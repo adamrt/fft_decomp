@@ -732,8 +732,7 @@ void world_formation_recalculate_selected_unit_stats(void) {
     for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
         unit.equipment[i] = ITEM_ID_NONE;
     }
-    item
-        = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND] & WORLD_ITEM_ID_MASK;
+    item = g_world_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] & WORLD_ITEM_ID_MASK;
     if (item != ITEM_ID_NOTHING) {
         if (g_main_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
             unit.equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = item;
@@ -741,7 +740,7 @@ void world_formation_recalculate_selected_unit_stats(void) {
             unit.equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item;
         }
     }
-    item = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND] & WORLD_ITEM_ID_MASK;
+    item = g_world_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] & WORLD_ITEM_ID_MASK;
     if (item != ITEM_ID_NOTHING) {
         if (g_main_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
             unit.equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = item;
@@ -750,11 +749,11 @@ void world_formation_recalculate_selected_unit_stats(void) {
         }
     }
     unit.equipment[UNIT_EQUIPMENT_SLOT_HEAD]
-        = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_HEAD];
+        = g_world_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_HEAD];
     unit.equipment[UNIT_EQUIPMENT_SLOT_BODY]
-        = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_BODY];
+        = g_world_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_BODY];
     unit.equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]
-        = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
+        = g_world_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
     for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
         item = unit.equipment[i];
         if (item == ITEM_ID_NOTHING || item >= ITEM_ID_END) {

@@ -21,7 +21,7 @@ extern menu_entry_t g_world_shop_hire_confirm_menu;
 extern u8 g_world_shop_hire_confirm_message_wait;
 
 /* shop */
-extern s16 g_world_shop_fitting_room_items[PARTY_ROSTER_SLOT_COUNT][WORLD_EQUIPMENT_SLOT_COUNT];
+extern s16 g_world_shop_fitting_room_items[PARTY_ROSTER_SLOT_COUNT][MENU_EQUIPMENT_SLOT_COUNT];
 extern u8 g_world_shop_hire_menu_initialized;
 extern u8 g_world_shop_item_category;
 extern world_shop_item_availability_t g_world_shop_item_availability[];
@@ -151,6 +151,6 @@ u32* world_shop_load_background_tim(s32 index);
 
 /* other */
 /* Second slot-category table of world_shop_build_fitting_room_best_fit_equipment. */
-extern u8 g_world_fitting_room_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_COUNT];
+extern u8 g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT];
 
 #endif

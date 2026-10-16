@@ -91,18 +91,18 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
     } else {
         record->abilities.fields.primary_skillset = unit->primary_skillset;
         if (record->identity.job_id != JOB_ID_MIME) {
-            record->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]
+            record->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
                 = party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
                 ? party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]
                 : party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
-            record->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND]
+            record->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]
                 = party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] != ITEM_ID_NONE
                 ? party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]
                 : party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
-            record->equipment[WORLD_EQUIPMENT_SLOT_HEAD] = party->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
-            record->equipment[WORLD_EQUIPMENT_SLOT_BODY] = party->equipment[UNIT_EQUIPMENT_SLOT_BODY];
-            record->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY] = party->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
-            for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+            record->equipment[MENU_EQUIPMENT_SLOT_HEAD] = party->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
+            record->equipment[MENU_EQUIPMENT_SLOT_BODY] = party->equipment[UNIT_EQUIPMENT_SLOT_BODY];
+            record->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] = party->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
+            for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if (record->equipment[i] >= ITEM_ID_END) {
                     record->equipment[i] = ITEM_ID_NOTHING;
                 }
@@ -196,7 +196,7 @@ s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s
         }
         if (id > 0) {
             found = 0;
-            for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+            for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if (g_world_unit_records[count].equipment[i] == id) {
                     found = 1;
                 }
@@ -241,7 +241,7 @@ void world_formation_save_records_to_party(void) {
         party->movement_ability[0] = g_world_unit_pointers[i]->abilities.fields.movement_ability;
         party->movement_ability[1] = g_world_unit_pointers[i]->abilities.fields.movement_ability >> 8;
         if (g_world_unit_pointers[i]->uses_monster_skillset == 0) {
-            item = g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
+            item = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
             if (item != ITEM_ID_NOTHING) {
@@ -251,7 +251,7 @@ void world_formation_save_records_to_party(void) {
                     party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item;
                 }
             }
-            item = g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND];
+            item = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
             party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
             party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = ITEM_ID_NONE;
             if (item != ITEM_ID_NOTHING) {
@@ -262,18 +262,18 @@ void world_formation_save_records_to_party(void) {
                 }
             }
             value = ITEM_ID_NONE;
-            if (g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_HEAD] != ITEM_ID_NOTHING) {
-                value = g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_HEAD];
+            if (g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_HEAD] != ITEM_ID_NOTHING) {
+                value = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_HEAD];
             }
             party->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = value;
             value = ITEM_ID_NONE;
-            if (g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_BODY] != ITEM_ID_NOTHING) {
-                value = g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_BODY];
+            if (g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_BODY] != ITEM_ID_NOTHING) {
+                value = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_BODY];
             }
             party->equipment[UNIT_EQUIPMENT_SLOT_BODY] = value;
             value = ITEM_ID_NONE;
-            if (g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY] != ITEM_ID_NOTHING) {
-                value = g_world_unit_pointers[i]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
+            if (g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != ITEM_ID_NOTHING) {
+                value = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
             }
             party->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY] = value;
             bcopy(g_world_unit_pointers[i]->learned_abilities, party->career.learned_abilities,

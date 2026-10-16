@@ -716,18 +716,18 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
         detail->magical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE];
     }
     detail->magical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
-    detail->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]
+    detail->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
         = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
         ? unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]
         : unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
-    detail->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND]
+    detail->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]
         = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] != ITEM_ID_NONE
         ? unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]
         : unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
-    detail->equipment[WORLD_EQUIPMENT_SLOT_HEAD] = unit->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
-    detail->equipment[WORLD_EQUIPMENT_SLOT_BODY] = unit->equipment[UNIT_EQUIPMENT_SLOT_BODY];
-    detail->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY] = unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
-    for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+    detail->equipment[MENU_EQUIPMENT_SLOT_HEAD] = unit->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
+    detail->equipment[MENU_EQUIPMENT_SLOT_BODY] = unit->equipment[UNIT_EQUIPMENT_SLOT_BODY];
+    detail->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] = unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
+    for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
         if (detail->equipment[i] == 0 || detail->equipment[i] == ITEM_ID_NONE) {
             detail->equipment[i] = -1;
         }

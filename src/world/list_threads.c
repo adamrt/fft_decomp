@@ -104,7 +104,7 @@ void menu_run_equipment_list_thread_variant(void) {
             menu_clear_render_buffer(text, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
             menu_set_text_origin(0, 0);
-            for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+            for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                     color_bits = state->equipment[i] & 0xc000;
                     g_menu_text_palette_offset = color_bits >> 12;
@@ -118,8 +118,8 @@ void menu_run_equipment_list_thread_variant(void) {
         }
         screen->sprites[12].u0 = u;
         screen->sprites[13].u0 = u;
-        menu_init_sprite_array(&screen->sprites[19], WORLD_EQUIPMENT_SLOT_COUNT, 0x7cfc);
-        for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+        menu_init_sprite_array(&screen->sprites[19], MENU_EQUIPMENT_SLOT_COUNT, 0x7cfc);
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture, &g_world_equipment_panel_origin,
                 &g_world_equipment_panel_icon_params[i]);
             id = state->equipment[i];
@@ -154,7 +154,7 @@ void menu_run_equipment_list_thread_variant(void) {
         gfx_draw_or_append_gpu_primitive(&screen->draw_modes[0]);
         gfx_draw_or_append_gpu_primitive(&screen->sprites[12]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_modes[1]);
-        for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->sprites[19 + i]);
         }
         gfx_draw_or_append_gpu_primitive(&screen->draw_modes[2]);

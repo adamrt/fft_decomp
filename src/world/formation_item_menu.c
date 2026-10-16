@@ -189,7 +189,7 @@ static s32 world_formation_run_equip_item_menu(void) {
         return 1;
     }
     if (g_equip_item_list_open == 0) {
-        g_equip_item_slot = menu_update_vertical_selection_and_mark_change(WORLD_EQUIPMENT_SLOT_COUNT,
+        g_equip_item_slot = menu_update_vertical_selection_and_mark_change(MENU_EQUIPMENT_SLOT_COUNT,
             WORLD_MENU_CURSOR_EQUIP_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             world_item_build_category_list(g_unit_selected_index, g_equip_item_slot + 1, g_equip_item_slot,
@@ -328,10 +328,10 @@ static s32 world_menu_run_best_fit_equipment(void) {
         g_menu_status_display_thread_params.redraw_request = 1;
         g_world_formation_unit_cycle_mode = 2;
         if (*choice == 0) {
-            for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+            for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 item_adjust_inventory_count(g_world_unit_pointers[g_unit_selected_index]->equipment[i], 1);
             }
-            for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+            for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 g_world_unit_pointers[g_unit_selected_index]->equipment[i]
                     = g_item_preview_stat_detail.state.equipment[i];
                 item_adjust_inventory_count(g_item_preview_stat_detail.state.equipment[i], -1);
@@ -421,7 +421,7 @@ static s32 world_menu_run_remove_item(void) {
         g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
     }
     slot = menu_update_vertical_selection_and_mark_change(
-        WORLD_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
+        MENU_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
     cursor_y = &g_world_remove_item_cursor_point.y;
     index = slot;
     *cursor_y = index * 16 + 0x90;
@@ -485,7 +485,7 @@ static s32 world_menu_handle_remove_all_equipment(void) {
     gfx_set_otag_index(0x28);
     g_world_remove_all_equipment_blink_counter = g_world_remove_all_equipment_blink_counter + 1;
     if (g_world_remove_all_equipment_blink_counter & 1) {
-        for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             g_world_remove_all_equipment_cursor_point.y = i * 0x10 + 0x90;
             value = 0;
             menu_update_and_draw_sliding_cursor_variant(
@@ -498,7 +498,7 @@ static s32 world_menu_handle_remove_all_equipment(void) {
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         changed = 0;
-        for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             if (g_world_unit_pointers[g_unit_selected_index]->equipment[i] != ITEM_ID_NOTHING) {
                 changed = 1;
                 world_formation_equip_item_to_unit_slot(g_unit_selected_index, i, ITEM_ID_NOTHING);

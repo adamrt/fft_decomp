@@ -34,8 +34,8 @@ s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
     if (unit_index != 1) {
         item_adjust_inventory_count(((s16*)g_equip_unit_data[unit_index])[slot + 42], 1);
     }
-    if (slot < EQUIP_SLOT_HAND_COUNT && result != EQUIP_SLOT_ITEM_ALLOWED) {
-        s32 other = slot == EQUIP_SLOT_RIGHT_HAND;
+    if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result != EQUIP_SLOT_ITEM_ALLOWED) {
+        s32 other = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         if (unit_index != 1) {
             item_adjust_inventory_count(((s16*)g_equip_unit_data[unit_index])[other + 42], 1);
         }
@@ -75,7 +75,7 @@ static s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
 /* Validate a candidate item against slot locks, job rules, and hand pairing.
  *
  * The s16 slot parameter is retained because it reproduces the original
- * calling convention; equip_unit_equipment_slot_e names its accepted values.
+ * calling convention; menu_equipment_slot_e names its accepted values.
  * The s16 id and its new_item copy reproduce the target's two callee-saved
  * copies of the masked id (the same shape as
  * world_formation_can_equip_item_in_slot). */
@@ -102,7 +102,7 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
         return EQUIP_SLOT_ITEM_CURRENT_LOCKED;
     }
     result = equip_unit_can_equip_item_id(unit, id);
-    if (slot < EQUIP_SLOT_HAND_COUNT && result == EQUIP_SLOT_ITEM_ALLOWED) {
+    if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result == EQUIP_SLOT_ITEM_ALLOWED) {
         is_nonstandard_weapon = id >= ITEM_ID_THROWABLE_FIRST;
         if (is_nonstandard_weapon) {
             forced_two_hands = 0;
@@ -112,7 +112,7 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
             forced_two_hands = flags & WEAPON_FLAG_FORCED_TWO_HANDS;
             two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
-        other_slot = slot == EQUIP_SLOT_RIGHT_HAND;
+        other_slot = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         other = g_equip_unit_data[unit]->equipment[other_slot] & EQUIP_ITEM_ID_MASK;
         other_is_nonstandard_weapon = other >= ITEM_ID_THROWABLE_FIRST;
         if (other_is_nonstandard_weapon) {

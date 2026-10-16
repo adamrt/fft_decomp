@@ -206,6 +206,18 @@ extern RECT g_menu_portrait_palette_rect;
 
 /* Unreferenced in both scenes: uploads one EVTFACE.BIN portrait and its palettes. */
 void menu_load_portrait_image(s32 portrait_id);
+/* The five equipment slots in the order the equipment screens list them (not
+ * the order of a unit record's equipment array). */
+typedef enum menu_equipment_slot {
+    MENU_EQUIPMENT_SLOT_RIGHT_HAND = 0,
+    MENU_EQUIPMENT_SLOT_LEFT_HAND = 1,
+    MENU_EQUIPMENT_SLOT_HEAD = 2,
+    MENU_EQUIPMENT_SLOT_BODY = 3,
+    MENU_EQUIPMENT_SLOT_ACCESSORY = 4,
+    MENU_EQUIPMENT_SLOT_HAND_COUNT = 2,
+    MENU_EQUIPMENT_SLOT_COUNT = 5,
+} menu_equipment_slot_e;
+
 /* Portrait code bits 8-9: either set means the code is not a unit portrait, so no portrait CLUT is built. */
 enum { MENU_PORTRAIT_CLUT_SUPPRESS_MASK = 0x300 };
 void menu_build_portrait_poly_variant(s32 portrait_id, POLY_FT4* poly);

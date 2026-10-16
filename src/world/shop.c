@@ -544,7 +544,7 @@ static s32 world_item_get_equip_candidate_marker(s32 unit_index) {
     world_unit_t* unit = g_world_unit_pointers[unit_index];
     s32 i;
 
-    for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+    for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
         if (unit->equipment[i] == g_world_shop_equip_candidate_item) {
             return MENU_UNIT_READOUT_EQUIP_LABEL;
         }
@@ -614,7 +614,7 @@ void world_shop_run_equip_candidate_step(void) {
             i = 0;
             equipped = 0;
             g_world_shop_equip_candidate_last_unit = g_unit_selected_index;
-            for (; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+            for (; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if (g_world_unit_pointers[g_unit_selected_index]->equipment[i] == g_world_shop_equip_candidate_item) {
                     equipped = 1;
                     g_world_selected_unit_stat_detail.state.equipment[i] |= 0x8000;
@@ -936,8 +936,8 @@ void world_shop_run_fitting_room_equip_menu(void) {
         }
     } else if (g_world_shop_fitting_room_item_list_open == 0) {
         prev = g_world_shop_fitting_equip_slot;
-        g_world_shop_fitting_equip_slot = menu_update_vertical_selection_and_mark_change(WORLD_EQUIPMENT_SLOT_COUNT,
-            WORLD_MENU_CURSOR_EQUIP_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
+        g_world_shop_fitting_equip_slot = menu_update_vertical_selection_and_mark_change(
+            MENU_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_EQUIP_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
         if (prev != g_world_shop_fitting_equip_slot) {
             g_menu_list_selected_index = 0;
         }
@@ -1124,7 +1124,7 @@ void world_shop_run_fitting_room_remove_step(void) {
         g_sound_queued_effect_id = MAIN_SFX_CANCEL;
     }
     slot = menu_update_vertical_selection_and_mark_change(
-        WORLD_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
+        MENU_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
     if (g_world_unit_pointers[g_unit_selected_index]->equipment[(u8)slot] != ITEM_ID_NOTHING) {
         value = (g_world_unit_pointers[g_unit_selected_index]->equipment[(u8)slot] & WORLD_ITEM_ID_MASK) + 0x6800;
     } else {
@@ -1302,7 +1302,7 @@ static void world_shop_apply_fitting_room_items_to_all_units(void) {
     s32 j;
 
     for (i = 0; i < g_world_formation_unit_count; i++) {
-        for (j = 0; j < WORLD_EQUIPMENT_SLOT_COUNT; j++) {
+        for (j = 0; j < MENU_EQUIPMENT_SLOT_COUNT; j++) {
             if ((g_world_unit_pointers[i]->equipment[j] >> 14) != 0
                 || g_world_shop_fitting_room_items[i][j] != ITEM_ID_NOTHING) {
                 g_world_unit_pointers[i]->equipment[j] = g_world_shop_fitting_room_items[i][j];
@@ -1344,7 +1344,7 @@ static void world_shop_apply_fitting_room_items_to_all_units(void) {
  * The target has `move s1,v0` after menu_start_managed_thread and no
  * initialization of s1 at loop 2's head: loop 2's counter is the run_thread
  * result's allocno, so the source assigns the result to `i` and the loop is
- * written `for (; i < WORLD_EQUIPMENT_SLOT_ACCESSORY; i++)`. A fresh block-local takes a call-clobbered
+ * written `for (; i < MENU_EQUIPMENT_SLOT_ACCESSORY; i++)`. A fresh block-local takes a call-clobbered
  * register; reusing a function-scope allocno that is already dead puts the
  * counter in the target's callee-saved s1 and decides which of the two loop
  * quantities is allocated first.
@@ -1390,16 +1390,16 @@ void world_shop_run_best_fit_preview_step(void) {
         bcopy(g_world_unit_pointers[g_unit_selected_index]->equipment, staged, sizeof(staged));
         unit_slot = &g_world_unit_pointers[g_unit_selected_index];
         room_base = &g_world_shop_fitting_room_items[0][0];
-        reserved = room_base + g_unit_selected_index * WORLD_EQUIPMENT_SLOT_COUNT;
-        for (i = 0; i < WORLD_EQUIPMENT_SLOT_ACCESSORY; i++, reserved++) {
+        reserved = room_base + g_unit_selected_index * MENU_EQUIPMENT_SLOT_COUNT;
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_ACCESSORY; i++, reserved++) {
             if (((*unit_slot)->equipment[i] >> 15) != 0) {
                 (*unit_slot)->equipment[i] = *reserved;
             }
         }
         world_shop_build_fitting_room_best_fit_equipment(
             g_unit_selected_index, g_world_menu_context_id, g_item_preview_stat_detail.state.equipment);
-        g_item_preview_stat_detail.state.equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY]
-            = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
+        g_item_preview_stat_detail.state.equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
+            = g_world_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
         bcopy(staged, g_world_unit_pointers[g_unit_selected_index]->equipment, sizeof(staged));
         item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
             g_world_unit_pointers[g_unit_selected_index]->equipment, (u16*)g_item_preview_stat_detail.state.equipment);
@@ -1427,7 +1427,7 @@ void world_shop_run_best_fit_preview_step(void) {
         g_world_shop_best_fit_menu_open = 0;
         g_world_formation_unit_cycle_mode = 2;
         if (g_world_menu_selection_results[5] == 0) {
-            for (; i < WORLD_EQUIPMENT_SLOT_ACCESSORY; i++) {
+            for (; i < MENU_EQUIPMENT_SLOT_ACCESSORY; i++) {
                 u16 suggested;
                 s32 shifted;
                 s32 current;
@@ -1494,7 +1494,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
                 g_world_shop_sell_equipped_result_shown = 0;
             }
         } else if (g_world_shop_sell_equipped_prompt_active == 0) {
-            g_world_shop_sell_equipped_slot = menu_update_vertical_selection_and_mark_change(WORLD_EQUIPMENT_SLOT_COUNT,
+            g_world_shop_sell_equipped_slot = menu_update_vertical_selection_and_mark_change(MENU_EQUIPMENT_SLOT_COUNT,
                 WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
             if (g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_sell_equipped_slot]
                 != ITEM_ID_NOTHING) {
@@ -1623,17 +1623,17 @@ static void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_inde
 
     g_world_unit_pointers[formation_index]->equipment[equipment_index] = ITEM_ID_NOTHING;
     reserved_item = g_world_shop_fitting_room_items[formation_index][equipment_index];
-    if (equipment_index < WORLD_EQUIPMENT_SLOT_HEAD) {
-        u16 right_hand = g_world_unit_pointers[formation_index]->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
-        u16 left_hand = g_world_unit_pointers[formation_index]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND];
+    if (equipment_index < MENU_EQUIPMENT_SLOT_HEAD) {
+        u16 right_hand = g_world_unit_pointers[formation_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+        u16 left_hand = g_world_unit_pointers[formation_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
 
         if (right_hand == ITEM_ID_NOTHING && left_hand == ITEM_ID_NOTHING) {
-            g_world_unit_pointers[formation_index]->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]
-                = g_world_shop_fitting_room_items[formation_index][WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
-            g_world_unit_pointers[formation_index]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND]
-                = g_world_shop_fitting_room_items[formation_index][WORLD_EQUIPMENT_SLOT_LEFT_HAND];
-            g_world_shop_fitting_room_items[formation_index][WORLD_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
-            g_world_shop_fitting_room_items[formation_index][WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
+            g_world_unit_pointers[formation_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
+                = g_world_shop_fitting_room_items[formation_index][MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+            g_world_unit_pointers[formation_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]
+                = g_world_shop_fitting_room_items[formation_index][MENU_EQUIPMENT_SLOT_LEFT_HAND];
+            g_world_shop_fitting_room_items[formation_index][MENU_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
+            g_world_shop_fitting_room_items[formation_index][MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
             return;
         }
         if (reserved_item != ITEM_ID_NOTHING
@@ -1655,7 +1655,7 @@ static void world_shop_buy_from_fitting_room(void) {
     s32 j;
 
     for (i = 0; i < g_world_formation_unit_count; i++) {
-        for (j = 0; j < WORLD_EQUIPMENT_SLOT_COUNT; j++) {
+        for (j = 0; j < MENU_EQUIPMENT_SLOT_COUNT; j++) {
             s32 equipped_item = g_world_unit_pointers[i]->equipment[j];
             if ((equipped_item >> 14) != 0) {
                 g_world_unit_pointers[i]->equipment[j] &= WORLD_ITEM_ID_MASK;
@@ -2130,7 +2130,7 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
                 slot = world_formation_generate_unit(g_world_menu_selection_results[0]);
                 if (slot >= 0) {
                     g_world_shop_service_fee = 1000;
-                    for (; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+                    for (; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                         g_world_shop_service_fee += world_item_get_price(g_world_unit_pointers[slot]->equipment[i]);
                     }
                     if (world_shop_adjust_gil(0) < g_world_shop_service_fee) {

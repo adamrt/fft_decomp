@@ -50,7 +50,7 @@ s32 world_item_get_half_price(s16 item_id);
 s32 world_item_get_price(s16 item_id);
 s8 world_item_run_action_menu(void);
 s8 world_item_run_sort_order_menu(void);
-world_unit_equipment_slot_e world_item_select_equipment_slot(s16 unit_index, s32 item_id);
+menu_equipment_slot_e world_item_select_equipment_slot(s16 unit_index, s32 item_id);
 s32 world_item_show_units_equipping_selected(void);
 
 #endif

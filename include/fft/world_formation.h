@@ -66,7 +66,7 @@ extern image_load_parameters_t g_world_equipment_panel_sprite_params_0[19];
 extern image_load_parameters_t g_world_equipment_panel_sprite_params_1[19];
 extern image_load_parameters_t g_world_equipment_panel_sprite_params_2[19];
 extern image_load_parameters_t g_world_equipment_panel_sprite_params_3[19];
-extern image_load_parameters_t g_world_equipment_panel_icon_params[WORLD_EQUIPMENT_SLOT_COUNT];
+extern image_load_parameters_t g_world_equipment_panel_icon_params[MENU_EQUIPMENT_SLOT_COUNT];
 extern menu_status_thread_t g_world_equipment_ability_panel_thread_params;
 extern s8 g_world_equip_menu_initialized;
 extern u16 g_world_equip_item_cursor_anim;
@@ -338,7 +338,7 @@ extern point16_t g_world_remove_item_cursor_point;
 extern s8 g_world_dismiss_unit_prompt_running;
 extern menu_entry_t g_world_best_fit_confirm_menu;
 extern menu_entry_t g_world_order_unit_menu;
-extern u8 g_world_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_COUNT];
+extern u8 g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT];
 extern u8 g_world_order_unit_saved_browse_enabled;
 s32 world_unit_get_facing_sixteenth_by_runtime_id(s32 runtime_id);
 

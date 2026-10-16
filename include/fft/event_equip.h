@@ -17,16 +17,6 @@ extern s8 g_equip_type_order_ready;
 s32 equip_entrypoint(s32 unit, u32* otag);
 
 /* unit */
-typedef enum equip_slot {
-    EQUIP_SLOT_RIGHT_HAND = 0,
-    EQUIP_SLOT_LEFT_HAND = 1,
-    EQUIP_SLOT_HEAD = 2,
-    EQUIP_SLOT_BODY = 3,
-    EQUIP_SLOT_ACCESSORY = 4,
-    EQUIP_SLOT_HAND_COUNT = 2,
-    EQUIP_SLOT_COUNT = 5,
-} equip_unit_equipment_slot_e;
-
 typedef enum equip_slot_item_result {
     EQUIP_SLOT_ITEM_CURRENT_LOCKED = -2,
     EQUIP_SLOT_ITEM_CANNOT_EQUIP = -1,
@@ -68,7 +58,7 @@ typedef struct equip_unit_data {
     s16 magical_class_evade;              /* 0x4e; cleared (lower billboard M-C-Ev) */
     s16 magical_shield_evade;             /* 0x50 */
     s16 magical_accessory_evade;          /* 0x52 */
-    u16 equipment[5];                     /* 0x54; equip_unit_equipment_slot_e order */
+    u16 equipment[5];                     /* 0x54; menu_equipment_slot_e order */
     u8 _unused_5e[0x12];                  /* 0x5e; ability ids and the spare tail of the stat-detail block, left zero */
     u8 equipment_categories[4];           /* 0x70 */
     u8 support_abilities[4];              /* 0x74; copy of unit_stats_t.ability_flags.support */

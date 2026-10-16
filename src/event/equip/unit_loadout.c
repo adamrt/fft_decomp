@@ -23,14 +23,14 @@ static s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_supp
     u8 flags;
 
     result = 0;
-    w0 = slots[EQUIP_SLOT_RIGHT_HAND];
+    w0 = slots[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     item_id = 0;
     if (w0 != 0) {
-        if (slots[EQUIP_SLOT_LEFT_HAND] == 0) {
+        if (slots[MENU_EQUIPMENT_SLOT_LEFT_HAND] == 0) {
             item_id = w0;
         }
     } else {
-        w1 = slots[EQUIP_SLOT_LEFT_HAND];
+        w1 = slots[MENU_EQUIPMENT_SLOT_LEFT_HAND];
         if (w1 != 0) {
             item_id = w1;
         }
@@ -130,19 +130,19 @@ static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_dat
     unit->magical_shield_evade = larger;
     unit->magical_accessory_evade = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
     if (stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE) {
-        unit->equipment[EQUIP_SLOT_RIGHT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
+        unit->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
     } else {
-        unit->equipment[EQUIP_SLOT_RIGHT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
+        unit->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
     }
     if (stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] != ITEM_ID_NONE) {
-        unit->equipment[EQUIP_SLOT_LEFT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
+        unit->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
     } else {
-        unit->equipment[EQUIP_SLOT_LEFT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
+        unit->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
     }
-    unit->equipment[EQUIP_SLOT_HEAD] = stats->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
-    unit->equipment[EQUIP_SLOT_BODY] = stats->equipment[UNIT_EQUIPMENT_SLOT_BODY];
-    unit->equipment[EQUIP_SLOT_ACCESSORY] = stats->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
-    for (i = 0; i < EQUIP_SLOT_COUNT; i++) {
+    unit->equipment[MENU_EQUIPMENT_SLOT_HEAD] = stats->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
+    unit->equipment[MENU_EQUIPMENT_SLOT_BODY] = stats->equipment[UNIT_EQUIPMENT_SLOT_BODY];
+    unit->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] = stats->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
+    for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
         if (unit->equipment[i] >= ITEM_ID_NONE) {
             unit->equipment[i] = 0;
         }
@@ -212,7 +212,7 @@ void equip_unit_commit_loadout_to_stats(void) {
 
     unit_id = g_equip_unit_data[0]->battle_id;
     stats = battle_unit_get_stats_from_battle_id(unit_id);
-    item_id = g_equip_unit_data[0]->equipment[EQUIP_SLOT_RIGHT_HAND];
+    item_id = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
     stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
     if (item_id != 0) {
@@ -222,7 +222,7 @@ void equip_unit_commit_loadout_to_stats(void) {
             stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item_id;
         }
     }
-    item_id = g_equip_unit_data[0]->equipment[EQUIP_SLOT_LEFT_HAND];
+    item_id = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
     stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = ITEM_ID_NONE;
     if (item_id != 0) {
@@ -232,14 +232,15 @@ void equip_unit_commit_loadout_to_stats(void) {
             stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = item_id;
         }
     }
-    stats->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = g_equip_unit_data[0]->equipment[EQUIP_SLOT_HEAD] != 0
-        ? g_equip_unit_data[0]->equipment[EQUIP_SLOT_HEAD]
+    stats->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_HEAD] != 0
+        ? g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_HEAD]
         : ITEM_ID_NONE;
-    stats->equipment[UNIT_EQUIPMENT_SLOT_BODY] = g_equip_unit_data[0]->equipment[EQUIP_SLOT_BODY] != 0
-        ? g_equip_unit_data[0]->equipment[EQUIP_SLOT_BODY]
+    stats->equipment[UNIT_EQUIPMENT_SLOT_BODY] = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_BODY] != 0
+        ? g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_BODY]
         : ITEM_ID_NONE;
-    stats->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY] = g_equip_unit_data[0]->equipment[EQUIP_SLOT_ACCESSORY] != 0
-        ? g_equip_unit_data[0]->equipment[EQUIP_SLOT_ACCESSORY]
+    stats->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]
+        = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != 0
+        ? g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
         : ITEM_ID_NONE;
     bcopy(stats->equipment, main_party_get_unit(g_equip_unit_data[0]->party_index)->equipment, 7);
     main_unit_refresh_stats_and_statuses(stats);

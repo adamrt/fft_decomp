@@ -35,7 +35,7 @@ s32 world_menu_has_items(s32 mode) {
         }
     }
     for (i = 0; i < g_world_formation_record_count; i++) {
-        for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_COUNT; slot++) {
+        for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
             if (g_world_unit_pointers[i]->equipment[slot]) {
                 has_equipment = 1;
                 break;
@@ -79,7 +79,7 @@ s32 item_get_equipped_count_variant(s32 item_id) {
     item_id &= WORLD_ITEM_ID_MASK;
     for (unit_index = 0; unit_index < g_world_formation_record_count; unit_index++) {
         unit = g_world_unit_pointers[unit_index];
-        for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_COUNT; slot++) {
+        for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
             if (unit->equipment[slot] == item_id) {
                 count++;
             }
@@ -130,8 +130,8 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
     s16 retry;
 
     two_swords = 0;
-    right_hand = g_world_unit_pointers[unit_index]->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
-    left_hand = g_world_unit_pointers[unit_index]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND];
+    right_hand = g_world_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    left_hand = g_world_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (world_ability_has_two_swords(unit_index)) {
         two_swords = world_ability_has_two_hands(unit_index) == 0;
     }
@@ -139,14 +139,14 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
     held_weapon = ITEM_ID_NOTHING;
     if (two_swords) {
         held_weapon = right_hand;
-        g_world_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
+        g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
         held_off_hand = left_hand;
         if (held_weapon == ITEM_ID_NOTHING) {
             held_weapon = left_hand;
             held_off_hand = ITEM_ID_NOTHING;
         }
     } else {
-        g_world_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
+        g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
         if (right_hand >= ITEM_ID_THROWABLE_FIRST)
             held_off_hand = right_hand;
         else if (right_hand != ITEM_ID_NOTHING)
@@ -157,7 +157,7 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
             held_weapon = left_hand;
     }
 
-    for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_COUNT; slot++) {
+    for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
         category = g_world_best_fit_slot_categories[slot];
         count = world_item_build_category_list(
             unit_index, 7, g_world_best_fit_slot_categories[slot], list, ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY);
@@ -181,15 +181,15 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
                 retry = 0;
                 for (i = 0;; i++) {
                     if (list[i] == -1) {
-                        g_world_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
-                        if (slot == WORLD_EQUIPMENT_SLOT_LEFT_HAND) {
+                        g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
+                        if (slot == MENU_EQUIPMENT_SLOT_LEFT_HAND) {
                             retry = 1;
                             slot--;
                         }
                         break;
                     }
                     if (g_main_item_weapon_data[list[i]].flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE) {
-                        if (slot == WORLD_EQUIPMENT_SLOT_RIGHT_HAND) {
+                        if (slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND) {
                             list[0] = list[i];
                             break;
                         }
@@ -198,7 +198,7 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
                             owned++;
                         if (held_off_hand == list[i])
                             owned++;
-                        if (owned >= 2 || equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND] != list[i]) {
+                        if (owned >= 2 || equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] != list[i]) {
                             list[0] = list[i];
                             break;
                         }
@@ -209,9 +209,9 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
             if ((world_ability_has_two_hands(unit_index)
-                    && (g_main_item_weapon_data[equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]].flags
+                    && (g_main_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                         & WEAPON_FLAG_TWO_HANDS_COMPATIBLE))
-                || (g_main_item_weapon_data[equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]].flags
+                || (g_main_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                     & WEAPON_FLAG_FORCED_TWO_HANDS)) {
                 list[0] = -1;
             } else {
@@ -233,12 +233,12 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
 
     i = 0; /* reused as the swap flag (the target keeps it in i's register) */
     if (g_world_unit_pointers[unit_index]->support_abilities[2] & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
-        equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
-        equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
+        equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
+        equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
-    if (right_hand != ITEM_ID_NOTHING && right_hand == equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND]) {
+    if (right_hand != ITEM_ID_NOTHING && right_hand == equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]) {
         i = 1;
-    } else if (left_hand != ITEM_ID_NOTHING && left_hand == equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]) {
+    } else if (left_hand != ITEM_ID_NOTHING && left_hand == equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]) {
         i = 1;
     } else if (!two_swords && left_hand < ITEM_ID_THROWABLE_FIRST && left_hand != ITEM_ID_NOTHING) {
         i = 1;
@@ -246,9 +246,9 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
         i = 1;
     }
     if (i) {
-        s32 swap = equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
-        equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND] = equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND];
-        equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = swap;
+        s32 swap = equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+        equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+        equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = swap;
     }
 }
 
@@ -272,17 +272,17 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
     s16 retry;
     s16 reserved;
 
-    reserved = g_world_shop_fitting_room_items[unit_index][WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
+    reserved = g_world_shop_fitting_room_items[unit_index][MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     if (reserved != ITEM_ID_NOTHING) {
         right = reserved;
     } else {
-        right = g_world_unit_pointers[unit_index]->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND] & WORLD_ITEM_ID_MASK;
+        right = g_world_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] & WORLD_ITEM_ID_MASK;
     }
-    reserved = g_world_shop_fitting_room_items[unit_index][WORLD_EQUIPMENT_SLOT_LEFT_HAND];
+    reserved = g_world_shop_fitting_room_items[unit_index][MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (reserved != ITEM_ID_NOTHING) {
         left = reserved;
     } else {
-        left = g_world_unit_pointers[unit_index]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND] & WORLD_ITEM_ID_MASK;
+        left = g_world_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] & WORLD_ITEM_ID_MASK;
     }
 
     second = ITEM_ID_NOTHING;
@@ -293,7 +293,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
     }
     if (dual) {
         second = left;
-        g_world_fitting_room_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
+        g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
         /* Written last so it is the instruction immediately before the test:
          * reorg scans backward from the branch and takes it into the delay
          * slot, which is where the target has `sw s8,328(sp)`. */
@@ -303,7 +303,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
             second = ITEM_ID_NOTHING;
         }
     } else {
-        g_world_fitting_room_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
+        g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
         if (right >= ITEM_ID_THROWABLE_FIRST)
             second = right;
         else if (right != ITEM_ID_NOTHING)
@@ -314,7 +314,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
             first = left;
     }
 
-    for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_ACCESSORY; slot++) {
+    for (slot = 0; slot < MENU_EQUIPMENT_SLOT_ACCESSORY; slot++) {
         category = g_world_fitting_room_best_fit_slot_categories[slot];
         count = world_shop_build_item_list(unit_index, shop_id, category, list, ITEM_LIST_MODE_EQUIPPABLE);
         length = count;
@@ -323,10 +323,10 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
              * through it from both sides of the test (`sh t0,0(v1)` then
              * `sh zero,0(a0)`), with `length` post-incremented. Two separate
              * `list[length] = ...` statements duplicate the address computation. */
-            if (slot == WORLD_EQUIPMENT_SLOT_RIGHT_HAND) {
+            if (slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND) {
                 list[length++] = (first < ITEM_ID_THROWABLE_FIRST) ? first : ITEM_ID_NOTHING;
             }
-            if (slot == WORLD_EQUIPMENT_SLOT_LEFT_HAND) {
+            if (slot == MENU_EQUIPMENT_SLOT_LEFT_HAND) {
                 list[length++] = (second < ITEM_ID_THROWABLE_FIRST) ? second : ITEM_ID_NOTHING;
             }
             list[length] = -1;
@@ -343,9 +343,9 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
                 retry = 0;
                 for (i = 0;; i++) {
                     if (list[i] == -1) {
-                        g_world_fitting_room_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_LEFT_HAND]
+                        g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND]
                             = ITEM_LIST_FILTER_SHIELD;
-                        if (slot == WORLD_EQUIPMENT_SLOT_LEFT_HAND) {
+                        if (slot == MENU_EQUIPMENT_SLOT_LEFT_HAND) {
                             retry = 1;
                             slot--;
                         }
@@ -361,9 +361,9 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
             if ((world_ability_has_two_hands(unit_index)
-                    && (g_main_item_weapon_data[out[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]].flags
+                    && (g_main_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                         & WEAPON_FLAG_TWO_HANDS_COMPATIBLE))
-                || (g_main_item_weapon_data[out[WORLD_EQUIPMENT_SLOT_RIGHT_HAND]].flags
+                || (g_main_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                     & WEAPON_FLAG_FORCED_TWO_HANDS)) {
                 list[0] = -1;
             } else {
@@ -385,23 +385,23 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
 
     i = 0; /* reused as the swap flag, as in the sibling */
     if (g_world_unit_pointers[unit_index]->support_abilities[2] & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
-        out[WORLD_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
-        out[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
+        out[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
+        out[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
-    if ((right != ITEM_ID_NOTHING && right == out[WORLD_EQUIPMENT_SLOT_LEFT_HAND])
-        || (left != ITEM_ID_NOTHING && left == out[WORLD_EQUIPMENT_SLOT_RIGHT_HAND])
+    if ((right != ITEM_ID_NOTHING && right == out[MENU_EQUIPMENT_SLOT_LEFT_HAND])
+        || (left != ITEM_ID_NOTHING && left == out[MENU_EQUIPMENT_SLOT_RIGHT_HAND])
         || (!dual && left < ITEM_ID_THROWABLE_FIRST && left != ITEM_ID_NOTHING) || right >= ITEM_ID_THROWABLE_FIRST)
         i = 1;
     if (i) {
         /* The target keeps the swap flag and the swap temporary in ONE
          * register (a0), and gcc 2.6.3 never splits live ranges, so the two
          * non-overlapping roles were one variable in the original source. */
-        i = out[WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
-        out[WORLD_EQUIPMENT_SLOT_RIGHT_HAND] = out[WORLD_EQUIPMENT_SLOT_LEFT_HAND];
-        out[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = i;
+        i = out[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+        out[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = out[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+        out[MENU_EQUIPMENT_SLOT_LEFT_HAND] = i;
     }
 
-    for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_ACCESSORY; slot++) {
+    for (slot = 0; slot < MENU_EQUIPMENT_SLOT_ACCESSORY; slot++) {
         s16 item = out[slot];
         if (item != g_world_unit_pointers[unit_index]->equipment[slot]
             && item != g_world_shop_fitting_room_items[unit_index][slot]) {
@@ -507,7 +507,7 @@ s32 world_formation_can_equip_item_in_slot(s16 unit_index, s16 slot, s16 item_id
         return 1;
     }
     result = world_unit_can_equip_item_id(unit_index, id);
-    if (slot < WORLD_EQUIPMENT_SLOT_HEAD) {
+    if (slot < MENU_EQUIPMENT_SLOT_HEAD) {
         if (result != 1) {
             return result;
         }
@@ -520,7 +520,7 @@ s32 world_formation_can_equip_item_in_slot(s16 unit_index, s16 slot, s16 item_id
             forced_two_hands = flags & WEAPON_FLAG_FORCED_TWO_HANDS;
             two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
-        other_slot = slot == WORLD_EQUIPMENT_SLOT_RIGHT_HAND;
+        other_slot = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         other = g_world_unit_pointers[unit_index]->equipment[other_slot] & WORLD_ITEM_ID_MASK;
         other_is_nonstandard_weapon = other >= ITEM_ID_THROWABLE_FIRST;
         other_forced_two_hands = 0;
@@ -559,11 +559,11 @@ s32 world_formation_can_equip_item_in_slot(s16 unit_index, s16 slot, s16 item_id
  * items; ordinary slots return their old equipment before reserving replacements.
  */
 s32 world_formation_change_unit_job(s16 unit_id, s16 job_id, s32 update_equipment) {
-    s16 equipment[WORLD_EQUIPMENT_SLOT_COUNT];
+    s16 equipment[MENU_EQUIPMENT_SLOT_COUNT];
     s32 i;
     g_world_unit_pointers[unit_id]->identity.job_id = job_id;
     if (job_id == JOB_ID_MIME) {
-        for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             if (unit_id != WORLD_FORMATION_PREVIEW_UNIT_INDEX) {
                 item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[i], 1);
             }
@@ -576,10 +576,10 @@ s32 world_formation_change_unit_job(s16 unit_id, s16 job_id, s32 update_equipmen
         if (unit_id != WORLD_FORMATION_PREVIEW_UNIT_INDEX) {
             if (g_world_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
                 world_unit_build_best_fit_equipment(unit_id, equipment);
-                for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+                for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                     item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[i], 1);
                 }
-                for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+                for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                     g_world_unit_pointers[unit_id]->equipment[i] = equipment[i];
                     item_adjust_inventory_count(equipment[i], -1);
                 }
@@ -606,7 +606,7 @@ void world_formation_remove_invalid_unit_loadout(s16 unit_id) {
     s32 i;
     s32 status;
 
-    for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
+    for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
         status = world_formation_can_equip_item_in_slot(unit_id, i, g_world_unit_pointers[unit_id]->equipment[i]);
         if (status == -1 || status == 0 || status == -6) {
             if (unit_id != WORLD_FORMATION_PREVIEW_UNIT_INDEX) {
@@ -615,14 +615,14 @@ void world_formation_remove_invalid_unit_loadout(s16 unit_id) {
             g_world_unit_pointers[unit_id]->equipment[i] = ITEM_ID_NOTHING;
         }
     }
-    i = g_world_unit_pointers[unit_id]->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
-    status = g_world_unit_pointers[unit_id]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND];
+    i = g_world_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    status = g_world_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (i < ITEM_ID_THROWABLE_FIRST && i != ITEM_ID_NOTHING && status < ITEM_ID_THROWABLE_FIRST
         && status != ITEM_ID_NOTHING && world_ability_has_two_swords(unit_id) == 0) {
         if (unit_id != WORLD_FORMATION_PREVIEW_UNIT_INDEX) {
-            item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND], 1);
+            item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND], 1);
         }
-        g_world_unit_pointers[unit_id]->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
+        g_world_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
     if (g_world_unit_pointers[unit_id]->identity.job_id == JOB_ID_MIME) {
         memset(&g_world_unit_pointers[unit_id]->abilities, 0, sizeof(world_formation_abilities_t));
@@ -750,39 +750,39 @@ s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16*
  *
  * Weapons and shields choose a hand based on what the unit already holds.
  */
-world_unit_equipment_slot_e world_item_select_equipment_slot(s16 unit_index, s32 item_id) {
+menu_equipment_slot_e world_item_select_equipment_slot(s16 unit_index, s32 item_id) {
     world_unit_t* unit = g_world_unit_pointers[unit_index];
     s32 right_hand;
     s32 left_hand;
-    world_unit_equipment_slot_e slot;
+    menu_equipment_slot_e slot;
 
     item_id &= WORLD_ITEM_ID_MASK;
-    right_hand = unit->equipment[WORLD_EQUIPMENT_SLOT_RIGHT_HAND];
-    left_hand = unit->equipment[WORLD_EQUIPMENT_SLOT_LEFT_HAND];
+    right_hand = unit->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    left_hand = unit->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (item_id < ITEM_ID_THROWABLE_FIRST) {
         if (left_hand < ITEM_ID_THROWABLE_FIRST) {
             if (right_hand >= ITEM_ID_THROWABLE_FIRST) {
-                slot = WORLD_EQUIPMENT_SLOT_LEFT_HAND;
+                slot = MENU_EQUIPMENT_SLOT_LEFT_HAND;
             } else {
                 slot = left_hand != ITEM_ID_NOTHING;
             }
         } else {
-            slot = WORLD_EQUIPMENT_SLOT_RIGHT_HAND;
+            slot = MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         }
     } else if (item_id < ITEM_ID_HEADGEAR_FIRST) {
         if (left_hand < ITEM_ID_THROWABLE_FIRST && left_hand != ITEM_ID_NOTHING) {
-            slot = WORLD_EQUIPMENT_SLOT_RIGHT_HAND;
+            slot = MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         } else if (right_hand < ITEM_ID_THROWABLE_FIRST && right_hand != ITEM_ID_NOTHING) {
-            slot = WORLD_EQUIPMENT_SLOT_LEFT_HAND;
+            slot = MENU_EQUIPMENT_SLOT_LEFT_HAND;
         } else {
             slot = left_hand >= ITEM_ID_THROWABLE_FIRST;
         }
     } else if (item_id < ITEM_ID_BODY_ARMOR_FIRST) {
-        slot = WORLD_EQUIPMENT_SLOT_HEAD;
+        slot = MENU_EQUIPMENT_SLOT_HEAD;
     } else if (item_id < ITEM_ID_ACCESSORY_FIRST) {
-        slot = WORLD_EQUIPMENT_SLOT_BODY;
+        slot = MENU_EQUIPMENT_SLOT_BODY;
     } else {
-        slot = WORLD_EQUIPMENT_SLOT_ACCESSORY;
+        slot = MENU_EQUIPMENT_SLOT_ACCESSORY;
     }
     return slot;
 }

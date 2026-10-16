@@ -173,16 +173,6 @@ typedef enum world_ability_list_mode {
     WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
 } world_ability_list_mode_e;
 
-/* equipment */
-typedef enum world_equipment_slot {
-    WORLD_EQUIPMENT_SLOT_RIGHT_HAND = 0,
-    WORLD_EQUIPMENT_SLOT_LEFT_HAND = 1,
-    WORLD_EQUIPMENT_SLOT_HEAD = 2,
-    WORLD_EQUIPMENT_SLOT_BODY = 3,
-    WORLD_EQUIPMENT_SLOT_ACCESSORY = 4,
-    WORLD_EQUIPMENT_SLOT_COUNT = 5,
-} world_unit_equipment_slot_e;
-
 /* gfx */
 /* Texture-page 7 uses a grid of 16-pixel square allocation cells. */
 enum {
@@ -473,14 +463,14 @@ typedef struct world_unit {
     s16 physical_shield_evade;            /* 0x046 */
     s16 physical_accessory_evade;         /* 0x048 */
     u8 _unused_04a[2];
-    s16 magical_attack;                        /* 0x04c */
-    s16 magical_class_evade;                   /* 0x04e */
-    s16 magical_shield_evade;                  /* 0x050 */
-    s16 magical_accessory_evade;               /* 0x052 */
-    u16 equipment[WORLD_EQUIPMENT_SLOT_COUNT]; /* 0x054; right hand, left hand, head, body, accessory */
-    world_formation_abilities_t abilities;     /* 0x05e */
-    u8 _unused_068[8];                         /* 0x068; spare tail of the stat-detail block */
-    u8 gender_flags;                           /* 0x070; unit_flags_e (fft/unit.h) */
+    s16 magical_attack;                       /* 0x04c */
+    s16 magical_class_evade;                  /* 0x04e */
+    s16 magical_shield_evade;                 /* 0x050 */
+    s16 magical_accessory_evade;              /* 0x052 */
+    u16 equipment[MENU_EQUIPMENT_SLOT_COUNT]; /* 0x054; right hand, left hand, head, body, accessory */
+    world_formation_abilities_t abilities;    /* 0x05e */
+    u8 _unused_068[8];                        /* 0x068; spare tail of the stat-detail block */
+    u8 gender_flags;                          /* 0x070; unit_flags_e (fft/unit.h) */
     u8 _unused_071;
     u8 sprite_set;               /* 0x072; "Sprite Set ID": party_unit_t.sprite_set / character identity */
     u8 equippable_item_types[4]; /* 0x073; bit per item type, read by can_unit_equip_item_id */

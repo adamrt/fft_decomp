@@ -50,7 +50,7 @@ void menu_draw_item_status_list(s16 item_id) {
         count = 12;
     }
     bit = 0xC2;
-    if (g_menu_selected_slot == EQUIP_SLOT_BODY) {
+    if (g_menu_selected_slot == MENU_EQUIPMENT_SLOT_BODY) {
         bit = 0xDA;
     }
     y = bit - count * 9;
