@@ -1,7 +1,8 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-/* Scenario bytecode, interpreter APIs and shared helpers for BATTLE and WORLD. */
+/* The event script interpreter for BATTLE and WORLD: interpreter state, instruction helpers and shared routines.
+ * The bytecode is in script_instruction.h and the script variables in script_variable.h. */
 
 #include "fft/gfx.h"
 #include "fft/map.h"
