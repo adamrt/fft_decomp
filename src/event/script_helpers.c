@@ -637,13 +637,15 @@ void menu_draw_active_window_frames(void) {
             setUV4(&window->quads[1], u, 0xCE, u + 0x1F, 0xCE, u, 0xFE, u + 0x1F, 0xFE);
             window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
             window->quads[1].clut = GetClut(window->portrait_code % 4 * 16 + 0x1C0, window->portrait_code / 4 + 0xFE);
-        } else {
+#else
+            menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_code);
+#endif
+        }
+#ifdef FFT_BATTLE
+        else {
             menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_battle_id);
         }
         gfx_flip_poly_ft4_uv_if_negative(&window->quads[1], -window->portrait_flipped);
-#else
-            menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_code);
-        }
 #endif
         gfx_draw_or_append_gpu_primitive(&window->quads[1]);
         gfx_draw_or_append_gpu_primitive(&window->quads[0]);

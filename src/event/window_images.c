@@ -38,12 +38,11 @@ void mem_copy_bytes_nonempty(void* destination, const void* source, s32 count) {
  * WORLD inlines them into the mirror; BATTLE calls them. The target evaluates
  * the argument expressions before choosing the mask and multiplies
  * afterwards. */
+static
 #ifdef FFT_WORLD
-static inline s32 gfx_read_packed_nibble(const u8* pixels, s32 x, s32 y, s32 stride)
-#else
-static s32 gfx_read_packed_nibble(const u8* pixels, s32 x, s32 y, s32 stride)
+    inline
 #endif
-{
+    s32 gfx_read_packed_nibble(const u8* pixels, s32 x, s32 y, s32 stride) {
     s32 mask;
     s32 value;
 
@@ -63,12 +62,11 @@ static s32 gfx_read_packed_nibble(const u8* pixels, s32 x, s32 y, s32 stride)
 /* The parity test lands in the mask's own register, which is dead there
  * because `pixels` has already been copied out of it, so the parity is
  * assigned to `mask` rather than tested inline. */
+static
 #ifdef FFT_WORLD
-static inline void gfx_write_packed_nibble(u8* pixels, s32 x, s32 y, s32 stride, s32 value)
-#else
-static void gfx_write_packed_nibble(u8* pixels, s32 x, s32 y, s32 stride, s32 value)
+    inline
 #endif
-{
+    void gfx_write_packed_nibble(u8* pixels, s32 x, s32 y, s32 stride, s32 value) {
     s32 mask;
     u8* byte;
 
