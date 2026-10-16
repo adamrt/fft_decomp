@@ -335,7 +335,7 @@ void world_formation_restore_menu_after_core_exit(void) {
     world_menu_init_with_world_text_and_faces();
     DrawSync(0);
     VSync(0);
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     DrawSync(0);
     VSync(0);
     profile = g_main_game_options.fields.finger_cursor_repeat_speed;
@@ -347,7 +347,7 @@ void world_formation_restore_menu_after_core_exit(void) {
     g_main_menu_scroll_fast_step = g_world_input_timing_profiles[profile].scroll_fast_step;
     world_menu_set_brightness(0x80, 0x80, 0x80);
     world_formation_run_screen(0, 0);
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     ClearImage(&g_world_screen_clear_rect, 0, 0, 0);
     DrawSync(0);
     script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT));
@@ -367,8 +367,8 @@ s32 world_menu_take_and_clear_thread_result(void) {
 
 /* Return 1 while a WORLD dialog waits on the player (a centered box at its confirm prompt, or a
  * choice list); WLDCORE checks it before moving on. */
-s32 world_menu_get_event_state_flag(void) {
-    return g_world_menu_event_state_flag;
+s32 world_menu_is_dialog_waiting(void) {
+    return g_world_menu_dialog_waiting;
 }
 
 /* Ask a thread to stop by setting its task id to
@@ -442,7 +442,7 @@ void world_menu_disable_alternate_main_palette(void) {
 
 /* Resets shared context before framebuffer setup and after formation or
  * memory-card sessions. */
-void world_formation_reset_menu_context(void) {
+void world_menu_reset_context(void) {
     DrawSync(0);
     menu_init_subsystem_pointers();
     menu_reset_subsystems();
@@ -613,17 +613,17 @@ void world_main_menu_text_window_thread(void) {
     thread_exit_current();
 }
 
-/* Thread body that opens the game options screen through world_menu_run_main_mode. */
-static void world_menu_run_main_mode_0_thread(void) {
-    world_menu_run_main_mode(MENU_OPTION_TYPE_GAME_OPTIONS);
+/* Thread body that opens the game options screen through world_menu_run_option_screen. */
+static void world_menu_open_game_options_thread(void) {
+    world_menu_run_option_screen(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
-/* Runs the main-menu mode-0 thread in the slot below the current thread,
+/* Runs the game options thread in the slot below the current thread,
  * handing it this thread's first parameter, then waits for it and stops. */
-void world_menu_run_main_mode_0_in_previous_thread(void) {
+void world_menu_open_game_options_in_previous_thread(void) {
     s32 thread_id;
 
-    thread_start(g_thread_current_id - 1, world_menu_run_main_mode_0_thread);
+    thread_start(g_thread_current_id - 1, world_menu_open_game_options_thread);
     thread_id = g_thread_current_id;
     thread_set_parameters(thread_id - 1, g_threads[thread_id].function_parameter_1, 0, 0);
     thread_wait_until_inactive(g_thread_current_id - 1);
@@ -634,35 +634,35 @@ void world_menu_run_main_mode_0_in_previous_thread(void) {
  * formation input state to the event input and exit the thread. */
 void world_card_open_menu(void) {
     g_world_card_menu_request_state = WORLD_SCREEN_REQUEST_START_FADE_OUT;
-    g_world_formation_menu_new_buttons = 0;
-    script_load_event_input_state(&g_world_formation_menu_input_state);
+    g_world_menu_new_buttons = 0;
+    script_load_event_input_state(&g_world_menu_input_state);
     thread_exit_current();
 }
 
 /* Menu action: request the tutorial categories from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_formation_request_tutorial_categories(void) {
+void world_map_request_tutorial_categories(void) {
     g_world_tutorial_categories_request_state = WORLD_SCREEN_REQUEST_START_FADE_OUT;
-    g_world_formation_menu_new_buttons = 0;
-    script_load_event_input_state(&g_world_formation_menu_input_state);
+    g_world_menu_new_buttons = 0;
+    script_load_event_input_state(&g_world_menu_input_state);
     thread_exit_current();
 }
 
 /* Menu action: request the fixed number panel from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_formation_request_fixed_number_panel(void) {
+void world_map_request_fixed_number_panel(void) {
     g_world_fixed_number_panel_request_state = 1;
-    g_world_formation_menu_new_buttons = 0;
-    script_load_event_input_state(&g_world_formation_menu_input_state);
+    g_world_menu_new_buttons = 0;
+    script_load_event_input_state(&g_world_menu_input_state);
     thread_exit_current();
 }
 
 /* Menu action: request the debug variable list from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_formation_request_debug_variable_list(void) {
+void world_map_request_debug_variable_list(void) {
     g_world_debug_variable_list_request_state = 1;
-    g_world_formation_menu_new_buttons = 0;
-    script_load_event_input_state(&g_world_formation_menu_input_state);
+    g_world_menu_new_buttons = 0;
+    script_load_event_input_state(&g_world_menu_input_state);
     thread_exit_current();
 }
 
@@ -670,29 +670,29 @@ void world_formation_request_debug_variable_list(void) {
  * state to the event input and exit the thread. */
 void world_formation_open(void) {
     g_world_formation_open_request_state = WORLD_SCREEN_REQUEST_START_FADE_OUT;
-    g_world_formation_menu_new_buttons = 0;
-    script_load_event_input_state(&g_world_formation_menu_input_state);
+    g_world_menu_new_buttons = 0;
+    script_load_event_input_state(&g_world_menu_input_state);
     thread_exit_current();
 }
 
-/* Menu action: request the world map root level from the world map, hand the formation input
+/* Menu action: request the Brave Story from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_formation_request_world_map_root(void) {
-    g_world_map_root_request_state = WORLD_SCREEN_REQUEST_START_FADE_OUT;
-    g_world_formation_menu_new_buttons = 0;
-    script_load_event_input_state(&g_world_formation_menu_input_state);
+void world_map_request_brave_story(void) {
+    g_world_map_brave_story_request_state = WORLD_SCREEN_REQUEST_START_FADE_OUT;
+    g_world_menu_new_buttons = 0;
+    script_load_event_input_state(&g_world_menu_input_state);
     thread_exit_current();
 }
 
 /* Save the system flags and hide the world map's layers (dots, routes,
- * background, display objects, context value, date and location marker)
+ * background, display objects, context value, date and location label)
  * with the display off, for a full-screen menu. */
 static void world_menu_hide_world_map(void) {
     g_world_formation_saved_system_flags = g_main_system_flags;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES
         | MAIN_SYSTEM_FLAG_DISPLAY_OFF | MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE | MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS
         | MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
-        | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
+        | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
 }
 
 /* Restore the system flags saved before the formation screen opened. */
@@ -703,7 +703,7 @@ static void world_menu_restore_world_map(void) {
 /* Debug battle setup thread: add 3 to the system flags, select the world debug battle style, clear
  * the event, map arrangement, weather and time variables, and make the number entered in the menu
  * the next map. */
-void world_script_reset_event_variables_thread(void) {
+void world_script_setup_debug_battle_thread(void) {
     g_main_system_flags += 3;
     script_set_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 1);
     script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
@@ -739,10 +739,10 @@ static void world_formation_update_open_request(void) {
         return;
     }
     if (state == WORLD_SCREEN_REQUEST_RUN) {
-        world_formation_reset_menu_context();
+        world_menu_reset_context();
         world_menu_set_brightness(0x80, 0x80, 0x80);
         world_formation_run_screen(0, 0);
-        world_formation_reset_menu_context();
+        world_menu_reset_context();
         g_world_menu_screen_open_request = 0;
         world_menu_start_thread_group(g_world_menu_thread_group_parameter, g_world_menu_location_id,
             g_world_menu_location_window_x, g_world_menu_location_window_y);
@@ -777,9 +777,9 @@ static void world_formation_update_open_request(void) {
 /* Run the formation screen opened on the given menu (index + 1), with the menu context reset
  * before and after, then clear the screen request and restore the default menu entries. */
 void world_formation_run_screen_for_menu_index(s32 menu_index) {
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     world_formation_run_screen(menu_index + 1, 0);
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     g_world_menu_screen_open_request = 0;
     g_menu_thread_menu_data = g_world_menu_default_entries;
 }
@@ -787,7 +787,7 @@ void world_formation_run_screen_for_menu_index(s32 menu_index) {
 /* Steps a pending request to open the tutorial categories from the world
  * map: start the screen fade-out, wait for it, then reset the menu context
  * and raise MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL. */
-static void world_formation_update_tutorial_categories_request(void) {
+static void world_map_update_tutorial_categories_request(void) {
     s16 state = g_world_tutorial_categories_request_state;
 
     if (state == WORLD_SCREEN_REQUEST_IDLE) {
@@ -805,7 +805,7 @@ static void world_formation_update_tutorial_categories_request(void) {
         }
         return;
     }
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     world_menu_set_brightness(0x80, 0x80, 0x80);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL;
     g_world_tutorial_categories_request_state = WORLD_SCREEN_REQUEST_IDLE;
@@ -814,12 +814,12 @@ static void world_formation_update_tutorial_categories_request(void) {
 /* Serve a pending request to open the debug variable list from the world
  * map: reset the menu context and raise
  * MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST. */
-static void world_formation_update_debug_variable_list_request(void) {
+static void world_map_update_debug_variable_list_request(void) {
     s32 state = g_world_debug_variable_list_request_state;
 
     if (state != 0 && state == 1) {
         g_world_menu_screen_open_request = 1;
-        world_formation_reset_menu_context();
+        world_menu_reset_context();
         world_menu_set_brightness(0x80, 0x80, 0x80);
         g_world_debug_variable_list_request_state = 0;
         g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST;
@@ -829,12 +829,12 @@ static void world_formation_update_debug_variable_list_request(void) {
 /* Serve a pending request to open the fixed number panel from the world
  * map: reset the menu context, reload and relocate the menu text file and
  * raise MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL. */
-static void world_formation_update_fixed_number_panel_request(void) {
+static void world_map_update_fixed_number_panel_request(void) {
     s32 state = g_world_fixed_number_panel_request_state;
 
     if (state != 0 && state == 1) {
         g_world_menu_screen_open_request = 1;
-        world_formation_reset_menu_context();
+        world_menu_reset_context();
         g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, g_world_menu_text_file_buffer);
         text_relocate_pointer_table(g_world_menu_text_file_buffer);
@@ -844,7 +844,7 @@ static void world_formation_update_fixed_number_panel_request(void) {
     }
 }
 
-/* Sibling of world_formation_update_tutorial_categories_request driven by g_world_card_menu_request_state. */
+/* Sibling of world_map_update_tutorial_categories_request driven by g_world_card_menu_request_state. */
 static void world_card_update_menu_request(void) {
     s16 state = g_world_card_menu_request_state;
     s32 result;
@@ -866,10 +866,10 @@ static void world_card_update_menu_request(void) {
         return;
     }
     if (state == WORLD_SCREEN_REQUEST_RUN) {
-        world_formation_reset_menu_context();
+        world_menu_reset_context();
         world_menu_set_brightness(0x80, 0x80, 0x80);
         result = world_card_run_menu_screen(1);
-        world_formation_reset_menu_context();
+        world_menu_reset_context();
         g_world_menu_screen_open_request = 0;
         g_menu_thread_menu_data = g_world_menu_default_entries;
         world_menu_hide_world_map();
@@ -906,9 +906,9 @@ static void world_card_update_menu_request(void) {
     }
 }
 
-/* Sibling of world_formation_update_tutorial_categories_request driven by g_world_map_root_request_state. */
-static void world_formation_update_world_map_root_request(void) {
-    s16 state = g_world_map_root_request_state;
+/* Sibling of world_map_update_tutorial_categories_request driven by g_world_map_brave_story_request_state. */
+static void world_map_update_brave_story_request(void) {
+    s16 state = g_world_map_brave_story_request_state;
 
     if (state == WORLD_SCREEN_REQUEST_IDLE) {
         return;
@@ -916,18 +916,18 @@ static void world_formation_update_world_map_root_request(void) {
     if (state == WORLD_SCREEN_REQUEST_START_FADE_OUT) {
         g_world_menu_screen_open_request = 1;
         wldcore_fade_start_screen(0x12, 0x10);
-        g_world_map_root_request_state++;
+        g_world_map_brave_story_request_state++;
         return;
     }
     if (state == WORLD_SCREEN_REQUEST_WAIT_FADE_OUT) {
         if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
-            g_world_map_root_request_state = state + 1;
+            g_world_map_brave_story_request_state = state + 1;
         }
         return;
     }
     if (state == WORLD_SCREEN_REQUEST_RUN) {
-        world_formation_reset_menu_context();
-        g_world_map_root_request_state = WORLD_SCREEN_REQUEST_IDLE;
+        world_menu_reset_context();
+        g_world_map_brave_story_request_state = WORLD_SCREEN_REQUEST_IDLE;
         g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_BRAVE_STORY;
     }
 }
@@ -1067,26 +1067,25 @@ static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2],
     sprite->clut = 0x7D7C;
 }
 
-/* Set which buttons the formation menu accepts. */
-void world_formation_set_menu_allowed_buttons(u32 mask) {
-    g_world_formation_menu_allowed_buttons = mask;
+/* Set which buttons the WORLD menus accept. */
+void world_menu_set_allowed_buttons(u32 mask) {
+    g_world_menu_allowed_buttons = mask;
 }
 
-/* The six 32-bit input masks are g_world_formation_menu_input_state,
+/* The six 32-bit input masks are g_world_menu_input_state,
  * but a struct global makes GCC keep a base register for the field accesses
  * (see menu_input_update_event_state), so they are separate scalars here. */
-extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous_input,
-    g_world_formation_menu_initial_repeat_counter, g_world_formation_menu_repeat_counter,
-    g_world_formation_menu_secondary_repeat_counter;
+extern u32 g_world_menu_current_input, g_world_menu_previous_input, g_world_menu_initial_repeat_counter,
+    g_world_menu_repeat_counter, g_world_menu_secondary_repeat_counter;
 
-/* Per-frame formation-menu step: loads the input timing profile selected by
+/* Per-frame WORLD menu step: loads the input timing profile selected by
  * the finger cursor repeat speed option, derives the edge/auto-repeat 32-bit input mask
- * (masked by the formation entry mask and cleared while any of the six
+ * (masked by the allowed-button mask and cleared while any of the six
  * g_world_formation_open_request_state.. flags is set), runs the formation/memory-card request
  * updates, publishes the input, yields once while tracking thread status
  * changes and returns the menu result slot g_menu_pending_selection[0] (-2 while pending).
- * Formation-menu sibling of menu_input_update_event_state. */
-s16 world_formation_run_menu_frame(u32* otag, u32 input) {
+ * WORLD's sibling of menu_input_update_event_state. */
+s16 world_menu_run_frame(u32* otag, u32 input) {
     s32 profile = g_main_game_options.fields.finger_cursor_repeat_speed;
     u32 previous_input;
     u32 filtered_input;
@@ -1104,86 +1103,85 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     g_main_menu_scroll_slow_step = g_world_input_timing_profiles[profile].scroll_slow_step;
     g_main_menu_scroll_fast_step = g_world_input_timing_profiles[profile].scroll_fast_step;
     if (input == 0) {
-        g_world_formation_menu_initial_repeat_counter = 0;
-        g_world_formation_menu_repeat_counter = 0;
-        g_world_formation_menu_secondary_repeat_counter = 0;
+        g_world_menu_initial_repeat_counter = 0;
+        g_world_menu_repeat_counter = 0;
+        g_world_menu_secondary_repeat_counter = 0;
     }
 
-    previous_input = g_world_formation_menu_current_input;
-    g_world_formation_menu_current_input = input;
-    g_world_formation_menu_new_buttons = 0;
-    g_world_formation_menu_previous_input = previous_input;
+    previous_input = g_world_menu_current_input;
+    g_world_menu_current_input = input;
+    g_world_menu_new_buttons = 0;
+    g_world_menu_previous_input = previous_input;
 
     if (previous_input != input || (filtered_input = input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK)) == 0) {
-        g_world_formation_menu_new_buttons = ~previous_input & input;
-        g_world_formation_menu_initial_repeat_counter = 0;
+        g_world_menu_new_buttons = ~previous_input & input;
+        g_world_menu_initial_repeat_counter = 0;
     } else {
         initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
-        counter = ++g_world_formation_menu_initial_repeat_counter;
+        counter = ++g_world_menu_initial_repeat_counter;
         if (counter == initial_delay) {
-            g_world_formation_menu_new_buttons = filtered_input;
+            g_world_menu_new_buttons = filtered_input;
         }
         if (counter >= initial_delay) {
             repeat_delay = g_main_input_repeat_period / g_script_event_speed;
-            counter = ++g_world_formation_menu_repeat_counter;
-            g_world_formation_menu_secondary_repeat_counter++;
+            counter = ++g_world_menu_repeat_counter;
+            g_world_menu_secondary_repeat_counter++;
             if (counter >= repeat_delay) {
-                g_world_formation_menu_repeat_counter = 0;
+                g_world_menu_repeat_counter = 0;
                 if ((input & PSX_PAD_SQUARE) != 0) {
-                    g_world_formation_menu_new_buttons = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
+                    g_world_menu_new_buttons = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
-                    g_world_formation_menu_new_buttons = input & PSX_PAD_DPAD_MASK;
+                    g_world_menu_new_buttons = input & PSX_PAD_DPAD_MASK;
                 }
             }
             secondary_delay = g_main_input_secondary_repeat_period / g_script_event_speed;
-            if (g_world_formation_menu_secondary_repeat_counter >= secondary_delay) {
-                g_world_formation_menu_secondary_repeat_counter = 0;
-                if ((g_world_formation_menu_current_input & PSX_PAD_SQUARE) != 0) {
-                    g_world_formation_menu_new_buttons
-                        |= g_world_formation_menu_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
+            if (g_world_menu_secondary_repeat_counter >= secondary_delay) {
+                g_world_menu_secondary_repeat_counter = 0;
+                if ((g_world_menu_current_input & PSX_PAD_SQUARE) != 0) {
+                    g_world_menu_new_buttons
+                        |= g_world_menu_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
-                    g_world_formation_menu_new_buttons
-                        |= g_world_formation_menu_current_input & (PSX_PAD_L1 | PSX_PAD_R1);
+                    g_world_menu_new_buttons |= g_world_menu_current_input & (PSX_PAD_L1 | PSX_PAD_R1);
                 }
             }
         } else {
-            g_world_formation_menu_repeat_counter = 0;
-            g_world_formation_menu_secondary_repeat_counter = 0;
+            g_world_menu_repeat_counter = 0;
+            g_world_menu_secondary_repeat_counter = 0;
         }
     }
 
-    g_world_formation_menu_new_buttons &= g_world_formation_menu_allowed_buttons;
+    g_world_menu_new_buttons &= g_world_menu_allowed_buttons;
     if (g_world_formation_open_request_state != WORLD_SCREEN_REQUEST_IDLE) {
-        g_world_formation_menu_new_buttons = 0;
+        g_world_menu_new_buttons = 0;
     }
     if (g_world_tutorial_categories_request_state != WORLD_SCREEN_REQUEST_IDLE) {
-        g_world_formation_menu_new_buttons = 0;
+        g_world_menu_new_buttons = 0;
     }
     if (g_world_debug_variable_list_request_state != 0) {
-        g_world_formation_menu_new_buttons = 0;
+        g_world_menu_new_buttons = 0;
     }
     if (g_world_card_menu_request_state != WORLD_SCREEN_REQUEST_IDLE) {
-        g_world_formation_menu_new_buttons = 0;
+        g_world_menu_new_buttons = 0;
     }
-    if (g_world_map_root_request_state != WORLD_SCREEN_REQUEST_IDLE) {
-        g_world_formation_menu_new_buttons = 0;
+    if (g_world_map_brave_story_request_state != WORLD_SCREEN_REQUEST_IDLE) {
+        g_world_menu_new_buttons = 0;
     }
     if (g_world_fixed_number_panel_request_state != 0) {
-        g_world_formation_menu_new_buttons = 0;
+        g_world_menu_new_buttons = 0;
     }
     g_formation_screen_active = 1;
     world_formation_update_open_request();
-    world_formation_update_world_map_root_request();
+    world_map_update_brave_story_request();
     world_card_update_menu_request();
-    world_formation_update_tutorial_categories_request();
-    world_formation_update_debug_variable_list_request();
-    world_formation_update_fixed_number_panel_request();
+    world_map_update_tutorial_categories_request();
+    world_map_update_debug_variable_list_request();
+    world_map_update_fixed_number_panel_request();
     g_menu_pending_selection[0] = -2;
     g_gfx_current_otag_entry = otag;
     g_sound_pending_sfx_id = -1;
     menu_draw_active_window_frames();
-    script_load_event_input_state(&g_world_formation_menu_input_state);
-    if (g_world_formation_menu_new_buttons != PSX_PAD_SELECT && g_world_formation_menu_new_buttons != 0) {
+    script_load_event_input_state(&g_world_menu_input_state);
+    if (g_world_menu_new_buttons != PSX_PAD_SELECT && g_world_menu_new_buttons != 0) {
         g_script_input_suppression_frames = 5;
     }
 

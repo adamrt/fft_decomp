@@ -236,7 +236,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - CARD save menu state 9 is compared and never stored. EQUIP refuses command
   row 1, so its screen state 3 is never entered. `g_etc_graphics` entries 0, 5
   and 6 all name CHAPTER1.BIN.
-- `world_script_reset_event_variables_thread` does `g_main_system_flags += 3`
+- `world_script_setup_debug_battle_thread` does `g_main_system_flags += 3`
   on a 32-bit flags value. System flag bits 0x80, 0x400000 and 0x20000000 are
   tested and never set.
 - `thread_resolve_id` searches slots 1-16 where BATTLE searches 1-15;
@@ -497,7 +497,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   back only HP, MP, CT, level, EXP, Brave, Faith, zodiac sign, Move, Speed and
   Jump, and `menu_load_selected_unit` reloads the unit after every
   change, so the other edits are lost at once.
-- `wldcore_script_calculate_save_data_completion_percent` (no caller) counts
+- `wldcore_sound_novel_calculate_read_percent` (no caller) counts
   0x1000 bits from `g_main_sound_novel_read_section_bits`, which holds 1,280 (40 words), so it
   also counts `g_main_item_location_flags` and the first 224 bytes of
   `g_main_item_poached_quantities`.
@@ -924,7 +924,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `menu_build_window_sprites`: for the Bar's send-unit list (header 0x10) the arrow x reads the "height" of the record at the panel's value pointer, `&g_wldcore_active_menu_value` + 6, which is the upper half of `g_wldcore_proposition_dispatch_days` (0).
 - `battle_unit_generate_treasure`: outside action execution (AI simulation, preview) it returns with no value, so `$v0` still holds `g_battle_action_state` and the crystal pickup result names item 1 or 2 as the treasure.
 - `open_title_step_new_game_start`: no retail code sets step 5, which pops New Game and opens the Music Test (`open_menu_start_music_test_controller`, controller slots 7 and 8); only a poke of the 32-bit step value reaches it.
-- WORLD's copy of the battle menus is dead code: nothing in any module calls or names `menu_init_system_function` (0x800f5230) or `menu_start_mini_menu_display_thread` (0x800f0e48), so modes 1 (AT list) and 2 (dead-unit panel) of `world_menu_run_main_mode` never run; the world map's Options row runs mode 0. With them goes WORLD's event interpreter: `script_start_current_event_thread`, the only starter of the event thread, is called by `menu_init_system_function` and by the menu-building thread that only BATTLE's `menu_build_idle_action_menu` starts (WORLD's copy is empty), so WORLD's `script_execute_event` never runs.
+- WORLD's copy of the battle menus is dead code: nothing in any module calls or names `menu_init_system_function` (0x800f5230) or `menu_start_mini_menu_display_thread` (0x800f0e48), so modes 1 (AT list) and 2 (dead-unit panel) of `world_menu_run_option_screen` never run; the world map's Options row runs mode 0. With them goes WORLD's event interpreter: `script_start_current_event_thread`, the only starter of the event thread, is called by `menu_init_system_function` and by the menu-building thread that only BATTLE's `menu_build_idle_action_menu` starts (WORLD's copy is empty), so WORLD's `script_execute_event` never runs.
 - Abilities no skillset lists: 0x16f (Attack), Reflect (0x1b8), Non-charge,
   Teleport 2, Move Underwater and Silent Walk. Four ids with no name text are
   played as Altima's teleport effects (0x28, 0xb8, 0xdb, 0xdc), and 0x200 is

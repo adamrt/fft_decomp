@@ -55,7 +55,7 @@ void world_formation_init_menu_display(void) {
     RECT rect;
     palette_t palette;
 
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     menu_set_vsync_mode_and_event_speed(0);
     if (g_world_menu_context_id != WORLD_MENU_CONTEXT_NAME_ENTRY) {
         rect.x = 0;
@@ -160,7 +160,7 @@ void world_formation_rebuild_unit_list(void) {
 /* Reports whether the screen is busy: the grid help is up (g_world_grid_menu_id),
  * a menu runs in the upper menu or screen menu thread slot, or menu input is
  * locked (g_menu_input_lock_mode). */
-s32 world_map_is_busy(void) {
+s32 world_screen_is_busy(void) {
     s32 result = 0;
 
     if (g_world_grid_menu_id != MENU_GRID_HELP_NONE || thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU) != 0

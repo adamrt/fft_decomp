@@ -1389,7 +1389,7 @@ data:
   - {addr: 0x80079a98, name: battle_state_run_game_loop}
   - {addr: 0x80093170, name: battle_map_color_field}
   - {addr: 0x800a778c, name: g_battle_game_flow_state}
-  - {addr: 0x800d0bbc, name: g_wldcore_save_slot_buffer}
+  - {addr: 0x800d0bbc, name: g_wldcore_sound_novel_script}
   - {addr: 0x800e6edc, name: world_text_find_entry}
   - {addr: 0x800fc55c, name: g_battle_render_buffers}
   - {addr: 0x8010656c, name: world_menu_init_with_world_text}

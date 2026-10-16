@@ -143,7 +143,7 @@ void wldcore_gfx_capture_map_backdrop(void) {
     g_main_gfx_active_buffer_index = buffer_index;
     GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
     GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_menu_draw_event_transition_sprite(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     /* The map passes run with the stack moved into the 1 KB scratchpad, starting
      * at its last word. */
     wldcore_switch_to_stack(getScratchAddr(255));
@@ -181,7 +181,7 @@ void wldcore_gfx_capture_map_backdrop(void) {
 static void wldcore_gfx_draw_world_frame_with_map(void) {
     GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_menu_draw_event_transition_sprite(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_switch_to_stack(getScratchAddr(255));
     wldcore_map_project_and_cull_tiles();
     wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
@@ -214,7 +214,7 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
 }
 
 /* Per-frame WLDCORE render pass: clears the current ordering table, runs the
- * menu frame and marker/display-object passes, draws screen fades, waits for
+ * menu frame and location-label/display-object passes, draws screen fades, waits for
  * VSync and, unless MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE is set, uploads the
  * captured map backdrop to the new draw buffer before drawing the ordering
  * table over it. */
@@ -223,7 +223,7 @@ void wldcore_gfx_draw_world_frame(void) {
 
     GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
-    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_menu_draw_event_transition_sprite(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_switch_to_stack(getScratchAddr(255));
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
@@ -383,7 +383,7 @@ static void wldcore_init_world_map_state(void) {
     g_wldcore_hud_color.b = 0x80;
     g_wldcore_calendar_display_x = -0x78;
     g_wldcore_calendar_display_y = -0x64;
-    g_wldcore_location_marker_shade = 0x80;
+    g_wldcore_location_label_shade = 0x80;
     g_wldcore_map_selected_location = 0;
 
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_TUTORIAL_EVENT)) {
@@ -400,7 +400,7 @@ static void wldcore_init_world_map_state(void) {
     g_wldcore_audio_queue.music.tracks[0] = 0;
     g_wldcore_audio_queue.current_command = WLDCORE_AUDIO_COMMAND_NONE;
     g_wldcore_sound_novel_countdown_frames = 0;
-    g_wldcore_location_entry_state.flags = 0;
+    g_wldcore_route_travel.flags = 0;
 
     /* Debug unlock (nothing sets MAIN_SYSTEM_FLAG_UNLOCK_ALL): every profile,
      * rumor, route, location and story event; unless Start is held, every

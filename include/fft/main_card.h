@@ -70,7 +70,7 @@ typedef struct card_save_summary {
 typedef char card_save_summary_size_must_be_24[(sizeof(card_save_summary_t) == 24) ? 1 : -1];
 
 /* The 0x1e00-byte memory-card save image, parity-covered per 128-byte block.
- * WORLD builds and loads it in g_world_load_work_buffer; CARD fills the same
+ * WORLD builds and loads it in g_world_card_work_buffer; CARD fills the same
  * layout from the SCUS globals in card_save_build_buffer through
  * g_card_save_buffer_pointer. */
 typedef struct card_save_buffer {

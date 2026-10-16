@@ -22,13 +22,13 @@ typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_PROPOSITION_DETAIL = 9,
     WLDCORE_MENU_LEVEL_PROPOSITION_ACCEPT = 10,
     WLDCORE_MENU_LEVEL_VARIABLE_LIST = 11,
-    WLDCORE_MENU_LEVEL_NUMBER_PANEL = 12,
+    WLDCORE_MENU_LEVEL_PROPOSITION_DAYS = 12,
     WLDCORE_MENU_LEVEL_PROPOSITION_DISPATCH_CONFIRM = 13,
     WLDCORE_MENU_LEVEL_RETURNED_PROPOSITIONS = 14,
-    WLDCORE_MENU_LEVEL_RETURNED_PROPOSITIONS_BROWSE = 15,
+    WLDCORE_MENU_LEVEL_PROPOSITION_REPORT_CONFIRM = 15,
     WLDCORE_MENU_LEVEL_PROPOSITION_REPORT = 16,
     WLDCORE_MENU_LEVEL_PROPOSITION_RESULT = 17,
-    WLDCORE_MENU_LEVEL_PROPOSITIONS = 18,
+    WLDCORE_MENU_LEVEL_BAR_ACTIVE_PROPOSITIONS = 18,
     WLDCORE_MENU_LEVEL_PROPOSITION_CANCEL_CONFIRM = 19,
     WLDCORE_MENU_LEVEL_SOUND_NOVEL_RESUME = 20,
     WLDCORE_MENU_LEVEL_SOUND_NOVEL = 21,
@@ -42,7 +42,7 @@ typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_STORY_EVENTS = 29,
     WLDCORE_MENU_LEVEL_STORY_EVENT_TEXT = 30,
     WLDCORE_MENU_LEVEL_PERSONS = 31,
-    WLDCORE_MENU_LEVEL_VARIABLE_DETAIL = 32,
+    WLDCORE_MENU_LEVEL_PERSON_DETAIL = 32,
     WLDCORE_MENU_LEVEL_TUTORIAL_TOPICS = 33,
     WLDCORE_MENU_LEVEL_TUTORIAL_TOPIC_TEXT = 34,
     WLDCORE_MENU_LEVEL_EVENT_TRANSITION = 35,
@@ -58,7 +58,7 @@ typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS = 45,
     WLDCORE_MENU_LEVEL_FACTS = 46,
     WLDCORE_MENU_LEVEL_FACT_DETAIL = 47,
-    WLDCORE_MENU_LEVEL_NUMBER_PANEL_WITH_ARGUMENT = 48,
+    WLDCORE_MENU_LEVEL_VARIABLE_EDIT = 48,
     WLDCORE_MENU_LEVEL_SCREEN_TRANSITION = 49,
     WLDCORE_MENU_LEVEL_FOCUS_LOCATION = 50,
     WLDCORE_MENU_LEVEL_SCROLLABLE_TEXT_WINDOW = 51,
@@ -150,7 +150,8 @@ typedef struct wldcore_text_list_panel {
 } wldcore_text_list_panel_t;
 
 /* lists, panels and details */
-/* Panel levels: the number panels (wldcore_menu_push_number_panel_level and its _with_argument form) and the list
+/* Panel levels: the number panels (wldcore_menu_push_proposition_days_level, wldcore_menu_push_variable_edit_level and
+ * wldcore_menu_push_fixed_number_panel_level) and the list
  * panels (wldcore_list_open_unexplored_lands, wldcore_list_open_tutorial_topics and
  * wldcore_menu_pop_level_and_rebuild_screen). */
 typedef struct wldcore_menu_panel_level {
@@ -176,7 +177,7 @@ typedef enum wldcore_list_window_mode {
 
 /* Provisional: the list-window level of the bar, the Brave Story and the tutorials, beneath their flag-list panels.
  * wldcore_list_open_brave_story_propositions and wldcore_list_open_persons hide its content render record when they
- * push; wldcore_menu_close_fact_detail_level shows its upper and lower windows again when it pops back to it. */
+ * push; wldcore_menu_wait_fact_text_then_pop_level shows its upper and lower windows again when it pops back to it. */
 typedef struct wldcore_menu_list_window_level {
     s32 main_window;
     s32 side_window;    /* 0x04 */
@@ -204,7 +205,7 @@ typedef struct wldcore_menu_variable_list_level {
     s32 row_count; /* 0x30 */
 } wldcore_menu_variable_list_level_t;
 
-/* wldcore_menu_variable_detail_level_t.phase, shared by the variable,
+/* wldcore_menu_detail_level_t.phase, shared by the person,
  * treasure and unexplored-land detail steps. */
 typedef enum wldcore_detail_phase {
     WLDCORE_DETAIL_PHASE_SHOWN = 0,
@@ -213,10 +214,10 @@ typedef enum wldcore_detail_phase {
     WLDCORE_DETAIL_PHASE_POP_IN = 3, /* waits for the text window's opening animation */
 } wldcore_detail_phase_e;
 
-/* Provisional: the VARIABLE_DETAIL level pushed by wldcore_menu_push_variable_detail_level over the list-window
- * level; it keeps the selected entry value (variable index * 16 + value) and the render record it appends. The
+/* Provisional: the PERSON_DETAIL level pushed by wldcore_menu_push_person_detail_level over the list-window
+ * level; it keeps the selected entry value (person * 16 + profile) and the render record it appends. The
  * treasure and unexplored-land details use the same record. */
-typedef struct wldcore_menu_variable_detail_level {
+typedef struct wldcore_menu_detail_level {
     s32 value;        /* 0x00 */
     s32 render_index; /* 0x04 */
     /* 0x08; no push sets it. The treasure detail stores the saved record of the treasure's sound novel
@@ -225,7 +226,7 @@ typedef struct wldcore_menu_variable_detail_level {
     s32 saved_record_index;
     s32 phase; /* 0x0c; wldcore_detail_phase_e; LOAD at push */
     s32 timer; /* 0x10; cleared at push; text delay or dissolve step, counted per frame */
-} wldcore_menu_variable_detail_level_t;
+} wldcore_menu_detail_level_t;
 
 /* transitions and announcements */
 /* Provisional: the SCREEN_TRANSITION level pushed by wldcore_menu_push_screen_transition_level and stepped by
@@ -272,8 +273,8 @@ typedef enum wldcore_event_transition_drift {
 
 /* Provisional: the EVENT_TRANSITION level pushed by wldcore_menu_push_event_transition_level and stepped by
  * wldcore_menu_step_event_transition_level, which spins or fades the screen out before an event.
- * wldcore_draw_close_indicator_if_pending draws g_wldcore_menu_indicator_sprite while the parent level's mode is
- * not 2. */
+ * wldcore_menu_draw_event_transition_sprite draws g_wldcore_menu_event_transition_sprite while the parent level's mode
+ * is not 2. */
 typedef struct wldcore_menu_event_transition_level {
     s32 frame;           /* 0x00; counts step frames; the sprite updates every third, 1 restores the captured screen */
     s32 drift_direction; /* 0x04; wldcore_event_transition_drift_e; rand() * 4 >> 15 at push */
@@ -650,7 +651,7 @@ typedef union wldcore_menu_stack_record {
     wldcore_menu_participant_list_level_t participant_list;
     wldcore_menu_proposition_cancel_confirm_level_t proposition_cancel_confirm;
     wldcore_menu_proposition_detail_panel_t proposition_detail_panel;
-    wldcore_menu_variable_detail_level_t variable_detail;
+    wldcore_menu_detail_level_t detail;
     wldcore_menu_event_transition_level_t event_transition;
     wldcore_menu_sound_novel_resume_level_t sound_novel_resume;
     wldcore_menu_screen_transition_level_t screen_transition;

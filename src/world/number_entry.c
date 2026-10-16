@@ -26,7 +26,7 @@ static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph
 /* Select's help-text thread: take the menu entry's selected row (for table kinds 2 and
  * -1, the next running menu thread's entry), look up its text id and show it in a dialog,
  * then unlock menu input and restore the saved input state. */
-void world_menu_announce_entry_value_thread(void) {
+void world_menu_help_text_thread(void) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     thread_t* thread;
     s32 kind = entry->select_text_table;
@@ -64,9 +64,9 @@ void world_menu_announce_entry_value_thread(void) {
     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
     thread_set_parameters(g_thread_current_id, 0x3F, value, 0);
     text_run_dialog_thread();
-    g_world_formation_menu_new_buttons = 0;
+    g_world_menu_new_buttons = 0;
     g_menu_input_lock_mode = 0;
-    script_load_event_input_state(&g_world_formation_menu_input_state);
+    script_load_event_input_state(&g_world_menu_input_state);
     thread_exit_current();
 }
 

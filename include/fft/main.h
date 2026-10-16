@@ -33,7 +33,7 @@ typedef enum main_system_flags {
     MAIN_SYSTEM_FLAG_DISPLAY_OFF = 0x00000040,
     /* wldcore_menu_run_world_frame returns without running the menu frame; no code sets it. */
     MAIN_SYSTEM_FLAG_SKIP_MENU_FRAME = 0x00000080,
-    /* Set by world_formation_update_world_map_root_request: the return level opens the Brave Story screen. */
+    /* Set by world_map_update_brave_story_request: the return level opens the Brave Story screen. */
     MAIN_SYSTEM_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
     /* wldcore_gfx_draw_world_frame does not load the scratch image into the display buffer. */
     MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
@@ -44,7 +44,7 @@ typedef enum main_system_flags {
     /* wldcore_gfx_draw_calendar_date draws nothing. */
     MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE = 0x00001000,
     /* wldcore_map_draw_location_label draws no label; set while a level moves or covers the map view. */
-    MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER = 0x00002000,
+    MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL = 0x00002000,
     /* WORLD's menu chose a map (script variable CURRENT_MAP): the return level restarts the core and travels there. */
     MAIN_SYSTEM_FLAG_REQUEST_DESTINATION = 0x00004000,
     /* wldcore_map_step_route_travel rolled an encounter: wldcore_entrypoint returns 1. */
@@ -57,15 +57,15 @@ typedef enum main_system_flags {
     MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY = 0x00040000,
     /* Set by open_title_update_menu: the world entry opens the tutorial menu, which leaves through RETURN_TO_TITLE. */
     MAIN_SYSTEM_FLAG_TITLE_TUTORIAL = 0x00080000,
-    /* Set by world_formation_update_tutorial_categories_request: the return level opens the tutorial menu. */
+    /* Set by world_map_update_tutorial_categories_request: the return level opens the tutorial menu. */
     MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL = 0x00100000,
     /* A tutorial event plays: wldcore_entrypoint returns 2 with the music kept; the next entry reopens its list. */
     MAIN_SYSTEM_FLAG_TUTORIAL_EVENT = 0x00200000,
     /* wldcore_init_world_map_state sets the rumor, path, location and story-event variables; no code sets it. */
     MAIN_SYSTEM_FLAG_UNLOCK_ALL = 0x00400000,
-    /* Set by world_formation_update_debug_variable_list_request: the return level opens the variable list. */
+    /* Set by world_map_update_debug_variable_list_request: the return level opens the variable list. */
     MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST = 0x00800000,
-    /* Set by world_formation_update_fixed_number_panel_request: the return level opens the fixed number panel. */
+    /* Set by world_map_update_fixed_number_panel_request: the return level opens the fixed number panel. */
     MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL = 0x01000000,
     /* The location menu chose a deep-dungeon battle: wldcore_entrypoint returns 4. */
     MAIN_SYSTEM_FLAG_DEEP_DUNGEON_BATTLE = 0x02000000,

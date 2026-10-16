@@ -71,7 +71,7 @@ extern u8 g_world_location_names_resident[];
 
 /* screen requests */
 /* State of a screen request raised from the world map menu (the
- * g_world_*_request_state globals stepped by world_formation_run_menu_frame):
+ * g_world_*_request_state globals stepped by world_menu_run_frame):
  * fade out, run the screen, fade back in. States 4 to 7 only count frames. */
 typedef enum world_screen_request_state {
     WORLD_SCREEN_REQUEST_IDLE = 0,
@@ -85,8 +85,8 @@ typedef enum world_screen_request_state {
 /* world map */
 extern u16 g_world_map_append_state;
 extern u16 g_world_map_reload_state;
-extern s16 g_world_map_root_request_state; /* world_screen_request_state_e */
-s32 world_map_is_busy(void);
+extern s16 g_world_map_brave_story_request_state; /* world_screen_request_state_e */
+s32 world_screen_is_busy(void);
 void world_map_confirm_destination(void);
 
 /* system */

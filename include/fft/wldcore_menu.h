@@ -29,8 +29,9 @@ extern void (*g_wldcore_menu_resume_handlers[])(wldcore_menu_stack_record_t*);
 extern s32 g_wldcore_menu_ordering_table_offset;
 extern s32 g_wldcore_menu_root_window_index;
 extern s16 g_wldcore_active_menu_value;
-/* The close indicator, sorted with GsSortSprite by wldcore_draw_close_indicator_if_pending. */
-extern GsSPRITE g_wldcore_menu_indicator_sprite;
+/* The event transition's spinning screen-capture sprite, sorted with GsSortSprite by
+ * wldcore_menu_draw_event_transition_sprite. */
+extern GsSPRITE g_wldcore_menu_event_transition_sprite;
 void wldcore_menu_reset_stack(void);
 void wldcore_menu_run_world_frame(GsOT* context);
 void wldcore_menu_dispatch_idle_handler(void);
@@ -40,7 +41,7 @@ void wldcore_menu_dispatch_pending_script_requests(void);
 void wldcore_menu_resume_root_level(wldcore_menu_stack_record_t* level);
 void wldcore_menu_resume_sound_novel_level(wldcore_menu_stack_record_t* level);
 void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level);
-void wldcore_draw_close_indicator_if_pending(GsOT* ot);
+void wldcore_menu_draw_event_transition_sprite(GsOT* ot);
 
 /* push routines */
 void wldcore_menu_push_entry_window_level(void);
@@ -48,7 +49,7 @@ void wldcore_menu_push_layout_window_level(void);
 void wldcore_menu_push_message_level(s32 text, s32 reload_text);
 void wldcore_menu_push_text_window_level(s32 text, s32 reload_text);
 void wldcore_menu_push_scrollable_text_window_level(s32 text_id);
-void wldcore_menu_push_number_panel_level(void);
+void wldcore_menu_push_proposition_days_level(void);
 void wldcore_menu_push_location_menu_level(s32 menu);
 void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
 void wldcore_menu_push_event_transition_level(s32 mode);
@@ -62,7 +63,7 @@ typedef enum wldcore_cursor_slot {
     WLDCORE_CURSOR_SLOT_RUMORS = 2,
     WLDCORE_CURSOR_SLOT_AVAILABLE_PROPOSITIONS = 3,
     WLDCORE_CURSOR_SLOT_RETURNED_PROPOSITIONS = 4,
-    WLDCORE_CURSOR_SLOT_PROPOSITIONS = 5,
+    WLDCORE_CURSOR_SLOT_BAR_ACTIVE_PROPOSITIONS = 5,
     WLDCORE_CURSOR_SLOT_UNEXPLORED_LANDS = 7,
     WLDCORE_CURSOR_SLOT_TREASURES = 8,
     WLDCORE_CURSOR_SLOT_STORY_EVENTS = 10,
@@ -91,7 +92,7 @@ extern s16 g_wldcore_list_entry_values[];
 /* Withhold every button (g_menu_blocked_buttons = -1) before a list level opens a message over itself. The list
  * steps hand each its level, which it does not read: the parameter is only what the target passes in $a0. */
 void wldcore_list_rumors_block_all_buttons(wldcore_menu_panel_level_t* level);
-void wldcore_list_propositions_block_all_buttons(wldcore_menu_panel_level_t* level);
+void wldcore_list_available_propositions_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_unexplored_lands_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_story_events_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_persons_block_all_buttons(wldcore_menu_panel_level_t* level);
@@ -108,7 +109,7 @@ typedef enum wldcore_bar_menu_row {
     WLDCORE_BAR_MENU_ROW_RUMORS = 0,
     WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS = 1,
     WLDCORE_BAR_MENU_ROW_RETURNED_PROPOSITIONS = 2,
-    WLDCORE_BAR_MENU_ROW_PROPOSITIONS = 3,
+    WLDCORE_BAR_MENU_ROW_ACTIVE_PROPOSITIONS = 3,
     WLDCORE_BAR_MENU_ROW_LEAVE = 4,
 } wldcore_bar_menu_row_e;
 
@@ -121,7 +122,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
 void wldcore_list_open_available_propositions(void);
 void wldcore_list_open_returned_propositions(void);
 void wldcore_list_handle_returned_propositions_input(wldcore_menu_stack_record_t* level);
-void wldcore_list_open_propositions(void);
+void wldcore_bar_open_active_propositions(void);
 
 /* Brave Story */
 /* Row kinds of the Brave Story list (wldcore_menu_build_brave_story_entries), named after the level each row

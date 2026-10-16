@@ -1,4 +1,4 @@
-/* The main menu mode and game options. */
+/* WORLD's copy of the Options screen entry and the game options thread. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
@@ -26,14 +26,14 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-/* Unpacks the configured options into the options-menu value table, then runs a main-menu mode:
+/* Unpacks the configured options into the options-menu value table, then runs one Options screen:
  * MENU_OPTION_TYPE_GAME_OPTIONS runs world_menu_run_game_options in the thread slot before this one
  * and exits once it ends, MENU_OPTION_TYPE_AT_LIST starts the AT list and MENU_OPTION_TYPE_CRYSTAL_PICKUP the
  * crystal pickup threads.
  *
  * g_menu_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
  * option equals its g_menu_option_reference_values entry. */
-void world_menu_run_main_mode(s32 mode) {
+void world_menu_run_option_screen(s32 mode) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     game_options_fields_t options = g_main_game_options.fields;
     s32 i;
@@ -82,7 +82,7 @@ void world_menu_run_main_mode(s32 mode) {
 }
 
 /*
- * Options-menu thread started by world_menu_run_main_mode (mode 0) with
+ * Options-menu thread started by world_menu_run_option_screen (MENU_OPTION_TYPE_GAME_OPTIONS) with
  * entry->context = &g_menu_option_entry_table.
  *
  * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread, shows the

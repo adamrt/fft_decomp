@@ -50,7 +50,7 @@ static s32 world_shop_run_fur_buy_quantity_menu(void);
 static s32 world_shop_run_fur_sell_quantity_menu(void);
 static s32 world_shop_run_item_purchase_quantity_menu(void);
 static s32 world_shop_run_item_sell_menu(void);
-static void world_shop_run_obtain_gil_menu(void);
+static void world_shop_run_war_funds_menu_script(void);
 static void world_shop_run_soldier_office_fee_menu_script(void);
 
 /* Run a shop screen (item shop, Fur Shop or Soldier Office): set the primitive budgets,
@@ -235,7 +235,7 @@ void world_shop_run_screen(s32 shop_type) {
     main_sound_unload_scenario_mus(g_world_menu_music_slot);
     world_formation_save_records_to_party();
     menu_set_vsync_mode_and_event_speed(0);
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     gfx_load_image_and_wait(&g_world_shop_background_vram_rect, tim);
     main_heap_free(tim);
 }
@@ -274,7 +274,7 @@ void world_shop_run_main_menu_step(void) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF803, 0);
         }
     }
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Menu screen step: on the first frame reset the fade flag; once any of the
@@ -296,7 +296,7 @@ void world_menu_run_exit_fade_step(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         g_world_shop_exit_fade_started = 1;
     }
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
     if (g_world_menu_context_id == WORLD_MENU_CONTEXT_SOLDIER_OFFICE) {
         world_shop_run_soldier_office_fee_menu_script();
         world_menu_run_script_with_callback_suppressed();
@@ -305,14 +305,14 @@ void world_menu_run_exit_fade_step(void) {
 
 /* Run the shop's war-funds menu script with world_shop_adjust_gil installed as the
  * script callback, then put the previous callback back. The step handlers call it. */
-static void world_shop_run_obtain_gil_menu(void) {
+static void world_shop_run_war_funds_menu_script(void) {
     menu_callback_t* callback_slot;
     s32 (*previous_callback)(s32);
 
     callback_slot = g_world_menu_script_callbacks;
     previous_callback = callback_slot->value;
     callback_slot->value = world_shop_adjust_gil;
-    menu_run_script_with_palette_mode(&g_world_shop_obtain_gil_menu_script, 0, 0);
+    menu_run_script_with_palette_mode(&g_world_shop_war_funds_menu_script, 0, 0);
     callback_slot->value = previous_callback;
 }
 
@@ -463,12 +463,13 @@ void world_shop_handle_item_purchase_menu(void) {
     world_menu_switch_item_category(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
         &g_world_shop_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    if (world_map_is_busy() != 0 || g_menu_list_entry_count == 0 || g_world_shop_item_category == ITEM_MENU_TAB_OTHER) {
+    if (world_screen_is_busy() != 0 || g_menu_list_entry_count == 0
+        || g_world_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, MAIN_SFX_CONFIRM);
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /*
@@ -513,7 +514,7 @@ void world_menu_confirm_item_purchase(void) {
     world_menu_switch_item_category(0);
     menu_run_script_with_palette_mode(&g_world_shop_purchase_menu_script, 0, g_menu_input_lock_mode);
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, MAIN_SFX_CONFIRM);
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Runs the shop purchase-quantity menu for the highlighted item.
@@ -749,7 +750,7 @@ void world_shop_run_item_sell_list_step(void) {
     world_menu_switch_item_category(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
         &g_world_shop_sell_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Item sell confirmation step: pays half price times the quantity, removes the
@@ -794,7 +795,7 @@ void world_shop_run_item_sell_confirm_step(void) {
     world_menu_switch_item_category(0);
     menu_run_script_with_palette_mode(
         &g_world_shop_sell_list_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Shop: the quantity prompt of a sale, capped by the inventory count.
@@ -866,7 +867,7 @@ void world_shop_run_fitting_room_step(void) {
 
     if (g_world_shop_fitting_room_initialized == 0) {
         if (g_menu_input_newly_pressed == 0) {
-            world_shop_run_obtain_gil_menu();
+            world_shop_run_war_funds_menu_script();
             return;
         }
         world_formation_init_cursor_and_scroll_state(0);
@@ -1071,7 +1072,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
         }
 
         menu_run_script_with_palette_mode(
-            &g_world_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, world_map_is_busy());
+            &g_world_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, world_screen_is_busy());
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
             ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE
             : -1;
@@ -1254,7 +1255,7 @@ void world_shop_run_fitting_room_checkout_step(void) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf818, 0);
         }
     }
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /*
@@ -1793,7 +1794,7 @@ void world_shop_run_fur_menu_step(void) {
             g_world_shop_fur_opened = 0;
         }
     }
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Query the selected poached-stock entry with a 0 quantity adjustment.
@@ -1854,7 +1855,7 @@ void world_shop_run_fur_sell_list_step(void) {
     world_menu_switch_item_category(g_menu_input_newly_pressed);
     menu_run_script_with_palette_mode(
         &g_world_shop_sale_confirm_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Fur shop: confirm a sale. The party receives half price, and the sold copies join the
@@ -1900,7 +1901,7 @@ void world_shop_run_fur_sell_confirm_step(void) {
     world_menu_switch_item_category(0);
     menu_run_script_with_palette_mode(
         &g_world_shop_sale_confirm_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Fur shop: the quantity prompt of a sale, capped by the inventory count. */
@@ -2024,12 +2025,13 @@ void world_shop_run_fur_buy_list_step(void) {
     world_menu_switch_item_category(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
         &g_world_shop_fur_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    if (world_map_is_busy() != 0 || g_menu_list_entry_count == 0 || g_world_shop_item_category == ITEM_MENU_TAB_OTHER) {
+    if (world_screen_is_busy() != 0 || g_menu_list_entry_count == 0
+        || g_world_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, MAIN_SFX_CONFIRM);
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Fur shop sibling of world_menu_confirm_item_purchase: the party pays half
@@ -2076,7 +2078,7 @@ void world_shop_run_fur_buy_confirm_step(void) {
     menu_run_script_with_palette_mode(
         &g_world_shop_fur_purchase_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, MAIN_SFX_CONFIRM);
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
 }
 
 /* Fur shop twin of world_shop_run_item_purchase_quantity_menu: the quantity
@@ -2228,7 +2230,7 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
             }
         }
     }
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
     world_shop_run_soldier_office_fee_menu_script();
     world_menu_run_script_with_callback_suppressed();
 }
@@ -2254,7 +2256,7 @@ void world_shop_run_recruit_unit_preview_step(void) {
             g_menu_help_message_text_id = MENU_GRID_HELP_RECRUIT_PREVIEW;
             g_world_shop_recruit_preview_initialized = 1;
         }
-        world_shop_run_obtain_gil_menu();
+        world_shop_run_war_funds_menu_script();
         world_shop_run_soldier_office_fee_menu_script();
         world_menu_run_script_with_callback_suppressed();
     } else if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
@@ -2303,7 +2305,7 @@ void world_shop_run_hire_confirm_step(void) {
             g_world_shop_hire_confirm_message_wait = 1;
         }
     }
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
     world_shop_run_soldier_office_fee_menu_script();
     world_menu_run_script_with_callback_suppressed();
 }
@@ -2359,7 +2361,7 @@ void world_shop_run_hire_fee_confirm_step(void) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_HIRE_NAME_ENTRY;
         }
     }
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
     world_shop_run_soldier_office_fee_menu_script();
     world_menu_run_script_with_callback_suppressed();
 }
@@ -2370,7 +2372,7 @@ void world_shop_reopen_soldier_office_menu_step(void) {
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf821, 0);
     g_world_shop_menu_step = WORLD_SHOP_STEP_SOLDIER_OFFICE_MENU;
     g_world_shop_hire_menu_initialized = 0;
-    world_shop_run_obtain_gil_menu();
+    world_shop_run_war_funds_menu_script();
     world_shop_run_soldier_office_fee_menu_script();
     world_menu_run_script_with_callback_suppressed();
 }
@@ -2394,7 +2396,7 @@ void world_shop_run_rename_unit_prompt_step(void) {
 
     if (g_world_shop_rename_prompt_initialized == 0) {
         if (!(g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE))) {
-            world_shop_run_obtain_gil_menu();
+            world_shop_run_war_funds_menu_script();
             world_shop_run_soldier_office_fee_menu_script();
             world_menu_run_script_with_callback_suppressed();
             return;

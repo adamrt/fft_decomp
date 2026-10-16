@@ -50,7 +50,7 @@ u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1) {
         return 0;
     }
     if (g_world_name_entry_state != 0xFF) {
-        busy = world_map_is_busy();
+        busy = world_screen_is_busy();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
                 world_name_apply_entry_key(WORLD_NAME_ENTRY_KEY_CURSOR_LEFT);
@@ -191,7 +191,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         DrawOTag(otag);
         ClearOTag(g_menu_gfx_context->otag, g_world_ot_length);
         world_menu_input_update_with_message_state();
-        busy = world_map_is_busy();
+        busy = world_screen_is_busy();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
                 world_name_apply_entry_key(WORLD_NAME_ENTRY_KEY_CURSOR_LEFT);
@@ -242,7 +242,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     }
     menu_set_vsync_mode_and_event_speed(2);
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
     world_gfx_set_fade_disabled(0);
     return g_world_name_entry_text;
 }

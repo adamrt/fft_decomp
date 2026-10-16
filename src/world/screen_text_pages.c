@@ -104,7 +104,7 @@ static u8* world_screen_menu_redraw_text_page_on_scroll(
  * copied to `layout` before the loop: with one variable the allocator gives
  * the image buffer the last callee-saved register instead of the layout.
  */
-void world_screen_build_at_list(void) {
+void world_screen_text_list_thread(void) {
     image_load_parameters_t image_parameters;
     RECT image_rect;
     RECT clear;

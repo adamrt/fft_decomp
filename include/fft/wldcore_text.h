@@ -139,6 +139,6 @@ typedef char wldcore_text_scrollable_window_size_must_be_112[sizeof(wldcore_text
 
 extern wldcore_text_scrollable_window_t g_wldcore_scrollable_text_window;
 void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state);
-s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* window);
+s32 wldcore_text_step_scrollable_window(wldcore_text_scrollable_window_t* window);
 
 #endif

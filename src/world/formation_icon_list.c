@@ -20,7 +20,7 @@ static s32 g_world_formation_name_string_revision = 0;
 /* WORLD's simple menu window thread: like menu_icon_list_thread, but it reads the formation
  * screen's input, ignores input while the previous thread runs and tints the window with the world
  * menu color. */
-void world_menu_formation_icon_list_thread(void) {
+void world_menu_icon_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     s32 cursor;
@@ -61,7 +61,7 @@ void world_menu_formation_icon_list_thread(void) {
         param->selected_index = cursor;
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, i, cursor);
-        if (menu_should_close_thread(&g_world_formation_menu_input_state.new_buttons) != 0) {
+        if (menu_should_close_thread(&g_world_menu_input_state.new_buttons) != 0) {
             break;
         }
         if (thread_is_previous_running() == 0) {

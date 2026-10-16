@@ -142,7 +142,7 @@ typedef struct wldcore_window_panel_layout {
 
 /* The panel renderer's entry (g_wldcore_window_panel_render_state), filled by
  * wldcore_window_init_panel_render_state and wldcore_window_init_number_panel_render_thread and read by
- * world_screen_build_at_list. Its text binding is the label layout g_wldcore_window_panel_label_state (column mode
+ * world_screen_text_list_thread. Its text binding is the label layout g_wldcore_window_panel_label_state (column mode
  * 0 text, 2 hidden, 3 alternate number) or, for number panels, g_wldcore_window_panel_number_state. */
 extern menu_text_layout_t g_wldcore_window_panel_label_state;
 extern menu_entry_t g_wldcore_window_panel_render_state;

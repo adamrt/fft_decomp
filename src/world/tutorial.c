@@ -66,11 +66,11 @@ void world_tutorial_start(s32 index) {
         g_text_section_pointers[WORLD_TEXT_SECTION_TUTORIAL_MESSAGES] = g_world_tutorial_state.messages;
         world_card_init_menu_state();
         world_card_build_save_image(-1);
-        bcopy(g_world_load_work_buffer, &g_world_tutorial_state.saved_game, sizeof(g_world_tutorial_state.saved_game));
-        main_file_load_checked_to_address(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_world_load_work_buffer);
-        g_world_load_work_buffer->options.show_unequippable_items = GAME_OPTION_ON;
-        g_world_load_work_buffer->options.max_equip_at_job_change = g_main_game_options.fields.max_equip_at_job_change;
-        g_world_load_work_buffer->options.sound_mode = g_main_game_options.fields.sound_mode;
+        bcopy(g_world_card_work_buffer, &g_world_tutorial_state.saved_game, sizeof(g_world_tutorial_state.saved_game));
+        main_file_load_checked_to_address(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_world_card_work_buffer);
+        g_world_card_work_buffer->options.show_unequippable_items = GAME_OPTION_ON;
+        g_world_card_work_buffer->options.max_equip_at_job_change = g_main_game_options.fields.max_equip_at_job_change;
+        g_world_card_work_buffer->options.sound_mode = g_main_game_options.fields.sound_mode;
         world_card_load_globals_from_save_image(1);
         g_world_tutorial_command_active = 0;
         world_text_build_roster_name_list();
@@ -138,11 +138,11 @@ static s32 world_tutorial_opcode_17_end(void) {
             g_world_tutorial_id = 0;
             main_heap_call_free(g_world_tutorial_state.messages);
             main_heap_call_free(g_world_tutorial_state.script);
-            bcopy(&g_world_tutorial_state.saved_game, g_world_load_work_buffer,
+            bcopy(&g_world_tutorial_state.saved_game, g_world_card_work_buffer,
                 sizeof(g_world_tutorial_state.saved_game));
             world_card_load_globals_from_save_image(1);
             world_text_build_roster_name_list();
-            main_heap_call_free(g_world_load_work_buffer);
+            main_heap_call_free(g_world_card_work_buffer);
             world_formation_build_record_list(
                 0, (world_unit_t**)&g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);
             return 0;

@@ -952,7 +952,7 @@ void world_text_message_box_thread(void) {
     thread_set_current_task_id(THREAD_TASK_MESSAGE_BOX);
     value_index = 0;
     script_variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
-    g_world_menu_event_state_flag = 0;
+    g_world_menu_dialog_waiting = 0;
     param = thread_get_current_parameter_1();
     rec.box_type = param & 0x70;
     rec.dialog_type = param;
@@ -1088,7 +1088,7 @@ void world_text_message_box_thread(void) {
             }
             message = thread_get_current_parameter_2();
             if ((message & no_value) == no_value) {
-                g_world_menu_event_state_flag = 0;
+                g_world_menu_dialog_waiting = 0;
                 break;
             }
             text = text_find_entry(message);
@@ -1108,7 +1108,7 @@ void world_text_message_box_thread(void) {
             rec.color = 0;
             rec.mark = -1;
             rec.line = 0;
-            g_world_menu_event_state_flag = 0;
+            g_world_menu_dialog_waiting = 0;
             width_override = no_value;
             rec.text = message;
             repeat = 0;
@@ -1130,7 +1130,7 @@ void world_text_message_box_thread(void) {
                 break;
             }
             if (code == TEXT_END_WAIT_FOR_CONFIRM) {
-                g_world_menu_event_state_flag = 1;
+                g_world_menu_dialog_waiting = 1;
                 /* The end of a substituted string returns to the text that named it. */
                 if (saved != (u8*)-1) {
                     text = saved;

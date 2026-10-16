@@ -35,7 +35,7 @@ static void wldcore_list_open_story_events(void);
 static void wldcore_menu_build_brave_story_entries(void);
 static void wldcore_menu_push_proposition_category_level(void);
 static void wldcore_menu_push_tutorial_topic_text_level(s32 topic);
-static void wldcore_menu_push_variable_detail_level(s32 value);
+static void wldcore_menu_push_person_detail_level(s32 value);
 
 /* Draws the event transition's spinning sprite while that level is on top of
  * the menu stack, unless it is a plain fade.
@@ -43,12 +43,12 @@ static void wldcore_menu_push_variable_detail_level(s32 value);
  * The level is spelled g_wldcore_menu_stack_records_next[current - 1]; the
  * equivalent g_wldcore_menu_stack_records[current] changes the address
  * arithmetic. */
-void wldcore_draw_close_indicator_if_pending(GsOT* ordering_table) {
+void wldcore_menu_draw_event_transition_sprite(GsOT* ordering_table) {
     s32 current = g_wldcore_menu_stack_depth;
 
     if (g_wldcore_menu_stack_types[current] == WLDCORE_MENU_LEVEL_EVENT_TRANSITION
         && g_wldcore_menu_stack_records_next[current - 1].event_transition.mode != WLDCORE_EVENT_TRANSITION_MODE_FADE) {
-        GsSortSprite(&g_wldcore_menu_indicator_sprite, ordering_table, 2);
+        GsSortSprite(&g_wldcore_menu_event_transition_sprite, ordering_table, 2);
     }
 }
 
@@ -133,37 +133,37 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
         }
     }
 
-    /* The indicator drifts a pixel a frame on each axis; spin, scale and shade step every third frame. */
+    /* The sprite drifts a pixel a frame on each axis; spin, scale and shade step every third frame. */
     switch (level->phase) {
     case WLDCORE_EVENT_TRANSITION_PHASE_SPIN_IN:
         if (level->drift_direction & WLDCORE_EVENT_TRANSITION_DRIFT_RIGHT) {
-            g_wldcore_menu_indicator_sprite.x = g_wldcore_menu_indicator_sprite.x + 1;
+            g_wldcore_menu_event_transition_sprite.x = g_wldcore_menu_event_transition_sprite.x + 1;
         } else {
-            g_wldcore_menu_indicator_sprite.x = g_wldcore_menu_indicator_sprite.x - 1;
+            g_wldcore_menu_event_transition_sprite.x = g_wldcore_menu_event_transition_sprite.x - 1;
         }
         if (level->drift_direction & WLDCORE_EVENT_TRANSITION_DRIFT_DOWN) {
-            g_wldcore_menu_indicator_sprite.y = g_wldcore_menu_indicator_sprite.y + 1;
+            g_wldcore_menu_event_transition_sprite.y = g_wldcore_menu_event_transition_sprite.y + 1;
         } else {
-            g_wldcore_menu_indicator_sprite.y = g_wldcore_menu_indicator_sprite.y - 1;
+            g_wldcore_menu_event_transition_sprite.y = g_wldcore_menu_event_transition_sprite.y - 1;
         }
 
         if (level->frame == ((level->frame / 3) * 3)) {
             step = level->anim_step + 2;
             level->anim_step = step;
-            g_wldcore_menu_indicator_sprite.scalex = 0x1100 - (step << 7);
-            g_wldcore_menu_indicator_sprite.scaley = 0x1100 - (level->anim_step << 7);
+            g_wldcore_menu_event_transition_sprite.scalex = 0x1100 - (step << 7);
+            g_wldcore_menu_event_transition_sprite.scaley = 0x1100 - (level->anim_step << 7);
             if (level->spin_direction != 0) {
-                angle = g_wldcore_menu_indicator_sprite.rotate + 0x2000;
+                angle = g_wldcore_menu_event_transition_sprite.rotate + 0x2000;
             } else {
-                angle = g_wldcore_menu_indicator_sprite.rotate - 0x2000;
+                angle = g_wldcore_menu_event_transition_sprite.rotate - 0x2000;
             }
-            g_wldcore_menu_indicator_sprite.rotate = angle;
+            g_wldcore_menu_event_transition_sprite.rotate = angle;
 
             /* Stored as a byte, -0x80 - 4 * step darkens the sprite from 0x80. */
             shade = -0x80 - (level->anim_step * 4);
-            g_wldcore_menu_indicator_sprite.b = shade;
-            g_wldcore_menu_indicator_sprite.g = shade;
-            g_wldcore_menu_indicator_sprite.r = shade;
+            g_wldcore_menu_event_transition_sprite.b = shade;
+            g_wldcore_menu_event_transition_sprite.g = shade;
+            g_wldcore_menu_event_transition_sprite.r = shade;
 
             if (level->mode == WLDCORE_EVENT_TRANSITION_MODE_SPIN) {
                 if (level->anim_step == 4) {
@@ -173,10 +173,10 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
                 /* Spin back out at full size, textured from the 16-bit page holding the capture. */
                 if (level->anim_step >= 0x20) {
                     level->phase = WLDCORE_EVENT_TRANSITION_PHASE_SPIN_OUT;
-                    g_wldcore_menu_indicator_sprite.attribute = 0x52000000;
-                    g_wldcore_menu_indicator_sprite.tpage = GetTPage(2, 1, 0x100, 0);
-                    g_wldcore_menu_indicator_sprite.scaley = ONE;
-                    g_wldcore_menu_indicator_sprite.scalex = ONE;
+                    g_wldcore_menu_event_transition_sprite.attribute = 0x52000000;
+                    g_wldcore_menu_event_transition_sprite.tpage = GetTPage(2, 1, 0x100, 0);
+                    g_wldcore_menu_event_transition_sprite.scaley = ONE;
+                    g_wldcore_menu_event_transition_sprite.scalex = ONE;
                 }
             } else {
                 if (level->anim_step == 4) {
@@ -198,28 +198,28 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
 
     case WLDCORE_EVENT_TRANSITION_PHASE_SPIN_OUT:
         if (level->drift_direction & WLDCORE_EVENT_TRANSITION_DRIFT_RIGHT) {
-            g_wldcore_menu_indicator_sprite.x = g_wldcore_menu_indicator_sprite.x - 1;
+            g_wldcore_menu_event_transition_sprite.x = g_wldcore_menu_event_transition_sprite.x - 1;
         } else {
-            g_wldcore_menu_indicator_sprite.x = g_wldcore_menu_indicator_sprite.x + 1;
+            g_wldcore_menu_event_transition_sprite.x = g_wldcore_menu_event_transition_sprite.x + 1;
         }
         if (level->drift_direction & WLDCORE_EVENT_TRANSITION_DRIFT_DOWN) {
-            g_wldcore_menu_indicator_sprite.y = g_wldcore_menu_indicator_sprite.y - 1;
+            g_wldcore_menu_event_transition_sprite.y = g_wldcore_menu_event_transition_sprite.y - 1;
         } else {
-            g_wldcore_menu_indicator_sprite.y = g_wldcore_menu_indicator_sprite.y + 1;
+            g_wldcore_menu_event_transition_sprite.y = g_wldcore_menu_event_transition_sprite.y + 1;
         }
 
         if (level->frame == ((level->frame / 3) * 3)) {
             step = level->anim_step + 4;
             level->anim_step = step;
-            g_wldcore_menu_indicator_sprite.scalex = 0x1100 - ((0x40 - step) << 7);
-            g_wldcore_menu_indicator_sprite.scaley = 0x1100 - ((0x40 - level->anim_step) << 7);
-            g_wldcore_menu_indicator_sprite.b = (level->anim_step - 0x20) * 4;
+            g_wldcore_menu_event_transition_sprite.scalex = 0x1100 - ((0x40 - step) << 7);
+            g_wldcore_menu_event_transition_sprite.scaley = 0x1100 - ((0x40 - level->anim_step) << 7);
+            g_wldcore_menu_event_transition_sprite.b = (level->anim_step - 0x20) * 4;
             if (level->spin_direction != 0) {
-                angle = g_wldcore_menu_indicator_sprite.rotate - 0x2000;
+                angle = g_wldcore_menu_event_transition_sprite.rotate - 0x2000;
             } else {
-                angle = g_wldcore_menu_indicator_sprite.rotate + 0x2000;
+                angle = g_wldcore_menu_event_transition_sprite.rotate + 0x2000;
             }
-            g_wldcore_menu_indicator_sprite.rotate = angle;
+            g_wldcore_menu_event_transition_sprite.rotate = angle;
 
             if (level->anim_step >= 0x38) {
                 g_wldcore_screen_fade_color.r = 0;
@@ -229,9 +229,9 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
                 level->fade_phase = WLDCORE_EVENT_TRANSITION_FADE_FLASH;
             }
             if (level->anim_step >= 0x50) {
-                g_wldcore_menu_indicator_sprite.r = 0;
-                g_wldcore_menu_indicator_sprite.g = 0;
-                g_wldcore_menu_indicator_sprite.b = 0;
+                g_wldcore_menu_event_transition_sprite.r = 0;
+                g_wldcore_menu_event_transition_sprite.g = 0;
+                g_wldcore_menu_event_transition_sprite.b = 0;
                 level->phase = WLDCORE_EVENT_TRANSITION_PHASE_DONE;
             }
         }
@@ -604,7 +604,7 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
         wldcore_window_set_render_objects_visible(1);
         g_wldcore_menu_stack_depth--;
         g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
-            | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER);
+            | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL);
         wldcore_menu_dispatch_suspend_handler();
 
         /* Opened from the title screen: go back there instead of to the map. */
@@ -943,7 +943,7 @@ void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* lev
         return;
     }
 
-    if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) != 0) {
+    if (wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) != 0) {
         return;
     }
 
@@ -1036,7 +1036,7 @@ void wldcore_list_persons_block_all_buttons(wldcore_menu_panel_level_t* level) {
 /* Input step of the persons list opened by wldcore_list_open_persons; twin of
  * wldcore_list_handle_unexplored_lands_input with help message 0x1056.
  * Canceling pops the injured/casualties record back in; a confirmed entry's
- * value is passed to wldcore_menu_push_variable_detail_level. */
+ * value is passed to wldcore_menu_push_person_detail_level. */
 void wldcore_list_handle_persons_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -1046,7 +1046,7 @@ void wldcore_list_handle_persons_input(wldcore_menu_panel_level_t* level) {
         g_wldcore_menu_stack_depth--;
         if (level->result != 0) {
             wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_PERSONS);
-            wldcore_menu_push_variable_detail_level(
+            wldcore_menu_push_person_detail_level(
                 g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
@@ -1073,7 +1073,7 @@ void wldcore_list_handle_persons_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
-/* Opens the detail view (WLDCORE_MENU_LEVEL_VARIABLE_DETAIL) of a person
+/* Opens the detail view (WLDCORE_MENU_LEVEL_PERSON_DETAIL) of a person
  * chosen in wldcore_list_handle_persons_input: value is person * 16 + profile.
  * It loads the message block of the person's group of 16 (blocks 6 on),
  * appends a hidden render record for the portrait, hides the Brave Story menu
@@ -1081,7 +1081,7 @@ void wldcore_list_handle_persons_input(wldcore_menu_panel_level_t* level) {
  * WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the profile's name.
  *
  * The unused 48-byte local reproduces the target's frame size. */
-static void wldcore_menu_push_variable_detail_level(s32 value) {
+static void wldcore_menu_push_person_detail_level(s32 value) {
     u8 unused[0x30];
     s32 variable;
     s32 index;
@@ -1089,9 +1089,9 @@ static void wldcore_menu_push_variable_detail_level(s32 value) {
 
     variable = value >> 4;
     wldcore_load_message_block_if_changed(variable / 16 + 6);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.value = value;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.value = value;
     index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.render_index = index;
     g_wldcore_window_render_records[index].flags
         = (g_wldcore_window_render_records[index].flags & ~WORLD_RENDER_RECORD_8BIT_CLUT) | WORLD_RENDER_RECORD_HIDDEN;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].list_window.main_window]
@@ -1113,9 +1113,9 @@ static void wldcore_menu_push_variable_detail_level(s32 value) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
     }
     depth = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[depth].variable_detail.phase = WLDCORE_DETAIL_PHASE_LOAD;
-    g_wldcore_menu_stack_records_next[depth].variable_detail.timer = 0;
-    g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_VARIABLE_DETAIL;
+    g_wldcore_menu_stack_records_next[depth].detail.phase = WLDCORE_DETAIL_PHASE_LOAD;
+    g_wldcore_menu_stack_records_next[depth].detail.timer = 0;
+    g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_PERSON_DETAIL;
     g_wldcore_menu_stack_depth = depth + 1;
 }
 
@@ -1135,7 +1135,7 @@ static void wldcore_menu_push_variable_detail_level(s32 value) {
  * g_main_file_still_loading): only a struct-member load stays behind the
  * delay store. The unused RECT reserves the 8 bytes that put the descriptor
  * at sp+0x18, and page_x keeps the target's (column + 0x280) association. */
-void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_t* level) {
+void wldcore_menu_step_person_detail_level(wldcore_menu_detail_level_t* level) {
     RECT rect;
     POLY_FT4 portrait;
     s32 entry;
@@ -1156,7 +1156,7 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
         }
         return;
     case WLDCORE_DETAIL_PHASE_BUILD:
-        if (level->timer < 8 || world_menu_get_event_state_flag() == 0) {
+        if (level->timer < 8 || world_menu_is_dialog_waiting() == 0) {
             level->timer = level->timer + 1;
             return;
         }
@@ -1221,7 +1221,7 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
         }
         return;
     default:
-        if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) == 0) {
+        if (wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) == 0) {
             depth = g_wldcore_menu_stack_depth;
             g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[depth - 2].list_window.frame_render].flags
                 |= WORLD_RENDER_RECORD_POP_IN;
@@ -1391,14 +1391,14 @@ static void wldcore_menu_push_tutorial_topic_text_level(s32 topic) {
 
 /* Step of the tutorial topic text level pushed by
  * wldcore_menu_push_tutorial_topic_text_level: once the text window has
- * finished (wldcore_text_is_window_finished), pop the level, show the
+ * closed (wldcore_text_step_scrollable_window), pop the level, show the
  * tutorial menu's windows and frame again and reopen the topic list. */
 void wldcore_menu_wait_tutorial_topic_text_then_pop_level(void) {
     s32 depth;
 
     if (!(g_wldcore_window_render_records[g_wldcore_scrollable_text_window.render_record_index].flags
             & WORLD_RENDER_RECORD_POP_IN)
-        && wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) == 0) {
+        && wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) == 0) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         depth = g_wldcore_menu_stack_depth;
         g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[depth - 2].window_pair_render.render_index]

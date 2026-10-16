@@ -94,7 +94,7 @@ s32 menu_update_equipment(void) {
         g_world_menu_prompt_active = 1;
     }
     disabled = 0;
-    if (world_map_is_busy() != 0 || g_world_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
+    if (world_screen_is_busy() != 0 || g_world_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
         || item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) == 0) {
         disabled = 1;
     }

@@ -545,7 +545,7 @@ void text_run_dialog_thread(void) {
                             }
                         } else {
                             if (character == TEXT_END_WAIT_FOR_CONFIRM && rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
-                                g_world_menu_event_state_flag = 1;
+                                g_world_menu_dialog_waiting = 1;
                             }
                             if (character == TEXT_NEWLINE
                                 || (character == TEXT_END_WAIT_FOR_CONFIRM
@@ -617,7 +617,7 @@ void text_run_dialog_thread(void) {
                 }
 
                 /* Hide the cursor, arrow and scroll icons in both buffers, one frame apart. */
-                g_world_menu_event_state_flag = 0;
+                g_world_menu_dialog_waiting = 0;
                 hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
                 hidden_window->sprites[0].x0 = 0x200;
                 hidden_window->sprites[1].x0 = 0x200;
@@ -659,7 +659,7 @@ void text_run_dialog_thread(void) {
                     rec.color = 0;
                     rec.line = 0;
                     rec.portrait = thread->function_parameter_4 - 1;
-                    g_world_menu_event_state_flag = 0;
+                    g_world_menu_dialog_waiting = 0;
                     win->portrait_code = rec.portrait;
                     value_index = 0;
                     saved = (u8*)-1;
@@ -699,7 +699,7 @@ void text_run_dialog_thread(void) {
             if (rec.mark != -1) {
                 selection = rec.mark;
                 for (i = 0;; i += g_script_event_speed) {
-                    g_world_menu_event_state_flag = 1;
+                    g_world_menu_dialog_waiting = 1;
                     select_window = WINDOW_AT(g_menu_packet_buffer_index);
                     select_window->sprites[0].x0
                         = mark_x + (select_window->quads[0].x0 + rec.x - select_window->quads[0].u0) - ((i >> 4) & 3);
@@ -740,7 +740,7 @@ void text_run_dialog_thread(void) {
                 g_script_variables[EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
             }
             NEXT();
-            g_world_menu_event_state_flag = 0;
+            g_world_menu_dialog_waiting = 0;
         } else if (character == TEXT_WAIT_FOR_RESUME) {
             thread_set_current_task_id(THREAD_TASK_WAIT_FOR_RESUME);
             while (thread_get_current_task_id() != THREAD_TASK_RESUME) {
@@ -769,7 +769,7 @@ void text_run_dialog_thread(void) {
                 rec.mark = -1;
                 rec.line = 0;
                 repeat = 0;
-                g_world_menu_event_state_flag = 0;
+                g_world_menu_dialog_waiting = 0;
                 saved = (u8*)-1;
                 thread_yield();
                 continue;
@@ -934,7 +934,7 @@ end:
         mem_copy_bytes_nonempty(&to, &from, sizeof(to));
         menu_tween_window_quads(win, &from, &to, 4);
     }
-    g_world_menu_event_state_flag = 0;
+    g_world_menu_dialog_waiting = 0;
     win->active = 0;
     menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);

@@ -466,7 +466,7 @@ void wldcore_map_draw_visible_routes(GsOT* ot) {
  * target's register choice for both index computations. The packed 32-bit position values supply x in the low
  * 16 bits and y in the high 16 bits; the `flags` local gives the
  * target's `or` operand order. */
-static s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* state, u32 route, s32 step) {
+static s32 wldcore_location_begin_route_segment(wldcore_route_travel_t* state, u32 route, s32 step) {
     s32 unused[8];
     wldcore_route_record_t* record;
     s32 index;
@@ -523,7 +523,7 @@ static s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* 
 }
 
 /* Loads the route joining locations from and to (in either direction) into
- * g_wldcore_map_path_animation as a slideshow: copies its polyline, reversed when the record
+ * g_wldcore_map_path_animation: copies its polyline, reversed when the record
  * runs from `to` to `from`, and times each segment by its length.
  *
  * `data` holds the polyline table and then the polyline itself, as the target
@@ -550,12 +550,12 @@ void wldcore_map_prepare_path_animation(s32 from, s32 to) {
         first = record->start_location;
         second = (*(u32*)record & 0xFF0000) >> 16;
         if (first == from && second == to) {
-            g_wldcore_map_path_animation.script_variable = i;
+            g_wldcore_map_path_animation.route_id = i;
             break;
         }
         if (second == from && first == to) {
-            g_wldcore_map_path_animation.script_variable = i;
-            g_wldcore_map_path_animation.flags |= WLDCORE_SLIDESHOW_REVERSED;
+            g_wldcore_map_path_animation.route_id = i;
+            g_wldcore_map_path_animation.flags |= WLDCORE_MAP_PATH_ANIMATION_REVERSED;
             break;
         }
         records++;
@@ -565,17 +565,17 @@ void wldcore_map_prepare_path_animation(s32 from, s32 to) {
         return;
     }
 
-    g_wldcore_map_path_animation.flags |= WLDCORE_SLIDESHOW_RUNNING;
+    g_wldcore_map_path_animation.flags |= WLDCORE_MAP_PATH_ANIMATION_RUNNING;
     first = record->count - 1;
     g_wldcore_map_path_animation.frame_timer = 0;
-    g_wldcore_map_path_animation.page_index = 0;
-    g_wldcore_map_path_animation.page_count = first;
+    g_wldcore_map_path_animation.segment_index = 0;
+    g_wldcore_map_path_animation.segment_count = first;
     data = (u16*)g_wldcore_map_route_polylines;
-    data = ((u16**)data)[g_wldcore_map_path_animation.script_variable];
+    data = ((u16**)data)[g_wldcore_map_path_animation.route_id];
     g_wldcore_map_path_animation.point_count = *data;
     data++;
     for (i = 0; i < g_wldcore_map_path_animation.point_count; i++) {
-        if (g_wldcore_map_path_animation.flags & WLDCORE_SLIDESHOW_REVERSED) {
+        if (g_wldcore_map_path_animation.flags & WLDCORE_MAP_PATH_ANIMATION_REVERSED) {
             g_wldcore_map_path_animation.coords[i * 2] = data[(g_wldcore_map_path_animation.point_count - i - 1) * 2];
             g_wldcore_map_path_animation.coords[i * 2 + 1]
                 = data[(g_wldcore_map_path_animation.point_count - i - 1) * 2 + 1];
@@ -585,18 +585,18 @@ void wldcore_map_prepare_path_animation(s32 from, s32 to) {
         }
     }
 
-    for (i = 0; i < g_wldcore_map_path_animation.page_count; i++) {
+    for (i = 0; i < g_wldcore_map_path_animation.segment_count; i++) {
         dx = -g_wldcore_map_path_animation.coords[i * 4] + g_wldcore_map_path_animation.coords[i * 4 + 4];
         dy = -g_wldcore_map_path_animation.coords[i * 4 + 1] + g_wldcore_map_path_animation.coords[i * 4 + 5];
-        g_wldcore_map_path_animation.page_frames[i] = csqrt(dx * dx + dy * dy) >> 5;
+        g_wldcore_map_path_animation.segment_frames[i] = csqrt(dx * dx + dy * dy) >> 5;
     }
 }
 
-/* Draws the slideshow pages shown so far as textured semi-transparent quads:
- * every page up to page_index is projected from its four outline points, and
- * the current page's far edge is interpolated by frame_timer / page_frames so
- * it unrolls over the page's display time. A negative page_index or one equal
- * to page_count stops the slideshow instead. */
+/* Draws the route segments unrolled so far as textured semi-transparent quads:
+ * every segment up to segment_index is projected from its four outline points, and
+ * the current segment's far edge is interpolated by frame_timer / segment_frames so
+ * it unrolls over the segment's time. A negative segment_index or one equal
+ * to segment_count stops the animation instead. */
 void wldcore_map_draw_path_animation(GsOT* ot) {
     SVECTOR verts[4];
     SVECTOR in;
@@ -606,7 +606,7 @@ void wldcore_map_draw_path_animation(GsOT* ot) {
     s32 j;
     s32 frames;
 
-    if (!(g_wldcore_map_path_animation.flags & WLDCORE_SLIDESHOW_RUNNING)) {
+    if (!(g_wldcore_map_path_animation.flags & WLDCORE_MAP_PATH_ANIMATION_RUNNING)) {
         return;
     }
 
@@ -617,17 +617,17 @@ void wldcore_map_draw_path_animation(GsOT* ot) {
         &poly, g_wldcore_screen_brightness_rgb.r, g_wldcore_screen_brightness_rgb.g, g_wldcore_screen_brightness_rgb.b);
     poly.tpage = GetTPage(0, 0, 0x1C0, 0x100);
     poly.clut = GetClut(0x10, 0x1E8);
-    if (g_wldcore_map_path_animation.page_index < 0
-        || g_wldcore_map_path_animation.page_index == g_wldcore_map_path_animation.page_count) {
-        g_wldcore_map_path_animation.flags &= ~WLDCORE_SLIDESHOW_RUNNING;
+    if (g_wldcore_map_path_animation.segment_index < 0
+        || g_wldcore_map_path_animation.segment_index == g_wldcore_map_path_animation.segment_count) {
+        g_wldcore_map_path_animation.flags &= ~WLDCORE_MAP_PATH_ANIMATION_RUNNING;
         return;
     }
 
-    for (i = 0; i < g_wldcore_map_path_animation.page_index + 1; i++) {
-        if (i == g_wldcore_map_path_animation.page_index) {
+    for (i = 0; i < g_wldcore_map_path_animation.segment_index + 1; i++) {
+        if (i == g_wldcore_map_path_animation.segment_index) {
             frames = g_wldcore_map_path_animation.frame_timer;
         } else {
-            frames = g_wldcore_map_path_animation.page_frames[i];
+            frames = g_wldcore_map_path_animation.segment_frames[i];
         }
         for (j = 0; j < 4; j++) {
             in.vx = g_wldcore_map_path_animation.coords[i * 4 + j * 2];
@@ -635,15 +635,15 @@ void wldcore_map_draw_path_animation(GsOT* ot) {
             in.vz = 0;
             RotTransSV(&in, &verts[j], &projected);
         }
-        if (frames != g_wldcore_map_path_animation.page_frames[i]) {
+        if (frames != g_wldcore_map_path_animation.segment_frames[i]) {
             verts[2].vx
-                = verts[0].vx + (verts[2].vx - verts[0].vx) * frames / g_wldcore_map_path_animation.page_frames[i];
+                = verts[0].vx + (verts[2].vx - verts[0].vx) * frames / g_wldcore_map_path_animation.segment_frames[i];
             verts[2].vy
-                = verts[0].vy + (verts[2].vy - verts[0].vy) * frames / g_wldcore_map_path_animation.page_frames[i];
+                = verts[0].vy + (verts[2].vy - verts[0].vy) * frames / g_wldcore_map_path_animation.segment_frames[i];
             verts[3].vx
-                = verts[1].vx + (verts[3].vx - verts[1].vx) * frames / g_wldcore_map_path_animation.page_frames[i];
+                = verts[1].vx + (verts[3].vx - verts[1].vx) * frames / g_wldcore_map_path_animation.segment_frames[i];
             verts[3].vy
-                = verts[1].vy + (verts[3].vy - verts[1].vy) * frames / g_wldcore_map_path_animation.page_frames[i];
+                = verts[1].vy + (verts[3].vy - verts[1].vy) * frames / g_wldcore_map_path_animation.segment_frames[i];
         }
         setXY4(&poly, verts[0].vx, verts[0].vy, verts[1].vx, verts[1].vy, verts[2].vx, verts[2].vy, verts[3].vx,
             verts[3].vy);
@@ -703,11 +703,11 @@ static void wldcore_map_find_best_route_path(s32 from, s32 to) {
         start = record->start_location;
         end = record->end_location;
         cost = record->cost;
-        if (g_wldcore_location_entry_state.best_length_bound < length) {
+        if (g_wldcore_route_travel.best_length_bound < length) {
             continue;
         }
-        if (length == g_wldcore_location_entry_state.best_length_bound
-            && g_wldcore_location_entry_state.best_cost < cost + g_wldcore_route_search_cost) {
+        if (length == g_wldcore_route_travel.best_length_bound
+            && g_wldcore_route_travel.best_cost < cost + g_wldcore_route_search_cost) {
             continue;
         }
         if (from == start && to == end) {
@@ -719,11 +719,11 @@ static void wldcore_map_find_best_route_path(s32 from, s32 to) {
         if (to == start && from == end) {
             g_wldcore_route_search_path.routes[g_wldcore_route_search_depth] = route | WLDCORE_ROUTE_PATH_REVERSED;
         found:
-            g_wldcore_location_entry_state.route_path = g_wldcore_route_search_path;
-            g_wldcore_location_entry_state.best_cost = g_wldcore_route_search_cost + cost;
-            g_wldcore_location_entry_state.best_length_bound = g_wldcore_location_entry_state.best_path_length
+            g_wldcore_route_travel.route_path = g_wldcore_route_search_path;
+            g_wldcore_route_travel.best_cost = g_wldcore_route_search_cost + cost;
+            g_wldcore_route_travel.best_length_bound = g_wldcore_route_travel.best_path_length
                 = g_wldcore_route_search_depth + 1;
-            g_wldcore_location_entry_state.flags |= WLDCORE_ROUTE_TRAVEL_ACTIVE;
+            g_wldcore_route_travel.flags |= WLDCORE_ROUTE_TRAVEL_ACTIVE;
             continue;
         }
         if (from == start) {
@@ -754,11 +754,11 @@ static void wldcore_map_find_best_route_path(s32 from, s32 to) {
  * destination's picture starts loading. Returns 1.
  *
  * g_wldcore_route_search_depth is a separate scalar: as a field of the entry state it becomes
- * the address anchor that the later &g_wldcore_location_entry_state argument is formed from, and
+ * the address anchor that the later &g_wldcore_route_travel argument is formed from, and
  * the chained 99999 store makes best_cost that anchor as in the target. The
  * location load and the two argument addresses share one base register in the
  * target, which needs them to be members of the one g_wldcore_map_projection_state record. */
-s32 wldcore_location_process_entry(s32 from_location, s32 to_location) {
+s32 wldcore_location_start_travel(s32 from_location, s32 to_location) {
     s32 depth;
 
     if (wldcore_script_process_conditional_set(
@@ -769,7 +769,7 @@ s32 wldcore_location_process_entry(s32 from_location, s32 to_location) {
         g_wldcore_next_map_id[0] = 0;
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_wldcore_script_state.args[0]);
         wldcore_menu_push_event_transition_level(g_wldcore_script_state.args[1]);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
+        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         return 0;
     } else {
         if (wldcore_script_process_conditional_set(
@@ -779,22 +779,22 @@ s32 wldcore_location_process_entry(s32 from_location, s32 to_location) {
         }
         g_wldcore_route_search_cost = 0;
         g_wldcore_route_search_depth = 0;
-        g_wldcore_location_entry_state.best_cost = g_wldcore_location_entry_state.best_length_bound = 99999;
-        g_wldcore_location_entry_state.flags = 0;
+        g_wldcore_route_travel.best_cost = g_wldcore_route_travel.best_length_bound = 99999;
+        g_wldcore_route_travel.flags = 0;
         wldcore_map_find_best_route_path(from_location, to_location);
-        if (!(g_wldcore_location_entry_state.flags & WLDCORE_ROUTE_TRAVEL_ACTIVE)) {
+        if (!(g_wldcore_route_travel.flags & WLDCORE_ROUTE_TRAVEL_ACTIVE)) {
             return 1;
         }
-        g_wldcore_location_entry_state.route_index = 0;
-        if (g_wldcore_location_entry_state.best_path_length == 0) {
+        g_wldcore_route_travel.route_index = 0;
+        if (g_wldcore_route_travel.best_path_length == 0) {
             return 1;
         }
-        g_wldcore_location_entry_state.segment_count = wldcore_location_begin_route_segment(
-            &g_wldcore_location_entry_state, g_wldcore_location_entry_state.route_path.routes[0], 0);
-        g_wldcore_location_entry_state.segment_index = 0;
-        g_wldcore_map_projection_state.angle = g_wldcore_location_entry_state.heading;
+        g_wldcore_route_travel.segment_count = wldcore_location_begin_route_segment(
+            &g_wldcore_route_travel, g_wldcore_route_travel.route_path.routes[0], 0);
+        g_wldcore_route_travel.segment_index = 0;
+        g_wldcore_map_projection_state.angle = g_wldcore_route_travel.heading;
         depth = g_wldcore_menu_stack_depth - 1;
-        g_wldcore_location_entry_state.menu_level = depth;
+        g_wldcore_route_travel.menu_level = depth;
         g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].window_index].flags
             |= WORLD_RENDER_RECORD_HIDDEN;
         if (wldcore_map_start_projection_motion_if_outside_bounds(
@@ -804,7 +804,7 @@ s32 wldcore_location_process_entry(s32 from_location, s32 to_location) {
                 |= WLDCORE_PROJECTION_FLAG_UPDATE_DIRECTION | WLDCORE_PROJECTION_FLAG_ALTERNATE_DIRECTION_SET;
         }
         g_wldcore_map_projection_state.marker.sub_kind = wldcore_gfx_load_location_picture(to_location);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
+        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         return 1;
     }
 }
@@ -828,7 +828,7 @@ void wldcore_map_step_route_travel(void) {
     s32 dy;
     s32 result;
 
-    if (!(g_wldcore_location_entry_state.flags & WLDCORE_ROUTE_TRAVEL_ACTIVE)) {
+    if (!(g_wldcore_route_travel.flags & WLDCORE_ROUTE_TRAVEL_ACTIVE)) {
         return;
     }
 
@@ -841,15 +841,15 @@ void wldcore_map_step_route_travel(void) {
         return;
     }
 
-    if (g_wldcore_location_entry_state.segment_frame >= g_wldcore_location_entry_state.segment_frames) {
-        if (++g_wldcore_location_entry_state.segment_index >= g_wldcore_location_entry_state.segment_count) {
+    if (g_wldcore_route_travel.segment_frame >= g_wldcore_route_travel.segment_frames) {
+        if (++g_wldcore_route_travel.segment_index >= g_wldcore_route_travel.segment_count) {
             wldcore_calendar_advance_day();
-            g_wldcore_map_projection_state.marker.position = g_wldcore_location_entry_state.target_position;
+            g_wldcore_map_projection_state.marker.position = g_wldcore_route_travel.target_position;
             g_wldcore_map_projection_state.flags
                 |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION | WLDCORE_PROJECTION_FLAG_UPDATE_DIRECTION;
-            g_wldcore_map_projection_state.marker.kind = g_wldcore_location_entry_state.leg_end_location;
-            script_set_variable(EVENT_SCRIPT_VAR_LOCATION, g_wldcore_location_entry_state.leg_end_location);
-            g_wldcore_location_entry_state.route_index++;
+            g_wldcore_map_projection_state.marker.kind = g_wldcore_route_travel.leg_end_location;
+            script_set_variable(EVENT_SCRIPT_VAR_LOCATION, g_wldcore_route_travel.leg_end_location);
+            g_wldcore_route_travel.route_index++;
             if (wldcore_script_process_conditional_set(
                     g_wldcore_map_projection_state.marker.kind, WLDCORE_SCRIPT_ACTION_LOAD_EVENT)
                 != 0) {
@@ -858,9 +858,9 @@ void wldcore_map_step_route_travel(void) {
                 wldcore_menu_push_event_transition_level(g_wldcore_script_state.args[1]);
                 g_wldcore_map_projection_state.angle = 0;
                 g_wldcore_map_projection_state.flags &= ~WLDCORE_PROJECTION_FLAG_ALTERNATE_DIRECTION_SET;
-                g_wldcore_location_entry_state.flags &= ~(WLDCORE_ROUTE_TRAVEL_ACTIVE | WLDCORE_ROUTE_TRAVEL_REVERSED);
-                g_wldcore_menu_stack_records_next[g_wldcore_location_entry_state.menu_level]
-                    .location_transition.location_id = g_wldcore_map_projection_state.marker.kind;
+                g_wldcore_route_travel.flags &= ~(WLDCORE_ROUTE_TRAVEL_ACTIVE | WLDCORE_ROUTE_TRAVEL_REVERSED);
+                g_wldcore_menu_stack_records_next[g_wldcore_route_travel.menu_level].location_transition.location_id
+                    = g_wldcore_map_projection_state.marker.kind;
                 return;
             }
             if (wldcore_script_process_conditional_set(
@@ -868,8 +868,8 @@ void wldcore_map_step_route_travel(void) {
                 != 0) {
                 script_set_variable(g_wldcore_script_state.args[0], g_wldcore_script_state.args[1]);
             }
-            if (wldcore_map_roll_random_encounter(g_wldcore_location_entry_state.leg_end_location,
-                    g_wldcore_location_entry_state.route_path.routes[g_wldcore_location_entry_state.route_index - 1]
+            if (wldcore_map_roll_random_encounter(g_wldcore_route_travel.leg_end_location,
+                    g_wldcore_route_travel.route_path.routes[g_wldcore_route_travel.route_index - 1]
                         & WLDCORE_ROUTE_PATH_ID_MASK)
                 != 0) {
                 g_main_system_flags |= MAIN_SYSTEM_FLAG_RANDOM_BATTLE;
@@ -881,37 +881,36 @@ void wldcore_map_step_route_travel(void) {
                 wldcore_menu_push_event_transition_level(WLDCORE_EVENT_TRANSITION_MODE_SPIN);
                 g_wldcore_map_projection_state.angle = 0;
                 g_wldcore_map_projection_state.flags &= ~WLDCORE_PROJECTION_FLAG_ALTERNATE_DIRECTION_SET;
-                g_wldcore_location_entry_state.flags &= ~(WLDCORE_ROUTE_TRAVEL_ACTIVE | WLDCORE_ROUTE_TRAVEL_REVERSED);
-                g_wldcore_menu_stack_records_next[g_wldcore_location_entry_state.menu_level]
-                    .location_transition.location_id = g_wldcore_map_projection_state.marker.kind;
+                g_wldcore_route_travel.flags &= ~(WLDCORE_ROUTE_TRAVEL_ACTIVE | WLDCORE_ROUTE_TRAVEL_REVERSED);
+                g_wldcore_menu_stack_records_next[g_wldcore_route_travel.menu_level].location_transition.location_id
+                    = g_wldcore_map_projection_state.marker.kind;
                 return;
             }
             wldcore_sound_play_effect(MAIN_SFX_WORLD_MAP_ARRIVE);
-            if (g_wldcore_location_entry_state.route_index < g_wldcore_location_entry_state.best_path_length) {
-                g_wldcore_location_entry_state.flags &= ~WLDCORE_ROUTE_TRAVEL_REVERSED;
-                g_wldcore_location_entry_state.segment_count = wldcore_location_begin_route_segment(
-                    &g_wldcore_location_entry_state,
-                    g_wldcore_location_entry_state.route_path.routes[g_wldcore_location_entry_state.route_index], 0);
-                g_wldcore_location_entry_state.segment_index = 0;
-                g_wldcore_map_projection_state.angle = g_wldcore_location_entry_state.heading;
+            if (g_wldcore_route_travel.route_index < g_wldcore_route_travel.best_path_length) {
+                g_wldcore_route_travel.flags &= ~WLDCORE_ROUTE_TRAVEL_REVERSED;
+                g_wldcore_route_travel.segment_count = wldcore_location_begin_route_segment(&g_wldcore_route_travel,
+                    g_wldcore_route_travel.route_path.routes[g_wldcore_route_travel.route_index], 0);
+                g_wldcore_route_travel.segment_index = 0;
+                g_wldcore_map_projection_state.angle = g_wldcore_route_travel.heading;
                 return;
             }
-            g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_location_entry_state.menu_level]
+            g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_route_travel.menu_level]
                                          .location_transition.window_index]
                 .flags ^= WORLD_RENDER_RECORD_HIDDEN;
-            g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_location_entry_state.menu_level]
+            g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_route_travel.menu_level]
                                          .location_transition.window_index]
                 .position.x = g_wldcore_map_projection_state.marker.render.position.x;
-            g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_location_entry_state.menu_level]
+            g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_route_travel.menu_level]
                                          .location_transition.window_index]
                 .position.y = g_wldcore_map_projection_state.marker.render.position.y - 4;
-            g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
-            g_wldcore_location_entry_state.arrival_location = g_wldcore_map_projection_state.marker.kind + 1;
+            g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+            g_wldcore_route_travel.arrival_location = g_wldcore_map_projection_state.marker.kind + 1;
             file_wait_for_pending();
             g_wldcore_map_projection_state.angle = 0;
             g_wldcore_map_projection_state.flags &= ~WLDCORE_PROJECTION_FLAG_ALTERNATE_DIRECTION_SET;
-            g_wldcore_location_entry_state.flags &= ~(WLDCORE_ROUTE_TRAVEL_ACTIVE | WLDCORE_ROUTE_TRAVEL_REVERSED);
-            g_wldcore_menu_stack_records_next[g_wldcore_location_entry_state.menu_level].location_transition.location_id
+            g_wldcore_route_travel.flags &= ~(WLDCORE_ROUTE_TRAVEL_ACTIVE | WLDCORE_ROUTE_TRAVEL_REVERSED);
+            g_wldcore_menu_stack_records_next[g_wldcore_route_travel.menu_level].location_transition.location_id
                 = g_wldcore_map_projection_state.marker.kind;
             result = wldcore_location_collect_choice_text_ids(g_wldcore_map_projection_state.marker.kind,
                 g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_transition.choice_text_ids);
@@ -923,23 +922,23 @@ void wldcore_map_step_route_travel(void) {
             }
             return;
         } else {
-            wldcore_location_begin_route_segment(&g_wldcore_location_entry_state,
-                g_wldcore_location_entry_state.route_id, g_wldcore_location_entry_state.segment_index);
-            g_wldcore_map_projection_state.angle = g_wldcore_location_entry_state.heading;
+            wldcore_location_begin_route_segment(
+                &g_wldcore_route_travel, g_wldcore_route_travel.route_id, g_wldcore_route_travel.segment_index);
+            g_wldcore_map_projection_state.angle = g_wldcore_route_travel.heading;
             g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_DIRECTION;
         }
     } else {
-        g_wldcore_location_entry_state.segment_frame++;
+        g_wldcore_route_travel.segment_frame++;
     }
 
-    dx = (g_wldcore_location_entry_state.target_position.vx - g_wldcore_location_entry_state.position.vx)
-        * g_wldcore_location_entry_state.segment_frame / g_wldcore_location_entry_state.segment_frames;
-    dy = (g_wldcore_location_entry_state.target_position.vy - g_wldcore_location_entry_state.position.vy)
-        * g_wldcore_location_entry_state.segment_frame / g_wldcore_location_entry_state.segment_frames;
+    dx = (g_wldcore_route_travel.target_position.vx - g_wldcore_route_travel.position.vx)
+        * g_wldcore_route_travel.segment_frame / g_wldcore_route_travel.segment_frames;
+    dy = (g_wldcore_route_travel.target_position.vy - g_wldcore_route_travel.position.vy)
+        * g_wldcore_route_travel.segment_frame / g_wldcore_route_travel.segment_frames;
     previous = g_wldcore_map_projection_state.marker.position;
-    delta.x = g_wldcore_location_entry_state.previous_position.vx + dx;
+    delta.x = g_wldcore_route_travel.previous_position.vx + dx;
     g_wldcore_map_projection_state.marker.position.vx = delta.x;
-    delta.y = g_wldcore_location_entry_state.previous_position.vy + dy;
+    delta.y = g_wldcore_route_travel.previous_position.vy + dy;
     g_wldcore_map_projection_state.marker.position.vy = delta.y;
     delta.x -= previous.vx;
     delta.y -= previous.vy;

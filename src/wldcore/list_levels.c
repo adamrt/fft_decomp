@@ -1090,7 +1090,7 @@ static void wldcore_menu_push_proposition_attempt_detail_level(s32 value) {
 }
 
 /* Close a completed job's text level once its window has popped in and
- * wldcore_text_is_window_finished reports it finished: show the category
+ * wldcore_text_step_scrollable_window reports it closed: show the category
  * menu's window and frame again (replaying the frame's pop-in), pop the
  * stack and reopen the completed jobs list. Mirrors
  * wldcore_menu_wait_text_then_pop_level. */
@@ -1101,7 +1101,7 @@ void wldcore_menu_wait_brave_story_text_then_pop_level(void) {
     if (g_wldcore_window_render_records[*index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
-    if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) != 0) {
+    if (wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) != 0) {
         return;
     }
     depth = g_wldcore_menu_stack_depth;
@@ -1115,7 +1115,7 @@ void wldcore_menu_wait_brave_story_text_then_pop_level(void) {
     wldcore_list_open_brave_story_propositions();
 }
 
-/* Push a screen transition into `screen` (a menu level type): clear the map, hide date, marker and
+/* Push a screen transition into `screen` (a menu level type): clear the map, hide date, location label and
  * value, fade in, do that screen's setup (music, list, message block), clear the scratch buffer
  * and start the zoom thread; param_a and param_b are kept for the new screen. */
 void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b) {
@@ -1126,7 +1126,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
 
     wldcore_clear_screen_and_set_map_clip_rect(1);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
-        | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
+        | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
     wldcore_fade_start_screen(0, 0x10);
     switch (screen) {
     case WLDCORE_MENU_LEVEL_BRAVE_STORY:
@@ -1523,7 +1523,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
                 g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth - 1;
                 g_main_system_flags = g_main_system_flags
                     & ~(MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
-                        | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER);
+                        | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL);
                 wldcore_menu_dispatch_suspend_handler();
                 if (g_main_system_flags & MAIN_SYSTEM_FLAG_TITLE_TUTORIAL) {
                     g_main_system_flags

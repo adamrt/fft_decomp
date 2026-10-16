@@ -17,7 +17,7 @@ typedef struct wldcore_sound_novel_script_file {
 } wldcore_sound_novel_script_file_t;
 
 /* The loaded sound-novel script (wldcore_load_sound_novel_files). */
-extern struct wldcore_sound_novel_script_file g_wldcore_save_slot_buffer;
+extern struct wldcore_sound_novel_script_file g_wldcore_sound_novel_script;
 /* Sector offsets of each sound novel's script in SNPLBIN.BIN and its text in SNPLMES.BIN. */
 extern s32 g_wldcore_sound_novel_script_sector_offsets[];
 extern s32 g_wldcore_sound_novel_text_sector_offsets[];
@@ -25,7 +25,7 @@ void wldcore_load_sound_novel_files(s32 chapter);
 
 /* interpreter */
 /* Interpreter state of the sound-novel script (wldcore_saved_record_t.state_flags),
- * stepped by wldcore_script_run_until_yield. */
+ * stepped by wldcore_sound_novel_run_until_yield. */
 typedef enum wldcore_sound_novel_state_flag {
     WLDCORE_SOUND_NOVEL_STATE_BRANCH
     = 0x002, /* a branch was taken: mark its saved-data bit and enter the next section */
@@ -61,7 +61,7 @@ extern wldcore_sound_novel_state_t g_wldcore_sound_novel_state;
  * spelling shares one base register where the target uses absolute addresses. */
 extern u16 g_wldcore_sound_novel_state_flags;
 extern void (*g_wldcore_sound_novel_opcode_handlers[])(void); /* by the instruction's low byte */
-s32 wldcore_script_run_until_yield(void);
+s32 wldcore_sound_novel_run_until_yield(void);
 u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode);
 void wldcore_sound_novel_opcode_05_load_background_set(void);
 void wldcore_sound_novel_opcode_0a_load_picture(void);

@@ -142,7 +142,7 @@ typedef enum wldcore_projection_flags {
 /* The world map camera state (g_wldcore_map_projection_state): two control fields followed by the player's own map
  * dot. The marker at +8 makes the views of this object agree field for field: the camera update writes the dot's
  * render sequence and screen position, and the marker init writes its kind, position and flags. For the player's
- * marker, kind is the current location id and sub_kind the proposition picture id. */
+ * marker, kind is the current location id and sub_kind the location picture id. */
 typedef struct wldcore_projection_state {
     s32 flags; /* 0x00; wldcore_projection_flags_e */
     s32 angle;
@@ -202,26 +202,25 @@ typedef struct wldcore_route_record {
 } wldcore_route_record_t;
 typedef char wldcore_route_record_size_must_be_4[sizeof(wldcore_route_record_t) == 4 ? 1 : -1];
 
-/* wldcore_slideshow_t.flags. */
-typedef enum wldcore_slideshow_flag {
-    WLDCORE_SLIDESHOW_RUNNING = 0x01,  /* the page timer runs */
-    WLDCORE_SLIDESHOW_REVERSED = 0x02, /* the route is shown end to start */
-} wldcore_slideshow_flag_e;
+/* wldcore_map_path_animation_t.flags. */
+typedef enum wldcore_map_path_animation_flag {
+    WLDCORE_MAP_PATH_ANIMATION_RUNNING = 0x01,  /* the segment timer runs */
+    WLDCORE_MAP_PATH_ANIMATION_REVERSED = 0x02, /* the route is shown end to start */
+} wldcore_map_path_animation_flag_e;
 
-/* Provisional: a slideshow page list. The path animation (g_wldcore_map_path_animation) uses it for a route: the
- * route id is the script variable (offset by 0x22c, the route-visible variables), each page is one two-point segment
- * of the route polyline that follows the page list, shown for its length / 32 frames, and page i runs from point 2i
- * to point 2i + 2. */
-typedef struct wldcore_slideshow {
-    u16 flags;           /* 0x00; wldcore_slideshow_flag_e */
-    s16 script_variable; /* 0x02; script variable base, offset by 0x22c */
-    s16 page_count;      /* 0x04 */
-    s16 page_index;      /* 0x06 */
-    s16 page_frames[16]; /* 0x08; frames each page stays up */
-    s16 frame_timer;     /* 0x28 */
-    s16 point_count;     /* 0x2a */
-    s16 coords[1];       /* 0x2c; packed (x, y) pairs */
-} wldcore_slideshow_t;
+/* The path animation (g_wldcore_map_path_animation): a route drawn segment by segment. route_id is the route
+ * (offset by 0x22c, its route-visible script variable); each segment is one two-point step of the route polyline that
+ * follows the segment list, drawn over its length / 32 frames, and segment i runs from point 2i to point 2i + 2. */
+typedef struct wldcore_map_path_animation {
+    u16 flags;              /* 0x00; wldcore_map_path_animation_flag_e */
+    s16 route_id;           /* 0x02; route; + 0x22c is its route-visible script variable */
+    s16 segment_count;      /* 0x04 */
+    s16 segment_index;      /* 0x06 */
+    s16 segment_frames[16]; /* 0x08; frames each segment takes to unroll */
+    s16 frame_timer;        /* 0x28 */
+    s16 point_count;        /* 0x2a */
+    s16 coords[1];          /* 0x2c; packed (x, y) pairs */
+} wldcore_map_path_animation_t;
 
 /* The route records by route id: a pointer cell to the WLDCORE_ROUTE_COUNT record pointers. */
 extern wldcore_route_record_t** g_wldcore_map_route_tables;
@@ -231,7 +230,7 @@ extern u16** g_wldcore_map_route_polylines;
 extern s32 g_wldcore_route_search_depth;
 extern s32 g_wldcore_route_search_cost;
 extern wldcore_route_path_t g_wldcore_route_search_path;
-extern wldcore_slideshow_t g_wldcore_map_path_animation;
+extern wldcore_map_path_animation_t g_wldcore_map_path_animation;
 void wldcore_map_draw_visible_routes(GsOT* ot);
 void wldcore_map_prepare_path_animation(s32 from, s32 to);
 void wldcore_map_draw_path_animation(GsOT* ot);
@@ -240,21 +239,21 @@ void wldcore_map_draw_path_animation(GsOT* ot);
 /* Provisional: four-byte per-location records reached through g_wldcore_location_records. */
 typedef struct wldcore_state_record {
     u8 _unused_00[2];
-    u8 picture; /* 0x02; proposition picture + 1, 0 for none */
+    u8 picture; /* 0x02; location picture set + 1, 0 for none */
     u8 is_town; /* 0x03; 1 offers the town entries WLDCORE_TEXT_ID_BAR to _SOLDIER_OFFICE in the location menu */
 } wldcore_state_record_t;
 
-/* wldcore_location_entry_state_t.flags. */
+/* wldcore_route_travel_t.flags. */
 typedef enum wldcore_route_travel_flag {
     WLDCORE_ROUTE_TRAVEL_ACTIVE = 0x01,   /* a path was found and is being traveled */
     WLDCORE_ROUTE_TRAVEL_REVERSED = 0x02, /* the current leg runs its route end to start */
 } wldcore_route_travel_flag_e;
 
-/* Provisional: the route travel state (g_wldcore_location_entry_state), filled by the route search
+/* Provisional: the route travel state (g_wldcore_route_travel), filled by the route search
  * wldcore_map_find_best_route_path, staged per route leg by wldcore_location_begin_route_segment and stepped by
  * wldcore_map_step_route_travel. The vertices are SVECTORs: their 2-byte alignment is what makes
  * `previous_position = position` take GCC's unaligned block-move path (lwl/lwr, swl/swr) that the target emits. */
-typedef struct wldcore_location_entry_state {
+typedef struct wldcore_route_travel {
     s32 flags;                       /* 0x00; wldcore_route_travel_flag_e */
     s32 route_id;                    /* 0x04; route & 0xff, index into g_wldcore_map_route_tables */
     s32 segment_index;               /* 0x08; current segment of the leg, the step for begin_route_segment */
@@ -274,20 +273,20 @@ typedef struct wldcore_location_entry_state {
     SVECTOR position;                /* 0x80 */
     SVECTOR target_position;         /* 0x88 */
     s32 arrival_location;            /* 0x90; arrival location id + 1 */
-} wldcore_location_entry_state_t;
-typedef char wldcore_location_entry_state_size_must_be_148[sizeof(wldcore_location_entry_state_t) == 148 ? 1 : -1];
+} wldcore_route_travel_t;
+typedef char wldcore_route_travel_size_must_be_148[sizeof(wldcore_route_travel_t) == 148 ? 1 : -1];
 
 extern wldcore_state_record_t* g_wldcore_location_records;
-extern wldcore_location_entry_state_t g_wldcore_location_entry_state;
-extern s32 g_wldcore_location_marker_shade;
+extern wldcore_route_travel_t g_wldcore_route_travel;
+extern s32 g_wldcore_location_label_shade;
 extern u32* g_wldcore_location_frame_tim;
 /* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
  * choice from the location menu (wldcore_map_build_location_menu_entries). */
 extern u8 g_wldcore_choice_hidden_variable_offsets[];
-/* Indexed so the store in wldcore_location_process_entry stays behind the
+/* Indexed so the store in wldcore_location_start_travel stays behind the
  * window-flag store (MEM_IN_STRUCT_P). */
 extern s32 g_wldcore_next_map_id[];
-s32 wldcore_location_process_entry(s32 from_location, s32 to_location);
+s32 wldcore_location_start_travel(s32 from_location, s32 to_location);
 s32 wldcore_map_build_location_menu_entries(s32 location_id, s32* out);
 void wldcore_map_step_route_travel(void);
 

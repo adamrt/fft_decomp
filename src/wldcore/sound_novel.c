@@ -35,7 +35,7 @@ static void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record);
 static void wldcore_sound_change_scenario_music(s32 music_id);
 static s32 wldcore_sound_novel_update_countdown_timer(void);
 static void wldcore_sound_play_pending_script_sounds(s32 sound_id, s32 weather_sound_id, s32 track);
-static void wldcore_sound_stop_music_and_play_sound(s32 sound_id);
+static void wldcore_sound_play_background_sound(s32 sound_id);
 static void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id);
 
 /* Resume the selected sound novel from its saved reading record (a reset one for
@@ -59,7 +59,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     }
 
     g_wldcore_active_saved_record.picture_render_index = render_record;
-    g_wldcore_active_saved_record.buffer = &g_wldcore_save_slot_buffer;
+    g_wldcore_active_saved_record.buffer = &g_wldcore_sound_novel_script;
     g_wldcore_active_saved_record.state_flags &= ~(WLDCORE_SOUND_NOVEL_STATE_BRANCH | WLDCORE_SOUND_NOVEL_STATE_FETCH);
     for (i = 0; i < 1; i++) {
         g_wldcore_sound_novel_local_flags[i] = 0;
@@ -98,12 +98,12 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
         g_wldcore_active_saved_record.music_selection = 0;
     }
 
-    /* Bit 0x4000 marks an environment sound (wldcore_sound_novel_opcode_2f_stop_music_and_play_sound);
+    /* Bit 0x4000 marks an environment sound (wldcore_sound_novel_opcode_2f_play_background_sound);
      * otherwise the id names a sound quad. */
     sound = g_wldcore_active_saved_record.sound_id;
     if (sound != 0) {
         if (sound & 0x4000) {
-            wldcore_sound_stop_music_and_play_sound((sound ^ 0x4000));
+            wldcore_sound_play_background_sound((sound ^ 0x4000));
         } else {
             wldcore_sound_stop_weather_sfx_and_send_quad(sound);
         }
@@ -138,8 +138,8 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     section = g_wldcore_active_saved_record.section;
     if (section != 0) {
         /* The 32-bit view preserves register order; the named offset field swaps the index and base. */
-        g_wldcore_active_saved_record.script_words
-            = &((u32*)&g_wldcore_save_slot_buffer)[((u32*)g_wldcore_active_saved_record.buffer)[section] / sizeof(u32)];
+        g_wldcore_active_saved_record.script_words = &(
+            (u32*)&g_wldcore_sound_novel_script)[((u32*)g_wldcore_active_saved_record.buffer)[section] / sizeof(u32)];
         /* A struct-field store: as a scalar global the store would be
          * scheduled above the table load (GCC 2.7 alias rule). */
         g_wldcore_active_saved_record.word_index = 0;
@@ -195,7 +195,7 @@ static void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record) {
  * it; it also clears YIELD on the way out.
  *
  * The record holds the loaded script's section-offset table. */
-s32 wldcore_script_run_until_yield(void) {
+s32 wldcore_sound_novel_run_until_yield(void) {
     s32 low;
     s32 high;
     u32 section_byte_offset;
@@ -217,7 +217,7 @@ s32 wldcore_script_run_until_yield(void) {
             g_wldcore_active_saved_record.word_index = 0;
             g_wldcore_active_saved_record.state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
             g_wldcore_active_saved_record.script_words
-                = &((u32*)&g_wldcore_save_slot_buffer)[section_byte_offset / sizeof(u32)];
+                = &((u32*)&g_wldcore_sound_novel_script)[section_byte_offset / sizeof(u32)];
             if (g_wldcore_sound_novel_index < 5) {
                 memcpy(&g_main_sound_novel_saved_records[g_wldcore_sound_novel_index], &g_wldcore_active_saved_record,
                     sizeof(wldcore_saved_record_t));
@@ -247,7 +247,7 @@ s32 wldcore_script_run_until_yield(void) {
 /* Find an opcode in a sound-novel script section; return its whole instruction or zero. */
 u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode) {
     u32* word
-        = &((u32*)&g_wldcore_save_slot_buffer)[g_wldcore_active_saved_record.buffer->offsets[section] / sizeof(u32)];
+        = &((u32*)&g_wldcore_sound_novel_script)[g_wldcore_active_saved_record.buffer->offsets[section] / sizeof(u32)];
     s32 i;
 
     for (i = 0; i < 256; i++) {
@@ -355,7 +355,7 @@ static void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id) {
 
 /* Stop the weather sound and play environment sound `sound_id` as the
  * background sound. */
-static void wldcore_sound_stop_music_and_play_sound(s32 sound_id) {
+static void wldcore_sound_play_background_sound(s32 sound_id) {
     main_sound_stop_weather_sfx_music();
     main_sound_play_bg_sfx(sound_id + SUZUKI_SOUND_ID(MAIN_SOUND_RESOURCE_ENV, 0));
 }
@@ -410,7 +410,7 @@ static s32 wldcore_sound_novel_update_countdown_timer(void) {
     return 0;
 }
 
-/* Sound-novel opcode 0x00: end the script; wldcore_script_run_until_yield then returns 0. */
+/* Sound-novel opcode 0x00: end the script; wldcore_sound_novel_run_until_yield then returns 0. */
 void wldcore_sound_novel_opcode_00_end_script(void) {
     u16* flags = &g_wldcore_active_saved_record.state_flags;
 
@@ -637,7 +637,7 @@ void wldcore_sound_novel_opcode_0e_branch_to_random_section(void) {
 
 /* Sound-novel opcode 0x0F: branch to the section in byte 3 when section byte 2 of novel byte 1 has
  * been reached, i.e. bit (byte 1 << 8 | byte 2) of g_main_sound_novel_read_section_bits that
- * wldcore_script_run_until_yield sets on each branch. */
+ * wldcore_sound_novel_run_until_yield sets on each branch. */
 void wldcore_sound_novel_opcode_0f_branch_if_section_read(void) {
     wldcore_sound_novel_branch_if_section_read_state(1);
 }
@@ -1095,7 +1095,7 @@ void wldcore_sound_novel_opcode_2e_start_countdown_timer(void) {
 /* Sound-novel opcode: stop the weather sound and play environment sound
  * operand 0 as the background sound. A nonzero operand 1 also records the
  * sound, flagged 0x4000, so a restored reading replays it. */
-void wldcore_sound_novel_opcode_2f_stop_music_and_play_sound(void) {
+void wldcore_sound_novel_opcode_2f_play_background_sound(void) {
     char unused[8];
     s32 sound_id;
 
@@ -1103,7 +1103,7 @@ void wldcore_sound_novel_opcode_2f_stop_music_and_play_sound(void) {
     if (g_wldcore_sound_novel_state.instruction & 0xFF0000) {
         g_wldcore_active_saved_record.sound_id = sound_id | 0x4000;
     }
-    wldcore_sound_stop_music_and_play_sound(sound_id);
+    wldcore_sound_play_background_sound(sound_id);
     g_wldcore_active_saved_record.state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 

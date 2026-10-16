@@ -56,7 +56,7 @@ void wldcore_window_init_vram_render_record(s32 index, RECT bounds, point32_t cl
 void wldcore_window_start_panel_render_thread(
     s32 thread_id, s32 extent, wldcore_window_panel_layout_t* layout, point32_t* origin) {
     wldcore_window_init_panel_render_state(thread_id, extent, layout, origin);
-    thread_start(thread_id, world_screen_build_at_list);
+    thread_start(thread_id, world_screen_text_list_thread);
     thread_set_parameters(thread_id, &g_wldcore_window_panel_render_state, 0, 0);
 }
 
@@ -301,7 +301,7 @@ static void wldcore_window_init_record(s32 index, s32 priority, s32 sequence) {
  * so only the other paths load $a0 (in their jump delay slots), as in the
  * target.
  */
-s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* state) {
+s32 wldcore_text_step_scrollable_window(wldcore_text_scrollable_window_t* state) {
     if (state->scroll_state == WLDCORE_TEXT_SCROLL_RETURN) {
         if (state->scroll_row == state->page_start_row) {
             state->scroll_state = WLDCORE_TEXT_SCROLL_PAGING;

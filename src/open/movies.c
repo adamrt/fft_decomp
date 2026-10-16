@@ -732,9 +732,8 @@ static void open_menu_run_world_menu_frame(void) {
         u32 blocked_buttons = g_menu_blocked_buttons;
 
         g_main_gfx_active_buffer_index ^= 1;
-        world_formation_set_menu_allowed_buttons(~blocked_buttons);
-        world_formation_run_menu_frame(
-            &g_open_gfx_otags[g_main_gfx_active_buffer_index ^ 1][g_open_menu_world_frame_otag_index],
+        world_menu_set_allowed_buttons(~blocked_buttons);
+        world_menu_run_frame(&g_open_gfx_otags[g_main_gfx_active_buffer_index ^ 1][g_open_menu_world_frame_otag_index],
             g_input_current_buttons);
         g_main_gfx_active_buffer_index ^= 1;
     }

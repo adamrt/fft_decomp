@@ -47,7 +47,7 @@ typedef struct world_menu_image_pages {
 extern world_menu_thread_group_t g_world_menu_thread_groups[];
 extern s32 g_world_menu_thread_group_parameter;
 extern s32 g_world_menu_thread_result;
-extern s32 g_world_menu_event_state_flag;
+extern s32 g_world_menu_dialog_waiting;
 extern s16 g_world_menu_screen_open_request;
 extern s16 g_world_menu_open_entry_index;
 extern s32 g_world_menu_main_scroll_direction;
@@ -70,13 +70,13 @@ extern menu_scroll_text_layout_t g_world_menu_location_list_layout;
 extern RECT g_world_screen_clear_rect;
 extern s16 g_world_debug_variable_list_request_state;
 extern s16 g_world_fixed_number_panel_request_state;
-void world_menu_run_main_mode(s32 mode);
+void world_menu_run_option_screen(s32 mode);
 void world_main_menu_text_window_thread(void);
 void world_menu_open_entry_window(s32 index, s32 unused_x, s32 unused_y);
 void world_menu_set_default_entry_0_text_values(u32 text_index, u32 value);
 void world_menu_set_default_entry_1_text_values(s32 value);
 void world_menu_set_slot_4_cursor_index(s32 index);
-s32 world_menu_get_event_state_flag(void);
+s32 world_menu_is_dialog_waiting(void);
 void world_menu_build_location_list(void);
 /* Set up the WORLD menus with EVENT/WORLD.LZW from the main thread. */
 void world_menu_init_with_world_text(void);
@@ -85,7 +85,7 @@ void world_menu_init_with_world_text_and_faces(void);
 /* Set up the menus with EVENT/OPEN.LZW for the new-game prologue. */
 void world_menu_init_with_open_text(void);
 void world_menu_run_game_options(void);
-void world_screen_build_at_list(void);
+void world_screen_text_list_thread(void);
 
 /* window frames */
 extern RECT g_world_menu_frame_image_rect;
@@ -285,7 +285,7 @@ extern s32 g_world_menu_number_entry_digit_steps[];
 extern u32* g_world_menu_list_controller_input;
 void world_menu_number_entry_thread(void);
 void world_menu_labeled_number_entry_thread(void);
-void world_menu_announce_entry_value_thread(void);
+void world_menu_help_text_thread(void);
 void world_menu_resize_parent_entry_to_digits(void);
 
 /* unit panels */

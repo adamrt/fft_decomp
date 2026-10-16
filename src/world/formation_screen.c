@@ -161,7 +161,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                     g_world_formation_triangle_menu_open + g_world_grid_menu_id != 0
                         ? 0
                         : g_world_input_secondary_repeat_latched,
-                    world_map_is_busy(), 0, 0);
+                    world_screen_is_busy(), 0, 0);
             } else {
                 world_formation_draw_background_tiles(
                     g_world_formation_scroll_position + g_world_formation_scroll_velocity, 0);
@@ -250,7 +250,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
     world_formation_save_records_to_party();
     world_formation_stop_menu_threads();
     menu_set_vsync_mode_and_event_speed(0);
-    world_formation_reset_menu_context();
+    world_menu_reset_context();
 }
 
 /* Per-frame WORLD sound effect dispatch. A queued text glyph or page sound

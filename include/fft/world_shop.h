@@ -96,7 +96,7 @@ enum {
 extern s16 g_world_shop_quantity_limit;
 extern menu_entry_t g_world_shop_quantity_menu_data[2];
 extern u8 g_world_shop_quantity_menu_running;
-extern menu_instruction_t g_world_shop_obtain_gil_menu_script;
+extern menu_instruction_t g_world_shop_war_funds_menu_script;
 extern menu_instruction_t g_world_shop_purchase_menu_script;
 extern s8 g_world_shop_purchase_list_initialized;
 extern s8 g_world_shop_purchase_equip_check_pending;

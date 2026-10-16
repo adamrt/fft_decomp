@@ -53,7 +53,7 @@ void wldcore_menu_suspend_bar_menu_level(wldcore_menu_list_window_level_t* level
     g_wldcore_window_records[index].frame_index = 0;
 }
 
-/* Leave the bar: pop its level, show the date and location marker again, rebuild and push the
+/* Leave the bar: pop its level, show the date and location label again, rebuild and push the
  * location menu for the current location, fade the map back in and clear the scratch buffer. */
 static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_level_t* unused_level) {
     s32* selected = &g_wldcore_map_projection_state.marker.kind;
@@ -61,7 +61,7 @@ static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_l
 
     wldcore_window_set_render_objects_visible(1);
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth - 1;
-    g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER);
+    g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL);
     wldcore_menu_dispatch_suspend_handler();
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count
         = wldcore_map_build_location_menu_entries(
@@ -152,9 +152,9 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
             wldcore_menu_suspend_bar_menu_level(level);
             wldcore_list_open_returned_propositions();
             return;
-        case WLDCORE_BAR_MENU_ROW_PROPOSITIONS:
+        case WLDCORE_BAR_MENU_ROW_ACTIVE_PROPOSITIONS:
             wldcore_menu_suspend_bar_menu_level(level);
-            wldcore_list_open_propositions();
+            wldcore_bar_open_active_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_LEAVE:
             g_wldcore_bar_menu_saved_cursor = 0;
@@ -404,7 +404,7 @@ void wldcore_bar_wait_rumor_text_then_pop_level(wldcore_menu_rumor_detail_level_
     if (g_wldcore_window_render_records[*index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
-    if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) != 0) {
+    if (wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) != 0) {
         return;
     }
     g_wldcore_window_records[level->first_window].flags ^= WORLD_RENDER_RECORD_HIDDEN;
@@ -504,23 +504,23 @@ void wldcore_list_open_available_propositions(void) {
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
-/* Resume handler of the propositions list: block Circle, Cross and Select for the
+/* Resume handler of the available propositions list: block Circle, Cross and Select for the
  * levels underneath and show WLDCORE_TEXT_ID_PROPOSITIONS_INTRO again. */
-void wldcore_list_propositions_restore_prompt(void) {
+void wldcore_list_available_propositions_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_PROPOSITIONS_INTRO, 0);
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void wldcore_list_propositions_block_all_buttons(wldcore_menu_panel_level_t* level) {
+void wldcore_list_available_propositions_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* Pop the propositions list level: toggle the input-blocked system flag and
+/* Pop the available propositions list level: toggle the input-blocked system flag and
  * unblock the menu buttons. The caller hands in its menu level; the target
  * reads no argument. */
-static void wldcore_list_propositions_close_level(wldcore_menu_panel_level_t* level) {
+static void wldcore_list_available_propositions_close_level(wldcore_menu_panel_level_t* level) {
     g_wldcore_menu_ordering_table_offset = 1;
     g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     --g_wldcore_menu_stack_depth;
@@ -534,12 +534,12 @@ static void wldcore_list_propositions_close_level(wldcore_menu_panel_level_t* le
  * proposition already attempted (WLDCORE_PROPOSITION_VARIABLE_ATTEMPTED) it
  * first hides the parent level's windows and render record, says "Think I
  * told you before but..." and waits in result 2 for Circle or Cross. */
-void wldcore_list_handle_propositions_input(wldcore_menu_panel_level_t* level) {
+void wldcore_list_handle_available_propositions_input(wldcore_menu_panel_level_t* level) {
     s32 depth;
 
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
-        wldcore_list_propositions_close_level(level);
+        wldcore_list_available_propositions_close_level(level);
         if (level->result != 0) {
             wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_AVAILABLE_PROPOSITIONS);
             wldcore_proposition_push_detail_level(
@@ -562,7 +562,7 @@ void wldcore_list_handle_propositions_input(wldcore_menu_panel_level_t* level) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
-        wldcore_list_propositions_block_all_buttons(level);
+        wldcore_list_available_propositions_block_all_buttons(level);
         wldcore_menu_push_message_level(0x105F, 1);
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
         && g_main_file_still_loading == 0) {
@@ -849,7 +849,7 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
  * starts the number panel thread on that range at the minimum, and withholds
  * Circle and Cross from the WORLD menu threads (the level's own step handles
  * them). */
-void wldcore_menu_push_number_panel_level(void) {
+void wldcore_menu_push_proposition_days_level(void) {
     point32_t origin;
     s32 record_index;
     s32 min_days = g_wldcore_selected_proposition_row[0].min_days;
@@ -867,7 +867,7 @@ void wldcore_menu_push_number_panel_level(void) {
         WLDCORE_THREAD_SLOT_WINDOW_PANEL, min_days | (max_days << 16), WLDCORE_TEXT_ID_DAYS_LABEL, &origin);
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
-    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_NUMBER_PANEL;
+    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_PROPOSITION_DAYS;
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
@@ -876,7 +876,7 @@ void wldcore_menu_push_number_panel_level(void) {
  * g_wldcore_proposition_dispatch_days; either tells the thread to close. Once
  * it has, two levels are popped and result 1 goes on to the dispatch
  * confirmation, -1 back to the propositions list. */
-void wldcore_menu_number_panel_wait_for_thread_step(wldcore_menu_panel_level_t* level) {
+void wldcore_menu_step_proposition_days_level(wldcore_menu_panel_level_t* level) {
     if (level->result != 0 && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_wldcore_menu_ordering_table_offset = 1;

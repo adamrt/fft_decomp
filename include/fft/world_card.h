@@ -110,7 +110,7 @@ extern s16 g_world_card_list_scroll_velocity;
 extern s16 g_world_card_list_first_visible_row;
 
 /* save images */
-extern card_save_buffer_t* g_world_load_work_buffer;
+extern card_save_buffer_t* g_world_card_work_buffer;
 s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size);
 void world_card_build_save_image(s32 slot);
 s32 world_card_load_globals_from_save_image(s32 partial_load);

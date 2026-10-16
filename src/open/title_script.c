@@ -123,7 +123,7 @@ static void open_menu_start_music_test_list_thread(s32 thread_id, s32 limit, poi
     g_open_music_test_list_params.selected_index = 0;
     g_open_music_test_list_params.select_text_table = 0;
 
-    thread_start(thread_id, world_screen_build_at_list);
+    thread_start(thread_id, world_screen_text_list_thread);
     thread_set_parameters(thread_id, (s32)&g_open_music_test_list_params, 0, 0);
 }
 

@@ -107,7 +107,7 @@ s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_leve
     case 3:
         if (!(g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE))
             return 0;
-        if (!world_menu_get_event_state_flag())
+        if (!world_menu_is_dialog_waiting())
             return 0;
         state->phase++;
         break;
@@ -639,8 +639,7 @@ void wldcore_menu_step_discovery_level(wldcore_menu_discovery_t* discovery) {
             wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 0x10);
         }
     } else if (discovery->phase == WLDCORE_DISCOVERY_PHASE_LAST_MESSAGE) {
-        if (world_menu_get_event_state_flag() != 0
-            && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE
+        if (world_menu_is_dialog_waiting() != 0 && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE
             && g_wldcore_audio_queue.count == 0) {
             wldcore_sound_enqueue_audio_command(
                 WLDCORE_AUDIO_COMMAND_PLAY_MUSIC, WLDCORE_AUDIO_MUSIC(2, MAIN_MUSIC_MILESTONE));
@@ -654,7 +653,7 @@ void wldcore_menu_step_discovery_level(wldcore_menu_discovery_t* discovery) {
 
 /* Open the bar's in-progress list: every accepted job that has not returned, recalled ones marked,
  * under 'These jobs're in progress.'; up to six rows. */
-void wldcore_list_open_propositions(void) {
+void wldcore_bar_open_active_propositions(void) {
     point32_t origin;
     wldcore_window_panel_layout_t layout;
     point32_t unused_point;
@@ -701,7 +700,7 @@ void wldcore_list_open_propositions(void) {
     origin.x = 0x4C;
     layout.visible_rows = i;
     origin.y = 0x50;
-    wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_PROPOSITIONS, g_main_save_proposition_count, i);
+    wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_BAR_ACTIVE_PROPOSITIONS, g_main_save_proposition_count, i);
     wldcore_window_start_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL,
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count, &layout, &origin);
     previous = g_wldcore_menu_stack_depth - 1;
@@ -722,7 +721,7 @@ void wldcore_list_open_propositions(void) {
     }
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.first_window = 0;
-    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_PROPOSITIONS;
+    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_BAR_ACTIVE_PROPOSITIONS;
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
@@ -774,7 +773,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
         level->panel.result = 0;
         /* Scheduling barrier: keeps the store ahead of the cursor argument. */
         __asm__("");
-        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_PROPOSITIONS);
+        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_BAR_ACTIVE_PROPOSITIONS);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     } else if (buttons & PSX_PAD_SELECT) {
@@ -789,7 +788,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
             level->panel.result = 1;
             /* Scheduling barrier: keeps the store ahead of the cursor argument. */
             __asm__("");
-            wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_PROPOSITIONS);
+            wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_BAR_ACTIVE_PROPOSITIONS);
             g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
             thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         }
@@ -963,7 +962,7 @@ void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t
         g_wldcore_window_render_record_count -= 2;
         g_wldcore_window_render_object_count -= 4;
         g_wldcore_menu_stack_depth--;
-        wldcore_list_open_propositions();
+        wldcore_bar_open_active_propositions();
         return;
     }
 
@@ -1130,7 +1129,7 @@ void wldcore_menu_suspend_sound_novel_level(void) {
 /*
  * Per-frame step of the sound novel (WLDCORE_MENU_LEVEL_SOUND_NOVEL).
  *
- * It runs the novel's script until it yields (wldcore_script_run_until_yield).
+ * It runs the novel's script until it yields (wldcore_sound_novel_run_until_yield).
  * L1 and R1 raise and lower the screen brightness, showing the brightness bar
  * for 60 frames. While the message box waits for a button: Select opens help
  * message 0x1036, Start (with the side windows up) opens the Quit/Continue
@@ -1190,7 +1189,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
         return;
     }
 
-    if (wldcore_script_run_until_yield() != 0) {
+    if (wldcore_sound_novel_run_until_yield() != 0) {
         if (g_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1)) {
             if (g_input_current_buttons & PSX_PAD_L1) {
                 if (g_wldcore_active_saved_record.brightness < 0xFF) {
@@ -1221,7 +1220,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
             g_wldcore_window_records[level->overlay_window].flags |= WORLD_RENDER_RECORD_HIDDEN;
         }
 
-        if (world_menu_get_event_state_flag() != 0) {
+        if (world_menu_is_dialog_waiting() != 0) {
             buttons = g_wldcore_input_new_button_presses;
             if (buttons & PSX_PAD_CIRCLE) {
                 return;
@@ -1946,10 +1945,10 @@ static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
     u8 unused[8];
     calendar_date_t date;
 
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.value = value;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.value = value;
     wldcore_gfx_load_picture_set(g_wldcore_unexplored_land_picture_sets[value]);
     index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.render_index = index;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
     base = &g_wldcore_window_render_records[index].base;
     base->x = -0x74;
@@ -1990,7 +1989,7 @@ static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
         .flags |= WORLD_RENDER_RECORD_HIDDEN;
     g_text_substitution_values[0] = value + TEXT_ID_UNEXPLORED_LAND_NAME_BASE;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.phase = WLDCORE_DETAIL_PHASE_LOAD;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.phase = WLDCORE_DETAIL_PHASE_LOAD;
     g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_UNEXPLORED_LAND_DETAIL;
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
@@ -2009,7 +2008,7 @@ static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
  * The TIM widths are read unsigned (`lhu`), as Psy-Q's GsIMAGE declares
  * pw/ph. The text window's base and image rectangle are each copied as one
  * aggregate: the target loads both 32-bit values before either store. */
-void wldcore_menu_step_unexplored_land_detail_level(wldcore_menu_variable_detail_level_t* level) {
+void wldcore_menu_step_unexplored_land_detail_level(wldcore_menu_detail_level_t* level) {
     GsIMAGE image;
     RECT bounds;
     point32_t clut_position;
@@ -2061,7 +2060,7 @@ void wldcore_menu_step_unexplored_land_detail_level(wldcore_menu_variable_detail
         if (g_wldcore_window_render_records[*index].flags & WORLD_RENDER_RECORD_POP_IN) {
             break;
         }
-        if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) != 0) {
+        if (wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) != 0) {
             break;
         }
         depth = g_wldcore_menu_stack_depth;
@@ -2211,10 +2210,10 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
     u8 unused[8];
     calendar_date_t date;
 
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.value = value;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.value = value;
     wldcore_gfx_load_picture_set(g_wldcore_treasure_picture_sets[value]);
     index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.render_index = index;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
     wldcore_calendar_read_date(g_main_treasure_acquisition_date_bits, value, &date);
     g_wldcore_scrollable_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
@@ -2252,8 +2251,8 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
         .flags |= WORLD_RENDER_RECORD_HIDDEN;
     g_text_substitution_values[0] = value + TEXT_ID_TREASURE_NAME_BASE;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.phase = WLDCORE_DETAIL_PHASE_LOAD;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.timer = 0;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.phase = WLDCORE_DETAIL_PHASE_LOAD;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].detail.timer = 0;
     g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_TREASURE_DETAIL;
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
@@ -2280,7 +2279,7 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
  * reloads the full 32-bit value for the 16-bit store instead of narrowing the load.
  * The button path's byte uses its own local; sharing `slot` changes the
  * register allocation. */
-void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_t* level) {
+void wldcore_menu_step_treasure_detail_level(wldcore_menu_detail_level_t* level) {
     GsIMAGE image;
     RECT bounds;
     point32_t clut_position;
@@ -2348,7 +2347,7 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
             wldcore_menu_push_sound_novel_level(level->value);
             break;
         }
-        if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) == 0) {
+        if (wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) == 0) {
             depth = g_wldcore_menu_stack_depth;
             g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth - 2].list_window.main_window].flags
                 ^= WORLD_RENDER_RECORD_HIDDEN;
@@ -2637,7 +2636,7 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
  * after starting the seek to BATTLE.BIN. A FADE transition freezes the map
  * and fades the screen out. The spinning ones hide everything on the map but
  * the tiles, save VRAM (0x100, 0) 128x256 to (0x200, 0x100) and clear it for
- * the screen capture, set up the indicator sprite over that area, fade the
+ * the screen capture, set up the transition sprite over that area, fade the
  * music out and pick a random drift and spin direction. */
 void wldcore_menu_push_event_transition_level(s32 mode) {
     RECT rect;
@@ -2655,7 +2654,7 @@ void wldcore_menu_push_event_transition_level(s32 mode) {
         g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP | MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS
             | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES | MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE
             | MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
-            | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
+            | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         g_wldcore_map_projection_state.marker.render.flags |= WORLD_RENDER_RECORD_HIDDEN;
         MoveImage(&rect, 0x200, 0x100);
         DrawSync(0);
@@ -2664,24 +2663,24 @@ void wldcore_menu_push_event_transition_level(s32 mode) {
         rect.w = 0x100;
         rect.h = 0xF0;
         ClearImage(&rect, 0, 0, 0);
-        g_wldcore_menu_indicator_sprite.attribute = 0x42000000;
-        g_wldcore_menu_indicator_sprite.x = 0x20;
-        g_wldcore_menu_indicator_sprite.y = 0x20;
-        g_wldcore_menu_indicator_sprite.tpage = GetTPage(2, 0, 0x100, 0);
-        g_wldcore_menu_indicator_sprite.w = 0xFF;
-        g_wldcore_menu_indicator_sprite.mx = 0xA0;
-        g_wldcore_menu_indicator_sprite.my = 0x98;
-        g_wldcore_menu_indicator_sprite.scaley = ONE;
-        g_wldcore_menu_indicator_sprite.scalex = ONE;
-        g_wldcore_menu_indicator_sprite.cy = 0;
-        g_wldcore_menu_indicator_sprite.cx = 0;
-        g_wldcore_menu_indicator_sprite.v = 0;
-        g_wldcore_menu_indicator_sprite.u = 0;
-        g_wldcore_menu_indicator_sprite.h = 0xF0;
-        g_wldcore_menu_indicator_sprite.rotate = 0;
-        g_wldcore_menu_indicator_sprite.r = 0x80;
-        g_wldcore_menu_indicator_sprite.g = 0x80;
-        g_wldcore_menu_indicator_sprite.b = 0x80;
+        g_wldcore_menu_event_transition_sprite.attribute = 0x42000000;
+        g_wldcore_menu_event_transition_sprite.x = 0x20;
+        g_wldcore_menu_event_transition_sprite.y = 0x20;
+        g_wldcore_menu_event_transition_sprite.tpage = GetTPage(2, 0, 0x100, 0);
+        g_wldcore_menu_event_transition_sprite.w = 0xFF;
+        g_wldcore_menu_event_transition_sprite.mx = 0xA0;
+        g_wldcore_menu_event_transition_sprite.my = 0x98;
+        g_wldcore_menu_event_transition_sprite.scaley = ONE;
+        g_wldcore_menu_event_transition_sprite.scalex = ONE;
+        g_wldcore_menu_event_transition_sprite.cy = 0;
+        g_wldcore_menu_event_transition_sprite.cx = 0;
+        g_wldcore_menu_event_transition_sprite.v = 0;
+        g_wldcore_menu_event_transition_sprite.u = 0;
+        g_wldcore_menu_event_transition_sprite.h = 0xF0;
+        g_wldcore_menu_event_transition_sprite.rotate = 0;
+        g_wldcore_menu_event_transition_sprite.r = 0x80;
+        g_wldcore_menu_event_transition_sprite.g = 0x80;
+        g_wldcore_menu_event_transition_sprite.b = 0x80;
         wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_OUT, 0x10);
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].event_transition.frame = 0;
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].event_transition.anim_step = 0;

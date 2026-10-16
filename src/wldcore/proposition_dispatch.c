@@ -326,7 +326,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_window_panel_render_state.header_id = 0x10;
     g_wldcore_window_panel_render_state.selected_index = 0;
     g_wldcore_menu_scroll_offset = 0;
-    thread_start(WLDCORE_THREAD_SLOT_WINDOW_PANEL, world_screen_build_at_list);
+    thread_start(WLDCORE_THREAD_SLOT_WINDOW_PANEL, world_screen_text_list_thread);
     thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, (s32)&g_wldcore_window_panel_render_state, 0, 0);
 
     index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
@@ -549,7 +549,7 @@ static void wldcore_proposition_draw_send_unit_names(wldcore_menu_send_unit_leve
  * x 0x280 + 0x40 per 40 portraits + 16 * (code % 4), y 0x1F0 +
  * (code % 40) / 4), at full brightness, and show the record. The first
  * argument is not read. */
-static void wldcore_window_load_party_unit_sprite_record(
+static void wldcore_window_bind_party_unit_portrait(
     wldcore_menu_send_unit_level_t* unused, s32 party_index, s32 index) {
     POLY_FT4 poly;
     s32 code;
@@ -593,7 +593,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
         unit = g_wldcore_proposition_send_units[level->slot] & 0x7FF;
         if (unit != level->shown_unit) {
             level->shown_unit = unit;
-            wldcore_window_load_party_unit_sprite_record(level, unit, level->portrait_render);
+            wldcore_window_bind_party_unit_portrait(level, unit, level->portrait_render);
         }
     }
 
@@ -771,7 +771,7 @@ static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_le
         g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS);
         thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CHOOSE_UNITS, 0);
-        thread_start(WLDCORE_THREAD_SLOT_WINDOW_PANEL, world_screen_build_at_list);
+        thread_start(WLDCORE_THREAD_SLOT_WINDOW_PANEL, world_screen_text_list_thread);
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, (s32)&g_wldcore_window_panel_render_state, 0, 0);
         g_wldcore_window_records[level->list_frame.window_index].flags ^= WORLD_RENDER_RECORD_HIDDEN;
         g_wldcore_window_render_records[level->list_frame.render_index].flags ^= WORLD_RENDER_RECORD_HIDDEN;
@@ -859,7 +859,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
             g_wldcore_menu_stack_depth--;
             wldcore_proposition_push_detail_level(g_wldcore_selected_proposition_row[0].id - 1);
             wldcore_menu_suspend_proposition_detail_level(&level->list_frame);
-            wldcore_menu_push_number_panel_level();
+            wldcore_menu_push_proposition_days_level();
         }
         return;
     }
@@ -879,7 +879,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
         value = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         if (value != level->shown_preview) {
             level->shown_preview = value;
-            wldcore_window_load_party_unit_sprite_record(level, value, level->preview_render);
+            wldcore_window_bind_party_unit_portrait(level, value, level->preview_render);
         }
     }
 
@@ -1108,7 +1108,7 @@ void wldcore_list_handle_returned_propositions_input(wldcore_menu_stack_record_t
         origin.y = 0x20;
         wldcore_window_build_yes_no_panel(origin);
         depth = g_wldcore_menu_stack_depth;
-        g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_RETURNED_PROPOSITIONS_BROWSE;
+        g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_PROPOSITION_REPORT_CONFIRM;
         g_wldcore_menu_stack_depth = depth + 1;
         g_wldcore_menu_stack_records_next[depth].proposition_report_confirm.argument
             = level->proposition_list.entries[g_wldcore_window_panel_render_state.selected_index];
@@ -1935,7 +1935,7 @@ static s32 wldcore_proposition_step_message(wldcore_proposition_report_level_t* 
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19,
             wldcore_proposition_adjust_message_index(message, *party_index) + TEXT_ID_WORLD_MESSAGE_BASE, 0);
     } else if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
-        if (world_menu_get_event_state_flag()) {
+        if (world_menu_is_dialog_waiting()) {
             state->phase = 0;
             return 1;
         }

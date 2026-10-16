@@ -193,10 +193,10 @@ extern void (*g_world_formation_menu_handlers[])(void);
 extern s16 g_world_formation_open_request_state; /* world_screen_request_state_e */
 extern u8 g_world_formation_screen_running;
 extern s8 g_world_formation_main_menu_initialized;
-extern menu_input_state_t g_world_formation_menu_input_state;
+extern menu_input_state_t g_world_menu_input_state;
 /* Alias for the first 32-bit field retained for the target's separate absolute store. */
-extern s32 g_world_formation_menu_new_buttons;
-extern u32 g_world_formation_menu_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
+extern s32 g_world_menu_new_buttons;
+extern u32 g_world_menu_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
 extern u32* g_world_formation_ordering_table;
 /* g_main_system_flags as saved by world_menu_hide_world_map (main_system_flags_e). */
 extern POLY_FT4 g_world_formation_view_quads[2][30];
@@ -212,13 +212,13 @@ extern menu_entry_t g_world_formation_egg_triangle_menu;
 extern menu_entry_t g_world_formation_egg_submenu;
 void world_formation_run_screen(s32 tutorial, s32 unused);
 void world_formation_run_screen_for_menu_index(s32 menu_index);
-s16 world_formation_run_menu_frame(u32* otag, u32 input);
+s16 world_menu_run_frame(u32* otag, u32 input);
 void world_formation_init_menu_state(void);
 void world_formation_init_menu_display(void);
-void world_formation_reset_menu_context(void);
+void world_menu_reset_context(void);
 void world_formation_restore_menu_after_core_exit(void);
 void world_formation_stop_menu_threads(void);
-void world_formation_set_menu_allowed_buttons(u32 mask);
+void world_menu_set_allowed_buttons(u32 mask);
 void world_formation_set_ordering_table_pointer(u32* ordering_table);
 void world_formation_set_display_mode(s32 mode);
 void world_formation_draw_background_tiles(s32 y, s32 unused_1);

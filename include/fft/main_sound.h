@@ -220,7 +220,7 @@ typedef enum main_sfx {
     MAIN_SFX_HIT_GUN = 91,
     MAIN_SFX_TELEPORT_OUT = 106,
     MAIN_SFX_TELEPORT_IN = 107,
-    /* Animation step 4 of the world event-transition indicator
+    /* Animation step 4 of the world event-transition sprite
      * (wldcore_menu_step_event_transition_level): 0x6c in mode 0, which a
      * random encounter pushes, 0x6d in the other spinning modes. */
     MAIN_SFX_EVENT_TRANSITION_MODE_0 = 108,

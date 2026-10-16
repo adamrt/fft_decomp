@@ -495,9 +495,9 @@ s32 wldcore_test_bit(u32* bits, s32 index) {
     return (value & mask) != 0;
 }
 
-/* Count the set bits among the first 0x1000 saved-data bits and return that
+/* Count the set bits among the first 0x1000 read-section bits and return that
  * count as a percentage of 76, the number retail treats as complete. */
-s32 wldcore_script_calculate_save_data_completion_percent(void) {
+s32 wldcore_sound_novel_calculate_read_percent(void) {
     s32 count = 0;
     s32 i;
 
@@ -606,7 +606,7 @@ void wldcore_list_handle_facts_input(wldcore_menu_panel_level_t* level) {
 }
 
 /* Pushes WLDCORE_MENU_LEVEL_FACT_DETAIL, the text of one fact, which
- * wldcore_menu_close_fact_detail_level closes: records the entry on the new
+ * wldcore_menu_wait_fact_text_then_pop_level closes: records the entry on the new
  * level, sets up g_wldcore_scrollable_text_window on its text
  * (TEXT_ID_WORLD_MESSAGE_BASE + entry) with no substitutions, hides the Brave
  * Story menu's four windows and frame, and says
@@ -664,15 +664,15 @@ static void wldcore_menu_push_fact_detail_level(s32 value) {
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
-/* Steps a fact's text window until wldcore_text_is_window_finished reports it
- * finished, then pops the level, shows the Brave Story menu's windows and
+/* Steps a fact's text window until wldcore_text_step_scrollable_window reports it
+ * closed, then pops the level, shows the Brave Story menu's windows and
  * frame again and reopens the Facts list (wldcore_list_open_facts). */
-void wldcore_menu_close_fact_detail_level(void) {
+void wldcore_menu_wait_fact_text_then_pop_level(void) {
     s32 depth;
 
     if (!(g_wldcore_window_render_records[g_wldcore_scrollable_text_window.render_record_index].flags
             & WORLD_RENDER_RECORD_POP_IN)
-        && wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) == 0) {
+        && wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) == 0) {
         depth = g_wldcore_menu_stack_depth;
         g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[depth - 2].list_window.frame_render].flags
             |= WORLD_RENDER_RECORD_POP_IN;
