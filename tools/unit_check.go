@@ -743,6 +743,10 @@ func compareUnitRanges(section string, ranges []rodataSpec, data []byte) []strin
 	}
 	last := ranges[len(ranges)-1]
 	total := int(last.Addr + uint32(last.Size) - ranges[0].Addr)
+	if section == ".data" && len(data) > total && len(data)-total < 8 && allZero(data[total:]) {
+		// The section is padded to its alignment after the last table.
+		data = data[:total]
+	}
 	if len(data) != total {
 		return []string{fmt.Sprintf("compiled %s is %d bytes, the declared ranges cover %d", section, len(data), total)}
 	}
@@ -754,4 +758,13 @@ func compareUnitRanges(section string, ranges []rodataSpec, data []byte) []strin
 		}
 	}
 	return problems
+}
+
+func allZero(data []byte) bool {
+	for _, b := range data {
+		if b != 0 {
+			return false
+		}
+	}
+	return true
 }

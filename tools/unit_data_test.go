@@ -28,6 +28,9 @@ func TestUnitOwnedDataRendersAndCompares(t *testing.T) {
 	if problems := compareUnitRanges(".data", m.Units[0].Data, table[:4]); len(problems) != 1 || !strings.Contains(problems[0], "cover 8") {
 		t.Fatalf("short data reported %v", problems)
 	}
+	if problems := compareUnitRanges(".data", m.Units[0].Data, append(append([]byte(nil), table...), 0, 0)); len(problems) != 0 {
+		t.Fatalf("zero alignment padding reported %v", problems)
+	}
 	unit := &unitInstance{addr: 0x80068000, data: m.Units[0].Data}
 	if script := unitLinkerScript(unit, map[string]uint32{}, false); !strings.Contains(script, ".data 0x80070000 : SUBALIGN(4) { *(.data) }") {
 		t.Fatalf("script:\n%s", script)
