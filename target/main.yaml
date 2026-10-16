@@ -681,8 +681,8 @@ functions:
   - {addr: 0x80041890, size: 652, name: main_boot_build_and_draw_squaresoft_logo, hash: 429977c5de60ed46, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x80041b1c, size: 612, name: main_boot_fade_out_squaresoft_logo, hash: a75b1f62cd2cc9b5, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x80041d80, size: 280, name: main_boot_draw_sceap_logo, hash: bdee131a2f49829f, unit: game_loop}
-  - {addr: 0x80041e98, size: 1004, name: main_boot_build_and_draw_sceap_logo, hash: 34c0ed5f4b6c9b9f, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80042284, size: 572, name: main_gfx_reset_display, hash: f9ff37a175b62153, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
+  - {addr: 0x80041e98, size: 1004, name: main_boot_build_and_draw_sceap_logo, hash: 34c0ed5f4b6c9b9f, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80042284, size: 572, name: main_gfx_reset_display, hash: f9ff37a175b62153, unit: game_loop, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
   - {addr: 0x800424c0, size: 72, name: main_file_reset_cdrom_cpu_ram, hash: f6a52c31a19f52c7, unit: startup}
   - {addr: 0x80042508, size: 124, name: main_gfx_load_zodiac_frame, hash: cece1a887e42aea4, unit: startup, rodata: [{addr: 0x8004092c, size: 8, hash: 35e3f82be5641d60}]}
   - {addr: 0x80042584, size: 268, name: main_boot_run_startup, hash: f89462346cd91dbc, unit: startup}

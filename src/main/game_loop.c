@@ -1,5 +1,5 @@
 /* Game reset, the BATTLE.BIN entrypoint call, the main game loop, main, the Now Loading message, the display setter,
- * and the Squaresoft and SCE boot logos. */
+ * the Squaresoft and SCE boot logos and the display reset. */
 
 #include "fft/battle.h"
 #include "fft/main.h"
@@ -15,8 +15,6 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-/* Wait for drawing to finish, blank the display, then shut down the Suzuki sound driver and the
- * SPU before a reset or a program switch. */
 static void main_system_stop_display_and_audio_for_game_reset(void) {
     DrawSync(0);
     DrawSync(0);
@@ -423,4 +421,122 @@ int main_boot_draw_sceap_logo(u32* otag, u32* image) {
     DrawOTag(otag);
     FntFlush(-1);
     return elapsed;
+}
+
+/* Show the publisher's logo strip at power-on.
+ *
+ * Loads SCEAP.DAT (sector 198, a 320x32 16-bit image) to the high overlay address
+ * and switches to a 320x240 display. A full-screen subtractive black quad fades
+ * the strip in over 32 frames, it stays for 180 frames, and the same quad fades
+ * it out over 32; each frame uploads the image again through
+ * main_boot_draw_sceap_logo. Both display buffers are cleared before and after. */
+void main_boot_build_and_draw_sceap_logo(void) {
+    POLY_F4 polygons[2];
+    DR_MODE draw_modes[2];
+    u32 otags[2][2];
+    /* SetDrawMode uses this as a texture window; zero selects the full window. */
+    RECT image_rect = { 0 };
+    u32* current_otag;
+    s16 intensity;
+    int frame;
+
+    main_set_display_draw(320, 240, 512, 0, 0, 0);
+    main_file_load_checked_to_address(DISC_SECTOR_SCEAP_DAT, 0x5000, g_main_heap_high_overlay_load_address);
+    frame = 0;
+
+    SetPolyF4(&polygons[0]);
+    setRGB0(&polygons[0], 0, 0, 0);
+    setXY4(&polygons[0], 0, 0, 320, 0, 0, 240, 320, 240);
+    SetSemiTrans(&polygons[0], 1);
+    polygons[1] = polygons[0];
+
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
+    draw_modes[1] = draw_modes[0];
+
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 320;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+    SetDispMask(1);
+
+    for (; frame < 15; frame++) {
+        VSync(0);
+    }
+
+    intensity = 248;
+    while (intensity >= 0) {
+        current_otag = otags[g_main_gfx_screen_polarity];
+        ClearOTag(current_otag, 2);
+        setRGB0(&g_main_gfx_screen_polarity[polygons], intensity, intensity, intensity);
+        AddPrim(current_otag, &polygons[g_main_gfx_screen_polarity]);
+        AddPrim(current_otag, &draw_modes[g_main_gfx_screen_polarity]);
+        main_boot_draw_sceap_logo(current_otag, (u32*)g_main_heap_high_overlay_load_address);
+        intensity -= 8;
+    }
+
+    for (frame = 0; frame < 180; frame++) {
+        VSync(0);
+    }
+
+    intensity = 0;
+    while (intensity < 256) {
+        if (intensity >= 248) {
+            intensity = 255;
+        }
+
+        current_otag = otags[g_main_gfx_screen_polarity];
+        ClearOTag(current_otag, 2);
+        setRGB0(&g_main_gfx_screen_polarity[polygons], intensity, intensity, intensity);
+        AddPrim(current_otag, &polygons[g_main_gfx_screen_polarity]);
+        AddPrim(current_otag, &draw_modes[g_main_gfx_screen_polarity]);
+        main_boot_draw_sceap_logo(current_otag, (u32*)g_main_heap_high_overlay_load_address);
+        intensity += 8;
+    }
+
+    DrawSync(0);
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 320;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+}
+
+/* Restart the GPU and set up double-buffered drawing at width x height with the
+ * second buffer 240 lines below the first (an interlaced 480-line mode uses one).
+ *
+ * Unlike main_set_display_draw this also calls ResetGraph(0) and InitGeom, clears
+ * the whole 1024x512 VRAM, loads the debug font at (640, 0) and opens a print
+ * stream, and leaves background clearing off. The display stays masked. */
+void main_gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+    RECT image_rect = { 0, 0, 1024, 512 };
+    int second_y = height == 480 ? 0 : 240;
+    int font_stream;
+
+    SetDispMask(0);
+    ResetGraph(0);
+    InitGeom();
+    SetGeomOffset(width / 2, height / 2);
+    SetGeomScreen(projection);
+
+    SetDefDrawEnv(&g_main_gfx_draw_envs[0], 0, 0, width, height);
+    SetDefDispEnv(&g_main_gfx_display_envs[0], 0, second_y, width, height);
+    SetDefDrawEnv(&g_main_gfx_draw_envs[1], 0, second_y, width, height);
+    SetDefDispEnv(&g_main_gfx_display_envs[1], 0, 0, width, height);
+
+    g_main_gfx_draw_envs[0].dtd = g_main_gfx_draw_envs[1].dtd = 0;
+    g_main_gfx_draw_envs[0].isbg = g_main_gfx_draw_envs[1].isbg = 0;
+    setRGB0(&g_main_gfx_draw_envs[0], red, green, blue);
+    setRGB0(&g_main_gfx_draw_envs[1], red, green, blue);
+
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+    FntLoad(640, 0);
+    font_stream = FntOpen(40, 16, 512, 256, 0, 512);
+    SetDumpFnt(font_stream);
+
+    PutDispEnv(&g_main_gfx_display_envs[g_main_gfx_screen_polarity]);
+    PutDrawEnv(&g_main_gfx_draw_envs[g_main_gfx_screen_polarity]);
 }
