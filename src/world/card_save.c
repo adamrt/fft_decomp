@@ -465,7 +465,7 @@ static void world_card_run_load_step(s32 slot) {
     if (state == 0) {
         g_world_card_load_step_state = 1;
         g_world_card_load_failed = 0;
-        D_801CC7D0 = 0;
+        g_world_unknown_801cc7d0 = 0;
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_loading_message);
         memset(g_world_load_work_buffer, 0xFF, 0x1E80);
         return;
@@ -523,7 +523,7 @@ static void world_card_run_save_step(s32 slot) {
     if (state == 0) {
         g_world_card_save_step_state = 1;
         g_world_card_save_failed = 0;
-        D_801CC7D8 = 0;
+        g_world_unknown_801cc7d8 = 0;
         world_card_build_save_image(slot);
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_saving_message);
         return;
@@ -640,7 +640,7 @@ void world_card_build_save_image(s32 slot) {
         sizeof(g_world_load_work_buffer->poached_item_quantities));
     bcopy(g_main_item_location_flags, g_world_load_work_buffer->item_location_flags,
         sizeof(g_world_load_work_buffer->item_location_flags));
-    g_world_load_work_buffer->_unknown_1c88 = D_80057b1c;
+    g_world_load_work_buffer->_unknown_1c88 = g_main_unknown_80057b1c;
     bcopy(g_main_script_variables, g_world_load_work_buffer->script_variables,
         sizeof(g_world_load_work_buffer->script_variables));
     bcopy(&g_main_game_options, &g_world_load_work_buffer->options, sizeof(g_world_load_work_buffer->options));
@@ -764,7 +764,7 @@ s32 world_card_load_globals_from_save_image(s32 partial_load) {
         sizeof(g_world_load_work_buffer->poached_item_quantities));
     bcopy(g_world_load_work_buffer->item_location_flags, g_main_item_location_flags,
         sizeof(g_world_load_work_buffer->item_location_flags));
-    D_80057b1c = g_world_load_work_buffer->_unknown_1c88;
+    g_main_unknown_80057b1c = g_world_load_work_buffer->_unknown_1c88;
     bcopy(g_world_load_work_buffer->script_variables, g_main_script_variables,
         sizeof(g_world_load_work_buffer->script_variables));
     bcopy(&g_world_load_work_buffer->options, &g_main_game_options, sizeof(g_world_load_work_buffer->options));

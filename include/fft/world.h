@@ -346,11 +346,11 @@ typedef struct world_shop_roster_count_menu_script {
 } world_shop_roster_count_menu_script_t;
 
 /* unnamed */
-extern s8 D_8018D18A;
-extern s8 D_801C833C;
-extern u8 D_801CC7D0;
-extern u8 D_801CC7D8;
-extern u8 D_801CD0EC;
-extern u8 D_801CD0F4;
+extern s8 g_world_unknown_8018d18a; /* cleared when Set Ability opens; never read */
+extern s8 g_world_unknown_801c833c; /* cleared with the formation scroll velocity; never read */
+extern u8 g_world_unknown_801cc7d0; /* cleared with the card load and save failure flags; never read */
+extern u8 g_world_unknown_801cc7d8; /* as g_world_unknown_801cc7d0 */
+extern u8 g_world_unknown_801cd0ec; /* cleared when the Soldier Office hire menu opens; never read */
+extern u8 g_world_unknown_801cd0f4; /* as g_world_unknown_801cd0ec */
 
 #endif

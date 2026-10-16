@@ -1671,7 +1671,7 @@ data:
   - {addr: 0x8018d187, name: g_world_set_ability_slot}
   - {addr: 0x8018d188, name: g_world_set_ability_list_close_pending}
   - {addr: 0x8018d189, name: g_world_set_ability_show_stat_preview}
-  - {addr: 0x8018d18a, name: D_8018D18A}
+  - {addr: 0x8018d18a, name: g_world_unknown_8018d18a}
   - {addr: 0x8018d18c, name: g_world_set_ability_cursor_anim}
   - {addr: 0x8018d194, name: g_world_set_ability_cursor_point}
   - {addr: 0x8018d1a0, name: g_world_ability_category}
@@ -2075,7 +2075,7 @@ data:
   - {addr: 0x801c7a04, name: g_editor_numeric_text_b}
   - {addr: 0x801c831c, name: g_thread_status_snapshot}
   - {addr: 0x801c8338, name: g_world_formation_cursor_target}
-  - {addr: 0x801c833c, name: D_801C833C}
+  - {addr: 0x801c833c, name: g_world_unknown_801c833c}
   - {addr: 0x801c8344, name: g_world_formation_cursor_trail}
   - {addr: 0x801c8364, name: g_menu_selection_records}
   - {addr: 0x801c83b8, name: g_world_job_wheel_spin_progress}
@@ -2190,9 +2190,9 @@ data:
   - {addr: 0x801cc788, name: g_input_repeat_counters}
   - {addr: 0x801cc7c8, name: g_world_input_previous}
   - {addr: 0x801cc7cc, name: g_world_card_load_failed}
-  - {addr: 0x801cc7d0, name: D_801CC7D0}
+  - {addr: 0x801cc7d0, name: g_world_unknown_801cc7d0}
   - {addr: 0x801cc7d4, name: g_world_card_save_failed}
-  - {addr: 0x801cc7d8, name: D_801CC7D8}
+  - {addr: 0x801cc7d8, name: g_world_unknown_801cc7d8}
   - {addr: 0x801cc7dc, name: g_world_card_probe_result}
   - {addr: 0x801cc7e4, name: g_world_card_scan_prompt_active}
   - {addr: 0x801cc7e8, name: g_world_card_slot_scan_index}
@@ -2244,9 +2244,9 @@ data:
   - {addr: 0x801cd0dc, name: g_world_shop_fur_purchase_item}
   - {addr: 0x801cd0e0, name: g_world_shop_fur_purchase_confirm_shown}
   - {addr: 0x801cd0e4, name: g_world_shop_fur_access_granted}
-  - {addr: 0x801cd0ec, name: D_801CD0EC}
+  - {addr: 0x801cd0ec, name: g_world_unknown_801cd0ec}
   - {addr: 0x801cd0f0, name: g_world_shop_hire_result_shown}
-  - {addr: 0x801cd0f4, name: D_801CD0F4}
+  - {addr: 0x801cd0f4, name: g_world_unknown_801cd0f4}
   - {addr: 0x801cd0f8, name: g_world_shop_rename_error_shown}
   - {addr: 0x801cd0fc, name: g_world_shop_party_unit_count}
   - {addr: 0x801cd100, name: g_world_shop_entered_unit_name}

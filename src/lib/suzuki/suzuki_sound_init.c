@@ -29,7 +29,7 @@ void suzuki_sound_init(s32 flags) {
     g_suzuki_sound_music_key_off_voices = 0;
     g_suzuki_sound_sfx_key_off_voices = 0;
     g_suzuki_sound_sfx_instrument = 0;
-    D_80032A58 = 0;
+    g_suzuki_unknown_80032a58 = 0;
     g_suzuki_sound_sfx_music = suzuki_sound_init_sfx_music();
     g_suzuki_sound_spu_state.common.mvolmode.left = SPU_VOICE_DIRECT;
     g_suzuki_sound_spu_state.common.mvolmode.right = SPU_VOICE_DIRECT;
@@ -38,7 +38,7 @@ void suzuki_sound_init(s32 flags) {
     g_suzuki_sound_root_counter_2_event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, suzuki_sound_root_counter_2_handler);
     g_suzuki_sound_spu_event = OpenEvent(HwSPU, EvSpTRAP, EvMdINTR, suzuki_sound_spu_event_handler);
     g_suzuki_sound_tick_count = 0;
-    D_80032A34 = 0;
+    g_suzuki_unknown_80032a34 = 0;
     SetRCnt(RCntCNT2, 0x44e8, RCntMdINTR);
     StartRCnt(RCntCNT2);
     EnableEvent(g_suzuki_sound_root_counter_2_event);
@@ -55,5 +55,5 @@ void suzuki_sound_init(s32 flags) {
         suzuki_sound_put_type(0xc0);
     }
     suzuki_sound_set_sfx_enabled(1);
-    D_80032A28 = 0;
+    g_suzuki_unknown_80032a28 = 0;
 }

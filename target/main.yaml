@@ -262,7 +262,7 @@ functions:
   - {addr: 0x800183c0, size: 64, name: suzuki_sound_set_cd_reverb, hash: 3920c543eba03b70, source: src/lib/suzuki/suzuki_sound_set_cd_reverb.c}
   - {addr: 0x80018400, size: 140, name: suzuki_sound_commit_volume_change, hash: 9664c665c65eb230, source: src/lib/suzuki/suzuki_sound_commit_volume_change.c}
   - {addr: 0x8001848c, size: 84, name: suzuki_sound_set_vol_balance, hash: 690d749cb3ddab10, source: src/lib/suzuki/suzuki_sound_set_vol_balance.c}
-  - {addr: 0x800184e0, size: 16, name: func_800184e0, hash: d753dba51b973163, source: src/lib/suzuki/func_800184e0.c}
+  - {addr: 0x800184e0, size: 16, name: suzuki_sound_set_unknown_80032a28, hash: d753dba51b973163, source: src/lib/suzuki/suzuki_sound_set_unknown_80032a28.c}
   - {addr: 0x800184f0, size: 32, name: suzuki_sound_spu_transfer_callback, hash: c1b2b4bd9f3d6f10, source: src/lib/suzuki/suzuki_sound_spu_transfer_callback.c}
   - {addr: 0x80018510, size: 8, name: suzuki_sound_spu_event_handler, hash: 207819bf4ebe3078, source: src/lib/suzuki/suzuki_sound_spu_event_handler.c}
   - {addr: 0x80018518, size: 316, name: suzuki_sound_transfer_spu_data, hash: 05f8d8da327ae08d, source: src/lib/suzuki/suzuki_sound_transfer_spu_data.c, rodata: [{addr: 0x80010030, size: 20, hash: 70cca047fa34bab7}]}
@@ -1138,10 +1138,10 @@ data:
   - {addr: 0x80032a18, name: g_suzuki_smd_random_state}
   - {addr: 0x80032a1c, name: g_suzuki_sound_sfx_instrument}
   - {addr: 0x80032a20, name: g_suzuki_sound_sfx_key_off_voices}
-  - {addr: 0x80032a28, name: D_80032A28}
+  - {addr: 0x80032a28, name: g_suzuki_unknown_80032a28}
   - {addr: 0x80032a2c, name: g_suzuki_sound_tick_count}
   - {addr: 0x80032a30, name: g_suzuki_sound_spu_transfer_status_index}
-  - {addr: 0x80032a34, name: D_80032A34}
+  - {addr: 0x80032a34, name: g_suzuki_unknown_80032a34}
   - {addr: 0x80032a38, name: g_suzuki_sound_heap_size}
   - {addr: 0x80032a3c, name: g_suzuki_sound_cd_mix}
   - {addr: 0x80032a40, name: g_suzuki_sound_decoded_data_result}
@@ -1150,7 +1150,7 @@ data:
   - {addr: 0x80032a4c, name: g_suzuki_sound_voice_update_requests}
   - {addr: 0x80032a50, name: g_suzuki_sound_active_music_list}
   - {addr: 0x80032a54, name: g_suzuki_sound_driver_flags}
-  - {addr: 0x80032a58, name: D_80032A58}
+  - {addr: 0x80032a58, name: g_suzuki_unknown_80032a58}
   - {addr: 0x80032a5c, name: g_suzuki_sound_root_counter_2_event}
   - {addr: 0x80032a60, name: g_suzuki_sound_sfx_music}
   - {addr: 0x80032a64, name: g_suzuki_sound_heap_end}
@@ -1240,7 +1240,7 @@ data:
   - {addr: 0x800459c8, name: g_main_battle_bin_sector}
   - {addr: 0x800459cc, name: g_main_debug_display_enabled}
   - {addr: 0x800459d0, name: g_main_font_print_enabled}
-  - {addr: 0x800459d8, name: D_800459D8}
+  - {addr: 0x800459d8, name: g_main_unknown_800459d8}
   - {addr: 0x800459dc, name: g_battle_entd_selection_mode}
   - {addr: 0x800459e0, name: g_main_gfx_now_loading_palette}
   - {addr: 0x80045a00, name: g_main_boot_squaresoft_logo_image_words}
@@ -1253,7 +1253,7 @@ data:
   - {addr: 0x800473a4, name: g_main_menu_scroll_accel_delay}
   - {addr: 0x800473a5, name: g_main_menu_scroll_slow_step}
   - {addr: 0x800473a6, name: g_main_menu_scroll_fast_step}
-  - {addr: 0x800473a7, name: D_800473A7}
+  - {addr: 0x800473a7, name: g_main_unknown_800473a7}
   - {addr: 0x800473a8, name: g_main_common_menu_graphics_loaded}
   - {addr: 0x800473ac, name: g_main_game_options}
   - {addr: 0x800473b0, name: g_main_game_options_defaults}
@@ -1304,7 +1304,7 @@ data:
   - {addr: 0x80056b18, name: g_main_gfx_battle_otags}
   - {addr: 0x80057718, name: g_main_system_session_frames}
   - {addr: 0x8005771c, name: g_main_script_variables}
-  - {addr: 0x80057b1c, name: D_80057b1c}
+  - {addr: 0x80057b1c, name: g_main_unknown_80057b1c}
   - {addr: 0x80057b20, name: g_main_item_type_order_tables}
   - {addr: 0x80057b2c, name: g_main_item_type_order_1}
   - {addr: 0x80057b34, name: g_main_item_type_order_2}

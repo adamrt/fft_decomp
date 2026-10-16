@@ -336,9 +336,9 @@ typedef char wldcore_saved_record_size_must_be_56[sizeof(wldcore_saved_record_t)
  * beyond those stores remain provisional. */
 struct wldcore_sound_novel_script_file;
 
-extern u8 D_800473A7;
+extern u8 g_main_unknown_800473a7; /* set to 1 with the input repeat timings; never read */
 
-extern u8 D_80057b1c;
+extern u8 g_main_unknown_80057b1c; /* saved and restored with save image offset 0x1c88; never read */
 
 extern u8 g_main_save_proposition_count;
 extern s32 g_main_saved_animation_speed;
@@ -653,7 +653,7 @@ typedef enum main_system_error {
     MAIN_SYSTEM_ERROR_DISTORTION_ANIMATION = 23, /* distortion animation id without a handler */
 } main_system_error_e;
 
-extern s32 D_800459D8;
+extern s32 g_main_unknown_800459d8; /* cleared with the debug display flag; never read */
 
 extern s32 g_main_system_frontend_world_result;
 extern u32 g_main_system_game_flow_state; /* main_game_flow_state_e */

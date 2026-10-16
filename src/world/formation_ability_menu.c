@@ -359,7 +359,7 @@ static s32 world_formation_run_set_ability_menu(void) {
         g_world_set_ability_initialized = 1;
         g_world_set_ability_cursor = 0xFF;
         g_world_set_ability_list_close_pending = 0;
-        D_8018D18A = 0;
+        g_world_unknown_8018d18a = 0;
         g_world_set_ability_list_open = 0;
         g_world_formation_unit_cycle_mode = 2;
         g_world_set_ability_show_stat_preview = 0;

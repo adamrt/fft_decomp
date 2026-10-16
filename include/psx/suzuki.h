@@ -743,9 +743,9 @@ extern suzuki_spu_state_t g_suzuki_sound_spu_state; /* 0x80037020 */
 /* Allocation records and one trailing free-range record. */
 extern psyq_spu_heap_record_t g_suzuki_sound_spu_malloc_table[SUZUKI_SOUND_SPU_ALLOC_RECORD_COUNT];
 typedef char suzuki_spu_allocator_storage_size_must_be_56[sizeof(g_suzuki_sound_spu_malloc_table) == 56 ? 1 : -1];
-extern u16 D_80032A28; /* only ever stored */
-extern u32 D_80032A34; /* only ever stored */
-extern s16 D_80032A58; /* only ever stored */
+extern u16 g_suzuki_unknown_80032a28; /* only ever stored */
+extern u32 g_suzuki_unknown_80032a34; /* only ever stored */
+extern s16 g_suzuki_unknown_80032a58; /* only ever stored */
 
 /* Suzuki driver entry points. The music handle passed by the game wrappers
  * is the suzuki_music_t* that suzuki_smd_create_music returns. */
@@ -977,7 +977,7 @@ s16 suzuki_sound_wait_for_spu_transfer(s32 flags);
 void suzuki_sound_init_stub(void);
 void suzuki_sound_enable_root_counter_2_event(void);
 void suzuki_sound_disable_root_counter_2_event(void);
-void func_800184e0(u16 value);
+void suzuki_sound_set_unknown_80032a28(u16 value);
 
 /* Suzuki key-on/key-off flushes. The driver compiled them both as functions
  * and inline in its root-counter handler, so their bodies live here once. */
