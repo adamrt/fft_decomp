@@ -371,7 +371,7 @@ s32 battle_target_copy_ability_targets(u8* out) {
     return count;
 }
 
-/* Store value in D_8019387C when unit_id is the acting unit of a primary
+/* Store value in g_battle_unknown_8019387c when unit_id is the acting unit of a primary
  * (non-reaction) action. */
 void battle_action_store_8019387c_if_not_reacting(s32 unit_id, s8 value) {
     if (g_battle_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_battle_acting_unit_id) {

@@ -778,7 +778,7 @@ void battle_sound_start_weather_sfx(void) {
 
 /* Start map weather effect mode 0x96 for `value` frames, from frame 0; effect
  * E458 passes the frames left of its timeline. An id other than 0x96 does
- * nothing. D_800F668C receives 0x95 and no code reads it. */
+ * nothing. g_battle_unknown_800f668c receives 0x95 and no code reads it. */
 void battle_map_set_command_0x96_duration(s32 id, s32 value) {
     if (id == MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
         g_battle_unknown_800f668c = 0x95;
