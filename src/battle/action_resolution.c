@@ -1535,7 +1535,7 @@ void battle_status_update_expiring(s32 unit_id) {
     s32 mask;
     unit_stats_t* target;
     action_data_t* action;
-    s32 remaining_ct;
+    u8 remaining_ct;
 
     battle_action_set_target_variables(&g_battle_unit_stats[unit_id]);
 
@@ -1548,7 +1548,7 @@ void battle_status_update_expiring(s32 unit_id) {
             if ((target->status_sets.innate[byte_idx] & mask) == 0) {
                 remaining_ct = target->status_ct[i] - 1;
                 target->status_ct[i] = remaining_ct;
-                if ((remaining_ct & 0xFF) == 0) {
+                if (remaining_ct == 0) {
                     action = g_battle_action_target_data;
                     action->status_changes.removal[byte_idx] = mask | action->status_changes.removal[byte_idx];
                 }

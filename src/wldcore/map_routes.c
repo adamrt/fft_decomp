@@ -120,7 +120,7 @@ void wldcore_map_pulse_dot_colors(void) {
     s32 bright;
     s32 dark;
     u8 state;
-    s32 counter;
+    u8 counter;
     CVECTOR* color;
 
     if (flags & MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
@@ -132,14 +132,14 @@ void wldcore_map_pulse_dot_colors(void) {
         if (state == 0) {
             counter = g_wldcore_map_dot_pulse_phase + 1;
             g_wldcore_map_dot_pulse_phase = counter;
-            counter = counter & 0xff;
+            counter = counter;
             if (counter == flags) {
                 g_wldcore_map_dot_pulse_direction = state ^ 1;
             }
         } else {
             counter = g_wldcore_map_dot_pulse_phase - 1;
             g_wldcore_map_dot_pulse_phase = counter;
-            counter = counter & 0xff;
+            counter = counter;
             if (counter == 0) {
                 g_wldcore_map_dot_pulse_direction = state ^ 1;
             }

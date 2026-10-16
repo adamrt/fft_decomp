@@ -1337,7 +1337,7 @@ static void battle_move_encode_path_steps(void) {
     s32 path_index;
     u8 level;
     s32 i;
-    s32 target;
+    u8 target;
     s32 rem;
     u8 hit;
     u8 dir;
@@ -1353,10 +1353,10 @@ static void battle_move_encode_path_steps(void) {
         path_index = step + 1;
         target = state->path_length - path_index;
         for (i = 0; i < MOVE_PANEL_COUNT; i++) {
-            if (i >= MAP_TILE_COUNT && g_battle_target_panels[i].ride_remaining_range == (target & 0xff)) {
+            if (i >= MAP_TILE_COUNT && g_battle_target_panels[i].ride_remaining_range == target) {
                 hit = 1;
                 record = &records[i - MAP_TILE_COUNT];
-            } else if (g_battle_target_panels[i].mark == (target & 0xff)) {
+            } else if (g_battle_target_panels[i].mark == target) {
                 hit = 0;
                 if (i < MAP_TILE_COUNT) {
                     state->destination_unit_record_index = 0;
@@ -3067,7 +3067,7 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
     unit_stats_t* unit;
     ability_secondary_data_t* ability;
     s32 mode;
-    s32 range;
+    u8 range;
     s32 result;
     u8 flags;
     u8 item;
@@ -3140,7 +3140,7 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
         result = battle_target_set_ability_panels(&action);
     }
     if (mode == 2) {
-        result = battle_target_spread_ability_range(unit, range & 0xff);
+        result = battle_target_spread_ability_range(unit, range);
         flags = ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET;
     }
     if (result != 0) {

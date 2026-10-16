@@ -1165,7 +1165,7 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
     s32 i;
     s32 count;
     s32 result;
-    s32 menu_type;
+    u8 menu_type;
     u8 flags_1;
     u16 mp;
     s32 tid;
@@ -1191,7 +1191,7 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
 
     menu_type = g_main_action_menu_types_by_skillset[unit->action_command.skillset_id];
     flags_1 = 0;
-    if ((menu_type & 0xff) == ACTION_MENU_TYPE_DEFAULT || (menu_type & 0xff) == ACTION_MENU_TYPE_MONSTER) {
+    if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MONSTER) {
         ability_id = unit->action_command.ability_id;
         if (ability_id < ABILITY_ID_ITEM_FIRST) {
             flags_1 = g_main_ability_range_data[ability_id].flags_1;
@@ -1199,9 +1199,8 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
     }
 
     result = -1;
-    if ((menu_type & 0xff) == ACTION_MENU_TYPE_ATTACK || (menu_type & 0xff) == ACTION_MENU_TYPE_CHARGE
-        || (menu_type & 0xff) == ACTION_MENU_TYPE_WEAPON_INVENTORY
-        || (flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE)) {
+    if (menu_type == ACTION_MENU_TYPE_ATTACK || menu_type == ACTION_MENU_TYPE_CHARGE
+        || menu_type == ACTION_MENU_TYPE_WEAPON_INVENTORY || (flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE)) {
         result = battle_target_validate_weapon_target(&unit->action_command);
     }
     if (result == -1) {

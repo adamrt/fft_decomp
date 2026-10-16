@@ -242,7 +242,7 @@ s32 battle_gfx_is_spritesheet_id_loaded(s16 spritesheet_id) {
  * already holds it, otherwise take the first free one, and report error 0xB when all nine are taken. */
 s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
     s32 slot;
-    s32 found = 0xFF;
+    u16 found = 0xFF;
 
     for (slot = 0; slot < 9; slot++) {
         if (g_battle_gfx_spritesheet_slots[slot].spritesheet_id == spritesheet_id) {
@@ -251,7 +251,7 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
             break;
         }
     }
-    if ((found & 0xFFFF) == 0xFF) {
+    if (found == 0xFF) {
         for (slot = 0; slot < 9; slot++) {
             if (g_battle_gfx_spritesheet_slots[slot].in_use == 0) {
                 g_battle_gfx_spritesheet_slots[slot].in_use = spritesheet_id;
@@ -265,7 +265,7 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
         main_system_handle_error(MAIN_SYSTEM_ERROR_NO_SPRITESHEET_SLOT);
         return 0xFFFF;
     }
-    return found & 0xFFFF;
+    return found;
 }
 
 /* Reload a unit's palette tinted for tile effects, weather and time of day.
