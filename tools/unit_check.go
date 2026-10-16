@@ -119,6 +119,7 @@ type unitInstance struct {
 	addr    uint32
 	size    int
 	rodata  []rodataSpec
+	data    []rodataSpec // initialized tables the unit defines, its .data
 }
 
 // symbols lists the definitions the unit source must hold, one per member
@@ -221,7 +222,19 @@ func (m *moduleSpec) unitInstance(config *projectConfig, name string) (*unitInst
 		functions = append(functions, f.Name)
 	}
 	spec := &unitSpec{name: unit.Name, source: unit.Source, functions: functions, rodata: unit.Rodata}
-	return resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID})
+	instance, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID})
+	if err != nil {
+		return nil, err
+	}
+	instance.data = append([]rodataSpec(nil), unit.Data...)
+	for i := 1; i < len(instance.data); i++ {
+		previous := instance.data[i-1]
+		end := previous.Addr + uint32(previous.Size)
+		if instance.data[i].Addr < end || instance.data[i].Addr-end >= 8 {
+			return nil, fmt.Errorf("%s: data ranges are not contiguous at 0x%08x", unit.Name, instance.data[i].Addr)
+		}
+	}
+	return instance, nil
 }
 
 // unitProfile is the one profile a unit instance compiles with. Members may
@@ -329,6 +342,9 @@ func unitLinkerScriptSkipping(unit *unitInstance, bindings map[string]uint32, as
 	script.WriteString("SECTIONS {\n")
 	if len(unit.rodata) > 0 {
 		fmt.Fprintf(&script, "  .rodata 0x%x : SUBALIGN(4) { *(.rodata) *(.rdata) }\n", unit.rodata[0].Addr)
+	}
+	if len(unit.data) > 0 {
+		fmt.Fprintf(&script, "  .data 0x%x : SUBALIGN(4) { *(.data) }\n", unit.data[0].Addr)
 	}
 	fmt.Fprintf(&script, "  .text 0x%x : SUBALIGN(4) { *(.text) }\n", unit.addr)
 	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) *(.MIPS.abiflags) }\n}\n")
@@ -494,28 +510,15 @@ func compareUnitSections(unit *unitInstance, sections map[string][]byte) ([]unit
 	if len(text) != unit.size {
 		problems = append(problems, fmt.Sprintf("compiled .text is %d bytes, the unit's functions cover %d", len(text), unit.size))
 	}
-	if len(unit.rodata) > 0 {
-		data := sections[".rodata"]
-		last := unit.rodata[len(unit.rodata)-1]
-		total := int(last.Addr + uint32(last.Size) - unit.rodata[0].Addr)
-		if len(data) != total {
-			problems = append(problems, fmt.Sprintf("compiled .rodata is %d bytes, the declared ranges cover %d", len(data), total))
-		} else {
-			for _, rodata := range unit.rodata {
-				start := int(rodata.Addr - unit.rodata[0].Addr)
-				if shortHash(data[start:start+rodata.Size]) != rodata.Hash {
-					problems = append(problems, fmt.Sprintf(".rodata at 0x%08x differs", rodata.Addr))
-				}
-			}
-		}
-	}
+	problems = append(problems, compareUnitRanges(".rodata", unit.rodata, sections[".rodata"])...)
+	problems = append(problems, compareUnitRanges(".data", unit.data, sections[".data"])...)
 	names := make([]string, 0, len(sections))
 	for name := range sections {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		if name != ".text" && (name != ".rodata" || len(unit.rodata) == 0) {
+		if name != ".text" && (name != ".rodata" || len(unit.rodata) == 0) && (name != ".data" || len(unit.data) == 0) {
 			problems = append(problems, fmt.Sprintf("emitted undeclared allocatable section %s", name))
 		}
 	}
@@ -729,4 +732,26 @@ func (p project) unitCheckCommand(args []string) error {
 		return nil
 	}
 	return fmt.Errorf("unit-check: %d of %d functions differ, %d unit-level problems", failed, total, problemCount)
+}
+
+// compareUnitRanges checks a compiled section against the ranges the unit
+// declares for it: the section spans exactly from the first range to the end
+// of the last, and every range hashes to its original bytes.
+func compareUnitRanges(section string, ranges []rodataSpec, data []byte) []string {
+	if len(ranges) == 0 {
+		return nil
+	}
+	last := ranges[len(ranges)-1]
+	total := int(last.Addr + uint32(last.Size) - ranges[0].Addr)
+	if len(data) != total {
+		return []string{fmt.Sprintf("compiled %s is %d bytes, the declared ranges cover %d", section, len(data), total)}
+	}
+	var problems []string
+	for _, span := range ranges {
+		start := int(span.Addr - ranges[0].Addr)
+		if shortHash(data[start:start+span.Size]) != span.Hash {
+			problems = append(problems, fmt.Sprintf("%s at 0x%08x differs", section, span.Addr))
+		}
+	}
+	return problems
 }

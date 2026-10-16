@@ -77,6 +77,7 @@ type unitDef struct {
 	Source  string
 	Profile string       // empty: each member's own profile; else the profile every member compiles with
 	Rodata  []rodataSpec // read-only tables the unit defines between its functions' literals
+	Data    []rodataSpec // initialized tables the unit defines, placed as its .data
 }
 
 type rodataSpec struct {
@@ -234,7 +235,6 @@ func (m *moduleSpec) sourceOf(f *functionSpec) string {
 	return m.defaultSource(f)
 }
 
-// unit returns the module's unit definition of that name.
 // renderRodataRanges writes read-only ranges as the inline YAML list items.
 func renderRodataRanges(ranges []rodataSpec) string {
 	items := make([]string, len(ranges))
@@ -258,6 +258,7 @@ func (m *moduleSpec) dataAt(addr uint32) *symbolSpec {
 	return nil
 }
 
+// unit returns the module's unit definition of that name, or nil.
 func (m *moduleSpec) unit(name string) *unitDef {
 	for index := range m.Units {
 		if m.Units[index].Name == name {
@@ -414,6 +415,7 @@ type unitYAML struct {
 	Source  string       `yaml:"source"`
 	Profile string       `yaml:"profile"`
 	Rodata  []rodataYAML `yaml:"rodata"`
+	Data    []rodataYAML `yaml:"data"`
 }
 
 type rodataYAML struct {
@@ -469,6 +471,10 @@ func parseModuleConfig(data []byte) (*moduleSpec, error) {
 			unit.Rodata = append(unit.Rodata, rodataSpec(rodata))
 		}
 		sort.SliceStable(unit.Rodata, func(i, j int) bool { return unit.Rodata[i].Addr < unit.Rodata[j].Addr })
+		for _, data := range item.Data {
+			unit.Data = append(unit.Data, rodataSpec(data))
+		}
+		sort.SliceStable(unit.Data, func(i, j int) bool { return unit.Data[i].Addr < unit.Data[j].Addr })
 		module.Units = append(module.Units, unit)
 	}
 	for _, item := range file.Libraries {
@@ -603,6 +609,9 @@ func renderModuleConfig(m *moduleSpec) []byte {
 		}
 		if len(item.Rodata) > 0 {
 			text += ", rodata: [" + renderRodataRanges(item.Rodata) + "]"
+		}
+		if len(item.Data) > 0 {
+			text += ", data: [" + renderRodataRanges(item.Data) + "]"
 		}
 		return text
 	})
@@ -908,6 +917,17 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 				}
 				if m.dataAt(rodata.Addr) == nil {
 					fail("%s: owned rodata 0x%08x names no data row of the module", where, rodata.Addr)
+				}
+			}
+			for _, data := range unit.Data {
+				if data.Size <= 0 || !m.contains(data.Addr, data.Size) {
+					fail("%s: owned data 0x%08x lies outside the module image", where, data.Addr)
+				}
+				if !validHash(data.Hash) {
+					fail("%s: owned data 0x%08x has no valid hash; run `make checksums`", where, data.Addr)
+				}
+				if m.dataAt(data.Addr) == nil {
+					fail("%s: owned data 0x%08x names no data row of the module", where, data.Addr)
 				}
 			}
 			if _, err := projectPath(p.root, unit.Source, "unit source"); err != nil {

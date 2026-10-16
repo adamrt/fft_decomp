@@ -748,6 +748,21 @@ func (p project) checksumsCommand(args []string) error {
 				}
 				return nil
 			}
+			for index := range m.Units {
+				unit := &m.Units[index]
+				for rangeIndex := range unit.Rodata {
+					span := &unit.Rodata[rangeIndex]
+					if err := record(span.Addr, span.Size, &span.Hash); err != nil {
+						return err
+					}
+				}
+				for rangeIndex := range unit.Data {
+					span := &unit.Data[rangeIndex]
+					if err := record(span.Addr, span.Size, &span.Hash); err != nil {
+						return err
+					}
+				}
+			}
 			for index := range m.Functions {
 				f := &m.Functions[index]
 				if err := record(f.Addr, f.Size, &f.Hash); err != nil {
