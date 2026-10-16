@@ -23,17 +23,17 @@ void menu_run_unit_status_thread_variant(void) {
     menu_status_panel_editor_packet_t* editor_base; /* sp68 */
     menu_number_entry_t* number_entries;            /* sp70 */
     menu_unit_status_record_t* state;               /* sp78 */
-    s32 portrait_request;                           /* sp80 */
+    s32 portrait_arg;                               /* sp80 */
     const RECT* transition;                         /* sp88 */
     palette_t* portrait_palettes;                   /* sp90 */
     u8* value_pixels;                               /* sp98 */
-    u8* name_pixels;                                /* spA0 */
+    u8* name_image;                                 /* spA0 */
     menu_status_panel_packet_t* panel_base;         /* spA8 */
     menu_active_unit_t* unit_info;                  /* spB0 */
     menu_status_panel_display_thread_t* thread;     /* spB8 */
     s32 shake;                                      /* spC0 */
     s32 dimmed;                                     /* spC8 */
-    s32 hide_portrait;                              /* spD0 */
+    s32 suppress;                                   /* spD0 */
 
     s32 thread_id;
     s32 frame;
@@ -57,7 +57,7 @@ void menu_run_unit_status_thread_variant(void) {
     u8* value_pixels_c;
     POLY_FT4* panel_portrait;
 
-    hide_portrait = 0;
+    suppress = 0;
     thread_set_current_task_id(THREAD_TASK_UNIT_STATUS_BANNER);
     g_input_controller = script_get_controller_input_pointer(0) + 1;
     thread_id = g_thread_current_id;
@@ -67,7 +67,7 @@ void menu_run_unit_status_thread_variant(void) {
         editor = g_panel_selected_editor_packets;
         number_pixels = g_panel_selected_number_image;
         value_pixels = g_panel_selected_large_number_image;
-        name_pixels = g_panel_selected_name_image;
+        name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
         unit_info = &g_attack_panel_selected_unit_data;
@@ -80,7 +80,7 @@ void menu_run_unit_status_thread_variant(void) {
         editor = g_panel_comparison_editor_packets;
         number_pixels = g_panel_comparison_number_image;
         value_pixels = g_panel_comparison_large_number_image;
-        name_pixels = g_panel_comparison_name_image;
+        name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
         unit_info = &g_attack_panel_comparison_unit_data;
@@ -267,17 +267,17 @@ void menu_run_unit_status_thread_variant(void) {
         if (anim_state >= 0xA) {
             anim_state = 0;
             prev_unit = cur_unit;
-            hide_portrait = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+            suppress = thread->flags & MENU_STATUS_PANEL_HIDDEN;
         }
         if (thread->work != 0) {
             if (anim_state == 0) {
                 prev_unit = cur_unit;
-                portrait_request = thread->work;
+                portrait_arg = thread->work;
                 cur_unit = state->unit_index;
             } else {
                 anim_state = 2;
                 prev_unit = cur_unit;
-                portrait_request = thread->work;
+                portrait_arg = thread->work;
                 cur_unit = state->unit_index;
             }
         }
@@ -287,7 +287,7 @@ void menu_run_unit_status_thread_variant(void) {
             }
         }
         gfx_build_portrait_transition_primitives(
-            transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_request);
+            transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
         {
             CVECTOR* color;
 
@@ -352,13 +352,13 @@ void menu_run_unit_status_thread_variant(void) {
             menu_draw_numeric_display_entries(number_pixels_b, &number_entries[8], text_position, 2);
             LoadImage(&rects[1], number_pixels_b);
             thread->work = 0;
-            menu_clear_render_buffer(name_pixels, 0x580);
+            menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(unit_info->name_id + 0x5800, name_pixels, text_position);
+            menu_display_text_entry(unit_info->name_id + 0x5800, name_image, text_position);
             menu_set_text_origin(0, 0x10);
-            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_pixels, text_position);
-            LoadImage(&rects[2], name_pixels);
+            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
+            LoadImage(&rects[2], name_image);
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
@@ -391,7 +391,7 @@ void menu_run_unit_status_thread_variant(void) {
                 gfx_draw_or_append_gpu_primitive(&editor->label_sprites[i]);
             }
             gfx_draw_or_append_gpu_primitive(&editor->draw_mode_b);
-            if (hide_portrait == 0) {
+            if (suppress == 0) {
                 if (anim_state >= 5) {
                     gfx_draw_or_append_gpu_primitive(&editor->portrait[2]);
                     gfx_draw_or_append_gpu_primitive(&editor->portrait[3]);

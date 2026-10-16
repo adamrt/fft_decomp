@@ -52,7 +52,7 @@ void world_ability_find_stat_changes_due_to_equipped(
  * Invalid item IDs leave the cleared preview unchanged.
  */
 void item_collect_stat_deltas_variant(
-    s16 item_id, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 slot) {
+    s16 item_id, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 alternate) {
     s32 attribute;
     s32 secondary;
     u8 power;
@@ -65,7 +65,7 @@ void item_collect_stat_deltas_variant(
             secondary = g_main_item_primary_data[item_id].secondary_data_id;
             power = g_main_item_weapon_data[secondary].power;
             evade = g_main_item_weapon_data[secondary].evade;
-            if (slot != 0) {
+            if (alternate != 0) {
                 detail->state.left_weapon_power = power;
                 detail->state.left_weapon_evade = evade;
             } else {

@@ -10,10 +10,10 @@
  * 0xff marks an inactive group. */
 void menu_build_status_group_primitives_variant(POLY_FT4* poly) {
     s32 group;
-    s32 index;
+    s32 cell;
     s32 count;
     s32 first;
-    s32 status;
+    s32 index;
     u8 group_id;
 
     for (group = 0; group < g_menu_panel_status_group_count; group++) {
@@ -36,12 +36,12 @@ void menu_build_status_group_primitives_variant(POLY_FT4* poly) {
             }
         }
 
-        for (index = 0; index < count; index++) {
+        for (cell = 0; cell < count; cell++) {
             menu_init_default_poly_ft4(poly);
-            status = first + count - index;
+            index = first + count - cell;
             g_menu_draw_area_template.y += g_menu_panel_status_y_offsets[group * 2];
             gfx_set_scaled_poly_ft4_4bpp(poly, &g_menu_panel_status_texture, &g_menu_draw_area_template,
-                &g_menu_panel_status_uv_rects[status], &g_menu_panel_status_scales[status],
+                &g_menu_panel_status_uv_rects[index], &g_menu_panel_status_scales[index],
                 &g_menu_panel_status_offsets[group]);
             g_menu_draw_area_template.y -= g_menu_panel_status_y_offsets[group * 2];
 

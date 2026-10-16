@@ -23,7 +23,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     u16 ot_index;
     u16 previous_selected;
     s32 row_count;
-    u16 step;
+    u16 speed;
     s16* row_ids;
     s16 text_id;
     s32 input;
@@ -46,7 +46,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     }
     g_menu_list_row_mode = 1;
     previous_selected = g_menu_list_selected_index;
-    step = 2;
+    speed = 2;
     if (g_menu_list_redraw_pending != 0) {
         menu_draw_scrollable_list(command);
     }
@@ -104,10 +104,10 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     }
     if (g_menu_list_scroll_direction < 0) {
         if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset -= step * g_main_menu_scroll_fast_step;
+            g_menu_list_scroll_offset -= speed * g_main_menu_scroll_fast_step;
         } else {
-            g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * (step & 0xff);
-            g_menu_list_scroll_progress = (step & 0xff) + g_menu_list_scroll_progress;
+            g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * (speed & 0xff);
+            g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
         }
         if (g_menu_list_scroll_offset <= -g_menu_list_row_height) {
             g_menu_list_scroll_offset = 0;
@@ -127,10 +127,10 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
         }
     } else if (g_menu_list_scroll_direction > 0) {
         if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset += step * g_main_menu_scroll_fast_step;
+            g_menu_list_scroll_offset += speed * g_main_menu_scroll_fast_step;
         } else {
-            g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * (step & 0xff);
-            g_menu_list_scroll_progress = (step & 0xff) + g_menu_list_scroll_progress;
+            g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * (speed & 0xff);
+            g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
         }
         if (g_menu_list_scroll_offset >= g_menu_list_row_height) {
             g_menu_list_scroll_offset = 0;

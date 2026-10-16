@@ -14,7 +14,7 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32
     s32 offset;
     s8 raw_offset;
     s32 i;
-    u16 cursor_clut;
+    u16 front_clut;
     u16 shadow_clut;
 
     active_bit = *state >> 15;
@@ -70,10 +70,10 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32
     }
 
     if (mode != 0) {
-        cursor_clut = g_menu_cursor_mode1_foreground_clut;
+        front_clut = g_menu_cursor_mode1_foreground_clut;
         shadow_clut = g_menu_cursor_mode1_background_clut;
     } else {
-        cursor_clut = g_menu_cursor_mode0_foreground_clut;
+        front_clut = g_menu_cursor_mode0_foreground_clut;
         shadow_clut = g_menu_cursor_mode0_background_clut;
     }
 
@@ -81,7 +81,7 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32
     rect.y = pos->y;
     rect.w = 0x10;
     rect.h = 0x10;
-    menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, cursor_clut, 0x3C);
+    menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, front_clut, 0x3C);
     rect.x += 2;
     rect.y += 2;
     menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, shadow_clut, 0x3B);

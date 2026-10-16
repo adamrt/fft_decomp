@@ -14,8 +14,8 @@
  * confirm. */
 s32 menu_ability_update_list_menu_variant(void) {
     RECT rect;
-    s16 selected_index;
-    s16 scroll_index;
+    s16 selected;
+    s16 scroll;
     s32 entry;
     s32 category;
     s32 input;
@@ -82,10 +82,9 @@ s32 menu_ability_update_list_menu_variant(void) {
             g_menu_ability_category, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
         jobstts_ability_build_list(0, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
-        menu_get_selection_record_variant(
-            g_menu_ability_category, &selected_index, &scroll_index, g_menu_ability_entries);
+        menu_get_selection_record_variant(g_menu_ability_category, &selected, &scroll, g_menu_ability_entries);
         menu_init_scrollable_list(
-            g_menu_ability_entries, selected_index, scroll_index, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
+            g_menu_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(0xa);
         g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
     }

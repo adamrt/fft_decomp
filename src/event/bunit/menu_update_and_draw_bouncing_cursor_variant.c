@@ -16,10 +16,10 @@ void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s3
     s32 active;
     s32 active_bit;
     s32 timer;
-    s32 offset;
+    s32 y_offset;
     s8 raw_offset;
     s32 i;
-    u16 cursor_clut;
+    u16 front_clut;
     u16 shadow_clut;
 
     active_bit = *state >> 15;
@@ -59,7 +59,7 @@ void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s3
         raw_offset = g_menu_cursor_forward_offset_keyframes[i + 1];
     }
 
-    offset = raw_offset;
+    y_offset = raw_offset;
     timer += menu_get_event_speed();
     active_bit = active;
     if (active_bit != 0) {
@@ -75,20 +75,20 @@ void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s3
     }
 
     if (mode != 0) {
-        cursor_clut = g_menu_cursor_mode1_foreground_clut;
+        front_clut = g_menu_cursor_mode1_foreground_clut;
         shadow_clut = g_menu_cursor_mode1_background_clut;
     } else {
-        cursor_clut = g_menu_cursor_mode0_foreground_clut;
+        front_clut = g_menu_cursor_mode0_foreground_clut;
         shadow_clut = g_menu_cursor_mode0_background_clut;
     }
 
-    bottom = offset + 0x10;
-    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, offset + pos->y, pos->x + 0x10, offset + pos->y, pos->x,
+    bottom = y_offset + 0x10;
+    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, y_offset + pos->y, pos->x + 0x10, y_offset + pos->y, pos->x,
         pos->y + bottom, pos->x + 0x10, pos->y + bottom);
-    g_bunit_bouncing_cursor_quad.clut = cursor_clut;
+    g_bunit_bouncing_cursor_quad.clut = front_clut;
     g_bunit_bouncing_cursor_quad.tpage = g_menu_cursor_texture_page;
     gfx_enqueue_textured_quad_corners(&g_bunit_bouncing_cursor_quad, 0, 0, 0x3C);
-    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, offset + pos->y + 2, pos->x + 0x10, offset + pos->y + 2, pos->x,
+    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, y_offset + pos->y + 2, pos->x + 0x10, y_offset + pos->y + 2, pos->x,
         pos->y + bottom + 2, pos->x + 0x10, pos->y + bottom + 2);
     g_bunit_bouncing_cursor_quad.clut = shadow_clut;
     g_bunit_bouncing_cursor_quad.tpage = 0x5F;

@@ -16,7 +16,7 @@
  * Numbers (0xE4/0xE6) are drawn one digit per 6-pixel column. Indexing the
  * divisor table inside the digit loop, rather than walking a pointer, is
  * what gives the target's strength-reduced pointer and register choice. */
-void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text) {
+void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     party_unit_t* party;
     u8* cursor;
     s32 i;
@@ -123,11 +123,11 @@ void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8
                             state->value = state->value - state->command * g_text_decimal_divisors[i];
                             if (line >= g_menu_text_param_24) {
                                 /* Leaves the digit loop and the text loop. */
-                                goto end;
+                                goto done;
                             }
                             if (line >= g_menu_text_param_22) {
                                 text_render_glyph_to_4bpp_image(
-                                    g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, pixels,
+                                    g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                                     &g_menu_text_pen, g_menu_text_palette_offset);
                             }
                         }
@@ -173,7 +173,7 @@ void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8
             break;
         }
         if (line >= g_menu_text_param_22) {
-            text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, pixels,
+            text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                 &g_menu_text_pen, g_menu_text_palette_offset);
         }
         g_menu_text_pen.rect.x += g_text_glyph_widths[state->command];
@@ -181,7 +181,7 @@ void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8
             break;
         }
     }
-end:
+done:
     g_menu_text_palette_offset = 0;
     g_menu_text_param_22 = 0;
     g_menu_text_param_24 = 0xFF;

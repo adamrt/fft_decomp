@@ -66,7 +66,7 @@ void text_run_dialog_thread_variant(void) {
     s16 cursor_x;
     s32 character;
     s32 i;
-    s32 k;
+    s32 tick;
     s32 value;
     s32 digits;
     u16 started;
@@ -405,12 +405,12 @@ void text_run_dialog_thread_variant(void) {
                     column = 0;
                 }
                 if (no_wait == 0) {
-                    for (k = 0;; k += g_script_event_speed) {
+                    for (tick = 0;; tick += g_script_event_speed) {
                         if (rec.box_type == DIALOG_BOX_TYPE_CENTERED && character != TEXT_PAGE_BREAK) {
-                            for (k = 0x80; k > 0x30; k -= 8) {
-                                WINDOW_AT(g_menu_packet_buffer_index)->color.r = k;
-                                WINDOW_AT(g_menu_packet_buffer_index)->color.g = k;
-                                WINDOW_AT(g_menu_packet_buffer_index)->color.b = k;
+                            for (tick = 0x80; tick > 0x30; tick -= 8) {
+                                WINDOW_AT(g_menu_packet_buffer_index)->color.r = tick;
+                                WINDOW_AT(g_menu_packet_buffer_index)->color.g = tick;
+                                WINDOW_AT(g_menu_packet_buffer_index)->color.b = tick;
                                 thread_yield();
                             }
                             break;
@@ -425,7 +425,7 @@ void text_run_dialog_thread_variant(void) {
                                 cursor_window = WINDOW_AT(g_menu_packet_buffer_index);
                                 cursor_window->sprites[0].x0 = cursor_x
                                     + (cursor_window->quads[0].x0 + rec.x - cursor_window->quads[0].u0)
-                                    + (s16)(((k >> 4) & 3) - 8);
+                                    + (s16)(((tick >> 4) & 3) - 8);
                                 cursor_window->sprites[0].y0 = cursor_y
                                     + (cursor_window->quads[0].y0 + rec.y - cursor_window->quads[0].v0)
                                     - (cursor_window->quads[0].v0 + 8);
@@ -437,7 +437,7 @@ void text_run_dialog_thread_variant(void) {
                                 g_battle_text_awaiting_input = 1;
                             }
                             if (character == TEXT_NEWLINE) {
-                                WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].u0 = (k & 0x30) - 0x58;
+                                WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].u0 = (tick & 0x30) - 0x58;
                                 WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].v0 = 0x10;
                                 arrow_window = WINDOW_AT(g_menu_packet_buffer_index);
                                 arrow_window->sprites[2].x0 = rec.arrow_x;
@@ -556,10 +556,10 @@ void text_run_dialog_thread_variant(void) {
                 } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                     ClearImage(&rec.rect, 0, 0, 0);
                     thread_yield();
-                    for (k = 0; k < 2; k++) {
-                        win[k].color.r = 0x80;
-                        win[k].color.g = 0x80;
-                        win[k].color.b = 0x80;
+                    for (tick = 0; tick < 2; tick++) {
+                        win[tick].color.r = 0x80;
+                        win[tick].color.g = 0x80;
+                        win[tick].color.b = 0x80;
                     }
                 } else {
                     g_sound_pending_sfx_id = MAIN_SFX_TEXT_PAGE;

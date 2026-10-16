@@ -1439,7 +1439,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
 s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
-    s32 op;
+    s32 finish_op;
     u32 prims;
     u32* ordering_table;
     s32 polarity;
@@ -1465,8 +1465,8 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
             }
         }
         if (i == 17) {
-            op = script_get_current_scenario_finish_operation();
-            if (op != 0) {
+            finish_op = script_get_current_scenario_finish_operation();
+            if (finish_op != 0) {
                 if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
                     g_script_threads_idle = 0;
                     script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
@@ -1480,17 +1480,17 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
             if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_FUNERAL) {
                 return 0x13;
             }
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, ((op & 0xC00) >> 2) | (op & 0xFF));
-            op = (op & 0xF300) >> 8;
+            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, ((finish_op & 0xC00) >> 2) | (finish_op & 0xFF));
+            finish_op = (finish_op & 0xF300) >> 8;
             g_script_threads_idle = 0;
             g_menu_overlay_state = 0;
-            if (op == 0x80) {
+            if (finish_op == 0x80) {
                 return 9;
             }
-            if (op == 0x81) {
+            if (finish_op == 0x81) {
                 return 0xA;
             }
-            if (op == 0x82) {
+            if (finish_op == 0x82) {
                 return 0xB;
             }
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);

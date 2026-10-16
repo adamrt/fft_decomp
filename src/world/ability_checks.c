@@ -56,7 +56,7 @@ s32 world_ability_has_secret_hunt(s32 unit_id) {
  * the target's cursors are the loop optimizer's reduced induction variables,
  * set after the unit-pointer address is formed.
  */
-s32 ability_build_list_variant(s16 unit, s16 job, s32 kind, s16* out, s32 mode) {
+s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s16* list, s32 mode) {
     s32 skillset;
     s16 generic;
     s16* abilities;
@@ -65,30 +65,30 @@ s32 ability_build_list_variant(s16 unit, s16 job, s32 kind, s16* out, s32 mode) 
     s32 i;
     s32 count;
     s16 jp;
-    s32 learned;
+    s32 kind;
     s16 id;
 
-    if (mode == WORLD_ABILITY_LIST_MODE_LEARNED_ONLY && kind == MENU_ABILITY_CATEGORY_ACTION) {
-        return world_ability_list_secondary_skillsets(unit, out);
+    if (mode == WORLD_ABILITY_LIST_MODE_LEARNED_ONLY && ability_category == MENU_ABILITY_CATEGORY_ACTION) {
+        return world_ability_list_secondary_skillsets(unit_index, list);
     }
     skillset = job_get_skillset(job);
     generic = job_get_generic_index(job);
     if (job_find_first_for_skillset(skillset) == -1) {
-        skillset = g_world_unit_pointers[unit]->abilities.fields.primary_skillset;
+        skillset = g_world_unit_pointers[unit_index]->abilities.fields.primary_skillset;
     }
     abilities = (s16*)main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
-    if (kind == MENU_ABILITY_CATEGORY_ACTION) {
+    if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
         hi = ABILITY_ID_REACTION_FIRST - 1;
-    } else if (kind == MENU_ABILITY_CATEGORY_REACTION) {
+    } else if (ability_category == MENU_ABILITY_CATEGORY_REACTION) {
         lo = ABILITY_ID_REACTION_FIRST;
         hi = ABILITY_ID_SUPPORT_FIRST - 1;
-    } else if (kind == MENU_ABILITY_CATEGORY_SUPPORT) {
+    } else if (ability_category == MENU_ABILITY_CATEGORY_SUPPORT) {
         lo = ABILITY_ID_SUPPORT_FIRST;
         hi = ABILITY_ID_MOVEMENT_FIRST - 1;
     } else {
         lo = 1;
-        if (kind == MENU_ABILITY_CATEGORY_MOVEMENT) {
+        if (ability_category == MENU_ABILITY_CATEGORY_MOVEMENT) {
             lo = ABILITY_ID_MOVEMENT_FIRST;
         }
         hi = ABILITY_ID_RANDOM_FIRST - 1;
@@ -99,40 +99,40 @@ s32 ability_build_list_variant(s16 unit, s16 job, s32 kind, s16* out, s32 mode) 
         }
     }
     count = 0;
-    jp = g_world_unit_pointers[unit]->job_points.current.values[generic];
-    bits_init_primary_reader_variant(g_world_unit_pointers[unit]->learned_abilities[generic]);
+    jp = g_world_unit_pointers[unit_index]->job_points.current.values[generic];
+    bits_init_primary_reader_variant(g_world_unit_pointers[unit_index]->learned_abilities[generic]);
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
-        if (job_is_special_monster(g_world_unit_pointers[unit]->identity.job_id) != 0) {
-            learned = 1;
-        } else if (g_world_unit_pointers[unit]->uses_monster_skillset != 0) {
+        if (job_is_special_monster(g_world_unit_pointers[unit_index]->identity.job_id) != 0) {
+            kind = 1;
+        } else if (g_world_unit_pointers[unit_index]->uses_monster_skillset != 0) {
             if (i >= 3) {
                 break;
             }
-            learned = 1;
+            kind = 1;
         } else {
-            learned = bits_read_primary(1);
+            kind = bits_read_primary(1);
         }
         id = abilities[i];
         if (id == 0) {
             continue;
         }
         if (mode == WORLD_ABILITY_LIST_MODE_VIEW_ALL) {
-            if (!learned) {
+            if (!kind) {
                 if (!(g_main_ability_data[id].type_flags >> 7)) {
                     id |= ABILITY_LIST_ENTRY_DISABLED;
                 } else {
                     id |= ABILITY_LIST_ENTRY_DISABLED | ABILITY_LIST_ENTRY_HIDE_DETAILS;
                 }
             }
-            out[count] = id;
+            list[count] = id;
             count++;
         } else if (mode == WORLD_ABILITY_LIST_MODE_LEARNED_ONLY) {
-            if (learned) {
-                out[count] = id;
+            if (kind) {
+                list[count] = id;
                 count++;
             }
         } else if (mode == WORLD_ABILITY_LIST_MODE_LEARN_MENU) {
-            if (!learned) {
+            if (!kind) {
                 if (g_main_ability_data[id].type_flags >> 7) {
                     continue;
                 }
@@ -142,16 +142,16 @@ s32 ability_build_list_variant(s16 unit, s16 job, s32 kind, s16* out, s32 mode) 
             } else {
                 id |= ABILITY_LIST_ENTRY_LEARNED;
             }
-            out[count] = id;
+            list[count] = id;
             count++;
         } else if (mode == WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED) {
-            if (!learned) {
+            if (!kind) {
                 count++;
             }
         }
     }
     if (mode != WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED) {
-        out[count] = -1;
+        list[count] = -1;
     }
     return count;
 }

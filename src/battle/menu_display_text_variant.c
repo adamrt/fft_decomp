@@ -27,7 +27,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     glyph_blit_t* pen;
     s32 digit;
     s32 started;
-    s32 count;
+    s32 line;
     u8 variable_base;
 
     main_party_get_unit(0);
@@ -49,7 +49,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     state->row = 0;
     g_menu_text_pen.rect.x = origin->rect.x;
     pen = &g_menu_text_pen;
-    count = 0;
+    line = 0;
     g_text_glyph_first_row = 0;
     g_menu_text_pen.rect.y = origin->rect.y;
     g_text_glyph_row_limit = 0x10;
@@ -91,11 +91,11 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     pen->rect.x += 4;
                 } else if (state->command == TEXT_NEWLINE) {
                     pen->rect.x = origin->rect.x;
-                    if (count >= g_menu_text_param_22) {
+                    if (line >= g_menu_text_param_22) {
                         g_text_glyph_first_row = 0;
                         pen->rect.y += 16;
                     }
-                    count++;
+                    line++;
                 } else if (state->command == TEXT_SET_NUMBER_WIDTH) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                     operand = *cursor;
@@ -125,10 +125,10 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                                 state->command = state->value / *divisor;
                                 started = 1;
                                 state->value = state->value - state->command * *divisor;
-                                if (count >= g_menu_text_param_24) {
+                                if (line >= g_menu_text_param_24) {
                                     goto done;
                                 }
-                                if (count >= g_menu_text_param_22) {
+                                if (line >= g_menu_text_param_22) {
                                     text_render_glyph_to_4bpp_image(
                                         g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                                         &g_menu_text_pen, g_menu_text_palette_offset);
@@ -174,10 +174,10 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
             }
         }
         cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-        if (count >= g_menu_text_param_24) {
+        if (line >= g_menu_text_param_24) {
             break;
         }
-        if (count >= g_menu_text_param_22) {
+        if (line >= g_menu_text_param_22) {
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                 &g_menu_text_pen, g_menu_text_palette_offset);
         }

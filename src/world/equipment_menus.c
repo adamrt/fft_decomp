@@ -120,10 +120,10 @@ s32 menu_update_equipment_variant(void) {
  * category list on entry, steps the cursor, and refreshes the stat preview.
  */
 s32 item_run_category_menu_variant(void) {
-    s16 x;
-    s16 y;
+    s16 selected;
+    s16 scroll;
     s32 input;
-    s32 selected;
+    s32 slot;
     s32 description;
 
     if (g_world_item_category_menu_initialized == 0) {
@@ -133,8 +133,9 @@ s32 item_run_category_menu_variant(void) {
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
-        menu_get_selection_record_variant(g_menu_selected_slot, &x, &y, g_item_list_entries);
-        menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        menu_get_selection_record_variant(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
+        menu_init_scrollable_list(
+            g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_world_menu_script_callbacks[0].value = menu_get_entry_item_equipped_count;
         g_world_menu_script_callbacks[1].value = menu_get_entry_item_count;
         g_world_menu_script_callbacks[2].icon = menu_build_item_type_icon_source;
@@ -158,25 +159,24 @@ s32 item_run_category_menu_variant(void) {
         g_world_item_category_menu_initialized = 0;
         return MENU_ITEM_LIST_STATE_CLOSE;
     }
-    selected
-        = menu_update_horizontal_selection_and_mark_change(5, WORLD_MENU_CURSOR_ITEM_TAB, input, MAIN_SFX_PAGE_SWITCH);
-    if (selected != g_menu_selected_slot) {
+    slot = menu_update_horizontal_selection_and_mark_change(5, WORLD_MENU_CURSOR_ITEM_TAB, input, MAIN_SFX_PAGE_SWITCH);
+    if (slot != g_menu_selected_slot) {
         menu_set_selection_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
 
-        g_menu_selected_slot = selected;
+        g_menu_selected_slot = slot;
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
         g_world_item_category_previewed_cursor = -1;
-        menu_get_selection_record_variant(g_menu_selected_slot, &x, &y, g_item_list_entries);
-        menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        menu_get_selection_record_variant(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
+        menu_init_scrollable_list(
+            g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
     } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (g_menu_list_entry_count != 0) {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
-            menu_set_selection_record(
-                selected, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
+            menu_set_selection_record(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
             return MENU_ITEM_LIST_STATE_REARRANGE;
         }
         g_sound_queued_effect_id = MAIN_SFX_INVALID;
@@ -192,12 +192,12 @@ s32 item_run_category_menu_variant(void) {
     }
     if (g_menu_list_selected_index != g_world_item_category_previewed_cursor) {
         if (g_menu_list_entry_count != 0) {
-            selected = g_item_list_entries[g_menu_list_selected_index];
+            slot = g_item_list_entries[g_menu_list_selected_index];
         } else {
-            selected = 0;
+            slot = 0;
         }
         g_world_item_category_previewed_cursor = g_menu_list_selected_index;
-        item_collect_stat_deltas_variant(selected, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_collect_stat_deltas_variant(slot, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_menu_status_display_thread_params.redraw_request = 1;
         g_menu_preview_stats_thread_params.redraw_request = 1;
     }

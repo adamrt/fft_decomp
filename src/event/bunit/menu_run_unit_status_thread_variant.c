@@ -20,15 +20,15 @@ void menu_run_unit_status_thread_variant(void) {
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* render_a;
+    u8* number_pixels;
     menu_status_panel_editor_packet_t* editor_base;
-    menu_number_entry_t* env_a;
+    menu_number_entry_t* number_entries;
     menu_unit_status_record_t* state;
     s32 portrait_arg;
     const RECT* transition;
     palette_t* portrait_palettes;
-    u8* render_b;
-    u8* render_c;
+    u8* value_pixels;
+    u8* name_image;
     menu_status_panel_packet_t* panel_base;
     s16* scroll;
     menu_status_panel_display_thread_t* thread;
@@ -39,23 +39,23 @@ void menu_run_unit_status_thread_variant(void) {
     s32 thread_id;
     s32 frame;
     s32 i;
-    s32* win;
+    s32* window_width;
     s32 px1;
     s32 pya;
     s32 px2;
     s32 pyb;
-    s32 dx1;
-    s32 dx2;
-    s32 dx3;
-    s32 dx4;
-    s16 srow;
-    glyph_blit_t* origin;
+    s32 panel_y_a;
+    s32 panel_y_b;
+    s32 editor_y_a;
+    s32 editor_y_b;
+    s16 portrait_cell;
+    glyph_blit_t* text_position;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
-    SPRT* cur1;
-    u8* cur2;
-    u8* cur3;
-    POLY_FT4* cur5;
+    SPRT* panel_sprites;
+    u8* number_pixels_b;
+    u8* value_pixels_b;
+    POLY_FT4* panel_portrait;
 
     suppress = 0;
     thread_set_current_task_id(THREAD_TASK_UNIT_STATUS_BANNER);
@@ -65,10 +65,10 @@ void menu_run_unit_status_thread_variant(void) {
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
         panel = g_panel_selected_packets;
         editor = g_panel_selected_editor_packets;
-        render_a = g_panel_selected_number_image;
-        render_b = g_panel_selected_large_number_image;
-        render_c = g_panel_selected_name_image;
-        env_a = g_panel_selected_numeric_entries;
+        number_pixels = g_panel_selected_number_image;
+        value_pixels = g_panel_selected_large_number_image;
+        name_image = g_panel_selected_name_image;
+        number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
         scroll = g_bunit_panel_selected_unit_data;
         transition = &g_panel_selected_portrait_rect;
@@ -78,10 +78,10 @@ void menu_run_unit_status_thread_variant(void) {
     } else {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
-        render_a = g_panel_comparison_number_image;
-        render_b = g_panel_comparison_large_number_image;
-        render_c = g_panel_comparison_name_image;
-        env_a = g_panel_comparison_numeric_entries;
+        number_pixels = g_panel_comparison_number_image;
+        value_pixels = g_panel_comparison_large_number_image;
+        name_image = g_panel_comparison_name_image;
+        number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
         scroll = g_bunit_panel_comparison_unit_data;
         transition = &g_panel_comparison_portrait_rect;
@@ -121,10 +121,10 @@ void menu_run_unit_status_thread_variant(void) {
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_numeric_display_frame_primitives(&g_panel_frame_rect, &panel->numeric_frame);
-    cur1 = &panel->sprites[0];
-    menu_init_sprite_array(cur1, 7, 0x7C3C);
+    panel_sprites = &panel->sprites[0];
+    menu_init_sprite_array(panel_sprites, 7, 0x7C3C);
     menu_init_default_poly_ft4(&panel->portrait);
-    text_configure_sprite_vram(&rects[2], 0x58, 0x20, cur1, 0);
+    text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel_sprites, 0);
     text_configure_sprite_vram(&rects[3], 0x10, 0xA, &panel->sprites[1], 0);
     text_configure_sprite_vram(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
     text_configure_sprite_vram(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
@@ -246,24 +246,24 @@ void menu_run_unit_status_thread_variant(void) {
             }
         }
         px1 = thread->x;
-        dx1 = g_gfx_draw_offset_y;
+        panel_y_a = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = px1 - 0x80;
         pya = (u16)thread->shake_y;
-        panel->draw_offset_a.position.y = pya + dx1;
+        panel->draw_offset_a.position.y = pya + panel_y_a;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
-        dx2 = g_gfx_draw_offset_y;
+        panel_y_b = g_gfx_draw_offset_y;
         panel->draw_offset_b.position.x = -0x80;
-        panel->draw_offset_b.position.y = dx2;
+        panel->draw_offset_b.position.y = panel_y_b;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
         px2 = thread->x;
-        dx3 = g_gfx_draw_offset_y;
+        editor_y_a = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = px2 - 0x80;
         pyb = (u16)thread->shake_y;
-        editor->draw_offset_a.position.y = pyb + dx3;
+        editor->draw_offset_a.position.y = pyb + editor_y_a;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
-        dx4 = g_gfx_draw_offset_y;
+        editor_y_b = g_gfx_draw_offset_y;
         editor->draw_offset_b.position.x = -0x80;
-        editor->draw_offset_b.position.y = dx4;
+        editor->draw_offset_b.position.y = editor_y_b;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
         if (anim_state >= 0xA) {
             anim_state = 0;
@@ -344,43 +344,43 @@ void menu_run_unit_status_thread_variant(void) {
             }
         }
         panel->sprites[6].u0 = (scroll[4] % 7) * 0x18;
-        srow = scroll[4];
+        portrait_cell = scroll[4];
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (srow / 7) * 0x14 + 0x2A;
+        panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
         if ((frame == 0) || (thread->work != 0)) {
             if (state->list_index < 0) {
-                env_a[6].format = 0xC00;
+                number_entries[6].format = 0xC00;
             } else {
-                env_a[6].format = 2;
+                number_entries[6].format = 2;
             }
-            menu_clear_render_buffer(render_a, 0x700);
-            win = &g_menu_text_state.pen.stride;
-            origin = (glyph_blit_t*)(win - 2);
-            *win = 0x38;
-            menu_draw_numeric_display_entries(render_a, env_a, origin, 6);
-            LoadImage(&rects[0], (u32*)render_a);
-            cur2 = render_a + 0x400;
-            *win = 0x60;
-            menu_draw_numeric_display_entries(cur2, &env_a[6], origin, 4);
-            LoadImage(&rects[1], (u32*)cur2);
+            menu_clear_render_buffer(number_pixels, 0x700);
+            window_width = &g_menu_text_state.pen.stride;
+            text_position = (glyph_blit_t*)(window_width - 2);
+            *window_width = 0x38;
+            menu_draw_numeric_display_entries(number_pixels, number_entries, text_position, 6);
+            LoadImage(&rects[0], (u32*)number_pixels);
+            number_pixels_b = number_pixels + 0x400;
+            *window_width = 0x60;
+            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_position, 4);
+            LoadImage(&rects[1], (u32*)number_pixels_b);
             thread->work = 0;
-            menu_clear_render_buffer(render_c, 0x580);
-            *win = 0x58;
+            menu_clear_render_buffer(name_image, 0x580);
+            *window_width = 0x58;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(scroll[0] + TEXT_ID_UNIT_NAME_BASE, render_c, origin);
+            menu_display_text_entry(scroll[0] + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
             menu_set_text_origin(0, 0x10);
-            menu_display_text_entry(scroll[1] + TEXT_ID_JOB_NAME_BASE, render_c, origin);
-            LoadImage(&rects[2], (u32*)render_c);
-            menu_clear_render_buffer(render_b, 0xF0);
-            *win = 0x10;
+            menu_display_text_entry(scroll[1] + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
+            LoadImage(&rects[2], (u32*)name_image);
+            menu_clear_render_buffer(value_pixels, 0xF0);
+            *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs_variant(scroll[2], 0x202, render_b, origin);
-            LoadImage(&rects[3], (u32*)render_b);
+            text_draw_large_number_glyphs_variant(scroll[2], 0x202, value_pixels, text_position);
+            LoadImage(&rects[3], (u32*)value_pixels);
             menu_set_text_origin(0, 0);
-            cur3 = render_b + 0x50;
-            text_draw_large_number_glyphs_variant(scroll[3], 0x202, cur3, origin);
-            LoadImage(&rects[4], (u32*)cur3);
+            value_pixels_b = value_pixels + 0x50;
+            text_draw_large_number_glyphs_variant(scroll[3], 0x202, value_pixels_b, text_position);
+            LoadImage(&rects[4], (u32*)value_pixels_b);
             if (g_menu_post_battle_unit_changes_active == 0) {
                 unit_stats_t* stats;
                 menu_set_text_origin(0, 0);
@@ -390,10 +390,10 @@ void menu_run_unit_status_thread_variant(void) {
                     if (id == BATTLE_FORMATION_INDEX_NONE) {
                         id = 0;
                     }
-                    text_draw_large_number_glyphs_variant(id + 1, 0x4002, render_b + 0xA0, origin);
+                    text_draw_large_number_glyphs_variant(id + 1, 0x4002, value_pixels + 0xA0, text_position);
                 }
             }
-            LoadImage(&rects[5], (u32*)(render_b + 0xA0));
+            LoadImage(&rects[5], (u32*)(value_pixels + 0xA0));
         }
         if (!(thread->flags & MENU_STATUS_PANEL_HIDDEN)) {
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_b);
@@ -420,9 +420,9 @@ void menu_run_unit_status_thread_variant(void) {
             menu_submit_numeric_display_frame_primitives(&editor->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
-            cur5 = &panel->portrait;
-            SetSemiTrans(cur5, 1);
-            gfx_draw_or_append_gpu_primitive(cur5);
+            panel_portrait = &panel->portrait;
+            SetSemiTrans(panel_portrait, 1);
+            gfx_draw_or_append_gpu_primitive(panel_portrait);
             for (i = 3; i >= 0; i--) {
                 gfx_draw_or_append_gpu_primitive(&panel->sprites[i]);
             }

@@ -10,7 +10,7 @@
 /* Run the job list menu; on Circle, record the chosen job and return 1 to advance the menu state. */
 s32 menu_run_job_list_variant(void) {
     s16 state[10];
-    s32 input;
+    s32 mask;
 
     if (g_jobstts_job_list_menu_initialized == 0) {
         g_menu_row_callbacks[0].value = job_calculate_current_level_variant;
@@ -25,8 +25,8 @@ s32 menu_run_job_list_variant(void) {
     }
 
     g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
-    input = g_menu_input_primary_repeat;
-    if (input & PSX_PAD_CIRCLE) {
+    mask = g_menu_input_primary_repeat;
+    if (mask & PSX_PAD_CIRCLE) {
         g_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];
         job_calculate_current_level_variant(g_menu_list_selected_index);
         job_calculate_current_jp_variant(g_menu_list_selected_index);
@@ -39,6 +39,6 @@ s32 menu_run_job_list_variant(void) {
         g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;
     }
-    menu_run_script_with_palette_mode_variant(&g_jobstts_job_list_render_commands, input, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode_variant(&g_jobstts_job_list_render_commands, mask, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }

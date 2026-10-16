@@ -28,7 +28,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     u8 unused_40[8];
     menu_instruction_t* start;
     s16* ids;
-    u16 previous;
+    u16 previous_selected;
     s32 input;
     u8 speed;
     s32 i;
@@ -51,7 +51,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
         return command;
     }
     g_menu_list_row_mode = 1;
-    previous = g_menu_list_selected_index;
+    previous_selected = g_menu_list_selected_index;
     if (g_menu_list_redraw_pending != 0) {
         menu_draw_scrollable_list(command);
     }
@@ -226,7 +226,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
         g_menu_list_row_index += 1;
     }
     g_menu_list_row_mode = 0;
-    if (previous != g_menu_list_selected_index) {
+    if (previous_selected != g_menu_list_selected_index) {
         g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
     return command;

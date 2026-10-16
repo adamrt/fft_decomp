@@ -50,7 +50,7 @@ void text_run_dialog_thread_variant(void) {
     u16 mark_x;
     u16 delay;
     u16 no_wait;
-    u16 variable_id;
+    u16 variable_base;
     u16 value_index;
     thread_t* thread;
     s32 party_name_request;
@@ -59,25 +59,25 @@ void text_run_dialog_thread_variant(void) {
     menu_window_buffer_t* arrow_window;
     menu_window_buffer_t* scroll_window;
     menu_window_buffer_t* hidden_window;
-    menu_window_buffer_t* hidden_window_2;
-    menu_window_buffer_t* choice_window;
-    menu_window_buffer_t* choice_hidden_window;
-    menu_window_buffer_t* choice_hidden_window_2;
+    menu_window_buffer_t* hidden_window_next;
+    menu_window_buffer_t* select_window;
+    menu_window_buffer_t* select_hidden_window;
+    menu_window_buffer_t* select_hidden_window_next;
     party_unit_t* party;
     job_data_t* job;
     u8* text;
     s16 cursor_x;
     s32 column;
-    s32 code;
+    s32 character;
     s32 i;
     s32 tick;
     s32 value;
     s32 digits;
     u16 started;
-    u16 choice;
+    u16 selection;
     s32* substitution;
     s32 portrait_id;
-    s32 base;
+    s32 window_u;
     s32 half_w;
     s32 half_h;
     s32 center;
@@ -88,7 +88,7 @@ void text_run_dialog_thread_variant(void) {
     thread_set_current_task_id(THREAD_TASK_RESUME);
     script_set_variable(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET, 0);
     value_index = 0;
-    variable_id = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
+    variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     thread = &g_threads[g_thread_current_id];
     param = thread_get_current_parameter_1();
     rec.dialog_type = param;
@@ -135,16 +135,16 @@ void text_run_dialog_thread_variant(void) {
         party = main_party_get_unit(rec.portrait);
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
             if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {
-                s32 base = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
-                portrait_id = base + 0x60;
+                s32 window_u = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
+                portrait_id = window_u + 0x60;
                 if (party->job_id == JOB_ID_MIME) {
-                    portrait_id = base + 0x5E;
+                    portrait_id = window_u + 0x5E;
                 }
             } else if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_FEMALE) {
-                s32 base = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
-                portrait_id = base + 0x61;
+                s32 window_u = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
+                portrait_id = window_u + 0x61;
                 if (party->job_id == JOB_ID_MIME) {
-                    portrait_id = base + 0x5F;
+                    portrait_id = window_u + 0x5F;
                 }
             } else {
                 job = main_job_get_data_pointer(party->job_id);
@@ -397,11 +397,11 @@ void text_run_dialog_thread_variant(void) {
     } else {
         menu_animate_window_quad_crop(win, &from, &to);
     }
-    base = win->quads[0].u0;
-    rec.x = base + 8;
+    window_u = win->quads[0].u0;
+    rec.x = window_u + 8;
     rec.y = win->quads[0].v0 + 8;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.tail_offset < 0 && rec.portrait < 8) {
-        rec.x = base + 0x30;
+        rec.x = window_u + 0x30;
     }
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL && rec.position == 2) {
         rec.y += 8;
@@ -426,14 +426,14 @@ void text_run_dialog_thread_variant(void) {
     repeat = 0;
     while (1) {
         no_value = 0xFFFF;
-        code = *text;
+        character = *text;
         CHECK_ABORT();
-        if (code == TEXT_NEWLINE || code == TEXT_END_WAIT_FOR_CONFIRM || code == TEXT_END_AUTO_CLOSE
-            || code == TEXT_PAGE_BREAK) {
-            if (code == TEXT_END_AUTO_CLOSE) {
+        if (character == TEXT_NEWLINE || character == TEXT_END_WAIT_FOR_CONFIRM || character == TEXT_END_AUTO_CLOSE
+            || character == TEXT_PAGE_BREAK) {
+            if (character == TEXT_END_AUTO_CLOSE) {
                 break;
             }
-            if (code == TEXT_END_WAIT_FOR_CONFIRM) {
+            if (character == TEXT_END_WAIT_FOR_CONFIRM) {
                 if (saved != (u8*)-1) {
                     text = saved;
                     saved = (u8*)-1;
@@ -450,13 +450,13 @@ void text_run_dialog_thread_variant(void) {
             } else {
                 NEXT();
             }
-            if (code != TEXT_PAGE_BREAK) {
+            if (character != TEXT_PAGE_BREAK) {
                 column++;
                 rec.line++;
             }
             rec.first_line = rec.line - rec.lines;
-            if (column >= rec.lines || code == TEXT_END_WAIT_FOR_CONFIRM || code == TEXT_PAGE_BREAK) {
-                if (code != TEXT_PAGE_BREAK) {
+            if (column >= rec.lines || character == TEXT_END_WAIT_FOR_CONFIRM || character == TEXT_PAGE_BREAK) {
+                if (character != TEXT_PAGE_BREAK) {
                     column = 0;
                 }
                 if (no_wait == 0) {
@@ -466,7 +466,7 @@ void text_run_dialog_thread_variant(void) {
                             break;
                         }
                         CHECK_ABORT();
-                        if (code == TEXT_PAGE_BREAK) {
+                        if (character == TEXT_PAGE_BREAK) {
                             if (rec.box_type != DIALOG_BOX_TYPE_PORTRAIT) {
                                 cursor_window = WINDOW_AT(g_menu_packet_buffer_index);
                                 cursor_window->sprites[0].x0 = cursor_x
@@ -479,11 +479,12 @@ void text_run_dialog_thread_variant(void) {
                                 cursor_window->sprites[1].y0 = cursor_window->sprites[0].y0 + 2;
                             }
                         } else {
-                            if (code == TEXT_END_WAIT_FOR_CONFIRM && rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
+                            if (character == TEXT_END_WAIT_FOR_CONFIRM && rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                                 g_world_menu_event_state_flag = 1;
                             }
-                            if (code == TEXT_NEWLINE
-                                || (code == TEXT_END_WAIT_FOR_CONFIRM && rec.box_type == DIALOG_BOX_TYPE_CENTERED)) {
+                            if (character == TEXT_NEWLINE
+                                || (character == TEXT_END_WAIT_FOR_CONFIRM
+                                    && rec.box_type == DIALOG_BOX_TYPE_CENTERED)) {
                                 WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].u0 = (tick & 0x30) - 0x58;
                                 WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].v0 = 0x10;
                                 arrow_window = WINDOW_AT(g_menu_packet_buffer_index);
@@ -553,12 +554,12 @@ void text_run_dialog_thread_variant(void) {
                 hidden_window->sprites[2].x0 = 0x200;
                 hidden_window->icon_flags = 0;
                 YIELD_OR_INPUT();
-                hidden_window_2 = WINDOW_AT(g_menu_packet_buffer_index);
-                hidden_window_2->sprites[0].x0 = 0x200;
-                hidden_window_2->sprites[1].x0 = 0x200;
-                hidden_window_2->sprites[2].x0 = 0x200;
-                hidden_window_2->icon_flags = 0;
-                if (code == TEXT_END_WAIT_FOR_CONFIRM) {
+                hidden_window_next = WINDOW_AT(g_menu_packet_buffer_index);
+                hidden_window_next->sprites[0].x0 = 0x200;
+                hidden_window_next->sprites[1].x0 = 0x200;
+                hidden_window_next->sprites[2].x0 = 0x200;
+                hidden_window_next->icon_flags = 0;
+                if (character == TEXT_END_WAIT_FOR_CONFIRM) {
                     if (rec.no_box == 0) {
                         break;
                     }
@@ -593,7 +594,7 @@ void text_run_dialog_thread_variant(void) {
                     thread_yield();
                     continue;
                 }
-                if (code == TEXT_PAGE_BREAK) {
+                if (character == TEXT_PAGE_BREAK) {
                     continue;
                 }
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
@@ -611,22 +612,22 @@ void text_run_dialog_thread_variant(void) {
             cursor_x = rec.x;
             no_wait = 0;
             cursor_y += 0x10;
-        } else if (code == TEXT_CHOICE_MARK) {
+        } else if (character == TEXT_CHOICE_MARK) {
             rec.mark = column;
             mark_x = cursor_x - rec.x - 0x10;
             NEXT();
-        } else if (code == TEXT_CHOICE_SELECT) {
+        } else if (character == TEXT_CHOICE_SELECT) {
             if (rec.mark != -1) {
-                choice = rec.mark;
+                selection = rec.mark;
                 for (i = 0;; i += g_script_event_speed) {
                     g_world_menu_event_state_flag = 1;
-                    choice_window = WINDOW_AT(g_menu_packet_buffer_index);
-                    choice_window->sprites[0].x0
-                        = mark_x + (choice_window->quads[0].x0 + rec.x - choice_window->quads[0].u0) - ((i >> 4) & 3);
-                    choice_window->sprites[0].y0
-                        = (choice_window->quads[0].y0 + rec.y - choice_window->quads[0].v0) + choice * 16;
-                    choice_window->sprites[1].x0 = choice_window->sprites[0].x0 + 2;
-                    choice_window->sprites[1].y0 = choice_window->sprites[0].y0 + 2;
+                    select_window = WINDOW_AT(g_menu_packet_buffer_index);
+                    select_window->sprites[0].x0
+                        = mark_x + (select_window->quads[0].x0 + rec.x - select_window->quads[0].u0) - ((i >> 4) & 3);
+                    select_window->sprites[0].y0
+                        = (select_window->quads[0].y0 + rec.y - select_window->quads[0].v0) + selection * 16;
+                    select_window->sprites[1].x0 = select_window->sprites[0].x0 + 2;
+                    select_window->sprites[1].y0 = select_window->sprites[0].y0 + 2;
                     thread_yield();
                     if (thread_get_current_task_id() == THREAD_TASK_STOP_REQUEST) {
                         goto end;
@@ -634,13 +635,13 @@ void text_run_dialog_thread_variant(void) {
                     if (thread_get_current_task_id() == THREAD_TASK_WAIT_FOR_RESUME) {
                         continue;
                     }
-                    if ((g_script_event_input & PSX_PAD_UP) && choice != rec.mark) {
+                    if ((g_script_event_input & PSX_PAD_UP) && selection != rec.mark) {
                         g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
-                        choice += no_value;
+                        selection += no_value;
                     }
-                    if ((g_script_event_input & PSX_PAD_DOWN) && choice != column) {
+                    if ((g_script_event_input & PSX_PAD_DOWN) && selection != column) {
                         g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
-                        choice++;
+                        selection++;
                     }
                     if (g_script_event_input & PSX_PAD_CIRCLE) {
                         if (rec.box_type != DIALOG_BOX_TYPE_CENTERED) {
@@ -649,18 +650,18 @@ void text_run_dialog_thread_variant(void) {
                         break;
                     }
                 }
-                choice_hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
-                choice_hidden_window->sprites[0].x0 = 0x200;
-                choice_hidden_window->sprites[1].x0 = 0x200;
+                select_hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
+                select_hidden_window->sprites[0].x0 = 0x200;
+                select_hidden_window->sprites[1].x0 = 0x200;
                 thread_yield();
-                choice_hidden_window_2 = WINDOW_AT(g_menu_packet_buffer_index);
-                choice_hidden_window_2->sprites[0].x0 = 0x200;
-                choice_hidden_window_2->sprites[1].x0 = 0x200;
-                g_script_variables[EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION] = choice - rec.mark;
+                select_hidden_window_next = WINDOW_AT(g_menu_packet_buffer_index);
+                select_hidden_window_next->sprites[0].x0 = 0x200;
+                select_hidden_window_next->sprites[1].x0 = 0x200;
+                g_script_variables[EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
             }
             NEXT();
             g_world_menu_event_state_flag = 0;
-        } else if (code == TEXT_WAIT_FOR_RESUME) {
+        } else if (character == TEXT_WAIT_FOR_RESUME) {
             thread_set_current_task_id(THREAD_TASK_WAIT_FOR_RESUME);
             while (thread_get_current_task_id() != THREAD_TASK_RESUME) {
                 if (thread_get_current_task_id() == THREAD_TASK_STOP_REQUEST) {
@@ -694,7 +695,7 @@ void text_run_dialog_thread_variant(void) {
             thread_yield();
             NEXT();
             no_wait = 1;
-        } else if (code == TEXT_RELEASE_WAITING_THREADS) {
+        } else if (character == TEXT_RELEASE_WAITING_THREADS) {
             for (i = 0; i < 0x11; i++) {
                 if (g_thread_current_id != i && g_thread_contexts[i].task_id == THREAD_TASK_WAIT_FOR_RESUME
                     && thread_is_running_asm(i)) {
@@ -703,53 +704,53 @@ void text_run_dialog_thread_variant(void) {
             }
             thread_yield();
             NEXT();
-        } else if (code == TEXT_SET_PORTRAIT) {
+        } else if (character == TEXT_SET_PORTRAIT) {
             NEXT();
             win[0].portrait_code = *text;
             win[1].portrait_code = *text;
             script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *text);
             NEXT();
-        } else if (code == TEXT_SET_VARIABLE_BASE) {
+        } else if (character == TEXT_SET_VARIABLE_BASE) {
             NEXT();
-            variable_id = *text;
+            variable_base = *text;
             NEXT();
-        } else if (code == TEXT_STORE_VARIABLE) {
+        } else if (character == TEXT_STORE_VARIABLE) {
             NEXT();
             i = script_get_variable(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
             if (i != 0) {
-                script_set_variable(variable_id + i * 10, *text);
+                script_set_variable(variable_base + i * 10, *text);
                 script_set_variable(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
             } else {
-                script_set_variable(variable_id, *text);
+                script_set_variable(variable_base, *text);
             }
             NEXT();
-        } else if (code == TEXT_SET_GLYPH_DELAY) {
+        } else if (character == TEXT_SET_GLYPH_DELAY) {
             NEXT();
             delay = *text;
             NEXT();
-        } else if (code == TEXT_SET_PALETTE) {
+        } else if (character == TEXT_SET_PALETTE) {
             NEXT();
             rec.color = *text;
             NEXT();
         } else {
             substitution = &g_text_substitution_values[value_index];
-            value = text_resolve_format_string_id(code, *substitution);
+            value = text_resolve_format_string_id(character, *substitution);
             if (value != -1) {
                 saved = text + 1;
                 value_index++;
-                if (code == TEXT_FORMAT_RAMZA_NAME) {
+                if (character == TEXT_FORMAT_RAMZA_NAME) {
                     text = g_text_player_name_buffer;
                 } else {
                     text = text_find_entry(value);
                 }
                 continue;
             }
-            if (code == TEXT_SET_NUMBER_WIDTH) {
+            if (character == TEXT_SET_NUMBER_WIDTH) {
                 NEXT();
                 width_override = *text;
                 NEXT();
-            } else if (code == TEXT_PRINT_NEXT_VALUE || code == TEXT_PRINT_INDEXED_VALUE) {
-                if (code == TEXT_PRINT_NEXT_VALUE) {
+            } else if (character == TEXT_PRINT_NEXT_VALUE || character == TEXT_PRINT_INDEXED_VALUE) {
+                if (character == TEXT_PRINT_NEXT_VALUE) {
                     value = *substitution;
                     value_index++;
                 } else {
@@ -763,31 +764,31 @@ void text_run_dialog_thread_variant(void) {
                     width_override = no_value;
                 }
                 for (i = digits - 1; i >= 0; i--) {
-                    code = value / g_text_decimal_divisors[i];
+                    character = value / g_text_decimal_divisors[i];
                     if (value < g_text_decimal_divisors[i] && i != 0 && started == 0) {
-                        code = TEXT_SPACE;
+                        character = TEXT_SPACE;
                     } else {
                         started = 1;
-                        value -= code * g_text_decimal_divisors[i];
+                        value -= character * g_text_decimal_divisors[i];
                     }
                     {
                         text_glyph_state_t* glyph = &g_text_typewriter_glyph;
 
                         glyph->x = cursor_x;
                         glyph->y = cursor_y;
-                        glyph->glyph = code;
+                        glyph->glyph = character;
                         glyph->mode = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;
                         glyph->palette = rec.color;
                     }
                     text_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
-                    if (code == TEXT_SPACE) {
+                    if (character == TEXT_SPACE) {
                         cursor_x += 4;
                     } else {
-                        cursor_x += g_text_glyph_widths[code];
+                        cursor_x += g_text_glyph_widths[character];
                     }
                 }
                 NEXT();
-            } else if ((code & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (code & 0xF) < 4) {
+            } else if ((character & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (character & 0xF) < 4) {
                 saved = text + 3;
                 value = (text[0] & 3) * 8;
                 repeat = value + (text[1] >> 5) + 4;
@@ -796,10 +797,10 @@ void text_run_dialog_thread_variant(void) {
                 value = value + text[2];
                 text -= value;
             } else {
-                if (code < TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
-                    code = *text;
-                } else if ((code & 0xF0) == TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
-                    code = (*text & 0xF) * TEXT_GLYPHS_PER_PREFIX;
+                if (character < TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
+                    character = *text;
+                } else if ((character & 0xF0) == TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
+                    character = (*text & 0xF) * TEXT_GLYPHS_PER_PREFIX;
                     NEXT();
                     if ((*text & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (*text & 0xF) < 4) {
                         saved = text + 3;
@@ -810,22 +811,22 @@ void text_run_dialog_thread_variant(void) {
                         value = value + text[2];
                         text -= value;
                     }
-                    code += *text;
+                    character += *text;
                 }
                 {
                     text_glyph_state_t* glyph = &g_text_typewriter_glyph;
 
                     glyph->x = cursor_x;
                     glyph->y = cursor_y;
-                    glyph->glyph = code;
+                    glyph->glyph = character;
                     glyph->mode = rec.box_type;
                     glyph->palette = rec.color;
                 }
                 text_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
-                if (code == TEXT_SPACE) {
+                if (character == TEXT_SPACE) {
                     cursor_x += 4;
                 } else {
-                    cursor_x += g_text_glyph_widths[code];
+                    cursor_x += g_text_glyph_widths[character];
                 }
                 NEXT();
             }

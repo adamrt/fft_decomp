@@ -37,9 +37,9 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     s32 cursor;
     menu_list_page_t* base;
     menu_scroll_text_layout_t* layout;
-    s32 accum;
-    s32 delta;
-    s32 timer;
+    s32 scroll_accum;
+    s32 scroll_delta;
+    s32 hold_time;
     s32 redraw_pending;
     s32 row_buffer_live;
     menu_entry_t* entry;
@@ -68,7 +68,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     window.rect.y = 0xFE;
     window.x_screen_offset = 8;
     window.y_screen_offset = 0xC;
-    timer = 0;
+    hold_time = 0;
     window.rect.w = entry->inner_width - 8;
     window.rect.h = entry->window.h - 0x1A;
     base = page;
@@ -151,13 +151,13 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         base[i].icons.icons[2] = &icons2[i];
     }
     i = 0;
-    accum = 0;
-    delta = 0;
+    scroll_accum = 0;
+    scroll_delta = 0;
     for (;;) {
         page = &base[i & 1];
         frame = &page->frame;
         SetSemiTrans(&frame, 1);
-        if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
+        if (scroll_delta == 0 && menu_can_accept_input() != 0 && i != 0) {
             if (layout->columns.mode[0] == MENU_TEXT_COLUMN_TEXT && layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT) {
                 if (g_script_event_input & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
                     toggle ^= 1;
@@ -170,7 +170,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                     cursor--;
                     sound_queue_sfx_cursor_move();
                 } else if (row_offset != 0) {
-                    delta = -1;
+                    scroll_delta = -1;
                     sound_queue_sfx_cursor_move();
                 } else if (layout->columns.hidden_rows == 0) {
                     cursor = layout->columns.row_count - 1;
@@ -182,17 +182,17 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                     cursor++;
                     sound_queue_sfx_cursor_move();
                 } else if (row_offset != layout->columns.hidden_rows) {
-                    delta++;
+                    scroll_delta++;
                     sound_queue_sfx_cursor_move();
                 } else if (row_offset == 0) {
                     cursor = 0;
                     sound_queue_sfx_cursor_move();
                 }
             } else {
-                timer = 0;
+                hold_time = 0;
             }
-            if (delta != 0) {
-                if (delta > 0) {
+            if (scroll_delta != 0) {
+                if (scroll_delta > 0) {
                     image_rect.y = (((ring + layout->columns.row_count) * 16) & 0x7F) + entry->vram_origin.y;
                 } else {
                     image_rect.y = (((ring - 1) * 16) & 0x7F) + entry->vram_origin.y;
@@ -204,7 +204,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 menu_clear_render_buffer(buffer, window.rect.w * 8);
                 g_menu_text_state.pen.stride = window.rect.w;
                 for (column = 0; column < 3; column++) {
-                    index = cursor + row_offset + delta;
+                    index = cursor + row_offset + scroll_delta;
                     menu_set_text_origin(layout->columns.x[column], 0);
                     if (layout->columns.mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
@@ -262,7 +262,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
-        if (delta == 0 && menu_can_accept_input() != 0) {
+        if (scroll_delta == 0 && menu_can_accept_input() != 0) {
             buffer = world_menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
@@ -299,33 +299,33 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 = top + span * entry->selected_index / (layout->columns.row_count + layout->columns.hidden_rows) - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
-        if (g_world_menu_scrolling_list_depth < 2 && delta == 0) {
+        if (g_world_menu_scrolling_list_depth < 2 && scroll_delta == 0) {
             menu_handle_action(entry, cursor);
         }
         menu_handle_cancel_input(entry);
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
-            if (timer < g_main_menu_scroll_accel_delay) {
+            if (hold_time < g_main_menu_scroll_accel_delay) {
                 step = g_main_menu_scroll_slow_step;
             } else {
                 step = g_main_menu_scroll_fast_step;
             }
-            accum += delta * (step << 1);
+            scroll_accum += scroll_delta * (step << 1);
         }
-        timer += g_script_event_speed;
-        if (accum < -0xF || accum > 0xF) {
-            ring += delta;
-            row_offset += delta;
+        hold_time += g_script_event_speed;
+        if (scroll_accum < -0xF || scroll_accum > 0xF) {
+            ring += scroll_delta;
+            row_offset += scroll_delta;
             repeat = script_get_event_initial_repeat_counter();
-            accum = 0;
-            delta = 0;
+            scroll_accum = 0;
+            scroll_delta = 0;
             if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
                 g_script_event_input |= g_script_event_current_input & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
             menu_free_memory(buffer);
             row_buffer_live = 0;
         }
-        frame->v0 = (ring * 16 + accum - 2) & 0x7F;
+        frame->v0 = (ring * 16 + scroll_accum - 2) & 0x7F;
         if (i * g_script_event_speed < 12) {
             gfx_init_image_loading(
                 &page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);

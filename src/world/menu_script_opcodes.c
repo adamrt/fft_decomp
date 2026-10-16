@@ -535,7 +535,7 @@ menu_instruction_t* world_menu_script_set_draw_priority(menu_instruction_t* inst
  * The command selects its value source, width, spacing, palette, and one of
  * three glyph layouts. High value bits request a disabled palette or dashes.
  */
-menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t* instruction) {
+menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t* command) {
     s8 text[16];
     RECT rect;
     RECT glyph;
@@ -553,14 +553,14 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
     rgb24_t* color;
     u16 clut;
 
-    getter = g_world_menu_script_callbacks[instruction->number.getter].value;
+    getter = g_world_menu_script_callbacks[command->number.getter].value;
     if (g_world_menu_use_scroll_position == 0) {
-        row = instruction->number.value;
-        y = instruction->number.y;
+        row = command->number.value;
+        y = command->number.y;
     } else {
         row = g_menu_scroll_base_index + g_world_menu_scroll_row_offset;
         step = g_world_menu_row_height;
-        y = step * g_world_menu_scroll_row_offset + instruction->number.y - g_menu_list_scroll_offset;
+        y = step * g_world_menu_scroll_row_offset + command->number.y - g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
             row--;
             y -= step;
@@ -576,13 +576,13 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
         value = -value;
         negative = 1;
     }
-    if (instruction->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED
-        || instruction->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
+    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED
+        || command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
         color = &g_world_menu_sprite_color;
     } else {
         color = 0;
     }
-    if (instruction->number.alternate_palette != 0) {
+    if (command->number.alternate_palette != 0) {
         clut = g_world_menu_alternate_number_clut;
     } else {
         clut = g_menu_palette_clut;
@@ -591,12 +591,12 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
         clut = g_world_menu_disabled_number_clut;
         value &= ~MENU_NUMBER_VALUE_DISABLED;
     }
-    if (instruction->number.style == 1) {
+    if (command->number.style == 1) {
         glyph.x = 0x78;
         glyph.y = 1;
         glyph.w = 8;
         glyph.h = 0xE;
-    } else if (instruction->number.style == 0) {
+    } else if (command->number.style == 0) {
         glyph.x = 0x78;
         glyph.y = 0x10;
         glyph.w = 6;
@@ -608,8 +608,8 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
         glyph.h = 0x10;
     }
     if (value & MENU_NUMBER_VALUE_DASHES) {
-        for (value = instruction->number.width; value > 0; value--) {
-            rect.x = instruction->number.x + (value - 1) * instruction->number.spacing;
+        for (value = command->number.width; value > 0; value--) {
+            rect.x = command->number.x + (value - 1) * command->number.spacing;
             rect.y = y + 5;
             rect.w = 6;
             rect.h = 3;
@@ -617,10 +617,10 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
                 g_world_menu_window_tpage, clut, g_menu_gfx_otag_index);
         }
     } else {
-        blanks = instruction->number.width - sprintf(text, "%d", value) - negative;
+        blanks = command->number.width - sprintf(text, "%d", value) - negative;
         text_index = 0;
-        for (i = 0; i < instruction->number.width; i++) {
-            rect.x = instruction->number.x + i * instruction->number.spacing;
+        for (i = 0; i < command->number.width; i++) {
+            rect.x = command->number.x + i * command->number.spacing;
             rect.y = y;
             rect.w = glyph.w;
             rect.h = glyph.h;
@@ -629,38 +629,38 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
                 minus_rect.y = y + 2;
                 minus_rect.w = 6;
                 minus_rect.h = 0xB;
-                if (instruction->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
+                if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
                     minus_rect.x = 0xAE;
                 }
                 menu_gfx_enqueue_textured_quad(&minus_rect, 0xBA, 0x10, color, g_menu_gfx_semitransparency,
                     g_world_menu_window_tpage, clut, g_menu_gfx_otag_index);
                 negative = 0;
             } else {
-                if (instruction->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
+                if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
                     clut = g_menu_palette_clut;
                 }
                 if (blanks != 0) {
                     digit = 0;
                     blanks--;
-                    if (instruction->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
+                    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
                         continue;
                     }
-                    if (instruction->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS
-                        && i < instruction->number.width - 1) {
+                    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS
+                        && i < command->number.width - 1) {
                         clut = g_world_menu_disabled_number_clut;
                     }
                 } else {
                     digit = text[text_index] - '0';
                     text_index++;
                 }
-                if (instruction->number.style < 2) {
+                if (command->number.style < 2) {
                     menu_gfx_enqueue_textured_quad(&rect, glyph.x + glyph.w * digit, glyph.y, color,
                         g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, g_menu_gfx_otag_index);
                 }
             }
         }
     }
-    return menu_next_instruction(instruction);
+    return menu_next_instruction(command);
 }
 
 /*
@@ -718,18 +718,18 @@ menu_instruction_t* menu_cmd_draw_right_aligned_number_handler_variant(menu_inst
  * Bit 15 selects the alternate animation. The `state_mode` copies are the
  * target's own `move v0,s2` before each test.
  */
-void menu_update_and_draw_sliding_cursor_variant(point16_t* position, u16* state, s32 mode) {
+void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     /* Pin required: unpinned, the roles held in $s2/$s3/$s4 rotate. */
     register s32 active __asm__("$20");
     u32 state_mode;
     s32 alternate;
-    s32 frame;
-    s32 index;
-    s8 bob;
+    s32 timer;
+    s32 i;
+    s8 raw_offset;
     s32 x_offset;
     u16 front_clut;
-    u16 back_clut;
+    u16 shadow_clut;
 
     active = mode;
     state_mode = *state >> 15;
@@ -749,52 +749,52 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* position, u16* state
         *state = 0x8000;
         alternate = 1;
     }
-    frame = *state;
-    frame &= 0x7F;
-    frame *= menu_get_event_speed();
+    timer = *state;
+    timer &= 0x7F;
+    timer *= menu_get_event_speed();
     state_mode = alternate;
     if (state_mode != 0) {
-        if (frame >= 0x25) {
-            frame = 0x24;
+        if (timer >= 0x25) {
+            timer = 0x24;
         }
-    } else if (frame >= 0x2F) {
-        frame = 0;
+    } else if (timer >= 0x2F) {
+        timer = 0;
     }
     state_mode = alternate;
     if (state_mode != 0) {
-        for (index = 0; g_world_menu_cursor_bob_active_thresholds[index] < frame; index += 2) { }
-        bob = g_world_menu_cursor_bob_active_thresholds[index + 1];
+        for (i = 0; g_world_menu_cursor_bob_active_thresholds[i] < timer; i += 2) { }
+        raw_offset = g_world_menu_cursor_bob_active_thresholds[i + 1];
     } else {
-        for (index = 0; g_world_menu_cursor_bob_thresholds[index] < frame; index += 2) { }
-        bob = g_world_menu_cursor_bob_thresholds[index + 1];
+        for (i = 0; g_world_menu_cursor_bob_thresholds[i] < timer; i += 2) { }
+        raw_offset = g_world_menu_cursor_bob_thresholds[i + 1];
     }
-    x_offset = bob;
-    frame += menu_get_event_speed();
+    x_offset = raw_offset;
+    timer += menu_get_event_speed();
     state_mode = alternate;
     if (state_mode != 0) {
-        if (frame < 0x25) {
+        if (timer < 0x25) {
             *state += 1;
         }
-    } else if (frame < 0x2F) {
+    } else if (timer < 0x2F) {
         *state += 1;
     } else {
         *state = 0;
     }
     if (active != 0) {
         front_clut = g_menu_cursor_mode1_foreground_clut;
-        back_clut = g_menu_cursor_mode1_background_clut;
+        shadow_clut = g_menu_cursor_mode1_background_clut;
     } else {
         front_clut = g_menu_cursor_mode0_foreground_clut;
-        back_clut = g_menu_cursor_mode0_background_clut;
+        shadow_clut = g_menu_cursor_mode0_background_clut;
     }
-    rect.x = x_offset + position->x - 2;
-    rect.y = position->y;
+    rect.x = x_offset + pos->x - 2;
+    rect.y = pos->y;
     rect.w = 0x10;
     rect.h = 0x10;
     menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, front_clut, g_menu_gfx_otag_index);
     rect.x += 2;
     rect.y += 2;
-    menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, back_clut, g_menu_gfx_otag_index);
+    menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, shadow_clut, g_menu_gfx_otag_index);
 }
 
 /*
@@ -803,93 +803,93 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* position, u16* state
  * This variant offsets a shared textured quad vertically before submitting
  * two `POLY_FT4` layers. Bit 15 selects the alternate animation.
  */
-void menu_update_and_draw_bouncing_cursor_variant(point16_t* position, u16* state, s32 mode) {
+void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode) {
     RECT rect; /* never used; retail reserves its 8 bytes */
     u32 state_mode;
-    s32 alternate;
-    s32 frame;
-    s32 index;
+    s32 active;
+    s32 timer;
+    s32 i;
     s8 bob;
     s32 y_offset;
-    s32 y_end;
+    s32 bottom;
     u16 front_clut;
-    u16 back_clut;
+    u16 shadow_clut;
 
     state_mode = *state >> 15;
-    alternate = state_mode;
+    active = state_mode;
     if (mode == 0) {
-        state_mode = alternate;
+        state_mode = active;
         if (state_mode != 0) {
             *state = 0;
-            alternate = 0;
+            active = 0;
         }
     }
-    state_mode = alternate;
+    state_mode = active;
     if (state_mode == 0 && (mode & 1)) {
         *state = 0x8000;
-        alternate = 1;
+        active = 1;
     }
-    frame = *state;
-    frame &= 0x7F;
-    frame *= menu_get_event_speed();
-    state_mode = alternate;
+    timer = *state;
+    timer &= 0x7F;
+    timer *= menu_get_event_speed();
+    state_mode = active;
     if (state_mode != 0) {
-        if (frame >= 0x25) {
-            frame = 0x24;
+        if (timer >= 0x25) {
+            timer = 0x24;
         }
-    } else if (frame >= 0x2F) {
-        frame = 0;
+    } else if (timer >= 0x2F) {
+        timer = 0;
     }
-    state_mode = alternate;
+    state_mode = active;
     if (state_mode != 0) {
-        for (index = 0; g_world_menu_cursor_bob_active_thresholds[index] < frame; index += 2) { }
-        bob = g_world_menu_cursor_bob_active_thresholds[index + 1];
+        for (i = 0; g_world_menu_cursor_bob_active_thresholds[i] < timer; i += 2) { }
+        bob = g_world_menu_cursor_bob_active_thresholds[i + 1];
     } else {
-        for (index = 0; g_world_menu_cursor_bob_thresholds[index] < frame; index += 2) { }
-        bob = g_world_menu_cursor_bob_thresholds[index + 1];
+        for (i = 0; g_world_menu_cursor_bob_thresholds[i] < timer; i += 2) { }
+        bob = g_world_menu_cursor_bob_thresholds[i + 1];
     }
     y_offset = bob;
-    frame += menu_get_event_speed();
-    state_mode = alternate;
+    timer += menu_get_event_speed();
+    state_mode = active;
     if (state_mode != 0) {
-        if (frame < 0x25) {
+        if (timer < 0x25) {
             *state += 1;
         }
-    } else if (frame < 0x2F) {
+    } else if (timer < 0x2F) {
         *state += 1;
     } else {
         *state = 0;
     }
     if (mode != 0) {
         front_clut = g_menu_cursor_mode1_foreground_clut;
-        back_clut = g_menu_cursor_mode1_background_clut;
+        shadow_clut = g_menu_cursor_mode1_background_clut;
     } else {
         front_clut = g_menu_cursor_mode0_foreground_clut;
-        back_clut = g_menu_cursor_mode0_background_clut;
+        shadow_clut = g_menu_cursor_mode0_background_clut;
     }
 
-    g_world_vertical_cursor_quad.x0 = position->x;
-    g_world_vertical_cursor_quad.y0 = y_offset + position->y;
-    g_world_vertical_cursor_quad.x1 = position->x + 0x10;
-    g_world_vertical_cursor_quad.y1 = y_offset + position->y;
-    g_world_vertical_cursor_quad.x2 = position->x;
-    y_end = y_offset + 0x10;
-    g_world_vertical_cursor_quad.y2 = position->y + y_end;
-    g_world_vertical_cursor_quad.x3 = position->x + 0x10;
-    g_world_vertical_cursor_quad.y3 = position->y + y_end;
+    g_world_vertical_cursor_quad.x0 = pos->x;
+    g_world_vertical_cursor_quad.y0 = y_offset + pos->y;
+    g_world_vertical_cursor_quad.x1 = pos->x + 0x10;
+    g_world_vertical_cursor_quad.y1 = y_offset + pos->y;
+    g_world_vertical_cursor_quad.x2 = pos->x;
+    bottom = y_offset + 0x10;
+    g_world_vertical_cursor_quad.y2 = pos->y + bottom;
+    g_world_vertical_cursor_quad.x3 = pos->x + 0x10;
+    g_world_vertical_cursor_quad.y3 = pos->y + bottom;
     g_world_vertical_cursor_quad.clut = front_clut;
     g_world_vertical_cursor_quad.tpage = g_menu_cursor_texture_page;
     gfx_enqueue_textured_quad_corners(&g_world_vertical_cursor_quad, 0, 0, g_menu_gfx_otag_index);
 
-    g_world_vertical_cursor_quad.x0 = position->x;
-    g_world_vertical_cursor_quad.y0 = y_offset + position->y + 2;
-    g_world_vertical_cursor_quad.x1 = position->x + 0x10;
-    g_world_vertical_cursor_quad.y1 = y_offset + position->y + 2;
-    g_world_vertical_cursor_quad.x2 = position->x;
-    g_world_vertical_cursor_quad.y2 = position->y + y_end + 2;
-    g_world_vertical_cursor_quad.x3 = position->x + 0x10;
-    g_world_vertical_cursor_quad.y3 = position->y + y_end + 2;
-    g_world_vertical_cursor_quad.clut = back_clut;
+    g_world_vertical_cursor_quad.x0 = pos->x;
+    g_world_vertical_cursor_quad.y0 = y_offset + pos->y + 2;
+    g_world_vertical_cursor_quad.x1 = pos->x + 0x10;
+    g_world_vertical_cursor_quad.y1 = y_offset + pos->y + 2;
+    g_world_vertical_cursor_quad.x2 = pos->x;
+    g_world_vertical_cursor_quad.y2 = pos->y + bottom + 2;
+    g_world_vertical_cursor_quad.x3 = pos->x + 0x10;
+    g_world_vertical_cursor_quad.y3 = pos->y + bottom + 2;
+    g_world_vertical_cursor_quad.clut = shadow_clut;
     g_world_vertical_cursor_quad.tpage = 0x5F;
     gfx_enqueue_textured_quad_corners(&g_world_vertical_cursor_quad, 0, 1, g_menu_gfx_otag_index);
 }
@@ -984,8 +984,8 @@ void world_menu_init_and_load_scrollable_list(
 /* Built at -O1: the unscheduled prologue (sw ra, sw s0, lw s0) is the -O1 signature shared by the
  * neighboring menu-script handlers. */
 void menu_init_and_draw_scrollable_list_variant(
-    const s16* values, s32 value, s32 selected, u8* text_table, const menu_instruction_t* script) {
-    menu_init_scrollable_list(values, value, selected, text_table);
+    const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script) {
+    menu_init_scrollable_list(entries, selected_index, scroll_base_index, text_table);
     world_menu_load_scrollable_list_layout(script);
 }
 
@@ -1008,37 +1008,37 @@ void menu_init_and_draw_scrollable_list_variant(
  * An empty list skips the list command and its following row group. Returns
  * the record that follows the list.
  */
-menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* instruction) {
+menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {
     RECT rect;
     s32 unused[4];
-    point16_t point;
-    u16 priority;
+    point16_t marker;
+    u16 ot_index;
     u8 speed;
     s32 i;
     s32 j;
     s32 rows;
     s32 index;
     u16 old_cursor;
-    menu_instruction_t* base;
+    menu_instruction_t* row_commands;
 
-    priority = g_menu_gfx_otag_index;
+    ot_index = g_menu_gfx_otag_index;
     if (g_menu_list_entry_count <= 0) {
-        for (j = instruction->list.skip_count; j != -1; j--) {
-            instruction = world_menu_skip_instruction_group(instruction);
+        for (j = command->list.skip_count; j != -1; j--) {
+            command = world_menu_skip_instruction_group(command);
         }
-        return instruction;
+        return command;
     }
     speed = menu_get_event_speed();
     g_world_menu_use_scroll_position = 1;
     if (g_world_menu_list_layout_pending != 0) {
-        world_menu_load_scrollable_list_layout(instruction);
+        world_menu_load_scrollable_list_layout(command);
     }
     old_cursor = g_menu_list_selected_index;
     if (g_world_menu_list_scroll_direction == 0) {
         i = menu_input_read_page_scroll_direction_variant();
         if (i != 0) {
             if (i != 2) {
-                menu_scroll_list_by_page_variant(i, instruction);
+                menu_scroll_list_by_page_variant(i, command);
             }
         } else if ((g_menu_cmd_stream_input & 0x10000000) || (g_menu_cmd_stream_input & PSX_PAD_UP)) {
             index = g_menu_scroll_base_index;
@@ -1100,7 +1100,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
                     rect.y = (i - 1) * g_world_menu_row_height + 0x130;
                     rect.w = g_world_menu_list_image_width;
                     rect.h = g_world_menu_row_height;
-                    menu_gfx_enqueue_draw_move(&rect, 0x240, g_world_menu_row_height * i + 0x130, priority - 1);
+                    menu_gfx_enqueue_draw_move(&rect, 0x240, g_world_menu_row_height * i + 0x130, ot_index - 1);
                 }
             }
         }
@@ -1121,21 +1121,21 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
                 rect.y = g_world_menu_row_height + 0x130;
                 rect.w = g_world_menu_list_image_width;
                 rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows;
-                menu_gfx_enqueue_draw_move(&rect, 0x240, 0x130, priority - 1);
+                menu_gfx_enqueue_draw_move(&rect, 0x240, 0x130, ot_index - 1);
             }
         }
     }
     if (g_world_menu_list_text_table != 0) {
         if (g_menu_list_scroll_offset != 0) {
-            rect.x = instruction->list.x;
-            rect.y = instruction->list.y - 5;
+            rect.x = command->list.x;
+            rect.y = command->list.y - 5;
             rect.w = g_world_menu_list_image_width * 4;
             rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows + 10;
             menu_gfx_enqueue_textured_quad(&rect, 0, g_menu_list_scroll_offset + 0x2B, 0, g_menu_gfx_semitransparency,
                 g_world_menu_window_tpage, g_world_menu_window_clut, g_menu_gfx_otag_index);
         } else {
-            rect.x = instruction->list.x;
-            rect.y = instruction->list.y;
+            rect.x = command->list.x;
+            rect.y = command->list.y;
             rect.w = g_world_menu_list_image_width * 4;
             rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows;
             menu_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage,
@@ -1145,7 +1145,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     if (g_world_menu_use_alternate_palette == 0) {
         if (g_menu_scroll_base_index != 0) {
             rect.x = g_world_menu_window_right_x;
-            rect.y = instruction->list.arrow_up_y;
+            rect.y = command->list.arrow_up_y;
             rect.w = 8;
             rect.h = 0x10;
             menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
@@ -1153,15 +1153,15 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
         }
         if (g_menu_scroll_base_index < g_menu_list_entry_count - g_world_menu_list_visible_rows) {
             rect.x = g_world_menu_window_right_x;
-            rect.y = instruction->list.arrow_down_y;
+            rect.y = command->list.arrow_down_y;
             rect.w = 8;
             rect.h = 0x10;
             menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
         if (g_menu_list_entry_count > g_world_menu_list_visible_rows) {
-            i = instruction->list.arrow_up_y + 0xF;
-            j = instruction->list.arrow_down_y - (s16)(i + 5);
+            i = command->list.arrow_up_y + 0xF;
+            j = command->list.arrow_down_y - (s16)(i + 5);
             i += j * g_menu_list_selected_index / (g_menu_list_entry_count - 1);
             rect.x = g_world_menu_window_right_x;
             rect.y = i;
@@ -1171,34 +1171,33 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
                 g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
     }
-    if (instruction->list.show_cursor != 0) {
-        point.x = instruction->list.x - instruction->list.cursor_x_offset;
-        point.y
-            = instruction->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_world_menu_row_height;
+    if (command->list.show_cursor != 0) {
+        marker.x = command->list.x - command->list.cursor_x_offset;
+        marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_world_menu_row_height;
         menu_update_and_draw_sliding_cursor_variant(
-            &point, &g_world_menu_list_cursor_anim, g_world_menu_use_alternate_palette);
+            &marker, &g_world_menu_list_cursor_anim, g_world_menu_use_alternate_palette);
     }
-    instruction = menu_next_instruction(instruction);
+    command = menu_next_instruction(command);
     g_world_menu_scroll_row_offset = 0;
     rows = g_world_menu_list_visible_rows + 1;
     if (g_menu_list_scroll_offset == 0) {
         rows--;
     }
-    base = instruction;
+    row_commands = command;
     for (i = 0; i < rows; i++, g_world_menu_scroll_row_offset++) {
         if (g_menu_scroll_base_index + i > g_menu_list_entry_count - 1 && g_menu_list_scroll_offset == 0) {
             break;
         }
-        instruction = base;
+        command = row_commands;
         for (j = 0; j < g_world_menu_list_row_record_count; j++) {
-            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
+            command = g_menu_cmd_handlers[command->header.opcode](command);
         }
     }
     g_world_menu_use_scroll_position = 0;
     if (old_cursor != g_menu_list_selected_index) {
         g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
-    return instruction;
+    return command;
 }
 
 void world_menu_set_sprite_color(const rgb24_t* src) {

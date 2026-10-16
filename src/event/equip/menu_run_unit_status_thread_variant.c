@@ -30,14 +30,14 @@ void menu_run_unit_status_thread_variant(void) {
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* number_image;                               /* sp60 */
+    u8* number_pixels;                              /* sp60 */
     menu_status_panel_editor_packet_t* editor_base; /* sp68 */
-    menu_number_entry_t* numeric_entries;           /* sp70 */
+    menu_number_entry_t* number_entries;            /* sp70 */
     menu_unit_status_record_t* state;               /* sp78 */
     s32 portrait_arg;                               /* sp80 */
-    const RECT* portrait_rect;                      /* sp88 */
+    const RECT* transition;                         /* sp88 */
     palette_t* portrait_palettes;                   /* sp90 */
-    u8* small_text_image;                           /* sp98 */
+    u8* value_pixels;                               /* sp98 */
     u8* name_image;                                 /* spA0 */
     menu_status_panel_packet_t* panel_base;         /* spA8 */
     menu_unit_status_identity_t* unit_data;         /* spB0 */
@@ -54,19 +54,19 @@ void menu_run_unit_status_thread_variant(void) {
     s32 editor_x;
     s32 editor_shake_y;
     s32* window_width;
-    s32 panel_offset_y;
-    s32 panel_base_offset_y;
-    s32 editor_offset_y;
-    s32 editor_base_offset_y;
-    s16 icon_index;
+    s32 panel_y_a;
+    s32 panel_y_b;
+    s32 editor_y_a;
+    s32 editor_y_b;
+    s16 portrait_cell;
     glyph_blit_t* text_position;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
-    SPRT* name_sprite;
-    u8* number_image_lower;
-    u8* small_text_image_2;
-    u8* small_text_image_3;
-    POLY_FT4* portrait_poly;
+    SPRT* panel_sprites;
+    u8* number_pixels_b;
+    u8* value_pixels_b;
+    u8* value_pixels_c;
+    POLY_FT4* panel_portrait;
 
     suppress = 0;
     thread_set_current_task_id(THREAD_TASK_UNIT_STATUS_BANNER);
@@ -76,26 +76,26 @@ void menu_run_unit_status_thread_variant(void) {
     if (thread_id == EQUIP_THREAD_SLOT_UNIT_STATUS) {
         panel = g_panel_selected_packets;
         editor = g_panel_selected_editor_packets;
-        number_image = g_panel_selected_number_image;
-        small_text_image = g_panel_selected_large_number_image;
+        number_pixels = g_panel_selected_number_image;
+        value_pixels = g_panel_selected_large_number_image;
         name_image = g_panel_selected_name_image;
-        numeric_entries = g_panel_selected_numeric_entries;
+        number_entries = g_panel_selected_numeric_entries;
         state = &g_menu_selected_unit_stat_summary;
         unit_data = &g_equip_panel_selected_unit_data;
-        portrait_rect = &g_panel_selected_portrait_rect;
+        transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_palettes = g_equip_panel_selected_portrait_palettes;
     } else {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
-        number_image = g_panel_comparison_number_image;
-        small_text_image = g_panel_comparison_large_number_image;
+        number_pixels = g_panel_comparison_number_image;
+        value_pixels = g_panel_comparison_large_number_image;
         name_image = g_panel_comparison_name_image;
-        numeric_entries = g_panel_comparison_numeric_entries;
+        number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
         unit_data = &g_equip_panel_comparison_unit_data;
-        portrait_rect = &g_panel_comparison_portrait_rect;
+        transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_palettes = g_equip_panel_comparison_portrait_palettes;
@@ -132,10 +132,10 @@ void menu_run_unit_status_thread_variant(void) {
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_numeric_display_frame_primitives(&g_panel_frame_rect, &panel->numeric_frame);
-    name_sprite = &panel->sprites[0];
-    menu_init_sprite_array(name_sprite, 7, 0x7C3C);
+    panel_sprites = &panel->sprites[0];
+    menu_init_sprite_array(panel_sprites, 7, 0x7C3C);
     menu_init_default_poly_ft4(&panel->portrait);
-    text_configure_sprite_vram(&rects[2], 0x58, 0x20, name_sprite, 0);
+    text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel_sprites, 0);
     text_configure_sprite_vram(&rects[3], 0x10, 0xA, &panel->sprites[1], 0);
     text_configure_sprite_vram(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
     text_configure_sprite_vram(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
@@ -257,24 +257,24 @@ void menu_run_unit_status_thread_variant(void) {
             }
         }
         panel_x = thread->x;
-        panel_offset_y = g_gfx_draw_offset_y;
+        panel_y_a = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = panel_x - 0x80;
         panel_shake_y = (u16)thread->shake_y;
-        panel->draw_offset_a.position.y = panel_shake_y + panel_offset_y;
+        panel->draw_offset_a.position.y = panel_shake_y + panel_y_a;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
-        panel_base_offset_y = g_gfx_draw_offset_y;
+        panel_y_b = g_gfx_draw_offset_y;
         panel->draw_offset_b.position.x = -0x80;
-        panel->draw_offset_b.position.y = panel_base_offset_y;
+        panel->draw_offset_b.position.y = panel_y_b;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
         editor_x = thread->x;
-        editor_offset_y = g_gfx_draw_offset_y;
+        editor_y_a = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = editor_x - 0x80;
         editor_shake_y = (u16)thread->shake_y;
-        editor->draw_offset_a.position.y = editor_shake_y + editor_offset_y;
+        editor->draw_offset_a.position.y = editor_shake_y + editor_y_a;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
-        editor_base_offset_y = g_gfx_draw_offset_y;
+        editor_y_b = g_gfx_draw_offset_y;
         editor->draw_offset_b.position.x = -0x80;
-        editor->draw_offset_b.position.y = editor_base_offset_y;
+        editor->draw_offset_b.position.y = editor_y_b;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
         if (anim_state >= 0xA) {
             anim_state = 0;
@@ -299,7 +299,7 @@ void menu_run_unit_status_thread_variant(void) {
             }
         }
         gfx_build_portrait_transition_primitives(
-            portrait_rect, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
+            transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
         {
             CVECTOR* color;
             menu_unit_status_gauge_t* bar;
@@ -355,40 +355,40 @@ void menu_run_unit_status_thread_variant(void) {
             }
         }
         panel->sprites[6].u0 = (unit_data->zodiac % 7) * 0x18;
-        icon_index = unit_data->zodiac;
+        portrait_cell = unit_data->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (icon_index / 7) * 0x14 + 0x2A;
+        panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
         if ((frame == 0) || (thread->work != 0)) {
             if (state->list_index < 0) {
-                numeric_entries[6].format = 0xC00;
+                number_entries[6].format = 0xC00;
             } else {
-                numeric_entries[6].format = 2;
+                number_entries[6].format = 2;
             }
-            menu_clear_render_buffer(number_image, 0x700);
+            menu_clear_render_buffer(number_pixels, 0x700);
             {
                 s32* stride;
                 glyph_blit_t* position;
                 stride = &g_menu_text_state.pen.stride;
                 *stride = 0x38;
                 if (g_equip_item_numeric_thread_enabled == 0) {
-                    menu_draw_numeric_display_entries(number_image, numeric_entries, (glyph_blit_t*)(stride - 2), 6);
+                    menu_draw_numeric_display_entries(number_pixels, number_entries, (glyph_blit_t*)(stride - 2), 6);
                 } else {
                     position = (glyph_blit_t*)(stride - 2);
-                    menu_text_render_decimal_entry_list(number_image, &numeric_entries[10], position, 1);
-                    menu_text_render_decimal_entry_list(number_image, &numeric_entries[12], position, 1);
-                    menu_draw_numeric_display_entries(number_image, &numeric_entries[11], position, 1);
-                    menu_draw_numeric_display_entries(number_image, &numeric_entries[13], position, 1);
-                    menu_draw_numeric_display_entries(number_image, &numeric_entries[4], position, 2);
+                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], position, 1);
+                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], position, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[11], position, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[13], position, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[4], position, 2);
                 }
             }
-            LoadImage(&rects[0], number_image);
+            LoadImage(&rects[0], number_pixels);
             window_width = &g_menu_text_state.pen.stride;
             text_position = (glyph_blit_t*)(window_width - 2);
-            number_image_lower = number_image + 0x400;
+            number_pixels_b = number_pixels + 0x400;
             *window_width = 0x60;
-            menu_draw_numeric_display_entries(number_image_lower, &numeric_entries[6], text_position, 4);
-            LoadImage(&rects[1], number_image_lower);
+            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_position, 4);
+            LoadImage(&rects[1], number_pixels_b);
             thread->work = 0;
             menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
@@ -397,23 +397,23 @@ void menu_run_unit_status_thread_variant(void) {
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
             LoadImage(&rects[2], name_image);
-            menu_clear_render_buffer(small_text_image, 0xF0);
+            menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs_variant(unit_data->brave, 0x202, small_text_image, text_position);
-            LoadImage(&rects[3], small_text_image);
+            text_draw_large_number_glyphs_variant(unit_data->brave, 0x202, value_pixels, text_position);
+            LoadImage(&rects[3], value_pixels);
             menu_set_text_origin(0, 0);
-            small_text_image_2 = small_text_image + 0x50;
-            text_draw_large_number_glyphs_variant(unit_data->faith, 0x202, small_text_image_2, text_position);
-            LoadImage(&rects[4], small_text_image_2);
+            value_pixels_b = value_pixels + 0x50;
+            text_draw_large_number_glyphs_variant(unit_data->faith, 0x202, value_pixels_b, text_position);
+            LoadImage(&rects[4], value_pixels_b);
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
-                small_text_image_3 = small_text_image + 0xA0;
+                value_pixels_c = value_pixels + 0xA0;
                 text_draw_large_number_glyphs_variant(
-                    unit_data->roster_slot + 1, 0x4002, small_text_image_3, text_position);
-                LoadImage(&rects[5], small_text_image_3);
+                    unit_data->roster_slot + 1, 0x4002, value_pixels_c, text_position);
+                LoadImage(&rects[5], value_pixels_c);
             } else {
-                LoadImage(&rects[5], small_text_image + 0xA0);
+                LoadImage(&rects[5], value_pixels + 0xA0);
             }
         }
         if (!(thread->flags & MENU_STATUS_PANEL_HIDDEN)) {
@@ -441,9 +441,9 @@ void menu_run_unit_status_thread_variant(void) {
             menu_submit_numeric_display_frame_primitives(&editor->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
-            portrait_poly = &panel->portrait;
-            SetSemiTrans(portrait_poly, 1);
-            gfx_draw_or_append_gpu_primitive(portrait_poly);
+            panel_portrait = &panel->portrait;
+            SetSemiTrans(panel_portrait, 1);
+            gfx_draw_or_append_gpu_primitive(panel_portrait);
             for (i = 3; i >= 0; i--) {
                 gfx_draw_or_append_gpu_primitive(&panel->sprites[i]);
             }

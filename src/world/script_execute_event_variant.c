@@ -35,12 +35,12 @@
  * The native inner-call trampoline intentionally forwards varying argument
  * counts through its () ABI. */
 void script_execute_event_variant(void) {
-    s32 unit_lookup_status;
+    s32 added_unit_state;
     s32 ghost_runtime_id;
     s32 region_runtime_id;
-    s16 zalera_runtime_id;
-    s32 month;
-    s32 appearance_battle_id;
+    s16 draw_runtime_id;
+    s32 date_month;
+    s32 added_battle_id;
     s32 work_index;
 
     s16 first_operand;
@@ -63,17 +63,17 @@ void script_execute_event_variant(void) {
     s32 operand_1;
     event_set_battle_unit_position_instruction_t* position_instruction;
     u8* dialogue_cursor;
-    event_display_message_instruction_t* dialogue_instruction;
-    s32* event_words;
+    event_display_message_instruction_t* message_instruction;
+    s32* script_variables;
     u8* parameters;
     /* One unit pointer, one thread pointer and one index serve every handler;
      * separate ones per handler change the saved-register allocation. */
     unit_stats_t* unit;
     u8* instruction;
-    u8* ghost_operands;
+    u8* ghost_parameters;
     map_tile_t* tile;
     unit_stats_t* copy_destination;
-    u8* focus_instruction;
+    u8* effect_instruction;
     thread_t* thread;
     thread_t* threads;
 
@@ -101,7 +101,7 @@ void script_execute_event_variant(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS, 0);
     script_set_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0);
     script_set_variable(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
-restart_event:
+restart_script:
     script_set_event_speed(1U);
     instruction_offset = 0;
     camera_normalize_yaw_angle();
@@ -268,11 +268,11 @@ restart_event:
                 script_warp_unit_display_to_paired_unit(operand_1);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS) {
-                zalera_runtime_id = script_resolve_runtime_id(CHARACTER_IDENTITY_ZALERA);
-                if (zalera_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(zalera_runtime_id), 0);
+                draw_runtime_id = script_resolve_runtime_id(CHARACTER_IDENTITY_ZALERA);
+                if (draw_runtime_id != EVENT_RUNTIME_ID_NONE) {
+                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(draw_runtime_id), 0);
                     g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
-                    thread_call_on_main_stack(zalera_runtime_id);
+                    thread_call_on_main_stack(draw_runtime_id);
                 }
             }
         } else if (opcode == EVENT_OPCODE_BLUE_REMOVE_UNIT) {
@@ -310,7 +310,7 @@ restart_event:
                 g_script_condition_unit_battle_id = 0xFF;
                 script_run_scenario_conditions();
                 if (script_load_next_event() != 0) {
-                    goto restart_event;
+                    goto restart_script;
                 }
             }
             work_index = 0;
@@ -362,12 +362,12 @@ restart_event:
             g_thread_contexts[operand_1].function_parameter_2 = ((operand_4 << 8) + operand_3) - 1;
             dialogue_cursor = (u8*)g_script_event_block;
             dialogue_cursor += instruction_offset;
-            dialogue_instruction = (event_display_message_instruction_t*)dialogue_cursor;
-            operand_4 = dialogue_instruction->unit_id_le[1];
-            operand_3 = dialogue_instruction->unit_id_le[0];
+            message_instruction = (event_display_message_instruction_t*)dialogue_cursor;
+            operand_4 = message_instruction->unit_id_le[1];
+            operand_3 = message_instruction->unit_id_le[0];
             g_thread_contexts[operand_1].function_parameter_3 = (operand_4 << 8) + operand_3;
-            g_thread_contexts[operand_1].function_parameter_4 = dialogue_instruction->portrait_selector;
-            g_thread_contexts[operand_1].task_words[2] = script_read_s16(dialogue_instruction->x_offset_le);
+            g_thread_contexts[operand_1].function_parameter_4 = message_instruction->portrait_selector;
+            g_thread_contexts[operand_1].task_words[2] = script_read_s16(message_instruction->x_offset_le);
             g_thread_contexts[operand_1].task_words[3] = script_read_s16(
                 ((event_display_message_instruction_t*)(instruction_offset + (u8*)g_script_event_block))->y_offset_le);
             g_thread_contexts[operand_1].task_words[4] = script_read_s16(
@@ -490,11 +490,11 @@ restart_event:
             g_event_pending_effect_id = first_operand;
             g_world_event_effect_target_runtime_id
                 = script_resolve_runtime_id(((((u8*)g_script_event_block) + instruction_offset))[3]);
-            focus_instruction = (u8*)g_script_event_block;
-            focus_instruction += instruction_offset;
-            g_event_effect_target_x = focus_instruction[4];
-            g_event_effect_target_y = focus_instruction[5];
-            g_event_effect_target_mode = focus_instruction[6];
+            effect_instruction = (u8*)g_script_event_block;
+            effect_instruction += instruction_offset;
+            g_event_effect_target_x = effect_instruction[4];
+            g_event_effect_target_y = effect_instruction[5];
+            g_event_effect_target_mode = effect_instruction[6];
             script_set_variable(EVENT_SCRIPT_VAR_CAMERA_ROLL, 0);
             thread_wait_frames(2);
         } else if (opcode == EVENT_OPCODE_EFFECT_START) {
@@ -510,9 +510,9 @@ restart_event:
             camera_store_yaw_band(g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]);
             script_focus((event_focus_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_FOCUS_SPEED) {
-            event_words = g_script_variables;
-            script_focus_speed(
-                parameters, event_words + EVENT_SCRIPT_VAR_CAMERA_X, event_words + EVENT_SCRIPT_VAR_CAMERA_TILT);
+            script_variables = g_script_variables;
+            script_focus_speed(parameters, script_variables + EVENT_SCRIPT_VAR_CAMERA_X,
+                script_variables + EVENT_SCRIPT_VAR_CAMERA_TILT);
         } else if (opcode == EVENT_OPCODE_RELATIVE_CAMERA) {
             script_apply_relative_camera(
                 (event_camera_values_t*)parameters, g_script_variables + EVENT_SCRIPT_VAR_CAMERA_X);
@@ -743,13 +743,13 @@ restart_event:
                 }
             }
         } else if (opcode == EVENT_OPCODE_DRAW) {
-            zalera_runtime_id = script_resolve_runtime_id(first_operand);
-            if (zalera_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_unit_draw_and_activate_by_runtime_id(zalera_runtime_id);
+            draw_runtime_id = script_resolve_runtime_id(first_operand);
+            if (draw_runtime_id != EVENT_RUNTIME_ID_NONE) {
+                battle_unit_draw_and_activate_by_runtime_id(draw_runtime_id);
                 if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_LIMBERRY_CEMETERY_BATTLE) {
-                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(zalera_runtime_id), 1);
+                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(draw_runtime_id), 1);
                     g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
-                    thread_call_on_main_stack(zalera_runtime_id);
+                    thread_call_on_main_stack(draw_runtime_id);
                 }
             }
         } else if (opcode == EVENT_OPCODE_ERASE) {
@@ -758,20 +758,21 @@ restart_event:
                 battle_gfx_reset_unit_graphic_trigger(erased_runtime_id);
             }
         } else if (opcode == EVENT_OPCODE_ADD_GHOST_UNIT) {
-            ghost_operands = (u8*)g_script_event_block + instruction_offset + 3;
+            ghost_parameters = (u8*)g_script_event_block + instruction_offset + 3;
             ghost_runtime_id = 3;
             do {
                 --ghost_runtime_id;
             } while (ghost_runtime_id >= 0);
             for (ghost_runtime_id = 0; ghost_runtime_id < EVENT_UNIT_SLOT_COUNT; ghost_runtime_id++) {
                 if (battle_unit_has_runtime_id(ghost_runtime_id) == 0) {
-                    g_script_unit_slots[ghost_operands[0]] = ghost_runtime_id;
+                    g_script_unit_slots[ghost_parameters[0]] = ghost_runtime_id;
                     break;
                 }
             }
             if (ghost_runtime_id != EVENT_UNIT_SLOT_COUNT) {
-                battle_script_add_ghost_unit_event_instruction(ghost_operands[1], ghost_operands[2], ghost_operands[3],
-                    ghost_operands[4], first_operand, g_script_unit_slots[ghost_operands[0]], ghost_operands[5]);
+                battle_script_add_ghost_unit_event_instruction(ghost_parameters[1], ghost_parameters[2],
+                    ghost_parameters[3], ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]],
+                    ghost_parameters[5]);
                 g_unit_graphics_load_pending = 1U;
             } else {
                 continue;
@@ -779,23 +780,23 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_UNKNOWN_75) {
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
             script_add_unit_stub();
-            appearance_unit = battle_unit_find_stats_by_entd_unit_id(first_operand, &unit_lookup_status);
-            if ((unit_lookup_status == -2) || (unit_lookup_status >= 0)) {
-                for (appearance_battle_id = 0; appearance_battle_id < EVENT_UNIT_SLOT_COUNT; appearance_battle_id++) {
-                    if (battle_unit_get_stats_from_battle_id(appearance_battle_id) == appearance_unit) {
+            appearance_unit = battle_unit_find_stats_by_entd_unit_id(first_operand, &added_unit_state);
+            if ((added_unit_state == -2) || (added_unit_state >= 0)) {
+                for (added_battle_id = 0; added_battle_id < EVENT_UNIT_SLOT_COUNT; added_battle_id++) {
+                    if (battle_unit_get_stats_from_battle_id(added_battle_id) == appearance_unit) {
                         break;
                     }
                 }
-                operand_1 = battle_unit_get_runtime_id_by_battle_id(appearance_battle_id);
+                operand_1 = battle_unit_get_runtime_id_by_battle_id(added_battle_id);
                 if (operand_1 == -1) {
-                    unit_save_staged_status_data(appearance_battle_id);
-                    battle_gfx_load_unit_graphics_by_battle_id(appearance_battle_id, operand_3);
+                    unit_save_staged_status_data(added_battle_id);
+                    battle_gfx_load_unit_graphics_by_battle_id(added_battle_id, operand_3);
                     g_unit_graphics_load_pending = 1U;
                 } else {
                     if (operand_3 == 0) {
                         battle_unit_draw_and_activate_by_runtime_id(operand_1);
                     }
-                    if (unit_save_staged_status_data(appearance_battle_id) != 0) {
+                    if (unit_save_staged_status_data(added_battle_id) != 0) {
                         g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
                         thread_call_on_main_stack(operand_1);
                     }
@@ -888,8 +889,8 @@ restart_event:
             main_sound_play_tune(operand_1);
         } else if (opcode == EVENT_OPCODE_UNLOCK_DATE) {
             if ((script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) && (operand_1 != 0)) {
-                month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
-                script_unlockdate_event_instruction(g_main_treasure_acquisition_date_bits, operand_1 - 1, month,
+                date_month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
+                script_unlockdate_event_instruction(g_main_treasure_acquisition_date_bits, operand_1 - 1, date_month,
                     script_get_variable(EVENT_SCRIPT_VAR_DAY));
             }
         } else if (opcode == EVENT_OPCODE_TEMP_WEAPON) {

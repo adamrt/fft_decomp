@@ -90,7 +90,7 @@ void open_gfx_clear_current_otag(void) {
 /* Dispatch a list of display objects to one of two handlers by object kind.
  * Objects with flags 0x18 are skipped, and the whole pass is suppressed while
  * system flag 0x400 is set. */
-void window_dispatch_record_list_variant(GsOT* ot, void** list, s32 count) {
+void window_dispatch_record_list_variant(GsOT* otag, void** list, s32 count) {
     void* object;
     s32* flags;
     s32 i;
@@ -106,10 +106,10 @@ void window_dispatch_record_list_variant(GsOT* ot, void** list, s32 count) {
         }
         if (*flags & WORLD_RENDER_RECORD_ANIMATED) {
             world_animated_render_record_t* animated = object;
-            wldcore_gfx_draw_animated_display_object(animated, ot);
+            wldcore_gfx_draw_animated_display_object(animated, otag);
         } else if (*flags & WORLD_RENDER_RECORD_IMAGE) {
             wldcore_window_render_record_t* image = object;
-            wldcore_gfx_draw_display_object_sprite(image, ot);
+            wldcore_gfx_draw_display_object_sprite(image, otag);
         }
     }
 }
@@ -121,9 +121,9 @@ void window_dispatch_record_list_variant(GsOT* ot, void** list, s32 count) {
  * 56-byte one. Nothing is drawn while
  * OPEN_SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN is set, which no code in
  * OPEN.BIN does. */
-void window_dispatch_record_list_variant(GsOT* otag, void** records, s32 count) {
+void window_dispatch_record_list_variant(GsOT* otag, void** list, s32 count) {
     s32 i;
-    void* record;
+    void* object;
     u32* flags_word;
     u32 flags;
 
@@ -132,16 +132,16 @@ void window_dispatch_record_list_variant(GsOT* otag, void** records, s32 count) 
     }
 
     for (i = 0; i < count; i++) {
-        record = records[i];
-        flags_word = record;
+        object = list[i];
+        flags_word = object;
         flags = *flags_word;
         /* Both layouts start with the 32-bit flags. */
         if ((flags & (WORLD_RENDER_RECORD_BLANK | WORLD_RENDER_RECORD_HIDDEN)) == 0) {
             if ((flags & WORLD_RENDER_RECORD_ANIMATED) != 0) {
-                world_animated_render_record_t* animated = record;
+                world_animated_render_record_t* animated = object;
                 open_gfx_draw_animated_render_record(animated, otag);
             } else if ((flags & WORLD_RENDER_RECORD_IMAGE) != 0) {
-                open_render_record_56_t* window = record;
+                open_render_record_56_t* window = object;
                 open_gfx_draw_window_record(window, otag);
             }
         }

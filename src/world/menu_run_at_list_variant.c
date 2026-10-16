@@ -25,8 +25,8 @@ void menu_run_at_list_variant(void) {
     s32 row_offset;
     s32 ring;
     s32 cursor;
-    u32* input0;
-    u32* input1;
+    u32* input;
+    u32* input2;
     SPRT* frame;
     menu_list_page_t* page;
     menu_text_layout_t* layout;
@@ -48,8 +48,8 @@ void menu_run_at_list_variant(void) {
 
     page = g_at_list_pages;
     timer = 0;
-    input0 = script_get_controller_input_pointer(0);
-    input1 = script_get_controller_input_pointer(1);
+    input = script_get_controller_input_pointer(0);
+    input2 = script_get_controller_input_pointer(1);
     row_offset = 0;
     cursor = 0;
     entry = (menu_entry_t*)thread_get_current_parameter_1();
@@ -134,9 +134,9 @@ void menu_run_at_list_variant(void) {
     }
     delta = 0;
     accum = 0;
-    *input0 = 0;
+    *input = 0;
     i = 0;
-    *input1 = 0;
+    *input2 = 0;
     for (;;) {
         page = &g_at_list_pages[i & 1];
         frame = &page->frame;
@@ -151,7 +151,7 @@ void menu_run_at_list_variant(void) {
             if (layout == 0) {
                 column = 0;
             }
-            if ((*input0 & PSX_PAD_UP) && !(*input1 & PSX_PAD_SQUARE)) {
+            if ((*input & PSX_PAD_UP) && !(*input2 & PSX_PAD_SQUARE)) {
                 if (cursor != 0) {
                     cursor--;
                     g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
@@ -164,7 +164,7 @@ void menu_run_at_list_variant(void) {
                         g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
                     }
                 }
-            } else if ((*input0 & PSX_PAD_DOWN) && !(*input1 & PSX_PAD_SQUARE)) {
+            } else if ((*input & PSX_PAD_DOWN) && !(*input2 & PSX_PAD_SQUARE)) {
                 if (cursor != layout->row_count - 1) {
                     cursor++;
                     g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
@@ -227,7 +227,7 @@ void menu_run_at_list_variant(void) {
         }
         entry->selected_index = cursor + row_offset;
         entry->select_text_table = row_offset;
-        if (menu_should_close_thread(input0) != 0) {
+        if (menu_should_close_thread(input) != 0) {
             break;
         }
         if (delta == 0) {
@@ -251,7 +251,7 @@ void menu_run_at_list_variant(void) {
             delta = 0;
             accum = 0;
             if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
-                *input0 |= *input1 & (PSX_PAD_UP | PSX_PAD_DOWN);
+                *input |= *input2 & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
         }
         frame->v0 = ring * 16 + accum - 2;
