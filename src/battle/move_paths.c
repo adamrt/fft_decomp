@@ -476,15 +476,15 @@ s32 battle_camera_get_input_direction(s32 source) {
         case CAMERA_INPUT_PRESSED:
             input = g_main_input_pressed_buttons;
             switch (g_main_game_options.fields.cursor_repeat_speed) {
-            case 0:
+            case GAME_CURSOR_REPEAT_SPEED_FAST:
                 divisor = 3;
                 threshold = 15;
                 break;
-            case 1:
+            case GAME_CURSOR_REPEAT_SPEED_REGULAR:
                 divisor = 6;
                 threshold = 30;
                 break;
-            case 2:
+            case GAME_CURSOR_REPEAT_SPEED_SLOW:
             default:
                 divisor = 12;
                 threshold = 60;
@@ -550,15 +550,15 @@ s32 battle_camera_get_input_direction(s32 source) {
                 }
             }
             switch (g_main_game_options.fields.cursor_repeat_speed) {
-            case 0:
+            case GAME_CURSOR_REPEAT_SPEED_FAST:
                 divisor = 6;
                 threshold = 6;
                 break;
-            case 1:
+            case GAME_CURSOR_REPEAT_SPEED_REGULAR:
                 divisor = 10;
                 threshold = 15;
                 break;
-            case 2:
+            case GAME_CURSOR_REPEAT_SPEED_SLOW:
             default:
                 divisor = 16;
                 threshold = 30;

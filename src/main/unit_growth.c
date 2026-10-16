@@ -17,6 +17,7 @@ static void main_status_update_unit_flags_and_ct(unit_stats_t* unit);
 static u8 main_unit_get_spritesheet_palette(const unit_stats_t* unit, u8* palette);
 static void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 skip_status_check, s32 initializing);
 
+/* Copy count bytes one at a time; the source comes first, unlike memcpy. */
 void main_mem_copy_bytes_source_first(const void* source, void* destination, int count) {
     const u8* src = source;
     u8* dst = destination;
@@ -898,13 +899,11 @@ s32 main_unit_has_status_in_set(const unit_stats_t* unit, main_status_check_set_
     return 0;
 }
 
-/* Return the learned-ability bits of one job slot as a 24-bit value, first byte
- * most significant. Despite its name, skillset_id is the job slot index of
- * career.learned_abilities (0 = base job). */
-u32 main_ability_get_known(const unit_stats_t* unit, u32 skillset_id) {
-    return (unit->career.learned_abilities[skillset_id][0] << 16)
-        + (unit->career.learned_abilities[skillset_id][1] << 8)
-        | unit->career.learned_abilities[skillset_id][2];
+/* Return the learned-ability bits of one job slot of career.learned_abilities
+ * (0 = base job) as a 24-bit value, first byte most significant. */
+u32 main_ability_get_known(const unit_stats_t* unit, u32 job_index) {
+    return (unit->career.learned_abilities[job_index][0] << 16) + (unit->career.learned_abilities[job_index][1] << 8)
+        | unit->career.learned_abilities[job_index][2];
 }
 
 /* Aggregate assignment changes the retail byte-copy loop. */

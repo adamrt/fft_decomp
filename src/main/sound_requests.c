@@ -82,7 +82,7 @@ void main_gfx_fade_in_orbonne_monastery(void) {
     SetSemiTrans(&fade_polygons[0], 1);
     fade_polygons[1] = fade_polygons[0];
 
-    SetDrawMode(&draw_modes[0], 0, 0, 0x40, &image_rect);
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
     draw_modes[1] = draw_modes[0];
 
     setPolyFT4(&title_polygons[0]);
@@ -138,7 +138,7 @@ void main_gfx_fade_out_orbonne_monastery(void) {
     SetSemiTrans(&fade_polygons[0], 1);
     fade_polygons[1] = fade_polygons[0];
 
-    SetDrawMode(&draw_modes[0], 0, 0, 0x40, &image_rect);
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
     draw_modes[1] = draw_modes[0];
 
     setPolyFT4(&title_polygons[0]);
@@ -214,6 +214,8 @@ void main_file_handle_cd_ready_callback(u8 event, u8* result) {
 void main_file_handle_cd_read_callback(u8 event, u8* result) {
 }
 
+/* Load scenario music `music_id` into scenario slot `slot` (1 or 2) when that slot is
+ * free and return the slot; return 0 when it is taken. */
 s32 main_sound_load_music_into_slot(s32 music_id, s32 slot) {
     suzuki_smd_header_t* smd;
 

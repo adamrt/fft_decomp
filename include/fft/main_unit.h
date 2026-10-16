@@ -66,7 +66,7 @@ s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* main_ability_store_skillset_abilities(s32 skillset, s32 flags);
 s32 main_ability_calculate_pointers_and_type(
     s32 id, ability_data_t** out_ability_data, main_ability_secondary_pointer_t* out_secondary_data);
-u32 main_ability_get_known(const unit_stats_t* unit, u32 skillset_id);
+u32 main_ability_get_known(const unit_stats_t* unit, u32 job_index);
 
 /* job */
 extern job_data_t g_main_job_data[];
@@ -128,7 +128,7 @@ u32 main_party_level_unit_to_target(party_unit_t* party_unit, s32 level_delta);
 void main_party_remove_unit(u32 index);
 s32 main_party_save_unit(unit_stats_t* unit, s32 allow_guest);
 void main_unit_apply_level_growth(unit_stats_t* unit, s32 level_down);
-void main_unit_calculate_move_jump(unit_stats_t* unit, s32 keep_position);
+void main_unit_calculate_move_jump(unit_stats_t* unit, s32 keep_hp_mp);
 u8 main_unit_calculate_palette_spritesheet(unit_stats_t* unit, u8* palette);
 s32 main_unit_calculate_random_equipment(
     unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);

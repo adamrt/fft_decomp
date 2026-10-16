@@ -47,6 +47,13 @@ typedef struct menu_palette_pair {
     rgba5551_t colors[2 * PALETTE_COLOR_COUNT];
 } menu_palette_pair_t;
 typedef char menu_palette_pair_size_must_be_64[(sizeof(menu_palette_pair_t) == 64) ? 1 : -1];
+
+/* CLUTs of the normal and dimmed menu colors: GetClut(0x3c0, 0x1f0) and
+ * GetClut(0x3c0, 0x1f4). */
+enum {
+    MENU_CLUT_NORMAL = 0x7c3c,
+    MENU_CLUT_DIMMED = 0x7d3c,
+};
 extern menu_palette_pair_t g_menu_palette_colors;
 extern u8 g_menu_numeric_display_palette_indices[12];
 void menu_set_palette_colors(const menu_palette_pair_t* source);

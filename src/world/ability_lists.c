@@ -33,6 +33,8 @@
 
 static s32 world_ability_run_view_list(void);
 
+/* Ability-list menu-script callback 13: 1 while the list shows the Action category. The
+ * row argument is ignored. */
 static s32 world_ability_is_category_action(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_ACTION;
 }
@@ -564,8 +566,8 @@ s32 world_shop_adjust_gil(s32 delta) {
     if (gil < 0) {
         gil = 0;
     }
-    if (gil > 0x5F5E0FF) {
-        gil = 0x5F5E0FF;
+    if (gil > EVENT_WAR_FUNDS_MAX) {
+        gil = EVENT_WAR_FUNDS_MAX;
     }
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, gil);
     return gil;

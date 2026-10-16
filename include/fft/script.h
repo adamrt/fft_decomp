@@ -18,6 +18,8 @@ enum {
     /* External unit-id selectors used by scenario commands. */
     EVENT_UNIT_SELECTOR_SLOT_FIRST = 0x64,
     EVENT_UNIT_SELECTOR_SLOT_COUNT = 4,
+    /* The first ENTD unit whose team flags have a nonzero BATTLE_TEAM_IMPORTANCE_MASK. */
+    EVENT_UNIT_SELECTOR_IMPORTANT_UNIT = 0x68,
     EVENT_UNIT_SELECTOR_ACTIVE_TURN = 0x69,
     /* First unit-group selector. The instructions that take a unit group pass
      * selector - 0xfe to *_script_filter_unit_id_by_mode as its mode (2 up);
@@ -28,6 +30,8 @@ enum {
     EVENT_UNIT_ID_DEPLOYED_END = 0x7d,
     /* script_resolve_runtime_id result for an absent unit. */
     EVENT_RUNTIME_ID_NONE = 2000,
+    /* unit_get_battle_id_by_event_unit_id result for an absent unit: the same value. */
+    EVENT_BATTLE_ID_NONE = EVENT_RUNTIME_ID_NONE,
     /* g_script_unit_slots[] entry with no ghost unit assigned. */
     EVENT_UNIT_SLOT_EMPTY = 1000,
 };
@@ -989,6 +993,15 @@ typedef enum event_id {
  * sound effect's variable before it runs the entry script. */
 enum {
     EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION = 0x5c,
+};
+
+/* Script variable caps: script_set_variable and each program that adds to
+ * EVENT_SCRIPT_VAR_WAR_FUNDS stop the war funds at 99,999,999, and
+ * main_unit_increase_casualty_counters stops EVENT_SCRIPT_VAR_CASUALTIES and
+ * EVENT_SCRIPT_VAR_INJURED at 9999. */
+enum {
+    EVENT_WAR_FUNDS_MAX = 99999999,
+    EVENT_CASUALTY_COUNT_MAX = 9999,
 };
 
 /* Ordinary variables are 32-bit values; the remaining script-variable domains

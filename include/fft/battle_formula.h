@@ -24,6 +24,13 @@ typedef enum battle_ability_facing_modifier {
     BATTLE_ABILITY_FACING_BACK = 2,
 } battle_ability_facing_modifier_e;
 
+/* rates */
+/* Chances in 100 of a critical hit and of a weapon's added effect. */
+enum {
+    BATTLE_FORMULA_CRITICAL_HIT_CHANCE = 4,
+    BATTLE_FORMULA_ADDED_EFFECT_CHANCE = 19,
+};
+
 /* damage and stat modifiers */
 void battle_formula_apply_attack_up_and_martial_arts(void);
 void battle_formula_apply_attacker_berserk_frog(void);

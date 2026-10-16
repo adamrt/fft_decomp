@@ -34,6 +34,9 @@ static void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* reco
 static void world_menu_start_thread_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y);
 static void world_menu_thread_group_supervisor_thread(void);
 
+/* Menu thread of the location list: list every visible location by name (row color 8
+ * while its color variable is clear, 4 for the current location, which starts
+ * selected), show up to 7 rows and run the scrolling list. */
 void world_menu_build_location_list(void) {
     s32 i;
     s32 count;
@@ -127,6 +130,8 @@ void world_menu_set_slot_4_cursor_index(s32 index) {
 void world_noop_80106138(void) {
 }
 
+/* Read WLDFACE.BIN into a heap buffer, upload its four portrait sheets to their VRAM
+ * rectangles and free the buffer once the transfers finish. */
 static void world_gfx_load_wldface_to_frame_buffer(void) {
     menu_portrait_sheet_t* sheets;
 
@@ -541,10 +546,10 @@ void world_main_menu_text_window_thread(void) {
             break;
         }
         if (g_world_menu_use_alternate_main_palette != 0) {
-            record->text_sprite.clut = 0x7D3C;
+            record->text_sprite.clut = MENU_CLUT_DIMMED;
             record->frame_sprites[0].clut = 0x7C7C;
         } else {
-            record->text_sprite.clut = 0x7C3C;
+            record->text_sprite.clut = MENU_CLUT_NORMAL;
             record->frame_sprites[0].clut = 0x7CBC;
         }
         if (g_threads[g_thread_current_id].task_id == THREAD_TASK_MENU_GROUP_SECOND_WINDOW) {
@@ -990,7 +995,7 @@ static void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* reco
     out->w = record->inner_width >> 2;
     out->h = record->inner_height;
     menu_init_sprt(primitive);
-    primitive->clut = 0x7C3C;
+    primitive->clut = MENU_CLUT_NORMAL;
     gfx_init_image_loading(primitive, &record->vram_origin, &record->window, &record->text_image);
 }
 

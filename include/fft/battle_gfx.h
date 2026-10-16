@@ -606,7 +606,7 @@ void battle_gfx_start_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green
 void battle_gfx_start_unit_fade_out_red(s32 unit_id);
 void battle_gfx_start_event_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
 void battle_gfx_modify_palette_based_on_team(struct battle_unit* unit, s32 amount);
-void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 preset,
+void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
     s16 red, s16 green, s16 blue, s32 final_value);
 void battle_gfx_set_evtchr_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32 clut_index);
 void battle_gfx_set_thrown_item_graphic_palette(s32 item_id, battle_unit_t* unit);

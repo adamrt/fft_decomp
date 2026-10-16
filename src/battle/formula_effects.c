@@ -415,7 +415,8 @@ void battle_formula_apply_maintenance(void) {
 /* When executing, a roll of 0..99 below 19 sets the added-effect flag (special
  * effect 0x0200). */
 static void battle_formula_roll_conditional_status_proc_inner(void) {
-    if (g_battle_action_state == ACTION_STATE_EXECUTE && main_util_roll_pass_fail(0x64, 0x13) == 0) {
+    if (g_battle_action_state == ACTION_STATE_EXECUTE
+        && main_util_roll_pass_fail(100, BATTLE_FORMULA_ADDED_EFFECT_CHANCE) == 0) {
         action_data_t* action = g_battle_action_target_data;
         /* The 16-bit read-modify-write sets the added-effect flag. */
         action->special_effect = action->special_effect | ACTION_SPECIAL_EFFECT_ADDED_EFFECT;

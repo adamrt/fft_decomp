@@ -22,6 +22,8 @@
 static s32 battle_map_tile_data_15_stub(void);
 static s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y);
 
+/* Give a unit back its move and its action by clearing both taken flags. No retail
+ * code calls it. */
 void battle_action_activate_move_act(unit_stats_t* unit) {
     unit->movement_taken = 0;
     unit->action_taken = 0;
@@ -1289,7 +1291,7 @@ void battle_formula_apply_target_magical_status_xa_modifiers(void) {
 void battle_formula_calculate_critical_hit(void) {
     s32 rnd;
     s16 base_xa;
-    if (battle_formula_roll_random_at_least(0x64, 4) == 0) {
+    if (battle_formula_roll_random_at_least(100, BATTLE_FORMULA_CRITICAL_HIT_CHANCE) == 0) {
         g_battle_action_target_data->critical = 1;
         rnd = battle_formula_get_random_0_7fff();
         base_xa = g_battle_action_current_ability.xa;
@@ -1391,7 +1393,7 @@ void battle_formula_calculate_stolen_gil(void) {
 /*
  * Steal Exp.: take attacker Speed + Y EXP, at most 100 and at most the target's
  * EXP; nothing to take is a forced miss. The attacker gains the amount; the
- * target's exp_change carries it with bit 0x80, the loss flag
+ * target's exp_change carries it with ACTION_EXP_CHANGE_LOSS, the flag
  * battle_action_apply_exp_change tests.
  */
 void battle_formula_set_exp_stolen(void) {
@@ -1413,7 +1415,7 @@ void battle_formula_set_exp_stolen(void) {
     g_battle_action_attacker_data->exp_change = amount;
     g_battle_action_attacker_data->hit = 1;
     g_battle_action_attacker_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
-    g_battle_action_target_data->exp_change = amount + 0x80;
+    g_battle_action_target_data->exp_change = amount + ACTION_EXP_CHANGE_LOSS;
     g_battle_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 

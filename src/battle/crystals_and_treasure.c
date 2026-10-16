@@ -46,9 +46,9 @@ s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable)
     return 0;
 }
 
-/* Clears the unit's Charging, Jump, Defending and Performing statuses (action state 0). */
+/* Clears the unit's Charging, Jump, Defending and Performing statuses (action state none). */
 static void battle_status_disable_acting(unit_stats_t* unit) {
-    main_status_set_action_state(unit, 0);
+    main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_NONE);
 }
 
 /* Pick the rare or common move-find item on the unit's tile and mark the tile found.

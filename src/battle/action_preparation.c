@@ -360,9 +360,9 @@ action_command_t* battle_unit_get_action_command_by_battle_id(s32 battle_id) {
  * the battle on the blue team; other teams have unlimited stock.
  *
  * Returns -1 when the party owns none, otherwise 0. One item is removed only when
- * always_one is nonzero and the action is executing (not a preview or an AI
- * simulation); with always_one 0 the call only tests the stock. */
-s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id, s32 always_one) {
+ * spend is nonzero and the action is executing (not a preview or an AI
+ * simulation); with spend 0 the call only tests the stock. */
+s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id, s32 spend) {
     u32 idx;
     s32 qty;
 
@@ -372,7 +372,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
         if (qty == 0) {
             return -1;
         }
-        if (always_one == 0) {
+        if (spend == 0) {
             return 0;
         }
         if (g_battle_action_state != ACTION_STATE_EXECUTE) {
@@ -387,9 +387,9 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
  * the acting unit with its last ability, clear every unit's reaction and outcome
  * and set up the first strike.
  *
- * Returns 0 when the action can run, -1 for an empty unit slot, 6 when Hamedo
- * pre-empted the action (g_battle_action_hamedo_flag set), or the nonzero
- * rejection code of battle_action_check_and_consume_mp; on those failures only
+ * Returns 0 when the action can run, -1 for an empty unit slot, ACTION_REJECTION_HAMEDO
+ * when Hamedo pre-empted the action (g_battle_action_hamedo_flag set), or the nonzero
+ * action_rejection_e of battle_action_check_and_consume_mp; on those failures only
  * the acting-unit data is stored. */
 s32 battle_action_init_current_data(s32 id) {
     unit_stats_t* unit;
@@ -406,7 +406,7 @@ s32 battle_action_init_current_data(s32 id) {
     }
     if (g_battle_action_hamedo_flag != 0) {
         battle_action_store_acting_unit_data(unit);
-        return 6;
+        return ACTION_REJECTION_HAMEDO;
     }
     mp_result = battle_action_check_and_consume_mp(unit);
     if (mp_result != 0) {
@@ -804,8 +804,8 @@ static void battle_action_finalize_draw_out_katana_result(
 static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
     ability_secondary_data_t* data;
     u8 menu_type;
-    u8 weapon_kind;
-    u8 chance;
+    u8 formula;
+    u8 x;
     s16 ability_id;
     u8 support;
     u8 left_hand;
@@ -814,7 +814,7 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
     g_battle_action_current_ability.strike_counter = 0;
     g_battle_action_current_ability.weapon_proc_pending = 0;
     g_battle_action_current_ability.knockback_flags = 0;
-    weapon_kind = 0;
+    formula = 0;
     if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
         g_battle_action_current_ability.can_earn_exp_jp = 0;
         g_battle_action_current_ability.earned_experience = 0;
@@ -842,18 +842,17 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
         if (ability_id >= 0 || ability_id < ABILITY_ID_ITEM_FIRST) {
             data = &g_main_ability_range_data[ability_id];
             g_battle_loaded_ability_flags_1 = data->flags_1;
-            chance = data->x;
-            weapon_kind = data->formula;
+            x = data->x;
+            formula = data->formula;
         }
-        if (weapon_kind == ABILITY_FORMULA_MULTIHIT_TRUTH_MAGIC
-            || weapon_kind == ABILITY_FORMULA_UNFAITH_MAGICAL_DAMAGE) {
+        if (formula == ABILITY_FORMULA_MULTIHIT_TRUTH_MAGIC || formula == ABILITY_FORMULA_UNFAITH_MAGICAL_DAMAGE) {
             if (g_battle_action_state == ACTION_STATE_EXECUTE) {
-                g_battle_action_current_ability.strike_count = ((chance * rand()) / 32768) + 1;
+                g_battle_action_current_ability.strike_count = ((x * rand()) / 32768) + 1;
                 return;
             }
         }
-        if (weapon_kind == ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA) {
-            g_battle_action_current_ability.strike_count = chance + 1;
+        if (formula == ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA) {
+            g_battle_action_current_ability.strike_count = x + 1;
             return;
         }
     }
@@ -878,7 +877,7 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
             && g_battle_action_current_ability.secondary_weapon_id == ITEM_ID_NONE)
         || (g_battle_action_current_ability.primary_weapon_id != ITEM_ID_NONE
             && g_battle_action_current_ability.secondary_weapon_id != ITEM_ID_NONE)) {
-        if (support & 1) {
+        if (support & BATTLE_SUPPORT_SET_3_TWO_SWORDS) {
             g_battle_action_current_ability.strike_count = 2;
         }
     }
@@ -994,7 +993,7 @@ static s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* orig
 /*
  * Check action restrictions and consume MP outside preview mode.
  *
- * Return 0 when allowed, or a rejection code. Only ordinary-menu,
+ * Return 0 when allowed, or an action_rejection_e. Only ordinary-menu,
  * non-Mime abilities consume MP; the effective cost is recorded first.
  * Preview skips only subtraction; earlier bookkeeping still runs.
  */
@@ -1015,19 +1014,19 @@ static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
         result = BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     if (result)
-        return result + 6;
+        return result + ACTION_REJECTION_RESTRICTION_OFFSET;
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
         if (ability_id != 0 && ability_id != ABILITY_ID_FROG_ATTACK && ability_id != ABILITY_ID_BLACK_MAGIC_FROG)
-            return 5;
+            return ACTION_REJECTION_FROG;
         if (menu == ACTION_MENU_TYPE_CHARGE)
-            return 5;
+            return ACTION_REJECTION_FROG;
     }
     if (ability_id >= 0 && ability_id < ABILITY_ID_ITEM_FIRST) {
         ability = &g_main_ability_range_data[ability_id];
         if ((menu == ACTION_MENU_TYPE_DEFAULT || menu == ACTION_MENU_TYPE_MONSTER)
             && (ability->flags_3 & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE)
             && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SILENCE)] & STATUS_BYTE_MASK(STATUS_ID_SILENCE)))
-            return 2;
+            return ACTION_REJECTION_SILENCED;
         if (menu == ACTION_MENU_TYPE_DEFAULT && unit->job_id != JOB_ID_MIME) {
             cost = ability->mp_cost;
             if (unit->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_HALF_MP)
@@ -1037,7 +1036,7 @@ static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
              * casting the unsigned value hoists the MP load and loses a nop. */
             mp = unit->mp;
             if (mp < cost)
-                return 3;
+                return ACTION_REJECTION_NOT_ENOUGH_MP;
             if (g_battle_action_state != ACTION_STATE_PREVIEW)
                 unit->mp = mp - cost;
         }

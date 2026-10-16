@@ -260,8 +260,8 @@ s32 script_get_variable(s32 variable_id) {
 void script_set_variable(s32 variable_id, s32 value) {
     s32 saved_current_variable = *g_script_variables;
 
-    if (variable_id == EVENT_SCRIPT_VAR_WAR_FUNDS && value > 0x05f5e0ff) {
-        value = 0x05f5e0ff;
+    if (variable_id == EVENT_SCRIPT_VAR_WAR_FUNDS && value > EVENT_WAR_FUNDS_MAX) {
+        value = EVENT_WAR_FUNDS_MAX;
     }
     script_run_variable_command(EVENT_OPCODE_ZERO_VARIABLE, variable_id, 0, 0);
     script_run_variable_command(EVENT_OPCODE_ADD_IMMEDIATE, variable_id, value, 0);
@@ -936,6 +936,9 @@ void menu_reset_unit_records_wrapper(void) {
 void menu_run_companion_overlay_stub(void) {
 }
 
+/* Menu-building thread: once the previous menu, the camera and the target panel are done
+ * (and a tutorial slot has started its next event), open menu parameter 1, the egg menu for
+ * an egg, and reopen the skillset and ability lists when restoring the same unit's menu. */
 static void menu_start_entry_thread(void) {
     s32 menu_id = thread_get_current_parameter_1();
     s32 count;

@@ -39,12 +39,11 @@
 static s32 menu_display_projected_action_effect(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_load_parameters_t* unused_parameters);
 
-/* Lay out the textured pieces of piece group `group` (the tile height readout for one
- * display_height value) as gradient quads at g_menu_quad_origin. Returns the number of quads
- * written. */
 static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly);
 static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
 
+/* Return 1 when the unit has any current status (innate ones included), else 0; one of
+ * the conditions under which Circle opens the status list. */
 s32 unit_has_any_current_status(s32 battle_id) {
     unit_stats_t* unit = battle_unit_get_stats_from_battle_id(battle_id);
     s32 index;
@@ -147,12 +146,12 @@ void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const 
  * TEXT_SECTION_COUNT offsets, each measured from the end of that table. */
 void text_relocate_pointer_table(const u32* offsets) {
     s32 index = 0;
-    const u8* text_data = (const u8*)offsets + sizeof(u32) * 32;
+    const u8* text_data = (const u8*)offsets + sizeof(u32) * TEXT_SECTION_COUNT;
 
     do {
         g_text_section_pointers[index] = (u8*)(text_data + offsets[index]);
         index++;
-    } while (index < 32);
+    } while (index < TEXT_SECTION_COUNT);
 }
 
 /* Back up the text section pointer table once. */
@@ -170,6 +169,8 @@ void text_restore_section_pointers(void) {
     g_text_section_backup_active = 0;
 }
 
+/* DismissUnit: remove the first roster member after slot 0 with this sprite set from
+ * the party, returning its equipment to the inventory. Nothing happens if none matches. */
 void script_opcode_dismiss_unit(s32 sprite_set) {
     party_unit_t* party;
     s32 party_index = 1;
@@ -188,7 +189,7 @@ void script_opcode_dismiss_unit(s32 sprite_set) {
     if (party_index != PARTY_ROSTER_SLOT_COUNT) {
         slot = 0;
         empty_item = ITEM_ID_NONE;
-        for (; slot < 7; slot++) {
+        for (; slot < UNIT_EQUIPMENT_SLOT_COUNT; slot++) {
             item = party->equipment[slot];
             if (item != ITEM_ID_NOTHING && item != empty_item) {
                 g_main_item_quantities[item]++;
@@ -298,7 +299,7 @@ void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet,
     rect->w = width;
     rect->h = height;
     gfx_alloc_texture_rect(rect, primitive, (u32*)-1);
-    primitive->sprt.clut = (clut_offset << 4) + 0x7c3c;
+    primitive->sprt.clut = (clut_offset << 4) + MENU_CLUT_NORMAL;
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
@@ -377,6 +378,9 @@ void menu_run_selected_tile_info_display_thread(void) {
     thread_exit_current();
 }
 
+/* Lay out the textured pieces of piece group `group` (the tile height readout for one
+ * display_height value) as gradient quads at g_menu_quad_origin. Returns the number of quads
+ * written. */
 static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly) {
     menu_quad_piece_t* piece;
     s32 count;
@@ -522,8 +526,8 @@ static s32 menu_display_projected_action_effect(
 
         image = ACTION_DISPLAY_IMAGE_EXP;
         value = exp;
-        if (exp & 0x80) {
-            value &= 0x7f;
+        if (exp & ACTION_EXP_CHANGE_LOSS) {
+            value &= ACTION_EXP_CHANGE_VALUE_MASK;
             panel[0].format = 0x403;
         } else {
             panel[0].format = 0x803;
@@ -890,7 +894,7 @@ static void menu_run_unit_stats_panel(
         }
         poly = page->bars;
         if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
-            page->quads[1].clut = 0x7C3C;
+            page->quads[1].clut = MENU_CLUT_NORMAL;
             page->quads[2].clut = 0x7D7C;
         }
         color = g_menu_unit_status_gauge_colors;
@@ -1137,7 +1141,7 @@ void menu_run_unit_summary_panel_thread(void) {
     sprite = frames[0].sprites;
     gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_init_sprite_array(sprite, 7, 0x7C3C);
+    menu_init_sprite_array(sprite, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&frames[0].portrait);
     text_configure_sprite_vram(&rects[0], 0x58, 0x20, &frames[0].sprites[0], 0);
     text_configure_sprite_vram(&rects[1], 0x10, 0xA, &frames[0].sprites[1], 0);
@@ -1185,7 +1189,7 @@ void menu_run_unit_summary_panel_thread(void) {
         text_draw_large_number_glyphs_variant(value + 1, 0x4002, digits->roster_slot, origin);
     }
     LoadImage(&rects[3], (u32*)digits->roster_slot);
-    frames[0].sprites[6].clut = 0x7C3C;
+    frames[0].sprites[6].clut = MENU_CLUT_NORMAL;
     frames[0].sprites[6].w = 0x18;
     frames[0].sprites[6].h = 0x14;
     zodiac = g_menu_selected_unit.zodiac;
@@ -1264,18 +1268,18 @@ void menu_run_unit_summary_panel_thread(void) {
         gfx_draw_or_append_gpu_primitive(&frame_record->portrait);
         for (i = 3; i >= 0; i--) {
             if (value != 0) {
-                frame_record->sprites[i].clut = 0x7D3C;
+                frame_record->sprites[i].clut = MENU_CLUT_DIMMED;
             } else {
-                frame_record->sprites[i].clut = 0x7C3C;
+                frame_record->sprites[i].clut = MENU_CLUT_NORMAL;
             }
             gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_1);
         for (i = 4; i < 7; i++) {
             if (value != 0) {
-                frame_record->sprites[i].clut = 0x7D3C;
+                frame_record->sprites[i].clut = MENU_CLUT_DIMMED;
             } else {
-                frame_record->sprites[i].clut = 0x7C3C;
+                frame_record->sprites[i].clut = MENU_CLUT_NORMAL;
             }
             gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
@@ -1397,6 +1401,9 @@ void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 code) {
 }
 #endif
 
+/* The unit editor's numeric side panel: draw its 15 numbers into three VRAM images
+ * once, then draw the double-buffered frame and 18 sprites every frame, dimmed while a
+ * grandchild menu runs, until thread parameter 3 is set. */
 void menu_run_numeric_display_panel_thread(void) {
     menu_panel_record_t* records;
     menu_panel_record_t* record = g_menu_numeric_display_panel_records;
@@ -1448,13 +1455,13 @@ void menu_run_numeric_display_panel_thread(void) {
         }
         if (thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
             for (i = 17; i >= 0; i--) {
-                record->sprites[i].clut = 0x7D3C;
+                record->sprites[i].clut = MENU_CLUT_DIMMED;
             }
             record->sprites[10].clut = 0x7EBC;
             menu_init_primitive_colors_dimmed(record->palette);
         } else {
             for (i = 17; i >= 0; i--) {
-                record->sprites[i].clut = 0x7C3C;
+                record->sprites[i].clut = MENU_CLUT_NORMAL;
             }
             record->sprites[10].clut = 0x7D7C;
             record->sprites[14].clut = 0x7FFC;
@@ -1540,7 +1547,7 @@ void menu_run_unit_editor_panel_thread(void) {
         line++;
     }
     menu_init_sprite_array(&frame_record->sprites[0], 0xC, 0x7D7C);
-    menu_init_sprite_array(&frame_record->sprites[12], 7, 0x7C3C);
+    menu_init_sprite_array(&frame_record->sprites[12], 7, MENU_CLUT_NORMAL);
 
     /* Each arm copies all four rows itself; the compiler cross-jumps the
        common tails, leaving only the first call's table loads in the arms. */
@@ -2033,9 +2040,9 @@ void menu_select_sprite_clut(void* packet) {
     texture_primitive_t* primitive = packet;
 
     if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
-        clut = 0x7D3C;
+        clut = MENU_CLUT_DIMMED;
     } else {
-        clut = 0x7C3C;
+        clut = MENU_CLUT_NORMAL;
     }
     primitive->sprt.clut = clut;
 }
@@ -2057,12 +2064,12 @@ void menu_select_icon_sprite_clut(SPRT* sprite) {
  * previous thread is running or g_menu_input_lock_mode is 1. */
 void menu_select_icon_cluts(menu_icon_sprites_t* frame) {
     if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
-        frame->sprites[0].clut = 0x7d3c;
+        frame->sprites[0].clut = MENU_CLUT_DIMMED;
         frame->sprites[1].clut = 0x7dfc;
         frame->sprites[2].clut = 0x7e3c;
         frame->sprites[3].clut = 0x7c7c;
     } else {
-        frame->sprites[0].clut = 0x7c3c;
+        frame->sprites[0].clut = MENU_CLUT_NORMAL;
         frame->sprites[1].clut = 0x7d7c;
         frame->sprites[2].clut = 0x7dbc;
         frame->sprites[3].clut = 0x7cbc;

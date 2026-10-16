@@ -115,8 +115,8 @@ typedef enum wldcore_proposition_speaker {
 } wldcore_proposition_speaker_e;
 
 typedef enum wldcore_proposition_condition_flag {
-    WLDCORE_PROPOSITION_CONDITION_SCRIPT_VAR_6F = 0x01, /* EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY >= minimum */
-    WLDCORE_PROPOSITION_CONDITION_MONTH = 0x02,         /* today's zodiac sign (1 = Aries) == condition_value */
+    WLDCORE_PROPOSITION_CONDITION_SHOP_AVAILABILITY = 0x01, /* EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY >= minimum */
+    WLDCORE_PROPOSITION_CONDITION_ZODIAC_SIGN = 0x02,       /* today's zodiac sign (1 = Aries) == condition_value */
     WLDCORE_PROPOSITION_CONDITION_STATUS = 0x04,
 } wldcore_proposition_condition_flag_e;
 

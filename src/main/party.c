@@ -31,6 +31,8 @@ static void main_unit_set_rsm_flag(unit_stats_t* unit, u32 ability_id);
 static void main_unit_store_character_names(unit_stats_t* unit);
 static void main_unit_store_ramza_name_birthday_zodiac(unit_stats_t* unit);
 
+/* At boot, clear the item location flags and build g_main_status_check_sets: rows 0 to 9
+ * from each status's effect flags, and the unmountable row from a fixed status list. */
 void main_status_init_check_data(void) {
     int status;
     u8 flags4;
@@ -717,6 +719,8 @@ s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_worl
     return 0;
 }
 
+/* The shared last steps of building a unit from a party slot or from ENTD data: apply
+ * its equipment stats and attributes, work out Move and Jump, and store its names. */
 static void main_unit_apply_equipment_move_jump_and_name(unit_stats_t* unit) {
     main_unit_set_equipment_stats(unit);
     main_unit_set_equipment_attributes(unit, 1);
@@ -909,17 +913,17 @@ static s32 main_unit_init_from_entd_party_member(unit_stats_t* unit, entd_unit_t
 
 /*
  * Fills an in-battle unit record from its persistent party record. The unit
- * is a player-controlled blue unit (team 8); Ramza's identities also get
- * importance 3 (team 0xb), so losing him decides the battle. A roster member
- * (slot below 16) gets palette 0, while a guest keeps its saved palette.
+ * is a player-controlled blue unit; Ramza's identities also get importance 3
+ * (the whole BATTLE_TEAM_IMPORTANCE_MASK), so losing him decides the battle. A
+ * roster member (slot below 16) gets palette 0, while a guest keeps its saved palette.
  */
 static void main_unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party) {
-    s32 team = 8;
+    s32 team = BATTLE_TEAM_BLUE | BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
     s32 i;
     s32 value;
 
     if (party->sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
-        team = 0xb;
+        team = BATTLE_TEAM_BLUE | BATTLE_TEAM_FLAG_PLAYER_CONTROLLED | BATTLE_TEAM_IMPORTANCE_MASK;
     }
     unit->team_flags = team;
     unit->initial_team_flags = team;
@@ -1182,20 +1186,20 @@ static void main_unit_set_rsm_flag(unit_stats_t* unit, u32 ability_id) {
 static void main_unit_calculate_actual_stats(unit_stats_t* unit, s32 mode) {
     u32 value;
     u32 multiplier;
-    s32 cap = 100;
-    s32 max = UNIT_HP_MP_MAX;
+    s32 hp_mp_divisor = 100;
+    s32 hp_mp_max = UNIT_HP_MP_MAX;
     s32 i;
     s32 j;
     u8 level;
-    s32 brave_flag = mode & 1;
+    s32 keep_base_attributes = mode & 1;
     s32 divisor;
     s32 is_low;
     job_stat_growth_t* mult;
     unit_raw_stat_t* raw;
 
     if (unit->unit_flags & UNIT_FLAG_EGG) {
-        cap = 10;
-        max = 0xffff;
+        hp_mp_divisor = 10;
+        hp_mp_max = 0xffff;
     }
     mult = unit->stat_growths;
     level = unit->level;
@@ -1220,15 +1224,15 @@ static void main_unit_calculate_actual_stats(unit_stats_t* unit, s32 mode) {
         raw[i].high = value >> 16;
         multiplier = mult[i].multiplier;
         if (is_low) {
-            divisor = cap;
+            divisor = hp_mp_divisor;
         }
         value = (value * multiplier) / divisor >> 14;
         if (value == 0) {
             value = 1;
         }
         if (is_low) {
-            if (value > max) {
-                value = max;
+            if (value > hp_mp_max) {
+                value = hp_mp_max;
             }
         }
         if (i == UNIT_RAW_STAT_SPEED && value > UNIT_SPEED_MAX) {
@@ -1251,17 +1255,17 @@ static void main_unit_calculate_actual_stats(unit_stats_t* unit, s32 mode) {
             }
             break;
         case UNIT_RAW_STAT_SPEED:
-            if (brave_flag == 0) {
+            if (keep_base_attributes == 0) {
                 unit->base_attributes[UNIT_ATTRIBUTE_SPEED] = value;
             }
             break;
         case UNIT_RAW_STAT_PHYSICAL_ATTACK:
-            if (brave_flag == 0) {
+            if (keep_base_attributes == 0) {
                 unit->base_attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK] = value;
             }
             break;
         case UNIT_RAW_STAT_MAGIC_ATTACK:
-            if (brave_flag == 0) {
+            if (keep_base_attributes == 0) {
                 unit->base_attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK] = value;
             }
             break;
@@ -1725,14 +1729,14 @@ void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) 
 }
 
 /* Add the Move +1/+2/+3 and Jump +1/+2/+3 abilities to Move and Jump; Move is
- * capped at 0xFC and Jump at 7. With keep_position 0, HP and MP are refilled
+ * capped at 0xFC and Jump at 7. With keep_hp_mp 0, HP and MP are refilled
  * first. */
-void main_unit_calculate_move_jump(unit_stats_t* unit, s32 keep_position) {
+void main_unit_calculate_move_jump(unit_stats_t* unit, s32 keep_hp_mp) {
     u16 move;
     u16 jump;
     u8 flags;
 
-    if (keep_position == 0) {
+    if (keep_hp_mp == 0) {
         unit->hp = unit->max_hp;
         unit->mp = unit->max_mp;
     }

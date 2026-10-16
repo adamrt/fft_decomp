@@ -18,10 +18,7 @@
  * selections and rebuild the inventory totals and item category lists. */
 static void equip_menu_load_images_and_reset_lists(void) {
     RECT rect;
-    /* One 16-color palette split in two: the 16-color store into buf1 runs on
-     * into buf2, so buf2[0] is color 4 (JOBSTTS spells it as one palette_t). */
-    u16 buf1[4];
-    u16 buf2[12];
+    palette_t palette;
 
     rect.x = 0x100;
     rect.y = 0;
@@ -37,34 +34,34 @@ static void equip_menu_load_images_and_reset_lists(void) {
     rect.y = 0x1F0;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_store_image_and_wait(&rect, buf1);
-    buf2[0] = 0;
+    gfx_store_image_and_wait(&rect, palette);
+    palette[4].red = palette[4].green = palette[4].blue = palette[4].semi_transparent = 0;
     rect.x = 0x120;
     rect.y = 0xFE;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf1);
+    gfx_load_image_and_wait(&rect, palette);
     rect.x = 0x100;
     rect.y = 0xFE;
     rect.w = 0xC;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf2);
+    gfx_load_image_and_wait(&rect, &palette[4]);
     rect.x = 0x3C0;
     rect.y = 0x1F4;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_store_image_and_wait(&rect, buf1);
-    buf2[0] = 0;
+    gfx_store_image_and_wait(&rect, palette);
+    palette[4].red = palette[4].green = palette[4].blue = palette[4].semi_transparent = 0;
     rect.x = 0x130;
     rect.y = 0xFE;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf1);
+    gfx_load_image_and_wait(&rect, palette);
     rect.x = 0x110;
     rect.y = 0xFE;
     rect.w = 0xC;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf2);
+    gfx_load_image_and_wait(&rect, &palette[4]);
     menu_clear_selection_values();
     g_menu_help_message_text_id = 0;
     equip_menu_reset_selection_indices();

@@ -153,6 +153,7 @@ s32 main_unit_calculate_zodiac_symbol(u16 birthday) {
     return (u16)zodiac;
 }
 
+/* Clear count bytes one at a time; a count of 0 or less clears nothing. */
 void main_mem_zero(void* destination, s32 count) {
     u8* dst = destination;
     s32 index = 0;
@@ -172,7 +173,7 @@ void main_unit_increase_casualty_counters(unit_stats_t* unit) {
     id = (unit->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE ? EVENT_SCRIPT_VAR_INJURED
                                                                            : EVENT_SCRIPT_VAR_CASUALTIES;
     count = script_get_variable(id);
-    if (count < 0x270F) {
+    if (count < EVENT_CASUALTY_COUNT_MAX) {
         count++;
     }
     script_set_variable(id, count);

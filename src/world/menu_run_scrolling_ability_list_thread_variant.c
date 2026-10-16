@@ -1,3 +1,5 @@
+/* The scrolling three-column ability list thread. */
+
 #include "fft/battle_ai.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
@@ -115,7 +117,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     page->thumb.clut = 0x7D7C;
     menu_init_sprt(&page->frame);
     gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
-    menu_init_sprite_array(page->arrow_marks, 2, 0x7C3C);
+    menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
     page->arrow_marks[0].h = 0xC;
     page->arrow_marks[1].w = 4;

@@ -49,6 +49,15 @@ enum {
     PSYQ_GPU_POLYGON_GOURAUD = 0x10,
 };
 
+/* Semi-transparency mode in bits 5-6 of a texture page value (getTPage's abr
+ * outside the GraphType 1 and 2 layouts); texture page 0 when used alone. */
+typedef enum {
+    PSYQ_GPU_TPAGE_ABR_AVERAGE = 0x00,     /* back / 2 + front / 2 */
+    PSYQ_GPU_TPAGE_ABR_ADD = 0x20,         /* back + front */
+    PSYQ_GPU_TPAGE_ABR_SUBTRACT = 0x40,    /* back - front */
+    PSYQ_GPU_TPAGE_ABR_ADD_QUARTER = 0x60, /* back + front / 4 */
+} psyq_gpu_tpage_abr_e;
+
 #define PSYQ_GPU_FIXED_TILE_WORDS          2
 #define PSYQ_GPU_FIXED_SPRITE_WORDS        3
 #define PSYQ_GPU_PACKET_WORDS(packet_type) (sizeof(packet_type) / sizeof(u32) - 1)

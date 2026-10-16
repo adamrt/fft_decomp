@@ -30,6 +30,8 @@ static s32 world_menu_run_learn(void);
 static s32 world_menu_run_remove_ability(void);
 static s32 world_menu_update_clear_all_abilities_prompt(void);
 
+/* A thread that only waits, frame after frame; it occupies the upper menu's child slot
+ * while the Set or Remove ability mode runs. */
 static void world_formation_ability_menu_idle_thread(void) {
     for (;;) {
         thread_wait_frames(1);
@@ -93,12 +95,12 @@ void world_menu_run_ability(void) {
         value = world_formation_get_unit_lock(g_unit_selected_index);
         g_world_ability_menu_unit_index = g_unit_selected_index;
         if (value == WORLD_FORMATION_UNIT_LOCK_MIME) {
-            g_world_ability_menu.text_id = 0xd80d;
+            g_world_ability_menu.text_id = WORLD_FORMATION_ABILITY_MENU_TEXT_MIME;
         } else {
             if (value == WORLD_FORMATION_UNIT_UNLOCKED) {
-                g_world_ability_menu.text_id = 0xd80b;
+                g_world_ability_menu.text_id = WORLD_FORMATION_ABILITY_MENU_TEXT_UNLOCKED;
             } else {
-                g_world_ability_menu.text_id = 0xd80c;
+                g_world_ability_menu.text_id = WORLD_FORMATION_ABILITY_MENU_TEXT_LOCKED;
             }
         }
         g_world_menu_text_redraw_request = 1;
@@ -280,6 +282,8 @@ static s32 world_menu_run_remove_ability(void) {
     return 1;
 }
 
+/* One frame of the remove-all-abilities prompt: blink the cursors on the four ability
+ * slots; Circle empties them all and Right backs out, both returning 0, else 1. */
 static s32 world_menu_update_clear_all_abilities_prompt(void) {
     world_unit_t* unit;
     u16 value;

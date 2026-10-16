@@ -628,12 +628,12 @@ s32 wldcore_proposition_is_available_at_location(s32 index, s32 location) {
             return 0;
         }
     }
-    if (entry.condition_flags & WLDCORE_PROPOSITION_CONDITION_SCRIPT_VAR_6F) {
-        if (script_get_variable(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) < entry.required_script_var_6f) {
+    if (entry.condition_flags & WLDCORE_PROPOSITION_CONDITION_SHOP_AVAILABILITY) {
+        if (script_get_variable(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) < entry.required_shop_availability) {
             return 0;
         }
     }
-    if (entry.condition_flags & WLDCORE_PROPOSITION_CONDITION_MONTH) {
+    if (entry.condition_flags & WLDCORE_PROPOSITION_CONDITION_ZODIAC_SIGN) {
         month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
         day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
         wldcore_calendar_convert_date_to_zodiac(&month, &day);

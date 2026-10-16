@@ -147,7 +147,7 @@ void menu_run_unit_status_thread_variant(void) {
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_numeric_display_frame_primitives(&g_world_unit_status_panel_origin, &panel->numeric_frame);
-    menu_init_sprite_array(panel->sprites, 7, 0x7C3C);
+    menu_init_sprite_array(panel->sprites, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&panel->portrait);
     text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel->sprites, 0);
     text_configure_sprite_vram(&rects[3], 0x10, 0xA, &panel->sprites[1], 0);
@@ -206,9 +206,9 @@ void menu_run_unit_status_thread_variant(void) {
         }
         for (i = 0; i < 7; i++) {
             if (dimmed != 0) {
-                panel->sprites[i].clut = 0x7D3C;
+                panel->sprites[i].clut = MENU_CLUT_DIMMED;
             } else {
-                panel->sprites[i].clut = 0x7C3C;
+                panel->sprites[i].clut = MENU_CLUT_NORMAL;
             }
         }
         if (dimmed != 0) {

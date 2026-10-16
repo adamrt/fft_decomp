@@ -1,3 +1,5 @@
+/* The thread drawing a text screen's window frame until asked to stop. */
+
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
@@ -64,7 +66,7 @@ void world_screen_menu_window_frame_thread(void) {
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
 
     LoadImage(&texture, (u32*)pixels);
-    menu_init_sprite_array(prim->sprites, 9, 0x7c3c);
+    menu_init_sprite_array(prim->sprites, 9, MENU_CLUT_NORMAL);
     texture_u = (texture.x & 0x3f) * 4;
     texture_v = texture.y & 0xFF;
     for (index = 0; index < 4; index++) {
@@ -142,9 +144,9 @@ void world_screen_menu_window_frame_thread(void) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &prim->draw_areas, (const RECT*)menu, frame, g_active_graphics_buffer_index);
-        texture_u = 0x7d3c;
+        texture_u = MENU_CLUT_DIMMED;
         if (thread_get_current_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
-            texture_u = 0x7c3c;
+            texture_u = MENU_CLUT_NORMAL;
         }
         for (index = 8; index >= 0; index--) {
             prim->sprites[index].clut = texture_u;

@@ -250,8 +250,8 @@ s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
         total += g_main_item_primary_data[item_id].price >> 2;
     }
     value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + total;
-    if (value > 99999999) {
-        value = 99999999;
+    if (value > EVENT_WAR_FUNDS_MAX) {
+        value = EVENT_WAR_FUNDS_MAX;
     } else if (value < 0) {
         value = 0;
     }
@@ -259,8 +259,8 @@ s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
     return total;
 }
 
-/* Apply an action result's EXP change when executing. Without bit 0x80 the
- * amount is gained: EXP saturates at 255 and the level-up check runs. With it
+/* Apply an action result's EXP change when executing. Without ACTION_EXP_CHANGE_LOSS
+ * the amount is gained: EXP saturates at 255 and the level-up check runs. With it
  * the low seven bits are lost, down to 0. */
 void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount) {
     s32 total;
@@ -270,7 +270,7 @@ void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return;
     }
-    if ((amount & 0x80) == 0) {
+    if ((amount & ACTION_EXP_CHANGE_LOSS) == 0) {
         total = unit->experience + amount;
         capped = total;
         if (total >= 0x100) {
@@ -283,7 +283,7 @@ void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount) {
             }
         }
     } else {
-        reduced = unit->experience - (amount & 0x7F);
+        reduced = unit->experience - (amount & ACTION_EXP_CHANGE_VALUE_MASK);
         if (reduced < 0) {
             reduced = 0;
         }

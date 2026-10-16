@@ -86,8 +86,8 @@ static void battle_move_confirm_unit_move(battle_unit_t* unit, battle_unit_t* ri
     battle_unit_t* mount;
 
     if (rider->stats != 0) {
-        battle_unit_set_tile_position(
-            rider->stats->battle_id, rider->map_x, rider->map_y, rider->map_z, (rider->facing / 1024));
+        battle_unit_set_tile_position(rider->stats->battle_id, rider->map_x, rider->map_y, rider->map_z,
+            (rider->facing / BATTLE_FACING_QUARTER_TURN));
         if (rider->mount_state == BATTLE_UNIT_MOUNT_STATE_MOUNT) {
             mount = battle_unit_get_by_runtime_id(rider->mount_partner_runtime_id);
             if (mount != 0) {
@@ -98,8 +98,8 @@ static void battle_move_confirm_unit_move(battle_unit_t* unit, battle_unit_t* ri
                 mount->world_coords = rider->world_coords;
                 mount->world_coords.vy -= 10;
                 mount->real.vy -= 0xa000;
-                battle_unit_set_tile_position(
-                    mount->stats->battle_id, rider->map_x, rider->map_y, rider->map_z, (rider->facing / 1024));
+                battle_unit_set_tile_position(mount->stats->battle_id, rider->map_x, rider->map_y, rider->map_z,
+                    (rider->facing / BATTLE_FACING_QUARTER_TURN));
             }
         }
     }
@@ -247,11 +247,12 @@ void battle_state_handle_wait_direction_state(void) {
     } else {
         facing_hint = unit->command_state.cursor.facing_hint;
         if (facing_hint < 4) {
-            battle_unit_decide_facing_direction(unit, facing_hint << 10);
+            battle_unit_decide_facing_direction(unit, facing_hint * BATTLE_FACING_QUARTER_TURN);
             if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
                 mounted_unit = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
                 if (mounted_unit != 0) {
-                    battle_unit_decide_facing_direction(mounted_unit, unit->command_state.cursor.facing_hint << 10);
+                    battle_unit_decide_facing_direction(
+                        mounted_unit, unit->command_state.cursor.facing_hint * BATTLE_FACING_QUARTER_TURN);
                 }
             }
         }

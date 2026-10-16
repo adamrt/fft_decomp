@@ -32,6 +32,9 @@
 
 static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only);
 
+/* Wait until no thread runs a task from THREAD_TASK_CAMERA to THREAD_TASK_ADD_UNIT, then
+ * load the event the current-event variable names unless it is already loaded. Returns
+ * 1 when it loaded one, else 0. */
 s32 script_load_next_event(void) {
     s32 task_id;
     s32 event_id;
@@ -1554,7 +1557,7 @@ static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 w
     s32 byte;
     s32 bit;
 
-    if (idx == 0x7D0) {
+    if (idx == EVENT_BATTLE_ID_NONE) {
         return;
     }
     unit = battle_unit_get_stats_from_battle_id(idx);

@@ -1962,9 +1962,9 @@ void battle_gfx_init_earned_exp_jp_display(battle_unit_t* unit) {
     }
 }
 
-/* Queues the failure message for a charged action that cannot start: mode 1 no
- * target, 2 silenced, 3 not enough MP (the result of
- * action_init_current_data); any other mode queues none.
+/* Queues the failure message for a charged action that cannot start: mode is the
+ * action_rejection_e of battle_action_init_current_data, and only no target,
+ * silenced and not enough MP queue one.
  *
  * The three numeric displays are pointed at the FRAME.BIN page, and the first
  * display is built at once unless one is already running. */
@@ -1977,13 +1977,13 @@ void battle_gfx_queue_charge_failure_message(battle_unit_t* unit, s32 mode) {
     display_1->tpage = BATTLE_GFX_TPAGE_FRAME;
     display_0->tpage = BATTLE_GFX_TPAGE_FRAME;
     switch (mode) {
-    case 1:
+    case ACTION_REJECTION_NO_TARGET:
         unit->action_display_flags |= ACTION_DISPLAY_FLAG_NO_TARGET;
         break;
-    case 2:
+    case ACTION_REJECTION_SILENCED:
         unit->action_display_flags |= ACTION_DISPLAY_FLAG_SILENCED;
         break;
-    case 3:
+    case ACTION_REJECTION_NOT_ENOUGH_MP:
         unit->action_display_flags |= ACTION_DISPLAY_FLAG_NO_MP;
         break;
     }

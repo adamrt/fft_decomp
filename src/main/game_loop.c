@@ -32,6 +32,7 @@ void main_system_reset_game(void) {
     main_restore_game_loop_stack_pointer(&g_main_system_game_loop_stack_pointer);
 }
 
+/* Call battle_bin_entrypoint, which only returns (see main_overlay_exec_battle_bin). */
 static void main_overlay_call_battle_entrypoint(void) {
     battle_bin_entrypoint();
 }
@@ -322,7 +323,7 @@ void main_boot_build_and_draw_squaresoft_logo(void) {
     SetSemiTrans(&polygons[0], 1);
     polygons[1] = polygons[0];
 
-    SetDrawMode(&draw_modes[0], 0, 0, 0x40, &image_rect);
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
     draw_modes[1] = draw_modes[0];
 
     image_rect.x = 0;
@@ -372,7 +373,7 @@ void main_boot_fade_out_squaresoft_logo(void) {
     SetSemiTrans(&polygons[0], 1);
     polygons[1] = polygons[0];
 
-    SetDrawMode(&draw_modes[0], 0, 0, 0x40, &image_rect);
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
     draw_modes[1] = draw_modes[0];
     otag_base = otags[0];
 

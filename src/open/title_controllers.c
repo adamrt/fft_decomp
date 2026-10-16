@@ -40,11 +40,11 @@ void open_file_load_main_menu_graphics(void) {
     file_wait_for_pending_variant();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    file_wait_then_build_header(header, 0x1506e, 0x11, g_open_file_destination);
+    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x11, 0x11, g_open_file_destination);
     file_wait_for_pending_variant();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    file_wait_then_build_header(header, 0x1507f, 0x21, g_open_file_destination);
+    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x22, 0x21, g_open_file_destination);
     file_wait_for_pending_variant();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
@@ -60,7 +60,7 @@ void open_file_load_end_movie_graphics(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
     RECT frame;
 
-    file_wait_then_build_header(header, 0x150c2, 0x11, g_open_file_destination);
+    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x65, 0x11, g_open_file_destination);
     file_wait_for_pending_variant();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
@@ -74,7 +74,7 @@ void open_file_load_end_movie_graphics(void) {
     LoadImage(&frame, g_open_gfx_opntex_data);
     DrawSync(0);
 
-    file_wait_then_build_header(header, 0x150d3, 0x170, g_open_gfx_opntex_data);
+    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x76, 0x170, g_open_gfx_opntex_data);
     file_wait_for_pending_variant();
 }
 
@@ -84,11 +84,11 @@ void open_file_load_end_movie_graphics(void) {
 static void open_file_load_prologue_text_pages(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
-    file_wait_then_build_header(header, 0x150a0, 0x11, g_open_file_destination);
+    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x43, 0x11, g_open_file_destination);
     file_wait_for_pending_variant();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    file_wait_then_build_header(header, 0x150b1, 0x11, g_open_file_destination);
+    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x54, 0x11, g_open_file_destination);
     file_wait_for_pending_variant();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 }
@@ -968,7 +968,6 @@ static void open_birthday_build_confirmation_menu(open_birthday_date_state_t* st
 
 #define OPEN_BIRTHDAY_MONTH_COUNT 12
 #define OPEN_BIRTHDAY_CURSOR_STEP 0x20
-#define OPEN_PAD_START_OR_CIRCLE  0x820
 
 /* Per-frame handler of the birthday date-entry controller (handler 5).
  *
@@ -988,7 +987,7 @@ void open_birthday_handle_menu_input(open_controller_record_t* record) {
         return;
     }
 
-    if (g_open_input_new_button_presses & OPEN_PAD_START_OR_CIRCLE) {
+    if (g_open_input_new_button_presses & (PSX_PAD_START | PSX_PAD_CIRCLE)) {
         main_sound_play_sfx(MAIN_SFX_CONFIRM);
         open_birthday_build_confirmation_menu(menu);
         open_birthday_push_confirmation_controller();
@@ -1157,7 +1156,8 @@ void open_birthday_handle_confirmation_input(open_controller_record_t* record) {
             open_birthday_convert_date_to_zodiac(&month, &day);
             member = main_party_get_unit(0);
             member->birthday_day = value;
-            member->zodiac = ((value & 0x100) >> 8) | ((month - 1) * 0x10);
+            member->zodiac
+                = ((value & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) | ((month - 1) << PARTY_ZODIAC_SHIFT);
             main_sound_set_current_music_target(0, 0x60);
             open_gfx_start_overlay_fade_in(0x20);
             g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;

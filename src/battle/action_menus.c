@@ -497,6 +497,8 @@ void battle_menu_open_mini_menu_help(void) {
     menu_start_help_menu_thread();
 }
 
+/* Show the AT-list entry picked in the mini menu: put the cursor on its unit or, for a
+ * charging action, on that action's target with the target tiles marked. */
 void battle_action_show_at_list_entry(s32 at_index) {
     s32 id;
     battle_unit_t* unit;
@@ -1379,7 +1381,7 @@ static void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* run
             }
             break;
         case 7:
-            if (action->exp_change & 0x80) {
+            if (action->exp_change & ACTION_EXP_CHANGE_LOSS) {
                 g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x2f;
                 g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->exp_change;
                 queued = 1;

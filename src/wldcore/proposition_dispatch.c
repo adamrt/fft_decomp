@@ -1687,8 +1687,8 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
         g_main_active_propositions[level->proposition].proposition_id + EVENT_SCRIPT_VAR_PROPOSITION_FIRST,
         proposition_flags);
     war_funds = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_wldcore_proposition_gil_amount;
-    if (war_funds > 0x05F5E0FF) {
-        war_funds = 0x05F5E0FF;
+    if (war_funds > EVENT_WAR_FUNDS_MAX) {
+        war_funds = EVENT_WAR_FUNDS_MAX;
     }
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, war_funds);
     g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);

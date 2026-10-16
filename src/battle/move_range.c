@@ -37,7 +37,7 @@ static void battle_move_spread_horizontal_jump(void);
 static void battle_move_spread_to_neighbors(void);
 static void battle_move_load_tile_height_for_spread(void);
 static void battle_target_apply_unit_team_eligibility(
-    s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff);
+    s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_whole_map);
 static void battle_target_apply_vertical_fixed(s32 x, s32 y);
 static void battle_target_build_directional_attack_panels(const action_command_t* source, u8 mode);
 static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi);
@@ -55,6 +55,8 @@ static s32 battle_target_validate_height_overlap(
     s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id);
 static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
 
+/* Movement cost of the weather-dependent terrains: 1 in clear weather, rain or snow,
+ * 2 in a storm or snowstorm, 3 in the strong ones. */
 static s32 battle_move_get_weather_terrain_cost(void) {
     s32 weather = battle_map_get_effective_weather();
 
@@ -365,7 +367,7 @@ s32 battle_move_set_reachable_tiles(s32 unit_id, s32 unused_map_x, s32 unused_ma
     if (config->move_type == MOVE_CLASS_TELEPORT) {
         u8 remaining_range = 1;
         target_panel_t* fill_panels = g_battle_target_panels;
-        for (pass = 511; pass >= 0; pass--) {
+        for (pass = MAP_TILE_COUNT - 1; pass >= 0; pass--) {
             fill_panels[pass].remaining_range = remaining_range;
         }
     } else {
@@ -2176,7 +2178,7 @@ static void battle_target_check_moldball_virus_depth(s16 ability_id) {
         tile++;
         i += 1;
         panel++;
-    } while (i < 0x200);
+    } while (i < MAP_TILE_COUNT);
 }
 
 /* Clear the range and the mark of each panel whose tile is flagged untargetable.
@@ -2187,7 +2189,7 @@ static void battle_target_clear_panels_on_untargetable_tiles(void) {
     target_panel_t* dst = g_battle_target_panel_data;
 
     src = g_battle_map_tile_data;
-    for (; i < 256; src++, i++, dst++) {
+    for (; i < MAP_TILES_PER_LAYER; src++, i++, dst++) {
         if (src->flags.untargetable) {
             dst->remaining_range = 0;
             dst->mark = 0;
@@ -2219,7 +2221,7 @@ static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, 
     target_panel_t* lower_panel;
     target_panel_t* upper_panel;
 
-    for (i = 0; i < 0x100; i++) {
+    for (i = 0; i < MAP_TILES_PER_LAYER; i++) {
         tile = &g_battle_map_tile_data[i];
         lower_panel = &g_battle_target_panel_data[i];
         if (!tile->flags.blocked) {
@@ -2281,7 +2283,7 @@ void battle_target_clear_panel_spread_flags(void) {
     s32 i;
     target_panel_t* panel;
 
-    for (i = 511, panel = &g_battle_target_panels[511]; i >= 0; i--, panel--) {
+    for (i = MAP_TILE_COUNT - 1, panel = &g_battle_target_panels[MAP_TILE_COUNT - 1]; i >= 0; i--, panel--) {
         panel->mark = 0;
     }
 }
@@ -2420,7 +2422,7 @@ static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
     water_depth = tile->depth_half_height.depth * 2;
     effective_height = height;
     if (flags & BATTLE_MOUNT_INFO_FLAG_RIDER) {
-        unit = &g_battle_unit_stats[flags & 0x1f];
+        unit = &g_battle_unit_stats[flags & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
         height += 2;
         effective_height = height;
     }
@@ -2557,7 +2559,7 @@ static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit,
 
     x = unit->x;
     y = unit->position.y;
-    if (flags & 0x80) {
+    if (flags & WEAPON_FLAG_STRIKING) {
         lo = height - 6;
         hi = height + 5;
         battle_target_mark_tile_in_height_band(x - 1, y, lo, hi);
@@ -2613,7 +2615,7 @@ static void battle_target_clear_range_on_untargetable_tiles(void) {
     s32 i = 0;
     target_panel_t* dst = g_battle_target_panel_data;
     map_tile_t* src = g_battle_map_tile_data;
-    for (; i < 0x200; i++) {
+    for (; i < MAP_TILE_COUNT; i++) {
         if (src->flags.untargetable)
             dst->remaining_range = 0;
         src++;
@@ -2726,7 +2728,7 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
     marked = 0;
     panels = g_battle_target_panels;
     upper_panels = panels + 0x100;
-    for (i = 0; i < 0x100; i++) {
+    for (i = 0; i < MAP_TILES_PER_LAYER; i++) {
         other_panel = &upper_panels[i];
         panel = &panels[i];
         lower = &g_battle_map_tile_data[i];
@@ -2789,7 +2791,7 @@ static s32 battle_target_spread_ability_range(const unit_stats_t* unit, u8 range
     }
     count = 0;
     tile = g_battle_map_tile_data;
-    for (i = 0, panels = g_battle_target_panels; i < 0x200; i++) {
+    for (i = 0, panels = g_battle_target_panels; i < MAP_TILE_COUNT; i++) {
         if (panels->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
             tile[i].ceiling_depth_and_marks.ability_range = 1;
             count++;
@@ -2852,13 +2854,13 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
     origin_offset = location * sizeof(target_panel_t);
     origin = (target_panel_t*)((s32)panels + origin_offset);
     index = y * g_battle_map_max_x + x;
-    if (range == 0xff) {
-        for (i = 0; i < 0x200; i++) {
+    if (range == ABILITY_RANGE_WHOLE_MAP) {
+        for (i = 0; i < MAP_TILE_COUNT; i++) {
             panels[i].remaining_range = 1;
             panels[i].mark = 0;
         }
     } else {
-        for (i = 0; i < 0x200; i++) {
+        for (i = 0; i < MAP_TILE_COUNT; i++) {
             panels[i].remaining_range = 0;
             panels[i].mark = 0;
         }
@@ -3769,15 +3771,15 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
     }
     height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK)
         + ((*(u8*)&tile->depth_half_height) >> 5) * 2;
-    if (aoe == 0xff) {
+    if (aoe == ABILITY_RANGE_WHOLE_MAP) {
         cursor = g_battle_target_panels;
-        for (i = 0; i < 0x200; i++) {
+        for (i = 0; i < MAP_TILE_COUNT; i++) {
             cursor[i].remaining_range = 1;
             cursor[i].mark = 0;
         }
     } else {
         cursor = g_battle_target_panels;
-        for (i = 0; i < 0x200; i++) {
+        for (i = 0; i < MAP_TILE_COUNT; i++) {
             cursor[i].remaining_range = 0;
             cursor[i].mark = 0;
         }
@@ -3812,12 +3814,12 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
     }
     if (flags_2 & (ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES)) {
         battle_target_apply_unit_team_eligibility(unit_id, flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES,
-            flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES, aoe == 0xff);
+            flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES, aoe == ABILITY_RANGE_WHOLE_MAP);
     }
     count = 0;
     if (!(flags_2 & (ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES))) {
         tile = g_battle_map_tile_data;
-        for (i = 0, marked = g_battle_target_panels; i < 0x200; i++) {
+        for (i = 0, marked = g_battle_target_panels; i < MAP_TILE_COUNT; i++) {
             if (marked->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
                 count++;
                 tile[i].ceiling_depth_and_marks.targeted = 1;
@@ -3829,7 +3831,7 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         return count;
     }
     tile = g_battle_map_tile_data;
-    for (i = 0, marked = g_battle_target_panels; i < 0x200; i++) {
+    for (i = 0, marked = g_battle_target_panels; i < MAP_TILE_COUNT; i++) {
         if (marked->mark != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
             count++;
             tile[i].ceiling_depth_and_marks.targeted = 1;
@@ -3845,10 +3847,10 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
  *
  * The low byte of `raw_unit_id` selects the acting unit, which is treated as
  * same-team even if its initial and live team fields differ. `allow_allies`
- * and `allow_enemies` are raw nonzero flag values. Unless the ability AoE is
- * `0xff`, every nonempty panel left after filtering is marked selected. */
+ * and `allow_enemies` are raw nonzero flag values. Unless the ability AoE covers
+ * the whole map, every nonempty panel left after filtering is marked selected. */
 static void battle_target_apply_unit_team_eligibility(
-    s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff) {
+    s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_whole_map) {
     s32 relation;
     u8 team_flags;
     s32 panel_index;
@@ -3881,7 +3883,7 @@ static void battle_target_apply_unit_team_eligibility(
             }
         }
     }
-    if (!aoe_is_0xff) {
+    if (!aoe_whole_map) {
         for (i = 0; i < MAP_TILE_COUNT; i++) {
             panel = &g_battle_target_panels[i];
             if (panel->remaining_range != 0) {

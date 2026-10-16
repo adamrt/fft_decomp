@@ -116,6 +116,21 @@ typedef enum action_state {
     ACTION_STATE_PREVIEW = 2,
 } action_state_e;
 
+/* Why battle_action_init_current_data rejects an action; battle_gfx_queue_charge_failure_message
+ * shows a pop-up for the codes below 4. */
+typedef enum action_rejection {
+    ACTION_REJECTION_NONE = 0,
+    ACTION_REJECTION_NO_TARGET = 1, /* pop-up mode only; never returned */
+    ACTION_REJECTION_SILENCED = 2,
+    ACTION_REJECTION_NOT_ENOUGH_MP = 3,
+    ACTION_REJECTION_FROG = 5,   /* a Frog using Charge or an ability other than Attack, Frog Attack or Frog */
+    ACTION_REJECTION_HAMEDO = 6, /* a Hamedo reaction pre-empted the action */
+    /* A battle_unit_action_restriction_e plus this offset. */
+    ACTION_REJECTION_RESTRICTION_OFFSET = 6,
+    ACTION_REJECTION_CANNOT_ACT = 7,
+    ACTION_REJECTION_DEEP_WATER = 8,
+} action_rejection_e;
+
 /* g_battle_action_phase: which unit's action the attack phase is announcing. */
 typedef enum action_phase {
     ACTION_PHASE_PRE_ACTION = 0,    /* a reaction that pre-empts the pending action (Hamedo) */
@@ -275,6 +290,31 @@ typedef char action_display_image_rect_size_must_be_4[(sizeof(action_display_ima
 enum {
     ACTION_STAT_CHANGE_VALUE_MASK = 0x7f,
     ACTION_STAT_CHANGE_INCREASE = 0x80,
+};
+
+/* action_data_t.exp_change: the low seven bits are the amount, and the top bit
+ * marks a loss, the opposite sense of ACTION_STAT_CHANGE_INCREASE. */
+enum {
+    ACTION_EXP_CHANGE_VALUE_MASK = 0x7f,
+    ACTION_EXP_CHANGE_LOSS = 0x80,
+};
+
+/* Action result limits: HP and MP damage and healing stop at 999. The EXP an
+ * action earns starts at 10 for a success or 20 divided by the KO count for a
+ * kill, and ends within 1..99. Poach yields the rare item 31 times in 256. */
+enum {
+    BATTLE_ACTION_VALUE_MAX = 999,
+    BATTLE_EXP_SUCCESS_BASE = 10,
+    BATTLE_EXP_KILL_BASE = 20,
+    BATTLE_EXP_MAX = 99,
+    BATTLE_POACH_RARE_ITEM_CHANCE = 31,
+};
+
+/* End of turn: CT gains 20 for an unused move and 20 for an unused action, and
+ * the result is capped at 60. */
+enum {
+    BATTLE_TURN_UNUSED_CT_REFUND = 20,
+    BATTLE_TURN_END_CT_MAX = 60,
 };
 
 /* strike data */
@@ -454,7 +494,7 @@ s32 battle_action_get_at_list_entry_unit_id(s32 at_index);
 s32 battle_action_find_unit_turn_index(const unit_stats_t* unit);
 void battle_target_hide_cursor(void);
 void battle_action_clear_at_list_id(void);
-void battle_action_show_at_list_entry(s32 arg);
+void battle_action_show_at_list_entry(s32 at_index);
 u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries);
 void battle_action_open_status_menu_at_list_start(void);
 s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_at_entry_t* at_list);
@@ -544,7 +584,7 @@ extern u8 g_battle_mimic_pending_flags[21];
 
 s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id);
 s32 battle_action_apply_tile_trap(unit_stats_t* unit);
-s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id, s32 always_one);
+s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id, s32 spend);
 void battle_action_handle_move_command(void);
 void battle_action_grant_rewards(void);
 void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount);

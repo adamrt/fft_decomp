@@ -9,6 +9,9 @@
 
 static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
 
+/* Set the status panel's sprite CLUTs and the tint of its last five sprites: the dimmed
+ * set with a blue tint for style 1 or while menu input lock mode 1 is on, otherwise the
+ * normal set with a neutral 0x80 tint. */
 void menu_set_status_panel_primitive_colors(menu_status_panel_buffer_t* primitives, const menu_status_thread_t* state) {
     s32 i;
     s32 clut;
@@ -19,7 +22,7 @@ void menu_set_status_panel_primitive_colors(menu_status_panel_buffer_t* primitiv
             (primitives->sprites + i)->clut = clut;
         }
         for (i = 12; i < 19; i++) {
-            (primitives->sprites + i)->clut = 0x7d3c;
+            (primitives->sprites + i)->clut = MENU_CLUT_DIMMED;
         }
         primitives->sprites[0].clut = 0x7c7c;
         primitives->sprites[1].clut = 0x7c7c;
@@ -35,7 +38,7 @@ void menu_set_status_panel_primitive_colors(menu_status_panel_buffer_t* primitiv
             (primitives->sprites + i)->clut = clut;
         }
         for (i = 12; i < 19; i++) {
-            (primitives->sprites + i)->clut = 0x7c3c;
+            (primitives->sprites + i)->clut = MENU_CLUT_NORMAL;
         }
         primitives->sprites[0].clut = 0x7cbc;
         primitives->sprites[1].clut = 0x7cbc;

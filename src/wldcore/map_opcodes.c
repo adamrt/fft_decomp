@@ -100,6 +100,7 @@ void wldcore_opcode_map_check_var_equal(void) {
     }
 }
 
+/* Read the next two 16-bit map script operands and step past them. */
 static void wldcore_script_read_operand_pair(s32* out1, s32* out2) {
     u16* ip = &g_wldcore_script_state.ip;
     u16 next_ip;
@@ -208,6 +209,8 @@ void wldcore_opcode_map_check_date_on_or_after(void) {
     }
 }
 
+/* Read a month and day operand pair from the map script, as
+ * wldcore_script_read_operand_pair does, along with the current month and day. */
 static void wldcore_script_read_operand_pair_and_date(
     s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day) {
     u16* ipp;
@@ -401,6 +404,8 @@ void wldcore_opcode_map_check_ramza_brave_at_least(void) {
     }
 }
 
+/* Return the first party slot holding Ramza (any of his chapter sprite sets), or
+ * PARTY_MEMBER_SLOT_COUNT when none does; callers use the result unchecked. */
 static s32 wldcore_get_ramza_roster_index(void) {
     s32 i;
     for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
@@ -529,7 +534,7 @@ void wldcore_list_open_facts(void) {
     origin.x = 0x58;
     layout.visible_rows = i;
     origin.y = 0x50;
-    wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_SCRIPT_FLAGS_01A4_01BB, count, i);
+    wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_FACTS, count, i);
     wldcore_window_start_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL,
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count, &layout, &origin);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
@@ -540,7 +545,7 @@ void wldcore_list_open_facts(void) {
     record_index = g_wldcore_menu_stack_depth;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_wldcore_menu_ordering_table_offset = 9;
-    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_SCRIPT_FLAGS_01A4_01BB;
+    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_FACTS;
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
@@ -565,12 +570,12 @@ void wldcore_list_handle_script_flags_01a4_01bb_input(wldcore_menu_panel_level_t
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         g_wldcore_menu_stack_depth--;
         if (level->result != 0) {
-            wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_SCRIPT_FLAGS_01A4_01BB);
+            wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_FACTS);
             wldcore_menu_push_script_flag_01a4_detail_level(
                 g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
-        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_SCRIPT_FLAGS_01A4_01BB);
+        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_FACTS);
         wldcore_menu_dispatch_resume_handler();
         return;
     }
@@ -645,7 +650,7 @@ static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value) {
         .flags |= WORLD_RENDER_RECORD_HIDDEN;
     g_text_substitution_values[0] = value + TEXT_ID_FACT_NAME_BASE;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
-    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_SCRIPT_FLAG_01A4_DETAIL;
+    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_FACT_DETAIL;
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 

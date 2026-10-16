@@ -737,6 +737,8 @@ void battle_gfx_set_thrown_item_graphic_palette(s32 item_id, battle_unit_t* unit
 
 struct battle_unit;
 
+/* A plain call through to battle_unit_set_animation_based_on_status, used by the
+ * battle state handlers. */
 void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit) {
     battle_unit_set_animation_based_on_status(unit);
 }
@@ -2898,7 +2900,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->standing_on_battle_id_plus_one = 0;
     unit->stats = stats;
     unit->requested_animation = 0;
-    unit->facing = facing * 1024;
+    unit->facing = facing * BATTLE_FACING_QUARTER_TURN;
     unit->camera_facing_sixteenth = unit->camera_facing_quadrant = unit->attack_facing = -1;
     unit->mount_state = BATTLE_UNIT_MOUNT_STATE_NONE;
     unit->horizontal_flip_flag = 0;

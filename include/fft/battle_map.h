@@ -915,8 +915,8 @@ void battle_map_update_and_store_palette_colors(
 void battle_map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all);
 void battle_map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
 s32 battle_map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color);
-void battle_map_update_palette_from_other(
-    const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 preset, s16 red, s16 green, s16 blue, s32 final_value);
+void battle_map_update_palette_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
+    s16 red, s16 green, s16 blue, s32 final_value);
 
 /* lighting and colors */
 extern rgb24_t g_battle_map_background_color;

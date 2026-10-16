@@ -29,6 +29,8 @@
 
 static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
 
+/* As an event starts in battle, run each of its InflictStatus instructions whose unit
+ * has Float or Jump, one at a time on a free thread. */
 void script_process_inflict_status_commands(void) {
     s32 instruction_offset = 0;
     s32 runtime_id;
@@ -44,9 +46,9 @@ void script_process_inflict_status_commands(void) {
             runtime_id = script_resolve_runtime_id(script_read_s16(instruction + instruction_offset + 1));
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
                 battle_id = battle_unit_get_battle_id_by_runtime_id(runtime_id);
-                /* 2000 is unit_get_battle_id_by_event_unit_id's "no unit" value; this lookup fails
-                 * with -1 instead, so the test never rejects anything. */
-                if (battle_id != 0x7d0) {
+                /* EVENT_BATTLE_ID_NONE is unit_get_battle_id_by_event_unit_id's "no unit" value;
+                 * this lookup fails with -1 instead, so the test never rejects anything. */
+                if (battle_id != EVENT_BATTLE_ID_NONE) {
                     unit = battle_unit_get_stats_from_battle_id(battle_id);
                     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
                             & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
@@ -159,8 +161,8 @@ s32 script_is_tutorial_event_slot(void) {
 #endif
 }
 
-/* The battle id of the unit an event unit id resolves to, or 2000 when it resolves to no runtime
- * unit or one without battle stats. */
+/* The battle id of the unit an event unit id resolves to, or EVENT_BATTLE_ID_NONE (2000) when it
+ * resolves to no runtime unit or one without battle stats. */
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
     s32 runtime_id = script_resolve_runtime_id(event_unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -169,7 +171,7 @@ s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
             return idx;
         }
     }
-    return 0x7D0;
+    return EVENT_BATTLE_ID_NONE;
 }
 
 /* Set the flag that menu_clear_modal_open clears: the companion overlay openers (OPTION.OUT and
@@ -408,7 +410,7 @@ void menu_init_sprt(SPRT* sprite) {
     sprite->w = 0;
     sprite->h = 0;
     sprite->y0 = 0;
-    sprite->clut = 0x7c3c;
+    sprite->clut = MENU_CLUT_NORMAL;
     SetSemiTrans(sprite, 1);
 }
 
@@ -458,7 +460,7 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
                 buffer->icon_flags = 0;
                 buffer->scroll_range = 1;
                 buffer->scroll_position = 1;
-                menu_init_sprite_array(buffer->sprites, 4, 0x7c3c);
+                menu_init_sprite_array(buffer->sprites, 4, MENU_CLUT_NORMAL);
                 menu_init_sprite_array(buffer->icon_sprites, 3, 0x7e7c);
                 SetDrawMode(&buffer->draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
                 SetSemiTrans(&buffer->sprites[0], 0);
@@ -596,10 +598,10 @@ void menu_draw_active_window_frames(void) {
 #ifdef FFT_WORLD
         if (window->is_message_box != 0) {
             if (g_menu_input_lock_mode != 0) {
-                window->quads[0].clut = 0x7D3C;
+                window->quads[0].clut = MENU_CLUT_DIMMED;
                 setRGB0(&window->quads[1], 0x40, 0x50, 0x70);
             } else {
-                window->quads[0].clut = 0x7C3C;
+                window->quads[0].clut = MENU_CLUT_NORMAL;
             }
         }
 #endif
@@ -728,7 +730,7 @@ void gfx_alloc_texture_rect(RECT* rect, void* prim, u32* image) {
                 sprite->v0 = y;
                 sprite->w = rect->w;
                 sprite->h = rect->h;
-                sprite->clut = 0x7C3C;
+                sprite->clut = MENU_CLUT_NORMAL;
             } else {
                 POLY_FT4* quad = prim;
 
@@ -740,7 +742,7 @@ void gfx_alloc_texture_rect(RECT* rect, void* prim, u32* image) {
                 quad->u1 = quad->u3 = rect->w + x;
                 quad->v2 = quad->v3 = rect->h + y;
                 quad->tpage = GetTPage(0, 0, 0x1C0, 0);
-                quad->clut = 0x7C3C;
+                quad->clut = MENU_CLUT_NORMAL;
             }
             rect->x = column * 4 + 0x1C0;
             rect->y = y;
@@ -971,7 +973,7 @@ void menu_init_primitive_colors_normal(menu_palette_primitives_t* menu) {
         line->g0 = g_menu_palette_colors.colors[palette_index].green << 3;
         line->b0 = g_menu_palette_colors.colors[palette_index].blue << 3;
     }
-    menu->sprite.clut = 0x7c3c;
+    menu->sprite.clut = MENU_CLUT_NORMAL;
 }
 
 /* Give the twelve frame lines the colors of the dimmed menu palette (the second
@@ -987,5 +989,5 @@ void menu_init_primitive_colors_dimmed(menu_palette_primitives_t* menu) {
         line->g0 = g_menu_palette_colors.colors[palette_index].green << 3;
         line->b0 = g_menu_palette_colors.colors[palette_index].blue << 3;
     }
-    menu->sprite.clut = 0x7d3c;
+    menu->sprite.clut = MENU_CLUT_DIMMED;
 }

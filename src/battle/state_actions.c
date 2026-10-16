@@ -270,8 +270,8 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
                 target->map_x = unit->strike.target_new_x;
                 target->map_y = unit->strike.target_new_y;
                 target->map_z = unit->strike.target_new_map_level;
-                battle_unit_set_tile_position(
-                    target->stats->battle_id, target->map_x, target->map_y, target->map_z, target->facing / 1024);
+                battle_unit_set_tile_position(target->stats->battle_id, target->map_x, target->map_y, target->map_z,
+                    target->facing / BATTLE_FACING_QUARTER_TURN);
                 battle_unit_set_move_and_world_coords(target);
             }
         }

@@ -29,6 +29,9 @@ static s32 world_menu_handle_remove_all_equipment(void);
 static s32 world_menu_run_best_fit_equipment(void);
 static s32 world_menu_run_remove_item(void);
 
+/* The formation screen's Item menu, run each frame: slide the grid in or out, keep the
+ * icon menu running, enter Equip, Best Fit, Remove (all refused for a locked unit) or the
+ * item list, and come back to the icon menu when that submenu ends. */
 void world_formation_item_menu(void) {
     s32 state = g_world_formation_current_menu;
     s8 running;
@@ -82,9 +85,9 @@ void world_formation_item_menu(void) {
     if (g_world_item_menu_unit_index != g_unit_selected_index) {
         g_world_item_menu_unit_index = g_unit_selected_index;
         if (world_formation_get_unit_lock(g_unit_selected_index) < 0) {
-            g_world_item_icon_menu.text_id = 0xD802;
+            g_world_item_icon_menu.text_id = WORLD_FORMATION_ITEM_MENU_TEXT_LOCKED;
         } else {
-            g_world_item_icon_menu.text_id = 0xD801;
+            g_world_item_icon_menu.text_id = WORLD_FORMATION_ITEM_MENU_TEXT_UNLOCKED;
         }
         g_world_menu_text_redraw_request = 1;
     }
@@ -524,6 +527,8 @@ static s32 world_menu_handle_remove_all_equipment(void) {
 void world_formation_menu_noop_callback(void) {
 }
 
+/* Thread entry of the quantity row of g_item_action_menu: a plain call to
+ * world_menu_number_entry_thread. */
 void world_item_discard_quantity_entry_thread(void) {
     world_menu_number_entry_thread();
 }

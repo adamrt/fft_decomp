@@ -47,6 +47,9 @@ static s32 battle_unit_apply_level_up_down_ability(void);
 static s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min);
 static void battle_unit_update_attacker_earned_experience(s32 outcome);
 
+/* When the unit acts with the Jump skillset while Transparent is inflicted on it, make
+ * the attacker's own action result a hit that removes Transparent. Also points
+ * g_battle_action_attacker_data at that result. */
 void battle_status_remove_transparent_if_jump_used(unit_stats_t* unit) {
     action_data_t* action = &g_battle_action_attacker_action_data;
     g_battle_action_attacker_data = action;
@@ -135,8 +138,8 @@ static void battle_move_apply_knockback(void) {
             diff = (g_battle_action_current_ability.knockback_fall_height >> 1) - unit->jump;
             if (diff > 0) {
                 amount = (diff * unit->max_hp) / 10;
-                if (amount >= 0x3E8) {
-                    amount = 0x3E7;
+                if (amount > BATTLE_ACTION_VALUE_MAX) {
+                    amount = BATTLE_ACTION_VALUE_MAX;
                 }
             }
         }
@@ -174,13 +177,13 @@ static s32 battle_action_perform_reaction_ability(void) {
     battle_action_clear_data();
     switch (g_battle_current_reaction_ability_id) {
     case ABILITY_ID_REACTION_PA_SAVE:
-        g_battle_action_target_data->pa_change = 0x81;
+        g_battle_action_target_data->pa_change = ACTION_STAT_CHANGE_INCREASE | 1;
         break;
     case ABILITY_ID_REACTION_MA_SAVE:
-        g_battle_action_target_data->ma_change = 0x81;
+        g_battle_action_target_data->ma_change = ACTION_STAT_CHANGE_INCREASE | 1;
         break;
     case ABILITY_ID_REACTION_SPEED_SAVE:
-        g_battle_action_target_data->sp_change = 0x81;
+        g_battle_action_target_data->sp_change = ACTION_STAT_CHANGE_INCREASE | 1;
         break;
     case ABILITY_ID_REACTION_SUNKEN_STATE:
         g_battle_action_target_data->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
@@ -211,10 +214,10 @@ static s32 battle_action_perform_reaction_ability(void) {
         }
         break;
     case ABILITY_ID_REACTION_BRAVE_UP:
-        g_battle_action_target_data->brave_change = 0x83;
+        g_battle_action_target_data->brave_change = ACTION_STAT_CHANGE_INCREASE | 3;
         break;
     case ABILITY_ID_REACTION_FAITH_UP:
-        g_battle_action_target_data->faith_change = 0x83;
+        g_battle_action_target_data->faith_change = ACTION_STAT_CHANGE_INCREASE | 3;
         break;
     case ABILITY_ID_REACTION_HP_RESTORE:
         attack_type = ACTION_TYPE_HP_HEALING;
@@ -560,17 +563,17 @@ void battle_action_finalize_target_current_action(void) {
     if (g_battle_action_target_data->attack_accuracy == 0) {
         g_battle_action_target_data->hit = 0;
     }
-    if (g_battle_action_target_data->hp_damage >= 1000) {
-        g_battle_action_target_data->hp_damage = 999;
+    if (g_battle_action_target_data->hp_damage > BATTLE_ACTION_VALUE_MAX) {
+        g_battle_action_target_data->hp_damage = BATTLE_ACTION_VALUE_MAX;
     }
-    if (g_battle_action_target_data->hp_healing >= 1000) {
-        g_battle_action_target_data->hp_healing = 999;
+    if (g_battle_action_target_data->hp_healing > BATTLE_ACTION_VALUE_MAX) {
+        g_battle_action_target_data->hp_healing = BATTLE_ACTION_VALUE_MAX;
     }
-    if (g_battle_action_target_data->mp_damage >= 1000) {
-        g_battle_action_target_data->mp_damage = 999;
+    if (g_battle_action_target_data->mp_damage > BATTLE_ACTION_VALUE_MAX) {
+        g_battle_action_target_data->mp_damage = BATTLE_ACTION_VALUE_MAX;
     }
-    if (g_battle_action_target_data->mp_healing >= 1000) {
-        g_battle_action_target_data->mp_healing = 999;
+    if (g_battle_action_target_data->mp_healing > BATTLE_ACTION_VALUE_MAX) {
+        g_battle_action_target_data->mp_healing = BATTLE_ACTION_VALUE_MAX;
     }
     if (g_battle_action_target_data->hp_damage >= g_battle_action_target->hp) {
         battle_action_clear_knockback_flag();
@@ -859,7 +862,7 @@ static s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
         return 0;
     }
     idx = unit->job_id - JOB_ID_CHOCOBO;
-    if (main_util_roll_pass_fail(0x100, 0x1f) != 0) {
+    if (main_util_roll_pass_fail(256, BATTLE_POACH_RARE_ITEM_CHANCE) != 0) {
         item = g_main_item_poach_table[idx].common_item;
     } else {
         item = g_main_item_poach_table[idx].rare_item;
@@ -1281,8 +1284,8 @@ static void battle_action_check_mp_switch_usability(void) {
     }
     action = g_battle_action_target_data;
     action->mp_damage = action->mp_damage + action->hp_damage;
-    if (action->mp_damage >= 0x3E8) {
-        action->mp_damage = 0x3E7;
+    if (action->mp_damage > BATTLE_ACTION_VALUE_MAX) {
+        action->mp_damage = BATTLE_ACTION_VALUE_MAX;
     }
     action2 = g_battle_action_target_data;
     action2->attack_type &= ~ACTION_TYPE_HP_DAMAGE;
@@ -1329,6 +1332,9 @@ s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit) {
     return main_util_roll_pass_fail(0x64, unit->brave);
 }
 
+/* Take the equipment a Break or Steal hit off the target (unremovable items stay) and
+ * give stolen items to the attacker's side; losing a weapon also cancels a Charge in
+ * progress. Returns 1 when anything was removed. */
 static s32 battle_action_remove_broken_or_stolen_equipment(void) {
     s32 i;
     s32 count = 0;
@@ -1433,12 +1439,12 @@ static void battle_unit_update_attacker_earned_experience(s32 outcome) {
 
     if ((g_battle_action_context == ACTION_CONTEXT_PRIMARY) && (outcome != 0)) {
         if (outcome == 1) {
-            base = 10;
+            base = BATTLE_EXP_SUCCESS_BASE;
         } else {
             divisor = g_battle_action_target->ko_count;
-            base = 20;
+            base = BATTLE_EXP_KILL_BASE;
             if (divisor != 0) {
-                base = 20 / divisor;
+                base = BATTLE_EXP_KILL_BASE / divisor;
             }
         }
         attacker = g_battle_action_attacker;
@@ -1450,8 +1456,8 @@ static void battle_unit_update_attacker_earned_experience(s32 outcome) {
         if (attacker->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_GAINED_EXP_UP) {
             exp = exp * 2;
         }
-        if (exp >= 100) {
-            exp = 99;
+        if (exp > BATTLE_EXP_MAX) {
+            exp = BATTLE_EXP_MAX;
         }
         signed_exp = exp << 16;
         if (g_battle_action_current_ability.earned_experience < (signed_exp >> 16)) {
@@ -1925,7 +1931,8 @@ static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only
                 g_battle_action_target->auto_battle_target = 0;
             }
         }
-        if (!(g_battle_action_target->initial_team_flags & BATTLE_TEAM_MASK) && (i == 1 || i == 2)) {
+        if (!(g_battle_action_target->initial_team_flags & BATTLE_TEAM_MASK)
+            && (i == STATUS_ID_CRYSTAL || i == STATUS_ID_DEAD)) {
             g_battle_player_unit_fallen = 1;
         }
     }

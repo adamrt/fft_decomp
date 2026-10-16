@@ -134,6 +134,16 @@ typedef enum world_formation_unit_lock {
     WORLD_FORMATION_UNIT_UNLOCKED = 1,
 } world_formation_unit_lock_e;
 
+/* Command texts of the formation's Item and Ability menus, chosen by the
+ * selected unit's world_formation_unit_lock_e. */
+enum {
+    WORLD_FORMATION_ITEM_MENU_TEXT_UNLOCKED = 0xd801,
+    WORLD_FORMATION_ITEM_MENU_TEXT_LOCKED = 0xd802,
+    WORLD_FORMATION_ABILITY_MENU_TEXT_UNLOCKED = 0xd80b,
+    WORLD_FORMATION_ABILITY_MENU_TEXT_LOCKED = 0xd80c,
+    WORLD_FORMATION_ABILITY_MENU_TEXT_MIME = 0xd80d,
+};
+
 /* The formation screen's state: the index of its handler in
  * g_world_formation_menu_handlers. */
 typedef enum world_formation_menu {

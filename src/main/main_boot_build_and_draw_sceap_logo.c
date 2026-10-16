@@ -1,3 +1,5 @@
+/* The publisher's logo strip shown at power-on, faded in and out. */
+
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_gfx.h"
@@ -32,7 +34,7 @@ void main_boot_build_and_draw_sceap_logo(void) {
     SetSemiTrans(&polygons[0], 1);
     polygons[1] = polygons[0];
 
-    SetDrawMode(&draw_modes[0], 0, 0, 0x40, &image_rect);
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
     draw_modes[1] = draw_modes[0];
 
     image_rect.x = 0;

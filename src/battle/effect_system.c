@@ -2365,6 +2365,8 @@ s32 battle_return_zero_801b0fec(void) {
     return 0;
 }
 
+/* An empty routine among the secondary-effect handlers. Nothing references it, not
+ * even g_battle_effect_secondary_handlers. */
 void battle_noop_801b0ff4(void) {
 }
 
@@ -2775,8 +2777,8 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
         g_battle_effect_secondary_state.charge.color = g_battle_effect_current_secondary->parameter;
         g_battle_effect_secondary_state.charge.max_trails = g_battle_effect_charge_line_params[index].max_trails;
         g_battle_effect_secondary_state.charge.fade_row = g_battle_effect_charge_line_params[index].fade_row;
-        SetDrawMode(&state->mode[0], 1, 1, 0x20, 0);
-        SetDrawMode(&state->mode[1], 1, 1, 0x20, 0);
+        SetDrawMode(&state->mode[0], 1, 1, PSYQ_GPU_TPAGE_ABR_ADD, 0);
+        SetDrawMode(&state->mode[1], 1, 1, PSYQ_GPU_TPAGE_ABR_ADD, 0);
         for (i = 0; i < 2; i++) {
             for (j = 0; j < 96; j++) {
                 SetLineG2(&state->lines[i][j]);

@@ -80,7 +80,7 @@ static void battle_state_run_deployment(void) {
     g_battle_screen_fade_polygons[1] = g_battle_screen_fade_polygons[0];
     g_battle_gfx_screen_modulation_polygons[0] = g_battle_screen_fade_polygons[0];
     g_battle_gfx_screen_modulation_polygons[1] = g_battle_screen_fade_polygons[0];
-    SetDrawMode(&g_battle_screen_fade_draw_modes[0], 0, 0, 0x40, &window);
+    SetDrawMode(&g_battle_screen_fade_draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &window);
     g_battle_screen_fade_draw_modes[1] = g_battle_screen_fade_draw_modes[0];
     g_battle_gfx_screen_modulation_draw_modes[0] = g_battle_screen_fade_draw_modes[0];
     g_battle_gfx_screen_modulation_draw_modes[1] = g_battle_screen_fade_draw_modes[0];
@@ -858,6 +858,9 @@ void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination)
     }
 }
 
+/* Reset the unit sprite renderer at battle start: the identity third row and column of
+ * the numeric display matrix, depth 0x200 in the GTE projection inputs, the frame
+ * counters, and the sprite primitive pool, which begins just past the unit slots. */
 static void battle_gfx_init_render_state(void) {
     g_battle_gfx_numeric_display_matrix.m[2][2] = ONE;
     g_battle_gte_rtps_vxy0.vz = 0x200;

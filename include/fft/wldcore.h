@@ -368,7 +368,7 @@ typedef enum wldcore_message_block {
     WLDCORE_MESSAGE_BLOCK_STORY_EVENTS = 4,
     WLDCORE_MESSAGE_BLOCK_TUTORIAL_TOPICS = 5,
     WLDCORE_MESSAGE_BLOCK_BRAVE_STORY_PROPOSITIONS = 10,
-    WLDCORE_MESSAGE_BLOCK_SCRIPT_FLAGS_01A4_01BB = 11,
+    WLDCORE_MESSAGE_BLOCK_FACTS = 11,
     WLDCORE_MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST = 16, /* one block per proposition id */
 } wldcore_message_block_e;
 
@@ -482,8 +482,8 @@ typedef struct wldcore_proposition_fields {
     u16 _unused_24;      /* 0x24 */
     u16 speaker_mode;    /* 0x26; wldcore_proposition_speaker_e */
     u16 preferred_job;   /* 0x28 */
-    u16 required_script_var_6f; /* 0x2a; minimum EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY */
-    u16 condition_value;        /* 0x2c; zodiac month or proposition status index */
+    u16 required_shop_availability; /* 0x2a; minimum EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY */
+    u16 condition_value;            /* 0x2c; zodiac sign or proposition status index */
 } wldcore_proposition_fields_t;
 
 typedef char wldcore_proposition_fields_size_must_be_46[sizeof(wldcore_proposition_fields_t) == 46 ? 1 : -1];
@@ -680,13 +680,13 @@ typedef enum wldcore_cursor_slot {
     WLDCORE_CURSOR_SLOT_UNEXPLORED_LANDS = 7,
     WLDCORE_CURSOR_SLOT_TREASURES = 8,
     WLDCORE_CURSOR_SLOT_STORY_EVENTS = 10,
-    WLDCORE_CURSOR_SLOT_SET_SCRIPT_VARIABLES_03C0_03FF = 11,
+    WLDCORE_CURSOR_SLOT_PERSONS = 11,
     WLDCORE_CURSOR_SLOT_TUTORIAL_TOPICS = 12,
     WLDCORE_CURSOR_SLOT_PARTICIPANT_LIST = 15,
     WLDCORE_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS = 16,
     WLDCORE_CURSOR_SLOT_FORMATION_TUTORIALS = 18,
     WLDCORE_CURSOR_SLOT_TUTORIAL_MASK_1_ENTRIES = 19,
-    WLDCORE_CURSOR_SLOT_SCRIPT_FLAGS_01A4_01BB = 20,
+    WLDCORE_CURSOR_SLOT_FACTS = 20,
 } wldcore_cursor_slot_e;
 
 enum { WLDCORE_CURSOR_SLOT_COUNT = 21 };

@@ -1,3 +1,5 @@
+/* The thread drawing the numeric editor panel. */
+
 #include "fft/event_debugchr.h"
 #include "fft/gfx.h"
 #include "fft/main_gfx.h"
@@ -114,7 +116,7 @@ void debugchr_editor_run_numeric_thread(void) {
         SetDrawOffset(&buffer->draw_offsets[1].packet, (u16*)&buffer->draw_offsets[1].position);
         if (thread->style == 1 || g_menu_input_lock_mode == 1) {
             for (i = 17; i >= 0; i--) {
-                buffer->sprites[i].clut = 0x7D3C;
+                buffer->sprites[i].clut = MENU_CLUT_DIMMED;
             }
             buffer->sprites[10].clut = 0x7EBC;
             buffer->sprites[14].clut = 0x7F7D;
@@ -122,7 +124,7 @@ void debugchr_editor_run_numeric_thread(void) {
             buffer->sprites[16].clut = 0x7F7D;
         } else {
             for (i = 17; i >= 0; i--) {
-                buffer->sprites[i].clut = 0x7C3C;
+                buffer->sprites[i].clut = MENU_CLUT_NORMAL;
             }
             buffer->sprites[10].clut = 0x7D7C;
             buffer->sprites[14].clut = 0x7FFC;

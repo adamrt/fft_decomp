@@ -663,8 +663,8 @@ enum {
  * copies element into the considered AI ability. Its loader reads CT at
  * 0x80195c64 and AoE at 0x80195cec. Other bytes stay provisional. */
 typedef struct ability_secondary_data {
-    u8 range;                /* 0x00 */
-    u8 aoe;                  /* 0x01 */
+    u8 range;                /* 0x00; ABILITY_RANGE_WHOLE_MAP covers the whole map */
+    u8 aoe;                  /* 0x01; ABILITY_RANGE_WHOLE_MAP covers the whole map */
     u8 vertical;             /* 0x02; passed as the vertical tolerance at 0x8017a47c */
     u8 flags_1;              /* 0x03; ability_secondary_flags_1_e */
     u8 flags_2;              /* 0x04; ability_secondary_flags_2_e */
@@ -679,6 +679,9 @@ typedef struct ability_secondary_data {
     u8 mp_cost;              /* 0x0d; ability-list eligibility compares this with max MP at 0x8019a89c */
 } ability_secondary_data_t;
 typedef char ability_secondary_data_size_must_be_14[(sizeof(ability_secondary_data_t) == 14) ? 1 : -1];
+
+/* An ability_secondary_data_t range or AoE that covers every panel of the map. */
+enum { ABILITY_RANGE_WHOLE_MAP = 0xff };
 
 /* Jump ability record, 12 of them at g_main_jump_ability_data: horizontal
  * range and vertical reach. */

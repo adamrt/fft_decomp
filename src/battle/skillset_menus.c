@@ -1013,7 +1013,7 @@ static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
         action->attack_type = ACTION_TYPE_STATUS_CHANGE;
     }
     if (unit->brave < 10) {
-        action->brave_change = 0x81;
+        action->brave_change = ACTION_STAT_CHANGE_INCREASE | 1;
         action->attack_type |= ACTION_TYPE_PSEUDO_STATUS;
     }
     return (action->attack_type != 0) * 2;
@@ -1477,15 +1477,15 @@ s32 battle_action_end_turn(s32 unit_id) {
     action_check = (status4 & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT)) | unit->action_taken
         | (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)] & STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
     if (movement_check == 0) {
-        ct += 0x14;
+        ct += BATTLE_TURN_UNUSED_CT_REFUND;
     }
     result = ct;
     if (action_check == 0) {
-        ct += 0x14;
+        ct += BATTLE_TURN_UNUSED_CT_REFUND;
         result = ct;
     }
-    if (result >= 0x3D)
-        ct = 0x3C;
+    if (result > BATTLE_TURN_END_CT_MAX)
+        ct = BATTLE_TURN_END_CT_MAX;
     unit->ct = ct;
     unit->has_turn = 0;
     return 1;
@@ -1525,13 +1525,13 @@ s32 battle_action_check_change_of_turn(s32 unit_id) {
 /* End the unit's Charging, Jump, Defending and Performing statuses and drop its charged ability
  * (action state none). Same body as crystals_and_treasure.c's static battle_status_disable_acting. */
 void battle_status_enable_disable_acting(unit_stats_t* unit) {
-    main_status_set_action_state(unit, 0);
+    main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_NONE);
 }
 
 /* Put the unit in the Defending action state, which ends Charging, Jump and Performing and drops
  * any charged ability. Used by the Defend command and the AI's simulation of it; always returns 0. */
 s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {
-    main_status_set_action_state(&g_battle_unit_stats[unit_id], STATUS_HANDLER_INDEX(STATUS_ID_DEFENDING));
+    main_status_set_action_state(&g_battle_unit_stats[unit_id], MAIN_UNIT_ACTION_STATE_DEFENDING);
     return 0;
 }
 

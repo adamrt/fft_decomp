@@ -1,3 +1,5 @@
+/* The thread drawing a window frame of nine border sprites until asked to stop. */
+
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
@@ -61,7 +63,7 @@ void menu_window_frame_thread(void) {
     text_blit_glyph(g_menu_glyph_sheet->pixels, g_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
 
     LoadImage(&texture, (u32*)g_menu_window_frame_image);
-    menu_init_sprite_array(prim->sprites, 9, 0x7c3c);
+    menu_init_sprite_array(prim->sprites, 9, MENU_CLUT_NORMAL);
     texture_u = (texture.x & 0x3f) * 4;
     /* The target loads the returned rectangle's y once as a byte (lbu 0x1a(sp))
        and reuses it for every 16-bit and byte store below. */
@@ -147,9 +149,9 @@ void menu_window_frame_thread(void) {
            the target keeps in this variable's register once the texture column
            is dead. A separate local is allocated a different callee-saved
            register and does not reproduce the target. */
-        texture_u = 0x7d3c;
+        texture_u = MENU_CLUT_DIMMED;
         if (thread_get_current_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
-            texture_u = 0x7c3c;
+            texture_u = MENU_CLUT_NORMAL;
         }
         for (index = 8; index >= 0; index--) {
             prim->sprites[index].clut = texture_u;

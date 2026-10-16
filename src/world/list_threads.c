@@ -74,7 +74,7 @@ void menu_run_equipment_list_thread_variant(void) {
         screen->lines[i].y1 += g_world_equipment_panel_origin.y;
     }
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
-    menu_init_sprite_array(&screen->sprites[12], 7, 0x7c3c);
+    menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
     screen->sprites[0].clut = 0x7cbc;
     screen->sprites[1].clut = 0x7cbc;
     mem_copy_bytes_nonempty(&screen[1], screen, sizeof(menu_status_panel_buffer_t));
@@ -232,7 +232,7 @@ void menu_run_ability_list_thread_variant(void) {
         screen->lines[i].y1 += g_world_equipment_panel_origin.y;
     }
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
-    menu_init_sprite_array(&screen->sprites[12], 7, 0x7c3c);
+    menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
     screen->sprites[0].clut = 0x7cbc;
     screen->sprites[1].clut = 0x7cbc;
     mem_copy_bytes_nonempty(&screen[1], screen, sizeof(menu_status_panel_buffer_t));

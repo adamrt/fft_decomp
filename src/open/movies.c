@@ -149,7 +149,7 @@ void open_movie_start_stream(s32 sector, s32 end_frame, s32 video_end_frame, s32
 
     for (;;) {
         open_movie_init_stream(sector, open_movie_handle_mdec_output_slice);
-        while (CdRead2(0x1e0) == 0) { }
+        while (CdRead2(CdlModeStream | CdlModeSpeed | CdlModeRT | CdlModeSize1) == 0) { }
         if (open_movie_decode_next_frame(&g_open_movie_mdec_stream_state) != 0) {
             break;
         }
@@ -190,7 +190,8 @@ static void open_movie_update_stream_frame(void) {
         open_movie_start_cd_stream_read(&position);
     }
 
-    DecDCTin(g_open_movie_mdec_stream_state.vlc_buffers[g_open_movie_mdec_stream_state.vlc_buffer_index], 3);
+    DecDCTin(g_open_movie_mdec_stream_state.vlc_buffers[g_open_movie_mdec_stream_state.vlc_buffer_index],
+        PSYQ_PRESS_MODE_RGB24 | PSYQ_PRESS_MODE_SET_BIT15);
     words = g_open_movie_mdec_stream_state.output_rect.w;
     words *= g_open_movie_mdec_stream_state.output_rect.h;
     DecDCTout(
@@ -394,13 +395,13 @@ static void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* stat
     state->output_ready = 0;
 }
 
-/* Set the read location and start the streaming read (CdRead2 mode 0x1a0),
- * repeating both until the read is accepted. Unlike the first read in
- * open_movie_start_stream (0x1e0), this mode leaves out CdlModeRT. */
+/* Set the read location and start the streaming read (stream, double speed and
+ * 2340-byte sectors), repeating both until the read is accepted. Unlike the first
+ * read in open_movie_start_stream, this mode leaves out CdlModeRT. */
 static void open_movie_start_cd_stream_read(const CdlLOC* location) {
     for (;;) {
         while (CdControl(CdlSetloc, (u8*)location, 0) == 0) { }
-        if (CdRead2(0x1a0) != 0) {
+        if (CdRead2(CdlModeStream | CdlModeSpeed | CdlModeSize1) != 0) {
             break;
         }
     }
