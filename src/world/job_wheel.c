@@ -563,8 +563,8 @@ static void world_formation_build_job_wheel_availability(void) {
         entry = g_world_job_wheel_jobs[i];
         id = entry & WORLD_JOB_LIST_ENTRY_ID_MASK;
         if (id == g_world_unit_pointers[unit]->identity.job_id || !(entry & WORLD_JOB_LIST_ENTRY_UNAVAILABLE)) {
-            g_world_job_wheel_mastered_jobs[i] = ability_build_list_variant(unit, id, MENU_ABILITY_CATEGORY_ALL, 0,
-                                                     WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED)
+            g_world_job_wheel_mastered_jobs[i]
+                = ability_build_list_variant(unit, id, MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED)
                 == 0;
         } else {
             g_world_job_wheel_mastered_jobs[i] = 0;

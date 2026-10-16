@@ -70,7 +70,7 @@ s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s1
     s32 kind;
     s16 id;
 
-    if (mode == WORLD_ABILITY_LIST_MODE_LEARNED_ONLY && ability_category == MENU_ABILITY_CATEGORY_ACTION) {
+    if (mode == ABILITY_LIST_MODE_LEARNED_ONLY && ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         return world_ability_list_secondary_skillsets(unit_index, list);
     }
     skillset = job_get_skillset(job);
@@ -118,7 +118,7 @@ s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s1
         if (id == 0) {
             continue;
         }
-        if (mode == WORLD_ABILITY_LIST_MODE_VIEW_ALL) {
+        if (mode == ABILITY_LIST_MODE_VIEW_ALL) {
             if (!kind) {
                 if (!(g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT)) {
                     id |= ABILITY_LIST_ENTRY_DISABLED;
@@ -128,12 +128,12 @@ s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s1
             }
             list[count] = id;
             count++;
-        } else if (mode == WORLD_ABILITY_LIST_MODE_LEARNED_ONLY) {
+        } else if (mode == ABILITY_LIST_MODE_LEARNED_ONLY) {
             if (kind) {
                 list[count] = id;
                 count++;
             }
-        } else if (mode == WORLD_ABILITY_LIST_MODE_LEARN_MENU) {
+        } else if (mode == ABILITY_LIST_MODE_LEARN_MENU) {
             if (!kind) {
                 if (g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT) {
                     continue;
@@ -146,13 +146,13 @@ s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s1
             }
             list[count] = id;
             count++;
-        } else if (mode == WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED) {
+        } else if (mode == ABILITY_LIST_MODE_COUNT_UNLEARNED) {
             if (!kind) {
                 count++;
             }
         }
     }
-    if (mode != WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED) {
+    if (mode != ABILITY_LIST_MODE_COUNT_UNLEARNED) {
         list[count] = -1;
     }
     return count;
@@ -181,10 +181,10 @@ s32 world_ability_build_equippable_rsm_list(s16 unit_index, s32 slot, s16* out) 
     s16 job_id = g_world_unit_pointers[unit_index]->identity.job_id;
 
     count = ability_build_list_variant(
-        unit_index, job_get_base_variant(unit_index), slot, abilities, WORLD_ABILITY_LIST_MODE_LEARNED_ONLY);
+        unit_index, job_get_base_variant(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
     for (i = 1; i < JOB_ID_GENERIC_COUNT - 1; i++) {
         count += ability_build_list_variant(
-            unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], WORLD_ABILITY_LIST_MODE_LEARNED_ONLY);
+            unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], ABILITY_LIST_MODE_LEARNED_ONLY);
     }
 
     for (n = count - 1; n > 0; n--) {

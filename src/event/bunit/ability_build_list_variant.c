@@ -76,7 +76,7 @@ s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category,
         ability_id = abilities[i];
         if (ability_id != 0) {
             encoded_ability_id = ability_id;
-            if (mode == 0) {
+            if (mode == ABILITY_LIST_MODE_VIEW_ALL) {
                 if (kind == 0) {
                     if ((g_main_ability_data[ability_id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT)
                         == 0) {
@@ -87,13 +87,13 @@ s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category,
                 }
                 list[count] = encoded_ability_id;
                 count++;
-            } else if (mode == 3 && kind == 0) {
+            } else if (mode == ABILITY_LIST_MODE_COUNT_UNLEARNED && kind == 0) {
                 count++;
             }
         }
     }
 
-    if (mode != 3) {
+    if (mode != ABILITY_LIST_MODE_COUNT_UNLEARNED) {
         list[count] = ABILITY_LIST_ENTRY_END;
     }
     return count;

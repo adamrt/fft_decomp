@@ -103,7 +103,7 @@ s32 world_ability_run_learn_list(void) {
         menu_clear_selection_record(13);
         g_world_ability_category = menu_update_wrapped_horizontal_selection(4, WORLD_MENU_CURSOR_ABILITY_TAB, 0);
         ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
-            g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
+            g_menu_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
         menu_init_scrollable_list_core_variant(
             g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         rect.x = 0x240;
@@ -149,7 +149,7 @@ s32 world_ability_run_learn_list(void) {
                 g_menu_scroll_base_index, g_menu_ability_entries);
             g_world_ability_category = category;
             ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
-                g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
+                g_menu_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
             menu_get_selection_record_variant(g_world_ability_category + 10, &x, &y, g_menu_ability_entries);
             menu_init_scrollable_list(
                 g_menu_ability_entries, x, y, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
@@ -171,7 +171,7 @@ s32 world_ability_run_learn_list(void) {
             }
             g_sound_suppressed = 0;
             ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
-                g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
+                g_menu_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
             menu_init_scrollable_list_core_variant(g_menu_ability_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
             menu_set_window_scale_step(10);
@@ -274,7 +274,7 @@ static s32 world_ability_run_view_list(void) {
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_world_view_job_name_list, &rect, 0);
         g_world_ability_category = menu_update_wrapped_horizontal_selection(4, WORLD_MENU_CURSOR_ABILITY_TAB, 0);
         ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
-            g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_VIEW_ALL);
+            g_menu_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
         menu_init_scrollable_list_core_variant(
             g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_world_ability_view_list_initialized = 1;
@@ -302,7 +302,7 @@ static s32 world_ability_run_view_list(void) {
             g_menu_ability_entries);
         g_world_ability_category = category;
         ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
-            g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_VIEW_ALL);
+            g_menu_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
         menu_get_selection_record_variant(g_world_ability_category + 10, &x, &y, g_menu_ability_entries);
         menu_init_scrollable_list(g_menu_ability_entries, x, y, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(10);

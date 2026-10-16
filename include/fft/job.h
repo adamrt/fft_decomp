@@ -9,6 +9,15 @@
 
 /* mastery and abilities */
 s32 job_calculate_current_mastered_variant(s32 index);
+/* What ability_build_list_variant lists: every ability of the job, the learned
+ * ones, the learn menu's rows, or only a count of the unlearned ones. */
+typedef enum ability_list_mode {
+    ABILITY_LIST_MODE_VIEW_ALL = 0,
+    ABILITY_LIST_MODE_LEARNED_ONLY = 1,
+    ABILITY_LIST_MODE_LEARN_MENU = 2,
+    ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
+} ability_list_mode_e;
+
 s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category, s16* ability_list, s32 mode);
 
 /* state */

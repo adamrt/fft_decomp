@@ -59,8 +59,8 @@ s32 menu_ability_update_list_menu_variant(void) {
         text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_bunit_ability_list_job_name_row, &rect, 0);
         g_menu_ability_category = menu_update_wrapped_horizontal_selection(4, 0, 0);
-        ability_build_list_variant(
-            g_unit_selected_index, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
+        ability_build_list_variant(g_unit_selected_index, g_job_selected_id, g_menu_ability_category,
+            g_menu_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
         menu_init_scrollable_list_core_variant(
             g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_bunit_ability_list_ready = 1;
@@ -87,8 +87,8 @@ s32 menu_ability_update_list_menu_variant(void) {
         menu_set_selection_record(
             g_menu_ability_category + 10, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
-        ability_build_list_variant(
-            g_unit_selected_index, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
+        ability_build_list_variant(g_unit_selected_index, g_job_selected_id, g_menu_ability_category,
+            g_menu_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
         menu_get_selection_record_variant(g_menu_ability_category + 10, &selected, &scroll, g_menu_ability_entries);
         menu_init_scrollable_list(
             g_menu_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);

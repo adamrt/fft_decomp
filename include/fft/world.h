@@ -164,15 +164,6 @@ void world_thread_yield_forever(void);
 void world_thread_request_redraw(s32 thread_id);
 void world_thread_request_stop(s32 thread_id);
 
-/* ability */
-/* Final selector for the WORLD ability-list builder at 0x801228f0. */
-typedef enum world_ability_list_mode {
-    WORLD_ABILITY_LIST_MODE_VIEW_ALL = 0,
-    WORLD_ABILITY_LIST_MODE_LEARNED_ONLY = 1,
-    WORLD_ABILITY_LIST_MODE_LEARN_MENU = 2,
-    WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
-} world_ability_list_mode_e;
-
 /* gfx */
 /* Texture-page 7 uses a grid of 16-pixel square allocation cells. */
 enum {
