@@ -28,7 +28,7 @@
  * of the side crossed (0 low, 1 sloping, 2 high), so a low side
  * lies below the center and a high side above it. VectorNormal reduces the vector
  * to unit length (ONE) and g_main_system_vsync_interval scales it; the caller
- * applies the walk speed with move_interpolate_partial. */
+ * applies the walk speed with battle_move_interpolate_partial. */
 static void battle_move_set_unit_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
@@ -58,14 +58,10 @@ static void battle_move_set_unit_step_delta_center_to_edge(
     unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
-enum {
-    MOVE_STEP_HEIGHT_SCALE = 6,
-};
-
 /* Set the unit's per-frame velocity for the second half of a step, from the entry
  * edge of a tile to its center.
  *
- * The mirror of move_set_unit_step_delta_center_to_edge: the height part
+ * The mirror of battle_move_set_unit_step_delta_center_to_edge: the height part
  * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
  * is not negated, so entering over a high side (slope height 2) moves the unit
  * down to the center. */
@@ -73,7 +69,7 @@ static void battle_move_set_unit_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 
-    direction.vy = (edge_height - 1) * tile->depth_half_height.half_height * MOVE_STEP_HEIGHT_SCALE;
+    direction.vy = (edge_height - 1) * tile->depth_half_height.half_height * (MAP_HEIGHT_STEP / 2);
     switch (step->direction) {
     case MOVE_STEP_DIRECTION_EAST:
         direction.vx = MAP_TILE_SIZE;
@@ -98,18 +94,8 @@ static void battle_move_set_unit_step_delta_edge_to_center(
     unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
-/* The original wrote the body of battle_move_set_unit_step_delta_center_to_edge a second time as
- * battle_move_set_float_step_delta_center_to_edge. */
-/* Set the unit's per-frame velocity for the first half of a step, from the tile
- * center to its exit edge.
- *
- * The direction vector is 28 along the axis the step byte's top two bits select
- * and (edge_height - 1) * the tile's slope half-height * 6 in height, negated
- * because height is negative upward. edge_height is the slope_type height
- * of the side crossed (0 low, 1 sloping, 2 high), so a low side
- * lies below the center and a high side above it. VectorNormal reduces the vector
- * to unit length (ONE) and g_main_system_vsync_interval scales it; the caller
- * applies the walk speed with move_interpolate_partial. */
+/* The float steps' copy of battle_move_set_unit_step_delta_center_to_edge: the
+ * original wrote the same body a second time. */
 static void battle_move_set_float_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
@@ -139,20 +125,13 @@ static void battle_move_set_float_step_delta_center_to_edge(
     unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
-/* The original wrote the body of battle_move_set_unit_step_delta_edge_to_center a second time as
- * battle_move_set_float_step_delta_edge_to_center. */
-/* Set the unit's per-frame velocity for the second half of a step, from the entry
- * edge of a tile to its center.
- *
- * The mirror of move_set_unit_step_delta_center_to_edge: the height part
- * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
- * is not negated, so entering over a high side (slope height 2) moves the unit
- * down to the center. */
+/* The float steps' copy of battle_move_set_unit_step_delta_edge_to_center: the
+ * original wrote the same body a second time. */
 static void battle_move_set_float_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 
-    direction.vy = (edge_height - 1) * tile->depth_half_height.half_height * MOVE_STEP_HEIGHT_SCALE;
+    direction.vy = (edge_height - 1) * tile->depth_half_height.half_height * (MAP_HEIGHT_STEP / 2);
     switch (step->direction) {
     case MOVE_STEP_DIRECTION_EAST:
         direction.vx = MAP_TILE_SIZE;
@@ -430,11 +409,14 @@ void battle_move_start_unit_step_at_climb_speed(
 
 /* Start a unit's jump step toward the next path tile.
  *
- * The step byte's low two bits give the jump length in tiles and its top two
- * bits the direction. The vertical velocity scales with the length; a long
- * jump (length 2+) uses animation 0x1e with a per-direction facing, while a
- * short hop dismounts any rider and toggles movement bit 27 to alternate the
- * 0x30/0x31 hop animation. */
+ * The step byte's low two bits give the extra tiles the jump spans and its top
+ * two bits the direction. The launch speed is the jump gravity times the
+ * distance to the destination center (length tiles plus half a tile) in 6-unit
+ * half-steps, and the horizontal speed is a fixed 3 world units per frame. A
+ * jump of two or more extra tiles takes the JUMP_START phase and the jump
+ * animation facing the travel direction; a shorter one goes straight to
+ * JUMP_ASCENT, dismounts any rider and alternates between the two hop
+ * animations (movement.alternate_short_hop). */
 static void battle_move_start_unit_jump_step(
     battle_unit_t* unit, const map_tile_t* unused_from, const map_tile_t* unused_to) {
     u16 facings[4] = { BATTLE_FACING_EAST, BATTLE_FACING_WEST, BATTLE_FACING_SOUTH, BATTLE_FACING_NORTH };
@@ -498,13 +480,16 @@ static void battle_move_start_unit_jump_step(
 
 /* Start a unit's jump across one or more tiles onto the destination tile.
  *
- * The landing height is the top of a unit standing on the destination (per
- * battle_unit_calculate_height_data) or, when the tile is empty or that unit
- * is flagged 0x80, the tile height plus its slope scaled by destination_edge_height. The
- * vertical speed and frame count come from the rise over the unit's current
- * world height plus a clearance of two half-heights per tile of jump length.
+ * Heights are in half-steps of 6 world units. The landing height is the top of
+ * the unit it lands on (standing_on_battle_id_plus_one, set for a step onto a
+ * unit; per battle_unit_calculate_height_data) or, when there is none or its
+ * height is BATTLE_UNIT_HEIGHT_UNAVAILABLE, the destination tile's height plus
+ * its slope scaled by destination_edge_height, plus 2. The launch speed comes
+ * from the rise over the unit's current height plus two half-steps of
+ * clearance per tile crossed (length + 1); the frame count adds a fall from
+ * the apex, and the horizontal speed covers half a tile over those frames.
  * The step byte's top two bits give the direction, as in
- * move_start_unit_jump_step. `unused_10` reproduces an unreferenced
+ * battle_move_start_unit_jump_step. `unused_10` reproduces an unreferenced
  * 16-byte frame slot below the height data. */
 static void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     VECTOR unused_10;
@@ -566,10 +551,12 @@ static void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const ma
     unit->movement.destination_z = step->higher;
 }
 
-/* Starts a unit's hop to a nearby tile (called from
- * move_update_walking_step_at_tile_edge): derives the launch rise and flight frames from the landing
- * height, then sets the facing, destination tile and horizontal velocity for
- * the direction in bits 6-7 of `current_path_step`.
+/* Starts a unit's hop up to a tile at most seven half-steps higher (called from
+ * battle_move_update_walking_step_at_tile_edge): derives the launch speed and
+ * flight frames from the rise to the landing height, then sets the facing,
+ * destination tile and horizontal velocity (half a tile over the flight) for
+ * the direction in bits 6-7 of `current_path_step`, and plays the next of the
+ * two alternating hop animations.
  *
  * Case bodies store the destination before clearing the other velocity axis;
  * that order gives the target's map_x/step load order. */
@@ -1074,10 +1061,8 @@ static void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
 /* Start the landing effect that suits the surface of the unit's destination tile:
  * the fall dust on hard ground, floors and structures, the splash on swamp, marsh
  * and open water. Other surfaces (grassland, thicket, snow, lava, rugs, furniture
- * and the like) get none.
- *
- * Nothing starts when the unit's 32-bit movement value carries
- * BATTLE_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS. */
+ * and the like) get none. Nothing starts for a unit whose motion flags suppress
+ * landing effects, or when the destination tile does not exist. */
 static void battle_effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
     map_tile_t* tile;
     s32 surface;
@@ -1197,20 +1182,23 @@ void battle_move_get_current_and_destination_tiles(
  * to the tile, the cursor moves to it, the movement path is emptied and the
  * status animation restarts.
  *
- * For a mounted pair the partner lookup uses the unit's own unit_id, so the
- * second battle_unit_set_tile_position call repeats the first for the same unit. */
+ * For a mounted pair the partner is meant to take the same tile, but retail
+ * looks it up by the unit's own runtime_id (not mount_partner_runtime_id) and
+ * tests the unit's stats rather than the result's, so the second
+ * battle_unit_set_tile_position call repeats the first for the same unit. */
 void battle_unit_settle_on_tile(battle_unit_t* unit) {
-    unit_stats_t* data = unit->stats;
-    battle_unit_t* mount;
+    unit_stats_t* stats = unit->stats;
+    battle_unit_t* partner;
 
-    if (data != 0) {
+    if (stats != 0) {
         /* facing is read signed (lh) here. */
-        battle_unit_set_tile_position(data->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing / 1024);
+        battle_unit_set_tile_position(
+            stats->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing / BATTLE_FACING_QUARTER_TURN);
         if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
-            mount = battle_unit_get_by_runtime_id(unit->runtime_id);
+            partner = battle_unit_get_by_runtime_id(unit->runtime_id);
             if (unit->stats != 0) {
-                battle_unit_set_tile_position(
-                    mount->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing / 1024);
+                battle_unit_set_tile_position(partner->stats->battle_id, unit->map_x, unit->map_y, unit->map_z,
+                    unit->facing / BATTLE_FACING_QUARTER_TURN);
             }
         }
     }
@@ -1303,10 +1291,13 @@ static void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, 
 
 /* Pushes a unit sharing the mover's tile aside as the mover steps off-center.
  *
- * The push is 3/2 of the mover's distance short of 7 pixels past the tile
- * center along direction. It is skipped while the mover's step before last
- * carries movement flag 0x10. The case order and per-case center temporaries
- * reproduce the target's cross-jumped tails. */
+ * The other unit is set (7 - d) * 3 / 2 world units off its own tile center,
+ * where d is how far the mover is past its tile center in `direction` (at most
+ * 7), so the push fades out as the mover leaves. The push direction is
+ * whatever battle_move_displace_unit_at_destination_tile last left in
+ * g_battle_move_displacement_direction. Nothing is pushed while the mover's
+ * step before last was onto a unit (the step's mount bit). The case order and
+ * per-case center temporaries reproduce the target's cross-jumped tails. */
 static void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
     battle_unit_t* other = battle_unit_find_overlapping_at_tile(unit, unit->map_x, unit->map_y, unit->map_z);
     s32 dist;
@@ -1501,9 +1492,16 @@ s32 battle_move_has_reached_destination_tile_entry_edge(s32 direction, battle_un
 }
 
 /*
- * Finishes a unit's step once it reaches the destination tile's entry edge:
- * drops the horizontal velocity, and either starts the next step (walk or
- * climb) or lands the unit, playing the landing sound and terrain effect.
+ * Step handler of the JUMP_ASCENT and JUMP_DESCENT phases: carry a jumping unit
+ * to the entry edge of its destination tile, where its horizontal motion stops,
+ * and land it once it is down at the ground height there.
+ *
+ * A hop (either hop animation) landing slower than 0x6000 runs straight on into
+ * the step's to-center stage, with the landing sound and effect only when it
+ * comes down below the surface of a tile with depth (water). Any other landing
+ * enters the JUMP_LANDING phase for two frames with the land animation (kept
+ * off during action execution), plus the soft landing sound on a unit or the
+ * surface's landing sound and effect.
  */
 void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
     s32 direction;
@@ -1527,6 +1525,7 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
     if (unit->world_coords.vy < target_z) {
         return;
     }
+    /* BATTLE_UNIT_ANIMATION_HOP or BATTLE_UNIT_ANIMATION_HOP_ALTERNATE. */
     if (((unit->animation.sequence_id >> 1) - BATTLE_UNIT_ANIMATION_HOP) < 2U) {
         if (unit->velocity.vy < 0x6000) {
             unit->velocity.vy = 0;
@@ -1581,9 +1580,10 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
     battle_effect_set_landing_secondary_by_surface_type(unit);
 }
 
-/* Advances a jumping unit's ascent. Once its vertical velocity is no longer
- * negative, the unit takes the destination level and, when step flag 0x10 is
- * set, records the unit standing on the destination tile (id plus one). */
+/* Step handler of the JUMP_ASCENT phases. Once the unit's vertical velocity is
+ * no longer negative it enters the JUMP_DESCENT phase on the destination
+ * level and, for a jump onto a unit (the step's mount bit), records the unit
+ * on the destination tile as the one it stands on (battle id plus one). */
 void battle_move_update_airborne_ascent_phase(battle_unit_t* unit) {
     battle_unit_t* occupant;
     s32 direction;
@@ -1631,9 +1631,10 @@ s32 battle_move_has_reached_destination_tile_center(s32 direction, battle_unit_t
 enum { TILE_EDGE_MARGIN = 7, REAL_COORD_SHIFT = 12 };
 
 /*
- * Snaps the unit's screen/real coordinate on the axis of travel to the margin
- * band of the tile it currently occupies, mirroring
- * move_snap_axis_to_destination_tile_center against map_x/map_y.
+ * Snaps the unit's world and real coordinate on the axis of travel to
+ * TILE_EDGE_MARGIN inside the exit edge of its current tile, the point where
+ * battle_move_has_reached_current_tile_exit_edge turns true; the counterpart of
+ * battle_move_snap_axis_to_destination_tile_center for map_x/map_y.
  */
 void battle_move_snap_axis_to_current_tile_exit_edge(s32 direction, battle_unit_t* unit) {
     s16 coordinate;
@@ -1667,9 +1668,9 @@ enum {
 };
 
 /*
- * Snaps the unit's screen/real coordinate on the axis of travel to the center
- * of its movement destination tile: south/north (0, 2) set Y, west/east (1, 3)
- * set X.
+ * Snaps the unit's world and real coordinate on the axis of travel to the
+ * center of its movement destination tile: north and south set the map-depth
+ * axis (vz), east and west the x axis.
  */
 void battle_move_snap_axis_to_destination_tile_center(s32 direction, battle_unit_t* unit) {
     s16 coordinate;
@@ -1738,20 +1739,23 @@ s32 battle_move_has_reached_current_tile_exit_edge(s32 direction, battle_unit_t*
     }
 }
 
-/* Per-frame movement step for a unit walking between two tiles.
+/* Step handler of the WALK_TO_EDGE and CLIMB_TO_EDGE stages: advance a walking
+ * unit one frame toward the exit edge of its tile, pushing aside a unit that
+ * shares the tile outside events.
  *
- * Once the unit reaches the exit edge of the tile it occupies, the step is
- * re-planned: a jumping unit (step value bits 0-1) restarts a jump step, and
- * otherwise the edge heights of the current and destination tiles are recomputed
- * from the tile height/depth pair scaled by the unit's per-step scales, taking
- * a mount's walking height into account when one is present and float/fly slope
- * otherwise.  A height difference of at most one step starts an ordinary step
- * (the WALK_TO_CENTER phase) or a climb-speed step (CLIMB_TO_CENTER); up to seven
- * starts move_start_unit_climb_hop_step, and anything higher
- * move_start_unit_climb_jump_step. */
+ * At the edge the rest of the step is planned. A step that spans extra tiles
+ * (a nonzero length) starts a jump step. Otherwise the heights of the two
+ * edges are compared in half-steps of 6 world units: the current one is the
+ * top of the unit the mover stands on, or the tile edge height plus any water
+ * lift; the destination one is the top of the unit on the destination tile for
+ * a step onto a unit, or the tile edge height. A rise of at most one half-step
+ * continues as a walk (WALK_TO_CENTER) or climb-speed step (CLIMB_TO_CENTER),
+ * up to seven starts battle_move_start_unit_climb_hop_step, and anything higher
+ * battle_move_start_unit_climb_jump_step. An occupant whose height is
+ * BATTLE_UNIT_HEIGHT_UNAVAILABLE counts as the bare tile. */
 void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
     s32 direction = battle_move_get_direction(unit);
-    u8 rider;
+    u8 standing_on;
 
     battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
@@ -1762,9 +1766,9 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
     }
     battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
     if (g_battle_move_step_value.length == 0) {
-        rider = unit->standing_on_battle_id_plus_one;
-        if (rider != 0) {
-            battle_unit_calculate_height_data(&g_battle_move_tile_occupant_height, rider - 1);
+        standing_on = unit->standing_on_battle_id_plus_one;
+        if (standing_on != 0) {
+            battle_unit_calculate_height_data(&g_battle_move_tile_occupant_height, standing_on - 1);
             if (g_battle_move_tile_occupant_height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
                 g_battle_move_current_edge_height = g_battle_move_current_tile->height * 2
                     + g_battle_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
@@ -1834,10 +1838,11 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
 }
 
 /*
- * Advance a unit toward its current tile's exit edge; on reaching it, compare
- * the scaled heights of both step records and either continue into the next
- * tile or, when the next tile is more than one step higher, start the
- * 0x2000 vertical-motion path through battle_move_start_float_climb_jump_step.
+ * Step handler of the FLOAT_TO_EDGE stages: advance a floating unit one frame
+ * toward its current tile's exit edge. At the edge the two tiles' edge heights
+ * decide: a rise of at most one half-step continues as a float step into the
+ * FLOAT_TO_CENTER stage, anything higher starts a float jump
+ * (battle_move_start_float_climb_jump_step) at step speed 0x2000.
  */
 void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit) {
     s32 direction = battle_move_get_direction(unit);
@@ -1863,10 +1868,10 @@ void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit
     }
 }
 
-/* The original wrote the body of battle_move_update_unit_step_to_destination_tile_center a second time as
- * battle_move_update_float_step_to_destination_tile_center. */
 /* Step handler of the FLOAT_TO_CENTER stages: advance a floating unit one frame
- * toward the center of its destination tile.
+ * toward the center of its destination tile. The original wrote the body of
+ * battle_move_update_unit_step_to_destination_tile_center a second time for it,
+ * differing only in the push.
  *
  * Outside events it pushes aside a unit sharing its current tile, where the
  * walking twin pushes one on the destination tile. At the center the horizontal

@@ -223,15 +223,15 @@ void main_unit_copy_last_ability_ct(unit_stats_t* unit) {
  * ability's CT. KEEP_PERFORMING keeps Performing if the unit has it and otherwise acts as NONE. */
 void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
     u8 old_status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
-    s32 battle_id;
+    s32 battle_id = unit->battle_id;
     u8 status;
     u8 cleared;
     s32 status_id;
     u8 mask;
     u8 changed;
 
-    battle_id = unit->battle_id;
     if (action_state == MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING) {
+        /* The Performing bit (0x01) shifted left 3 is PERFORMING (8); without it, NONE (0). */
         action_state = (old_status & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) << 3;
     }
     switch (action_state) {

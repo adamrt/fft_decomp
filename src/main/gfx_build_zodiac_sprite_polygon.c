@@ -5,32 +5,27 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Build a centered sprite-cell quad using rounded 4.12 fixed-point geometry.
- *
- * This variant selects 8-bit texture mode and adds the PSX screen center to
- * the draw offset. */
+/* Build an 8-bit textured quad for one sprite-sheet cell, scaled by scale
+ * (4.12 fixed). The cell's offset and size are scaled and rounded to whole
+ * pixels; the size is made positive, so a negative scale moves the offset but
+ * does not mirror the cell. The quad sits at position + offset + the scaled
+ * cell offset + (256, 120), the center of a 256x240 screen whose draw area
+ * starts at x -128 as BATTLE's does. */
 void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
     sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset) {
-    s32 rx;
-    s32 ry;
-    s32 rw;
-    s32 rh;
-    s32 ox;
-    s32 oy;
-    s32 w;
-    s32 h;
+    s32 rx = 0;
+    s32 ry = 0;
+    s32 rw = 0;
+    s32 rh = 0;
+    s32 ox = sprite_rect->offset.x * scale->x;
+    s32 oy = sprite_rect->offset.y * scale->y;
+    s32 w = sprite_rect->source.w * scale->x;
+    s32 h = sprite_rect->source.h * scale->y;
     s32 x1;
     s32 y1;
 
-    ox = sprite_rect->offset.x * scale->x;
-    oy = sprite_rect->offset.y * scale->y;
-    w = sprite_rect->source.w * scale->x;
-    h = sprite_rect->source.h * scale->y;
-
-    rx = 0;
-    ry = 0;
-    rw = 0;
-    rh = 0;
+    /* Round each product half up. A negative product's remainder is negative, so it
+     * truncates toward zero instead. */
     if ((ox - ((ox / ONE) * ONE)) >= 0x800) {
         rx = 1;
     }

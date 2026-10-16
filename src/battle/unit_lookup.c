@@ -49,8 +49,15 @@ static void battle_gfx_extract_deployed_unit_palettes(void) {
 static void battle_state_deployment_frame_stub(void) {
 }
 
-/* Fade in the deployment banner, run map initialization until it reaches step
- * 0xd, then fade the screen back in.
+/* Load the battle map, its units, sprites, event and music, showing a loading screen.
+ *
+ * A battle entered directly (g_main_system_go_straight_to_battle, unless a saved
+ * game is being resumed) shows the deployment banner: it fades in from black,
+ * stays over a black screen while map initialization steps run up to step 0xd
+ * (done), then fades back out to black. Otherwise the NOW LOADING display is
+ * drawn instead. The fade polygons subtract their gray level from the screen, so
+ * 0xff is black and 0 leaves the picture as drawn. The battle starts from a black
+ * screen (g_battle_screen_fade_intensity 0xff).
  *
  * banner_p and the loop's fade = 0xff reproduce the target's preheader order and
  * register choice for the hoisted color. The dead fade = 0 before done keeps the
@@ -59,15 +66,15 @@ static void battle_state_deployment_frame_stub(void) {
 static void battle_state_run_deployment(void) {
     RECT window = { 0, 0, 0, 0 };
     POLY_FT4 banner[2];
-    u8 fade_enabled;
+    u8 show_banner;
     s32 map_id;
     s16 fade;
     POLY_FT4* banner_p;
 
     battle_state_init_deployment_display(0x100, 0xf0, 0x200, 0, 0, 0);
-    fade_enabled = g_main_system_go_straight_to_battle;
+    show_banner = g_main_system_go_straight_to_battle;
     if (script_get_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS) != 0) {
-        fade_enabled = 0;
+        show_banner = 0;
     }
     g_battle_deployment_skipped = menu_init_attack_resources_and_threads();
     main_gfx_build_now_loading_center(g_battle_deployment_skipped);
@@ -98,8 +105,10 @@ static void battle_state_run_deployment(void) {
     banner[1] = banner[0];
     SetDispMask(1);
 
+    /* Fade the banner in. Primitives added later to an ordering-table entry are
+     * drawn first, so the fade polygon covers the banner. */
     fade = 0xf8;
-    if (fade_enabled != 0) {
+    if (show_banner != 0) {
         do {
             main_gfx_swap_and_clear_otag();
             (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->r0 = fade;
@@ -119,7 +128,7 @@ static void battle_state_run_deployment(void) {
     fade = 0xff;
     while (battle_state_update_deployment_controller_input() != -1) {
         main_gfx_swap_and_clear_otag();
-        if (fade_enabled != 0) {
+        if (show_banner != 0) {
             AddPrim(main_gfx_get_otag(), &banner_p[g_main_gfx_screen_polarity]);
         } else {
             main_gfx_add_now_loading_to_otag(main_gfx_get_otag());
@@ -148,7 +157,8 @@ static void battle_state_run_deployment(void) {
     }
     fade = 0;
 done:
-    if (fade_enabled != 0) {
+    /* Fade the banner out to black. */
+    if (show_banner != 0) {
         fade = 0;
         do {
             if (fade >= 0xf8) {
@@ -169,7 +179,10 @@ done:
     }
 }
 
-/* Run deployment and advance the battle state one rendered frame at a time. */
+/* The battle program's main loop. After deployment, each frame reads the pad,
+ * renders the map, runs the handler of the current game state, updates the camera,
+ * map animations and music, and presents the frame. Entering CloseBattle ends the
+ * loop; it starts over with deployment while the game flow is still battle. */
 void battle_state_run_game_loop(void) {
     battle_gfx_vram_slot_t* timer_field;
     SVECTOR* camera_integer;
@@ -186,8 +199,9 @@ void battle_state_run_game_loop(void) {
     battle_gfx_init_render_state();
     battle_effect_init_system();
 
-    /* A reverse slot-index loop changes the reset's original bytes. */
-    /* Clear the spritesheet id (byte 1) of all nine 0x32d6-byte slot records. */
+    /* Clear the spritesheet id (byte 1) of all nine 0x32d6-byte slot records, last
+     * first. It walks a byte offset: a reverse slot-index loop changes the reset's
+     * original bytes. */
     init_offset = 0x196b0;
     do {
         g_battle_gfx_spritesheet_ids_by_vram_slot[init_offset] = 0;
@@ -597,11 +611,10 @@ battle_unit_t* battle_unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 
     return 0;
 }
 
-/* Find the other Chocobo renderer record occupying a map tile.
- *
- * Mounting logic excludes the acting and casting records when multiple
- * Chocobo records share the coordinates.
- */
+/* The first unit drawn with the chocobo sprite sheet on tile (x, y, z) that is
+ * neither the source nor the casting unit, or 0: the chocobo a unit arriving on
+ * the tile mounts (battle_unit_mount_onto_pending_mount). The candidate array
+ * holds 16 entries and is filled without a bound check. */
 battle_unit_t* battle_unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z) {
     battle_unit_t* unit;
     battle_unit_t** cursor;
@@ -778,7 +791,7 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
 
 /* Free the EVTCHR slots whose page holds the unit's SP2 image. */
 void battle_gfx_invalidate_sp2_vram_slot(battle_unit_t* unit) {
-    u32 invalid;
+    u32 invalid; /* loaded before the loop, as in the target */
     battle_gfx_vram_slot_t* slot;
     s32 count = 0;
 
@@ -813,8 +826,10 @@ static u32 battle_gfx_read_compressed_nibble(void) {
 
 /* Expands a nibble-RLE attack spritesheet into 0x6400 bytes of 4bpp pixels.
  *
- * A zero nibble introduces a run of transparent pixels whose length follows as
- * one nibble, or as two or three nibbles after the markers 7 and 8. */
+ * A non-zero nibble is one pixel. A zero nibble starts a run of transparent
+ * (index 0) pixels; the next nibble is the run length itself, except that 0
+ * takes the length from one more nibble, and 7 and 8 from two or three more,
+ * low nibble first. Decoding stops when the output is full. */
 void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination) {
     s32 high = 0;
     s32 count = 0;
@@ -1130,6 +1145,8 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
     }
 }
 
+/* Fill in part `index` of a sprite display: its offset from the sprite origin, its texture
+ * rectangle and its flags. */
 void battle_gfx_store_sprite_display_data(battle_gfx_sprite_display_data_t* display, s32 index, s16 x_shift,
     s16 y_shift, s16 u, s16 v, s16 width, s16 height, s16 flags) {
     battle_gfx_sprite_part_display_data_t* part;
@@ -1144,9 +1161,13 @@ void battle_gfx_store_sprite_display_data(battle_gfx_sprite_display_data_t* disp
     part->flags = flags;
 }
 
-/* Replace the two mirror bits of a sprite part (2 mirrors x, 4 mirrors y). Never called. */
+/* Replace the two mirror bits of a sprite part (BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP and
+ * _VERTICAL_FLIP) with `flags`. Never called. */
 void battle_gfx_set_sprite_part_flip(battle_gfx_sprite_display_data_t* display, s32 part_index, u32 flags) {
-    display->parts[part_index].flags = (display->parts[part_index].flags & 0xf9) | flags;
+    display->parts[part_index].flags
+        = (display->parts[part_index].flags
+              & ~(BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP | BATTLE_SPRITE_DISPLAY_VERTICAL_FLIP))
+        | flags;
 }
 
 /* Set or clear bit 0 of a sprite part's flags: the part is drawn semi-transparent while it is set. */
@@ -1321,7 +1342,7 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
     quad[2].vz = coords.vz - 10;
     quad[3].vx = coords.vx + 10;
     quad[3].vz = coords.vz - 10;
-    quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -(height * 12);
+    quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -(height * MAP_HEIGHT_STEP);
 
     slope = depth.half_height;
     if (slope == 0) {
@@ -1331,28 +1352,30 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
     switch (slope_type) {
     case MAP_SLOPE_EDGE_EAST: /* edge up to east */
         tx = coords.vx % MAP_TILE_SIZE;
-        rise = tx * 12;
+        rise = tx * MAP_HEIGHT_STEP;
         quad[0].vy = quad[1].vy = quad[3].vy = quad[2].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         quad[0].vy = quad[2].vy = quad[2].vy + 6;
         quad[1].vy = quad[3].vy = quad[3].vy - 6;
         break;
     case MAP_SLOPE_EDGE_WEST: /* edge up to west */
         tx = coords.vx % MAP_TILE_SIZE;
-        rise = tx * 12;
-        quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+        rise = tx * MAP_HEIGHT_STEP;
+        quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
+            = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         quad[1].vy = quad[3].vy = quad[3].vy + 6;
         quad[0].vy = quad[2].vy = quad[2].vy - 6;
         break;
     case MAP_SLOPE_EDGE_SOUTH: /* edge up to south */
         ty = coords.vz % MAP_TILE_SIZE;
-        rise = ty * 12;
-        quad[0].vy = quad[2].vy = quad[3].vy = quad[1].vy = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+        rise = ty * MAP_HEIGHT_STEP;
+        quad[0].vy = quad[2].vy = quad[3].vy = quad[1].vy
+            = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         quad[0].vy = quad[1].vy = quad[1].vy + 6;
         quad[2].vy = quad[3].vy = quad[3].vy - 6;
         break;
     case MAP_SLOPE_EDGE_NORTH: /* edge up to north */
         ty = coords.vz % MAP_TILE_SIZE;
-        rise = ty * 12;
+        rise = ty * MAP_HEIGHT_STEP;
         quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         quad[2].vy = quad[3].vy = quad[3].vy + 6;
         quad[0].vy = quad[1].vy = quad[1].vy - 6;
@@ -1363,10 +1386,10 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = tx;
         rhs = ty;
         if (lhs < rhs) {
-            rise = lhs * 12;
+            rise = lhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         } else {
-            rise = rhs * 12;
+            rise = rhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         }
         break;
@@ -1376,11 +1399,11 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = tx;
         rhs = MAP_TILE_SIZE - ty;
         if (lhs >= rhs) {
-            rise = ty * 12;
+            rise = ty * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         } else {
-            rise = lhs * 12;
+            rise = lhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         }
         break;
@@ -1390,13 +1413,13 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = MAP_TILE_SIZE - tx;
         rhs = MAP_TILE_SIZE - ty;
         if (lhs >= rhs) {
-            rise = ty * 12;
+            rise = ty * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         } else {
-            rise = tx * 12;
+            rise = tx * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         }
         break;
     case MAP_SLOPE_LOW_CORNER_NORTH_WEST: /* low corner, north-west up */
@@ -1405,12 +1428,12 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = MAP_TILE_SIZE - tx;
         rhs = ty;
         if (lhs >= rhs) {
-            rise = rhs * 12;
+            rise = rhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         } else {
-            rise = tx * 12;
+            rise = tx * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         }
         break;
     case MAP_SLOPE_HIGH_CORNER_NORTH_EAST: /* high corner, north-east up */
@@ -1419,10 +1442,10 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = tx;
         rhs = ty;
         if (lhs >= rhs) {
-            rise = lhs * 12;
+            rise = lhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         } else {
-            rise = rhs * 12;
+            rise = rhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         }
         break;
@@ -1432,12 +1455,12 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = tx;
         rhs = MAP_TILE_SIZE - ty;
         if (lhs >= rhs) {
-            rise = lhs * 12;
+            rise = lhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         } else {
-            rise = ty * 12;
+            rise = ty * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         }
         break;
     case MAP_SLOPE_HIGH_CORNER_SOUTH_WEST: /* high corner, south-west up */
@@ -1446,13 +1469,13 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = MAP_TILE_SIZE - tx;
         rhs = MAP_TILE_SIZE - ty;
         if (lhs < rhs) {
-            rise = ty * 12;
+            rise = ty * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         } else {
-            rise = tx * 12;
+            rise = tx * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         }
         break;
     case MAP_SLOPE_HIGH_CORNER_NORTH_WEST: /* high corner, north-west up */
@@ -1461,11 +1484,11 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
         lhs = MAP_TILE_SIZE - tx;
         rhs = ty;
         if (lhs >= rhs) {
-            rise = tx * 12;
+            rise = tx * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * 12 - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
         } else {
-            rise = rhs * 12;
+            rise = rhs * MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
         }
         break;

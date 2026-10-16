@@ -12,11 +12,14 @@
 
 /* Renders a text entry's glyphs into a menu image at the pen position.
  *
- * The thread target installed by menu_display_text_entry. text 0 or 1
- * selects text_id's entry.
+ * The thread target installed by menu_display_text_entry. A `text` of 0 or 1
+ * selects text_id's entry; any other value is the text itself.
  * Handles the substitution, script-variable, palette, width and numeric
- * control codes; glyph drawing is limited to the characters counted from
- * g_menu_text_param_22 up to g_menu_text_param_24, which are reset on exit.
+ * control codes. Only lines g_menu_text_param_22 up to, not including,
+ * g_menu_text_param_24 are drawn; earlier lines still advance the pen
+ * horizontally, and reaching the end line stops rendering. Both line limits
+ * and the text palette are reset on exit. Rendering also stops when the pen
+ * comes within 8 pixels of the image's right edge.
  *
  * Reading each control operand through the byte local and the u8
  * variable_base keep the outer loop large enough that loop.c does not hoist
@@ -130,6 +133,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
                     }
 
                     if (digit >= 0) {
+                        /* Byte arithmetic on the table address; `&powers[digit]` compiles differently. */
                         divisor = (u32*)(digit * 4 + (s32)powers);
                         do {
                             /* Leading zeros draw nothing but still advance the pen. */
@@ -166,6 +170,9 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
                     continue;
                 }
 
+                /* A back-reference (0xf0-0xf3) replays earlier text. Its three bytes pack a length of
+                 * 4 to 35 bytes and a distance back of up to 15 * 254 + 255; reading resumes after
+                 * the code once the copy is used up. */
                 if ((state->command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (state->command & 0xF) < 4) {
                     state->return_cursor = cursor + 3;
                     state->scratch = (cursor[0] & 3) * 8;

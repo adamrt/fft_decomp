@@ -7,7 +7,8 @@
 #include "fft/effect.h"
 #include "psx/types.h"
 
-/* Start the timed map transform for the remaining child-timeline frames. */
+/* Callback handler: when its keyframe starts, run map weather mode 0x96 (the
+ * timed particle transform) for the frames left in the child timeline. */
 s32 effect_map_set_timed_transform_duration(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame) {
     s16 state_index = record_index;

@@ -261,6 +261,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         config->mountable_chocobo = 0;
     }
 
+    /* Move is capped at 124, the range of a generic pathfinding search. */
     value = unit->move;
     if (value >= 0x7D) {
         value = 0x7C;
@@ -490,6 +491,9 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
         if (i < MAP_TILE_COUNT) {
             tile = &g_battle_map_tile_data[i];
             frontier[i] = 0;
+
+            /* Bits 0 and 2 are the low bits of the east and west side heights. Exactly one of
+             * them (1 or 4) marks a corner shape, low or high; flat tiles and edges give 0 or 5. */
             slope = tile->slope_type & 5;
             if (slope == 1 || slope == 4) {
                 *frontier_cell |= FRONTIER_FLAG_LOW_CORNER;
@@ -559,6 +563,9 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
     if (mode == MOVE_TILE_FLAGS_MODE_START_SPREAD) {
         panel = &g_battle_target_panels[index];
         if (frontier[index] & FRONTIER_FLAG_MOUNTABLE_UNIT) {
+            /* A riding mover shares its tile with its mount's record: also spread from the
+             * mount's top and standing heights (battle_move_check_and_spread_one_tile_around),
+             * seeding the record's panel. */
             state->outer_count = 0x24;
             aux = g_battle_target_panels + MAP_TILE_COUNT + panel->unit_record_index;
             aux->remaining_range = config->move + 1;
@@ -744,11 +751,15 @@ static s32 battle_move_check_spreading_tile_coordinates(void) {
 }
 
 /*
- * Select a source movement panel and prepare its exit height.
+ * Prepare the source side of a spread step from the current tile: its exit
+ * height, the ceiling over it and the source panel. Directions 0..3 leave from
+ * the tile's own exit side, 4..7 from the top of the unit on the tile, and 8 and
+ * up from that unit's standing height + direction / 4 - 2 (its record panel).
  *
- * Return 1 for a low extended sample, 2 for an unavailable unit-top path,
- * 3 for a restricted terrain exit, or 4 for a panel with less than 2
- * remaining range units. Return 0 when spreading can continue.
+ * Returns 0 when spreading can continue, 1 when that standing height is below
+ * the tile's exit side, 2 when the unit on the tile cannot be stood on, 3 when
+ * a steep slope is left toward its high side, and 4 when the source panel has
+ * less than 2 range left.
  */
 static s32 battle_move_init_source_panel(s32 direction) {
     move_pathfind_scratch_t* config = g_battle_move_config_ptr;
@@ -869,6 +880,7 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
     if (config->move_type == MOVE_CLASS_FLY)
         state->height_delta = 0;
     if (state->destination_unit_record_flag != 0) {
+        /* The record panel's address is recomputed for every access, as retail does. */
         state->candidate_remaining_range = state->source_panel->remaining_range - 1 - extra_span;
         if (state->candidate_remaining_range <= 0)
             return 11; /* no range left to step onto the unit */
@@ -1065,6 +1077,7 @@ static s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shif
     state = g_battle_move_scratch_pad_ptr;
     records = g_battle_move_records_ptr;
     state->jump_unit_size = g_battle_move_config_ptr->unit_size;
+    /* Even passes test a layer's terrain span, odd passes an enemy standing on it. */
     for (layer = 0; layer < 4; layer++) {
         index = (layer / 2) * MAP_TILES_PER_LAYER + tile_index;
         tile = &g_battle_map_tile_data[index];
@@ -1182,8 +1195,8 @@ static void battle_move_spread_horizontal_jump(void) {
  * unit before battle_move_encode_path_steps builds the step list. Either way the result is
  * the path buffer at g_battle_move_path.
  *
- * The flag byte at 0x8018f86d is written through a pointer loaded twice: the
- * target materialises its address in a register in both blocks. */
+ * g_battle_move_effective_flags is written through a pointer loaded twice: the
+ * target materializes its address in a register in both blocks. */
 battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
     move_height_offsets_t no_offsets = { 0 };
     move_pathfind_scratch_t* config = g_battle_move_config_ptr;
@@ -1235,7 +1248,8 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
         config->destination_tile_occupied = 1;
         state->source_unit_record_index = g_battle_target_panels[index].unit_record_index;
         g_battle_move_destination_unit_record
-            = (records[state->source_unit_record_index].unit_id_flags & MOVE_RECORD_UNIT_ID_MASK) + 0x80;
+            = (records[state->source_unit_record_index].unit_id_flags & MOVE_RECORD_UNIT_ID_MASK)
+            + BATTLE_PENDING_MOUNT_SET;
         state->outer_count = 0x1c;
     }
     index = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
@@ -1273,6 +1287,11 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
     state->path_length = 0;
     state->inner_count = 4;
     state->selected_source_side_shift = 0;
+
+    /* Trace back from the target, numbering each panel with its distance from the end
+     * (a mount at the target through its record's ride range, when riding it leaves
+     * more range). A tile with no predecessor means no path, unless the mover starts
+     * on a mount and a retry against the mount's seven standing heights finds one. */
     while (state->candidate_remaining_range != 0) {
         state->previous_source_side_shift = state->selected_source_side_shift;
         pass = state->path_length + 1;
@@ -1336,18 +1355,18 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
  * with a 10 in 100 chance per tile of distance beyond Move. */
 static s32 battle_move_calculate_teleport_chances(void) {
     move_pathfind_scratch_t* ctx = g_battle_move_config_ptr;
-    s32 dx, dy;
+    s32 dy, dx;
 
     if (ctx->movement_set_2 & BATTLE_MOVEMENT_SET_2_TELEPORT_2) {
         return 1;
     }
-    dy = ctx->target_x - ctx->x;
-    dx = ctx->target_y - ctx->y;
-    if (dy < 0)
-        dy = -dy;
+    dx = ctx->target_x - ctx->x;
+    dy = ctx->target_y - ctx->y;
     if (dx < 0)
         dx = -dx;
-    return main_util_roll_pass_fail(0x64, ((dy + dx) - ctx->move) * 10);
+    if (dy < 0)
+        dy = -dy;
+    return main_util_roll_pass_fail(100, ((dx + dy) - ctx->move) * 10);
 }
 
 /* padding */
@@ -1370,7 +1389,7 @@ static void battle_move_encode_path_steps(void) {
     s32 i;
     u8 target;
     s32 rem;
-    u8 hit;
+    u8 ride;
     u8 dir;
     s32 flag;
     u8 source_bit;
@@ -1384,11 +1403,12 @@ static void battle_move_encode_path_steps(void) {
         path_index = step + 1;
         target = state->path_length - path_index;
         for (i = 0; i < MOVE_PANEL_COUNT; i++) {
+            /* A record panel whose ride range holds the step number is a mount ridden onto. */
             if (i >= MAP_TILE_COUNT && g_battle_target_panels[i].ride_remaining_range == target) {
-                hit = 1;
+                ride = 1;
                 record = &records[i - MAP_TILE_COUNT];
             } else if (g_battle_target_panels[i].mark == target) {
-                hit = 0;
+                ride = 0;
                 if (i < MAP_TILE_COUNT) {
                     state->destination_unit_record_index = 0;
                     state->work_level = (u8)(i / MAP_TILES_PER_LAYER);
@@ -1402,38 +1422,42 @@ static void battle_move_encode_path_steps(void) {
             } else {
                 continue;
             }
-            if (state->destination_unit_record_index || hit) {
+            if (state->destination_unit_record_index || ride) {
                 state->work_x = record->x;
                 state->work_y = record->y;
                 state->work_level = record->higher_elevation;
             }
+            /* dir is the step direction already in bits 6-7 of the step byte. */
             if (state->work_x == state->tile_x) {
-                dir = 0xc0;
+                dir = MOVE_STEP_DIRECTION_NORTH << 6;
                 if (state->work_y > state->tile_y) {
                     state->source_side_shift = 6;
                     state->destination_side_shift = 4;
                     state->step_distance = state->work_y - state->tile_y;
                 } else {
-                    dir = 0x80;
+                    dir = MOVE_STEP_DIRECTION_SOUTH << 6;
                     state->source_side_shift = 4;
                     state->destination_side_shift = 6;
                     state->step_distance = state->tile_y - state->work_y;
                 }
             } else {
-                dir = 0;
+                dir = MOVE_STEP_DIRECTION_EAST << 6;
                 if (state->tile_x < state->work_x) {
                     state->source_side_shift = 0;
                     state->destination_side_shift = 2;
                     state->step_distance = state->work_x - state->tile_x;
                 } else {
-                    dir = 0x40;
+                    dir = MOVE_STEP_DIRECTION_WEST << 6;
                     state->source_side_shift = 2;
                     state->destination_side_shift = 0;
                     state->step_distance = state->tile_x - state->work_x;
                 }
             }
+
+            /* A climb end is a slope rising more than the mover's jump, or a corner rising
+             * 3 or more; the destination counts only when entered from its low side. */
             state->destination_climb = 0;
-            if (!state->destination_unit_record_index && !hit) {
+            if (!state->destination_unit_record_index && !ride) {
                 tile = &g_battle_map_tile_data[i];
                 state->destination_entry_height
                     = tile->depth_half_height.half_height * ((tile->slope_type >> state->source_side_shift) & 3);
@@ -1469,7 +1493,10 @@ static void battle_move_encode_path_steps(void) {
             }
             source_bit = state->source_climb << 2;
             destination_bit = state->destination_climb << 3;
-            /* Pack the complete path byte; individual field stores add truncation and change scheduling. */
+            /* Pack the complete move_step_t: length (distance - 1), slow (source climb), climb
+             * (destination climb), mount, higher and direction. Individual field stores add
+             * truncation and change scheduling. The final step also sets the mount bit when
+             * the back-trace began on a mount at the target (source height offset present). */
             *(u8*)&g_battle_move_path.data.steps[step]
                 = (state->step_distance - 1) | (source_bit | (destination_bit | (flag | (dir | level))));
             state->tile_x = state->work_x;
@@ -1536,8 +1563,11 @@ static s32 battle_move_init_source_geometry(s32 direction) {
 
 /* Prepare destination geometry for a movement candidate.
  *
- * Tile candidates use the selected map layer. unit-record candidates use
- * compact standing/top heights and an auxiliary targeting panel.
+ * Candidate bit 0 picks the map layer and candidates 2 and up the top of the
+ * unit there; with seven candidates (inner_count 7) each is one of the standing
+ * heights of the mount on the mover's own layer. Unit candidates use the
+ * record's heights and its record panel. Returns 0 for a usable candidate,
+ * otherwise a rejection code (1-5).
  */
 static s32 battle_move_init_destination_geometry(s32 candidate) {
     move_pathfind_scratch_t* config = g_battle_move_config_ptr;
@@ -1664,10 +1694,12 @@ static s32 battle_move_update_candidate(s32 extra_span) {
     return 0;
 }
 
-/* Spread movement to ordinary neighboring candidates.
+/* One-tile steps from the current tile to its four neighbors.
  *
- * Direction callbacks prepare each candidate; accepted movement updates use
- * zero extra span. Outside AI mode, candidate_saved enables the common finalizer.
+ * In AI propagation an accepted step gives the neighbor this tile's range less
+ * the step cost when that is more than it has (battle_move_update_candidate).
+ * In a back-trace, the best neighbor whose range accounts for the step is saved
+ * and becomes the next traced tile.
  */
 static void battle_move_spread_to_neighbors(void) {
     move_pathfind_scratch_t* config = g_battle_move_config_ptr;
@@ -1715,6 +1747,7 @@ static void battle_move_apply_selected_candidate(move_spread_state_t* state) {
         *offsets = packed;
     }
     if (state->saved_height_offset_flags & MOVE_SAVED_DESTINATION_HEIGHT) {
+        /* Bit 0 is destination_present, bits 1-3 destination_height_offset. */
         u8* offsets = (u8*)&g_battle_move_path_height_offsets;
         u32 selected = state->saved_destination_height_offset;
         u32 packed = *offsets;
@@ -1928,6 +1961,12 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         config->move_type = MOVE_CLASS_NORMAL;
         config->movement_3 = 0;
         g_battle_move_pathing_ignore_terrain = 0;
+
+        /* g_battle_move_pathing_scratch holds the cost-table row here, the capped jump
+         * next and each traced panel's range in the back-trace. Retail copies 256 costs
+         * (four rows) into the 64-byte block, and its Ignore Terrain Cost test compares
+         * the row index instead of the cost with 0xff, so blocked surfaces cost 1 too
+         * (QUIRKS.md). */
         g_battle_move_pathing_scratch = config->cost_table;
         for (i = 0; i < 256; i++) {
             g_battle_move_terrain_cost = g_main_terrain_movement_cost_tables[g_battle_move_pathing_scratch][i];
@@ -1968,6 +2007,8 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         main_mem_copy_byte_data_source_first(
             g_battle_ai_unit_snapshot_storage, getScratchAddr(0), PSX_SCRATCHPAD_BYTE_COUNT);
     }
+    /* Each pass snapshots and clears the queued flags first, so tiles queued while
+     * spreading wait for the next pass. */
     for (i = g_battle_move_pathing_resume_pass; i < config->move; i++) {
         if (check_budget && battle_ai_is_pathfinding_budget_exhausted() && completed_pass) {
             g_battle_move_pathing_resume_pass = i;
@@ -2015,6 +2056,10 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         }
         completed_pass = 1;
     }
+
+    /* The destination filter of battle_move_set_reachable_tile_flags, except that lava
+     * is refused only to a flier, which this generic walker never is, so a path may end
+     * on lava. */
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
         tile->ceiling_depth_and_marks.move_destination = 0;
@@ -2055,6 +2100,9 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
     state->source_unit_record_index = 0;
     state->path_length = 0;
     state->inner_count = 2;
+
+    /* Trace back from the target, numbering each panel with its distance from the end,
+     * until the start tile is reached; a tile with no predecessor means no path. */
     while (state->candidate_remaining_range != 0) {
         state->previous_source_side_shift = state->selected_source_side_shift;
         state->tile_index = state->tile_level * MAP_TILES_PER_LAYER + state->tile_y * config->map_max_x + state->tile_x;
@@ -2260,7 +2308,7 @@ static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, 
             lower_panel->remaining_range = 0;
             lower_panel->mark = 0;
         }
-        j = i + 0x100;
+        j = i + MAP_TILES_PER_LAYER;
         tile = &g_battle_map_tile_data[j];
         upper_panel = &g_battle_target_panel_data[j];
         if (!tile->flags.blocked) {
@@ -2331,7 +2379,7 @@ static void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
             dx = (x < j) ? (j - x) : (x - j);
             if (range >= (dy + dx)) {
                 g_battle_target_panel_data[(i * g_battle_map_max_x) + j].remaining_range = 0;
-                k = j + 0x100;
+                k = j + MAP_TILES_PER_LAYER;
                 g_battle_target_panel_data[(i * g_battle_map_max_x) + k].remaining_range = 0;
             }
         }
@@ -2417,7 +2465,7 @@ static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
             panel = &g_battle_target_panels[index];
             if (panel->remaining_range < range) {
                 panel->remaining_range = spread_range;
-                upper_x = next_x + 0x100;
+                upper_x = next_x + MAP_TILES_PER_LAYER;
                 g_battle_target_panels[next_y * g_battle_map_max_x + upper_x].remaining_range = spread_range;
                 if (range >= 3) {
                     panel->mark = 1;
@@ -2556,7 +2604,7 @@ static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
     range = data->range;
     flags = data->flags;
     panel = &g_battle_target_panels[index];
-    upper = &g_battle_target_panels[index + 0x100];
+    upper = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
     panel->remaining_range = range + 1;
     upper->remaining_range = range + 1;
     panel->mark = 1;
@@ -2731,16 +2779,16 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
         min_height = 0;
     }
     battle_target_clear_panel_data();
-    if (location < 0x100) {
-        other_location = location + 0x100;
+    if (location < MAP_TILES_PER_LAYER) {
+        other_location = location + MAP_TILES_PER_LAYER;
     } else {
-        other_location = location - 0x100;
+        other_location = location - MAP_TILES_PER_LAYER;
     }
     panel = &g_battle_target_panels[location];
     other_panel = &g_battle_target_panels[other_location];
     panel->remaining_range = range + 1;
     other_panel->remaining_range = range + 1;
-    if (location < 0x100) {
+    if (location < MAP_TILES_PER_LAYER) {
         panel->mark = 1;
     } else {
         other_panel->mark = 1;
@@ -2755,12 +2803,12 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
     }
     marked = 0;
     panels = g_battle_target_panels;
-    upper_panels = panels + 0x100;
+    upper_panels = panels + MAP_TILES_PER_LAYER;
     for (i = 0; i < MAP_TILES_PER_LAYER; i++) {
         other_panel = &upper_panels[i];
         panel = &panels[i];
         lower = &g_battle_map_tile_data[i];
-        upper = &g_battle_map_tile_data[i + 0x100];
+        upper = &g_battle_map_tile_data[i + MAP_TILES_PER_LAYER];
         if (panel->remaining_range == 0 || (lower->flags.blocked)) {
             lower_height = -1;
         } else {
@@ -2791,10 +2839,9 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
 /* Spread an ability range from the unit's tile and mark the reachable panels.
  *
  * Range bits 0-6 seed the unit's panel on both map levels and bit 7 excludes
- * the unit's own tile afterwards. Panels flagged in flags bits 0-1 are never
+ * the unit's own tile afterwards. Blocked and untargetable tiles are never
  * marked. Returns the number of marked panels. */
 static s32 battle_target_spread_ability_range(const unit_stats_t* unit, u8 range) {
-    /* A byte collision test retains the original single-mask branch. */
     target_panel_t* panel;
     target_panel_t* upper;
     target_panel_t* panels;
@@ -2808,7 +2855,7 @@ static s32 battle_target_spread_ability_range(const unit_stats_t* unit, u8 range
     battle_target_clear_panel_data();
     remaining = (range & 0x7f) + 1;
     panel = &g_battle_target_panels[index];
-    upper = &g_battle_target_panels[index + 0x100];
+    upper = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
     panel->remaining_range = remaining;
     upper->remaining_range = remaining;
     panel->mark = 1;
@@ -2820,6 +2867,7 @@ static s32 battle_target_spread_ability_range(const unit_stats_t* unit, u8 range
     count = 0;
     tile = g_battle_map_tile_data;
     for (i = 0, panels = g_battle_target_panels; i < MAP_TILE_COUNT; i++) {
+        /* A byte collision test retains the original single-mask branch. */
         if (panels->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
             tile[i].ceiling_depth_and_marks.ability_range = 1;
             count++;
@@ -2893,7 +2941,7 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
             panels[i].mark = 0;
         }
         seed = &g_battle_target_panels[index];
-        seed_upper = &g_battle_target_panels[index + 0x100];
+        seed_upper = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
         seed->remaining_range = range + 1;
         seed_upper->remaining_range = range + 1;
         seed->mark = 1;
@@ -2942,12 +2990,12 @@ static s32 battle_target_set_weapon_attack_panels(const action_command_t* source
     battle_target_clear_panel_data();
     battle_target_calculate_weapon_range(unit);
     {
-        target_panel_t* p1;
-        target_panel_t* p2;
-        p1 = &g_battle_target_panel_data[idx];
-        p2 = &g_battle_target_panel_data[idx + 0x100];
-        p1->remaining_range = 0;
-        p2->remaining_range = 0;
+        target_panel_t* panel;
+        target_panel_t* upper_panel;
+        panel = &g_battle_target_panel_data[idx];
+        upper_panel = &g_battle_target_panel_data[idx + MAP_TILES_PER_LAYER];
+        panel->remaining_range = 0;
+        upper_panel->remaining_range = 0;
         return battle_target_set_ability_range_flags();
     }
 }
@@ -3032,11 +3080,13 @@ static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit
     }
 }
 
-/* Mark the horizontal and vertical targeting runs on both map layers.
+/* For a vertical-fixed ability, mark the panels in range along the caster's row
+ * and column (up to 31 tiles either way), which battle_target_set_ability_panels
+ * then publishes.
  *
- * The target reads the first layer's availability byte unsigned and marks
- * both layers when that byte is nonzero. Sharing the loop index and panel
- * temporaries across the sweeps preserves the target register allocation. */
+ * Only the lower layer's range is tested, and a hit marks both layers. Sharing
+ * the loop index and panel temporaries across the sweeps preserves the target
+ * register allocation. */
 static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
     s32 shared;
     s32 vertical;
@@ -3051,14 +3101,14 @@ static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
         for (i = -0x1F; i < 0x20; i++) {
             s32 mx;
             target_panel_t* base = g_battle_target_panel_data;
-            target_panel_t* lvl1 = base + 0x100;
+            target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
             shared = x + i;
             mx = g_battle_map_max_x;
             tile_index = (vertical * mx) + shared;
             panel = &base[tile_index];
             if ((shared >= 0) && (shared < mx) && (panel->remaining_range != 0)) {
                 panel->mark = 1;
-                lvl1[tile_index].mark = 1;
+                upper_panels[tile_index].mark = 1;
             }
         }
     }
@@ -3066,13 +3116,13 @@ static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
         shared = x;
         for (i = -0x1F; i < 0x20; i++) {
             target_panel_t* base = g_battle_target_panel_data;
-            target_panel_t* lvl1 = base + 0x100;
+            target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
             vertical = y + i;
             tile_index = (vertical * g_battle_map_max_x) + shared;
             panel = &base[tile_index];
             if ((vertical >= 0) && (vertical < g_battle_map_max_y) && (panel->remaining_range != 0)) {
                 panel->mark = 1;
-                lvl1[tile_index].mark = 1;
+                upper_panels[tile_index].mark = 1;
             }
         }
     }
@@ -3109,6 +3159,8 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
     u8 item;
     u16 ability_id;
 
+    /* mode 1 takes the range from the ability's range data; mode 2 spreads `range`
+     * directly, bit 7 leaving out the unit's own tile. */
     main_util_copy_action_data(source, &action);
     mode = 0;
     if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
@@ -3201,6 +3253,8 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
     s32 mode;
     s32 result;
 
+    /* mode 1 runs the green-panel pass for an ability, mode 2 keeps only the target
+     * tile, and mode 0 means the calculator already did the work. */
     main_util_copy_action_data(source, &action);
     mode = 1;
     if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
@@ -3491,10 +3545,10 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
         }
         high = limit;
 
-        /* Both layers of the middle tile; upper-layer tiles start 0x100 entries later. */
+        /* Both layers of the middle tile. */
         index = mid_y * g_battle_map_max_x + mid_x;
         lower = &g_battle_map_tile_data[index];
-        upper_index = index + 0x100;
+        upper_index = index + MAP_TILES_PER_LAYER;
         upper = &g_battle_map_tile_data[upper_index];
         lower_height = lower->height * 2 + lower->depth_half_height.half_height;
         upper_height = upper->height * 2 + upper->depth_half_height.half_height;
@@ -3746,13 +3800,11 @@ static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
  * `(elevation * 256 + y * width) + x` operand order.
  */
 static s32 battle_target_set_green_panels_for_action(const action_command_t* action) {
-    /* A byte collision test retains the original single-mask branch. */
     action_command_t action_copy;
     ability_secondary_data_t* ability;
     unit_stats_t* unit;
     unit_stats_t* target;
     map_tile_t* tile;
-    /* Byte access retains the original packed load and field-extraction order. */
     target_panel_t* panel;
     target_panel_t* other_panel;
     target_panel_t* cursor;
@@ -3818,7 +3870,8 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         return -1;
     }
 
-    /* Center height in half steps, including the water depth. */
+    /* Center height in half steps, including the water depth. Byte access retains the
+     * original packed load and field-extraction order. */
     height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK)
         + ((*(u8*)&tile->depth_half_height) >> 5) * 2;
 
@@ -3836,13 +3889,13 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         }
         panel = &g_battle_target_panels[index];
         panel->remaining_range = aoe + 1;
-        /* Mark the center column on both layers; upper-layer panels sit 0x100 entries
-         * after the lower ones. */
-        if (index < 0x100) {
-            other_panel = &g_battle_target_panels[index + 0x100];
+        /* Seed the spread from the center position's lower-layer panel, which the spread
+         * walks (the trailing `index & 0xff` store marks it a second time). */
+        if (index < MAP_TILES_PER_LAYER) {
+            other_panel = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
             panel->mark = 1;
         } else {
-            other_panel = &g_battle_target_panels[index - 0x100];
+            other_panel = &g_battle_target_panels[index - MAP_TILES_PER_LAYER];
             other_panel->mark = 1;
         }
         g_battle_target_panels[index & 0xff].mark = 1;
@@ -3871,7 +3924,8 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
             flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES, aoe == ABILITY_RANGE_WHOLE_MAP);
     }
 
-    /* Without team targeting every tile in range counts; with it only the marked tiles do. */
+    /* Without team targeting every tile in range counts; with it only the marked tiles do.
+     * A byte collision test retains the original single-mask branch. */
     count = 0;
     if (!(flags_2 & (ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES))) {
         tile = g_battle_map_tile_data;
@@ -4087,7 +4141,7 @@ static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
         if (panel->remaining_range != 0) {
             panel->mark = 1;
         }
-        dir += 0x100;
+        dir += MAP_TILES_PER_LAYER;
         panel = &g_battle_target_panel_data[dir];
         y += dy;
         if (panel->remaining_range != 0) {

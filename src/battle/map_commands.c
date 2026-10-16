@@ -327,6 +327,8 @@ s32 battle_return_zero_8008e6d0(void) {
     return 0;
 }
 
+/* A volatile view of battle_unit_encounter.h's global: with the plain
+ * declaration battle_unit_select_and_open_entd compiles differently. */
 extern volatile s32 g_main_entd_selection_mode;
 
 /* Chooses the encounter's ENTD id and starts reading its ENTD file.
@@ -380,9 +382,11 @@ enum {
 
 /* Randomizes the battle's weather and time of day for the current date.
  *
- * The calendar cutoffs divide the year into four weather periods. Each row of
- * signed adjustments is indexed by a uniform `rand()` bucket and applied to
- * the current weather strength before it is clamped to 0..4.
+ * The calendar cutoffs divide the year into four weather periods (the last
+ * cutoff wraps back to the first period's row). Each row of signed
+ * adjustments is indexed by a uniform `rand()` bucket and applied to the
+ * current weather strength before it is clamped to none..strong storm. One
+ * battle in three takes place at night.
  */
 static void battle_weather_randomize_from_calendar(void) {
     u8 period_end_month[BATTLE_WEATHER_CALENDAR_PERIOD_COUNT] = { 2, 5, 7, 11 };
@@ -433,9 +437,14 @@ static void battle_weather_randomize_from_calendar(void) {
     }
 }
 
-/* Runs one step of the battle map initialization sequence and returns the
- * next step; steps that poll a loader stay on the same step until it
- * finishes. `unused_18` reproduces the target's unreferenced frame slot at sp+0x18.
+/* Runs one step of the map initialization the MapInitialize game states run
+ * behind a black screen, and returns the next step (13 when done); steps that
+ * poll a loader stay on the same step until it finishes. In order: reset the
+ * camera and palettes and open SMALL, load the map, open and load the ENTD
+ * units, load their graphics, build the deployed units, pick random battle
+ * music for a random battle (world result 1) or a debug battle, then start the
+ * weather sound and seed the color fades. `unused_18` reproduces the target's
+ * unreferenced frame slot at sp+0x18.
  *
  * Jump table: .rodata 0x80068260, 13 32-bit addresses. */
 s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
@@ -524,10 +533,15 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
     return step;
 }
 
-/* Runs one step of the expanded battle-map initialization sequence.
+/* Runs one step of the battle-entry map initialization, which the deployment
+ * loop drives, and returns the next step (13 when done).
  *
- * Loader steps retain their current state while work is pending. The final
- * steps initialize scenario audio, map lighting, and AI state. */
+ * Unlike battle_map_step_init_sequence it randomizes a random battle's weather,
+ * loads the shared SHP and SEQ data once (skipped when already loaded), waits
+ * at step 8 until the deployment screen or map_data_load_complete_thread
+ * releases it (battle_deployment_mark_finished), and at step 10 waits for
+ * deployment to end before restoring the scenario music and darkness. Loader
+ * steps retain their current state while work is pending. */
 s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running) {
     s32 result;
     u8 unused_18[4];
@@ -664,16 +678,13 @@ void battle_gfx_restore_screen_color_modulation(void) {
     g_battle_gfx_screen_color_modulation.b = g_battle_gfx_screen_color_modulation_backup.b;
 }
 
-/* Fade state shared with battle_gfx_update_screen_color_modulation_fade: the
- * final color, the color in effect, a Q8 accumulator and per-frame Q8 step
- * per channel, and the frames left. */
-
 /*
  * Start a screen color-modulation fade towards (red, green, blue).
  *
  * The duration is scaled by the animation speed; a fade that rounds to zero
- * frames only records the target color. The overlay draw mode is rebuilt
- * with the given semi-transparency mode for both screen polarities.
+ * frames only records the target color, and a zero duration does nothing. The
+ * overlay draw mode is rebuilt with the given semi-transparency mode for both
+ * screen polarities.
  */
 void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration) {
     s16 frames;
@@ -704,11 +715,15 @@ void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 
     }
 }
 
-/* Color fade state at 0x800961c4..0x800961e1: the final color, the color
- * currently in effect, a Q8 accumulator per channel, the per-frame Q8 step per
- * channel, and the number of frames left.  The three-element shape is what
- * makes GCC hold the base addresses of the current-color and accumulator
- * arrays in registers for element 0. */
+/* Advance the screen color-modulation fade by one frame: each channel's Q8
+ * accumulator takes its step and the color in effect its integer part, and the
+ * last frame lands exactly on the target color.
+ *
+ * The fade state (0x800961c4..0x800961e1) holds the target color, the color in
+ * effect, the Q8 accumulator and per-frame Q8 step per channel, and the frames
+ * left. The three-element array shape is what makes GCC hold the base
+ * addresses of the current-color and accumulator arrays in registers for
+ * element 0. */
 void battle_gfx_update_screen_color_modulation_fade(void) {
     u16 count = g_battle_gfx_screen_color_modulation_fade_frames;
     u16 remaining;

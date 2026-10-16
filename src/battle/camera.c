@@ -29,7 +29,10 @@ void battle_camera_set_current_real_coords(const VECTOR* coords) {
 
 /* Starts a linear move of the camera position to `destination` (20.12) over
  * frame_count frames (divided by the animation speed), applied by
- * battle_camera_update_real_coord_animation. No retail code calls it. */
+ * battle_camera_update_real_coord_animation. No retail code calls it.
+ *
+ * Like every move starter here, it divides by the frame count as read back from
+ * the 16-bit countdown, so the step always matches the frames actually run. */
 void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destination, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_vsync_interval;
 
@@ -93,17 +96,18 @@ void battle_camera_set_screen_offset(const VECTOR* coords) {
 void battle_camera_start_screen_offset_move_uniform(const s32* destination_value, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_vsync_interval;
     s32 current_x = g_battle_camera_current_screen_offset.vx;
-    s32 current_z = g_battle_camera_current_screen_offset.vy;
-    s32 current_y = g_battle_camera_current_screen_offset.vz;
+    s32 current_y = g_battle_camera_current_screen_offset.vy;
+    s32 current_z = g_battle_camera_current_screen_offset.vz;
     s32 delta_x;
 
-    setVector(&g_battle_camera_screen_offset_fixed, current_x * ONE, current_z * ONE, current_y * ONE);
+    /* The move runs in 20.12 so fractional steps accumulate. */
+    setVector(&g_battle_camera_screen_offset_fixed, current_x * ONE, current_y * ONE, current_z * ONE);
     delta_x = *destination_value - current_x;
     g_battle_camera_screen_offset_countdown = animation_frames;
     animation_frames = g_battle_camera_screen_offset_countdown;
     setVector(&g_battle_camera_real_coord_delta, (delta_x * ONE) / animation_frames,
-        ((*destination_value - current_z) * ONE) / animation_frames,
-        ((*destination_value - current_y) * ONE) / animation_frames);
+        ((*destination_value - current_y) * ONE) / animation_frames,
+        ((*destination_value - current_z) * ONE) / animation_frames);
 }
 
 /* Starts a linear move of the screen offset by the vector `values` over
@@ -127,17 +131,17 @@ void battle_camera_start_screen_offset_move_relative(const VECTOR* values, s32 f
  * start the countdown, so nothing moves in retail. */
 void battle_camera_update_screen_offset_animation(void) {
     s32 fixed_x;
-    s32 fixed_z;
     s32 fixed_y;
+    s32 fixed_z;
 
     if (g_battle_camera_screen_offset_countdown != 0) {
         fixed_x = g_battle_camera_screen_offset_fixed.vx + g_battle_camera_real_coord_delta.vx;
         g_battle_camera_screen_offset_fixed.vx = fixed_x;
-        fixed_z = g_battle_camera_screen_offset_fixed.vy + g_battle_camera_real_coord_delta.vy;
-        fixed_y = g_battle_camera_screen_offset_fixed.vz + g_battle_camera_real_coord_delta.vz;
-        g_battle_camera_screen_offset_fixed.vy = fixed_z;
-        g_battle_camera_screen_offset_fixed.vz = fixed_y;
-        setVector(&g_battle_camera_current_screen_offset, fixed_x / ONE, fixed_z / ONE, fixed_y / ONE);
+        fixed_y = g_battle_camera_screen_offset_fixed.vy + g_battle_camera_real_coord_delta.vy;
+        fixed_z = g_battle_camera_screen_offset_fixed.vz + g_battle_camera_real_coord_delta.vz;
+        g_battle_camera_screen_offset_fixed.vy = fixed_y;
+        g_battle_camera_screen_offset_fixed.vz = fixed_z;
+        setVector(&g_battle_camera_current_screen_offset, fixed_x / ONE, fixed_y / ONE, fixed_z / ONE);
         g_battle_camera_screen_offset_countdown--;
     }
 }
@@ -176,11 +180,10 @@ void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 f
         (*destination_value - g_battle_camera_zoom.vz) / animation_frames);
 }
 
-/* The original wrote the body of battle_camera_set_real_coord_delta_from_values a second time as
- * battle_camera_set_zoom_delta_from_values. */
 /* Starts a linear change of the zoom scales by the vector `values` over
  * frame_count frames (divided by the animation speed), applied by
- * battle_camera_update_zoom_animation. No retail code calls it. */
+ * battle_camera_update_zoom_animation. No retail code calls it. The body repeats
+ * battle_camera_set_real_coord_delta_from_values with the zoom globals. */
 void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_vsync_interval;
 
@@ -190,11 +193,10 @@ void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_co
         values->vz / animation_frames);
 }
 
-/* The original wrote the body of battle_camera_update_real_coord_animation a second time as
- * battle_camera_update_zoom_animation. */
 /* Advances the zoom change by one frame while its countdown runs. Only the
  * uncalled battle_camera_set_zoom_delta_* routines start the countdown, so the
- * zoom never animates here in retail. */
+ * zoom never animates here in retail. The body repeats
+ * battle_camera_update_real_coord_animation with the zoom globals. */
 void battle_camera_update_zoom_animation(void) {
     if (g_battle_camera_zoom_countdown != 0) {
         g_battle_camera_zoom_countdown--;

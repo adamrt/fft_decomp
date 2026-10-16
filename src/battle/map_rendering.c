@@ -98,9 +98,6 @@ static void battle_map_polygon_flag_command(s32 command) {
     }
 }
 
-/* Main-executable libgte routine at 0x8001d108; it loads the matrix into GTE
- * control registers 16-20 (the color matrix), like Psy-Q SetColorMatrix. */
-
 /*
  * Copy two matrices into the working pair at g_battle_map_light_color_matrix and into entries 0 and
  * 2 of g_battle_map_lightning_state.color_matrices, then load the first into the GTE color matrix.
@@ -395,7 +392,15 @@ static const u32 g_map_white_cvector_rodata[2] = {
 #define SAVED_GT4(i) g_battle_target_tile_color_buffer->gt4[i]
 
 /* Queue the map mesh parts and weather particles for one frame, then apply or
- * restore the targeting and movement tile colors. */
+ * restore the targeting and movement tile colors.
+ *
+ * In order: link the backdrop gradient, advance the texture and mesh part
+ * animations, run a lightning flash (random strikes while lightning is on),
+ * step a light matrix transition, draw part 0 with the camera alone and each
+ * animated part 1-8 posed under its parent, then the weather particles (snow,
+ * the E458 particle swell, or rain with splashes), repeat an ambient repaint in
+ * this buffer, and finally apply the SHOW and HIDE requests of the three
+ * tile-mark layers. */
 void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     MATRIX light_rotation;
     MATRIX light_matrix;
@@ -666,7 +671,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             tile = (g_battle_map_weather_particles[i].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i].x / MAP_TILE_SIZE;
             ground_tile = &g_battle_map_tile_data_ptr[tile];
-            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
 
             /* A flake whose last projected y (read from buffer 0) is below the screen respawns at the top
              * with a random sprite, speed, x and z. */
@@ -768,11 +773,11 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             tile = (g_battle_map_weather_particles[i].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i].x / MAP_TILE_SIZE;
             ground_tile = &g_battle_map_tile_data_ptr[tile];
-            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
             tile = (g_battle_map_weather_particles[i + 32].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i + 32].x / MAP_TILE_SIZE;
             ground_tile = &g_battle_map_tile_data_ptr[tile];
-            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
 
             /* Respawn particles that leave the screen: at the top while falling, at the bottom while rising. */
             if ((g_battle_map_command_0x96_frame < g_battle_map_command_0x96_duration / 8
@@ -885,7 +890,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             tile = (g_battle_map_weather_particles[i].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i].x / MAP_TILE_SIZE;
             ground_tile = &g_battle_map_tile_data_ptr[tile];
-            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
 
             /* A streak whose upper end passed the ground respawns at a random spot high above the map. */
             if (ground < g_battle_map_weather_particles[i + 32].y) {
@@ -1859,6 +1864,7 @@ void battle_map_reset_mesh_render_state(void) {
     }
     battle_map_run_weather_command(MAP_WEATHER_COMMAND_CLEAR);
     g_battle_map_lightning_mode = MAP_LIGHTNING_OFF;
+    /* Clear MAP_WEATHER_FLAG_IGNORE_WEATHER and bit 7. */
     weather_flags = &g_battle_map_weather_flags;
     *weather_flags &= 0x7d;
     SetDrawMode(&g_battle_render_buffers[0].overlay_modes[1], 0, 1, 0, 0);
@@ -1954,9 +1960,10 @@ void battle_camera_update_matrices(
 
 /* Run a weather display command.
  *
- * Command 0x8b reads the weather from script variable 0x23 and re-issues the
- * set-up commands for values 0-1, 2, 3 and 4, choosing each variant by the
- * snow bit of the map weather flags. The weather local is an s8: compares on
+ * APPLY_SCRIPT_WEATHER reads EVENT_SCRIPT_VAR_WEATHER and issues the clear
+ * command for no weather, or the set-up command for rain, storm or strong
+ * storm, taking the snow variant on snowy maps; each choice also sets the
+ * weather sounds and restores the lighting. The weather local is an s8: compares on
  * the promoted value copy it into a scratch register for the 3 and 4 tests,
  * as the target does. */
 void battle_map_run_weather_command(map_weather_command_e command) {
@@ -2016,6 +2023,8 @@ void battle_map_run_weather_command(map_weather_command_e command) {
             }
         }
         break;
+    /* Both lightning commands zero color matrix 1, so on the flash's flicker
+     * frames only the blue back color lights the map. */
     case MAP_WEATHER_COMMAND_THUNDER:
         g_battle_map_lightning_mode = MAP_LIGHTNING_ONCE;
         g_battle_map_lightning_state.timer = 0x3c;
@@ -2088,13 +2097,13 @@ void battle_map_run_weather_command(map_weather_command_e command) {
     }
 }
 
-/* Flat-textured triangle; the psx/libgpu.h clean-room set does not declare it. */
-
 /* Set up the weather particles and their flat-textured sprites.
  *
- * 0x8f (snow, from battle_map_run_weather_command 0x53/0x7e/0x7f) scatters 64 flakes;
- * 0x90 (rain, 0x55/0x7c/0x7d) scatters 32 drop pairs over the map extent and
- * records the lowest tile surface (largest y) in g_battle_map_lowest_surface_y. The rain UV
+ * INIT_SNOW_PARTICLES (from the SNOW, LIGHT_SNOW and HEAVY_SNOW commands)
+ * scatters 64 flakes around the origin; INIT_RAIN_PARTICLES (from RAIN,
+ * LIGHT_RAIN and HEAVY_RAIN) scatters 32 streak end pairs over the map extent
+ * and records the lowest tile surface (largest y) in
+ * g_battle_map_lowest_surface_y. The rain UV
  * pointer is formed from one combined byte offset: the target adds the
  * buffer/primitive offset it already keeps for the field stores to the pool
  * base instead of reusing the SetSemiTrans argument. */
@@ -2184,7 +2193,7 @@ static void battle_map_init_weather_particles(map_weather_command_e command) {
                 tile = i + j * g_battle_map_tile_width;
                 surface_y = -((g_battle_map_tile_data_ptr[tile].height
                                   + (g_battle_map_tile_data_ptr[tile].depth_half_height.depth))
-                    * 12);
+                    * MAP_HEIGHT_STEP);
                 if (g_battle_map_lowest_surface_y < surface_y) {
                     g_battle_map_lowest_surface_y = surface_y;
                 }
@@ -2633,7 +2642,8 @@ static void battle_map_update_mesh_part_animations(void) {
  *
  * For event Use3DObject (0x80) `index` is the object id, `object_state` its
  * state row and `flag` is stored beside it; 0x9d reuses `object_state` as a
- * duration. */
+ * duration. Only the two GET commands set the result; the others return the
+ * unset local. */
 s32 battle_map_dispatch_map_data_command(map_data_command_e command, u32 index, s32 object_state, s32 flag) {
     s32 result;
     s16 i;
@@ -2681,6 +2691,8 @@ s32 battle_map_dispatch_map_data_command(map_data_command_e command, u32 index, 
         g_battle_map_mesh_part_animation_states[index] = (object_state << 8) | flag;
         break;
     case MAP_DATA_COMMAND_SPLIT_MESH_PARTS:
+        /* Cut the primary mesh's polygons of each class into eight equal runs for
+         * parts 1-8 (the last may run past the end) and leave part 0 empty. */
         for (i = 1; i < 9; i++) {
             g_battle_map_mesh_parts[i].textured_triangle_count
                 = (g_battle_map_primary_textured_triangle_count - 1) / 8 + 1;
@@ -2760,6 +2772,9 @@ s32 battle_map_dispatch_map_data_command(map_data_command_e command, u32 index, 
  * starts a rotation of the map row's colors canvas_x..canvas_x + width - 1.
  * Only the low byte of g_main_system_vsync_interval is read (lbu), and the start call
  * passes the color range unmasked, as the target does.
+ *
+ * The two loop modes count frames and step once the timer reaches the
+ * duration; the other modes count vertical blanks and step once it exceeds it.
  */
 static void battle_map_update_texture_animations(void) {
     s32 i;

@@ -17,9 +17,16 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Run one phase of a tentacle-mesh effect: allocate its segment quads, spawn
- * up to 8 segments on the emitter interval, then advance each segment and
- * draw it as a strip of paired POLY_GT4 quads. */
+/* Callback handler for tentacle meshes. Every spawn interval up to eight
+ * tentacles start from random points of the emitter's spawn volume, each with
+ * a launch velocity and a tip near the anchor that placement_flags selects.
+ * Each frame a tentacle's newest trail point eases from its moving particle
+ * towards the tip over its travel time (`length` frames); once there, the
+ * strip shortens from its tail a point a frame. The last nine points are
+ * projected and drawn as a strip of up to eight quads mitered at the joints,
+ * each paired with a copy one pixel right and down. The emitter's mid-life
+ * child spawns at the strip's head every frame and its death child when the
+ * strip is gone. */
 s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     SVECTOR tip;

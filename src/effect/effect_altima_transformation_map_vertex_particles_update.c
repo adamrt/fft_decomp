@@ -8,13 +8,18 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Altima transformation particle handler: allocate the map-vertex work,
- * enable map data groups 1-6, then spawn particles for timed vertex emitters.
- * E464's shipped emitter records all have vertex group 0, so none spawn here. */
+/* Altima transformation particle handler. INIT allocates the map-vertex cache
+ * (four vertices of each of map mesh parts 1-8, which the map renderer keeps
+ * current while g_battle_effect_map_vertices is set) and sets map 3D objects
+ * 1-6 to state 1; UPDATE spawns the particles of every emitter whose vertex
+ * group is live this frame at that group's cached vertex; DESTROY frees the
+ * cache. E464's shipped emitter records all have vertex group 0, so none
+ * spawn here. The group bound of 12 is the Banish handler's, but this
+ * location table has three entries: groups 4-12 would read past it. */
 s32 effect_altima_transformation_map_vertex_particles_update(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame) {
     s16 state_index = record_index;
-    effect_record_t* record;
+    effect_record_t* record = &g_battle_effect_state_records[state_index];
     VECTOR* work;
     effect_work_record_t parent;
     s32 emitter_index;
@@ -23,8 +28,6 @@ s32 effect_altima_transformation_map_vertex_particles_update(
     const effect_particle_vertex_emitter_view_t* emitter;
     VECTOR* vertex;
     VECTOR* vertex_work;
-
-    record = &g_battle_effect_state_records[state_index];
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

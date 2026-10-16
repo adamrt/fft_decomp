@@ -99,7 +99,7 @@ void battle_unit_set_specific_animation_by_runtime_id(u32 runtime_id, u32 animat
         battle_unit_store_animation_facing(animation, unit->facing, unit);
 }
 
-/* Request animation on every unit, keeping its camera-facing quadrant. */
+/* Request `animation` on every unit, keeping its camera-facing quadrant. */
 void battle_unit_store_camera_facing_animation_for_all(u32 animation) {
     battle_unit_t* unit = g_battle_unit_list_head;
 
@@ -330,13 +330,9 @@ SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id) {
     return &unit->world_coords;
 }
 
-/*
- * Store a unit's tile-center coordinates and calculated screen Z.
- *
- * Return 0 when the battle ID has no renderer-side runtime record, otherwise 1.
- * The original performs a tile lookup whose returned pointer is unused; keep
- * that call because it is part of the target instruction stream.
- */
+/* Store the center of a unit's tile in coords->vx and coords->vz and its world height in
+ * coords->vy. Returns 0 when the battle id has no runtime record, otherwise 1. The tile lookup's
+ * result is unused, but the call is part of the retail instruction stream. */
 s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords) {
     battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
 
@@ -390,13 +386,15 @@ s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
     return 0;
 }
 
-/* Path a unit to a destination tile and start it walking at the given speed. */
+/* Path a unit from its tile to `destination` (the WalkTo event instruction) and start it walking.
+ * `flags` and `jump` go to the pathfinder; the unit's walk speed is twice `speed`. A riding unit
+ * dismounts. Returns 1 when a path was found, 0 when none was; a missing unit raises
+ * pointer exception 12 and returns 0. */
 s32 battle_move_start_unit_walk_to(
     s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     battle_walk_path_t* path;
 
-    unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0) {
         path = battle_move_calculate_walkto_pathing(
             flags, jump, unit->map_x, unit->map_y, unit->map_z, destination->x, destination->y, destination->layer);
@@ -409,7 +407,7 @@ s32 battle_move_start_unit_walk_to(
             return 1;
         }
     } else {
-        main_system_handle_pointer_exception(0xC);
+        main_system_handle_pointer_exception(12);
     }
     return 0;
 }

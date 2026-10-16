@@ -5,7 +5,11 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* Reset the save record fields and new-game data tables.
+/* Reset the save record fields and new-game data tables: the five saved
+ * sound-novel states (no text history, picture or background, zero counters
+ * and flags, each on the shared save-slot buffer, brightness 0x10 except in
+ * records 2 and 3), the Brave Story character ages from their template, the
+ * saved data bits, the proposition states and count, and the system flags.
  *
  * Assembled with ASPSX < 2.30: the slot loop keeps five 4-instruction
  * `lui $at / addiu $at / addu $at,idx / sh 0($at)` forms, so this function

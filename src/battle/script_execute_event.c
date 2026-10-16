@@ -200,6 +200,8 @@ restart_script:
                     script_join_units_silently();
                 }
 
+                /* Stop thread slots 2..14 around the save menu, which runs in the CARD
+                 * companion overlay. */
                 if (operand_1 == EVENT_CALL_FUNCTION_OPEN_SAVE_MENU) {
                     operand_1 = 2;
                     do {
@@ -292,6 +294,9 @@ restart_script:
                 thread_yield();
             }
 
+            /* Resets the graphic trigger of every unit standing in x 0..3, y 0..10 or in
+             * x 4..6, y 2..7. operand_1 is left holding the last unit's battle id, which the
+             * selector tests below then see. */
             if (operand_1 == EVENT_CALL_FUNCTION_RESET_BETHLA_REGION_UNIT_GRAPHICS) {
                 region_runtime_id = 0;
                 do {
@@ -776,6 +781,10 @@ restart_script:
             g_battle_event_music_switch_fade = operand_3;
             thread_yield();
         } else if (opcode == EVENT_OPCODE_FADE_SOUND) {
+            /* The request carries the target volume in its low half and the fade time in
+             * its high half. Byte 1 only adds to the shift, so the target volume is always
+             * 0: FadeSound fades the music out over byte 2's frames, doubled per unit of
+             * byte 1 (which scripts leave 0). */
             /* Matching limitation: target sllv masks its count to five bits.
              * An explicit &31 adds an instruction with GCC 2.6.3, so counts
              * above 31 remain undefined in C; no script restriction is proven. */

@@ -15,16 +15,20 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Draws a four-fold polar mesh anchored to an effect target. Its center uses
- * the target's render and secondary coordinates; each ring stores RGB bytes
- * separately. Shared index temporaries and the non-void signature preserve
- * register allocation and the phase-dispatch delay slots. */
+/* The polar mesh of effect_polar_mesh_update anchored to the effect's current
+ * target: the target's world position plus its unit's event offset is
+ * projected through the battle camera, and the spawn-position curve offsets
+ * the mesh center from that screen point (projected coordinates already
+ * include the draw offset, so no + 0x80 here). It stores each ring's color as
+ * separate bytes instead of packed words, which shifts its scratchpad layout.
+ * Shared index temporaries and the non-void signature preserve register
+ * allocation and the phase-dispatch delay slots. */
 s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
-    effect_anchored_polar_mesh_scratch_t* scratch;
-    effect_record_t* record;
-    const effect_geometry_record_t* entry;
-    u32* ot;
+    effect_anchored_polar_mesh_scratch_t* scratch = (effect_anchored_polar_mesh_scratch_t*)getScratchAddr(0);
+    effect_record_t* record = &g_battle_effect_state_records[state_index];
+    const effect_geometry_record_t* entry = &g_battle_effect_geometry_table->entries[emitter_index];
+    u32* ot = main_gfx_get_otag();
     effect_polar_mesh_work_t* work;
     POLY_GT4* quad;
     POLY_GT4* inner;
@@ -35,11 +39,6 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
     u16 angle_binding;
     u8 delta_binding;
     u32 brightness;
-
-    scratch = (effect_anchored_polar_mesh_scratch_t*)getScratchAddr(0);
-    record = &g_battle_effect_state_records[state_index];
-    entry = &g_battle_effect_geometry_table->entries[emitter_index];
-    ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
@@ -84,7 +83,8 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->half_width = entry->polar_mesh.texture_width / 2;
         scratch->half_height = entry->polar_mesh.texture_height / 2;
 
-        /* The anchor: the target's position plus its unit's event offset, projected to the screen. */
+        /* The anchor: the target's position plus its unit's event offset, projected to the screen.
+         * The record array is indexed again rather than read through record, as the target does. */
         scratch->target_index = g_battle_effect_state_records[state_index].timeline.target_index;
         battle_effect_resolve_target_world_coords(
             g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, scratch->target_index,

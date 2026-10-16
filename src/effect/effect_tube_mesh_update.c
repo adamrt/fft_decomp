@@ -26,9 +26,15 @@ enum {
     TUBE_MESH_LAST_RING_OFFSET = (TUBE_MESH_RING_COUNT - 1) * TUBE_MESH_SEGMENT_COUNT,
 };
 
-/* Draws a closed tube from nine lattice rows mirrored about the middle ring.
- * It scrolls texture and applies brightness by row. Shared temporaries retain
- * the renderer's matched register allocation. */
+/* Callback handler for the tube mesh: eight rings of eight textured quads
+ * around the emitter origin, spinning about the vertical axis. Its nine
+ * lattice rows are octagons mirrored about the middle row: rows 4 - i and
+ * 4 + i share the radius scale g_effect_tube_mesh_ring_scales[i] and sit at
+ * opposite heights, which grow with the radius. The whole radius grows from
+ * frame to frame. Each update projects the lattice through the battle camera
+ * into the current quad buffer, shades the rows, depth-sorts the quads and
+ * flips buffers. Shared temporaries retain the renderer's matched register
+ * allocation. */
 s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     SVECTOR vertex;
@@ -125,6 +131,7 @@ s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
+        /* Indexed again rather than read through record, as the target does. */
         target_index = g_battle_effect_state_records[state_index].timeline.target_index;
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
@@ -207,7 +214,8 @@ s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         /* Rows 4 - i and 4 + i share one scaled ring, mirrored above and below the middle row; row
          * heights are proportional to the radius (k). Points 0 and 1 come from the two angles and the
-         * other six are quarter turns of them. */
+         * other six are quarter turns of them. The target recomputes the radius at each use; a
+         * shared local changes the code. */
         k = (radius + (work->radius_offset >> 8)) / 4;
         for (i = 0; i < TUBE_MESH_RING_SCALE_COUNT; i++) {
             extent = (((cos0 * g_effect_tube_mesh_ring_scales[i]) >> 12) * (radius + (work->radius_offset >> 8))) >> 12;
@@ -325,8 +333,8 @@ s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         quad->x3 = other->x2;
         quad->y3 = other->y2;
 
-        /* Rows 1-7 reuse the lower corners of the row above and add lattice row
-         * j + 1. The quad/other increments are dead (both are recomputed before
+        /* Rows 1-7: corners 2/3 repeat the previous row's corners 0/1, and lattice row j + 1
+         * gives corners 0/1. The quad/other increments are dead (both are recomputed before
          * use) but lengthen the loop past the loop.c threshold at which the
          * target leaves points[n] unreduced. */
         for (j = 1; j < TUBE_MESH_RING_COUNT; j++, quad++, other++) {

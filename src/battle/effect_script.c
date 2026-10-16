@@ -42,6 +42,7 @@ static void battle_effect_init_palette(s16 index) {
     g_battle_effect_palette_ptr = data;
     battle_map_load_palette_data(data->primary_clut, MAP_CLUT_ROW_EFFECT, 0, 1);
     battle_map_load_palette_data(data->secondary_clut, MAP_CLUT_ROW_EFFECT_SECOND, 0, 1);
+    /* The image size is a 24-bit little-endian byte count; the rows follow from the width. */
     raw_size = data->image_size[0] + (data->image_size[1] << 8);
     raw_size = (data->image_size[2] << 16) + raw_size;
     height = raw_size;
@@ -159,7 +160,9 @@ static void battle_effect_init_flags_section_pointer(s16 effect_id) {
     g_battle_effect_flags_section = (const effect_flags_section_t*)((u8*)header + header->flags_section);
 }
 
-/* A zero section offset binds the pointer to the file header. */
+/* Bind effect file effect_id's timing-curve section as
+ * g_battle_effect_timing_curves; a zero section offset binds the file header
+ * itself. */
 static void battle_effect_set_timing_curves_pointer(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
@@ -588,6 +591,11 @@ static void battle_effect_free_state_record(s16 record_index) {
 
     particle = work = g_battle_effect_state_records[record_index].work_head;
     head = g_battle_effect_allocated_record_head;
+    /* Retail bug: work->next is read after the record has gone back to the free
+     * chain, so it points at the old free head rather than the next record of
+     * this list. The walk only ends correctly on an empty list (or a one-record
+     * list with no free records), so an effect's records must be gone before
+     * its script ends. */
     while (work != 0) {
         battle_effect_free_work_record(record_index, particle);
         particle = work = work->next;
@@ -1352,7 +1360,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
     effect_child_sound_track_t* sound;
     s32 i;
     s16 k;
-    s16 units_keyframe;
+    s16 surroundings_keyframe;
     s16 caster_keyframe;
     s16 target_keyframe;
     s16 screen_keyframe;
@@ -1418,11 +1426,11 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
         }
 
         track = &g_battle_effect_child_timeline->surroundings;
-        units_keyframe = timeline->state.child.keyframe.tracks.surroundings;
-        if (units_keyframe < track->count - 1) {
+        surroundings_keyframe = timeline->state.child.keyframe.tracks.surroundings;
+        if (surroundings_keyframe < track->count - 1) {
             if (timeline->state.child.remaining.tracks.surroundings == 0) {
-                timeline->state.child.keyframe.tracks.surroundings = units_keyframe + 1;
-                index = units_keyframe;
+                timeline->state.child.keyframe.tracks.surroundings = surroundings_keyframe + 1;
+                index = surroundings_keyframe;
                 /* Track durations count units of 8 frames; 0 still takes one frame. */
                 i = track->duration[index];
                 if (i == 0) {
@@ -1442,6 +1450,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                         battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                             track->duration[index], g_battle_effect_palette_target_runtime_ids[i], red, green, blue);
                     }
+                    /* The darkness color has 8-bit channels; the offsets are 5-bit palette steps. */
                     if (!(g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
                         battle_map_start_darkness_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                             track->duration[index], red * 8, green * 8, blue * 8);
@@ -1725,7 +1734,8 @@ static void battle_effect_step_emitter_timeline(
  *
  * When an APPLY keyframe starts, its color is applied to the field, to the
  * palette of every spectator unit (those that are neither a target nor the
- * caster) and, unless weather flag 2 is set, to the scaled map palette. The
+ * caster) and, unless the map ignores weather, to the darkness color (offsets
+ * scaled to 8-bit channels). The
  * loop counter reuses the frame-count variable, which keeps both in $s0 as in
  * the target. */
 static void battle_effect_advance_surroundings_palette_track(
@@ -1856,10 +1866,10 @@ static void battle_effect_advance_target_palette_track(
 
 /* Advance the screen color track one frame.
  *
- * A starting APPLY keyframe modulates the background gradient by
- * its doubled color (and the scaled palette when weather flag 2 is set);
- * otherwise both colors become the new gradient stops, with the first also
- * driving the darkness color under weather flag 2. */
+ * A starting APPLY keyframe modulates the background gradient by its doubled
+ * color (and the darkness color when the map ignores weather); otherwise both
+ * colors become the new gradient stops, with the first also driving the
+ * darkness color when the map ignores weather. */
 static void battle_effect_advance_map_background_track(
     effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
     map_background_gradient_colors_t colors;
@@ -2068,7 +2078,9 @@ effect_script_result_e battle_effect_code_script_2d_nop(effect_record_t* record)
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Run until yield or abort; returns 1 on yield and 0 on abort. */
+/* Run record `index`'s script from its pc, one opcode handler after another,
+ * until a handler yields (returns 1: the record runs on next frame) or ends it
+ * (returns 0: the caller frees the record). */
 static s32 battle_effect_run_block(s16 index) {
     effect_record_t* rec;
     /* A narrow result preserves the retail sign extension before the tests. */

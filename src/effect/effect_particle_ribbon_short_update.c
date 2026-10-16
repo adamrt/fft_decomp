@@ -34,7 +34,7 @@
  *
  * Matching notes: `quadrant` is assigned twice so the scheduler keeps the
  * RotMatrix arguments after the angle arithmetic; `point` and `index` are spelled
- * so fold keeps the target's (j - 16) and (index - 16) subexpressions; the
+ * so fold keeps the target's (j - 8) and (index - 8) subexpressions; the
  * head point is re-read through the same `slot->trail[index]` address before
  * `index` steps back to the tail. */
 s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {

@@ -15,6 +15,7 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* Let the GPU finish, blank the display and shut down the sound driver and the SPU. */
 static void main_system_stop_display_and_audio_for_game_reset(void) {
     DrawSync(0);
     DrawSync(0);
@@ -308,11 +309,10 @@ void main_boot_build_and_draw_squaresoft_logo(void) {
     u32 otags[2][2];
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
-    s16 intensity;
+    s16 intensity = 248;
     int frame;
     int buffer;
 
-    intensity = 248;
     main_set_display_draw(320, 240, 512, 0, 0, 0);
 
     SetPolyF4(&polygons[0]);
@@ -361,10 +361,9 @@ void main_boot_fade_out_squaresoft_logo(void) {
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
     u32* otag_base;
-    s16 intensity;
+    s16 intensity = 0;
     int buffer;
 
-    intensity = 0;
     SetPolyF4(&polygons[0]);
     setRGB0(&polygons[0], 0, 0, 0);
     setXY4(&polygons[0], 0, 0, 320, 0, 0, 256, 320, 256);

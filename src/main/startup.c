@@ -35,9 +35,8 @@ static void main_file_reset_cdrom_cpu_ram(void) {
  * values at (640, 0), subsequently rendered as 8-bit indexed texture data. */
 void main_gfx_load_zodiac_frame(void) {
     RECT destination = { 640, 0, 128, 256 };
-    u32* image;
+    u32* image = main_file_load_checked_to_heap(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
 
-    image = main_file_load_checked_to_heap(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
     LoadImage(&destination, image);
     DrawSync(0);
     main_heap_free(image);
@@ -162,9 +161,10 @@ int main_entd_open_file(void) {
     return 1;
 }
 
-/* Returns -1 for no current encounter and NULL while its file is loading.
- * Event ids 0-127 index the loaded ENTD file directly; each further
- * range of 128 ids (the last one open-ended) indexes it from its own base. */
+/* Return the current event's encounter in the loaded ENTD file: -1 when there
+ * is no current event, NULL while the file is still loading. Event ids 0-127
+ * index the file directly; each further range of 128 ids (the last one
+ * open-ended) indexes it from its own base. */
 entd_encounter_t* main_entd_get_encounter(void) {
     int* event_id = &g_main_entd_current_event_id;
     int id;

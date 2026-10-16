@@ -34,10 +34,14 @@ enum {
     DOME_MESH_LONGITUDE_STEP = ONE / DOME_MESH_SEGMENTS,
 };
 
-/* Builds a spinning 8x16 dome in scratchpad, projects it through the battle
- * camera and draws alternating quad buffers with scrolling texture and row
- * brightness. The shared temporaries and non-void signature preserve the
- * renderer's register allocation and phase-dispatch delay slots. */
+/* Callback handler for the dome mesh: a hemisphere of 8 rows of 16 textured
+ * quads over the emitter origin, spinning about the vertical axis. Its nine
+ * lattice rows run in equal latitude steps from the rim to the pole, and the
+ * whole radius grows from frame to frame. Each update builds the lattice in
+ * the scratchpad, projects it through the battle camera into the current quad
+ * buffer, shades the rows, depth-sorts the quads and flips buffers. The shared
+ * temporaries and non-void signature preserve the renderer's register
+ * allocation and phase-dispatch delay slots. */
 s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     SVECTOR vertex;
@@ -48,15 +52,15 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     VECTOR screen[4];   /* projected quad corners; RotTrans writes its flag to pad */
     s16 depth[DOME_MESH_ROWS + 1][DOME_MESH_SEGMENTS + 1];
     SVECTOR map_max;
-    effect_record_t* record;
-    const effect_radial_mesh_geometry_t* entry;
+    effect_record_t* record = &g_battle_effect_state_records[state_index];
+    const effect_radial_mesh_geometry_t* entry = &g_battle_effect_geometry_table->entries[emitter_index].radial_mesh;
     effect_dome_mesh_work_t* work;
     POLY_GT4* quad;
     POLY_GT4* other;
     vec3s16_t* lattice_point;
     map_tile_t* tile;
     u8* lattice_bytes;
-    u16 placement;
+    u16 placement = entry->placement_flags;
     u8 target_index;
     s32 k;
     s32 j;
@@ -71,7 +75,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     s32 v;
     s32 u_span;
     s32 v_span;
-    u32* ot;
+    u32* ot = main_gfx_get_otag();
     s32 i;
     u32 red;
     u32 green;
@@ -80,11 +84,6 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     u32 shade_g;
     u32 shade_b;
     s32 n;
-
-    record = &g_battle_effect_state_records[state_index];
-    entry = &g_battle_effect_geometry_table->entries[emitter_index].radial_mesh;
-    placement = entry->placement_flags;
-    ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
@@ -124,6 +123,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         break;
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
+        /* Indexed again rather than read through record, as the target does. */
         target_index = g_battle_effect_state_records[state_index].timeline.target_index;
         work = record->work_slots[callback_slot];
 
@@ -263,8 +263,8 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             depth[1][j] = screen[1].vz;
         }
 
-        /* Rows 1-7 reuse the lower corners of the row above and add lattice row
-         * i + 1. */
+        /* Rows 1-7: corners 2/3 repeat the previous row's corners 0/1, and lattice row i + 1
+         * gives corners 0/1. */
         for (i = 1; i < DOME_MESH_ROWS; i++) {
             n = i + 1;
 
@@ -376,7 +376,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 }
             }
 
-            /* The closing quad spans the last lattice column and column 0. */
+            /* The closing quad spans lattice columns 15 and 0. */
             n = (depth[i][0] + depth[i][DOME_MESH_SEGMENTS - 1] + depth[i + 1][0]
                     + depth[i + 1][DOME_MESH_SEGMENTS - 1])
                 / 16;

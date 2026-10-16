@@ -20,6 +20,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* &win[index], the window of the current packet buffer; the byte arithmetic
+ * matches the target where plain indexing does not. */
 #define WINDOW_AT(index) ((menu_window_buffer_t*)((index) * sizeof(menu_window_buffer_t) + (s32)win))
 
 #define NEXT() text = text_advance_cursor_with_separate_backreference_state(&repeat, text, &saved)
@@ -29,8 +31,16 @@
         goto end;                                                                                                      \
     }
 
-/* Dialog text thread: opens a dialog window and draws the text entry named
- * by thread parameter 2 glyph by glyph, handling the control bytes.
+/* Dialog text thread: opens a dialog window, draws a text entry into it glyph
+ * by glyph while handling the control bytes, then closes the window and exits.
+ *
+ * Thread parameters: 1 is the DisplayMessage dialog type byte, 2 the text id,
+ * 3 the speaker's script unit id (portrait boxes) and 4 the portrait index
+ * plus one. The DIALOG_THREAD_WORD_* task words add position offsets, a tail
+ * shift, the opening tween and a width override. A stop request ends the
+ * thread at any wait. With the 0x80 dialog-type bit the window outlives the
+ * end of its text: the thread waits for a ChangeDialog resume carrying the
+ * next text id in parameter 2, and 0xFFFF there closes the window.
  *
  * The 0xFE/0xFD waits compare against resume_task rather than the constant
  * THREAD_TASK_RESUME (1): with a constant, loop.c pools every constant 1
@@ -39,8 +49,8 @@
  * label; the WORLD twin's `character == 0xE4 || character == 0xE6` form is not threaded here
  * and loses the substitution-table base CSE. */
 void text_run_dialog_thread(void) {
-    /* dialog_type is the DisplayMessage Dialog Type byte; box_type is its 0x70 bits.
-     * The offsets at 0x44..0x4c are the instruction's arrow position and coordinates. */
+    /* rec.dialog_type is the DisplayMessage dialog type byte, split into box_type,
+     * position, options and no_box below. */
     text_dialog_record_t rec;
     RECT from;
     RECT to;
@@ -82,7 +92,7 @@ void text_run_dialog_thread(void) {
     s32 half_h;
     s32 center;
     u16 param;
-    s32 no_value;
+    s32 no_value; /* 0xFFFF: no width override, no next text, and minus one for the u16 counters */
     s32 resume_task;
 
     thread_set_current_task_id(THREAD_TASK_RESUME);
@@ -166,7 +176,7 @@ void text_run_dialog_thread(void) {
         rec.x = g_unit_scratch_coords.vx - center - 4;
         /* Automatic position: below the speaker when it projects above the screen or its swap
          * partner projects higher, else above. g_battle_camera_script_rotation is scratch here. */
-        if (rec.position == 0) {
+        if (rec.position == DIALOG_POSITION_AUTO) {
             if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_a) {
                 value = g_text_speaker_swap_unit_b;
             } else if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_b) {
@@ -174,18 +184,18 @@ void text_run_dialog_thread(void) {
             }
             unit_project_to_screen(script_resolve_runtime_id(value), &g_battle_camera_script_rotation);
             if (g_unit_scratch_coords.vy < 0 || g_battle_camera_script_rotation.vy < g_unit_scratch_coords.vy) {
-                rec.position = 2;
+                rec.position = DIALOG_POSITION_BOTTOM;
             } else {
-                rec.position = 1;
+                rec.position = DIALOG_POSITION_TOP;
             }
             rec.dialog_type = (rec.dialog_type & 0xFFF0) | rec.position;
         }
 
-        if (rec.position == 1) {
+        if (rec.position == DIALOG_POSITION_TOP) {
             rec.x += 0xC;
             rec.y = g_unit_scratch_coords.vy - rec.height - 0x28;
         }
-        if (rec.position == 2) {
+        if (rec.position == DIALOG_POSITION_BOTTOM) {
             rec.x -= 8;
             rec.y = g_unit_scratch_coords.vy;
         }
@@ -226,10 +236,10 @@ void text_run_dialog_thread(void) {
         }
 
         /* The window grows out of the tail's spot on the box edge. */
-        if (rec.position == 1) {
+        if (rec.position == DIALOG_POSITION_TOP) {
             bottom = rec.y + rec.height - 8;
         }
-        if (rec.position == 2) {
+        if (rec.position == DIALOG_POSITION_BOTTOM) {
             bottom = rec.y + 8;
         }
         right = rec.x + rec.tail_offset + (rec.width >> 1);
@@ -238,13 +248,13 @@ void text_run_dialog_thread(void) {
         half_w = rec.width >> 1;
         rec.x = (0x100 - half_w) & 0xFFFE;
         half_h = rec.height >> 1;
-        if (rec.position == 1) {
+        if (rec.position == DIALOG_POSITION_TOP) {
             rec.y = 0x16;
         }
-        if (rec.position == 2) {
+        if (rec.position == DIALOG_POSITION_BOTTOM) {
             rec.y = 0xE4 - rec.height;
         }
-        if (rec.position == 3) {
+        if (rec.position == DIALOG_POSITION_CENTER) {
             rec.y = (0x78 - half_h) & 0xFFFE;
         }
 
@@ -319,7 +329,7 @@ void text_run_dialog_thread(void) {
         }
         to.y = rec.y + 7;
         if (rec.options != DIALOG_OPTIONS_NO_TAIL) {
-            if (rec.position == 2) {
+            if (rec.position == DIALOG_POSITION_BOTTOM) {
                 to.y = rec.y + 0xF;
                 rec.origin_y += 8;
             } else {
@@ -378,7 +388,8 @@ void text_run_dialog_thread(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.tail_offset < 0 && rec.portrait < 8) {
         rec.x = window_u + 0x30;
     }
-    if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL && rec.position == 2) {
+    if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL
+        && rec.position == DIALOG_POSITION_BOTTOM) {
         rec.y += 8;
     }
 
@@ -389,6 +400,8 @@ void text_run_dialog_thread(void) {
     rec.line = 0;
     g_text_current_line = 0;
 
+    /* Centered boxes center each line on its measured width, except in two
+     * events (unless primitives draw immediately), where lines start flush left. */
     if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
         if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_MALAK_REVIVED)

@@ -8,17 +8,19 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Banish particle handler: phase 1 allocates the 32-vertex work and
- * enables map data groups 1-6, phase 2 spawns each active emitter's particles
- * at its work vertices, phase 3 frees the work.
+/* Banish particle handler: phase 1 allocates the 32-vertex cache and sets map
+ * 3D objects 1-6 to state 1, phase 2 spawns each live emitter's particles at
+ * its cached vertices, phase 3 frees the cache.
  *
- * The work caches four vertices per map mesh part. The overlay table maps
- * emitter groups 1-12 to vertex and mesh-part indices; groups 13 and 14
- * visit groups 1-4 and 5-12. */
+ * The cache holds four vertices of each of map mesh parts 1-8, which the map
+ * renderer keeps current while g_battle_effect_map_vertices is set. The
+ * overlay table maps emitter vertex groups 1-12 to one vertex each; groups 13
+ * and 14 spawn at every vertex of groups 1-4 and 5-12. An emitter is live
+ * from its start_frame up to, not including, its end_frame. */
 s32 effect_banish_map_vertex_particles_update(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame) {
     s16 state_index = record_index;
-    effect_record_t* record;
+    effect_record_t* record = &g_battle_effect_state_records[state_index];
     /* VECTOR indexing changes the offset-sum register. */
     u8* work;
     effect_work_record_t parent;
@@ -29,8 +31,6 @@ s32 effect_banish_map_vertex_particles_update(
     const effect_particle_vertex_emitter_view_t* emitter;
     VECTOR* vertex;
     VECTOR* vertex_work;
-
-    record = &g_battle_effect_state_records[state_index];
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

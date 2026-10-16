@@ -227,7 +227,8 @@ void battle_map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 
  * component first, 2/6 and 3/7 add the bias to a weighted gray
  * ((2R + 3G + B) / 6 or / 12), 8 copies the packed color, and 10 clears the
  * repeat record and returns. Black components are left alone (their deltas
- * become neutral). A nonzero amount stores biased deltas and arms the CLUT
+ * become neutral), and a result that would be black takes blue 1, since the
+ * color value 0 is transparent. A nonzero amount stores biased deltas and arms the CLUT
  * animations with that step; zero applies the colors immediately and marks
  * the palette upload pending.
  *
@@ -2035,22 +2036,21 @@ void battle_map_unfreeze(void) {
 }
 
 /* Event ColorField: tint or fade all 256 colors of the map CLUT row with
- * battle_map_modify_palette. `first` is its color mode (map_color_mode_e) and
- * `second` its amount: 0 applies the colors at once, another value fades to
- * them. */
-void battle_map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue) {
-    battle_map_modify_palette(first, second, MAP_CLUT_ROW_MAP, 0, 1, red, green, blue);
+ * battle_map_modify_palette. `mode` is its color mode (map_color_mode_e) and
+ * `amount` 0 applies the colors at once, another value fades to them. */
+void battle_map_color_field(s32 mode, s32 amount, s16 red, s16 green, s16 blue) {
+    battle_map_modify_palette(mode, amount, MAP_CLUT_ROW_MAP, 0, 1, red, green, blue);
 }
 
-/* Tints one unit's two CLUTs through battle_map_modify_palette; `preset_color` is
- * the MAP_COLOR_MODE_* command and `time` its amount.
+/* Tints one unit's two CLUTs through battle_map_modify_palette with color mode
+ * `mode` (map_color_mode_e) and `amount` (0 applies at once, else a blend).
  *
  * The unit's CLUT of MAP_CLUT_ROW_UNITS takes the offsets as given. Its CLUT of
  * MAP_CLUT_ROW_UNIT_SHADOWS takes the same offsets while the unit stands on a
  * tile with depth, at or below the tile's surface, and the negated offsets
  * otherwise. An absent unit is skipped. */
 static void battle_gfx_apply_unit_palette_modulation(
-    s32 preset_color, s32 time, s32 runtime_id, s16 red, s16 green, s16 blue) {
+    s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue) {
     SVECTOR screen_coordinates;
     battle_unit_t* unit;
     map_tile_t* tile;
@@ -2064,28 +2064,28 @@ static void battle_gfx_apply_unit_palette_modulation(
     tile = battle_map_get_tile_data_pointer(
         screen_coordinates.vx / MAP_TILE_SIZE, screen_coordinates.vz / MAP_TILE_SIZE, unit->map_z);
 
-    battle_map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNITS, runtime_id, 0, red, green, blue);
+    battle_map_modify_palette(mode, amount, MAP_CLUT_ROW_UNITS, runtime_id, 0, red, green, blue);
 
     if (tile->depth_half_height.depth != 0
-        && unit->world_coords.vy >= -(tile->height + tile->depth_half_height.depth) * 12) {
-        battle_map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, red, green, blue);
+        && unit->world_coords.vy >= -(tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP) {
+        battle_map_modify_palette(mode, amount, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, red, green, blue);
     } else {
-        battle_map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, -red, -green, -blue);
+        battle_map_modify_palette(mode, amount, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, -red, -green, -blue);
     }
 }
 
 /* battle_gfx_apply_unit_palette_modulation for one unit, or for all sixteen
  * when runtime_id is 16 or more. */
 void battle_gfx_apply_unit_palette_modulation_to_units(
-    s32 preset_color, s32 time, s32 runtime_id, s16 red, s16 green, s16 blue) {
+    s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue) {
     s32 index;
 
     if (runtime_id >= BATTLE_UNIT_RUNTIME_SLOT_COUNT) {
         for (index = 0; index < BATTLE_UNIT_RUNTIME_SLOT_COUNT; index++) {
-            battle_gfx_apply_unit_palette_modulation(preset_color, time, index, red, green, blue);
+            battle_gfx_apply_unit_palette_modulation(mode, amount, index, red, green, blue);
         }
     } else {
-        battle_gfx_apply_unit_palette_modulation(preset_color, time, runtime_id, red, green, blue);
+        battle_gfx_apply_unit_palette_modulation(mode, amount, runtime_id, red, green, blue);
     }
 }
 
@@ -2101,10 +2101,9 @@ void battle_map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red,
     battle_map_blend_ambient_light_color(mode, frame_duration, red, green, blue);
 }
 
-/* battle_map_blend_darkness_color with the color offsets narrowed to s16. The
- * arguments are the mode, the frame duration and the red, green and blue offsets. */
-void battle_map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth) {
-    battle_map_blend_darkness_color(first, second, third, fourth, fifth);
+/* battle_map_blend_darkness_color with the color offsets narrowed to s16. */
+void battle_map_start_darkness_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue) {
+    battle_map_blend_darkness_color(mode, frame_duration, red, green, blue);
 }
 
 /* battle_map_update_palette_colors for all sixteen CLUTs of the map row. */
@@ -2190,8 +2189,7 @@ s32 battle_state_update_controller_input(void) {
         }
     }
 
-    if ((g_input_previous_buttons & (PSX_PAD_START | PSX_PAD_SELECT | PSX_PAD_L1 | PSX_PAD_R1))
-        == (PSX_PAD_START | PSX_PAD_SELECT | PSX_PAD_L1 | PSX_PAD_R1)) {
+    if ((g_input_previous_buttons & MAIN_INPUT_RESET_BUTTONS) == MAIN_INPUT_RESET_BUTTONS) {
         main_system_reset_game();
     }
     return 1;

@@ -33,7 +33,8 @@ static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geome
  *   every other row whose comparison holds.
  * - Resources: read the pending rows one file at a time in type order and hand
  *   each to battle_map_dispatch_gns_resource. Types 0x12-0x17 come last: 0x12
- *   raises exception 0x3cb, the texture quarters load without being applied
+ *   reports error 0x3cb (to the empty main_system_report_error), the texture
+ *   quarters load without being applied
  *   here, and the texture is followed by the pending lighting, the texture
  *   upload and the pending palettes.
  * - Mesh records: battle_map_append_mesh_geometry requests them; the render
@@ -44,7 +45,8 @@ static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geome
  * Returns g_battle_map_gns_load_phase: nonzero while loading, 0 when done or
  * idle. A command that cannot start because a file read is in progress also
  * returns 0, and a loaded file held by START_HELD returns MAP_LOAD_RESULT_HELD
- * until MAP_DATA_COMMAND_RELEASE_GNS_HOLD.
+ * until MAP_DATA_COMMAND_RELEASE_GNS_HOLD. A failed buffer allocation is only
+ * reported (to the same empty hook) and the load goes on with a null buffer.
  *
  * Texture rows are never copied to g_battle_map_loaded_gns_records, so a selected
  * texture is read again on every start. The fourth pass does not exclude the
@@ -461,7 +463,12 @@ enum {
  * file into a temporary 0x20000-byte buffer. The loader's fourth argument is
  * the resource type, as at its other call sites; battle_map_start_file_load
  * does not read it. `palette_mode` is the animation mode the alternate mesh's
- * palette is applied with (battle_map_update_palette_colors). */
+ * palette is applied with (battle_map_update_palette_colors). Returns the load
+ * state, nonzero until the palette has been applied.
+ *
+ * Retail bug: the second step applies the palette and frees the buffer while
+ * the read is still in progress, and waits forever once it has finished. The
+ * only caller runs while g_map_refresh_pending is set, which nothing sets. */
 s32 battle_map_load_alternate_mesh(s32 palette_mode) {
     s32 i;
     s16 state;
@@ -512,6 +519,12 @@ s32 battle_map_load_alternate_mesh(s32 palette_mode) {
 }
 
 /*
+ * Append one mesh part's polygons to the map's polygon tables: the vertex
+ * positions of all four polygon classes, and the normals and terrain-tile
+ * locations of the textured ones. `metadata` receives the part's first index
+ * and count per class. Also asks battle_map_load_data to rebuild the render
+ * records over the next two frames.
+ *
  * The geometry block starts with four polygon counts, then stores positions
  * for all four polygon classes, normals for textured polygons, per-polygon
  * render data, and finally terrain-tile locations for textured polygons.
@@ -654,7 +667,9 @@ void battle_map_append_mesh_geometry(const map_mesh_geometry_t* geometry_data, m
 }
 
 /*
- * Runtime polygon records interleave GPU packet fields with renderer state.
+ * Fill the current render buffer's packets for one mesh part, after the
+ * records already filled this pass. Runtime polygon records interleave GPU
+ * packet fields with renderer state.
  * This pass skips the geometry and normal vectors consumed by
  * battle_map_append_mesh_geometry, then appends UV coordinates, CLUT commands,
  * texture-page commands, and the initial state of untextured records.

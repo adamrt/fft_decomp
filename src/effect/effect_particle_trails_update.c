@@ -16,9 +16,9 @@
 
 /* Runs up to four unseen particles from the emitter's spawn volume towards a
  * tip, keeping a 17-point trail of each, and spawns the emitter's children
- * from the trail's far end: the mid-life child every frame and the death
- * child when the trail has run out. The tentacle mesh renderer without its
- * mesh. */
+ * from the trail's head (the newest point while travelling, the arrival point
+ * after): the mid-life child every frame and the death child when the trail
+ * has run out. The tentacle mesh renderer without its mesh. */
 s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     SVECTOR tip;
@@ -35,9 +35,9 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
     MATRIX facing;
     effect_work_record_t emitter;
     SVECTOR map_max;
-    effect_record_t* record;
+    effect_record_t* record = &g_battle_effect_state_records[state_index];
     effect_trail_work_t* work;
-    const effect_geometry_record_t* entry;
+    const effect_geometry_record_t* entry = &g_battle_effect_geometry_table->entries[emitter_index];
     s16 speed_min;
     s16 speed_max;
     s16 length_min;
@@ -49,8 +49,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
     effect_trail_segment_t* seg;
     map_tile_t* tile;
     s32 orient;
-    u16 placement;
-    u16 flags;
+    u16 placement = entry->tentacle_mesh.placement_flags;
+    u16 flags = entry->tentacle_mesh.flags;
     s32 target_index;
     s32 spawn_bindings;
     s32 tip_bindings;
@@ -69,11 +69,6 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
     s32 py;
     s32 pz;
     s32 wrap;
-
-    record = &g_battle_effect_state_records[state_index];
-    entry = &g_battle_effect_geometry_table->entries[emitter_index];
-    placement = entry->tentacle_mesh.placement_flags;
-    flags = entry->tentacle_mesh.flags;
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

@@ -27,13 +27,13 @@
 #include "psx/types.h"
 
 /* World position of a tile's center (x, layer, y in the SVECTOR): x and z are tile * 28 + 14 and y
- * is the tile surface, -(height * 12), without the depth. */
+ * is the tile surface, -(height * MAP_HEIGHT_STEP), without the depth. */
 static void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {
     map_tile_t* tile = battle_map_get_tile_data_pointer(in->vx, in->vz, in->vy);
 
     out->vx = in->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     out->vz = in->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-    out->vy = -(tile->height * 12);
+    out->vy = -(tile->height * MAP_HEIGHT_STEP);
 }
 
 /* Copies the camera rotation with its yaw cut to a multiple of 0x200 (an
@@ -213,7 +213,7 @@ static void battle_camera_execute_angle_command(s32 command, s32 target, s32 dur
 static void battle_camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset) {
     VECTOR sum;
     VECTOR* coords;
-    SVECTOR* screen;
+    SVECTOR* world;
     s32 i;
 
     switch (command & EFFECT_CAMERA_SOURCE_MASK) {
@@ -273,14 +273,16 @@ static void battle_camera_execute_position_command(s32 command, s32 target, s32 
         }
         break;
     case EFFECT_CAMERA_SOURCE_TARGET_AVERAGE:
+        /* Retail divides by every target, units or not, and stores the average only
+         * when an offset is given; without one the target position is left as it was. */
         setVector(&sum, 0, 0, 0);
         for (i = 0; i < g_battle_effect_context.target_count; i++) {
             if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                screen = battle_unit_get_world_coords_by_runtime_id(
+                world = battle_unit_get_world_coords_by_runtime_id(
                     g_battle_effect_context.targets[i].data.unit.runtime_id);
-                sum.vx += screen->vx;
-                sum.vy += screen->vy;
-                sum.vz += screen->vz;
+                sum.vx += world->vx;
+                sum.vy += world->vy;
+                sum.vz += world->vz;
             }
         }
         sum.vx /= i;
@@ -381,6 +383,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
             battle_camera_set_rotation(&g_battle_effect_camera_rotation_start);
         }
         break;
+    /* An out-and-back move ends where it began, so the start stays as it is. */
     case EFFECT_CAMERA_MODE_COSINE_Q12:
         if (g_battle_effect_camera_rotation_duration > g_battle_effect_camera_rotation_frame) {
             g_battle_effect_camera_rotation_frame++;
@@ -1662,6 +1665,7 @@ static s32 battle_effect_calculate_arcing_trajectory(battle_arc_query_t* query, 
 
     tile = battle_map_get_tile_data_ptr_from_battle_id(query->target.unit_id);
     tile_height = tile->height + tile->depth_half_height.depth;
+    /* The tile surface, tile_height * MAP_HEIGHT_STEP, in 20.12. */
     floor = (tile_height * 3) << 14;
     peak = battle_effect_calculate_arc_height_term(query->delta.distance);
     if (query->delta.distance != 0) {
@@ -1808,7 +1812,7 @@ static s32 battle_effect_test_position_for_obstacle(
     }
     height = tile->height;
     y = position->vy;
-    if (y >= -(height * 12) && y < -((height - ceiling) * 12)) {
+    if (y >= -(height * MAP_HEIGHT_STEP) && y < -((height - ceiling) * MAP_HEIGHT_STEP)) {
         tile_ref->layer = 0;
         g_battle_effect_trajectory_tile_flags = tile->flags._unknown_00;
         return 1;
@@ -1821,7 +1825,7 @@ static s32 battle_effect_test_position_for_obstacle(
     }
     height = tile->height;
     y = position->vy;
-    if (y >= -(height * 12) && y < -((height - ceiling) * 12)) {
+    if (y >= -(height * MAP_HEIGHT_STEP) && y < -((height - ceiling) * MAP_HEIGHT_STEP)) {
         tile_ref->layer = 1;
         g_battle_effect_trajectory_tile_flags = tile->flags._unknown_00;
         return 1;
@@ -2009,7 +2013,7 @@ s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_p
         tile = battle_map_get_tile_data_pointer(tile_position->vx, tile_position->vz, tile_position->vy);
         g_battle_effect_trajectory_destination.vx = tile_position->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         g_battle_effect_trajectory_destination.vz = tile_position->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        g_battle_effect_trajectory_destination.vy = -((tile->height + tile->depth_half_height.depth) * 12);
+        g_battle_effect_trajectory_destination.vy = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
     } else {
         battle_unit_get_tile_center_and_height_by_battle_id(target_id, &g_battle_effect_trajectory_destination);
     }
@@ -2239,7 +2243,7 @@ s32 battle_effect_check_direct_trajectory_to_target(s32 source_id, SVECTOR* tile
         tile = battle_map_get_tile_data_pointer(tile_position->vx, tile_position->vz, tile_position->vy);
         g_battle_effect_trajectory_destination.vx = tile_position->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         g_battle_effect_trajectory_destination.vz = tile_position->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        g_battle_effect_trajectory_destination.vy = -(tile->height * 12);
+        g_battle_effect_trajectory_destination.vy = -(tile->height * MAP_HEIGHT_STEP);
     } else {
         battle_unit_get_tile_center_and_height_by_battle_id(target_id, &g_battle_effect_trajectory_destination);
         g_battle_effect_trajectory_destination.vy -= target_height;
@@ -2280,7 +2284,7 @@ void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s
         tile = battle_map_get_tile_data_pointer(tile_position->vx, tile_position->vz, tile_position->vy);
         g_battle_effect_trajectory_destination.vx = tile_position->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         g_battle_effect_trajectory_destination.vz = tile_position->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        g_battle_effect_trajectory_destination.vy = -(tile->height * 12);
+        g_battle_effect_trajectory_destination.vy = -(tile->height * MAP_HEIGHT_STEP);
     } else {
         battle_unit_get_tile_center_and_height_by_battle_id(target_id, &g_battle_effect_trajectory_destination);
         g_battle_effect_trajectory_destination.vy -= target_height;
@@ -3221,7 +3225,7 @@ s32 battle_effect_splash_secondary_handler(void) {
         tile = battle_map_get_unit_tile_from_world_coords(
             g_battle_effect_current_secondary->target.record.data.unit.runtime_id);
         g_battle_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPLASH].position.y
-            = -((tile->height + tile->depth_half_height.depth) * 12)
+            = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP)
             - battle_unit_get_world_coords_by_runtime_id(
                 g_battle_effect_current_secondary->target.record.data.unit.runtime_id)
                   ->vy;

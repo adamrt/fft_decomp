@@ -119,9 +119,14 @@ static void battle_move_update_unit_vertical_step_to_destination_tile_center(bat
     }
 }
 
-/* Selects the slope bits of the two step tiles that face the movement
- * direction (top two bits of g_battle_move_step_value) and stores them as the unit's
- * per-step scales; a rider or a g_battle_move_step_value bit 0x10 step clears them. */
+/* Store the edge heights the unit's next step crosses: the side of its current
+ * tile it leaves and the side of the destination tile it enters, each a 2-bit
+ * field of slope_type (bits 0-1 east, 2-3 west, 4-5 south, 6-7 north; 0 low,
+ * 1 sloping, 2 high). Both go to the unit's per-step scales and to
+ * g_battle_move_current_edge_height and g_battle_move_destination_edge_height.
+ * A unit standing on another unit leaves at edge height 0, and a step onto a
+ * unit (the step's mount bit) enters at 0. The step tiles are reloaded first
+ * and the unit's palette follows the destination tile's shading. */
 static void battle_move_set_unit_step_slope_scales(battle_unit_t* unit) {
     battle_move_get_current_and_destination_tiles(unit, &g_battle_move_current_tile, &g_battle_move_destination_tile);
     battle_gfx_check_tile_status_palette_mod(unit, g_battle_move_destination_tile->flags.shading, 1);
@@ -182,9 +187,9 @@ static void battle_move_set_unit_path_flag(battle_unit_t* unit) {
 }
 
 /*
- * Advance a walking unit by one frame: the elaborate sibling of
- * move_update_knockback_step, with the full 0x3c-entry
- * step-phase table instead of the knockback subset.
+ * Advance a moving unit along its path by one frame: the full counterpart of
+ * battle_move_update_knockback_step, dispatching every step phase (walk,
+ * climb, jump, fly, float and teleport) rather than the knockback subset.
  *
  * The jump-start phases dismount any rider once the jump animation has run
  * out; the two teleport phases play the teleport. When no step is active the
@@ -289,6 +294,8 @@ void battle_move_update_path_step(battle_unit_t* unit) {
         battle_move_finalize_path_after_animation(unit);
         break;
     }
+
+    /* With no step in progress, the path count decides what follows. */
     if (unit->step_phase == MOVE_STEP_PHASE_NONE) {
         count = unit->path.count;
         if (count == MOVE_PATH_TELEPORT) {
@@ -305,6 +312,8 @@ void battle_move_update_path_step(battle_unit_t* unit) {
             if (unit->movement_path_offset == count - 1) {
                 battle_move_set_unit_path_flag(unit);
             }
+
+            /* Take the next step and start it with the starter for the movement type. */
             offset = unit->movement_path_offset;
             unit->movement_path_offset = offset + 1;
             unit->current_path_step = g_battle_move_step_value = unit->path.data.steps[offset];
@@ -336,9 +345,9 @@ void battle_move_update_path_step(battle_unit_t* unit) {
  * Advance a knocked-back or path-moving unit by one frame.
  *
  * While a step is in progress (step_phase non-zero) the walk speed
- * decays by a quarter towards 0x1000 and the step phase handler runs. Once
- * no step is active, the next path byte starts a new step, or the mount
- * animation coordinates are stored when the path is exhausted.
+ * decays by a quarter per frame down to ONE and the step phase handler runs.
+ * Once no step is active, the next path byte starts a new step, or
+ * battle_unit_settle_on_tile ends the move when the path is exhausted.
  */
 void battle_move_update_knockback_step(battle_unit_t* unit) {
     u32 offset;
@@ -856,6 +865,8 @@ void battle_target_store_cursor_unit_name_and_data(void) {
  * info panel when the tile is empty. */
 void battle_target_store_cursor_unit_as_preview_target(void) {
     battle_unit_t* unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
+
+    /* Retail looks up the source unit here and ignores it. */
     battle_unit_get_source();
     if (unit != 0) {
         menu_start_unit_view_thread(UNIT_VIEW_MODE_RIGHT_UNIT, 0xFF, unit->stats->battle_id);
@@ -915,10 +926,11 @@ void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const
  * it moved.
  *
  * Before reading the direction, the cursor may hop to the other map level:
- * on START when the multi-height cursor option is 3, otherwise once the
- * repeat counter passes the option's delay. A step onto a blocked tile whose
- * other level is also blocked is undone; otherwise the cursor takes the
- * unblocked level, or the one nearer the old tile's height.
+ * on START when the multi-height cursor option is STOP, otherwise once the
+ * cursor has rested longer than the option's delay (30, 60 or 90 frames). A
+ * step onto a blocked tile whose other level is also blocked is undone;
+ * otherwise the cursor takes the unblocked level, or the one nearer the old
+ * tile's height.
  *
  * `direction` doubles as the level-hop flag, as the target keeps both in one
  * register. The do-while(0) weights the delay's references so that GCC
@@ -930,21 +942,21 @@ s32 battle_target_move_cursor_by_input(void) {
     u32 delay;
     s32 direction;
     map_tile_t* current;
-    map_tile_t* lower;
-    map_tile_t* upper;
+    map_tile_t* stepped;
+    map_tile_t* opposite;
     map_tile_t* other_level;
-    s8 lower_rise;
-    s8 upper_rise;
+    s8 stepped_rise;
+    s8 opposite_rise;
 
     do {
         switch (options.fields.multi_height_cursor_speed) {
-        case 0:
+        case GAME_MULTI_HEIGHT_CURSOR_SPEED_FAST:
             delay = 30;
             break;
-        case 1:
+        case GAME_MULTI_HEIGHT_CURSOR_SPEED_REGULAR:
             delay = 60;
             break;
-        case 2:
+        case GAME_MULTI_HEIGHT_CURSOR_SPEED_SLOW:
         default:
             delay = 90;
             break;
@@ -953,7 +965,7 @@ s32 battle_target_move_cursor_by_input(void) {
 
     direction = 0;
     current = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-    if (g_main_game_options.fields.multi_height_cursor_speed == 3) {
+    if (g_main_game_options.fields.multi_height_cursor_speed == GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP) {
         if (g_main_input_pressed_buttons & PSX_PAD_START) {
             other_level = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
             if (!other_level->flags.blocked) {
@@ -1022,10 +1034,11 @@ s32 battle_target_move_cursor_by_input(void) {
             g_battle_cursor_y = 0;
         }
 
-        lower = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-        upper = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
-        if (lower->flags.blocked) {
-            if (upper->flags.blocked) {
+        /* The tile stepped onto at the cursor's level and the tile on the other level. */
+        stepped = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
+        opposite = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
+        if (stepped->flags.blocked) {
+            if (opposite->flags.blocked) {
                 switch (direction) {
                 case BATTLE_FACING_NORTH:
                     g_battle_cursor_y--;
@@ -1059,16 +1072,16 @@ s32 battle_target_move_cursor_by_input(void) {
             } else {
                 g_battle_cursor_z ^= 1;
             }
-        } else if (!upper->flags.blocked) {
-            lower_rise = lower->height - current->height;
-            upper_rise = upper->height - current->height;
-            if (lower_rise < 0) {
-                lower_rise = -lower_rise;
+        } else if (!opposite->flags.blocked) {
+            stepped_rise = stepped->height - current->height;
+            opposite_rise = opposite->height - current->height;
+            if (stepped_rise < 0) {
+                stepped_rise = -stepped_rise;
             }
-            if (upper_rise < 0) {
-                upper_rise = -upper_rise;
+            if (opposite_rise < 0) {
+                opposite_rise = -opposite_rise;
             }
-            if (upper_rise < lower_rise) {
+            if (opposite_rise < stepped_rise) {
                 g_battle_cursor_z ^= 1;
             }
         }
@@ -1394,6 +1407,8 @@ void battle_camera_update_zoom(void) {
             *zoom_ptr = ONE;
         }
     } else if (g_battle_camera_zoom_action == CAMERA_STEP_DECREASE
+        /* Retail compares the target with the action already loaded: CAMERA_STEP_DECREASE equals
+         * MAP_ZOOM_OUT. */
         && g_battle_map_zoom_target == g_battle_camera_zoom_action) {
         s32 zoom;
         s32 below;
@@ -1442,12 +1457,12 @@ void battle_camera_handle_tilt_request(s32 mode) {
         if (g_battle_camera_render_state.vx >= 0x1C1) {
             g_battle_map_tilt_target = MAP_TILT_HIGH;
             g_battle_camera_tilt_action = CAMERA_STEP_DECREASE;
-            g_battle_camera_tilt_increment = mode;
+            g_battle_camera_tilt_increment = 1;
             main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
         } else if (g_battle_camera_render_state.vx < 0x1C0) {
             g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
             g_battle_map_tilt_target = MAP_TILT_HIGH;
-            g_battle_camera_tilt_increment = mode;
+            g_battle_camera_tilt_increment = 1;
             main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
         }
         break;
@@ -1493,6 +1508,8 @@ void battle_camera_update_tilt(void) {
     s16 tilt;
 
     if (g_battle_camera_tilt_action == CAMERA_STEP_INCREASE
+        /* Retail compares the target with the action already loaded: CAMERA_STEP_INCREASE equals
+         * MAP_TILT_HIGH. */
         && g_battle_map_tilt_target == g_battle_camera_tilt_action) {
         s16* state = &g_battle_camera_render_state.vx;
         tilt = *state + g_battle_camera_tilt_increment;
@@ -1568,6 +1585,7 @@ static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
     s32 height;
     map_tile_depth_t depth;
 
+    /* Retail also looks up the tile on the other level and ignores it. */
     battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
     depth = tile->depth_half_height;
     height = -((tile->height + depth.depth) * MAP_HEIGHT_STEP + depth.half_height * (MAP_HEIGHT_STEP / 2));
@@ -1705,9 +1723,6 @@ static void battle_camera_step_real_coords_toward_target(const battle_unit_t* ta
  * battle_camera_update_cursor_tile_vector, and that state and those above it
  * clear the vector.
  *
- * The scaling routine passes the normal routine's result through, and these
- * callers hand it on.
- *
  * The idle path is battle_camera_update_cursor_tile_vector verbatim. The four
  * main_util_set_vector calls are one tail-merged block in the target, placed
  * last so it falls into the epilogue, so the idle path's window test is
@@ -1780,13 +1795,17 @@ void battle_camera_update_vector_from_game_state(void) {
     }
 }
 
-/* Refresh the cursor-tile camera vector while the map camera is idle.
+/* Refresh the cursor-tile camera vector while the map camera is idle (no zoom,
+ * tilt, rotation or free pan).
  *
- * The cursor unit's sprite height (scaled by g_battle_camera_zoom.vy, 4.12 fixed point)
- * offsets the cursor's screen position (g_battle_cursor_screen_x, g_battle_cursor_screen_y). Inside the
- * central window the vector is cleared; nearer the edge the unit tile normal
- * is used as is, otherwise doubled. The tile height left in $v0 by either
- * vector routine is passed on to battle_camera_step_focus_toward_cursor_tile. */
+ * Half the cursor unit's sprite height (scaled by g_battle_camera_zoom.vy, 4.12
+ * fixed point) raises the cursor's screen position (g_battle_cursor_screen_x,
+ * g_battle_cursor_screen_y) to the unit's middle. Inside the inner window
+ * (x 0xb1..0x14f, y 0x51..0x9f) the camera holds still; inside the outer
+ * window, 0x10 pixels wider on every side, it drifts toward the cursor tile
+ * at the normal speed, and beyond that at double speed. The tile height either
+ * vector routine returns is the height bound for
+ * battle_camera_step_focus_toward_cursor_tile. */
 void battle_camera_update_cursor_tile_vector(void) {
     battle_unit_t* unit;
     s32 height;

@@ -44,7 +44,6 @@ static u8 g_battle_status_bubble_digit_v[24]
  * creases it along the v0-v3 diagonal, 2 along v1-v2. */
 s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad) {
     map_tile_t* tile;
-    /* Byte access retains the original packed load and field-extraction order. */
     s32 split;
     s32 rise;
     u8 height;
@@ -54,6 +53,7 @@ s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer,
     split = 0;
     tile = battle_map_get_tile_data_pointer((coords->vx / MAP_TILE_SIZE), (coords->vz / MAP_TILE_SIZE), layer);
     height = tile->height;
+    /* Byte access retains the original packed load and field-extraction order. */
     depth = (*(u8*)&tile->depth_half_height);
     slope = tile->slope_type;
     quad[0].vx = coords->vx - 14;
@@ -64,9 +64,11 @@ s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer,
     quad[2].vz = coords->vz - 14;
     quad[3].vx = coords->vx + 14;
     quad[3].vz = coords->vz - 14;
-    quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -((height + (depth >> MAP_TILE_DEPTH_SHIFT)) * 12);
+    quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -((height + (depth >> MAP_TILE_DEPTH_SHIFT)) * MAP_HEIGHT_STEP);
     if ((depth & MAP_TILE_HALF_HEIGHT_MASK) != 0) {
-        rise = (depth & MAP_TILE_HALF_HEIGHT_MASK) * 6;
+        /* The slope spans half_height levels: raise the quad to its middle, then
+         * move the high corners up and the low corners down by half the span. */
+        rise = (depth & MAP_TILE_HALF_HEIGHT_MASK) * (MAP_HEIGHT_STEP / 2);
         quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise;
         switch (slope) {
         case MAP_SLOPE_EDGE_EAST: /* edge up to east */
@@ -303,10 +305,16 @@ static battle_unit_t* battle_unit_get_mount(battle_unit_t* unit) {
 }
 
 /*
- * Returns the signed-16-bit world height at coords after applying unit height,
- * terrain depth, movement behavior and sprite-specific adjustments.
- * vx/vz are integer world x/depth; vy selects the map layer.
- * An unavailable unit-height record falls back to terrain height.
+ * The world y (negative is up) of a unit's feet at coords: vx and vz are world
+ * x and z, vy holds the map layer.
+ *
+ * A unit standing on another unit (standing_on_battle_id_plus_one) stands on
+ * top of it, unless that unit's height is unavailable; any other unit stands
+ * on the terrain surface under coords. On a water tile a unit with Float or
+ * on-water movement, a treasure or a crystal stays at the water surface, a
+ * chicken or frog 4 units below it, and an in-water mover or a dead unit one
+ * level below it; others stand on the bottom. depth_height_offset (the rise
+ * of a floating unit) then lifts every case.
  */
 static s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, const SVECTOR* coords) {
     battle_unit_height_data_t height;
@@ -322,7 +330,8 @@ static s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, co
         if (height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
             world_height = battle_map_calculate_slope_height(coords, coords->vy & 0xff);
         } else {
-            world_height = -height.total_height / 2 * 12;
+            /* total_height counts half levels. */
+            world_height = -height.total_height / 2 * MAP_HEIGHT_STEP;
         }
     } else {
         world_height = battle_map_calculate_slope_height(coords, coords->vy & 0xff);
@@ -334,14 +343,14 @@ static s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, co
             sprite = unit->spritesheet_id;
             animation = unit->animation.sequence_id >> 1;
             if ((flags & BATTLE_EFFECTIVE_MOVEMENT_FLOAT) || (flags & BATTLE_EFFECTIVE_MOVEMENT_ON_WATER)) {
-                world_height -= (tile->depth_half_height.depth) * 12 + unit->depth_height_offset;
+                world_height -= (tile->depth_half_height.depth) * MAP_HEIGHT_STEP + unit->depth_height_offset;
             } else if (sprite == BATTLE_SPRITESHEET_ID_CHICKEN || sprite == BATTLE_SPRITESHEET_ID_FROG) {
                 raised = world_height + 4;
-                world_height = raised - ((tile->depth_half_height.depth) * 12 + unit->depth_height_offset);
+                world_height = raised - ((tile->depth_half_height.depth) * MAP_HEIGHT_STEP + unit->depth_height_offset);
             } else if ((flags & BATTLE_EFFECTIVE_MOVEMENT_IN_WATER) || animation == BATTLE_UNIT_ANIMATION_DEAD) {
-                world_height -= ((tile->depth_half_height.depth) - 1) * 12 + unit->depth_height_offset;
+                world_height -= ((tile->depth_half_height.depth) - 1) * MAP_HEIGHT_STEP + unit->depth_height_offset;
             } else if (sprite == BATTLE_SPRITESHEET_ID_TREASURE || sprite == BATTLE_SPRITESHEET_ID_CRYSTAL) {
-                world_height -= (tile->depth_half_height.depth) * 12 + unit->depth_height_offset;
+                world_height -= (tile->depth_half_height.depth) * MAP_HEIGHT_STEP + unit->depth_height_offset;
             } else {
                 world_height -= unit->depth_height_offset;
             }
@@ -356,7 +365,10 @@ static s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, co
 
 /* battle_gfx_calculate_world_height_from_coords at the caller's coords (vy
  * holds the map layer), evaluated for the mount when the unit is a rider. A
- * rider's result is moved by -10 plus the mount's float bob offset. */
+ * rider's result is moved by -10 plus the mount's float bob offset.
+ *
+ * Here and in the three functions below, the separate adjusted_world_height
+ * step keeps the target's order of operations. */
 s32 battle_gfx_calculate_world_height_with_caller_coords(battle_unit_t* unit, const SVECTOR* coords) {
     battle_unit_t* mount = battle_unit_get_mount(unit);
     s32 adjusted_world_height;
@@ -430,12 +442,10 @@ s32 battle_gfx_calculate_world_height_from_unit_tile(battle_unit_t* unit) {
     return (s16)world_height;
 }
 
-/*
- * Calculate world height at the grounded unit's map-tile center.
- *
- * A mounted rider uses the mount's map position, then applies its mounted
- * height offset and the original -10 adjustment.
- */
+/* battle_gfx_calculate_world_height_from_coords at the center of the tile
+ * recorded in the battle stats of the unit, or of its mount for a rider, on the
+ * mount's map layer. A rider's result is moved by -10 plus the mount's float bob
+ * offset. */
 s32 battle_gfx_calculate_world_height_from_battle_tile(battle_unit_t* unit) {
     SVECTOR coord;
     unit_stats_t* stats;
@@ -458,13 +468,16 @@ s32 battle_gfx_calculate_world_height_from_battle_tile(battle_unit_t* unit) {
 
 /* Queue a unit's ground shadow quad.
  *
- * The four shadow corners at 0x29c are projected into a semi-transparent
- * POLY_FT4. On a tile with depth where screen_z is greater than
- * -(height + depth) * 12, the quad uses tpage 0x3f and UVs that rotate with
- * the counter at 0x29a; otherwise it uses tpage 0x5f and fixed UVs.
- * When the unit is above the ground height at its effect-adjusted position,
- * the quad is sorted by that ground point's depth; otherwise it goes into
- * the caller's ordering-table entry.
+ * The four shadow_quad corners are projected into a semi-transparent POLY_FT4.
+ * A unit below the water surface of its tile (world y greater than
+ * -(height + depth) * 12, negative y being up) gets the additive (tpage 0x3f)
+ * water image, whose UVs turn a quarter every 16 counts of shadow_counter
+ * (advanced by the frame interval); any other unit gets the subtractive
+ * (tpage 0x5f) shadow image.
+ *
+ * A unit at or below the terrain under its event and SEQ adjusted position uses
+ * the caller's ordering-table entry. A unit above it (jumping, floating or on
+ * water) is sorted at the depth of the ground or water surface below it.
  *
  * The dirty test sets bit 0 of shadow_dirty before testing it, so the quad is
  * recalculated on every call.
@@ -508,7 +521,8 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
     prim->code |= 2;
     tile = battle_map_get_tile_data_pointer(
         (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_z);
-    if (tile->depth_half_height.depth && -(tile->height + tile->depth_half_height.depth) * 12 < unit->world_coords.vy) {
+    if (tile->depth_half_height.depth
+        && -(tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP < unit->world_coords.vy) {
         unit->shadow_counter += g_main_system_vsync_interval;
         frame = unit->shadow_counter;
         prim->tpage = 0x3f;
@@ -557,7 +571,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
     } else {
         tile = battle_map_get_tile_data_pointer(
             (position.vx / MAP_TILE_SIZE), (position.vz / MAP_TILE_SIZE), unit->map_z);
-        position.vy -= tile->depth_half_height.depth * 12;
+        position.vy -= tile->depth_half_height.depth * MAP_HEIGHT_STEP;
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if (tile->surface.depth_bias) {
                 battle_camera_calculate_relative_offset_by_5(&position, &offset);
@@ -581,11 +595,14 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
 /*
  * Queue the glow primitives for one cursor tile.
  *
- * The four vertices are projected with the battle camera. Shape 0 draws a textured
- * quad; shapes 1 and 2 split the tile into two textured triangles along either
- * diagonal. Each primitive gets a copy with the 0x1f texture page and the
- * 0x50 palette, and both are queued only when the first three projected
- * vertices face the camera. The pool stride is always sizeof(POLY_FT4).
+ * The four vertices are projected with the battle camera. Shape 0 (see
+ * battle_target_calculate_cursor_tile_polygon) draws a textured quad; shapes 1
+ * and 2 split the tile into two textured triangles along the v0-v3 or v1-v2
+ * diagonal. Each primitive draws the 13 x 13 glow image additively (tpage 0x3f)
+ * with CLUT palette + 1 of the sprite row, and a copy of it fills the same area
+ * from a single texel with CLUT 5 at half blend (tpage 0x1f). Both are queued
+ * only when the first three projected vertices face the camera. Every
+ * primitive takes a POLY_FT4-sized slot of the pool.
  */
 void battle_gfx_build_cursor_tile_glow(
     s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot) {
@@ -782,20 +799,18 @@ void battle_gfx_build_cursor_tile_glow(
     }
 }
 
-/* Per-sprite height table, one byte every four. */
-
 /*
- * Queue the map selection cursor over the currently selected tile.
+ * Queue the map selection cursor over the cursor tile, whose surface point the
+ * caller passes in `base` with the camera matrices loaded.
  *
- * The explicit default arm is required: it gives GCC the target's jump past
- * the default 0x3c path. Scheduling the r0 color assignment directly after
- * u2 retains the primitive's semantics and produces the nearer late move.
+ * The cursor floats 0x3c units above the tile, or 0x18 above the sprite height
+ * of the unit the cursor selects there, scaled by the camera zoom. It bobs
+ * down through an eight-frame pattern, advanced by the frame interval unless
+ * the status screen is open. Its quad is the 16 x 24 cursor image scaled by
+ * the camera zoom, sorted at the depth of the tile's surface point.
  *
- * The two initialized locals occupy 64 bytes of .rodata at 0x80067798: the
- * eight-frame vertical bob offsets and their per-frame durations. The bob
- * advances once per call unless the status screen owns the frame. The cursor
- * floats 0x3c above the tile, or above the occupying unit's sprite height
- * scaled by the camera zoom, and its quad is sized from the camera zoom.
+ * The two initialized locals occupy 64 bytes of .rodata at 0x80067798: the bob
+ * offsets and their durations in frames.
  */
 void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     VECTOR transformed;
@@ -806,10 +821,7 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     POLY_FT4* prim;
     battle_unit_t* unit;
     s32 height;
-    s32 scaled;
-    s32 half_width;
     s32 half_height;
-    u8 color;
 
     prim = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
     ((P_TAG*)prim)->len = 9;
@@ -826,65 +838,37 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     }
     unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (unit != 0) {
-        scaled = g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height * g_battle_camera_zoom.vy;
-        height = (scaled / ONE) + 0x18;
+        height
+            = g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height * g_battle_camera_zoom.vy / ONE + 0x18;
     } else {
         height = 0x3c;
     }
     base->vy -= height - bob[g_battle_gfx_selection_cursor_bob_frame];
     RotTrans(base, &transformed, &flag);
 
-    half_width = g_battle_camera_zoom.vx;
-    if (half_width < 0) {
-        half_width += 0x1ff;
-    }
-    prim->x0 = transformed.vx - (half_width >> 9);
+    prim->x0 = transformed.vx - g_battle_camera_zoom.vx / 512;
+    prim->y0 = transformed.vy - g_battle_camera_zoom.vy * 12 / ONE;
+    prim->x1 = transformed.vx + g_battle_camera_zoom.vx / 512;
+    prim->y1 = transformed.vy - g_battle_camera_zoom.vy * 12 / ONE;
+    prim->x2 = transformed.vx - g_battle_camera_zoom.vx / 512;
+    prim->y2 = transformed.vy + g_battle_camera_zoom.vy * 12 / ONE;
+    prim->x3 = transformed.vx + g_battle_camera_zoom.vx / 512;
+    half_height = g_battle_camera_zoom.vy * 12 / ONE;
     {
-        s32 zoom_height = g_battle_camera_zoom.vy * 12;
-        prim->y0 = transformed.vy - (zoom_height / ONE);
-    }
-    half_width = g_battle_camera_zoom.vx;
-    if (half_width < 0) {
-        half_width += 0x1ff;
-    }
-    prim->x1 = transformed.vx + (half_width >> 9);
-    {
-        s32 zoom_height = g_battle_camera_zoom.vy * 12;
-        prim->y1 = transformed.vy - (zoom_height / ONE);
-    }
-    half_width = g_battle_camera_zoom.vx;
-    if (half_width < 0) {
-        half_width += 0x1ff;
-    }
-    prim->x2 = transformed.vx - (half_width >> 9);
-    {
-        s32 zoom_height = g_battle_camera_zoom.vy * 12;
-        prim->y2 = transformed.vy + (zoom_height / ONE);
-    }
-    half_width = g_battle_camera_zoom.vx;
-    if (half_width < 0) {
-        half_width += 0x1ff;
-    }
-    prim->x3 = transformed.vx + (half_width >> 9);
-    half_height = g_battle_camera_zoom.vy * 12;
-    if (half_height < 0) {
-        half_height += 0xfff;
-    }
-    {
+        /* Read as a halfword, as the target does, after the half height. */
         u16 screen_y = transformed.vy;
         prim->tpage = 0x5f;
-        prim->y3 = screen_y + (half_height >> 12);
+        prim->y3 = screen_y + half_height;
     }
     prim->code |= 2;
-    color = 0x80;
     prim->clut = GetClut(0x40, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
-    prim->r0 = prim->g0 = prim->b0 = color;
+    prim->r0 = prim->g0 = prim->b0 = 0x80;
     prim->u2 = 0x40;
     prim->u0 = 0x40;
     prim->u3 = 0x50;
     prim->u1 = 0x50;
-    prim->v1 = color;
-    prim->v0 = color;
+    prim->v1 = 0x80;
+    prim->v0 = 0x80;
     prim->v3 = 0x98;
     prim->v2 = 0x98;
     battle_camera_convert_screen_coords_modify_by_1(base, &screen);
@@ -893,8 +877,9 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
 }
 
 /*
- * Queue the four wait-direction arrows around a unit's feet, highlighting the
- * one that matches its facing quadrant.  Called from
+ * Queue the four wait-direction arrows around a unit's feet. The arrow of the
+ * source unit's facing quadrant blinks between two lit images every 32 timer
+ * counts; the others show the unlit image. Called from
  * battle_gfx_draw_wait_direction_unit with the unit's base position and the
  * ordering-table slot for its depth.
  *
@@ -973,18 +958,21 @@ static const u32 g_battle_unit_float_bob_offsets_rodata[6] = {
     0x03030302,
 };
 
+/* battle_gfx_calculate_world_height_from_world_coords is called as returning s16; the target's
+ * handling of the result needs it, and a plain s32 call compiles differently. */
 typedef s16 (*battle_screen_z_halfword_fn_t)(battle_unit_t* unit);
 
 /* Raise a floating unit's height offset, or lower it back to the ground.
  *
- * A floating unit rises up to 12 and then bobs through
- * g_battle_unit_float_bob_offsets unless it is a mount's rider. Otherwise the offset decays to 0,
- * except during the crystal-learn state. The screen/real Z follow the lower
- * of the stored and recalculated heights. Jumping units whose height is
- * controlled by their jump animation are left untouched. */
+ * A floating unit rises by the frame interval each update up to 12, then bobs through
+ * g_battle_unit_float_bob_offsets (24 entries, two frames each) unless it is
+ * a mount's rider. Otherwise the offset decays to 0, except during the
+ * crystal-learn state. The unit's world and real y are then raised to the
+ * recalculated ground height when they lie below it. Jumping units whose
+ * height is controlled by their jump animation are left untouched. */
 static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
     s8 wave[24];
-    s16 screen_z;
+    s16 ground_y;
     u32 phase;
 
     memcpy(wave, g_battle_unit_float_bob_offsets, sizeof(wave));
@@ -1006,25 +994,30 @@ static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
             if (unit->depth_height_offset < 0) {
                 unit->depth_height_offset = 0;
             }
-            screen_z = ((battle_screen_z_halfword_fn_t)battle_gfx_calculate_world_height_from_world_coords)(unit);
-            unit->world_coords.vy = screen_z;
-            unit->real.vy = screen_z * ONE;
+            ground_y = ((battle_screen_z_halfword_fn_t)battle_gfx_calculate_world_height_from_world_coords)(unit);
+            unit->world_coords.vy = ground_y;
+            unit->real.vy = ground_y * ONE;
         } else {
             unit->float_bob_offset = 0;
         }
     }
-    screen_z = ((battle_screen_z_halfword_fn_t)battle_gfx_calculate_world_height_from_world_coords)(unit);
-    if (unit->world_coords.vy > screen_z) {
-        unit->world_coords.vy = screen_z;
-        unit->real.vy = screen_z * ONE;
+    ground_y = ((battle_screen_z_halfword_fn_t)battle_gfx_calculate_world_height_from_world_coords)(unit);
+    if (unit->world_coords.vy > ground_y) {
+        unit->world_coords.vy = ground_y;
+        unit->real.vy = ground_y * ONE;
     }
 }
 
 /* Advances one unit's status bubble by g_main_system_vsync_interval frames.
  *
- * Every 16 timer ticks the bubble id walks forward to the next status the unit
- * carries, wrapping at 0x16, and the bubble's x/y offsets are chosen from the
- * unit's SHP type and animation.
+ * The bubble switches texture rows every 16 timer ticks (bubble 9 every 8).
+ * Every 16 ticks the bubble id walks forward to the next of the 22 bubbles
+ * that applies, wrapping to 0, and the bubble's x/y offsets are chosen from
+ * the unit's SHP type and animation. Bubbles 0 to 0x14 follow statuses
+ * (g_battle_gfx_status_bubble_status_masks); bubble 0x15 belongs to the source
+ * unit instead. The dead (0) and Death Sentence (0x14) bubbles, which show
+ * counters, stay while their status lasts. A unit with no bubble status that
+ * is not the source unit loses its bubble.
  *
  * The block-scoped bubble_mask keeps GCC from rotating the loop's leading exit
  * tests to the bottom, and indexing g_battle_gfx_status_bubble_status_masks inside the loop lets loop.c
@@ -1162,11 +1155,15 @@ static const u32 g_status_bubble_zoom_rodata[2] = {
 /*
  * Queue the unit's status bubble into the ordering table.
  *
- * The bubble's texture coordinates are chosen from the status bubble id: the
- * "dying" bubble (id 0) and the status-CT bubble (id 20) show a counter digit,
- * and ids 9, 10 and 21 have a second texture row selected by status_bubble_alternate_row.  The
- * bubble is drawn one tile above the unit's feet and offset by status_bubble_x
- * and status_bubble_y.
+ * The bubble's texture coordinates are chosen from the status bubble id. The
+ * dead bubble (id 0) shows the Reraise image (entry 10) on a unit with
+ * Reraise, else the digit of its death counter, else (counter 0xff) its own
+ * image. The Death Sentence bubble (id 20) shows the digit of that status's
+ * count. Ids 0, 9, 10 and 21 have a second texture row, selected by
+ * status_bubble_alternate_row. The bubble is drawn at status_bubble_y (negative
+ * is up) from the unit's feet and status_bubble_x across, one pixel higher
+ * while bit 4 of the timer is set, and sorted at the depth of a point 12 units
+ * below its base.
  */
 void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_screen_coords) {
     SVECTOR position;
@@ -1283,11 +1280,13 @@ void battle_gfx_init_position_vector_copies(battle_unit_t* unit) {
 }
 
 /*
- * Draw the unit's sprite once at each of its six position_copies.
+ * Draw the unit's current sprite frame once at each of its six position_copies:
+ * the afterimage trail that battle_gfx_init_position_vector_copies starts.
  *
- * Counterpart of battle_gfx_init_position_vector_copies, which seeds the
- * copies; each copy is projected with the battle camera and queued at its own
- * ordering-table depth using the current camera zoom.
+ * Each copy is projected with the battle camera and queued at its own
+ * ordering-table depth using the current camera zoom, semi-transparent with the
+ * blend bits cleared (half blend). The camera matrices are rebuilt for every
+ * copy.
  */
 void battle_gfx_draw_unit_sprite_position_copies(battle_unit_t* unit) {
     SVECTOR position;
@@ -1382,7 +1381,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
     u8 green;
     u8 blue;
     s16 y_shift;
-    s32 result;
+    s32 image_id;
     u8 change;
     u8 status;
 
@@ -1655,10 +1654,10 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
         break;
     case BATTLE_NUMERIC_DISPLAY_STATUS_INFLICTED:
     case BATTLE_NUMERIC_DISPLAY_STATUS_REMOVED:
-        result = status;
-        battle_gfx_store_sprite_display_data(display_2, 0, -21, -32, g_battle_action_display_image_rects[result].u,
-            g_battle_action_display_image_rects[result].v, g_battle_action_display_image_rects[result].width,
-            (g_battle_action_display_image_rects + result)->height, 0);
+        image_id = status;
+        battle_gfx_store_sprite_display_data(display_2, 0, -21, -32, g_battle_action_display_image_rects[image_id].u,
+            g_battle_action_display_image_rects[image_id].v, g_battle_action_display_image_rects[image_id].width,
+            (g_battle_action_display_image_rects + image_id)->height, 0);
         break;
     case BATTLE_NUMERIC_DISPLAY_LEVEL_DOWN:
         /* The fall-through overwrites both sprites, so level down places them like level up. */
@@ -1730,7 +1729,7 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
         }
         if (action->attack_type & ACTION_TYPE_PSEUDO_STATUS) {
             if (action->sp_change != 0) {
-                if (action->sp_change & 0x80) {
+                if (action->sp_change & ACTION_STAT_CHANGE_INCREASE) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_SPEED_GAIN;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_SPEED_DAMAGE;
@@ -1741,35 +1740,35 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_QUICK;
                 } else if (action->ct_change == ACTION_CT_CHANGE_ZERO) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_CT_ZERO;
-                } else if (action->ct_change & 0x80) {
+                } else if (action->ct_change & 0x80) { /* the top bit marks a gain, as for the stats */
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_CT_GAIN;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_CT_DAMAGE;
                 }
             }
             if (action->pa_change != 0) {
-                if (action->pa_change & 0x80) {
+                if (action->pa_change & ACTION_STAT_CHANGE_INCREASE) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_PA_GAIN;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_PA_DAMAGE;
                 }
             }
             if (action->ma_change != 0) {
-                if (action->ma_change & 0x80) {
+                if (action->ma_change & ACTION_STAT_CHANGE_INCREASE) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_MA_GAIN;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_MA_DAMAGE;
                 }
             }
             if (action->brave_change != 0) {
-                if (action->brave_change & 0x80) {
+                if (action->brave_change & ACTION_STAT_CHANGE_INCREASE) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_BRAVE_GAIN;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_BRAVE_DAMAGE;
                 }
             }
             if (action->faith_change != 0) {
-                if (action->faith_change & 0x80) {
+                if (action->faith_change & ACTION_STAT_CHANGE_INCREASE) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_FAITH_GAIN;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_FAITH_DAMAGE;
@@ -1816,8 +1815,13 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
             }
         }
     } else {
+        /* An evade (accessory, either hand, Blade Grasp or Finger Guard) or a forced
+         * failure reads MISSED for an ability that targets allies only (team bits 1,
+         * AI_ABILITY_FLAG_1_TARGET_ALLIES) and GUARDED otherwise; a catch reads
+         * CAUGHT, a canceled or reflected action nothing, any other miss MISSED. */
         miss = action->miss_type;
         if (miss != ACTION_MISS_TYPE_HIT) {
+            /* types 1 and 2: accessory and right-hand evade */
             if ((u32)(action->miss_type - 1) < 2 || miss == ACTION_MISS_TYPE_LEFT_HAND_EVADE
                 || miss == ACTION_MISS_TYPE_FORCED_FAILURE || miss == ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD) {
                 if ((action->miss_display_flags & ACTION_MISS_DISPLAY_TEAM_MASK) == 1) {
@@ -1839,7 +1843,9 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
     }
 }
 
-/* Builds the next EXP/JP or failure-message display.
+/* Builds the next EXP/JP or failure-message display: gained Exp, then gained JP,
+ * then no target, silenced or not enough MP, clearing that flag. A number shows
+ * its last two digits (a value over 999 shows 99).
  *
  * The companion of battle_gfx_build_next_action_result_display for flags
  * 0x02000000 and above. Returns 0 when no flag is pending. Reading the
@@ -1916,6 +1922,7 @@ s32 battle_gfx_build_next_special_action_result_display(battle_unit_t* unit) {
     display_1 = display->displays[1];
     display_2 = display->displays[2];
 
+    /* Empty displays 1 and 2; each case below fills only the sprites it uses. */
     battle_gfx_store_sprite_display_data(display_2, 0, -21, 16, 0, 0, 0, 0, 0);
     battle_gfx_store_sprite_display_data(display_1, 0, -21, 16, 0, 0, 0, 0, 0);
 

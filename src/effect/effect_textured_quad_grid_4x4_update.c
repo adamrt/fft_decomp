@@ -29,14 +29,15 @@ enum { QUAD_GRID_SIZE = 4, QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE, QUAD_GRID_DEPT
  */
 s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
-    effect_record_t* record;
+    effect_record_t* record = &g_battle_effect_state_records[state_index];
     s32 translucent;
     u16 texture_page;
     effect_texture_page_config_t configuration;
     s32 texture_width;
     s32 texture_height;
     u32* ot;
-    const effect_textured_quad_geometry_view_t* geometry;
+    const effect_textured_quad_geometry_view_t* geometry
+        = &g_battle_effect_geometry_table->entries[emitter_index].textured_quad;
     effect_textured_quad_grid_4x4_work_t* work;
     POLY_GT4* quad;
     /* Keep unsigned bindings separate from the signed curve-index scratch. */
@@ -55,8 +56,6 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
     u8 u;
     u8 v;
 
-    record = &g_battle_effect_state_records[state_index];
-    geometry = &g_battle_effect_geometry_table->entries[emitter_index].textured_quad;
     ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
@@ -78,7 +77,8 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         texture_page
             = (configuration.blend_mode << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT) | EFFECT_RENDER_TEXTURE_PAGE_BASE;
 
-        /* The quads never move, so their positions are set here once, in both buffers. */
+        /* The quads never move, so their positions are set here once, in both buffers. The grid
+         * starts at draw x 128, the left screen edge: BATTLE's draw areas begin at x -128. */
         for (row = 0; row < QUAD_GRID_SIZE; row++) {
             for (column = 0; column < QUAD_GRID_SIZE; column++) {
                 quad = &work->quads[0][row * QUAD_GRID_SIZE + column];

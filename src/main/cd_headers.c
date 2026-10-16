@@ -1,4 +1,4 @@
-/* File header building, the CD-ROM pause and the CD subsystem reset. */
+/* Starting an asynchronous CD read on a load descriptor, pausing the drive and resetting the CD library. */
 
 #include "fft/main.h"
 #include "fft/main_file.h"
@@ -14,7 +14,14 @@ int main_file_request_read_quiet(main_file_load_descriptor_t* header, int sector
     return main_file_request_read(header, sector, sectors, destination, MAIN_FILE_LOADING_DISPLAY_OFF);
 }
 
-/* Initialize a descriptor and enter the asynchronous loader's setup phase. */
+/* Queue an asynchronous read of sector_count sectors from lba into destination
+ * on an idle descriptor; main_file_poll_load then carries it out. Returns 1
+ * without queuing when the descriptor is busy, else 0.
+ *
+ * loading_display_mode other than PRESERVE restarts the Now Loading counter
+ * (OFF, -1, keeps the message hidden). INIT also blanks the display, builds
+ * the message, clears both 256x240 buffers of VRAM and sets up a plain
+ * double-buffered 256x240 display for it. */
 s32 main_file_request_read(
     main_file_load_descriptor_t* header, s32 lba, s32 sector_count, void* destination, s32 loading_display_mode) {
     RECT rect;

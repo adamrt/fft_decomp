@@ -8,6 +8,12 @@
 
 /* Advance one asynchronous CD read and keep the loading indicator current.
  *
+ * The read sets double speed, waits four frames, seeks, then reads. A failed
+ * seek, or a read that has delivered no sector (or reports an error) more than
+ * 256 frames after it started, resets the CD library and starts again from the
+ * speed change, counting an error; the retries never give up. A descriptor
+ * without a destination ends after the seek.
+ *
  * Sequential transitions use ++ because explicit enum assignments replace the
  * target's increment instructions and do not match. */
 void main_file_poll_load(main_file_load_descriptor_t* header) {

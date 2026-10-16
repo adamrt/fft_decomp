@@ -728,6 +728,8 @@ s32 battle_effect_spawn_emitter_particles(
         battle_effect_init_animation_sequence(
             particle->data, entry->emitter.animation_frame_group, entry->emitter.animation_index);
     }
+    /* Each record is pushed at the head of the owner's list, so the last one
+     * allocated leads the batch and `next` walks the rest of it. */
     head = particle;
 
     EFFECT_READ_CURVE(curve, factor, entry->emitter.spawn_bindings.position, frame);
@@ -743,7 +745,7 @@ s32 battle_effect_spawn_emitter_particles(
     case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
         spawn.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         spawn.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        spawn.vy -= tile->height * 12;
+        spawn.vy -= tile->height * MAP_HEIGHT_STEP;
         break;
     case EFFECT_EMITTER_ORIGIN_CASTER:
         battle_effect_add_svector_to_vector(&caster, &spawn, &spawn);
@@ -833,6 +835,7 @@ s32 battle_effect_spawn_emitter_particles(
         angle_spread.vz = battle_lerp_fixed8(
             entry->emitter.spawn.velocity_spread_start.z, entry->emitter.spawn.velocity_spread_end.z, factor);
     } else {
+        /* Without a curve the start spread is halved; the curve path uses it whole. */
         setVector(&angle_spread, entry->emitter.spawn.velocity_spread_start.x / 2,
             entry->emitter.spawn.velocity_spread_start.y / 2, entry->emitter.spawn.velocity_spread_start.z / 2);
     }
@@ -1026,7 +1029,7 @@ s32 battle_effect_spawn_emitter_particles(
     case EFFECT_EMITTER_HOMING_CURSOR_TILE:
         tile_anchor.vx = g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         tile_anchor.vz = g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        tile_anchor.vy = -(tile->height * 12);
+        tile_anchor.vy = -(tile->height * MAP_HEIGHT_STEP);
         for (i = 0; i < count; i++) {
             particle->target.x = tile_anchor.vx + target_offset.vx;
             particle->target.y = tile_anchor.vy + target_offset.vy;
@@ -1076,10 +1079,11 @@ s32 battle_effect_spawn_emitter_particles(
  * returns its random lifetime.
  *
  * Position is the emitter offset plus a random point in the spread box, both
- * optionally rotated to face the caster or the target line (motion_flags 0x410
- * / 0x400) and anchored at the caster or target (anchor_flags 0x400 / 0x600).
+ * optionally rotated to the caster's facing or the caster-to-target line
+ * (motion_flags VELOCITY_CASTER_FACING or VELOCITY_TOWARD_TARGET) and anchored
+ * at the caster or target (anchor_flags ORIGIN_CASTER or ORIGIN_TARGET).
  * Velocity is a random speed along the angle cone, or aimed back at the
- * position when motion_flags is 0x10. The caller stores the result as the
+ * position for VELOCITY_INWARD. The caller stores the result as the
  * particle lifetime.
  *
  * The caster and target blocks go through a secondary-init record, as in the
@@ -1528,9 +1532,10 @@ void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out
 /* Resolve one effect target to integer world coordinates.
  *
  * A unit target copies the unit's world-coordinate record, and when
- * add_depth is set lowers Y to the tile's own surface height. A tile target
- * uses the tile center (x * 28 + 14, y * 28 + 14) and takes its height
- * from the tile record, adding the slope depth when add_depth is set. */
+ * add_depth is set a unit below its tile's surface (depth included) is lifted
+ * onto it (y grows downward). A tile target uses the tile center
+ * (x * 28 + 14, y * 28 + 14) and takes its height from the tile record,
+ * adding the depth when add_depth is set. */
 void battle_effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out) {
     map_tile_t* tile;
@@ -1543,7 +1548,7 @@ void battle_effect_resolve_target_world_coords(
                 s32 height;
                 tile = battle_map_get_unit_tile_by_runtime_id(
                     coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
-                height = -((tile->height + tile->depth_half_height.depth) * 12);
+                height = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
                 if (height < out->vy) {
                     out->vy = height;
                 }
@@ -1555,9 +1560,9 @@ void battle_effect_resolve_target_world_coords(
             out->vx = coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             out->vz = coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             if (add_depth != 0) {
-                out->vy = -((tile->height + tile->depth_half_height.depth) * 12);
+                out->vy = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
             } else {
-                out->vy = -(tile->height * 12);
+                out->vy = -(tile->height * MAP_HEIGHT_STEP);
             }
         }
     } else {
@@ -1566,7 +1571,7 @@ void battle_effect_resolve_target_world_coords(
             if (add_depth != 0) {
                 s32 height;
                 tile = battle_map_get_unit_tile_by_runtime_id(coord_data->targets[target_index].data.unit.runtime_id);
-                height = -((tile->height + tile->depth_half_height.depth) * 12);
+                height = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
                 if (height < out->vy) {
                     out->vy = height;
                 }
@@ -1577,15 +1582,17 @@ void battle_effect_resolve_target_world_coords(
             out->vx = coord_data->targets[target_index].data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             out->vz = coord_data->targets[target_index].data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             if (add_depth != 0) {
-                out->vy = -((tile->height + tile->depth_half_height.depth) * 12);
+                out->vy = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
             } else {
-                out->vy = -(tile->height * 12);
+                out->vy = -(tile->height * MAP_HEIGHT_STEP);
             }
         }
     }
 }
 
-/* Resolve a battle ID before calculating its integer world coordinates. */
+/* Meant to resolve a battle id's world coordinates, but it passes the unit's
+ * runtime id where battle_effect_resolve_target_world_coords expects an index
+ * into the effect's target list. Nothing in the game calls it. */
 void battle_effect_get_world_coords_by_battle_id(
     s32 adjust_for_tile_height, u32 battle_id, effect_secondary_init_t* effect_coordinates, SVECTOR* destination) {
     battle_effect_resolve_target_world_coords(
@@ -1664,7 +1671,7 @@ void battle_effect_add_random_vector_offsets(const VECTOR* source, const VECTOR*
     destination->vz = source->vz + battle_effect_get_random_between_s16(-range, range);
 }
 
-/* Add random X/Z/Y offsets and convert each result to Q12 coordinates. */
+/* As battle_effect_add_random_vector_offsets, then convert each result to 20.12 fixed point. */
 void battle_effect_add_random_vector_offsets_and_store_q12(
     const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
     u16 range;
@@ -1741,26 +1748,26 @@ void battle_effect_add_vectors_to_svector(const VECTOR* left, const VECTOR* righ
     result->vz = left->vz + right->vz;
 }
 
-/* Only the low 16 bits of each input component are read. */
 /* result = left + right rotated 270 degrees about Y (RotMatrixY convention:
- * x' = x cos + z sin, z' = -x sin + z cos), i.e. (x - rz, y + ry, z + rx). */
+ * x' = x cos + z sin, z' = -x sin + z cos), i.e. (x - rz, y + ry, z + rx).
+ * Only the low 16 bits of each input component are read. */
 void battle_effect_add_vectors_to_svector_rot_y_270(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx - right->vz;
     result->vy = left->vy + right->vy;
     result->vz = left->vz + right->vx;
 }
 
-/* Only the low 16 bits of each input component are read. */
-/* result = left + right rotated 180 degrees about Y, i.e. (x - rx, y + ry, z - rz). */
+/* result = left + right rotated 180 degrees about Y, i.e. (x - rx, y + ry, z - rz).
+ * Only the low 16 bits of each input component are read. */
 void battle_effect_add_vectors_to_svector_rot_y_180(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx - right->vx;
     result->vy = left->vy + right->vy;
     result->vz = left->vz - right->vz;
 }
 
-/* Only the low 16 bits of each input component are read. */
 /* result = left + right rotated 90 degrees about Y (RotMatrixY convention:
- * x' = x cos + z sin, z' = -x sin + z cos), i.e. (x + rz, y + ry, z - rx). */
+ * x' = x cos + z sin, z' = -x sin + z cos), i.e. (x + rz, y + ry, z - rx).
+ * Only the low 16 bits of each input component are read. */
 void battle_effect_add_vectors_to_svector_rot_y_90(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx + right->vz;
     result->vy = left->vy + right->vy;
@@ -1801,7 +1808,9 @@ void battle_effect_restore_inertia_threshold(void) {
     g_battle_effect_inertia_threshold = g_battle_effect_saved_inertia_threshold;
 }
 
-/* Advance an effect slot's motion state by one frame. */
+/* Advance an effect slot's motion state by one frame: move by the velocity,
+ * then damp the velocity by the inertia threshold, add the acceleration and
+ * the weighted gravity, and step the acceleration. */
 static void battle_effect_step_motion(effect_motion_t* motion) {
     s32 unused[4]; /* The target reserves an unused 16-byte frame. */
 
@@ -1856,6 +1865,7 @@ void battle_effect_integrate_particle_motion(effect_work_record_t* list) {
         motion->position.y += motion->velocity.y;
         motion->position.z += motion->velocity.z;
 
+        /* `weight` holds the damping numerator here and the homing strength below. */
         weight = motion->inertia - threshold;
 
         motion->velocity.x = (weight * motion->velocity.x + (motion->acceleration.x * ONE)) / motion->inertia

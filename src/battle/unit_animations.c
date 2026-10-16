@@ -1,5 +1,5 @@
 /* Unit animation selection by action, status and mount, unit frame and SEQ script execution, spritesheet unpacking and
- * VRAM loading, and the unit update loops. */
+ * VRAM loading, unit record creation and removal, the unit graphics file loaders, and the unit update loops. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"
@@ -31,14 +31,16 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Per-weapon-type sound tables, 0x20 entries each: swing, hit, and the
- * guarded/nullified reaction sound. */
-
-/* Play the weapon swing sound, or the hit sound for each current target.
+/* Play the weapon swing sound (`hit` 0) or the sound of each strike target's
+ * outcome (`hit` 1).
  *
- * The weapon type comes from the unit's used weapon; Throwing and later types use
- * type 1. In hit mode each target's action miss type selects the table, and a
- * critical hit plays sound 0x72. */
+ * The sound tables cover the 0x20 weapon item types, so shuriken and the later
+ * item types use the knife's sounds. A target's miss type picks its sound: a
+ * hand or Golem guard plays the weapon's deflect sound; an accessory or class
+ * evasion, a forced failure, Blade Grasp or a catch the error sound; a
+ * nullified, missed or canceled action none; anything else (a hit or a
+ * reflection) the weapon's hit sound or, when critical, MAIN_SFX_CRITICAL_HIT.
+ * A target without battle stats is skipped. */
 void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
     battle_unit_t* target;
     s32 weapon_type = main_item_get_data_pointer(unit->strike.used_weapon_id)->type;
@@ -92,27 +94,27 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
  * otherwise the depth of its tile. */
 static u8 battle_move_get_water_animation_mode(battle_unit_t* unit) {
     map_tile_t* tile;
-    s32 status;
-    u32 flags;
+    s32 movement;
+    u32 statuses;
 
     tile = battle_map_get_tile_data_pointer(
         unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_z);
     if (unit->stats != 0) {
-        status = battle_move_get_effective_flags(unit->stats);
-        if (status & BATTLE_EFFECTIVE_MOVEMENT_ON_WATER) {
+        movement = battle_move_get_effective_flags(unit->stats);
+        if (movement & BATTLE_EFFECTIVE_MOVEMENT_ON_WATER) {
             return 0;
         }
-        flags = unit->status_flags_5_6;
-        if (flags & BATTLE_UNIT_STATUS_FLOAT) {
+        statuses = unit->status_flags_5_6;
+        if (statuses & BATTLE_UNIT_STATUS_FLOAT) {
             return 0;
         }
-        if (flags & (BATTLE_UNIT_STATUS_CHICKEN | BATTLE_UNIT_STATUS_FROG | BATTLE_UNIT_STATUS_TREASURE)) {
+        if (statuses & (BATTLE_UNIT_STATUS_CHICKEN | BATTLE_UNIT_STATUS_FROG | BATTLE_UNIT_STATUS_TREASURE)) {
             return 1;
         }
-        if (status & BATTLE_EFFECTIVE_MOVEMENT_IN_WATER) {
+        if (movement & BATTLE_EFFECTIVE_MOVEMENT_IN_WATER) {
             return 1;
         }
-        if (flags & BATTLE_UNIT_STATUS_CRYSTAL) {
+        if (statuses & BATTLE_UNIT_STATUS_CRYSTAL) {
             return 0;
         }
     }
@@ -213,12 +215,10 @@ static void battle_unit_set_animation_for_item_abilities(battle_unit_t* unit, ba
 
 /* Start the first animation of the used ability's charge set, if it has one. */
 void battle_unit_start_ability_charge_animation(battle_unit_t* unit) {
-    u8 animation;
+    u8 set_id = g_battle_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
+    u8 animation = g_battle_ability_charge_animation_sets[set_id][0];
 
-    animation = g_battle_ability_charge_animation_sets[g_battle_ability_animation_data[unit->used_ability_id]
-            .charge_animation_set_id][0];
     if (animation != 0) {
-        /* facing is passed sign-extended (lh) here. */
         battle_unit_store_animation_facing(animation, unit->facing, unit);
     }
 }
@@ -226,19 +226,17 @@ void battle_unit_start_ability_charge_animation(battle_unit_t* unit) {
 /* Start the second animation of the used ability's charge set, the one held
  * while charging or performing; the submerged idle in water two or more deep. */
 void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit) {
-    u8 animation;
+    u8 set_id = g_battle_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
+    u8 animation = g_battle_ability_charge_animation_sets[set_id][1];
     u8 water_depth;
     s32 selected_animation;
 
-    animation = g_battle_ability_charge_animation_sets[g_battle_ability_animation_data[unit->used_ability_id]
-            .charge_animation_set_id][1];
     if (animation != 0) {
         water_depth = battle_move_get_water_animation_mode(unit);
         selected_animation = BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE;
         if (water_depth < 2) {
             selected_animation = animation;
         }
-        /* facing is read signed (lh) here. */
         battle_unit_store_animation_facing(selected_animation, unit->facing, unit);
     }
 }
@@ -250,9 +248,8 @@ void battle_unit_select_attack_animation_for_ability(battle_unit_t* attacker, ba
     s32 animation;
     s32 seq_type = g_battle_gfx_spritesheet_data[attacker->spritesheet_id].seq_id;
 
-    if (seq_type < 8) {
+    if (seq_type <= BATTLE_SEQ_KANZEN) {
         if (seq_type >= BATTLE_SEQ_RUKA) {
-            /* facing is loaded signed (lh) here. */
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_CAST, attacker->facing, attacker);
             return;
         }
@@ -328,9 +325,6 @@ void battle_unit_set_mounted_animation(battle_unit_t* unit) {
  * the walk of its walk speed (fast from 0x3000, slow up to 0x1400), or the
  * submerged idle of that speed in water two or more deep. A mount on land
  * also puts its rider in the riding animation.
- *
- * The height-mode result is deliberately truncated to its low byte, and
- * facing is read signed (`lh`) throughout.
  */
 void battle_unit_set_walk_animation(battle_unit_t* unit) {
     s32 anim;
@@ -646,7 +640,6 @@ void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit) {
     unit->tpage = unit->spritesheet_vram_slot + BATTLE_GFX_TPAGE_SPRITESHEET_SLOT_0;
     tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
     battle_gfx_check_tile_status_palette_mod(unit, tile->flags.shading, 1);
-    /* The target reads the u16 facing field signed (lh). */
     battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
     battle_unit_transform_into_morbol(unit->stats);
     battle_ai_init_unit_abilities(unit->stats->battle_id);
@@ -737,11 +730,9 @@ void battle_gfx_set_thrown_item_graphic_palette(s32 item_id, battle_unit_t* unit
     unit->equipped_weapon_type = weapon_type;
 }
 
-struct battle_unit;
-
 /* A plain call through to battle_unit_set_animation_based_on_status, used by the
  * battle state handlers. */
-void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit) {
+void battle_unit_call_set_animation_based_on_status(battle_unit_t* unit) {
     battle_unit_set_animation_based_on_status(unit);
 }
 
@@ -750,7 +741,7 @@ void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit) {
  * height. Only the TYPE1 and TYPE2 sheets have the recoils. */
 static void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* attacker, battle_unit_t* target) {
     unit_stats_t* stats;
-    s32 kind;
+    s32 miss_type;
     s32 anim;
 
     stats = target->stats;
@@ -760,10 +751,10 @@ static void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* a
     if (g_battle_gfx_spritesheet_data[attacker->spritesheet_id].shp_id >= BATTLE_SHP_CYOKO) {
         return;
     }
-    kind = stats->action.miss_type;
+    miss_type = stats->action.miss_type;
     anim = 0;
-    if (kind >= ACTION_MISS_TYPE_RIGHT_HAND_EVADE
-        && (kind < ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD || kind == ACTION_MISS_TYPE_GOLEM_GUARD)) {
+    if (miss_type >= ACTION_MISS_TYPE_RIGHT_HAND_EVADE
+        && (miss_type < ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD || miss_type == ACTION_MISS_TYPE_GOLEM_GUARD)) {
         switch (attacker->animation.sequence_id >> 1) {
         case BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_HIGH:
             anim = BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_BLOCKED_HIGH;
@@ -795,7 +786,6 @@ static void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* a
         }
     }
     if (anim != 0) {
-        /* The target reads the u16 facing field signed (lh). */
         battle_unit_force_animation_facing(anim, attacker->facing, attacker);
     }
 }
@@ -803,14 +793,24 @@ static void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* a
 /*
  * Pick and start the reaction animation a target plays after an action
  * resolves, then apply the action's special-effect side effects.
+ *
+ * A target already dead or dying is left alone. In water two or more deep it
+ * takes the submerged idle, and a target without battle stats the hurt
+ * animation. Otherwise the miss type decides: a hand guard turns to the
+ * attacker and parries at the attacker's relative height (the same 12-unit
+ * thresholds as battle_unit_select_weapon_attack_animation), an evasion with
+ * the dodge display flag dodges, Blade Grasp and catches raise the hands, and
+ * a hit hurts on damage or raises the hands on healing. The sheets from the
+ * crystal up play only the hurt animation. Knockback, Poach and Morbol start
+ * here, and a broken or stolen item rebuilds the target's AI ability data.
  */
 void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* target) {
     unit_stats_t* stats;
     action_data_t* action;
     s32 animation;
-    s32 delta;
-    s16 attacker_height;
-    s16 target_height;
+    s32 difference;
+    s16 attacker_center;
+    s16 target_center;
     u32 water_depth;
 
     if (attacker == target) {
@@ -834,16 +834,16 @@ void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* ta
             case ACTION_MISS_TYPE_LEFT_HAND_EVADE:
                 battle_unit_face_towards_action_target(target, attacker);
                 battle_gfx_set_thrown_item_graphic_palette(action->item_lost, target);
-                attacker_height = battle_gfx_get_unit_spritesheet_height_by_runtime_id(attacker->runtime_id) / 2
+                attacker_center = battle_gfx_get_unit_spritesheet_height_by_runtime_id(attacker->runtime_id) / 2
                     - attacker->world_coords.vy;
-                target_height = battle_gfx_get_unit_spritesheet_height_by_runtime_id(target->runtime_id) / 2
+                target_center = battle_gfx_get_unit_spritesheet_height_by_runtime_id(target->runtime_id) / 2
                     - target->world_coords.vy;
-                delta = attacker_height - target_height;
-                if (delta < -0xb) {
+                difference = attacker_center - target_center;
+                if (difference < -11) {
                     animation = BATTLE_UNIT_ANIMATION_WEAPON_GUARD_LOW;
                 } else {
                     animation = BATTLE_UNIT_ANIMATION_WEAPON_GUARD_LEVEL;
-                    if (delta >= 0xc) {
+                    if (difference >= 12) {
                         animation = BATTLE_UNIT_ANIMATION_WEAPON_GUARD_HIGH;
                     }
                 }
@@ -909,12 +909,12 @@ void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* ta
 
 /* Refresh the display of every unit in the strike's target list. */
 void battle_unit_update_target_displays(battle_unit_t* unit) {
-    s32 counter;
+    s32 i;
     battle_unit_t* target;
 
     if (unit->strike.target_count != 0) {
-        for (counter = 0; counter < unit->strike.target_count; counter++) {
-            target = battle_unit_get_by_battle_id(unit->strike.target_list[counter]);
+        for (i = 0; i < unit->strike.target_count; i++) {
+            target = battle_unit_get_by_battle_id(unit->strike.target_list[i]);
             if (target != 0) {
                 battle_unit_update_display_by_runtime_id(target->runtime_id);
             }
@@ -927,8 +927,8 @@ void battle_unit_update_target_displays(battle_unit_t* unit) {
  *
  * Ids below 16 take their own slot, failing if another in-use slot already
  * carries that id or the slot is taken. Larger ids take the first free slot,
- * whose index becomes the stored runtime ID; exhausting all 16 raises animation error
- * 6. Returns 0 on failure.
+ * whose index becomes the stored runtime ID; exhausting all 16 raises
+ * MAIN_SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT. Returns 0 on failure.
  */
 static battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id) {
     s32 i;
@@ -1504,7 +1504,6 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 value = seq->sequences[index][pos++];
                 value |= seq->sequences[index][pos++] << 8;
                 state->display->rotation = value;
-
                 break;
             case BATTLE_SEQ_OP_MOVE_UNIT:
                 battle_unit_shift_right_or_left(unit, seq->sequences[index][pos++]);
@@ -1709,6 +1708,7 @@ static void battle_gfx_run_wep_eff_seq_script(
                 sprite->flags ^= BATTLE_SPRITE_DISPLAY_VERTICAL_FLIP;
                 break;
             case BATTLE_SEQ_OP_END_ANIMATION:
+                /* Ending also switches the block off; both stop the script. */
                 sprite->trigger = 0;
             case BATTLE_SEQ_OP_PAUSE_ANIMATION:
                 sprite->wait = 0;
@@ -1722,6 +1722,7 @@ static void battle_gfx_run_wep_eff_seq_script(
                 break;
             case BATTLE_SEQ_OP_LAUNCH_PROJECTILE:
                 battle_effect_start_action_projectile_secondary(unit);
+                /* fallthrough: the command's two operand bytes are skipped like the unknowns' */
             case BATTLE_SEQ_OP_UNKNOWN_E6:
             case BATTLE_SEQ_OP_UNKNOWN_E7:
             case BATTLE_SEQ_OP_UNKNOWN_E8:
@@ -1797,7 +1798,6 @@ static void battle_gfx_run_wep_eff_seq_script(
                 value = seq[sequence_id][pos++];
                 value |= seq[sequence_id][pos++] << 8;
                 sprite->display->rotation = value;
-
                 break;
             case BATTLE_SEQ_OP_UNKNOWN_F7:
             case BATTLE_SEQ_OP_MOVE_UNIT:
@@ -1926,8 +1926,11 @@ static void battle_gfx_run_wep_eff_seq_script(
  *
  * The unit's compressed spritesheet slot is expanded into `image_slot`'s
  * image buffer and uploaded to `slot`'s rectangle; the unit's 64x32 VRAM
- * block (column slot >> 3, row slot & 7 of the 0x340,0x100 spritesheet area)
- * is copied 200 lines below it. `slot` is then owned by the unit (id | 0x80). */
+ * block (column spritesheet slot / 8, row spritesheet slot % 8 of the
+ * 0x340,0x100 area) is copied 200 lines below it. `slot` is then owned by the unit's attack
+ * image (runtime id | BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE), and the image
+ * buffer stays busy for BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES frames while the
+ * upload completes. */
 static void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot, s32 image_slot) {
     RECT rect;
 
@@ -2081,6 +2084,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                                 if (i == 2) {
                                     ok = 0;
                                 }
+                                /* With no free slot, j was never set (QUIRKS.md). */
                                 if (j == 2) {
                                     ok = 0;
                                 }
@@ -2329,6 +2333,7 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
     }
     if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
         if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
+            /* Its mount draws it. */
         } else if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_MOUNT) {
             for (i = 0; i < 4; i++) {
                 entry = g_battle_gfx_animation_layer_priorities[row][i];
@@ -2400,11 +2405,16 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
     }
 }
 
-/* Projects every display unit into camera space.
+/* Project every unit record into camera space for drawing.
  *
- * Refreshes each item-effect origin and ordering-table depth. Terrain depth
- * lowers grounded units, while In Water, Float, and Walk on Water select
- * their original exceptions. */
+ * camera_relative_x and _y take the projected draw position plus the unit's
+ * screen offset, subtracted along an axis whose sprite is mirrored. The
+ * ordering-table depth comes from a second projection of the unit's depth
+ * point (the stepping variant while the unit is mid-step, offset 5 instead
+ * of 1 on a tile with a depth bias). A unit standing in water takes that
+ * depth at the water surface, 12 units per depth level above its feet; In
+ * Water moves it up one level only on a water tile, and Float and Walk on
+ * Water not at all. */
 void battle_gfx_project_all_units(void) {
     VECTOR transformed;
     SVECTOR screen;
@@ -2469,10 +2479,11 @@ void battle_gfx_project_all_units(void) {
 /*
  * Per-frame status-bubble and unit-graphics update.
  *
- * In the listed game states, bubbles are held off for 0x3c frames whenever the
- * camera zooms, tilts, rotates or moves, and processed for every runtime unit
- * Data record once the countdown has run out. Every state then reloads the
- * casting unit's graphics and runs battle_gfx_draw_unit_sprite_layers on every record.
+ * In the cursor, menu, move and targeting states listed below, status bubbles
+ * stay hidden while the camera zooms, tilts, rotates or pans and for 0x3c
+ * vertical blanks (one second) after it stops; then every unit record updates
+ * its bubble. Every state then reloads the casting unit's frame parts and
+ * draws every unit record's sprite layers.
  */
 void battle_gfx_update_status_bubbles_and_graphics(void) {
     battle_unit_t* unit;
@@ -2796,8 +2807,17 @@ static void battle_gfx_copy_shp_data_to_ram(
     g_battle_gfx_shp_frame_data_cursor += j;
 }
 
-/* Upload both uncompressed images, copy the compressed attack image,
- * and enable STP on each palette's entries 1..15.
+/* Load a unit's SPR file into spritesheet VRAM slot `index`.
+ *
+ * The file's 16 palettes go to the slot's CLUT copy with the STP bit set on
+ * colors 1..15 (color 0 stays transparent). The 256x256 4-bit sprite image
+ * goes to VRAM x 0x100 + 64 * index, y 0x100, and the 256x32 portrait and
+ * body strip to the 0x340,0x100 area (column index / 8, row index % 8). The
+ * compressed attack image is copied into the slot for
+ * battle_gfx_load_unit_into_evtchr_slot to expand later; its fixed length
+ * overruns most files (QUIRKS.md). A null file loads nothing, and `unused`
+ * and `unused_palette` are not read.
+ *
  * Indexed byte copies preserve the original loop scheduling. Three RECT
  * locals preserve the 0x50-byte frame and its otherwise unused x/y stores. */
 static void battle_gfx_load_spritesheet_into_vram_slot(
@@ -2904,11 +2924,14 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     }
     runtime_id = unit->runtime_id;
     unit->spritesheet_id = id;
+    /* slot reads the claim back through the u8 field, so a failed claim
+     * (0xffff) arrives as 0xff and this test never holds (QUIRKS.md). */
     slot = unit->spritesheet_vram_slot = battle_gfx_claim_spritesheet_slot(spritesheet_id);
     if (slot == 0xffff) {
         g_battle_unit_slot_states[unit->runtime_id].in_use = 0;
         return 0;
     }
+
     if (id >= BATTLE_SPRITESHEET_ID_JOB_FIRST && id < BATTLE_SPRITESHEET_ID_CHOCOBO && stats != 0) {
         palette = stats->sprite_palette;
     }
@@ -2916,18 +2939,22 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
         palette = 0;
     }
     unit->stored_palette = palette;
+
     unit->statuses_to_remove_5_6 = 0;
     unit->statuses_to_remove_1_4 = 0;
     unit->statuses_to_add_5_6 = 0;
     unit->statuses_to_add_1_4 = 0;
     unit->status_flags_5_6 = 0;
     unit->status_flags_1_4 = 0;
+
     battle_gfx_load_spritesheet_into_vram_slot(data, slot, runtime_id, unit, palette);
     tile = battle_map_get_tile_data_pointer(map_x, map_y, map_level);
+    /* The tint runs before mount_state is reset below (QUIRKS.md). */
     battle_gfx_check_tile_status_palette_mod(unit, tile->flags.shading, 1);
     battle_map_load_palette_data(&g_battle_gfx_shadow_palette, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0);
     unit->clut = GetClut(runtime_id << 4, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_UNITS);
     unit->tpage = slot + BATTLE_GFX_TPAGE_SPRITESHEET_SLOT_0;
+
     if (flags == 0) {
         unit->draw_enabled = 1;
         unit->animation.trigger = 1;
@@ -2935,6 +2962,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
         unit->draw_enabled = 0;
         unit->animation.trigger = 0;
     }
+
     unit->standing_on_battle_id_plus_one = 0;
     unit->stats = stats;
     unit->requested_animation = 0;
@@ -2953,6 +2981,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->special_graphic_y_offset = 0;
     unit->distortion_animation_id = BATTLE_DISTORTION_ANIMATION_NONE;
     unit->distortion_phase = 0;
+
     tile_x = map_x;
     unit->map_x = tile_x;
     unit->movement.suppress_facing_update = 0;
@@ -2968,6 +2997,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->movement.destination_y = tile_y;
     unit->movement.destination_z = tile_z;
     battle_unit_set_move_and_world_coords(unit);
+
     cursor.animation = &unit->animation;
     unit->velocity.vz = 0;
     unit->velocity.vy = 0;
@@ -2986,6 +3016,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->shadow_graphic_trigger = 1;
     unit->shadow_dirty = 1;
     unit->shadow_counter = 0;
+
     unit->numeric_display.active = 0;
     unit->numeric_display.selector = BATTLE_NUMERIC_DISPLAY_HP_DAMAGE;
     unit->numeric_display.progress = 0;
@@ -3002,6 +3033,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
         = unit->clut + 0x100; /* the unit's CLUT of MAP_CLUT_ROW_ACTION_RESULTS */
     unit->numeric_display.displays[0]->part_count = unit->numeric_display.displays[1]->part_count
         = unit->numeric_display.displays[2]->part_count = 1;
+
     unit->status_bubble_active = 0;
     unit->status_bubble_id = 0;
     unit->status_bubble_timer = 0;
@@ -3009,6 +3041,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->item_display_active = 0;
     unit->item_display = battle_gfx_init_item_sprite_display(runtime_id);
     unit->position_copies_active = 0;
+
     unit->animation.display = battle_gfx_init_unit_sprite_display(runtime_id);
     cursor.animation->graphic_type = BATTLE_SPRITE_GRAPHIC_UNIT;
     unit->animation.shp = unit->animation.saved_shp = battle_gfx_get_unit_shp_by_spritesheet_id(id);
@@ -3027,6 +3060,8 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->animation.display->rotation = 0;
     battle_unit_set_animation_based_on_status(unit);
     battle_gfx_run_unit_seq_script(unit, cursor.animation, 1);
+
+    /* Block 0 draws the weapon sheet, blocks 1 and 2 the effect sheet. */
     for (i = 0; i < 3; i++) {
         cursor.block = &unit->sprite_blocks[i];
         cursor.block->display = battle_gfx_init_weapon_sprite_display(runtime_id, i);
@@ -3051,16 +3086,20 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
         cursor.block->display->scale_x = ONE;
         cursor.block->display->scale_y = ONE;
         cursor.block->display->rotation = 0;
+        /* No id is both below VELIUS and from BOY up, so this never runs and the
+         * blocks wait for their first sequence command. */
         if ((s16)id < BATTLE_SPRITESHEET_ID_CHOCOBO && (s16)id < BATTLE_SPRITESHEET_ID_VELIUS
             && (s16)id >= BATTLE_SPRITESHEET_ID_BOY && (s16)id != BATTLE_SPRITESHEET_ID_DAMI) {
             battle_gfx_run_wep_eff_seq_script(unit, &unit->sprite_blocks[i], i, 1);
         }
     }
+
     head = &g_battle_unit_list_head;
     unit->previous = *head;
     *head = unit;
     battle_gfx_set_thrown_item_graphic_palette(unit->stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], unit);
     battle_status_init_special_flag_enabling(unit->stats->battle_id);
+    /* Settle the new unit's display and pose without landing sounds or effects. */
     unit->movement.suppress_sfx_and_landing_effects = 1;
     battle_unit_update_display_by_runtime_id(unit->runtime_id);
     battle_unit_set_animation_based_on_status(unit);
@@ -3068,7 +3107,12 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     return unit;
 }
 
-/* The two clearing loops walk their arrays by byte offset. A struct-subscript
+/* Reset the unit graphics for a new battle: empty the unit list, free the
+ * runtime slots, the nine spritesheet slots and both EVTCHR slots (whose
+ * image rectangles are 64x200 at 0x100,0 and 0x140,0), rewind the SEQ and SHP
+ * data cursors and restart the shared-file loader.
+ *
+ * The two clearing loops walk their arrays by byte offset. A struct-subscript
  * walk leaves GCC with both the index and the scaled address as induction
  * variables, adding an `addiu`/`li` pair to each loop; the byte offset is what
  * reproduces the target's single `bgez` on the address offset. */

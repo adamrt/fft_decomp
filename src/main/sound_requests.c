@@ -12,11 +12,12 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-/* The original wrote the body of main_set_display_draw a second time as main_set_display_draw_new_game. */
-/* Set up double-buffered drawing at width x height without restarting the GPU:
- * the second buffer sits 240 lines below the first (a 480-line mode uses one),
- * both draw environments clear to the given color, and the display is masked
- * until the caller turns it on. image_rect is not used. */
+/* A second copy of main_set_display_draw in the original, for the Orbonne
+ * caption fades. Set up double-buffered drawing at width x height without
+ * restarting the GPU: the second buffer sits 240 lines below the first (a
+ * 480-line mode uses one), both draw environments clear to the given color,
+ * and the display is masked until the caller turns it on. image_rect is not
+ * used. */
 static void main_set_display_draw_new_game(int width, int height, int projection, u8 red, u8 green, u8 blue) {
     RECT image_rect = { 0, 0, 1024, 512 };
     int second_y = height == 480 ? 0 : 240;
@@ -71,9 +72,8 @@ void main_gfx_fade_in_orbonne_monastery(void) {
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
     u32* current_otag;
-    s16 intensity;
+    s16 intensity = 248;
 
-    intensity = 248;
     main_set_display_draw_new_game(256, 240, 512, 0, 0, 0);
 
     SetPolyF4(&fade_polygons[0]);
@@ -128,9 +128,7 @@ void main_gfx_fade_out_orbonne_monastery(void) {
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
     u32* current_otag;
-    s16 intensity;
-
-    intensity = 0;
+    s16 intensity = 0;
 
     SetPolyF4(&fade_polygons[0]);
     setRGB0(&fade_polygons[0], 0, 0, 0);
@@ -262,8 +260,10 @@ int main_sound_is_music_loading_stub(void) {
     } while (0)
 
 /* Starts the asynchronous load of music file `music_id` (main_music_e) into
- * music slot `slot` (1-based) if the slot is free. Returns the slot, or 0 when it was occupied or the load
- * failed (which also raises exception 0x11). */
+ * music slot `slot` (1-based) if the slot is free. Returns the slot, or 0 when
+ * it was occupied or the load failed, which also reports
+ * MAIN_SYSTEM_ERROR_SMD_LOAD. When the read cannot start (the loader is busy)
+ * the SMD block stays allocated and is never freed. */
 s32 main_sound_open_music_into_slot(s32 music_id, s32 slot) {
     if (g_main_sound_music.slots.smd[slot - 1] == 0) {
         suzuki_smd_header_t* data = main_heap_alloc_smd(g_main_sound_scenario_smd_files[music_id].size);
@@ -284,8 +284,10 @@ s32 main_sound_open_music_into_slot(s32 music_id, s32 slot) {
 
 /* Starts the asynchronous load of music file `music_id` (main_music_e) into
  * the first free scenario music slot (1 or 2) and returns that slot, or 0
- * when both are taken or the load fails. main_sound_poll_scenario_smd_load
- * creates the music record once the file has arrived. */
+ * when both are taken or the load fails (reporting MAIN_SYSTEM_ERROR_SMD_LOAD;
+ * as in main_sound_open_music_into_slot, a read that cannot start leaks its
+ * SMD block). main_sound_poll_scenario_smd_load creates the music record once
+ * the file has arrived. */
 int main_sound_start_music_load_into_free_slot(int music_id) {
     int i;
     suzuki_smd_header_t* buffer;
@@ -487,10 +489,9 @@ int main_sound_set_tune_volume(int time) {
  * torn down once it ends and the scenario music is faded back in. The tune
  * at `tune_index` lives in music slot 2 + `tune_index`. */
 s32 main_sound_update_tunes(void) {
-    s32 tune;
+    s32 tune = g_main_sound_music.slots.tune;
     s32 tune_index;
 
-    tune = g_main_sound_music.slots.tune;
     if (tune & MAIN_SOUND_TUNE_PENDING) {
         suzuki_music_t** tune_handles;
         suzuki_music_t** handle;
@@ -499,6 +500,7 @@ s32 main_sound_update_tunes(void) {
             return 0;
         }
         tune_index = g_main_sound_music.slots.tune & MAIN_SOUND_TUNE_ID_MASK;
+        /* Drop MAIN_SOUND_TUNE_PENDING: the tune is now playing. */
         g_main_sound_music.slots.tune &= 0x7f;
         tune_handles = &g_main_sound_music.slots.music[1];
         handle = &tune_handles[tune_index];

@@ -11,12 +11,29 @@
  * the sign and marker glyphs selected by the flag bits of `digits`. Sibling of
  * menu_draw_number_glyphs (0x8014ac30) on the 5-pixel font. WORLD links its
  * own body under this name: it lacks the leading 0x800 glyph and the hidden
- * value check, and draws every digit as 0xba under flag 0x800 instead. */
+ * value check, and draws every digit as 0xba under flag 0x800 instead.
+ *
+ * The high byte of `digits` selects the extras (glyphs named by their x in the
+ * menu glyph sheet, where the digits sit 6 pixels apart from x 0x78; they
+ * draw 5 pixels apart):
+ *   0xc00, 0xe00  the whole number becomes three 0xba or 0xd0 placeholders,
+ *                 after an 0xb4 glyph when bit 0 is set
+ *   0x800         a leading 0xba glyph
+ *   0x200         the value 100 widens to three digits (brave and faith use 0x202)
+ *   0x400         values other than 100 draw two digits, 6 pixels further
+ *                 right so they line up with a three-digit 100
+ *   0x1000        a leading 0xb4 glyph; 0x8000 draws it 2 pixels further left
+ *   0x100         a short glyph (4 rows from y 0x1a) lowered by 3 pixels
+ *   0x2000        a trailing 0xc0 glyph
+ * While numeric values are hidden every digit draws as 0xd0 and the 0x200 and
+ * 0x400 width rules are skipped. The pen ends 5 pixels past the last digit. */
 void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
     glyph_blit_t* src = &g_text_large_number_glyph_rect;
 
+    /* `cursor` holds the format's high byte first and the pen's final x
+     * later; giving the two roles separate locals changes register use. */
     cursor = digits & 0xFF00;
     if (cursor == 0xC00 || cursor == 0xE00) {
         g_text_large_number_glyph_rect.rect.y = 0x10;
@@ -41,10 +58,10 @@ void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
         pos->rect.x += 7;
     }
     if (g_menu_hide_numeric_values == 0) {
-        if ((digits & 0x200) && value == 0x64) {
+        if ((digits & 0x200) && value == 100) {
             digits = cursor + 3;
         }
-        if ((digits & 0x400) && value != 0x64) {
+        if ((digits & 0x400) && value != 100) {
             digits = (digits & 0xFF00) + 2;
             pos->rect.x += 6;
         }

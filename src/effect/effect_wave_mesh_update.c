@@ -12,9 +12,12 @@
 #include "psx/types.h"
 
 /* Distorts an 8x8 textured quad grid with horizontal and vertical sine waves
- * on a 9x9 scratchpad lattice. Each wave's amplitude is cosine-modulated by
- * row or column. The lattice-origin products, shared index temporaries and
- * non-void signature preserve register allocation and loop scheduling. */
+ * on a 9x9 scratchpad lattice that rests on a 48-pixel grid from draw
+ * position (56, -64), larger than the screen. Each wave's amplitude is
+ * cosine-modulated by row or column, and the four wave phases advance once
+ * per update by their speed curves. The lattice-origin products, shared index
+ * temporaries and non-void signature preserve register allocation and loop
+ * scheduling. */
 s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     VECTOR spread;

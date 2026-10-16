@@ -7,7 +7,11 @@
 #include "fft/script.h"
 #include "psx/types.h"
 
-/* Release GNS dispatch hold and advance the map-destruction handoff. */
+/* Callback handler for the map-destruction effect. Its first call releases the
+ * GNS data a held map append loaded (MAP_LOAD_COMMAND_START_HELD); every later
+ * call reports the map destroyed, moving the map-destruction wait state from 1
+ * (append finished) to 2, after which the event request loop releases the hold
+ * again and polls the load to its end. */
 s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame) {
     s16 state_index = record_index;
     effect_record_t* record = &g_battle_effect_state_records[state_index];

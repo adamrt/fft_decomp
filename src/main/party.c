@@ -693,6 +693,8 @@ s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_worl
             return -1;
         }
     }
+    /* For kind 0 a load-formation unit, and a Ramza without a birth month, came whole
+     * from the roster in main_unit_calculate_entd_data. */
     if (kind == 0) {
         if ((entd->unit_flags & UNIT_FLAG_LOAD_FORMATION) != 0) {
             return 0;
@@ -798,6 +800,11 @@ static s32 main_unit_calculate_entd_data(unit_stats_t* unit, entd_unit_t* entd) 
     unit->team_flags = entd->team_flags;
     unit->initial_team_flags = entd->team_flags;
 
+    /* An ENTD Ramza without a birth month stands for the roster's Ramza: each roster Ramza
+     * takes this chapter's identity, and its job too while that is his chapter 1 or 2-3
+     * Squire job; a secondary skillset from one of his three Squire jobs becomes this
+     * chapter job's skillset. He is then loaded from the roster like a load-formation
+     * unit. */
     value = entd->unit_flags;
     if (value & UNIT_FLAG_LOAD_FORMATION) {
         party_slot = main_unit_init_from_entd_party_member(unit, entd);
@@ -970,7 +977,17 @@ static void main_unit_copy_party_record(unit_stats_t* unit, const party_unit_t* 
     main_mem_zero(&unit->ai_target_x, 7);
 }
 
-/* Initialize packed job levels, unlocked jobs, and ENTD skillset overrides. */
+/* Set an ENTD unit's job levels, unlocked jobs, job record and skillsets.
+ *
+ * A human gets job levels that meet the unlock requirements of its job_unlock
+ * career job, that job at job_level, and at least level 1 in every job but the
+ * Bard or Dancer its sex cannot take; its unlocked jobs follow from those
+ * levels. A monster unlocks nothing. The ENTD primary skillset, unless 0 or
+ * SKILLSET_ID_NONE, replaces the job's. A random secondary skillset
+ * (ENTD_VALUE_RANDOM) is that of a random unlocked job, or none for a monster
+ * or when it matches the primary. With a null entd the unit keeps its job
+ * record, loses its secondary skillset and unlocked jobs, and becomes a
+ * monster. */
 static void main_unit_calculate_jobs_and_skillsets_from_entd(unit_stats_t* unit, const entd_unit_t* entd) {
     s32 i;
     u32 unlocked;
@@ -1390,6 +1407,7 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
     u8 item;
     u8 flags;
     s32 i;
+    u8 right_weapon;
 
     if (unit->unit_flags & UNIT_FLAG_MONSTER) {
         main_unit_store_monster_equipment(unit, entd);
@@ -1461,10 +1479,9 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
 
     /* Left hand: empty beside a weapon that needs both hands, or with Two Hands. */
     item = entd->equipment[ENTD_EQUIPMENT_SLOT_LEFT_HAND];
-    if (unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
-        && ((g_main_item_weapon_data[g_main_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]]
-                                         .secondary_data_id]
-                    .flags
+    right_weapon = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
+    if (right_weapon != ITEM_ID_NONE
+        && ((g_main_item_weapon_data[g_main_item_primary_data[right_weapon].secondary_data_id].flags
                 & WEAPON_FLAG_FORCED_TWO_HANDS)
             || (unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS))) {
         item = ITEM_ID_NONE;
@@ -1632,11 +1649,15 @@ void main_unit_set_equipment_stats(unit_stats_t* unit) {
     }
 }
 
-/* Applies equipment attribute bonuses to a unit's stats.
- *
- * Clears the equipment PA/MA/SP bonuses, recomputes the base stats, then
- * folds in each equipped item's attribute record and head/body HP/MP bonuses.
- * Actual PA/MA cap at 99 and Speed at 50. */
+/* Recompute a unit's stats with its equipment. Max HP and MP come from the raw
+ * stats again (with level_up_check set, the base Speed, PA and MA too). Each
+ * equipped item then adds its attribute record: PA, MA and Speed bonuses (each
+ * total capped at 255), Move (capped at 0xfd) and Jump (at 7), its innate,
+ * immunity and starting statuses to the unit's innate, immunity and current
+ * sets, and its elemental affinities; headgear and body armor add their HP and
+ * MP bonuses (max 999). A monster takes nothing from equipment. HP and MP are
+ * clamped to the new maxima, and the actual PA and MA are base + bonus capped
+ * at 99, Speed at 50. Also sets the Materia Blade and sword equipped flags. */
 void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) {
     s32 i;
     s32 j;
@@ -1690,6 +1711,7 @@ void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) 
                 value = 7;
             }
             unit->jump = value;
+            /* One 15-byte pass covers all three status sets. */
             j = 0;
             target = unit->status_sets.innate;
             for (; j < 15; j++) {
@@ -1725,6 +1747,7 @@ void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) 
     if (unit->mp > unit->max_mp) {
         unit->mp = unit->max_mp;
     }
+    /* base_attributes, equipment_attributes and attributes lie 3 bytes apart. */
     bonus = unit->base_attributes;
     for (j = 0; j < 3; j++) {
         value = bonus[j + 3] + bonus[j];
@@ -1788,10 +1811,13 @@ enum {
     NAME_GENDER_MASK = UNIT_FLAG_MALE | UNIT_FLAG_FEMALE | UNIT_FLAG_MONSTER,
 };
 
-/* Copies the unit's name, job name and skillset names into its battle
- * record.  Units without a party slot get a random unused generic name for
- * their gender, drawn as in main_unit_generate_out_of_battle (index 255 is
- * never drawn). */
+/* Copy the unit's name, job name and skillset names into its battle record,
+ * from BATTLE's or WORLD's text as g_main_unit_name_uses_world_text says. A
+ * roster unit keeps its saved name. Any other unit takes the special-character
+ * name quote_name_id selects, or, when that is 0xff, a random generic name of
+ * its kind that no roster member or battle unit of the same kind has, drawn as
+ * in main_unit_generate_out_of_battle (index 255 is never drawn). The action's
+ * status changes are cleared too. */
 static void main_unit_store_character_names(unit_stats_t* unit) {
     /* Removing this unused array reduces the native stack frame by 0x100. */
     u8 unused[0x100];

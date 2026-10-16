@@ -17,9 +17,13 @@
 
 /* Animate and queue the three numeric post-action display sprites.
  *
- * Scales each digit sprite by its per-frame zoom curve, starts the next
- * queued result once the animation passes frame 50, and retires the display
- * after frame 61.
+ * Over the first 21 frames each digit sprite scales by its own zoom curve (the
+ * critical curves for a critical hit); the word displays (Missed, Guarded, EXP,
+ * JP) scale all three parts by the middle digit's curve. At frame 50 the next
+ * queued result starts, or else the display begins fading: its palette darkens
+ * and its parts turn semi-transparent. After frame 61 it retires unless another
+ * result follows. Damage draws 0x30 pixels above the unit's screen position,
+ * healing and gains 0x10, the words 8.
  *
  * Keep the curves external: local initializers change the following switch
  * table's alignment relative to the original rodata. */
@@ -138,7 +142,8 @@ void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* scr
 }
 
 /* Request `animation` with facing `facing` (0x400 per quarter turn) for the next animation update;
- * the request is dropped when that sequence is already playing in the same view. */
+ * the request is dropped when that sequence is already playing in the same view. The request
+ * is stored as the animation plus one, so 0 means none. */
 void battle_unit_store_animation_facing(u32 animation, s32 facing, battle_unit_t* unit) {
     animation++;
     unit->requested_animation = animation;
@@ -248,7 +253,9 @@ s32 battle_gfx_is_spritesheet_id_loaded(s16 spritesheet_id) {
 }
 
 /* Claim a VRAM spritesheet slot for `spritesheet_id`: reuse the slot that
- * already holds it, otherwise take the first free one, and report error 0xB when all nine are taken. */
+ * already holds it, otherwise take the first free one. Returns the slot, or
+ * reports MAIN_SYSTEM_ERROR_NO_SPRITESHEET_SLOT and returns 0xFFFF when all
+ * nine are taken. A slot's in_use holds the id of the sheet claiming it. */
 s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
     s32 slot;
     u16 found = 0xFF;
@@ -277,15 +284,16 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
     return found;
 }
 
-/* Reload a unit's palette tinted for tile effects, weather and time of day.
+/* Reload a unit's palette tinted for its tile's shading, the weather and the
+ * time of day.
  *
- * The unit's spritesheet palette is installed first (monster sheets
- * 0x60-0x9a use the upper eight palettes). The RGB offset starts at -4, -8 or
- * -0xc for tile effect levels 1-3; unless weather bit 1 is set, script
- * variables 0x23 (weather) and 0x24 (night) shift it further, and a unit more
- * than 0x30 above the ground height at its position (in the air, as during
- * Jump) stays untinted. Crystal, chicken, frog and treasure sheets take fixed
- * palettes.
+ * The second CLUT row is installed first from the slot's upper eight
+ * palettes. The RGB offset starts at -4, -8 or -12 for the three tile shading
+ * levels. Unless the map ignores weather, rain and storms cool it (less red,
+ * more blue), night cools it further, and a unit more than 0x30 above the
+ * ground at its position (in the air, as during Jump) stays untinted. Crystal,
+ * chicken, frog and treasure sheets tint fixed RAM palettes instead of the
+ * slot's.
  *
  * Each branch makes its own palette call, as the original evidently did:
  * cross-jumping merges them only after register allocation, so the extra

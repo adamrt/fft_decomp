@@ -17,8 +17,10 @@
 #include "psx/types.h"
 
 /* Builds and draws a spinning, flaring ring of 32 textured quads: the
- * single-ring build of the ring mesh renderer, with two lattice rows of one
- * quadrant in the scratchpad instead of three. */
+ * single-ring build of the ring mesh renderer (see effect_ring_mesh_update),
+ * with two lattice rows of one quadrant in the scratchpad instead of three. It
+ * projects and offsets the vertices inline instead of through the
+ * battle_effect_add_vectors_to_svector helpers. */
 s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     SVECTOR vertex;
     SVECTOR unused_18[3]; /* frame padding the target reserves but never touches */
@@ -108,6 +110,7 @@ s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emit
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
+        /* Indexed again rather than read through record, as the target does. */
         target_index = g_battle_effect_state_records[record_index].timeline.target_index;
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
@@ -355,7 +358,7 @@ s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emit
             red = EFFECT_COLOR_NEUTRAL;
         }
 
-        /* Lattice row r shades corners 2/3 of ring r and corners 0/1 of ring r - 1. */
+        /* Lattice row 0 shades corners 2/3 of every quad, row 1 corners 0/1. */
         k = g_effect_single_ring_mesh_brightness_table[n][0];
         for (i = 0; i < RING_MESH_SEGMENTS; i++) {
             quad = &work->quads[buffer][i];

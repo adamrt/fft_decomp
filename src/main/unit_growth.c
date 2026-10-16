@@ -125,7 +125,7 @@ s32 main_unit_calculate_random_equipment(
  * mask and `scratch` holds both the unlocked-job bits and the learn chance;
  * separate locals change the register allocation. */
 void main_unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_unit_t* entd) {
-    s32 job_index;
+    s32 job_index = job_id - JOB_ID_SQUIRE;
     s32 skillset;
     s32 auto_learn = 0;
     s32 learned;
@@ -136,7 +136,6 @@ void main_unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_un
     u8 character;
     s32 unit_flags;
 
-    job_index = job_id - JOB_ID_SQUIRE;
     if (job_id == JOB_ID_SQUIRE) {
         character = unit->character_identity;
         if (character < CHARACTER_IDENTITY_SELECTOR_FIRST
@@ -415,12 +414,11 @@ static void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s3
     s32 mask;
     s32 byte_index;
     s32 current_bit;
-    s32 battle_id;
+    s32 battle_id = unit->battle_id;
     s32 saved_bit;
     u8 formation_index;
     job_data_t* job;
 
-    battle_id = unit->battle_id;
     main_status_store_current(unit);
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         saved_current[i] = unit->status_sets.current[i];
@@ -554,17 +552,13 @@ u32 main_party_level_unit_to_target(party_unit_t* party_unit, s32 level_delta) {
  * 24-bit raw stat: raw +/- raw / (growth + level), a zero growth counting as
  * 1, capped at 0xffffff; then refreshes the derived stats and clamps HP/MP. */
 void main_unit_apply_level_growth(unit_stats_t* unit, s32 level_down) {
-    unit_raw_stat_t* raw_stats;
-    job_stat_growth_t* growth;
+    unit_raw_stat_t* raw_stats = unit->raw_stats;
+    job_stat_growth_t* growth = unit->stat_growths;
     u32 value;
     u32 divisor;
-    s32 level;
+    s32 level = unit->level;
     u32 minimum_growth;
     s32 i;
-
-    raw_stats = unit->raw_stats;
-    growth = unit->stat_growths;
-    level = unit->level;
 
     for (i = 0; i < UNIT_RAW_STAT_COUNT; i++) {
         divisor = growth[i].growth;
@@ -574,6 +568,7 @@ void main_unit_apply_level_growth(unit_stats_t* unit, s32 level_down) {
             minimum_growth = 1;
         }
         divisor = minimum_growth + level;
+        /* Drawn and discarded: each stat's growth consumes one random number. */
         rand();
         if (level_down) {
             value -= value / divisor;
@@ -910,7 +905,8 @@ u32 main_ability_get_known(const unit_stats_t* unit, u32 job_index) {
         | unit->career.learned_abilities[job_index][2];
 }
 
-/* Aggregate assignment changes the retail byte-copy loop. */
+/* Copy one action command record byte by byte. An aggregate assignment would
+ * replace the retail byte-copy loop. */
 void main_util_copy_action_data(const action_command_t* source, action_command_t* destination) {
     const u8* from = (const u8*)source;
     u8* to = (u8*)destination;

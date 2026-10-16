@@ -15,9 +15,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Builds a flaring 2x32 ring from one quadrant of lattice points, projects it
- * through the battle camera and draws alternating quad buffers with scrolling
- * texture. The narrow record index, shared temporaries and non-void signature
+/* Callback handler for the ring mesh: a band two quads high and 32 around
+ * the emitter origin, spinning about the vertical axis. Its three lattice rows
+ * are circles whose height and radius step apart by the growth curves, and the
+ * whole radius grows from frame to frame. Each update builds one quadrant of
+ * the lattice in the scratchpad (the other three quadrants are the same points
+ * turned by quarter turns), projects it through the battle camera into the
+ * current quad buffer, shades the rows, depth-sorts the quads and flips
+ * buffers. The narrow record index, shared temporaries and non-void signature
  * preserve the renderer's register allocation and delay slots. */
 s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     SVECTOR unused_10[3]; /* frame padding the target reserves but never touches */
@@ -104,6 +109,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
+        /* Indexed again rather than read through record, as the target does. */
         target_index = g_battle_effect_state_records[record_index].timeline.target_index;
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
@@ -316,7 +322,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             scratch->depth[1][i] = scratch->screen[1].vz;
         }
 
-        /* Ring 1 reuses the lower corners of ring 0 and adds lattice row 2. */
+        /* Ring 1: corners 2/3 repeat ring 0's corners 0/1, and lattice row 2 gives corners 0/1. */
         battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[2][0], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[0], &scratch->screen[0].pad);
         quads = work->quads[buffer];

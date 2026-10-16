@@ -54,7 +54,8 @@ static void battle_effect_store_targets_and_display_types(s32 ability, battle_un
     effect_secondary_init_t init;
     battle_unit_t* target;
     battle_unit_t* spectator;
-    unit_stats_t* stats;
+    unit_stats_t* target_stats;
+    unit_stats_t* spectator_stats;
     s32 i;
     s32 j;
     s32 spectators;
@@ -73,22 +74,17 @@ static void battle_effect_store_targets_and_display_types(s32 ability, battle_un
             target = battle_unit_get_by_battle_id(block->target_list[i]);
             init.targets[i].target_type = EFFECT_TARGET_TYPE_UNIT;
             init.targets[i].data.unit.runtime_id = target->runtime_id;
-            {
-                unit_stats_t* target_stats;
-
-                target_stats = target->stats;
-
-                if (target_stats == 0) {
-                    init.targets[i].data.unit.result_animation = EFFECT_HIT_NORMAL;
-                } else if (target_stats->action.critical != 0) {
-                    init.targets[i].data.unit.result_animation = EFFECT_HIT_CRITICAL;
-                } else if (target_stats->action.miss_type == ACTION_MISS_TYPE_REFLECTED) {
-                    init.targets[i].data.unit.result_animation = EFFECT_HIT_REFLECTED;
-                } else if (target_stats->action.miss_type != ACTION_MISS_TYPE_HIT) {
-                    init.targets[i].data.unit.result_animation = EFFECT_HIT_MISSED;
-                } else {
-                    init.targets[i].data.unit.result_animation = EFFECT_HIT_NORMAL;
-                }
+            target_stats = target->stats;
+            if (target_stats == 0) {
+                init.targets[i].data.unit.result_animation = EFFECT_HIT_NORMAL;
+            } else if (target_stats->action.critical != 0) {
+                init.targets[i].data.unit.result_animation = EFFECT_HIT_CRITICAL;
+            } else if (target_stats->action.miss_type == ACTION_MISS_TYPE_REFLECTED) {
+                init.targets[i].data.unit.result_animation = EFFECT_HIT_REFLECTED;
+            } else if (target_stats->action.miss_type != ACTION_MISS_TYPE_HIT) {
+                init.targets[i].data.unit.result_animation = EFFECT_HIT_MISSED;
+            } else {
+                init.targets[i].data.unit.result_animation = EFFECT_HIT_NORMAL;
             }
         }
     } else if (unit->strike.skip_empty_tile_effect == 0) {
@@ -103,10 +99,10 @@ static void battle_effect_store_targets_and_display_types(s32 ability, battle_un
         if (i != unit->runtime_id) {
             spectator = battle_unit_get_by_runtime_id(i);
             if (spectator != 0) {
-                stats = spectator->stats;
-                if (stats != 0) {
+                spectator_stats = spectator->stats;
+                if (spectator_stats != 0) {
                     for (j = 0; j < block->target_count; j++) {
-                        if (stats->battle_id == block->target_list[j]) {
+                        if (spectator_stats->battle_id == block->target_list[j]) {
                             break;
                         }
                     }
@@ -121,6 +117,9 @@ static void battle_effect_store_targets_and_display_types(s32 ability, battle_un
     init.spectator_count = spectators;
     init.math_skill_flag = block->math_skill_flag;
     init.used_weapon_id = block->used_weapon_id;
+
+    /* The subtraction tests for Blaze Gun or Glacier Gun; the three elemental guns pass no
+     * charge set or element. */
     if (block->last_attack_id == 0 || block->reaction_occurred != 0 || g_battle_action_phase != ACTION_PHASE_ACTING_UNIT
         || (unit->used_item_or_weapon_id - ITEM_ID_BLAZE_GUN) < 2U
         || (item = unit->used_item_or_weapon_id) == ITEM_ID_BLAST_GUN) {
@@ -306,20 +305,20 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
  * targets and their result animations stored for the effect. */
 void battle_action_start_next_strike_display(void) {
     battle_unit_t* unit;
-    u16 raw;
+    u16 attack_id;
     s32 ability;
-    s32 target;
+    s32 reaction;
 
     g_main_system_vsync_interval = 1;
     unit = battle_unit_get_casting();
     battle_action_resolve_ability_strike(unit->stats->battle_id, &unit->strike);
-    raw = unit->strike.last_attack_id;
-    /* The target reads 0x1a6 as a signed 16-bit value. */
-    target = unit->strike.reaction_id;
-    ability = raw;
-    unit->used_ability_id = raw;
+    attack_id = unit->strike.last_attack_id;
+    /* The target reads reaction_id as a signed 16-bit value. */
+    reaction = unit->strike.reaction_id;
+    ability = attack_id;
+    unit->used_ability_id = attack_id;
     battle_gfx_set_thrown_item_graphic_palette(unit->strike.used_weapon_id, unit);
-    if (((target != 0) && (ability != target)) || (ability == ABILITY_ID_KNOCKBACK) || (ability == 0)
+    if (((reaction != 0) && (ability != reaction)) || (ability == ABILITY_ID_KNOCKBACK) || (ability == 0)
         || (battle_effect_ability_has_no_file(ability) != 0)) {
         battle_action_set_target_coords_and_attacker_anim();
         return;
@@ -373,8 +372,11 @@ void battle_state_enter_action_cast(void) {
 }
 
 /* Starts the acting unit's confirmed ability: marks the action taken, faces the
- * cursor and runs the attack preview. A preview result of 1 or 3 enters the
- * commence-attack phase; 0 starts the charge animation. */
+ * cursor and commits the attack preparation. An immediate or Jump action enters
+ * the commence-attack phase, with the charge-hold animation when the ability has a
+ * charge set. A charged action starts its charge-hold animation and ends the
+ * command until the charge comes due; any other result raises pointer exception
+ * 19 and ends the command. */
 void battle_action_execute_ability(void) {
     battle_unit_t* unit;
     s32 result;
@@ -402,7 +404,7 @@ void battle_action_execute_ability(void) {
         return;
     case BATTLE_ATTACK_PREPARATION_CHANGE_EQUIPMENT:
     default:
-        main_system_handle_pointer_exception(0x13);
+        main_system_handle_pointer_exception(19);
         break;
     }
     battle_unit_end_command(unit);
@@ -440,16 +442,18 @@ void battle_menu_start_help_thread(void) {
 /*
  * Seed the source unit's pending action target and run target-tile selection.
  *
- * During ability-preview phase 2 the target is the unit's own tile; for
- * player-controlled units it is the current cursor tile.
- * battle_target_calculate_for_menu_types's result
- * picks the next step: 0/1 enter the ability-preview state, 2 restores the
- * unit and stops game flow, and -1 returns to the idle action menu.
+ * An action without targeting (TARGET_PANELS_NO_TARGETING) targets the unit's own
+ * tile; otherwise a player-controlled unit targets the cursor tile and an AI unit
+ * keeps the target it chose. battle_target_calculate_for_menu_types's result picks
+ * the next step: 0 or 1 (affected tiles marked or not) enter the ability-preview
+ * state with the free cursor, 2 (a menu type without targeting) goes straight to
+ * the pre-attack animation, and -1 (an invalid action) returns to the idle action
+ * menu.
  */
 void battle_target_select_tile(void) {
     battle_unit_t* unit = battle_unit_get_source();
     s32 result;
-    s32 prev;
+    s32 saved_input_mode;
 
     unit->state_frame_counter = 0;
     if (unit->ability_preview_phase == TARGET_PANELS_NO_TARGETING) {
@@ -467,10 +471,10 @@ void battle_target_select_tile(void) {
     case 0:
     case 1:
         battle_camera_enable_map_pan();
-        prev = g_battle_cursor_input_mode;
+        saved_input_mode = g_battle_cursor_input_mode;
         g_battle_game_state = BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING;
         g_battle_cursor_input_mode = BATTLE_CURSOR_INPUT_FREE_CURSOR;
-        g_battle_cursor_input_mode_saved = prev;
+        g_battle_cursor_input_mode_saved = saved_input_mode;
         battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
         battle_target_store_cursor_casting_unit_name_and_data();
         if (g_main_game_options.fields.target_flashing == GAME_OPTION_ON) {
@@ -652,32 +656,32 @@ void battle_state_enter_target_select(void) {
  * 2 for a recovery selection. Any other selection command over a unit opens no
  * prompt. */
 void battle_state_enter_target_select_denied(void) {
-    battle_unit_t* runtime;
-    battle_unit_t* unit;
+    battle_unit_t* occupant;
+    battle_unit_t* caster;
     unit_stats_t* stats;
-    s32 kind;
+    s32 command;
 
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_TARGET_SELECT_DENIED;
-    runtime = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-    if (runtime != 0) {
-        stats = runtime->stats;
+    occupant = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
+    if (occupant != 0) {
+        stats = occupant->stats;
         if (stats != 0) {
             menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, stats->battle_id, 0);
         }
     }
-    unit = battle_unit_get_casting();
-    if (runtime == 0) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 3, unit->stats->battle_id, 0, 1);
+    caster = battle_unit_get_casting();
+    if (occupant == 0) {
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 3, caster->stats->battle_id, 0, 1);
         return;
     }
-    kind = unit->target_select_command;
-    if (kind == AI_COMMAND_AUTOBATTLE_TARGETED_SELECT) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 1, unit->stats->battle_id, 0, 1);
+    command = caster->target_select_command;
+    if (command == AI_COMMAND_AUTOBATTLE_TARGETED_SELECT) {
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 1, caster->stats->battle_id, 0, 1);
         return;
     }
-    if (kind == AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 2, unit->stats->battle_id, 0, 1);
+    if (command == AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT) {
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 2, caster->stats->battle_id, 0, 1);
     }
 }
 
@@ -716,20 +720,20 @@ static void battle_state_enter_target_display_start(void) {
  * auto-battle target, turn the camera when its tile is hidden and show its
  * summary panel. */
 void battle_state_enter_target_display(void) {
-    unit_stats_t* cast;
-    battle_unit_t* unit;
-    unit_stats_t* target;
+    unit_stats_t* caster_stats;
+    battle_unit_t* target;
+    unit_stats_t* target_stats;
 
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_TARGET_DISPLAY;
-    cast = battle_unit_get_casting()->stats;
-    unit = battle_unit_get_by_battle_id(cast->auto_battle_target);
-    battle_target_move_cursor_to_unit(unit);
-    battle_camera_rotate_when_unit_tile_not_visible(unit);
-    if (unit != 0) {
-        target = unit->stats;
-        if (target != 0) {
-            menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, target->battle_id, 0);
+    caster_stats = battle_unit_get_casting()->stats;
+    target = battle_unit_get_by_battle_id(caster_stats->auto_battle_target);
+    battle_target_move_cursor_to_unit(target);
+    battle_camera_rotate_when_unit_tile_not_visible(target);
+    if (target != 0) {
+        target_stats = target->stats;
+        if (target_stats != 0) {
+            menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, target_stats->battle_id, 0);
         }
     }
 }
@@ -767,15 +771,15 @@ void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32
 /* Project the cursor tile to the screen; while g_battle_action_at_list_active is set, also draw
  * the map cursor and its tile glow. */
 void battle_target_update_cursor(void) {
-    SVECTOR secondary;
-    SVECTOR tertiary;
-    VECTOR primary;
+    SVECTOR position;
+    SVECTOR raised;
+    VECTOR projected;
 
     if (g_battle_action_at_list_active != 0) {
         battle_target_calculate_tile_coords_with_cursor_glow();
         return;
     }
-    battle_target_project_cursor_tile_to_screen(&primary, &secondary, &tertiary);
+    battle_target_project_cursor_tile_to_screen(&projected, &position, &raised);
 }
 
 /* Per-frame unit update shared by most game-state handlers; it reads no input.
@@ -890,7 +894,8 @@ void battle_state_handle_open_action_menus_state(void) {
 
 /* IdlingActionMenus game-state handler: act on the selected menu command.
  *
- * Move (0) and the 0x19 variant hand off to the move command, Act (1)
+ * Move (0) hands off to the move command, moving the unit's mount partner
+ * instead when it has one, and its MOVE_SELF variant moves the unit itself; Act (1)
  * dispatches Defend, Equip Change and ordinary abilities on the command's
  * skillset, Wait (2) chooses a facing, and the remaining commands enter
  * target selection/display, the event check or scripted menus.
@@ -1005,10 +1010,15 @@ void battle_state_handle_idling_action_menus_state(void) {
 }
 
 /*
- * Advance menu-to-targeting state and consume the unit's renderer command.
+ * MenuToTargeting game-state handler for a unit the AI controls. From the
+ * unit's 31st frame in the state it builds the unit's AI command, at half speed
+ * until battle_ai_build_command reports the command ready (it can take several
+ * frames), then carries the command out as the menu handler would: a move, an
+ * act (Defend, Equip Change, Mimic, or an ability through target selection) or
+ * the end of the turn, which marks both move and act taken.
  *
- * AI setup may suspend before the command is ready. Keep each special
- * skillset's completion explicit so its distinct call tail is preserved.
+ * Each special skillset's completion stays explicit so its distinct call tail
+ * is preserved.
  */
 void battle_state_handle_menu_to_targeting_state(void) {
     battle_unit_t* unit;
@@ -1213,11 +1223,16 @@ void battle_state_handle_unit_move_state(void) {
     }
 }
 
-/* Free-cursor movement step. With the acting unit under player control the
- * confirm button routes the cursor to the pathfinder and, on a reachable
- * destination, installs the returned step list on the casting record and
- * enters the moving state. Without player control the same happens from the
- * unit's own stored target after 0x1f frames. */
+/* CloseMoveHelp game-state handler: choosing the move destination. The casting
+ * unit is the one that walks (the source unit, or its mount).
+ *
+ * A player-controlled source unit moves the cursor and camera. Circle paths the
+ * casting unit to the cursor tile and starts the move setup, or opens the
+ * illegal-move help when no path reaches it; cross clears the move range and
+ * returns to the idle action menu; triangle recenters the cursor on the unit.
+ * An AI-controlled unit waits 31 frames, then paths to the tile its AI command
+ * chose, puts the cursor there and starts the move setup, or goes on to its next
+ * scripted menu when no path reaches it. */
 void battle_state_handle_close_move_help_state(void) {
     battle_unit_t* source = battle_unit_get_source();
     battle_unit_t* casting = battle_unit_get_casting();
@@ -1227,7 +1242,7 @@ void battle_state_handle_close_move_help_state(void) {
     s32 x;
     s32 elevation;
     s32 y;
-    battle_unit_command_state_t scratch;
+    battle_unit_command_state_t scratch; /* never used; retail reserves its frame space */
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
@@ -1241,7 +1256,6 @@ void battle_state_handle_close_move_help_state(void) {
             path = battle_move_build_path_to_tile(
                 casting->stats->battle_id, g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
             if (path != 0) {
-                /* Copy the 0x80-byte movement block in the renderer-side runtime record. */
                 casting->path = *path;
                 casting->walk_speed = 0x2000;
                 battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 1);

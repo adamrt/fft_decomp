@@ -209,9 +209,14 @@ void menu_run_scrolling_ability_list_thread(void) {
     for (;;) {
         page = &base[i & 1];
         frame = &page->frame;
+        /* Retail bug: this passes the pointer's address, so the bit lands on the
+         * stack and the frame sprite stays opaque (see QUIRKS.md). */
         SetSemiTrans(&frame, 1);
 
         if (scroll_delta == 0 && menu_can_accept_input() != 0 && i != 0) {
+            /* With two text columns Left and Right switch the cursor between them; column 2's
+             * text pointer carries the choice to the help overlay. Otherwise they open the
+             * AT list preview of the selected ability. */
             if (layout->columns.mode[0] == MENU_TEXT_COLUMN_TEXT && layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT) {
                 if (g_script_event_input & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
                     toggle ^= 1;
@@ -226,7 +231,7 @@ void menu_run_scrolling_ability_list_thread(void) {
                 thread_set_parameters(g_thread_current_id - 1,
                     (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST], 0, 0);
                 /* Blink CLUTs 1 and 2 (24 and 6 frames of every 30) until the preview thread ends,
-                 * then restore CLUT 3. */
+                 * then restore CLUT 3. `column` serves as the frame counter. */
                 column = 0;
                 while (1) {
                     if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
@@ -365,6 +370,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             }
         }
 
+        /* The outermost list blinks CLUTs 3 and 4 (24 and 6 frames of every 30). */
         if (g_battle_menu_scroll_list_depth == 1) {
             if (i % 30 < 24) {
                 LoadImage(&g_battle_menu_ability_list_clut_rect, (u32*)(saved_clut + 48));
@@ -465,6 +471,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             menu_zoom_cursor_frame(entry, frame, i * g_script_event_speed);
         }
 
+        /* The cursor sprites move to column 1 while the toggle selects it. */
         if (layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT && toggle == 1) {
             {
                 menu_text_layout_t* columns = entry->context;

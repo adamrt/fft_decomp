@@ -19,16 +19,20 @@
 
 #define POLY_RGB(poly, n) (*(u32*)&(poly)->r##n)
 
-/* Builds a four-fold polar mesh from radius and angle curves, then draws its
- * double-buffered quads with a drifting center and scrolling texture. Shared
- * index temporaries and the non-void signature preserve register allocation
- * and phase-dispatch delay slots. */
+/* Callback handler for the polar mesh, a flat screen-space disc: six rings of
+ * points around a center, each ring a radius and a start angle that step from
+ * ring to ring by the curves, cut into four quadrants of 5 x 4 quads that are
+ * the first quadrant turned by quarter turns. The center drifts from ring to
+ * ring by a velocity that the acceleration curves bend, and the texture window
+ * scrolls. Screen x carries + 0x80 because BATTLE's draw areas begin at x
+ * -0x80. Shared index temporaries and the non-void signature preserve register
+ * allocation and phase-dispatch delay slots. */
 s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
-    effect_polar_mesh_scratch_t* scratch;
-    effect_record_t* record;
-    const effect_geometry_record_t* entry;
-    u32* ot;
+    effect_polar_mesh_scratch_t* scratch = (effect_polar_mesh_scratch_t*)getScratchAddr(0);
+    effect_record_t* record = &g_battle_effect_state_records[state_index];
+    const effect_geometry_record_t* entry = &g_battle_effect_geometry_table->entries[emitter_index];
+    u32* ot = main_gfx_get_otag();
     effect_polar_mesh_work_t* work;
     POLY_GT4* quad;
     POLY_GT4* inner;
@@ -39,11 +43,6 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
     u16 angle_binding;
     u8 delta_binding;
     u32 brightness;
-
-    scratch = (effect_polar_mesh_scratch_t*)getScratchAddr(0);
-    record = &g_battle_effect_state_records[state_index];
-    entry = &g_battle_effect_geometry_table->entries[emitter_index];
-    ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

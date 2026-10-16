@@ -19,10 +19,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* The original wrote the body of battle_unit_add_event_offset_by_runtime_id a second time as
- * battle_unit_add_event_offset_by_runtime_id_unused. */
-/* A second, identical copy of battle_unit_add_event_offset_by_runtime_id. No retail code calls
- * it. */
+/* A second, identical copy of battle_unit_add_event_offset_by_runtime_id, placed just before it.
+ * No retail code calls it. */
 s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVECTOR* amount) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -65,12 +63,12 @@ SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id) {
     return &unit->event_offset;
 }
 
-/*
- * Move a display unit to the supplied tile and facing.
- *
- * Clears the effect vectors, sets both the current and destination tile, and
- * recomputes the integer and fixed-point world positions from the tile.
- */
+/* Warp a unit to `tile` facing `facing` (in quarter turns), for event placement and warps:
+ * clears its event, sequence and screen offsets, sets both its current and destination tile and
+ * recomputes its world position from the tile center and slope height. A unit with battle stats
+ * also re-registers its tile there; that call passes the 16-bit facing, whose low byte is always
+ * 0, so the stats record facing 0 (south) whatever was asked. Returns 0 when no record has the
+ * runtime id. */
 s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* tile, s32 facing) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -319,8 +317,9 @@ s32 battle_gfx_load_unit_graphics_by_battle_id(s32 battle_id, s32 flags) {
     return 1;
 }
 
-/* The underlying loader handles ordinary SPR as well as special SHP/SEQ.
- * Keep polling only its immediate-progress result, not deferred work. */
+/* Advance the queued unit graphics load as far as it goes this frame: a step that ends on a step
+ * boundary (2) continues at once, and the loop stops on 1 (a read in progress) or 0 (every
+ * descriptor done), which it returns. */
 s32 battle_gfx_poll_unit_graphics_load(void) {
     s32 status;
 
@@ -384,7 +383,7 @@ s32 battle_unit_remove_by_runtime_id(u32 runtime_id) {
         battle_unit_remove(unit);
         return 1;
     }
-    main_system_handle_pointer_exception(0xC);
+    main_system_handle_pointer_exception(12);
     return 0;
 }
 
@@ -405,7 +404,9 @@ void battle_gfx_start_event_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16
  *
  * The integer sum with the decayed data array keeps the target's
  * offset-plus-0x108-then-base order; a byte pointer for the palettes keeps
- * that copy an end-pointer loop like the others. */
+ * that copy an end-pointer loop like the others. Every access indexes
+ * g_battle_gfx_vram_slots[index] again: a slot pointer local compiles far
+ * shorter than the retail code. */
 s32 battle_gfx_unpack_evtchr_file_to_vram_slot(s32 index, const evtchr_file_record_t* record) {
     s32 i;
     s32 pos;
@@ -513,6 +514,8 @@ s32 battle_gfx_load_unit_attack_image_into_evtchr_slot(s32 runtime_id, s32 slot)
                 battle_gfx_decompress_attack_spritesheet(
                     g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].compressed_attack_image, image_data);
                 LoadImage(&g_battle_gfx_vram_slots[slot].image_rect, (u32*)image_data);
+                /* The unit's 64x32 block in the spritesheet area (its sheet rows below the
+                 * first 256, the portrait and lower body) goes 200 lines below the image. */
                 rect.x = (unit->spritesheet_vram_slot >> 3) * 64 + 0x340;
                 rect.y = (unit->spritesheet_vram_slot & 7) * 32 + 0x100;
                 rect.w = 0x40;
@@ -531,7 +534,8 @@ s32 battle_gfx_load_unit_attack_image_into_evtchr_slot(s32 runtime_id, s32 slot)
     return 0;
 }
 
-/* Free a slot's page if it holds a unit's attack image. */
+/* Free a slot's page if it holds a unit's attack image. The EVTCHR (0xfe) and free (0xff)
+ * markers carry the same 0x80 bit, so a saved EVTCHR page is freed too (QUIRKS.md). */
 s32 battle_gfx_release_reserved_vram_slot(s32 slot_index) {
     if ((g_battle_gfx_vram_slots[slot_index].owner & BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE) != 0) {
         g_battle_gfx_vram_slots[slot_index].owner = BATTLE_GFX_VRAM_SLOT_OWNER_NONE;
@@ -566,6 +570,7 @@ s32 battle_gfx_get_vram_slot_summary(battle_gfx_vram_slot_summary_t* summary) {
     s32 i;
     u32 owner;
     u32 marker;
+    battle_unit_t* unit;
 
     for (i = 0; i < 2; i++) {
         owner = g_battle_gfx_vram_slots[i].owner;
@@ -574,10 +579,9 @@ s32 battle_gfx_get_vram_slot_summary(battle_gfx_vram_slot_summary_t* summary) {
         } else if (owner == BATTLE_GFX_VRAM_SLOT_OWNER_EVTCHR) {
             summary[i].spritesheet_id = 0xfe;
         } else if (owner & BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE) {
-            summary[i].spritesheet_id
-                = g_battle_gfx_spritesheet_slots[battle_unit_get_by_runtime_id(g_battle_gfx_vram_slots[i].owner & 0x7f)
-                                                     ->spritesheet_vram_slot]
-                      .spritesheet_id;
+            /* Rereads owner, as retail does; the low seven bits are the runtime id. */
+            unit = battle_unit_get_by_runtime_id(g_battle_gfx_vram_slots[i].owner & 0x7f);
+            summary[i].spritesheet_id = g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].spritesheet_id;
         } else {
             summary[i].spritesheet_id = 0xfd;
         }
@@ -610,9 +614,8 @@ void battle_gfx_set_evtchr_palette_by_runtime_id(s32 runtime_id, s32 slot_index,
  */
 battle_gfx_source_frame_t* battle_gfx_get_unit_sprite_frame_and_vram_ids(
     u32 runtime_id, battle_unit_sprite_query_t* out) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit == 0) {
         return 0;
     }
@@ -653,8 +656,6 @@ static u32 battle_gfx_get_unit_spritesheet_height(battle_unit_t* unit) {
 s32 battle_gfx_get_unit_spritesheet_height_by_runtime_id(u32 runtime_id) {
     return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_runtime_id(runtime_id));
 }
-
-struct battle_unit;
 
 /* The sprite height of the unit with this battle id, 0 when it is absent, dead,
  * crystal or treasure. */
@@ -709,7 +710,8 @@ void battle_effect_start_new(s32 ability_id, s32 target_mode, effect_start_targe
 /* battle_effect_update_file_load as a 0 or 1 result: the event script's EffectStart
  * instruction calls it on the main stack each frame until it returns 0. */
 s32 battle_effect_try_init_data(void) {
-    /* The target loads no argument; the parameter is the $a0 value unhandled states return. */
+    /* No argument is passed: for a load state outside 0..3, battle_effect_update_file_load
+     * returns whatever this caller left in $a0. */
     return battle_effect_update_file_load() != 0;
 }
 

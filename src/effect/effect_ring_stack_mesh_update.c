@@ -24,9 +24,15 @@ enum {
     RING_STACK_LAST_RING_OFFSET = (RING_STACK_RING_COUNT - 1) * RING_STACK_SEGMENT_COUNT,
 };
 
-/* Draws a spinning stack of eight textured rings using alternating quad
- * buffers, scrolling texture and per-row brightness. Separate screen vectors
- * and chained color stores preserve the renderer's register scheduling. */
+/* Callback handler for the ring stack: eight rings of eight textured quads
+ * stacked around the emitter origin and spinning about the vertical axis. Its
+ * nine lattice rows are octagons whose height and radius step apart by the
+ * growth curves; two points of each row come from the spin angle and the six
+ * others are quarter turns of them. The whole radius grows from frame to
+ * frame. Each update projects the lattice through the battle camera into the
+ * current quad buffer, shades the rows, depth-sorts the quads and flips
+ * buffers. Separate screen vectors and chained color stores preserve the
+ * renderer's register scheduling. */
 s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     SVECTOR vertex;
@@ -122,6 +128,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
+        /* Indexed again rather than read through record, as the target does. */
         target_index = g_battle_effect_state_records[state_index].timeline.target_index;
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
@@ -204,7 +211,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         cos1 = rcos(work->spin + (ONE / RING_STACK_SEGMENT_COUNT));
 
         /* Each lattice row rises by growth.vy and widens by growth.vz; both steps grow by growth_step per row.
-         * Points 0 and 1 come from the two angles; the other six are quarter turns of them. */
+         * Points 0 and 1 come from the two angles; the other six are quarter turns of them. The
+         * target recomputes the row radius at each use; a shared local changes the code. */
         n = 0;
         k = 0;
         for (i = 0; i < RING_STACK_LATTICE_ROW_COUNT; i++) {
@@ -300,8 +308,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         quads[RING_STACK_LAST_SEGMENT].x3 = other->x2;
         quads[RING_STACK_LAST_SEGMENT].y3 = other->y2;
 
-        /* Ring j reuses the lower corners of ring j - 1 and adds lattice row
-         * j + 1. */
+        /* Ring j: corners 2/3 repeat ring j - 1's corners 0/1, and lattice row j + 1 gives
+         * corners 0/1. */
         for (j = 1; j < RING_STACK_RING_COUNT; j++) {
             n = j + 1;
 
