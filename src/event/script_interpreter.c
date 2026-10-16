@@ -14,6 +14,8 @@
 #include "fft/battle_unit.h"
 #include "fft/camera.h"
 #include "fft/data.h"
+#include "fft/data_job.h"
+#include "fft/data_skillset.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/main_unit.h"

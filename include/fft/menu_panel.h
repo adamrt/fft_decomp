@@ -4,7 +4,7 @@
 /* Menu library status panels: the unit status, equipment, ability and numeric editor panels, portraits and thread
  * indicators. */
 
-#include "fft/data.h"
+#include "fft/data_ability.h"
 #include "fft/gfx.h"
 #include "fft/map.h"
 #include "fft/menu.h"

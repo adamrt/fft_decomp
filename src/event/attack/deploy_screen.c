@@ -2,7 +2,8 @@
  * render thread and portrait quads. */
 
 #include "fft/battle_map.h"
-#include "fft/data.h"
+#include "fft/data_item.h"
+#include "fft/data_skillset.h"
 #include "fft/event_attack.h"
 #include "fft/gfx.h"
 #include "fft/main.h"

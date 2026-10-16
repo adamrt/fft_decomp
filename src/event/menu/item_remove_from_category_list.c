@@ -1,6 +1,6 @@
 /* Removing an item from a category list. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/item.h"
 #include "psx/types.h"
 

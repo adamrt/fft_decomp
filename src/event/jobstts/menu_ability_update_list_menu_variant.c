@@ -1,6 +1,6 @@
 /* The selected job's ability list, tabbed by category, with the selected ability's description. */
 
-#include "fft/data.h"
+#include "fft/data_ability.h"
 #include "fft/event_jobstts.h"
 #include "fft/job.h"
 #include "fft/main.h"

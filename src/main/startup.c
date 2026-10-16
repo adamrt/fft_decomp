@@ -1,7 +1,7 @@
 /* CD-ROM and CPU RAM reset, the zodiac frame, startup and game state reset, ENTD files and encounters, new game
  * inventory and party, and SVECTOR setting. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_gfx.h"

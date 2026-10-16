@@ -2,7 +2,9 @@
  * checks, job changes, loadout validation and item category lists. */
 
 #include "fft/bits.h"
-#include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
+#include "fft/data_job.h"
 #include "fft/item.h"
 #include "fft/main.h"
 #include "fft/main_item.h"

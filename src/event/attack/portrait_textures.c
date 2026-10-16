@@ -1,6 +1,6 @@
 /* Party portrait textures and formation sprites. */
 
-#include "fft/data.h"
+#include "fft/data_job.h"
 #include "fft/event_attack.h"
 #include "fft/file.h"
 #include "fft/main.h"

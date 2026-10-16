@@ -9,6 +9,8 @@
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
 #include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
 #include "fft/main.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"

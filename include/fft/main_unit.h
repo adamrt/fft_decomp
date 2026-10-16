@@ -4,6 +4,9 @@
 /* Resident unit data: generation, stats, jobs, abilities, statuses and the party. */
 
 #include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_job.h"
+#include "fft/data_skillset.h"
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"

@@ -2,6 +2,7 @@
 
 #include "fft/bits.h"
 #include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/main_item.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

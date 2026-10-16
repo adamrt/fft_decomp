@@ -1,6 +1,6 @@
 /* Textured quad submission and inventory totals. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
 #include "fft/main_item.h"

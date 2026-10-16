@@ -1,7 +1,7 @@
 /* Slot items, equip checks, slot validation and the filtered item list. */
 
 #include "fft/bits.h"
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/event_equip.h"
 #include "fft/item.h"
 #include "fft/main.h"

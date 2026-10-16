@@ -4,6 +4,8 @@
 /* Battle AI workspace, ability evaluation and action selection. */
 
 #include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
 #include "fft/map.h"
 #include "fft/script.h"
 #include "fft/unit.h"

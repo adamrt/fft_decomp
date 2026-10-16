@@ -1,7 +1,8 @@
 /* Ability category checks, the learn and view ability lists, unit ordering, text entry waits, the dismiss unit step and
  * gil adjustment. */
 
-#include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/main.h"

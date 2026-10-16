@@ -1,6 +1,6 @@
 /* The shop, including the main, gil, purchase, sell, fitting room, best fit preview and fur shop menus and steps. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/item.h"
 #include "fft/main.h"

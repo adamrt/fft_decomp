@@ -3,6 +3,10 @@
 
 #include "fft/battle_text.h"
 #include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
+#include "fft/data_job.h"
+#include "fft/data_skillset.h"
 #include "fft/main.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"

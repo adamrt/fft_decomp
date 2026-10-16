@@ -4,6 +4,8 @@
 /* SCUS_942.21: resident game services and data tables. */
 
 #include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/script.h"

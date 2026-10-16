@@ -4,6 +4,7 @@
 /* WORLD.BIN (formation, shops, memory card and menu screens): the types and declarations its topic headers share. */
 
 #include "fft/data.h"
+#include "fft/data_job.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"

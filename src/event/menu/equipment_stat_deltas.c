@@ -1,6 +1,6 @@
 /* Stat deltas of swapping equipment and the scaled preview subtraction. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/item.h"
 #include "fft/menu.h"
 #include "fft/menu_panel.h"

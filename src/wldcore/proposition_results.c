@@ -2,6 +2,7 @@
  * active propositions and cancel confirmation, sound novel levels, unexplored lands and treasures. */
 
 #include "fft/data.h"
+#include "fft/data_job.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/main.h"

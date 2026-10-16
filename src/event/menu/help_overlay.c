@@ -1,6 +1,7 @@
 /* Menu close, battle/require help runners and the first running menu thread. */
 
-#include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/main_file.h"

@@ -1,6 +1,6 @@
 /* Equipment updates and the item category menu. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/item.h"
 #include "fft/main.h"
 #include "fft/menu.h"

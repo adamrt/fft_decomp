@@ -1,7 +1,7 @@
 /* The job wheel, including the cursor job level, availability, the menu, sprites, job changes, open and close
  * animations, the portrait and the job name. */
 
-#include "fft/data.h"
+#include "fft/data_job.h"
 #include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/main.h"

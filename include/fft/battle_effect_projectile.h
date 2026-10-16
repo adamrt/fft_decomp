@@ -4,6 +4,11 @@
 /* BATTLE effect targets, elements, projectiles and effect models. */
 
 #include "fft/battle_effect.h"
+#include "fft/battle_unit.h"
+#include "fft/map.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* target_type of an effect target record. */
 typedef enum effect_target_type {

@@ -4,6 +4,9 @@
 /* BATTLE secondary effects: hit sparks, poofs, charge rings and traps. */
 
 #include "fft/battle_effect.h"
+#include "fft/battle_unit.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Sixteen secondary effects may run at once; record zero anchors their chains. */
 enum {

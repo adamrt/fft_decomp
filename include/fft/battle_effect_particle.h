@@ -4,6 +4,9 @@
 /* BATTLE effect particles: motion, pools, sprite animation and rendering. */
 
 #include "fft/battle_effect.h"
+#include "fft/gfx.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Index into g_battle_effect_trap_particle_configs: the particle groups of the secondary effect
  * handlers, named after the handler that spawns each. */

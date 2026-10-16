@@ -1,6 +1,6 @@
 /* The thread drawing the equipment panel with the five equipped item names and icons. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
 #include "fft/item.h"

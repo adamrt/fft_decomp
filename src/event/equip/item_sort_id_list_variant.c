@@ -1,6 +1,6 @@
 /* Sorting an item list by a mode's list of criteria, dropping empty and invalid entries. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/item.h"
 #include "fft/main_item.h"
 #include "fft/menu.h"

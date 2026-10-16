@@ -1,6 +1,6 @@
 /* The zero-based index of a generic job, Squire through Mime. */
 
-#include "fft/data.h"
+#include "fft/data_job.h"
 #include "fft/main.h"
 #include "psx/types.h"
 

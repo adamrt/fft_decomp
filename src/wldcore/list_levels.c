@@ -3,6 +3,8 @@
  * category, formation and mask 1 lists. */
 
 #include "fft/data.h"
+#include "fft/data_item.h"
+#include "fft/data_skillset.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/main.h"

@@ -1,6 +1,6 @@
 /* The primary stat of an item's category, used to rank items in menu sorts. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/item.h"
 #include "fft/main_item.h"
 #include "psx/types.h"

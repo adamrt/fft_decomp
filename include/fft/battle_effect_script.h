@@ -4,6 +4,9 @@
 /* BATTLE effect files: loading and playback, timelines and the effect script. */
 
 #include "fft/battle_effect.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
+#include "psx/types.h"
 
 /* g_battle_effect_load_state: the steps of battle_effect_update_file_load, which loads the ability's effect file
  * while its charge secondary effect plays. */

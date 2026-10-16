@@ -1,6 +1,6 @@
 /* Item order tables, card event init and the OPEN.BIN main loop and ending calls. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_item.h"

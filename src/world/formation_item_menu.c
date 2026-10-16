@@ -1,7 +1,7 @@
 /* The formation item menu, including equip, best fit, remove and remove-all, quantity discards and the selected unit HP
  * bonus. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/item.h"
 #include "fft/main.h"

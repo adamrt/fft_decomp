@@ -1,6 +1,7 @@
 /* Move and jump increases, stat changes due to equipment and item stat deltas. */
 
-#include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
 #include "fft/main_item.h"
 #include "fft/menu.h"
 #include "fft/menu_panel.h"

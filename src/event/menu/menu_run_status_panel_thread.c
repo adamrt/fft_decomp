@@ -1,6 +1,6 @@
 /* The thread drawing the selected unit's equipment and ability status panel. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/main_gfx.h"
 #include "fft/memory.h"

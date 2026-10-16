@@ -1,7 +1,7 @@
 /* The base job and the all-units job lock check. */
 
 #include "fft/bits.h"
-#include "fft/data.h"
+#include "fft/data_job.h"
 #include "fft/main.h"
 #include "fft/unit.h"
 #include "fft/world_formation.h"

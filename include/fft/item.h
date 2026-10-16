@@ -3,7 +3,7 @@
 
 /* Item and equipment logic shared by EQUIP and WORLD: categories, stat previews and inventory counts. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "psx/types.h"

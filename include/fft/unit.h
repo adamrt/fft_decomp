@@ -4,6 +4,7 @@
 /* Unit records shared across modules: party, ENTD and battle stats, status and identity. */
 
 #include "fft/data.h"
+#include "fft/data_job.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

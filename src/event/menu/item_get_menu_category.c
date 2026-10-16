@@ -1,6 +1,6 @@
 /* The equipment menu's list category of an item. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
 #include "psx/types.h"
 
 /* Classify an item ID into the equipment menu's broad list category.

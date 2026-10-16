@@ -6,6 +6,8 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_unit.h"
 #include "fft/data.h"
+#include "fft/data_ability.h"
+#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/unit.h"

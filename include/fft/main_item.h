@@ -3,7 +3,8 @@
 
 /* Resident item data and inventory. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
+#include "fft/data_job.h"
 #include "psx/types.h"
 
 /* item */

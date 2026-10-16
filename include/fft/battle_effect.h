@@ -7,10 +7,7 @@
  * the camera, palette, sound and math helpers. Native overlay callbacks and
  * their work records are declared in effect.h. */
 
-#include "fft/battle_unit.h"
 #include "fft/gfx.h"
-#include "fft/main.h"
-#include "fft/map.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

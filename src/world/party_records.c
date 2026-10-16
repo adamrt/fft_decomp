@@ -1,6 +1,8 @@
 /* Unit records built from the party, the record list and saving records back to the party. */
 
-#include "fft/data.h"
+#include "fft/data_item.h"
+#include "fft/data_job.h"
+#include "fft/data_skillset.h"
 #include "fft/main.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"

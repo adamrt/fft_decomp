@@ -1,6 +1,6 @@
 /* Learned tests and MP/CT/JP display values. */
 
-#include "fft/data.h"
+#include "fft/data_ability.h"
 #include "fft/main_unit.h"
 #include "fft/menu_panel.h"
 #include "fft/menu_script.h"
