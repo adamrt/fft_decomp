@@ -540,8 +540,9 @@ static void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
  * commits the final values back to the live light state.
  */
 void map_light_thread(void) {
-    /* One keyframe: three rotation angles and three color scale factors,
-     * also read as six words by the operand loop. */
+    /* One keyframe: three rotation angles and three color scale factors.
+     * The original reads all six operands in one loop, so the target also
+     * needs a six-word view; stores through the named fields do not match. */
     union {
         struct {
             s32 angles[3];
