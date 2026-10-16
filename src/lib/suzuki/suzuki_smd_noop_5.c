@@ -1,5 +1,5 @@
 #include "psx/suzuki.h"
 
 /* Empty driver routine; nothing in the tree calls it or takes its address. */
-void suzuki_noop_800121d4(void) {
+void suzuki_smd_noop_5(void) {
 }

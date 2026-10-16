@@ -12,7 +12,8 @@ extern u16 g_sound_music_track_1_id;
 extern u16 g_sound_music_track_2_id;
 
 void sound_play_music_tracks(s32 slot_1_music_id, s32 slot_2_music_id);
-void sound_wait_for_music_stub(void);
+/* Wait while the music loads, checking on the main stack; the check always answers done. */
+void sound_wait_for_music_load(void);
 
 /* queued effects */
 extern s32 g_sound_pending_sfx_id; /* main_sfx_e; -1 means no request */

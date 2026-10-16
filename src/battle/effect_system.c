@@ -79,7 +79,7 @@ static void battle_camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile
 /* The 12-byte target stores both arguments to their incoming stack home slots
  * and returns. Taking their addresses reproduces those stores; it does not
  * establish what the original source body contained. */
-void battle_noop_801aad30(s32 ignored_1, s32 ignored_2) {
+void battle_camera_noop_1(s32 ignored_1, s32 ignored_2) {
     s32* unused = &ignored_1;
     unused = &ignored_2;
 }
@@ -2388,7 +2388,7 @@ s32 battle_effect_none_secondary_handler(void) {
 
 /* An empty routine among the secondary-effect handlers. Nothing references it, not
  * even g_battle_effect_secondary_handlers. */
-void battle_noop_801b0ff4(void) {
+void battle_effect_noop_4(void) {
 }
 
 /*
@@ -2499,7 +2499,7 @@ s32 battle_effect_arrow_arc_secondary_handler(void) {
             g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_FINALIZING;
             flags = g_battle_effect_current_secondary->target.record.data.unit.result_animation;
             if (flags == EFFECT_HIT_MISSED || flags - 4 < 2U || g_battle_effect_trajectory_hit_unit_id == -1) {
-                g_battle_unknown_801b8b98 = 0x80000000;
+                g_battle_effect_arrow_miss_marker = 0x80000000;
                 battle_effect_end_secondary_on_current_unit();
             }
         }

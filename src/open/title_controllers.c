@@ -773,7 +773,7 @@ void open_title_step_new_game_start(open_controller_record_t* record) {
 
     if (state->step == 4) {
         open_title_init_new_game_party(0, 0);
-        world_menu_load_text_1c18();
+        world_menu_init_with_open_text();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */
         if (g_main_gfx_active_buffer_index != 0) {

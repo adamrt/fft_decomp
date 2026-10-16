@@ -64,8 +64,9 @@ extern RECT g_world_shop_edge_tile_rect;
 extern RECT g_world_shop_background_vram_rect;
 extern RECT g_world_shop_vram_backup_rect;
 extern u8 g_world_shop_cost_window_visible;
-extern u8 g_world_unknown_801cd0ec; /* cleared when the Soldier Office hire menu opens; never read */
-extern u8 g_world_unknown_801cd0f4; /* as g_world_unknown_801cd0ec */
+/* Cleared when the Soldier Office hire menu opens; nothing reads it. */
+extern u8 g_world_shop_hire_unread_flag_1; /* cleared when the Soldier Office hire menu opens; never read */
+extern u8 g_world_shop_hire_unread_flag_2; /* as g_world_shop_hire_unread_flag_1 */
 void world_shop_run_screen(s32 shop_type);
 u32* world_shop_load_background_tim(s32 index);
 void world_shop_update_unit_selection(void);

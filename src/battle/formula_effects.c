@@ -451,7 +451,7 @@ void battle_formula_select_magic_gun_ability(void) {
     s32 roll;
 
     element = g_battle_action_current_ability.weapon_data.element;
-    roll = battle_formula_get_random_0_7fff();
+    roll = battle_formula_get_random();
     pct = (roll * 100) / 0x8000;
     if (element & BATTLE_ELEMENT_FIRE) {
         if (pct < 10) {
@@ -737,7 +737,7 @@ void battle_formula_apply_status_to_action(void) {
             status++;
         } while (status < STATUS_COUNT);
 
-        selected_status = status_ids[(battle_formula_get_random_0_7fff() * count) / 32768];
+        selected_status = status_ids[(battle_formula_get_random() * count) / 32768];
         g_battle_action_target_data->status_changes.infliction[selected_status / 8] |= 0x80 >> (selected_status & 7);
     } else if (type & STATUS_INFLICTION_TYPE_SEPARATE) {
         status = 0;

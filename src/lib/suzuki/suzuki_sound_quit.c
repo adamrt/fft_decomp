@@ -22,6 +22,6 @@ void suzuki_sound_quit(void) {
         }
         SpuSetKey(SPU_OFF, SPU_ALLCH);
         suzuki_sound_set_reverb_mode(0, 0, 0, 0);
-        g_suzuki_unknown_80032a28 = 0;
+        g_suzuki_sound_unread_value = 0;
     }
 }

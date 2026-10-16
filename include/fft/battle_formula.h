@@ -143,7 +143,8 @@ void battle_formula_cause_action_miss(void);
 void battle_formula_clear_pending_proc(void);
 void battle_formula_determine_reduced_stat(void);
 void battle_formula_force_attack_miss(void);
-s32 battle_formula_get_random_0_7fff(void);
+/* rand() while the action executes; the midpoint 0x4000 for previews and AI simulations. */
+s32 battle_formula_get_random(void);
 s32 battle_formula_roll_random_at_least(s32 limit, s32 threshold);
 void battle_formula_queue_weapon_spell(void);
 

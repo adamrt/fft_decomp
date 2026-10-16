@@ -30,6 +30,7 @@ s32 effect_map_set_timed_transform_duration(
 s32 effect_map_split_mesh_and_set_3d_objects_state_3(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 s32 effect_map_unfreeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+/* Native callback at 0x801c44a0 in E000 (catalog ids 0, 24, 73, 92, 121); does nothing and leaves the result unset. */
 s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_emitter_index, s32 unused_frame);
 
 /* texture pages */

@@ -49,18 +49,18 @@ functions:
   - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5, source: src/main/gfx_draw_now_loading_message.c}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, source: src/lib/suzuki/suzuki_smd_create_music.c}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, source: src/lib/suzuki/suzuki_smd_unload_music.c}
-  - {addr: 0x800121cc, size: 8, name: suzuki_noop_800121cc, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800121cc.c}
-  - {addr: 0x800121d4, size: 8, name: suzuki_noop_800121d4, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800121d4.c}
+  - {addr: 0x800121cc, size: 8, name: suzuki_smd_noop_1, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_1.c}
+  - {addr: 0x800121d4, size: 8, name: suzuki_smd_noop_2, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_2.c}
   - {addr: 0x800121dc, size: 168, name: suzuki_smd_reset_music, hash: 44afefa7901459f8, source: src/lib/suzuki/suzuki_smd_reset_music.c}
   - {addr: 0x80012284, size: 180, name: suzuki_smd_resume_music, hash: 9ca87443d0a57b65, source: src/lib/suzuki/suzuki_smd_resume_music.c}
   - {addr: 0x80012338, size: 72, name: suzuki_smd_stop_music, hash: edad10ef3e4983b0, source: src/lib/suzuki/suzuki_smd_stop_music.c}
   - {addr: 0x80012380, size: 76, name: suzuki_smd_pause_music, hash: 332bc3d728987bfd, source: src/lib/suzuki/suzuki_smd_pause_music.c}
   - {addr: 0x800123cc, size: 120, name: suzuki_smd_stop_marked_music, hash: a7b1907e199f23a6, source: src/lib/suzuki/suzuki_smd_stop_marked_music.c}
   - {addr: 0x80012444, size: 104, name: suzuki_smd_init_channel_streams, hash: 927e773aa1e329e2, source: src/lib/suzuki/suzuki_smd_init_channel_streams.c}
-  - {addr: 0x800124ac, size: 8, name: suzuki_noop_800124ac, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800124ac.c}
-  - {addr: 0x800124b4, size: 8, name: suzuki_noop_800124b4, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800124b4.c}
-  - {addr: 0x800124bc, size: 8, name: suzuki_noop_800124bc, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800124bc.c}
-  - {addr: 0x800124c4, size: 8, name: suzuki_noop_800124c4, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800124c4.c}
+  - {addr: 0x800124ac, size: 8, name: suzuki_smd_noop_3, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_3.c}
+  - {addr: 0x800124b4, size: 8, name: suzuki_smd_noop_4, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_4.c}
+  - {addr: 0x800124bc, size: 8, name: suzuki_smd_noop_5, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_5.c}
+  - {addr: 0x800124c4, size: 8, name: suzuki_smd_noop_6, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_6.c}
   - {addr: 0x800124cc, size: 76, name: suzuki_sound_set_sfx_enabled, hash: 611450485243b18c, source: src/lib/suzuki/suzuki_sound_set_sfx_enabled.c}
   - {addr: 0x80012518, size: 72, name: suzuki_sound_play_direct_sfx, hash: 0ab4485dd97c7a5a, source: src/lib/suzuki/suzuki_sound_play_direct_sfx.c}
   - {addr: 0x80012560, size: 72, name: suzuki_sound_play_background_sfx, hash: f6d2d939a00dfd76, source: src/lib/suzuki/suzuki_sound_play_background_sfx.c}
@@ -97,7 +97,7 @@ functions:
   - {addr: 0x80013544, size: 100, name: suzuki_smd_retrigger_held_voices, hash: dcd68b24fc0d9d04, source: src/lib/suzuki/suzuki_smd_retrigger_held_voices.c}
   - {addr: 0x800135a8, size: 84, name: suzuki_smd_get_held_voices, hash: be2b7e3d5851257b, source: src/lib/suzuki/suzuki_smd_get_held_voices.c}
   - {addr: 0x800135fc, size: 56, name: suzuki_smd_get_active_voice_mask, hash: 6b1b0f74b14ca96b, source: src/lib/suzuki/suzuki_smd_get_active_voice_mask.c}
-  - {addr: 0x80013634, size: 8, name: suzuki_noop_80013634, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_80013634.c}
+  - {addr: 0x80013634, size: 8, name: suzuki_smd_noop_7, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_7.c}
   - {addr: 0x8001363c, size: 132, name: suzuki_sound_init_sfx_music, hash: 08529bebd42ab9ea, source: src/lib/suzuki/suzuki_sound_init_sfx_music.c}
   - {addr: 0x800136c0, size: 200, name: suzuki_smd_transfer_music_data, hash: 52a7c8670ffec868, source: src/lib/suzuki/suzuki_smd_transfer_music_data.c}
   - {addr: 0x80013788, size: 80, name: suzuki_smd_init_sfx_music_header, hash: 2752bac6c9a55989, source: src/lib/suzuki/suzuki_smd_init_sfx_music_header.c}
@@ -110,7 +110,7 @@ functions:
   - {addr: 0x80014078, size: 208, name: suzuki_smd_remove_music, hash: 5b241f709a33e6d8, source: src/lib/suzuki/suzuki_smd_remove_music.c}
   - {addr: 0x80014148, size: 56, name: suzuki_smd_set_flags_all_channels, hash: a707cd18a9d0bfd7, source: src/lib/suzuki/suzuki_smd_set_flags_all_channels.c}
   - {addr: 0x80014180, size: 132, name: suzuki_smd_get_instrument_attr, hash: e62ca444c99c2166, source: src/lib/suzuki/suzuki_smd_get_instrument_attr.c}
-  - {addr: 0x80014204, size: 8, name: suzuki_return_zero_80014204, hash: 207819bf4ebe3078, source: src/lib/suzuki/suzuki_return_zero_80014204.c}
+  - {addr: 0x80014204, size: 8, name: suzuki_sound_return_zero_1, hash: 207819bf4ebe3078, source: src/lib/suzuki/suzuki_sound_return_zero_1.c}
   - {addr: 0x8001420c, size: 48, name: suzuki_sound_sum_resource_words, hash: 8eadc6f1c70f6a75, source: src/lib/suzuki/suzuki_sound_sum_resource_words.c}
   - {addr: 0x8001423c, size: 60, name: suzuki_sound_init_heap, hash: 34064af7b82b9b40, profile: gcc-2.6.3_O2_G8_aspsx-2.34, source: src/lib/suzuki/suzuki_sound_init_heap.c}
   - {addr: 0x80014278, size: 224, name: suzuki_sound_alloc, hash: ce530b24cb2e1a41, profile: gcc-2.6.3_O2_G8_aspsx-2.34, source: src/lib/suzuki/suzuki_sound_alloc.c}
@@ -131,7 +131,7 @@ functions:
   - {addr: 0x80015098, size: 160, name: suzuki_sound_calculate_reverb_voices, hash: 691289f02cdb84f7, source: src/lib/suzuki/suzuki_sound_calculate_reverb_voices.c}
   - {addr: 0x80015138, size: 492, name: suzuki_smd_update_channel_ramps, hash: d0c73c6718ada2ce, source: src/lib/suzuki/suzuki_smd_update_channel_ramps.c}
   - {addr: 0x80015324, size: 1344, name: suzuki_smd_read_instructions, hash: 8eb6628213d126e4, source: src/lib/suzuki/suzuki_smd_read_instructions.c}
-  - {addr: 0x80015864, size: 8, name: suzuki_noop_80015864, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_80015864.c}
+  - {addr: 0x80015864, size: 8, name: suzuki_smd_noop_8, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_8.c}
   - {addr: 0x8001586c, size: 8, name: suzuki_smd_no_instruction, hash: cc2f57dc1c5c5ee3, source: src/lib/suzuki/suzuki_smd_no_instruction.c}
   - {addr: 0x80015874, size: 40, name: suzuki_smd_rest, hash: 3c07da86436791ee, source: src/lib/suzuki/suzuki_smd_rest.c}
   - {addr: 0x8001589c, size: 28, name: suzuki_smd_fermata, hash: c89ff34cc5d52578, source: src/lib/suzuki/suzuki_smd_fermata.c}
@@ -262,13 +262,13 @@ functions:
   - {addr: 0x800183c0, size: 64, name: suzuki_sound_set_cd_reverb, hash: 3920c543eba03b70, source: src/lib/suzuki/suzuki_sound_set_cd_reverb.c}
   - {addr: 0x80018400, size: 140, name: suzuki_sound_commit_volume_change, hash: 9664c665c65eb230, source: src/lib/suzuki/suzuki_sound_commit_volume_change.c}
   - {addr: 0x8001848c, size: 84, name: suzuki_sound_set_vol_balance, hash: 690d749cb3ddab10, source: src/lib/suzuki/suzuki_sound_set_vol_balance.c}
-  - {addr: 0x800184e0, size: 16, name: suzuki_sound_set_unknown_80032a28, hash: d753dba51b973163, source: src/lib/suzuki/suzuki_sound_set_unknown_80032a28.c}
+  - {addr: 0x800184e0, size: 16, name: suzuki_sound_set_unread_value, hash: d753dba51b973163, source: src/lib/suzuki/suzuki_sound_set_unread_value.c}
   - {addr: 0x800184f0, size: 32, name: suzuki_sound_spu_transfer_callback, hash: c1b2b4bd9f3d6f10, source: src/lib/suzuki/suzuki_sound_spu_transfer_callback.c}
   - {addr: 0x80018510, size: 8, name: suzuki_sound_spu_event_handler, hash: 207819bf4ebe3078, source: src/lib/suzuki/suzuki_sound_spu_event_handler.c}
   - {addr: 0x80018518, size: 316, name: suzuki_sound_transfer_spu_data, hash: 05f8d8da327ae08d, source: src/lib/suzuki/suzuki_sound_transfer_spu_data.c, rodata: [{addr: 0x80010030, size: 20, hash: 70cca047fa34bab7}]}
-  - {addr: 0x80018654, size: 8, name: suzuki_noop_80018654, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_80018654.c}
+  - {addr: 0x80018654, size: 8, name: suzuki_sound_noop_1, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_sound_noop_1.c}
   - {addr: 0x8001865c, size: 96, name: suzuki_sound_wait_for_spu_transfer, hash: 30625f6e920b4684, source: src/lib/suzuki/suzuki_sound_wait_for_spu_transfer.c}
-  - {addr: 0x800186bc, size: 8, name: suzuki_noop_800186bc, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800186bc.c}
+  - {addr: 0x800186bc, size: 8, name: suzuki_sound_noop_2, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_sound_noop_2.c}
   - {addr: 0x800186c4, size: 32, name: SpuInit, hash: 88a4657274163f46, source: src/lib/psyq/libspu/SpuInit.c}
   - {addr: 0x800186e4, size: 248, name: _SpuInit, hash: 75c2d5909458014e, source: src/lib/psyq/libspu/_SpuInit.c}
   - {addr: 0x800187dc, size: 124, name: SpuStart, hash: 4f7e8f0f8686ff5f, source: src/lib/psyq/libspu/SpuStart.c}
@@ -771,7 +771,7 @@ functions:
   - {addr: 0x800458b8, size: 72, name: main_overlay_exec_open_bin_main_loop, hash: ec2d3c302ca9b1f1, unit: open_overlay}
   - {addr: 0x80045900, size: 60, name: main_overlay_exec_open_bin_ending, hash: 47240d2c7733c304, unit: open_overlay}
   - {addr: 0x80059854, size: 620, name: main_status_init_check_data, hash: c4a7f36df3f82f32, unit: party}
-  - {addr: 0x80059ac0, size: 8, name: main_noop_80059ac0, hash: 6d64edf91449c1b1, unit: party}
+  - {addr: 0x80059ac0, size: 8, name: main_party_noop_1, hash: 6d64edf91449c1b1, unit: party}
   - {addr: 0x80059ac8, size: 40, name: main_party_clear_all, hash: a26cc5df81715e07, unit: party}
   - {addr: 0x80059af0, size: 40, name: main_party_get_unit, hash: 1d19410c46f4c04e, unit: party}
   - {addr: 0x80059b18, size: 152, name: main_unit_save_entd_unit_to_party, hash: 1462a0da6719f387, unit: party}
@@ -1138,7 +1138,7 @@ data:
   - {addr: 0x80032a18, name: g_suzuki_smd_random_state}
   - {addr: 0x80032a1c, name: g_suzuki_sound_sfx_instrument}
   - {addr: 0x80032a20, name: g_suzuki_sound_sfx_key_off_voices}
-  - {addr: 0x80032a28, name: g_suzuki_unknown_80032a28}
+  - {addr: 0x80032a28, name: g_suzuki_sound_unread_value}
   - {addr: 0x80032a2c, name: g_suzuki_sound_tick_count}
   - {addr: 0x80032a30, name: g_suzuki_sound_spu_transfer_status_index}
   - {addr: 0x80032a34, name: g_suzuki_unknown_80032a34}
@@ -1240,7 +1240,7 @@ data:
   - {addr: 0x800459c8, name: g_main_battle_bin_sector}
   - {addr: 0x800459cc, name: g_main_debug_display_enabled}
   - {addr: 0x800459d0, name: g_main_font_print_enabled}
-  - {addr: 0x800459d8, name: g_main_unknown_800459d8}
+  - {addr: 0x800459d8, name: g_main_debug_display_unread_flag}
   - {addr: 0x800459dc, name: g_main_entd_selection_mode}
   - {addr: 0x800459e0, name: g_main_gfx_now_loading_palette}
   - {addr: 0x80045a00, name: g_main_boot_squaresoft_logo_image_words}
@@ -1253,7 +1253,7 @@ data:
   - {addr: 0x800473a4, name: g_main_menu_scroll_accel_delay}
   - {addr: 0x800473a5, name: g_main_menu_scroll_slow_step}
   - {addr: 0x800473a6, name: g_main_menu_scroll_fast_step}
-  - {addr: 0x800473a7, name: g_main_unknown_800473a7}
+  - {addr: 0x800473a7, name: g_main_menu_scroll_unread_setting}
   - {addr: 0x800473a8, name: g_main_common_menu_graphics_loaded}
   - {addr: 0x800473ac, name: g_main_game_options}
   - {addr: 0x800473b0, name: g_main_game_options_defaults}
@@ -1304,7 +1304,7 @@ data:
   - {addr: 0x80056b18, name: g_main_gfx_battle_otags}
   - {addr: 0x80057718, name: g_main_system_session_frames}
   - {addr: 0x8005771c, name: g_main_script_variables}
-  - {addr: 0x80057b1c, name: g_main_unknown_80057b1c}
+  - {addr: 0x80057b1c, name: g_main_save_unread_byte}
   - {addr: 0x80057b20, name: g_main_item_type_order_tables}
   - {addr: 0x80057b2c, name: g_main_item_type_order_1}
   - {addr: 0x80057b34, name: g_main_item_type_order_2}
@@ -1392,7 +1392,7 @@ data:
   - {addr: 0x800d0bbc, name: g_wldcore_save_slot_buffer}
   - {addr: 0x800e6edc, name: world_text_find_entry}
   - {addr: 0x800fc55c, name: g_battle_render_buffers}
-  - {addr: 0x8010656c, name: world_menu_load_text_1bd8}
+  - {addr: 0x8010656c, name: world_menu_init_with_world_text}
   - {addr: 0x8011a2d4, name: g_battle_gfx_current_render_buffer}
   - {addr: 0x80132824, name: battle_text_find_entry}
   - {addr: 0x8013b590, name: script_get_variable}

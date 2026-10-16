@@ -218,19 +218,19 @@ static void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_l
 }
 
 /* Report an effect stub and return zero. */
-s32 battle_effect_report_stub_return_zero(void) {
+s32 battle_effect_report_0x320_return_zero(void) {
     main_system_report_stub(1, 0x320);
     return 0;
 }
 
 /* Report an effect stub. */
-void battle_effect_report_stub(void) {
+void battle_effect_report_0x320_1(void) {
     main_system_report_stub(1, 0x320);
 }
 
 /* Calls the empty main_system_report_stub with (1, 0x320) from a 0x100-byte frame it
  * does not use. No code calls it. */
-void battle_noop_801a1328(void) {
+void battle_effect_report_0x320_2(void) {
     s32 unused[0x40];
     main_system_report_stub(1, 0x320);
 }
@@ -368,7 +368,7 @@ void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_seconda
         g_battle_effect_sound_call_counts[1] = 0;
         g_battle_effect_sound_call_counts[0] = 0;
         g_battle_effect_context = *source;
-        g_battle_unknown_801bc0d4 = 0;
+        g_battle_effect_request_unread = 0;
         return;
     }
 
@@ -454,7 +454,7 @@ static s32 battle_effect_update_stage(void) {
         menu_suppress_height_display();
         battle_effect_init_palette(g_battle_ability_effect_id);
         g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
-        g_battle_effect_unknown_801bf000 = 0;
+        g_battle_effect_script_opcode_05_value = 0;
         battle_state_reset_frame_pacing_timer();
         result = 1;
         break;
@@ -766,7 +766,7 @@ effect_script_result_e battle_effect_code_script_05_store_high_nibble(effect_rec
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
     effect_script_parameters_t parameters = instruction->header.parameters;
-    g_battle_effect_unknown_801bf000 = parameters.opcode_05.high_nibble;
+    g_battle_effect_script_opcode_05_value = parameters.opcode_05.high_nibble;
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }

@@ -847,7 +847,7 @@ unit_deployment_coordinates_t* attack_deploy_get_coordinate_slots(void) {
 }
 
 /* Return 0. Nothing calls it. */
-s32 attack_return_zero(void) {
+s32 attack_deploy_return_zero_1(void) {
     return 0;
 }
 
@@ -1084,7 +1084,7 @@ static void attack_deploy_select_next_roster_unit(void) {
 }
 
 /* Empty and unreferenced. */
-void attack_noop_801c61dc(void) {
+void attack_deploy_noop_2(void) {
 }
 
 /* Thread body: step the deployment roster cursor to the previous deployable

@@ -146,7 +146,8 @@ void main_system_report_stub(s32 category, s32 code);
 
 /* debug */
 extern s32 g_main_debug_display_enabled;
-extern s32 g_main_unknown_800459d8; /* cleared with the debug display flag; never read */
+/* Cleared with the debug display flag; nothing reads it. */
+extern s32 g_main_debug_display_unread_flag; /* cleared with the debug display flag; never read */
 extern s32 g_main_font_print_enabled;
 
 /* input */
@@ -158,7 +159,8 @@ enum {
 extern u8 g_main_input_repeat_initial_delay;
 extern u8 g_main_input_repeat_period;
 extern u8 g_main_input_secondary_repeat_period;
-extern u8 g_main_unknown_800473a7; /* set to 1 with the input repeat timings; never read */
+/* Set to 1 with the menu scroll timings; nothing reads it. */
+extern u8 g_main_menu_scroll_unread_setting; /* set to 1 with the input repeat timings; never read */
 extern s32 g_main_input_pressed_buttons;
 extern u32 g_main_input_released_buttons;
 extern u32 g_main_input_pressed_copy_0;

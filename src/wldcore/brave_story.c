@@ -57,7 +57,7 @@ void wldcore_draw_close_indicator_if_pending(GsOT* ordering_table) {
  * it separately from the 32-bit flags: reaching it through the fade-state
  * struct makes the flags update use absolute addressing instead of a base
  * register. */
-extern CVECTOR g_wldcore_screen_fade_box_0_color;
+extern CVECTOR g_wldcore_screen_fade_color;
 
 /* Per-frame step of the event-transition level (WLDCORE_MENU_LEVEL_EVENT_TRANSITION)
  * pushed by wldcore_menu_push_event_transition_level: the screen effect that
@@ -68,7 +68,7 @@ extern CVECTOR g_wldcore_screen_fade_box_0_color;
  * to VRAM (0x100, 0) and hides the map and root windows; the sprite drifts a
  * pixel a frame and, every third frame, spins and shrinks in SPIN_IN, then in
  * SPIN mode spins back out (SPIN_OUT) textured with the captured screen. The
- * fade box over g_wldcore_screen_fade_box_0_color flashes up by 0x10 a frame
+ * fade box over g_wldcore_screen_fade_color flashes up by 0x10 a frame
  * to 0x80 (FLASH), then whites out by 8 a frame (WHITE_OUT); at full white the
  * world loop ends and the picture at VRAM (0x200, 0x100) is moved to
  * (0x100, 0). */
@@ -101,14 +101,14 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
     /* White-out: brighten the overlay by 8 a frame; at full white, toggle the running flag
      * and move the image at VRAM (0x200, 0x100) back to (0x100, 0). */
     if (level->fade_phase == WLDCORE_EVENT_TRANSITION_FADE_WHITE_OUT) {
-        red_sum = g_wldcore_screen_fade_box_0_color.r + 8;
-        g_wldcore_screen_fade_box_0_color.r = red_sum;
-        g_wldcore_screen_fade_box_0_color.g = g_wldcore_screen_fade_box_0_color.g + 8;
-        g_wldcore_screen_fade_box_0_color.b = g_wldcore_screen_fade_box_0_color.b + 8;
+        red_sum = g_wldcore_screen_fade_color.r + 8;
+        g_wldcore_screen_fade_color.r = red_sum;
+        g_wldcore_screen_fade_color.g = g_wldcore_screen_fade_color.g + 8;
+        g_wldcore_screen_fade_color.b = g_wldcore_screen_fade_color.b + 8;
         if (red_sum >= 0xF8) {
-            g_wldcore_screen_fade_box_0_color.b = 0xFF;
-            g_wldcore_screen_fade_box_0_color.g = 0xFF;
-            g_wldcore_screen_fade_box_0_color.r = 0xFF;
+            g_wldcore_screen_fade_color.b = 0xFF;
+            g_wldcore_screen_fade_color.g = 0xFF;
+            g_wldcore_screen_fade_color.r = 0xFF;
             rect.x = 0x200;
             rect.y = 0x100;
             rect.w = 0x80;
@@ -122,13 +122,13 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
 
     /* Flash: brighten by 0x10 a frame to 0x80, then cut to black and start the white-out. */
     if (level->fade_phase == WLDCORE_EVENT_TRANSITION_FADE_FLASH) {
-        g_wldcore_screen_fade_box_0_color.r = g_wldcore_screen_fade_box_0_color.r + 0x10;
-        g_wldcore_screen_fade_box_0_color.g = g_wldcore_screen_fade_box_0_color.g + 0x10;
-        g_wldcore_screen_fade_box_0_color.b = g_wldcore_screen_fade_box_0_color.b + 0x10;
-        if (g_wldcore_screen_fade_box_0_color.g >= 0x80) {
-            g_wldcore_screen_fade_box_0_color.r = 0;
-            g_wldcore_screen_fade_box_0_color.g = 0;
-            g_wldcore_screen_fade_box_0_color.b = 0;
+        g_wldcore_screen_fade_color.r = g_wldcore_screen_fade_color.r + 0x10;
+        g_wldcore_screen_fade_color.g = g_wldcore_screen_fade_color.g + 0x10;
+        g_wldcore_screen_fade_color.b = g_wldcore_screen_fade_color.b + 0x10;
+        if (g_wldcore_screen_fade_color.g >= 0x80) {
+            g_wldcore_screen_fade_color.r = 0;
+            g_wldcore_screen_fade_color.g = 0;
+            g_wldcore_screen_fade_color.b = 0;
             level->fade_phase = WLDCORE_EVENT_TRANSITION_FADE_WHITE_OUT;
         }
     }
@@ -186,9 +186,9 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
                     level->phase = WLDCORE_EVENT_TRANSITION_PHASE_DONE;
                 }
                 if (level->anim_step == 0x18) {
-                    g_wldcore_screen_fade_box_0_color.r = 0;
-                    g_wldcore_screen_fade_box_0_color.g = 0;
-                    g_wldcore_screen_fade_box_0_color.b = 0;
+                    g_wldcore_screen_fade_color.r = 0;
+                    g_wldcore_screen_fade_color.g = 0;
+                    g_wldcore_screen_fade_color.b = 0;
                     g_wldcore_screen_fade_state.flags[0] |= WLDCORE_SCREEN_FADE_BOX_VISIBLE;
                     level->fade_phase = WLDCORE_EVENT_TRANSITION_FADE_WHITE_OUT;
                 }
@@ -222,9 +222,9 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
             g_wldcore_menu_indicator_sprite.rotate = angle;
 
             if (level->anim_step >= 0x38) {
-                g_wldcore_screen_fade_box_0_color.r = 0;
-                g_wldcore_screen_fade_box_0_color.g = 0;
-                g_wldcore_screen_fade_box_0_color.b = 0;
+                g_wldcore_screen_fade_color.r = 0;
+                g_wldcore_screen_fade_color.g = 0;
+                g_wldcore_screen_fade_color.b = 0;
                 g_wldcore_screen_fade_state.flags[0] |= WLDCORE_SCREEN_FADE_BOX_VISIBLE;
                 level->fade_phase = WLDCORE_EVENT_TRANSITION_FADE_FLASH;
             }

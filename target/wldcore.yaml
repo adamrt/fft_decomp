@@ -139,7 +139,7 @@ functions:
   - {addr: 0x800712b0, size: 476, name: wldcore_bar_push_menu_level, hash: bf1acfda6e80fa75, unit: menu_levels}
   - {addr: 0x8007148c, size: 1092, name: wldcore_bar_build_menu_rows, hash: 0bf2b1b02faf6e4f, unit: menu_levels}
   - {addr: 0x800718d0, size: 236, name: wldcore_bar_restore_list_and_show_welcome, hash: a6d8e7a5dc83c4a5, unit: menu_levels}
-  - {addr: 0x800719bc, size: 228, name: wldcore_window_publish_slot_b806, hash: 512442d2f93c0290, unit: bar}
+  - {addr: 0x800719bc, size: 228, name: wldcore_menu_publish_bar_menu_level, hash: 512442d2f93c0290, unit: bar}
   - {addr: 0x80071aa0, size: 272, name: wldcore_menu_pop_level_and_rebuild_screen, hash: b422526c51f8f5d4, unit: bar}
   - {addr: 0x80071bb0, size: 1212, name: wldcore_bar_handle_menu_input, hash: 0a6e9dc857b30aa8, unit: bar, rodata: [{addr: 0x80067034, size: 20, hash: ae99fb771d003104}]}
   - {addr: 0x8007206c, size: 844, name: wldcore_list_open_rumors, hash: fceb17e0a6e9a75a, unit: bar}
@@ -288,7 +288,7 @@ functions:
   - {addr: 0x800890f0, size: 1100, name: wldcore_list_open_tutorial_categories, hash: 61d22220966e7b4d, unit: list_levels}
   - {addr: 0x8008953c, size: 392, name: wldcore_list_build_tutorial_category_panel_image, hash: 6e7e170a9de6189f, unit: list_levels}
   - {addr: 0x800896c4, size: 236, name: wldcore_tutorial_restore_list_and_show_welcome, hash: 1fe1a6d4d29bc858, unit: list_levels}
-  - {addr: 0x800897b0, size: 228, name: wldcore_window_publish_slot_b8dd, hash: 512442d2f93c0290, unit: list_levels}
+  - {addr: 0x800897b0, size: 228, name: wldcore_menu_publish_tutorial_categories_level, hash: 512442d2f93c0290, unit: list_levels}
   - {addr: 0x80089894, size: 1468, name: wldcore_list_handle_tutorial_categories_input, hash: a3346d6f4a1eb56a, unit: list_levels}
   - {addr: 0x80089e50, size: 412, name: wldcore_list_open_formation_tutorials, hash: e1c1e7140539bd33, unit: list_levels}
   - {addr: 0x80089fec, size: 20, name: wldcore_list_formation_tutorials_restore_blocked_buttons, hash: 7e9ed99f23ab0769, unit: list_levels}
@@ -374,7 +374,7 @@ functions:
   - {addr: 0x8008d194, size: 308, name: wldcore_map_get_dot_snap_step, hash: 983f17049348bd36, unit: map_routes}
   - {addr: 0x8008d2c8, size: 248, name: wldcore_map_build_location_menu_entries, hash: d2122546324ab53a, unit: map_routes}
   - {addr: 0x8008d3c0, size: 340, name: wldcore_location_collect_choice_text_ids, hash: 6061327aac03598c, unit: map_routes}
-  - {addr: 0x8008d514, size: 8, name: wldcore_init_stub, hash: 6d64edf91449c1b1, unit: map_routes}
+  - {addr: 0x8008d514, size: 8, name: wldcore_map_init_stub, hash: 6d64edf91449c1b1, unit: map_routes}
   - {addr: 0x8008d51c, size: 740, name: wldcore_map_draw_visible_routes, hash: 536661d7cc829621, unit: map_routes}
   - {addr: 0x8008d800, size: 416, name: wldcore_location_begin_route_segment, hash: ec085cca25775352, unit: map_routes}
   - {addr: 0x8008d9a0, size: 604, name: wldcore_map_prepare_path_animation, hash: 8fc93df7e7f43eb6, unit: map_routes}
@@ -602,7 +602,7 @@ data:
   - {addr: 0x800d09b4, name: g_wldcore_displayed_numeric_value_tertiary}
   - {addr: 0x800d09b8, name: g_wldcore_proposition_candidate_levels}
   - {addr: 0x800d0ab8, name: g_wldcore_screen_fade_state}
-  - {addr: 0x800d0adc, name: g_wldcore_screen_fade_box_0_color}
+  - {addr: 0x800d0adc, name: g_wldcore_screen_fade_color}
   - {addr: 0x800d0af0, name: g_wldcore_loaded_picture_set}
   - {addr: 0x800d0af4, name: g_wldcore_loaded_message_block}
   - {addr: 0x800d0af8, name: g_wldcore_map_projection_motion}

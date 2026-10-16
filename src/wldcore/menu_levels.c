@@ -388,7 +388,7 @@ void wldcore_proposition_submit_marker_request(GsOT* ot) {
 void wldcore_system_init_world_menus_and_date(void) {
     s32 value;
 
-    world_menu_load_text_1bd8_with_face();
+    world_menu_init_with_world_text_and_faces();
     world_text_build_roster_name_list();
     value = script_get_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE);
     if (value != 0) {

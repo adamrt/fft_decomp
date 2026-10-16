@@ -278,6 +278,6 @@ extern u8 g_equip_thread_idle_stop_pending;
 extern u8 g_equip_sound_suppress_queued;
 
 /* unknown state */
-extern s16 g_equip_unknown_801d86ac;
+extern s16 g_equip_input_unread_value;
 
 #endif

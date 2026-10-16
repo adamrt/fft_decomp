@@ -68,7 +68,7 @@ s32 battle_state_enter_effect_playback(void) {
 }
 
 /* Empty, and nothing in the game calls it. */
-void battle_noop_8008de88(void) {
+void battle_state_noop_1(void) {
 }
 
 /* Stop the slow-down timer the game loop starts when a frame of the effect or
@@ -331,7 +331,7 @@ void battle_gfx_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s1
 }
 
 /* Always 0. No code calls it. */
-s32 battle_return_zero_8008e6d0(void) {
+s32 battle_unit_return_zero_1(void) {
     return 0;
 }
 

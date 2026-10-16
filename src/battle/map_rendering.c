@@ -27,9 +27,9 @@
  * the disc. The 150 x 14-byte shape suggests per-instruction parameter
  * storage (an event opcode takes at most 14 parameters), but no code proves
  * it, so the names stay provisional. */
-static u8 g_battle_unknown_800f70b4[150][14] = { 0 };
+static u8 g_battle_map_unread_gns_load_infos[150][14] = { 0 };
 
-static u8 g_battle_unknown_800f78e8[150] = { 0 };
+static u8 g_battle_map_unread_gns_record_flags[150] = { 0 };
 
 static void battle_map_init_weather_particles(map_weather_command_e command);
 static void battle_map_update_mesh_part_animations(void);
@@ -1858,9 +1858,9 @@ void battle_map_reset_mesh_render_state(void) {
     g_battle_map_gns_dispatch_held = 0;
     for (i = 0; i < 150; i++) {
         for (j = 0; j < 14; j++) {
-            g_battle_unknown_800f70b4[i][j] = 0;
+            g_battle_map_unread_gns_load_infos[i][j] = 0;
         }
-        g_battle_unknown_800f78e8[i] = 0;
+        g_battle_map_unread_gns_record_flags[i] = 0;
     }
     for (i = 0; i < GNS_RESOURCE_TABLE_COUNT; i++) {
         bzero(g_battle_map_loaded_gns_records[i].load_info.bytes, sizeof(gns_load_info_t));

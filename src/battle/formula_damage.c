@@ -157,7 +157,7 @@ void battle_formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
     battle_formula_apply_physical_modifiers_without_supports();
     battle_formula_calculate_critical_hit();
     battle_formula_store_hit_chance();
-    rnd = battle_formula_get_random_0_7fff();
+    rnd = battle_formula_get_random();
     factor = &g_battle_action_current_ability.random_damage_factor;
     *factor = (rnd * g_battle_action_current_ability.range_data.x) / 32768 + 1;
     action = g_battle_action_target_data;
@@ -338,8 +338,7 @@ void battle_formula_heal_random_one_to_z_add_status(void) {
         g_battle_action_target_data->hp_damage = unit->hp;
     } else {
         g_battle_action_target_data->hp_damage
-            = (battle_formula_get_random_0_7fff()
-                  * g_main_item_secondary_data[g_battle_action_current_ability.used_item_id].z)
+            = (battle_formula_get_random() * g_main_item_secondary_data[g_battle_action_current_ability.used_item_id].z)
                 / 32768
             + 1;
     }

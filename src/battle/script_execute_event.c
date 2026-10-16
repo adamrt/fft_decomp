@@ -262,7 +262,7 @@ restart_script:
 
             if (operand_1 == EVENT_CALL_FUNCTION_DISABLE_DEBUG_DISPLAY) {
                 g_main_debug_display_enabled = 0;
-                g_main_unknown_800459d8 = 0;
+                g_main_debug_display_unread_flag = 0;
             }
 
             if (operand_1 == EVENT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE) {

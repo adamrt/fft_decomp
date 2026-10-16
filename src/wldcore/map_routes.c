@@ -355,7 +355,7 @@ static s32 wldcore_location_collect_choice_text_ids(s32 location_id, s32* out) {
 }
 
 /* Empty. wldcore_init_subsystems calls it between drawing the map dots and placing the location marker. */
-void wldcore_init_stub(void) {
+void wldcore_map_init_stub(void) {
 }
 
 /* Draws the visible world-map routes into the auxiliary ordering table as

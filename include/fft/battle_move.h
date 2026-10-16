@@ -90,7 +90,7 @@ typedef struct move_pathfind_scratch {
     u8 _unused_17;
     u8 map_max_x;       /* 0x18 */
     u8 map_max_y;       /* 0x19 */
-    u8 _unknown_1a;     /* 0x1a; see g_battle_unknown_8018f4fc */
+    u8 _unknown_1a;     /* 0x1a; see g_battle_move_config_unknown_1a_value */
     u8 unit_size;       /* 0x1b */
     u8 movement_set_3;  /* 0x1c */
     u8 fly_or_teleport; /* 0x1d */

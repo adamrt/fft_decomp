@@ -1486,9 +1486,9 @@ void wldcore_tutorial_restore_list_and_show_welcome(wldcore_menu_stack_record_t*
 }
 
 /* Gray out the tutorial category menu while a sub-level opens over it. The
- * original wrote the body of wldcore_window_publish_slot_b806 a second time
+ * original wrote the body of wldcore_menu_publish_bar_menu_level a second time
  * here; see there for the matching notes. */
-void wldcore_window_publish_slot_b8dd(wldcore_menu_list_window_level_t* level) {
+void wldcore_menu_publish_tutorial_categories_level(wldcore_menu_list_window_level_t* level) {
     s32 index;
 
     g_wldcore_window_records[level->main_window].palette = 10;
@@ -1571,7 +1571,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_window_publish_slot_b8dd(level);
+        wldcore_menu_publish_tutorial_categories_level(level);
         wldcore_menu_push_message_level(level->entries[level->selected_entry] + 0x108B, 1);
         return;
     }
@@ -1582,18 +1582,18 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         g_wldcore_tutorial_category_saved_cursor = *selected_entry;
         switch (level->entries[*selected_entry]) {
         case WLDCORE_TUTORIAL_CATEGORY_ROW_FORMATION:
-            wldcore_window_publish_slot_b8dd(level);
+            wldcore_menu_publish_tutorial_categories_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_formation_tutorials();
             return;
         case WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES:
-            wldcore_window_publish_slot_b8dd(level);
+            wldcore_menu_publish_tutorial_categories_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_battle_tutorials();
             return;
         case WLDCORE_TUTORIAL_CATEGORY_ROW_TOPICS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_TUTORIAL_TOPICS);
-            wldcore_window_publish_slot_b8dd(level);
+            wldcore_menu_publish_tutorial_categories_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_tutorial_topics();
             return;

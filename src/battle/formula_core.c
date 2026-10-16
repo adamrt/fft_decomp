@@ -1046,7 +1046,7 @@ void battle_formula_calculate_base_xa(void) {
     } else if (type == ITEM_TYPE_STAFF || type == ITEM_TYPE_STICK) {
         g_battle_action_current_ability.xa = ma;
     } else if (type == ITEM_TYPE_AXE || type == ITEM_TYPE_HAMMER || type == ITEM_TYPE_BAG) {
-        g_battle_action_current_ability.xa = pa * battle_formula_get_random_0_7fff() / 0x8000 + 1;
+        g_battle_action_current_ability.xa = pa * battle_formula_get_random() / 0x8000 + 1;
     } else if (type == ITEM_TYPE_INSTRUMENT || type == ITEM_TYPE_DICTIONARY || type == ITEM_TYPE_CLOTH) {
         g_battle_action_current_ability.xa = (pa + ma) >> 1;
     }
@@ -1307,7 +1307,7 @@ void battle_formula_calculate_critical_hit(void) {
 
     if (battle_formula_roll_random_at_least(100, BATTLE_FORMULA_CRITICAL_HIT_CHANCE) == 0) {
         g_battle_action_target_data->critical = 1;
-        rnd = battle_formula_get_random_0_7fff();
+        rnd = battle_formula_get_random();
         base_xa = g_battle_action_current_ability.xa;
         g_battle_action_current_ability.xa = base_xa + rnd * base_xa / 32768;
         battle_formula_calculate_knockback();
@@ -1448,7 +1448,7 @@ void battle_formula_apply_damage_and_knockback(void) {
     s32 roll;
     s32 state;
 
-    damage = (((battle_formula_get_random_0_7fff() * g_battle_action_current_ability.range_data.y) / 32768) + 1)
+    damage = (((battle_formula_get_random() * g_battle_action_current_ability.range_data.y) / 32768) + 1)
         * (u16)g_battle_action_current_ability.xa;
     action = g_battle_action_target_data;
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
@@ -1457,7 +1457,7 @@ void battle_formula_apply_damage_and_knockback(void) {
     if (state != ACTION_STATE_EXECUTE) {
         return;
     }
-    roll = (battle_formula_get_random_0_7fff() * g_battle_action_attacker->brave) / 32768;
+    roll = (battle_formula_get_random() * g_battle_action_attacker->brave) / 32768;
     if (main_util_roll_pass_fail(g_battle_action_target->brave, roll) == 0) {
         battle_formula_calculate_knockback();
     }

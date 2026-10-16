@@ -79,8 +79,9 @@ extern u8 g_world_card_load_step_state;
 extern u8 g_world_card_save_step_state;
 extern u8 g_world_card_load_failed;
 extern u8 g_world_card_save_failed;
-extern u8 g_world_unknown_801cc7d0; /* cleared with the card load and save failure flags; never read */
-extern u8 g_world_unknown_801cc7d8; /* as g_world_unknown_801cc7d0 */
+/* Cleared with the load-failed flag when a card load starts; nothing reads it. */
+extern u8 g_world_card_load_unread_flag; /* cleared with the card load and save failure flags; never read */
+extern u8 g_world_card_save_unread_flag; /* as g_world_card_load_unread_flag */
 
 /* save slot list */
 extern const char* g_world_card_save_file_names[15];

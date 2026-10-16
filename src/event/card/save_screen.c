@@ -379,7 +379,7 @@ static void card_save_update_slot_write(s32 slot) {
     if (g_card_save_write_phase == 0) {
         g_card_save_write_phase = 1;
         g_card_save_write_failed = 0;
-        g_card_unknown_801ca964 = 0;
+        g_card_save_unread_flag = 0;
         card_save_build_buffer(slot);
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_card_save_in_progress_thread_descriptor);
         g_sound_suppressed = 1;
@@ -496,7 +496,7 @@ static void card_save_build_buffer(s32 slot) {
         sizeof(g_card_save_buffer_pointer->poached_item_quantities));
     bcopy(g_main_item_location_flags, g_card_save_buffer_pointer->item_location_flags,
         sizeof(g_card_save_buffer_pointer->item_location_flags));
-    g_card_save_buffer_pointer->_unknown_1c88 = g_main_unknown_80057b1c;
+    g_card_save_buffer_pointer->_unknown_1c88 = g_main_save_unread_byte;
     bcopy(g_main_script_variables, g_card_save_buffer_pointer->script_variables, sizeof(g_main_script_variables));
     bcopy(&g_main_game_options, &g_card_save_buffer_pointer->options, 4);
     bcopy(g_main_item_type_order_tables.order_0, g_card_save_buffer_pointer->item_type_order_0, 0xc);

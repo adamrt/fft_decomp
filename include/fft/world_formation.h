@@ -241,7 +241,8 @@ extern u8 g_world_formation_cursor_ot_override;
 extern s8 g_world_formation_selection_cursor_ready;
 extern s8 g_world_formation_scroll_position;
 extern s8 g_world_formation_scroll_velocity;
-extern s8 g_world_unknown_801c833c; /* cleared with the formation scroll velocity; never read */
+/* Cleared with the formation scroll velocity; nothing reads it. */
+extern s8 g_world_formation_scroll_unread; /* cleared with the formation scroll velocity; never read */
 extern u8 g_world_formation_unit_cycle_mode;
 extern u8 g_world_formation_unit_browse_enabled;
 extern s16 g_world_formation_selected_unit_index_latch;
@@ -481,7 +482,7 @@ extern s8 g_world_set_ability_list_open;          /* ability list open */
 extern s8 g_world_set_ability_entry_count;        /* ability list entry count */
 extern s8 g_world_set_ability_list_close_pending; /* close the ability list this frame */
 extern s8 g_world_set_ability_show_stat_preview;  /* show the stat preview window */
-extern s8 g_world_unknown_8018d18a;               /* cleared when Set Ability opens; never read */
+extern s8 g_world_set_ability_unread_flag;        /* cleared when Set Ability opens; never read */
 extern s8 g_world_remove_ability_initialized;
 extern s8 g_world_remove_ability_unit_index;
 extern s8 g_world_remove_ability_cursor;

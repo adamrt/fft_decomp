@@ -80,9 +80,12 @@ void world_menu_set_default_entry_1_text_values(s32 value);
 void world_menu_set_slot_4_cursor_index(s32 index);
 s32 world_menu_get_event_state_flag(void);
 void world_menu_build_location_list(void);
-void world_menu_load_text_1bd8(void);
-void world_menu_load_text_1bd8_with_face(void);
-void world_menu_load_text_1c18(void);
+/* Set up the WORLD menus with EVENT/WORLD.LZW from the main thread. */
+void world_menu_init_with_world_text(void);
+/* Set up the WORLD menus with EVENT/WORLD.LZW and the WLDFACE portraits. */
+void world_menu_init_with_world_text_and_faces(void);
+/* Set up the menus with EVENT/OPEN.LZW for the new-game prologue. */
+void world_menu_init_with_open_text(void);
 void world_menu_run_game_options(void);
 void world_screen_build_at_list(void);
 

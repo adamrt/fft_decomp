@@ -95,7 +95,8 @@ extern s8 g_card_save_slot_scan_active;
 extern s8 g_card_save_slot_scan_index;
 extern u8 g_card_save_write_phase;
 extern u8 g_card_save_write_failed;
-extern u8 g_card_unknown_801ca964; /* cleared when a write starts; never read */
+/* Cleared with the write-failed flag when a save starts; nothing reads it. */
+extern u8 g_card_save_unread_flag; /* cleared when a write starts; never read */
 
 /* slot list */
 /* Ten-byte number command in a 12-byte save-menu slot. */

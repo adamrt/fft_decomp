@@ -168,8 +168,10 @@ void wldcore_window_restore_location_list_palette(wldcore_menu_stack_record_t* l
 void wldcore_window_restore_proposition_detail_palette(wldcore_menu_stack_record_t* level);
 void wldcore_window_set_layout_states(wldcore_menu_proposition_list_level_t* level);
 void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* state);
-void wldcore_window_publish_slot_b806(wldcore_menu_list_window_level_t* level);
-void wldcore_window_publish_slot_b8dd(wldcore_menu_list_window_level_t* level);
+/* Publish handler of the bar menu level: dim its windows (palettes 10, 6, 2) and show the pressed cursor. */
+void wldcore_menu_publish_bar_menu_level(wldcore_menu_list_window_level_t* level);
+/* Publish handler of the tutorial categories level; a second copy of the bar menu body. */
+void wldcore_menu_publish_tutorial_categories_level(wldcore_menu_list_window_level_t* level);
 void wldcore_window_begin_tint_transition(wldcore_menu_list_window_level_t* level);
 void wldcore_window_end_tint_transition(wldcore_menu_list_window_level_t* level);
 void wldcore_window_set_states_and_blue_tint(wldcore_menu_send_unit_level_t* level);

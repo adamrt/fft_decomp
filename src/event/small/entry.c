@@ -19,6 +19,6 @@ void small_text_init_battle_pointers(void) {
 }
 
 /* Returns 0; nothing on the disc calls it. */
-s32 small_return_zero(void) {
+s32 small_text_return_zero_1(void) {
     return 0;
 }

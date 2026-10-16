@@ -289,7 +289,7 @@ void attack_scenario_restore_music_and_darkness(void) {
                 thread_call_on_main_stack((g_battle_sound_music_track_index ^ 1) + 1);
                 g_thread_call_target = (void (*)(void))main_sound_load_music_into_slot;
                 thread_call_on_main_stack(replacement, (g_battle_sound_music_track_index ^ 1) + 1);
-                sound_wait_for_music_stub();
+                sound_wait_for_music_load();
             }
         }
 

@@ -41,7 +41,7 @@ static void wldcore_list_open_rumors(void);
  * stored. The record stores may alias `level`, so they invalidate the cached
  * parameter loads and reproduce the target's reloads; `index` shares one
  * address computation between the last two. */
-void wldcore_window_publish_slot_b806(wldcore_menu_list_window_level_t* level) {
+void wldcore_menu_publish_bar_menu_level(wldcore_menu_list_window_level_t* level) {
     s32 index;
 
     g_wldcore_window_records[level->main_window].palette = 10;
@@ -124,7 +124,7 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_window_publish_slot_b806(level);
+        wldcore_menu_publish_bar_menu_level(level);
         wldcore_menu_push_message_level(
             g_wldcore_bar_row_help_text_ids[level->entries[level->selected_entry]] | 0x1000, 1);
         return;
@@ -140,20 +140,20 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
         switch (level->entries[level->selected_entry]) {
         case WLDCORE_BAR_MENU_ROW_RUMORS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_RUMORS);
-            wldcore_window_publish_slot_b806(level);
+            wldcore_menu_publish_bar_menu_level(level);
             wldcore_list_open_rumors();
             return;
         case WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_PROPOSITIONS);
-            wldcore_window_publish_slot_b806(level);
+            wldcore_menu_publish_bar_menu_level(level);
             wldcore_list_open_available_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS:
-            wldcore_window_publish_slot_b806(level);
+            wldcore_menu_publish_bar_menu_level(level);
             wldcore_list_open_completed_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_PROPOSITIONS:
-            wldcore_window_publish_slot_b806(level);
+            wldcore_menu_publish_bar_menu_level(level);
             wldcore_list_open_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_LEAVE:
@@ -451,7 +451,7 @@ void wldcore_list_open_available_propositions(void) {
                                             .list_window.frame_render]
             .flags &= ~WORLD_RENDER_RECORD_HIDDEN;
         wldcore_bar_build_menu_rows(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
-        wldcore_window_publish_slot_b806(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
+        wldcore_menu_publish_bar_menu_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
         index = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].list_window.main_window;
         record = &g_wldcore_window_records[index];
         record->anim_counter = 0;

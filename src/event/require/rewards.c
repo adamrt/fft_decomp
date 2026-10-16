@@ -1856,7 +1856,7 @@ static void require_condition_show_general(s32 hold_frames) {
 }
 
 /* Empty and unreferenced. */
-void require_noop_801c9fa4(void) {
+void require_condition_noop_1(void) {
 }
 
 /* The target re-reads the first-quad index for every field. */

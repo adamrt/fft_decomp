@@ -80,7 +80,8 @@ extern u32 g_main_saved_data_bits[40];
 extern u32 g_main_secondary_saved_data_bits[2];
 extern u8* g_main_brave_story_ages_source;
 extern u8 g_main_brave_story_character_ages[0x40];
-extern u8 g_main_unknown_80057b1c; /* saved and restored with save image offset 0x1c88; never read */
+/* Saved and restored at save-image byte 0x1c88; nothing else uses it. */
+extern u8 g_main_save_unread_byte; /* saved and restored with save image offset 0x1c88; never read */
 
 /* world-map state kept across events */
 /* A story event replayed from the Brave Story list: the event, the list cursor

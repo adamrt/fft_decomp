@@ -2159,8 +2159,8 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
         g_world_shop_hire_result_shown = 0;
         g_world_shop_hire_menu_initialized = 1;
         g_menu_status_display_thread_params.y = 0;
-        g_world_unknown_801cd0ec = 0;
-        g_world_unknown_801cd0f4 = 0;
+        g_world_shop_hire_unread_flag_1 = 0;
+        g_world_shop_hire_unread_flag_2 = 0;
         g_world_formation_unit_banner_enabled = 0;
         g_world_shop_party_unit_count = 0;
         for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {

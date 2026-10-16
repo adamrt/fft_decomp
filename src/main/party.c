@@ -93,7 +93,7 @@ void main_status_init_check_data(void) {
 /* An empty routine (jr ra; nop in the original) between
  * main_status_init_check_data and main_party_clear_all. No function in the tree
  * calls it. */
-void main_noop_80059ac0(void) {
+void main_party_noop_1(void) {
 }
 
 /* Mark all 20 roster slots empty (party_id = PARTY_ID_NONE); the rest of each record is left as

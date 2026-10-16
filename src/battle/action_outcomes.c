@@ -383,17 +383,17 @@ s32 battle_target_copy_ability_targets(u8* out) {
     return count;
 }
 
-/* Store value in g_battle_unknown_8019387c when unit_id is the acting unit of a primary
+/* Store value in g_battle_action_acting_unit_value when unit_id is the acting unit of a primary
  * (non-reaction) action. */
-void battle_action_store_8019387c_if_not_reacting(s32 unit_id, s8 value) {
+void battle_action_store_acting_unit_value(s32 unit_id, s8 value) {
     if (g_battle_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_battle_acting_unit_id) {
-        g_battle_unknown_8019387c = value;
+        g_battle_action_acting_unit_value = value;
     }
 }
 
 /* Random value 0..0x7FFF for the formulas while the action executes; previews and AI simulations
  * get the midpoint 0x4000, so projected results use an average roll. */
-s32 battle_formula_get_random_0_7fff(void) {
+s32 battle_formula_get_random(void) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0x4000;
     }
@@ -402,7 +402,7 @@ s32 battle_formula_get_random_0_7fff(void) {
 
 /* Return 1 when a random value in [0, limit) is at least threshold, otherwise 0. */
 s32 battle_formula_roll_random_at_least(s32 limit, s32 threshold) {
-    return (battle_formula_get_random_0_7fff() * limit) / 32768 >= threshold;
+    return (battle_formula_get_random() * limit) / 32768 >= threshold;
 }
 
 /* Empty. Called when the acting unit's own action has ended, with its stats and the quadrant

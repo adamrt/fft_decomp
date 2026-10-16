@@ -122,7 +122,7 @@ static void etc_graphic_open(s32 graphic_id) {
 }
 
 /* Empty, and nothing on the disc calls it. */
-void etc_noop_801bf3d8(void) {
+void etc_graphic_noop_1(void) {
 }
 
 /* The record for one half of the title: `dimension_set` picks the pair,

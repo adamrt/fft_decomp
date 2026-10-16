@@ -55,5 +55,5 @@ void suzuki_sound_init(s32 flags) {
         suzuki_sound_put_type(0xc0);
     }
     suzuki_sound_set_sfx_enabled(1);
-    g_suzuki_unknown_80032a28 = 0;
+    g_suzuki_sound_unread_value = 0;
 }

@@ -95,7 +95,7 @@ typedef enum effect_script_result {
 } effect_script_result_e;
 
 /* Written by effect-script opcode 05; no game source reads it. */
-extern u16 g_battle_effect_unknown_801bf000;
+extern u16 g_battle_effect_script_opcode_05_value;
 extern effect_callback_t g_battle_effect_callback_slots[];
 extern effect_script_result_e (*g_battle_effect_instructions[120])(effect_record_t*);
 extern effect_callback_t g_battle_effect_native_callbacks[EFFECT_NATIVE_CALLBACK_COUNT];

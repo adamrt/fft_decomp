@@ -302,17 +302,28 @@ extern u8 g_battle_job_level_gained_flag;
 s32 battle_return_one(s32 unused_runtime_id);
 
 /* unknown state */
-extern s32 g_battle_unknown_800f668c;
-extern s16 g_battle_unknown_800b628c;
-extern s16 g_battle_unknown_800b6290;
-extern u8 g_battle_unknown_8018f4fc;
-extern u8 g_battle_unknown_8019387c;
-extern s32 g_battle_unknown_801b8b18;
-extern s32 g_battle_unknown_801b8b1c;
-extern s32 g_battle_unknown_801b8b98;
-extern s32 g_battle_unknown_801bacc4;
-extern s32 g_battle_unknown_801bc0c4;
-extern s32 g_battle_unknown_801bc0d4;
-extern s32 g_battle_unknown_801bc0d8;
+extern s32 g_battle_map_timed_transform_unread;
+/* Cleared with the sprite counters at render init; nothing reads it. */
+extern s16 g_battle_gfx_unread_1;
+/* Cleared with the sprite counters at render init; nothing reads it. */
+extern s16 g_battle_gfx_unread_2;
+/* Provisional: always 0; copied into the move config byte 0x1a, which nothing reads. */
+extern u8 g_battle_move_config_unknown_1a_value;
+/* Provisional: written only by the uncalled battle_action_store_acting_unit_value; never read. */
+extern u8 g_battle_action_acting_unit_value;
+/* Cleared with the effect camera modes; nothing reads it. */
+extern s32 g_battle_effect_camera_unread_1;
+/* Cleared with the effect camera modes; nothing reads it. */
+extern s32 g_battle_effect_camera_unread_2;
+/* Provisional: 0x80000000 when an arrow arc ends without a hit; nothing reads it. */
+extern s32 g_battle_effect_arrow_miss_marker;
+/* Provisional: never written; battle_heap_print_stats prints it x4 in its "DP" line. */
+extern s32 g_battle_heap_debug_dp_words;
+/* Cleared when the effect work-record chain is built; nothing reads it. */
+extern s32 g_battle_effect_work_records_unread;
+/* Cleared when an ability effect is requested; nothing reads it. */
+extern s32 g_battle_effect_request_unread;
+/* Provisional: never written; added to the "DP" figure of battle_heap_print_stats. */
+extern s32 g_battle_heap_debug_dp_bytes;
 
 #endif

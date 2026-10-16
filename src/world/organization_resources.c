@@ -142,7 +142,7 @@ void world_menu_set_slot_4_cursor_index(s32 index) {
 }
 
 /* Empty and unreferenced. */
-void world_noop_80106138(void) {
+void world_menu_noop_1(void) {
 }
 
 /* Read WLDFACE.BIN into a heap buffer, upload its four portrait sheets to their VRAM
@@ -217,10 +217,10 @@ void world_menu_set_default_entry_1_text_values(s32 value) {
     g_world_menu_default_entry_1_text_values[1] = 0;
 }
 
-/* Variant of world_menu_load_text_1bd8 that loads no graphics and reads the
+/* Variant of world_menu_init_with_world_text that loads no graphics and reads the
  * 0x5800-byte OPEN.LZW text file (sector 0x1C18); all 0x20 section pointers
  * come from the file, relative to the end of its offset table. */
-void world_menu_load_text_1c18(void) {
+void world_menu_init_with_open_text(void) {
     s32 i;
 
     menu_init_subsystem_pointers();
@@ -240,11 +240,11 @@ void world_menu_load_text_1c18(void) {
 }
 
 /*
- * Variant of world_menu_load_text_1bd8 for a caller that is not the main
+ * Variant of world_menu_init_with_world_text for a caller that is not the main
  * thread: it leaves g_thread_current_id alone, loads the common
  * graphics in mode 1 and also uploads the WLDFACE portraits.
  */
-void world_menu_load_text_1bd8_with_face(void) {
+void world_menu_init_with_world_text_and_faces(void) {
     s32 i;
     s32 value;
     u8* base;
@@ -285,7 +285,7 @@ void world_menu_load_text_1bd8_with_face(void) {
  * become g_text_section_pointers, with the location names taken from
  * the resident copy. The deployment script variables are reset to one squad.
  */
-void world_menu_load_text_1bd8(void) {
+void world_menu_init_with_world_text(void) {
     s32 i;
     s32 value;
     u8* base;
@@ -327,7 +327,7 @@ void world_formation_restore_menu_after_core_exit(void) {
     ClearImage(&g_world_screen_clear_rect, 0, 0, 0);
     DrawSync(0);
     VSync(0);
-    world_menu_load_text_1bd8_with_face();
+    world_menu_init_with_world_text_and_faces();
     DrawSync(0);
     VSync(0);
     world_formation_reset_menu_context();

@@ -18,7 +18,8 @@ extern u32 g_wldcore_previous_system_flags;
 s32 wldcore_entrypoint(void);
 void wldcore_switch_to_stack(void*);
 void wldcore_restore_previous_stack(void);
-void wldcore_init_stub(void);
+/* Empty; wldcore_init_subsystems calls it between the map dot and location marker setup. */
+void wldcore_map_init_stub(void);
 void wldcore_system_init_world_menus_and_date(void);
 
 /* threads */

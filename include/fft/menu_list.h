@@ -26,6 +26,7 @@ void menu_stop_managed_thread(s32 thread_id);
 void menu_stop_thread_and_wait(s32 thread_id);
 void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
 s32 menu_thread_is_running(s32 thread_id);
+/* Empty; menu_init_subsystems calls it between the palette and text setup and the subsystem reset. */
 void menu_init_stub(void);
 /* Acts on Circle for a row: starts the row's entry one thread slot below, clears the selection, or (for a
  * negative action -n) closes n menu threads; stores the row as the entry's result. */

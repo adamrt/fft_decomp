@@ -158,7 +158,7 @@ void battle_heap_print_stats(void) {
         g_battle_heap_min_largest_free = largest;
     }
     FntPrint(g_battle_text_min_heap_format, g_battle_heap_min_largest_free * 8);
-    FntPrint(g_battle_text_heap_dp_format, g_battle_unknown_801bacc4 * 4 + g_battle_unknown_801bc0d8);
+    FntPrint(g_battle_text_heap_dp_format, g_battle_heap_debug_dp_words * 4 + g_battle_heap_debug_dp_bytes);
     for (owner = 0; owner < 16; owner++) {
         used = 0;
         for (node = g_battle_heap_owner_lists[owner].head; node != 0; node = node->next) {
@@ -460,7 +460,7 @@ static void battle_effect_init_record_chain(void) {
     records = battle_heap_alloc_block(EFFECT_WORK_RECORD_CAPACITY * sizeof(effect_work_record_t), 0);
     g_battle_effect_work_records = records;
     g_battle_effect_free_work_record_head = records;
-    g_battle_unknown_801bc0c4 = 0;
+    g_battle_effect_work_records_unread = 0;
     records[0].prev = 0;
     records[0].next = &records[1];
     for (index = 1; index < EFFECT_WORK_RECORD_CAPACITY - 1; index++) {
@@ -582,12 +582,12 @@ void battle_effect_update_node_from_work(s16 record_index, effect_work_record_t*
     }
 }
 
-/* Empty. Nothing in the game calls it or battle_noop_801a6018. */
-void battle_noop_801a6010(void) {
+/* Empty. Nothing in the game calls it or battle_effect_noop_2. */
+void battle_effect_noop_1(void) {
 }
 
-/* Empty and uncalled, like battle_noop_801a6010 before it. */
-void battle_noop_801a6018(void) {
+/* Empty and uncalled, like battle_effect_noop_1 before it. */
+void battle_effect_noop_2(void) {
 }
 
 /* Meant to return the requested_index-th work record of an allocated state
@@ -1226,7 +1226,7 @@ s32 battle_effect_spawn_particle_motion(effect_emitter_values_t* values, effect_
 }
 
 /* Calls the empty main_system_report_stub with (1, 0x50). No code calls it. */
-void battle_noop_801a866c(void) {
+void battle_effect_report_0x50(void) {
     main_system_report_stub(1, 0x50);
 }
 
@@ -1455,7 +1455,7 @@ static s32 battle_effect_get_random_between(s32 value_a, s32 value_b) {
 }
 
 /* Empty, and nothing in the game calls it. */
-void battle_noop_801a8e74(void) {
+void battle_effect_noop_3(void) {
 }
 
 /* Select the single object's relative sections and rewind its primitive stream. */
@@ -2273,8 +2273,8 @@ void battle_effect_init_camera_and_screen_data(void) {
     g_battle_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
     g_battle_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
     g_battle_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
-    g_battle_unknown_801b8b1c = 0;
-    g_battle_unknown_801b8b18 = 0;
+    g_battle_effect_camera_unread_2 = 0;
+    g_battle_effect_camera_unread_1 = 0;
     battle_effect_seed_camera_tracks();
     (void)pad;
 }

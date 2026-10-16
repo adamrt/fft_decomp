@@ -255,7 +255,7 @@ static void wldcore_init_subsystems(void) {
     wldcore_map_init_tile_atlas();
     wldcore_system_init_world_menus_and_date();
     wldcore_map_init_dots();
-    wldcore_init_stub();
+    wldcore_map_init_stub();
     wldcore_map_init_location_marker_and_camera();
     wldcore_menu_reset_stack();
     wldcore_init_runtime_state();

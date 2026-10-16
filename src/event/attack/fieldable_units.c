@@ -12,7 +12,7 @@
 #include "psx/types.h"
 
 /* Empty and unreferenced. */
-void attack_noop_801c3070(void) {
+void attack_deploy_noop_1(void) {
 }
 
 #define ATTACK_NAME_BYTES 16
