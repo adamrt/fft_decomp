@@ -3,6 +3,7 @@
 #include "fft/battle_event.h"
 #include "fft/battle_map.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/event_attack.h"
 #include "fft/main.h"
 #include "fft/main_sound.h"

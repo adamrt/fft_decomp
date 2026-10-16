@@ -3,6 +3,7 @@
 #include "fft/battle_action.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/data_item.h"
 #include "fft/data_skillset.h"
 #include "fft/main_item.h"

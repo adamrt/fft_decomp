@@ -1,7 +1,7 @@
 /* The dialog text thread, opening a dialog window and drawing a text entry glyph by glyph. */
 
 #include "fft/battle.h"
-#include "fft/battle_unit.h"
+#include "fft/battle_unit_animation.h"
 #include "fft/data_job.h"
 #include "fft/gfx.h"
 #include "fft/main.h"

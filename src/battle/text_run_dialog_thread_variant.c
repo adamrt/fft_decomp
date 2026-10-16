@@ -4,6 +4,7 @@
 #include "fft/battle_camera.h"
 #include "fft/battle_text.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_animation.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/memory.h"

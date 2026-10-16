@@ -2,6 +2,7 @@
  * POLY_GT4 arrays, condition display, the bonus image burst and the help menu overlay. */
 
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/data_item.h"
 #include "fft/data_skillset.h"
 #include "fft/event_require.h"

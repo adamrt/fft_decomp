@@ -1,6 +1,6 @@
 /* The unit editor, including applying values to a battle unit, the unit thread and the session. */
 
-#include "fft/battle_unit.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/data_item.h"
 #include "fft/event_debugchr.h"
 #include "fft/gfx.h"

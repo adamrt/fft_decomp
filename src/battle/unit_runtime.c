@@ -9,6 +9,8 @@
 #include "fft/battle_move.h"
 #include "fft/battle_script.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_animation.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/main_gfx.h"

@@ -10,6 +10,7 @@
 #include "fft/battle_move.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_animation.h"
 #include "fft/data.h"
 #include "fft/data_ability.h"
 #include "fft/data_item.h"

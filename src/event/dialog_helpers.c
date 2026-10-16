@@ -2,7 +2,7 @@
  * screen projection. */
 
 #include "fft/battle_camera.h"
-#include "fft/battle_unit.h"
+#include "fft/battle_unit_animation.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_text.h"

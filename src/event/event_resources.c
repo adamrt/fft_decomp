@@ -6,6 +6,7 @@
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_animation.h"
 #include "fft/camera.h"
 #include "fft/event_debugchr.h"
 #include "fft/event_etc.h"

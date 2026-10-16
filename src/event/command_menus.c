@@ -14,6 +14,7 @@
 #include "fft/battle_script.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/camera.h"
 #include "fft/data_ability.h"
 #include "fft/data_item.h"

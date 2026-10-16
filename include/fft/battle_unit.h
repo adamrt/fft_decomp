@@ -7,7 +7,6 @@
 #include "fft/data.h"
 #include "fft/gfx.h"
 #include "fft/map.h"
-#include "fft/menu.h"
 #include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -131,98 +130,6 @@ enum {
     BATTLE_ATTACK_ANIMATION_USE_WEAPON = 0,
     BATTLE_ATTACK_ANIMATION_USE_ITEM = 1,
 };
-
-/* Unit animation ids: the ones the code and the two animation tables of
- * BATTLE.BIN select by number. Animation n is sequences 2n (seen from the
- * front) and 2n + 1 (from behind) of the sheet's SEQ file; the comments
- * describe the sequences of the human sheets. */
-typedef enum battle_unit_animation {
-    /* Plays sequences 1 to 5 instead: the standing pose for each direction the unit is seen from. */
-    BATTLE_UNIT_ANIMATION_STAND = 2, /* stop, petrify, cursed; the default hit reaction */
-    BATTLE_UNIT_ANIMATION_IDLE = 3,
-    BATTLE_UNIT_ANIMATION_IDLE_HASTE = 4,
-    BATTLE_UNIT_ANIMATION_IDLE_SLOW = 5,
-    BATTLE_UNIT_ANIMATION_IDLE_FLYING = 6, /* sheets with the flying flag */
-    BATTLE_UNIT_ANIMATION_IDLE_FLYING_HASTE = 7,
-    BATTLE_UNIT_ANIMATION_IDLE_FLYING_SLOW = 8,
-    BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE
-    = 9, /* in water two or more deep (move_get_water_depth); also the crystal sprite */
-    BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE_HASTE = 10,
-    BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE_SLOW = 11,
-    BATTLE_UNIT_ANIMATION_WALK = 12, /* a movement step on foot (battle_unit_set_walk_animation) */
-    BATTLE_UNIT_ANIMATION_WALK_FAST = 13,
-    BATTLE_UNIT_ANIMATION_WALK_SLOW = 14,
-    BATTLE_UNIT_ANIMATION_FLY = 18,      /* a flying unit's movement step */
-    BATTLE_UNIT_ANIMATION_TREASURE = 21, /* the treasure chest sprite */
-    BATTLE_UNIT_ANIMATION_KNEEL = 22,    /* one held frame, the picture of SLEEP: event poison, a failed mimic */
-    BATTLE_UNIT_ANIMATION_DEFEND = 23,
-    BATTLE_UNIT_ANIMATION_DODGE = 24,
-    BATTLE_UNIT_ANIMATION_HURT = 25,
-    BATTLE_UNIT_ANIMATION_DEAD = 26,
-    BATTLE_UNIT_ANIMATION_RAISE_HANDS = 27, /* healed, blade grasp or catch, crystal pickup */
-    /* Jumps for joy; in water one deep and for a rider, small hops instead. */
-    BATTLE_UNIT_ANIMATION_LEVEL_UP = 28,
-    BATTLE_UNIT_ANIMATION_LEVEL_UP_HOP = 29,
-    BATTLE_UNIT_ANIMATION_JUMP = 30,
-    BATTLE_UNIT_ANIMATION_FALL = 31,
-    BATTLE_UNIT_ANIMATION_LAND = 32, /* after a jump or a fall */
-    /* Held while charging: the second animation of several charge animation sets. */
-    BATTLE_UNIT_ANIMATION_CHARGE = 34,
-    BATTLE_UNIT_ANIMATION_CLIMB = 35,
-    BATTLE_UNIT_ANIMATION_SLEEP = 36, /* kneeling: also the critical status */
-    BATTLE_UNIT_ANIMATION_CONFUSION = 37,
-    BATTLE_UNIT_ANIMATION_SING = 40,
-    BATTLE_UNIT_ANIMATION_DANCE = 41,
-    BATTLE_UNIT_ANIMATION_CAST_START = 42,  /* the first animation of most charge animation sets */
-    BATTLE_UNIT_ANIMATION_CAST_CHARGE = 43, /* its loop, held while charging as CHARGE is */
-    /* Arms raised until the effect ends: the usual attack animation of the
-     * ability table, and every ability of the RUKA, ARUTE and KANZEN sequences. */
-    BATTLE_UNIT_ANIMATION_CAST = 44,
-    BATTLE_UNIT_ANIMATION_HOP = 48, /* short hops alternate between the two */
-    BATTLE_UNIT_ANIMATION_HOP_ALTERNATE = 49,
-    BATTLE_UNIT_ANIMATION_RIDING = 50, /* a mounted unit; the rider while its mount moves */
-    BATTLE_UNIT_ANIMATION_FOUND_ITEM = 51,
-    BATTLE_UNIT_ANIMATION_DEATH = 52,
-    BATTLE_UNIT_ANIMATION_REVIVE = 53,
-    BATTLE_UNIT_ANIMATION_HOLD_ITEM = 57,
-    BATTLE_UNIT_ANIMATION_TELEPORT = 60,
-    /* attacks: HIGH at a target at least 12 higher, LOW at one at least 12 lower */
-    BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_HIGH = 61,
-    BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_LEVEL = 62,
-    BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_LOW = 63,
-    BATTLE_UNIT_ANIMATION_SWING_HIGH = 64,
-    BATTLE_UNIT_ANIMATION_SWING_LEVEL = 65,
-    BATTLE_UNIT_ANIMATION_SWING_LOW = 66,
-    BATTLE_UNIT_ANIMATION_THROW_ITEM = 76, /* an item used on a target that is not adjacent */
-    BATTLE_UNIT_ANIMATION_THRUST_HIGH = 77,
-    BATTLE_UNIT_ANIMATION_THRUST_LEVEL = 78,
-    BATTLE_UNIT_ANIMATION_THRUST_LOW = 79,
-    BATTLE_UNIT_ANIMATION_GUN_HIGH = 80,
-    BATTLE_UNIT_ANIMATION_GUN_LEVEL = 81,
-    BATTLE_UNIT_ANIMATION_GUN_LOW = 82,
-    BATTLE_UNIT_ANIMATION_BOW_HIGH = 83, /* a bow shot takes its row from battle_effect_get_bow_shot_angle */
-    BATTLE_UNIT_ANIMATION_BOW_LEVEL = 84,
-    BATTLE_UNIT_ANIMATION_BOW_LOW = 85,
-    BATTLE_UNIT_ANIMATION_BOOK = 86,
-    BATTLE_UNIT_ANIMATION_INSTRUMENT = 87,
-    BATTLE_UNIT_ANIMATION_WEAPON_GUARD_HIGH = 88, /* the attacker stands at least 12 higher */
-    BATTLE_UNIT_ANIMATION_WEAPON_GUARD_LEVEL = 89,
-    BATTLE_UNIT_ANIMATION_WEAPON_GUARD_LOW = 90,
-    BATTLE_UNIT_ANIMATION_SWING_BLOCKED_HIGH = 91, /* the attacker's recoil from a blocked attack */
-    BATTLE_UNIT_ANIMATION_SWING_BLOCKED_LEVEL = 92,
-    BATTLE_UNIT_ANIMATION_SWING_BLOCKED_LOW = 93,
-    BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_BLOCKED_HIGH = 94,
-    BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_BLOCKED_LEVEL = 95,
-    BATTLE_UNIT_ANIMATION_UNARMED_ATTACK_BLOCKED_LOW = 96,
-    BATTLE_UNIT_ANIMATION_THRUST_BLOCKED_HIGH = 97,
-    BATTLE_UNIT_ANIMATION_THRUST_BLOCKED_LEVEL = 98,
-    BATTLE_UNIT_ANIMATION_THRUST_BLOCKED_LOW = 99,
-    BATTLE_UNIT_ANIMATION_JUMP_DEPART = 117, /* the jump status is added in event mode; charging a Jump */
-    BATTLE_UNIT_ANIMATION_JUMP_LAND = 118,
-    BATTLE_UNIT_ANIMATION_CLOTH_HIGH = 119, /* bags and cloths */
-    BATTLE_UNIT_ANIMATION_CLOTH_LEVEL = 120,
-    BATTLE_UNIT_ANIMATION_CLOTH_LOW = 121,
-} battle_unit_animation_e;
 
 /* Animation ids from 500 up are not doubled into a front and a back
  * sequence: 500 + n and 600 + n play sequence n of EVTCHR slot 0 and 1. */
@@ -1150,27 +1057,6 @@ void battle_unit_remove(battle_unit_t* unit);
 void battle_unit_clear_all(void);
 s32 battle_unit_find_slot_by_character_identity(u32 character_identity);
 
-/* encounters and deployment */
-extern s32 g_battle_entd_selection_mode; /* battle_entd_selection_e */
-
-/* Count and coordinates of the tiles already handed out as dismount
- * destinations this action. */
-extern s32 g_battle_relocated_unit_count;
-extern battle_tile_coordinates_t g_battle_relocated_unit_coords[];
-extern s16 g_battle_unit_entd_spritesheet_ids[];
-extern s32 g_battle_unit_entd_spritesheet_count;
-
-unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battle_id);
-void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode);
-s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id);
-s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit_index);
-s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* tile, s32 facing);
-void battle_unit_set_enemy_level_data(unit_stats_t* unit);
-s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* destination);
-s32 battle_unit_build_deployed_units_data(unit_deployment_coordinates_t* formation, s32 unused_1);
-void battle_unit_init_deployed_units_data_for_debug_red_team(unit_deployment_coordinates_t* formation, s32 unused_1);
-void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit);
-
 /* statuses and mounts */
 extern const u32 g_battle_unit_status_mask_by_handler_index[STATUS_COUNT + 1];
 
@@ -1193,113 +1079,6 @@ extern u16 g_battle_enemy_level_sum;
 extern u8 g_battle_highest_enemy_level;
 
 battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_stats_t* unit);
-
-/* animation */
-extern battle_ability_animation_data_t g_battle_ability_animation_data[BATTLE_ABILITY_ANIMATION_COUNT];
-
-/* Two battle_unit_animation_e for each set: the one that starts a charge and
- * the one held while the unit charges or performs; 0 for none. */
-extern u8 g_battle_ability_charge_animation_sets[BATTLE_CHARGE_ANIMATION_SET_COUNT]
-                                                [BATTLE_CHARGE_ANIMATION_VARIANT_COUNT];
-extern battle_distortion_animation_handler_t
-    g_battle_unit_distortion_animation_handlers[BATTLE_DISTORTION_ANIMATION_COUNT];
-extern s32 g_battle_unit_palette_animation_offset;
-extern s32 g_battle_unit_palette_animation_timer;
-
-/* WalkToAnim: requested animation applied after movement stops; 0 means none. */
-extern u16 g_unit_pending_animation_ids[];
-extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
-extern s8 g_battle_unit_float_bob_offsets[24];
-
-/* Event-script rotation state for each runtime unit slot. */
-extern unit_animation_state_t g_unit_animation_states[];
-
-void battle_unit_clear_distortion_animation_id_10(battle_unit_t* unit);
-void battle_unit_clear_distortion_animation_id_11(battle_unit_t* unit);
-void battle_unit_clear_facing_update_suppression(u32 runtime_id);
-void battle_unit_decide_facing_direction(battle_unit_t* unit, s32 facing);
-s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit);
-void battle_unit_dispatch_distortion_animation(battle_unit_t* unit);
-void battle_unit_face_toward_cursor(battle_unit_t* unit);
-s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id);
-void battle_unit_set_facing_update_suppression(u32 runtime_id);
-s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id);
-void battle_unit_set_mounted_animation(battle_unit_t* unit);
-void battle_unit_set_animation_based_on_status(battle_unit_t* unit);
-void battle_unit_set_walk_animation(battle_unit_t* unit);
-void battle_unit_set_level_up_animation(battle_unit_t* unit);
-void unit_set_facing(s32 runtime_id, s32 facing);
-void battle_unit_snap_all_facings_to_quadrants(void);
-void battle_unit_start_ability_charge_animation(battle_unit_t* unit);
-void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit);
-void battle_unit_store_animation_facing(u32 animation, s32 facing, battle_unit_t* unit);
-void battle_unit_settle_on_tile(battle_unit_t* unit);
-void battle_unit_update_and_animate_units(void);
-void battle_unit_update_target_displays(battle_unit_t* unit);
-void battle_unit_end_command(battle_unit_t* unit);
-void battle_unit_update_animation_for_status_changes(battle_unit_t* unit);
-void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* target);
-s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id);
-void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id);
-void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit);
-void battle_unit_clear_horizontal_flip_flag(u32 runtime_id);
-void battle_unit_clear_movement_effect_suppression(u32 runtime_id);
-void battle_unit_clear_palette_update_suppression(u32 runtime_id);
-void battle_unit_face_towards_action_target(battle_unit_t* unit, battle_unit_t* target);
-s32 battle_unit_get_facing_nibble_by_runtime_id(u32 runtime_id);
-void battle_unit_select_attack_animation_for_ability(battle_unit_t* attacker, battle_unit_t* target);
-void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_unit_t* target);
-s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibble);
-void battle_unit_set_horizontal_flip_flag(u32 runtime_id);
-void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id);
-void battle_unit_set_movement_effect_suppression(u32 runtime_id);
-void battle_unit_set_palette_update_suppression(u32 runtime_id);
-void battle_unit_set_specific_animation_by_runtime_id(u32 runtime_id, u32 animation);
-void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id);
-void battle_unit_force_animation_facing(s32 animation, s32 facing, battle_unit_t* unit);
-
-/* world coordinates */
-
-SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id);
-SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id);
-void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
-void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
-void battle_unit_set_real_coords_from_world_coords(struct battle_unit* unit);
-void battle_unit_set_world_coords_from_real_coords(struct battle_unit* unit);
-void battle_unit_set_move_and_world_coords(battle_unit_t* unit);
-
-/* position and display */
-battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_data_t* out, s32 unit_id);
-battle_unit_t* battle_unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
-void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
-battle_unit_t* battle_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z);
-void battle_unit_update_display_by_runtime_id(s32 runtime_id);
-void battle_unit_update_float_and_jump_height(battle_unit_t* unit);
-void battle_unit_update_graphics_by_runtime_id(u32 runtime_id);
-s32 battle_unit_set_tile_position(s32 battle_id, u8 map_x, u8 map_y, u8 map_z, u8 facing);
-void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
-void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* runtime);
-void battle_unit_dismount_rider_and_update_display(battle_unit_t* rider);
-SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id);
-s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
-battle_unit_t* battle_unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z);
-s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords);
-s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
-
-/* progression and pickups */
-void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit);
-u8 battle_unit_calculate_move_exp_jp_up_to_earn(const unit_stats_t* unit);
-s32 battle_unit_count_crystals(void);
-void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result);
-battle_unit_t* battle_unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
-void battle_unit_learn_used_ability(unit_stats_t* unit);
-void battle_unit_transform_into_morbol(unit_stats_t* unit);
-s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* display);
-s32 battle_unit_build_action_rewards(unit_stats_t* unit, action_reward_display_t* rewards);
-s32 battle_unit_learn_from_crystal(unit_stats_t* unit, s32 flags);
-s32 battle_unit_load_job_level(unit_stats_t* unit, s32 job_id, s32* out_slot);
-s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot);
-crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* mover);
 
 /* unit views */
 extern image_load_parameters_t g_battle_unit_summary_portrait_image_params;

@@ -11,6 +11,8 @@
 #include "fft/battle_menu.h"
 #include "fft/battle_move.h"
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_animation.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/camera.h"
 #include "fft/data_skillset.h"
 #include "fft/event_attack.h"

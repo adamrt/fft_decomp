@@ -1,6 +1,7 @@
 /* A no-op and the search for fieldable units. */
 
 #include "fft/battle_unit.h"
+#include "fft/battle_unit_encounter.h"
 #include "fft/event_attack.h"
 #include "fft/main_unit.h"
 #include "fft/menu.h"
