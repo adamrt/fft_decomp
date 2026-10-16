@@ -106,11 +106,14 @@ typedef struct ai_wait_facing_work {
 /*
  * Choose a facing hint for an AI-controlled unit's Wait command.
  *
- * Values other than 5 are returned directly. Otherwise prefer the nearest
- * imminent enemy, then any enemy, while rejecting blocked or steeply rising
- * adjacent tiles. The original does not bounds-check the direction lookup, so
- * coincident source and target coordinates can read one byte past the four-byte
- * viability array.
+ * A hint other than AI_DIRECTION_CHOOSE_AT_WAIT is returned as is. Otherwise
+ * face the nearest imminent enemy whose direction is viable, trying each in
+ * turn, then the nearest enemy of any kind; a direction is viable when its
+ * adjacent tile is on the map, unblocked and not 3 or more higher (all four
+ * are when none is). Failing that, keep the current facing if viable, else
+ * the last viable direction. The original does not bounds-check the direction
+ * lookup, so coincident source and target coordinates can read one byte past
+ * the four-byte viability array.
  */
 s32 battle_ai_choose_wait_facing(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -171,7 +174,7 @@ s32 battle_ai_choose_wait_facing(void) {
 /*
  * Reject a facing candidate outside the map or too far above the source.
  *
- * Return 1 for rejection and 0 otherwise. Tile flag 0 also rejects a candidate.
+ * Return 1 for rejection and 0 otherwise. A blocked tile is also rejected.
  * Only the destination's lower layer is checked; a rise of 3 is rejected,
  * but descents are unrestricted. Slope and depth do not affect this test.
  */
@@ -240,6 +243,17 @@ s32 battle_ai_is_pathfinding_budget_exhausted(void) {
  *
  * Return -1 to suspend and 0 when finished, including rejected abilities.
  * Suspended target searches resume without reinitializing the candidate.
+ *
+ * An ability the AI may not use, or a random-use ability that loses its roll,
+ * is skipped. A map-tile ability is tried from the unit's tile and the
+ * scenario's candidate tile (Arithmeticks from the unit's tile, over its
+ * calculator combinations). Otherwise the searches run in turn: for a
+ * reflectable ability, casts reflected off a Reflect unit; then, on the units
+ * the ability would be useful on, casts on the caster itself, unit-targeted
+ * casts for an ability that follows its target (split by whether each target
+ * acts before the ability lands) and, unless that ability has no area,
+ * tile-targeted casts without the enemies that act first. The best cast so far
+ * is added to the ranked list as stages finish.
  */
 s32 battle_ai_evaluate_ability_outcome(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -451,6 +465,8 @@ prepare_origin:
         mode = AI_TILE_MASK_EXPLICIT;
     battle_ai_build_targetable_tile_mask(mode, 0);
     battle_mem_copy_u16_values(ai->attack_origin_tiles, ai->targetable_tiles, sizeof(ai->attack_origin_tiles));
+    /* Both passes test the unit's current tile, even when it casts after moving
+     * (battle_ai_evaluate_cast_origins tests the destination). */
     if (battle_ai_is_ability_origin_allowed(&ai->acting_unit_coords)) {
     evaluate_targets:
         if (battle_ai_evaluate_target_tiles() == -1) {
@@ -477,6 +493,9 @@ prepare_origin:
  *
  * Return 1 when these checks permit use, otherwise 0. Geomancy delegates
  * directly to its terrain check; this is not a complete ability-use test.
+ * A unit that cannot enter water rejects depth 2 or more, and a Monster Skill
+ * ability needs a same-team Monster Skill holder that can react, at most one
+ * tile from the origin and within 2 in height.
  */
 s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coords) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -563,6 +582,11 @@ static s32 battle_ai_can_use_geomancy(const ai_coords_t* coords) {
 /*
  * Evaluate reachable origins for reflecting an ability onto another unit.
  *
+ * For each unit whose Reflect outlasts the charge and each useful target, when
+ * neither acts before the ability lands, the origin is the reachable tile
+ * mirroring the target through the reflector (2 * reflector - target), from
+ * which a cast aimed at the reflector bounces onto the target.
+ *
  * Return -1 to suspend and 0 after restoring the temporary unit's position
  * and submitting the action to the ranked list. Stored counters survive
  * suspension, but the target does not reload the local reflector pointer
@@ -634,6 +658,8 @@ static s32 battle_ai_evaluate_reflected_target_origins(void) {
                     battle_ai_update_tile_pickup();
                     ai->current_action.act_before_move = 1;
                     ai->reflected_origin_phase = 0;
+                    /* Act from the current tile, then move to the mirror tile and act; both
+                     * passes test the current tile's origin restrictions. */
                     for (;;) {
                         if (battle_ai_is_ability_origin_allowed(&ai->acting_unit_coords)) {
                         evaluate_targets:
@@ -763,6 +789,10 @@ static s32 battle_ai_evaluate_math_targets(void) {
  * Return -1 with the search stage saved when time or a child suspends;
  * return 0 after restoring the temporary unit's position. The scan path
  * reloads its full row mask on resume and continues at its saved x index.
+ *
+ * An exhaustive-origin ability visits every movable origin in map order (with
+ * max_possibilities as the x counter). Any other ability takes origins best
+ * first by tile score while both the attack-origin and movable counts last.
  */
 static s32 battle_ai_evaluate_movement_origins(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -895,7 +925,18 @@ static void battle_ai_take_next_movement_origin(void) {
     ai->movable_tile_count--;
 }
 
-/* Build attack-origin and movable tile masks for the considered ability. */
+/* Build attack-origin and movable tile masks for the considered ability.
+ *
+ * movable_tiles are the scenario's reachable tiles to cast from: for an arcing
+ * ability all of them; otherwise those with a targetable unit within range
+ * (range plus area when aiming at tiles), dropping deep water for a unit that
+ * cannot enter it, for Geomancy the tiles whose terrain gives another ability,
+ * and for a Monster Skill ability the tiles out of a holder's reach.
+ * attack_origin_tiles are the walkable tiles a cast can be aimed at to hit a
+ * targetable unit: its own tile for unit targeting, any tile within the area
+ * otherwise. An ability that follows its target cannot be aimed at a unit's
+ * own tile when aiming at tiles or when the unit is jumping. Both counts are
+ * stored. */
 void battle_ai_build_attack_origin_masks(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
@@ -912,6 +953,8 @@ void battle_ai_build_attack_origin_masks(void) {
         ai->attack_origin_tiles[0][i] = 0;
         ai->attack_origin_tiles[1][i] = 0;
     }
+
+    /* Tiles to cast from; attack_origin_tiles is scratch here for every tile in range of a target. */
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_ARC_TRAJECTORY) {
         battle_mem_copy_u16_values(
             ai->movable_tiles, ai->reachable_tiles[ai->movement_scenario][0], sizeof(ai->movable_tiles));
@@ -967,6 +1010,8 @@ void battle_ai_build_attack_origin_masks(void) {
             }
         }
     }
+
+    /* Aim tiles: each targetable unit's tile, or the tiles whose area covers it. */
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         if (ai->targetability.live.unit_targetable[unit_id]) {
             battle_ai_copy_unit_coordinates(unit_id, &ai->considered_unit_coords);
@@ -1007,7 +1052,11 @@ void battle_ai_build_attack_origin_masks(void) {
 /*
  * Build the considered origin's targetable-tile mask on both map levels.
  *
- * Modes 0, 1, and 2 select range, area, or their sum; other modes use radius.
+ * The range, area and range-plus-area modes take their radius from the
+ * considered ability; AI_TILE_MASK_EXPLICIT uses the radius argument. The
+ * diamond is built from row templates centered on column 7 and shifted to the
+ * origin's column, then copied to the upper level; a linear ability keeps
+ * only the origin's row and column.
  * Radius 16 or greater fills both masks without applying the linear filter.
  * Radii 8 through 15 read the following status-priority weights instead of
  * row templates. Jump Level 8 can supply radius 8 on non-arcing origin scans.
@@ -1075,12 +1124,14 @@ static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 r
     battle_mem_copy_u16_values(ai->targetable_tiles[1], ai->targetable_tiles[0], sizeof(ai->targetable_tiles[0]));
 }
 
-/* The target loads 0xff as 255, not -1, for the first 2 directions. */
 /*
  * Build the targetable-tile mask around same-team Monster Skill holders.
  *
  * Only the low map level is visited; the high-level mask remains cleared.
  * Tile base heights must differ by at most 2; slope and depth are ignored.
+ * The offsets are unsigned bytes, so the -1 of the south and west neighbors
+ * adds 255 and fails the bounds test: only the north and east neighbors are
+ * ever marked (QUIRKS.md).
  */
 static void battle_ai_build_monster_skill_tile_mask(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -1119,10 +1170,9 @@ static void battle_ai_build_monster_skill_tile_mask(void) {
             if (y < 0 || y >= ai->map_max_y)
                 continue;
             for (level = 0; level <= 0; level++) {
-                if ((g_battle_map_tile_data[(level * MAP_TILES_PER_LAYER) + y * ai->map_max_x + x].height - height)
-                        >= -2
-                    && (g_battle_map_tile_data[(level * MAP_TILES_PER_LAYER) + y * ai->map_max_x + x].height - height)
-                        <= 2) {
+                s32 rise
+                    = g_battle_map_tile_data[(level * MAP_TILES_PER_LAYER) + y * ai->map_max_x + x].height - height;
+                if (rise >= -2 && rise <= 2) {
                     /* A typed level-row pointer folds the field offset into
                      * the induction value. Preserve the target's AI-base
                      * cursor with a member-derived displacement. */
@@ -1231,6 +1281,7 @@ static s32 battle_ai_evaluate_target_tiles(void) {
                                 == 0)
                                 continue;
                         } else if (ai->considered_ability.ai_flags.word & AI_ABILITY_DIRECT_TRAJECTORY) {
+                            /* A thrown item needs a clear path only to a target beyond the next tile. */
                             if ((g_main_action_menu_types_by_skillset[ai->considered_ability.skillset]
                                         != ACTION_MENU_TYPE_ITEM_INVENTORY
                                     || battle_ai_calculate_distance_between_units(
@@ -1250,9 +1301,12 @@ static s32 battle_ai_evaluate_target_tiles(void) {
                             ai->search_resume_flag = 1;
                             return -1;
                         }
+                        /* Give up this origin when the simulation never resolved the acting unit's action. */
                         if (ai->ability_processing_done == 0)
                             return 0;
                     remove_useful_origin:
+                        /* Consume the aim tile (CONSUME_EVALUATED_ORIGINS, or a caster outcome the strike
+                         * simulation flagged) so later origins skip it. */
                         if (ai->useful_on_caster_flag) {
                             ai->attack_origin_tiles[level][y] ^= 0x8000 >> x;
                             ai->attack_origin_tile_count--;
@@ -1343,6 +1397,14 @@ enum {
  * Return -1 to suspend, 0 for a rejected or flag-update-only pass, and 1
  * after scoring. Save/restore helpers preserve selected unit data, not the
  * whole AI workspace; resumed phases skip fresh action preparation.
+ *
+ * The candidate's move and action are applied to the live unit records in its
+ * order (an immediate action that hits nothing rejects it). The turn then ends
+ * and the turn order runs, resolving charged actions and noting who gets a
+ * turn first, until nobody is charging or performing or 256 events pass. The
+ * outcome is scored into the action's priority: for each unit its HP share,
+ * status weights, kept equipment, MP share and team Golem, negated for
+ * enemies. Every unit's data is then restored from the baseline snapshot.
  */
 s32 battle_ai_simulate_action_and_score(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -1476,7 +1538,7 @@ s32 battle_ai_simulate_action_and_score(void) {
                     & (STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING))))
                 break;
         }
-        if (unit_index == BATTLE_UNIT_ID_NONE)
+        if (unit_index == BATTLE_UNIT_SLOT_COUNT)
             break;
     }
 
@@ -1615,6 +1677,8 @@ score_state:
             ai->current_action.rank.priority += score;
         }
 
+        /* Throwing anything but a shuriken or a ball halves the hit percent, which lowers
+         * the action's rank and its chance to be picked. */
         if (g_main_action_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_WEAPON_INVENTORY
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_SHURIKEN
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_BALL)
@@ -1702,7 +1766,10 @@ static s32 battle_ai_simulate_action_hits(action_command_t* action) {
  *
  * A nonzero reaction mode skips initial preparation and recursive reaction dispatch.
  * Hit accounting is disabled by counter 0xff; included target/strike pairs
- * can adjust priority and mark whether a valuable target was hit.
+ * can adjust priority and mark whether a valuable target was hit. A hit on the
+ * side the ability is meant for adds `positive` to the priority and one on the
+ * other side subtracts `negative`: 0 and 1, or 3 and 4 for an ability that
+ * affects stats.
  */
 static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -2000,10 +2067,10 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
         return AI_ABILITY_EFFECT_NONE;
 
     i = ai->considered_ability.element;
-    /* i now holds the element; Earth (8) misses a floating unit. */
+    /* i now holds the element: nullified elements and Earth against a floating unit do nothing. */
     if (i) {
         if (i == (i & unit->elemental_affinity[ELEMENTAL_AFFINITY_NULLIFY])
-            || (i == 8
+            || (i == BATTLE_ELEMENT_EARTH
                 && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
                     & STATUS_BYTE_MASK(STATUS_ID_FLOAT)))) {
             return AI_ABILITY_EFFECT_NONE;
@@ -2196,8 +2263,8 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
         }
     }
 
-    /* Late stat-effect gate: Praise, Accumulate, and Yell only.
-     * Odd parity still falls through to the Unequip flag below. */
+    /* A stat-changing ability is useful, except that Praise, Accumulate and Yell
+     * count only on an even roll; an odd roll falls through to the Unequip test. */
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_AFFECTS_STATS) {
         ability_id = ai->considered_ability.ability_id;
         if (ability_id != ABILITY_ID_TALK_PRAISE && ability_id != ABILITY_ID_BASIC_SKILL_ACCUMULATE
@@ -2228,6 +2295,7 @@ s32 battle_ai_is_status_active_through_delay(s32 delay, const unit_stats_t* unit
             return 0;
         }
     } else {
+        /* Statuses before Poison have no countdown. */
         if (status_id < STATUS_ID_POISON) {
             return 1;
         }
@@ -2270,7 +2338,7 @@ static s32 battle_ai_exclude_enemies_acting_before_ct(void) {
     for (i = 0, walk = ai; i < BATTLE_UNIT_SLOT_COUNT;
         i++, walk = (ai_data_t*)((u8*)walk + sizeof(ai_unit_decision_t))) {
         if (ai->targetability.live.unit_targetable[i] != 0) {
-            if ((ai->considered_ability.ai_flags.word & AI_ABILITY_FLAG_1_TARGET_ENEMIES)
+            if ((ai->considered_ability.ai_flags.word & AI_ABILITY_TARGET_ENEMIES)
                 && (walk->unit_decisions[0].enemy_flag != 0) && (battle_ai_can_unit_act_within_charge_time(i) != 0)) {
                 ai->targetability.live.unit_targetable[i] = 0;
             } else {

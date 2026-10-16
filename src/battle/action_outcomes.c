@@ -42,8 +42,8 @@ void battle_ai_end_action_simulation(void) {
 }
 
 /* Current weather as seen by damage and movement rules: none when the map
- * ignores weather (indoors), otherwise the {3C} strength shifted into the
- * snow range when the map's snow flag is set. */
+ * ignores weather (indoors), otherwise the weather script variable, with rain
+ * and storms moved to the matching snow values on a map flagged for snow. */
 s32 battle_map_get_effective_weather(void) {
     s32 weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
     u32 flags = g_battle_map_weather_flags;
@@ -127,6 +127,8 @@ s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                         scratch[k] = src[k];
                     }
 
+                    /* Ability j of the skillset is learned when bit 7 - j % 8 of
+                     * byte j / 8 of the job's row is set. */
                     for (j = 0; j < BATTLE_LEARN_ON_HIT_ABILITY_COUNT; j++) {
                         byte_index = j / 8;
                         bit = 0x80 >> (j - byte_index * 8);
@@ -153,18 +155,19 @@ s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
 /* Integer address arithmetic preserves the retail instruction order here. */
 #define LEARNED_ABILITIES_OFFSET ((u32) & ((unit_stats_t*)0)->career.learned_abilities)
 
-/* Learn-on-hit: marks the acting unit's used ability as learned in the unit's
+/* Learn-on-hit: mark the acting unit's used ability as learned in the unit's
  * current job.
  *
- * Walks the 24 abilities of the unit's primary skillset; the one whose id equals
+ * Walks the 24 abilities of the unit's primary skillset; each one whose id equals
  * g_battle_acting_unit_used_ability_id and is not yet learned gets its bit set
- * (MSB first, three bytes per job). A job below Squire uses job slot 0. */
+ * (MSB first, three bytes per job). A job below Squire uses job slot 0. The
+ * learned bits are tested on a copy taken before the walk. */
 void battle_unit_learn_used_ability(unit_stats_t* unit) {
-    u8 learned[3];
+    u8 learned[BATTLE_LEARN_ON_HIT_ROW_BYTES];
     u8 skillset;
     s32 job;
     s32 i;
-    s32 byte_idx;
+    s32 byte_index;
     s32 mask;
     u8* src;
     u8* dst;
@@ -189,11 +192,12 @@ void battle_unit_learn_used_ability(unit_stats_t* unit) {
     i = 0;
     base = (u8*)(((job * 3) + (s32)unit) + LEARNED_ABILITIES_OFFSET);
     do {
-        byte_idx = i / 8;
-        mask = 0x80 >> (i - (byte_idx * 8));
-        if (!(learned[byte_idx] & mask)) {
+        byte_index = i / 8;
+        mask = 0x80 >> (i - (byte_index * 8));
+        if (!(learned[byte_index] & mask)) {
             if ((u16)main_ability_get_id_from_skillset(skillset, i) == g_battle_acting_unit_used_ability_id) {
-                learned_byte = base + byte_idx;
+                /* `base[byte_index] |= mask` emits different code. */
+                learned_byte = base + byte_index;
                 *learned_byte = mask | *learned_byte;
             }
         }
@@ -201,7 +205,7 @@ void battle_unit_learn_used_ability(unit_stats_t* unit) {
     } while (i < SKILLSET_ABILITY_LIST_COUNT);
 }
 
-/* Passes a status change on to the unit's display flags
+/* Pass a status change on to the unit's display flags
  * (battle_status_queue_runtime_graphics_flag_change), but only while an action is
  * executing: previews and AI simulations change no display state.
  *
@@ -231,7 +235,7 @@ s32 battle_action_give_item(unit_stats_t* unit, u8 item) {
     if (item_id == ITEM_ID_NONE) {
         return 0;
     }
-    if (main_item_get_total_equipment_quantity(item_id, 1) >= 0x63) {
+    if (main_item_get_total_equipment_quantity(item_id, 1) >= 99) {
         return battle_action_add_war_funds(unit, 0, item_id);
     }
     g_main_item_quantities[item_id] += 1;
@@ -239,9 +243,9 @@ s32 battle_action_give_item(unit_stats_t* unit, u8 item) {
 }
 
 /* Add total to the war funds, plus a quarter of the item's price when an item
- * is given (action_increment_item_quantity_for_steal_break passes one
- * the stock is full of). Only for a unit on team 0 and only when executing;
- * the funds stay within 0..99,999,999. Returns the amount added. */
+ * is given (battle_action_give_item passes one the stock is full of). Only for
+ * a unit currently on the player team and only when executing; the funds stay
+ * within 0..99,999,999. Returns the amount added before that clamp. */
 s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
     s32 value;
 
@@ -296,7 +300,8 @@ void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount) {
     }
 }
 
-/* Resolve a unit's status changes with the action state set to preview (2). */
+/* Resolve a unit's status changes with the action state set to preview, so no
+ * display change is queued, then return to the execute state. */
 void battle_status_resolve_unit_changes_in_preview(s32 unit_id, s32 removal_only) {
     g_battle_action_state = ACTION_STATE_PREVIEW;
     battle_status_resolve_unit_changes(unit_id, removal_only);
@@ -306,14 +311,15 @@ void battle_status_resolve_unit_changes_in_preview(s32 unit_id, s32 removal_only
 /*
  * Remove the statuses the unit's action marks for removal.
  *
- * Only statuses the unit currently has are kept in the removal mask; each one
- * gets its CT cleared and its special flags dropped, then the bits are cleared
- * from both the current and innate status sets.
+ * Points g_battle_action_target_data at the unit's action data. Only statuses
+ * the unit currently has are kept in the removal mask; each one gets its CT
+ * cleared and its display removal queued, then the bits are cleared from both
+ * the current and innate status sets.
  */
 void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
     s32 i;
     s32 battle_id;
-    s32 idx;
+    s32 byte_index;
     s32 mask;
 
     g_battle_action_target_data = &unit->action;
@@ -322,9 +328,9 @@ void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
         g_battle_action_target_data->status_changes.removal[i] &= unit->status_sets.current[i];
     }
     for (i = 0; i < STATUS_COUNT; i++) {
-        idx = i / 8;
+        byte_index = i / 8;
         mask = 0x80 >> (i & 7);
-        if (g_battle_action_target_data->status_changes.removal[idx] & mask) {
+        if (g_battle_action_target_data->status_changes.removal[byte_index] & mask) {
             main_status_set_ct(unit, i, 0);
             battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
@@ -443,13 +449,16 @@ void battle_action_set_current_attacker_data(unit_stats_t* unit) {
  * actor's weapons.
  *
  * Returns 0 for an ineligible unit, -1 if targeting or preview fails, and 1
- * on success. Failed targeting or preview clears both borrowed weapon slots.
+ * on success. Targeting fails when the panel routine finds no target, or when
+ * the copied target tile is outside the ability's range; failed targeting or
+ * preview clears both borrowed weapon slots. The preview runs in the preview
+ * action state and then drops any charge, Jump or Performing it started.
+ *
  * The menu type stays byte-sized, and the facing subtraction and action-field
  * assignments retain the target's evaluation order. The tile index and saved
  * action state share a temporary because their lifetimes do not overlap.
  */
 s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
-    /* A byte flag test retains the original compound-condition scheduling. */
     action_command_t action;
     action_command_t* current;
     s32 x;
@@ -484,6 +493,8 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
             return 0;
         }
     }
+    /* Quarter turns from the actor's facing to the Mime's, kept non-negative by
+     * the extra 4; a Jump picks its landing layer by height (bit 8). */
     facing = unit->position.facing;
     attacker_facing = g_battle_action_current_attacker.facing - 4;
     direction = facing - attacker_facing;
@@ -507,8 +518,9 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = weapon_id;
     unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = g_battle_action_current_attacker.left_hand_weapon_id;
     result = battle_target_set_panels_for_action(&action);
-    if (result == -1 || result == 3
-        || (result < 2
+    /* A byte flag test retains the original compound-condition scheduling. */
+    if (result == TARGET_PANELS_INVALID || result == TARGET_PANELS_NONE
+        || (result < TARGET_PANELS_NO_TARGETING
             && !((*(u8*)&g_battle_map_tile_data[saved_state = (z << 8) + (g_battle_map_max_x * y) + x]
                          .ceiling_depth_and_marks)
                 & MAP_TILE_FLAG_ABILITY_RANGE))) {
@@ -533,13 +545,16 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     return 1;
 }
 
-/* Rotate a tile offset by the caller's facing and select its terrain layer.
+/* Rotate a tile offset around the unit and select the destination's terrain
+ * layer.
  *
- * Returns -1 when the rotated offset leaves the map or lands on a blocked
- * lower tile whose upper tile is blocked too; otherwise 0 with `*out_flag`
- * selecting the upper (1) or lower (0) terrain layer.  Bit 8 of `flags` picks
- * the destination by absolute height instead of by proximity to the reference
- * tile's height.
+ * The low two bits of `flags` turn (dx, dy) by that many quarter turns. Returns
+ * -1 when the rotated offset leaves the map or lands where both layers are
+ * blocked; otherwise 0 with `*out_flag` selecting the upper (1) or lower (0)
+ * terrain layer. With one layer blocked the other is chosen. Bit 8 of `flags`
+ * picks the higher layer outright; otherwise the layer nearer the height of the
+ * unit's own tile wins, ties going to the higher one. An upper-layer tile sits
+ * 0x100 entries after its lower-layer tile in g_battle_map_tile_data.
  */
 s32 battle_map_resolve_rotated_offset_layer(
     unit_stats_t* unit, s32 dx, s32 dy, s32 flags, s32* out_x, s32* out_y, s32* out_flag) {
@@ -635,7 +650,7 @@ s32 battle_map_resolve_rotated_offset_layer(
     return 0;
 }
 
-/* Nothing in the game calls it. */
+/* Return g_battle_reaction_unit_last_ability_id. Nothing in the game calls it. */
 s16 battle_action_load_last_used_ability(void) {
     return g_battle_reaction_unit_last_ability_id;
 }

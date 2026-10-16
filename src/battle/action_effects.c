@@ -50,15 +50,16 @@ void battle_target_move_cursor_to_unit(const battle_unit_t* unit) {
 /* Move the cursor to the target of the unit's stored action: the target tile, or
  * the tile of the target unit. */
 void battle_target_move_cursor_to_action_target(const battle_unit_t* unit) {
-    unit_stats_t* bd = unit->stats;
+    unit_stats_t* stats = unit->stats;
 
-    if (bd->action_command.targeting_type == BATTLE_TARGETING_TYPE_TILE) {
-        g_battle_cursor_x = bd->action_command.target_position.vx;
+    if (stats->action_command.targeting_type == BATTLE_TARGETING_TYPE_TILE) {
+        /* The retail code reloads unit->stats for the elevation and y reads. */
+        g_battle_cursor_x = stats->action_command.target_position.vx;
         g_battle_cursor_z = unit->stats->action_command.target_position.vy;
         g_battle_cursor_y = unit->stats->action_command.target_position.vz;
         return;
     }
-    battle_target_move_cursor_to_unit(battle_unit_get_by_battle_id(bd->action_command.target_id));
+    battle_target_move_cursor_to_unit(battle_unit_get_by_battle_id(stats->action_command.target_id));
 }
 
 /* Stop every running color animation on the unit CLUT row and restore those palettes
@@ -74,9 +75,10 @@ void battle_gfx_restore_unit_palettes(void) {
     }
 }
 
-/* Tint a unit's palette by its team: blue, red, green or light blue.
- *
- * `amount` passes through to battle_map_modify_palette. */
+/* Tint a unit's palette by its team: blue, red, green or light blue (green plus
+ * blue). The tint is a repeating base-color pulse on the unit's own CLUT;
+ * `amount` passes through to battle_map_modify_palette. A null unit or one
+ * without battle data is left alone. */
 void battle_gfx_modify_palette_based_on_team(battle_unit_t* unit, s32 amount) {
     if (unit == 0) {
         return;
@@ -134,6 +136,7 @@ void battle_action_show_next_at_list_entry(void) {
 
     for (;;) {
         id = battle_action_get_at_list_entry_unit_id(g_battle_action_at_list_id);
+        /* The low byte is the unit's battle id; 0x100 marks a charged action. */
         if (id >= 0) {
             unit = battle_unit_get_by_battle_id(id & 0xFF);
             if ((id & 0x100) != 0) {
@@ -184,12 +187,13 @@ void battle_effect_build_secondary_init(battle_unit_t* unit, effect_secondary_in
     effect->targets[0].data.unit.runtime_id = unit->runtime_id;
 }
 
-/* Fill a secondary-effect init record with the unit's current action targets.
+/* Fill a secondary-effect init record with the unit's current action: the
+ * caster entry, the used weapon and one entry per strike target.
  *
- * Each target block records the target's unit id and a result animation
- * derived from its action data. With no targets the first block instead holds
- * the cursor tile position. The record's target blocks form an array of up to
- * 16 entries starting at the header's first `target` block. */
+ * Each target entry records the target's runtime id and a result animation
+ * read from its action data: a miss, no effect, a Golem block, an equipment
+ * break, a critical or a normal hit. With no targets the first entry instead
+ * holds the cursor tile. */
 static void battle_effect_build_secondary_init_from_action(battle_unit_t* unit, effect_secondary_init_t* init) {
     battle_unit_t* target;
     action_data_t* action;
@@ -242,25 +246,27 @@ static void battle_effect_build_secondary_init_from_action(battle_unit_t* unit, 
     }
 }
 
-/* Starts the weapon-hit secondary effect of the unit's action, in the element
- * of the used weapon; is_bow is 1 for the bow hardcoding path and 0
- * otherwise, and unused. */
+/* Start the weapon-hit secondary effect of the unit's action, in the element
+ * of the used weapon. `is_bow` is 1 from the projectile-hit path and 0
+ * otherwise; battle_effect_init_weapon_hit_secondary ignores it. */
 void battle_effect_start_weapon_hit_secondary(battle_unit_t* unit, s32 is_bow) {
     effect_secondary_init_t secondary_init;
+
     battle_effect_build_secondary_init_from_action(unit, &secondary_init);
     battle_effect_init_weapon_hit_secondary(
         g_main_item_weapon_data[unit->used_item_or_weapon_id].element, &secondary_init, is_bow);
 }
 
-/* Starts the projectile secondary effect of the unit's action: the stone for
+/* Start the projectile secondary effect of the unit's action: the stone for
  * Throw Stone, the thrown item for the Item and Throw abilities, and for
  * anything else the animation of the equipped weapon's type (an arrow for
- * bows and crossbows, none for the rest). The target retains a redundant
- * Shuriken test before checking the complete Item/Throw span. */
+ * bows and crossbows, none for the rest). The retail code tests Throw
+ * Shuriken on its own before the Item/Throw span, which already holds it. */
 void battle_effect_start_action_projectile_secondary(battle_unit_t* unit) {
     effect_secondary_init_t secondary_init;
     u16 ability_id;
     u8 animation_id;
+
     battle_effect_build_secondary_init_from_action(unit, &secondary_init);
     ability_id = unit->used_ability_id;
     if (ability_id == ABILITY_ID_BASIC_SKILL_THROW_STONE) {
@@ -522,13 +528,15 @@ s32 battle_status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s3
     return 1;
 }
 
-/* No retail code calls it. */
+/* battle_gfx_set_thrown_item_graphic_palette for the unit in slot battle_id. No
+ * retail code calls it. */
 void battle_gfx_set_thrown_item_graphic_palette_by_battle_id(s32 item_id, u16 battle_id) {
     battle_gfx_set_thrown_item_graphic_palette(item_id, battle_unit_get_by_battle_id(battle_id));
 }
 
 /* Seat the rider on the mount: link both records, copy the mount's facing,
- * position and map coordinates to the rider and raise the rider above it. */
+ * position and map coordinates to the rider and raise the rider 10 world units
+ * above it (negative y is up), then refresh both units' display. */
 void battle_unit_mount_rider_onto_unit(battle_unit_t* rider, battle_unit_t* mount) {
     rider->mount_state = BATTLE_UNIT_MOUNT_STATE_RIDER;
     rider->mount_partner_runtime_id = mount->runtime_id;
@@ -541,7 +549,7 @@ void battle_unit_mount_rider_onto_unit(battle_unit_t* rider, battle_unit_t* moun
     rider->world_coords.vy -= 10;
     rider->real = mount->real;
     rider->standing_on_battle_id_plus_one = 0;
-    rider->real.vy += -0xa000;
+    rider->real.vy -= 10 * ONE; /* the same raise in 20.12 fixed point */
     rider->map_x = mount->map_x;
     rider->map_y = mount->map_y;
     rider->map_z = mount->map_z;
@@ -562,7 +570,7 @@ void battle_unit_dismount_rider(battle_unit_t* unit) {
         unit->standing_on_battle_id_plus_one = 0;
         unit->mount_state = BATTLE_UNIT_MOUNT_STATE_NONE;
         unit->mount_partner_runtime_id = 0;
-        unit->status_flags_1_4 = unit->status_flags_1_4 & ~BATTLE_UNIT_STATUS_MOUNTED;
+        unit->status_flags_1_4 &= ~BATTLE_UNIT_STATUS_MOUNTED;
         if (mount != 0) {
             mount->mount_state = BATTLE_UNIT_MOUNT_STATE_NONE;
             mount->mount_partner_runtime_id = 0;
@@ -615,10 +623,16 @@ static s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer)
     return 0x40;
 }
 
+enum {
+    MOVE_STEP_HEIGHT_SCALE = 6, /* world units per half height unit; world y grows downward */
+};
+
 /*
- * Clamps a camera/height value into the walkable band above one tile: the
- * lower bound subtracts the layer step clearance from move_calculate_tile_layer_step_offset, the
- * upper bound is the tile surface height alone less 0x30.
+ * Clamp a world height (world_coords.vy) to a band above one tile. World y
+ * grows downward, so the smaller bound is the higher one: `lo` is the tile
+ * surface raised by the clearance of battle_move_calculate_tile_layer_step_offset,
+ * and `hi` is the surface raised by 0x30 world units (8 half heights). When the
+ * band is empty the result is `lo`.
  */
 static s32 battle_move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer) {
     map_tile_t* tile = battle_map_get_tile_data_pointer(x, y, layer);
@@ -629,11 +643,11 @@ static s32 battle_move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 lay
     map_tile_depth_t depth = tile->depth_half_height;
 
     height = ((tile->height + depth.depth) * 2) + depth.half_height;
-    lo = -(height + clearance) * 6;
+    lo = -(height + clearance) * MOVE_STEP_HEIGHT_SCALE;
     if (value < lo) {
         return lo;
     }
-    hi = (-height * 6) - 0x30;
+    hi = (-height * MOVE_STEP_HEIGHT_SCALE) - 0x30;
     if (value >= hi) {
         if (hi < lo) {
             return lo;
@@ -650,12 +664,16 @@ enum {
 };
 
 /*
- * Builds the per-frame velocity for a run of identical movement steps: walks
- * the remaining path while the steps keep the same direction quadrant and the
- * clamped ground height stays at the unit's current height, then hands the
- * accumulated edge-to-edge delta to the velocity solver.
- * move_set_velocity_for_contiguous_steps_with_final_tile_height does
- * the same for the final step, where it reads the tile directly.
+ * Build the per-frame velocity for a run of identical movement steps: walk
+ * the remaining path while the steps keep the same direction and the clamped
+ * ground height stays at the unit's current height, then normalize the delta
+ * from the unit to the far edge of the run and scale it by the vsync interval.
+ * battle_move_set_velocity_for_contiguous_steps_with_final_tile_height is the
+ * same walk with the target tile's own surface height on the path's last step.
+ *
+ * The end point stops 7 world units short of the near edge of the run's last
+ * tile (MOVE_STEP_NEAR_EDGE when x or y grows, MOVE_STEP_FAR_EDGE, a tile plus 7,
+ * when it shrinks), on the center line of the other axis.
  *
  * The step code is copied to a 16-bit value before the switch: read through the
  * byte again, cse reuses the direction test's load and the reload is lost.
@@ -675,7 +693,7 @@ void battle_move_set_velocity_for_contiguous_clamped_steps(
     s32 end_z;
     s16 code;
 
-    battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z); /* result unused */
     x = unit->map_x;
     y = unit->map_y;
     index = unit->movement_path_offset - 1;
@@ -688,6 +706,7 @@ void battle_move_set_velocity_for_contiguous_clamped_steps(
         if (current->direction != step->direction) {
             break;
         }
+        /* Bits 6-7 are the step's direction, bits 0-1 its length less one. */
         code = *(u8*)current;
         switch (code >> 6) {
         case MOVE_STEP_DIRECTION_EAST:
@@ -727,15 +746,11 @@ void battle_move_set_velocity_for_contiguous_clamped_steps(
     unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
-enum {
-    MOVE_STEP_HEIGHT_SCALE = 6,
-};
-
 /*
- * Builds the per-frame velocity for a run of identical movement steps: walks
- * the remaining path while the steps keep the same direction quadrant and the
- * ground stays at the unit's current height, then hands the accumulated
- * edge-to-edge delta to the velocity solver.
+ * Build the per-frame velocity for a run of identical movement steps, as
+ * battle_move_set_velocity_for_contiguous_clamped_steps does, but aiming at the
+ * far edge of the run's last tile, and on the path's last step at that tile's
+ * own surface height instead of the clamped one.
  *
  * The step code is copied to a 16-bit value before the switch, as in the clamped
  * twin: read through the byte again, cse reuses the direction test's load.
@@ -758,7 +773,7 @@ void battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
     map_tile_depth_t depth;
     s16 code;
 
-    battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z); /* result unused */
     x = unit->map_x;
     y = unit->map_y;
     index = unit->movement_path_offset - 1;

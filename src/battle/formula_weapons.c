@@ -37,7 +37,7 @@ static s32 battle_formula_calculate_golem_accuracy(void) {
     if ((g_battle_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)]
             & STATUS_BYTE_MASK(STATUS_ID_FAITH))
         != 0) {
-        g_battle_action_current_ability.attacker_faith = 0x64;
+        g_battle_action_current_ability.attacker_faith = 100;
     }
     if ((g_battle_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_INNOCENT)]
             & STATUS_BYTE_MASK(STATUS_ID_INNOCENT))
@@ -198,7 +198,8 @@ void battle_formula_weapon_absorb_hp(void) {
 }
 
 /* Formula 0x07: heal weapon (XA * YA) HP (damage to undead); no evade. Zodiac
- * compatibility is applied twice. */
+ * compatibility is applied twice: here and again inside
+ * battle_formula_apply_physical_modifiers. */
 void battle_formula_weapon_heal(void) {
     battle_formula_calculate_base_xa();
     battle_formula_apply_zodiac_compatibility();
@@ -324,6 +325,7 @@ void battle_formula_absorb_mp_y_percent(void) {
         return;
     }
     battle_formula_calculate_mp_percent_damage();
+    /* battle_formula_apply_mp_absorption takes its amount from hp_damage. */
     g_battle_action_target_data->hp_damage = g_battle_action_target_data->mp_damage;
     battle_formula_apply_mp_absorption();
 }
@@ -632,13 +634,17 @@ void battle_formula_steal_exp_hit_sp_x_percent(void) {
         battle_formula_apply_zodiac_compatibility();
         battle_formula_store_hit_chance();
         battle_formula_use_hp_damage_as_action_hit_percent();
+        /* Outside execution the amount is filled in even after a miss (a 0%
+         * chance), so previews and the AI still see it. */
         if (g_battle_action_target_data->hit != 0 || g_battle_action_state != ACTION_STATE_EXECUTE) {
             battle_formula_set_exp_stolen();
         }
     }
 }
 
-/* Formula 0x29: opposite sex only, hit (MA+X)%. */
+/* Formula 0x29: opposite sex only, hit (MA+X)%. A target whose sex and monster
+ * flags all equal the caster's is a forced miss, so a monster target of a
+ * human caster can be hit. */
 void battle_formula_opposite_sex_hit_ma_x_percent(void) {
     battle_formula_store_ma_and_x();
     battle_formula_apply_zodiac_compatibility();

@@ -71,17 +71,20 @@ static void battle_ai_update_team_targeting_flags(void);
 
 /* Build the acting AI unit's next command (move, act or end turn), deciding a new
  * action first when none is pending. Returns -1 when the frame's scanline budget runs
- * out, resuming at the suspended stage on the next call, else 0. */
+ * out, resuming at the suspended stage on the next call, else 0.
+ *
+ * A new action is decided when none is, and again once the unit has acted (to
+ * choose where to move afterward). Each call then returns one step of it: the
+ * move to the action's tile, unless the unit has moved or is still to act
+ * before moving; else the act; else END_TURN once the unit has acted or the
+ * action has no skillset. When the previous command changed neither the moved
+ * nor the acted flag, the turn ends rather than repeat it. The turn also ends
+ * at once when the acting unit, or any present unit, has no compact AI record. */
 s32 battle_ai_build_command(s32 unit_id, ai_command_t* command) {
-    ai_data_t* ai;
-    unit_stats_t* unit;
-    ai_command_t* last_command;
-    ai_command_t* history;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
     s32 ticks = VSync(1);
-    u8 moved;
 
-    ai = &g_battle_ai_data_base;
     if (ticks >= AI_DECISION_SCANLINE_LIMIT)
         return -1;
     if (g_battle_ai_data_base.resume_pending) {
@@ -162,15 +165,13 @@ s32 battle_ai_build_command(s32 unit_id, ai_command_t* command) {
         battle_mem_copy_u16_values(&command->data.action, &ai->selected_action.command, sizeof(command->data.action));
     }
 preserve:
-    moved = ai->acting_unit->movement_taken;
-    ai->movement_taken = moved;
-    unit = ai->acting_unit;
-    ai->action_taken = unit->action_taken;
+    ai->movement_taken = ai->acting_unit->movement_taken;
+    ai->action_taken = ai->acting_unit->action_taken;
     battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
-    history = &g_battle_ai_command_history[0];
-    last_command = history + 1;
-    battle_mem_copy_u16_values(history, last_command, sizeof(*history));
-    battle_mem_copy_u16_values(last_command, command, sizeof(*last_command));
+    /* Shift the two-entry command history: the previous command moves to entry 0
+     * and this one becomes entry 1. */
+    battle_mem_copy_u16_values(&g_battle_ai_command_history[0], &g_battle_ai_command_history[1], sizeof(ai_command_t));
+    battle_mem_copy_u16_values(&g_battle_ai_command_history[1], command, sizeof(ai_command_t));
     return 0;
 }
 
@@ -209,9 +210,15 @@ static void battle_ai_init_acting_unit_data(void) {
 }
 
 /*
- * Refresh cached unit decision flags before AI simulation.
+ * Rebuild every unit's per-turn decision flags, then run the refresh pass of
+ * the action simulation.
  *
- * Keep the simulation flag set across suspension; clear it on completion.
+ * Each in-play unit gets its enemy flag (against the acting unit's team), its
+ * dead, HP and MP target flags and its considered flag; an untargetable unit
+ * only gains AI_TARGET_UNTARGETABLE. The simulation then marks the transient
+ * statuses each unit will have (battle_ai_simulate_action_and_score). Its
+ * REFRESH_UNIT_STATUS_FLAGS setting stays on across a suspension and is
+ * cleared once the pass completes. Returns -1 to suspend, else 0.
  */
 static s32 battle_ai_refresh_unit_decision_flags(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -398,11 +405,9 @@ static void battle_ai_init_target_consideration(void) {
     }
 }
 
-/*
- * Focus the acting unit's decision on one target and its coordinates.
- *
- * Set focus flag 0x40 and clear stay-near flag 0x20, retaining other flags.
- */
+/* Make the unit the acting unit's main target: switch its decision from
+ * stay-near-coordinates to focus-target and take the unit's tile as the
+ * decision's target coordinates. */
 static void battle_ai_focus_on_target(s32 unit_id) {
     ai_unit_decision_t* decision = g_battle_ai_data_base.acting_unit_decision;
 
@@ -414,12 +419,15 @@ static void battle_ai_focus_on_target(s32 unit_id) {
 /* Build the AI walkable and reachable tile rows for the acting unit.
  *
  * A fresh decision (resume_pending 0) sets the water penalty, rebuilds the
- * walkable rows, clears the scenario rows and spreads movement unless the
- * unit has moved or cannot move. The reachable rows then drop occupied tiles
- * and, unless the unit is disabled, the four listed coordinates. Returns -1
- * when the frame budget is spent. i and j are reused as the spread unit id
- * and the teleport-range distances, as the target's register assignment
- * shows. */
+ * walkable rows, clears scenario 0 and spreads movement from the unit's tile
+ * (a rider spreads with its mount's Move); a unit that has moved or has
+ * Don't Move reaches only its own tile. Scenario 0 then takes every tile the
+ * spread marked as a move destination (within Move by distance for a
+ * teleporter), drops tiles other units stand on and, unless the unit has
+ * Confusion or Berserk, the known trap tiles; the unit's own tile stays
+ * reachable. Returns -1 when the frame budget is spent, to finish on the next
+ * call. i and j are reused as the spread unit id and the teleport-range
+ * distances, as the target's register assignment shows. */
 static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
     ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit;
@@ -442,17 +450,20 @@ static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
         } else {
             g_battle_ai_data_base.water_penalty = 1;
         }
+
         battle_mem_zero_32bit_values(ai->walkable_tiles, sizeof(ai->walkable_tiles));
         for (level = 0; level < MAP_TERRAIN_LAYER_COUNT; level++) {
             for (y = 0; y < ai->map_max_y; y++) {
                 for (x = 0; x < ai->map_max_x; x++) {
                     tile = &g_battle_map_tile_data[level * MAP_TILES_PER_LAYER + y * ai->map_max_x + x];
                     if (!(tile->flags.blocked) && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
+                        /* Row bit 15 is x = 0. */
                         ai->walkable_tiles[level][y] |= 0x8000 >> x;
                     }
                 }
             }
         }
+
         ai->movement_scenario = 0;
         for (j = 0; j < AI_GRID_ROW_COUNT; j++) {
             ai->reachable_tiles[ai->movement_scenario][0][j] = 0;
@@ -474,6 +485,7 @@ static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
         battle_move_set_reachable_tiles(i, ai->acting_unit_coords.fields.x, ai->acting_unit_coords.fields.y,
             ai->acting_unit_coords.fields.elevation);
     }
+
     if (VSync(1) >= AI_DECISION_SCANLINE_LIMIT) {
         return -1;
     }
@@ -503,6 +515,9 @@ static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
             }
         }
     }
+
+    /* Other units' tiles are no destinations, except a crystal or treasure, which the unit
+     * picks up by stepping on it. */
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE && i != ai->acting_unit_id
@@ -514,6 +529,7 @@ static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
     }
     ai->reachable_tiles[0][ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
         |= 0x8000 >> ai->acting_unit_coords.fields.x;
+
     if (*(u32*)&ai->acting_unit->status_sets.current[0]
         & (STATUS_PACKED_MASK(STATUS_ID_CONFUSION) | STATUS_PACKED_MASK(STATUS_ID_BERSERK))) {
         return 0;
@@ -532,15 +548,16 @@ static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
 
 /* Mark each unit's usable abilities and derive the acting unit's AI hints.
  *
- * For every AI-considered unit, abilities blocked by Don't Act, Silence,
- * Innocent, MP, item stock or level are left unmarked; usable ones get entry
- * bit 0x8000 and feed the enemy-team counters and the per-unit helpful ratio.
+ * For every in-play unit, abilities blocked by Frog, Don't Act, Silence,
+ * Innocent, MP, item stock or level are left unmarked; usable ones are marked
+ * usable and feed the enemy-team counters and the per-unit helpful ratio.
  * The acting unit's list then drops buff-only abilities the enemies cannot
  * threaten, aggregates cancellable statuses, range limits and the random-use
  * threshold. action_taken clears the usable bits again.
  *
- * threshold holds first the status-check CT and later the enemy-count cutoff;
- * the single variable reproduces the target's register allocation. */
+ * threshold holds first the status-check CT and later the enemy-count cutoff,
+ * and throw_id doubles as the status byte index of the second pass; the shared
+ * variables reproduce the target's register allocation. */
 static void battle_ai_set_ability_considerations(s32 action_taken) {
     ai_data_t* ai;
     ai_considered_ability_t* ability;
@@ -647,7 +664,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                         continue;
                     }
                     /* Only the acting unit weighs Throw. Keep the highest-level item among its known
-                     * throws: the blue team needs 5 in stock, other teams the item's level. */
+                     * throws: the blue team needs 5 in stock, other teams the item's level. Throw's
+                     * learned bits 0 and 1 are Shuriken and Ball, so Knife is bit 2. */
                     best_level = -1;
                     for (throw_id = ABILITY_ID_THROW_KNIFE, type_index = 1; throw_id < ABILITY_ID_THROW_BALL;
                         throw_id++, type_index++) {
@@ -863,6 +881,9 @@ static void battle_ai_disable_ability_if_only_inflicts_status(ai_ability_entry_t
         return;
     }
 
+    /* The inflicted statuses must be this one alone: its own byte may hold only
+     * its bit (shift reaches the bit's position within that byte) and every
+     * other byte must be empty. */
     {
         s32 status_set;
         s32 mask;
@@ -896,7 +917,14 @@ static void battle_ai_disable_ability_if_only_inflicts_status(ai_ability_entry_t
 /*
  * Load an ability-list entry into the considered AI ability.
  *
- * Decode its physical unit and specialize inventory, weapon and timing data.
+ * The entry's packed id names the ability and the unit that owns it. Attack,
+ * Charge and Jump take their AI flags from the owner's weapon summary (Attack
+ * and Charge also its range and element; Charge and Jump add their CT, Jump its
+ * own range), and Arithmeticks is weighed as inflicting every status on map
+ * tiles. Other abilities read the ability tables for flags, CT, element, MP
+ * cost (halved by Half of MP), range, area and statuses, with item, katana and
+ * throw abilities substituting their item. The current action's calculator
+ * fields are cleared.
  */
 static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -1151,11 +1179,16 @@ void battle_ai_reset_action_ranking_fields(ai_action_data_t* action) {
     action->reflected_action = 0;
 }
 
-/* Evaluate movement while keeping or removing the acting unit's charge.
+/* Weigh keeping the acting unit's charging action against abandoning it.
  *
- * The second simulation temporarily changes unit data; a suspended pass
- * preserves those changes until resumed and completed. The simulation helper
- * resumes from its saved phase when the frame budget is exhausted.
+ * Returns 0 at once when nothing is charging. The candidate is a move-only
+ * action: to the unit's own tile for a Charge ability, else to the scenario's
+ * candidate tile. A Song or Dance in progress is just scored and ranked (0).
+ * Otherwise the move is simulated with the charge kept, which becomes the
+ * selected action, and again with the charge and Charging/Performing cleared
+ * from the unit; they are restored afterward, and a suspended pass keeps them
+ * cleared until it resumes and ends. Returns 1 when keeping the charge ranks
+ * higher, so the selected action stands; 0 otherwise; -1 to suspend.
  */
 static s32 battle_ai_evaluate_charging_movement(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -1300,10 +1333,14 @@ enum {
 #define AI_TILE_PRIORITY_OFFSET ((u32) & ((ai_data_t*)0)->tile_priority)
 
 /*
- * Copies the candidate tile's priority into the inverted-priority scratch
- * action with its sign flipped.  tile_priority is a
- * grid of 16 columns x 18 signed 16-bit values per map level. The lookup reads
- * the stored 16-bit pattern before negating them.
+ * Seed the inverted-priority action, the baseline a ranked action must beat
+ * (battle_ai_insert_ranked_action), with 100% hit and the score of simply
+ * moving to the scenario's candidate tile.
+ *
+ * tile_priority holds each tile's move-only score negated, so the destination
+ * search can take the lowest value; negating it again restores the score. The
+ * grid is 16 columns x 18 rows of 16-bit values per map level, read as the
+ * stored unsigned pattern before the negation.
  */
 static void battle_ai_invert_target_priority(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -1327,7 +1364,19 @@ extern s32 g_battle_ai_movement_unit_index;         /* Reused unit/row loop inde
 extern s32 g_battle_ai_target_distance;             /* Target-distance byte at the acting unit's tile. */
 extern s32 g_battle_ai_stay_near_destination_fixed; /* 1 after a reachable Stay Near destination is fixed. */
 
-/* Prepare candidate destinations and reachable movement scenarios.
+/* Prepare the general search's three movement scenarios and their candidate
+ * destinations.
+ *
+ * Scenario 0 holds every reachable tile. When the decision's target is within
+ * reach of the unit's tile (battle_ai_get_movement_range), scenario 1 keeps
+ * every reachable tile and candidate 1 is the best-scoring one; a free,
+ * reachable stay-near tile is instead taken as is. Otherwise scenario 1 keeps
+ * the tiles closer to the target and candidate 1 is the best-scoring tile
+ * within reach of it, else the nearest; a non-player team halves the reach
+ * one time in seven. Scenario 2 holds the reachable tiles outside scenario 1.
+ * Candidate 0 is a tile closer to a focused target in reach when the unit has
+ * not acted, else candidate 1. While the unit is low on HP or MP, crystals
+ * count as distance 1.
  *
  * Return -1 when a child suspends and 0 after all scenarios are prepared.
  * 32-bit scratch values preserve branch decisions across suspension.
@@ -1415,7 +1464,8 @@ score_tiles:
             battle_ai_select_destination_with_nearest_fallback(g_battle_ai_closest_ability_range);
         }
     }
-    /* XOR preserves the target operation without assuming scenario 1 is a subset. */
+    /* Scenario 2: the reachable tiles outside scenario 1. The XOR is that
+     * difference because scenario 1 is filtered from scenario 0. */
     ai->movement_scenario = 2;
     for (g_battle_ai_movement_unit_index = 0; g_battle_ai_movement_unit_index < ai->map_max_y;
         g_battle_ai_movement_unit_index++) {
@@ -1440,10 +1490,10 @@ score_tiles:
 }
 
 /*
- * Select a destination with the conditional three-tile distance floor.
- *
- * Against an enemy target, targeting flag 0x01 raises smaller limits to 3.
- * Selection still uses the ordinary unrestricted distance-first fallback.
+ * Select a destination within distance_limit of the main target. A unit with
+ * a ranged ability need not come closer than 3 to an enemy target: smaller
+ * limits are raised to 3. Selection still uses the ordinary unrestricted
+ * distance-first fallback.
  */
 static void battle_ai_select_destination_with_range_floor(s32 distance_limit) {
     ai_unit_decision_t* decision = g_battle_ai_data_base.acting_unit_decision;
@@ -1513,6 +1563,8 @@ static s32 battle_ai_select_destination(s32 max_distance, ai_destination_order_e
                             score += proximity;
                         }
                         if (order != AI_DESTINATION_PRIORITY_FIRST) {
+                            /* max_distance now tracks the best distance: a later tile must be at
+                             * least as close, and an equally close one must score no worse. */
                             if (max_distance == distance && best_score < score) {
                                 continue;
                             }
@@ -1579,7 +1631,7 @@ static s32 battle_ai_filter_reachable_tiles_by_target_distance(s32 distance_limi
 }
 
 /* 1 when the unit is untargetable or dead without Reraise per its AI decision
- * record, or petrified. */
+ * record, or petrified (Petrify is the top bit of status byte 1). */
 static s32 battle_ai_is_unit_out_of_play(s32 unit_id) {
     u8 flags = g_battle_ai_data_base.unit_decisions[unit_id].targeting_flags_2;
 
@@ -1783,6 +1835,13 @@ static s32 battle_ai_select_action_ranked(void) {
  *
  * Chicken takes precedence over Blood Suck, Confusion and Berserk. Return
  * -1 to suspend, 1 when selection completes, or 0 if none of these applies.
+ *
+ * Chicken only moves: to the best-scoring reachable tile, with fewer nearby
+ * foes breaking ties. Blood Suck attacks the nearest unit without Blood Suck
+ * with the Blood Suck entry; Berserk attacks the nearest enemy with Attack, or
+ * with the Frog Attack entry for a monster or a frog. Confusion tries the
+ * usable abilities in random order on any unit. When no ability is chosen, the
+ * unit walks toward its target (the nearest unit under Confusion).
  */
 static s32 battle_ai_select_action_status(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -1917,6 +1976,12 @@ success:
  * Math Skill first chooses learned ability and parameter combinations. Return
  * 1 after copying the current action, including fields unchanged by this pass,
  * or 0 when selection fails.
+ *
+ * A map-tile ability takes random reachable tiles until one allows it. Any
+ * other ability takes random origins until a random tile in range from one
+ * works; a follow-target ability aims at a unit or a tile at random (tiles
+ * when no unit can be reached), and a unit aim needs a unit on the tile. Used
+ * for status-imposed actions only; nothing is scored.
  */
 static s32 battle_ai_select_action_random(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -2051,7 +2116,7 @@ static s32 battle_ai_calculate_ability_range(void) {
     u16 row;
     s32 tile_mask;
     u32 level_address;
-    char unused[24];
+    char unused[24]; /* the target's frame reserves 24 bytes nothing uses */
 
     battle_ai_move_temp_unit_to_coords(&ai->current_action.coords);
     count = 0;
@@ -2257,8 +2322,10 @@ static s32 battle_ai_evaluate_ability_list(void) {
  * Dispatch the acting unit's special automatic-battle behavior.
  *
  * A result of -2 chains recovery into retreat, or fading-life behavior into
- * recovery. All dispatched routines otherwise collapse success to 1 while
- * preserving the suspended result -1.
+ * recovery; recovery never returns -2, so its chain is unreachable (QUIRKS.md).
+ * All dispatched routines otherwise collapse success to 1 while preserving the
+ * suspended result -1. Any other setting returns 0, leaving the caller to run
+ * the general search.
  */
 static s32 battle_ai_select_action_autobattle(void) {
     s32 result;
@@ -2302,10 +2369,16 @@ static s32 battle_ai_select_action_autobattle(void) {
 }
 
 /*
- * Select an AI action around the unit's designated target.
+ * Select an action for the TARGETED auto-battle mode, aimed at the unit's
+ * auto-battle target.
  *
- * Preserve the target across the staged movement and ability passes. Return
- * -1 to suspend and 0 when selection completes.
+ * A target that is out of play or no longer an enemy is replaced, and special
+ * behavior dropped: a mount by its rider (unless both are Transparent), any
+ * other unit by the nearest eligible enemy, or by the first Transparent enemy
+ * when none is left. The search then moves toward the target and ranks
+ * abilities on it, then on any unit, before the fallback. The target is
+ * reloaded from the unit on every resume. Return -1 to suspend and 0 when
+ * selection completes.
  */
 static s32 battle_ai_select_action_targeted(void) {
     s32 target = g_battle_ai_data_base.acting_unit->auto_battle_target;
@@ -2741,6 +2814,7 @@ static s32 battle_ai_select_peril_target(void) {
         } else {
             status_score = 0;
             if (ai->acting_unit_decision->targeting_flags_1 & AI_TARGETING_FLAG_1_CAN_HEAL_ALLIES) {
+                /* Branch-free 0x72 below half HP: the flag is bit 0, so its negation is all ones. */
                 status_score = -(decision->targeting_flags_2 & AI_TARGET_HP_BELOW_HALF) & 0x72;
             }
         }
@@ -2925,8 +2999,10 @@ fill_target_distance:
  * Select the nearest unit admitted by the requested target filter.
  *
  * Manhattan-distance ties keep the first slot. If none qualify, return the
- * acting unit's ID. Mode 5 admits crystals before ordinary targetability
- * checks, while mode 4 shares mode 0's Blood Suck exclusion.
+ * acting unit's ID. Every mode skips untargetable and petrified units, and all
+ * but AI_NEAREST_ELIGIBLE_ENEMY dead ones; AI_NEAREST_HEALER_OR_CRYSTAL admits
+ * crystals before those checks, and AI_NEAREST_ELIGIBLE_ENEMY falls through to
+ * the Blood Suck exclusion of AI_NEAREST_WITHOUT_BLOOD_SUCK.
  */
 s32 battle_ai_find_nearest_target(ai_nearest_target_mode_e mode) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -3046,8 +3122,8 @@ static void battle_ai_set_candidate_and_actor_reachable_tiles(void) {
     }
 }
 
-/* Reset the selected action to the candidate coordinates for the current
- * movement scenario; the Defend skillset marks a Defend when the unit has it. */
+/* Fall back to moving to the current scenario's candidate tile, then Defending
+ * when the unit's support ability is Defend, else taking no action. */
 static void battle_ai_select_action_fallback(void) {
     u8 scenario = g_battle_ai_data_base.movement_scenario;
     unit_stats_t* unit = g_battle_ai_data_base.acting_unit;
@@ -3497,6 +3573,8 @@ void battle_ai_init_unit_abilities(s32 unit_id) {
     decision->silence_mod = battle_ai_calculate_ratio_times_4(ability_count, silence_count);
     decision->mp_ability_mod = battle_ai_calculate_ratio_times_4(ability_count, mp_count);
     decision->evade_mod = battle_ai_calculate_ratio_times_4(ability_count, evade_count);
+    /* The five ENTD AI bytes become flags, main target, both targeting flag bytes and
+     * the enemy flag; the stay-near tile's level is the top bit of the first. */
     battle_mem_copy_bytes(&decision->flags, &unit->ai_flags, 5);
     decision->target.fields.x = unit->ai_target_x;
     decision->target.fields.y = unit->ai_target_y;

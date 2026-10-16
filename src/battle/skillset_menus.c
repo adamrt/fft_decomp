@@ -34,12 +34,14 @@ static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit)
 /* Build the parallel ability lists for one of a unit's skillsets.
  *
  * Every learned slot of the skillset is listed in ability_ids (terminated with
- * -1); the count is returned. Ordinary abilities also report MP cost (halved
- * by Half of MP), CT (halved by Short Charge, zeroed by Non-Charge unless the
- * ability perseveres), reflectable/silence flags and the number of turns until
- * it resolves; Charge abilities (0x196-0x19d) report CT and turns only. A Frog
- * may list only Frog (0x1d), and abilities requiring a sword or Materia Blade
- * are skipped when the unit lacks one.
+ * -1); the count is returned. For a monster, or a skillset that is neither a
+ * generic job skillset nor the unit's primary or base job skillset, every slot
+ * counts as learned. Ordinary abilities also report MP cost (halved, rounding up, by
+ * Half of MP), CT (halved by Short Charge, zeroed by Non-Charge unless the
+ * ability perseveres), a flag byte (bit 0 reflectable, bit 1 affected by
+ * Silence) and the number of turns until it resolves; Charge abilities report
+ * CT and turns only. A Frog may list only the Frog spell, and abilities
+ * requiring a sword or Materia Blade are skipped when the unit lacks one.
  *
  * The two flag bytes need separate locals: sharing one keeps the attribute
  * byte in a globally allocated register, which the target does not. */
@@ -107,6 +109,7 @@ s32 battle_menu_get_unit_skillset_ability_data(
     } else {
         known = main_ability_get_known(unit, skillset_index);
     }
+    /* The learned bits run MSB first from bit 23; only the 16 action slots are listed. */
     for (i = 0; i < 16; i++) {
         if (!(known & (0x800000 >> i))) {
             continue;
@@ -162,16 +165,16 @@ s32 battle_menu_get_unit_skillset_ability_data(
     return count;
 }
 
-/* Loads the unit's Item skillset entries through battle_menu_load_item_abilities and returns the
+/* Load the unit's Item skillset entries through battle_menu_load_item_abilities and return the
  * low byte of its result (the entry count). */
 s32 battle_menu_display_item_inventory_ability(s32 unit_id, s32 skillset, u8* out_item_ids) {
     return battle_menu_load_item_abilities(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /*
- * Collects the item abilities the unit can use into out_item_ids, terminated
- * by 0xff, and returns 0x100 plus the number of entries (0 when the unit or
- * the skillset is wrong, or the menu is empty).
+ * Collect the item ids of the unit's learned Item abilities into out_item_ids,
+ * terminated by ITEM_ID_NONE, and return 0x100 plus the number of entries (0
+ * when the unit or the skillset is wrong, or the menu is empty).
  *
  * Loading the ability id into `item_index` before subtracting ABILITY_ID_ITEM_FIRST
  * keeps the table index in its own s16 pseudo, so GCC emits the target's fresh
@@ -227,11 +230,14 @@ s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids
     return battle_menu_collect_throwable_items(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
-/* Collect the item ids the unit may throw into `out`, terminated with -1.
+/* Collect the item ids the unit may throw into `out`, terminated with
+ * ITEM_ID_NONE, and return 0x100 plus their count (0 when the unit or the
+ * skillset is wrong or no Throw ability is learned).
  *
  * The skillset's abilities select item types through g_main_throw_ability_item_types; every item of
- * a selected type that is throwable and that the party still owns is listed.
- * */
+ * a selected type that is throwable and in stock is listed (battle_action_decrement_player_item_quantity:
+ * only a player-team unit can run out).
+ */
 s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     u16 abilities[0x14];
     u8 item_types[0x14];
@@ -295,23 +301,23 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     return count + 0x100;
 }
 
-/* Collects the unit's learned Math Skill attribute abilities (CT, Level, Exp,
+/* Collect the unit's learned Math Skill attribute abilities (CT, Level, Exp,
  * Height) into out_ability_ids. */
 s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids) {
     return battle_menu_collect_math_skill_abilities_by_flags(
         unit_id, skillset, out_ability_ids, CALCULATOR_ATTRIBUTE_MASK);
 }
 
-/* Collects the unit's learned Math Skill divisor abilities (Prime, 5, 4, 3)
+/* Collect the unit's learned Math Skill divisor abilities (Prime, 5, 4, 3)
  * into out_ability_ids. */
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids) {
     return battle_menu_collect_math_skill_abilities_by_flags(
         unit_id, skillset, out_ability_ids, CALCULATOR_MULTIPLE_MASK);
 }
 
-/* Collects the unit's learned Math Skill abilities (0x19e..0x1a5) whose
- * secondary-data flags intersect mask into out, -1-terminated, and returns
- * the count. */
+/* Collect the unit's learned Math Skill abilities whose
+ * g_main_math_rsm_ability_data flags intersect mask into out, -1-terminated,
+ * and return the count. An empty list writes no terminator. */
 static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask) {
     u16 abilities[0x14];
     u8 mp_costs[0x18];
@@ -354,9 +360,9 @@ static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 ski
 }
 
 /*
- * Collects the unit's Calculator-eligible abilities from the four skillsets
- * at g_battle_menu_calculator_skillsets into out, -1-terminated, and returns the count. Only the Math
- * Skill skillset collects anything.
+ * Collect the unit's Calculator-eligible abilities from the four skillsets
+ * in g_battle_menu_calculator_skillsets into out, -1-terminated, and return the
+ * count. Only a request for the Math Skill skillset collects anything.
  *
  * The record pointer must be taken inside the inner loop: hoisting the table
  * base into a local before the loop swaps the two preheader address setups.
@@ -402,7 +408,7 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
     return count;
 }
 
-/* Returns the Elemental (Geomancy) ability for the surface under the unit when
+/* Return the Elemental (Geomancy) ability for the surface under the unit when
  * the unit knows and can use it, otherwise 0. */
 u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset) {
     unit_stats_t* unit;
@@ -439,17 +445,23 @@ u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset) {
 
 /*
  * Collect the monster-skill ability ids a unit can use into `out`, with one
- * range/charge flag byte per accepted id in `flags_out`.
+ * flag byte per listed ordinary ability in `flags_out` (bit 0 reflectable, bit
+ * 1 affected by Silence).
+ *
+ * A monster lists its first three skills, and the fourth too when a Monster
+ * Skill supporter stands next to it. A Frog lists Frog Attack first and then
+ * only the Frog spell. The function has no return statement and writes no
+ * terminator after a list; its one caller ignores the result.
  *
  * The target keeps two live copies of the ability id: `id` in $a0 feeds both
  * sign extensions and the `addiu -1` range check, while `ability` in $a1
- * carries the value the `sh` store writes and is shared with the berserk arm's
+ * carries the value the `sh` store writes and is shared with the Frog arm's
  * Frog Attack.
  */
 s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out) {
     unit_stats_t* unit;
     s32 count = 3;
-    s32 berserk = 0;
+    s32 frog = 0;
     s32 i;
     s16 id;
     s16 ability;
@@ -460,13 +472,13 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
         return 0;
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
-        berserk = 1;
+        frog = 1;
     }
     if (g_main_action_menu_types_by_skillset[skillset] != ACTION_MENU_TYPE_MONSTER) {
         *out = -1;
         return 0;
     }
-    if (berserk != 0) {
+    if (frog != 0) {
         ability = ABILITY_ID_FROG_ATTACK;
         *out = ability;
         out++;
@@ -477,7 +489,7 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
     for (i = 0; i < count; i++) {
         id = main_ability_get_id_from_skillset(skillset, i);
         ability = id;
-        if ((berserk == 0 || id == ABILITY_ID_BLACK_MAGIC_FROG) && id != 0 && id >= 1 && id < ABILITY_ID_ITEM_FIRST) {
+        if ((frog == 0 || id == ABILITY_ID_BLACK_MAGIC_FROG) && id != 0 && id >= 1 && id < ABILITY_ID_ITEM_FIRST) {
             flags = g_main_ability_range_data[id].flags_3;
             *flags_out++ = (flags >> 7) | ((flags & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE) >> 4);
             *out = ability;
@@ -487,8 +499,8 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
 }
 
 /* Monster Skill check: the number of the four tiles adjacent to the unit that
- * hold a same-team Monster Skill supporter at the unit's total height. Returns 0
- * for an empty slot. */
+ * hold a same-team Monster Skill supporter within 5 of the unit's total
+ * height. Returns 0 for an empty slot. */
 s32 battle_menu_init_monster_skill_check(const unit_stats_t* unit) {
     battle_unit_height_data_t height_data;
     s32 team;
@@ -511,7 +523,9 @@ s32 battle_menu_init_monster_skill_check(const unit_stats_t* unit) {
     return sum + battle_menu_has_monster_skill_supporter_at_tile(team, x, y + 1, height);
 }
 
-/* Returns whether a same-team Monster Skill supporter occupies the supplied tile. */
+/* Return whether a unit on the team of `team_flags` that has the Monster Skill
+ * support ability and can react stands on the tile, with a total height within
+ * 5 of `total_height` (taken as a byte). */
 static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height) {
     battle_unit_height_data_t height;
     u8 reference_height;
@@ -553,10 +567,10 @@ s32 battle_menu_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_
     return battle_menu_collect_draw_out_katanas(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
-/* Collects the Draw Out weapon entry (ability id - 0x26) of each of the unit's
- * usable Draw Out abilities into out_item_ids, 0xff-terminated, and returns
- * 0x100 plus their count (0 when the unit or skillset is wrong or the list is
- * empty). */
+/* Collect the katana item id of each of the unit's learned Draw Out abilities
+ * into out_item_ids, terminated by ITEM_ID_NONE, and return 0x100 plus their
+ * count (0 when the unit or skillset is wrong or the list is empty). Draw Out
+ * abilities run in the same order as their katanas. */
 s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) {
     u16 abilities[0x10];
     u8 mp_costs[0x10];
@@ -601,14 +615,16 @@ s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids) {
     u8 charge_times[16];
     u8 turn_counts[16];
+
     return battle_menu_load_charge_skillset(unit_id, skillset_id, ability_ids, charge_times, turn_counts);
 }
 
-/* Loads the skillset's usable abilities with their CT and turn counts into the
+/* Load the skillset's usable abilities with their CT and turn counts into the
  * caller's lists; the MP-cost and silence/reflect flag lists are scratch. */
 s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns) {
     u8 mp_costs[16];
     u8 ability_flags[16];
+
     return battle_menu_get_unit_skillset_ability_data(
         unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
 }
@@ -807,6 +823,8 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             /* clang-format on */
             break;
         case BATTLE_BETWEEN_TURN_STATE_COLLECT_PENDING_ACTIONS:
+            /* The Mime flags double here as the list of units whose expiring
+             * statuses left an action result to apply. */
             i = 0;
             do {
                 unit = &g_battle_unit_stats[i];
@@ -968,6 +986,10 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
  * (Defending removed, +1 Brave for a Chicken with Brave below 10), 1 when the
  * death counter runs out and the unit becomes a crystal or treasure, 3 when
  * Death Sentence expires on a unit that is not undead, and 0 when nothing happens.
+ *
+ * Reraise revives with a tenth of max HP; an Undead unit whose death counter
+ * runs out revives on a coin flip with 1 to max HP. Outside the execute action
+ * state (previews and AI simulations) a dead unit's counter does not move.
  */
 static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
     action_data_t* action = &unit->action;
@@ -995,6 +1017,7 @@ static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
         if (unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION)) {
             return 0;
         }
+        /* The unit leaves on the tick its counter is already 0. */
         counter = unit->death_counter;
         counter -= 1;
         if (counter != 0xff) {
@@ -1094,7 +1117,10 @@ s32 battle_status_calculate_turn_flags(const unit_stats_t* unit) {
 /* Determine whether either side has met its battle-ending condition.
  *
  * Returns -1 when the blue side is defeated, 0 when all opposing units are
- * defeated, and 1 while both sides can continue. */
+ * defeated, and 1 while both sides can continue. A unit of importance 3 (whose
+ * loss decides the battle) that is disabled or lost decides it at once:
+ * defeat for a player-team unit, victory for any other. Otherwise the side
+ * left with no unit free of the KO status set loses, the player side first. */
 s32 battle_action_check_battle_outcome(void) {
     s32 player_unit_count = 0;
     s32 enemy_unit_count = 0;
@@ -1148,8 +1174,9 @@ s32 battle_action_check_battle_outcome(void) {
 
 /* Return the unit's position on a freshly built AT list.
  *
- * Returns -1 for an empty slot, -3 for a unit that cannot act and -2 when the
- * unit is not on the list. */
+ * Returns -1 for an empty slot, -3 for a unit the AT list leaves out (Dead,
+ * Crystal, Petrify, Treasure or a ridden mount) and -2 when the unit is not on
+ * the list. */
 s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
     battle_at_entry_t at_list[BATTLE_AT_LIST_CAPACITY];
     s32 i;
@@ -1173,8 +1200,8 @@ s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
 
 /* Rebuild the AT list and return the unit id of the chosen entry.
  *
- * Returns -4 for an empty entry; a charged-action entry (bit 0x40) returns its
- * unit id plus 0x100. */
+ * Returns -4 for an empty entry; a charged-action entry (BATTLE_AT_ACTION_ENTRY)
+ * returns its unit id plus 0x100. */
 s32 battle_action_get_at_list_entry_unit_id(s32 at_index) {
     battle_at_entry_t at_list[BATTLE_AT_LIST_CAPACITY];
     u32 entry;
@@ -1399,7 +1426,7 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
                 }
                 ct += value;
                 /* Give up on a unit that cannot reach 100 CT within 500 ticks. */
-                if (tick >= 0x1f5) {
+                if (tick >= 501) {
                     break;
                 }
             }
@@ -1427,9 +1454,11 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
 
 /* Insert an entry into the 40-entry AT list ahead of the first one with a
  * larger key; the last entry drops off. Mode 0 is a unit's turn (the battle ID).
- * Mode 1 is a charged ability landing: battle ID + 0x40 with the ability id's
- * low byte in action_id_low, battle ID - 0x40 for an ability id of 0x100 or more, or
- * battle ID + 0x60 for Jump. Returns 1 when the entry was placed. */
+ * Mode 1 is a charged ability landing: battle ID + BATTLE_AT_ACTION_ENTRY with
+ * the ability id's low byte in action_id_low, or battle ID + BATTLE_AT_ACTION_ENTRY
+ * + BATTLE_AT_JUMP for Jump. For an ability id of 0x100 or more the code is battle
+ * ID - 0x40, which as a byte is battle ID + 0xc0: the action entry plus
+ * BATTLE_AT_ABILITY_ID_HIGH_BIT. Returns 1 when the entry was placed. */
 static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t* list) {
     unit_stats_t* unit;
     s32 i;
@@ -1483,9 +1512,10 @@ void battle_action_set_only_movement_taken(s32 unit_id) {
 
 /* Mark the unit's move and/or action as taken and end its turn once nothing is
  * left to do. -1 for an absent unit, 1 when the turn ended, otherwise 0. */
-static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
-    unit_stats_t* unit = &g_battle_unit_stats[idx];
+static s32 battle_action_set_move_act_flags(s32 unit_id, s32 move_flag, s32 act_flag) {
+    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     s32 ret;
+
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return -1;
     if (move_flag != 0) {
@@ -1496,7 +1526,7 @@ static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag
     }
     ret = battle_action_should_end_unit_turn(unit);
     if (ret != 0) {
-        ret = battle_action_end_turn(idx);
+        ret = battle_action_end_turn(unit_id);
     }
     return ret;
 }
@@ -1509,7 +1539,7 @@ static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag
 s32 battle_action_end_turn(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     u16 ct;
-    u8 status4;
+    u8 status5;
     u8 movement_check;
     u8 action_check;
     u32 result;
@@ -1519,9 +1549,9 @@ s32 battle_action_end_turn(s32 unit_id) {
     if (unit->has_turn == 0)
         return 1;
     ct = unit->ct;
-    status4 = unit->status_sets.current[4];
-    movement_check = unit->movement_taken | (status4 & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE));
-    action_check = (status4 & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT)) | unit->action_taken
+    status5 = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)];
+    movement_check = unit->movement_taken | (status5 & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE));
+    action_check = (status5 & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT)) | unit->action_taken
         | (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)] & STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
     if (movement_check == 0) {
         ct += BATTLE_TURN_UNUSED_CT_REFUND;
@@ -1538,7 +1568,9 @@ s32 battle_action_end_turn(s32 unit_id) {
     return 1;
 }
 
-/* Returns whether a unit with no remaining move or action should end its turn. */
+/* Return 1 when the unit's turn should end: it can no longer move (moved, or
+ * Don't Move) nor act (acted, or an action restriction), and it has used at
+ * least one of the two. */
 static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit) {
     s32 cannot_act = battle_unit_get_action_restriction(unit);
     u8 no_move;

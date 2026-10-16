@@ -57,15 +57,15 @@ static void battle_unit_update_attacker_earned_experience(s32 outcome);
  * g_battle_action_attacker_data at that result. */
 void battle_status_remove_transparent_if_jump_used(unit_stats_t* unit) {
     action_data_t* action = &g_battle_action_attacker_action_data;
+
     g_battle_action_attacker_data = action;
-    /* Inflicted status byte 2 bit 0x10 is Transparent. */
     if (unit->action_command.skillset_id == SKILLSET_ID_JUMP
         && (unit->inflicted_status[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
             & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT))) {
         action->hit = 1;
         g_battle_action_attacker_action_data.attack_type |= ACTION_TYPE_STATUS_CHANGE;
-        g_battle_action_attacker_action_data.status_changes.removal[2]
-            = g_battle_action_attacker_action_data.status_changes.removal[2] | STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT);
+        g_battle_action_attacker_action_data.status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
+            |= STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT);
     }
 }
 
@@ -92,21 +92,22 @@ s32 battle_formula_apply_status_and_check_undead(void) {
  * cleared. */
 void battle_action_switch_ability_to_default_attack(void) {
     unit_stats_t* unit = g_battle_action_attacker;
-    unit_stats_t* u2;
-    unit_stats_t* u3;
+    unit_stats_t* attacker;
+    unit_stats_t* attacker_after;
     u8 saved_strike_counter = g_battle_action_current_ability.strike_counter;
     u8 saved_skillset = unit->action_command.skillset_id;
     u16 saved_ability;
 
+    /* g_battle_action_attacker is read again after each store, as retail does. */
     unit->action_command.skillset_id = SKILLSET_ID_ATTACK;
-    u2 = g_battle_action_attacker;
+    attacker = g_battle_action_attacker;
     saved_ability = unit->action_command.ability_id;
-    u2->action_command.ability_id = 0;
-    battle_action_run_pre_formula_setup(&u2->action_command, g_battle_action_current_ability.target_id);
-    u3 = g_battle_action_attacker;
+    attacker->action_command.ability_id = 0;
+    battle_action_run_pre_formula_setup(&attacker->action_command, g_battle_action_current_ability.target_id);
+    attacker_after = g_battle_action_attacker;
     g_battle_action_current_ability.strike_counter = saved_strike_counter;
-    u3->action_command.ability_id = saved_ability;
-    u3->action_command.skillset_id = saved_skillset;
+    attacker_after->action_command.ability_id = saved_ability;
+    attacker_after->action_command.skillset_id = saved_skillset;
     g_battle_action_current_ability.weapon_proc_pending = 0;
     g_battle_action_current_ability.reaction_id = 0;
 }
@@ -156,10 +157,17 @@ static void battle_move_apply_knockback(void) {
     }
 }
 
-/* Applies the pending reaction ability's effect to the current target action
- * record and finishes the strike. Returns 0 when the ability's behavior
- * flags select the alternate handler, -1 for an ability with no effect entry,
- * and 1 once the action has been finalized.
+/* Apply the pending reaction ability's effect to the current target action
+ * record and finish the strike. Returns 0 for a reaction whose behavior flags
+ * have TRIGGER_ABILITY without ABILITY (one that answers with an ability, such
+ * as Counter), which the caller resolves as an ordinary strike; -1 for an
+ * ability with no effect entry; and 1 once the action has been finalized.
+ * Reflect strikes on behalf of the original acting unit.
+ *
+ * The saves add 1 to PA, MA or Speed, Brave Up and Faith Up add 3, HP and MP
+ * Restore fill the gauge, Distribute heals each listed unit its share of the
+ * excess healing (rounded up) and Damage Split moves half the damage onto the
+ * attacker while the reactor heals it.
  *
  * The Damage Split case chains the damage store so the value reaches `healing` through
  * the target record; storing it there first is what orders the three global
@@ -324,8 +332,8 @@ void battle_action_store_used_weapon(action_command_t* action) {
  * which changes this function's code. */
 extern battle_current_ability_t g_battle_action_current_ability_view;
 
-/* Pre-formula setup: loads the current ability, weapon and item data for one
- * attacker/target pair and runs the formula handler.
+/* Pre-formula setup: load the current ability, weapon and item data for one
+ * attacker/target pair and run the formula handler.
  *
  * Returns 1 when the target was already missed before the formula (reflect,
  * Blade Grasp, Arrow Guard) and 0 otherwise, including the reaction and
@@ -522,8 +530,8 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     }
 
     g_battle_formula_handlers[formula - 1]();
-    /* Only the weapon damage formulas (1..6) go on to Poach and Train. */
-    if (formula < 7) {
+    /* Only the weapon formulas before Weapon Heal (1..6) go on to Poach and Train. */
+    if (formula < ABILITY_FORMULA_WEAPON_HEAL) {
         battle_formula_apply_poach_and_train();
     }
     if (formula == ABILITY_FORMULA_DAMAGE_PA_TIMES_WP) {
@@ -537,10 +545,11 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     return 0;
 }
 
-/* For an ability whose status infliction type is cancel, copies its status bytes
+/* For an ability whose status infliction type is cancel, copy its status bytes
  * to g_battle_action_canceled_statuses. Run during the pre-formula setup. */
 static void battle_status_store_ability_cancellations(void) {
     s32 i;
+
     if (g_battle_action_current_ability.status_infliction.type & STATUS_INFLICTION_TYPE_CANCEL) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             g_battle_action_canceled_statuses[i] = g_battle_action_current_ability.status_infliction.statuses[i];
@@ -618,17 +627,18 @@ void battle_action_finalize_target_current_action(void) {
     }
 }
 
-/* Drop a pending weapon proc together with the added-effect flag (special
- * effect 0x0200). */
+/* Drop a pending weapon proc together with the target's
+ * ACTION_SPECIAL_EFFECT_ADDED_EFFECT flag. */
 void battle_formula_clear_pending_proc(void) {
-    u16* pflag = &g_battle_action_current_ability.weapon_proc_pending;
+    u16* proc_pending = &g_battle_action_current_ability.weapon_proc_pending;
     action_data_t* action;
     u16* special_effect;
-    if (*pflag != 0) {
+
+    if (*proc_pending != 0) {
         action = g_battle_action_target_data;
         g_battle_action_current_ability.reaction_id = 0;
-        *pflag = 0;
-        /* Clear the added-effect bit (0x0200). Reading the field through a
+        *proc_pending = 0;
+        /* Clear the added-effect bit. Reading the field through a
          * second pointer keeps the lhu below the two scalar global stores;
          * a direct action->special_effect load is hoisted above them
          * (MEM_IN_STRUCT_P) and the function comes out 4 bytes short. */
@@ -641,6 +651,7 @@ void battle_formula_clear_pending_proc(void) {
  * target's KNOCKBACK special effect. */
 void battle_action_clear_knockback_flag(void) {
     action_data_t* target_data;
+
     if ((g_battle_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING) != 0) {
         target_data = g_battle_action_target_data;
         g_battle_action_current_ability.knockback_flags = 0;
@@ -668,6 +679,7 @@ void battle_action_clear_current_data(action_data_t* action) {
  * canceled statuses with them. */
 static void battle_action_clear_status_changes(action_data_t* action) {
     s32 i;
+
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         g_battle_action_canceled_statuses[i] = 0;
         action->status_changes.infliction[i] = 0;
@@ -679,8 +691,20 @@ static void battle_action_clear_status_changes(action_data_t* action) {
 
 /* Apply the target's pending action results and flag reactions.
  *
- * Returns -1 for an invalid or absent unit, or when a mounted target ends
- * the action dead or crystallized; otherwise 0.
+ * A dead unit turning into a crystal or treasure only resolves that change.
+ * Otherwise, in order: the target's reactions are armed (a Catch takes the
+ * item), a Golem guard takes the damage off the team's Golem HP instead, HP and
+ * MP change (clamped), the stat changes apply, lost or stolen equipment goes,
+ * an unbroken Draw Out katana comes back, gil, EXP and JP change, and a level
+ * change, a poach and a Morbol transformation apply. A unit brought to 0 HP
+ * only becomes Dead; otherwise Critical (HP at a fifth of max or less) and
+ * Chicken (Brave below 10) are set or cleared, HP damage removes Sleep, Charm,
+ * Confusion and Transparent, and a knockback cancels a Charge before the status
+ * changes resolve. The outcome (0 nothing changed, 1 changed, 2 the unit died)
+ * feeds the attacker's EXP.
+ *
+ * Returns -1 for an invalid or absent unit, or when a rider ends the action
+ * dead or crystallized; otherwise 0.
  *
  * The HP/MP damage and healing fields are read signed (lh), hence the s16
  * casts on the u16 header fields. The KO test's three status-bit checks fold
@@ -692,11 +716,11 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     s32 i;
     u16 old_hp;
     u16 old_mp;
-    u8 old_status[5];
-    u8 old_status_ct[16];
+    u8 old_status[STATUS_BYTE_COUNT];
+    u8 old_status_ct[BATTLE_TIMED_STATUS_COUNT];
 
     outcome = 0;
-    if (unit_id >= 21) {
+    if (unit_id >= BATTLE_UNIT_SLOT_COUNT) {
         return -1;
     }
 
@@ -851,10 +875,10 @@ s32 battle_action_apply_target_result(s32 unit_id) {
 
     battle_status_modify_inflictions(0);
     /* Snapshot the statuses to see what resolving the changes alters. */
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         old_status[i] = g_battle_action_target->status_sets.current[i];
     }
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < BATTLE_TIMED_STATUS_COUNT; i++) {
         old_status_ct[i] = g_battle_action_target->status_ct[i];
     }
 
@@ -865,13 +889,13 @@ s32 battle_action_apply_target_result(s32 unit_id) {
             g_battle_action_target->ko_count++;
         }
     } else {
-        for (i = 0; i < 5; i++) {
+        for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             if (g_battle_action_target->status_sets.current[i] != old_status[i]) {
                 outcome = 1;
                 break;
             }
         }
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < BATTLE_TIMED_STATUS_COUNT; i++) {
             if (g_battle_action_target->status_ct[i] != old_status_ct[i]) {
                 outcome = 1;
                 break;
@@ -899,7 +923,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
  * Inventory quantities saturate at 0xff. */
 static s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
     unit_stats_t* unit;
-    s32 idx;
+    s32 monster_index;
     s32 item;
     s32 count;
     s32 result;
@@ -914,11 +938,11 @@ static s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
     if (unit->job_id < JOB_ID_CHOCOBO || unit->job_id > JOB_ID_TIAMAT) {
         return 0;
     }
-    idx = unit->job_id - JOB_ID_CHOCOBO;
+    monster_index = unit->job_id - JOB_ID_CHOCOBO;
     if (main_util_roll_pass_fail(256, BATTLE_POACH_RARE_ITEM_CHANCE) != 0) {
-        item = g_main_item_poach_table[idx].common_item;
+        item = g_main_item_poach_table[monster_index].common_item;
     } else {
-        item = g_main_item_poach_table[idx].rare_item;
+        item = g_main_item_poach_table[monster_index].rare_item;
     }
     count = g_main_item_poached_quantities[item];
     result = 0xff;
@@ -929,7 +953,10 @@ static s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
     return result;
 }
 
-/* Transform a unit into a Morbol, keeping its name, position and facing. */
+/* Transform a unit into a Morbol, keeping its name, unit id, formation index,
+ * position and facing. Init kind 0x82 rebuilds the unit's stats for its new job
+ * without resetting it or reading ENTD data; the generated-unit formation index
+ * meanwhile lets the level growth run. */
 void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     u8 saved_name[0x10];
     u8 palette[8];
@@ -946,7 +973,7 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     unit_id = unit->unit_id;
     unit->job_id = JOB_ID_MORBOL;
     unit->character_identity = CHARACTER_IDENTITY_MONSTER;
-    main_mem_copy_byte_data_source_first(name, saved_name, 0x10);
+    main_mem_copy_byte_data_source_first(name, saved_name, sizeof(saved_name));
     formation_index = unit->formation_index;
     x = unit->x;
     y = unit->position.y;
@@ -959,7 +986,7 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     unit->formation_index = formation_index;
     unit->position.higher_elevation = higher_elevation;
     unit->position.facing = facing;
-    main_mem_copy_byte_data_source_first(saved_name, name, 0x10);
+    main_mem_copy_byte_data_source_first(saved_name, name, sizeof(saved_name));
     unit->unit_id = unit_id;
     main_unit_calculate_palette_spritesheet(unit, palette);
 }
@@ -970,28 +997,28 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
  * new level. The unit changes only when executing; returns 1 when the action
  * carries either effect. */
 static s32 battle_unit_apply_level_up_down_ability(void) {
-    s32 lv;
-    s32 dir;
+    s32 level;
+    s32 level_down;
     u16 flags = g_battle_action_target_data->special_effect;
 
     if (flags & ACTION_SPECIAL_EFFECT_LEVEL_UP) {
-        lv = g_battle_action_target->level + 1;
-        dir = 0;
-        if (lv > UNIT_LEVEL_MAX) {
-            lv = UNIT_LEVEL_MAX;
+        level = g_battle_action_target->level + 1;
+        level_down = 0;
+        if (level > UNIT_LEVEL_MAX) {
+            level = UNIT_LEVEL_MAX;
         }
     } else if (flags & ACTION_SPECIAL_EFFECT_LEVEL_DOWN) {
-        lv = g_battle_action_target->level - 1;
-        dir = 1;
-        if (lv <= 0) {
-            lv = 1;
+        level = g_battle_action_target->level - 1;
+        level_down = 1;
+        if (level <= 0) {
+            level = 1;
         }
     } else {
         return 0;
     }
     if (g_battle_action_state == ACTION_STATE_EXECUTE) {
-        g_battle_action_target->level = lv;
-        main_unit_apply_level_growth(g_battle_action_target, dir);
+        g_battle_action_target->level = level;
+        main_unit_apply_level_growth(g_battle_action_target, level_down);
     }
     return 1;
 }
@@ -1026,6 +1053,7 @@ s32 battle_action_is_reaction_prevented(const unit_stats_t* unit) {
  * otherwise. */
 static s32 battle_action_check_reaction(const unit_stats_t* unit) {
     s32 result;
+
     /* Both globals are loaded unsigned (lhu) here. */
     if (g_battle_action_current_ability.reaction_id != 0) {
         if (g_battle_action_current_ability.weapon_proc_pending == 0)
@@ -1038,7 +1066,9 @@ static s32 battle_action_check_reaction(const unit_stats_t* unit) {
     return result;
 }
 
-/* Apply the target's reflect or weapon-evasion reactions before the attack resolves. */
+/* Apply the target's Reflect status or its weapon-evasion reaction (Blade
+ * Grasp, else Arrow Guard) before the attack resolves. Only a primary action
+ * other than Weapon Heal is checked, and not while a weapon's proc resolves. */
 static void battle_action_check_evasion_reactions(void) {
     u8 reaction_flags;
 
@@ -1076,8 +1106,8 @@ static void battle_action_check_evasion_reactions(void) {
     }
 }
 
-/* Dispatches the target unit's first reaction ability whose bit is set in
- * ability_flags.reaction[0..2]. Formula 7 abilities never provoke a reaction.
+/* Dispatch the target unit's first reaction ability whose bit is set in
+ * ability_flags.reaction[0..2]. Weapon Heal (formula 7) never provokes a reaction.
  *
  * Counter Magic (byte 1) is tested last, after the byte-2 reactions, so
  * Absorb Used MP or Counter takes precedence over it. */
@@ -1234,6 +1264,7 @@ static void battle_action_check_critical_hp_reaction_usability(s16 reaction_id) 
 static void battle_action_check_mp_cost_reaction_usability(s16 reaction_id) {
     u8* used_mp = &g_battle_action_current_ability.mp_cost;
     action_data_t* action;
+
     if (*used_mp != 0) {
         if (battle_action_calculate_chance_to_react(g_battle_action_target) == 0) {
             action = g_battle_action_target_data;
@@ -1250,6 +1281,7 @@ static void battle_action_check_reflect_reaction(void) {
     /* Loaded through a pointer so the reaction_id store stays above it. */
     u16* ability_ptr = &g_battle_action_current_ability.ability_id;
     u16 ability;
+
     if (g_battle_action_current_ability.skillset != SKILLSET_ID_MATH_SKILL
         && (g_battle_action_current_ability.range_data.flags_3 & ABILITY_SECONDARY_FLAG_3_REFLECTABLE)) {
         action = g_battle_action_target_data;
@@ -1267,16 +1299,16 @@ static void battle_action_check_reflect_reaction(void) {
  * 100 - Brave of the target; when the target passes its reaction roll during
  * execution the strike becomes a miss and the reaction is recorded. */
 static void battle_action_check_blade_grasp_usability(void) {
-    unit_stats_t* attacker;
-    action_data_t* target;
+    unit_stats_t* target;
+    action_data_t* action;
 
     if ((g_battle_action_current_ability.range_data.flags_4 & ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE) == 0)
         return;
-    attacker = g_battle_action_target;
-    target = g_battle_action_target_data;
+    target = g_battle_action_target;
+    action = g_battle_action_target_data;
     /* 16-bit store covers attack_accuracy and the pad byte after it. */
-    target->attack_accuracy = 0x64 - attacker->brave;
-    if (battle_action_calculate_chance_to_react(attacker) != 0)
+    action->attack_accuracy = 100 - target->brave;
+    if (battle_action_calculate_chance_to_react(target) != 0)
         return;
     if (g_battle_action_state != ACTION_STATE_EXECUTE)
         return;
@@ -1285,10 +1317,11 @@ static void battle_action_check_blade_grasp_usability(void) {
     g_battle_action_target_data->reaction_id = ABILITY_ID_REACTION_BLADE_GRASP;
 }
 
-/* Applies Arrow Guard to bow and crossbow attacks that use weapon range.
+/* Apply Arrow Guard to bow and crossbow attacks that use weapon range.
  *
- * A successful Brave-based reaction changes the target result to the shared
- * class-evade/Arrow Guard miss type. */
+ * The displayed accuracy becomes 100 - Brave; a successful Brave roll while
+ * executing changes the target result to the shared class-evade/Arrow Guard
+ * miss type. */
 static void battle_action_check_arrow_guard_usability(void) {
     unit_stats_t* target;
     action_data_t* action;
@@ -1340,6 +1373,7 @@ static void battle_action_check_mp_switch_usability(void) {
     if (action->mp_damage > BATTLE_ACTION_VALUE_MAX) {
         action->mp_damage = BATTLE_ACTION_VALUE_MAX;
     }
+    /* The record pointer is reloaded twice more, as retail does. */
     action2 = g_battle_action_target_data;
     action2->attack_type &= ~ACTION_TYPE_HP_DAMAGE;
     action = g_battle_action_target_data;
@@ -1355,6 +1389,7 @@ static void battle_action_check_distribute_usability(void) {
     action_data_t* action = g_battle_action_target_data;
     /* hp_healing is read signed (lh) here. */
     s32 excess = action->hp_healing - (target->max_hp - target->hp);
+
     if (excess > 0 && battle_action_calculate_chance_to_react(target) == 0) {
         g_battle_action_target_data->last_received_attack = excess;
         g_battle_action_target_data->reaction_id = ABILITY_ID_REACTION_DISTRIBUTE;
@@ -1382,12 +1417,15 @@ s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
-    return main_util_roll_pass_fail(0x64, unit->brave);
+    return main_util_roll_pass_fail(100, unit->brave);
 }
 
 /* Take the equipment a Break or Steal hit off the target (unremovable items stay) and
  * give stolen items to the attacker's side; losing a weapon also cancels a Charge in
- * progress. Returns 1 when anything was removed. */
+ * progress. Returns 1 when anything was removed.
+ *
+ * equipment_destroyed holds one bit per equipment slot, head first from
+ * ACTION_EQUIPMENT_SLOT_HEAD. */
 static s32 battle_action_remove_broken_or_stolen_equipment(void) {
     s32 i;
     s32 count = 0;
@@ -1433,7 +1471,7 @@ static s32 battle_action_remove_broken_or_stolen_equipment(void) {
 }
 
 /* Apply one stat change of an action result: the low seven bits are the amount
- * and bit 0x80 means increase. The result is clamped to min..max; returns 1
+ * and ACTION_STAT_CHANGE_INCREASE means increase. The result is clamped to min..max; returns 1
  * when the stat changed. With max 255 (CT) an amount of 0x7f stands for 255,
  * which empties or fills CT. With min 1 (Speed, PA, MA) stat is the base
  * value: the total six bytes on is rebuilt as base + equipment bonus, capped
@@ -1478,10 +1516,13 @@ static s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max,
     return 1;
 }
 
-/* Record the highest EXP award produced by the current action.
+/* Record the highest EXP award produced by the current action, for an outcome
+ * of 1 (the target changed) or 2 (the target died).
  *
- * Success starts at 10; kills divide 20 by KO count. Level difference and
- * Gained EXP Up then adjust the result, which is clamped to 1 through 99. */
+ * The base is 10 for a change, and for a kill 20 divided by the target's KO
+ * count. The target's level less the attacker's is added (at least 1 in all),
+ * Gained EXP Up doubles it and the award is capped at 99. Reactions and
+ * simulations earn nothing. */
 static void battle_unit_update_attacker_earned_experience(s32 outcome) {
     s16 base;
     s32 signed_exp;
@@ -1520,9 +1561,8 @@ static void battle_unit_update_attacker_earned_experience(s32 outcome) {
 }
 
 /* Apply the prepared action result to one target: make the unit the current
- * target, copy the 0x2c-byte result from g_battle_action_attacker_action_data
- * into its action record and finalize it with
- * action_finalize_attack_and_flag_reactions.
+ * target, copy the result in g_battle_action_attacker_action_data into its
+ * action record and apply it with battle_action_apply_target_result.
  *
  * Returns that routine's result, or -1 for an invalid or empty slot. A result
  * that is not a hit is marked as canceled. */
@@ -1541,7 +1581,7 @@ s32 battle_action_store_target_stats_pointer_data(s32 unit_id) {
     if (stats->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
-    main_mem_copy_byte_data_source_first(&g_battle_action_attacker_action_data, action, 0x2C);
+    main_mem_copy_byte_data_source_first(&g_battle_action_attacker_action_data, action, sizeof(action_data_t));
     result = battle_action_apply_target_result(unit_id);
     if (g_battle_action_target_data->hit == 0) {
         g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_CANCELED;
@@ -1554,11 +1594,12 @@ s32 battle_action_store_target_stats_pointer_data(s32 unit_id) {
  * out of action. */
 s32 battle_status_apply_poison_and_regen(unit_stats_t* unit) {
     u8 status;
+
     if (battle_status_is_unit_out_of_action(unit) != 0) {
         return 0;
     }
     battle_action_set_target_variables(unit);
-    status = unit->status_sets.current[3];
+    status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_POISON)];
     if (status & STATUS_BYTE_MASK(STATUS_ID_POISON)) {
         g_battle_action_target_data->hp_damage = unit->max_hp >> 3;
         g_battle_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
@@ -1569,7 +1610,7 @@ s32 battle_status_apply_poison_and_regen(unit_stats_t* unit) {
     return g_battle_action_target_data->attack_type;
 }
 
-/* Between-turn step: makes a unit that has acted lose Transparent.
+/* Between-turn step: make a unit that has acted lose Transparent.
  *
  * The unit becomes the current target with a cleared action result. When it has
  * taken its action, carries Transparent as an inflicted status and has
@@ -1590,7 +1631,8 @@ s32 battle_status_remove_transparent(unit_stats_t* unit) {
                 & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT))
             != 0) {
             if (target->transparent_removal_flag != 0) {
-                g_battle_action_target_data->status_changes.removal[2] = STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT);
+                g_battle_action_target_data->status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
+                    = STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT);
                 g_battle_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;
             }
         }
@@ -1602,7 +1644,7 @@ s32 battle_status_remove_transparent(unit_stats_t* unit) {
  * is not among them), and queue the removal of each that runs out. */
 void battle_status_update_expiring(s32 unit_id) {
     s32 i;
-    s32 byte_idx;
+    s32 byte_index;
     s32 mask;
     unit_stats_t* target;
     action_data_t* action;
@@ -1611,17 +1653,17 @@ void battle_status_update_expiring(s32 unit_id) {
     battle_action_set_target_variables(&g_battle_unit_stats[unit_id]);
 
     /* Statuses 24..38 (bytes 3 and 4): tick the CT of each inflicted,
-       non-innate status and flag it for removal when it reaches zero. */
+     * non-innate status and flag it for removal when it reaches zero. */
     for (i = 0; i < 15; i++) {
-        byte_idx = (i / 8) + 3;
+        byte_index = (i / 8) + 3;
         target = g_battle_action_target;
-        if (target->inflicted_status[byte_idx] & (mask = 0x80 >> (i & 7))) {
-            if ((target->status_sets.innate[byte_idx] & mask) == 0) {
+        if (target->inflicted_status[byte_index] & (mask = 0x80 >> (i & 7))) {
+            if ((target->status_sets.innate[byte_index] & mask) == 0) {
                 remaining_ct = target->status_ct[i] - 1;
                 target->status_ct[i] = remaining_ct;
                 if (remaining_ct == 0) {
                     action = g_battle_action_target_data;
-                    action->status_changes.removal[byte_idx] = mask | action->status_changes.removal[byte_idx];
+                    action->status_changes.removal[byte_index] = mask | action->status_changes.removal[byte_index];
                 }
             }
         }
@@ -1635,6 +1677,7 @@ void battle_status_update_expiring(s32 unit_id) {
 /* Make the unit the current target and reset its action result record. */
 static void battle_action_set_target_variables(unit_stats_t* unit) {
     action_data_t* action = &unit->action;
+
     g_battle_action_target = unit;
     g_battle_action_target_data = action;
     g_battle_action_current_ability.target_id = unit->battle_id;
@@ -1645,6 +1688,7 @@ static void battle_action_set_target_variables(unit_stats_t* unit) {
  * petrified or a treasure; otherwise 0. */
 static s32 battle_status_is_unit_out_of_action(const unit_stats_t* unit) {
     s32 result;
+
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return 1;
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
@@ -1657,11 +1701,13 @@ static s32 battle_status_is_unit_out_of_action(const unit_stats_t* unit) {
     return result;
 }
 
-/* Prepare Poison Marsh's automatic status action for a grounded unit.
+/* Prepare the automatic Poison of a poisonous surface (such as a poisoned
+ * marsh) for a grounded unit, as an action against itself. Returns 1 when
+ * Poison would take hold, else 0.
  *
  * Mounts cannot receive the terrain effect. A rider uses the linked mount's
  * Float status because that unit determines whether the pair touches the
- * terrain. The resident terrain table marks surfaces that inflict Poison. */
+ * terrain. g_main_terrain_status_flags marks the surfaces that inflict Poison. */
 s32 battle_status_prepare_terrain_poison(unit_stats_t* unit) {
     s32 mount_info;
     u8 unit_id;
@@ -1793,9 +1839,10 @@ s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit) {
     return 0;
 }
 
-/* Simulate the unit's pending action and write the EXP and JP gained and any
- * new level and job level to rewards[0..3]. Returns -1 for an empty unit
- * slot, otherwise the action finalization result. */
+/* Apply the unit's pending action result to itself in the simulation context
+ * (as for a movement ability's benefit) and write the EXP and JP gained and any
+ * new level and job level to rewards. Returns -1 for an empty unit slot,
+ * otherwise battle_action_apply_target_result's result. */
 s32 battle_unit_build_action_rewards(unit_stats_t* unit, action_reward_display_t* rewards) {
     s32 job_slot[2];
     s32 result;
@@ -1824,18 +1871,18 @@ s32 battle_unit_build_action_rewards(unit_stats_t* unit, action_reward_display_t
     return result;
 }
 
-/* Adds the pending JP change to the unit's job and, if that changed the job
-   level, sets the job-level-gained flag so the caller queues the level-up report. */
+/* Add the pending JP change to the unit's job and, if that changed the job
+ * level, set the job-level-gained flag so the caller queues the level-up report. */
 static void battle_action_apply_jp_change(unit_stats_t* unit) {
-    s32 jp;
+    s32 job_slot;
     s32 initial_level;
     u8 job = unit->job_id;
     u8 battle_id;
 
     battle_id = unit->battle_id;
-    initial_level = battle_unit_load_job_level(unit, job, &jp);
-    battle_unit_add_job_jp(battle_id, unit->action.jp_change, unit->initial_team_flags & BATTLE_TEAM_MASK, jp);
-    if (battle_unit_load_job_level(unit, job, &jp) != initial_level) {
+    initial_level = battle_unit_load_job_level(unit, job, &job_slot);
+    battle_unit_add_job_jp(battle_id, unit->action.jp_change, unit->initial_team_flags & BATTLE_TEAM_MASK, job_slot);
+    if (battle_unit_load_job_level(unit, job, &job_slot) != initial_level) {
         g_battle_action_current_ability.job_level_gained_flag = 1;
     }
 }
@@ -1882,9 +1929,9 @@ static void battle_status_remove_control(unit_stats_t* unit) {
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
             & (STATUS_BYTE_MASK(STATUS_ID_BERSERK) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN)))
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARM)] & STATUS_BYTE_MASK(STATUS_ID_CHARM))) {
-        unit->team_flags = unit->team_flags & ~BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+        unit->team_flags &= ~BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
     } else {
-        unit->team_flags = unit->team_flags | (unit->initial_team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+        unit->team_flags |= unit->initial_team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARM)] & STATUS_BYTE_MASK(STATUS_ID_CHARM)) == 0) {
         unit->team_flags = (unit->team_flags & ~BATTLE_TEAM_MASK) | (unit->initial_team_flags & BATTLE_TEAM_MASK);
@@ -1898,13 +1945,13 @@ static void battle_status_apply_action_removals(s32 unit_idx) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_idx];
     s32 i;
     s32 mask;
-    s32 idx;
+    s32 byte_index;
 
     for (i = 0; i < STATUS_COUNT; i++) {
-        idx = i / 8;
+        byte_index = i / 8;
         mask = 0x80 >> (i & 7);
-        if (unit->action.status_changes.removal[idx] & mask) {
-            unit->inflicted_status[idx] = unit->inflicted_status[idx] & ~mask;
+        if (unit->action.status_changes.removal[byte_index] & mask) {
+            unit->inflicted_status[byte_index] &= ~mask;
             if (main_status_set_ct(unit, i, 1) == 0) {
                 battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 0, unit_idx);
             }
@@ -1913,7 +1960,7 @@ static void battle_status_apply_action_removals(s32 unit_idx) {
     main_status_store_current(unit);
 }
 
-/* Applies the pending status inflictions of unit_id's current action.
+/* Apply the pending status inflictions of unit_id's current action.
  *
  * For each of the 40 statuses the action inflicts that none of the unit's
  * inflicted statuses blocks, the status's cancel list becomes the action's

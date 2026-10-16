@@ -42,9 +42,12 @@ static s32 battle_unit_validate_placement(s32 unit_idx);
 
 /* Build a unit's targeting-height record.
  *
- * For a non-Chocobo, another unit at the same x, y, and elevation supplies
- * terrain, status, and movement data. Body, Float, and water movement then
- * determine the effective height.
+ * A unit is 6 half heights tall, 4 as a Chicken or Frog, and 2 more when
+ * another unit shares its x, y and elevation (a rider and its mount); for a
+ * non-Chocobo that other unit then supplies the terrain, status and movement
+ * data. Float and the water movement abilities set the walking height on a
+ * water tile. A dead or absent unit, a crystal or a treasure is marked
+ * BATTLE_UNIT_HEIGHT_UNAVAILABLE.
  *
  * `id` holds the ENTD slot and then the job, and `level` the elevation and
  * then the walking height. Each shared variable is required: `id` conflicts
@@ -56,7 +59,6 @@ battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_
     unit_stats_t* unit;
     unit_stats_t* candidate;
     map_tile_t* tile;
-    /* Byte access retains the original packed load and field-extraction order. */
     s32 offset;
     s32 i;
     s32 id;
@@ -70,7 +72,7 @@ battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_
 
     offset = 0;
     unit = &g_battle_unit_stats[unit_id];
-    if (unit_id >= 0 && unit_id < BATTLE_UNIT_SLOT_COUNT && (id = unit->entd_slot) != 0xff
+    if (unit_id >= 0 && unit_id < BATTLE_UNIT_SLOT_COUNT && (id = unit->entd_slot) != BATTLE_ENTD_SLOT_NONE
         && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))
         && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
         flags = unit_id;
@@ -95,13 +97,14 @@ battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_
             }
         }
         height.unit_flags = flags;
-        flags = unit->status_sets.current[2];
+        flags = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHICKEN)];
         if (flags & (STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG)))
             height.unit_height = offset + 4;
         else
             height.unit_height = offset + 6;
         flags = unit->ability_flags.movement[2];
         tile = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
+        /* Byte access retains the original packed load and field-extraction order. */
         tile_height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK);
         depth = (*(u8*)&tile->depth_half_height) >> MAP_TILE_DEPTH_SHIFT;
         level = tile_height;
@@ -158,7 +161,8 @@ s32 battle_action_commit_attack_preparation(action_command_t* command) {
  * (rounded up) by Short Charge and zeroed by Non-Charge unless they are
  * performances (Persevere). A nonzero phase stores the CT; an odd phase also
  * commits the action (spends the item, marks the unit as acted, starts Charging,
- * Performing or Jumping). Returns a battle_attack_preparation_e code.
+ * Performing or Jumping). Returns a battle_attack_preparation_e code: an
+ * ordinary ability returns IMMEDIATE with a CT of 0 and CHARGE otherwise.
  *
  * The one-trip loop around `skip = 1` counts that set one loop level deeper,
  * so global-alloc ranks `skip` above `persevere` and gives them s6/s7 as in
@@ -264,6 +268,8 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         }
         ability = item + (ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE);
         action.ability_id = ability;
+        /* The katana is spent here; battle_action_apply_target_result gives it
+         * back when it does not break. */
         if (phase & 1) {
             battle_action_decrement_player_item_quantity(unit, item, 1);
         }
@@ -362,7 +368,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
     return ct == 0;
 }
 
-/* Returns an occupied unit slot's action command, or 0 for an
+/* Return an occupied unit slot's action command, or 0 for an
  * empty slot or an id past the last slot. No retail code calls it. */
 action_command_t* battle_unit_get_action_command_by_battle_id(s32 battle_id) {
     if (battle_id < BATTLE_UNIT_SLOT_COUNT) {
@@ -380,13 +386,13 @@ action_command_t* battle_unit_get_action_command_by_battle_id(s32 battle_id) {
  * spend is nonzero and the action is executing (not a preview or an AI
  * simulation); with spend 0 the call only tests the stock. */
 s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id, s32 spend) {
-    u32 idx;
-    s32 qty;
+    u32 item;
+    s32 quantity;
 
     if ((unit->initial_team_flags & BATTLE_TEAM_MASK) == BATTLE_TEAM_BLUE) {
-        idx = item_id & 0xFF;
-        qty = g_main_item_quantities[idx];
-        if (qty == 0) {
+        item = item_id & 0xFF;
+        quantity = g_main_item_quantities[item];
+        if (quantity == 0) {
             return -1;
         }
         if (spend == 0) {
@@ -395,7 +401,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
         if (g_battle_action_state != ACTION_STATE_EXECUTE) {
             return 0;
         }
-        g_main_item_quantities[idx] = qty - 1;
+        g_main_item_quantities[item] = quantity - 1;
     }
     return 0;
 }
@@ -417,8 +423,12 @@ s32 battle_action_init_current_data(s32 id) {
 
     g_battle_acting_unit_id = -1;
     g_battle_action_context = ACTION_CONTEXT_PRIMARY;
-    if (id >= BATTLE_UNIT_SLOT_COUNT
-        || (unit = &g_battle_unit_stats[id], base = g_battle_unit_stats, unit->entd_slot == BATTLE_ENTD_SLOT_NONE)) {
+    if (id >= BATTLE_UNIT_SLOT_COUNT) {
+        return -1;
+    }
+    unit = &g_battle_unit_stats[id];
+    base = g_battle_unit_stats; /* indexing the global in the loop below is 8 bytes longer */
+    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
     if (g_battle_action_hamedo_flag != 0) {
@@ -446,10 +456,12 @@ s32 battle_action_init_current_data(s32 id) {
 /*
  * Build the target list for a reaction ability.
  *
- * Reflect redirects to the unit on the action tile, Distribute selects
- * injured allies, and Damage Split selects the acting unit. The remaining
+ * Reflect redirects to the unit on the action tile (the rider of a mounted
+ * pair), Distribute selects the injured units whose original team is the
+ * reactor's current team, and Damage Split selects the acting unit. The remaining
  * reactions follow the target policy stored in the reaction flags table.
- * Returns 0 only for a reaction that targets the attacker.
+ * Returns 0 only for a reaction that targets the attacker, which the caller
+ * then targets through the ordinary panels.
  */
 static s32 battle_action_build_reaction_targets(
     s32 actor_id, battle_strike_work_t* work, s32* target_count, u8* target_ids) {
@@ -559,11 +571,13 @@ static s32 battle_action_build_reaction_targets(
 }
 
 /*
- * Compute target tiles for the action and report its ability flags_3 byte.
+ * Compute target tiles for the action and report its ability flags_3 byte (0
+ * for anything but an ordinary or monster ability). Returns -1 when targeting
+ * fails.
  *
  * Attack, Charge, item-inventory, weapon-inventory, direct-targeting, and
  * weapon-range actions use the weapon/direct resolver. Random-fire selection
- * runs only after successful ordinary targeting outside AI simulation.
+ * runs only after successful ordinary targeting while an action executes.
  */
 static s32 battle_target_calculate_map_for_action(const action_command_t* action, u8* flags_3) {
     ability_secondary_data_t* ability;
@@ -665,7 +679,8 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
             work->continue_attack = 0;
             return -1;
         }
-        /* A pending weapon proc or knockback narrows the panels to its post-action target's tile. */
+        /* A pending weapon proc or knockback narrows the panels to its post-action
+         * target's tile; the list itself is rebuilt from the panels below. */
         if (g_battle_action_current_ability.post_action_target_id < BATTLE_UNIT_SLOT_COUNT
             && (g_battle_action_current_ability.weapon_proc_pending != 0
                 || (g_battle_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING))) {
@@ -790,9 +805,11 @@ static void battle_target_set_coordinates_for_ability(const unit_stats_t* acting
 /* Finalize Draw Out's katana-consumption result after target processing.
  *
  * hit_count is the number of units the strike hit; with none, or when the
- * katana did not break, the action becomes a pseudo-status hit. When the
- * katana broke, retail copies can_earn_experience onto itself (lbu/sb of the
- * same byte): a genuine no-op kept for the match. */
+ * katana did not break, the attacker's own result becomes a pseudo-status hit
+ * marked DRAW_OUT_KATANA_NOT_BROKEN, which gives the spent katana back when it
+ * is applied. A Mime's Draw Out is left alone. When the katana broke, retail
+ * copies can_earn_experience onto itself (lbu/sb of the same byte): a genuine
+ * no-op kept for the match. */
 static void battle_action_finalize_draw_out_katana_result(
     unit_stats_t* attacker, battle_strike_work_t* work, u8 hit_count) {
     u16 flags;
@@ -819,11 +836,12 @@ static void battle_action_finalize_draw_out_katana_result(
  * Seed the strike state before an action resolves: reset the strike counter,
  * proc and knockback scratch, clear the EXP/JP flags in the primary action
  * context, and latch the two hands (the left moves up when the right is empty).
- * Throw only records the thrown item. Formulas 0x1E/0x1F strike a random 1..X
- * times while executing and 0x5E strikes X+1 times; Attack, Charge and
- * ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE abilities strike twice with Two Swords
- * when both hands hold weapons or both are empty (Frog and monsters count as
- * empty).
+ * Throw only records the thrown item. ABILITY_FORMULA_MULTIHIT_TRUTH_MAGIC and
+ * ABILITY_FORMULA_UNFAITH_MAGICAL_DAMAGE strike a random 1..X times while
+ * executing (once in a preview) and ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA
+ * strikes X+1 times; Attack, Charge and ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE
+ * abilities strike twice with Two Swords when both hands hold weapons or both
+ * are empty (Frog and monsters count as empty).
  *
  * The `ability_id >= 0 || ability_id < ABILITY_ID_ITEM_FIRST` guard is the target's own: the
  * second arm is unreachable, so the table read is never actually skipped.
@@ -936,6 +954,7 @@ static void battle_target_select_random_tile_for_random_fire_abilities(void) {
 
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile_data = &g_battle_map_tile_data[i];
+        /* The upper layer's tiles start at index 0x100. */
         if (i == 0x100) {
             lower_count = count;
         }
@@ -969,7 +988,6 @@ static void battle_target_select_random_tile_for_random_fire_abilities(void) {
  * `origin`.
  */
 static s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* origin) {
-    /* A byte flag test retains the original compound-condition scheduling. */
     s32 distance[BATTLE_UNIT_SLOT_COUNT];
     s32 tile;
     s32 count;
@@ -988,6 +1006,7 @@ static s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* orig
     y = origin->position.y;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
+        /* A byte flag test retains the original compound-condition scheduling. */
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE && battle_target_is_unit_untargetable_and_store_tile(i, &tile) == 0
             && ((*(u8*)&g_battle_map_tile_data[tile].ceiling_depth_and_marks) & MAP_TILE_FLAG_TARGETED)) {
             if (g_battle_sort_targets_nearest_first != 0) {
@@ -1026,9 +1045,13 @@ static s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* orig
 /*
  * Check action restrictions and consume MP outside preview mode.
  *
- * Return 0 when allowed, or an action_rejection_e. Only ordinary-menu,
- * non-Mime abilities consume MP; the effective cost is recorded first.
- * Preview skips only subtraction; earlier bookkeeping still runs.
+ * Return 0 when allowed, or an action_rejection_e: an action restriction (Don't
+ * Act, a ridden mount, deep water), a Frog using anything but Attack, Frog
+ * Attack or the Frog spell (or any Charge), Silence against a silenceable
+ * ability, or too little MP. Only ordinary-menu, non-Mime abilities consume MP,
+ * halved and rounded down by Half of MP; the effective cost is recorded first.
+ * Preview skips only subtraction; earlier bookkeeping still runs. In the primary
+ * context the unit's Charging, Jump and Defending end first (Performing stays).
  */
 static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
     s16 ability_id;
@@ -1080,13 +1103,15 @@ static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
 /*
  * Save the actor's position or restore its pre-reaction action command.
  *
- * A Mime's weapons are cleared first. Normal actions save X/Y, elevation,
- * and facing; reactions restore the 20 saved command bytes at 0x16e.
+ * A Mime drops the weapons it borrowed for the copied action; any other unit
+ * acting in the primary context records its facing for Mimes. Normal actions
+ * save X/Y and elevation; reactions restore the action command saved in
+ * g_battle_action_saved_command and return to the primary context.
  */
 void battle_action_store_acting_unit_data(unit_stats_t* unit) {
     if (unit->job_id == JOB_ID_MIME) {
-        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE; /* right hand */
-        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;  /* left hand */
+        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
+        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
     } else if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
         g_battle_action_current_attacker.facing = unit->position.facing;
     }
@@ -1111,11 +1136,11 @@ s32 battle_target_find_unit_at_tile(s32 x, s32 y, s32 level) {
  *
  * The status filter bits are alternatives: a unit with any requested status
  * is eligible. The Chocobo bit is an additional requirement. Mounted riders
- * resolve to the mount's battle slot, and invalid coordinates or terrain are
- * distinguished from an empty tile.
+ * resolve to the mount's battle slot. Returns the unit's slot, -1 for an empty
+ * tile, or -2 for coordinates off the map, a blocked tile, or (with
+ * BATTLE_UNIT_TILE_FILTER_DRY_LOW_SLOPE) water or a slope of 3 or more.
  */
 s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
-    /* A byte collision test retains the original single-mask branch. */
     s32 unit_index;
     unit_stats_t* unit;
     map_tile_t* tile;
@@ -1130,6 +1155,7 @@ s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
     }
 
     tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_max_x + x];
+    /* A byte collision test retains the original single-mask branch. */
     if (((*(u8*)&tile->flags) & MAP_TILE_COLLISION_MASK)) {
         return -2;
     }
@@ -1181,7 +1207,8 @@ s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
 void battle_target_clear_panel_data(void) {
     s32 i = 0;
     target_panel_t* panel = g_battle_target_panel_data;
-    for (; i < 512; i++) {
+
+    for (; i < MAP_TILE_COUNT; i++) {
         panel->remaining_range = 0;
         panel->mark = 0;
         panel++;
@@ -1192,7 +1219,13 @@ void battle_target_clear_panel_data(void) {
  * Give the single unit targeted by `id`'s pending action a chance to Hamedo
  * the actor, reporting the reaction ability through `out_ability`.
  *
- * Returns the reacting unit's slot, or -1 when nothing reacts.
+ * Only an Attack, Charge, Throw or weapon-range action that the actor can pay
+ * for (its MP is put back after the check) and that reaches exactly one other
+ * unit qualifies; that unit needs Hamedo, a passed Brave roll, no status that
+ * prevents reactions, and a counterattack it can aim at the actor. On success
+ * the counter is staged in the reaction context and g_battle_action_hamedo_flag
+ * is set, which makes the actor's own action fail; a Mime actor drops its
+ * borrowed weapons. Returns the reacting unit's slot, or -1 when nothing reacts.
  *
  * battle_target_validate_weapon_target takes only the action record (it copies the record and
  * rederives the menu type itself); menu_type and flags_1 merely happen to sit
@@ -1211,7 +1244,7 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
     u8 menu_type;
     u8 flags_1;
     u16 mp;
-    s32 tid;
+    s32 target_id;
     u16 ability_id;
 
     unit = &g_battle_unit_stats[id];
@@ -1255,11 +1288,11 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
     if (count != 1) {
         return -1;
     }
-    tid = targets[0];
-    if (tid == id) {
+    target_id = targets[0];
+    if (target_id == id) {
         return -1;
     }
-    target = &g_battle_unit_stats[tid];
+    target = &g_battle_unit_stats[target_id];
     if (!(target->ability_flags.reaction[3] & BATTLE_REACTION_SET_4_HAMEDO)) {
         return -1;
     }
@@ -1271,34 +1304,39 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
         return -1;
     }
 
-    g_battle_action_context = count;
+    g_battle_action_context = ACTION_CONTEXT_REACTION_OR_SIMULATION;
     main_util_copy_action_data(action, &g_battle_action_saved_command);
     g_battle_current_reaction_ability_id = ABILITY_ID_REACTION_HAMEDO;
     g_battle_acting_unit_id = id;
-    target->action_command.actor_id = tid;
+    target->action_command.actor_id = target_id;
     if (battle_action_store_counter_ability(target, SKILLSET_ID_ATTACK, 0, 1) == 0
         && battle_action_check_and_consume_mp(target) == 0) {
         battle_action_init_current_ability_strike_data(target);
         *out_ability = g_battle_current_reaction_ability_id;
-        g_battle_action_hamedo_flag = count;
+        g_battle_action_hamedo_flag = 1;
         if (unit->job_id == JOB_ID_MIME) {
             unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
             unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
         }
-        return tid;
+        return target_id;
     }
     main_util_copy_action_data(&g_battle_action_saved_command, action);
     return -1;
 }
 
 /* Reaction-ability outcome carried in `outcome` between the per-ability arms
- * and the common tail. */
+ * and the common tail. ATTACK and COUNTER pay MP; ATTACK through REFLECT get the
+ * full strike setup; SELF_TILE aims a strike at the reactor's own tile (the
+ * attacker's for Damage Split). */
 enum {
+    BATTLE_REACTION_OUTCOME_SELF_TILE = -1,
     BATTLE_REACTION_OUTCOME_NONE = 0,
+    BATTLE_REACTION_OUTCOME_ATTACK = 1, /* the default: a counterattack */
     BATTLE_REACTION_OUTCOME_COUNTER = 2,
+    BATTLE_REACTION_OUTCOME_REFLECT = 3,
 };
 
-/* Finds the first unit holding a pending reaction and resolves it.
+/* Find the first unit holding a pending reaction and prepare it.
  *
  * Walks the 21 unit slots, skipping the acting unit, and for the first unit
  * whose queued reaction id is set and who can still react, saves the unit's
@@ -1345,23 +1383,21 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                     action->actor_id = i;
                     action->skillset_id = 0;
                     reaction_id = g_battle_current_reaction_ability_id;
-                    outcome = 1;
+                    outcome = BATTLE_REACTION_OUTCOME_ATTACK;
                     action->ability_id = reaction_id;
                     last_attack = unit->action.last_received_attack;
                     unit->action.reaction_id = 0;
 
-                    /* outcome 0 means no reaction. 1 and 2 pay MP; 1..3 (3 is Reflect) get the strike
-                     * setup, and -1 a self-targeted tile action (Damage Split aims at the attacker). */
                     switch (reaction_id) {
                     case ABILITY_ID_REACTION_REFLECT:
-                        outcome = -(battle_target_apply_reflect(unit) == 0) & 3;
+                        /* REFLECT when the bounce tile is valid, else NONE. */
+                        outcome = -(battle_target_apply_reflect(unit) == 0) & BATTLE_REACTION_OUTCOME_REFLECT;
                         break;
                     case ABILITY_ID_REACTION_MEATBONE_SLASH:
                         if (battle_action_store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
                             outcome = BATTLE_REACTION_OUTCOME_NONE;
                         } else {
-                            /* Skillset 1 is Attack. */
-                            action->skillset_id = 1;
+                            action->skillset_id = SKILLSET_ID_ATTACK;
                             action->targeting_type = BATTLE_TARGETING_TYPE_TILE;
                         }
                         break;
@@ -1390,8 +1426,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                             outcome = BATTLE_REACTION_OUTCOME_NONE;
                             break;
                         }
-                        /* Skillset 6 is Item. */
-                        action->skillset_id = 6;
+                        action->skillset_id = SKILLSET_ID_ITEM;
                         /* Auto-Potion updates only the low byte of the 16-bit item/equipment field. */
                         *(u8*)&action->item_or_equipment = result;
                         action->targeting_type = BATTLE_TARGETING_TYPE_TILE;
@@ -1402,8 +1437,9 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         result = battle_action_commit_attack_preparation(action);
                         outcome = BATTLE_REACTION_OUTCOME_COUNTER;
                         unit->action_command.ability_id = ABILITY_ID_REACTION_AUTO_POTION;
-                        /* Invalid (-1), equipment change (2) and Jump (3) results cancel the potion. */
-                        if (result == -1 || result == 2 || result == 3) {
+                        if (result == BATTLE_ATTACK_PREPARATION_INVALID
+                            || result == BATTLE_ATTACK_PREPARATION_CHANGE_EQUIPMENT
+                            || result == BATTLE_ATTACK_PREPARATION_JUMP) {
                             outcome = BATTLE_REACTION_OUTCOME_NONE;
                         }
                         break;
@@ -1413,6 +1449,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         }
                         break;
                     default:
+                        /* SELF_TILE for a reaction flagged neither passive nor active, else NONE. */
                         outcome
                             = -((g_main_reaction_behavior_flags[g_battle_current_reaction_ability_id
                                      - ABILITY_ID_REACTION_FIRST]
@@ -1421,7 +1458,8 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         break;
                     }
 
-                    if ((outcome == 1 || outcome == 2) && battle_action_check_and_consume_mp(unit) != 0) {
+                    if ((outcome == BATTLE_REACTION_OUTCOME_ATTACK || outcome == BATTLE_REACTION_OUTCOME_COUNTER)
+                        && battle_action_check_and_consume_mp(unit) != 0) {
                         outcome = BATTLE_REACTION_OUTCOME_NONE;
                     }
                     if (outcome == BATTLE_REACTION_OUTCOME_NONE) {
@@ -1430,7 +1468,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         continue;
                     }
 
-                    if (outcome >= 1 && outcome <= 3) {
+                    if (outcome >= BATTLE_REACTION_OUTCOME_ATTACK && outcome <= BATTLE_REACTION_OUTCOME_REFLECT) {
                         battle_action_init_current_ability_strike_data(unit);
                     } else {
                         g_battle_action_current_ability.strike_count = 1;
@@ -1460,7 +1498,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
             }
         }
         i++;
-    } while (i < 21);
+    } while (i < BATTLE_UNIT_SLOT_COUNT);
 
     g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     *out_ability = 0;
@@ -1472,7 +1510,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
  * of it. -1 when the caster stands on the unit's tile or that tile is off the
  * map or blocked. */
 static s32 battle_target_apply_reflect(unit_stats_t* unit) {
-    action_command_t* act = &unit->action_command;
+    action_command_t* action = &unit->action_command;
     s32 x;
     s32 y;
     s32 z;
@@ -1488,24 +1526,26 @@ static s32 battle_target_apply_reflect(unit_stats_t* unit) {
     if (battle_map_resolve_rotated_offset_layer(unit, dx, dy, 0, &x, &y, &z) != 0) {
         return -1;
     }
-    act->skillset_id = SKILLSET_ID_BLACK_MAGIC;
+    action->skillset_id = SKILLSET_ID_BLACK_MAGIC;
     last_attack = unit->action.last_received_attack;
-    act->targeting_type = BATTLE_TARGETING_TYPE_TILE;
-    act->target_id = 0;
-    act->ability_id = last_attack;
-    act->target_position.vx = x;
-    act->target_position.vz = y;
-    act->target_position.vy = z;
+    action->targeting_type = BATTLE_TARGETING_TYPE_TILE;
+    action->target_id = 0;
+    action->ability_id = last_attack;
+    action->target_position.vx = x;
+    action->target_position.vz = y;
+    action->target_position.vy = z;
     return 0;
 }
 
-/* Writes the acting unit's tile into unit's action fields (0x16e..) as the
- * target of skillset/ability and runs the attack preview.  Returns -1 when the
- * action itself fails, -2 when the acting unit's tile is not targetable and
- * -3 when the preview fails; 0 otherwise. */
+/* Write skillset_id and ability_id into the reacting unit's action command,
+ * aimed at the acting unit's tile, and commit it with
+ * battle_action_commit_attack_preparation; the unit's own charge CT is kept.
+ * With validate_target the ability's range panels are built first and must
+ * cover the acting unit's tile. Returns -1 when the panels cannot be built,
+ * -2 when the acting unit's tile is out of range and -3 when the preparation
+ * fails or yields an equipment change or a Jump; 0 otherwise. */
 static s32 battle_action_store_counter_ability(
     unit_stats_t* unit, s8 skillset_id, s16 ability_id, s32 validate_target) {
-    /* A byte flag test retains the original compound-condition scheduling. */
     action_command_t* action;
     unit_stats_t* acting_unit;
     s32 result;
@@ -1520,9 +1560,10 @@ static s32 battle_action_store_counter_ability(
     acting_unit = &g_battle_unit_stats[acting_unit_id];
     if (validate_target != 0) {
         result = battle_target_set_panels_for_action(action);
-        if (result == -1 || result == 2 || result == 3) {
+        if (result == TARGET_PANELS_INVALID || result == TARGET_PANELS_NO_TARGETING || result == TARGET_PANELS_NONE) {
             return -1;
         }
+        /* A byte flag test retains the original compound-condition scheduling. */
         if (((*(u8*)&g_battle_map_tile_data[battle_map_calculate_location(acting_unit)].ceiling_depth_and_marks)
                 & MAP_TILE_FLAG_ABILITY_RANGE)
             == 0) {
@@ -1548,7 +1589,7 @@ static s32 battle_action_store_counter_ability(
 
 /* The item Auto Potion uses: the first of Potion, Hi-Potion and X-Potion the
  * party has in stock, or -1 with none. A unit that did not start on the blue team
- * always uses a Potion. */
+ * always uses a Potion, without spending it. */
 static s32 battle_action_select_auto_potion_item(unit_stats_t* unit) {
     if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
         return ITEM_ID_POTION;
@@ -1656,14 +1697,15 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
 }
 
 /*
- * Returns the unit's level (0..8) in the generic job job_id, from the
- * nibble-packed unit_stats_t.career.job_levels bytes at 0xd2.
+ * Return the unit's level (0..8) in the generic job job_id, from the
+ * nibble-packed unit_stats_t.career.job_levels bytes (high nibble first).
  * *out_slot receives the zero-based job slot (Chemist = 1 ... Mime = 19),
  * or 0 for Squire and non-generic jobs.
  */
 s32 battle_unit_load_job_level(unit_stats_t* unit, s32 job_id, s32* out_slot) {
     s32 slot;
     s32 packed;
+
     if (job_id >= JOB_ID_CHEMIST && job_id <= JOB_ID_MIME) {
         *out_slot = job_id - JOB_ID_SQUIRE;
     } else {
@@ -1681,7 +1723,8 @@ s32 battle_unit_load_job_level(unit_stats_t* unit, s32 job_id, s32* out_slot) {
     return packed;
 }
 
-/* Adds JP to a battle unit's job slot and recomputes its level and unlocks.
+/* Add JP to a battle unit's job slot (both its current and total JP, each
+ * capped at UNIT_JOB_POINT_MAX) and recompute its job level and unlocks.
  *
  * Skips absent, crystal, dead, treasure, monster and other-team units, and
  * the Bard slot for females and the Dancer slot for males. The battle twin of
@@ -1731,6 +1774,7 @@ s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot) {
         total = UNIT_JOB_POINT_MAX;
     }
     unit->career.job_points.total.values[slot] = total;
+    /* The job level comes from total JP; even slots take the high nibble. */
     level = main_job_calculate_level(total);
     levels = unit->career.job_levels[slot / 2];
     level_byte = level;
@@ -1760,7 +1804,6 @@ s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot) {
 s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* destination) {
     unit_stats_t* unit;
     map_tile_t* tile;
-    /* Byte access retains the original packed load and field-extraction order. */
     s32 origin_x;
     s32 origin_y;
     s32 low;
@@ -1815,10 +1858,12 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
         panel = &g_battle_target_panels[index];
         panel->unit_record_index = 1;
     }
+    /* Radius i rings: dx runs across the ring and dy = i - |dx| gives the two
+     * tiles above and below it. */
     for (pass = 0; pass < 2; pass++) {
         limit = 4;
         if (pass != 0) {
-            limit = 0x11;
+            limit = 17;
         }
         for (i = 1; i < limit; i++) {
             for (dx = -i; dx <= i; dx++) {
@@ -1839,6 +1884,7 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
                         for (level = 0; level < 2; level++) {
                             index = level * 256 + g_battle_map_max_x * y + x;
                             tile = &g_battle_map_tile_data[index];
+                            /* Byte access retains the original packed load and field-extraction order. */
                             depth = (*(u8*)&tile->depth_half_height);
                             if (tile->depth_half_height.depth >= 3) {
                                 continue;
@@ -1945,23 +1991,25 @@ move_effective_flags_e battle_move_get_effective_flags(const unit_stats_t* unit)
 u8 battle_unit_calculate_move_exp_jp_up_to_earn(const unit_stats_t* unit) {
     u8 amount = g_battle_move_path.count;
 
-    if (amount == 0xFE) {
+    if (amount == MOVE_PATH_TELEPORT) {
         amount = (rand() * unit->move) / 0x8000 + 1;
     }
-    if (amount == 0xFF) {
+    if (amount == MOVE_PATH_TELEPORT_FAILED) {
         amount = 1;
     }
-    if (amount >= 0x64) {
-        amount = 0x63;
+    if (amount >= 100) {
+        amount = 99;
     }
     return amount;
 }
 
-/* Run the ability formula for a preview of attacker's command against target.
+/* Run the ability formula for a preview of attacker's command against target,
+ * leaving the projected result in the target's action data.
  *
- * The attacker's 20 command bytes are saved, replaced by command, and
- * restored afterwards. Without the Auto flag in the loaded ability data, the
- * target's tile must be targetable; otherwise its action data is cleared. */
+ * The attacker's action command is saved, replaced by command, and restored
+ * afterwards. Without the Auto flag in the loaded ability data, the target's
+ * tile must be among the action's targeted panels; otherwise its action data is
+ * cleared to a miss with 0 accuracy. Always returns 0. */
 s32 battle_action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command) {
     u8 flags_3;
     s32 result;
@@ -2022,8 +2070,12 @@ s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit
 /* Initialize deployed units from map coordinates and return a failure bitmask.
  *
  * Normal deployment fills slots 0x10..0x14; red team debug deployment fills
- * slots 0..4 and clears the remaining ENTD slots. The target reloads each row
- * from g_main_unit_deployed_coords at its distinct uses.
+ * slots 0..4 and clears the remaining ENTD slots. Bit i of the result is set
+ * when deployment row i names no party member. A unit whose identity is not a
+ * Ramza (1..3) gets a generated unit id, from 0x78 upward (from 0xfe downward
+ * in the debug mode). Load failures report battle load exceptions 500 and 400
+ * plus the slot. The target reloads each row from g_main_unit_deployed_coords
+ * at its distinct uses.
  */
 static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
     s32 failures = 0;
@@ -2111,10 +2163,7 @@ s32 battle_unit_build_deployed_units_data(unit_deployment_coordinates_t* formati
     return battle_unit_init_deployed_units_data(formation, 0);
 }
 
-/* Store the deployment position and return its placement validation result.
- *
- * The caller at 0x8017f48c tests the returned value after this function's
- * final call to battle_unit_validate_placement. */
+/* Store the deployment position and return its placement validation result. */
 static s32 battle_unit_set_placement_and_validate(s32 unit_idx, unit_deployment_coordinates_t* src) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_idx];
 
@@ -2131,7 +2180,6 @@ static s32 battle_unit_set_placement_and_validate(s32 unit_idx, unit_deployment_
  * steep or deep for the unit's movement abilities, lava or an obstacle, or
  * already occupied by an earlier unit slot at the same elevation; 0 otherwise. */
 static s32 battle_unit_validate_placement(s32 unit_idx) {
-    /* A byte collision test retains the original single-mask branch. */
     unit_stats_t* unit = &g_battle_unit_stats[unit_idx];
     unit_stats_t* other;
     map_tile_t* tile;
@@ -2150,6 +2198,7 @@ static s32 battle_unit_validate_placement(s32 unit_idx) {
         return -1;
     }
     tile = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
+    /* A byte collision test retains the original single-mask branch. */
     if (((*(u8*)&tile->flags) & MAP_TILE_COLLISION_MASK)) {
         return -1;
     }
@@ -2179,15 +2228,19 @@ static s32 battle_unit_validate_placement(s32 unit_idx) {
     return 0;
 }
 
-/* Loads the 16 ENTD units of the encounter into the battle unit slots.
+/* Load the 16 ENTD units of the encounter into the battle unit slots.
  *
- * Each present unit is initialized. A unit that would need a new spritesheet
- * beyond the sheets left for the ENTD (nine less the deployment unit limit) is
- * taken off the field, and the units placed on the field are capped at that
- * number + 7; the exception reports use the error bases 600, 300, 100 and 200
- * plus the slot. `status` holds both the initialization result and the
- * graphics descriptor's not-deployed flag: sharing the one variable is what
- * gives the flag enough uses to win s1 ahead of battle_id. */
+ * Each present unit is initialized; ENTD unit id 0xff takes a generated id
+ * counting down from 0xfe. A unit whose presence bits are clear, or randomly
+ * present on a failed coin flip, stays off the field. A unit that would need a
+ * new spritesheet beyond the sheets left for the ENTD (nine less the
+ * deployment unit limit) is taken off the field, and the units placed on the
+ * field are capped at that number + 7; a unit with both presence bits set
+ * loads its graphics but waits off the field and does not count. The
+ * exception reports use the error bases 600, 300, 100 and 200 plus the slot.
+ * `status` holds both the initialization result and the graphics descriptor's
+ * not-deployed flag: sharing the one variable is what gives the flag enough
+ * uses to win s1 ahead of battle_id. */
 void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
     s32 battle_id;
     s32 enemy_count;
@@ -2296,13 +2349,14 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
     }
 }
 
-/* Keeps the list of distinct spritesheets the ENTD units need.
+/* Keep the list of distinct spritesheets the ENTD units need.
  *
  * Mode 0xff empties the list and mode 0 restarts it with value; any other mode
- * adds value when it is not listed yet. Returns 1 when value's position in the
- * list is limit or more (no spritesheet is left for it), else 0. */
+ * (the unit's slot) adds value when it is not listed yet. Returns 1 when value's
+ * position in the list is limit or more (no spritesheet is left for it), else 0.
+ * As slot 0 restarts the list, the first ENTD unit's sheet is always listed. */
 static s32 battle_unit_add_unique_entd_spritesheet(s32 mode, s16 value, s32 limit) {
-    s32 idx;
+    s32 index;
     s32 i;
 
     if (mode == 0xFF) {
@@ -2314,25 +2368,26 @@ static s32 battle_unit_add_unique_entd_spritesheet(s32 mode, s16 value, s32 limi
         g_battle_unit_entd_spritesheet_ids[0] = value;
         return 0;
     }
-    idx = 0xFF;
+    index = 0xFF;
     for (i = 0; i < g_battle_unit_entd_spritesheet_count; i++) {
         if (g_battle_unit_entd_spritesheet_ids[i] == value) {
-            idx = i;
+            index = i;
             break;
         }
     }
-    if (idx == 0xFF) {
-        idx = g_battle_unit_entd_spritesheet_count;
-        g_battle_unit_entd_spritesheet_count = idx + 1;
-        g_battle_unit_entd_spritesheet_ids[idx] = value;
+    if (index == 0xFF) {
+        index = g_battle_unit_entd_spritesheet_count;
+        g_battle_unit_entd_spritesheet_count = index + 1;
+        g_battle_unit_entd_spritesheet_ids[index] = value;
     }
-    return idx >= limit;
+    return index >= limit;
 }
 
-/* Takes a present unit out of the battle: the slot is emptied and its existence
+/* Take a present unit out of the battle: the slot is emptied and its existence
  * set to BATTLE_UNIT_EXISTENCE_DISABLED. Always returns 0. */
 s32 battle_unit_disable_remove(s32 battle_id) {
     unit_stats_t* unit = &g_battle_unit_stats[battle_id];
+
     if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
         unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
         unit->existence = BATTLE_UNIT_EXISTENCE_DISABLED;
@@ -2340,7 +2395,7 @@ s32 battle_unit_disable_remove(s32 battle_id) {
     return 0;
 }
 
-/* Puts an off-field unit on the field: the slot becomes occupied, its existence
+/* Put an off-field unit on the field: the slot becomes occupied, its existence
  * active, and a unit of any team but blue is counted into the enemy level
  * statistics.
  *
@@ -2361,19 +2416,21 @@ s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id) {
     return 0;
 }
 
-/* Empties a unit slot and marks it off the field (defined but not placed). Always
+/* Empty a unit slot and mark it off the field (defined but not placed). Always
  * returns 0. */
 s32 battle_unit_set_cannot_exist(s32 battle_id) {
     unit_stats_t* unit = &g_battle_unit_stats[battle_id];
+
     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
     unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
     return 0;
 }
 
-/* Empties a unit slot and sets its existence to pending removal, without testing
+/* Empty a unit slot and set its existence to pending removal, without testing
  * whether the unit is present. No retail code calls it. */
 s32 battle_unit_erase_pending_party_removal(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
+
     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
     unit->existence = BATTLE_UNIT_EXISTENCE_PENDING_REMOVAL;
     return 0;
@@ -2390,16 +2447,16 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
     unit_stats_t* unit;
     unit_stats_t* partner;
     s32 occupant;
-    u8 rider;
-    s32 has_rider = 0;
+    u8 mount_id;
+    s32 has_mount = 0;
     u8 mount_info;
     map_tile_flags_t tile_flags;
 
     unit = &g_battle_unit_stats[battle_id];
     occupant = battle_unit_find_at_tile(x, y, level, BATTLE_UNIT_TILE_FILTER_MOUNTABLE_CHOCOBO);
     if (occupant >= 0 && occupant != battle_id) {
-        rider = occupant;
-        has_rider = 1;
+        mount_id = occupant;
+        has_mount = 1;
     }
 
     tile_flags = g_battle_map_tile_data[(level << 8) + y * g_battle_map_max_x + x].flags;
@@ -2418,9 +2475,9 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
             partner->mount_info = 0;
         }
     }
-    if (has_rider != 0) {
-        unit->mount_info = rider + BATTLE_MOUNT_INFO_FLAG_RIDER;
-        g_battle_unit_stats[rider].mount_info = battle_id + BATTLE_MOUNT_INFO_FLAG_MOUNT;
+    if (has_mount != 0) {
+        unit->mount_info = mount_id + BATTLE_MOUNT_INFO_FLAG_RIDER;
+        g_battle_unit_stats[mount_id].mount_info = battle_id + BATTLE_MOUNT_INFO_FLAG_MOUNT;
     }
 
     unit->position.y = y;

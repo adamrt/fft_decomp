@@ -10,8 +10,9 @@
 #include "psx/types.h"
 
 /* Formula 0x2A: talk skill, hit (MA+X)%: gil (Level * SP), CT to 0, +/-Brave
- * or Faith (Y), or status by ability. Misses a sleeping target and, without
- * Monster Talk, a monster; Finger Guard can cancel it. */
+ * or Faith (Y), or status by ability (battle_formula_apply_talk_skill). Misses
+ * a sleeping target and, without Monster Talk, a monster; Finger Guard can
+ * cancel it. */
 void battle_formula_talk_skill_hit_ma_x_percent(void) {
     battle_formula_force_sleeping_target_miss();
     if ((g_battle_action_target->unit_flags & UNIT_FLAG_MONSTER)
@@ -138,10 +139,13 @@ void battle_formula_damage_pa_plus_y_half_times_pa(void) {
     }
 }
 
-/* Formula 0x32: damage ((PA + (PA + Y) / 2) * rnd(1..X)); physical evade. */
+/* Formula 0x32: damage ((PA + (PA + Y) / 2) * rnd(1..X)); physical evade. The
+ * sum comes from battle_formula_store_hit_chance, so zodiac compatibility
+ * scales only its (PA + Y) / 2 part. The random factor is kept in
+ * random_damage_factor. */
 void battle_formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
     action_data_t* action;
-    u8* mult;
+    u8* factor;
     s32 rnd;
 
     if (battle_formula_calculate_physical_evade() != 0)
@@ -152,12 +156,11 @@ void battle_formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
     battle_formula_calculate_critical_hit();
     battle_formula_store_hit_chance();
     rnd = battle_formula_get_random_0_7fff();
-    mult = &g_battle_action_current_ability.random_damage_factor;
-    *mult = (rnd * g_battle_action_current_ability.range_data.x) / 32768 + 1;
+    factor = &g_battle_action_current_ability.random_damage_factor;
+    *factor = (rnd * g_battle_action_current_ability.range_data.x) / 32768 + 1;
     action = g_battle_action_target_data;
-    /* The target loads hp_damage signed (lh) here; keep the cast and the
-       multiplier deref separated so `* *` never reads as a comment. */
-    action->hp_damage = action->hp_damage * (*mult);
+    /* The target loads hp_damage signed (lh) here. */
+    action->hp_damage = action->hp_damage * *factor;
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
 }
 
@@ -269,7 +272,8 @@ void battle_formula_hit_ma_x_percent_miss_same_zodiac(void) {
     }
 }
 
-/* Formula 0x42: damage (PA * Y); the caster takes (PA * Y / X). No evade. */
+/* Formula 0x42: damage (PA * Y); the caster takes (PA * Y / X), so the
+ * caster's action data is marked hit too. No evade. */
 void battle_formula_damage_pa_times_y_damage_caster_pa_times_y_over_x(void) {
     s16 damage;
     action_data_t* action;
@@ -277,10 +281,10 @@ void battle_formula_damage_pa_times_y_damage_caster_pa_times_y_over_x(void) {
     battle_formula_store_pa_and_y();
     battle_formula_apply_zodiac_compatibility();
     damage = g_battle_action_current_ability.xa * g_battle_action_current_ability.ya;
-    /* Cast-pointer stores: as struct members GCC sinks them past the
-     * following scalar global loads; the target keeps source order. */
     g_battle_action_target_data->hp_damage = damage;
     damage = damage / g_battle_action_current_ability.range_data.x;
+    /* One load of the attacker's record serves both stores; reading the global
+     * for each store is three instructions longer. */
     action = g_battle_action_attacker_data;
     action->hit = 1;
     action->hp_damage = damage;
@@ -299,7 +303,9 @@ void battle_formula_absorb_hp_y_percent_status(void) {
     battle_formula_apply_status();
 }
 
-/* Formula 0x48: heal (Z * 10) HP. */
+/* Formula 0x48: heal (Z * 10) HP, Z from the used item's data. The amount is
+ * stored as damage; battle_formula_apply_undead_reversal turns it into healing
+ * unless the target is undead. */
 void battle_formula_heal_z_times_ten(void) {
     g_battle_action_target_data->hp_damage
         = g_main_item_secondary_data[g_battle_action_current_ability.used_item_id].z * 10;
@@ -400,7 +406,9 @@ void battle_formula_hit_ma_x_percent_no_evade(void) {
     }
 }
 
-/* Formula 0x52: damage (CasMaxHP - CasCurHP), 100% status; caster in AoE takes its own current HP as damage. */
+/* Formula 0x52: damage equal to the caster's missing HP (max HP - HP), with
+ * 100% status; the caster itself, when caught in the area, takes its own
+ * current HP as damage and no status. */
 void battle_formula_damage_caster_missing_hp_self_sacrifice(void) {
     if (g_battle_action_target != g_battle_action_attacker) {
         unit_stats_t* caster = g_battle_action_attacker;
@@ -480,6 +488,9 @@ void battle_formula_raise_level_by_one_add_status_on_caster(void) {
         battle_formula_force_attack_miss();
         return;
     }
+
+    /* The status goes to the caster: the target globals point at the caster
+     * for battle_formula_apply_status_to_action, then are put back. */
     action = g_battle_action_target_data;
     action->attack_type = ACTION_TYPE_PSEUDO_STATUS;
     saved_unit = g_battle_action_target;
@@ -543,7 +554,7 @@ void battle_formula_lower_level_by_one(void) {
     }
 }
 
-/* Formula 0x5A: status, 100%; dragons only (formula_check_dragon). */
+/* Formula 0x5A: status, 100%; dragons only (battle_formula_check_dragon). */
 void battle_formula_dragon_hit_100(void) {
     battle_formula_check_dragon();
     if (g_battle_action_target_data->hit != 0) {

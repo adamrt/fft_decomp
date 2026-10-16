@@ -28,8 +28,9 @@ static void battle_status_disable_acting(unit_stats_t* unit);
 static u8 battle_unit_generate_treasure(unit_stats_t* unit);
 
 /* 1 when the unit, or its rider when it is a mount, is charging an attack of
- * the Charge skillset; with do_disable, battle_status_disable_acting is called
- * on that unit. */
+ * the Charge skillset; with do_disable that unit's charge is also canceled
+ * (battle_status_disable_acting). A move or a knockback cancels a Charge
+ * through this test. */
 s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable) {
     u8 mount_info;
 
@@ -57,14 +58,13 @@ static void battle_status_disable_acting(unit_stats_t* unit) {
 
 /* Pick the rare or common move-find item on the unit's tile and mark the tile found.
  *
- * The rare item is chosen with a (100 - Brave)% chance; the tile is the
- * unit's x and position (y in the low byte, the layer in bit 15). */
+ * The rare item is chosen with a (100 - Brave)% chance. */
 move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
     move_find_result_data_t* find_result
         = battle_map_get_move_find_result(unit->x, unit->position.y, unit->position.higher_elevation);
     u8 item_id;
 
-    if (main_util_roll_pass_fail(0x64, 0x64 - unit->brave) == 0) {
+    if (main_util_roll_pass_fail(100, 100 - unit->brave) == 0) {
         item_id = find_result->rare_item_id;
     } else {
         item_id = find_result->common_item_id;
@@ -77,12 +77,15 @@ move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
 }
 
 /*
- * Fill the move-find result record for tile (x, y, layer): flag 4 and the
- * unit id when a unit stands there, then, for a matching move-find tile, its
- * index, flag 1 and the rare/common items when the item is still unfound,
- * and flag 2 with the trap number (0 degenerator, 1 deathtrap, 2 sleeping gas,
- * 3 steel needle) unless the trap is disabled. The final flag
- * update must go through a pointer to keep the target's register address.
+ * Fill the move-find result record for tile (x, y, layer): MOVE_FIND_RESULT_OCCUPIED
+ * and the unit id when a unit stands there; then, when the tile is one of the
+ * map's four move-find tiles, its index, MOVE_FIND_RESULT_ITEM and the rare and
+ * common items while the item is still unfound, and MOVE_FIND_RESULT_TRAP with
+ * the first trap its flags name unless the tile has no trap.
+ *
+ * The occupant lookup does not depend on the loop counter, so the retail code
+ * repeats the same search up to 21 times. The final flag update must go
+ * through a pointer to keep the target's register address.
  */
 move_find_result_data_t* battle_map_get_move_find_result(s32 x, u8 y, u8 layer) {
     map_move_find_item_entry_t* tile;
@@ -140,8 +143,8 @@ move_find_result_data_t* battle_map_get_move_find_result(s32 x, u8 y, u8 layer) 
 
 /* Test (save == 0) or set the found flag of one of a map's four move-find item tiles.
  *
- * Each flag byte holds two maps, four tiles each; the test returns 1 while the item is
- * still unfound. */
+ * Each flag byte holds two maps, four tiles each, MSB first with the even map in
+ * the high nibble; the test returns 1 while the item is still unfound. */
 static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
     s32 byte_index = map_id / 2;
     s32 bit = 0x80 >> (((map_id & 1) * 4) + tile_index);
@@ -192,6 +195,7 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
         g_main_crystal_pickup_result.result = 4;
         g_main_crystal_pickup_result.treasure_item = battle_unit_generate_treasure(crystal);
     } else {
+        /* The empty loops are measured residue: without them the code differs. */
         do {
             do {
                 g_main_crystal_pickup_result.result = 2;
@@ -205,7 +209,8 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
                 + mover->career.unlocked_jobs[2];
             mover_identity = mover->character_identity;
             crystal_identity = crystal->character_identity;
-            main_mem_zero(g_main_crystal_pickup_result.learned_abilities, 0x40);
+            main_mem_zero(
+                g_main_crystal_pickup_result.learned_abilities, sizeof(g_main_crystal_pickup_result.learned_abilities));
             for (job_index = UNIT_CAREER_JOB_INDEX_BASE; job_index < UNIT_LEARNED_ABILITY_JOB_COUNT; job_index++) {
                 for (j = 0; j < UNIT_LEARNED_ABILITY_BYTES_PER_JOB; j++) {
                     g_main_crystal_pickup_result.learned[job_index][j] = 0;
@@ -231,7 +236,9 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
                     continue;
                 }
                 skillset = g_main_job_data_pointer[job_id].skillset;
-                for (j = 0; j < 24; j++) {
+                /* Learned bits run MSB first in the job's three bytes; the
+                 * result's learned_abilities set is indexed by ability id, LSB first. */
+                for (j = 0; j < SKILLSET_ABILITY_LIST_COUNT; j++) {
                     byte_index = j / 8;
                     mask = 0x80 >> (j - byte_index * 8);
                     if (!(known[byte_index] & mask) && (offered[byte_index] & mask)) {
@@ -260,7 +267,7 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
     return &g_main_crystal_pickup_result;
 }
 
-/* Fills a unit's action result for picking up a crystal or treasure
+/* Fill a unit's action result for picking up a crystal or treasure
  * (BATTLE_CRYSTAL_* flags).
  *
  * The result starts as a canceled miss. TAKE_TREASURE adds
@@ -342,6 +349,8 @@ static u8 battle_unit_generate_treasure(unit_stats_t* unit) {
     }
 
     if (count == 0) {
+        /* 0 to 12 less 16 wraps in the u8 to the consumable ids from Potion;
+         * skipping Elixir reaches the thirteenth. */
         candidates[0] = ((rand() * 13) / 0x8000) - (ITEM_ID_COUNT - ITEM_ID_CONSUMABLE_FIRST);
         if (candidates[0] >= ITEM_ID_ELIXIR) {
             candidates[0] = candidates[0] + 1;
@@ -353,7 +362,7 @@ static u8 battle_unit_generate_treasure(unit_stats_t* unit) {
     return candidates[i];
 }
 
-/* The battle stats in a unit slot, occupied or not; 0 for an battle_id past the last
+/* The battle stats in a unit slot, occupied or not; 0 for a battle_id past the last
  * slot. */
 unit_stats_t* battle_unit_get_stats_from_battle_id(u32 battle_id) {
     if (battle_id >= BATTLE_UNIT_SLOT_COUNT) {
@@ -418,12 +427,14 @@ s32 battle_unit_find_slot_by_character_identity(u32 character_identity) {
 
 /* Find the battle-stats record whose ENTD unit ID matches unit_id.
  *
- * Present units (entd_slot != 0xff) are searched first: the result code is the
- * battle index, or -3 for a Crystal or Treasure unit. Absent units are then
- * matched by existence state: 0 gives -2, disabled -3 and pending removal -6.
- * Otherwise returns 0 with -3. Both loops compare against (unit_id & 0xff):
- * the (u8) cast adds a loop insn and stops loop.c hoisting the constant 2 in
- * the second loop. */
+ * Present units are searched first: the result code is the battle index, or -3
+ * for a Crystal or Treasure unit. Absent units are then matched by existence
+ * state: off field gives -2, disabled -3 and pending removal -6. Otherwise
+ * returns 0 with -3. Both loops compare against (unit_id & 0xff): the (u8) cast
+ * adds a loop insn and stops loop.c hoisting the constant 2 in the second loop.
+ * The second loop's test of existence against entd_slot, just found to be
+ * BATTLE_ENTD_SLOT_NONE, is a test against BATTLE_UNIT_EXISTENCE_NONE (both
+ * 0xff). */
 unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battle_id) {
     unit_stats_t* unit;
     s32 i;
@@ -465,15 +476,16 @@ unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battl
     return 0;
 }
 
-/* Counts a unit of any team but blue into the enemy level statistics: its level
+/* Count a unit of any team but blue into the enemy level statistics: its level
  * is added to g_battle_enemy_level_sum and raises g_battle_highest_enemy_level. */
 void battle_unit_set_enemy_level_data(unit_stats_t* unit) {
-    u8 lvl;
+    u8 level;
+
     if (unit->team_flags & BATTLE_TEAM_MASK) {
-        lvl = unit->level;
-        g_battle_enemy_level_sum = g_battle_enemy_level_sum + lvl;
-        if (g_battle_highest_enemy_level < lvl) {
-            g_battle_highest_enemy_level = lvl;
+        level = unit->level;
+        g_battle_enemy_level_sum += level;
+        if (g_battle_highest_enemy_level < level) {
+            g_battle_highest_enemy_level = level;
         }
     }
 }
@@ -634,36 +646,36 @@ battle_menu_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
  * gone (moved, or Don't Move) and its action is gone (acted, or any action
  * restriction), and any other unit gets PLAYER_UNIT or OTHER_UNIT.
  *
- * The local can_evade holds the action restriction. */
+ */
 static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit) {
-    unit_stats_t* act;
-    s32 flag = 0;
+    unit_stats_t* active;
+    s32 inspect_only = 0;
     s32 player_controlled;
     s32 player_flag;
     s32 dont_move;
-    s32 can_evade;
+    s32 restriction;
     u8 moved;
     u8 acted;
 
-    act = battle_unit_find_active_data_pointer();
-    if (act != 0) {
-        if ((act->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) == 0
-            || act->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
-            flag = 1;
+    active = battle_unit_find_active_data_pointer();
+    if (active != 0) {
+        if ((active->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) == 0
+            || active->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
+            inspect_only = 1;
         }
     }
     player_flag = unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
     player_controlled = player_flag != 0;
-    if (flag != 0) {
+    if (inspect_only != 0) {
         if (player_controlled != 0) {
             return BATTLE_MENU_ID_PLAYER_UNIT_INSPECT;
         }
         return BATTLE_MENU_ID_OTHER_UNIT_INSPECT;
     }
     dont_move = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)];
-    can_evade = battle_unit_get_action_restriction(unit);
+    restriction = battle_unit_get_action_restriction(unit);
     moved = unit->movement_taken | (dont_move & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE));
-    acted = unit->action_taken | can_evade;
+    acted = unit->action_taken | restriction;
     if (unit->has_turn != 0) {
         if (moved == 0 && acted == 0) {
             return BATTLE_MENU_ID_TURN;
@@ -682,11 +694,12 @@ static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* 
     return BATTLE_MENU_ID_OTHER_UNIT;
 }
 
-/* Returns the unit's battle_unit_action_restriction_e.
+/* Return the unit's battle_unit_action_restriction_e.
  *
  * CANNOT_ACT for Don't Act or a ridden mount. DEEP_WATER on a tile of depth 2 or
  * more, unless the unit has Float, Chicken or Frog, one of the Move in Water,
- * Walk on Water or Float movement abilities, or is a rider. */
+ * Walk on Water or Float movement abilities, or is a rider; the last test
+ * computes DEEP_WATER (2) as the rider test shifted left once. */
 battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_stats_t* unit) {
     s32 depth;
 
@@ -715,7 +728,7 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
     return ((unit->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) == 0) << 1;
 }
 
-/* Builds a unit's 0xff-terminated action-menu skillset list and loads each
+/* Build a unit's 0xff-terminated action-menu skillset list and load each
  * entry's abilities.
  *
  * `menu_types` receives each entry's low-nibble menu type and `empty` is set
@@ -791,7 +804,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
     return 0;
 }
 
-/* Loads the unit's usable abilities for an action menu type into scratch lists.
+/* Load the unit's usable abilities for an action menu type into scratch lists.
  *
  * A frog only keeps the default, blank, monster and attack menus. Returns the
  * menu loader's result, or whether the menu type is below 15 for menus without
@@ -840,9 +853,15 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
 }
 
 /* Count the AT-list entries that resolve before an action by battle_id
- * charging for ct; returns 0xff when no such position exists within 40. */
+ * charging for ct; returns 0xff when no such position exists within 40.
+ *
+ * Keys hold the tick in their high byte. On an equal key the action resolves
+ * after only another unit's charged action with a lower battle id. Between the
+ * charge pass and the next tick (PICK_UNIT_AFTER_CHARGE) a nonzero charge lands
+ * one tick later. */
 u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries) {
     s32 count;
+
     if (g_battle_between_turn_resume_state == BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE && ct != 0) {
         ct += 1;
     }

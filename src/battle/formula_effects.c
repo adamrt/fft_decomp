@@ -76,8 +76,8 @@ void battle_formula_add_brave_x_stats_y(void) {
     g_battle_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 
-/* Formula 3C: damage the caster for MaxHP/5 and heal the target for twice
- * that amount. */
+/* Formula 0x3C: damage the caster for a fifth of its max HP and heal the
+ * target for twice the damage stored (read back as a 16-bit value). */
 void battle_formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths(void) {
     u16 amount = g_battle_action_attacker->max_hp / 5;
     s32 dealt;
@@ -86,7 +86,7 @@ void battle_formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths(voi
 
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
     action->hp_damage = amount;
-    action = g_battle_action_attacker_data;
+    action = g_battle_action_attacker_data; /* reloaded, as retail does */
     action->hit = 1;
     target = g_battle_action_target_data;
     dealt = g_battle_action_attacker_data->hp_damage;
@@ -94,25 +94,27 @@ void battle_formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths(voi
     target->hp_healing = dealt * 2;
 }
 
-/* Formula 0x43: damage equal to the caster's missing HP (MaxHP - CurHP). */
+/* Formula 0x43: damage equal to the caster's missing HP (max HP - HP). */
 void battle_formula_43_damage_caster_missing_hp(void) {
     unit_stats_t* unit = g_battle_action_attacker;
     action_data_t* action = g_battle_action_target_data;
     u16 max_hp = unit->max_hp;
-    u16 cur_hp = unit->hp;
+    u16 hp = unit->hp;
+
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
-    action->hp_damage = max_hp - cur_hp;
+    action->hp_damage = max_hp - hp;
 }
 
-/* Formula 0x44: damage equal to the target's current MP. */
+/* Formula 0x44: HP damage equal to the target's current MP. */
 void battle_formula_damage_hp_target_current_mp(void) {
     u16 mp = g_battle_action_target->mp;
     action_data_t* action = g_battle_action_target_data;
+
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
     action->hp_damage = mp;
 }
 
-/* Formula 0x45: damage equal to the target's missing HP (MaxHP - CurHP). */
+/* Formula 0x45: damage equal to the target's missing HP (max HP - HP). */
 void battle_formula_damage_target_missing_hp(void) {
     unit_stats_t* unit = g_battle_action_target;
     action_data_t* action = g_battle_action_target_data;
@@ -129,9 +131,11 @@ void battle_formula_set_brave_loss_y(void) {
     g_battle_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 
-/* Fire loses and lightning gains a quarter of its HP damage in a
- * thunderstorm; ice gains a quarter in a snowstorm.  Plain rain and snow
- * have no effect. */
+/* Fire loses and lightning gains a quarter of its HP damage in a storm or a
+ * strong storm; ice gains a quarter in a snowstorm or a strong snowstorm.
+ * Plain rain and snow have no effect. The weather comes through
+ * battle_map_get_effective_weather, so an indoor map has none, unlike the bow
+ * penalty of battle_formula_apply_weather_effects_on_bows. */
 void battle_formula_apply_weather_elemental_effects(void) {
     u8 element;
     s32 weather;
@@ -168,9 +172,8 @@ void battle_formula_apply_elemental(void) {
     s32 mount_info;
 
     element = g_battle_action_current_ability.range_data.element;
-    /* Oil (status byte 2 bit 0x80) is removed by fire (element bit 0x80). XA is
-     * doubled, but every caller has already stored the HP damage and nothing
-     * reads XA afterwards, so the damage does not change. */
+    /* Fire removes Oil. XA is doubled, but every caller has already stored the
+     * HP damage and nothing reads XA afterwards, so the damage does not change. */
     if ((g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_OIL)]
             & STATUS_BYTE_MASK(STATUS_ID_OIL))
         && (element & BATTLE_ELEMENT_FIRE)) {
@@ -186,7 +189,7 @@ void battle_formula_apply_elemental(void) {
     if (mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
         unit = &g_battle_unit_stats[mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
     }
-    /* Float (status byte 2 bit 0x40) nullifies earth (element bit 0x08). */
+    /* Float nullifies earth. */
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)] & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
         && (element & BATTLE_ELEMENT_EARTH)) {
         battle_formula_nullify_action();
@@ -212,9 +215,11 @@ void battle_formula_apply_elemental_absorption(void) {
 }
 
 /* Faith step: HP damage * caster Faith * target Faith / 10000. The Faith
- * status counts as 100 and Innocent as 0; Innocent wins when a unit has both. */
+ * status counts as 100 and Innocent as 0; Innocent wins when a unit has both.
+ * The two Faith values come from attacker_faith and target_faith, which the
+ * action setup loaded. */
 void battle_formula_calculate_faith(void) {
-    action_data_t* act;
+    action_data_t* action;
 
     if (g_battle_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)]
         & STATUS_BYTE_MASK(STATUS_ID_FAITH)) {
@@ -233,14 +238,15 @@ void battle_formula_calculate_faith(void) {
         g_battle_action_current_ability.target_faith = 0;
     }
 
-    act = g_battle_action_target_data;
-    act->hp_damage = act->hp_damage * g_battle_action_current_ability.target_faith
+    action = g_battle_action_target_data;
+    action->hp_damage = action->hp_damage * g_battle_action_current_ability.target_faith
         * g_battle_action_current_ability.attacker_faith / 10000;
 }
 
 /* Drain step: once the target's result is final, a hit heals the attacker by
  * the HP damage. Against an undead target it is reversed: the attacker takes
- * the damage and the target is healed by it. */
+ * the damage and the target is healed by it. The several pointer locals are
+ * the retail code's separate loads of the same globals. */
 void battle_formula_apply_hp_absorption(void) {
     action_data_t* action;
     action_data_t* attacker;
@@ -284,6 +290,7 @@ void battle_formula_apply_undead_reversal(void) {
     action_data_t* action;
     action_data_t* action_again;
     u16 hp_damage;
+
     if (g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
         & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) {
         g_battle_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
@@ -300,10 +307,8 @@ void battle_formula_apply_undead_reversal(void) {
 }
 
 /* Result of formula 0x0E: an undead target is healed by the amount and
- * receives none of the statuses of the first status byte; a target immune to
- * Dead is missed; anyone else takes it as HP damage.
- *
- * Status byte 1: 0x20 Dead, 0x10 Undead. */
+ * receives none of the statuses of the first status byte (Dead among them); a
+ * target immune to Dead is missed; anyone else takes it as HP damage. */
 void battle_formula_apply_undead_absorb_attack(void) {
     unit_stats_t* unit = g_battle_action_target;
 
@@ -362,33 +367,33 @@ void battle_formula_convert_hp_damage_to_mp_recovery(void) {
  * executing, a roll of 0..99 at or above it misses; a chance of 0 misses in
  * every state. */
 void battle_formula_use_hp_damage_as_action_hit_percent(void) {
-    s32 pct;
-    s32 amount;
+    s32 percent;
+    s32 scaled;
     s32 state;
-    s32 xa;
-    action_data_t* act = g_battle_action_target_data;
+    s32 accuracy;
+    action_data_t* action = g_battle_action_target_data;
 
-    pct = act->hp_damage;
-    if (pct >= 100) {
-        act->hp_damage = 0;
+    percent = action->hp_damage;
+    if (percent >= 100) {
+        action->hp_damage = 0;
         return;
     }
-    xa = act->attack_accuracy;
+    accuracy = action->attack_accuracy;
     state = g_battle_action_state;
-    amount = pct * xa / 100;
-    act->hp_damage = 0;
-    act->attack_accuracy = amount;
-    if (state != ACTION_STATE_EXECUTE && pct != 0) {
+    scaled = percent * accuracy / 100;
+    action->hp_damage = 0;
+    action->attack_accuracy = scaled;
+    if (state != ACTION_STATE_EXECUTE && percent != 0) {
         return;
     }
-    if (main_util_roll_pass_fail(100, pct) != 0) {
+    if (main_util_roll_pass_fail(100, percent) != 0) {
         battle_formula_cause_action_miss();
         g_battle_action_target_data->hp_damage = 0;
     }
 }
 
-/* Miss unless the target's monster graphic is 0x0F or 0x10: the dragon and
- * hydra jobs and the Holy Dragon. */
+/* Miss unless the target's monster graphic is 0x0F or 0x10 (one unsigned
+ * compare tests both): the dragon and hydra jobs and the Holy Dragon. */
 void battle_formula_check_dragon(void) {
     if ((g_battle_action_target->monster_graphic - 0xF) >= 2U) {
         battle_formula_force_attack_miss();
@@ -404,9 +409,7 @@ void battle_formula_force_sleeping_target_miss(void) {
     }
 }
 
-/* Maintenance on the target turns a break or steal into a forced failure.
- *
- * Battle Stats 0x91 bit 0x04 is the Maintenance support. */
+/* Maintenance on the target turns a break or steal into a forced failure. */
 void battle_formula_apply_maintenance(void) {
     if (g_battle_action_target->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_MAINTENANCE) {
         g_battle_action_target_data->hit = 0;
@@ -415,8 +418,8 @@ void battle_formula_apply_maintenance(void) {
     }
 }
 
-/* When executing, a roll of 0..99 below 19 sets the added-effect flag (special
- * effect 0x0200). */
+/* When executing, a roll of 0..99 below BATTLE_FORMULA_ADDED_EFFECT_CHANCE (19)
+ * sets ACTION_SPECIAL_EFFECT_ADDED_EFFECT. */
 static void battle_formula_roll_conditional_status_proc_inner(void) {
     if (g_battle_action_state == ACTION_STATE_EXECUTE
         && main_util_roll_pass_fail(100, BATTLE_FORMULA_ADDED_EFFECT_CHANCE) == 0) {
@@ -435,10 +438,11 @@ void battle_formula_queue_weapon_spell(void) {
     battle_action_clear_knockback_flag();
 }
 
-/* Selects the Fire line for a fire gun, else Bolt for lightning, else Ice (also
- * for any other element or none), and the tier from a roll of 0..99: below 10
- * the third spell, below 40 the second, otherwise the first (10/30/60%).
- * Installs that spell's ability data. */
+/* Magic gun: select the Fire line for a fire gun, else Bolt for lightning, else
+ * Ice (also for any other element or none), and the tier from a roll of 0..99:
+ * below 10 the third spell, below 40 the second, otherwise the first
+ * (10/30/60%). The spell becomes the current ability, in the attacker's action
+ * command too, and its ability data is installed. */
 void battle_formula_select_magic_gun_ability(void) {
     u8 element;
     u8 pct;
@@ -528,14 +532,13 @@ void battle_formula_calculate_katana_break_chance(void) {
     }
 }
 
-/* Picks the equipment slot a Steal, Break or Might Sword ability targets.
+/* Pick the equipment slot a Steal, Break or Mighty Sword ability targets.
  *
- * Helmet (0x6e/0x8a/0xa1), armor (0x6f/0x8b/0xa0), shield (0x70/0x8c: right
- * hand shield, else left), accessory (0x72/0xa3) and weapon (0x71/0x8d/0xa2:
- * the hand whose item has the higher level, right on ties) abilities record
- * the slot bit in equipment_destroyed and the item in item_lost, returning 0.
- * Monsters, empty slots and other abilities clear equipment_destroyed and
- * return -1. */
+ * Helmet, armor, shield (the right hand's, else the left's), accessory and
+ * weapon (the hand whose item has the higher required level, right on ties)
+ * abilities record the slot bit in equipment_destroyed and the item in
+ * item_lost, returning 0. Monsters, empty slots and other abilities clear
+ * equipment_destroyed and return -1. */
 s32 battle_formula_select_targeted_equipment(void) {
     u16 ability;
     s32 right_level;
@@ -740,6 +743,8 @@ void battle_formula_apply_status_to_action(void) {
         do {
             byte = status / 8;
             if (g_battle_action_current_ability.status_infliction.statuses[byte] & (mask = 0x80 >> (status & 7))) {
+                /* Drop the status from the set unless a 24 in 100 roll keeps
+                 * it; the preview test cannot pass, as only EXECUTE gets here. */
                 if (main_util_roll_pass_fail(100, 24) != 0 || g_battle_action_state == ACTION_STATE_PREVIEW) {
                     g_battle_action_current_ability.status_infliction.statuses[byte] ^= mask;
                 }
@@ -782,7 +787,7 @@ void battle_formula_apply_status_to_action(void) {
     }
 }
 
-/* Formula 0x49: heal (Z * 10) MP. */
+/* Formula 0x49: heal (Z * 10) MP, Z from the used item's data. */
 void battle_formula_heal_mp_z_times_ten(void) {
     s32 index = g_battle_action_current_ability.used_item_id;
     s32 amount;
@@ -805,7 +810,9 @@ void battle_formula_apply_full_hp_mp_heal(void) {
     action->attack_type = ACTION_TYPE_HP_DAMAGE | ACTION_TYPE_MP_HEALING;
 }
 
-/* Cancel the action with Finger Guard when the target's Brave-based reaction roll succeeds. */
+/* Cancel the action with Finger Guard when the target's Brave-based reaction
+ * roll succeeds. The shown accuracy becomes 100 - Brave, and a Brave of 100
+ * always guards, even outside execution. */
 void battle_formula_apply_finger_guard(void) {
     unit_stats_t* unit;
     s32 chance;
@@ -815,7 +822,7 @@ void battle_formula_apply_finger_guard(void) {
     unit = g_battle_action_target;
     if ((unit->ability_flags.reaction[3] & BATTLE_REACTION_SET_4_FINGER_GUARD) == 0)
         return;
-    chance = 0x64 - unit->brave;
+    chance = 100 - unit->brave;
     /* The target stores the accuracy as a 16-bit value (0x2a..0x2b). */
     g_battle_action_target_data->attack_accuracy = chance;
     if (chance != 0) {
@@ -829,8 +836,9 @@ void battle_formula_apply_finger_guard(void) {
     g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD;
 }
 
-/* Catch the thrown weapon when the target's Brave-based reaction roll succeeds.
- * A Mime attacker's throw is never caught. */
+/* Catch the thrown weapon when the target's Brave-based reaction roll succeeds,
+ * as battle_formula_apply_finger_guard decides it; the caught weapon goes in
+ * last_received_attack. A Mime attacker's throw is never caught. */
 void battle_formula_apply_catch(void) {
     unit_stats_t* unit;
     action_data_t* action;
@@ -847,7 +855,7 @@ void battle_formula_apply_catch(void) {
     unit = g_battle_action_target;
     if ((unit->ability_flags.reaction[3] & BATTLE_REACTION_SET_4_CATCH) == 0)
         return;
-    chance = 0x64 - unit->brave;
+    chance = 100 - unit->brave;
     /* The target stores the accuracy as a 16-bit value (0x2a..0x2b). */
     g_battle_action_target_data->attack_accuracy = chance;
     if (chance != 0) {
@@ -872,8 +880,9 @@ static s32 battle_formula_roll_evades(void) {
 }
 
 /* Added-effect roll of the damage formulas: returns 0 when the status or proc
- * applies. When executing that is a roll of 0..99 below 19; a preview always
- * shows it; the AI simulation never counts it. */
+ * applies. When executing that is a roll of 0..99 below
+ * BATTLE_FORMULA_ADDED_EFFECT_CHANCE (19); a preview always shows it; the AI
+ * simulation never counts it. */
 s32 battle_formula_roll_conditional_status_proc(void) {
     battle_formula_roll_conditional_status_proc_inner();
     if (g_battle_action_state == ACTION_STATE_PREVIEW) {
