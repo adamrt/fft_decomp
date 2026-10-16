@@ -25,8 +25,8 @@ static void main_unit_generate_base_raw_stats(
     unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], main_unit_generation_type_e unit_type);
 static void main_unit_generate_out_of_battle(party_unit_t* party, main_unit_generation_type_e unit_type);
 static void main_unit_generate_party_base_raw_stats(party_unit_t* party, main_unit_generation_type_e unit_type);
-static void main_unit_init_battle_data(unit_stats_t* unit, const party_unit_t* party);
-static s32 main_unit_init_job_data_from_entd(unit_stats_t* unit, entd_unit_t* entd_unit);
+static void main_unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party);
+static s32 main_unit_init_from_entd_party_member(unit_stats_t* unit, entd_unit_t* entd_unit);
 static void main_unit_set_rsm_flag(unit_stats_t* unit, u32 ability_id);
 static void main_unit_store_character_names(unit_stats_t* unit);
 static void main_unit_store_ramza_name_birthday_zodiac(unit_stats_t* unit);
@@ -103,7 +103,7 @@ party_unit_t* main_party_get_unit(s32 party_index) {
  * party roster. Returns -2 for an empty ENTD slot, otherwise
  * main_party_save_unit's result (0, or -1 when the roster is full). guest_id is
  * passed on as that function's allow_guest flag. */
-s32 main_unit_init(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initialize_for_battle) {
+s32 main_unit_save_entd_unit_to_party(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initialize_for_battle) {
     entd_unit_t* entd_unit = &entd->units[unit_id];
 
     g_main_entd_current_unit = entd_unit;
@@ -118,7 +118,7 @@ s32 main_unit_init(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initia
         unit_data->entd_slot = 0x20;
         unit_data->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
         unit_data->formation_index = BATTLE_FORMATION_INDEX_NONE;
-        main_unit_init_for_battle(unit_data, entd_unit, initialize_for_battle, 0);
+        main_unit_init_from_entd(unit_data, entd_unit, initialize_for_battle, 0);
         return main_party_save_unit(unit_data, guest_id);
     }
 }
@@ -644,7 +644,7 @@ job_data_t* main_job_get_data_pointer(s32 job_id) {
  *
  * use_world_text selects the name-text provider used by the shared final
  * setup. Returns -1 when the requested party slot is unavailable. */
-s32 main_unit_init_job_data(unit_stats_t* unit, s32 slot, s32 use_world_text) {
+s32 main_unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_text) {
     party_unit_t* party_unit;
 
     g_main_unit_name_uses_world_text = use_world_text;
@@ -660,7 +660,7 @@ s32 main_unit_init_job_data(unit_stats_t* unit, s32 slot, s32 use_world_text) {
         main_job_calculate_unlocked(party_unit->career.job_levels, party_unit->gender_flags));
     main_unit_reset_battle_state(unit);
     unit->formation_index = slot;
-    main_unit_init_battle_data(unit, party_unit);
+    main_unit_copy_party_record(unit, party_unit);
     main_unit_copy_job_data(unit);
     main_unit_enable_rsm_flags(unit);
     main_unit_calculate_actual_stats(unit, 0);
@@ -675,7 +675,7 @@ s32 main_unit_init_job_data(unit_stats_t* unit, s32 slot, s32 use_world_text) {
  * setup. A temporary formation index enables level growth for generated units.
  * Mode 0x82 is the transformed-monster recalculation path and preserves the
  * existing runtime/ENTD-derived state. */
-s32 main_unit_init_for_battle(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind) {
+s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind) {
     g_main_unit_name_uses_world_text = use_world_text;
     /* Kind 0x82 skips the reset and the ENTD calculation. */
     if (kind != 0x82) {
@@ -789,7 +789,7 @@ static s32 main_unit_calculate_entd_data(unit_stats_t* unit, entd_unit_t* entd) 
 
     value = entd->unit_flags;
     if (value & UNIT_FLAG_LOAD_FORMATION) {
-        party_slot = main_unit_init_job_data_from_entd(unit, entd);
+        party_slot = main_unit_init_from_entd_party_member(unit, entd);
     } else if (entd->sprite_set < CHARACTER_IDENTITY_RAMZA_END && entd->birth_month == 0) {
         for (party_index = 0, ramza_jobs = &g_main_job_data[1]; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
             party_unit = main_party_get_unit(party_index);
@@ -809,7 +809,7 @@ static s32 main_unit_calculate_entd_data(unit_stats_t* unit, entd_unit_t* entd) 
                 || skillset == ramza_jobs[2].skillset) {
                 party_unit->secondary_skillset = g_main_job_data[entd->sprite_set].skillset;
             }
-            party_slot = main_unit_init_job_data_from_entd(unit, entd);
+            party_slot = main_unit_init_from_entd_party_member(unit, entd);
             value = UNIT_FLAG_LOAD_FORMATION;
         }
     }
@@ -891,11 +891,11 @@ static s32 main_unit_calculate_entd_data(unit_stats_t* unit, entd_unit_t* entd) 
  *
  * Preserve the party unit's kind flags while taking the ENTD persistence
  * controls and team assignment. Returns -1 when no matching party slot exists. */
-static s32 main_unit_init_job_data_from_entd(unit_stats_t* unit, entd_unit_t* entd_unit) {
+static s32 main_unit_init_from_entd_party_member(unit_stats_t* unit, entd_unit_t* entd_unit) {
     s32 slot = main_party_find_slot_by_sprite_set(entd_unit->sprite_set);
 
     if (slot != -1) {
-        main_unit_init_job_data(unit, slot, g_main_unit_name_uses_world_text);
+        main_unit_init_from_party_slot(unit, slot, g_main_unit_name_uses_world_text);
         /* Keep the party unit's kind flags and take the two persistence
          * controls from the ENTD definition. */
         unit->unit_flags &= ~(UNIT_FLAG_JOIN_AFTER_EVENT | UNIT_FLAG_SAVE_FORMATION);
@@ -913,7 +913,7 @@ static s32 main_unit_init_job_data_from_entd(unit_stats_t* unit, entd_unit_t* en
  * importance 3 (team 0xb), so losing him decides the battle. A roster member
  * (slot below 16) gets palette 0, while a guest keeps its saved palette.
  */
-static void main_unit_init_battle_data(unit_stats_t* unit, const party_unit_t* party) {
+static void main_unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party) {
     s32 team = 8;
     s32 i;
     s32 value;

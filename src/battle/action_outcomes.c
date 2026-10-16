@@ -201,7 +201,7 @@ void battle_unit_learn_used_ability(unit_stats_t* unit) {
  * executing: previews and AI simulations change no display state.
  *
  * status_id is the status handler index (status id + 1). */
-void battle_status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_id) {
+void battle_status_queue_graphics_change_if_executing(s32 status_id, s32 enabled, s32 battle_id) {
     if (g_battle_action_state == ACTION_STATE_EXECUTE) {
         battle_status_queue_runtime_graphics_flag_change(status_id, enabled, battle_id);
     }
@@ -262,7 +262,7 @@ s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
 /* Apply an action result's EXP change when executing. Without bit 0x80 the
  * amount is gained: EXP saturates at 255 and the level-up check runs. With it
  * the low seven bits are lost, down to 0. */
-void battle_action_handle_steal_exp(unit_stats_t* unit, u8 amount) {
+void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount) {
     s32 total;
     u8 capped;
     s16 reduced;
@@ -321,7 +321,7 @@ void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
         mask = 0x80 >> (i & 7);
         if (g_battle_action_target_data->status_changes.removal[idx] & mask) {
             main_status_set_ct(unit, i, 0);
-            battle_status_enable_special_flags(STATUS_HANDLER_INDEX(i), 0, battle_id);
+            battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
     }
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
@@ -332,7 +332,7 @@ void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
 
 /* Remove a unit from the current ability's target list, shifting later entries down and filling
  * the freed last slot with 0xFF. */
-void battle_target_sort_list(s32 target_battle_id) {
+void battle_target_remove_ability_target(s32 target_battle_id) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {

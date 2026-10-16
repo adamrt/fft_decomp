@@ -39,7 +39,7 @@ static void battle_action_dispatch_target_reaction_ability(void);
 static s32 battle_action_remove_broken_or_stolen_equipment(void);
 static void battle_action_set_target_variables(unit_stats_t* unit);
 static s32 battle_status_is_unit_out_of_action(const unit_stats_t* unit);
-static void battle_status_remove(void);
+static void battle_status_store_ability_cancellations(void);
 static void battle_status_remove_control(unit_stats_t* unit);
 static void battle_status_apply_action_removals(s32 unit_idx);
 static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only);
@@ -487,7 +487,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     }
     main_mem_copy_byte_data_source_first(&g_main_status_infliction_data[id],
         &g_battle_action_current_ability_view.status_infliction, sizeof(status_infliction_data_t));
-    battle_status_remove();
+    battle_status_store_ability_cancellations();
     g_battle_action_current_ability.formula = formula;
     battle_action_check_evasion_reactions();
     if (g_battle_action_target_data->hit == 0) {
@@ -509,7 +509,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
 
 /* For an ability whose status infliction type is cancel, copies its status bytes
  * to g_battle_action_canceled_statuses. Run during the pre-formula setup. */
-static void battle_status_remove(void) {
+static void battle_status_store_ability_cancellations(void) {
     s32 i;
     if (g_battle_action_current_ability.status_infliction.type & STATUS_INFLICTION_TYPE_CANCEL) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
@@ -548,9 +548,9 @@ void battle_action_finalize_target_current_action(void) {
         invalid = 1;
     }
     if (invalid != 0) {
-        battle_target_sort_list(g_battle_action_target->battle_id);
+        battle_target_remove_ability_target(g_battle_action_target->battle_id);
         battle_action_clear_data();
-        battle_formula_clear_nullify_flags();
+        battle_formula_clear_pending_proc();
         battle_action_clear_knockback_flag();
         g_battle_action_current_ability.post_action_message = BATTLE_POST_ACTION_MESSAGE_NONE;
         battle_formula_force_attack_miss();
@@ -574,7 +574,7 @@ void battle_action_finalize_target_current_action(void) {
     }
     if (g_battle_action_target_data->hp_damage >= g_battle_action_target->hp) {
         battle_action_clear_knockback_flag();
-        battle_formula_clear_nullify_flags();
+        battle_formula_clear_pending_proc();
     }
     team = (g_battle_action_target->initial_team_flags & BATTLE_TEAM_MASK) >> BATTLE_TEAM_SHIFT;
     action = g_battle_action_target_data;
@@ -590,7 +590,7 @@ void battle_action_finalize_target_current_action(void) {
 
 /* Drop a pending weapon proc together with the added-effect flag (special
  * effect 0x0200). */
-void battle_formula_clear_nullify_flags(void) {
+void battle_formula_clear_pending_proc(void) {
     u16* pflag = &g_battle_action_current_ability.weapon_proc_pending;
     action_data_t* action;
     u16* special_effect;
@@ -655,7 +655,7 @@ static void battle_action_clear_status_changes(action_data_t* action) {
  * The HP/MP damage and healing fields are read signed (lh), hence the s16
  * casts on the u16 header fields. The KO test's three status-bit checks fold
  * into the target's single 16-bit load of current[0..1] & 0x160. */
-s32 battle_action_finalize_attack_and_flag_reactions(s32 unit_id) {
+s32 battle_action_apply_target_result(s32 unit_id) {
     s32 outcome;
     s32 hp;
     s32 mp;
@@ -753,7 +753,7 @@ s32 battle_action_finalize_attack_and_flag_reactions(s32 unit_id) {
         outcome |= 1;
     }
     battle_action_add_war_funds(g_battle_action_target, g_battle_action_target_data->gil_change, ITEM_ID_NOTHING);
-    battle_action_handle_steal_exp(g_battle_action_target, g_battle_action_target_data->exp_change);
+    battle_action_apply_exp_change(g_battle_action_target, g_battle_action_target_data->exp_change);
     if (g_battle_action_target_data->jp_change != 0) {
         battle_action_apply_jp_change(g_battle_action_target);
     }
@@ -762,7 +762,7 @@ s32 battle_action_finalize_attack_and_flag_reactions(s32 unit_id) {
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_MORBOL) {
         outcome |= 1;
         if (g_battle_action_state == ACTION_STATE_EXECUTE) {
-            battle_status_reapply_active_flags(g_battle_action_target);
+            battle_status_clear_all(g_battle_action_target);
         }
     }
     if (hp == 0 && !(g_battle_action_target->status_sets.current[0] & STATUS_MASK(CRYSTAL))
@@ -897,7 +897,7 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     higher_elevation = unit->position.higher_elevation;
     facing = unit->position.facing;
     unit->formation_index = BATTLE_FORMATION_INDEX_GENERATED_UNIT;
-    main_unit_init_for_battle(unit, 0, 0, 0x82);
+    main_unit_init_from_entd(unit, 0, 0, 0x82);
     unit->x = x;
     unit->position.y = y;
     unit->formation_index = formation_index;
@@ -1483,7 +1483,7 @@ s32 battle_action_store_target_stats_pointer_data(s32 unit_id) {
         return -1;
     }
     main_mem_copy_byte_data_source_first(&g_battle_action_attacker_action_data, action, 0x2C);
-    result = battle_action_finalize_attack_and_flag_reactions(unit_id);
+    result = battle_action_apply_target_result(unit_id);
     if (g_battle_action_target_data->hit == 0) {
         g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_CANCELED;
     }
@@ -1644,7 +1644,7 @@ s32 battle_status_prepare_terrain_poison(unit_stats_t* unit) {
  * Sleep (a miss when they cannot take hold), Steel Needle deals MaxHP/5. Returns the trap id, or
  * BATTLE_TRAP_ID_NONE. */
 s32 battle_action_apply_tile_trap(unit_stats_t* unit) {
-    u8 trap = battle_map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation)->trap_id;
+    u8 trap = battle_map_get_move_find_result(unit->x, unit->position.y, unit->position.higher_elevation)->trap_id;
     action_data_t* action;
 
     if (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
@@ -1750,7 +1750,7 @@ s32 battle_unit_build_gained_exp_jp_level_job_level(unit_stats_t* unit, action_r
     g_battle_action_current_ability.job_level_gained_flag = 0;
     g_battle_action_context = ACTION_CONTEXT_REACTION_OR_SIMULATION;
     g_battle_acting_unit_id = unit_id;
-    result = battle_action_finalize_attack_and_flag_reactions(unit->battle_id);
+    result = battle_action_apply_target_result(unit->battle_id);
     g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     rewards->earned_experience = unit->action.exp_change;
     rewards->earned_jp = unit->action.jp_change;
@@ -1848,7 +1848,7 @@ static void battle_status_apply_action_removals(s32 unit_idx) {
         if (unit->action.status_changes.removal[idx] & mask) {
             unit->inflicted_status[idx] = unit->inflicted_status[idx] & ~mask;
             if (main_status_set_ct(unit, i, 1) == 0) {
-                battle_status_enable_special_flags(STATUS_HANDLER_INDEX(i), 0, unit_idx);
+                battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 0, unit_idx);
             }
         }
     }
@@ -1905,9 +1905,9 @@ static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only
             continue;
         }
         if ((previous & mask) && i != STATUS_ID_CRYSTAL && i != STATUS_ID_OIL) {
-            battle_status_enable_special_flags(STATUS_HANDLER_INDEX(i), 2, unit_id);
+            battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 2, unit_id);
         } else {
-            battle_status_enable_special_flags(STATUS_HANDLER_INDEX(i), 1, unit_id);
+            battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 1, unit_id);
         }
         if (i == STATUS_ID_TRANSPARENT) {
             g_battle_action_target->transparent_removal_flag = 0;

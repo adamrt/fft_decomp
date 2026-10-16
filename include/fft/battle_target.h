@@ -93,7 +93,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source);
 extern u8 g_battle_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
 
 s32 battle_target_copy_ability_targets(u8* out);
-void battle_target_sort_list(s32 target_battle_id);
+void battle_target_remove_ability_target(s32 target_battle_id);
 
 /* cursor */
 void battle_target_move_cursor_to_action_target(const battle_unit_t* unit);
@@ -114,9 +114,9 @@ extern s16 g_battle_target_tile_mark_modes[3]; /* battle_tile_mark_mode_e, one p
 extern battle_render_buffer_t* g_battle_target_tile_color_buffer;
 
 s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad);
-void battle_target_calculate_tile_coords_and_glow_from_at_list(void);
+void battle_target_update_cursor(void);
 void battle_target_calculate_tile_coords_with_cursor_glow(void);
-s32 battle_target_set_boxes_red(void);
+s32 battle_target_begin_tile_selection(void);
 void battle_target_set_tile_background_color(s32 mode, s32 unused);
 void battle_target_show_move_range_in_free_cursor(void);
 

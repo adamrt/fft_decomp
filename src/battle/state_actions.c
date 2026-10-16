@@ -178,7 +178,7 @@ s32 battle_state_announce_next_charged_action(void) {
             } else {
                 if (result >= 0) {
                     if (result < 4) {
-                        battle_gfx_activate_numerical_sprite_data(unit, result);
+                        battle_gfx_queue_charge_failure_message(unit, result);
                     }
                 }
                 battle_unit_set_animation_based_on_status(unit);
@@ -232,7 +232,7 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
     battle_strike_work_t* action;
     s32 i;
 
-    g_main_system_animation_speed = 1;
+    g_main_system_vsync_interval = 1;
     g_battle_game_state = BATTLE_GAME_STATE_SECONDARY_EFFECT;
     unit = battle_unit_get_casting();
     unit->state_frame_counter = 0;
@@ -244,8 +244,7 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
         for (i = 0; i < action->target_count; i++) {
             target = battle_unit_get_by_battle_id(action->target_list[i]);
             if (target != 0) {
-                target->pending_attack_result
-                    = battle_action_finalize_attack_and_flag_reactions(target->stats->battle_id);
+                target->pending_attack_result = battle_action_apply_target_result(target->stats->battle_id);
                 if (target->pending_attack_result == -1) {
                     battle_unit_find_relocation_tile(target->stats->battle_id, &target->dismount);
                 }
@@ -305,7 +304,7 @@ void battle_action_start_next_strike_display(void) {
     s32 ability;
     s32 target;
 
-    g_main_system_animation_speed = 1;
+    g_main_system_vsync_interval = 1;
     unit = battle_unit_get_casting();
     battle_action_resolve_ability_strike(unit->stats->battle_id, &unit->strike);
     raw = unit->strike.last_attack_id;
@@ -315,7 +314,7 @@ void battle_action_start_next_strike_display(void) {
     unit->used_ability_id = raw;
     battle_gfx_set_thrown_item_graphic_palette(unit->strike.used_weapon_id, unit);
     if (((target != 0) && (ability != target)) || (ability == ABILITY_ID_KNOCKBACK) || (ability == 0)
-        || (battle_effect_load_ability(ability) != 0)) {
+        || (battle_effect_ability_has_no_file(ability) != 0)) {
         battle_action_set_target_coords_and_attacker_anim();
         return;
     }
@@ -326,7 +325,7 @@ void battle_action_start_next_strike_display(void) {
 /* Enter the OpenSp2Files game state at full animation speed, with no SP2 buffer yet, so its
  * handler starts a fresh load. */
 void battle_state_enter_open_sp2_files(void) {
-    g_main_system_animation_speed = 1;
+    g_main_system_vsync_interval = 1;
     g_battle_game_state = BATTLE_GAME_STATE_OPEN_SP2_FILES;
     g_battle_gfx_sp2_data = 0;
 }
@@ -349,7 +348,7 @@ void battle_state_enter_pre_attack_animation(void) {
         /* facing is read signed (lh) here. */
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_STAND, unit->facing, unit);
     }
-    battle_action_clear_at_list_active();
+    battle_target_hide_cursor();
 }
 
 /* Enter the action-cast state for the source unit, unless the scenario check
@@ -379,7 +378,7 @@ void battle_action_execute_ability(void) {
     battle_action_set_only_action_taken(unit->stats->battle_id);
     unit->turn_action_flags |= BATTLE_UNIT_TURN_ACTION_ACTED;
     battle_unit_face_toward_cursor(unit);
-    result = battle_action_call_attack_preparation_at_preview(&unit->command_state.ai.data.action);
+    result = battle_action_commit_attack_preparation(&unit->command_state.ai.data.action);
     unit->attack_phase_state = result;
     switch (result) {
     case BATTLE_ATTACK_PREPARATION_CHARGE:
@@ -429,7 +428,7 @@ void battle_menu_start_help_thread(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ABILITY_PREVIEW_HELP;
     g_battle_menu_help_opening = 1;
-    menu_start_building_thread();
+    menu_start_help_menu_thread();
 }
 
 /*
@@ -481,7 +480,7 @@ void battle_target_select_tile(void) {
         battle_menu_dispatch_idle_action_menu();
         break;
     }
-    battle_action_clear_at_list_active();
+    battle_target_hide_cursor();
 }
 
 /* Enter the illegal-range state, reached when the chosen tile lacks the
@@ -505,7 +504,7 @@ void battle_state_enter_target_out_of_range(void) {
  * range tiles shown and the cursor unit as preview target. An action without
  * targeting selects its tile at once. With no valid panels the idle action menu
  * reopens. */
-s32 battle_target_set_boxes_red(void) {
+s32 battle_target_begin_tile_selection(void) {
     battle_unit_t* unit = battle_unit_get_source();
 
     unit->state_frame_counter = 0;
@@ -517,9 +516,9 @@ s32 battle_target_set_boxes_red(void) {
         battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_RANGE, 2);
         battle_target_store_cursor_unit_as_preview_target();
         if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
-            battle_action_set_at_list_active();
+            battle_target_show_cursor();
         } else {
-            battle_action_clear_at_list_active();
+            battle_target_hide_cursor();
         }
         break;
     case TARGET_PANELS_NO_TARGETING:
@@ -626,7 +625,7 @@ static void battle_state_enter_target_select_start(void) {
     unit = battle_unit_get_casting();
     stats = unit->stats;
     menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, stats->battle_id, 0, 1);
-    battle_action_set_at_list_active();
+    battle_target_show_cursor();
 }
 
 /* Enter the target-select state: show the panel for the cursor tile and tint the
@@ -704,7 +703,7 @@ static void battle_state_enter_target_display_start(void) {
     menu_init_system_function(
         BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, battle_unit_get_casting()->stats->battle_id, 0, 1);
     g_battle_action_post_action = 0;
-    battle_action_set_at_list_active();
+    battle_target_show_cursor();
 }
 
 /* Enter the target-display state: move the cursor to the casting unit's
@@ -731,29 +730,29 @@ void battle_state_enter_target_display(void) {
 
 /* Enter the Effect game state at two vertical blanks per frame. No code calls it
  * or battle_state_enter_effect_playback, the only other entry to that state. */
-void battle_state_halve_animation_speed_for_effects(void) {
-    g_main_system_animation_speed = 2;
+void battle_state_enter_effect_state(void) {
+    g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_EFFECT;
-    battle_action_set_at_list_active();
+    battle_target_show_cursor();
 }
 
 /* Enter the MapJumpingOut game state at two vertical blanks per frame. No code
  * calls it. */
 void battle_state_halve_animation_speed_for_jump_out(void) {
-    g_main_system_animation_speed = 2;
+    g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_OUT;
 }
 
 /* Enter the MapJumpingIn game state at two vertical blanks per frame. No code
  * calls it. */
 void battle_state_halve_animation_speed_for_jump_in(void) {
-    g_main_system_animation_speed = 2;
+    g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_IN;
 }
 
 /* Queue the CloseBattle game state; callers always pass transition step 8. */
 void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32 close_flow_state) {
-    g_main_system_animation_speed = 2;
+    g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_CLOSE_BATTLE;
     g_battle_state_screen_fade_step = transition_step;
     g_main_system_game_flow_state = close_flow_state;
@@ -761,7 +760,7 @@ void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32
 
 /* Project the cursor tile to the screen; while g_battle_action_at_list_active is set, also draw
  * the map cursor and its tile glow. */
-void battle_target_calculate_tile_coords_and_glow_from_at_list(void) {
+void battle_target_update_cursor(void) {
     SVECTOR secondary;
     SVECTOR tertiary;
     VECTOR primary;
@@ -779,18 +778,18 @@ void battle_target_calculate_tile_coords_and_glow_from_at_list(void) {
  * updates the status bubbles and unit graphics, and projects the cursor tile,
  * drawing the map cursor and tile glow while g_battle_action_at_list_active is
  * set. */
-void battle_state_handle_free_cursor_input(void) {
+void battle_state_update_units(void) {
     battle_gfx_update_all_unit_rotation_and_vectors();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
     }
     battle_gfx_update_status_bubbles_and_graphics();
-    battle_target_calculate_tile_coords_and_glow_from_at_list();
+    battle_target_update_cursor();
 }
 
 /* Free-cursor game state: camera and cursor input, then the button actions
  * (help, team highlight, act menu, move range, AT list and mini menu). */
-void battle_state_handle_default_state(void) {
+void battle_state_handle_free_cursor_state(void) {
     battle_unit_t* unit;
     s32 input;
     RECT rect; /* never used; retail reserves its 8 bytes */
@@ -799,7 +798,7 @@ void battle_state_handle_default_state(void) {
     battle_camera_update_zoom_input();
     battle_camera_update_tilt_input();
     battle_target_move_cursor_by_input();
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     input = g_main_input_pressed_buttons;
     if (input & PSX_PAD_SELECT) {
@@ -847,7 +846,7 @@ void battle_state_handle_free_cursor_help_state(void) {
         g_battle_menu_help_opening = 0;
         battle_state_set_free_cursor();
     }
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
@@ -857,12 +856,12 @@ void battle_state_handle_highlight_units_state(void) {
     if (g_main_input_released_buttons & PSX_PAD_SQUARE) {
         g_battle_cursor_input_mode = g_battle_cursor_input_mode_saved;
         battle_state_set_free_cursor();
-        battle_gfx_update_unit_palettes();
+        battle_gfx_restore_unit_palettes();
     }
     battle_camera_handle_rotation_input();
     battle_camera_update_zoom_input();
     battle_camera_update_tilt_input();
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
 }
 
 /* OpenActionMenus game-state handler: once the window has closed (command 7, 8 or
@@ -871,7 +870,7 @@ void battle_state_handle_highlight_units_state(void) {
 void battle_state_handle_open_action_menus_state(void) {
     s32 selected_command;
 
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
@@ -905,7 +904,7 @@ void battle_state_handle_idling_action_menus_state(void) {
     if (g_main_input_pressed_buttons & PSX_PAD_SELECT) {
         battle_menu_open_help();
     }
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     command = menu_get_selected_command_address();
     unit = battle_unit_get_casting();
@@ -1011,18 +1010,18 @@ void battle_state_handle_menu_to_targeting_state(void) {
     s32 result;
     u16 frame;
 
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     unit = battle_unit_get_source();
     if (unit->state_frame_counter >= 31 && !unit->command_ready) {
-        g_main_system_animation_speed = 2;
+        g_main_system_vsync_interval = 2;
         if (!battle_ai_build_command(unit->stats->battle_id, &unit->command_state.ai)) {
             if (unit->command_state.ai.kind == AI_COMMAND_ACT) {
                 unit->command_state.ai.data.action.actor_id = unit->stats->battle_id;
                 battle_action_call_attack_preparation(&unit->command_state.ai.data.action);
             }
             unit->command_ready = 1;
-            g_main_system_animation_speed = 1;
+            g_main_system_vsync_interval = 1;
         }
     }
     frame = unit->state_frame_counter++;
@@ -1127,7 +1126,7 @@ void battle_state_handle_action_help_menu_state(void) {
             }
         }
     }
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
@@ -1144,7 +1143,7 @@ void battle_state_handle_display_move_area_state(void) {
     battle_camera_handle_rotation_input();
     battle_camera_update_zoom_input();
     battle_camera_update_tilt_input();
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
@@ -1160,9 +1159,9 @@ void battle_state_handle_mini_menu_state(void) {
         g_battle_cursor_input_mode = g_main_game_options.fields.cursor_movement;
         battle_state_set_free_cursor();
     } else if (menu_result >= 0x64) {
-        battle_action_get_next_acting_unit(menu_result - 0x64);
+        battle_action_show_at_list_entry(menu_result - 0x64);
     }
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
@@ -1173,7 +1172,7 @@ void battle_state_handle_mini_menu_help_state(void) {
         g_battle_menu_help_opening = 0;
         battle_menu_open_free_cursor_mini_menu();
     }
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
@@ -1185,7 +1184,7 @@ void battle_state_handle_active_turn_state(void) {
     if ((controller_input & PSX_PAD_CIRCLE) || (controller_input & PSX_PAD_CROSS)) {
         battle_menu_open_mini_menu();
     }
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
@@ -1194,12 +1193,12 @@ void battle_state_handle_active_turn_state(void) {
 void battle_state_handle_unit_move_state(void) {
     s32 selected_command;
 
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     switch (selected_command) {
     case 7:
-        battle_menu_close_move_help();
+        battle_state_enter_select_move_tile();
         return;
     case 8:
     case 0xff:
@@ -1224,7 +1223,7 @@ void battle_state_handle_close_move_help_state(void) {
     s32 y;
     battle_unit_command_state_t scratch;
 
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if (source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) {
         battle_target_move_cursor_by_input();
@@ -1287,7 +1286,7 @@ void battle_state_handle_close_move_help_state(void) {
 void battle_state_handle_move_range_exception_state(void) {
     s32 selected_command;
 
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
@@ -1300,11 +1299,11 @@ void battle_state_handle_move_range_exception_state(void) {
 void battle_state_handle_illegal_move_menu_state(void) {
     s32 selected_command;
 
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
-        battle_menu_close_move_help();
+        battle_state_enter_select_move_tile();
     }
 }
 
@@ -1315,7 +1314,7 @@ void battle_state_handle_unit_moving_setup_state(void) {
     s32 selected_command;
     battle_unit_t* casting_unit;
 
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     casting_unit = battle_unit_get_casting();
@@ -1327,7 +1326,7 @@ void battle_state_handle_unit_moving_setup_state(void) {
     case 8:
     case 0xff:
         casting_unit->path.count = 0;
-        battle_menu_close_move_help();
+        battle_state_enter_select_move_tile();
         return;
     }
 }
@@ -1349,6 +1348,6 @@ void battle_state_handle_unit_moving_state(void) {
         battle_unit_update_display_by_runtime_id(casting_unit->runtime_id);
         battle_menu_open_move_confirm();
     }
-    battle_state_handle_free_cursor_input();
+    battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }

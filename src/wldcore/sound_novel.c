@@ -821,7 +821,7 @@ static void wldcore_sound_change_scenario_music(s32 music_id) {
         slot = 2;
     }
     VSync(2);
-    main_sound_open_and_play_music(music_id, slot);
+    main_sound_load_music_into_slot(music_id, slot);
     g_wldcore_active_saved_record.music_selection = (slot << 8) | music_id;
     while (main_sound_is_music_loading_stub() != 0) {
         VSync(0);

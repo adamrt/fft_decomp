@@ -113,7 +113,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   and the direction-times-spread products over `scale` in
   `battle_effect_spawn_particle_motion`.
 - Locals read before any assignment, so the value is whatever the caller left
-  in a register: `battle_effect_init_data` tests `result` (`$a0`) for a load
+  in a register: `battle_effect_update_file_load` tests `result` (`$a0`) for a load
   state outside 0-3, which nothing sets; `battle_camera_get_input_direction`
   tests `input` (`$a1`) when `mode` or the controller mode is outside 0-2;
   `main_status_set_action_state` leaves `status` unset for an action state
@@ -127,7 +127,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `world_get_formation_unit_stat_by_mode` return `value` (`$a1`) for a stat
   mode outside 0-2; `battle_move_start_unit_step` leaves `facing` (`$a2`, the
   destination tile its callers pass) unset for a direction outside 0-3;
-  `battle_map_load_saved_state_record` returns `next` (`$a1`) for record type
+  `battle_map_load_mesh_animation_record` returns `next` (`$a1`) for record type
   0; `world_formation_run_set_ability_menu` indexes the entry ids with
   `cursor` when the list is empty; `world_menu_build_location_list`
   uses `selected` when no entry matches the current item;
@@ -338,7 +338,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `battle_formula_raise_level_by_one_add_status_on_caster` (formula 0x57,
   Please Eat) stores a full HP and MP heal (max-HP damage for an undead
   target) and then overwrites `attack_type` with the level change's:
-  `battle_action_finalize_attack_and_flag_reactions` still applies the
+  `battle_action_apply_target_result` still applies the
   amounts, but `battle_gfx_prepare_post_action_display` shows no number.
 - `main_sound_unload_scenario_mus` releases a slot's music record and SMD
   without clearing `g_main_sound_music.state` when that slot is the playing
@@ -488,7 +488,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   every caller asks for action abilities or for all four classes, so nothing
   sees the difference.
 - Tests that cannot succeed: `battle_state_sync_frame` zeroes a
-  `g_battle_frame_pacing` of 1 under `wait < g_battle_frame_pacing` with `wait` at least 2;
+  `g_main_system_min_vsync_interval` of 1 under `wait < g_main_system_min_vsync_interval` with `wait` at least 2;
   `battle_state_run_deployment` loops until
   `battle_state_update_deployment_controller_input` returns -1, and it always
   returns 1; the first `switch` of `battle_move_apply_unit_step_velocity`
@@ -702,7 +702,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   runs `battle_status_apply_unit_action_removal` (`0x8018ec44`, WORLD text data).
   `unit_get_battle_id_by_event_unit_id` calls
   `battle_unit_get_battle_id_by_runtime_id` (`0x8008cdd0`), which in WLDCORE
-  is the epilogue of `wldcore_map_color_and_draw_dots`: it would reload
+  is the epilogue of `wldcore_map_init_dots`: it would reload
   `s0`..`s4` from the caller's frame and pop 48 bytes of its stack. The other
   unit-core helpers the shared event code calls (`battle_unit_has_runtime_id`,
   `battle_unit_get_runtime_id_by_battle_id`,
@@ -713,9 +713,9 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `unit_set_animation` likewise reaches three BATTLE-only animation setters,
   behind script-variable tests WORLD scenes would have to pass first.
   `camera_wait_until_idle`, `menu_run_triangle_selection` and
-  `menu_start_building_thread` call `battle_camera_is_active` (`0x8008e17c`,
+  `menu_start_help_menu_thread` call `battle_camera_is_active` (`0x8008e17c`,
   0x1e4 bytes into WLDCORE's `wldcore_map_find_best_route_path`), and
-  `menu_update_menus_and_event_speed` calls `battle_state_get_animation_speed`
+  `menu_update_menus_and_event_speed` calls `battle_state_get_vsync_interval`
   (`0x8008ded8`, 0x2dc bytes into `wldcore_map_draw_path_animation`).
 - OPTION.OUT carries its own copy of `menu_init_scaled_draw_area_packets`
   (`0x801c02d0`) but its window and option threads call BATTLE's copy
@@ -874,7 +874,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   for Darkness, Cross section and the unnamed surfaces 0x2f-0x3e; the terrain
   help text says "None" for Sky, Darkness and Cross section.
 - `battle_camera_update_rotation` chains a held R1 through
-  `battle_camera_rotate_left`, as it does L1; the two helpers differ only in
+  `battle_camera_set_left_turn_destination`, as it does L1; the two helpers differ only in
   which way they move a destination that is a multiple of 0x400.
 - `main_unit_copy_job_data` adds the immortal and formation immunity sets
   only to a unit that is both immortal and flagged save- or load-formation;
@@ -916,7 +916,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `battle_formula_49_unused_with_extra_steps` is a second entry to formula 0x49's
   handler, but neither the formula table nor any caller names it.
 - `battle_state_enter_effect_playback` and
-  `battle_state_halve_animation_speed_for_effects` are the only code that enters
+  `battle_state_enter_effect_state` are the only code that enters
   `BATTLE_GAME_STATE_EFFECT`; neither has a caller, so
   `battle_state_handle_effect_state` never runs.
 - WORLD's `world_menu_resize_parent_entry_to_digits` and

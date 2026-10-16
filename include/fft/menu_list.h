@@ -22,7 +22,7 @@ void menu_init_stub(void);
 void menu_wait_thread(void);
 void menu_input_thread(void);
 void menu_build_main(void);
-void menu_start_building_thread(void);
+void menu_start_help_menu_thread(void);
 /* BATTLE and WORLD each link their own bodies of the next four. */
 void menu_handle_action(menu_entry_t* entry, s32 row_index);
 void menu_handle_cancel_input(menu_entry_t* context);

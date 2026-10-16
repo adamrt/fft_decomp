@@ -57,11 +57,11 @@ s32 main_sound_get_current_scenario_music(void);
 suzuki_music_t* main_sound_get_music_handle(s32 slot);
 /* Verified SCUS scenario-music and tune wrappers. Include this header in
  * their definitions as well as callers so ABI declarations cannot drift. */
-s32 main_sound_open_and_play_music(s32 music_id, s32 slot);
+s32 main_sound_load_music_into_slot(s32 music_id, s32 slot);
 void main_sound_open_generic_sfx(void);
 s32 main_sound_open_music_into_free_slot(s32 music_id);
 s32 main_sound_open_music_into_slot(s32 music_id, s32 slot);
-s32 main_sound_open_scenario_smd_files(s32 music_id);
+s32 main_sound_start_music_load_into_free_slot(s32 music_id);
 void main_sound_play_sfx(s32 sound_id);
 void main_sound_play_bg_sfx(s32 sound_id);
 void main_sound_play_sfx_find_channel(s32 sound_id);

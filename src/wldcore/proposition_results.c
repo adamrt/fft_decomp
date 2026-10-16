@@ -1073,7 +1073,7 @@ static void wldcore_menu_push_sound_novel_level(s32 argument) {
 
 /* Resume handler of the sound novel level: reload the saved background set, show the picture again
  * (and the side windows when the script left them visible) and resume the message thread. */
-void wldcore_window_reload_data_set_and_resume_thread14(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_sound_novel_level(wldcore_menu_stack_record_t* level) {
     s16 set = g_wldcore_active_saved_record.background_set;
 
     if (set != -1) {
@@ -1903,7 +1903,7 @@ static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
     base = &g_wldcore_window_render_records[index].base;
     base->x = -0x74;
     base->y = -0x22;
-    wldcore_read_nine_bit_record(g_main_land_discovery_date_bits, value, &date);
+    wldcore_calendar_read_date(g_main_land_discovery_date_bits, value, &date);
     g_wldcore_scrollable_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
@@ -2163,7 +2163,7 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
     index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-    wldcore_read_nine_bit_record(g_main_treasure_acquisition_date_bits, value, &date);
+    wldcore_calendar_read_date(g_main_treasure_acquisition_date_bits, value, &date);
     g_wldcore_scrollable_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:

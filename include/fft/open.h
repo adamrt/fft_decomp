@@ -75,7 +75,7 @@ extern s32 g_open_movie_width;
 
 /* movie playback */
 void open_movie_init_and_play_end(void);
-void open_movie_init_and_stream_opening(s32 skip_movie);
+void open_system_init_title_sequence(s32 skip_movie);
 
 void open_movie_pause_cd_audio(void);
 void open_movie_play_end(void);
@@ -303,7 +303,7 @@ void open_controller_wait_text_message(open_controller_record_t* record);
 void open_movie_finish_fftend_controller_if_ready_or_skipped(open_controller_record_t* unused_record);
 void open_script_update_controller(open_controller_record_t* unused_record);
 void open_movie_start_fftst_or_skip_controller(open_controller_record_t* unused_record);
-void open_title_update_exit_transition(open_controller_record_t* record);
+void open_title_update_card_warning(open_controller_record_t* record);
 
 /* birthday */
 extern u8 g_open_birthday_title_image[];
@@ -316,13 +316,13 @@ extern u8 g_open_birthday_window_image[];
 extern u8 g_open_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2];
 void open_birthday_convert_date_to_zodiac(s32* month, s32* day);
 
-void open_birthday_load_window_image(s32 record_index, u32* image);
+void open_gfx_load_window_record_image(s32 record_index, u32* image);
 
 /* menu */
 
 extern s32 g_open_menu_formation_otag_index;
 
-void open_menu_init_render_record_fields(
+void open_gfx_init_vram_render_record(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags);
 
 /* music test */
@@ -485,7 +485,7 @@ extern s32 g_open_script_external_counter; /* dispatch.external_counter */
 
 extern POLY_FT4 g_open_script_glyph_primitives[2][672];
 extern u8* g_open_script_initial_data_base;
-void open_opcode_toggle_control(s16* unused_entry);
+void open_opcode_end_script(s16* unused_entry);
 void open_opcode_create_positioned_text_record(s16* command);
 void open_opcode_set_timing_step(s16* entry);
 void open_opcode_start_overlay_fade_out(s16* command);
@@ -631,7 +631,7 @@ extern world_sprite_animation_sequence_t** g_open_gfx_record_36_animations;
 extern world_sprite_cel_header_t** g_open_gfx_record_36_sprites;
 extern POLY_GT4 g_open_gfx_transition_line_primitives[2][14];
 s32 open_gfx_update_transition_sequence(void);
-void open_gfx_restore_frame_vram_page(void);
+void open_gfx_restore_frame_bin_page(void);
 void open_gfx_clear_and_draw_current_frame(void);
 void open_gfx_clear_current_otag(void);
 void open_gfx_init_screen_environments(s32 clear_first);

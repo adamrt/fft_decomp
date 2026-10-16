@@ -61,6 +61,6 @@ void main_gfx_load_zodiac_frame(void);
 void main_gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void main_gfx_swap_and_clear_otag(void);
 void main_gfx_build_now_loading_center(u32 visible);
-void main_gfx_call_build_zodiac_bin(zodiac_draw_context_t* context, POLY_FT4* poly);
+void main_gfx_call_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
 
 #endif

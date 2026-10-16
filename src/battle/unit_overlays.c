@@ -258,7 +258,7 @@ s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
 
 /* How far a unit stands above a water tile's floor, in half levels: the full depth for Float and
  * on-water movement, one level less for in-water movement, else 0. */
-s32 battle_move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile) {
+s32 battle_move_get_water_standing_offset(battle_unit_t* unit, map_tile_t* tile) {
     s32 movement_flags;
 
     if (unit->stats != 0) {
@@ -473,7 +473,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
     }
     SetRotMatrix(&g_battle_camera_matrix);
     SetTransMatrix(&g_battle_camera_matrix);
-    prim = g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter();
+    prim = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
     corners = unit->shadow_quad;
     ((P_TAG*)prim)->len = 9;
     prim->code = 0x2c;
@@ -493,7 +493,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
     tile = battle_map_get_tile_data_pointer(
         (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_z);
     if (tile->depth_half_height.depth && -(tile->height + tile->depth_half_height.depth) * 12 < unit->world_coords.vy) {
-        unit->shadow_counter += g_main_system_animation_speed;
+        unit->shadow_counter += g_main_system_vsync_interval;
         frame = unit->shadow_counter;
         prim->tpage = 0x3f;
         prim->clut = unit->clut + 0x40; /* the unit's CLUT of MAP_CLUT_ROW_UNIT_SHADOWS */
@@ -587,8 +587,8 @@ void battle_gfx_build_cursor_tile_glow(
     SetTransMatrix(&g_battle_camera_matrix);
     switch (shape) {
     case 0:
-        quad = g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter();
-        quad_glow = g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter();
+        quad = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
+        quad_glow = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
         ((P_TAG*)quad)->len = 9;
         quad->code = 0x2c;
         RotTrans(v0, &screen, &flag);
@@ -632,10 +632,10 @@ void battle_gfx_build_cursor_tile_glow(
         }
         return;
     case 1:
-        tri_a = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
-        tri_b = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
-        tri_a_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
-        tri_b_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
+        tri_a = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
+        tri_b = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
+        tri_a_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
+        tri_b_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
         ((P_TAG*)tri_a)->len = 7;
         tri_a->code = 0x24;
         ((P_TAG*)tri_b)->len = 7;
@@ -698,10 +698,10 @@ void battle_gfx_build_cursor_tile_glow(
         }
         break;
     case 2:
-        tri_a = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
-        tri_b = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
-        tri_a_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
-        tri_b_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter());
+        tri_a = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
+        tri_b = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
+        tri_a_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
+        tri_b_glow = (POLY_FT3*)(g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim());
         ((P_TAG*)tri_a)->len = 7;
         tri_a->code = 0x24;
         ((P_TAG*)tri_b)->len = 7;
@@ -795,11 +795,11 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     s32 half_height;
     u8 color;
 
-    prim = g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter();
+    prim = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
     ((P_TAG*)prim)->len = 9;
     prim->code = 0x2c;
     if (g_battle_menu_status_screen_selected != 1) {
-        g_battle_gfx_selection_cursor_bob_timer += g_main_system_animation_speed;
+        g_battle_gfx_selection_cursor_bob_timer += g_main_system_vsync_interval;
         if (g_battle_gfx_selection_cursor_bob_timer >= duration[g_battle_gfx_selection_cursor_bob_frame]) {
             g_battle_gfx_selection_cursor_bob_frame += 1;
             g_battle_gfx_selection_cursor_bob_timer = 0;
@@ -903,9 +903,9 @@ void battle_gfx_draw_wait_direction_arrows(SVECTOR* base, u32* ot) {
     s32 i;
 
     unit = battle_unit_get_source();
-    g_battle_gfx_wait_arrow_blink_timer += g_main_system_animation_speed;
+    g_battle_gfx_wait_arrow_blink_timer += g_main_system_vsync_interval;
     for (i = 0; i < 4; i++) {
-        prim = g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter();
+        prim = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
         ((P_TAG*)prim)->len = 9;
         prim->code = 0x2e;
         prim->tpage = 0x3f;
@@ -977,16 +977,16 @@ static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
     }
     if (unit->movement.floating) {
         if (unit->depth_height_offset < 12) {
-            unit->depth_height_offset += g_main_system_animation_speed;
+            unit->depth_height_offset += g_main_system_vsync_interval;
         } else if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_RIDER) {
-            phase = unit->float_bob_phase += g_main_system_animation_speed;
+            phase = unit->float_bob_phase += g_main_system_vsync_interval;
             unit->float_bob_offset = wave[phase % 48 / 2];
         } else {
             unit->float_bob_offset = 0;
         }
     } else if (g_battle_game_state != BATTLE_GAME_STATE_CRYSTAL_LEARN) {
         if (unit->depth_height_offset != 0) {
-            unit->depth_height_offset -= g_main_system_animation_speed;
+            unit->depth_height_offset -= g_main_system_vsync_interval;
             if (unit->depth_height_offset < 0) {
                 unit->depth_height_offset = 0;
             }
@@ -1019,7 +1019,7 @@ static void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
     u32 status_flags;
     s32 animation;
 
-    for (frame = 0; frame < g_main_system_animation_speed; frame++) {
+    for (frame = 0; frame < g_main_system_vsync_interval; frame++) {
         bubble = unit->status_bubble_id;
         if (bubble == 9) {
             unit->status_bubble_alternate_row = (unit->status_bubble_timer & 8) >> 3;
@@ -1242,7 +1242,7 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
 /* Per-frame float and status-bubble update of one unit: adjusts its float height
  * except during the four float-jump step phases, then advances its status bubble
  * when one is active. */
-void battle_gfx_init_status_bubble(battle_unit_t* unit) {
+void battle_gfx_update_float_height_and_status_bubble(battle_unit_t* unit) {
     u8 phase = unit->step_phase;
 
     if (phase != MOVE_STEP_PHASE_FLOAT_JUMP_SOUTH && phase != MOVE_STEP_PHASE_FLOAT_JUMP_EAST
@@ -1968,7 +1968,7 @@ void battle_gfx_init_earned_exp_jp_display(battle_unit_t* unit) {
  *
  * The three numeric displays are pointed at the FRAME.BIN page, and the first
  * display is built at once unless one is already running. */
-void battle_gfx_activate_numerical_sprite_data(battle_unit_t* unit, s32 mode) {
+void battle_gfx_queue_charge_failure_message(battle_unit_t* unit, s32 mode) {
     battle_gfx_sprite_display_data_t* display_0 = unit->numeric_display.displays[0];
     battle_gfx_sprite_display_data_t* display_1 = unit->numeric_display.displays[1];
     battle_gfx_sprite_display_data_t* display_2 = unit->numeric_display.displays[2];

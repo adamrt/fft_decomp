@@ -241,7 +241,7 @@ void battle_effect_load_data(void) {
  * work remains. A load state outside 0-3 leaves `result` unset: the test then
  * reads whatever the caller left in $a0.
  */
-s32 battle_effect_init_data(void) {
+s32 battle_effect_update_file_load(void) {
     s32 result;
     s32 lba;
     s32 byte_length;
@@ -363,7 +363,7 @@ void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_seconda
 /* Returns 1 when the ability has no effect file (effect id 0xffff), 0 for
  * Vertical Jump8, all Charge abilities and Accumulate. The target's range
  * starts at Vertical Jump8 rather than Charge +1. */
-u32 battle_effect_load_ability(s32 ability_id) {
+u32 battle_effect_ability_has_no_file(s32 ability_id) {
     u32 result;
 
     if (ability_id >= ABILITY_ID_JUMP_VERTICAL_8 && ability_id < ABILITY_ID_MATH_FIRST) {
@@ -1551,7 +1551,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
             battle_camera_start_effect_keyframe_moves(timeline->frame);
         }
         if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
-            battle_state_set_time_scale(battle_effect_get_animation_timing_curve_value(record));
+            battle_state_set_min_vsync_interval(battle_effect_get_animation_timing_curve_value(record));
         }
         timeline->frame++;
     } else {
@@ -1703,7 +1703,7 @@ static void battle_effect_step_emitter_timeline(
  * caster) and, unless weather flag 2 is set, to the scaled map palette. The
  * loop counter reuses the frame-count variable, which keeps both in $s0 as in
  * the target. */
-static void battle_effect_advance_target_palette_track(
+static void battle_effect_advance_surroundings_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
@@ -1788,7 +1788,7 @@ static void battle_effect_advance_caster_palette_track(
  *
  * The frame timer and the loop counter are separate locals here: the target
  * keeps the timer in $v0 and the counter in $s1. */
-static void battle_effect_advance_coord_target_palette_track(
+static void battle_effect_advance_target_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
@@ -1953,7 +1953,7 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
                 &timeline->state.parent.remaining.tracks.particle[0][i],
                 &timeline->state.parent.step.tracks.particle[0][i]);
         }
-        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[0].surroundings,
+        battle_effect_advance_surroundings_palette_track(&g_battle_effect_timeline->color_tracks[0].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[0],
             &timeline->state.parent.remaining.tracks.surroundings[0]);
         if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
@@ -1961,7 +1961,7 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
                 &timeline->state.parent.keyframe.tracks.caster[0], &timeline->state.parent.remaining.tracks.caster[0],
                 g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        battle_effect_advance_coord_target_palette_track(&g_battle_effect_timeline->color_tracks[0].target,
+        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[0].target,
             &timeline->state.parent.keyframe.tracks.target[0], &timeline->state.parent.remaining.tracks.target[0]);
         battle_effect_advance_map_background_track(&g_battle_effect_timeline->color_tracks[0].screen,
             &timeline->state.parent.keyframe.tracks.screen[0], &timeline->state.parent.remaining.tracks.screen[0]);
@@ -1975,7 +1975,7 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
             &timeline->state.parent.keyframe.tracks.sound[2][0], &timeline->state.parent.remaining.tracks.sound[2][0],
             &timeline->state.parent.step.tracks._unknown_24[2][0][1]);
         if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
-            battle_state_set_time_scale(battle_effect_get_timing_curve_value(record));
+            battle_state_set_min_vsync_interval(battle_effect_get_timing_curve_value(record));
         }
     }
     i = g_battle_effect_timeline->phase1_duration
@@ -1988,7 +1988,7 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
                 &timeline->state.parent.remaining.tracks.particle[1][i],
                 &timeline->state.parent.step.tracks.particle[1][i]);
         }
-        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[1].surroundings,
+        battle_effect_advance_surroundings_palette_track(&g_battle_effect_timeline->color_tracks[1].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[1],
             &timeline->state.parent.remaining.tracks.surroundings[1]);
         if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
@@ -1996,7 +1996,7 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
                 &timeline->state.parent.keyframe.tracks.caster[1], &timeline->state.parent.remaining.tracks.caster[1],
                 g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        battle_effect_advance_coord_target_palette_track(&g_battle_effect_timeline->color_tracks[1].target,
+        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[1].target,
             &timeline->state.parent.keyframe.tracks.target[1], &timeline->state.parent.remaining.tracks.target[1]);
         battle_effect_advance_map_background_track(&g_battle_effect_timeline->color_tracks[1].screen,
             &timeline->state.parent.keyframe.tracks.screen[1], &timeline->state.parent.remaining.tracks.screen[1]);

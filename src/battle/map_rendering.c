@@ -675,7 +675,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
                 }
             }
             g_battle_map_weather_particles[i].y
-                += g_battle_map_weather_particles[i].fall_speed * g_main_system_animation_speed;
+                += g_battle_map_weather_particles[i].fall_speed * g_main_system_vsync_interval;
             RotTrans((SVECTOR*)&g_battle_map_weather_particles[i], &screen, &flag);
             depth = screen.vz / 4;
             if (depth > 0 && depth < 0x180) {
@@ -780,12 +780,12 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             }
             if (g_battle_map_command_0x96_frame < g_battle_map_command_0x96_duration / 8) {
                 g_battle_map_weather_particles[i].y += g_battle_map_weather_particles[i].fall_speed
-                    * g_main_system_animation_speed
+                    * g_main_system_vsync_interval
                     * rsin((g_battle_map_command_0x96_frame << 13) / g_battle_map_command_0x96_duration + 0x400) / 2048;
             }
             if (g_battle_map_command_0x96_duration / 8 < g_battle_map_command_0x96_frame) {
                 g_battle_map_weather_particles[i].y
-                    -= g_battle_map_weather_particles[i].fall_speed * g_main_system_animation_speed;
+                    -= g_battle_map_weather_particles[i].fall_speed * g_main_system_vsync_interval;
             }
             RotTrans((SVECTOR*)&g_battle_map_weather_particles[i], &screen, &flag);
             depth = screen.vz / 4;
@@ -836,18 +836,18 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
                 g_battle_map_weather_particles[i + 32].y
                     = spawn_y - g_battle_map_weather_fall_speed - rand() % (g_battle_map_weather_primary_speed * 12);
             }
-            g_battle_map_weather_particles[i].y += g_battle_map_weather_fall_speed * g_main_system_animation_speed;
-            g_battle_map_weather_particles[i + 32].y += g_battle_map_weather_fall_speed * g_main_system_animation_speed;
+            g_battle_map_weather_particles[i].y += g_battle_map_weather_fall_speed * g_main_system_vsync_interval;
+            g_battle_map_weather_particles[i + 32].y += g_battle_map_weather_fall_speed * g_main_system_vsync_interval;
             if (i < 16) {
                 g_battle_map_weather_particles[i].y
-                    += g_battle_map_weather_primary_speed * g_main_system_animation_speed;
+                    += g_battle_map_weather_primary_speed * g_main_system_vsync_interval;
                 g_battle_map_weather_particles[i + 32].y
-                    += g_battle_map_weather_primary_speed * g_main_system_animation_speed;
+                    += g_battle_map_weather_primary_speed * g_main_system_vsync_interval;
             } else {
                 g_battle_map_weather_particles[i].y
-                    += g_battle_map_rain_secondary_fall_speed * g_main_system_animation_speed;
+                    += g_battle_map_rain_secondary_fall_speed * g_main_system_vsync_interval;
                 g_battle_map_weather_particles[i + 32].y
-                    += g_battle_map_rain_secondary_fall_speed * g_main_system_animation_speed;
+                    += g_battle_map_rain_secondary_fall_speed * g_main_system_vsync_interval;
             }
             if (g_battle_map_weather_particles[i].y >= -0x17F) {
                 if (ground < g_battle_map_weather_particles[i].y) {
@@ -2141,7 +2141,7 @@ static void battle_map_update_mesh_part_animations(void) {
          * next instruction; one of duration 0 ends the animation. */
         if (g_battle_map_mesh_animation_instructions[i].states[0][1].next != 0) {
             g_battle_map_mesh_parts[i].elapsed
-                += (g_battle_map_mesh_parts[i].speed >> 4) * g_main_system_animation_speed;
+                += (g_battle_map_mesh_parts[i].speed >> 4) * g_main_system_vsync_interval;
             if (g_battle_map_mesh_parts[i].duration < g_battle_map_mesh_parts[i].elapsed) {
                 next = g_battle_map_mesh_parts[i].next_instruction;
                 g_battle_map_mesh_parts[i].keyframe = 0;
@@ -2478,7 +2478,7 @@ s32 battle_map_dispatch_map_data_command(map_data_command_e command, u32 index, 
             g_battle_map_texture_animations[index].frame = 0;
             break;
         default:
-            main_system_handle_malloc_exception(2, 0x3cd);
+            main_system_report_error(2, 0x3cd);
             break;
         }
         break;
@@ -2612,7 +2612,7 @@ static void battle_map_update_texture_animations(void) {
             AddPrim(g_battle_gfx_current_render_buffer->otag, &g_battle_map_texture_animation_moves[i]);
             break;
         case MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG:
-            g_battle_map_texture_animations[i].timer += g_main_system_animation_speed;
+            g_battle_map_texture_animations[i].timer += g_main_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame++;
@@ -2634,7 +2634,7 @@ static void battle_map_update_texture_animations(void) {
             }
             break;
         case MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG_BACK:
-            g_battle_map_texture_animations[i].timer += g_main_system_animation_speed;
+            g_battle_map_texture_animations[i].timer += g_main_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame--;
@@ -2674,7 +2674,7 @@ static void battle_map_update_texture_animations(void) {
                 MAP_CLUT_ROW_MAP, g_battle_map_texture_animations[i].canvas_x / 16, 0);
             break;
         case MAP_TEXTURE_ANIMATION_MODE_PALETTE_PING_PONG:
-            g_battle_map_texture_animations[i].timer += g_main_system_animation_speed;
+            g_battle_map_texture_animations[i].timer += g_main_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame++;
@@ -2687,7 +2687,7 @@ static void battle_map_update_texture_animations(void) {
             }
             break;
         case MAP_TEXTURE_ANIMATION_MODE_PALETTE_PING_PONG_BACK:
-            g_battle_map_texture_animations[i].timer += g_main_system_animation_speed;
+            g_battle_map_texture_animations[i].timer += g_main_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame--;
@@ -2726,7 +2726,7 @@ static void battle_map_update_texture_animations(void) {
             g_battle_map_texture_animations[i].mode = MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_PLAYING;
             /* fall through */
         case MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_PLAYING:
-            g_battle_map_texture_animations[i].timer += g_main_system_animation_speed;
+            g_battle_map_texture_animations[i].timer += g_main_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame--;
@@ -2758,7 +2758,7 @@ static void battle_map_update_texture_animations(void) {
         case MAP_TEXTURE_ANIMATION_MODE_UV_ONCE_5:
         case MAP_TEXTURE_ANIMATION_MODE_UV_ONCE_6:
         case MAP_TEXTURE_ANIMATION_MODE_UV_ONCE_7:
-            g_battle_map_texture_animations[i].timer += g_main_system_animation_speed;
+            g_battle_map_texture_animations[i].timer += g_main_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 if (g_battle_map_texture_animations[i].column != 0) {
                     g_battle_map_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
@@ -2795,7 +2795,7 @@ static void battle_map_update_texture_animations(void) {
         case MAP_TEXTURE_ANIMATION_MODE_PALETTE_ONCE_5:
         case MAP_TEXTURE_ANIMATION_MODE_PALETTE_ONCE_6:
         case MAP_TEXTURE_ANIMATION_MODE_PALETTE_ONCE_7:
-            g_battle_map_texture_animations[i].timer += g_main_system_animation_speed;
+            g_battle_map_texture_animations[i].timer += g_main_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 g_battle_map_texture_animations[i].timer = 0;
                 battle_map_load_palette_data(g_battle_map_palette_animation_frames
@@ -2814,7 +2814,7 @@ static void battle_map_update_texture_animations(void) {
                         g_battle_map_texture_animations[i].canvas_x,
                         g_battle_map_texture_animations[i].canvas_x + g_battle_map_texture_animations[i].width - 1);
                 if (g_battle_map_texture_animation_cycle_handles[i] == 0) {
-                    main_system_handle_malloc_exception(2, 0x3CC);
+                    main_system_report_error(2, 0x3CC);
                 }
             }
             break;
@@ -2830,7 +2830,7 @@ static void battle_map_update_texture_animations(void) {
  * entry, extra entries skipped). The caller at 0x800f32e4 stops at type 0
  * before calling, so the result for type 0 or an unknown type is never used;
  * `next` is left unset there, which is why the target returns $a1. */
-static map_state_record_t* battle_map_load_saved_state_record(map_state_record_t* record) {
+static map_state_record_t* battle_map_load_mesh_animation_record(map_state_record_t* record) {
     map_state_record_t* next;
     u32 count;
     u32 i;
@@ -3114,7 +3114,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         battle_map_load_palette_data(data->clut, MAP_CLUT_ROW_MARKED_TILES, 0, 1);
         break;
     case MAP_RESOURCE_UNSUPPORTED_12:
-        main_system_handle_malloc_exception(2, 0x3ca);
+        main_system_report_error(2, 0x3ca);
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_0:
         g_battle_map_vram_load_rect.x = 0x300;
@@ -3256,7 +3256,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         cursor = &data->state_record;
         if (cursor->type != MAP_MESH_ANIMATION_RECORD_END) {
             do {
-                cursor = battle_map_load_saved_state_record(cursor);
+                cursor = battle_map_load_mesh_animation_record(cursor);
             } while (cursor->type != MAP_MESH_ANIMATION_RECORD_END);
         }
         break;

@@ -324,7 +324,7 @@ void battle_formula_apply_undead_absorb_attack(void) {
 
 /* MP drain step: the stored HP damage becomes MP damage on the target; when it
  * lands, the attacker recovers the same amount of MP. */
-void battle_formula_apply_mp_recovery(void) {
+void battle_formula_apply_mp_absorption(void) {
     u16 mp_amount;
     action_data_t* action = g_battle_action_target_data;
     action_data_t* action_after;
@@ -424,7 +424,7 @@ static void battle_formula_roll_conditional_status_proc_inner(void) {
 
 /* Queue the weapon's proc ability (proc_id) to strike the current target after
  * the action, in place of a status, and cancel any pending knockback. */
-void battle_formula_store_reaction_proc_id_and_target(void) {
+void battle_formula_queue_weapon_spell(void) {
     g_battle_action_current_ability.weapon_proc_pending = 1;
     g_battle_action_current_ability.reaction_id = g_battle_action_current_ability.proc_id;
     g_battle_action_current_ability.post_action_target_id = g_battle_action_current_ability.target_id;
@@ -532,7 +532,7 @@ void battle_formula_calculate_katana_break_chance(void) {
  * the slot bit in equipment_destroyed and the item in item_lost, returning 0.
  * Monsters, empty slots and other abilities clear equipment_destroyed and
  * return -1. */
-s32 battle_formula_apply_steal_break_might_sword_hardcoding(void) {
+s32 battle_formula_select_targeted_equipment(void) {
     u16 ability;
     s32 right_level;
     s32 left_level;
@@ -648,7 +648,7 @@ void battle_formula_apply_poach_and_train(void) {
             return;
         }
         battle_action_clear_knockback_flag();
-        battle_formula_clear_nullify_flags();
+        battle_formula_clear_pending_proc();
         g_battle_action_target_data->special_effect |= ACTION_SPECIAL_EFFECT_POACH;
         g_battle_action_current_ability.post_action_message = BATTLE_POST_ACTION_MESSAGE_POACHED;
         return;
@@ -862,7 +862,7 @@ void battle_formula_apply_catch(void) {
 
 /* Roll the evades (battle_formula_calculate_final_hit_percent). Returns 1 when
  * the attack was evaded. */
-static s32 battle_formula_calculate_hit(void) {
+static s32 battle_formula_roll_evades(void) {
     battle_formula_calculate_final_hit_percent();
     return g_battle_action_target_data->hit == 0;
 }
@@ -892,18 +892,18 @@ s32 battle_formula_calculate_physical_evade(void) {
     battle_formula_apply_evasion_changes_due_to_statuses();
     battle_formula_apply_weather_effects_on_bows();
     battle_formula_calculate_facing_evade();
-    return battle_formula_calculate_hit();
+    return battle_formula_roll_evades();
 }
 
 /* battle_formula_calculate_physical_evade without the bow weather penalty. */
-s32 battle_formula_calculate_physical_evade_charge(void) {
+s32 battle_formula_calculate_physical_evade_without_weather(void) {
     battle_formula_store_physical_evade_values();
     battle_formula_calculate_concentrate();
     battle_formula_calculate_dark_confuse();
     battle_formula_calculate_abandon();
     battle_formula_apply_evasion_changes_due_to_statuses();
     battle_formula_calculate_facing_evade();
-    return battle_formula_calculate_hit();
+    return battle_formula_roll_evades();
 }
 
 /* Magic evade step: load the target's magic evades, then a Transparent
@@ -914,7 +914,7 @@ s32 battle_formula_calculate_magical_evade(void) {
     battle_formula_calculate_transparent();
     battle_formula_calculate_abandon();
     battle_formula_apply_evasion_changes_due_to_statuses();
-    return battle_formula_calculate_hit();
+    return battle_formula_roll_evades();
 }
 
 /* Physical modifiers on XA, in order: attacker supports (Two Hands, Attack Up,
@@ -956,7 +956,7 @@ void battle_formula_calculate_physical_damage(void) {
  * Returns 1 on a miss. */
 s32 battle_formula_calculate_physical_accuracy(void) {
     battle_formula_apply_physical_xa_modifying_statuses_support();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     return g_battle_action_target_data->hit == 0;
 }

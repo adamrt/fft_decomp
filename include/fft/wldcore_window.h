@@ -92,7 +92,7 @@ void wldcore_window_build_yes_no_panel(point32_t origin);
 /* Menu resume callbacks consume the variant selected by the level tag. */
 void wldcore_window_clear_layout_states(wldcore_menu_stack_record_t* level);
 void wldcore_window_restore_proposition_detail_palette(wldcore_menu_stack_record_t* level);
-void wldcore_window_reload_data_set_and_resume_thread14(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_sound_novel_level(wldcore_menu_stack_record_t* level);
 void wldcore_window_clear_pair_state(wldcore_menu_stack_record_t* level);
 void wldcore_window_clear_slot_state(wldcore_menu_stack_record_t* level);
 void wldcore_window_restore_location_list_palette(wldcore_menu_stack_record_t* level);

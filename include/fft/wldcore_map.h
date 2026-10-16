@@ -172,7 +172,7 @@ extern s32* g_wldcore_map_tile_descriptors;
  * the animation, bit 1 selects the zoomed-out direction. */
 extern wldcore_zoom_motion_t g_wldcore_map_zoom_motion;
 void wldcore_map_init_tile_atlas(void);
-void wldcore_map_color_and_draw_dots(void);
+void wldcore_map_init_dots(void);
 s32 wldcore_map_build_location_menu_entries(s32 proposition_id, s32* out);
 void wldcore_map_draw_visible_routes(GsOT* ot);
 void wldcore_map_draw_path_animation(GsOT* ot);

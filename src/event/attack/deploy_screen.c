@@ -724,7 +724,7 @@ ramza_placed:
             }
         }
     }
-    battle_map_mark_data_load_complete();
+    battle_deployment_mark_finished();
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
     thread_start(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, attack_map_show_title);
     thread_set_parameters(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
@@ -823,7 +823,7 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     u16 maximum_mp;
     menu_unit_status_record_t* gauges;
 
-    main_unit_init_job_data(&g_editor_party_unit_stats, party_index, 0);
+    main_unit_init_from_party_slot(&g_editor_party_unit_stats, party_index, 0);
     editor = &g_menu_selected_unit_fields.state;
     unit = &g_editor_party_unit_stats;
     gauges = &g_panel_selected_billboard;
@@ -1334,7 +1334,8 @@ static void attack_deploy_run_render_thread(void) {
             g_attack_deploy_zodiac_draw_context.scale_y -= 0x100;
         }
         if (g_attack_deploy_tiles_only_mode == 0) {
-            main_gfx_call_build_zodiac_bin(&g_attack_deploy_zodiac_draw_context, g_main_zodiac_primitives[frame & 1]);
+            main_gfx_call_build_zodiac_primitives(
+                &g_attack_deploy_zodiac_draw_context, g_main_zodiac_primitives[frame & 1]);
         }
         frame++;
     }

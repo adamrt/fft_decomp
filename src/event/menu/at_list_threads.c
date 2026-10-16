@@ -157,7 +157,7 @@ void menu_start_dead_unit_threads(void) {
                 }
                 g_dead_unit_controller_input = script_get_controller_input_pointer(0);
                 if ((*g_dead_unit_controller_input & PSX_PAD_SELECT) != 0) {
-                    menu_start_building_thread();
+                    menu_start_help_menu_thread();
                 }
             }
 

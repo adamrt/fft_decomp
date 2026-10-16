@@ -10,7 +10,7 @@
 /* Count g_world_input_lockout_timer down while thread 7 (the comparison status panel) is idle
  * and no status panel slides, and reset it to 10 otherwise. While it is nonzero, the menu input
  * masks are cleared (menu_input_clear_state). */
-void world_menu_update_thread_7_idle_countdown(void) {
+void world_input_update_lockout_timer(void) {
     s32 value;
 
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {

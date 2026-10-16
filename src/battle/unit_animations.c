@@ -86,7 +86,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
 /* The depth of water the unit stands in, which picks its animations: 0 on the surface (ON_WATER
  * movement, Float, a crystal), 1 for a chicken, frog or treasure and for IN_WATER movement,
  * otherwise the depth of its tile. */
-static u8 battle_move_get_water_depth(battle_unit_t* unit) {
+static u8 battle_move_get_water_animation_mode(battle_unit_t* unit) {
     map_tile_t* tile;
     s32 status;
     u32 flags;
@@ -230,7 +230,7 @@ void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit) {
     animation = g_battle_ability_charge_animation_sets[g_battle_ability_animation_data[unit->used_ability_id]
             .charge_animation_set_id][1];
     if (animation != 0) {
-        water_depth = battle_move_get_water_depth(unit);
+        water_depth = battle_move_get_water_animation_mode(unit);
         selected_animation = BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE;
         if (water_depth < 2) {
             selected_animation = animation;
@@ -274,7 +274,7 @@ void battle_unit_set_level_up_animation(battle_unit_t* unit) {
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
         return;
     }
-    switch (battle_move_get_water_depth(unit)) {
+    switch (battle_move_get_water_animation_mode(unit)) {
     case 0:
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LEVEL_UP, unit->facing, unit);
         break;
@@ -298,7 +298,7 @@ void battle_unit_set_animation_based_on_mounted_state(battle_unit_t* unit) {
     battle_unit_t* other;
 
     if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_RIDER) {
-        water_depth = battle_move_get_water_depth(unit);
+        water_depth = battle_move_get_water_animation_mode(unit);
         if (water_depth < 0) {
             selected = BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE;
         } else if (water_depth < 2) {
@@ -329,7 +329,7 @@ void battle_unit_set_animation_based_on_mounted_state(battle_unit_t* unit) {
  * The height-mode result is deliberately truncated to its low byte, and
  * facing is read signed (`lh`) throughout.
  */
-void battle_unit_set_idle_animation_for_movement(battle_unit_t* unit) {
+void battle_unit_set_walk_animation(battle_unit_t* unit) {
     s32 anim;
     s32 walk_speed;
     battle_unit_t* mount;
@@ -338,7 +338,7 @@ void battle_unit_set_idle_animation_for_movement(battle_unit_t* unit) {
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_RIDING, unit->facing, unit);
         return;
     }
-    switch (battle_move_get_water_depth(unit)) {
+    switch (battle_move_get_water_animation_mode(unit)) {
     case 0:
     case 1:
         walk_speed = unit->walk_speed;
@@ -393,7 +393,7 @@ void battle_unit_set_idle_animation_for_movement(battle_unit_t* unit) {
  */
 void battle_unit_set_animation_based_on_status(battle_unit_t* unit) {
     s32 animation;
-    u8 water_depth = battle_move_get_water_depth(unit);
+    u8 water_depth = battle_move_get_water_animation_mode(unit);
     u8 spritesheet_id;
 
     animation = 0;
@@ -582,7 +582,7 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
             battle_unit_draw_and_activate_by_runtime_id(unit->runtime_id);
             battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_JUMP_LAND, unit->facing, unit);
         }
-        if (battle_move_get_water_depth(unit) >= 2) {
+        if (battle_move_get_water_animation_mode(unit) >= 2) {
             if (unit->statuses_to_add_1_4 & BATTLE_UNIT_STATUS_DEAD) {
                 battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_DEAD, unit->facing, unit);
                 unit->animation.sequence_id = BATTLE_UNIT_ANIMATION_DEAD << 1;
@@ -594,7 +594,7 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
                 unit->animation.wait = 0;
             }
         }
-    } else if (battle_move_get_water_depth(unit) < 2) {
+    } else if (battle_move_get_water_animation_mode(unit) < 2) {
         if (unit->statuses_to_add_1_4 & BATTLE_UNIT_STATUS_DEAD) {
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_DEATH, unit->facing, unit);
         } else if (unit->statuses_to_remove_1_4 & BATTLE_UNIT_STATUS_DEAD) {
@@ -818,7 +818,7 @@ void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, 
     if ((target->animation.sequence_id >> 1) == BATTLE_UNIT_ANIMATION_DEATH) {
         return;
     }
-    water_depth = battle_move_get_water_depth(target);
+    water_depth = battle_move_get_water_animation_mode(target);
     animation = BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE;
     if (water_depth < 2) {
         stats = target->stats;
@@ -883,7 +883,7 @@ void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, 
                 }
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_KNOCKBACK) {
-                battle_move_transfer_target_coordinates(attacker, target);
+                battle_move_start_knockback(attacker, target);
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_POACH) {
                 target->status_flags_5_6 |= BATTLE_UNIT_STATUS_POACHED;
@@ -2133,7 +2133,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                         }
                     }
                 } else if (unit->animation.wait != 0) {
-                    for (i = 0; i < g_main_system_animation_speed; i++) {
+                    for (i = 0; i < g_main_system_vsync_interval; i++) {
                         if (unit->animation.wait != 0) {
                             unit->animation.wait--;
                             if (unit->animation.wait == 0) {
@@ -2166,7 +2166,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
             unit->camera_facing_sixteenth = sixteenth;
             battle_gfx_run_unit_seq_script(unit, &unit->animation, 0);
         } else if (unit->animation.wait != 0) {
-            for (i = 0; i < g_main_system_animation_speed; i++) {
+            for (i = 0; i < g_main_system_vsync_interval; i++) {
                 if (unit->animation.wait != 0) {
                     unit->animation.wait--;
                     if (unit->animation.wait == 0) {
@@ -2177,7 +2177,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
             }
         }
     } else if (unit->animation.wait != 0) {
-        for (i = 0; i < g_main_system_animation_speed; i++) {
+        for (i = 0; i < g_main_system_vsync_interval; i++) {
             if (unit->animation.wait != 0) {
                 unit->animation.wait--;
                 if (unit->animation.wait == 0) {
@@ -2189,7 +2189,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
     }
     for (i = 0; i < 3; i++) {
         if (unit->sprite_blocks[i].trigger != 0 && unit->sprite_blocks[i].wait != 0) {
-            for (j = 0; j < g_main_system_animation_speed; j++) {
+            for (j = 0; j < g_main_system_vsync_interval; j++) {
                 if (unit->sprite_blocks[i].wait != 0) {
                     unit->sprite_blocks[i].wait--;
                     if (unit->sprite_blocks[i].wait == 0) {
@@ -2454,7 +2454,7 @@ void battle_gfx_update_status_bubbles_and_graphics(void) {
             && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE
             && !(g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz)) {
             if (g_battle_gfx_status_bubble_delay != 0) {
-                g_battle_gfx_status_bubble_delay -= g_main_system_animation_speed;
+                g_battle_gfx_status_bubble_delay -= g_main_system_vsync_interval;
                 if (g_battle_gfx_status_bubble_delay <= 0) {
                     g_battle_gfx_status_bubble_delay = 0;
                 }
@@ -2555,7 +2555,7 @@ void battle_unit_update_and_animate_units(void) {
 
     while (unit != 0) {
         battle_gfx_update_and_animate_unit_wep_eff(unit);
-        battle_gfx_init_status_bubble(unit);
+        battle_gfx_update_float_height_and_status_bubble(unit);
         battle_unit_update_fade_out_removal(unit);
         unit = unit->previous;
     }
@@ -3520,7 +3520,7 @@ void battle_gfx_update_unit_palette_animation(void) {
     palette_t* palettes;
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    g_battle_unit_palette_animation_timer += g_main_system_animation_speed;
+    g_battle_unit_palette_animation_timer += g_main_system_vsync_interval;
     if (g_battle_unit_palette_animation_timer >= 4) {
         g_battle_unit_palette_animation_timer = 0;
         g_battle_unit_palette_animation_offset++;

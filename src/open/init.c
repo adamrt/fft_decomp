@@ -32,7 +32,7 @@ void open_sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration) {
 
 /* Set up the title sequence: reset the runtime state, load the title graphics and
  * start the FFTST.STR logo movie, or the title menu when skip_movie is set. */
-void open_movie_init_and_stream_opening(s32 skip_movie) {
+void open_system_init_title_sequence(s32 skip_movie) {
     main_sound_unload_scenario_music_and_tunes();
     open_system_init_runtime_state();
     open_file_load_main_menu_graphics();
@@ -67,7 +67,7 @@ void open_movie_init_and_play_end(void) {
 /* Copy FRAME.BIN's 64x256 VRAM page (the window frames and UI sprites) back
  * from (960, 0), where open_movie_init_and_play_end parked it before the
  * ending's graphics loaded, to (960, 256). */
-void open_gfx_restore_frame_vram_page(void) {
+void open_gfx_restore_frame_bin_page(void) {
     RECT source;
 
     source.x = 0x3c0;

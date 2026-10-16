@@ -130,7 +130,7 @@ void world_menu_input_update_dialog_state(void) {
 }
 #endif
 
-void menu_release_current_thread_slot(void) {
+void text_release_typewriter_slot(void) {
     s32 index = 0;
     s32 current_thread_id = g_thread_current_id;
     s32* owner_thread_id;

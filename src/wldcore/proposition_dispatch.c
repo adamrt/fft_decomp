@@ -254,7 +254,7 @@ void wldcore_proposition_advance_daily_counters(void) {
  * The daily updater sets completion flag 0x04. A location of -1 accepts every
  * completed record; the stored count is not clamped to the save-data capacity.
  */
-s32 wldcore_proposition_count_completed(s32 location) {
+s32 wldcore_proposition_count_returned(s32 location) {
     s32 i;
     s32 count = 0;
     for (i = 0; i < g_main_save_proposition_count; i++) {
@@ -517,7 +517,7 @@ static s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_
 }
 
 /* Redraw the send-unit list window: the empty frame, then one name row per unit chosen so far. */
-static void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level) {
+static void wldcore_proposition_draw_send_unit_names(wldcore_menu_send_unit_level_t* level) {
     point32_t point;
     s32 index = level->list_frame.render_index;
     s32 i;
@@ -597,7 +597,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         unit = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         g_wldcore_proposition_send_units[level->slot] = unit;
-        wldcore_window_draw_text_rows(level);
+        wldcore_proposition_draw_send_unit_names(level);
         wldcore_proposition_load_send_unit_candidates(level);
         world_thread_request_redraw(WLDCORE_THREAD_SLOT_WINDOW_PANEL);
     close:
@@ -636,7 +636,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
 /* Build the status panel data of party member `party_index` and start the
  * three unit panel threads on it (status banner, numeric editor, equipment
  * and ability panel), raising MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS. */
-static void wldcore_start_core_background_threads(s32 party_index) {
+static void wldcore_unit_start_status_panel_threads(s32 party_index) {
     menu_status_thread_t* thread8;
 
     wldcore_unit_build_status_panel_data(party_index);
@@ -674,7 +674,7 @@ static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_le
         g_wldcore_window_records[level->right_arrow].flags ^= WORLD_RENDER_RECORD_HIDDEN;
         level->mode = WLDCORE_SEND_UNIT_MODE_STATUS;
         menu_selected_index = &g_wldcore_window_panel_render_state.selected_index;
-        wldcore_start_core_background_threads(g_wldcore_list_entry_values[*menu_selected_index] & TEXT_ID_ENTRY_MASK);
+        wldcore_unit_start_status_panel_threads(g_wldcore_list_entry_values[*menu_selected_index] & TEXT_ID_ENTRY_MASK);
         level->slot = *menu_selected_index;
     } else if (level->mode == WLDCORE_SEND_UNIT_MODE_STATUS) {
         buttons = g_wldcore_input_new_button_presses;
@@ -922,7 +922,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
                 g_wldcore_proposition_send_units[value - 1] = g_wldcore_proposition_send_units[value];
             }
             g_wldcore_proposition_send_unit_count--;
-            wldcore_window_draw_text_rows(level);
+            wldcore_proposition_draw_send_unit_names(level);
             wldcore_proposition_load_send_unit_candidates(level);
             world_thread_request_redraw(WLDCORE_THREAD_SLOT_WINDOW_PANEL);
             return;
@@ -949,7 +949,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
     g_wldcore_proposition_send_units[g_wldcore_proposition_send_unit_count] = value;
     g_wldcore_proposition_send_unit_count++;
 
-    wldcore_window_draw_text_rows(level);
+    wldcore_proposition_draw_send_unit_names(level);
     wldcore_proposition_load_send_unit_candidates(level);
     world_thread_request_redraw(WLDCORE_THREAD_SLOT_WINDOW_PANEL);
 }
@@ -1697,22 +1697,21 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
     if (g_wldcore_proposition_report.result == WLDCORE_PROPOSITION_RESULT_SUCCESS) {
         date.day = day;
         date.month = month;
-        wldcore_write_nine_bit_record(g_main_proposition_last_attempt_date_bits,
+        wldcore_calendar_write_date(g_main_proposition_last_attempt_date_bits,
             g_main_active_propositions[level->proposition].proposition_id, &date);
     }
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_TREASURE) {
         script_set_variable(g_wldcore_proposition_report.reward_index + EVENT_SCRIPT_VAR_TREASURE_FIRST, 1);
         date.day = day;
         date.month = month;
-        wldcore_write_nine_bit_record(
+        wldcore_calendar_write_date(
             g_main_treasure_acquisition_date_bits, g_wldcore_proposition_report.reward_index, &date);
     }
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND) {
         script_set_variable(g_wldcore_proposition_report.reward_index + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST, 1);
         date.day = day;
         date.month = month;
-        wldcore_write_nine_bit_record(
-            g_main_land_discovery_date_bits, g_wldcore_proposition_report.reward_index, &date);
+        wldcore_calendar_write_date(g_main_land_discovery_date_bits, g_wldcore_proposition_report.reward_index, &date);
     }
     for (i = 0; i < g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_count; i++) {
         wldcore_get_party_unit(

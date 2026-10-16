@@ -205,7 +205,7 @@ void main_entd_init_event_unit_data(int event_id) {
         if (entd != 0) {
             main_party_clear_all();
             for (unit_id = 0; unit_id < ENTD_UNITS_PER_ENCOUNTER; unit_id++) {
-                main_unit_init(entd, unit_id, 0, 1);
+                main_unit_save_entd_unit_to_party(entd, unit_id, 0, 1);
             }
             main_heap_call_free(g_main_entd_set);
             break;

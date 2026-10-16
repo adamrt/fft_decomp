@@ -45,7 +45,7 @@ static void require_editor_load_party_unit(s32 unused, s32 party_index) {
     u16 maximum_mp;
     menu_unit_status_record_t* gauges;
 
-    main_unit_init_job_data(&g_editor_party_unit_stats, party_index, 0);
+    main_unit_init_from_party_slot(&g_editor_party_unit_stats, party_index, 0);
     editor = &g_menu_selected_unit_fields.state;
     unit = &g_editor_party_unit_stats;
     gauges = &g_menu_selected_unit_status;
@@ -1213,7 +1213,7 @@ static void require_reward_run_gil_ticker(void) {
     }
     digits = text_count_decimal_digits(money);
     if (digits >= 7) {
-        main_system_handle_malloc_exception(7, 0);
+        main_system_report_error(7, 0);
         money = 0;
         digits = 1;
     }

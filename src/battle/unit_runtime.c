@@ -696,7 +696,7 @@ void battle_effect_start_new(s32 ability_id, s32 target_mode, effect_start_targe
  * instruction calls it on the main stack each frame until it returns 0. */
 s32 battle_effect_try_init_data(void) {
     /* The target loads no argument; the parameter is the $a0 value unhandled states return. */
-    return battle_effect_init_data() != 0;
+    return battle_effect_update_file_load() != 0;
 }
 
 /* battle_effect_play as a g_thread_call_target: script_play_effect_and_wait runs it on the main

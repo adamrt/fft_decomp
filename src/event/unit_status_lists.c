@@ -720,7 +720,7 @@ static s32 menu_display_projected_action_effect(
  * caster or target of an attack preview. The panel slides in, redraws each frame and slides out on
  * the stop request; CT shows at most 100, an egg's numbers are hidden and the target panel also
  * names its reaction ability. */
-static void menu_display_hovered_unit_stats(
+static void menu_run_unit_stats_panel(
     RECT* frame_rect, s32 mode, struct menu_number_entry* entries, menu_unit_status_record_t* status) {
     RECT rects[4];
     menu_unit_status_offsets_t offsets[2];
@@ -1042,7 +1042,7 @@ void menu_refresh_hovered_unit_stats_display(void) {
     if (g_menu_selected_unit_status.list_index < 0) {
         g_menu_hovered_unit_stats_setup[6].format = 0x0c00;
     }
-    menu_display_hovered_unit_stats(&g_menu_hovered_unit_stats_rect, UNIT_STATS_PANEL_HOVERED_UNIT,
+    menu_run_unit_stats_panel(&g_menu_hovered_unit_stats_rect, UNIT_STATS_PANEL_HOVERED_UNIT,
         g_menu_hovered_unit_stats_setup, &g_menu_selected_unit_status);
 }
 
@@ -1053,8 +1053,8 @@ void menu_refresh_right_unit_stats_display(void) {
     if (g_menu_comparison_unit_status.list_index < 0) {
         g_menu_right_unit_stats_setup[6].format = 0x0c00;
     }
-    menu_display_hovered_unit_stats(&g_menu_right_unit_stats_rect, UNIT_STATS_PANEL_RIGHT_UNIT,
-        g_menu_right_unit_stats_setup, &g_menu_comparison_unit_status);
+    menu_run_unit_stats_panel(&g_menu_right_unit_stats_rect, UNIT_STATS_PANEL_RIGHT_UNIT, g_menu_right_unit_stats_setup,
+        &g_menu_comparison_unit_status);
 }
 
 /* Preview the pending action, then display its caster panel. */
@@ -1085,7 +1085,7 @@ void menu_preview_attack_caster_stats(void) {
     thread_yield();
     thread_yield();
     menu_load_selected_unit_variant();
-    menu_display_hovered_unit_stats(&g_menu_attack_caster_stats_rect, UNIT_STATS_PANEL_ATTACK_CASTER,
+    menu_run_unit_stats_panel(&g_menu_attack_caster_stats_rect, UNIT_STATS_PANEL_ATTACK_CASTER,
         g_menu_attack_caster_stats_setup, &g_menu_selected_unit_status);
 }
 
@@ -1106,7 +1106,7 @@ void menu_preview_attack_target_stats(void) {
     g_menu_comparison_unit_fields.state.generic_monster = g_menu_selected_unit_fields.state.generic_monster;
     g_menu_comparison_unit_fields.state.ability_ids[2] = g_menu_selected_unit_fields.state.ability_ids[2];
     menu_load_selected_unit_variant();
-    menu_display_hovered_unit_stats(&g_menu_attack_target_stats_rect, UNIT_STATS_PANEL_ATTACK_TARGET,
+    menu_run_unit_stats_panel(&g_menu_attack_target_stats_rect, UNIT_STATS_PANEL_ATTACK_TARGET,
         g_menu_attack_target_stats_setup, &g_menu_comparison_unit_status);
 }
 

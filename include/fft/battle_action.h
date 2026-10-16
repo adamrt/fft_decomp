@@ -452,24 +452,24 @@ extern s32 g_battle_action_at_list_id;
 s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode);
 s32 battle_action_get_at_list_entry_unit_id(s32 at_index);
 s32 battle_action_find_unit_turn_index(const unit_stats_t* unit);
-void battle_action_clear_at_list_active(void);
+void battle_target_hide_cursor(void);
 void battle_action_clear_at_list_id(void);
-void battle_action_get_next_acting_unit(s32 arg);
+void battle_action_show_at_list_entry(s32 arg);
 u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries);
 void battle_action_open_status_menu_at_list_start(void);
 s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_at_entry_t* at_list);
-void battle_action_set_at_list_active(void);
+void battle_target_show_cursor(void);
 void battle_action_show_next_at_list_entry(void);
 
 /* preparation */
 extern u8 g_action_menu_row_types[]; /* per-row skillset kind; 13 keeps the row active */
 
 void battle_action_call_attack_preparation(action_command_t* action);
-s32 battle_action_call_attack_preparation_at_preview(action_command_t* command);
+s32 battle_action_commit_attack_preparation(action_command_t* command);
 void battle_action_confirm(void);
 s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit);
 s32 battle_action_prepare_attack(action_command_t* action, action_command_t* target, s32 flag);
-void battle_action_set_casting_unit_id_ff(void);
+void battle_state_enter_event(void);
 void battle_action_set_casting_unit_id_ff_and_init(void);
 void battle_action_switch_ability_to_default_attack(void);
 
@@ -499,7 +499,7 @@ void battle_action_execute_ability(void);
 void battle_action_finalize_target_current_action(void);
 s32 battle_action_init_current_data(s32 unit_id);
 s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* work);
-s32 battle_action_resume_attack_phase_control(void);
+s32 battle_action_show_next_effect_message(void);
 s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 target_id);
 void battle_action_set_target_coords_and_attacker_anim(void);
 void battle_action_store_acting_unit_data(unit_stats_t* unit);
@@ -517,7 +517,7 @@ extern s16 g_battle_reaction_unit_last_ability_id;
 
 s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit);
 s32 battle_action_is_reaction_prevented(const unit_stats_t* unit);
-s32 battle_action_finalize_attack_and_flag_reactions(s32 runtime_id);
+s32 battle_action_apply_target_result(s32 runtime_id);
 s32 battle_action_is_reaction_blocked(const unit_stats_t* unit);
 s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability);
 s32 battle_reaction_prepare_next(s16* reaction_id);
@@ -546,14 +546,14 @@ s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id);
 s32 battle_action_apply_tile_trap(unit_stats_t* unit);
 s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id, s32 always_one);
 void battle_action_handle_move_command(void);
-void battle_action_handle_post_action_xp_jp_ability(void);
-void battle_action_handle_steal_exp(unit_stats_t* unit, u8 amount);
+void battle_action_grant_rewards(void);
+void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount);
 s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item);
 void battle_action_init_learn_ability_on_hit(void);
 s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit);
 void battle_action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
 void battle_action_start_next_strike_display(void);
-void battle_action_set_item_throw_stone_ability_display(void);
+void battle_state_enter_action_execute(void);
 void battle_action_set_only_action_taken(s32 unit_id);
 void battle_action_set_only_movement_taken(s32 unit_id);
 void battle_action_show_caster_post_effect_messages(void);

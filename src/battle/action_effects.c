@@ -23,13 +23,13 @@
 
 /* Show the map cursor and its tile glow again; the counterpart of
  * battle_action_clear_at_list_active. */
-void battle_action_set_at_list_active(void) {
+void battle_target_show_cursor(void) {
     g_battle_action_at_list_active = 1;
 }
 
 /* Hide the map cursor and its tile glow: the flag is read only by
  * target_calculate_tile_coords_and_glow_from_at_list. */
-void battle_action_clear_at_list_active(void) {
+void battle_target_hide_cursor(void) {
     g_battle_action_at_list_active = 0;
 }
 
@@ -55,7 +55,7 @@ void battle_target_move_cursor_to_action_target(const battle_unit_t* unit) {
     battle_target_move_cursor_to_unit(battle_unit_get_by_battle_id(bd->action_command.target_id));
 }
 
-void battle_gfx_update_unit_palettes(void) {
+void battle_gfx_restore_unit_palettes(void) {
     s32 palette_index;
 
     for (palette_index = 0; palette_index < MAP_CLUTS_PER_ROW; palette_index++) {
@@ -347,7 +347,7 @@ s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id) {
 /* Lands a projectile strike on its target: the weapon hit sound, the target's
  * reaction animation, its post-action display and the evade and weapon-element
  * effect data. Does nothing when either unit is missing. */
-static void battle_unit_set_bow_hardcoding(battle_unit_t* attacker, battle_unit_t* target) {
+static void battle_unit_resolve_projectile_hit(battle_unit_t* attacker, battle_unit_t* target) {
     if ((attacker != 0) && (target != 0)) {
         battle_sound_play_weapon_sfx(attacker, 1);
         battle_unit_set_target_animation_from_attack_type(attacker, target);
@@ -361,7 +361,7 @@ void battle_unit_call_bow_hardcoding_by_battle_id(u16 attacker_id, u16 target_id
     battle_unit_t* attacker = battle_unit_get_by_battle_id(attacker_id);
     battle_unit_t* target = battle_unit_get_by_battle_id(target_id);
 
-    battle_unit_set_bow_hardcoding(attacker, target);
+    battle_unit_resolve_projectile_hit(attacker, target);
 }
 
 /* battle_unit_set_bow_hardcoding for two runtime ids: called by the arrow-arc
@@ -370,7 +370,7 @@ void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_i
     battle_unit_t* attacker = battle_unit_get_by_runtime_id(attacker_id);
     battle_unit_t* target = battle_unit_get_by_runtime_id(target_id);
 
-    battle_unit_set_bow_hardcoding(attacker, target);
+    battle_unit_resolve_projectile_hit(attacker, target);
 }
 
 /* Apply a unit's queued status changes (removals, then additions) and refresh everything that
@@ -706,9 +706,9 @@ void battle_move_set_velocity_for_contiguous_clamped_steps(
     direction.vz = end_y - start_y;
     direction.vy = end_z - start_z;
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
 enum {
@@ -796,7 +796,7 @@ void battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
     direction.vz = end_y - start_y;
     direction.vy = end_z - start_z;
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }

@@ -37,7 +37,7 @@ void require_text_show_battle_congratulations(void) {
 
     g_thread_call_target = main_sound_unload_scenario_music_and_tunes;
     thread_call_on_main_stack();
-    g_thread_call_target = (void (*)(void))main_sound_open_scenario_smd_files;
+    g_thread_call_target = (void (*)(void))main_sound_start_music_load_into_free_slot;
     thread_call_on_main_stack(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON
             ? MAIN_MUSIC_CONGRATULATIONS
             : MAIN_MUSIC_CONGRATULATIONS_FINAL_BATTLE);

@@ -142,7 +142,7 @@ extern s32 g_wldcore_tutorial_event_ids[];
 extern s16 g_wldcore_list_row_flags[];
 /* Row value column of the world list panels, read signed as `value & 0x7ff`. */
 extern s16 g_wldcore_list_entry_values[];
-void wldcore_list_open_script_flags_01a4_01bb(void);
+void wldcore_list_open_facts(void);
 void wldcore_list_clamp_cursor_state(s32 index, s32 count, s32 visible);
 void wldcore_list_clear_cursor_state(s32 index);
 void wldcore_list_open_tutorial_topics(void);

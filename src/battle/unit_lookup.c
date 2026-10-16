@@ -227,7 +227,7 @@ void battle_state_run_game_loop(void) {
             switch (g_battle_game_state) {
             default:
             case BATTLE_GAME_STATE_FREE_CURSOR:
-                battle_state_handle_default_state();
+                battle_state_handle_free_cursor_state();
                 break;
             case BATTLE_GAME_STATE_FREE_CURSOR_HELP:
                 battle_state_handle_free_cursor_help_state();
@@ -441,7 +441,7 @@ void battle_state_run_game_loop(void) {
 
             if (g_battle_game_state == BATTLE_GAME_STATE_EFFECT
                 || g_battle_game_state == BATTLE_GAME_STATE_ACTION_EXECUTE) {
-                if (g_main_system_animation_speed == 1) {
+                if (g_main_system_vsync_interval == 1) {
                     g_battle_frame_pacing_timer = 0;
                 } else if (g_battle_frame_pacing_suppressed == 0) {
                     if (g_main_system_battle_frame_hsync_count >= 0x301) {
@@ -1004,7 +1004,7 @@ static void battle_gfx_init_render_frame(void) {
 
 /* Takes the next of the 256 primitives of g_battle_gfx_sprite_prim_pool, used as
  * a ring, and returns its index. */
-s16 battle_gfx_increment_counter(void) {
+s16 battle_gfx_take_sprite_prim(void) {
     g_battle_gfx_counter = (g_battle_gfx_counter + 1) % 0x100;
     return g_battle_gfx_counter;
 }
@@ -1050,7 +1050,7 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
     for (i = start; i < end; i++) {
         part = &display->parts[i];
         flags = part->flags;
-        index = battle_gfx_increment_counter();
+        index = battle_gfx_take_sprite_prim();
         flags ^= mode;
         prim = g_battle_gfx_sprite_prim_pool + index;
         setlen(prim, 9);

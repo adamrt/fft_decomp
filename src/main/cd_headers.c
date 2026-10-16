@@ -10,12 +10,12 @@
 
 /* main_file_build_header with the Now Loading message turned off (NNL: no Now Loading); returns
  * its result. */
-int main_file_build_header_nnl(main_file_load_descriptor_t* header, int sector, int sectors, void* destination) {
-    return main_file_build_header(header, sector, sectors, destination, MAIN_FILE_LOADING_DISPLAY_OFF);
+int main_file_request_read_quiet(main_file_load_descriptor_t* header, int sector, int sectors, void* destination) {
+    return main_file_request_read(header, sector, sectors, destination, MAIN_FILE_LOADING_DISPLAY_OFF);
 }
 
 /* Initialize a descriptor and enter the asynchronous loader's setup phase. */
-s32 main_file_build_header(
+s32 main_file_request_read(
     main_file_load_descriptor_t* header, s32 lba, s32 sector_count, void* destination, s32 loading_display_mode) {
     RECT rect;
 

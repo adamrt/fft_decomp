@@ -40,14 +40,14 @@ static void battle_target_apply_unit_team_eligibility(
     s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff);
 static void battle_target_apply_vertical_fixed(s32 x, s32 y);
 static void battle_target_build_directional_attack_panels(const action_command_t* source, u8 mode);
-static void battle_target_calculate_aoe_vertical_tolerance(s32 x, s32 y, s32 lo, s32 hi);
+static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi);
 static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y);
 static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags);
 static void battle_target_clear_range_on_untargetable_tiles(void);
 static s32 battle_target_clear_selection_state_of_all_panels(void);
 static s32 battle_target_keep_only_target_tile(const action_command_t* action);
 static s32 battle_target_run_calculator(const action_command_t* source);
-static s32 battle_target_set_all_panels_targeted_if_targetable(void);
+static s32 battle_target_set_ability_range_flags(void);
 static s32 battle_target_set_green_panels_for_action(const action_command_t* action);
 static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags);
 static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x);
@@ -2560,18 +2560,18 @@ static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit,
     if (flags & 0x80) {
         lo = height - 6;
         hi = height + 5;
-        battle_target_calculate_aoe_vertical_tolerance(x - 1, y, lo, hi);
-        battle_target_calculate_aoe_vertical_tolerance(x + 1, y, lo, hi);
-        battle_target_calculate_aoe_vertical_tolerance(x, y - 1, lo, hi);
-        battle_target_calculate_aoe_vertical_tolerance(x, y + 1, lo, hi);
+        battle_target_mark_tile_in_height_band(x - 1, y, lo, hi);
+        battle_target_mark_tile_in_height_band(x + 1, y, lo, hi);
+        battle_target_mark_tile_in_height_band(x, y - 1, lo, hi);
+        battle_target_mark_tile_in_height_band(x, y + 1, lo, hi);
     } else {
         for (i = 1; i < 3; i++) {
             lo = height + (i - 5) * 2;
             hi = height + 7;
-            battle_target_calculate_aoe_vertical_tolerance(x - i, y, lo, hi);
-            battle_target_calculate_aoe_vertical_tolerance(x + i, y, lo, hi);
-            battle_target_calculate_aoe_vertical_tolerance(x, y - i, lo, hi);
-            battle_target_calculate_aoe_vertical_tolerance(x, y + i, lo, hi);
+            battle_target_mark_tile_in_height_band(x - i, y, lo, hi);
+            battle_target_mark_tile_in_height_band(x + i, y, lo, hi);
+            battle_target_mark_tile_in_height_band(x, y - i, lo, hi);
+            battle_target_mark_tile_in_height_band(x, y + i, lo, hi);
         }
     }
 }
@@ -2580,7 +2580,7 @@ static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit,
  * height lies in lo..hi. Heights are in half steps (height * 2 + slope half
  * height + depth * 2); a negative lo counts as 0 and a position off the map is
  * ignored. The strike and lunge weapon ranges are built from it. */
-static void battle_target_calculate_aoe_vertical_tolerance(s32 x, s32 y, s32 lo, s32 hi) {
+static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi) {
     s32 level;
     s32 idx;
     s32 height;
@@ -2896,7 +2896,7 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
             | ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS)) {
         return battle_target_clear_selection_state_of_all_panels();
     }
-    return battle_target_set_all_panels_targeted_if_targetable();
+    return battle_target_set_ability_range_flags();
 }
 
 /* Build the targeting panels for a weapon attack: the weapon's range around the
@@ -2918,14 +2918,14 @@ static s32 battle_target_set_weapon_attack_panels(const action_command_t* source
         p2 = &g_battle_target_panel_data[idx + 0x100];
         p1->remaining_range = 0;
         p2->remaining_range = 0;
-        return battle_target_set_all_panels_targeted_if_targetable();
+        return battle_target_set_ability_range_flags();
     }
 }
 
 /* Publish the panels in range to the map: a tile whose panel has range left gets
  * MAP_TILE_FLAG_ABILITY_RANGE unless it is blocked or a cross-section surface,
  * and every other tile loses the flag. Returns the number of flagged tiles. */
-static s32 battle_target_set_all_panels_targeted_if_targetable(void) {
+static s32 battle_target_set_ability_range_flags(void) {
     map_tile_t* tile;
     target_panel_t* panel;
     s32 count = 0;

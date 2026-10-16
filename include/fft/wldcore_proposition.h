@@ -147,7 +147,7 @@ void wldcore_proposition_roll_bonus_reward(void);
 void wldcore_proposition_apply_extra_days_multiplier(void);
 s32 wldcore_proposition_adjust_message_index(s32 base, s32 party_index);
 void wldcore_proposition_advance_daily_counters(void);
-s32 wldcore_proposition_count_completed(s32 location);
+s32 wldcore_proposition_count_returned(s32 location);
 /* File records have different layouts; the selected record determines the table type. */
 void* wldcore_proposition_get_data_pointer(wldcore_proposition_data_record_e record);
 s32 wldcore_proposition_load_picture(s32 index);

@@ -499,7 +499,7 @@ s32 wldcore_script_calculate_save_data_completion_percent(void) {
 
 /* Open the Brave Story Facts list: one row per fact flag set (EVENT_SCRIPT_VAR_FACT_FIRST onward),
  * up to eight, hiding the parent's content panel. */
-void wldcore_list_open_script_flags_01a4_01bb(void) {
+void wldcore_list_open_facts(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -674,6 +674,6 @@ void wldcore_menu_close_script_flag_01a4_detail_level(void) {
         g_wldcore_menu_stack_depth = depth - 1;
         g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth - 2].list_window.lower_window].flags
             &= ~WORLD_RENDER_RECORD_HIDDEN;
-        wldcore_list_open_script_flags_01a4_01bb();
+        wldcore_list_open_facts();
     }
 }

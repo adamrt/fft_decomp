@@ -850,7 +850,7 @@ end:
     win->active = 0;
     menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
-    menu_release_current_thread_slot();
+    text_release_typewriter_slot();
     YIELD_OR_INPUT();
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 1) {
         g_menu_input_lock_mode = 0;

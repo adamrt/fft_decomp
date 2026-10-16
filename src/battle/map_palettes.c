@@ -2202,7 +2202,7 @@ s32 battle_state_sync_frame(u32* ordering_table) {
     s32 timer;
     s32 sync_result;
 
-    if (g_main_system_animation_speed == 1) {
+    if (g_main_system_vsync_interval == 1) {
         DrawSync(0);
         sync_result = VSync(0);
     } else {
@@ -2219,7 +2219,7 @@ s32 battle_state_sync_frame(u32* ordering_table) {
             } else {
                 wait = 2;
             }
-            sync_wait = g_battle_frame_pacing;
+            sync_wait = g_main_system_min_vsync_interval;
             if (wait < sync_wait) {
                 if (sync_wait == 1) {
                     sync_wait = 0;
@@ -2229,7 +2229,7 @@ s32 battle_state_sync_frame(u32* ordering_table) {
             }
             sync_result = VSync(sync_wait);
         } else {
-            sync_result = VSync(g_main_system_animation_speed);
+            sync_result = VSync(g_main_system_vsync_interval);
         }
     }
 

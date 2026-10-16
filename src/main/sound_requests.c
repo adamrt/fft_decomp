@@ -214,7 +214,7 @@ void main_file_handle_cd_ready_callback(u8 event, u8* result) {
 void main_file_handle_cd_read_callback(u8 event, u8* result) {
 }
 
-s32 main_sound_open_and_play_music(s32 music_id, s32 slot) {
+s32 main_sound_load_music_into_slot(s32 music_id, s32 slot) {
     suzuki_smd_header_t* smd;
 
     if (g_main_sound_music.slots.smd[slot - 1] == 0) {
@@ -284,7 +284,7 @@ s32 main_sound_open_music_into_slot(s32 music_id, s32 slot) {
  * the first free scenario music slot (1 or 2) and returns that slot, or 0
  * when both are taken or the load fails. main_sound_poll_scenario_smd_load
  * creates the music record once the file has arrived. */
-int main_sound_open_scenario_smd_files(int music_id) {
+int main_sound_start_music_load_into_free_slot(int music_id) {
     int i;
     suzuki_smd_header_t* buffer;
 
@@ -330,7 +330,7 @@ int main_sound_poll_scenario_smd_load(void) {
  * frame until the music record exists. Returns the slot, or 0 when no load
  * started. */
 s32 main_sound_wait_for_scenario_smd_load(s32 music_id) {
-    s32 result = main_sound_open_scenario_smd_files(music_id);
+    s32 result = main_sound_start_music_load_into_free_slot(music_id);
 
     if (result != 0) {
         while (main_sound_poll_scenario_smd_load() != 0) {

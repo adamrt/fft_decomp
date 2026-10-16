@@ -601,7 +601,7 @@ void battle_formula_nullify_action(void) {
     target_data->attack_accuracy = 0;
     target_data->special_effect = 0;
     target_data_reload->attack_type = 0;
-    battle_formula_clear_nullify_flags();
+    battle_formula_clear_pending_proc();
     battle_action_clear_knockback_flag();
 }
 
@@ -1311,7 +1311,7 @@ void battle_formula_store_xa_times_ya_damage(void) {
  * battle_formula_use_hp_damage_as_action_hit_percent, or formula 0x32's damage
  * base. YA gets zodiac compatibility here (the callers apply it to XA), except
  * for Golem. */
-void battle_formula_store_xa_plus_ya_status_damage(void) {
+void battle_formula_store_hit_chance(void) {
     u16 original_xa;
 
     if (g_battle_action_current_ability.ability_id != ABILITY_ID_SUMMON_MAGIC_GOLEM) {
@@ -1345,7 +1345,7 @@ void battle_formula_calculate_mp_percent_damage(void) {
 }
 
 /* HP damage equal to the target's current HP - 1 (0 when it has none). */
-void battle_formula_calculate_gravi2_damage(void) {
+void battle_formula_calculate_damage_leaving_one_hp(void) {
     unit_stats_t* target = g_battle_action_target;
 
     if (target->hp != 0) {

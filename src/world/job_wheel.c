@@ -33,7 +33,7 @@ static s32 world_formation_process_job_change(s32 job);
 static void world_formation_step_job_wheel_close_animation(void);
 static void world_formation_step_job_wheel_open_animation(void);
 static void world_formation_update_job_wheel_state(void);
-static void world_menu_select_stat_gauge_level(s32 x, s32 y, s32 otag_index, s32 value);
+static void world_formation_draw_job_wheel_mastered_star(s32 x, s32 y, s32 otag_index, s32 value);
 
 static s32 world_formation_get_job_wheel_cursor_job_level(s32 unused_row) {
     s32 index = job_get_generic_index(g_world_job_wheel_jobs[g_world_job_wheel_cursor_index]);
@@ -375,7 +375,7 @@ static void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 
             rgb = &g_world_formation_dimmed_sprite_color;
         }
         if (g_world_job_wheel_mastered_jobs[job] != 0) {
-            world_menu_select_stat_gauge_level(
+            world_formation_draw_job_wheel_mastered_star(
                 sprite.position.x, sprite.position.y, ot_index, g_world_job_wheel_animation_counter);
         }
         world_formation_draw_sprite_with_shadow(&sprite, rgb, ot_index);
@@ -693,7 +693,7 @@ static void world_formation_build_job_wheel_job_name(void) {
  * 0x5E (frame 4 from 0x64 on); otherwise it shows frame 0. Frames are 10
  * texels apart from u 0x24.
  */
-static void world_menu_select_stat_gauge_level(s32 x, s32 y, s32 otag_index, s32 value) {
+static void world_formation_draw_job_wheel_mastered_star(s32 x, s32 y, s32 otag_index, s32 value) {
     s32 level;
     oriented_quad_t* sprite;
 

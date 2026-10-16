@@ -37,7 +37,7 @@ static void open_script_update_timing_and_record_values(void);
 static void open_script_update_xa_audio(void);
 static s32 open_text_decode_hex_digit(s32 character);
 
-void open_menu_init_render_record_fields(
+void open_gfx_init_vram_render_record(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags) {
     RECT* quad_base;
     RECT* quad;
@@ -375,7 +375,7 @@ void open_title_start_new_game_or_clear_file_buffer(void) {
  * When the fade has ended the notice record and the controller are released: on
  * Cross the frame image saved in g_open_work_buffer_0 is copied back and the
  * title menu is pushed again; on Circle or Start the new-game prologue starts. */
-void open_title_update_exit_transition(open_controller_record_t* record) {
+void open_title_update_card_warning(open_controller_record_t* record) {
     s32 state;
     u32 buttons;
 
@@ -900,7 +900,7 @@ static void open_script_init_state(void) {
  * g_open_opcode_handlers. A handler advances byte_offset itself; one that has to
  * wait clears OPEN_SCRIPT_DISPATCH_CONTINUE to end the frame and is entered again
  * on the next, and opcode 0 clears OPEN_SCRIPT_DISPATCH_RUNNING. */
-static s32 open_script_init_and_dispatch_entries(void) {
+static s32 open_script_run_frame(void) {
     open_script_dispatch_state_t* state;
     open_script_cursor_t* cursor;
     s32 result;
@@ -1509,7 +1509,7 @@ static void open_script_push_controller(void) {
 /* Handler 10: run the ending script for a frame. When it ends, VSync mode 0 is
  * restored, the controller is popped and OPEN.BIN's loop ends. */
 void open_script_update_controller(open_controller_record_t* unused_record) {
-    if (open_script_init_and_dispatch_entries() == 0) {
+    if (open_script_run_frame() == 0) {
         g_open_system_vsync_mode = 0;
         g_open_current_controller_index--;
         g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_RUNNING;
@@ -1519,7 +1519,7 @@ void open_script_update_controller(open_controller_record_t* unused_record) {
 /* Opcode 0: end the script. It yields for the frame while the XA start or stop
  * sequence runs; after that it clears OPEN_SCRIPT_DISPATCH_RUNNING, which stops
  * the dispatcher. Two bytes. */
-void open_opcode_toggle_control(s16* unused_entry) {
+void open_opcode_end_script(s16* unused_entry) {
     u32 state = g_open_script_state.dispatch.flags;
 
     if (state & (OPEN_SCRIPT_DISPATCH_XA_STOPPING | OPEN_SCRIPT_DISPATCH_XA_STARTING)) {

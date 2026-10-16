@@ -1925,10 +1925,10 @@ extern s32 g_battle_effect_playback_phase; /* effect_playback_phase_e */
 void battle_effect_call_play(void);
 void battle_effect_cancel_playback_request(void);
 s32 battle_effect_get_playback_phase(void);
-s32 battle_effect_init_data(void);
+s32 battle_effect_update_file_load(void);
 void battle_effect_init_system(void);
 s32 battle_effect_is_item_ability(s32 ability_id);
-u32 battle_effect_load_ability(s32 ability_id);
+u32 battle_effect_ability_has_no_file(s32 ability_id);
 void battle_effect_play(void);
 void battle_effect_replace_flags_0006(struct effect_flag_prefix* object, s32 value);
 void battle_effect_reset_subsystems(void);
@@ -1975,7 +1975,7 @@ extern u8 g_battle_effect_weapon_projectile_animations[];
  * sprite palette (the secondary effect's parameter). */
 extern u8 g_battle_effect_zodiac_poof_animations[];
 
-s32 battle_noop_801b2968(void);
+s32 battle_effect_unused_07_secondary_handler(void);
 s32 battle_noop_801b2bfc(void);
 s32 battle_noop_801b2c04(void);
 s32 battle_noop_801b2e60(void);

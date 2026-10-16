@@ -237,7 +237,7 @@ void wldcore_gfx_set_display_rect(s32 buffer_index, RECT* rect) {
  * and the newly pressed ones (both 0 while MAIN_SYSTEM_FLAG_INPUT_BLOCKED is
  * set). Exactly L1 + R1 + Select + Start restores the sound volumes and
  * resets the game. */
-void wldcore_reset_game_if_special_keycode_is_pressed(void) {
+void wldcore_input_update_buttons_and_check_game_reset(void) {
     u32 input;
     u32 previous;
 
@@ -768,7 +768,7 @@ party_unit_t* wldcore_get_party_unit(s32 party_index) {
 
 /* Writes one nine-bit record: bits 0-4 from source->day, bits 5-8 from
  * source->month. Records are packed nine bits apart in the bit array. */
-void wldcore_write_nine_bit_record(u32* bits, s32 record, calendar_date_t* source) {
+void wldcore_calendar_write_date(u32* bits, s32 record, calendar_date_t* source) {
     s32 base = record * 9;
     s32 mask;
     s32 i;
@@ -793,7 +793,7 @@ void wldcore_write_nine_bit_record(u32* bits, s32 record, calendar_date_t* sourc
  * Records are packed nine bits apart in the bit array, matching
  * wldcore_write_nine_bit_record. A field that decodes to zero or beyond its
  * range falls back to 1. */
-void wldcore_read_nine_bit_record(u32* bits, s32 record, calendar_date_t* dest) {
+void wldcore_calendar_read_date(u32* bits, s32 record, calendar_date_t* dest) {
     s32 base = record * 9;
     s32 mask;
     s32 i;

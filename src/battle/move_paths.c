@@ -447,7 +447,7 @@ static void battle_move_init_knockback(battle_unit_t* unit) {
 /* Knockback: copy the destination tile that the attacker's record (src) holds for
  * its target into the target's (dst) movement destination and start the target's
  * one-step knockback path. */
-void battle_move_transfer_target_coordinates(const battle_unit_t* src, battle_unit_t* dst) {
+void battle_move_start_knockback(const battle_unit_t* src, battle_unit_t* dst) {
     dst->movement.destination_x = src->strike.target_new_x;
     dst->movement.destination_y = src->strike.target_new_y;
     dst->movement.destination_z = src->strike.target_new_map_level;
@@ -1160,7 +1160,7 @@ void battle_camera_update_map_pan(void) {
 /* Set the destination of a left turn (falling yaw) and record the yaw it
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
-static void battle_camera_rotate_left(s32 target_angle) {
+static void battle_camera_set_left_turn_destination(s32 target_angle) {
     g_battle_previous_camera_yaw = g_battle_camera_render_state.vy & 0xfe00;
     g_battle_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
@@ -1172,13 +1172,13 @@ static void battle_camera_rotate_left(s32 target_angle) {
 static void battle_camera_start_rotation_left(s32 target_angle) {
     g_battle_camera_rotation_action = CAMERA_ROTATION_LEFT;
     g_battle_camera_rotation_increment = 1;
-    battle_camera_rotate_left(target_angle);
+    battle_camera_set_left_turn_destination(target_angle);
 }
 
 /* Set the destination of a right turn (rising yaw) and record the yaw it
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
-static void battle_camera_rotate_right(s32 target_angle) {
+static void battle_camera_set_right_turn_destination(s32 target_angle) {
     g_battle_previous_camera_yaw = g_battle_camera_render_state.vy & 0xfe00;
     g_battle_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
@@ -1190,7 +1190,7 @@ static void battle_camera_rotate_right(s32 target_angle) {
 static void battle_camera_start_rotation_right(s32 target_angle) {
     g_battle_camera_rotation_action = CAMERA_ROTATION_RIGHT;
     g_battle_camera_rotation_increment = 1;
-    battle_camera_rotate_right(target_angle);
+    battle_camera_set_right_turn_destination(target_angle);
 }
 
 /* Start an automatic turn of angle yaw units (0x400 is a quarter turn;
@@ -1239,7 +1239,7 @@ void battle_camera_update_rotation(void) {
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_L1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
-                    battle_camera_rotate_left((angle & 0xFE0) - 0x400);
+                    battle_camera_set_left_turn_destination((angle & 0xFE0) - 0x400);
                 }
             } else {
                 g_battle_camera_rotation_action = CAMERA_ROTATION_NONE;
@@ -1258,7 +1258,7 @@ void battle_camera_update_rotation(void) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
                     /* Retail continues the right turn through rotate_left. Harmless: the two
                      * differ only for a destination on an axis, which this one never is. */
-                    battle_camera_rotate_left((angle & 0xFE0) + 0x400);
+                    battle_camera_set_left_turn_destination((angle & 0xFE0) + 0x400);
                 }
             } else {
                 g_battle_camera_rotation_action = CAMERA_ROTATION_NONE;
@@ -1271,7 +1271,7 @@ void battle_camera_update_rotation(void) {
         return;
     }
     if (g_battle_camera_rotation_increment < 0x30) {
-        g_battle_camera_rotation_increment = (g_main_system_animation_speed * 2) + g_battle_camera_rotation_increment;
+        g_battle_camera_rotation_increment = (g_main_system_vsync_interval * 2) + g_battle_camera_rotation_increment;
     }
 }
 
@@ -1396,7 +1396,7 @@ void battle_camera_update_zoom(void) {
         return;
     }
     if (increment < 0x300) {
-        g_battle_camera_zoom_increment = g_main_system_animation_speed * 4 + increment;
+        g_battle_camera_zoom_increment = g_main_system_vsync_interval * 4 + increment;
     }
 }
 
@@ -1509,7 +1509,7 @@ void battle_camera_update_tilt(void) {
         return;
     }
     if (g_battle_camera_tilt_increment < 0x30) {
-        g_battle_camera_tilt_increment += g_main_system_animation_speed * 2;
+        g_battle_camera_tilt_increment += g_main_system_vsync_interval * 2;
     }
 }
 

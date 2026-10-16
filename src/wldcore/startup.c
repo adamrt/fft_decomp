@@ -109,7 +109,7 @@ s32 wldcore_entrypoint(void) {
 static void wldcore_process_frame_gate(void) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) == 0
         && (g_wldcore_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) != 0) {
-        wldcore_init_core();
+        wldcore_gfx_capture_map_backdrop();
     }
     g_wldcore_previous_system_flags = g_main_system_flags;
 }
@@ -118,7 +118,7 @@ static void wldcore_process_frame_gate(void) {
  * records once, store the drawn image in g_wldcore_scratch_buffer (which
  * wldcore_gfx_draw_world_frame uploads behind each later frame), then draw
  * the menu frame over it. */
-void wldcore_init_core(void) {
+void wldcore_gfx_capture_map_backdrop(void) {
     RECT rect;
     s32 count;
 
@@ -187,7 +187,7 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_restore_previous_stack();
     DrawSync(0);
-    wldcore_reset_game_if_special_keycode_is_pressed();
+    wldcore_input_update_buttons_and_check_game_reset();
     VSync(0);
     GsSwapDispBuff();
     GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
@@ -216,7 +216,7 @@ void wldcore_gfx_draw_world_frame(void) {
     wldcore_fade_draw_screen_overlays();
     wldcore_restore_previous_stack();
     DrawSync(0);
-    wldcore_reset_game_if_special_keycode_is_pressed();
+    wldcore_input_update_buttons_and_check_game_reset();
     VSync(0);
     GsSwapDispBuff();
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE)) {
@@ -232,12 +232,12 @@ static void wldcore_init_subsystems(void) {
     SetDispMask(0);
     wldcore_init_world_map_state();
     wldcore_input_init_repeat_state();
-    wldcore_load_scratch_data_blocking();
+    wldcore_map_load_texture();
     wldcore_gfx_init_subsystem();
     window_init_record_pools_variant();
     wldcore_map_init_tile_atlas();
-    wldcore_load_formation_unit_name_and_face();
-    wldcore_map_color_and_draw_dots();
+    wldcore_system_init_world_menus_and_date();
+    wldcore_map_init_dots();
     wldcore_init_stub();
     wldcore_map_init_location_marker_and_camera();
     wldcore_menu_reset_window_list_and_store_origin();
@@ -403,11 +403,11 @@ static void wldcore_init_world_map_state(void) {
             date.day = 1;
             for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
                 script_set_variable(EVENT_SCRIPT_VAR_TREASURE_FIRST + i, 1);
-                wldcore_write_nine_bit_record(g_main_treasure_acquisition_date_bits, i, &date);
+                wldcore_calendar_write_date(g_main_treasure_acquisition_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
                 script_set_variable(EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST + i, 1);
-                wldcore_write_nine_bit_record(g_main_land_discovery_date_bits, i, &date);
+                wldcore_calendar_write_date(g_main_land_discovery_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++)
                 script_set_variable(EVENT_SCRIPT_VAR_PROPOSITION_FIRST + i, 4);
@@ -457,7 +457,7 @@ static void wldcore_init_runtime_state(void) {
     count = GsGetActiveBuff();
     g_active_graphics_buffer_index = count;
     GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + count * 0xE000);
-    wldcore_init_core();
+    wldcore_gfx_capture_map_backdrop();
     VSync(0);
     ResetGraph(1);
     GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);

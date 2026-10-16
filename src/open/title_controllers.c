@@ -81,7 +81,7 @@ void open_file_load_end_movie_graphics(void) {
 /* Upload the two TIMs at sectors 0x43 and 0x54 of OPNTEX.BIN: the text pages at
  * VRAM (256, 256) and (320, 256) that the new-game prologue draws its lines from.
  * The only caller is open_title_start_new_game_transition. */
-static void open_file_load_sound_menu_textures(void) {
+static void open_file_load_prologue_text_pages(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
     file_wait_then_build_header(header, 0x150a0, 0x11, g_open_file_destination);
@@ -711,7 +711,7 @@ void open_title_start_new_game_transition(void) {
     suzuki_sound_set_master_volume(0, 1);
     main_sound_set_current_music_track(MAIN_MUSIC_NEW_GAME);
     suzuki_sound_set_master_volume(0x3fff, 5);
-    open_file_load_sound_menu_textures();
+    open_file_load_prologue_text_pages();
     open_file_build_openbk_header(1, g_open_file_destination);
     file_wait_for_pending_variant();
     open_gfx_init_transition_request(12, 3, g_open_new_game_transition_entries);
@@ -902,7 +902,7 @@ static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     *substitution = menu->day;
     window_display_text_entry_variant(index, 0xB802, position, g_open_birthday_window_image);
 
-    open_birthday_load_window_image(index, (u32*)g_open_birthday_window_image);
+    open_gfx_load_window_record_image(index, (u32*)g_open_birthday_window_image);
 
     translation = g_open_gfx_record_translation;
     translation += index;
@@ -1226,7 +1226,7 @@ void open_gfx_init_window_frame_record(s32 index, RECT quad, s32 depth, u16* ima
  * The record's quad is in 4-bit texels within its texture page, four to a
  * VRAM halfword, so the image goes to x = quad.x / 4 + 0x180 + 64 * depth
  * (texture page 6 + depth) with width quad.w / 4. */
-void open_birthday_load_window_image(s32 record_index, u32* image) {
+void open_gfx_load_window_record_image(s32 record_index, u32* image) {
     RECT destination;
     s32 x;
     s32 depth;

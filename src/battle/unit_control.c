@@ -82,8 +82,8 @@ void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id) {
 
 /* battle_unit_set_idle_animation_for_movement by runtime id. No retail code
  * calls it. */
-void battle_unit_set_movement_idle_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_idle_animation_for_movement(battle_unit_get_by_runtime_id(runtime_id));
+void battle_unit_set_walk_animation_by_runtime_id(u32 runtime_id) {
+    battle_unit_set_walk_animation(battle_unit_get_by_runtime_id(runtime_id));
 }
 
 /* battle_unit_set_animation_based_on_status by runtime id, for event scripts. */
@@ -289,7 +289,7 @@ void battle_state_start_change_map_jump_in(s32 duration) {
 /* Leave the battle for the world map: enter CloseBattle at two vertical blanks
  * per frame with a fade step of 0x100 / duration (0x100 for a duration of 0). */
 void battle_state_start_close_battle(s32 duration) {
-    g_main_system_animation_speed = 2;
+    g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_CLOSE_BATTLE;
     g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
     g_main_system_game_flow_state = MAIN_GAME_FLOW_WORLD;
@@ -416,7 +416,7 @@ s32 battle_move_start_unit_walk_to(
 /* Start a unit on a one-step path: a jump of jump_length extra tiles in `direction` on its own
  * layer, at full speed. The Jump event instruction uses it. A missing unit raises pointer
  * exception 12 and returns 0. */
-s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_length) {
+s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {

@@ -12,7 +12,7 @@
 
 static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
 
-void main_gfx_call_build_zodiac_bin(zodiac_draw_context_t* context, POLY_FT4* poly) {
+void main_gfx_call_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
     menu_build_zodiac_primitives(context, poly);
 }
 
@@ -54,7 +54,7 @@ void main_overlay_open_world_bin(s32 mode) {
 static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode) {
     main_file_load_descriptor_t* descriptor = &g_main_file_cd_state;
 
-    main_file_build_header(descriptor, sector, sectors, destination, loading_display_mode);
+    main_file_request_read(descriptor, sector, sectors, destination, loading_display_mode);
     while (g_main_file_still_loading != 0) {
         main_file_poll_load(descriptor);
         VSync(0);

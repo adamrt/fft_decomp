@@ -166,7 +166,7 @@ s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s
     s32 i;
 
     for (; slot < PARTY_ROSTER_SLOT_COUNT; slot++) {
-        if (main_unit_init_job_data(&unit, slot, 1) != 0) {
+        if (main_unit_init_from_party_slot(&unit, slot, 1) != 0) {
             continue;
         }
         world_formation_build_unit_record(&unit, &g_world_unit_records[count], main_party_get_unit(slot));
@@ -280,7 +280,7 @@ void world_formation_save_records_to_party(void) {
             bcopy(&g_world_unit_pointers[i]->job_points.total, &party->career.job_points.total,
                 sizeof(party->career.job_points.total));
         }
-        main_unit_init_job_data(&unit, slot, 1);
+        main_unit_init_from_party_slot(&unit, slot, 1);
         world_formation_build_unit_record(&unit, g_world_unit_pointers[i], party);
     }
 }

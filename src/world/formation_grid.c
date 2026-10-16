@@ -88,7 +88,7 @@ void world_menu_start_equipment_and_ability_panel_thread(s32 enabled) {
 }
 
 /* Request a redraw from all eight formation panel threads. */
-void world_menu_enable_all_order_entries(void) {
+void world_menu_request_unit_panel_redraw(void) {
     g_menu_status_display_thread_params.redraw_request = 1;
     g_menu_comparison_display_thread_params.redraw_request = 1;
     g_world_equipment_ability_panel_thread_params.redraw_request = 1;

@@ -36,7 +36,7 @@ static void wldcore_list_open_active_propositions(void);
 static void wldcore_list_open_brave_story_propositions(void);
 static void wldcore_list_open_formation_tutorials(void);
 static void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset);
-static void wldcore_list_open_tutorial_mask_1_entries(void);
+static void wldcore_list_open_battle_tutorials(void);
 static void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant);
 static void wldcore_menu_push_participant_list_level(s32 proposition);
 static void wldcore_menu_push_proposition_attempt_detail_level(s32 value);
@@ -656,7 +656,7 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
     u16 maximum_hp;
     u16 maximum_mp;
 
-    if (main_unit_init_job_data(&g_wldcore_status_unit, party_index, 1) == -1) {
+    if (main_unit_init_from_party_slot(&g_wldcore_status_unit, party_index, 1) == -1) {
         return;
     }
     unit = &g_wldcore_status_unit;
@@ -1000,7 +1000,7 @@ static void wldcore_menu_push_proposition_attempt_detail_level(s32 value) {
 
     file_wait_for_pending_variant();
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_index = value;
-    wldcore_read_nine_bit_record(g_main_proposition_last_attempt_date_bits, value, &date);
+    wldcore_calendar_read_date(g_main_proposition_last_attempt_date_bits, value, &date);
     g_wldcore_scrollable_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
@@ -1285,7 +1285,7 @@ void wldcore_menu_step_screen_transition_level(wldcore_menu_screen_transition_le
             g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1]
                                                 .list_window.frame_render]
                 .flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-            wldcore_list_open_tutorial_mask_1_entries();
+            wldcore_list_open_battle_tutorials();
             break;
         case WLDCORE_MENU_LEVEL_TREASURE_DETAIL:
             thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
@@ -1526,7 +1526,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         case WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES:
             wldcore_window_publish_slot_b8dd(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
-            wldcore_list_open_tutorial_mask_1_entries();
+            wldcore_list_open_battle_tutorials();
             return;
         case WLDCORE_TUTORIAL_CATEGORY_ROW_TOPICS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_TUTORIAL_TOPICS);
@@ -1684,7 +1684,7 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
  * flagged 8 when bit 32 + row of 0x8004c6bc is set, shown at (0x54, 0x50)
  * with width 0x8c; appends its record tagged 0x2d. Sibling of
  * wldcore_list_open_formation_tutorials. */
-static void wldcore_list_open_tutorial_mask_1_entries(void) {
+static void wldcore_list_open_battle_tutorials(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s32 i;

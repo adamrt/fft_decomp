@@ -57,7 +57,7 @@ static void battle_status_disable_acting(unit_stats_t* unit) {
  * unit's x and position (y in the low byte, the layer in bit 15). */
 move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
     move_find_result_data_t* find_result
-        = battle_map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation);
+        = battle_map_get_move_find_result(unit->x, unit->position.y, unit->position.higher_elevation);
     u8 item_id;
 
     if (main_util_roll_pass_fail(0x64, 0x64 - unit->brave) == 0) {
@@ -80,7 +80,7 @@ move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
  * 3 steel needle) unless the trap is disabled. The final flag
  * update must go through a pointer to keep the target's register address.
  */
-move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
+move_find_result_data_t* battle_map_get_move_find_result(s32 x, u8 y, u8 layer) {
     map_move_find_item_entry_t* tile;
     s32 unit;
     s32 i;
@@ -522,7 +522,7 @@ void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) 
 /* Strip a unit of every status: queue each current status's display flag off, then zero the
  * innate, immunity and current sets with the 16 status CTs that follow them (one 0x1F-byte clear
  * from status_sets) and the inflicted statuses. Used before a Morbol transformation. */
-void battle_status_reapply_active_flags(unit_stats_t* unit) {
+void battle_status_clear_all(unit_stats_t* unit) {
     s32 i;
     s32 battle_id = unit->battle_id;
 

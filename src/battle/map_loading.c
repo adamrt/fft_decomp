@@ -68,7 +68,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             }
             g_battle_map_data_load_buffer = main_heap_alloc(0x20000);
             if (g_battle_map_data_load_buffer == 0) {
-                main_system_handle_malloc_exception(2, 0x3c2);
+                main_system_report_error(2, 0x3c2);
             }
             battle_map_load_gns_and_move_find_items(map_id & 0xffff);
             g_battle_map_resource_load_state = MAP_LOAD_STATE_GNS_FILE;
@@ -84,7 +84,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             }
             g_battle_map_data_load_buffer = main_heap_alloc(0x20000);
             if (g_battle_map_data_load_buffer == 0) {
-                main_system_handle_malloc_exception(2, 0x3c2);
+                main_system_report_error(2, 0x3c2);
             }
             g_battle_map_texture_quarter_0_pending = 0;
             g_battle_map_texture_quarter_1_pending = 0;
@@ -265,7 +265,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                     g_battle_map_resource_load_state = MAP_LOAD_STATE_RESOURCE_FILE;
                 } else if (g_battle_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type
                     != GNS_RECORD_NONE) {
-                    main_system_handle_malloc_exception(2, 0x3cb);
+                    main_system_report_error(2, 0x3cb);
                     g_battle_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type = GNS_RECORD_NONE;
                 } else if (g_battle_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type
                     != GNS_RECORD_NONE) {
@@ -469,7 +469,7 @@ s32 battle_map_load_alternate_mesh(s32 palette_mode) {
         }
         g_battle_map_mesh_load_buffer = main_heap_alloc(0x20000);
         if (g_battle_map_mesh_load_buffer == 0) {
-            main_system_handle_malloc_exception(2, 0x3c9);
+            main_system_report_error(2, 0x3c9);
         }
         battle_map_start_file_load(g_battle_map_directory_path, &g_battle_map_selected_mesh_record.load_info,
             g_battle_map_mesh_load_buffer, MAP_RESOURCE_MESH_ALTERNATE);

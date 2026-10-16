@@ -370,7 +370,7 @@ void wldcore_proposition_submit_marker_request(GsOT* ot) {
 
 /* Init step: load WORLD's menu text and unit portraits, build the formation unit name strings,
  * then apply and clear any day advance pending in EVENT_SCRIPT_VAR_DATE_ADVANCE. */
-void wldcore_load_formation_unit_name_and_face(void) {
+void wldcore_system_init_world_menus_and_date(void) {
     s32 value;
 
     world_menu_load_text_1bd8_with_face();
@@ -1110,7 +1110,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
     }
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_DESTINATION) {
         location = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
-        wldcore_init_core();
+        wldcore_gfx_capture_map_backdrop();
         wldcore_menu_dispatch_resume_handler();
         if (g_wldcore_map_projection_state.marker.kind != location) {
             wldcore_location_process_entry(g_wldcore_map_projection_state.marker.kind, location);
@@ -2312,11 +2312,11 @@ void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level) {
         level->entries[1] = WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS;
         level->entry_count++;
     }
-    if (wldcore_proposition_count_completed(g_wldcore_map_projection_state.marker.kind) != 0) {
+    if (wldcore_proposition_count_returned(g_wldcore_map_projection_state.marker.kind) != 0) {
         level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS;
         level->entry_count++;
     }
-    if (g_main_save_proposition_count != wldcore_proposition_count_completed(-1)) {
+    if (g_main_save_proposition_count != wldcore_proposition_count_returned(-1)) {
         level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_PROPOSITIONS;
         level->entry_count++;
     }

@@ -132,7 +132,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                 world_menu_run_unit_status_banner_countdown(0, 0);
                 menu_input_clear_state();
             }
-            world_menu_update_thread_7_idle_countdown();
+            world_input_update_lockout_timer();
             world_gfx_update_fade_in_tile();
             if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
                 world_menu_start_description_text_thread(DIALOG_POSITION_CENTER);
@@ -607,7 +607,7 @@ void world_formation_stage_selected_unit(void) {
             = (g_world_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) ? MENU_STATUS_PANEL_HIDDEN
                                                                                            : 0;
     }
-    world_menu_enable_all_order_entries();
+    world_menu_request_unit_panel_redraw();
 }
 
 /*
@@ -729,7 +729,7 @@ void world_formation_recalculate_selected_unit_stats(void) {
 
     g_world_formation_selected_unit_index_latch = g_unit_selected_index;
     roster_slot = g_world_unit_pointers[g_unit_selected_index]->identity.roster_slot;
-    main_unit_init_job_data(&unit, roster_slot, 1);
+    main_unit_init_from_party_slot(&unit, roster_slot, 1);
     for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
         unit.equipment[i] = ITEM_ID_NONE;
     }
@@ -772,5 +772,5 @@ void world_formation_recalculate_selected_unit_stats(void) {
     item_sum_equipment_stat_details(
         &g_world_selected_unit_stat_detail, g_world_unit_pointers[g_unit_selected_index]->equipment);
     world_formation_copy_unit_to_temp(g_unit_selected_index, WORLD_FORMATION_PREVIEW_UNIT_INDEX);
-    world_menu_enable_all_order_entries();
+    world_menu_request_unit_panel_redraw();
 }

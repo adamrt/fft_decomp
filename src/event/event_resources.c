@@ -1064,7 +1064,7 @@ void menu_build_idle_action_menu(s32 menu_id) {
  * open, the camera moves, a companion overlay is busy or that slot runs. While a menu other than
  * the mini menu is up it also sets g_menu_building_thread_started, so the next idle action menu is
  * skipped. */
-void menu_start_building_thread(void) {
+void menu_start_help_menu_thread(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU) != 0 || thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         if (g_menu_current_id != BATTLE_MENU_ID_MINI_MENU) {
             g_menu_building_thread_started = 1;
@@ -1122,7 +1122,7 @@ s32 map_return_zero_1(void) {
 /* Mark map-data loading complete after one yield, then exit after another. */
 void map_data_load_complete_thread(void) {
     thread_yield();
-    battle_map_mark_data_load_complete();
+    battle_deployment_mark_finished();
     thread_yield();
     thread_exit_current();
 }

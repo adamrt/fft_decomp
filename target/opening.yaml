@@ -50,9 +50,9 @@ functions:
   - {addr: 0x8006854c, size: 160, name: open_menu_update_world_formation, hash: b27c035b144dee4f, unit: movies}
   - {addr: 0x800685ec, size: 76, name: unit_birthday_calculate_day_of_year, hash: e796a8582427e794, source: src/wldcore/unit_birthday_calculate_day_of_year.c}
   - {addr: 0x80068638, size: 76, name: open_sound_set_cd_mix_and_volume, hash: 3fcd975cc8b2da0c, unit: init}
-  - {addr: 0x80068684, size: 88, name: open_movie_init_and_stream_opening, hash: 7f2fe3e68306a213, unit: init}
+  - {addr: 0x80068684, size: 88, name: open_system_init_title_sequence, hash: 7f2fe3e68306a213, unit: init}
   - {addr: 0x800686dc, size: 132, name: open_movie_init_and_play_end, hash: c5005cd2d64378db, unit: init}
-  - {addr: 0x80068760, size: 76, name: open_gfx_restore_frame_vram_page, hash: 74303d09981cd6c2, unit: init}
+  - {addr: 0x80068760, size: 76, name: open_gfx_restore_frame_bin_page, hash: 74303d09981cd6c2, unit: init}
   - {addr: 0x800687ac, size: 832, name: open_gfx_init_screen_environments, hash: 00685f629e5f306d, unit: init}
   - {addr: 0x80068aec, size: 136, name: open_system_init_runtime_state, hash: 1795eb2597584b2e, unit: init}
   - {addr: 0x80068b74, size: 60, name: open_gfx_clear_and_draw_current_frame, hash: 22d70e319b6161e8, unit: init}
@@ -68,7 +68,7 @@ functions:
   - {addr: 0x80069a34, size: 92, name: file_wait_for_pending_variant, hash: 5e8c5303cf510992, unit: file_wait}
   - {addr: 0x80069a90, size: 220, name: open_file_load_main_menu_graphics, hash: c9dcd99baa6edbc0, unit: title_controllers}
   - {addr: 0x80069b6c, size: 204, name: open_file_load_end_movie_graphics, hash: 7f816e64bff3ea9a, unit: title_controllers}
-  - {addr: 0x80069c38, size: 144, name: open_file_load_sound_menu_textures, hash: 2e359e04e3a564a1, unit: title_controllers}
+  - {addr: 0x80069c38, size: 144, name: open_file_load_prologue_text_pages, hash: 2e359e04e3a564a1, unit: title_controllers}
   - {addr: 0x80069cc8, size: 112, name: open_file_build_openbk_header, hash: 2fab328389970f4a, unit: title_controllers}
   - {addr: 0x80069d38, size: 68, name: open_file_get_cd_sync_state_delta, hash: 1656986d7649ae48, unit: title_controllers}
   - {addr: 0x80069d7c, size: 228, name: open_gfx_load_opntex_into_frame_buffer, hash: 590cf49a34430f90, unit: title_controllers}
@@ -94,11 +94,11 @@ functions:
   - {addr: 0x8006c0d0, size: 916, name: open_birthday_push_confirmation_controller, hash: 16fd129a48959bf2, unit: title_controllers}
   - {addr: 0x8006c464, size: 748, name: open_birthday_handle_confirmation_input, hash: f574d10bdce9561d, unit: title_controllers}
   - {addr: 0x8006c750, size: 344, name: open_gfx_init_window_frame_record, hash: 9fddadbd2cffc53b, unit: title_controllers}
-  - {addr: 0x8006c8a8, size: 196, name: open_birthday_load_window_image, hash: bdab620f029fd3c1, unit: title_controllers}
+  - {addr: 0x8006c8a8, size: 196, name: open_gfx_load_window_record_image, hash: bdab620f029fd3c1, unit: title_controllers}
   - {addr: 0x8006c96c, size: 88, name: window_display_text_entry_variant, hash: 5dccdaeb10297930, unit: window_text_records}
   - {addr: 0x8006c9c4, size: 104, name: open_text_measure_menu_image, hash: 1dee4681dccf0eb6, unit: window_text_records}
   - {addr: 0x8006ca2c, size: 212, name: window_init_text_record_variant, hash: 5f2251260b376d41, unit: window_text_records}
-  - {addr: 0x8006cb00, size: 248, name: open_menu_init_render_record_fields, hash: e55c249f3c899201, unit: title_script}
+  - {addr: 0x8006cb00, size: 248, name: open_gfx_init_vram_render_record, hash: e55c249f3c899201, unit: title_script}
   - {addr: 0x8006cbf8, size: 444, name: open_menu_start_music_test_list_thread, hash: a1bb85931a6abb8e, unit: title_script}
   - {addr: 0x8006cdb4, size: 316, name: open_menu_start_music_test_controller, hash: 45eaf45a7a3b75ee, unit: title_script}
   - {addr: 0x8006cef0, size: 876, name: open_menu_update_music_test, hash: c7076123a75c7032, unit: title_script}
@@ -107,7 +107,7 @@ functions:
   - {addr: 0x8006d3cc, size: 180, name: open_movie_stream_title_demo_and_push_controller, hash: 29c7eb100bdbc02b, unit: title_script}
   - {addr: 0x8006d480, size: 164, name: open_movie_start_fftst_or_skip_controller, hash: 4e72507cef1a9abd, unit: title_script}
   - {addr: 0x8006d524, size: 308, name: open_title_start_new_game_or_clear_file_buffer, hash: efa74633bab45d83, unit: title_script}
-  - {addr: 0x8006d658, size: 340, name: open_title_update_exit_transition, hash: 7c3ab8fe1d7d5d9c, unit: title_script}
+  - {addr: 0x8006d658, size: 340, name: open_title_update_card_warning, hash: 7c3ab8fe1d7d5d9c, unit: title_script}
   - {addr: 0x8006d7ac, size: 64, name: open_gfx_init_transition_request, hash: d59678a277450164, unit: title_script}
   - {addr: 0x8006d7ec, size: 8, name: open_gfx_transition_finished_stub, hash: 6d64edf91449c1b1, unit: title_script}
   - {addr: 0x8006d7f4, size: 912, name: open_gfx_update_transition_sequence, hash: 7bbe865958bd3a67, unit: title_script}
@@ -115,7 +115,7 @@ functions:
   - {addr: 0x8006e068, size: 212, name: open_gfx_copy_file_image_to_210x180_buffer, hash: 5e7217187c9c4567, unit: title_script}
   - {addr: 0x8006e13c, size: 436, name: open_gfx_step_image_crossfade, hash: 2470d3b4a852e44e, unit: title_script}
   - {addr: 0x8006e2f0, size: 1264, name: open_script_init_state, hash: c000e380ea2213d8, unit: title_script}
-  - {addr: 0x8006e7e0, size: 200, name: open_script_init_and_dispatch_entries, hash: 06563bf022b02028, unit: title_script}
+  - {addr: 0x8006e7e0, size: 200, name: open_script_run_frame, hash: 06563bf022b02028, unit: title_script}
   - {addr: 0x8006e8a8, size: 8, name: open_script_add_pointer_offset, hash: 6e3d0af1356c7afe, unit: title_script}
   - {addr: 0x8006e8b0, size: 748, name: open_script_draw_text_records, hash: a86705083fc5f375, unit: title_script}
   - {addr: 0x8006eb9c, size: 1432, name: open_script_build_text_record, hash: 54e7999ae4054929, unit: title_script}
@@ -129,7 +129,7 @@ functions:
   - {addr: 0x8006f988, size: 136, name: open_movie_finish_fftend_controller_if_ready_or_skipped, hash: df1c60f300df0a2c, unit: title_script}
   - {addr: 0x8006fa10, size: 144, name: open_script_push_controller, hash: d38b74485501d567, unit: title_script}
   - {addr: 0x8006faa0, size: 88, name: open_script_update_controller, hash: c31c968e8b96aab5, unit: title_script}
-  - {addr: 0x8006faf8, size: 72, name: open_opcode_toggle_control, hash: 5abc662795697b2e, unit: title_script}
+  - {addr: 0x8006faf8, size: 72, name: open_opcode_end_script, hash: 5abc662795697b2e, unit: title_script}
   - {addr: 0x8006fb40, size: 548, name: open_opcode_create_positioned_text_record, hash: 79ffee469a0e46ff, unit: title_script}
   - {addr: 0x8006fd64, size: 56, name: open_opcode_set_timing_step, hash: 022baf84860eb042, unit: title_script}
   - {addr: 0x8006fd9c, size: 68, name: open_opcode_start_overlay_fade_out, hash: 8b4cecdc94072c05, unit: title_script}

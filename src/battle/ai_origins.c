@@ -1361,7 +1361,7 @@ s32 battle_ai_simulate_action_and_score(void) {
         if (ai->current_action.command.skillset_id != 0
             && ai->current_action.command.skillset_id != SKILLSET_ID_DEFEND) {
             action = &ai->current_action.command;
-            if (battle_action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
+            if (battle_action_commit_attack_preparation(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
                 && battle_ai_simulate_action_hits(action) == 0) {
                 battle_ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
                 ai->resume_pending = 0;
@@ -1375,7 +1375,7 @@ s32 battle_ai_simulate_action_and_score(void) {
         if (ai->current_action.command.skillset_id != 0
             && ai->current_action.command.skillset_id != SKILLSET_ID_DEFEND) {
             action = &ai->current_action.command;
-            if (battle_action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
+            if (battle_action_commit_attack_preparation(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
                 && battle_ai_simulate_action_hits(action) == 0) {
                 battle_ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
                 ai->resume_pending = 0;
@@ -1413,7 +1413,7 @@ s32 battle_ai_simulate_action_and_score(void) {
         if (status == BATTLE_TURN_EVENT_NONE)
             break;
         if (status == BATTLE_TURN_EVENT_ACTION_RESULT) {
-            battle_action_finalize_attack_and_flag_reactions(unit_index);
+            battle_action_apply_target_result(unit_index);
         } else if (status == BATTLE_TURN_EVENT_ABILITY_READY) {
             if (battle_ai_simulate_action_hits(&unit->action_command) == 0) {
                 g_battle_between_turn_state = ai->saved_between_turn_state;
@@ -1699,7 +1699,7 @@ static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mo
                         continue;
                     }
                 }
-                battle_action_finalize_attack_and_flag_reactions(target_id);
+                battle_action_apply_target_result(target_id);
                 if (ai->hit_counter == 0xff) {
                     continue;
                 }

@@ -1182,7 +1182,7 @@ void battle_unit_mount_rider_onto_unit(battle_unit_t* rider, battle_unit_t* moun
 void battle_unit_set_map_coords_after_death_dismount(battle_unit_t* unit);
 battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stats_t* unit);
 void battle_unit_mount_onto_pending_mount(battle_unit_t* unit);
-s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_length);
+s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length);
 
 /* battle_unit_animation_e of each item type's attack at a higher, a level and a lower target. */
 extern u8 g_battle_weapon_attack_animations[][3];
@@ -1226,7 +1226,7 @@ void battle_unit_set_facing_update_suppression(u32 runtime_id);
 s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id);
 void battle_unit_set_animation_based_on_mounted_state(battle_unit_t* unit);
 void battle_unit_set_animation_based_on_status(battle_unit_t* unit);
-void battle_unit_set_idle_animation_for_movement(battle_unit_t* unit);
+void battle_unit_set_walk_animation(battle_unit_t* unit);
 void battle_unit_set_level_up_animation(battle_unit_t* unit);
 void unit_set_facing(s32 runtime_id, s32 facing);
 void battle_unit_snap_all_facings_to_quadrants(void);

@@ -745,7 +745,7 @@ void script_focus(event_focus_parameters_t* parameters) {
     if (first == EVENT_RUNTIME_ID_NONE || second == EVENT_RUNTIME_ID_NONE) {
         ((event_camera_instruction_t*)(cursor - offsetof(event_camera_instruction_t, parameters)))->opcode
             = EVENT_OPCODE_CAMERA_DISABLED;
-        main_system_handle_malloc_exception(7, 0);
+        main_system_report_error(7, 0);
         return;
     }
     unit_copy_world_coords_to_vector(first, (VECTOR*)coords[0]);

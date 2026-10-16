@@ -667,7 +667,7 @@ extern s32 g_main_system_play_time_seconds;
 /* main_system_flags_e bits; cleared by main_save_init_data_tables. */
 extern u32 g_main_system_flags;
 extern s32 g_main_system_session_frames;
-extern s32 g_main_system_animation_speed;
+extern s32 g_main_system_vsync_interval;
 extern s32 g_main_system_battle_frame_hsync_count;
 extern s32 g_main_system_battle_frame_hsync_count_max;
 extern s32 g_main_debug_display_enabled;
@@ -682,7 +682,7 @@ void main_system_report_stub(s32 category, s32 code);
 void main_restore_game_loop_stack_pointer(u32* source);
 void main_system_handle_error(int error_code);
 void main_system_handle_battle_load_exception(s32 value);
-void main_system_handle_malloc_exception(s32 allocator_id, s32 error_code);
+void main_system_report_error(s32 allocator_id, s32 error_code);
 void main_system_handle_pointer_exception(int error_code);
 void main_system_reset_game(void);
 void main_system_store_stack_pointer(u32* destination);

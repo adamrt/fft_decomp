@@ -97,7 +97,7 @@ void window_init_text_record_variant(s32 record_index, RECT bounds, s32 coordina
     if (text_id != 0) {
         window_display_text_entry_variant(record_index, text_id, text_origin, image);
     }
-    open_birthday_load_window_image(record_index, (u32*)image);
+    open_gfx_load_window_record_image(record_index, (u32*)image);
     g_open_gfx_render_records_56[record_index].flags |= WORLD_RENDER_RECORD_POP_IN;
 }
 #endif

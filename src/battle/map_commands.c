@@ -38,14 +38,14 @@ s32 battle_state_enter_effect_playback(void) {
     s32 previous_animation_speed;
 
     /* The target loads no argument; the parameter is the $a0 value unhandled states return. */
-    if (battle_effect_init_data() != 0) {
+    if (battle_effect_update_file_load() != 0) {
         return 1;
     }
     battle_effect_play();
     previous_state = g_battle_game_state;
-    previous_animation_speed = g_main_system_animation_speed;
+    previous_animation_speed = g_main_system_vsync_interval;
     g_battle_game_state = BATTLE_GAME_STATE_EFFECT;
-    g_main_system_animation_speed = 2;
+    g_main_system_vsync_interval = 2;
     g_battle_gfx_screen_color_modulation_fade_frames = 0;
     g_battle_camera_screen_offset_countdown = 0;
     g_battle_camera_rotation_countdown = 0;
@@ -82,15 +82,15 @@ void battle_menu_leave_status_screen_selection(void) {
 
 /* Return g_main_system_animation_speed, the vertical blanks per frame (1, or 2 during effects and
  * events); event waits divide their frame counts by it. */
-s32 battle_state_get_animation_speed(void) {
-    return g_main_system_animation_speed;
+s32 battle_state_get_vsync_interval(void) {
+    return g_main_system_vsync_interval;
 }
 
 /* Set g_main_system_animation_speed, the number of vertical blanks per frame, to
  * 1 or 2. Returns 0, or -1 for any other value. */
 s32 battle_state_set_animation_speed(s32 speed) {
     if (speed == 1 || speed == 2) {
-        g_main_system_animation_speed = speed;
+        g_main_system_vsync_interval = speed;
         return 0;
     }
     return -1;
@@ -224,7 +224,7 @@ s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
 /* Release step 8 of battle_map_init_units_sprites_event_and_music, which waits for this flag
  * before setting up deployment graphics. The deployment screen sets it after placing units, and
  * map_data_load_complete_thread when deployment is skipped. */
-void battle_map_mark_data_load_complete(void) {
+void battle_deployment_mark_finished(void) {
     g_battle_map_data_load_complete = 1;
 }
 
@@ -237,15 +237,15 @@ s32 battle_state_get_frame_measurement(void) {
 /* Set g_battle_frame_pacing, the minimum number of vertical blanks
  * battle_state_sync_frame waits per frame in the effect and action-execute
  * states. Values outside 1-9 are ignored. */
-void battle_state_set_time_scale(s32 value) {
+void battle_state_set_min_vsync_interval(s32 value) {
     if (value >= 1 && value <= 9) {
-        g_battle_frame_pacing = value;
+        g_main_system_min_vsync_interval = value;
     }
 }
 
 /* Remove the minimum frame wait battle_state_set_time_scale set. */
 void battle_state_clear_frame_pacing(void) {
-    g_battle_frame_pacing = 0;
+    g_main_system_min_vsync_interval = 0;
 }
 
 /* Apply a GNS camera command: aim the camera at the negated integer position (in 20.12) with the
@@ -674,7 +674,7 @@ void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 
     s16 frames;
 
     if (duration != 0) {
-        frames = duration / g_main_system_animation_speed;
+        frames = duration / g_main_system_vsync_interval;
         g_battle_gfx_screen_color_modulation_target.r = red;
         g_battle_gfx_screen_color_modulation_target.g = green;
         g_battle_gfx_screen_color_modulation_target.b = blue;

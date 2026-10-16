@@ -50,9 +50,9 @@ static void battle_move_set_unit_step_delta_center_to_edge(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
 enum {
@@ -90,9 +90,9 @@ static void battle_move_set_unit_step_delta_edge_to_center(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
 /* The original wrote the body of battle_move_set_unit_step_delta_center_to_edge a second time as
@@ -131,9 +131,9 @@ static void battle_move_set_float_step_delta_center_to_edge(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
 /* The original wrote the body of battle_move_set_unit_step_delta_edge_to_center a second time as
@@ -169,9 +169,9 @@ static void battle_move_set_float_step_delta_edge_to_center(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
 }
 
 /* Scale the unit's per-frame velocity by a 4.12 factor: callers pass the walk speed, or the step
@@ -251,7 +251,7 @@ void battle_move_start_float_step(battle_unit_t* unit, const map_tile_t* from, c
         break;
     }
     unit->facing = facing;
-    battle_unit_set_idle_animation_for_movement(unit);
+    battle_unit_set_walk_animation(unit);
     battle_move_set_float_step_delta_center_to_edge(unit, step, from, edge_height);
     battle_move_interpolate_partial(unit, unit->walk_speed);
     unit->movement.destination_z = step->higher;
@@ -361,7 +361,7 @@ void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, co
     }
     if (g_battle_game_state != BATTLE_GAME_STATE_ACTION_EXECUTE) {
         unit->facing = facing;
-        battle_unit_set_idle_animation_for_movement(unit);
+        battle_unit_set_walk_animation(unit);
     }
     battle_move_set_unit_step_delta_center_to_edge(unit, step, from, edge_height);
     battle_move_interpolate_partial(unit, unit->walk_speed);
@@ -1760,7 +1760,8 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
         } else {
             g_battle_move_current_edge_height = g_battle_move_current_tile->height * 2
                 + g_battle_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
-            g_battle_move_current_edge_height += battle_move_calculate_water_lift(unit, g_battle_move_current_tile);
+            g_battle_move_current_edge_height
+                += battle_move_get_water_standing_offset(unit, g_battle_move_current_tile);
         }
 
         if (g_battle_move_step_value.mount) {
@@ -1781,7 +1782,8 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
                 + g_battle_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
             /* Retail adds the destination's water lift to the current height, not to the
              * destination height, so a step up onto deep water can pass as a plain step. */
-            g_battle_move_current_edge_height += battle_move_calculate_water_lift(unit, g_battle_move_destination_tile);
+            g_battle_move_current_edge_height
+                += battle_move_get_water_standing_offset(unit, g_battle_move_destination_tile);
         }
 
         if (g_battle_move_current_edge_height + 1 >= g_battle_move_destination_edge_height) {

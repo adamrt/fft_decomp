@@ -634,7 +634,7 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_SCRIPT_FLAGS_01A4_01BB);
             wldcore_window_set_list_window_states(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
-            wldcore_list_open_script_flags_01a4_01bb();
+            wldcore_list_open_facts();
             return;
         case WLDCORE_BRAVE_STORY_ROW_STORY_EVENTS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_STORY_EVENTS);

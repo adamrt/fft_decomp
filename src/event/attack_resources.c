@@ -701,7 +701,7 @@ void script_opcode_jump(const event_jump_parameters_t* parameters) {
         stats = battle_unit_get_stats_from_battle_id(battle_unit_get_battle_id_by_runtime_id(runtime_id));
         saved = stats->jump;
         stats->jump = 6;
-        battle_unit_prepare_rider_dismount(runtime_id, parameters->direction, parameters->length_plus_one - 1);
+        battle_move_start_unit_jump_by_runtime_id(runtime_id, parameters->direction, parameters->length_plus_one - 1);
         stats->jump = saved;
     }
 }
@@ -1137,7 +1137,7 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
         || thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
         if (g_menu_animation_speed_forced == 0) {
             g_menu_animation_speed_forced = 1;
-            g_menu_saved_animation_speed = battle_state_get_animation_speed();
+            g_menu_saved_animation_speed = battle_state_get_vsync_interval();
             script_set_event_speed(2);
         }
     } else if (g_menu_animation_speed_forced == 1) {

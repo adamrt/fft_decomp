@@ -44,7 +44,7 @@ extern RECT g_text_typewriter_vram_rect;
 extern u8 g_text_typewriter_glyph_images[3][8][0x54];
 extern u8 g_text_typewriter_previous_images[3][0x54];
 extern u8 g_text_typewriter_column_scratch[14];
-void menu_release_current_thread_slot(void);
+void text_release_typewriter_slot(void);
 void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay);
 
 /* text threads */

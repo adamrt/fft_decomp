@@ -12,7 +12,7 @@
  * destination, once any read still pending has finished. */
 void file_wait_then_build_header(main_file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination) {
     file_wait_for_pending_variant();
-    main_file_build_header_nnl(header, sector, sector_count, destination);
+    main_file_request_read_quiet(header, sector, sector_count, destination);
 }
 
 #ifdef FFT_WLDCORE
@@ -24,7 +24,7 @@ void file_wait_then_build_header(main_file_load_descriptor_t* header, s32 sector
  * outgoing arguments plus the ra/s0 save pair leave 8 bytes of unreferenced
  * locals, so the original declared an 8-byte stack object it never used. Its
  * type is unknown; the array below reproduces the slot exactly. */
-void wldcore_load_scratch_data_blocking(void) {
+void wldcore_map_load_texture(void) {
     s32 unused_stack_slot[2];
 
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_RESTART) == 0) {

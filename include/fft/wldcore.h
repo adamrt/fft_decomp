@@ -33,7 +33,7 @@ void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month
 void wldcore_file_poll_vram_image_stream(main_file_load_descriptor_t* stream);
 void wldcore_file_seek_to_battle_bin(void);
 
-void wldcore_load_scratch_data_blocking(void);
+void wldcore_map_load_texture(void);
 /* input */
 extern u32 g_wldcore_input_new_button_presses;
 extern s32 g_wldcore_input_repeat_counter_up;
@@ -185,11 +185,11 @@ extern u32 g_wldcore_previous_system_flags;
 
 void wldcore_restore_previous_stack(void);
 void wldcore_init_stub(void);
-void wldcore_reset_game_if_special_keycode_is_pressed(void);
+void wldcore_input_update_buttons_and_check_game_reset(void);
 
 void wldcore_switch_to_stack(void*);
 s32 wldcore_entrypoint(void);
-void wldcore_init_core(void);
+void wldcore_gfx_capture_map_backdrop(void);
 /* thread */
 /* Slots that the WLDCORE screens use for threads of their own. */
 typedef enum wldcore_thread_slot {
@@ -209,7 +209,7 @@ extern unit_stats_t g_wldcore_status_unit;
 party_unit_t* wldcore_get_party_unit(s32 party_index);
 void wldcore_unit_build_status_panel_data(s32 party_index);
 
-void wldcore_load_formation_unit_name_and_face(void);
+void wldcore_system_init_world_menus_and_date(void);
 /* gfx */
 /* g_wldcore_context_value_display_mode: the layout of the HUD numeric readout
  * (wldcore_gfx_draw_context_value_display). */
@@ -1170,7 +1170,7 @@ void wldcore_draw_close_indicator_if_pending(GsOT* ot);
 void wldcore_set_bit_value(u32* bits, s32 index, s32 set);
 s32 wldcore_test_bit(u32* bits, s32 index);
 
-void wldcore_write_nine_bit_record(u32* bits, s32 record, calendar_date_t* source);
-void wldcore_read_nine_bit_record(u32* bits, s32 record, calendar_date_t* dest);
+void wldcore_calendar_write_date(u32* bits, s32 record, calendar_date_t* source);
+void wldcore_calendar_read_date(u32* bits, s32 record, calendar_date_t* dest);
 
 #endif

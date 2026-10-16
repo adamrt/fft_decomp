@@ -136,7 +136,7 @@ void battle_action_call_attack_preparation(action_command_t* action) {
  * An action that resolves immediately also ends the unit's Charging, Jump,
  * Defending and Performing statuses, but only in the primary action context.
  * Returns the battle_attack_preparation_e result. */
-s32 battle_action_call_attack_preparation_at_preview(action_command_t* command) {
+s32 battle_action_commit_attack_preparation(action_command_t* command) {
     unit_stats_t* unit = &g_battle_unit_stats[command->actor_id];
     s32 result = battle_action_prepare_attack(command, &unit->action_command, 1);
 
@@ -1360,7 +1360,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         action->target_position.vx = unit->x;
                         action->target_position.vz = unit->position.y;
                         action->target_position.vy = unit->position.higher_elevation;
-                        result = battle_action_call_attack_preparation_at_preview(action);
+                        result = battle_action_commit_attack_preparation(action);
                         outcome = BATTLE_REACTION_OUTCOME_COUNTER;
                         unit->action_command.ability_id = ABILITY_ID_REACTION_AUTO_POTION;
                         if (result == -1 || result == 2 || result == 3) {
@@ -1491,7 +1491,7 @@ static s32 battle_action_store_counter_ability(
     action->target_position.vz = acting_unit->position.y;
     action->target_position.vy = acting_unit->position.higher_elevation;
     saved_charged_ability_ct = unit->charged_ability_ct;
-    result = battle_action_call_attack_preparation_at_preview(action);
+    result = battle_action_commit_attack_preparation(action);
     unit->charged_ability_ct = saved_charged_ability_ct;
     if (result == BATTLE_ATTACK_PREPARATION_INVALID
         || (preview_result
@@ -1968,7 +1968,7 @@ s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit
     s32 formation_id = g_main_unit_deployed_coords->party_id;
 
     unit->battle_id = unit_index;
-    if (main_unit_init_job_data(unit, formation_id, 0) != 0) {
+    if (main_unit_init_from_party_slot(unit, formation_id, 0) != 0) {
         return -1;
     }
     main_unit_init_status_and_rewards(unit, 1);
@@ -2010,7 +2010,7 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
         if (g_main_unit_deployed_coords[i].party_id != PARTY_ID_NONE) {
             unit->entd_slot = battle_id;
             unit->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
-            if (main_unit_init_job_data(unit, g_main_unit_deployed_coords[i].party_id, 0) != 0) {
+            if (main_unit_init_from_party_slot(unit, g_main_unit_deployed_coords[i].party_id, 0) != 0) {
                 main_system_handle_battle_load_exception(battle_id + 0x1f4);
             } else if (battle_unit_set_placement_and_validate(battle_id, &g_main_unit_deployed_coords[i]) != 0) {
                 main_system_handle_battle_load_exception(battle_id + 0x190);
@@ -2182,7 +2182,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
 
         unit->entd_slot = battle_id;
         unit->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
-        status = main_unit_init_for_battle(unit, g_main_entd_current_unit, 0, 0);
+        status = main_unit_init_from_entd(unit, g_main_entd_current_unit, 0, 0);
         if (status != 0) {
             main_system_handle_battle_load_exception(battle_id + 600);
         }
@@ -2398,7 +2398,7 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
  * crystal or treasure on its tile; for a rider, the mount-removal statuses applied to its mount; a
  * Move-Find Item find (the mount's ability when riding) or else a trap; a canceled Charge; and the
  * Move-HP/MP Up and Move-Get EXP/JP flags. */
-u32 battle_move_set_target_for_mounted_unit_and_find_item(unit_stats_t* unit) {
+u32 battle_move_get_post_move_events(unit_stats_t* unit) {
     unit_stats_t* target;
     u32 flags;
     s32 i;
@@ -2429,7 +2429,7 @@ u32 battle_move_set_target_for_mounted_unit_and_find_item(unit_stats_t* unit) {
         }
     }
     find_item = target->ability_flags.movement[2] & BATTLE_MOVEMENT_SET_3_MOVE_FIND_ITEM;
-    tile = battle_map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation);
+    tile = battle_map_get_move_find_result(unit->x, unit->position.y, unit->position.higher_elevation);
     if (find_item && (tile->flags & MOVE_FIND_RESULT_ITEM)) {
         flags |= MOVE_POST_EVENT_ITEM_FOUND;
     } else if (tile->flags & MOVE_FIND_RESULT_TRAP) {

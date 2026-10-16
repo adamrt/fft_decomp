@@ -25,12 +25,12 @@ s32 battle_status_calculate_turn_flags(const unit_stats_t* unit);
 void battle_status_enable_disable_acting(unit_stats_t* unit);
 
 /* infliction and removal */
-void battle_status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_id);
+void battle_status_queue_graphics_change_if_executing(s32 status_id, s32 enabled, s32 battle_id);
 s32 battle_status_inflict_defending_to_battle_id(s32 unit_id);
 s32 battle_status_init_special_flag_enabling(s32 unit_id);
 s32 battle_status_modify_inflictions(s32 removal_only);
 s32 battle_status_prepare_terrain_poison(unit_stats_t* unit);
-void battle_status_reapply_active_flags(unit_stats_t* unit);
+void battle_status_clear_all(unit_stats_t* unit);
 s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable);
 s32 battle_status_remove_transparent(unit_stats_t* unit);
 void battle_status_remove_transparent_if_jump_used(unit_stats_t* unit);

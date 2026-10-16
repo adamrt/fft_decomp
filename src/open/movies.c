@@ -47,7 +47,7 @@ s32 open_system_run_main_loop(s32 skip_movie) {
     u32* otag_0;
     u32* otag_1;
 
-    open_movie_init_and_stream_opening(skip_movie);
+    open_system_init_title_sequence(skip_movie);
     if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0) {
         otag_0 = g_open_gfx_otags[0];
         otag_1 = g_open_gfx_otags[1];
@@ -126,7 +126,7 @@ void open_system_run_ending_cutscene(void) {
         } while ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
     }
 
-    open_gfx_restore_frame_vram_page();
+    open_gfx_restore_frame_bin_page();
     SetDispMask(0);
     open_sound_set_cd_mix_and_volume(0xc0, 0x78);
 }
@@ -269,7 +269,7 @@ static void open_movie_init_stream(s32 sector, psyq_interrupt_callback_t output_
     StSetStream(1, 0, -1, 0, 0); /* 24-bit mode, from frame 0, no end frame, no callbacks */
 
     header = &g_main_file_cd_state;
-    main_file_build_header_nnl(header, sector, 1, 0);
+    main_file_request_read_quiet(header, sector, 1, 0);
     while (g_main_file_still_loading != 0) {
         main_file_poll_load(header);
         VSync(0);

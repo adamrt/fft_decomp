@@ -660,7 +660,7 @@ void world_formation_request_world_map_root(void) {
 /* Save the system flags and hide the world map's layers (dots, routes,
  * background, display objects, context value, date and location marker)
  * with the display off, for a full-screen menu. */
-static void world_formation_save_and_set_system_flags(void) {
+static void world_menu_hide_world_map(void) {
     g_world_formation_saved_system_flags = g_main_system_flags;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES
         | MAIN_SYSTEM_FLAG_DISPLAY_OFF | MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE | MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS
@@ -669,7 +669,7 @@ static void world_formation_save_and_set_system_flags(void) {
 }
 
 /* Restore the system flags saved before the formation screen opened. */
-static void world_formation_restore_saved_system_flags(void) {
+static void world_menu_restore_world_map(void) {
     g_main_system_flags = g_world_formation_saved_system_flags;
 }
 
@@ -718,7 +718,7 @@ static void world_formation_update_open_request(void) {
             g_world_menu_location_window_x, g_world_menu_location_window_y);
         world_menu_open_entry_window(g_world_menu_open_entry_index, -0x30, -0x38);
         g_menu_thread_menu_data = g_world_menu_default_entries;
-        world_formation_save_and_set_system_flags();
+        world_menu_hide_world_map();
         wldcore_clear_screen_and_set_map_clip_rect(0);
         for (i = 0x77FF; i >= 0; i--) {
             g_wldcore_scratch_buffer[i] = 0;
@@ -732,7 +732,7 @@ static void world_formation_update_open_request(void) {
         return;
     }
     if (state == WORLD_SCREEN_REQUEST_START_FADE_IN) {
-        world_formation_restore_saved_system_flags();
+        world_menu_restore_world_map();
         wldcore_fade_start_screen(0x24, 0x10);
         g_world_formation_open_request_state++;
         return;
@@ -842,7 +842,7 @@ static void world_card_update_menu_request(void) {
         world_formation_reset_menu_context();
         g_world_menu_screen_open_request = 0;
         g_menu_thread_menu_data = g_world_menu_default_entries;
-        world_formation_save_and_set_system_flags();
+        world_menu_hide_world_map();
         if (result == 1) {
             g_world_card_menu_request_state = WORLD_SCREEN_REQUEST_IDLE;
             g_main_system_flags |= MAIN_SYSTEM_FLAG_RESTART;
@@ -864,7 +864,7 @@ static void world_card_update_menu_request(void) {
         return;
     }
     if (state == WORLD_SCREEN_REQUEST_START_FADE_IN) {
-        world_formation_restore_saved_system_flags();
+        world_menu_restore_world_map();
         wldcore_fade_start_screen(0x24, 0x10);
         g_world_card_menu_request_state++;
         return;

@@ -92,7 +92,7 @@ void battle_state_enter_action_execution_setup(void);
 void battle_state_enter_after_command(void);
 void battle_state_enter_commence_attack_phase(void);
 void battle_state_enter_highlight_units_by_team(void);
-void battle_state_enter_jp_xp_gain(void);
+void battle_state_enter_continue_turn(void);
 void battle_state_enter_open_sp2_files(void);
 void battle_state_enter_pre_attack_animation(void);
 void battle_state_enter_status_execute(void);
@@ -125,7 +125,7 @@ void battle_state_handle_crystal_learn_state(void);
 void battle_state_handle_deep_dungeon_mesh_finish_state(void);
 void battle_state_handle_deep_dungeon_mesh_load_state(void);
 /* Per-frame handlers dispatched by battle_state_run_game_loop. */
-void battle_state_handle_default_state(void);
+void battle_state_handle_free_cursor_state(void);
 void battle_state_handle_display_move_area_state(void);
 void battle_state_handle_effect_state(void);
 void battle_state_handle_highlight_units_state(void);
@@ -175,16 +175,16 @@ s32 battle_state_update_controller_input(void);
 void battle_state_update_event_mode(void);
 
 /* frame timing */
-extern s32 g_battle_frame_pacing;
+extern s32 g_main_system_min_vsync_interval;
 extern s32 g_battle_frame_pacing_suppressed;
 extern s32 g_battle_frame_pacing_timer;
 
 void battle_state_clear_frame_pacing(void);
-s32 battle_state_get_animation_speed(void);
+s32 battle_state_get_vsync_interval(void);
 void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32 close_flow_state);
 void battle_state_reset_frame_pacing_timer(void);
 s32 battle_state_set_animation_speed(s32 speed);
-void battle_state_set_time_scale(s32 value);
+void battle_state_set_min_vsync_interval(s32 value);
 
 /* deployment */
 extern palette_t g_battle_deployed_unit_palettes[2];
@@ -216,7 +216,7 @@ extern s32 g_battle_cursor_y;
 extern s32 g_battle_cursor_z;
 
 void battle_state_handle_free_cursor_help_state(void);
-void battle_state_handle_free_cursor_input(void);
+void battle_state_update_units(void);
 void battle_state_set_free_cursor(void);
 
 /* heap */

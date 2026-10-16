@@ -265,9 +265,9 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
         status_id++) {
         if (changed & mask) {
             if ((old_status & mask) != 0) {
-                battle_status_enable_special_flags(status_id, 0, battle_id);
+                battle_status_queue_graphics_change_if_executing(status_id, 0, battle_id);
             } else {
-                battle_status_enable_special_flags(status_id, 1, battle_id);
+                battle_status_queue_graphics_change_if_executing(status_id, 1, battle_id);
             }
         }
         mask >>= 1;
@@ -279,5 +279,5 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
  * limit reached, 300 or 400 placement rejected, 500 roster unit load failed, 600 ENTD unit init
  * failed; 0x80 alone marks a map tile-data retry that gave up after 1000 tries. */
 void main_system_handle_battle_load_exception(s32 value) {
-    main_system_handle_malloc_exception(3, value);
+    main_system_report_error(3, value);
 }

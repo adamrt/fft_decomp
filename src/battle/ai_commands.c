@@ -24,7 +24,7 @@ static void battle_ai_build_unit_ability_list(s32 unit_id);
 static s32 battle_ai_calculate_ability_range(void);
 static s32 battle_ai_calculate_ratio_times_4(s32 divisor, s32 dividend);
 static s32 battle_ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit);
-static s32 battle_ai_check_target_type(s32 unit_id);
+static s32 battle_ai_is_unit_out_of_play(s32 unit_id);
 static ai_rank_order_e battle_ai_compare_target_priority_and_hit_rate(
     const ai_action_rank_t* first, const ai_action_rank_t* second);
 static void battle_ai_disable_ability_if_only_inflicts_status(ai_ability_entry_t* entry, s32 status_id);
@@ -288,7 +288,7 @@ static void battle_ai_update_team_targeting_flags(void) {
     enemy_count = 0;
     impaired_ally_count = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (battle_ai_check_target_type(i)) {
+        if (battle_ai_is_unit_out_of_play(i)) {
             continue;
         }
         if (ai->unit_decisions[i].enemy_flag) {
@@ -354,7 +354,7 @@ static void battle_ai_init_target_consideration(void) {
                 return;
             if (flags & AI_DECISION_FOCUS_TARGET) {
                 battle_ai_copy_unit_coordinates(decision->main_target_id, &decision->target);
-                target = battle_ai_check_target_type(decision->main_target_id);
+                target = battle_ai_is_unit_out_of_play(decision->main_target_id);
             } else {
                 target = ai->single_enemy_remaining;
             }
@@ -573,7 +573,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
     ability = &g_battle_ai_data_base.considered_ability;
     unit_id = 0;
     do {
-        if (battle_ai_check_target_type(unit_id) == 0) {
+        if (battle_ai_is_unit_out_of_play(unit_id) == 0) {
             decision = &ai->unit_decisions[unit_id];
             unit = &g_battle_unit_stats[unit_id];
             unit_harmful = 0;
@@ -1535,7 +1535,7 @@ static s32 battle_ai_filter_reachable_tiles_by_target_distance(s32 distance_limi
 
 /* 1 when the unit is untargetable or dead without Reraise per its AI decision
  * record, or petrified. */
-static s32 battle_ai_check_target_type(s32 unit_id) {
+static s32 battle_ai_is_unit_out_of_play(s32 unit_id) {
     u8 flags = g_battle_ai_data_base.unit_decisions[unit_id].targeting_flags_2;
 
     if (((flags >> 4) & (AI_TARGET_UNTARGETABLE >> 4)) || ((flags >> 5) & (AI_TARGET_DEAD_WITHOUT_RERAISE >> 5))) {
@@ -1810,7 +1810,7 @@ static s32 battle_ai_select_action_status(void) {
         if (battle_ai_select_active_units(AI_UNIT_FILTER_ANY, 255)) {
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 ai->targetability.live.unit_targetable[i] = 0;
-                if (!battle_ai_check_target_type(i))
+                if (!battle_ai_is_unit_out_of_play(i))
                     ai->targetability.live.unit_targetable[i] = ai->targetability.live.unit_active[i];
             }
             /* The aligned skillset/usage 16-bit value preserves target LHU/SH;
@@ -2283,7 +2283,7 @@ static s32 battle_ai_select_action_targeted(void) {
             goto other_abilities;
         }
     }
-    if (battle_ai_check_target_type(target) || !ai->unit_decisions[target].enemy_flag) {
+    if (battle_ai_is_unit_out_of_play(target) || !ai->unit_decisions[target].enemy_flag) {
         g_battle_ai_data_base.acting_unit_decision->flags &= ~AI_DECISION_SPECIAL_BEHAVIOR;
         unit = &g_battle_unit_stats[target];
         if (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
@@ -3097,7 +3097,7 @@ static void battle_ai_fill_foe_proximity_grid(void) {
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         ai->targetability.live.unit_targetable[i] = 0;
-        if (battle_ai_check_target_type(i) == 0 && battle_ai_should_exclude_from_imminent_enemies(i) == 0) {
+        if (battle_ai_is_unit_out_of_play(i) == 0 && battle_ai_should_exclude_from_imminent_enemies(i) == 0) {
             ai->targetability.live.unit_targetable[i] = 1;
         }
     }

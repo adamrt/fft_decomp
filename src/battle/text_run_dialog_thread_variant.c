@@ -825,7 +825,7 @@ end:
     win->active = 0;
     menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
-    menu_release_current_thread_slot();
+    text_release_typewriter_slot();
     thread_yield();
     thread_exit_current();
 }

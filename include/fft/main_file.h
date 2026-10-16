@@ -40,13 +40,13 @@ extern main_file_load_descriptor_t g_main_file_cd_state;
  * MAIN_FILE_LOAD_STATE_IDLE) while a load is in progress. */
 extern u32 g_main_file_still_loading;
 /* File-header wrapper at 0x80011bd0 forwards main_file_build_header's result. */
-s32 main_file_build_header_nnl(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
+s32 main_file_request_read_quiet(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
 s32 main_file_call_build_header(s32 sector, u32 size, void* destination);
 int main_file_is_still_loading(void);
 void main_file_reset_cd_subsystems(void);
 void main_file_handle_cd_read_callback(u8 event, u8* result);
 void main_file_handle_cd_ready_callback(u8 event, u8* result);
-int main_file_build_header(
+int main_file_request_read(
     main_file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
 void* main_file_load_checked_to_heap(int sector, int size);
 void* main_file_load_checked_to_address(int sector, int size, void* destination);

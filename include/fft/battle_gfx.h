@@ -499,7 +499,7 @@ extern s16 g_battle_gfx_previous_counter;
 extern u8 g_battle_gfx_targeted_frame_back[];
 extern u8 g_battle_gfx_targeted_frame_front[];
 
-s16 battle_gfx_increment_counter(void);
+s16 battle_gfx_take_sprite_prim(void);
 
 /* sprite rendering */
 /* One of the two 60968-byte battle render buffers. The primitive pools are
@@ -616,7 +616,7 @@ void battle_gfx_apply_unit_palette_modulation_to_units(
 void battle_gfx_tint_all_units_by_team(void);
 void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 level, s32 final_value);
 void battle_gfx_update_unit_palette_animation(void);
-void battle_gfx_update_unit_palettes(void);
+void battle_gfx_restore_unit_palettes(void);
 
 /* unit displays */
 extern MATRIX g_battle_gfx_numeric_display_matrix;
@@ -633,14 +633,14 @@ extern s16 g_battle_numeric_digit_1_zoom_curve[21];
 extern s16 g_battle_numeric_digit_2_critical_zoom_curve[21];
 extern s16 g_battle_numeric_digit_2_zoom_curve[21];
 
-void battle_gfx_activate_numerical_sprite_data(battle_unit_t* unit, s32 mode);
+void battle_gfx_queue_charge_failure_message(battle_unit_t* unit, s32 mode);
 void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* screen_coords);
 s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit);
 s32 battle_gfx_build_next_special_action_result_display(battle_unit_t* unit);
 void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_screen_coords);
 void battle_gfx_init_earned_exp_jp_display(struct battle_unit* unit);
 battle_gfx_sprite_display_data_t* battle_gfx_init_numeric_sprite_display(s32 unit_index, s32 display_section);
-void battle_gfx_init_status_bubble(battle_unit_t* unit);
+void battle_gfx_update_float_height_and_status_bubble(battle_unit_t* unit);
 battle_gfx_sprite_display_data_t* battle_gfx_init_status_bubble_sprite_display(s32 unit_index);
 void battle_gfx_prepare_post_action_display(battle_unit_t* unit);
 s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id);

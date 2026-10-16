@@ -519,7 +519,7 @@ next:
         if (*slot_track != 0) {
             main_sound_unload_scenario_mus(slot);
         }
-        if (main_sound_open_and_play_music(track, slot) != 0) {
+        if (main_sound_load_music_into_slot(track, slot) != 0) {
             g_wldcore_audio_queue.current_command = WLDCORE_AUDIO_COMMAND_WAIT_LOAD;
             g_wldcore_audio_queue.current_slot = slot;
             *slot_track = track;

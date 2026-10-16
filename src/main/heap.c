@@ -201,7 +201,7 @@ void main_heap_clear_game_allocator_table(void) {
  * Overlay callers pass a byte count; the lower-level builder takes sectors.
  */
 s32 main_file_call_build_header(s32 sector, u32 size, void* destination) {
-    return main_file_build_header_nnl(&g_main_file_cd_state, sector, size >> 11, destination);
+    return main_file_request_read_quiet(&g_main_file_cd_state, sector, size >> 11, destination);
 }
 
 /* Return the shared CD descriptor's load state: nonzero while a read through g_main_file_cd_state
@@ -221,7 +221,7 @@ suzuki_smd_header_t* main_file_get_smd(int sector, u32 size) {
     if (buffer == 0) {
         main_system_handle_error(MAIN_SYSTEM_ERROR_SMD_LOAD);
     }
-    while (main_file_build_header_nnl(&g_main_file_cd_state, sector, size >> 11, buffer) != 0) {
+    while (main_file_request_read_quiet(&g_main_file_cd_state, sector, size >> 11, buffer) != 0) {
         VSync(0);
         main_system_frame_stub();
         main_file_poll_load(&g_main_file_cd_state);
@@ -247,7 +247,7 @@ static void* main_file_load_to_heap(s32 sector, u32 size) {
     if (destination == 0) {
         main_system_handle_error(MAIN_SYSTEM_ERROR_HEAP_ALLOC);
     }
-    while (main_file_build_header_nnl(&g_main_file_cd_state, sector, (size >> 11), destination) != 0) {
+    while (main_file_request_read_quiet(&g_main_file_cd_state, sector, (size >> 11), destination) != 0) {
         VSync(0);
         main_system_frame_stub();
         main_file_poll_load(&g_main_file_cd_state);
@@ -270,7 +270,7 @@ static void* main_file_load_to_heap(s32 sector, u32 size) {
 void* main_file_load_to_address(int sector, unsigned int size, void* destination) {
     main_file_load_descriptor_t* header;
 
-    while (main_file_build_header_nnl(&g_main_file_cd_state, sector, size >> 11, destination) != 0) {
+    while (main_file_request_read_quiet(&g_main_file_cd_state, sector, size >> 11, destination) != 0) {
         VSync(0);
         main_system_frame_stub();
         main_file_poll_load(&g_main_file_cd_state);

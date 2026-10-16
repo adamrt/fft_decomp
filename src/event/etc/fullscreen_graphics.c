@@ -384,7 +384,7 @@ static void etc_graphic_show_game_over(s32 graphic_id) {
 
     g_thread_call_target = main_sound_unload_scenario_music_and_tunes;
     thread_call_on_main_stack();
-    g_thread_call_target = (void (*)(void))main_sound_open_scenario_smd_files;
+    g_thread_call_target = (void (*)(void))main_sound_start_music_load_into_free_slot;
     thread_call_on_main_stack(MAIN_MUSIC_GAME_OVER);
     do {
         thread_yield();

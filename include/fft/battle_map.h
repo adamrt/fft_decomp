@@ -843,7 +843,7 @@ void map_data_load_complete_thread(void);
 s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data);
 s32 battle_map_start_data_load(void);
 s32 battle_map_poll_data_load(void);
-void battle_map_mark_data_load_complete(void);
+void battle_deployment_mark_finished(void);
 s32 battle_map_step_init_sequence(s32 map_id, s32 step);
 s32 battle_map_load_data(s32 map_id, s32 command);
 s32 battle_map_apply_gns_command(s32 phase, map_resource_t* record);
@@ -889,7 +889,7 @@ extern move_found_item_t g_battle_map_rare_item_result;
 
 void battle_map_load_move_find_item_data(map_move_find_item_data_t* map_data);
 move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit);
-move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer);
+move_find_result_data_t* battle_map_get_move_find_result(s32 x, u8 y, u8 layer);
 gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id);
 
 /* palettes */

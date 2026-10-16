@@ -1200,7 +1200,7 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
     old_action_taken = unit->action_taken;
     old_state = g_battle_action_state;
     g_battle_action_state = ACTION_STATE_PREVIEW;
-    if (battle_action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE) {
+    if (battle_action_commit_attack_preparation(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE) {
         unit->charged_ability_ct = 0;
     }
     turns = battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_PREVIEW);
@@ -1538,7 +1538,7 @@ s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {
 /* Marks a present unit that has a formation index for removal: the slot is
  * emptied and its existence set to pending removal. Returns -1 when the slot is
  * empty or has no formation index, else 0. No retail code calls it. */
-s32 battle_unit_check_exists(s32 unit_id) {
+s32 battle_unit_mark_pending_removal(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
 
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)

@@ -27,7 +27,7 @@ static s32 wldcore_map_roll_random_encounter(s32 location, s32 route);
 static void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta);
 static void wldcore_window_transform_point_for_mode(s32 mode, RECT bounds, point32_t* output);
 
-void wldcore_map_color_and_draw_dots(void) {
+void wldcore_map_init_dots(void) {
     wldcore_map_dot_source_t* src;
     wldcore_map_dot_t* dots = g_wldcore_map_dots;
     wldcore_map_dot_t* dot;

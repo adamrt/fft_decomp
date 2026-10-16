@@ -22,7 +22,7 @@ void battle_formula_talk_skill_hit_ma_x_percent(void) {
         if (g_battle_action_target_data->hit != 0) {
             battle_formula_store_ma_and_x();
             battle_formula_apply_zodiac_compatibility();
-            battle_formula_store_xa_plus_ya_status_damage();
+            battle_formula_store_hit_chance();
             battle_formula_use_hp_damage_as_action_hit_percent();
             if (g_battle_action_target_data->hit != 0) {
                 battle_formula_apply_talk_skill();
@@ -76,7 +76,7 @@ void battle_formula_break_equipped_damage_pa_times_wp(void) {
     if (battle_formula_calculate_physical_evade() != 0) {
         return;
     }
-    if (battle_formula_apply_steal_break_might_sword_hardcoding() != 0) {
+    if (battle_formula_select_targeted_equipment() != 0) {
         battle_formula_nullify_action();
         g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_FORCED_FAILURE;
         return;
@@ -103,7 +103,7 @@ void battle_formula_absorb_mp_pa_times_wp(void) {
     if (battle_formula_calculate_physical_evade() == 0) {
         battle_formula_store_pa_and_weapon_power();
         battle_formula_calculate_physical_damage();
-        battle_formula_apply_mp_recovery();
+        battle_formula_apply_mp_absorption();
     }
 }
 
@@ -149,7 +149,7 @@ void battle_formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
     battle_formula_apply_attack_up_and_martial_arts();
     battle_formula_apply_physical_status_support_compatibility();
     battle_formula_calculate_critical_hit();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     rnd = battle_formula_get_random_0_7fff();
     mult = &g_battle_action_current_ability.random_damage_factor;
     *mult = (rnd * g_battle_action_current_ability.range_data.x) / 32768 + 1;
@@ -166,7 +166,7 @@ void battle_formula_hit_pa_x_percent(void) {
     battle_formula_apply_attack_up_and_martial_arts();
     battle_formula_apply_attacker_berserk_frog();
     battle_formula_apply_zodiac_compatibility();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_status_to_action();
@@ -196,7 +196,7 @@ void battle_formula_heal_y_percent_hit_pa_x_percent(void) {
     battle_formula_store_pa_and_x();
     battle_formula_apply_attack_up_and_martial_arts();
     battle_formula_apply_zodiac_compatibility();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_battle_action_target_data->hit != 0 && battle_formula_apply_status_and_check_undead() != 0) {
         battle_formula_calculate_hp_percent_damage();
@@ -226,14 +226,14 @@ void battle_formula_hit_ma_x_percent_magical_evade(void) {
 
 /* Formula 0x3E: damage equal to the target's current HP - 1 (0 when it has none). */
 void battle_formula_damage_target_hp_minus_one_always_hit(void) {
-    battle_formula_calculate_gravi2_damage();
+    battle_formula_calculate_damage_leaving_one_hp();
 }
 
 /* Formula 0x3F: hit (SP+X)%. */
 void battle_formula_hit_sp_x_percent(void) {
     battle_formula_store_speed_and_x();
     battle_formula_apply_physical_xa_modifying_statuses_support();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_status_to_action();
@@ -244,7 +244,7 @@ void battle_formula_hit_sp_x_percent(void) {
 void battle_formula_undead_hit_sp_x_percent(void) {
     battle_formula_store_speed_and_x();
     battle_formula_apply_physical_xa_modifying_statuses_support();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_battle_action_target_data->hit != 0) {
         if ((g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
@@ -361,7 +361,7 @@ void battle_formula_absorb_hp_y_percent_hit_ma_x_percent(void) {
 void battle_formula_damage_ma_times_y(void) {
     if (battle_formula_calculate_magical_evade() == 0) {
         battle_formula_store_ma_and_y();
-        battle_formula_calculate_truth_magical_damage();
+        battle_formula_calculate_magical_damage_without_faith();
     }
 }
 
@@ -392,7 +392,7 @@ void battle_formula_hit_ma_x_percent_no_evade(void) {
     battle_formula_apply_elemental_strengthen();
     battle_formula_apply_magic_attack_up();
     battle_formula_apply_zodiac_compatibility();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_status_to_action();
@@ -506,7 +506,7 @@ void battle_formula_set_morbol(void) {
     battle_formula_apply_elemental_strengthen();
     battle_formula_apply_magic_attack_up();
     battle_formula_apply_zodiac_compatibility();
-    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     action = g_battle_action_target_data;
     if (action->hit == 0)
@@ -552,7 +552,7 @@ void battle_formula_dragon_hit_100(void) {
 
 /* Formula 0x5B: dragons only; the caster loses MaxHP/5 and the target gains
  * twice that (formula 0x3C), then 100% status. Y is not read. */
-void battle_formula_dragon_heal_y_percent_add_status(void) {
+void battle_formula_dragon_transfer_caster_hp_add_status(void) {
     battle_formula_check_dragon();
     if (g_battle_action_target_data->hit != 0) {
         battle_formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths();

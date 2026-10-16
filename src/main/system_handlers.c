@@ -13,7 +13,7 @@ void main_system_report_stub(s32 category, s32 code) {
 
 /* Empty error hook. Callers pass an id of the reporting subsystem and a code;
  * both are dropped. */
-void main_system_handle_malloc_exception(s32 allocator_id, s32 error_code) {
+void main_system_report_error(s32 allocator_id, s32 error_code) {
 }
 
 /* The error hook of the file loads, the heap, the SMD loads and the battle sprite code. */
@@ -26,7 +26,7 @@ void main_system_handle_error(int error_code) {
  * dropped (main_system_handle_malloc_exception is empty) and
  * g_main_system_graphics_error is cleared. */
 void main_system_handle_pointer_exception(int error_code) {
-    main_system_handle_malloc_exception(0, error_code);
+    main_system_report_error(0, error_code);
     g_main_system_graphics_error = 0;
 }
 

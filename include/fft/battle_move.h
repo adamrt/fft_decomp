@@ -302,7 +302,7 @@ extern u8 g_battle_move_weather_terrain_cost;
 
 move_effective_flags_e battle_move_get_effective_flags(const unit_stats_t* unit);
 s32 battle_move_get_support_flags(const unit_stats_t* unit);
-s32 battle_move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile);
+s32 battle_move_get_water_standing_offset(battle_unit_t* unit, map_tile_t* tile);
 
 /* pathfinding */
 extern battle_unit_t* g_battle_move_tile_occupant;
@@ -397,7 +397,7 @@ void battle_move_set_velocity_for_contiguous_clamped_steps(
     battle_unit_t* unit, const battle_walk_path_t* path, const move_step_t* step);
 void battle_move_start_fly_step(
     battle_unit_t* unit, const map_tile_t* unused_current_tile, const map_tile_t* unused_destination_tile);
-void battle_move_transfer_target_coordinates(const battle_unit_t* src, battle_unit_t* dst);
+void battle_move_start_knockback(const battle_unit_t* src, battle_unit_t* dst);
 void battle_move_update_all_unit_paths(void);
 void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit);
 void battle_move_update_float_step_to_destination_tile_center(battle_unit_t* unit);
@@ -432,6 +432,6 @@ extern s32 g_battle_move_find_result;
 
 s32 battle_move_start_next_post_movement_step(void);
 void battle_move_init_post_movement_display(void);
-u32 battle_move_set_target_for_mounted_unit_and_find_item(unit_stats_t* unit);
+u32 battle_move_get_post_move_events(unit_stats_t* unit);
 
 #endif

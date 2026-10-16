@@ -33,7 +33,7 @@
 #include "psx/types.h"
 
 static void world_menu_run_script_with_callback_suppressed(void);
-static void world_shop_apply_fitting_room_items_to_all_units(void);
+static void world_shop_undo_fitting_room(void);
 static void world_shop_buy_from_fitting_room(void);
 static void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 equipment_index);
 static void world_shop_install_callbacks_and_run(void);
@@ -134,7 +134,7 @@ void world_shop_run_screen(s32 shop_type) {
     while (g_world_shop_menu_step != WORLD_SHOP_STEP_EXIT) {
         world_gfx_present_frame_and_swap_packet_buffer(0, 0);
         menu_input_update_with_message_state_variant();
-        world_menu_update_thread_7_idle_countdown();
+        world_input_update_lockout_timer();
         world_gfx_update_fade_in_tile();
         if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
             world_menu_start_description_text_thread(DIALOG_POSITION_CENTER);
@@ -1276,7 +1276,7 @@ static s32 world_shop_run_fitting_room_checkout_prompt(void) {
             return WORLD_SHOP_CHECKOUT_PROMPT_OPEN;
         }
         if (g_world_shop_checkout_prompt_result != 1) {
-            world_shop_apply_fitting_room_items_to_all_units();
+            world_shop_undo_fitting_room();
             g_world_shop_checkout_prompt_initialized = 0;
             return WORLD_SHOP_CHECKOUT_DONE;
         }
@@ -1290,7 +1290,7 @@ static s32 world_shop_run_fitting_room_checkout_prompt(void) {
     g_world_shop_checkout_prompt_initialized = 0;
     if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] != 1) {
         if (g_world_shop_checkout_prompt_result != 0) {
-            world_shop_apply_fitting_room_items_to_all_units();
+            world_shop_undo_fitting_room();
             return WORLD_SHOP_CHECKOUT_DONE;
         }
         return WORLD_SHOP_CHECKOUT_DONE;
@@ -1302,7 +1302,7 @@ static s32 world_shop_run_fitting_room_checkout_prompt(void) {
 /* Move every reserved fitting-room item onto its formation unit and clear
  * the reservation. Equipment slots flagged in bit 14 are overwritten even
  * when no item was reserved. */
-static void world_shop_apply_fitting_room_items_to_all_units(void) {
+static void world_shop_undo_fitting_room(void) {
     s32 i;
     s32 j;
 
@@ -2110,7 +2110,7 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
         g_world_formation_unit_banner_enabled = 0;
         g_world_shop_party_unit_count = 0;
         for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-            result = main_unit_init_job_data(&unit, i, 1);
+            result = main_unit_init_from_party_slot(&unit, i, 1);
             if (result == 0 && unit.formation_index < PARTY_GUEST_SLOT_FIRST) {
                 g_world_shop_party_unit_count++;
             }
