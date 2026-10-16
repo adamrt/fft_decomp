@@ -282,7 +282,7 @@ static s32 world_formation_run_equip_item_menu(void) {
             }
             g_menu_status_display_thread_params.redraw_request = 1;
         }
-        menu_cmd_run_stream(&g_world_item_menu_script, g_menu_input_primary_repeat);
+        menu_script_run(&g_world_item_menu_script, g_menu_input_primary_repeat);
     }
 
     if (g_world_item_list_refresh != 0) {

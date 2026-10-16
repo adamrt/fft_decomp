@@ -11,15 +11,15 @@
  * transition frames it first queues a draw area cropped about the window's
  * center to the zoom table's percentage of its size (and, for the first
  * three, withholds the stream's input), then draws the frame through
- * menu_cmd_draw_window_frame_handler. */
-menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* command) {
+ * menu_opcode_00_draw_window_frame. */
+menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* command) {
     RECT area;
     s32 frame = g_gfx_transition_frame;
     s32 scale;
 
     if (frame < 4) {
         if (frame < 3) {
-            g_menu_cmd_stream_input = 0;
+            g_menu_script_input = 0;
         }
         scale = g_gfx_window_zoom_percent[frame];
         area.w = command->window.width * scale / 100;
@@ -31,5 +31,5 @@ menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* co
     } else {
         g_gfx_otag_index_locked = 0;
     }
-    return menu_cmd_draw_window_frame_handler(command);
+    return menu_opcode_00_draw_window_frame(command);
 }

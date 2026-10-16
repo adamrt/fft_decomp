@@ -160,7 +160,7 @@ static void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const R
 
 /* Pause: yield until Select, Cross or Circle is pressed, or until the thread's
  * task id becomes the stop request. */
-void script_opcode_pause(void) {
+void script_opcode_16_pause(void) {
     do {
         thread_yield();
         if (thread_get_current_task_id() == THREAD_TASK_STOP_REQUEST) {

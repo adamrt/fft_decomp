@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* Draw the getter's decimal value, or dashes, using the current row and palette. */
-menu_instruction_t* jobstts_menu_cmd_draw_formatted_number_handler(menu_instruction_t* data) {
+menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instruction_t* data) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     u16 unused[8]; /* Preserves the original frame size. */

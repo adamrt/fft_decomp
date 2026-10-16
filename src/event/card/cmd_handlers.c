@@ -12,7 +12,7 @@
 /* Stream command: draw a textured quad of size (command[5], command[6]) at
  * (command[3], command[4]) with texture origin (command[7], command[8]), in the
  * current sprite color or, for MENU_SCRIPT_OP_UNCOLORED_QUAD, unshaded. Returns the next command. */
-u8* card_cmd_draw_textured_quad_handler(u8* command) {
+u8* card_draw_textured_quad(u8* command) {
     RECT rect;
     const rgb24_t* color;
     s32 x = command[3];
@@ -33,14 +33,14 @@ u8* card_cmd_draw_textured_quad_handler(u8* command) {
 
 /*
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
- * the interior through menu_cmd_draw_tiled_rectangle_handler.
+ * the interior through menu_opcode_11_draw_tiled_rectangle.
  *
- * CARD copy of world_menu_parse_draw_window_frame: source 2 takes the signed
+ * CARD copy of world_menu_opcode_00_draw_window_frame: source 2 takes the signed
  * rectangle from the shared window record, other sources use the command's
  * byte operands, and source 1 selects the alternate border texture
  * coordinates. Returns the command that follows.
  */
-menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t* command) {
+menu_window_command_t* card_draw_window_frame(menu_window_command_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -161,7 +161,7 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
         g_cmd_window_interior_command.width = command->width;
         g_cmd_window_interior_command.height = command->height;
     }
-    menu_cmd_draw_tiled_rectangle_handler(&g_cmd_window_interior_command);
+    menu_opcode_11_draw_tiled_rectangle(&g_cmd_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;

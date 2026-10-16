@@ -7,7 +7,7 @@
 
 /* Draw the selected callback's icon for the literal or current list row,
  * using its texture, dimensions and palette. */
-menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* cmd) {
     menu_icon_source_t* entry;
     s32 row;
     menu_icon_source_t* (*callback)(s32);
@@ -24,15 +24,15 @@ menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* 
 
     entry = callback(row);
     if (entry != 0) {
-        g_menu_cmd_row_quad.sprite.x = cmd->callback_sprite.x;
-        g_menu_cmd_row_quad.sprite.y = cmd->callback_sprite.y;
-        g_menu_cmd_row_quad.sprite.w = entry->w;
-        g_menu_cmd_row_quad.sprite.h = entry->h;
-        g_menu_cmd_row_quad.sprite.u = entry->u;
-        g_menu_cmd_row_quad.sprite.v = entry->v;
+        g_menu_script_quad_command.sprite.x = cmd->callback_sprite.x;
+        g_menu_script_quad_command.sprite.y = cmd->callback_sprite.y;
+        g_menu_script_quad_command.sprite.w = entry->w;
+        g_menu_script_quad_command.sprite.h = entry->h;
+        g_menu_script_quad_command.sprite.u = entry->u;
+        g_menu_script_quad_command.sprite.v = entry->v;
         g_menu_gfx_clut_id = entry->clut;
         g_menu_gfx_texture_page = entry->tpage;
-        menu_cmd_draw_textured_quad_handler((menu_instruction_t*)&g_menu_cmd_row_quad);
+        menu_opcode_04_draw_textured_quad((menu_instruction_t*)&g_menu_script_quad_command);
     }
     return menu_next_instruction(cmd);
 }

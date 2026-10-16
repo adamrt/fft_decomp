@@ -175,29 +175,29 @@ extern s8 g_world_menu_cursor_bob_active_thresholds[];
 extern textured_quad_source_t g_world_vertical_cursor_quad;
 extern const RECT g_world_option_gfx_draw_area_template;
 /* WORLD's display-script command handlers (menu_script.h has the shared ones). The CARD and JOBSTTS overlays call
- * world_menu_parse_draw_window_frame directly. */
-menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_conditional(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_draw_tile(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_draw_sprite(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_draw_callback_sprite(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_draw_line(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_set_fixed_clut(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_set_clut(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_set_sprite_color(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_set_texture_page(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_set_semi_trans(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_set_draw_priority(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_handle_window_command_with_scaled_clip(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_clear_temporary_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_set_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_add_blend_draw_mode(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_draw_formatted_number(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
+ * world_menu_opcode_00_draw_window_frame directly. */
+menu_instruction_t* world_menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_01_if_group(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_02_if_else_group(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_03_draw_tile(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_07_draw_line(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_09_set_fixed_clut(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_0a_set_clut(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_0b_set_draw_color(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_0c_set_texture_page(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_14_set_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction);
 
 /* scrollable lists */
 extern const s16* g_world_menu_list_entry_ids;

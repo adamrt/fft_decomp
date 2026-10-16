@@ -5,7 +5,7 @@
 
 /* Skip a command plus, for group opcodes 1 and 2, the child commands it counts;
  * return the command that follows. */
-menu_instruction_t* menu_cmd_skip_group(menu_instruction_t* command) {
+menu_instruction_t* menu_script_skip_group(menu_instruction_t* command) {
     s32 count;
 
     if (command->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {

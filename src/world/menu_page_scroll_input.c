@@ -65,7 +65,7 @@ menu_vertical_scroll_direction_e world_menu_input_read_page_scroll_direction(voi
     s32 repeat;
     u16 counter;
 
-    if (g_world_menu_prompt_active == 0 && g_menu_input_lock_mode == 0 && g_world_script_tutorial_id == 0) {
+    if (g_world_menu_prompt_active == 0 && g_menu_input_lock_mode == 0 && g_world_tutorial_id == 0) {
         value = world_menu_input_read_tutorial_or_controller(0);
         if ((value & PSX_PAD_UP) && (value & PSX_PAD_SQUARE)) {
             g_world_menu_scroll_hold_counter++;

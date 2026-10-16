@@ -142,11 +142,11 @@ enum {
 };
 
 void jobstts_menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
-menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
 
 /* text */
 /* The "%d" literal that JOBSTTS.OUT keeps at overlay file offset 0, i.e. the

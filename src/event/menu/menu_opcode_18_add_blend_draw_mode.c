@@ -5,7 +5,7 @@
 #include "psx/libgpu.h"
 
 /* Queue a draw mode with the requested blend rate at the current OT entry. */
-menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* data) {
     menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, data->blend.blend_rate, 0x100, 0), 0, g_menu_gfx_otag_index);
     return menu_next_instruction(data);
 }

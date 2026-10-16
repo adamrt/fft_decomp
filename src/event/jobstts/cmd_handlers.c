@@ -9,13 +9,13 @@
 #include "psx/types.h"
 
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
- * interior through menu_cmd_draw_background_tiles_handler.
+ * interior through menu_opcode_11_draw_background_tiles.
  *
- * JOBSTTS copy of world_menu_parse_draw_window_frame without the rectangle
+ * JOBSTTS copy of world_menu_opcode_00_draw_window_frame without the rectangle
  * source selection. Reassigning the command pointer before the return keeps
  * its reference count high enough for global allocation to place it in s6.
  */
-menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* command) {
+menu_instruction_t* jobstts_menu_opcode_00_draw_window_frame(menu_instruction_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -100,7 +100,7 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     g_cmd_window_interior_command.y = command->window.y;
     g_cmd_window_interior_command.width = command->window.width;
     g_cmd_window_interior_command.height = command->window.height;
-    menu_cmd_draw_background_tiles_handler((menu_instruction_t*)&g_cmd_window_interior_command);
+    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&g_cmd_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
@@ -137,9 +137,9 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
 /* Draw a window frame that opens vertically: during the first 8 transition frames, clip
  * drawing to a band centered on the window whose height follows
  * g_jobstts_gfx_transition_height_percent, and lock the ordering-table index so later
- * set-index commands leave it until menu_cmd_release_otag_lock_handler restores the full
+ * set-index commands leave it until menu_opcode_13_clear_temporary_draw_area restores the full
  * draw area. Input is withheld for the first 3 frames. */
-menu_instruction_t* jobstts_menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* command) {
+menu_instruction_t* jobstts_menu_opcode_12_draw_opening_window_frame(menu_instruction_t* command) {
     menu_instruction_t* next;
     RECT rect;
 
@@ -147,7 +147,7 @@ menu_instruction_t* jobstts_menu_cmd_draw_border_tiles_with_transition_clip(menu
         s32 scale;
 
         if (g_gfx_transition_frame < 3) {
-            g_menu_cmd_stream_input = 0;
+            g_menu_script_input = 0;
         }
         scale = g_jobstts_gfx_transition_height_percent[g_gfx_transition_frame];
         rect.w = 0x100;
@@ -160,7 +160,7 @@ menu_instruction_t* jobstts_menu_cmd_draw_border_tiles_with_transition_clip(menu
     } else {
         g_gfx_otag_index_locked = 0;
     }
-    next = jobstts_cmd_draw_window_frame_handler(command);
+    next = jobstts_menu_opcode_00_draw_window_frame(command);
     g_menu_gfx_otag_index++;
     return next;
 }

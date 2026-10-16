@@ -5,7 +5,7 @@
 
 /* Menu script command: run the next count commands when the row predicate holds, otherwise skip
  * them. The predicate gets the command's literal row, or the current list row in list mode. */
-menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* cmd) {
     s32 (*callback)(s32);
     s32 count;
     s32 row;
@@ -27,7 +27,7 @@ menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* cmd) {
         }
     } else {
         while (--count != -1) {
-            cmd = g_menu_cmd_handlers[cmd->header.opcode](cmd);
+            cmd = g_menu_opcode_handlers[cmd->header.opcode](cmd);
         }
     }
     return cmd;
@@ -35,7 +35,7 @@ menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* cmd) {
 
 /* Run the selected branch and skip the other, using the literal or current
  * list row as the predicate's argument. */
-menu_instruction_t* menu_cmd_run_if_else_group_handler(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* cmd) {
     s32 then_count;
     s32 else_count;
     s32 (*callback)(s32);
@@ -55,7 +55,7 @@ menu_instruction_t* menu_cmd_run_if_else_group_handler(menu_instruction_t* cmd) 
     cmd = menu_next_instruction(cmd);
     if (callback(row) != 0) {
         for (then_count--; then_count != -1; then_count--) {
-            cmd = g_menu_cmd_handlers[cmd->header.opcode](cmd);
+            cmd = g_menu_opcode_handlers[cmd->header.opcode](cmd);
         }
         for (else_count--; else_count != -1; else_count--) {
             cmd = menu_next_instruction(cmd);
@@ -65,7 +65,7 @@ menu_instruction_t* menu_cmd_run_if_else_group_handler(menu_instruction_t* cmd) 
             cmd = menu_next_instruction(cmd);
         }
         for (else_count--; else_count != -1; else_count--) {
-            cmd = g_menu_cmd_handlers[cmd->header.opcode](cmd);
+            cmd = g_menu_opcode_handlers[cmd->header.opcode](cmd);
         }
     }
     return cmd;

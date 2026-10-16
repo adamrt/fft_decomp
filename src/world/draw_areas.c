@@ -50,7 +50,7 @@ void world_menu_set_palette_mode(s32 mode) {
  * draw-area clip is active), end the clip by adding
  * g_world_gfx_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index, and unlock the index. Returns the next instruction. */
-menu_instruction_t* world_menu_script_clear_temporary_draw_area(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked != 0) {
         g_world_gfx_temporary_draw_area.y = 0;
         world_gfx_add_draw_area_primitive(&g_world_gfx_temporary_draw_area, g_menu_gfx_otag_index + 1);
@@ -62,7 +62,7 @@ menu_instruction_t* world_menu_script_clear_temporary_draw_area(menu_instruction
 /* Menu-script opcode: unless the ordering-table index is locked, add the
  * instruction's draw area one entry before the current ordering-table index.
  * Returns the next instruction. */
-menu_instruction_t* world_menu_script_set_draw_area(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_14_set_draw_area(menu_instruction_t* instruction) {
     RECT rect;
 
     if (g_gfx_otag_index_locked == 0) {
@@ -78,7 +78,7 @@ menu_instruction_t* world_menu_script_set_draw_area(menu_instruction_t* instruct
 /* Menu-script opcode: unless the ordering-table index is locked, add
  * g_world_gfx_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index. Returns the next instruction. */
-menu_instruction_t* world_menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
         g_world_gfx_temporary_draw_area.y = 0;
         world_gfx_add_draw_area_primitive(&g_world_gfx_temporary_draw_area, g_menu_gfx_otag_index + 1);

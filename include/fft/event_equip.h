@@ -236,17 +236,17 @@ enum {
     EQUIP_CMD_END = 0x19,
 };
 
-/* A g_menu_row_callbacks getter, as equip_menu_cmd_draw_formatted_number_handler calls it. */
+/* A g_menu_row_callbacks getter, as equip_menu_opcode_0d_draw_formatted_number calls it. */
 typedef s32 (*equip_row_callback_t)(s32 row);
 
 extern u16 g_equip_menu_list_cursor_anim_state[];
 extern s16 g_equip_menu_list_scroll_entry_ids;
 
-menu_instruction_t* equip_menu_cmd_draw_line_f2_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_menu_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_opcode_07_draw_line(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_opcode_03_draw_tile(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
 
 /* text */
 /* The "%d" format string at the head of the overlay. */

@@ -525,11 +525,11 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     g_bunit_unit_grid_max_stat_number.x = cell.x + 40;
                     g_bunit_unit_grid_max_stat_number.y = cell_y + 45;
                     g_bunit_unit_grid_max_stat_number.value = unit_index;
-                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_max_stat_number);
+                    bunit_menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_max_stat_number);
                     g_bunit_unit_grid_stat_number.x = cell.x + 20;
                     g_bunit_unit_grid_stat_number.y = number_y;
                     g_bunit_unit_grid_stat_number.value = unit_index;
-                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_stat_number);
+                    bunit_menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_stat_number);
                     rect.x = cell.x + 35;
                     rect.y = top + 5;
                     rect.w = 6;
@@ -588,11 +588,12 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     g_bunit_unit_grid_level_number.x = cell.x + 13;
                     g_bunit_unit_grid_level_number.y = upper_y3;
                     g_bunit_unit_grid_level_number.value = unit_index;
-                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_level_number);
+                    bunit_menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_level_number);
                     g_bunit_unit_grid_experience_number.x = cell.x + 45;
                     g_bunit_unit_grid_experience_number.y = number_y3;
                     g_bunit_unit_grid_experience_number.value = unit_index;
-                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_experience_number);
+                    bunit_menu_opcode_0d_draw_formatted_number(
+                        (menu_instruction_t*)&g_bunit_unit_grid_experience_number);
                 } else if (g_bunit_unit_stat_mode == MENU_UNIT_READOUT_BRAVE_FAITH) {
                     top = cell_y + 45;
                     rect.x = cell.x - 1;
@@ -628,20 +629,22 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     g_bunit_unit_grid_brave_number_wide.value = g_bunit_unit_grid_brave_number.value = unit_index;
                     if (g_bunit_unit_pointers[unit_index]->brave >= 100) {
                         g_bunit_unit_grid_brave_number_wide.x = cell.x + 10;
-                        bunit_menu_script_draw_formatted_number(
+                        bunit_menu_opcode_0d_draw_formatted_number(
                             (menu_instruction_t*)&g_bunit_unit_grid_brave_number_wide);
                     } else
-                        bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_brave_number);
+                        bunit_menu_opcode_0d_draw_formatted_number(
+                            (menu_instruction_t*)&g_bunit_unit_grid_brave_number);
                     lower_y4 = top;
                     g_bunit_unit_grid_faith_number.x = cell.x + 45;
                     g_bunit_unit_grid_faith_number_wide.y = g_bunit_unit_grid_faith_number.y = lower_y4;
                     g_bunit_unit_grid_faith_number_wide.value = g_bunit_unit_grid_faith_number.value = unit_index;
                     if (g_bunit_unit_pointers[unit_index]->faith >= 100) {
                         g_bunit_unit_grid_faith_number_wide.x = cell.x + 40;
-                        bunit_menu_script_draw_formatted_number(
+                        bunit_menu_opcode_0d_draw_formatted_number(
                             (menu_instruction_t*)&g_bunit_unit_grid_faith_number_wide);
                     } else
-                        bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_faith_number);
+                        bunit_menu_opcode_0d_draw_formatted_number(
+                            (menu_instruction_t*)&g_bunit_unit_grid_faith_number);
                 }
             }
             bunit_gfx_draw_unit_sprite_and_name_plate(g_bunit_unit_reorderable_indices[unit], cell.x, cell.y);

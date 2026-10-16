@@ -65,35 +65,35 @@ s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask) {
 }
 
 /* Map script opcodes 0x00 and 0x16: do nothing. */
-void wldcore_opcode_map_nop(void) {
+void wldcore_script_opcode_00_nop(void) {
 }
 
 /* Map script opcodes 0x14 and 0x15: skip one operand without testing anything. */
-void wldcore_opcode_map_skip_1_operand(void) {
+void wldcore_script_opcode_14_skip_1_operand(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 1;
 }
 
 /* Map script opcodes 0x05 to 0x0B and 0x1B: skip two operands without testing anything. */
-void wldcore_opcode_map_skip_2_operands(void) {
+void wldcore_script_opcode_05_skip_2_operands(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 2;
 }
 
 /* Map script opcode 0x17: skip three operands without testing anything. */
-void wldcore_opcode_map_skip_3_operands(void) {
+void wldcore_script_opcode_17_skip_3_operands(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 3;
 }
 
 /* Map script opcode 0x18: skip four operands without testing anything. */
-void wldcore_opcode_map_skip_4_operands(void) {
+void wldcore_script_opcode_18_skip_4_operands(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 4;
 }
 
 /* Reject the Var= condition when the script variable differs from the operand. */
-void wldcore_opcode_map_check_var_equal(void) {
+void wldcore_script_opcode_01_check_var_equal(void) {
     s32 variable_id;
     s32 value;
 
@@ -116,7 +116,7 @@ static void wldcore_script_read_operand_pair(s32* out1, s32* out2) {
 }
 
 /* Reject the Var>= condition when the script variable is below the operand. */
-void wldcore_opcode_map_check_var_at_least(void) {
+void wldcore_script_opcode_02_check_var_at_least(void) {
     s32 variable_id;
     s32 value;
 
@@ -127,7 +127,7 @@ void wldcore_opcode_map_check_var_at_least(void) {
 }
 
 /* Reject the Var<= condition when the script variable is above the operand. */
-void wldcore_opcode_map_check_var_at_most(void) {
+void wldcore_script_opcode_03_check_var_at_most(void) {
     s32 variable_id;
     s32 value;
 
@@ -138,7 +138,7 @@ void wldcore_opcode_map_check_var_at_most(void) {
 }
 
 /* Reject the HasUnit condition when no roster unit has the operand's sprite set. */
-void wldcore_opcode_map_check_roster_has_sprite_set(void) {
+void wldcore_script_opcode_04_check_roster_has_sprite_set(void) {
     s32 i;
     s32 sprite_set;
     u16* ipp;
@@ -166,20 +166,20 @@ void wldcore_opcode_map_check_roster_has_sprite_set(void) {
 
 /* Map script opcode 0x0C: skip one operand without testing anything (its own copy of the 0x14
  * body). */
-void wldcore_opcode_map_skip_1_operand_0x0c(void) {
+void wldcore_script_opcode_0c_skip_1_operand(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 1;
 }
 
 /* Map script opcode 0x0D: skip one operand without testing anything (its own copy of the 0x14
  * body). */
-void wldcore_opcode_map_skip_1_operand_0x0d(void) {
+void wldcore_script_opcode_0d_skip_1_operand(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 1;
 }
 
 /* Reject the Gil>= condition when current war funds are below the operand. */
-void wldcore_opcode_map_check_war_funds_at_least(void) {
+void wldcore_script_opcode_0e_check_war_funds_at_least(void) {
     u16* ip = &g_wldcore_script_state.ip;
     u16 idx = *ip;
     u16 value = g_wldcore_script_state.data[idx];
@@ -190,7 +190,7 @@ void wldcore_opcode_map_check_war_funds_at_least(void) {
 }
 
 /* Reject the Gil<= condition when current war funds are above the operand. */
-void wldcore_opcode_map_check_war_funds_at_most(void) {
+void wldcore_script_opcode_0f_check_war_funds_at_most(void) {
     u16* ip = &g_wldcore_script_state.ip;
     u16 idx = *ip;
     s32 value = g_wldcore_script_state.data[idx];
@@ -201,7 +201,7 @@ void wldcore_opcode_map_check_war_funds_at_most(void) {
 }
 
 /* Reject the Date>= condition when the current date precedes the operand. */
-void wldcore_opcode_map_check_date_on_or_after(void) {
+void wldcore_script_opcode_10_check_date_on_or_after(void) {
     s32 month, day, current_month, current_day;
     s32* flags;
 
@@ -230,7 +230,7 @@ static void wldcore_script_read_operand_pair_and_date(
 }
 
 /* Reject the Date<= condition when the current date follows the operand. */
-void wldcore_opcode_map_check_date_on_or_before(void) {
+void wldcore_script_opcode_11_check_date_on_or_before(void) {
     s32 month, day, current_month, current_day;
     s32* flags;
 
@@ -242,7 +242,7 @@ void wldcore_opcode_map_check_date_on_or_before(void) {
 }
 
 /* Reject the Casualties>= condition when the current count is below the operand. */
-void wldcore_opcode_map_check_casualties_at_least(void) {
+void wldcore_script_opcode_12_check_casualties_at_least(void) {
     u16* ip = &g_wldcore_script_state.ip;
     u16 idx = *ip;
     u16 value = g_wldcore_script_state.data[idx];
@@ -253,7 +253,7 @@ void wldcore_opcode_map_check_casualties_at_least(void) {
 }
 
 /* Reject the Casualties<= condition when the current count is above the operand. */
-void wldcore_opcode_map_check_casualties_at_most(void) {
+void wldcore_script_opcode_13_check_casualties_at_most(void) {
     u16* ip = &g_wldcore_script_state.ip;
     u16 idx = *ip;
     s32 value = g_wldcore_script_state.data[idx];
@@ -265,7 +265,7 @@ void wldcore_opcode_map_check_casualties_at_most(void) {
 
 /* Stage a deferred LoadEvent request: the event to play and its transition
  * mode (wldcore_menu_push_event_transition_level). */
-void wldcore_opcode_map_request_load_event(void) {
+void wldcore_script_opcode_19_request_load_event(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
     g_wldcore_script_state.args[1] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
@@ -274,7 +274,7 @@ void wldcore_opcode_map_request_load_event(void) {
 }
 
 /* Stage four variable/value pairs for a deferred Choice request. */
-void wldcore_opcode_map_request_choice(void) {
+void wldcore_script_opcode_1a_request_choice(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
@@ -287,7 +287,7 @@ void wldcore_opcode_map_request_choice(void) {
 
 /* Map script opcode 0x1C (SetVar): set the script variable named by the first
  * operand to the second. */
-void wldcore_opcode_map_set_var(void) {
+void wldcore_script_opcode_1c_set_var(void) {
     s32 variable_id;
     s32 value;
 
@@ -296,7 +296,7 @@ void wldcore_opcode_map_set_var(void) {
 }
 
 /* Stage the text operand for a deferred Text request (opcode 0x1D). */
-void wldcore_opcode_map_request_text(void) {
+void wldcore_script_opcode_1d_request_text(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
     g_wldcore_script_state.flags |= WLDCORE_SCRIPT_REQUEST_TEXT;
@@ -306,7 +306,7 @@ void wldcore_opcode_map_request_text(void) {
  *
  * Each operand advances the script IP before the request becomes ready.
  */
-void wldcore_opcode_map_request_deep_dungeon_entry(void) {
+void wldcore_script_opcode_1e_request_deep_dungeon_entry(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
     g_wldcore_script_state.args[1] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
@@ -320,7 +320,7 @@ void wldcore_opcode_map_request_deep_dungeon_entry(void) {
  *
  * This opcode only prepares the request; a later dispatcher performs it.
  */
-void wldcore_opcode_map_request_set_var_2(void) {
+void wldcore_script_opcode_1f_request_set_var_2(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
     g_wldcore_script_state.args[1] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
@@ -332,7 +332,7 @@ void wldcore_opcode_map_request_set_var_2(void) {
  *
  * The request flag is published after both operands and IP updates.
  */
-void wldcore_opcode_map_request_draw_path(void) {
+void wldcore_script_opcode_20_request_draw_path(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
     g_wldcore_script_state.args[1] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
@@ -341,7 +341,7 @@ void wldcore_opcode_map_request_draw_path(void) {
 }
 
 /* Stage the two operands for a deferred ErasePath request (opcode 0x21). */
-void wldcore_opcode_map_request_erase_path(void) {
+void wldcore_script_opcode_21_request_erase_path(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
     g_wldcore_script_state.args[1] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
@@ -352,14 +352,14 @@ void wldcore_opcode_map_request_erase_path(void) {
 /* Map script opcode 0x22: stage the location ID for a deferred DrawLocation
  * request. Unlike other opcodes it leaves ip on its operand, which is
  * harmless because staging the request ends the block. */
-void wldcore_opcode_map_request_draw_location(void) {
+void wldcore_script_opcode_22_request_draw_location(void) {
     g_wldcore_script_flags |= WLDCORE_SCRIPT_REQUEST_DRAW_LOCATION;
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
 }
 
 /* Map script opcode 0x23: stage the location ID for a deferred EraseLocation
  * request, leaving ip on its operand like DrawLocation. */
-void wldcore_opcode_map_request_erase_location(void) {
+void wldcore_script_opcode_23_request_erase_location(void) {
     g_wldcore_script_flags |= WLDCORE_SCRIPT_REQUEST_ERASE_LOCATION;
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
 }
@@ -368,7 +368,7 @@ void wldcore_opcode_map_request_erase_location(void) {
  * for the current one) and, only when its dot lies outside the view, request
  * the focus-location level that moves the map to it. It always ends the block
  * and, like DrawLocation, leaves ip on its operand. */
-void wldcore_opcode_map_focus_location(void) {
+void wldcore_script_opcode_24_focus_location(void) {
     u16 ip = g_wldcore_script_state.ip;
     u16* data = g_wldcore_script_state.data;
     u16 entry;
@@ -396,7 +396,7 @@ void wldcore_opcode_map_focus_location(void) {
 }
 
 /* Reject the MCBrave>= condition when Ramza's Brave is below the operand. */
-void wldcore_opcode_map_check_ramza_brave_at_least(void) {
+void wldcore_script_opcode_25_check_ramza_brave_at_least(void) {
     party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;
@@ -426,7 +426,7 @@ static s32 wldcore_get_ramza_roster_index(void) {
 }
 
 /* Reject the MCBrave<= condition when Ramza's Brave is above the operand. */
-void wldcore_opcode_map_check_ramza_brave_at_most(void) {
+void wldcore_script_opcode_26_check_ramza_brave_at_most(void) {
     party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;
@@ -440,7 +440,7 @@ void wldcore_opcode_map_check_ramza_brave_at_most(void) {
 }
 
 /* Reject the MCFaith>= condition when Ramza's Faith is below the operand. */
-void wldcore_opcode_map_check_ramza_faith_at_least(void) {
+void wldcore_script_opcode_27_check_ramza_faith_at_least(void) {
     party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;
@@ -454,7 +454,7 @@ void wldcore_opcode_map_check_ramza_faith_at_least(void) {
 }
 
 /* Reject the MCFaith<= condition when Ramza's Faith is above the operand. */
-void wldcore_opcode_map_check_ramza_faith_at_most(void) {
+void wldcore_script_opcode_28_check_ramza_faith_at_most(void) {
     party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;

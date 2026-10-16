@@ -5,7 +5,7 @@
 #include "psx/types.h"
 
 /* Select the normal or alternate sprite color. */
-menu_instruction_t* menu_cmd_set_draw_color_handler(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* data) {
     u8 blue;
     if (g_menu_use_alternate_palette != 0) {
         g_menu_text_color.r = data->sprite_color.alternate.r;

@@ -8,7 +8,7 @@
 /* Draw a menu window's border and tile its interior through the overlay's handler.
  * Source 1 selects alternate border UVs. The final command reassignment
  * preserves the original pointer allocation. */
-menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -111,7 +111,7 @@ menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* comma
     g_menu_window_interior_command.y = command->window.y;
     g_menu_window_interior_command.width = command->window.width;
     g_menu_window_interior_command.height = command->window.height;
-    menu_cmd_draw_background_tiles_handler((menu_instruction_t*)&g_menu_window_interior_command);
+    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&g_menu_window_interior_command);
 
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;

@@ -176,8 +176,8 @@ extern u8 g_card_save_list_input_armed;
 void card_input_update_suppressed_during_fade(void);
 
 /* menu commands */
-menu_draw_number_command_t* card_cmd_draw_decimal_number_handler(menu_draw_number_command_t* command);
-menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t* command);
+menu_draw_number_command_t* card_draw_decimal_number(menu_draw_number_command_t* command);
+menu_window_command_t* card_draw_window_frame(menu_window_command_t* command);
 
 /* text */
 extern const char g_card_text_decimal_format[];

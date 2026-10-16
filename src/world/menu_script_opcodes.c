@@ -23,7 +23,7 @@
 /* Menu script command: run the next count commands when the row predicate holds, otherwise skip
  * them. The predicate gets the command's literal value, or the current list row while the list
  * uses its scroll position. */
-menu_instruction_t* world_menu_script_conditional(menu_instruction_t* script) {
+menu_instruction_t* world_menu_opcode_01_if_group(menu_instruction_t* script) {
     menu_instruction_t* instruction = script;
     s32 (*predicate)(s32) = g_world_menu_script_callbacks[instruction->conditional.predicate].value;
     s32 count = instruction->conditional.count;
@@ -47,7 +47,7 @@ menu_instruction_t* world_menu_script_conditional(menu_instruction_t* script) {
     } else {
         count -= 1;
         while (count != -1) {
-            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
+            instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
             count -= 1;
         }
     }
@@ -56,7 +56,7 @@ menu_instruction_t* world_menu_script_conditional(menu_instruction_t* script) {
 
 /* Execute the selected branch and skip the other by encoded instruction
  * lengths, using a literal predicate argument or the current scrolling row. */
-menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_02_if_else_group(menu_instruction_t* instruction) {
     s32 (*predicate)(s32) = g_world_menu_script_callbacks[instruction->if_else.predicate].value;
     s32 count_true = instruction->if_else.count_true;
     s32 count_false = instruction->if_else.count_false;
@@ -74,7 +74,7 @@ menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction) {
     if (predicate(arg) != 0) {
         count_true -= 1;
         while (count_true != -1) {
-            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
+            instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
             count_true -= 1;
         }
         count_false -= 1;
@@ -90,7 +90,7 @@ menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction) {
         }
         count_false -= 1;
         while (count_false != -1) {
-            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
+            instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
             count_false -= 1;
         }
     }
@@ -100,7 +100,7 @@ menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction) {
 /* Menu script command: draw a filled tile (x, y, width, height and color) at
  * the current draw priority and semi-transparency, and return the next
  * command. Inside a list body, y follows the row being drawn. */
-menu_instruction_t* world_menu_script_draw_tile(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_03_draw_tile(menu_instruction_t* instruction) {
     RECT rect;
     s32 y;
     s16 step;
@@ -126,7 +126,7 @@ menu_instruction_t* world_menu_script_draw_tile(menu_instruction_t* instruction)
  * with the current texture page and CLUT, tinted by the menu sprite color
  * unless it is the uncolored variant, and returns the next command. Inside a
  * list body, y follows the row being drawn. */
-menu_instruction_t* world_menu_script_draw_sprite(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction) {
     RECT rect;
     s32 y;
     s16 step;
@@ -156,7 +156,7 @@ menu_instruction_t* world_menu_script_draw_sprite(menu_instruction_t* instructio
 }
 
 /* Draw the command's two endpoints with its RGB color, then advance. */
-menu_instruction_t* world_menu_script_draw_line(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_07_draw_line(menu_instruction_t* instruction) {
     point16_t endpoints[2];
 
     endpoints[0].x = instruction->line.x0;
@@ -169,7 +169,7 @@ menu_instruction_t* world_menu_script_draw_line(menu_instruction_t* instruction)
 
 /* Ask the selected callback for the literal row's icon, or the current
  * scrolling row's icon, then draw it at the command's position. */
-menu_instruction_t* world_menu_script_draw_callback_sprite(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction) {
     menu_icon_source_t* (*handler)(s32);
     menu_icon_source_t* entry;
     s32 index;
@@ -194,14 +194,14 @@ menu_instruction_t* world_menu_script_draw_callback_sprite(menu_instruction_t* i
         g_world_menu_script_sprite_command.sprite.v = entry->v;
         g_world_menu_clut = entry->clut;
         g_world_menu_texture_page = entry->tpage;
-        world_menu_script_draw_sprite((menu_instruction_t*)&g_world_menu_script_sprite_command);
+        world_menu_opcode_04_draw_textured_quad((menu_instruction_t*)&g_world_menu_script_sprite_command);
     }
     return menu_next_instruction(instruction);
 }
 
 /*
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
- * the interior through world_menu_parse_draw_tiled_rectangle.
+ * the interior through world_menu_opcode_11_draw_tiled_rectangle.
  *
  * Source 2 takes the signed rectangle from the shared window record; other
  * sources use the command's byte operands. Source 1 selects the alternate
@@ -209,7 +209,7 @@ menu_instruction_t* world_menu_script_draw_callback_sprite(menu_instruction_t* i
  * pointer's reference count above the draw priority's, so global allocation
  * places them in s6 and s7 like the target.
  */
-menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_00_draw_window_frame(menu_instruction_t* instruction) {
     RECT rect;
     s32 left;
     s32 top;
@@ -329,7 +329,7 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
         g_world_menu_window_interior_command.width = instruction->window.width;
         g_world_menu_window_interior_command.height = instruction->window.height;
     }
-    world_menu_parse_draw_tiled_rectangle((menu_instruction_t*)&g_world_menu_window_interior_command);
+    world_menu_opcode_11_draw_tiled_rectangle((menu_instruction_t*)&g_world_menu_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
@@ -369,13 +369,13 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
  * Steps 0-3 scale width and height by the signed percentage table. Later
  * steps disable the temporary clip; the downstream command still runs.
  */
-menu_instruction_t* world_menu_handle_window_command_with_scaled_clip(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction) {
     RECT clip;
     s32 scale;
 
     if (g_gfx_transition_frame < 4) {
         if (g_gfx_transition_frame < 3) {
-            g_menu_cmd_stream_input = 0;
+            g_menu_script_input = 0;
         }
         scale = g_world_menu_window_scale_table[g_gfx_transition_frame];
         clip.w = instruction->window.width * scale / 100;
@@ -387,7 +387,7 @@ menu_instruction_t* world_menu_handle_window_command_with_scaled_clip(menu_instr
     } else {
         g_gfx_otag_index_locked = 0;
     }
-    return world_menu_parse_draw_window_frame(instruction);
+    return world_menu_opcode_00_draw_window_frame(instruction);
 }
 
 /*
@@ -395,7 +395,7 @@ menu_instruction_t* world_menu_handle_window_command_with_scaled_clip(menu_instr
  *
  * Source 2 uses the signed shared rectangle; other sources use byte operands.
  */
-menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* instruction) {
     RECT rect;
     s32 base_x;
     s32 full_rows;
@@ -469,7 +469,7 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
  * Built at -O1: the unscheduled prologue and load order are the -O1 signature
  * of the menu-script handlers (see world_menu_script_* in src/world). The
  * reassigned s32 y defeats plus->ior folding (gives addu). */
-menu_instruction_t* world_menu_script_set_fixed_clut(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_09_set_fixed_clut(menu_instruction_t* instruction) {
     s32 x = instruction->fixed_clut.x_div_16;
     s32 y;
 
@@ -483,8 +483,8 @@ menu_instruction_t* world_menu_script_set_fixed_clut(menu_instruction_t* instruc
 /* Menu-script opcode handler: pick the CLUT x/y operands from bytes 2..4 or,
  * when g_world_menu_use_alternate_palette selects the alternate palette, bytes 5..7, and record the
  * resulting CLUT id. Advances by the instruction length (byte 1), like
- * world_menu_script_set_texture_page. */
-menu_instruction_t* world_menu_script_set_clut(menu_instruction_t* instruction) {
+ * world_menu_opcode_0c_set_texture_page. */
+menu_instruction_t* world_menu_opcode_0a_set_clut(menu_instruction_t* instruction) {
     if (g_world_menu_use_alternate_palette != 0) {
         g_world_menu_clut = GetClut(instruction->clut.alternate_x_div_16 << 4,
             instruction->clut.alternate_y_low + (instruction->clut.alternate_y_high << 8));
@@ -496,8 +496,8 @@ menu_instruction_t* world_menu_script_set_clut(menu_instruction_t* instruction) 
 }
 
 /* Menu-script opcode handler: set the texture page from the operand bytes and
- * advance by the instruction length (byte 1), like world_menu_script_set_semi_trans. */
-menu_instruction_t* world_menu_script_set_texture_page(menu_instruction_t* instruction) {
+ * advance by the instruction length (byte 1), like world_menu_opcode_0e_set_semi_trans. */
+menu_instruction_t* world_menu_opcode_0c_set_texture_page(menu_instruction_t* instruction) {
     g_world_menu_texture_page = GetTPage(instruction->texture_page.depth, instruction->texture_page.y_blend >> 4,
         instruction->texture_page.x_div_16 << 4, instruction->texture_page.y_blend << 8);
     return menu_next_instruction(instruction);
@@ -506,14 +506,14 @@ menu_instruction_t* world_menu_script_set_texture_page(menu_instruction_t* instr
 /* Menu-script opcode handler: byte 3 of the instruction selects the
  * semi-transparency flag used by the window/text primitives. Returns the
  * address of the next instruction (byte 1 is the instruction length). */
-menu_instruction_t* world_menu_script_set_semi_trans(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction) {
     g_menu_gfx_semitransparency = instruction->draw_state.value;
     return menu_next_instruction(instruction);
 }
 
 /* Menu script command: queue a draw-mode packet that selects the command's blend rate at the
  * current ordering-table slot, then continue with the next command. */
-menu_instruction_t* world_menu_script_add_blend_draw_mode(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction) {
     menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, instruction->blend.blend_rate, 0x100, 0), 0, g_menu_gfx_otag_index);
     return menu_next_instruction(instruction);
 }
@@ -521,7 +521,7 @@ menu_instruction_t* world_menu_script_add_blend_draw_mode(menu_instruction_t* in
 /* Set the current sprite color from a menu-script operand triplet.
  *
  * The palette selector chooses bytes 5..7 instead of the normal bytes 2..4. */
-menu_instruction_t* world_menu_script_set_sprite_color(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_0b_set_draw_color(menu_instruction_t* instruction) {
     if (g_world_menu_use_alternate_palette != 0) {
         g_world_menu_sprite_color.r = instruction->sprite_color.alternate.r,
         g_world_menu_sprite_color.g = instruction->sprite_color.alternate.g,
@@ -536,7 +536,7 @@ menu_instruction_t* world_menu_script_set_sprite_color(menu_instruction_t* instr
 
 /* Menu-script opcode handler: byte 3 of the instruction sets the menu draw
  * priority. Returns the address of the next instruction. */
-menu_instruction_t* world_menu_script_set_draw_priority(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction) {
     g_menu_gfx_otag_index = instruction->draw_state.value;
     return menu_next_instruction(instruction);
 }
@@ -547,7 +547,7 @@ menu_instruction_t* world_menu_script_set_draw_priority(menu_instruction_t* inst
  * The command selects its value source, width, spacing, palette, and one of
  * three glyph layouts. High value bits request a disabled palette or dashes.
  */
-menu_instruction_t* world_menu_script_draw_formatted_number(menu_instruction_t* command) {
+menu_instruction_t* world_menu_opcode_0d_draw_formatted_number(menu_instruction_t* command) {
     s8 text[16];
     RECT rect;
     RECT glyph;
@@ -684,7 +684,7 @@ menu_instruction_t* world_menu_script_draw_formatted_number(menu_instruction_t* 
  * destination register as the minuend; written as a single subtraction the
  * sign-extended blanks claims $s2 and the operands swap.
  */
-menu_instruction_t* world_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction) {
     s8 text[16];
     RECT rect;
     s32 value;
@@ -906,7 +906,7 @@ void world_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 
 }
 
 /* Walks past the records that follow the header, returning the next one. */
-static menu_instruction_t* world_menu_skip_instruction_group(menu_instruction_t* instruction) {
+static menu_instruction_t* world_menu_script_skip_group(menu_instruction_t* instruction) {
     s32 count;
 
     if (instruction->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {
@@ -1023,7 +1023,7 @@ void world_menu_init_and_draw_scrollable_list(
  * An empty list skips the list command and its following row group. Returns
  * the record that follows the list.
  */
-menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
+menu_instruction_t* world_menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     s32 unused[4];
     point16_t marker;
@@ -1039,7 +1039,7 @@ menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instru
     ot_index = g_menu_gfx_otag_index;
     if (g_menu_list_entry_count <= 0) {
         for (j = command->list.skip_count; j != -1; j--) {
-            command = world_menu_skip_instruction_group(command);
+            command = world_menu_script_skip_group(command);
         }
         return command;
     }
@@ -1055,7 +1055,7 @@ menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instru
             if (i != 2) {
                 world_menu_scroll_list_by_page(i, command);
             }
-        } else if ((g_menu_cmd_stream_input & (PSX_PAD_UP << 16)) || (g_menu_cmd_stream_input & PSX_PAD_UP)) {
+        } else if ((g_menu_script_input & (PSX_PAD_UP << 16)) || (g_menu_script_input & PSX_PAD_UP)) {
             index = g_menu_scroll_base_index;
             if (index == g_menu_list_selected_index) {
                 if (index > 0) {
@@ -1070,10 +1070,10 @@ menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instru
                             g_world_menu_list_text_table, g_world_menu_list_row_text_ids, &rect, 0);
                     }
                 }
-            } else if (g_menu_cmd_stream_input & PSX_PAD_UP) {
+            } else if (g_menu_script_input & PSX_PAD_UP) {
                 g_menu_list_selected_index--;
             }
-        } else if ((g_menu_cmd_stream_input & (PSX_PAD_DOWN << 16)) || (g_menu_cmd_stream_input & PSX_PAD_DOWN)) {
+        } else if ((g_menu_script_input & (PSX_PAD_DOWN << 16)) || (g_menu_script_input & PSX_PAD_DOWN)) {
             if (g_menu_scroll_base_index + g_world_menu_list_visible_rows - 1 == g_menu_list_selected_index) {
                 if (g_menu_scroll_base_index + g_world_menu_list_visible_rows - 1 < g_menu_list_entry_count - 1) {
                     g_world_menu_list_scroll_direction = 1;
@@ -1089,8 +1089,7 @@ menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instru
                     }
                 }
             } else {
-                if (g_menu_list_selected_index < g_menu_list_entry_count - 1
-                    && (g_menu_cmd_stream_input & PSX_PAD_DOWN)) {
+                if (g_menu_list_selected_index < g_menu_list_entry_count - 1 && (g_menu_script_input & PSX_PAD_DOWN)) {
                     g_menu_list_selected_index++;
                 }
             }
@@ -1205,7 +1204,7 @@ menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instru
         }
         command = row_commands;
         for (j = 0; j < g_world_menu_list_row_record_count; j++) {
-            command = g_menu_cmd_handlers[command->header.opcode](command);
+            command = g_menu_opcode_handlers[command->header.opcode](command);
         }
     }
     g_world_menu_use_scroll_position = 0;

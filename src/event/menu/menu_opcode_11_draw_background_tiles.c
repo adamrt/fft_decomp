@@ -10,7 +10,7 @@
  * Command bytes 5 and 6 encode the full-tile counts in their high nibbles and
  * the remaining width and height in their low nibbles.
  */
-menu_instruction_t* menu_cmd_draw_background_tiles_handler(menu_instruction_t* desc) {
+menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* desc) {
     RECT rect;
     s32 full_columns;
     s32 origin_x;

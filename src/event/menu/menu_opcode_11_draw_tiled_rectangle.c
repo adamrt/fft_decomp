@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* Tile the command rectangle, or the shared rectangle when source is 2. */
-menu_window_command_t* menu_cmd_draw_tiled_rectangle_handler(menu_window_command_t* command) {
+menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t* command) {
     RECT rect;
     s32 base_x;
     s32 base_y;

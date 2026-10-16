@@ -6,7 +6,7 @@
 #include "psx/libgpu.h"
 
 /* Queue the instruction draw area unless the zoom transition already queued one. */
-menu_instruction_t* menu_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t* data) {
     RECT area;
 
     if (g_gfx_otag_index_locked == 0) {

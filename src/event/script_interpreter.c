@@ -309,7 +309,7 @@ void camera_thread(void) {
  * thread alive under the MapDarkness task id for
  * g_script_map_darkness_durations[duration index] frames (1 to 256). WORLD's copy
  * also calls the BATTLE blend at 0x800934d0, which is WLDCORE data there. */
-void script_map_darkness(void) {
+void script_opcode_1a_map_darkness(void) {
     event_unit_color_t* parameters;
 
     thread_set_current_task_id(THREAD_TASK_MAP_DARKNESS);
@@ -323,7 +323,7 @@ void script_map_darkness(void) {
 /* Thread body of Earthquake: each of the two pulses adds its z delta to the camera shake
  * offset every pulses[k].frames frames, on independent counters. The thread never ends on
  * its own; another instruction tears it down. */
-void script_earthquake_start(void) {
+void script_opcode_41_earthquake_start(void) {
     event_earthquake_parameters_t* parameters;
     s32 first_counter;
     s32 second_counter;
@@ -350,7 +350,7 @@ void script_earthquake_start(void) {
 /* Thread body of ColorScreen: blend the screen color modulation from the start RGB to the
  * end RGB over the duration in frames, restarting a 2-frame modulation fade every second
  * frame, then settle on the end color. */
-void script_color_screen_thread(void) {
+void script_opcode_3e_color_screen_thread(void) {
     struct {
         s32 start_and_end[6];
         s32 current[3];
@@ -548,7 +548,7 @@ void script_sprite_move_beta(void) {
 /* WaitSpriteMove: yield until no thread is still running the sprite-move task
  * for the calling event's sprite. A unit id that does not resolve has nothing
  * to wait for. */
-void script_opcode_wait_sprite_move(s32 unit_id) {
+void script_opcode_6f_wait_sprite_move(s32 unit_id) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
     s32 i;
 
@@ -984,7 +984,7 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
  * it by -0x1f and wait 60 frames more. Then, when `remove` is set, mark its
  * battle unit as not existing. A unit id that does not resolve does nothing. The
  * interpreter always passes remove = 1. */
-void script_opcode_teleport_out(s32 unit_id, s32 remove) {
+void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
     s32 unit = script_resolve_runtime_id(unit_id);
     s32 idx;
 
@@ -1007,7 +1007,7 @@ void script_opcode_teleport_out(s32 unit_id, s32 remove) {
 
 /* Start the teleport-in effect for an event unit. The interpreter supplies 1
  * as its second argument; this entry forwards only the unit ID. */
-void script_opcode_teleport_in(s32 unit_id, s32 unused) {
+void script_opcode_98_teleport_in(s32 unit_id, s32 unused) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
@@ -1044,7 +1044,7 @@ void script_blue_remove_all_enemy_units(void) {
  *
  * The team test reads the current team byte (0x05), not the initial one at
  * 0x1ba. */
-void script_blue_remove_unit(s32 unit_id) {
+void script_opcode_99_blue_remove_unit(s32 unit_id) {
     s32 runtime_id;
     s32 battle_index;
     unit_stats_t* unit;
@@ -1126,7 +1126,7 @@ void script_warp_unit(const event_warp_unit_parameters_t* instruction) {
 }
 
 /* Set facing and animation immediately; the animation high byte also controls facing-update suppression. */
-void script_opcode_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters) {
+void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters) {
     u8 rotation;
     s16 animation;
     s16 call_runtime_id;
@@ -1640,7 +1640,7 @@ static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 w
  *
  * Parameters: 16-bit unit id, stat selector (event_change_stats_e), then a
  * 16-bit delta. HP clamps to max HP and the other stats to 0-100. */
-void script_change_stats(const event_change_stats_parameters_t* parameters) {
+void script_opcode_83_change_stats(const event_change_stats_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 unit_index;
@@ -1729,7 +1729,7 @@ void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
  * animation and wait.  Parameters: 0x00 unit id (16-bit value), 0x02 wait length
  * in frames. Units are selected as script_prepare_unit_filter describes.
  */
-void script_march_units(const event_march_parameters_t* parameters) {
+void script_opcode_80_march(const event_march_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1753,7 +1753,7 @@ void script_march_units(const event_march_parameters_t* parameters) {
  * Parameters: 0x00 unit id (16-bit value), 0x02 nonzero to set, zero to clear.
  * Units are selected as script_prepare_unit_filter describes.
  */
-void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
+void script_opcode_81_set_unit_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1781,7 +1781,7 @@ void script_set_units_movement_effect_suppression(const event_movement_effect_pa
  * EVENT_UNIT_GROUP_FIRST run all 21 unit ids through
  * script_filter_unit_id_by_mode. Nothing happens when a plain unit id does
  * not resolve. */
-void script_opcode_color_unit(const event_color_unit_parameters_t* parameters) {
+void script_opcode_32_color_unit(const event_color_unit_parameters_t* parameters) {
     const event_unit_color_t* color;
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
@@ -1853,7 +1853,7 @@ s32 unit_check_facing_relative_to_camera(s32 event_unit_id) {
  * tile center to pick one of 16 facings; the n-th matching unit gets
  * rotation time * n / 4.
  */
-void script_face_tile(const event_face_tile_parameters_t* parameters) {
+void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) {
     SVECTOR screen;
     SVECTOR tile;
     u16 unit_id;
@@ -1892,7 +1892,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
 }
 
 /* WaitRotateUnit/All: resolved units yield at least once; -1 waits for all 21 slots. */
-void script_opcode_wait_rotate_all(s32 unit_id) {
+void script_opcode_65_wait_rotate_all(s32 unit_id) {
     s32 i;
     s32 index;
 

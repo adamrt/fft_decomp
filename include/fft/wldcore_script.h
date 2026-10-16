@@ -49,7 +49,7 @@ typedef enum wldcore_script_request_flags {
 
 /* interpreter */
 /* The interpreter's state; the opcode handlers read ip and data here. It is one object through the choice and
- * argument values: wldcore_opcode_map_request_choice reaches ip at -4 and the arguments at +0x10 from its
+ * argument values: wldcore_script_opcode_1a_request_choice reaches ip at -4 and the arguments at +0x10 from its
  * &choice_vars base. */
 typedef struct wldcore_script_state {
     s32 flags;          /* 0x00; wldcore_script_result_flags_e | wldcore_script_action_flags_e */
@@ -73,11 +73,11 @@ extern wldcore_script_state_t g_wldcore_script_state;
 extern s32 g_wldcore_script_flags;
 extern void (*g_wldcore_script_opcode_table[])(void); /* by opcode */
 s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask);
-void wldcore_opcode_map_request_load_event(void);
-void wldcore_opcode_map_request_text(void);
-void wldcore_opcode_map_request_deep_dungeon_entry(void);
-void wldcore_opcode_map_request_set_var_2(void);
-void wldcore_opcode_map_request_draw_path(void);
-void wldcore_opcode_map_request_erase_path(void);
+void wldcore_script_opcode_19_request_load_event(void);
+void wldcore_script_opcode_1d_request_text(void);
+void wldcore_script_opcode_1e_request_deep_dungeon_entry(void);
+void wldcore_script_opcode_1f_request_set_var_2(void);
+void wldcore_script_opcode_20_request_draw_path(void);
+void wldcore_script_opcode_21_request_erase_path(void);
 
 #endif

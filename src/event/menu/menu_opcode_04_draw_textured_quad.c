@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* Draw a textured quad at its literal position or current list row. */
-menu_instruction_t* menu_cmd_draw_textured_quad_handler(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* cmd) {
     RECT rect;
     s32 y;
     rgb24_t* color;

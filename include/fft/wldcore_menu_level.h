@@ -121,7 +121,7 @@ typedef struct wldcore_menu_scrollable_text_level {
     s32 _unknown_20; /* 0x20; 0x28 at push; nothing reads it */
 } wldcore_menu_scrollable_text_level_t;
 
-/* A level owning two window records; wldcore_opcode_set_parent_windows_visible toggles both records'
+/* A level owning two window records; wldcore_sound_novel_opcode_0c_set_parent_windows_visible toggles both records'
  * WORLD_RENDER_RECORD_HIDDEN. */
 typedef struct wldcore_menu_window_pair_level {
     s32 first_window;

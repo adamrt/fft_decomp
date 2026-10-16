@@ -1,10 +1,8 @@
 /* The menu command that draws a scrollable list's body, moving its cursor and scrolling by row or page. */
 
-#include "fft/event_bunit.h"
-#include "fft/gfx.h"
+#include "fft/event_equip.h"
 #include "fft/main.h"
 #include "fft/main_sound.h"
-#include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
@@ -22,15 +20,16 @@
  * group once per visible row, plus one while a scroll offset is in effect.
  * An empty list skips its row command groups.
  *
- * BUNIT's body: unlike EQUIP's, its scroll speed is the event speed rather than a
- * constant 2, as in JOBSTTS's. The padding arrays reproduce the target's frame (only
- * rect and marker are referenced). The scroll-down path follows WORLD's
- * world_menu_cmd_draw_scrollable_list_body_handler spelling.
+ * EQUIP's body: the JOBSTTS and BUNIT command without the event-speed multiplier.
+ * The padding arrays reproduce the target's frame (only rect and marker are
+ * referenced). The scroll-down path follows WORLD's world_menu_opcode_10_draw_scrollable_list
+ * spelling; its `(s16)` row-height cast adds the other 8 bytes of frame and
+ * keeps the row count in a register of its own.
  */
-menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
+menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
-    point16_t marker;
+    RECT marker;
     u8 pad1[0x8];
     u16 ot_index;
     u16 previous_selected;
@@ -51,32 +50,32 @@ menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instru
     if (g_menu_list_entry_count <= 0) {
         j = command->list.skip_count;
         while (j != -1) {
-            command = menu_cmd_skip_group(command);
+            command = menu_script_skip_group(command);
             j -= 1;
         }
         return command;
     }
-    speed = menu_get_event_speed();
     g_menu_list_row_mode = 1;
+    previous_selected = g_menu_list_selected_index;
+    speed = 2;
     if (g_menu_list_redraw_pending != 0) {
         menu_draw_scrollable_list(command);
     }
-    previous_selected = g_menu_list_selected_index;
     if (g_menu_list_scroll_direction == 0) {
-        j = bunit_menu_input_read_page_scroll_direction();
+        j = equip_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
                 menu_scroll_list_by_page(j, command);
             }
         } else {
-            input = g_menu_cmd_stream_input;
+            input = g_menu_script_input;
             if ((input & (PSX_PAD_UP << 16)) || (input & PSX_PAD_UP)) {
                 scroll_base = g_menu_scroll_base_index;
                 if (scroll_base == g_menu_list_selected_index) {
                     if (scroll_base > 0) {
                         g_menu_list_scroll_direction = -1;
                         if (g_menu_list_text_table != 0) {
-                            row_ids = &g_bunit_menu_list_scroll_entry_ids[0];
+                            row_ids = &g_equip_menu_list_scroll_entry_ids;
                             text_id = g_menu_list_entries[scroll_base - 1];
                             rect.x = 0x100;
                             rect.y = 0x20;
@@ -97,7 +96,7 @@ menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instru
                             s16* entry_ids;
 
                             j = g_menu_scroll_base_index + g_menu_list_visible_rows - 1;
-                            entry_ids = &g_bunit_menu_list_scroll_entry_ids[0];
+                            entry_ids = &g_equip_menu_list_scroll_entry_ids;
                             *entry_ids = g_menu_list_entries[j + 1];
                             rect.x = 0x100;
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
@@ -116,7 +115,7 @@ menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instru
     }
     if (g_menu_list_scroll_direction < 0) {
         if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset -= g_main_menu_scroll_fast_step * (speed & 0xff);
+            g_menu_list_scroll_offset -= speed * g_main_menu_scroll_fast_step;
         } else {
             g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * (speed & 0xff);
             g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
@@ -139,7 +138,7 @@ menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instru
         }
     } else if (g_menu_list_scroll_direction > 0) {
         if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset += g_main_menu_scroll_fast_step * (speed & 0xff);
+            g_menu_list_scroll_offset += speed * g_main_menu_scroll_fast_step;
         } else {
             g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * (speed & 0xff);
             g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
@@ -210,8 +209,8 @@ menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instru
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_sliding_cursor(
-            &marker, &g_bunit_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+        menu_update_and_draw_animated_cursor(
+            &marker, g_equip_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);
     g_menu_list_row_index = 0;
@@ -226,7 +225,7 @@ menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instru
         }
         command = row_commands;
         for (j = 0; j < g_menu_list_row_group_count; j++) {
-            command = g_menu_cmd_handlers[command->header.opcode](command);
+            command = g_menu_opcode_handlers[command->header.opcode](command);
         }
         g_menu_list_row_index += 1;
     }

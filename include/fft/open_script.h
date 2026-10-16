@@ -109,7 +109,7 @@ typedef struct open_script_state {
 typedef char open_script_state_size_must_be_5800[(sizeof(open_script_state_t) == 5800) ? 1 : -1];
 
 extern open_script_state_t g_open_script_state;
-/* Scalar views of 32-bit fields of g_open_script_state. open_opcode_set_timing_step,
+/* Scalar views of 32-bit fields of g_open_script_state. open_opcode_02_set_timing_step,
  * open_script_update_timing_and_record_values and
  * open_gfx_update_opntex_sequence load and store each of these by absolute
  * address; the member spelling lets cse keep the address in a register. */
@@ -144,21 +144,21 @@ typedef void (*open_script_entry_handler_t)(s16* entry);
 
 extern open_script_entry_handler_t g_open_opcode_handlers[16];
 
-void open_opcode_end_script(s16* unused_entry);
-void open_opcode_create_positioned_text_record(s16* command);
-void open_opcode_set_timing_step(s16* entry);
-void open_opcode_start_overlay_fade_out(s16* command);
-void open_opcode_start_overlay_fade_in(s16* command);
-void open_opcode_wait_counted(s16* entry);
-void open_opcode_wait_for_external_counter(s16* entry);
-void open_opcode_start_xa_audio(s16* command);
-void open_opcode_start_sound_fade_in(s16* command);
-void open_opcode_start_sound_fade_out(s16* command);
-void open_opcode_stop_xa_audio(s16* unused_entry);
-void open_opcode_load_opntex_frame(s16* command);
-void open_opcode_start_fade_intensity_increase(s16* command);
-void open_opcode_start_fade_intensity_decrease(s16* command);
-void open_opcode_wait_for_xa_audio_idle(s16* unused_entry);
-void open_opcode_start_opntex_sequence(s16* command);
+void open_opcode_00_end_script(s16* unused_entry);
+void open_opcode_01_create_positioned_text_record(s16* command);
+void open_opcode_02_set_timing_step(s16* entry);
+void open_opcode_03_start_overlay_fade_out(s16* command);
+void open_opcode_04_start_overlay_fade_in(s16* command);
+void open_opcode_05_wait_counted(s16* entry);
+void open_opcode_06_wait_for_external_counter(s16* entry);
+void open_opcode_07_start_xa_audio(s16* command);
+void open_opcode_08_start_sound_fade_in(s16* command);
+void open_opcode_09_start_sound_fade_out(s16* command);
+void open_opcode_0a_stop_xa_audio(s16* unused_entry);
+void open_opcode_0b_load_opntex_frame(s16* command);
+void open_opcode_0c_start_fade_intensity_increase(s16* command);
+void open_opcode_0d_start_fade_intensity_decrease(s16* command);
+void open_opcode_0e_wait_for_xa_audio_idle(s16* unused_entry);
+void open_opcode_0f_start_opntex_sequence(s16* command);
 
 #endif

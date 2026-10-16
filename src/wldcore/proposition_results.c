@@ -1116,7 +1116,7 @@ void wldcore_menu_resume_sound_novel_level(wldcore_menu_stack_record_t* level) {
     }
     g_wldcore_window_render_records[g_wldcore_active_saved_record.picture_render_index].flags
         &= ~WORLD_RENDER_RECORD_BLANK;
-    if (g_wldcore_active_saved_record.state_flags & WLDCORE_OPCODE_STATE_PARENT_WINDOWS_VISIBLE) {
+    if (g_wldcore_active_saved_record.state_flags & WLDCORE_SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE) {
         g_wldcore_window_records[level->sound_novel.left_window].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
         g_wldcore_window_records[level->sound_novel.right_window].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
     }
@@ -1186,7 +1186,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
     }
 
     state_flags = &g_wldcore_active_saved_record.state_flags;
-    if (*state_flags & WLDCORE_OPCODE_STATE_END) {
+    if (*state_flags & WLDCORE_SOUND_NOVEL_STATE_END) {
         return;
     }
 
@@ -1233,8 +1233,8 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
                 return;
             }
             if ((buttons & PSX_PAD_START)
-                && (g_wldcore_active_saved_record.state_flags & WLDCORE_OPCODE_STATE_PARENT_WINDOWS_VISIBLE)
-                && !(g_wldcore_active_saved_record.state_flags & WLDCORE_OPCODE_STATE_WHITE_OVERLAY)) {
+                && (g_wldcore_active_saved_record.state_flags & WLDCORE_SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE)
+                && !(g_wldcore_active_saved_record.state_flags & WLDCORE_SOUND_NOVEL_STATE_WHITE_OVERLAY)) {
                 g_wldcore_window_records[level->left_window].sequence
                     = WLDCORE_ANIM_SEQUENCE_SOUND_NOVEL_START_BUTTON_PRESS;
                 g_wldcore_window_records[level->left_window].frame_index
@@ -1246,7 +1246,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
                 return;
             }
             if ((g_input_current_buttons & PSX_PAD_SQUARE)
-                && (g_wldcore_active_saved_record.state_flags & WLDCORE_OPCODE_STATE_PARENT_WINDOWS_VISIBLE)
+                && (g_wldcore_active_saved_record.state_flags & WLDCORE_SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE)
                 && g_wldcore_active_saved_record.text_history_3 != -1) {
                 g_wldcore_window_records[level->right_window].sequence
                     = WLDCORE_ANIM_SEQUENCE_SOUND_NOVEL_SQUARE_BUTTON_PRESS;
@@ -1272,7 +1272,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
         main_sound_stop_weather_sfx_music();
         level->phase = WLDCORE_SOUND_NOVEL_PHASE_END;
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
-        if (!(*state_flags & WLDCORE_OPCODE_STATE_WHITE_OVERLAY)) {
+        if (!(*state_flags & WLDCORE_SOUND_NOVEL_STATE_WHITE_OVERLAY)) {
             wldcore_fade_start_screen(WLDCORE_SCREEN_FADE_OUT, 0x10);
         }
     }

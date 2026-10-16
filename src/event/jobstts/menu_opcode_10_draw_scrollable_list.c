@@ -25,9 +25,9 @@
  * JOBSTTS's body: EQUIP's command with BUNIT's event-speed multiplier. The
  * unused arrays reproduce the target's frame: it references only rect (0x20) and
  * marker (0x38). The scroll-down path follows WORLD's
- * world_menu_cmd_draw_scrollable_list_body_handler spelling.
+ * world_menu_opcode_10_draw_scrollable_list spelling.
  */
-menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
+menu_instruction_t* jobstts_menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 unused_28[16];
     point16_t marker;
@@ -52,7 +52,7 @@ menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_inst
     if (g_menu_list_entry_count <= 0) {
         count = command->list.skip_count + 1;
         while (--count != -1) {
-            command = menu_cmd_skip_group(command);
+            command = menu_script_skip_group(command);
         }
         return command;
     }
@@ -68,7 +68,7 @@ menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_inst
                 menu_scroll_list_by_page(j, command);
             }
         } else {
-            input = g_menu_cmd_stream_input;
+            input = g_menu_script_input;
             if ((input & (PSX_PAD_UP << 16)) || (input & PSX_PAD_UP)) {
                 if (g_menu_scroll_base_index == g_menu_list_selected_index) {
                     if (g_menu_scroll_base_index > 0) {
@@ -227,7 +227,7 @@ menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_inst
         }
         command = start;
         for (j = 0; j < g_menu_list_row_group_count; j++) {
-            command = g_menu_cmd_handlers[command->header.opcode](command);
+            command = g_menu_opcode_handlers[command->header.opcode](command);
         }
         g_menu_list_row_index += 1;
     }

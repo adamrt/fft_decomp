@@ -129,22 +129,22 @@ functions:
   - {addr: 0x8006f988, size: 136, name: open_movie_finish_fftend_controller_if_ready_or_skipped, hash: df1c60f300df0a2c, unit: title_script}
   - {addr: 0x8006fa10, size: 144, name: open_script_push_controller, hash: d38b74485501d567, unit: title_script}
   - {addr: 0x8006faa0, size: 88, name: open_script_update_controller, hash: c31c968e8b96aab5, unit: title_script}
-  - {addr: 0x8006faf8, size: 72, name: open_opcode_end_script, hash: 5abc662795697b2e, unit: title_script}
-  - {addr: 0x8006fb40, size: 548, name: open_opcode_create_positioned_text_record, hash: 79ffee469a0e46ff, unit: title_script}
-  - {addr: 0x8006fd64, size: 56, name: open_opcode_set_timing_step, hash: 022baf84860eb042, unit: title_script}
-  - {addr: 0x8006fd9c, size: 68, name: open_opcode_start_overlay_fade_out, hash: 8b4cecdc94072c05, unit: title_script}
-  - {addr: 0x8006fde0, size: 68, name: open_opcode_start_overlay_fade_in, hash: 6c979a6c306bfedc, unit: title_script}
-  - {addr: 0x8006fe24, size: 144, name: open_opcode_wait_counted, hash: 8db29caed7e75f80, unit: title_script}
-  - {addr: 0x8006feb4, size: 128, name: open_opcode_wait_for_external_counter, hash: 970c9c390ea7fcc4, unit: title_script}
-  - {addr: 0x8006ff34, size: 176, name: open_opcode_start_xa_audio, hash: aeffca5ff068f70b, unit: title_script}
-  - {addr: 0x8006ffe4, size: 60, name: open_opcode_start_sound_fade_in, hash: 721878b86ef21ca2, unit: title_script}
-  - {addr: 0x80070020, size: 60, name: open_opcode_start_sound_fade_out, hash: 814bce2be3c9e22d, unit: title_script}
-  - {addr: 0x8007005c, size: 164, name: open_opcode_stop_xa_audio, hash: 0c8b8bcfc224018a, unit: title_script}
-  - {addr: 0x80070100, size: 96, name: open_opcode_load_opntex_frame, hash: 5841d3ac770689b8, unit: title_script}
-  - {addr: 0x80070160, size: 76, name: open_opcode_start_fade_intensity_increase, hash: f38fc77944fcfc9e, unit: title_script}
-  - {addr: 0x800701ac, size: 80, name: open_opcode_start_fade_intensity_decrease, hash: 5eb2d91a96a89dc9, unit: title_script}
-  - {addr: 0x800701fc, size: 68, name: open_opcode_wait_for_xa_audio_idle, hash: 62a970bd0a049ed2, unit: title_script}
-  - {addr: 0x80070240, size: 104, name: open_opcode_start_opntex_sequence, hash: d633de2c09194393, unit: title_script}
+  - {addr: 0x8006faf8, size: 72, name: open_opcode_00_end_script, hash: 5abc662795697b2e, unit: title_script}
+  - {addr: 0x8006fb40, size: 548, name: open_opcode_01_create_positioned_text_record, hash: 79ffee469a0e46ff, unit: title_script}
+  - {addr: 0x8006fd64, size: 56, name: open_opcode_02_set_timing_step, hash: 022baf84860eb042, unit: title_script}
+  - {addr: 0x8006fd9c, size: 68, name: open_opcode_03_start_overlay_fade_out, hash: 8b4cecdc94072c05, unit: title_script}
+  - {addr: 0x8006fde0, size: 68, name: open_opcode_04_start_overlay_fade_in, hash: 6c979a6c306bfedc, unit: title_script}
+  - {addr: 0x8006fe24, size: 144, name: open_opcode_05_wait_counted, hash: 8db29caed7e75f80, unit: title_script}
+  - {addr: 0x8006feb4, size: 128, name: open_opcode_06_wait_for_external_counter, hash: 970c9c390ea7fcc4, unit: title_script}
+  - {addr: 0x8006ff34, size: 176, name: open_opcode_07_start_xa_audio, hash: aeffca5ff068f70b, unit: title_script}
+  - {addr: 0x8006ffe4, size: 60, name: open_opcode_08_start_sound_fade_in, hash: 721878b86ef21ca2, unit: title_script}
+  - {addr: 0x80070020, size: 60, name: open_opcode_09_start_sound_fade_out, hash: 814bce2be3c9e22d, unit: title_script}
+  - {addr: 0x8007005c, size: 164, name: open_opcode_0a_stop_xa_audio, hash: 0c8b8bcfc224018a, unit: title_script}
+  - {addr: 0x80070100, size: 96, name: open_opcode_0b_load_opntex_frame, hash: 5841d3ac770689b8, unit: title_script}
+  - {addr: 0x80070160, size: 76, name: open_opcode_0c_start_fade_intensity_increase, hash: f38fc77944fcfc9e, unit: title_script}
+  - {addr: 0x800701ac, size: 80, name: open_opcode_0d_start_fade_intensity_decrease, hash: 5eb2d91a96a89dc9, unit: title_script}
+  - {addr: 0x800701fc, size: 68, name: open_opcode_0e_wait_for_xa_audio_idle, hash: 62a970bd0a049ed2, unit: title_script}
+  - {addr: 0x80070240, size: 104, name: open_opcode_0f_start_opntex_sequence, hash: d633de2c09194393, unit: title_script}
   - {addr: 0x800702a8, size: 16, name: card_io_set_selected_slot, hash: 1f22427930c61f2c, unit: card_io}
   - {addr: 0x800702b8, size: 40, name: card_io_consume_all_events, hash: 8f5b83a6cd3ad9da, unit: card_io}
   - {addr: 0x800702e0, size: 192, name: card_io_poll_bios_event_result, hash: 5d6b60fd071709b7, unit: card_io}

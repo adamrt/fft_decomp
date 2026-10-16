@@ -8,10 +8,10 @@
 #include "psx/types.h"
 
 /* Sector and size pairs; flat 32-bit value access preserves the original addressing. */
-static s32 g_world_script_tutorial_message_files[7 * 2]
+static s32 g_world_tutorial_message_files[7 * 2]
     = { 72298, 4096, 72301, 6144, 72305, 6144, 72309, 4096, 72312, 6144, 72316, 2048, 72318, 2048 };
 
-static s32 g_world_script_tutorial_script_files[7 * 2]
+static s32 g_world_tutorial_script_files[7 * 2]
     = { 72297, 2048, 72300, 2048, 72304, 2048, 72308, 2048, 72311, 2048, 72315, 2048, 72317, 2048 };
 
 /* Load shop background image `index` to the heap; the table holds a sector
@@ -61,11 +61,11 @@ u8* world_text_get_resident_data(world_text_data_e index) {
 
 /* Load tutorial `index`'s (1-based) message text and command stream to the
  * heap and store their addresses in `record`. */
-void world_script_load_tutorial_files(s32 index, world_tutorial_state_t* record) {
+void world_tutorial_load_files(s32 index, world_tutorial_state_t* record) {
     s32 slot = index - 1;
 
     record->messages = main_file_load_checked_to_heap(
-        g_world_script_tutorial_message_files[slot * 2], g_world_script_tutorial_message_files[(slot * 2) + 1]);
+        g_world_tutorial_message_files[slot * 2], g_world_tutorial_message_files[(slot * 2) + 1]);
     record->script = main_file_load_checked_to_heap(
-        g_world_script_tutorial_script_files[slot * 2], g_world_script_tutorial_script_files[(slot * 2) + 1]);
+        g_world_tutorial_script_files[slot * 2], g_world_tutorial_script_files[(slot * 2) + 1]);
 }

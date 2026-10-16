@@ -14,7 +14,7 @@
  * cells on the left, then the digit glyphs (u 0xa8 + 8 per digit, v 0x30 on the cursor
  * texture page). A value with more digits than `width` would start the blank-cell
  * countdown below -1 and run it through the whole 16-bit range. */
-menu_instruction_t* bunit_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* cmd) {
+menu_instruction_t* bunit_menu_opcode_17_draw_right_aligned_number(menu_instruction_t* cmd) {
     s8 digits[16];
     RECT glyph_rect;
     s32 count;

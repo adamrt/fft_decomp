@@ -102,7 +102,7 @@ void world_formation_init_menu_display(void) {
     g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_world_formation_menu_text_buffer;
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_world_formation_menu_text_table;
     g_world_formation_cursor_ot_override = 0;
-    g_world_script_tutorial_id = 0;
+    g_world_tutorial_id = 0;
 }
 
 /* Rebuild the formation unit list for the screen in use: every unit on the

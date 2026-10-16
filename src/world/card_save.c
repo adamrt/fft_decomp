@@ -67,7 +67,7 @@ static s32 world_input_read_controller(s32 unused) {
 
 /*
  * Publish newly pressed buttons and two repeat rates for WORLD menus, reading
- * pad 0 (world_script_update_tutorial_controller_input is the tutorial twin).
+ * pad 0 (world_tutorial_update_controller_input is the tutorial twin).
  *
  * Triangle reports one press and nothing while held. Otherwise one button is
  * reported at a time: of several, the lowest button bit is latched and
@@ -292,7 +292,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
     thread_start(THREAD_BORROWED_SLOT_CARD_BACKDROP, world_formation_view_zoom_thread);
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, 0, 0);
     while (world_gfx_update_fade_out_tile() != 0) {
-        g_world_script_tutorial_id = 0;
+        g_world_tutorial_id = 0;
         world_gfx_present_frame_and_swap_packet_buffer(0, 0);
         world_card_input_update_with_message_state();
         world_gfx_update_fade_in_tile();
@@ -1453,7 +1453,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
         gfx_set_otag_index(10);
         value = row != g_world_card_slot_cursor_row || busy != 0;
         world_menu_set_palette_mode(value);
-        world_menu_parse_draw_window_frame((menu_instruction_t*)&g_world_card_slot_window_command);
+        world_menu_opcode_00_draw_window_frame((menu_instruction_t*)&g_world_card_slot_window_command);
 
         label_y = g_world_card_slot_window.rect.y - 14;
         g_world_card_slot_quad_1.position.y = label_y;
@@ -1475,7 +1475,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
             gfx_set_otag_index(11);
             g_world_card_slot_number_command.y = g_world_card_slot_quad_0.position.y;
             g_world_card_slot_number_command.value = i + 1;
-            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_slot_number_command);
+            world_menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_world_card_slot_number_command);
         }
 
         g_world_card_slot_quad_2.position.y = g_world_card_slot_quad_0.position.y;
@@ -1490,9 +1490,9 @@ static void world_card_update_and_draw_slot_list(s32 input) {
             if (g_world_card_playtime_hours_command.value >= 100) {
                 g_world_card_playtime_hours_command.value = 99;
             }
-            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_hours_command);
-            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_minutes_command);
-            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_seconds_command);
+            world_menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_hours_command);
+            world_menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_minutes_command);
+            world_menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_seconds_command);
         }
 
         if (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_AVAILABLE) {

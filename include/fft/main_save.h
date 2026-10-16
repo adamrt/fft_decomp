@@ -41,7 +41,7 @@ typedef struct wldcore_saved_record {
     u32* script_words; /* 0x04 */
     u32 instruction;   /* 0x08 */
     /* 0x0c-0x37 mirror the live sound-novel state at g_wldcore_state_flags. */
-    u16 state_flags;          /* 0x0c; wldcore_opcode_state_flag_e */
+    u16 state_flags;          /* 0x0c; wldcore_sound_novel_state_flag_e */
     s16 section;              /* 0x0e */
     s16 word_index;           /* 0x10; index of the 32-bit instruction in the section; cleared by
                                * wldcore_sound_novel_restore_saved_state

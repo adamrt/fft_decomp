@@ -56,7 +56,7 @@ static void main_overlay_exec_battle_bin(void) {
  * with result 5, which also skips the opening movie). An OPEN.BIN result of 0
  * goes straight into BATTLE.BIN; otherwise WLDCORE and WORLD run first and leave
  * their result in g_main_system_frontend_world_result. World map and BATTLE.BIN
- * then alternate until g_main_system_game_flow_state asks for a reset or the
+ * then alternate until g_battle_game_flow_state asks for a reset or the
  * ending. The ending sets event 0x12a, plays OPEN.BIN's ending cutscene and runs
  * BATTLE.BIN once more. */
 static void main_system_run_game_loop(void) {

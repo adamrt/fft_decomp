@@ -210,7 +210,7 @@ static s32 equip_menu_run_equip_mode(void) {
                 g_equip_unit_status_panel_redraw = 1;
             }
         }
-        menu_cmd_run_stream(&g_equip_item_menu_script, g_menu_input_primary_repeat);
+        menu_script_run(&g_equip_item_menu_script, g_menu_input_primary_repeat);
     }
     if (g_equip_item_list_refresh != 0) {
         g_equip_equipment_panel_style = 0;

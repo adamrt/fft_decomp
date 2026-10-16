@@ -119,7 +119,7 @@ void sound_run_background_fade_thread(void) {
  *
  * record_index is never assigned: the target indexes with whatever $s0 holds
  * on entry and tests that one record six times. */
-void script_toggle_message_portrait_flip(const u8* parameters) {
+void script_opcode_37_flip_message_portrait(const u8* parameters) {
     s32 i;
     s32 record_index;
     s16 record_id = script_read_s16(parameters);
@@ -136,7 +136,7 @@ void script_toggle_message_portrait_flip(const u8* parameters) {
 }
 
 /* EVENT_OPCODE_UNKNOWN_74: receives the operand pointer and does nothing. */
-void script_opcode_unknown_74(const u8* unused_parameters) {
+void script_opcode_74_unknown(const u8* unused_parameters) {
 }
 
 /* Returns the slot a thread should start in: a requested id below 16 as it is,
@@ -455,7 +455,7 @@ static s32 script_get_variable_bit_position(s32 value) {
 }
 
 /* Wait until the variable reaches the signed 16-bit test value. */
-void script_opcode_wait_value(const event_wait_value_parameters_t* parameters) {
+void script_opcode_7e_wait_value(const event_wait_value_parameters_t* parameters) {
     s32 variable_id = script_read_s16(parameters->variable_id_le);
     s32 test_value = script_read_s16(parameters->test_value_le);
 

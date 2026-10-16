@@ -15,7 +15,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static u32 g_world_script_tutorial_repeat_counters[16] = { 0 };
+static u32 g_world_tutorial_repeat_counters[16] = { 0 };
 
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
@@ -30,7 +30,7 @@ static u32 g_world_script_tutorial_repeat_counters[16] = { 0 };
  * the activation timer reaches 4 (VSyncs), except a D-pad press, which counts
  * at once.
  */
-static void world_script_update_tutorial_controller_input(void) {
+static void world_tutorial_update_controller_input(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -58,24 +58,24 @@ static void world_script_update_tutorial_controller_input(void) {
     } else {
         g_world_input_triangle_latched = 0;
         {
-            u16 previous_latch = g_world_script_tutorial_latched_button;
+            u16 previous_latch = g_world_tutorial_latched_button;
             u32 latched_input = current_input & previous_latch;
             if (latched_input != 0) {
                 current_input = latched_input;
             } else if (current_input == 0) {
-                g_world_script_tutorial_latched_button = 0;
-                g_world_script_tutorial_activation_timer += speed;
+                g_world_tutorial_latched_button = 0;
+                g_world_tutorial_activation_timer += speed;
             } else {
-                if (g_world_script_tutorial_activation_timer < 4) {
+                if (g_world_tutorial_activation_timer < 4) {
                     u32 priority_input = current_input & PSX_PAD_DPAD_MASK;
 
                     if (priority_input != 0) {
                         current_input = priority_input;
-                        g_world_script_tutorial_activation_timer = 10;
+                        g_world_tutorial_activation_timer = 10;
                     }
                 }
-                if (g_world_script_tutorial_activation_timer >= 4) {
-                    g_world_script_tutorial_activation_timer = 0;
+                if (g_world_tutorial_activation_timer >= 4) {
+                    g_world_tutorial_activation_timer = 0;
                     index = 0;
                     {
                         s32 bit_base = 1;
@@ -86,38 +86,38 @@ static void world_script_update_tutorial_controller_input(void) {
                             index++;
                             if (matched_input != 0) {
                                 current_input = matched_input;
-                                g_world_script_tutorial_latched_button = bit;
+                                g_world_tutorial_latched_button = bit;
                             }
                         } while (index < 16);
                     }
                 } else {
                     current_input = 0;
-                    g_world_script_tutorial_latched_button = 0;
+                    g_world_tutorial_latched_button = 0;
                 }
             }
         }
         filtered_input = current_input;
-        if (g_world_script_tutorial_activation_timer >= 10) {
-            g_world_script_tutorial_activation_timer = 10;
+        if (g_world_tutorial_activation_timer >= 10) {
+            g_world_tutorial_activation_timer = 10;
         }
         g_menu_input_newly_pressed = filtered_input;
         for (index = 0; index < 16; index++) {
             s32 mask = 1U << index;
 
             if (mask & g_menu_input_newly_pressed) {
-                if (mask & g_world_script_tutorial_previous_input) {
+                if (mask & g_world_tutorial_previous_input) {
                     g_menu_input_newly_pressed &= ~mask;
                 } else {
-                    g_world_script_tutorial_previous_input |= mask;
+                    g_world_tutorial_previous_input |= mask;
                 }
             } else {
-                g_world_script_tutorial_previous_input &= ~mask;
+                g_world_tutorial_previous_input &= ~mask;
             }
         }
         /* Auto-repeat for the shoulder buttons (bits 0-3) and the D-pad (bits 12-15); the
          * face buttons, Select and Start (bits 4-11) skip the counters and report only new
          * presses. Bits 16-31 flag a button held past the initial delay. */
-        counter_base = g_world_script_tutorial_repeat_counters;
+        counter_base = g_world_tutorial_repeat_counters;
         for (index = 0; index < 16; index++) {
             if (index == 4) {
                 index = 12;
@@ -169,7 +169,7 @@ void world_menu_input_update_with_message_state(void) {
     s32 step;
     u8 value;
 
-    world_script_update_tutorial_controller_input();
+    world_tutorial_update_controller_input();
     step = menu_get_window_scale_step();
     if (step >= 1 && step <= 3) {
         menu_input_clear_state();

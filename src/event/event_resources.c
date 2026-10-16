@@ -834,7 +834,7 @@ void gfx_load_evtchr_thread(void) {
 /* Uploads eight 32x48 portraits and their palettes from one EVTFACE.BIN block, yielding while
  * the file loads. Each portrait is 8 VRAM columns (32 4-bit pixels) wide, placed side by side
  * from g_menu_portrait_pixel_rect. */
-void script_opcode_portrait_col(s32 portrait_id) {
+void script_opcode_50_portrait_col(s32 portrait_id) {
     RECT rect;
     menu_portrait_image_file_t* buffer;
     u32(*pixels)[48][4];

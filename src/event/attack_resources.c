@@ -367,7 +367,7 @@ static void script_assign_bitset_flag(u32* bits, s32 index, s32 set) {
 }
 
 /* Store five day bits and four month bits in the indexed nine-bit date record. */
-void script_opcode_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
+void script_opcode_85_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
     s32 base = record * 9;
     s32 i;
     u8 mask = 1;
@@ -686,7 +686,7 @@ void script_print_debug_message(void) {
 
 /* WalkTo: start the unit walking to the tile at the signed speed. A terrain_cost_flag of 1 makes
  * the path respect terrain costs; 0 ignores them. */
-void script_opcode_walk_to(const event_walk_to_parameters_t* parameters) {
+void script_opcode_28_walk_to(const event_walk_to_parameters_t* parameters) {
     s32 id = script_read_s16(parameters->unit_id_le);
     map_tile_coordinates_t coordinates;
 
@@ -702,7 +702,7 @@ void script_opcode_walk_to(const event_walk_to_parameters_t* parameters) {
 }
 
 /* Mirror the unit sprite for mode 1 and restore it for every other mode. */
-void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* parameters) {
+void script_opcode_68_mirror_sprite(const event_mirror_sprite_parameters_t* parameters) {
     s32 mode;
     s32 runtime_id = script_read_s16(parameters->unit_id_le);
 
@@ -719,7 +719,7 @@ void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* paramet
 
 /* ResetPalette: resolve the unit id operand and reapply the weather, time-of-day
  * palette modulation without tile effects, unless the unit is missing. */
-void script_opcode_reset_palette(const event_unit_parameters_t* parameters) {
+void script_opcode_97_reset_palette(const event_unit_parameters_t* parameters) {
     s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         battle_gfx_reset_unit_palette_by_runtime_id(runtime_id);
@@ -730,7 +730,7 @@ void script_opcode_reset_palette(const event_unit_parameters_t* parameters) {
  * of length_plus_one - 1 tiles in the encoded direction through
  * battle_move_start_unit_jump_by_runtime_id. The unit's Jump stat is 6 while that runs
  * and is restored afterwards. A unit id that does not resolve does nothing. */
-void script_opcode_jump(const event_jump_parameters_t* parameters) {
+void script_opcode_70_jump(const event_jump_parameters_t* parameters) {
     SVECTOR vec;
     s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     SVECTOR* coords;
@@ -750,7 +750,7 @@ void script_opcode_jump(const event_jump_parameters_t* parameters) {
 }
 
 /* Yield at least once, then wait until the resolved unit stops moving. */
-void script_opcode_wait_walk(s32 unit_id) {
+void script_opcode_29_wait_walk(s32 unit_id) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
 
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -765,7 +765,7 @@ void script_opcode_wait_walk(s32 unit_id) {
  * scenario's special portrait and unit, and build the formation sprites and
  * portraits, so the later ATTACK entry skips reloading the overlay, sprites
  * and portraits. */
-void script_opcode_load_attack_graphics(void) {
+void script_opcode_82_load_attack_graphics(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOADED;
         menu_request_open_companion_executable(COMPANION_OVERLAY_ATTACK);
@@ -790,7 +790,7 @@ void script_play_effect_and_wait(void) {
 
 /* Thread body of EffectEnd: play the effect that Effect and EffectStart prepared
  * and exit when it has finished. */
-void script_play_effect_thread(void) {
+void script_opcode_8b_effect_end_thread(void) {
     thread_set_current_task_id(THREAD_TASK_PLAY_EFFECT);
     script_play_effect_and_wait();
     thread_exit_current();
@@ -799,7 +799,7 @@ void script_play_effect_thread(void) {
 /* Thread body of BlockStart: run the instructions up to BlockEnd in this thread, then exit.
  * Only a subset of the unit, wait, sound and effect instructions run here; any other
  * instruction in the block is skipped. */
-void script_block_start_thread(void) {
+void script_opcode_2a_block_start_thread(void) {
     /* Preserve the target's unused 40-byte stack area. */
     s32 unused[10];
     u8* script;
@@ -824,11 +824,11 @@ void script_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_WARP_UNIT) {
             script_warp_unit((const event_warp_unit_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_WAIT_VALUE) {
-            script_opcode_wait_value((const event_wait_value_parameters_t*)parameters);
+            script_opcode_7e_wait_value((const event_wait_value_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_DEBUG_PAUSE) {
             script_print_debug_message();
         } else if (script[0] == EVENT_OPCODE_WALK_TO) {
-            g_thread_call_target = (void (*)(void))script_opcode_walk_to;
+            g_thread_call_target = (void (*)(void))script_opcode_28_walk_to;
             thread_call_on_main_stack(parameters);
         } else if (script[0] == EVENT_OPCODE_WALK_TO_ANIM) {
             runtime_id = script_resolve_runtime_id(first_halfword);
@@ -839,15 +839,15 @@ void script_block_start_thread(void) {
              * 21-entry array. */
             g_unit_was_moving_latch[runtime_id] = 0;
         } else if (script[0] == EVENT_OPCODE_JUMP) {
-            script_opcode_jump((const event_jump_parameters_t*)parameters);
+            script_opcode_70_jump((const event_jump_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_WAIT_WALK) {
-            script_opcode_wait_walk(first_halfword);
+            script_opcode_29_wait_walk(first_halfword);
         } else if (script[0] == EVENT_OPCODE_UNIT_ANIM) {
             script_unit_anim((const event_unit_anim_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_MIRROR_SPRITE) {
-            script_opcode_mirror_sprite((const event_mirror_sprite_parameters_t*)(script + 1));
+            script_opcode_68_mirror_sprite((const event_mirror_sprite_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_RESET_PALETTE) {
-            script_opcode_reset_palette((const event_unit_parameters_t*)(script + 1));
+            script_opcode_97_reset_palette((const event_unit_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_SET_FIRST_UNIT) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -886,13 +886,13 @@ void script_block_start_thread(void) {
             g_thread_contexts[thread_id].task_words[SPRITE_MOVE_THREAD_WORD_RUNTIME_ID]
                 = script_resolve_runtime_id(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_SPRITE_MOVE) {
-            script_opcode_wait_sprite_move(first_halfword);
+            script_opcode_6f_wait_sprite_move(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_UNIT) {
-            script_opcode_wait_rotate_all(script[1]);
+            script_opcode_65_wait_rotate_all(script[1]);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_ALL) {
-            script_opcode_wait_rotate_all(-1);
+            script_opcode_65_wait_rotate_all(-1);
         } else if (script[0] == EVENT_OPCODE_UNIT_ANIM_ROTATE) {
-            script_opcode_unit_anim_rotate((const event_unit_anim_rotate_parameters_t*)(script + 1));
+            script_opcode_8c_unit_anim_rotate((const event_unit_anim_rotate_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_COLOR_UNIT) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -914,7 +914,7 @@ void script_block_start_thread(void) {
  * flag is set, and its graphics refresh when the snapshot is new. Each AddUnit waits for the
  * graphics load to finish.
  */
-void script_add_unit_start_thread(void) {
+void script_opcode_49_add_unit_start_thread(void) {
     s32 index;
     s32 slot;
     const u8* script;
@@ -935,7 +935,7 @@ void script_add_unit_start_thread(void) {
             break;
         }
         if (opcode == EVENT_OPCODE_LOAD_ATTACK_GRAPHICS) {
-            script_opcode_load_attack_graphics();
+            script_opcode_82_load_attack_graphics();
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
             unit = battle_unit_find_stats_by_entd_unit_id(unit_id, &index);
             if (index == -2 || index >= 0) {

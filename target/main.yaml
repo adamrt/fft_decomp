@@ -39,14 +39,14 @@ functions:
   - {addr: 0x80010a30, size: 160, name: __SN_ENTRY_POINT, hash: 179da0ce7d5e763f, source: src/lib/psyq/crt/__SN_ENTRY_POINT.c}
   - {addr: 0x80010ad0, size: 112, name: __main, hash: 1dec58075cb55f11, source: src/lib/psyq/crt/__main.c}
   - {addr: 0x80010b40, size: 104, name: __do_global_dtors, hash: 30e458972df14eda, source: src/lib/psyq/crt/__do_global_dtors.c}
-  - {addr: 0x80011bb0, size: 16, name: main_system_store_stack_pointer, hash: 972f7e917252ee42}
+  - {addr: 0x80011bb0, size: 16, name: main_system_store_stack_pointer, hash: 972f7e917252ee42, source: src/main/system_store_stack_pointer.c}
   - {addr: 0x80011bc0, size: 16, name: main_restore_game_loop_stack_pointer, hash: 8b9c9cab30efada8, asm: "Stack-replacing ABI tail transfer to main_system_run_game_loop; ordinary C cannot assign sp."}
   - {addr: 0x80011bd0, size: 36, name: main_file_request_read_quiet, hash: 323354187cbfd5ba, unit: cd_headers}
   - {addr: 0x80011bf4, size: 484, name: main_file_request_read, hash: 2289317868ab7dd4, unit: cd_headers}
   - {addr: 0x80011dd8, size: 64, name: main_file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: cd_headers}
   - {addr: 0x80011e18, size: 32, name: main_file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: cd_headers}
-  - {addr: 0x80011e38, size: 488, name: main_file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
-  - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5}
+  - {addr: 0x80011e38, size: 488, name: main_file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/main/file_poll_load.c, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
+  - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5, source: src/main/gfx_draw_now_loading_message.c}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, source: src/lib/suzuki/suzuki_smd_create_music.c}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, source: src/lib/suzuki/suzuki_smd_unload_music.c}
   - {addr: 0x800121cc, size: 8, name: suzuki_noop_800121cc, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800121cc.c}
@@ -765,7 +765,7 @@ functions:
   - {addr: 0x800451cc, size: 104, name: main_overlay_open_world_and_wldcore, hash: 9de0809817ea03b9, unit: overlay_loading}
   - {addr: 0x80045234, size: 52, name: main_overlay_open_world_bin, hash: f0dc6ce1683e216e, unit: overlay_loading}
   - {addr: 0x80045268, size: 132, name: main_file_load_data_from_disc, hash: 061eb9238379898e, unit: overlay_loading}
-  - {addr: 0x800452ec, size: 480, name: main_save_init_data_tables, hash: 13bfa79a2bc689e1, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x800452ec, size: 480, name: main_save_init_data_tables, hash: 13bfa79a2bc689e1, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/main/save_init_data_tables.c}
   - {addr: 0x80045514, size: 524, name: main_item_init_order_tables, hash: d7bbcb00c4fad7e9, unit: open_overlay}
   - {addr: 0x80045720, size: 408, name: main_card_init_events, hash: c3df9151b2bf6647, unit: open_overlay}
   - {addr: 0x800458b8, size: 72, name: main_overlay_exec_open_bin_main_loop, hash: ec2d3c302ca9b1f1, unit: open_overlay}

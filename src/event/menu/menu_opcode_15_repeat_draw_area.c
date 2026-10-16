@@ -6,7 +6,7 @@
 #include "psx/types.h"
 
 /* Queue the full draw area at the next ordering-table slot when unlocked. */
-menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
         s32 otag_index = g_menu_gfx_otag_index;
         g_gfx_draw_area.y = 0;

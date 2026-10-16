@@ -93,7 +93,7 @@ void wldcore_gfx_draw_calendar_date(GsOT* ot);
 /* Sector offsets of each picture set in WLDPIC.BIN and each background set in WLDBK.BIN. */
 extern s32 g_wldcore_picture_sector_offsets[];
 extern s32 g_wldcore_background_sector_offsets[];
-/* Destination image buffer (read back as a TIM by wldcore_opcode_load_picture). */
+/* Destination image buffer (read back as a TIM by wldcore_sound_novel_opcode_0a_load_picture). */
 extern u32* g_wldcore_picture_buffer;
 extern u32* g_wldcore_scratch_buffer;
 /* Currently resident picture set, reset to -1 by wldcore_init_world_map_state. */

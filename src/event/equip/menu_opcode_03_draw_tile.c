@@ -11,7 +11,7 @@
  * (cmd->tile.x, cmd->tile.y) in cmd->tile.color. While a list row is
  * rendered, y is offset by the row's position and the scroll offset. Returns
  * the next command. */
-menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* cmd) {
+menu_instruction_t* equip_menu_opcode_03_draw_tile(menu_instruction_t* cmd) {
     RECT rect;
     s32 y;
     s32 base;

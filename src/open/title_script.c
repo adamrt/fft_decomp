@@ -1564,7 +1564,7 @@ void open_script_update_controller(open_controller_record_t* unused_record) {
 /* Opcode 0: end the script. It yields for the frame while the XA start or stop
  * sequence runs; after that it clears OPEN_SCRIPT_DISPATCH_RUNNING, which stops
  * the dispatcher. Two bytes. */
-void open_opcode_end_script(s16* unused_entry) {
+void open_opcode_00_end_script(s16* unused_entry) {
     u32 state = g_open_script_state.dispatch.flags;
 
     if (state & (OPEN_SCRIPT_DISPATCH_XA_STOPPING | OPEN_SCRIPT_DISPATCH_XA_STARTING)) {
@@ -1580,7 +1580,7 @@ void open_opcode_end_script(s16* unused_entry) {
  *
  * A coordinate of -1 centers the record on its last glyph's extent. X bit 0x100
  * instead centers the glyph selected by its low byte. */
-void open_opcode_create_positioned_text_record(s16* command) {
+void open_opcode_01_create_positioned_text_record(s16* command) {
     s32 x;
     s32 y;
     s32 index;
@@ -1623,7 +1623,7 @@ void open_opcode_create_positioned_text_record(s16* command) {
 /* Opcode 2: set the text scroll speed to command[1] (1/256 pixel per frame,
  * negative for upward) and zero the fraction and the scrolled-distance counter.
  * Four bytes. */
-void open_opcode_set_timing_step(s16* entry) {
+void open_opcode_02_set_timing_step(s16* entry) {
     const s16* command = entry;
     s32 value = command[1];
     s32 next = g_open_script_byte_offset + 4;
@@ -1636,7 +1636,7 @@ void open_opcode_set_timing_step(s16* entry) {
 
 /* Opcode 3: reveal the screen over command[1] frames, with the overlay in
  * ordering-table entry 2. Four bytes. */
-void open_opcode_start_overlay_fade_out(s16* command) {
+void open_opcode_03_start_overlay_fade_out(s16* command) {
     command++;
     g_open_gfx_overlay_fade.ot_index = 2;
     open_gfx_start_overlay_fade_out(*command);
@@ -1645,7 +1645,7 @@ void open_opcode_start_overlay_fade_out(s16* command) {
 
 /* Opcode 4: fade the screen to black over command[1] frames, with the overlay in
  * ordering-table entry 2. Four bytes. */
-void open_opcode_start_overlay_fade_in(s16* command) {
+void open_opcode_04_start_overlay_fade_in(s16* command) {
     command++;
     g_open_gfx_overlay_fade.ot_index = 2;
     open_gfx_start_overlay_fade_in(*command);
@@ -1654,7 +1654,7 @@ void open_opcode_start_overlay_fade_in(s16* command) {
 
 /* Opcode 5: wait command[1] frames. The first call arms the wait and each later
  * call counts one frame, yielding until the count is reached. Four bytes. */
-void open_opcode_wait_counted(s16* entry) {
+void open_opcode_05_wait_counted(s16* entry) {
     u32 flags;
     s32 counter;
     open_script_dispatch_state_t* state = &g_open_script_state.dispatch;
@@ -1678,7 +1678,7 @@ void open_opcode_wait_counted(s16* entry) {
 
 /* Opcode 6: wait until the text has scrolled command[1] pixels, counted from the
  * call that arms the wait. Four bytes. */
-void open_opcode_wait_for_external_counter(s16* entry) {
+void open_opcode_06_wait_for_external_counter(s16* entry) {
     u32 flags;
     open_script_dispatch_state_t* state = &g_open_script_state.dispatch;
 
@@ -1701,7 +1701,7 @@ void open_opcode_wait_for_external_counter(s16* entry) {
  * sequence of open_script_update_xa_audio has finished. The CD volume is dropped
  * to 0 first. The opcode is skipped when XA audio is already playing, starting or
  * stopping. Four bytes. */
-void open_opcode_start_xa_audio(s16* command) {
+void open_opcode_07_start_xa_audio(s16* command) {
     u32 flags = g_open_script_state.dispatch.flags;
 
     if (flags & OPEN_SCRIPT_DISPATCH_WAITING) {
@@ -1733,7 +1733,7 @@ void open_opcode_start_xa_audio(s16* command) {
  * `command` is not const, matching the script handler type: GCC 2.7.2 marks a
  * load through a const pointer unchanging and would schedule it above the
  * prologue's ra save. */
-void open_opcode_start_sound_fade_in(s16* command) {
+void open_opcode_08_start_sound_fade_in(s16* command) {
     open_sound_set_cd_mix_and_volume(0x7a, command[1] * 4);
     g_open_script_state.dispatch.cursor.byte_offset += 4;
 }
@@ -1743,7 +1743,7 @@ void open_opcode_start_sound_fade_in(s16* command) {
  * `command` is not const, matching the script handler type: GCC 2.7.2 marks a
  * load through a const pointer unchanging and would schedule it above the
  * prologue's ra save. */
-void open_opcode_start_sound_fade_out(s16* command) {
+void open_opcode_09_start_sound_fade_out(s16* command) {
     open_sound_set_cd_mix_and_volume(0, command[1] * 4);
     g_open_script_state.dispatch.cursor.byte_offset += 4;
 }
@@ -1751,7 +1751,7 @@ void open_opcode_start_sound_fade_out(s16* command) {
 /* Opcode 10: stop the XA audio and wait until the stop sequence of
  * open_script_update_xa_audio has finished. The opcode is skipped when XA audio
  * is neither playing nor starting. Two bytes. */
-void open_opcode_stop_xa_audio(s16* unused_entry) {
+void open_opcode_0a_stop_xa_audio(s16* unused_entry) {
     u32 state = g_open_script_state.dispatch.flags;
 
     if (state & OPEN_SCRIPT_DISPATCH_WAITING) {
@@ -1776,7 +1776,7 @@ void open_opcode_stop_xa_audio(s16* unused_entry) {
 
 /* Opcode 11: upload frame command[1] of the loaded OPNTEX data as the picture and
  * set its fade intensity to 0, which hides it. Four bytes. */
-void open_opcode_load_opntex_frame(s16* command) {
+void open_opcode_0b_load_opntex_frame(s16* command) {
     open_gfx_load_opntex_into_frame_buffer(
         g_open_gfx_opntex_data + command[1] * OPEN_OPNTEX_FRAME_SECTORS * (0x800 / sizeof(u32)));
     g_open_script_state.opntex.fade_intensity = 0;
@@ -1785,7 +1785,7 @@ void open_opcode_load_opntex_frame(s16* command) {
 
 /* Opcode 12: fade the OPNTEX picture in over command[1] frames (intensity 0 to
  * 0x80). Four bytes. */
-void open_opcode_start_fade_intensity_increase(s16* command) {
+void open_opcode_0c_start_fade_intensity_increase(s16* command) {
     s32 value = command[1];
 
     g_open_script_state.dispatch.flags |= OPEN_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
@@ -1797,7 +1797,7 @@ void open_opcode_start_fade_intensity_increase(s16* command) {
 
 /* Opcode 13: fade the OPNTEX picture out over command[1] frames (intensity 0x80
  * to 0). Four bytes. */
-void open_opcode_start_fade_intensity_decrease(s16* command) {
+void open_opcode_0d_start_fade_intensity_decrease(s16* command) {
     s32 value = command[1];
 
     g_open_script_state.dispatch.flags |= OPEN_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;
@@ -1809,7 +1809,7 @@ void open_opcode_start_fade_intensity_decrease(s16* command) {
 
 /* Opcode 14: yield each frame until the XA audio is neither playing, starting nor
  * stopping. Two bytes. */
-void open_opcode_wait_for_xa_audio_idle(s16* unused_entry) {
+void open_opcode_0e_wait_for_xa_audio_idle(s16* unused_entry) {
     u32 state = g_open_script_state.dispatch.flags;
 
     if (state
@@ -1823,7 +1823,7 @@ void open_opcode_wait_for_xa_audio_idle(s16* unused_entry) {
 /* Opcode 15: start a slideshow of OPNTEX frames command[1] to command[2], each on
  * screen for command[3] frames with fades in and out of command[4] frames. The
  * first frame is loaded on the next update. Ten bytes. */
-void open_opcode_start_opntex_sequence(s16* command) {
+void open_opcode_0f_start_opntex_sequence(s16* command) {
     command++;
     g_open_script_state.opntex.first_frame = *command++;
     g_open_script_state.opntex.last_frame = *command++;

@@ -123,7 +123,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
 
     /* Values above 10 are not tutorials and become 0, the plain screen. */
     tutorial = -(tutorial < 11) & tutorial;
-    world_script_start_tutorial(tutorial);
+    world_tutorial_start(tutorial);
     if (tutorial == 0) {
         g_world_menu_music_slot = main_sound_open_music_into_free_slot(MAIN_MUSIC_FORMATION);
         while (main_sound_is_music_loading_stub() != 0) { }
@@ -133,7 +133,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
     if (g_world_formation_screen_running != 0) {
         do {
             world_gfx_present_frame_and_swap_packet_buffer(0, 0);
-            if (world_script_handle_tutorial_command() == 0) {
+            if (world_tutorial_run_frame() == 0) {
                 break;
             }
             world_menu_input_update_with_message_state();
@@ -393,7 +393,7 @@ void world_formation_process_frame(void) {
         }
 
         /* Leave once the fade-out that Cross starts below completes. */
-        if (g_world_script_tutorial_id == 0 && world_gfx_update_fade_out_tile() == 0) {
+        if (g_world_tutorial_id == 0 && world_gfx_update_fade_out_tile() == 0) {
             g_world_formation_main_menu_initialized = 0;
             thread_suspend(THREAD_SCREEN_SLOT_MENU);
             g_world_formation_screen_running = 0;
@@ -499,8 +499,7 @@ void world_formation_process_frame(void) {
                     }
                 }
 
-                if (g_world_formation_unit_browse_enabled == 0 && (input & PSX_PAD_CROSS)
-                    && g_world_script_tutorial_id == 0) {
+                if (g_world_formation_unit_browse_enabled == 0 && (input & PSX_PAD_CROSS) && g_world_tutorial_id == 0) {
                     world_gfx_start_increasing_fade();
                     main_sound_set_current_music_target(0, 0xF0);
                     g_sound_queued_effect_id = MAIN_SFX_CANCEL;
