@@ -63,10 +63,10 @@ extern u16 g_wldcore_state_flags;
 extern void (*g_wldcore_sound_novel_opcode_handlers[])(void); /* by the instruction's low byte */
 s32 wldcore_script_run_until_yield(void);
 u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode);
-void wldcore_sound_novel_opcode_1e_apply_counter_delta(void);
-void wldcore_sound_novel_opcode_1c_start_pending_value_transition(void);
-void wldcore_sound_novel_opcode_0a_load_picture(void);
 void wldcore_sound_novel_opcode_05_load_background_set(void);
+void wldcore_sound_novel_opcode_0a_load_picture(void);
+void wldcore_sound_novel_opcode_1c_start_pending_value_transition(void);
+void wldcore_sound_novel_opcode_1e_apply_counter_delta(void);
 
 /* saved readings */
 extern wldcore_saved_record_t g_wldcore_active_saved_record;

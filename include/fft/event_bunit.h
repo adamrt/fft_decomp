@@ -295,9 +295,9 @@ enum {
 
 extern s16 g_bunit_menu_list_scroll_entry_ids[];
 
-menu_instruction_t* bunit_menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
-menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
 menu_instruction_t* bunit_menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* bunit_menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
 
 /* text */
 extern const char g_bunit_text_decimal_format[];

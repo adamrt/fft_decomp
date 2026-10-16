@@ -264,8 +264,6 @@ extern menu_instruction_t* (*g_menu_opcode_handlers[])(menu_instruction_t* instr
 void menu_script_run(menu_instruction_t* instruction, s32 flags);
 void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
 menu_instruction_t* menu_script_skip_group(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* command);
 
 static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
     return (menu_instruction_t*)((u8*)instruction + instruction->header.length);
@@ -275,6 +273,28 @@ static inline const menu_instruction_t* menu_next_const_instruction(const menu_i
     return (const menu_instruction_t*)((const u8*)instruction + instruction->header.length);
 }
 
+/* opcode handlers */
+menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
+menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t* command);
+menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+/* JOBSTTS builds its own body. */
+menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
+
 /* drawing commands */
 extern menu_callback_t g_menu_row_callbacks[16];
 extern menu_sprite_command_t g_menu_script_quad_command;
@@ -282,27 +302,6 @@ extern menu_window_command_t g_menu_window_interior_command;
 /* The JOBSTTS and CARD window-frame handlers' copy of g_menu_window_interior_command. */
 extern menu_window_command_t g_cmd_window_interior_command;
 extern s16 g_menu_window_right_x;
-
-menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
-menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t* command);
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* instruction);
-
-/* draw state commands */
-menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
-/* JOBSTTS builds its own body. */
-menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
 
 /* scrollable lists */
 /* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of

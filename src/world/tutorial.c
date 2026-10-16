@@ -23,15 +23,15 @@
 
 static void world_tutorial_advance_highlight_brightness(void);
 static void world_tutorial_draw_highlight_quads(s32 brightness);
-static void world_tutorial_opcode_11_change_dialog(void);
-static void world_tutorial_opcode_10_display_message(void);
-static s32 world_tutorial_opcode_17_end(void);
-static void world_tutorial_opcode_13_highlight_ring(void);
 static void world_tutorial_opcode_00_shift(void);
-static void world_tutorial_opcode_14_wait(void);
-static void world_tutorial_opcode_16_wait_for_button(void);
+static void world_tutorial_opcode_10_display_message(void);
+static void world_tutorial_opcode_11_change_dialog(void);
 static void world_tutorial_opcode_12_wait_for_message(void);
+static void world_tutorial_opcode_13_highlight_ring(void);
+static void world_tutorial_opcode_14_wait(void);
 static void world_tutorial_opcode_15_wait_time(void);
+static void world_tutorial_opcode_16_wait_for_button(void);
+static s32 world_tutorial_opcode_17_end(void);
 
 /* The pad state world_tutorial_run_frame read this frame; the tutorial text
  * thread takes its button input from it. */
