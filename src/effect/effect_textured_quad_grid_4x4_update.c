@@ -1,4 +1,5 @@
-/* A 4x4 grid of textured quads with a scrolling texture window and tints from color curves. */
+/* E230's second textured quad grid: a 4x4 copy of effect_textured_quad_grid_update linked after its 8x8 build,
+ * with its own name, work block and brightness table. */
 
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
@@ -13,9 +14,25 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* The grid is QUAD_GRID_SIZE quads on a side, each QUAD_GRID_CELL pixels of the 256x256 field; this
- * build clamps the ordering-table depth at QUAD_GRID_DEPTH_MIN (EFFECT_OT_DEPTH_MIN in the 2x2 and 8x8 builds). */
+/* The grid is QUAD_GRID_SIZE quads on a side, each QUAD_GRID_CELL pixels of the 256x256 field; like the shared
+ * renderer's 4x4 builds, this copy clamps the ordering-table depth at 1. */
 enum { QUAD_GRID_SIZE = 4, QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE, QUAD_GRID_DEPTH_MIN = 1 };
+
+/* The work block; see effect_textured_quad_grid_work_t in the shared renderer. */
+typedef struct effect_textured_quad_grid_4x4_work {
+    s32 buffer;            /* 0x000: quads[buffer] is drawn this frame */
+    POLY_GT4 quads[2][16]; /* 0x004: row-major 4x4 grid, double buffered */
+    u8 _unused_684[0x48];
+    s32 scroll_u; /* 0x6cc: 20.12 texture scroll, wrapped to texture_width / 2 */
+    s32 scroll_v; /* 0x6d0: 20.12 texture scroll, wrapped to texture_height / 2 */
+    u8 _unused_6d4[4];
+    u16 texture_u;       /* 0x6d8: from the emitter record; read back as u8 */
+    u16 texture_v;       /* 0x6da */
+    s32 frame;           /* 0x6dc: column of the animation curves */
+    s32 destroy_latched; /* 0x6e0: phase 3 frees the block on its second call */
+} effect_textured_quad_grid_4x4_work_t;
+typedef char
+    assert_effect_textured_quad_grid_4x4_work_size[sizeof(effect_textured_quad_grid_4x4_work_t) == 1764 ? 1 : -1];
 
 /*
  * Phase handler for a scrolling textured quad grid.

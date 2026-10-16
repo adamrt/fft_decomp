@@ -1,4 +1,5 @@
-/* An 8x8 grid of textured quads with a scrolling texture window and tints from color curves. */
+/* A grid of textured quads with a scrolling texture window and tints from color curves. Each effect overlay that
+ * links the renderer builds this source with its grid size: VARIANT_QUAD_GRID_SIZE quads on a side (2, 4 or 8). */
 
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
@@ -13,9 +14,40 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* The grid is QUAD_GRID_SIZE quads on a side, each QUAD_GRID_CELL pixels of the 256x256 field; this
- * build clamps the ordering-table depth at QUAD_GRID_DEPTH_MIN. */
-enum { QUAD_GRID_SIZE = 8, QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE, QUAD_GRID_DEPTH_MIN = EFFECT_OT_DEPTH_MIN };
+/* The grid is QUAD_GRID_SIZE quads on a side, each QUAD_GRID_CELL pixels of the 256x256 field. The 4x4 builds
+ * clamp the ordering-table depth at 1, the 2x2 and 8x8 builds at EFFECT_OT_DEPTH_MIN. */
+enum {
+    QUAD_GRID_SIZE = VARIANT_QUAD_GRID_SIZE,
+    QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE,
+    QUAD_GRID_DEPTH_MIN = QUAD_GRID_SIZE == 4 ? 1 : EFFECT_OT_DEPTH_MIN,
+};
+
+/* The renderer's work block, allocated in phase 1 and freed in phase 3. The 2x2 and 4x4 builds leave a 0x48-byte
+ * gap after the quads that the 8x8 build does not have. */
+typedef struct effect_textured_quad_grid_work {
+    s32 buffer;                                         /* quads[buffer] is drawn this frame */
+    POLY_GT4 quads[2][QUAD_GRID_SIZE * QUAD_GRID_SIZE]; /* row-major grid, double buffered */
+#if VARIANT_QUAD_GRID_SIZE != 8
+    u8 _unused_gap[0x48];
+#endif
+    s32 scroll_u; /* 20.12 texture scroll, wrapped to texture_width / 2 */
+    s32 scroll_v; /* 20.12 texture scroll, wrapped to texture_height / 2 */
+    u8 _unused_scroll_pad[4];
+    u16 texture_u; /* from the emitter record; read back as u8 */
+    u16 texture_v;
+    s32 frame;           /* column of the animation curves */
+    s32 destroy_latched; /* phase 3 frees the block on its second call */
+} effect_textured_quad_grid_work_t;
+typedef char assert_effect_textured_quad_grid_work_size[sizeof(effect_textured_quad_grid_work_t)
+            == (QUAD_GRID_SIZE == 2       ? 516
+                    : QUAD_GRID_SIZE == 4 ? 1764
+                                          : 6684)
+        ? 1
+        : -1];
+
+/* The overlay's vertex brightness rows (12-bit fixed): a row per brightness setting, a column per quad row edge.
+ * Declared here because its width follows the build's grid size. */
+extern u32 g_effect_textured_quad_grid_brightness_table[][QUAD_GRID_SIZE + 1];
 
 /*
  * Phase handler for a scrolling textured quad grid.
@@ -30,7 +62,7 @@ enum { QUAD_GRID_SIZE = 8, QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE, QUAD_GRID_DEPT
  * gives each C variable one pseudo, and that sharing is what places the curve
  * index, color curves and brightness in s2 and the curve factor in s3.
  */
-s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
+s32 effect_textured_quad_grid_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     effect_record_t* record = &g_battle_effect_state_records[state_index];
     s32 translucent;
@@ -41,7 +73,7 @@ s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s3
     u32* ot;
     const effect_textured_quad_geometry_view_t* geometry
         = &g_battle_effect_geometry_table->entries[emitter_index].textured_quad;
-    effect_textured_quad_grid_8x8_work_t* work;
+    effect_textured_quad_grid_work_t* work;
     POLY_GT4* quad;
     /* Keep unsigned bindings separate from the signed curve-index scratch. */
     u32 selector;
@@ -69,7 +101,7 @@ s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s3
         if (record->work_slots[callback_slot] != 0) {
             battle_heap_free_block(record->work_slots[callback_slot]);
         }
-        work = battle_heap_alloc_block(sizeof(effect_textured_quad_grid_8x8_work_t), state_index);
+        work = battle_heap_alloc_block(sizeof(effect_textured_quad_grid_work_t), state_index);
         record->work_slots[callback_slot] = work;
 
         configuration = geometry->texture_page_config;
@@ -169,10 +201,10 @@ s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s3
                 v = (work->scroll_v >> 12) + work->texture_v;
                 quad->v0 = quad->v1 = v;
                 quad->v2 = quad->v3 = v + texture_height;
-                row = g_effect_textured_quad_grid_8x8_brightness_table[brightness_row][quad_row];
+                row = g_effect_textured_quad_grid_brightness_table[brightness_row][quad_row];
                 setRGB0(
                     quad, quad->r1 = (row * red) / ONE, quad->g1 = (row * green) / ONE, quad->b1 = (row * blue) / ONE);
-                row = g_effect_textured_quad_grid_8x8_brightness_table[brightness_row][quad_row + 1];
+                row = g_effect_textured_quad_grid_brightness_table[brightness_row][quad_row + 1];
                 setRGB2(
                     quad, quad->r3 = (row * red) / ONE, quad->g3 = (row * green) / ONE, quad->b3 = (row * blue) / ONE);
                 AddPrim(ot + depth, quad);

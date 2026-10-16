@@ -235,63 +235,10 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
 s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* quad grid */
-/* Work blocks of the scrolling textured quad grid renderer, compiled in
- * 2x2, 4x4 and 8x8 builds. Each block is allocated in phase 1 and freed in
- * phase 3. The 2x2 and 4x4 builds leave a 0x48-byte gap after the quads that
- * the 8x8 build does not have. */
-typedef struct effect_textured_quad_grid_2x2_work {
-    s32 buffer;           /* 0x000: quads[buffer] is drawn this frame */
-    POLY_GT4 quads[2][4]; /* 0x004: row-major 2x2 grid, double buffered */
-    u8 _unused_1a4[0x48];
-    s32 scroll_u; /* 0x1ec: 20.12 texture scroll, wrapped to texture_width / 2 */
-    s32 scroll_v; /* 0x1f0: 20.12 texture scroll, wrapped to texture_height / 2 */
-    u8 _unused_1f4[4];
-    u16 texture_u;       /* 0x1f8: from the emitter record; read back as u8 */
-    u16 texture_v;       /* 0x1fa */
-    s32 frame;           /* 0x1fc: column of the animation curves */
-    s32 destroy_latched; /* 0x200: phase 3 frees the block on its second call */
-} effect_textured_quad_grid_2x2_work_t;
-typedef char
-    assert_effect_textured_quad_grid_2x2_work_size[sizeof(effect_textured_quad_grid_2x2_work_t) == 516 ? 1 : -1];
-
-typedef struct effect_textured_quad_grid_4x4_work {
-    s32 buffer;            /* 0x000: quads[buffer] is drawn this frame */
-    POLY_GT4 quads[2][16]; /* 0x004: row-major 4x4 grid, double buffered */
-    u8 _unused_684[0x48];
-    s32 scroll_u; /* 0x6cc: 20.12 texture scroll, wrapped to texture_width / 2 */
-    s32 scroll_v; /* 0x6d0: 20.12 texture scroll, wrapped to texture_height / 2 */
-    u8 _unused_6d4[4];
-    u16 texture_u;       /* 0x6d8: from the emitter record; read back as u8 */
-    u16 texture_v;       /* 0x6da */
-    s32 frame;           /* 0x6dc: column of the animation curves */
-    s32 destroy_latched; /* 0x6e0: phase 3 frees the block on its second call */
-} effect_textured_quad_grid_4x4_work_t;
-typedef char
-    assert_effect_textured_quad_grid_4x4_work_size[sizeof(effect_textured_quad_grid_4x4_work_t) == 1764 ? 1 : -1];
-
-typedef struct effect_textured_quad_grid_8x8_work {
-    s32 buffer;            /* 0x000: quads[buffer] is drawn this frame */
-    POLY_GT4 quads[2][64]; /* 0x004: row-major 8x8 grid, double buffered */
-    s32 scroll_u;          /* 0x1a04: 20.12 texture scroll, wrapped to texture_width / 2 */
-    s32 scroll_v;          /* 0x1a08: 20.12 texture scroll, wrapped to texture_height / 2 */
-    u8 _unused_1a0c[4];
-    u16 texture_u;       /* 0x1a10: from the emitter record; read back as u8 */
-    u16 texture_v;       /* 0x1a12 */
-    s32 frame;           /* 0x1a14: column of the animation curves */
-    s32 destroy_latched; /* 0x1a18: phase 3 frees the block on its second call */
-} effect_textured_quad_grid_8x8_work_t;
-typedef char
-    assert_effect_textured_quad_grid_8x8_work_size[sizeof(effect_textured_quad_grid_8x8_work_t) == 6684 ? 1 : -1];
-
-/* Overlay-local vertex brightness rows (12-bit fixed) for the 2x2 grid:
- * brightness_row selects the row, the column is the quad row. */
-extern u32 g_effect_textured_quad_grid_2x2_brightness_table[][3];
-/* Overlay-local vertex brightness rows (12-bit fixed) for the 4x4 grid-mesh
- * family: brightness_row selects the row, the column is the quad row. */
+/* E230 links a second, 4x4 quad grid after its 8x8 one: vertex brightness rows (12-bit fixed) of that copy,
+ * indexed by brightness setting and quad row edge. The shared renderer declares its own table, whose width
+ * follows the build's grid size. */
 extern u32 g_effect_textured_quad_grid_4x4_brightness_table[][5];
-/* Overlay-local vertex brightness rows (12-bit fixed) for the 8x8 grid:
- * brightness_row selects the row, the column is the quad row. */
-extern u32 g_effect_textured_quad_grid_8x8_brightness_table[][9];
 
 s32 effect_textured_quad_grid_2x2_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);

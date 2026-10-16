@@ -92,16 +92,17 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 5368, name: effect_ring_stack_mesh_update, hash: abbcc54785141bac}
   - {addr: 0x801c39f8, size: 5584, name: effect_ring_mesh_update, hash: 211b02b490c1235a}
-  - {addr: 0x801c4fc8, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 0a5510c678a3053f}
+  - {addr: 0x801c4fc8, size: 1908, name: effect_textured_quad_grid_update, hash: 0a5510c678a3053f}
 
 data:
   - {addr: 0x801c573c, name: g_effect_ring_stack_mesh_brightness_table}
   - {addr: 0x801c5814, name: g_effect_ring_mesh_brightness_table}
-  - {addr: 0x801c585c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c585c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e033
 file: EFFECT/E033.BIN
@@ -164,12 +165,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 819565fe92fe27fa}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 819565fe92fe27fa}
 
 data:
-  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e065
 file: EFFECT/E065.BIN
@@ -180,14 +182,15 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 5af81951d4a57d89}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 5af81951d4a57d89}
   - {addr: 0x801c2c74, size: 6012, name: effect_polar_mesh_update, hash: 771a299c053fe24a}
   - {addr: 0x801c43f0, size: 5368, name: effect_ring_stack_mesh_update, hash: f2748954eb9da668}
 
 data:
-  - {addr: 0x801c58e8, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c58e8, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c5974, name: g_effect_polar_mesh_brightness_table}
   - {addr: 0x801c5a1c, name: g_effect_ring_stack_mesh_brightness_table}
 ---
@@ -200,14 +203,15 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 5368, name: effect_ring_stack_mesh_update, hash: ec9f01532f0dadad}
-  - {addr: 0x801c39f8, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 768f9361fd485798}
+  - {addr: 0x801c39f8, size: 1908, name: effect_textured_quad_grid_update, hash: 768f9361fd485798}
 
 data:
   - {addr: 0x801c416c, name: g_effect_ring_stack_mesh_brightness_table}
-  - {addr: 0x801c4244, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c4244, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e068
 file: EFFECT/E068.BIN
@@ -251,16 +255,17 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 8096, name: effect_particle_ribbon_long_update, hash: 3b550609f912378d}
   - {addr: 0x801c44a0, size: 6012, name: effect_polar_mesh_update, hash: bce6de9538a6310f}
-  - {addr: 0x801c5c1c, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: d5823b091e7f313b}
+  - {addr: 0x801c5c1c, size: 1908, name: effect_textured_quad_grid_update, hash: d5823b091e7f313b}
 
 data:
   - {addr: 0x801c6390, name: g_effect_particle_ribbon_long_brightness_table}
   - {addr: 0x801c656c, name: g_effect_polar_mesh_brightness_table}
-  - {addr: 0x801c6614, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c6614, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e071
 file: EFFECT/E071.BIN
@@ -271,17 +276,18 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: daf9ed8d679eda98}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: daf9ed8d679eda98}
   - {addr: 0x801c2c74, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c2cec, size: 4744, name: effect_dome_mesh_update, hash: 653686a6ff4966e9, unit: effect_dome_mesh}
 
 data:
-  - {addr: 0x801c3f74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c3f74, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c4000, name: g_effect_dome_mesh_brightness_table}
 ---
 module: effect-e072
@@ -293,12 +299,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 819565fe92fe27fa}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 819565fe92fe27fa}
 
 data:
-  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e073
 file: EFFECT/E073.BIN
@@ -327,18 +334,19 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: dae7117bbf342f79}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: dae7117bbf342f79}
   - {addr: 0x801c2c74, size: 5368, name: effect_ring_stack_mesh_update, hash: 164c7961cfc994ac}
   - {addr: 0x801c416c, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c41e4, size: 4744, name: effect_dome_mesh_update, hash: 1e8f06cd21cb78bb, unit: effect_dome_mesh}
 
 data:
-  - {addr: 0x801c546c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c546c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c54f8, name: g_effect_ring_stack_mesh_brightness_table}
   - {addr: 0x801c55d0, name: g_effect_dome_mesh_brightness_table}
 ---
@@ -404,16 +412,17 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 2924, name: effect_wave_mesh_update, hash: 781d158acd136de4}
   - {addr: 0x801c306c, size: 5584, name: effect_ring_mesh_update, hash: 6b52b79bbad4e66a}
-  - {addr: 0x801c463c, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 956f6a5e62faebf8}
+  - {addr: 0x801c463c, size: 1908, name: effect_textured_quad_grid_update, hash: 956f6a5e62faebf8}
 
 data:
   - {addr: 0x801c4db0, name: g_effect_wave_mesh_brightness_table}
   - {addr: 0x801c4eac, name: g_effect_ring_mesh_brightness_table}
-  - {addr: 0x801c4ef4, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c4ef4, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e088
 file: EFFECT/E088.BIN
@@ -599,16 +608,17 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 5368, name: effect_ring_stack_mesh_update, hash: abbcc54785141bac}
   - {addr: 0x801c39f8, size: 5584, name: effect_ring_mesh_update, hash: 211b02b490c1235a}
-  - {addr: 0x801c4fc8, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 0a5510c678a3053f}
+  - {addr: 0x801c4fc8, size: 1908, name: effect_textured_quad_grid_update, hash: 0a5510c678a3053f}
 
 data:
   - {addr: 0x801c573c, name: g_effect_ring_stack_mesh_brightness_table}
   - {addr: 0x801c5814, name: g_effect_ring_mesh_brightness_table}
-  - {addr: 0x801c585c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c585c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e176
 file: EFFECT/E176.BIN
@@ -651,12 +661,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 819565fe92fe27fa}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 819565fe92fe27fa}
 
 data:
-  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e229
 file: EFFECT/E229.BIN
@@ -683,14 +694,15 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 8}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_8x8_update, hash: 6f1a8d13bdf9792f}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 6f1a8d13bdf9792f}
   - {addr: 0x801c2c7c, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 5870370c93d65ac4}
   - {addr: 0x801c33f0, size: 2924, name: effect_wave_mesh_update, hash: dd9c87a25aa097ec}
 
 data:
-  - {addr: 0x801c3f5c, name: g_effect_textured_quad_grid_8x8_brightness_table}
+  - {addr: 0x801c3f5c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c4058, name: g_effect_textured_quad_grid_4x4_brightness_table}
   - {addr: 0x801c40e4, name: g_effect_wave_mesh_brightness_table}
 ---
@@ -719,13 +731,14 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 892abecc1ddbefd6}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 892abecc1ddbefd6}
   - {addr: 0x801c2c74, size: 5584, name: effect_ring_mesh_update, hash: 441de84b92425f64}
 
 data:
-  - {addr: 0x801c4244, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c4244, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c42d0, name: g_effect_ring_mesh_brightness_table}
 ---
 module: effect-e236
@@ -737,12 +750,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 819565fe92fe27fa}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 819565fe92fe27fa}
 
 data:
-  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e240
 file: EFFECT/E240.BIN
@@ -769,13 +783,14 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 32fecd3d84aad01e}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 32fecd3d84aad01e}
   - {addr: 0x801c2c74, size: 6012, name: effect_polar_mesh_update, hash: 91041bebc960a7d1}
 
 data:
-  - {addr: 0x801c43f0, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c43f0, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c447c, name: g_effect_polar_mesh_brightness_table}
 ---
 module: effect-e242
@@ -787,16 +802,17 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 8096, name: effect_particle_ribbon_short_update, hash: d046d63d43b93a53}
-  - {addr: 0x801c44a0, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: c777c397051e1f29}
+  - {addr: 0x801c44a0, size: 1908, name: effect_textured_quad_grid_update, hash: c777c397051e1f29}
   - {addr: 0x801c4c14, size: 5368, name: effect_ring_stack_mesh_update, hash: 2e736b118fb83e8f}
   - {addr: 0x801c610c, size: 6012, name: effect_polar_mesh_update, hash: fbc351f627ec2957}
 
 data:
   - {addr: 0x801c7888, name: g_effect_particle_ribbon_short_brightness_table}
-  - {addr: 0x801c7960, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c7960, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c79ec, name: g_effect_ring_stack_mesh_brightness_table}
   - {addr: 0x801c7ac4, name: g_effect_polar_mesh_brightness_table}
 ---
@@ -825,14 +841,15 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 6012, name: effect_polar_mesh_update, hash: 8f8047bff22e4f2f}
-  - {addr: 0x801c3c7c, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 123121c0883da522}
+  - {addr: 0x801c3c7c, size: 1908, name: effect_textured_quad_grid_update, hash: 123121c0883da522}
 
 data:
   - {addr: 0x801c43f0, name: g_effect_polar_mesh_brightness_table}
-  - {addr: 0x801c4498, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c4498, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e246
 file: EFFECT/E246.BIN
@@ -995,12 +1012,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 819565fe92fe27fa}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 819565fe92fe27fa}
 
 data:
-  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e317
 file: EFFECT/E317.BIN
@@ -1208,16 +1226,17 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 6012, name: effect_polar_mesh_update, hash: a26b6a634d12bf43}
   - {addr: 0x801c3c7c, size: 8668, name: effect_tentacle_mesh_update, hash: 9631ba61f32b2bac}
-  - {addr: 0x801c5e58, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 21467990dfa7cf05}
+  - {addr: 0x801c5e58, size: 1908, name: effect_textured_quad_grid_update, hash: 21467990dfa7cf05}
 
 data:
   - {addr: 0x801c65cc, name: g_effect_polar_mesh_brightness_table}
   - {addr: 0x801c6674, name: g_effect_tentacle_mesh_brightness_table}
-  - {addr: 0x801c674c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c674c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e385
 file: EFFECT/E385.BIN
@@ -1228,12 +1247,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 819565fe92fe27fa}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 819565fe92fe27fa}
 
 data:
-  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e395
 file: EFFECT/E395.BIN
@@ -1308,13 +1328,14 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 32fecd3d84aad01e}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 32fecd3d84aad01e}
   - {addr: 0x801c2c74, size: 6012, name: effect_polar_mesh_update, hash: 91041bebc960a7d1}
 
 data:
-  - {addr: 0x801c43f0, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c43f0, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c447c, name: g_effect_polar_mesh_brightness_table}
 ---
 module: effect-e409
@@ -1360,14 +1381,15 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 8096, name: effect_particle_ribbon_long_update, hash: 8a53dcbf41941ee1}
-  - {addr: 0x801c44a0, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 0e4b4346f21dc805}
+  - {addr: 0x801c44a0, size: 1908, name: effect_textured_quad_grid_update, hash: 0e4b4346f21dc805}
 
 data:
   - {addr: 0x801c4c14, name: g_effect_particle_ribbon_long_brightness_table}
-  - {addr: 0x801c4df0, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c4df0, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e450
 file: EFFECT/E450.BIN
@@ -1378,15 +1400,16 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: ccef26cc127a5e9f}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: ccef26cc127a5e9f}
   - {addr: 0x801c2c74, size: 148, name: effect_map_unfreeze, hash: 7010af2cee8fac92}
   - {addr: 0x801c2d08, size: 5584, name: effect_ring_mesh_update, hash: e58f9077bafaa3cc}
   - {addr: 0x801c42d8, size: 148, name: effect_map_freeze, hash: 7a52868d505092b0}
 
 data:
-  - {addr: 0x801c436c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c436c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c43f8, name: g_effect_ring_mesh_brightness_table}
 ---
 module: effect-e451
@@ -1415,6 +1438,7 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 2}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
@@ -1423,12 +1447,12 @@ functions:
   - {addr: 0x801c2500, size: 5584, name: effect_ring_mesh_update, hash: b1d2acab22900fef}
   - {addr: 0x801c3ad0, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c3b48, size: 4744, name: effect_dome_mesh_update, hash: 56950ab67bb2bdff, unit: effect_dome_mesh}
-  - {addr: 0x801c4dd0, size: 1916, name: effect_textured_quad_grid_2x2_update, hash: 34a87769661dd184}
+  - {addr: 0x801c4dd0, size: 1916, name: effect_textured_quad_grid_update, hash: 34a87769661dd184}
 
 data:
   - {addr: 0x801c554c, name: g_effect_ring_mesh_brightness_table}
   - {addr: 0x801c5594, name: g_effect_dome_mesh_brightness_table}
-  - {addr: 0x801c566c, name: g_effect_textured_quad_grid_2x2_brightness_table}
+  - {addr: 0x801c566c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e453
 file: EFFECT/E453.BIN
@@ -1460,17 +1484,18 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
   - {addr: 0x801c2500, size: 1000, name: effect_banish_map_vertex_particles_update, hash: 96b9db988669fa57}
   - {addr: 0x801c28e8, size: 260, name: effect_map_set_3d_objects_state_2, hash: c50b73d4a0e1859b}
   - {addr: 0x801c29ec, size: 6012, name: effect_polar_mesh_update, hash: b706f2b469299fd3}
-  - {addr: 0x801c4168, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 7c4feff22928839e}
+  - {addr: 0x801c4168, size: 1908, name: effect_textured_quad_grid_update, hash: 7c4feff22928839e}
 
 data:
   - {addr: 0x801c48dc, name: g_effect_banish_vertex_locations}
   - {addr: 0x801c48f4, name: g_effect_polar_mesh_brightness_table}
-  - {addr: 0x801c499c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c499c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e455
 file: EFFECT/E455.BIN
@@ -1516,13 +1541,14 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: e78fbae91480e6c0}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: e78fbae91480e6c0}
   - {addr: 0x801c2c74, size: 168, name: effect_map_set_timed_transform_duration, hash: 0682312fd498b75f}
 
 data:
-  - {addr: 0x801c2d1c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2d1c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e460
 file: EFFECT/E460.BIN
@@ -1533,12 +1559,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: 819565fe92fe27fa}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: 819565fe92fe27fa}
 
 data:
-  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c2c74, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e461
 file: EFFECT/E461.BIN
@@ -1753,12 +1780,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 8}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_8x8_update, hash: 0aabf95ffb22eed9}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 0aabf95ffb22eed9}
 
 data:
-  - {addr: 0x801c2c7c, name: g_effect_textured_quad_grid_8x8_brightness_table}
+  - {addr: 0x801c2c7c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e474
 file: EFFECT/E474.BIN
@@ -1769,18 +1797,19 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 8}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_8x8_update, hash: 1f197b48f154251b}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 1f197b48f154251b}
   - {addr: 0x801c2c7c, size: 5584, name: effect_ring_mesh_update, hash: afb2e8c0d6ae9ae7}
   - {addr: 0x801c424c, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c42c4, size: 4744, name: effect_dome_mesh_update, hash: d92a2d33a073e9bf, unit: effect_dome_mesh}
 
 data:
-  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_8x8_brightness_table}
+  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c5648, name: g_effect_ring_mesh_brightness_table}
   - {addr: 0x801c5690, name: g_effect_dome_mesh_brightness_table}
 ---
@@ -1793,18 +1822,19 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 8}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_8x8_update, hash: 1f197b48f154251b}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 1f197b48f154251b}
   - {addr: 0x801c2c7c, size: 5584, name: effect_ring_mesh_update, hash: afb2e8c0d6ae9ae7}
   - {addr: 0x801c424c, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c42c4, size: 4744, name: effect_dome_mesh_update, hash: d92a2d33a073e9bf, unit: effect_dome_mesh}
 
 data:
-  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_8x8_brightness_table}
+  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c5648, name: g_effect_ring_mesh_brightness_table}
   - {addr: 0x801c5690, name: g_effect_dome_mesh_brightness_table}
 ---
@@ -1817,18 +1847,19 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 8}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_8x8_update, hash: 1f197b48f154251b}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 1f197b48f154251b}
   - {addr: 0x801c2c7c, size: 5584, name: effect_ring_mesh_update, hash: afb2e8c0d6ae9ae7}
   - {addr: 0x801c424c, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c42c4, size: 4744, name: effect_dome_mesh_update, hash: d92a2d33a073e9bf, unit: effect_dome_mesh}
 
 data:
-  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_8x8_brightness_table}
+  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c5648, name: g_effect_ring_mesh_brightness_table}
   - {addr: 0x801c5690, name: g_effect_dome_mesh_brightness_table}
 ---
@@ -1841,18 +1872,19 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 8}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_8x8_update, hash: 1f197b48f154251b}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 1f197b48f154251b}
   - {addr: 0x801c2c7c, size: 5584, name: effect_ring_mesh_update, hash: afb2e8c0d6ae9ae7}
   - {addr: 0x801c424c, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c42c4, size: 4744, name: effect_dome_mesh_update, hash: d92a2d33a073e9bf, unit: effect_dome_mesh}
 
 data:
-  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_8x8_brightness_table}
+  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c5648, name: g_effect_ring_mesh_brightness_table}
   - {addr: 0x801c5690, name: g_effect_dome_mesh_brightness_table}
 ---
@@ -1865,18 +1897,19 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 8}
 
 units:
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_8x8_update, hash: 1f197b48f154251b}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 1f197b48f154251b}
   - {addr: 0x801c2c7c, size: 5584, name: effect_ring_mesh_update, hash: afb2e8c0d6ae9ae7}
   - {addr: 0x801c424c, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c42c4, size: 4744, name: effect_dome_mesh_update, hash: d92a2d33a073e9bf, unit: effect_dome_mesh}
 
 data:
-  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_8x8_brightness_table}
+  - {addr: 0x801c554c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c5648, name: g_effect_ring_mesh_brightness_table}
   - {addr: 0x801c5690, name: g_effect_dome_mesh_brightness_table}
 ---
@@ -1889,15 +1922,16 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
 functions:
-  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_4x4_update, hash: ccef26cc127a5e9f}
+  - {addr: 0x801c2500, size: 1908, name: effect_textured_quad_grid_update, hash: ccef26cc127a5e9f}
   - {addr: 0x801c2c74, size: 148, name: effect_map_unfreeze, hash: 7010af2cee8fac92}
   - {addr: 0x801c2d08, size: 5584, name: effect_ring_mesh_update, hash: e58f9077bafaa3cc}
   - {addr: 0x801c42d8, size: 148, name: effect_map_freeze, hash: 7a52868d505092b0}
 
 data:
-  - {addr: 0x801c436c, name: g_effect_textured_quad_grid_4x4_brightness_table}
+  - {addr: 0x801c436c, name: g_effect_textured_quad_grid_brightness_table}
   - {addr: 0x801c43f8, name: g_effect_ring_mesh_brightness_table}
 ---
 module: effect-e481
@@ -1909,12 +1943,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 2}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_2x2_update, hash: 33d5f006b29e378b}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 33d5f006b29e378b}
 
 data:
-  - {addr: 0x801c2c7c, name: g_effect_textured_quad_grid_2x2_brightness_table}
+  - {addr: 0x801c2c7c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e482
 file: EFFECT/E482.BIN
@@ -1925,12 +1960,13 @@ load: 0x801c2500
 source_dir: src/effect
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_QUAD_GRID_SIZE: 2}
 
 functions:
-  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_2x2_update, hash: 33d5f006b29e378b}
+  - {addr: 0x801c2500, size: 1916, name: effect_textured_quad_grid_update, hash: 33d5f006b29e378b}
 
 data:
-  - {addr: 0x801c2c7c, name: g_effect_textured_quad_grid_2x2_brightness_table}
+  - {addr: 0x801c2c7c, name: g_effect_textured_quad_grid_brightness_table}
 ---
 module: effect-e483
 file: EFFECT/E483.BIN
