@@ -102,6 +102,14 @@ dependencies.
   its topic. When code several programs compile calls a function whose body
   differs by program, every body takes that one topic-only name, since the
   call site can name only one.
+- A bytecode machine's handler for one opcode is named
+  `<machine>_opcode_<nn>_<instruction>` with the opcode in two hex digits:
+  `script_opcode_28_walk_to` (event scripts), `wldcore_sound_novel_opcode_*`,
+  `wldcore_script_opcode_*` (world map scripts), `open_opcode_*`,
+  `menu_opcode_*` (menu display scripts), `world_tutorial_opcode_*`. A
+  handler shared by several opcodes takes the lowest. Use "opcode" only for
+  an instruction stream that a dispatcher decodes; request codes and
+  single records are commands.
 - Globals follow the same rule: a global with one definition carries the
   defining program's token (`g_main_`, `g_battle_`, `g_bunit_`), and a name
   that shared code binds to a different definition in each program carries
