@@ -1370,6 +1370,10 @@ typedef struct effect_emitter_geometry_view {
 } effect_emitter_geometry_view_t;
 typedef char assert_effect_emitter_geometry_view_size[sizeof(effect_emitter_geometry_view_t) == 56 ? 1 : -1];
 
+/* Nibble positions of the zero-based red, green and blue curve indices in a
+ * record's color_curves word. The renderers copy the word into a signed local
+ * and shift and mask each nibble. A bit-field record would extract with
+ * different shifts, which the original instructions rule out. */
 enum {
     EFFECT_COLOR_CURVE_RED_SHIFT = 0,
     EFFECT_COLOR_CURVE_GREEN_SHIFT = 4,
