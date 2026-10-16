@@ -2169,79 +2169,97 @@ static void battle_map_update_mesh_part_animations(void) {
                 start_b = &g_battle_map_mesh_parts[i].translation_start;
                 *start_b = current_b[i * (sizeof(map_mesh_part_t) / sizeof(SVECTOR))];
                 g_battle_map_mesh_parts[i].elapsed = 1;
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[0] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_X]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].rotation_step.vx
                         = g_battle_map_mesh_animation_keyframes[anim].rotation.vx
                         - g_battle_map_mesh_parts[i].rotation_start.vx;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[1] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Y]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].rotation_step.vy
                         = g_battle_map_mesh_animation_keyframes[anim].rotation.vy
                         - g_battle_map_mesh_parts[i].rotation_start.vy;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[2] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Z]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].rotation_step.vz
                         = g_battle_map_mesh_animation_keyframes[anim].rotation.vz
                         - g_battle_map_mesh_parts[i].rotation_start.vz;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[3] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_X]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].translation_step.vx
                         = g_battle_map_mesh_animation_keyframes[anim].translation.vx
                         - g_battle_map_mesh_parts[i].translation_start.vx;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[4] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Y]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].translation_step.vy
                         = g_battle_map_mesh_animation_keyframes[anim].translation.vy
                         - g_battle_map_mesh_parts[i].translation_start.vy;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[5] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Z]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].translation_step.vz
                         = g_battle_map_mesh_animation_keyframes[anim].translation.vz
                         - g_battle_map_mesh_parts[i].translation_start.vz;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[6] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_X]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].scale_step.vx = g_battle_map_mesh_animation_keyframes[anim].scale_x
                         - g_battle_map_mesh_parts[i].scale_start.vx;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[7] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Y]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].scale_step.vy = g_battle_map_mesh_animation_keyframes[anim].scale_y
                         - g_battle_map_mesh_parts[i].scale_start.vy;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[8] & MAP_MESH_TWEEN_TO) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Z]
+                    & MAP_MESH_TWEEN_TO) {
                     g_battle_map_mesh_parts[i].scale_step.vz = g_battle_map_mesh_animation_keyframes[anim].scale_z
                         - g_battle_map_mesh_parts[i].scale_start.vz;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[0] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_X]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].rotation_step.vx
                         = g_battle_map_mesh_animation_keyframes[anim].rotation.vx;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[1] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Y]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].rotation_step.vy
                         = g_battle_map_mesh_animation_keyframes[anim].rotation.vy;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[2] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Z]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].rotation_step.vz
                         = g_battle_map_mesh_animation_keyframes[anim].rotation.vz;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[3] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_X]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].translation_step.vx
                         = g_battle_map_mesh_animation_keyframes[anim].translation.vx;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[4] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Y]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].translation_step.vy
                         = g_battle_map_mesh_animation_keyframes[anim].translation.vy;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[5] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Z]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].translation_step.vz
                         = g_battle_map_mesh_animation_keyframes[anim].translation.vz;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[6] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_X]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].scale_step.vx = g_battle_map_mesh_animation_keyframes[anim].scale_x;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[7] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Y]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].scale_step.vy = g_battle_map_mesh_animation_keyframes[anim].scale_y;
                 }
-                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[8] & MAP_MESH_TWEEN_BY) {
+                if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Z]
+                    & MAP_MESH_TWEEN_BY) {
                     g_battle_map_mesh_parts[i].scale_step.vz = g_battle_map_mesh_animation_keyframes[anim].scale_z;
                 }
             }
@@ -2250,186 +2268,228 @@ static void battle_map_update_mesh_part_animations(void) {
             anim = g_battle_map_mesh_parts[i].keyframe;
             duration = g_battle_map_mesh_parts[i].duration;
             time = g_battle_map_mesh_parts[i].elapsed;
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[0] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_X]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].rotation.vx = g_battle_map_mesh_parts[i].rotation_step.vx * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[1] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Y]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].rotation.vy = g_battle_map_mesh_parts[i].rotation_step.vy * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[2] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Z]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].rotation.vz = g_battle_map_mesh_parts[i].rotation_step.vz * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[3] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_X]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].translation.vx
                     = g_battle_map_mesh_parts[i].translation_step.vx * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[4] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Y]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].translation.vy
                     = g_battle_map_mesh_parts[i].translation_step.vy * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[5] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Z]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].translation.vz
                     = g_battle_map_mesh_parts[i].translation_step.vz * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[6] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_X]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].scale.vx = g_battle_map_mesh_parts[i].scale_step.vx * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[7] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Y]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].scale.vy = g_battle_map_mesh_parts[i].scale_step.vy * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[8] & MAP_MESH_TWEEN_LINEAR) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Z]
+                & MAP_MESH_TWEEN_LINEAR) {
                 g_battle_map_mesh_parts[i].scale.vz = g_battle_map_mesh_parts[i].scale_step.vz * time / duration;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[0] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_X]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].rotation.vx = g_battle_map_mesh_parts[i].rotation_step.vx
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[0]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[0])
+                        * rsin(
+                            (g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_ROTATION_X]
+                                - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_X])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[0])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_X])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[1] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Y]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].rotation.vy = g_battle_map_mesh_parts[i].rotation_step.vy
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[1]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[1])
+                        * rsin(
+                            (g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_ROTATION_Y]
+                                - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_Y])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[1])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_Y])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[2] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Z]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].rotation.vz = g_battle_map_mesh_parts[i].rotation_step.vz
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[2]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[2])
+                        * rsin(
+                            (g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_ROTATION_Z]
+                                - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_Z])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[2])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_Z])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[3] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_X]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].translation.vx = g_battle_map_mesh_parts[i].translation_step.vx
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[3]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[3])
+                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_TRANSLATION_X]
+                                   - g_battle_map_mesh_animation_keyframes[anim]
+                                       .angle_start[MAP_MESH_CHANNEL_TRANSLATION_X])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[3])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_TRANSLATION_X])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[4] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Y]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].translation.vy = g_battle_map_mesh_parts[i].translation_step.vy
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[4]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[4])
+                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_TRANSLATION_Y]
+                                   - g_battle_map_mesh_animation_keyframes[anim]
+                                       .angle_start[MAP_MESH_CHANNEL_TRANSLATION_Y])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[4])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_TRANSLATION_Y])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[5] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Z]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].translation.vz = g_battle_map_mesh_parts[i].translation_step.vz
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[5]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[5])
+                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_TRANSLATION_Z]
+                                   - g_battle_map_mesh_animation_keyframes[anim]
+                                       .angle_start[MAP_MESH_CHANNEL_TRANSLATION_Z])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[5])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_TRANSLATION_Z])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[6] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_X]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].scale.vx = g_battle_map_mesh_parts[i].scale_step.vx
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[6]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[6])
+                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_SCALE_X]
+                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_X])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[6])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_X])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[7] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Y]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].scale.vy = g_battle_map_mesh_parts[i].scale_step.vy
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[7]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[7])
+                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_SCALE_Y]
+                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Y])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[7])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Y])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[8] & MAP_MESH_TWEEN_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Z]
+                & MAP_MESH_TWEEN_SINE) {
                 g_battle_map_mesh_parts[i].scale.vz = g_battle_map_mesh_parts[i].scale_step.vz
-                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[8]
-                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[8])
+                        * rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_SCALE_Z]
+                                   - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Z])
                                 * time / duration
-                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[8])
+                            + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Z])
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[0] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_X]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].rotation.vx = g_battle_map_mesh_parts[i].rotation_step.vx
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[0]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[0])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_ROTATION_X]
+                                    - g_battle_map_mesh_animation_keyframes[anim]
+                                        .angle_start[MAP_MESH_CHANNEL_ROTATION_X])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[0])
+                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_X])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[1] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Y]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].rotation.vy = g_battle_map_mesh_parts[i].rotation_step.vy
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[1]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[1])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_ROTATION_Y]
+                                    - g_battle_map_mesh_animation_keyframes[anim]
+                                        .angle_start[MAP_MESH_CHANNEL_ROTATION_Y])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[1])
+                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_Y])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[2] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_ROTATION_Z]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].rotation.vz = g_battle_map_mesh_parts[i].rotation_step.vz
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[2]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[2])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_ROTATION_Z]
+                                    - g_battle_map_mesh_animation_keyframes[anim]
+                                        .angle_start[MAP_MESH_CHANNEL_ROTATION_Z])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[2])
+                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_ROTATION_Z])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[3] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_X]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].translation.vx = g_battle_map_mesh_parts[i].translation_step.vx
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[3]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[3])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_TRANSLATION_X]
+                                    - g_battle_map_mesh_animation_keyframes[anim]
+                                        .angle_start[MAP_MESH_CHANNEL_TRANSLATION_X])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[3])
+                               + g_battle_map_mesh_animation_keyframes[anim]
+                                   .angle_start[MAP_MESH_CHANNEL_TRANSLATION_X])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[4] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Y]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].translation.vy = g_battle_map_mesh_parts[i].translation_step.vy
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[4]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[4])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_TRANSLATION_Y]
+                                    - g_battle_map_mesh_animation_keyframes[anim]
+                                        .angle_start[MAP_MESH_CHANNEL_TRANSLATION_Y])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[4])
+                               + g_battle_map_mesh_animation_keyframes[anim]
+                                   .angle_start[MAP_MESH_CHANNEL_TRANSLATION_Y])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[5] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_TRANSLATION_Z]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].translation.vz = g_battle_map_mesh_parts[i].translation_step.vz
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[5]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[5])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_TRANSLATION_Z]
+                                    - g_battle_map_mesh_animation_keyframes[anim]
+                                        .angle_start[MAP_MESH_CHANNEL_TRANSLATION_Z])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[5])
+                               + g_battle_map_mesh_animation_keyframes[anim]
+                                   .angle_start[MAP_MESH_CHANNEL_TRANSLATION_Z])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[6] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_X]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].scale.vx = g_battle_map_mesh_parts[i].scale_step.vx
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[6]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[6])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_SCALE_X]
+                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_X])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[6])
+                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_X])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[7] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Y]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].scale.vy = g_battle_map_mesh_parts[i].scale_step.vy
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[7]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[7])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_SCALE_Y]
+                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Y])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[7])
+                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Y])
                             + ONE)
                     >> 12;
             }
-            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[8] & MAP_MESH_TWEEN_RAISED_SINE) {
+            if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[MAP_MESH_CHANNEL_SCALE_Z]
+                & MAP_MESH_TWEEN_RAISED_SINE) {
                 g_battle_map_mesh_parts[i].scale.vz = g_battle_map_mesh_parts[i].scale_step.vz
-                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[8]
-                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[8])
+                        * (rsin((g_battle_map_mesh_animation_keyframes[anim].angle_end[MAP_MESH_CHANNEL_SCALE_Z]
+                                    - g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Z])
                                    * time / duration
-                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[8])
+                               + g_battle_map_mesh_animation_keyframes[anim].angle_start[MAP_MESH_CHANNEL_SCALE_Z])
                             + ONE)
                     >> 12;
             }

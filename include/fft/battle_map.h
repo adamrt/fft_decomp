@@ -635,22 +635,37 @@ typedef struct map_mesh_part {
 } map_mesh_part_t;
 typedef char map_mesh_part_size_must_be_152[(sizeof(map_mesh_part_t) == 152) ? 1 : -1];
 
+/* Channels of a mesh keyframe's per-channel arrays (angle_start, angle_end,
+ * tween_flags) and of a part's animation state. */
+typedef enum map_mesh_channel {
+    MAP_MESH_CHANNEL_ROTATION_X = 0,
+    MAP_MESH_CHANNEL_ROTATION_Y = 1,
+    MAP_MESH_CHANNEL_ROTATION_Z = 2,
+    MAP_MESH_CHANNEL_TRANSLATION_X = 3,
+    MAP_MESH_CHANNEL_TRANSLATION_Y = 4,
+    MAP_MESH_CHANNEL_TRANSLATION_Z = 5,
+    MAP_MESH_CHANNEL_SCALE_X = 6,
+    MAP_MESH_CHANNEL_SCALE_Y = 7,
+    MAP_MESH_CHANNEL_SCALE_Z = 8,
+    MAP_MESH_CHANNEL_COUNT = 9,
+} map_mesh_channel_e;
+
 /* One 0x50-byte keyframe from a mesh animation record of type 1.
  * Keyframe ids are 1-based; entry 0 is never loaded. Each of the nine channels
  * (rotation, translation and scale of a mesh part) has a target value, a
  * start/end angle for the sine modes and a 16-bit mode flags whose bits 0 and 1
  * are TweenTo and TweenBy. */
 typedef struct map_mesh_keyframe {
-    SVECTOR rotation;    /* 0x00; target */
-    SVECTOR translation; /* 0x08; target */
-    s16 scale_x;         /* 0x10; ONE = 1.0 */
-    s16 scale_y;         /* 0x12 */
-    s16 scale_z;         /* 0x14 */
-    s16 _unused_16;      /* 0x16 */
-    s16 angle_start[9];  /* 0x18 */
-    s16 angle_end[9];    /* 0x2a */
-    u16 tween_flags[9];  /* 0x3c; per channel */
-    u16 _unused_4e;      /* 0x4e */
+    SVECTOR rotation;                        /* 0x00; target */
+    SVECTOR translation;                     /* 0x08; target */
+    s16 scale_x;                             /* 0x10; ONE = 1.0 */
+    s16 scale_y;                             /* 0x12 */
+    s16 scale_z;                             /* 0x14 */
+    s16 _unused_16;                          /* 0x16 */
+    s16 angle_start[MAP_MESH_CHANNEL_COUNT]; /* 0x18 */
+    s16 angle_end[MAP_MESH_CHANNEL_COUNT];   /* 0x2a */
+    u16 tween_flags[MAP_MESH_CHANNEL_COUNT]; /* 0x3c */
+    u16 _unused_4e;                          /* 0x4e */
 } map_mesh_keyframe_t;
 typedef char map_mesh_keyframe_size_must_be_80[(sizeof(map_mesh_keyframe_t) == 80) ? 1 : -1];
 
