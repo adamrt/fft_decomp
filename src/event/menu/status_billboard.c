@@ -281,7 +281,7 @@ void menu_load_selected_unit(void) {
         editor->generic_monster = 1;
 
     if (editor->generic_monster != 0) {
-        innate_items = main_ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        innate_items = ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         i = 0;
         do {
             editor->ability_ids[i] = *innate_items++;
@@ -334,9 +334,9 @@ void menu_load_selected_unit(void) {
     }
 
     if (item_id != ITEM_ID_NOTHING) {
-        item = main_item_get_data_pointer(item_id);
+        item = item_get_data(item_id);
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
-            item_flags = g_main_item_weapon_data[item_id].flags;
+            item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
                 || ((unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS)
                     && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
@@ -376,7 +376,7 @@ void menu_load_selected_unit(void) {
  * before the names are cleared and copied.
  */
 void menu_load_selected_unit(void) {
-    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_comparison_unit_data.battle_id);
+    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_unit_panel_comparison_unit_data.battle_id);
     menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
     u16* innate_items;
     item_data_t* item;
@@ -391,18 +391,18 @@ void menu_load_selected_unit(void) {
         menu_copy_unit_data_to_status_billboard(unit, &g_panel_comparison_billboard);
     }
 
-    unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_selected_unit_data.battle_id);
+    unit = battle_unit_get_stats_from_battle_id(g_unit_panel_selected_unit_data.battle_id);
     if (unit == 0)
         return;
     menu_copy_unit_data_to_status_billboard(unit, &g_panel_selected_billboard);
 
-    g_debugchr_panel_selected_unit_data.job_id = unit->job_id;
-    g_debugchr_panel_selected_unit_data.brave = unit->brave;
-    g_debugchr_panel_selected_unit_data.faith = unit->faith;
+    g_unit_panel_selected_unit_data.job_id = unit->job_id;
+    g_unit_panel_selected_unit_data.brave = unit->brave;
+    g_unit_panel_selected_unit_data.faith = unit->faith;
     /* The zodiac sign is the top nibble of the 16-bit birthday value. */
     /* Direct union-member access hoists the 16-bit load above the faith
      * store (1344 vs 1348 bytes); keep the typed field's aliased 16-bit view. */
-    g_debugchr_panel_selected_unit_data.zodiac = unit->birthday.zodiac;
+    g_unit_panel_selected_unit_data.zodiac = unit->birthday.zodiac;
 
     editor->move = unit->move;
     editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -453,7 +453,7 @@ void menu_load_selected_unit(void) {
         editor->generic_monster = 1;
 
     if (editor->generic_monster != 0) {
-        innate_items = main_ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        innate_items = ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         i = 0;
         do {
             editor->ability_ids[i] = *innate_items++;
@@ -506,9 +506,9 @@ void menu_load_selected_unit(void) {
     }
 
     if (item_id != ITEM_ID_NOTHING) {
-        item = main_item_get_data_pointer(item_id);
+        item = item_get_data(item_id);
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
-            item_flags = g_main_item_weapon_data[item_id].flags;
+            item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
                 || ((unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS)
                     && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
@@ -516,14 +516,14 @@ void menu_load_selected_unit(void) {
         }
     }
 
-    text_fill_field_with_terminators(g_debugchr_editor_unit_name);
-    text_fill_field_with_terminators(g_debugchr_editor_job_name);
+    text_fill_field_with_terminators(g_unit_editor_unit_name);
+    text_fill_field_with_terminators(g_unit_editor_job_name);
     text_fill_field_with_terminators(g_editor_primary_skillset_name);
     text_fill_field_with_terminators(g_editor_secondary_skillset_name);
     /* The editor uses 16-byte windows at each text destination, including
      * the two eight-byte skillset names; preserve those target copy lengths. */
-    mem_copy_bytes_nonempty(g_debugchr_editor_unit_name, unit->name, 0x10);
-    mem_copy_bytes_nonempty(g_debugchr_editor_job_name, unit->job_name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_editor_unit_name, unit->name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_editor_job_name, unit->job_name, 0x10);
     mem_copy_bytes_nonempty(g_editor_primary_skillset_name, unit->primary_skillset_name, 0x10);
     mem_copy_bytes_nonempty(g_editor_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
 }

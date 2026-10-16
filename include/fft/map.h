@@ -353,7 +353,7 @@ typedef char map_tile_size_must_be_8[(sizeof(map_tile_t) == 8) ? 1 : -1];
 /* Provisional 0xa-byte selected-tile record, filled by
  * map_store_selected_tile_data and copied whole by
  * menu_copy_billboard_data_out. _unknown_02/_unknown_04 are the two bytes of
- * the per-surface-type main table g_main_terrain_tile_info_pairs, 25 and 25
+ * the per-surface-type main table g_terrain_tile_info_pairs, 25 and 25
  * for all 64 surface types; nothing reads them back. */
 typedef struct map_selected_tile {
     s16 surface_type;   /* 0x00 */

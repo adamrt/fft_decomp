@@ -18,8 +18,8 @@
  *
  * CARD's body, without the other bodies' frame_arg latch,
  * the numeric-value flag and the thread status indicators; CARD instead sets
- * g_main_gfx_screen_polarity when `count_frame` is nonzero. A held direction
- * or L1/R1 repeats after g_main_input_repeat_initial_delay frames and then
+ * g_gfx_screen_polarity when `count_frame` is nonzero. A held direction
+ * or L1/R1 repeats after g_input_repeat_initial_delay frames and then
  * every repeat period (directions) or secondary repeat period (L1/R1), all
  * divided by the event speed; holding Square restricts the fast repeat to
  * Left/Right and adds Up/Down to the slow one. Any input other than Select, or a thread starting or stopping across
@@ -36,7 +36,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame) {
     s32 status;
 
     if (count_frame != 0) {
-        g_main_gfx_screen_polarity = 1;
+        g_gfx_screen_polarity = 1;
     }
     g_gfx_current_otag_entry = otag;
     g_input_controller = script_get_controller_input_pointer(0);
@@ -58,7 +58,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame) {
         g_input_event = ~previous_input & input;
         g_input_initial_repeat_counter = 0;
     } else {
-        initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
+        initial_delay = g_input_repeat_initial_delay / g_script_event_speed;
         counter = ++g_input_initial_repeat_counter;
         if (counter == initial_delay) {
             g_input_event = filtered_input;
@@ -66,7 +66,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame) {
         if (counter >= initial_delay) {
             counter = ++g_input_repeat_counter;
             g_input_secondary_repeat_counter++;
-            repeat_delay = g_main_input_repeat_period / g_script_event_speed;
+            repeat_delay = g_input_repeat_period / g_script_event_speed;
             if (counter >= repeat_delay) {
                 g_input_repeat_counter = 0;
                 if ((input & PSX_PAD_SQUARE) != 0) {
@@ -75,7 +75,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame) {
                     g_input_event = input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
                 }
             }
-            secondary_delay = g_main_input_secondary_repeat_period / g_script_event_speed;
+            secondary_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (g_input_secondary_repeat_counter >= secondary_delay) {
                 g_input_secondary_repeat_counter = 0;
                 if ((g_input_current & PSX_PAD_SQUARE) != 0) {

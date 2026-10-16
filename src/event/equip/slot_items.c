@@ -10,19 +10,19 @@
 #include "fft/menu_status.h"
 #include "psx/types.h"
 
-static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id);
+static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, s32 item_id);
 
 /* Install an item into a unit's equipment slot. EQUIP copy of
  * formation_item_equip.
  *
  * Returns the validation result when it is negative. Otherwise the slot's
  * old item goes back to the inventory, and equipping into a hand slot with
- * any result other than EQUIP_SLOT_ITEM_ALLOWED also returns the other hand's
+ * any result other than EQUIPMENT_SLOT_ITEM_ALLOWED also returns the other hand's
  * item and clears that slot. Unit index 1 is the preview record: it is
  * updated without touching the inventory or the battle stats. */
-s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
+s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
     s16 value = item_id & ITEM_ENTRY_ID_MASK;
-    equip_item_slot_result_e result = equip_unit_validate_slot_item(unit_index, slot, value);
+    equipment_slot_result_e result = equipment_validate_slot_item(unit_index, slot, value);
 
     if (result < 0) {
         return result;
@@ -30,45 +30,45 @@ s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
     /* The typed equipment field folds 0x54 into the pointer expression and
      * changes register scheduling. This 16-bit view (halfword 42 is offset 0x54)
      * preserves the exact target while indexing the same
-     * equip_unit_data_t.equipment array. */
+     * equipment_unit_preview_t.equipment array. */
     if (unit_index != 1) {
-        item_adjust_inventory_count(((s16*)g_equip_unit_data[unit_index])[slot + 42], 1);
+        item_adjust_inventory_count(((s16*)g_equipment_unit_data[unit_index])[slot + 42], 1);
     }
-    if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result != EQUIP_SLOT_ITEM_ALLOWED) {
+    if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result != EQUIPMENT_SLOT_ITEM_ALLOWED) {
         s32 other = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         if (unit_index != 1) {
-            item_adjust_inventory_count(((s16*)g_equip_unit_data[unit_index])[other + 42], 1);
+            item_adjust_inventory_count(((s16*)g_equipment_unit_data[unit_index])[other + 42], 1);
         }
-        ((s16*)g_equip_unit_data[unit_index])[other + 42] = 0;
+        ((s16*)g_equipment_unit_data[unit_index])[other + 42] = 0;
     }
-    ((s16*)g_equip_unit_data[unit_index])[slot + 42] = value;
+    ((s16*)g_equipment_unit_data[unit_index])[slot + 42] = value;
     if (unit_index != 1) {
-        equip_unit_commit_loadout_to_stats();
+        equipment_commit_loadout();
     }
-    return EQUIP_SLOT_ITEM_ALLOWED;
+    return EQUIPMENT_SLOT_ITEM_ALLOWED;
 }
 
-/* Whether a unit's job can equip an item: EQUIP_SLOT_ITEM_ALLOWED for no item or an item whose
- * type bit is set in the unit's equippable-types bitfield, EQUIP_SLOT_ITEM_CANNOT_EQUIP for an item
+/* Whether a unit's job can equip an item: EQUIPMENT_SLOT_ITEM_ALLOWED for no item or an item whose
+ * type bit is set in the unit's equippable-types bitfield, EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP for an item
  * of the "other" menu category or a type the unit cannot use. The low ten
  * bits of the entry are the item id. */
-static s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
+static s32 equipment_can_equip_item(s16 unit_index, s16 item_entry) {
     s32 item_id = item_entry & ITEM_ENTRY_ID_MASK;
     s32 result;
 
     if (item_id == 0) {
-        return EQUIP_SLOT_ITEM_ALLOWED;
+        return EQUIPMENT_SLOT_ITEM_ALLOWED;
     }
     if (item_get_menu_category(item_id) == ITEM_MENU_CATEGORY_OTHER) {
-        return EQUIP_SLOT_ITEM_CANNOT_EQUIP;
+        return EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP;
     }
     /* Skip to the item type's bit in the unit's bitfield, first byte's bit 7 first. */
-    bits_init_primary_reader(g_equip_unit_data[unit_index]->equipment_categories);
+    bits_init_primary_reader(g_equipment_unit_data[unit_index]->equipment_categories);
     bits_read_primary(item_get_type(item_id));
     if (bits_read_primary(1) == 0) {
-        result = EQUIP_SLOT_ITEM_CANNOT_EQUIP;
+        result = EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP;
     } else {
-        result = EQUIP_SLOT_ITEM_ALLOWED;
+        result = EQUIPMENT_SLOT_ITEM_ALLOWED;
     }
     return result;
 }
@@ -80,7 +80,7 @@ static s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
  * The s16 id and its new_item copy reproduce the target's two callee-saved
  * copies of the masked id (the same shape as
  * formation_item_can_equip_in_slot). */
-static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id) {
+static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, s32 item_id) {
     s32 result;
     s16 id = item_id & ITEM_ENTRY_ID_MASK;
     s16 new_item = id;
@@ -95,53 +95,53 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
     u8 flags;
 
     if (id == ITEM_ID_NOTHING) {
-        return EQUIP_SLOT_ITEM_ALLOWED;
+        return EQUIPMENT_SLOT_ITEM_ALLOWED;
     }
-    if (g_main_item_primary_data[g_equip_unit_data[unit]->equipment[slot]].type_flags & ITEM_TYPE_FLAG_UNREMOVABLE) {
-        return EQUIP_SLOT_ITEM_CURRENT_LOCKED;
+    if (g_item_primary_data[g_equipment_unit_data[unit]->equipment[slot]].type_flags & ITEM_TYPE_FLAG_UNREMOVABLE) {
+        return EQUIPMENT_SLOT_ITEM_CURRENT_LOCKED;
     }
-    result = equip_unit_can_equip_item_id(unit, id);
+    result = equipment_can_equip_item(unit, id);
 
     /* Hand pairing, where ids from ITEM_ID_THROWABLE_FIRST on (shields included) count as
      * non-weapons: two Two Swords weapons pair when the unit has Two Swords; otherwise two
      * weapons, two non-weapons, or a non-weapon beside a forced two-hand weapon do not. */
-    if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result == EQUIP_SLOT_ITEM_ALLOWED) {
+    if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result == EQUIPMENT_SLOT_ITEM_ALLOWED) {
         is_nonstandard_weapon = id >= ITEM_ID_THROWABLE_FIRST;
         if (is_nonstandard_weapon) {
             forced_two_hands = 0;
             two_swords = 0;
         } else {
-            flags = g_main_item_weapon_data[id].flags;
+            flags = g_item_weapon_data[id].flags;
             forced_two_hands = flags & WEAPON_FLAG_FORCED_TWO_HANDS;
             two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
         other_slot = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
-        other = g_equip_unit_data[unit]->equipment[other_slot] & ITEM_ENTRY_ID_MASK;
+        other = g_equipment_unit_data[unit]->equipment[other_slot] & ITEM_ENTRY_ID_MASK;
         other_is_nonstandard_weapon = other >= ITEM_ID_THROWABLE_FIRST;
         if (other_is_nonstandard_weapon) {
             other_forced_two_hands = 0;
             other_two_swords = 0;
         } else {
-            flags = g_main_item_weapon_data[other].flags;
+            flags = g_item_weapon_data[other].flags;
             other_forced_two_hands = flags & WEAPON_FLAG_FORCED_TWO_HANDS;
             other_two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
 
-        if (two_swords && other_two_swords && equip_unit_has_two_swords(unit)) {
-            return EQUIP_SLOT_ITEM_ALLOWED;
+        if (two_swords && other_two_swords && ability_has_two_swords(unit)) {
+            return EQUIPMENT_SLOT_ITEM_ALLOWED;
         }
         if (!is_nonstandard_weapon && !other_is_nonstandard_weapon && new_item != ITEM_ID_NOTHING
             && other != ITEM_ID_NOTHING) {
-            return EQUIP_SLOT_ITEM_INCOMPATIBLE_PAIR;
+            return EQUIPMENT_SLOT_ITEM_INCOMPATIBLE_PAIR;
         }
         if (is_nonstandard_weapon && other_is_nonstandard_weapon) {
-            return EQUIP_SLOT_ITEM_INCOMPATIBLE_PAIR;
+            return EQUIPMENT_SLOT_ITEM_INCOMPATIBLE_PAIR;
         }
         if (is_nonstandard_weapon && other_forced_two_hands) {
-            return EQUIP_SLOT_ITEM_INCOMPATIBLE_PAIR;
+            return EQUIPMENT_SLOT_ITEM_INCOMPATIBLE_PAIR;
         }
         if (other_is_nonstandard_weapon && forced_two_hands) {
-            return EQUIP_SLOT_ITEM_INCOMPATIBLE_PAIR;
+            return EQUIPMENT_SLOT_ITEM_INCOMPATIBLE_PAIR;
         }
     }
     return result;
@@ -153,9 +153,9 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
  * with ITEM_ENTRY_UNEQUIPPABLE, and 2 omits them; filter 1 is
  * promoted to 2 when Show Unequippable is not On. `sort_mode` 1-5 with a
  * category list index below 5 uses that category order list; anything else falls back to
- * equip_item_sort_id_list. Returns the number of listed items.
+ * item_sort_id_list. Returns the number of listed items.
  */
-s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter) {
+s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter) {
     s32 count;
     s32 item_id;
     s32 entry;
@@ -164,7 +164,7 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
     s32 category_index;
 
     if (equip_filter == ITEM_LIST_MODE_MARK_UNEQUIPPABLE
-        && g_main_game_options.fields.show_unequippable_items != GAME_OPTION_ON) {
+        && g_game_options.fields.show_unequippable_items != GAME_OPTION_ON) {
         equip_filter = ITEM_LIST_MODE_EQUIPPABLE;
     }
     item_id = 1;
@@ -208,11 +208,11 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
             continue;
         }
         if (equip_filter != ITEM_LIST_MODE_ALL) {
-            matches = equip_unit_can_equip_item_id(unit_index, entry);
-            if (equip_filter == ITEM_LIST_MODE_EQUIPPABLE && matches == EQUIP_SLOT_ITEM_CANNOT_EQUIP) {
+            matches = equipment_can_equip_item(unit_index, entry);
+            if (equip_filter == ITEM_LIST_MODE_EQUIPPABLE && matches == EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP) {
                 continue;
             }
-            if (equip_filter == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && matches == EQUIP_SLOT_ITEM_CANNOT_EQUIP) {
+            if (equip_filter == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && matches == EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP) {
                 entry |= ITEM_ENTRY_UNEQUIPPABLE;
             }
         }
@@ -232,7 +232,7 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
     if (category_index < 5 && sort_mode >= 1 && sort_mode < 6) {
         count = item_sort_list_by_category_order(category_index, list);
     } else {
-        equip_item_sort_id_list(sort_mode & 0xF, list);
+        item_sort_id_list(sort_mode & 0xF, list);
     }
     return count;
 }

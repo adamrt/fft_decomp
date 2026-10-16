@@ -14,7 +14,7 @@
  * Same state machine and curves as menu_update_and_draw_sliding_cursor; the
  * curve offset moves the quad's y edges instead of its x origin.
  */
-void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
+void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
     u16 unused[4]; /* never accessed; the sibling's rect keeps the 0x38-byte frame */
     s32 bottom;
     s32 active;
@@ -87,14 +87,14 @@ void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 
     }
 
     bottom = y_offset + 0x10;
-    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, y_offset + pos->y, pos->x + 0x10, y_offset + pos->y, pos->x,
+    setXY4(&g_unit_list_bouncing_cursor_quad, pos->x, y_offset + pos->y, pos->x + 0x10, y_offset + pos->y, pos->x,
         pos->y + bottom, pos->x + 0x10, pos->y + bottom);
-    g_bunit_bouncing_cursor_quad.clut = front_clut;
-    g_bunit_bouncing_cursor_quad.tpage = g_menu_cursor_texture_page;
-    gfx_enqueue_textured_quad_corners(&g_bunit_bouncing_cursor_quad, 0, 0, 0x3C);
-    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, y_offset + pos->y + 2, pos->x + 0x10, y_offset + pos->y + 2, pos->x,
-        pos->y + bottom + 2, pos->x + 0x10, pos->y + bottom + 2);
-    g_bunit_bouncing_cursor_quad.clut = shadow_clut;
-    g_bunit_bouncing_cursor_quad.tpage = 0x5F;
-    gfx_enqueue_textured_quad_corners(&g_bunit_bouncing_cursor_quad, 0, 1, 0x3B);
+    g_unit_list_bouncing_cursor_quad.clut = front_clut;
+    g_unit_list_bouncing_cursor_quad.tpage = g_menu_cursor_texture_page;
+    gfx_enqueue_textured_quad_corners(&g_unit_list_bouncing_cursor_quad, 0, 0, 0x3C);
+    setXY4(&g_unit_list_bouncing_cursor_quad, pos->x, y_offset + pos->y + 2, pos->x + 0x10, y_offset + pos->y + 2,
+        pos->x, pos->y + bottom + 2, pos->x + 0x10, pos->y + bottom + 2);
+    g_unit_list_bouncing_cursor_quad.clut = shadow_clut;
+    g_unit_list_bouncing_cursor_quad.tpage = 0x5F;
+    gfx_enqueue_textured_quad_corners(&g_unit_list_bouncing_cursor_quad, 0, 1, 0x3B);
 }

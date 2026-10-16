@@ -710,9 +710,9 @@ static void message_box_draw_glyph(s32 x, s32 y, s32 wait) {
     } else {
         if (PadRead(1) & PSX_PAD_CIRCLE) {
             g_message_box_glyph_delay = 8;
-        } else if (g_main_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_FAST) {
+        } else if (g_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_FAST) {
             g_message_box_glyph_delay = 8;
-        } else if (g_main_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_REGULAR) {
+        } else if (g_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_REGULAR) {
             g_message_box_glyph_delay = 2;
         } else {
             g_message_box_glyph_delay = 1;
@@ -726,7 +726,7 @@ static void message_box_draw_glyph(s32 x, s32 y, s32 wait) {
     }
 
     if (g_message_box_glyph.mode != 0) {
-        g_sound_pending_sfx_id = MAIN_SFX_TEXT_GLYPH;
+        g_sound_pending_sfx_id = SOUND_SFX_TEXT_GLYPH;
     }
 }
 

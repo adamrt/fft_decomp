@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* game options */
-/* The live options word is g_main_game_options. The options screen unpacks its fields in menu order. Toggle
+/* The live options word is g_game_options. The options screen unpacks its fields in menu order. Toggle
  * settings encode On as 0 and Off as 1; the paired high bit participates in the menu's Customize/Initialize
  * state. */
 enum {

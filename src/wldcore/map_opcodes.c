@@ -502,7 +502,7 @@ s32 sound_novel_calculate_read_percent(void) {
     s32 i;
 
     for (i = 0; i < 0x1000; i++) {
-        if (bits_test(g_main_sound_novel_read_section_bits, i) != 0) {
+        if (bits_test(g_sound_novel_read_section_bits, i) != 0) {
             count++;
         }
     }
@@ -544,7 +544,7 @@ void brave_story_open_fact_list(void) {
     menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_FACTS, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count, &layout, &origin);
-    g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
     g_window_render_records[g_menu_stack_records_next[g_menu_stack_depth - 1].list_window.content_render].flags
         |= DISPLAY_OBJECT_HIDDEN;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
@@ -571,11 +571,10 @@ void brave_story_block_fact_list_buttons(menu_stack_panel_level_t* level) {
  * with help message 0x108f, handing a confirmed entry's value to
  * brave_story_push_fact_level. */
 void brave_story_handle_fact_list_input(menu_stack_panel_level_t* level) {
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
-        g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         if (level->result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_FACTS);
@@ -587,20 +586,20 @@ void brave_story_handle_fact_list_input(menu_stack_panel_level_t* level) {
         menu_stack_dispatch_resume();
         return;
     }
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CANCEL);
         level->result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
         brave_story_block_fact_list_buttons(level);
         menu_stack_push_message_level(0x108F, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
-        && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
 

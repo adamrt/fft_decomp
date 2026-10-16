@@ -45,13 +45,13 @@ s32 item_run_rearrange_mode(void) {
     g_menu_help_message_text_id = -1;
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_item_rearrange_initialized = 0;
-        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return MENU_ITEM_LIST_STATE_BROWSE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         cursor = g_menu_list_selected_index;
         picked = g_item_rearrange_picked_cursor;
-        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         if (cursor == picked) {
             g_item_rearrange_initialized = 0;
             g_item_action_menu.selected_index = 0;

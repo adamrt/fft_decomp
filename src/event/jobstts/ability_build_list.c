@@ -18,7 +18,7 @@
  * special monster counts every ability as learned. A nonzero `unlearned_only` omits the
  * learned abilities, so an empty result means the job is mastered.
  */
-s32 jobstts_ability_build_list(
+s32 ability_list_build(
     s16 unit_index, s16 job_id, menu_ability_category_e ability_category, s16* list, s32 unlearned_only) {
     s16* abilities;
     s16 generic_index;
@@ -27,7 +27,7 @@ s32 jobstts_ability_build_list(
     s16 ability_id;
     s16 encoded_ability_id;
     s32 byte_offset;
-    jobstts_unit_job_data_t* unit_data;
+    status_screen_unit_jobs_t* unit_data;
     s32 i; /* holds the skillset id before it counts the two loops */
     s16 lo;
     s16 hi;
@@ -35,9 +35,9 @@ s32 jobstts_ability_build_list(
     generic_index = job_get_generic_index(job_id);
     i = job_get_skillset(job_id);
     if (job_find_first_for_skillset(i) == -1) {
-        i = g_jobstts_unit_data[unit_index]->primary_skillset;
+        i = g_status_screen_unit_data[unit_index]->primary_skillset;
     }
-    abilities = (s16*)main_ability_store_skillset_abilities(i, SKILLSET_ABILITY_FILTER_ALL);
+    abilities = (s16*)ability_store_skillset_abilities(i, SKILLSET_ABILITY_FILTER_ALL);
 
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
@@ -64,15 +64,15 @@ s32 jobstts_ability_build_list(
     }
 
     count = 0;
-    unit_data = g_jobstts_unit_data[unit_index];
+    unit_data = g_status_screen_unit_data[unit_index];
     /* The job's learned-ability bits, one per skillset slot, read most significant first.
      * Keeping this offset separate preserves the target's GCC operand order;
      * direct learned_abilities indexing reverses the final commutative addu. */
     byte_offset = generic_index * UNIT_LEARNED_ABILITY_BYTES_PER_JOB
-        + offsetof(jobstts_unit_job_data_t, career.learned_abilities);
+        + offsetof(status_screen_unit_jobs_t, career.learned_abilities);
     bits_init_primary_reader((u8*)(byte_offset + (s32)unit_data));
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
-        if (job_is_special_monster(g_jobstts_unit_data[unit_index]->job_id) != 0) {
+        if (job_is_special_monster(g_status_screen_unit_data[unit_index]->job_id) != 0) {
             learned = 1;
         } else {
             learned = bits_read_primary(1);
@@ -82,7 +82,7 @@ s32 jobstts_ability_build_list(
         if (ability_id != 0) {
             encoded_ability_id = ability_id;
             if (learned == 0) {
-                if ((g_main_ability_data[ability_id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT) == 0) {
+                if ((g_ability_data[ability_id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT) == 0) {
                     encoded_ability_id |= ABILITY_LIST_ENTRY_DISABLED;
                 } else {
                     encoded_ability_id |= ABILITY_LIST_ENTRY_DISABLED | ABILITY_LIST_ENTRY_HIDE_DETAILS;

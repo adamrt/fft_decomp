@@ -92,7 +92,7 @@ typedef enum menu_command_id {
 extern s32 g_menu_current_id; /* menu_command_id_e */
 
 /* turn menus */
-/* Per-skillset menu behavior (g_main_action_menu_types_by_skillset). Values select specialized
+/* Per-skillset menu behavior (g_command_menu_types_by_skillset). Values select specialized
  * inventory, targeting, and ability-loading paths; they are not menu command
  * opcodes. */
 typedef enum action_menu_type {

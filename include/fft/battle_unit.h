@@ -167,7 +167,7 @@ typedef struct battle_unit {
     s16 depth_height_offset;     /* 0x074 */
     u16 float_bob_offset;        /* 0x076; from the float bob table */
     /* 0x078; battle_unit_increment_or_decrement_height_mod advances it by
-     * g_main_system_vsync_interval. */
+     * g_system_vsync_interval. */
     u16 float_bob_phase;
     u16 special_graphic_y_offset;      /* 0x07a; added to the v of each part: a status sheet's rows in OTHER.SPR */
     u8 map_x;                          /* 0x07c */

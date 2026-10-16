@@ -2949,28 +2949,28 @@ data:
   - {addr: 0x801cc074, name: g_menu_scratch_buffer}
 
 imports:
-  - {addr: 0x801bf3b8, name: card_save_run_menu}
-  - {addr: 0x801bf7e0, name: equip_entrypoint}
-  - {addr: 0x801c05d4, name: etc_graphic_show_async}
+  - {addr: 0x801bf3b8, name: save_run_menu}
+  - {addr: 0x801bf7e0, name: equipment_entrypoint}
+  - {addr: 0x801c05d4, name: fullscreen_graphic_thread}
   - {addr: 0x801c1a3c, name: option_entrypoint}
-  - {addr: 0x801c3078, name: attack_deploy_find_fieldable_units}
-  - {addr: 0x801c3190, name: bunit_entrypoint}
-  - {addr: 0x801c34b4, name: attack_load_scenario_conditionals}
-  - {addr: 0x801c3b00, name: attack_scenario_restore_music_and_darkness}
-  - {addr: 0x801c3d84, name: debugchr_status_run_unit_thread}
-  - {addr: 0x801c3f44, name: attack_deploy_run_screen}
-  - {addr: 0x801c438c, name: debugchr_editor_run_session}
-  - {addr: 0x801c5a50, name: attack_deploy_get_coordinate_slots}
-  - {addr: 0x801c7fe4, name: attack_gfx_build_formation_sprites}
-  - {addr: 0x801c8004, name: attack_gfx_load_portraits}
-  - {addr: 0x801c9488, name: attack_text_build_deployment_strings}
-  - {addr: 0x801c9d68, name: attack_map_show_title}
-  - {addr: 0x801c9ec0, name: attack_map_load_title_graphic}
-  - {addr: 0x801ca664, name: require_condition_animate_bonus_image_burst}
-  - {addr: 0x801cafd4, name: require_condition_dispatch}
-  - {addr: 0x801d7000, name: small_text_init_battle_pointers}
+  - {addr: 0x801c3078, name: deploy_find_fieldable_units}
+  - {addr: 0x801c3190, name: unit_list_entrypoint}
+  - {addr: 0x801c34b4, name: scenario_load_conditionals}
+  - {addr: 0x801c3b00, name: scenario_restore_music_and_darkness}
+  - {addr: 0x801c3d84, name: status_screen_mounted_unit_thread}
+  - {addr: 0x801c3f44, name: deploy_run}
+  - {addr: 0x801c438c, name: unit_editor_run}
+  - {addr: 0x801c5a50, name: deploy_get_coordinate_slots}
+  - {addr: 0x801c7fe4, name: formation_build_sprites}
+  - {addr: 0x801c8004, name: portrait_load_party}
+  - {addr: 0x801c9488, name: deploy_build_strings}
+  - {addr: 0x801c9d68, name: battle_map_title_thread}
+  - {addr: 0x801c9ec0, name: battle_map_title_load_graphic}
+  - {addr: 0x801ca664, name: conditions_animate_banner_burst}
+  - {addr: 0x801cafd4, name: conditions_dispatch}
+  - {addr: 0x801d7000, name: text_init_battle_pointers}
   - {addr: 0x801df050, name: menu_run_battle_help}
-  - {addr: 0x801df198, name: jobstts_entrypoint}
+  - {addr: 0x801df198, name: status_screen_entrypoint}
 
 overrides:
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80165ecc}

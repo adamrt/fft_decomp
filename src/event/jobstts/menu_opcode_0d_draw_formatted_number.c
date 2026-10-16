@@ -8,11 +8,11 @@
 #include "psx/types.h"
 
 /* Draw the getter's decimal value, or dashes, using the current row and palette. */
-menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* data) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     u16 unused[8]; /* Preserves the original frame size. */
-    jobstts_row_callback_t callback;
+    menu_row_callback_t callback;
     s32 arg;
     s32 y;
     s32 value;
@@ -65,13 +65,13 @@ menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instructio
             glyph.rect.h = 3;
             glyph.rect.x = dash_x;
             menu_gfx_enqueue_textured_quad(&glyph.rect, 0xBA, 0x13, 0, g_menu_gfx_semitransparency,
-                g_jobstts_gfx_background_texture_page, clut, g_menu_gfx_otag_index);
+                g_status_screen_gfx_background_texture_page, clut, g_menu_gfx_otag_index);
             value = cell;
         }
         return menu_next_instruction(data);
     }
 
-    pad = data->number.width - sprintf(text, g_jobstts_text_decimal_format, value);
+    pad = data->number.width - sprintf(text, g_status_screen_text_decimal_format, value);
     pos = 0;
     i = 0;
     if (data->number.width != 0) {
@@ -89,7 +89,7 @@ menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instructio
             glyph.rect.h = glyph.h;
             glyph.rect.x = cell_x;
             menu_gfx_enqueue_textured_quad(&glyph.rect, glyph.u + (glyph.w * digit), glyph.v, 0,
-                g_menu_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, g_menu_gfx_otag_index);
+                g_menu_gfx_semitransparency, g_status_screen_gfx_background_texture_page, clut, g_menu_gfx_otag_index);
             i += 1;
         } while (i < data->number.width);
     }

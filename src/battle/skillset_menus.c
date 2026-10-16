@@ -109,14 +109,14 @@ s32 battle_menu_get_unit_skillset_ability_data(
     if (skillset_index == -1) {
         known = 0xffffff;
     } else {
-        known = main_ability_get_known(unit, skillset_index);
+        known = ability_get_learned(unit, skillset_index);
     }
     /* The learned bits run MSB first from bit 23; only the 16 action slots are listed. */
     for (i = 0; i < 16; i++) {
         if (!(known & (0x800000 >> i))) {
             continue;
         }
-        ability = main_ability_get_id_from_skillset(skillset, i);
+        ability = ability_get_id_from_skillset(skillset, i);
         if (frog && ability != ABILITY_ID_BLACK_MAGIC_FROG) {
             continue;
         }
@@ -124,7 +124,7 @@ s32 battle_menu_get_unit_skillset_ability_data(
             continue;
         }
         if (ability >= 1 && ability < ABILITY_ID_ITEM_FIRST) {
-            secondary = &g_main_ability_range_data[ability];
+            secondary = &g_ability_range_data[ability];
             requirements = secondary->flags_4;
             if ((requirements & ABILITY_SECONDARY_FLAG_4_REQUIRES_SWORD) && !sword) {
                 continue;
@@ -153,7 +153,7 @@ s32 battle_menu_get_unit_skillset_ability_data(
             flags_out[count] = kind;
             turns_out[count] = turns;
         } else if (ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST) {
-            ct = (g_main_charge_ability_data - ABILITY_ID_CHARGE_FIRST)[ability].ct;
+            ct = (g_ability_charge_data - ABILITY_ID_CHARGE_FIRST)[ability].ct;
             turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = 0;
             ct_out[count] = ct;
@@ -214,7 +214,7 @@ s32 battle_menu_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_id
     }
     for (i = 0; i < count; i++) {
         if (abilities[i] >= ABILITY_ID_ITEM_FIRST && abilities[i] < ABILITY_ID_THROW_FIRST) {
-            table = g_main_item_ability_item_ids;
+            table = g_item_ability_item_ids;
             item_index = abilities[i];
             item_index = item_index - ABILITY_ID_ITEM_FIRST;
             found++;
@@ -236,7 +236,7 @@ s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids
  * ITEM_ID_NONE, and return 0x100 plus their count (0 when the unit or the
  * skillset is wrong or no Throw ability is learned).
  *
- * The skillset's abilities select item types through g_main_throw_ability_item_types; every item of
+ * The skillset's abilities select item types through g_ability_throw_item_types; every item of
  * a selected type that is throwable and in stock is listed (battle_action_decrement_player_item_quantity:
  * only a player-team unit can run out).
  */
@@ -273,14 +273,14 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     }
     for (i = 0; i < ability_count; i++) {
         if (abilities[i] >= ABILITY_ID_THROW_FIRST && abilities[i] < ABILITY_ID_JUMP_FIRST) {
-            type_table = g_main_throw_ability_item_types;
+            type_table = g_ability_throw_item_types;
             throw_index = abilities[i];
             throw_index = throw_index - ABILITY_ID_THROW_FIRST;
             item_types[i] = type_table[throw_index];
         }
     }
     for (i = 0; i < ITEM_ID_COUNT; i++) {
-        item = &g_main_item_primary_data[i];
+        item = &g_item_primary_data[i];
         type = item->type;
         found = 0;
         for (j = 0; j < ability_count; j++) {
@@ -290,7 +290,7 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
             }
         }
         if (found != 0 && (item->type_flags & ITEM_TYPE_FLAG_WEAPON) != 0
-            && (g_main_item_weapon_data[item->secondary_data_id].flags & WEAPON_FLAG_THROWABLE) != 0) {
+            && (g_item_weapon_data[item->secondary_data_id].flags & WEAPON_FLAG_THROWABLE) != 0) {
             item_id = i;
             if (battle_action_decrement_player_item_quantity(unit, item_id, 0) == 0) {
                 *out = item_id;
@@ -318,7 +318,7 @@ s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ab
 }
 
 /* Collect the unit's learned Math Skill abilities whose
- * g_main_math_rsm_ability_data flags intersect mask into out, -1-terminated,
+ * g_ability_math_rsm_data flags intersect mask into out, -1-terminated,
  * and return the count. An empty list writes no terminator. */
 static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask) {
     u16 abilities[0x14];
@@ -349,7 +349,7 @@ static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 ski
     for (i = 0; i < ability_count; i++) {
         ability = abilities[i];
         if (ability >= ABILITY_ID_MATH_FIRST && ability < ABILITY_ID_REACTION_FIRST) {
-            secondary_flags = &g_main_math_rsm_ability_data[ability - ABILITY_ID_MATH_FIRST];
+            secondary_flags = &g_ability_math_rsm_data[ability - ABILITY_ID_MATH_FIRST];
             flag_bits = *secondary_flags;
             if (flag_bits & mask) {
                 *out++ = ability;
@@ -398,7 +398,7 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
         if (ability_count != 0) {
             for (j = 0; j < ability_count; j++) {
                 ability = abilities[j];
-                secondary = &g_main_ability_range_data[ability];
+                secondary = &g_ability_range_data[ability];
                 if (secondary->flags_3 & ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE) {
                     *out++ = ability;
                     count++;
@@ -436,7 +436,7 @@ u16 battle_menu_get_elemental_ability(s32 unit_id, u8 skillset) {
         return 0;
     }
     terrain_ability
-        = g_main_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
+        = g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
     for (i = 0; i < count; i++) {
         if (abilities[i] == terrain_ability) {
             return terrain_ability;
@@ -476,7 +476,7 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
         frog = 1;
     }
-    if (g_main_action_menu_types_by_skillset[skillset] != ACTION_MENU_TYPE_MONSTER) {
+    if (g_command_menu_types_by_skillset[skillset] != ACTION_MENU_TYPE_MONSTER) {
         *out = -1;
         return 0;
     }
@@ -489,10 +489,10 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
         count = MONSTER_SKILLSET_ABILITY_COUNT;
     }
     for (i = 0; i < count; i++) {
-        id = main_ability_get_id_from_skillset(skillset, i);
+        id = ability_get_id_from_skillset(skillset, i);
         ability = id;
         if ((frog == 0 || id == ABILITY_ID_BLACK_MAGIC_FROG) && id != 0 && id >= 1 && id < ABILITY_ID_ITEM_FIRST) {
-            flags = g_main_ability_range_data[id].flags_3;
+            flags = g_ability_range_data[id].flags_3;
             *flags_out++ = (flags >> 7) | ((flags & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE) >> 4);
             *out = ability;
             out++;
@@ -746,7 +746,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                      * a turn; only the first counts as a casualty. */
                     if (ret & 1) {
                         if (ret == 1) {
-                            main_unit_increase_casualty_counters(unit);
+                            unit_increase_casualty_counters(unit);
                         }
                         return result;
                     }
@@ -798,7 +798,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     /* A performer's song or dance starts charging again instead of ending. */
                     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                         & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
-                        main_unit_copy_last_ability_ct(unit);
+                        unit_copy_last_ability_ct(unit);
                         unit->charged_ability_ct = unit->ability_ct;
                     } else {
                         unit->charged_ability_ct = 0xff;
@@ -1093,7 +1093,7 @@ s32 battle_status_calculate_turn_flags(const unit_stats_t* unit) {
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return BATTLE_TURN_STATUS_CT_FROZEN;
     }
-    if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_FREEZE_CT) != 0) {
+    if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_FREEZE_CT) != 0) {
         return BATTLE_TURN_STATUS_CT_FROZEN;
     }
     if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
@@ -1135,7 +1135,7 @@ s32 battle_action_check_battle_outcome(void) {
         if ((unit->initial_team_flags & UNIT_TEAM_IMPORTANCE_MASK) == UNIT_TEAM_IMPORTANCE_MASK) {
             if (unit->existence != UNIT_EXISTENCE_NONE) {
                 selected = unit->existence == UNIT_EXISTENCE_DISABLED;
-                selected += main_unit_has_status_in_set(unit, STATUS_CHECK_SET_UNIT_LOST);
+                selected += status_unit_has_any_in_set(unit, STATUS_CHECK_SET_UNIT_LOST);
                 if (selected != 0) {
                     if (unit->initial_team_flags & UNIT_TEAM_MASK) {
                         enemy_unit_count++;
@@ -1158,7 +1158,7 @@ s32 battle_action_check_battle_outcome(void) {
         unit = &g_battle_unit_stats[unit_index];
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
             selected = unit->initial_team_flags & UNIT_TEAM_MASK;
-            if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_KO) == 0) {
+            if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_KO) == 0) {
                 if (selected != 0) {
                     enemy_unit_count++;
                 } else {
@@ -1256,7 +1256,7 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
     u8 old_movement_taken;
     u8 old_action_taken;
 
-    main_util_copy_action_data(action_data, &saved_action);
+    action_copy_data(action_data, &saved_action);
     old_charged_ability_ct = unit->charged_ability_ct;
     old_inflicted_status = unit->inflicted_status[0];
     old_movement_taken = unit->movement_taken;
@@ -1274,9 +1274,9 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
     unit->movement_taken = old_movement_taken;
     unit->action_taken = old_action_taken;
     unit->inflicted_status[0] = old_inflicted_status;
-    main_status_store_current(unit);
+    status_store_current(unit);
     unit->charged_ability_ct = old_charged_ability_ct;
-    main_util_copy_action_data(&saved_action, action_data);
+    action_copy_data(&saved_action, action_data);
     return turns;
 }
 
@@ -1358,7 +1358,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
              * the key's high byte. */
             if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                 & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
-                main_unit_copy_last_ability_ct(unit);
+                unit_copy_last_ability_ct(unit);
                 for (turns = 0; turns < AT_LIST_CAPACITY - 1; turns++) {
                     tick += unit->ability_ct;
                     key = tick;
@@ -1607,13 +1607,13 @@ s32 battle_action_check_change_of_turn(s32 unit_id) {
 /* End the unit's Charging, Jump, Defending and Performing statuses and drop its charged ability
  * (action state none). Same body as crystals_and_treasure.c's static battle_status_cancel_charge. */
 void battle_status_clear_action_state(unit_stats_t* unit) {
-    main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_NONE);
+    status_set_action_state(unit, STATUS_ACTION_STATE_NONE);
 }
 
 /* Put the unit in the Defending action state, which ends Charging, Jump and Performing and drops
  * any charged ability. Used by the Defend command and the AI's simulation of it; always returns 0. */
 s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {
-    main_status_set_action_state(&g_battle_unit_stats[unit_id], MAIN_UNIT_ACTION_STATE_DEFENDING);
+    status_set_action_state(&g_battle_unit_stats[unit_id], STATUS_ACTION_STATE_DEFENDING);
     return 0;
 }
 

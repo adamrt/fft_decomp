@@ -49,7 +49,7 @@ typedef struct menu_status_panel_display_thread {
     s32 flags;       /* 0x08: menu_status_panel_flags_e */
     s32 work;        /* 0x0c: redraw request flags, cleared once serviced */
     s32 dimmed;      /* 0x10: nonzero forces the dimmed CLUTs and colors; bound as
-                           g_bunit_status_display_dimmed and the WORLD display globals */
+                           g_unit_panel_status_display_dimmed and the WORLD display globals */
 } menu_status_panel_display_thread_t;
 
 /* Parameter blocks of the selected unit's and the comparison unit's status panels, the stat preview panel and
@@ -332,7 +332,7 @@ void menu_init_panel_fade_tiles(void);
 void menu_update_panel_fade(void);
 
 /* thread status indicators */
-/* g_menu_indicator_state[] (and EQUIP's g_equip_menu_indicator_state[]): state of each of the two translucent
+/* g_menu_indicator_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two translucent
  * panels menu_draw_thread_status_indicators draws behind the unit status banners. */
 typedef enum menu_indicator_state {
     MENU_INDICATOR_STATE_HIDDEN = 0,     /* not drawn */

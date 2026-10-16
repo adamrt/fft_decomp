@@ -19,40 +19,40 @@
  * CIRCLE caches the chosen job's figures, saves the cursor and returns
  * MENU_JOB_LIST_STEP_ABILITIES; otherwise the list script runs and the result is
  * MENU_JOB_LIST_STEP_JOBS (the entrypoint handles CROSS). */
-s32 jobstts_menu_run_job_list(void) {
+s32 job_list_run(void) {
     s16 unused[8]; /* Preserves the original frame size. */
     s16 selected;
     s16 scroll;
     s32 mask;
 
-    if (g_jobstts_job_list_menu_initialized == 0) {
-        g_menu_row_callbacks[0].value = jobstts_job_calculate_current_level;
-        g_menu_row_callbacks[2].value = jobstts_job_calculate_current_jp;
+    if (g_job_list_list_menu_initialized == 0) {
+        g_menu_row_callbacks[0].value = job_list_calculate_level;
+        g_menu_row_callbacks[2].value = job_list_calculate_jp;
         g_menu_row_callbacks[5].value = menu_job_calculate_next_level_jp_requirement;
-        g_menu_row_callbacks[6].value = jobstts_job_calculate_current_total_jp;
-        g_menu_row_callbacks[13].value = jobstts_job_calculate_current_mastered;
-        jobstts_job_build_unit_job_list(0, g_menu_job_ids, 0);
+        g_menu_row_callbacks[6].value = job_list_calculate_total_jp;
+        g_menu_row_callbacks[13].value = job_list_calculate_mastered;
+        job_list_build(0, g_menu_job_ids, 0);
         menu_get_selection_record(4, &selected, &scroll, g_menu_job_ids);
         menu_init_scrollable_list(g_menu_job_ids, selected, scroll, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
-        g_jobstts_job_list_menu_initialized = 1;
+        g_job_list_list_menu_initialized = 1;
     }
 
     g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + HELP_TEXT_ID_JOB_BASE;
     mask = g_menu_input_primary_repeat;
     if (mask & PSX_PAD_CIRCLE) {
         g_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];
-        jobstts_job_calculate_current_level(g_menu_list_selected_index);
-        jobstts_job_calculate_current_jp(g_menu_list_selected_index);
-        jobstts_job_calculate_current_total_jp(g_menu_list_selected_index);
+        job_list_calculate_level(g_menu_list_selected_index);
+        job_list_calculate_jp(g_menu_list_selected_index);
+        job_list_calculate_total_jp(g_menu_list_selected_index);
         /* A mastered job has no next level to show. */
-        if (jobstts_job_calculate_current_mastered(g_menu_list_selected_index) == 0) {
+        if (job_list_calculate_mastered(g_menu_list_selected_index) == 0) {
             menu_job_calculate_next_level_jp_requirement(g_menu_list_selected_index);
         }
         menu_set_selection_record(4, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_job_ids);
-        g_jobstts_job_list_menu_initialized = 0;
-        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_job_list_list_menu_initialized = 0;
+        g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;
     }
-    jobstts_menu_run_script_with_palette_mode(&g_jobstts_job_list_render_commands, mask, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(&g_job_list_list_render_commands, mask, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }

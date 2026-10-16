@@ -68,10 +68,10 @@ u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
         gfx_set_otag_index(0x28);
         menu_update_and_draw_bouncing_cursor(&cursor, &g_name_entry_keyboard_text_cursor_anim, busy);
         menu_run_script_with_palette_mode(&g_name_entry_display_script, 0, busy);
-        menu_draw_pressable_button(
-            MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(
-            MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
+            SOUND_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
+            SOUND_SFX_PAGE_SWITCH);
         menu_run_script_with_palette_mode(&g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         if (g_name_entry_state != g_name_entry_keyboard_last_state) {
             g_name_entry_keyboard_last_state = g_name_entry_state;
@@ -147,7 +147,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     menu_input_update_with_message_state();
     while (g_name_entry_state != 0xFF) {
         screen_fade_update_in();
-        main_system_frame_stub();
+        system_frame_stub();
         g_gfx_poly_f3_count = 0;
         g_gfx_poly_ft3_count = 0;
         g_screen_poly_f4_count = 0;
@@ -210,10 +210,10 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         gfx_set_otag_index(0x28);
         menu_update_and_draw_bouncing_cursor(&cursor, &g_name_entry_text_cursor_anim, busy);
         menu_run_script_with_palette_mode(&g_name_entry_display_script, 0, busy);
-        menu_draw_pressable_button(
-            MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(
-            MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
+            SOUND_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
+            SOUND_SFX_PAGE_SWITCH);
         menu_run_script_with_palette_mode(&g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
@@ -223,23 +223,23 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         if (value != g_name_entry_last_state) {
             g_name_entry_last_state = value;
         }
-        if (g_sound_pending_sfx_id == MAIN_SFX_CANCEL || g_sound_pending_sfx_id == MAIN_SFX_CURSOR_MOVE) {
+        if (g_sound_pending_sfx_id == SOUND_SFX_CANCEL || g_sound_pending_sfx_id == SOUND_SFX_CURSOR_MOVE) {
             g_sound_queued_effect_id = g_sound_pending_sfx_id;
         }
         if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
-            g_sound_pending_sfx_id = MAIN_SFX_NONE;
+            g_sound_pending_sfx_id = SOUND_SFX_NONE;
         }
         value = g_sound_pending_sfx_id;
-        if (value == MAIN_SFX_NONE) {
+        if (value == SOUND_SFX_NONE) {
             value = g_sound_queued_effect_id;
         }
-        if (value == MAIN_SFX_TEXT_GLYPH) {
-            main_sound_play_sfx_find_channel(MAIN_SFX_TEXT_GLYPH);
-        } else if (value != MAIN_SFX_NONE) {
-            main_sound_play_sfx(value);
+        if (value == SOUND_SFX_TEXT_GLYPH) {
+            sound_play_sfx_on_free_channel(SOUND_SFX_TEXT_GLYPH);
+        } else if (value != SOUND_SFX_NONE) {
+            sound_play_sfx(value);
         }
-        g_sound_queued_effect_id = MAIN_SFX_NONE;
-        g_sound_pending_sfx_id = MAIN_SFX_NONE;
+        g_sound_queued_effect_id = SOUND_SFX_NONE;
+        g_sound_pending_sfx_id = SOUND_SFX_NONE;
     }
     menu_set_vsync_mode_and_event_speed(2);
     screen_reset_context();
@@ -292,7 +292,7 @@ void name_entry_handle_keys(void) {
         g_name_entry_confirm_message_shown = 1;
     }
     if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_name_entry_input_delay >= 10) {
-        g_sound_queued_effect_id = MAIN_SFX_SELECT;
+        g_sound_queued_effect_id = SOUND_SFX_SELECT;
         if (g_name_entry_list_cursor == 0) {
             if (g_name_entry_cursor_index == 5) {
                 previous = g_name_entry_state;
@@ -302,7 +302,7 @@ void name_entry_handle_keys(void) {
             } else {
                 name_entry_apply_key(g_name_entry_key_codes[g_name_entry_cursor_index]);
             }
-            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             return;
         }
         character = screen_text_get_char_at(
@@ -364,7 +364,7 @@ static void name_entry_update_cursor(void) {
         cursor.y = 0x80;
     }
     if (g_name_entry_cursor_index != previous) {
-        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
     gfx_set_otag_index(0x28);
     screen_draw_sliding_cursor(&cursor, &g_name_entry_key_cursor_anim, g_menu_input_lock_mode);
@@ -529,7 +529,7 @@ static void name_entry_init(const u8* name) {
     }
     /* A cursor move at slot 0 changes nothing but kerns and uploads the name. */
     name_entry_apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
-    g_sound_queued_effect_id = MAIN_SFX_NONE;
+    g_sound_queued_effect_id = SOUND_SFX_NONE;
     g_name_entry_state = 0;
     name_entry_open_key_list();
     menu_set_vsync_mode_and_event_speed(2);

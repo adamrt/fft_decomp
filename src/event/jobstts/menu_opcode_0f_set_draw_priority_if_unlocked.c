@@ -7,7 +7,7 @@
 
 /* Menu script command: select the ordering-table slot for later primitives unless the slot is
  * locked, and continue with the next command. */
-menu_instruction_t* jobstts_menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* data) {
     if (g_gfx_otag_index_locked == 0) {
         g_menu_gfx_otag_index = data->draw_state.value;
     }

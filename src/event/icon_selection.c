@@ -232,7 +232,7 @@ static void menu_build_ability_preview_at_list(void) {
     u16 text_id;
     const u16* at_table = g_ai_workspace_ptr->ability_list.ids;
 
-    work = (menu_at_list_work_t*)g_main_heap_companion_overlay_load_address;
+    work = (menu_at_list_work_t*)g_heap_companion_overlay_load_address;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].select_text_table = 0x13;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].context = &g_menu_at_list_layout;
     text_id = at_table[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index];
@@ -562,7 +562,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
             if (offset < 0) {
                 *row_offset = 0;
             }
-            g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+            g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
             changed = 1;
         } else if ((*pressed & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
             offset = layout->row_count + *row_offset;
@@ -570,7 +570,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
             if (layout->hidden_rows < offset) {
                 *row_offset = layout->hidden_rows;
             }
-            g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+            g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
             changed = 1;
         } else if (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0) {
             changed = 1;
@@ -578,7 +578,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
         }
         if (changed != 0) {
             if (g_battle_menu_scroll_list_depth == 2) {
-                buffer = g_main_heap_companion_overlay_load_address + 0x2000;
+                buffer = g_heap_companion_overlay_load_address + 0x2000;
             } else {
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
@@ -639,7 +639,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
         if (offset < 0) {
             *row_offset = 0;
         }
-        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
         changed = 1;
     } else if ((*pressed & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
         offset = layout->row_count + *row_offset;
@@ -647,7 +647,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
         if (layout->hidden_rows < offset) {
             *row_offset = layout->hidden_rows;
         }
-        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
         changed = 1;
     } else if (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0) {
         changed = 1;

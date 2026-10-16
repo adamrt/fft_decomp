@@ -12,7 +12,7 @@
 #include "psx/types.h"
 
 /* encounters and deployment */
-/* g_main_entd_selection_mode: which ENTD battle_unit_select_and_open_entd opens. */
+/* g_encounter_selection_mode: which ENTD battle_unit_select_and_open_entd opens. */
 typedef enum battle_entd_selection {
     BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE = 0, /* EVENT_SCRIPT_VAR_CURRENT_ENTD */
     BATTLE_ENTD_SELECTION_ENTD_250 = 1,
@@ -45,7 +45,7 @@ enum {
 
 /* War trophies and bonus money of the battle's units, filled by
  * battle_unit_find_war_trophies_and_bonus_money; REQUIRE fills
- * g_require_reward_war_trophy_search_result with it for the war trophy screen. */
+ * g_war_trophy_search_result with it for the war trophy screen. */
 typedef struct battle_war_result {
     u8 item_ids[BATTLE_UNIT_SLOT_COUNT]; /* 0x00 */
     u8 item_count;                       /* 0x15 */

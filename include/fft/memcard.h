@@ -6,11 +6,11 @@
 #include "psx/types.h"
 
 struct DIRENTRY;
-struct card_save_buffer;
+struct save_image;
 
 /* results */
 /* The BIOS and hardware card pollers return the first event observed in the
- * IOE, ERROR, TIMOUT, NEW order installed by main_card_init_events. */
+ * IOE, ERROR, TIMOUT, NEW order installed by memcard_init_events. */
 typedef enum memcard_result {
     MEMCARD_RESULT_PENDING = -1,
     MEMCARD_RESULT_COMPLETE = 0,
@@ -44,7 +44,7 @@ s32 memcard_file_count_free_blocks(const struct DIRENTRY* entries, s32 entry_cou
 s32 memcard_file_open_selected_with_retries(const char* filename, s32 mode);
 s32 memcard_file_close_with_retries(s32 descriptor);
 s32 memcard_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);
-s32 memcard_file_write_buffer(const char* filename, const struct card_save_buffer* source, u32 size, s32 create_file);
+s32 memcard_file_write_buffer(const char* filename, const struct save_image* source, u32 size, s32 create_file);
 s32 memcard_file_delete_selected_with_retries(const char* filename);
 s32 memcard_file_read_with_retries(s32 descriptor, void* destination, s32 size);
 s32 memcard_file_write_with_retries(s32 descriptor, const void* source, s32 size);

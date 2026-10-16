@@ -18,7 +18,7 @@ extern GsOT g_world_map_ordering_tables[2];
 extern GsOT_TAG g_world_map_aux_ot_tags[2][4];
 extern GsOT g_world_map_aux_ordering_tables[2];
 extern PACKET g_world_map_primitive_buffers[];
-/* g_main_system_flags as saved by world_map_toggle_captured_frame (main_system_flags_e). */
+/* g_system_flags as saved by world_map_toggle_captured_frame (system_flags_e). */
 extern u32 g_world_map_saved_system_flags;
 void world_map_draw_frame(void);
 void world_map_set_display_rect(s32 buffer_index, RECT* rect);
@@ -35,10 +35,10 @@ void world_map_toggle_captured_frame(s32 capture);
 typedef enum world_map_fade_flag {
     WORLD_MAP_FADE_RUNNING = 0x01,
     WORLD_MAP_FADE_OUT = 0x02,         /* fades to black; stays set while the screen is dark */
-    WORLD_MAP_FADE_REDRAW_MAP = 0x04,  /* every fade step sets MAIN_SYSTEM_FLAG_DRAW_MAP */
+    WORLD_MAP_FADE_REDRAW_MAP = 0x04,  /* every fade step sets SYSTEM_FLAG_DRAW_MAP */
     WORLD_MAP_FADE_BOX_VISIBLE = 0x08, /* the fill box is drawn without a running fade */
     WORLD_MAP_FADE_STOP_MUSIC = 0x10,  /* also fades the music out and unloads it */
-    WORLD_MAP_FADE_START_MUSIC = 0x20, /* also loads AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP), fading it in */
+    WORLD_MAP_FADE_START_MUSIC = 0x20, /* also loads AUDIO_MUSIC(1, MUSIC_WORLD_MAP), fading it in */
 } world_map_fade_flag_e;
 
 /* The screen fade and its two full-screen fill boxes. The parallel arrays share one object, which is why the

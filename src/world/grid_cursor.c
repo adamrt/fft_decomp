@@ -60,7 +60,7 @@ void screen_update_grid_cursor(s16 alternate) {
             g_screen_grid_cell_23_text_offset = HELP_TEXT_ID_ABILITY_BASE;
             g_screen_grid_cell_24_text_offset = HELP_TEXT_ID_ABILITY_BASE;
         }
-        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         g_screen_grid_initialized = 1;
         g_screen_grid_selected_cell = 0;
         if (g_screen_grid_id == MENU_GRID_HELP_BANNER_TOP) {
@@ -78,7 +78,7 @@ void screen_update_grid_cursor(s16 alternate) {
         if (input & PSX_PAD_CROSS) {
             s32 menu_id = g_screen_grid_id;
             g_screen_grid_id = MENU_GRID_HELP_NONE;
-            g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+            g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_screen_grid_initialized = 0;
             g_menu_help_message_text_id = menu_id;
         } else if (input & PSX_PAD_CIRCLE) {
@@ -107,7 +107,7 @@ void screen_update_grid_cursor(s16 alternate) {
             }
         }
         if (cell != g_screen_grid_selected_cell) {
-            g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+            g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
             g_screen_grid_selected_cell = cell;
         }
     }

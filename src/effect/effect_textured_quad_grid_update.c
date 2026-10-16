@@ -91,7 +91,7 @@ s32 effect_textured_quad_grid_update(s32 record_index, s32 callback_slot, s32 em
     u8 u;
     u8 v;
 
-    ot = main_gfx_get_battle_otag();
+    ot = gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

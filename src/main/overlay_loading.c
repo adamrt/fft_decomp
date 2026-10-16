@@ -9,59 +9,58 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static RECT g_main_gfx_frame_image_rect = { 960, 256, 64, 256 };
-static RECT g_main_gfx_frame_palette_rect = { 960, 496, 16, 16 };
-static RECT g_main_gfx_frame_palette_tail_rect = { 976, 506, 16, 6 };
+static RECT g_gfx_frame_image_rect = { 960, 256, 64, 256 };
+static RECT g_gfx_frame_palette_rect = { 960, 496, 16, 16 };
+static RECT g_gfx_frame_palette_tail_rect = { 976, 506, 16, 6 };
 
-static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
+static void file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
 
 /* Call MAIN's own menu_build_zodiac_primitives; ATTACK.OUT's deployment screen draws its
  * zodiac sprites through this wrapper rather than its own copy. */
-void main_gfx_call_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
+void zodiac_call_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
     menu_build_zodiac_primitives(context, poly);
 }
 
 /* Load EVENT/FRAME.BIN and upload its pixels and its two palette blocks. */
-void main_gfx_load_frame_bin_into_vram(void) {
-    main_gfx_frame_bin_t* frame
-        = main_file_load_checked_to_heap(DISC_SECTOR_EVENT_FRAME_BIN, sizeof(main_gfx_frame_bin_t));
+void gfx_load_frame_bin(void) {
+    gfx_frame_bin_t* frame = file_load_checked_to_heap(DISC_SECTOR_EVENT_FRAME_BIN, sizeof(gfx_frame_bin_t));
 
-    LoadImage(&g_main_gfx_frame_image_rect, (u32*)frame->pixels[32]);
-    LoadImage(&g_main_gfx_frame_palette_rect, (u32*)frame->clut);
-    LoadImage(&g_main_gfx_frame_palette_tail_rect, (u32*)frame->palette_tail);
+    LoadImage(&g_gfx_frame_image_rect, (u32*)frame->pixels[32]);
+    LoadImage(&g_gfx_frame_palette_rect, (u32*)frame->clut);
+    LoadImage(&g_gfx_frame_palette_tail_rect, (u32*)frame->palette_tail);
     DrawSync(0);
-    main_heap_call_free(frame);
+    heap_call_free(frame);
 }
 
 /* Load WLDCORE.BIN into the low overlay area with the Now Loading screen and, when load_world is
  * set, WORLD.BIN at the world overlay address, then run WLDCORE's entry point and return its
  * result. */
-s32 main_overlay_open_world_and_wldcore(s32 load_world) {
-    main_file_load_data_from_disc(
-        DISC_SECTOR_WORLD_WLDCORE_BIN, 0xDC, g_main_heap_low_overlay_load_address, MAIN_FILE_LOADING_DISPLAY_INIT);
+s32 overlay_open_world_and_wldcore(s32 load_world) {
+    file_load_data_from_disc(
+        DISC_SECTOR_WORLD_WLDCORE_BIN, 0xDC, g_heap_low_overlay_load_address, FILE_LOADING_DISPLAY_INIT);
     if (load_world != 0) {
-        main_file_load_data_from_disc(DISC_SECTOR_WORLD_WORLD_BIN, 0x1E0, g_main_heap_world_overlay_load_address,
-            MAIN_FILE_LOADING_DISPLAY_PRESERVE);
+        file_load_data_from_disc(
+            DISC_SECTOR_WORLD_WORLD_BIN, 0x1E0, g_heap_world_overlay_load_address, FILE_LOADING_DISPLAY_PRESERVE);
     }
     return world_map_entrypoint();
 }
 
 /* Load WORLD.BIN alone. mode - 1 is the loading display mode of
- * main_file_request_read, so mode 1 shows the "Now Loading" screen. */
-void main_overlay_open_world_bin(s32 mode) {
-    main_file_load_data_from_disc(DISC_SECTOR_WORLD_WORLD_BIN, 0x1E0, g_main_heap_world_overlay_load_address, mode - 1);
+ * file_request_read, so mode 1 shows the "Now Loading" screen. */
+void overlay_open_world(s32 mode) {
+    file_load_data_from_disc(DISC_SECTOR_WORLD_WORLD_BIN, 0x1E0, g_heap_world_overlay_load_address, mode - 1);
 }
 
 /* Blocking read of whole sectors to destination through the shared loader. The
- * last argument is main_file_request_read's loading display mode: 0 blanks the
+ * last argument is file_request_read's loading display mode: 0 blanks the
  * screen and sets up the "Now Loading" message, 1 leaves the display state alone,
  * and -1 turns the message off. */
-static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode) {
-    main_file_load_descriptor_t* descriptor = &g_main_file_cd_state;
+static void file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode) {
+    file_load_descriptor_t* descriptor = &g_file_cd_state;
 
-    main_file_request_read(descriptor, sector, sectors, destination, loading_display_mode);
-    while (g_main_file_still_loading != 0) {
-        main_file_poll_load(descriptor);
+    file_request_read(descriptor, sector, sectors, destination, loading_display_mode);
+    while (g_file_still_loading != 0) {
+        file_poll_load(descriptor);
         VSync(0);
     }
 }

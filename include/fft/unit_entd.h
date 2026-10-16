@@ -56,7 +56,7 @@ typedef enum entd_equipment_slot {
  * An ENTD entry is the static 0x28-byte encounter definition read from an
  * ENTD#.ENT file. It is input to the SCUS unit initializers; it is neither a
  * persistent party_unit_t record nor a runtime unit_stats_t record. The
- * current-ENTD pointer g_main_entd_current_unit selects one entry, not an
+ * current-ENTD pointer g_encounter_current_unit selects one entry, not an
  * encounter.
  *
  * Names below are established by target SCUS initialization routines.

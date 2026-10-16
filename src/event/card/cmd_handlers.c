@@ -9,12 +9,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static s16 g_card_menu_window_right_x = 0;
+static s16 g_save_menu_window_right_x = 0;
 
 /* Stream command: draw a textured quad of size (command[5], command[6]) at
  * (command[3], command[4]) with texture origin (command[7], command[8]), in the
  * current sprite color or, for MENU_SCRIPT_OP_UNCOLORED_QUAD, unshaded. Returns the next command. */
-u8* card_draw_textured_quad(u8* command) {
+u8* menu_draw_textured_quad(u8* command) {
     RECT rect;
     const rgb24_t* color;
     s32 x = command[3];
@@ -29,7 +29,7 @@ u8* card_draw_textured_quad(u8* command) {
         color = 0;
     }
     menu_gfx_enqueue_textured_quad(&rect, command[7], command[8], color, g_menu_gfx_semitransparency,
-        g_card_gfx_texture_page, g_card_gfx_draw_clut, g_menu_gfx_otag_index);
+        g_save_gfx_texture_page, g_save_gfx_draw_clut, g_menu_gfx_otag_index);
     return command + command[1];
 }
 
@@ -42,7 +42,7 @@ u8* card_draw_textured_quad(u8* command) {
  * byte operands, and source 1 selects the alternate border texture
  * coordinates. Returns the command that follows.
  */
-menu_window_command_t* card_draw_window_frame(menu_window_command_t* command) {
+menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -80,7 +80,7 @@ menu_window_command_t* card_draw_window_frame(menu_window_command_t* command) {
         partial_height = height & 15;
     }
     g_cmd_window_interior_command.rectangle_source = command->rectangle_source;
-    g_card_menu_window_right_x = command->width + left + 5;
+    g_save_menu_window_right_x = command->width + left + 5;
     v_top = 2;
     if (command->rectangle_source == 1) {
         u_left = 0xDA;

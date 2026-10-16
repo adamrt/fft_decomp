@@ -64,7 +64,7 @@ extern CVECTOR g_world_map_fade_color;
  * leads from the map into an event or battle.
  *
  * In FADE mode it only waits for the screen fade and then ends the world loop
- * (toggling MAIN_SYSTEM_FLAG_RUNNING off). Otherwise frame 1 copies the screen
+ * (toggling SYSTEM_FLAG_RUNNING off). Otherwise frame 1 copies the screen
  * to VRAM (0x100, 0) and hides the map and root windows; the sprite drifts a
  * pixel a frame and, every third frame, spins and shrinks in SPIN_IN, then in
  * SPIN mode spins back out (SPIN_OUT) textured with the captured screen. The
@@ -80,8 +80,8 @@ void event_transition_step_level(event_transition_level_t* level) {
     s32 angle;
 
     if (level->mode == EVENT_TRANSITION_MODE_FADE) {
-        if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
-            g_main_system_flags = g_main_system_flags ^ MAIN_SYSTEM_FLAG_RUNNING;
+        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+            g_system_flags = g_system_flags ^ SYSTEM_FLAG_RUNNING;
         }
         return;
     }
@@ -113,7 +113,7 @@ void event_transition_step_level(event_transition_level_t* level) {
             rect.y = 0x100;
             rect.w = 0x80;
             rect.h = 0x100;
-            g_main_system_flags = g_main_system_flags ^ MAIN_SYSTEM_FLAG_RUNNING;
+            g_system_flags = g_system_flags ^ SYSTEM_FLAG_RUNNING;
             MoveImage(&rect, 0x100, 0);
             DrawSync(0);
         }
@@ -167,7 +167,7 @@ void event_transition_step_level(event_transition_level_t* level) {
 
             if (level->mode == EVENT_TRANSITION_MODE_SPIN) {
                 if (level->anim_step == 4) {
-                    sound_play_effect(MAIN_SFX_EVENT_TRANSITION_MODE_0);
+                    sound_play_effect(SOUND_SFX_EVENT_TRANSITION_MODE_0);
                 }
 
                 /* Spin back out at full size, textured from the 16-bit page holding the capture. */
@@ -180,7 +180,7 @@ void event_transition_step_level(event_transition_level_t* level) {
                 }
             } else {
                 if (level->anim_step == 4) {
-                    sound_play_effect(MAIN_SFX_EVENT_TRANSITION_MODE_1);
+                    sound_play_effect(SOUND_SFX_EVENT_TRANSITION_MODE_1);
                 }
                 if (level->anim_step >= 0x20) {
                     level->phase = EVENT_TRANSITION_PHASE_DONE;
@@ -262,7 +262,7 @@ void brave_story_push_level(void) {
     s32 temp;
     u8 unused[0x30];
 
-    g_main_system_flags = g_main_system_flags & ~MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_system_flags = g_system_flags & ~SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records_next[g_menu_stack_depth].list_window.main_window = index;
@@ -345,9 +345,9 @@ void brave_story_push_level(void) {
     }
 
     g_hud_value_mode = HUD_VALUE_PLAY_TIME;
-    g_hud_value = g_main_system_play_time_hours;
-    g_hud_value_secondary = g_main_system_play_time_minutes;
-    g_hud_value_tertiary = g_main_system_play_time_seconds;
+    g_hud_value = g_save_play_time_hours;
+    g_hud_value_secondary = g_save_play_time_minutes;
+    g_hud_value_tertiary = g_save_play_time_seconds;
 
     depth = g_menu_stack_depth;
     /* temp spans two blocks without crossing a call, so global allocation
@@ -421,7 +421,7 @@ static void brave_story_build_rows(void) {
         = BRAVE_STORY_ROW_PERSONS;
     g_menu_stack_records_next[g_menu_stack_depth].list_window.entry_count += 2;
 
-    count = g_main_save_proposition_count;
+    count = g_proposition_count;
     for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
             count++;
@@ -511,7 +511,7 @@ void brave_story_resume_level(menu_stack_record_t* level) {
     }
     if (g_window_render_records[level->list_window.content_render].flags & DISPLAY_OBJECT_HIDDEN) {
         g_window_render_records[level->list_window.content_render].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+        g_system_flags &= ~SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
         g_window_render_records[level->list_window.content_render].flags |= DISPLAY_OBJECT_POP_IN;
     }
     level->list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
@@ -521,7 +521,7 @@ void brave_story_resume_level(menu_stack_record_t* level) {
  * takes palette 10 and restarts its press animation, the side label 6, the
  * frame 2 and both stars 5. Under a help message (FADE_OR_HELP) the
  * injured/casualties record is grayed too; otherwise any row but Persons hides
- * it and the play-time display (MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE).
+ * it and the play-time display (SYSTEM_FLAG_HIDE_CONTEXT_VALUE).
  *
  * The chained store keeps one main-window index for both cleared fields. */
 void brave_story_suspend_level(menu_stack_window_level_t* state) {
@@ -537,7 +537,7 @@ void brave_story_suspend_level(menu_stack_window_level_t* state) {
         return;
     }
     if (state->entries[state->selected_entry] != BRAVE_STORY_ROW_PERSONS) {
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+        g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
         g_window_render_records[state->content_render].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 }
@@ -566,19 +566,19 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
     u32 flags;
     u32 buttons;
 
-    g_hud_value = g_main_system_play_time_hours;
-    g_hud_value_secondary = g_main_system_play_time_minutes;
-    g_hud_value_tertiary = g_main_system_play_time_seconds;
+    g_hud_value = g_save_play_time_hours;
+    g_hud_value_secondary = g_save_play_time_minutes;
+    g_hud_value_tertiary = g_save_play_time_seconds;
 
     if (g_window_render_records[level->content_render].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
-    flags = g_main_system_flags;
-    if (flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) {
-        if (level->mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP && !(flags & MAIN_SYSTEM_FLAG_FADING)) {
+    flags = g_system_flags;
+    if (flags & SYSTEM_FLAG_INPUT_BLOCKED) {
+        if (level->mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP && !(flags & SYSTEM_FLAG_FADING)) {
             level->mode = MENU_STACK_WINDOW_MODE_LEAVE_WAIT;
-            g_main_system_flags = flags | MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+            g_system_flags = flags | SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
             world_map_clear_vram_and_scratch(1);
         }
         if (level->mode != MENU_STACK_WINDOW_MODE_LEAVE_WAIT) {
@@ -587,22 +587,21 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
             return;
         }
-        if ((g_main_system_flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) && g_audio_queue.count != 0) {
+        if ((g_system_flags & SYSTEM_FLAG_TITLE_BRAVE_STORY) && g_audio_queue.count != 0) {
             return;
         }
 
-        g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         window_set_render_objects_visible(1);
         g_menu_stack_depth--;
-        g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
-            | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL);
+        g_system_flags
+            &= ~(SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL);
         menu_stack_dispatch_suspend();
 
         /* Opened from the title screen: go back there instead of to the map. */
-        if (g_main_system_flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) {
-            g_main_system_flags
-                = (g_main_system_flags ^ (MAIN_SYSTEM_FLAG_RUNNING | MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY))
-                | MAIN_SYSTEM_FLAG_RETURN_TO_TITLE;
+        if (g_system_flags & SYSTEM_FLAG_TITLE_BRAVE_STORY) {
+            g_system_flags = (g_system_flags ^ (SYSTEM_FLAG_RUNNING | SYSTEM_FLAG_TITLE_BRAVE_STORY))
+                | SYSTEM_FLAG_RETURN_TO_TITLE;
             return;
         }
         world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
@@ -616,13 +615,13 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
         }
         level->mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
-        if (g_main_system_flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) {
+        if (g_system_flags & SYSTEM_FLAG_TITLE_BRAVE_STORY) {
             audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
             audio_queue_add(AUDIO_COMMAND_UNLOAD, 0);
         } else {
-            audio_queue_start_music(AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
+            audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
         }
         g_brave_story_saved_cursor[0] = 0;
         return;
@@ -634,7 +633,7 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
 
     buttons = g_world_map_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_GOODBYE, 0);
         level->mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
 
@@ -653,7 +652,7 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
     }
 
     if (buttons & PSX_PAD_CIRCLE) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         g_brave_story_saved_cursor[0] = level->selected_entry;
         switch (level->entries[level->selected_entry]) {
         case BRAVE_STORY_ROW_FACTS:
@@ -710,7 +709,7 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
             g_window_records[level->main_window].position.y -= (level->entry_count - 1) * -16;
             level->selected_entry = level->entry_count - 1;
         }
-        sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+        sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
@@ -721,7 +720,7 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
             g_window_records[level->main_window].position.y -= (level->entry_count - 1) * 16;
             level->selected_entry = 0;
         }
-        sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+        sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 }
 
@@ -769,7 +768,7 @@ static void brave_story_open_event_list(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_menu_stack_ot_offset = 9;
     record_index = g_menu_stack_depth;
-    g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
     g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_BRAVE_STORY_EVENTS;
     g_menu_stack_depth = record_index + 1;
 }
@@ -791,11 +790,10 @@ void brave_story_block_event_list_buttons(menu_stack_panel_level_t* level) {
  * message 0x1055. Cancel and confirm wait for file loading to finish; a
  * confirmed entry's value is passed to brave_story_push_event_level. */
 void brave_story_handle_event_list_input(menu_stack_panel_level_t* level) {
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
-        g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         if (level->result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_EVENTS);
@@ -809,20 +807,20 @@ void brave_story_handle_event_list_input(menu_stack_panel_level_t* level) {
         menu_stack_dispatch_resume();
         return;
     }
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CANCEL);
         level->result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
         brave_story_block_event_list_buttons(level);
         menu_stack_push_message_level(0x1055, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
-        && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
 
@@ -894,7 +892,7 @@ void brave_story_push_event_level(s32 value) {
 /* Input step of a story event's text page. Triangle replays the event: it
  * sets EVENT_SCRIPT_VAR_CURRENT_EVENT, suppresses progress effects and fades
  * out, and once the fade ends the world loop stops with
- * MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY, saving the list cursor and the weather
+ * SYSTEM_FLAG_STORY_EVENT_REPLAY, saving the list cursor and the weather
  * variable. When the text window closes, the story event list reopens. */
 void brave_story_handle_event_input(menu_stack_record_t* level) {
     s32 depth;
@@ -906,15 +904,14 @@ void brave_story_handle_event_input(menu_stack_record_t* level) {
         return;
     }
 
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
-        flags = g_main_system_flags;
-        if ((flags & MAIN_SYSTEM_FLAG_FADING) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+        flags = g_system_flags;
+        if ((flags & SYSTEM_FLAG_FADING) == 0) {
             value = level->story_event_index;
-            g_main_saved_list_cursor_state = g_brave_story_event_list_cursor;
-            g_main_system_flags = (flags ^ MAIN_SYSTEM_FLAG_RUNNING) | MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY;
-            g_main_replay_story_event_index = value;
-            g_main_saved_weather_variable = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
+            g_brave_story_saved_list_cursor_state = g_brave_story_event_list_cursor;
+            g_system_flags = (flags ^ SYSTEM_FLAG_RUNNING) | SYSTEM_FLAG_STORY_EVENT_REPLAY;
+            g_brave_story_replay_story_event_index = value;
+            g_brave_story_saved_weather_variable = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
             return;
         }
     }
@@ -922,10 +919,10 @@ void brave_story_handle_event_input(menu_stack_record_t* level) {
     if ((g_world_map_input_new_button_presses & PSX_PAD_TRIANGLE) != 0) {
         script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_brave_story_event_ids[level->story_event_index]);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
         return;
     }
@@ -934,7 +931,7 @@ void brave_story_handle_event_input(menu_stack_record_t* level) {
         return;
     }
 
-    sound_play_effect(MAIN_SFX_CANCEL);
+    sound_play_effect(SOUND_SFX_CANCEL);
     depth = g_menu_stack_depth;
     index = depth - 2;
     g_window_render_records[g_menu_stack_records_next[index].list_window.frame_render].flags |= DISPLAY_OBJECT_POP_IN;
@@ -994,7 +991,7 @@ static void brave_story_open_person_list(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_menu_stack_ot_offset = 9;
     record_index = g_menu_stack_depth;
-    g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
     g_window_render_records[g_menu_stack_records_next[record_index - 1].list_window.content_render].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_types_next[record_index] = MENU_STACK_LEVEL_BRAVE_STORY_PERSONS;
@@ -1019,11 +1016,10 @@ void brave_story_block_person_list_buttons(menu_stack_panel_level_t* level) {
  * Canceling pops the injured/casualties record back in; a confirmed entry's
  * value is passed to brave_story_push_person_level. */
 void brave_story_handle_person_list_input(menu_stack_panel_level_t* level) {
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
-        g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         if (level->result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_PERSONS);
@@ -1038,18 +1034,18 @@ void brave_story_handle_person_list_input(menu_stack_panel_level_t* level) {
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         level->result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
         brave_story_block_person_list_buttons(level);
         menu_stack_push_message_level(0x1056, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
 
@@ -1110,8 +1106,8 @@ static void brave_story_push_person_level(s32 value) {
  * once the text window has opened; SHOWN pops the level back to the persons
  * list once the text window has finished.
  *
- * The loading test reads g_main_file_cd_state.state (the same 32-bit value as
- * g_main_file_still_loading): only a struct-member load stays behind the
+ * The loading test reads g_file_cd_state.state (the same 32-bit value as
+ * g_file_still_loading): only a struct-member load stays behind the
  * delay store. The unused RECT reserves the 8 bytes that put the descriptor
  * at sp+0x18, and page_x keeps the target's (column + 0x280) association. */
 void brave_story_step_person_level(brave_story_detail_level_t* level) {
@@ -1130,7 +1126,7 @@ void brave_story_step_person_level(brave_story_detail_level_t* level) {
     switch (level->phase) {
     case BRAVE_STORY_DETAIL_PHASE_LOAD:
         level->timer = level->timer + 1;
-        if (g_main_file_cd_state.state == MAIN_FILE_LOAD_STATE_IDLE) {
+        if (g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
             level->phase = level->phase + 1;
         }
         return;
@@ -1153,9 +1149,9 @@ void brave_story_step_person_level(brave_story_detail_level_t* level) {
         g_text_window.text_id = (entry & 0xFF) | TEXT_ID_WORLD_MESSAGE_BASE;
         if (character == 0) {
             g_text_window.text_substitutions[0] = g_text_substitution_values[0];
-            g_text_window.text_substitutions[1] = g_main_brave_story_character_ages[0];
+            g_text_window.text_substitutions[1] = g_brave_story_character_ages[0];
         } else {
-            g_text_window.text_substitutions[0] = g_main_brave_story_character_ages[character];
+            g_text_window.text_substitutions[0] = g_brave_story_character_ages[character];
             g_text_window.text_substitutions[1] = -1;
         }
         g_text_window.extra_render_index = -1;
@@ -1281,11 +1277,10 @@ void tutorial_block_topic_list_buttons(menu_stack_panel_level_t* level) {
  * brave_story_handle_treasure_list_input with help message 0x108d. A confirmed
  * topic's value is passed to tutorial_push_topic_level. */
 void tutorial_handle_topic_list_input(menu_stack_panel_level_t* level) {
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
-        g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         if (level->result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_TUTORIAL_TOPICS);
@@ -1297,20 +1292,20 @@ void tutorial_handle_topic_list_input(menu_stack_panel_level_t* level) {
         menu_stack_dispatch_resume();
         return;
     }
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CANCEL);
         level->result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
         tutorial_block_topic_list_buttons(level);
         menu_stack_push_message_level(0x108D, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
-        && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
 
@@ -1376,7 +1371,7 @@ void tutorial_wait_topic_then_pop(void) {
 
     if (!(g_window_render_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)
         && text_window_step(&g_text_window) == 0) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         depth = g_menu_stack_depth;
         g_window_render_records[g_menu_stack_records_next[depth - 2].window_pair_render.render_index].flags
             |= DISPLAY_OBJECT_POP_IN;
@@ -1421,7 +1416,7 @@ static void brave_story_push_propositions_level(void) {
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
     g_menu_stack_records_next[g_menu_stack_depth].list_window.entry_count = 0;
-    completed = g_main_save_proposition_count;
+    completed = g_proposition_count;
     if (completed != 0) {
         g_menu_stack_records_next[g_menu_stack_depth].list_window.entries[0] = BRAVE_STORY_PROPOSITION_ROW_ADVANCING;
         g_menu_stack_records_next[g_menu_stack_depth].list_window.entry_count++;

@@ -23,7 +23,7 @@
  * VRAM for the page title. Returns MENU_JOB_LIST_STEP_ABILITIES while open,
  * MENU_JOB_LIST_STEP_JOBS on CROSS (back to the job page) and MENU_JOB_LIST_STEP_CLOSE on
  * CIRCLE; both exits play the cancel sound. */
-s32 jobstts_menu_ability_update_list_menu(void) {
+s32 ability_list_update(void) {
     RECT rect;
     s16 selected;
     s16 scroll;
@@ -31,7 +31,7 @@ s32 jobstts_menu_ability_update_list_menu(void) {
     s32 category;
     s32 input;
 
-    if (g_jobstts_ability_list_initialized == 0) {
+    if (g_ability_list_list_initialized == 0) {
         g_menu_row_callbacks[0].value = menu_job_get_current_level;
         g_menu_row_callbacks[1].value = job_get_current_total_jp;
         g_menu_row_callbacks[2].value = menu_job_get_next_level_jp_requirement;
@@ -56,13 +56,13 @@ s32 jobstts_menu_ability_update_list_menu(void) {
         rect.y = 0xc8;
         rect.w = 0x14;
         rect.h = 0x10;
-        g_jobstts_ability_list_job_name_ids[0] = g_job_selected_id;
+        g_ability_list_list_job_name_ids[0] = g_job_selected_id;
         text_render_id_rows_to_vram(
-            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_jobstts_ability_list_job_name_ids, &rect, 0);
-        g_menu_ability_category = jobstts_menu_update_wrapped_horizontal_selection(4, 5, 0);
-        jobstts_ability_build_list(0, g_job_selected_id & 0x3ff, g_menu_ability_category, g_menu_ability_entries, 0);
+            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_list_job_name_ids, &rect, 0);
+        g_menu_ability_category = status_screen_update_wrapped_horizontal_selection(4, 5, 0);
+        ability_list_build(0, g_job_selected_id & 0x3ff, g_menu_ability_category, g_menu_ability_entries, 0);
         menu_init_scrollable_list_core(g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        g_jobstts_ability_list_initialized = 1;
+        g_ability_list_list_initialized = 1;
     }
 
     /* The help text is the ability's entry in HELP_TEXT_SECTION_ABILITIES; abilities JP cannot
@@ -78,37 +78,37 @@ s32 jobstts_menu_ability_update_list_menu(void) {
 
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CROSS) {
-        g_jobstts_ability_list_initialized = 0;
-        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_ability_list_list_initialized = 0;
+        g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_JOBS;
     }
     if (input & PSX_PAD_CIRCLE) {
-        g_jobstts_ability_list_initialized = 0;
-        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_ability_list_list_initialized = 0;
+        g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
 
     /* On a tab change, save the old tab's cursor and rebuild the list for the new one. */
-    category = jobstts_menu_update_wrapped_horizontal_selection(4, 5, g_menu_input_secondary_repeat);
+    category = status_screen_update_wrapped_horizontal_selection(4, 5, g_menu_input_secondary_repeat);
     if (category != g_menu_ability_category) {
         menu_set_selection_record(
             g_menu_ability_category, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
-        jobstts_ability_build_list(0, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
+        ability_list_build(0, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
         menu_get_selection_record(g_menu_ability_category, &selected, &scroll, g_menu_ability_entries);
         menu_init_scrollable_list(
             g_menu_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(0xa);
-        g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+        g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
-    jobstts_menu_run_script_with_palette_mode(
-        &g_jobstts_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(
+        &g_ability_list_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x27;
     rect.w = 0x50;
     rect.h = 0x10;
     menu_gfx_enqueue_textured_quad(
-        &rect, 0, 0xc8, 0, 0, g_jobstts_gfx_background_texture_page, g_menu_window_clut, 0xb);
+        &rect, 0, 0xc8, 0, 0, g_status_screen_gfx_background_texture_page, g_menu_window_clut, 0xb);
     return MENU_JOB_LIST_STEP_ABILITIES;
 }

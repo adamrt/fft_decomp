@@ -14,7 +14,7 @@
 
 /* Uploads the 20 party portraits (sprite and palette cells) from EVENT/WLDFACE.BIN to
  * VRAM; with no entry mode set the sheets are read back from VRAM instead. The loop is
- * ATTACK's (attack_gfx_prepare_party_portrait_textures) with its slot 20, the special
+ * ATTACK's (portrait_prepare_party_textures) with its slot 20, the special
  * portrait, cut off by a `break`; the dead i == 20 tests remain.
  *
  * Register allocation and scheduling depend on the variable shapes: `value`
@@ -22,7 +22,7 @@
  * the job arms reread `unit->job_id`, `offset` is built in three statements
  * (multi-set temps keep the i / 7 mult after the row * 0x3000 terms), and the
  * palette offset has its own variable. */
-void require_gfx_prepare_party_portrait_textures(void) {
+void portrait_prepare_party_textures(void) {
     menu_portrait_sheet_t* file;
     s32 offset;
     s32 pal_offset;
@@ -39,9 +39,9 @@ void require_gfx_prepare_party_portrait_textures(void) {
     u8* src;
     RECT unused[2];
 
-    file = main_heap_alloc(MENU_WLDFACE_FILE_SIZE);
+    file = heap_alloc(MENU_WLDFACE_FILE_SIZE);
     if (g_script_attack_entry_mode != 0) {
-        g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+        g_thread_call_target = (void (*)(void))file_load_checked_to_address;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE, file);
     } else {
         StoreImage(&g_portrait_sheet_rect_0, (u32*)file[0].pixels);
@@ -57,7 +57,7 @@ void require_gfx_prepare_party_portrait_textures(void) {
         /* The portrait code: a special character's own, a generic job's male/female pair
          * from 0x60 (Mime's pair two lower, as Bard and Dancer take one code each), or the
          * job's sprite sheet for a monster. */
-        unit = main_party_get_unit(i);
+        unit = party_get_unit(i);
         if (unit->sprite_set < CHARACTER_IDENTITY_SELECTOR_FIRST) {
             value = unit->sprite_set;
         } else {
@@ -74,7 +74,7 @@ void require_gfx_prepare_party_portrait_textures(void) {
                     value = base + 0x5f;
                 }
             } else {
-                g_formation_job_data = main_job_get_data_pointer(unit->job_id);
+                g_formation_job_data = job_get_data(unit->job_id);
                 value = g_formation_job_data->spritesheet_id;
             }
             job_id = unit->job_id;
@@ -101,10 +101,10 @@ void require_gfx_prepare_party_portrait_textures(void) {
         col = value % 8;
         /* Copy the 32x48 cell into the staging buffer and upload it, in rows of seven from
          * (0x100, 0x28). */
-        g_require_portrait_cell_rect.x = (i % 7) * 8 + 0x100;
-        g_require_portrait_cell_rect.y = (i / 7) * 0x30 + 0x28;
-        g_require_portrait_cell_rect.w = 8;
-        g_require_portrait_cell_rect.h = 0x30;
+        g_portrait_cell_rect.x = (i % 7) * 8 + 0x100;
+        g_portrait_cell_rect.y = (i / 7) * 0x30 + 0x28;
+        g_portrait_cell_rect.w = 8;
+        g_portrait_cell_rect.h = 0x30;
         value = 0;
         offset = row * 2;
         offset += row;
@@ -115,19 +115,18 @@ void require_gfx_prepare_party_portrait_textures(void) {
         src = (u8*)(sheet * MENU_WLDFACE_SHEET_SIZE + (s32)file + offset);
         for (; value < 0x30; value++) {
             for (col = 0; col < 0x10; col++) {
-                g_require_portrait_cell_pixels[value * 0x10 + col] = src[col];
+                g_portrait_cell_pixels[value * 0x10 + col] = src[col];
             }
             src += 0x80;
         }
-        LoadImage(
-            i == 20 ? &g_special_portrait_rect : &g_require_portrait_cell_rect, (u32*)g_require_portrait_cell_pixels);
+        LoadImage(i == 20 ? &g_special_portrait_rect : &g_portrait_cell_rect, (u32*)g_portrait_cell_pixels);
         /* Upload the palette, three per VRAM line from (0x100, 0): palette n is in row n / 4
          * of the sheet's palette block; a monster's alternate palette is in its row from
          * MENU_WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
-        g_require_portrait_palette_rect.x = (i % 3) * 0x10 + 0x100;
-        g_require_portrait_palette_rect.y = i / 3;
-        g_require_portrait_palette_rect.w = 0x10;
-        g_require_portrait_palette_rect.h = 1;
+        g_portrait_palette_rect.x = (i % 3) * 0x10 + 0x100;
+        g_portrait_palette_rect.y = i / 3;
+        g_portrait_palette_rect.w = 0x10;
+        g_portrait_palette_rect.h = 1;
         sheet = cell / MENU_WLDFACE_PORTRAITS_PER_SHEET;
         value = cell - sheet * MENU_WLDFACE_PORTRAITS_PER_SHEET;
         row = value / 4;
@@ -144,9 +143,9 @@ void require_gfx_prepare_party_portrait_textures(void) {
         if (i == 20) {
             LoadImage(&g_special_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         } else {
-            LoadImage(&g_require_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
+            LoadImage(&g_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         }
         DrawSync(0);
     }
-    main_heap_call_free(file);
+    heap_call_free(file);
 }

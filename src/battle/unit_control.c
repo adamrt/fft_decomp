@@ -294,10 +294,10 @@ void battle_state_start_change_map_jump_in(s32 duration) {
 /* Leave the battle for the world map: enter CloseBattle at two vertical blanks
  * per frame with a fade step of 0x100 / duration (0x100 for a duration of 0). */
 void battle_state_start_close_battle(s32 duration) {
-    g_main_system_vsync_interval = 2;
+    g_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_CLOSE_BATTLE;
     g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
-    g_battle_game_flow_state = MAIN_GAME_FLOW_WORLD;
+    g_battle_game_flow_state = SYSTEM_GAME_FLOW_WORLD;
 }
 
 /* The number of records in the runtime unit list. No retail code calls it. */
@@ -386,7 +386,7 @@ s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
             return 1;
         }
     }
-    main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+    system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     return 0;
 }
 
@@ -411,7 +411,7 @@ s32 battle_move_start_unit_walk_to(
             return 1;
         }
     } else {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     }
     return 0;
 }
@@ -441,7 +441,7 @@ s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32
         unit->path.flags = 0;
         battle_unit_dismount_rider_and_update_display(unit);
     } else {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return 1;

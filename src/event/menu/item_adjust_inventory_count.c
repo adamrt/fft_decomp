@@ -13,10 +13,10 @@ s32 item_adjust_inventory_count(s16 item_entry, s32 delta) {
     if (item_id == 0) {
         return 0;
     }
-    new_count = g_main_item_quantities[item_id] + delta;
+    new_count = g_item_quantities[item_id] + delta;
     if (new_count < 0) {
         new_count = 0;
     }
-    g_main_item_quantities[item_id] = new_count;
+    g_item_quantities[item_id] = new_count;
     return new_count;
 }

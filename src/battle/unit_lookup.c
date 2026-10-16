@@ -61,7 +61,7 @@ static void battle_state_deployment_frame_stub(void) {
 
 /* Load the battle map, its units, sprites, event and music, showing a loading screen.
  *
- * A battle entered directly (g_main_system_go_straight_to_battle, unless a saved
+ * A battle entered directly (g_system_go_straight_to_battle, unless a saved
  * game is being resumed) shows the deployment banner: it fades in from black,
  * stays over a black screen while map initialization steps run up to step 0xd
  * (done), then fades back out to black. Otherwise the NOW LOADING display is
@@ -82,12 +82,12 @@ static void battle_state_run_deployment(void) {
     POLY_FT4* banner_p;
 
     battle_state_init_deployment_display(0x100, 0xf0, 0x200, 0, 0, 0);
-    show_banner = g_main_system_go_straight_to_battle;
+    show_banner = g_system_go_straight_to_battle;
     if (script_get_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS) != 0) {
         show_banner = 0;
     }
     g_battle_deployment_skipped = menu_init_attack_resources_and_threads();
-    main_gfx_build_now_loading_center(g_battle_deployment_skipped);
+    loading_build_message_centered(g_battle_deployment_skipped);
     map_id = g_battle_map_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
     g_battle_state_map_init_step = 0;
     g_battle_deployment_finished = 0;
@@ -120,16 +120,16 @@ static void battle_state_run_deployment(void) {
     fade = 0xf8;
     if (show_banner != 0) {
         do {
-            main_gfx_swap_and_clear_battle_otag();
-            (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->r0 = fade;
-            (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->g0 = fade;
-            (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->b0 = fade;
-            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_battle_otag(), &banner[g_main_gfx_screen_polarity]);
-            g_main_gfx_screen_polarity = g_main_gfx_screen_polarity == 0;
-            g_main_system_battle_frame_hsync_count
-                = battle_state_sync_and_submit_deployment_frame(main_gfx_get_battle_otag() + 0x17f);
+            gfx_swap_and_clear_battle_otag();
+            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
+            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
+            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
+            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
+            g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
+            g_system_battle_frame_hsync_count
+                = battle_state_sync_and_submit_deployment_frame(gfx_get_battle_otag() + 0x17f);
             fade -= 8;
         } while (fade >= 0);
     }
@@ -137,14 +137,14 @@ static void battle_state_run_deployment(void) {
     banner_p = banner;
     fade = 0xff;
     while (battle_state_update_deployment_controller_input() != -1) {
-        main_gfx_swap_and_clear_battle_otag();
+        gfx_swap_and_clear_battle_otag();
         if (show_banner != 0) {
-            AddPrim(main_gfx_get_battle_otag(), &banner_p[g_main_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &banner_p[g_gfx_screen_polarity]);
         } else {
-            main_gfx_add_now_loading_to_otag(main_gfx_get_battle_otag());
+            loading_add_to_otag(gfx_get_battle_otag());
         }
         g_battle_state_map_init_step = battle_map_step_deployment_init_sequence(map_id, g_battle_state_map_init_step,
-            script_run_frame_and_check_deployment(main_gfx_get_battle_otag(), g_input_current_buttons));
+            script_run_frame_and_check_deployment(gfx_get_battle_otag(), g_input_current_buttons));
         if (g_battle_state_map_init_step == 0xd) {
             battle_gfx_load_fixed_sprite_cluts();
             battle_state_enter_event_at_battle_start();
@@ -154,16 +154,16 @@ static void battle_state_run_deployment(void) {
             goto done;
         }
         battle_state_deployment_frame_stub();
-        (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->r0 = fade;
-        (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->g0 = fade;
-        (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->b0 = fade;
-        AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-        AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
-        g_main_gfx_screen_polarity = g_main_gfx_screen_polarity == 0;
-        g_main_system_battle_frame_hsync_count
-            = battle_state_sync_and_submit_deployment_frame(main_gfx_get_battle_otag() + 0x17f);
-        main_file_poll_load(&g_main_file_cd_state);
-        main_system_frame_stub();
+        (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
+        (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
+        (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
+        AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_gfx_screen_polarity]);
+        AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_gfx_screen_polarity]);
+        g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
+        g_system_battle_frame_hsync_count
+            = battle_state_sync_and_submit_deployment_frame(gfx_get_battle_otag() + 0x17f);
+        file_poll_load(&g_file_cd_state);
+        system_frame_stub();
     }
     fade = 0;
 done:
@@ -174,16 +174,16 @@ done:
             if (fade >= 0xf8) {
                 fade = 0xff;
             }
-            main_gfx_swap_and_clear_battle_otag();
-            (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->r0 = fade;
-            (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->g0 = fade;
-            (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->b0 = fade;
-            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_battle_otag(), &banner[g_main_gfx_screen_polarity]);
-            g_main_gfx_screen_polarity = g_main_gfx_screen_polarity == 0;
-            g_main_system_battle_frame_hsync_count
-                = battle_state_sync_and_submit_deployment_frame(main_gfx_get_battle_otag() + 0x17f);
+            gfx_swap_and_clear_battle_otag();
+            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
+            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
+            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
+            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
+            g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
+            g_system_battle_frame_hsync_count
+                = battle_state_sync_and_submit_deployment_frame(gfx_get_battle_otag() + 0x17f);
             fade += 8;
         } while (fade < 0x100);
     }
@@ -224,13 +224,13 @@ void battle_state_run_game_loop(void) {
     do {
         battle_state_run_deployment();
         g_battle_menu_status_enabled = 0;
-        g_battle_cursor_input_mode = g_main_game_options.fields.cursor_movement;
+        g_battle_cursor_input_mode = g_game_options.fields.cursor_movement;
 
         for (;;) {
             battle_state_update_controller_input();
             battle_gfx_init_render_frame();
             SetGeomScreen(0x200);
-            main_gfx_swap_and_clear_battle_otag();
+            gfx_swap_and_clear_battle_otag();
             battle_camera_update_vector_from_game_state();
 
             /* Negate the Q12 camera position into whole units; the x conversion spells out the
@@ -440,22 +440,22 @@ void battle_state_run_game_loop(void) {
             battle_camera_update_zoom();
             battle_camera_update_tilt();
             battle_map_update_animations();
-            main_sound_update_tunes();
+            music_update_tunes();
 
             /* A closing battle leaves before this frame is presented. */
             if (g_battle_game_state == BATTLE_GAME_STATE_CLOSE_BATTLE) {
                 break;
             }
 
-            main_file_poll_load(&g_main_file_cd_state);
-            g_main_gfx_screen_polarity = !g_main_gfx_screen_polarity;
+            file_poll_load(&g_file_cd_state);
+            g_gfx_screen_polarity = !g_gfx_screen_polarity;
             g_frame_counter++;
             battle_map_upload_clut_rows();
-            frame_measurement = battle_state_sync_frame(main_gfx_get_battle_otag() + 0x17f);
-            g_main_system_battle_frame_hsync_count = frame_measurement;
+            frame_measurement = battle_state_sync_frame(gfx_get_battle_otag() + 0x17f);
+            g_system_battle_frame_hsync_count = frame_measurement;
             i = 0;
-            if (g_main_system_battle_frame_hsync_count_max < frame_measurement) {
-                g_main_system_battle_frame_hsync_count_max = frame_measurement;
+            if (g_system_battle_frame_hsync_count_max < frame_measurement) {
+                g_system_battle_frame_hsync_count_max = frame_measurement;
             }
 
             /* Count down the image buffers' upload timers; 0 (free) and BUFFER_EVTCHR are markers,
@@ -478,24 +478,24 @@ void battle_state_run_game_loop(void) {
              * uses to lengthen the following waits. */
             if (g_battle_game_state == BATTLE_GAME_STATE_EFFECT
                 || g_battle_game_state == BATTLE_GAME_STATE_ACTION_EXECUTE) {
-                if (g_main_system_vsync_interval == 1) {
-                    g_main_frame_pacing_timer = 0;
-                } else if (g_main_frame_pacing_suppressed == 0) {
-                    if (g_main_system_battle_frame_hsync_count >= 0x301) {
-                        g_main_frame_pacing_timer = 0x1e;
-                    } else if (g_main_system_battle_frame_hsync_count >= 0x201 && g_main_frame_pacing_timer < 0x0f) {
-                        g_main_frame_pacing_timer = 0x0f;
+                if (g_system_vsync_interval == 1) {
+                    g_system_frame_pacing_timer = 0;
+                } else if (g_system_frame_pacing_suppressed == 0) {
+                    if (g_system_battle_frame_hsync_count >= 0x301) {
+                        g_system_frame_pacing_timer = 0x1e;
+                    } else if (g_system_battle_frame_hsync_count >= 0x201 && g_system_frame_pacing_timer < 0x0f) {
+                        g_system_frame_pacing_timer = 0x0f;
                     }
                 }
             }
 
-            g_main_frame_pacing_suppressed = 0;
-            main_system_frame_stub();
+            g_system_frame_pacing_suppressed = 0;
+            system_frame_stub();
         }
 
         battle_state_stop_map_animations();
         battle_unit_clear_all();
-    } while (g_battle_game_flow_state == MAIN_GAME_FLOW_BATTLE);
+    } while (g_battle_game_flow_state == SYSTEM_GAME_FLOW_BATTLE);
 
     /* Let drawing and two vertical blanks finish before leaving. */
     DrawSync(0);
@@ -784,7 +784,7 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
         }
         if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_battle_gfx_worker8_sp2_files[index].size;
-            return main_file_request_read_bytes(lba, byte_length, destination) != 0;
+            return file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     } else {
         lba = g_battle_gfx_sp2_files[spritesheet_id].sector;
@@ -793,7 +793,7 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
         }
         if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_battle_gfx_sp2_files[spritesheet_id].size;
-            return main_file_request_read_bytes(lba, byte_length, destination) != 0;
+            return file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     }
     return -1;
@@ -1301,7 +1301,7 @@ void battle_camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* d
  * bob added to y. */
 void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* unit) {
     /* float_bob_offset is read signed (lh) here. */
-    main_util_set_svector(destination, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx,
+    vector_set_svector(destination, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx,
         unit->world_coords.vy + unit->event_offset.vy + unit->seq_offset.vy + (s16)unit->float_bob_offset,
         unit->world_coords.vz + unit->event_offset.vz + unit->seq_offset.vz);
 }

@@ -10,7 +10,7 @@
  * Publish newly pressed buttons and two repeat rates for menus.
  *
  * Same latch/activation/repeat logic as screen_input_update_pad and
- * card_input_update_controller, with the frame-speed divisor fixed at 2.
+ * save_input_update_controller, with the frame-speed divisor fixed at 2.
  * The divisor stays a variable: the target divides by a register holding 2
  * rather than shifting. Counter slots 4..11 are skipped: only the shoulder
  * buttons and the d-pad (bits 0-3 and 12-15) repeat, while the face buttons,
@@ -25,9 +25,9 @@ void menu_input_update_controller(void) {
     s32* counter_base;
     u32 speed, initial_delay, secondary_repeat_period, repeat_period;
     speed = 2;
-    initial_delay = g_main_input_repeat_initial_delay / speed;
-    repeat_period = g_main_input_repeat_period / speed;
-    secondary_repeat_period = g_main_input_secondary_repeat_period / speed;
+    initial_delay = g_input_repeat_initial_delay / speed;
+    repeat_period = g_input_repeat_period / speed;
+    secondary_repeat_period = g_input_secondary_repeat_period / speed;
     current_input = PadRead(0);
     if (current_input & g_menu_input_latched_button) {
         current_input &= g_menu_input_latched_button;

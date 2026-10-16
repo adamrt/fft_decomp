@@ -187,7 +187,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
     u16 multiplier;
     u8 support;
 
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
         return BATTLE_ATTACK_PREPARATION_INVALID;
     }
@@ -209,13 +209,13 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
 
     /* Menus that resolve at once return here; the others break with the ability for the
      * CT step below. */
-    switch (g_main_action_menu_types_by_skillset[action.skillset_id]) {
+    switch (g_command_menu_types_by_skillset[action.skillset_id]) {
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
         item = action.item_or_equipment;
-        if (g_main_item_primary_data[item].type != ITEM_TYPE_CONSUMABLE) {
+        if (g_item_primary_data[item].type != ITEM_TYPE_CONSUMABLE) {
             return BATTLE_ATTACK_PREPARATION_INVALID;
         }
-        main_util_copy_action_data(&action, dest);
+        action_copy_data(&action, dest);
         ability = item + (ABILITY_ID_ITEM_FIRST - ITEM_ID_CONSUMABLE_FIRST);
         dest->ability_id = ability;
         if (phase != 0 && (phase & 1)) {
@@ -227,17 +227,17 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         /* Throw resolves to the Throw ability whose item type matches the thrown item. */
         ability = ABILITY_ID_THROW_FIRST;
         item = action.item_or_equipment;
-        table = g_main_throw_ability_item_types - ABILITY_ID_THROW_FIRST;
+        table = g_ability_throw_item_types - ABILITY_ID_THROW_FIRST;
         for (; ability < ABILITY_ID_JUMP_FIRST; ability++) {
             /* The index+base integer spelling of the biased table is byte-required. */
-            if (*(u8*)(ability + (s32)table) == g_main_item_primary_data[item].type) {
+            if (*(u8*)(ability + (s32)table) == g_item_primary_data[item].type) {
                 break;
             }
         }
         if (ability == ABILITY_ID_JUMP_FIRST) {
             return BATTLE_ATTACK_PREPARATION_INVALID;
         }
-        main_util_copy_action_data(&action, dest);
+        action_copy_data(&action, dest);
         dest->ability_id = ability;
         if (phase != 0 && (phase & 1)) {
             battle_action_decrement_player_item_quantity(unit, item, 1);
@@ -257,7 +257,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         if (ability < 0 || ability >= ABILITY_ID_ITEM_FIRST) {
             return BATTLE_ATTACK_PREPARATION_INVALID;
         }
-        main_util_copy_action_data(&action, dest);
+        action_copy_data(&action, dest);
         if (phase != 0 && (phase & 1)) {
             unit->action_taken = 1;
         }
@@ -279,14 +279,14 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         }
         break;
     case ACTION_MENU_TYPE_ATTACK:
-        main_util_copy_action_data(&action, dest);
+        action_copy_data(&action, dest);
         if (phase != 0 && (phase & 1)) {
             unit->action_taken = 1;
         }
         dest->ability_id = 0;
         return BATTLE_ATTACK_PREPARATION_IMMEDIATE;
     case ACTION_MENU_TYPE_JUMP:
-        main_util_copy_action_data(&action, dest);
+        action_copy_data(&action, dest);
         if (phase != 0) {
             ct = 50 / unit->attributes[UNIT_ATTRIBUTE_SPEED];
             if (ct == 0) {
@@ -298,7 +298,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
             if (phase & 1) {
                 unit->action_taken = 1;
                 unit->movement_taken = 1;
-                main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_JUMPING);
+                status_set_action_state(unit, STATUS_ACTION_STATE_JUMPING);
             }
         }
         dest->ability_id = ABILITY_ID_JUMP_FIRST;
@@ -308,8 +308,8 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         if (ability < ABILITY_ID_CHARGE_FIRST || ability >= ABILITY_ID_MATH_FIRST) {
             return BATTLE_ATTACK_PREPARATION_INVALID;
         }
-        main_util_copy_action_data(&action, dest);
-        ct = g_main_charge_ability_data[ability - ABILITY_ID_CHARGE_FIRST].ct;
+        action_copy_data(&action, dest);
+        ct = g_ability_charge_data[ability - ABILITY_ID_CHARGE_FIRST].ct;
         /* Charge has its own CT, so the generic CT step and Short Charge are skipped. */
         do {
             skip = 1;
@@ -335,8 +335,8 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         if (ability < 0 || ability >= ABILITY_ID_ITEM_FIRST) {
             return BATTLE_ATTACK_PREPARATION_INVALID;
         }
-        main_util_copy_action_data(&action, dest);
-        entry = &g_main_ability_range_data[ability];
+        action_copy_data(&action, dest);
+        entry = &g_ability_range_data[ability];
         /* Bit 7 is masked off here, though the AI reads the whole byte; no retail record sets it. */
         ct = entry->ct & 0x7f;
         persevere = entry->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE;
@@ -361,9 +361,9 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
             unit->action_taken = 1;
             if (ct != 0) {
                 if (persevere) {
-                    main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_PERFORMING);
+                    status_set_action_state(unit, STATUS_ACTION_STATE_PERFORMING);
                 } else {
-                    main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_CHARGING);
+                    status_set_action_state(unit, STATUS_ACTION_STATE_CHARGING);
                 }
             }
         }
@@ -395,7 +395,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
 
     if ((unit->initial_team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE) {
         item = item_id & 0xFF;
-        quantity = g_main_item_quantities[item];
+        quantity = g_item_quantities[item];
         if (quantity == 0) {
             return -1;
         }
@@ -405,7 +405,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
         if (g_battle_action_state != ACTION_STATE_EXECUTE) {
             return 0;
         }
-        g_main_item_quantities[item] = quantity - 1;
+        g_item_quantities[item] = quantity - 1;
     }
     return 0;
 }
@@ -559,7 +559,7 @@ static s32 battle_action_build_reaction_targets(
         break;
 
     default:
-        flags = g_main_reaction_behavior_flags[g_battle_current_reaction_ability_id - ABILITY_ID_REACTION_FIRST];
+        flags = g_ability_reaction_behavior_flags[g_battle_current_reaction_ability_id - ABILITY_ID_REACTION_FIRST];
         if (flags & BATTLE_REACTION_BEHAVIOR_FLAG_TARGET_SELF) {
             *target_count = 1;
             *target_ids = actor_id;
@@ -592,13 +592,13 @@ static s32 battle_target_calculate_map_for_action(const action_command_t* action
     s32 result;
     s16 ability_id;
 
-    menu_type = g_main_action_menu_types_by_skillset[action->skillset_id];
+    menu_type = g_command_menu_types_by_skillset[action->skillset_id];
     flags_2 = 0;
     *flags_3 = 0;
     if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MONSTER) {
         ability_id = action->ability_id;
         if (ability_id < ABILITY_ID_ITEM_FIRST) {
-            ability = &g_main_ability_range_data[ability_id];
+            ability = &g_ability_range_data[ability_id];
             *flags_3 = ability->flags_3;
             flags_4 = ability->flags_4;
             flags_1 = ability->flags_1;
@@ -818,7 +818,7 @@ static void battle_action_finalize_draw_out_katana_result(
     unit_stats_t* attacker, battle_strike_work_t* work, u8 hit_count) {
     u16 flags;
 
-    if (g_main_action_menu_types_by_skillset[attacker->action_command.skillset_id] != ACTION_MENU_TYPE_KATANA_INVENTORY)
+    if (g_command_menu_types_by_skillset[attacker->action_command.skillset_id] != ACTION_MENU_TYPE_KATANA_INVENTORY)
         return;
     if (attacker->job_id == JOB_ID_MIME)
         return;
@@ -877,7 +877,7 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
         g_battle_action_current_ability.job_level_gained_flag = 0;
     }
 
-    menu_type = g_main_action_menu_types_by_skillset[unit->action_command.skillset_id];
+    menu_type = g_command_menu_types_by_skillset[unit->action_command.skillset_id];
     g_battle_loaded_ability_flags_1 = 0;
     g_battle_action_current_ability.primary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
     g_battle_action_current_ability.secondary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
@@ -895,7 +895,7 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
     if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MONSTER) {
         ability_id = unit->action_command.ability_id;
         if (ability_id >= 0 || ability_id < ABILITY_ID_ITEM_FIRST) {
-            data = &g_main_ability_range_data[ability_id];
+            data = &g_ability_range_data[ability_id];
             g_battle_loaded_ability_flags_1 = data->flags_1;
             x = data->x;
             formula = data->formula;
@@ -1066,10 +1066,10 @@ static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
     ability_secondary_data_t* ability;
 
     ability_id = unit->action_command.ability_id;
-    menu = g_main_action_menu_types_by_skillset[unit->action_command.skillset_id];
+    menu = g_command_menu_types_by_skillset[unit->action_command.skillset_id];
     g_battle_action_current_ability.mp_cost = 0;
     if (g_battle_action_context == ACTION_CONTEXT_PRIMARY)
-        main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING);
+        status_set_action_state(unit, STATUS_ACTION_STATE_KEEP_PERFORMING);
     result = battle_unit_get_action_restriction(unit);
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
         result = BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
@@ -1082,7 +1082,7 @@ static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
             return ACTION_REJECTION_FROG;
     }
     if (ability_id >= 0 && ability_id < ABILITY_ID_ITEM_FIRST) {
-        ability = &g_main_ability_range_data[ability_id];
+        ability = &g_ability_range_data[ability_id];
         if ((menu == ACTION_MENU_TYPE_DEFAULT || menu == ACTION_MENU_TYPE_MONSTER)
             && (ability->flags_3 & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE)
             && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SILENCE)] & STATUS_BYTE_MASK(STATUS_ID_SILENCE)))
@@ -1125,7 +1125,7 @@ void battle_action_store_acting_unit_data(unit_stats_t* unit) {
         g_battle_acting_unit_y = unit->position.y;
         g_battle_acting_unit_elevation = unit->position.higher_elevation;
     } else {
-        main_util_copy_action_data(&g_battle_action_saved_command, &unit->action_command);
+        action_copy_data(&g_battle_action_saved_command, &unit->action_command);
         g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     }
 }
@@ -1269,12 +1269,12 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
         base[i].ability_outcome = 0;
     }
 
-    menu_type = g_main_action_menu_types_by_skillset[unit->action_command.skillset_id];
+    menu_type = g_command_menu_types_by_skillset[unit->action_command.skillset_id];
     flags_1 = 0;
     if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MONSTER) {
         ability_id = unit->action_command.ability_id;
         if (ability_id < ABILITY_ID_ITEM_FIRST) {
-            flags_1 = g_main_ability_range_data[ability_id].flags_1;
+            flags_1 = g_ability_range_data[ability_id].flags_1;
         }
     }
 
@@ -1309,7 +1309,7 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
     }
 
     g_battle_action_context = ACTION_CONTEXT_REACTION_OR_SIMULATION;
-    main_util_copy_action_data(action, &g_battle_action_saved_command);
+    action_copy_data(action, &g_battle_action_saved_command);
     g_battle_current_reaction_ability_id = ABILITY_ID_REACTION_HAMEDO;
     g_battle_acting_unit_id = id;
     target->action_command.actor_id = target_id;
@@ -1324,7 +1324,7 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
         }
         return target_id;
     }
-    main_util_copy_action_data(&g_battle_action_saved_command, action);
+    action_copy_data(&g_battle_action_saved_command, action);
     return -1;
 }
 
@@ -1382,7 +1382,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         || ability == ABILITY_ID_REACTION_REFLECT)
                     && ability != 0) {
                     g_battle_action_context = ACTION_CONTEXT_REACTION_OR_SIMULATION;
-                    main_util_copy_action_data(action, &g_battle_action_saved_command);
+                    action_copy_data(action, &g_battle_action_saved_command);
                     g_battle_current_reaction_ability_id = ability;
                     action->actor_id = i;
                     action->skillset_id = 0;
@@ -1420,7 +1420,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                     case ABILITY_ID_REACTION_COUNTER_FLOOD:
                         surface = g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type;
                         outcome = (battle_action_store_counter_ability(
-                                       unit, SKILLSET_ID_ELEMENTAL, g_main_terrain_geomancy_abilities[surface], 0)
+                                       unit, SKILLSET_ID_ELEMENTAL, g_terrain_geomancy_abilities[surface], 0)
                                       == 0)
                             * 2;
                         break;
@@ -1455,7 +1455,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                     default:
                         /* SELF_TILE for a reaction flagged neither passive nor active, else NONE. */
                         outcome
-                            = -((g_main_reaction_behavior_flags[g_battle_current_reaction_ability_id
+                            = -((g_ability_reaction_behavior_flags[g_battle_current_reaction_ability_id
                                      - ABILITY_ID_REACTION_FIRST]
                                     & (BATTLE_REACTION_BEHAVIOR_FLAG_PASSIVE | BATTLE_REACTION_BEHAVIOR_FLAG_ACTIVE))
                                 == 0);
@@ -1467,7 +1467,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         outcome = BATTLE_REACTION_OUTCOME_NONE;
                     }
                     if (outcome == BATTLE_REACTION_OUTCOME_NONE) {
-                        main_util_copy_action_data(&g_battle_action_saved_command, action);
+                        action_copy_data(&g_battle_action_saved_command, action);
                         i++;
                         continue;
                     }
@@ -1598,13 +1598,13 @@ static s32 battle_action_select_auto_potion_item(unit_stats_t* unit) {
     if (unit->initial_team_flags & UNIT_TEAM_MASK) {
         return ITEM_ID_POTION;
     }
-    if (g_main_item_quantities[ITEM_ID_POTION] != 0) {
+    if (g_item_quantities[ITEM_ID_POTION] != 0) {
         return ITEM_ID_POTION;
     }
-    if (g_main_item_quantities[ITEM_ID_HI_POTION] != 0) {
+    if (g_item_quantities[ITEM_ID_HI_POTION] != 0) {
         return ITEM_ID_HI_POTION;
     }
-    if (g_main_item_quantities[ITEM_ID_X_POTION] != 0) {
+    if (g_item_quantities[ITEM_ID_X_POTION] != 0) {
         return ITEM_ID_X_POTION;
     }
     return -1;
@@ -1661,7 +1661,7 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
         experience = 0xff;
     }
     unit->experience = experience;
-    if (main_unit_check_level_up(unit) != 0 || g_battle_action_current_ability.level_gained_flag != 0) {
+    if (unit_check_level_up(unit) != 0 || g_battle_action_current_ability.level_gained_flag != 0) {
         display->level_for_display = unit->level;
     }
     display->earned_experience = g_battle_action_current_ability.earned_experience;
@@ -1732,7 +1732,7 @@ s32 battle_unit_load_job_level(unit_stats_t* unit, s32 job_id, s32* out_slot) {
  *
  * Skips absent, crystal, dead, treasure, monster and other-team units, and
  * the Bard slot for females and the Dancer slot for males. The battle twin of
- * main_job_add_proposition_jp; returns -1 when nothing is stored. */
+ * job_add_proposition_jp; returns -1 when nothing is stored. */
 s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot) {
     unit_stats_t* unit;
     s32 total;
@@ -1779,7 +1779,7 @@ s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot) {
     }
     unit->career.job_points.total.values[slot] = total;
     /* The job level comes from total JP; even slots take the high nibble. */
-    level = main_job_calculate_level(total);
+    level = job_calculate_level(total);
     levels = unit->career.job_levels[slot / 2];
     level_byte = level;
     if (slot & 1) {
@@ -1788,8 +1788,8 @@ s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot) {
         levels = (levels & 0xf) | (level_byte << 4);
     }
     unit->career.job_levels[slot / 2] = levels;
-    main_job_store_unlock_bitset(
-        unit->career.unlocked_jobs, main_job_calculate_unlocked(unit->career.job_levels, unit->unit_flags));
+    job_store_unlock_bitset(
+        unit->career.unlocked_jobs, job_calculate_unlocked(unit->career.job_levels, unit->unit_flags));
     return 0;
 }
 
@@ -2020,8 +2020,8 @@ s32 battle_action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_
     s32 saved_action_state;
     s32 saved_action_context;
 
-    main_util_copy_action_data(&attacker->action_command, &g_battle_action_saved_command);
-    main_util_copy_action_data(command, &attacker->action_command);
+    action_copy_data(&attacker->action_command, &g_battle_action_saved_command);
+    action_copy_data(command, &attacker->action_command);
     battle_action_init_current_ability_strike_data(attacker);
     saved_action_state = g_battle_action_state;
     g_battle_action_state = ACTION_STATE_PREVIEW;
@@ -2036,7 +2036,7 @@ s32 battle_action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_
             target->action.hit = 0;
             target->action.attack_accuracy = 0;
             g_battle_action_state = saved_action_state;
-            main_util_copy_action_data(&g_battle_action_saved_command, &attacker->action_command);
+            action_copy_data(&g_battle_action_saved_command, &attacker->action_command);
             return 0;
         }
     }
@@ -2047,13 +2047,13 @@ s32 battle_action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_
     battle_action_calculate_target_result(&attacker->action_command, target->battle_id);
     g_battle_action_context = saved_action_context;
     g_battle_action_state = saved_action_state;
-    main_util_copy_action_data(&g_battle_action_saved_command, &attacker->action_command);
+    action_copy_data(&g_battle_action_saved_command, &attacker->action_command);
     return 0;
 }
 
 /* The Elemental ability that the surface type of the unit's tile selects. */
 s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit) {
-    return g_main_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
+    return g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
 }
 
 /* Build battle slot unit_index from the party member the current deployment row names: rebuild it
@@ -2061,13 +2061,13 @@ s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit) {
  * when that party slot is unavailable; the first two parameters are unused. */
 s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit_index) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_index];
-    s32 formation_id = g_main_unit_deployed_coords->party_id;
+    s32 formation_id = g_unit_deployed_coords->party_id;
 
     unit->battle_id = unit_index;
-    if (main_unit_init_from_party_slot(unit, formation_id, 0) != 0) {
+    if (unit_init_from_party_slot(unit, formation_id, 0) != 0) {
         return -1;
     }
-    main_unit_init_status_and_rewards(unit, 1);
+    unit_init_status_and_rewards(unit, 1);
     return 0;
 }
 
@@ -2078,7 +2078,7 @@ s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit
  * when deployment row i names no party member. A unit whose identity is not a
  * Ramza (1..3) gets a generated unit id, from 0x78 upward (from 0xfe downward
  * in the debug mode). Load failures report the PARTY_UNIT_LOAD and
- * PARTY_PLACEMENT battle load exceptions plus the slot. The target reloads each row from g_main_unit_deployed_coords
+ * PARTY_PLACEMENT battle load exceptions plus the slot. The target reloads each row from g_unit_deployed_coords
  * at its distinct uses.
  */
 static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
@@ -2090,7 +2090,7 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
     s32 next_generated_unit_id;
     u8 palette;
 
-    g_main_unit_deployed_coords = formation;
+    g_unit_deployed_coords = formation;
     if (is_red_team_debug) {
         next_generated_unit_id = 0xfe;
         slot_step = -1;
@@ -2107,15 +2107,15 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
         u32 identity;
 
         unit->battle_id = battle_id;
-        if (g_main_unit_deployed_coords[i].party_id != PARTY_ID_NONE) {
+        if (g_unit_deployed_coords[i].party_id != PARTY_ID_NONE) {
             unit->entd_slot = battle_id;
             unit->existence = UNIT_EXISTENCE_ACTIVE;
-            if (main_unit_init_from_party_slot(unit, g_main_unit_deployed_coords[i].party_id, 0) != 0) {
-                main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_PARTY_UNIT_LOAD);
-            } else if (battle_unit_set_placement_and_validate(battle_id, &g_main_unit_deployed_coords[i]) != 0) {
-                main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_PARTY_PLACEMENT);
+            if (unit_init_from_party_slot(unit, g_unit_deployed_coords[i].party_id, 0) != 0) {
+                system_handle_battle_load_exception(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_UNIT_LOAD);
+            } else if (battle_unit_set_placement_and_validate(battle_id, &g_unit_deployed_coords[i]) != 0) {
+                system_handle_battle_load_exception(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_PLACEMENT);
             } else {
-                sprite = main_unit_calculate_palette_spritesheet(unit, &palette);
+                sprite = unit_calculate_palette_spritesheet(unit, &palette);
                 identity = unit->character_identity;
                 if ((identity & 0xff) == 0 || (identity & 0xff) >= 4) {
                     identity = next_generated_unit_id;
@@ -2127,13 +2127,13 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
                     unit->initial_team_flags = UNIT_TEAM_RED | UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
                     unit->sprite_palette = 1;
                 }
-                if (g_main_unit_deployed_coords[i].flags.off_field) {
+                if (g_unit_deployed_coords[i].flags.off_field) {
                     unit->existence = UNIT_EXISTENCE_OFF_FIELD;
                     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
                 } else {
                     battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
                         unit->position.facing, sprite, palette, 0xff, unit, 0);
-                    main_unit_init_status_and_rewards(unit, 1);
+                    unit_init_status_and_rewards(unit, 1);
                     unit->existence = UNIT_EXISTENCE_ACTIVE;
                 }
                 continue;
@@ -2265,7 +2265,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
     g_battle_player_unit_fallen = 0;
     g_battle_enemy_level_sum = 0;
     g_battle_highest_enemy_level = 0;
-    main_party_calculate_highest_level();
+    party_calculate_highest_level();
     free_spritesheets = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT);
     free_spritesheets = (free_spritesheets < 10) ? 9 - free_spritesheets : 0;
     enemy_limit = free_spritesheets + 7;
@@ -2274,7 +2274,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
     for (battle_id = 0, entd = entd_list; battle_id < ENTD_UNITS_PER_ENCOUNTER; entd++, battle_id++) {
         unit = &g_battle_unit_stats[battle_id];
         unit->battle_id = battle_id;
-        g_main_entd_current_unit = entd;
+        g_encounter_current_unit = entd;
         if (entd->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
             unit->existence = UNIT_EXISTENCE_NONE;
@@ -2283,15 +2283,15 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
 
         unit->entd_slot = battle_id;
         unit->existence = UNIT_EXISTENCE_ACTIVE;
-        status = main_unit_init_from_entd(unit, g_main_entd_current_unit, 0, MAIN_UNIT_ENTD_INIT_NEW);
+        status = unit_init_from_encounter(unit, g_encounter_current_unit, 0, UNIT_ENTD_INIT_NEW);
         if (status != 0) {
-            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT);
+            system_handle_battle_load_exception(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT);
         }
-        spritesheet_id = main_unit_calculate_palette_spritesheet(unit, &palette_id);
-        main_unit_init_status_and_rewards(unit, 0);
+        spritesheet_id = unit_calculate_palette_spritesheet(unit, &palette_id);
+        unit_init_status_and_rewards(unit, 0);
         /* s32 so the fallback id is zero-extended once here and passed on
          * unmasked, like the target. */
-        unit_id = g_main_entd_current_unit->unit_id;
+        unit_id = g_encounter_current_unit->unit_id;
         if (unit_id == 0xff) {
             unit_id = next_unused_unit_id--;
         }
@@ -2301,13 +2301,13 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
         if (presence == 0 || (presence == UNIT_TEAM_FLAG_RANDOMLY_PRESENT && (rand() & 1))) {
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
             unit->existence = UNIT_EXISTENCE_OFF_FIELD;
-            main_unit_init_position_and_rewards(unit, g_main_entd_current_unit);
+            unit_init_position_and_rewards(unit, g_encounter_current_unit);
             continue;
         }
 
-        main_unit_init_position_and_rewards(unit, g_main_entd_current_unit);
+        unit_init_position_and_rewards(unit, g_encounter_current_unit);
         if (battle_unit_validate_placement(battle_id) != 0) {
-            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_ENTD_PLACEMENT);
+            system_handle_battle_load_exception(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_PLACEMENT);
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
             unit->existence = UNIT_EXISTENCE_NONE;
             continue;
@@ -2321,7 +2321,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             if (duplicate_message_shown != 0) {
                 continue;
             }
-            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_NO_SPRITESHEET_SLOT);
+            system_handle_battle_load_exception(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_NO_SPRITESHEET_SLOT);
             duplicate_message_shown = 1;
             continue;
         }
@@ -2332,7 +2332,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             if (limit_message_shown != 0) {
                 continue;
             }
-            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_ENEMY_LIMIT);
+            system_handle_battle_load_exception(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENEMY_LIMIT);
             limit_message_shown = 1;
             enemy_count++;
             continue;
@@ -2525,7 +2525,7 @@ u32 battle_move_get_post_move_events(unit_stats_t* unit) {
         battle_action_clear_current_data(&target->action);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             g_battle_action_target_data->status_changes.removal[i]
-                = g_main_status_check_sets[STATUS_CHECK_SET_MOUNT_REMOVAL][i];
+                = g_status_check_sets[STATUS_CHECK_SET_MOUNT_REMOVAL][i];
         }
         if (battle_status_modify_inflictions(0) != 0) {
             g_battle_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;

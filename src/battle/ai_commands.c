@@ -649,15 +649,14 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                 }
 
                 /* Blue-team units need the item in the party inventory; other teams need only its level. */
-                menu = g_main_action_menu_types_by_skillset[entry->skillset];
+                menu = g_command_menu_types_by_skillset[entry->skillset];
                 if (menu == ACTION_MENU_TYPE_ITEM_INVENTORY || menu == ACTION_MENU_TYPE_KATANA_INVENTORY
                     || ability_id == ABILITY_ID_THROW_SHURIKEN || ability_id == ABILITY_ID_THROW_BALL) {
                     if (!(unit->initial_team_flags & UNIT_TEAM_MASK)) {
-                        if (g_main_item_quantities[ability->parameters.fields.item_id] == 0) {
+                        if (g_item_quantities[ability->parameters.fields.item_id] == 0) {
                             continue;
                         }
-                    } else if (g_main_item_primary_data[ability->parameters.fields.item_id].required_level
-                        > unit->level) {
+                    } else if (g_item_primary_data[ability->parameters.fields.item_id].required_level > unit->level) {
                         continue;
                     }
                 } else if (menu == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
@@ -672,13 +671,13 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                         throw_id++, type_index++) {
                         if (battle_ai_is_ability_known(
                                 unit_id, ability->skillset, throw_id - (ABILITY_ID_THROW_KNIFE - 2))) {
-                            item_type = g_main_throw_ability_item_types[type_index];
+                            item_type = g_ability_throw_item_types[type_index];
                             for (item_id = 0; item_id < ITEM_ID_COUNT; item_id++) {
-                                if (g_main_item_primary_data[item_id].type == item_type) {
-                                    level = g_main_item_primary_data[item_id].required_level;
+                                if (g_item_primary_data[item_id].type == item_type) {
+                                    level = g_item_primary_data[item_id].required_level;
                                     if (level >= best_level) {
                                         if (!(unit->initial_team_flags & UNIT_TEAM_MASK)) {
-                                            lacking = g_main_item_quantities[item_id] < 5;
+                                            lacking = g_item_quantities[item_id] < 5;
                                         } else {
                                             lacking = unit->level < level;
                                         }
@@ -820,7 +819,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                     decision->enemy_ability_min_reach = range;
                 }
                 if (ability->ai_flags.groups.target_effect_flags & AI_ABILITY_TARGET_ALLIES) {
-                    if (g_main_action_menu_types_by_skillset[ability->skillset] == ACTION_MENU_TYPE_ITEM_INVENTORY) {
+                    if (g_command_menu_types_by_skillset[ability->skillset] == ACTION_MENU_TYPE_ITEM_INVENTORY) {
                         range = (range + 1) / 2;
                     }
                     if (range < decision->ally_ability_min_reach) {
@@ -943,7 +942,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
     ability_id = g_battle_ai_data_base.considered_ability.ability_id = entry->packed_id & AI_ABILITY_ENTRY_ABILITY_MASK;
     unit_id = entry->packed_id >> AI_ABILITY_ENTRY_UNIT_SHIFT;
     unit = &g_battle_unit_stats[unit_id];
-    menu = g_main_action_menu_types_by_skillset[entry->skillset];
+    menu = g_command_menu_types_by_skillset[entry->skillset];
     status_id = 0;
 
     /* Attack, Jump, Charge and Arithmeticks fill in the whole ability and return;
@@ -965,15 +964,14 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
                 = (ai->considered_ability.ai_flags.word | AI_ABILITY_TARGET_ENEMIES) & ~AI_ABILITY_TARGET_ALLIES;
         return;
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
-        status_id = g_main_item_secondary_data[ability_id - ABILITY_ID_ITEM_FIRST].status_infliction_id;
+        status_id = g_item_secondary_data[ability_id - ABILITY_ID_ITEM_FIRST].status_infliction_id;
         /* The AI uses Move for Throw Item's range; the real targeting uses 4. */
         if (unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_THROW_ITEM)
             ai->considered_ability.parameters.fields.range = unit->move;
         else
             ai->considered_ability.parameters.fields.range = 1;
         ai->considered_ability.parameters.fields.aoe = 0;
-        ai->considered_ability.parameters.fields.item_id
-            = g_main_item_ability_item_ids[ability_id - ABILITY_ID_ITEM_FIRST];
+        ai->considered_ability.parameters.fields.item_id = g_item_ability_item_ids[ability_id - ABILITY_ID_ITEM_FIRST];
         break;
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
         ai->considered_ability.parameters.fields.item_id
@@ -983,11 +981,11 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         if (ability_id >= ITEM_ID_SHURIKEN && ability_id <= ITEM_ID_YAGYU_DARKNESS) {
             ai->considered_ability.ability_id = ABILITY_ID_THROW_SHURIKEN;
             ai->considered_ability.parameters.fields.item_id = ability_id;
-            ai->considered_ability.element = g_main_item_weapon_data[ability_id].element;
+            ai->considered_ability.element = g_item_weapon_data[ability_id].element;
         } else if (ability_id >= ITEM_ID_FIRE_BALL && ability_id <= ITEM_ID_LIGHTNING_BALL) {
             ai->considered_ability.ability_id = ABILITY_ID_THROW_BALL;
             ai->considered_ability.parameters.fields.item_id = ability_id;
-            ai->considered_ability.element = g_main_item_weapon_data[ability_id].element;
+            ai->considered_ability.element = g_item_weapon_data[ability_id].element;
         } else {
             ai->considered_ability.ability_id = ai->throw_ability_id;
             ai->considered_ability.parameters.fields.item_id = ai->throw_weapon_id;
@@ -1018,11 +1016,11 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
             ai->considered_ability.parameters.fields.range = 1;
         else
             ai->considered_ability.parameters.fields.range
-                = g_main_jump_ability_data[ability_id - ABILITY_ID_JUMP_FIRST].range;
+                = g_ability_jump_data[ability_id - ABILITY_ID_JUMP_FIRST].range;
         weapon = &ai->unit_weapon_data[ai->unit_compact_indices[unit_id]];
         goto weapon_flags;
     case ACTION_MENU_TYPE_CHARGE:
-        ai->considered_ability.ct = g_main_charge_ability_data[ability_id - ABILITY_ID_CHARGE_FIRST].ct;
+        ai->considered_ability.ct = g_ability_charge_data[ability_id - ABILITY_ID_CHARGE_FIRST].ct;
         /* Placing this case above ATTACK to fall through reorders the blocks. */
         goto attack;
     case ACTION_MENU_TYPE_ARITHMETICKS: {
@@ -1046,14 +1044,14 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
     }
     }
 
-    battle_mem_copy_u16_values(&ai->considered_ability.ai_flags, &g_main_ability_data[ability_id].ai_flags, 4);
+    battle_mem_copy_u16_values(&ai->considered_ability.ai_flags, &g_ability_data[ability_id].ai_flags, 4);
     if (menu == ACTION_MENU_TYPE_ITEM_INVENTORY || menu == ACTION_MENU_TYPE_WEAPON_INVENTORY)
         ai->considered_ability.ai_flags.word |= AI_ABILITY_DIRECT_TRAJECTORY;
     ai->considered_ability.ai_flags.fields.flags_4 = entry->usage.flags;
 
     if (ability_id < ABILITY_ID_ITEM_FIRST) {
         s32 ct;
-        secondary = &g_main_ability_range_data[ability_id];
+        secondary = &g_ability_range_data[ability_id];
         ct = secondary->ct;
         status_id = secondary->status_infliction_id;
         ai->considered_ability.ct = ct;
@@ -1082,7 +1080,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         ai->considered_ability.ct = 0;
 copy_status:
     battle_mem_copy_bytes(ai->considered_ability.parameters.fields.status_infliction,
-        g_main_status_infliction_data[status_id].statuses,
+        g_status_infliction_data[status_id].statuses,
         sizeof(ai->considered_ability.parameters.fields.status_infliction));
 }
 
@@ -1215,7 +1213,7 @@ static s32 battle_ai_evaluate_charging_movement(void) {
     }
     if (unit->charged_ability_ct == 0xff)
         return 0;
-    if (g_main_action_menu_types_by_skillset[unit->action_command.skillset_id] == ACTION_MENU_TYPE_CHARGE) {
+    if (g_command_menu_types_by_skillset[unit->action_command.skillset_id] == ACTION_MENU_TYPE_CHARGE) {
         g_battle_ai_data_base.current_action.coords = g_battle_ai_data_base.acting_unit_coords;
     } else {
         g_battle_ai_data_base.current_action.coords = ai->candidate_coords[g_battle_ai_data_base.movement_scenario];
@@ -2002,14 +2000,14 @@ static s32 battle_ai_select_action_random(void) {
     /* Item selection updates only the low byte of the 16-bit command field. */
     *(u8*)&g_battle_ai_data_base.current_action.command.item_or_equipment
         = ai->considered_ability.parameters.fields.item_id;
-    if (g_main_action_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ARITHMETICKS) {
+    if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ARITHMETICKS) {
         do {
             skillset = g_battle_ai_math_source_skillsets[rand() % AI_MATH_SOURCE_SKILLSET_COUNT];
-            abilities = main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ACTION);
+            abilities = ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ACTION);
             index_or_count = rand() % HUMAN_SKILLSET_ACTION_SLOT_COUNT;
             value = abilities[index_or_count];
-        } while (value == 0 || !(g_main_ability_data[value].ai_flags.flags_4 & AI_ABILITY_FLAG_4_USABLE_BY_AI)
-            || !(g_main_ability_range_data[value].flags_3 & ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE)
+        } while (value == 0 || !(g_ability_data[value].ai_flags.flags_4 & AI_ABILITY_FLAG_4_USABLE_BY_AI)
+            || !(g_ability_range_data[value].flags_3 & ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE)
             || !battle_ai_is_ability_known(ai->acting_unit_id, skillset, index_or_count));
         ai->current_action.command.ability_id = value;
         do {
@@ -2955,7 +2953,7 @@ charging:
             break;
         battle_ai_load_ability_entry(entry);
         /* The aligned skillset/usage pair preserves the target's LHU/SH. */
-        if (g_main_action_menu_types_by_skillset[entry->skillset] == ACTION_MENU_TYPE_CHARGE)
+        if (g_command_menu_types_by_skillset[entry->skillset] == ACTION_MENU_TYPE_CHARGE)
             entry->usage.policy.usable = 0;
     }
     if (battle_ai_select_active_units(AI_UNIT_FILTER_ANY, 255)) {
@@ -3565,12 +3563,12 @@ void battle_ai_init_unit_abilities(s32 unit_id) {
         } else {
             if (ai->considered_ability.ability_id < ABILITY_ID_ITEM_FIRST) {
                 if (ai->considered_ability.parameters.fields.range + ai->considered_ability.parameters.fields.aoe < 3
-                    && (g_main_ability_range_data[ai->considered_ability.ability_id].flags_4
+                    && (g_ability_range_data[ai->considered_ability.ability_id].flags_4
                         & ABILITY_SECONDARY_FLAG_4_EVADEABLE)) {
                     entry->usage.policy.exhaustive_origin_scan = 1;
                     continue;
                 }
-                if (g_main_ability_range_data[ai->considered_ability.ability_id].flags_2
+                if (g_ability_range_data[ai->considered_ability.ability_id].flags_2
                     & (ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES)) {
                     entry->usage.policy.force_consume_evaluated_aim_tiles = 1;
                     continue;
@@ -3717,7 +3715,7 @@ static void battle_ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_i
     if (item_id == ITEM_ID_NONE) {
         return;
     }
-    weapon = &g_main_item_weapon_data[item_id];
+    weapon = &g_item_weapon_data[item_id];
     flags = weapon->flags;
     if (flags & WEAPON_FLAG_ARC) {
         out->fields.flags_3 |= AI_ABILITY_FLAG_3_ARC_TRAJECTORY;
@@ -3779,8 +3777,8 @@ static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s3
         return count;
     }
     jump_found = 0;
-    abilities = main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ACTION);
-    menu = g_main_action_menu_types_by_skillset[skillset];
+    abilities = ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ACTION);
+    menu = g_command_menu_types_by_skillset[skillset];
     list_id = ai->unit_compact_indices[unit_id];
     if (menu == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
         if (battle_ai_is_ability_known(unit_id, skillset, 0)) {
@@ -3830,11 +3828,11 @@ static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s3
             continue;
         }
         entry = &ai->ability_lists[list_id][count];
-        if (!(g_main_ability_data[ability_id].ai_flags.flags_4 & AI_ABILITY_FLAG_4_USABLE_BY_AI)) {
+        if (!(g_ability_data[ability_id].ai_flags.flags_4 & AI_ABILITY_FLAG_4_USABLE_BY_AI)) {
             continue;
         }
         if (ability_id < ABILITY_ID_ITEM_FIRST) {
-            mp_cost = g_main_ability_range_data[ability_id].mp_cost;
+            mp_cost = g_ability_range_data[ability_id].mp_cost;
             if (unit->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_HALF_MP) {
                 mp_cost >>= 1;
             }
@@ -3847,7 +3845,7 @@ static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s3
                     & STATUS_BYTE_MASK(STATUS_ID_INNOCENT))) {
                 continue;
             }
-            flags = g_main_ability_range_data[ability_id].flags_4;
+            flags = g_ability_range_data[ability_id].flags_4;
             if (flags & ABILITY_SECONDARY_FLAG_4_REQUIRES_SWORD) {
                 if (!(unit->equipped_flags & UNIT_EQUIPPED_FLAG_SWORD)) {
                     continue;

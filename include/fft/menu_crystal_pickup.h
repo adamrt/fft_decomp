@@ -18,7 +18,7 @@ typedef enum crystal_pickup_kind {
     CRYSTAL_PICKUP_TREASURE = 0x4,
 } crystal_pickup_kind_e;
 
-/* Crystal/treasure pickup result (g_main_crystal_pickup_result) that battle_unit_resolve_crystal_pickup
+/* Crystal/treasure pickup result (g_crystal_pickup_result) that battle_unit_resolve_crystal_pickup
  * builds on the main thread stack and returns; each program keeps the pointer in g_menu_crystal_pickup_context. The
  * crystal pickup panels pick their variant from `result` and show `treasure_item`. */
 typedef struct crystal_pickup_result {

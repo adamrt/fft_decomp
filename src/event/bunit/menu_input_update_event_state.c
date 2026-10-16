@@ -54,7 +54,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
         g_input_event = ~previous_input & input;
         g_input_initial_repeat_counter = 0;
     } else {
-        initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
+        initial_delay = g_input_repeat_initial_delay / g_script_event_speed;
         counter = ++g_input_initial_repeat_counter;
         if (counter == initial_delay) {
             g_input_event = filtered_input;
@@ -62,7 +62,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
         if (counter >= initial_delay) {
             counter = ++g_input_repeat_counter;
             g_input_secondary_repeat_counter++;
-            repeat_delay = g_main_input_repeat_period / g_script_event_speed;
+            repeat_delay = g_input_repeat_period / g_script_event_speed;
             if (counter >= repeat_delay) {
                 g_input_repeat_counter = 0;
                 if ((input & PSX_PAD_SQUARE) != 0) {
@@ -71,7 +71,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
                     g_input_event = input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
                 }
             }
-            secondary_delay = g_main_input_secondary_repeat_period / g_script_event_speed;
+            secondary_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (g_input_secondary_repeat_counter >= secondary_delay) {
                 g_input_secondary_repeat_counter = 0;
                 if ((g_input_current & PSX_PAD_SQUARE) != 0) {
@@ -87,7 +87,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     }
 
     g_sound_pending_sfx_id = -1;
-    script_load_event_input_state(&g_bunit_input_event_state);
+    script_load_event_input_state(&g_unit_list_input_event_state);
     if (g_input_event != PSX_PAD_SELECT && g_input_event != 0) {
         g_script_input_suppression_frames = 5;
     }

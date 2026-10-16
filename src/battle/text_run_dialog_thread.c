@@ -532,7 +532,7 @@ void text_run_dialog_thread(void) {
                                         }
                                     }
                                     if ((g_script_event_input & PSX_PAD_UP) && rec.first_line != 0) {
-                                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                                         WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
                                         rec.first_line += no_value;
                                         rec.last_line = rec.first_line + rec.lines;
@@ -540,7 +540,7 @@ void text_run_dialog_thread(void) {
                                     }
                                     if ((g_script_event_input & PSX_PAD_DOWN)
                                         && rec.first_line != rec.line - rec.lines) {
-                                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                                         WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
                                         rec.first_line++;
                                         rec.last_line = rec.first_line + rec.lines;
@@ -644,7 +644,7 @@ void text_run_dialog_thread(void) {
                         win[tick].color.b = 0x80;
                     }
                 } else {
-                    g_sound_pending_sfx_id = MAIN_SFX_TEXT_PAGE;
+                    g_sound_pending_sfx_id = SOUND_SFX_TEXT_PAGE;
                     rec.first_line = rec.line;
                     rec.last_line = rec.line + rec.lines;
                     menu_render_text_image_at_record_origin(&rec);
@@ -705,15 +705,15 @@ void text_run_dialog_thread(void) {
                         continue;
                     }
                     if ((g_script_event_input & PSX_PAD_UP) && selection != rec.mark) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                         selection += no_value;
                     }
                     if ((g_script_event_input & PSX_PAD_DOWN) && selection != column) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                         selection++;
                     }
                     if (g_script_event_input & PSX_PAD_CIRCLE) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+                        g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                         break;
                     }
                 }

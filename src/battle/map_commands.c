@@ -55,15 +55,15 @@ s32 battle_state_enter_effect_playback(void) {
     }
     battle_effect_play();
     previous_state = g_battle_game_state;
-    previous_vsync_interval = g_main_system_vsync_interval;
+    previous_vsync_interval = g_system_vsync_interval;
     g_battle_game_state = BATTLE_GAME_STATE_EFFECT;
-    g_main_system_vsync_interval = 2;
+    g_system_vsync_interval = 2;
     g_battle_gfx_screen_color_modulation_fade_frames = 0;
     g_battle_camera_screen_offset_countdown = 0;
     g_battle_camera_rotation_countdown = 0;
     g_battle_camera_zoom_countdown = 0;
     g_battle_previous_game_state = previous_state;
-    g_main_saved_vsync_interval = previous_vsync_interval;
+    g_system_saved_vsync_interval = previous_vsync_interval;
     return 0;
 }
 
@@ -74,7 +74,7 @@ void battle_state_noop_1(void) {
 /* Stop the slow-down timer the game loop starts when a frame of the effect or
  * action-execute state takes more than 0x200 hsyncs. */
 void battle_state_reset_frame_pacing_timer(void) {
-    g_main_frame_pacing_timer = 0;
+    g_system_frame_pacing_timer = 0;
 }
 
 /* Count one more entry into the Status screen (BATTLE's own or DEBUGCHR's for a mounted unit). While the count is
@@ -93,17 +93,17 @@ void battle_menu_leave_status_screen_selection(void) {
     g_battle_menu_status_screen_selected = 0;
 }
 
-/* Return g_main_system_vsync_interval, the vertical blanks per frame (1, or 2 during effects and
+/* Return g_system_vsync_interval, the vertical blanks per frame (1, or 2 during effects and
  * events); event waits divide their frame counts by it. */
 s32 battle_state_get_vsync_interval(void) {
-    return g_main_system_vsync_interval;
+    return g_system_vsync_interval;
 }
 
-/* Set g_main_system_vsync_interval, the number of vertical blanks per frame, to
+/* Set g_system_vsync_interval, the number of vertical blanks per frame, to
  * 1 or 2. Returns 0, or -1 for any other value. */
 s32 battle_state_set_vsync_interval(s32 speed) {
     if (speed == 1 || speed == 2) {
-        g_main_system_vsync_interval = speed;
+        g_system_vsync_interval = speed;
         return 0;
     }
     return -1;
@@ -111,12 +111,12 @@ s32 battle_state_set_vsync_interval(s32 speed) {
 
 /* Write the cursor tile to `destination` as (x, map level, y). */
 void battle_map_store_selected_tile_coordinates(SVECTOR* destination) {
-    main_util_set_svector(destination, g_battle_cursor_x, g_battle_cursor_z, g_battle_cursor_y);
+    vector_set_svector(destination, g_battle_cursor_x, g_battle_cursor_z, g_battle_cursor_y);
 }
 
 /* Write the map's width and depth in tiles to `destination` as (x, 0, z). */
 void battle_map_store_max_coordinates(SVECTOR* destination) {
-    main_util_set_svector(destination, g_battle_map_max_x, 0, g_battle_map_max_y);
+    vector_set_svector(destination, g_battle_map_max_x, 0, g_battle_map_max_y);
 }
 
 /* The tile a unit stands on, by runtime id. The runtime record lookup is not checked:
@@ -211,7 +211,7 @@ s32 battle_effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) 
     SVECTOR target_position;
 
     if (target != 0) {
-        main_util_set_svector(&target_position, target->map_x, target->map_y, target->map_z);
+        vector_set_svector(&target_position, target->map_x, target->map_y, target->map_z);
         battle_effect_check_direct_trajectory_to_target(attacker_id, &target_position, target_id);
         if (attacker != 0) {
             attacker->strike.target_count = 1;
@@ -244,21 +244,21 @@ void battle_deployment_mark_finished(void) {
 /* Returns the hsync count battle_state_sync_frame measured for the last frame. No
  * code calls it. */
 s32 battle_state_get_frame_measurement(void) {
-    return g_main_system_battle_frame_hsync_count;
+    return g_system_battle_frame_hsync_count;
 }
 
-/* Set g_main_system_min_vsync_interval, the minimum number of vertical blanks
+/* Set g_system_min_vsync_interval, the minimum number of vertical blanks
  * battle_state_sync_frame waits per frame in the effect and action-execute
  * states. Values outside 1-9 are ignored. */
 void battle_state_set_min_vsync_interval(s32 value) {
     if (value >= 1 && value <= 9) {
-        g_main_system_min_vsync_interval = value;
+        g_system_min_vsync_interval = value;
     }
 }
 
 /* Remove the minimum frame wait battle_state_set_min_vsync_interval set. */
 void battle_state_clear_min_vsync_interval(void) {
-    g_main_system_min_vsync_interval = 0;
+    g_system_min_vsync_interval = 0;
 }
 
 /* Apply a GNS camera command: aim the camera at the negated integer position (in 20.12) with the
@@ -268,8 +268,8 @@ void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTO
     s32 tile_x;
     s32 tile_y;
 
-    main_util_set_vector(&g_battle_camera_current_real_coords, -coords->vx * ONE, -coords->vy * ONE, -coords->vz * ONE);
-    main_util_set_svector(
+    vector_set_vector(&g_battle_camera_current_real_coords, -coords->vx * ONE, -coords->vy * ONE, -coords->vz * ONE);
+    vector_set_svector(
         &g_battle_camera_render_state, rotation->vx & 0x1fff, rotation->vy & 0x1fff, rotation->vz & 0x1fff);
     g_battle_cursor_z = 0;
     tile_x = g_battle_camera_current_real_coords.vx / (MAP_TILE_SIZE * ONE);
@@ -285,10 +285,10 @@ void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTO
  * (0, 0), no acting or casting unit, no rotation, tilt or zoom in progress and
  * directional panning off. */
 static void battle_camera_init_defaults(void) {
-    main_util_set_vector(&g_battle_camera_current_screen_offset, 0x100, 0xA0, 0x280);
-    main_util_set_vector(&g_battle_camera_zoom, ONE, ONE, ONE);
-    main_util_set_svector(&g_battle_camera_render_state, 0x12E, 0xE00, 0);
-    main_util_set_vector(&g_battle_camera_current_real_coords, 0, 0, 0);
+    vector_set_vector(&g_battle_camera_current_screen_offset, 0x100, 0xA0, 0x280);
+    vector_set_vector(&g_battle_camera_zoom, ONE, ONE, ONE);
+    vector_set_svector(&g_battle_camera_render_state, 0x12E, 0xE00, 0);
+    vector_set_vector(&g_battle_camera_current_real_coords, 0, 0, 0);
 
     g_battle_casting_runtime_id = 0xFF;
     g_battle_unit_source_runtime_id = 0xFF;
@@ -311,22 +311,21 @@ static void battle_camera_init_defaults(void) {
  * queue, so a seventeenth call writes the record one past its end. */
 void battle_gfx_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
     s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags) {
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].map_x = map_x;
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].map_y = map_y;
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].map_level = map_level;
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].facing = facing;
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].spritesheet_id
-        = spritesheet_id;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].map_x = map_x;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].map_y = map_y;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].map_level = map_level;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].facing = facing;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].spritesheet_id = spritesheet_id;
     if (spritesheet_id >= BATTLE_SPRITESHEET_ID_COUNT) {
-        g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].spritesheet_id
+        g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].spritesheet_id
             = BATTLE_SPRITESHEET_ID_RAMZA_CHAPTER_1;
     }
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].palette_id = palette_id;
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].runtime_id = runtime_id;
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].stats = unit;
-    g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].flags = flags;
-    if (g_main_gfx_unit_graphics_load_queue.count < BATTLE_UNIT_RUNTIME_SLOT_COUNT) {
-        g_main_gfx_unit_graphics_load_queue.count++;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].palette_id = palette_id;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].runtime_id = runtime_id;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].stats = unit;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].flags = flags;
+    if (g_unit_graphics_load_queue.count < BATTLE_UNIT_RUNTIME_SLOT_COUNT) {
+        g_unit_graphics_load_queue.count++;
     }
 }
 
@@ -337,21 +336,21 @@ s32 battle_unit_return_zero_1(void) {
 
 /* A volatile view of battle_unit_encounter.h's global: with the plain
  * declaration battle_unit_select_and_open_entd compiles differently. */
-extern volatile s32 g_main_entd_selection_mode;
+extern volatile s32 g_encounter_selection_mode;
 
 /* Chooses the encounter's ENTD id and starts reading its ENTD file.
  *
  * The id is script variable EVENT_SCRIPT_VAR_CURRENT_ENTD unless
- * g_main_entd_selection_mode overrides it: 250, a random id 75..79, a random id
- * 1..59, or the map id when that is not 0. Returns main_entd_open_file's result. */
+ * g_encounter_selection_mode overrides it: 250, a random id 75..79, a random id
+ * 1..59, or the map id when that is not 0. Returns encounter_open_file's result. */
 static s32 battle_unit_select_and_open_entd(void) {
     volatile s32* current_event_id;
     s32 event_id;
     s32 selection_mode;
 
     event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD);
-    selection_mode = g_main_entd_selection_mode;
-    current_event_id = &g_main_entd_current_event_id;
+    selection_mode = g_encounter_selection_mode;
+    current_event_id = &g_encounter_current_event_id;
     *current_event_id = event_id;
 
     if (selection_mode == BATTLE_ENTD_SELECTION_ENTD_250) {
@@ -364,21 +363,21 @@ static s32 battle_unit_select_and_open_entd(void) {
         *current_event_id = g_battle_map_id;
     }
 
-    return main_entd_open_file();
+    return encounter_open_file();
 }
 
 /* Loads the encounter's ENTD units once the ENTD file has arrived, then frees the
  * file. Returns 1 while the file is still loading, else 0 (also when there is no
  * current encounter). */
 static s32 battle_unit_poll_and_load_entd_units(void) {
-    entd_encounter_t* entd_data = main_entd_get_encounter();
+    entd_encounter_t* entd_data = encounter_get_current();
 
     if (entd_data != (entd_encounter_t*)-1) {
         if (entd_data == 0) {
             return 1;
         }
         battle_unit_load_entd_units(entd_data, 0);
-        main_heap_call_free(g_main_entd_set);
+        heap_call_free(g_encounter_set);
     }
     return 0;
 }
@@ -462,12 +461,12 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
     switch (step) {
     case 0:
         /* No sound id is loaded: the callee receives map_id, still in $a0. */
-        main_sound_stop_sfx(map_id);
+        sound_stop_sfx(map_id);
         step++;
         battle_camera_init_defaults();
         battle_map_init_palette_state();
         battle_map_load_palette_data(&g_battle_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
-        g_main_gfx_unit_graphics_load_queue.count = 0;
+        g_unit_graphics_load_queue.count = 0;
         menu_request_open_small();
         break;
     case 1:
@@ -508,7 +507,7 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
         }
         break;
     case 8:
-        battle_unit_build_deployed_units_data(g_main_deployed_unit_map_coordinates, 0);
+        battle_unit_build_deployed_units_data(g_deploy_deployed_unit_map_coordinates, 0);
         step++;
         break;
     case 9:
@@ -516,13 +515,13 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
         step++;
         break;
     case 11:
-        if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_RANDOM_BATTLE
+        if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE
             || script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
-            main_sound_unload_current_scenario_music();
+            music_unload_current_scenario();
             /* Called with no argument: the sound id is whatever
-             * main_sound_unload_current_scenario_music left in $a0. */
-            ((void (*)(void))main_sound_stop_sfx)();
-            main_sound_set_current_music_track(g_battle_random_battle_music_tracks[rand() / 0x2000]);
+             * music_unload_current_scenario left in $a0. */
+            ((void (*)(void))sound_stop_sfx)();
+            music_set_track(g_battle_random_battle_music_tracks[rand() / 0x2000]);
         }
         step++;
         break;
@@ -558,15 +557,15 @@ s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deploymen
     case 0:
         /* Called with no argument: the callee receives map_id, still in $a0
          * (passing it explicitly changes the register allocation). */
-        ((void (*)(void))main_sound_stop_sfx)();
+        ((void (*)(void))sound_stop_sfx)();
         battle_camera_init_defaults();
         battle_map_init_palette_state();
-        if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_RANDOM_BATTLE) {
+        if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE) {
             battle_weather_randomize_from_calendar();
         }
         step++;
         battle_map_load_palette_data(&g_battle_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
-        g_main_gfx_unit_graphics_load_queue.count = 0;
+        g_unit_graphics_load_queue.count = 0;
         break;
     case 1:
         step++;
@@ -635,17 +634,17 @@ s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deploymen
     case 10:
         if (deployment_running == 0) {
             step++;
-            attack_scenario_restore_music_and_darkness();
+            scenario_restore_music_and_darkness();
         }
         break;
     case 11:
-        if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_RANDOM_BATTLE
+        if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE
             || script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
-            main_sound_unload_current_scenario_music();
+            music_unload_current_scenario();
             /* Called with no argument: the sound id is whatever
-             * main_sound_unload_current_scenario_music left in $a0. */
-            ((void (*)(void))main_sound_stop_sfx)();
-            main_sound_set_current_music_track(g_battle_random_battle_music_tracks[rand() / 0x2000]);
+             * music_unload_current_scenario left in $a0. */
+            ((void (*)(void))sound_stop_sfx)();
+            music_set_track(g_battle_random_battle_music_tracks[rand() / 0x2000]);
         }
         step++;
         break;
@@ -698,7 +697,7 @@ void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 
     s16 frames;
 
     if (duration != 0) {
-        frames = duration / g_main_system_vsync_interval;
+        frames = duration / g_system_vsync_interval;
         g_battle_gfx_screen_color_modulation_target.r = red;
         g_battle_gfx_screen_color_modulation_target.g = green;
         g_battle_gfx_screen_color_modulation_target.b = blue;
@@ -768,10 +767,10 @@ void battle_gfx_draw_screen_color_modulation_overlay(void) {
     if ((g_battle_gfx_screen_color_modulation.r | g_battle_gfx_screen_color_modulation.g
             | g_battle_gfx_screen_color_modulation.b)
         != 0) {
-        g_battle_gfx_screen_modulation_polygons[g_main_gfx_screen_polarity].r0 = g_battle_gfx_screen_color_modulation.r;
-        g_battle_gfx_screen_modulation_polygons[g_main_gfx_screen_polarity].g0 = g_battle_gfx_screen_color_modulation.g;
-        g_battle_gfx_screen_modulation_polygons[g_main_gfx_screen_polarity].b0 = g_battle_gfx_screen_color_modulation.b;
-        AddPrim(main_gfx_get_battle_otag(), &g_battle_gfx_screen_modulation_polygons[g_main_gfx_screen_polarity]);
-        AddPrim(main_gfx_get_battle_otag(), &g_battle_gfx_screen_modulation_draw_modes[g_main_gfx_screen_polarity]);
+        g_battle_gfx_screen_modulation_polygons[g_gfx_screen_polarity].r0 = g_battle_gfx_screen_color_modulation.r;
+        g_battle_gfx_screen_modulation_polygons[g_gfx_screen_polarity].g0 = g_battle_gfx_screen_color_modulation.g;
+        g_battle_gfx_screen_modulation_polygons[g_gfx_screen_polarity].b0 = g_battle_gfx_screen_color_modulation.b;
+        AddPrim(gfx_get_battle_otag(), &g_battle_gfx_screen_modulation_polygons[g_gfx_screen_polarity]);
+        AddPrim(gfx_get_battle_otag(), &g_battle_gfx_screen_modulation_draw_modes[g_gfx_screen_polarity]);
     }
 }

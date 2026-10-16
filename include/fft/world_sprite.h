@@ -66,7 +66,7 @@ typedef enum display_object_flag {
     DISPLAY_OBJECT_BLEND_RATE_MASK = 0x0c0,
     DISPLAY_OBJECT_POP_IN = 0x100,   /* image: the opening animation is running; clears itself */
     DISPLAY_OBJECT_UNTINTED = 0x400, /* WLDCORE: the color is used as is, without the fade tint */
-    /* WLDCORE animated object: steps its frame counter even while MAIN_SYSTEM_FLAG_FREEZE_ANIMATION is set. */
+    /* WLDCORE animated object: steps its frame counter even while SYSTEM_FLAG_FREEZE_ANIMATION is set. */
     DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED = 0x800,
 } display_object_flag_e;
 

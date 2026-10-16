@@ -316,7 +316,7 @@ s32 battle_ai_evaluate_ability_outcome(void) {
         ai->current_action.command.target_id = acting_id;
         ai->current_action.coords = ai->candidate_coords[ai->movement_scenario];
         battle_ai_update_tile_pickup();
-        if (g_main_action_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ARITHMETICKS) {
+        if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ARITHMETICKS) {
         evaluate_math_targets:
             if (battle_ai_evaluate_math_targets() == -1) {
                 ai->outcome_evaluation_state = AI_ABILITY_EVALUATION_MATH_TARGETS;
@@ -443,7 +443,7 @@ static s32 battle_ai_evaluate_self_target_origins(void) {
     g_battle_ai_data_base.current_action.coords = ai->candidate_coords[g_battle_ai_data_base.movement_scenario];
     battle_ai_update_tile_pickup();
     if ((g_battle_ai_data_base.considered_ability.ai_flags.word & AI_ABILITY_FOLLOW_TARGET)
-        && !(g_main_ability_range_data[g_battle_ai_data_base.considered_ability.ability_id].flags_1
+        && !(g_ability_range_data[g_battle_ai_data_base.considered_ability.ability_id].flags_1
             & ABILITY_SECONDARY_FLAG_1_CANNOT_TARGET_SELF)) {
         g_battle_ai_data_base.current_action.act_before_move = 1;
         g_battle_ai_data_base.current_action.command.targeting_type = BATTLE_TARGETING_TYPE_UNIT;
@@ -513,7 +513,7 @@ s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coords) {
         if (depth >= 2)
             return 0;
     }
-    if (g_main_action_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ELEMENTS)
+    if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ELEMENTS)
         return battle_ai_can_use_geomancy(coords);
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_REQUIRES_MONSTER_SKILL) {
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
@@ -524,7 +524,7 @@ s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coords) {
                 continue;
             if ((unit->initial_team_flags & UNIT_TEAM_MASK) != ai->acting_unit_team)
                 continue;
-            if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
+            if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
                 continue;
             dx = unit->x - coords->fields.x;
             if (dx < 0)
@@ -576,7 +576,7 @@ static s32 battle_ai_can_use_geomancy(const ai_coords_t* coords) {
     tile_id = (coords->fields.elevation * MAP_TILES_PER_LAYER) + coords->fields.y * g_battle_ai_data_base.map_max_x
         + coords->fields.x;
     tile_type = g_battle_map_tile_data[tile_id].surface.type;
-    ability_terrain = g_main_terrain_geomancy_abilities[tile_type];
+    ability_terrain = g_terrain_geomancy_abilities[tile_type];
     return ability_terrain == g_battle_ai_data_base.considered_ability.ability_id;
 }
 
@@ -726,15 +726,14 @@ static s32 battle_ai_evaluate_math_targets(void) {
         g_battle_ai_math_skillset_index++) {
         g_battle_ai_math_skillset_id = g_battle_ai_math_source_skillsets[g_battle_ai_math_skillset_index];
         g_battle_ai_math_ability_list
-            = main_ability_store_skillset_abilities(g_battle_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
+            = ability_store_skillset_abilities(g_battle_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
         for (g_battle_ai_math_ability_index = 0; g_battle_ai_math_ability_index < HUMAN_SKILLSET_ACTION_SLOT_COUNT;
             g_battle_ai_math_ability_index++) {
             /* Math targeting reads only the low byte of each 16-bit ID. */
             ai->math_ability_id = g_battle_ai_math_ability_list[g_battle_ai_math_ability_index];
             if (ai->math_ability_id == 0)
                 continue;
-            if (!(g_main_ability_range_data[ai->math_ability_id].flags_3
-                    & ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE))
+            if (!(g_ability_range_data[ai->math_ability_id].flags_3 & ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE))
                 continue;
             if (!battle_ai_is_ability_known(
                     ai->acting_unit_id, g_battle_ai_math_skillset_id, g_battle_ai_math_ability_index))
@@ -746,14 +745,12 @@ static s32 battle_ai_evaluate_math_targets(void) {
                         ai->acting_unit_id, g_battle_ai_math_skillset_id, g_battle_ai_math_ability_index + 1);
             }
             battle_mem_copy_u16_values(
-                &ai->considered_ability.ai_flags, &g_main_ability_data[ai->math_ability_id].ai_flags, 4);
+                &ai->considered_ability.ai_flags, &g_ability_data[ai->math_ability_id].ai_flags, 4);
             battle_mem_copy_bytes(ai->considered_ability.parameters.fields.status_infliction,
-                g_main_status_infliction_data[g_main_ability_range_data[ai->math_ability_id].status_infliction_id]
-                    .statuses,
-                5);
+                g_status_infliction_data[g_ability_range_data[ai->math_ability_id].status_infliction_id].statuses, 5);
             ai->considered_ability.ai_flags.fields.flags_4 = AI_ABILITY_FLAG_4_USABLE_BY_AI;
             ai->current_action.command.ability_id = ai->math_ability_id;
-            ai->considered_ability.element = g_main_ability_range_data[ai->math_ability_id].element;
+            ai->considered_ability.element = g_ability_range_data[ai->math_ability_id].element;
             for (unit = 0; unit < BATTLE_UNIT_SLOT_COUNT; unit++)
                 ai->targetability.live.unit_targetable[unit] = ai->targetability.live.unit_active[unit];
             if (!battle_ai_filter_useful_targets())
@@ -991,7 +988,7 @@ void battle_ai_build_cast_origin_and_aim_tiles(void) {
                                        .depth_half_height.depth)
                                 >= 2) {
                             ai->cast_origin_tiles[i][j] ^= 0x8000 >> x;
-                        } else if (g_main_action_menu_types_by_skillset[ai->considered_ability.skillset]
+                        } else if (g_command_menu_types_by_skillset[ai->considered_ability.skillset]
                             == ACTION_MENU_TYPE_ELEMENTS) {
                             ai->considered_unit_coords.fields.x = x;
                             ai->considered_unit_coords.fields.y = j;
@@ -1158,7 +1155,7 @@ static void battle_ai_build_monster_skill_tile_mask(void) {
             continue;
         if ((unit->initial_team_flags & UNIT_TEAM_MASK) != ai->acting_unit_team)
             continue;
-        if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
+        if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
             continue;
         height = g_battle_map_tile_data[unit->position.higher_elevation * MAP_TILES_PER_LAYER
             + unit->position.y * ai->map_max_x + unit->x]
@@ -1283,7 +1280,7 @@ static s32 battle_ai_evaluate_target_tiles(void) {
                                 continue;
                         } else if (ai->considered_ability.ai_flags.word & AI_ABILITY_DIRECT_TRAJECTORY) {
                             /* A thrown item needs a clear path only to a target beyond the next tile. */
-                            if ((g_main_action_menu_types_by_skillset[ai->considered_ability.skillset]
+                            if ((g_command_menu_types_by_skillset[ai->considered_ability.skillset]
                                         != ACTION_MENU_TYPE_ITEM_INVENTORY
                                     || battle_ai_calculate_distance_between_units(
                                            ai->acting_unit, &g_battle_unit_stats[ai->current_action.command.target_id])
@@ -1680,7 +1677,7 @@ score_state:
 
         /* Throwing anything but a shuriken or a ball halves the hit percent, which lowers
          * the action's rank and its chance to be picked. */
-        if (g_main_action_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_WEAPON_INVENTORY
+        if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_WEAPON_INVENTORY
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_SHURIKEN
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_BALL)
             ai->current_action.rank.base_hit_percent >>= 1;
@@ -1786,7 +1783,7 @@ static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mo
     if (reaction_mode == 0 && battle_action_init_current_data(action->actor_id) != 0) {
         return;
     }
-    behavior = &g_main_ability_data[action->ability_id].ai_flags;
+    behavior = &g_ability_data[action->ability_id].ai_flags;
     if (g_battle_ai_data_base.hit_counter != 0xff) {
         self_hit = 0;
         positive = 0;
@@ -2022,7 +2019,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
     if (unit_id == ai->acting_unit_id) {
         ability_id = ai->considered_ability.ability_id;
         if (ability_id < ABILITY_ID_ITEM_FIRST
-            && (g_main_ability_range_data[ability_id].flags_2 & ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER))
+            && (g_ability_range_data[ability_id].flags_2 & ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER))
             return AI_ABILITY_EFFECT_NONE;
     }
     if (check_reflect && (ai->considered_ability.ai_flags.word & AI_ABILITY_REFLECTABLE)
@@ -2098,7 +2095,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
             else
                 i = 0;
             if ((ai->considered_ability.ai_flags.word & AI_ABILITY_AFFECTS_HP)
-                && g_main_action_menu_types_by_skillset[ai->considered_ability.skillset] != ACTION_MENU_TYPE_CHARGE) {
+                && g_command_menu_types_by_skillset[ai->considered_ability.skillset] != ACTION_MENU_TYPE_CHARGE) {
                 if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)]
                     & STATUS_BYTE_MASK(STATUS_ID_CONFUSION))
                     return AI_ABILITY_EFFECT_USEFUL;

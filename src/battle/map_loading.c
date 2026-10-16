@@ -42,7 +42,7 @@ static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geome
  *   every other row whose comparison holds.
  * - Resources: read the pending rows one file at a time in type order and hand
  *   each to battle_map_dispatch_gns_resource. Types 0x12-0x17 come last: 0x12
- *   reports error 0x3cb (to the empty main_system_report_error), the texture
+ *   reports error 0x3cb (to the empty system_report_error), the texture
  *   quarters load without being applied
  *   here, and the texture is followed by the pending lighting, the texture
  *   upload and the pending palettes.
@@ -74,13 +74,13 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
     if (g_battle_map_gns_load_phase == MAP_GNS_LOAD_PHASE_IDLE) {
         switch (command) {
         case MAP_LOAD_COMMAND_LOAD_GNS:
-            if (main_file_is_still_loading() != 0) {
+            if (file_is_still_loading() != 0) {
                 return 0;
             }
 
-            g_battle_map_data_load_buffer = main_heap_alloc(0x20000);
+            g_battle_map_data_load_buffer = heap_alloc(0x20000);
             if (g_battle_map_data_load_buffer == 0) {
-                main_system_report_error(2, 0x3c2);
+                system_report_error(2, 0x3c2);
             }
 
             battle_map_load_gns_and_move_find_items(map_id & 0xffff);
@@ -93,13 +93,13 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             g_battle_map_gns_dispatch_held = 1;
             /* fall through */
         case MAP_LOAD_COMMAND_START:
-            if (main_file_is_still_loading() != 0) {
+            if (file_is_still_loading() != 0) {
                 return 0;
             }
 
-            g_battle_map_data_load_buffer = main_heap_alloc(0x20000);
+            g_battle_map_data_load_buffer = heap_alloc(0x20000);
             if (g_battle_map_data_load_buffer == 0) {
-                main_system_report_error(2, 0x3c2);
+                system_report_error(2, 0x3c2);
             }
 
             g_battle_map_texture_quarter_0_pending = 0;
@@ -270,7 +270,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
         } else {
             /* Resources: start the next pending file. Types 0x12-0x17 are
              * passed over here and taken after the others. */
-            if (main_file_is_still_loading() == 0) {
+            if (file_is_still_loading() == 0) {
                 while (
                     (g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor].resource_type == GNS_RECORD_NONE
                         && g_battle_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT)
@@ -290,7 +290,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                     g_battle_map_resource_load_state = MAP_LOAD_STATE_RESOURCE_FILE;
                 } else if (g_battle_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type
                     != GNS_RECORD_NONE) {
-                    main_system_report_error(2, 0x3cb);
+                    system_report_error(2, 0x3cb);
                     g_battle_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type = GNS_RECORD_NONE;
                 } else if (g_battle_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type
                     != GNS_RECORD_NONE) {
@@ -353,14 +353,14 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                     g_battle_map_gns_load_phase = MAP_GNS_LOAD_PHASE_IDLE;
                     g_battle_map_resource_load_state = MAP_LOAD_STATE_DONE;
                     battle_map_run_weather_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
-                    main_heap_free(g_battle_map_data_load_buffer);
+                    heap_free(g_battle_map_data_load_buffer);
                 }
             }
         }
     } else {
         switch (g_battle_map_resource_load_state) {
         case MAP_LOAD_STATE_GNS_FILE:
-            if (main_file_is_still_loading() == 0) {
+            if (file_is_still_loading() == 0) {
                 gns_record_t* source;
                 gns_record_t* destination;
 
@@ -377,7 +377,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             }
             break;
         case MAP_LOAD_STATE_RESOURCE_FILE:
-            if (main_file_is_still_loading() == 0) {
+            if (file_is_still_loading() == 0) {
                 if (g_battle_map_gns_dispatch_held != 0) {
                     return MAP_LOAD_RESULT_HELD;
                 }
@@ -391,7 +391,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             }
             break;
         case MAP_LOAD_STATE_APPLY_LIGHTING:
-            if (main_file_is_still_loading() == 0) {
+            if (file_is_still_loading() == 0) {
                 if (g_battle_map_lighting_pending != 0) {
                     battle_map_dispatch_gns_resource(
                         MAP_RESOURCE_APPLY_LIGHTING, (map_resource_t*)g_battle_map_pending_lighting_data);
@@ -500,9 +500,9 @@ s32 battle_map_load_alternate_mesh(s32 palette_mode) {
                 }
             }
         }
-        g_battle_map_mesh_load_buffer = main_heap_alloc(0x20000);
+        g_battle_map_mesh_load_buffer = heap_alloc(0x20000);
         if (g_battle_map_mesh_load_buffer == 0) {
-            main_system_report_error(2, 0x3c9);
+            system_report_error(2, 0x3c9);
         }
         battle_map_start_file_load(g_battle_map_directory_path, &g_battle_map_selected_mesh_record.load_info,
             g_battle_map_mesh_load_buffer, MAP_RESOURCE_MESH_ALTERNATE);
@@ -510,7 +510,7 @@ s32 battle_map_load_alternate_mesh(s32 palette_mode) {
         break;
 
     case MAP_MESH_LOAD_WAITING:
-        if (main_file_is_still_loading() != 0) {
+        if (file_is_still_loading() != 0) {
             s32 mesh_data_offset;
             map_resource_t* mesh_data;
 
@@ -519,7 +519,7 @@ s32 battle_map_load_alternate_mesh(s32 palette_mode) {
             mesh_data_offset = mesh_data->mesh_file[MAP_RESOURCE_PALETTES] * 4;
             mesh_data = (map_resource_t*)(mesh_data->bytes + mesh_data_offset);
             battle_map_update_palette_colors(palette_mode, MAP_CLUT_ROW_MARKED_TILES, 0, 1, mesh_data->clut);
-            main_heap_free(g_battle_map_mesh_load_buffer);
+            heap_free(g_battle_map_mesh_load_buffer);
             g_battle_map_mesh_load_state = MAP_MESH_LOAD_IDLE;
         }
         break;
@@ -813,7 +813,7 @@ void battle_sound_start_weather_sfx(void) {
 
     g_battle_sound_weather_sfx_enabled = 1;
     if (sound_id != 0) {
-        main_sound_play_bg_sfx(sound_id);
+        sound_play_background(sound_id);
     }
 }
 
@@ -836,19 +836,19 @@ s32 battle_sound_stop_weather_sfx(void) {
     s32 sound_id = g_battle_sound_primary_weather_sfx_id;
 
     if (sound_id != 0) {
-        main_sound_stop_sfx(sound_id);
+        sound_stop_sfx(sound_id);
         g_battle_sound_primary_weather_sfx_id = 0;
     }
 
     sound_id = g_battle_sound_secondary_weather_sfx_id;
     if (sound_id != 0) {
-        main_sound_stop_sfx(sound_id);
+        sound_stop_sfx(sound_id);
         g_battle_sound_secondary_weather_sfx_id = 0;
     }
 
     sound_id = g_battle_sound_tertiary_weather_sfx_id;
     if (sound_id != 0) {
-        main_sound_stop_sfx(sound_id);
+        sound_stop_sfx(sound_id);
         g_battle_sound_tertiary_weather_sfx_id = 0;
     }
 

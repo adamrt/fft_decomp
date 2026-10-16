@@ -13,7 +13,7 @@
 #include "psx/types.h"
 
 /* entry and frame loop */
-/* g_main_system_flags as world_map_update_backdrop last saw it (main_system_flags_e). */
+/* g_system_flags as world_map_update_backdrop last saw it (system_flags_e). */
 extern u32 g_world_map_previous_system_flags;
 s32 world_map_entrypoint(void);
 void world_map_switch_to_stack(void*);
@@ -63,7 +63,7 @@ void bits_set_value(u32* bits, s32 index, s32 set);
 s32 bits_test(u32* bits, s32 index);
 
 /* files */
-void world_map_poll_texture_stream(main_file_load_descriptor_t* stream);
+void world_map_poll_texture_stream(file_load_descriptor_t* stream);
 void event_transition_seek_battle_bin(void);
 
 /* party units */

@@ -87,7 +87,7 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
     if (record->uses_monster_skillset != 0) {
         s32 count;
 
-        abilities = (s16*)main_ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = (s16*)ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 3; i++) {
             if (abilities[i] != 0) {
@@ -124,8 +124,7 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
     if (job_is_special_monster(unit->job_id) != 0 || record->uses_monster_skillset != 0) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
-        i = main_job_calculate_unlocked(
-            unit->career.job_levels, unit->unit_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
+        i = job_calculate_unlocked(unit->career.job_levels, unit->unit_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
         record->unlocked_jobs[0] = i >> 16;
         record->unlocked_jobs[1] = i >> 8;
         record->unlocked_jobs[2] = i;
@@ -173,10 +172,10 @@ s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, s32
     s32 i;
 
     for (; slot < PARTY_ROSTER_SLOT_COUNT; slot++) {
-        if (main_unit_init_from_party_slot(&unit, slot, 1) != 0) {
+        if (unit_init_from_party_slot(&unit, slot, 1) != 0) {
             continue;
         }
-        formation_build_unit_record(&unit, &g_formation_unit_records[count], main_party_get_unit(slot));
+        formation_build_unit_record(&unit, &g_formation_unit_records[count], party_get_unit(slot));
         if (mode == FORMATION_RECORD_LIST_AVAILABLE_HUMANS) {
             if (g_formation_unit_records[count].proposition_status != 0) {
                 continue;
@@ -235,7 +234,7 @@ void formation_save_records(void) {
 
     for (i = 0; i < g_formation_record_count; i++) {
         slot = g_formation_unit_pointers[i]->identity.roster_slot;
-        party = main_party_get_unit(slot);
+        party = party_get_unit(slot);
         party->job_id = g_formation_unit_pointers[i]->identity.job_id;
         party->gender_flags = g_formation_unit_pointers[i]->gender_flags;
         party->secondary_skillset = g_formation_unit_pointers[i]->abilities.fields.secondary_skillset;
@@ -250,7 +249,7 @@ void formation_save_records(void) {
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
             if (item != ITEM_ID_NOTHING) {
-                if (g_main_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
+                if (g_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
                     party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = item;
                 } else {
                     party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item;
@@ -260,7 +259,7 @@ void formation_save_records(void) {
             party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
             party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = ITEM_ID_NONE;
             if (item != ITEM_ID_NOTHING) {
-                if (g_main_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
+                if (g_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
                     party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = item;
                 } else {
                     party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = item;
@@ -288,7 +287,7 @@ void formation_save_records(void) {
             bcopy(&g_formation_unit_pointers[i]->job_points.total, &party->career.job_points.total,
                 sizeof(party->career.job_points.total));
         }
-        main_unit_init_from_party_slot(&unit, slot, 1);
+        unit_init_from_party_slot(&unit, slot, 1);
         formation_build_unit_record(&unit, g_formation_unit_pointers[i], party);
     }
 }

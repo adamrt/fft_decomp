@@ -25,7 +25,7 @@
 void option_entrypoint(s32 menu_type) {
     menu_entry_t* menu = (menu_entry_t*)thread_get_current_parameter_1();
     s32 index;
-    game_options_fields_t options = g_main_game_options.fields;
+    game_options_fields_t options = g_game_options.fields;
 
     g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
     g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
@@ -63,7 +63,7 @@ void option_entrypoint(s32 menu_type) {
     g_menu_hide_numeric_values = 0;
     if (menu_type == MENU_OPTION_TYPE_GAME_OPTIONS) {
         script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
-        thread_start(g_thread_current_id - 1, option_menu_run_game_options);
+        thread_start(g_thread_current_id - 1, option_game_options_thread);
         menu->select_text_table = 1;
         menu->context = g_menu_option_entry_table;
         thread_set_parameters(g_thread_current_id - 1, menu, 0, 0);

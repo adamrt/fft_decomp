@@ -16,40 +16,41 @@
  * with the 256-color palette that ends its file. The END graphics (mode 2) upload
  * nothing: they fade the screen in, hold for a per-graphic number of frames and fade
  * out. The buffer is freed after. */
-static void etc_graphic_open(s32 graphic_id) {
+static void fullscreen_graphic_open(s32 graphic_id) {
     u8* image_buffer;
     s32 frame;
 
     while (1) {
-        image_buffer = main_heap_reserve_at(g_main_heap_high_overlay_load_address, 0x20000);
-        if (image_buffer == g_main_heap_high_overlay_load_address) {
+        image_buffer = heap_reserve_at(g_heap_high_overlay_load_address, 0x20000);
+        if (image_buffer == g_heap_high_overlay_load_address) {
             break;
         }
         thread_yield();
-        if (g_main_font_print_enabled != 0) {
-            FntPrint(g_etc_allocation_wait_message);
+        if (g_debug_font_print_enabled != 0) {
+            FntPrint(g_fullscreen_graphic_allocation_wait_message);
         }
     }
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
-    } while (
-        thread_call_on_main_stack(g_etc_graphics[graphic_id].lba, g_etc_graphics[graphic_id].size, image_buffer) != 0);
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
+    } while (thread_call_on_main_stack(
+                 g_fullscreen_graphics[graphic_id].lba, g_fullscreen_graphics[graphic_id].size, image_buffer)
+        != 0);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_is_still_loading;
+        g_thread_call_target = (void (*)(void))file_is_still_loading;
     } while (thread_call_on_main_stack() != 0);
 
-    if (g_etc_graphics[graphic_id].texture_mode < 2U) {
-        LoadImage(g_etc_graphics[graphic_id].framebuffer_rect, (u32*)image_buffer);
-        if (g_etc_graphics[graphic_id].texture_mode == 1) {
-            LoadImage(
-                &g_etc_graphic_game_over_palette_rect, (u32*)(image_buffer + g_etc_graphics[graphic_id].size - 0x200));
+    if (g_fullscreen_graphics[graphic_id].texture_mode < 2U) {
+        LoadImage(g_fullscreen_graphics[graphic_id].framebuffer_rect, (u32*)image_buffer);
+        if (g_fullscreen_graphics[graphic_id].texture_mode == 1) {
+            LoadImage(&g_fullscreen_graphic_game_over_palette_rect,
+                (u32*)(image_buffer + g_fullscreen_graphics[graphic_id].size - 0x200));
         }
     } else {
         g_gfx_draw_primitives_immediately = 1;
-        if (graphic_id == ETC_GRAPHIC_END1) {
+        if (graphic_id == FULLSCREEN_GRAPHIC_END1) {
             g_gfx_screen_fade = -0xff;
             do {
                 thread_yield();
@@ -65,21 +66,21 @@ static void etc_graphic_open(s32 graphic_id) {
         g_gfx_screen_fade = 0;
 
         /* Hold: 1260 frames for END1, 1440 for END3, 2220 for END4, 600 for END5 and 6120 for END2. */
-        if (graphic_id == ETC_GRAPHIC_END1) {
+        if (graphic_id == FULLSCREEN_GRAPHIC_END1) {
             frame = 0;
             do {
                 frame++;
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
             } while (frame < 1260);
-        } else if (graphic_id == ETC_GRAPHIC_END3) {
+        } else if (graphic_id == FULLSCREEN_GRAPHIC_END3) {
             frame = 0;
             do {
                 frame++;
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
             } while (frame < 1440);
-        } else if (graphic_id == ETC_GRAPHIC_END4) {
+        } else if (graphic_id == FULLSCREEN_GRAPHIC_END4) {
             frame = 0;
             do {
                 frame++;
@@ -88,7 +89,7 @@ static void etc_graphic_open(s32 graphic_id) {
             } while (frame < 2220);
         } else {
             frame = 0;
-            if (graphic_id == ETC_GRAPHIC_END5) {
+            if (graphic_id == FULLSCREEN_GRAPHIC_END5) {
                 do {
                     frame++;
                     thread_yield();
@@ -112,17 +113,17 @@ static void etc_graphic_open(s32 graphic_id) {
         } while (g_gfx_screen_fade < 0x100);
         g_gfx_screen_fade = 0xff;
         g_gfx_draw_primitives_immediately = 0;
-        if (graphic_id == ETC_GRAPHIC_END3) {
+        if (graphic_id == FULLSCREEN_GRAPHIC_END3) {
             g_gfx_screen_fade = 0;
         }
     }
 
     DrawSync(0);
-    main_heap_free(image_buffer);
+    heap_free(image_buffer);
 }
 
 /* Empty, and nothing on the disc calls it. */
-void etc_graphic_noop_1(void) {
+void fullscreen_graphic_noop_1(void) {
 }
 
 /* The record for one half of the title: `dimension_set` picks the pair,
@@ -131,7 +132,7 @@ void etc_graphic_noop_1(void) {
 
 /* Build the 2x2 POLY_GT4 grid that shows a chapter title graphic. Row 0 is
  * the part already revealed by `fade`; row 1 is the 32-pixel gradient edge. */
-static void etc_graphic_build_chapter_polygons(
+static void chapter_title_build_polygons(
     s32 graphic_id, s32 fade, s32 dimension_set, s32 layer, POLY_GT4* primitives, s32 color) {
     sprite_sheet_frame_t* dimensions;
     s32 texture_mode;
@@ -140,8 +141,8 @@ static void etc_graphic_build_chapter_polygons(
     s32 column;
     s32 clip;
 
-    dimensions = g_etc_graphics[graphic_id].dimensions;
-    texture_mode = g_etc_graphics[graphic_id].texture_mode;
+    dimensions = g_fullscreen_graphics[graphic_id].dimensions;
+    texture_mode = g_fullscreen_graphics[graphic_id].texture_mode;
     poly = primitives;
     for (row = 0; row < 2; row++) {
         for (column = 0; column < 2; column++) {
@@ -229,7 +230,7 @@ static void etc_graphic_build_chapter_polygons(
  * The graphic is always 8-bit (texture mode 1). Retail keeps the first
  * half's right edge in the dead `graphic_id` argument. The unsigned vertical
  * origin preserves the width/x load order. */
-static void etc_graphic_build_game_over_polygons(
+static void game_over_build_polygons(
     s32 graphic_id, s32 fade, s32 dimension_set, s32 reverse_order, POLY_GT4* primitives, s32 color) {
     sprite_sheet_frame_t* dimensions;
     POLY_GT4* primitive;
@@ -240,7 +241,7 @@ static void etc_graphic_build_game_over_polygons(
     s32 fade_x;
 
     texture_mode = 1;
-    dimensions = g_etc_graphics[graphic_id].dimensions;
+    dimensions = g_fullscreen_graphics[graphic_id].dimensions;
     primitive = primitives;
     for (half = 0; half < 2; half++) {
         for (tile = 0; tile < 2; tile++) {
@@ -328,7 +329,7 @@ static void etc_graphic_build_game_over_polygons(
  * to 0 over 128 steps. Each frame builds the graphic twice, into the two
  * primitive sets (parts 2 and 0), alternating buffers by frame.
  */
-static void etc_graphic_show_chapter_title(s32 graphic_id) {
+static void chapter_title_show(s32 graphic_id) {
     /* The target reserves two otherwise unreferenced local 32-bit values. */
     s32 reserved_stack_words[2];
     s32 frame;
@@ -336,15 +337,15 @@ static void etc_graphic_show_chapter_title(s32 graphic_id) {
     s32 color;
     sprite_sheet_frame_t* dimensions;
 
-    dimensions = g_etc_graphics[graphic_id].dimensions;
+    dimensions = g_fullscreen_graphics[graphic_id].dimensions;
     frame = 0;
     fade = 0;
     if (dimensions[2].source.w > 0) {
         do {
-            etc_graphic_build_chapter_polygons(
-                graphic_id, fade, 2, 0, g_etc_graphic_chapter_primitives_a[frame & 1], 0x80);
-            etc_graphic_build_chapter_polygons(
-                graphic_id, fade, 0, 1, g_etc_graphic_chapter_primitives_b[frame & 1], 0x80);
+            chapter_title_build_polygons(
+                graphic_id, fade, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+            chapter_title_build_polygons(
+                graphic_id, fade, 0, 1, g_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
             frame++;
             thread_yield();
             fade += g_script_event_speed;
@@ -353,10 +354,10 @@ static void etc_graphic_show_chapter_title(s32 graphic_id) {
 
     fade = 0;
     do {
-        etc_graphic_build_chapter_polygons(
-            graphic_id, dimensions[2].source.w, 2, 0, g_etc_graphic_chapter_primitives_a[frame & 1], 0x80);
-        etc_graphic_build_chapter_polygons(
-            graphic_id, dimensions[2].source.w, 0, 1, g_etc_graphic_chapter_primitives_b[frame & 1], 0x80);
+        chapter_title_build_polygons(
+            graphic_id, dimensions[2].source.w, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+        chapter_title_build_polygons(
+            graphic_id, dimensions[2].source.w, 0, 1, g_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
         frame++;
         thread_yield();
         fade += g_script_event_speed;
@@ -365,10 +366,10 @@ static void etc_graphic_show_chapter_title(s32 graphic_id) {
     color = 0x80;
     fade = 0;
     do {
-        etc_graphic_build_chapter_polygons(
-            graphic_id, dimensions[2].source.w, 2, 0, g_etc_graphic_chapter_primitives_a[frame & 1], color);
-        etc_graphic_build_chapter_polygons(
-            graphic_id, dimensions[2].source.w, 0, 1, g_etc_graphic_chapter_primitives_b[frame & 1], color);
+        chapter_title_build_polygons(
+            graphic_id, dimensions[2].source.w, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
+        chapter_title_build_polygons(
+            graphic_id, dimensions[2].source.w, 0, 1, g_fullscreen_graphic_chapter_primitives_b[frame & 1], color);
         color -= g_script_event_speed;
         thread_yield();
         fade += g_script_event_speed;
@@ -383,7 +384,7 @@ static void etc_graphic_show_chapter_title(s32 graphic_id) {
  * brightness from 0x80 to 0 over 128 steps. The two primitive buffers
  * alternate by frame.
  */
-static void etc_graphic_show_game_over(s32 graphic_id) {
+static void game_over_show(s32 graphic_id) {
     /* The target reserves two otherwise unreferenced local 32-bit values. */
     s32 reserved_stack_words[2];
     s32 frame;
@@ -391,24 +392,24 @@ static void etc_graphic_show_game_over(s32 graphic_id) {
     s32 color;
     sprite_sheet_frame_t* dimensions;
 
-    g_thread_call_target = main_sound_unload_scenario_music_and_tunes;
+    g_thread_call_target = music_unload_scenario_and_tunes;
     thread_call_on_main_stack();
-    g_thread_call_target = (void (*)(void))main_sound_start_music_load_into_free_slot;
-    thread_call_on_main_stack(MAIN_MUSIC_GAME_OVER);
+    g_thread_call_target = (void (*)(void))music_start_load_into_free_slot;
+    thread_call_on_main_stack(MUSIC_GAME_OVER);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_sound_poll_scenario_smd_load;
+        g_thread_call_target = (void (*)(void))music_poll_scenario_load;
     } while (thread_call_on_main_stack() != 0);
-    g_thread_call_target = (void (*)(void))main_sound_switch_music_track;
+    g_thread_call_target = (void (*)(void))music_switch_track;
     thread_call_on_main_stack(1, 0x7f, 0);
 
-    dimensions = g_etc_graphics[graphic_id].dimensions;
+    dimensions = g_fullscreen_graphics[graphic_id].dimensions;
     frame = 0;
     fade = 0;
     if (dimensions[2].source.h > 0) {
         do {
-            etc_graphic_build_game_over_polygons(
-                graphic_id, fade, 2, 0, g_etc_graphic_chapter_primitives_a[frame & 1], 0x80);
+            game_over_build_polygons(
+                graphic_id, fade, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
             frame++;
             thread_yield();
             fade += g_script_event_speed;
@@ -417,8 +418,8 @@ static void etc_graphic_show_game_over(s32 graphic_id) {
 
     fade = 0;
     do {
-        etc_graphic_build_game_over_polygons(
-            graphic_id, dimensions[2].source.h, 2, 0, g_etc_graphic_chapter_primitives_a[frame & 1], 0x80);
+        game_over_build_polygons(
+            graphic_id, dimensions[2].source.h, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
         frame++;
         thread_yield();
         fade += g_script_event_speed;
@@ -427,8 +428,8 @@ static void etc_graphic_show_game_over(s32 graphic_id) {
     color = 0x80;
     fade = 0;
     do {
-        etc_graphic_build_game_over_polygons(
-            graphic_id, dimensions[2].source.h, 2, 0, g_etc_graphic_chapter_primitives_a[frame & 1], color);
+        game_over_build_polygons(
+            graphic_id, dimensions[2].source.h, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
         color -= g_script_event_speed;
         thread_yield();
         fade += g_script_event_speed;
@@ -438,16 +439,16 @@ static void etc_graphic_show_game_over(s32 graphic_id) {
 
 /* Thread body: load ETC graphic parameter 1 and run its show routine, the
  * chapter title for texture mode 0 or the game-over screen for mode 1. */
-void etc_graphic_show_async(void) {
+void fullscreen_graphic_thread(void) {
     s32 graphic_id = thread_get_current_parameter_1();
     s32 graphic_type;
 
-    etc_graphic_open(graphic_id);
-    graphic_type = g_etc_graphics[graphic_id].texture_mode;
+    fullscreen_graphic_open(graphic_id);
+    graphic_type = g_fullscreen_graphics[graphic_id].texture_mode;
     if (graphic_type == 0) {
-        etc_graphic_show_chapter_title(graphic_id);
+        chapter_title_show(graphic_id);
     } else if (graphic_type == 1) {
-        etc_graphic_show_game_over(graphic_id);
+        game_over_show(graphic_id);
     }
     thread_exit_current();
 }

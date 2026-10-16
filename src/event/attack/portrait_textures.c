@@ -14,21 +14,21 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static RECT g_attack_portrait_upload_rect = { 0 };
-static RECT g_attack_portrait_palette_upload_rect = { 0 };
-static u8 g_attack_portrait_staging[768] = { 0 };
-static u8 g_attack_formation_sprite_staging[1152] = { 0 };
+static RECT g_portrait_upload_rect = { 0 };
+static RECT g_portrait_palette_upload_rect = { 0 };
+static u8 g_portrait_staging[768] = { 0 };
+static u8 g_formation_sprite_staging[1152] = { 0 };
 
 /* Uploads the portraits and palettes of roster slots 0-19 from EVENT/WLDFACE.BIN to VRAM,
- * plus slot 20, the scenario's special portrait (g_main_special_portrait_wldface_id). With
+ * plus slot 20, the scenario's special portrait (g_portrait_special_wldface_id). With
  * no entry mode set the sheets are read back from VRAM instead of the disc.
  *
- * Port of require_gfx_prepare_party_portrait_textures. Here `value` is the party
- * index passed to main_party_get_unit, so the pixel-row counter is a
+ * Port of portrait_prepare_party_textures. Here `value` is the party
+ * index passed to party_get_unit, so the pixel-row counter is a
  * separate variable `j`. The never-taken `j <= 0` test after the row loop only
  * adds one reference to `j`, raising its global-allocation priority above the
  * source pointer's so the counter gets $a3 as in the target. */
-void attack_gfx_prepare_party_portrait_textures(void) {
+void portrait_prepare_party_textures(void) {
     menu_portrait_sheet_t* file;
     s32 offset;
     s32 pal_offset;
@@ -46,12 +46,12 @@ void attack_gfx_prepare_party_portrait_textures(void) {
     u8* src;
     RECT unused[2];
 
-    file = main_heap_alloc(MENU_WLDFACE_FILE_SIZE);
+    file = heap_alloc(MENU_WLDFACE_FILE_SIZE);
     if (g_script_attack_entry_mode != 0) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             file_load_sync(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE, file);
         } else {
-            g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+            g_thread_call_target = (void (*)(void))file_load_checked_to_address;
             thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE, file);
         }
     } else {
@@ -63,7 +63,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
     }
     for (i = 0; i < 21; i++) {
         if (i == 20) {
-            value = g_main_special_portrait_wldface_id;
+            value = g_portrait_special_wldface_id;
         } else {
             value = i;
         }
@@ -71,7 +71,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
          * a generic job's male/female pair from 0x60 (Mime's pair two lower, as Bard and
          * Dancer take one code each), or the job's sprite sheet for a monster. */
         if (i != 20) {
-            unit = main_party_get_unit(value);
+            unit = party_get_unit(value);
             if (unit->sprite_set < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 value = unit->sprite_set;
             } else {
@@ -88,7 +88,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
                         value = base + 0x5f;
                     }
                 } else {
-                    g_formation_job_data = main_job_get_data_pointer(unit->job_id);
+                    g_formation_job_data = job_get_data(unit->job_id);
                     value = g_formation_job_data->spritesheet_id;
                 }
                 job_id = unit->job_id;
@@ -116,10 +116,10 @@ void attack_gfx_prepare_party_portrait_textures(void) {
         col = value % 8;
         /* Copy the 32x48 cell (16 bytes by 48 rows of the sheet's 128-byte rows) into the
          * staging buffer and upload it: party slots in rows of seven from (0x100, 0x28). */
-        g_attack_portrait_upload_rect.x = (i % 7) * 8 + 0x100;
-        g_attack_portrait_upload_rect.y = (i / 7) * 0x30 + 0x28;
-        g_attack_portrait_upload_rect.w = 8;
-        g_attack_portrait_upload_rect.h = 0x30;
+        g_portrait_upload_rect.x = (i % 7) * 8 + 0x100;
+        g_portrait_upload_rect.y = (i / 7) * 0x30 + 0x28;
+        g_portrait_upload_rect.w = 8;
+        g_portrait_upload_rect.h = 0x30;
         j = 0;
         offset = row * 2;
         offset += row;
@@ -130,21 +130,21 @@ void attack_gfx_prepare_party_portrait_textures(void) {
         src = (u8*)(sheet * MENU_WLDFACE_SHEET_SIZE + (s32)file + offset);
         for (; j < 0x30; j++) {
             for (col = 0; col < 0x10; col++) {
-                g_attack_portrait_staging[j * 0x10 + col] = src[col];
+                g_portrait_staging[j * 0x10 + col] = src[col];
             }
             src += 0x80;
         }
         if (j <= 0) {
             j = 0;
         }
-        LoadImage(i == 20 ? &g_special_portrait_rect : &g_attack_portrait_upload_rect, (u32*)g_attack_portrait_staging);
+        LoadImage(i == 20 ? &g_special_portrait_rect : &g_portrait_upload_rect, (u32*)g_portrait_staging);
         /* Upload the portrait's palette, three per VRAM line from (0x100, 0): palette n is in
          * row n / 4 of the sheet's palette block; a monster's alternate palette is in its row
          * from MENU_WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
-        g_attack_portrait_palette_upload_rect.x = (i % 3) * 0x10 + 0x100;
-        g_attack_portrait_palette_upload_rect.y = i / 3;
-        g_attack_portrait_palette_upload_rect.w = 0x10;
-        g_attack_portrait_palette_upload_rect.h = 1;
+        g_portrait_palette_upload_rect.x = (i % 3) * 0x10 + 0x100;
+        g_portrait_palette_upload_rect.y = i / 3;
+        g_portrait_palette_upload_rect.w = 0x10;
+        g_portrait_palette_upload_rect.h = 1;
         sheet = cell / MENU_WLDFACE_PORTRAITS_PER_SHEET;
         value = cell - sheet * MENU_WLDFACE_PORTRAITS_PER_SHEET;
         row = value / 4;
@@ -161,7 +161,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
         if (i == 20) {
             LoadImage(&g_special_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         } else {
-            LoadImage(&g_attack_portrait_palette_upload_rect, (u32*)((u8*)&file[sheet] + pal_offset));
+            LoadImage(&g_portrait_palette_upload_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         }
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             thread_yield();
@@ -169,14 +169,14 @@ void attack_gfx_prepare_party_portrait_textures(void) {
             DrawSync(0);
         }
     }
-    main_heap_call_free(file);
+    heap_call_free(file);
 }
 
 /* Loads EVENT/UNIT.BIN (0x10000 bytes) via the entry-mode load paths, uploads its
  * second half, then for the 16 formation slots derives each unit's portrait
  * (inlined formation_get_unit_palette_index logic), copies a 0x18x0x30 cell into
- * the g_attack_formation_sprite_staging staging buffer, uploads it to g_attack_portrait_upload_rect and uploads the
- * 16x1 CLUT to g_attack_portrait_palette_upload_rect; g_attack_formation_sprite_tall_cell[slot] records the cell
+ * the g_formation_sprite_staging staging buffer, uploads it to g_portrait_upload_rect and uploads the
+ * 16x1 CLUT to g_portrait_palette_upload_rect; g_formation_sprite_tall_cell[slot] records the cell
  * layout.
  *
  * Load-bearing shapes: the nested else routes the remainder<8 and (code-8)/5
@@ -190,7 +190,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
  * order. The palette offset's `/ 2` of an even sum compiles to the target's
  * plain `sra` and its allocation order; it also adds an 8-byte compiler
  * stack slot, so `unused` covers only the remaining 16 bytes. */
-void attack_gfx_prepare_formation_sprites(void) {
+void formation_prepare_sprites(void) {
     u8 unused[0x10];
     u8* buffer;
     s32 i;
@@ -210,23 +210,23 @@ void attack_gfx_prepare_formation_sprites(void) {
     s32 y;
     s32 source;
 
-    buffer = main_heap_alloc(0x10000);
+    buffer = heap_alloc(0x10000);
 
     /* With no entry mode set, the sheet is read back from VRAM instead of loaded from disc. */
     if (g_script_attack_entry_mode != 0) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             file_load_sync(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
         } else {
-            g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+            g_thread_call_target = (void (*)(void))file_load_checked_to_address;
             thread_call_on_main_stack(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
         }
     } else {
-        StoreImage(&g_attack_formation_sheet_rect, (u32*)buffer);
-        StoreImage(&g_attack_formation_sheet_source_rect, (u32*)(buffer + 0x8000));
+        StoreImage(&g_formation_sheet_rect, (u32*)buffer);
+        StoreImage(&g_formation_sheet_source_rect, (u32*)(buffer + 0x8000));
         DrawSync(0);
     }
 
-    LoadImage(&g_attack_formation_sheet_rect, (u32*)(buffer + 0x8000));
+    LoadImage(&g_formation_sheet_rect, (u32*)(buffer + 0x8000));
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         thread_yield();
     } else {
@@ -234,7 +234,7 @@ void attack_gfx_prepare_formation_sprites(void) {
     }
 
     for (i = 0; i < 16; i++) {
-        party = main_party_get_unit(i);
+        party = party_get_unit(i);
         /* Generic jobs take a male and female pair of codes from 0x60; Bard and Dancer take one code each
          * (0x82, 0x83), which moves Mime's pair down by two. */
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
@@ -251,7 +251,7 @@ void attack_gfx_prepare_formation_sprites(void) {
                     code = base + 0x5F;
                 }
             } else {
-                g_formation_job_data = main_job_get_data_pointer(party->job_id);
+                g_formation_job_data = job_get_data(party->job_id);
                 code = g_formation_job_data->spritesheet_id;
             }
             if (party->job_id == JOB_ID_BARD) {
@@ -309,7 +309,7 @@ void attack_gfx_prepare_formation_sprites(void) {
         /* Clear the 48x48 staging cell; a 24x40 cell sits in it centered and bottom-aligned. */
         cell_row = row;
         x = 0x47F;
-        pixel = &g_attack_formation_sprite_staging[0x47F];
+        pixel = &g_formation_sprite_staging[0x47F];
         do {
             *pixel = 0;
             x--;
@@ -320,32 +320,32 @@ void attack_gfx_prepare_formation_sprites(void) {
             palette_base = (quotient << 15) + ((column * 0x30 + cell_row * 0x3000 + 0x2800) >> 1);
             y = 0;
             source = (s32)buffer + palette_base;
-            g_attack_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
-            g_attack_portrait_upload_rect.y = (i / 5) * 0x30;
-            g_attack_portrait_upload_rect.w = 0xC;
-            g_attack_portrait_upload_rect.h = 0x30;
+            g_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
+            g_portrait_upload_rect.y = (i / 5) * 0x30;
+            g_portrait_upload_rect.w = 0xC;
+            g_portrait_upload_rect.h = 0x30;
             for (; y < 0x30; y++) {
                 for (x = 0; x < 0x18; x++) {
-                    g_attack_formation_sprite_staging[y * 0x18 + x] = *(u8*)(y * 0x80 + (source + x));
+                    g_formation_sprite_staging[y * 0x18 + x] = *(u8*)(y * 0x80 + (source + x));
                 }
             }
-            LoadImage(&g_attack_portrait_upload_rect, (u32*)g_attack_formation_sprite_staging);
-            g_attack_formation_sprite_tall_cell[i] = 1;
+            LoadImage(&g_portrait_upload_rect, (u32*)g_formation_sprite_staging);
+            g_formation_sprite_tall_cell[i] = 1;
         } else {
             palette_base = (quotient << 15) + ((column * 0x18 + cell_row * 0x2800) >> 1);
             y = 8;
             source = (s32)buffer + palette_base;
-            g_attack_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
-            g_attack_portrait_upload_rect.y = (i / 5) * 0x30;
-            g_attack_portrait_upload_rect.w = 0xC;
-            g_attack_portrait_upload_rect.h = 0x30;
+            g_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
+            g_portrait_upload_rect.y = (i / 5) * 0x30;
+            g_portrait_upload_rect.w = 0xC;
+            g_portrait_upload_rect.h = 0x30;
             for (; y < 0x30; y++) {
                 for (x = 6; x < 0x12; x++) {
-                    g_attack_formation_sprite_staging[y * 0x18 + x] = *(u8*)(x + source + ((y - 8) * 0x80 - 6));
+                    g_formation_sprite_staging[y * 0x18 + x] = *(u8*)(x + source + ((y - 8) * 0x80 - 6));
                 }
             }
-            LoadImage(&g_attack_portrait_upload_rect, (u32*)g_attack_formation_sprite_staging);
-            g_attack_formation_sprite_tall_cell[i] = 0;
+            LoadImage(&g_portrait_upload_rect, (u32*)g_formation_sprite_staging);
+            g_formation_sprite_tall_cell[i] = 0;
         }
 
         /* The file's CLUTs start at 0xF000, four 16-color palettes per line; each monster portrait has
@@ -362,11 +362,11 @@ void attack_gfx_prepare_formation_sprites(void) {
         row = code / 4;
         column = code % 4;
         offset = (row * 0x100 + column * 0x40) / 2 + 0xF000;
-        g_attack_portrait_palette_upload_rect.x = (i % 4) * 0x10 + 0x180;
-        g_attack_portrait_palette_upload_rect.y = i / 4 + 0xE0;
-        g_attack_portrait_palette_upload_rect.w = 0x10;
-        g_attack_portrait_palette_upload_rect.h = 1;
-        LoadImage(&g_attack_portrait_palette_upload_rect, (u32*)(buffer + offset));
+        g_portrait_palette_upload_rect.x = (i % 4) * 0x10 + 0x180;
+        g_portrait_palette_upload_rect.y = i / 4 + 0xE0;
+        g_portrait_palette_upload_rect.w = 0x10;
+        g_portrait_palette_upload_rect.h = 1;
+        LoadImage(&g_portrait_palette_upload_rect, (u32*)(buffer + offset));
 
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             thread_yield();
@@ -374,5 +374,5 @@ void attack_gfx_prepare_formation_sprites(void) {
             DrawSync(0);
         }
     }
-    main_heap_call_free(buffer);
+    heap_call_free(buffer);
 }

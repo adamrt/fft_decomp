@@ -93,9 +93,9 @@ typedef struct menu_input_timing_profile {
     u8 initial_delay;
     u8 repeat_period;
     u8 secondary_repeat_period;
-    u8 scroll_accel_delay; /* copied to g_main_menu_scroll_accel_delay */
-    u8 scroll_slow_step;   /* copied to g_main_menu_scroll_slow_step */
-    u8 scroll_fast_step;   /* copied to g_main_menu_scroll_fast_step */
+    u8 scroll_accel_delay; /* copied to g_menu_scroll_accel_delay */
+    u8 scroll_slow_step;   /* copied to g_menu_scroll_slow_step */
+    u8 scroll_fast_step;   /* copied to g_menu_scroll_fast_step */
 } menu_input_timing_profile_t;
 
 extern menu_input_timing_profile_t g_menu_option_input_repeat_timings[];

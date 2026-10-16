@@ -28,142 +28,142 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-static s16 g_open_music_test_row_actions[16]
+static s16 g_music_test_row_actions[16]
     = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
 
-static void open_controller_start_text_message(s32 parameter, s32 use_world_text);
-static void open_prologue_prepare_crossfade(s32 file_index);
-static void open_prologue_draw_text_lines(s32 intensity);
-static void open_prologue_step_crossfade(void);
-static void open_gfx_update_opntex_sequence(void);
-static void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame);
-static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset);
-static void open_script_push_controller(void);
-static void open_script_update_screen_fade(void);
-static void open_script_scroll_text(void);
-static void open_script_update_xa_audio(void);
-static s32 open_text_decode_hex_digit(s32 character);
+static void controller_start_text_message(s32 parameter, s32 use_world_text);
+static void prologue_prepare_crossfade(s32 file_index);
+static void prologue_draw_text_lines(s32 intensity);
+static void prologue_step_crossfade(void);
+static void ending_update_opntex_sequence(void);
+static void movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame);
+static u8* ending_add_pointer_offset(u8* base, s32 byte_offset);
+static void ending_start_script(void);
+static void ending_update_screen_fade(void);
+static void ending_scroll_text(void);
+static void ending_update_xa_audio(void);
+static s32 ending_decode_hex_digit(s32 character);
 
 /* The new-game prologue's pictures are 210x180, at rows 43 to 222 of the
  * 256-pixel-wide frame image. */
-#define OPEN_IMAGE_WIDTH      210
-#define OPEN_IMAGE_HEIGHT     180
-#define OPEN_IMAGE_ROW_STRIDE 256
+#define PROLOGUE_IMAGE_WIDTH      210
+#define PROLOGUE_IMAGE_HEIGHT     180
+#define PROLOGUE_IMAGE_ROW_STRIDE 256
 
 /* A 256x240 16-bit frame image in 32-bit words. */
-#define OPEN_FRAME_IMAGE_WORDS (256 * 240 / 2)
+#define PROLOGUE_FRAME_IMAGE_WORDS (256 * 240 / 2)
 
 /* Each OPNTEX frame occupies 23 * 0x800 bytes of the loaded data. */
-#define OPEN_OPNTEX_FRAME_SECTORS 23
+#define TITLE_OPNTEX_FRAME_SECTORS 23
 
 /* OPEN twin of window_init_vram_render_record for the 56-byte records: it keeps
  * the VRAM position instead of a texture page and also clears the 8-bit CLUT flag.
  * Nothing in OPEN.BIN calls it. */
-void open_gfx_init_vram_render_record(
+void window_init_vram_record(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags) {
     RECT* quad_base;
     RECT* quad;
     CVECTOR* color;
 
-    g_open_gfx_render_records_56[record_index].flags
-        = (g_open_gfx_render_records_56[record_index].flags
+    g_window_render_records_56[record_index].flags
+        = (g_window_render_records_56[record_index].flags
               & ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN))
         | flags;
-    g_open_gfx_render_records_56[record_index].tail.clut = clut_position;
-    g_open_gfx_render_records_56[record_index].vram_x = vram_position.x;
-    g_open_gfx_render_records_56[record_index].vram_y = vram_position.y;
+    g_window_render_records_56[record_index].tail.clut = clut_position;
+    g_window_render_records_56[record_index].vram_x = vram_position.x;
+    g_window_render_records_56[record_index].vram_y = vram_position.y;
     /* Direct quad indexing changes the original record and column base selection. */
-    quad_base = &g_open_gfx_render_records_56[0].tail.quad;
-    quad = quad_base + record_index * (sizeof(open_render_record_56_t) / sizeof(RECT));
+    quad_base = &g_window_render_records_56[0].tail.quad;
+    quad = quad_base + record_index * (sizeof(window_record_56_t) / sizeof(RECT));
     quad->x = (vram_position.x & 0x3f) * 2;
     quad->y = vram_position.y & 0xFF;
     quad->w = image_size.x * 2;
     quad->h = image_size.y;
-    color = &g_open_gfx_render_records_56[record_index].color;
+    color = &g_window_render_records_56[record_index].color;
     color->b = color->g = color->r = 0x80;
-    g_open_gfx_render_records_56[record_index].pop_in_step = 0;
+    g_window_render_records_56[record_index].pop_in_step = 0;
 }
 
 /* Fills the music-test list's column layout and menu entry, then starts the
  * AT list thread on them. The window is the extent's width plus a 24-pixel
  * margin, rounded down to a multiple of four; its height fields start at 0. */
-static void open_menu_start_music_test_list_thread(s32 thread_id, s32 limit, point32_t* extent, point32_t* origin) {
+static void music_test_start_list_thread(s32 thread_id, s32 limit, point32_t* extent, point32_t* origin) {
     s32 width = (extent->x + 0x18) & 0xFFFC;
 
-    g_open_music_test_list_state.row_count = extent->y;
-    g_open_music_test_list_state.hidden_rows = limit - extent->y;
-    g_open_music_test_list_state.x[1] = 4;
-    g_open_music_test_list_state.x[0] = 4;
-    g_open_music_test_list_state.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
-    g_open_music_test_list_state.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
-    g_open_music_test_list_state.text_ids[0] = g_open_music_test_list_entries;
-    g_open_music_test_list_state.text_colors[0] = g_open_music_test_list_entry_flags;
-    g_open_music_test_list_state.mode[0] = MENU_TEXT_COLUMN_TEXT;
-    g_open_music_test_list_params.vram_origin.x = 0x200;
-    g_open_music_test_list_params.vram_origin.y = 0x100;
-    g_open_music_test_list_params.inner_width = width;
-    g_open_music_test_list_params.inner_height = 0;
-    g_open_music_test_list_params.window.x = origin->x - 0x80;
-    g_open_music_test_list_params.window.y = origin->y - 0x78;
-    g_open_music_test_list_params.window.w = width;
-    g_open_music_test_list_params.window.h = 0;
-    g_open_music_test_list_params.text_image.x_load = 0;
-    g_open_music_test_list_params.text_image.y_load = 0;
-    g_open_music_test_list_params.text_image.width = width;
-    g_open_music_test_list_params.text_image.height = 0;
-    g_open_music_test_list_params.text_image.x_screen_offset = 0;
-    g_open_music_test_list_params.text_image.y_screen_offset = 0;
-    g_open_music_test_list_params.text_id = 0;
-    g_open_music_test_list_params.max_row_index = extent->y;
-    g_open_music_test_list_params.thread_count = 0;
-    g_open_music_test_list_params.row_actions = g_open_music_test_row_actions;
-    g_open_music_test_list_params.header_id = 1;
-    g_open_music_test_list_params.context = &g_open_music_test_list_state;
-    g_open_music_test_list_params.value = &g_open_music_test_selected_option;
-    g_open_music_test_list_params.selected_index = 0;
-    g_open_music_test_list_params.select_text_table = 0;
+    g_music_test_list_state.row_count = extent->y;
+    g_music_test_list_state.hidden_rows = limit - extent->y;
+    g_music_test_list_state.x[1] = 4;
+    g_music_test_list_state.x[0] = 4;
+    g_music_test_list_state.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
+    g_music_test_list_state.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
+    g_music_test_list_state.text_ids[0] = g_music_test_list_entries;
+    g_music_test_list_state.text_colors[0] = g_music_test_list_entry_flags;
+    g_music_test_list_state.mode[0] = MENU_TEXT_COLUMN_TEXT;
+    g_music_test_list_params.vram_origin.x = 0x200;
+    g_music_test_list_params.vram_origin.y = 0x100;
+    g_music_test_list_params.inner_width = width;
+    g_music_test_list_params.inner_height = 0;
+    g_music_test_list_params.window.x = origin->x - 0x80;
+    g_music_test_list_params.window.y = origin->y - 0x78;
+    g_music_test_list_params.window.w = width;
+    g_music_test_list_params.window.h = 0;
+    g_music_test_list_params.text_image.x_load = 0;
+    g_music_test_list_params.text_image.y_load = 0;
+    g_music_test_list_params.text_image.width = width;
+    g_music_test_list_params.text_image.height = 0;
+    g_music_test_list_params.text_image.x_screen_offset = 0;
+    g_music_test_list_params.text_image.y_screen_offset = 0;
+    g_music_test_list_params.text_id = 0;
+    g_music_test_list_params.max_row_index = extent->y;
+    g_music_test_list_params.thread_count = 0;
+    g_music_test_list_params.row_actions = g_music_test_row_actions;
+    g_music_test_list_params.header_id = 1;
+    g_music_test_list_params.context = &g_music_test_list_state;
+    g_music_test_list_params.value = &g_music_test_selected_option;
+    g_music_test_list_params.selected_index = 0;
+    g_music_test_list_params.select_text_table = 0;
 
     thread_start(thread_id, screen_text_list_thread);
-    thread_set_parameters(thread_id, (s32)&g_open_music_test_list_params, 0, 0);
+    thread_set_parameters(thread_id, (s32)&g_music_test_list_params, 0, 0);
 }
 
 /* Open the music test: read OPNBK image 1 as the background, fill the 96-entry
  * track list (text ids 0xc000 + entry, flags clear) and push the music test
- * controller (handler 7) at OPEN_MUSIC_TEST_STEP_OPEN as the screen is revealed.
+ * controller (handler 7) at MUSIC_TEST_STEP_OPEN as the screen is revealed.
  *
  * The list is drawn by the WORLD menu frame, which this turns on with Circle,
  * Cross and Select withheld from it and ordering-table entry 4 as its base. The
- * only caller is step 5 of open_title_step_new_game_start. */
-void open_menu_start_music_test_controller(void) {
+ * only caller is step 5 of new_game_update. */
+void music_test_open(void) {
     s32 i;
     s32 four;
     s32 controller;
 
-    open_file_request_openbk_image(1, g_open_file_destination);
+    file_request_openbk_image(1, g_file_destination);
     file_wait_for_pending();
 
     for (i = 0; i < 96; i++) {
-        g_open_music_test_list_entries[i] = i + 0xc000;
-        g_open_music_test_list_entry_flags[i] = 0;
+        g_music_test_list_entries[i] = i + 0xc000;
+        g_music_test_list_entry_flags[i] = 0;
     }
 
     script_set_event_speed(1);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    /* The same 4 is stored twice, as the WORLD menu frame's OT index and as OPEN_MUSIC_TEST_STEP_OPEN; the local
+    /* The same 4 is stored twice, as the WORLD menu frame's OT index and as MUSIC_TEST_STEP_OPEN; the local
      * keeps it in a saved register across the fade-out call instead of being rematerialized. */
     four = 4;
-    g_open_menu_world_frame_otag_index = four;
-    g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
-    open_gfx_start_overlay_fade_out(0x20);
+    g_music_test_world_menu_otag_index = four;
+    g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
+    gfx_start_overlay_fade_out(0x20);
 
-    controller = g_open_current_controller_index;
-    g_open_controller_records_next[controller].music_test.music_id = 0;
-    g_open_controller_records_next[controller].music_test.delay = 0;
-    g_open_controller_records_next[controller].music_test.music_slot = 0;
-    g_open_controller_records_next[controller].music_test.step = four;
-    g_open_controller_records_next[controller].music_test.blink_frames = 0;
-    g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_MUSIC_TEST;
-    g_open_current_controller_index = controller + 1;
+    controller = g_controller_current_index;
+    g_controller_records_next[controller].music_test.music_id = 0;
+    g_controller_records_next[controller].music_test.delay = 0;
+    g_controller_records_next[controller].music_test.music_slot = 0;
+    g_controller_records_next[controller].music_test.step = four;
+    g_controller_records_next[controller].music_test.blink_frames = 0;
+    g_controller_handler_indices[controller] = CONTROLLER_MUSIC_TEST;
+    g_controller_current_index = controller + 1;
 }
 
 /* Runs the hidden Music Test menu.
@@ -177,8 +177,8 @@ void open_menu_start_music_test_controller(void) {
  * release. Up and Down are withheld from the list for ten frames after each
  * selection.
  */
-void open_menu_update_music_test(open_controller_record_t* record) {
-    open_menu_sound_test_state_t* state = &record->music_test;
+void music_test_update(controller_record_t* record) {
+    music_test_state_t* state = &record->music_test;
     point32_t extent;
     point32_t origin;
     s32 buttons;
@@ -189,33 +189,32 @@ void open_menu_update_music_test(open_controller_record_t* record) {
         g_menu_blocked_buttons ^= PSX_PAD_UP | PSX_PAD_DOWN;
     }
 
-    if (state->step == OPEN_MUSIC_TEST_STEP_OPEN) {
-        if (!(g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE)) {
+    if (state->step == MUSIC_TEST_STEP_OPEN) {
+        if (!(g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE)) {
             extent.x = 0x15;
             extent.y = 0xB;
             origin.x = 0x8C;
             origin.y = 0x14;
-            open_menu_start_music_test_list_thread(OPEN_THREAD_SLOT_MUSIC_TEST_LIST, 0x60, &extent, &origin);
-            state->step = OPEN_MUSIC_TEST_STEP_IDLE;
+            music_test_start_list_thread(MUSIC_TEST_THREAD_SLOT_LIST, 0x60, &extent, &origin);
+            state->step = MUSIC_TEST_STEP_IDLE;
         }
-    } else if (state->step == OPEN_MUSIC_TEST_STEP_START_TRACK) {
-        if (main_sound_is_music_loading_stub() == 0) {
-            g_open_music_test_sound_handle = main_sound_switch_music_track(state->music_slot, 0x7F, 0x10);
-            state->step = OPEN_MUSIC_TEST_STEP_IDLE;
+    } else if (state->step == MUSIC_TEST_STEP_START_TRACK) {
+        if (music_is_loading_stub() == 0) {
+            g_music_test_sound_handle = music_switch_track(state->music_slot, 0x7F, 0x10);
+            state->step = MUSIC_TEST_STEP_IDLE;
         }
-    } else if (state->step == OPEN_MUSIC_TEST_STEP_FADE_OUT) {
-        if (!(g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE)) {
-            g_open_system_runtime_flags
-                ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED | OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
-            open_file_request_openbk_image(0, g_open_file_destination);
+    } else if (state->step == MUSIC_TEST_STEP_FADE_OUT) {
+        if (!(g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE)) {
+            g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED | SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
+            file_request_openbk_image(0, g_file_destination);
             file_wait_for_pending();
-            g_open_current_controller_index--;
-            open_title_push_menu_controller(0);
+            g_controller_current_index--;
+            title_push_menu(0);
         }
-    } else if (state->step == OPEN_MUSIC_TEST_STEP_CLOSE) {
-        if (thread_is_running(OPEN_THREAD_SLOT_MUSIC_TEST_LIST) == 0) {
-            state->step = OPEN_MUSIC_TEST_STEP_FADE_OUT;
-            open_gfx_start_overlay_fade_in(0x20);
+    } else if (state->step == MUSIC_TEST_STEP_CLOSE) {
+        if (thread_is_running(MUSIC_TEST_THREAD_SLOT_LIST) == 0) {
+            state->step = MUSIC_TEST_STEP_FADE_OUT;
+            gfx_start_overlay_fade_in(0x20);
         }
     } else if (state->delay != 0) {
         /* A queued change: once the old track has faded, release its slot and
@@ -223,58 +222,58 @@ void open_menu_update_music_test(open_controller_record_t* record) {
         if (--state->delay == 0) {
             if (state->music_id != 0) {
                 if (state->music_slot != 0) {
-                    main_sound_unload_scenario_mus(state->music_slot);
+                    music_unload_scenario_slot(state->music_slot);
                 }
-                state->music_slot = main_sound_open_music_into_free_slot(state->music_id);
-                state->step = OPEN_MUSIC_TEST_STEP_START_TRACK;
+                state->music_slot = music_open_into_free_slot(state->music_id);
+                state->step = MUSIC_TEST_STEP_START_TRACK;
             } else {
                 if (state->music_slot != 0) {
-                    main_sound_unload_scenario_mus(state->music_slot);
+                    music_unload_scenario_slot(state->music_slot);
                 }
                 state->music_slot = 0;
             }
         }
     } else {
         /* Idle: release a track that has finished on its own, then take input. */
-        if (state->music_slot != 0 && suzuki_smd_is_music_playing(g_open_music_test_sound_handle) == 0) {
-            main_sound_unload_scenario_mus(state->music_slot);
+        if (state->music_slot != 0 && suzuki_smd_is_music_playing(g_music_test_sound_handle) == 0) {
+            music_unload_scenario_slot(state->music_slot);
             state->music_slot = 0;
             state->music_id = 0;
         }
-        buttons = g_open_input_new_button_presses;
+        buttons = g_input_new_button_presses;
         if (buttons & PSX_PAD_CIRCLE) {
             formation_set_display_mode(1);
             state->blink_frames = 1;
             g_menu_blocked_buttons |= PSX_PAD_UP | PSX_PAD_DOWN;
             if (state->music_id != 0) {
                 state->delay = 0x20;
-                main_sound_set_current_music_target(0, 0x78);
+                music_set_target(0, 0x78);
             } else {
                 state->delay = 1;
             }
-            state->music_id = g_open_music_test_music_ids[g_open_music_test_list_params.selected_index];
+            state->music_id = g_music_test_music_ids[g_music_test_list_params.selected_index];
         } else if (buttons & PSX_PAD_CROSS) {
             if (state->music_id != 0) {
-                main_sound_set_current_music_target(0, 0x78);
+                music_set_target(0, 0x78);
                 state->music_id = 0;
                 state->delay = 0x20;
             } else {
-                state->step = OPEN_MUSIC_TEST_STEP_CLOSE;
-                thread_set_parameters(OPEN_THREAD_SLOT_MUSIC_TEST_LIST, 0, 0, 1);
-                g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
+                state->step = MUSIC_TEST_STEP_CLOSE;
+                thread_set_parameters(MUSIC_TEST_THREAD_SLOT_LIST, 0, 0, 1);
+                g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             }
         } else if (buttons & PSX_PAD_SELECT) {
-            open_controller_start_text_message(g_open_music_test_list_params.selected_index + 0xC800, 0);
+            controller_start_text_message(g_music_test_list_params.selected_index + 0xC800, 0);
         }
     }
 }
 
 /* Start the text message thread and push the controller that waits for it. */
-static void open_controller_start_text_message(s32 parameter, s32 use_world_text) {
+static void controller_start_text_message(s32 parameter, s32 use_world_text) {
     {
-        s32 controller = g_open_current_controller_index;
+        s32 controller = g_controller_current_index;
 
-        g_open_controller_records_next[controller].text_message.use_world_text = use_world_text;
+        g_controller_records_next[controller].text_message.use_world_text = use_world_text;
     }
     if (use_world_text != 0) {
         text_save_section_pointers();
@@ -285,32 +284,32 @@ static void open_controller_start_text_message(s32 parameter, s32 use_world_text
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, parameter, 0);
 
     {
-        s32 controller = g_open_current_controller_index;
+        s32 controller = g_controller_current_index;
         s32 saved_blocked_buttons = g_menu_blocked_buttons;
 
         g_menu_blocked_buttons = -1;
-        g_open_controller_records_next[controller].text_message.saved_blocked_buttons = saved_blocked_buttons;
+        g_controller_records_next[controller].text_message.saved_blocked_buttons = saved_blocked_buttons;
     }
-    main_sound_play_sfx(MAIN_SFX_WINDOW_OPEN);
+    sound_play_sfx(SOUND_SFX_WINDOW_OPEN);
 
     {
-        s32 controller = g_open_current_controller_index;
+        s32 controller = g_controller_current_index;
         s32 next_controller = controller + 1;
 
-        g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_TEXT_MESSAGE;
-        g_open_current_controller_index = next_controller;
+        g_controller_handler_indices[controller] = CONTROLLER_TEXT_MESSAGE;
+        g_controller_current_index = next_controller;
     }
 }
 
 /* Handler 8: once the message thread has ended, give back the blocked buttons,
  * pop the controller and, with use_world_text, restore the text section pointers
- * open_controller_start_text_message replaced. */
-void open_controller_wait_text_message(open_controller_record_t* record) {
+ * controller_start_text_message replaced. */
+void controller_wait_text_message(controller_record_t* record) {
     if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
         return;
     }
     g_menu_blocked_buttons = record->text_message.saved_blocked_buttons;
-    g_open_current_controller_index--;
+    g_controller_current_index--;
     if (record->text_message.use_world_text != 0) {
         text_restore_section_pointers();
     }
@@ -318,41 +317,40 @@ void open_controller_wait_text_message(open_controller_record_t* record) {
 
 /* Start one of the title screen's demo movies (FFTPRE, FFTPR or FFTUNIT.STR) at cd_mix_level with
  * no separate video end frame, and push handler 11 with the stream's start sector and length. */
-void open_movie_stream_title_demo_and_push_controller(
-    s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level) {
+void movie_stream_title_demo(s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level) {
     s32 controller;
 
-    open_movie_start_stream(start_sector, end_frame, -1, cd_mix_level);
-    g_open_system_runtime_flags &= ~OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-    controller = g_open_current_controller_index;
-    g_open_controller_records_next[controller].movie.start_sector = start_sector;
-    g_open_controller_records_next[controller].movie.stream_length = stream_length;
-    g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_TITLE_DEMO_MOVIE;
-    g_open_current_controller_index = controller + 1;
+    movie_start_stream(start_sector, end_frame, -1, cd_mix_level);
+    g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
+    controller = g_controller_current_index;
+    g_controller_records_next[controller].movie.start_sector = start_sector;
+    g_controller_records_next[controller].movie.stream_length = stream_length;
+    g_controller_handler_indices[controller] = CONTROLLER_TITLE_DEMO_MOVIE;
+    g_controller_current_index = controller + 1;
 }
 
 /* Handler 11, a title demo movie: Start stops the stream. Once the stream has
  * stopped, by itself or on the update after Start, the display is blanked and the
  * controller is replaced by the FFTST.STR logo movie, which leads back to the
  * title menu. */
-void open_movie_update_title_demo(open_controller_record_t* unused_record) {
-    if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
+void movie_update_title_demo(controller_record_t* unused_record) {
+    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
         SetDispMask(0);
-        g_main_gfx_active_buffer_index = 1;
-        g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-        g_open_current_controller_index--;
-        open_movie_stream_fftst_and_push_controller(DISC_SECTOR_OPEN_FFTST_STR, 0x278a, 0x3df, 0x2de);
-    } else if ((g_open_input_new_button_presses & PSX_PAD_START) != 0) {
-        open_movie_stop_stream(1);
+        g_gfx_active_buffer_index = 1;
+        g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
+        g_controller_current_index--;
+        movie_stream_fftst(DISC_SECTOR_OPEN_FFTST_STR, 0x278a, 0x3df, 0x2de);
+    } else if ((g_input_new_button_presses & PSX_PAD_START) != 0) {
+        movie_stop_stream(1);
     }
 }
 
 /* New Game on the title menu. With a memory card in either slot the new-game
  * prologue starts at once. With none the frame image is saved to
- * g_open_work_buffer_0 and blanked, animation 0x12 is shown on the black screen
+ * g_system_work_buffer_0 and blanked, animation 0x12 is shown on the black screen
  * and the title-exit controller (handler 12) is pushed: Cross returns to the
  * title menu, Circle or Start starts the prologue anyway. */
-void open_title_select_new_game(void) {
+void title_select_new_game(void) {
     s32* source;
     s32* destination;
     s32 index;
@@ -362,34 +360,34 @@ void open_title_select_new_game(void) {
     s32 card_present;
     s32 frame_padding[2];
 
-    card_present = open_card_check_slots();
+    card_present = title_check_card_slots();
     index = 0;
     if (card_present != 0) {
-        open_prologue_start();
+        prologue_start();
         return;
     }
 
-    source = g_open_file_destination;
-    destination = (s32*)g_open_work_buffer_0;
-    for (; index < OPEN_FRAME_IMAGE_WORDS; index++) {
+    source = g_file_destination;
+    destination = (s32*)g_system_work_buffer_0;
+    for (; index < PROLOGUE_FRAME_IMAGE_WORDS; index++) {
         *destination = *source;
         *source = 0;
         source++;
         destination++;
     }
 
-    open_gfx_start_overlay_fade_out(0x10);
-    record = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
-    g_open_gfx_render_records_36[record].sequence = 0x12;
-    g_open_gfx_render_records_36[record].anim_counter = 0;
-    g_open_gfx_render_records_36[record].frame_index = 0;
-    position = &g_open_gfx_render_records_36[record].position;
-    controller = g_open_current_controller_index;
+    gfx_start_overlay_fade_out(0x10);
+    record = window_append_animated_record(g_window_render_record_pointers, &g_window_render_record_pointer_count);
+    g_window_render_records_36[record].sequence = 0x12;
+    g_window_render_records_36[record].anim_counter = 0;
+    g_window_render_records_36[record].frame_index = 0;
+    position = &g_window_render_records_36[record].position;
+    controller = g_controller_current_index;
     position->x = -4;
     position->y = -16;
-    g_open_controller_records_next[controller].title_exit.state = 0;
-    g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_TITLE_EXIT;
-    g_open_current_controller_index = controller + 1;
+    g_controller_records_next[controller].title_exit.state = 0;
+    g_controller_handler_indices[controller] = CONTROLLER_TITLE_EXIT;
+    g_controller_current_index = controller + 1;
 }
 
 /* Per-frame handler of the title-exit controller (handler 12), pushed when New
@@ -397,66 +395,66 @@ void open_title_select_new_game(void) {
  *
  * Cross, or Circle or Start, records the choice and fades the screen to black.
  * When the fade has ended the notice record and the controller are released: on
- * Cross the frame image saved in g_open_work_buffer_0 is copied back and the
+ * Cross the frame image saved in g_system_work_buffer_0 is copied back and the
  * title menu is pushed again; on Circle or Start the new-game prologue starts. */
-void open_title_update_card_warning(open_controller_record_t* record) {
+void title_update_card_warning(controller_record_t* record) {
     s32 state;
     u32 buttons;
 
-    if ((g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE) != 0) {
+    if ((g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) != 0) {
         return;
     }
 
-    if (record->title_exit.state != OPEN_TITLE_EXIT_INPUT) {
-        g_open_gfx_next_render_record_36 -= 1;
-        g_open_gfx_render_record_pointer_count -= 1;
-        g_open_current_controller_index -= 1;
+    if (record->title_exit.state != TITLE_EXIT_INPUT) {
+        g_window_next_render_record_36 -= 1;
+        g_window_render_record_pointer_count -= 1;
+        g_controller_current_index -= 1;
         state = record->title_exit.state;
-        if (state == OPEN_TITLE_EXIT_CANCEL) {
+        if (state == TITLE_EXIT_CANCEL) {
             s32* source;
             s32* destination;
             s32 index;
 
             SetDispMask(0);
-            source = (s32*)g_open_work_buffer_0;
-            g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-            destination = g_open_file_destination;
-            for (index = 0; index < OPEN_FRAME_IMAGE_WORDS; index++) {
+            source = (s32*)g_system_work_buffer_0;
+            g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
+            destination = g_file_destination;
+            for (index = 0; index < PROLOGUE_FRAME_IMAGE_WORDS; index++) {
                 destination[index] = source[index];
             }
-            open_title_push_menu_controller(0);
-        } else if (state == OPEN_TITLE_EXIT_CONFIRM) {
-            open_prologue_start();
+            title_push_menu(0);
+        } else if (state == TITLE_EXIT_CONFIRM) {
+            prologue_start();
         }
         return;
     }
 
-    buttons = g_open_input_new_button_presses;
+    buttons = g_input_new_button_presses;
     if ((buttons & PSX_PAD_CROSS) != 0) {
-        main_sound_play_sfx(MAIN_SFX_CANCEL);
-        open_gfx_start_overlay_fade_in(0x20);
-        record->title_exit.state = OPEN_TITLE_EXIT_CANCEL;
+        sound_play_sfx(SOUND_SFX_CANCEL);
+        gfx_start_overlay_fade_in(0x20);
+        record->title_exit.state = TITLE_EXIT_CANCEL;
     } else if ((buttons & (PSX_PAD_CIRCLE | PSX_PAD_START)) != 0) {
-        main_sound_play_sfx(MAIN_SFX_CONFIRM);
-        open_gfx_start_overlay_fade_in(0x20);
-        record->title_exit.state = OPEN_TITLE_EXIT_CONFIRM;
+        sound_play_sfx(SOUND_SFX_CONFIRM);
+        gfx_start_overlay_fade_in(0x20);
+        record->title_exit.state = TITLE_EXIT_CONFIRM;
     }
 }
 
 /* Arm the new-game prologue sequence: start before entry 0 of entry_table with NEXT_ENTRY set, end
  * at entry target, draw its text in ordering-table entries ot_layer and ot_layer + 1, at full
  * brightness (0x80). */
-void open_prologue_init_sequence(s32 target, s32 ot_layer, open_prologue_entry_t** entry_table) {
-    g_open_prologue.flags = OPEN_PROLOGUE_NEXT_ENTRY;
-    g_open_prologue.current_index = 0;
-    g_open_prologue.target_index = target;
-    g_open_prologue.entry_table = entry_table;
-    g_open_prologue.ot_layer = ot_layer;
-    g_open_prologue.intensity = 0x80;
+void prologue_init_sequence(s32 target, s32 ot_layer, prologue_entry_t** entry_table) {
+    g_prologue.flags = PROLOGUE_NEXT_ENTRY;
+    g_prologue.current_index = 0;
+    g_prologue.target_index = target;
+    g_prologue.entry_table = entry_table;
+    g_prologue.ot_layer = ot_layer;
+    g_prologue.intensity = 0x80;
 }
 
-/* Empty. open_title_step_new_game_start calls it once the prologue has finished. */
-void open_prologue_finished_stub(void) {
+/* Empty. new_game_update calls it once the prologue has finished. */
+void prologue_finished_stub(void) {
 }
 
 /* Advance the new-game prologue by one frame: the picture crossfade and the text
@@ -474,112 +472,109 @@ void open_prologue_finished_stub(void) {
  *
  * Start sets SKIP: the lines keep advancing while the brightness runs down, and
  * the sequence ends once it is 0 and the crossfade has stopped. */
-s32 open_prologue_update(void) {
+s32 prologue_update(void) {
     u16 flags;
     s32 i;
-    open_prologue_entry_t* entry;
+    prologue_entry_t* entry;
     s32 image_command;
 
-    open_prologue_step_crossfade();
-    if (!(g_open_prologue.flags & OPEN_PROLOGUE_SKIP)) {
-        if (g_open_input_new_button_presses & PSX_PAD_START) {
-            main_sound_play_sfx(MAIN_SFX_COMPLETE);
-            g_open_prologue.flags |= OPEN_PROLOGUE_SKIP;
+    prologue_step_crossfade();
+    if (!(g_prologue.flags & PROLOGUE_SKIP)) {
+        if (g_input_new_button_presses & PSX_PAD_START) {
+            sound_play_sfx(SOUND_SFX_COMPLETE);
+            g_prologue.flags |= PROLOGUE_SKIP;
         }
-        flags = g_open_prologue.flags;
-        if (!(flags & OPEN_PROLOGUE_SKIP)) {
-            if (flags & OPEN_PROLOGUE_DIM) {
-                g_open_prologue.intensity -= 2;
-                open_prologue_draw_text_lines(g_open_prologue.intensity);
-                if (g_open_prologue.intensity == 0) {
-                    g_open_prologue.intensity = 0x80;
-                    g_open_prologue.flags = (g_open_prologue.flags ^ OPEN_PROLOGUE_DIM) | OPEN_PROLOGUE_NEXT_ENTRY;
+        flags = g_prologue.flags;
+        if (!(flags & PROLOGUE_SKIP)) {
+            if (flags & PROLOGUE_DIM) {
+                g_prologue.intensity -= 2;
+                prologue_draw_text_lines(g_prologue.intensity);
+                if (g_prologue.intensity == 0) {
+                    g_prologue.intensity = 0x80;
+                    g_prologue.flags = (g_prologue.flags ^ PROLOGUE_DIM) | PROLOGUE_NEXT_ENTRY;
                 }
                 return 1;
             }
-            if (flags & OPEN_PROLOGUE_WAIT_CIRCLE) {
-                if (g_open_input_new_button_presses & PSX_PAD_CIRCLE) {
-                    g_open_prologue.flags = (flags ^ OPEN_PROLOGUE_WAIT_CIRCLE) | OPEN_PROLOGUE_DIM;
-                    g_open_prologue.intensity = 0x80;
+            if (flags & PROLOGUE_WAIT_CIRCLE) {
+                if (g_input_new_button_presses & PSX_PAD_CIRCLE) {
+                    g_prologue.flags = (flags ^ PROLOGUE_WAIT_CIRCLE) | PROLOGUE_DIM;
+                    g_prologue.intensity = 0x80;
                 }
-                open_prologue_draw_text_lines(g_open_prologue.intensity);
+                prologue_draw_text_lines(g_prologue.intensity);
                 return 1;
             }
-            if (flags & OPEN_PROLOGUE_NEXT_ENTRY) {
-                flags ^= OPEN_PROLOGUE_NEXT_ENTRY;
-                g_open_prologue.flags = flags;
-                if (g_open_prologue.current_index == g_open_prologue.target_index) {
+            if (flags & PROLOGUE_NEXT_ENTRY) {
+                flags ^= PROLOGUE_NEXT_ENTRY;
+                g_prologue.flags = flags;
+                if (g_prologue.current_index == g_prologue.target_index) {
                     return 0;
                 }
-                g_open_prologue.flags = flags | OPEN_PROLOGUE_NEXT_STEP;
-                entry = g_open_prologue.entry_table[g_open_prologue.current_index];
-                g_open_prologue.entry = entry;
-                g_open_prologue.step_count = (u8)entry->header;
-                g_open_prologue.tpage_x = (entry->header & 0xf00) >> 2;
-                g_open_prologue.tpage_y = (entry->header >> 4) & 0x100;
+                g_prologue.flags = flags | PROLOGUE_NEXT_STEP;
+                entry = g_prologue.entry_table[g_prologue.current_index];
+                g_prologue.entry = entry;
+                g_prologue.step_count = (u8)entry->header;
+                g_prologue.tpage_x = (entry->header & 0xf00) >> 2;
+                g_prologue.tpage_y = (entry->header >> 4) & 0x100;
                 /* The high nibble selects the operation; the low nibble selects its image. */
                 image_command = (u8)(entry->header >> 16);
-                switch (image_command & OPEN_PROLOGUE_IMAGE_OPERATION_MASK) {
-                case OPEN_PROLOGUE_PREPARE_IMAGE:
-                    open_prologue_prepare_crossfade(image_command & OPEN_PROLOGUE_IMAGE_INDEX_MASK);
+                switch (image_command & PROLOGUE_IMAGE_OPERATION_MASK) {
+                case PROLOGUE_PREPARE_IMAGE:
+                    prologue_prepare_crossfade(image_command & PROLOGUE_IMAGE_INDEX_MASK);
                     break;
-                case OPEN_PROLOGUE_START_CROSSFADE:
+                case PROLOGUE_START_CROSSFADE:
                     file_wait_for_pending();
-                    g_open_prologue_crossfade_rows[0] = 1;
+                    g_prologue_crossfade_rows[0] = 1;
                     break;
                 }
                 {
-                    s16* index = &g_open_prologue.current_index;
+                    s16* index = &g_prologue.current_index;
 
-                    g_open_prologue.step = 0;
+                    g_prologue.step = 0;
                     (*index)++;
                 }
             }
         }
     }
 
-    flags = g_open_prologue.flags;
-    if (flags & OPEN_PROLOGUE_NEXT_STEP) {
-        g_open_prologue.flags = flags ^ OPEN_PROLOGUE_NEXT_STEP;
+    flags = g_prologue.flags;
+    if (flags & PROLOGUE_NEXT_STEP) {
+        g_prologue.flags = flags ^ PROLOGUE_NEXT_STEP;
         /* Every line is out: the page waits for Circle. */
-        if (g_open_prologue.step == g_open_prologue.step_count) {
-            g_open_prologue.flags
-                = (flags ^ OPEN_PROLOGUE_NEXT_STEP) | (OPEN_PROLOGUE_NEXT_ENTRY | OPEN_PROLOGUE_WAIT_CIRCLE);
-            open_prologue_draw_text_lines(g_open_prologue.intensity);
+        if (g_prologue.step == g_prologue.step_count) {
+            g_prologue.flags = (flags ^ PROLOGUE_NEXT_STEP) | (PROLOGUE_NEXT_ENTRY | PROLOGUE_WAIT_CIRCLE);
+            prologue_draw_text_lines(g_prologue.intensity);
             return 1;
         }
         /* Byte indexing preserves the retail address-add order and entry reloads. */
-        if (g_open_prologue.step == 0) {
-            for (i = 0; i < g_open_prologue.step_count; i++) {
-                g_open_prologue.line_widths[i]
-                    = g_open_prologue.entry
-                          ->line_data[i * sizeof(open_prologue_line_t) + offsetof(open_prologue_line_t, width)];
-                g_open_prologue.line_texture_rows[i]
-                    = g_open_prologue.entry
-                          ->line_data[i * sizeof(open_prologue_line_t) + offsetof(open_prologue_line_t, texture_row)];
+        if (g_prologue.step == 0) {
+            for (i = 0; i < g_prologue.step_count; i++) {
+                g_prologue.line_widths[i]
+                    = g_prologue.entry->line_data[i * sizeof(prologue_line_t) + offsetof(prologue_line_t, width)];
+                g_prologue.line_texture_rows[i]
+                    = g_prologue.entry->line_data[i * sizeof(prologue_line_t) + offsetof(prologue_line_t, texture_row)];
             }
         }
         {
-            s16* step = &g_open_prologue.step;
+            s16* step = &g_prologue.step;
 
-            g_open_prologue.timer = -0x10;
+            g_prologue.timer = -0x10;
             (*step)++;
         }
     }
 
-    if (++g_open_prologue.timer == g_open_prologue.line_widths[g_open_prologue.step - 1]) {
-        g_open_prologue.flags |= OPEN_PROLOGUE_NEXT_STEP;
+    if (++g_prologue.timer == g_prologue.line_widths[g_prologue.step - 1]) {
+        g_prologue.flags |= PROLOGUE_NEXT_STEP;
     }
 
-    if (g_open_prologue.flags & OPEN_PROLOGUE_SKIP) {
-        if (g_open_prologue.intensity != 0) {
-            g_open_prologue.intensity -= 2;
-        } else if (g_open_prologue_crossfade_rows[0] == 0) {
+    if (g_prologue.flags & PROLOGUE_SKIP) {
+        if (g_prologue.intensity != 0) {
+            g_prologue.intensity -= 2;
+        } else if (g_prologue_crossfade_rows[0] == 0) {
             return 0;
         }
     }
 
-    open_prologue_draw_text_lines(g_open_prologue.intensity);
+    prologue_draw_text_lines(g_prologue.intensity);
     return 1;
 }
 
@@ -601,7 +596,7 @@ s32 open_prologue_update(void) {
  * The coordinates are written in setXY4 order (x0, y0, x1, y1, ...) per
  * primitive, and width + 1 goes through its own variable (the target adds left
  * afterwards). */
-static void open_prologue_draw_text_lines(s32 intensity) {
+static void prologue_draw_text_lines(s32 intensity) {
     POLY_GT4* prims;
     s32 i;
     s32 prim_index;
@@ -613,52 +608,52 @@ static void open_prologue_draw_text_lines(s32 intensity) {
     s32 v;
     u16 clut;
 
-    for (i = 0; i < g_open_prologue.step + 1; i++) {
+    for (i = 0; i < g_prologue.step + 1; i++) {
         prim_index = i * 2;
-        prims = g_open_prologue_line_primitives[g_main_gfx_active_buffer_index];
+        prims = g_prologue_line_primitives[g_gfx_active_buffer_index];
         SetPolyGT4(&prims[prim_index]);
         SetPolyGT4(&prims[prim_index + 1]);
 
-        if (i == g_open_prologue.step) {
+        if (i == g_prologue.step) {
             /* Leading edge of the line in progress (line i - 1): black on its right. */
-            if (g_open_prologue.line_widths[i - 1] < g_open_prologue.timer) {
+            if (g_prologue.line_widths[i - 1] < g_prologue.timer) {
                 continue;
             }
-            width = g_open_prologue.line_widths[i - 1] - g_open_prologue.timer;
-            if (g_open_prologue.timer < 0) {
-                width = g_open_prologue.timer + 0x10;
+            width = g_prologue.line_widths[i - 1] - g_prologue.timer;
+            if (g_prologue.timer < 0) {
+                width = g_prologue.timer + 0x10;
             } else if (width >= 0x11) {
                 width = 0x10;
             }
-            u = g_open_prologue.timer;
+            u = g_prologue.timer;
             if (u < 0) {
                 u = 0;
             }
-            v = g_open_prologue.line_texture_rows[i - 1] * 0x10;
+            v = g_prologue.line_texture_rows[i - 1] * 0x10;
             setRGB1(&prims[prim_index], 0, 0, 0);
             setRGB1(&prims[prim_index + 1], 0, 0, 0);
             setRGB3(&prims[prim_index], 0, 0, 0);
             setRGB3(&prims[prim_index + 1], 0, 0, 0);
-            left = u - g_open_prologue.line_widths[i - 1] / 2;
-            top_y = (i - 1) * 0x14 - g_open_prologue.step_count * 10;
+            left = u - g_prologue.line_widths[i - 1] / 2;
+            top_y = (i - 1) * 0x14 - g_prologue.step_count * 10;
         } else {
             /* Line i: the revealed part of the line in progress, or a whole finished line. */
-            if (i == g_open_prologue.step - 1) {
-                width = g_open_prologue.timer;
+            if (i == g_prologue.step - 1) {
+                width = g_prologue.timer;
             } else {
-                width = g_open_prologue.line_widths[i];
+                width = g_prologue.line_widths[i];
             }
             u = 0;
             if (width <= 0) {
                 continue;
             }
-            v = g_open_prologue.line_texture_rows[i] * 0x10;
+            v = g_prologue.line_texture_rows[i] * 0x10;
             setRGB1(&prims[prim_index], intensity, intensity, intensity);
             setRGB1(&prims[prim_index + 1], intensity / 2, intensity / 2, intensity / 2);
             setRGB3(&prims[prim_index], intensity, intensity, intensity);
             setRGB3(&prims[prim_index + 1], intensity / 2, intensity / 2, intensity / 2);
-            left = -(g_open_prologue.line_widths[i] / 2);
-            top_y = i * 0x14 - g_open_prologue.step_count * 10;
+            left = -(g_prologue.line_widths[i] / 2);
+            top_y = i * 0x14 - g_prologue.step_count * 10;
         }
 
         setRGB0(&prims[prim_index], intensity, intensity, intensity);
@@ -669,8 +664,8 @@ static void open_prologue_draw_text_lines(s32 intensity) {
         clut = GetClut(0, 0x1e3);
         prims[prim_index + 1].clut = clut;
         prims[prim_index].clut = clut;
-        prims[prim_index].tpage = GetTPage(0, 1, g_open_prologue.tpage_x, g_open_prologue.tpage_y);
-        prims[prim_index + 1].tpage = GetTPage(0, 2, g_open_prologue.tpage_x, g_open_prologue.tpage_y);
+        prims[prim_index].tpage = GetTPage(0, 1, g_prologue.tpage_x, g_prologue.tpage_y);
+        prims[prim_index + 1].tpage = GetTPage(0, 2, g_prologue.tpage_x, g_prologue.tpage_y);
 
         setXY4(&prims[prim_index], left, top_y, left + width, top_y, left, top_y + 0x10, left + width, top_y + 0x10);
         width_plus_one = width + 1;
@@ -681,9 +676,8 @@ static void open_prologue_draw_text_lines(s32 intensity) {
 
         SetSemiTrans(&prims[prim_index], 1);
         SetSemiTrans(&prims[prim_index + 1], 1);
-        AddPrim(&g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_prologue.ot_layer], &prims[prim_index]);
-        AddPrim(
-            &g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_prologue.ot_layer + 1], &prims[prim_index + 1]);
+        AddPrim(&g_gfx_otags[g_gfx_active_buffer_index][g_prologue.ot_layer], &prims[prim_index]);
+        AddPrim(&g_gfx_otags[g_gfx_active_buffer_index][g_prologue.ot_layer + 1], &prims[prim_index + 1]);
     }
 }
 
@@ -691,13 +685,13 @@ static void open_prologue_draw_text_lines(s32 intensity) {
  * file_index + 2.
  *
  * Points the crossfade at its three buffers, starts the asynchronous read of the
- * new image into g_open_work_buffer_0 (the crossfade's source) and copies the
- * 210x180 picture on screen out of the frame image into g_open_work_buffer_1,
+ * new image into g_system_work_buffer_0 (the crossfade's source) and copies the
+ * 210x180 picture on screen out of the frame image into g_system_work_buffer_1,
  * packed 210 pixels per row. It clears the per-row fade steps, the running flag
- * (g_open_prologue_crossfade_rows[0]) and the progress row (rows[1], the same byte as
- * g_open_prologue_crossfade_progress); image operation 0x20 of a later prologue
+ * (g_prologue_crossfade_rows[0]) and the progress row (rows[1], the same byte as
+ * g_prologue_crossfade_progress); image operation 0x20 of a later prologue
  * entry waits for the read and sets the running flag. */
-static void open_prologue_prepare_crossfade(s32 file_index) {
+static void prologue_prepare_crossfade(s32 file_index) {
     u16* copy_source;
     u16* copy_destination;
     u16* file_pixels;
@@ -711,40 +705,40 @@ static void open_prologue_prepare_crossfade(s32 file_index) {
     u16 value;
     u16(*file_image)[256];
 
-    copy_source = (u16*)g_open_work_buffer_0;
-    copy_destination = (u16*)g_open_work_buffer_1;
-    file_image = g_open_file_destination;
+    copy_source = (u16*)g_system_work_buffer_0;
+    copy_destination = (u16*)g_system_work_buffer_1;
+    file_image = g_file_destination;
     /* The 210x180 picture begins at row 43 of the 256-pixel frame image. */
     file_pixels = file_image[43];
-    g_open_prologue_crossfade_new_picture = copy_source;
-    g_open_prologue_crossfade_old_picture = copy_destination;
-    g_open_prologue_crossfade_frame_pixels = file_pixels;
-    open_file_request_openbk_image(file_index + 2, g_open_work_buffer_0);
+    g_prologue_crossfade_new_picture = copy_source;
+    g_prologue_crossfade_old_picture = copy_destination;
+    g_prologue_crossfade_frame_pixels = file_pixels;
+    file_request_openbk_image(file_index + 2, g_system_work_buffer_0);
 
     row = 0;
     source_row = 0;
-    for (; row < OPEN_IMAGE_HEIGHT; row++) {
+    for (; row < PROLOGUE_IMAGE_HEIGHT; row++) {
         column = 0;
-        source_offset = row * OPEN_IMAGE_ROW_STRIDE;
-        while (column < OPEN_IMAGE_WIDTH) {
+        source_offset = row * PROLOGUE_IMAGE_ROW_STRIDE;
+        while (column < PROLOGUE_IMAGE_WIDTH) {
             destination_index = source_row + column;
             source_index = source_offset + column++;
             destination_index <<= 1;
-            pixels = g_open_prologue_crossfade_frame_pixels;
+            pixels = g_prologue_crossfade_frame_pixels;
             value = pixels[source_index];
             /* Destination indexing hoists pointer loads; byte-pointer arithmetic changes registers. */
-            *(u16*)(destination_index + (u32)g_open_prologue_crossfade_old_picture) = value;
+            *(u16*)(destination_index + (u32)g_prologue_crossfade_old_picture) = value;
         }
-        g_open_prologue_crossfade_rows[row + 2] = 0;
-        source_row += OPEN_IMAGE_WIDTH;
+        g_prologue_crossfade_rows[row + 2] = 0;
+        source_row += PROLOGUE_IMAGE_WIDTH;
     }
 
-    g_open_prologue_crossfade_rows[0] = 0;
-    g_open_prologue_crossfade_rows[1] = 0;
+    g_prologue_crossfade_rows[0] = 0;
+    g_prologue_crossfade_rows[1] = 0;
 }
 
-#define OPEN_IMAGE_BLEND_BAND_HEIGHT 17
-#define OPEN_IMAGE_BLEND_END_ROW     (OPEN_IMAGE_HEIGHT + OPEN_IMAGE_BLEND_BAND_HEIGHT)
+#define PROLOGUE_IMAGE_BLEND_BAND_HEIGHT 17
+#define PROLOGUE_IMAGE_BLEND_END_ROW     (PROLOGUE_IMAGE_HEIGHT + PROLOGUE_IMAGE_BLEND_BAND_HEIGHT)
 
 /*
  * Advance the bottom-up crossfade between the two 210x180 opening images by one row.
@@ -760,7 +754,7 @@ static void open_prologue_prepare_crossfade(s32 file_index) {
  * target. The s16 components are copied for the compare and the difference,
  * while the sums use the originals.
  */
-static void open_prologue_step_crossfade(void) {
+static void prologue_step_crossfade(void) {
     s32 row;
     s32 last_row;
     s32 reverse_row;
@@ -777,21 +771,21 @@ static void open_prologue_step_crossfade(void) {
     s32 difference;
     u8 fade;
 
-    if (g_open_prologue_crossfade_rows[0] != 0) {
-        row = g_open_prologue_crossfade_progress - OPEN_IMAGE_BLEND_BAND_HEIGHT;
-        if (row < g_open_prologue_crossfade_progress) {
-            last_row = OPEN_IMAGE_HEIGHT - 1;
+    if (g_prologue_crossfade_rows[0] != 0) {
+        row = g_prologue_crossfade_progress - PROLOGUE_IMAGE_BLEND_BAND_HEIGHT;
+        if (row < g_prologue_crossfade_progress) {
+            last_row = PROLOGUE_IMAGE_HEIGHT - 1;
             do {
-                if (row >= 0 && row < OPEN_IMAGE_HEIGHT) {
+                if (row >= 0 && row < PROLOGUE_IMAGE_HEIGHT) {
                     reverse_row = last_row - row;
                     column = 0;
-                    source_row_start = reverse_row * OPEN_IMAGE_WIDTH;
-                    destination_row_start = reverse_row * OPEN_IMAGE_ROW_STRIDE;
-                    fade = g_open_prologue_crossfade_rows[row + 2]++;
+                    source_row_start = reverse_row * PROLOGUE_IMAGE_WIDTH;
+                    destination_row_start = reverse_row * PROLOGUE_IMAGE_ROW_STRIDE;
+                    fade = g_prologue_crossfade_rows[row + 2]++;
                     do {
                         /* An ordinary source-pointer load is hoisted and adds a saved-register frame. */
-                        source_pixel = g_open_prologue_crossfade_new_picture[source_row_start + column];
-                        destination_pixel = g_open_prologue_crossfade_old_picture[source_row_start + column];
+                        source_pixel = g_prologue_crossfade_new_picture[source_row_start + column];
+                        destination_pixel = g_prologue_crossfade_old_picture[source_row_start + column];
                         pixel = 0;
                         if (source_pixel != destination_pixel) {
                             for (component = 2; component >= 0; component--) {
@@ -812,19 +806,19 @@ static void open_prologue_step_crossfade(void) {
                         } else {
                             pixel = source_pixel;
                         }
-                        g_open_prologue_crossfade_frame_pixels[destination_row_start + column]
+                        g_prologue_crossfade_frame_pixels[destination_row_start + column]
                             = pixel | (destination_pixel & 0x8000);
                         column++;
-                    } while (column < OPEN_IMAGE_WIDTH);
+                    } while (column < PROLOGUE_IMAGE_WIDTH);
                 }
                 row++;
-            } while (row < g_open_prologue_crossfade_progress);
+            } while (row < g_prologue_crossfade_progress);
         }
         {
-            u8* progress = &g_open_prologue_crossfade_progress;
+            u8* progress = &g_prologue_crossfade_progress;
 
-            if (++*progress >= OPEN_IMAGE_BLEND_END_ROW) {
-                g_open_prologue_crossfade_rows[0] = 0;
+            if (++*progress >= PROLOGUE_IMAGE_BLEND_END_ROW) {
+                g_prologue_crossfade_rows[0] = 0;
             }
         }
     }
@@ -834,26 +828,26 @@ static void open_prologue_step_crossfade(void) {
  * VRAM under them, reset the dispatch state and point its cursor at the start of the script data,
  * clear the 16 text records, and build the two semi-transparent edge bands and the two picture
  * quads. */
-static void open_script_init_state(void) {
+static void ending_init_script(void) {
     RECT rect;
     s32 i;
     s32 j;
     POLY_FT4* prim;
 
-    SetDefDrawEnv(&g_open_gfx_screen_environments[0].draw, 0, 0, 0x200, 0xf0);
-    SetDefDispEnv(&g_open_gfx_screen_environments[0].disp, 0, 0xf0, 0x200, 0xf0);
-    SetDefDrawEnv(&g_open_gfx_screen_environments[1].draw, 0, 0xf0, 0x200, 0xf0);
-    SetDefDispEnv(&g_open_gfx_screen_environments[1].disp, 0, 0, 0x200, 0xf0);
-    g_open_gfx_screen_environments[0].draw.ofs[0] = 0x100;
-    g_open_gfx_screen_environments[0].draw.ofs[1] = 0x78;
-    g_open_gfx_screen_environments[1].draw.ofs[0] = 0x100;
-    g_open_gfx_screen_environments[1].draw.ofs[1] = 0x168;
-    g_open_gfx_screen_environments[0].draw.isbg = g_open_gfx_screen_environments[1].draw.isbg = 0;
-    g_open_gfx_overlay_fade.rect.x = -0x100;
-    g_open_gfx_overlay_fade.rect.y = -0x78;
-    g_open_gfx_overlay_fade.rect.w = 0x200;
-    g_open_gfx_overlay_fade.rect.h = 0xf0;
-    g_open_gfx_screen_environments[0].disp.isrgb24 = g_open_gfx_screen_environments[1].disp.isrgb24 = 0;
+    SetDefDrawEnv(&g_gfx_screen_environments[0].draw, 0, 0, 0x200, 0xf0);
+    SetDefDispEnv(&g_gfx_screen_environments[0].disp, 0, 0xf0, 0x200, 0xf0);
+    SetDefDrawEnv(&g_gfx_screen_environments[1].draw, 0, 0xf0, 0x200, 0xf0);
+    SetDefDispEnv(&g_gfx_screen_environments[1].disp, 0, 0, 0x200, 0xf0);
+    g_gfx_screen_environments[0].draw.ofs[0] = 0x100;
+    g_gfx_screen_environments[0].draw.ofs[1] = 0x78;
+    g_gfx_screen_environments[1].draw.ofs[0] = 0x100;
+    g_gfx_screen_environments[1].draw.ofs[1] = 0x168;
+    g_gfx_screen_environments[0].draw.isbg = g_gfx_screen_environments[1].draw.isbg = 0;
+    g_gfx_overlay_fade.rect.x = -0x100;
+    g_gfx_overlay_fade.rect.y = -0x78;
+    g_gfx_overlay_fade.rect.w = 0x200;
+    g_gfx_overlay_fade.rect.h = 0xf0;
+    g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 0;
     rect.x = 0;
     rect.y = 0;
     rect.w = 0x200;
@@ -861,43 +855,43 @@ static void open_script_init_state(void) {
     ClearImage(&rect, 0, 0, 0);
     DrawSync(0);
 
-    g_open_script_state.dispatch.flags = OPEN_SCRIPT_DISPATCH_RUNNING;
-    g_open_script_state.dispatch.tpage = (s16)GetTPage(0, 2, 0x300, 0);
-    g_open_script_state.dispatch.clut = (s16)GetClut(0, 0x1e0);
-    g_open_script_state._unknown_1674 = 0;
-    g_open_script_state.dispatch.scrolled_distance = 0;
-    g_open_script_state.dispatch.scroll_fraction = 0;
-    g_open_script_state.dispatch.scroll_speed = 0;
-    g_open_script_state.dispatch.font_index = 0;
-    g_open_script_state.dispatch.wide_glyphs = 0;
-    g_open_script_state.dispatch.skew = 0;
-    g_open_script_state.dispatch.cursor.byte_offset = 0;
-    g_open_script_state.dispatch.cursor.data_base = g_open_script_initial_data_base;
+    g_ending_script_state.dispatch.flags = ENDING_SCRIPT_DISPATCH_RUNNING;
+    g_ending_script_state.dispatch.tpage = (s16)GetTPage(0, 2, 0x300, 0);
+    g_ending_script_state.dispatch.clut = (s16)GetClut(0, 0x1e0);
+    g_ending_script_state._unknown_1674 = 0;
+    g_ending_script_state.dispatch.scrolled_distance = 0;
+    g_ending_script_state.dispatch.scroll_fraction = 0;
+    g_ending_script_state.dispatch.scroll_speed = 0;
+    g_ending_script_state.dispatch.font_index = 0;
+    g_ending_script_state.dispatch.wide_glyphs = 0;
+    g_ending_script_state.dispatch.skew = 0;
+    g_ending_script_state.dispatch.cursor.byte_offset = 0;
+    g_ending_script_state.dispatch.cursor.data_base = g_ending_script_initial_data_base;
     for (j = 0; j < 16; j++) {
-        g_open_script_state.records[j].flags = 0;
+        g_ending_script_state.records[j].flags = 0;
     }
-    g_open_script_state.opntex.fade_intensity = 0;
+    g_ending_script_state.opntex.fade_intensity = 0;
 
     for (i = 0; i < 2; i++) {
-        prim = &g_open_gfx_credit_band_primitives[i];
+        prim = &g_ending_credit_band_primitives[i];
         SetPolyFT4(prim);
         SetSemiTrans(prim, 1);
-        g_open_gfx_credit_band_primitives[i].tpage = GetTPage(0, 2, 0x300, 0);
-        g_open_gfx_credit_band_primitives[i].clut = GetClut(0x10, 0x1e0);
+        g_ending_credit_band_primitives[i].tpage = GetTPage(0, 2, 0x300, 0);
+        g_ending_credit_band_primitives[i].clut = GetClut(0x10, 0x1e0);
         setRGB0(prim, 0x80, 0x80, 0x80);
     }
 
-    setUV4(&g_open_gfx_credit_band_primitives[0], 0xf8, 0, 0xf9, 0, 0xf8, 0x30, 0xf9, 0x30);
-    setXY4(&g_open_gfx_credit_band_primitives[0], -0x100, 0x48, 0x100, 0x48, -0x100, 0x78, 0x100, 0x78);
-    setUV4(&g_open_gfx_credit_band_primitives[1], 0xfc, 0, 0xfd, 0, 0xfc, 0x30, 0xfd, 0x30);
-    setXY4(&g_open_gfx_credit_band_primitives[1], -0x100, -0x78, 0x100, -0x78, -0x100, -0x48, 0x100, -0x48);
+    setUV4(&g_ending_credit_band_primitives[0], 0xf8, 0, 0xf9, 0, 0xf8, 0x30, 0xf9, 0x30);
+    setXY4(&g_ending_credit_band_primitives[0], -0x100, 0x48, 0x100, 0x48, -0x100, 0x78, 0x100, 0x78);
+    setUV4(&g_ending_credit_band_primitives[1], 0xfc, 0, 0xfd, 0, 0xfc, 0x30, 0xfd, 0x30);
+    setXY4(&g_ending_credit_band_primitives[1], -0x100, -0x78, 0x100, -0x78, -0x100, -0x48, 0x100, -0x48);
 
     for (i = 0; i < 2; i++) {
-        prim = &g_open_gfx_fade_primitives[i];
+        prim = &g_ending_fade_primitives[i];
         SetPolyFT4(prim);
         SetSemiTrans(prim, 1);
-        g_open_gfx_fade_primitives[i].tpage = GetTPage(1, 2, 0x200, 0);
-        g_open_gfx_fade_primitives[i].clut = GetClut(0, 0x1e1);
+        g_ending_fade_primitives[i].tpage = GetTPage(1, 2, 0x200, 0);
+        g_ending_fade_primitives[i].clut = GetClut(0, 0x1e1);
         setRGB0(prim, 0, 0, 0);
         setUV4(prim, 0, 0, 0xff, 0, 0, 0xb4, 0xff, 0xb4);
         setXY4(prim, -0x100, -0x5a, 0x100, -0x5a, -0x100, 0x5a, 0x100, 0x5a);
@@ -917,43 +911,43 @@ static void open_script_init_state(void) {
  * Updates the text scroll, the XA audio, the OPNTEX sequence and the picture
  * fade, then executes script entries. An entry is a row of 16-bit values at
  * data_base + byte_offset whose first value, the opcode, indexes
- * g_open_opcode_handlers. A handler advances byte_offset itself; one that has to
- * wait clears OPEN_SCRIPT_DISPATCH_CONTINUE to end the frame and is entered again
- * on the next, and opcode 0 clears OPEN_SCRIPT_DISPATCH_RUNNING. */
-static s32 open_script_run_frame(void) {
-    open_script_dispatch_state_t* state;
-    open_script_cursor_t* cursor;
+ * g_ending_opcode_handlers. A handler advances byte_offset itself; one that has to
+ * wait clears ENDING_SCRIPT_DISPATCH_CONTINUE to end the frame and is entered again
+ * on the next, and opcode 0 clears ENDING_SCRIPT_DISPATCH_RUNNING. */
+static s32 ending_run_script_frame(void) {
+    ending_script_dispatch_state_t* state;
+    ending_script_cursor_t* cursor;
     s32 result;
     s16* entry;
     u32 flags;
 
-    open_script_scroll_text();
-    open_script_update_xa_audio();
-    open_gfx_update_opntex_sequence();
-    open_script_update_screen_fade();
+    ending_scroll_text();
+    ending_update_xa_audio();
+    ending_update_opntex_sequence();
+    ending_update_screen_fade();
 
-    state = &g_open_script_state.dispatch;
-    result = state->flags | OPEN_SCRIPT_DISPATCH_CONTINUE;
+    state = &g_ending_script_state.dispatch;
+    result = state->flags | ENDING_SCRIPT_DISPATCH_CONTINUE;
     state->flags = result;
-    if (result & OPEN_SCRIPT_DISPATCH_CONTINUE) {
+    if (result & ENDING_SCRIPT_DISPATCH_CONTINUE) {
         cursor = &state->cursor;
         do {
-            entry = (s16*)open_script_add_pointer_offset(cursor->data_base, cursor->byte_offset);
-            g_open_opcode_handlers[*entry](entry);
+            entry = (s16*)ending_add_pointer_offset(cursor->data_base, cursor->byte_offset);
+            g_ending_opcode_handlers[*entry](entry);
             /* Keeping the cursor base live matches retail; the direct state view is four bytes shorter. */
-            flags = ((open_script_dispatch_state_t*)((u8*)cursor - offsetof(open_script_dispatch_state_t, cursor)))
+            flags = ((ending_script_dispatch_state_t*)((u8*)cursor - offsetof(ending_script_dispatch_state_t, cursor)))
                         ->flags;
-            if ((flags & OPEN_SCRIPT_DISPATCH_RUNNING) == 0) {
+            if ((flags & ENDING_SCRIPT_DISPATCH_RUNNING) == 0) {
                 return 0;
             }
-        } while (flags & OPEN_SCRIPT_DISPATCH_CONTINUE);
+        } while (flags & ENDING_SCRIPT_DISPATCH_CONTINUE);
     }
     return 1;
 }
 
 /* base advanced by byte_offset bytes. Retail keeps this as a call: the
  * dispatcher and opcode 1 reach script data through it. */
-static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset) {
+static u8* ending_add_pointer_offset(u8* base, s32 byte_offset) {
     return base + byte_offset;
 }
 
@@ -965,39 +959,39 @@ static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset) {
  * shifts the top edge of each glyph. The AddPrim calls pass the contents of
  * otag[15] and otag[8], not their addresses: after ClearOTagR those are the
  * addresses of entries 14 and 7, which is where the primitives are linked. */
-void open_script_draw_text_records(u32* otag, s32 graphics_buffer_index) {
+void ending_draw_text_records(u32* otag, s32 graphics_buffer_index) {
     s32 i;
     s32 j;
     s32 prim_index;
     s32 x;
     s32 y;
 
-    if (g_open_script_state.dispatch.flags & OPEN_SCRIPT_DISPATCH_RUNNING) {
-        if (g_open_script_state.opntex.fade_intensity != 0) {
-            AddPrim((void*)otag[15], &g_open_gfx_fade_primitives[graphics_buffer_index]);
+    if (g_ending_script_state.dispatch.flags & ENDING_SCRIPT_DISPATCH_RUNNING) {
+        if (g_ending_script_state.opntex.fade_intensity != 0) {
+            AddPrim((void*)otag[15], &g_ending_fade_primitives[graphics_buffer_index]);
         }
-        AddPrim((void*)otag[8], &g_open_gfx_credit_band_primitives[0]);
-        AddPrim((void*)otag[8], &g_open_gfx_credit_band_primitives[1]);
+        AddPrim((void*)otag[8], &g_ending_credit_band_primitives[0]);
+        AddPrim((void*)otag[8], &g_ending_credit_band_primitives[1]);
         for (i = 0; i < 16; i++) {
-            if (g_open_script_state.records[i].flags & OPEN_SCRIPT_RECORD_ACTIVE) {
+            if (g_ending_script_state.records[i].flags & ENDING_SCRIPT_RECORD_ACTIVE) {
                 prim_index = i * 42;
-                for (j = 0; j < g_open_script_state.records[i].glyph_count; j++, prim_index++) {
-                    x = g_open_script_state.records[i].x + g_open_script_state.records[i].glyphs[j].x - 256;
-                    y = g_open_script_state.records[i].y + g_open_script_state.records[i].glyphs[j].y - 120;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].x0
-                        = x + g_open_script_state.records[i].skew;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].y0 = y;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].x1
-                        = g_open_script_state.records[i].glyphs[j].w + x + g_open_script_state.records[i].skew;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].y1 = y;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].x2 = x;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].y2
-                        = g_open_script_state.records[i].glyphs[j].h + y;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].x3
-                        = g_open_script_state.records[i].glyphs[j].w + x;
-                    g_open_script_glyph_primitives[graphics_buffer_index][prim_index].y3
-                        = g_open_script_state.records[i].glyphs[j].h + y;
-                    AddPrim((void*)otag[8], &g_open_script_glyph_primitives[graphics_buffer_index][prim_index]);
+                for (j = 0; j < g_ending_script_state.records[i].glyph_count; j++, prim_index++) {
+                    x = g_ending_script_state.records[i].x + g_ending_script_state.records[i].glyphs[j].x - 256;
+                    y = g_ending_script_state.records[i].y + g_ending_script_state.records[i].glyphs[j].y - 120;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].x0
+                        = x + g_ending_script_state.records[i].skew;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].y0 = y;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].x1
+                        = g_ending_script_state.records[i].glyphs[j].w + x + g_ending_script_state.records[i].skew;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].y1 = y;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].x2 = x;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].y2
+                        = g_ending_script_state.records[i].glyphs[j].h + y;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].x3
+                        = g_ending_script_state.records[i].glyphs[j].w + x;
+                    g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].y3
+                        = g_ending_script_state.records[i].glyphs[j].h + y;
+                    AddPrim((void*)otag[8], &g_ending_script_glyph_primitives[graphics_buffer_index][prim_index]);
                 }
             }
         }
@@ -1019,16 +1013,16 @@ void open_script_draw_text_records(u32* otag, s32 graphics_buffer_index) {
  * (s3, ahead of the loop counter). The second metrics pointer is a separate
  * variable so the first stays in a0.
  */
-static s32 open_script_build_text_record(u8* text) {
+static s32 ending_build_text_record(u8* text) {
     s32 index;
     s32 i;
     s32 drawn;
     s32 pen;
     s32 width;
     s32 height;
-    open_font_metrics_t* font = g_open_script_font_metrics;
-    open_font_metrics_t* mt;
-    open_font_metrics_t* mt2;
+    ending_font_metrics_t* font = g_ending_script_font_metrics;
+    ending_font_metrics_t* mt;
+    ending_font_metrics_t* mt2;
     s32 value;
     s32 slot;
     POLY_FT4* back;
@@ -1039,7 +1033,7 @@ static s32 open_script_build_text_record(u8* text) {
     u16 tpage;
 
     for (i = 0; i < 16; i++) {
-        if (!(g_open_script_state.records[i].flags & OPEN_SCRIPT_RECORD_ACTIVE)) {
+        if (!(g_ending_script_state.records[i].flags & ENDING_SCRIPT_RECORD_ACTIVE)) {
             break;
         }
     }
@@ -1050,7 +1044,7 @@ static s32 open_script_build_text_record(u8* text) {
 
     index = i;
 
-    g_open_script_state.records[index].flags = OPEN_SCRIPT_RECORD_ACTIVE;
+    g_ending_script_state.records[index].flags = ENDING_SCRIPT_RECORD_ACTIVE;
     pen = 0;
     slot = index * 42;
     drawn = 0;
@@ -1061,80 +1055,80 @@ static s32 open_script_build_text_record(u8* text) {
         }
         if (ch == '$') {
             text++;
-            value = open_text_decode_hex_digit(*text++);
-            g_open_script_state.dispatch.font_index = value;
+            value = ending_decode_hex_digit(*text++);
+            g_ending_script_state.dispatch.font_index = value;
             i--;
         } else if (ch == '^') {
             text++;
-            value = open_text_decode_hex_digit(*text++);
-            g_open_script_state.dispatch.clut = GetClut(value * 16, 0x1e0);
+            value = ending_decode_hex_digit(*text++);
+            g_ending_script_state.dispatch.clut = GetClut(value * 16, 0x1e0);
             i--;
         } else if (ch == '<') {
             text++;
-            value = open_text_decode_hex_digit(*text++);
+            value = ending_decode_hex_digit(*text++);
             pen -= value;
             i--;
         } else if (ch == '>') {
             text++;
-            value = open_text_decode_hex_digit(*text++);
+            value = ending_decode_hex_digit(*text++);
             pen += value;
             i--;
         } else if (ch == '/') {
             text++;
-            value = open_text_decode_hex_digit(*text++);
-            g_open_script_state.dispatch.skew = value;
+            value = ending_decode_hex_digit(*text++);
+            g_ending_script_state.dispatch.skew = value;
             i--;
         } else if (ch == '*') {
             text++;
-            value = open_text_decode_hex_digit(*text++);
-            g_open_script_state.dispatch.wide_glyphs = value;
+            value = ending_decode_hex_digit(*text++);
+            g_ending_script_state.dispatch.wide_glyphs = value;
             i--;
         } else if (ch == '+') {
             text++;
-            pen = open_text_decode_hex_digit(*text++) * 20;
+            pen = ending_decode_hex_digit(*text++) * 20;
             i--;
         } else {
-            value = (ch - 0x20) * 8 + g_open_script_state.dispatch.font_index * 0x380;
+            value = (ch - 0x20) * 8 + g_ending_script_state.dispatch.font_index * 0x380;
             /* Typed pointer addition reverses this retail addu's operands. */
-            mt = (open_font_metrics_t*)(value + (s32)font);
+            mt = (ending_font_metrics_t*)(value + (s32)font);
             if (mt->flags & 1) {
                 text++;
                 i--;
                 pen += mt->width;
             } else {
-                g_open_script_state.records[index].glyphs[drawn].x = pen - mt->bearing;
-                g_open_script_state.records[index].glyphs[drawn].y = -mt->descender;
+                g_ending_script_state.records[index].glyphs[drawn].x = pen - mt->bearing;
+                g_ending_script_state.records[index].glyphs[drawn].y = -mt->descender;
                 width = mt->bearing + mt->width;
                 height = mt->height + mt->descender - 1;
-                g_open_script_state.records[index].glyphs[drawn].w = width;
-                g_open_script_state.records[index].glyphs[drawn].h = height;
-                if (g_open_script_state.dispatch.wide_glyphs == 0) {
-                    g_open_script_state.records[index].glyphs[drawn].x
-                        = g_open_script_state.records[index].glyphs[drawn].x * 2;
-                    g_open_script_state.records[index].glyphs[drawn].w
-                        = g_open_script_state.records[index].glyphs[drawn].w * 2;
+                g_ending_script_state.records[index].glyphs[drawn].w = width;
+                g_ending_script_state.records[index].glyphs[drawn].h = height;
+                if (g_ending_script_state.dispatch.wide_glyphs == 0) {
+                    g_ending_script_state.records[index].glyphs[drawn].x
+                        = g_ending_script_state.records[index].glyphs[drawn].x * 2;
+                    g_ending_script_state.records[index].glyphs[drawn].w
+                        = g_ending_script_state.records[index].glyphs[drawn].w * 2;
                 } else {
-                    g_open_script_state.records[index].glyphs[drawn].x
-                        = g_open_script_state.records[index].glyphs[drawn].x
-                        + g_open_script_state.records[index].glyphs[drawn].x / 2;
-                    g_open_script_state.records[index].glyphs[drawn].w
-                        = g_open_script_state.records[index].glyphs[drawn].w
-                        + g_open_script_state.records[index].glyphs[drawn].w / 2;
+                    g_ending_script_state.records[index].glyphs[drawn].x
+                        = g_ending_script_state.records[index].glyphs[drawn].x
+                        + g_ending_script_state.records[index].glyphs[drawn].x / 2;
+                    g_ending_script_state.records[index].glyphs[drawn].w
+                        = g_ending_script_state.records[index].glyphs[drawn].w
+                        + g_ending_script_state.records[index].glyphs[drawn].w / 2;
                 }
-                front = &g_open_script_glyph_primitives[0][slot];
-                g_open_script_state.records[index].skew = g_open_script_state.dispatch.skew;
+                front = &g_ending_script_glyph_primitives[0][slot];
+                g_ending_script_state.records[index].skew = g_ending_script_state.dispatch.skew;
                 SetPolyFT4(front);
-                back = &g_open_script_glyph_primitives[1][slot];
+                back = &g_ending_script_glyph_primitives[1][slot];
                 SetPolyFT4(back);
                 SetSemiTrans(front, 1);
                 SetSemiTrans(back, 1);
-                tpage = g_open_script_state.dispatch.tpage;
+                tpage = g_ending_script_state.dispatch.tpage;
                 front[16 * 42].tpage = tpage;
-                g_open_script_glyph_primitives[0][slot].tpage = tpage;
+                g_ending_script_glyph_primitives[0][slot].tpage = tpage;
                 drawn++;
-                tpage = g_open_script_state.dispatch.clut;
+                tpage = g_ending_script_state.dispatch.clut;
                 front[16 * 42].clut = tpage;
-                g_open_script_glyph_primitives[0][slot].clut = tpage;
+                g_ending_script_glyph_primitives[0][slot].clut = tpage;
                 setRGB0(front, 0x80, 0x80, 0x80);
                 setRGB0(back, 0x80, 0x80, 0x80);
                 mt2 = font + (value >> 3);
@@ -1149,7 +1143,7 @@ static s32 open_script_build_text_record(u8* text) {
         }
     }
 
-    g_open_script_state.records[index].glyph_count = drawn;
+    g_ending_script_state.records[index].glyph_count = drawn;
     return index + 1;
 }
 
@@ -1159,8 +1153,8 @@ static s32 open_script_build_text_record(u8* text) {
  * The whole pixels moved are added to the y of every active text record and, as a
  * distance, to the scrolled distance opcode 6 waits on. A record that leaves y
  * 0x10..0x100 is released. */
-static void open_script_scroll_text(void) {
-    s32 step = g_open_script_state.dispatch.scroll_speed;
+static void ending_scroll_text(void) {
+    s32 step = g_ending_script_state.dispatch.scroll_speed;
     s32 work;
     s32 index;
 
@@ -1169,23 +1163,23 @@ static void open_script_scroll_text(void) {
     }
 
     if (step > 0) {
-        work = step + g_open_script_scroll_fraction;
-        g_open_script_scroll_fraction = work & 0xff;
+        work = step + g_ending_script_scroll_fraction;
+        g_ending_script_scroll_fraction = work & 0xff;
         work >>= 8;
-        g_open_script_scrolled_distance += work;
+        g_ending_script_scrolled_distance += work;
     } else {
-        work = g_open_script_scroll_fraction - step;
-        g_open_script_scroll_fraction = work & 0xff;
+        work = g_ending_script_scroll_fraction - step;
+        g_ending_script_scroll_fraction = work & 0xff;
         work >>= 8;
-        g_open_script_scrolled_distance += work;
+        g_ending_script_scrolled_distance += work;
         work = -work;
     }
 
     for (index = 0; index < 16; index++) {
-        if (g_open_script_state.records[index].flags & OPEN_SCRIPT_RECORD_ACTIVE) {
-            g_open_script_state.records[index].y += work;
-            if (g_open_script_state.records[index].y < 0x10 || g_open_script_state.records[index].y > 0x100) {
-                g_open_script_state.records[index].flags ^= OPEN_SCRIPT_RECORD_ACTIVE;
+        if (g_ending_script_state.records[index].flags & ENDING_SCRIPT_RECORD_ACTIVE) {
+            g_ending_script_state.records[index].y += work;
+            if (g_ending_script_state.records[index].y < 0x10 || g_ending_script_state.records[index].y > 0x100) {
+                g_ending_script_state.records[index].flags ^= ENDING_SCRIPT_RECORD_ACTIVE;
             }
         }
     }
@@ -1200,7 +1194,7 @@ static void open_script_scroll_text(void) {
  * 2340-byte sectors at single speed), seeks to ENDING.XA, sets the filter to
  * file 1 and the channel in control_parameter (command 0xd, CdlSetfilter),
  * starts a streaming read and waits for it to be acknowledged; control_state
- * counts the steps and open_file_get_cd_sync_state_delta advances it past
+ * counts the steps and file_get_cd_sync_state_delta advances it past
  * each command and back one step on a disc error. A seek (step 5) still
  * unfinished after 120 frames resets the CD subsystem and starts over.
  * Playing: from two seconds in, restarts the sequence if the drive stopped
@@ -1208,44 +1202,44 @@ static void open_script_scroll_text(void) {
  * file's last sector.
  * Stopping: pauses the drive, restores double speed and brings the CD
  * volume back for the streams. */
-static void open_script_update_xa_audio(void) {
+static void ending_update_xa_audio(void) {
     u8 result[8];
     CdlFILTER filter;
     u8 mode;
 
-    if (g_open_script_state.dispatch.flags & OPEN_SCRIPT_DISPATCH_XA_STARTING) {
-        switch (g_open_script_state.control_state) {
+    if (g_ending_script_state.dispatch.flags & ENDING_SCRIPT_DISPATCH_XA_STARTING) {
+        switch (g_ending_script_state.control_state) {
         case 0:
             mode = CdlModeRT | CdlModeSF | CdlModeSize1;
             CdControlF(CdlSetmode, &mode);
             {
-                s32* state = &g_open_script_state.control_state;
+                s32* state = &g_ending_script_state.control_state;
 
                 (*state)++;
             }
             break;
 
         case 4:
-            CdIntToPos(DISC_SECTOR_OPEN_ENDING_XA, &g_main_file_cd_state.position);
-            CdControlF(CdlSeekL, (u8*)&g_main_file_cd_state.position);
+            CdIntToPos(DISC_SECTOR_OPEN_ENDING_XA, &g_file_cd_state.position);
+            CdControlF(CdlSeekL, (u8*)&g_file_cd_state.position);
             {
-                s32* state = &g_open_script_state.control_state;
+                s32* state = &g_ending_script_state.control_state;
 
-                g_main_system_session_frames = 0;
+                g_system_session_frames = 0;
                 (*state)++;
             }
             break;
 
         case 5: {
-            s32 delta = open_file_get_cd_sync_state_delta();
-            s32* state = &g_open_script_state.control_state;
+            s32 delta = file_get_cd_sync_state_delta();
+            s32* state = &g_ending_script_state.control_state;
             s32 value = *state;
 
             *state = value + delta;
 
             /* The frame counter was cleared when the seek was issued. */
-            if (g_main_system_session_frames >= 0x79 && *state == 5) {
-                main_file_reset_cd_subsystems();
+            if (g_system_session_frames >= 0x79 && *state == 5) {
+                file_reset_cd_subsystems();
                 *state = 0;
             }
         } break;
@@ -1253,18 +1247,18 @@ static void open_script_update_xa_audio(void) {
         case 6:
             filter.file = 1;
             {
-                s32 parameter = g_open_script_state.control_parameter;
+                s32 parameter = g_ending_script_state.control_parameter;
 
                 filter.chan = parameter;
             }
             CdControlF(CdlSetfilter, (u8*)&filter);
-            g_open_script_state.control_state++;
+            g_ending_script_state.control_state++;
             break;
 
         case 1:
         case 7: {
-            s32 delta = open_file_get_cd_sync_state_delta();
-            s32* state = &g_open_script_state.control_state;
+            s32 delta = file_get_cd_sync_state_delta();
+            s32* state = &g_ending_script_state.control_state;
             s32 value = *state;
 
             *state = value + delta;
@@ -1273,24 +1267,24 @@ static void open_script_update_xa_audio(void) {
         case 8:
             CdControlF(CdlReadS, 0);
             {
-                s32* state = &g_open_script_state.control_state;
+                s32* state = &g_ending_script_state.control_state;
 
                 (*state)++;
             }
             break;
 
         case 9:
-            if (open_file_get_cd_sync_state_delta() == 1) {
-                u32* control = &g_open_script_state.dispatch.flags;
+            if (file_get_cd_sync_state_delta() == 1) {
+                u32* control = &g_ending_script_state.dispatch.flags;
 
-                g_open_script_state.xa_wait_frames = 0;
-                *control = (*control | OPEN_SCRIPT_DISPATCH_XA_PLAYING) ^ OPEN_SCRIPT_DISPATCH_XA_STARTING;
+                g_ending_script_state.xa_wait_frames = 0;
+                *control = (*control | ENDING_SCRIPT_DISPATCH_XA_PLAYING) ^ ENDING_SCRIPT_DISPATCH_XA_STARTING;
             }
             break;
 
         /* Steps 2 and 3 issue nothing and only wait a frame each. */
         default: {
-            s32* state = &g_open_script_state.control_state;
+            s32* state = &g_ending_script_state.control_state;
 
             (*state)++;
         } break;
@@ -1298,35 +1292,35 @@ static void open_script_update_xa_audio(void) {
     }
 
     {
-        u32* control = &g_open_script_state.dispatch.flags;
+        u32* control = &g_ending_script_state.dispatch.flags;
 
         /* Give the stream two seconds (120 frames) to settle before checking on it. */
-        if (*control & OPEN_SCRIPT_DISPATCH_XA_PLAYING) {
-            g_open_script_state.xa_wait_frames++;
-            if (g_open_script_state.xa_wait_frames < 0x78) {
+        if (*control & ENDING_SCRIPT_DISPATCH_XA_PLAYING) {
+            g_ending_script_state.xa_wait_frames++;
+            if (g_ending_script_state.xa_wait_frames < 0x78) {
                 return;
             }
 
             if (!(CdStatus() & CdlStatRead)) {
-                g_open_script_state.control_state = 0;
-                *control = (*control ^ OPEN_SCRIPT_DISPATCH_XA_PLAYING) | OPEN_SCRIPT_DISPATCH_XA_STARTING;
+                g_ending_script_state.control_state = 0;
+                *control = (*control ^ ENDING_SCRIPT_DISPATCH_XA_PLAYING) | ENDING_SCRIPT_DISPATCH_XA_STARTING;
                 return;
             }
             if (CdControl(CdlGetlocL, 0, result) != 0 && CdPosToInt((CdlLOC*)result) > ENDING_XA_LAST_SECTOR) {
-                open_sound_set_cd_mix_and_volume(0, 1);
-                g_open_script_state.control_state = 0;
-                *control = (*control ^ OPEN_SCRIPT_DISPATCH_XA_PLAYING) | OPEN_SCRIPT_DISPATCH_XA_STOPPING;
+                sound_set_cd_mix_and_volume(0, 1);
+                g_ending_script_state.control_state = 0;
+                *control = (*control ^ ENDING_SCRIPT_DISPATCH_XA_PLAYING) | ENDING_SCRIPT_DISPATCH_XA_STOPPING;
                 return;
             }
         }
     }
 
-    if (g_open_script_state.dispatch.flags & OPEN_SCRIPT_DISPATCH_XA_STOPPING) {
-        switch (g_open_script_state.control_state) {
+    if (g_ending_script_state.dispatch.flags & ENDING_SCRIPT_DISPATCH_XA_STOPPING) {
+        switch (g_ending_script_state.control_state) {
         case 0:
             CdControlF(CdlPause, 0);
             {
-                s32* state = &g_open_script_state.control_state;
+                s32* state = &g_ending_script_state.control_state;
 
                 (*state)++;
             }
@@ -1336,7 +1330,7 @@ static void open_script_update_xa_audio(void) {
             mode = CdlModeSpeed;
             CdControlF(CdlSetmode, &mode);
             {
-                s32* state = &g_open_script_state.control_state;
+                s32* state = &g_ending_script_state.control_state;
 
                 (*state)++;
             }
@@ -1344,23 +1338,23 @@ static void open_script_update_xa_audio(void) {
 
         case 1:
         case 3: {
-            s32 delta = open_file_get_cd_sync_state_delta();
-            s32* state = &g_open_script_state.control_state;
+            s32 delta = file_get_cd_sync_state_delta();
+            s32* state = &g_ending_script_state.control_state;
             s32 value = *state;
 
             *state = value + delta;
         } break;
 
         case 6: {
-            u32* control = &g_open_script_state.dispatch.flags;
+            u32* control = &g_ending_script_state.dispatch.flags;
 
-            *control ^= OPEN_SCRIPT_DISPATCH_XA_STOPPING;
-            open_sound_set_cd_mix_and_volume(0xc0, 1);
+            *control ^= ENDING_SCRIPT_DISPATCH_XA_STOPPING;
+            sound_set_cd_mix_and_volume(0xc0, 1);
         } break;
 
         /* Steps 4 and 5 only wait a frame each. */
         default: {
-            s32* state = &g_open_script_state.control_state;
+            s32* state = &g_ending_script_state.control_state;
 
             (*state)++;
         } break;
@@ -1369,7 +1363,7 @@ static void open_script_update_xa_audio(void) {
 }
 
 /* Value of a hexadecimal digit character, or 0 for any other character. */
-static s32 open_text_decode_hex_digit(s32 character) {
+static s32 ending_decode_hex_digit(s32 character) {
     u32 value = character - '0';
 
     if (value < 10) {
@@ -1391,185 +1385,185 @@ static s32 open_text_decode_hex_digit(s32 character) {
  * Advance the script-controlled screen fade and tint the active fade quad.
  * Block-local control pointers retain the original materialized flag addresses.
  */
-static void open_script_update_screen_fade(void) {
+static void ending_update_screen_fade(void) {
     s32 intensity;
 
     {
-        u32* control = &g_open_script_state.dispatch.flags;
+        u32* control = &g_ending_script_state.dispatch.flags;
         u32 flags;
 
         flags = *control;
-        if (flags & OPEN_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY) {
-            s32 elapsed_frames = g_open_script_state.opntex.fade_elapsed_frames + 1;
-            s32 duration_frames = g_open_script_state.opntex.fade_duration_frames;
+        if (flags & ENDING_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY) {
+            s32 elapsed_frames = g_ending_script_state.opntex.fade_elapsed_frames + 1;
+            s32 duration_frames = g_ending_script_state.opntex.fade_duration_frames;
 
             intensity = (elapsed_frames << 7) / duration_frames;
-            g_open_script_state.opntex.fade_elapsed_frames = elapsed_frames;
+            g_ending_script_state.opntex.fade_elapsed_frames = elapsed_frames;
             if (intensity >= 0x81) {
                 intensity = 0x80;
             }
-            g_open_script_state.opntex.fade_intensity = intensity;
+            g_ending_script_state.opntex.fade_intensity = intensity;
             if (elapsed_frames >= duration_frames) {
-                g_open_script_state.opntex.fade_intensity = 0x80;
-                *control = flags ^ OPEN_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
+                g_ending_script_state.opntex.fade_intensity = 0x80;
+                *control = flags ^ ENDING_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
             }
         }
     }
     {
-        u32* control = &g_open_script_state.dispatch.flags;
+        u32* control = &g_ending_script_state.dispatch.flags;
         u32 flags;
 
         flags = *control;
-        if (flags & OPEN_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY) {
-            s32 elapsed_frames = g_open_script_state.opntex.fade_elapsed_frames + 1;
-            s32 duration_frames = g_open_script_state.opntex.fade_duration_frames;
+        if (flags & ENDING_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY) {
+            s32 elapsed_frames = g_ending_script_state.opntex.fade_elapsed_frames + 1;
+            s32 duration_frames = g_ending_script_state.opntex.fade_duration_frames;
 
-            g_open_script_state.opntex.fade_intensity = 0x80;
-            g_open_script_state.opntex.fade_elapsed_frames = elapsed_frames;
+            g_ending_script_state.opntex.fade_intensity = 0x80;
+            g_ending_script_state.opntex.fade_elapsed_frames = elapsed_frames;
             intensity = 0x80 - (elapsed_frames << 7) / duration_frames;
             if (intensity < 0) {
                 intensity = 0;
             }
-            g_open_script_state.opntex.fade_intensity = intensity;
+            g_ending_script_state.opntex.fade_intensity = intensity;
             if (elapsed_frames >= duration_frames) {
-                g_open_script_state.opntex.fade_intensity = 0;
-                *control = flags ^ OPEN_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;
+                g_ending_script_state.opntex.fade_intensity = 0;
+                *control = flags ^ ENDING_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;
             }
         }
     }
 
-    intensity = g_open_script_state.opntex.fade_intensity;
-    setRGB0(&g_open_gfx_fade_primitives[g_main_gfx_active_buffer_index], intensity, intensity, intensity);
+    intensity = g_ending_script_state.opntex.fade_intensity;
+    setRGB0(&g_ending_fade_primitives[g_gfx_active_buffer_index], intensity, intensity, intensity);
 }
 
 /* Advance the OPNTEX sequence: run down the fade delay of the frame on
  * screen, and when the frame countdown expires load the next frame and start
  * its fade (or stop the sequence after the last frame). */
-static void open_gfx_update_opntex_sequence(void) {
+static void ending_update_opntex_sequence(void) {
     s32 frame;
     u32* source;
 
-    if (g_open_script_state.opntex.frame_duration == 0) {
+    if (g_ending_script_state.opntex.frame_duration == 0) {
         return;
     }
 
-    if (g_open_script_state.opntex.delay != 0) {
-        g_open_script_state.opntex.delay--;
-        if (g_open_script_state.opntex.delay == 0) {
-            g_open_script_state.dispatch.flags |= OPEN_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;
-            g_open_script_state.opntex.fade_intensity = 0x80;
-            g_open_script_state.opntex.fade_elapsed_frames = 0;
-            g_open_script_state.opntex.fade_duration_frames = g_open_script_state.opntex_control_value;
+    if (g_ending_script_state.opntex.delay != 0) {
+        g_ending_script_state.opntex.delay--;
+        if (g_ending_script_state.opntex.delay == 0) {
+            g_ending_script_state.dispatch.flags |= ENDING_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;
+            g_ending_script_state.opntex.fade_intensity = 0x80;
+            g_ending_script_state.opntex.fade_elapsed_frames = 0;
+            g_ending_script_state.opntex.fade_duration_frames = g_ending_script_state.opntex_control_value;
         }
     }
 
-    if (--g_open_script_state.opntex.frame_countdown != 0) {
+    if (--g_ending_script_state.opntex.frame_countdown != 0) {
         return;
     }
 
-    frame = g_open_script_state.opntex.first_frame;
-    if (g_open_script_state.opntex.last_frame < frame) {
-        g_open_script_state.opntex.frame_duration = 0;
+    frame = g_ending_script_state.opntex.first_frame;
+    if (g_ending_script_state.opntex.last_frame < frame) {
+        g_ending_script_state.opntex.frame_duration = 0;
         return;
     }
 
-    source = g_open_gfx_opntex_data;
-    source += frame * OPEN_OPNTEX_FRAME_SECTORS * (0x800 / sizeof(u32));
-    open_gfx_load_opntex_into_frame_buffer(source);
-    g_open_script_state.dispatch.flags |= OPEN_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
-    g_open_script_state.opntex.fade_elapsed_frames = 0;
-    g_open_script_state.opntex.fade_intensity = 0;
-    g_open_script_state.opntex.fade_duration_frames = g_open_script_state.opntex_control_value;
-    g_open_script_state.opntex.first_frame++;
-    g_open_script_state.opntex.frame_countdown = g_open_script_state.opntex.frame_duration;
-    g_open_script_state.opntex.delay
-        = g_open_script_state.opntex.frame_duration - g_open_script_state.opntex_control_value;
+    source = g_gfx_opntex_data;
+    source += frame * TITLE_OPNTEX_FRAME_SECTORS * (0x800 / sizeof(u32));
+    gfx_load_opntex(source);
+    g_ending_script_state.dispatch.flags |= ENDING_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
+    g_ending_script_state.opntex.fade_elapsed_frames = 0;
+    g_ending_script_state.opntex.fade_intensity = 0;
+    g_ending_script_state.opntex.fade_duration_frames = g_ending_script_state.opntex_control_value;
+    g_ending_script_state.opntex.first_frame++;
+    g_ending_script_state.opntex.frame_countdown = g_ending_script_state.opntex.frame_duration;
+    g_ending_script_state.opntex.delay
+        = g_ending_script_state.opntex.frame_duration - g_ending_script_state.opntex_control_value;
 }
 
 /* Start FFTEND.STR (sector 0x21908, ending at frame 0x571) as the first
  * controller. */
-void open_movie_play_end(void) {
-    g_open_current_controller_index = 0;
-    g_main_gfx_active_buffer_index = 0;
-    open_movie_stream_fftend(DISC_SECTOR_OPEN_FFTEND_STR, 0x3858, 0x571);
+void movie_play_ending(void) {
+    g_controller_current_index = 0;
+    g_gfx_active_buffer_index = 0;
+    movie_stream_fftend(DISC_SECTOR_OPEN_FFTEND_STR, 0x3858, 0x571);
 }
 
 /* Start the ending movie at CD mix level 0x7e and push handler 9. The second
  * argument, the stream's length in sectors, is not read. */
-static void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame) {
+static void movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame) {
     s32 controller;
 
     (void)unused;
-    open_movie_start_stream(start_sector, end_frame, -1, 0x7e);
-    g_open_system_runtime_flags &= ~OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-    controller = g_open_current_controller_index;
-    g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_FFTEND_MOVIE;
-    g_open_current_controller_index = controller + 1;
+    movie_start_stream(start_sector, end_frame, -1, 0x7e);
+    g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
+    controller = g_controller_current_index;
+    g_controller_handler_indices[controller] = CONTROLLER_FFTEND_MOVIE;
+    g_controller_current_index = controller + 1;
 }
 
 /* Handler 9, the FFTEND.STR ending movie: Start stops the stream. Once the stream
  * has stopped, by itself or on the update after Start, the display is blanked and
  * the controller is replaced by the ending script. */
-void open_movie_update_fftend(open_controller_record_t* unused_record) {
+void movie_update_fftend(controller_record_t* unused_record) {
     u32 flags;
     s32 controller;
 
-    if (!(g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
+    if (!(g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
         SetDispMask(0);
-        flags = g_open_system_runtime_flags;
-        controller = g_open_current_controller_index;
-        flags |= OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
+        flags = g_system_runtime_flags;
+        controller = g_controller_current_index;
+        flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
         controller--;
-        g_open_system_runtime_flags = flags;
-        g_open_current_controller_index = controller;
-        open_script_push_controller();
+        g_system_runtime_flags = flags;
+        g_controller_current_index = controller;
+        ending_start_script();
         return;
     }
 
-    if (g_open_input_new_button_presses & PSX_PAD_START) {
-        open_movie_stop_stream(1);
+    if (g_input_new_button_presses & PSX_PAD_START) {
+        movie_stop_stream(1);
     }
 }
 
 /* Start the ending script: leave the 320-pixel and 24-bit modes, make each
  * frame's background the picture copied from VRAM
- * (OPEN_SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM), reset the script state, which sets
+ * (SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM), reset the script state, which sets
  * up the 512-pixel screen, select VSync mode 2 and push handler 10. */
-static void open_script_push_controller(void) {
+static void ending_start_script(void) {
     s32 controller;
 
-    g_open_system_runtime_flags &= ~(OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN | OPEN_SYSTEM_RUNTIME_FLAG_RGB24);
-    open_gfx_init_screen_environments(1);
-    g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM;
-    open_script_init_state();
+    g_system_runtime_flags &= ~(SYSTEM_RUNTIME_FLAG_WIDE_SCREEN | SYSTEM_RUNTIME_FLAG_RGB24);
+    gfx_init_screen_environments(1);
+    g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM;
+    ending_init_script();
 
-    controller = g_open_current_controller_index;
-    g_open_system_vsync_mode = 2;
-    g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_SCRIPT;
-    g_open_current_controller_index = controller + 1;
+    controller = g_controller_current_index;
+    g_system_vsync_mode = 2;
+    g_controller_handler_indices[controller] = CONTROLLER_SCRIPT;
+    g_controller_current_index = controller + 1;
 }
 
 /* Handler 10: run the ending script for a frame. When it ends, VSync mode 0 is
  * restored, the controller is popped and OPEN.BIN's loop ends. */
-void open_script_update_controller(open_controller_record_t* unused_record) {
-    if (open_script_run_frame() == 0) {
-        g_open_system_vsync_mode = 0;
-        g_open_current_controller_index--;
-        g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_RUNNING;
+void ending_update_script(controller_record_t* unused_record) {
+    if (ending_run_script_frame() == 0) {
+        g_system_vsync_mode = 0;
+        g_controller_current_index--;
+        g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
     }
 }
 
 /* Opcode 0: end the script. It yields for the frame while the XA start or stop
- * sequence runs; after that it clears OPEN_SCRIPT_DISPATCH_RUNNING, which stops
+ * sequence runs; after that it clears ENDING_SCRIPT_DISPATCH_RUNNING, which stops
  * the dispatcher. Two bytes. */
-void open_opcode_00_end_script(s16* unused_entry) {
-    u32 state = g_open_script_state.dispatch.flags;
+void ending_opcode_00_end_script(s16* unused_entry) {
+    u32 state = g_ending_script_state.dispatch.flags;
 
-    if (state & (OPEN_SCRIPT_DISPATCH_XA_STOPPING | OPEN_SCRIPT_DISPATCH_XA_STARTING)) {
-        g_open_script_state.dispatch.flags = state ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+    if (state & (ENDING_SCRIPT_DISPATCH_XA_STOPPING | ENDING_SCRIPT_DISPATCH_XA_STARTING)) {
+        g_ending_script_state.dispatch.flags = state ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
     } else {
-        g_open_script_state.dispatch.flags = state ^ OPEN_SCRIPT_DISPATCH_RUNNING;
-        g_open_script_state.dispatch.cursor.byte_offset += 2;
+        g_ending_script_state.dispatch.flags = state ^ ENDING_SCRIPT_DISPATCH_RUNNING;
+        g_ending_script_state.dispatch.cursor.byte_offset += 2;
     }
 }
 
@@ -1578,7 +1572,7 @@ void open_opcode_00_end_script(s16* unused_entry) {
  *
  * A coordinate of -1 centers the record on its last glyph's extent. X bit 0x100
  * instead centers the glyph selected by its low byte. */
-void open_opcode_01_create_positioned_text_record(s16* command) {
+void ending_opcode_01_create_positioned_text_record(s16* command) {
     s32 x;
     s32 y;
     s32 index;
@@ -1586,143 +1580,145 @@ void open_opcode_01_create_positioned_text_record(s16* command) {
     command++;
     x = *command++;
     y = *command++;
-    index = open_script_build_text_record(
-        open_script_add_pointer_offset(g_open_script_state.dispatch.cursor.data_base, *command));
+    index = ending_build_text_record(
+        ending_add_pointer_offset(g_ending_script_state.dispatch.cursor.data_base, *command));
     if (index != 0) {
         index--;
         if (x == -1) {
-            s32 last = g_open_script_state.records[index].glyph_count - 1;
+            s32 last = g_ending_script_state.records[index].glyph_count - 1;
 
             x = 256
-                - (g_open_script_state.records[index].glyphs[last].x
-                      + g_open_script_state.records[index].glyphs[last].w)
+                - (g_ending_script_state.records[index].glyphs[last].x
+                      + g_ending_script_state.records[index].glyphs[last].w)
                     / 2;
         }
         if (y == -1) {
-            s32 last = g_open_script_state.records[index].glyph_count - 1;
+            s32 last = g_ending_script_state.records[index].glyph_count - 1;
 
             y = 120
-                - (g_open_script_state.records[index].glyphs[last].y
-                      + g_open_script_state.records[index].glyphs[last].h)
+                - (g_ending_script_state.records[index].glyphs[last].y
+                      + g_ending_script_state.records[index].glyphs[last].h)
                     / 2;
         }
         if (x & 0x100) {
             s32 glyph = x & 0xFF;
 
-            x = 0x100 - g_open_script_state.records[index].glyphs[glyph].x
-                - g_open_script_state.records[index].glyphs[glyph].w / 2;
+            x = 0x100 - g_ending_script_state.records[index].glyphs[glyph].x
+                - g_ending_script_state.records[index].glyphs[glyph].w / 2;
         }
-        g_open_script_state.records[index].x = x;
-        g_open_script_state.records[index].y = y;
+        g_ending_script_state.records[index].x = x;
+        g_ending_script_state.records[index].y = y;
     }
-    g_open_script_state.dispatch.cursor.byte_offset += 8;
+    g_ending_script_state.dispatch.cursor.byte_offset += 8;
 }
 
 /* Opcode 2: set the text scroll speed to command[1] (1/256 pixel per frame,
  * negative for upward) and zero the fraction and the scrolled-distance counter.
  * Four bytes. */
-void open_opcode_02_set_scroll_speed(s16* entry) {
+void ending_opcode_02_set_scroll_speed(s16* entry) {
     const s16* command = entry;
     s32 value = command[1];
-    s32 next = g_open_script_byte_offset + 4;
+    s32 next = g_ending_script_byte_offset + 4;
 
-    g_open_script_state.dispatch.scrolled_distance = 0;
-    g_open_script_state.dispatch.scroll_fraction = 0;
-    g_open_script_state.dispatch.scroll_speed = value;
-    g_open_script_byte_offset = next;
+    g_ending_script_state.dispatch.scrolled_distance = 0;
+    g_ending_script_state.dispatch.scroll_fraction = 0;
+    g_ending_script_state.dispatch.scroll_speed = value;
+    g_ending_script_byte_offset = next;
 }
 
 /* Opcode 3: reveal the screen over command[1] frames, with the overlay in
  * ordering-table entry 2. Four bytes. */
-void open_opcode_03_start_overlay_fade_out(s16* command) {
+void ending_opcode_03_start_overlay_fade_out(s16* command) {
     command++;
-    g_open_gfx_overlay_fade.ot_index = 2;
-    open_gfx_start_overlay_fade_out(*command);
-    g_open_script_state.dispatch.cursor.byte_offset += 4;
+    g_gfx_overlay_fade.ot_index = 2;
+    gfx_start_overlay_fade_out(*command);
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 4: fade the screen to black over command[1] frames, with the overlay in
  * ordering-table entry 2. Four bytes. */
-void open_opcode_04_start_overlay_fade_in(s16* command) {
+void ending_opcode_04_start_overlay_fade_in(s16* command) {
     command++;
-    g_open_gfx_overlay_fade.ot_index = 2;
-    open_gfx_start_overlay_fade_in(*command);
-    g_open_script_state.dispatch.cursor.byte_offset += 4;
+    g_gfx_overlay_fade.ot_index = 2;
+    gfx_start_overlay_fade_in(*command);
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 5: wait command[1] frames. The first call arms the wait and each later
  * call counts one frame, yielding until the count is reached. Four bytes. */
-void open_opcode_05_wait_counted(s16* entry) {
+void ending_opcode_05_wait_counted(s16* entry) {
     u32 flags;
     s32 counter;
-    open_script_dispatch_state_t* state = &g_open_script_state.dispatch;
+    ending_script_dispatch_state_t* state = &g_ending_script_state.dispatch;
 
     flags = state->flags;
     entry++;
-    if (flags & OPEN_SCRIPT_DISPATCH_WAITING) {
+    if (flags & ENDING_SCRIPT_DISPATCH_WAITING) {
         counter = state->wait_counter + 1;
         state->wait_counter = counter;
         if (counter >= *entry) {
-            state->flags = flags ^ OPEN_SCRIPT_DISPATCH_WAITING;
+            state->flags = flags ^ ENDING_SCRIPT_DISPATCH_WAITING;
             state->cursor.byte_offset = state->cursor.byte_offset + 4;
         } else {
-            state->flags = flags ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+            state->flags = flags ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
         }
     } else {
-        state->flags = (flags | OPEN_SCRIPT_DISPATCH_WAITING) ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+        state->flags = (flags | ENDING_SCRIPT_DISPATCH_WAITING) ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
         state->wait_counter = 0;
     }
 }
 
 /* Opcode 6: wait until the text has scrolled command[1] pixels, counted from the
  * call that arms the wait. Four bytes. */
-void open_opcode_06_wait_for_scroll(s16* entry) {
+void ending_opcode_06_wait_for_scroll(s16* entry) {
     u32 flags;
-    open_script_dispatch_state_t* state = &g_open_script_state.dispatch;
+    ending_script_dispatch_state_t* state = &g_ending_script_state.dispatch;
 
     flags = state->flags;
     entry++;
-    if (flags & OPEN_SCRIPT_DISPATCH_WAITING) {
+    if (flags & ENDING_SCRIPT_DISPATCH_WAITING) {
         if (state->scrolled_distance >= *entry) {
-            state->flags = flags ^ OPEN_SCRIPT_DISPATCH_WAITING;
+            state->flags = flags ^ ENDING_SCRIPT_DISPATCH_WAITING;
             state->cursor.byte_offset = state->cursor.byte_offset + 4;
         } else {
-            state->flags = flags ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+            state->flags = flags ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
         }
     } else {
-        state->flags = (flags | OPEN_SCRIPT_DISPATCH_WAITING) ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+        state->flags = (flags | ENDING_SCRIPT_DISPATCH_WAITING) ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
         state->scrolled_distance = 0;
     }
 }
 
 /* Opcode 7: start channel command[1] of ENDING.XA and wait until the start
- * sequence of open_script_update_xa_audio has finished. The CD volume is dropped
+ * sequence of ending_update_xa_audio has finished. The CD volume is dropped
  * to 0 first. The opcode is skipped when XA audio is already playing, starting or
  * stopping. Four bytes. */
-void open_opcode_07_start_xa_audio(s16* command) {
-    u32 flags = g_open_script_state.dispatch.flags;
+void ending_opcode_07_start_xa_audio(s16* command) {
+    u32 flags = g_ending_script_state.dispatch.flags;
 
-    if (flags & OPEN_SCRIPT_DISPATCH_WAITING) {
-        if (flags & OPEN_SCRIPT_DISPATCH_XA_STARTING) {
-            g_open_script_state.dispatch.flags = flags ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+    if (flags & ENDING_SCRIPT_DISPATCH_WAITING) {
+        if (flags & ENDING_SCRIPT_DISPATCH_XA_STARTING) {
+            g_ending_script_state.dispatch.flags = flags ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
             return;
         }
-        g_open_script_state.dispatch.flags = flags ^ OPEN_SCRIPT_DISPATCH_WAITING;
-        g_open_script_state.dispatch.cursor.byte_offset += 4;
+        g_ending_script_state.dispatch.flags = flags ^ ENDING_SCRIPT_DISPATCH_WAITING;
+        g_ending_script_state.dispatch.cursor.byte_offset += 4;
         return;
     }
     if (flags
-        & (OPEN_SCRIPT_DISPATCH_XA_PLAYING | OPEN_SCRIPT_DISPATCH_XA_STOPPING | OPEN_SCRIPT_DISPATCH_XA_STARTING)) {
-        g_open_script_state.dispatch.cursor.byte_offset += 4;
+        & (ENDING_SCRIPT_DISPATCH_XA_PLAYING | ENDING_SCRIPT_DISPATCH_XA_STOPPING
+            | ENDING_SCRIPT_DISPATCH_XA_STARTING)) {
+        g_ending_script_state.dispatch.cursor.byte_offset += 4;
         return;
     }
-    g_open_script_state.control_parameter = command[1];
-    g_open_script_state.control_state = 0;
-    g_open_script_state.dispatch.flags = (flags
-                                             & ~(OPEN_SCRIPT_DISPATCH_CONTINUE | OPEN_SCRIPT_DISPATCH_XA_PLAYING
-                                                 | OPEN_SCRIPT_DISPATCH_XA_STOPPING | OPEN_SCRIPT_DISPATCH_XA_STARTING))
-        | (OPEN_SCRIPT_DISPATCH_WAITING | OPEN_SCRIPT_DISPATCH_XA_STARTING);
-    open_sound_set_cd_mix_and_volume(0, 1);
+    g_ending_script_state.control_parameter = command[1];
+    g_ending_script_state.control_state = 0;
+    g_ending_script_state.dispatch.flags
+        = (flags
+              & ~(ENDING_SCRIPT_DISPATCH_CONTINUE | ENDING_SCRIPT_DISPATCH_XA_PLAYING
+                  | ENDING_SCRIPT_DISPATCH_XA_STOPPING | ENDING_SCRIPT_DISPATCH_XA_STARTING))
+        | (ENDING_SCRIPT_DISPATCH_WAITING | ENDING_SCRIPT_DISPATCH_XA_STARTING);
+    sound_set_cd_mix_and_volume(0, 1);
 }
 
 /* Opcode 8: fade the CD audio in at mix level 0x7a over command[1] * 4 ticks.
@@ -1731,9 +1727,9 @@ void open_opcode_07_start_xa_audio(s16* command) {
  * `command` is not const, matching the script handler type: GCC 2.7.2 marks a
  * load through a const pointer unchanging and would schedule it above the
  * prologue's ra save. */
-void open_opcode_08_start_sound_fade_in(s16* command) {
-    open_sound_set_cd_mix_and_volume(0x7a, command[1] * 4);
-    g_open_script_state.dispatch.cursor.byte_offset += 4;
+void ending_opcode_08_start_sound_fade_in(s16* command) {
+    sound_set_cd_mix_and_volume(0x7a, command[1] * 4);
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 9: fade the CD audio out over command[1] * 4 ticks. Four bytes.
@@ -1741,92 +1737,92 @@ void open_opcode_08_start_sound_fade_in(s16* command) {
  * `command` is not const, matching the script handler type: GCC 2.7.2 marks a
  * load through a const pointer unchanging and would schedule it above the
  * prologue's ra save. */
-void open_opcode_09_start_sound_fade_out(s16* command) {
-    open_sound_set_cd_mix_and_volume(0, command[1] * 4);
-    g_open_script_state.dispatch.cursor.byte_offset += 4;
+void ending_opcode_09_start_sound_fade_out(s16* command) {
+    sound_set_cd_mix_and_volume(0, command[1] * 4);
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 10: stop the XA audio and wait until the stop sequence of
- * open_script_update_xa_audio has finished. The opcode is skipped when XA audio
+ * ending_update_xa_audio has finished. The opcode is skipped when XA audio
  * is neither playing nor starting. Two bytes. */
-void open_opcode_0a_stop_xa_audio(s16* unused_entry) {
-    u32 state = g_open_script_state.dispatch.flags;
+void ending_opcode_0a_stop_xa_audio(s16* unused_entry) {
+    u32 state = g_ending_script_state.dispatch.flags;
 
-    if (state & OPEN_SCRIPT_DISPATCH_WAITING) {
-        if (state & OPEN_SCRIPT_DISPATCH_XA_STOPPING) {
-            g_open_script_state.dispatch.flags = state ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+    if (state & ENDING_SCRIPT_DISPATCH_WAITING) {
+        if (state & ENDING_SCRIPT_DISPATCH_XA_STOPPING) {
+            g_ending_script_state.dispatch.flags = state ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
         } else {
-            g_open_script_state.dispatch.flags = state ^ OPEN_SCRIPT_DISPATCH_WAITING;
-            g_open_script_state.dispatch.cursor.byte_offset += 2;
+            g_ending_script_state.dispatch.flags = state ^ ENDING_SCRIPT_DISPATCH_WAITING;
+            g_ending_script_state.dispatch.cursor.byte_offset += 2;
         }
-    } else if (!(state & (OPEN_SCRIPT_DISPATCH_XA_PLAYING | OPEN_SCRIPT_DISPATCH_XA_STARTING))) {
-        g_open_script_state.dispatch.cursor.byte_offset += 2;
+    } else if (!(state & (ENDING_SCRIPT_DISPATCH_XA_PLAYING | ENDING_SCRIPT_DISPATCH_XA_STARTING))) {
+        g_ending_script_state.dispatch.cursor.byte_offset += 2;
     } else {
-        g_open_script_state.control_state = 0;
-        g_open_script_state.dispatch.flags
+        g_ending_script_state.control_state = 0;
+        g_ending_script_state.dispatch.flags
             = (state
-                  & ~(OPEN_SCRIPT_DISPATCH_CONTINUE | OPEN_SCRIPT_DISPATCH_XA_PLAYING | OPEN_SCRIPT_DISPATCH_XA_STOPPING
-                      | OPEN_SCRIPT_DISPATCH_XA_STARTING))
-            | (OPEN_SCRIPT_DISPATCH_WAITING | OPEN_SCRIPT_DISPATCH_XA_STOPPING);
-        open_sound_set_cd_mix_and_volume(0, 1);
+                  & ~(ENDING_SCRIPT_DISPATCH_CONTINUE | ENDING_SCRIPT_DISPATCH_XA_PLAYING
+                      | ENDING_SCRIPT_DISPATCH_XA_STOPPING | ENDING_SCRIPT_DISPATCH_XA_STARTING))
+            | (ENDING_SCRIPT_DISPATCH_WAITING | ENDING_SCRIPT_DISPATCH_XA_STOPPING);
+        sound_set_cd_mix_and_volume(0, 1);
     }
 }
 
 /* Opcode 11: upload frame command[1] of the loaded OPNTEX data as the picture and
  * set its fade intensity to 0, which hides it. Four bytes. */
-void open_opcode_0b_load_opntex_frame(s16* command) {
-    open_gfx_load_opntex_into_frame_buffer(
-        g_open_gfx_opntex_data + command[1] * OPEN_OPNTEX_FRAME_SECTORS * (0x800 / sizeof(u32)));
-    g_open_script_state.opntex.fade_intensity = 0;
-    g_open_script_state.dispatch.cursor.byte_offset += 4;
+void ending_opcode_0b_load_opntex_frame(s16* command) {
+    gfx_load_opntex(g_gfx_opntex_data + command[1] * TITLE_OPNTEX_FRAME_SECTORS * (0x800 / sizeof(u32)));
+    g_ending_script_state.opntex.fade_intensity = 0;
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 12: fade the OPNTEX picture in over command[1] frames (intensity 0 to
  * 0x80). Four bytes. */
-void open_opcode_0c_start_fade_intensity_increase(s16* command) {
+void ending_opcode_0c_start_fade_intensity_increase(s16* command) {
     s32 value = command[1];
 
-    g_open_script_state.dispatch.flags |= OPEN_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
-    g_open_script_state.opntex.fade_elapsed_frames = 0;
-    g_open_script_state.opntex.fade_intensity = 0;
-    g_open_script_state.opntex.fade_duration_frames = value;
-    g_open_script_state.dispatch.cursor.byte_offset += 4;
+    g_ending_script_state.dispatch.flags |= ENDING_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
+    g_ending_script_state.opntex.fade_elapsed_frames = 0;
+    g_ending_script_state.opntex.fade_intensity = 0;
+    g_ending_script_state.opntex.fade_duration_frames = value;
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 13: fade the OPNTEX picture out over command[1] frames (intensity 0x80
  * to 0). Four bytes. */
-void open_opcode_0d_start_fade_intensity_decrease(s16* command) {
+void ending_opcode_0d_start_fade_intensity_decrease(s16* command) {
     s32 value = command[1];
 
-    g_open_script_state.dispatch.flags |= OPEN_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;
-    g_open_script_state.opntex.fade_elapsed_frames = 0;
-    g_open_script_state.opntex.fade_intensity = 0x80;
-    g_open_script_state.opntex.fade_duration_frames = value;
-    g_open_script_state.dispatch.cursor.byte_offset += 4;
+    g_ending_script_state.dispatch.flags |= ENDING_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;
+    g_ending_script_state.opntex.fade_elapsed_frames = 0;
+    g_ending_script_state.opntex.fade_intensity = 0x80;
+    g_ending_script_state.opntex.fade_duration_frames = value;
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 14: yield each frame until the XA audio is neither playing, starting nor
  * stopping. Two bytes. */
-void open_opcode_0e_wait_for_xa_audio_idle(s16* unused_entry) {
-    u32 state = g_open_script_state.dispatch.flags;
+void ending_opcode_0e_wait_for_xa_audio_idle(s16* unused_entry) {
+    u32 state = g_ending_script_state.dispatch.flags;
 
     if (state
-        & (OPEN_SCRIPT_DISPATCH_XA_PLAYING | OPEN_SCRIPT_DISPATCH_XA_STOPPING | OPEN_SCRIPT_DISPATCH_XA_STARTING)) {
-        g_open_script_state.dispatch.flags = state ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
+        & (ENDING_SCRIPT_DISPATCH_XA_PLAYING | ENDING_SCRIPT_DISPATCH_XA_STOPPING
+            | ENDING_SCRIPT_DISPATCH_XA_STARTING)) {
+        g_ending_script_state.dispatch.flags = state ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
     } else {
-        g_open_script_state.dispatch.cursor.byte_offset += 2;
+        g_ending_script_state.dispatch.cursor.byte_offset += 2;
     }
 }
 
 /* Opcode 15: start a slideshow of OPNTEX frames command[1] to command[2], each on
  * screen for command[3] frames with fades in and out of command[4] frames. The
  * first frame is loaded on the next update. Ten bytes. */
-void open_opcode_0f_start_opntex_sequence(s16* command) {
+void ending_opcode_0f_start_opntex_sequence(s16* command) {
     command++;
-    g_open_script_state.opntex.first_frame = *command++;
-    g_open_script_state.opntex.last_frame = *command++;
-    g_open_script_state.opntex.frame_duration = *command++;
-    g_open_script_state.opntex_control_value = *command++;
-    g_open_script_state.opntex.frame_countdown = 1;
-    g_open_script_state.dispatch.cursor.byte_offset += 10;
+    g_ending_script_state.opntex.first_frame = *command++;
+    g_ending_script_state.opntex.last_frame = *command++;
+    g_ending_script_state.opntex.frame_duration = *command++;
+    g_ending_script_state.opntex_control_value = *command++;
+    g_ending_script_state.opntex.frame_countdown = 1;
+    g_ending_script_state.dispatch.cursor.byte_offset += 10;
 }

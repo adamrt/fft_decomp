@@ -10,22 +10,22 @@
 /* Per-frame handler of the unit list's job page: runs the job list and,
  * once a job is chosen, its ability list, and returns to the unit list when
  * either step reports MENU_JOB_LIST_STEP_CLOSE. */
-void bunit_menu_update_job(void) {
-    if (g_bunit_job_menu_active == 0) {
-        g_bunit_job_menu_active = 1;
-        g_bunit_job_menu_phase = MENU_JOB_LIST_STEP_JOBS;
+void unit_list_update_job_page(void) {
+    if (g_job_list_menu_active == 0) {
+        g_job_list_menu_active = 1;
+        g_job_list_menu_phase = MENU_JOB_LIST_STEP_JOBS;
         menu_set_selection_value(0, 0);
         menu_clear_selection_records();
-        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
-    if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
-        g_bunit_job_menu_phase = bunit_menu_run_job_list();
-    } else if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_ABILITIES) {
-        g_bunit_job_menu_phase = bunit_menu_ability_update_list_menu();
+    if (g_job_list_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
+        g_job_list_menu_phase = job_list_run();
+    } else if (g_job_list_menu_phase == MENU_JOB_LIST_STEP_ABILITIES) {
+        g_job_list_menu_phase = ability_list_update();
     }
-    if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_CLOSE) {
-        g_bunit_menu_current_menu = BUNIT_MENU_UNIT_LIST;
+    if (g_job_list_menu_phase == MENU_JOB_LIST_STEP_CLOSE) {
+        g_unit_list_current_menu = UNIT_LIST_MENU_UNIT_LIST;
         menu_input_clear_state();
-        g_bunit_job_menu_active = 0;
+        g_job_list_menu_active = 0;
     }
 }

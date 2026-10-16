@@ -16,7 +16,7 @@
  * input), and NONE when nothing is held, page scrolling is disabled or input is
  * locked.
  */
-menu_vertical_scroll_direction_e bunit_menu_input_read_page_scroll_direction(void) {
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
     menu_vertical_scroll_direction_e direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input;
     s32 initial_delay;
@@ -37,8 +37,8 @@ menu_vertical_scroll_direction_e bunit_menu_input_read_page_scroll_direction(voi
             }
             /* One variable holds the input and then the speed, as in the target. */
             input = menu_get_event_speed();
-            initial_delay = g_main_input_repeat_initial_delay / input;
-            repeat_period = g_main_input_secondary_repeat_period / input;
+            initial_delay = g_input_repeat_initial_delay / input;
+            repeat_period = g_input_secondary_repeat_period / input;
             held_frames = g_input_page_scroll_hold_frames;
             if ((held_frames < initial_delay) || ((held_frames % repeat_period) == 0)) {
                 if ((held_frames >= 2) && (held_frames < initial_delay)) {

@@ -261,7 +261,7 @@ void battle_effect_start_weapon_hit_secondary(battle_unit_t* unit, s32 is_bow) {
 
     battle_effect_build_secondary_init_from_action(unit, &secondary_init);
     battle_effect_init_weapon_hit_secondary(
-        g_main_item_weapon_data[unit->used_item_or_weapon_id].element, &secondary_init, is_bow);
+        g_item_weapon_data[unit->used_item_or_weapon_id].element, &secondary_init, is_bow);
 }
 
 /* Start the projectile secondary effect of the unit's action: the stone for
@@ -369,7 +369,7 @@ s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id) {
         battle_gfx_prepare_post_action_display(unit);
         return 1;
     }
-    main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+    system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     return 0;
 }
 
@@ -748,9 +748,9 @@ void battle_move_set_velocity_for_contiguous_clamped_steps(
     direction.vz = end_y - start_y;
     direction.vy = end_z - start_z;
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
+    unit->velocity.vx = unit->velocity.vx * g_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_system_vsync_interval;
 }
 
 /*
@@ -834,7 +834,7 @@ void battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
     direction.vz = end_y - start_y;
     direction.vy = end_z - start_z;
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
+    unit->velocity.vx = unit->velocity.vx * g_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_system_vsync_interval;
 }

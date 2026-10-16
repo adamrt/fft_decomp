@@ -22,7 +22,7 @@
  * test) and is cleared after the minus-glyph call, and the if/else spellings
  * of `color` and `value` set the live lengths that put `color` in s6 ahead of
  * `negative` in s7. */
-menu_instruction_t* bunit_menu_opcode_0d_draw_formatted_number(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* command) {
     s8 text[16];
     RECT rect;
     RECT glyph;
@@ -108,7 +108,7 @@ menu_instruction_t* bunit_menu_opcode_0d_draw_formatted_number(menu_instruction_
             value = next_remaining;
         }
     } else {
-        blanks = command->number.width - sprintf(text, g_bunit_text_decimal_format, value) - negative;
+        blanks = command->number.width - sprintf(text, g_unit_list_text_decimal_format, value) - negative;
         text_index = 0;
         for (i = 0; i < command->number.width; i++) {
             x = command->number.x + i * command->number.spacing;

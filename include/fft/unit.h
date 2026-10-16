@@ -255,8 +255,8 @@ enum {
 };
 
 /* Serialized unit-career layout shared by party records and battle stats.
- * main_unit_generate_out_of_battle clears the 0x96-byte span, while
- * main_job_add_proposition_jp and main_unit_copy_party_record establish the
+ * unit_generate_party_record clears the 0x96-byte span, while
+ * job_add_proposition_jp and unit_copy_party_record establish the
  * little-endian byte order of each serialized JP value. Each packed level byte
  * stores the even career index in its high nibble and the following odd index
  * in its low nibble. */
@@ -410,7 +410,7 @@ enum {
 };
 
 /* unit_stats_t.equipment_stats (Battle Stats 0x3c-0x46), filled by
- * main_unit_set_equipment_stats: each hand's weapon power and weapon evade
+ * unit_set_equipment_stats: each hand's weapon power and weapon evade
  * (which battle counts only under Weapon Guard), then the physical evades of
  * the accessory, each hand's shield and the class, then the magic evades of
  * the accessory and each hand's shield. RIGHT_SHIELD comes from
@@ -673,7 +673,7 @@ typedef struct unit_stats {
         u8 movement[3];        /* 0x08; battle_unit_movement_set_N_e */
     } ability_flags;           /* 0x08b */
     unit_career_data_t career; /* 0x096; unlocked jobs, learned abilities, levels and JP */
-    /* main_unit_store_character_names copies 16/16/8/8 bytes to these four
+    /* unit_store_names copies 16/16/8/8 bytes to these four
      * destinations. All names use the game's encoding. */
     u8 name[UNIT_NAME_SIZE];         /* 0x12c */
     u8 job_name[16];                 /* 0x13c */

@@ -22,65 +22,65 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
-static s32 g_main_boot_startup2_has_run = 0;
+static s32 g_boot_startup2_has_run = 0;
 
 /* Set the RAM size to 2 MB, initialize the CD library with debug output off, pause the drive and
  * mark the shared file descriptor idle. */
-static void main_file_reset_cdrom_cpu_ram(void) {
+static void file_reset_cdrom_cpu_ram(void) {
     SetMem(2);
     CdInit();
     CdSetDebug(0);
-    main_file_reset_pause_cdrom(&g_main_file_cd_state);
-    g_main_file_still_loading = 0;
+    file_reset_pause_cdrom(&g_file_cd_state);
+    g_file_still_loading = 0;
 }
 
 /* BATTLE/ZODIAC.BIN is a headerless image, not an executable overlay.
  * Sector 0xec61 supplies 0x10000 bytes: 128 * 256 16-bit VRAM transfer
  * values at (640, 0), subsequently rendered as 8-bit indexed texture data. */
-void main_gfx_load_zodiac_frame(void) {
+void zodiac_load_frame(void) {
     RECT destination = { 640, 0, 128, 256 };
-    u32* image = main_file_load_checked_to_heap(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
+    u32* image = file_load_checked_to_heap(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
 
     LoadImage(&destination, image);
     DrawSync(0);
-    main_heap_free(image);
-    main_gfx_load_frame_bin_into_vram();
+    heap_free(image);
+    gfx_load_frame_bin();
 }
 
 /* Power-on initialization: install the VSync, DrawSync and CD callbacks, start
  * the GPU, pad, SPU and CD, show the two logos, open the memory-card events and
  * load the shared sounds and the zodiac frame while the Squaresoft logo is up.
  *
- * rand is seeded with 1, and g_main_boot_startup2_has_run is cleared so the first
- * main_boot_reset_game_state does not repeat the hardware restart. */
-void main_boot_run_startup(void) {
-    main_heap_clear_game_allocator_table();
+ * rand is seeded with 1, and g_boot_startup2_has_run is cleared so the first
+ * boot_reset_game_state does not repeat the hardware restart. */
+void boot_run_startup(void) {
+    heap_clear_game_table();
     ResetCallback();
 
-    g_main_system_play_time_hours = 0;
-    g_main_system_play_time_minutes = 0;
-    g_main_system_play_time_seconds = 0;
-    g_main_system_play_time_frames = 0;
+    g_save_play_time_hours = 0;
+    g_save_play_time_minutes = 0;
+    g_save_play_time_seconds = 0;
+    g_save_play_time_frames = 0;
 
-    VSyncCallback(main_system_handle_vsync_callback);
-    DrawSyncCallback(main_system_handle_draw_sync_callback);
-    CdReadyCallback(main_file_handle_cd_ready_callback);
-    CdReadCallback(main_file_handle_cd_read_callback);
+    VSyncCallback(system_handle_vsync);
+    DrawSyncCallback(system_handle_draw_sync);
+    CdReadyCallback(file_handle_cd_ready);
+    CdReadCallback(file_handle_cd_read);
 
     ResetGraph(0);
     SetGraphDebug(0);
     PadInit(0);
     SpuInit();
-    main_file_reset_cdrom_cpu_ram();
-    main_gfx_reset_display(256, 240, 512, 0, 0, 0);
-    main_boot_build_and_draw_sceap_logo();
-    main_boot_fade_in_squaresoft_logo();
-    main_card_init_events();
-    main_sound_open_generic_sfx();
-    main_gfx_load_zodiac_frame();
+    file_reset_cdrom_cpu_ram();
+    gfx_reset_display(256, 240, 512, 0, 0, 0);
+    boot_show_sceap_logo();
+    boot_fade_in_squaresoft_logo();
+    memcard_init_events();
+    sound_open_generic_sfx();
+    zodiac_load_frame();
     srand(1);
-    main_boot_fade_out_squaresoft_logo();
-    g_main_boot_startup2_has_run = 0;
+    boot_fade_out_squaresoft_logo();
+    g_boot_startup2_has_run = 0;
 }
 
 /* Prepare a fresh session before the opening runs: reset the 32-bit save values and
@@ -88,77 +88,77 @@ void main_boot_run_startup(void) {
  * tables.
  *
  * On the first pass after power-on only that is done, because
- * main_boot_run_startup has just shown the logos. On every later pass (a soft
+ * boot_run_startup has just shown the logos. On every later pass (a soft
  * reset or the end of the game) it first frees the game heap, unloads the
  * scenario music, zeroes the play time, restarts the GPU, SPU and CD, and shows
  * the Squaresoft logo again for at least 60 frames while the shared sounds and
  * the zodiac frame reload. */
-void main_boot_reset_game_state(void) {
+void boot_reset_game_state(void) {
     int frame;
 
-    if (g_main_boot_startup2_has_run != 0) {
-        main_heap_clear_game_allocator_table();
-        main_sound_unload_scenario_music_and_tunes();
-        g_main_system_play_time_hours = 0;
-        g_main_system_play_time_minutes = 0;
-        g_main_system_play_time_seconds = 0;
-        g_main_system_play_time_frames = 0;
+    if (g_boot_startup2_has_run != 0) {
+        heap_clear_game_table();
+        music_unload_scenario_and_tunes();
+        g_save_play_time_hours = 0;
+        g_save_play_time_minutes = 0;
+        g_save_play_time_seconds = 0;
+        g_save_play_time_frames = 0;
         ResetGraph(1);
         SetGraphDebug(0);
         SpuInitHot();
-        main_file_reset_cdrom_cpu_ram();
-        main_gfx_reset_display(256, 240, 512, 0, 0, 0);
-        main_boot_fade_in_squaresoft_logo();
-        main_sound_open_generic_sfx();
-        main_gfx_load_zodiac_frame();
+        file_reset_cdrom_cpu_ram();
+        gfx_reset_display(256, 240, 512, 0, 0, 0);
+        boot_fade_in_squaresoft_logo();
+        sound_open_generic_sfx();
+        zodiac_load_frame();
     }
 
-    main_save_init_state_and_options();
-    main_status_init_check_data();
-    main_save_init_data_tables();
-    main_item_init_order_tables();
+    save_init_state_and_options();
+    status_init_check_data();
+    save_init_data_tables();
+    item_init_order_tables();
 
-    if (g_main_boot_startup2_has_run != 0) {
+    if (g_boot_startup2_has_run != 0) {
         for (frame = 0; frame < 60; frame++) {
             VSync(0);
         }
-        main_boot_fade_out_squaresoft_logo();
+        boot_fade_out_squaresoft_logo();
     }
 
-    g_main_boot_startup2_has_run = 1;
+    g_boot_startup2_has_run = 1;
 }
 
-/* Start loading the ENTD file that holds g_main_entd_current_event_id into a new
- * 0x14000-byte heap block (g_main_entd_set). The four files cover 128 events
+/* Start loading the ENTD file that holds g_encounter_current_event_id into a new
+ * 0x14000-byte heap block (g_encounter_set). The four files cover 128 events
  * each.
  *
  * Returns 1 once the read is queued, and also for event 0, which loads nothing.
  * Returns 0 with the block freed when the loader is busy; the caller retries. */
-int main_entd_open_file(void) {
+int encounter_open_file(void) {
     int lba;
     entd_file_t* entd_set;
 
-    if (g_main_entd_current_event_id != 0) {
-        if (g_main_entd_current_event_id < ENTD2_FIRST_EVENT) {
-            entd_set = main_heap_alloc(sizeof(entd_file_t));
-            g_main_entd_set = entd_set;
+    if (g_encounter_current_event_id != 0) {
+        if (g_encounter_current_event_id < ENTD2_FIRST_EVENT) {
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
             lba = DISC_SECTOR_BATTLE_ENTD1_ENT;
-        } else if (g_main_entd_current_event_id < ENTD3_FIRST_EVENT) {
-            entd_set = main_heap_alloc(sizeof(entd_file_t));
-            g_main_entd_set = entd_set;
+        } else if (g_encounter_current_event_id < ENTD3_FIRST_EVENT) {
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
             lba = DISC_SECTOR_BATTLE_ENTD2_ENT;
-        } else if (g_main_entd_current_event_id < ENTD4_FIRST_EVENT) {
-            entd_set = main_heap_alloc(sizeof(entd_file_t));
-            g_main_entd_set = entd_set;
+        } else if (g_encounter_current_event_id < ENTD4_FIRST_EVENT) {
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
             lba = DISC_SECTOR_BATTLE_ENTD3_ENT;
         } else {
-            entd_set = main_heap_alloc(sizeof(entd_file_t));
-            g_main_entd_set = entd_set;
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
             lba = DISC_SECTOR_BATTLE_ENTD4_ENT;
         }
 
-        if (main_file_request_read_bytes(lba, sizeof(entd_file_t), entd_set) != 0) {
-            main_heap_call_free(g_main_entd_set);
+        if (file_request_read_bytes(lba, sizeof(entd_file_t), entd_set) != 0) {
+            heap_call_free(g_encounter_set);
             return 0;
         }
     }
@@ -169,19 +169,19 @@ int main_entd_open_file(void) {
  * is no current event, NULL while the file is still loading. Event ids 0-127
  * index the file directly; each further range of 128 ids (the last one
  * open-ended) indexes it from its own base. */
-entd_encounter_t* main_entd_get_encounter(void) {
-    int* event_id = &g_main_entd_current_event_id;
+entd_encounter_t* encounter_get_current(void) {
+    int* event_id = &g_encounter_current_event_id;
     int id;
 
     if (*event_id == 0) {
         return (entd_encounter_t*)-1;
     }
-    if (main_file_is_still_loading() == 0) {
+    if (file_is_still_loading() == 0) {
         id = *event_id;
         if (id < ENTD2_FIRST_EVENT) {
-            return &g_main_entd_set->encounters[id];
+            return &g_encounter_set->encounters[id];
         }
-        return &g_main_entd_set->encounters[id < ENTD3_FIRST_EVENT ? id - ENTD2_FIRST_EVENT
+        return &g_encounter_set->encounters[id < ENTD3_FIRST_EVENT ? id - ENTD2_FIRST_EVENT
                 : id < ENTD4_FIRST_EVENT                           ? id - ENTD3_FIRST_EVENT
                                                                    : id - ENTD4_FIRST_EVENT];
     }
@@ -190,60 +190,60 @@ entd_encounter_t* main_entd_get_encounter(void) {
 
 /* Rebuild the party roster from an event's ENTD: load the ENTD file that holds
  * event_id (blocking), empty the roster, save each of the encounter's 16 unit
- * slots into it through main_unit_save_entd_unit_to_party, and free the file. */
-void main_entd_init_event_unit_data(int event_id) {
+ * slots into it through party_save_encounter_unit, and free the file. */
+void encounter_init_event_units(int event_id) {
     entd_encounter_t* entd;
     int unit_id;
 
-    g_main_entd_current_event_id = event_id;
-    while (main_entd_open_file() == 0) {
+    g_encounter_current_event_id = event_id;
+    while (encounter_open_file() == 0) {
         VSync(0);
-        main_file_poll_load(&g_main_file_cd_state);
+        file_poll_load(&g_file_cd_state);
     }
 
     for (;;) {
-        entd = main_entd_get_encounter();
+        entd = encounter_get_current();
         if (entd == (entd_encounter_t*)-1) {
             break;
         }
         if (entd != 0) {
-            main_party_clear_all();
+            party_clear();
             for (unit_id = 0; unit_id < ENTD_UNITS_PER_ENCOUNTER; unit_id++) {
-                main_unit_save_entd_unit_to_party(entd, unit_id, 0, 1);
+                party_save_encounter_unit(entd, unit_id, 0, 1);
             }
-            main_heap_call_free(g_main_entd_set);
+            heap_call_free(g_encounter_set);
             break;
         }
         VSync(0);
-        main_file_poll_load(&g_main_file_cd_state);
+        file_poll_load(&g_file_cd_state);
     }
 }
 
 /* Empty the inventory, then stock the new-game consumables: five Potions, two each of Hi-Potion,
  * Eye Drop and Phoenix Down, and one of each other basic restorative. */
-void main_item_init_new_game_inventory(void) {
+void item_init_new_game_inventory(void) {
     s32 remaining;
     u8* quantity;
 
-    for (remaining = ITEM_ID_COUNT - 1, quantity = &g_main_item_quantities[ITEM_ID_COUNT - 1]; remaining >= 0;
+    for (remaining = ITEM_ID_COUNT - 1, quantity = &g_item_quantities[ITEM_ID_COUNT - 1]; remaining >= 0;
         remaining--, quantity--) {
         *quantity = 0;
     }
 
-    g_main_item_quantities[ITEM_ID_POTION] = 5;
-    g_main_item_quantities[ITEM_ID_HI_POTION] = 2;
-    g_main_item_quantities[ITEM_ID_X_POTION] = 1;
-    g_main_item_quantities[ITEM_ID_ETHER] = 1;
-    g_main_item_quantities[ITEM_ID_HI_ETHER] = 1;
-    g_main_item_quantities[ITEM_ID_ELIXIR] = 1;
-    g_main_item_quantities[ITEM_ID_ANTIDOTE] = 1;
-    g_main_item_quantities[ITEM_ID_EYE_DROP] = 2;
-    g_main_item_quantities[ITEM_ID_ECHO_GRASS] = 1;
-    g_main_item_quantities[ITEM_ID_MAIDENS_KISS] = 1;
-    g_main_item_quantities[ITEM_ID_SOFT] = 1;
-    g_main_item_quantities[ITEM_ID_HOLY_WATER] = 1;
-    g_main_item_quantities[ITEM_ID_REMEDY] = 1;
-    g_main_item_quantities[ITEM_ID_PHOENIX_DOWN] = 2;
+    g_item_quantities[ITEM_ID_POTION] = 5;
+    g_item_quantities[ITEM_ID_HI_POTION] = 2;
+    g_item_quantities[ITEM_ID_X_POTION] = 1;
+    g_item_quantities[ITEM_ID_ETHER] = 1;
+    g_item_quantities[ITEM_ID_HI_ETHER] = 1;
+    g_item_quantities[ITEM_ID_ELIXIR] = 1;
+    g_item_quantities[ITEM_ID_ANTIDOTE] = 1;
+    g_item_quantities[ITEM_ID_EYE_DROP] = 2;
+    g_item_quantities[ITEM_ID_ECHO_GRASS] = 1;
+    g_item_quantities[ITEM_ID_MAIDENS_KISS] = 1;
+    g_item_quantities[ITEM_ID_SOFT] = 1;
+    g_item_quantities[ITEM_ID_HOLY_WATER] = 1;
+    g_item_quantities[ITEM_ID_REMEDY] = 1;
+    g_item_quantities[ITEM_ID_PHOENIX_DOWN] = 2;
 }
 
 enum {
@@ -256,29 +256,29 @@ enum {
 /* Start a new roster: empty it, then generate Ramza alone (mode 0) or load the
  * party of event 254 from its ENTD (mode 2); any other mode leaves it empty. The
  * inventory is reset to the new-game stock and the war funds to 2000. */
-void main_party_init_new_game(int mode) {
+void party_init_new_game(int mode) {
     screen_init_with_world_text();
-    main_party_clear_all();
+    party_clear();
 
     if (mode == NEW_GAME_GENERATE_DEFAULT_UNIT) {
-        main_party_generate_unit(MAIN_UNIT_TYPE_RAMZA);
+        party_generate_unit(UNIT_TYPE_RAMZA);
     } else if (mode == NEW_GAME_LOAD_EVENT_PARTY) {
-        main_entd_init_event_unit_data(STARTING_EVENT_ID);
+        encounter_init_event_units(STARTING_EVENT_ID);
     }
 
-    main_item_init_new_game_inventory();
+    item_init_new_game_inventory();
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, STARTING_WAR_FUNDS);
 }
 
 /* Store x, y and z in an SVECTOR, truncated to 16 bits. */
-void main_util_set_svector(SVECTOR* vector, s32 x, s32 y, s32 z) {
+void vector_set_svector(SVECTOR* vector, s32 x, s32 y, s32 z) {
     vector->vx = x;
     vector->vy = y;
     vector->vz = z;
 }
 
 /* Store x, y and z in a VECTOR. */
-void main_util_set_vector(VECTOR* vector, s32 x, s32 y, s32 z) {
+void vector_set_vector(VECTOR* vector, s32 x, s32 y, s32 z) {
     vector->vx = x;
     vector->vy = y;
     vector->vz = z;

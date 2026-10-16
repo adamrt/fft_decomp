@@ -35,7 +35,7 @@
  * option equals its g_menu_option_reference_values entry. */
 void option_entrypoint(s32 mode) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
-    game_options_fields_t options = g_main_game_options.fields;
+    game_options_fields_t options = g_game_options.fields;
     s32 i;
     s32 last_mode;
 
@@ -88,7 +88,7 @@ void option_entrypoint(s32 mode) {
  * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread, shows the
  * selected option's value text (g_menu_option_value_text_id_bases[i] + g_menu_option_values[i]),
  * starts menu_run_option_choice on confirm, and each frame packs the option
- * values back into g_main_game_options, applies the sound mode on the main
+ * values back into g_game_options, applies the sound mode on the main
  * stack and reloads the input-repeat timings for the finger-cursor speed.
  *
  * The do/while (0) around the thread lookup is a scheduling barrier: its
@@ -266,26 +266,26 @@ void option_game_options_thread(void) {
             if ((*input0 & PSX_PAD_UP) && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
                     cursor--;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset != 0) {
                     delta = -1;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (layout->hidden_rows == 0) {
                     cursor = layout->row_count - 1;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 }
             } else if ((*input0 & PSX_PAD_DOWN)
                 && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != layout->row_count - 1) {
                     cursor++;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset != layout->hidden_rows) {
                     delta++;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset == 0) {
                     /* row_offset equals hidden_rows here, so the cursor wraps only when no rows are hidden. */
                     cursor = 0;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 }
             } else {
                 timer = 0;
@@ -319,7 +319,7 @@ void option_game_options_thread(void) {
             }
 
             if (*input0 & PSX_PAD_CIRCLE) {
-                g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+                g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                 if (menu_can_accept_input() != 0) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
@@ -360,10 +360,10 @@ void option_game_options_thread(void) {
 
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
-            if (timer < g_main_menu_scroll_accel_delay) {
-                step = g_main_menu_scroll_slow_step * 2;
+            if (timer < g_menu_scroll_accel_delay) {
+                step = g_menu_scroll_slow_step * 2;
             } else {
-                step = g_main_menu_scroll_fast_step * 2;
+                step = g_menu_scroll_fast_step * 2;
             }
             accum += delta * step;
         }
@@ -378,7 +378,7 @@ void option_game_options_thread(void) {
             repeat = script_get_event_initial_repeat_counter();
             delta = 0;
             accum = 0;
-            if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
+            if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
                 *input0 |= *input1 & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
         }
@@ -418,8 +418,8 @@ void option_game_options_thread(void) {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_main_gfx_active_buffer_index);
-        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_main_gfx_active_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_gfx_active_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_gfx_active_buffer_index);
         gfx_draw_or_append_gpu_primitive(&page->title_area.areas[1]);
         gfx_draw_or_append_gpu_primitive(&page->icon_mode);
         gfx_draw_or_append_gpu_primitive(frame);
@@ -434,32 +434,30 @@ void option_game_options_thread(void) {
         /* Apply the option values every frame. g_thread_call_target is the callback that
          * thread_call_on_main_stack runs below with the sound mode. */
         g_thread_call_target = (void (*)(void))suzuki_sound_set_type;
-        g_main_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
-        g_main_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
-        g_main_game_options.fields.multi_height_cursor_speed
-            = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
-        g_main_game_options.fields.finger_cursor_repeat_speed
-            = g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
-        g_main_game_options.fields.message_display_speed = g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
-        g_main_game_options.fields.navigation_messages = g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
-        g_main_game_options.fields.ability_names = g_menu_option_values[GAME_OPTION_ABILITY_NAMES];
-        g_main_game_options.fields.effect_messages = g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES];
-        g_main_game_options.fields.display_gained_exp_jp = g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
-        g_main_game_options.fields.target_flashing = g_menu_option_values[GAME_OPTION_TARGET_FLASHING];
-        g_main_game_options.fields.show_unequippable_items = g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
-        g_main_game_options.fields.max_equip_at_job_change = g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
-        g_main_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
+        g_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
+        g_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
+        g_game_options.fields.multi_height_cursor_speed = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
+        g_game_options.fields.finger_cursor_repeat_speed = g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
+        g_game_options.fields.message_display_speed = g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
+        g_game_options.fields.navigation_messages = g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
+        g_game_options.fields.ability_names = g_menu_option_values[GAME_OPTION_ABILITY_NAMES];
+        g_game_options.fields.effect_messages = g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES];
+        g_game_options.fields.display_gained_exp_jp = g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
+        g_game_options.fields.target_flashing = g_menu_option_values[GAME_OPTION_TARGET_FLASHING];
+        g_game_options.fields.show_unequippable_items = g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
+        g_game_options.fields.max_equip_at_job_change = g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
+        g_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
         thread_call_on_main_stack(g_menu_option_values[GAME_OPTION_SOUND_MODE]);
         i++;
 
         /* `column` is reused as the input-repeat timing profile index. */
-        column = g_main_game_options.fields.finger_cursor_repeat_speed;
-        g_main_input_repeat_initial_delay = g_menu_option_input_repeat_timings[column].initial_delay;
-        g_main_input_repeat_period = g_menu_option_input_repeat_timings[column].repeat_period;
-        g_main_input_secondary_repeat_period = g_menu_option_input_repeat_timings[column].secondary_repeat_period;
-        g_main_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[column].scroll_accel_delay;
-        g_main_menu_scroll_slow_step = g_menu_option_input_repeat_timings[column].scroll_slow_step;
-        g_main_menu_scroll_fast_step = g_menu_option_input_repeat_timings[column].scroll_fast_step;
+        column = g_game_options.fields.finger_cursor_repeat_speed;
+        g_input_repeat_initial_delay = g_menu_option_input_repeat_timings[column].initial_delay;
+        g_input_repeat_period = g_menu_option_input_repeat_timings[column].repeat_period;
+        g_input_secondary_repeat_period = g_menu_option_input_repeat_timings[column].secondary_repeat_period;
+        g_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[column].scroll_accel_delay;
+        g_menu_scroll_slow_step = g_menu_option_input_repeat_timings[column].scroll_slow_step;
+        g_menu_scroll_fast_step = g_menu_option_input_repeat_timings[column].scroll_fast_step;
     }
 
     menu_free_memory(buffer);

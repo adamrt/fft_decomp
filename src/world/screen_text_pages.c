@@ -57,7 +57,7 @@ static u8* screen_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offse
         if (offset < 0) {
             *row_offset = 0;
         }
-        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
         changed = 1;
     } else if ((*input0 & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
         offset = layout->row_count + *row_offset;
@@ -65,7 +65,7 @@ static u8* screen_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offse
         if (layout->hidden_rows < offset) {
             *row_offset = layout->hidden_rows;
         }
-        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
         changed = 1;
     } else if (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0) {
         changed = 1;
@@ -261,28 +261,28 @@ void screen_text_list_thread(void) {
             if ((*input0 & PSX_PAD_UP) && !(*input1 & PSX_PAD_SQUARE)) {
                 if (cursor != 0) {
                     cursor--;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset != 0) {
                     delta = -1;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (layout->hidden_rows == 0) {
                     cursor = layout->row_count - 1;
                     if (layout->row_count != 1) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                     }
                 }
             } else if ((*input0 & PSX_PAD_DOWN) && !(*input1 & PSX_PAD_SQUARE)) {
                 if (cursor != layout->row_count - 1) {
                     cursor++;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset != layout->hidden_rows) {
                     delta++;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset == 0) {
                     /* row_offset equals hidden_rows here, so the cursor wraps only when no rows are hidden. */
                     cursor = 0;
                     if (layout->row_count != 1) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                     }
                 }
             } else {
@@ -358,10 +358,10 @@ void screen_text_list_thread(void) {
 
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
-            if (timer < g_main_menu_scroll_accel_delay) {
-                step = g_main_menu_scroll_slow_step;
+            if (timer < g_menu_scroll_accel_delay) {
+                step = g_menu_scroll_slow_step;
             } else {
-                step = g_main_menu_scroll_fast_step;
+                step = g_menu_scroll_fast_step;
             }
             accum += delta * (step << 1);
         }
@@ -375,7 +375,7 @@ void screen_text_list_thread(void) {
             repeat = script_get_event_initial_repeat_counter();
             delta = 0;
             accum = 0;
-            if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
+            if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
                 *input0 |= *input1 & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
             menu_free_memory(buffer);
@@ -406,7 +406,7 @@ void screen_text_list_thread(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_main_gfx_active_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_active_buffer_index);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);

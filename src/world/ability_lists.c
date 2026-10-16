@@ -135,24 +135,24 @@ s32 formation_ability_learn_list(void) {
             index = g_menu_list_selected_index;
             /* DISABLED in the learn list: the unit cannot pay the JP. */
             if (g_menu_ability_entries[index] >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
-                message_box_show_with_sound(0xc009, MAIN_SFX_ERROR_MESSAGE);
+                message_box_show_with_sound(0xc009, SOUND_SFX_ERROR_MESSAGE);
             } else if (formation_ability_is_learned(index) != 0) {
-                g_sound_queued_effect_id = MAIN_SFX_INVALID;
+                g_sound_queued_effect_id = SOUND_SFX_INVALID;
             } else {
                 g_formation_ability_learn_confirm_prompt_state
                     = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_formation_ability_learn_confirm_menu);
-                g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+                g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 g_formation_ability_learn_confirm_submenu.selected_index = 0;
                 g_sound_suppressed = 1;
             }
         } else if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
             g_formation_ability_learn_ability_list_open = 0;
-            g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+            g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_formation_cursor_ot_override = 0;
             return MENU_JOB_LIST_STEP_JOBS;
         }
         category = menu_update_horizontal_selection_and_mark_change(
-            4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, MAIN_SFX_PAGE_SWITCH);
+            4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, SOUND_SFX_PAGE_SWITCH);
         if (category != g_formation_ability_category) {
             menu_set_selection_record(g_formation_ability_category + 10, g_menu_list_selected_index,
                 g_menu_scroll_base_index, g_menu_ability_entries);
@@ -172,12 +172,12 @@ s32 formation_ability_learn_list(void) {
                 formation_ability_learn(g_unit_selected_index, g_formation_ability_learn_selected_job,
                     g_menu_ability_entries[g_menu_list_selected_index]);
                 /* `category` doubles as the JP cost; a separate local changes the register allocation. */
-                category = g_main_ability_data[g_menu_ability_entries[g_menu_list_selected_index]].jp_cost;
+                category = g_ability_data[g_menu_ability_entries[g_menu_list_selected_index]].jp_cost;
                 g_formation_unit_pointers[g_unit_selected_index]
                     ->job_points.current.values[g_formation_ability_learn_selected_job_index] -= category;
-                main_sound_play_sfx_find_channel(MAIN_SFX_ABILITY_LEARNED);
+                sound_play_sfx_on_free_channel(SOUND_SFX_ABILITY_LEARNED);
             } else if (g_screen_selection_results[5] == 1) {
-                g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+                g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             }
             g_sound_suppressed = 0;
             ability_build_list(g_unit_selected_index, g_formation_ability_learn_selected_job,
@@ -220,7 +220,7 @@ void formation_ability_view_menu(void) {
         g_formation_equipment_panel_thread_params.style = 1;
         screen_init_cursor_position(SCREEN_CURSOR_ABILITY_TAB, 0);
         menu_clear_selection_records();
-        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
     if (g_formation_ability_view_step == MENU_JOB_LIST_STEP_JOBS) {
         g_formation_ability_view_step = formation_ability_learn_job_list();
@@ -299,16 +299,16 @@ static s32 formation_ability_view_list(void) {
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_formation_ability_view_list_initialized = 0;
-        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_JOBS;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         g_formation_ability_view_list_initialized = 0;
-        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
     category = menu_update_horizontal_selection_and_mark_change(
-        4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
+        4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
     if (category != g_formation_ability_category) {
         menu_set_selection_record(g_formation_ability_category + 10, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_menu_ability_entries);
@@ -457,7 +457,7 @@ void formation_dismiss_menu(void) {
     if (g_formation_dismiss_prompt_running == 0) {
         sprite = g_unit_selected_index;
         if (g_formation_unit_pointers[sprite]->proposition_status != 0) {
-            message_box_show_with_sound(0xC012, MAIN_SFX_ERROR_MESSAGE);
+            message_box_show_with_sound(0xC012, SOUND_SFX_ERROR_MESSAGE);
             g_formation_dismiss_step = 2;
             g_formation_dismiss_prompt_running = 1;
         } else {
@@ -540,9 +540,9 @@ void formation_dismiss_menu(void) {
                 selection = g_screen_selection_results[10];
                 g_sound_suppressed = step;
                 if (selection == 0) {
-                    g_sound_queued_effect_id = MAIN_SFX_DISMISS;
+                    g_sound_queued_effect_id = SOUND_SFX_DISMISS;
                 } else if (selection == step) {
-                    g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+                    g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 }
                 /* A default assignment plus a conditional override, not an
                  * if/else over the two stores: the target puts `li v1,1` in the
@@ -551,7 +551,7 @@ void formation_dismiss_menu(void) {
                  * branch sense and orders the two `li`s the other way, which
                  * also costs the store's register. */
                 step = 1;
-                if (g_sound_queued_effect_id != MAIN_SFX_NONE) {
+                if (g_sound_queued_effect_id != SOUND_SFX_NONE) {
                     step = 0x64;
                 }
                 g_formation_dismiss_step = step;
@@ -600,7 +600,7 @@ void shop_cash_out_excess_items(void) {
     s32 item_id = 0;
     s32 excess;
     s32 price;
-    u8* quantity = g_main_item_quantities;
+    u8* quantity = g_item_quantities;
 
     for (; item_id < ITEM_ID_END - 1; item_id++) {
         excess = item_get_total_count(item_id);

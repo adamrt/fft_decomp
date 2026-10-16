@@ -17,7 +17,7 @@
  * menu_vertical_scroll_direction_e value, UP or DOWN on the first held frame and on each
  * repeat, WAIT on the held frames in between, NONE when nothing is held, page scrolling is
  * disabled or input is locked. */
-s32 equip_input_read_page_scroll_direction(void) {
+s32 equipment_input_read_page_scroll_direction(void) {
     s32 direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input;
     s32 initial_delay;
@@ -37,8 +37,8 @@ s32 equip_input_read_page_scroll_direction(void) {
         }
         /* One variable holds the input and then the speed, as in the target. */
         input = g_menu_event_speed;
-        initial_delay = g_main_input_repeat_initial_delay / input;
-        repeat_period = g_main_input_secondary_repeat_period / input;
+        initial_delay = g_input_repeat_initial_delay / input;
+        repeat_period = g_input_secondary_repeat_period / input;
         held_frames = g_input_page_scroll_hold_frames;
         if ((held_frames < initial_delay) || ((held_frames % repeat_period) == 0)) {
             if ((held_frames >= 2) && (held_frames < initial_delay)) {
@@ -52,17 +52,17 @@ s32 equip_input_read_page_scroll_direction(void) {
 }
 
 /* Reset primitive counts, swap packet buffers, and clear the active OT tail. */
-void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
+void equipment_gfx_swap_context(s32 first_otag, s32 unused) {
     DRAWENV environment;
     menu_gfx_context_t* buffer;
 
     g_gfx_poly_f3_count = 0;
     g_gfx_poly_ft3_count = 0;
-    g_equip_gfx_poly_f4_count = 0;
+    g_equipment_gfx_poly_f4_count = 0;
     g_menu_gfx_poly_ft4_count = 0;
     g_gfx_poly_g3_count = 0;
     g_gfx_poly_gt3_count = 0;
-    g_equip_gfx_poly_g4_count = 0;
+    g_equipment_gfx_poly_g4_count = 0;
     g_gfx_poly_gt4_count = 0;
     g_gfx_line_f2_count = 0;
     g_gfx_line_f3_count = 0;
@@ -81,7 +81,7 @@ void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
     g_menu_gfx_draw_area_count = 0;
     g_menu_gfx_draw_mode_count = 0;
     GetDrawEnv(&environment);
-    buffer = g_equip_gfx_context_base;
+    buffer = g_equipment_gfx_context_base;
     g_menu_gfx_drawenv_y = environment.clip.y;
     if (g_menu_gfx_context == buffer) {
         buffer++;
@@ -93,7 +93,7 @@ void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
 /* Initialize the LINE_F2, POLY_F4, POLY_FT4, TILE and DR_MOVE primitive
  * headers of one graphics context, up to each pool's capacity; the quads
  * also get texture shading enabled. */
-static void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
+static void equipment_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
     s32 i;
 
     for (i = 0; i < g_gfx_line_f2_capacity; i++) {
@@ -110,17 +110,17 @@ static void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
     for (i = 0; i < g_gfx_tile_capacity; i++) {
         SetTile(&context->tiles[i]);
     }
-    for (i = 0; i < g_equip_gfx_draw_move_capacity; i++) {
+    for (i = 0; i < g_equipment_gfx_draw_move_capacity; i++) {
         SetDrawMove(&context->draw_moves[i]);
     }
 }
 
-#define EQUIP_GFX_CONTEXT_COUNT 2
+#define EQUIPMENT_GFX_CONTEXT_COUNT 2
 
 /* Partition each primitive pool across the two graphics contexts.
  *
  * Each pointer uses its pool's 16-bit capacity and the context index. */
-void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
+void equipment_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
     POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
@@ -128,11 +128,11 @@ void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_
     s32 index;
     menu_gfx_context_t* context;
 
-    g_equip_gfx_context_base = base;
+    g_equipment_gfx_context_base = base;
     g_menu_gfx_context = base;
 
-    for (index = 0; index < EQUIP_GFX_CONTEXT_COUNT; index++) {
-        context = &g_equip_gfx_context_base[index];
+    for (index = 0; index < EQUIPMENT_GFX_CONTEXT_COUNT; index++) {
+        context = &g_equipment_gfx_context_base[index];
 
         context->otag = otag + g_gfx_otag_length * index;
         context->flat_triangles = poly_f3 + g_gfx_poly_f3_capacity * index;
@@ -146,8 +146,8 @@ void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_
         context->flat_lines = line_f2 + g_gfx_line_f2_capacity * index;
         context->flat_lines_3 = line_f3 + g_gfx_line_f3_capacity * index;
         context->flat_lines_4 = line_f4 + g_gfx_line_f4_capacity * index;
-        context->gouraud_lines = line_g2 + g_equip_gfx_line_g2_capacity * index;
-        context->gouraud_lines_3 = line_g3 + g_equip_gfx_line_g3_capacity * index;
+        context->gouraud_lines = line_g2 + g_equipment_gfx_line_g2_capacity * index;
+        context->gouraud_lines_3 = line_g3 + g_equipment_gfx_line_g3_capacity * index;
         context->gouraud_lines_4 = line_g4 + g_gfx_line_g4_capacity * index;
         context->tiles = tiles + g_gfx_tile_capacity * index;
         context->tiles_1 = tiles_1 + g_gfx_tile_1_capacity * index;
@@ -156,13 +156,13 @@ void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_
         context->sprites = sprites + g_gfx_sprite_capacity * index;
         context->sprites_8 = sprites_8 + g_gfx_sprite_8_capacity * index;
         context->sprites_16 = sprites_16 + g_gfx_sprite_16_capacity * index;
-        context->draw_moves = draw_moves + g_equip_gfx_draw_move_capacity * index;
-        context->draw_areas = draw_areas + g_equip_gfx_draw_area_capacity * index;
+        context->draw_moves = draw_moves + g_equipment_gfx_draw_move_capacity * index;
+        context->draw_areas = draw_areas + g_equipment_gfx_draw_area_capacity * index;
         context->draw_modes = draw_modes + g_gfx_draw_mode_capacity * index;
 
-        equip_gfx_init_primitive_buffers(context);
+        equipment_gfx_init_primitive_buffers(context);
     }
 
-    equip_gfx_swap_context_and_clear_otag(0, -1);
-    equip_gfx_swap_context_and_clear_otag(0, -1);
+    equipment_gfx_swap_context(0, -1);
+    equipment_gfx_swap_context(0, -1);
 }

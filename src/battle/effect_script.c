@@ -219,20 +219,20 @@ static void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_l
 
 /* Report an effect stub and return zero. */
 s32 battle_effect_report_0x320_return_zero(void) {
-    main_system_report_stub(1, 0x320);
+    system_report_stub(1, 0x320);
     return 0;
 }
 
 /* Report an effect stub. */
 void battle_effect_report_0x320_1(void) {
-    main_system_report_stub(1, 0x320);
+    system_report_stub(1, 0x320);
 }
 
-/* Calls the empty main_system_report_stub with (1, 0x320) from a 0x100-byte frame it
+/* Calls the empty system_report_stub with (1, 0x320) from a 0x100-byte frame it
  * does not use. No code calls it. */
 void battle_effect_report_0x320_2(void) {
     s32 unused[0x40];
-    main_system_report_stub(1, 0x320);
+    system_report_stub(1, 0x320);
 }
 
 /* Seek the CD to the effect file of g_battle_ability_effect_id: the read request
@@ -249,7 +249,7 @@ void battle_effect_seek_file(void) {
         g_battle_ability_effect_id = EFFECT_FILE_CURE;
         battle_effect_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
     }
-    main_file_request_read_bytes(lba, byte_length, 0);
+    file_request_read_bytes(lba, byte_length, 0);
 }
 
 /*
@@ -266,7 +266,7 @@ s32 battle_effect_update_file_load(void) {
     s32 result;
     s32 lba;
     s32 byte_length;
-    u8* destination = g_main_heap_companion_overlay_load_address + 0x3500;
+    u8* destination = g_heap_companion_overlay_load_address + 0x3500;
 
     if (g_battle_ability_effect_id >= 0) {
         switch (g_battle_effect_load_state) {
@@ -281,14 +281,14 @@ s32 battle_effect_update_file_load(void) {
                 g_battle_ability_effect_id = EFFECT_FILE_CURE;
                 battle_effect_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
             }
-            result = main_file_request_read_bytes(lba, byte_length, destination);
+            result = file_request_read_bytes(lba, byte_length, destination);
             if (result == 0) {
                 g_battle_effect_load_state = EFFECT_LOAD_READING;
                 result = 1;
             }
             break;
         case EFFECT_LOAD_READING:
-            result = main_file_is_still_loading();
+            result = file_is_still_loading();
             if (result == 0) {
                 g_battle_effect_load_state = EFFECT_LOAD_COUNTDOWN;
                 result = 1;
@@ -306,7 +306,7 @@ s32 battle_effect_update_file_load(void) {
             battle_effect_init_flags_section_pointer(g_battle_ability_effect_id);
             /* An `lw` of the section's leading 32-bit value, not a byte test. */
             if (g_battle_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
-                main_sound_set_current_music_volume(0x40, 0xF0);
+                music_set_volume(0x40, 0xF0);
             }
             result = 1;
             break;
@@ -462,7 +462,7 @@ static s32 battle_effect_update_stage(void) {
         break;
     case EFFECT_PLAYBACK_PHASE_START_SCRIPT:
         battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
-            g_main_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
+            g_heap_battle_end_address - (u32)g_battle_effect_palette_ptr);
         battle_effect_reset_subsystems();
         battle_effect_seed_camera_tracks();
         battle_state_clear_min_vsync_interval();
@@ -488,7 +488,7 @@ static s32 battle_effect_update_stage(void) {
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_RUNNING:
-        g_battle_effect_otag = main_gfx_get_battle_otag();
+        g_battle_effect_otag = gfx_get_battle_otag();
         battle_effect_start_render_frame();
         while (id != 0) {
             next = g_battle_effect_state_records[id].next_index;
@@ -503,7 +503,7 @@ static s32 battle_effect_update_stage(void) {
             result = 1;
         } else {
             if (g_battle_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
-                main_sound_set_current_music_volume_timed(0x78);
+                music_set_volume_timed(0x78);
             }
             if (g_battle_effect_sound_section_ptr != 0) {
                 suzuki_sound_remove_resource(g_battle_effect_sound_section_ptr);
@@ -519,7 +519,7 @@ static s32 battle_effect_update_stage(void) {
         break;
     case EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT:
         battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
-            g_main_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
+            g_heap_battle_end_address - (u32)g_battle_effect_palette_ptr);
         battle_effect_reset_subsystems();
         battle_effect_reset_frame_data_pointer();
         battle_effect_reset_animation_sequences_pointer();
@@ -707,7 +707,7 @@ static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16
  * $v0 still holds this handler's address, which battle_effect_run_block treats as 'continue'
  * without the pc moving, so an invalid opcode hangs the script loop. */
 effect_script_result_e battle_effect_code_script_2e_invalid(effect_record_t* unused_record) {
-    main_system_report_stub(1, 0x22);
+    system_report_stub(1, 0x22);
     /* Retail leaves the dispatch result undefined after an invalid opcode. */
 }
 

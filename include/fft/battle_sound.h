@@ -21,7 +21,7 @@ extern s32 g_battle_sound_music_volume_transition_request;
 extern u16 g_battle_sound_music_track_index; /* zero-based music slot */
 
 /* unit sound effects */
-/* main_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
+/* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
  * hit, and the hit a shield or Golem stops (battle_sound_play_weapon_sfx). */
 extern u8 g_battle_sound_weapon_swing_sfx_ids[];
 extern u8 g_battle_sound_weapon_hit_sfx_ids[];

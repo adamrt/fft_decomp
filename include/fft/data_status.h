@@ -73,7 +73,7 @@ typedef enum status_id {
 
 /* status sets */
 /* A unit's innate, immunity and current statuses, STATUS_BYTE_COUNT bytes
- * each. main_unit_copy_job_data copies the three sets as one 15-byte block, so
+ * each. unit_copy_job_data copies the three sets as one 15-byte block, so
  * they stay one aggregate that a whole-block byte copy can span; status readers
  * use the named sets. */
 typedef struct status_sets {
@@ -94,7 +94,7 @@ typedef struct initial_status_sets {
 typedef char initial_status_sets_size_must_be_15[(sizeof(initial_status_sets_t) == 15) ? 1 : -1];
 
 /* status effect records */
-/* One record per status id in g_main_status_effect_data. */
+/* One record per status id in g_status_effect_data. */
 typedef struct status_effect_data {
     u8 _unused_00[2];
     u8 order;
@@ -127,8 +127,8 @@ typedef enum status_effect_flags_2 {
 } status_effect_flags_2_e;
 
 /* check sets */
-/* Rows of g_main_status_check_sets. main_status_init_check_data builds rows 0
- * to 9 from the flag bytes of g_main_status_effect_data and writes row 10
+/* Rows of g_status_check_sets. status_init_check_data builds rows 0
+ * to 9 from the flag bytes of g_status_effect_data and writes row 10
  * itself. Each enumerator's comment lists the statuses its row holds in this
  * release, then what the row is used for. */
 typedef enum status_check_set {

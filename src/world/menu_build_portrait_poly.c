@@ -19,7 +19,7 @@
  * slot (no sprite set) gets code 0.
  */
 void menu_build_portrait_poly(s32 roster_slot, POLY_FT4* poly) {
-    party_unit_t* party = main_party_get_unit(roster_slot);
+    party_unit_t* party = party_get_unit(roster_slot);
     job_data_t* job;
     u32 sprite = party->sprite_set;
     u8 job_id;
@@ -42,7 +42,7 @@ void menu_build_portrait_poly(s32 roster_slot, POLY_FT4* poly) {
                 sprite = offset + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
             }
         } else {
-            job = main_job_get_data_pointer(party->job_id);
+            job = job_get_data(party->job_id);
             sprite = job->spritesheet_id;
         }
         current_job = party->job_id;

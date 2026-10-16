@@ -12,11 +12,11 @@
  * 6x11 digits, 1 the 8x14 ones, 2 and up the 10x16 digits (eight to a row from u 0x20)
  * in the window CLUT. The getter is given the command's value, or the list row inside a
  * scrollable list; a negative result gets a minus sign before the first cell. */
-menu_instruction_t* equip_menu_opcode_0d_draw_formatted_number(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* data) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     RECT minus_rect;
-    equip_row_callback_t callback;
+    menu_row_callback_t callback;
     s32 arg;
     s32 y;
     s32 value;
@@ -89,7 +89,7 @@ menu_instruction_t* equip_menu_opcode_0d_draw_formatted_number(menu_instruction_
         }
         return menu_next_instruction(data);
     }
-    pad = data->number.width - sprintf(text, g_equip_text_decimal_format, value) - negative;
+    pad = data->number.width - sprintf(text, g_equipment_text_decimal_format, value) - negative;
     pos = 0;
     for (i = 0; i < data->number.width; i++) {
         cell_x = data->number.x + (i * data->number.spacing);

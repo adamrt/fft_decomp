@@ -17,7 +17,7 @@ s32 screen_input_read(s32 unused_0) {
     } else {
         input = PadRead(0);
     }
-    if (input == MAIN_INPUT_RESET_BUTTONS) {
+    if (input == INPUT_RESET_BUTTONS) {
         save_close_stub();
         screen_reset_game();
     }

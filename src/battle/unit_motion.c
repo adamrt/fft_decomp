@@ -36,7 +36,7 @@ void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* pos
     battle_gfx_cycle_tile_glow_palettes();
     SetRotMatrix(&g_battle_camera_matrix);
     SetTransMatrix(&g_battle_camera_matrix);
-    main_util_set_svector(position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
+    vector_set_svector(position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
         g_battle_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
     position->vy = battle_map_calculate_slope_height(position, (u8)g_battle_cursor_z);
     tile = battle_map_get_tile_data_pointer(
@@ -70,13 +70,13 @@ void battle_target_draw_cursor_with_tile_glow(void) {
     battle_target_project_cursor_tile_to_screen(&projected, &position, &raised);
     /* The projected z is the ordering-table depth for the cursor glow. */
     depth = projected.vz / 4;
-    battle_gfx_draw_map_selection_cursor(&position, main_gfx_get_battle_otag());
+    battle_gfx_draw_map_selection_cursor(&position, gfx_get_battle_otag());
     /* The polygon routine reads the same three 16-bit values in renderer x, z, y order. */
     shape = battle_target_calculate_cursor_tile_polygon(&position, g_battle_cursor_z, &corner0);
     tile
         = battle_map_get_tile_data_pointer(position.vx / MAP_TILE_SIZE, position.vz / MAP_TILE_SIZE, g_battle_cursor_z);
     battle_gfx_build_cursor_tile_glow(
-        tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, main_gfx_get_battle_otag() + depth);
+        tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, gfx_get_battle_otag() + depth);
 }
 
 /*
@@ -95,14 +95,14 @@ void battle_gfx_draw_wait_direction_unit(void) {
     SetRotMatrix(&g_battle_camera_matrix);
     SetTransMatrix(&g_battle_camera_matrix);
     unit = battle_unit_get_source();
-    main_util_set_svector(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
+    vector_set_svector(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
     /* The second RotTrans overwrites this result unread. */
     RotTrans(&base, &transformed, &flag);
     battle_camera_get_tile_depth_point_unbiased(&unit->world_coords, &raised);
     raised.vy -= 48;
     RotTrans(&raised, &transformed, &flag);
     depth = transformed.vz / 4;
-    ot = main_gfx_get_battle_otag();
+    ot = gfx_get_battle_otag();
     battle_gfx_draw_wait_direction_arrows(&base, &ot[depth]);
 }
 
@@ -523,7 +523,7 @@ void battle_move_animate_jump_arc_to_own_tile(battle_unit_t* unit) {
         timer--;
         break;
     case 2:
-        main_util_set_svector(&target, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
+        vector_set_svector(&target, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
             unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
         target.vy = battle_gfx_calculate_world_height_from_world_coords(unit);
         if (unit->world_coords.vy < target.vy) {
@@ -649,17 +649,17 @@ void battle_move_animate_fall_to_target_tile(battle_unit_t* unit) {
              * not real.vz. The first frame adds the fall speed to it and the
              * next one snaps the height to the ground. */
             unit->real.vy = y * ONE;
-            main_util_set_svector(&coords, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), unit->map_z,
+            vector_set_svector(&coords, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), unit->map_z,
                 unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
             coords.vy = world_height_from_world_coords_passing_coords(unit, &coords);
         } else {
             if (unit->strike.target_count != 0) {
                 other = battle_unit_get_by_battle_id(unit->strike.target_list[0]);
-                main_util_set_svector(&coords, other->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), other->map_z,
+                vector_set_svector(&coords, other->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), other->map_z,
                     other->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
             } else {
                 stats = unit->stats;
-                main_util_set_svector(&coords,
+                vector_set_svector(&coords,
                     stats->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2),
                     stats->action_command.target_position.vy,
                     stats->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
@@ -714,7 +714,7 @@ static s32 battle_effect_start_teleport_departure(battle_unit_t* unit) {
         return 1;
     }
     battle_effect_set_secondary_teleport(unit);
-    main_sound_play_sfx_find_channel(MAIN_SFX_TELEPORT_OUT);
+    sound_play_sfx_on_free_channel(SOUND_SFX_TELEPORT_OUT);
     return 0;
 }
 
@@ -734,7 +734,7 @@ static s32 battle_effect_start_teleport_arrival(battle_unit_t* unit) {
         return 1;
     }
     battle_effect_set_secondary_teleport(unit);
-    main_sound_play_sfx_find_channel(MAIN_SFX_TELEPORT_IN);
+    sound_play_sfx_on_free_channel(SOUND_SFX_TELEPORT_IN);
     return 0;
 }
 
@@ -970,7 +970,7 @@ void battle_move_animate_jump_arc_to_own_tile_faded(battle_unit_t* unit) {
         timer--;
         break;
     case 3:
-        main_util_set_svector(&target, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
+        vector_set_svector(&target, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
             unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
         target.vy = battle_gfx_calculate_world_height_from_world_coords(unit);
         if (unit->world_coords.vy < target.vy) {
@@ -1020,7 +1020,7 @@ void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
         timer = speed / g_battle_move_jump_gravity;
         velocity.vy = -speed;
         battle_gfx_init_position_vector_copies(unit);
-        battle_sound_play_unit_sfx(unit, MAIN_SFX_JUMP);
+        battle_sound_play_unit_sfx(unit, SOUND_SFX_JUMP);
         unit->distortion_phase++;
     case 1:
         if (timer > 0) {
@@ -1039,7 +1039,7 @@ void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
 
 /* Run one frame of the unit's distortion animation from
  * g_battle_unit_distortion_animation_handlers. An id past the table reports
- * MAIN_SYSTEM_ERROR_DISTORTION_ANIMATION. */
+ * SYSTEM_ERROR_DISTORTION_ANIMATION. */
 void battle_unit_dispatch_distortion_animation(battle_unit_t* unit) {
     u32 distortion_id = unit->distortion_animation_id;
 
@@ -1047,7 +1047,7 @@ void battle_unit_dispatch_distortion_animation(battle_unit_t* unit) {
         if (distortion_id < BATTLE_DISTORTION_ANIMATION_COUNT) {
             g_battle_unit_distortion_animation_handlers[distortion_id](unit);
         } else {
-            main_system_handle_error(MAIN_SYSTEM_ERROR_DISTORTION_ANIMATION);
+            system_handle_error(SYSTEM_ERROR_DISTORTION_ANIMATION);
         }
     }
 }

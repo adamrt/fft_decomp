@@ -74,7 +74,7 @@ void formation_zodiac_backdrop_thread(void) {
  * unit's sprite reaches 0x3e.
  */
 s32 formation_get_unit_palette_index(s32 party_index) {
-    party_unit_t* unit = main_party_get_unit(party_index);
+    party_unit_t* unit = party_get_unit(party_index);
     job_data_t* job;
     s32 portrait;
     s32 product;
@@ -94,7 +94,7 @@ s32 formation_get_unit_palette_index(s32 party_index) {
                 portrait = base + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
             }
         } else {
-            job = main_job_get_data_pointer(unit->job_id);
+            job = job_get_data(unit->job_id);
             portrait = job->spritesheet_id;
         }
         if (unit->job_id == JOB_ID_BARD) {
@@ -134,7 +134,7 @@ s32 formation_get_unit_palette_index(s32 party_index) {
 /* Resolve a party member's 32-bit formation sprite value: bits 0-9 select the
  * sprite, and for monsters bits 10-11 carry the job's portrait palette. */
 s32 formation_get_party_unit_sprite(s32 party_index) {
-    party_unit_t* party_unit = main_party_get_unit(party_index);
+    party_unit_t* party_unit = party_get_unit(party_index);
     job_data_t* job_data;
     u32 sprite_set;
     s32 portrait_id;
@@ -154,7 +154,7 @@ s32 formation_get_party_unit_sprite(s32 party_index) {
                 portrait_id -= 2;
             }
         } else {
-            job_data = main_job_get_data_pointer(party_unit->job_id);
+            job_data = job_get_data(party_unit->job_id);
             portrait_id = job_data->spritesheet_id;
         }
         if (party_unit->job_id == JOB_ID_BARD) {

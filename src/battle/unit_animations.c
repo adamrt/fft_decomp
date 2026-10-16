@@ -81,11 +81,11 @@ file_extent_t g_battle_gfx_spritesheet_files[159] = { { 0, 0 }, { 59021, 45056 }
  * hand or Golem guard plays the weapon's deflect sound; an accessory or class
  * evasion, a forced failure, Blade Grasp or a catch the error sound; a
  * nullified, missed or canceled action none; anything else (a hit or a
- * reflection) the weapon's hit sound or, when critical, MAIN_SFX_CRITICAL_HIT.
+ * reflection) the weapon's hit sound or, when critical, SOUND_SFX_CRITICAL_HIT.
  * A target without battle stats is skipped. */
 void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
     battle_unit_t* target;
-    s32 weapon_type = main_item_get_data_pointer(unit->strike.used_weapon_id)->type;
+    s32 weapon_type = item_get_data(unit->strike.used_weapon_id)->type;
     s32 i;
 
     if (weapon_type >= ITEM_TYPE_SHURIKEN) {
@@ -112,7 +112,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
             case ACTION_MISS_TYPE_FORCED_FAILURE:
             case ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD:
             case ACTION_MISS_TYPE_CATCH:
-                battle_sound_play_unit_sfx(unit, MAIN_SFX_ERROR_MESSAGE);
+                battle_sound_play_unit_sfx(unit, SOUND_SFX_ERROR_MESSAGE);
                 break;
             case ACTION_MISS_TYPE_NULLIFIED:
             case ACTION_MISS_TYPE_ACCURACY_MISS:
@@ -120,7 +120,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
                 break;
             default:
                 if (target->stats->action.critical != 0) {
-                    battle_sound_play_unit_sfx(unit, MAIN_SFX_CRITICAL_HIT);
+                    battle_sound_play_unit_sfx(unit, SOUND_SFX_CRITICAL_HIT);
                 } else {
                     battle_sound_play_unit_sfx(unit, g_battle_sound_weapon_hit_sfx_ids[weapon_type]);
                 }
@@ -602,11 +602,11 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
             stats = unit->stats;
             if (stats != 0) {
                 if (stats->unit_flags & UNIT_FLAG_MALE) {
-                    battle_sound_play_unit_sfx(unit, MAIN_SFX_DEATH_MALE);
+                    battle_sound_play_unit_sfx(unit, SOUND_SFX_DEATH_MALE);
                 } else if (stats->unit_flags & UNIT_FLAG_FEMALE) {
-                    battle_sound_play_unit_sfx(unit, MAIN_SFX_DEATH_FEMALE);
+                    battle_sound_play_unit_sfx(unit, SOUND_SFX_DEATH_FEMALE);
                 } else if (stats->unit_flags & UNIT_FLAG_MONSTER) {
-                    battle_sound_play_unit_sfx(unit, MAIN_SFX_DEATH_MONSTER);
+                    battle_sound_play_unit_sfx(unit, SOUND_SFX_DEATH_MONSTER);
                 }
             }
         }
@@ -754,7 +754,7 @@ void battle_gfx_set_thrown_item_graphic_palette(s32 item_id, battle_unit_t* unit
      * the two reads into one. */
     u16 ability_id;
 
-    item = main_item_get_data_pointer(item_id);
+    item = item_get_data(item_id);
     weapon_type = item->type;
     if ((weapon_type >= ITEM_TYPE_SHURIKEN)
         || ((u32)(unit->used_ability_id - ABILITY_ID_THROW_FIRST) < ABILITY_ID_JUMP_FIRST - ABILITY_ID_THROW_FIRST)
@@ -968,7 +968,7 @@ void battle_unit_update_target_displays(battle_unit_t* unit) {
  * Ids below 16 take their own slot, failing if another in-use slot already
  * carries that id or the slot is taken. Larger ids take the first free slot,
  * whose index becomes the stored runtime ID; exhausting all 16 raises
- * MAIN_SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT. Returns 0 on failure.
+ * SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT. Returns 0 on failure.
  */
 static battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id) {
     s32 i;
@@ -996,7 +996,7 @@ static battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id) {
             return &g_battle_units[i];
         }
     }
-    main_system_handle_error(MAIN_SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT);
+    system_handle_error(SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT);
     return 0;
 }
 
@@ -1159,14 +1159,14 @@ void battle_gfx_load_unit_frame(battle_unit_t* unit, battle_unit_anim_state_t* s
      * of part count cannot pass 8. */
     battle_gfx_select_unit_shp_frame(unit, state, frame, sequence_id, &frame_table, &frame_data);
     if (frame_data == (battle_gfx_source_frame_t*)-1) {
-        main_system_handle_error(MAIN_SYSTEM_ERROR_SHP_FRAME);
+        system_handle_error(SYSTEM_ERROR_SHP_FRAME);
     }
     display = state->display;
     count = display->part_count = (frame_data->part_count_and_rotation & 7) + 1;
     display->rotation = g_battle_gfx_sprite_y_rotations[frame_data->part_count_and_rotation >> 3];
     if (count > 8) {
         count = 8;
-        main_system_handle_error(MAIN_SYSTEM_ERROR_FRAME_PART_COUNT);
+        system_handle_error(SYSTEM_ERROR_FRAME_PART_COUNT);
     }
     flags = frame_data->flags;
     if (unit->spritesheet_id >= BATTLE_SPRITESHEET_ID_CRYSTAL) {
@@ -1327,7 +1327,7 @@ static void battle_unit_shift_forward_or_backward(battle_unit_t* unit, s8 delta)
  * A sequence that ends leaves a unit on its SHP type's
  * g_battle_gfx_targeted_frame_front or _back frame with a wait of 0. The
  * unpackers resolve a missing sequence to the start of the sequence data,
- * never to -1, so the MAIN_SYSTEM_ERROR_SEQ_ANIMATION test cannot fire. */
+ * never to -1, so the SYSTEM_ERROR_SEQ_ANIMATION test cannot fire. */
 static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim_state_t* state, s32 advance) {
     battle_gfx_unit_seq_table_t* seq;
     battle_unit_sprite_block_t* block;
@@ -1362,7 +1362,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
         pos -= 2;
     }
     if (seq->sequences[index] == (u8*)-1) {
-        main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_ANIMATION);
+        system_handle_error(SYSTEM_ERROR_SEQ_ANIMATION);
     }
 
     for (;;) {
@@ -1511,7 +1511,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 block_id = seq->sequences[index][pos++];
                 block_sequence = seq->sequences[index][pos++];
                 if (block_id == 0) {
-                    main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_OPCODE);
+                    system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 }
                 block = &unit->sprite_blocks[block_id - 1];
                 block->wait = 1;
@@ -1644,7 +1644,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 pos++;
                 break;
             default:
-                main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_OPCODE);
+                system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 break;
             }
         } else {
@@ -1728,10 +1728,10 @@ static void battle_gfx_run_wep_eff_seq_script(
         pos -= 2;
     }
     if (sequence_id > 0x100) {
-        main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_ANIMATION);
+        system_handle_error(SYSTEM_ERROR_SEQ_ANIMATION);
     }
     if (seq[sequence_id] == (u8*)-1) {
-        main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_ANIMATION);
+        system_handle_error(SYSTEM_ERROR_SEQ_ANIMATION);
     }
     for (;;) {
         data = seq[sequence_id];
@@ -1821,7 +1821,7 @@ static void battle_gfx_run_wep_eff_seq_script(
                 block_id = seq[sequence_id][pos++];
                 block_sequence = seq[sequence_id][pos++];
                 if (block_id == 0) {
-                    main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_OPCODE);
+                    system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 }
                 block = &unit->sprite_blocks[block_id - 1];
                 block->sequence_id = block_sequence;
@@ -1871,7 +1871,7 @@ static void battle_gfx_run_wep_eff_seq_script(
             case BATTLE_SEQ_OP_SHOW_SHADOW:
                 break;
             default:
-                main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_OPCODE);
+                system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 break;
             }
         } else {
@@ -1883,10 +1883,10 @@ static void battle_gfx_run_wep_eff_seq_script(
             }
             src = shp->frames[frame];
             if (frame > 0x200) {
-                main_system_handle_error(MAIN_SYSTEM_ERROR_SHP_FRAME);
+                system_handle_error(SYSTEM_ERROR_SHP_FRAME);
             }
             if (src == (battle_gfx_source_frame_t*)-1) {
-                main_system_handle_error(MAIN_SYSTEM_ERROR_SHP_FRAME);
+                system_handle_error(SYSTEM_ERROR_SHP_FRAME);
             }
             display = sprite->display;
             parts = display->part_count = (src->part_count_and_rotation & 7) + 1;
@@ -1984,7 +1984,7 @@ static void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot,
     rect.h = BATTLE_GFX_SPRITESHEET_STRIP_HEIGHT;
     MoveImage(&rect, g_battle_gfx_vram_slots[slot].image_rect.x, g_battle_gfx_vram_slots[slot].image_rect.y + 200);
     g_battle_gfx_vram_slots[slot].owner = unit->runtime_id | BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE;
-    g_main_frame_pacing_suppressed = 1;
+    g_system_frame_pacing_suppressed = 1;
     g_battle_gfx_vram_slots[image_slot].image_buffer_state = BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES;
     g_battle_gfx_vram_slots[slot].evtchr_load_state = 1;
 }
@@ -2020,7 +2020,7 @@ static void battle_gfx_release_unit_vram_slot(battle_unit_t* unit) {
  * holds it, which is left on its rest frame. Without a request, a change of
  * sixteenth turns the standing pose or swaps the running sequence for its
  * other side; otherwise the sequence and the three weapon/effect blocks
- * count their waits down by g_main_system_vsync_interval.
+ * count their waits down by g_system_vsync_interval.
  *
  * unit is initialized in its declaration so its copy precedes the table
  * copies, and the unread unused_10 sizes the target's frame. */
@@ -2209,7 +2209,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                     }
                 } else if (unit->animation.wait != 0) {
                     /* No slot could be had: the request stays pending while the current sequence runs on. */
-                    for (i = 0; i < g_main_system_vsync_interval; i++) {
+                    for (i = 0; i < g_system_vsync_interval; i++) {
                         if (unit->animation.wait != 0) {
                             unit->animation.wait--;
                             if (unit->animation.wait == 0) {
@@ -2247,7 +2247,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
             unit->camera_facing_sixteenth = sixteenth;
             battle_gfx_run_unit_seq_script(unit, &unit->animation, 0);
         } else if (unit->animation.wait != 0) {
-            for (i = 0; i < g_main_system_vsync_interval; i++) {
+            for (i = 0; i < g_system_vsync_interval; i++) {
                 if (unit->animation.wait != 0) {
                     unit->animation.wait--;
                     if (unit->animation.wait == 0) {
@@ -2259,7 +2259,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
         }
     } else if (unit->animation.wait != 0) {
         /* Facing updates are suppressed: only count the wait down. */
-        for (i = 0; i < g_main_system_vsync_interval; i++) {
+        for (i = 0; i < g_system_vsync_interval; i++) {
             if (unit->animation.wait != 0) {
                 unit->animation.wait--;
                 if (unit->animation.wait == 0) {
@@ -2273,7 +2273,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
     /* Count down the three weapon/effect sprite blocks. */
     for (i = 0; i < 3; i++) {
         if (unit->sprite_blocks[i].trigger != 0 && unit->sprite_blocks[i].wait != 0) {
-            for (j = 0; j < g_main_system_vsync_interval; j++) {
+            for (j = 0; j < g_system_vsync_interval; j++) {
                 if (unit->sprite_blocks[i].wait != 0) {
                     unit->sprite_blocks[i].wait--;
                     if (unit->sprite_blocks[i].wait == 0) {
@@ -2383,11 +2383,11 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
                     }
                     display = unit->sprite_blocks[entry - 1].display;
                     battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, angle,
-                        flags, &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
+                        flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
                 } else {
                     display = unit->animation.display;
-                    battle_gfx_construct_polygon_data_for_units(display, 3, 0, &position, angle, flags, &zoom,
-                        main_gfx_get_battle_otag() + unit->otag_depth_index);
+                    battle_gfx_construct_polygon_data_for_units(
+                        display, 3, 0, &position, angle, flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
                     rider = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
                     if (rider != 0 && rider->draw_enabled != 0) {
                         rider_position.vx = rider->camera_relative_x;
@@ -2403,21 +2403,21 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
                                 rider_display = rider->sprite_blocks[entry - 1].display;
                                 battle_gfx_construct_polygon_data_for_units(rider_display, rider_display->part_count, 0,
                                     &rider_position, angle, rider_flags, &zoom,
-                                    main_gfx_get_battle_otag() + unit->otag_depth_index);
+                                    gfx_get_battle_otag() + unit->otag_depth_index);
                             } else {
                                 rider_display = rider->animation.display;
                                 battle_gfx_construct_polygon_data_for_units(rider_display, rider_display->part_count, 0,
                                     &rider_position, angle, rider_flags, &zoom,
-                                    main_gfx_get_battle_otag() + unit->otag_depth_index);
+                                    gfx_get_battle_otag() + unit->otag_depth_index);
                             }
                         }
                     }
                     battle_gfx_construct_polygon_data_for_units(display, display->part_count, 3, &position, angle,
-                        flags, &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
+                        flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
                 }
             }
             if (unit->shadow_graphic_trigger) {
-                battle_gfx_draw_unit_shadow(unit, main_gfx_get_battle_otag() + unit->otag_depth_index);
+                battle_gfx_draw_unit_shadow(unit, gfx_get_battle_otag() + unit->otag_depth_index);
             }
         }
     } else {
@@ -2429,15 +2429,15 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
                 }
                 display = unit->sprite_blocks[entry - 1].display;
                 battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, angle, flags,
-                    &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
+                    &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
             } else {
                 display = unit->animation.display;
                 battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, angle,
-                    flags ^ unit->animation.flags, &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
+                    flags ^ unit->animation.flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
             }
         }
         if (unit->shadow_graphic_trigger) {
-            battle_gfx_draw_unit_shadow(unit, main_gfx_get_battle_otag() + unit->otag_depth_index);
+            battle_gfx_draw_unit_shadow(unit, gfx_get_battle_otag() + unit->otag_depth_index);
         }
     }
     if (unit->position_copies_active) {
@@ -2545,7 +2545,7 @@ void battle_gfx_update_status_bubbles_and_graphics(void) {
             && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE
             && !(g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz)) {
             if (g_battle_gfx_status_bubble_delay != 0) {
-                g_battle_gfx_status_bubble_delay -= g_main_system_vsync_interval;
+                g_battle_gfx_status_bubble_delay -= g_system_vsync_interval;
                 if (g_battle_gfx_status_bubble_delay <= 0) {
                     g_battle_gfx_status_bubble_delay = 0;
                 }
@@ -3209,120 +3209,120 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
         case BATTLE_GFX_SHARED_LOAD_SPRITE_SHP:
             index = &g_battle_gfx_unit_graphics_load_state.index;
             /* A failed allocation or read leaves the phase unchanged, so the next step retries. */
-            buffer = main_heap_alloc(g_battle_gfx_sprite_shp_files[*index].size);
+            buffer = heap_alloc(g_battle_gfx_sprite_shp_files[*index].size);
             g_battle_gfx_unit_graphics_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(
+            if (file_request_read_bytes(
                     g_battle_gfx_sprite_shp_files[*index].sector, g_battle_gfx_sprite_shp_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_SHARED_LOAD_SPRITE_SEQ:
             index = &g_battle_gfx_unit_graphics_load_state.index;
-            buffer = main_heap_alloc(g_battle_gfx_sprite_seq_files[*index].size);
+            buffer = heap_alloc(g_battle_gfx_sprite_seq_files[*index].size);
             g_battle_gfx_unit_graphics_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(
+            if (file_request_read_bytes(
                     g_battle_gfx_sprite_seq_files[*index].sector, g_battle_gfx_sprite_seq_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_SHARED_LOAD_WEAPON_SHP:
             index = &g_battle_gfx_unit_graphics_load_state.index;
-            buffer = main_heap_alloc(g_battle_gfx_weapon_shp_files[*index].size);
+            buffer = heap_alloc(g_battle_gfx_weapon_shp_files[*index].size);
             g_battle_gfx_unit_graphics_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(
+            if (file_request_read_bytes(
                     g_battle_gfx_weapon_shp_files[*index].sector, g_battle_gfx_weapon_shp_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_SHARED_LOAD_WEAPON_SEQ:
             index = &g_battle_gfx_unit_graphics_load_state.index;
-            buffer = main_heap_alloc(g_battle_gfx_weapon_seq_files[*index].size);
+            buffer = heap_alloc(g_battle_gfx_weapon_seq_files[*index].size);
             g_battle_gfx_unit_graphics_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(
+            if (file_request_read_bytes(
                     g_battle_gfx_weapon_seq_files[*index].sector, g_battle_gfx_weapon_seq_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_SHARED_LOAD_EFFECT_SHP:
             index = &g_battle_gfx_unit_graphics_load_state.index;
-            buffer = main_heap_alloc(g_battle_gfx_effect_shp_files[*index].size);
+            buffer = heap_alloc(g_battle_gfx_effect_shp_files[*index].size);
             g_battle_gfx_unit_graphics_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(
+            if (file_request_read_bytes(
                     g_battle_gfx_effect_shp_files[*index].sector, g_battle_gfx_effect_shp_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_SHARED_LOAD_EFFECT_SEQ:
             index = &g_battle_gfx_unit_graphics_load_state.index;
-            buffer = main_heap_alloc(g_battle_gfx_effect_seq_files[*index].size);
+            buffer = heap_alloc(g_battle_gfx_effect_seq_files[*index].size);
             g_battle_gfx_unit_graphics_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(
+            if (file_request_read_bytes(
                     g_battle_gfx_effect_seq_files[*index].sector, g_battle_gfx_effect_seq_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_SHARED_LOAD_WEAPON_SPR:
-            *(slot = &g_battle_gfx_unit_graphics_load_state.buffer) = main_heap_alloc(0x15000);
+            *(slot = &g_battle_gfx_unit_graphics_load_state.buffer) = heap_alloc(0x15000);
             if (*slot == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, (void*)*slot) == 0) {
+            if (file_request_read_bytes(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, (void*)*slot) == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free((void*)*slot);
+                heap_call_free((void*)*slot);
             }
             break;
         case BATTLE_GFX_SHARED_LOAD_OTHER_SPR:
-            *(slot = &g_battle_gfx_unit_graphics_load_state.buffer) = main_heap_alloc(0x8800);
+            *(slot = &g_battle_gfx_unit_graphics_load_state.buffer) = heap_alloc(0x8800);
             if (*slot == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, (void*)*slot) == 0) {
+            if (file_request_read_bytes(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, (void*)*slot) == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free((void*)*slot);
+                heap_call_free((void*)*slot);
             }
             break;
         }
         break;
     case BATTLE_GFX_UNIT_LOAD_PHASE_WAIT:
-        if (main_file_is_still_loading() != 0) {
+        if (file_is_still_loading() != 0) {
             break;
         }
         (*phase)++;
@@ -3372,7 +3372,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
         }
         break;
     case BATTLE_GFX_UNIT_LOAD_PHASE_FINISH:
-        main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+        heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
         *phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
         /* Five sprite SHP and SEQ files, two weapon, one effect, then each SPR file once. */
         switch (g_battle_gfx_unit_graphics_load_state.file_kind) {
@@ -3453,14 +3453,14 @@ void battle_gfx_clear_unit_graphics_load_state(s32 unused_map_id) {
  * loader.
  *
  * A battle whose deployment screen is skipped places the units from
- * g_main_deployed_unit_map_coordinates; otherwise the coordinate slots of the
+ * g_deploy_deployed_unit_map_coordinates; otherwise the coordinate slots of the
  * deployment screen are used, and in the debug battle style the red team is set
  * up from them first. */
 void battle_gfx_init_deployment_and_reset_unit_graphics_state(void) {
-    g_main_gfx_unit_graphics_load_queue.count = 0;
+    g_unit_graphics_load_queue.count = 0;
     if (script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) == 0) {
         if (g_battle_deployment_skipped != 0) {
-            battle_unit_build_deployed_units_data(g_main_deployed_unit_map_coordinates, 0);
+            battle_unit_build_deployed_units_data(g_deploy_deployed_unit_map_coordinates, 0);
             g_battle_gfx_unit_graphics_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
             g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
             g_battle_gfx_unit_graphics_load_state.index = 0;
@@ -3468,9 +3468,9 @@ void battle_gfx_init_deployment_and_reset_unit_graphics_state(void) {
             return;
         }
     } else {
-        battle_unit_init_deployed_units_data_for_debug_red_team(attack_deploy_get_coordinate_slots(), 0);
+        battle_unit_init_deployed_units_data_for_debug_red_team(deploy_get_coordinate_slots(), 0);
     }
-    battle_unit_build_deployed_units_data(attack_deploy_get_coordinate_slots(), 0);
+    battle_unit_build_deployed_units_data(deploy_get_coordinate_slots(), 0);
     g_battle_gfx_unit_graphics_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
     g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
     g_battle_gfx_unit_graphics_load_state.index = 0;
@@ -3492,7 +3492,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
     case BATTLE_GFX_UNIT_LOAD_PHASE_START_READ:
         switch (g_battle_gfx_unit_graphics_load_state.file_kind) {
         case BATTLE_GFX_QUEUED_LOAD_SHP:
-            id = g_battle_gfx_spritesheet_data[g_main_gfx_unit_graphics_load_queue
+            id = g_battle_gfx_spritesheet_data[g_unit_graphics_load_queue
                                                    .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                    .spritesheet_id]
                      .shp_id;
@@ -3505,20 +3505,20 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
             }
 
             g_battle_gfx_last_loaded_shp_id = id;
-            g_battle_gfx_unit_graphics_load_state.buffer = main_heap_alloc(g_battle_gfx_sprite_shp_files[id].size);
+            g_battle_gfx_unit_graphics_load_state.buffer = heap_alloc(g_battle_gfx_sprite_shp_files[id].size);
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(g_battle_gfx_sprite_shp_files[id].sector,
+            if (file_request_read_bytes(g_battle_gfx_sprite_shp_files[id].sector,
                     g_battle_gfx_sprite_shp_files[id].size, g_battle_gfx_unit_graphics_load_state.buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_QUEUED_LOAD_SEQ:
-            id = g_battle_gfx_spritesheet_data[g_main_gfx_unit_graphics_load_queue
+            id = g_battle_gfx_spritesheet_data[g_unit_graphics_load_queue
                                                    .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                    .spritesheet_id]
                      .seq_id;
@@ -3531,32 +3531,30 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
             }
 
             g_battle_gfx_last_loaded_seq_id = id;
-            g_battle_gfx_unit_graphics_load_state.buffer = main_heap_alloc(g_battle_gfx_sprite_seq_files[id].size);
+            g_battle_gfx_unit_graphics_load_state.buffer = heap_alloc(g_battle_gfx_sprite_seq_files[id].size);
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(g_battle_gfx_sprite_seq_files[id].sector,
+            if (file_request_read_bytes(g_battle_gfx_sprite_seq_files[id].sector,
                     g_battle_gfx_sprite_seq_files[id].size, g_battle_gfx_unit_graphics_load_state.buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         case BATTLE_GFX_QUEUED_LOAD_SPR:
             /* Ids from 0xa0 up load Ramza's chapter 1 sheet instead; id 0x9f also lies past the
              * 159-entry table but slips through (QUIRKS.md). */
-            if (g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
-                    .spritesheet_id
+            if (g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].spritesheet_id
                 >= 0xa0) {
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
-                    .spritesheet_id = BATTLE_SPRITESHEET_ID_RAMZA_CHAPTER_1;
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].spritesheet_id
+                    = BATTLE_SPRITESHEET_ID_RAMZA_CHAPTER_1;
             }
 
             /* A sheet already in VRAM skips the read but still goes to install, which creates the unit. */
             if (battle_gfx_is_spritesheet_id_loaded(
-                    g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
-                        .spritesheet_id)
+                    g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].spritesheet_id)
                 != 0) {
                 g_battle_gfx_unit_graphics_load_state.buffer = 0;
                 g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_INSTALL;
@@ -3564,20 +3562,18 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                 break;
             }
 
-            g_battle_gfx_unit_graphics_load_state.buffer = main_heap_alloc(
-                g_battle_gfx_spritesheet_files[g_main_gfx_unit_graphics_load_queue
-                                                   .descriptors[g_battle_gfx_unit_graphics_load_state.index]
-                                                   .spritesheet_id]
-                    .size);
+            g_battle_gfx_unit_graphics_load_state.buffer = heap_alloc(g_battle_gfx_spritesheet_files
+                    [g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].spritesheet_id]
+                        .size);
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
                 break;
             }
-            if (main_file_request_read_bytes(
-                    g_battle_gfx_spritesheet_files[g_main_gfx_unit_graphics_load_queue
+            if (file_request_read_bytes(
+                    g_battle_gfx_spritesheet_files[g_unit_graphics_load_queue
                                                        .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                        .spritesheet_id]
                         .sector,
-                    g_battle_gfx_spritesheet_files[g_main_gfx_unit_graphics_load_queue
+                    g_battle_gfx_spritesheet_files[g_unit_graphics_load_queue
                                                        .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                        .spritesheet_id]
                         .size,
@@ -3585,13 +3581,13 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
-                main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+                heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
             }
             break;
         }
         break;
     case BATTLE_GFX_UNIT_LOAD_PHASE_WAIT:
-        if (!main_file_is_still_loading()) {
+        if (!file_is_still_loading()) {
             g_battle_gfx_unit_graphics_load_state.phase++;
         }
         break;
@@ -3609,17 +3605,15 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                 &g_battle_gfx_boss_seq_tables, g_battle_gfx_unit_graphics_load_state.buffer);
             break;
         case BATTLE_GFX_QUEUED_LOAD_SPR:
-            battle_unit_init(
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].map_x,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].map_y,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].map_level,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].facing,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
-                    .spritesheet_id,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].palette_id,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].runtime_id,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].stats,
-                g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].flags,
+            battle_unit_init(g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].map_x,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].map_y,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].map_level,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].facing,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].spritesheet_id,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].palette_id,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].runtime_id,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].stats,
+                g_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index].flags,
                 g_battle_gfx_unit_graphics_load_state.buffer);
             battle_unit_update_and_animate_units_three_times();
             break;
@@ -3628,7 +3622,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
         break;
     case BATTLE_GFX_UNIT_LOAD_PHASE_FINISH:
         if (g_battle_gfx_unit_graphics_load_state.buffer != 0) {
-            main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
+            heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
         }
         g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
         switch (g_battle_gfx_unit_graphics_load_state.file_kind) {
@@ -3645,7 +3639,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
         break;
     }
 
-    return (g_battle_gfx_unit_graphics_load_state.index < g_main_gfx_unit_graphics_load_queue.count) ? result : 0;
+    return (g_battle_gfx_unit_graphics_load_state.index < g_unit_graphics_load_queue.count) ? result : 0;
 }
 
 /* Cycles the colors of the two cursor tile glow palettes (sprite CLUTs 1 and 2).
@@ -3659,7 +3653,7 @@ void battle_gfx_cycle_tile_glow_palettes(void) {
     palette_t* palettes;
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    g_battle_gfx_tile_glow_cycle_timer += g_main_system_vsync_interval;
+    g_battle_gfx_tile_glow_cycle_timer += g_system_vsync_interval;
     if (g_battle_gfx_tile_glow_cycle_timer >= 4) {
         g_battle_gfx_tile_glow_cycle_timer = 0;
         g_battle_gfx_tile_glow_cycle_offset++;

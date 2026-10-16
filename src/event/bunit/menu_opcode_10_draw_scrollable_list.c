@@ -27,7 +27,7 @@
  * rect and marker are referenced). The scroll-down path follows WORLD's
  * menu_opcode_10_draw_scrollable_list spelling.
  */
-menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
     point16_t marker;
@@ -63,7 +63,7 @@ menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t
     }
     previous_selected = g_menu_list_selected_index;
     if (g_menu_list_scroll_direction == 0) {
-        j = bunit_menu_input_read_page_scroll_direction();
+        j = menu_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
                 menu_scroll_list_by_page(j, command);
@@ -76,7 +76,7 @@ menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t
                     if (scroll_base > 0) {
                         g_menu_list_scroll_direction = -1;
                         if (g_menu_list_text_table != 0) {
-                            row_ids = &g_bunit_menu_list_scroll_entry_ids[0];
+                            row_ids = &g_unit_list_list_scroll_entry_ids[0];
                             text_id = g_menu_list_entries[scroll_base - 1];
                             rect.x = 0x100;
                             rect.y = 0x20;
@@ -97,7 +97,7 @@ menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t
                             s16* entry_ids;
 
                             j = g_menu_scroll_base_index + g_menu_list_visible_rows - 1;
-                            entry_ids = &g_bunit_menu_list_scroll_entry_ids[0];
+                            entry_ids = &g_unit_list_list_scroll_entry_ids[0];
                             *entry_ids = g_menu_list_entries[j + 1];
                             rect.x = 0x100;
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
@@ -115,10 +115,10 @@ menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t
         }
     }
     if (g_menu_list_scroll_direction < 0) {
-        if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset -= g_main_menu_scroll_fast_step * (speed & 0xff);
+        if (g_menu_list_scroll_progress >= g_menu_scroll_accel_delay) {
+            g_menu_list_scroll_offset -= g_menu_scroll_fast_step * (speed & 0xff);
         } else {
-            g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * (speed & 0xff);
+            g_menu_list_scroll_offset -= g_menu_scroll_slow_step * (speed & 0xff);
             g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
         }
         if (g_menu_list_scroll_offset <= -g_menu_list_row_height) {
@@ -138,10 +138,10 @@ menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t
             }
         }
     } else if (g_menu_list_scroll_direction > 0) {
-        if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset += g_main_menu_scroll_fast_step * (speed & 0xff);
+        if (g_menu_list_scroll_progress >= g_menu_scroll_accel_delay) {
+            g_menu_list_scroll_offset += g_menu_scroll_fast_step * (speed & 0xff);
         } else {
-            g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * (speed & 0xff);
+            g_menu_list_scroll_offset += g_menu_scroll_slow_step * (speed & 0xff);
             g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
         }
         if (g_menu_list_scroll_offset >= g_menu_list_row_height) {
@@ -210,8 +210,7 @@ menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_sliding_cursor(
-            &marker, &g_bunit_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+        menu_update_and_draw_sliding_cursor(&marker, &g_unit_list_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);
     g_menu_list_row_index = 0;
@@ -232,7 +231,7 @@ menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t
     }
     g_menu_list_row_mode = 0;
     if (previous_selected != g_menu_list_selected_index) {
-        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
     return command;
 }

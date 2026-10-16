@@ -69,7 +69,7 @@ void sound_novel_opcode_1e_apply_counter_delta(void);
 /* saved readings */
 extern sound_novel_reading_t g_sound_novel_reading;
 /* The sound novel being read: it selects the script files, and below 5 its saved reading in
- * g_main_sound_novel_saved_records. */
+ * g_sound_novel_saved_readings. */
 extern s16 g_sound_novel_selected;
 void sound_novel_reset_selected_reading(s32 unused);
 void sound_novel_restore_reading(s32 render_index);

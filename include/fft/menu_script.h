@@ -16,8 +16,8 @@
  * library) or <program>_menu_opcode_NN_<name> (a program's own copy); CARD has no table and calls its few
  * drawing routines directly. Opcode 8 has no handler anywhere. BUNIT also leaves 3 and 7 empty, EQUIP leaves
  * 0x19-0x1b empty, and JOBSTTS leaves 3, 6, 7, 0x0b and 0x16-0x1b empty. Each module ends a stream with its
- * own opcode, the first one past its table (SCREEN_SCRIPT_END, BUNIT_CMD_END, EQUIP_CMD_END,
- * JOBSTTS_CMD_END). */
+ * own opcode, the first one past its table (SCREEN_SCRIPT_END, UNIT_LIST_SCRIPT_END, EQUIPMENT_SCRIPT_END,
+ * STATUS_SCREEN_SCRIPT_END). */
 typedef enum menu_script_opcode {
     MENU_SCRIPT_OP_WINDOW_FRAME = 0x00,
     MENU_SCRIPT_OP_IF_GROUP = 0x01,      /* run the next group when a row callback returns nonzero */
@@ -250,6 +250,10 @@ typedef union menu_callback {
     s32 (*value)(s32 row);
     menu_icon_source_t* (*icon)(s32 row);
 } menu_callback_t;
+
+/* A g_menu_row_callbacks value getter, as the overlays' menu_opcode_0d_draw_formatted_number bodies call it with a
+ * row or literal operand. */
+typedef s32 (*menu_row_callback_t)(s32 row);
 typedef char menu_callback_size_must_be_4[sizeof(menu_callback_t) == 4 ? 1 : -1];
 
 /* running scripts */

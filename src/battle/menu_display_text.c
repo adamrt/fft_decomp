@@ -36,7 +36,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     u8 variable_base;
 
     /* The result is unused; WORLD's body copies the player's name from roster slot 0 here. */
-    main_party_get_unit(0);
+    party_get_unit(0);
 
     if (text == 0 || text == (u8*)1) {
         cursor = text_find_entry(text_id);

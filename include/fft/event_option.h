@@ -7,6 +7,6 @@
 
 /* screen */
 void option_entrypoint(s32 menu_type);
-void option_menu_run_game_options(void);
+void option_game_options_thread(void);
 
 #endif

@@ -156,7 +156,7 @@ void text_run_dialog_thread(void) {
         if (party_name_request == 0) {
             rec.portrait = thread->function_parameter_4;
         }
-        party = main_party_get_unit(rec.portrait);
+        party = party_get_unit(rec.portrait);
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
             if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {
                 s32 sheet_offset = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
@@ -171,7 +171,7 @@ void text_run_dialog_thread(void) {
                     portrait_id = sheet_offset + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
                 }
             } else {
-                job = main_job_get_data_pointer(party->job_id);
+                job = job_get_data(party->job_id);
                 portrait_id = job->spritesheet_id;
             }
             if (party->job_id == JOB_ID_BARD) {
@@ -575,7 +575,7 @@ void text_run_dialog_thread(void) {
                                         }
                                     }
                                     if ((g_script_event_input & PSX_PAD_UP) && rec.first_line != 0) {
-                                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                                         WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
                                         rec.first_line += no_value;
                                         rec.last_line = rec.first_line + rec.lines;
@@ -583,7 +583,7 @@ void text_run_dialog_thread(void) {
                                     }
                                     if ((g_script_event_input & PSX_PAD_DOWN)
                                         && rec.first_line != rec.line - rec.lines) {
-                                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                                         WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
                                         rec.first_line++;
                                         rec.last_line = rec.first_line + rec.lines;
@@ -677,7 +677,7 @@ void text_run_dialog_thread(void) {
                     menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else if (rec.box_type != DIALOG_BOX_TYPE_CENTERED) {
-                    g_sound_pending_sfx_id = MAIN_SFX_TEXT_PAGE;
+                    g_sound_pending_sfx_id = SOUND_SFX_TEXT_PAGE;
                     rec.first_line = rec.line;
                     rec.last_line = rec.line + rec.lines;
                     menu_render_text_image_at_record_origin(&rec);
@@ -715,16 +715,16 @@ void text_run_dialog_thread(void) {
                         continue;
                     }
                     if ((g_script_event_input & PSX_PAD_UP) && selection != rec.mark) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                         selection += no_value;
                     }
                     if ((g_script_event_input & PSX_PAD_DOWN) && selection != column) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                         selection++;
                     }
                     if (g_script_event_input & PSX_PAD_CIRCLE) {
                         if (rec.box_type != DIALOG_BOX_TYPE_CENTERED) {
-                            g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+                            g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                         }
                         break;
                     }

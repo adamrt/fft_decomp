@@ -801,7 +801,7 @@ void script_focus(event_focus_parameters_t* parameters) {
     if (first == EVENT_RUNTIME_ID_NONE || second == EVENT_RUNTIME_ID_NONE) {
         ((event_camera_instruction_t*)(cursor - offsetof(event_camera_instruction_t, parameters)))->opcode
             = EVENT_OPCODE_CAMERA_DISABLED;
-        main_system_report_error(7, 0);
+        system_report_error(7, 0);
         return;
     }
     unit_copy_world_coords_to_vector(first, (VECTOR*)coords[0]);
@@ -946,8 +946,7 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
             return 1;
         }
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-            if ((unit->status_sets.current[i] & g_main_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i])
-                != 0) {
+            if ((unit->status_sets.current[i] & g_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i]) != 0) {
                 break;
             }
         }
@@ -966,15 +965,15 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
         if (index == -1) {
             return 0;
         }
-        first = g_main_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][0];
+        first = g_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][0];
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             if (i == 0) {
                 s32 status = unit->status_sets.current[0] & (0xff ^ STATUS_BYTE_MASK(STATUS_ID_UNDEAD));
 
                 blocked = first & status;
             } else {
-                blocked = unit->status_sets.current[i]
-                    & g_main_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i];
+                blocked
+                    = unit->status_sets.current[i] & g_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i];
             }
             if (blocked != 0) {
                 break;
@@ -999,7 +998,7 @@ void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
     if (unit == EVENT_RUNTIME_ID_NONE) {
         return;
     }
-    g_sound_pending_sfx_id = MAIN_SFX_TELEPORT_OUT;
+    g_sound_pending_sfx_id = SOUND_SFX_TELEPORT_OUT;
     g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
     thread_call_on_main_stack(unit);
     idx = battle_unit_get_battle_id_by_runtime_id(unit);
@@ -1597,7 +1596,7 @@ void script_inflict_status_thread(void) {
             status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 1, 1);
             g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
             thread_call_on_main_stack(runtime_id);
-            g_sound_pending_sfx_id = MAIN_SFX_EVENT_REVIVE;
+            g_sound_pending_sfx_id = SOUND_SFX_EVENT_REVIVE;
         } else if (health == 2) {
             g_thread_call_target = (void (*)(void))battle_unit_set_mounted_animation_by_runtime_id;
             thread_call_on_main_stack(runtime_id);

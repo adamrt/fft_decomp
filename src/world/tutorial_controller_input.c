@@ -43,9 +43,9 @@ static void tutorial_update_input(void) {
     u32 repeat_period;
 
     speed = menu_get_event_speed();
-    initial_delay = g_main_input_repeat_initial_delay / speed;
-    repeat_period = g_main_input_repeat_period / speed;
-    secondary_repeat_period = g_main_input_secondary_repeat_period / speed + 2;
+    initial_delay = g_input_repeat_initial_delay / speed;
+    repeat_period = g_input_repeat_period / speed;
+    secondary_repeat_period = g_input_secondary_repeat_period / speed + 2;
     current_input = screen_input_read(0);
     if (current_input & PSX_PAD_TRIANGLE) {
         if (g_screen_input_triangle_latched != 0) {
@@ -197,6 +197,6 @@ void menu_input_update_with_message_state(void) {
         g_screen_sound_release_held_loop = 0;
     }
     if (g_screen_text_task_phase == 1) {
-        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
+        g_sound_queued_effect_id = SOUND_SFX_WINDOW_OPEN;
     }
 }

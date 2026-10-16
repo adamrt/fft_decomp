@@ -82,7 +82,7 @@ typedef char world_tutorial_wait_instruction_size_must_be_2[sizeof(tutorial_wait
 /* The current game is serialized here while a tutorial runs; its message
  * text and command stream follow the saved bytes at +0x1e00/+0x1e04. */
 typedef struct tutorial_state {
-    card_save_buffer_t saved_game;
+    save_image_t saved_game;
     u8* messages;
     u8* script;
 } tutorial_state_t;

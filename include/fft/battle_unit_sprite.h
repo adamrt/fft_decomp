@@ -123,7 +123,7 @@ typedef enum battle_seq_opcode {
     BATTLE_SEQ_OP_UNKNOWN_D7 = 0xd7,           /* one operand; the sequences of death and revival start with it */
     BATTLE_SEQ_OP_SET_FRAME_BIAS = 0xd8,       /* signed; added to every later frame id */
     BATTLE_SEQ_OP_LAUNCH_PROJECTILE = 0xd9,    /* two unread operands: the thrown item, stone or arrow of the action */
-    BATTLE_SEQ_OP_UNDEFINED_DA = 0xda,         /* no handler: MAIN_SYSTEM_ERROR_SEQ_OPCODE like any other value */
+    BATTLE_SEQ_OP_UNDEFINED_DA = 0xda,         /* no handler: SYSTEM_ERROR_SEQ_OPCODE like any other value */
     BATTLE_SEQ_OP_SET_WAIT_BIAS = 0xdb,        /* signed; added to every later wait */
     BATTLE_SEQ_OP_RETURN = 0xdc,               /* resume the sequence BATTLE_SEQ_OP_CALL_SEQUENCE left */
     BATTLE_SEQ_OP_CALL_SEQUENCE = 0xdd,        /* sequence id: run it from its start; one level deep */
@@ -151,7 +151,7 @@ typedef enum battle_seq_opcode {
     BATTLE_SEQ_OP_UNKNOWN_F3 = 0xf3,           /* one operand */
     BATTLE_SEQ_OP_UNKNOWN_F4 = 0xf4,           /* one operand */
     BATTLE_SEQ_OP_UNKNOWN_F5 = 0xf5,           /* one operand */
-    BATTLE_SEQ_OP_PLAY_SOUND = 0xf6,           /* main_sfx_e */
+    BATTLE_SEQ_OP_PLAY_SOUND = 0xf6,           /* sound_sfx_e */
     BATTLE_SEQ_OP_UNKNOWN_F7 = 0xf7,           /* three operands */
     BATTLE_SEQ_OP_UNKNOWN_F8 = 0xf8,           /* two operands */
     BATTLE_SEQ_OP_MOVE_SCREEN_OFFSET = 0xf9,   /* signed x, y: added to the unit's screen_offset */

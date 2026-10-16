@@ -21,8 +21,8 @@
 
 /*
  * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. EQUIP's
- * body (DEBUGCHR, ATTACK and BUNIT have their own): EQUIP_THREAD_SLOT_UNIT_STATUS selects the
- * first packet set. While the item preview panel is open (g_equip_item_numeric_thread_enabled)
+ * body (DEBUGCHR, ATTACK and BUNIT have their own): EQUIPMENT_THREAD_SLOT_UNIT_STATUS selects the
+ * first packet set. While the item preview panel is open (g_equipment_item_numeric_thread_enabled)
  * the first numeric block is drawn as five separate entries, two of them signed; the third
  * large number is always the roster slot + 1 (DEBUGCHR's editor branch is absent).
  *
@@ -83,7 +83,7 @@ void menu_run_unit_status_thread(void) {
     thread = (menu_status_panel_display_thread_t*)g_threads[thread_id].function_parameter_1;
 
     /* One body serves two thread slots: the status slot draws the selected unit, the other the comparison unit. */
-    if (thread_id == EQUIP_THREAD_SLOT_UNIT_STATUS) {
+    if (thread_id == EQUIPMENT_THREAD_SLOT_UNIT_STATUS) {
         panel = g_panel_selected_packets;
         editor = g_panel_selected_editor_packets;
         number_pixels = g_panel_selected_number_image;
@@ -91,11 +91,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_menu_selected_unit_stat_summary;
-        unit_data = &g_equip_panel_selected_unit_data;
+        unit_data = &g_equipment_selected_unit_data;
         transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_equip_panel_selected_portrait_palettes;
+        portrait_palettes = g_unit_panel_selected_portrait_palettes;
     } else {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
@@ -104,11 +104,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
-        unit_data = &g_equip_panel_comparison_unit_data;
+        unit_data = &g_equipment_comparison_unit_data;
         transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_equip_panel_comparison_portrait_palettes;
+        portrait_palettes = g_unit_panel_comparison_portrait_palettes;
     }
     shake = 0;
 
@@ -255,7 +255,7 @@ void menu_run_unit_status_thread(void) {
         }
 
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
-        g_gfx_draw_offset_y = ((g_main_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
+        g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
 
         /* A slide steps one table row every other frame (down rows 1-6, up rows 11-16),
          * then clears every flag but HIDDEN. */
@@ -421,7 +421,7 @@ void menu_run_unit_status_thread(void) {
                 glyph_blit_t* position;
                 stride = &g_menu_text_state.pen.stride;
                 *stride = 0x38;
-                if (g_equip_item_numeric_thread_enabled == 0) {
+                if (g_equipment_item_numeric_thread_enabled == 0) {
                     menu_draw_numeric_display_entries(number_pixels, number_entries, (glyph_blit_t*)(stride - 2), 6);
                 } else {
                     position = (glyph_blit_t*)(stride - 2);

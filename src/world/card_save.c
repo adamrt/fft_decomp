@@ -46,7 +46,7 @@
 static u8 g_save_title_template[0x16]
     = { 130, 101, 130, 101, 130, 115, 129, 64, 130, 101, 130, 104, 130, 107, 130, 100, 129, 64, 129, 64, 129, 64 };
 
-static void save_build_file_header(s32 slot, s32 level, card_save_header_t* header);
+static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static s32 save_build_slot_description(s32 mode, u8* destination);
 static s32 save_count_selectable_slots(void);
 static void save_draw_slot_text(s32 save_slot_index);
@@ -89,9 +89,9 @@ static void screen_input_update_pad(void) {
     u32 repeat_period;
 
     speed = menu_get_event_speed();
-    initial_delay = g_main_input_repeat_initial_delay / speed;
-    repeat_period = g_main_input_repeat_period / speed;
-    secondary_repeat_period = g_main_input_secondary_repeat_period / speed;
+    initial_delay = g_input_repeat_initial_delay / speed;
+    repeat_period = g_input_repeat_period / speed;
+    secondary_repeat_period = g_input_secondary_repeat_period / speed;
     current_input = screen_input_read_pad(0);
     if (current_input & PSX_PAD_TRIANGLE) {
         if (g_screen_input_triangle_latch != 0) {
@@ -226,7 +226,7 @@ static void save_input_update(void) {
         g_screen_sound_release_held_loop = 0;
     }
     if (g_screen_input_blocked_state == 1) {
-        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
+        g_sound_queued_effect_id = SOUND_SFX_WINDOW_OPEN;
     }
 }
 
@@ -282,9 +282,9 @@ s32 save_run_screen(s32 mode_select_enabled) {
     g_save_menu_step = SAVE_STEP_SELECT_CARD;
     /* 1 from the world menu, 0 from the title screen's Continue (load only). */
     g_save_mode_select_enabled = mode_select_enabled;
-    music_handle = main_sound_open_music_into_free_slot(MAIN_MUSIC_SAVE);
-    while (main_sound_is_music_loading_stub() != 0) { }
-    main_sound_switch_music_track(music_handle, 0x7f, 0);
+    music_handle = music_open_into_free_slot(MUSIC_SAVE);
+    while (music_is_loading_stub() != 0) { }
+    music_switch_track(music_handle, 0x7f, 0);
     memcard_consume_all_events();
     g_save_directory_buffer = directory_buffer;
     save_init_screen();
@@ -316,7 +316,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
         } else if (step == SAVE_STEP_SAVING) {
             save_write_step(g_save_active_slot);
         } else if (step == SAVE_STEP_LEAVE) {
-            main_sound_set_current_music_target(0, 0xf0);
+            music_set_target(0, 0xf0);
             while (memcard_poll_operation_result() == MEMCARD_RESULT_PENDING) { }
             screen_fade_start_increasing();
             g_save_menu_step = SAVE_STEP_LEFT;
@@ -337,7 +337,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, -1, 0);
     save_free_work_buffer();
     save_close_stub();
-    main_sound_unload_scenario_mus(music_handle);
+    music_unload_scenario_slot(music_handle);
     screen_reset_context();
     formation_build_roster_names();
     return g_save_menu_result;
@@ -359,7 +359,7 @@ static void save_card_select_step(void) {
         g_save_mode = 0xff;
         g_save_slot_cursor_row = 0;
         g_screen_selection_results[5] = -1;
-        g_save_slot_select_menu[1].selected_index = g_main_card_save_selected_slot;
+        g_save_slot_select_menu[1].selected_index = g_save_selected_slot;
         return;
     }
     g_save_slot_select_running = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_save_slot_select_menu);
@@ -370,10 +370,10 @@ static void save_card_select_step(void) {
             g_save_menu_step = SAVE_STEP_LEAVE;
         } else {
             g_text_substitution_values[0] = slot + 1;
-            if (g_main_card_save_selected_slot != slot) {
-                g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+            if (g_save_selected_slot != slot) {
+                g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
             }
-            g_main_card_save_selected_slot = *selected;
+            g_save_selected_slot = *selected;
             memcard_set_selected_slot(slot);
             g_save_menu_step = SAVE_STEP_SCANNING;
         }
@@ -398,7 +398,7 @@ static void save_mode_select_step(void) {
 
     if (memcard_poll_operation_result() > MEMCARD_RESULT_COMPLETE) {
         g_save_pending_message = 0;
-        g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+        g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
         menu_stop_thread_and_wait(SCREEN_THREAD_SLOT_UPPER_MENU);
         menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
         g_save_mode_select_running = 0;
@@ -410,7 +410,7 @@ static void save_mode_select_step(void) {
         if (g_menu_input_primary_repeat & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             g_save_pending_message = 0;
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
-            g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+            g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
             g_save_menu_step = SAVE_STEP_SELECT_CARD;
         }
         return;
@@ -436,7 +436,7 @@ static void save_mode_select_step(void) {
     }
     if (slot == 0) {
         for (i = 0, all = 1; i < 15; i++) {
-            if (g_main_card_save_slot_file_states[i] != CARD_SAVE_SLOT_UNAVAILABLE) {
+            if (g_save_slot_file_states[i] != SAVE_SLOT_UNAVAILABLE) {
                 all = 0;
             }
         }
@@ -445,7 +445,7 @@ static void save_mode_select_step(void) {
         }
     } else {
         for (i = 0, all = 1; i < 15; i++) {
-            if (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_OCCUPIED) {
+            if (g_save_slot_file_states[i] == SAVE_SLOT_OCCUPIED) {
                 all = 0;
             }
         }
@@ -467,7 +467,7 @@ static void save_mode_select_step(void) {
         g_save_selectable_slot_count = save_count_selectable_slots();
         return;
     }
-    g_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
+    g_sound_queued_effect_id = SOUND_SFX_ERROR_MESSAGE;
 }
 
 /*
@@ -510,15 +510,15 @@ static void save_load_step(s32 slot) {
                 g_save_load_step_state = 0;
                 g_save_menu_step = SAVE_STEP_LEAVE;
                 script_set_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
-                g_sound_queued_effect_id = MAIN_SFX_COMPLETE;
-                g_main_card_save_last_used_slot = slot;
+                g_sound_queued_effect_id = SOUND_SFX_COMPLETE;
+                g_save_last_used_slot = slot;
                 return;
             }
         } else {
-            g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+            g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
         }
         g_save_load_failed = 1;
-        g_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
+        g_sound_queued_effect_id = SOUND_SFX_ERROR_MESSAGE;
     }
 }
 
@@ -560,7 +560,7 @@ static void save_write_step(s32 slot) {
         }
     } else {
         bytes_written = memcard_file_write_buffer(
-            g_save_file_names[slot], g_save_work_buffer, 0x1E00, g_main_card_save_slot_file_states[slot]);
+            g_save_file_names[slot], g_save_work_buffer, 0x1E00, g_save_slot_file_states[slot]);
         header_written = 0;
         menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
         if (bytes_written == 0x1E00) {
@@ -577,25 +577,25 @@ static void save_write_step(s32 slot) {
             }
             if (bytes_written == 0x1E00 && header_written == 0x80) {
                 g_save_menu_step = SAVE_STEP_SELECT_SAVE;
-                g_main_card_save_slot_file_states[slot] = CARD_SAVE_SLOT_OCCUPIED;
+                g_save_slot_file_states[slot] = SAVE_SLOT_OCCUPIED;
                 save_build_slot_description(0, g_save_slot_descriptions[slot]);
                 save_draw_slot_text(slot);
-                bcopy(&g_save_work_buffer->summary, &g_main_card_save_slot_metadata[slot], sizeof(card_save_summary_t));
+                bcopy(&g_save_work_buffer->summary, &g_save_slot_metadata[slot], sizeof(save_summary_t));
                 save_update_slot_playtime(slot);
-                g_sound_queued_effect_id = MAIN_SFX_COMPLETE;
+                g_sound_queued_effect_id = SOUND_SFX_COMPLETE;
                 g_save_write_step_state = 0;
-                g_main_card_save_last_used_slot = slot;
+                g_save_last_used_slot = slot;
                 return;
             }
         }
-        g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+        g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
         g_save_write_failed = 1;
-        g_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
+        g_sound_queued_effect_id = SOUND_SFX_ERROR_MESSAGE;
     }
 }
 
 /*
- * WORLD twin of CARD.OUT's card_save_build_buffer: serialize the whole
+ * WORLD twin of CARD.OUT's save_build_image: serialize the whole
  * 0x1e00-byte save image into g_save_work_buffer, then append one
  * parity bit per 128-byte block through the primary bitstream writer.
  *
@@ -643,65 +643,58 @@ void save_build_image(s32 slot) {
     g_save_work_buffer->summary.location = location;
     g_save_work_buffer->summary.slot = slot_marker;
     g_save_work_buffer->elapsed_seconds
-        = g_main_system_play_time_minutes * 60 + g_main_system_play_time_seconds + g_main_system_play_time_hours * 3600;
+        = g_save_play_time_minutes * 60 + g_save_play_time_seconds + g_save_play_time_hours * 3600;
     g_save_work_buffer->summary.format_version = 4;
 
     save_build_file_header(slot, g_formation_unit_pointers[i]->status.level, &g_save_work_buffer->header);
 
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-        bcopy(
-            &g_main_party_units[i], g_save_work_buffer->party_records[i], sizeof(g_save_work_buffer->party_records[i]));
+        bcopy(&g_party_units[i], g_save_work_buffer->party_records[i], sizeof(g_save_work_buffer->party_records[i]));
     }
 
-    bcopy(g_main_item_quantities, g_save_work_buffer->item_quantities, sizeof(g_save_work_buffer->item_quantities));
-    bcopy(g_main_item_poached_quantities, g_save_work_buffer->poached_item_quantities,
+    bcopy(g_item_quantities, g_save_work_buffer->item_quantities, sizeof(g_save_work_buffer->item_quantities));
+    bcopy(g_item_poached_quantities, g_save_work_buffer->poached_item_quantities,
         sizeof(g_save_work_buffer->poached_item_quantities));
-    bcopy(g_main_item_location_flags, g_save_work_buffer->item_location_flags,
+    bcopy(g_item_location_flags, g_save_work_buffer->item_location_flags,
         sizeof(g_save_work_buffer->item_location_flags));
-    g_save_work_buffer->_unknown_1c88 = g_main_save_unread_byte;
-    bcopy(g_main_script_variables, g_save_work_buffer->script_variables, sizeof(g_save_work_buffer->script_variables));
-    bcopy(&g_main_game_options, &g_save_work_buffer->options, sizeof(g_save_work_buffer->options));
-    bcopy(g_main_item_type_order_tables.order_0, g_save_work_buffer->item_type_order_0,
+    g_save_work_buffer->_unknown_1c88 = g_save_unread_byte;
+    bcopy(
+        g_script_variable_storage, g_save_work_buffer->script_variables, sizeof(g_save_work_buffer->script_variables));
+    bcopy(&g_game_options, &g_save_work_buffer->options, sizeof(g_save_work_buffer->options));
+    bcopy(g_item_type_order_tables.order_0, g_save_work_buffer->item_type_order_0,
         sizeof(g_save_work_buffer->item_type_order_0));
+    bcopy(g_item_type_order_1, g_save_work_buffer->item_type_order_1, sizeof(g_save_work_buffer->item_type_order_1));
+    bcopy(g_item_type_order_2, g_save_work_buffer->item_type_order_2, sizeof(g_save_work_buffer->item_type_order_2));
+    bcopy(g_item_type_order_3, g_save_work_buffer->item_type_order_3, sizeof(g_save_work_buffer->item_type_order_3));
+    bcopy(g_item_type_order_4, g_save_work_buffer->item_type_order_4, sizeof(g_save_work_buffer->item_type_order_4));
+    bcopy(g_item_type_order_5, g_save_work_buffer->item_type_order_5, sizeof(g_save_work_buffer->item_type_order_5));
+    bcopy(g_item_type_order_6, g_save_work_buffer->item_type_order_6, sizeof(g_save_work_buffer->item_type_order_6));
     bcopy(
-        g_main_item_type_order_1, g_save_work_buffer->item_type_order_1, sizeof(g_save_work_buffer->item_type_order_1));
+        g_item_weapon_page_order, g_save_work_buffer->weapon_page_order, sizeof(g_save_work_buffer->weapon_page_order));
     bcopy(
-        g_main_item_type_order_2, g_save_work_buffer->item_type_order_2, sizeof(g_save_work_buffer->item_type_order_2));
-    bcopy(
-        g_main_item_type_order_3, g_save_work_buffer->item_type_order_3, sizeof(g_save_work_buffer->item_type_order_3));
-    bcopy(
-        g_main_item_type_order_4, g_save_work_buffer->item_type_order_4, sizeof(g_save_work_buffer->item_type_order_4));
-    bcopy(
-        g_main_item_type_order_5, g_save_work_buffer->item_type_order_5, sizeof(g_save_work_buffer->item_type_order_5));
-    bcopy(
-        g_main_item_type_order_6, g_save_work_buffer->item_type_order_6, sizeof(g_save_work_buffer->item_type_order_6));
-    bcopy(
-        g_main_weapon_page_order, g_save_work_buffer->weapon_page_order, sizeof(g_save_work_buffer->weapon_page_order));
-    bcopy(
-        g_main_helmet_page_order, g_save_work_buffer->helmet_page_order, sizeof(g_save_work_buffer->helmet_page_order));
-    bcopy(g_main_armor_page_order, g_save_work_buffer->armor_page_order, sizeof(g_save_work_buffer->armor_page_order));
-    bcopy(g_main_accessory_page_order, g_save_work_buffer->accessory_page_order,
+        g_item_helmet_page_order, g_save_work_buffer->helmet_page_order, sizeof(g_save_work_buffer->helmet_page_order));
+    bcopy(g_item_armor_page_order, g_save_work_buffer->armor_page_order, sizeof(g_save_work_buffer->armor_page_order));
+    bcopy(g_item_accessory_page_order, g_save_work_buffer->accessory_page_order,
         sizeof(g_save_work_buffer->accessory_page_order));
-    bcopy(g_main_item_page_order, g_save_work_buffer->item_page_order, sizeof(g_save_work_buffer->item_page_order));
-    bcopy(g_main_treasure_acquisition_date_bits, g_save_work_buffer->treasure_acquisition_date_bits,
+    bcopy(g_item_page_order, g_save_work_buffer->item_page_order, sizeof(g_save_work_buffer->item_page_order));
+    bcopy(g_brave_story_treasure_acquisition_date_bits, g_save_work_buffer->treasure_acquisition_date_bits,
         sizeof(g_save_work_buffer->treasure_acquisition_date_bits));
-    bcopy(g_main_land_discovery_date_bits, g_save_work_buffer->land_discovery_date_bits,
+    bcopy(g_brave_story_land_discovery_date_bits, g_save_work_buffer->land_discovery_date_bits,
         sizeof(g_save_work_buffer->land_discovery_date_bits));
-    bcopy(g_main_proposition_last_attempt_date_bits, g_save_work_buffer->proposition_last_attempt_date_bits,
+    bcopy(g_proposition_last_attempt_date_bits, g_save_work_buffer->proposition_last_attempt_date_bits,
         sizeof(g_save_work_buffer->proposition_last_attempt_date_bits));
-    bcopy(g_main_proposition_states, g_save_work_buffer->proposition_states,
-        sizeof(g_save_work_buffer->proposition_states));
-    bcopy(g_main_sound_novel_saved_records, g_save_work_buffer->sound_novel_saved_records,
+    bcopy(g_proposition_states, g_save_work_buffer->proposition_states, sizeof(g_save_work_buffer->proposition_states));
+    bcopy(g_sound_novel_saved_readings, g_save_work_buffer->sound_novel_saved_records,
         sizeof(g_save_work_buffer->sound_novel_saved_records));
-    bcopy(g_main_sound_novel_read_section_bits, g_save_work_buffer->sound_novel_read_section_bits,
+    bcopy(g_sound_novel_read_section_bits, g_save_work_buffer->sound_novel_read_section_bits,
         sizeof(g_save_work_buffer->sound_novel_read_section_bits));
-    bcopy(g_main_sound_novel_saved_flags, g_save_work_buffer->sound_novel_saved_flags,
+    bcopy(g_sound_novel_saved_flags, g_save_work_buffer->sound_novel_saved_flags,
         sizeof(g_save_work_buffer->sound_novel_saved_flags));
-    bcopy(g_main_brave_story_character_ages, g_save_work_buffer->brave_story_character_ages,
+    bcopy(g_brave_story_character_ages, g_save_work_buffer->brave_story_character_ages,
         sizeof(g_save_work_buffer->brave_story_character_ages));
-    g_save_work_buffer->proposition_count = g_main_save_proposition_count;
-    bcopy(g_main_active_propositions, g_save_work_buffer->active_propositions,
-        sizeof(g_save_work_buffer->active_propositions));
+    g_save_work_buffer->proposition_count = g_proposition_count;
+    bcopy(
+        g_proposition_active, g_save_work_buffer->active_propositions, sizeof(g_save_work_buffer->active_propositions));
 
     bits_init_primary_reader(g_save_work_buffer->parity_bits);
     block = (u8*)g_save_work_buffer;
@@ -771,21 +764,21 @@ s32 save_restore_image(s32 partial_load) {
     }
 
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-        bcopy(
-            g_save_work_buffer->party_records[i], &g_main_party_units[i], sizeof(g_save_work_buffer->party_records[i]));
+        bcopy(g_save_work_buffer->party_records[i], &g_party_units[i], sizeof(g_save_work_buffer->party_records[i]));
     }
 
-    bcopy(g_save_work_buffer->item_quantities, g_main_item_quantities, sizeof(g_save_work_buffer->item_quantities));
-    bcopy(g_save_work_buffer->poached_item_quantities, g_main_item_poached_quantities,
+    bcopy(g_save_work_buffer->item_quantities, g_item_quantities, sizeof(g_save_work_buffer->item_quantities));
+    bcopy(g_save_work_buffer->poached_item_quantities, g_item_poached_quantities,
         sizeof(g_save_work_buffer->poached_item_quantities));
-    bcopy(g_save_work_buffer->item_location_flags, g_main_item_location_flags,
+    bcopy(g_save_work_buffer->item_location_flags, g_item_location_flags,
         sizeof(g_save_work_buffer->item_location_flags));
-    g_main_save_unread_byte = g_save_work_buffer->_unknown_1c88;
-    bcopy(g_save_work_buffer->script_variables, g_main_script_variables, sizeof(g_save_work_buffer->script_variables));
-    bcopy(&g_save_work_buffer->options, &g_main_game_options, sizeof(g_save_work_buffer->options));
+    g_save_unread_byte = g_save_work_buffer->_unknown_1c88;
+    bcopy(
+        g_save_work_buffer->script_variables, g_script_variable_storage, sizeof(g_save_work_buffer->script_variables));
+    bcopy(&g_save_work_buffer->options, &g_game_options, sizeof(g_save_work_buffer->options));
     i = 0;
     j = 0;
-    suzuki_sound_set_type(g_main_game_options.fields.sound_mode);
+    suzuki_sound_set_type(g_game_options.fields.sound_mode);
 
     for (; i < 11; i++) {
         if (g_save_work_buffer->item_type_order_0[i] == 11) {
@@ -793,68 +786,62 @@ s32 save_restore_image(s32 partial_load) {
         }
     }
     if (!j) {
-        bcopy(g_save_work_buffer->item_type_order_0, g_main_item_type_order_tables.order_0,
+        bcopy(g_save_work_buffer->item_type_order_0, g_item_type_order_tables.order_0,
             sizeof(g_save_work_buffer->item_type_order_0));
     }
 
     j = 0;
-    g_main_item_type_order_tables.order_0[11] = -1;
+    g_item_type_order_tables.order_0[11] = -1;
     for (i = 0; i < 7; i++) {
         if (g_save_work_buffer->item_type_order_1[i] == 11) {
             j = 1;
         }
     }
     if (!j) {
-        bcopy(g_save_work_buffer->item_type_order_1, g_main_item_type_order_1,
-            sizeof(g_save_work_buffer->item_type_order_1));
+        bcopy(
+            g_save_work_buffer->item_type_order_1, g_item_type_order_1, sizeof(g_save_work_buffer->item_type_order_1));
     }
 
-    g_main_item_type_order_1[7] = -1;
+    g_item_type_order_1[7] = -1;
+    bcopy(g_save_work_buffer->item_type_order_2, g_item_type_order_2, sizeof(g_save_work_buffer->item_type_order_2));
+    bcopy(g_save_work_buffer->item_type_order_3, g_item_type_order_3, sizeof(g_save_work_buffer->item_type_order_3));
+    bcopy(g_save_work_buffer->item_type_order_4, g_item_type_order_4, sizeof(g_save_work_buffer->item_type_order_4));
+    bcopy(g_save_work_buffer->item_type_order_5, g_item_type_order_5, sizeof(g_save_work_buffer->item_type_order_5));
+    bcopy(g_save_work_buffer->item_type_order_6, g_item_type_order_6, sizeof(g_save_work_buffer->item_type_order_6));
     bcopy(
-        g_save_work_buffer->item_type_order_2, g_main_item_type_order_2, sizeof(g_save_work_buffer->item_type_order_2));
+        g_save_work_buffer->weapon_page_order, g_item_weapon_page_order, sizeof(g_save_work_buffer->weapon_page_order));
     bcopy(
-        g_save_work_buffer->item_type_order_3, g_main_item_type_order_3, sizeof(g_save_work_buffer->item_type_order_3));
-    bcopy(
-        g_save_work_buffer->item_type_order_4, g_main_item_type_order_4, sizeof(g_save_work_buffer->item_type_order_4));
-    bcopy(
-        g_save_work_buffer->item_type_order_5, g_main_item_type_order_5, sizeof(g_save_work_buffer->item_type_order_5));
-    bcopy(
-        g_save_work_buffer->item_type_order_6, g_main_item_type_order_6, sizeof(g_save_work_buffer->item_type_order_6));
-    bcopy(
-        g_save_work_buffer->weapon_page_order, g_main_weapon_page_order, sizeof(g_save_work_buffer->weapon_page_order));
-    bcopy(
-        g_save_work_buffer->helmet_page_order, g_main_helmet_page_order, sizeof(g_save_work_buffer->helmet_page_order));
-    bcopy(g_save_work_buffer->armor_page_order, g_main_armor_page_order, sizeof(g_save_work_buffer->armor_page_order));
-    bcopy(g_save_work_buffer->accessory_page_order, g_main_accessory_page_order,
+        g_save_work_buffer->helmet_page_order, g_item_helmet_page_order, sizeof(g_save_work_buffer->helmet_page_order));
+    bcopy(g_save_work_buffer->armor_page_order, g_item_armor_page_order, sizeof(g_save_work_buffer->armor_page_order));
+    bcopy(g_save_work_buffer->accessory_page_order, g_item_accessory_page_order,
         sizeof(g_save_work_buffer->accessory_page_order));
-    bcopy(g_save_work_buffer->item_page_order, g_main_item_page_order, sizeof(g_save_work_buffer->item_page_order));
-    bcopy(g_save_work_buffer->treasure_acquisition_date_bits, g_main_treasure_acquisition_date_bits,
+    bcopy(g_save_work_buffer->item_page_order, g_item_page_order, sizeof(g_save_work_buffer->item_page_order));
+    bcopy(g_save_work_buffer->treasure_acquisition_date_bits, g_brave_story_treasure_acquisition_date_bits,
         sizeof(g_save_work_buffer->treasure_acquisition_date_bits));
-    bcopy(g_save_work_buffer->land_discovery_date_bits, g_main_land_discovery_date_bits,
+    bcopy(g_save_work_buffer->land_discovery_date_bits, g_brave_story_land_discovery_date_bits,
         sizeof(g_save_work_buffer->land_discovery_date_bits));
-    bcopy(g_save_work_buffer->proposition_last_attempt_date_bits, g_main_proposition_last_attempt_date_bits,
+    bcopy(g_save_work_buffer->proposition_last_attempt_date_bits, g_proposition_last_attempt_date_bits,
         sizeof(g_save_work_buffer->proposition_last_attempt_date_bits));
-    bcopy(g_save_work_buffer->proposition_states, g_main_proposition_states,
-        sizeof(g_save_work_buffer->proposition_states));
-    bcopy(g_save_work_buffer->sound_novel_saved_records, g_main_sound_novel_saved_records,
+    bcopy(g_save_work_buffer->proposition_states, g_proposition_states, sizeof(g_save_work_buffer->proposition_states));
+    bcopy(g_save_work_buffer->sound_novel_saved_records, g_sound_novel_saved_readings,
         sizeof(g_save_work_buffer->sound_novel_saved_records));
-    bcopy(g_save_work_buffer->sound_novel_read_section_bits, g_main_sound_novel_read_section_bits,
+    bcopy(g_save_work_buffer->sound_novel_read_section_bits, g_sound_novel_read_section_bits,
         sizeof(g_save_work_buffer->sound_novel_read_section_bits));
-    bcopy(g_save_work_buffer->sound_novel_saved_flags, g_main_sound_novel_saved_flags,
+    bcopy(g_save_work_buffer->sound_novel_saved_flags, g_sound_novel_saved_flags,
         sizeof(g_save_work_buffer->sound_novel_saved_flags));
-    bcopy(g_save_work_buffer->brave_story_character_ages, g_main_brave_story_character_ages,
+    bcopy(g_save_work_buffer->brave_story_character_ages, g_brave_story_character_ages,
         sizeof(g_save_work_buffer->brave_story_character_ages));
-    g_main_save_proposition_count = g_save_work_buffer->proposition_count;
-    bcopy(g_save_work_buffer->active_propositions, g_main_active_propositions,
-        sizeof(g_save_work_buffer->active_propositions));
+    g_proposition_count = g_save_work_buffer->proposition_count;
+    bcopy(
+        g_save_work_buffer->active_propositions, g_proposition_active, sizeof(g_save_work_buffer->active_propositions));
 
     if (partial_load == 0) {
         i = g_save_work_buffer->elapsed_seconds;
-        g_main_system_play_time_hours = i / 3600;
+        g_save_play_time_hours = i / 3600;
         i %= 3600;
-        g_main_system_play_time_minutes = i / 60;
+        g_save_play_time_minutes = i / 60;
         i %= 60;
-        g_main_system_play_time_seconds = i;
+        g_save_play_time_seconds = i;
     }
     return 1;
 }
@@ -862,7 +849,7 @@ s32 save_restore_image(s32 partial_load) {
 /* Resets the memory card menu state and allocates the 0x2000-byte load
  * buffer; also used by "Open tutorial files". */
 void save_init_screen(void) {
-    card_save_buffer_t* buffer;
+    save_image_t* buffer;
 
     g_save_list_scroll_y = 0x18;
     g_save_list_scroll_velocity = 0;
@@ -871,26 +858,26 @@ void save_init_screen(void) {
     g_save_slot_cursor_row = 0;
     g_save_menu_result = 0;
     g_save_slot_select_timer = 0;
-    buffer = main_heap_alloc(0x2000);
+    buffer = heap_alloc(0x2000);
     g_save_work_buffer = buffer;
     memset(buffer, 0xFF, 0x1E80);
 }
 
 /* Free the memory card menu's load buffer from save_init_screen. */
 static void save_free_work_buffer(void) {
-    main_heap_free(g_save_work_buffer);
+    heap_free(g_save_work_buffer);
 }
 
-/* WORLD twin of card_save_update_slot_playtime: splits the loaded save's
+/* WORLD twin of save_update_slot_playtime: splits the loaded save's
  * play time into hours/minutes/seconds for the memory card menu. */
 static void save_update_slot_playtime(s32 slot) {
     s32 component;
     s32 elapsed_seconds;
 
-    if (g_main_card_save_slot_file_states[slot] != CARD_SAVE_SLOT_OCCUPIED) {
-        g_main_card_save_slot_playtimes[slot].hours = 0;
-        g_main_card_save_slot_playtimes[slot].minutes = 0;
-        g_main_card_save_slot_playtimes[slot].seconds = 0;
+    if (g_save_slot_file_states[slot] != SAVE_SLOT_OCCUPIED) {
+        g_save_slot_playtimes[slot].hours = 0;
+        g_save_slot_playtimes[slot].minutes = 0;
+        g_save_slot_playtimes[slot].seconds = 0;
     } else {
         elapsed_seconds = g_save_work_buffer->elapsed_seconds;
 
@@ -898,21 +885,21 @@ static void save_update_slot_playtime(s32 slot) {
         if (component >= 100) {
             component = 99;
         }
-        g_main_card_save_slot_playtimes[slot].hours = component;
+        g_save_slot_playtimes[slot].hours = component;
 
         elapsed_seconds %= 3600;
         component = elapsed_seconds / 60;
-        g_main_card_save_slot_playtimes[slot].minutes = component;
+        g_save_slot_playtimes[slot].minutes = component;
 
         elapsed_seconds %= 60;
-        g_main_card_save_slot_playtimes[slot].seconds = elapsed_seconds;
+        g_save_slot_playtimes[slot].seconds = elapsed_seconds;
     }
 }
 
 /*
  * Scans the selected memory card and classifies each of the 15 save slots.
  *
- * WORLD twin of CARD's card_save_update_slot_scan: same state
+ * WORLD twin of CARD's save_update_scan: same state
  * machine, but a NEW_CARD probe result is retried once before use.
  */
 static void save_scan_slots(void) {
@@ -947,14 +934,14 @@ static void save_scan_slots(void) {
         menu_input_clear_state();
         /* While a slot is recorded as last used, the stored slot metadata is current: if the card
          * reports no change, rebuild the descriptions from it and skip the directory scan. */
-        if (g_main_card_save_last_used_slot < 0x10) {
+        if (g_save_last_used_slot < 0x10) {
             if (memcard_wait_operation_result(5) == MEMCARD_RESULT_COMPLETE) {
                 g_save_slot_scan_index = 0;
                 while (g_save_slot_scan_index < CARD_SAVE_SLOT_COUNT) {
-                    if (g_main_card_save_slot_file_states[g_save_slot_scan_index] >= 0) {
-                        bcopy(&g_main_card_save_slot_metadata[g_save_slot_scan_index], &g_save_work_buffer->summary,
-                            sizeof(card_save_summary_t));
-                        save_build_slot_description(g_main_card_save_slot_file_states[g_save_slot_scan_index],
+                    if (g_save_slot_file_states[g_save_slot_scan_index] >= 0) {
+                        bcopy(&g_save_slot_metadata[g_save_slot_scan_index], &g_save_work_buffer->summary,
+                            sizeof(save_summary_t));
+                        save_build_slot_description(g_save_slot_file_states[g_save_slot_scan_index],
                             g_save_slot_descriptions[g_save_slot_scan_index]);
                         save_draw_slot_text(g_save_slot_scan_index);
                     }
@@ -963,7 +950,7 @@ static void save_scan_slots(void) {
                 g_save_menu_step = SAVE_STEP_SELECT_MODE;
                 return;
             } else {
-                g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+                g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
             }
         }
 
@@ -1006,16 +993,16 @@ static void save_scan_slots(void) {
             g_save_free_block_count = memcard_file_count_free_blocks(g_save_directory_buffer, g_save_file_count);
         } else {
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
-            g_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
+            g_sound_queued_effect_id = SOUND_SFX_ERROR_MESSAGE;
         }
 
         /* Every slot starts unscanned; the scan below classifies one slot per call. */
         for (result = 0; result < 15; result++) {
-            g_main_card_save_slot_file_states[result] = CARD_SAVE_SLOT_UNSCANNED;
+            g_save_slot_file_states[result] = SAVE_SLOT_UNSCANNED;
         }
         g_screen_selection_results[5] = -1;
         g_save_format_prompt[1].selected_index = 1;
-        g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+        g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
         g_save_scan_prompt_active = 1;
         g_save_slot_scan_index = 0;
         g_save_slot_scan_active = 1;
@@ -1049,7 +1036,7 @@ static void save_scan_slots(void) {
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_save_access_error_message);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
             menu_stop_managed_thread(THREAD_SCREEN_SLOT_MENU);
-            g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+            g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_save_error_message_closing = 1;
         } else if (result == MEMCARD_RESULT_NEW_CARD || result == MEMCARD_RESULT_COMPLETE) {
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
@@ -1108,28 +1095,28 @@ static void save_scan_slots(void) {
 
             /* A full 0x80-byte summary read means the slot holds a save. */
             if (status == 0x80) {
-                g_main_card_save_slot_file_states[g_save_slot_scan_index] = CARD_SAVE_SLOT_OCCUPIED;
+                g_save_slot_file_states[g_save_slot_scan_index] = SAVE_SLOT_OCCUPIED;
             }
             if (status <= 0) {
                 if (g_save_free_block_count > 0) {
-                    g_main_card_save_slot_file_states[g_save_slot_scan_index] = CARD_SAVE_SLOT_AVAILABLE;
+                    g_save_slot_file_states[g_save_slot_scan_index] = SAVE_SLOT_AVAILABLE;
                     g_save_free_block_count--;
                 } else {
-                    g_main_card_save_slot_file_states[g_save_slot_scan_index] = CARD_SAVE_SLOT_UNAVAILABLE;
+                    g_save_slot_file_states[g_save_slot_scan_index] = SAVE_SLOT_UNAVAILABLE;
                 }
             }
-            if (g_main_card_save_slot_file_states[g_save_slot_scan_index] >= 0) {
-                save_build_slot_description(g_main_card_save_slot_file_states[g_save_slot_scan_index],
-                    g_save_slot_descriptions[g_save_slot_scan_index]);
-                bcopy(&g_save_work_buffer->summary, &g_main_card_save_slot_metadata[g_save_slot_scan_index],
-                    sizeof(card_save_summary_t));
+            if (g_save_slot_file_states[g_save_slot_scan_index] >= 0) {
+                save_build_slot_description(
+                    g_save_slot_file_states[g_save_slot_scan_index], g_save_slot_descriptions[g_save_slot_scan_index]);
+                bcopy(&g_save_work_buffer->summary, &g_save_slot_metadata[g_save_slot_scan_index],
+                    sizeof(save_summary_t));
                 save_update_slot_playtime(g_save_slot_scan_index);
                 save_draw_slot_text(g_save_slot_scan_index);
             }
             g_save_slot_scan_index++;
         } else {
             /* A last-used slot below 0x10 lets the next scan reuse these results. */
-            g_main_card_save_last_used_slot = 0;
+            g_save_last_used_slot = 0;
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             g_save_menu_step = SAVE_STEP_SELECT_MODE;
             g_save_slot_scan_active = 0;
@@ -1234,15 +1221,15 @@ static s32 save_count_selectable_slots(void) {
 
     g_screen_script_callbacks[0].value = 0;
     for (i = 0, count = 0; i < 15; i++) {
-        if (i == g_main_card_save_last_used_slot) {
+        if (i == g_save_last_used_slot) {
             g_save_active_slot = i;
             g_save_slot_cursor_row = count;
         }
         if (g_save_mode != 0) {
-            if (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_OCCUPIED) {
+            if (g_save_slot_file_states[i] == SAVE_SLOT_OCCUPIED) {
                 count++;
             }
-        } else if (g_main_card_save_slot_file_states[i] != CARD_SAVE_SLOT_UNAVAILABLE) {
+        } else if (g_save_slot_file_states[i] != SAVE_SLOT_UNAVAILABLE) {
             count++;
         }
     }
@@ -1262,7 +1249,7 @@ static s32 save_count_selectable_slots(void) {
  * Memory-card slot list: in menu step 3 handle slot selection input, then
  * draw the visible slot rows, the row cursor and the scroll arrows.
  *
- * WORLD twin of CARD's card_save_update_and_draw_slot_list. The row sprites
+ * WORLD twin of CARD's save_update_slot_list. The row sprites
  * and number commands are separate globals: the target keeps one address per
  * field and derives each call argument from it (reg - 2, reg - 8), which an
  * array of records would fold into a single base register.
@@ -1297,7 +1284,7 @@ static void save_slot_list_step(s32 input) {
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
                 g_save_menu_step = SAVE_STEP_SCANNING;
-                g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
+                g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
             }
         } else if (g_save_overwrite_prompt_running != 0) {
             g_save_overwrite_prompt_running
@@ -1311,12 +1298,12 @@ static void save_slot_list_step(s32 input) {
                 g_save_menu_step = SAVE_STEP_LOADING;
             }
         } else if ((input & PSX_PAD_CIRCLE) && g_save_list_scroll_velocity == 0) {
-            main_sound_play_sfx(MAIN_SFX_CONFIRM);
+            sound_play_sfx(SOUND_SFX_CONFIRM);
             /* The cursor counts listed slots only; find the slot index it points at. */
             remaining = g_save_slot_cursor_row;
             if (g_save_mode == 0) {
                 for (i = 0; i < 15; i++) {
-                    if (g_main_card_save_slot_file_states[i] != CARD_SAVE_SLOT_UNAVAILABLE) {
+                    if (g_save_slot_file_states[i] != SAVE_SLOT_UNAVAILABLE) {
                         remaining--;
                     }
                     if (remaining < 0) {
@@ -1325,7 +1312,7 @@ static void save_slot_list_step(s32 input) {
                 }
             } else {
                 for (i = 0; i < 15; i++) {
-                    if (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_OCCUPIED) {
+                    if (g_save_slot_file_states[i] == SAVE_SLOT_OCCUPIED) {
                         remaining--;
                     }
                     if (remaining < 0) {
@@ -1362,7 +1349,7 @@ static void save_slot_list_step(s32 input) {
             }
             g_save_confirm_prompt->window.y = i;
             if (g_save_mode == 0) {
-                if (g_main_card_save_slot_file_states[g_save_active_slot] == CARD_SAVE_SLOT_OCCUPIED) {
+                if (g_save_slot_file_states[g_save_active_slot] == SAVE_SLOT_OCCUPIED) {
                     g_save_overwrite_prompt_running = 1;
                 } else {
                     g_save_menu_step = SAVE_STEP_SAVING;
@@ -1372,7 +1359,7 @@ static void save_slot_list_step(s32 input) {
             }
         } else if (input & PSX_PAD_CROSS) {
             if (g_save_list_scroll_velocity == 0) {
-                g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+                g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                 g_save_menu_step = SAVE_STEP_SELECT_CARD;
             }
         } else if (g_save_list_scroll_velocity == 0) {
@@ -1386,7 +1373,7 @@ static void save_slot_list_step(s32 input) {
                 g_save_slot_cursor_row = i - 1;
             }
             if (i != g_save_slot_cursor_row) {
-                g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+                g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
             }
         }
 
@@ -1403,14 +1390,14 @@ static void save_slot_list_step(s32 input) {
     for (i = 0, row = 0; i < CARD_SAVE_SLOT_COUNT; i++, row++) {
         /* Loading lists occupied slots only; saving skips the unavailable ones. */
         if (g_save_mode != 0) {
-            while (g_main_card_save_slot_file_states[i] != CARD_SAVE_SLOT_OCCUPIED) {
+            while (g_save_slot_file_states[i] != SAVE_SLOT_OCCUPIED) {
                 i++;
                 if (i >= CARD_SAVE_SLOT_COUNT) {
                     break;
                 }
             }
         } else {
-            while (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_UNAVAILABLE) {
+            while (g_save_slot_file_states[i] == SAVE_SLOT_UNAVAILABLE) {
                 i++;
                 if (i >= CARD_SAVE_SLOT_COUNT) {
                     break;
@@ -1460,9 +1447,9 @@ static void save_slot_list_step(s32 input) {
                 &g_save_slot_quad_2, screen_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             g_save_playtime_seconds_command.y = g_save_playtime_minutes_command.y = g_save_playtime_hours_command.y
                 = g_save_slot_quad_0.position.y;
-            g_save_playtime_seconds_command.value = g_main_card_save_slot_playtimes[i].seconds;
-            g_save_playtime_minutes_command.value = g_main_card_save_slot_playtimes[i].minutes;
-            g_save_playtime_hours_command.value = g_main_card_save_slot_playtimes[i].hours;
+            g_save_playtime_seconds_command.value = g_save_slot_playtimes[i].seconds;
+            g_save_playtime_minutes_command.value = g_save_slot_playtimes[i].minutes;
+            g_save_playtime_hours_command.value = g_save_slot_playtimes[i].hours;
             if (g_save_playtime_hours_command.value >= 100) {
                 g_save_playtime_hours_command.value = 99;
             }
@@ -1471,7 +1458,7 @@ static void save_slot_list_step(s32 input) {
             menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_save_playtime_seconds_command);
         }
 
-        if (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_AVAILABLE) {
+        if (g_save_slot_file_states[i] == SAVE_SLOT_AVAILABLE) {
             rect.x = 0x74;
             rect.y = g_save_slot_window.rect.y + 5;
             rect.w = 0x28;
@@ -1569,24 +1556,24 @@ static void save_scroll_slot_list(s32 row) {
     }
 }
 
-/* WORLD twin of card_save_build_file_header (built at -O2 here): fills the
+/* WORLD twin of save_build_file_header (built at -O2 here): fills the
  * memory-card header with the title template, the one-based save-file number
  * and the play time as full-width Shift-JIS digits, then the slot's icon.
  *
  * Callers pass the save slot (save_write_step; -1 for the tutorial
  * image), which also selects one of the 15 icon records; level is unused. */
-static void save_build_file_header(s32 slot, s32 level, card_save_header_t* header) {
+static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header) {
     s32 value;
     s32 digit;
     s32 divisor;
     s32 pos;
-    card_save_icon_t* records;
-    card_save_icon_t* record;
+    save_icon_t* records;
+    save_icon_t* record;
 
-    header->magic0 = CARD_SAVE_HEADER_MAGIC_S;
-    header->magic1 = CARD_SAVE_HEADER_MAGIC_C;
-    header->icon_flags = CARD_SAVE_HEADER_ICON_ONE_FRAME;
-    header->block_count = CARD_SAVE_HEADER_BLOCK_COUNT_ONE;
+    header->magic0 = SAVE_HEADER_MAGIC_S;
+    header->magic1 = SAVE_HEADER_MAGIC_C;
+    header->icon_flags = SAVE_HEADER_ICON_ONE_FRAME;
+    header->block_count = SAVE_HEADER_BLOCK_COUNT_ONE;
     memset(header->reserved, 0, 0x1C);
     slot++;
     bcopy(g_save_title_template, header->title, 0x16);
@@ -1601,7 +1588,7 @@ static void save_build_file_header(s32 slot, s32 level, card_save_header_t* head
 
     pos = 0x16;
 
-    value = g_main_system_play_time_hours;
+    value = g_save_play_time_hours;
     if (value >= 100) {
         value = 99;
     }
@@ -1617,7 +1604,7 @@ static void save_build_file_header(s32 slot, s32 level, card_save_header_t* head
     header->title[pos++] = 0x81;
     header->title[pos++] = 0x46;
 
-    value = g_main_system_play_time_minutes;
+    value = g_save_play_time_minutes;
     if (value >= 60) {
         value = 59;
     }
@@ -1633,7 +1620,7 @@ static void save_build_file_header(s32 slot, s32 level, card_save_header_t* head
     header->title[pos++] = 0x81;
     header->title[pos++] = 0x46;
 
-    value = g_main_system_play_time_seconds;
+    value = g_save_play_time_seconds;
     if (value >= 60) {
         value = 59;
     }

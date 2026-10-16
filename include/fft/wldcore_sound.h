@@ -19,7 +19,7 @@ typedef struct audio_music_slots {
 
 /* Value of AUDIO_COMMAND_PLAY_MUSIC and of
  * audio_queue_start_music: a music slot (1 or 2) and the
- * main_music_e id to load into it. */
+ * music_id_e id to load into it. */
 #define AUDIO_MUSIC(slot, music_id) (((slot) << 8) | (music_id))
 
 /* Commands of the audio queue (audio_queue_add), and the

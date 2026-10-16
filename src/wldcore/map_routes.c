@@ -97,7 +97,7 @@ void world_map_init_dots(void) {
 }
 
 /* Projects every world-map dot and hides the ones that are off screen, all of
- * them while MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS is set, and those whose location
+ * them while SYSTEM_FLAG_HIDE_MAP_DOTS is set, and those whose location
  * is not yet visible (EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST + location).
  *
  * The screen bounds are written as the target's unsigned range tests: x in
@@ -112,7 +112,7 @@ void world_map_project_dots(void) {
         g_world_map_dots[i].render.position.x = position.vx;
         g_world_map_dots[i].render.position.y = position.vy;
         if (position.vx < -128 || position.vx > 128 || position.vy < -116 || position.vy > 120
-            || (g_main_system_flags & MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS)
+            || (g_system_flags & SYSTEM_FLAG_HIDE_MAP_DOTS)
             || script_get_variable(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
             g_world_map_dots[i].render.flags |= DISPLAY_OBJECT_HIDDEN;
         } else {
@@ -122,7 +122,7 @@ void world_map_project_dots(void) {
 }
 
 /* Pulse the map dots' brightness. The phase counts up to 0x40 and back down,
- * a step a frame unless MAIN_SYSTEM_FLAG_FREEZE_ANIMATION is set; dots with a
+ * a step a frame unless SYSTEM_FLAG_FREEZE_ANIMATION is set; dots with a
  * palette (colored towns and fields) run from 0x60 to 0xe0 with it and the
  * others the opposite way, so the two kinds pulse out of step.
  *
@@ -131,7 +131,7 @@ void world_map_project_dots(void) {
  * the limit ($v1); reusing the function-scope allocno reproduces the target
  * pair. */
 void world_map_pulse_dots(void) {
-    s32 flags = g_main_system_flags;
+    s32 flags = g_system_flags;
     s32 i;
     s32 phase;
     s32 bright;
@@ -140,11 +140,11 @@ void world_map_pulse_dots(void) {
     u8 counter;
     CVECTOR* color;
 
-    if (flags & MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
+    if (flags & SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
         return;
     }
 
-    if (!(flags & MAIN_SYSTEM_FLAG_FREEZE_ANIMATION)) {
+    if (!(flags & SYSTEM_FLAG_FREEZE_ANIMATION)) {
         state = g_world_map_dot_pulse_direction;
         flags = 0x40;
         if (state == 0) {
@@ -364,7 +364,7 @@ void world_map_init_stub(void) {
  * are full they become one POLY_FT4 quad, emitted when either edge-leading
  * vertex was in bounds, and the last pair slides down to slots 0 and 1 so the
  * next pair closes the following segment. Nothing is drawn while
- * MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES is set, and a route only once it is
+ * SYSTEM_FLAG_HIDE_MAP_ROUTES is set, and a route only once it is
  * revealed (EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + route).
  *
  * The count is sign-extended into count_tmp, which the loop guard tests before
@@ -390,7 +390,7 @@ void world_map_draw_routes(GsOT* ot) {
     s16 raw;
     s32 count_tmp;
 
-    if (g_main_system_flags & MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES) {
+    if (g_system_flags & SYSTEM_FLAG_HIDE_MAP_ROUTES) {
         return;
     }
 
@@ -675,12 +675,12 @@ static void travel_find_best_path(s32 from, s32 to) {
     table = g_world_map_routes;
     for (route = 0; route < WORLD_MAP_ROUTE_COUNT; route++) {
         if (VSync(1) > 200) {
-            main_file_poll_load(&g_main_file_cd_state);
+            file_poll_load(&g_file_cd_state);
             audio_queue_process();
             world_map_pulse_dots();
             world_map_draw_frame();
             buffer_index = GsGetActiveBuff();
-            g_main_gfx_active_buffer_index = buffer_index;
+            g_gfx_active_buffer_index = buffer_index;
             GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
         }
         if (script_get_variable(route + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST) == 0) {
@@ -760,7 +760,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
         g_travel_next_map_id[0] = 0;
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
         event_transition_push_level(g_location_script_state.args[1]);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+        g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         return 0;
     } else {
         if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
@@ -791,7 +791,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
                 |= WORLD_MAP_PROJECTION_UPDATE_DIRECTION | WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
         }
         g_world_map_projection_state.marker.sub_kind = location_load_picture(to_location);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+        g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         return 1;
     }
 }
@@ -854,7 +854,7 @@ void travel_step(void) {
             if (random_battle_roll(g_travel.leg_end_location,
                     g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)
                 != 0) {
-                g_main_system_flags |= MAIN_SYSTEM_FLAG_RANDOM_BATTLE;
+                g_system_flags |= SYSTEM_FLAG_RANDOM_BATTLE;
                 g_travel_next_map_id[0] = g_random_battle_map_id;
                 script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, g_random_battle_entd_id);
                 script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
@@ -868,7 +868,7 @@ void travel_step(void) {
                     = g_world_map_projection_state.marker.kind;
                 return;
             }
-            sound_play_effect(MAIN_SFX_WORLD_MAP_ARRIVE);
+            sound_play_effect(SOUND_SFX_WORLD_MAP_ARRIVE);
             if (g_travel.route_index < g_travel.best_path_length) {
                 g_travel.flags &= ~TRAVEL_REVERSED;
                 g_travel.segment_count
@@ -883,7 +883,7 @@ void travel_step(void) {
                 = g_world_map_projection_state.marker.render.position.x;
             g_window_records[g_menu_stack_records_next[g_travel.menu_level].location_transition.window_index].position.y
                 = g_world_map_projection_state.marker.render.position.y - 4;
-            g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+            g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
             g_travel.arrival_location = g_world_map_projection_state.marker.kind + 1;
             file_wait_for_pending();
             g_world_map_projection_state.angle = 0;
@@ -1022,7 +1022,7 @@ s32 world_map_step_pan(void) {
 
 /* Applies a scroll delta to the projection origin when the resulting window
  * origin would leave [-64, 72] horizontally or [-64, 64] vertically, and
- * sets MAIN_SYSTEM_FLAG_DRAW_MAP if the origin's x or y changed. */
+ * sets SYSTEM_FLAG_DRAW_MAP if the origin's x or y changed. */
 static void world_map_scroll_if_near_edge(point32_t* delta) {
     point32_t position;
     VECTOR saved = g_world_map_projection_origin;
@@ -1036,7 +1036,7 @@ static void world_map_scroll_if_near_edge(point32_t* delta) {
         world_map_apply_clamped_vertical_scroll(delta, &g_world_map_projection_origin);
     }
     if (saved.vx != g_world_map_projection_origin.vx || saved.vy != g_world_map_projection_origin.vy) {
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
+        g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
     }
 }
 

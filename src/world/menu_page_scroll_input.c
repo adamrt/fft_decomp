@@ -46,7 +46,7 @@ void screen_scroll_list_page(menu_vertical_scroll_direction_e dir, const menu_in
         g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
     if (old != g_menu_scroll_base_index) {
-        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
 }
 
@@ -77,8 +77,8 @@ menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
             g_screen_scroll_hold_counter = 0;
         }
         value = menu_get_event_speed();
-        delay = g_main_input_repeat_initial_delay / value;
-        repeat = g_main_input_secondary_repeat_period / value;
+        delay = g_input_repeat_initial_delay / value;
+        repeat = g_input_secondary_repeat_period / value;
         counter = g_screen_scroll_hold_counter;
         if (counter >= delay) {
             if (counter % repeat != 0) {

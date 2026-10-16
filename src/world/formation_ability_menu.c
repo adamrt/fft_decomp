@@ -134,7 +134,7 @@ void formation_ability_menu(void) {
                 allowed = 1;
             }
             if (allowed != 0) {
-                g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+                g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 g_formation_current_menu = *selection + FORMATION_MENU_ABILITY_SET;
                 if (g_formation_current_menu != FORMATION_MENU_ABILITY_LEARN) {
                     thread_start(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD, formation_ability_idle_thread);
@@ -144,7 +144,7 @@ void formation_ability_menu(void) {
                     menu_stop_managed_thread(SCREEN_THREAD_SLOT_UPPER_MENU);
                 }
             } else {
-                g_sound_queued_effect_id = MAIN_SFX_INVALID;
+                g_sound_queued_effect_id = SOUND_SFX_INVALID;
             }
             screen_reset_selection_results();
         }
@@ -204,7 +204,7 @@ static s32 formation_ability_remove_menu(void) {
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         formation_toggle_preview_stats_window(0);
-        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         g_formation_ability_remove_initialized = 0;
         g_formation_ability_remove_unit_index = -1;
         return 0;
@@ -217,7 +217,7 @@ static s32 formation_ability_remove_menu(void) {
         g_menu_help_message_text_id = 0;
         formation_toggle_preview_stats_window(0);
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-            g_sound_queued_effect_id = MAIN_SFX_INVALID;
+            g_sound_queued_effect_id = SOUND_SFX_INVALID;
         }
         return 1;
     }
@@ -236,10 +236,10 @@ static s32 formation_ability_remove_menu(void) {
         formation_toggle_preview_stats_window(1);
         g_formation_ability_remove_all_prompt_active = 1;
         g_menu_preview_stats_thread_params.redraw_request = 1;
-        g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+        g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
     slot = menu_update_vertical_selection_and_mark_change(
-               4, SCREEN_CURSOR_REMOVE_ABILITY_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH)
+               4, SCREEN_CURSOR_REMOVE_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
         + 1;
     cursor_y = &g_formation_ability_remove_cursor_point.y;
     slot_index = slot;
@@ -262,7 +262,7 @@ static s32 formation_ability_remove_menu(void) {
         saved_slot = saved_slots + slot;
         sound = *saved_slot;
         if (sound == 0) {
-            sound = MAIN_SFX_INVALID;
+            sound = SOUND_SFX_INVALID;
         } else {
             formation_ability_set_slot(g_unit_selected_index, slot, 0,
                 formation_ability_is_equip_support_change(
@@ -271,7 +271,7 @@ static s32 formation_ability_remove_menu(void) {
             *saved_slot = 0;
             g_formation_ability_remove_cursor = -1;
             formation_stage_selected_unit();
-            sound = MAIN_SFX_UNEQUIP;
+            sound = SOUND_SFX_UNEQUIP;
         }
         g_sound_queued_effect_id = sound;
     }
@@ -312,7 +312,7 @@ static s32 formation_ability_remove_all_prompt(void) {
         }
     }
     if (g_menu_input_primary_repeat & PSX_PAD_RIGHT) {
-        g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+        g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
         return 0;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
@@ -327,9 +327,9 @@ static s32 formation_ability_remove_all_prompt(void) {
         }
         formation_stage_selected_unit();
         if (changed == 0) {
-            g_sound_queued_effect_id = MAIN_SFX_INVALID;
+            g_sound_queued_effect_id = SOUND_SFX_INVALID;
         } else {
-            g_sound_queued_effect_id = MAIN_SFX_UNEQUIP;
+            g_sound_queued_effect_id = SOUND_SFX_UNEQUIP;
         }
         return 0;
     }
@@ -380,7 +380,7 @@ static s32 formation_ability_set_menu(void) {
 
     /* Cross leaves the menu from the slot cursor, or closes the open list below. */
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
-        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         if (g_formation_ability_set_list_open == 0) {
             thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
             g_formation_ability_set_initialized = 0;
@@ -399,7 +399,7 @@ static s32 formation_ability_set_menu(void) {
         formation_toggle_preview_stats_window(0);
         g_menu_help_message_text_id = 0;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-            g_sound_queued_effect_id = MAIN_SFX_INVALID;
+            g_sound_queued_effect_id = SOUND_SFX_INVALID;
             return 1;
         }
         return 1;
@@ -420,11 +420,11 @@ static s32 formation_ability_set_menu(void) {
         }
 
         slot = menu_update_vertical_selection_and_mark_change(
-                   4, SCREEN_CURSOR_SET_ABILITY_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH)
+                   4, SCREEN_CURSOR_SET_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
             + 1;
         g_formation_ability_set_slot = slot;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             if (slot == 1) {
                 g_formation_ability_set_entry_count = ability_build_list(g_unit_selected_index,
                     g_formation_unit_pointers[g_unit_selected_index]->identity.job_id, MENU_ABILITY_CATEGORY_ACTION,
@@ -458,7 +458,7 @@ static s32 formation_ability_set_menu(void) {
             if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
                 selected = g_item_list_entries[cursor];
                 if (selected & ABILITY_LIST_ENTRY_DISABLED) {
-                    message_box_show_with_sound(0xD81D, MAIN_SFX_ERROR_MESSAGE);
+                    message_box_show_with_sound(0xD81D, SOUND_SFX_ERROR_MESSAGE);
                 } else {
                     /* Revalidate equipment when either the new or the replaced ability is an equip support. */
                     value = formation_ability_is_equip_support_change(g_unit_selected_index, selected);
@@ -466,7 +466,7 @@ static s32 formation_ability_set_menu(void) {
                                   ->abilities.slots[g_formation_ability_set_slot];
                     formation_ability_set_slot(g_unit_selected_index, g_formation_ability_set_slot, selected,
                         value | formation_ability_is_equip_support_change(g_unit_selected_index, current));
-                    g_sound_queued_effect_id = MAIN_SFX_EQUIP;
+                    g_sound_queued_effect_id = SOUND_SFX_EQUIP;
                     g_formation_ability_menu_slots_changed = 1;
                     g_formation_ability_set_list_close_pending = 1;
                     formation_stage_selected_unit();
@@ -476,9 +476,9 @@ static s32 formation_ability_set_menu(void) {
             g_menu_help_message_text_id = -1;
             if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
                 if (g_formation_ability_set_slot != 1) {
-                    message_box_show_with_sound(0xC006, MAIN_SFX_ERROR_MESSAGE);
+                    message_box_show_with_sound(0xC006, SOUND_SFX_ERROR_MESSAGE);
                 } else {
-                    g_sound_queued_effect_id = MAIN_SFX_INVALID;
+                    g_sound_queued_effect_id = SOUND_SFX_INVALID;
                 }
             }
         }
@@ -568,7 +568,7 @@ static s32 formation_ability_learn_menu(void) {
  * eight equip-type supports, Martial Arts, Two Hands and Two Swords can
  * invalidate the current loadout. */
 static s32 formation_ability_is_equip_support_change(s16 unit_id, s16 ability_id) {
-    if (unit_id == FORMATION_PREVIEW_UNIT_INDEX || g_main_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON)
+    if (unit_id == FORMATION_PREVIEW_UNIT_INDEX || g_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON)
         return 0;
     if (ability_id >= ABILITY_ID_SUPPORT_EQUIP_ARMOR && ability_id < ABILITY_ID_SUPPORT_EQUIP_ARMOR + 8)
         return 1;

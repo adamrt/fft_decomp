@@ -46,6 +46,6 @@ void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const 
         g_menu_list_selected_index = count - 1;
     }
     if (previous_base != g_menu_scroll_base_index) {
-        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
 }

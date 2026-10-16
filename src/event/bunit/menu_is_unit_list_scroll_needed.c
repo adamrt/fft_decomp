@@ -7,11 +7,11 @@
 /* Returns 1 while the unit list is scrolling, or when the selected unit lies
  * outside the three rows of four shown at the current page offset, so that
  * the list has to scroll. */
-s32 bunit_menu_is_unit_list_scroll_needed(void) {
+s32 unit_list_is_scroll_needed(void) {
     s32 ret = 0;
 
-    if (g_bunit_unit_list_scroll_step == 0) {
-        switch (g_bunit_unit_list_page_offset) {
+    if (g_unit_list_list_scroll_step == 0) {
+        switch (g_unit_list_list_page_offset) {
         case -0x78:
             if (g_unit_selected_index < 8) {
                 ret = 1;

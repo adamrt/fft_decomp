@@ -39,14 +39,14 @@ functions:
   - {addr: 0x80010a30, size: 160, name: __SN_ENTRY_POINT, hash: 179da0ce7d5e763f, source: src/lib/psyq/crt/__SN_ENTRY_POINT.c}
   - {addr: 0x80010ad0, size: 112, name: __main, hash: 1dec58075cb55f11, source: src/lib/psyq/crt/__main.c}
   - {addr: 0x80010b40, size: 104, name: __do_global_dtors, hash: 30e458972df14eda, source: src/lib/psyq/crt/__do_global_dtors.c}
-  - {addr: 0x80011bb0, size: 16, name: main_system_store_stack_pointer, hash: 972f7e917252ee42, source: src/main/system_store_stack_pointer.c}
-  - {addr: 0x80011bc0, size: 16, name: main_restore_game_loop_stack_pointer, hash: 8b9c9cab30efada8, asm: "Stack-replacing ABI tail transfer to main_system_run_game_loop; ordinary C cannot assign sp."}
-  - {addr: 0x80011bd0, size: 36, name: main_file_request_read_quiet, hash: 323354187cbfd5ba, unit: cd_headers}
-  - {addr: 0x80011bf4, size: 484, name: main_file_request_read, hash: 2289317868ab7dd4, unit: cd_headers}
-  - {addr: 0x80011dd8, size: 64, name: main_file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: cd_headers}
-  - {addr: 0x80011e18, size: 32, name: main_file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: cd_headers}
-  - {addr: 0x80011e38, size: 488, name: main_file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/main/file_poll_load.c, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
-  - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5, source: src/main/gfx_draw_now_loading_message.c}
+  - {addr: 0x80011bb0, size: 16, name: system_store_stack_pointer, hash: 972f7e917252ee42}
+  - {addr: 0x80011bc0, size: 16, name: system_restore_game_loop_stack_pointer, hash: 8b9c9cab30efada8, asm: "Stack-replacing ABI tail transfer to system_run_game_loop; ordinary C cannot assign sp."}
+  - {addr: 0x80011bd0, size: 36, name: file_request_read_quiet, hash: 323354187cbfd5ba, unit: cd_headers}
+  - {addr: 0x80011bf4, size: 484, name: file_request_read, hash: 2289317868ab7dd4, unit: cd_headers}
+  - {addr: 0x80011dd8, size: 64, name: file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: cd_headers}
+  - {addr: 0x80011e18, size: 32, name: file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: cd_headers}
+  - {addr: 0x80011e38, size: 488, name: file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
+  - {addr: 0x80012020, size: 212, name: loading_draw_message, hash: dd193b96065424a5, source: src/main/gfx_draw_now_loading_message.c}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, source: src/lib/suzuki/suzuki_smd_create_music.c}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, source: src/lib/suzuki/suzuki_smd_unload_music.c}
   - {addr: 0x800121cc, size: 8, name: suzuki_smd_noop_1, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_1.c}
@@ -666,207 +666,207 @@ functions:
   - {addr: 0x800289d4, size: 108, name: _patch_card2, hash: fe97d372338458dc, source: src/lib/psyq/libcard/_patch_card2.c}
   - {addr: 0x80028a40, size: 24, name: psyq_card_long_delay, hash: 3ab55a0f1f416982, source: src/lib/psyq/libcard/psyq_card_long_delay.c}
   - {addr: 0x80028a64, size: 104, name: psyq_card_restore_exception_prefix, hash: 1f518d7271104687, source: src/lib/psyq/libcard/psyq_card_restore_exception_prefix.c}
-  - {addr: 0x80040934, size: 64, name: main_system_stop_display_and_audio_for_game_reset, hash: c64016389ec5e4a0, unit: game_loop}
-  - {addr: 0x80040974, size: 48, name: main_system_reset_game, hash: 561bc72b9357246b, unit: game_loop}
-  - {addr: 0x800409a4, size: 32, name: main_overlay_call_battle_entrypoint, hash: c58eafc808ea8434, unit: game_loop}
-  - {addr: 0x800409c4, size: 60, name: main_overlay_exec_battle_bin, hash: 9f332892998856cc, unit: game_loop}
-  - {addr: 0x80040a00, size: 392, name: main_system_run_game_loop, hash: a21b6246c7cbd252, unit: game_loop}
+  - {addr: 0x80040934, size: 64, name: system_stop_display_and_audio, hash: c64016389ec5e4a0, unit: game_loop}
+  - {addr: 0x80040974, size: 48, name: system_reset_game, hash: 561bc72b9357246b, unit: game_loop}
+  - {addr: 0x800409a4, size: 32, name: overlay_call_battle_entrypoint, hash: c58eafc808ea8434, unit: game_loop}
+  - {addr: 0x800409c4, size: 60, name: overlay_exec_battle, hash: 9f332892998856cc, unit: game_loop}
+  - {addr: 0x80040a00, size: 392, name: system_run_game_loop, hash: a21b6246c7cbd252, unit: game_loop}
   - {addr: 0x80040b88, size: 80, name: main, hash: 5c256ef1eae8d688, unit: game_loop}
-  - {addr: 0x80040bd8, size: 1964, name: main_gfx_build_now_loading, hash: 15501d7711e0aeea, unit: game_loop}
-  - {addr: 0x80041384, size: 36, name: main_gfx_build_now_loading_center, hash: c119ee540bd1e857, unit: game_loop}
-  - {addr: 0x800413a8, size: 196, name: main_gfx_add_now_loading_to_otag, hash: 5438e0eb0e7a80c7, unit: game_loop}
-  - {addr: 0x8004146c, size: 300, name: main_gfx_load_efc_fnt, hash: 02911c7008f10711, unit: game_loop}
-  - {addr: 0x80041598, size: 476, name: main_set_display_draw, hash: 8715c0b670c3f523, unit: game_loop, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x80041774, size: 284, name: main_boot_draw_squaresoft_logo, hash: 8a5c9395c78d9abc, unit: game_loop}
-  - {addr: 0x80041890, size: 652, name: main_boot_fade_in_squaresoft_logo, hash: 429977c5de60ed46, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80041b1c, size: 612, name: main_boot_fade_out_squaresoft_logo, hash: a75b1f62cd2cc9b5, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80041d80, size: 280, name: main_boot_draw_sceap_logo, hash: bdee131a2f49829f, unit: game_loop}
-  - {addr: 0x80041e98, size: 1004, name: main_boot_build_and_draw_sceap_logo, hash: 34c0ed5f4b6c9b9f, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80042284, size: 572, name: main_gfx_reset_display, hash: f9ff37a175b62153, unit: game_loop, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x800424c0, size: 72, name: main_file_reset_cdrom_cpu_ram, hash: f6a52c31a19f52c7, unit: startup}
-  - {addr: 0x80042508, size: 124, name: main_gfx_load_zodiac_frame, hash: cece1a887e42aea4, unit: startup, rodata: [{addr: 0x8004092c, size: 8, hash: 35e3f82be5641d60}]}
-  - {addr: 0x80042584, size: 268, name: main_boot_run_startup, hash: f89462346cd91dbc, unit: startup}
-  - {addr: 0x80042690, size: 276, name: main_boot_reset_game_state, hash: 30bc9957e9902423, unit: startup}
-  - {addr: 0x800427a4, size: 220, name: main_entd_open_file, hash: 2842b52d61b959ce, unit: startup}
-  - {addr: 0x80042880, size: 176, name: main_entd_get_encounter, hash: 8eeb97f209cde10e, unit: startup}
-  - {addr: 0x80042930, size: 224, name: main_entd_init_event_unit_data, hash: 93e02043901b5bc7, unit: startup}
-  - {addr: 0x80042a10, size: 160, name: main_item_init_new_game_inventory, hash: 37d23fecd658ca21, unit: startup}
-  - {addr: 0x80042ab0, size: 108, name: main_party_init_new_game, hash: f14ad7433eefb74c, unit: startup}
-  - {addr: 0x80042b1c, size: 16, name: main_util_set_svector, hash: 694486283a46f5f8, unit: startup}
-  - {addr: 0x80042b2c, size: 16, name: main_util_set_vector, hash: 28901a8f332a5d7a, unit: startup}
-  - {addr: 0x80042b3c, size: 476, name: main_set_display_draw_new_game, hash: 8715c0b670c3f523, unit: sound_requests, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x80042d18, size: 188, name: main_gfx_swap_display_area, hash: 18f2c8600c046389, unit: sound_requests}
-  - {addr: 0x80042dd4, size: 904, name: main_gfx_fade_in_orbonne_monastery, hash: 1ce397677ccb4bb6, unit: sound_requests, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x8004315c, size: 896, name: main_gfx_fade_out_orbonne_monastery, hash: 588fa5761ae61f7b, unit: sound_requests, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x800434dc, size: 208, name: main_system_handle_vsync_callback, hash: a0172ee6d97c1bfd, unit: sound_requests}
-  - {addr: 0x800435ac, size: 8, name: main_system_handle_draw_sync_callback, hash: 6d64edf91449c1b1, unit: sound_requests}
-  - {addr: 0x800435b4, size: 8, name: main_file_handle_cd_ready_callback, hash: 6d64edf91449c1b1, unit: sound_requests}
-  - {addr: 0x800435bc, size: 8, name: main_file_handle_cd_read_callback, hash: 6d64edf91449c1b1, unit: sound_requests}
-  - {addr: 0x800435c4, size: 156, name: main_sound_load_music_into_slot, hash: dc882519778a9dfe, unit: sound_requests}
-  - {addr: 0x80043660, size: 168, name: main_sound_open_music_into_free_slot, hash: 185c9e9bb1bb9c55, unit: sound_requests}
-  - {addr: 0x80043708, size: 8, name: main_sound_is_music_loading_stub, hash: 207819bf4ebe3078, unit: sound_requests}
-  - {addr: 0x80043710, size: 200, name: main_sound_open_music_into_slot, hash: d068d9f896a5379b, unit: sound_requests}
-  - {addr: 0x800437d8, size: 248, name: main_sound_start_music_load_into_free_slot, hash: 0b6f75c1755d440b, unit: sound_requests}
-  - {addr: 0x800438d0, size: 136, name: main_sound_poll_scenario_smd_load, hash: 96a506be6e381a11, unit: sound_requests}
-  - {addr: 0x80043958, size: 104, name: main_sound_wait_for_scenario_smd_load, hash: 793faa58744c23db, unit: sound_requests}
-  - {addr: 0x800439c0, size: 120, name: main_sound_unload_scenario_mus, hash: c92064cadd7628ae, unit: sound_requests}
-  - {addr: 0x80043a38, size: 88, name: main_sound_stop_current_music, hash: 6b4c533ed48aaf0e, unit: sound_requests}
-  - {addr: 0x80043a90, size: 180, name: main_sound_switch_music_track, hash: 69069da0383341dc, unit: sound_requests}
-  - {addr: 0x80043b44, size: 16, name: main_sound_get_current_scenario_music, hash: ed983cc491943ec8, unit: sound_requests}
-  - {addr: 0x80043b54, size: 76, name: main_sound_set_current_music_volume, hash: a1d1ea2b032eb3a5, unit: sound_requests}
-  - {addr: 0x80043ba0, size: 72, name: main_sound_set_current_music_volume_timed, hash: 12aee3665cc12e32, unit: sound_requests}
-  - {addr: 0x80043be8, size: 84, name: main_sound_set_current_music_target, hash: 1f57d764fcc9219d, unit: sound_requests}
-  - {addr: 0x80043c3c, size: 76, name: main_sound_set_current_music_tempo_scale_timed, hash: 12d3ddf3f76e80af, unit: sound_requests}
-  - {addr: 0x80043c88, size: 76, name: main_sound_set_current_music_pitch_shift_timed, hash: 0997b09f98b20f70, unit: sound_requests}
-  - {addr: 0x80043cd4, size: 76, name: main_sound_set_current_music_balance_shift_timed, hash: e8a9fa6318c8a42b, unit: sound_requests}
-  - {addr: 0x80043d20, size: 96, name: main_sound_play_tune, hash: 66e21780561ddd1d, unit: sound_requests}
-  - {addr: 0x80043d80, size: 96, name: main_sound_set_tune_volume, hash: bb2b40daa06f22bf, unit: sound_requests}
-  - {addr: 0x80043de0, size: 288, name: main_sound_update_tunes, hash: 46f151791fb86bc2, unit: sound_requests}
-  - {addr: 0x80043f00, size: 56, name: main_sound_unload_scenario_music_and_tunes, hash: 8a55c4911959dc2e, unit: sound_requests}
-  - {addr: 0x80043f38, size: 24, name: main_sound_get_music_handle, hash: 006705ceb0b16735, unit: sound_requests}
-  - {addr: 0x80043f50, size: 56, name: main_sound_unload_current_scenario_music, hash: 00e6b4c7c08d9437, unit: sound_requests}
-  - {addr: 0x80043f88, size: 112, name: main_sound_set_current_music_track, hash: 990c6633acf74e71, unit: sound_requests}
-  - {addr: 0x80043ff8, size: 32, name: main_sound_play_sfx, hash: 5460a41510478fdd, unit: sound_requests}
-  - {addr: 0x80044018, size: 32, name: main_sound_play_sfx_find_channel, hash: 93a986ea943c5d65, unit: sound_requests}
-  - {addr: 0x80044038, size: 40, name: main_sound_play_bg_sfx, hash: d3b2bdc64299c755, unit: sound_requests}
-  - {addr: 0x80044060, size: 44, name: main_sound_replay_bg_sfx, hash: d4b1a5bec31f46a3, unit: sound_requests}
-  - {addr: 0x8004408c, size: 64, name: main_sound_set_sfx_echo, hash: 17e97804797bfd75, unit: sound_requests}
-  - {addr: 0x800440cc, size: 40, name: main_sound_stop_weather_sfx_music, hash: c0c1ba34c9724590, unit: sound_requests}
-  - {addr: 0x800440f4, size: 52, name: main_sound_stop_sfx, hash: 21e1e455590397bf, unit: sound_requests}
-  - {addr: 0x80044128, size: 44, name: main_sound_stop_current_weather_sfx, hash: 47c3d337927a07ec, unit: sound_requests}
-  - {addr: 0x80044154, size: 360, name: main_sound_open_generic_sfx, hash: ba9b164dee501015, unit: sound_requests}
-  - {addr: 0x800442bc, size: 200, name: main_heap_alloc_smd, hash: a37ef45a15eb4c27, unit: heap}
-  - {addr: 0x80044384, size: 108, name: main_heap_free_smd, hash: 1d3fc00bb5ccc417, unit: heap}
-  - {addr: 0x800443f0, size: 36, name: main_heap_clear_smd_allocator_table, hash: 86fdd143dae92bbd, unit: heap}
-  - {addr: 0x80044414, size: 200, name: main_heap_alloc, hash: 6367212638bc921c, unit: heap}
-  - {addr: 0x800444dc, size: 292, name: main_heap_reserve_at, hash: bb2cd7a4ddd3dc36, unit: heap}
-  - {addr: 0x80044600, size: 112, name: main_heap_free, hash: 51b9936a5ea34c17, unit: heap}
-  - {addr: 0x80044670, size: 36, name: main_heap_clear_game_allocator_table, hash: baa90df5f4fd6324, unit: heap}
-  - {addr: 0x80044694, size: 52, name: main_file_request_read_bytes, hash: 0a87b13dd21b6135, unit: heap}
-  - {addr: 0x800446c8, size: 16, name: main_file_is_still_loading, hash: 2bf2cd79d5e3b972, unit: heap}
-  - {addr: 0x800446d8, size: 228, name: main_file_get_smd, hash: 7c3adb54cd59bad4, unit: heap}
-  - {addr: 0x800447bc, size: 228, name: main_file_load_to_heap, hash: a436e8832314d2f3, unit: heap}
-  - {addr: 0x800448a0, size: 180, name: main_file_load_to_address, hash: 9da2049c8a2e24ac, unit: heap}
-  - {addr: 0x80044954, size: 60, name: main_file_load_checked_to_address, hash: e4a2578d2206edfb, unit: heap}
-  - {addr: 0x80044990, size: 60, name: main_file_load_checked_to_heap, hash: f704f1ec47fb6ed5, unit: heap}
-  - {addr: 0x800449cc, size: 32, name: main_heap_call_free, hash: 68e41579281fa6e2, unit: heap}
-  - {addr: 0x800449f8, size: 8, name: main_system_report_stub, hash: 6d64edf91449c1b1, unit: system_handlers}
-  - {addr: 0x80044a00, size: 8, name: main_system_report_error, hash: 6d64edf91449c1b1, unit: system_handlers}
-  - {addr: 0x80044a08, size: 44, name: main_system_handle_error, hash: 0520ba9fd79942b9, unit: system_handlers}
-  - {addr: 0x80044a34, size: 44, name: main_system_handle_pointer_exception, hash: c49c56d6a872179f, unit: system_handlers}
-  - {addr: 0x80044a60, size: 28, name: main_gfx_get_battle_otag, hash: 0e1f986e004b6e64, unit: system_handlers}
-  - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_battle_otag, hash: 676737da60ea151b, unit: system_handlers}
-  - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, unit: system_handlers}
-  - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: system_handlers}
+  - {addr: 0x80040bd8, size: 1964, name: loading_build_message, hash: 15501d7711e0aeea, unit: game_loop}
+  - {addr: 0x80041384, size: 36, name: loading_build_message_centered, hash: c119ee540bd1e857, unit: game_loop}
+  - {addr: 0x800413a8, size: 196, name: loading_add_to_otag, hash: 5438e0eb0e7a80c7, unit: game_loop}
+  - {addr: 0x8004146c, size: 300, name: debug_load_efc_font, hash: 02911c7008f10711, unit: game_loop}
+  - {addr: 0x80041598, size: 476, name: gfx_set_display_draw, hash: 8715c0b670c3f523, unit: game_loop, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
+  - {addr: 0x80041774, size: 284, name: boot_draw_squaresoft_logo, hash: 8a5c9395c78d9abc, unit: game_loop}
+  - {addr: 0x80041890, size: 652, name: boot_fade_in_squaresoft_logo, hash: 429977c5de60ed46, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80041b1c, size: 612, name: boot_fade_out_squaresoft_logo, hash: a75b1f62cd2cc9b5, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80041d80, size: 280, name: boot_draw_sceap_logo, hash: bdee131a2f49829f, unit: game_loop}
+  - {addr: 0x80041e98, size: 1004, name: boot_show_sceap_logo, hash: 34c0ed5f4b6c9b9f, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80042284, size: 572, name: gfx_reset_display, hash: f9ff37a175b62153, unit: game_loop, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
+  - {addr: 0x800424c0, size: 72, name: file_reset_cdrom_cpu_ram, hash: f6a52c31a19f52c7, unit: startup}
+  - {addr: 0x80042508, size: 124, name: zodiac_load_frame, hash: cece1a887e42aea4, unit: startup, rodata: [{addr: 0x8004092c, size: 8, hash: 35e3f82be5641d60}]}
+  - {addr: 0x80042584, size: 268, name: boot_run_startup, hash: f89462346cd91dbc, unit: startup}
+  - {addr: 0x80042690, size: 276, name: boot_reset_game_state, hash: 30bc9957e9902423, unit: startup}
+  - {addr: 0x800427a4, size: 220, name: encounter_open_file, hash: 2842b52d61b959ce, unit: startup}
+  - {addr: 0x80042880, size: 176, name: encounter_get_current, hash: 8eeb97f209cde10e, unit: startup}
+  - {addr: 0x80042930, size: 224, name: encounter_init_event_units, hash: 93e02043901b5bc7, unit: startup}
+  - {addr: 0x80042a10, size: 160, name: item_init_new_game_inventory, hash: 37d23fecd658ca21, unit: startup}
+  - {addr: 0x80042ab0, size: 108, name: party_init_new_game, hash: f14ad7433eefb74c, unit: startup}
+  - {addr: 0x80042b1c, size: 16, name: vector_set_svector, hash: 694486283a46f5f8, unit: startup}
+  - {addr: 0x80042b2c, size: 16, name: vector_set_vector, hash: 28901a8f332a5d7a, unit: startup}
+  - {addr: 0x80042b3c, size: 476, name: new_game_set_display_draw, hash: 8715c0b670c3f523, unit: sound_requests, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
+  - {addr: 0x80042d18, size: 188, name: new_game_present_caption_frame, hash: 18f2c8600c046389, unit: sound_requests}
+  - {addr: 0x80042dd4, size: 904, name: new_game_fade_in_orbonne_caption, hash: 1ce397677ccb4bb6, unit: sound_requests, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x8004315c, size: 896, name: new_game_fade_out_orbonne_caption, hash: 588fa5761ae61f7b, unit: sound_requests, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x800434dc, size: 208, name: system_handle_vsync, hash: a0172ee6d97c1bfd, unit: sound_requests}
+  - {addr: 0x800435ac, size: 8, name: system_handle_draw_sync, hash: 6d64edf91449c1b1, unit: sound_requests}
+  - {addr: 0x800435b4, size: 8, name: file_handle_cd_ready, hash: 6d64edf91449c1b1, unit: sound_requests}
+  - {addr: 0x800435bc, size: 8, name: file_handle_cd_read, hash: 6d64edf91449c1b1, unit: sound_requests}
+  - {addr: 0x800435c4, size: 156, name: music_load_into_slot, hash: dc882519778a9dfe, unit: sound_requests}
+  - {addr: 0x80043660, size: 168, name: music_open_into_free_slot, hash: 185c9e9bb1bb9c55, unit: sound_requests}
+  - {addr: 0x80043708, size: 8, name: music_is_loading_stub, hash: 207819bf4ebe3078, unit: sound_requests}
+  - {addr: 0x80043710, size: 200, name: music_open_into_slot, hash: d068d9f896a5379b, unit: sound_requests}
+  - {addr: 0x800437d8, size: 248, name: music_start_load_into_free_slot, hash: 0b6f75c1755d440b, unit: sound_requests}
+  - {addr: 0x800438d0, size: 136, name: music_poll_scenario_load, hash: 96a506be6e381a11, unit: sound_requests}
+  - {addr: 0x80043958, size: 104, name: music_wait_for_scenario_load, hash: 793faa58744c23db, unit: sound_requests}
+  - {addr: 0x800439c0, size: 120, name: music_unload_scenario_slot, hash: c92064cadd7628ae, unit: sound_requests}
+  - {addr: 0x80043a38, size: 88, name: music_stop, hash: 6b4c533ed48aaf0e, unit: sound_requests}
+  - {addr: 0x80043a90, size: 180, name: music_switch_track, hash: 69069da0383341dc, unit: sound_requests}
+  - {addr: 0x80043b44, size: 16, name: music_get_current_scenario, hash: ed983cc491943ec8, unit: sound_requests}
+  - {addr: 0x80043b54, size: 76, name: music_set_volume, hash: a1d1ea2b032eb3a5, unit: sound_requests}
+  - {addr: 0x80043ba0, size: 72, name: music_set_volume_timed, hash: 12aee3665cc12e32, unit: sound_requests}
+  - {addr: 0x80043be8, size: 84, name: music_set_target, hash: 1f57d764fcc9219d, unit: sound_requests}
+  - {addr: 0x80043c3c, size: 76, name: music_set_tempo_scale_timed, hash: 12d3ddf3f76e80af, unit: sound_requests}
+  - {addr: 0x80043c88, size: 76, name: music_set_pitch_shift_timed, hash: 0997b09f98b20f70, unit: sound_requests}
+  - {addr: 0x80043cd4, size: 76, name: music_set_balance_shift_timed, hash: e8a9fa6318c8a42b, unit: sound_requests}
+  - {addr: 0x80043d20, size: 96, name: music_play_tune, hash: 66e21780561ddd1d, unit: sound_requests}
+  - {addr: 0x80043d80, size: 96, name: music_set_tune_volume, hash: bb2b40daa06f22bf, unit: sound_requests}
+  - {addr: 0x80043de0, size: 288, name: music_update_tunes, hash: 46f151791fb86bc2, unit: sound_requests}
+  - {addr: 0x80043f00, size: 56, name: music_unload_scenario_and_tunes, hash: 8a55c4911959dc2e, unit: sound_requests}
+  - {addr: 0x80043f38, size: 24, name: music_get_handle, hash: 006705ceb0b16735, unit: sound_requests}
+  - {addr: 0x80043f50, size: 56, name: music_unload_current_scenario, hash: 00e6b4c7c08d9437, unit: sound_requests}
+  - {addr: 0x80043f88, size: 112, name: music_set_track, hash: 990c6633acf74e71, unit: sound_requests}
+  - {addr: 0x80043ff8, size: 32, name: sound_play_sfx, hash: 5460a41510478fdd, unit: sound_requests}
+  - {addr: 0x80044018, size: 32, name: sound_play_sfx_on_free_channel, hash: 93a986ea943c5d65, unit: sound_requests}
+  - {addr: 0x80044038, size: 40, name: sound_play_background, hash: d3b2bdc64299c755, unit: sound_requests}
+  - {addr: 0x80044060, size: 44, name: sound_replay_background, hash: d4b1a5bec31f46a3, unit: sound_requests}
+  - {addr: 0x8004408c, size: 64, name: sound_set_sfx_echo, hash: 17e97804797bfd75, unit: sound_requests}
+  - {addr: 0x800440cc, size: 40, name: sound_stop_weather_music, hash: c0c1ba34c9724590, unit: sound_requests}
+  - {addr: 0x800440f4, size: 52, name: sound_stop_sfx, hash: 21e1e455590397bf, unit: sound_requests}
+  - {addr: 0x80044128, size: 44, name: sound_stop_weather, hash: 47c3d337927a07ec, unit: sound_requests}
+  - {addr: 0x80044154, size: 360, name: sound_open_generic_sfx, hash: ba9b164dee501015, unit: sound_requests}
+  - {addr: 0x800442bc, size: 200, name: heap_alloc_smd, hash: a37ef45a15eb4c27, unit: heap}
+  - {addr: 0x80044384, size: 108, name: heap_free_smd, hash: 1d3fc00bb5ccc417, unit: heap}
+  - {addr: 0x800443f0, size: 36, name: heap_clear_smd_table, hash: 86fdd143dae92bbd, unit: heap}
+  - {addr: 0x80044414, size: 200, name: heap_alloc, hash: 6367212638bc921c, unit: heap}
+  - {addr: 0x800444dc, size: 292, name: heap_reserve_at, hash: bb2cd7a4ddd3dc36, unit: heap}
+  - {addr: 0x80044600, size: 112, name: heap_free, hash: 51b9936a5ea34c17, unit: heap}
+  - {addr: 0x80044670, size: 36, name: heap_clear_game_table, hash: baa90df5f4fd6324, unit: heap}
+  - {addr: 0x80044694, size: 52, name: file_request_read_bytes, hash: 0a87b13dd21b6135, unit: heap}
+  - {addr: 0x800446c8, size: 16, name: file_is_still_loading, hash: 2bf2cd79d5e3b972, unit: heap}
+  - {addr: 0x800446d8, size: 228, name: file_load_smd, hash: 7c3adb54cd59bad4, unit: heap}
+  - {addr: 0x800447bc, size: 228, name: file_load_to_heap, hash: a436e8832314d2f3, unit: heap}
+  - {addr: 0x800448a0, size: 180, name: file_load_to_address, hash: 9da2049c8a2e24ac, unit: heap}
+  - {addr: 0x80044954, size: 60, name: file_load_checked_to_address, hash: e4a2578d2206edfb, unit: heap}
+  - {addr: 0x80044990, size: 60, name: file_load_checked_to_heap, hash: f704f1ec47fb6ed5, unit: heap}
+  - {addr: 0x800449cc, size: 32, name: heap_call_free, hash: 68e41579281fa6e2, unit: heap}
+  - {addr: 0x800449f8, size: 8, name: system_report_stub, hash: 6d64edf91449c1b1, unit: system_handlers}
+  - {addr: 0x80044a00, size: 8, name: system_report_error, hash: 6d64edf91449c1b1, unit: system_handlers}
+  - {addr: 0x80044a08, size: 44, name: system_handle_error, hash: 0520ba9fd79942b9, unit: system_handlers}
+  - {addr: 0x80044a34, size: 44, name: system_handle_pointer_exception, hash: c49c56d6a872179f, unit: system_handlers}
+  - {addr: 0x80044a60, size: 28, name: gfx_get_battle_otag, hash: 0e1f986e004b6e64, unit: system_handlers}
+  - {addr: 0x80044a7c, size: 80, name: gfx_swap_and_clear_battle_otag, hash: 676737da60ea151b, unit: system_handlers}
+  - {addr: 0x80044acc, size: 156, name: save_init_state_and_options, hash: 57c6eff374a797aa, unit: system_handlers}
+  - {addr: 0x80044b68, size: 56, name: overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: system_handlers}
   - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f}
   - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, unit: zodiac_primitives}
-  - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_primitives, hash: 3e5255b795ac3b4e, unit: overlay_loading}
-  - {addr: 0x80045154, size: 120, name: main_gfx_load_frame_bin_into_vram, hash: 3d0e02e92a4b71b7, unit: overlay_loading}
-  - {addr: 0x800451cc, size: 104, name: main_overlay_open_world_and_wldcore, hash: 9de0809817ea03b9, unit: overlay_loading}
-  - {addr: 0x80045234, size: 52, name: main_overlay_open_world_bin, hash: f0dc6ce1683e216e, unit: overlay_loading}
-  - {addr: 0x80045268, size: 132, name: main_file_load_data_from_disc, hash: 061eb9238379898e, unit: overlay_loading}
-  - {addr: 0x800452ec, size: 480, name: main_save_init_data_tables, hash: 13bfa79a2bc689e1, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/main/save_init_data_tables.c}
-  - {addr: 0x80045514, size: 524, name: main_item_init_order_tables, hash: d7bbcb00c4fad7e9, unit: open_overlay}
-  - {addr: 0x80045720, size: 408, name: main_card_init_events, hash: c3df9151b2bf6647, unit: open_overlay}
-  - {addr: 0x800458b8, size: 72, name: main_overlay_exec_open_bin_main_loop, hash: ec2d3c302ca9b1f1, unit: open_overlay}
-  - {addr: 0x80045900, size: 60, name: main_overlay_exec_open_bin_ending, hash: 47240d2c7733c304, unit: open_overlay}
-  - {addr: 0x80059854, size: 620, name: main_status_init_check_data, hash: c4a7f36df3f82f32, unit: party}
-  - {addr: 0x80059ac0, size: 8, name: main_party_noop_1, hash: 6d64edf91449c1b1, unit: party}
-  - {addr: 0x80059ac8, size: 40, name: main_party_clear_all, hash: a26cc5df81715e07, unit: party}
-  - {addr: 0x80059af0, size: 40, name: main_party_get_unit, hash: 1d19410c46f4c04e, unit: party}
-  - {addr: 0x80059b18, size: 152, name: main_unit_save_entd_unit_to_party, hash: 1462a0da6719f387, unit: party}
-  - {addr: 0x80059bb0, size: 428, name: main_party_save_unit, hash: 3462bca0bc65c7dd, unit: party}
-  - {addr: 0x80059d5c, size: 188, name: main_party_find_free_slot, hash: c3e5d4aff4ee2bd5, unit: party}
-  - {addr: 0x80059e18, size: 188, name: main_party_create_monster_egg, hash: cb42f8827ff55f42, unit: party}
-  - {addr: 0x80059ed4, size: 192, name: main_party_generate_unit, hash: a5e82d4160e0f240, unit: party}
-  - {addr: 0x80059f94, size: 76, name: main_party_find_slot_by_sprite_set, hash: 47dfec5aba810bc2, unit: party}
-  - {addr: 0x80059fe0, size: 28, name: main_party_remove_unit, hash: a2e47287f74e0e3c, unit: party}
-  - {addr: 0x80059ffc, size: 996, name: main_unit_generate_out_of_battle, hash: 6fd3606d364422a6, unit: party}
-  - {addr: 0x8005a3e0, size: 32, name: main_unit_generate_party_base_raw_stats, hash: 5eec620572779a5c, unit: party}
-  - {addr: 0x8005a400, size: 72, name: main_unit_generate_raw_stats, hash: 3a24de7ee784f8fb, unit: party}
-  - {addr: 0x8005a448, size: 216, name: main_unit_generate_base_raw_stats, hash: 756a8d1bcbfc1980, unit: party}
-  - {addr: 0x8005a520, size: 72, name: main_unit_copy_job_growths_and_multipliers, hash: 364c7c7d0237a485, unit: party}
-  - {addr: 0x8005a568, size: 208, name: main_ability_get_id_from_skillset, hash: d3a8257d5b2a02d2, unit: party}
-  - {addr: 0x8005a638, size: 244, name: main_ability_store_skillset_abilities, hash: c19fcfb3e8de3d11, unit: party}
-  - {addr: 0x8005a72c, size: 344, name: main_ability_calculate_pointers_and_type, hash: efb4851817eeef88, unit: party}
-  - {addr: 0x8005a884, size: 32, name: main_item_get_data_pointer, hash: bf988aefe1ea3d13, unit: party}
-  - {addr: 0x8005a8a4, size: 48, name: main_job_get_data_pointer, hash: 510f01261d300e5f, unit: party}
-  - {addr: 0x8005a8d4, size: 224, name: main_unit_init_from_party_slot, hash: ae487841a96c8018, unit: party}
-  - {addr: 0x8005a9b4, size: 332, name: main_unit_init_from_entd, hash: cf0a846da8422d88, unit: party}
-  - {addr: 0x8005ab00, size: 72, name: main_unit_apply_equipment_move_jump_and_name, hash: 8c7f887045198aea, unit: party}
-  - {addr: 0x8005ab48, size: 212, name: main_unit_store_ramza_name_birthday_zodiac, hash: bcd6fe831cbd8c6e, unit: party}
-  - {addr: 0x8005ac1c, size: 1052, name: main_unit_calculate_entd_data, hash: 3d79228140d99399, unit: party}
-  - {addr: 0x8005b038, size: 152, name: main_unit_init_from_entd_party_member, hash: eea8ec3957bb934a, unit: party}
-  - {addr: 0x8005b0d0, size: 484, name: main_unit_copy_party_record, hash: 557d774ff311c66c, unit: party}
-  - {addr: 0x8005b2b4, size: 588, name: main_unit_calculate_jobs_and_skillsets_from_entd, hash: 82aa3022b3183bb2, unit: party}
-  - {addr: 0x8005b500, size: 220, name: main_job_get_random_unlocked, hash: b6d4c187979987c2, unit: party}
-  - {addr: 0x8005b5dc, size: 452, name: main_unit_copy_job_data, hash: 1bcef74070bd921e, unit: party}
-  - {addr: 0x8005b7a0, size: 140, name: main_unit_enable_rsm_flags, hash: cc4808dfe49cd9ec, unit: party}
-  - {addr: 0x8005b82c, size: 84, name: main_unit_set_rsm_flag, hash: e08afa389f906d8d, unit: party}
-  - {addr: 0x8005b880, size: 496, name: main_unit_calculate_actual_stats, hash: 0715763bb40a644e, unit: party, rodata: [{addr: 0x80059818, size: 20, hash: 7d8dcfa94afb51b6}]}
-  - {addr: 0x8005ba70, size: 832, name: main_unit_calculate_abilities, hash: 7cf7a5b87413e65c, unit: party}
-  - {addr: 0x8005bdb0, size: 64, name: main_unit_store_monster_equipment, hash: f05ae65f8fd22982, unit: party}
-  - {addr: 0x8005bdf0, size: 1164, name: main_unit_calculate_entd_equipment, hash: 3c68c7196313eb38, unit: party}
-  - {addr: 0x8005c27c, size: 284, name: main_unit_set_equippable_items, hash: a0da56e8a072742e, unit: party}
-  - {addr: 0x8005c398, size: 560, name: main_unit_set_equipment_stats, hash: 8bbdcd34209f742e, unit: party}
-  - {addr: 0x8005c5c8, size: 804, name: main_unit_set_equipment_attributes, hash: 692a362c43589a84, unit: party}
-  - {addr: 0x8005c8ec, size: 152, name: main_unit_calculate_move_jump, hash: bad416e1a3b09741, unit: party}
-  - {addr: 0x8005c984, size: 588, name: main_unit_store_character_names, hash: "5127461766844007", unit: party}
-  - {addr: 0x8005cbd0, size: 148, name: main_party_calculate_highest_level, hash: 149c03a50c0d50b6, unit: party}
-  - {addr: 0x8005cc64, size: 52, name: main_mem_copy_bytes_source_first, hash: 850c2fc16771314e, unit: unit_growth}
-  - {addr: 0x8005cc98, size: 476, name: main_unit_calculate_random_equipment, hash: 57273afe761c2134, unit: unit_growth}
-  - {addr: 0x8005ce74, size: 584, name: main_unit_learn_job_abilities, hash: 64efa860cd5766d5, unit: unit_growth}
-  - {addr: 0x8005d0bc, size: 776, name: main_unit_calculate_rsm, hash: 89c806b79390dc83, unit: unit_growth}
-  - {addr: 0x8005d3c4, size: 80, name: main_job_find_by_skillset, hash: 244d4a19cf67d067, unit: unit_growth}
-  - {addr: 0x8005d414, size: 92, name: main_status_init_unit, hash: f0c85edbe52a2b1f, unit: unit_growth}
-  - {addr: 0x8005d470, size: 96, name: main_status_init_ct, hash: 0e4864df799dfd4d, unit: unit_growth}
-  - {addr: 0x8005d4d0, size: 236, name: main_status_update_unit_flags_and_ct, hash: 5679f7c36927d2aa, unit: unit_growth}
-  - {addr: 0x8005d5bc, size: 36, name: main_unit_update_formation_stats, hash: 727b9c3e9a4e4537, unit: unit_growth}
-  - {addr: 0x8005d5e0, size: 36, name: main_unit_refresh_stats_and_statuses, hash: 7bc70d66d5844d85, unit: unit_growth}
-  - {addr: 0x8005d604, size: 36, name: main_unit_init_stats_and_statuses, hash: e0f928bf1cec31ac, unit: unit_growth}
-  - {addr: 0x8005d628, size: 600, name: main_unit_update_stats_statuses_and_equipment, hash: 63ba1bc2ff5c9565, unit: unit_growth}
-  - {addr: 0x8005d880, size: 124, name: main_unit_check_level_up, hash: c9c4daab4f1dc60b, unit: unit_growth}
-  - {addr: 0x8005d8fc, size: 276, name: main_party_level_unit_to_target, hash: f2ed58f59a7b8e9c, unit: unit_growth}
-  - {addr: 0x8005da10, size: 352, name: main_unit_apply_level_growth, hash: ad37ee1e81a8715a, unit: unit_growth}
-  - {addr: 0x8005db70, size: 164, name: main_status_set_ct, hash: 43eec0cb2cc1750b, unit: unit_growth}
-  - {addr: 0x8005dc14, size: 308, name: main_job_calculate_unlocked, hash: 95e581bd15bc029e, unit: unit_growth}
-  - {addr: 0x8005dd48, size: 400, name: main_job_add_proposition_jp, hash: dc7a826268ee417e, unit: unit_growth}
-  - {addr: 0x8005ded8, size: 28, name: main_job_store_unlock_bitset, hash: bbca0a6a5b33e332, unit: unit_growth}
-  - {addr: 0x8005def4, size: 68, name: main_job_calculate_level, hash: 1efed41e13747f1b, unit: unit_growth}
-  - {addr: 0x8005df38, size: 116, name: main_unit_init_job_levels, hash: 130fba93b82fa402, unit: unit_growth}
-  - {addr: 0x8005dfac, size: 40, name: main_unit_reset_battle_state, hash: 7a195f61c0a1a1e6, unit: unit_growth}
-  - {addr: 0x8005dfd4, size: 68, name: main_unit_init_status_and_rewards, hash: ed3fe2370b8a89c1, unit: unit_growth}
-  - {addr: 0x8005e018, size: 56, name: main_ability_get_range, hash: b65e2074178b867e, unit: unit_growth}
-  - {addr: 0x8005e050, size: 56, name: main_ability_get_aoe, hash: 19fbd3e4b9bb0ee2, unit: unit_growth}
-  - {addr: 0x8005e088, size: 68, name: main_unit_calculate_palette_spritesheet, hash: 3c5d71a05f0eb639, unit: unit_growth}
-  - {addr: 0x8005e0cc, size: 84, name: main_util_roll_pass_fail, hash: 4ddcd1c53620c436, unit: unit_growth}
-  - {addr: 0x8005e120, size: 144, name: main_unit_get_spritesheet_palette, hash: 77fff8afccf5df6b, unit: unit_growth}
-  - {addr: 0x8005e1b0, size: 80, name: main_unit_has_status_in_set, hash: 8b0638eb283dca01, unit: unit_growth}
-  - {addr: 0x8005e200, size: 44, name: main_ability_get_known, hash: f03d26c875a93271, unit: unit_growth}
-  - {addr: 0x8005e22c, size: 40, name: main_util_copy_action_data, hash: 3a97060e78efbf69, unit: unit_growth}
-  - {addr: 0x8005e254, size: 52, name: main_mem_copy_byte_data_source_first, hash: 850c2fc16771314e, unit: unit_status}
-  - {addr: 0x8005e288, size: 496, name: main_item_get_total_equipment_quantity, hash: 3e5d96728559f2cd, unit: unit_status}
-  - {addr: 0x8005e478, size: 112, name: main_unit_init_position_and_rewards, hash: 9421b9d560e38650, unit: unit_status}
-  - {addr: 0x8005e4e8, size: 240, name: main_status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, unit: unit_status}
-  - {addr: 0x8005e5d8, size: 108, name: main_unit_calculate_zodiac_symbol, hash: 0042a97bca78c29a, unit: unit_status}
-  - {addr: 0x8005e644, size: 44, name: main_mem_zero, hash: 56f3e9bb00dabbd7, unit: unit_status}
-  - {addr: 0x8005e670, size: 92, name: main_unit_increase_casualty_counters, hash: 42b35d6ac1f3c89f, unit: unit_status}
-  - {addr: 0x8005e6cc, size: 120, name: main_status_change_unit, hash: dc7a2bc945f89882, unit: unit_status}
-  - {addr: 0x8005e744, size: 52, name: main_status_store_current, hash: a213e350e165866b, unit: unit_status}
-  - {addr: 0x8005e778, size: 48, name: main_unit_copy_last_ability_ct, hash: "3904255598531e38", unit: unit_status}
-  - {addr: 0x8005e7a8, size: 320, name: main_status_set_action_state, hash: a518a597cf1ee626, unit: unit_status, rodata: [{addr: 0x80059830, size: 36, hash: d297e0f6906b441c}]}
-  - {addr: 0x8005e8e8, size: 36, name: main_system_handle_battle_load_exception, hash: a531e47d7cc2ef0f, unit: unit_status}
+  - {addr: 0x80045134, size: 32, name: zodiac_call_build_primitives, hash: 3e5255b795ac3b4e, unit: overlay_loading}
+  - {addr: 0x80045154, size: 120, name: gfx_load_frame_bin, hash: 3d0e02e92a4b71b7, unit: overlay_loading}
+  - {addr: 0x800451cc, size: 104, name: overlay_open_world_and_wldcore, hash: 9de0809817ea03b9, unit: overlay_loading}
+  - {addr: 0x80045234, size: 52, name: overlay_open_world, hash: f0dc6ce1683e216e, unit: overlay_loading}
+  - {addr: 0x80045268, size: 132, name: file_load_data_from_disc, hash: 061eb9238379898e, unit: overlay_loading}
+  - {addr: 0x800452ec, size: 480, name: save_init_data_tables, hash: 13bfa79a2bc689e1, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80045514, size: 524, name: item_init_order_tables, hash: d7bbcb00c4fad7e9, unit: open_overlay}
+  - {addr: 0x80045720, size: 408, name: memcard_init_events, hash: c3df9151b2bf6647, unit: open_overlay}
+  - {addr: 0x800458b8, size: 72, name: overlay_exec_open_title, hash: ec2d3c302ca9b1f1, unit: open_overlay}
+  - {addr: 0x80045900, size: 60, name: overlay_exec_open_ending, hash: 47240d2c7733c304, unit: open_overlay}
+  - {addr: 0x80059854, size: 620, name: status_init_check_data, hash: c4a7f36df3f82f32, unit: party}
+  - {addr: 0x80059ac0, size: 8, name: party_noop_1, hash: 6d64edf91449c1b1, unit: party}
+  - {addr: 0x80059ac8, size: 40, name: party_clear, hash: a26cc5df81715e07, unit: party}
+  - {addr: 0x80059af0, size: 40, name: party_get_unit, hash: 1d19410c46f4c04e, unit: party}
+  - {addr: 0x80059b18, size: 152, name: party_save_encounter_unit, hash: 1462a0da6719f387, unit: party}
+  - {addr: 0x80059bb0, size: 428, name: party_save_unit, hash: 3462bca0bc65c7dd, unit: party}
+  - {addr: 0x80059d5c, size: 188, name: party_find_free_slot, hash: c3e5d4aff4ee2bd5, unit: party}
+  - {addr: 0x80059e18, size: 188, name: party_create_monster_egg, hash: cb42f8827ff55f42, unit: party}
+  - {addr: 0x80059ed4, size: 192, name: party_generate_unit, hash: a5e82d4160e0f240, unit: party}
+  - {addr: 0x80059f94, size: 76, name: party_find_slot_by_sprite_set, hash: 47dfec5aba810bc2, unit: party}
+  - {addr: 0x80059fe0, size: 28, name: party_remove_unit, hash: a2e47287f74e0e3c, unit: party}
+  - {addr: 0x80059ffc, size: 996, name: unit_generate_party_record, hash: 6fd3606d364422a6, unit: party}
+  - {addr: 0x8005a3e0, size: 32, name: unit_generate_party_base_raw_stats, hash: 5eec620572779a5c, unit: party}
+  - {addr: 0x8005a400, size: 72, name: unit_generate_raw_stats, hash: 3a24de7ee784f8fb, unit: party}
+  - {addr: 0x8005a448, size: 216, name: unit_generate_base_raw_stats, hash: 756a8d1bcbfc1980, unit: party}
+  - {addr: 0x8005a520, size: 72, name: unit_copy_job_growths_and_multipliers, hash: 364c7c7d0237a485, unit: party}
+  - {addr: 0x8005a568, size: 208, name: ability_get_id_from_skillset, hash: d3a8257d5b2a02d2, unit: party}
+  - {addr: 0x8005a638, size: 244, name: ability_store_skillset_abilities, hash: c19fcfb3e8de3d11, unit: party}
+  - {addr: 0x8005a72c, size: 344, name: ability_get_data_and_type, hash: efb4851817eeef88, unit: party}
+  - {addr: 0x8005a884, size: 32, name: item_get_data, hash: bf988aefe1ea3d13, unit: party}
+  - {addr: 0x8005a8a4, size: 48, name: job_get_data, hash: 510f01261d300e5f, unit: party}
+  - {addr: 0x8005a8d4, size: 224, name: unit_init_from_party_slot, hash: ae487841a96c8018, unit: party}
+  - {addr: 0x8005a9b4, size: 332, name: unit_init_from_encounter, hash: cf0a846da8422d88, unit: party}
+  - {addr: 0x8005ab00, size: 72, name: unit_apply_equipment_move_jump_and_name, hash: 8c7f887045198aea, unit: party}
+  - {addr: 0x8005ab48, size: 212, name: unit_store_ramza_name_birthday_zodiac, hash: bcd6fe831cbd8c6e, unit: party}
+  - {addr: 0x8005ac1c, size: 1052, name: unit_calculate_encounter_data, hash: 3d79228140d99399, unit: party}
+  - {addr: 0x8005b038, size: 152, name: unit_init_from_encounter_party_member, hash: eea8ec3957bb934a, unit: party}
+  - {addr: 0x8005b0d0, size: 484, name: unit_copy_party_record, hash: 557d774ff311c66c, unit: party}
+  - {addr: 0x8005b2b4, size: 588, name: unit_calculate_encounter_jobs_and_skillsets, hash: 82aa3022b3183bb2, unit: party}
+  - {addr: 0x8005b500, size: 220, name: job_get_random_unlocked, hash: b6d4c187979987c2, unit: party}
+  - {addr: 0x8005b5dc, size: 452, name: unit_copy_job_data, hash: 1bcef74070bd921e, unit: party}
+  - {addr: 0x8005b7a0, size: 140, name: unit_enable_rsm_flags, hash: cc4808dfe49cd9ec, unit: party}
+  - {addr: 0x8005b82c, size: 84, name: unit_set_rsm_flag, hash: e08afa389f906d8d, unit: party}
+  - {addr: 0x8005b880, size: 496, name: unit_calculate_actual_stats, hash: 0715763bb40a644e, unit: party, rodata: [{addr: 0x80059818, size: 20, hash: 7d8dcfa94afb51b6}]}
+  - {addr: 0x8005ba70, size: 832, name: unit_calculate_encounter_abilities, hash: 7cf7a5b87413e65c, unit: party}
+  - {addr: 0x8005bdb0, size: 64, name: unit_store_monster_equipment, hash: f05ae65f8fd22982, unit: party}
+  - {addr: 0x8005bdf0, size: 1164, name: unit_calculate_encounter_equipment, hash: 3c68c7196313eb38, unit: party}
+  - {addr: 0x8005c27c, size: 284, name: unit_set_equippable_items, hash: a0da56e8a072742e, unit: party}
+  - {addr: 0x8005c398, size: 560, name: unit_set_equipment_stats, hash: 8bbdcd34209f742e, unit: party}
+  - {addr: 0x8005c5c8, size: 804, name: unit_set_equipment_attributes, hash: 692a362c43589a84, unit: party}
+  - {addr: 0x8005c8ec, size: 152, name: unit_calculate_move_jump, hash: bad416e1a3b09741, unit: party}
+  - {addr: 0x8005c984, size: 588, name: unit_store_names, hash: "5127461766844007", unit: party}
+  - {addr: 0x8005cbd0, size: 148, name: party_calculate_highest_level, hash: 149c03a50c0d50b6, unit: party}
+  - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e, unit: unit_growth}
+  - {addr: 0x8005cc98, size: 476, name: unit_calculate_random_equipment, hash: 57273afe761c2134, unit: unit_growth}
+  - {addr: 0x8005ce74, size: 584, name: unit_learn_job_abilities, hash: 64efa860cd5766d5, unit: unit_growth}
+  - {addr: 0x8005d0bc, size: 776, name: unit_calculate_rsm, hash: 89c806b79390dc83, unit: unit_growth}
+  - {addr: 0x8005d3c4, size: 80, name: job_find_by_skillset, hash: 244d4a19cf67d067, unit: unit_growth}
+  - {addr: 0x8005d414, size: 92, name: status_init_unit, hash: f0c85edbe52a2b1f, unit: unit_growth}
+  - {addr: 0x8005d470, size: 96, name: status_init_ct, hash: 0e4864df799dfd4d, unit: unit_growth}
+  - {addr: 0x8005d4d0, size: 236, name: status_update_unit_flags_and_ct, hash: 5679f7c36927d2aa, unit: unit_growth}
+  - {addr: 0x8005d5bc, size: 36, name: unit_update_formation_stats, hash: 727b9c3e9a4e4537, unit: unit_growth}
+  - {addr: 0x8005d5e0, size: 36, name: unit_refresh_stats_and_statuses, hash: 7bc70d66d5844d85, unit: unit_growth}
+  - {addr: 0x8005d604, size: 36, name: unit_init_stats_and_statuses, hash: e0f928bf1cec31ac, unit: unit_growth}
+  - {addr: 0x8005d628, size: 600, name: unit_update_stats_statuses_and_equipment, hash: 63ba1bc2ff5c9565, unit: unit_growth}
+  - {addr: 0x8005d880, size: 124, name: unit_check_level_up, hash: c9c4daab4f1dc60b, unit: unit_growth}
+  - {addr: 0x8005d8fc, size: 276, name: party_level_unit_to_target, hash: f2ed58f59a7b8e9c, unit: unit_growth}
+  - {addr: 0x8005da10, size: 352, name: unit_apply_level_growth, hash: ad37ee1e81a8715a, unit: unit_growth}
+  - {addr: 0x8005db70, size: 164, name: status_set_ct, hash: 43eec0cb2cc1750b, unit: unit_growth}
+  - {addr: 0x8005dc14, size: 308, name: job_calculate_unlocked, hash: 95e581bd15bc029e, unit: unit_growth}
+  - {addr: 0x8005dd48, size: 400, name: job_add_proposition_jp, hash: dc7a826268ee417e, unit: unit_growth}
+  - {addr: 0x8005ded8, size: 28, name: job_store_unlock_bitset, hash: bbca0a6a5b33e332, unit: unit_growth}
+  - {addr: 0x8005def4, size: 68, name: job_calculate_level, hash: 1efed41e13747f1b, unit: unit_growth}
+  - {addr: 0x8005df38, size: 116, name: unit_init_job_levels, hash: 130fba93b82fa402, unit: unit_growth}
+  - {addr: 0x8005dfac, size: 40, name: unit_reset_battle_state, hash: 7a195f61c0a1a1e6, unit: unit_growth}
+  - {addr: 0x8005dfd4, size: 68, name: unit_init_status_and_rewards, hash: ed3fe2370b8a89c1, unit: unit_growth}
+  - {addr: 0x8005e018, size: 56, name: ability_get_range, hash: b65e2074178b867e, unit: unit_growth}
+  - {addr: 0x8005e050, size: 56, name: ability_get_aoe, hash: 19fbd3e4b9bb0ee2, unit: unit_growth}
+  - {addr: 0x8005e088, size: 68, name: unit_calculate_palette_spritesheet, hash: 3c5d71a05f0eb639, unit: unit_growth}
+  - {addr: 0x8005e0cc, size: 84, name: random_roll_pass_fail, hash: 4ddcd1c53620c436, unit: unit_growth}
+  - {addr: 0x8005e120, size: 144, name: unit_get_spritesheet_palette, hash: 77fff8afccf5df6b, unit: unit_growth}
+  - {addr: 0x8005e1b0, size: 80, name: status_unit_has_any_in_set, hash: 8b0638eb283dca01, unit: unit_growth}
+  - {addr: 0x8005e200, size: 44, name: ability_get_learned, hash: f03d26c875a93271, unit: unit_growth}
+  - {addr: 0x8005e22c, size: 40, name: action_copy_data, hash: 3a97060e78efbf69, unit: unit_growth}
+  - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, unit: unit_status}
+  - {addr: 0x8005e288, size: 496, name: item_get_total_quantity, hash: 3e5d96728559f2cd, unit: unit_status}
+  - {addr: 0x8005e478, size: 112, name: unit_init_position_and_rewards, hash: 9421b9d560e38650, unit: unit_status}
+  - {addr: 0x8005e4e8, size: 240, name: status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, unit: unit_status}
+  - {addr: 0x8005e5d8, size: 108, name: zodiac_calculate_sign, hash: 0042a97bca78c29a, unit: unit_status}
+  - {addr: 0x8005e644, size: 44, name: mem_zero, hash: 56f3e9bb00dabbd7, unit: unit_status}
+  - {addr: 0x8005e670, size: 92, name: unit_increase_casualty_counters, hash: 42b35d6ac1f3c89f, unit: unit_status}
+  - {addr: 0x8005e6cc, size: 120, name: status_change_unit, hash: dc7a2bc945f89882, unit: unit_status}
+  - {addr: 0x8005e744, size: 52, name: status_store_current, hash: a213e350e165866b, unit: unit_status}
+  - {addr: 0x8005e778, size: 48, name: unit_copy_last_ability_ct, hash: "3904255598531e38", unit: unit_status}
+  - {addr: 0x8005e7a8, size: 320, name: status_set_action_state, hash: a518a597cf1ee626, unit: unit_status, rodata: [{addr: 0x80059830, size: 36, hash: d297e0f6906b441c}]}
+  - {addr: 0x8005e8e8, size: 36, name: system_handle_battle_load_exception, hash: a531e47d7cc2ef0f, unit: unit_status}
 
 data:
   - {addr: 0x00000000, name: g_psyq_crt_constructor_count}
   - {addr: 0x00000000, name: g_psyq_crt_destructor_count}
-  - {addr: 0x80010000, name: g_main_heap_low_overlay_load_address}
+  - {addr: 0x80010000, name: g_heap_low_overlay_load_address}
   - {addr: 0x80010000, name: g_psyq_crt_constructor_table}
   - {addr: 0x80010000, name: g_psyq_crt_destructor_table}
-  - {addr: 0x80010004, name: g_main_heap_world_overlay_load_address}
-  - {addr: 0x80010008, name: g_main_heap_companion_overlay_load_address}
-  - {addr: 0x8001000c, name: g_main_battle_heap_end_address}
-  - {addr: 0x80010010, name: g_main_heap_high_overlay_load_address}
+  - {addr: 0x80010004, name: g_heap_world_overlay_load_address}
+  - {addr: 0x80010008, name: g_heap_companion_overlay_load_address}
+  - {addr: 0x8001000c, name: g_heap_battle_end_address}
+  - {addr: 0x80010010, name: g_heap_high_overlay_load_address}
   - {addr: 0x80010044, name: g_psyq_spu_timeout_format}
   - {addr: 0x80010054, name: g_psyq_spu_init_timeout_name}
   - {addr: 0x80010064, name: g_psyq_spu_fifo_ready_timeout_name}
@@ -957,7 +957,7 @@ data:
   - {addr: 0x80010a04, name: g_psyq_gpu_tmd_ft4_name}
   - {addr: 0x80010a0c, name: g_psyq_gpu_tmd_gt4_name}
   - {addr: 0x80010a14, name: g_psyq_gpu_unsupported_tmd_format}
-  - {addr: 0x80010ba8, name: main_run_zero_padding}
+  - {addr: 0x80010ba8, name: system_zero_padding}
   - {addr: 0x8001dad0, name: g_psyq_gte_exception_patch_template}
   - {addr: 0x8001db08, name: g_psyq_gte_exception_patch_template_end}
   - {addr: 0x80022f5c, name: g_psyq_gpu_font_clut_y_offset_immediate}
@@ -971,7 +971,7 @@ data:
   - {addr: 0x80028ae4, name: g_psyq_crt_constructors_ran}
   - {addr: 0x80028ae8, name: g_psyq_crt_heap_base}
   - {addr: 0x80028aec, name: g_psyq_crt_heap_size}
-  - {addr: 0x80028b08, name: g_main_gfx_loading_display_frame_counter}
+  - {addr: 0x80028b08, name: g_loading_display_frame_counter}
   - {addr: 0x80028b0c, name: g_suzuki_smd_opcode_handlers}
   - {addr: 0x80028d0c, name: g_suzuki_smd_opcode_lengths}
   - {addr: 0x80028d8c, name: g_suzuki_smd_note_durations}
@@ -1154,7 +1154,7 @@ data:
   - {addr: 0x80032a5c, name: g_suzuki_sound_root_counter_2_event}
   - {addr: 0x80032a60, name: g_suzuki_sound_sfx_music}
   - {addr: 0x80032a64, name: g_suzuki_sound_heap_end}
-  - {addr: 0x80032a68, name: g_main_gfx_now_loading_otags}
+  - {addr: 0x80032a68, name: g_loading_otags}
   - {addr: 0x80032a78, name: g_psyq_etc_pad_buttons}
   - {addr: 0x80032a7c, name: g_psyq_cd_sync_result}
   - {addr: 0x80032a84, name: g_psyq_cd_ready_result}
@@ -1205,186 +1205,186 @@ data:
   - {addr: 0x800408e0, name: g_suzuki_sound_spu_malloc_table}
   - {addr: 0x80040918, name: g_psyq_cd_stream_ring_sectors}
   - {addr: 0x8004091c, name: g_psyq_crt_bss_end}
-  - {addr: 0x800449ec, name: main_system_frame_stub}
-  - {addr: 0x800454cc, name: g_main_brave_story_ages_source}
+  - {addr: 0x800449ec, name: system_frame_stub}
+  - {addr: 0x800454cc, name: g_brave_story_ages_source}
   - {addr: 0x8004593c, name: _ramsize}
   - {addr: 0x80045940, name: _stacksize}
   - {addr: 0x80045944, name: g_input_current_buttons}
   - {addr: 0x80045948, name: g_input_previous_buttons}
-  - {addr: 0x8004594c, name: g_main_input_pressed_buttons}
-  - {addr: 0x80045950, name: g_main_input_released_buttons}
-  - {addr: 0x80045954, name: g_main_input_previous_copy_0}
-  - {addr: 0x80045958, name: g_main_input_previous_copy_1}
-  - {addr: 0x8004595c, name: g_main_input_previous_copy_2}
-  - {addr: 0x80045960, name: g_main_input_previous_copy_3}
-  - {addr: 0x80045964, name: g_main_input_pressed_copy_0}
-  - {addr: 0x80045968, name: g_main_input_pressed_copy_1}
-  - {addr: 0x8004596c, name: g_main_input_pressed_copy_2}
-  - {addr: 0x80045970, name: g_main_input_pressed_copy_3}
-  - {addr: 0x80045974, name: g_main_input_stable_frames}
-  - {addr: 0x80045978, name: g_main_system_frontend_world_result}
-  - {addr: 0x8004597c, name: g_main_gfx_screen_polarity}
-  - {addr: 0x80045980, name: g_main_system_vsync_interval}
-  - {addr: 0x80045984, name: g_main_system_battle_frame_hsync_count}
-  - {addr: 0x80045988, name: g_main_system_battle_frame_hsync_count_max}
-  - {addr: 0x8004598c, name: g_main_frame_pacing_timer}
-  - {addr: 0x80045990, name: g_main_frame_pacing_suppressed}
+  - {addr: 0x8004594c, name: g_input_pressed_buttons}
+  - {addr: 0x80045950, name: g_input_released_buttons}
+  - {addr: 0x80045954, name: g_input_previous_copy_0}
+  - {addr: 0x80045958, name: g_input_previous_copy_1}
+  - {addr: 0x8004595c, name: g_input_previous_copy_2}
+  - {addr: 0x80045960, name: g_input_previous_copy_3}
+  - {addr: 0x80045964, name: g_input_pressed_copy_0}
+  - {addr: 0x80045968, name: g_input_pressed_copy_1}
+  - {addr: 0x8004596c, name: g_input_pressed_copy_2}
+  - {addr: 0x80045970, name: g_input_pressed_copy_3}
+  - {addr: 0x80045974, name: g_input_stable_frames}
+  - {addr: 0x80045978, name: g_system_frontend_world_result}
+  - {addr: 0x8004597c, name: g_gfx_screen_polarity}
+  - {addr: 0x80045980, name: g_system_vsync_interval}
+  - {addr: 0x80045984, name: g_system_battle_frame_hsync_count}
+  - {addr: 0x80045988, name: g_system_battle_frame_hsync_count_max}
+  - {addr: 0x8004598c, name: g_system_frame_pacing_timer}
+  - {addr: 0x80045990, name: g_system_frame_pacing_suppressed}
   - {addr: 0x80045994, name: g_frame_counter}
-  - {addr: 0x80045998, name: g_main_system_min_vsync_interval}
-  - {addr: 0x8004599c, name: g_main_sound_weather_sfx_id}
-  - {addr: 0x800459a0, name: g_main_deployed_unit_map_coordinates}
-  - {addr: 0x800459b8, name: g_main_system_play_time_frames}
-  - {addr: 0x800459bc, name: g_main_system_play_time_seconds}
-  - {addr: 0x800459c0, name: g_main_system_play_time_minutes}
-  - {addr: 0x800459c4, name: g_main_system_play_time_hours}
-  - {addr: 0x800459c8, name: g_main_battle_bin_sector}
-  - {addr: 0x800459cc, name: g_main_debug_display_enabled}
-  - {addr: 0x800459d0, name: g_main_font_print_enabled}
-  - {addr: 0x800459d8, name: g_main_debug_display_unread_flag}
-  - {addr: 0x800459dc, name: g_main_entd_selection_mode}
-  - {addr: 0x800459e0, name: g_main_gfx_now_loading_palette}
-  - {addr: 0x80045a00, name: g_main_boot_squaresoft_logo_image_words}
-  - {addr: 0x80047080, name: g_main_sound_scenario_smd_files}
-  - {addr: 0x800471e8, name: g_main_sound_permanent_smd_files}
-  - {addr: 0x800473a0, name: g_main_system_go_straight_to_battle}
-  - {addr: 0x800473a1, name: g_main_input_repeat_initial_delay}
-  - {addr: 0x800473a2, name: g_main_input_repeat_period}
-  - {addr: 0x800473a3, name: g_main_input_secondary_repeat_period}
-  - {addr: 0x800473a4, name: g_main_menu_scroll_accel_delay}
-  - {addr: 0x800473a5, name: g_main_menu_scroll_slow_step}
-  - {addr: 0x800473a6, name: g_main_menu_scroll_fast_step}
-  - {addr: 0x800473a7, name: g_main_menu_scroll_unread_setting}
-  - {addr: 0x800473a8, name: g_main_common_menu_graphics_loaded}
-  - {addr: 0x800473ac, name: g_main_game_options}
-  - {addr: 0x800473b0, name: g_main_game_options_defaults}
-  - {addr: 0x800473b4, name: g_main_gfx_zodiac_screen_position}
+  - {addr: 0x80045998, name: g_system_min_vsync_interval}
+  - {addr: 0x8004599c, name: g_sound_weather_sfx_id}
+  - {addr: 0x800459a0, name: g_deploy_deployed_unit_map_coordinates}
+  - {addr: 0x800459b8, name: g_save_play_time_frames}
+  - {addr: 0x800459bc, name: g_save_play_time_seconds}
+  - {addr: 0x800459c0, name: g_save_play_time_minutes}
+  - {addr: 0x800459c4, name: g_save_play_time_hours}
+  - {addr: 0x800459c8, name: g_file_battle_sector}
+  - {addr: 0x800459cc, name: g_debug_display_enabled}
+  - {addr: 0x800459d0, name: g_debug_font_print_enabled}
+  - {addr: 0x800459d8, name: g_debug_display_unread_flag}
+  - {addr: 0x800459dc, name: g_encounter_selection_mode}
+  - {addr: 0x800459e0, name: g_loading_palette}
+  - {addr: 0x80045a00, name: g_boot_squaresoft_logo_image_words}
+  - {addr: 0x80047080, name: g_music_scenario_smd_files}
+  - {addr: 0x800471e8, name: g_music_permanent_smd_files}
+  - {addr: 0x800473a0, name: g_system_go_straight_to_battle}
+  - {addr: 0x800473a1, name: g_input_repeat_initial_delay}
+  - {addr: 0x800473a2, name: g_input_repeat_period}
+  - {addr: 0x800473a3, name: g_input_secondary_repeat_period}
+  - {addr: 0x800473a4, name: g_menu_scroll_accel_delay}
+  - {addr: 0x800473a5, name: g_menu_scroll_slow_step}
+  - {addr: 0x800473a6, name: g_menu_scroll_fast_step}
+  - {addr: 0x800473a7, name: g_menu_scroll_unread_setting}
+  - {addr: 0x800473a8, name: g_menu_common_graphics_loaded}
+  - {addr: 0x800473ac, name: g_game_options}
+  - {addr: 0x800473b0, name: g_game_options_defaults}
+  - {addr: 0x800473b4, name: g_zodiac_screen_position}
   - {addr: 0x800473bc, name: g_menu_gfx_scaled_sprite_texture_page}
   - {addr: 0x800473c4, name: g_menu_gfx_scaled_sprite_uv_rects}
   - {addr: 0x80047520, name: g_menu_gfx_scaled_sprite_scale}
   - {addr: 0x80047595, name: g_menu_gfx_scaled_sprite_count}
-  - {addr: 0x80047598, name: g_main_gfx_frame_image_rect}
-  - {addr: 0x800475a0, name: g_main_gfx_frame_palette_rect}
-  - {addr: 0x800475a8, name: g_main_gfx_frame_palette_tail_rect}
-  - {addr: 0x800475e0, name: g_main_scenario_condition_offsets}
-  - {addr: 0x80047600, name: g_main_entd_current_event_id}
-  - {addr: 0x80047604, name: g_main_entd_set}
-  - {addr: 0x80047608, name: g_main_system_game_loop_stack_pointer}
-  - {addr: 0x8004760c, name: g_main_gfx_now_loading_visible}
-  - {addr: 0x80047610, name: g_main_sound_system_sed_data}
-  - {addr: 0x80049a10, name: g_main_saved_list_cursor_state}
-  - {addr: 0x80049a18, name: g_main_scenario_condition_data}
-  - {addr: 0x80049c18, name: g_main_gfx_unit_graphics_load_queue}
-  - {addr: 0x80049d5c, name: g_main_zodiac_primitives}
-  - {addr: 0x8004a6bc, name: g_main_script_event_block}
-  - {addr: 0x8004c6bc, name: g_main_tutorial_progress_masks}
-  - {addr: 0x8004c6c4, name: g_main_system_graphics_error}
-  - {addr: 0x8004c6c8, name: g_main_poly_gt4_array_32}
-  - {addr: 0x8004c6c8, name: g_main_poly_gt4_buffers}
-  - {addr: 0x8004cd48, name: g_main_poly_gt4_array_8}
-  - {addr: 0x8004d720, name: g_main_gfx_now_loading_primitives}
-  - {addr: 0x8004d950, name: g_main_system_flags}
-  - {addr: 0x8004d954, name: g_main_special_portrait_unit_id}
-  - {addr: 0x8004d958, name: g_main_saved_vsync_interval}
-  - {addr: 0x8004d95c, name: g_main_sound_music}
-  - {addr: 0x8004d9ac, name: g_main_special_portrait_wldface_id}
-  - {addr: 0x8004d9b0, name: g_main_saved_weather_variable}
-  - {addr: 0x8004d9b4, name: g_main_boot_startup2_has_run}
-  - {addr: 0x8004d9b8, name: g_main_sound_env_sed_data}
-  - {addr: 0x8004e5b8, name: g_main_gfx_now_loading_frame_counter}
-  - {addr: 0x8004e5bc, name: g_main_gfx_active_buffer_index}
-  - {addr: 0x8004e5c0, name: g_main_heap_smd_allocator_table}
-  - {addr: 0x8004e5d0, name: g_main_scenario_event_finish_operations}
-  - {addr: 0x8004e9d0, name: g_main_replay_story_event_index}
-  - {addr: 0x8004e9d4, name: g_main_heap_game_allocator_table}
-  - {addr: 0x8004ea14, name: g_main_gfx_draw_envs}
-  - {addr: 0x8004eacc, name: g_main_gfx_display_envs}
-  - {addr: 0x8004eaf4, name: g_main_file_cd_state}
-  - {addr: 0x8004eaf8, name: g_main_file_still_loading}
-  - {addr: 0x8004eb18, name: g_main_heap_smd_base}
-  - {addr: 0x80056b18, name: g_main_gfx_battle_otags}
-  - {addr: 0x80057718, name: g_main_system_session_frames}
-  - {addr: 0x8005771c, name: g_main_script_variables}
-  - {addr: 0x80057b1c, name: g_main_save_unread_byte}
-  - {addr: 0x80057b20, name: g_main_item_type_order_tables}
-  - {addr: 0x80057b2c, name: g_main_item_type_order_1}
-  - {addr: 0x80057b34, name: g_main_item_type_order_2}
-  - {addr: 0x80057b3c, name: g_main_item_type_order_3}
-  - {addr: 0x80057b44, name: g_main_item_type_order_4}
-  - {addr: 0x80057b4c, name: g_main_item_type_order_5}
-  - {addr: 0x80057b54, name: g_main_item_type_order_6}
-  - {addr: 0x80057b5c, name: g_main_weapon_page_order}
-  - {addr: 0x80057be8, name: g_main_helmet_page_order}
-  - {addr: 0x80057c08, name: g_main_armor_page_order}
-  - {addr: 0x80057c30, name: g_main_accessory_page_order}
-  - {addr: 0x80057c54, name: g_main_item_page_order}
-  - {addr: 0x80057c69, name: g_main_card_save_last_used_slot}
-  - {addr: 0x80057c6a, name: g_main_card_save_selected_slot}
-  - {addr: 0x80057c6b, name: g_main_card_bios_events_opened}
-  - {addr: 0x80057c6c, name: g_main_card_save_slot_file_states}
-  - {addr: 0x80057c7c, name: g_main_proposition_last_attempt_date_bits}
-  - {addr: 0x80057ce8, name: g_main_save_proposition_count}
-  - {addr: 0x80057cec, name: g_main_treasure_acquisition_date_bits}
-  - {addr: 0x80057d24, name: g_main_proposition_states}
-  - {addr: 0x80057d84, name: g_main_card_save_slot_metadata}
-  - {addr: 0x80057eec, name: g_main_active_propositions}
-  - {addr: 0x80057f34, name: g_main_brave_story_character_ages}
-  - {addr: 0x80057f74, name: g_main_party_units}
-  - {addr: 0x80059374, name: g_main_sound_novel_read_section_bits}
-  - {addr: 0x80059414, name: g_main_item_location_flags}
-  - {addr: 0x80059494, name: g_main_item_poached_quantities}
-  - {addr: 0x80059594, name: g_main_sound_novel_saved_records}
-  - {addr: 0x800596ac, name: g_main_land_discovery_date_bits}
-  - {addr: 0x800596c0, name: g_main_card_bios_events}
-  - {addr: 0x800596e0, name: g_main_item_quantities}
-  - {addr: 0x800597e0, name: g_main_card_save_slot_playtimes}
-  - {addr: 0x80059810, name: g_main_sound_novel_saved_flags}
-  - {addr: 0x8005e90c, name: g_main_unit_generation_base_data}
-  - {addr: 0x8005e93c, name: g_main_unit_generation_raw_stat_variance}
-  - {addr: 0x8005e950, name: g_main_terrain_tile_info_pairs}
-  - {addr: 0x8005e9d0, name: g_main_terrain_geomancy_abilities}
-  - {addr: 0x8005ea10, name: g_main_terrain_status_flags}
-  - {addr: 0x8005ea50, name: g_main_terrain_movement_cost_tables}
-  - {addr: 0x8005ebd0, name: g_main_reaction_behavior_flags}
-  - {addr: 0x8005ebf0, name: g_main_ability_data}
-  - {addr: 0x8005fbf0, name: g_main_ability_range_data}
-  - {addr: 0x80061010, name: g_main_item_ability_item_ids}
-  - {addr: 0x80061020, name: g_main_throw_ability_item_types}
-  - {addr: 0x8006102c, name: g_main_jump_ability_data}
-  - {addr: 0x80061044, name: g_main_charge_ability_data}
-  - {addr: 0x80061054, name: g_main_math_rsm_ability_data}
-  - {addr: 0x800610b8, name: g_main_job_data}
-  - {addr: 0x80062eb8, name: g_main_item_primary_data}
-  - {addr: 0x80062ebc, name: g_main_item_secondary_data_ids}
-  - {addr: 0x80063ab8, name: g_main_item_weapon_data}
-  - {addr: 0x80063eb8, name: g_main_item_shield_data}
-  - {addr: 0x80063ed8, name: g_main_item_helm_armor_secondary_data}
-  - {addr: 0x80063f58, name: g_main_item_accessory_data}
-  - {addr: 0x80063f98, name: g_main_item_secondary_data}
-  - {addr: 0x80063fc4, name: g_main_status_infliction_data}
-  - {addr: 0x800642c4, name: g_main_item_attributes}
-  - {addr: 0x80064a94, name: g_main_ability_human_skillset_abilities}
-  - {addr: 0x80065bc4, name: g_main_ability_monster_skillset_abilities}
-  - {addr: 0x80065cb4, name: g_main_action_menu_types_by_skillset}
-  - {addr: 0x80065de4, name: g_main_status_effect_data}
-  - {addr: 0x80066064, name: g_main_item_poach_table}
-  - {addr: 0x800660c4, name: g_main_job_unlock_requirements}
-  - {addr: 0x80066182, name: g_main_job_jp_requirements_by_level}
-  - {addr: 0x80066184, name: g_main_job_level_jp_requirements}
-  - {addr: 0x80066194, name: g_main_job_data_pointer}
-  - {addr: 0x80066198, name: g_main_calculator_primes}
-  - {addr: 0x800661ce, name: g_main_month_start_day_offsets}
-  - {addr: 0x800661e8, name: g_main_zodiac_day_limits}
-  - {addr: 0x80066200, name: g_main_unit_name_uses_world_text}
-  - {addr: 0x80066204, name: g_main_ability_temp_list}
-  - {addr: 0x80066234, name: g_main_unit_deployed_coords}
-  - {addr: 0x80066238, name: g_main_entd_current_unit}
-  - {addr: 0x8006623c, name: g_main_crystal_pickup_result}
-  - {addr: 0x80066254, name: g_main_crystal_learnable_abilities}
-  - {addr: 0x8006628e, name: g_main_crystal_treasure_item_id}
-  - {addr: 0x800662d0, name: g_main_status_check_sets}
-  - {addr: 0x80066308, name: g_main_party_highest_level}
-  - {addr: 0x800670f0, name: open_system_run_main_loop}
-  - {addr: 0x8006720c, name: open_system_run_ending_cutscene}
+  - {addr: 0x80047598, name: g_gfx_frame_image_rect}
+  - {addr: 0x800475a0, name: g_gfx_frame_palette_rect}
+  - {addr: 0x800475a8, name: g_gfx_frame_palette_tail_rect}
+  - {addr: 0x800475e0, name: g_scenario_condition_offsets}
+  - {addr: 0x80047600, name: g_encounter_current_event_id}
+  - {addr: 0x80047604, name: g_encounter_set}
+  - {addr: 0x80047608, name: g_system_game_loop_stack_pointer}
+  - {addr: 0x8004760c, name: g_loading_visible}
+  - {addr: 0x80047610, name: g_sound_system_sed_data}
+  - {addr: 0x80049a10, name: g_brave_story_saved_list_cursor_state}
+  - {addr: 0x80049a18, name: g_scenario_condition_data}
+  - {addr: 0x80049c18, name: g_unit_graphics_load_queue}
+  - {addr: 0x80049d5c, name: g_zodiac_primitives}
+  - {addr: 0x8004a6bc, name: g_script_event_block_buffer}
+  - {addr: 0x8004c6bc, name: g_tutorial_progress_masks}
+  - {addr: 0x8004c6c4, name: g_system_graphics_error}
+  - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_array_32}
+  - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_buffers}
+  - {addr: 0x8004cd48, name: g_gfx_poly_gt4_array_8}
+  - {addr: 0x8004d720, name: g_loading_primitives}
+  - {addr: 0x8004d950, name: g_system_flags}
+  - {addr: 0x8004d954, name: g_portrait_special_unit_id}
+  - {addr: 0x8004d958, name: g_system_saved_vsync_interval}
+  - {addr: 0x8004d95c, name: g_music}
+  - {addr: 0x8004d9ac, name: g_portrait_special_wldface_id}
+  - {addr: 0x8004d9b0, name: g_brave_story_saved_weather_variable}
+  - {addr: 0x8004d9b4, name: g_boot_startup2_has_run}
+  - {addr: 0x8004d9b8, name: g_sound_env_sed_data}
+  - {addr: 0x8004e5b8, name: g_loading_frame_counter}
+  - {addr: 0x8004e5bc, name: g_gfx_active_buffer_index}
+  - {addr: 0x8004e5c0, name: g_heap_smd_allocator_table}
+  - {addr: 0x8004e5d0, name: g_scenario_event_finish_operations}
+  - {addr: 0x8004e9d0, name: g_brave_story_replay_story_event_index}
+  - {addr: 0x8004e9d4, name: g_heap_game_allocator_table}
+  - {addr: 0x8004ea14, name: g_gfx_draw_envs}
+  - {addr: 0x8004eacc, name: g_gfx_display_envs}
+  - {addr: 0x8004eaf4, name: g_file_cd_state}
+  - {addr: 0x8004eaf8, name: g_file_still_loading}
+  - {addr: 0x8004eb18, name: g_heap_smd_base}
+  - {addr: 0x80056b18, name: g_gfx_battle_otags}
+  - {addr: 0x80057718, name: g_system_session_frames}
+  - {addr: 0x8005771c, name: g_script_variable_storage}
+  - {addr: 0x80057b1c, name: g_save_unread_byte}
+  - {addr: 0x80057b20, name: g_item_type_order_tables}
+  - {addr: 0x80057b2c, name: g_item_type_order_1}
+  - {addr: 0x80057b34, name: g_item_type_order_2}
+  - {addr: 0x80057b3c, name: g_item_type_order_3}
+  - {addr: 0x80057b44, name: g_item_type_order_4}
+  - {addr: 0x80057b4c, name: g_item_type_order_5}
+  - {addr: 0x80057b54, name: g_item_type_order_6}
+  - {addr: 0x80057b5c, name: g_item_weapon_page_order}
+  - {addr: 0x80057be8, name: g_item_helmet_page_order}
+  - {addr: 0x80057c08, name: g_item_armor_page_order}
+  - {addr: 0x80057c30, name: g_item_accessory_page_order}
+  - {addr: 0x80057c54, name: g_item_page_order}
+  - {addr: 0x80057c69, name: g_save_last_used_slot}
+  - {addr: 0x80057c6a, name: g_save_selected_slot}
+  - {addr: 0x80057c6b, name: g_memcard_bios_events_opened}
+  - {addr: 0x80057c6c, name: g_save_slot_file_states}
+  - {addr: 0x80057c7c, name: g_proposition_last_attempt_date_bits}
+  - {addr: 0x80057ce8, name: g_proposition_count}
+  - {addr: 0x80057cec, name: g_brave_story_treasure_acquisition_date_bits}
+  - {addr: 0x80057d24, name: g_proposition_states}
+  - {addr: 0x80057d84, name: g_save_slot_metadata}
+  - {addr: 0x80057eec, name: g_proposition_active}
+  - {addr: 0x80057f34, name: g_brave_story_character_ages}
+  - {addr: 0x80057f74, name: g_party_units}
+  - {addr: 0x80059374, name: g_sound_novel_read_section_bits}
+  - {addr: 0x80059414, name: g_item_location_flags}
+  - {addr: 0x80059494, name: g_item_poached_quantities}
+  - {addr: 0x80059594, name: g_sound_novel_saved_readings}
+  - {addr: 0x800596ac, name: g_brave_story_land_discovery_date_bits}
+  - {addr: 0x800596c0, name: g_memcard_bios_events}
+  - {addr: 0x800596e0, name: g_item_quantities}
+  - {addr: 0x800597e0, name: g_save_slot_playtimes}
+  - {addr: 0x80059810, name: g_sound_novel_saved_flags}
+  - {addr: 0x8005e90c, name: g_unit_generation_base_data}
+  - {addr: 0x8005e93c, name: g_unit_generation_raw_stat_variance}
+  - {addr: 0x8005e950, name: g_terrain_tile_info_pairs}
+  - {addr: 0x8005e9d0, name: g_terrain_geomancy_abilities}
+  - {addr: 0x8005ea10, name: g_terrain_status_flags}
+  - {addr: 0x8005ea50, name: g_terrain_movement_cost_tables}
+  - {addr: 0x8005ebd0, name: g_ability_reaction_behavior_flags}
+  - {addr: 0x8005ebf0, name: g_ability_data}
+  - {addr: 0x8005fbf0, name: g_ability_range_data}
+  - {addr: 0x80061010, name: g_item_ability_item_ids}
+  - {addr: 0x80061020, name: g_ability_throw_item_types}
+  - {addr: 0x8006102c, name: g_ability_jump_data}
+  - {addr: 0x80061044, name: g_ability_charge_data}
+  - {addr: 0x80061054, name: g_ability_math_rsm_data}
+  - {addr: 0x800610b8, name: g_job_data}
+  - {addr: 0x80062eb8, name: g_item_primary_data}
+  - {addr: 0x80062ebc, name: g_item_secondary_data_ids}
+  - {addr: 0x80063ab8, name: g_item_weapon_data}
+  - {addr: 0x80063eb8, name: g_item_shield_data}
+  - {addr: 0x80063ed8, name: g_item_helm_armor_secondary_data}
+  - {addr: 0x80063f58, name: g_item_accessory_data}
+  - {addr: 0x80063f98, name: g_item_secondary_data}
+  - {addr: 0x80063fc4, name: g_status_infliction_data}
+  - {addr: 0x800642c4, name: g_item_attributes}
+  - {addr: 0x80064a94, name: g_ability_human_skillset_abilities}
+  - {addr: 0x80065bc4, name: g_ability_monster_skillset_abilities}
+  - {addr: 0x80065cb4, name: g_command_menu_types_by_skillset}
+  - {addr: 0x80065de4, name: g_status_effect_data}
+  - {addr: 0x80066064, name: g_item_poach_table}
+  - {addr: 0x800660c4, name: g_job_unlock_requirements}
+  - {addr: 0x80066182, name: g_job_jp_requirements_by_level}
+  - {addr: 0x80066184, name: g_job_level_jp_requirements}
+  - {addr: 0x80066194, name: g_job_data_pointer}
+  - {addr: 0x80066198, name: g_ability_calculator_primes}
+  - {addr: 0x800661ce, name: g_calendar_month_start_day_offsets}
+  - {addr: 0x800661e8, name: g_zodiac_day_limits}
+  - {addr: 0x80066200, name: g_unit_name_uses_world_text}
+  - {addr: 0x80066204, name: g_ability_temp_list}
+  - {addr: 0x80066234, name: g_unit_deployed_coords}
+  - {addr: 0x80066238, name: g_encounter_current_unit}
+  - {addr: 0x8006623c, name: g_crystal_pickup_result}
+  - {addr: 0x80066254, name: g_crystal_learnable_abilities}
+  - {addr: 0x8006628e, name: g_crystal_treasure_item_id}
+  - {addr: 0x800662d0, name: g_status_check_sets}
+  - {addr: 0x80066308, name: g_party_highest_level}
+  - {addr: 0x800670f0, name: title_run_main_loop}
+  - {addr: 0x8006720c, name: ending_run}
   - {addr: 0x800672f8, name: world_map_entrypoint}
   - {addr: 0x80079a98, name: battle_state_run_game_loop}
   - {addr: 0x80093170, name: battle_map_color_field}
@@ -1402,9 +1402,9 @@ data:
   - {addr: 0x801908cc, name: g_battle_unit_stats}
 
 overrides:
-  - {function: main_party_init_new_game, name: script_set_variable, addr: 0x800ef25c}
   - {function: menu_build_zodiac_primitives, name: g_menu_draw_area_template, addr: 0x800473b4}
   - {function: menu_build_zodiac_primitives, name: gfx_set_scaled_poly_ft4_8bpp, addr: 0x80044ba0}
+  - {function: party_init_new_game, name: script_set_variable, addr: 0x800ef25c}
 
 regions:
   - {addr: 0x80011ba8, end: 0x80011bb0, kind: handwritten, why: "callable jr-ra/nop tail after deprecated-entry padding"}

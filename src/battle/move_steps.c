@@ -31,7 +31,7 @@ static u8 g_battle_move_jump_landing_phases[4] = { 20, 24, 28, 32 };
  * because height is negative upward. edge_height is the slope_type height
  * of the side crossed (0 low, 1 sloping, 2 high), so a low side
  * lies below the center and a high side above it. VectorNormal reduces the vector
- * to unit length (ONE) and g_main_system_vsync_interval scales it; the caller
+ * to unit length (ONE) and g_system_vsync_interval scales it; the caller
  * applies the walk speed with battle_move_scale_velocity. */
 static void battle_move_set_unit_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
@@ -57,9 +57,9 @@ static void battle_move_set_unit_step_delta_center_to_edge(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
+    unit->velocity.vx = unit->velocity.vx * g_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_system_vsync_interval;
 }
 
 /* Set the unit's per-frame velocity for the second half of a step, from the entry
@@ -93,9 +93,9 @@ static void battle_move_set_unit_step_delta_edge_to_center(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
+    unit->velocity.vx = unit->velocity.vx * g_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_system_vsync_interval;
 }
 
 /* The float steps' copy of battle_move_set_unit_step_delta_center_to_edge: the
@@ -124,9 +124,9 @@ static void battle_move_set_float_step_delta_center_to_edge(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
+    unit->velocity.vx = unit->velocity.vx * g_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_system_vsync_interval;
 }
 
 /* The float steps' copy of battle_move_set_unit_step_delta_edge_to_center: the
@@ -155,9 +155,9 @@ static void battle_move_set_float_step_delta_edge_to_center(
         break;
     }
     VectorNormal(&direction, &unit->velocity);
-    unit->velocity.vx = unit->velocity.vx * g_main_system_vsync_interval;
-    unit->velocity.vy = unit->velocity.vy * g_main_system_vsync_interval;
-    unit->velocity.vz = unit->velocity.vz * g_main_system_vsync_interval;
+    unit->velocity.vx = unit->velocity.vx * g_system_vsync_interval;
+    unit->velocity.vy = unit->velocity.vy * g_system_vsync_interval;
+    unit->velocity.vz = unit->velocity.vz * g_system_vsync_interval;
 }
 
 /* Scale the unit's per-frame velocity by a 4.12 factor: callers pass the walk speed, or the step
@@ -1013,14 +1013,14 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
  * animations play their sounds through it. */
 void battle_sound_play_unit_sfx(battle_unit_t* unit, s32 sound_id) {
     if ((unit->movement.suppress_sfx_and_landing_effects) == 0) {
-        main_sound_play_sfx_find_channel(sound_id);
+        sound_play_sfx_on_free_channel(sound_id);
     }
 }
 
 /* Play the landing sound for the surface of the tile a unit's step ends on:
- * MAIN_SFX_LAND_SOFT for grassland, thicket and rug, MAIN_SFX_LAND_WATER for the
- * water and marsh surfaces, MAIN_SFX_LAND_WOOD for wooden floor, tree and box,
- * and MAIN_SFX_LAND_DEFAULT otherwise. Nothing plays for a unit whose motion
+ * SOUND_SFX_LAND_SOFT for grassland, thicket and rug, SOUND_SFX_LAND_WATER for the
+ * water and marsh surfaces, SOUND_SFX_LAND_WOOD for wooden floor, tree and box,
+ * and SOUND_SFX_LAND_DEFAULT otherwise. Nothing plays for a unit whose motion
  * flags suppress landing effects, or when the destination tile does not exist. */
 static void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
     map_tile_t* tile;
@@ -1038,7 +1038,7 @@ static void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
     case MAP_SURFACE_GRASSLAND:
     case MAP_SURFACE_THICKET:
     case MAP_SURFACE_RUG:
-        sfx = MAIN_SFX_LAND_SOFT;
+        sfx = SOUND_SFX_LAND_SOFT;
         break;
     case MAP_SURFACE_SWAMP:
     case MAP_SURFACE_MARSH:
@@ -1048,18 +1048,18 @@ static void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
     case MAP_SURFACE_LAKE:
     case MAP_SURFACE_SEA:
     case MAP_SURFACE_WATERFALL:
-        sfx = MAIN_SFX_LAND_WATER;
+        sfx = SOUND_SFX_LAND_WATER;
         break;
     case MAP_SURFACE_WOODEN_FLOOR:
     case MAP_SURFACE_TREE:
     case MAP_SURFACE_BOX:
-        sfx = MAIN_SFX_LAND_WOOD;
+        sfx = SOUND_SFX_LAND_WOOD;
         break;
     default:
-        sfx = MAIN_SFX_LAND_DEFAULT;
+        sfx = SOUND_SFX_LAND_DEFAULT;
         break;
     }
-    main_sound_play_sfx_find_channel(sfx);
+    sound_play_sfx_on_free_channel(sfx);
 }
 
 /* Start the landing effect that suits the surface of the unit's destination tile:
@@ -1227,7 +1227,7 @@ void battle_unit_mount_onto_pending_mount(battle_unit_t* unit) {
         other = battle_unit_get_by_battle_id(unit->path.pending_mount & BATTLE_PENDING_MOUNT_ID_MASK);
         if (other != 0) {
             battle_unit_mount_rider_onto_unit(unit, other);
-            battle_sound_play_unit_sfx(unit, MAIN_SFX_LAND_DEFAULT);
+            battle_sound_play_unit_sfx(unit, SOUND_SFX_LAND_DEFAULT);
         }
         return;
     }
@@ -1562,7 +1562,7 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
         }
         if (g_battle_move_step_value.mount) {
-            battle_sound_play_unit_sfx(unit, MAIN_SFX_LAND_SOFT);
+            battle_sound_play_unit_sfx(unit, SOUND_SFX_LAND_SOFT);
             return;
         }
         battle_sound_play_landing_sfx_by_surface_type(unit);
@@ -1576,7 +1576,7 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
     }
     if (g_battle_move_step_value.mount) {
-        battle_sound_play_unit_sfx(unit, MAIN_SFX_LAND_SOFT);
+        battle_sound_play_unit_sfx(unit, SOUND_SFX_LAND_SOFT);
         return;
     }
     battle_sound_play_landing_sfx_by_surface_type(unit);

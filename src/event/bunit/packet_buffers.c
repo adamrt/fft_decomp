@@ -8,13 +8,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static s16 g_bunit_gfx_poly_f4_count = 0;
+static s16 g_unit_list_gfx_poly_f4_count = 0;
 
 /*
  * Submit the finished bunit frame and swap to the other graphics context.
- * Twin of card_gfx_submit_frame_and_swap_buffers over the BUNIT globals.
+ * Twin of save_gfx_submit_frame over the BUNIT globals.
  */
-void bunit_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag) {
+void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
     u32* previous_otag = g_menu_gfx_context->otag;
     menu_gfx_context_t* context;
     /*
@@ -25,16 +25,16 @@ void bunit_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag) {
      */
     u8 unused_scratch[0x60];
 
-    main_system_frame_stub();
+    system_frame_stub();
     g_gfx_poly_f3_count = 0;
     g_gfx_poly_ft3_count = 0;
-    g_bunit_gfx_poly_f4_count = 0;
+    g_unit_list_gfx_poly_f4_count = 0;
     g_menu_gfx_poly_ft4_count = 0;
     g_gfx_poly_g3_count = 0;
     g_gfx_poly_gt3_count = 0;
     g_gfx_poly_g4_count = 0;
     g_menu_gfx_poly_gt4_count = 0;
-    g_bunit_gfx_line_f2_count = 0;
+    g_unit_list_gfx_line_f2_count = 0;
     g_gfx_line_f3_count = 0;
     g_gfx_line_f4_count = 0;
     g_gfx_line_g2_count = 0;
@@ -52,7 +52,7 @@ void bunit_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag) {
     g_menu_gfx_draw_mode_count = 0;
     while (DrawSync(1) != 0) { }
     VSync(g_menu_event_speed);
-    context = g_bunit_gfx_context_base;
+    context = g_unit_list_gfx_context_base;
     if (g_menu_gfx_context == context) {
         context++;
     }
@@ -67,14 +67,14 @@ void bunit_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag) {
 }
 
 /* The double-buffer binder uses a volatile view of these two capacities. */
-extern u16 g_bunit_gfx_line_g2_capacity;
-extern u16 g_bunit_gfx_line_g3_capacity;
+extern u16 g_unit_list_gfx_line_g2_capacity;
+extern u16 g_unit_list_gfx_line_g3_capacity;
 
 /* Initializes every primitive pool of one frame buffer with its libgpu
  * constructor; polygons additionally get texture shading enabled.
  *
  * BUNIT twin of screen_init_packet_pools. */
-static void bunit_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
+static void unit_list_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_f3_capacity; i++) {
@@ -118,10 +118,10 @@ static void bunit_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
     for (i = 0; i < g_gfx_line_f4_capacity; i++) {
         SetLineF4(&buffer->flat_lines_4[i]);
     }
-    for (i = 0; i < g_bunit_gfx_line_g2_capacity; i++) {
+    for (i = 0; i < g_unit_list_gfx_line_g2_capacity; i++) {
         SetLineG2(&buffer->gouraud_lines[i]);
     }
-    for (i = 0; i < g_bunit_gfx_line_g3_capacity; i++) {
+    for (i = 0; i < g_unit_list_gfx_line_g3_capacity; i++) {
         SetLineG3(&buffer->gouraud_lines_3[i]);
     }
     for (i = 0; i < g_gfx_line_g4_capacity; i++) {
@@ -148,21 +148,21 @@ static void bunit_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
     for (i = 0; i < g_gfx_sprite_16_capacity; i++) {
         SetSprt16(&buffer->sprites_16[i]);
     }
-    for (i = 0; i < g_bunit_gfx_draw_move_capacity; i++) {
+    for (i = 0; i < g_unit_list_gfx_draw_move_capacity; i++) {
         SetDrawMove(&buffer->draw_moves[i]);
     }
 }
 
 /* Plain reads of these two capacities change the load scheduling. */
-extern volatile u16 g_bunit_gfx_line_g2_capacity;
-extern volatile u16 g_bunit_gfx_line_g3_capacity;
+extern volatile u16 g_unit_list_gfx_line_g2_capacity;
+extern volatile u16 g_unit_list_gfx_line_g3_capacity;
 
 /* Bind both frame buffers' primitive pools, set up their draw/display
  * environments and present twice to establish the active pair.
  *
  * BUNIT twin of screen_init_packet_buffers: one pool argument per
  * frame-buffer pointer, each advanced by its capacity for the second buffer. */
-void bunit_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
+void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,
     POLY_GT3* gouraud_textured_triangles, POLY_G4* gouraud_quads, POLY_GT4* gouraud_textured_quads, LINE_F2* flat_lines,
     LINE_F3* flat_lines_3, LINE_F4* flat_lines_4, LINE_G2* gouraud_lines, LINE_G3* gouraud_lines_3,
@@ -170,44 +170,44 @@ void bunit_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otag
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes) {
     s32 i;
 
-    g_bunit_gfx_context_base = buffers;
+    g_unit_list_gfx_context_base = buffers;
     g_menu_gfx_context = buffers;
     for (i = 0; i < 2; i++) {
-        g_bunit_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
-        g_bunit_gfx_context_base[i].flat_triangles = flat_triangles + g_gfx_poly_f3_capacity * i;
-        g_bunit_gfx_context_base[i].textured_triangles = textured_triangles + g_gfx_poly_ft3_capacity * i;
-        g_bunit_gfx_context_base[i].flat_quads = flat_quads + g_gfx_poly_f4_capacity * i;
-        g_bunit_gfx_context_base[i].textured_quads = textured_quads + g_gfx_poly_ft4_capacity * i;
-        g_bunit_gfx_context_base[i].gouraud_triangles = gouraud_triangles + g_gfx_poly_g3_capacity * i;
-        g_bunit_gfx_context_base[i].gouraud_textured_triangles
+        g_unit_list_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
+        g_unit_list_gfx_context_base[i].flat_triangles = flat_triangles + g_gfx_poly_f3_capacity * i;
+        g_unit_list_gfx_context_base[i].textured_triangles = textured_triangles + g_gfx_poly_ft3_capacity * i;
+        g_unit_list_gfx_context_base[i].flat_quads = flat_quads + g_gfx_poly_f4_capacity * i;
+        g_unit_list_gfx_context_base[i].textured_quads = textured_quads + g_gfx_poly_ft4_capacity * i;
+        g_unit_list_gfx_context_base[i].gouraud_triangles = gouraud_triangles + g_gfx_poly_g3_capacity * i;
+        g_unit_list_gfx_context_base[i].gouraud_textured_triangles
             = gouraud_textured_triangles + g_gfx_poly_gt3_capacity * i;
-        g_bunit_gfx_context_base[i].gouraud_quads = gouraud_quads + g_gfx_poly_g4_capacity * i;
-        g_bunit_gfx_context_base[i].gouraud_textured_quads = gouraud_textured_quads + g_gfx_poly_gt4_capacity * i;
-        g_bunit_gfx_context_base[i].flat_lines = flat_lines + g_gfx_line_f2_capacity * i;
-        g_bunit_gfx_context_base[i].flat_lines_3 = flat_lines_3 + g_gfx_line_f3_capacity * i;
-        g_bunit_gfx_context_base[i].flat_lines_4 = flat_lines_4 + g_gfx_line_f4_capacity * i;
-        g_bunit_gfx_context_base[i].gouraud_lines = gouraud_lines + g_bunit_gfx_line_g2_capacity * i;
-        g_bunit_gfx_context_base[i].gouraud_lines_3 = gouraud_lines_3 + g_bunit_gfx_line_g3_capacity * i;
-        g_bunit_gfx_context_base[i].gouraud_lines_4 = gouraud_lines_4 + g_gfx_line_g4_capacity * i;
-        g_bunit_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
-        g_bunit_gfx_context_base[i].tiles_1 = tiles_1 + g_gfx_tile_1_capacity * i;
-        g_bunit_gfx_context_base[i].tiles_8 = tiles_8 + g_gfx_tile_8_capacity * i;
-        g_bunit_gfx_context_base[i].tiles_16 = tiles_16 + g_gfx_tile_16_capacity * i;
-        g_bunit_gfx_context_base[i].sprites = sprites + g_gfx_sprite_capacity * i;
-        g_bunit_gfx_context_base[i].sprites_8 = sprites_8 + g_gfx_sprite_8_capacity * i;
-        g_bunit_gfx_context_base[i].sprites_16 = sprites_16 + g_gfx_sprite_16_capacity * i;
-        g_bunit_gfx_context_base[i].draw_moves = draw_moves + g_bunit_gfx_draw_move_capacity * i;
-        g_bunit_gfx_context_base[i].draw_areas = draw_areas + g_bunit_gfx_draw_area_capacity * i;
-        g_bunit_gfx_context_base[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
-        bunit_gfx_init_packet_pools(&g_bunit_gfx_context_base[i]);
+        g_unit_list_gfx_context_base[i].gouraud_quads = gouraud_quads + g_gfx_poly_g4_capacity * i;
+        g_unit_list_gfx_context_base[i].gouraud_textured_quads = gouraud_textured_quads + g_gfx_poly_gt4_capacity * i;
+        g_unit_list_gfx_context_base[i].flat_lines = flat_lines + g_gfx_line_f2_capacity * i;
+        g_unit_list_gfx_context_base[i].flat_lines_3 = flat_lines_3 + g_gfx_line_f3_capacity * i;
+        g_unit_list_gfx_context_base[i].flat_lines_4 = flat_lines_4 + g_gfx_line_f4_capacity * i;
+        g_unit_list_gfx_context_base[i].gouraud_lines = gouraud_lines + g_unit_list_gfx_line_g2_capacity * i;
+        g_unit_list_gfx_context_base[i].gouraud_lines_3 = gouraud_lines_3 + g_unit_list_gfx_line_g3_capacity * i;
+        g_unit_list_gfx_context_base[i].gouraud_lines_4 = gouraud_lines_4 + g_gfx_line_g4_capacity * i;
+        g_unit_list_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
+        g_unit_list_gfx_context_base[i].tiles_1 = tiles_1 + g_gfx_tile_1_capacity * i;
+        g_unit_list_gfx_context_base[i].tiles_8 = tiles_8 + g_gfx_tile_8_capacity * i;
+        g_unit_list_gfx_context_base[i].tiles_16 = tiles_16 + g_gfx_tile_16_capacity * i;
+        g_unit_list_gfx_context_base[i].sprites = sprites + g_gfx_sprite_capacity * i;
+        g_unit_list_gfx_context_base[i].sprites_8 = sprites_8 + g_gfx_sprite_8_capacity * i;
+        g_unit_list_gfx_context_base[i].sprites_16 = sprites_16 + g_gfx_sprite_16_capacity * i;
+        g_unit_list_gfx_context_base[i].draw_moves = draw_moves + g_unit_list_gfx_draw_move_capacity * i;
+        g_unit_list_gfx_context_base[i].draw_areas = draw_areas + g_unit_list_gfx_draw_area_capacity * i;
+        g_unit_list_gfx_context_base[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
+        unit_list_gfx_init_packet_pools(&g_unit_list_gfx_context_base[i]);
         /* Buffer 0 draws at y 0 while showing y 0xf0, buffer 1 the reverse. Both are 255
          * pixels wide, as in WORLD (CARD uses 256). */
-        SetDefDrawEnv(&g_bunit_gfx_context_base[i].draw_env, 0, i * 0xf0, 0xff, 0xf0);
-        SetDefDispEnv(&g_bunit_gfx_context_base[i].disp_env, 0, i == 0 ? 0xf0 : 0, 0xff, 0xf0);
-        g_bunit_gfx_context_base[i].draw_env.isbg = 0;
-        setRGB0(&g_bunit_gfx_context_base[i].draw_env, 0, 0, 0);
-        g_bunit_gfx_context_base[i].draw_env.ofs[0] = -0x80;
+        SetDefDrawEnv(&g_unit_list_gfx_context_base[i].draw_env, 0, i * 0xf0, 0xff, 0xf0);
+        SetDefDispEnv(&g_unit_list_gfx_context_base[i].disp_env, 0, i == 0 ? 0xf0 : 0, 0xff, 0xf0);
+        g_unit_list_gfx_context_base[i].draw_env.isbg = 0;
+        setRGB0(&g_unit_list_gfx_context_base[i].draw_env, 0, 0, 0);
+        g_unit_list_gfx_context_base[i].draw_env.ofs[0] = -0x80;
     }
-    bunit_gfx_submit_frame_and_swap_buffers(0, -1);
-    bunit_gfx_submit_frame_and_swap_buffers(0, -1);
+    unit_list_gfx_submit_frame(0, -1);
+    unit_list_gfx_submit_frame(0, -1);
 }

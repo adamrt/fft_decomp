@@ -20,7 +20,7 @@
  * throwing items for shields.
  * `diff *= -1` keeps the negation in int on the sign-extended difference, and
  * the offset-first address sum keeps the target's addu operand order. */
-void equip_item_sort_id_list(s32 mode, s16* list) {
+void item_sort_id_list(s32 mode, s16* list) {
     s16 count = 0;
     s16* entry;
     s32 j;
@@ -61,23 +61,21 @@ void equip_item_sort_id_list(s32 mode, s16* list) {
 
             while (criterion >= 0) {
                 if (criterion == ITEM_SORT_KEY_TYPE) {
-                    key_a = g_main_item_primary_data[item_a].type;
+                    key_a = g_item_primary_data[item_a].type;
                     if (key_a == ITEM_TYPE_SHIELD) {
                         key_a = 100;
                     }
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
-                    key_a = g_main_item_primary_data[item_a].price;
+                    key_a = g_item_primary_data[item_a].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
                     key_a = item_get_ranking_value(item_a);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_a < ITEM_ID_THROWABLE_FIRST) {
-                        key_a = g_main_item_weapon_data[g_main_item_primary_data[item_a].secondary_data_id].evade;
+                        key_a = g_item_weapon_data[g_item_primary_data[item_a].secondary_data_id].evade;
                     } else if (item_a < ITEM_ID_HEADGEAR_FIRST) {
-                        key_a = g_main_item_shield_data[g_main_item_primary_data[item_a].secondary_data_id]
-                                    .physical_evade;
+                        key_a = g_item_shield_data[g_item_primary_data[item_a].secondary_data_id].physical_evade;
                     } else if (item_a < ITEM_ID_CONSUMABLE_FIRST) {
-                        key_a = g_main_item_accessory_data[g_main_item_primary_data[item_a].secondary_data_id]
-                                    .physical_evade;
+                        key_a = g_item_accessory_data[g_item_primary_data[item_a].secondary_data_id].physical_evade;
                     } else {
                         key_a = 0;
                     }
@@ -85,10 +83,9 @@ void equip_item_sort_id_list(s32 mode, s16* list) {
                     if (item_a < ITEM_ID_THROWABLE_FIRST) {
                         key_a = 0;
                     } else if (item_a < ITEM_ID_HEADGEAR_FIRST) {
-                        key_a = g_main_item_shield_data[g_main_item_primary_data[item_a].secondary_data_id].magic_evade;
+                        key_a = g_item_shield_data[g_item_primary_data[item_a].secondary_data_id].magic_evade;
                     } else if (item_a < ITEM_ID_CONSUMABLE_FIRST) {
-                        key_a = g_main_item_accessory_data[g_main_item_primary_data[item_a].secondary_data_id]
-                                    .magic_evade;
+                        key_a = g_item_accessory_data[g_item_primary_data[item_a].secondary_data_id].magic_evade;
                     } else {
                         key_a = 0;
                     }
@@ -97,35 +94,32 @@ void equip_item_sort_id_list(s32 mode, s16* list) {
                 }
 
                 if (criterion == ITEM_SORT_KEY_TYPE) {
-                    key_b = g_main_item_primary_data[item_b].type;
+                    key_b = g_item_primary_data[item_b].type;
                     if (key_b == ITEM_TYPE_SHIELD) {
                         key_b = 100;
                     }
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
-                    key_b = g_main_item_primary_data[item_b].price;
+                    key_b = g_item_primary_data[item_b].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
                     key_b = item_get_ranking_value(item_b);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_b < ITEM_ID_THROWABLE_FIRST) {
-                        key_b = g_main_item_weapon_data[g_main_item_primary_data[item_b].secondary_data_id].evade;
+                        key_b = g_item_weapon_data[g_item_primary_data[item_b].secondary_data_id].evade;
                     } else if (item_b < ITEM_ID_HEADGEAR_FIRST) {
-                        key_b = g_main_item_shield_data[g_main_item_primary_data[item_b].secondary_data_id]
-                                    .physical_evade;
+                        key_b = g_item_shield_data[g_item_primary_data[item_b].secondary_data_id].physical_evade;
                     } else if (item_b < ITEM_ID_CONSUMABLE_FIRST) {
-                        key_b = g_main_item_accessory_data[g_main_item_primary_data[item_b].secondary_data_id]
-                                    .physical_evade;
+                        key_b = g_item_accessory_data[g_item_primary_data[item_b].secondary_data_id].physical_evade;
                     } else {
                         key_b = 0;
                     }
                 } else if (criterion == ITEM_SORT_KEY_MAGIC_EVADE) {
                     /* A weapon's key here is its evade, where key_a above reads 0 (retail asymmetry). */
                     if (item_b < ITEM_ID_THROWABLE_FIRST) {
-                        key_b = g_main_item_weapon_data[g_main_item_primary_data[item_b].secondary_data_id].evade;
+                        key_b = g_item_weapon_data[g_item_primary_data[item_b].secondary_data_id].evade;
                     } else if (item_b < ITEM_ID_HEADGEAR_FIRST) {
-                        key_b = g_main_item_shield_data[g_main_item_primary_data[item_b].secondary_data_id].magic_evade;
+                        key_b = g_item_shield_data[g_item_primary_data[item_b].secondary_data_id].magic_evade;
                     } else if (item_b < ITEM_ID_CONSUMABLE_FIRST) {
-                        key_b = g_main_item_accessory_data[g_main_item_primary_data[item_b].secondary_data_id]
-                                    .magic_evade;
+                        key_b = g_item_accessory_data[g_item_primary_data[item_b].secondary_data_id].magic_evade;
                     } else {
                         key_b = 0;
                     }

@@ -1109,7 +1109,7 @@ data:
   - {addr: 0x800e0070, name: g_script_pause_message}
   - {addr: 0x800e007c, name: g_text_reading_character_message}
   - {addr: 0x800e01e8, name: g_save_title_template}
-  - {addr: 0x800eda00, name: g_open_work_buffer_1}
+  - {addr: 0x800eda00, name: g_system_work_buffer_1}
   - {addr: 0x800feff0, name: text_blit_glyph}
   - {addr: 0x800ff284, name: text_render_glyph_to_4bpp_image}
   - {addr: 0x800ff3d4, name: menu_clear_render_buffer}
@@ -1117,7 +1117,7 @@ data:
   - {addr: 0x80100188, name: mul_div_s64}
   - {addr: 0x801002d8, name: fixed_cross_product_q12}
   - {addr: 0x80100384, name: thread_call_on_main_stack}
-  - {addr: 0x80115a00, name: g_open_movie_cd_stream_ring_buffer}
+  - {addr: 0x80115a00, name: g_movie_cd_stream_ring_buffer}
   - {addr: 0x8013a310, name: g_map_selected_tile_data}
   - {addr: 0x8013a31c, name: g_menu_selected_unit_status}
   - {addr: 0x8013a340, name: g_menu_comparison_unit_status}
@@ -2409,23 +2409,23 @@ data:
 
 imports:
   - {addr: 0x800222fc, name: memset}
-  - {addr: 0x801bf3b8, name: card_save_run_menu}
-  - {addr: 0x801bf7e0, name: equip_entrypoint}
-  - {addr: 0x801c05d4, name: etc_graphic_show_async}
-  - {addr: 0x801c3078, name: attack_deploy_find_fieldable_units}
-  - {addr: 0x801c3190, name: bunit_entrypoint}
-  - {addr: 0x801c34b4, name: attack_load_scenario_conditionals}
-  - {addr: 0x801c3d84, name: debugchr_status_run_unit_thread}
-  - {addr: 0x801c3f44, name: attack_deploy_run_screen}
-  - {addr: 0x801c438c, name: debugchr_editor_run_session}
-  - {addr: 0x801c7fe4, name: attack_gfx_build_formation_sprites}
-  - {addr: 0x801c8004, name: attack_gfx_load_portraits}
-  - {addr: 0x801c9488, name: attack_text_build_deployment_strings}
-  - {addr: 0x801c9d68, name: attack_map_show_title}
-  - {addr: 0x801c9ec0, name: attack_map_load_title_graphic}
-  - {addr: 0x801cafd4, name: require_condition_dispatch}
-  - {addr: 0x801d7000, name: small_text_init_battle_pointers}
-  - {addr: 0x801df198, name: jobstts_entrypoint}
+  - {addr: 0x801bf3b8, name: save_run_menu}
+  - {addr: 0x801bf7e0, name: equipment_entrypoint}
+  - {addr: 0x801c05d4, name: fullscreen_graphic_thread}
+  - {addr: 0x801c3078, name: deploy_find_fieldable_units}
+  - {addr: 0x801c3190, name: unit_list_entrypoint}
+  - {addr: 0x801c34b4, name: scenario_load_conditionals}
+  - {addr: 0x801c3d84, name: status_screen_mounted_unit_thread}
+  - {addr: 0x801c3f44, name: deploy_run}
+  - {addr: 0x801c438c, name: unit_editor_run}
+  - {addr: 0x801c7fe4, name: formation_build_sprites}
+  - {addr: 0x801c8004, name: portrait_load_party}
+  - {addr: 0x801c9488, name: deploy_build_strings}
+  - {addr: 0x801c9d68, name: battle_map_title_thread}
+  - {addr: 0x801c9ec0, name: battle_map_title_load_graphic}
+  - {addr: 0x801cafd4, name: conditions_dispatch}
+  - {addr: 0x801d7000, name: text_init_battle_pointers}
+  - {addr: 0x801df198, name: status_screen_entrypoint}
 
 overrides:
   - {function: menu_build_zodiac_primitives, name: g_menu_draw_area_template, addr: 0x8016e44c}
@@ -2438,17 +2438,17 @@ overrides:
   - {function: menu_run_numeric_panel_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x8010ca18}
   - {function: menu_run_script_with_palette_mode, name: menu_set_palette_mode, addr: 0x801298c0}
   - {function: menu_start_crystal_pickup_threads, name: thread_wait_forever, addr: 0x8010226c}
-  - {function: menu_thin_window_frame_thread, name: g_main_gfx_screen_polarity, addr: 0x8004e5bc}
+  - {function: menu_thin_window_frame_thread, name: g_gfx_screen_polarity, addr: 0x8004e5bc}
   - {function: menu_thin_window_frame_thread, name: g_text_glyph_dest, addr: 0x801ac92c}
   - {function: menu_thin_window_frame_thread, name: g_text_glyph_source, addr: 0x801ac91c}
   - {function: menu_thin_window_frame_thread, name: text_set_blit_source_rect, addr: 0x801014fc}
-  - {function: menu_window_frame_thread, name: g_main_gfx_screen_polarity, addr: 0x8004e5bc}
+  - {function: menu_window_frame_thread, name: g_gfx_screen_polarity, addr: 0x8004e5bc}
   - {function: menu_window_frame_thread, name: g_text_glyph_dest, addr: 0x801ac92c}
   - {function: menu_window_frame_thread, name: g_text_glyph_source, addr: 0x801ac91c}
   - {function: menu_window_frame_thread, name: text_set_blit_source_rect, addr: 0x801014fc}
   - {function: option_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80156c8c}
   - {function: screen_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x8016e44c}
-  - {function: screen_thin_window_frame_thread, name: g_main_gfx_screen_polarity, addr: 0x8004e5bc}
+  - {function: screen_thin_window_frame_thread, name: g_gfx_screen_polarity, addr: 0x8004e5bc}
   - {function: screen_thin_window_frame_thread, name: g_menu_thin_panel_texture_windows, addr: 0x8018a330}
   - {function: screen_thin_window_frame_thread, name: text_set_blit_destination, addr: 0x8010a4a8}
   - {function: text_set_blit_destination, name: g_text_glyph_dest, addr: 0x801ac92c}

@@ -19,7 +19,7 @@
  * and 0 once it has ended, when the message and sound locks are released.
  * Any repeat input starts a five-frame timer during which L2 is masked out.
  */
-void equip_menu_input_update_with_message_state(void) {
+void menu_input_update_with_message_state(void) {
     s32 running = 0;
     s32 frame;
     u8 state;
@@ -55,11 +55,11 @@ void equip_menu_input_update_with_message_state(void) {
         g_input_lock_timer = 5;
     }
     if (running == 0) {
-        g_equip_text_message_thread_active = 0;
+        g_equipment_text_message_thread_active = 0;
         g_menu_input_lock_mode = 0;
-        g_equip_sound_suppress_queued = 0;
+        g_equipment_sound_suppress_queued = 0;
     }
     if (g_text_thread_running_state == 1) {
-        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
+        g_sound_queued_effect_id = SOUND_SFX_WINDOW_OPEN;
     }
 }

@@ -31,7 +31,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     s32 started;
 
     /* Refresh the player name buffer that the Ramza format code reads: end bytes, then party unit 0's name. */
-    party = main_party_get_unit(0);
+    party = party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;

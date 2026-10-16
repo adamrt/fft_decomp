@@ -15,7 +15,7 @@ typedef struct calendar_date {
 typedef char calendar_date_size_must_be_2[sizeof(calendar_date_t) == 2 ? 1 : -1];
 
 /* calculator */
-/* Flags stored by the eight Math Skill abilities in g_main_math_rsm_ability_data.
+/* Flags stored by the eight Math Skill abilities in g_ability_math_rsm_data.
  * The first four select a unit attribute; the last four select its divisor
  * test. */
 enum {

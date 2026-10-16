@@ -81,7 +81,7 @@ typedef enum battle_game_state {
 
 extern s32 g_battle_game_state;
 extern s32 g_battle_previous_game_state;
-/* What MAIN does once battle_state_run_game_loop returns: a main_game_flow_state_e. */
+/* What MAIN does once battle_state_run_game_loop returns: a system_game_flow_e. */
 extern u32 g_battle_game_flow_state;
 /* Nonzero while the action's effect is pending: 1 while its file loads, 2 while it plays, with
  * the knockback targets' step phases ORed in. SEQ ops 0xd3 and 0xd6 and

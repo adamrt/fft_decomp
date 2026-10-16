@@ -301,7 +301,7 @@ u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, 
         buffer = menu_alloc_memory(0x3000);
 #ifdef FFT_BATTLE
     } else if (mode == MENU_WINDOW_FRAME_ALTERNATE_UPLOAD && g_battle_menu_scroll_list_depth == 2) {
-        buffer = g_main_heap_companion_overlay_load_address + 0x8000;
+        buffer = g_heap_companion_overlay_load_address + 0x8000;
 #endif
     } else {
         buffer = menu_alloc_memory(size);

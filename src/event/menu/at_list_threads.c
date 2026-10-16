@@ -112,11 +112,11 @@ void menu_start_crystal_pickup_threads(void) {
     g_menu_crystal_pickup_item = 0;
     if (context->result == CRYSTAL_PICKUP_TREASURE) {
         /* At the 99 limit, message 0x101b also shows a quarter of the item's price. */
-        if (main_item_get_total_equipment_quantity(context->treasure_item, 1) == 0x63) {
+        if (item_get_total_quantity(context->treasure_item, 1) == 0x63) {
             g_text_substitution_values[0] = context->treasure_item;
             g_text_substitution_values[1] = context->treasure_item;
             message_id = 0x101b;
-            g_text_substitution_values[2] = main_item_get_data_pointer(context->treasure_item)->price >> 2;
+            g_text_substitution_values[2] = item_get_data(context->treasure_item)->price >> 2;
             g_menu_crystal_pickup_item = context->treasure_item;
         } else {
             message_id = 0x101a;

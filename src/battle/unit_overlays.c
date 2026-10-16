@@ -528,7 +528,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_z);
     if (tile->depth_half_height.depth
         && -(tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP < unit->world_coords.vy) {
-        unit->shadow_counter += g_main_system_vsync_interval;
+        unit->shadow_counter += g_system_vsync_interval;
         frame = unit->shadow_counter;
         prim->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         prim->clut = unit->clut + 0x40; /* the unit's CLUT of MAP_CLUT_ROW_UNIT_SHADOWS */
@@ -568,7 +568,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         prim->v0 = prim->v1 = 0x40;
         prim->v2 = prim->v3 = 0x53;
     }
-    main_util_set_svector(&position, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx, 0,
+    vector_set_svector(&position, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx, 0,
         unit->world_coords.vz + unit->event_offset.vz + unit->seq_offset.vz);
     position.vy = battle_map_calculate_slope_height(&position, unit->map_z);
     if (unit->world_coords.vy >= position.vy) {
@@ -592,7 +592,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         SetTransMatrix(&g_battle_camera_matrix);
         RotTrans(&offset, &transformed, &flag);
         depth = transformed.vz / 4;
-        packet = main_gfx_get_battle_otag() + depth;
+        packet = gfx_get_battle_otag() + depth;
     }
     AddPrim(packet, prim);
 }
@@ -832,7 +832,7 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     ((P_TAG*)prim)->len = 9;
     prim->code = 0x2c;
     if (g_battle_menu_status_screen_selected != 1) {
-        g_battle_gfx_selection_cursor_bob_timer += g_main_system_vsync_interval;
+        g_battle_gfx_selection_cursor_bob_timer += g_system_vsync_interval;
         if (g_battle_gfx_selection_cursor_bob_timer >= duration[g_battle_gfx_selection_cursor_bob_frame]) {
             g_battle_gfx_selection_cursor_bob_frame += 1;
             g_battle_gfx_selection_cursor_bob_timer = 0;
@@ -909,13 +909,13 @@ void battle_gfx_draw_wait_direction_arrows(SVECTOR* base, u32* ot) {
     s32 i;
 
     unit = battle_unit_get_source();
-    g_battle_gfx_wait_arrow_blink_timer += g_main_system_vsync_interval;
+    g_battle_gfx_wait_arrow_blink_timer += g_system_vsync_interval;
     for (i = 0; i < 4; i++) {
         prim = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
         ((P_TAG*)prim)->len = 9;
         prim->code = 0x2e;
         prim->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
-        main_util_set_svector(&position, base->vx + dx[i], base->vy - 48, base->vz + dz[i]);
+        vector_set_svector(&position, base->vx + dx[i], base->vy - 48, base->vz + dz[i]);
         RotTrans(&position, &transformed, &flag);
         prim->x0 = prim->x2 = transformed.vx - 7;
         prim->x1 = prim->x3 = transformed.vx + 7;
@@ -986,16 +986,16 @@ static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
     }
     if (unit->movement.floating) {
         if (unit->depth_height_offset < 12) {
-            unit->depth_height_offset += g_main_system_vsync_interval;
+            unit->depth_height_offset += g_system_vsync_interval;
         } else if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_RIDER) {
-            phase = unit->float_bob_phase += g_main_system_vsync_interval;
+            phase = unit->float_bob_phase += g_system_vsync_interval;
             unit->float_bob_offset = wave[phase % 48 / 2];
         } else {
             unit->float_bob_offset = 0;
         }
     } else if (g_battle_game_state != BATTLE_GAME_STATE_CRYSTAL_LEARN) {
         if (unit->depth_height_offset != 0) {
-            unit->depth_height_offset -= g_main_system_vsync_interval;
+            unit->depth_height_offset -= g_system_vsync_interval;
             if (unit->depth_height_offset < 0) {
                 unit->depth_height_offset = 0;
             }
@@ -1013,7 +1013,7 @@ static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
     }
 }
 
-/* Advances one unit's status bubble by g_main_system_vsync_interval frames.
+/* Advances one unit's status bubble by g_system_vsync_interval frames.
  *
  * The bubble switches texture rows every 16 timer ticks (CHARGING every 8).
  * Every 16 ticks the bubble id walks forward to the next of the
@@ -1034,7 +1034,7 @@ static void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
     u32 status_flags;
     s32 animation;
 
-    for (frame = 0; frame < g_main_system_vsync_interval; frame++) {
+    for (frame = 0; frame < g_system_vsync_interval; frame++) {
         bubble = unit->status_bubble_id;
         if (bubble == BATTLE_STATUS_BUBBLE_CHARGING) {
             unit->status_bubble_alternate_row = (unit->status_bubble_timer & 8) >> 3;
@@ -1239,7 +1239,7 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
 
     SetRotMatrix(&g_battle_camera_matrix);
     SetTransMatrix(&g_battle_camera_matrix);
-    main_util_set_svector(&base, unit->world_coords.vx + unit->event_offset.vx,
+    vector_set_svector(&base, unit->world_coords.vx + unit->event_offset.vx,
         unit->world_coords.vy + unit->event_offset.vy + unit->status_bubble_y,
         unit->world_coords.vz + unit->event_offset.vz);
     RotTrans(&base, &transformed, &unit->gte_flag);
@@ -1253,7 +1253,7 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
     raised.vy += 12;
     RotTrans(&raised, &transformed, &flag);
     display = unit->status_bubble_display;
-    otag = main_gfx_get_battle_otag();
+    otag = gfx_get_battle_otag();
     depth = transformed.vz / 4;
     battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, 0, 0, &zoom, otag + depth);
 }
@@ -1280,7 +1280,7 @@ void battle_gfx_init_position_vector_copies(battle_unit_t* unit) {
 
     unit->position_copies_active = 1;
     for (i = 0; i < 6; i++) {
-        main_util_set_svector(
+        vector_set_svector(
             &unit->position_copies[i], unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
     }
 }
@@ -1318,7 +1318,7 @@ void battle_gfx_draw_unit_sprite_position_copies(battle_unit_t* unit) {
         copyVector(&zoom, &g_battle_camera_zoom);
         display = unit->animation.display;
         battle_gfx_construct_polygon_data_for_units(
-            display, display->part_count, 0, &position, 0, flags, &zoom, main_gfx_get_battle_otag() + depth);
+            display, display->part_count, 0, &position, 0, flags, &zoom, gfx_get_battle_otag() + depth);
     }
 }
 
@@ -1360,8 +1360,8 @@ void battle_gfx_draw_item_display(battle_unit_t* unit) {
     position.vy = unit->item_display_y_offset;
     position.vx += unit->camera_relative_x;
     position.vy += unit->camera_relative_y;
-    main_util_set_svector(&zoom, ONE, ONE, ONE);
-    otag = main_gfx_get_battle_otag();
+    vector_set_svector(&zoom, ONE, ONE, ONE);
+    otag = gfx_get_battle_otag();
     otag += unit->otag_depth_index;
     battle_gfx_construct_polygon_data_for_units(
         unit->item_display, unit->item_display->part_count, 0, &position, 0, 0, &zoom, otag);
@@ -1979,7 +1979,7 @@ void battle_gfx_init_earned_exp_jp_display(battle_unit_t* unit) {
     battle_gfx_sprite_display_data_t* display_1;
     battle_gfx_sprite_display_data_t* display_2;
 
-    if (g_main_game_options.fields.display_gained_exp_jp == GAME_OPTION_ON) {
+    if (g_game_options.fields.display_gained_exp_jp == GAME_OPTION_ON) {
         display_0 = unit->numeric_display.displays[0];
         display_1 = unit->numeric_display.displays[1];
         display_2 = unit->numeric_display.displays[2];

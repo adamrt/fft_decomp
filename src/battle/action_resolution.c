@@ -183,7 +183,7 @@ static s32 battle_action_perform_reaction_ability(void) {
     if (ability_id == ABILITY_ID_REACTION_REFLECT) {
         g_battle_action_attacker = &g_battle_unit_stats[g_battle_acting_unit_id];
     }
-    if ((g_main_reaction_behavior_flags[ability_id - ABILITY_ID_REACTION_FIRST]
+    if ((g_ability_reaction_behavior_flags[ability_id - ABILITY_ID_REACTION_FIRST]
             & (BATTLE_REACTION_BEHAVIOR_FLAG_TRIGGER_ABILITY | BATTLE_REACTION_BEHAVIOR_FLAG_ABILITY))
         == 1) {
         return 0;
@@ -298,14 +298,14 @@ void battle_action_store_used_weapon(action_command_t* action) {
     } else {
         weapon = g_battle_action_current_ability.secondary_weapon_id;
     }
-    switch (g_main_action_menu_types_by_skillset[action->skillset_id]) {
+    switch (g_command_menu_types_by_skillset[action->skillset_id]) {
     case ACTION_MENU_TYPE_DEFAULT:
     case ACTION_MENU_TYPE_ARITHMETICKS:
     case ACTION_MENU_TYPE_ELEMENTS:
     case ACTION_MENU_TYPE_MONSTER:
         ability_id = action->ability_id;
         if (ability_id < ABILITY_ID_ITEM_FIRST) {
-            if ((g_main_ability_range_data[ability_id].flags_1
+            if ((g_ability_range_data[ability_id].flags_1
                     & (ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE | ABILITY_SECONDARY_FLAG_1_WEAPON_STRIKE))
                 == 0) {
                 weapon = ITEM_ID_NOTHING;
@@ -354,7 +354,7 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
     u16 ability_id;
     s32 location;
 
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     g_battle_action_current_ability.target_id = target_id;
     g_battle_action_target = &g_battle_unit_stats[target_id];
     g_battle_action_target_data = &g_battle_unit_stats[target_id].action;
@@ -397,11 +397,10 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
     }
 
     /* Start from the weapon's data and formula; the menu switch below overrides them. */
-    weapon = &g_main_item_weapon_data[id];
-    main_mem_copy_byte_data_source_first(&g_main_ability_range_data[ability_id],
-        &g_battle_action_current_ability_view.range_data, sizeof(ability_secondary_data_t));
-    main_mem_copy_byte_data_source_first(
-        weapon, &g_battle_action_current_ability_view.weapon_data, sizeof(weapon_data_t));
+    weapon = &g_item_weapon_data[id];
+    mem_copy_byte_data_source_first(&g_ability_range_data[ability_id], &g_battle_action_current_ability_view.range_data,
+        sizeof(ability_secondary_data_t));
+    mem_copy_byte_data_source_first(weapon, &g_battle_action_current_ability_view.weapon_data, sizeof(weapon_data_t));
     g_battle_action_current_ability.proc_id = weapon->proc_id;
     g_battle_action_current_ability.charge_power = 0;
     g_battle_action_current_ability.formula = ABILITY_FORMULA_WEAPON_DAMAGE;
@@ -411,7 +410,7 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
     battle_action_clear_data();
     skillset = action.skillset_id;
     g_battle_action_current_ability.skillset = skillset;
-    menu_type = g_main_action_menu_types_by_skillset[skillset];
+    menu_type = g_command_menu_types_by_skillset[skillset];
     /* A pending weapon proc resolves its spell, held in reaction_id, as a default-menu ability. */
     if (g_battle_action_current_ability_view.weapon_proc_pending != 0) {
         action.ability_id = g_battle_action_current_ability_view.reaction_id;
@@ -421,7 +420,7 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
         g_battle_action_current_ability_view.reaction_id = 0;
     }
 
-    data = &g_main_ability_data[action.ability_id];
+    data = &g_ability_data[action.ability_id];
     g_battle_action_target_data->miss_display_flags = data->ai_flags.flags_1 & ACTION_MISS_DISPLAY_TEAM_MASK;
     if (data->ai_flags.flags_4 & AI_ABILITY_FLAG_4_EVADE_WITH_MOTION) {
         g_battle_action_target_data->miss_display_flags += ACTION_MISS_DISPLAY_DODGE_ANIMATION;
@@ -447,11 +446,11 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
                     & STATUS_BYTE_MASK(STATUS_ID_FROG))
                 && g_battle_action_current_ability_view.weapon_proc_pending == 0) {
                 g_battle_action_current_ability_view.weapon_id = ITEM_ID_NOTHING;
-                main_mem_copy_byte_data_source_first(
-                    g_main_item_weapon_data, &g_battle_action_current_ability_view.weapon_data, sizeof(weapon_data_t));
+                mem_copy_byte_data_source_first(
+                    g_item_weapon_data, &g_battle_action_current_ability_view.weapon_data, sizeof(weapon_data_t));
             }
-            ability = &g_main_ability_range_data[action.ability_id];
-            main_mem_copy_byte_data_source_first(
+            ability = &g_ability_range_data[action.ability_id];
+            mem_copy_byte_data_source_first(
                 ability, &g_battle_action_current_ability_view.range_data, sizeof(ability_secondary_data_t));
             g_battle_action_current_ability.proc_id = ability->status_infliction_id;
             formula = ability->formula;
@@ -469,10 +468,10 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
         if (id >= ITEM_ID_CONSUMABLE_FIRST) {
             g_battle_action_current_ability_view.weapon_id = id;
             id += ITEM_ID_COUNT - ITEM_ID_CONSUMABLE_FIRST;
-            item = &g_main_item_secondary_data[id];
+            item = &g_item_secondary_data[id];
             g_battle_action_current_ability.used_item_id = id;
             g_battle_action_current_ability.proc_id = item->status_infliction_id;
-            main_mem_zero(&g_battle_action_current_ability_view.range_data, sizeof(ability_secondary_data_t));
+            mem_zero(&g_battle_action_current_ability_view.range_data, sizeof(ability_secondary_data_t));
             formula = item->formula;
         }
         break;
@@ -488,7 +487,7 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
             ability_id = ABILITY_ID_CHARGE_FIRST;
         }
         g_battle_action_current_ability.charge_power
-            = (g_main_charge_ability_data - ABILITY_ID_CHARGE_FIRST)[ability_id].power;
+            = (g_ability_charge_data - ABILITY_ID_CHARGE_FIRST)[ability_id].power;
         /* fall through */
     case ACTION_MENU_TYPE_ATTACK:
         formula = weapon->formula;
@@ -520,7 +519,7 @@ s32 battle_action_calculate_target_result(const action_command_t* source, u8 tar
     if (formula == ABILITY_FORMULA_GUN_DAMAGE) {
         id = 0;
     }
-    main_mem_copy_byte_data_source_first(&g_main_status_infliction_data[id],
+    mem_copy_byte_data_source_first(&g_status_infliction_data[id],
         &g_battle_action_current_ability_view.status_infliction, sizeof(status_infliction_data_t));
     battle_status_store_ability_cancellations();
     g_battle_action_current_ability.formula = formula;
@@ -667,9 +666,9 @@ void battle_action_clear_knockback_flag(void) {
  * last_received_attack (0x26) keep their values. The canceled-status list is
  * cleared with the record's status changes. */
 void battle_action_clear_current_data(action_data_t* action) {
-    main_mem_zero(action, 0xE);
-    main_mem_zero(&action->special_effect, 0x16);
-    main_mem_zero(&action->exp_change, 2);
+    mem_zero(action, 0xE);
+    mem_zero(&action->special_effect, 0x16);
+    mem_zero(&action->exp_change, 2);
     /* The target stores the accuracy as a 16-bit value (0x2a..0x2b). */
     action->attack_accuracy = 100;
     action->attack_type = 0;
@@ -940,22 +939,22 @@ static s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
         return 0;
     }
     monster_index = unit->job_id - JOB_ID_CHOCOBO;
-    if (main_util_roll_pass_fail(256, BATTLE_POACH_RARE_ITEM_CHANCE) != 0) {
-        item = g_main_item_poach_table[monster_index].common_item;
+    if (random_roll_pass_fail(256, BATTLE_POACH_RARE_ITEM_CHANCE) != 0) {
+        item = g_item_poach_table[monster_index].common_item;
     } else {
-        item = g_main_item_poach_table[monster_index].rare_item;
+        item = g_item_poach_table[monster_index].rare_item;
     }
-    count = g_main_item_poached_quantities[item];
+    count = g_item_poached_quantities[item];
     result = 0xff;
     if (count != result) {
         result = count + 1;
-        g_main_item_poached_quantities[item] = result;
+        g_item_poached_quantities[item] = result;
     }
     return result;
 }
 
 /* Transform a unit into a Morbol, keeping its name, unit id, formation index,
- * position and facing. MAIN_UNIT_ENTD_INIT_TRANSFORM rebuilds the unit's stats
+ * position and facing. UNIT_ENTD_INIT_TRANSFORM rebuilds the unit's stats
  * for its new job without resetting it or reading ENTD data; the generated-unit
  * formation index meanwhile lets the level growth run. */
 void battle_unit_transform_into_morbol(unit_stats_t* unit) {
@@ -974,22 +973,22 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     unit_id = unit->unit_id;
     unit->job_id = JOB_ID_MORBOL;
     unit->character_identity = CHARACTER_IDENTITY_MONSTER;
-    main_mem_copy_byte_data_source_first(name, saved_name, sizeof(saved_name));
+    mem_copy_byte_data_source_first(name, saved_name, sizeof(saved_name));
     formation_index = unit->formation_index;
     x = unit->x;
     y = unit->position.y;
     higher_elevation = unit->position.higher_elevation;
     facing = unit->position.facing;
     unit->formation_index = UNIT_FORMATION_INDEX_GENERATED_UNIT;
-    main_unit_init_from_entd(unit, 0, 0, MAIN_UNIT_ENTD_INIT_TRANSFORM);
+    unit_init_from_encounter(unit, 0, 0, UNIT_ENTD_INIT_TRANSFORM);
     unit->x = x;
     unit->position.y = y;
     unit->formation_index = formation_index;
     unit->position.higher_elevation = higher_elevation;
     unit->position.facing = facing;
-    main_mem_copy_byte_data_source_first(saved_name, name, sizeof(saved_name));
+    mem_copy_byte_data_source_first(saved_name, name, sizeof(saved_name));
     unit->unit_id = unit_id;
-    main_unit_calculate_palette_spritesheet(unit, palette);
+    unit_calculate_palette_spritesheet(unit, palette);
 }
 
 /* Apply a level-up or level-down special effect: level + 1 (99 at most) or
@@ -1019,7 +1018,7 @@ static s32 battle_unit_apply_level_up_down_ability(void) {
     }
     if (g_battle_action_state == ACTION_STATE_EXECUTE) {
         g_battle_action_target->level = level;
-        main_unit_apply_level_growth(g_battle_action_target, level_down);
+        unit_apply_level_growth(g_battle_action_target, level_down);
     }
     return 1;
 }
@@ -1046,7 +1045,7 @@ s32 battle_action_is_reaction_prevented(const unit_stats_t* unit) {
     if (g_battle_action_context != ACTION_CONTEXT_PRIMARY) {
         return 1;
     }
-    return main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION);
+    return status_unit_has_any_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION);
 }
 
 /* Whether a reaction is already in play: 1 while a weapon's proc ability is
@@ -1325,8 +1324,8 @@ static void battle_action_try_arrow_guard(void) {
     if ((g_battle_action_current_ability.range_data.flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE) == 0) {
         return;
     }
-    if (g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type != ITEM_TYPE_CROSSBOW
-        && g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type != ITEM_TYPE_BOW) {
+    if (g_item_primary_data[g_battle_action_current_ability.weapon_id].type != ITEM_TYPE_CROSSBOW
+        && g_item_primary_data[g_battle_action_current_ability.weapon_id].type != ITEM_TYPE_BOW) {
         return;
     }
     target = g_battle_action_target;
@@ -1413,7 +1412,7 @@ s32 battle_action_fails_reaction_roll(const unit_stats_t* unit) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
-    return main_util_roll_pass_fail(100, unit->brave);
+    return random_roll_pass_fail(100, unit->brave);
 }
 
 /* Take the equipment a Break or Steal hit off the target (unremovable items stay) and
@@ -1435,7 +1434,7 @@ static s32 battle_action_remove_broken_or_stolen_equipment(void) {
             if (g_battle_action_target_data->equipment_destroyed & (ACTION_EQUIPMENT_SLOT_HEAD >> i)) {
                 item = g_battle_action_target->equipment[i];
                 if (item != ITEM_ID_NOTHING && item != ITEM_ID_NONE
-                    && !(g_main_item_primary_data[item].type_flags & ITEM_TYPE_FLAG_UNREMOVABLE)) {
+                    && !(g_item_primary_data[item].type_flags & ITEM_TYPE_FLAG_UNREMOVABLE)) {
                     g_battle_action_target->equipment[i] = ITEM_ID_NONE;
                     count++;
                     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM) {
@@ -1446,7 +1445,7 @@ static s32 battle_action_remove_broken_or_stolen_equipment(void) {
         }
         if (count != 0) {
             if (g_battle_action_state == ACTION_STATE_EXECUTE) {
-                main_unit_refresh_stats_and_statuses(g_battle_action_target);
+                unit_refresh_stats_and_statuses(g_battle_action_target);
             }
             action = g_battle_action_target_data;
             if (action->equipment_destroyed == ACTION_EQUIPMENT_SLOT_RIGHT_WEAPON
@@ -1577,7 +1576,7 @@ s32 battle_action_apply_attacker_result(s32 unit_id) {
     if (stats->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
-    main_mem_copy_byte_data_source_first(&g_battle_action_attacker_action_data, action, sizeof(action_data_t));
+    mem_copy_byte_data_source_first(&g_battle_action_attacker_action_data, action, sizeof(action_data_t));
     result = battle_action_apply_target_result(unit_id);
     if (g_battle_action_target_data->hit == 0) {
         g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_CANCELED;
@@ -1703,7 +1702,7 @@ static s32 battle_status_is_unit_out_of_action(const unit_stats_t* unit) {
  *
  * Mounts cannot receive the terrain effect. A rider uses the linked mount's
  * Float status because that unit determines whether the pair touches the
- * terrain. g_main_terrain_status_flags marks the surfaces that inflict Poison. */
+ * terrain. g_terrain_status_flags marks the surfaces that inflict Poison. */
 s32 battle_status_prepare_terrain_poison(unit_stats_t* unit) {
     s32 mount_info;
     u8 unit_id;
@@ -1728,8 +1727,8 @@ s32 battle_status_prepare_terrain_poison(unit_stats_t* unit) {
     g_battle_action_target_data = action;
     g_battle_action_current_ability.target_id = unit_id;
     battle_action_clear_current_data(action);
-    if (g_main_terrain_status_flags[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type]
-        & MAIN_TERRAIN_STATUS_FLAG_POISON) {
+    if (g_terrain_status_flags[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type]
+        & TERRAIN_STATUS_FLAG_POISON) {
         g_battle_action_target_data->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_POISON)]
             = STATUS_BYTE_MASK(STATUS_ID_POISON);
         if (battle_status_modify_inflictions(0)) {
@@ -1808,7 +1807,7 @@ s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit) {
     g_battle_action_target_data = &unit->action;
     g_battle_action_current_ability.target_id = unit_id;
     battle_action_clear_current_data(&unit->action);
-    if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
+    if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
         return -1;
     flags = battle_move_get_movement_ability_events(unit);
     if (flags & MOVE_POST_EVENT_MOVE_HP_UP) {
@@ -1894,7 +1893,7 @@ s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
     if (g_battle_unit_stats[unit_id].entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
-    main_mem_copy_byte_data_source_first(&g_battle_action_target_data->status_changes, &saved, sizeof(saved));
+    mem_copy_byte_data_source_first(&g_battle_action_target_data->status_changes, &saved, sizeof(saved));
     g_battle_action_current_ability.target_id = unit_id;
     g_battle_action_target = &g_battle_unit_stats[unit_id];
     g_battle_action_target_data = &g_battle_unit_stats[unit_id].action;
@@ -1911,7 +1910,7 @@ s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
         g_battle_action_target->charged_ability_ct = 0xFF;
     }
     battle_status_update_control(g_battle_action_target);
-    main_mem_copy_byte_data_source_first(&saved, &g_battle_action_target_data->status_changes, sizeof(saved));
+    mem_copy_byte_data_source_first(&saved, &g_battle_action_target_data->status_changes, sizeof(saved));
     return 0;
 }
 
@@ -1948,12 +1947,12 @@ static void battle_status_apply_action_removals(s32 unit_idx) {
         mask = 0x80 >> (i & 7);
         if (unit->action.status_changes.removal[byte_index] & mask) {
             unit->inflicted_status[byte_index] &= ~mask;
-            if (main_status_set_ct(unit, i, 1) == 0) {
+            if (status_set_ct(unit, i, 1) == 0) {
                 battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 0, unit_idx);
             }
         }
     }
-    main_status_store_current(unit);
+    status_store_current(unit);
 }
 
 /* Apply the pending status inflictions of unit_id's current action.
@@ -1987,7 +1986,7 @@ static void battle_status_apply_action_inflictions(s32 unit_id, s32 removal_only
         }
         blocked = 0;
         for (j = 0; j < STATUS_BYTE_COUNT; j++) {
-            if (g_battle_action_target->inflicted_status[j] & g_main_status_effect_data[i].cant_stack[j]) {
+            if (g_battle_action_target->inflicted_status[j] & g_status_effect_data[i].cant_stack[j]) {
                 blocked = 1;
                 break;
             }
@@ -1996,13 +1995,13 @@ static void battle_status_apply_action_inflictions(s32 unit_id, s32 removal_only
             continue;
         }
         for (j = 0; j < STATUS_BYTE_COUNT; j++) {
-            g_battle_action_target_data->status_changes.removal[j] = g_main_status_effect_data[i].cancels[j];
+            g_battle_action_target_data->status_changes.removal[j] = g_status_effect_data[i].cancels[j];
         }
         battle_status_modify_inflictions(removal_only);
         battle_status_apply_action_removals(unit_id);
         previous = g_battle_action_target->inflicted_status[byte];
         g_battle_action_target->inflicted_status[byte] = previous | mask;
-        if (main_status_set_ct(g_battle_action_target, i, 0) != 0) {
+        if (status_set_ct(g_battle_action_target, i, 0) != 0) {
             continue;
         }
         if ((previous & mask) && i != STATUS_ID_CRYSTAL && i != STATUS_ID_OIL) {
@@ -2031,5 +2030,5 @@ static void battle_status_apply_action_inflictions(s32 unit_id, s32 removal_only
             g_battle_player_unit_fallen = 1;
         }
     }
-    main_status_store_current(g_battle_action_target);
+    status_store_current(g_battle_action_target);
 }

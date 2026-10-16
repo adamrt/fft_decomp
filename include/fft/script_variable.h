@@ -9,7 +9,7 @@
 /* variable ids */
 /* Event-script variable ids shared by the BATTLE and WORLD interpreters.
  * The calendar and location ids are also serialized into the memory-card
- * slot description by card_save_build_buffer. */
+ * slot description by save_build_image. */
 typedef enum event_script_variable_id {
     /* 32-bit result tested by the conditional-jump opcodes. */
     EVENT_SCRIPT_VAR_COMPARISON_RESULT = 0x00,
@@ -220,7 +220,7 @@ enum {
 
 /* Script variable caps: script_set_variable and each program that adds to
  * EVENT_SCRIPT_VAR_WAR_FUNDS stop the war funds at 99,999,999, and
- * main_unit_increase_casualty_counters stops EVENT_SCRIPT_VAR_CASUALTIES and
+ * unit_increase_casualty_counters stops EVENT_SCRIPT_VAR_CASUALTIES and
  * EVENT_SCRIPT_VAR_INJURED at 9999. */
 enum {
     EVENT_WAR_FUNDS_MAX = 99999999,
@@ -247,7 +247,7 @@ enum {
 /* event ids */
 /* Event ids: EVENT_SCRIPT_VAR_CURRENT_EVENT, the 0x2000-byte block of
  * EVENT/TEST.EVT that holds the event's script and text, and the index of
- * g_main_scenario_event_finish_operations. The game names only the 64 Brave
+ * g_scenario_event_finish_operations. The game names only the 64 Brave
  * Story record scenes (g_brave_story_event_ids lists their setup events);
  * the ones the code singles out are named here for what their own script and
  * text show. */

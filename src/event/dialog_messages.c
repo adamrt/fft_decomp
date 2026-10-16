@@ -116,13 +116,13 @@ void screen_input_update_dialog_state(void) {
         g_script_event_input = ~previous_input & input;
         g_script_event_initial_repeat_counter = 0;
     } else {
-        initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
+        initial_delay = g_input_repeat_initial_delay / g_script_event_speed;
         counter = ++g_script_event_initial_repeat_counter;
         if (counter == initial_delay) {
             g_script_event_input = input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK);
         }
         if (counter >= initial_delay) {
-            repeat_delay = g_main_input_repeat_period / g_script_event_speed;
+            repeat_delay = g_input_repeat_period / g_script_event_speed;
             counter = ++g_script_event_repeat_counter;
             g_script_event_secondary_repeat_counter++;
             if (counter >= repeat_delay) {
@@ -133,7 +133,7 @@ void screen_input_update_dialog_state(void) {
                     g_script_event_input = input & PSX_PAD_DPAD_MASK;
                 }
             }
-            secondary_repeat_delay = g_main_input_secondary_repeat_period / g_script_event_speed;
+            secondary_repeat_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (g_script_event_secondary_repeat_counter >= secondary_repeat_delay) {
                 g_script_event_secondary_repeat_counter = 0;
                 if ((g_script_event_current_input & PSX_PAD_SQUARE) != 0) {
@@ -339,9 +339,9 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
         } else {
             if (PadRead(1) & PSX_PAD_CIRCLE) {
                 g_text_glyphs_per_wait = 8;
-            } else if (g_main_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_FAST) {
+            } else if (g_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_FAST) {
                 g_text_glyphs_per_wait = 8;
-            } else if (g_main_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_REGULAR) {
+            } else if (g_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_REGULAR) {
                 g_text_glyphs_per_wait = 2;
             } else {
                 g_text_glyphs_per_wait = 1;
@@ -358,7 +358,7 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
         }
 
         if (script_get_variable(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE) == 0 && request->mode != 0) {
-            g_sound_pending_sfx_id = MAIN_SFX_TEXT_GLYPH;
+            g_sound_pending_sfx_id = SOUND_SFX_TEXT_GLYPH;
         }
     }
 }
@@ -401,7 +401,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
     /* Stage the first party unit's name (Ramza) for TEXT_FORMAT_RAMZA_NAME, in a buffer of
      * terminators. */
     cursor = (u8*)text;
-    party = main_party_get_unit(0);
+    party = party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;
@@ -513,7 +513,7 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
     /* Stage the first party unit's name (Ramza) for TEXT_FORMAT_RAMZA_NAME, in a buffer of
      * terminators. */
     cursor = (u8*)text;
-    party = main_party_get_unit(0);
+    party = party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;

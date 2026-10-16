@@ -222,7 +222,7 @@ void battle_move_update_path_step(battle_unit_t* unit) {
         if (unit->animation.wait == 0) {
             unit->step_phase++;
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_FALL, unit->facing, unit);
-            battle_sound_play_unit_sfx(unit, MAIN_SFX_JUMP);
+            battle_sound_play_unit_sfx(unit, SOUND_SFX_JUMP);
             battle_unit_dismount_rider(unit);
         }
         break;
@@ -492,8 +492,8 @@ s32 battle_camera_get_input_direction(s32 source) {
             input = g_input_previous_buttons;
             break;
         case CAMERA_INPUT_PRESSED:
-            input = g_main_input_pressed_buttons;
-            switch (g_main_game_options.fields.cursor_repeat_speed) {
+            input = g_input_pressed_buttons;
+            switch (g_game_options.fields.cursor_repeat_speed) {
             case GAME_CURSOR_REPEAT_SPEED_FAST:
                 divisor = 3;
                 threshold = 15;
@@ -509,23 +509,23 @@ s32 battle_camera_get_input_direction(s32 source) {
                 break;
             }
             /* Buttons held past threshold frames count as pressed again every divisor frames. */
-            if (threshold < g_main_input_stable_frames && g_main_input_stable_frames % divisor == 0) {
+            if (threshold < g_input_stable_frames && g_input_stable_frames % divisor == 0) {
                 input = g_input_previous_buttons;
             }
             break;
         case CAMERA_INPUT_RELEASED:
-            input = g_main_input_released_buttons;
+            input = g_input_released_buttons;
             break;
         }
         break;
     case BATTLE_CURSOR_INPUT_FREE_CURSOR:
         switch (source) {
         case CAMERA_INPUT_HELD:
-            input = g_input_previous_buttons | g_main_input_previous_copy_0;
+            input = g_input_previous_buttons | g_input_previous_copy_0;
             break;
         case CAMERA_INPUT_PRESSED:
-            previous = g_input_previous_buttons | g_main_input_previous_copy_0;
-            pressed = g_main_input_pressed_buttons;
+            previous = g_input_previous_buttons | g_input_previous_copy_0;
+            pressed = g_input_pressed_buttons;
             input = 0;
 
             /* A new press counts only when it completes a diagonal with a held perpendicular button. */
@@ -553,28 +553,28 @@ s32 battle_camera_get_input_direction(s32 source) {
                 } else if (previous & PSX_PAD_DOWN) {
                     input = PSX_PAD_RIGHT | PSX_PAD_DOWN;
                 }
-            } else if (g_main_input_pressed_copy_1 & PSX_PAD_UP) {
+            } else if (g_input_pressed_copy_1 & PSX_PAD_UP) {
                 /* battle_state_update_controller_input stores last frame's presses in both copy_0 and
                  * copy_1, so these lone-direction tests never pass: a lone direction registers only
                  * through the auto-repeat below. */
-                if (!((pressed | g_main_input_pressed_copy_0) & PSX_PAD_UP) && (previous & PSX_PAD_UP)) {
+                if (!((pressed | g_input_pressed_copy_0) & PSX_PAD_UP) && (previous & PSX_PAD_UP)) {
                     input = PSX_PAD_UP;
                 }
-            } else if (g_main_input_pressed_copy_1 & PSX_PAD_DOWN) {
-                if (!((pressed | g_main_input_pressed_copy_0) & PSX_PAD_DOWN) && (previous & PSX_PAD_DOWN)) {
+            } else if (g_input_pressed_copy_1 & PSX_PAD_DOWN) {
+                if (!((pressed | g_input_pressed_copy_0) & PSX_PAD_DOWN) && (previous & PSX_PAD_DOWN)) {
                     input = PSX_PAD_DOWN;
                 }
-            } else if (g_main_input_pressed_copy_1 & PSX_PAD_LEFT) {
-                if (!((pressed | g_main_input_pressed_copy_0) & PSX_PAD_LEFT) && (previous & PSX_PAD_LEFT)) {
+            } else if (g_input_pressed_copy_1 & PSX_PAD_LEFT) {
+                if (!((pressed | g_input_pressed_copy_0) & PSX_PAD_LEFT) && (previous & PSX_PAD_LEFT)) {
                     input = PSX_PAD_LEFT;
                 }
-            } else if (g_main_input_pressed_copy_1 & PSX_PAD_RIGHT) {
-                if (!((pressed | g_main_input_pressed_copy_0) & PSX_PAD_RIGHT) && (previous & PSX_PAD_RIGHT)) {
+            } else if (g_input_pressed_copy_1 & PSX_PAD_RIGHT) {
+                if (!((pressed | g_input_pressed_copy_0) & PSX_PAD_RIGHT) && (previous & PSX_PAD_RIGHT)) {
                     input = PSX_PAD_RIGHT;
                 }
             }
 
-            switch (g_main_game_options.fields.cursor_repeat_speed) {
+            switch (g_game_options.fields.cursor_repeat_speed) {
             case GAME_CURSOR_REPEAT_SPEED_FAST:
                 divisor = 6;
                 threshold = 6;
@@ -589,12 +589,12 @@ s32 battle_camera_get_input_direction(s32 source) {
                 threshold = 30;
                 break;
             }
-            if (threshold < g_main_input_stable_frames && g_main_input_stable_frames % divisor == 0) {
-                input = g_input_previous_buttons | g_main_input_previous_copy_0;
+            if (threshold < g_input_stable_frames && g_input_stable_frames % divisor == 0) {
+                input = g_input_previous_buttons | g_input_previous_copy_0;
             }
             break;
         case CAMERA_INPUT_RELEASED:
-            input = g_main_input_released_buttons;
+            input = g_input_released_buttons;
             break;
         }
         break;
@@ -844,7 +844,7 @@ s32 battle_camera_get_input_direction(s32 source) {
         break;
     }
 
-    if (g_main_input_pressed_buttons
+    if (g_input_pressed_buttons
         & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT | PSX_PAD_START)) {
         direction = -1;
     }
@@ -945,7 +945,7 @@ void battle_target_move_cursor_to_selection(const battle_unit_t* unit, const bat
  * 32-bit option value is copied first so the loop note does not stop the load from
  * being scheduled into the prologue. */
 s32 battle_target_move_cursor_by_input(void) {
-    game_options_t options = g_main_game_options;
+    game_options_t options = g_game_options;
     u32 delay;
     s32 direction;
     map_tile_t* current;
@@ -972,8 +972,8 @@ s32 battle_target_move_cursor_by_input(void) {
 
     direction = 0;
     current = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-    if (g_main_game_options.fields.multi_height_cursor_speed == GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP) {
-        if (g_main_input_pressed_buttons & PSX_PAD_START) {
+    if (g_game_options.fields.multi_height_cursor_speed == GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP) {
+        if (g_input_pressed_buttons & PSX_PAD_START) {
             other_level = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
             if (!other_level->flags.blocked) {
                 direction = 1;
@@ -1097,7 +1097,7 @@ s32 battle_target_move_cursor_by_input(void) {
     if (((g_battle_cursor_x != g_battle_cursor_previous_x) | (g_battle_cursor_z != g_battle_cursor_previous_z)
             | (g_battle_cursor_y != g_battle_cursor_previous_y))
         != 0) {
-        main_sound_play_sfx(MAIN_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
         g_battle_cursor_repeat_counter = 0;
         switch (g_battle_game_state) {
         case BATTLE_GAME_STATE_FREE_CURSOR:
@@ -1239,10 +1239,10 @@ static void battle_camera_request_rotation(s32 angle) {
     if (g_battle_camera_rotation_action == CAMERA_ROTATION_NONE) {
         if (angle < 0) {
             battle_camera_start_rotation_left((g_battle_camera_render_state.vy & 0xFE00) + angle);
-            main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_LEFT);
+            sound_play_sfx_on_free_channel(SOUND_SFX_CAMERA_ROTATE_LEFT);
         } else {
             battle_camera_start_rotation_right((g_battle_camera_render_state.vy & 0xFE00) + angle);
-            main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_RIGHT);
+            sound_play_sfx_on_free_channel(SOUND_SFX_CAMERA_ROTATE_RIGHT);
         }
     }
 }
@@ -1251,13 +1251,13 @@ static void battle_camera_request_rotation(s32 angle) {
  * a rotation is running. */
 void battle_camera_handle_rotation_input(void) {
     if (g_battle_camera_rotation_action == CAMERA_ROTATION_NONE) {
-        if (g_main_input_pressed_buttons & PSX_PAD_L1) {
+        if (g_input_pressed_buttons & PSX_PAD_L1) {
             battle_camera_start_rotation_left((g_battle_camera_render_state.vy & 0xFE00) - 0x400);
-            main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_LEFT);
+            sound_play_sfx_on_free_channel(SOUND_SFX_CAMERA_ROTATE_LEFT);
         }
-        if (g_main_input_pressed_buttons & PSX_PAD_R1) {
+        if (g_input_pressed_buttons & PSX_PAD_R1) {
             battle_camera_start_rotation_right((g_battle_camera_render_state.vy & 0xFE00) + 0x400);
-            main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_RIGHT);
+            sound_play_sfx_on_free_channel(SOUND_SFX_CAMERA_ROTATE_RIGHT);
         }
     }
 }
@@ -1283,9 +1283,9 @@ void battle_camera_update_rotation(void) {
                 }
             } else {
                 g_battle_camera_rotation_action = CAMERA_ROTATION_NONE;
-                main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_RIGHT);
-                main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_LEFT);
-                main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_STOP);
+                sound_stop_sfx(SOUND_SFX_CAMERA_ROTATE_RIGHT);
+                sound_stop_sfx(SOUND_SFX_CAMERA_ROTATE_LEFT);
+                sound_play_sfx_on_free_channel(SOUND_SFX_CAMERA_ROTATE_STOP);
             }
         }
     } else if (g_battle_camera_rotation_action == CAMERA_ROTATION_RIGHT) {
@@ -1302,16 +1302,16 @@ void battle_camera_update_rotation(void) {
                 }
             } else {
                 g_battle_camera_rotation_action = CAMERA_ROTATION_NONE;
-                main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_RIGHT);
-                main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_LEFT);
-                main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_STOP);
+                sound_stop_sfx(SOUND_SFX_CAMERA_ROTATE_RIGHT);
+                sound_stop_sfx(SOUND_SFX_CAMERA_ROTATE_LEFT);
+                sound_play_sfx_on_free_channel(SOUND_SFX_CAMERA_ROTATE_STOP);
             }
         }
     } else {
         return;
     }
     if (g_battle_camera_rotation_increment < 0x30) {
-        g_battle_camera_rotation_increment = (g_main_system_vsync_interval * 2) + g_battle_camera_rotation_increment;
+        g_battle_camera_rotation_increment = (g_system_vsync_interval * 2) + g_battle_camera_rotation_increment;
     }
 }
 
@@ -1327,14 +1327,14 @@ void battle_camera_zoom_map(s32 mode) {
             g_battle_map_zoom_target = MAP_ZOOM_IN;
             g_battle_camera_zoom_action = CAMERA_STEP_DECREASE;
             g_battle_camera_zoom_increment = 4;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_OUT);
+            sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_OUT);
             return;
         }
         if (g_battle_camera_zoom.vx < ONE) {
             g_battle_map_zoom_target = MAP_ZOOM_IN;
             g_battle_camera_zoom_action = CAMERA_STEP_INCREASE;
             g_battle_camera_zoom_increment = 4;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_IN);
+            sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_IN);
             return;
         }
         return;
@@ -1343,14 +1343,14 @@ void battle_camera_zoom_map(s32 mode) {
             g_battle_map_zoom_target = MAP_ZOOM_OUT;
             g_battle_camera_zoom_action = CAMERA_STEP_DECREASE;
             g_battle_camera_zoom_increment = 4;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_OUT);
+            sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_OUT);
             return;
         }
         if (g_battle_camera_zoom.vx < 0xC00) {
             g_battle_map_zoom_target = MAP_ZOOM_OUT;
             g_battle_camera_zoom_action = CAMERA_STEP_INCREASE;
             g_battle_camera_zoom_increment = 4;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_IN);
+            sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_IN);
             return;
         }
         return;
@@ -1364,11 +1364,11 @@ static void battle_camera_toggle_zoom(void) {
     if (g_battle_map_zoom_target == MAP_ZOOM_IN) {
         g_battle_camera_zoom_action = CAMERA_STEP_DECREASE;
         g_battle_map_zoom_target = MAP_ZOOM_OUT;
-        main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_OUT);
+        sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_OUT);
     } else if (g_battle_map_zoom_target == MAP_ZOOM_OUT) {
         g_battle_map_zoom_target = MAP_ZOOM_IN;
         g_battle_camera_zoom_action = CAMERA_STEP_INCREASE;
-        main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_IN);
+        sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_IN);
     }
     g_battle_camera_zoom_increment = 4;
 }
@@ -1376,7 +1376,7 @@ static void battle_camera_toggle_zoom(void) {
 /* Toggles the zoom when L2 is newly pressed and no zoom is running. */
 void battle_camera_update_zoom_input(void) {
     if (g_battle_camera_zoom_action == CAMERA_STEP_NONE) {
-        if ((g_main_input_pressed_buttons & PSX_PAD_L2) != 0) {
+        if ((g_input_pressed_buttons & PSX_PAD_L2) != 0) {
             battle_camera_toggle_zoom();
         }
     }
@@ -1438,7 +1438,7 @@ void battle_camera_update_zoom(void) {
         return;
     }
     if (increment < 0x300) {
-        g_battle_camera_zoom_increment = g_main_system_vsync_interval * 4 + increment;
+        g_battle_camera_zoom_increment = g_system_vsync_interval * 4 + increment;
     }
 }
 
@@ -1452,12 +1452,12 @@ void battle_camera_handle_tilt_request(s32 mode) {
             g_battle_map_tilt_target = MAP_TILT_LOW;
             g_battle_camera_tilt_action = CAMERA_STEP_DECREASE;
             g_battle_camera_tilt_increment = 1;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
+            sound_play_sfx(SOUND_SFX_CAMERA_TILT);
         } else if (g_battle_camera_render_state.vx < 0x12E) {
             g_battle_map_tilt_target = MAP_TILT_LOW;
             g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
             g_battle_camera_tilt_increment = 1;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
+            sound_play_sfx(SOUND_SFX_CAMERA_TILT);
         }
         break;
     case 1:
@@ -1465,12 +1465,12 @@ void battle_camera_handle_tilt_request(s32 mode) {
             g_battle_map_tilt_target = MAP_TILT_HIGH;
             g_battle_camera_tilt_action = CAMERA_STEP_DECREASE;
             g_battle_camera_tilt_increment = 1;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
+            sound_play_sfx(SOUND_SFX_CAMERA_TILT);
         } else if (g_battle_camera_render_state.vx < 0x1C0) {
             g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
             g_battle_map_tilt_target = MAP_TILT_HIGH;
             g_battle_camera_tilt_increment = 1;
-            main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
+            sound_play_sfx(SOUND_SFX_CAMERA_TILT);
         }
         break;
     }
@@ -1496,13 +1496,13 @@ static void battle_camera_toggle_tilt(void) {
         g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
     }
     g_battle_camera_tilt_increment = 1;
-    main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
+    sound_play_sfx(SOUND_SFX_CAMERA_TILT);
 }
 
 /* Toggles the tilt when R2 is newly pressed and no tilt is running. */
 void battle_camera_update_tilt_input(void) {
     if (g_battle_camera_tilt_action == CAMERA_STEP_NONE) {
-        if ((g_main_input_pressed_buttons & PSX_PAD_R2) != 0) {
+        if ((g_input_pressed_buttons & PSX_PAD_R2) != 0) {
             battle_camera_toggle_tilt();
         }
     }
@@ -1553,7 +1553,7 @@ void battle_camera_update_tilt(void) {
         return;
     }
     if (g_battle_camera_tilt_increment < 0x30) {
-        g_battle_camera_tilt_increment += g_main_system_vsync_interval * 2;
+        g_battle_camera_tilt_increment += g_system_vsync_interval * 2;
     }
 }
 
@@ -1596,7 +1596,7 @@ static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
     battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
     depth = tile->depth_half_height;
     height = -((tile->height + depth.depth) * MAP_HEIGHT_STEP + depth.half_height * (MAP_HEIGHT_STEP / 2));
-    main_util_set_svector(&tile_position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), height,
+    vector_set_svector(&tile_position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), height,
         g_battle_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
     setVector(&delta, tile_position.vx - g_battle_camera_current_real_coords.vx / ONE,
         height - g_battle_camera_current_real_coords.vy / ONE,
@@ -1731,7 +1731,7 @@ static void battle_camera_step_real_coords_toward_target(const battle_unit_t* ta
  * clear the vector.
  *
  * The idle path is battle_camera_update_cursor_tile_vector verbatim. The four
- * main_util_set_vector calls are one tail-merged block in the target, placed
+ * vector_set_vector calls are one tail-merged block in the target, placed
  * last so it falls into the epilogue, so the idle path's window test is
  * spelled inverted with the clear-vector call as the function's last
  * statement. Written the natural way, the merged block lands mid-function
@@ -1749,7 +1749,7 @@ void battle_camera_update_vector_from_game_state(void) {
         }
         if (g_battle_cursor_screen_x >= 0xF9 && g_battle_cursor_screen_x < 0x108
             && g_battle_cursor_screen_y - height >= 0xA1 && g_battle_cursor_screen_y < 0xB0) {
-            main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
+            vector_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
             return;
         }
         /* The scaling routine passes through the normal routine's height bound. */
@@ -1763,7 +1763,7 @@ void battle_camera_update_vector_from_game_state(void) {
             = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_battle_camera_zoom.vy / ONE;
         if (unit->camera_relative_x >= 0xB1 && unit->camera_relative_x < 0x150
             && unit->camera_relative_y - height >= 0x51 && unit->camera_relative_y < 0xA0) {
-            main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
+            vector_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
             return;
         }
         if (unit->camera_relative_x >= 0xA1 && unit->camera_relative_x < 0x160
@@ -1776,7 +1776,7 @@ void battle_camera_update_vector_from_game_state(void) {
         return;
     }
     if (g_battle_game_state >= BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT) {
-        main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
+        vector_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
         return;
     }
     if (g_battle_camera_zoom_action == CAMERA_STEP_NONE && g_battle_camera_tilt_action == CAMERA_STEP_NONE
@@ -1798,7 +1798,7 @@ void battle_camera_update_vector_from_game_state(void) {
             }
             return;
         }
-        main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
+        vector_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
     }
 }
 
@@ -1827,7 +1827,7 @@ void battle_camera_update_cursor_tile_vector(void) {
         }
         if (g_battle_cursor_screen_x >= 0xB1 && g_battle_cursor_screen_x < 0x150
             && g_battle_cursor_screen_y - height >= 0x51 && g_battle_cursor_screen_y < 0xA0) {
-            main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
+            vector_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
             return;
         }
         if (g_battle_cursor_screen_x >= 0xA1 && g_battle_cursor_screen_x < 0x160

@@ -106,7 +106,7 @@ s8 formation_item_action_menu(void) {
     }
     if (g_formation_item_action_option_states[g_item_action_menu.selected_index] >= 0x1000
         && (g_menu_input_primary_repeat & PSX_PAD_CIRCLE)) {
-        g_sound_queued_effect_id = MAIN_SFX_INVALID;
+        g_sound_queued_effect_id = SOUND_SFX_INVALID;
     }
 
     item = g_screen_selection_results[3];
@@ -145,12 +145,12 @@ s8 formation_item_action_menu(void) {
             if (g_formation_item_action_menu_initialized == selected) {
                 g_sound_suppressed = 1;
                 if (g_screen_selection_results[5] == 0) {
-                    g_sound_queued_effect_id = MAIN_SFX_UNEQUIP;
+                    g_sound_queued_effect_id = SOUND_SFX_UNEQUIP;
                 } else if (g_screen_selection_results[5] == 1) {
-                    g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+                    g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 }
                 /* Once a sound is queued, 100 keeps the menu initialized but stops this block running again. */
-                g_formation_item_action_menu_initialized = g_sound_queued_effect_id != MAIN_SFX_NONE ? 100 : 1;
+                g_formation_item_action_menu_initialized = g_sound_queued_effect_id != SOUND_SFX_NONE ? 100 : 1;
             }
             if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
                 return MENU_ITEM_LIST_STATE_ACTION;
@@ -180,7 +180,7 @@ s8 formation_item_action_menu(void) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
         result = menu_update_horizontal_selection_and_mark_change(
-            5, SCREEN_CURSOR_ITEM_TAB, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
+            5, SCREEN_CURSOR_ITEM_TAB, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
         if (result == g_menu_selected_slot) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
@@ -327,7 +327,7 @@ s32 formation_item_show_equipping_units(void) {
             menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
             g_formation_item_equipping_units_initialized = 0;
             g_formation_unit_cycle_mode = 0;
-            g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+            g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             return MENU_ITEM_LIST_STATE_BROWSE;
         }
     }

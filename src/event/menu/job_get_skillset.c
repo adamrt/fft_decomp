@@ -6,5 +6,5 @@
 
 /* Return the skillset of a job from the job data table. */
 s32 job_get_skillset(s32 job_id) {
-    return main_job_get_data_pointer(job_id)->skillset;
+    return job_get_data(job_id)->skillset;
 }

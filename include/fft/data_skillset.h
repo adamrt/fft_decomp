@@ -14,8 +14,8 @@ enum {
 };
 
 /* skillset ids */
-/* Skillset ids: the rows of g_main_ability_human_skillset_abilities and, from
- * SKILLSET_ID_MONSTER_FIRST, of g_main_ability_monster_skillset_abilities. A
+/* Skillset ids: the rows of g_ability_human_skillset_abilities and, from
+ * SKILLSET_ID_MONSTER_FIRST, of g_ability_monster_skillset_abilities. A
  * name is the skillset's name in the game's text. Where rows share a name, a
  * suffix names the job whose record has the row (job_data_t.skillset) or, for
  * a row no job has, the unit the ENTD gives it to; a second row for one
@@ -188,7 +188,7 @@ enum {
 };
 
 /* ability filters */
-/* Ability classes main_ability_store_skillset_abilities collects from a
+/* Ability classes ability_store_skillset_abilities collects from a
  * skillset; the random R/S/M selector uses rsm_ability_filter_e instead. */
 typedef enum skillset_ability_filter {
     SKILLSET_ABILITY_FILTER_ACTION = 0x01,

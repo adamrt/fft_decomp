@@ -8,7 +8,7 @@
 
 /* Stream command: draw a LINE_F2 from (x0, y0) to
    (x1, y1) with the RGB that follows the endpoints in the command. */
-menu_instruction_t* equip_menu_opcode_07_draw_line(menu_instruction_t* stream) {
+menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* stream) {
     point16_t endpoints[2];
 
     endpoints[0].x = stream->line.x0;

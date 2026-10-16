@@ -351,7 +351,7 @@ s32 battle_action_apply_attacker_result(s32 unit_id);
 void battle_action_store_used_weapon(action_command_t* action);
 
 /* reactions */
-/* Reaction behavior flags (g_main_reaction_behavior_flags). */
+/* Reaction behavior flags (g_ability_reaction_behavior_flags). */
 typedef enum battle_reaction_behavior_flag {
     BATTLE_REACTION_BEHAVIOR_FLAG_TRIGGER_ABILITY = 0x01,
     BATTLE_REACTION_BEHAVIOR_FLAG_ABILITY = 0x02,

@@ -56,30 +56,30 @@ void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* scr
     display_0 = unit->numeric_display.displays[0];
     display_1 = unit->numeric_display.displays[1];
     display_2 = unit->numeric_display.displays[2];
-    progress = unit->numeric_display.progress + g_main_system_vsync_interval;
+    progress = unit->numeric_display.progress + g_system_vsync_interval;
     display = &unit->numeric_display;
     if (progress < 21) {
         if (unit->numeric_display.selector & BATTLE_NUMERIC_DISPLAY_MODIFIER_CRITICAL) {
-            main_util_set_svector(
+            vector_set_svector(
                 &zoom_0, critical_scale_0[progress], critical_scale_0[progress], critical_scale_0[progress]);
-            main_util_set_svector(
+            vector_set_svector(
                 &zoom_1, critical_scale_1[progress], critical_scale_1[progress], critical_scale_1[progress]);
-            main_util_set_svector(
+            vector_set_svector(
                 &zoom_2, critical_scale_2[progress], critical_scale_2[progress], critical_scale_2[progress]);
         } else {
             switch (unit->numeric_display.selector & BATTLE_NUMERIC_DISPLAY_SELECTOR_MASK) {
             case BATTLE_NUMERIC_DISPLAY_HP_DAMAGE ... BATTLE_NUMERIC_DISPLAY_MA_GAIN:
-                main_util_set_svector(&zoom_0, scale_0[progress], scale_0[progress], scale_0[progress]);
-                main_util_set_svector(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
-                main_util_set_svector(&zoom_2, scale_2[progress], scale_2[progress], scale_2[progress]);
+                vector_set_svector(&zoom_0, scale_0[progress], scale_0[progress], scale_0[progress]);
+                vector_set_svector(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_svector(&zoom_2, scale_2[progress], scale_2[progress], scale_2[progress]);
                 break;
             case BATTLE_NUMERIC_DISPLAY_MISSED:
             case BATTLE_NUMERIC_DISPLAY_GUARDED:
             case BATTLE_NUMERIC_DISPLAY_GAINED_EXP:
             case BATTLE_NUMERIC_DISPLAY_GAINED_JP:
-                main_util_set_svector(&zoom_0, scale_1[progress], scale_1[progress], scale_1[progress]);
-                main_util_set_svector(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
-                main_util_set_svector(&zoom_2, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_svector(&zoom_0, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_svector(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_svector(&zoom_2, scale_1[progress], scale_1[progress], scale_1[progress]);
                 break;
             }
         }
@@ -136,12 +136,12 @@ void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* scr
         break;
     }
     battle_gfx_construct_polygon_data_for_units(
-        display_0, display_0->part_count, 0, &position, 0, 0, &zoom_0, main_gfx_get_battle_otag() + 1);
+        display_0, display_0->part_count, 0, &position, 0, 0, &zoom_0, gfx_get_battle_otag() + 1);
     battle_gfx_construct_polygon_data_for_units(
-        display_1, display_1->part_count, 0, &position, 0, 0, &zoom_1, main_gfx_get_battle_otag() + 1);
+        display_1, display_1->part_count, 0, &position, 0, 0, &zoom_1, gfx_get_battle_otag() + 1);
     battle_gfx_construct_polygon_data_for_units(
-        display_2, display_2->part_count, 0, &position, 0, 0, &zoom_2, main_gfx_get_battle_otag() + 1);
-    display->progress += g_main_system_vsync_interval;
+        display_2, display_2->part_count, 0, &position, 0, 0, &zoom_2, gfx_get_battle_otag() + 1);
+    display->progress += g_system_vsync_interval;
 }
 
 /* Request `animation` with facing `facing` (0x400 per quarter turn) for the next animation update;
@@ -257,7 +257,7 @@ s32 battle_gfx_is_spritesheet_id_loaded(s16 spritesheet_id) {
 
 /* Claim a VRAM spritesheet slot for `spritesheet_id`: reuse the slot that
  * already holds it, otherwise take the first free one. Returns the slot, or
- * reports MAIN_SYSTEM_ERROR_NO_SPRITESHEET_SLOT and returns 0xFFFF when all
+ * reports SYSTEM_ERROR_NO_SPRITESHEET_SLOT and returns 0xFFFF when all
  * nine are taken. A slot's in_use holds the id of the sheet claiming it. */
 s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
     s32 slot;
@@ -281,7 +281,7 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
         }
     }
     if (slot >= BATTLE_GFX_SPRITESHEET_SLOT_COUNT) {
-        main_system_handle_error(MAIN_SYSTEM_ERROR_NO_SPRITESHEET_SLOT);
+        system_handle_error(SYSTEM_ERROR_NO_SPRITESHEET_SLOT);
         return 0xFFFF;
     }
     return found;

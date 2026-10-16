@@ -92,11 +92,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
-        unit_info = &g_debugchr_panel_selected_unit_data;
+        unit_info = &g_unit_panel_selected_unit_data;
         transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_debugchr_panel_selected_portrait_palettes;
+        portrait_palettes = g_unit_panel_selected_portrait_palettes;
     } else {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
@@ -105,11 +105,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
-        unit_info = &g_debugchr_panel_comparison_unit_data;
+        unit_info = &g_unit_panel_comparison_unit_data;
         transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_debugchr_panel_comparison_portrait_palettes;
+        portrait_palettes = g_unit_panel_comparison_portrait_palettes;
     }
     shake = 0;
 
@@ -256,7 +256,7 @@ void menu_run_unit_status_thread(void) {
         }
 
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
-        g_gfx_draw_offset_y = ((g_main_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
+        g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
 
         /* A slide steps one table row every other frame (down rows 1-6, up rows 11-16),
          * then clears every flag but HIDDEN. */
@@ -451,7 +451,7 @@ void menu_run_unit_status_thread(void) {
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
-                if (g_debugchr_editor_active != 0) {
+                if (g_unit_editor_active != 0) {
                     menu_set_text_origin(0, 0);
                     value_pixels_c = value_pixels + 0xA0;
                     text_draw_small_number_glyphs(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);

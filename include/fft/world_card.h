@@ -88,7 +88,7 @@ extern const char* g_save_file_names[15];
 /* Encoded captions addressed directly by save_build_slot_description,
  * immediately after the 15 save-file pointers at g_save_file_names. */
 extern u8 g_save_slot_text_table[];
-extern card_save_icon_t g_save_icon_records[15];
+extern save_icon_t g_save_icon_records[15];
 extern u8 g_save_slot_descriptions[][0x8C];
 extern s16 g_save_slot_description_row_ids[];
 extern menu_window_command_t g_save_slot_window_command;
@@ -110,7 +110,7 @@ extern s16 g_save_list_scroll_velocity;
 extern s16 g_save_list_first_visible_row;
 
 /* save images */
-extern card_save_buffer_t* g_save_work_buffer;
+extern save_image_t* g_save_work_buffer;
 s32 save_read_file_chunked(const char* filename, u8* destination, u32 size);
 void save_build_image(s32 slot);
 s32 save_restore_image(s32 partial_load);

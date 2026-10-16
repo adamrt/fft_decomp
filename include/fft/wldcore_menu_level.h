@@ -99,7 +99,7 @@ typedef struct unit_panel_help_level {
 /* entry, messages and text windows */
 /* Provisional: the RETURN level that closes the world map, pushed by world_map_push_menu_level.
  * world_map_step_menu_level is its only reader: delay counts down the frames the fade needs and pending latches
- * while MAIN_SYSTEM_FLAG_SCREEN_CLEARED is up. */
+ * while SYSTEM_FLAG_SCREEN_CLEARED is up. */
 typedef struct world_map_menu_level {
     s32 delay;
     s32 pending; /* 0x04 */
@@ -289,8 +289,8 @@ typedef struct event_transition_level {
 /* proposition_discovery_level_t.phase. */
 typedef enum proposition_discovery_phase {
     PROPOSITION_DISCOVERY_PHASE_MESSAGES = 0,     /* circle shows the next message */
-    PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE = 1, /* waits for the message box, then starts MAIN_MUSIC_MILESTONE */
-    PROPOSITION_DISCOVERY_PHASE_JINGLE = 2,       /* 180 frames, then back to MAIN_MUSIC_BAR */
+    PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE = 1, /* waits for the message box, then starts MUSIC_MILESTONE */
+    PROPOSITION_DISCOVERY_PHASE_JINGLE = 2,       /* 180 frames, then back to MUSIC_BAR */
     PROPOSITION_DISCOVERY_PHASE_CLOSE = 3,        /* waits for the audio queue, then pops */
 } proposition_discovery_phase_e;
 
@@ -454,7 +454,7 @@ typedef struct brave_story_advancing_level {
     s32 cursor; /* 0x1c; initial row from g_brave_story_advancing_saved_cursor */
     u8 _unused_20[0x10];
     s32 entry_count; /* 0x30 */
-    s32 entries[10]; /* 0x34; indices into g_main_active_propositions */
+    s32 entries[10]; /* 0x34; indices into g_proposition_active */
 } brave_story_advancing_level_t;
 
 /* The proposition detail panel's outputs, at the same offsets in the PROPOSITION_CANCEL_CONFIRM and
@@ -496,13 +496,13 @@ typedef struct brave_story_participant_list_level {
 
 /* Provisional: the PARTICIPANT_DETAIL level pushed by brave_story_push_participant_level with two frame
  * windows; unit_panel_build_unit_data draws the participant
- * g_main_active_propositions[proposition].participant_indices[participant]. */
+ * g_proposition_active[proposition].participant_indices[participant]. */
 typedef struct brave_story_participant_level {
     s32 left_window;  /* 0x00 */
     s32 right_window; /* 0x04 */
     s32 _unknown_08;  /* 0x08; cleared at push */
     s32 _unused_0c;   /* 0x0c */
-    s32 proposition;  /* 0x10; index into g_main_active_propositions */
+    s32 proposition;  /* 0x10; index into g_proposition_active */
     s32 participant;  /* 0x14; slot in participant_indices */
 } brave_story_participant_level_t;
 
@@ -550,7 +550,7 @@ typedef struct proposition_result_level {
     s32 phase; /* 0x10; proposition_result_phase_e */
     u8 _unused_14[0x14];
     s32 delay;       /* 0x28; frames before the success jingle restarts */
-    s32 proposition; /* 0x2c; index into g_main_active_propositions */
+    s32 proposition; /* 0x2c; index into g_proposition_active */
     u8 _unused_30[0x2c];
 } proposition_result_level_t;
 

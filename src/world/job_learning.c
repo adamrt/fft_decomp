@@ -43,7 +43,7 @@ s32 formation_ability_learn_job_list(void) {
     g_menu_help_message_text_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         menu_set_vsync_mode_and_event_speed(0);
-        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         g_formation_ability_learn_job_list_initialized = 0;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
@@ -60,10 +60,10 @@ s32 formation_ability_learn_job_list(void) {
             menu_job_calculate_next_level_jp_requirement(g_menu_list_selected_index);
             menu_set_selection_record(9, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_job_ids);
             g_formation_ability_learn_job_list_initialized = 0;
-            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             return MENU_JOB_LIST_STEP_ABILITIES;
         }
-        message_box_show_with_sound(0xC007, MAIN_SFX_ERROR_MESSAGE);
+        message_box_show_with_sound(0xC007, SOUND_SFX_ERROR_MESSAGE);
     }
     menu_run_script_with_palette_mode(
         &g_formation_ability_learn_job_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);

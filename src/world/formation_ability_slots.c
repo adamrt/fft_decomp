@@ -90,7 +90,7 @@ s32 formation_get_unit_lock(s32 unit_id) {
 void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
     s32 skillset = job_get_skillset(job_id);
     s16 generic_job = job_get_generic_index(job_id);
-    s16* list = (s16*)main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    s16* list = (s16*)ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
     s32 i = 0;
     s32 byte;
     s32 bit;
@@ -254,10 +254,10 @@ void breeding_update(s32 unused) {
     u8** name_buffer;
     party_unit_t* unit;
 
-    srand(g_main_system_play_time_frames * 100 + g_main_system_play_time_seconds * 10 + g_main_system_play_time_minutes
-        + g_main_system_play_time_hours + g_main_system_play_time_frames);
+    srand(g_save_play_time_frames * 100 + g_save_play_time_seconds * 10 + g_save_play_time_minutes
+        + g_save_play_time_hours + g_save_play_time_frames);
     do {
-        unit = main_party_get_unit(i);
+        unit = party_get_unit(i);
         if (unit->party_id != PARTY_ID_NONE) {
             if (unit->gender_flags & UNIT_FLAG_EGG) {
                 n = unit->birthday_day & 0xF;
@@ -303,7 +303,7 @@ void breeding_update(s32 unused) {
         return;
     }
     monster_count = rand() % monster_count;
-    n = g_breeding_table[main_party_get_unit(monsters[monster_count])->job_id - JOB_ID_CHOCOBO]
+    n = g_breeding_table[party_get_unit(monsters[monster_count])->job_id - JOB_ID_CHOCOBO]
             .offspring_job_by_rarity[n - BREEDING_RARITY_COMMON];
     i = rand() % g_breeding_table[n - JOB_ID_CHOCOBO].hatch_range + 1;
     if (i < 2) {
@@ -315,11 +315,11 @@ void breeding_update(s32 unused) {
     name_buffer = &g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     value = (s32)*name_buffer;
     *name_buffer = g_text_section_pointers[TEXT_SECTION_UNIT_NAMES];
-    n = main_party_create_monster_egg(n, i + i * 0x10, rand() % 4);
+    n = party_create_monster_egg(n, i + i * 0x10, rand() % 4);
     *name_buffer = (u8*)value;
     if (n != -1) {
-        unit = main_party_get_unit(n);
-        main_party_level_unit_to_target(unit, levels[rand() % unit_count] - 1);
+        unit = party_get_unit(n);
+        party_level_unit_to_target(unit, levels[rand() % unit_count] - 1);
     }
 }
 
@@ -338,7 +338,7 @@ void screen_present_frame(s32 first_otag, s32 draw_otag) {
     menu_gfx_context_t* context;
     u32* otag = g_menu_gfx_context->otag;
 
-    main_system_frame_stub();
+    system_frame_stub();
     envp = &env;
     /* Keep the stack address available before resetting the packet counters;
      * otherwise GCC moves its calculation into GetDrawEnv's delay slot. */

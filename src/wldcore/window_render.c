@@ -335,7 +335,7 @@ s32 text_window_step(text_window_t* state) {
         } else {
             return 1;
         }
-        sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+        sound_play_effect(SOUND_SFX_CURSOR_MOVE);
         text_window_render_page(state, state->scroll_row);
         text_window_update_scroll_indicators(state);
         return 1;
@@ -353,7 +353,7 @@ s32 text_window_step(text_window_t* state) {
                 g_window_render_object_count -= 5;
                 return 0;
             }
-            sound_play_effect(MAIN_SFX_TEXT_PAGE);
+            sound_play_effect(SOUND_SFX_TEXT_PAGE);
             text_window_render_page(state, state->page_start_row);
         } else if (g_world_map_input_new_button_presses & PSX_PAD_SQUARE) {
             state->scroll_state = TEXT_WINDOW_SCROLL_MANUAL;
@@ -461,9 +461,9 @@ static void text_window_update_scroll_indicators(text_window_t* state) {
     }
 }
 
-/* Play sound effect `sound_id` (WLDCORE's wrapper for main_sound_play_sfx). */
+/* Play sound effect `sound_id` (WLDCORE's wrapper for sound_play_sfx). */
 void sound_play_effect(s32 sound_id) {
-    main_sound_play_sfx(sound_id);
+    sound_play_sfx(sound_id);
 }
 
 /* Queue an audio command, servicing frame work while the queue is full.
@@ -472,7 +472,7 @@ void sound_play_effect(s32 sound_id) {
  * after each array store. */
 void audio_queue_add(audio_command_e command, s32 value) {
     while (g_audio_queue.count >= AUDIO_QUEUE_CAPACITY) {
-        main_file_poll_load(&g_main_file_cd_state);
+        file_poll_load(&g_file_cd_state);
         audio_queue_process();
         VSync(0);
     }
@@ -517,7 +517,7 @@ next:
         g_audio_queue.count--;
         break;
     case AUDIO_COMMAND_PLAY_MUSIC:
-        if (g_main_file_still_loading != 0) {
+        if (g_file_still_loading != 0) {
             return;
         }
         slot = (g_audio_queue.current_value & 0xF00) >> 8;
@@ -526,13 +526,13 @@ next:
         if (*slot_track == track) {
             g_audio_queue.current_slot = slot;
             g_audio_queue.current_command = AUDIO_COMMAND_NONE;
-            main_sound_switch_music_track(slot, 0, 0);
+            music_switch_track(slot, 0, 0);
             return;
         }
         if (*slot_track != 0) {
-            main_sound_unload_scenario_mus(slot);
+            music_unload_scenario_slot(slot);
         }
-        if (main_sound_load_music_into_slot(track, slot) != 0) {
+        if (music_load_into_slot(track, slot) != 0) {
             g_audio_queue.current_command = AUDIO_COMMAND_WAIT_LOAD;
             g_audio_queue.current_slot = slot;
             *slot_track = track;
@@ -544,12 +544,12 @@ next:
         if ((g_audio_queue.music.flags & AUDIO_MUSIC_PLAYING) == 0) {
             goto clear_command;
         }
-        main_sound_set_current_music_target(0, g_audio_queue.current_value << 2);
+        music_set_target(0, g_audio_queue.current_value << 2);
         g_audio_queue.current_command = AUDIO_COMMAND_WAIT_FADE_OUT;
         return;
     case AUDIO_COMMAND_FADE_IN:
-        main_sound_switch_music_track(g_audio_queue.current_slot, 0, 0);
-        main_sound_set_current_music_target(g_audio_queue.volume, g_audio_queue.current_value << 2);
+        music_switch_track(g_audio_queue.current_slot, 0, 0);
+        music_set_target(g_audio_queue.volume, g_audio_queue.current_value << 2);
         g_audio_queue.current_command = AUDIO_COMMAND_WAIT_FADE_IN;
         return;
     case AUDIO_COMMAND_UNLOAD:
@@ -559,7 +559,7 @@ next:
         } else {
             slot = g_audio_queue.current_slot;
         }
-        main_sound_unload_scenario_mus(slot);
+        music_unload_scenario_slot(slot);
         if (slot == g_audio_queue.current_slot) {
             g_audio_queue.music.flags &= ~AUDIO_MUSIC_PLAYING;
         }
@@ -569,7 +569,7 @@ next:
         g_audio_queue.current_command = AUDIO_COMMAND_NONE;
         break;
     case AUDIO_COMMAND_WAIT_LOAD:
-        if (g_main_file_still_loading == 0) {
+        if (g_file_still_loading == 0) {
             goto clear_command;
         }
         return;
@@ -578,7 +578,7 @@ next:
             return;
         }
         g_audio_queue.music.flags &= ~AUDIO_MUSIC_PLAYING;
-        main_sound_stop_current_music();
+        music_stop();
         goto clear_command;
     case AUDIO_COMMAND_WAIT_FADE_IN:
         if (--g_audio_queue.current_value != 0) {
@@ -608,7 +608,7 @@ void audio_queue_start_music(s32 value) {
  * scalars. */
 void audio_queue_wait_until_empty(void) {
     while (g_audio_queue.count != 0 || g_audio_queue.current_command != AUDIO_COMMAND_NONE) {
-        main_file_poll_load(&g_main_file_cd_state);
+        file_poll_load(&g_file_cd_state);
         audio_queue_process();
         VSync(0);
     }

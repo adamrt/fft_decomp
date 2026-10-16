@@ -190,28 +190,28 @@ void menu_run_at_list(void) {
             if ((*input & PSX_PAD_UP) && !(*input2 & PSX_PAD_SQUARE)) {
                 if (cursor != 0) {
                     cursor--;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset != 0) {
                     delta = -1;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (layout->hidden_rows == 0) {
                     cursor = layout->row_count - 1;
                     if (layout->row_count != 1) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                     }
                 }
             } else if ((*input & PSX_PAD_DOWN) && !(*input2 & PSX_PAD_SQUARE)) {
                 if (cursor != layout->row_count - 1) {
                     cursor++;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset != layout->hidden_rows) {
                     delta++;
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 } else if (row_offset == 0) {
                     /* row_offset equals hidden_rows here, so the cursor wraps only when no rows are hidden. */
                     cursor = 0;
                     if (layout->row_count != 1) {
-                        g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                     }
                 }
             } else {
@@ -284,10 +284,10 @@ void menu_run_at_list(void) {
 
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
-            if (timer < g_main_menu_scroll_accel_delay) {
-                step = g_main_menu_scroll_slow_step << 1;
+            if (timer < g_menu_scroll_accel_delay) {
+                step = g_menu_scroll_slow_step << 1;
             } else {
-                step = g_main_menu_scroll_fast_step << 1;
+                step = g_menu_scroll_fast_step << 1;
             }
             accum += delta * step;
         }
@@ -301,7 +301,7 @@ void menu_run_at_list(void) {
             repeat = script_get_event_initial_repeat_counter();
             delta = 0;
             accum = 0;
-            if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
+            if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
                 *input |= *input2 & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
         }
@@ -332,7 +332,7 @@ void menu_run_at_list(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_main_gfx_screen_polarity);
+        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_screen_polarity);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);

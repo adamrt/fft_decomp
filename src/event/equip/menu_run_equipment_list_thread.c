@@ -45,7 +45,7 @@ void menu_run_equipment_list_thread(void) {
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    if (g_thread_current_id == EQUIP_THREAD_SLOT_EQUIPMENT_LIST) {
+    if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
         text = g_panel_text_image_a;
         screen = g_panel_frames_a;
         state = &g_menu_selected_unit_fields.state;
@@ -54,10 +54,10 @@ void menu_run_equipment_list_thread(void) {
         u = 0;
     } else {
         text = g_panel_text_image_b;
-        screen = g_equip_panel_frames_b;
+        screen = g_unit_panel_frames_b;
         state = &g_item_preview_stat_detail.state;
         upload = &g_panel_text_upload_rect_b;
-        base = g_equip_panel_frames_b;
+        base = g_unit_panel_frames_b;
         u = 0x50;
     }
 
@@ -145,14 +145,14 @@ void menu_run_equipment_list_thread(void) {
         screen->sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->x - 0x80;
-        g_gfx_draw_offset_y = g_main_gfx_screen_polarity * 0xf0 != 0xf0 ? 0xf0 : 0;
+        g_gfx_draw_offset_y = g_gfx_screen_polarity * 0xf0 != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_menu_status_panel_frame_rect[1], frame, g_main_gfx_screen_polarity * 0xf0, thread);
+            &screen->portrait, &g_menu_status_panel_frame_rect[1], frame, g_gfx_screen_polarity * 0xf0, thread);
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
 

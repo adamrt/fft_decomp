@@ -82,11 +82,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
-        unit_info = &g_bunit_panel_selected_unit_data;
+        unit_info = &g_unit_panel_panel_selected_unit_data;
         transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_bunit_panel_selected_portrait_palettes;
+        portrait_palettes = g_unit_panel_panel_selected_portrait_palettes;
     } else {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
@@ -95,11 +95,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
-        unit_info = &g_bunit_panel_comparison_unit_data;
+        unit_info = &g_unit_panel_panel_comparison_unit_data;
         transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_bunit_panel_comparison_portrait_palettes;
+        portrait_palettes = g_unit_panel_panel_comparison_portrait_palettes;
     }
     shake = 0;
 

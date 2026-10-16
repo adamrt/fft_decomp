@@ -18,7 +18,7 @@
 #include "psx/types.h"
 
 /* Two-column ability panel thread (task THREAD_TASK_STATUS_PANEL); EQUIP's body (WORLD has its
- * own). In EQUIP_THREAD_SLOT_EQUIPMENT_LIST it draws the selected unit's abilities into the first
+ * own). In EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST it draws the selected unit's abilities into the first
  * frame pair; in any other slot it draws g_item_preview_stat_detail into the second. The rows
  * name the two skillsets, then the reaction, support and movement abilities; a generic monster's
  * five rows name its abilities. Same double-buffered menu_status_panel_buffer_t frame as
@@ -39,7 +39,7 @@ void menu_run_ability_list_thread(void) {
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    if (g_thread_current_id == EQUIP_THREAD_SLOT_EQUIPMENT_LIST) {
+    if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
         text = g_panel_text_image_a;
         screen = g_panel_frames_a;
         state = &g_menu_selected_unit_fields.state;
@@ -48,14 +48,14 @@ void menu_run_ability_list_thread(void) {
         u = 0;
     } else {
         text = g_panel_text_image_b;
-        screen = g_equip_panel_frames_b;
+        screen = g_unit_panel_frames_b;
         state = &g_item_preview_stat_detail.state;
         upload = &g_panel_text_upload_rect_b;
-        base = g_equip_panel_frames_b;
+        base = g_unit_panel_frames_b;
         u = 0x50;
     }
 
-    menu_init_numeric_display_frame_primitives(&g_equip_right_panel_frame_rect, &screen->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_equipment_right_panel_frame_rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
     /* The tile/line fixups must read g_panel_origin_offsets as an array
@@ -135,7 +135,7 @@ void menu_run_ability_list_thread(void) {
         screen->sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->x - 0xf3;
-        g_gfx_draw_offset_y = g_main_gfx_screen_polarity * 0xf0 != 0xf0 ? 0xf0 : 0;
+        g_gfx_draw_offset_y = g_gfx_screen_polarity * 0xf0 != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
@@ -144,7 +144,7 @@ void menu_run_ability_list_thread(void) {
         offset.x = thread->x - 0x73;
         offset.y = thread->y;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_menu_status_panel_frame_rect[2], frame, g_main_gfx_screen_polarity * 0xf0, &offset);
+            &screen->portrait, &g_menu_status_panel_frame_rect[2], frame, g_gfx_screen_polarity * 0xf0, &offset);
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
 

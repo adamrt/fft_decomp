@@ -43,13 +43,13 @@ void memcard_consume_all_events(void) {
  * fired. A result clears all four events. */
 s32 memcard_poll_bios_event_result(void) {
     s32 result = MEMCARD_RESULT_PENDING;
-    if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_DONE]) == 1)
+    if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_DONE]) == 1)
         result = MEMCARD_RESULT_COMPLETE;
-    else if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_ERROR]) == 1)
+    else if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_ERROR]) == 1)
         result = MEMCARD_RESULT_ERROR;
-    else if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_TIMEOUT]) == 1)
+    else if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_TIMEOUT]) == 1)
         result = MEMCARD_RESULT_TIMEOUT;
-    else if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_NEW_CARD]) == 1)
+    else if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_NEW_CARD]) == 1)
         result = MEMCARD_RESULT_NEW_CARD;
     if (result != MEMCARD_RESULT_PENDING)
         memcard_consume_bios_events();
@@ -75,10 +75,10 @@ s32 memcard_wait_for_bios_event(void) {
 
 /* Clear the four BIOS card events (done, error, timeout, new card) by testing each. */
 static void memcard_consume_bios_events(void) {
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_DONE]);
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_ERROR]);
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_TIMEOUT]);
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_NEW_CARD]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_DONE]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_ERROR]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_TIMEOUT]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_NEW_CARD]);
 }
 
 /* Test the four hardware card events (done, error, timeout, new card) and return
@@ -86,13 +86,13 @@ static void memcard_consume_bios_events(void) {
  * fired. A result clears all four events. */
 static s32 memcard_poll_hardware_event_result(void) {
     s32 result = MEMCARD_RESULT_PENDING;
-    if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_DONE]) == 1)
+    if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_DONE]) == 1)
         result = MEMCARD_RESULT_COMPLETE;
-    else if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_ERROR]) == 1)
+    else if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_ERROR]) == 1)
         result = MEMCARD_RESULT_ERROR;
-    else if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_TIMEOUT]) == 1)
+    else if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_TIMEOUT]) == 1)
         result = MEMCARD_RESULT_TIMEOUT;
-    else if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_NEW_CARD]) == 1)
+    else if (TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_NEW_CARD]) == 1)
         result = MEMCARD_RESULT_NEW_CARD;
     if (result != MEMCARD_RESULT_PENDING)
         memcard_consume_hardware_events();
@@ -118,10 +118,10 @@ static s32 memcard_wait_for_hardware_event(void) {
 
 /* Consume the four hardware-card event notifications in handle order. */
 static void memcard_consume_hardware_events(void) {
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_DONE]);
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_ERROR]);
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_TIMEOUT]);
-    TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_NEW_CARD]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_DONE]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_ERROR]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_TIMEOUT]);
+    TestEvent(g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_NEW_CARD]);
 }
 
 #if defined(FFT_WORLD) || defined(FFT_EVENT_CARD)
@@ -411,7 +411,7 @@ s32 memcard_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin) {
  * mode 2 opens for writing. Each attempt seeks by the bytes written so far from the current
  * position (origin 1) rather than to them, so after a short write the next attempt would skip
  * ahead (retail; a whole save normally goes in one write). */
-s32 memcard_file_write_buffer(const char* filename, const card_save_buffer_t* source, u32 size, s32 create_file) {
+s32 memcard_file_write_buffer(const char* filename, const save_image_t* source, u32 size, s32 create_file) {
     s32 error;
     s32 result;
     s32 retries;

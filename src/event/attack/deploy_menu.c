@@ -24,7 +24,7 @@
 /* Run the deployment screen's field-help cursor: the D-pad moves a bobbing hand between the status
  * panel's fields, Circle opens the help text for the field under it in the parent thread's slot,
  * and Cross closes it. Input waits while that help text is open. */
-void attack_deploy_run_help_cursor(void) {
+void deploy_run_help_cursor(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shade[2];
     s32 i;
@@ -47,9 +47,9 @@ void attack_deploy_run_help_cursor(void) {
     s32 value_id;
 
     u_mid = 0xb8;
-    g_attack_panel_status_animation[0] = 1;
-    g_attack_panel_status_animation[1] = 1;
-    g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+    g_unit_panel_status_animation[0] = 1;
+    g_unit_panel_status_animation[1] = 1;
+    g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
 
     for (i = 0; i < 2; i++) {
         menu_init_default_poly_ft4(&cursor[i]);
@@ -65,25 +65,25 @@ void attack_deploy_run_help_cursor(void) {
     /* Parameter 1 (Select on the roster view) makes nodes 5, 9 and 10 their own down neighbors; from
      * the unit detail view (0) they lead down to nodes 12 and 17. */
     if (thread_get_current_parameter_1() != 0) {
-        g_attack_deploy_help_cursor_nodes[5].destination[1] = 5;
-        g_attack_deploy_help_cursor_nodes[9].destination[1] = 9;
-        g_attack_deploy_help_cursor_nodes[10].destination[1] = 10;
+        g_deploy_help_cursor_nodes[5].destination[1] = 5;
+        g_deploy_help_cursor_nodes[9].destination[1] = 9;
+        g_deploy_help_cursor_nodes[10].destination[1] = 10;
     } else {
-        g_attack_deploy_help_cursor_nodes[5].destination[1] = 12;
-        g_attack_deploy_help_cursor_nodes[9].destination[1] = 17;
-        g_attack_deploy_help_cursor_nodes[10].destination[1] = 17;
+        g_deploy_help_cursor_nodes[5].destination[1] = 12;
+        g_deploy_help_cursor_nodes[9].destination[1] = 17;
+        g_deploy_help_cursor_nodes[10].destination[1] = 17;
     }
 
     /* Each roster unit owns 11 help entries: nodes 18 to 27 take the first ten, node 8 the last. */
-    g_attack_deploy_help_cursor_nodes[8].help_base = g_attack_deploy_selected_roster_index * 11 + 10 - 0x3000;
+    g_deploy_help_cursor_nodes[8].help_base = g_deploy_selected_roster_index * 11 + 10 - 0x3000;
     for (i = 0; i < 10; i++) {
-        g_attack_deploy_help_cursor_nodes[i + 18].help_base = g_attack_deploy_selected_roster_index * 11 - 0x3000 + i;
+        g_deploy_help_cursor_nodes[i + 18].help_base = g_deploy_selected_roster_index * 11 - 0x3000 + i;
     }
 
     selected = 0;
-    nodes = g_attack_deploy_help_cursor_nodes;
-    g_text_section_pointers[TEXT_SECTION_DEPLOYMENT_UNIT_HELP] = g_attack_deploy_unit_text_section;
-    g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_attack_deploy_help_text_section;
+    nodes = g_deploy_help_cursor_nodes;
+    g_text_section_pointers[TEXT_SECTION_DEPLOYMENT_UNIT_HELP] = g_deploy_unit_text_section;
+    g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_deploy_help_text_section;
     parent_id = g_thread_current_id - 1;
     input = script_get_controller_input_pointer(0);
     i = 0;
@@ -115,7 +115,7 @@ void attack_deploy_run_help_cursor(void) {
             y += 8;
 
             if (buttons & PSX_PAD_CROSS) {
-                g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
+                g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
                 *input = 0;
                 break;
             }
@@ -132,7 +132,7 @@ void attack_deploy_run_help_cursor(void) {
                         if (value_id == 0x7ff || value_id == 0) {
                             *input = 0;
                         } else {
-                            g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
+                            g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                             thread_start(parent_id, text_run_dialog_thread);
                             thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                         }
@@ -143,7 +143,7 @@ void attack_deploy_run_help_cursor(void) {
                     } else if (node->help_base == (s16)HELP_TEXT_ID_SKILLSET_BASE && (u16)*node->value - 1 >= 0x101U) {
                         *input = 0;
                     } else {
-                        g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
+                        g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                         thread_start(parent_id, text_run_dialog_thread);
                         thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
@@ -152,7 +152,7 @@ void attack_deploy_run_help_cursor(void) {
                     text_id = node->help_base;
                     g_thread_call_target = (void (*)(void))text_find_entry;
                     if ((*(u8*)thread_call_on_main_stack(text_id) & 0xfe) != 0xfe) {
-                        g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
+                        g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                         thread_start(parent_id, text_run_dialog_thread);
                         thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
@@ -171,7 +171,7 @@ void attack_deploy_run_help_cursor(void) {
                     }
                 }
                 if (selected != node->destination[text_id]) {
-                    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 }
                 selected = node->destination[text_id];
             }
@@ -284,15 +284,15 @@ void attack_deploy_run_help_cursor(void) {
         i++;
     }
 
-    g_attack_panel_status_animation[0] = 0;
-    g_attack_panel_status_animation[1] = 0;
+    g_unit_panel_status_animation[0] = 0;
+    g_unit_panel_status_animation[1] = 0;
     thread_exit_current();
 }
 
 /* Point the battle text sections at an overlay text file: 32 offsets
  * followed by the section data they are relative to. The event-message
  * section is left as it is. */
-static void attack_text_init_battle_pointers(attack_text_file_t* file) {
+static void text_init_battle_pointers(deploy_text_file_t* file) {
     s32* offsets = file->section_offsets;
     s32 i = 0;
     u8* data;
@@ -317,7 +317,7 @@ static void attack_text_init_battle_pointers(attack_text_file_t* file) {
     src = text_find_entry(text_id);                                                                                    \
     *dst++ = *src++;                                                                                                   \
     while ((dst[-1] & 0xfe) != 0xfe) {                                                                                 \
-        if (dst >= g_attack_scenario_table + 0x4000) {                                                                 \
+        if (dst >= g_scenario_scenario_table + 0x4000) {                                                               \
             goto end;                                                                                                  \
         }                                                                                                              \
         *dst++ = *src++;                                                                                               \
@@ -344,55 +344,55 @@ static void attack_text_init_battle_pointers(attack_text_file_t* file) {
  * APPEND_TEXT jumps past both of those steps, leaving the deployment help
  * broken; 16 units' strings stay far below that size.
  */
-void attack_text_build_deployment_strings(void) {
-    u8* dst = g_attack_scenario_table;
-    attack_text_file_t* file = main_heap_alloc(0x18000);
+void deploy_build_strings(void) {
+    u8* dst = g_scenario_scenario_table;
+    deploy_text_file_t* file = heap_alloc(0x18000);
     s32 i;
     s32 j;
     u8* src;
     s32 k;
     party_unit_t* unit;
 
-    g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+    g_thread_call_target = (void (*)(void))file_load_checked_to_address;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_ATCHELP_LZW, 0x16800, file);
     text_save_section_pointers();
-    attack_text_init_battle_pointers(file);
+    text_init_battle_pointers(file);
     for (i = 0; i < 16; i++) {
-        unit = main_party_get_unit(i);
+        unit = party_get_unit(i);
         if (unit->party_id == PARTY_ID_NONE || i >= 0x10 || unit->proposition_status != 0) {
             for (k = 0; k < 11; k++) {
                 *dst++ = 0xfe;
             }
             continue;
         }
-        attack_editor_load_party_unit(1, i);
+        unit_panel_load_party_unit(1, i);
         for (j = 0; j < 5; j++) {
-            APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j], HELP_TEXT_ID_ITEM_BASE);
+            APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j], HELP_TEXT_ID_ITEM_BASE);
         }
         if (g_menu_selected_unit_fields.state.generic_monster != 0) {
             for (j = 0; j < 5; j++) {
-                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
+                APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
             }
         } else {
             for (j = 0; j < 2; j++) {
-                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_SKILLSET_BASE);
+                APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_SKILLSET_BASE);
             }
             for (j = 2; j < 5; j++) {
-                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
+                APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
             }
         }
-        APPEND_TEXT(g_attack_panel_selected_unit_data.job_id + HELP_TEXT_ID_JOB_BASE);
+        APPEND_TEXT(g_unit_panel_selected_unit_data.job_id + HELP_TEXT_ID_JOB_BASE);
     }
-    g_attack_deploy_unit_text_section = g_attack_scenario_table;
-    g_attack_deploy_help_text_section = g_attack_event_condition_blocks;
+    g_deploy_unit_text_section = g_scenario_scenario_table;
+    g_deploy_help_text_section = g_scenario_event_condition_blocks;
     src = text_find_entry(0x5800);
-    dst = g_attack_event_condition_blocks;
+    dst = g_scenario_event_condition_blocks;
     for (i = 0; i < 0x1400; i++) {
         *dst++ = *src++;
     }
 end:
     text_restore_section_pointers();
-    main_heap_call_free(file);
+    heap_call_free(file);
 }
 
 /*
@@ -408,7 +408,7 @@ end:
  * its branch: that keeps the target's loop hoisting, where
  * `x + (0x80 + width)` is recomputed once per row instead of leaving both loops.
  */
-static void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse) {
+static void battle_map_title_build_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse) {
     POLY_GT4* poly;
     s32 row;
     s32 rest;
@@ -505,7 +505,7 @@ static void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32
 /* Thread body that animates the map-title panel strip with double-buffered
  * primitives: widen it by the thread's step, hold it, then sweep it again
  * with `reverse` set. The hold phase reuses `width` as its frame counter. */
-void attack_map_show_title(void) {
+void battle_map_title_thread(void) {
     s32 step = thread_get_current_parameter_3();
     s32 buffer = 0;
     s32 width;
@@ -517,7 +517,7 @@ void attack_map_show_title(void) {
     width = 8;
     do {
         buffer ^= 1;
-        attack_gfx_build_shaded_panel_strips(g_attack_map_title_sprites[buffer], width, 0x80, 0);
+        battle_map_title_build_strips(g_battle_map_title_sprites[buffer], width, 0x80, 0);
         width += step;
         thread_yield();
     } while (width < 0xf8);
@@ -525,7 +525,7 @@ void attack_map_show_title(void) {
     width = 0;
     do {
         buffer ^= 1;
-        attack_gfx_build_shaded_panel_strips(g_attack_map_title_sprites[buffer], 0xf8, 0x80, 0);
+        battle_map_title_build_strips(g_battle_map_title_sprites[buffer], 0xf8, 0x80, 0);
         width += step;
         thread_yield();
     } while (width < 0x6e);
@@ -533,9 +533,9 @@ void attack_map_show_title(void) {
     width = 8;
     do {
         buffer ^= 1;
-        attack_gfx_build_shaded_panel_strips(g_attack_map_title_sprites[buffer], width, 0x80, 1);
+        battle_map_title_build_strips(g_battle_map_title_sprites[buffer], width, 0x80, 1);
         if (width >= 0x81) {
-            g_attack_map_title_closing_past_midpoint = 1;
+            g_battle_map_title_closing_past_midpoint = 1;
         }
         width += step;
         thread_yield();
@@ -552,7 +552,7 @@ void attack_map_show_title(void) {
  * 0x100 no file is read and the freshly allocated buffer is uploaded as it
  * is.
  */
-void attack_map_load_title_graphic(void) {
+void battle_map_title_load_graphic(void) {
     s32 group;
     u8* image = menu_alloc_memory(0x2800);
     s32 title = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
@@ -567,11 +567,11 @@ void attack_map_load_title_graphic(void) {
 
     if (adjusted != 0xff) {
         title = group_input * 5 + DISC_SECTOR_EVENT_MAPTITLE_BIN;
-        g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+        g_thread_call_target = (void (*)(void))file_load_checked_to_address;
         thread_call_on_main_stack(title, 0x2800, image);
     }
 
-    LoadImage(&g_attack_map_title_image_rect, (u32*)(image + group * 0xa00));
-    LoadImage(&g_attack_map_title_palette_rect, &g_attack_map_title_palette_data);
+    LoadImage(&g_battle_map_title_image_rect, (u32*)(image + group * 0xa00));
+    LoadImage(&g_battle_map_title_palette_rect, &g_battle_map_title_palette_data);
     menu_free_memory(image);
 }

@@ -38,7 +38,7 @@ void sound_run_background_sfx_thread(void) {
     s32 sound;
     s32 volume;
     s32 find_channel;
-    s32 resource = SUZUKI_SOUND_ID(MAIN_SOUND_RESOURCE_ENV, 0);
+    s32 resource = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, 0);
 
     thread_set_current_task_id(THREAD_TASK_BG_SOUND);
     request = (event_background_sound_parameters_t*)thread_get_current_parameter_1();
@@ -46,18 +46,18 @@ void sound_run_background_sfx_thread(void) {
     sound_id = request->sound_id;
     if (find_channel != 0) {
         sound = sound_id + resource;
-        main_sound_stop_sfx(sound);
-        main_sound_play_sfx_find_channel(sound);
+        sound_stop_sfx(sound);
+        sound_play_sfx_on_free_channel(sound);
     } else {
         sound = sound_id + resource;
-        main_sound_stop_sfx(sound);
-        main_sound_play_bg_sfx(sound);
+        sound_stop_sfx(sound);
+        sound_play_background(sound);
     }
     volume = request->volume_from;
     if (volume == 0) {
         volume = 1;
     }
-    main_sound_set_sfx_echo(sound_id | resource, volume);
+    sound_set_sfx_echo(sound_id | resource, volume);
     sound_run_background_fade_thread();
 }
 
@@ -90,7 +90,7 @@ void sound_run_background_fade_thread(void) {
     volume_from = request->volume_from;
     steps = request->frames;
     volume_to = request->volume_to;
-    resource = SUZUKI_SOUND_ID(MAIN_SOUND_RESOURCE_ENV, 0);
+    resource = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, 0);
     if (steps != 0) {
         delta = volume_to - volume_from;
         scaled = 0;
@@ -104,11 +104,11 @@ void sound_run_background_fade_thread(void) {
                 volume = 1;
             }
             scaled += delta;
-            main_sound_set_sfx_echo(sound_id + resource, volume);
+            sound_set_sfx_echo(sound_id + resource, volume);
             step++;
         } while (step < steps);
     }
-    main_sound_set_sfx_echo(sound_id | resource, volume_to);
+    sound_set_sfx_echo(sound_id | resource, volume_to);
     thread_exit_current();
 }
 
@@ -604,7 +604,7 @@ void gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin) {
 
 /* Returns 0 in BATTLE and WORLD; in BATTLE it sits between
  * gfx_set_draw_mode_from_origin and script_noop_10. MAIN calls BATTLE's copy
- * through main_overlay_call_battle_return_zero while script variable 0xff is
+ * through overlay_call_battle_return_zero while script variable 0xff is
  * set. Nothing else references it; the name is a neutral placeholder until a
  * role turns up. */
 s32 script_return_zero_1(void) {

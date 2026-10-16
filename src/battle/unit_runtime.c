@@ -31,7 +31,7 @@ s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVEC
         unit->event_offset.vy = unit->event_offset.vy + amount->vy;
         unit->event_offset.vz = unit->event_offset.vz + amount->vz;
     } else {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return 1;
@@ -47,7 +47,7 @@ s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* am
         unit->event_offset.vy = unit->event_offset.vy + amount->vy;
         unit->event_offset.vz = unit->event_offset.vz + amount->vz;
     } else {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return 1;
@@ -59,7 +59,7 @@ SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return &unit->event_offset;
@@ -210,7 +210,7 @@ s32 battle_unit_get_battle_id_by_runtime_id(u32 runtime_id) {
             return stats->battle_id;
         }
     } else {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     }
     return -1;
 }
@@ -262,7 +262,7 @@ s32 battle_move_is_unit_moving_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return unit->path.count != 0;
@@ -288,7 +288,7 @@ s32 battle_script_opcode_47_add_ghost_unit(
     if (battle_unit_get_by_runtime_id(runtime_id) != 0) {
         ret = 0;
     } else {
-        g_main_gfx_unit_graphics_load_queue.count = 0;
+        g_unit_graphics_load_queue.count = 0;
         g_battle_gfx_unit_graphics_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
         g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
         g_battle_gfx_unit_graphics_load_state.index = 0;
@@ -307,7 +307,7 @@ s32 battle_script_opcode_47_add_ghost_unit(
 s32 battle_gfx_load_unit_graphics_by_battle_id(s32 battle_id, s32 flags) {
     unit_stats_t* unit;
 
-    g_main_gfx_unit_graphics_load_queue.count = 0;
+    g_unit_graphics_load_queue.count = 0;
     g_battle_gfx_unit_graphics_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
     g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
     g_battle_gfx_unit_graphics_load_state.index = 0;
@@ -385,7 +385,7 @@ s32 battle_unit_remove_by_runtime_id(u32 runtime_id) {
         battle_unit_remove(unit);
         return 1;
     }
-    main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+    system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     return 0;
 }
 

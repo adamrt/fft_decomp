@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* propositions */
-/* One active proposition (g_main_active_propositions).
+/* One active proposition (g_proposition_active).
  * proposition_advance_day advances elapsed_days and sets the
  * returned flag; proposition_handle_dispatch_confirm_input stores the
  * current world-map location and the participants, and
@@ -24,14 +24,14 @@ typedef struct proposition_progress {
 } proposition_progress_t;
 typedef char wldcore_proposition_progress_size_must_be_9[sizeof(proposition_progress_t) == 9 ? 1 : -1];
 
-extern proposition_progress_t g_main_active_propositions[8];
-extern u8 g_main_save_proposition_count; /* used entries of g_main_active_propositions */
-extern u8 g_main_proposition_states[96]; /* proposition_state_e */
+extern proposition_progress_t g_proposition_active[8];
+extern u8 g_proposition_count;      /* used entries of g_proposition_active */
+extern u8 g_proposition_states[96]; /* proposition_state_e */
 
 /* sound-novel records */
 struct sound_novel_script_file;
 
-/* A saved sound-novel reading state (g_main_sound_novel_saved_records, 0x38 bytes each).
+/* A saved sound-novel reading state (g_sound_novel_saved_readings, 0x38 bytes each).
  * sound_novel_reset_selected_reading establishes the stride and
  * sound_novel_reset_reading resets fields selectively; meanings beyond
  * those stores remain provisional. */
@@ -67,34 +67,34 @@ typedef struct sound_novel_reading {
 } sound_novel_reading_t;
 typedef char wldcore_saved_record_size_must_be_56[sizeof(sound_novel_reading_t) == 56 ? 1 : -1];
 
-extern sound_novel_reading_t g_main_sound_novel_saved_records[];
+extern sound_novel_reading_t g_sound_novel_saved_readings[];
 
 /* dates and saved bits */
 /* RAM bitmaps indexed by 32-bit values; the save serializer copies only their packed data
  * bytes and omits the padding at the end of each allocation. */
-extern u32 g_main_proposition_last_attempt_date_bits[27]; /* written only for a successful result */
-extern u32 g_main_treasure_acquisition_date_bits[14];
-extern u32 g_main_land_discovery_date_bits[5];
+extern u32 g_proposition_last_attempt_date_bits[27]; /* written only for a successful result */
+extern u32 g_brave_story_treasure_acquisition_date_bits[14];
+extern u32 g_brave_story_land_discovery_date_bits[5];
 
-extern u32 g_main_sound_novel_read_section_bits[40];
-extern u32 g_main_sound_novel_saved_flags[2];
-extern u8* g_main_brave_story_ages_source;
-extern u8 g_main_brave_story_character_ages[0x40];
+extern u32 g_sound_novel_read_section_bits[40];
+extern u32 g_sound_novel_saved_flags[2];
+extern u8* g_brave_story_ages_source;
+extern u8 g_brave_story_character_ages[0x40];
 /* Saved and restored at save-image byte 0x1c88; nothing else uses it. */
-extern u8 g_main_save_unread_byte; /* saved and restored with save image offset 0x1c88; never read */
+extern u8 g_save_unread_byte; /* saved and restored with save image offset 0x1c88; never read */
 
 /* world-map state kept across events */
 /* A story event replayed from the Brave Story list: the event, the list cursor
  * to restore and the weather variable to put back afterwards. */
-extern s32 g_main_replay_story_event_index;
-extern menu_cursor_state_t g_main_saved_list_cursor_state;
-extern s32 g_main_saved_weather_variable;
-extern s32 g_main_saved_vsync_interval;
+extern s32 g_brave_story_replay_story_event_index;
+extern menu_cursor_state_t g_brave_story_saved_list_cursor_state;
+extern s32 g_brave_story_saved_weather_variable;
+extern s32 g_system_saved_vsync_interval;
 /* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
-extern u32 g_main_tutorial_progress_masks[];
+extern u32 g_tutorial_progress_masks[];
 
 /* initialization */
-void main_save_init_data_tables(void);
-void main_save_init_state_and_options(void);
+void save_init_data_tables(void);
+void save_init_state_and_options(void);
 
 #endif

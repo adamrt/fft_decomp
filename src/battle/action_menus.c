@@ -60,7 +60,7 @@ enum {
  * speed 2, reset the jump graphics and the event state, disable the status menu
  * and clear the casting and source unit ids (0xff). */
 void battle_state_enter_event(void) {
-    g_main_system_vsync_interval = 2;
+    g_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_EVENT;
     battle_gfx_hide_jumping_units();
     script_reset_event_state();
@@ -165,7 +165,7 @@ void battle_state_enter_open_action_menus(void) {
 void battle_state_set_free_cursor(void) {
     battle_unit_t* unit;
 
-    g_main_system_vsync_interval = 1;
+    g_system_vsync_interval = 1;
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_FREE_CURSOR;
     g_battle_menu_help_active = 0;
@@ -187,7 +187,7 @@ void battle_menu_open_free_cursor_help(void) {
 
 /* Reload the map when the number of crystals on the field has changed.
  *
- * Only in a Deep Dungeon battle (MAIN_WORLD_RESULT_DEEP_DUNGEON_BATTLE), and not while such a reload is
+ * Only in a Deep Dungeon battle (WORLD_MAP_RESULT_DEEP_DUNGEON_BATTLE), and not while such a reload is
  * running: the crystal count, capped at 4, is compared with script variable
  * EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, the map state that GNS rows of
  * those maps select on. A new count is stored and a map data load started; the
@@ -197,7 +197,7 @@ static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
     s32 crystal_count;
     s32 previous_count;
 
-    if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_DEEP_DUNGEON_BATTLE) {
+    if (g_system_frontend_world_result == WORLD_MAP_RESULT_DEEP_DUNGEON_BATTLE) {
         if (g_battle_map_deep_dungeon_load_in_progress == 0) {
             crystal_count = battle_unit_count_crystals();
             if (crystal_count >= 5) {
@@ -224,7 +224,7 @@ static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
 static s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
     if (battle_map_check_deep_dungeon_crystal_and_init_state() != 0) {
         g_battle_game_state = BATTLE_GAME_STATE_DEEP_DUNGEON_MESH_LOAD;
-        g_main_system_vsync_interval = 1;
+        g_system_vsync_interval = 1;
         return 1;
     }
 
@@ -236,7 +236,7 @@ static s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
 static s32 battle_map_try_start_deep_dungeon_mesh_finish(void) {
     if (battle_map_check_deep_dungeon_crystal_and_init_state()) {
         g_battle_game_state = BATTLE_GAME_STATE_DEEP_DUNGEON_MESH_FINISH;
-        g_main_system_vsync_interval = 1;
+        g_system_vsync_interval = 1;
         return 1;
     }
     return 0;
@@ -265,7 +265,7 @@ static void battle_action_run_between_turn_events(void) {
     if (unit != 0) {
         g_battle_unit_source_runtime_id = unit->runtime_id;
     } else {
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     }
     switch (g_battle_action_turn_event_type) {
     case BATTLE_TURN_EVENT_UNIT_READY:
@@ -294,7 +294,7 @@ static void battle_action_run_between_turn_events(void) {
                    tree at 0x500 as the target does; nothing compares it, so the
                    original value is not recoverable */
     default:
-        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_TURN_EVENT);
+        system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_TURN_EVENT);
         break;
     }
     unit = battle_unit_get_source();
@@ -322,7 +322,7 @@ void battle_action_start_next_turn_event(void) {
         return;
     }
     battle_action_clear_at_list_cursor();
-    g_main_system_vsync_interval = 1;
+    g_system_vsync_interval = 1;
     battle_action_run_between_turn_events();
     unit = battle_unit_get_source();
     if (unit == 0) {
@@ -336,7 +336,7 @@ void battle_action_start_next_turn_event(void) {
         if (g_battle_menu_status_requested != 0 && !(unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)
             && g_battle_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY) {
             battle_unit_update_display_by_runtime_id(unit->runtime_id);
-            main_sound_play_sfx(MAIN_SFX_STATUS_MENU_REQUEST);
+            sound_play_sfx(SOUND_SFX_STATUS_MENU_REQUEST);
             battle_action_open_status_menu_at_list_start();
             battle_action_show_next_at_list_entry();
             battle_state_enter_open_action_menus();
@@ -516,7 +516,7 @@ void battle_target_show_move_range_in_free_cursor(void) {
     previous_mode = g_battle_cursor_input_mode;
     g_battle_cursor_input_mode = BATTLE_CURSOR_INPUT_FREE_CURSOR;
     g_battle_cursor_input_mode_saved = previous_mode;
-    main_sound_play_sfx(MAIN_SFX_CONFIRM);
+    sound_play_sfx(SOUND_SFX_CONFIRM);
 }
 
 /* Triangle in the free cursor, or the end of the mini-menu help: enter the mini-menu state and
@@ -654,7 +654,7 @@ void battle_state_enter_unit_moving_setup(void) {
     }
     path_count = casting->path.count + 2;
     if (path_count < 2) {
-        if (g_main_game_options.fields.navigation_messages != GAME_OPTION_ON) {
+        if (g_game_options.fields.navigation_messages != GAME_OPTION_ON) {
             menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, MENU_MOVE_FEEDBACK_CLOSE,
                 source->stats->battle_id, 0, source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
             return;
@@ -745,7 +745,7 @@ void battle_menu_open_move_confirm(void) {
         }
         caster->last_path_count = 0;
     } else {
-        if (g_main_game_options.fields.navigation_messages != GAME_OPTION_ON) {
+        if (g_game_options.fields.navigation_messages != GAME_OPTION_ON) {
             battle_gfx_modify_palette_based_on_team(source, 2);
             menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT, 0, source->stats->battle_id, 0,
                 source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
@@ -765,7 +765,7 @@ void battle_menu_open_move_confirm(void) {
 /* Enter the after-command state at vsync interval 1: clear the window-closed flag, put the cursor
  * back on the source unit and close the system function window. */
 void battle_state_enter_after_command(void) {
-    g_main_system_vsync_interval = 1;
+    g_system_vsync_interval = 1;
     g_battle_game_state = BATTLE_GAME_STATE_AFTER_COMMAND;
     g_battle_state_window_closed = 0;
     battle_target_move_cursor_to_unit(battle_unit_get_source());
@@ -824,7 +824,7 @@ static s32 battle_action_report_level_up(battle_unit_t* unit) {
         battle_unit_set_level_up_animation(unit);
         battle_target_move_cursor_to_unit(unit);
         battle_effect_set_secondary_level_up(unit);
-        main_sound_play_tune(MAIN_SOUND_TUNE_LEVEL_UP);
+        music_play_tune(MUSIC_TUNE_LEVEL_UP);
         return 1;
     }
     return 0;
@@ -844,7 +844,7 @@ static s32 battle_action_report_job_level_up(battle_unit_t* unit) {
         battle_unit_set_level_up_animation(unit);
         battle_target_move_cursor_to_unit(unit);
         battle_effect_set_secondary_level_up(unit);
-        main_sound_play_tune(MAIN_SOUND_TUNE_JOB_LEVEL_UP);
+        music_play_tune(MUSIC_TUNE_JOB_LEVEL_UP);
         return 1;
     }
     return 0;
@@ -915,7 +915,7 @@ s32 battle_move_start_next_post_movement_step(void) {
         battle_gfx_start_unit_fade_out_red(target->runtime_id);
         target->depth_height_offset
             = 0x24 - (battle_gfx_calculate_world_height_from_world_coords(source) - target->world_coords.vy);
-        main_sound_play_sfx_find_channel(MAIN_SFX_COMPLETE);
+        sound_play_sfx_on_free_channel(SOUND_SFX_COMPLETE);
         return 1;
     }
     if (g_battle_move_post_move_events & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
@@ -940,7 +940,7 @@ s32 battle_move_start_next_post_movement_step(void) {
         if (!(source->team_flags & UNIT_TEAM_MASK)) {
             menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_battle_move_find_display_item.item_id,
                 source->stats->battle_id, 0, 1);
-            main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
+            music_play_tune(MUSIC_TUNE_ITEM_FOUND);
             return 1;
         }
         menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_battle_move_find_display_item.item_id,
@@ -1249,7 +1249,7 @@ static void battle_unit_restore_all_facings_after_attack(void) {
 void battle_state_enter_continue_turn(void) {
     battle_unit_t* unit;
 
-    g_main_system_vsync_interval = 1;
+    g_system_vsync_interval = 1;
     g_battle_game_state = BATTLE_GAME_STATE_CONTINUE_TURN;
     unit = battle_unit_get_source();
     if (unit != 0) {
@@ -1310,24 +1310,24 @@ void battle_state_enter_action_execute(void) {
     battle_target_move_cursor_to_action_target(unit);
 
     if ((ability == 0) || (ability == ABILITY_ID_KNOCKBACK)) {
-        g_main_system_vsync_interval = 1;
+        g_system_vsync_interval = 1;
         battle_target_hide_cursor();
         return;
     }
     if (battle_effect_ability_has_no_file(ability) != 0) {
-        g_main_system_vsync_interval = 1;
+        g_system_vsync_interval = 1;
         battle_target_hide_cursor();
         return;
     }
     if ((ability == ABILITY_ID_BASIC_SKILL_ACCUMULATE)
         || (ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST)) {
         if (battle_effect_is_item_ability(ability) != 0) {
-            g_main_system_vsync_interval = 1;
+            g_system_vsync_interval = 1;
             battle_target_hide_cursor();
             return;
         }
         battle_effect_play();
-        g_main_system_vsync_interval = 1;
+        g_system_vsync_interval = 1;
         battle_target_hide_cursor();
         return;
     }
@@ -1335,8 +1335,8 @@ void battle_state_enter_action_execute(void) {
         || ((unit->animation.sequence_id >> 1) == BATTLE_UNIT_ANIMATION_HOLD_ITEM)) {
         battle_effect_play();
     }
-    main_sound_stop_current_weather_sfx();
-    g_main_system_vsync_interval = 2;
+    sound_stop_weather();
+    g_system_vsync_interval = 2;
     battle_target_hide_cursor();
 }
 
@@ -1348,7 +1348,7 @@ s32 battle_action_show_next_effect_message(void) {
     s32 index;
 
     g_battle_game_state = BATTLE_GAME_STATE_RESUME_ATTACK_PHASE;
-    g_main_system_vsync_interval = 1;
+    g_system_vsync_interval = 1;
     battle_unit_get_casting(); /* result unused */
     index = g_battle_action_post_effect_msg_counter;
     if (index != 0) {
@@ -1525,7 +1525,7 @@ void battle_action_show_caster_post_effect_messages(void) {
     battle_unit_t* unit = battle_unit_get_casting();
 
     battle_action_queue_post_effect_messages_for_unit(unit);
-    if (g_main_game_options.fields.effect_messages != GAME_OPTION_ON) {
+    if (g_game_options.fields.effect_messages != GAME_OPTION_ON) {
         g_battle_action_post_effect_msg_counter = 0;
     }
     if (battle_action_show_next_effect_message() == 0) {
@@ -1565,7 +1565,7 @@ void battle_state_start_battle_message_display(void) {
     s32 i;
 
     g_battle_game_state = BATTLE_GAME_STATE_BATTLE_MESSAGE_DISPLAY;
-    g_main_system_vsync_interval = 1;
+    g_system_vsync_interval = 1;
     g_battle_state_window_closed = 0;
     unit = battle_unit_get_casting();
     battle_action_build_targets_post_effect_messages();
@@ -1574,12 +1574,12 @@ void battle_state_start_battle_message_display(void) {
     text_set_message_duration_frames(60);
     switch (unit->strike.post_action_message) {
     case BATTLE_POST_ACTION_MESSAGE_POACHED:
-        main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
+        music_play_tune(MUSIC_TUNE_ITEM_FOUND);
         menu_init_system_function(
             MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_POACHED, unit->stats->battle_id, 0, 1);
         return;
     case BATTLE_POST_ACTION_MESSAGE_TRAINED:
-        main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
+        music_play_tune(MUSIC_TUNE_ITEM_FOUND);
         menu_init_system_function(
             MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_TRAINED, unit->stats->battle_id, 0, 1);
         return;
@@ -1598,7 +1598,7 @@ void battle_state_start_battle_message_display(void) {
                 break;
             }
             if (message == 6) {
-                main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
+                music_play_tune(MUSIC_TUNE_ITEM_FOUND);
             }
             break;
         }
@@ -1625,7 +1625,7 @@ void battle_state_enter_learn_ability_on_hit(void) {
     u16 ability_id;
 
     g_battle_game_state = BATTLE_GAME_STATE_LEARN_ABILITY_ON_HIT;
-    g_main_system_vsync_interval = 1;
+    g_system_vsync_interval = 1;
     unit = battle_unit_get_source();
     menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     text_set_message_duration_frames(30);

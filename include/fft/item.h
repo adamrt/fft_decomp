@@ -13,7 +13,7 @@
 
 /* item lists */
 /* The category argument of formation_item_build_list,
- * shop_build_stock_list and equip_item_build_filtered_list. 0 to 4
+ * shop_build_stock_list and equipment_build_item_list. 0 to 4
  * select what fits that equipment slot. The item menus pass their tab + 1 for
  * the first four tabs and OTHER for the fifth; the best-fit builders pass
  * WEAPON or SHIELD for the left hand. */
@@ -41,7 +41,7 @@ typedef enum item_list_mode {
                                                    EQUIPPABLE, counting no equipped copies */
 } item_list_mode_e;
 
-/* A key in the list equip_item_sort_id_list and item_sort_id_list
+/* A key in the list item_sort_id_list and item_sort_id_list
  * sort by (g_item_type_order_lists); -1 ends
  * the list. TYPE sorts ascending, the others descending. */
 typedef enum item_sort_key {
@@ -54,7 +54,7 @@ typedef enum item_sort_key {
 } item_sort_key_e;
 
 /* State of the item list screen (g_formation_item_menu_mode in the formation
- * screen, g_equip_menu_substate in EQUIP). Each state's handler returns the
+ * screen, g_equipment_substate in EQUIP). Each state's handler returns the
  * next state. */
 typedef enum menu_item_list_state {
     MENU_ITEM_LIST_STATE_CLOSE = -1,

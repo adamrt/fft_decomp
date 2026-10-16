@@ -6,15 +6,15 @@
 #include "psx/types.h"
 
 /* text */
-/* Offsets of the two name sections in g_small_text_name_data. */
-typedef struct small_text_name_section_offsets {
+/* Offsets of the two name sections in g_text_name_data. */
+typedef struct text_name_section_offsets {
     u32 unit_names;
     u32 job_names;
-} small_text_name_section_offsets_t;
+} text_name_section_offsets_t;
 
-extern u8 g_small_text_name_data[];
-extern const small_text_name_section_offsets_t g_small_text_name_section_offsets;
+extern u8 g_text_name_data[];
+extern const text_name_section_offsets_t g_text_name_section_offsets;
 
-void small_text_init_battle_pointers(void);
+void text_init_battle_pointers(void);
 
 #endif

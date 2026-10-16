@@ -55,7 +55,7 @@ static void calendar_advance_birthdays(void);
  * change at the current sector.
  *
  * The switch's jump table is the first 32 bytes of WLDCORE.BIN. */
-void world_map_poll_texture_stream(main_file_load_descriptor_t* stream) {
+void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
     RECT rect;
     u8 mode[8];
     s32 rect_count;
@@ -64,25 +64,25 @@ void world_map_poll_texture_stream(main_file_load_descriptor_t* stream) {
     s32 status;
 
     switch (stream->state) {
-    case MAIN_FILE_LOAD_STATE_IDLE:
+    case FILE_LOAD_STATE_IDLE:
         break;
-    case MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED:
+    case FILE_LOAD_STATE_SET_DOUBLE_SPEED:
         mode[0] = CdlModeSpeed;
         CdControl(CdlSetmode, mode, 0);
-        g_main_system_session_frames = 0;
+        g_system_session_frames = 0;
         stream->state++;
         break;
-    case MAIN_FILE_LOAD_STATE_WAIT_AFTER_SET_MODE:
-        if (g_main_system_session_frames < 4) {
+    case FILE_LOAD_STATE_WAIT_AFTER_SET_MODE:
+        if (g_system_session_frames < 4) {
             return;
         }
         stream->state++;
         break;
-    case MAIN_FILE_LOAD_STATE_START_SEEK:
+    case FILE_LOAD_STATE_START_SEEK:
         CdControlF(CdlSetloc, (u8*)&stream->position);
         stream->state++;
         break;
-    case MAIN_FILE_LOAD_STATE_POLL_SEEK:
+    case FILE_LOAD_STATE_POLL_SEEK:
         status = CdSync(1, 0);
         if (status == CdlComplete) {
             stream->state++;
@@ -91,12 +91,12 @@ void world_map_poll_texture_stream(main_file_load_descriptor_t* stream) {
         if (status != CdlDiskError) {
             return;
         }
-        stream->state = MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED;
+        stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
         stream->error_count++;
         return;
-    case MAIN_FILE_LOAD_STATE_START_READ:
+    case FILE_LOAD_STATE_START_READ:
         if (CdRead2(CdlModeSpeed) == 0) {
-            stream->state = MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED;
+            stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             stream->error_count++;
             return;
         }
@@ -104,7 +104,7 @@ void world_map_poll_texture_stream(main_file_load_descriptor_t* stream) {
         stream->sector_index = 0;
         stream->state++;
         break;
-    case MAIN_FILE_LOAD_STATE_POLL_READ:
+    case FILE_LOAD_STATE_POLL_READ:
         status = CdReady(1, 0);
         if (status == CdlDataReady) {
             CdGetSector(stream->destination + (stream->sector_index & 1) * 2048, 0x200);
@@ -113,19 +113,19 @@ void world_map_poll_texture_stream(main_file_load_descriptor_t* stream) {
             break;
         }
         if (status == CdlDiskError) {
-            stream->state = MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED;
+            stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             stream->error_count++;
         }
         if (stream->wait_frames > 0x40000 || (CdStatus() & 1) != 0) {
-            main_file_reset_cd_subsystems();
+            file_reset_cd_subsystems();
             CdIntToPos(stream->lba + stream->sector_index, &stream->position);
-            stream->state = MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED;
+            stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             stream->error_count++;
             return;
         }
         stream->wait_frames++;
         return;
-    case MAIN_FILE_LOAD_STATE_UPLOAD_VRAM:
+    case FILE_LOAD_STATE_UPLOAD_VRAM:
         if (CdDataSync(1) != 0) {
             return;
         }
@@ -146,10 +146,10 @@ void world_map_poll_texture_stream(main_file_load_descriptor_t* stream) {
         }
         stream->sector_index++;
         if (stream->sector_index < stream->sector_count) {
-            stream->state = MAIN_FILE_LOAD_STATE_POLL_READ;
+            stream->state = FILE_LOAD_STATE_POLL_READ;
             return;
         }
-        stream->state = MAIN_FILE_LOAD_STATE_IDLE;
+        stream->state = FILE_LOAD_STATE_IDLE;
         CdControlB(CdlPause, 0, 0);
         return;
     }
@@ -171,7 +171,7 @@ void picture_load_set(s32 set) {
     if (set != g_picture_loaded_set) {
         file_wait_for_pending();
         g_picture_loaded_set = set;
-        file_wait_then_request_read(&g_main_file_cd_state, g_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
+        file_wait_then_request_read(&g_file_cd_state, g_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
             g_picture_sector_offsets[set + 1] - g_picture_sector_offsets[set], g_picture_buffer);
     }
 }
@@ -186,7 +186,7 @@ void picture_load_background_set(s32 set) {
     if (set != g_picture_background_loaded_set) {
         file_wait_for_pending();
         g_picture_background_loaded_set = set;
-        file_wait_then_request_read(&g_main_file_cd_state,
+        file_wait_then_request_read(&g_file_cd_state,
             g_picture_background_sector_offsets[set] + DISC_SECTOR_WORLD_WLDBK_BIN,
             g_picture_background_sector_offsets[set + 1] - g_picture_background_sector_offsets[set],
             g_world_map_scratch_buffer);
@@ -202,7 +202,7 @@ void message_block_load_if_changed(s32 block) {
     if (block != g_message_block_loaded) {
         file_wait_for_pending();
         g_message_block_loaded = block;
-        file_wait_then_request_read(&g_main_file_cd_state,
+        file_wait_then_request_read(&g_file_cd_state,
             g_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
             g_message_block_sector_offsets[block + 1] - g_message_block_sector_offsets[block], g_message_block_buffer);
     }
@@ -216,12 +216,12 @@ void message_block_load_if_changed(s32 block) {
  * so entry i+1 minus entry i is that chapter's sector count. */
 void sound_novel_load_files(s32 chapter) {
     file_wait_for_pending();
-    file_wait_then_request_read(&g_main_file_cd_state,
+    file_wait_then_request_read(&g_file_cd_state,
         g_sound_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
         g_sound_novel_script_sector_offsets[chapter + 1] - g_sound_novel_script_sector_offsets[chapter],
         &g_sound_novel_script);
     file_wait_for_pending();
-    file_wait_then_request_read(&g_main_file_cd_state,
+    file_wait_then_request_read(&g_file_cd_state,
         g_sound_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
         g_sound_novel_text_sector_offsets[chapter + 1] - g_sound_novel_text_sector_offsets[chapter],
         g_message_block_buffer);
@@ -232,7 +232,7 @@ void sound_novel_load_files(s32 chapter) {
 /* Queue a one-sector read of BATTLE.BIN's first sector with no destination,
  * which seeks the drive there while the event transition plays. */
 void event_transition_seek_battle_bin(void) {
-    file_wait_then_request_read(&g_main_file_cd_state, g_main_battle_bin_sector, 1, 0);
+    file_wait_then_request_read(&g_file_cd_state, g_file_battle_sector, 1, 0);
 }
 
 /* Fill the rectangle with the 256x238 display area of frame
@@ -249,7 +249,7 @@ void world_map_set_display_rect(s32 buffer_index, RECT* rect) {
 }
 
 /* WLDCORE's per-frame pad poll: reads pad 0 and publishes the held buttons
- * and the newly pressed ones (both 0 while MAIN_SYSTEM_FLAG_INPUT_BLOCKED is
+ * and the newly pressed ones (both 0 while SYSTEM_FLAG_INPUT_BLOCKED is
  * set). Exactly L1 + R1 + Select + Start restores the sound volumes and
  * resets the game. */
 void world_map_read_pad(void) {
@@ -260,7 +260,7 @@ void world_map_read_pad(void) {
     input = PadRead(0);
     g_input_polled_buttons = input;
 
-    if (g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) {
+    if (g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) {
         g_world_map_input_new_button_presses = 0;
         g_input_current_buttons = 0;
     } else {
@@ -274,7 +274,7 @@ void world_map_read_pad(void) {
         suzuki_sound_set_master_volume(0x3fff, 1);
         suzuki_sound_put_type(0xc0);
         suzuki_sound_set_cd_volume(0x74ff, 1);
-        main_system_reset_game();
+        system_reset_game();
     }
 }
 
@@ -331,9 +331,9 @@ void world_map_init_input_repeat(void) {
     g_world_map_input_repeat_counter_left = 0;
     g_world_map_input_repeat_counter_down = 0;
     g_world_map_input_repeat_counter_up = 0;
-    g_world_map_input_repeat_initial_delay = g_main_input_repeat_initial_delay;
-    g_world_map_input_repeat_period = g_main_input_repeat_period;
-    g_world_map_input_secondary_repeat_period = g_main_input_secondary_repeat_period;
+    g_world_map_input_repeat_initial_delay = g_input_repeat_initial_delay;
+    g_world_map_input_repeat_period = g_input_repeat_period;
+    g_world_map_input_secondary_repeat_period = g_input_secondary_repeat_period;
 }
 
 /* Return the newly pressed buttons in `buttons`, or else the first held button
@@ -475,9 +475,9 @@ void world_map_fade_start(s32 flags, s32 duration) {
         g_world_map_fade.flags[0] = flags | WORLD_MAP_FADE_RUNNING;
         g_world_map_fade.elapsed = 0;
         g_world_map_fade.duration = duration;
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_FADING;
+        g_system_flags |= SYSTEM_FLAG_FADING;
         if (flags & WORLD_MAP_FADE_START_MUSIC) {
-            audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
+            audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
             audio_queue_add(AUDIO_COMMAND_FADE_IN, 0x10);
         }
         if (flags & WORLD_MAP_FADE_STOP_MUSIC) {
@@ -502,7 +502,7 @@ s32 world_map_fade_step(void) {
                 = flags & ~(WORLD_MAP_FADE_RUNNING | WORLD_MAP_FADE_REDRAW_MAP | WORLD_MAP_FADE_BOX_VISIBLE);
         } else {
             if (g_world_map_fade.elapsed + 1 == g_world_map_fade.duration) {
-                g_main_system_flags &= ~MAIN_SYSTEM_FLAG_FADING;
+                g_system_flags &= ~SYSTEM_FLAG_FADING;
                 audio_queue_wait_until_empty();
             }
             if (g_world_map_fade.flags[0] & WORLD_MAP_FADE_OUT) {
@@ -543,7 +543,7 @@ s32 world_map_fade_step(void) {
             g_world_map_fade.boxes[0].g = box_level;
             g_world_map_fade.boxes[0].b = box_level;
             if (g_world_map_fade.flags[0] & WORLD_MAP_FADE_REDRAW_MAP) {
-                g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
+                g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
             }
             return 1;
         }
@@ -603,7 +603,7 @@ void world_map_fade_draw_boxes(void) {
         if (flags[i] & (WORLD_MAP_FADE_RUNNING | WORLD_MAP_FADE_BOX_VISIBLE)) {
             if (g_world_map_fade.boxes[i].r != 0 || g_world_map_fade.boxes[i].g != 0
                 || g_world_map_fade.boxes[i].b != 0) {
-                GsSortBoxFill(&boxes[i], &g_world_map_ordering_tables[g_main_gfx_active_buffer_index], priorities[i]);
+                GsSortBoxFill(&boxes[i], &g_world_map_ordering_tables[g_gfx_active_buffer_index], priorities[i]);
             }
         }
     }
@@ -702,7 +702,7 @@ void calendar_advance_day(void) {
 }
 
 /* Converts a calendar date in place into a zodiac sign number (1 = Aries) and
- * the day within that sign. An invalid date plays MAIN_SFX_INVALID and
+ * the day within that sign. An invalid date plays SOUND_SFX_INVALID and
  * becomes 1/1. */
 void calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
     s32 index = 0;
@@ -713,7 +713,7 @@ void calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
     calendar_date_t* previous_dates;
 
     if (*month_ptr < 1 || *month_ptr > 12 || *day_ptr < 1 || *day_ptr > 31) {
-        sound_play_effect(MAIN_SFX_INVALID);
+        sound_play_effect(SOUND_SFX_INVALID);
         *day_ptr = 1;
         *month_ptr = 1;
         return;
@@ -753,7 +753,7 @@ void calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  * the pointer g_brave_story_birthdays.
  *
  * The age column is walked one byte at a time from index 1, which is why the
- * loop's base materializes as g_main_brave_story_character_ages + 1; entry 0
+ * loop's base materializes as g_brave_story_character_ages + 1; entry 0
  * is the only absolute access to the array.
  */
 static void calendar_advance_birthdays(void) {
@@ -766,24 +766,24 @@ static void calendar_advance_birthdays(void) {
     s32 i;
 
     if (month == birth_month && day == birth_day) {
-        age = g_main_brave_story_character_ages[0];
+        age = g_brave_story_character_ages[0];
         if (age < 99) {
-            g_main_brave_story_character_ages[0] = age + 1;
+            g_brave_story_character_ages[0] = age + 1;
         }
     }
 
     for (i = 1; i < 64; i++) {
         if (month == birthdays[i][0] && day == birthdays[i][1]) {
-            if (g_main_brave_story_character_ages[i] < 99) {
-                g_main_brave_story_character_ages[i]++;
+            if (g_brave_story_character_ages[i] < 99) {
+                g_brave_story_character_ages[i]++;
             }
         }
     }
 }
 
-/* WLDCORE's wrapper for main_party_get_unit: the roster record of slot `party_index`. */
+/* WLDCORE's wrapper for party_get_unit: the roster record of slot `party_index`. */
 party_unit_t* party_get_roster_unit(s32 party_index) {
-    return main_party_get_unit(party_index);
+    return party_get_unit(party_index);
 }
 
 /* Writes one nine-bit record: bits 0-4 from source->day, bits 5-8 from

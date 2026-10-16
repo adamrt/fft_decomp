@@ -79,7 +79,7 @@ typedef struct battle_gfx_weapon_sprite_archive {
 /* spritesheets */
 /* Spritesheet ids index g_battle_gfx_spritesheet_data and
  * g_battle_gfx_spritesheet_files. An id below 0x80 is the character_identity_e
- * value it is loaded for (main_unit_get_spritesheet_palette returns those
+ * value it is loaded for (unit_get_spritesheet_palette returns those
  * unchanged) and has that identity's name; a numbered name loads the file of
  * the sheet with the plain name. From 0x60 the sheets are the generic jobs',
  * male then female: the generic selectors resolve to

@@ -414,12 +414,11 @@ void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level) {
  * MENU_HIGH_OVERLAY_SIZE. */
 static void menu_reserve_high_overlay(u32 size) {
     while (1) {
-        if (main_heap_reserve_at(g_main_heap_high_overlay_load_address, size)
-            == g_main_heap_high_overlay_load_address) {
+        if (heap_reserve_at(g_heap_high_overlay_load_address, size) == g_heap_high_overlay_load_address) {
             break;
         }
         thread_yield();
-        if (g_main_font_print_enabled != 0) {
+        if (g_debug_font_print_enabled != 0) {
             FntPrint(g_menu_wait_for_file_allocation_message);
         }
     }
@@ -427,7 +426,7 @@ static void menu_reserve_high_overlay(u32 size) {
 
 /* Free the block menu_reserve_high_overlay reserved. */
 static void menu_free_high_overlay(void) {
-    main_heap_free(g_main_heap_high_overlay_load_address);
+    heap_free(g_heap_high_overlay_load_address);
 }
 
 /* Load companion overlay request_index and wait for it: wait until no executable or data-file
@@ -479,7 +478,7 @@ void script_noop_1(void) {
  * thread parameters. */
 void script_execute_display_conditions_instruction(void) {
     g_menu_hide_numeric_values = 0;
-    require_condition_dispatch();
+    conditions_dispatch();
 }
 
 /* The thread EVENT_OPCODE_DARK_SCREEN starts: it takes the task id, and in
@@ -489,7 +488,7 @@ void script_dark_screen_thread(void) {
     thread_set_current_task_id(THREAD_TASK_DARK_SCREEN);
 #ifdef FFT_BATTLE
     menu_request_open_companion_executable(COMPANION_OVERLAY_REQUIRE);
-    require_condition_animate_bonus_image_burst();
+    conditions_animate_banner_burst();
 #endif
 }
 
@@ -533,13 +532,13 @@ void text_run_spell_quote_thread(void) {
         window_mode = 0x12;
     }
     message_id = thread_get_current_parameter_2() | 0xA800;
-    g_menu_companion_data_file_buffer = main_heap_alloc(0x4000);
+    g_menu_companion_data_file_buffer = heap_alloc(0x4000);
     menu_request_open_companion_data_file(COMPANION_FILE_SPELL_MES);
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_menu_companion_data_file_buffer;
     thread_start(THREAD_SLOT_MENU, text_run_dialog_thread);
     thread_set_parameters(THREAD_SLOT_MENU, window_mode, message_id, id);
     thread_wait_until_inactive(THREAD_SLOT_MENU);
-    main_heap_free(g_menu_companion_data_file_buffer);
+    heap_free(g_menu_companion_data_file_buffer);
     g_menu_pending_selection[0] = 7;
     script_set_event_speed(1);
     g_menu_system_function_thread_busy = 0;
@@ -749,7 +748,7 @@ void menu_open_mounted_unit_status_screen(void) {
         thread_wait_for_unit_view_panels();
         menu_record_selection_for_selected_unit();
         battle_menu_enter_status_screen_selection();
-        debugchr_status_run_unit_thread(*unit_index);
+        status_screen_mounted_unit_thread(*unit_index);
         g_menu_overlay_state = 0;
         g_sound_suppressed = 0;
         g_script_event_input = 0;
@@ -772,7 +771,7 @@ void menu_open_debugchr(void) {
     thread_wait_for_unit_view_panels();
     thread_yield();
     thread_yield();
-    debugchr_editor_run_session();
+    unit_editor_run();
     g_menu_overlay_state = 0;
     g_sound_suppressed = 0;
     g_script_event_input = 0;
@@ -784,7 +783,7 @@ void menu_open_debugchr(void) {
 void script_show_graphic(void) {
     thread_set_current_task_id(THREAD_TASK_SHOW_GRAPHIC);
     menu_request_open_companion_executable(COMPANION_OVERLAY_ETC);
-    etc_graphic_show_async();
+    fullscreen_graphic_thread();
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between script_show_graphic and
@@ -798,7 +797,7 @@ void menu_load_portrait_image(s32 portrait_id) {
     menu_portrait_image_file_t* buffer;
 
     buffer = menu_alloc_memory(sizeof(*buffer));
-    g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+    g_thread_call_target = (void (*)(void))file_load_checked_to_address;
     thread_call_on_main_stack(portrait_id * 4 + DISC_SECTOR_EVENT_EVTFACE_BIN, sizeof(*buffer), buffer);
     LoadImage(&g_menu_portrait_pixel_rect, buffer->pixels[0][0]);
     LoadImage(&g_menu_portrait_palette_rect, (u32*)buffer->palettes);
@@ -818,19 +817,19 @@ void gfx_load_evtchr_thread(void) {
     evtchr_file_record_t* buffer;
 
     thread_set_current_task_id(THREAD_TASK_LOAD_EVTCHR);
-    buffer = main_heap_alloc(0x7800);
+    buffer = heap_alloc(0x7800);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack((block * 15) + DISC_SECTOR_EVENT_EVTCHR_BIN, 0x7800, buffer) != 0);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_is_still_loading;
+        g_thread_call_target = (void (*)(void))file_is_still_loading;
     } while (thread_call_on_main_stack() != 0);
     g_script_pending_loaded_evtchr_slot = parameter;
     g_script_loaded_evtchr_buffer = buffer;
     thread_yield();
-    main_heap_free(buffer);
+    heap_free(buffer);
     thread_exit_current();
 }
 
@@ -847,11 +846,11 @@ void script_opcode_50_portrait_col(s32 portrait_id) {
     buffer = menu_alloc_memory(sizeof(*buffer));
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack(portrait_id * 4 + DISC_SECTOR_EVENT_EVTFACE_BIN, sizeof(*buffer), buffer) != 0);
     do {
         thread_yield();
-        g_thread_call_target = main_file_is_still_loading;
+        g_thread_call_target = file_is_still_loading;
     } while (thread_call_on_main_stack() != 0);
 
     palette = buffer->palettes;
@@ -886,14 +885,14 @@ void script_load_event(s32 id) {
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack(
-                 id * EVENT_BLOCK_SECTORS + DISC_SECTOR_EVENT_TEST_EVT, EVENT_BLOCK_BYTES, g_main_script_event_block)
+                 id * EVENT_BLOCK_SECTORS + DISC_SECTOR_EVENT_TEST_EVT, EVENT_BLOCK_BYTES, g_script_event_block_buffer)
         != 0);
 
     do {
         thread_yield();
-        g_thread_call_target = main_file_is_still_loading;
+        g_thread_call_target = file_is_still_loading;
     } while (thread_call_on_main_stack() != 0);
 
     block = g_script_event_block;
@@ -931,7 +930,7 @@ void menu_noop_4(void) {
  * clear the request. */
 void menu_poll_companion_data_file_load(void) {
     if ((g_menu_companion_data_file_request_index != 0) && (g_menu_companion_data_file_loading == 0)) {
-        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
         if (thread_call_on_main_stack(g_menu_companion_data_file_lbas[g_menu_companion_data_file_request_index],
                 g_menu_companion_data_file_sizes[g_menu_companion_data_file_request_index],
                 g_menu_companion_data_file_buffer)
@@ -939,7 +938,7 @@ void menu_poll_companion_data_file_load(void) {
             g_menu_companion_data_file_loading = 1;
         }
     } else if ((g_menu_companion_data_file_request_index != 0) && (g_menu_companion_data_file_loading != 0)) {
-        g_thread_call_target = main_file_is_still_loading;
+        g_thread_call_target = file_is_still_loading;
         if (thread_call_on_main_stack() == 0) {
             g_menu_companion_data_file_loading = 0;
             g_menu_companion_data_file_request_index = 0;
@@ -955,14 +954,14 @@ void menu_poll_companion_executable_load(void) {
     s32 idx = g_menu_companion_executable_request_index;
 
     if ((idx != 0) && (g_menu_companion_executable_loading == 0)) {
-        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
         if (thread_call_on_main_stack(g_menu_companion_executable_lbas[idx], g_menu_companion_executable_sizes[idx],
-                g_menu_companion_executable_offsets[idx] + (s32)g_main_heap_companion_overlay_load_address)
+                g_menu_companion_executable_offsets[idx] + (s32)g_heap_companion_overlay_load_address)
             == 0) {
             g_menu_companion_executable_loading = 1;
         }
     } else if ((g_menu_companion_executable_request_index != 0) && (g_menu_companion_executable_loading != 0)) {
-        g_thread_call_target = main_file_is_still_loading;
+        g_thread_call_target = file_is_still_loading;
         if (thread_call_on_main_stack() == 0) {
             g_menu_companion_executable_loading = 0;
             g_menu_companion_executable_request_index = 0;
@@ -1153,7 +1152,7 @@ s32 menu_poll_small_load(void) {
     if (g_menu_companion_executable_request_index != 0) {
         return 1;
     }
-    small_text_init_battle_pointers();
+    text_init_battle_pointers();
     return 0;
 }
 

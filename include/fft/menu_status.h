@@ -23,8 +23,8 @@ typedef enum menu_equipment_slot {
 } menu_equipment_slot_e;
 
 /* unit status records */
-/* The unit a status panel shows (g_menu_selected_unit; DEBUGCHR's g_debugchr_panel_selected_unit_data, ATTACK's
- * g_attack_panel_selected_unit_data), saved and restored whole by menu_copy_billboard_data_out and
+/* The unit a status panel shows (g_menu_selected_unit; DEBUGCHR's g_unit_panel_selected_unit_data, ATTACK's
+ * g_unit_panel_selected_unit_data), saved and restored whole by menu_copy_billboard_data_out and
  * menu_copy_billboard_data_in. menu_load_selected_unit fills job_id..zodiac for the unit named by battle_id; the
  * overlays' status panels keep a second record for the comparison unit (g_menu_comparison_unit_data).
  * Provisional. */
@@ -125,7 +125,7 @@ typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gaug
  * menu_copy_billboard_data_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
  * fields. Provisional. */
 typedef struct menu_unit_status_record {
-    s16 level;      /* 0x00; debugchr_editor_apply_values_to_battle_unit writes it back */
+    s16 level;      /* 0x00; unit_editor_apply_values writes it back */
     s16 team_kind;  /* 0x02: 0 ally, 1 enemy, 2 neutral, 3 auto-battle; selects the status icon,
                        the panel's 0xc-byte geometry row and its CLUT */
     s16 list_index; /* 0x04: AT-list position + 1, negative when the unit is not listed
@@ -182,8 +182,8 @@ s32 menu_get_preview_mp_bonus_display(s32 unused_row);
 
 /* unit grid readouts */
 /* What the unit grids draw below a unit (formation_draw_unit_readout,
- * bunit_menu_update_unit_grid). L2/R2 step g_formation_stat_display_mode and
- * g_bunit_unit_stat_mode through the first five, wrapping between HP and
+ * unit_list_update_grid). L2/R2 step g_formation_stat_display_mode and
+ * g_unit_list_stat_mode through the first five, wrapping between HP and
  * BRAVE_FAITH; WORLD picks the others per unit. */
 typedef enum menu_unit_readout {
     MENU_UNIT_READOUT_HP = 0,

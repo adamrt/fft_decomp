@@ -1096,7 +1096,7 @@ static u8 battle_effect_allocate_secondary_slot(void) {
         }
         return id;
     }
-    main_system_report_stub(1, 0x66);
+    system_report_stub(1, 0x66);
     return id;
 }
 
@@ -1118,7 +1118,7 @@ static void battle_effect_remove_secondary(u8 id) {
 
     if (id != 0 && id < EFFECT_SECONDARY_RECORD_COUNT) {
         if (slot->allocation != 0) {
-            main_heap_free(slot->allocation);
+            heap_free(slot->allocation);
             slot->allocation = 0;
         }
         if (slot->next_slot_id != 0) {
@@ -1142,7 +1142,7 @@ static void battle_effect_remove_secondary(u8 id) {
         slot->phase = EFFECT_SECONDARY_PHASE_ENDED;
         return;
     }
-    main_system_report_stub(1, 0x67);
+    system_report_stub(1, 0x67);
 }
 
 /* Return the phase of secondary effect record secondary_id; ENDED once the record has been
@@ -1889,7 +1889,7 @@ static s32 battle_effect_trace_arc_trajectory_path(
     if (advance != 0) {
         steps = ((advance + *distance) - 1) / advance;
     } else {
-        main_system_report_stub(1, 0);
+        system_report_stub(1, 0);
         steps = 0;
     }
 
@@ -2445,9 +2445,9 @@ s32 battle_effect_arrow_arc_secondary_handler(void) {
         RotMatrix(&rotation, &g_battle_effect_projectile_matrix);
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         if (g_battle_effect_current_secondary->allocation != 0) {
-            main_heap_free(g_battle_effect_current_secondary->allocation);
+            heap_free(g_battle_effect_current_secondary->allocation);
         }
-        work = main_heap_alloc(0xc88);
+        work = heap_alloc(0xc88);
         g_battle_effect_current_secondary->allocation = work;
         for (i = 0; i < 2; i++) {
             for (j = 0; j < 4; j++) {
@@ -2547,10 +2547,10 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
             return 0;
         }
         if (effect->allocation != 0) {
-            main_heap_free(effect->allocation);
+            heap_free(effect->allocation);
         }
 
-        state = main_heap_alloc(sizeof(effect_burst_state_t));
+        state = heap_alloc(sizeof(effect_burst_state_t));
         g_battle_effect_current_secondary->allocation = state;
         state->frame = 0;
         state->done = 0;
@@ -2863,7 +2863,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
         state->x = out.vx;
         state->y = out.vy;
 
-        suzuki_sound_play_sfx(MAIN_SFX_SPELL_CHARGE);
+        suzuki_sound_play_sfx(SOUND_SFX_SPELL_CHARGE);
         result = 1;
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         break;
@@ -3062,7 +3062,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
             || (state->count.trails != 0 || state->count.auxiliary_particles != 0 || state->count.particles != 0)) {
             result = 1;
         } else {
-            suzuki_sound_stop_sfx_channels(MAIN_SFX_SPELL_CHARGE);
+            suzuki_sound_stop_sfx_channels(SOUND_SFX_SPELL_CHARGE);
             result = 0;
         }
         break;
@@ -3117,7 +3117,7 @@ s32 battle_effect_red_orbs_secondary_handler(void) {
         effect->timer = 0;
         effect->finish_timer = 0;
         effect->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
-        suzuki_sound_play_sfx(MAIN_SFX_RED_ORBS);
+        suzuki_sound_play_sfx(SOUND_SFX_RED_ORBS);
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
@@ -3296,7 +3296,7 @@ s32 battle_effect_trap_secondary_handler(void) {
         effect->timer = 0;
         effect->finish_timer = 0;
         effect->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
-        suzuki_sound_play_sfx(MAIN_SFX_TRAP);
+        suzuki_sound_play_sfx(SOUND_SFX_TRAP);
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
@@ -3652,9 +3652,9 @@ s32 battle_effect_reflect_secondary_handler(void) {
     switch (g_battle_effect_current_secondary->phase) {
     case EFFECT_SECONDARY_PHASE_INITIALIZING:
         if (g_battle_effect_current_secondary->allocation != 0) {
-            main_heap_free(g_battle_effect_current_secondary->allocation);
+            heap_free(g_battle_effect_current_secondary->allocation);
         }
-        work = main_heap_alloc(0x798);
+        work = heap_alloc(0x798);
         g_battle_effect_current_secondary->allocation = work;
         for (i = 0; i < 2; i++) {
             for (j = 0; j < 24; j++) {
@@ -3839,13 +3839,13 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
 
         if (g_battle_effect_current_secondary->allocation != 0) {
-            main_heap_free(g_battle_effect_current_secondary->allocation);
+            heap_free(g_battle_effect_current_secondary->allocation);
         }
 
         /* Allocate the drawn model's primitives, one set per display buffer. */
         parameter = g_battle_effect_secondary_animations[g_battle_effect_current_secondary->animation_id].parameter;
         if ((parameter & 0xff) == EFFECT_MODEL_ARROW) {
-            arrow = main_heap_alloc(0xc88);
+            arrow = heap_alloc(0xc88);
             g_battle_effect_current_secondary->allocation = arrow;
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < 4; j++) {
@@ -3858,7 +3858,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
         }
 
         if ((parameter & 0xff) == EFFECT_MODEL_STONE) {
-            work12 = main_heap_alloc(0x2a0);
+            work12 = heap_alloc(0x2a0);
             g_battle_effect_current_secondary->allocation = work12;
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < 12; j++) {
@@ -3870,7 +3870,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
         if (parameter == EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC) {
             item = g_battle_effect_current_secondary->used_weapon_id;
             if (item >= ITEM_ID_SHURIKEN && item <= ITEM_ID_YAGYU_DARKNESS) {
-                work16 = main_heap_alloc(0x380);
+                work16 = heap_alloc(0x380);
                 g_battle_effect_current_secondary->allocation = work16;
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 16; j++) {
@@ -4099,7 +4099,7 @@ s32 battle_effect_summon_charge_secondary_handler(void) {
         g_battle_effect_current_secondary->timer = 0;
         g_battle_effect_current_secondary->finish_timer = 0;
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
-        suzuki_sound_play_sfx(MAIN_SFX_SUMMON_CHARGE);
+        suzuki_sound_play_sfx(SOUND_SFX_SUMMON_CHARGE);
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
@@ -4171,7 +4171,7 @@ s32 battle_effect_summon_charge_secondary_handler(void) {
                     g_battle_effect_current_secondary->slot_ids[i] = 0;
                 }
             }
-            suzuki_sound_stop_sfx_channels(MAIN_SFX_SUMMON_CHARGE);
+            suzuki_sound_stop_sfx_channels(SOUND_SFX_SUMMON_CHARGE);
             result = 0;
         } else {
             result = 1;
@@ -4190,7 +4190,7 @@ s32 battle_effect_update_secondary_effects(void) {
     effect_secondary_data_t* effect;
     u32 previous_slot_id;
 
-    g_battle_effect_polygon_depth_data = main_gfx_get_battle_otag();
+    g_battle_effect_polygon_depth_data = gfx_get_battle_otag();
     g_battle_effect_buffer_index = 1 - g_battle_effect_buffer_index;
     g_battle_effect_current_secondary_id = g_battle_effect_secondary_active_tail;
     if (g_battle_effect_secondary_active_tail == 0) {

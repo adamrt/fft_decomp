@@ -115,7 +115,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
     entry = &g_battle_effect_geometry_table->entries[emitter_index];
     placement = entry->particle_ribbon.placement_flags;
     flags = entry->particle_ribbon.flags;
-    ot = main_gfx_get_battle_otag();
+    ot = gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

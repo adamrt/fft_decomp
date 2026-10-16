@@ -8,12 +8,12 @@
 /* Build the 4x8 grid of shaded, textured quads behind the panel: each row is
  * one step brighter than the one above, and every cell shows the same 64x32
  * texture rectangle. */
-void attack_gfx_build_gradient_grid_primitives(POLY_GT4* poly) {
+void gfx_build_gradient_grid_primitives(POLY_GT4* poly) {
     s32 row;
     s32 column;
     s32 intensity;
 
-    if (g_attack_deploy_tiles_only_mode != 0) {
+    if (g_deploy_tiles_only_mode != 0) {
         return;
     }
 

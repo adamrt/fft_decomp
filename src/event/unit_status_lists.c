@@ -208,7 +208,7 @@ void script_opcode_7a_dismiss_unit(s32 sprite_set) {
     u8 item;
 
     for (; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
-        party = main_party_get_unit(party_index);
+        party = party_get_unit(party_index);
         if (party->party_id != empty_party_id && party->sprite_set == sprite_set) {
             break;
         }
@@ -220,10 +220,10 @@ void script_opcode_7a_dismiss_unit(s32 sprite_set) {
         for (; slot < UNIT_EQUIPMENT_SLOT_COUNT; slot++) {
             item = party->equipment[slot];
             if (item != ITEM_ID_NOTHING && item != empty_item) {
-                g_main_item_quantities[item]++;
+                g_item_quantities[item]++;
             }
         }
-        main_party_remove_unit(party_index);
+        party_remove_unit(party_index);
     }
 }
 
@@ -243,7 +243,7 @@ void script_join_units_silently(void) {
                     && first <= CHARACTER_IDENTITY_RAMZA_CHAPTER_4)) {
                 flags = unit->unit_flags;
                 if (flags & UNIT_FLAG_JOIN_AFTER_EVENT) {
-                    main_party_save_unit(unit, flags & UNIT_FLAG_SAVE_FORMATION);
+                    party_save_unit(unit, flags & UNIT_FLAG_SAVE_FORMATION);
                 }
             }
         }
@@ -600,17 +600,17 @@ static s32 menu_display_projected_action_effect(
         panel[0].kind = 2;
         *label_x = *label_x - g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_BROKEN].width + 8;
     } else if (g_menu_preview_target_action->attack_type & ACTION_TYPE_STATUS_CHANGE) {
-        g_thread_call_target = (void (*)(void))main_status_find_action_highest_order_effect;
+        g_thread_call_target = (void (*)(void))status_find_action_highest_order_effect;
         image = thread_call_on_main_stack(g_menu_preview_target_action);
         if (image > 0) {
-            if (image & MAIN_ACTION_STATUS_RESULT_REMOVAL) {
+            if (image & STATUS_ACTION_RESULT_REMOVAL) {
                 extra = 0x1f;
-            } else if ((image & (MAIN_ACTION_STATUS_RESULT_REMOVAL | MAIN_ACTION_STATUS_RESULT_SCRIPT_FILTER_EXCLUDED))
-                == (MAIN_ACTION_STATUS_RESULT_REMOVAL | MAIN_ACTION_STATUS_RESULT_SCRIPT_FILTER_EXCLUDED)) {
+            } else if ((image & (STATUS_ACTION_RESULT_REMOVAL | STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED))
+                == (STATUS_ACTION_RESULT_REMOVAL | STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED)) {
                 /* Unreachable: the preceding removal test also catches these flags. */
                 extra = 0x1e;
             }
-            image &= MAIN_ACTION_STATUS_RESULT_INDEX_MASK;
+            image &= STATUS_ACTION_RESULT_INDEX_MASK;
             image = g_battle_status_display_image_ids[image - 1];
             /* Duplicated store: it keeps the state write in its own block
              * ahead of the label arithmetic, as in the target. */
@@ -716,15 +716,15 @@ static s32 menu_display_projected_action_effect(
         && g_menu_preview_target_action->attack_type != ACTION_TYPE_STATUS_CHANGE) {
         prim++;
         params++;
-        g_thread_call_target = (void (*)(void))main_status_find_action_highest_order_effect;
+        g_thread_call_target = (void (*)(void))status_find_action_highest_order_effect;
         image = thread_call_on_main_stack(g_menu_preview_target_action);
         if (image > 0) {
-            if (image & MAIN_ACTION_STATUS_RESULT_REMOVAL) {
+            if (image & STATUS_ACTION_RESULT_REMOVAL) {
                 setRGB0(prim, 0x30, 0x8c, 0xdc);
             } else {
                 setRGB0(prim, 0xbe, 0x28, 0xa);
             }
-            image &= MAIN_ACTION_STATUS_RESULT_INDEX_MASK;
+            image &= STATUS_ACTION_RESULT_INDEX_MASK;
             image = g_battle_status_display_image_ids[image - 1];
             if (image != ACTION_DISPLAY_IMAGE_NONE && image != ACTION_DISPLAY_IMAGE_INVITE) {
                 rect = &g_battle_action_display_image_rects[image];
@@ -1010,7 +1010,7 @@ static void menu_run_unit_stats_panel(
             text_loaded = 1;
         }
         offs = &offsets[frame & 1];
-        base_y = (g_main_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
+        base_y = (g_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
         if (mode == UNIT_STATS_PANEL_ATTACK_TARGET || mode == UNIT_STATS_PANEL_RIGHT_UNIT) {
             offs->a.position.x = slide - 0x80;
         } else {
@@ -1109,7 +1109,7 @@ void menu_preview_attack_caster_stats(void) {
     action = battle_unit_get_runtime_action_command_by_battle_id(*selected);
     action->actor_id = *selected;
     if (action->ability_id < ABILITY_ID_ITEM_FIRST) {
-        main_ability_calculate_pointers_and_type(action->ability_id & ABILITY_ID_MASK, &ability_data, &secondary);
+        ability_get_data_and_type(action->ability_id & ABILITY_ID_MASK, &ability_data, &secondary);
     }
     /* Item IDs leave secondary unset before this range-flags read. */
     if (((secondary.range->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE) && action->ability_id < ABILITY_ID_ITEM_FIRST)
@@ -1218,7 +1218,7 @@ void menu_run_unit_summary_panel_thread(void) {
     text_draw_small_number_glyphs(g_menu_selected_unit.faith, 0x202, digits->faith, origin);
     LoadImage(&rects[2], (u32*)digits->faith);
     menu_set_text_origin(0, 0);
-    if (g_main_debug_display_enabled != 0) {
+    if (g_debug_display_enabled != 0) {
         text_draw_small_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits->roster_slot, origin);
     } else if (g_menu_selected_unit.battle_id >= 0x10) {
         value = unit->formation_index;
@@ -1253,7 +1253,7 @@ void menu_run_unit_summary_panel_thread(void) {
         }
 
         /* y of the frame buffer drawn this frame. */
-        value = (g_main_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
+        value = (g_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
         /* One slide step per event-speed step, so fast-forward speeds the slide. */
         for (i = 0; i < g_script_event_speed; i++) {
             if (thread_get_current_parameter_3() != 0) {
@@ -1360,7 +1360,7 @@ exit:
  * row from v = 0x20 of the item icon page, and the item's palette picks one of 8 CLUTs per
  * CLUT row from the item icon CLUT base. */
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
-    item_data_t* item = main_item_get_data_pointer(item_id);
+    item_data_t* item = item_get_data(item_id);
     s32 sprite_id;
     s32 palette;
     s32 column;
@@ -1380,7 +1380,7 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
 /*
  * Set the texture page, CLUT and UVs of a unit's portrait quad.
  *
- * The unit whose ID equals g_main_special_portrait_unit_id uses the fixed 0x380/0x100 page; others
+ * The unit whose ID equals g_portrait_special_unit_id uses the fixed 0x380/0x100 page; others
  * select a 32-line band of the spritesheet VRAM slot's page and the CLUT of
  * MAP_CLUT_ROW_UNITS_SECOND indexed by the low nibble of the unit runtime record ID.
  */
@@ -1389,7 +1389,7 @@ void menu_build_unit_portrait_poly(POLY_FT4* poly, s32 battle_id) {
     s32 runtime_id;
     u8 v;
 
-    if (battle_unit_get_stats_from_battle_id(battle_id)->unit_id == g_main_special_portrait_unit_id) {
+    if (battle_unit_get_stats_from_battle_id(battle_id)->unit_id == g_portrait_special_unit_id) {
         setUV4(poly, 0xe0, 0xcf, 0xff, 0xcf, 0xe0, 0xff, 0xff, 0xff);
         poly->tpage = GetTPage(0, 0, 0x380, 0x100);
         poly->clut = GetClut(0x40, 0x1fe);
@@ -1506,7 +1506,7 @@ void menu_run_numeric_display_panel_thread(void) {
         thread_yield();
         record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
-            &record->draw_areas, &g_menu_numeric_display_panel_texture_window, frame, g_main_gfx_screen_polarity);
+            &record->draw_areas, &g_menu_numeric_display_panel_texture_window, frame, g_gfx_screen_polarity);
         if (thread_get_current_parameter_3() != 0) {
             break;
         }
@@ -1729,7 +1729,7 @@ void menu_run_status_screen_thread(void) {
         thread_yield();
         frame_record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
-            &frame_record->draw_areas, &g_menu_status_screen_cursor_rect, frame, g_main_gfx_screen_polarity);
+            &frame_record->draw_areas, &g_menu_status_screen_cursor_rect, frame, g_gfx_screen_polarity);
         if (g_menu_input_lock_mode == 0 && g_menu_help_open == 0 && thread_get_current_parameter_3() != 0) {
             break;
         }

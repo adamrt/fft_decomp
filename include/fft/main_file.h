@@ -66,32 +66,32 @@ typedef enum disc_sector {
     DISC_SECTOR_OPEN_ENDING_XA = 0x2f551,
 } disc_sector_e;
 
-extern s32 g_main_battle_bin_sector;
+extern s32 g_file_battle_sector;
 
 /* CD loader */
 /* Loading-display mode passed to the shared file-header builder. */
-typedef enum main_file_loading_display_mode {
-    MAIN_FILE_LOADING_DISPLAY_OFF = -1,
-    MAIN_FILE_LOADING_DISPLAY_INIT = 0,
-    MAIN_FILE_LOADING_DISPLAY_PRESERVE = 1,
-} main_file_loading_display_mode_e;
+typedef enum file_loading_display_mode {
+    FILE_LOADING_DISPLAY_OFF = -1,
+    FILE_LOADING_DISPLAY_INIT = 0,
+    FILE_LOADING_DISPLAY_PRESERVE = 1,
+} file_loading_display_mode_e;
 
 /* One poll advances at most one phase; recoverable CD errors restart setup. */
-typedef enum main_file_load_state {
-    MAIN_FILE_LOAD_STATE_IDLE = 0,
-    MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED = 1,
-    MAIN_FILE_LOAD_STATE_WAIT_AFTER_SET_MODE = 2,
-    MAIN_FILE_LOAD_STATE_START_SEEK = 3,
-    MAIN_FILE_LOAD_STATE_POLL_SEEK = 4,
-    MAIN_FILE_LOAD_STATE_START_READ = 5,
-    MAIN_FILE_LOAD_STATE_POLL_READ = 6,
-    MAIN_FILE_LOAD_STATE_UPLOAD_VRAM = 7, /* WLDCORE image stream only */
-} main_file_load_state_e;
+typedef enum file_load_state {
+    FILE_LOAD_STATE_IDLE = 0,
+    FILE_LOAD_STATE_SET_DOUBLE_SPEED = 1,
+    FILE_LOAD_STATE_WAIT_AFTER_SET_MODE = 2,
+    FILE_LOAD_STATE_START_SEEK = 3,
+    FILE_LOAD_STATE_POLL_SEEK = 4,
+    FILE_LOAD_STATE_START_READ = 5,
+    FILE_LOAD_STATE_POLL_READ = 6,
+    FILE_LOAD_STATE_UPLOAD_VRAM = 7, /* WLDCORE image stream only */
+} file_load_state_e;
 
-/* Asynchronous CD read state advanced by main_file_poll_load. */
-typedef struct main_file_load_descriptor {
+/* Asynchronous CD read state advanced by file_poll_load. */
+typedef struct file_load_descriptor {
     s32 _unknown_00;
-    s32 state; /* main_file_load_state_e */
+    s32 state; /* file_load_state_e */
     s32 error_count;
     s32 wait_frames;
     s32 sector_count;
@@ -99,60 +99,60 @@ typedef struct main_file_load_descriptor {
     s32 sector_index; /* 0x18; sector being read by world_map_poll_texture_stream */
     CdlLOC position;
     u8* destination;
-} main_file_load_descriptor_t;
-typedef char main_file_load_descriptor_size_must_be_36[sizeof(main_file_load_descriptor_t) == 36 ? 1 : -1];
+} file_load_descriptor_t;
+typedef char main_file_load_descriptor_size_must_be_36[sizeof(file_load_descriptor_t) == 36 ? 1 : -1];
 
-extern main_file_load_descriptor_t g_main_file_cd_state;
-/* g_main_file_cd_state.state under a second name: nonzero (not
- * MAIN_FILE_LOAD_STATE_IDLE) while a load is in progress. */
-extern u32 g_main_file_still_loading;
+extern file_load_descriptor_t g_file_cd_state;
+/* g_file_cd_state.state under a second name: nonzero (not
+ * FILE_LOAD_STATE_IDLE) while a load is in progress. */
+extern u32 g_file_still_loading;
 
-int main_file_request_read(
-    main_file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
-/* Forwards main_file_request_read's result. */
-s32 main_file_request_read_quiet(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
-s32 main_file_request_read_bytes(s32 sector, u32 size, void* destination);
-void main_file_poll_load(main_file_load_descriptor_t* state);
-int main_file_is_still_loading(void);
-void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state);
-void main_file_reset_cd_subsystems(void);
-void main_file_handle_cd_read_callback(u8 event, u8* result);
-void main_file_handle_cd_ready_callback(u8 event, u8* result);
-void* main_file_load_to_address(int sector, u32 size, void* destination);
-void* main_file_load_checked_to_address(int sector, int size, void* destination);
-void* main_file_load_checked_to_heap(int sector, int size);
-suzuki_smd_header_t* main_file_get_smd(int sector, u32 size);
+int file_request_read(
+    file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
+/* Forwards file_request_read's result. */
+s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
+s32 file_request_read_bytes(s32 sector, u32 size, void* destination);
+void file_poll_load(file_load_descriptor_t* state);
+int file_is_still_loading(void);
+void file_reset_pause_cdrom(file_load_descriptor_t* state);
+void file_reset_cd_subsystems(void);
+void file_handle_cd_read(u8 event, u8* result);
+void file_handle_cd_ready(u8 event, u8* result);
+void* file_load_to_address(int sector, u32 size, void* destination);
+void* file_load_checked_to_address(int sector, int size, void* destination);
+void* file_load_checked_to_heap(int sector, int size);
+suzuki_smd_header_t* file_load_smd(int sector, u32 size);
 
 /* heaps */
 /* Game and music heaps allocate whole pages, tagged by these byte tables. */
 enum {
-    MAIN_HEAP_PAGE_SHIFT = 11,
-    MAIN_HEAP_PAGE_SIZE = 1 << MAIN_HEAP_PAGE_SHIFT,
-    MAIN_HEAP_GAME_PAGE_COUNT = 64,
-    MAIN_HEAP_SMD_PAGE_COUNT = 16,
+    HEAP_PAGE_SHIFT = 11,
+    HEAP_PAGE_SIZE = 1 << HEAP_PAGE_SHIFT,
+    HEAP_GAME_PAGE_COUNT = 64,
+    HEAP_SMD_PAGE_COUNT = 16,
 };
 
-extern u8 g_main_heap_smd_allocator_table[MAIN_HEAP_SMD_PAGE_COUNT];
-extern u8 g_main_heap_smd_base[];
-extern u32 g_main_battle_heap_end_address;
-extern u8* g_main_heap_high_overlay_load_address;
-extern u8* g_main_heap_low_overlay_load_address;
-extern u8* g_main_heap_world_overlay_load_address;
-extern u8* g_main_heap_companion_overlay_load_address;
+extern u8 g_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT];
+extern u8 g_heap_smd_base[];
+extern u32 g_heap_battle_end_address;
+extern u8* g_heap_high_overlay_load_address;
+extern u8* g_heap_low_overlay_load_address;
+extern u8* g_heap_world_overlay_load_address;
+extern u8* g_heap_companion_overlay_load_address;
 
-void* main_heap_alloc(u32 size);
-s32 main_heap_free(void* allocation);
-void main_heap_call_free(void* allocation);
-u8* main_heap_reserve_at(u8* allocation, u32 size);
-void main_heap_clear_game_allocator_table(void);
-void* main_heap_alloc_smd(u32 size);
-s32 main_heap_free_smd(void* allocation);
-void main_heap_clear_smd_allocator_table(void);
+void* heap_alloc(u32 size);
+s32 heap_free(void* allocation);
+void heap_call_free(void* allocation);
+u8* heap_reserve_at(u8* allocation, u32 size);
+void heap_clear_game_table(void);
+void* heap_alloc_smd(u32 size);
+s32 heap_free_smd(void* allocation);
+void heap_clear_smd_table(void);
 
 /* overlays */
-int main_overlay_exec_open_bin_main_loop(int mode);
-void main_overlay_exec_open_bin_ending(void);
-int main_overlay_open_world_and_wldcore(int load_world);
-void main_overlay_open_world_bin(s32 mode);
+int overlay_exec_open_title(int mode);
+void overlay_exec_open_ending(void);
+int overlay_open_world_and_wldcore(int load_world);
+void overlay_open_world(s32 mode);
 
 #endif

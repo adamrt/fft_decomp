@@ -19,7 +19,7 @@ void menu_draw_weapon_hand_icons(s16 weapon_id) {
     s32 two_swords;
 
     if (weapon_id != 0 && weapon_id < ITEM_ID_THROWABLE_FIRST) {
-        flags = g_main_item_weapon_data[weapon_id].flags;
+        flags = g_item_weapon_data[weapon_id].flags;
         forced = flags & WEAPON_FLAG_FORCED_TWO_HANDS;
         two_hands = flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE;
         two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;

@@ -15,9 +15,9 @@
 #include "fft/unit_party.h"
 #include "psx/types.h"
 
-/* The original wrote the body of main_mem_copy_bytes_source_first a second time as
- * main_mem_copy_byte_data_source_first. */
-void main_mem_copy_byte_data_source_first(const void* source, void* destination, int count) {
+/* The original wrote the body of mem_copy_bytes_source_first a second time as
+ * mem_copy_byte_data_source_first. */
+void mem_copy_byte_data_source_first(const void* source, void* destination, int count) {
     const u8* src = source;
     u8* dst = destination;
     int i;
@@ -31,8 +31,8 @@ void main_mem_copy_byte_data_source_first(const void* source, void* destination,
  * equipped copies. With include_battle set, roster humans deployed in the battle are counted from
  * their battle records instead, along with every other non-Mime human that started on the blue
  * team. */
-s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
-    s32 total = g_main_item_quantities[item_id];
+s32 item_get_total_quantity(u8 item_id, s32 include_battle) {
+    s32 total = g_item_quantities[item_id];
     s32 i;
     s32 j;
     party_unit_t* party;
@@ -41,7 +41,7 @@ s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
     s32 party_id;
 
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-        party = main_party_get_unit(i);
+        party = party_get_unit(i);
         party_id = party->party_id;
         if (party_id == PARTY_ID_NONE) {
             continue;
@@ -90,7 +90,7 @@ s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
 
 /* Copy the ENTD unit's map X and Y, elevation, facing and spell-quote bits, war trophy and bonus
  * money into the battle unit. */
-void main_unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd) {
+void unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd) {
     unit->x = entd->x;
     unit->position.y = entd->position.y;
     unit->position.higher_elevation = entd->position.higher_elevation;
@@ -105,7 +105,7 @@ void main_unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd) 
  * Return the highest-order status changed by an action. Bits 0-6 encode the
  * one-based status index, 0x80 marks removal, and 0x100 reflects flags_2 bit 3.
  */
-s32 main_status_find_action_highest_order_effect(const action_data_t* action) {
+s32 status_find_action_highest_order_effect(const action_data_t* action) {
     s32 highest_order = -1;
     s32 result = 0;
     s32 status_index;
@@ -117,23 +117,23 @@ s32 main_status_find_action_highest_order_effect(const action_data_t* action) {
         byte_index = status_index / 8;
         mask = 0x80 >> (status_index & 7);
         if (action->status_changes.removal[byte_index] & mask) {
-            current_order = g_main_status_effect_data[status_index].order;
+            current_order = g_status_effect_data[status_index].order;
             if (current_order > highest_order) {
                 highest_order = current_order;
-                result = status_index + 1 + MAIN_ACTION_STATUS_RESULT_REMOVAL;
-                if (g_main_status_effect_data[status_index].flags_2 & STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED) {
-                    result = status_index + 1 + MAIN_ACTION_STATUS_RESULT_REMOVAL
-                        + MAIN_ACTION_STATUS_RESULT_SCRIPT_FILTER_EXCLUDED;
+                result = status_index + 1 + STATUS_ACTION_RESULT_REMOVAL;
+                if (g_status_effect_data[status_index].flags_2 & STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED) {
+                    result
+                        = status_index + 1 + STATUS_ACTION_RESULT_REMOVAL + STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED;
                 }
             }
         }
         if (action->status_changes.infliction[byte_index] & mask) {
-            current_order = g_main_status_effect_data[status_index].order;
+            current_order = g_status_effect_data[status_index].order;
             if (current_order > highest_order) {
                 highest_order = current_order;
                 result = status_index + 1;
-                if (g_main_status_effect_data[status_index].flags_2 & STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED) {
-                    result = status_index + 1 + MAIN_ACTION_STATUS_RESULT_SCRIPT_FILTER_EXCLUDED;
+                if (g_status_effect_data[status_index].flags_2 & STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED) {
+                    result = status_index + 1 + STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED;
                 }
             }
         }
@@ -145,19 +145,19 @@ s32 main_status_find_action_highest_order_effect(const action_data_t* action) {
  *
  * Counts the sign boundaries at or before the day, then rotates the count
  * into zodiac order with (count + 9) % 12. */
-s32 main_unit_calculate_zodiac_symbol(u16 birthday) {
+s32 zodiac_calculate_sign(u16 birthday) {
     s32 zodiac = 0;
     s32 i;
 
     for (i = 0; i < ZODIAC_SIGN_ORDINARY_COUNT; i++) {
-        zodiac += birthday >= g_main_zodiac_day_limits[i];
+        zodiac += birthday >= g_zodiac_day_limits[i];
     }
     zodiac = (zodiac + 9) % ZODIAC_SIGN_ORDINARY_COUNT;
     return (u16)zodiac;
 }
 
 /* Clear count bytes one at a time; a count of 0 or less clears nothing. */
-void main_mem_zero(void* destination, s32 count) {
+void mem_zero(void* destination, s32 count) {
     u8* dst = destination;
     s32 index = 0;
 
@@ -169,7 +169,7 @@ void main_mem_zero(void* destination, s32 count) {
 
 /* Count a KO in the script variables: a unit that started on the blue team adds to
  * EVENT_SCRIPT_VAR_CASUALTIES, any other unit to EVENT_SCRIPT_VAR_INJURED; both stop at 9999. */
-void main_unit_increase_casualty_counters(unit_stats_t* unit) {
+void unit_increase_casualty_counters(unit_stats_t* unit) {
     s32 id;
     s32 count;
 
@@ -183,18 +183,18 @@ void main_unit_increase_casualty_counters(unit_stats_t* unit) {
 }
 
 /* Add, remove, or replace a status-set flag and refresh the unit's current status. */
-void main_status_change_unit(unit_stats_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type) {
+void status_change_unit(unit_stats_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type) {
     u8 updated;
 
     /* An enum selector removes the native signed range test. */
     switch (change_type) {
-    case MAIN_STATUS_ADD:
+    case STATUS_ADD:
         updated = unit->inflicted_status[status_byte_index] | status_flag;
         break;
-    case MAIN_STATUS_REMOVE:
+    case STATUS_REMOVE:
         updated = unit->inflicted_status[status_byte_index] & ~status_flag;
         break;
-    case MAIN_STATUS_REPLACE:
+    case STATUS_REPLACE:
         updated = status_flag;
         break;
     }
@@ -204,7 +204,7 @@ void main_status_change_unit(unit_stats_t* unit, s32 status_byte_index, u8 statu
 }
 
 /* Recompute the current status set as innate | inflicted. */
-void main_status_store_current(unit_stats_t* unit) {
+void status_store_current(unit_stats_t* unit) {
     s32 status_set;
 
     for (status_set = 0; status_set < STATUS_BYTE_COUNT; status_set++) {
@@ -215,15 +215,15 @@ void main_status_store_current(unit_stats_t* unit) {
 
 /* Charge time of the unit's last ability: the low seven bits of the ability
  * record's CT byte. */
-void main_unit_copy_last_ability_ct(unit_stats_t* unit) {
-    unit->ability_ct = g_main_ability_range_data[unit->action_command.ability_id].ct & 0x7f;
+void unit_copy_last_ability_ct(unit_stats_t* unit) {
+    unit->ability_ct = g_ability_range_data[unit->action_command.ability_id].ct & 0x7f;
 }
 
 /* Make Charging, Jump, Defending or Performing the unit's only action status, or clear all four
- * with MAIN_UNIT_ACTION_STATE_NONE, and enable or disable the special flags of each status that
+ * with STATUS_ACTION_STATE_NONE, and enable or disable the special flags of each status that
  * changed. NONE and DEFENDING also clear the charging ability CT; PERFORMING sets it from the last
  * ability's CT. KEEP_PERFORMING keeps Performing if the unit has it and otherwise acts as NONE. */
-void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
+void status_set_action_state(unit_stats_t* unit, u8 action_state) {
     u8 old_status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
     s32 battle_id = unit->battle_id;
     u8 status;
@@ -232,36 +232,36 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
     u8 mask;
     u8 changed;
 
-    if (action_state == MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING) {
+    if (action_state == STATUS_ACTION_STATE_KEEP_PERFORMING) {
         /* The Performing bit (0x01) shifted left 3 is PERFORMING (8); without it, NONE (0). */
         action_state = (old_status & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) << 3;
     }
     switch (action_state) {
-    case MAIN_UNIT_ACTION_STATE_NONE:
+    case STATUS_ACTION_STATE_NONE:
         status = 0;
         unit->charged_ability_ct = 0xff;
         break;
-    case MAIN_UNIT_ACTION_STATE_CHARGING:
+    case STATUS_ACTION_STATE_CHARGING:
         status = STATUS_BYTE_MASK(STATUS_ID_CHARGING);
         break;
-    case MAIN_UNIT_ACTION_STATE_JUMPING:
+    case STATUS_ACTION_STATE_JUMPING:
         status = STATUS_BYTE_MASK(STATUS_ID_JUMP);
         break;
-    case MAIN_UNIT_ACTION_STATE_DEFENDING:
+    case STATUS_ACTION_STATE_DEFENDING:
         status = STATUS_BYTE_MASK(STATUS_ID_DEFENDING);
         unit->charged_ability_ct = 0xff;
         break;
-    case MAIN_UNIT_ACTION_STATE_PERFORMING:
+    case STATUS_ACTION_STATE_PERFORMING:
         status = STATUS_BYTE_MASK(STATUS_ID_PERFORMING);
-        main_unit_copy_last_ability_ct(unit);
+        unit_copy_last_ability_ct(unit);
         unit->charged_ability_ct = unit->ability_ct;
         break;
     }
     cleared = status
         ^ (STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
             | STATUS_BYTE_MASK(STATUS_ID_DEFENDING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
-    main_status_change_unit(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), status, MAIN_STATUS_ADD);
-    main_status_change_unit(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), cleared, MAIN_STATUS_REMOVE);
+    status_change_unit(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), status, STATUS_ADD);
+    status_change_unit(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), cleared, STATUS_REMOVE);
 
     changed = old_status ^ unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
     mask = STATUS_BYTE_MASK(STATUS_ID_CHARGING);
@@ -278,8 +278,8 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
     }
 }
 
-/* Pass a BATTLE.BIN unit-setup error (main_battle_load_exception_e) to the empty
- * main_system_report_error hook as source 3. */
-void main_system_handle_battle_load_exception(s32 value) {
-    main_system_report_error(3, value);
+/* Pass a BATTLE.BIN unit-setup error (system_battle_load_exception_e) to the empty
+ * system_report_error hook as source 3. */
+void system_handle_battle_load_exception(s32 value) {
+    system_report_error(3, value);
 }

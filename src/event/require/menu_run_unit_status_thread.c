@@ -80,7 +80,7 @@ void menu_run_unit_status_thread(void) {
         transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_require_panel_selected_portrait_palettes;
+        portrait_palettes = g_unit_panel_selected_portrait_palettes;
     } else {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
@@ -93,7 +93,7 @@ void menu_run_unit_status_thread(void) {
         transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_require_panel_comparison_portrait_palettes;
+        portrait_palettes = g_unit_panel_comparison_portrait_palettes;
     }
 
     /* Build the editor packets once; the second buffer gets a copy of them below. */
@@ -242,7 +242,7 @@ void menu_run_unit_status_thread(void) {
         panel_x = thread->x;
         panel->draw_offset_a.position.x = panel_x - 0x80;
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
-        g_gfx_draw_offset_y = ((g_main_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
+        g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
         panel->draw_offset_a.position.y = thread->shake_y + g_gfx_draw_offset_y;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
         panel->draw_offset_b.position.x = -0x80;

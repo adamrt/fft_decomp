@@ -59,10 +59,10 @@ typedef enum companion_file {
 typedef enum companion_overlay_state {
     COMPANION_OVERLAY_STATE_IDLE = 0,
     COMPANION_OVERLAY_STATE_STUB = 1,      /* an empty function */
-    COMPANION_OVERLAY_STATE_BUNIT = 2,     /* bunit_entrypoint */
-    COMPANION_OVERLAY_STATE_JOBSTTS = 3,   /* jobstts_entrypoint */
-    COMPANION_OVERLAY_STATE_EQUIP = 4,     /* equip_entrypoint */
-    COMPANION_OVERLAY_STATE_CARD_SAVE = 5, /* card_save_run_menu */
+    COMPANION_OVERLAY_STATE_BUNIT = 2,     /* unit_list_entrypoint */
+    COMPANION_OVERLAY_STATE_JOBSTTS = 3,   /* status_screen_entrypoint */
+    COMPANION_OVERLAY_STATE_EQUIP = 4,     /* equipment_entrypoint */
+    COMPANION_OVERLAY_STATE_CARD_SAVE = 5, /* save_run_menu */
 } companion_overlay_state_e;
 
 extern s32 g_menu_companion_overlay_state;

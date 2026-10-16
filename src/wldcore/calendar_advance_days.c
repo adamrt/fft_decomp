@@ -50,7 +50,7 @@ void calendar_advance_days(s32 days) {
     day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
     today = unit_birthday_calculate_day_of_year(month, day);
     for (i = 0; i < 64; i++) {
-        g_main_brave_story_character_ages[i] += years;
+        g_brave_story_character_ages[i] += years;
         if (i == 0) {
             month = script_get_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH);
             day = script_get_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY);
@@ -62,10 +62,10 @@ void calendar_advance_days(s32 days) {
          * 31 December misses those early in the new year (retail quirk). */
         until_birthday = unit_birthday_calculate_day_of_year(month, day) - today;
         if (until_birthday > 0 && days >= until_birthday) {
-            g_main_brave_story_character_ages[i] += 1;
+            g_brave_story_character_ages[i] += 1;
         }
-        if (g_main_brave_story_character_ages[i] >= 100) {
-            g_main_brave_story_character_ages[i] = 99;
+        if (g_brave_story_character_ages[i] >= 100) {
+            g_brave_story_character_ages[i] = 99;
         }
     }
 
@@ -78,19 +78,19 @@ void calendar_advance_days(s32 days) {
     script_set_variable(EVENT_SCRIPT_VAR_MONTH, month);
     script_set_variable(EVENT_SCRIPT_VAR_DAY, day);
 
-    for (i = 0; i < g_main_save_proposition_count; i++) {
-        if (!(g_main_active_propositions[i].flags & PROPOSITION_PROGRESS_RETURNED)) {
-            if (g_main_active_propositions[i].elapsed_days + days >= g_main_active_propositions[i].assigned_days) {
-                g_main_active_propositions[i].elapsed_days = g_main_active_propositions[i].assigned_days;
-                g_main_active_propositions[i].flags |= PROPOSITION_PROGRESS_RETURNED;
-            } else if (g_main_active_propositions[i].flags & PROPOSITION_PROGRESS_RECALLED) {
-                g_main_active_propositions[i].elapsed_days++;
-                g_main_active_propositions[i].flags |= PROPOSITION_PROGRESS_RETURNED;
+    for (i = 0; i < g_proposition_count; i++) {
+        if (!(g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED)) {
+            if (g_proposition_active[i].elapsed_days + days >= g_proposition_active[i].assigned_days) {
+                g_proposition_active[i].elapsed_days = g_proposition_active[i].assigned_days;
+                g_proposition_active[i].flags |= PROPOSITION_PROGRESS_RETURNED;
+            } else if (g_proposition_active[i].flags & PROPOSITION_PROGRESS_RECALLED) {
+                g_proposition_active[i].elapsed_days++;
+                g_proposition_active[i].flags |= PROPOSITION_PROGRESS_RETURNED;
             }
         }
     }
 
-    counter = g_main_proposition_states;
+    counter = g_proposition_states;
     do {
         if (*counter & PROPOSITION_STATE_DAYS_MASK) {
             day = (*counter & PROPOSITION_STATE_DAYS_MASK) - days;
@@ -101,5 +101,5 @@ void calendar_advance_days(s32 days) {
                 | (day & PROPOSITION_STATE_DAYS_MASK);
         }
         counter++;
-    } while ((s32)counter < (s32)(g_main_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
+    } while ((s32)counter < (s32)(g_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
 }

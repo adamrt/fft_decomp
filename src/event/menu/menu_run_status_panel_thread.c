@@ -160,7 +160,7 @@ void menu_run_status_panel_thread(void) {
 
         /* A field_y of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into the
          * upper half. */
-        field_y = g_main_gfx_screen_polarity * 0xf0;
+        field_y = g_gfx_screen_polarity * 0xf0;
         mask = field_y ^ 0xf0;
         mask = -(mask != 0);
         g_gfx_draw_offset_y = mask & 0xf0;

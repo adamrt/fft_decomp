@@ -19,7 +19,7 @@
  * placed in the buffer at y 0xF0. REQUIRE then forces both
  * rectangles to x 0, discarding the horizontal crop position.
  */
-void require_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
+void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const menu_status_thread_t* thread) {
     s32 percent;
     s32 w;

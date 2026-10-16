@@ -70,7 +70,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     record = &g_battle_effect_state_records[record_index];
     entry = &g_battle_effect_geometry_table->entries[emitter_index];
     placement = entry->radial_mesh.placement_flags;
-    ot = main_gfx_get_battle_otag();
+    ot = gfx_get_battle_otag();
     scratch = (effect_ring_mesh_scratch_t*)getScratchAddr(0);
 
     switch (record->callback_phase[callback_slot]) {

@@ -91,7 +91,7 @@ void formation_build_roster_names(void) {
     u8 character;
 
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-        unit = main_party_get_unit(i);
+        unit = party_get_unit(i);
         if (unit->party_id == PARTY_ID_NONE) {
             *out = 0xFE;
             out++;

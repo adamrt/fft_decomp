@@ -31,7 +31,7 @@ s32 formation_has_items(s32 mode) {
     s32 slot;
 
     for (i = 1; i < ITEM_ID_END; i++) {
-        if (g_main_item_quantities[i]) {
+        if (g_item_quantities[i]) {
             has_inventory = 1;
             break;
         }
@@ -55,12 +55,12 @@ s32 formation_has_items(s32 mode) {
 
 /* Return an item's price from the item data table; only the item id bits of the entry are used. */
 s32 shop_get_item_price(s16 item_id) {
-    return g_main_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].price;
+    return g_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].price;
 }
 
 /* Return half of the item-table price, clamped to at least 1. */
 s32 shop_get_item_half_price(s16 item_id) {
-    u32 value = g_main_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].price >> 1;
+    u32 value = g_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].price >> 1;
 
     if (value == 0) {
         value = 1;
@@ -103,7 +103,7 @@ s32 item_get_total_count(s16 item_id) {
  * return the new count; callers pass 0 to read it. */
 s32 fur_shop_adjust_stock(s16 item_id, s32 delta) {
     s32 slot = item_id & ITEM_ENTRY_ID_MASK;
-    s32 value = g_main_item_poached_quantities[slot] + delta;
+    s32 value = g_item_poached_quantities[slot] + delta;
 
     if (value < 0) {
         value = 0;
@@ -111,7 +111,7 @@ s32 fur_shop_adjust_stock(s16 item_id, s32 delta) {
     if (value >= 0x100) {
         value = 0xFF;
     }
-    g_main_item_poached_quantities[slot] = value;
+    g_item_poached_quantities[slot] = value;
     return value;
 }
 
@@ -182,7 +182,7 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
             if (formation_ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
-                    if (g_main_item_weapon_data[item_id].flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE) {
+                    if (g_item_weapon_data[item_id].flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE) {
                         list[0] = item_id;
                         break;
                     }
@@ -200,7 +200,7 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
                         }
                         break;
                     }
-                    if (g_main_item_weapon_data[list[i]].flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE) {
+                    if (g_item_weapon_data[list[i]].flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE) {
                         if (slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND) {
                             list[0] = list[i];
                             break;
@@ -221,9 +221,9 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
             if ((formation_ability_has_two_hands(unit_index)
-                    && (g_main_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
+                    && (g_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                         & WEAPON_FLAG_TWO_HANDS_COMPATIBLE))
-                || (g_main_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
+                || (g_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                     & WEAPON_FLAG_FORCED_TWO_HANDS)) {
                 list[0] = -1;
             } else {
@@ -352,7 +352,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
             if (formation_ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
-                    if (g_main_item_weapon_data[item_id].flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE) {
+                    if (g_item_weapon_data[item_id].flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE) {
                         list[0] = item_id;
                         break;
                     }
@@ -370,7 +370,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                         }
                         break;
                     }
-                    if (g_main_item_weapon_data[list[i]].flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE) {
+                    if (g_item_weapon_data[list[i]].flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE) {
                         list[0] = list[i];
                         break;
                     }
@@ -380,10 +380,9 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
             if ((formation_ability_has_two_hands(unit_index)
-                    && (g_main_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
+                    && (g_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                         & WEAPON_FLAG_TWO_HANDS_COMPATIBLE))
-                || (g_main_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
-                    & WEAPON_FLAG_FORCED_TWO_HANDS)) {
+                || (g_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags & WEAPON_FLAG_FORCED_TWO_HANDS)) {
                 list[0] = -1;
             } else {
                 if (second >= ITEM_ID_THROWABLE_FIRST)
@@ -543,7 +542,7 @@ s32 formation_item_can_equip_in_slot(s16 unit_index, s16 slot, s16 item_id) {
         if (is_nonstandard_weapon) {
             two_swords = 0;
         } else {
-            flags = g_main_item_weapon_data[id].flags;
+            flags = g_item_weapon_data[id].flags;
             forced_two_hands = flags & WEAPON_FLAG_FORCED_TWO_HANDS;
             two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
@@ -554,7 +553,7 @@ s32 formation_item_can_equip_in_slot(s16 unit_index, s16 slot, s16 item_id) {
         if (other_is_nonstandard_weapon) {
             other_two_swords = 0;
         } else {
-            flags = g_main_item_weapon_data[other].flags;
+            flags = g_item_weapon_data[other].flags;
             other_forced_two_hands = flags & WEAPON_FLAG_FORCED_TWO_HANDS;
             other_two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
@@ -704,8 +703,7 @@ s32 formation_item_build_list(s16 unit_id, s16 sort_mode, s8 category, s16* entr
     s32 result;
     s32 list_index;
 
-    if (mode == ITEM_LIST_MODE_MARK_UNEQUIPPABLE
-        && g_main_game_options.fields.show_unequippable_items != GAME_OPTION_ON) {
+    if (mode == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && g_game_options.fields.show_unequippable_items != GAME_OPTION_ON) {
         mode = ITEM_LIST_MODE_EQUIPPABLE;
     }
     item = 1;

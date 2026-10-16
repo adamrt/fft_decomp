@@ -89,7 +89,7 @@ gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id) {
 
     lba = g_battle_map_gns_lba[selected_map];
     if (lba != 0) {
-        if (main_file_request_read_bytes(lba, GNS_INITIAL_LOAD_BYTES, g_battle_map_data_load_buffer) != 0) {
+        if (file_request_read_bytes(lba, GNS_INITIAL_LOAD_BYTES, g_battle_map_data_load_buffer) != 0) {
             return 0;
         }
         return gns_records;
@@ -107,7 +107,7 @@ void* battle_map_start_file_load(
         result = 0;
     } else {
         /* These 32-bit values are aligned within the file row; retail loads both with lw. */
-        if (main_file_request_read_bytes(
+        if (file_request_read_bytes(
                 *(const s32*)load_info->fields.disc_lba_le, *(const s32*)load_info->fields.byte_length_le, destination)
             == 0) {
             return destination;

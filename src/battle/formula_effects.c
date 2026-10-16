@@ -387,7 +387,7 @@ void battle_formula_use_hp_damage_as_action_hit_percent(void) {
     if (state != ACTION_STATE_EXECUTE && percent != 0) {
         return;
     }
-    if (main_util_roll_pass_fail(100, percent) != 0) {
+    if (random_roll_pass_fail(100, percent) != 0) {
         battle_formula_cause_action_miss();
         g_battle_action_target_data->hp_damage = 0;
     }
@@ -423,7 +423,7 @@ void battle_formula_apply_maintenance(void) {
  * sets ACTION_SPECIAL_EFFECT_ADDED_EFFECT. */
 static void battle_formula_roll_conditional_status_proc_inner(void) {
     if (g_battle_action_state == ACTION_STATE_EXECUTE
-        && main_util_roll_pass_fail(100, BATTLE_FORMULA_ADDED_EFFECT_CHANCE) == 0) {
+        && random_roll_pass_fail(100, BATTLE_FORMULA_ADDED_EFFECT_CHANCE) == 0) {
         action_data_t* action = g_battle_action_target_data;
         /* The 16-bit read-modify-write sets the added-effect flag. */
         action->special_effect = action->special_effect | ACTION_SPECIAL_EFFECT_ADDED_EFFECT;
@@ -483,7 +483,7 @@ void battle_formula_select_magic_gun_ability(void) {
     }
     g_battle_action_current_ability.ability_id = id;
     g_battle_action_attacker->action_command.ability_id = id;
-    main_mem_copy_byte_data_source_first(&g_main_ability_range_data[id], &g_battle_action_current_ability.range_data,
+    mem_copy_byte_data_source_first(&g_ability_range_data[id], &g_battle_action_current_ability.range_data,
         sizeof(g_battle_action_current_ability.range_data));
 }
 
@@ -526,7 +526,7 @@ void battle_formula_calculate_katana_break_chance(void) {
     g_battle_action_attacker_data->miss_type = ACTION_MISS_TYPE_CANCELED;
 
     if (g_battle_action_state == ACTION_STATE_EXECUTE
-        && main_util_roll_pass_fail(100, g_battle_action_current_ability.weapon_data.power) != 0) {
+        && random_roll_pass_fail(100, g_battle_action_current_ability.weapon_data.power) != 0) {
         g_battle_action_attacker_data->special_effect = ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN;
     } else {
         g_battle_action_attacker_data->special_effect = ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_BROKEN;
@@ -588,12 +588,12 @@ s32 battle_formula_select_targeted_equipment(void) {
             right_level = -1;
             if (g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE) {
                 right_level
-                    = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]]
+                    = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]]
                           .required_level;
             }
             if (g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] != ITEM_ID_NONE) {
                 left_level
-                    = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]]
+                    = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]]
                           .required_level;
             }
             if (right_level != -1 || left_level != right_level) {
@@ -746,7 +746,7 @@ void battle_formula_apply_status_to_action(void) {
             if (g_battle_action_current_ability.status_infliction.statuses[byte] & (mask = 0x80 >> (status & 7))) {
                 /* Drop the status from the set unless a 24 in 100 roll keeps
                  * it; the preview test cannot pass, as only EXECUTE gets here. */
-                if (main_util_roll_pass_fail(100, 24) != 0 || g_battle_action_state == ACTION_STATE_PREVIEW) {
+                if (random_roll_pass_fail(100, 24) != 0 || g_battle_action_state == ACTION_STATE_PREVIEW) {
                     g_battle_action_current_ability.status_infliction.statuses[byte] ^= mask;
                 }
             }
@@ -794,7 +794,7 @@ void battle_formula_heal_mp_z_times_ten(void) {
     s32 amount;
     action_data_t* action = g_battle_action_target_data;
 
-    amount = g_main_item_secondary_data[index].z;
+    amount = g_item_secondary_data[index].z;
     action->attack_type = ACTION_TYPE_MP_HEALING;
     action->mp_healing = amount * 10;
 }

@@ -67,10 +67,10 @@ void tutorial_start(s32 index) {
         save_init_screen();
         save_build_image(-1);
         bcopy(g_save_work_buffer, &g_tutorial_state.saved_game, sizeof(g_tutorial_state.saved_game));
-        main_file_load_checked_to_address(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_save_work_buffer);
+        file_load_checked_to_address(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_save_work_buffer);
         g_save_work_buffer->options.show_unequippable_items = GAME_OPTION_ON;
-        g_save_work_buffer->options.max_equip_at_job_change = g_main_game_options.fields.max_equip_at_job_change;
-        g_save_work_buffer->options.sound_mode = g_main_game_options.fields.sound_mode;
+        g_save_work_buffer->options.max_equip_at_job_change = g_game_options.fields.max_equip_at_job_change;
+        g_save_work_buffer->options.sound_mode = g_game_options.fields.sound_mode;
         save_restore_image(1);
         g_tutorial_command_active = 0;
         formation_build_roster_names();
@@ -95,7 +95,7 @@ s32 tutorial_step(void) {
         return 1;
     }
     g_tutorial_button_input = PadRead(0);
-    if (g_tutorial_button_input == MAIN_INPUT_RESET_BUTTONS) {
+    if (g_tutorial_button_input == INPUT_RESET_BUTTONS) {
         screen_reset_game();
     }
     g_tutorial_buttons = g_tutorial_button_input;
@@ -136,12 +136,12 @@ static s32 tutorial_opcode_17_end(void) {
     if (g_tutorial_command_active != 0) {
         if (screen_fade_update_out() == 0) {
             g_tutorial_id = 0;
-            main_heap_call_free(g_tutorial_state.messages);
-            main_heap_call_free(g_tutorial_state.script);
+            heap_call_free(g_tutorial_state.messages);
+            heap_call_free(g_tutorial_state.script);
             bcopy(&g_tutorial_state.saved_game, g_save_work_buffer, sizeof(g_tutorial_state.saved_game));
             save_restore_image(1);
             formation_build_roster_names();
-            main_heap_call_free(g_save_work_buffer);
+            heap_call_free(g_save_work_buffer);
             formation_build_record_list(0, (formation_unit_t**)&g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
             return 0;
         }

@@ -79,7 +79,7 @@ typedef struct move_pathfind_scratch {
     u8 target_level;
     u8 unit_id;              /* 0x0d; mount id when riding */
     u8 move_type;            /* 0x0e; move_class_e */
-    u8 cost_table;           /* 0x0f; main_terrain_cost_table_e */
+    u8 cost_table;           /* 0x0f; terrain_cost_table_e */
     u8 movement_3;           /* 0x10 */
     u8 cannot_enter_water;   /* 0x11 */
     u8 will_drown;           /* 0x12 */

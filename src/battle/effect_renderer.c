@@ -493,7 +493,7 @@ static effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s
         g_battle_effect_work_record_peak = g_battle_effect_work_record_count;
     }
     if (work == 0) {
-        main_system_report_stub(1, 0x3E);
+        system_report_stub(1, 0x3E);
     }
     g_battle_effect_free_work_record_head = work->next;
     switch (kind & EFFECT_WORK_KIND_MASK) {
@@ -1215,9 +1215,9 @@ s32 battle_effect_spawn_particle_motion(effect_emitter_values_t* values, effect_
     return battle_effect_get_random_between(values->lifetime_min, values->lifetime_max);
 }
 
-/* Calls the empty main_system_report_stub with (1, 0x50). No code calls it. */
+/* Calls the empty system_report_stub with (1, 0x50). No code calls it. */
 void battle_effect_report_0x50(void) {
-    main_system_report_stub(1, 0x50);
+    system_report_stub(1, 0x50);
 }
 
 /* Return a signed 16-bit value in the half-open interval between two bounds. */

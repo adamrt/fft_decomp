@@ -85,7 +85,7 @@ void menu_run_scrolling_ability_list_thread(void) {
 
     if (g_battle_menu_scroll_list_depth != 0) {
         /* Nested list: page pair in the event overlay area, 0x1000 bytes in. */
-        page = (menu_list_page_t*)(g_main_heap_companion_overlay_load_address + 0x1000);
+        page = (menu_list_page_t*)(g_heap_companion_overlay_load_address + 0x1000);
         base = page;
     } else {
         /* Outermost list: page pair at +0x388 of the current subsystem workspace. */
@@ -171,7 +171,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
 
     if (g_battle_menu_scroll_list_depth == 2) {
-        buffer = g_main_heap_companion_overlay_load_address + 0x2000;
+        buffer = g_heap_companion_overlay_load_address + 0x2000;
     } else {
         StoreImage(&g_battle_menu_ability_list_clut_rect, (u32*)saved_clut);
         buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
@@ -443,10 +443,10 @@ void menu_run_scrolling_ability_list_thread(void) {
          * once the hold passes the acceleration delay. */
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
-            if (hold_time < g_main_menu_scroll_accel_delay) {
-                step = g_main_menu_scroll_slow_step;
+            if (hold_time < g_menu_scroll_accel_delay) {
+                step = g_menu_scroll_slow_step;
             } else {
-                step = g_main_menu_scroll_fast_step;
+                step = g_menu_scroll_fast_step;
             }
             scroll_accum += scroll_delta * (step << 1);
         }
@@ -460,7 +460,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             repeat = script_get_event_initial_repeat_counter();
             scroll_accum = 0;
             scroll_delta = 0;
-            if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
+            if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
                 g_script_event_input |= g_script_event_current_input & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
             menu_free_memory(buffer);

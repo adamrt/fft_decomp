@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* roster */
-/* The persistent roster, g_main_party_units, holds 16 formation slots
+/* The persistent roster, g_party_units, holds 16 formation slots
  * followed by four guest slots, each with the party_unit_t 0x100-byte stride. */
 enum {
     PARTY_MEMBER_SLOT_COUNT = 16,

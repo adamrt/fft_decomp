@@ -15,8 +15,8 @@
 #include "psx/types.h"
 
 static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
-static void open_gfx_draw_animated_render_record(display_object_animated_t* actor, u32* ot);
-static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot);
+static void window_draw_animated_record_56(display_object_animated_t* actor, u32* ot);
+static void window_draw_image_record_56(window_record_56_t* record, u32* ot);
 static void window_draw_image_record(window_render_record_t* object, GsOT* ot);
 
 #ifdef FFT_WLDCORE
@@ -57,22 +57,22 @@ void window_init_record_pools(void) {
     s32 i;
     CVECTOR* color;
 
-    g_open_gfx_primitive_count = 0;
-    g_open_gfx_next_render_record_56 = 0;
-    g_open_gfx_next_render_record_36 = 0;
-    g_open_gfx_render_record_pointer_count = 0;
+    g_window_primitive_count = 0;
+    g_window_next_render_record_56 = 0;
+    g_window_next_render_record_36 = 0;
+    g_window_render_record_pointer_count = 0;
 
     for (i = 0; i < OPEN_GFX_RENDER_RECORD_CAPACITY; i++) {
-        g_open_gfx_render_records_36[i].flags = DISPLAY_OBJECT_ANIMATED;
-        g_open_gfx_render_records_36[i].priority = 8;
-        color = &g_open_gfx_render_records_36[i].color;
+        g_window_render_records_36[i].flags = DISPLAY_OBJECT_ANIMATED;
+        g_window_render_records_36[i].priority = 8;
+        color = &g_window_render_records_36[i].color;
         color->b = color->g = color->r = 0x80;
     }
 
     for (i = 0; i < OPEN_GFX_RENDER_RECORD_CAPACITY; i++) {
-        g_open_gfx_render_records_56[i].flags = DISPLAY_OBJECT_IMAGE;
-        g_open_gfx_render_records_56[i].ot_layer = 8;
-        color = &g_open_gfx_render_records_56[i].color;
+        g_window_render_records_56[i].flags = DISPLAY_OBJECT_IMAGE;
+        g_window_render_records_56[i].ot_layer = 8;
+        color = &g_window_render_records_56[i].color;
         color->b = color->g = color->r = 0x80;
     }
 }
@@ -81,11 +81,11 @@ void window_init_record_pools(void) {
 #ifdef FFT_OPEN
 /* Clear the active buffer's 16-entry ordering table and release the frame's
  * sprite primitives. */
-void open_gfx_clear_current_otag(void) {
+void gfx_clear_current_otag(void) {
     u32 stack_padding[2];
 
-    ClearOTagR(g_open_gfx_otags[g_main_gfx_active_buffer_index], 0x10);
-    g_open_gfx_primitive_count = 0;
+    ClearOTagR(g_gfx_otags[g_gfx_active_buffer_index], 0x10);
+    g_window_primitive_count = 0;
 }
 #endif
 
@@ -93,13 +93,13 @@ void open_gfx_clear_current_otag(void) {
 /* Draw the listed display objects into the ordering table: ANIMATED objects
  * through their animation sequence, IMAGE objects as one sprite. Objects with
  * BLANK or HIDDEN set are skipped, and nothing is drawn while
- * MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS is set. */
+ * SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS is set. */
 void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
     void* object;
     s32* flags;
     s32 i;
 
-    if (g_main_system_flags & MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
+    if (g_system_flags & SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
         return;
     }
     for (i = 0; i < count; i++) {
@@ -123,7 +123,7 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
 /* Draw the listed render records into the ordering table. A record with BLANK or
  * HIDDEN set is skipped; ANIMATED selects the 36-byte layout and IMAGE the
  * 56-byte one. Nothing is drawn while
- * OPEN_SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN is set, which no code in
+ * SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN is set, which no code in
  * OPEN.BIN does. */
 void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
     s32 i;
@@ -131,7 +131,7 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
     u32* flags_word;
     u32 flags;
 
-    if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN) != 0) {
+    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN) != 0) {
         return;
     }
 
@@ -143,10 +143,10 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
         if ((flags & (DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) == 0) {
             if ((flags & DISPLAY_OBJECT_ANIMATED) != 0) {
                 display_object_animated_t* animated = object;
-                open_gfx_draw_animated_render_record(animated, otag);
+                window_draw_animated_record_56(animated, otag);
             } else if ((flags & DISPLAY_OBJECT_IMAGE) != 0) {
-                open_render_record_56_t* window = object;
-                open_gfx_draw_window_record(window, otag);
+                window_record_56_t* window = object;
+                window_draw_image_record_56(window, otag);
             }
         }
     }
@@ -159,7 +159,7 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
  * ordering table.
  *
  * UNTINTED uses the object's color as is, otherwise the global fade tint is
- * applied. The frame counter steps unless MAIN_SYSTEM_FLAG_FREEZE_ANIMATION is
+ * applied. The frame counter steps unless SYSTEM_FLAG_FREEZE_ANIMATION is
  * set, or always with ANIMATE_WHILE_PAUSED. SEMI_TRANSPARENT replaces each
  * part's own blend mode with the object's BLEND_RATE_MASK bits.
  *
@@ -219,8 +219,7 @@ void window_draw_animated_record(display_object_animated_t* object, GsOT* ot) {
     sprite.r = color.r;
     sprite.g = color.g;
     sprite.b = color.b;
-    if ((object->flags & DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED)
-        || !(g_main_system_flags & MAIN_SYSTEM_FLAG_FREEZE_ANIMATION)) {
+    if ((object->flags & DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED) || !(g_system_flags & SYSTEM_FLAG_FREEZE_ANIMATION)) {
         object->anim_counter = object->anim_counter + 1;
     }
 
@@ -399,13 +398,13 @@ static void window_draw_image_record(window_render_record_t* object, GsOT* ot) {
 /* Advances one OPEN sprite actor's animation and emits its parts into an
  * ordering table.
  *
- * The actor names an animation in the table at g_open_gfx_record_36_animations; each animation is
+ * The actor names an animation in the table at g_window_record_36_animations; each animation is
  * a frame count followed by {sprite_id, duration} pairs, and a duration of
- * 0xffff holds the frame indefinitely. The named sprite in g_open_gfx_record_36_sprites is a
+ * 0xffff holds the frame indefinitely. The named sprite in g_window_record_36_sprites is a
  * part list whose odd 32-bit entries carry the texture page, semi-transparency and
  * palette bits and whose byte fields give the part offset, size and texture
  * coordinates. Each part consumes one DR_MODE + SPRT pair from the shared
- * 32-entry per-buffer primitive pool at g_open_gfx_sprite_primitive_pool.
+ * 32-entry per-buffer primitive pool at g_window_sprite_primitive_pool.
  *
  * Both high halves are masked before the shift. The code is the same as a
  * plain shift, but it matches the target's frame: CSE shares the 0xffff0000
@@ -415,9 +414,9 @@ static void window_draw_image_record(window_render_record_t* object, GsOT* ot) {
  * unreferenced 8-byte reload slot (0x38 and 0x40). Reading x and y into their
  * own locals keeps the target's x + byte operand order and v0/v1 allocation.
  */
-static void open_gfx_draw_animated_render_record(display_object_animated_t* actor, u32* ot) {
-    display_object_cel_header_t** sprites = g_open_gfx_record_36_sprites;
-    display_object_sequence_t* anim = g_open_gfx_record_36_animations[actor->sequence];
+static void window_draw_animated_record_56(display_object_animated_t* actor, u32* ot) {
+    display_object_cel_header_t** sprites = g_window_record_36_sprites;
+    display_object_sequence_t* anim = g_window_record_36_animations[actor->sequence];
     display_object_cel_header_t* cel;
     u32* sprite;
     s32 value;
@@ -456,52 +455,46 @@ loop:
     clut_y = (cel->packed_clut_origin & 0xffff0000) >> 16;
 
     for (i = 0; i < part_count; i++) {
-        if (g_open_gfx_primitive_count >= 0x20) {
+        if (g_window_primitive_count >= 0x20) {
             return;
         }
-        setRGB0((&g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt),
+        setRGB0((&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt),
             actor->color.r, actor->color.g, actor->color.b);
-        SetSprt(&g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt);
+        SetSprt(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt);
         value = ((part_count - i) * 2) | 1;
-        SetDrawMode(&g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].mode,
-            1, 0, GetTPage(PART(value)->texture_flags >> 2, PART(value)->blend_rate, tpage_x, tpage_y), 0);
+        SetDrawMode(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].mode, 1, 0,
+            GetTPage(PART(value)->texture_flags >> 2, PART(value)->blend_rate, tpage_x, tpage_y), 0);
         if (PART(value)->semi_transparent) {
-            SetSemiTrans(
-                &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt, 1);
+            SetSemiTrans(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt, 1);
         } else {
-            SetSemiTrans(
-                &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt, 0);
+            SetSemiTrans(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt, 0);
         }
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.x0
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0
             = (x = actor->position.x, x + PART(value)->x_offset - 0x80);
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.y0
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0
             = (y = actor->position.y, y + PART(value)->y_offset - 0x80);
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.u0
-            = PART(value)->u;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.v0
-            = PART(value)->v;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.w
-            = PART(value)->width;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.h
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0 = PART(value)->u;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.v0 = PART(value)->v;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.w = PART(value)->width;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.h
             = PART(value)->height;
         /* A byte-field palette read shortens the native 32-bit flags load. */
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.clut
-            = GetClut(clut_x
-                    + ((actor->palette == 0 || (PART(value)->use_part_palette)) ? ((sprite[value] >> 12) & 0xf0)
-                                                                                : ((actor->palette - 1) * 0x10)),
-                clut_y);
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.clut = GetClut(clut_x
+                + ((actor->palette == 0 || (PART(value)->use_part_palette)) ? ((sprite[value] >> 12) & 0xf0)
+                                                                            : ((actor->palette - 1) * 0x10)),
+            clut_y);
         AddPrim(&ot[actor->priority],
-            &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt);
+            &g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt);
         AddPrim(&ot[actor->priority],
-            &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].mode);
-        g_open_gfx_primitive_count++;
+            &g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].mode);
+        g_window_primitive_count++;
     }
 }
 #endif
 
 #ifdef FFT_OPEN
 /* Emits one 56-byte render record as a DR_MODE + SPRT pair from the shared
- * 32-entry per-buffer primitive pool at g_open_gfx_sprite_primitive_pool.
+ * 32-entry per-buffer primitive pool at g_window_sprite_primitive_pool.
  *
  * 8BIT_CLUT and BLEND_RATE_MASK select the texture page mode, SEMI_TRANSPARENT
  * enables semi-transparency, and POP_IN runs the pop-in scale: pop_in_step counts the
@@ -514,7 +507,7 @@ loop:
  * otherwise unused px/py/qx/qy/cx/qu/qv copies reproduce that. The SPRT casts
  * on the color stores keep their index order and the 0x50-byte frame.
  */
-static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot) {
+static void window_draw_image_record_56(window_record_56_t* record, u32* ot) {
     point32_t clut;
     RECT scaled;
     s32 step;
@@ -526,10 +519,10 @@ static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot
     u16 qu;
     u16 qv;
 
-    if (g_open_gfx_primitive_count >= 0x20) {
+    if (g_window_primitive_count >= 0x20) {
         return;
     }
-    SetSprt(&g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt);
+    SetSprt(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt);
 
     if (record->palette != 0) {
         clut.x = (cx = record->tail.clut.x) + (record->palette - 1) * 0x10;
@@ -537,37 +530,34 @@ static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot
     } else {
         clut = record->tail.clut;
     }
-    g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.clut
+    g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.clut
         = GetClut(clut.x, clut.y);
-    setRGB0((&g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt),
+    setRGB0((&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt),
         record->color.r, record->color.g, record->color.b);
 
-    SetDrawMode(&g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].mode, 1,
-        0,
+    SetDrawMode(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].mode, 1, 0,
         GetTPage(((record->flags & DISPLAY_OBJECT_8BIT_CLUT) >> 2) != 0,
             (record->flags & DISPLAY_OBJECT_BLEND_RATE_MASK) >> 6, record->vram_x, record->vram_y),
         0);
 
     if (record->flags & DISPLAY_OBJECT_SEMI_TRANSPARENT) {
-        SetSemiTrans(
-            &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt, 1);
+        SetSemiTrans(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt, 1);
     } else {
-        SetSemiTrans(
-            &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt, 0);
+        SetSemiTrans(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt, 0);
     }
 
     if (record->flags & DISPLAY_OBJECT_POP_IN) {
         gfx_calculate_scaled_rectangle(record->pop_in_step / 2, &record->tail.quad, &scaled);
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.x0
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0
             = scaled.x + (px = record->x);
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.y0
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0
             = scaled.y + (py = record->y);
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.u0
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0
             = record->tail.quad.x + scaled.x;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.v0
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.v0
             = record->tail.quad.y + scaled.y;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.w = scaled.w;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.h = scaled.h;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.w = scaled.w;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.h = scaled.h;
         step = record->pop_in_step;
         if (step / 2 >= 4) {
             record->pop_in_step = 0;
@@ -576,25 +566,23 @@ static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot
             record->pop_in_step = step + 1;
         }
     } else {
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.x0 = qx
-            = record->x;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.y0 = qy
-            = record->y;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.u0 = qu
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0 = qx = record->x;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0 = qy = record->y;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0 = qu
             = record->tail.quad.x;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.v0 = qv
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.v0 = qv
             = record->tail.quad.y;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.w
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.w
             = record->tail.quad.w;
-        g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt.h
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.h
             = record->tail.quad.h;
     }
 
     AddPrim(&ot[record->ot_layer],
-        &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].sprt);
+        &g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt);
     AddPrim(&ot[record->ot_layer],
-        &g_open_gfx_sprite_primitive_pool[g_main_gfx_active_buffer_index][g_open_gfx_primitive_count].mode);
-    g_open_gfx_primitive_count++;
+        &g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].mode);
+    g_window_primitive_count++;
 }
 #endif
 
@@ -621,16 +609,16 @@ s32 window_append_animated_record(void** queue, s32* count) {
 /* Appends the next free 36-byte render record to `list`, resets it and
  * returns its pool index. */
 s32 window_append_animated_record(void** list, s32* count) {
-    list[*count] = &g_open_gfx_render_records_36[g_open_gfx_next_render_record_36];
-    g_open_gfx_render_records_36[g_open_gfx_next_render_record_36].flags
+    list[*count] = &g_window_render_records_36[g_window_next_render_record_36];
+    g_window_render_records_36[g_window_next_render_record_36].flags
         &= ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_SEMI_TRANSPARENT);
-    g_open_gfx_render_records_36[g_open_gfx_next_render_record_36].palette = 0;
+    g_window_render_records_36[g_window_next_render_record_36].palette = 0;
     /* Direct color members change the shared base and add four instructions. */
-    (&g_open_gfx_render_records_36[g_open_gfx_next_render_record_36].color)->r = 0x80;
-    (&g_open_gfx_render_records_36[g_open_gfx_next_render_record_36].color)->g = 0x80;
-    (&g_open_gfx_render_records_36[g_open_gfx_next_render_record_36].color)->b = 0x80;
+    (&g_window_render_records_36[g_window_next_render_record_36].color)->r = 0x80;
+    (&g_window_render_records_36[g_window_next_render_record_36].color)->g = 0x80;
+    (&g_window_render_records_36[g_window_next_render_record_36].color)->b = 0x80;
     (*count)++;
-    return g_open_gfx_next_render_record_36++;
+    return g_window_next_render_record_36++;
 }
 #endif
 
@@ -661,17 +649,17 @@ s32 window_append_record(void** queue, s32* count) {
 /* Appends the next free 56-byte render record to `list`, resets it and
  * returns its pool index. */
 s32 window_append_record(void** list, s32* count) {
-    list[*count] = &g_open_gfx_render_records_56[g_open_gfx_next_render_record_56];
-    g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].flags
+    list[*count] = &g_window_render_records_56[g_window_next_render_record_56];
+    g_window_render_records_56[g_window_next_render_record_56].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_SEMI_TRANSPARENT);
-    g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].palette = 0;
+    g_window_render_records_56[g_window_next_render_record_56].palette = 0;
     /* Direct color members change the shared base and add four instructions. */
-    (&g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].color)->r = 0x80;
-    (&g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].color)->g = 0x80;
-    (&g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].color)->b = 0x80;
-    g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].pop_in_step = 0;
+    (&g_window_render_records_56[g_window_next_render_record_56].color)->r = 0x80;
+    (&g_window_render_records_56[g_window_next_render_record_56].color)->g = 0x80;
+    (&g_window_render_records_56[g_window_next_render_record_56].color)->b = 0x80;
+    g_window_render_records_56[g_window_next_render_record_56].pop_in_step = 0;
     (*count)++;
-    return g_open_gfx_next_render_record_56++;
+    return g_window_next_render_record_56++;
 }
 #endif
 

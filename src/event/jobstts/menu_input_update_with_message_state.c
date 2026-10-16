@@ -18,7 +18,7 @@
  * window-open sound), 2 after it and 0 once it has ended. Any repeat input
  * starts a five-frame timer during which L2 is masked out.
  */
-void jobstts_menu_input_update_with_message_state(void) {
+void menu_input_update_with_message_state(void) {
     s32 running = 0;
     s32 frame;
 
@@ -55,6 +55,6 @@ void jobstts_menu_input_update_with_message_state(void) {
         g_menu_input_lock_mode = 0;
     }
     if (g_text_thread_running_state == 1) {
-        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
+        g_sound_queued_effect_id = SOUND_SFX_WINDOW_OPEN;
     }
 }

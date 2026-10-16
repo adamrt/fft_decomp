@@ -83,7 +83,7 @@ static s32 battle_move_get_weather_terrain_cost(void) {
 battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stats_t* unit) {
     if (unit->job_id < JOB_ID_CHOCOBO || unit->job_id > JOB_ID_RED_CHOCOBO)
         return BATTLE_CHOCOBO_MOUNT_NONE;
-    if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_UNMOUNTABLE) != 0)
+    if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_UNMOUNTABLE) != 0)
         return BATTLE_CHOCOBO_MOUNT_NONE;
     if (unit->mount_info != 0)
         return BATTLE_CHOCOBO_MOUNT_PAIRED;
@@ -100,7 +100,7 @@ battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stat
  *
  * `mount` and `blocked` hold the 0xFF record fill and terrain-cost sentinel,
  * and the cost table base is loaded before its row offset is added: literal
- * constants and `g_main_terrain_movement_cost_tables[cost_table]` let sched1 reorder the pre-loop
+ * constants and `g_terrain_movement_cost_tables[cost_table]` let sched1 reorder the pre-loop
  * `li s2`/`li a3`/`lbu` sequence.
  */
 static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
@@ -182,32 +182,32 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
 
     weather = battle_move_get_weather_terrain_cost();
     if (movement[2] & BATTLE_MOVEMENT_SET_3_FLY) {
-        config->cost_table = MAIN_TERRAIN_COST_TABLE_FLY_TELEPORT;
+        config->cost_table = TERRAIN_COST_TABLE_FLY_TELEPORT;
         config->move_type = MOVE_CLASS_FLY;
         config->fly_or_teleport = 1;
     } else if (movement[1] & (BATTLE_MOVEMENT_SET_2_TELEPORT | BATTLE_MOVEMENT_SET_2_TELEPORT_2)) {
-        config->cost_table = MAIN_TERRAIN_COST_TABLE_FLY_TELEPORT;
+        config->cost_table = TERRAIN_COST_TABLE_FLY_TELEPORT;
         config->movement_set_2 = movement[1];
         config->move_type = MOVE_CLASS_TELEPORT;
         config->fly_or_teleport = 1;
     } else {
         if (movement[2] & BATTLE_MOVEMENT_SET_3_FLOAT) {
-            config->cost_table = MAIN_TERRAIN_COST_TABLE_FLOAT;
+            config->cost_table = TERRAIN_COST_TABLE_FLOAT;
             config->move_type = MOVE_CLASS_FLOAT;
         } else if (movement[2] & BATTLE_MOVEMENT_SET_3_MOVE_ON_LAVA) {
-            config->cost_table = MAIN_TERRAIN_COST_TABLE_LAVA;
+            config->cost_table = TERRAIN_COST_TABLE_LAVA;
             config->move_type = MOVE_CLASS_LAVA;
         } else if (movement[2] & BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER) {
-            config->cost_table = MAIN_TERRAIN_COST_TABLE_WATER;
+            config->cost_table = TERRAIN_COST_TABLE_WATER;
             config->move_type = MOVE_CLASS_WATER_SURFACE;
         } else if (movement[2] & BATTLE_MOVEMENT_SET_3_WALK_ON_WATER) {
-            config->cost_table = MAIN_TERRAIN_COST_TABLE_WATER;
+            config->cost_table = TERRAIN_COST_TABLE_WATER;
             config->move_type = MOVE_CLASS_WATER_DEPTH_ONE;
         } else if (movement[2] & BATTLE_MOVEMENT_SET_3_MOVE_UNDERWATER) {
-            config->cost_table = MAIN_TERRAIN_COST_TABLE_UNDERWATER;
+            config->cost_table = TERRAIN_COST_TABLE_UNDERWATER;
             config->move_type = MOVE_CLASS_UNDERWATER;
         } else {
-            config->cost_table = MAIN_TERRAIN_COST_TABLE_DEFAULT;
+            config->cost_table = TERRAIN_COST_TABLE_DEFAULT;
             config->move_type = MOVE_CLASS_NORMAL;
         }
     }
@@ -234,12 +234,12 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
      * Any Ground, 1 for every passable surface. */
     ignore_terrain = movement[1] & BATTLE_MOVEMENT_SET_2_ANY_GROUND;
     i = 0;
-    blocked = MAIN_TERRAIN_COST_BLOCKED;
-    table = g_main_terrain_movement_cost_tables[0];
+    blocked = TERRAIN_COST_BLOCKED;
+    table = g_terrain_movement_cost_tables[0];
     table += config->cost_table * 64;
     for (; i < 0x40; i++) {
         byte = table[i];
-        if (byte == MAIN_TERRAIN_COST_WEATHER) {
+        if (byte == TERRAIN_COST_WEATHER) {
             byte = weather;
         } else if (ignore_terrain && byte != blocked) {
             byte = 1;
@@ -1370,7 +1370,7 @@ static s32 battle_move_roll_teleport(void) {
         dx = -dx;
     if (dy < 0)
         dy = -dy;
-    return main_util_roll_pass_fail(100, ((dx + dy) - ctx->move) * 10);
+    return random_roll_pass_fail(100, ((dx + dy) - ctx->move) * 10);
 }
 
 /* padding */
@@ -1961,7 +1961,7 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         config->unit_size = 6;
         config->movement_set_3 = 0;
         g_battle_move_weather_terrain_cost = battle_move_get_weather_terrain_cost();
-        config->cost_table = MAIN_TERRAIN_COST_TABLE_DEFAULT;
+        config->cost_table = TERRAIN_COST_TABLE_DEFAULT;
         config->move_type = MOVE_CLASS_NORMAL;
         config->movement_3 = 0;
         g_battle_move_pathing_ignore_terrain = 0;
@@ -1973,8 +1973,8 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
          * (QUIRKS.md). */
         g_battle_move_pathing_scratch = config->cost_table;
         for (i = 0; i < 256; i++) {
-            g_battle_move_terrain_cost = g_main_terrain_movement_cost_tables[g_battle_move_pathing_scratch][i];
-            if (g_battle_move_terrain_cost == MAIN_TERRAIN_COST_WEATHER) {
+            g_battle_move_terrain_cost = g_terrain_movement_cost_tables[g_battle_move_pathing_scratch][i];
+            if (g_battle_move_terrain_cost == TERRAIN_COST_WEATHER) {
                 g_battle_move_terrain_cost = g_battle_move_weather_terrain_cost;
             }
             if ((flags & MOVE_PATHFIND_IGNORE_TERRAIN_COST) && g_battle_move_pathing_scratch != 0xFF) {
@@ -2008,7 +2008,7 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         state->frontier_max_remaining_range = config->move + 1;
         g_battle_move_pathing_resume_pass = 0;
     } else {
-        main_mem_copy_byte_data_source_first(
+        mem_copy_byte_data_source_first(
             g_battle_ai_unit_snapshot_storage, getScratchAddr(0), PSX_SCRATCHPAD_BYTE_COUNT);
     }
     /* Each pass snapshots and clears the queued flags first, so tiles queued while
@@ -2017,7 +2017,7 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         if (check_budget && battle_ai_is_pathfinding_budget_exhausted() && completed_pass) {
             g_battle_move_pathing_resume_pass = i;
             *suspended = 1;
-            main_mem_copy_byte_data_source_first(
+            mem_copy_byte_data_source_first(
                 getScratchAddr(0), g_battle_ai_unit_snapshot_storage, PSX_SCRATCHPAD_BYTE_COUNT);
             return &g_battle_move_path;
         }
@@ -2176,7 +2176,7 @@ s32 battle_ai_propagate_target_movement(
         config->ai_propagation_mode = 1;
     } else {
         /* A direct scratchpad address avoids an extra linker-address addiu. */
-        main_mem_copy_byte_data_source_first(
+        mem_copy_byte_data_source_first(
             g_battle_ai_unit_snapshot_storage, getScratchAddr(0), PSX_SCRATCHPAD_BYTE_COUNT);
     }
     if (config->move_type == MOVE_CLASS_TELEPORT) {
@@ -2190,7 +2190,7 @@ s32 battle_ai_propagate_target_movement(
             if (check_budget && battle_ai_is_pathfinding_budget_exhausted() && completed_pass) {
                 g_battle_ai_propagation_resume_pass = pass;
                 *suspended = 1;
-                main_mem_copy_byte_data_source_first(
+                mem_copy_byte_data_source_first(
                     getScratchAddr(0), g_battle_ai_unit_snapshot_storage, PSX_SCRATCHPAD_BYTE_COUNT);
                 return 0;
             }
@@ -2603,7 +2603,7 @@ static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
     if (weapon >= ITEM_ID_SHIELD_FIRST) {
         weapon = ITEM_ID_NOTHING;
     }
-    data = &g_main_item_weapon_data[weapon];
+    data = &g_item_weapon_data[weapon];
     range = data->range;
     flags = data->flags;
     panel = &g_battle_target_panels[index];
@@ -2749,7 +2749,7 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
     u8 vertical;
 
     range = 1;
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     unit = &g_battle_unit_stats[action.actor_id];
     vertical = 2;
     if (unit->job_id == JOB_ID_MIME) {
@@ -2766,7 +2766,7 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
         ability_id = abilities[i];
         if (ability_id >= ABILITY_ID_JUMP_FIRST && ability_id < ABILITY_ID_CHARGE_FIRST) {
             jump_index = ability_id - ABILITY_ID_JUMP_FIRST;
-            jump = &g_main_jump_ability_data[(u16)jump_index];
+            jump = &g_ability_jump_data[(u16)jump_index];
             jump_vertical = jump->vertical * 2;
             if (range < jump->range) {
                 range = jump->range;
@@ -2915,9 +2915,9 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
     s32 x;
     u8 y;
 
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     unit = &g_battle_unit_stats[action.actor_id];
-    ability = &g_main_ability_range_data[action.ability_id];
+    ability = &g_ability_range_data[action.ability_id];
     range = ability->range;
     aoe = ability->aoe;
     flags_1 = ability->flags_1;
@@ -2987,7 +2987,7 @@ static s32 battle_target_set_weapon_attack_panels(const action_command_t* source
     unit_stats_t* unit;
     s32 idx;
 
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     unit = &g_battle_unit_stats[action.actor_id];
     idx = unit->position.y * g_battle_map_max_x + unit->x;
     battle_target_clear_panel_data();
@@ -3164,7 +3164,7 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
 
     /* mode 1 takes the range from the ability's range data; mode 2 spreads `range`
      * directly, bit 7 leaving out the unit's own tile. */
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     mode = 0;
     if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
         return TARGET_PANELS_INVALID;
@@ -3173,7 +3173,7 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return TARGET_PANELS_INVALID;
     }
-    switch (g_main_action_menu_types_by_skillset[action.skillset_id]) {
+    switch (g_command_menu_types_by_skillset[action.skillset_id]) {
     case ACTION_MENU_TYPE_DEFAULT:
     case ACTION_MENU_TYPE_MONSTER:
         ability_id = action.ability_id;
@@ -3189,8 +3189,8 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
         range = unit->move | 0x80;
         break;
     case ACTION_MENU_TYPE_ELEMENTS:
-        ability_id = g_main_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)]
-                .surface.type];
+        ability_id
+            = g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
         mode = 1;
         break;
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
@@ -3220,7 +3220,7 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
         if (ability_id >= ABILITY_ID_ITEM_FIRST) {
             return TARGET_PANELS_INVALID;
         }
-        ability = &g_main_ability_range_data[ability_id];
+        ability = &g_ability_range_data[ability_id];
         range = ability->range;
         flags = ability->flags_2;
         if ((ability->flags_1 & ABILITY_SECONDARY_FLAG_1_AUTO) && range == 0
@@ -3258,7 +3258,7 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
 
     /* mode 1 runs the green-panel pass for an ability, mode 2 keeps only the target
      * tile, and mode 0 means the calculator already did the work. */
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     mode = 1;
     if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
         return -1;
@@ -3270,7 +3270,7 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
     if (action.targeting_type == BATTLE_TARGETING_TYPE_UNIT && action.target_id >= BATTLE_UNIT_SLOT_COUNT) {
         return -1;
     }
-    switch (g_main_action_menu_types_by_skillset[action.skillset_id]) {
+    switch (g_command_menu_types_by_skillset[action.skillset_id]) {
     case ACTION_MENU_TYPE_DEFAULT:
     case ACTION_MENU_TYPE_MONSTER:
         ability_id = action.ability_id;
@@ -3356,7 +3356,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
     s32 distance;
     s32 result;
 
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     unit_id = action.actor_id;
     if (unit_id >= BATTLE_UNIT_SLOT_COUNT) {
         return -1;
@@ -3365,11 +3365,11 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
-    menu_type = g_main_action_menu_types_by_skillset[action.skillset_id];
+    menu_type = g_command_menu_types_by_skillset[action.skillset_id];
     ability_flags = 0;
     if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MONSTER) {
         /* Retail indexes by the id's low byte, so abilities 0x100 and up read another ability's flags. */
-        ability_flags = g_main_ability_range_data[(u8)action.ability_id].flags_1;
+        ability_flags = g_ability_range_data[(u8)action.ability_id].flags_1;
     }
     if (menu_type == ACTION_MENU_TYPE_ATTACK || menu_type == ACTION_MENU_TYPE_CHARGE
         || (ability_flags & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE)) {
@@ -3389,7 +3389,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
         if (weapon_id >= ITEM_ID_SHIELD_FIRST) {
             return -1;
         }
-        flags = g_main_item_weapon_data[weapon_id].flags;
+        flags = g_item_weapon_data[weapon_id].flags;
     } else {
         if (action.targeting_type == BATTLE_TARGETING_TYPE_UNIT) {
             if (action.target_id >= BATTLE_UNIT_SLOT_COUNT) {
@@ -3686,7 +3686,7 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
     s32 i;
     s32 j;
 
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     type = action.calculator_type;
     multiplier = action.calculator_multiplier;
     actor = &g_battle_unit_stats[action.actor_id];
@@ -3696,8 +3696,8 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
     if (multiplier < ABILITY_ID_MATH_FIRST || multiplier >= ABILITY_ID_REACTION_FIRST) {
         return -1;
     }
-    type_entry = &g_main_math_rsm_ability_data[type - ABILITY_ID_MATH_FIRST];
-    multiplier_entry = &g_main_math_rsm_ability_data[multiplier - ABILITY_ID_MATH_FIRST];
+    type_entry = &g_ability_math_rsm_data[type - ABILITY_ID_MATH_FIRST];
+    multiplier_entry = &g_ability_math_rsm_data[multiplier - ABILITY_ID_MATH_FIRST];
     type_flags = *type_entry;
     multiplier_flags = *multiplier_entry;
     if (!(type_flags & CALCULATOR_ATTRIBUTE_MASK) || !(multiplier_flags & CALCULATOR_MULTIPLE_MASK)
@@ -3743,7 +3743,7 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
         hit = 0;
         if (multiplier_flags & CALCULATOR_MULTIPLE_PRIME) {
             for (j = 0; j < CALCULATOR_PRIME_COUNT; j++) {
-                if (g_main_calculator_primes[j] == value) {
+                if (g_ability_calculator_primes[j] == value) {
                     hit = 1;
                     break;
                 }
@@ -3773,7 +3773,7 @@ static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
     u8 level;
     map_tile_t* tile;
 
-    main_util_copy_action_data(action, &action_copy);
+    action_copy_data(action, &action_copy);
     /* The byte locals keep only the low byte of each 16-bit coordinate, as retail does. */
     x = action_copy.target_position.vx;
     y = action_copy.target_position.vz;
@@ -3826,8 +3826,8 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
     u8 aoe;
     u8 vertical;
 
-    main_util_copy_action_data(action, &action_copy);
-    ability = &g_main_ability_range_data[action_copy.ability_id];
+    action_copy_data(action, &action_copy);
+    ability = &g_ability_range_data[action_copy.ability_id];
     flags_1 = ability->flags_1;
     flags_2 = ability->flags_2;
     aoe = ability->aoe;
@@ -4044,7 +4044,7 @@ static void battle_target_build_directional_attack_panels(const action_command_t
     s32 y;
     s32 i;
 
-    main_util_copy_action_data(source, &action);
+    action_copy_data(source, &action);
     g_battle_sort_targets_nearest_first = 1;
     unit = &g_battle_unit_stats[action.actor_id];
     x = unit->x;

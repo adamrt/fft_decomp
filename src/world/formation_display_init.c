@@ -175,7 +175,7 @@ s32 screen_is_busy(void) {
 void message_box_show_with_sound(s32 message_id, s32 sound_id) {
     menu_text_start_thread_if_idle(THREAD_SCREEN_SLOT_TEXT, 0x2B, message_id, 0);
     g_screen_sound_release_held_loop = 1;
-    main_sound_play_sfx_find_channel(sound_id);
+    sound_play_sfx_on_free_channel(sound_id);
     g_menu_input_lock_mode = 1;
 }
 

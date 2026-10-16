@@ -14,7 +14,7 @@ s32 menu_ability_is_non_action_learned(s32 index) {
     s32 result;
     u16 ability;
 
-    g_menu_ability_type = main_ability_calculate_pointers_and_type(
+    g_menu_ability_type = ability_get_data_and_type(
         *entry & ABILITY_LIST_ENTRY_ID_MASK, &g_menu_selected_ability_data, &g_menu_selected_ability_secondary_data);
     result = 0;
     if (g_menu_ability_type != ABILITY_TYPE_DEFAULT) {
@@ -89,7 +89,7 @@ s32 menu_ability_get_jp_cost_display_value(s32 index) {
     if (entry & ABILITY_LIST_ENTRY_HIDE_DETAILS) {
         result = MENU_NUMBER_VALUE_DASHES;
     } else {
-        result = g_main_ability_data[entry & ABILITY_LIST_ENTRY_ID_MASK].jp_cost;
+        result = g_ability_data[entry & ABILITY_LIST_ENTRY_ID_MASK].jp_cost;
     }
     if (entry >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
         result |= MENU_NUMBER_VALUE_DISABLED;

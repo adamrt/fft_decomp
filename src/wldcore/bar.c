@@ -61,7 +61,7 @@ static void bar_leave(menu_stack_window_level_t* unused_level) {
 
     window_set_render_objects_visible(1);
     g_menu_stack_depth = g_menu_stack_depth - 1;
-    g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL);
+    g_system_flags &= ~(SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL);
     menu_stack_dispatch_suspend();
     g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count
         = location_build_menu_entries(*selected, g_menu_stack_records_next[g_menu_stack_depth].panel.entries);
@@ -86,13 +86,13 @@ void bar_handle_input(menu_stack_window_level_t* level) {
         return;
     }
 
-    flags = g_main_system_flags;
-    if (flags & MAIN_SYSTEM_FLAG_FADING) {
+    flags = g_system_flags;
+    if (flags & SYSTEM_FLAG_FADING) {
         return;
     }
 
-    if ((flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
-        g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+    if ((flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         bar_leave(level);
         return;
     }
@@ -103,15 +103,15 @@ void bar_handle_input(menu_stack_window_level_t* level) {
         }
         level->mode = MENU_STACK_WINDOW_MODE_BROWSE;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
-        audio_queue_start_music(AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
+        audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
         return;
     }
 
     buttons = g_world_map_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         /* Same exit as the Leave row below; GCC cross-jumps the two copies. */
         g_bar_saved_cursor = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
@@ -129,7 +129,7 @@ void bar_handle_input(menu_stack_window_level_t* level) {
     }
 
     if (buttons & PSX_PAD_CIRCLE) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         selected_entry = &level->selected_entry;
         g_bar_saved_cursor = *selected_entry;
         if (level->entries[*selected_entry] != BAR_ROW_LEAVE) {
@@ -186,7 +186,7 @@ void bar_handle_input(menu_stack_window_level_t* level) {
         return;
     }
 
-    sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+    sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     if (level->content_render != 0) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
         level->content_render = 0;
@@ -231,7 +231,7 @@ static void rumor_open_list(void) {
     }
 
     if (count != 0) {
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+        g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RUMORS_INTRO, 0);
         g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count = count;
         if (count < 8) {
@@ -287,7 +287,7 @@ void rumor_block_list_buttons(menu_stack_panel_level_t* level) {
  * reads no argument. */
 static void rumor_close_list(menu_stack_panel_level_t* level) {
     g_menu_stack_ot_offset = 1;
-    g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+    g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
     --g_menu_stack_depth;
     g_menu_blocked_buttons = 0;
 }
@@ -303,8 +303,7 @@ static void rumor_close_list(menu_stack_panel_level_t* level) {
  * rumor_block_list_buttons even though neither reads an argument;
  * their local prototypes here take it. */
 void rumor_handle_list_input(menu_stack_panel_level_t* level) {
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         rumor_close_list(level);
         if (level->result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_RUMORS);
@@ -313,25 +312,25 @@ void rumor_handle_list_input(menu_stack_panel_level_t* level) {
             return;
         }
         menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_RUMORS);
-        g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+        g_system_flags &= ~SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
         menu_stack_dispatch_resume();
         return;
     }
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CANCEL);
         level->result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
         rumor_block_list_buttons(level);
         menu_stack_push_message_level(0x105E, 1);
         return;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
-        && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
 
@@ -413,7 +412,7 @@ void rumor_wait_detail_then_pop(rumor_detail_level_t* level) {
  * bar_build_rows and grayed out.
  *
  * The list holds every proposition neither in progress nor completed, not
- * waiting out a failure (its g_main_proposition_states days are 0) and
+ * waiting out a failure (its g_proposition_states days are 0) and
  * offered in this town (proposition_is_available_at), by name
  * (TEXT_ID_PROPOSITION_NAME_BASE + id). With entries it shows
  * TEXT_ID_PROPOSITIONS_INTRO and up to six rows at (0x4c, 0x50), 0x96
@@ -452,7 +451,7 @@ void proposition_open_available_list(void) {
     for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
         if (!(script_get_variable(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
                 & (PROPOSITION_VARIABLE_IN_PROGRESS | PROPOSITION_VARIABLE_COMPLETED))
-            && !(g_main_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK)
+            && !(g_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK)
             && proposition_is_available_at(i, g_world_map_projection_state.marker.kind + 1) != 0) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_PROPOSITION_NAME_BASE;
             g_menu_stack_row_flags[count] = 0;
@@ -508,7 +507,7 @@ void proposition_block_available_list_buttons(menu_stack_panel_level_t* level) {
  * reads no argument. */
 static void proposition_close_available_list(menu_stack_panel_level_t* level) {
     g_menu_stack_ot_offset = 1;
-    g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+    g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
     --g_menu_stack_depth;
     g_menu_blocked_buttons = 0;
 }
@@ -516,15 +515,14 @@ static void proposition_close_available_list(menu_stack_panel_level_t* level) {
 /* List level input step for the available propositions (cursor slot 3, Select
  * help 0x105f). Circle hands the chosen entry to
  * proposition_push_detail_level, but is refused with "I can't give
- * anymore jobs" once g_main_save_proposition_count has reached 8. For a
+ * anymore jobs" once g_proposition_count has reached 8. For a
  * proposition already attempted (PROPOSITION_VARIABLE_ATTEMPTED) it
  * first hides the parent level's windows and render record, says "Think I
  * told you before but..." and waits in result 2 for Circle or Cross. */
 void proposition_handle_available_list_input(menu_stack_panel_level_t* level) {
     s32 depth;
 
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         proposition_close_available_list(level);
         if (level->result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS);
@@ -540,24 +538,24 @@ void proposition_handle_available_list_input(menu_stack_panel_level_t* level) {
     if (level->result == 2) {
         if (g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             level->result = 1;
-            g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+            g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         }
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_main_file_still_loading == 0) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_still_loading == 0) {
+        sound_play_effect(SOUND_SFX_CANCEL);
         level->result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
         proposition_block_available_list_buttons(level);
         menu_stack_push_message_level(0x105F, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
-        && g_main_file_still_loading == 0) {
-        if (g_main_save_proposition_count >= 8) {
-            sound_play_effect(MAIN_SFX_INVALID);
+        && g_file_still_loading == 0) {
+        if (g_proposition_count >= 8) {
+            sound_play_effect(SOUND_SFX_INVALID);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_MORE_JOBS, 0);
             return;
         }
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         if (script_get_variable(
                 (g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK)
@@ -575,7 +573,7 @@ void proposition_handle_available_list_input(menu_stack_panel_level_t* level) {
             return;
         }
         level->result = 1;
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
 
@@ -586,7 +584,7 @@ void proposition_push_detail_level(s32 value) {
     s32 chance;
     s32 index;
     s32 depth;
-    u8 state = g_main_proposition_states[value];
+    u8 state = g_proposition_states[value];
     RECT bounds;
     point32_t* base;
 
@@ -650,13 +648,13 @@ void proposition_handle_accept_input(window_render_pair_t* owner) {
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         g_window_render_record_count--;
         g_window_render_object_count--;
         g_menu_stack_depth--;
         proposition_open_available_list();
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         total = g_proposition_selected_row[0].fee_a + g_proposition_selected_row[0].fee_b;
         g_proposition_gil_amount = total;
         if (total != 0) {
@@ -762,7 +760,7 @@ void proposition_handle_accept_confirm_input(proposition_confirm_level_t* level)
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
     dismiss:
         g_window_record_count -= 2;
         g_window_render_record_count--;
@@ -780,7 +778,7 @@ void proposition_handle_accept_confirm_input(proposition_confirm_level_t* level)
         level->row = row;
         g_window_records[level->cursor_window].position.y
             = g_window_render_records[level->render_index].base.y - -(row * 0x10 + 0xE);
-        sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+        sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (!(g_world_map_input_new_button_presses & PSX_PAD_CIRCLE)) {
@@ -788,7 +786,7 @@ void proposition_handle_accept_confirm_input(proposition_confirm_level_t* level)
     }
 
     if (level->row == 1) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         goto dismiss;
     }
 
@@ -811,14 +809,14 @@ void proposition_handle_accept_confirm_input(proposition_confirm_level_t* level)
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NOT_ENOUGH_GIL, 0);
         level->mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
     fail:
-        sound_play_effect(MAIN_SFX_INVALID);
+        sound_play_effect(SOUND_SFX_INVALID);
         g_window_record_count -= 2;
         g_window_render_record_count--;
         g_window_render_object_count -= 3;
         return;
     }
 
-    sound_play_effect(MAIN_SFX_CONFIRM);
+    sound_play_effect(SOUND_SFX_CONFIRM);
     g_window_record_count -= 2;
     g_window_render_record_count--;
     g_window_render_object_count -= 3;
@@ -875,12 +873,12 @@ void proposition_step_days_level(menu_stack_panel_level_t* level) {
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         g_hud_value_mode = HUD_VALUE_FUNDS;
         level->result = -1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         g_proposition_dispatch_days = g_window_panel_value;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);

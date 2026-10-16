@@ -158,7 +158,7 @@ void proposition_push_dispatch_confirm_level(void) {
 /* Input step of the dispatch confirmation's OK/NO panel: up/down toggle the
  * row, Cross and NO close the panel; OK pays g_proposition_gil_amount
  * from the war funds, marks the proposition attempted and in progress,
- * records it in the next g_main_active_propositions slot with its
+ * records it in the next g_proposition_active slot with its
  * participants (each marked busy), and closes the panel. Either way the
  * propositions list reopens. */
 void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* level) {
@@ -170,7 +170,7 @@ void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* leve
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         /* Shared tail: the target keeps this copy and both confirm paths
          * jump into it; duplicated copies cross-jump into the last one. */
     block_tail:
@@ -188,11 +188,11 @@ void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* leve
         level->row = row;
         g_window_records[level->cursor_window].position.y
             = g_window_render_records[level->render_index].base.y - -(row * 0x10 + 0xE);
-        sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+        sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         if (level->row != 1) {
             script_set_variable(
                 EVENT_SCRIPT_VAR_WAR_FUNDS, script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) - g_proposition_gil_amount);
@@ -200,20 +200,17 @@ void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* leve
             script_set_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
                 script_get_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
                     | PROPOSITION_VARIABLE_ATTEMPTED);
-            g_main_active_propositions[g_main_save_proposition_count].flags = PROPOSITION_PROGRESS_DISPATCHED;
-            g_main_active_propositions[g_main_save_proposition_count].proposition_id
-                = g_proposition_selected_row[0].id - 1;
-            g_main_active_propositions[g_main_save_proposition_count].elapsed_days = 0;
-            g_main_active_propositions[g_main_save_proposition_count].assigned_days = g_proposition_dispatch_days;
-            g_main_active_propositions[g_main_save_proposition_count].location
-                = g_world_map_projection_state.marker.kind;
-            g_main_active_propositions[g_main_save_proposition_count].participant_count = g_proposition_send_unit_count;
+            g_proposition_active[g_proposition_count].flags = PROPOSITION_PROGRESS_DISPATCHED;
+            g_proposition_active[g_proposition_count].proposition_id = g_proposition_selected_row[0].id - 1;
+            g_proposition_active[g_proposition_count].elapsed_days = 0;
+            g_proposition_active[g_proposition_count].assigned_days = g_proposition_dispatch_days;
+            g_proposition_active[g_proposition_count].location = g_world_map_projection_state.marker.kind;
+            g_proposition_active[g_proposition_count].participant_count = g_proposition_send_unit_count;
             for (i = 0; i < g_proposition_send_unit_count; i++) {
                 party_get_roster_unit(g_proposition_send_units[i])->proposition_status = 1;
-                g_main_active_propositions[g_main_save_proposition_count].participant_indices[i]
-                    = g_proposition_send_units[i];
+                g_proposition_active[g_proposition_count].participant_indices[i] = g_proposition_send_units[i];
             }
-            g_main_save_proposition_count++;
+            g_proposition_count++;
             script_set_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
                 script_get_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
                     | PROPOSITION_VARIABLE_IN_PROGRESS);
@@ -234,16 +231,16 @@ void proposition_advance_day(void) {
     s32 i;
     u8* counter;
 
-    for (i = 0; i < g_main_save_proposition_count; i++) {
-        if (!(g_main_active_propositions[i].flags & PROPOSITION_PROGRESS_RETURNED)) {
-            g_main_active_propositions[i].elapsed_days++;
-            if (g_main_active_propositions[i].assigned_days == g_main_active_propositions[i].elapsed_days
-                || (g_main_active_propositions[i].flags & PROPOSITION_PROGRESS_RECALLED)) {
-                g_main_active_propositions[i].flags |= PROPOSITION_PROGRESS_RETURNED;
+    for (i = 0; i < g_proposition_count; i++) {
+        if (!(g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED)) {
+            g_proposition_active[i].elapsed_days++;
+            if (g_proposition_active[i].assigned_days == g_proposition_active[i].elapsed_days
+                || (g_proposition_active[i].flags & PROPOSITION_PROGRESS_RECALLED)) {
+                g_proposition_active[i].flags |= PROPOSITION_PROGRESS_RETURNED;
             }
         }
     }
-    counter = g_main_proposition_states;
+    counter = g_proposition_states;
     do {
         u32 value = *counter;
         s32 days = value & PROPOSITION_STATE_DAYS_MASK;
@@ -255,7 +252,7 @@ void proposition_advance_day(void) {
             *counter = (value & (PROPOSITION_STATE_FAILURE | PROPOSITION_STATE_BAD_FAILURE)) | days;
         }
         counter++;
-    } while ((s32)counter < (s32)(g_main_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
+    } while ((s32)counter < (s32)(g_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
 }
 
 /*
@@ -266,9 +263,9 @@ void proposition_advance_day(void) {
 s32 proposition_count_returned(s32 location) {
     s32 i;
     s32 count = 0;
-    for (i = 0; i < g_main_save_proposition_count; i++) {
-        if (g_main_active_propositions[i].flags & PROPOSITION_PROGRESS_RETURNED) {
-            if (location == -1 || g_main_active_propositions[i].location == location)
+    for (i = 0; i < g_proposition_count; i++) {
+        if (g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED) {
+            if (location == -1 || g_proposition_active[i].location == location)
                 count++;
         }
     }
@@ -592,14 +589,14 @@ static void proposition_step_send_unit_slots(proposition_send_unit_level_t* leve
 
     buttons = g_world_map_input_new_button_presses;
     if ((buttons & PSX_PAD_CROSS) != 0) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         /* Shared tail: a duplicated close path cross-jumps to the same
          * layout, but without this label the scheduler reorders its loads. */
         goto close;
     }
 
     if ((buttons & PSX_PAD_CIRCLE) != 0) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         unit = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         g_proposition_send_units[level->slot] = unit;
         proposition_draw_send_unit_names(level);
@@ -632,7 +629,7 @@ static void proposition_step_send_unit_slots(proposition_send_unit_level_t* leve
         return;
     }
 
-    sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+    sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     g_window_records[level->cursor_window].position.x
         = g_window_render_records[level->list_frame.render_index].base.x + 6;
     g_window_records[level->cursor_window].position.y
@@ -641,7 +638,7 @@ static void proposition_step_send_unit_slots(proposition_send_unit_level_t* leve
 
 /* Build the status panel data of party member `party_index` and start the
  * three unit panel threads on it (status banner, numeric panel, equipment
- * and ability panel), raising MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS. */
+ * and ability panel), raising SYSTEM_FLAG_UNIT_PANEL_THREADS. */
 static void unit_panel_start_threads(s32 party_index) {
     menu_status_thread_t* thread8;
 
@@ -657,7 +654,7 @@ static void unit_panel_start_threads(s32 party_index) {
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
-    g_main_system_flags |= MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS;
+    g_system_flags |= SYSTEM_FLAG_UNIT_PANEL_THREADS;
 }
 
 /* Status view of the send-unit level: once the panel threads stop it opens the unit's status
@@ -695,7 +692,7 @@ static void proposition_step_send_unit_status(proposition_send_unit_level_t* lev
         }
         if (buttons & PSX_PAD_SELECT) {
             g_window_records[level->left_arrow].palette = g_window_records[level->right_arrow].palette = 0xA;
-            sound_play_effect(MAIN_SFX_CONFIRM);
+            sound_play_effect(SOUND_SFX_CONFIRM);
             unit_panel_push_help_level();
             return;
         }
@@ -744,7 +741,7 @@ static void proposition_step_send_unit_status(proposition_send_unit_level_t* lev
         g_unit_panel_panel_params.redraw_request = 1;
         g_unit_panel_numbers_params.redraw_request = 1;
     done:
-        sound_play_effect(MAIN_SFX_PAGE_SWITCH);
+        sound_play_effect(SOUND_SFX_PAGE_SWITCH);
     } else if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE) {
         if (thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) != 0) {
             return;
@@ -756,7 +753,7 @@ static void proposition_step_send_unit_status(proposition_send_unit_level_t* lev
             return;
         }
         level->mode = PROPOSITION_SEND_UNIT_MODE_SELECT;
-        g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS);
+        g_system_flags &= ~(SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_UNIT_PANEL_THREADS);
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
         thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
@@ -832,7 +829,7 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
     if (level->mode == PROPOSITION_SEND_UNIT_MODE_CANCEL) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
             g_menu_blocked_buttons = 0;
-            g_main_system_flags &= ~MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+            g_system_flags &= ~SYSTEM_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
             proposition_open_available_list();
         }
@@ -842,7 +839,7 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
     if (level->mode == PROPOSITION_SEND_UNIT_MODE_ACCEPT) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
             g_menu_blocked_buttons = 0;
-            g_main_system_flags &= ~MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+            g_system_flags &= ~SYSTEM_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
             proposition_push_detail_level(g_proposition_selected_row[0].id - 1);
             proposition_suspend_detail_level(&level->list_frame);
@@ -879,10 +876,10 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
 
     if (buttons & PSX_PAD_START) {
         if (g_proposition_send_unit_count == 0) {
-            sound_play_effect(MAIN_SFX_INVALID);
+            sound_play_effect(SOUND_SFX_INVALID);
             return;
         }
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         level->mode = PROPOSITION_SEND_UNIT_MODE_ACCEPT;
         g_hud_value_mode = HUD_VALUE_COST_AND_FUNDS;
         g_hud_value_secondary = g_proposition_gil_amount;
@@ -892,14 +889,14 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
     }
 
     if (buttons & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         level->mode = PROPOSITION_SEND_UNIT_MODE_CANCEL;
     suspend:
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_window_record_count -= 7;
         g_window_render_record_count -= 5;
         g_window_render_object_count -= 0xC;
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         return;
     }
 
@@ -912,7 +909,7 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
         g_window_records[level->frame_window_b].flags |= DISPLAY_OBJECT_HIDDEN;
         g_window_render_records[level->preview_render].flags |= DISPLAY_OBJECT_HIDDEN;
         g_window_render_records[level->list_render].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+        g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
         level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN;
         return;
     }
@@ -921,7 +918,7 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
         return;
     }
 
-    sound_play_effect(MAIN_SFX_CONFIRM);
+    sound_play_effect(SOUND_SFX_CONFIRM);
     value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
     for (i = 0; i < g_proposition_send_unit_count; i++) {
         if (g_proposition_send_units[i] == value) {
@@ -993,15 +990,15 @@ void proposition_open_returned_list(void) {
 
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_RETURNED, 0);
     count = 0;
-    loaded_count = g_main_save_proposition_count;
+    loaded_count = g_proposition_count;
     if ((i = 0, loaded_count) > 0) {
         location = &g_world_map_projection_state.marker.kind;
         entry_value_base = TEXT_ID_PROPOSITION_NAME_BASE;
         total = loaded_count;
         do {
-            if ((g_main_active_propositions[i].flags & PROPOSITION_PROGRESS_RETURNED)
-                && g_main_active_propositions[i].location == *location) {
-                g_menu_stack_entry_values[count] = g_main_active_propositions[i].proposition_id + entry_value_base;
+            if ((g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED)
+                && g_proposition_active[i].location == *location) {
+                g_menu_stack_entry_values[count] = g_proposition_active[i].proposition_id + entry_value_base;
                 g_menu_stack_row_flags[count] = 0;
                 g_menu_stack_records_next[g_menu_stack_depth].proposition_list.entries[count] = i;
                 count++;
@@ -1057,11 +1054,10 @@ void proposition_handle_returned_list_input(menu_stack_record_t* level) {
     s32 depth;
     point32_t origin;
 
-    if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
-        g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         menu_stack_dispatch_resume();
         return;
@@ -1069,9 +1065,9 @@ void proposition_handle_returned_list_input(menu_stack_record_t* level) {
 
     buttons = g_world_map_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
         menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_RETURNED);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
+        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         return;
     }
@@ -1081,7 +1077,7 @@ void proposition_handle_returned_list_input(menu_stack_record_t* level) {
         return;
     }
     if (buttons & PSX_PAD_CIRCLE) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         proposition_block_returned_list_buttons(level);
         proposition_prepare_report(level->proposition_list.entries[g_window_panel_render_state.selected_index]);
         menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_RETURNED);
@@ -1126,7 +1122,7 @@ void proposition_handle_report_confirm_input(proposition_report_confirm_level_t*
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(SOUND_SFX_CANCEL);
     block_tail:
         g_window_record_count -= 2;
         g_window_render_record_count -= 1;
@@ -1140,11 +1136,11 @@ void proposition_handle_report_confirm_input(proposition_report_confirm_level_t*
         level->selection = selection;
         g_window_records[level->cursor_window].position.y
             = g_window_render_records[level->render_index].base.y - -(selection * 0x10 + 0xE);
-        sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+        sound_play_effect(SOUND_SFX_CURSOR_MOVE);
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(SOUND_SFX_CONFIRM);
         if (level->selection != 0) {
             /* Shared tail: a duplicated release path is cross-jumped into
              * this arm instead of the cancel arm the target keeps. */
@@ -1182,7 +1178,7 @@ static void proposition_push_report_level(s32 argument) {
     if (g_proposition_report.recalled != 0) {
         g_menu_stack_records_next[depth].proposition_report.state = 0x63;
     } else {
-        audio_queue_start_music(AUDIO_MUSIC(2, MAIN_MUSIC_PROPOSITION_REPORT));
+        audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_PROPOSITION_REPORT));
     }
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
     g_menu_stack_types[g_menu_stack_depth + 1] = MENU_STACK_LEVEL_PROPOSITION_REPORT;
@@ -1231,11 +1227,11 @@ void proposition_step_report_level(proposition_report_level_t* level) {
         }
         level->load_phase = PROPOSITION_REPORT_LOAD_PICTURE;
         message_block_load_if_changed(
-            g_main_active_propositions[level->proposition].proposition_id + MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST);
+            g_proposition_active[level->proposition].proposition_id + MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST);
         return;
 
     case PROPOSITION_REPORT_LOAD_PICTURE:
-        if (g_main_file_still_loading != 0) {
+        if (g_file_still_loading != 0) {
             return;
         }
         kind = &g_proposition_report.reward_type;
@@ -1365,9 +1361,8 @@ void proposition_step_report_level(proposition_report_level_t* level) {
         /* Name a random participant as the finder; rand() is 15 bits, so the >> 15 gives a slot below count. */
         if (level->phase == 0) {
             participant
-                = g_main_active_propositions[g_proposition_report.proposition_index].participant_indices
-                      [(rand() * g_main_active_propositions[g_proposition_report.proposition_index].participant_count)
-                          >> 15];
+                = g_proposition_active[g_proposition_report.proposition_index].participant_indices
+                      [(rand() * g_proposition_active[g_proposition_report.proposition_index].participant_count) >> 15];
             if (participant == g_proposition_report.excluded_party_index) {
                 g_text_substitution_values[1] = proposition_adjust_message(0xE5, participant) + TEXT_ID_WORLD_MENU_BASE;
             } else {
@@ -1382,7 +1377,7 @@ void proposition_step_report_level(proposition_report_level_t* level) {
 
     case 14:
         /* Wait for the picture set the load phase requested. */
-        if (g_main_file_still_loading != 0) {
+        if (g_file_still_loading != 0) {
             return;
         }
 
@@ -1423,7 +1418,7 @@ void proposition_step_report_level(proposition_report_level_t* level) {
                     base->x = -0x46;
                     base->y = -0x2A;
                 }
-                sound_play_effect(MAIN_SFX_COMPLETE);
+                sound_play_effect(SOUND_SFX_COMPLETE);
             }
             if (*picture == PROPOSITION_REWARD_UNEXPLORED_LAND) {
                 record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
@@ -1459,7 +1454,7 @@ void proposition_step_report_level(proposition_report_level_t* level) {
                     base->x = -0x41;
                     base->y = -0x2C;
                 }
-                sound_play_effect(MAIN_SFX_COMPLETE);
+                sound_play_effect(SOUND_SFX_COMPLETE);
             }
         }
         if (proposition_step_message(level, 0x7E) == 0) {
@@ -1530,7 +1525,7 @@ static void proposition_push_result_level(s32 proposition) {
     s32 index;
     s32 i;
     s32 message;
-    s32 count = g_main_active_propositions[proposition].participant_count;
+    s32 count = g_proposition_active[proposition].participant_count;
     s32 depth;
     u16* panel_text;
     s32* party;
@@ -1587,7 +1582,7 @@ static void proposition_push_result_level(s32 proposition) {
         point.y = (text_rows + row) * 0x10 + 8;
         point.x = x;
         window_display_text_entry(index,
-            g_main_active_propositions[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
+            g_proposition_active[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
             g_window_image_buffer);
     }
 
@@ -1628,14 +1623,14 @@ static void proposition_push_result_level(s32 proposition) {
     g_menu_stack_records_next[g_menu_stack_depth].proposition_result.delay = 0;
     switch (g_proposition_report.result) {
     case PROPOSITION_RESULT_SUCCESS:
-        suzuki_sound_play_2_sfx(MAIN_SFX_PROPOSITION_SUCCESS_A, MAIN_SFX_PROPOSITION_SUCCESS_B);
+        suzuki_sound_play_2_sfx(SOUND_SFX_PROPOSITION_SUCCESS_A, SOUND_SFX_PROPOSITION_SUCCESS_B);
         g_menu_stack_records_next[g_menu_stack_depth].proposition_result.delay = 0x78;
         break;
     case PROPOSITION_RESULT_FAILURE:
-        suzuki_sound_play_2_sfx(MAIN_SFX_PROPOSITION_PARTIAL_A, MAIN_SFX_PROPOSITION_PARTIAL_B);
+        suzuki_sound_play_2_sfx(SOUND_SFX_PROPOSITION_PARTIAL_A, SOUND_SFX_PROPOSITION_PARTIAL_B);
         break;
     case PROPOSITION_RESULT_BAD_FAILURE:
-        sound_play_effect(MAIN_SFX_PROPOSITION_FAILURE);
+        sound_play_effect(SOUND_SFX_PROPOSITION_FAILURE);
         break;
     }
 
@@ -1655,7 +1650,7 @@ static void proposition_push_result_level(s32 proposition) {
  * packed nine-bit arrays, releases each participant from the
  * proposition and pays them their share, marks the proposition
  * state byte, and finally compacts the participant record out of
- * g_main_active_propositions. CLOSING waits for the message box and the audio
+ * g_proposition_active. CLOSING waits for the message box and the audio
  * queue and restarts the bar music; DONE pops the level and hands off to the
  * discovery level or to proposition_open_returned_list.
  *
@@ -1693,7 +1688,7 @@ void proposition_step_result_level(proposition_result_level_t* level) {
         if (g_audio_queue.count == 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE
             && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
             if (proposition_get_milestone_rank() == 0 && g_proposition_report.recalled == 0) {
-                audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(2, MAIN_MUSIC_BAR));
+                audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(2, MUSIC_BAR));
             }
             level->phase = PROPOSITION_RESULT_PHASE_DONE;
         }
@@ -1703,7 +1698,7 @@ void proposition_step_result_level(proposition_result_level_t* level) {
     if (level->delay != 0) {
         level->delay = level->delay - 1;
         if (level->delay == 0) {
-            suzuki_sound_play_2_sfx(MAIN_SFX_PROPOSITION_SUCCESS_A, MAIN_SFX_PROPOSITION_SUCCESS_B);
+            suzuki_sound_play_2_sfx(SOUND_SFX_PROPOSITION_SUCCESS_A, SOUND_SFX_PROPOSITION_SUCCESS_B);
         }
     }
 
@@ -1714,15 +1709,14 @@ void proposition_step_result_level(proposition_result_level_t* level) {
     g_window_render_record_count = g_window_render_record_count - 1;
     g_window_render_object_count = g_window_render_object_count - 1;
     /* 0xFFFD clears PROPOSITION_VARIABLE_IN_PROGRESS from the 16-bit value. */
-    proposition_flags = script_get_variable(g_main_active_propositions[level->proposition].proposition_id
+    proposition_flags = script_get_variable(g_proposition_active[level->proposition].proposition_id
                             + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
         & 0xFFFD;
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         proposition_flags |= PROPOSITION_VARIABLE_COMPLETED;
     }
 
-    script_set_variable(
-        g_main_active_propositions[level->proposition].proposition_id + EVENT_SCRIPT_VAR_PROPOSITION_FIRST,
+    script_set_variable(g_proposition_active[level->proposition].proposition_id + EVENT_SCRIPT_VAR_PROPOSITION_FIRST,
         proposition_flags);
     war_funds = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_proposition_gil_amount;
     if (war_funds > EVENT_WAR_FUNDS_MAX) {
@@ -1736,48 +1730,47 @@ void proposition_step_result_level(proposition_result_level_t* level) {
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         date.day = day;
         date.month = month;
-        calendar_write_date(g_main_proposition_last_attempt_date_bits,
-            g_main_active_propositions[level->proposition].proposition_id, &date);
+        calendar_write_date(
+            g_proposition_last_attempt_date_bits, g_proposition_active[level->proposition].proposition_id, &date);
     }
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_TREASURE) {
         script_set_variable(g_proposition_report.reward_index + EVENT_SCRIPT_VAR_TREASURE_FIRST, 1);
         date.day = day;
         date.month = month;
-        calendar_write_date(g_main_treasure_acquisition_date_bits, g_proposition_report.reward_index, &date);
+        calendar_write_date(g_brave_story_treasure_acquisition_date_bits, g_proposition_report.reward_index, &date);
     }
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_UNEXPLORED_LAND) {
         script_set_variable(g_proposition_report.reward_index + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST, 1);
         date.day = day;
         date.month = month;
-        calendar_write_date(g_main_land_discovery_date_bits, g_proposition_report.reward_index, &date);
+        calendar_write_date(g_brave_story_land_discovery_date_bits, g_proposition_report.reward_index, &date);
     }
 
-    for (i = 0; i < g_main_active_propositions[g_proposition_report.proposition_index].participant_count; i++) {
-        party_get_roster_unit(g_main_active_propositions[g_proposition_report.proposition_index].participant_indices[i])
+    for (i = 0; i < g_proposition_active[g_proposition_report.proposition_index].participant_count; i++) {
+        party_get_roster_unit(g_proposition_active[g_proposition_report.proposition_index].participant_indices[i])
             ->proposition_status = 0;
-        main_job_add_proposition_jp(
-            g_main_active_propositions[g_proposition_report.proposition_index].participant_indices[i],
+        job_add_proposition_jp(g_proposition_active[g_proposition_report.proposition_index].participant_indices[i],
             g_proposition_report.participant_jp[i]);
     }
 
     /* A failed job returns to the bar after its cooldown. */
     if (g_proposition_report.result == PROPOSITION_RESULT_FAILURE) {
-        g_main_proposition_states[g_main_active_propositions[g_proposition_report.proposition_index].proposition_id]
+        g_proposition_states[g_proposition_active[g_proposition_report.proposition_index].proposition_id]
             = PROPOSITION_STATE_FAILURE | PROPOSITION_FAILURE_COOLDOWN_DAYS;
     }
 
     if (g_proposition_report.result == PROPOSITION_RESULT_BAD_FAILURE) {
-        g_main_proposition_states[g_main_active_propositions[g_proposition_report.proposition_index].proposition_id]
+        g_proposition_states[g_proposition_active[g_proposition_report.proposition_index].proposition_id]
             = PROPOSITION_STATE_BAD_FAILURE | PROPOSITION_BAD_FAILURE_COOLDOWN_DAYS;
     }
 
-    for (i = level->proposition; i < g_main_save_proposition_count - 1; i++) {
-        g_main_active_propositions[i] = g_main_active_propositions[i + 1];
+    for (i = level->proposition; i < g_proposition_count - 1; i++) {
+        g_proposition_active[i] = g_proposition_active[i + 1];
     }
 
-    g_main_save_proposition_count--;
+    g_proposition_count--;
     if (proposition_get_milestone_rank() == 0 && g_proposition_report.recalled == 0) {
         audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
     }
@@ -1790,7 +1783,7 @@ void proposition_step_result_level(proposition_result_level_t* level) {
  * row, pick the unit who reports, decide the result and work out the JP and
  * gil, the bonus reward and the extra-days multiplier. */
 static void proposition_prepare_report(s32 proposition_index) {
-    proposition_unpack_row(g_proposition_selected_row, g_main_active_propositions[proposition_index].proposition_id);
+    proposition_unpack_row(g_proposition_selected_row, g_proposition_active[proposition_index].proposition_id);
     g_proposition_report.proposition_index = proposition_index;
     g_proposition_report.excluded_party_index = proposition_select_report_speaker(proposition_index);
     proposition_determine_success();
@@ -1810,15 +1803,15 @@ static s32 proposition_select_report_speaker(s32 index) {
     s32 i;
     s32 selected;
 
-    if (g_main_active_propositions[index].participant_count == 1) {
-        return g_main_active_propositions[index].participant_indices[0];
+    if (g_proposition_active[index].participant_count == 1) {
+        return g_proposition_active[index].participant_indices[0];
     }
     best = (g_proposition_selected_row[0].speaker_mode == PROPOSITION_SPEAKER_HIGHEST_BRAVERY
                || g_proposition_selected_row[0].speaker_mode == PROPOSITION_SPEAKER_HIGHEST_FAITH)
         ? -1
         : 99999;
-    for (i = 0; i < g_main_active_propositions[index].participant_count; i++) {
-        unit = party_get_roster_unit(g_main_active_propositions[index].participant_indices[i]);
+    for (i = 0; i < g_proposition_active[index].participant_count; i++) {
+        unit = party_get_roster_unit(g_proposition_active[index].participant_indices[i]);
         switch (g_proposition_selected_row[0].speaker_mode) {
         case PROPOSITION_SPEAKER_HIGHEST_BRAVERY:
             if (best < unit->bravery) {
@@ -1829,7 +1822,7 @@ static s32 proposition_select_report_speaker(s32 index) {
             if (unit->bravery < best) {
             take_bravery:
                 best = unit->bravery;
-                selected = g_main_active_propositions[index].participant_indices[i];
+                selected = g_proposition_active[index].participant_indices[i];
             }
             break;
         case PROPOSITION_SPEAKER_HIGHEST_FAITH:
@@ -1841,7 +1834,7 @@ static s32 proposition_select_report_speaker(s32 index) {
             if (unit->faith < best) {
             take_faith:
                 best = unit->faith;
-                selected = g_main_active_propositions[index].participant_indices[i];
+                selected = g_proposition_active[index].participant_indices[i];
             }
             break;
         }

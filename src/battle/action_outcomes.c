@@ -30,7 +30,7 @@ static u8 g_battle_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT] =
 void battle_ai_begin_action_simulation(void) {
     g_battle_action_state = ACTION_STATE_AI_SIMULATION;
     g_battle_action_hamedo_flag = 0;
-    main_mem_copy_byte_data_source_first(&g_battle_action_current_attacker, &g_battle_ai_current_attacker_backup,
+    mem_copy_byte_data_source_first(&g_battle_action_current_attacker, &g_battle_ai_current_attacker_backup,
         sizeof(g_battle_action_current_attacker));
 }
 
@@ -38,7 +38,7 @@ void battle_ai_begin_action_simulation(void) {
  * the action state to execute. */
 void battle_ai_end_action_simulation(void) {
     g_battle_action_state = ACTION_STATE_EXECUTE;
-    main_mem_copy_byte_data_source_first(&g_battle_ai_current_attacker_backup, &g_battle_action_current_attacker,
+    mem_copy_byte_data_source_first(&g_battle_ai_current_attacker_backup, &g_battle_action_current_attacker,
         sizeof(g_battle_action_current_attacker));
 }
 
@@ -98,7 +98,7 @@ s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
         return -1;
     }
 
-    ability = &g_main_ability_data[g_battle_acting_unit_used_ability_id];
+    ability = &g_ability_data[g_battle_acting_unit_used_ability_id];
     i = 0;
     if (!(ability->type_flags & ABILITY_TYPE_FLAG_LEARN_ON_HIT)) {
         return -1;
@@ -111,7 +111,7 @@ s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
             if (unit->ability_outcome & UNIT_ABILITY_OUTCOME_AFFECTED) {
                 unit->ability_outcome = UNIT_ABILITY_OUTCOME_LEARN_CHECKED;
                 if (!(unit->unit_flags & UNIT_FLAG_MONSTER)
-                    && main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION) == 0) {
+                    && status_unit_has_any_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION) == 0) {
                     skillset = unit->primary_skillset;
                     row = unit->job_id;
                     if (row < JOB_ID_SQUIRE) {
@@ -136,11 +136,11 @@ s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                         if (scratch[byte_index] & bit) {
                             continue;
                         }
-                        if ((main_ability_get_id_from_skillset(skillset, j) & 0xffff)
+                        if ((ability_get_id_from_skillset(skillset, j) & 0xffff)
                             != g_battle_acting_unit_used_ability_id) {
                             continue;
                         }
-                        if (main_util_roll_pass_fail(BATTLE_LEARN_ON_HIT_ROLL_MAXIMUM, ability->learn_rate) == 0) {
+                        if (random_roll_pass_fail(BATTLE_LEARN_ON_HIT_ROLL_MAXIMUM, ability->learn_rate) == 0) {
                             *ability_id = g_battle_acting_unit_used_ability_id;
                             return i;
                         }
@@ -196,7 +196,7 @@ void battle_unit_learn_used_ability(unit_stats_t* unit) {
         byte_index = i / 8;
         mask = 0x80 >> (i - (byte_index * 8));
         if (!(learned[byte_index] & mask)) {
-            if ((u16)main_ability_get_id_from_skillset(skillset, i) == g_battle_acting_unit_used_ability_id) {
+            if ((u16)ability_get_id_from_skillset(skillset, i) == g_battle_acting_unit_used_ability_id) {
                 /* `base[byte_index] |= mask` emits different code. */
                 learned_byte = base + byte_index;
                 *learned_byte = mask | *learned_byte;
@@ -236,10 +236,10 @@ s32 battle_action_give_item(unit_stats_t* unit, u8 item) {
     if (item_id == ITEM_ID_NONE) {
         return 0;
     }
-    if (main_item_get_total_equipment_quantity(item_id, 1) >= 99) {
+    if (item_get_total_quantity(item_id, 1) >= 99) {
         return battle_action_add_war_funds(unit, 0, item_id);
     }
-    g_main_item_quantities[item_id] += 1;
+    g_item_quantities[item_id] += 1;
     return 0;
 }
 
@@ -257,7 +257,7 @@ s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
         return 0;
     }
     if (item_id != ITEM_ID_NOTHING) {
-        total += g_main_item_primary_data[item_id].price >> 2;
+        total += g_item_primary_data[item_id].price >> 2;
     }
     value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + total;
     if (value > EVENT_WAR_FUNDS_MAX) {
@@ -287,7 +287,7 @@ void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount) {
             capped = 0xFF;
         }
         unit->experience = capped;
-        if (main_unit_check_level_up(unit) != 0) {
+        if (unit_check_level_up(unit) != 0) {
             if (unit->battle_id == g_battle_acting_unit_id) {
                 g_battle_action_current_ability.level_gained_flag = 1;
             }
@@ -332,7 +332,7 @@ void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
         byte_index = i / 8;
         mask = 0x80 >> (i & 7);
         if (g_battle_action_target_data->status_changes.removal[byte_index] & mask) {
-            main_status_set_ct(unit, i, 0);
+            status_set_ct(unit, i, 0);
             battle_status_queue_graphics_change_if_executing(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
     }
@@ -423,7 +423,7 @@ void battle_action_set_current_attacker_data(unit_stats_t* unit) {
     if (unit->job_id == JOB_ID_MIME) {
         return;
     }
-    main_util_copy_action_data(&unit->action_command, &g_battle_action_current_attacker.action);
+    action_copy_data(&unit->action_command, &g_battle_action_current_attacker.action);
     if (unit->action_command.targeting_type == BATTLE_TARGETING_TYPE_UNIT) {
         target = &g_battle_unit_stats[unit->action_command.target_id];
         x = target->x;
@@ -485,12 +485,12 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     if (unit->battle_id == current->actor_id) {
         return 0;
     }
-    menu_type = g_main_action_menu_types_by_skillset[current->skillset_id];
+    menu_type = g_command_menu_types_by_skillset[current->skillset_id];
     /* The target loads the ability id signed (lh). */
     ability_id = g_battle_action_current_attacker.action.ability_id;
     if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_ARITHMETICKS
         || menu_type == ACTION_MENU_TYPE_MONSTER) {
-        if (g_main_ability_range_data[ability_id].flags_3 & ABILITY_SECONDARY_FLAG_3_CANNOT_MIMIC) {
+        if (g_ability_range_data[ability_id].flags_3 & ABILITY_SECONDARY_FLAG_3_CANNOT_MIMIC) {
             return 0;
         }
     }
@@ -507,7 +507,7 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
         != 0) {
         return -1;
     }
-    main_util_copy_action_data(current, &action);
+    action_copy_data(current, &action);
     action.targeting_type = BATTLE_TARGETING_TYPE_TILE;
     action.actor_id = unit->battle_id;
     unit_id = unit->battle_id;
@@ -533,10 +533,10 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     g_battle_action_state = ACTION_STATE_PREVIEW;
     result = battle_action_prepare_attack(&action, &unit->action_command, 1);
     unit->charged_ability_ct = 0xff;
-    main_status_change_unit(unit, 0,
+    status_change_unit(unit, 0,
         STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
             | STATUS_BYTE_MASK(STATUS_ID_PERFORMING),
-        MAIN_STATUS_REMOVE);
+        STATUS_REMOVE);
     g_battle_action_state = saved_state;
     if (result < 0) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;

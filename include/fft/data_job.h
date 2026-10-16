@@ -22,9 +22,9 @@ typedef struct job_stat_growth {
 typedef char job_stat_growth_size_must_be_2[(sizeof(job_stat_growth_t) == 2) ? 1 : -1];
 
 /*
- * 0x30-byte job record (g_main_job_data_pointer). The named fields are those copied
- * by main_unit_copy_job_data, main_unit_calculate_abilities and
- * main_unit_set_equipment_stats into unit_stats_t.
+ * 0x30-byte job record (g_job_data_pointer). The named fields are those copied
+ * by unit_copy_job_data, unit_calculate_encounter_abilities and
+ * unit_set_equipment_stats into unit_stats_t.
  */
 typedef struct job_data {
     u8 skillset;                       /* 0x00 */
@@ -47,7 +47,7 @@ typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 extern job_data_t* g_formation_job_data;
 
 /* job ids */
-/* Job ids index the 160 records of g_main_job_data. A name is the job's name
+/* Job ids index the 160 records of g_job_data. A name is the job's name
  * in the game's text. Where records share a name, a suffix names the
  * character: the unit name the game's text has at the same index, which is
  * also the name the ENTD gives the job's units. Two records of one character

@@ -21,7 +21,7 @@ s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
         item_id = slots[1] & 0x3FF;
     }
     if (item_id != 0 && item_id < ITEM_ID_THROWABLE_FIRST) {
-        u8 flags = g_main_item_weapon_data[item_id].flags;
+        u8 flags = g_item_weapon_data[item_id].flags;
         if (flags & WEAPON_FLAG_FORCED_TWO_HANDS) {
             result = 1;
         } else if (two_hands_support != 0 && (flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)) {

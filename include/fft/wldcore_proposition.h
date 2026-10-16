@@ -98,7 +98,7 @@ typedef enum proposition_variable_flag {
     PROPOSITION_VARIABLE_ATTEMPTED = 0x08, /* dispatched at least once */
 } proposition_variable_flag_e;
 
-/* g_main_proposition_states[]: days until a failed proposition is offered
+/* g_proposition_states[]: days until a failed proposition is offered
  * again, and which failure it was. */
 typedef enum proposition_state {
     PROPOSITION_STATE_DAYS_MASK = 0x3f,
@@ -175,7 +175,7 @@ typedef struct proposition_report {
     s32 excluded_party_index; /* 0x00 */
     s32 speaker_party_index;  /* 0x04; chosen and read back by proposition_step_participant_message */
     s32 preferred_unit;       /* 0x08; fixed speaker passed to proposition_step_participant_message */
-    s32 proposition_index;    /* 0x0c; index into g_main_active_propositions */
+    s32 proposition_index;    /* 0x0c; index into g_proposition_active */
     s32 result;               /* 0x10; proposition_result_e */
     s32 reward_type;          /* 0x14; proposition_reward_e */
     s32 reward_index;         /* 0x18 */

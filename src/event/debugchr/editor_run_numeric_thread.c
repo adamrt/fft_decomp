@@ -20,7 +20,7 @@
  * The primitive block is menu_status_panel_numeric_buffer_t, double buffered at
  * g_editor_numeric_state_a (thread 12) or _b; the thread parameter block is
  * menu_status_thread_t. */
-void debugchr_editor_run_numeric_thread(void) {
+void unit_panel_numbers_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;
     menu_status_panel_numeric_buffer_t* buffers;
@@ -122,7 +122,7 @@ void debugchr_editor_run_numeric_thread(void) {
         }
 
         /* A field_y of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into the upper half. */
-        field_y = g_main_gfx_screen_polarity * 0xF0;
+        field_y = g_gfx_screen_polarity * 0xF0;
         use_offset = field_y != 0xF0;
         g_gfx_draw_offset_y = -use_offset & 0xF0;
         menu_build_scaled_draw_area_packets(

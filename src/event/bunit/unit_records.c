@@ -15,9 +15,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static s16 g_bunit_shown_unit_indices[22] = { 0 };
-static s16 g_bunit_unit_count = 0;
-static bunit_unit_t g_bunit_unit_records[21] = { 0 };
+static s16 g_unit_list_shown_unit_indices[22] = { 0 };
+static s16 g_unit_list_count = 0;
+static unit_list_record_t g_unit_list_records[21] = { 0 };
 
 /* Builds a BUNIT unit-data record from a battle unit: clamps level, HP/MP
  * and CT for display, lists up to four monster-skillset abilities (the fourth
@@ -28,7 +28,7 @@ static bunit_unit_t g_bunit_unit_records[21] = { 0 };
  * slot so loop.c strength-reduces it into the record pointer; with an explicit
  * pointer walk the smaller loop lets loop.c hoist the constant 3 into $s6. The
  * caller also passes its shown-list slot, which is not read. */
-static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_unit_t* record, s32 unused_slot) {
+static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t* record, s32 unused_slot) {
     s16* abilities;
     s32 count;
     s32 i;
@@ -38,7 +38,7 @@ static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_u
     u32 evade;
     u32 other;
 
-    memset(record, 0, sizeof(bunit_unit_t));
+    memset(record, 0, sizeof(unit_list_record_t));
     record->level = unit->level <= UNIT_LEVEL_MAX ? unit->level : UNIT_LEVEL_MAX;
 
     /* Later checks win: 1 enemy team, 2 neither enemy nor player controlled, 3 auto battle. */
@@ -118,7 +118,7 @@ static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_u
     record->magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
     if (record->uses_monster_skillset != 0) {
-        abilities = (s16*)main_ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = (s16*)ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 4; i++) {
             found = 0;
@@ -168,7 +168,7 @@ static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_u
     if (job_is_special_monster(unit->job_id) != 0 || record->uses_monster_skillset != 0 || record->team_kind == 1) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
-        i = main_job_calculate_unlocked(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
+        i = job_calculate_unlocked(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
         /* The 24-bit unlocked-job mask is stored high byte first. */
         record->unlocked_jobs[0] = i >> 16;
         record->unlocked_jobs[1] = i >> 8;
@@ -194,7 +194,7 @@ static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_u
  * status billboard record, store the shown-plus-egg unit count in each
  * record and sort the shown list; returns the number of shown units. `mode`
  * and `unit_data` are not read. */
-s32 bunit_unit_build_data_list(s32 mode, s32 unit_data, s32 sort_mode) {
+s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode) {
     unit_stats_t* unit;
     s32 i;
     s32 shown = 0;
@@ -211,28 +211,28 @@ s32 bunit_unit_build_data_list(s32 mode, s32 unit_data, s32 sort_mode) {
                 && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                     & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
                 total++;
-                bunit_unit_build_record_from_stats(unit, &g_bunit_unit_records[shown], shown);
-                g_bunit_shown_unit_indices[shown] = shown;
+                unit_list_build_record(unit, &g_unit_list_records[shown], shown);
+                g_unit_list_shown_unit_indices[shown] = shown;
                 shown++;
             }
         }
     }
 
     for (i = 0; i < shown; i++) {
-        g_bunit_unit_records[i].unit_count = total;
+        g_unit_list_records[i].unit_count = total;
     }
-    g_bunit_unit_count = shown;
-    bunit_unit_sort_index_list_by_order_keys(sort_mode);
+    g_unit_list_count = shown;
+    unit_list_sort(sort_mode);
     return shown;
 }
 
-/* Bubble-sort g_bunit_shown_unit_indices (the shown-unit index list) by the
- * successive keys of g_main_item_type_order_tables.order_0 (the unit sort order the
- * reorder list edits, each key a record field picked through g_bunit_unit_sort_field_indices; a tie
+/* Bubble-sort g_unit_list_shown_unit_indices (the shown-unit index list) by the
+ * successive keys of g_item_type_order_tables.order_0 (the unit sort order the
+ * reorder list edits, each key a record field picked through g_unit_list_sort_field_indices; a tie
  * moves on to the next key), then publish the sorted record pointers into
- * g_bunit_unit_pointers. Keys 1 and 4 and up sort in descending order. `sort_mode` is
+ * g_unit_list_pointers. Keys 1 and 4 and up sort in descending order. `sort_mode` is
  * not read. BUNIT twin of formation_sort_roster. */
-void bunit_unit_sort_index_list_by_order_keys(s32 sort_mode) {
+void unit_list_sort(s32 sort_mode) {
     s32 count;
     s32 j;
     s32 k;
@@ -241,73 +241,72 @@ void bunit_unit_sort_index_list_by_order_keys(s32 sort_mode) {
     s32 rhs;
     s16* rec; /* Native sort keys select signed 16-bit values within the record. */
 
-    for (count = g_bunit_unit_count - 1; count > 0; count--) {
+    for (count = g_unit_list_count - 1; count > 0; count--) {
         for (j = 0; j < count; j++) {
             k = 0;
             do {
-                rec = (s16*)&g_bunit_unit_records[g_bunit_shown_unit_indices[j]];
-                lhs = rec[g_bunit_unit_sort_field_indices[g_main_item_type_order_tables.order_0[k]]];
-                rec = (s16*)&g_bunit_unit_records[g_bunit_shown_unit_indices[j + 1]];
-                rhs = rec[g_bunit_unit_sort_field_indices[g_main_item_type_order_tables.order_0[k]]];
+                rec = (s16*)&g_unit_list_records[g_unit_list_shown_unit_indices[j]];
+                lhs = rec[g_unit_list_sort_field_indices[g_item_type_order_tables.order_0[k]]];
+                rec = (s16*)&g_unit_list_records[g_unit_list_shown_unit_indices[j + 1]];
+                rhs = rec[g_unit_list_sort_field_indices[g_item_type_order_tables.order_0[k]]];
                 diff = rhs - lhs;
                 k++;
             } while (diff == 0);
-            if (g_main_item_type_order_tables.order_0[k - 1] == 1
-                || g_main_item_type_order_tables.order_0[k - 1] >= 4) {
+            if (g_item_type_order_tables.order_0[k - 1] == 1 || g_item_type_order_tables.order_0[k - 1] >= 4) {
                 diff = -diff;
             }
             if (diff < 0) {
-                s32 swap = g_bunit_shown_unit_indices[j];
-                g_bunit_shown_unit_indices[j] = g_bunit_shown_unit_indices[j + 1];
-                g_bunit_shown_unit_indices[j + 1] = swap;
+                s32 swap = g_unit_list_shown_unit_indices[j];
+                g_unit_list_shown_unit_indices[j] = g_unit_list_shown_unit_indices[j + 1];
+                g_unit_list_shown_unit_indices[j + 1] = swap;
             }
         }
     }
-    for (j = 0; j < g_bunit_unit_count; j++) {
-        g_bunit_unit_pointers[j] = &g_bunit_unit_records[g_bunit_shown_unit_indices[j]];
+    for (j = 0; j < g_unit_list_count; j++) {
+        g_unit_list_pointers[j] = &g_unit_list_records[g_unit_list_shown_unit_indices[j]];
     }
 }
 
 /* Copies the first signed-byte order list into a -1-terminated s16 list. */
-void bunit_unit_copy_orders_to_reorder_list(s32 unused, s16* entries) {
+void unit_list_load_sort_order(s32 unused, s16* entries) {
     s32 i;
 
-    for (i = 0; (*entries = g_main_item_type_order_tables.order_0[i]) != -1; i++) {
+    for (i = 0; (*entries = g_item_type_order_tables.order_0[i]) != -1; i++) {
         entries++;
     }
 }
 
-/* Copy the low byte of each 16-bit entry into g_main_item_type_order_tables.order_0
+/* Copy the low byte of each 16-bit entry into g_item_type_order_tables.order_0
  * (the first, 12-byte list of those tables) until the terminator (-1) has been copied.
  * The first parameter is unused. */
-void bunit_unit_copy_reorder_list_to_orders(s32 unused, const s16* entries) {
+void unit_list_store_sort_order(s32 unused, const s16* entries) {
     s32 index = 0;
     s8 value = *entries;
 
-    g_main_item_type_order_tables.order_0[index] = value;
+    g_item_type_order_tables.order_0[index] = value;
     while (value != -1) {
         entries++;
         value = *entries;
         index += 1;
-        g_main_item_type_order_tables.order_0[index] = value;
+        g_item_type_order_tables.order_0[index] = value;
     }
 }
 
 /* Find the BUNIT record with a battle id, or return the active record count.
  *
  * The not-found result doubles as the next/end index for both known callers. */
-s32 bunit_unit_find_index_by_battle_id(s16 battle_id) {
+s32 unit_list_find_by_battle_id(s16 battle_id) {
     s32 stack_scratch[2]; /* Unused; the target keeps an 8-byte leaf frame. */
     s32 count;
     s32 i;
     s32 search_value;
-    bunit_unit_t** units;
+    unit_list_record_t** units;
 
-    count = g_bunit_unit_count;
+    count = g_unit_list_count;
     i = 0;
     if (count > 0) {
         search_value = battle_id;
-        units = g_bunit_unit_pointers;
+        units = g_unit_list_pointers;
         do {
             if ((*units)->battle_id == search_value) {
                 return i;

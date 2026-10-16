@@ -13,14 +13,14 @@
 /* Stream command: set the texture page from the command (color mode
  * data[4], x data[3] * 16, y data[2] * 256, blend rate 0) and return the
  * next command. */
-const u8* card_set_texture_page(const u8* data) {
-    g_card_gfx_texture_page = GetTPage(data[4], 0, data[3] << 4, data[2] << 8);
+const u8* menu_set_texture_page(const u8* data) {
+    g_save_gfx_texture_page = GetTPage(data[4], 0, data[3] << 4, data[2] << 8);
     return data + data[1];
 }
 
 /* Menu script command: select the ordering-table slot later primitives go to (byte 3) and return
  * the next command (byte 1 holds this command's length). */
-const u8* card_set_draw_priority(const u8* data) {
+const u8* menu_set_draw_priority(const u8* data) {
     g_menu_gfx_otag_index = data[3];
     return data + data[1];
 }
@@ -28,7 +28,7 @@ const u8* card_set_draw_priority(const u8* data) {
 /* Draw the command's literal value as `width` zero-padded digit glyphs from (x, y),
  * `spacing` pixels apart, tinted with the menu text color. A style of 2 or more draws
  * nothing. Returns the next command. */
-menu_draw_number_command_t* card_draw_decimal_number(menu_draw_number_command_t* command) {
+menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     RECT unused_minus_rect; /* Preserves the original frame size. */
@@ -48,7 +48,7 @@ menu_draw_number_command_t* card_draw_decimal_number(menu_draw_number_command_t*
     glyph.v = 0x10;
     glyph.w = 6;
     glyph.h = 0xB;
-    pad = command->width - sprintf(text, g_card_text_decimal_format, value);
+    pad = command->width - sprintf(text, g_save_text_decimal_format, value);
     pos = 0;
     color = &g_menu_text_color;
     for (i = 0; i < command->width; i++) {

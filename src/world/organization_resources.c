@@ -105,16 +105,16 @@ void world_map_confirm_destination(void) {
     if (g_world_map_destination_list_row_colors[selection] != 4) {
         s16* pending = g_menu_pending_selection;
 
-        g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+        g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
         pending[0] = 0;
         value = g_world_map_destination_list_text_ids[selection] - TEXT_ID_LOCATION_NAME_BASE;
         pending[1] = value;
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, value);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_DESTINATION;
+        g_system_flags |= SYSTEM_FLAG_REQUEST_DESTINATION;
         thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
         thread_set_parameters(g_thread_current_id + 2, 0, 0, 1);
     } else {
-        g_sound_pending_sfx_id = MAIN_SFX_INVALID;
+        g_sound_pending_sfx_id = SOUND_SFX_INVALID;
     }
     g_menu_text_palette_offset = 0;
     thread_exit_current();
@@ -155,14 +155,14 @@ void screen_noop(void) {
 static void screen_load_wldface_portraits(void) {
     menu_portrait_sheet_t* sheets;
 
-    g_thread_call_target = main_file_load_checked_to_heap;
+    g_thread_call_target = file_load_checked_to_heap;
     sheets = (menu_portrait_sheet_t*)thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE);
     LoadImage(&g_screen_wldface_vram_rects, (u32*)sheets[0].pixels);
     LoadImage(&g_screen_wldface_vram_rect_1, (u32*)sheets[1].pixels);
     LoadImage(&g_screen_wldface_vram_rect_2, (u32*)sheets[2].pixels);
     LoadImage(&g_screen_wldface_vram_rect_3, (u32*)sheets[3].pixels);
     DrawSync(0);
-    main_heap_call_free(sheets);
+    heap_call_free(sheets);
 }
 
 /*
@@ -174,38 +174,38 @@ static void screen_load_wldface_portraits(void) {
 static void screen_load_common_graphics(s32 load_extra_pages) {
     void* resource;
     screen_image_pages_t* pages;
-    main_gfx_frame_bin_t* frame;
+    gfx_frame_bin_t* frame;
 
-    if (g_main_common_menu_graphics_loaded == 0) {
-        g_thread_call_target = main_file_load_checked_to_heap;
+    if (g_menu_common_graphics_loaded == 0) {
+        g_thread_call_target = file_load_checked_to_heap;
         resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_ITEM_BIN, 0x8800);
         pages = resource;
         LoadImage(&g_screen_item_image_rect, pages->first_page);
         LoadImage(&g_screen_item_palette_rect, pages->second_page);
         DrawSync(0);
-        main_heap_call_free(resource);
-        g_main_common_menu_graphics_loaded++;
+        heap_call_free(resource);
+        g_menu_common_graphics_loaded++;
     }
     /* LoadImage transfers pairs of 16-bit colors through 32-bit buffer elements. */
     LoadImage(&g_screen_common_clut_rect, (u32*)&g_screen_common_clut_data);
     DrawSync(0);
-    g_thread_call_target = main_file_load_checked_to_heap;
-    resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_FRAME_BIN, sizeof(main_gfx_frame_bin_t));
+    g_thread_call_target = file_load_checked_to_heap;
+    resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_FRAME_BIN, sizeof(gfx_frame_bin_t));
     frame = resource;
     LoadImage(&g_screen_frame_image_rect, (u32*)frame->pixels[32]);
     LoadImage(&g_screen_frame_palette_rect, (u32*)frame->clut);
     LoadImage(&g_screen_frame_palette_tail_rect, (u32*)frame->palette_tail);
     menu_set_palette_colors(&g_menu_glyph_sheet->palette);
     DrawSync(0);
-    main_heap_call_free(resource);
+    heap_call_free(resource);
     if (load_extra_pages != 0) {
-        g_thread_call_target = main_file_load_checked_to_heap;
+        g_thread_call_target = file_load_checked_to_heap;
         resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000);
         pages = resource;
         LoadImage(&g_screen_unit_image_rect_a, pages->first_page);
         LoadImage(&g_screen_unit_image_rect_b, pages->second_page);
         DrawSync(0);
-        main_heap_call_free(resource);
+        heap_call_free(resource);
     }
 }
 
@@ -229,7 +229,7 @@ void screen_init_with_open_text(void) {
     s32 i;
 
     menu_init_subsystem_pointers();
-    g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+    g_thread_call_target = (void (*)(void))file_load_checked_to_address;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_OPEN_LZW, 0x5800, g_screen_text_file_buffer);
     menu_reset_subsystems();
     script_set_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
@@ -258,7 +258,7 @@ void screen_init_with_world_text_and_faces(void) {
     menu_init_subsystem_pointers();
     screen_load_common_graphics(1);
     screen_load_wldface_portraits();
-    g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+    g_thread_call_target = (void (*)(void))file_load_checked_to_address;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, g_screen_text_file_buffer);
     menu_reset_subsystems();
     script_set_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
@@ -299,7 +299,7 @@ void screen_init_with_world_text(void) {
     g_thread_current_id = THREAD_SLOT_MAIN;
     menu_init_subsystem_pointers();
     screen_load_common_graphics(0);
-    g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+    g_thread_call_target = (void (*)(void))file_load_checked_to_address;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xe800, g_screen_text_file_buffer);
     menu_reset_subsystems();
     script_set_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
@@ -327,7 +327,7 @@ void screen_init_with_world_text(void) {
 void formation_reopen_after_world_map(void) {
     s32 profile;
 
-    main_sound_unload_scenario_music_and_tunes();
+    music_unload_scenario_and_tunes();
     ClearImage(&g_screen_clear_rect, 0, 0, 0);
     DrawSync(0);
     VSync(0);
@@ -337,13 +337,13 @@ void formation_reopen_after_world_map(void) {
     screen_reset_context();
     DrawSync(0);
     VSync(0);
-    profile = g_main_game_options.fields.finger_cursor_repeat_speed;
-    g_main_input_repeat_initial_delay = g_screen_input_timing_profiles[profile].initial_delay;
-    g_main_input_repeat_period = g_screen_input_timing_profiles[profile].repeat_period;
-    g_main_input_secondary_repeat_period = g_screen_input_timing_profiles[profile].secondary_repeat_period;
-    g_main_menu_scroll_accel_delay = g_screen_input_timing_profiles[profile].scroll_accel_delay;
-    g_main_menu_scroll_slow_step = g_screen_input_timing_profiles[profile].scroll_slow_step;
-    g_main_menu_scroll_fast_step = g_screen_input_timing_profiles[profile].scroll_fast_step;
+    profile = g_game_options.fields.finger_cursor_repeat_speed;
+    g_input_repeat_initial_delay = g_screen_input_timing_profiles[profile].initial_delay;
+    g_input_repeat_period = g_screen_input_timing_profiles[profile].repeat_period;
+    g_input_secondary_repeat_period = g_screen_input_timing_profiles[profile].secondary_repeat_period;
+    g_menu_scroll_accel_delay = g_screen_input_timing_profiles[profile].scroll_accel_delay;
+    g_menu_scroll_slow_step = g_screen_input_timing_profiles[profile].scroll_slow_step;
+    g_menu_scroll_fast_step = g_screen_input_timing_profiles[profile].scroll_fast_step;
     screen_set_brightness(0x80, 0x80, 0x80);
     formation_run_screen(0, 0);
     screen_reset_context();
@@ -687,23 +687,22 @@ void world_map_open_brave_story(void) {
  * background, display objects, context value, date and location label)
  * with the display off, for a full-screen menu. */
 static void world_map_hide(void) {
-    g_formation_saved_system_flags = g_main_system_flags;
-    g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES
-        | MAIN_SYSTEM_FLAG_DISPLAY_OFF | MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE | MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS
-        | MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
-        | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    g_formation_saved_system_flags = g_system_flags;
+    g_system_flags |= SYSTEM_FLAG_HIDE_MAP_DOTS | SYSTEM_FLAG_HIDE_MAP_ROUTES | SYSTEM_FLAG_DISPLAY_OFF
+        | SYSTEM_FLAG_NO_BACKGROUND_IMAGE | SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS | SYSTEM_FLAG_HIDE_CONTEXT_VALUE
+        | SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
 }
 
 /* Restore the system flags saved before the formation screen opened. */
 static void world_map_restore(void) {
-    g_main_system_flags = g_formation_saved_system_flags;
+    g_system_flags = g_formation_saved_system_flags;
 }
 
 /* Debug battle setup thread: add 3 to the system flags, select the world debug battle style, clear
  * the event, map arrangement, weather and time variables, and make the number entered in the menu
  * the next map. */
 void debug_battle_setup_thread(void) {
-    g_main_system_flags += 3;
+    g_system_flags += 3;
     script_set_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 1);
     script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
     script_set_variable(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, 0);
@@ -732,7 +731,7 @@ static void world_map_step_formation_request(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
+        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             g_formation_open_request_state = state + 1;
         }
         return;
@@ -767,7 +766,7 @@ static void world_map_step_formation_request(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_IN) {
-        if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
+        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             g_formation_open_request_state = WORLD_MAP_REQUEST_IDLE;
         }
     }
@@ -785,7 +784,7 @@ void formation_run_at_menu(s32 menu_index) {
 
 /* Steps a pending request to open the tutorial categories from the world
  * map: start the screen fade-out, wait for it, then reset the menu context
- * and raise MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL. */
+ * and raise SYSTEM_FLAG_REQUEST_TUTORIAL. */
 static void world_map_step_tutorial_request(void) {
     s16 state = g_world_map_tutorial_request_state;
 
@@ -799,20 +798,20 @@ static void world_map_step_tutorial_request(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
+        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             g_world_map_tutorial_request_state = state + 1;
         }
         return;
     }
     screen_reset_context();
     screen_set_brightness(0x80, 0x80, 0x80);
-    g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL;
+    g_system_flags |= SYSTEM_FLAG_REQUEST_TUTORIAL;
     g_world_map_tutorial_request_state = WORLD_MAP_REQUEST_IDLE;
 }
 
 /* Serve a pending request to open the debug variable list from the world
  * map: reset the menu context and raise
- * MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST. */
+ * SYSTEM_FLAG_REQUEST_VARIABLE_LIST. */
 static void world_map_step_debug_variable_list_request(void) {
     s32 state = g_world_map_debug_variable_list_request_state;
 
@@ -821,25 +820,25 @@ static void world_map_step_debug_variable_list_request(void) {
         screen_reset_context();
         screen_set_brightness(0x80, 0x80, 0x80);
         g_world_map_debug_variable_list_request_state = 0;
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST;
+        g_system_flags |= SYSTEM_FLAG_REQUEST_VARIABLE_LIST;
     }
 }
 
 /* Serve a pending request to open the fixed number panel from the world
  * map: reset the menu context, reload and relocate the menu text file and
- * raise MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL. */
+ * raise SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL. */
 static void world_map_step_fixed_number_panel_request(void) {
     s32 state = g_world_map_fixed_number_panel_request_state;
 
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
         screen_reset_context();
-        g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
+        g_thread_call_target = (void (*)(void))file_load_checked_to_address;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, g_screen_text_file_buffer);
         text_relocate_pointer_table(g_screen_text_file_buffer);
         screen_set_brightness(0x80, 0x80, 0x80);
         g_world_map_fixed_number_panel_request_state = 0;
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL;
+        g_system_flags |= SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL;
     }
 }
 
@@ -859,7 +858,7 @@ static void world_map_step_save_request(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
+        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             g_save_menu_request_state = state + 1;
         }
         return;
@@ -874,7 +873,7 @@ static void world_map_step_save_request(void) {
         world_map_hide();
         if (result == 1) {
             g_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
-            g_main_system_flags |= MAIN_SYSTEM_FLAG_RESTART;
+            g_system_flags |= SYSTEM_FLAG_RESTART;
             return;
         }
         world_map_menu_start_group(g_world_map_menu_group_parameter, g_world_map_destination_id,
@@ -899,7 +898,7 @@ static void world_map_step_save_request(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_IN) {
-        if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
+        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             g_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
         }
     }
@@ -919,7 +918,7 @@ static void world_map_step_brave_story_request(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
+        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             g_world_map_brave_story_request_state = state + 1;
         }
         return;
@@ -927,7 +926,7 @@ static void world_map_step_brave_story_request(void) {
     if (state == WORLD_MAP_REQUEST_RUN) {
         screen_reset_context();
         g_world_map_brave_story_request_state = WORLD_MAP_REQUEST_IDLE;
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_BRAVE_STORY;
+        g_system_flags |= SYSTEM_FLAG_REQUEST_BRAVE_STORY;
     }
 }
 
@@ -1085,7 +1084,7 @@ extern u32 g_screen_current_input, g_screen_previous_input, g_screen_initial_rep
  * changes and returns the menu result slot g_menu_pending_selection[0] (-2 while pending).
  * WORLD's sibling of menu_input_update_event_state. */
 s16 screen_menu_frame(u32* otag, u32 input) {
-    s32 profile = g_main_game_options.fields.finger_cursor_repeat_speed;
+    s32 profile = g_game_options.fields.finger_cursor_repeat_speed;
     u32 previous_input;
     u32 filtered_input;
     s32 initial_delay;
@@ -1095,12 +1094,12 @@ s16 screen_menu_frame(u32* otag, u32 input) {
     s32 thread_id;
     s32 status;
 
-    g_main_input_repeat_initial_delay = g_screen_input_timing_profiles[profile].initial_delay;
-    g_main_input_repeat_period = g_screen_input_timing_profiles[profile].repeat_period;
-    g_main_input_secondary_repeat_period = g_screen_input_timing_profiles[profile].secondary_repeat_period;
-    g_main_menu_scroll_accel_delay = g_screen_input_timing_profiles[profile].scroll_accel_delay;
-    g_main_menu_scroll_slow_step = g_screen_input_timing_profiles[profile].scroll_slow_step;
-    g_main_menu_scroll_fast_step = g_screen_input_timing_profiles[profile].scroll_fast_step;
+    g_input_repeat_initial_delay = g_screen_input_timing_profiles[profile].initial_delay;
+    g_input_repeat_period = g_screen_input_timing_profiles[profile].repeat_period;
+    g_input_secondary_repeat_period = g_screen_input_timing_profiles[profile].secondary_repeat_period;
+    g_menu_scroll_accel_delay = g_screen_input_timing_profiles[profile].scroll_accel_delay;
+    g_menu_scroll_slow_step = g_screen_input_timing_profiles[profile].scroll_slow_step;
+    g_menu_scroll_fast_step = g_screen_input_timing_profiles[profile].scroll_fast_step;
     if (input == 0) {
         g_screen_initial_repeat_counter = 0;
         g_screen_repeat_counter = 0;
@@ -1116,13 +1115,13 @@ s16 screen_menu_frame(u32* otag, u32 input) {
         g_screen_new_buttons = ~previous_input & input;
         g_screen_initial_repeat_counter = 0;
     } else {
-        initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
+        initial_delay = g_input_repeat_initial_delay / g_script_event_speed;
         counter = ++g_screen_initial_repeat_counter;
         if (counter == initial_delay) {
             g_screen_new_buttons = filtered_input;
         }
         if (counter >= initial_delay) {
-            repeat_delay = g_main_input_repeat_period / g_script_event_speed;
+            repeat_delay = g_input_repeat_period / g_script_event_speed;
             counter = ++g_screen_repeat_counter;
             g_screen_secondary_repeat_counter++;
             if (counter >= repeat_delay) {
@@ -1133,7 +1132,7 @@ s16 screen_menu_frame(u32* otag, u32 input) {
                     g_screen_new_buttons = input & PSX_PAD_DPAD_MASK;
                 }
             }
-            secondary_delay = g_main_input_secondary_repeat_period / g_script_event_speed;
+            secondary_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (g_screen_secondary_repeat_counter >= secondary_delay) {
                 g_screen_secondary_repeat_counter = 0;
                 if ((g_screen_current_input & PSX_PAD_SQUARE) != 0) {
@@ -1204,11 +1203,11 @@ s16 screen_menu_frame(u32* otag, u32 input) {
     g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_sound_pending_sfx_id != -1) {
-        main_sound_play_sfx_find_channel(g_sound_pending_sfx_id);
+        sound_play_sfx_on_free_channel(g_sound_pending_sfx_id);
     }
     if (g_menu_pending_selection[0] == 0) {
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_menu_pending_selection[1]);
-        g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_DESTINATION;
+        g_system_flags |= SYSTEM_FLAG_REQUEST_DESTINATION;
     }
     if (g_menu_input_block_frames != 0) {
         g_menu_input_block_frames--;

@@ -63,7 +63,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     scratch = (effect_wave_mesh_scratch_t*)getScratchAddr(0);
     record = &g_battle_effect_state_records[state_index];
     geometry = &g_battle_effect_geometry_table->entries[emitter_index];
-    ot = main_gfx_get_battle_otag();
+    ot = gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

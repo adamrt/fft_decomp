@@ -33,7 +33,7 @@
  * value highlighted; up/down wrap the cursor, circle stores it and cross
  * cancels. For option index 13 circle only accepts entry 1, which restores
  * g_menu_option_reference_values; any other option clears value 13.
- * On exit the thirteen values are packed back into g_main_game_options, the
+ * On exit the thirteen values are packed back into g_game_options, the
  * sound mode is applied on the main stack and the input-repeat timing is
  * reloaded from the finger-cursor speed profile.
  */
@@ -111,12 +111,12 @@ void menu_run_option_choice(void) {
         record = &g_menu_option_picker_icon_records[width & 1].base;
         if (menu_can_accept_input()) {
             if (*input & PSX_PAD_CROSS) {
-                g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
+                g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
                 break;
             }
 
             if (*input & PSX_PAD_CIRCLE) {
-                g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+                g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                 /* Row 13 is the defaults entry: choice 1 restores every option to its reference value. */
                 if (kind == GAME_OPTION_COUNT) {
                     if (cursor == 1) {
@@ -146,7 +146,7 @@ void menu_run_option_choice(void) {
                 } else {
                     cursor = g_menu_option_choice_counts[kind] - 1;
                 }
-                g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
             }
 
             if (*input & PSX_PAD_DOWN) {
@@ -156,7 +156,7 @@ void menu_run_option_choice(void) {
                 } else {
                     cursor++;
                 }
-                g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+                g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
             }
         }
 
@@ -166,31 +166,30 @@ void menu_run_option_choice(void) {
         thread_wait_frames(1);
     }
 
-    g_main_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
-    g_main_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
-    g_main_game_options.fields.multi_height_cursor_speed = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
-    g_main_game_options.fields.finger_cursor_repeat_speed
-        = g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
-    g_main_game_options.fields.message_display_speed = g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
-    g_main_game_options.fields.navigation_messages = g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
-    g_main_game_options.fields.ability_names = g_menu_option_values[GAME_OPTION_ABILITY_NAMES];
-    g_main_game_options.fields.effect_messages = g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES];
-    g_main_game_options.fields.display_gained_exp_jp = g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
-    g_main_game_options.fields.target_flashing = g_menu_option_values[GAME_OPTION_TARGET_FLASHING];
-    g_main_game_options.fields.show_unequippable_items = g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
-    g_main_game_options.fields.max_equip_at_job_change = g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
-    g_main_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
+    g_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
+    g_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
+    g_game_options.fields.multi_height_cursor_speed = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
+    g_game_options.fields.finger_cursor_repeat_speed = g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
+    g_game_options.fields.message_display_speed = g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
+    g_game_options.fields.navigation_messages = g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
+    g_game_options.fields.ability_names = g_menu_option_values[GAME_OPTION_ABILITY_NAMES];
+    g_game_options.fields.effect_messages = g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES];
+    g_game_options.fields.display_gained_exp_jp = g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
+    g_game_options.fields.target_flashing = g_menu_option_values[GAME_OPTION_TARGET_FLASHING];
+    g_game_options.fields.show_unequippable_items = g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
+    g_game_options.fields.max_equip_at_job_change = g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
+    g_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
     g_thread_call_target = (void (*)(void))suzuki_sound_set_type;
     thread_call_on_main_stack(g_menu_option_values[GAME_OPTION_SOUND_MODE]);
 
     /* `width` is reused as the input-repeat timing profile index. */
-    width = g_main_game_options.fields.finger_cursor_repeat_speed;
-    g_main_input_repeat_initial_delay = g_menu_option_input_repeat_timings[width].initial_delay;
-    g_main_input_repeat_period = g_menu_option_input_repeat_timings[width].repeat_period;
-    g_main_input_secondary_repeat_period = g_menu_option_input_repeat_timings[width].secondary_repeat_period;
-    g_main_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[width].scroll_accel_delay;
-    g_main_menu_scroll_slow_step = g_menu_option_input_repeat_timings[width].scroll_slow_step;
-    g_main_menu_scroll_fast_step = g_menu_option_input_repeat_timings[width].scroll_fast_step;
+    width = g_game_options.fields.finger_cursor_repeat_speed;
+    g_input_repeat_initial_delay = g_menu_option_input_repeat_timings[width].initial_delay;
+    g_input_repeat_period = g_menu_option_input_repeat_timings[width].repeat_period;
+    g_input_secondary_repeat_period = g_menu_option_input_repeat_timings[width].secondary_repeat_period;
+    g_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[width].scroll_accel_delay;
+    g_menu_scroll_slow_step = g_menu_option_input_repeat_timings[width].scroll_slow_step;
+    g_menu_scroll_fast_step = g_menu_option_input_repeat_timings[width].scroll_fast_step;
 
     /* Clear the closing press so the options list thread does not act on it too. */
     *input = 0;

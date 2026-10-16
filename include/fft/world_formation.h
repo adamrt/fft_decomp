@@ -198,7 +198,7 @@ extern menu_input_state_t g_screen_input_state;
 extern s32 g_screen_new_buttons;
 extern u32 g_screen_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
 extern u32* g_formation_ordering_table;
-/* g_main_system_flags as saved by world_map_hide (main_system_flags_e). */
+/* g_system_flags as saved by world_map_hide (system_flags_e). */
 extern POLY_FT4 g_formation_view_quads[2][30];
 extern formation_background_tile_t g_formation_background_tiles[2][4];
 extern u8 g_formation_menu_text_table[];
@@ -291,7 +291,7 @@ void formation_stage_selected_unit(void);
 /* unit banner and stat bar */
 /* Set while the selected unit is in the upper rows of the grid: the unit banner
  * then sits at the bottom of the screen and the stat bar at the top (BUNIT's
- * g_bunit_status_banner_at_bottom). The latch is the value the banner was last
+ * g_unit_list_status_banner_at_bottom). The latch is the value the banner was last
  * placed for. Majority spelling: five readers sign-extend as u8. Two files
  * (formation_init_selection_cursor, formation_step_grid_transition)
  * need s8 to match and keep their own local extern. */

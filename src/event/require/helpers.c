@@ -11,29 +11,29 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static RECT g_require_condition_bonus_image_rect = { 384, 0, 64, 256 };
+static RECT g_conditions_banner_rect = { 384, 0, 64, 256 };
 
 /* Thread body that waits 16 frames and exits. Nothing references it. */
-void require_thread_stop_after_16_frames(void) {
+void thread_stop_after_16_frames(void) {
     thread_wait_frames(0x10);
-    require_thread_exit_current();
+    thread_exit_current_wrapper();
 }
 
 /* Set to `value` the script variable of every record in
- * g_require_party_bio_update_records that lists `unit_class` among its three
- * identities, a require_bio_state_e. */
-void require_party_update_bio_variable_for_unit_class(s32 unit_class, s32 value) {
+ * g_party_bio_update_records that lists `unit_class` among its three
+ * identities, a party_bio_state_e. */
+void party_set_class_variable(s32 unit_class, s32 value) {
     s32 i;
     s32 j;
 
     for (i = 0; i < 11; i++) {
         for (j = 0; j < 3; j++) {
-            if (unit_class == g_require_party_bio_update_records[i].unit_ids[j]) {
+            if (unit_class == g_party_bio_update_records[i].unit_ids[j]) {
                 break;
             }
         }
         if (j != 3) {
-            script_set_variable(g_require_party_bio_update_records[i].variable, value);
+            script_set_variable(g_party_bio_update_records[i].variable, value);
         }
     }
 }
@@ -46,16 +46,16 @@ void require_party_update_bio_variable_for_unit_class(s32 unit_class, s32 value)
  * the file there on the main stack, uploads the pixels and the palette that
  * follows them, and frees the buffer after one more frame.
  */
-void require_condition_load_bonus_image(s32 image_id) {
-    require_condition_bonus_image_file_t* allocation;
+void conditions_load_banner_image(s32 image_id) {
+    conditions_banner_file_t* allocation;
     s32 (*read_operation)(s32 sector, u32 size, void* destination);
 
     do {
         thread_yield();
-        allocation = main_heap_reserve_at(g_main_heap_high_overlay_load_address, 0x8000);
-    } while (allocation != g_main_heap_high_overlay_load_address);
+        allocation = heap_reserve_at(g_heap_high_overlay_load_address, 0x8000);
+    } while (allocation != g_heap_high_overlay_load_address);
 
-    read_operation = main_file_request_read_bytes;
+    read_operation = file_request_read_bytes;
     do {
         thread_yield();
         g_thread_call_target = (void (*)(void))read_operation;
@@ -63,7 +63,7 @@ void require_condition_load_bonus_image(s32 image_id) {
         thread_call_on_main_stack(image_id * 13 + DISC_SECTOR_EVENT_BONUS_BIN, sizeof(*allocation), allocation) != 0);
 
     {
-        int (*poll_operation)(void) = main_file_is_still_loading;
+        int (*poll_operation)(void) = file_is_still_loading;
         do {
             thread_yield();
             g_thread_call_target = (void (*)(void))poll_operation;
@@ -71,14 +71,14 @@ void require_condition_load_bonus_image(s32 image_id) {
     }
 
     /* The 256-row upload includes the reserved suffix beyond the 0x6800-byte file. */
-    LoadImage(&g_require_condition_bonus_image_rect, allocation->pixels[0]);
-    LoadImage(&g_require_condition_bonus_palette_rect, (u32*)allocation->palettes);
+    LoadImage(&g_conditions_banner_rect, allocation->pixels[0]);
+    LoadImage(&g_conditions_banner_palette_rect, (u32*)allocation->palettes);
     thread_yield();
-    main_heap_free(allocation);
+    heap_free(allocation);
 }
 
 /* Wait `frames` frames, ending early when Circle is newly pressed. */
-void require_input_wait_frames_or_skip(s32 frames) {
+void input_wait_frames_or_skip(s32 frames) {
     s32 reserved_stack_words[2];
     s32 i = 0;
     u32* input;
@@ -99,9 +99,9 @@ void require_input_wait_frames_or_skip(s32 frames) {
     }
 }
 
-/* Fade g_require_gfx_fade_rgb linearly from its current value to eight times
+/* Fade g_after_battle_gfx_fade_rgb linearly from its current value to eight times
  * each target over 31 frames, yielding once per frame. */
-void require_gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2) {
+void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2) {
     s32 current[3];
     s32 interpolated[3];
     s32 target[3];
@@ -112,13 +112,13 @@ void require_gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2) {
     target[0] = target_0 * 8;
     target[1] = target_1 * 8;
     target[2] = target_2 * 8;
-    current[0] = g_require_gfx_fade_rgb[0];
-    current[1] = g_require_gfx_fade_rgb[1];
-    current[2] = g_require_gfx_fade_rgb[2];
+    current[0] = g_after_battle_gfx_fade_rgb[0];
+    current[1] = g_after_battle_gfx_fade_rgb[1];
+    current[2] = g_after_battle_gfx_fade_rgb[2];
     do {
         for (i = 0; i < 3; i++) {
             interpolated[i] = (((target[i] - current[i]) * frame) / 30) + current[i];
-            g_require_gfx_fade_rgb[i] = interpolated[i];
+            g_after_battle_gfx_fade_rgb[i] = interpolated[i];
         }
         frame++;
         thread_yield();

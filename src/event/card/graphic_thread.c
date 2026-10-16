@@ -9,12 +9,12 @@
 #include "psx/types.h"
 
 /* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
-static POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30] = { 0 };
-static u32* g_card_gfx_render_otag = 0;
+static POLY_FT4 g_save_gfx_scaled_sprite_primitive_buffers[2][30] = { 0 };
+static u32* g_save_gfx_render_otag = 0;
 
 /* Set the ordering-table entry the card screen's graphic thread draws into. */
-void card_gfx_set_render_otag(u32* otag) {
-    g_card_gfx_render_otag = otag;
+void save_gfx_set_render_otag(u32* otag) {
+    g_save_gfx_render_otag = otag;
 }
 
 /*
@@ -27,36 +27,36 @@ void card_gfx_set_render_otag(u32* otag) {
  * With the first parameter zero it starts at twice its size and shrinks by
  * 1/16 (0x100) per event-speed step to full size.
  */
-void card_save_run_menu_graphic_thread(void) {
+void save_backdrop_thread(void) {
     s32 frame;
 
     if (g_formation_screen_active != 0) {
-        g_card_input_display_state.offset.position.x = 0;
-        g_card_input_display_state.offset.position.y = 8;
+        g_save_input_display_state.offset.position.x = 0;
+        g_save_input_display_state.offset.position.y = 8;
     } else {
-        g_card_input_display_state.offset.position.x = 0x100;
-        g_card_input_display_state.offset.position.y = 0x80;
+        g_save_input_display_state.offset.position.x = 0x100;
+        g_save_input_display_state.offset.position.y = 0x80;
     }
 
     if (thread_get_current_parameter_1() != 0) {
-        g_card_input_display_state.scale_x = ONE;
-        g_card_input_display_state.scale_y = ONE;
+        g_save_input_display_state.scale_x = ONE;
+        g_save_input_display_state.scale_y = ONE;
     } else {
-        g_card_input_display_state.scale_x = ONE * 2;
-        g_card_input_display_state.scale_y = ONE * 2;
+        g_save_input_display_state.scale_x = ONE * 2;
+        g_save_input_display_state.scale_y = ONE * 2;
     }
 
     for (frame = 0;; frame++) {
-        g_card_input_display_state.ot = g_card_gfx_render_otag;
-        if (g_card_input_display_state.scale_x > ONE) {
+        g_save_input_display_state.ot = g_save_gfx_render_otag;
+        if (g_save_input_display_state.scale_x > ONE) {
             s32 delta = g_script_event_speed << 8;
 
-            g_card_input_display_state.scale_x -= delta;
-            g_card_input_display_state.scale_y -= delta;
+            g_save_input_display_state.scale_x -= delta;
+            g_save_input_display_state.scale_y -= delta;
         }
-        g_card_input_display_state.brightness = 0x80;
+        g_save_input_display_state.brightness = 0x80;
         menu_build_zodiac_primitives(
-            &g_card_input_display_state, g_card_gfx_scaled_sprite_primitive_buffers[frame & 1]);
+            &g_save_input_display_state, g_save_gfx_scaled_sprite_primitive_buffers[frame & 1]);
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             thread_exit_current();

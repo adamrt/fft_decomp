@@ -83,11 +83,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
-        unit_info = &g_attack_panel_selected_unit_data;
+        unit_info = &g_unit_panel_selected_unit_data;
         transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_attack_panel_selected_portrait_palettes;
+        portrait_palettes = g_unit_panel_selected_portrait_palettes;
     } else {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
@@ -96,11 +96,11 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
-        unit_info = &g_attack_panel_comparison_unit_data;
+        unit_info = &g_unit_panel_comparison_unit_data;
         transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_attack_panel_comparison_portrait_palettes;
+        portrait_palettes = g_unit_panel_comparison_portrait_palettes;
     }
     shake = 0;
 
@@ -246,7 +246,7 @@ void menu_run_unit_status_thread(void) {
         }
 
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
-        g_gfx_draw_offset_y = ((g_main_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
+        g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
 
         /* A slide steps one table row every other frame (down rows 1-6, up rows 11-16),
          * then clears every flag but HIDDEN. */
@@ -411,7 +411,7 @@ void menu_run_unit_status_thread(void) {
             menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
             menu_set_text_origin(0, 0);
-            /* ATTACK's unit names are the party name list attack_deploy_find_fieldable_units writes to
+            /* ATTACK's unit names are the party name list deploy_find_fieldable_units writes to
              * TEXT_SECTION_PARTY_UNIT_NAMES (section 11, text id 0x5800). */
             menu_display_text_entry(unit_info->name_id + 0x5800, name_image, text_position);
             menu_set_text_origin(0, 0x10);

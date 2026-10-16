@@ -26,7 +26,7 @@
  * spelling; its `(s16)` row-height cast adds the other 8 bytes of frame and
  * keeps the row count in a register of its own.
  */
-menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
     RECT marker;
@@ -62,7 +62,7 @@ menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t
         menu_draw_scrollable_list(command);
     }
     if (g_menu_list_scroll_direction == 0) {
-        j = equip_input_read_page_scroll_direction();
+        j = equipment_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
                 menu_scroll_list_by_page(j, command);
@@ -75,7 +75,7 @@ menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t
                     if (scroll_base > 0) {
                         g_menu_list_scroll_direction = -1;
                         if (g_menu_list_text_table != 0) {
-                            row_ids = &g_equip_menu_list_scroll_entry_ids;
+                            row_ids = &g_equipment_list_scroll_entry_ids;
                             text_id = g_menu_list_entries[scroll_base - 1];
                             rect.x = 0x100;
                             rect.y = 0x20;
@@ -96,7 +96,7 @@ menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t
                             s16* entry_ids;
 
                             j = g_menu_scroll_base_index + g_menu_list_visible_rows - 1;
-                            entry_ids = &g_equip_menu_list_scroll_entry_ids;
+                            entry_ids = &g_equipment_list_scroll_entry_ids;
                             *entry_ids = g_menu_list_entries[j + 1];
                             rect.x = 0x100;
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
@@ -114,10 +114,10 @@ menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t
         }
     }
     if (g_menu_list_scroll_direction < 0) {
-        if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset -= speed * g_main_menu_scroll_fast_step;
+        if (g_menu_list_scroll_progress >= g_menu_scroll_accel_delay) {
+            g_menu_list_scroll_offset -= speed * g_menu_scroll_fast_step;
         } else {
-            g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * (speed & 0xff);
+            g_menu_list_scroll_offset -= g_menu_scroll_slow_step * (speed & 0xff);
             g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
         }
         if (g_menu_list_scroll_offset <= -g_menu_list_row_height) {
@@ -137,10 +137,10 @@ menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t
             }
         }
     } else if (g_menu_list_scroll_direction > 0) {
-        if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset += speed * g_main_menu_scroll_fast_step;
+        if (g_menu_list_scroll_progress >= g_menu_scroll_accel_delay) {
+            g_menu_list_scroll_offset += speed * g_menu_scroll_fast_step;
         } else {
-            g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * (speed & 0xff);
+            g_menu_list_scroll_offset += g_menu_scroll_slow_step * (speed & 0xff);
             g_menu_list_scroll_progress = (speed & 0xff) + g_menu_list_scroll_progress;
         }
         if (g_menu_list_scroll_offset >= g_menu_list_row_height) {
@@ -209,8 +209,7 @@ menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_animated_cursor(
-            &marker, g_equip_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+        menu_update_and_draw_animated_cursor(&marker, g_equipment_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);
     g_menu_list_row_index = 0;
@@ -231,7 +230,7 @@ menu_instruction_t* equip_menu_opcode_10_draw_scrollable_list(menu_instruction_t
     }
     g_menu_list_row_mode = 0;
     if (previous_selected != g_menu_list_selected_index) {
-        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
     return command;
 }

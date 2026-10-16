@@ -151,7 +151,7 @@ typedef enum text_id_base {
 /* Index into g_text_section_pointers: a text id's top five bits. Only the
  * sections the code binds or reads by a fixed role are named. A screen
  * rebinds a slot to its own text while it is up: help_text_section_e here,
- * screen_text_section_e and require_text_section_e map those bindings. */
+ * screen_text_section_e and after_battle_text_section_e map those bindings. */
 typedef enum text_section {
     TEXT_SECTION_EVENT_MESSAGES = 0,      /* the loaded event's text; BUNIT binds its menu text here */
     TEXT_SECTION_SKILLSET_NAMES_COPY = 2, /* TEXT_ID_SKILLSET_NAME_BASE; a copy of section 22 */

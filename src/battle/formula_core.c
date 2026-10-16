@@ -176,7 +176,7 @@ s32 battle_map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y,
             attempts++;
         }
         if (attempts == 1000) {
-            main_system_handle_battle_load_exception(MAIN_BATTLE_LOAD_EXCEPTION_MAP_RETRY);
+            system_handle_battle_load_exception(SYSTEM_BATTLE_LOAD_EXCEPTION_MAP_RETRY);
         }
         break;
     default:
@@ -218,7 +218,7 @@ s32 battle_formula_calculate_dance_song_hit(void) {
     s32 action_state = g_battle_action_state;
 
     action->attack_accuracy = action->attack_accuracy * hit_percent / 100;
-    if (action_state != ACTION_STATE_EXECUTE || main_util_roll_pass_fail(100, hit_percent) == 0) {
+    if (action_state != ACTION_STATE_EXECUTE || random_roll_pass_fail(100, hit_percent) == 0) {
         return 0;
     }
     battle_formula_cause_action_miss();
@@ -433,7 +433,7 @@ static s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y) 
  * drawn, but only while executing does an evade clear the hit, record the miss
  * type and the item that blocked, and return 1; a preview or AI pass returns 0. */
 static s32 battle_formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
-    if (main_util_roll_pass_fail(denominator, numerator) != 0) {
+    if (random_roll_pass_fail(denominator, numerator) != 0) {
         return 0;
     }
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
@@ -578,7 +578,7 @@ s32 battle_status_modify_inflictions(s32 removal_only) {
             }
             if (immortal) {
                 g_battle_action_target_data->status_changes.infliction[i]
-                    &= ~g_main_status_check_sets[STATUS_CHECK_SET_FORMATION_IMMUNITY][i];
+                    &= ~g_status_check_sets[STATUS_CHECK_SET_FORMATION_IMMUNITY][i];
             }
         }
         g_battle_action_target_data->status_changes.removal[i] = g_battle_action_target_data->status_changes.removal[i]
@@ -590,7 +590,7 @@ s32 battle_status_modify_inflictions(s32 removal_only) {
             mask = 0x80 >> (i & 7);
             if (g_battle_action_target_data->status_changes.infliction[byte] & mask) {
                 for (j = 0; j < STATUS_BYTE_COUNT; j++) {
-                    if (g_battle_action_target->status_sets.current[j] & g_main_status_effect_data[i].cant_stack[j]) {
+                    if (g_battle_action_target->status_sets.current[j] & g_status_effect_data[i].cant_stack[j]) {
                         g_battle_action_target_data->status_changes.infliction[byte] &= ~mask;
                     }
                 }
@@ -601,8 +601,7 @@ s32 battle_status_modify_inflictions(s32 removal_only) {
             mask = 0x80 >> (i & 7);
             if (g_battle_action_target_data->status_changes.infliction[byte] & mask) {
                 for (j = 0; j < STATUS_BYTE_COUNT; j++) {
-                    g_battle_action_target_data->status_changes.infliction[j]
-                        &= ~g_main_status_effect_data[i].cancels[j];
+                    g_battle_action_target_data->status_changes.infliction[j] &= ~g_status_effect_data[i].cancels[j];
                 }
             }
         }
@@ -708,45 +707,42 @@ void battle_formula_store_physical_evade_values(void) {
     }
 
     /* weapon_flags first holds the accessory's type flags. */
-    weapon_flags
-        = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]].type_flags;
+    weapon_flags = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]].type_flags;
     if ((weapon_flags & ITEM_TYPE_FLAG_ACCESSORY) != 0) {
         g_battle_action_current_ability.accessory_evade
-            = g_main_item_accessory_data
-                  [g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]]
+            = g_item_accessory_data
+                  [g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]]
                           .secondary_data_id]
                       .physical_evade;
     }
 
     weapon_flags
-        = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]].type_flags;
-    weapon_secondary
-        = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]]
-              .secondary_data_id;
+        = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]].type_flags;
+    weapon_secondary = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]]
+                           .secondary_data_id;
     shield_flags
-        = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]].type_flags;
-    shield_secondary
-        = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]]
-              .secondary_data_id;
+        = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]].type_flags;
+    shield_secondary = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]]
+                           .secondary_data_id;
     if ((weapon_flags & ITEM_TYPE_FLAG_WEAPON) != 0 && weapon_guard != 0) {
-        g_battle_action_current_ability.right_hand_evade = g_main_item_weapon_data[weapon_secondary].evade;
+        g_battle_action_current_ability.right_hand_evade = g_item_weapon_data[weapon_secondary].evade;
     } else if ((shield_flags & ITEM_TYPE_FLAG_SHIELD) != 0) {
-        g_battle_action_current_ability.right_hand_evade = g_main_item_shield_data[shield_secondary].physical_evade;
+        g_battle_action_current_ability.right_hand_evade = g_item_shield_data[shield_secondary].physical_evade;
     }
 
     weapon_secondary
-        = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]].type_flags;
+        = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]].type_flags;
     weapon_flags = weapon_secondary;
-    weapon_secondary = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]]
+    weapon_secondary = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]]
                            .secondary_data_id;
-    shield_record = &g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]];
+    shield_record = &g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]];
     shield_flags = shield_record->type_flags;
-    shield_secondary = g_main_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]]
+    shield_secondary = g_item_primary_data[g_battle_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]]
                            .secondary_data_id;
     if ((weapon_flags & ITEM_TYPE_FLAG_WEAPON) != 0 && weapon_guard != 0) {
-        g_battle_action_current_ability.left_hand_evade = g_main_item_weapon_data[weapon_secondary].evade;
+        g_battle_action_current_ability.left_hand_evade = g_item_weapon_data[weapon_secondary].evade;
     } else if ((shield_flags & ITEM_TYPE_FLAG_SHIELD) != 0) {
-        g_battle_action_current_ability.left_hand_evade = g_main_item_shield_data[shield_secondary].physical_evade;
+        g_battle_action_current_ability.left_hand_evade = g_item_shield_data[shield_secondary].physical_evade;
     }
 }
 
@@ -766,21 +762,20 @@ void battle_formula_store_magical_evade_values(void) {
     if (target->unit_flags & UNIT_FLAG_MONSTER) {
         return;
     }
-    items = g_main_item_primary_data;
+    items = g_item_primary_data;
     item = &items[target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]];
     if (item->type_flags & ITEM_TYPE_FLAG_ACCESSORY) {
-        g_battle_action_current_ability.accessory_evade
-            = g_main_item_accessory_data[item->secondary_data_id].magic_evade;
+        g_battle_action_current_ability.accessory_evade = g_item_accessory_data[item->secondary_data_id].magic_evade;
     }
     item = &items[target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]];
     secondary = item->secondary_data_id;
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
-        g_battle_action_current_ability.right_hand_evade = g_main_item_shield_data[secondary].magic_evade;
+        g_battle_action_current_ability.right_hand_evade = g_item_shield_data[secondary].magic_evade;
     }
     item = &items[target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]];
     secondary = item->secondary_data_id;
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
-        g_battle_action_current_ability.left_hand_evade = g_main_item_shield_data[secondary].magic_evade;
+        g_battle_action_current_ability.left_hand_evade = g_item_shield_data[secondary].magic_evade;
     }
 }
 
@@ -788,7 +783,7 @@ void battle_formula_store_magical_evade_values(void) {
  * and class, stored together) become 0. */
 void battle_formula_calculate_concentrate(void) {
     if (g_battle_action_attacker->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_CONCENTRATE) {
-        main_mem_zero(&g_battle_action_current_ability.accessory_evade, 4);
+        mem_zero(&g_battle_action_current_ability.accessory_evade, 4);
     }
 }
 
@@ -838,7 +833,7 @@ void battle_formula_apply_evasion_changes_due_to_statuses(void) {
         flag = 1;
     }
     if (flag) {
-        main_mem_zero(&g_battle_action_current_ability.accessory_evade, 4);
+        mem_zero(&g_battle_action_current_ability.accessory_evade, 4);
     }
     if (g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEFENDING)]
         & STATUS_BYTE_MASK(STATUS_ID_DEFENDING)) {
@@ -851,7 +846,7 @@ void battle_formula_apply_evasion_changes_due_to_statuses(void) {
 void battle_formula_calculate_transparent(void) {
     if (g_battle_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
         & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT)) {
-        main_mem_zero(&g_battle_action_current_ability.accessory_evade, 4);
+        mem_zero(&g_battle_action_current_ability.accessory_evade, 4);
     }
 }
 
@@ -938,8 +933,8 @@ void battle_formula_apply_weather_effects_on_bows(void) {
     s32 weather;
     s32 time_of_day;
 
-    if (g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type == ITEM_TYPE_CROSSBOW
-        || g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type == ITEM_TYPE_BOW) {
+    if (g_item_primary_data[g_battle_action_current_ability.weapon_id].type == ITEM_TYPE_CROSSBOW
+        || g_item_primary_data[g_battle_action_current_ability.weapon_id].type == ITEM_TYPE_BOW) {
         weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
         time_of_day = script_get_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY);
         if (time_of_day == TIME_OF_DAY_NIGHT) {
@@ -1033,7 +1028,7 @@ void battle_formula_calculate_base_xa(void) {
     s16 value;
     u8 brave;
 
-    type = g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type;
+    type = g_item_primary_data[g_battle_action_current_ability.weapon_id].type;
     pa = g_battle_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     ma = g_battle_action_attacker->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     brave = g_battle_action_attacker->brave;
@@ -1158,7 +1153,7 @@ void battle_formula_store_pa_and_weapon_power_plus_y(void) {
 /* XA and YA of formula 0x64 (Jump): XA = PA, or PA * 3/2 with a spear; YA =
  * weapon power, or bare-handed XA * Brave / 100 (at least 1). */
 void battle_formula_store_jump_xa_ya(void) {
-    u8 weapon_type = g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type;
+    u8 weapon_type = g_item_primary_data[g_battle_action_current_ability.weapon_id].type;
 
     if (weapon_type == ITEM_TYPE_SPEAR) {
         g_battle_action_current_ability.xa
@@ -1232,7 +1227,7 @@ void battle_formula_apply_attack_up_and_martial_arts(void) {
     {
         u8 weapon_id = g_battle_action_current_ability.weapon_id;
         unit_stats_t* attacker = g_battle_action_attacker;
-        u8 weapon_type = g_main_item_primary_data[weapon_id].type;
+        u8 weapon_type = g_item_primary_data[weapon_id].type;
         u8 has_martial_arts = attacker->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS;
 
         if (has_martial_arts && weapon_type == ITEM_TYPE_UNARMED) {
@@ -1473,7 +1468,7 @@ void battle_formula_apply_damage_and_knockback(void) {
         return;
     }
     roll = (battle_formula_get_random() * g_battle_action_attacker->brave) / 32768;
-    if (main_util_roll_pass_fail(g_battle_action_target->brave, roll) == 0) {
+    if (random_roll_pass_fail(g_battle_action_target->brave, roll) == 0) {
         battle_formula_calculate_knockback();
     }
 }

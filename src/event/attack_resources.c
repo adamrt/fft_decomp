@@ -78,20 +78,20 @@ s32 menu_init_attack_resources_and_threads(void) {
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOAD_USED;
     } else {
-        g_thread_call_target = main_file_load_checked_to_address;
-        thread_call_on_main_stack(DISC_SECTOR_EVENT_ATTACK_OUT, 0x20000, g_main_heap_companion_overlay_load_address);
+        g_thread_call_target = file_load_checked_to_address;
+        thread_call_on_main_stack(DISC_SECTOR_EVENT_ATTACK_OUT, 0x20000, g_heap_companion_overlay_load_address);
     }
-    result = attack_load_scenario_conditionals();
+    result = scenario_load_conditionals();
     if (g_script_attack_entry_mode != SCRIPT_ATTACK_ENTRY_PRELOAD_USED) {
-        attack_gfx_build_formation_sprites();
-        attack_gfx_load_portraits();
+        formation_build_sprites();
+        portrait_load_party();
     }
     g_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
     g_menu_panel_fade_intensity = 0;
     if (script_is_tutorial_event_slot() != 0) {
         g_gfx_screen_fade = 0xff;
-        g_menu_saved_game_options = g_main_game_options;
-        options = &g_main_game_options.fields;
+        g_menu_saved_game_options = g_game_options;
+        options = &g_game_options.fields;
         options->cursor_movement = GAME_CURSOR_MOVEMENT_TYPE_A;
         options->multi_height_cursor_speed = GAME_MULTI_HEIGHT_CURSOR_SPEED_REGULAR;
         options->navigation_messages = GAME_OPTION_ON;
@@ -101,17 +101,17 @@ s32 menu_init_attack_resources_and_threads(void) {
     } else {
         g_gfx_screen_fade = 0;
     }
-    attack_deploy_find_fieldable_units();
+    deploy_find_fieldable_units();
     if (result != 0) {
         thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, map_skip_deployment_thread);
         return_value = 1;
     } else {
         g_sound_music_track_1_id = 0;
         g_sound_music_track_2_id = 0;
-        sound_play_music_tracks(MAIN_MUSIC_DEPLOYMENT, MAIN_MUSIC_NONE);
-        attack_text_build_deployment_strings();
-        attack_map_load_title_graphic();
-        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, attack_deploy_run_screen);
+        sound_play_music_tracks(MUSIC_DEPLOYMENT, MUSIC_NONE);
+        deploy_build_strings();
+        battle_map_title_load_graphic();
+        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, deploy_run);
         return_value = 0;
     }
     return return_value;
@@ -769,9 +769,9 @@ void script_opcode_82_load_attack_graphics(void) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOADED;
         menu_request_open_companion_executable(COMPANION_OVERLAY_ATTACK);
         thread_yield();
-        attack_load_scenario_conditionals();
-        attack_gfx_build_formation_sprites();
-        attack_gfx_load_portraits();
+        scenario_load_conditionals();
+        formation_build_sprites();
+        portrait_load_party();
     }
 }
 
@@ -963,7 +963,7 @@ void script_opcode_49_add_unit_start_thread(void) {
                 if (g_unit_graphics_load_pending == 0) {
                     break;
                 }
-                if (g_main_debug_display_enabled != 0) {
+                if (g_debug_display_enabled != 0) {
                     FntPrint(g_text_reading_character_message, slot);
                 }
             }
@@ -990,8 +990,8 @@ void menu_init_subsystem_pointers(void) {
     g_threads = g_thread_contexts;
     g_text_glyph_bitmap_data = g_text_glyph_bitmaps;
     g_menu_glyph_sheet = &g_menu_glyph_image_data;
-    g_script_event_block = g_main_script_event_block;
-    g_script_variables = g_main_script_variables;
+    g_script_event_block = g_script_event_block_buffer;
+    g_script_variables = g_script_variable_storage;
     g_menu_thread_menu_data = g_menu_idle_action_entries;
     g_menu_help_active_text_id_tables = (u16* const*)-1;
     g_unit_graphics_load_pending = 0;
@@ -1203,7 +1203,7 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
 /* Fill g_map_selected_tile_data for the tile under the cursor, which the
  * tile information display shows: the surface type, the depth, the displayed
  * height in half-height units (height * 2 + slope half-height + depth * 2) and
- * the surface type's two bytes of g_main_terrain_tile_info_pairs. */
+ * the surface type's two bytes of g_terrain_tile_info_pairs. */
 static void map_store_selected_tile_data(void) {
     SVECTOR coords;
     s16* surface_type;
@@ -1219,8 +1219,8 @@ static void map_store_selected_tile_data(void) {
     depth = battle_map_get_tile_data_value(MAP_TILE_DATA_DEPTH, coords.vx, coords.vz, coords.vy) & 0xFF;
     g_map_selected_tile_data.depth = depth;
     g_map_selected_tile_data.display_height += depth * 2;
-    g_map_selected_tile_data._unknown_02 = g_main_terrain_tile_info_pairs[*surface_type][0];
-    g_map_selected_tile_data._unknown_04 = g_main_terrain_tile_info_pairs[*surface_type][1];
+    g_map_selected_tile_data._unknown_02 = g_terrain_tile_info_pairs[*surface_type][0];
+    g_map_selected_tile_data._unknown_04 = g_terrain_tile_info_pairs[*surface_type][1];
 }
 
 /* Reset the cursor row of the 11 menu entries listed in g_menu_cleared_entry_indices. */
@@ -1329,7 +1329,7 @@ void menu_mini_menu_cancel_delay_thread(void) {
 
 /* Queue the confirm sound and hold the mini-menu task id for 16 frames. */
 void menu_confirm_sound_delay_thread(void) {
-    g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+    g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
     thread_set_current_task_id(THREAD_TASK_MINI_MENU);
     thread_wait_frames(16);
     thread_exit_current();
@@ -1469,8 +1469,7 @@ static void menu_build_ability_list(s32 mode) {
         menu_copy_u8_to_u16(g_ai_workspace_ptr->ability_list.extras, g_ai_workspace_ptr->ability_list.turns, count);
         found = 0;
         for (i = 0; i < count; i++) {
-            g_ai_workspace_ptr->ability_list.values[i]
-                = g_main_item_quantities[g_ai_workspace_ptr->ability_list.ids[i]];
+            g_ai_workspace_ptr->ability_list.values[i] = g_item_quantities[g_ai_workspace_ptr->ability_list.ids[i]];
             if (g_ai_workspace_ptr->ability_list.values[i] == 0) {
                 g_menu_ability_display_flags[i] = 4;
             } else {

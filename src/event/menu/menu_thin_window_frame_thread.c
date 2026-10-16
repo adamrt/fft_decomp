@@ -152,8 +152,7 @@ void menu_thin_window_frame_thread(void) {
     frame = 0;
     while (thread_get_current_parameter_3() == 0) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
-        gfx_build_scaled_draw_area_pair_swapped(
-            &prim->draw_areas, (const RECT*)menu, frame, g_main_gfx_screen_polarity);
+        gfx_build_scaled_draw_area_pair_swapped(&prim->draw_areas, (const RECT*)menu, frame, g_gfx_screen_polarity);
 
         /* The CLUT id the nine border sprites are drawn with this frame, which
          * the target keeps in this variable's register once the texture column

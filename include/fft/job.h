@@ -49,8 +49,8 @@ s32 ability_build_list(s16 unit_index, s16 job_id, s32 ability_category, s16* ab
 /* job and ability menus */
 /* Step of the job list menus (WORLD learn and view-abilities menus, BUNIT job
  * menu, the JOBSTTS page); each list's handler returns the next step. In
- * JOBSTTS, JOBS is jobstts_menu_run_job_list, ABILITIES is
- * jobstts_menu_ability_update_list_menu and CLOSE makes jobstts_entrypoint close
+ * JOBSTTS, JOBS is job_list_run, ABILITIES is
+ * ability_list_update and CLOSE makes status_screen_entrypoint close
  * the screen. */
 typedef enum menu_job_list_step {
     MENU_JOB_LIST_STEP_CLOSE = -1,

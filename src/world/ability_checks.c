@@ -90,7 +90,7 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
     if (job_find_first_for_skillset(skillset) == -1) {
         skillset = g_formation_unit_pointers[unit_index]->abilities.fields.primary_skillset;
     }
-    abilities = (s16*)main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    abilities = (s16*)ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
         hi = ABILITY_ID_REACTION_FIRST - 1;
@@ -132,7 +132,7 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
         }
         if (mode == ABILITY_LIST_MODE_VIEW_ALL) {
             if (!learned) {
-                if (!(g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT)) {
+                if (!(g_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT)) {
                     id |= ABILITY_LIST_ENTRY_DISABLED;
                 } else {
                     id |= ABILITY_LIST_ENTRY_DISABLED | ABILITY_LIST_ENTRY_HIDE_DETAILS;
@@ -147,10 +147,10 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
             }
         } else if (mode == ABILITY_LIST_MODE_LEARN_MENU) {
             if (!learned) {
-                if (g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT) {
+                if (g_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT) {
                     continue;
                 }
-                if (jp < g_main_ability_data[id].jp_cost) {
+                if (jp < g_ability_data[id].jp_cost) {
                     id |= ABILITY_LIST_ENTRY_DISABLED;
                 }
             } else {

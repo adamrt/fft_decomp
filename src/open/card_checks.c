@@ -57,7 +57,7 @@ s32 memcard_poll_operation_result(void) {
 /* Probe the selected slot until three probes in a row complete, and return
  * complete. Any other settled result counts against retry_limit and is returned
  * when the limit is reached. A nonpositive limit leaves the result unset. */
-static s32 open_card_poll_info_until_stable(s32 retry_limit) {
+static s32 memcard_poll_info_until_stable(s32 retry_limit) {
     s32 attempts = 0;
     s32 consecutive_successes = 0;
     s32 result;
@@ -84,20 +84,20 @@ static s32 open_card_poll_info_until_stable(s32 retry_limit) {
 /* 1 when a memory card answers in either slot, 0 when neither does. Slot 1 is
  * probed first, then slot 0, which stays selected; complete and new card both
  * count as a card. */
-s32 open_card_check_slots(void) {
+s32 title_check_card_slots(void) {
     s32 card_present = 0;
     s32 result;
 
     memcard_consume_all_events();
 
     memcard_set_selected_slot(1);
-    result = open_card_poll_info_until_stable(3);
+    result = memcard_poll_info_until_stable(3);
     if (result == MEMCARD_RESULT_COMPLETE || result == MEMCARD_RESULT_NEW_CARD) {
         card_present = 1;
     }
 
     memcard_set_selected_slot(0);
-    result = open_card_poll_info_until_stable(3);
+    result = memcard_poll_info_until_stable(3);
     if (result == MEMCARD_RESULT_COMPLETE || result == MEMCARD_RESULT_NEW_CARD) {
         card_present = 1;
     }

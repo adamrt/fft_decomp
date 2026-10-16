@@ -35,7 +35,7 @@ typedef enum at_entry_flags {
 
 /* AT list */
 /* Provisional: the AT-list work area menu_build_ability_preview_at_list
- * fills, reached through g_main_heap_companion_overlay_load_address. The five
+ * fills, reached through g_heap_companion_overlay_load_address. The five
  * parallel 16-bit columns become the layout's text_ids/text_colors tables,
  * `text` is published through g_text_section_pointers[TEXT_SECTION_AT_LIST].
  * The main-stack preview fills all 40 AT entries; the menu displays entries

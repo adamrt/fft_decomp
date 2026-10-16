@@ -178,7 +178,7 @@ restart_script:
             if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
                 if (operand_1 == EVENT_CALL_FUNCTION_JOIN_UNITS_SILENTLY) {
                     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) < EVENT_ID_NEW_GAME_INVENTORY_END) {
-                        main_item_init_new_game_inventory();
+                        item_init_new_game_inventory();
                     }
                     script_join_units_silently();
                 }
@@ -229,8 +229,8 @@ restart_script:
                 g_camera_wrap_yaw_pending = 1;
             }
             if (operand_1 == EVENT_CALL_FUNCTION_DISABLE_DEBUG_DISPLAY) {
-                g_main_debug_display_enabled = 0;
-                g_main_debug_display_unread_flag = 0;
+                g_debug_display_enabled = 0;
+                g_debug_display_unread_flag = 0;
             }
             if (operand_1 == EVENT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE) {
                 script_set_variable(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 1);
@@ -248,9 +248,9 @@ restart_script:
             }
             if (operand_1 == EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC) {
                 g_screen_sound_current_music_track_index = 0;
-                g_sound_music_track_1_id = MAIN_MUSIC_ALTIMA;
+                g_sound_music_track_1_id = MUSIC_ALTIMA;
                 g_sound_music_track_2_id = 0;
-                sound_play_music_tracks(MAIN_MUSIC_ALTIMA, MAIN_MUSIC_NONE);
+                sound_play_music_tracks(MUSIC_ALTIMA, MUSIC_NONE);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_COPY_UNIT_8_POSITION_TO_UNIT_9_AND_RELOAD_GRAPHICS) {
                 unit = battle_unit_get_stats_from_battle_id(7);
@@ -321,13 +321,13 @@ restart_script:
             } while (thread_find_running_by_task(THREAD_TASK_EVENT_BLOCK) != 0);
             do {
                 thread_yield();
-            } while (main_file_is_still_loading() != 0);
+            } while (file_is_still_loading() != 0);
             thread_yield();
 
             /* A tutorial restores the player's saved options and closes its battle. */
             if (script_is_tutorial_event_slot() != 0) {
                 gfx_ramp_screen_overlay_intensity_to_max();
-                g_main_game_options = g_menu_saved_game_options;
+                g_game_options = g_menu_saved_game_options;
                 script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                 battle_state_start_close_battle(0x20);
             }
@@ -347,7 +347,7 @@ restart_script:
 
             /* With player input, an event that has no finish operation and is not one of the
              * common events 0x190..0x1a9 tries to chain into the event its conditions select. */
-            event_flags = (g_main_scenario_event_finish_operations[operand_1] & ~0x0CFF) >> 8;
+            event_flags = (g_scenario_event_finish_operations[operand_1] & ~0x0CFF) >> 8;
             if (g_menu_input_mode == MENU_INPUT_PLAYER && event_flags == 0
                 && (operand_1 - EVENT_ID_COMMON_FIRST) >= 0x1AU && operand_1 != 0) {
                 g_script_condition_unit_battle_id = 0xFF;
@@ -606,7 +606,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_WAIT_FILE_LOAD) {
             do {
                 thread_yield();
-            } while (main_file_is_still_loading() != 0);
+            } while (file_is_still_loading() != 0);
         } else if (opcode == EVENT_OPCODE_ROTATE_UNIT) {
             script_rotate_unit((const event_rotate_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_FACE_EACH_OTHER) {
@@ -921,7 +921,7 @@ restart_script:
                 thread_yield();
             } while (!(first_operand & g_script_unfiltered_controller_input));
         } else if (opcode == EVENT_OPCODE_END_SOUND) {
-            main_sound_stop_weather_sfx_music();
+            sound_stop_weather_music();
         }
         /* ---- Miscellaneous unit and display commands ---- */
         else if (opcode == EVENT_OPCODE_UNIT_SHADOW) {
@@ -947,11 +947,11 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_CHANGE_STATS) {
             script_opcode_83_change_stats((const event_change_stats_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_PLAY_TUNE) {
-            main_sound_play_tune(operand_1);
+            music_play_tune(operand_1);
         } else if (opcode == EVENT_OPCODE_UNLOCK_DATE) {
             if ((script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) && (operand_1 != 0)) {
                 date_month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
-                script_opcode_85_unlock_date(g_main_treasure_acquisition_date_bits, operand_1 - 1, date_month,
+                script_opcode_85_unlock_date(g_brave_story_treasure_acquisition_date_bits, operand_1 - 1, date_month,
                     script_get_variable(EVENT_SCRIPT_VAR_DAY));
             }
         } else if (opcode == EVENT_OPCODE_TEMP_WEAPON) {
@@ -997,8 +997,8 @@ restart_script:
         else if (opcode == EVENT_OPCODE_SHOW_MAP_TITLE) {
             operand_4 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
             menu_request_open_companion_executable(COMPANION_OVERLAY_ATTACK);
-            attack_map_load_title_graphic();
-            thread_start(operand_4, attack_map_show_title);
+            battle_map_title_load_graphic();
+            thread_start(operand_4, battle_map_title_thread);
             thread_set_parameters(operand_4, (s8)operand_1, (s8)operand_2, (s8)operand_3);
             thread_wait_until_inactive(operand_4);
         } else if (opcode == EVENT_OPCODE_SET_DATE_ADVANCE) {

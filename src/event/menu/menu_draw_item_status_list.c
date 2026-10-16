@@ -14,7 +14,7 @@
 /* Flat view of item_attribute_t. The target addresses `starting` as
  * attribute * 25 + (base + 15), rebuilt from the live base + 5 register;
  * the nested status_sets member instead reuses the innate address + 10. */
-#define ITEM_ATTRIBUTES_FLAT ((item_attribute_flat_t*)g_main_item_attributes)
+#define ITEM_ATTRIBUTES_FLAT ((item_attribute_flat_t*)g_item_attributes)
 
 /* Draw the item detail panel's status column: immunity icons, then the
  * innate/starting status icons.
@@ -27,7 +27,7 @@ void menu_draw_item_status_list(s16 item_id) {
     u16 icon_tpage;
     u16 tpage;
     s16 count = 0;
-    s32 attribute = g_main_item_primary_data[item_id].attributes;
+    s32 attribute = g_item_primary_data[item_id].attributes;
     s32 drawn;
     s32 bit;
     s32 i;

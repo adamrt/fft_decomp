@@ -34,7 +34,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 
     origin.rect.x = point.x;
     origin.rect.y = point.y;
-    origin.stride = g_open_gfx_render_records_56[record_index].tail.quad.w;
+    origin.stride = g_window_render_records_56[record_index].tail.quad.w;
     menu_display_text_entry(text_id, buffer, &origin);
 }
 #endif
@@ -58,7 +58,7 @@ void window_measure_text_image(s32 value, size32_t* output) {
  * plus 24, rounded down to a multiple of 4, and 16 pixels per row plus 16. The
  * WLDCORE twin window_measure_text_image measures the text in pixels
  * instead. Nothing in OPEN.BIN calls it. */
-void open_text_measure_menu_image(s32 combined_text_index, size32_t* dimensions) {
+void window_measure_text_image(s32 combined_text_index, size32_t* dimensions) {
     s16 columns;
     s16 rows;
 
@@ -95,14 +95,14 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
      * which also lets the y store fill the beqz delay slot. */
     point32_t text_origin;
 
-    open_gfx_init_window_frame_record(record_index, bounds, coordinate_mode, (u16*)image);
+    window_init_frame_record(record_index, bounds, coordinate_mode, (u16*)image);
 
     text_origin.x = OPEN_MENU_TEXT_MARGIN;
     text_origin.y = OPEN_MENU_TEXT_MARGIN;
     if (text_id != 0) {
         window_display_text_entry(record_index, text_id, text_origin, image);
     }
-    open_gfx_load_window_record_image(record_index, (u32*)image);
-    g_open_gfx_render_records_56[record_index].flags |= DISPLAY_OBJECT_POP_IN;
+    window_load_record_image(record_index, (u32*)image);
+    g_window_render_records_56[record_index].flags |= DISPLAY_OBJECT_POP_IN;
 }
 #endif

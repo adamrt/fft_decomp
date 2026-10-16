@@ -17,7 +17,7 @@
  * the two hand slots is occupied, its item is below the throwable range, and
  * the weapon either forces two hands or allows them while `two_hands_support`
  * (the Two Hands support ability) is set. */
-static s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
+static s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
     s32 result = 0;
     s32 item_id;
     s16 w0 = slots[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
@@ -36,7 +36,7 @@ static s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_supp
         }
     }
     if (item_id != 0 && item_id < ITEM_ID_THROWABLE_FIRST) {
-        flags = g_main_item_weapon_data[item_id].flags;
+        flags = g_item_weapon_data[item_id].flags;
         if (flags & WEAPON_FLAG_FORCED_TWO_HANDS) {
             result = 1;
         } else if (two_hands_support != 0) {
@@ -50,14 +50,14 @@ static s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_supp
 
 /* Build EQUIP.OUT's unit preview from a unit_stats_t record, clamping the
  * displayed values and folding empty equipment slots (0xFF and above) to 0. */
-static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_data_t* unit) {
+static void equipment_build_unit_preview(unit_stats_t* stats, equipment_unit_preview_t* unit) {
     s32 i;
     s32 value;
     u8 larger;
     u8 other;
     u16 capped;
 
-    memset(unit, 0, sizeof(equip_unit_data_t));
+    memset(unit, 0, sizeof(equipment_unit_preview_t));
     unit->level = stats->level <= UNIT_LEVEL_MAX ? stats->level : UNIT_LEVEL_MAX;
     if (stats->team_flags & UNIT_TEAM_MASK) {
         unit->team_kind = 1;
@@ -152,25 +152,25 @@ static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_dat
     unit->party_index = stats->formation_index;
     bcopy(stats->equipment_categories, unit->equipment_categories, sizeof(unit->equipment_categories));
     bcopy(stats->ability_flags.support, unit->support_abilities, sizeof(unit->support_abilities));
-    unit->two_handing = equip_unit_is_two_handing_weapon(
-        unit->equipment, stats->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);
+    unit->two_handing
+        = unit_is_two_handing_weapon(unit->equipment, stats->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);
 }
 
 /* Build the equipment data and HP/MP for `battle_id` and count the units still on the field
  * (eggs included, crystals and treasure chests not). */
-void equip_unit_load_data_from_stats(s32 battle_id) {
+void equipment_load_unit(s32 battle_id) {
     unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     s32 i;
     s32 unit_count;
     u16 hp;
     u16 mp;
 
-    equip_unit_build_data_from_stats(stats, g_equip_unit_records);
+    equipment_build_unit_preview(stats, g_equipment_unit_records);
     unit_count = 0;
     hp = stats->hp;
     mp = stats->mp;
-    g_equip_unit_saved_hp = hp;
-    g_equip_unit_saved_mp = mp;
+    g_equipment_unit_saved_hp = hp;
+    g_equipment_unit_saved_mp = mp;
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         stats = battle_unit_get_stats_from_battle_id(i);
@@ -193,20 +193,20 @@ void equip_unit_load_data_from_stats(s32 battle_id) {
         unit_count++;
     }
 
-    g_equip_unit_records[0].unit_count = unit_count;
-    g_equip_unit_records[0].battle_id = battle_id;
-    g_equip_unit_data[0] = &g_equip_unit_records[0];
-    g_equip_unit_data[1] = &g_equip_unit_records[1];
+    g_equipment_unit_records[0].unit_count = unit_count;
+    g_equipment_unit_records[0].battle_id = battle_id;
+    g_equipment_unit_data[0] = &g_equipment_unit_records[0];
+    g_equipment_unit_data[1] = &g_equipment_unit_records[1];
 }
 
 /* Write the edited loadout back to the unit's battle stats and party record (a
  * hand's item goes to the hand's shield slot when it is a shield, else to its weapon
  * slot), refresh its stats, restore HP/MP up to the new maxima and rebuild the
  * EQUIP unit record. */
-void equip_unit_commit_loadout_to_stats(void) {
+void equipment_commit_loadout(void) {
     menu_status_panel_slot_storage_t bonuses;
     unit_stats_t* stats;
-    s16 unit_id = g_equip_unit_data[0]->battle_id;
+    s16 unit_id = g_equipment_unit_data[0]->battle_id;
     s32 item_id;
     s32 saved;
     s32 hp;
@@ -214,42 +214,41 @@ void equip_unit_commit_loadout_to_stats(void) {
     s32 max;
 
     stats = battle_unit_get_stats_from_battle_id(unit_id);
-    item_id = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    item_id = g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
     stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
     if (item_id != 0) {
-        if (g_main_item_primary_data[item_id].type == ITEM_TYPE_SHIELD) {
+        if (g_item_primary_data[item_id].type == ITEM_TYPE_SHIELD) {
             stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = item_id;
         } else {
             stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item_id;
         }
     }
-    item_id = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+    item_id = g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
     stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = ITEM_ID_NONE;
     if (item_id != 0) {
-        if (g_main_item_primary_data[item_id].type == ITEM_TYPE_SHIELD) {
+        if (g_item_primary_data[item_id].type == ITEM_TYPE_SHIELD) {
             stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = item_id;
         } else {
             stats->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = item_id;
         }
     }
-    stats->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_HEAD] != 0
-        ? g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_HEAD]
+    stats->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_HEAD] != 0
+        ? g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_HEAD]
         : ITEM_ID_NONE;
-    stats->equipment[UNIT_EQUIPMENT_SLOT_BODY] = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_BODY] != 0
-        ? g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_BODY]
+    stats->equipment[UNIT_EQUIPMENT_SLOT_BODY] = g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_BODY] != 0
+        ? g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_BODY]
         : ITEM_ID_NONE;
     stats->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]
-        = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != 0
-        ? g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
+        = g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != 0
+        ? g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
         : ITEM_ID_NONE;
-    bcopy(
-        stats->equipment, main_party_get_unit(g_equip_unit_data[0]->party_index)->equipment, sizeof(stats->equipment));
-    main_unit_refresh_stats_and_statuses(stats);
+    bcopy(stats->equipment, party_get_unit(g_equipment_unit_data[0]->party_index)->equipment, sizeof(stats->equipment));
+    unit_refresh_stats_and_statuses(stats);
     stats = battle_unit_get_stats_from_battle_id(unit_id);
-    hp = g_equip_unit_saved_hp;
-    mp = g_equip_unit_saved_mp;
+    hp = g_equipment_unit_saved_hp;
+    mp = g_equipment_unit_saved_mp;
     max = stats->max_hp;
     if (hp > max) {
         hp = max;
@@ -257,13 +256,13 @@ void equip_unit_commit_loadout_to_stats(void) {
     stats->hp = hp;
     max = stats->max_mp;
     stats->mp = mp > max ? max : mp;
-    item_sum_equipment_stat_details(&bonuses, g_equip_unit_data[0]->equipment);
+    item_sum_equipment_stat_details(&bonuses, g_equipment_unit_data[0]->equipment);
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = bonuses.state.right_weapon_power;
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = bonuses.state.left_weapon_power;
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = bonuses.state.right_weapon_evade;
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE] = bonuses.state.left_weapon_evade;
-    saved = g_equip_unit_data[0]->unit_count;
-    equip_unit_build_data_from_stats(stats, g_equip_unit_data[0]);
-    g_equip_unit_data[0]->unit_count = saved;
-    g_equip_unit_data[0]->battle_id = unit_id;
+    saved = g_equipment_unit_data[0]->unit_count;
+    equipment_build_unit_preview(stats, g_equipment_unit_data[0]);
+    g_equipment_unit_data[0]->unit_count = saved;
+    g_equipment_unit_data[0]->battle_id = unit_id;
 }

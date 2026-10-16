@@ -131,7 +131,7 @@ void menu_run_numeric_panel_frame_thread(void) {
         }
 
         /* A field_y of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into the upper half. */
-        field_y = g_main_gfx_screen_polarity * 0xF0;
+        field_y = g_gfx_screen_polarity * 0xF0;
         use_offset = field_y != 0xF0;
         g_gfx_draw_offset_y = -use_offset & 0xF0;
         menu_build_scaled_draw_area_packets(

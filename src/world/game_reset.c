@@ -5,5 +5,5 @@
 
 /* Reset the game (soft reset). */
 void screen_reset_game(void) {
-    main_system_reset_game();
+    system_reset_game();
 }

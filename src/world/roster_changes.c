@@ -33,7 +33,7 @@ void formation_dismiss(s16 formation_idx) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             formation_item_equip(formation_idx, i, ITEM_ID_NOTHING);
         }
-        main_party_remove_unit(g_formation_unit_pointers[formation_idx]->identity.roster_slot);
+        party_remove_unit(g_formation_unit_pointers[formation_idx]->identity.roster_slot);
     }
 }
 
@@ -52,12 +52,12 @@ s32 formation_generate_unit(s16 unit_type) {
 
     saved_names = *name_buffer;
     *name_buffer = g_text_section_pointers[TEXT_SECTION_UNIT_NAMES];
-    roster_slot = main_party_generate_unit(unit_type);
+    roster_slot = party_generate_unit(unit_type);
     *name_buffer = saved_names;
     if (roster_slot < 0) {
         return -1;
     }
-    party = main_party_get_unit(roster_slot);
+    party = party_get_unit(roster_slot);
     party->secondary_skillset = 0;
     /* Byte stores are required for the exact match; 16-bit assignments emit SH. */
     party->reaction_ability[0] = 0;
@@ -78,7 +78,7 @@ s32 formation_generate_unit(s16 unit_type) {
  * Rebuild the menu's name strings after updating both records.
  */
 void formation_set_unit_name(s16 formation_index, const u8* name) {
-    party_unit_t* party = main_party_get_unit(g_formation_unit_pointers[formation_index]->identity.roster_slot);
+    party_unit_t* party = party_get_unit(g_formation_unit_pointers[formation_index]->identity.roster_slot);
     s32 i;
     u8 character;
 

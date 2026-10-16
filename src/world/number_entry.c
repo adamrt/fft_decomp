@@ -61,7 +61,7 @@ void screen_help_text_thread(void) {
     } else {
         value = g_screen_entry_text_id_tables[kind][index];
     }
-    g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
+    g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
     thread_set_parameters(g_thread_current_id, 0x3F, value, 0);
     text_run_dialog_thread();
     g_screen_new_buttons = 0;

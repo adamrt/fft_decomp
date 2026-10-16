@@ -11,7 +11,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static jobstts_unit_job_data_t g_jobstts_unit_job_data = { 0 };
+static status_screen_unit_jobs_t g_status_screen_unit_job_data = { 0 };
 
 /* Copy the battle unit's job data into the compact JOBSTTS working record.
  *
@@ -19,7 +19,7 @@ static jobstts_unit_job_data_t g_jobstts_unit_job_data = { 0 };
  * unlock bits; the player's team (team_kind 0, or 2 for a guest without the
  * player-control flag) has them recalculated from job levels and gender. Current and
  * total JP are capped at UNIT_JOB_POINT_MAX, the four digits the menu shows. */
-static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data_t* out) {
+static void status_screen_copy_unit_jobs(unit_stats_t* unit, status_screen_unit_jobs_t* out) {
     s32 i;
     s32 team_kind;
     s32 flags;
@@ -39,7 +39,7 @@ static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data
     if ((team_kind == 1) || job_is_special_monster(unit->job_id)) {
         bcopy(unit->career.unlocked_jobs, out->career.unlocked_jobs, sizeof(out->career.unlocked_jobs));
     } else {
-        i = main_job_calculate_unlocked(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
+        i = job_calculate_unlocked(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
         out->career.unlocked_jobs[0] = i >> 16;
         out->career.unlocked_jobs[1] = i >> 8;
         out->career.unlocked_jobs[2] = i;
@@ -62,16 +62,16 @@ static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data
 
 /* Copy battle unit `unit_id`'s job data into the overlay's single unit
  * record and make it unit 0. */
-void jobstts_unit_init_job_data(s32 unit_id) {
-    jobstts_unit_copy_job_data(battle_unit_get_stats_from_battle_id(unit_id), &g_jobstts_unit_job_data);
-    g_jobstts_unit_data[0] = &g_jobstts_unit_job_data;
+void status_screen_init_unit_jobs(s32 unit_id) {
+    status_screen_copy_unit_jobs(battle_unit_get_stats_from_battle_id(unit_id), &g_status_screen_unit_job_data);
+    g_status_screen_unit_data[0] = &g_status_screen_unit_job_data;
 }
 
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-static s32 jobstts_job_get_base(s16 unit_id) {
-    jobstts_unit_job_data_t* unit = g_jobstts_unit_data[unit_id];
+static s32 job_list_get_base(s16 unit_id) {
+    status_screen_unit_jobs_t* unit = g_status_screen_unit_data[unit_id];
     u32 job_id = unit->character_identity;
 
     if (job_id == CHARACTER_IDENTITY_MONSTER) {
@@ -91,21 +91,21 @@ static s32 jobstts_job_get_base(s16 unit_id) {
  * monsters and units with the monster identity get only the base job. The
  * third argument is not read.
  */
-s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused) {
+s32 job_list_build(u8 unit_id, s16* job_ids, s32 unused) {
     u32 unit_index = unit_id;
-    jobstts_unit_job_data_t** unit_table = g_jobstts_unit_data;
+    status_screen_unit_jobs_t** unit_table = g_status_screen_unit_data;
     s16* out;
     s32 count;
     s32 i;
     s32 job;
-    jobstts_unit_job_data_t** slot;
-    jobstts_unit_job_data_t** loop_slot;
+    status_screen_unit_jobs_t** slot;
+    status_screen_unit_jobs_t** loop_slot;
 
     (void)unused;
 
     slot = &unit_table[unit_index];
     bits_init_primary_reader((*slot)->career.unlocked_jobs);
-    job_ids[0] = jobstts_job_get_base(unit_id);
+    job_ids[0] = job_list_get_base(unit_id);
     if ((job_is_special_monster((*slot)->job_id) != 0) || ((*slot)->character_identity == CHARACTER_IDENTITY_MONSTER)) {
         job_ids[1] = -1;
         return 1;

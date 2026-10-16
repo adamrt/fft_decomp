@@ -12,7 +12,7 @@
  * without one it draws unshaded.
  *
  * The two stack-passed arguments are copied into locals, as the target loads them. */
-void jobstts_gfx_enqueue_oriented_textured_quad(
+void status_screen_gfx_enqueue_oriented_textured_quad(
     RECT* rect, texture_source_t* uv, rgb24_t* color, s32 orientation, s32 semitrans, s32 ot_index) {
     s32 quad_semitrans = semitrans;
     s32 quad_ot_index = ot_index;

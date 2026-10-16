@@ -16,9 +16,9 @@ void sound_play_music_tracks(s32 slot_1_music_id, s32 slot_2_music_id);
 void sound_wait_for_music_load(void);
 
 /* queued effects */
-extern s32 g_sound_pending_sfx_id; /* main_sfx_e; -1 means no request */
+extern s32 g_sound_pending_sfx_id; /* sound_sfx_e; -1 means no request */
 extern s32 g_sound_suppressed;
-extern u8 g_sound_queued_effect_id; /* main_sfx_e */
+extern u8 g_sound_queued_effect_id; /* sound_sfx_e */
 
 void sound_queue_sfx_cancel(void);
 void sound_queue_sfx_confirm(void);

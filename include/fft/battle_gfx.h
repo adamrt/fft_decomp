@@ -23,7 +23,7 @@ enum {
 };
 
 /* One of the two 60968-byte battle render buffers. The primitive pools are
- * pre-initialized once; main_gfx_swap_and_clear_battle_otag reads the ordering table
+ * pre-initialized once; gfx_swap_and_clear_battle_otag reads the ordering table
  * pointer at +0xe5b4. */
 typedef struct battle_render_buffer {
     POLY_GT3 gt3[BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT]; /* 0x00000 */
@@ -38,7 +38,7 @@ typedef struct battle_render_buffer {
 } battle_render_buffer_t;
 typedef char battle_render_buffer_size_must_be_60968[(sizeof(battle_render_buffer_t) == 60968) ? 1 : -1];
 
-/* The buffer being built this frame; main_gfx_swap_and_clear_battle_otag alternates
+/* The buffer being built this frame; gfx_swap_and_clear_battle_otag alternates
  * it between the two g_battle_render_buffers entries. */
 extern battle_render_buffer_t* g_battle_gfx_current_render_buffer;
 extern battle_render_buffer_t g_battle_render_buffers[2];
@@ -185,7 +185,7 @@ extern palette_t g_battle_gfx_map_selection_cursor_palette;
 /* Frame counter and frame index of the selection cursor's bob animation. */
 extern s32 g_battle_gfx_selection_cursor_bob_timer;
 extern s32 g_battle_gfx_selection_cursor_bob_frame;
-/* Advanced by g_main_system_vsync_interval once per call and sampled with bit 5 to blink
+/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
  * the highlighted arrow. */
 extern u32 g_battle_gfx_wait_arrow_blink_timer;
 extern palette_t g_battle_gfx_wait_direction_arrow_palette;

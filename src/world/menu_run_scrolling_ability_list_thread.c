@@ -354,10 +354,10 @@ void menu_run_scrolling_ability_list_thread(void) {
          * the button has been held past the acceleration delay. */
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
-            if (hold_time < g_main_menu_scroll_accel_delay) {
-                step = g_main_menu_scroll_slow_step;
+            if (hold_time < g_menu_scroll_accel_delay) {
+                step = g_menu_scroll_slow_step;
             } else {
-                step = g_main_menu_scroll_fast_step;
+                step = g_menu_scroll_fast_step;
             }
             scroll_accum += scroll_delta * (step << 1);
         }
@@ -371,7 +371,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             repeat = script_get_event_initial_repeat_counter();
             scroll_accum = 0;
             scroll_delta = 0;
-            if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
+            if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
                 g_script_event_input |= g_script_event_current_input & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
             menu_free_memory(buffer);

@@ -52,7 +52,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   values from the following 16-bit direction components.
 - `battle_map_load_alternate_mesh`: scales the mesh header's color palette byte
   offset by four, placing the palette read past most mesh files. Its wait step
-  tests `main_file_is_still_loading() != 0`, the reverse of the other loaders:
+  tests `file_is_still_loading() != 0`, the reverse of the other loaders:
   it applies the palette and frees the buffer while the read runs, then never
   leaves the wait. Its caller runs it only while `g_map_refresh_pending` is
   set, and nothing sets it.
@@ -95,7 +95,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `battle_effect_spell_charge_secondary_handler` saves the inertia threshold
   and sets the secondary-effect value but never restores it, unlike the other
   secondary handlers.
-- `main_unit_calculate_random_equipment`: throwing and bomb item
+- `unit_calculate_random_equipment`: throwing and bomb item
   types index past the four equipment-category bytes into the first innate
   status byte; that adjacent byte controls their eligibility.
 - Both copies of `menu_text_render_encoded_ids_to_image`: the encoded-text branch tests
@@ -134,7 +134,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   linked entry; `battle_effect_update_file_load` tests `result` (`$a0`) for a
   load state outside 0-3, which nothing sets;
   `battle_camera_get_input_direction` tests `input` (`$a1`) when `mode` or the
-  controller mode is outside 0-2; `main_status_set_action_state` leaves
+  controller mode is outside 0-2; `status_set_action_state` leaves
   `status` unset for an action state other than 0 and 5-8 (its `switch` has no
   default; no caller passes one); `battle_map_dispatch_gns_resource` returns a
   local no path assigns (`$s8`); both copies of `menu_get_cursor_bob_offset`
@@ -142,7 +142,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `battle_effect_summon_charge_secondary_handler` returns `result` (`$a1`)
   unset when the phase is not 1-3, as does
   `battle_effect_linear_projectile_secondary_handler`;
-  `bunit_unit_get_current_stat`, `bunit_unit_get_max_stat` and
+  `unit_list_get_current_stat`, `unit_list_get_max_stat` and
   `formation_get_unit_stat_by_mode` return `value` (`$a1`) for a stat
   mode outside 0-2; `battle_move_start_unit_step` leaves `facing` (`$a2`, the
   destination tile its callers pass) unset for a direction outside 0-3;
@@ -161,7 +161,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `battle_map_control_gte_background_color` returns `result` unset for DISABLE
   and RESTORE (every caller issues SET); `memcard_get_info_with_retries`
   returns `result` unset for a retry limit below 1 (its caller passes 2);
-  `open_card_poll_info_until_stable` has the same empty-loop result for a
+  `memcard_poll_info_until_stable` has the same empty-loop result for a
   nonpositive retry limit (its callers pass 3);
   `battle_effect_select_sound_id` returns `sound` (`$a2`) for a channel mode
   above 4; `proposition_select_report_speaker` returns `selected` for
@@ -180,19 +180,19 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   of the minimum-width ladder, so the value is always placed as one digit, and
   they read the digit count as the low nibble for alignment and as the low
   byte for the digit loop.
-- `etc_graphic_build_game_over_polygons`: `texture_mode` is the constant 1,
+- `game_over_build_polygons`: `texture_mode` is the constant 1,
   so the 4-bit CLUT arm never runs.
-- `open_movie_init_mdec_stream_state` stores the slice width (24) into the
-  global `g_open_movie_mdec_stream_state.output_rect.w`, not through its
+- `movie_init_mdec_state` stores the slice width (24) into the
+  global `g_movie_mdec_stream_state.output_rect.w`, not through its
   `state` parameter; the one caller passes that global.
 - `battle_action_init_current_ability_strike_data` tests
   `ability_id >= 0 || ability_id < ABILITY_ID_ITEM_FIRST`, which is always
   true.
-- `main_unit_calculate_entd_data` copies ENTD bytes 0x21-0x27 with one
+- `unit_calculate_encounter_data` copies ENTD bytes 0x21-0x27 with one
   seven-byte loop over the two-byte `ai_target_xy`, reading on through the AI
   flags, the target unit, the two AI targeting flags and
   `ai_initial_enemy_flag`.
-- EQUIP never fills the physical accessory evade slot of `equip_unit_data_t`
+- EQUIP never fills the physical accessory evade slot of `equipment_unit_preview_t`
   (0x48); it stores the accessory's magic evade to 0x52.
 - Event script, both interpreters:
   - Ten instruction values (0x14, 0x20, 0x34-0x36, 0x52, 0x67, 0xe1, 0xe2,
@@ -234,14 +234,14 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `suzuki_smd_set_flags_all_channels` and `suzuki_smd_dispatch_snapshot` have no
   caller.
 - CARD save menu state 9 is compared and never stored. EQUIP refuses command
-  row 1, so its screen state 3 is never entered. `g_etc_graphics` entries 0, 5
+  row 1, so its screen state 3 is never entered. `g_fullscreen_graphics` entries 0, 5
   and 6 all name CHAPTER1.BIN.
-- `debug_battle_setup_thread` does `g_main_system_flags += 3`
+- `debug_battle_setup_thread` does `g_system_flags += 3`
   on a 32-bit flags value. System flag bits 0x80, 0x400000 and 0x20000000 are
   tested and never set.
 - `thread_resolve_id` searches slots 1-16 where BATTLE searches 1-15;
   WORLD's slot 16 (tutorial text) lies beyond the sixteen the reset clears.
-- `card_save_run_menu` and `save_run_screen` end with
+- `save_run_menu` and `save_run_screen` end with
   `thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, -1, 0)`: the
   backdrop thread exits only when its third parameter is set, so that call
   does not stop it. CARD also tests and stops slot 14 and suspends slot 15,
@@ -251,11 +251,11 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   pair.
 - `script_check_scenario_condition`: conditions 18 and 19 (casualties) compare
   with the record's 16-bit `id`, not `value` as the war-funds pair does.
-- `attack_load_scenario_conditionals` fills deployment squad ids 0x35/0x36 and
+- `scenario_load_conditionals` fills deployment squad ids 0x35/0x36 and
   clears 0x37/0x38, although the deployment screen handles four squads.
 - 32-bit variables 0xab-0xff of the script variable block are reachable by no variable
   id, yet variable 0xff gates the BATTLE call in
-  `main_overlay_call_battle_return_zero`, which itself has no caller.
+  `overlay_call_battle_return_zero`, which itself has no caller.
 - Formation menu states 22 and 23 have entries in
   `g_formation_menu_handlers` and code paths, and no code stores them,
   so `formation_step_portrait_slide` never runs. Menu input mode 1
@@ -271,16 +271,16 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - The fur shop's "sell" list (`fur_shop_sell_list_step`) sells
   ordinary inventory at half price; its "buy" list
   (`fur_shop_buy_list_step`) is the poached stock.
-- `main_unit_learn_job_abilities` sets the learned bit twice when the JP
+- `unit_learn_job_abilities` sets the learned bit twice when the JP
   purchase succeeds: once in the purchase branch and again under
   `if (learned)`.
-- `main_unit_apply_level_growth` calls `rand()` and discards the result; the
+- `unit_apply_level_growth` calls `rand()` and discards the result; the
   call only advances the generator.
 - `battle_gfx_load_unit_attack_image_into_evtchr_slot` searches
   `g_battle_gfx_vram_slots[0..1]` for a free load marker and decompresses into
   that slot's image data, but writes the owner, marker and state of the
   caller's slot.
-- `require_party_update_after_battle` searches the formation sprite groups
+- `party_update_after_battle` searches the formation sprite groups
   for the unit's row, remaps 0x49 to 0 and 0x47 to 0x48, and never uses the
   result.
 - Both copies of `menu_run_battle_help`: the
@@ -288,10 +288,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   (the first arm, which closes the help, takes modes 1 and 2); request
   kinds 4, 0x11, 0x12 and 0x17 call the close routine for an empty id and
   then start the text thread anyway, relying on close not returning.
-- `main_heap_free`: the clearing loop stops at the first page byte that differs
+- `heap_free`: the clearing loop stops at the first page byte that differs
   from the allocation id, not at the end of the 64-entry
-  `g_main_heap_game_allocator_table`; an allocation that reaches the last page
-  reads on into `g_main_gfx_draw_envs` and clears its bytes while they match.
+  `g_heap_game_allocator_table`; an allocation that reaches the last page
+  reads on into `g_gfx_draw_envs` and clears its bytes while they match.
 - `battle_map_load_data`: the four texture quarter files load at
   `buffer + 0x8000 * (n + 1)`, while `battle_map_dispatch_gns_resource` uploads
   quarter n from `buffer + 0x8000 * n`; quarter 3 is read past the end of the
@@ -300,8 +300,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   target 4, which `battle_camera_update_tilt` has no branch to finish.
 - `battle_action_calculate_target_result`: both tests bound the default
   ability class at `ABILITY_ID_ITEM_FIRST + 1`, so the Potion ability indexes
-  `g_main_ability_range_data` one record past its end, which is the bytes of
-  `g_main_item_ability_item_ids`. The other callers bound it at
+  `g_ability_range_data` one record past its end, which is the bytes of
+  `g_item_ability_item_ids`. The other callers bound it at
   `ABILITY_ID_ITEM_FIRST`.
 - `battle_reaction_prepare_next`: Counter Tackle performs Dash under the
   Black Magic skillset, the skillset Counter Magic passes.
@@ -320,7 +320,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   added. The bare Jump entry for a unit with no level-jump ability is written
   without being counted, so the caller's next entry overwrites it.
 - `battle_target_validate_weapon_target`: the weapon-range flag
-  is read from `g_main_ability_range_data[(u8)ability_id]`, so abilities
+  is read from `g_ability_range_data[(u8)ability_id]`, so abilities
   0x100 and up use the record of their id's low byte.
 - `battle_unit_apply_level_up_down_ability`: a level-1 target of a level-down
   (the Degenerator trap; formula 0x59 misses at level 1) is clamped back to
@@ -338,16 +338,16 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   0xb30-byte header of WAVESET.WD (176 instruments), and most music channels
   end with Instrument 0xFF before End Bar, so entry 255 is read 0x4f0 bytes
   past the copy.
-- Both copies, `equip_item_sort_id_list` and `item_sort_id_list`: the evade
-  keys read `g_main_item_shield_data` for ids 0x7a-0x8f and
-  `g_main_item_accessory_data` for 0x90-0xef by `secondary_data_id`, so thrown
+- Both copies, `item_sort_id_list` and `item_sort_id_list`: the evade
+  keys read `g_item_shield_data` for ids 0x7a-0x8f and
+  `g_item_accessory_data` for 0x90-0xef by `secondary_data_id`, so thrown
   weapons (122-127) read far past the 16 shield records, and headgear and body
   armor (0-63) read the 32 accessory records and on past them.
 - `shop_cash_out_excess_items` walks ids below `ITEM_ID_END - 1`, so
   Phoenix Downs (0xfd, the last item) over 99 are never cashed out; every
   other item walk runs to `ITEM_ID_END`.
 - `battle_move_calculate_pathing` copies 256 terrain costs from row 0 of
-  `g_main_terrain_movement_cost_tables` (64 a row) to the scratchpad cost
+  `g_terrain_movement_cost_tables` (64 a row) to the scratchpad cost
   block at 0x1f800100, on over the spread state at 0x1f800180. Its flag-0x100
   test (a WalkTo with terrain costs disabled) compares the cost-table index,
   not the cost, with 0xff, so blocked surfaces cost 1 too.
@@ -361,10 +361,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   target) and then overwrites `attack_type` with the level change's:
   `battle_action_apply_target_result` still applies the
   amounts, but `battle_gfx_prepare_post_action_display` shows no number.
-- `main_sound_unload_scenario_mus` releases a slot's music record and SMD
-  without clearing `g_main_sound_music.state` when that slot is the playing
+- `music_unload_scenario_slot` releases a slot's music record and SMD
+  without clearing `g_music.state` when that slot is the playing
   one. The shop, formation and both save screens unload their own music this
-  way, so the next `main_sound_stop_current_music` hands the released record
+  way, so the next `music_stop` hands the released record
   to `suzuki_smd_stop_music`.
 - `battle_map_stop_clut_cycle` clears the active byte of slot `handle`,
   but `battle_map_start_clut_cycle` returns slot + 1: it stops the slot
@@ -372,20 +372,20 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   the first of `g_battle_gfx_cycled_tile_glow_palettes`.
 - `battle_gfx_queue_unit_graphics_load` writes its record before it
   tests the count, which stops at 16: a seventeenth append lands one past the
-  16-entry queue, on the head of `g_main_zodiac_primitives`.
+  16-entry queue, on the head of `g_zodiac_primitives`.
 - `battle_effect_remove_secondary`: removing a record from the middle of the
   active chain leaves the record before it with `next_slot_id` naming the freed
   record. When that one is removed while a newer effect is still active, it
   patches the freed record's link (by then a free-chain link) and its real
   successor keeps naming it as the previous record.
-- `main_heap_alloc` tags a new block one above the highest tag met below it, so
+- `heap_alloc` tags a new block one above the highest tag met below it, so
   it can repeat the tag of the block directly above (free pages 0-3 under a
   block tagged 3: allocating 1, 1 and 2 pages gives tags 1, 2, 3).
-  `main_heap_free` tells blocks apart by tag alone: freeing the lower block
+  `heap_free` tells blocks apart by tag alone: freeing the lower block
   frees both, and freeing the upper one returns 0 and frees nothing.
-  `main_heap_reserve_at` picks an unused tag but bounds-checks only the starting
+  `heap_reserve_at` picks an unused tag but bounds-checks only the starting
   address, allowing the requested page range to extend beyond the heap.
-- `main_unit_calculate_entd_equipment`: the random body-armor roll tests
+- `unit_calculate_encounter_equipment`: the random body-armor roll tests
   `BATTLE_SUPPORT_SET_1_EQUIP_SHIELD` before asking for `ITEM_TYPE_ARMOR`;
   Equip Armor is tested only for the helmet.
 - `battle_target_clear_panels_on_untargetable_tiles` (ability ranges) visits
@@ -452,7 +452,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   after the advance passes December 31 is missed, and script variable 0x67
   counts the year when the date passes December 31 instead of on March 21,
   with no cap at 99.
-- `require_overlay_open_jobstts` reserves 0x1f000 bytes at the high overlay
+- `status_screen_open_after_battle` reserves 0x1f000 bytes at the high overlay
   address (0x801df000), but the companion loader reads the 0x20000 bytes that
   `g_menu_companion_executable_sizes` gives JOBSTTS.OUT, so the top two heap
   pages (0x801fe000-0x801ff000) are overwritten without being reserved.
@@ -480,7 +480,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   rows, and its last-band test `i - height >= 0x60` is never true. After the
   band at row 0x20 the rows are written before the start of the buffer. No
   retail window is known to be that large.
-- `main_unit_calculate_random_equipment` restarts its candidate list when an
+- `unit_calculate_random_equipment` restarts its candidate list when an
   item with a higher required level appears, but items scanned after it with a
   lower level still join the list, so the pick is not limited to the best
   level reached.
@@ -491,21 +491,21 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Serpentarius, skipping the floor of 1 at its end: an XA already cut to 0 (a
   Frog's XA of 1 against Defense Up or Protect) stays 0, and the hit deals 0
   damage where any other sign pair deals 1 * YA.
-- DEBUGCHR's unit editor (`debugchr_editor_run_session`) lets the job, the five
+- DEBUGCHR's unit editor (`unit_editor_run`) lets the job, the five
   equipment slots (Triangle empties one) and the five skillset and ability
-  slots be changed, but `debugchr_editor_apply_values_to_battle_unit` writes
+  slots be changed, but `unit_editor_apply_values` writes
   back only HP, MP, CT, level, EXP, Brave, Faith, zodiac sign, Move, Speed and
   Jump, and `menu_load_selected_unit` reloads the unit after every
   change, so the other edits are lost at once.
 - `sound_novel_calculate_read_percent` (no caller) counts
-  0x1000 bits from `g_main_sound_novel_read_section_bits`, which holds 1,280 (40 words), so it
-  also counts `g_main_item_location_flags` and the first 224 bytes of
-  `g_main_item_poached_quantities`.
-- `open_movie_update_stream_frame` restarts a stream whose ring has fewer than
-  16 free sectors through `open_movie_start_cd_stream_read`, which reads with
-  mode 0x1a0; the first read in `open_movie_start_stream` uses 0x1e0, so the
+  0x1000 bits from `g_sound_novel_read_section_bits`, which holds 1,280 (40 words), so it
+  also counts `g_item_location_flags` and the first 224 bytes of
+  `g_item_poached_quantities`.
+- `movie_update_stream_frame` restarts a stream whose ring has fewer than
+  16 free sectors through `movie_start_cd_read`, which reads with
+  mode 0x1a0; the first read in `movie_start_stream` uses 0x1e0, so the
   restart drops `CdlModeRT` (XA-ADPCM playback).
-- `main_ability_store_skillset_abilities` bounds the support class with
+- `ability_store_skillset_abilities` bounds the support class with
   `<= ABILITY_ID_MOVEMENT_FIRST`, so Move+1 (486) is filed as a support ability;
   every caller asks for action abilities or for all four classes, so nothing
   sees the difference.
@@ -515,14 +515,14 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `BATTLE_SPRITESHEET_ID_BOY` (74);
   `proposition_advance_day` caps waiting days above 32, and
   its only writer, `proposition_step_result_level`, stores 32 or 16;
-  `battle_state_sync_frame` zeroes a `g_main_system_min_vsync_interval` of 1
-  under `wait < g_main_system_min_vsync_interval` with `wait` at least 2;
+  `battle_state_sync_frame` zeroes a `g_system_min_vsync_interval` of 1
+  under `wait < g_system_min_vsync_interval` with `wait` at least 2;
   `battle_state_run_deployment` loops until
   `battle_state_update_deployment_controller_input` returns -1, and it always
   returns 1; the first `switch` of `battle_move_apply_unit_step_velocity`
   repeats the layer test that the statement before it has just made false;
   `battle_status_calculate_turn_flags` cannot report Sleep, whose
-  `g_main_status_effect_data` record carries the freeze-CT flag tested first;
+  `g_status_effect_data` record carries the freeze-CT flag tested first;
   `battle_unit_set_mounted_animation` tests a depth masked to a byte for `< 0`
   and a nonzero animation for 0; `menu_get_thread_activity` tests `i != 3`
   inside its scan of threads 4-9;
@@ -619,14 +619,14 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   set. Its unlinked path, which builds every sprite into the backdrop's
   packet, never runs: no code stores `link_primitives`, and the CARD, WORLD
   and ATTACK contexts start at 1.
-- `bunit_unit_build_list_index_map` maps a mount to its rider's list index
-  (`bunit_unit_find_index_by_battle_id`), not the rider's grid cell; they
+- `unit_list_build_index_map` maps a mount to its rider's list index
+  (`unit_list_find_by_battle_id`), not the rider's grid cell; they
   differ by the mounts sorted before the rider. Browsing onto such a mount
   with L1/R1 puts the grid cursor on a later unit's cell (or past the last),
   and ending the browse there selects that cell's unit.
 - The right-aligned number commands
-  (`bunit_menu_opcode_17_draw_right_aligned_number`,
-  `equip_menu_opcode_17_draw_right_aligned_number`,
+  (`menu_opcode_17_draw_right_aligned_number`,
+  `menu_opcode_17_draw_right_aligned_number`,
   `menu_opcode_17_draw_right_aligned_number`) count their blank cells
   down to -1 in an `s16` with no lower bound: a value with more digits than
   the field starts below -1 and queues a blank quad about 65,535 times.
@@ -649,17 +649,17 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `window_draw_animated_record`: a part with its own palette gets
   CLUT x `(clut_x + (word & 0xff0000)) >> 12`, shifting the cel's CLUT x
   origin out with the palette field; OPEN's
-  `open_gfx_draw_animated_render_record` adds the origin after the shift. All
+  `window_draw_animated_record` adds the origin after the shift. All
   141 WLDCORE cels have CLUT x 0, so nothing shows.
 - `party_find_ramza` returns 16 (`PARTY_MEMBER_SLOT_COUNT`) when
   no formation slot holds Ramza, and the four MCBrave/MCFaith opcodes
   (`location_script_opcode_25_check_ramza_brave_at_least` through
   `location_script_opcode_28_check_ramza_faith_at_most`) use it unchecked, so
   they test roster slot 16, the first guest slot.
-- `main_sound_start_music_load_into_free_slot` allocates the SMD block before
-  it requests the read; when `main_file_request_read_bytes` refuses (loader
-  busy) it reports `MAIN_SYSTEM_ERROR_SMD_LOAD` and returns 0 without freeing
-  the block. `main_sound_open_music_into_slot` (no caller) does the same.
+- `music_start_load_into_free_slot` allocates the SMD block before
+  it requests the read; when `file_request_read_bytes` refuses (loader
+  busy) it reports `SYSTEM_ERROR_SMD_LOAD` and returns 0 without freeing
+  the block. `music_open_into_slot` (no caller) does the same.
 
 ## Calls that disagree with the callee
 
@@ -681,15 +681,15 @@ written that way.
 - `g_suzuki_smd_modulator_waveforms` entries 8-15 call the void
   `suzuki_smd_modulator_deactivate`; `suzuki_smd_update_modulators` adds the
   leftover `$v0` (the cleared modulator flags) to the channel output.
-- `main_sound_update_tunes` passes `current_music` to `suzuki_smd_is_music_playing`
+- `music_update_tunes` passes `current_music` to `suzuki_smd_is_music_playing`
   even when no scenario music is loaded; the null record reads the status
   16-bit value at address `0x10`.
 - `menu_animate_window_quad_crop` passes an uninitialized
   source (a stale `$s5`) to `menu_zoom_cursor_frame`, which never reads it.
 - `battle_map_step_deployment_init_sequence` and
-  `battle_map_step_init_sequence` call `main_sound_stop_sfx` without its sound
+  `battle_map_step_init_sequence` call `sound_stop_sfx` without its sound
   id: step 0 passes `map_id`, still in `$a0`; step 11 passes whatever
-  `main_sound_unload_current_scenario_music` left there.
+  `music_unload_current_scenario` left there.
 - `battle_unit_get_world_coords_by_runtime_id` returns NULL for a missing
   unit, but its callers test for -1 and read through it. A teleport-out with
   removal (Wiegraf at the Fovoham windmill) fades the unit out while the
@@ -707,7 +707,7 @@ written that way.
   speaker who is not on the field; the portrait test then reads kernel RAM.
   `menu_copy_unit_data_to_status_billboard` (BATTLE and DEBUGCHR) does the same while
   counting units, for a runtime record with no battle unit (the final battle).
-- `equip_item_sort_id_list` and `item_sort_id_list`: each counts a unit's five equipment ids into a
+- `item_sort_id_list` and `item_sort_id_list`: each counts a unit's five equipment ids into a
   256-byte local array, but the ids are 16-bit values and an item tried on in the
   shop's fitting room carries flag bits above the low byte, so sorting the
   list then increments a byte far past the array.
@@ -727,8 +727,8 @@ written that way.
   for the acting unit reads `acting_unit`, which is NULL during the AI
   workspace setup at battle start (`acting_unit_id` is 0), so slot 0's Jump
   divides kernel-RAM bytes.
-- `bunit_entrypoint` passes a second argument, 0, to the
-  one-parameter `bunit_gfx_draw_falloff_shaded_rows`; its other caller passes
+- `unit_list_entrypoint` passes a second argument, 0, to the
+  one-parameter `unit_list_draw_shaded_rows`; its other caller passes
   one.
 - `menu_init_system_function` returns `$v0` as the void
   `text_select_ability_announcement` left it.
@@ -767,7 +767,7 @@ written that way.
 - `menu_ability_is_non_action_learned` passes one 32-bit pointer slot (0x801f0050, named
   both `g_menu_selected_ability_data` and
   `g_menu_selected_ability_secondary_data`) for both outputs of
-  `main_ability_calculate_pointers_and_type`, so the ability data pointer is
+  `ability_get_data_and_type`, so the ability data pointer is
   overwritten by the secondary data pointer.
 
 - `menu_input_update_event_state` passes six 32-bit values starting at `g_input_event`
@@ -788,14 +788,14 @@ written that way.
 
 ## Declaration leads
 
-- The heads of `equip_unit_data_t` and `bunit_unit_t` overlap
+- The heads of `equipment_unit_preview_t` and `unit_list_record_t` overlap
   `menu_unit_status_record_t`, but their fields at 0x1e and 0x20 differ.
 - BUNIT, EQUIP and WORLD use the 236-byte `menu_gfx_context_t`. JOBSTTS omits the draw-mode pool pointer at 0x60 and uses a
   244-byte stride.
 - WLDCORE's `g_calendar_zodiac_start_dates` uses `calendar_date_t`
-  records; OPEN's `g_open_birthday_zodiac_start_dates[24]` stores the same
+  records; OPEN's `g_birthday_zodiac_start_dates[24]` stores the same
   `{month, day}` pairs as bytes.
-- `g_main_item_location_flags` (`0x80059414`): only the first 64 bytes (512
+- `g_item_location_flags` (`0x80059414`): only the first 64 bytes (512
   Move-Find bits) are proven; the next 64-byte block is saved with it but has no
   known meaning.
 - `g_sound_novel_sound_quads` (`0x8009ec18`) starts one row before
@@ -806,12 +806,12 @@ written that way.
   `g_battle_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_ENDING].function_id`
   under a second name; the table's own symbol covers the 21 records before
   it.
-- `g_open_file_openbk_end_sector_offsets` (`0x80073f5c`) is
-  `g_open_file_openbk_start_sector_offsets + 1`: eight sector offsets of
+- `g_file_openbk_end_sector_offsets` (`0x80073f5c`) is
+  `g_file_openbk_start_sector_offsets + 1`: eight sector offsets of
   OPNBK.BIN under two names, each image ending where the next starts.
-- `g_open_prologue_crossfade_progress` (`0x800854b5`) is
-  `g_open_prologue_crossfade_rows[1]`;
-  `open_prologue_prepare_crossfade` clears it through the array.
+- `g_prologue_crossfade_progress` (`0x800854b5`) is
+  `g_prologue_crossfade_rows[1]`;
+  `prologue_prepare_crossfade` clears it through the array.
 
 ## Duplicated code
 
@@ -841,13 +841,13 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 
 ## Other surprises
 
-- `main_gfx_load_efc_fnt`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.
+- `debug_load_efc_font`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.
 - `StCdInterrupt`: tracks frame numbers through the header's low `u16`, while DMA completion and OPEN retain the full `u32` frame number.
 - `psyq_gte_apply_rotation_ir`: writes saturated IR1–IR3 32-bit output values and returns its unchanged third argument.
 - `sprintf`: unsupported conversions terminate output, `%#p` prefixes `0p`, hexadecimal alternate form prefixes zero, and `%#.0o` with zero emits no digit.
 - JOBSTTS.OUT offset `0x0` and BUNIT.OUT offset `0x200` hold the literal `"%d"`
-  (`g_jobstts_text_decimal_format`, `g_bunit_text_decimal_format`) used by `jobstts_menu_opcode_0d_draw_formatted_number` and
-  `bunit_menu_opcode_17_draw_right_aligned_number`.
+  (`g_status_screen_text_decimal_format`, `g_unit_list_text_decimal_format`) used by `menu_opcode_0d_draw_formatted_number` and
+  `menu_opcode_17_draw_right_aligned_number`.
 - The 32-bit game-options value (`game_options_t`) packs its last five fields
   out of array order.
 - CallFunction (both copies of `script_execute_event`)
@@ -883,7 +883,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `battle_action_dispatch_target_reaction_ability`: formula 7
   suppresses reactions. Counter Magic (`0x1b3`) is tested last, after byte
   `+0x8d`, so Counter (`0x1ba`) wins.
-- `g_main_debug_display_enabled` is only ever cleared by retail code; the
+- `g_debug_display_enabled` is only ever cleared by retail code; the
   add-unit threads and unit-summary panels print debug output when it is set.
 - `world_map_update_input_repeat`: the arms test
   UP, DOWN, RIGHT, LEFT, R1, L1, but the counters sit in UP, DOWN, LEFT, RIGHT,
@@ -909,21 +909,21 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `EFFECT/E223.BIN` through `E225.BIN` contain effect data but have zero resident load sizes; requesting those file IDs loads Cure instead. The ability-effect mapping does not reference them.
 - `screen_load_wldface_portraits`: the WLDFACE rectangles (`g_screen_wldface_vram_rects`) use x = 1664–1856; the GPU masks VRAM transfer coordinates, so the pages land at x = 640–832.
 - `suzuki_sound_init`: `suzuki_sound_init_sfx_music` reaches `suzuki_smd_insert_music`, which disables and re-enables `g_suzuki_sound_root_counter_2_event` before the initializer opens that event: handle 0 at boot, the handle `suzuki_sound_quit` closed on a soft reset.
-- `equip_menu_load_images_and_reset_lists` and `bunit_gfx_init_vram_and_start_fade`: store 16-color CLUTs into the 4-entry `buf1`; they run on into `buf2`, which the frame places directly after it (the source reads as two arrays, the stack holds one).
+- `equipment_load_images` and `unit_list_init_vram_and_fade`: store 16-color CLUTs into the 4-entry `buf1`; they run on into `buf2`, which the frame places directly after it (the source reads as two arrays, the stack holds one).
 - `battle_effect_code_script_2e_invalid`: opcodes 2e–77 report an error without setting a handler result; `battle_effect_run_block` then tests the undefined return value.
 - EFFECT scripts never run seven state handlers: E000's script calls only `effect_noop` (opcode 07) and E314's names no file function, so native function ids 1 and 90 are bound by nothing; E134/E242 `effect_ring_stack_mesh_update`, E454/E455 `effect_map_set_3d_objects_state_2` and E456 `effect_map_freeze` sit in callback slots (script opcode 06) that no keyframe selector fires. E457.BIN, which has no code, binds native function 88 (0x801c2578, E259's `effect_dome_mesh_update`; data in its own image) to slot 0, and none of its keyframes names a slot.
 - `battle_map_draw_mesh_and_weather`: when map command 0x96 (E458) ends, `battle_map_run_weather_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.
 - `save_run_screen`: its 0xCCD8-byte stack frame, containing packet pools and directory entries, reaches below 0x801ff000 into the top cells of MAIN's game heap (0x801df000-0x801ff000); it is safe only while those cells are free.
 - `tutorial_opcode_17_end`: two paths fall off the end of the s32 handler and return a stale nonzero `$v0` (the fade's result, or the 1 just stored), so the formation loop keeps running.
 - `menu_draw_thread_status_indicators` in WORLD and BUNIT (the ATTACK, DEBUGCHR and REQUIRE
-  copies, and EQUIP's `equip_menu_draw_thread_status_indicators`, have no caller): while a unit-status banner thread (8 or 7) is being
+  copies, and EQUIP's `menu_draw_thread_status_indicators`, have no caller): while a unit-status banner thread (8 or 7) is being
   stopped its first parameter is 0, and the panel check reads that display
   record at RAM address 0.
-- `open_script_draw_text_records`: passes OT entries by value (`otag[15]`, `otag[8]`) to `AddPrim`; after `ClearOTagR` each holds the physical address of the entry below it, so the credits fade, bands and glyphs link into layers 14 and 7 through the KUSEG mirror.
+- `ending_draw_text_records`: passes OT entries by value (`otag[15]`, `otag[8]`) to `AddPrim`; after `ClearOTagR` each holds the physical address of the entry below it, so the credits fade, bands and glyphs link into layers 14 and 7 through the KUSEG mirror.
 - `picture_step_dissolve_upload`: the step-0 call (start the dissolve) has no return value of its own; `$v0` keeps its clearing cursor, the address one byte below the band-progress table. Its three callers ignore that result.
 - `menu_build_window_sprites`: for the Bar's send-unit list (header 0x10) the arrow x reads the "height" of the record at the panel's value pointer, `&g_window_panel_value` + 6, which is the upper half of `g_proposition_dispatch_days` (0).
 - `battle_unit_generate_treasure`: outside action execution (AI simulation, preview) it returns with no value, so `$v0` still holds `g_battle_action_state` and the crystal pickup result names item 1 or 2 as the treasure.
-- `open_title_step_new_game_start`: no retail code sets step 5, which pops New Game and opens the Music Test (`open_menu_start_music_test_controller`, controller slots 7 and 8); only a poke of the 32-bit step value reaches it.
+- `new_game_update`: no retail code sets step 5, which pops New Game and opens the Music Test (`music_test_open`, controller slots 7 and 8); only a poke of the 32-bit step value reaches it.
 - WORLD's copy of the battle menus is dead code: nothing in any module calls or names `menu_init_system_function` (0x800f5230) or `menu_start_mini_menu_display_thread` (0x800f0e48), so modes 1 (AT list) and 2 (dead-unit panel) of `option_entrypoint` never run; the world map's Options row runs mode 0. With them goes WORLD's event interpreter: `script_start_current_event_thread`, the only starter of the event thread, is called by `menu_init_system_function` and by the menu-building thread that only BATTLE's `menu_build_idle_action_menu` starts (WORLD's copy is empty), so WORLD's `script_execute_event` never runs.
 - Abilities no skillset lists: 0x16f (Attack), Reflect (0x1b8), Non-charge,
   Teleport 2, Move Underwater and Silent Walk. Four ids with no name text are
@@ -955,14 +955,14 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   the preferred-job promotion in `proposition_determine_success`
   passes on a roll below 0x3D, 61 in 100; `battle_formula_apply_status_to_action`
   divides the displayed accuracy of separate statuses by four and keeps each
-  status on a roll below 24; `main_unit_generate_out_of_battle` and
-  `main_unit_store_character_names` draw a generic name with
+  status on a roll below 24; `unit_generate_party_record` and
+  `unit_store_names` draw a generic name with
   `rand() * 255 / 0x8000`, 0-254, so the last of each list's 256 names is
   never drawn.
 - `battle_unit_apply_level_up_down_ability` stores the new level before
-  calling `main_unit_apply_level_growth`, so an ability level-up divides each
-  raw stat by growth + new level; an EXP level-up (`main_unit_check_level_up`)
-  and the generated-unit replay in `main_unit_calculate_actual_stats` divide
+  calling `unit_apply_level_growth`, so an ability level-up divides each
+  raw stat by growth + new level; an EXP level-up (`unit_check_level_up`)
+  and the generated-unit replay in `unit_calculate_actual_stats` divide
   by growth + old level.
 - `battle_unit_find_war_trophies_and_bonus_money` computes
   `level_bonus_money` ((highest enemy level - lowest party level) * 100, 0
@@ -1020,8 +1020,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   368 records sets it; the low nibble of
   `ability_data_t.type_flags` holds the ability type plus one (0 for ids 0,
   0x1fe and 0x1ff) and nothing reads it, because
-  `main_ability_calculate_pointers_and_type` derives the type from the id.
-- `main_status_init_check_data` builds eleven status check sets; sets 2 and 7
+  `ability_get_data_and_type` derives the type from the id.
+- `status_init_check_data` builds eleven status check sets; sets 2 and 7
   (`STATUS_CHECK_SET_UNREAD_2`, `_UNREAD_7`) are read by nothing.
 - WORLD's copies of BATTLE's action-menu and tile-info routines
   (`menu_build_ability_list`, `menu_build_skillset_entries`,
@@ -1029,19 +1029,19 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   absolute data addresses 0x80173cbc, 0x8017403c, 0x80174048 and 0x8017404c.
   In WORLD's image those lie inside the text file embedded at 0x8016ee68, so
   the routines would read and write text bytes there.
-- `g_main_terrain_geomancy_abilities` gives Gusty Wind for Sky and Kamaitachi
+- `g_terrain_geomancy_abilities` gives Gusty Wind for Sky and Kamaitachi
   for Darkness, Cross section and the unnamed surfaces 0x2f-0x3e; the terrain
   help text says "None" for Sky, Darkness and Cross section.
 - `battle_camera_update_rotation` chains a held R1 through
   `battle_camera_set_left_turn_destination`, as it does L1; the two helpers differ only in
   which way they move a destination that is a multiple of 0x400.
-- `main_unit_copy_job_data` adds the immortal and formation immunity sets
+- `unit_copy_job_data` adds the immortal and formation immunity sets
   only to a unit that is both immortal and flagged save- or load-formation;
   the per-flag tests inside the loop are then always true.
 - `battle_formula_apply_status_to_action`: the
   `ACTION_STATE_PREVIEW` test in the separate-status loop cannot pass;
   any state but EXECUTE was switched to all-or-nothing above it.
-- `main_gfx_build_now_loading` loads the NOW LOADING CLUT to VRAM (0x70,
+- `loading_build_message` loads the NOW LOADING CLUT to VRAM (0x70,
   0x1e2), 16-bit CLUT ID 0x7887; in battle that is
   `MAP_CLUT(MAP_CLUT_ROW_SPRITES, 7)`, the status bubble CLUT.
 - The effect interpreter indexes fixed tables with wider fields and no check:
@@ -1060,12 +1060,12 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   named entry of the 256 is.
 - `battle_heap_alloc_block` has no failure exit: when no free block is large
   enough it walks the circular free list forever.
-  `attack_deploy_select_unit_for_stats_display` likewise loops forever when
+  `deploy_select_first_deployable_unit` likewise loops forever when
   no roster unit is deployable for the squad, and
   `battle_effect_alloc_work_record`, with its free chain empty, calls the empty
   report stub and then reads the next link through NULL.
 - `menu_run_status_screen_thread` hands a unit with mount info (a
-  rider or a mount) to DEBUGCHR.OUT's `debugchr_status_run_unit_thread`
+  rider or a mount) to DEBUGCHR.OUT's `status_screen_mounted_unit_thread`
   (`menu_open_mounted_unit_status_screen`); any other unit gets BATTLE's own
   panel.
 - The camera's L2/R2 input uses `battle_camera_toggle_zoom` and `battle_camera_toggle_tilt`,
@@ -1083,17 +1083,17 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   execute in retail WORLD.
 - `memcard_wait_for_hardware_event` is OPEN's only caller of
   `memcard_poll_hardware_event_result`, and nothing calls the wait routine.
-- MAIN's Orbonne caption fades have no callers. `main_set_display_draw_new_game`
-  is called only by `main_gfx_fade_in_orbonne_monastery`, so it is unreachable too.
+- MAIN's Orbonne caption fades have no callers. `new_game_set_display_draw`
+  is called only by `new_game_fade_in_orbonne_caption`, so it is unreachable too.
 - `suzuki_sound_set_unread_value` stores a 16-bit sound-driver value that `suzuki_sound_init`
   and `suzuki_sound_quit` clear and nothing reads; nothing calls the setter.
-- `main_run_zero_padding` (0x80010ba8), which `main_overlay_exec_battle_bin`
+- `system_zero_padding` (0x80010ba8), which `overlay_exec_battle`
   reaches after loading BATTLE.BIN, is not BATTLE code: it is the 4 KB of zero
   words after MAIN's C start-up, run as 1,024 no-ops up to the `jr ra` at
-  0x80011ba8. BATTLE runs when `main_system_run_game_loop` then calls
+  0x80011ba8. BATTLE runs when `system_run_game_loop` then calls
   `battle_state_run_game_loop`.
-- `main_boot_run_startup` installs the empty `main_file_handle_cd_ready_callback`
-  and `main_file_handle_cd_read_callback`; the `CdInit` it runs next replaces
+- `boot_run_startup` installs the empty `file_handle_cd_ready`
+  and `file_handle_cd_read`; the `CdInit` it runs next replaces
   them with LIBCD's `def_cbready` and `def_cbread`, so neither ever runs.
 - `FlushCache` is called only by the BIOS patches (`_patch_card`,
   `_patch_card2`, `_patch_gte`, `psyq_card_restore_exception_prefix`); no
@@ -1132,7 +1132,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   other spawn values use the start value unchanged when no curve is bound.
 - `battle_map_update_texture_animations`: the two loop modes (1 and 3) add 1
   per frame and step when the timer reaches `duration`; the other modes add
-  `g_main_system_vsync_interval` and step when it exceeds `duration`, so one
+  `g_system_vsync_interval` and step when it exceeds `duration`, so one
   duration means `duration` frames in a loop and over `duration` vertical
   blanks otherwise.
 - Lookups whose result is discarded:
@@ -1145,12 +1145,12 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   call `battle_map_get_tile_data_pointer`; and
   `battle_gfx_draw_wait_direction_unit` runs a `RotTrans` of the unit's feet
   that the next `RotTrans` overwrites.
-- `equip_menu_update_item_action_state` tests `g_item_action_menu`'s
+- `equipment_update_item_actions` tests `g_item_action_menu`'s
   `selected_index` for the sort-order row (2) even while the single-item menu
   runs; that index was zeroed when the menu opened, so with one item CIRCLE
   plays the invalid sound on every row. The single menu's row actions agree:
   row 2 has 0x13e8 like rows 0 and 1, where the full menu has -1.
-- `bunit_gfx_init_double_packet_buffers` and
+- `unit_list_gfx_init_buffers` and
   `screen_init_packet_buffers` set their draw and display
   environments 255 pixels wide where MAIN and CARD use 256, so the default
   drawing area ends at x = 254; `PutDispEnv` still picks the 256-pixel mode.
@@ -1167,7 +1167,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   scaled offset or size by testing the C remainder against half a pixel, so a
   negative product truncates toward zero: -1.75 pixels gives -1 where 1.75
   gives 2.
-- `main_file_poll_load` and `world_map_poll_texture_stream` count failed
+- `file_poll_load` and `world_map_poll_texture_stream` count failed
   seeks, refused reads and stalls in `error_count`, which nothing reads, so a
-  disc error restarts the read indefinitely. `main_file_poll_load` also counts
-  `wait_frames` unread; its stall timeout uses `g_main_system_session_frames`.
+  disc error restarts the read indefinitely. `file_poll_load` also counts
+  `wait_frames` unread; its stall timeout uses `g_system_session_frames`.

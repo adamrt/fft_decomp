@@ -12,61 +12,61 @@
 #include "psx/types.h"
 
 /* screen */
-extern s8 g_jobstts_active_page; /* menu_job_list_step_e; each page's function returns the next one */
-extern u8 g_jobstts_initialized;
-extern u8 g_jobstts_previous_event_mode;
+extern s8 g_status_screen_active_page; /* menu_job_list_step_e; each page's function returns the next one */
+extern u8 g_status_screen_initialized;
+extern u8 g_status_screen_previous_event_mode;
 
-u32* jobstts_entrypoint(s32 unit, void* unused_otag);
+u32* status_screen_entrypoint(s32 unit, void* unused_otag);
 
 /* unit */
 /* Job and ability data copied into JOBSTTS.OUT for the selected unit. */
-typedef struct jobstts_unit_job_data {
+typedef struct status_screen_unit_jobs {
     s16 job_id;                /* 0x00 */
     s16 entd_slot;             /* 0x02 */
     u16 primary_skillset;      /* 0x04 */
     u8 unit_flags;             /* 0x06 */
     u8 character_identity;     /* 0x07 */
     unit_career_data_t career; /* 0x08; unlocks, learned abilities, levels and JP */
-} jobstts_unit_job_data_t;
-typedef char jobstts_unit_job_data_size_must_be_158[(sizeof(jobstts_unit_job_data_t) == 158) ? 1 : -1];
+} status_screen_unit_jobs_t;
+typedef char jobstts_unit_job_data_size_must_be_158[(sizeof(status_screen_unit_jobs_t) == 158) ? 1 : -1];
 
-extern jobstts_unit_job_data_t* g_jobstts_unit_data[];
+extern status_screen_unit_jobs_t* g_status_screen_unit_data[];
 
-void jobstts_unit_init_job_data(s32 unit_id);
+void status_screen_init_unit_jobs(s32 unit_id);
 
 /* jobs */
-extern s32 g_jobstts_job_list_menu_initialized;
-extern menu_instruction_t g_jobstts_job_list_render_commands;
+extern s32 g_job_list_list_menu_initialized;
+extern menu_instruction_t g_job_list_list_render_commands;
 
-s32 jobstts_menu_run_job_list(void);
-s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused);
-s32 jobstts_job_calculate_current_level(s32 index);
-s32 jobstts_job_calculate_current_jp(s32 index);
-s32 jobstts_job_calculate_current_total_jp(s32 index);
-s32 jobstts_job_calculate_current_mastered(s32 index);
+s32 job_list_run(void);
+s32 job_list_build(u8 unit_id, s16* job_ids, s32 unused);
+s32 job_list_calculate_level(s32 index);
+s32 job_list_calculate_jp(s32 index);
+s32 job_list_calculate_total_jp(s32 index);
+s32 job_list_calculate_mastered(s32 index);
 
 /* abilities */
-extern u8 g_jobstts_ability_list_initialized;
-extern s16 g_jobstts_ability_list_job_name_ids[];
-extern menu_instruction_t g_jobstts_ability_list_render_commands;
+extern u8 g_ability_list_list_initialized;
+extern s16 g_ability_list_list_job_name_ids[];
+extern menu_instruction_t g_ability_list_list_render_commands;
 
-s32 jobstts_menu_ability_update_list_menu(void);
-s32 jobstts_ability_build_list(
+s32 ability_list_update(void);
+s32 ability_list_build(
     s16 unit_index, s16 job_id, menu_ability_category_e ability_category, s16* list, s32 unlearned_only);
 
 /* menus */
 /* Unsigned here where the other overlays keep signed values. */
-extern u16 g_jobstts_menu_list_cursor_anim_state;
-extern s16 g_jobstts_menu_list_scroll_entry_ids;
-extern u8 g_jobstts_menu_palette_image[];
+extern u16 g_status_screen_menu_list_cursor_anim_state;
+extern s16 g_status_screen_menu_list_scroll_entry_ids;
+extern u8 g_status_screen_menu_palette_image[];
 /* Window right edge; WORLD's twin stores it to g_screen_window_right_x. */
-extern s16 g_jobstts_menu_window_right_x;
+extern s16 g_status_screen_menu_window_right_x;
 
-s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
+s32 status_screen_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 
 /* graphics */
 /* Per-buffer primitive-pool pointers used by JOBSTTS.OUT's renderer. */
-typedef struct jobstts_gfx_context {
+typedef struct status_screen_gfx_context {
     u32* otag;                /* 0x00 */
     POLY_F3* poly_f3;         /* 0x04 */
     POLY_FT3* poly_ft3;       /* 0x08 */
@@ -92,62 +92,60 @@ typedef struct jobstts_gfx_context {
     DR_MOVE* draw_moves;      /* 0x58 */
     DR_AREA* draw_areas;      /* 0x5c */
     u8 _unused_60[0x94];      /* 0x60 */
-} jobstts_gfx_context_t;
-typedef char jobstts_gfx_context_size_must_be_244[(sizeof(jobstts_gfx_context_t) == 244) ? 1 : -1];
+} status_screen_gfx_context_t;
+typedef char jobstts_gfx_context_size_must_be_244[(sizeof(status_screen_gfx_context_t) == 244) ? 1 : -1];
 
-extern jobstts_gfx_context_t* g_jobstts_gfx_context_base;
-extern jobstts_gfx_context_t g_jobstts_gfx_contexts[];
-extern u16 g_jobstts_gfx_draw_area_capacity;
-extern u16 g_jobstts_gfx_draw_move_capacity;
-/* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in jobstts_gfx_init_contexts. */
-extern volatile u16 g_jobstts_gfx_line_g2_capacity;
-extern volatile u16 g_jobstts_gfx_line_g3_capacity;
-extern s16 g_jobstts_gfx_line_f2_count;
-extern s16 g_jobstts_gfx_poly_f4_count;
-extern s16 g_jobstts_gfx_poly_g4_count;
-extern s16 g_jobstts_gfx_tile_count;
-extern u16 g_jobstts_gfx_background_texture_page;
+extern status_screen_gfx_context_t* g_status_screen_gfx_context_base;
+extern status_screen_gfx_context_t g_status_screen_gfx_contexts[];
+extern u16 g_status_screen_gfx_draw_area_capacity;
+extern u16 g_status_screen_gfx_draw_move_capacity;
+/* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in status_screen_gfx_init_contexts. */
+extern volatile u16 g_status_screen_gfx_line_g2_capacity;
+extern volatile u16 g_status_screen_gfx_line_g3_capacity;
+extern s16 g_status_screen_gfx_line_f2_count;
+extern s16 g_status_screen_gfx_poly_f4_count;
+extern s16 g_status_screen_gfx_poly_g4_count;
+extern s16 g_status_screen_gfx_tile_count;
+extern u16 g_status_screen_gfx_background_texture_page;
 
-void jobstts_gfx_init_contexts(jobstts_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
+void status_screen_gfx_init_contexts(status_screen_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
     POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas);
-void jobstts_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
-void jobstts_gfx_enqueue_oriented_textured_quad(
+void status_screen_gfx_swap_context(s32 first_otag, s32 unused);
+void status_screen_gfx_enqueue_oriented_textured_quad(
     RECT* rect, texture_source_t* uv, rgb24_t* color, s32 orientation, s32 semitrans, s32 ot_index);
-void jobstts_gfx_enqueue_textured_quad_rect(
+void menu_gfx_enqueue_textured_quad_rect(
     RECT* rect, menu_icon_source_t* tex, rgb24_t* color, s32 semitrans, s32 ot_index);
 
 /* input */
-menu_vertical_scroll_direction_e jobstts_input_read_page_scroll_direction(void);
-void jobstts_menu_input_update_with_message_state(void);
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
+void menu_input_update_with_message_state(void);
 
 /* menu opcodes */
-/* Menu display script callbacks: every opcode handler consumes and returns an
- * command pointer; every row callback is indexed by a row or literal operand. */
-typedef menu_instruction_t* (*jobstts_opcode_handler_t)(menu_instruction_t* instruction);
-typedef s32 (*jobstts_row_callback_t)(s32);
+/* Menu display script opcode handlers: each consumes and returns a command pointer. */
+typedef menu_instruction_t* (*menu_opcode_handler_t)(menu_instruction_t* instruction);
 
 /* The opcode that ends a JOBSTTS menu display stream. */
 enum {
-    JOBSTTS_CMD_END = 0x16,
+    STATUS_SCREEN_SCRIPT_END = 0x16,
 };
 
 enum {
-    JOBSTTS_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6,
+    STATUS_SCREEN_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6,
 };
 
-void jobstts_menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
-menu_instruction_t* jobstts_menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
+menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
 
 /* text */
 /* The "%d" literal that JOBSTTS.OUT keeps at overlay file offset 0, i.e. the
  * three data bytes ahead of the first function. */
-extern const char g_jobstts_text_decimal_format[];
+extern const char g_status_screen_text_decimal_format[];
 
 #endif

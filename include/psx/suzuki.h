@@ -647,8 +647,8 @@ typedef struct suzuki_play_time {
 typedef enum suzuki_sound_sfx_priority {
     SUZUKI_SOUND_SFX_PRIORITY_STEALABLE = 0x20, /* a sound on a searched or caller-named channel pair */
     SUZUKI_SOUND_SFX_PRIORITY_BACKGROUND
-    = 0x60, /* suzuki_sound_play_background_sfx (main_sound_play_bg_sfx), channels 4-5 */
-    SUZUKI_SOUND_SFX_PRIORITY_DIRECT = 0x80, /* suzuki_sound_play_direct_sfx (main_sound_play_sfx), channels 6-7 */
+    = 0x60, /* suzuki_sound_play_background_sfx (sound_play_background), channels 4-5 */
+    SUZUKI_SOUND_SFX_PRIORITY_DIRECT = 0x80, /* suzuki_sound_play_direct_sfx (sound_play_sfx), channels 6-7 */
 } suzuki_sound_sfx_priority_e;
 
 #define SUZUKI_SOUND_ID(resource, sound) (((resource) << 16) | (sound))

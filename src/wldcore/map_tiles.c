@@ -57,7 +57,7 @@ void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* o
  * menu frame over it; then it saves the system flags and hides the map and
  * root menu windows and everything the map pass draws (routes, display
  * objects, context value, date and marker). With `capture` 0 the two windows
- * are shown again and the saved flags come back with MAIN_SYSTEM_FLAG_DRAW_MAP
+ * are shown again and the saved flags come back with SYSTEM_FLAG_DRAW_MAP
  * set, so the next frame redraws the map. */
 void world_map_toggle_captured_frame(s32 capture) {
     RECT display_rect;
@@ -70,7 +70,7 @@ void world_map_toggle_captured_frame(s32 capture) {
         map_window_index = g_world_map_window_index;
         menu_window_index = g_world_map_cursor_window;
         g_window_records[map_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_main_system_flags = g_world_map_saved_system_flags | MAIN_SYSTEM_FLAG_DRAW_MAP;
+        g_system_flags = g_world_map_saved_system_flags | SYSTEM_FLAG_DRAW_MAP;
         g_window_records[menu_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         return;
     }
@@ -79,52 +79,51 @@ void world_map_toggle_captured_frame(s32 capture) {
     VSync(0);
     GsSwapDispBuff();
     buffer_index = GsGetActiveBuff();
-    g_main_gfx_active_buffer_index = buffer_index;
+    g_gfx_active_buffer_index = buffer_index;
     GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
-    GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
     world_map_project_tiles();
-    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
     world_map_update_camera();
-    hud_draw_value(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
-    calendar_draw_date(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
-    location_draw_label(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
-    window_dispatch_record_list(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index],
+    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index],
         g_window_aux_render_object_queue, g_window_aux_render_object_count);
-    window_dispatch_record_list(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index],
-        g_window_render_object_queue, g_window_render_object_count);
+    window_dispatch_record_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index], g_window_render_object_queue,
+        g_window_render_object_count);
     world_map_restore_previous_stack();
-    GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsDrawOt(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsDrawOt(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    world_map_set_display_rect(g_main_gfx_active_buffer_index, &display_rect);
+    world_map_set_display_rect(g_gfx_active_buffer_index, &display_rect);
     StoreImage(&display_rect, g_world_map_scratch_buffer);
     DrawSync(0);
     g_picture_background_loaded_set = -1;
-    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
-    world_map_run_world_menus(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_run_world_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     {
         s32 map_window_index;
         s32 menu_window_index;
         u32 saved_system_flags;
 
-        saved_system_flags = g_main_system_flags;
+        saved_system_flags = g_system_flags;
         menu_window_index = g_world_map_cursor_window;
         map_window_index = g_world_map_window_index;
         g_world_map_saved_system_flags = saved_system_flags;
         g_window_records[map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_main_system_flags = saved_system_flags | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES
-            | MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS | MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE
-            | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+        g_system_flags = saved_system_flags | SYSTEM_FLAG_HIDE_MAP_ROUTES | SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS
+            | SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         g_window_records[menu_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        window_dispatch_record_list(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index],
+        window_dispatch_record_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index],
             g_window_render_object_queue, g_window_render_object_count);
     }
-    GsDrawOt(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
 }
 
@@ -197,7 +196,7 @@ void world_map_init_tile_atlas(void) {
     g_world_map_projection_rotation.vz = 0;
 
     descriptor = g_world_map_tile_descriptors;
-    if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_RESTART)) {
+    if (!(g_system_flags & SYSTEM_FLAG_RESTART)) {
         y = -192;
         k = 0;
         i = 0;

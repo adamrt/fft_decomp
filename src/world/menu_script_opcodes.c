@@ -1017,7 +1017,7 @@ void screen_init_and_draw_list(
  * last visible row starts a one-row scroll: the newly exposed row is
  * rendered into the list's VRAM strip at x 0x240, the pixel offset advances
  * by the slow step until the repeat timer reaches
- * g_main_menu_scroll_accel_delay and by the fast step after it, and when a
+ * g_menu_scroll_accel_delay and by the fast step after it, and when a
  * full row height is covered the strip is moved one row with draw-move
  * primitives (one per row when scrolling up). Then it draws the list image,
  * the up and down arrows, the scrollbar thumb and the cursor, and replays the
@@ -1100,11 +1100,11 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
         }
     }
     if (g_screen_list_scroll_direction < 0) {
-        if (g_screen_scroll_repeat_timer >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset -= g_main_menu_scroll_fast_step * speed;
+        if (g_screen_scroll_repeat_timer >= g_menu_scroll_accel_delay) {
+            g_menu_list_scroll_offset -= g_menu_scroll_fast_step * speed;
         } else {
             g_screen_scroll_repeat_timer += speed;
-            g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * speed;
+            g_menu_list_scroll_offset -= g_menu_scroll_slow_step * speed;
         }
         if (g_menu_list_scroll_offset <= -g_screen_row_height) {
             g_menu_list_scroll_offset = 0;
@@ -1121,11 +1121,11 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             }
         }
     } else if (g_screen_list_scroll_direction > 0) {
-        if (g_screen_scroll_repeat_timer >= g_main_menu_scroll_accel_delay) {
-            g_menu_list_scroll_offset += g_main_menu_scroll_fast_step * speed;
+        if (g_screen_scroll_repeat_timer >= g_menu_scroll_accel_delay) {
+            g_menu_list_scroll_offset += g_menu_scroll_fast_step * speed;
         } else {
             g_screen_scroll_repeat_timer += speed;
-            g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * speed;
+            g_menu_list_scroll_offset += g_menu_scroll_slow_step * speed;
         }
         if (g_menu_list_scroll_offset >= g_screen_row_height) {
             g_menu_list_scroll_offset = 0;
@@ -1210,7 +1210,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     }
     g_screen_use_scroll_position = 0;
     if (old_cursor != g_menu_list_selected_index) {
-        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
     return command;
 }

@@ -57,7 +57,7 @@ s32 battle_status_check_charging_charge(unit_stats_t* unit, s32 cancel) {
 
 /* Clears the unit's Charging, Jump, Defending and Performing statuses (action state none). */
 static void battle_status_cancel_charge(unit_stats_t* unit) {
-    main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_NONE);
+    status_set_action_state(unit, STATUS_ACTION_STATE_NONE);
 }
 
 /* Pick the rare or common move-find item on the unit's tile and mark the tile found.
@@ -68,7 +68,7 @@ move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
         = battle_map_get_move_find_result(unit->x, unit->position.y, unit->position.higher_elevation);
     u8 item_id;
 
-    if (main_util_roll_pass_fail(100, 100 - unit->brave) == 0) {
+    if (random_roll_pass_fail(100, 100 - unit->brave) == 0) {
         item_id = find_result->rare_item_id;
     } else {
         item_id = find_result->common_item_id;
@@ -154,13 +154,13 @@ static s32 battle_map_test_or_set_move_find_item_flag(s32 map_id, s32 tile_index
     s32 bit = 0x80 >> (((map_id & 1) * 4) + tile_index);
 
     if (save == 0) {
-        return (g_main_item_location_flags[byte_index] & bit) == 0;
+        return (g_item_location_flags[byte_index] & bit) == 0;
     }
-    g_main_item_location_flags[byte_index] = bit | g_main_item_location_flags[byte_index];
+    g_item_location_flags[byte_index] = bit | g_item_location_flags[byte_index];
     return 1;
 }
 
-/* Resolve what a moving unit picks up on its tile into g_main_crystal_pickup_result: NONE with no
+/* Resolve what a moving unit picks up on its tile into g_crystal_pickup_result: NONE with no
  * crystal or treasure there; TREASURE and a generated item for a treasure; otherwise CRYSTAL, and
  * when neither unit is a monster, each action ability the crystal knows and the mover does not (in
  * the mover's unlocked jobs, and the special job only for the same character) is learned on a roll
@@ -189,20 +189,20 @@ crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover)
     crystal_index = battle_unit_find_at_tile(mover->x, mover->position.y, mover->position.higher_elevation,
         BATTLE_UNIT_TILE_FILTER_CRYSTAL | BATTLE_UNIT_TILE_FILTER_TREASURE);
     if (crystal_index < 0) {
-        g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_NONE;
-        return &g_main_crystal_pickup_result;
+        g_crystal_pickup_result.result = CRYSTAL_PICKUP_NONE;
+        return &g_crystal_pickup_result;
     }
-    g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_NOTHING;
-    g_main_crystal_pickup_result.unit_index = crystal_index;
+    g_crystal_pickup_result.result = CRYSTAL_PICKUP_NOTHING;
+    g_crystal_pickup_result.unit_index = crystal_index;
     crystal = &g_battle_unit_stats[crystal_index];
     if (crystal->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
-        g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_TREASURE;
-        g_main_crystal_pickup_result.treasure_item = battle_unit_generate_treasure(crystal);
+        g_crystal_pickup_result.result = CRYSTAL_PICKUP_TREASURE;
+        g_crystal_pickup_result.treasure_item = battle_unit_generate_treasure(crystal);
     } else {
         /* The empty loops are measured residue: without them the code differs. */
         do {
             do {
-                g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_CRYSTAL;
+                g_crystal_pickup_result.result = CRYSTAL_PICKUP_CRYSTAL;
             } while (0);
         } while (0);
         mover_flags = mover->unit_flags;
@@ -213,11 +213,10 @@ crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover)
                 + mover->career.unlocked_jobs[2];
             mover_identity = mover->character_identity;
             crystal_identity = crystal->character_identity;
-            main_mem_zero(
-                g_main_crystal_pickup_result.learned_abilities, sizeof(g_main_crystal_pickup_result.learned_abilities));
+            mem_zero(g_crystal_pickup_result.learned_abilities, sizeof(g_crystal_pickup_result.learned_abilities));
             for (job_index = UNIT_CAREER_JOB_INDEX_BASE; job_index < UNIT_LEARNED_ABILITY_JOB_COUNT; job_index++) {
                 for (j = 0; j < UNIT_LEARNED_ABILITY_BYTES_PER_JOB; j++) {
-                    g_main_crystal_pickup_result.learned[job_index][j] = 0;
+                    g_crystal_pickup_result.learned[job_index][j] = 0;
                     gained[j] = 0;
                     known[j] = mover->career.learned_abilities[job_index][j];
                     offered[j] = crystal->career.learned_abilities[job_index][j];
@@ -239,46 +238,45 @@ crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover)
                 if (job_index == UNIT_CAREER_JOB_INDEX_DANCER && (mover_flags & UNIT_FLAG_MALE)) {
                     continue;
                 }
-                skillset = g_main_job_data_pointer[job_id].skillset;
+                skillset = g_job_data_pointer[job_id].skillset;
                 /* Learned bits run MSB first in the job's three bytes; the
                  * result's learned_abilities set is indexed by ability id, LSB first. */
                 for (j = 0; j < SKILLSET_ABILITY_LIST_COUNT; j++) {
                     byte_index = j / 8;
                     mask = 0x80 >> (j - byte_index * 8);
                     if (!(known[byte_index] & mask) && (offered[byte_index] & mask)) {
-                        ability = main_ability_get_id_from_skillset(skillset, j);
+                        ability = ability_get_id_from_skillset(skillset, j);
                         ability_id = ability;
-                        if (ability_id != 0
-                            && main_util_roll_pass_fail(100, g_main_ability_data[ability_id].learn_rate) == 0) {
+                        if (ability_id != 0 && random_roll_pass_fail(100, g_ability_data[ability_id].learn_rate) == 0) {
                             gained[byte_index] = mask | gained[byte_index];
                             learned_count++;
                             if (ability_id < ABILITY_ID_COUNT) {
-                                g_main_crystal_pickup_result.learned_abilities[ability_id >> 3] = (1 << (ability & 7))
-                                    | g_main_crystal_pickup_result.learned_abilities[ability_id >> 3];
+                                g_crystal_pickup_result.learned_abilities[ability_id >> 3]
+                                    = (1 << (ability & 7)) | g_crystal_pickup_result.learned_abilities[ability_id >> 3];
                             }
                         }
                     }
                 }
                 for (j = 0; j < UNIT_LEARNED_ABILITY_BYTES_PER_JOB; j++) {
-                    g_main_crystal_pickup_result.learned[job_index][j] = gained[j];
+                    g_crystal_pickup_result.learned[job_index][j] = gained[j];
                 }
             }
             if (learned_count != 0) {
-                g_main_crystal_pickup_result.result |= CRYSTAL_PICKUP_LEARNED;
+                g_crystal_pickup_result.result |= CRYSTAL_PICKUP_LEARNED;
             }
         }
     }
-    return &g_main_crystal_pickup_result;
+    return &g_crystal_pickup_result;
 }
 
 /* Fill a unit's action result for picking up a crystal or treasure
  * (BATTLE_CRYSTAL_* flags).
  *
  * The result starts as a canceled miss. TAKE_TREASURE adds
- * g_main_crystal_treasure_item_id to the inventory and returns that call's
+ * g_crystal_treasure_item_id to the inventory and returns that call's
  * result, ignoring the other flags. RESTORE_HP_MP turns the result into a hit
  * that heals the missing HP and MP. LEARN_ABILITIES ORs
- * g_main_crystal_learnable_abilities into the unit's learned-ability bits. These
+ * g_crystal_learnable_abilities into the unit's learned-ability bits. These
  * return 0. */
 s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags) {
     s32 i;
@@ -292,7 +290,7 @@ s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags) {
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
     if (flags & BATTLE_CRYSTAL_TAKE_TREASURE) {
-        return battle_action_give_item(unit, g_main_crystal_treasure_item_id);
+        return battle_action_give_item(unit, g_crystal_treasure_item_id);
     }
     if (flags & BATTLE_CRYSTAL_RESTORE_HP_MP) {
         unit->action.hit = 1;
@@ -305,7 +303,7 @@ s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags) {
         /* OR the crystal's ability bits into learned_abilities, three bytes
          * per job for 19 jobs; walked as raw bytes to keep the biased pointers. */
         i = 0;
-        src = g_main_crystal_learnable_abilities;
+        src = g_crystal_learnable_abilities;
         dst = (u8*)unit;
         do {
             learned = dst + 0x99;
@@ -421,7 +419,7 @@ s32 battle_unit_find_slot_by_character_identity(u32 character_identity) {
         }
     }
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-        party = main_party_get_unit(i);
+        party = party_get_unit(i);
         if (party->party_id != PARTY_ID_NONE && party->sprite_set == identity) {
             return BATTLE_CHARACTER_SLOT_IN_PARTY;
         }
@@ -553,8 +551,8 @@ void battle_status_clear_all(unit_stats_t* unit) {
             battle_status_queue_runtime_graphics_flag_change(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
     }
-    main_mem_zero(unit->status_sets.innate, 0x1F);
-    main_mem_zero(unit->inflicted_status, STATUS_BYTE_COUNT);
+    mem_zero(unit->status_sets.innate, 0x1F);
+    mem_zero(unit->inflicted_status, STATUS_BYTE_COUNT);
 }
 
 /* Enable the renderer status flags for each of a unit's current statuses.
@@ -764,7 +762,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
     if (primary >= SKILLSET_ID_MONSTER_FIRST || secondary >= SKILLSET_ID_MONSTER_FIRST) {
         entries[0] = primary;
         empty[0] = 0;
-        menu_types[0] = g_main_action_menu_types_by_skillset[primary];
+        menu_types[0] = g_command_menu_types_by_skillset[primary];
         entries[1] = SKILLSET_ID_NONE;
         return 1;
     }
@@ -797,7 +795,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
         if (id == SKILLSET_ID_NONE) {
             break;
         }
-        menu_type = g_main_action_menu_types_by_skillset[id] & 0xf;
+        menu_type = g_command_menu_types_by_skillset[id] & 0xf;
         menu_types[i] = menu_type;
         if (battle_menu_load_skillset(unit_id, id, menu_type) == 0) {
             empty[i] = 1;

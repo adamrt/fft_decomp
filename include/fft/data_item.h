@@ -12,7 +12,7 @@
  * type's items ("Ninja sword", "Hammer", "Dictionary", "Spear", "Stick",
  * "Clothes", "Gauntlet", "Mantle", "Women's ribbon"; INSTRUMENT is "Mus inst"
  * there) or, for the two thrown types, the name of the Throw ability that
- * g_main_throw_ability_item_types maps to it. */
+ * g_ability_throw_item_types maps to it. */
 typedef enum item_type {
     ITEM_TYPE_UNARMED = 0,
     ITEM_TYPE_KNIFE = 1,
@@ -77,7 +77,7 @@ enum {
     ITEM_TYPE_FILTER_ANY = 255,
 };
 
-/* Item ids index the 256 rows of g_main_item_primary_data. A name is the
+/* Item ids index the 256 rows of g_item_primary_data. A name is the
  * item's name in the game's text; the second Javelin and the second
  * Escutcheon, which repeat a name and are never sold, end in _RARE. Item 0 is
  * Nothing, the unarmed item record. Rows 0xfe and 0xff otherwise contain zero
@@ -446,7 +446,7 @@ typedef enum weapon_flag {
 } weapon_flag_e;
 
 /* Weapon record selected by item_data_t.secondary_data_id. Offsets are fixed
- * by main_unit_set_equipment_stats and main_unit_calculate_entd_equipment. */
+ * by unit_set_equipment_stats and unit_calculate_encounter_equipment. */
 typedef struct weapon_data {
     u8 range;      /* 0x00 */
     u8 flags;      /* 0x01; weapon_flag_e */
@@ -459,7 +459,7 @@ typedef struct weapon_data {
 } weapon_data_t;
 typedef char weapon_data_size_must_be_8[(sizeof(weapon_data_t) == 8) ? 1 : -1];
 
-/* Three-byte item ability records, g_main_item_secondary_data. Item abilities
+/* Three-byte item ability records, g_item_secondary_data. Item abilities
  * select these records directly; formula handlers use z and ability setup uses
  * the status infliction id. */
 typedef struct item_secondary_data {
@@ -498,7 +498,7 @@ typedef enum unit_attribute_index {
     UNIT_ATTRIBUTE_COUNT = 3,
 } unit_attribute_index_e;
 
-/* 25-byte item Attribute record (g_main_item_attributes). MAIN applies these
+/* 25-byte item Attribute record (g_item_attributes). MAIN applies these
  * bonuses to battle units; WORLD's item_collect_stat_deltas reads the same
  * first five bytes for equipment previews. */
 typedef struct item_attribute {
@@ -521,8 +521,8 @@ typedef struct item_attribute_flat {
     u8 elemental_affinity[5];
 } item_attribute_flat_t;
 
-/* g_main_item_type_order_tables: seven independent signed-byte order lists.
- * main_item_init_order_tables establishes capacities 12/8/8/8/8/8/8 with -1
+/* g_item_type_order_tables: seven independent signed-byte order lists.
+ * item_init_order_tables establishes capacities 12/8/8/8/8/8/8 with -1
  * terminators; member categories remain unproven. */
 typedef struct item_type_order_tables {
     s8 order_0[12];

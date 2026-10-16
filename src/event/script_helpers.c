@@ -210,22 +210,22 @@ void menu_clear_modal_open(void) {
 
 /* Queue the confirm sound; the frame update plays the pending effect. */
 void sound_queue_sfx_confirm(void) {
-    g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+    g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
 }
 
 /* Queue the cancel sound; the frame update plays the pending effect. */
 void sound_queue_sfx_cancel(void) {
-    g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
+    g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
 }
 
 /* Queue the cursor-move sound; the frame update plays the pending effect. */
 void sound_queue_sfx_cursor_move(void) {
-    g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
+    g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
 }
 
 /* Queue the invalid-choice sound; the frame update plays the pending effect. */
 void sound_queue_sfx_invalid(void) {
-    g_sound_pending_sfx_id = MAIN_SFX_INVALID;
+    g_sound_pending_sfx_id = SOUND_SFX_INVALID;
 }
 
 /* Menu thread for a refused command: queue the invalid-choice sound and exit. */
@@ -364,7 +364,7 @@ void script_update_event_input_state(u32 input) {
         g_script_event_input = ~previous_input & input;
         g_script_event_initial_repeat_counter = 0;
     } else {
-        initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
+        initial_delay = g_input_repeat_initial_delay / g_script_event_speed;
         counter = ++g_script_event_initial_repeat_counter;
         if (counter == initial_delay) {
             g_script_event_input = filtered_input;
@@ -372,7 +372,7 @@ void script_update_event_input_state(u32 input) {
         if (counter >= initial_delay) {
             counter = ++g_script_event_repeat_counter;
             g_script_event_secondary_repeat_counter++;
-            repeat_delay = g_main_input_repeat_period / g_script_event_speed;
+            repeat_delay = g_input_repeat_period / g_script_event_speed;
             if (counter >= repeat_delay) {
                 g_script_event_repeat_counter = 0;
                 if ((input & PSX_PAD_SQUARE) != 0) {
@@ -381,7 +381,7 @@ void script_update_event_input_state(u32 input) {
                     g_script_event_input = input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
                 }
             }
-            secondary_repeat_delay = g_main_input_secondary_repeat_period;
+            secondary_repeat_delay = g_input_secondary_repeat_period;
             {
                 s32 event_speed;
                 event_speed = g_script_event_speed;
@@ -887,7 +887,7 @@ void* menu_alloc_memory(s32 size) {
             }
         }
     fail:
-        if (g_main_font_print_enabled != 0) {
+        if (g_debug_font_print_enabled != 0) {
             FntPrint(g_text_wait_for_allocation_message, g_thread_current_id, size);
         }
         thread_yield();
@@ -912,7 +912,7 @@ void menu_free_memory(void* buffer_pointer) {
     s32 invalid_buffer;
     s32 page;
 
-    if (buffer < (u32)g_main_heap_companion_overlay_load_address && buffer != -1) {
+    if (buffer < (u32)g_heap_companion_overlay_load_address && buffer != -1) {
         invalid_buffer = -1;
         grid_base = (buffer - (u32)g_menu_buffer_arena) >> 8;
         allocation_grid = g_menu_buffer_allocation_map;

@@ -124,9 +124,9 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     tutorial = -(tutorial < 11) & tutorial;
     tutorial_start(tutorial);
     if (tutorial == 0) {
-        g_screen_music_slot = main_sound_open_music_into_free_slot(MAIN_MUSIC_FORMATION);
-        while (main_sound_is_music_loading_stub() != 0) { }
-        main_sound_switch_music_track(g_screen_music_slot, 0x7F, 0);
+        g_screen_music_slot = music_open_into_free_slot(MUSIC_FORMATION);
+        while (music_is_loading_stub() != 0) { }
+        music_switch_track(g_screen_music_slot, 0x7F, 0);
     }
 
     if (g_formation_screen_running != 0) {
@@ -179,9 +179,9 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 }
                 formation_cycle_selected_unit(buttons);
                 menu_draw_pressable_button(
-                    MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1, i, MAIN_SFX_PAGE_SWITCH);
+                    MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1, i, SOUND_SFX_PAGE_SWITCH);
                 menu_draw_pressable_button(
-                    MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1, i, MAIN_SFX_PAGE_SWITCH);
+                    MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1, i, SOUND_SFX_PAGE_SWITCH);
             }
 
             if (g_formation_current_menu != FORMATION_MENU_ITEM_REMOVE) {
@@ -220,7 +220,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 last_menu = g_formation_current_menu;
             }
             screen_sound_dispatch_effect();
-            main_sound_update_tunes();
+            music_update_tunes();
         } while (g_formation_screen_running != 0);
     }
 
@@ -241,7 +241,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     } while (buttons != 0);
 
     if (tutorial == 0) {
-        main_sound_unload_scenario_mus(g_screen_music_slot);
+        music_unload_scenario_slot(g_screen_music_slot);
     }
     formation_save_records();
     formation_stop_panels();
@@ -253,36 +253,36 @@ void formation_run_screen(s32 tutorial, s32 unused) {
  * plays at once on a free channel pair, as does an error message sound in
  * the menu queue. Then the id in g_sound_pending_sfx_id (dropped
  * when negative or while the menu sounds are muted), or failing that the one
- * in g_sound_queued_effect_id, plays on the main_sound_play_sfx channels
+ * in g_sound_queued_effect_id, plays on the sound_play_sfx channels
  * and both queues are cleared. Cancel and Cursor Move are copied to the menu
  * queue before the mute test, so they still play while muted. */
 void screen_sound_dispatch_effect(void) {
     s32 sound_id;
 
     if (g_screen_sound_release_held_loop != 0) {
-        g_sound_queued_effect_id = MAIN_SFX_NONE;
+        g_sound_queued_effect_id = SOUND_SFX_NONE;
     }
-    if (g_sound_pending_sfx_id == MAIN_SFX_TEXT_GLYPH || g_sound_pending_sfx_id == MAIN_SFX_TEXT_PAGE) {
-        main_sound_play_sfx_find_channel(g_sound_pending_sfx_id);
-        g_sound_pending_sfx_id = MAIN_SFX_NONE;
-    } else if (g_sound_queued_effect_id == MAIN_SFX_ERROR_MESSAGE) {
-        main_sound_play_sfx_find_channel(MAIN_SFX_ERROR_MESSAGE);
-        g_sound_queued_effect_id = MAIN_SFX_NONE;
+    if (g_sound_pending_sfx_id == SOUND_SFX_TEXT_GLYPH || g_sound_pending_sfx_id == SOUND_SFX_TEXT_PAGE) {
+        sound_play_sfx_on_free_channel(g_sound_pending_sfx_id);
+        g_sound_pending_sfx_id = SOUND_SFX_NONE;
+    } else if (g_sound_queued_effect_id == SOUND_SFX_ERROR_MESSAGE) {
+        sound_play_sfx_on_free_channel(SOUND_SFX_ERROR_MESSAGE);
+        g_sound_queued_effect_id = SOUND_SFX_NONE;
     }
-    if (g_sound_pending_sfx_id == MAIN_SFX_CANCEL || g_sound_pending_sfx_id == MAIN_SFX_CURSOR_MOVE) {
+    if (g_sound_pending_sfx_id == SOUND_SFX_CANCEL || g_sound_pending_sfx_id == SOUND_SFX_CURSOR_MOVE) {
         g_sound_queued_effect_id = g_sound_pending_sfx_id;
     }
     if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
-        g_sound_pending_sfx_id = MAIN_SFX_NONE;
+        g_sound_pending_sfx_id = SOUND_SFX_NONE;
     }
     sound_id = g_sound_pending_sfx_id;
-    if (sound_id == MAIN_SFX_NONE) {
+    if (sound_id == SOUND_SFX_NONE) {
         sound_id = g_sound_queued_effect_id;
     }
-    g_sound_queued_effect_id = MAIN_SFX_NONE;
-    g_sound_pending_sfx_id = MAIN_SFX_NONE;
-    if (sound_id != MAIN_SFX_NONE) {
-        main_sound_play_sfx(sound_id);
+    g_sound_queued_effect_id = SOUND_SFX_NONE;
+    g_sound_pending_sfx_id = SOUND_SFX_NONE;
+    if (sound_id != SOUND_SFX_NONE) {
+        sound_play_sfx(sound_id);
     }
 }
 
@@ -406,7 +406,7 @@ void formation_grid_menu(void) {
                     if (g_screen_selection_results[0] == 0) {
                         formation_dismiss(g_unit_selected_index);
                         g_formation_main_menu_initialized = 0;
-                        g_sound_queued_effect_id = MAIN_SFX_DISMISS;
+                        g_sound_queued_effect_id = SOUND_SFX_DISMISS;
                     }
                     g_formation_egg_submenu.selected_index = 0;
                     screen_reset_selection_results();
@@ -479,12 +479,12 @@ void formation_grid_menu(void) {
                     g_formation_triangle_menu_running = 1;
                     g_formation_triangle_menu_open = 1;
                     if ((input & PSX_PAD_TRIANGLE) || (input & PSX_PAD_START)) {
-                        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+                        g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                     }
                 } else if (input & PSX_PAD_CIRCLE) {
                     if (g_formation_unit_browse_enabled != 0) {
                         if (g_formation_unit_pointers[g_unit_selected_index]->uses_monster_skillset != 0) {
-                            g_sound_queued_effect_id = MAIN_SFX_INVALID;
+                            g_sound_queued_effect_id = SOUND_SFX_INVALID;
                         } else {
                             g_formation_main_menu_initialized = 0;
                             g_formation_current_menu = FORMATION_MENU_VIEW_ABILITIES;
@@ -494,8 +494,8 @@ void formation_grid_menu(void) {
 
                 if (g_formation_unit_browse_enabled == 0 && (input & PSX_PAD_CROSS) && g_tutorial_id == 0) {
                     screen_fade_start_increasing();
-                    main_sound_set_current_music_target(0, 0xF0);
-                    g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+                    music_set_target(0, 0xF0);
+                    g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                 }
             }
         }
@@ -759,14 +759,14 @@ void formation_recalculate_selected_stats(void) {
 
     g_formation_selected_unit_index_latch = g_unit_selected_index;
     roster_slot = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
-    main_unit_init_from_party_slot(&unit, roster_slot, 1);
+    unit_init_from_party_slot(&unit, roster_slot, 1);
     for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
         unit.equipment[i] = ITEM_ID_NONE;
     }
     item = g_formation_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
         & ITEM_ENTRY_ID_MASK;
     if (item != ITEM_ID_NOTHING) {
-        if (g_main_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
+        if (g_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
             unit.equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = item;
         } else {
             unit.equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item;
@@ -775,7 +775,7 @@ void formation_recalculate_selected_stats(void) {
     item = g_formation_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]
         & ITEM_ENTRY_ID_MASK;
     if (item != ITEM_ID_NOTHING) {
-        if (g_main_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
+        if (g_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
             unit.equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = item;
         } else {
             unit.equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = item;
@@ -793,8 +793,8 @@ void formation_recalculate_selected_stats(void) {
             unit.equipment[i] = ITEM_ID_NONE;
         }
     }
-    main_unit_update_formation_stats(&unit);
-    formation_build_unit_record(&unit, &record, main_party_get_unit(roster_slot));
+    unit_update_formation_stats(&unit);
+    formation_build_unit_record(&unit, &record, party_get_unit(roster_slot));
     bcopy(g_formation_unit_pointers[g_unit_selected_index]->equipment, record.equipment, sizeof(record.equipment));
     record.two_handed = unit_is_two_handing_weapon(
         (s16*)record.equipment, record.support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);

@@ -150,7 +150,7 @@ void formation_job_wheel_menu(void) {
         g_formation_job_change_anim_state
             = formation_job_step_change(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
         if (g_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_DONE) {
-            i = g_main_game_options.value & GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK;
+            i = g_game_options.value & GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK;
             formation_job_change(
                 g_unit_selected_index, g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index], i == 0);
             formation_stage_selected_unit();
@@ -220,7 +220,7 @@ void formation_job_wheel_menu(void) {
             g_formation_unit_cycle_mode = 2;
         }
         if (g_menu_input_secondary_repeat & PSX_PAD_SQUARE) {
-            g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+            g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
             if (banner != 0) {
                 g_formation_unit_banner_enabled = 0;
                 g_formation_unit_cycle_mode = 0;
@@ -253,13 +253,13 @@ void formation_job_wheel_menu(void) {
                     i = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
                     formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
                     g_unit_selected_index = formation_find_by_roster_slot(i);
-                    g_sound_queued_effect_id = MAIN_SFX_CANCEL;
+                    g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                     g_formation_job_wheel_job_selected = 1;
                     g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_LEAVE;
                     g_formation_unit_browse_enabled = g_formation_job_wheel_saved_browse_enabled;
                 } else if (g_formation_job_wheel_job_count < 2) {
                     if (pad & PSX_PAD_CIRCLE) {
-                        g_sound_queued_effect_id = MAIN_SFX_INVALID;
+                        g_sound_queued_effect_id = SOUND_SFX_INVALID;
                     }
                 } else {
                     /* The primary repeat's high half flags buttons held past the repeat delay. */
@@ -267,11 +267,11 @@ void formation_job_wheel_menu(void) {
                     if ((buttons & PSX_PAD_RIGHT) || ((pad >>= 16) & PSX_PAD_RIGHT)) {
                         g_formation_job_wheel_spin_progress = 1;
                         g_formation_job_wheel_spin_direction = 1;
-                        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
                     } else if ((buttons & PSX_PAD_LEFT) || (pad & PSX_PAD_LEFT)) {
                         g_formation_job_wheel_spin_progress = 1;
                         g_formation_job_wheel_spin_direction = -1;
-                        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+                        g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
                     }
 
                     if (g_menu_input_secondary_repeat & PSX_PAD_CIRCLE) {
@@ -292,10 +292,10 @@ void formation_job_wheel_menu(void) {
                             message_box_show_with_sound(
                                 formation_job_get_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK)
                                     + WORLD_TEXT_ID_FORMATION_TEXT_BASE,
-                                MAIN_SFX_ERROR_MESSAGE);
+                                SOUND_SFX_ERROR_MESSAGE);
                             g_menu_status_display_thread_params.style = 1;
                         } else {
-                            g_sound_queued_effect_id = MAIN_SFX_INVALID;
+                            g_sound_queued_effect_id = SOUND_SFX_INVALID;
                         }
                     }
 
@@ -304,7 +304,7 @@ void formation_job_wheel_menu(void) {
                             i = formation_job_get_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK);
                             if (i >= 0) {
                                 message_box_show_with_sound(
-                                    i + WORLD_TEXT_ID_FORMATION_TEXT_BASE, MAIN_SFX_WINDOW_OPEN);
+                                    i + WORLD_TEXT_ID_FORMATION_TEXT_BASE, SOUND_SFX_WINDOW_OPEN);
                                 g_menu_status_display_thread_params.style = 1;
                             }
                         }
@@ -453,18 +453,18 @@ static s32 formation_job_step_change(s32 job) {
     s32 line_x;
 
     if (g_formation_job_change_active == 0) {
-        main_sound_play_tune(MAIN_SOUND_TUNE_JOB_CHANGE);
+        music_play_tune(MUSIC_TUNE_JOB_CHANGE);
         g_formation_job_change_active = 1;
         g_formation_job_change_frame = 0;
         g_formation_job_change_skip_requested = 0;
         menu_input_clear_state();
-        g_formation_job_change_old_sprite_image = main_heap_alloc(0x1e0);
+        g_formation_job_change_old_sprite_image = heap_alloc(0x1e0);
         gfx_store_image_and_wait(&g_formation_job_change_old_sprite_rect, g_formation_job_change_old_sprite_image);
-        g_formation_job_change_new_sprite_image = main_heap_alloc(0x1e0);
+        g_formation_job_change_new_sprite_image = heap_alloc(0x1e0);
         memset(g_formation_job_change_new_sprite_image, 0, 0x1e0);
         formation_job_change(FORMATION_PREVIEW_UNIT_INDEX, job, 0);
         formation_build_unit_graphic(FORMATION_PREVIEW_UNIT_INDEX, &scratch.entry, 0);
-        g_formation_job_change_new_sprite_source = main_heap_alloc(0x1e0);
+        g_formation_job_change_new_sprite_source = heap_alloc(0x1e0);
         if (scratch.entry.tpage == 100) {
             rect.x = (scratch.entry.u >> 2) + 0x100;
         } else {
@@ -475,7 +475,7 @@ static s32 formation_job_step_change(s32 job) {
         rect.h = scratch.entry.h;
         g_formation_job_wheel_new_portrait_quad.clut = scratch.entry.clut;
         gfx_store_image_and_wait(&rect, g_formation_job_change_new_sprite_source);
-        g_formation_job_change_dissolve_order = main_heap_alloc(0x3c0);
+        g_formation_job_change_dissolve_order = heap_alloc(0x3c0);
         for (i = 479; i >= 0; i--) {
             g_formation_job_change_dissolve_order[i] = i;
         }
@@ -526,7 +526,7 @@ static s32 formation_job_step_change(s32 job) {
     if (g_formation_job_change_skip_requested != 0) {
         if (g_formation_job_change_frame >= 40 && g_formation_job_change_frame <= 220) {
             g_formation_job_change_frame = 220;
-            main_sound_set_tune_volume(0x46);
+            music_set_tune_volume(0x46);
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
         g_formation_job_change_skip_requested = 1;
@@ -537,10 +537,10 @@ static s32 formation_job_step_change(s32 job) {
     if (g_formation_job_change_frame < 240) {
         return FORMATION_JOB_CHANGE_ANIM_CLOSING;
     }
-    main_heap_free(g_formation_job_change_old_sprite_image);
-    main_heap_free(g_formation_job_change_new_sprite_image);
-    main_heap_free(g_formation_job_change_new_sprite_source);
-    main_heap_free(g_formation_job_change_dissolve_order);
+    heap_free(g_formation_job_change_old_sprite_image);
+    heap_free(g_formation_job_change_new_sprite_image);
+    heap_free(g_formation_job_change_new_sprite_source);
+    heap_free(g_formation_job_change_dissolve_order);
     g_formation_job_change_active = 0;
     return FORMATION_JOB_CHANGE_ANIM_DONE;
 }
@@ -650,7 +650,7 @@ static void formation_job_update_wheel(void) {
             step = g_formation_job_wheel_open_frame;
             g_formation_job_wheel_unit_index = g_unit_selected_index;
             formation_job_build_wheel_availability();
-            g_formation_job_wheel_open_frame = step + g_main_input_secondary_repeat_period / menu_get_event_speed();
+            g_formation_job_wheel_open_frame = step + g_input_secondary_repeat_period / menu_get_event_speed();
             if (g_formation_job_wheel_open_frame >= 0x11) {
                 g_formation_job_wheel_open_frame = 0x10;
             }

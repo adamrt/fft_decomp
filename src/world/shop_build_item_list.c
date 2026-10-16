@@ -48,8 +48,7 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
     u16 primary_category;
     u16 secondary_category;
 
-    if (mode == ITEM_LIST_MODE_MARK_UNEQUIPPABLE
-        && g_main_game_options.fields.show_unequippable_items != GAME_OPTION_ON) {
+    if (mode == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && g_game_options.fields.show_unequippable_items != GAME_OPTION_ON) {
         mode = ITEM_LIST_MODE_EQUIPPABLE;
     }
 
@@ -97,7 +96,7 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
                     & shop_mask)) {
                 continue;
             }
-            if (progression < g_main_item_primary_data[item_id].shop_availability) {
+            if (progression < g_item_primary_data[item_id].shop_availability) {
                 continue;
             }
             if (mode != ITEM_LIST_MODE_ALL) {

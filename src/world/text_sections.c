@@ -859,7 +859,7 @@ static s32 g_tutorial_script_files[7 * 2]
 /* Load shop background image `index` to the heap; the table holds a sector
  * and a size per image. */
 u32* shop_load_background(s32 index) {
-    return main_file_load_checked_to_heap(
+    return file_load_checked_to_heap(
         g_shop_background_tim_files[index * 2], g_shop_background_tim_files[(index * 2) + 1]);
 }
 
@@ -907,7 +907,7 @@ void tutorial_load_files(s32 index, tutorial_state_t* record) {
     s32 slot = index - 1;
 
     record->messages
-        = main_file_load_checked_to_heap(g_tutorial_message_files[slot * 2], g_tutorial_message_files[(slot * 2) + 1]);
+        = file_load_checked_to_heap(g_tutorial_message_files[slot * 2], g_tutorial_message_files[(slot * 2) + 1]);
     record->script
-        = main_file_load_checked_to_heap(g_tutorial_script_files[slot * 2], g_tutorial_script_files[(slot * 2) + 1]);
+        = file_load_checked_to_heap(g_tutorial_script_files[slot * 2], g_tutorial_script_files[(slot * 2) + 1]);
 }

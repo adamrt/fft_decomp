@@ -16,7 +16,7 @@ void menu_script_run(menu_instruction_t* instruction, s32 flags) {
     g_menu_gfx_otag_index = 0;
     g_menu_gfx_semitransparency = 0;
     g_menu_script_input = flags;
-    while (instruction->header.opcode != JOBSTTS_CMD_END) {
+    while (instruction->header.opcode != STATUS_SCREEN_SCRIPT_END) {
         instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
     }
     if (g_gfx_transition_frame < 10) {
@@ -25,7 +25,7 @@ void menu_script_run(menu_instruction_t* instruction, s32 flags) {
 }
 
 /* Select the palette set for `event_mode` and run the command stream. */
-void jobstts_menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode) {
+void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode) {
     menu_set_palette_mode(event_mode);
     menu_script_run(script, flags);
 }
