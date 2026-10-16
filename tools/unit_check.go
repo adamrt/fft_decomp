@@ -331,7 +331,7 @@ func unitLinkerScriptSkipping(unit *unitInstance, bindings map[string]uint32, as
 		fmt.Fprintf(&script, "  .rodata 0x%x : SUBALIGN(4) { *(.rodata) *(.rdata) }\n", unit.rodata[0].Addr)
 	}
 	fmt.Fprintf(&script, "  .text 0x%x : SUBALIGN(4) { *(.text) }\n", unit.addr)
-	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) }\n}\n")
+	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) *(.MIPS.abiflags) }\n}\n")
 	if assert {
 		for _, f := range unit.members {
 			if static[f.Name] {

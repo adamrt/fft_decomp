@@ -162,7 +162,7 @@ func TestUnitLinkerBindingsAndScript(t *testing.T) {
 		"PROVIDE(memset = 0x80010200);\n" +
 		"SECTIONS {\n" +
 		"  .text 0x80067000 : SUBALIGN(4) { *(.text) }\n" +
-		"  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) }\n}\n" +
+		"  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) *(.MIPS.abiflags) }\n}\n" +
 		"ASSERT(unit_a == 0x80067000, \"unit_a must begin at 0x80067000\");\n" +
 		"ASSERT(unit_b == 0x80067020, \"unit_b must begin at 0x80067020\");\n"
 	if script != want {
