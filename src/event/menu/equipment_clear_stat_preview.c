@@ -1,6 +1,8 @@
 /* Clearing the HP and MP preview bonuses and the equipment detail stats. */
 
-#include "fft/menu_status.h"
+#include "fft/equipment.h"
+#include "fft/menu.h"
+#include "fft/unit_panel.h"
 
 /* Clear the HP/MP preview bonuses and equipment-detail stats. */
 void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail) {

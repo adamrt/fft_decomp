@@ -1,12 +1,13 @@
 /* Fullscreen graphics for the chapter title and game over screens. */
 
-#include "fft/event_etc.h"
+#include "fft/file.h"
+#include "fft/fullscreen_graphic.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
-#include "fft/main_file.h"
-#include "fft/main_sound.h"
+#include "fft/memory.h"
+#include "fft/music.h"
 #include "fft/script.h"
+#include "fft/system.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

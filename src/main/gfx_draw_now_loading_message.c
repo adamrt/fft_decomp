@@ -1,7 +1,8 @@
 /* The blinking Now Loading message drawn while a read is unfinished. */
 
-#include "fft/main_file.h"
-#include "fft/main_gfx.h"
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/system.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

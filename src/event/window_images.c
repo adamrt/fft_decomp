@@ -1,9 +1,7 @@
 /* Byte copies, packed nibble access, 4bpp rect mirroring and pixel access, and window image and frame image building
  * and upload. */
 
-#include "fft/battle_menu.h"
 #include "fft/gfx.h"
-#include "fft/main_file.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"

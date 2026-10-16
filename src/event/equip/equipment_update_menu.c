@@ -1,18 +1,17 @@
 /* One frame of the equipment menu's state machine. */
 
-#include "fft/data_item.h"
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
 #include "fft/gfx_image.h"
+#include "fft/input.h"
 #include "fft/item.h"
-#include "fft/main_sound.h"
+#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
-#include "fft/menu_overlay.h"
-#include "fft/menu_panel.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 /* Runs one frame of the equipment menu state machine.

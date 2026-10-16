@@ -6,7 +6,6 @@
 
 #include "psx/types.h"
 
-/* input ownership */
 /* The controller or tutorial event that drives the scene menus. */
 typedef enum menu_input_mode {
     MENU_INPUT_PLAYER = 0,   /* the controller */
@@ -16,25 +15,29 @@ typedef enum menu_input_mode {
 } menu_input_mode_e;
 
 extern u16 g_menu_input_mode; /* menu_input_mode_e */
+
 /* Modal/message ownership suppresses menu input and dims palettes. */
 extern s32 g_menu_input_lock_mode;
+
 /* Nonzero while a modal selection, panel or companion overlay owns the input; the companion overlay openers
  * set it before loading and the overlay loaders clear it once the overlay is torn down. */
 extern u16 g_menu_modal_open;
+
 /* Frames left before menu input is accepted again; the frame update counts it down. */
 extern u16 g_menu_input_block_frames;
 
 void menu_set_modal_open(void);
 void menu_clear_modal_open(void);
+
 /* 1 when a menu thread may act on input: no previous thread running, no stop request, the input not locked,
  * no help window open and no block frames left. In WORLD an open Help box also blocks input for five frames. */
 s32 menu_can_accept_input(void);
+
 /* Clears the input while it is locked or a help window is open; returns 1 once this thread has a stop request
  * (parameter 3) and no other running thread does. WORLD's body also opens the entry's announcement text on
  * SELECT. */
 s32 menu_should_close_thread(u32* input);
 
-/* event input */
 /* menu_input_update_event_state runs once per frame: it derives the event input from the controller, with
  * edge detection and key repeat, and yields. WORLD, BUNIT and CARD build full bodies, BUNIT's and CARD's
  * keeping their state in the g_input_* globals; ATTACK, DEBUGCHR, EQUIP and REQUIRE link an empty one. */
@@ -46,29 +49,15 @@ typedef struct menu_input_state {
     u32 repeat_counter;           /* 0x10 */
     u32 secondary_repeat_counter; /* 0x14 */
 } menu_input_state_t;
+
 typedef char menu_input_state_size_must_be_24[sizeof(menu_input_state_t) == 24 ? 1 : -1];
-
-extern u32* g_input_controller;
-extern u32 g_input_current;
-extern u32 g_input_current_buttons;
-extern u32 g_input_event;
-extern u32 g_input_polled_buttons;
 extern u32 g_previous_input;
-extern u8 g_input_activation_timer;
-extern u8 g_input_lock_timer;
-extern u32 g_input_initial_repeat_counter;
-extern u32 g_input_repeat_counter;
-extern u32 g_input_secondary_repeat_counter;
-extern s32 g_input_repeat_counters[16];
-extern u8 g_input_page_scroll_disabled;
-extern u16 g_input_page_scroll_hold_frames;
-
 void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame);
 
-/* menu controller */
 /* menu_input_update_controller publishes the newly pressed buttons and two repeat rates for the menus, with
  * one repeat counter per button. */
 extern u32* g_menu_input_controller;
+
 extern u16 g_menu_input_newly_pressed;
 extern u16 g_menu_input_previous;
 extern u16 g_menu_input_latched_button;
@@ -76,17 +65,12 @@ extern u8 g_menu_input_activation_timer;
 extern u32 g_menu_input_primary_repeat;
 extern u32 g_menu_input_secondary_repeat;
 extern s32 g_menu_input_repeat_counters[16];
-
 void menu_input_update_controller(void);
 void menu_input_clear_state(void);
 
-/* program input state */
-/* Defined by OPEN, WLDCORE and MAIN rather than by the menu library. */
-extern u32 g_input_previous_buttons;
 /* Buttons OPEN and WLDCORE keep from their menus, -1 for all. */
 extern s32 g_menu_blocked_buttons;
 
-/* repeat timing */
 /* Six-byte row selected by the finger cursor repeat speed option (game options bits 9-11). The first three
  * bytes set the shared initial, primary and secondary input-repeat timings. */
 typedef struct menu_input_timing_profile {
@@ -98,9 +82,6 @@ typedef struct menu_input_timing_profile {
     u8 scroll_fast_step;   /* copied to g_menu_scroll_fast_step */
 } menu_input_timing_profile_t;
 
-extern menu_input_timing_profile_t g_option_input_repeat_timings[];
-
-/* pressable buttons */
 /* The index argument of *_menu_draw_pressable_button: an on-screen button,
  * named after the pad button its callers test. */
 typedef enum menu_pressable_button {
@@ -124,8 +105,10 @@ typedef struct menu_button_piece {
 } menu_button_piece_t;
 
 extern u16 g_menu_button_clut;
+
 /* Each button's first piece; the next button's start ends it. */
 extern u8 g_menu_button_piece_starts[];
+
 extern s8 g_menu_button_press_timers[];
 
 #endif

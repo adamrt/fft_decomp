@@ -6,11 +6,12 @@
  * draws. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* opcodes */
+struct menu_icon_source;
+
 /* Opcode byte of a menu script instruction: the index of its handler in g_menu_opcode_handlers, the table WORLD,
  * BUNIT, EQUIP and JOBSTTS each link. The handler for value NN is named menu_opcode_NN_<name> (shared menu
  * library) or <program>_menu_opcode_NN_<name> (a program's own copy); CARD has no table and calls its few
@@ -49,7 +50,6 @@ typedef enum menu_script_opcode {
     MENU_SCRIPT_OP_NUMBER_TINTED = 0x1b,                  /* sprite color */
 } menu_script_opcode_e;
 
-/* instructions */
 /* Seven-byte window command in the menu script streams. The length field
  * advances to the next command, which may have a different size. */
 typedef struct menu_window_command {
@@ -113,6 +113,7 @@ typedef struct menu_sprite_command {
     u8 _unused_02;
     menu_sprite_cell_t sprite;
 } menu_sprite_command_t;
+
 typedef char menu_sprite_command_size_must_be_9[sizeof(menu_sprite_command_t) == 9 ? 1 : -1];
 
 typedef struct menu_callback_sprite_command {
@@ -133,6 +134,7 @@ typedef struct menu_tile_command {
     u8 height;
     rgb24_t color;
 } menu_tile_command_t;
+
 typedef char menu_tile_command_size_must_be_9[sizeof(menu_tile_command_t) == 9 ? 1 : -1];
 
 /* LINE_F2 uses endpoint coordinates rather than a rectangle's extents. */
@@ -145,6 +147,7 @@ typedef struct menu_line_command {
     u8 y1;
     rgb24_t color;
 } menu_line_command_t;
+
 typedef char menu_line_command_size_must_be_9[sizeof(menu_line_command_t) == 9 ? 1 : -1];
 
 typedef struct menu_draw_area_command {
@@ -162,6 +165,7 @@ typedef struct menu_sprite_color_command {
     rgb24_t normal;
     rgb24_t alternate;
 } menu_sprite_color_command_t;
+
 typedef char menu_sprite_color_command_size_must_be_8[sizeof(menu_sprite_color_command_t) == 8 ? 1 : -1];
 
 /* Four-byte menu state commands, including draw priority and blend state. */
@@ -241,31 +245,33 @@ typedef union menu_instruction {
         u8 blend_rate;
     } blend;
 } menu_instruction_t;
+
 typedef char menu_instruction_size_must_be_14[sizeof(menu_instruction_t) == 14 ? 1 : -1];
 
-/* callbacks */
 /* The display opcode selects the row callback's result: an icon source
  * for opcode 0x06, or an integer for predicates and number renderers. */
 typedef union menu_callback {
     s32 (*value)(s32 row);
-    menu_icon_source_t* (*icon)(s32 row);
+    struct menu_icon_source* (*icon)(s32 row);
 } menu_callback_t;
 
 /* A g_menu_row_callbacks value getter, as the overlays' menu_opcode_0d_draw_formatted_number bodies call it with a
  * row or literal operand. */
 typedef s32 (*menu_row_callback_t)(s32 row);
+
 typedef char menu_callback_size_must_be_4[sizeof(menu_callback_t) == 4 ? 1 : -1];
 
-/* running scripts */
 /* menu_script_run calls the handler of each instruction's opcode until the module's terminator; each handler
  * returns the next instruction. */
 
 /* Input the stream's instructions see; a dimmed palette or a zooming window withholds it. */
 extern u32 g_menu_script_input;
+
 extern menu_instruction_t* (*g_menu_opcode_handlers[])(menu_instruction_t* instruction);
 
 /* JOBSTTS builds its own body. */
 void menu_script_run(menu_instruction_t* instruction, s32 flags);
+
 void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
 menu_instruction_t* menu_script_skip_group(menu_instruction_t* command);
 
@@ -277,7 +283,6 @@ static inline const menu_instruction_t* menu_next_const_instruction(const menu_i
     return (const menu_instruction_t*)((const u8*)instruction + instruction->header.length);
 }
 
-/* opcode handlers */
 menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* command);
@@ -292,22 +297,23 @@ menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruc
 menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
 menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t* command);
 menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+
 /* JOBSTTS builds its own body. */
 menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
+
 menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
-
-/* drawing commands */
 extern menu_callback_t g_menu_row_callbacks[16];
 extern menu_sprite_command_t g_menu_script_quad_command;
 extern menu_window_command_t g_menu_window_interior_command;
+
 /* The JOBSTTS and CARD window-frame handlers' copy of g_menu_window_interior_command. */
 extern menu_window_command_t g_cmd_window_interior_command;
+
 extern s16 g_menu_window_right_x;
 
-/* scrollable lists */
 /* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of
  * a list record (menu_list_record_t). Each program draws the rows with its own
  * *_menu_opcode_10_draw_scrollable_list. */
@@ -334,19 +340,68 @@ extern u16 g_menu_list_vram_width;
 extern s8 g_menu_list_scroll_direction; /* read with lb */
 extern u16 g_menu_list_scroll_progress;
 extern s8 g_menu_list_redraw_pending; /* read with lb (the per-program *_menu_opcode_10_draw_scrollable_list copies) */
+
 /* The row being drawn, its row mode and its scroll offset, which the row instructions read. */
 extern s32 g_menu_list_row_index;
+
 extern s16 g_menu_list_row_mode;
 extern s16 g_menu_list_scroll_offset;
-
 void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
+
 /* BUNIT, EQUIP, JOBSTTS and WORLD each build their own body. */
 void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* text_table);
+
 void menu_draw_scrollable_list(const menu_instruction_t* script);
+
 void menu_init_and_draw_scrollable_list(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
+
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
+
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
+
+/* Menu display script opcode handlers: each consumes and returns a command pointer. */
+typedef menu_instruction_t* (*menu_opcode_handler_t)(menu_instruction_t* instruction);
+
+menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+
+/* WORLD's display-script command handlers (menu_script.h has the shared ones). The CARD and JOBSTTS overlays call
+ * menu_opcode_00_draw_window_frame directly. */
+menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
+
+menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
 
 #endif

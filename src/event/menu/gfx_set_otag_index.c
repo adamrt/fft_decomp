@@ -1,5 +1,6 @@
 /* Selecting the ordering-table entry for the following menu packets. */
 
+#include "fft/gfx_primitive.h"
 #include "fft/menu_gfx.h"
 #include "psx/types.h"
 

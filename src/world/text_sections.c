@@ -1,10 +1,10 @@
 /* Shop background TIM loading, text section binding, resident data and tutorial file loading. */
 
-#include "fft/main_file.h"
+#include "fft/file.h"
+#include "fft/screen.h"
+#include "fft/shop.h"
 #include "fft/text.h"
-#include "fft/world_script.h"
-#include "fft/world_shop.h"
-#include "fft/world_text.h"
+#include "fft/tutorial.h"
 #include "psx/types.h"
 
 static s32 g_shop_background_tim_files[9 * 2] = { 72000, 67584, 72033, 67584, 72066, 67584, 72099, 67584, 72132, 67584,

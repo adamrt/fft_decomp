@@ -1,12 +1,10 @@
 /* Item id list sorting and roster sorting. */
 
-#include "fft/data_item.h"
+#include "fft/formation.h"
 #include "fft/item.h"
-#include "fft/main_item.h"
-#include "fft/menu_status.h"
+#include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
-#include "fft/world_formation.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

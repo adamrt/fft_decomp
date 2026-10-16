@@ -1,13 +1,12 @@
 /* Unit job data copies and init, the base job and the unit job list. */
 
-#include "fft/battle_unit.h"
 #include "fft/bits.h"
-#include "fft/data_job.h"
-#include "fft/event_jobstts.h"
 #include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/job_list.h"
+#include "fft/status_screen.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
+#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -70,7 +69,7 @@ void status_screen_init_unit_jobs(s32 unit_id) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-static s32 job_list_get_base(s16 unit_id) {
+s32 job_list_get_base(s16 unit_id) {
     status_screen_unit_jobs_t* unit = g_status_screen_unit_data[unit_id];
     u32 job_id = unit->character_identity;
 

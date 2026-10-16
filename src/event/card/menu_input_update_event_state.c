@@ -1,9 +1,8 @@
 /* The per-frame event input update, with edge and auto-repeat input and a yield. */
 
-#include "fft/battle_event.h"
+#include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
-#include "fft/main_gfx.h"
+#include "fft/input.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/script.h"

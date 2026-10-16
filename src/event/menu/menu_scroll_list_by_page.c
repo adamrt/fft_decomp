@@ -1,6 +1,5 @@
 /* Scrolling a list by one visible page. */
 
-#include "fft/main_sound.h"
 #include "fft/menu_script.h"
 #include "fft/sound.h"
 #include "psx/types.h"

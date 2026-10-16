@@ -1,7 +1,8 @@
 /* Texturing a quad with a unit portrait or, when the portrait id says so, a formation portrait. */
 
 #include "fft/gfx_primitive.h"
-#include "fft/menu_panel.h"
+#include "fft/menu.h"
+#include "fft/portrait.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

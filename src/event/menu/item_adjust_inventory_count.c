@@ -1,6 +1,6 @@
 /* Adding to an item's held count, never going below zero. */
 
-#include "fft/main_item.h"
+#include "fft/item.h"
 #include "psx/types.h"
 
 /* Add `delta` to the held count of an item (the low 10 bits of `item_entry`),

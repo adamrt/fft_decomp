@@ -1,0 +1,74 @@
+#ifndef PARTY_H
+#define PARTY_H
+
+/* The party roster: creating, joining and leaving units, monster eggs, after-battle departures. */
+
+#include "fft/menu.h"
+#include "fft/unit.h"
+#include "fft/unit_entd.h"
+#include "fft/unit_party.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
+
+void party_join_event_units(void);
+
+/* What party_set_class_variable stores in a character's bio variables. */
+typedef enum party_bio_state {
+    PARTY_BIO_STATE_DISMISSED = 12, /* dismissed or turned away */
+    PARTY_BIO_STATE_LEFT_LOW_BRAVE = 13,
+    PARTY_BIO_STATE_LEFT_HIGH_FAITH = 14,
+    PARTY_BIO_STATE_LOST_IN_BATTLE = 15,
+} party_bio_state_e;
+
+/* Three unit ids whose presence selects the event variable at +6. */
+typedef struct party_class_variable_record {
+    u16 unit_ids[3];
+    u16 variable;
+} party_class_variable_record_t;
+
+extern party_class_variable_record_t g_party_bio_update_records[11];
+extern s32 g_party_affected_unit_count;
+extern s32 g_party_affected_battle_unit_indices[];
+extern u8 g_party_removable_flags[];
+
+/* Six consecutive 0x3c-byte menu records; the target derives entry [4]'s
+   address from entry [2], so they are one array. */
+extern menu_entry_t g_party_removal_menus[6];
+
+extern s16 g_party_removal_result;
+extern RECT g_party_portrait_move_rect;
+extern s16 g_party_portrait_destination;
+extern RECT g_party_palette_move_rect;
+
+/* x and y of the palette MoveImage destination RECT. Read as two scalar symbols: a RECT view lets
+   GCC keep the struct address live in a saved register and changes the allocation. */
+extern s16 g_party_palette_destination;
+
+extern s16 g_party_palette_destination_y;
+s32 party_update_after_battle(void);
+void party_brave_faith_report_thread(void);
+void party_departures_thread(void);
+void party_set_class_variable(s32 unit_class, s32 value);
+s32 party_store_or_sell_equipment(s32 unit_id);
+s32 party_sell_equipment_over_limit(s32 unit_id);
+
+/* Out-of-battle generation normalizes every value except male, female and
+ * monster to Ramza. The raw-stat generator indexes the tables directly. */
+s32 party_generate_unit(unit_generation_type_e unit_type);
+
+extern party_unit_t g_party_units[PARTY_ROSTER_SLOT_COUNT];
+extern u8 g_party_highest_level;
+void party_clear(void);
+void party_init_new_game(s32 mode);
+party_unit_t* party_get_unit(s32 party_index);
+s32 party_find_free_slot(s32 save_formation, u8* palette);
+s32 party_save_unit(unit_stats_t* unit, s32 allow_guest);
+s32 party_save_encounter_unit(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initialize_for_battle);
+void party_remove_unit(u32 index);
+s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color);
+u32 party_level_unit_to_target(party_unit_t* party_unit, s32 level_delta);
+u8 party_calculate_highest_level(void);
+party_unit_t* party_get_roster_unit(s32 party_index);
+
+#endif

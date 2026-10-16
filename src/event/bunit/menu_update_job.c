@@ -1,11 +1,12 @@
 /* The per-frame handler of the unit list's job page and the chosen job's ability list. */
 
-#include "fft/event_bunit.h"
+#include "fft/ability_list.h"
 #include "fft/job.h"
-#include "fft/main_sound.h"
+#include "fft/job_list.h"
 #include "fft/menu_input.h"
 #include "fft/menu_selection.h"
 #include "fft/sound.h"
+#include "fft/unit_list.h"
 
 /* Per-frame handler of the unit list's job page: runs the job list and,
  * once a job is chosen, its ability list, and returns to the unit list when

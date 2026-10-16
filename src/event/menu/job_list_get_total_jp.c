@@ -1,6 +1,7 @@
 /* A row callback returning the selected job's total JP earned. */
 
 #include "fft/job.h"
+#include "fft/job_list.h"
 #include "psx/types.h"
 
 /* Row callback: return the selected job's total JP earned; the row is ignored. */

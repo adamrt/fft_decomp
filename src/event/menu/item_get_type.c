@@ -1,6 +1,6 @@
 /* An item's type from the item data table. */
 
-#include "fft/main_item.h"
+#include "fft/item.h"
 #include "psx/types.h"
 
 /* Return an item's type from the item data table; only the low ten bits of item_id are used. */

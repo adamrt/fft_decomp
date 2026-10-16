@@ -1,10 +1,12 @@
 /* Uploading the 20 party portraits and their palettes from the portrait sheet to VRAM. */
 
-#include "fft/data_job.h"
-#include "fft/event_require.h"
-#include "fft/main_file.h"
-#include "fft/main_unit.h"
-#include "fft/menu_panel.h"
+#include "fft/file.h"
+#include "fft/formation_job.h"
+#include "fft/job.h"
+#include "fft/memory.h"
+#include "fft/menu.h"
+#include "fft/party.h"
+#include "fft/portrait.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/unit_identity.h"

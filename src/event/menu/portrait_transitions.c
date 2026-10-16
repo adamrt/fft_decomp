@@ -3,8 +3,10 @@
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/memory.h"
-#include "fft/menu_panel.h"
+#include "fft/menu.h"
+#include "fft/portrait.h"
 #include "fft/script.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

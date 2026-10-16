@@ -1,17 +1,17 @@
 /* The view zoom thread, the unit palette index, formation sprites and redraw requests. */
 
-#include "fft/data_job.h"
-#include "fft/main_unit.h"
+#include "fft/formation.h"
+#include "fft/gfx.h"
+#include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/menu_list.h"
-#include "fft/menu_panel.h"
+#include "fft/party.h"
+#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
-#include "fft/world.h"
-#include "fft/world_formation.h"
-#include "fft/world_menu.h"
+#include "fft/zodiac.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

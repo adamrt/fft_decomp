@@ -4,12 +4,18 @@
 /* Unit records: the battle stats record every program builds, and the types it shares with the ENTD entries
  * (unit_entd.h) and party records (unit_party.h). */
 
-#include "fft/data_job.h"
-#include "fft/data_status.h"
+#include "fft/gfx.h"
+#include "fft/job.h"
+#include "fft/status.h"
+#include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* names */
+struct entd_unit;
+
+/* BATTLE's unit record, defined in unit_runtime.h; headers that only pass units around need just this name. */
+typedef struct unit unit_t;
+
 /* A packed unit-name ID and its index and text-page class. */
 typedef union unit_name_id {
     u16 value;
@@ -18,6 +24,7 @@ typedef union unit_name_id {
         u8 name_class;
     } fields;
 } unit_name_id_t;
+
 typedef char unit_name_id_size_must_be_2[(sizeof(unit_name_id_t) == 2) ? 1 : -1];
 
 /* unit_name_id_t.fields.name_class selects the unit-name text page. */
@@ -31,7 +38,6 @@ typedef enum party_name_class {
 /* Bytes of a unit name in the game's text encoding. */
 enum { UNIT_NAME_SIZE = 16 };
 
-/* unit flags */
 /* Shared by ENTD definitions, persistent party records, and runtime battle
  * units. The byte combines persistence controls with unit-kind flags. */
 typedef enum unit_flags {
@@ -44,13 +50,13 @@ typedef enum unit_flags {
     UNIT_FLAG_MALE = 0x80,
 } unit_flags_e;
 
-/* abilities */
 /* Equipped or ENTD-selected reaction/support/movement ability IDs. */
 typedef struct unit_abilities {
     u16 reaction;
     u16 support;
     u16 movement;
 } unit_abilities_t;
+
 typedef char unit_abilities_size_must_be_6[(sizeof(unit_abilities_t) == 6) ? 1 : -1];
 
 /* Active reaction abilities occupy four MSB-first bytes in unit_stats_t. */
@@ -177,7 +183,6 @@ typedef enum unit_movement_set_3 {
     UNIT_MOVEMENT_SET_3_MOVE_IN_WATER = 0x80, /* ability 0x1f6; stands on the water surface */
 } unit_movement_set_3_e;
 
-/* equipment */
 /* The four bytes of unit_stats_t.equipment_categories: one bit per equippable
  * item type, MSB first (EQUIPPABLE_ITEM_TYPE_BYTE_MASK). Only the bits the code
  * tests are named. */
@@ -222,107 +227,6 @@ typedef enum unit_equipment_slot {
 
 s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support);
 
-/* career */
-/* Career slots follow the generic jobs' order. Slot zero holds the unit's base
- * job, including a special character's job; generic Squire has job ID 74. */
-typedef enum unit_career_job_index {
-    UNIT_CAREER_JOB_INDEX_BASE = 0,
-    UNIT_CAREER_JOB_INDEX_CHEMIST = 1,
-    UNIT_CAREER_JOB_INDEX_KNIGHT = 2,
-    UNIT_CAREER_JOB_INDEX_ARCHER = 3,
-    UNIT_CAREER_JOB_INDEX_MONK = 4,
-    UNIT_CAREER_JOB_INDEX_PRIEST = 5,
-    UNIT_CAREER_JOB_INDEX_WIZARD = 6,
-    UNIT_CAREER_JOB_INDEX_TIME_MAGE = 7,
-    UNIT_CAREER_JOB_INDEX_SUMMONER = 8,
-    UNIT_CAREER_JOB_INDEX_THIEF = 9,
-    UNIT_CAREER_JOB_INDEX_MEDIATOR = 10,
-    UNIT_CAREER_JOB_INDEX_ORACLE = 11,
-    UNIT_CAREER_JOB_INDEX_GEOMANCER = 12,
-    UNIT_CAREER_JOB_INDEX_LANCER = 13,
-    UNIT_CAREER_JOB_INDEX_SAMURAI = 14,
-    UNIT_CAREER_JOB_INDEX_NINJA = 15,
-    UNIT_CAREER_JOB_INDEX_CALCULATOR = 16,
-    UNIT_CAREER_JOB_INDEX_BARD = 17,
-    UNIT_CAREER_JOB_INDEX_DANCER = 18,
-    UNIT_CAREER_JOB_INDEX_MIME = 19,
-} unit_career_job_index_e;
-
-/* Career limits: JP-derived levels stop at 8; ENTD nibbles can encode higher levels. */
-enum {
-    UNIT_JOB_LEVEL_MAX = 8,
-    UNIT_JOB_POINT_MAX = 9999,
-};
-
-/* Serialized unit-career layout shared by party records and battle stats.
- * unit_generate_party_record clears the 0x96-byte span, while
- * job_add_proposition_jp and unit_copy_party_record establish the
- * little-endian byte order of each serialized JP value. Each packed level byte
- * stores the even career index in its high nibble and the following odd index
- * in its low nibble. */
-enum {
-    UNIT_CAREER_JOB_COUNT = JOB_ID_GENERIC_COUNT,
-    UNIT_UNLOCKED_JOB_BYTE_COUNT = 3,
-    /* Mime has JP and a packed job level, but no learned-ability row. */
-    UNIT_LEARNED_ABILITY_JOB_COUNT = UNIT_CAREER_JOB_COUNT - 1,
-    /* Each job has 24 learned-ability bits, MSB-first within each byte. */
-    UNIT_LEARNED_ABILITY_BYTES_PER_JOB = 3,
-    UNIT_LEARNED_ABILITY_BYTE_COUNT = UNIT_LEARNED_ABILITY_JOB_COUNT * UNIT_LEARNED_ABILITY_BYTES_PER_JOB,
-    UNIT_JOBS_PER_LEVEL_BYTE = 2,
-    UNIT_JOB_LEVEL_BYTE_COUNT = UNIT_CAREER_JOB_COUNT / UNIT_JOBS_PER_LEVEL_BYTE,
-    UNIT_JOB_LEVEL_BYTE_INDEX_CALCULATOR_BARD = UNIT_CAREER_JOB_INDEX_BARD / UNIT_JOBS_PER_LEVEL_BYTE,
-    UNIT_JOB_LEVEL_BYTE_INDEX_DANCER_MIME = UNIT_CAREER_JOB_INDEX_DANCER / UNIT_JOBS_PER_LEVEL_BYTE,
-    UNIT_JOB_LEVEL_LOW_NIBBLE_MASK = 0x0f,
-    UNIT_JOB_LEVEL_HIGH_NIBBLE_MASK = 0xf0,
-    UNIT_JOB_LEVEL_ONE_LOW_NIBBLE = 0x01,
-    UNIT_JOB_LEVEL_ONE_HIGH_NIBBLE = 0x10,
-    UNIT_JOB_LEVEL_ONE_BOTH_NIBBLES = 0x11,
-    UNIT_JOB_POINT_BYTES_PER_JOB = 2,
-    UNIT_JOB_POINT_BYTE_COUNT = UNIT_CAREER_JOB_COUNT * UNIT_JOB_POINT_BYTES_PER_JOB,
-    UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT = UNIT_JOB_POINT_BYTE_COUNT * 2,
-    UNIT_CAREER_DATA_BYTE_COUNT = UNIT_UNLOCKED_JOB_BYTE_COUNT + UNIT_LEARNED_ABILITY_BYTE_COUNT
-        + UNIT_JOB_LEVEL_BYTE_COUNT + UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT,
-};
-
-/* Twenty job-unlock bits occupy the high bits of the three-byte career value. */
-enum {
-    UNIT_UNLOCKED_JOB_DANCER = 0x20,
-    UNIT_UNLOCKED_JOB_BARD = 0x40,
-    UNIT_UNLOCKED_JOB_SQUIRE = 0x800000,
-};
-enum {
-    UNIT_UNLOCKED_JOB_MASK = 0xfffff0,
-};
-
-/* Most JP access is 16-bit; party generation and proposition awards use bytes. */
-typedef union unit_job_point_table {
-    u16 values[UNIT_CAREER_JOB_COUNT];
-    struct {
-        u8 low;
-        u8 high;
-    } entries[UNIT_CAREER_JOB_COUNT];
-} unit_job_point_table_t;
-typedef char
-    unit_job_point_table_size_must_be_40[(sizeof(unit_job_point_table_t) == UNIT_JOB_POINT_BYTE_COUNT) ? 1 : -1];
-
-/* Party-to-battle initialization copies both adjacent tables as one block. */
-typedef struct unit_job_points {
-    unit_job_point_table_t current;
-    unit_job_point_table_t total;
-} unit_job_points_t;
-typedef char
-    unit_job_points_size_must_be_80[(sizeof(unit_job_points_t) == UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT) ? 1 : -1];
-
-/* Shared 150-byte progression block cleared when a party unit is generated. */
-typedef struct unit_career_data {
-    u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT];                                           /* 0x00 */
-    u8 learned_abilities[UNIT_LEARNED_ABILITY_JOB_COUNT][UNIT_LEARNED_ABILITY_BYTES_PER_JOB]; /* 0x03 */
-    u8 job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]; /* 0x3c; two packed nibbles per byte */
-    unit_job_points_t job_points;             /* 0x46; current JP followed by total JP */
-} unit_career_data_t;
-typedef char unit_career_data_size_must_be_150[(sizeof(unit_career_data_t) == UNIT_CAREER_DATA_BYTE_COUNT) ? 1 : -1];
-
-/* birthday and zodiac */
 /* Unshifted zodiac IDs. Party and battle records store these in the high
  * nibble; ordinary birthdays never produce Serpentarius. */
 typedef enum zodiac_sign {
@@ -353,13 +257,9 @@ typedef struct unit_birthday {
     u16 _unused_01 : 3; /* reserved bits 9..11 */
     u16 zodiac : 4;
 } unit_birthday_t;
+
 typedef char unit_birthday_size_must_be_2[(sizeof(unit_birthday_t) == 2) ? 1 : -1];
 
-extern u8 g_calendar_month_lengths[12];
-
-s32 calendar_calculate_day_of_year(s32 month, s32 day);
-
-/* stats */
 /* Character progression; excess EXP is discarded on a level-up. */
 enum {
     UNIT_LEVEL_MAX = 99,
@@ -396,12 +296,14 @@ typedef struct unit_raw_stat {
     u8 middle;
     u8 high;
 } unit_raw_stat_t;
+
 typedef char unit_raw_stat_size_must_be_3[(sizeof(unit_raw_stat_t) == UNIT_RAW_STAT_SERIALIZED_BYTES) ? 1 : -1];
 
 /* HP, MP, speed, physical attack and magic attack in UNIT_RAW_STAT_* order.
  * Generation, growth and derived-stat calculation select all five entries by index;
  * saved and battle units copy the complete record. */
 typedef unit_raw_stat_t unit_raw_stats_t[UNIT_RAW_STAT_COUNT];
+
 typedef char unit_raw_stats_size_must_be_15[(sizeof(unit_raw_stats_t) == UNIT_RAW_STAT_DATA_BYTE_COUNT) ? 1 : -1];
 
 /* CT points needed for a unit turn; speed supplies points each clocktick. */
@@ -430,7 +332,6 @@ typedef enum unit_equipment_stat_index {
     UNIT_EQUIPMENT_STAT_COUNT = 11,
 } unit_equipment_stat_index_e;
 
-/* position */
 /* Suppress random spell quotes for the matching primary or secondary skillset. */
 typedef enum unit_spell_quote_flags {
     UNIT_SPELL_QUOTE_SUPPRESS_SECONDARY = 0x01,
@@ -446,9 +347,9 @@ typedef struct unit_position {
     u16 stepping_stone : 1;
     u16 higher_elevation : 1;
 } unit_position_t;
+
 typedef char unit_position_size_must_be_2[(sizeof(unit_position_t) == 2) ? 1 : -1];
 
-/* deployment */
 /* unit_stats_t.formation_index values that name no party roster slot. */
 typedef enum unit_formation_index {
     UNIT_FORMATION_INDEX_GENERATED_UNIT = 254,
@@ -469,9 +370,9 @@ typedef struct unit_deployment_coordinates {
     u8 y;
     unit_deployment_flags_t flags;
 } unit_deployment_coordinates_t;
+
 typedef char unit_deployment_coordinates_size_must_be_4[(sizeof(unit_deployment_coordinates_t) == 4) ? 1 : -1];
 
-/* teams and control */
 /* Team bits select one of four independently tracked battle teams. */
 enum {
     UNIT_TEAM_COUNT = 4,
@@ -508,7 +409,6 @@ typedef enum ai_autobattle_mode {
     AI_AUTOBATTLE_RETREAT = 17,
 } ai_autobattle_mode_e;
 
-/* actions */
 /* The 20-byte action command shared by unit stats, AI candidates and menus.
  * Targeting reads coordinates as signed or unsigned 16-bit values. Item selection
  * reads and updates only the low byte of the 16-bit item/equipment field. */
@@ -523,6 +423,7 @@ typedef struct action_command {
     u8 target_id;              /* 0x0b */
     SVECTOR target_position;   /* 0x0c; tile x, elevation, y; padding is unread */
 } action_command_t;
+
 typedef char action_command_size_must_be_20[(sizeof(action_command_t) == 20) ? 1 : -1];
 
 /* action_data_t.ct_change values that are not an amount. Any other value is a gain when
@@ -537,6 +438,7 @@ typedef struct unit_action_status_changes {
     u8 infliction[STATUS_BYTE_COUNT];
     u8 removal[STATUS_BYTE_COUNT];
 } unit_action_status_changes_t;
+
 typedef char unit_action_status_changes_size_must_be_10[(sizeof(unit_action_status_changes_t) == 10) ? 1 : -1];
 
 /*
@@ -576,6 +478,7 @@ typedef struct action_data {
      * formula_force_attack_miss). */
     s16 attack_accuracy; /* 0x2a */
 } action_data_t;
+
 typedef char action_data_size_must_be_44[(sizeof(action_data_t) == 44) ? 1 : -1];
 
 /* action_data_t.miss_display_flags, loaded from the ability's AI flags. */
@@ -585,7 +488,6 @@ typedef enum action_miss_display_flags {
     ACTION_MISS_DISPLAY_DODGE_ANIMATION = 0x80, /* the ability's evade-with-motion bit */
 } action_miss_display_flags_e;
 
-/* battle stats */
 /* The battle simulation owns 21 unit records. Battle-slot search routines use
  * the first value beyond that array as their no-unit sentinel. */
 enum {
@@ -617,7 +519,6 @@ typedef enum unit_equipped_flags {
     UNIT_EQUIPPED_FLAG_SWORD = 0x08,
 } unit_equipped_flags_e;
 
-/* unit_stats_t.entd_slot value for an unused or removed slot. */
 enum {
     UNIT_ENTD_SLOT_NONE = 0xff,
 };
@@ -713,13 +614,260 @@ typedef struct unit_stats {
     u8 initial_team_flags;  /* 0x1ba */
     u8 inflicted_status[5]; /* 0x1bb */
 } unit_stats_t;
+
 typedef char unit_stats_size_must_be_448[(sizeof(unit_stats_t) == 448) ? 1 : -1];
 
-/* unit_stats_t.ability_outcome. */
 typedef enum unit_ability_outcome {
     UNIT_ABILITY_OUTCOME_TARGETED = 0x01,      /* target of a primary action */
     UNIT_ABILITY_OUTCOME_AFFECTED = 0x02,      /* that action changed the unit */
     UNIT_ABILITY_OUTCOME_LEARN_CHECKED = 0x04, /* the learn-on-hit pass consumed AFFECTED */
 } unit_ability_outcome_e;
+
+/* Tile coordinates stored in teleport paths and relocation reservations. */
+typedef struct move_tile_coordinates {
+    u8 x;
+    u8 y;
+    u8 elevation;
+} move_tile_coordinates_t;
+
+typedef char move_tile_coordinates_size_must_be_3[(sizeof(move_tile_coordinates_t) == 3) ? 1 : -1];
+
+/* Shared event snapshot for all 21 simulation slots. unit_save_staged_status_data
+ * writes the saved fields; unit_apply_staged_status_data restores them and
+ * applies intervening status differences through BATTLE callbacks. */
+typedef struct unit_status_staging {
+    u8 innate[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];
+    u8 current[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];    /* 0x069 */
+    u8 inflicted[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];  /* 0x0d2 */
+    u8 removed[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];    /* 0x13b */
+    u8 added[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];      /* 0x1a4 */
+    u8 status_ct[UNIT_SLOT_COUNT][STATUS_TIMED_COUNT]; /* 0x20d */
+    u8 charged_ability_ct[UNIT_SLOT_COUNT];            /* 0x35d */
+    u8 death_counter[UNIT_SLOT_COUNT];                 /* 0x372 */
+    u8 team_flags[UNIT_SLOT_COUNT];                    /* 0x387 */
+    u8 state[UNIT_SLOT_COUNT];                         /* 0x39c; 0 not staged, 1 saved, 2 restored */
+    u8 inflict_status_mode[UNIT_SLOT_COUNT];           /* 0x3b1; unit_inflict_status_mode_e */
+    u16 hp[UNIT_SLOT_COUNT];                           /* 0x3c6 */
+    u16 jump_float_flags;                              /* 0x3f0; UNIT_STATUS_STAGING_*_REMOVED */
+} unit_status_staging_t;
+
+typedef char unit_status_staging_size_must_be_1010[sizeof(unit_status_staging_t) == 1010 ? 1 : -1];
+
+/* Per-unit facing/animation state written by the event interpreters and
+ * advanced every frame by unit_update_facing_and_pending_animations.
+ * Seven bytes per unit, 21 units. */
+typedef struct unit_animation_state {
+    u8 target_facing;
+    u8 rotate_mode;     /* unit_rotate_mode_e */
+    u8 frames_per_step; /* facing steps once step_counter reaches this */
+    u8 step_counter;
+    u8 rotating;       /* nonzero while stepping toward target_facing */
+    u8 initial_facing; /* facing captured when animation states reset (0xff when
+                          absent); RotateUnit direction 0x14 rotates back to it */
+    u8 delay;          /* frames to wait before the first step */
+} unit_animation_state_t;
+
+typedef char unit_animation_state_size_must_be_7[sizeof(unit_animation_state_t) == 7 ? 1 : -1];
+
+/* Seven result bytes; assigning elevation preserves the unassigned high bit. */
+typedef struct unit_height_data {
+    u8 x;
+    u8 y;
+    u8 elevation : 7;
+    u8 _unused_02 : 1; /* not read or assigned */
+    u8 unit_flags;
+    u8 unit_height;
+    u8 walking_height;
+    u8 total_height;
+} unit_height_data_t;
+
+typedef char unit_height_data_size_must_be_7[sizeof(unit_height_data_t) == 7 ? 1 : -1];
+extern unit_status_staging_t* g_unit_status_staging_data;
+s32 unit_save_staged_status_data(s32 battle_id);
+void unit_clear_status_staging_data(void);
+void unit_update_staged_status_data(u16 unit_id, u16 restore);
+
+/* Unit graphics load result: 0 done, 1 pending. */
+extern u16 g_unit_graphics_load_pending;
+
+/* WalkToAnim: requested animation applied after movement stops; 0 means none. */
+extern u16 g_unit_pending_animation_ids[];
+
+extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
+
+/* Event-script rotation state for each runtime unit slot. */
+extern unit_animation_state_t g_unit_animation_states[];
+
+void unit_update_facing_and_pending_animations(void);
+void unit_set_animation(s32 runtime_id, u32 animation);
+void unit_set_facing(s32 runtime_id, s32 facing);
+s32 unit_check_facing_relative_to_camera(s32 event_unit_id);
+s32 unit_is_moving(s32 runtime_id);
+
+/* The position unit_copy_world_coords_to_scratch returns. */
+extern SVECTOR g_unit_runtime_coords;
+
+/* Scratch vector for a unit's map coordinates or projected screen position. */
+extern SVECTOR g_unit_scratch_coords;
+
+s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
+SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
+void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
+void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
+void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
+void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
+s32 unit_has_any_current_status(s32 battle_id);
+void unit_increase_blue_team_brave_by_10(void);
+
+/* Masks of the motion flags in the 32-bit view of unit_t.movement (move_destination_t),
+ * whose high byte is runtime-unit +0x83. */
+typedef enum unit_motion_flags {
+    UNIT_MOTION_FLAG_SUPPRESS_FACING_UPDATE = 0x01000000,
+    UNIT_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS = 0x02000000,
+    UNIT_MOTION_FLAG_SUPPRESS_PALETTE_UPDATE = 0x04000000,
+    UNIT_MOTION_FLAG_ALTERNATE_SHORT_HOP = 0x08000000,
+    UNIT_MOTION_FLAG_FLOAT = 0x10000000,
+    UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000, /* set with each stored animation request */
+} unit_motion_flags_e;
+
+/* The unit-ready test script_wait_for_unit_ready polls: always 1, so the wait never yields. */
+s32 unit_is_ready(s32 unused_runtime_id);
+
+/* Physical attack, magic attack and speed, in the order units and item
+ * attribute records store them. */
+typedef enum unit_attribute_index {
+    UNIT_ATTRIBUTE_PHYSICAL_ATTACK = 0,
+    UNIT_ATTRIBUTE_MAGIC_ATTACK = 1,
+    UNIT_ATTRIBUTE_SPEED = 2,
+    UNIT_ATTRIBUTE_COUNT = 3,
+} unit_attribute_index_e;
+
+extern s32 g_unit_casting_runtime_id;
+
+/* Count and coordinates of the tiles already handed out as dismount
+ * destinations this action. */
+extern s32 g_unit_relocated_count;
+
+extern move_tile_coordinates_t g_unit_relocated_coords[];
+
+/* Index of the unit the unit-list screens have selected. */
+extern s16 g_unit_selected_index;
+
+void unit_hide_all_jumping(void);
+s32 unit_hide_by_runtime_id(u32 runtime_id);
+s32 unit_height_calculate_from_battle_tile(struct unit* unit);
+s32 unit_height_calculate_from_tile(struct unit* unit);
+s32 unit_height_calculate_from_move_destination(struct unit* unit);
+
+/* The definition returns an s16, but an s16 prototype makes the callers re-extend the result;
+ * keep s32. */
+s32 unit_height_calculate_from_world_coords(struct unit* unit);
+
+s32 unit_height_calculate_with_caller_coords(struct unit* unit, const SVECTOR* coords);
+void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
+void unit_fade_out_start_red(s32 runtime_id);
+void unit_fade_out_start_for_event(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
+void unit_update_float_height_and_status_bubble(unit_t* unit);
+
+/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
+ * the highlighted arrow. */
+extern u32 g_unit_facing_wait_arrow_blink_timer;
+
+extern palette_t g_unit_facing_wait_arrow_palette;
+void unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
+void unit_facing_draw_wait_direction(void);
+void unit_play_sfx(struct unit* unit, s32 sound_id);
+struct unit_stats;
+
+/* One queued unit: where it stands, how it faces and which graphics it uses. */
+typedef struct unit_graphics_load_descriptor {
+    u8 map_x;
+    u8 map_y;
+    u8 map_level;
+    u8 _padding_03; /* aligns facing */
+    u16 facing;     /* a quarter turn per unit */
+    s16 spritesheet_id;
+    u16 palette_id;
+    u16 runtime_id;
+    unit_stats_t* stats;
+    u32 flags; /* nonzero: the unit starts undrawn */
+} unit_graphics_load_descriptor_t;
+
+typedef char unit_graphics_load_descriptor_size_must_be_20[(sizeof(unit_graphics_load_descriptor_t) == 20) ? 1 : -1];
+
+/* Resident unit-graphics queue, filled and consumed by the BATTLE loader. */
+typedef struct unit_graphics_load_queue {
+    s32 count;                                                            /* 0x00 */
+    unit_graphics_load_descriptor_t descriptors[UNIT_RUNTIME_SLOT_COUNT]; /* 0x04 */
+} unit_graphics_load_queue_t;
+
+typedef char unit_graphics_load_queue_size_must_be_324[(sizeof(unit_graphics_load_queue_t) == 324) ? 1 : -1];
+extern unit_graphics_load_queue_t g_unit_graphics_load_queue;
+
+/* Selects the rows of g_unit_generation_base_data and
+ * g_unit_generation_raw_stat_variance; these are not job ids or gender
+ * bit flags. */
+typedef enum unit_generation_type {
+    UNIT_TYPE_MALE = 0,
+    UNIT_TYPE_FEMALE = 1,
+    UNIT_TYPE_RAMZA = 2,
+    UNIT_TYPE_MONSTER = 3,
+    UNIT_TYPE_COUNT = 4
+} unit_generation_type_e;
+
+/* One row of g_unit_generation_base_data, selected by
+ * unit_generation_type_e. */
+typedef struct unit_generation_base_data {
+    u8 raw_stat_seeds[UNIT_RAW_STAT_COUNT];
+    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];
+} unit_generation_base_data_t;
+
+typedef char unit_generation_base_data_size_must_be_12[(sizeof(unit_generation_base_data_t) == 12) ? 1 : -1];
+extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_TYPE_COUNT];
+extern u8 g_unit_generation_raw_stat_variance[UNIT_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
+
+typedef enum unit_entd_init_kind {
+    UNIT_ENTD_INIT_NEW = 0, /* reset the unit and build it from its ENTD entry */
+    /* Rebuild a transformed unit's stats for its new job in place: no reset, no ENTD data and no
+     * ENTD equipment. */
+    UNIT_ENTD_INIT_TRANSFORM = 0x82,
+} unit_entd_init_kind_e;
+
+s32 unit_init_from_encounter(unit_stats_t* unit, struct entd_unit* entd, u32 use_world_text, s32 kind);
+s32 unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_text);
+void unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels);
+void unit_init_status_and_rewards(unit_stats_t* unit, s32 clear_rewards);
+void unit_init_position_and_rewards(unit_stats_t* unit, struct entd_unit* entd);
+void unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const struct entd_unit* entd);
+void unit_reset_battle_state(unit_stats_t* unit);
+void unit_refresh_stats_and_statuses(unit_stats_t* unit);
+void unit_update_formation_stats(unit_stats_t* unit);
+void unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check);
+void unit_set_equipment_stats(unit_stats_t* unit);
+void unit_set_equippable_items(unit_stats_t* unit);
+s32 unit_calculate_random_equipment(unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
+void unit_calculate_move_jump(unit_stats_t* unit, s32 keep_hp_mp);
+u8 unit_calculate_palette_spritesheet(unit_stats_t* unit, u8* palette);
+u16 unit_calculate_rsm(unit_stats_t* unit, u16 ability_id, s32 flags, struct entd_unit* entd);
+void unit_enable_rsm_flags(unit_stats_t* unit);
+void unit_copy_last_ability_ct(unit_stats_t* unit);
+s32 unit_check_level_up(unit_stats_t* unit);
+void unit_apply_level_growth(unit_stats_t* unit, s32 level_down);
+void unit_increase_casualty_counters(unit_stats_t* unit);
+extern unit_deployment_coordinates_t* g_unit_deployed_coords;
+
+/* The four unit stats panels are one thread body, unit_view_stats_panel_thread, run in a mode: the panel slides
+ * in, redraws each frame and slides out on the stop request. */
+
+/* The mode argument of unit_view_stats_panel_thread: which of the four
+ * unit stats panels the thread draws; each value has one caller. */
+typedef enum unit_stats_panel {
+    UNIT_STATS_PANEL_HOVERED_UNIT = 0,  /* unit_view_refresh_hovered_stats */
+    UNIT_STATS_PANEL_ATTACK_CASTER = 1, /* unit_view_preview_caster_stats */
+    UNIT_STATS_PANEL_ATTACK_TARGET = 2, /* unit_view_preview_target_stats; shows the reaction ability name */
+    UNIT_STATS_PANEL_RIGHT_UNIT = 3,    /* unit_view_refresh_right_stats */
+} unit_stats_panel_e;
+
+s32 unit_has_adjacent_monster_skill_support(struct unit_stats* unit);
 
 #endif

@@ -1,7 +1,7 @@
 /* Rendering a text entry glyph by glyph into a menu window image, with its commands and numbers. */
 
 #include "fft/gfx.h"
-#include "fft/main_unit.h"
+#include "fft/party.h"
 #include "fft/script_variable.h"
 #include "fft/text.h"
 #include "fft/unit.h"

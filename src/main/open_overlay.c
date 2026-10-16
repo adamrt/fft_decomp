@@ -1,10 +1,12 @@
 /* Item order tables, card event init and the OPEN.BIN main loop and ending calls. */
 
-#include "fft/data_item.h"
-#include "fft/main_card.h"
-#include "fft/main_file.h"
-#include "fft/main_item.h"
-#include "fft/open.h"
+#include "fft/ending.h"
+#include "fft/file.h"
+#include "fft/item.h"
+#include "fft/memcard.h"
+#include "fft/memory.h"
+#include "fft/overlay.h"
+#include "fft/title.h"
 #include "psx/kernel.h"
 #include "psx/libapi.h"
 #include "psx/libc.h"

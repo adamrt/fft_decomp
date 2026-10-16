@@ -1,8 +1,8 @@
 /* Two value return stubs and the unit name list. */
 
-#include "fft/battle_unit.h"
 #include "fft/text.h"
 #include "fft/unit.h"
+#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 #ifdef FFT_WORLD

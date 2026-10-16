@@ -1,6 +1,7 @@
 /* Copying a unit's world position into a vector. */
 
-#include "fft/battle_unit_animation.h"
+#include "fft/unit.h"
+#include "fft/unit_runtime.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

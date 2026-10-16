@@ -1,16 +1,16 @@
 /* Event input state updates and the thread running check. */
 
+#include "fft/formation.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
+#include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
-#include "fft/menu_panel.h"
+#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
-#include "fft/world_script.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

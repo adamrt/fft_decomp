@@ -1,10 +1,12 @@
 /* Frame submission and packet buffer swaps and init. */
 
-#include "fft/event_bunit.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
+#include "fft/system.h"
+#include "fft/unit_list.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

@@ -1,6 +1,6 @@
 /* Setting the source rectangle of the image blitter. */
 
-#include "fft/world_gfx.h"
+#include "fft/screen.h"
 #include "psx/types.h"
 
 /* Set the source rectangle used by the WORLD image blitter. */

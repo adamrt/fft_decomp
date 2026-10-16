@@ -1,9 +1,10 @@
 /* The list of jobs a unit can select: its base job, then its unlocked generic jobs. */
 
-#include "fft/data_job.h"
-#include "fft/event_bunit.h"
+#include "fft/bits.h"
 #include "fft/job.h"
+#include "fft/job_list.h"
 #include "fft/unit.h"
+#include "fft/unit_list.h"
 #include "psx/types.h"
 
 /*

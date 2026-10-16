@@ -2,17 +2,19 @@
  * status effect, zodiac symbols, memory zeroing, casualty counters, status changes, the last ability CT, the action
  * state setter and the battle load exception handler. */
 
-#include "fft/battle_status.h"
-#include "fft/battle_unit.h"
-#include "fft/data_job.h"
-#include "fft/data_status.h"
-#include "fft/main.h"
-#include "fft/main_item.h"
-#include "fft/main_unit.h"
+#include "fft/ability.h"
+#include "fft/item.h"
+#include "fft/job.h"
+#include "fft/memory.h"
+#include "fft/party.h"
 #include "fft/script_variable.h"
+#include "fft/status.h"
+#include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "fft/unit_party.h"
+#include "fft/unit_runtime.h"
+#include "fft/zodiac.h"
 #include "psx/types.h"
 
 /* The original wrote the body of mem_copy_bytes_source_first a second time as

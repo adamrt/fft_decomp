@@ -1,7 +1,8 @@
 /* The equipment screen's comparison slot copy and the Two Swords and Two
  * Hands support checks. */
 
-#include "fft/event_equip.h"
+#include "fft/ability.h"
+#include "fft/equipment.h"
 #include "fft/unit.h"
 #include "psx/libc.h"
 #include "psx/types.h"

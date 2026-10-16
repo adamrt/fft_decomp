@@ -1,6 +1,7 @@
 /* Queuing the context's single draw mode packet at an ordering-table entry. */
 
-#include "fft/event_card.h"
+#include "fft/menu_gfx.h"
+#include "fft/save.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

@@ -1,7 +1,6 @@
 /* A job's skillset from the job data table. */
 
 #include "fft/job.h"
-#include "fft/main_unit.h"
 #include "psx/types.h"
 
 /* Return the skillset of a job from the job data table. */

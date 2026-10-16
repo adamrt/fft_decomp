@@ -1,15 +1,11 @@
 /* The item list a normal shop or the poachers' den offers, hiding or marking what the selected unit cannot equip. */
 
-#include "fft/data_item.h"
+#include "fft/equipment.h"
 #include "fft/item.h"
-#include "fft/main.h"
-#include "fft/main_item.h"
-#include "fft/menu_option.h"
+#include "fft/screen.h"
 #include "fft/script_variable.h"
-#include "fft/world_formation.h"
-#include "fft/world_item.h"
-#include "fft/world_menu.h"
-#include "fft/world_shop.h"
+#include "fft/shop.h"
+#include "fft/state.h"
 #include "psx/types.h"
 
 /* Build the -1 terminated item list offered by a normal shop or the Fur Shop

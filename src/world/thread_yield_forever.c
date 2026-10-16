@@ -1,7 +1,7 @@
 /* Yielding the current thread forever. */
 
+#include "fft/screen.h"
 #include "fft/thread.h"
-#include "fft/world.h"
 
 /* Yield to the next WORLD thread, forever. */
 void screen_thread_yield_forever(void) {

@@ -1,6 +1,6 @@
 /* The menu command that draws a row callback's value right-aligned in eight-pixel cells. */
 
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_cursor.h"

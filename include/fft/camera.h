@@ -4,15 +4,136 @@
 /* Event library camera for BATTLE and WORLD: the script camera, its fusion tracks and the fixed-point math they
  * use. */
 
+#include "fft/script_instruction.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
-/* script camera */
+enum {
+    CAMERA_PITCH_STEEP_MASK_THRESHOLD = 0x178,
+};
+
+extern MATRIX g_camera_matrix;
+
+/* Base of the large render-state records; low offsets overlap camera/GPU fields.
+ * .vx is the camera pitch and .vy its yaw. */
+extern SVECTOR g_camera_render_state;
+
+void camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords);
+void camera_get_tile_depth_point_unbiased(const SVECTOR* screen, SVECTOR* destination);
+void camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* destination);
+void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords);
+void camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation);
+void camera_update_matrices(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* screen_offset, VECTOR* camera_zoom);
+
+/* camera_get_input_direction sources: which button state it reads. */
+typedef enum camera_input_source {
+    CAMERA_INPUT_HELD = 0,
+    CAMERA_INPUT_PRESSED = 1, /* newly pressed, repeating at the cursor repeat speed while held */
+    CAMERA_INPUT_RELEASED = 2,
+} camera_input_source_e;
+
+/* Held directions pan the map instead of following the cursor tile. */
+extern s32 g_camera_pan_enabled;
+
+void camera_pan_disable(void);
+void camera_pan_enable(void);
+s32 camera_get_input_direction(s32 source);
+void camera_rotation_handle_input(void);
+void camera_pan_update(void);
+void camera_tilt_handle_input(void);
+void camera_zoom_handle_input(void);
+extern VECTOR g_camera_real_coords;
+extern SVECTOR g_camera_integer_coords;
+extern u16 g_camera_real_coords_countdown;
+extern VECTOR g_camera_real_coords_delta;
+extern VECTOR g_camera_step_vector;
+VECTOR* camera_real_coords_get(void);
+s32 camera_is_active(void);
+void camera_real_coords_restore(void);
+void camera_real_coords_save(void);
+void camera_real_coords_set(const VECTOR* coords);
+void camera_update_cursor_tile_vector(void);
+void camera_real_coords_update_animation(void);
+void camera_update_vector_from_game_state(void);
+extern VECTOR g_camera_screen_offset;
+extern VECTOR g_camera_screen_offset_saved;
+extern u16 g_camera_screen_offset_countdown;
+extern VECTOR g_camera_screen_offset_fixed;
+VECTOR* camera_screen_offset_get(void);
+void camera_screen_offset_restore(void);
+void camera_screen_offset_save(void);
+void camera_screen_offset_set(const VECTOR* coords);
+void camera_screen_offset_start_move_relative(const VECTOR* values, s32 frame_count);
+void camera_screen_offset_start_move_uniform(const s32* destination_value, s32 frame_count);
+void camera_screen_offset_update_animation(void);
+
+typedef enum camera_rotation_action {
+    CAMERA_ROTATION_NONE = 0,
+    CAMERA_ROTATION_LEFT = 1,  /* the yaw falls to its destination */
+    CAMERA_ROTATION_RIGHT = 2, /* the yaw rises to its destination */
+} camera_rotation_action_e;
+
+/* Camera yaw rounded down to 0x200 (yaw & 0xfe00), stored as each turn's destination is set;
+ * nothing reads it. */
+extern s32 g_camera_previous_yaw;
+
+/* Maps a camera quadrant index to its map-tile camera-block direction. */
+extern u8 g_camera_quadrant_block_directions[4];
+
+extern camera_rotation_action_e g_camera_rotation_action;
+extern SVECTOR g_camera_rotation_saved;
+extern u16 g_camera_rotation_countdown;
+extern s32 g_camera_rotation_increment;
+extern s32 g_camera_yaw_band;
+extern s32 g_camera_yaw_target;
+SVECTOR* camera_rotation_get(void);
+void camera_rotation_restore(void);
+void camera_rotate_when_unit_tile_not_visible(const struct unit* unit);
+void camera_rotation_save(void);
+void camera_rotation_set(const SVECTOR* rotation);
+void camera_rotation_update(void);
+void camera_rotation_update_animation(void);
+
+/* g_camera_tilt_action and g_camera_zoom_action: the move in progress towards
+ * g_camera_tilt_target or g_camera_zoom_target. INCREASE equals BATTLE_MAP_TILT_HIGH and DECREASE
+ * equals BATTLE_MAP_ZOOM_OUT, and retail compares a target with the action loaded for that value. */
+typedef enum camera_step_action {
+    CAMERA_STEP_NONE = 0,
+    CAMERA_STEP_INCREASE = 2, /* tilt up; zoom in */
+    CAMERA_STEP_DECREASE = 4, /* tilt down; zoom out */
+} camera_step_action_e;
+
+extern camera_step_action_e g_camera_tilt_action;
+extern s32 g_camera_tilt_increment;
+void camera_tilt_update(void);
+extern VECTOR g_camera_zoom;
+extern camera_step_action_e g_camera_zoom_action;
+extern VECTOR g_camera_zoom_saved;
+extern u16 g_camera_zoom_countdown;
+extern s32 g_camera_zoom_increment;
+VECTOR* camera_zoom_get(void);
+void camera_zoom_restore(void);
+void camera_zoom_save(void);
+void camera_zoom_set(const VECTOR* zoom);
+void camera_zoom_update(void);
+void camera_zoom_update_animation(void);
+extern VECTOR* g_camera_published_coords_ptr;
+extern SVECTOR* g_camera_published_rotation_ptr;
+extern SVECTOR g_camera_script_rotation;
+extern u16 g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_COUNT];
+extern VECTOR g_camera_script_vector;
+void camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output);
+void camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output);
+extern s32 g_camera_tilt_target;
+extern s32 g_camera_zoom_target;
 extern u16 g_camera_shake_z_offset;
 extern u16 g_camera_position_locked;
+
 /* The CameraSpeedCurve operand, unpacked with the EVENT_CAMERA_SPEED_CURVE_* masks. */
 extern s32 g_camera_speed_curve;
-extern s32 g_camera_wrap_yaw_pending;
 
+extern s32 g_camera_wrap_yaw_pending;
 void camera_thread(void);
 void camera_wait_until_idle(void);
 void camera_init_tilt_and_zoom(void);
@@ -22,7 +143,6 @@ void camera_store_yaw_band(s32 value);
 s32 camera_wrap_yaw_angle(void);
 void camera_store_state_to_script_variables(void);
 
-/* fusion tracks */
 /* A camera operand or key value that keeps the component's current value. */
 enum {
     CAMERA_FUSION_HOLD_SENTINEL = 0x2710,
@@ -34,6 +154,7 @@ typedef struct camera_key {
     s32 value; /* 0x04 */
     u8 _unused_08[8];
 } camera_key_t;
+
 typedef char camera_key_size_must_be_16[sizeof(camera_key_t) == 16 ? 1 : -1];
 
 /* Provisional per-component camera fusion track (0xa4 bytes), seeded by
@@ -50,13 +171,10 @@ typedef struct camera_track {
     s32 segment_duration; /* 0x9c */
     s32 finished;         /* 0xa0 */
 } camera_track_t;
+
 typedef char camera_track_size_must_be_164[sizeof(camera_track_t) == 164 ? 1 : -1];
-
 void camera_fusion_thread(void);
-
-/* fixed-point math */
 extern s32 g_camera_cross_product_overflow; /* set by the Q12 cross product on overflow */
-
 s32 mul_div_s64(s32 a, s32 b, s32 c);
 s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 

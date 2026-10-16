@@ -5,7 +5,7 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
-#include "fft/world_menu.h"
+#include "fft/screen.h"
 #include "psx/types.h"
 
 /* Point the scrollable list at a -1 terminated array of entry ids and their

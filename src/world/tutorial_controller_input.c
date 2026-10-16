@@ -1,17 +1,14 @@
 /* Tutorial controller input and input with message state. */
 
-#include "fft/main.h"
-#include "fft/main_sound.h"
+#include "fft/help.h"
+#include "fft/input.h"
 #include "fft/menu.h"
-#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_window.h"
+#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
-#include "fft/world_gfx.h"
-#include "fft/world_menu.h"
-#include "fft/world_script.h"
-#include "fft/world_text.h"
+#include "fft/tutorial.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

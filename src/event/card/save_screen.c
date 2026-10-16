@@ -2,25 +2,29 @@
  * scrolling slot list. */
 
 #include "fft/bits.h"
-#include "fft/event_card.h"
+#include "fft/brave_story.h"
+#include "fft/calendar.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
-#include "fft/main_card.h"
-#include "fft/main_item.h"
-#include "fft/main_save.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
+#include "fft/item.h"
 #include "fft/memcard.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_script.h"
 #include "fft/menu_window.h"
+#include "fft/music.h"
+#include "fft/party.h"
+#include "fft/proposition.h"
+#include "fft/save.h"
+#include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
+#include "fft/sound_novel.h"
+#include "fft/state.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit_identity.h"
@@ -32,7 +36,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void save_build_image(s32 slot);
 static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void save_build_slot_description(s32 mode, u8* destination);
 static void save_init_menu_state(void);
@@ -444,7 +447,7 @@ static void save_update_write(s32 slot) {
  * writer. The summary's name, job and level come from the first Ramza in the
  * roster, or from the last roster slot when there is none.
  */
-static void save_build_image(s32 slot) {
+void save_build_image(s32 slot) {
     s32 i;
     s32 j;
     s32 unused_18;

@@ -1,10 +1,13 @@
 /* The new game display setter (a second copy of the display setter), display swaps and fades, vsync, draw sync and CD
  * callbacks, music loading, playback and parameters, tunes, and sound effects. */
 
-#include "fft/main.h"
-#include "fft/main_file.h"
-#include "fft/main_gfx.h"
-#include "fft/main_sound.h"
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/memory.h"
+#include "fft/music.h"
+#include "fft/save.h"
+#include "fft/sound.h"
+#include "fft/system.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

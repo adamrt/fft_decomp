@@ -1,6 +1,5 @@
 /* Reconciling an item category list with what the party owns. */
 
-#include "fft/data_item.h"
 #include "fft/item.h"
 #include "psx/types.h"
 

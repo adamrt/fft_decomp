@@ -1,17 +1,16 @@
 /* The equipment screen's item browser for one slot, with its stat change preview. */
 
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
+#include "fft/help.h"
 #include "fft/item.h"
-#include "fft/main_sound.h"
-#include "fft/menu_help.h"
+#include "fft/menu.h"
 #include "fft/menu_input.h"
-#include "fft/menu_panel.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
-#include "fft/menu_status.h"
 #include "fft/menu_window.h"
 #include "fft/sound.h"
 #include "fft/text.h"
+#include "fft/unit_panel.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

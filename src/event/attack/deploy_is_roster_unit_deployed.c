@@ -1,6 +1,6 @@
 /* Whether a roster unit stands on one of the current squad's deployment tiles. */
 
-#include "fft/event_attack.h"
+#include "fft/deploy.h"
 #include "psx/types.h"
 
 /* Return 1 when the roster unit stands on one of the current squad's 5x5 deployment tiles.

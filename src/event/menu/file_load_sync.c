@@ -1,6 +1,6 @@
 /* A disc read through the main stack that yields every frame until the load has finished. */
 
-#include "fft/main_file.h"
+#include "fft/file.h"
 #include "fft/thread.h"
 #include "psx/types.h"
 

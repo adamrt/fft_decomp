@@ -2,7 +2,7 @@
 
 #include "fft/gfx.h"
 #include "fft/memory.h"
-#include "fft/menu_panel.h"
+#include "fft/menu.h"
 #include "psx/libgpu.h"
 
 /* Clear the first draw area's width and install the default second draw area. */

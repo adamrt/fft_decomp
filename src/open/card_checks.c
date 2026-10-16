@@ -1,7 +1,7 @@
 /* Card info with retries, info result polling, polling until stable and slot checks. */
 
 #include "fft/memcard.h"
-#include "fft/open.h"
+#include "fft/title.h"
 #include "psx/libapi.h"
 #include "psx/types.h"
 

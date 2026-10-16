@@ -1,9 +1,9 @@
 /* Wrapped horizontal selection and textured quad rects. */
 
-#include "fft/event_jobstts.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
+#include "fft/status_screen.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

@@ -1,17 +1,15 @@
 /* The per-frame event input update, with edge and auto-repeat input, a yield and the thread status indicators. */
 
-#include "fft/battle_event.h"
-#include "fft/event_bunit.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
+#include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
-#include "fft/menu_panel.h"
 #include "fft/script.h"
 #include "fft/sound.h"
-#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit_list.h"
+#include "fft/unit_panel.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

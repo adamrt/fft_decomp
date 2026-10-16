@@ -1,11 +1,9 @@
 /* Background sound threads, thread slot and task lookups, jump target searches, script conditions and variables, the
  * event random generator, text section pointers, event input, primitive and draw mode helpers and number glyphs. */
 
-#include "fft/battle.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -16,6 +14,8 @@
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "fft/unit_panel.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/suzuki.h"

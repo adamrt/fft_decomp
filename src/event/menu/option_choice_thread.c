@@ -1,6 +1,5 @@
 /* The option menu's value picker thread for one game option. */
 
-#include "fft/main_sound.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
@@ -16,10 +15,11 @@
  *   it the target's second unreferenced 8-byte slot (frame 0x60; the text loop's entry test
  *   supplies the first). */
 
-#include "fft/main.h"
+#include "fft/input.h"
 #include "fft/menu_input.h"
-#include "fft/menu_option.h"
 #include "fft/menu_window.h"
+#include "fft/option.h"
+#include "fft/state.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

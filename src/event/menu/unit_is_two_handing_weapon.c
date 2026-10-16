@@ -1,7 +1,6 @@
 /* Whether a unit holds a single weapon in two hands. */
 
-#include "fft/data_item.h"
-#include "fft/main_item.h"
+#include "fft/item.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 

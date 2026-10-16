@@ -1,6 +1,7 @@
 /* The equipment and ability list threads. */
 
-#include "fft/data_item.h"
+#include "fft/formation.h"
+#include "fft/formation_ability.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
@@ -9,14 +10,12 @@
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
-#include "fft/menu_panel.h"
-#include "fft/menu_status.h"
+#include "fft/screen.h"
 #include "fft/script.h"
+#include "fft/status_screen.h"
 #include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/world.h"
-#include "fft/world_formation.h"
-#include "fft/world_menu.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

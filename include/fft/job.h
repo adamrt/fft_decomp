@@ -4,36 +4,357 @@
 /* Jobs and abilities shared by the menu overlays and WORLD: the selected job's level, JP and mastery, ability
  * lists, and the row callbacks of the job and ability menus. */
 
-#include "fft/data_ability.h"
-#include "fft/unit.h"
-#include "fft/unit_party.h"
+#include "fft/status.h"
 #include "psx/types.h"
 
-/* job lookups */
+struct party_unit;
+
+enum {
+    JOB_JUMP_VALUE_MASK = 0x7f,
+    JOB_JUMP_STEPPING_STONE = 0x80,
+};
+
+/* One pair for HP, MP, Speed, PA or MA. Unit growth uses the first byte;
+ * deriving the battle stat uses the second. */
+typedef struct job_stat_growth {
+    u8 growth;
+    u8 multiplier;
+} job_stat_growth_t;
+
+typedef char job_stat_growth_size_must_be_2[(sizeof(job_stat_growth_t) == 2) ? 1 : -1];
+
+/*
+ * 0x30-byte job record (g_job_data_pointer). The named fields are those copied
+ * by unit_copy_job_data, unit_calculate_encounter_abilities and
+ * unit_set_equipment_stats into unit_stats_t.
+ */
+typedef struct job_data {
+    u8 skillset;                       /* 0x00 */
+    u8 innate_abilities[8];            /* 0x01; four little-endian u16 ability ids, byte-copied */
+    u8 equipment_categories[4];        /* 0x09 */
+    job_stat_growth_t stat_growths[5]; /* 0x0d; HP, MP, Speed, PA, MA; copied to unit_stats_t 0x81 */
+    u8 move;                           /* 0x17 */
+    u8 jump;                           /* 0x18; JOB_JUMP_* */
+    u8 class_evade;                    /* 0x19; unit_stats_t equipment-stat slot 0x43 */
+    initial_status_sets_t status_sets; /* 0x1a */
+    u8 elemental_affinity[4];          /* 0x29; affinity indices 0 through 3 */
+    u8 spritesheet_id;                 /* 0x2d */
+    u8 job_portrait_palette;           /* 0x2e */
+    u8 monster_graphic;                /* 0x2f; copied to unit_stats_t 0x15e */
+} job_data_t;
+
+typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
+
+/* Job ids index the 160 records of g_job_data. A name is the job's name
+ * in the game's text. Where records share a name, a suffix names the
+ * character: the unit name the game's text has at the same index, which is
+ * also the name the ENTD gives the job's units. Two records of one character
+ * are told apart by the chapter, by the role the ENTD gives the unit (GUEST,
+ * JOIN, ENEMY) or by the record's status sets (UNDEAD, INNATE_KO and
+ * STARTING_KO are its innate and starting statuses). A numbered suffix marks a
+ * record that repeats a name with nothing but its id to name it: 0x35-0x38
+ * repeat four generic jobs for ENTD units that can equip every item type, and
+ * 0x98 is an empty second Holy Dragon. Records without name text (0x00, 0x39-0x3b, 0x9b-0x9f) and
+ * those the text calls "None" (0x8e, 0x8f, 0x92-0x95) have no enumerator. */
+typedef enum job_id {
+    JOB_ID_SQUIRE_RAMZA_CHAPTER_1 = 1,
+    JOB_ID_SQUIRE_RAMZA_CHAPTER_2_3 = 2,
+    JOB_ID_SQUIRE_RAMZA_CHAPTER_4 = 3,
+    JOB_ID_SQUIRE_DELITA = 4,
+    JOB_ID_HOLY_KNIGHT_DELITA = 5,
+    JOB_ID_ARC_KNIGHT_DELITA = 6,
+    JOB_ID_SQUIRE_ALGUS = 7,
+    JOB_ID_ARC_KNIGHT_ZALBAG = 8,
+    JOB_ID_LUNE_KNIGHT_DYCEDARG = 9,
+    JOB_ID_DUKE_LARG = 10,
+    JOB_ID_DUKE_GOLTANA = 11,
+    JOB_ID_PRINCESS_OVELIA = 12,
+    JOB_ID_HOLY_SWORDSMAN_ORLANDU = 13,
+    JOB_ID_HIGH_PRIEST_FUNERAL = 14,
+    JOB_ID_DRAGONER_REIS = 15,
+    JOB_ID_HOLY_PRIEST_ZALMO = 16,
+    JOB_ID_DARK_KNIGHT_GAFGARION_ENEMY = 17,
+    JOB_ID_HELL_KNIGHT_MALAK_INNATE_KO = 18,
+    JOB_ID_BISHOP_SIMON = 19,
+    JOB_ID_CLERIC_ALMA_STARTING_KO = 20,
+    JOB_ID_ASTROLOGIST_OLAN = 21,
+    JOB_ID_ENGINEER_MUSTADIO_JOIN = 22,
+    JOB_ID_DARK_KNIGHT_GAFGARION_GUEST = 23,
+    JOB_ID_CARDINAL_DRACLAU = 24,
+    JOB_ID_HEAVEN_KNIGHT_RAFA_GUEST = 25,
+    JOB_ID_HELL_KNIGHT_MALAK = 26,
+    JOB_ID_ARC_KNIGHT_ELMDOR = 27,
+    JOB_ID_DELITAS_SIS_TETA = 28,
+    JOB_ID_ARC_DUKE_BARINTEN = 29,
+    JOB_ID_HOLY_KNIGHT_AGRIAS_JOIN = 30,
+    JOB_ID_TEMPLE_KNIGHT_BEOWULF = 31,
+    JOB_ID_WHITE_KNIGHT_WIEGRAF_CHAPTER_1 = 32,
+    JOB_ID_ARC_WITCH_BALMAFULA = 33,
+    JOB_ID_ENGINEER_MUSTADIO_GUEST = 34,
+    JOB_ID_BI_COUNT_RUDVICH = 35,
+    JOB_ID_DIVINE_KNIGHT_VORMAV = 36,
+    JOB_ID_DIVINE_KNIGHT_ROFEL = 37,
+    JOB_ID_KNIGHT_BLADE_IZLUDE = 38,
+    JOB_ID_SORCERER_KLETIAN = 39, /* "Sorceror" in the name text */
+    JOB_ID_WHITE_KNIGHT_WIEGRAF_CHAPTER_3 = 40,
+    JOB_ID_HEAVEN_KNIGHT_RAFA_JOIN = 41,
+    JOB_ID_DIVINE_KNIGHT_MELIADOUL_JOIN = 42,
+    JOB_ID_ENGINEER_BALK = 43,
+    JOB_ID_CLERIC_ALMA_INNATE_KO = 44,
+    JOB_ID_ASSASSIN_CELIA = 45,
+    JOB_ID_ASSASSIN_LEDE = 46,
+    JOB_ID_DIVINE_KNIGHT_MELIADOUL_ENEMY = 47,
+    JOB_ID_CLERIC_ALMA = 48,
+    JOB_ID_PHONY_SAINT_AJORA = 49,
+    JOB_ID_SOLDIER_CLOUD = 50,
+    JOB_ID_ARC_KNIGHT_ZALBAG_VAMPIRE = 51,
+    JOB_ID_HOLY_KNIGHT_AGRIAS_GUEST = 52,
+    JOB_ID_CHEMIST_35 = 53,
+    JOB_ID_PRIEST_36 = 54,
+    JOB_ID_WIZARD_37 = 55,
+    JOB_ID_ORACLE_38 = 56,
+
+    JOB_ID_WARLOCK_VELIUS = 60,
+    JOB_ID_KNIGHT_UNDEAD = 61,
+    JOB_ID_ANGEL_OF_DEATH_ZALERA = 62,
+    JOB_ID_ARCHER_UNDEAD = 63,
+    JOB_ID_REGULATOR_HASHMALUM = 64,
+    JOB_ID_HOLY_ANGEL_ALTIMA = 65,
+    JOB_ID_WIZARD_UNDEAD = 66,
+    JOB_ID_IMPURE_KING_QUEKLAIN = 67,
+    JOB_ID_TIME_MAGE_UNDEAD = 68,
+    JOB_ID_GHOST_OF_FURY_ADRAMELK = 69,
+    JOB_ID_ORACLE_UNDEAD = 70,
+    JOB_ID_SUMMONER_UNDEAD = 71,
+    JOB_ID_HOLY_DRAGON_REIS = 72,
+    JOB_ID_ARCH_ANGEL_ALTIMA = 73,
+
+    JOB_ID_SQUIRE = 74,
+    JOB_ID_CHEMIST = 75,
+    JOB_ID_KNIGHT = 76,
+    JOB_ID_ARCHER = 77,
+    JOB_ID_MONK = 78,
+    JOB_ID_PRIEST = 79,
+    JOB_ID_WIZARD = 80,
+    JOB_ID_TIME_MAGE = 81,
+    JOB_ID_SUMMONER = 82,
+    JOB_ID_THIEF = 83,
+    JOB_ID_MEDIATOR = 84,
+    JOB_ID_ORACLE = 85,
+    JOB_ID_GEOMANCER = 86,
+    JOB_ID_LANCER = 87,
+    JOB_ID_SAMURAI = 88,
+    JOB_ID_NINJA = 89,
+    JOB_ID_CALCULATOR = 90,
+    JOB_ID_BARD = 91,
+    JOB_ID_DANCER = 92,
+    JOB_ID_MIME = 93,
+
+    JOB_ID_CHOCOBO = 94,
+    JOB_ID_BLACK_CHOCOBO = 95,
+    JOB_ID_RED_CHOCOBO = 96,
+    JOB_ID_GOBLIN = 97,
+    JOB_ID_BLACK_GOBLIN = 98,
+    JOB_ID_GOBBLEDEGUCK = 99,
+    JOB_ID_BOMB = 100,
+    JOB_ID_GRENADE = 101,
+    JOB_ID_EXPLOSIVE = 102,
+    JOB_ID_RED_PANTHER = 103,
+    JOB_ID_CUAR = 104,
+    JOB_ID_VAMPIRE = 105,
+    JOB_ID_PISCO_DEMON = 106,
+    JOB_ID_SQUIDLARKIN = 107,
+    JOB_ID_MINDFLARE = 108,
+    JOB_ID_SKELETON = 109,
+    JOB_ID_BONE_SNATCH = 110,
+    JOB_ID_LIVING_BONE = 111,
+    JOB_ID_GHOUL = 112,
+    JOB_ID_GUST = 113,
+    JOB_ID_REVNANT = 114,
+    JOB_ID_FLOTIBALL = 115,
+    JOB_ID_AHRIMAN = 116,
+    JOB_ID_PLAGUE = 117,
+    JOB_ID_JURAVIS = 118,
+    JOB_ID_STEEL_HAWK = 119,
+    JOB_ID_COCATORIS = 120,
+    JOB_ID_URIBO = 121,
+    JOB_ID_PORKY = 122,
+    JOB_ID_WILDBOW = 123,
+    JOB_ID_WOODMAN = 124,
+    JOB_ID_TRENT = 125,
+    JOB_ID_TAIJU = 126,
+    JOB_ID_BULL_DEMON = 127,
+    JOB_ID_MINITAURUS = 128,
+    JOB_ID_SACRED = 129,
+    JOB_ID_MORBOL = 130,
+    JOB_ID_OCHU = 131,
+    JOB_ID_GREAT_MORBOL = 132,
+    JOB_ID_BEHEMOTH = 133,
+    JOB_ID_KING_BEHEMOTH = 134,
+    JOB_ID_DARK_BEHEMOTH = 135,
+    JOB_ID_DRAGON = 136,
+    JOB_ID_BLUE_DRAGON = 137,
+    JOB_ID_RED_DRAGON = 138,
+    JOB_ID_HYUDRA = 139,
+    JOB_ID_HYDRA = 140,
+    JOB_ID_TIAMAT = 141,
+
+    JOB_ID_BYBLOS = 144,
+    JOB_ID_STEEL_GIANT = 145,
+    JOB_ID_APANDA = 150,
+    JOB_ID_SERPENTARIUS = 151,
+    JOB_ID_HOLY_DRAGON_98 = 152,
+    JOB_ID_ARCHAIC_DEMON = 153,
+    JOB_ID_ULTIMA_DEMON = 154,
+} job_id_e;
+
+/* Table/range sizes are counts, not additional job IDs. The special-monster
+ * predicates include undead human jobs and unnamed slots, not only monsters. */
+enum {
+    JOB_ID_SPECIAL_MONSTER_1_FIRST = JOB_ID_WARLOCK_VELIUS,
+    JOB_ID_SPECIAL_MONSTER_1_COUNT = 14,
+    JOB_ID_GENERIC_FIRST = JOB_ID_SQUIRE,
+    JOB_ID_GENERIC_LAST = JOB_ID_MIME,
+    JOB_ID_GENERIC_COUNT = 20,
+    JOB_ID_MONSTER_FIRST = JOB_ID_CHOCOBO,
+    JOB_ID_MONSTER_LAST = JOB_ID_TIAMAT,
+    JOB_ID_MONSTER_COUNT = JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRST + 1,
+    JOB_ID_CHOCOBO_FAMILY_LAST = JOB_ID_RED_CHOCOBO,
+    JOB_ID_CHOCOBO_FAMILY_COUNT = JOB_ID_CHOCOBO_FAMILY_LAST - JOB_ID_CHOCOBO + 1,
+    JOB_ID_MORBOL_FAMILY_LAST = JOB_ID_GREAT_MORBOL,
+    JOB_ID_MORBOL_FAMILY_COUNT = JOB_ID_MORBOL_FAMILY_LAST - JOB_ID_MORBOL + 1,
+    JOB_ID_SPECIAL_MONSTER_2_FIRST = JOB_ID_BYBLOS,
+    JOB_ID_SPECIAL_MONSTER_2_COUNT = 11,
+    JOB_ID_COUNT = 160,
+};
+
+/* The spritesheet of a generic unit (sprite_sheet_id_e): (job - JOB_ID_GENERIC_FIRST) * 2 plus the
+ * male or female base, the Mime base for a Mime, whose sheets sit one job lower; Bard and Dancer have
+ * their own sheets. */
+enum {
+    JOB_SHEET_GENERIC_MALE_MIME_BASE = 0x5e,
+    JOB_SHEET_GENERIC_FEMALE_MIME_BASE = 0x5f,
+    JOB_SHEET_GENERIC_MALE_BASE = 0x60,
+    JOB_SHEET_GENERIC_FEMALE_BASE = 0x61,
+    JOB_SHEET_BARD = 0x82,
+    JOB_SHEET_DANCER = 0x83,
+};
+
+/* Career slots follow the generic jobs' order. Slot zero holds the unit's base
+ * job, including a special character's job; generic Squire has job ID 74. */
+typedef enum unit_career_job_index {
+    UNIT_CAREER_JOB_INDEX_BASE = 0,
+    UNIT_CAREER_JOB_INDEX_CHEMIST = 1,
+    UNIT_CAREER_JOB_INDEX_KNIGHT = 2,
+    UNIT_CAREER_JOB_INDEX_ARCHER = 3,
+    UNIT_CAREER_JOB_INDEX_MONK = 4,
+    UNIT_CAREER_JOB_INDEX_PRIEST = 5,
+    UNIT_CAREER_JOB_INDEX_WIZARD = 6,
+    UNIT_CAREER_JOB_INDEX_TIME_MAGE = 7,
+    UNIT_CAREER_JOB_INDEX_SUMMONER = 8,
+    UNIT_CAREER_JOB_INDEX_THIEF = 9,
+    UNIT_CAREER_JOB_INDEX_MEDIATOR = 10,
+    UNIT_CAREER_JOB_INDEX_ORACLE = 11,
+    UNIT_CAREER_JOB_INDEX_GEOMANCER = 12,
+    UNIT_CAREER_JOB_INDEX_LANCER = 13,
+    UNIT_CAREER_JOB_INDEX_SAMURAI = 14,
+    UNIT_CAREER_JOB_INDEX_NINJA = 15,
+    UNIT_CAREER_JOB_INDEX_CALCULATOR = 16,
+    UNIT_CAREER_JOB_INDEX_BARD = 17,
+    UNIT_CAREER_JOB_INDEX_DANCER = 18,
+    UNIT_CAREER_JOB_INDEX_MIME = 19,
+} unit_career_job_index_e;
+
+/* Career limits: JP-derived levels stop at 8; ENTD nibbles can encode higher levels. */
+enum {
+    UNIT_JOB_LEVEL_MAX = 8,
+    UNIT_JOB_POINT_MAX = 9999,
+};
+
+/* Serialized unit-career layout shared by party records and battle stats.
+ * unit_generate_party_record clears the 0x96-byte span, while
+ * job_add_proposition_jp and unit_copy_party_record establish the
+ * little-endian byte order of each serialized JP value. Each packed level byte
+ * stores the even career index in its high nibble and the following odd index
+ * in its low nibble. */
+enum {
+    UNIT_CAREER_JOB_COUNT = JOB_ID_GENERIC_COUNT,
+    UNIT_UNLOCKED_JOB_BYTE_COUNT = 3,
+    /* Mime has JP and a packed job level, but no learned-ability row. */
+    UNIT_LEARNED_ABILITY_JOB_COUNT = UNIT_CAREER_JOB_COUNT - 1,
+    /* Each job has 24 learned-ability bits, MSB-first within each byte. */
+    UNIT_LEARNED_ABILITY_BYTES_PER_JOB = 3,
+    UNIT_LEARNED_ABILITY_BYTE_COUNT = UNIT_LEARNED_ABILITY_JOB_COUNT * UNIT_LEARNED_ABILITY_BYTES_PER_JOB,
+    UNIT_JOBS_PER_LEVEL_BYTE = 2,
+    UNIT_JOB_LEVEL_BYTE_COUNT = UNIT_CAREER_JOB_COUNT / UNIT_JOBS_PER_LEVEL_BYTE,
+    UNIT_JOB_LEVEL_BYTE_INDEX_CALCULATOR_BARD = UNIT_CAREER_JOB_INDEX_BARD / UNIT_JOBS_PER_LEVEL_BYTE,
+    UNIT_JOB_LEVEL_BYTE_INDEX_DANCER_MIME = UNIT_CAREER_JOB_INDEX_DANCER / UNIT_JOBS_PER_LEVEL_BYTE,
+    UNIT_JOB_LEVEL_LOW_NIBBLE_MASK = 0x0f,
+    UNIT_JOB_LEVEL_HIGH_NIBBLE_MASK = 0xf0,
+    UNIT_JOB_LEVEL_ONE_LOW_NIBBLE = 0x01,
+    UNIT_JOB_LEVEL_ONE_HIGH_NIBBLE = 0x10,
+    UNIT_JOB_LEVEL_ONE_BOTH_NIBBLES = 0x11,
+    UNIT_JOB_POINT_BYTES_PER_JOB = 2,
+    UNIT_JOB_POINT_BYTE_COUNT = UNIT_CAREER_JOB_COUNT * UNIT_JOB_POINT_BYTES_PER_JOB,
+    UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT = UNIT_JOB_POINT_BYTE_COUNT * 2,
+    UNIT_CAREER_DATA_BYTE_COUNT = UNIT_UNLOCKED_JOB_BYTE_COUNT + UNIT_LEARNED_ABILITY_BYTE_COUNT
+        + UNIT_JOB_LEVEL_BYTE_COUNT + UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT,
+};
+
+/* Twenty job-unlock bits occupy the high bits of the three-byte career value. */
+enum {
+    UNIT_UNLOCKED_JOB_DANCER = 0x20,
+    UNIT_UNLOCKED_JOB_BARD = 0x40,
+    UNIT_UNLOCKED_JOB_SQUIRE = 0x800000,
+};
+
+enum {
+    UNIT_UNLOCKED_JOB_MASK = 0xfffff0,
+};
+
+/* Most JP access is 16-bit; party generation and proposition awards use bytes. */
+typedef union unit_job_point_table {
+    u16 values[UNIT_CAREER_JOB_COUNT];
+    struct {
+        u8 low;
+        u8 high;
+    } entries[UNIT_CAREER_JOB_COUNT];
+} unit_job_point_table_t;
+
+typedef char
+    unit_job_point_table_size_must_be_40[(sizeof(unit_job_point_table_t) == UNIT_JOB_POINT_BYTE_COUNT) ? 1 : -1];
+
+/* Party-to-battle initialization copies both adjacent tables as one block. */
+typedef struct unit_job_points {
+    unit_job_point_table_t current;
+    unit_job_point_table_t total;
+} unit_job_points_t;
+
+typedef char
+    unit_job_points_size_must_be_80[(sizeof(unit_job_points_t) == UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT) ? 1 : -1];
+
+/* Shared 150-byte progression block cleared when a party unit is generated. */
+typedef struct unit_career_data {
+    u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT];                                           /* 0x00 */
+    u8 learned_abilities[UNIT_LEARNED_ABILITY_JOB_COUNT][UNIT_LEARNED_ABILITY_BYTES_PER_JOB]; /* 0x03 */
+    u8 job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]; /* 0x3c; two packed nibbles per byte */
+    unit_job_points_t job_points;             /* 0x46; current JP followed by total JP */
+} unit_career_data_t;
+
+typedef char unit_career_data_size_must_be_150[(sizeof(unit_career_data_t) == UNIT_CAREER_DATA_BYTE_COUNT) ? 1 : -1];
+
 /* The menu library's job helpers (src/event/menu), compiled into WORLD and the
  * EVENT overlays. */
-void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
+void job_calculate_and_store_unlocks(struct party_unit* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
+
 s32 job_find_first_for_skillset(s32 skillset);
 s32 job_get_generic_index(s32 job_id);
 s32 job_get_skillset(s32 job_id);
 s32 job_is_special_monster(s32 job_id);
-
-/* job levels and JP */
-/* The job highlighted in the job list, and the JP, total JP and mastery the job calculators last cached for the
- * row being drawn. */
-extern s16 g_job_list_selected_id;
 extern u32 g_job_current_jp;
 extern u32 g_job_current_total_jp;
 extern s32 g_job_current_mastered;
 
-/* Row callbacks returning the cached values. */
-s32 job_list_get_jp(s32 unused_row);
-s32 job_list_get_total_jp(s32 unused_row);
-s32 job_list_is_mastered(s32 unused_row);
-/* Caches and returns whether the index-th job's skillset has nothing left to learn for the selected unit. */
-s32 job_list_calculate_mastered(s32 index);
-
-/* ability lists */
 /* What ability_list_build lists: every ability of the job, the learned
  * ones, the learn menu's rows, or only a count of the unlearned ones. */
 typedef enum ability_list_mode {
@@ -68,40 +389,16 @@ typedef enum menu_ability_category {
     MENU_ABILITY_CATEGORY_ALL = 15, /* the list builders take any other value as all */
 } menu_ability_category_e;
 
-s32 ability_list_build(
-    s16 unit_index, s16 job_id, menu_ability_category_e ability_category, s16* ability_list, s32 mode);
-
-/* job menu callbacks */
-/* Row callbacks of the job lists: the menu script calls them for a row's level and JP numbers. */
-extern s16 g_job_list_job_ids[];
-extern s32 g_job_list_job_current_level;
-extern u32 g_job_list_job_next_level_jp_requirement;
-
-/* JP needed for the next level of the job whose level job_list_get_level last cached. */
-s32 job_list_calculate_next_level_jp(s32 index);
-s32 job_list_get_level(s32 unused_row);
-s32 job_list_get_next_level_jp(s32 unused_row);
-
-/* ability menu callbacks */
-/* Row callbacks of the ability lists: predicates that pick a row's icon or color, and its displayed costs. The
- * lookups cache the listed ability's data for the panel. */
-extern s16 g_ability_list_ability_category;  /* menu_ability_category_e; BUNIT and JOBSTTS tab selection */
-extern s16 g_ability_list_ability_entries[]; /* Packed ability IDs/flags; -1 terminates the list. */
-extern s32 g_ability_list_ability_type;
-extern ability_data_t* g_ability_list_selected_ability_data;
-extern ability_secondary_pointer_t g_ability_list_selected_ability_secondary_data;
-
-/* 1 unless the entry's disabled bit (0x4000) is set. */
-s32 ability_list_is_learned(s32 index);
-s32 ability_list_is_action(s32 unused_row);
-s32 ability_list_is_non_action_learned(s32 index);
-s32 ability_list_is_non_action_unlearned(s32 index);
-s32 ability_list_is_action_tab(s32 unused_row);
-s32 ability_list_is_reaction_tab(s32 unused_row);
-s32 ability_list_is_support_tab(s32 unused_row);
-s32 ability_list_is_movement_tab(s32 unused_row);
-s32 ability_list_get_mp_cost(s32 index);
-s32 ability_list_get_ct(s32 index);
-s32 ability_list_get_jp_cost(s32 index);
+extern job_data_t g_job_data[];
+extern job_data_t* g_job_data_pointer;
+extern const u16 g_job_level_jp_requirements[UNIT_JOB_LEVEL_MAX];
+extern u16 g_job_jp_requirements_by_level[];
+extern const u8 g_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
+job_data_t* job_get_data(s32 job_id);
+s32 job_find_by_skillset(u8 skillset_id);
+u32 job_calculate_level(u16 job_jp);
+u32 job_calculate_unlocked(const u8* packed_job_levels, u32 gender_flags);
+void job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
+s32 job_add_proposition_jp(u32 party_index, s32 jp);
 
 #endif

@@ -1,39 +1,41 @@
 /* Battle state timing, tile lookups, map data load polling, map command dispatch, ENTD unit loading, the map init
  * sequence and screen color modulation. */
 
-#include "fft/battle.h"
-#include "fft/battle_action.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_effect_projectile.h"
-#include "fft/battle_effect_script.h"
-#include "fft/battle_effect_secondary.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_gfx_resource.h"
+#include "fft/action.h"
+#include "fft/ai.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_light.h"
-#include "fft/battle_map_mesh.h"
+#include "fft/battle_map_load.h"
 #include "fft/battle_map_palette.h"
-#include "fft/battle_map_resource.h"
-#include "fft/battle_map_weather.h"
-#include "fft/battle_menu.h"
-#include "fft/battle_sound.h"
-#include "fft/battle_target.h"
-#include "fft/battle_unit.h"
-#include "fft/battle_unit_encounter.h"
-#include "fft/event_attack.h"
-#include "fft/main.h"
-#include "fft/main_file.h"
-#include "fft/main_gfx.h"
-#include "fft/main_save.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
+#include "fft/camera.h"
+#include "fft/cursor.h"
+#include "fft/deploy.h"
+#include "fft/effect_script.h"
+#include "fft/effect_secondary.h"
+#include "fft/encounter.h"
+#include "fft/fade.h"
+#include "fft/gfx.h"
+#include "fft/memory.h"
 #include "fft/menu.h"
-#include "fft/menu_overlay.h"
+#include "fft/music.h"
+#include "fft/overlay.h"
+#include "fft/projectile.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
+#include "fft/sprite.h"
+#include "fft/sprite_sheet.h"
+#include "fft/state.h"
+#include "fft/system.h"
+#include "fft/turn.h"
+#include "fft/unit.h"
+#include "fft/unit_entd.h"
+#include "fft/unit_runtime.h"
+#include "fft/weather.h"
+#include "fft/world_map.h"
 #include "psx/libc.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* Return g_state_animation_continue_check, nonzero while the action's effect is still
@@ -332,7 +334,7 @@ s32 unit_return_zero_1(void) {
     return 0;
 }
 
-/* A volatile view of battle_unit_encounter.h's global: with the plain
+/* A volatile view of encounter.h's global: with the plain
  * declaration unit_entd_select_and_open compiles differently. */
 extern volatile s32 g_encounter_selection_mode;
 

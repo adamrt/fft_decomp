@@ -1,9 +1,13 @@
 /* A 16-frame thread stop, the bio variable by unit class, bonus image loading, frame waits with skip and a 31-frame RGB
  * fade. */
 
-#include "fft/event_require.h"
-#include "fft/main_file.h"
+#include "fft/after_battle.h"
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/input.h"
+#include "fft/memory.h"
 #include "fft/menu_input.h"
+#include "fft/party.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/thread.h"

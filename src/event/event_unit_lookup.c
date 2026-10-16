@@ -1,15 +1,13 @@
 /* Unit map coordinate copies by runtime id and the missing unit stub. */
 
-#include "fft/battle_unit.h"
-#include "fft/battle_unit_animation.h"
-#include "fft/battle_unit_encounter.h"
-#include "fft/data_status.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
+#include "fft/status.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "fft/unit_identity.h"
+#include "fft/unit_runtime.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

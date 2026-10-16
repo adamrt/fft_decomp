@@ -1,8 +1,10 @@
 /* An item's equipment stats and attribute bonuses, collected for comparison. */
 
-#include "fft/data_item.h"
-#include "fft/main_item.h"
-#include "fft/menu_status.h"
+#include "fft/equipment.h"
+#include "fft/item.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
+#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 /*

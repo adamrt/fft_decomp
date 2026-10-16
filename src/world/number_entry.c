@@ -1,9 +1,9 @@
 /* Entry value announcement, clamped icon lists, entry cursor quads, the number, labeled number and text entry threads,
  * signed numbers and entry chains. */
 
+#include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main_sound.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
@@ -11,12 +11,12 @@
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
+#include "fft/message.h"
+#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/world_formation.h"
-#include "fft/world_menu.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

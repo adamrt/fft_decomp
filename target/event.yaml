@@ -94,7 +94,7 @@ functions:
   - {addr: 0x801c8598, size: 1648, name: formation_prepare_sprites, hash: a2000c973e9a87b8, unit: portrait_textures}
   - {addr: 0x801c8c08, size: 232, name: gfx_set_formation_icon_uv, hash: 353eab0a41a1e1a6, unit: gfx_set_formation_icon_uv}
   - {addr: 0x801c8cf0, size: 1876, name: deploy_run_help_cursor, hash: 76d0198aad839707, unit: deploy_menu}
-  - {addr: 0x801c9444, size: 68, name: text_init_battle_pointers, hash: 161ea8f59be23883, unit: deploy_menu}
+  - {addr: 0x801c9444, size: 68, name: text_init_battle_pointers_from_file, hash: 161ea8f59be23883, unit: deploy_menu}
   - {addr: 0x801c9488, size: 1188, name: deploy_build_strings, hash: 686fb6c3f5cef1eb, unit: deploy_menu}
   - {addr: 0x801c992c, size: 1084, name: battle_map_title_build_strips, hash: 92517fde5ecb3707, unit: deploy_menu}
   - {addr: 0x801c9d68, size: 344, name: battle_map_title_thread, hash: 01e9c8201ecae757, unit: deploy_menu}
@@ -373,7 +373,7 @@ functions:
   - {addr: 0x801c4164, size: 124, name: unit_list_get_max_stat, hash: 0582aeb905d42893, unit: unit_list}
   - {addr: 0x801c41e0, size: 188, name: unit_list_is_selected_in_upper_rows, hash: aa9baa00771d9394, unit: unit_list}
   - {addr: 0x801c429c, size: 280, name: unit_list_update_scroll, hash: eca581c8498c6c0a, unit: unit_list}
-  - {addr: 0x801c43b4, size: 700, name: menu_draw_pressable_button, hash: f23fb25a5d33ec97, unit: unit_list}
+  - {addr: 0x801c43b4, size: 700, name: unit_list_draw_pressable_button, hash: f23fb25a5d33ec97, unit: unit_list}
   - {addr: 0x801c4670, size: 224, name: unit_list_init, hash: 9b7cf4186658e38a, unit: unit_list}
   - {addr: 0x801c4750, size: 4208, name: unit_list_update_grid, hash: 93c70c2e5de2eb05, unit: unit_list}
   - {addr: 0x801c57c0, size: 164, name: unit_list_calculate_falloff, hash: 4e4cda01f5bf2e91, unit: unit_list}

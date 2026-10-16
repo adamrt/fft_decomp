@@ -2,37 +2,38 @@
  * save steps, the save image, slot scans, playtime, descriptions and the slot list. */
 
 #include "fft/bits.h"
+#include "fft/brave_story.h"
+#include "fft/calendar.h"
+#include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
-#include "fft/main_card.h"
-#include "fft/main_file.h"
-#include "fft/main_item.h"
-#include "fft/main_save.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
+#include "fft/help.h"
+#include "fft/input.h"
+#include "fft/item.h"
 #include "fft/memcard.h"
+#include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
+#include "fft/music.h"
+#include "fft/party.h"
+#include "fft/proposition.h"
+#include "fft/save.h"
+#include "fft/screen.h"
+#include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
+#include "fft/sound_novel.h"
+#include "fft/state.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/tutorial.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
-#include "fft/world.h"
-#include "fft/world_card.h"
-#include "fft/world_formation.h"
-#include "fft/world_gfx.h"
-#include "fft/world_menu.h"
-#include "fft/world_script.h"
-#include "fft/world_text.h"
 #include "psx/kernel.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
@@ -43,7 +44,7 @@
 
 /* The memory card title's start in Shift-JIS: full-width "FFT FILE" and three spaces, the first
  * two of which take the save number (bytes 0x10..0x13); the play time follows. */
-static u8 g_save_title_template[0x16]
+u8 g_save_title_template[0x16]
     = { 130, 101, 130, 101, 130, 115, 129, 64, 130, 101, 130, 104, 130, 107, 130, 100, 129, 64, 129, 64, 129, 64 };
 
 static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header);

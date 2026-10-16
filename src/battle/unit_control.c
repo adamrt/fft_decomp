@@ -1,18 +1,19 @@
 /* Unit control by runtime id, including map background color, animation and facing setters, shadow triggers, map jump
  * state starts, coordinate conversions and mounting. */
 
-#include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_gfx.h"
+#include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_light.h"
-#include "fft/battle_move.h"
-#include "fft/battle_unit.h"
-#include "fft/battle_unit_animation.h"
-#include "fft/battle_unit_path.h"
+#include "fft/camera.h"
+#include "fft/fade.h"
 #include "fft/gfx.h"
-#include "fft/main.h"
-#include "fft/map.h"
+#include "fft/move.h"
+#include "fft/sprite.h"
+#include "fft/state.h"
+#include "fft/system.h"
+#include "fft/unit.h"
+#include "fft/unit_list.h"
+#include "fft/unit_runtime.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

@@ -1,12 +1,13 @@
 /* Ability formulas for talk skills, physical stat reduction, PA and WP based damage, absorption and healing, level
  * changes, dragon abilities and brave loss. */
 
-#include "fft/battle_action.h"
-#include "fft/battle_formula.h"
-#include "fft/data_item.h"
-#include "fft/data_job.h"
-#include "fft/data_status.h"
-#include "fft/main_item.h"
+#include "fft/ability.h"
+#include "fft/action.h"
+#include "fft/formula.h"
+#include "fft/item.h"
+#include "fft/job.h"
+#include "fft/reaction.h"
+#include "fft/status.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
 #include "psx/types.h"

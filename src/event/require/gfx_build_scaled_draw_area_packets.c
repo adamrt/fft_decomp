@@ -1,10 +1,10 @@
 /* The double-buffered draw area pair of a window's open and close zoom, kept at the left edge. */
 
-#include "fft/event_require.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"
-#include "fft/menu_panel.h"
+#include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

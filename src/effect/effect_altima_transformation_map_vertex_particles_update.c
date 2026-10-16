@@ -1,12 +1,11 @@
 /* The Altima transformation particle handler, spawning particles at map vertices for timed emitters. */
 
-#include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_effect_geometry.h"
-#include "fft/battle_effect_particle.h"
-#include "fft/battle_effect_script.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
+#include "fft/effect_geometry.h"
+#include "fft/effect_heap.h"
+#include "fft/effect_particle.h"
+#include "fft/effect_script.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

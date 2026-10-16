@@ -1,19 +1,18 @@
 /* The description text thread, the grid cursor, the unit status banner countdown and the bits reader init. */
 
 #include "fft/bits.h"
+#include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main_sound.h"
+#include "fft/help.h"
 #include "fft/menu.h"
-#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/message.h"
+#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/world_formation.h"
-#include "fft/world_menu.h"
-#include "fft/world_script.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

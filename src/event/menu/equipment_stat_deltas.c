@@ -1,8 +1,9 @@
 /* Stat deltas of swapping equipment and the scaled preview subtraction. */
 
-#include "fft/data_item.h"
+#include "fft/equipment.h"
 #include "fft/item.h"
-#include "fft/menu_status.h"
+#include "fft/menu.h"
+#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 static void equipment_subtract_scaled_stat_preview(

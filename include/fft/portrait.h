@@ -1,0 +1,66 @@
+#ifndef PORTRAIT_H
+#define PORTRAIT_H
+
+/* Unit portraits and their cross-fades. */
+
+#include "fft/gfx.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
+
+void portrait_load_party(void);
+void portrait_prepare_party_textures(void);
+
+/* One EVTFACE.BIN block: pixels followed by eight 16-color palettes. */
+typedef struct menu_portrait_image_file {
+    u32 pixels[8][48][4];  /* 0x0000; eight 32x48 4bpp portraits */
+    palette_t palettes[8]; /* 0x1800; four palettes per uploaded VRAM row */
+    u8 _unused_1900[0x700];
+} portrait_image_file_t;
+
+typedef char portrait_image_file_size_must_be_8192[sizeof(portrait_image_file_t) == 8192 ? 1 : -1];
+
+/* EVENT/WLDFACE.BIN is four of these sheets: forty 32x48 portraits at 4 bits
+ * per pixel, eight across and five down, then sixteen rows of four palettes.
+ * Palette n is portrait n's; rows 10-15 hold the other palettes of the monster
+ * portraits, one row per monster with the palette number as the column. */
+typedef struct menu_portrait_sheet {
+    u8 pixels[240][128];       /* 0x0000; 4bpp, 256 pixels per row */
+    palette_t palettes[16][4]; /* 0x7800; four 16-color palettes per row */
+} portrait_sheet_t;
+
+typedef char portrait_sheet_size_must_be_32768[(sizeof(portrait_sheet_t) == 32768) ? 1 : -1];
+extern u16 g_portrait_index_by_sprite_set[];
+extern RECT g_portrait_sheet_rect_0;
+extern RECT g_portrait_sheet_rect_1;
+extern RECT g_portrait_sheet_rect_2;
+extern RECT g_portrait_sheet_rect_3;
+extern RECT g_portrait_special_rect;
+extern RECT g_portrait_special_palette_rect;
+
+/* Unreferenced in both scenes: uploads one EVTFACE.BIN portrait and its palettes. */
+void portrait_load_image(s32 portrait_id);
+
+/* ATTACK, REQUIRE, WORLD and the EVENT library each build their own body. */
+void portrait_build_poly(s32 portrait_id, POLY_FT4* poly);
+
+/* BATTLE's body takes a battle id and textures the quad from the unit's spritesheet page; WORLD's takes a
+ * portrait code into the WLDFACE.BIN sheets. */
+void portrait_build_unit_poly(POLY_FT4* poly, s32 id);
+
+extern u8 g_portrait_cell_pixels[];
+extern RECT g_portrait_cell_rect;
+extern RECT g_portrait_palette_rect;
+void portrait_prepare_party_textures(void);
+
+void portrait_build_transition(const RECT* texture_rect, s32* transition, const s32* first_portrait,
+    const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
+
+extern u8 g_portrait_special_unit_id;
+
+/* WLDFACE portrait for portrait slot 20: ATTACK sets it from the scenario
+ * record and portrait_prepare_party_textures uploads it before the
+ * battle; BATTLE never reads it. */
+extern u8 g_portrait_special_wldface_id;
+
+#endif

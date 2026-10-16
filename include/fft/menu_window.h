@@ -4,13 +4,11 @@
 /* Menu and message windows: their frame images, the window buffers the dialog threads draw into, window
  * scaling, the icon sprites menu windows draw cursors and arrows with, and the window frame panels. */
 
-#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* window images */
 /* Window images are 4bpp images built from the glyph sheet's eight-tile border and interior patterns; a message
  * window can add a tail that points at the speaker. */
 
@@ -30,14 +28,16 @@ typedef enum menu_window_frame_mode {
 extern u8 g_menu_window_frame_image[];
 
 void menu_build_window_image_row(const u16* tiles, u16* row, s32 count, s32 index);
+
 /* With keep set, returns the image instead of uploading and freeing it. */
 u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
+
 void menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
+
 /* In BATTLE, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD at scroll list depth 2 draws into the fixed UI buffer past the
  * companion overlay instead of allocating. */
 u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
 
-/* window buffers */
 /* menu_window_buffer_t::icon_flags: which of the window's three icon sprites
  * are drawn. */
 typedef enum menu_window_icon_flags {
@@ -77,29 +77,27 @@ typedef struct menu_window_buffer {
     rgb24_t color;        /* 0x114; window tint */
     u8 is_message_box;    /* 0x117: set by the message-box thread; alternate frame clut and tint */
 } menu_window_buffer_t;
-typedef char menu_window_buffer_size_must_be_280[(sizeof(menu_window_buffer_t) == 280) ? 1 : -1];
 
+typedef char menu_window_buffer_size_must_be_280[(sizeof(menu_window_buffer_t) == 280) ? 1 : -1];
 extern menu_window_buffer_t* g_menu_window_buffer_slots[6];
 extern menu_window_buffer_t g_menu_window_buffers[6];
-
 menu_window_buffer_t* menu_alloc_window_buffer_pair(void);
 void menu_reset_window_buffer_slots(void);
 void menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
+
 /* BATTLE's and WORLD's bodies differ. */
 void menu_draw_active_window_frames(void);
 
-/* window scaling */
 /* Transition step of the windows that zoom open: menu script command 0x16 advances it up to 4, and the zoomed
  * draw-area command crops each window by it. */
 extern s8 g_gfx_transition_frame;
-extern u16* g_menu_window_tween_easing_tables[];
 
+extern u16* g_menu_window_tween_easing_tables[];
 void menu_set_window_scale_step(s32 value);
 s32 menu_get_window_scale_step(void);
 void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 
-/* window icons */
 /* Icon packet head: two DR_MODE packets at +0x00/+0x0c and four SPRT packets
  * at +0x18 (CLUT ids at +0x26/+0x3a/+0x4e/+0x62). The submitter draws all
  * six packets. */
@@ -108,6 +106,7 @@ typedef struct menu_icon_sprites {
     DR_MODE draw_mode;
     SPRT sprites[4];
 } menu_icon_sprites_t;
+
 typedef char menu_icon_sprites_size_must_be_104[(sizeof(menu_icon_sprites_t) == 104) ? 1 : -1];
 
 /* The 0x7c-byte icon record menu_build_window_sprites fills: menu_icon_sprites_t followed by three borrowed
@@ -122,10 +121,10 @@ typedef struct menu_icon_record {
 void menu_select_icon_cluts(menu_icon_sprites_t* frame);
 void menu_submit_icon_primitives(menu_icon_sprites_t* frame);
 void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);
+
 /* BATTLE's and WORLD's bodies differ. */
 void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 
-/* window frames */
 /* Shared window record whose signed rectangle the window-frame and tiled
  * rectangle commands use for source 2 (g_menu_window_rect_source). */
 typedef struct menu_window_rect_source {
@@ -146,6 +145,7 @@ typedef struct menu_panel_frame {
     /* 0x130; menu_init_scaled_draw_area_packets */
     scaled_draw_area_pair_t draw_areas;
 } menu_panel_frame_t;
+
 typedef char menu_panel_frame_size_must_be_344[sizeof(menu_panel_frame_t) == 344 ? 1 : -1];
 
 /* Scratch in the event-overlay area past the scene program: the unit stats panels lay it out as two sprite
@@ -158,11 +158,12 @@ typedef union menu_scratch_buffer {
 } menu_scratch_buffer_t;
 
 extern menu_window_rect_source_t* g_menu_window_rect_source;
+
 /* Texture windows of the frame pieces the frame threads upload. */
 extern RECT g_menu_thin_panel_texture_windows[7];
+
 extern RECT g_menu_panel_texture_windows[7];
 extern menu_scratch_buffer_t g_menu_scratch_buffer;
-
 void menu_window_frame_thread(void);
 void menu_thin_window_frame_thread(void);
 

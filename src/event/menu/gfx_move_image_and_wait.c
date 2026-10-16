@@ -1,5 +1,6 @@
 /* A VRAM rectangle copy that waits for the copy to finish. */
 
+#include "fft/gfx_image.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

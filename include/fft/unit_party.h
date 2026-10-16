@@ -3,10 +3,10 @@
 
 /* Party records: the persistent roster of party_unit_t records and its slots. */
 
+#include "fft/job.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 
-/* roster */
 /* The persistent roster, g_party_units, holds 16 formation slots
  * followed by four guest slots, each with the party_unit_t 0x100-byte stride. */
 enum {
@@ -22,10 +22,6 @@ enum {
     PARTY_ID_NONE = 255,
 };
 
-/* Index of the unit the unit-list screens have selected. */
-extern s16 g_unit_selected_index;
-
-/* records */
 /* Serialized birthday and zodiac bits. */
 enum {
     PARTY_BIRTHDAY_DAY_MASK = 0x01ff,
@@ -66,6 +62,7 @@ typedef struct party_unit {
     u8 egg_color;        /* 0xd2; create/save/generate unit stores */
     u8 _unused_d3[0x2d]; /* 0xd3; saves and loads copy 0xe0 bytes per record, so 0xe0..0xff is not saved */
 } party_unit_t;
+
 typedef char party_unit_size_must_be_256[(sizeof(party_unit_t) == 256) ? 1 : -1];
 
 #endif

@@ -1,10 +1,11 @@
 /* CARD's own menu commands: texture page, ordering-table entry and
  * zero-padded number. */
 
-#include "fft/event_card.h"
 #include "fft/gfx.h"
+#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
+#include "fft/save.h"
 #include "fft/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"

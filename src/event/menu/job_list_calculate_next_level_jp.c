@@ -1,9 +1,8 @@
 /* The JP the last looked-up job needs for its next level, as a row callback. */
 
 #include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/job_list.h"
 #include "fft/menu_script.h"
-#include "fft/unit.h"
 #include "psx/types.h"
 
 /* JP needed for the next level of the job whose level

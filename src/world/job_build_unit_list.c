@@ -1,10 +1,11 @@
 /* The list of jobs a formation unit can select, optionally with jobs other units have unlocked. */
 
 #include "fft/bits.h"
-#include "fft/data_job.h"
+#include "fft/formation.h"
+#include "fft/formation_job.h"
 #include "fft/job.h"
+#include "fft/job_list.h"
 #include "fft/unit.h"
-#include "fft/world_formation.h"
 #include "psx/types.h"
 
 /*

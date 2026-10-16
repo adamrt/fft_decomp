@@ -3,9 +3,12 @@
 
 /* Cooperative game threads and the BATTLE/WORLD scheduler interfaces. */
 
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
-/* context */
+void thread_exit_current_wrapper(void);
+
 /* Native cooperative scheduler context, not scenario bytecode or its operand
  * buffer. thread_start initializes the same layout in BATTLE and WORLD: both
  * index slots with thread_id << 10 and start SP/FP at slot + 0x3f0.
@@ -40,6 +43,7 @@ typedef struct thread {
     u8 stack[0x3f0 - 0x6c];     /* 0x6c: the thread's stack */
     u32 stack_top[4];           /* 0x3f0: initial SP/FP; the stack grows down from here */
 } thread_t;
+
 typedef char thread_size_must_be_1024[(sizeof(thread_t) == 1024) ? 1 : -1];
 
 /* Thread ids run below sixteen, and reset loops clear those sixteen
@@ -53,9 +57,9 @@ enum {
     THREAD_LAST_WORD_OFFSET = 0x3ffc,
 };
 
-/* scheduler storage */
 /* Fixed backing array and the separate pointer used to access its slots. */
 extern thread_t g_thread_contexts[];
+
 extern thread_t* g_threads;
 extern s32 g_thread_current_id;
 
@@ -64,7 +68,6 @@ extern s32 g_thread_current_id;
  * event interpreter's. */
 extern u8 g_thread_status_snapshot[16];
 
-/* slots */
 /* Slot numbers of the cooperative threads: the index into g_threads
  * and the first argument of the thread calls. Slot 0 is the
  * program's main loop. No slot belongs to one thread for good: the battle and
@@ -121,7 +124,6 @@ typedef enum thread_borrowed_slot {
     THREAD_BORROWED_SLOT_FADE_OUT = 13, /* the fade-out thread that follows the unit list overlay */
 } thread_borrowed_slot_e;
 
-/* tasks */
 /* task_id values shared by the BATTLE and WORLD schedulers. Each named id is
  * set by one thread function (thread_set_current_task_id or a direct task_id
  * store) and is looked up with thread_find_running_by_task.
@@ -180,7 +182,6 @@ typedef enum thread_task {
     THREAD_TASK_UNIT_MESSAGE = 70,
 } thread_task_e;
 
-/* lifecycle */
 void thread_start(s32 thread_id, void (*function)(void));
 void thread_resume(s32 thread_id);
 void thread_suspend(s32 thread_id);
@@ -190,8 +191,6 @@ void thread_reset_scheduler(void);
 s32 thread_find_running_by_task(s32 task_id);
 s32 thread_resolve_id(s32 requested_thread_id);
 s32 thread_resolve_id_after_current(s32 requested_thread_id);
-
-/* parameters and task ids */
 void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
 void thread_set_four_parameters(s32 thread_id, s32 first, s32 second, s32 third, s32 fourth);
 s32 thread_get_current_task_id(void);
@@ -200,22 +199,21 @@ void thread_set_current_task_id(s32 task_id);
 /* Original assembly accessors: BATTLE adds the record offset with addu,
  * WORLD with the trapping add. */
 s32 thread_get_current_parameter_1(void);
+
 s32 thread_get_current_parameter_2(void);
 s32 thread_get_current_parameter_3(void);
 s32 thread_is_previous_running(void);
 s32 thread_is_running_asm(s32 thread_id);
 
-/* scheduling */
 /* Yield to the next active context in the resident scene scheduler.
  * BATTLE scans 16 slots; WORLD scans 17. Each keeps its own frame hook. */
 void thread_yield(void);
+
 void thread_wait_frames(s32 count);
 void thread_wait_until_inactive(s32 thread_id);
-void unit_view_wait_for_panels(void);
 void thread_wait_forever(void);
 void thread_wait_forever_by_frames(void);
 
-/* context capture */
 /* Named relocations preserve the assembled helpers' $at load sequence. */
 #define THREAD_LOAD_GLOBAL(result, global)                                                                             \
     __asm__("lui $1, %%hi(%1)\naddu $1,$1,$zero\nlw %0, %%lo(%1)($1)"                                                  \
@@ -226,7 +224,6 @@ void thread_wait_forever_by_frames(void);
 /* Read the running CPU's $gp when seeding a native thread context. */
 void* thread_get_current_global_pointer(void);
 
-/* callbacks */
 /* Main-stack callback dispatch, bound to the resident BATTLE or WORLD scheduler.
  * It forwards a0-a3 unchanged and switches to thread 0's stack when necessary;
  * arguments beyond those registers are not copied across the stack switch.

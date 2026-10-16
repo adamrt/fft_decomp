@@ -1,14 +1,14 @@
 /* Dismissing units, generating units and setting unit names. */
 
-#include "fft/data_item.h"
-#include "fft/main_unit.h"
-#include "fft/menu_status.h"
+#include "fft/formation.h"
+#include "fft/formation_item.h"
+#include "fft/item.h"
+#include "fft/menu.h"
+#include "fft/party.h"
 #include "fft/text.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
-#include "fft/world_formation.h"
-#include "fft/world_text.h"
 #include "psx/types.h"
 
 /* Return whether a formation unit can be dismissed: not Ramza (any chapter's sprite set) and

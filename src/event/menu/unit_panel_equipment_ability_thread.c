@@ -1,18 +1,18 @@
 /* The thread drawing the selected unit's combined equipment and ability status panel. */
 
-#include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
+#include "fft/item.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
-#include "fft/menu_panel.h"
-#include "fft/menu_status.h"
 #include "fft/script.h"
+#include "fft/status_screen.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

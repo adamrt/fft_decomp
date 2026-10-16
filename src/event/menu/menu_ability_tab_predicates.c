@@ -1,5 +1,6 @@
 /* Ability category tab tests. */
 
+#include "fft/ability_list.h"
 #include "fft/job.h"
 #include "psx/types.h"
 

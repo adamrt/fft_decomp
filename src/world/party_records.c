@@ -1,15 +1,16 @@
 /* Unit records built from the party, the record list and saving records back to the party. */
 
-#include "fft/data_item.h"
-#include "fft/data_job.h"
-#include "fft/data_skillset.h"
+#include "fft/ability.h"
+#include "fft/formation.h"
+#include "fft/formation_ability.h"
+#include "fft/item.h"
 #include "fft/job.h"
-#include "fft/main_item.h"
-#include "fft/main_unit.h"
-#include "fft/menu_status.h"
+#include "fft/menu.h"
+#include "fft/party.h"
+#include "fft/skillset.h"
 #include "fft/unit.h"
+#include "fft/unit_panel.h"
 #include "fft/unit_party.h"
-#include "fft/world_formation.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

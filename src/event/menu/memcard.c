@@ -4,7 +4,7 @@
  * the opening links only the slot and event routines and keeps its own info and polling bodies. */
 
 #include "fft/memcard.h"
-#include "fft/main_card.h"
+#include "fft/save.h"
 #include "psx/kernel.h"
 #include "psx/libapi.h"
 #include "psx/libc.h"

@@ -1,5 +1,6 @@
 /* Starting a text thread only when its scheduler slot is idle. */
 
+#include "fft/message.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/types.h"

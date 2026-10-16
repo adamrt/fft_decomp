@@ -1,16 +1,16 @@
 /* The unit list's job list for the selected unit, with job level and JP row callbacks. */
 
-#include "fft/event_bunit.h"
+#include "fft/help.h"
 #include "fft/job.h"
-#include "fft/main_sound.h"
+#include "fft/job_list.h"
 #include "fft/menu.h"
-#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/sound.h"
 #include "fft/text.h"
-#include "fft/unit_party.h"
+#include "fft/unit.h"
+#include "fft/unit_list.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

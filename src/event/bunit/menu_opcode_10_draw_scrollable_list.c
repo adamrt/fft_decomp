@@ -1,15 +1,13 @@
 /* The menu command that draws a scrollable list's body, moving its cursor and scrolling by row or page. */
 
-#include "fft/event_bunit.h"
 #include "fft/gfx.h"
-#include "fft/main.h"
-#include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/sound.h"
 #include "fft/text.h"
+#include "fft/unit_list.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

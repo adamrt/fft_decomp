@@ -1,9 +1,12 @@
 /* Move and jump increases, stat changes due to equipment and item stat deltas. */
 
-#include "fft/data_ability.h"
-#include "fft/data_item.h"
-#include "fft/main_item.h"
-#include "fft/menu_status.h"
+#include "fft/ability.h"
+#include "fft/equipment.h"
+#include "fft/formation_ability.h"
+#include "fft/item.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
+#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 /*

@@ -4,7 +4,7 @@
 #include "fft/gfx_primitive.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
-#include "fft/world_gfx.h"
+#include "fft/screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

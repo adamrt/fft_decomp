@@ -1,15 +1,10 @@
 /* Text entries of window records, shared by the opening and the world map with their own record layouts. */
 
 #include "fft/gfx.h"
-#include "fft/open_gfx.h"
 #include "fft/text.h"
-#include "fft/wldcore_window.h"
-#include "fft/world_sprite.h"
+#include "fft/window.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
-#ifdef FFT_OPEN
-#    include "fft/open.h"
-#endif
 
 #ifdef FFT_WLDCORE
 /* Draw text entry `text_id` into `buffer`, render record `record_index`'s

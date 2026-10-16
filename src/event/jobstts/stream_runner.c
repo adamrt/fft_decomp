@@ -1,10 +1,11 @@
 /* Command stream dispatch and the palette-mode script run. */
 
-#include "fft/event_jobstts.h"
 #include "fft/gfx_primitive.h"
+#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
+#include "fft/status_screen.h"
 #include "psx/types.h"
 
 /* Dispatch every command of a command stream through the handler table until

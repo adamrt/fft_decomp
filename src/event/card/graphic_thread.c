@@ -1,10 +1,11 @@
 /* The render ordering table and the save menu graphic thread. */
 
-#include "fft/event_card.h"
-#include "fft/menu.h"
-#include "fft/menu_panel.h"
+#include "fft/formation.h"
+#include "fft/save.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/zodiac.h"
+#include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

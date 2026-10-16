@@ -1,12 +1,11 @@
 /* Page scroll input, context swaps, and primitive buffer and context init. */
 
-#include "fft/event_jobstts.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
+#include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
 #include "fft/menu_script.h"
+#include "fft/status_screen.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

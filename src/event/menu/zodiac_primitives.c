@@ -2,7 +2,8 @@
 
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/menu_panel.h"
+#include "fft/menu.h"
+#include "fft/zodiac.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

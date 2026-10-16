@@ -1,7 +1,7 @@
 /* Rendering a text entry's glyphs into a menu image, with its substitution, variable, palette and width codes. */
 
 #include "fft/gfx.h"
-#include "fft/main_unit.h"
+#include "fft/party.h"
 #include "fft/script_variable.h"
 #include "fft/text.h"
 #include "psx/libetc.h"

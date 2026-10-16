@@ -1,6 +1,5 @@
 /* Whether a job id is in one of the special monster ranges. */
 
-#include "fft/data_job.h"
 #include "fft/job.h"
 #include "psx/types.h"
 

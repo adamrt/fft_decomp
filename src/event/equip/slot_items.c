@@ -1,13 +1,11 @@
 /* Slot items, equip checks, slot validation and the filtered item list. */
 
+#include "fft/ability.h"
 #include "fft/bits.h"
-#include "fft/data_item.h"
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
 #include "fft/item.h"
-#include "fft/main.h"
-#include "fft/main_item.h"
-#include "fft/menu_option.h"
-#include "fft/menu_status.h"
+#include "fft/menu.h"
+#include "fft/state.h"
 #include "psx/types.h"
 
 static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, s32 item_id);
@@ -52,7 +50,7 @@ s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
  * type bit is set in the unit's equippable-types bitfield, EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP for an item
  * of the "other" menu category or a type the unit cannot use. The low ten
  * bits of the entry are the item id. */
-static s32 equipment_can_equip_item(s16 unit_index, s16 item_entry) {
+s32 equipment_can_equip_item(s16 unit_index, s16 item_entry) {
     s32 item_id = item_entry & ITEM_ENTRY_ID_MASK;
     s32 result;
 

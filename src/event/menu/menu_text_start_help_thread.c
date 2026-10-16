@@ -1,7 +1,9 @@
 /* Starting the help text thread for the current help message. */
 
-#include "fft/menu_help.h"
+#include "fft/help.h"
+#include "fft/menu.h"
 #include "fft/menu_input.h"
+#include "fft/message.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/types.h"

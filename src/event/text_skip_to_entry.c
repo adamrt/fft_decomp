@@ -1,5 +1,6 @@
 /* Skipping forward through text to a numbered entry. */
 
+#include "fft/text.h"
 #include "psx/types.h"
 
 /* Return a pointer to entry entry_index of a packed text section: entries follow one another,

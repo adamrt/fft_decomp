@@ -1,38 +1,35 @@
 /* Location lists, destination confirmation, submenu text pages, common graphics and text loading, thread results and
  * control, palettes, the main menu threads, the card menu, and the formation open requests and screen dispatch. */
 
+#include "fft/ability_list.h"
+#include "fft/command.h"
+#include "fft/file.h"
+#include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
-#include "fft/main_file.h"
-#include "fft/main_gfx.h"
-#include "fft/main_sound.h"
+#include "fft/input.h"
+#include "fft/location.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
-#include "fft/menu_command.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
-#include "fft/menu_option.h"
-#include "fft/menu_overlay.h"
-#include "fft/menu_panel.h"
-#include "fft/menu_selection.h"
 #include "fft/menu_window.h"
+#include "fft/music.h"
+#include "fft/option.h"
+#include "fft/overlay.h"
+#include "fft/portrait.h"
+#include "fft/save.h"
+#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
+#include "fft/state.h"
+#include "fft/system.h"
 #include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/wldcore_gfx.h"
-#include "fft/wldcore_map.h"
-#include "fft/world.h"
-#include "fft/world_card.h"
-#include "fft/world_formation.h"
-#include "fft/world_gfx.h"
-#include "fft/world_menu.h"
-#include "fft/world_script.h"
-#include "fft/world_text.h"
+#include "fft/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -473,7 +470,7 @@ typedef struct world_map_menu_text_window {
     SPRT text_sprite;
     SPRT frame_sprites[2];
 } world_map_menu_text_window_t;
-typedef char world_menu_text_window_record_size_must_be_84[sizeof(world_map_menu_text_window_t) == 84 ? 1 : -1];
+typedef char world_map_menu_text_window_size_must_be_84[sizeof(world_map_menu_text_window_t) == 84 ? 1 : -1];
 
 /* Main menu text window thread:
  * sizes the entry's window to its text, clamps it on screen, redraws the text

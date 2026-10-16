@@ -1,11 +1,9 @@
 /* Waiting for file loads, shared by the opening and the world map; the world map adds a blocking scratch load. */
 
 #include "fft/file.h"
-#include "fft/main.h"
-#include "fft/main_file.h"
-#include "fft/wldcore.h"
-#include "fft/wldcore_gfx.h"
-#include "fft/wldcore_sound.h"
+#include "fft/sound.h"
+#include "fft/system.h"
+#include "fft/world_map.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

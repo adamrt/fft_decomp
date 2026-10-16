@@ -1,18 +1,12 @@
 /* Calendar month and day, the captured world frame, the map tile atlas, tile projection and culling, and clamped
  * scrolling. */
 
+#include "fft/calendar.h"
 #include "fft/gfx.h"
-#include "fft/main.h"
-#include "fft/main_gfx.h"
-#include "fft/unit.h"
+#include "fft/location.h"
+#include "fft/system.h"
 #include "fft/window.h"
-#include "fft/wldcore.h"
-#include "fft/wldcore_gfx.h"
-#include "fft/wldcore_map.h"
-#include "fft/wldcore_menu.h"
-#include "fft/wldcore_proposition.h"
-#include "fft/wldcore_window.h"
-#include "fft/world_sprite.h"
+#include "fft/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"

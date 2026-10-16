@@ -6,7 +6,6 @@
 #include "fft/gfx.h"
 #include "psx/types.h"
 
-/* block sizes and unit selectors */
 enum {
     EVENT_BLOCK_BYTES = 8192,
     EVENT_BLOCK_SECTORS = 4,
@@ -32,7 +31,6 @@ enum {
     EVENT_UNIT_SLOT_EMPTY = 1000,
 };
 
-/* opcodes */
 /* Retail scenario bytecode, reviewed against BATTLE's script_execute_event and
  * the shared BATTLE/WORLD operand-length table g_script_event_instruction_sizes.
  *
@@ -279,7 +277,6 @@ typedef enum event_opcode {
     EVENT_OPCODE_NOP = 0xf2,                  /* 0 */
 } event_opcode_e;
 
-/* operand values */
 /* Built-in operation selected by EVENT_OPCODE_CALL_FUNCTION. The PSX domain
  * is 0x01..0x12 and is shared by the structurally parallel BATTLE and WORLD
  * interpreters. BLOCK_START handles only the mute/unmute selectors. */
@@ -387,7 +384,6 @@ typedef enum event_inflict_status {
     EVENT_INFLICT_STATUS_POISON = 0x02,
 } event_inflict_status_e;
 
-/* event file */
 /* event_file_block_t.text_offset_or_marker once script_load_event has processed the block. */
 #define EVENT_TEXT_OFFSET_PROCESSED 0xf2f2f2f2U
 
@@ -400,9 +396,9 @@ typedef struct event_file_block {
     u32 text_offset_or_marker;
     u8 data[EVENT_BLOCK_BYTES - 4];
 } event_file_block_t;
+
 typedef char event_file_block_size_must_be_8192[(sizeof(event_file_block_t) == EVENT_BLOCK_BYTES) ? 1 : -1];
 
-/* dialog instructions */
 /* Dialogue commands are byte-aligned records in the event instruction stream. */
 typedef struct event_display_message_instruction {
     u8 opcode;
@@ -416,6 +412,7 @@ typedef struct event_display_message_instruction {
     u8 arrow_offset_le[2];
     u8 window_options;
 } event_display_message_instruction_t;
+
 typedef char
     event_display_message_instruction_size_must_be_15[sizeof(event_display_message_instruction_t) == 15 ? 1 : -1];
 
@@ -425,6 +422,7 @@ typedef struct event_change_dialog_instruction {
     u8 text_id_le[2]; /* one-based text id; 0xffff closes the window */
     u8 portrait_selector_le[2];
 } event_change_dialog_instruction_t;
+
 typedef char event_change_dialog_instruction_size_must_be_6[sizeof(event_change_dialog_instruction_t) == 6 ? 1 : -1];
 
 static inline event_display_message_instruction_t* event_display_message_at(u8* base, s32 byte_offset) {
@@ -435,7 +433,6 @@ static inline event_change_dialog_instruction_t* event_change_dialog_at(u8* base
     return (event_change_dialog_instruction_t*)(base + byte_offset);
 }
 
-/* unit operands */
 /* Operand records start after the opcode byte. 16-bit values stay in
  * little-endian byte arrays because the interpreter may address them at any
  * byte alignment. */
@@ -457,6 +454,7 @@ typedef struct event_set_battle_unit_position_instruction {
     u8 _unused_02;
     event_unit_placement_t placement;
 } event_set_battle_unit_position_instruction_t;
+
 typedef char event_set_battle_unit_position_instruction_size_must_be_7
     [sizeof(event_set_battle_unit_position_instruction_t) == 7 ? 1 : -1];
 
@@ -475,6 +473,7 @@ typedef struct event_walk_to_parameters {
     u8 speed_le[2];
     u8 terrain_cost_flag; /* 0 ignores terrain costs; 1 uses them */
 } event_walk_to_parameters_t;
+
 typedef char event_walk_to_parameters_size_must_be_8[sizeof(event_walk_to_parameters_t) == 8 ? 1 : -1];
 
 /* Jump operands: unit id, encoded path length, and direction. */
@@ -497,6 +496,7 @@ typedef struct event_sprite_move_parameters {
     u8 weight;
     u8 duration_or_speed_le[2];
 } event_sprite_move_parameters_t;
+
 typedef char event_sprite_move_parameters_size_must_be_12[sizeof(event_sprite_move_parameters_t) == 12 ? 1 : -1];
 
 typedef struct event_unit_anim_parameters {
@@ -553,6 +553,7 @@ typedef struct event_color_unit_parameters {
     u8 unit_id_le[2];
     event_unit_color_t color;
 } event_color_unit_parameters_t;
+
 typedef char event_color_unit_parameters_size_must_be_7[sizeof(event_color_unit_parameters_t) == 7 ? 1 : -1];
 
 typedef struct event_movement_effect_parameters {
@@ -565,6 +566,7 @@ typedef struct event_change_stats_parameters {
     u8 stat; /* event_change_stats_e */
     u8 delta_le[2];
 } event_change_stats_parameters_t;
+
 typedef char event_change_stats_parameters_size_must_be_5[sizeof(event_change_stats_parameters_t) == 5 ? 1 : -1];
 
 typedef struct event_inflict_status_parameters {
@@ -572,9 +574,9 @@ typedef struct event_inflict_status_parameters {
     u8 mode; /* event_inflict_status_e */
     u8 wait_frames_le[2];
 } event_inflict_status_parameters_t;
+
 typedef char event_inflict_status_parameters_size_must_be_5[sizeof(event_inflict_status_parameters_t) == 5 ? 1 : -1];
 
-/* screen, sound and wait operands */
 typedef struct event_background_sound_parameters {
     u8 sound_id;
     u8 volume_from;
@@ -582,6 +584,7 @@ typedef struct event_background_sound_parameters {
     u8 find_channel;
     u8 frames;
 } event_background_sound_parameters_t;
+
 typedef char
     event_background_sound_parameters_size_must_be_5[sizeof(event_background_sound_parameters_t) == 5 ? 1 : -1];
 
@@ -591,6 +594,7 @@ typedef struct event_earthquake_parameters {
         u8 frames;
     } pulses[2];
 } event_earthquake_parameters_t;
+
 typedef char event_earthquake_parameters_size_must_be_4[sizeof(event_earthquake_parameters_t) == 4 ? 1 : -1];
 
 typedef struct event_color_screen_parameters {
@@ -601,6 +605,7 @@ typedef struct event_color_screen_parameters {
     } colors;
     u8 duration_le[2];
 } event_color_screen_parameters_t;
+
 typedef char event_color_screen_parameters_size_must_be_9[sizeof(event_color_screen_parameters_t) == 9 ? 1 : -1];
 
 /* Six byte-aligned 16-bit lighting targets, followed by the frame duration. */
@@ -609,6 +614,7 @@ typedef struct event_map_light_parameters {
     u8 target_scale_le[3][2];
     u8 duration_le[2];
 } event_map_light_parameters_t;
+
 typedef char event_map_light_parameters_size_must_be_14[sizeof(event_map_light_parameters_t) == 14 ? 1 : -1];
 
 typedef struct event_wait_value_parameters {
@@ -616,7 +622,6 @@ typedef struct event_wait_value_parameters {
     u8 test_value_le[2];
 } event_wait_value_parameters_t;
 
-/* camera operands */
 typedef enum event_camera_component {
     EVENT_CAMERA_COMPONENT_X = 0,
     EVENT_CAMERA_COMPONENT_Z,
@@ -646,18 +651,21 @@ typedef struct event_camera_values {
     u8 rotation_le[3][2];
     u8 zoom_le[2];
 } event_camera_values_t;
+
 typedef char event_camera_values_size_must_be_14[sizeof(event_camera_values_t) == 14 ? 1 : -1];
 
 typedef struct event_camera_parameters {
     event_camera_values_t values;
     u8 duration_le[2];
 } event_camera_parameters_t;
+
 typedef char event_camera_parameters_size_must_be_16[sizeof(event_camera_parameters_t) == 16 ? 1 : -1];
 
 typedef struct event_camera_instruction {
     u8 opcode;
     event_camera_parameters_t parameters;
 } event_camera_instruction_t;
+
 typedef char event_camera_instruction_size_must_be_17[sizeof(event_camera_instruction_t) == 17 ? 1 : -1];
 
 /* Focus scans subsequent instructions for the Camera that it rewrites. */
@@ -666,6 +674,7 @@ typedef struct event_focus_parameters {
     u8 second_unit_id_le[2];
     u8 keep_angle;
 } event_focus_parameters_t;
+
 typedef char event_focus_parameters_size_must_be_5[sizeof(event_focus_parameters_t) == 5 ? 1 : -1];
 
 /* FocusSpeed rewrites the immediately following Camera's duration. */
@@ -677,6 +686,7 @@ typedef struct event_focus_speed_instruction {
     u8 opcode;
     event_focus_speed_parameters_t parameters;
 } event_focus_speed_instruction_t;
+
 typedef char event_focus_speed_instruction_size_must_be_3[sizeof(event_focus_speed_instruction_t) == 3 ? 1 : -1];
 
 #endif

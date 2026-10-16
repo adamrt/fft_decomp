@@ -1,6 +1,7 @@
 /* The panel background's 4x8 grid of shaded textured quads, each row brighter than the one above. */
 
-#include "fft/event_attack.h"
+#include "fft/deploy.h"
+#include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -1,9 +1,10 @@
 /* The idle countdown and the input lockout timer. */
 
+#include "fft/menu.h"
 #include "fft/menu_input.h"
-#include "fft/menu_panel.h"
+#include "fft/screen.h"
 #include "fft/thread.h"
-#include "fft/world_script.h"
+#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 /* Count g_screen_input_lockout_timer down while thread 7 (the comparison status panel) is idle

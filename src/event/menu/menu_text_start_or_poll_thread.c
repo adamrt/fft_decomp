@@ -1,5 +1,6 @@
 /* Starting the text thread when no text is pending, or polling the pending text. */
 
+#include "fft/message.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/types.h"

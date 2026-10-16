@@ -1,18 +1,17 @@
 /* Image loading, screen init and the unit status and equipment thread toggles. */
 
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
+#include "fft/help.h"
 #include "fft/item.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_help.h"
 #include "fft/menu_list.h"
-#include "fft/menu_overlay.h"
-#include "fft/menu_panel.h"
 #include "fft/menu_selection.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

@@ -1,9 +1,9 @@
 /* Page scroll input, context swaps, and primitive buffer and context init. */
 
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
+#include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"

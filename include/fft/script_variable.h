@@ -6,7 +6,6 @@
 #include "fft/script_instruction.h"
 #include "psx/types.h"
 
-/* variable ids */
 /* Event-script variable ids shared by the BATTLE and WORLD interpreters.
  * The calendar and location ids are also serialized into the memory-card
  * slot description by save_build_image. */
@@ -244,7 +243,6 @@ enum {
     EVENT_SCRIPT_PACKED_NIBBLE_WORD_FIRST = 0x97,
 };
 
-/* event ids */
 /* Event ids: EVENT_SCRIPT_VAR_CURRENT_EVENT, the 0x2000-byte block of
  * EVENT/TEST.EVT that holds the event's script and text, and the index of
  * g_scenario_event_finish_operations. The game names only the 64 Brave
@@ -287,18 +285,21 @@ typedef enum event_id {
     EVENT_ID_BEOWULF_INVITATION = 0x1d1,
 } event_id_e;
 
-/* variable bank */
 /* Each scene points to the resident script-variable bank. */
 extern s32* g_script_variables;
+
 /* Suppress recursive write filtering while getters use comparison variable 0. */
 extern u8 g_script_variable_write_guard;
 
 /* Read through the resident scene's variable commands, preserving the comparison
  * result. Reading weather/time first rebuilds it from the separate variables. */
 s32 script_get_variable(s32 variable_id);
+
 void script_set_variable(s32 variable_id, s32 value);
+
 /* The fourth argument is supplied by callers but is not read. */
 void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32 unused);
+
 void script_run_condition(event_opcode_e opcode);
 
 #endif

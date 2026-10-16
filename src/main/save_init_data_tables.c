@@ -1,8 +1,10 @@
 /* Resetting the save record fields and the new game data tables. */
 
-#include "fft/main.h"
-#include "fft/main_save.h"
-#include "fft/wldcore_sound_novel.h"
+#include "fft/brave_story.h"
+#include "fft/proposition.h"
+#include "fft/save.h"
+#include "fft/sound_novel.h"
+#include "fft/system.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

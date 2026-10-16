@@ -1,5 +1,6 @@
 /* LoadImage/StoreImage followed by a drawing wait. */
 
+#include "fft/gfx_image.h"
 #include "psx/libgpu.h"
 
 /* Copy an image from main memory into a VRAM rectangle and wait for the transfer to finish. */

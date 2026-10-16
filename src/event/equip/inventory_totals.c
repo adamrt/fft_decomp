@@ -1,11 +1,11 @@
 /* Textured quad submission and inventory totals. */
 
-#include "fft/data_item.h"
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
 #include "fft/gfx.h"
-#include "fft/main_item.h"
-#include "fft/main_unit.h"
+#include "fft/item.h"
+#include "fft/menu.h"
 #include "fft/menu_gfx.h"
+#include "fft/party.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
 #include "psx/libc.h"

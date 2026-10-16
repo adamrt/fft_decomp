@@ -1,7 +1,8 @@
 /* The unit's level in a listed job, cached for row callbacks. */
 
-#include "fft/event_jobstts.h"
 #include "fft/job.h"
+#include "fft/job_list.h"
+#include "fft/status_screen.h"
 #include "psx/types.h"
 
 /* Job level of the unit in the job list's `index`th job, also left in

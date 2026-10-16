@@ -1,9 +1,11 @@
 /* Ability formulas for magic accuracy, weapon and gun damage, magical damage and healing, quick, golem, CT zero, songs,
  * dances, truth, draw out, break and steal. */
 
-#include "fft/battle_action.h"
-#include "fft/battle_formula.h"
-#include "fft/data_status.h"
+#include "fft/ability.h"
+#include "fft/action.h"
+#include "fft/formula.h"
+#include "fft/item.h"
+#include "fft/status.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 

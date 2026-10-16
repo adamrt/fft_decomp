@@ -1,23 +1,18 @@
 /* Field filling with terminators, unit data copies to the status billboard and selected unit loading. */
 
-#include "fft/battle_action.h"
-#include "fft/battle_menu.h"
-#include "fft/battle_unit.h"
-#include "fft/battle_unit_encounter.h"
-#include "fft/data_item.h"
-#include "fft/data_skillset.h"
-#include "fft/main_item.h"
-#include "fft/main_unit.h"
+#include "fft/ability.h"
+#include "fft/at_list.h"
+#include "fft/item.h"
 #include "fft/memory.h"
-#include "fft/menu_panel.h"
-#include "fft/menu_status.h"
+#include "fft/menu.h"
+#include "fft/skillset.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_editor.h"
+#include "fft/unit_panel.h"
+#include "fft/unit_runtime.h"
 #include "psx/types.h"
-#ifdef FFT_EVENT_DEBUGCHR
-#    include "fft/event_debugchr.h"
-#endif
 
 static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output);
 

@@ -1,7 +1,8 @@
 /* Whether a listed job's skillset has no ability left to learn, cached for row callbacks. */
 
-#include "fft/event_jobstts.h"
+#include "fft/ability_list.h"
 #include "fft/job.h"
+#include "fft/job_list.h"
 #include "psx/types.h"
 
 /* Caches and returns whether the `index`th job's skillset has nothing left

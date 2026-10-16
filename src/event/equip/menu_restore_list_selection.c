@@ -1,6 +1,6 @@
 /* Restoring a list's saved cursor and scroll base, checked against the rebuilt entries. */
 
-#include "fft/event_equip.h"
+#include "fft/menu.h"
 #include "fft/menu_selection.h"
 #include "psx/types.h"
 

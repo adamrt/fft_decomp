@@ -1,15 +1,14 @@
 /* E230's second textured quad grid: a 4x4 copy of effect_textured_quad_grid_update linked after its 8x8 build,
  * with its own name, work block and brightness table. */
 
-#include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_effect_file.h"
-#include "fft/battle_effect_geometry.h"
-#include "fft/battle_effect_particle.h"
-#include "fft/battle_effect_script.h"
 #include "fft/battle_map_palette.h"
 #include "fft/effect.h"
-#include "fft/main_gfx.h"
+#include "fft/effect_file.h"
+#include "fft/effect_geometry.h"
+#include "fft/effect_heap.h"
+#include "fft/effect_particle.h"
+#include "fft/effect_script.h"
+#include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

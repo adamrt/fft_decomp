@@ -1,14 +1,15 @@
 /* Secondary skillset listing, the Two Swords, Two Hands and Secret Hunt checks, and the ability and equippable RSM
  * lists. */
 
+#include "fft/ability.h"
+#include "fft/ability_list.h"
 #include "fft/bits.h"
-#include "fft/data_ability.h"
-#include "fft/data_job.h"
-#include "fft/data_skillset.h"
+#include "fft/formation.h"
+#include "fft/formation_ability.h"
 #include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/job_list.h"
+#include "fft/skillset.h"
 #include "fft/unit.h"
-#include "fft/world_formation.h"
 #include "psx/types.h"
 
 /* List the skillsets a formation unit can set as its secondary: those of its unlocked jobs other

@@ -1,28 +1,24 @@
 /* Unit list panels, including stat accessors, list scrolling, the pressable button, the unit grid, falloff shading, the
  * rhombus cursor trail, sprite and name plates, and index lists. */
 
-#include "fft/battle_gfx.h"
-#include "fft/battle_unit_animation.h"
-#include "fft/battle_unit_sprite.h"
-#include "fft/event_bunit.h"
+#include "fft/unit_list.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main_sound.h"
+#include "fft/help.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
-#include "fft/menu_panel.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
-#include "fft/menu_status.h"
 #include "fft/sound.h"
+#include "fft/sprite.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
+#include "fft/unit_panel.h"
+#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -208,7 +204,7 @@ static void unit_list_update_scroll(s8* step, s8* offset) {
  * active the sprite is drawn one pixel lower with CLUT g_menu_button_clut. abs()
  * matters: GCC expands it to the single-insn abssi2, which keeps the entry
  * loop body one basic block as in the target. */
-static void menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id) {
+static void unit_list_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id) {
     oriented_quad_t desc;
     /* Eight untouched bytes plus descriptor alignment retain the target frame. */
     s16 unused_tail[4];
@@ -311,7 +307,7 @@ void unit_list_init(s32 unused_selected_index) {
  *   and cursor delta, and `top` the button y, highlight flag and panel y, as
  *   in the target's shared registers and stack slots. The cell x is not a
  *   variable: loop.c strength-reduces `col * 62` into the last stack slot.
- * - The busy argument of menu_draw_pressable_button is an inline `||` each time.
+ * - The busy argument of unit_list_draw_pressable_button is an inline `||` each time.
  * - number_y*, label_y* are single-set narrow copies of `top` assigned
  *   before a call; local-alloc sinks each to its use (the target's
  *   `move v0,s2` before the store). Their modes must differ from each other
@@ -430,9 +426,9 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
             g_unit_selected_index = g_unit_selected_index != g_unit_list_list_count - 1 ? g_unit_selected_index + 1 : 0;
         }
         g_unit_list_grid_selected_cell = g_unit_list_list_index_map[g_unit_selected_index];
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1,
+        unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1,
+        unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
     }
     /* The stat-mode bar on the side away from the banner, with its L2 and R2 buttons and the
@@ -448,9 +444,9 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
             menu = &g_unit_list_grid_stat_bar_script_bottom;
             quads = g_unit_list_grid_label_tiles_bottom;
         }
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L2, 0x26, top, buttons & PSX_PAD_L2,
+        unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_L2, 0x26, top, buttons & PSX_PAD_L2,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R2, 0xC2, top, buttons & PSX_PAD_R2,
+        unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_R2, 0xC2, top, buttons & PSX_PAD_R2,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
         menu_run_script_with_palette_mode(menu, 0, 0);
         menu_gfx_enqueue_textured_quad_list(quads, 0, 0, g_menu_cursor_texture_page, g_menu_text_clut_2_mode0, 0xB, 8);

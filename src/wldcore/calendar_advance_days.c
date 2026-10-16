@@ -1,11 +1,9 @@
 /* Advancing the calendar by days, with years, birthdays and ages, and proposition progress. */
 
-#include "fft/main_save.h"
+#include "fft/brave_story.h"
+#include "fft/calendar.h"
+#include "fft/proposition.h"
 #include "fft/script_variable.h"
-#include "fft/unit.h"
-#include "fft/wldcore.h"
-#include "fft/wldcore_menu.h"
-#include "fft/wldcore_proposition.h"
 #include "psx/types.h"
 
 /*

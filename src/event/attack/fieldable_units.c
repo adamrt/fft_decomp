@@ -1,13 +1,14 @@
 /* A no-op and the search for fieldable units. */
 
-#include "fft/battle_unit_encounter.h"
-#include "fft/event_attack.h"
-#include "fft/main_unit.h"
+#include "fft/deploy.h"
+#include "fft/encounter.h"
+#include "fft/party.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/text.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
+#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 static s32 g_deploy_text_roster_unit_names_offset = 1;

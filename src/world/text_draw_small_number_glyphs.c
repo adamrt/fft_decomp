@@ -3,6 +3,7 @@
 #include "fft/gfx.h"
 #include "fft/menu_gfx.h"
 #include "fft/text.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

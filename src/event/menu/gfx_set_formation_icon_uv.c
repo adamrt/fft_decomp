@@ -1,5 +1,6 @@
 /* Texture coordinates, page and CLUT of a formation portrait quad. */
 
+#include "fft/gfx_primitive.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

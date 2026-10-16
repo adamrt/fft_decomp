@@ -1,14 +1,13 @@
 /* The draw color and page scroll input. */
 
 #include "fft/gfx.h"
-#include "fft/main.h"
-#include "fft/main_sound.h"
+#include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
+#include "fft/screen.h"
 #include "fft/sound.h"
-#include "fft/world_menu.h"
-#include "fft/world_script.h"
+#include "fft/tutorial.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

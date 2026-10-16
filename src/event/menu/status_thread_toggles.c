@@ -1,8 +1,8 @@
 /* Unit status and comparison status thread toggles. */
 
 #include "fft/menu_list.h"
-#include "fft/menu_panel.h"
 #include "fft/thread.h"
+#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 /* Open the unit status panel thread if it is not already running, or with enable 0 ask it to stop. */

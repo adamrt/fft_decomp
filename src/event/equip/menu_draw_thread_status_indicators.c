@@ -1,10 +1,11 @@
 /* The two fading translucent letterbox panels behind the unit status banner. */
 
-#include "fft/event_equip.h"
+#include "fft/equipment.h"
 #include "fft/gfx_primitive.h"
+#include "fft/menu.h"
 #include "fft/menu_list.h"
-#include "fft/menu_panel.h"
 #include "fft/thread.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

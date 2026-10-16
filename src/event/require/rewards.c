@@ -1,39 +1,38 @@
 /* Rewards, including item and equipment overflow, post-battle changes, war trophies and bonus money, the gil ticker,
  * POLY_GT4 arrays, condition display, the bonus image burst and the help menu overlay. */
 
-#include "fft/battle_unit.h"
-#include "fft/battle_unit_encounter.h"
-#include "fft/data_item.h"
-#include "fft/data_skillset.h"
-#include "fft/event_require.h"
+#include "fft/ability.h"
+#include "fft/after_battle.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main.h"
-#include "fft/main_file.h"
-#include "fft/main_gfx.h"
-#include "fft/main_item.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
+#include "fft/help.h"
+#include "fft/input.h"
+#include "fft/item.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
-#include "fft/menu_overlay.h"
-#include "fft/menu_panel.h"
-#include "fft/menu_status.h"
 #include "fft/menu_window.h"
+#include "fft/message.h"
+#include "fft/overlay.h"
+#include "fft/party.h"
+#include "fft/portrait.h"
+#include "fft/reward.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
+#include "fft/skillset.h"
 #include "fft/sound.h"
+#include "fft/system.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
+#include "fft/unit_panel.h"
 #include "fft/unit_party.h"
+#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -46,7 +45,7 @@ static void text_build_battle_unit_names(void);
 /* REQUIRE twin of unit_panel_load_party_unit: rebuild party slot `party_index` into a
  * scratch unit and fill the selected-unit status and editor display from it, at full
  * HP, MP and CT. */
-static void unit_panel_load_party_unit(s32 unused, s32 party_index) {
+void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;
     u16* innate_items;

@@ -1,6 +1,6 @@
 /* Newly pressed buttons and two repeat rates for menus, from the controller. */
 
-#include "fft/main.h"
+#include "fft/input.h"
 #include "fft/menu_input.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"

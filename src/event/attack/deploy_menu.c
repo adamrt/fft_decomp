@@ -1,21 +1,23 @@
 /* The deployment field-help cursor, deployment strings, shaded panel strips and the map title graphic. */
 
-#include "fft/event_attack.h"
+#include "fft/battle_map.h"
+#include "fft/deploy.h"
+#include "fft/file.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main_file.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
+#include "fft/help.h"
+#include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_help.h"
 #include "fft/menu_input.h"
-#include "fft/menu_status.h"
+#include "fft/message.h"
+#include "fft/party.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit_panel.h"
 #include "fft/unit_party.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -292,7 +294,7 @@ void deploy_run_help_cursor(void) {
 /* Point the battle text sections at an overlay text file: 32 offsets
  * followed by the section data they are relative to. The event-message
  * section is left as it is. */
-static void text_init_battle_pointers(deploy_text_file_t* file) {
+static void text_init_battle_pointers_from_file(deploy_text_file_t* file) {
     s32* offsets = file->section_offsets;
     s32 i = 0;
     u8* data;
@@ -356,7 +358,7 @@ void deploy_build_strings(void) {
     g_thread_call_target = (void (*)(void))file_load_checked_to_address;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_ATCHELP_LZW, 0x16800, file);
     text_save_section_pointers();
-    text_init_battle_pointers(file);
+    text_init_battle_pointers_from_file(file);
     for (i = 0; i < 16; i++) {
         unit = party_get_unit(i);
         if (unit->party_id == PARTY_ID_NONE || i >= 0x10 || unit->proposition_status != 0) {

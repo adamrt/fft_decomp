@@ -1,11 +1,11 @@
 /* The change banner and stat preview panel thread toggles. */
 
+#include "fft/formation.h"
+#include "fft/menu.h"
 #include "fft/menu_list.h"
-#include "fft/menu_overlay.h"
-#include "fft/menu_panel.h"
+#include "fft/screen.h"
 #include "fft/thread.h"
-#include "fft/world.h"
-#include "fft/world_menu.h"
+#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 /* Open or close the equipment-change panel and its numeric stats panel. While the status panel
