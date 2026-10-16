@@ -7,14 +7,14 @@
 
 #ifdef FFT_WORLD
 /* Return `value` unchanged. Only WORLD has it, and nothing on the disc calls it. */
-s32 world_text_return_argument_1(s32 value) {
+s32 text_return_argument_1(s32 value) {
     return value;
 }
 #endif
 
 #ifdef FFT_WORLD
 /* A second identity function right after the first, equally uncalled. */
-s32 world_text_return_argument_2(s32 value) {
+s32 text_return_argument_2(s32 value) {
     return value;
 }
 #endif

@@ -661,7 +661,7 @@ void open_title_init_new_game_party(s32 party_mode, s32 world_load_mode) {
         g_open_system_runtime_flags
             = ((flags | OPEN_SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN) & ~OPEN_PARTY_MODE_FLAG_MASK) | party_mode_flag;
         main_party_init_new_game(party_mode);
-        world_text_build_roster_name_list();
+        formation_build_roster_names();
     }
 }
 
@@ -732,8 +732,8 @@ static void open_menu_run_world_menu_frame(void) {
         u32 blocked_buttons = g_menu_blocked_buttons;
 
         g_main_gfx_active_buffer_index ^= 1;
-        world_menu_set_allowed_buttons(~blocked_buttons);
-        world_menu_run_frame(&g_open_gfx_otags[g_main_gfx_active_buffer_index ^ 1][g_open_menu_world_frame_otag_index],
+        screen_set_allowed_buttons(~blocked_buttons);
+        screen_menu_frame(&g_open_gfx_otags[g_main_gfx_active_buffer_index ^ 1][g_open_menu_world_frame_otag_index],
             g_input_current_buttons);
         g_main_gfx_active_buffer_index ^= 1;
     }

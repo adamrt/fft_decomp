@@ -11,13 +11,13 @@
  * A drawing area is in absolute VRAM coordinates, so while the lower frame
  * buffer is the draw target (clip y 240 rather than 0) the rect moves down
  * 240 lines. The caller's rect is changed in place. */
-void world_gfx_add_draw_area_primitive(RECT* rect, s32 ot_index) {
+void screen_add_draw_area(RECT* rect, s32 ot_index) {
     DR_AREA* area;
 
-    if (g_world_gfx_draw_buffer_clip_y >= 0x65) {
+    if (g_screen_draw_buffer_clip_y >= 0x65) {
         rect->y += 0xF0;
     }
-    area = &g_menu_gfx_context->draw_areas[g_world_gfx_draw_area_count++];
+    area = &g_menu_gfx_context->draw_areas[g_screen_draw_area_count++];
     SetDrawArea(area, rect);
     addPrim(&g_menu_gfx_context->otag[ot_index], area);
 }

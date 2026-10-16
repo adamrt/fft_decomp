@@ -43,7 +43,7 @@ s32 main_overlay_open_world_and_wldcore(s32 load_world) {
         main_file_load_data_from_disc(DISC_SECTOR_WORLD_WORLD_BIN, 0x1E0, g_main_heap_world_overlay_load_address,
             MAIN_FILE_LOADING_DISPLAY_PRESERVE);
     }
-    return wldcore_entrypoint();
+    return world_map_entrypoint();
 }
 
 /* Load WORLD.BIN alone. mode - 1 is the loading display mode of

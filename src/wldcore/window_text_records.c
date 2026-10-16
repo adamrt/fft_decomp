@@ -22,7 +22,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 
     origin.rect.x = point.x;
     origin.rect.y = point.y;
-    origin.stride = g_wldcore_window_render_records[record_index].bounds.w;
+    origin.stride = g_window_render_records[record_index].bounds.w;
     menu_display_text_entry(text_id, (u8*)buffer, &origin);
 }
 #endif
@@ -43,7 +43,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 /* Padded pixel size of the window image for a text entry: the widest line plus 24,
  * rounded down to a multiple of 4, and 16 pixels per row plus 16. No retail code
  * calls it. */
-void wldcore_text_get_padded_dimensions(s32 value, size32_t* output) {
+void window_measure_text_image(s32 value, size32_t* output) {
     s16 maximum_line_width;
     s16 line_count;
 
@@ -56,7 +56,7 @@ void wldcore_text_get_padded_dimensions(s32 value, size32_t* output) {
 #ifdef FFT_OPEN
 /* Padded pixel size of the window image for a text entry: 10 pixels per column
  * plus 24, rounded down to a multiple of 4, and 16 pixels per row plus 16. The
- * WLDCORE twin wldcore_text_get_padded_dimensions measures the text in pixels
+ * WLDCORE twin window_measure_text_image measures the text in pixels
  * instead. Nothing in OPEN.BIN calls it. */
 void open_text_measure_menu_image(s32 combined_text_index, size32_t* dimensions) {
     s16 columns;
@@ -74,14 +74,14 @@ void open_text_measure_menu_image(s32 combined_text_index, size32_t* dimensions)
 void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode, s32 text_id, u32* image) {
     point32_t text_origin;
 
-    wldcore_window_build_render_record_image(record_index, bounds, coordinate_mode, image);
+    window_build_render_record_image(record_index, bounds, coordinate_mode, image);
     text_origin.x = 8;
     text_origin.y = 8;
     if (text_id != 0) {
         window_display_text_entry(record_index, text_id, text_origin, image);
     }
-    wldcore_window_load_image_record_to_vram(record_index, image);
-    g_wldcore_window_render_records[record_index].flags |= WORLD_RENDER_RECORD_POP_IN;
+    window_load_render_record_image(record_index, image);
+    g_window_render_records[record_index].flags |= DISPLAY_OBJECT_POP_IN;
 }
 #endif
 
@@ -103,6 +103,6 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
         window_display_text_entry(record_index, text_id, text_origin, image);
     }
     open_gfx_load_window_record_image(record_index, (u32*)image);
-    g_open_gfx_render_records_56[record_index].flags |= WORLD_RENDER_RECORD_POP_IN;
+    g_open_gfx_render_records_56[record_index].flags |= DISPLAY_OBJECT_POP_IN;
 }
 #endif

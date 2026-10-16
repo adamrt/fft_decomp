@@ -21,12 +21,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
+static void screen_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
 
 /* Select's help-text thread: take the menu entry's selected row (for table kinds 2 and
  * -1, the next running menu thread's entry), look up its text id and show it in a dialog,
  * then unlock menu input and restore the saved input state. */
-void world_menu_help_text_thread(void) {
+void screen_help_text_thread(void) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     thread_t* thread;
     s32 kind = entry->select_text_table;
@@ -59,14 +59,14 @@ void world_menu_help_text_thread(void) {
         }
         value |= 0x8000;
     } else {
-        value = g_world_menu_entry_text_id_tables[kind][index];
+        value = g_screen_entry_text_id_tables[kind][index];
     }
     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
     thread_set_parameters(g_thread_current_id, 0x3F, value, 0);
     text_run_dialog_thread();
-    g_world_menu_new_buttons = 0;
+    g_screen_new_buttons = 0;
     g_menu_input_lock_mode = 0;
-    script_load_event_input_state(&g_world_menu_input_state);
+    script_load_event_input_state(&g_screen_input_state);
     thread_exit_current();
 }
 
@@ -75,7 +75,7 @@ void world_menu_help_text_thread(void) {
  * icon sprites of the alternating record each frame. Up steps the cursor up,
  * but the Down test is inverted (a retail bug, QUIRKS.md): the cursor moves
  * down on every frame the Down bit is clear, until it reaches max_row_index. */
-void world_menu_icon_clamped_list_thread(void) {
+void screen_clamped_icon_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     menu_entry_t* param;
@@ -85,7 +85,7 @@ void world_menu_icon_clamped_list_thread(void) {
     menu_icon_record_t* record;
     menu_icon_sprites_t* sprites;
 
-    g_world_menu_list_controller_input = script_get_controller_input_pointer(0);
+    g_screen_list_controller_input = script_get_controller_input_pointer(0);
     param = (menu_entry_t*)thread_get_current_parameter_1();
     cursor = param->selected_index;
     record = &records[0];
@@ -108,14 +108,14 @@ void world_menu_icon_clamped_list_thread(void) {
             menu_free_memory(buffer);
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
             break;
         }
         if (thread_is_previous_running() == 0) {
-            if ((*g_world_menu_list_controller_input & PSX_PAD_UP) && cursor != 0) {
+            if ((*g_screen_list_controller_input & PSX_PAD_UP) && cursor != 0) {
                 cursor--;
             }
-            if (!(*g_world_menu_list_controller_input & PSX_PAD_DOWN) && cursor != param->max_row_index) {
+            if (!(*g_screen_list_controller_input & PSX_PAD_DOWN) && cursor != param->max_row_index) {
                 cursor++;
             }
             menu_handle_action(param, cursor);
@@ -135,7 +135,7 @@ void world_menu_icon_clamped_list_thread(void) {
 
 /* Place a number entry's bobbing digit cursor and its shadow over digit cursor (counted from the
  * right edge), freezing the bob while input belongs to another thread. */
-static void world_menu_update_entry_cursor_quads(
+static void screen_place_number_entry_cursor(
     menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* shadow, s32 unused, s32 cursor) {
     thread_t* thread = &g_threads[g_thread_current_id];
     s32 x;
@@ -177,17 +177,17 @@ static void world_menu_update_entry_cursor_quads(
 
 /* Numeric entry thread: edits the 16-bit value at param->value one decimal digit
  * at a time within the range bound at param->context. Left/right move the digit cursor, up/down
- * step the value by the g_world_menu_number_entry_digit_steps step of that digit (clamped to the range),
+ * step the value by the g_screen_number_entry_digit_steps step of that digit (clamped to the range),
  * and a changed value is redrawn as a signed number in the window. When the
  * cancel/confirm handlers change the 32-bit input mask, a -1 left in the value
  * restores the original; otherwise the value is stored and the range's
  * on_change callback runs. */
-void world_menu_number_entry_thread(void) {
+void screen_number_entry_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
-    world_menu_number_range_t* range;
+    screen_number_range_t* range;
     u8* buffer;
     s16 original;
     s32 digits;
@@ -205,7 +205,7 @@ void world_menu_number_entry_thread(void) {
     POLY_FT4* shadow_quad;
     s32* stride;
 
-    g_world_menu_list_controller_input = script_get_controller_input_pointer(0);
+    g_screen_list_controller_input = script_get_controller_input_pointer(0);
     /* A direct pen pointer folds both member-address adjustments and changes scheduling. */
     stride = &g_menu_text_state.pen.stride;
     thread = &g_threads[g_thread_current_id];
@@ -260,7 +260,7 @@ void world_menu_number_entry_thread(void) {
     *stride = param->inner_width;
     menu_set_text_origin(8, 9);
     menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-    world_gfx_draw_signed_number(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
+    screen_draw_signed_number(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
     LoadImage(&rect, buffer);
     redraw = 1;
 
@@ -273,20 +273,20 @@ void world_menu_number_entry_thread(void) {
             redraw = 0;
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
             break;
         }
 
         /* The handlers consume the input bits they act on, so a changed mask means one of them ran.
          * A cancel leaves -1 in the result, which restores the original value. */
-        input = *g_world_menu_list_controller_input;
+        input = *g_screen_list_controller_input;
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
-        if (input != *g_world_menu_list_controller_input) {
+        if (input != *g_screen_list_controller_input) {
             if (*menu_entry_result(param) == -1) {
                 *menu_entry_result(param) = original;
             } else {
-                world_menu_number_range_t* current_range;
+                screen_number_range_t* current_range;
 
                 *menu_entry_result(param) = value;
                 current_range = param->context;
@@ -297,23 +297,23 @@ void world_menu_number_entry_thread(void) {
         /* Digit 0 is the ones digit, so right moves the cursor toward it. Up and down step by the
          * cursor digit's place value, clamped to the range. */
         if (thread[-1].is_running == 0) {
-            if ((*g_world_menu_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
+            if ((*g_screen_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
                 digit--;
             }
-            if ((*g_world_menu_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
+            if ((*g_screen_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
                 digit++;
             }
-            if (*g_world_menu_list_controller_input & PSX_PAD_UP) {
-                if (value <= range->bounds.max - g_world_menu_number_entry_digit_steps[digit]) {
-                    value += g_world_menu_number_entry_digit_steps[digit];
+            if (*g_screen_list_controller_input & PSX_PAD_UP) {
+                if (value <= range->bounds.max - g_screen_number_entry_digit_steps[digit]) {
+                    value += g_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.max;
                 }
                 redraw = 1;
             }
-            if (*g_world_menu_list_controller_input & PSX_PAD_DOWN) {
-                if (value >= range->bounds.min + g_world_menu_number_entry_digit_steps[digit]) {
-                    value -= g_world_menu_number_entry_digit_steps[digit];
+            if (*g_screen_list_controller_input & PSX_PAD_DOWN) {
+                if (value >= range->bounds.min + g_screen_number_entry_digit_steps[digit]) {
+                    value -= g_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.min;
                 }
@@ -326,7 +326,7 @@ void world_menu_number_entry_thread(void) {
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             *stride = param->inner_width;
             menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-            world_gfx_draw_signed_number(
+            screen_draw_signed_number(
                 value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
             LoadImage(&rect, buffer);
         }
@@ -334,7 +334,7 @@ void world_menu_number_entry_thread(void) {
         /* The cursor and its shadow switch to dimmed CLUTs while the thread before this one runs. */
         cursor_quad = &cursor_quads[i & 1];
         shadow_quad = &shadow_quads[i & 1];
-        world_menu_update_entry_cursor_quads(param, cursor_quad, shadow_quad, i, digit);
+        screen_place_number_entry_cursor(param, cursor_quad, shadow_quad, i, digit);
         menu_select_sprite_clut(cursor_quad);
         menu_select_sprite_clut(shadow_quad);
         if (thread_is_previous_running() == 0) {
@@ -358,7 +358,7 @@ void world_menu_number_entry_thread(void) {
 }
 
 /*
- * Labeled numeric entry thread: world_menu_number_entry_thread with a text label.
+ * Labeled numeric entry thread: screen_number_entry_thread with a text label.
  *
  * Draws param->text_id left of the number and edits the 16-bit value at
  * param->value one decimal digit at a time within the range bound at param->context. The value is
@@ -366,13 +366,13 @@ void world_menu_number_entry_thread(void) {
  * measured in pixels and each redraw in character columns (times 6).
  * i is shared by the quad setup loop and the frame loop, as in the target.
  */
-void world_menu_labeled_number_entry_thread(void) {
+void screen_labeled_number_entry_thread(void) {
     RECT rect;
     menu_icon_record_t record;
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
     s16 label_size[2];
-    world_menu_number_range_t* range;
+    screen_number_range_t* range;
     u8* buffer;
     s16 original;
     s32 digits;
@@ -386,7 +386,7 @@ void world_menu_labeled_number_entry_thread(void) {
     POLY_FT4* cursor_quad;
     POLY_FT4* shadow_quad;
 
-    g_world_menu_list_controller_input = script_get_controller_input_pointer(0);
+    g_screen_list_controller_input = script_get_controller_input_pointer(0);
     thread = &g_threads[g_thread_current_id];
     param = *(menu_entry_t**)thread;
     range = param->context;
@@ -440,7 +440,7 @@ void world_menu_labeled_number_entry_thread(void) {
     menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
     menu_set_text_origin((u16)label_size[0] + 8, 9);
     menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-    world_gfx_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
+    screen_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, buffer);
     redraw = 1;
 
@@ -454,20 +454,20 @@ void world_menu_labeled_number_entry_thread(void) {
             menu_free_memory(buffer);
             redraw = 0;
         }
-        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
             break;
         }
 
         /* The handlers consume the input bits they act on, so a changed mask means one of them ran.
          * A cancel leaves -1 in the result, which restores the original value. */
-        input = *g_world_menu_list_controller_input;
+        input = *g_screen_list_controller_input;
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
-        if (input != *g_world_menu_list_controller_input) {
+        if (input != *g_screen_list_controller_input) {
             if (*menu_entry_result(param) == -1) {
                 *menu_entry_result(param) = original;
             } else {
-                world_menu_number_range_t* current_range;
+                screen_number_range_t* current_range;
 
                 *menu_entry_result(param) = value;
                 current_range = param->context;
@@ -478,23 +478,23 @@ void world_menu_labeled_number_entry_thread(void) {
         /* Digit 0 is the ones digit, so right moves the cursor toward it. Up and down step by the
          * cursor digit's place value, clamped to the range. */
         if (thread[-1].is_running == 0) {
-            if ((*g_world_menu_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
+            if ((*g_screen_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
                 digit--;
             }
-            if ((*g_world_menu_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
+            if ((*g_screen_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
                 digit++;
             }
-            if (*g_world_menu_list_controller_input & PSX_PAD_UP) {
-                if (value <= range->bounds.max - g_world_menu_number_entry_digit_steps[digit]) {
-                    value += g_world_menu_number_entry_digit_steps[digit];
+            if (*g_screen_list_controller_input & PSX_PAD_UP) {
+                if (value <= range->bounds.max - g_screen_number_entry_digit_steps[digit]) {
+                    value += g_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.max;
                 }
                 redraw = 1;
             }
-            if (*g_world_menu_list_controller_input & PSX_PAD_DOWN) {
-                if (value >= range->bounds.min + g_world_menu_number_entry_digit_steps[digit]) {
-                    value -= g_world_menu_number_entry_digit_steps[digit];
+            if (*g_screen_list_controller_input & PSX_PAD_DOWN) {
+                if (value >= range->bounds.min + g_screen_number_entry_digit_steps[digit]) {
+                    value -= g_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.min;
                 }
@@ -512,14 +512,14 @@ void world_menu_labeled_number_entry_thread(void) {
             menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
             menu_set_text_origin((u16)label_size[0] * 6 + 8, 9);
             menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-            world_gfx_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
+            screen_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
             LoadImage(&rect, buffer);
         }
 
         /* The cursor and its shadow switch to dimmed CLUTs while the thread before this one runs. */
         cursor_quad = &cursor_quads[i & 1];
         shadow_quad = &shadow_quads[i & 1];
-        world_menu_update_entry_cursor_quads(param, cursor_quad, shadow_quad, i, digit);
+        screen_place_number_entry_cursor(param, cursor_quad, shadow_quad, i, digit);
         menu_select_sprite_clut(cursor_quad);
         menu_select_sprite_clut(shadow_quad);
         if (thread_is_previous_running() == 0) {
@@ -550,7 +550,7 @@ void world_menu_labeled_number_entry_thread(void) {
  *
  * `digits` arrives as a full 32-bit value and only its low byte is used.
  */
-static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen) {
+static void screen_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen) {
     s32 original = value;
     s32 i;
 
@@ -572,15 +572,15 @@ static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph
 /* Reopen a chain of menu entries, each in the thread slot below the previous one, following each
  * entry's selected row action until a number-entry window is started or the action is not a menu
  * index. */
-void world_menu_start_entry_chain_threads(u32 index, s32 thread) {
+void screen_start_entry_chain(u32 index, s32 thread) {
     menu_entry_t* entry;
 
     do {
         entry = &g_menu_thread_menu_data[index];
         thread_start(thread, entry->thread_entry);
         thread_set_parameters(thread, (s32)entry, 0, 0);
-        if (entry->thread_entry == world_menu_labeled_number_entry_thread
-            || entry->thread_entry == world_menu_number_entry_thread) {
+        if (entry->thread_entry == screen_labeled_number_entry_thread
+            || entry->thread_entry == screen_number_entry_thread) {
             return;
         }
         index = entry->row_actions[entry->selected_index];
@@ -591,7 +591,7 @@ void world_menu_start_entry_chain_threads(u32 index, s32 thread) {
 /* Menu thread body: runs the entry's text binding hook, starts the text
  * thread for it, then idles until input arrives or the previous thread's
  * third parameter is raised. */
-void world_menu_text_entry_thread(void) {
+void screen_text_entry_thread(void) {
     thread_t* thread = &g_threads[g_thread_current_id];
     menu_entry_t* entry = (menu_entry_t*)thread->function_parameter_1;
     menu_text_binding_t* binding;
@@ -603,7 +603,7 @@ void world_menu_text_entry_thread(void) {
 
     prepare_binding = entry->context;
     prepare_binding->prepare();
-    g_world_menu_list_controller_input = script_get_controller_input_pointer(0);
+    g_screen_list_controller_input = script_get_controller_input_pointer(0);
     text_id = entry->text_id;
     second = entry->header_id;
     binding = entry->context;
@@ -612,10 +612,10 @@ void world_menu_text_entry_thread(void) {
     thread_start(text_thread, text_run_dialog_thread);
     thread_set_parameters(text_thread, second, text_id, speaker_id);
     thread_wait_until_inactive(text_thread);
-    *g_world_menu_list_controller_input = PSX_PAD_CIRCLE;
+    *g_screen_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
         menu_handle_action(entry, 0);
-        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
             break;
         }
         if ((thread - 1)->function_parameter_3 != 0) {
@@ -628,7 +628,7 @@ void world_menu_text_entry_thread(void) {
 
 /* Resize the current thread's menu entry's first parent entry to fit a
  * decimal number, keeping its right edge fixed. */
-void world_menu_resize_parent_entry_to_digits(void) {
+void screen_fit_parent_entry_to_digits(void) {
     menu_entry_t* entry = (menu_entry_t*)g_threads[g_thread_current_id].function_parameter_1;
     u32 index = entry->row_actions[0];
     s32 digits;

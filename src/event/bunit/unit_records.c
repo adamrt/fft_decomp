@@ -24,7 +24,7 @@ static bunit_unit_t g_bunit_unit_records[21] = { 0 };
  * only when battle_menu_count_monster_skill_supporters passes) or the equipment and
  * ability slots, and copies the job and ability tables with JP capped at 9999.
  *
- * BUNIT twin of world_formation_build_unit_record. `count` indexes the output
+ * BUNIT twin of formation_build_unit_record. `count` indexes the output
  * slot so loop.c strength-reduces it into the record pointer; with an explicit
  * pointer walk the smaller loop lets loop.c hoist the constant 3 into $s6. The
  * caller also passes its shown-list slot, which is not read. */
@@ -231,7 +231,7 @@ s32 bunit_unit_build_data_list(s32 mode, s32 unit_data, s32 sort_mode) {
  * reorder list edits, each key a record field picked through g_bunit_unit_sort_field_indices; a tie
  * moves on to the next key), then publish the sorted record pointers into
  * g_bunit_unit_pointers. Keys 1 and 4 and up sort in descending order. `sort_mode` is
- * not read. BUNIT twin of world_formation_sort_roster. */
+ * not read. BUNIT twin of formation_sort_roster. */
 void bunit_unit_sort_index_list_by_order_keys(s32 sort_mode) {
     s32 count;
     s32 j;

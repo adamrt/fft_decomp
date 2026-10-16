@@ -49,7 +49,7 @@ typedef struct menu_unit_status_identity {
     s16 brave;       /* 0x04 */
     s16 faith;       /* 0x06 */
     s16 zodiac;      /* 0x08 */
-    s16 roster_slot; /* 0x0a: party slot (world_menu_get_party_unit_name_id); shown as value + 1 */
+    s16 roster_slot; /* 0x0a: party slot (formation_get_selected_unit_name_id); shown as value + 1 */
     u8 _unused_0c[2];
 } menu_unit_status_identity_t;
 typedef char menu_unit_status_identity_size_must_be_14[sizeof(menu_unit_status_identity_t) == 14 ? 1 : -1];
@@ -119,8 +119,8 @@ typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gaug
 
 /* A unit's status summary: g_menu_selected_unit_status (BATTLE's AT banner) and g_menu_comparison_unit_status
  * (its status billboard), WORLD's formation records g_menu_selected_unit_stat_summary and
- * g_world_comparison_unit_stat_summary, and each overlay's pair of panel billboards, each pair 0x24 apart.
- * menu_copy_unit_data_to_status_billboard and wldcore_unit_build_status_panel_data fill the first 0x1e bytes,
+ * g_formation_comparison_unit_stat_summary, and each overlay's pair of panel billboards, each pair 0x24 apart.
+ * menu_copy_unit_data_to_status_billboard and unit_panel_build_unit_data fill the first 0x1e bytes,
  * menu_run_unit_stats_panel and the overlays' menu_run_unit_status_thread draw it, and
  * menu_copy_billboard_data_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
  * fields. Provisional. */
@@ -181,8 +181,8 @@ s32 menu_get_preview_hp_bonus_display(s32 unused_row);
 s32 menu_get_preview_mp_bonus_display(s32 unused_row);
 
 /* unit grid readouts */
-/* What the unit grids draw below a unit (world_formation_draw_graphics_below_sprite,
- * bunit_menu_update_unit_grid). L2/R2 step g_world_formation_stat_display_mode and
+/* What the unit grids draw below a unit (formation_draw_unit_readout,
+ * bunit_menu_update_unit_grid). L2/R2 step g_formation_stat_display_mode and
  * g_bunit_unit_stat_mode through the first five, wrapping between HP and
  * BRAVE_FAITH; WORLD picks the others per unit. */
 typedef enum menu_unit_readout {

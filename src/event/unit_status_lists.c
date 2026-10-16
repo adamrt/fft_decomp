@@ -2008,7 +2008,7 @@ s32 menu_should_close_thread(u32* input) {
         parameter = (menu_entry_t*)thread_get_current_parameter_1();
         if (parameter->select_text_table != 0) {
             if (g_script_input_suppression_frames == 0) {
-                thread_start(THREAD_SCREEN_SLOT_TEXT, world_menu_help_text_thread);
+                thread_start(THREAD_SCREEN_SLOT_TEXT, screen_help_text_thread);
                 thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, (s32)parameter, 0, 0);
                 g_menu_input_lock_mode = 1;
             }

@@ -9,42 +9,42 @@
 
 /* propositions */
 /* One active proposition (g_main_active_propositions).
- * wldcore_proposition_advance_daily_counters advances elapsed_days and sets the
- * returned flag; wldcore_proposition_handle_dispatch_confirm_input stores the
+ * proposition_advance_day advances elapsed_days and sets the
+ * returned flag; proposition_handle_dispatch_confirm_input stores the
  * current world-map location and the participants, and
- * wldcore_proposition_count_returned filters returned records by location. */
-typedef struct wldcore_proposition_progress {
-    u8 flags;          /* 0x00; wldcore_proposition_progress_flag_e */
+ * proposition_count_returned filters returned records by location. */
+typedef struct proposition_progress {
+    u8 flags;          /* 0x00; proposition_progress_flag_e */
     u8 proposition_id; /* 0x01; text 0xd000 | id names it */
     u8 elapsed_days;
     u8 assigned_days;
     u8 location;
-    u8 participant_count;      /* 0x05; wldcore_proposition_step_participant_message trusts this count */
+    u8 participant_count;      /* 0x05; proposition_step_participant_message trusts this count */
     u8 participant_indices[3]; /* 0x06; party indices, each checked by a party lookup before it is stored */
-} wldcore_proposition_progress_t;
-typedef char wldcore_proposition_progress_size_must_be_9[sizeof(wldcore_proposition_progress_t) == 9 ? 1 : -1];
+} proposition_progress_t;
+typedef char wldcore_proposition_progress_size_must_be_9[sizeof(proposition_progress_t) == 9 ? 1 : -1];
 
-extern wldcore_proposition_progress_t g_main_active_propositions[8];
+extern proposition_progress_t g_main_active_propositions[8];
 extern u8 g_main_save_proposition_count; /* used entries of g_main_active_propositions */
-extern u8 g_main_proposition_states[96]; /* wldcore_proposition_state_e */
+extern u8 g_main_proposition_states[96]; /* proposition_state_e */
 
 /* sound-novel records */
-struct wldcore_sound_novel_script_file;
+struct sound_novel_script_file;
 
 /* A saved sound-novel reading state (g_main_sound_novel_saved_records, 0x38 bytes each).
- * wldcore_reset_selected_saved_record establishes the stride and
- * wldcore_reset_saved_record_fields resets fields selectively; meanings beyond
+ * sound_novel_reset_selected_reading establishes the stride and
+ * sound_novel_reset_reading resets fields selectively; meanings beyond
  * those stores remain provisional. */
-typedef struct wldcore_saved_record {
+typedef struct sound_novel_reading {
     /* 0x00: loaded sound-novel script, including its section-offset table. */
-    struct wldcore_sound_novel_script_file* buffer;
+    struct sound_novel_script_file* buffer;
     u32* script_words; /* 0x04 */
     u32 instruction;   /* 0x08 */
-    /* 0x0c-0x37 mirror the live sound-novel state at g_wldcore_sound_novel_state_flags. */
-    u16 state_flags;          /* 0x0c; wldcore_sound_novel_state_flag_e */
+    /* 0x0c-0x37 mirror the live sound-novel state at g_sound_novel_state_flags. */
+    u16 state_flags;          /* 0x0c; sound_novel_state_flag_e */
     s16 section;              /* 0x0e */
     s16 word_index;           /* 0x10; index of the 32-bit instruction in the section; cleared by
-                               * wldcore_sound_novel_restore_saved_state
+                               * sound_novel_restore_reading
                                */
     s16 counter_delta;        /* 0x12 */
     s16 text_id;              /* 0x14 */
@@ -64,10 +64,10 @@ typedef struct wldcore_saved_record {
     s16 picture_y;            /* 0x30 */
     s16 sound_id;             /* 0x32 */
     s32 counter;              /* 0x34 */
-} wldcore_saved_record_t;
-typedef char wldcore_saved_record_size_must_be_56[sizeof(wldcore_saved_record_t) == 56 ? 1 : -1];
+} sound_novel_reading_t;
+typedef char wldcore_saved_record_size_must_be_56[sizeof(sound_novel_reading_t) == 56 ? 1 : -1];
 
-extern wldcore_saved_record_t g_main_sound_novel_saved_records[];
+extern sound_novel_reading_t g_main_sound_novel_saved_records[];
 
 /* dates and saved bits */
 /* RAM bitmaps indexed by 32-bit values; the save serializer copies only their packed data

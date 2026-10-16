@@ -21,7 +21,7 @@
  *
  * WORLD's body; publishes the state twice.
  * The six g_world_input_frame_* values are laid out as a menu_input_state_t
- * (g_world_input_frame_state), but a struct global makes GCC keep a base
+ * (g_screen_input_frame_state), but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.
  */
 void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
@@ -39,61 +39,61 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     g_menu_input_controller = script_get_controller_input_pointer(0);
     g_formation_screen_active = 0;
     if (input == 0) {
-        g_world_input_frame_initial_repeat_counter = 0;
-        g_world_input_frame_repeat_counter = 0;
-        g_world_input_frame_secondary_repeat_counter = 0;
+        g_screen_input_frame_initial_repeat_counter = 0;
+        g_screen_input_frame_repeat_counter = 0;
+        g_screen_input_frame_secondary_repeat_counter = 0;
     }
 
-    previous_input = g_world_input_frame_current;
-    g_world_input_frame_current = input;
-    g_world_input_frame_new = 0;
-    g_world_input_frame_previous = previous_input;
+    previous_input = g_screen_input_frame_current;
+    g_screen_input_frame_current = input;
+    g_screen_input_frame_new = 0;
+    g_screen_input_frame_previous = previous_input;
 
     /* Held D-pad, L1 and R1 auto-repeat once the initial delay passes: the
      * D-pad (only Left/Right while Square is held) every repeat period, and
      * L1/R1 (with Up/Down while Square is held, paging lists) every secondary
      * period. All delays are in frames divided by the event speed. */
     if (previous_input != input || (filtered_input = input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK)) == 0) {
-        g_world_input_frame_new = ~previous_input & input;
-        g_world_input_frame_initial_repeat_counter = 0;
+        g_screen_input_frame_new = ~previous_input & input;
+        g_screen_input_frame_initial_repeat_counter = 0;
     } else {
         initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
-        counter = ++g_world_input_frame_initial_repeat_counter;
+        counter = ++g_screen_input_frame_initial_repeat_counter;
         if (counter == initial_delay) {
-            g_world_input_frame_new = filtered_input;
+            g_screen_input_frame_new = filtered_input;
         }
         if (counter >= initial_delay) {
-            counter = ++g_world_input_frame_repeat_counter;
-            g_world_input_frame_secondary_repeat_counter++;
+            counter = ++g_screen_input_frame_repeat_counter;
+            g_screen_input_frame_secondary_repeat_counter++;
             repeat_delay = g_main_input_repeat_period / g_script_event_speed;
             if (counter >= repeat_delay) {
-                g_world_input_frame_repeat_counter = 0;
+                g_screen_input_frame_repeat_counter = 0;
                 if ((input & PSX_PAD_SQUARE) != 0) {
-                    g_world_input_frame_new = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
+                    g_screen_input_frame_new = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
-                    g_world_input_frame_new = input & PSX_PAD_DPAD_MASK;
+                    g_screen_input_frame_new = input & PSX_PAD_DPAD_MASK;
                 }
             }
             secondary_delay = g_main_input_secondary_repeat_period / g_script_event_speed;
-            if (g_world_input_frame_secondary_repeat_counter >= secondary_delay) {
-                g_world_input_frame_secondary_repeat_counter = 0;
-                if ((g_world_input_frame_current & PSX_PAD_SQUARE) != 0) {
-                    g_world_input_frame_new
-                        |= g_world_input_frame_current & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
+            if (g_screen_input_frame_secondary_repeat_counter >= secondary_delay) {
+                g_screen_input_frame_secondary_repeat_counter = 0;
+                if ((g_screen_input_frame_current & PSX_PAD_SQUARE) != 0) {
+                    g_screen_input_frame_new
+                        |= g_screen_input_frame_current & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
-                    g_world_input_frame_new |= g_world_input_frame_current & (PSX_PAD_L1 | PSX_PAD_R1);
+                    g_screen_input_frame_new |= g_screen_input_frame_current & (PSX_PAD_L1 | PSX_PAD_R1);
                 }
             }
         } else {
-            g_world_input_frame_repeat_counter = 0;
-            g_world_input_frame_secondary_repeat_counter = 0;
+            g_screen_input_frame_repeat_counter = 0;
+            g_screen_input_frame_secondary_repeat_counter = 0;
         }
     }
 
     g_sound_pending_sfx_id = -1;
-    script_load_event_input_state(&g_world_input_frame_state);
-    script_load_event_input_state(&g_world_input_frame_state);
-    if (g_world_input_frame_new != PSX_PAD_SELECT && g_world_input_frame_new != 0) {
+    script_load_event_input_state(&g_screen_input_frame_state);
+    script_load_event_input_state(&g_screen_input_frame_state);
+    if (g_screen_input_frame_new != PSX_PAD_SELECT && g_screen_input_frame_new != 0) {
         g_script_input_suppression_frames = 5;
     }
 

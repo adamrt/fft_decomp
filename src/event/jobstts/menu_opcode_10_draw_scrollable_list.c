@@ -25,7 +25,7 @@
  * JOBSTTS's body: EQUIP's command with BUNIT's event-speed multiplier. The
  * unused arrays reproduce the target's frame: it references only rect (0x20) and
  * marker (0x38). The scroll-down path follows WORLD's
- * world_menu_opcode_10_draw_scrollable_list spelling.
+ * menu_opcode_10_draw_scrollable_list spelling.
  */
 menu_instruction_t* jobstts_menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;

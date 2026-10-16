@@ -247,7 +247,7 @@ restart_script:
                 }
             }
             if (operand_1 == EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC) {
-                g_world_sound_current_music_track_index = 0;
+                g_screen_sound_current_music_track_index = 0;
                 g_sound_music_track_1_id = MAIN_MUSIC_ALTIMA;
                 g_sound_music_track_2_id = 0;
                 sound_play_music_tracks(MAIN_MUSIC_ALTIMA, MAIN_MUSIC_NONE);
@@ -397,7 +397,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_UNKNOWN_D8) {
         } else if (opcode == EVENT_OPCODE_BACK_TARGET_BARRIER) {
         } else if (opcode == EVENT_OPCODE_UNKNOWN_DC) {
-            g_world_script_opcode_dc_value = 0xD;
+            g_script_opcode_dc_value = 0xD;
         }
         /* ---- Dialogue and portraits ---- */
         else if (opcode == EVENT_OPCODE_DISPLAY_MESSAGE) {
@@ -454,9 +454,9 @@ restart_script:
         }
         /* ---- Map objects ---- */
         else if (opcode == EVENT_OPCODE_USE_3D_OBJECT) {
-            g_world_3d_object_use_request = 1;
-            g_world_event_map_command_80_args.arg1 = operand_1;
-            g_world_event_map_command_80_args.arg2 = operand_2;
+            g_script_3d_object_use_request = 1;
+            g_script_map_command_80_args.arg1 = operand_1;
+            g_script_map_command_80_args.arg2 = operand_2;
             thread_yield();
         } else if (opcode == EVENT_OPCODE_WAIT_3D_OBJECT) {
             g_3d_object_wait_status = 1;
@@ -464,9 +464,9 @@ restart_script:
                 thread_yield();
             } while (g_3d_object_wait_status != 0);
         } else if (opcode == EVENT_OPCODE_USE_FIELD_OBJECT) {
-            g_world_field_object_use_request = 1;
-            g_world_event_map_command_83_args.arg1 = operand_1;
-            g_world_event_map_command_83_args.arg2 = operand_2;
+            g_script_field_object_use_request = 1;
+            g_script_map_command_83_args.arg1 = operand_1;
+            g_script_map_command_83_args.arg2 = operand_2;
             thread_yield();
         } else if (opcode == EVENT_OPCODE_WAIT_FIELD_OBJECT) {
             g_field_object_wait_status = 1;
@@ -541,7 +541,7 @@ restart_script:
         /* ---- Effects ---- */
         else if (opcode == EVENT_OPCODE_EFFECT) {
             g_event_pending_effect_id = first_operand;
-            g_world_event_effect_target_runtime_id
+            g_script_effect_target_runtime_id
                 = script_resolve_runtime_id(((((u8*)g_script_event_block) + instruction_offset))[3]);
             effect_instruction = (u8*)g_script_event_block;
             effect_instruction += instruction_offset;
@@ -742,18 +742,18 @@ restart_script:
             thread_start(operand_1, sound_run_background_fade_thread);
             thread_set_parameters(operand_1, (s32)parameters, 0, 0);
         } else if (opcode == EVENT_OPCODE_SWITCH_TRACK) {
-            g_world_sound_music_switch_request = operand_1;
-            g_world_event_music_switch.volume = operand_2;
-            g_world_event_music_switch.fade = operand_3;
+            g_screen_sound_music_switch_request = operand_1;
+            g_script_music_switch.volume = operand_2;
+            g_script_music_switch.fade = operand_3;
             thread_yield();
         } else if (opcode == EVENT_OPCODE_FADE_SOUND) {
             /* The target MIPS variable shift uses the low five count bits.
              * Explicit C masking adds an instruction; counts >=32 retain the
              * original C shift limitation rather than an invented input restriction. */
-            g_world_sound_music_volume_transition_request = operand_2 << (operand_1 + 0x10);
+            g_screen_sound_music_volume_transition_request = operand_2 << (operand_1 + 0x10);
             thread_yield();
         } else if (opcode == EVENT_OPCODE_END_TRACK) {
-            g_world_sound_music_unload_slot_request = operand_1;
+            g_screen_sound_music_unload_slot_request = operand_1;
             thread_yield();
         }
         /* ---- EVTCHR and reserved VRAM slots ---- */

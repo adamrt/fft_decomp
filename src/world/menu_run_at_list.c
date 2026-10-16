@@ -145,8 +145,8 @@ void menu_run_at_list(void) {
     buffer = g_menu_render_buffer;
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
-    thread_start(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, menu_window_frame_thread);
-    thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 0, 0);
+    thread_start(SCREEN_THREAD_SLOT_AT_LIST_FRAME, menu_window_frame_thread);
+    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window.x, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;
     menu_draw_text_columns(entry, &row_offset, buffer);
@@ -182,9 +182,9 @@ void menu_run_at_list(void) {
 
         /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
-            thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 1, 0);
+            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window.x, 1, 0);
         } else {
-            thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 0, 0);
+            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window.x, 0, 0);
         }
 
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
@@ -359,7 +359,7 @@ void menu_run_at_list(void) {
     }
 
     /* A nonzero third parameter ends the frame thread. */
-    thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, 0, 0, 1);
+    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
     thread_yield();
     thread_exit_current();

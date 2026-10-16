@@ -236,7 +236,7 @@ void menu_run_invalid_choice_thread(void) {
 
 /* Yields the thread at least once, then until the camera stops moving. WORLD's
  * copy calls BATTLE's battle_camera_is_active address (0x8008e17c), which with
- * WLDCORE loaded lies inside wldcore_map_find_best_route_path. */
+ * WLDCORE loaded lies inside travel_find_best_path. */
 void camera_wait_until_idle(void) {
     do {
         thread_yield();
@@ -591,7 +591,7 @@ static void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness) {
  * scroll_position / scroll_range. The portrait quad takes its texture from
  * portrait_code, or in BATTLE from the unit's portrait when that is -1. */
 #ifdef FFT_WORLD
-#    define WINDOW_BRIGHTNESS g_world_menu_color_red
+#    define WINDOW_BRIGHTNESS g_screen_color_red
 #else
 #    define WINDOW_BRIGHTNESS window->color.r
 #endif

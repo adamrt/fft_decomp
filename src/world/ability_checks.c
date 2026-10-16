@@ -13,15 +13,15 @@
 
 /* List the skillsets a formation unit can set as its secondary: those of its unlocked jobs other
  * than its own job and Mime. The list ends with -1; return the count. */
-static s32 world_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {
+static s32 formation_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {
     s16 jobs[24];
     s32 count;
     s32 i;
     s32 job;
     s16 own_job;
 
-    own_job = g_world_unit_pointers[unit_id]->identity.job_id;
-    world_job_build_unit_list(unit_id, jobs, 1);
+    own_job = g_formation_unit_pointers[unit_id]->identity.job_id;
+    job_list_build(unit_id, jobs, 1);
     count = 0;
     for (i = 0; jobs[i] != -1; i++) {
         job = jobs[i];
@@ -34,18 +34,18 @@ static s32 world_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {
 }
 
 /* Return nonzero when the formation unit has the Two Swords support ability set. */
-s32 world_ability_has_two_swords(s16 unit_id) {
-    return g_world_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_SWORDS;
+s32 ability_has_two_swords(s16 unit_id) {
+    return g_formation_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_SWORDS;
 }
 
 /* Return nonzero when the formation unit has the Two Hands support ability set. */
-s32 world_ability_has_two_hands(s16 unit_id) {
-    return g_world_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS;
+s32 formation_ability_has_two_hands(s16 unit_id) {
+    return g_formation_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS;
 }
 
 /* Return nonzero when the formation unit has the Secret Hunt support ability set. */
-s32 world_ability_has_secret_hunt(s32 unit_id) {
-    return g_world_unit_pointers[(s16)unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_SECRET_HUNT;
+s32 formation_ability_has_secret_hunt(s32 unit_id) {
+    return g_formation_unit_pointers[(s16)unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_SECRET_HUNT;
 }
 
 /*
@@ -82,13 +82,13 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
     s16 id;
 
     if (mode == ABILITY_LIST_MODE_LEARNED_ONLY && ability_category == MENU_ABILITY_CATEGORY_ACTION) {
-        return world_ability_list_secondary_skillsets(unit_index, list);
+        return formation_ability_list_secondary_skillsets(unit_index, list);
     }
     skillset = job_get_skillset(job);
     generic = job_get_generic_index(job);
     /* A skillset no job owns (a special character's) falls back to the unit's primary skillset. */
     if (job_find_first_for_skillset(skillset) == -1) {
-        skillset = g_world_unit_pointers[unit_index]->abilities.fields.primary_skillset;
+        skillset = g_formation_unit_pointers[unit_index]->abilities.fields.primary_skillset;
     }
     abilities = (s16*)main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
@@ -113,12 +113,12 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
         }
     }
     count = 0;
-    jp = g_world_unit_pointers[unit_index]->job_points.current.values[generic];
-    bits_init_primary_reader(g_world_unit_pointers[unit_index]->learned_abilities[generic]);
+    jp = g_formation_unit_pointers[unit_index]->job_points.current.values[generic];
+    bits_init_primary_reader(g_formation_unit_pointers[unit_index]->learned_abilities[generic]);
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
-        if (job_is_special_monster(g_world_unit_pointers[unit_index]->identity.job_id) != 0) {
+        if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id) != 0) {
             learned = 1;
-        } else if (g_world_unit_pointers[unit_index]->uses_monster_skillset != 0) {
+        } else if (g_formation_unit_pointers[unit_index]->uses_monster_skillset != 0) {
             if (i >= 3) {
                 break;
             }
@@ -183,17 +183,17 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
  * `n` is the bubble-sort bound and then the ability being filtered; the two
  * uses share one register.
  */
-s32 world_ability_build_equippable_rsm_list(s16 unit_index, s32 slot, s16* out) {
+s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out) {
     s16 abilities[204];
     s32 count;
     s32 i;
     s32 n;
     s32 swap;
     s32 last;
-    s16 job_id = g_world_unit_pointers[unit_index]->identity.job_id;
+    s16 job_id = g_formation_unit_pointers[unit_index]->identity.job_id;
 
     count = ability_build_list(
-        unit_index, world_job_get_base(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
+        unit_index, job_list_get_base(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
     for (i = 1; i < JOB_ID_GENERIC_COUNT - 1; i++) {
         count += ability_build_list(
             unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], ABILITY_LIST_MODE_LEARNED_ONLY);

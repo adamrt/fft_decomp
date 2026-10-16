@@ -27,13 +27,13 @@
 #include "psx/types.h"
 
 /* Unpacks the configured options into the options-menu value table, then runs one Options screen:
- * MENU_OPTION_TYPE_GAME_OPTIONS runs world_menu_run_game_options in the thread slot before this one
+ * MENU_OPTION_TYPE_GAME_OPTIONS runs option_game_options_thread in the thread slot before this one
  * and exits once it ends, MENU_OPTION_TYPE_AT_LIST starts the AT list and MENU_OPTION_TYPE_CRYSTAL_PICKUP the
  * crystal pickup threads.
  *
  * g_menu_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
  * option equals its g_menu_option_reference_values entry. */
-void world_menu_run_option_screen(s32 mode) {
+void option_entrypoint(s32 mode) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     game_options_fields_t options = g_main_game_options.fields;
     s32 i;
@@ -65,7 +65,7 @@ void world_menu_run_option_screen(s32 mode) {
     last_mode = MENU_OPTION_TYPE_CRYSTAL_PICKUP;
     if (mode == MENU_OPTION_TYPE_GAME_OPTIONS) {
         script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
-        thread_start(g_thread_current_id - 1, world_menu_run_game_options);
+        thread_start(g_thread_current_id - 1, option_game_options_thread);
         entry->select_text_table = 1;
         entry->context = &g_menu_option_entry_table;
         thread_set_parameters(g_thread_current_id - 1, (s32)entry, 0, 0);
@@ -82,7 +82,7 @@ void world_menu_run_option_screen(s32 mode) {
 }
 
 /*
- * Options-menu thread started by world_menu_run_option_screen (MENU_OPTION_TYPE_GAME_OPTIONS) with
+ * Options-menu thread started by option_entrypoint (MENU_OPTION_TYPE_GAME_OPTIONS) with
  * entry->context = &g_menu_option_entry_table.
  *
  * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread, shows the
@@ -95,7 +95,7 @@ void world_menu_run_option_screen(s32 mode) {
  * loop notes keep the input-1 spill and the entry load ahead of the
  * row-count loads, as in the target.
  */
-void world_menu_run_game_options(void) {
+void option_game_options_thread(void) {
     image_load_parameters_t image_parameters;
     RECT image_rect;
     RECT clear;
@@ -128,7 +128,7 @@ void world_menu_run_game_options(void) {
     SPRT* frame;
     u8* image;
 
-    g_world_menu_thread_result = 1;
+    g_screen_thread_result = 1;
     input0 = script_get_controller_input_pointer(0);
     input1 = script_get_controller_input_pointer(1);
     do {
@@ -466,7 +466,7 @@ void world_menu_run_game_options(void) {
     gfx_free_texture_rect(&g_menu_option_title_image_rect);
     gfx_free_texture_rect(&g_menu_option_value_image_rect);
     thread_wait_frames(1);
-    g_world_menu_thread_result = 2;
+    g_screen_thread_result = 2;
     /* A nonzero third parameter ends the frame thread. */
     thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
     thread_exit_current();

@@ -58,7 +58,7 @@ static void card_gfx_init_primitive_lists(card_graphics_context_t* lists) {
  * environments (context 0 draws at y 0 and displays y 0xf0, context 1 the
  * reverse).
  *
- * CARD copy of world_gfx_init_double_packet_buffers reduced to the POLY_FT4
+ * CARD copy of screen_init_packet_buffers reduced to the POLY_FT4
  * and TILE pools; the pools this overlay does not use are arguments nobody
  * reads. */
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,

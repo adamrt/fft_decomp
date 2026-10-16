@@ -34,30 +34,30 @@
  * preview unit and not a Mime is then given its best-fit equipment: the old
  * items return to the inventory before the replacement set is taken from it,
  * and the auto-equip banner (0xD811) shows for 30 frames. Return 1 on success
- * and -2 when the unit is locked (see world_formation_get_unit_lock).
+ * and -2 when the unit is locked (see formation_get_unit_lock).
  */
-s32 world_formation_set_unit_ability_slot(s16 unit_id, s16 slot, s16 ability, s32 update_equipment) {
+s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_equipment) {
     s16 equipment[MENU_EQUIPMENT_SLOT_COUNT];
     s32 i;
 
-    if (world_formation_get_unit_lock(unit_id) == WORLD_FORMATION_UNIT_UNLOCKED) {
-        world_unit_t* unit = g_world_unit_pointers[unit_id];
+    if (formation_get_unit_lock(unit_id) == FORMATION_UNIT_UNLOCKED) {
+        formation_unit_t* unit = g_formation_unit_pointers[unit_id];
         unit->abilities.slots[slot] = ability;
-        world_formation_save_records_to_party();
-        world_formation_remove_invalid_unit_loadout(unit_id);
+        formation_save_records();
+        formation_remove_invalid_loadout(unit_id);
         if (update_equipment != 0) {
-            if (unit_id != WORLD_FORMATION_PREVIEW_UNIT_INDEX) {
-                if (g_world_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
-                    world_unit_build_best_fit_equipment(unit_id, equipment);
+            if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
+                if (g_formation_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
+                    formation_item_build_best_fit(unit_id, equipment);
                     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                        item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[i], 1);
+                        item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->equipment[i], 1);
                     }
                     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                        g_world_unit_pointers[unit_id]->equipment[i] = equipment[i];
+                        g_formation_unit_pointers[unit_id]->equipment[i] = equipment[i];
                         item_adjust_inventory_count(equipment[i], -1);
                     }
-                    world_formation_save_records_to_party();
-                    world_menu_run_unit_status_banner_countdown(0xD811, 0x1E);
+                    formation_save_records();
+                    formation_banner_countdown(0xD811, 0x1E);
                 }
             }
         }
@@ -68,26 +68,26 @@ s32 world_formation_set_unit_ability_slot(s16 unit_id, s16 slot, s16 ability, s3
 
 /* Why a formation unit cannot use a menu, as a WORLD_FORMATION_UNIT_LOCK_*
  * value: away on a proposition, a monster, an egg or a Mime, tested in that
- * order; WORLD_FORMATION_UNIT_UNLOCKED otherwise. */
-s32 world_formation_get_unit_lock(s32 unit_id) {
-    world_unit_t* unit = g_world_unit_pointers[unit_id];
+ * order; FORMATION_UNIT_UNLOCKED otherwise. */
+s32 formation_get_unit_lock(s32 unit_id) {
+    formation_unit_t* unit = g_formation_unit_pointers[unit_id];
 
     if (unit->proposition_status != 0)
-        return WORLD_FORMATION_UNIT_LOCK_PROPOSITION;
+        return FORMATION_UNIT_LOCK_PROPOSITION;
     if (unit->uses_monster_skillset != 0)
-        return WORLD_FORMATION_UNIT_LOCK_MONSTER;
+        return FORMATION_UNIT_LOCK_MONSTER;
     if (job_is_special_monster(unit->identity.job_id) != 0)
-        return WORLD_FORMATION_UNIT_LOCK_MONSTER;
-    if (g_world_unit_pointers[unit_id]->gender_flags & UNIT_FLAG_EGG)
-        return WORLD_FORMATION_UNIT_LOCK_EGG;
-    if (g_world_unit_pointers[unit_id]->identity.job_id == JOB_ID_MIME)
-        return WORLD_FORMATION_UNIT_LOCK_MIME;
-    return WORLD_FORMATION_UNIT_UNLOCKED;
+        return FORMATION_UNIT_LOCK_MONSTER;
+    if (g_formation_unit_pointers[unit_id]->gender_flags & UNIT_FLAG_EGG)
+        return FORMATION_UNIT_LOCK_EGG;
+    if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MIME)
+        return FORMATION_UNIT_LOCK_MIME;
+    return FORMATION_UNIT_UNLOCKED;
 }
 
 /* Mark an ability learned for a job: find its position in the job's skillset list and set that
  * bit, most significant first, in the unit's learned-ability bytes for the job. */
-void world_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
+void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
     s32 skillset = job_get_skillset(job_id);
     s16 generic_job = job_get_generic_index(job_id);
     s16* list = (s16*)main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
@@ -105,7 +105,8 @@ void world_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
     mask = 1;
     i = mask << bit;
     /* Keeping the job-byte stride before the field address preserves the retail load/add order. */
-    learned_abilities = ((world_unit_t*)((u8*)g_world_unit_pointers[unit_id] + generic_job * 3))->learned_abilities[0];
+    learned_abilities
+        = ((formation_unit_t*)((u8*)g_formation_unit_pointers[unit_id] + generic_job * 3))->learned_abilities[0];
     learned_abilities[byte] |= i;
 }
 
@@ -114,8 +115,8 @@ void world_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
  * Special jobs use fixed portrait entries; generic humans derive theirs from
  * job and gender. The third argument is retained because all known callers
  * pass it even though this function does not consume it. */
-void world_formation_build_unit_graphic_entry(s16 formation_index, texture_source_t* destination, s32 unused) {
-    world_unit_t* unit = g_world_unit_pointers[formation_index];
+void formation_build_unit_graphic(s16 formation_index, texture_source_t* destination, s32 unused) {
+    formation_unit_t* unit = g_formation_unit_pointers[formation_index];
     s16 job_id;
     s32 index;
     s32 palette;
@@ -139,13 +140,13 @@ void world_formation_build_unit_graphic_entry(s16 formation_index, texture_sourc
     } else if (unit->sprite_set == CHARACTER_IDENTITY_MONSTER) {
         index = unit->monster_graphic + 0x3D;
     } else if (unit->sprite_set < CHARACTER_IDENTITY_BOY) {
-        index = g_world_formation_generic_human_graphic_index_table[unit->sprite_set];
+        index = g_formation_generic_human_graphic_index_table[unit->sprite_set];
     } else {
-        world_formation_get_generic_human_graphic_entry(job_id, unit->gender_flags & UNIT_FLAG_FEMALE, destination);
+        formation_get_generic_human_graphic(job_id, unit->gender_flags & UNIT_FLAG_FEMALE, destination);
         return;
     }
-    bcopy(&g_world_formation_graphic_entries[index], destination, sizeof(*destination));
-    palette = (s16)world_formation_get_unit_palette_index(g_world_unit_pointers[formation_index]->identity.roster_slot);
+    bcopy(&g_formation_graphic_entries[index], destination, sizeof(*destination));
+    palette = (s16)formation_get_unit_palette_index(g_formation_unit_pointers[formation_index]->identity.roster_slot);
     clut_x = (palette % 4) * 0x10 + 0x140;
     job_id = palette / 4;
     destination->clut = GetClut(clut_x, job_id + 0xE0);
@@ -155,11 +156,11 @@ void world_formation_build_unit_graphic_entry(s16 formation_index, texture_sourc
  *
  * Narrow the requested slot to s16. On a miss, return the number of entries searched.
  */
-s32 world_formation_find_index_by_roster_slot(s16 roster_slot) {
+s32 formation_find_by_roster_slot(s16 roster_slot) {
     s32 index;
 
-    for (index = 0; index < g_world_formation_record_count; index++) {
-        if (g_world_unit_pointers[index]->identity.roster_slot == roster_slot) {
+    for (index = 0; index < g_formation_record_count; index++) {
+        if (g_formation_unit_pointers[index]->identity.roster_slot == roster_slot) {
             break;
         }
     }
@@ -170,12 +171,12 @@ s32 world_formation_find_index_by_roster_slot(s16 roster_slot) {
  * are looked up in a table; of the rest, Bard and Dancer have fixed entries
  * (0x3a, 0x3b), while Mime uses 0x3c and the others job * 2 - 0x7c, both
  * plus one for a female unit. */
-void world_formation_get_generic_human_graphic_entry(s32 job_id, s16 is_female, texture_source_t* destination) {
+void formation_get_generic_human_graphic(s32 job_id, s16 is_female, texture_source_t* destination) {
     s16 id = job_id;
     s16 idx;
 
     if (id < JOB_ID_CHEMIST_35) {
-        idx = g_world_formation_generic_human_graphic_index_table[id];
+        idx = g_formation_generic_human_graphic_index_table[id];
     } else if (id == JOB_ID_DANCER) {
         idx = 0x3B;
     } else if (id == JOB_ID_BARD) {
@@ -190,17 +191,17 @@ void world_formation_get_generic_human_graphic_entry(s32 job_id, s16 is_female, 
             idx += 1;
         }
     }
-    bcopy(&g_world_formation_graphic_entries[idx], destination, 0xC);
+    bcopy(&g_formation_graphic_entries[idx], destination, 0xC);
 }
 
 /*
  * Copy a formation unit into the shared temporary record.
  *
  * The snapshot caller supplies the preview index as a second argument; this
- * routine ignores it and always uses g_world_formation_temp_unit.
+ * routine ignores it and always uses g_formation_temp_unit.
  */
-void world_formation_copy_unit_to_temp(s16 index, s32 unused_slot) {
-    bcopy(g_world_unit_pointers[index], g_world_formation_temp_unit, sizeof(world_unit_t));
+void formation_copy_unit_to_temp(s16 index, s32 unused_slot) {
+    bcopy(g_formation_unit_pointers[index], g_formation_temp_unit, sizeof(formation_unit_t));
 }
 
 /*
@@ -210,20 +211,20 @@ void world_formation_copy_unit_to_temp(s16 index, s32 unused_slot) {
  * No date validation is performed; exhausting the 13 limits reads 31 from
  * the following month-length data, not a valid extra zodiac entry.
  */
-static s32 world_unit_get_zodiac_for_date(s32 month, s32 day) {
+static s32 zodiac_get_for_date(s32 month, s32 day) {
     s32 i;
 
-    for (i = 0; i < WORLD_ZODIAC_DATE_LIMIT_COUNT; i++) {
-        if (month < g_world_zodiac_date_limits[i].date.month) {
+    for (i = 0; i < ZODIAC_DATE_LIMIT_COUNT; i++) {
+        if (month < g_zodiac_date_limits[i].date.month) {
             break;
         }
-        if (month == g_world_zodiac_date_limits[i].date.month) {
-            if (g_world_zodiac_date_limits[i].date.day >= day) {
+        if (month == g_zodiac_date_limits[i].date.month) {
+            if (g_zodiac_date_limits[i].date.day >= day) {
                 break;
             }
         }
     }
-    return g_world_zodiac_date_limits[i].zodiac;
+    return g_zodiac_date_limits[i].zodiac;
 }
 
 /* Advance egg hatch counters, then make the daily monster-breeding roll.
@@ -235,7 +236,7 @@ static s32 world_unit_get_zodiac_for_date(s32 month, s32 day) {
  * offspring jobs in its Chocobo-based breeding-table entry. The new egg's
  * hatch range comes from its offspring entry, and its level is based on a
  * random non-egg roster member. */
-void world_unit_update_monster_breeding(s32 unused) {
+void breeding_update(s32 unused) {
     u8 monsters[0x18];
     u8 levels[0x18];
     s32 monster_count = 0;
@@ -268,10 +269,10 @@ void world_unit_update_monster_breeding(s32 unused) {
                     month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
                     value = 0;
                     for (n = 1; n < month; n++) {
-                        value += g_world_month_lengths[n];
+                        value += g_breeding_month_lengths[n];
                     }
                     value += day;
-                    value |= world_unit_get_zodiac_for_date(month, day) << 12;
+                    value |= zodiac_get_for_date(month, day) << 12;
                     unit->birthday_day = value;
                     unit->zodiac = value >> 8;
                 }
@@ -292,25 +293,25 @@ void world_unit_update_monster_breeding(s32 unused) {
     /* The day's roll out of 256: below 6 rare, below 16 uncommon, below 32 common, else no egg. */
     value = rand() & 0xFF;
     if (value < 6) {
-        n = WORLD_MONSTER_BREED_RARITY_RARE;
+        n = BREEDING_RARITY_RARE;
     } else if (value < 0x10) {
-        n = WORLD_MONSTER_BREED_RARITY_UNCOMMON;
+        n = BREEDING_RARITY_UNCOMMON;
     } else {
         n = value < 0x20; /* COMMON or NONE */
     }
-    if (n == WORLD_MONSTER_BREED_RARITY_NONE) {
+    if (n == BREEDING_RARITY_NONE) {
         return;
     }
     monster_count = rand() % monster_count;
-    n = g_world_unit_monster_breed_table[main_party_get_unit(monsters[monster_count])->job_id - JOB_ID_CHOCOBO]
-            .offspring_job_by_rarity[n - WORLD_MONSTER_BREED_RARITY_COMMON];
-    i = rand() % g_world_unit_monster_breed_table[n - JOB_ID_CHOCOBO].hatch_range + 1;
+    n = g_breeding_table[main_party_get_unit(monsters[monster_count])->job_id - JOB_ID_CHOCOBO]
+            .offspring_job_by_rarity[n - BREEDING_RARITY_COMMON];
+    i = rand() % g_breeding_table[n - JOB_ID_CHOCOBO].hatch_range + 1;
     if (i < 2) {
         i = 2;
     }
     /* The egg's hatch count goes in both nibbles; the low one counts down. Name generation
      * reads the unit-name table through the roster-name pointer, swapped for the call as
-     * world_formation_generate_unit does. */
+     * formation_generate_unit does. */
     name_buffer = &g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     value = (s32)*name_buffer;
     *name_buffer = g_text_section_pointers[TEXT_SECTION_UNIT_NAMES];
@@ -331,7 +332,7 @@ void world_unit_update_monster_breeding(s32 unused) {
  * draw_otag (-1 skips submission) and clears the new buffer's table from
  * first_otag onward.
  */
-void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_otag) {
+void screen_present_frame(s32 first_otag, s32 draw_otag) {
     DRAWENV env;
     DRAWENV* envp;
     menu_gfx_context_t* context;
@@ -346,16 +347,16 @@ void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_ota
     g_gfx_poly_g4_count = 0;
     g_menu_gfx_poly_gt4_count = 0;
     g_gfx_line_f2_count = 0;
-    g_world_gfx_gradient_line_count = 0;
+    g_screen_gradient_line_count = 0;
     g_gfx_tile_count = 0;
     g_menu_gfx_draw_move_count = 0;
-    g_world_gfx_draw_area_count = 0;
+    g_screen_draw_area_count = 0;
     g_menu_gfx_draw_mode_count = 0;
     GetDrawEnv(envp);
-    g_world_gfx_draw_buffer_clip_y = envp->clip.y;
+    g_screen_draw_buffer_clip_y = envp->clip.y;
     while (DrawSync(1) != 0) { }
     VSync(g_menu_event_speed);
-    context = g_world_gfx_packet_buffers;
+    context = g_screen_packet_buffers;
     if (g_menu_gfx_context == context) {
         context++;
     }
@@ -365,36 +366,36 @@ void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_ota
     if (draw_otag != -1) {
         DrawOTag(&otag[draw_otag]);
     }
-    ClearOTag(&g_menu_gfx_context->otag[first_otag], g_world_ot_length - first_otag);
+    ClearOTag(&g_menu_gfx_context->otag[first_otag], g_screen_ot_length - first_otag);
 }
 
 /* Initializes every primitive pool of a packet buffer with its libgpu
  * constructor; quads additionally get texture shading enabled. */
-static void world_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
+static void screen_init_packet_pools(menu_gfx_context_t* buffer) {
     s32 i;
 
-    for (i = 0; i < g_world_gfx_textured_quad_capacity; i++) {
+    for (i = 0; i < g_screen_textured_quad_capacity; i++) {
         SetPolyFT4(&buffer->textured_quads[i]);
         SetShadeTex(&buffer->textured_quads[i], 0);
     }
-    for (i = 0; i < g_world_gfx_gradient_quad_capacity; i++) {
+    for (i = 0; i < g_screen_gradient_quad_capacity; i++) {
         SetPolyG4(&buffer->gouraud_quads[i]);
         SetShadeTex(&buffer->gouraud_quads[i], 0);
     }
-    for (i = 0; i < g_world_gfx_textured_gradient_quad_capacity; i++) {
+    for (i = 0; i < g_screen_textured_gradient_quad_capacity; i++) {
         SetPolyGT4(&buffer->gouraud_textured_quads[i]);
         SetShadeTex(&buffer->gouraud_textured_quads[i], 0);
     }
-    for (i = 0; i < g_world_gfx_flat_line_capacity; i++) {
+    for (i = 0; i < g_screen_flat_line_capacity; i++) {
         SetLineF2(&buffer->flat_lines[i]);
     }
-    for (i = 0; i < g_world_gfx_gradient_line_capacity; i++) {
+    for (i = 0; i < g_screen_gradient_line_capacity; i++) {
         SetLineG2(&buffer->gouraud_lines[i]);
     }
     for (i = 0; i < g_gfx_tile_capacity; i++) {
         SetTile(&buffer->tiles[i]);
     }
-    for (i = 0; i < g_world_gfx_draw_move_capacity; i++) {
+    for (i = 0; i < g_screen_draw_move_capacity; i++) {
         SetDrawMove(&buffer->draw_moves[i]);
     }
 }
@@ -402,35 +403,35 @@ static void world_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
 /* Binds the primitive pools for both WORLD packet buffers, initializes their
  * draw/display environments, and presents twice to establish the active pair.
  */
-void world_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otags, void* unused_2, void* unused_3,
-    void* unused_4, POLY_FT4* textured_quads, void* unused_6, void* unused_7, POLY_G4* gradient_quads,
+void screen_init_packet_buffers(menu_gfx_context_t* buffers, u32* otags, void* unused_2, void* unused_3, void* unused_4,
+    POLY_FT4* textured_quads, void* unused_6, void* unused_7, POLY_G4* gradient_quads,
     POLY_GT4* textured_gradient_quads, LINE_F2* flat_lines, void* unused_11, void* unused_12, LINE_G2* gradient_lines,
     void* unused_14, void* unused_15, TILE* tiles, void* unused_17, void* unused_18, void* unused_19, void* unused_20,
     void* unused_21, void* unused_22, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes) {
     s32 i;
 
-    g_world_gfx_packet_buffers = buffers;
+    g_screen_packet_buffers = buffers;
     g_menu_gfx_context = buffers;
     for (i = 0; i < 2; i++) {
-        g_world_gfx_packet_buffers[i].otag = otags + g_world_ot_length * i;
-        g_world_gfx_packet_buffers[i].textured_quads = textured_quads + g_world_gfx_textured_quad_capacity * i;
-        g_world_gfx_packet_buffers[i].gouraud_quads = gradient_quads + g_world_gfx_gradient_quad_capacity * i;
-        g_world_gfx_packet_buffers[i].gouraud_textured_quads
-            = textured_gradient_quads + g_world_gfx_textured_gradient_quad_capacity * i;
-        g_world_gfx_packet_buffers[i].flat_lines = flat_lines + g_world_gfx_flat_line_capacity * i;
-        g_world_gfx_packet_buffers[i].gouraud_lines = gradient_lines + g_world_gfx_gradient_line_capacity * i;
-        g_world_gfx_packet_buffers[i].tiles = tiles + g_gfx_tile_capacity * i;
-        g_world_gfx_packet_buffers[i].draw_moves = draw_moves + g_world_gfx_draw_move_capacity * i;
-        g_world_gfx_packet_buffers[i].draw_areas = draw_areas + g_world_gfx_draw_area_capacity * i;
-        g_world_gfx_packet_buffers[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
-        world_gfx_init_packet_pools(&g_world_gfx_packet_buffers[i]);
-        SetDefDrawEnv(&g_world_gfx_packet_buffers[i].draw_env, 0, i * 240, 255, 240);
-        SetDefDispEnv(&g_world_gfx_packet_buffers[i].disp_env, 0, i == 0 ? 240 : 0, 255, 240);
-        g_world_gfx_packet_buffers[i].draw_env.isbg = 0;
-        g_world_gfx_packet_buffers[i].draw_env.dfe = 1;
-        setRGB0(&g_world_gfx_packet_buffers[i].draw_env, 0, 0, 0);
-        g_world_gfx_packet_buffers[i].draw_env.ofs[0] = -128;
+        g_screen_packet_buffers[i].otag = otags + g_screen_ot_length * i;
+        g_screen_packet_buffers[i].textured_quads = textured_quads + g_screen_textured_quad_capacity * i;
+        g_screen_packet_buffers[i].gouraud_quads = gradient_quads + g_screen_gradient_quad_capacity * i;
+        g_screen_packet_buffers[i].gouraud_textured_quads
+            = textured_gradient_quads + g_screen_textured_gradient_quad_capacity * i;
+        g_screen_packet_buffers[i].flat_lines = flat_lines + g_screen_flat_line_capacity * i;
+        g_screen_packet_buffers[i].gouraud_lines = gradient_lines + g_screen_gradient_line_capacity * i;
+        g_screen_packet_buffers[i].tiles = tiles + g_gfx_tile_capacity * i;
+        g_screen_packet_buffers[i].draw_moves = draw_moves + g_screen_draw_move_capacity * i;
+        g_screen_packet_buffers[i].draw_areas = draw_areas + g_screen_draw_area_capacity * i;
+        g_screen_packet_buffers[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
+        screen_init_packet_pools(&g_screen_packet_buffers[i]);
+        SetDefDrawEnv(&g_screen_packet_buffers[i].draw_env, 0, i * 240, 255, 240);
+        SetDefDispEnv(&g_screen_packet_buffers[i].disp_env, 0, i == 0 ? 240 : 0, 255, 240);
+        g_screen_packet_buffers[i].draw_env.isbg = 0;
+        g_screen_packet_buffers[i].draw_env.dfe = 1;
+        setRGB0(&g_screen_packet_buffers[i].draw_env, 0, 0, 0);
+        g_screen_packet_buffers[i].draw_env.ofs[0] = -128;
     }
-    world_gfx_present_frame_and_swap_packet_buffer(0, -1);
-    world_gfx_present_frame_and_swap_packet_buffer(0, -1);
+    screen_present_frame(0, -1);
+    screen_present_frame(0, -1);
 }

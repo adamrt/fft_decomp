@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /*
- * The menu-screen library's copy of world_option_gfx_build_scaled_draw_area_packets; nothing calls it.
+ * The menu-screen library's copy of option_build_scaled_draw_area_packets; nothing calls it.
  * Build a double-buffered draw-area pair whose rectangle is `source` moved
  * left 0x80, shifted by `offset` (x by offset->x, y by offset->w) and
  * cropped to a percentage of its size about its center. The percentage comes
@@ -20,7 +20,7 @@
  * own local makes the y subtraction a second allocno, which schedules three
  * instructions early and rotates every temporary.
  */
-void world_screen_gfx_build_scaled_draw_area_packets(
+void screen_build_scaled_draw_area_packets(
     scaled_draw_area_pair_t* pair, const RECT* source, s32 step, s32 flag, const RECT* offset) {
     s32 percent;
     s32 w;
@@ -33,7 +33,7 @@ void world_screen_gfx_build_scaled_draw_area_packets(
     if (step >= 12) {
         step = 11;
     }
-    percent = g_world_menu_zoom_percentages[step];
+    percent = g_screen_zoom_percentages[step];
     mem_copy_bytes_nonempty(&pair->rects[0], source, sizeof(pair->rects[0]));
     w = pair->rects[0].w;
     h = pair->rects[0].h;

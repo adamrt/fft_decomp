@@ -7,9 +7,9 @@
 #include "fft/world_text.h"
 #include "psx/types.h"
 
-static s32 g_world_shop_background_tim_files[9 * 2] = { 72000, 67584, 72033, 67584, 72066, 67584, 72099, 67584, 72132,
-    67584, 72165, 67584, 72198, 67584, 72231, 67584, 72264, 67584 };
-static u8 g_world_text_skillset_names_data[1104] = { 254, 10, 55, 55, 36, 38, 46, 254, 13, 40, 41, 40, 49, 39, 254, 14,
+static s32 g_shop_background_tim_files[9 * 2] = { 72000, 67584, 72033, 67584, 72066, 67584, 72099, 67584, 72132, 67584,
+    72165, 67584, 72198, 67584, 72231, 67584, 72264, 67584 };
+static u8 g_screen_text_skillset_names_data[1104] = { 254, 10, 55, 55, 36, 38, 46, 254, 13, 40, 41, 40, 49, 39, 254, 14,
     52, 56, 44, 51, 250, 12, 43, 36, 49, 42, 40, 254, 254, 11, 36, 54, 44, 38, 250, 28, 46, 44, 47, 47, 254, 18, 55, 40,
     48, 254, 11, 36, 55, 55, 47, 40, 250, 28, 46, 44, 47, 47, 254, 12, 43, 36, 53, 42, 40, 254, 25, 56, 49, 38, 43, 250,
     10, 53, 55, 254, 32, 43, 44, 55, 40, 250, 22, 36, 42, 44, 38, 254, 11, 47, 36, 38, 46, 250, 22, 36, 42, 44, 38, 254,
@@ -50,7 +50,7 @@ static u8 g_world_text_skillset_names_data[1104] = { 254, 10, 55, 55, 36, 38, 46
     37, 47, 50, 54, 254, 32, 50, 53, 46, 254, 11, 44, 50, 254, 13, 36, 53, 46, 250, 12, 47, 50, 56, 39, 254, 13, 36, 53,
     46, 250, 22, 36, 42, 44, 38, 254, 23, 44, 42, 43, 55, 250, 22, 36, 42, 44, 38, 254, 254, 254, 254, 254, 254, 254,
     254, 254, 254, 254, 254, 254, 10, 49, 60, 55, 43, 44, 49, 42, 254, 0 };
-static u8 g_world_text_job_names_data[1412] = { 254, 28, 52, 56, 44, 53, 40, 254, 28, 52, 56, 44, 53, 40, 254, 28, 52,
+static u8 g_screen_text_job_names_data[1412] = { 254, 28, 52, 56, 44, 53, 40, 254, 28, 52, 56, 44, 53, 40, 254, 28, 52,
     56, 44, 53, 40, 254, 28, 52, 56, 44, 53, 40, 254, 17, 50, 47, 60, 250, 20, 49, 44, 42, 43, 55, 254, 10, 53, 38, 250,
     20, 49, 44, 42, 43, 55, 254, 28, 52, 56, 44, 53, 40, 254, 10, 53, 38, 250, 20, 49, 44, 42, 43, 55, 254, 21, 56, 49,
     40, 250, 20, 49, 44, 42, 43, 55, 254, 13, 56, 46, 40, 254, 13, 56, 46, 40, 254, 25, 53, 44, 49, 38, 40, 54, 54, 254,
@@ -101,7 +101,7 @@ static u8 g_world_text_job_names_data[1412] = { 254, 28, 52, 56, 44, 53, 40, 254
     254, 23, 50, 49, 40, 254, 23, 50, 49, 40, 254, 23, 50, 49, 40, 254, 23, 50, 49, 40, 254, 10, 51, 36, 49, 39, 36,
     254, 28, 40, 53, 51, 40, 49, 55, 36, 53, 44, 56, 54, 254, 17, 50, 47, 60, 250, 13, 53, 36, 42, 50, 49, 254, 10, 53,
     38, 43, 36, 44, 38, 250, 13, 40, 48, 50, 49, 254, 30, 47, 55, 44, 48, 36, 250, 13, 40, 48, 50, 49, 254, 0, 0 };
-static u8 g_world_text_ability_names_data[4916] = { 254, 12, 56, 53, 40, 254, 12, 56, 53, 40, 250, 2, 254, 12, 56, 53,
+static u8 g_screen_text_ability_names_data[4916] = { 254, 12, 56, 53, 40, 254, 12, 56, 53, 40, 250, 2, 254, 12, 56, 53,
     40, 250, 3, 254, 12, 56, 53, 40, 250, 4, 254, 27, 36, 44, 54, 40, 254, 27, 36, 44, 54, 40, 250, 2, 254, 27, 40, 53,
     36, 44, 54, 40, 254, 27, 40, 42, 40, 49, 254, 25, 53, 50, 55, 40, 38, 55, 254, 25, 53, 50, 55, 40, 38, 55, 250, 2,
     254, 28, 43, 40, 47, 47, 254, 28, 43, 40, 47, 47, 250, 2, 254, 32, 36, 47, 47, 254, 14, 54, 56, 49, 36, 254, 17, 50,
@@ -278,7 +278,7 @@ static u8 g_world_text_ability_names_data[4916] = { 254, 12, 56, 53, 40, 254, 12
     254, 22, 50, 57, 40, 250, 50, 49, 250, 21, 36, 57, 36, 254, 22, 50, 57, 40, 250, 56, 49, 39, 53, 58, 36, 55, 40, 53,
     254, 15, 47, 50, 36, 55, 254, 15, 47, 60, 254, 28, 44, 47, 40, 49, 55, 250, 32, 36, 47, 46, 254, 22, 50, 57, 40,
     209, 29, 15, 44, 49, 39, 250, 18, 55, 40, 48, 254, 254, 254, 14, 49, 39, 248, 0 };
-static u8 g_world_text_formation_messages_data[904] = { 29, 43, 44, 54, 250, 38, 50, 48, 48, 36, 49, 39, 250, 38, 36,
+static u8 g_screen_text_formation_messages_data[904] = { 29, 43, 44, 54, 250, 38, 50, 48, 48, 36, 49, 39, 250, 38, 36,
     49, 49, 50, 55, 250, 37, 40, 250, 56, 54, 40, 39, 248, 36, 54, 250, 49, 50, 250, 44, 55, 40, 48, 54, 250, 36, 53,
     40, 250, 44, 49, 250, 51, 50, 54, 54, 40, 54, 54, 44, 50, 49, 217, 182, 254, 28, 40, 47, 40, 38, 55, 40, 39, 250,
     44, 55, 40, 48, 250, 44, 54, 250, 49, 50, 55, 250, 44, 49, 250, 54, 55, 50, 38, 46, 217, 182, 248, 12, 43, 50, 50,
@@ -313,7 +313,7 @@ static u8 g_world_text_formation_messages_data[904] = { 29, 43, 44, 54, 250, 38,
     55, 50, 250, 47, 50, 36, 39, 217, 182, 248, 13, 36, 55, 36, 250, 48, 36, 60, 250, 37, 40, 250, 39, 36, 48, 36, 42,
     40, 39, 217, 182, 250, 254, 13, 50, 250, 60, 50, 56, 250, 58, 36, 49, 55, 250, 55, 50, 250, 54, 36, 57, 40, 64, 254,
     0 };
-static u8 g_world_text_dismiss_unit_replies_data[4056] = { 227, 8, 225, 227, 0, 248, 217, 182, 217, 182, 217, 182, 217,
+static u8 g_screen_text_dismiss_unit_replies_data[4056] = { 227, 8, 225, 227, 0, 248, 217, 182, 217, 182, 217, 182, 217,
     182, 18, 250, 54, 40, 40, 217, 182, 250, 29, 43, 40, 49, 218, 116, 250, 18, 217, 193, 47, 47, 250, 42, 50, 217, 182,
     250, 248, 11, 56, 55, 218, 116, 250, 39, 50, 49, 217, 193, 55, 250, 53, 40, 42, 53, 40, 55, 250, 44, 55, 250, 47,
     36, 55, 40, 53, 217, 182, 254, 227, 8, 225, 227, 0, 248, 17, 40, 60, 218, 116, 250, 38, 50, 48, 40, 250, 50, 49,
@@ -472,7 +472,7 @@ static u8 g_world_text_dismiss_unit_replies_data[4056] = { 227, 8, 225, 227, 0, 
     217, 182, 217, 182, 254, 217, 182, 217, 182, 217, 182, 217, 182, 254, 217, 182, 217, 182, 217, 182, 254, 217, 182,
     217, 182, 217, 182, 217, 182, 254, 217, 182, 217, 182, 217, 182, 217, 182, 254, 217, 182, 217, 182, 217, 182, 217,
     182, 254, 217, 182, 217, 182, 217, 182, 217, 182, 254, 0, 0, 0 };
-static u8 g_world_text_job_descriptions_data[6720] = { 10, 250, 45, 50, 37, 250, 58, 43, 44, 38, 43, 250, 44, 54, 250,
+static u8 g_screen_text_job_descriptions_data[6720] = { 10, 250, 45, 50, 37, 250, 58, 43, 44, 38, 43, 250, 44, 54, 250,
     36, 250, 37, 36, 54, 44, 54, 250, 41, 50, 53, 250, 36, 47, 47, 250, 56, 49, 44, 55, 54, 217, 182, 250, 248, 29, 43,
     44, 54, 250, 45, 50, 37, 250, 44, 54, 250, 55, 43, 40, 250, 54, 55, 36, 53, 55, 44, 49, 42, 250, 51, 50, 44, 49, 55,
     250, 55, 50, 250, 37, 40, 38, 50, 48, 44, 49, 42, 250, 248, 36, 250, 41, 44, 49, 40, 250, 58, 36, 53, 53, 44, 50,
@@ -721,19 +721,19 @@ static u8 g_world_text_job_descriptions_data[6720] = { 10, 250, 45, 50, 37, 250,
     50, 55, 40, 38, 55, 44, 50, 49, 250, 37, 60, 250, 16, 50, 39, 217, 182, 250, 250, 250, 248, 23, 50, 250, 38, 50, 49,
     39, 44, 55, 44, 50, 49, 54, 250, 41, 50, 53, 250, 45, 50, 37, 250, 38, 43, 36, 49, 42, 40, 217, 182, 254, 254, 254,
     254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 0, 0, 0 };
-static u8 g_world_text_name_entry_keyboard_data[276] = { 250, 250, 227, 12, 217, 186, 250, 250, 250, 217, 187, 250, 250,
-    250, 250, 250, 11, 28, 250, 250, 250, 250, 250, 13, 14, 21, 250, 250, 250, 250, 250, 18, 23, 28, 250, 250, 250, 250,
-    250, 250, 250, 250, 250, 14, 23, 13, 254, 231, 2, 10, 231, 22, 11, 231, 42, 12, 231, 62, 13, 231, 82, 14, 231, 102,
-    15, 231, 122, 16, 231, 142, 17, 231, 163, 18, 231, 182, 19, 231, 202, 20, 254, 231, 2, 21, 231, 22, 22, 231, 42, 23,
-    231, 62, 24, 231, 82, 25, 231, 102, 26, 231, 122, 27, 231, 142, 28, 231, 162, 29, 231, 182, 30, 231, 202, 31, 254,
-    231, 2, 32, 231, 22, 33, 231, 42, 34, 231, 62, 35, 254, 231, 3, 36, 231, 23, 37, 231, 43, 38, 231, 63, 39, 231, 83,
-    40, 231, 103, 41, 231, 123, 42, 231, 143, 43, 231, 164, 44, 231, 183, 45, 231, 202, 46, 254, 231, 4, 47, 231, 22,
-    48, 231, 43, 49, 231, 63, 50, 231, 83, 51, 231, 103, 52, 231, 123, 53, 231, 143, 54, 231, 163, 55, 231, 183, 56,
-    231, 202, 57, 254, 231, 2, 58, 231, 23, 59, 231, 43, 60, 231, 63, 61, 254, 231, 2, 0, 231, 22, 1, 231, 42, 2, 231,
-    62, 3, 231, 82, 4, 231, 102, 5, 231, 120, 6, 231, 142, 7, 231, 162, 8, 231, 182, 9, 254, 231, 3, 62, 231, 22, 64,
-    231, 42, 66, 231, 62, 68, 231, 83, 70, 231, 104, 95, 231, 121, 139, 231, 143, 141, 231, 163, 142, 231, 183, 145,
-    231, 201, 147, 254, 0, 0 };
-static u8 g_world_text_shop_dialogue_data[2936] = { 254, 236, 114, 227, 8, 28, 43, 50, 51, 46, 40, 40, 51, 40, 53, 227,
+static u8 g_screen_text_name_entry_keyboard_data[276] = { 250, 250, 227, 12, 217, 186, 250, 250, 250, 217, 187, 250,
+    250, 250, 250, 250, 11, 28, 250, 250, 250, 250, 250, 13, 14, 21, 250, 250, 250, 250, 250, 18, 23, 28, 250, 250, 250,
+    250, 250, 250, 250, 250, 250, 14, 23, 13, 254, 231, 2, 10, 231, 22, 11, 231, 42, 12, 231, 62, 13, 231, 82, 14, 231,
+    102, 15, 231, 122, 16, 231, 142, 17, 231, 163, 18, 231, 182, 19, 231, 202, 20, 254, 231, 2, 21, 231, 22, 22, 231,
+    42, 23, 231, 62, 24, 231, 82, 25, 231, 102, 26, 231, 122, 27, 231, 142, 28, 231, 162, 29, 231, 182, 30, 231, 202,
+    31, 254, 231, 2, 32, 231, 22, 33, 231, 42, 34, 231, 62, 35, 254, 231, 3, 36, 231, 23, 37, 231, 43, 38, 231, 63, 39,
+    231, 83, 40, 231, 103, 41, 231, 123, 42, 231, 143, 43, 231, 164, 44, 231, 183, 45, 231, 202, 46, 254, 231, 4, 47,
+    231, 22, 48, 231, 43, 49, 231, 63, 50, 231, 83, 51, 231, 103, 52, 231, 123, 53, 231, 143, 54, 231, 163, 55, 231,
+    183, 56, 231, 202, 57, 254, 231, 2, 58, 231, 23, 59, 231, 43, 60, 231, 63, 61, 254, 231, 2, 0, 231, 22, 1, 231, 42,
+    2, 231, 62, 3, 231, 82, 4, 231, 102, 5, 231, 120, 6, 231, 142, 7, 231, 162, 8, 231, 182, 9, 254, 231, 3, 62, 231,
+    22, 64, 231, 42, 66, 231, 62, 68, 231, 83, 70, 231, 104, 95, 231, 121, 139, 231, 143, 141, 231, 163, 142, 231, 183,
+    145, 231, 201, 147, 254, 0, 0 };
+static u8 g_screen_text_shop_dialogue_data[2936] = { 254, 236, 114, 227, 8, 28, 43, 50, 51, 46, 40, 40, 51, 40, 53, 227,
     0, 248, 32, 40, 47, 38, 50, 48, 40, 217, 182, 248, 32, 43, 36, 55, 250, 38, 36, 49, 250, 18, 250, 39, 50, 250, 41,
     50, 53, 250, 60, 50, 56, 217, 201, 254, 236, 114, 227, 8, 28, 43, 50, 51, 46, 40, 40, 51, 40, 53, 227, 0, 248, 10,
     49, 60, 55, 43, 44, 49, 42, 250, 40, 47, 54, 40, 248, 18, 250, 38, 36, 49, 250, 39, 50, 250, 41, 50, 53, 250, 60,
@@ -843,70 +843,71 @@ static u8 g_world_text_shop_dialogue_data[2936] = { 254, 236, 114, 227, 8, 28, 4
     54, 55, 40, 53, 227, 0, 248, 12, 43, 36, 49, 42, 40, 250, 58, 43, 44, 38, 43, 250, 48, 50, 49, 54, 55, 40, 53, 217,
     193, 54, 250, 49, 36, 48, 40, 217, 201, 254, 236, 24, 27, 40, 44, 54, 248, 217, 182, 217, 182, 217, 182, 16, 53, 53,
     53, 217, 182, 217, 182, 217, 182, 254, 0, 0 };
-static u8* g_world_text_resident_data[9] = { (u8*)&g_world_text_skillset_names_data, (u8*)&g_world_text_job_names_data,
-    (u8*)&g_world_text_ability_names_data, (u8*)&g_world_text_formation_messages_data,
-    (u8*)&g_world_text_dismiss_unit_replies_data, (u8*)&g_world_text_job_descriptions_data, 0,
-    (u8*)&g_world_text_name_entry_keyboard_data, (u8*)&g_world_text_shop_dialogue_data };
+static u8* g_screen_text_resident_data[9]
+    = { (u8*)&g_screen_text_skillset_names_data, (u8*)&g_screen_text_job_names_data,
+          (u8*)&g_screen_text_ability_names_data, (u8*)&g_screen_text_formation_messages_data,
+          (u8*)&g_screen_text_dismiss_unit_replies_data, (u8*)&g_screen_text_job_descriptions_data, 0,
+          (u8*)&g_screen_text_name_entry_keyboard_data, (u8*)&g_screen_text_shop_dialogue_data };
 
 /* Sector and size pairs; flat 32-bit value access preserves the original addressing. */
-static s32 g_world_tutorial_message_files[7 * 2]
+static s32 g_tutorial_message_files[7 * 2]
     = { 72298, 4096, 72301, 6144, 72305, 6144, 72309, 4096, 72312, 6144, 72316, 2048, 72318, 2048 };
 
-static s32 g_world_tutorial_script_files[7 * 2]
+static s32 g_tutorial_script_files[7 * 2]
     = { 72297, 2048, 72300, 2048, 72304, 2048, 72308, 2048, 72311, 2048, 72315, 2048, 72317, 2048 };
 
 /* Load shop background image `index` to the heap; the table holds a sector
  * and a size per image. */
-u32* world_shop_load_background_tim(s32 index) {
+u32* shop_load_background(s32 index) {
     return main_file_load_checked_to_heap(
-        g_world_shop_background_tim_files[index * 2], g_world_shop_background_tim_files[(index * 2) + 1]);
+        g_shop_background_tim_files[index * 2], g_shop_background_tim_files[(index * 2) + 1]);
 }
 
 /* Points one of the text section pointers at its resident text data.
  *
- * No path returns a value; world_card_build_save_slot_description uses the
+ * No path returns a value; save_build_slot_description uses the
  * bound address the store leaves in $v0. */
-u8* world_text_bind_section_data(u32 index) {
+u8* screen_text_bind_section(u32 index) {
     switch (index) {
-    case WORLD_TEXT_DATA_SKILLSET_NAMES:
-        g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES] = g_world_text_skillset_names_data;
+    case SCREEN_TEXT_DATA_SKILLSET_NAMES:
+        g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES] = g_screen_text_skillset_names_data;
         break;
-    case WORLD_TEXT_DATA_JOB_NAMES:
-        g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_world_text_job_names_data;
+    case SCREEN_TEXT_DATA_JOB_NAMES:
+        g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_screen_text_job_names_data;
         break;
-    case WORLD_TEXT_DATA_ABILITY_NAMES:
-        g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES] = g_world_text_ability_names_data;
+    case SCREEN_TEXT_DATA_ABILITY_NAMES:
+        g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES] = g_screen_text_ability_names_data;
         break;
-    case WORLD_TEXT_DATA_FORMATION_MESSAGES:
-        g_text_section_pointers[TEXT_SECTION_FORMATION_MESSAGES] = g_world_text_formation_messages_data;
+    case SCREEN_TEXT_DATA_FORMATION_MESSAGES:
+        g_text_section_pointers[TEXT_SECTION_FORMATION_MESSAGES] = g_screen_text_formation_messages_data;
         break;
-    case WORLD_TEXT_DATA_DISMISS_UNIT_REPLIES:
-        g_text_section_pointers[WORLD_TEXT_SECTION_FORMATION_TEXT] = g_world_text_dismiss_unit_replies_data;
+    case SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES:
+        g_text_section_pointers[SCREEN_TEXT_SECTION_FORMATION_TEXT] = g_screen_text_dismiss_unit_replies_data;
         break;
-    case WORLD_TEXT_DATA_JOB_DESCRIPTIONS:
-        g_text_section_pointers[WORLD_TEXT_SECTION_FORMATION_TEXT] = g_world_text_job_descriptions_data;
+    case SCREEN_TEXT_DATA_JOB_DESCRIPTIONS:
+        g_text_section_pointers[SCREEN_TEXT_SECTION_FORMATION_TEXT] = g_screen_text_job_descriptions_data;
         break;
-    case WORLD_TEXT_DATA_NAME_ENTRY_KEYBOARD:
-        g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_world_text_name_entry_keyboard_data;
+    case SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD:
+        g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_screen_text_name_entry_keyboard_data;
         break;
-    case WORLD_TEXT_DATA_SHOP_DIALOGUE:
-        g_text_section_pointers[WORLD_TEXT_SECTION_SHOP_DIALOGUE] = g_world_text_shop_dialogue_data;
+    case SCREEN_TEXT_DATA_SHOP_DIALOGUE:
+        g_text_section_pointers[SCREEN_TEXT_SECTION_SHOP_DIALOGUE] = g_screen_text_shop_dialogue_data;
         break;
     }
 }
 
 /* Return the resident text resource; index 6 has no data. */
-u8* world_text_get_resident_data(world_text_data_e index) {
-    return g_world_text_resident_data[index];
+u8* screen_text_get_resident(screen_text_data_e index) {
+    return g_screen_text_resident_data[index];
 }
 
 /* Load tutorial `index`'s (1-based) message text and command stream to the
  * heap and store their addresses in `record`. */
-void world_tutorial_load_files(s32 index, world_tutorial_state_t* record) {
+void tutorial_load_files(s32 index, tutorial_state_t* record) {
     s32 slot = index - 1;
 
-    record->messages = main_file_load_checked_to_heap(
-        g_world_tutorial_message_files[slot * 2], g_world_tutorial_message_files[(slot * 2) + 1]);
-    record->script = main_file_load_checked_to_heap(
-        g_world_tutorial_script_files[slot * 2], g_world_tutorial_script_files[(slot * 2) + 1]);
+    record->messages
+        = main_file_load_checked_to_heap(g_tutorial_message_files[slot * 2], g_tutorial_message_files[(slot * 2) + 1]);
+    record->script
+        = main_file_load_checked_to_heap(g_tutorial_script_files[slot * 2], g_tutorial_script_files[(slot * 2) + 1]);
 }

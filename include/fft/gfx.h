@@ -156,7 +156,7 @@ typedef char sprite_draw_offset_size_must_be_12[sizeof(sprite_draw_offset_t) == 
 /* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
 typedef struct zodiac_draw_context {
     u32* ot;             /* 0x00: ordering table entry the primitives link into */
-    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_world_menu_color_red */
+    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_screen_color_red */
     s32 link_primitives; /* 0x08: nonzero: link each sprite into the OT */
     s16 scale_x;         /* 0x0c: signed scale with 12 fractional bits; ONE = 1.0 */
     s16 scale_y;         /* 0x0e: signed scale with 12 fractional bits; ONE = 1.0 */
@@ -166,7 +166,7 @@ typedef struct zodiac_draw_context {
 
 /* glyph images */
 /* The 0x10-byte glyph blit descriptor used by the window frame threads and filled
- * by world_gfx_set_image_blit_source_rect, text_set_blit_source_rect and
+ * by screen_set_blit_source_rect, text_set_blit_source_rect and
  * text_set_blit_destination. The stride is the surface width in pixels. */
 typedef struct glyph_blit {
     RECT rect;  /* 0x00 */

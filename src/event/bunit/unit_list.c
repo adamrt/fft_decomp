@@ -305,7 +305,7 @@ void bunit_menu_init_unit_list(s32 unused_selected_index) {
  * two numbers and gauge; 3 and 4 two labeled numbers), then ease the cursor
  * trail toward the selected cell.
  *
- * Twin of WORLD's world_formation_update_and_draw_unit_grid with world_formation_draw_graphics_below_sprite's panel
+ * Twin of WORLD's formation_update_grid with formation_draw_unit_readout's panel
  * body written inline. Details the target needs:
  * - `unit` is also the early "enabled" flag, `row` also the stat tile index
  *   and cursor delta, and `top` the button y, highlight flag and panel y, as

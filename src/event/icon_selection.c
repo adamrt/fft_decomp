@@ -523,7 +523,7 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
 #ifdef FFT_BATTLE
 /*
  * WORLD twin:
- * world_menu_redraw_text_page_on_scroll_in_rect, plus the mode-2 buffer
+ * menu_redraw_text_page_on_scroll_in_rect, plus the mode-2 buffer
  * placement after the event overlay.
  */
 
@@ -601,13 +601,13 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
 #endif
 
 #ifdef FFT_WORLD
-/* Sibling of world_screen_menu_redraw_text_page_on_scroll that draws through
+/* Sibling of screen_redraw_text_page_on_scroll that draws through
  * menu_draw_text_columns_narrow and takes the image rectangle from a caller-supplied
  * RECT (x and w in framebuffer pixels, divided by four; the image row is
  * fixed at y = 0x80). Pages the row window on Square+Up/Down (or on the running
  * thread's redraw request), redraws the page into a freshly allocated image
  * buffer and uploads it. Returns that buffer when the page was redrawn, else 0. */
-u8* world_menu_redraw_text_page_on_scroll_in_rect(
+u8* menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
     u32* pressed;

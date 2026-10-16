@@ -15,12 +15,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static s32 g_world_formation_name_string_revision = 0;
+static s32 g_formation_name_string_revision = 0;
 
 /* WORLD's simple menu window thread: like menu_icon_list_thread, but it reads the formation
  * screen's input, ignores input while the previous thread runs and tints the window with the world
  * menu color. */
-void world_menu_icon_list_thread(void) {
+void screen_icon_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     s32 cursor;
@@ -61,7 +61,7 @@ void world_menu_icon_list_thread(void) {
         param->selected_index = cursor;
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, i, cursor);
-        if (menu_should_close_thread(&g_world_menu_input_state.new_buttons) != 0) {
+        if (menu_should_close_thread(&g_screen_input_state.new_buttons) != 0) {
             break;
         }
         if (thread_is_previous_running() == 0) {
@@ -69,10 +69,10 @@ void world_menu_icon_list_thread(void) {
             menu_handle_action(param, cursor);
             menu_handle_cancel_input(param);
         }
-        setRGB0(&record->sprites[0], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
-        setRGB0(&record->sprites[1], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
-        setRGB0(&record->sprites[2], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
-        setRGB0(&record->sprites[3], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
+        setRGB0(&record->sprites[0], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
+        setRGB0(&record->sprites[1], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
+        setRGB0(&record->sprites[2], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
+        setRGB0(&record->sprites[3], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
         menu_submit_icon_primitives(record);
     }
     thread_yield();
@@ -83,7 +83,7 @@ void world_menu_icon_list_thread(void) {
  * terminated name per roster slot, empty for a vacant slot, with a terminator
  * appended to a name that fills all 16 bytes. A 0xFF byte also ends a name
  * and is copied as its terminator. Bumps the name string revision. */
-void world_text_build_roster_name_list(void) {
+void formation_build_roster_names(void) {
     u8* out = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     party_unit_t* unit;
     s32 i;
@@ -111,15 +111,15 @@ void world_text_build_roster_name_list(void) {
             }
         }
     }
-    g_world_formation_name_string_revision++;
+    g_formation_name_string_revision++;
 }
 
 /* Set the formation display mode; the title script switches it between 0 and 1. */
-void world_formation_set_display_mode(s32 mode) {
+void formation_set_display_mode(s32 mode) {
     g_menu_formation_display_mode = mode;
 }
 
 /* Set the ordering table the formation view zoom thread draws into. */
-void world_formation_set_ordering_table_pointer(u32* ordering_table) {
-    g_world_formation_ordering_table = ordering_table;
+void formation_set_backdrop_otag(u32* ordering_table) {
+    g_formation_ordering_table = ordering_table;
 }

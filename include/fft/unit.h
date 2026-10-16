@@ -99,7 +99,7 @@ typedef enum unit_reaction_set_4 {
 } unit_reaction_set_4_e;
 
 /* Active support abilities occupy four MSB-first bitsets in unit_stats_t
- * at +0x08f..+0x092. WORLD copies them to world_unit_t at +0x124;
+ * at +0x08f..+0x092. WORLD copies them to formation_unit_t at +0x124;
  * these masks name the shared byte domain, not ability IDs. */
 typedef enum unit_support_set_1 {
     BATTLE_SUPPORT_SET_1_EQUIP_GUN = 0x01,

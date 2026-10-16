@@ -13,7 +13,7 @@
 static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id);
 
 /* Install an item into a unit's equipment slot. EQUIP copy of
- * world_formation_equip_item_to_unit_slot.
+ * formation_item_equip.
  *
  * Returns the validation result when it is negative. Otherwise the slot's
  * old item goes back to the inventory, and equipping into a hand slot with
@@ -79,7 +79,7 @@ static s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
  * calling convention; menu_equipment_slot_e names its accepted values.
  * The s16 id and its new_item copy reproduce the target's two callee-saved
  * copies of the masked id (the same shape as
- * world_formation_can_equip_item_in_slot). */
+ * formation_item_can_equip_in_slot). */
 static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id) {
     s32 result;
     s16 id = item_id & ITEM_ENTRY_ID_MASK;

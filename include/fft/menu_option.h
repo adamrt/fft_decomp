@@ -106,7 +106,7 @@ typedef char game_options_size_must_be_4[sizeof(game_options_t) == 4 ? 1 : -1];
 extern game_options_t g_menu_saved_game_options;
 
 /* options screen */
-/* The argument of option_entrypoint and world_menu_run_option_screen: which of
+/* The argument of option_entrypoint and option_entrypoint: which of
  * the OPTION overlay's screens to run. */
 typedef enum menu_option_type {
     MENU_OPTION_TYPE_GAME_OPTIONS = 0,

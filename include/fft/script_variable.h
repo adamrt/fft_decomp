@@ -201,7 +201,7 @@ typedef enum event_script_variable_id {
 } event_script_variable_id_e;
 
 /* How many variables each of those ranges holds. The location ranges hold
- * WORLD_LOCATION_COUNT and the path range WLDCORE_ROUTE_COUNT. */
+ * LOCATION_COUNT and the path range WORLD_MAP_ROUTE_COUNT. */
 enum {
     EVENT_SCRIPT_VAR_FACT_COUNT = 24,
     EVENT_SCRIPT_VAR_STORY_EVENT_COUNT = 64,
@@ -248,7 +248,7 @@ enum {
 /* Event ids: EVENT_SCRIPT_VAR_CURRENT_EVENT, the 0x2000-byte block of
  * EVENT/TEST.EVT that holds the event's script and text, and the index of
  * g_main_scenario_event_finish_operations. The game names only the 64 Brave
- * Story record scenes (g_wldcore_story_event_ids lists their setup events);
+ * Story record scenes (g_brave_story_event_ids lists their setup events);
  * the ones the code singles out are named here for what their own script and
  * text show. */
 typedef enum event_id {

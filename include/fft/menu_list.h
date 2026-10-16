@@ -65,7 +65,7 @@ typedef struct menu_scroll_text_layout {
 
 /* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
  * helper redraws the page once and clears the request, which
- * world_thread_request_redraw sets. */
+ * screen_thread_request_redraw sets. */
 enum {
     MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4,
 };
@@ -76,7 +76,7 @@ u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* ren
 
 /* list pages */
 /* One of the two 0x134-byte packet pages a scrolling text list alternates between frames
- * (g_world_ability_list_pages, g_at_list_pages, g_world_text_list_pages). Provisional. */
+ * (g_formation_ability_list_pages, g_at_list_pages, g_screen_text_list_pages). Provisional. */
 typedef struct menu_list_page {
     SPRT frame;                         /* 0x00: text image / cursor frame */
     SPRT arrows[2];                     /* 0x14: scroll arrows */

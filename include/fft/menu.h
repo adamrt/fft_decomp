@@ -51,14 +51,14 @@ void* menu_alloc_buffer(s32 bytes);
  * own record type through context. */
 
 /* Record reached through menu_entry_t::context by menu_text_entry_wait_thread and WORLD's
- * world_menu_text_entry_thread: they call prepare, then start the text thread text_thread_id with speaker_id
+ * screen_text_entry_thread: they call prepare, then start the text thread text_thread_id with speaker_id
  * as its third and fourth parameters. Provisional: only these members are known. */
 typedef struct menu_text_binding {
     void (*prepare)(void); /* 0x00 */
     u16 speaker_id;        /* 0x04: unit whose portrait speaks (roster slot) */
     u16 text_thread_id;    /* 0x06 */
     u8 _unused_08[8];
-    s16* row_text_ids; /* 0x10: text ids indexed by entry selected_index (world_menu_help_text_thread) */
+    s16* row_text_ids; /* 0x10: text ids indexed by entry selected_index (screen_help_text_thread) */
 } menu_text_binding_t;
 
 /* Row actions 0..0xff open that menu entry; this flag suppresses the confirm sound. */
@@ -79,7 +79,7 @@ typedef enum menu_text_column_mode {
     MENU_TEXT_COLUMN_NUMBER_GLYPHS = 3, /* two-digit numbers, drawn by menu_draw_large_number_glyphs */
 } menu_text_column_mode_e;
 
-/* Three-column text layout walked by menu_draw_text_columns and WORLD's world_screen_menu_draw_text_columns,
+/* Three-column text layout walked by menu_draw_text_columns and WORLD's screen_draw_text_columns,
  * reached through menu_entry_t::context when the entry draws a list. Column i draws mode[i] at x[i] from
  * text_ids[i] in text_colors[i], both indexed by row plus the row offset. */
 typedef struct menu_text_layout {
@@ -113,19 +113,19 @@ typedef struct menu_entry {
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
     s16* row_actions;            /* 0x24: each row's action, indexed by selected_index */
     void (*thread_entry)(void);  /* 0x28 */
-    s16 header_id;               /* 0x2c: menu header; text-thread parameter (world_menu_text_entry_thread); the
+    s16 header_id;               /* 0x2c: menu header; text-thread parameter (screen_text_entry_thread); the
                                     icon threads read it signed as the icon kind: 0x10 arrow, 0..4 single
                                     icon, 5..15 four-piece icon (menu_build_window_sprites) */
     u8 _padding_2e[2];           /* aligns context */
     /* 0x30: context interpreted by the menu thread. Text threads use menu_text_binding_t
      * here, the list threads a menu_text_layout_t, the number threads a
-     * world_menu_number_range_t and the icon threads the s16 redraw flag they
+     * screen_number_range_t and the icon threads the s16 redraw flag they
      * poll (set to 1 to rebuild the text image). */
     void* context;
     void* value;           /* 0x34: thread-specific value data: s16 result cell or main-window s32 substitution pair */
     s16 selected_index;    /* 0x38: selected row; indexes the binding's 16-bit table
-                              (world_menu_help_text_thread) */
-    s16 select_text_table; /* 0x3a: "Index for select text": row of g_world_menu_entry_text_id_tables
+                              (screen_help_text_thread) */
+    s16 select_text_table; /* 0x3a: "Index for select text": row of g_screen_entry_text_id_tables
                               (0x11 = the binding's row_text_ids); 2 / -1 defer to the next running
                               thread's entry. The AT-list and option-list builders park their
                               scroll row offset here instead. */

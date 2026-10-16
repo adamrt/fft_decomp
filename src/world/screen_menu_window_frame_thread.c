@@ -24,8 +24,8 @@
  * WORLD's copy of the window frame thread the EVENT OPTION overlay links
  * (menu_window_frame_thread), byte-identical apart from addresses: the variant that allocates
  * its scratch pixel buffer, using the second WORLD blit descriptors and setters (as
- * world_screen_menu_thin_window_frame_thread does) and its own texture-window table. */
-void world_screen_menu_window_frame_thread(void) {
+ * screen_thin_window_frame_thread does) and its own texture-window table. */
+void screen_window_frame_thread(void) {
     RECT texture;
     /* The stride pointers are locals because the target keeps each one live
      * and re-derives the descriptor base from it (addiu -8) for the glyph
@@ -56,16 +56,16 @@ void world_screen_menu_window_frame_thread(void) {
 
     /* Copy the border pieces from the menu glyph sheet into one 128x16 image and upload it. */
     text_set_blit_source_rect(8, 8, 0x20, 0x10);
-    world_gfx_set_blit_dest_position(0, 0);
+    screen_set_blit_dest_position(0, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0, 8, 8, 0x10);
-    world_gfx_set_blit_dest_position(0x20, 0);
+    screen_set_blit_dest_position(0x20, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0xd8, 0, 0x28, 0x10);
-    world_gfx_set_blit_dest_position(0x28, 0);
+    screen_set_blit_dest_position(0x28, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0xd8, 0x10, 0x28, 0x10);
-    world_gfx_set_blit_dest_position(0x58, 0);
+    screen_set_blit_dest_position(0x58, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
 
     LoadImage(&texture, (u32*)pixels);
@@ -74,15 +74,14 @@ void world_screen_menu_window_frame_thread(void) {
     texture_u = (texture.x & 0x3f) * 4;
     texture_v = texture.y & 0xFF;
     for (index = 0; index < 4; index++) {
-        g_world_screen_menu_panel_texture_windows[index].x = (texture_u + index) * 0x10;
-        g_world_screen_menu_panel_texture_windows[index].y = texture_v;
+        g_screen_panel_texture_windows[index].x = (texture_u + index) * 0x10;
+        g_screen_panel_texture_windows[index].y = texture_v;
     }
-    g_world_screen_menu_panel_texture_windows[4].x = texture_u + 0x60;
-    g_world_screen_menu_panel_texture_windows[4].y = texture_v;
+    g_screen_panel_texture_windows[4].x = texture_u + 0x60;
+    g_screen_panel_texture_windows[4].y = texture_v;
 
     for (index = 0; index < 7; index++) {
-        SetDrawMode(
-            &prim->modes[index], 1, 0, GetTPage(0, 0, 0x1c0, 0), &g_world_screen_menu_panel_texture_windows[index]);
+        SetDrawMode(&prim->modes[index], 1, 0, GetTPage(0, 0, 0x1c0, 0), &g_screen_panel_texture_windows[index]);
     }
 
     /* Sprite 0 fills the interior and sprites 1-4 are the right, left, top and bottom edges;

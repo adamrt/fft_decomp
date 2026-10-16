@@ -13,7 +13,7 @@ static s16 g_jobstts_gfx_transition_height_percent[8] = { 5, 10, 20, 35, 60, 75,
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
  * interior through menu_opcode_11_draw_background_tiles.
  *
- * JOBSTTS copy of world_menu_opcode_00_draw_window_frame without the rectangle
+ * JOBSTTS copy of menu_opcode_00_draw_window_frame without the rectangle
  * source selection. Reassigning the command pointer before the return keeps
  * its reference count high enough for global allocation to place it in s6.
  */

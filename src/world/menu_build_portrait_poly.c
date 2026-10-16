@@ -53,7 +53,7 @@ void menu_build_portrait_poly(s32 roster_slot, POLY_FT4* poly) {
             sprite = JOB_SHEET_DANCER;
         }
     }
-    sprite = g_world_portrait_clut_by_sheet_id[sprite];
+    sprite = g_screen_portrait_clut_by_sheet_id[sprite];
     if (party->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
         sprite = 0;
     }

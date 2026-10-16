@@ -8,12 +8,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static u8 g_world_text_row_image_buffer[2048] = { 0 };
+static u8 g_screen_text_row_image_buffer[2048] = { 0 };
 
 /* Renders each text id of a -1 terminated list into its own 16 pixel line of
  * `destination`, uploading one line at a time through the scratch image at
- * g_world_text_row_image_buffer. */
-void world_text_render_id_list_to_image_rows(u8* font, s16* text_ids, RECT* destination, s32 palette) {
+ * g_screen_text_row_image_buffer. */
+void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 palette) {
     RECT scratch_rect;
     RECT destination_row;
     s16 row_text_ids[4];
@@ -29,10 +29,10 @@ void world_text_render_id_list_to_image_rows(u8* font, s16* text_ids, RECT* dest
     for (; *text_ids != -1; text_ids++) {
         row_text_ids[0] = *text_ids;
         row_text_ids[1] = -1;
-        memset(g_world_text_row_image_buffer, 0, 0x800);
+        memset(g_screen_text_row_image_buffer, 0, 0x800);
         menu_text_render_encoded_ids_to_image(
-            g_world_text_row_image_buffer, &scratch_rect, 0xa, 0x64, font, row_text_ids, 0x64, 0xe7, palette);
-        gfx_load_image_and_wait(&destination_row, g_world_text_row_image_buffer);
+            g_screen_text_row_image_buffer, &scratch_rect, 0xa, 0x64, font, row_text_ids, 0x64, 0xe7, palette);
+        gfx_load_image_and_wait(&destination_row, g_screen_text_row_image_buffer);
         destination_row.y += 0x10;
     }
 }
@@ -43,9 +43,9 @@ void world_text_render_id_list_to_image_rows(u8* font, s16* text_ids, RECT* dest
  * The pen advances by the glyph's width plus kerning pads chosen by that
  * width (2: two pixels before and after, 3: one before and two after, 4: one
  * each); 0xFA is a 6-pixel space and 0xFE terminates. The buffer then serves
- * as the text table for world_text_render_id_list_to_image_rows, with the
+ * as the text table for screen_text_render_rows, with the
  * caller's text ids (`name`), rect and palette passed through unchanged. */
-void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 palette) {
+void screen_text_kern(u8* text, s16* name, RECT* rect, s32 palette) {
     u8 buf[0x78];
     u8* out;
     s32 len;
@@ -110,13 +110,13 @@ void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 pa
         } while (glyph != TEXT_END_WAIT_FOR_CONFIRM);
     }
     buf[len] = TEXT_END_WAIT_FOR_CONFIRM;
-    world_text_render_id_list_to_image_rows(buf, name, rect, palette);
+    screen_text_render_rows(buf, name, rect, palette);
 }
 
 /* Renders one encoded glyph (either a direct id or a 0xD?-prefixed
  * two-byte code) into a 0x78-byte 4bpp image and uploads it at (x, y).
  * Single-byte codes from 0xD0 up (prefixes and control codes) draw nothing. */
-void world_font_upload_glyph_image(u16 code, s32 x, s32 y, s32 style) {
+void screen_font_upload_glyph(u16 code, s32 x, s32 y, s32 style) {
     u8 image[0x78];
     RECT rect;
     u32 glyph;
@@ -145,7 +145,7 @@ void world_font_upload_glyph_image(u16 code, s32 x, s32 y, s32 style) {
 
 /* Advance over count characters of a 0xFE-terminated text entry; bytes
  * TEXT_EXTENDED_GLYPH_PREFIX_FIRST..TEXT_EXTENDED_GLYPH_PREFIX_LAST carry a one-byte operand. */
-u8* world_text_advance_entry_by_char_count(u8* text, s32 count) {
+u8* screen_text_advance_chars(u8* text, s32 count) {
     s32 i;
     s32 offset = 0;
     u8* cursor;

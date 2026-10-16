@@ -387,21 +387,21 @@ enum {
     ITEM_ID_END = 254, /* one past the last item; ENTD's Random and None follow */
 };
 
-/* world_unit_t.equipment 16-bit values carry the item id in the low ten
- * bits and flags above (bit 14 is tested by world_shop_buy_from_fitting_room
+/* formation_unit_t.equipment 16-bit values carry the item id in the low ten
+ * bits and flags above (bit 14 is tested by shop_fitting_buy
  * and the job wheel); the WORLD item tables are indexed by the masked id
- * (world_item_get_price, item_get_type). The range boundaries follow the
+ * (shop_get_item_price, item_get_type). The range boundaries follow the
  * retail item table: throwable weapons start with Shuriken, followed by
  * shields, headgear, body armor, accessories, and consumables. */
 enum {
     ITEM_ENTRY_ID_MASK = 0x3ff,
-    ITEM_ENTRY_UNEQUIPPABLE = 0x4000,   /* item list entries: listed, but the unit cannot equip the item */
-    ITEM_LIST_END = 0xff,               /* the item id that ends an item list */
-    WORLD_EQUIPMENT_SHOP_ITEM = 0x8000, /* equipment 16-bit values: an unpaid shop item tried on in the fitting room */
+    ITEM_ENTRY_UNEQUIPPABLE = 0x4000, /* item list entries: listed, but the unit cannot equip the item */
+    ITEM_LIST_END = 0xff,             /* the item id that ends an item list */
+    SHOP_FITTING_ITEM = 0x8000,       /* equipment 16-bit values: an unpaid shop item tried on in the fitting room */
     /* The equipment values of a WORLD stat detail: the top two bits pick the name's text palette, and
      * HIGHLIGHT, the same bit as SHOP_ITEM, draws it in the highlight palette. */
-    WORLD_EQUIPMENT_PALETTE_MASK = 0xc000,
-    WORLD_EQUIPMENT_HIGHLIGHT = 0x8000,
+    FORMATION_PALETTE_MASK = 0xc000,
+    FORMATION_HIGHLIGHT = 0x8000,
 };
 
 /* Broad item categories shared by the WORLD and EQUIP menu classifiers.

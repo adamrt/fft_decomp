@@ -25,7 +25,7 @@
  * BUNIT's body: unlike EQUIP's, its scroll speed is the event speed rather than a
  * constant 2, as in JOBSTTS's. The padding arrays reproduce the target's frame (only
  * rect and marker are referenced). The scroll-down path follows WORLD's
- * world_menu_opcode_10_draw_scrollable_list spelling.
+ * menu_opcode_10_draw_scrollable_list spelling.
  */
 menu_instruction_t* bunit_menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;

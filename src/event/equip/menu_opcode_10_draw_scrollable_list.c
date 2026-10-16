@@ -22,7 +22,7 @@
  *
  * EQUIP's body: the JOBSTTS and BUNIT command without the event-speed multiplier.
  * The padding arrays reproduce the target's frame (only rect and marker are
- * referenced). The scroll-down path follows WORLD's world_menu_opcode_10_draw_scrollable_list
+ * referenced). The scroll-down path follows WORLD's menu_opcode_10_draw_scrollable_list
  * spelling; its `(s16)` row-height cast adds the other 8 bytes of frame and
  * keeps the row count in a register of its own.
  */

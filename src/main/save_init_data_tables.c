@@ -17,7 +17,7 @@
  * carries the per-function gcc-2.6.3_O2_aspsx-2.21 profile. */
 void main_save_init_data_tables(void) {
     s32 i;
-    wldcore_saved_record_t* record;
+    sound_novel_reading_t* record;
 
     for (i = 0; i < 5; i++) {
         record = &g_main_sound_novel_saved_records[i];
@@ -35,7 +35,7 @@ void main_save_init_data_tables(void) {
         record->_unknown_18 = 0;
         record->text_id = 0;
         g_main_sound_novel_saved_records[i].counter_delta = 0;
-        g_main_sound_novel_saved_records[i].buffer = &g_wldcore_sound_novel_script;
+        g_main_sound_novel_saved_records[i].buffer = &g_sound_novel_script;
     }
     g_main_sound_novel_saved_records[0].brightness = 0x10;
     g_main_sound_novel_saved_records[1].brightness = 0x10;

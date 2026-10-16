@@ -35,7 +35,7 @@ void main_card_init_events(void);
 /* save image */
 /* PlayStation memory-card save-file header block (256 bytes), as built by
  * card_save_build_file_header and its WORLD twin
- * world_card_build_save_file_header. */
+ * save_build_file_header. */
 typedef struct card_save_header {
     u8 magic0;           /* 0x00: 'S' */
     u8 magic1;           /* 0x01: 'C' */
@@ -70,7 +70,7 @@ typedef struct card_save_summary {
 typedef char card_save_summary_size_must_be_24[(sizeof(card_save_summary_t) == 24) ? 1 : -1];
 
 /* The 0x1e00-byte memory-card save image, parity-covered per 128-byte block.
- * WORLD builds and loads it in g_world_card_work_buffer; CARD fills the same
+ * WORLD builds and loads it in g_save_work_buffer; CARD fills the same
  * layout from the SCUS globals in card_save_build_buffer through
  * g_card_save_buffer_pointer. */
 typedef struct card_save_buffer {
@@ -78,14 +78,14 @@ typedef struct card_save_buffer {
     card_save_summary_t summary; /* 0x100 */
     u8 parity_bits[8];           /* 0x118; one parity bit per 128-byte block */
     s32 elapsed_seconds;         /* 0x120 */
-    /* 0x124-0x1dbe: filled by world_card_build_save_image and
+    /* 0x124-0x1dbe: filled by save_build_image and
      * card_save_build_buffer from the SCUS globals named in their bcopy calls. */
     u8 treasure_acquisition_date_bits[0x35];     /* 0x124; 47 packed 9-bit dates and 1 spare bit */
     u8 land_discovery_date_bits[0x12];           /* 0x159; packed 9-bit discovery dates */
     u8 proposition_last_attempt_date_bits[0x6c]; /* 0x16b; packed 9-bit dates */
     u8 proposition_states[0x60];                 /* 0x1d7; low 6 bits are a remaining-day counter */
     u8 _unused_0237[1];                          /* 0x237; serialized and parity-covered */
-    u8 sound_novel_saved_records[5][0x38];       /* 0x238; wldcore_saved_record_t: one sound-novel reading state each */
+    u8 sound_novel_saved_records[5][0x38];       /* 0x238; sound_novel_reading_t: one sound-novel reading state each */
     u32 sound_novel_read_section_bits[40];       /* 0x350 */
     u32 sound_novel_saved_flags[2];              /* 0x3f0 */
     u8 brave_story_character_ages[0x40];         /* 0x3f8 */
@@ -97,22 +97,21 @@ typedef struct card_save_buffer {
     u8 poached_item_quantities[ITEM_ID_COUNT];       /* 0x1704; g_main_item_poached_quantities */
     /* 0x1804; first 0x40 bytes are Move-Find-Item flags, second half unknown. */
     u8 item_location_flags[0x80];
-    s32 script_variables[0x100]; /* 0x1884 */
-    game_options_fields_t
-        options;                /* 0x1c84; copied to g_main_game_options by world_card_load_globals_from_save_image */
-    u8 _unknown_1c88;           /* 0x1c88 */
-    s8 item_type_order_0[0xc];  /* 0x1c89; signed, -1-terminated */
-    u8 _unused_1c95[1];         /* 0x1c95; serialized and parity-covered */
-    s8 item_type_order_1[8];    /* 0x1c96; signed, -1-terminated */
-    u8 _unused_1c9e[1];         /* 0x1c9e; serialized and parity-covered */
-    s8 item_type_order_2[7];    /* 0x1c9f; signed, -1-terminated */
-    s8 item_type_order_3[5];    /* 0x1ca6; signed, -1-terminated */
-    s8 item_type_order_4[5];    /* 0x1cab; signed, -1-terminated */
-    s8 item_type_order_5[7];    /* 0x1cb0; signed, -1-terminated */
-    s8 item_type_order_6[5];    /* 0x1cb7; signed, -1-terminated */
-    u8 weapon_page_order[0x8a]; /* 0x1cbc */
-    u8 helmet_page_order[0x1d]; /* 0x1d46 */
-    u8 armor_page_order[0x25];  /* 0x1d63 */
+    s32 script_variables[0x100];   /* 0x1884 */
+    game_options_fields_t options; /* 0x1c84; copied to g_main_game_options by save_restore_image */
+    u8 _unknown_1c88;              /* 0x1c88 */
+    s8 item_type_order_0[0xc];     /* 0x1c89; signed, -1-terminated */
+    u8 _unused_1c95[1];            /* 0x1c95; serialized and parity-covered */
+    s8 item_type_order_1[8];       /* 0x1c96; signed, -1-terminated */
+    u8 _unused_1c9e[1];            /* 0x1c9e; serialized and parity-covered */
+    s8 item_type_order_2[7];       /* 0x1c9f; signed, -1-terminated */
+    s8 item_type_order_3[5];       /* 0x1ca6; signed, -1-terminated */
+    s8 item_type_order_4[5];       /* 0x1cab; signed, -1-terminated */
+    s8 item_type_order_5[7];       /* 0x1cb0; signed, -1-terminated */
+    s8 item_type_order_6[5];       /* 0x1cb7; signed, -1-terminated */
+    u8 weapon_page_order[0x8a];    /* 0x1cbc */
+    u8 helmet_page_order[0x1d];    /* 0x1d46 */
+    u8 armor_page_order[0x25];     /* 0x1d63 */
     u8 accessory_page_order[0x21]; /* 0x1d88 */
     u8 item_page_order[0x15];      /* 0x1da9 */
     u8 _unused_1dbe[0x42];         /* 0x1dbe; parity-covered tail */

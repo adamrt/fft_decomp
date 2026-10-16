@@ -44,11 +44,11 @@ typedef enum disc_sector {
     DISC_SECTOR_BATTLE_ZODIAC_BIN = 0xec61,
     DISC_SECTOR_MENU_FFTSAVE_DAT = 0x11a7f,
     DISC_SECTOR_WORLD_WLDTEX_TM2 = 0x11d28,
-    DISC_SECTOR_WORLD_WLDPIC_BIN = 0x11dae,  /* by g_wldcore_picture_sector_offsets */
-    DISC_SECTOR_WORLD_WLDMES_BIN = 0x11f59,  /* by g_wldcore_message_block_sector_offsets */
-    DISC_SECTOR_WORLD_SNPLBIN_BIN = 0x128f9, /* by g_wldcore_sound_novel_script_sector_offsets */
-    DISC_SECTOR_WORLD_SNPLMES_BIN = 0x1291d, /* by g_wldcore_sound_novel_text_sector_offsets */
-    DISC_SECTOR_WORLD_WLDBK_BIN = 0x12995,   /* by g_wldcore_background_sector_offsets */
+    DISC_SECTOR_WORLD_WLDPIC_BIN = 0x11dae,  /* by g_picture_sector_offsets */
+    DISC_SECTOR_WORLD_WLDMES_BIN = 0x11f59,  /* by g_message_block_sector_offsets */
+    DISC_SECTOR_WORLD_SNPLBIN_BIN = 0x128f9, /* by g_sound_novel_script_sector_offsets */
+    DISC_SECTOR_WORLD_SNPLMES_BIN = 0x1291d, /* by g_sound_novel_text_sector_offsets */
+    DISC_SECTOR_WORLD_WLDBK_BIN = 0x12995,   /* by g_picture_background_sector_offsets */
     DISC_SECTOR_WORLD_WLDCORE_BIN = 0x14849,
     DISC_SECTOR_WORLD_WORLD_BIN = 0x14925,
     DISC_SECTOR_SOUND_ENV_SED = 0x14c08,
@@ -96,7 +96,7 @@ typedef struct main_file_load_descriptor {
     s32 wait_frames;
     s32 sector_count;
     s32 lba;
-    s32 sector_index; /* 0x18; sector being read by wldcore_file_poll_vram_image_stream */
+    s32 sector_index; /* 0x18; sector being read by world_map_poll_texture_stream */
     CdlLOC position;
     u8* destination;
 } main_file_load_descriptor_t;

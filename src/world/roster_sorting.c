@@ -10,7 +10,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static s8 g_world_formation_sort_field_indices[12] = { 22, 0, 18, 0, 19, 20, 0, 8, 0, 11, 0, 14 };
+static s8 g_formation_sort_field_indices[12] = { 22, 0, 18, 0, 19, 20, 0, 8, 0, 11, 0, 14 };
 
 /* Sort a -1 terminated item-id list in place for a shop or equipment menu.
  *
@@ -22,7 +22,7 @@ static s8 g_world_formation_sort_field_indices[12] = { 22, 0, 18, 0, 19, 20, 0, 
  * evade, 5 owned plus equipped count; keys other than 0 sort descending.
  * The magic-evade key reads 0 for the left weapon but the weapon's evade for
  * the right one; the target has this asymmetry. */
-void world_item_sort_id_list(s32 mode, s16* list) {
+void item_sort_id_list(s32 mode, s16* list) {
     s8 counts[0x100];
     s32 count;
     s32 i;
@@ -57,9 +57,9 @@ void world_item_sort_id_list(s32 mode, s16* list) {
 
     /* Count what the roster has equipped, for the held-count key. */
     memset(counts, 0, sizeof(counts));
-    for (j = 0; j < g_world_formation_record_count; j++) {
+    for (j = 0; j < g_formation_record_count; j++) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            counts[g_world_unit_pointers[j]->equipment[i]]++;
+            counts[g_formation_unit_pointers[j]->equipment[i]]++;
         }
     }
 
@@ -199,7 +199,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
  * order entry: both must be multi-set variables for the target's register
  * choice (a1/v0) and load order.
  */
-void world_formation_sort_roster(s32 index) {
+void formation_sort_roster(s32 index) {
     s8 egg_indices[PARTY_ROSTER_SLOT_COUNT];
     s8* keys;
     s32 i;
@@ -213,14 +213,14 @@ void world_formation_sort_roster(s32 index) {
     s16* rec; /* Sort keys select signed 16-bit values within the unit record. */
 
     keys = g_item_type_order_lists[index];
-    for (count = g_world_formation_record_count - 1; count > 0; count--) {
+    for (count = g_formation_record_count - 1; count > 0; count--) {
         for (i = 0; i < count; i++) {
             k = 0;
             do {
-                rec = (s16*)&g_world_unit_records[g_world_formation_record_order[i]];
-                lhs = rec[g_world_formation_sort_field_indices[keys[k]]];
-                rec = (s16*)&g_world_unit_records[g_world_formation_record_order[i + 1]];
-                swap = rec[g_world_formation_sort_field_indices[keys[k]]];
+                rec = (s16*)&g_formation_unit_records[g_formation_record_order[i]];
+                lhs = rec[g_formation_sort_field_indices[keys[k]]];
+                rec = (s16*)&g_formation_unit_records[g_formation_record_order[i + 1]];
+                swap = rec[g_formation_sort_field_indices[keys[k]]];
                 diff = swap - lhs;
                 k++;
             } while (diff == 0);
@@ -228,32 +228,32 @@ void world_formation_sort_roster(s32 index) {
                 diff = -diff;
             }
             if (diff < 0) {
-                diff = g_world_formation_record_order[i];
-                lhs = (u16)g_world_formation_record_order[i + 1];
-                g_world_formation_record_order[i] = lhs;
-                g_world_formation_record_order[i + 1] = diff;
+                diff = g_formation_record_order[i];
+                lhs = (u16)g_formation_record_order[i + 1];
+                g_formation_record_order[i] = lhs;
+                g_formation_record_order[i + 1] = diff;
             }
         }
     }
     count = 0;
-    for (i = 0; i < g_world_formation_record_count; i++) {
-        if (g_world_unit_records[g_world_formation_record_order[i]].gender_flags & UNIT_FLAG_EGG) {
-            egg_indices[count++] = g_world_formation_record_order[i];
+    for (i = 0; i < g_formation_record_count; i++) {
+        if (g_formation_unit_records[g_formation_record_order[i]].gender_flags & UNIT_FLAG_EGG) {
+            egg_indices[count++] = g_formation_record_order[i];
         }
     }
     for (i = 0; i < count; i++) {
         j = 0;
         swap = egg_indices[i];
         while (1) {
-            if (g_world_formation_record_order[j] == swap) {
+            if (g_formation_record_order[j] == swap) {
                 break;
             }
             j++;
         }
-        for (; j < g_world_formation_record_count - 1; j++) {
-            g_world_formation_record_order[j] = g_world_formation_record_order[j + 1];
+        for (; j < g_formation_record_count - 1; j++) {
+            g_formation_record_order[j] = g_formation_record_order[j + 1];
         }
-        g_world_formation_record_order[g_world_formation_record_count - 1] = egg_indices[i];
+        g_formation_record_order[g_formation_record_count - 1] = egg_indices[i];
     }
     for (i = count - 1; i > 0; i--) {
         for (j = 0; j < i; j++) {
@@ -265,11 +265,10 @@ void world_formation_sort_roster(s32 index) {
         }
     }
     for (i = 0; i < count; i++) {
-        g_world_formation_record_order[g_world_formation_record_count - 1 - i] = egg_indices[i];
+        g_formation_record_order[g_formation_record_count - 1 - i] = egg_indices[i];
     }
-    for (i = 0; i < g_world_formation_record_count; i++) {
-        g_world_unit_pointers[i] = &g_world_unit_records[g_world_formation_record_order[i]];
+    for (i = 0; i < g_formation_record_count; i++) {
+        g_formation_unit_pointers[i] = &g_formation_unit_records[g_formation_record_order[i]];
     }
-    g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]
-        = &g_world_unit_records[WORLD_FORMATION_PREVIEW_UNIT_INDEX];
+    g_formation_unit_pointers[FORMATION_PREVIEW_UNIT_INDEX] = &g_formation_unit_records[FORMATION_PREVIEW_UNIT_INDEX];
 }

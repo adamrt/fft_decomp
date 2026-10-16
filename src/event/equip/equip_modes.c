@@ -99,7 +99,7 @@ void equip_menu_update_screen_state(void) {
  * Confirming an item checks the inventory count, equips it and decrements
  * the count; moving the highlight equips the item on the scratch unit record
  * g_equip_unit_data[1] so the stat panel can preview the change. The WORLD
- * formation menu world_formation_run_equip_item_menu is the same routine plus an
+ * formation menu formation_item_equip_menu is the same routine plus an
  * equipment-lock check.
  *
  * The if/else spelling of the slot fallback is required: it keeps CSE from

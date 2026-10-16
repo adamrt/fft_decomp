@@ -28,7 +28,7 @@
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row
  * scroll whose new row is drawn into the image ring at row `ring * 16`;
- * world_menu_redraw_text_page_on_scroll_in_rect handles page scrolling, and
+ * menu_redraw_text_page_on_scroll_in_rect handles page scrolling, and
  * the scroll-bar thumb tracks entry->selected_index. Right/Left toggle the
  * third column's text when the first two columns are text. Parameter 2 keeps
  * the thread alive after the list closes.
@@ -72,7 +72,7 @@ void menu_run_scrolling_ability_list_thread(void) {
     s32 span;
 
     toggle = 0;
-    page = g_world_ability_list_pages[g_thread_current_id];
+    page = g_formation_ability_list_pages[g_thread_current_id];
     entry = (menu_entry_t*)thread_get_current_parameter_1();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
@@ -305,7 +305,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             redraw_pending = 0;
         }
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
-            buffer = world_menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
+            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
             /* The returned buffer doubles as the flag: 0 when no page was redrawn. */
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
@@ -345,7 +345,7 @@ void menu_run_scrolling_ability_list_thread(void) {
                 = top + span * entry->selected_index / (layout->columns.row_count + layout->columns.hidden_rows) - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
-        if (g_world_menu_scrolling_list_depth < 2 && scroll_delta == 0) {
+        if (g_screen_scrolling_list_depth < 2 && scroll_delta == 0) {
             menu_handle_action(entry, cursor);
         }
         menu_handle_cancel_input(entry);
@@ -418,7 +418,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         menu_free_memory(buffer);
     }
     thread_yield();
-    g_world_menu_scrolling_list_depth--;
+    g_screen_scrolling_list_depth--;
     if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }

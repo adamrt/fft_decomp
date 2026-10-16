@@ -28,7 +28,7 @@ static s32 memcard_get_selected_slot(void) {
 
 #ifdef FFT_WORLD
 /* Empty. Called before a soft reset and when the memory card screen closes. */
-void world_card_close_stub(void) {
+void save_close_stub(void) {
 }
 #endif
 
@@ -507,7 +507,7 @@ s32 memcard_file_delete_selected_with_retries(const char* filename) {
  * partial reads and -1 results allow another attempt. A successful close
  * returns the bytes read. The seek has the same relative-offset quirk as
  * memcard_file_write_buffer. */
-s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size) {
+s32 save_read_file_chunked(const char* filename, u8* destination, u32 size) {
     u32 total;
     s32 result = memcard_file_open_selected_with_retries(filename, 1);
     s32 i;

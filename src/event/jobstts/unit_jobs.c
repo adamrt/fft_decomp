@@ -84,7 +84,7 @@ static s32 jobstts_job_get_base(s16 unit_id) {
 
 /*
  * Writes a unit's selectable jobs to a -1-terminated list and returns their
- * count. JOBSTTS copy of world_job_build_unit_list without its list modes.
+ * count. JOBSTTS copy of job_list_build without its list modes.
  *
  * The base job comes first, followed by the generic jobs whose unlocked bit
  * is set (Bard excluded for female units, Dancer for male units); special

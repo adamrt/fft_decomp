@@ -56,7 +56,7 @@ static s32 open_text_decode_hex_digit(s32 character);
 /* Each OPNTEX frame occupies 23 * 0x800 bytes of the loaded data. */
 #define OPEN_OPNTEX_FRAME_SECTORS 23
 
-/* OPEN twin of wldcore_window_init_vram_render_record for the 56-byte records: it keeps
+/* OPEN twin of window_init_vram_render_record for the 56-byte records: it keeps
  * the VRAM position instead of a texture page and also clears the 8-bit CLUT flag.
  * Nothing in OPEN.BIN calls it. */
 void open_gfx_init_vram_render_record(
@@ -67,7 +67,7 @@ void open_gfx_init_vram_render_record(
 
     g_open_gfx_render_records_56[record_index].flags
         = (g_open_gfx_render_records_56[record_index].flags
-              & ~(WORLD_RENDER_RECORD_8BIT_CLUT | WORLD_RENDER_RECORD_BLANK | WORLD_RENDER_RECORD_HIDDEN))
+              & ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN))
         | flags;
     g_open_gfx_render_records_56[record_index].tail.clut = clut_position;
     g_open_gfx_render_records_56[record_index].vram_x = vram_position.x;
@@ -123,7 +123,7 @@ static void open_menu_start_music_test_list_thread(s32 thread_id, s32 limit, poi
     g_open_music_test_list_params.selected_index = 0;
     g_open_music_test_list_params.select_text_table = 0;
 
-    thread_start(thread_id, world_screen_text_list_thread);
+    thread_start(thread_id, screen_text_list_thread);
     thread_set_parameters(thread_id, (s32)&g_open_music_test_list_params, 0, 0);
 }
 
@@ -185,7 +185,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
 
     if (state->blink_frames != 0 && ++state->blink_frames >= 10) {
         state->blink_frames = 0;
-        world_formation_set_display_mode(0);
+        formation_set_display_mode(0);
         g_menu_blocked_buttons ^= PSX_PAD_UP | PSX_PAD_DOWN;
     }
 
@@ -243,7 +243,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
         }
         buttons = g_open_input_new_button_presses;
         if (buttons & PSX_PAD_CIRCLE) {
-            world_formation_set_display_mode(1);
+            formation_set_display_mode(1);
             state->blink_frames = 1;
             g_menu_blocked_buttons |= PSX_PAD_UP | PSX_PAD_DOWN;
             if (state->music_id != 0) {
@@ -278,7 +278,7 @@ static void open_controller_start_text_message(s32 parameter, s32 use_world_text
     }
     if (use_world_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_world_text_section_offsets);
+        text_relocate_pointer_table(g_screen_text_section_offsets);
     }
 
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread);

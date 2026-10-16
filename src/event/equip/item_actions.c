@@ -157,7 +157,7 @@ enum {
  * branch instead of the target's `li`/`sltiu`/`subu`. Assigning it before the
  * window call also keeps the constant load after the marker address arithmetic.
  *
- * Structurally identical to world_menu_draw_row_window_and_cursor, which draws
+ * Structurally identical to screen_draw_item_tabs, which draws
  * the same window/marker pair for the world-map menu.
  */
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override) {

@@ -42,24 +42,24 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void wldcore_bar_push_menu_level(void);
-static void wldcore_gfx_draw_funds_readout(GsOT* ot, GsSPRITE* sprite, GsLINE* line);
-static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot);
-static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad);
-static void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots, s32 restore);
-static void wldcore_menu_push_fixed_number_panel_level(void);
-static void wldcore_menu_push_focus_location_level(s32 dot_index);
-static void wldcore_menu_push_map_path_level(s32 from, s32 to, s32 erase);
-static void wldcore_menu_push_variable_edit_level(s32 variable_id, s32 value);
-static void wldcore_menu_push_root_level(void);
-static void wldcore_menu_push_variable_list_level(void);
-static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level);
-static void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id);
-static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_set);
-static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request);
+static void bar_push_level(void);
+static void hud_draw_funds(GsOT* ot, GsSPRITE* sprite, GsLINE* line);
+static void hud_draw_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot);
+static void hud_draw_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad);
+static void menu_stack_pop_and_release_records(menu_stack_slot_set_t* slots, s32 restore);
+static void debug_push_party_number_level(void);
+static void world_map_push_focus_level(s32 dot_index);
+static void world_map_push_path_level(s32 from, s32 to, s32 erase);
+static void debug_push_variable_edit_level(s32 variable_id, s32 value);
+static void world_map_push_cursor_level(void);
+static void debug_push_variable_list_level(void);
+static void debug_draw_variable_list(debug_variable_list_level_t* level);
+static void location_run_shop(s32 shop_id);
+static void world_map_push_location_visibility_level(s32 dot_index, s32 was_set);
+static void unit_panel_move_help_cursor(unit_panel_help_level_t* request);
 
 /* Draws the HUD numeric readout at the context-value display position, laid
- * out by g_wldcore_context_value_display_mode: FUNDS is the labeled,
+ * out by g_hud_value_mode: FUNDS is the labeled,
  * underlined war funds, PLAY_TIME hours, minutes and seconds with separators,
  * PLAIN and LABELED an eight-digit value (LABELED under a small label sprite)
  * and COST_AND_FUNDS a labeled five-digit secondary value plus the FUNDS
@@ -71,7 +71,7 @@ static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request
  * `separator` precede those into `sprite`. The position read back at the end
  * of case 4 is a plain 32-bit load narrowed by the store, where the chained
  * assignment before the switch reads only the low 16 bits. */
-void wldcore_gfx_draw_context_value_display(GsOT* ot) {
+void hud_draw_value(GsOT* ot) {
     GsSPRITE sprite;
     GsSPRITE separator;
     GsLINE line;
@@ -84,27 +84,27 @@ void wldcore_gfx_draw_context_value_display(GsOT* ot) {
     separator.attribute = sprite.attribute = 0;
     separator.tpage = sprite.tpage = GetTPage(0, 0, 0x3C0, 0x100);
     separator.cy = sprite.cy = 0x1E1;
-    wldcore_gfx_copy_color_with_tint(&g_wldcore_hud_color, &color);
+    world_map_fade_tint_color(&g_hud_color, &color);
     separator.r = color.r;
     separator.g = color.g;
     separator.b = color.b;
     sprite.r = color.r;
     sprite.g = color.g;
     sprite.b = color.b;
-    separator.x = sprite.x = g_wldcore_context_value_display_position.x;
-    separator.y = sprite.y = g_wldcore_context_value_display_position.y;
+    separator.x = sprite.x = g_hud_value_position.x;
+    separator.y = sprite.y = g_hud_value_position.y;
 
-    switch (g_wldcore_context_value_display_mode) {
-    case WLDCORE_VALUE_DISPLAY_FUNDS:
-        wldcore_gfx_draw_funds_readout(ot, &sprite, &line);
+    switch (g_hud_value_mode) {
+    case HUD_VALUE_FUNDS:
+        hud_draw_funds(ot, &sprite, &line);
         break;
-    case WLDCORE_VALUE_DISPLAY_PLAY_TIME:
+    case HUD_VALUE_PLAY_TIME:
         sprite.u = 0x60;
         sprite.v = 0x10;
         sprite.w = 0x14;
         sprite.h = 8;
         sprite.cx = 0x20;
-        GsSortFastSprite(&sprite, ot, g_wldcore_hud_ot_priority);
+        GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
 
         separator.u = 0x28;
         separator.v = 0;
@@ -114,56 +114,56 @@ void wldcore_gfx_draw_context_value_display(GsOT* ot) {
         sprite.y += 8;
         separator.y = sprite.y + 4;
         sprite.x -= 8;
-        wldcore_gfx_draw_number_digits(g_wldcore_displayed_numeric_value, 4, &sprite, ot);
+        hud_draw_digits(g_hud_value, 4, &sprite, ot);
 
         separator.x = sprite.x;
-        GsSortFastSprite(&separator, ot, g_wldcore_hud_ot_priority);
+        GsSortFastSprite(&separator, ot, g_hud_ot_priority);
         sprite.x += 6;
-        wldcore_gfx_draw_number_digits_with_fill(g_wldcore_displayed_numeric_value_secondary, 2, &sprite, ot, 1);
+        hud_draw_digits_with_fill(g_hud_value_secondary, 2, &sprite, ot, 1);
 
         separator.x = sprite.x;
-        GsSortFastSprite(&separator, ot, g_wldcore_hud_ot_priority);
+        GsSortFastSprite(&separator, ot, g_hud_ot_priority);
         sprite.x += 6;
-        wldcore_gfx_draw_number_digits_with_fill(g_wldcore_displayed_numeric_value_tertiary, 2, &sprite, ot, 1);
+        hud_draw_digits_with_fill(g_hud_value_tertiary, 2, &sprite, ot, 1);
         break;
-    case WLDCORE_VALUE_DISPLAY_LABELED:
+    case HUD_VALUE_LABELED:
         sprite.u = 0xA8;
         sprite.v = 0x20;
         sprite.w = 0xD;
         sprite.h = 9;
         sprite.cx = 0x20;
-        GsSortFastSprite(&sprite, ot, g_wldcore_hud_ot_priority);
+        GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
         /* fallthrough */
-    case WLDCORE_VALUE_DISPLAY_PLAIN:
+    case HUD_VALUE_PLAIN:
         sprite.x -= 0xC;
         sprite.y += 8;
-        wldcore_gfx_draw_number_digits(g_wldcore_displayed_numeric_value, 8, &sprite, ot);
+        hud_draw_digits(g_hud_value, 8, &sprite, ot);
         break;
-    case WLDCORE_VALUE_DISPLAY_COST_AND_FUNDS:
+    case HUD_VALUE_COST_AND_FUNDS:
         sprite.u = 0x60;
         sprite.w = 0x18;
         sprite.h = 8;
         sprite.v = 0;
         sprite.cx = 0x20;
         sprite.x -= 0x40;
-        GsSortFastSprite(&sprite, ot, g_wldcore_hud_ot_priority);
+        GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
 
         sprite.x += 4;
         sprite.y += 8;
-        wldcore_gfx_draw_number_digits_with_fill(g_wldcore_displayed_numeric_value_secondary, 5, &sprite, ot, 0);
+        hud_draw_digits_with_fill(g_hud_value_secondary, 5, &sprite, ot, 0);
 
-        sprite.x = g_wldcore_context_value_display_position.x;
-        sprite.y = g_wldcore_context_value_display_position.y;
-        wldcore_gfx_draw_funds_readout(ot, &sprite, &line);
+        sprite.x = g_hud_value_position.x;
+        sprite.y = g_hud_value_position.y;
+        hud_draw_funds(ot, &sprite, &line);
         break;
     }
 }
 
 /* Draws the FUNDS readout: the 41x8 label sprite at texel (0x9c, 0x78) with a
- * short black line under its right end, then g_wldcore_displayed_numeric_value
+ * short black line under its right end, then g_hud_value
  * in eight columns offset by (4, 8), through
- * wldcore_gfx_draw_number_digits_with_fill. */
-static void wldcore_gfx_draw_funds_readout(GsOT* ot, GsSPRITE* sprite, GsLINE* line) {
+ * hud_draw_digits_with_fill. */
+static void hud_draw_funds(GsOT* ot, GsSPRITE* sprite, GsLINE* line) {
     /* u16: the target reads GsSPRITE's short x/y with lhu. */
     u16 x;
     u16 y;
@@ -173,7 +173,7 @@ static void wldcore_gfx_draw_funds_readout(GsOT* ot, GsSPRITE* sprite, GsLINE* l
     sprite->w = 0x29;
     sprite->h = 8;
     sprite->cx = 0x20;
-    GsSortFastSprite(sprite, ot, g_wldcore_hud_ot_priority);
+    GsSortFastSprite(sprite, ot, g_hud_ot_priority);
 
     line->attribute = 0;
     line->r = 0;
@@ -185,11 +185,11 @@ static void wldcore_gfx_draw_funds_readout(GsOT* ot, GsSPRITE* sprite, GsLINE* l
     y = sprite->y + 8;
     line->y1 = y;
     line->y0 = y;
-    GsSortLine(line, ot, g_wldcore_hud_ot_priority);
+    GsSortLine(line, ot, g_hud_ot_priority);
 
     sprite->x += 4;
     sprite->y += 8;
-    wldcore_gfx_draw_number_digits_with_fill(g_wldcore_displayed_numeric_value, 8, sprite, ot, 0);
+    hud_draw_digits_with_fill(g_hud_value, 8, sprite, ot, 0);
 }
 
 /* Draws value right-aligned as digits glyphs, one 8x12 or 8x15 cell per
@@ -203,7 +203,7 @@ static void wldcore_gfx_draw_funds_readout(GsOT* ot, GsSPRITE* sprite, GsLINE* l
  * (divcheck expansion). Splitting the division and the remainder into two
  * statements gives the target's order; `s32 saved_y` (not s16) makes the
  * saved y load `lh`. */
-static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
+static void hud_draw_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
     s32 divisor = 1;
     s32 i;
     s32 digit;
@@ -232,7 +232,7 @@ static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* spri
                 sprite->h = 0xf;
                 sprite->y = sprite->y + 1;
             }
-            GsSortFastSprite(sprite, ot, g_wldcore_hud_ot_priority);
+            GsSortFastSprite(sprite, ot, g_hud_ot_priority);
             sprite->y = saved_y;
         }
         sprite->x = sprite->x + 8;
@@ -242,10 +242,10 @@ static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* spri
 }
 
 /* Draws value right-aligned in `digits` columns like
- * wldcore_gfx_draw_number_digits, but also draws the columns ahead of the
+ * hud_draw_digits, but also draws the columns ahead of the
  * first significant digit: a zero glyph when `zero_pad` is set, otherwise the
  * 8x8 filler glyph at (0xd0, 0x28). */
-static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad) {
+static void hud_draw_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad) {
     s32 divisor = 1;
     s32 y;
     s32 digit;
@@ -273,7 +273,7 @@ static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSP
                 sprite->h = 0xF;
                 sprite->y += 1;
             }
-            GsSortFastSprite(sprite, ot, g_wldcore_hud_ot_priority);
+            GsSortFastSprite(sprite, ot, g_hud_ot_priority);
             sprite->y = y;
         } else {
             if (zero_pad != 0) {
@@ -289,7 +289,7 @@ static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSP
                 sprite->h = 8;
                 sprite->y += 4;
             }
-            GsSortFastSprite(sprite, ot, g_wldcore_hud_ot_priority);
+            GsSortFastSprite(sprite, ot, g_hud_ot_priority);
             sprite->y = y;
         }
         sprite->x += 8;
@@ -301,8 +301,8 @@ static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSP
  * script variable, then the day as one or two digit sequences 0x1A pixels to
  * its right, in the tinted HUD color. Nothing is drawn while
  * MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE is set. */
-void wldcore_gfx_draw_calendar_date(GsOT* ot) {
-    world_animated_render_record_t request;
+void calendar_draw_date(GsOT* ot) {
+    display_object_animated_t request;
     CVECTOR color;
     s32 first;
     s32 second;
@@ -311,46 +311,46 @@ void wldcore_gfx_draw_calendar_date(GsOT* ot) {
         return;
     }
 
-    request.flags = WORLD_RENDER_RECORD_ANIMATED;
+    request.flags = DISPLAY_OBJECT_ANIMATED;
     request.priority = 4;
     request.palette = 0;
     request.anim_counter = 0;
     request.frame_index = 0;
-    request.position.x = g_wldcore_calendar_display_x;
-    request.position.y = g_wldcore_calendar_display_y;
-    wldcore_gfx_copy_color_with_tint(&g_wldcore_hud_color, &color);
+    request.position.x = g_calendar_display_x;
+    request.position.y = g_calendar_display_y;
+    world_map_fade_tint_color(&g_hud_color, &color);
     request.color.r = color.r;
     request.color.g = color.g;
     request.color.b = color.b;
 
     first = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
     second = script_get_variable(EVENT_SCRIPT_VAR_DAY);
-    request.sequence = first + (WLDCORE_ANIM_SEQUENCE_MONTH_FIRST - 1);
-    wldcore_gfx_draw_animated_display_object(&request, ot);
+    request.sequence = first + (WINDOW_ANIM_MONTH_FIRST - 1);
+    window_draw_animated_record(&request, ot);
 
     request.position.x += 0x1A;
     request.position.y -= 4;
     if (second >= 10) {
         request.anim_counter = 0;
         request.frame_index = 0;
-        request.sequence = second / 10 + WLDCORE_ANIM_SEQUENCE_DIGIT_FIRST;
-        wldcore_gfx_draw_animated_display_object(&request, ot);
+        request.sequence = second / 10 + WINDOW_ANIM_DIGIT_FIRST;
+        window_draw_animated_record(&request, ot);
         request.position.x += 8;
     }
-    request.sequence = second % 10 + WLDCORE_ANIM_SEQUENCE_DIGIT_FIRST;
-    wldcore_gfx_draw_animated_display_object(&request, ot);
+    request.sequence = second % 10 + WINDOW_ANIM_DIGIT_FIRST;
+    window_draw_animated_record(&request, ot);
 }
 
-/* Draws the name label of the selected location (g_wldcore_map_selected_location,
+/* Draws the name label of the selected location (g_location_selected,
  * location + 1) over its map dot, unless MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL
  * is set or no location is selected.
  *
- * The color is g_wldcore_location_label_shade replicated across the three
- * channels and tinted in place by wldcore_gfx_copy_color_with_tint. sequence
+ * The color is g_location_label_shade replicated across the three
+ * channels and tinted in place by world_map_fade_tint_color. sequence
  * is written after that call because the target reloads the selection
  * there. */
-void wldcore_map_draw_location_label(GsOT* ot) {
-    world_animated_render_record_t request;
+void location_draw_label(GsOT* ot) {
+    display_object_animated_t request;
     CVECTOR color;
     s32 index;
     s32 shade;
@@ -358,15 +358,15 @@ void wldcore_map_draw_location_label(GsOT* ot) {
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL) {
         return;
     }
-    if (g_wldcore_map_selected_location == 0) {
+    if (g_location_selected == 0) {
         return;
     }
 
-    index = g_wldcore_map_selected_location - 1;
-    request.flags = WORLD_RENDER_RECORD_ANIMATED;
-    request.position.x = g_wldcore_map_dots[index].render.position.x;
-    request.position.y = g_wldcore_map_dots[index].render.position.y;
-    shade = g_wldcore_location_label_shade;
+    index = g_location_selected - 1;
+    request.flags = DISPLAY_OBJECT_ANIMATED;
+    request.position.x = g_world_map_dots[index].render.position.x;
+    request.position.y = g_world_map_dots[index].render.position.y;
+    shade = g_location_label_shade;
     request.priority = 4;
     request.palette = 0;
     request.anim_counter = 0;
@@ -374,24 +374,24 @@ void wldcore_map_draw_location_label(GsOT* ot) {
     color.r = shade;
     color.g = shade;
     color.b = shade;
-    wldcore_gfx_copy_color_with_tint(&color, &color);
+    world_map_fade_tint_color(&color, &color);
     request.color.r = color.r;
     request.color.g = color.g;
     request.color.b = color.b;
-    request.sequence = g_wldcore_map_selected_location + (WLDCORE_ANIM_SEQUENCE_LOCATION_NAME_FIRST - 1);
-    wldcore_gfx_draw_animated_display_object(&request, ot);
+    request.sequence = g_location_selected + (WINDOW_ANIM_LOCATION_NAME_FIRST - 1);
+    window_draw_animated_record(&request, ot);
 }
 
 /* Init step: load WORLD's menu text and unit portraits, build the formation unit name strings,
  * then apply and clear any day advance pending in EVENT_SCRIPT_VAR_DATE_ADVANCE. */
-void wldcore_system_init_world_menus_and_date(void) {
+void world_map_init_menus_and_date(void) {
     s32 value;
 
-    world_menu_init_with_world_text_and_faces();
-    world_text_build_roster_name_list();
+    screen_init_with_world_text_and_faces();
+    formation_build_roster_names();
     value = script_get_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE);
     if (value != 0) {
-        wldcore_calendar_advance_days(value);
+        calendar_advance_days(value);
         script_set_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE, 0);
     }
 }
@@ -405,7 +405,7 @@ void wldcore_system_init_world_menus_and_date(void) {
  * menu frame. Buttons in g_menu_blocked_buttons are withheld from
  * the menus.
  */
-void wldcore_menu_run_world_frame(GsOT* context) {
+void world_map_run_world_menus(GsOT* context) {
     u32* otag_entries;
     u32* sprite_entries;
     u32* menu_entries;
@@ -413,57 +413,57 @@ void wldcore_menu_run_world_frame(GsOT* context) {
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_SKIP_MENU_FRAME) {
         return;
     }
-    world_formation_set_ordering_table_pointer((u32*)(context->org + 15));
-    world_menu_set_allowed_buttons(~g_menu_blocked_buttons);
+    formation_set_backdrop_otag((u32*)(context->org + 15));
+    screen_set_allowed_buttons(~g_menu_blocked_buttons);
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS) {
         otag_entries = (u32*)context->org;
-        g_gfx_current_otag_entry = otag_entries + g_wldcore_menu_ordering_table_offset;
+        g_gfx_current_otag_entry = otag_entries + g_menu_stack_ot_offset;
         menu_draw_active_window_frames();
         sprite_entries = (u32*)context->org;
-        menu_input_update_event_state(sprite_entries + g_wldcore_menu_ordering_table_offset + 2,
-            g_input_current_buttons, g_main_gfx_active_buffer_index * 240);
+        menu_input_update_event_state(
+            sprite_entries + g_menu_stack_ot_offset + 2, g_input_current_buttons, g_main_gfx_active_buffer_index * 240);
         if (g_sound_pending_sfx_id != -1) {
-            wldcore_sound_play_effect(g_sound_pending_sfx_id);
+            sound_play_effect(g_sound_pending_sfx_id);
         }
     } else {
         menu_entries = (u32*)context->org;
-        world_menu_run_frame(menu_entries + g_wldcore_menu_ordering_table_offset, g_input_current_buttons);
+        screen_menu_frame(menu_entries + g_menu_stack_ot_offset, g_input_current_buttons);
     }
 }
 
 /* Empty the menu stack, push the root level and place its window at the
  * projected location marker (4 pixels above it). */
-void wldcore_menu_reset_stack(void) {
-    g_wldcore_menu_stack_depth = 0;
-    wldcore_menu_push_root_level();
-    g_wldcore_window_records[g_wldcore_menu_stack_records[1].window_index].position.x
-        = g_wldcore_map_projection_state.marker.render.position.x;
-    g_wldcore_window_records[g_wldcore_menu_stack_records[1].window_index].position.y
-        = g_wldcore_map_projection_state.marker.render.position.y - 4;
+void menu_stack_reset(void) {
+    g_menu_stack_depth = 0;
+    world_map_push_cursor_level();
+    g_window_records[g_menu_stack_records[1].window_index].position.x
+        = g_world_map_projection_state.marker.render.position.x;
+    g_window_records[g_menu_stack_records[1].window_index].position.y
+        = g_world_map_projection_state.marker.render.position.y - 4;
 }
 
 /* Run the per-frame handler of the menu level on top of the stack, passing its level record. */
-void wldcore_menu_dispatch_idle_handler(void) {
-    s32 index = g_wldcore_menu_stack_depth;
+void menu_stack_dispatch_idle(void) {
+    s32 index = g_menu_stack_depth;
 
-    g_wldcore_menu_idle_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
+    g_menu_stack_idle_handlers[g_menu_stack_types[index]](&g_menu_stack_records[index]);
 }
 
 /* Run the resume handler of the level now on top of the stack after the level above it closed:
  * list levels restore their prompt and blocked buttons, window levels their palettes and cursor. */
-void wldcore_menu_dispatch_resume_handler(void) {
-    s32 index = g_wldcore_menu_stack_depth;
+void menu_stack_dispatch_resume(void) {
+    s32 index = g_menu_stack_depth;
 
-    g_wldcore_menu_resume_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
+    g_menu_stack_resume_handlers[g_menu_stack_types[index]](&g_menu_stack_records[index]);
 }
 
 /* Run the top level's suspend handler, called just before another level opens over it: list levels
  * withhold every button, window levels dim their windows (palettes 10, 6, 2 and the pressed
  * cursor). The resume handler undoes it. */
-void wldcore_menu_dispatch_suspend_handler(void) {
-    s32 index = g_wldcore_menu_stack_depth;
+void menu_stack_dispatch_suspend(void) {
+    s32 index = g_menu_stack_depth;
 
-    g_wldcore_menu_suspend_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
+    g_menu_stack_suspend_handlers[g_menu_stack_types[index]](&g_menu_stack_records[index]);
 }
 
 /* Pushes a two-window menu level: appends two window records, points the new
@@ -472,84 +472,82 @@ void wldcore_menu_dispatch_suspend_handler(void) {
  *
  * The level record is re-read into its own local after the script call; reusing
  * the window-level depth local changes the register allocation. */
-static void wldcore_menu_push_root_level(void) {
-    wldcore_window_xy_t* xy;
-    world_animated_render_record_t* records;
+static void world_map_push_cursor_level(void) {
+    window_xy_t* xy;
+    display_object_animated_t* records;
     s32 window_index;
     s32 depth;
     s32 level;
 
-    window_index
-        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
 
-    /* Taken from the record array: naming g_wldcore_window_record_positions here changes the
+    /* Taken from the record array: naming g_window_record_positions here changes the
      * target's address form. */
-    xy = (wldcore_window_xy_t*)&g_wldcore_window_records[0].position.x;
-    records = g_wldcore_window_records;
+    xy = (window_xy_t*)&g_window_records[0].position.x;
+    records = g_window_records;
 
-    depth = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[depth].window_pair.first_window = window_index;
-    g_wldcore_window_records[window_index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_STILL;
-    g_wldcore_window_records[window_index].priority = 12;
+    depth = g_menu_stack_depth;
+    g_menu_stack_records_next[depth].window_pair.first_window = window_index;
+    g_window_records[window_index].sequence = WINDOW_ANIM_CURSOR_STILL;
+    g_window_records[window_index].priority = 12;
     xy[window_index].x = 0;
     xy[window_index].y = 0;
     records[window_index].anim_counter = 0;
-    g_wldcore_window_records[window_index].frame_index = 0;
+    g_window_records[window_index].frame_index = 0;
 
-    window_index
-        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    depth = g_wldcore_menu_stack_depth;
-    g_wldcore_context_value_display_mode = WLDCORE_VALUE_DISPLAY_FUNDS;
-    g_wldcore_menu_stack_records_next[depth].window_pair.second_window = window_index;
-    g_wldcore_window_records[window_index].sequence = WLDCORE_ANIM_SEQUENCE_MAP_EDGE_ARROWS;
-    g_wldcore_window_records[window_index].priority = 12;
-    g_wldcore_window_records[window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
+    window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    depth = g_menu_stack_depth;
+    g_hud_value_mode = HUD_VALUE_FUNDS;
+    g_menu_stack_records_next[depth].window_pair.second_window = window_index;
+    g_window_records[window_index].sequence = WINDOW_ANIM_MAP_EDGE_ARROWS;
+    g_window_records[window_index].priority = 12;
+    g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     xy[window_index].x = 0;
     xy[window_index].y = 0;
     records[window_index].anim_counter = 0;
-    g_wldcore_window_records[window_index].frame_index = 0;
+    g_window_records[window_index].frame_index = 0;
 
-    g_wldcore_map_cursor_scroll_y.limit = 0x400;
-    g_wldcore_map_cursor_scroll_x.limit = 0x400;
-    g_wldcore_map_cursor_scroll_y.value = 0;
-    g_wldcore_map_cursor_scroll_x.value = 0;
-    g_wldcore_map_cursor_scroll_y.output = 0;
-    g_wldcore_map_cursor_scroll_x.output = 0;
-    g_wldcore_map_cursor_scroll_y.decay = 0x80;
-    g_wldcore_map_cursor_scroll_x.decay = 0x80;
-    g_wldcore_map_cursor_scroll_y.step = 0x80;
-    g_wldcore_map_cursor_scroll_x.step = 0x80;
+    g_world_map_scroll_y.limit = 0x400;
+    g_world_map_scroll_x.limit = 0x400;
+    g_world_map_scroll_y.value = 0;
+    g_world_map_scroll_x.value = 0;
+    g_world_map_scroll_y.output = 0;
+    g_world_map_scroll_x.output = 0;
+    g_world_map_scroll_y.decay = 0x80;
+    g_world_map_scroll_x.decay = 0x80;
+    g_world_map_scroll_y.step = 0x80;
+    g_world_map_scroll_x.step = 0x80;
 
-    g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    level = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[level].map_cursor.wide_view = 0;
-    g_wldcore_menu_stack_records_next[level].map_cursor.snap_hit = g_wldcore_map_projection_state.marker.kind + 1;
-    g_wldcore_menu_stack_records_next[level].map_cursor.pending_mode = 0;
-    g_wldcore_menu_stack_depth = level + 1;
-    g_wldcore_menu_stack_types[level + 1] = WLDCORE_MENU_LEVEL_ROOT;
+    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    level = g_menu_stack_depth;
+    g_menu_stack_records_next[level].map_cursor.wide_view = 0;
+    g_menu_stack_records_next[level].map_cursor.snap_hit = g_world_map_projection_state.marker.kind + 1;
+    g_menu_stack_records_next[level].map_cursor.pending_mode = 0;
+    g_menu_stack_depth = level + 1;
+    g_menu_stack_types[level + 1] = MENU_STACK_LEVEL_WORLD_MAP;
 }
 
 /* Resume handler of the world map's root level: show the war funds in the
  * context value display, reset the level's window palette, restore the live
  * map if the captured frame is showing and run any pending script requests. */
-void wldcore_menu_resume_root_level(wldcore_menu_stack_record_t* level) {
-    g_wldcore_context_value_display_mode = WLDCORE_VALUE_DISPLAY_FUNDS;
-    g_wldcore_window_records[level->map_cursor.window_index].palette = 0;
-    g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    if (g_wldcore_window_records[g_wldcore_map_window_index].flags & WORLD_RENDER_RECORD_HIDDEN) {
-        wldcore_gfx_toggle_captured_world_frame(0);
+void world_map_resume_cursor_level(menu_stack_record_t* level) {
+    g_hud_value_mode = HUD_VALUE_FUNDS;
+    g_window_records[level->map_cursor.window_index].palette = 0;
+    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    if (g_window_records[g_world_map_window_index].flags & DISPLAY_OBJECT_HIDDEN) {
+        world_map_toggle_captured_frame(0);
     }
-    wldcore_menu_dispatch_pending_script_requests();
+    location_script_dispatch_requests();
 }
 
 /* Reset the window palette and both map-cursor scroll axes. The scroll fields
  * preserve the original store order after the indexed window store. */
-void wldcore_menu_suspend_root_level(wldcore_menu_stack_record_t* level) {
-    g_wldcore_window_records[level->window_index].palette = 10;
-    g_wldcore_map_cursor_scroll_y.value = 0;
-    g_wldcore_map_cursor_scroll_x.value = 0;
-    g_wldcore_map_cursor_scroll_y.output = 0;
-    g_wldcore_map_cursor_scroll_x.output = 0;
+void world_map_suspend_cursor_level(menu_stack_record_t* level) {
+    g_window_records[level->window_index].palette = 10;
+    g_world_map_scroll_y.value = 0;
+    g_world_map_scroll_x.value = 0;
+    g_world_map_scroll_y.output = 0;
+    g_world_map_scroll_x.output = 0;
 }
 
 /* Once the current location's script yields a map-menu action, reset the
@@ -557,50 +555,50 @@ void wldcore_menu_suspend_root_level(wldcore_menu_stack_record_t* level) {
  * request. A focus location of 0xff means the current location.
  *
  * The flag tests are signed `> 0` comparisons; `!= 0` folds to srl/andi. */
-void wldcore_menu_dispatch_pending_script_requests(void) {
-    s32* location = &g_wldcore_map_projection_state.marker.kind;
+void location_script_dispatch_requests(void) {
+    s32* location = &g_world_map_projection_state.marker.kind;
     s32* flags;
     s32 id;
 
-    if (wldcore_script_process_conditional_set(*location, WLDCORE_SCRIPT_ACTION_MAP_MENU_MASK) == 0) {
+    if (location_script_run(*location, LOCATION_SCRIPT_ACTION_MAP_MENU_MASK) == 0) {
         return;
     }
-    flags = &g_wldcore_script_state.flags;
-    if (*flags & WLDCORE_SCRIPT_ACTION_PATH_MASK) {
-        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
-        wldcore_menu_push_map_path_level(g_wldcore_script_state.args[0], g_wldcore_script_state.args[1],
-            (*flags & WLDCORE_SCRIPT_ACTION_ERASE_PATH) > 0);
-    } else if (*flags & WLDCORE_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK) {
-        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
-        wldcore_push_map_location_visibility_level(
-            g_wldcore_script_state.args[0], (*flags & WLDCORE_SCRIPT_ACTION_ERASE_LOCATION) > 0);
-    } else if (*flags & WLDCORE_SCRIPT_ACTION_FOCUS_LOCATION) {
-        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
-        id = g_wldcore_script_state.args[0];
+    flags = &g_location_script_state.flags;
+    if (*flags & LOCATION_SCRIPT_ACTION_PATH_MASK) {
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+        world_map_push_path_level(g_location_script_state.args[0], g_location_script_state.args[1],
+            (*flags & LOCATION_SCRIPT_ACTION_ERASE_PATH) > 0);
+    } else if (*flags & LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK) {
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+        world_map_push_location_visibility_level(
+            g_location_script_state.args[0], (*flags & LOCATION_SCRIPT_ACTION_ERASE_LOCATION) > 0);
+    } else if (*flags & LOCATION_SCRIPT_ACTION_FOCUS_LOCATION) {
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+        id = g_location_script_state.args[0];
         if (id == 0xFF) {
             id = *location;
         }
-        wldcore_menu_push_focus_location_level(id);
+        world_map_push_focus_level(id);
     }
 }
 
 /* Per-frame step of the world map cursor (the root level).
  *
  * While route travel runs it only keeps the map redrawn. While a zoom runs
- * (WLDCORE_PROJECTION_MOTION_ACTIVE) it interpolates the view origin and the
+ * (WORLD_MAP_PAN_ACTIVE) it interpolates the view origin and the
  * projection scale over `duration` frames, out (ZOOMED_OUT) or back in, and
  * redraws the map each frame.
  *
  * Otherwise it handles input: Circle on the marker's own dot opens its
  * location menu, on another dot walks the marker there
- * (wldcore_location_start_travel), and off every dot hides the cursor and
- * pans back to the marker (wldcore_menu_push_focus_location_level); Triangle
- * or Start opens the entry window (wldcore_menu_push_entry_window_level);
+ * (travel_start), and off every dot hides the cursor and
+ * pans back to the marker (world_map_push_focus_level); Triangle
+ * or Start opens the entry window (world_map_push_menu_level);
  * Select on a dot shows the location's help message (0x8000 + location) over
  * a captured frame; L1 or R1 starts or reverses the zoom; holding Square
  * swaps the cursor window for the wide-view window. With no modal state
  * it accelerates the two scroll axes, snaps the cursor toward the nearest dot
- * through wldcore_map_get_dot_snap_step, scrolls the projection origin when
+ * through world_map_get_dot_snap_step, scrolls the projection origin when
  * the cursor approaches a screen edge, and finally clamps the cursor window to
  * x in [-0x70, 0x78] and y in [-0x68, 0x68].
  *
@@ -610,7 +608,7 @@ void wldcore_menu_dispatch_pending_script_requests(void) {
  * stores keep each branch's scale value a single-set temporary; one variable
  * shared by both branches is multi-set, is scheduled early and changes the
  * register allocation of the interpolation. */
-void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
+void world_map_step_cursor_level(menu_stack_record_t* level) {
     point32_t amount;
     point32_t point;
     point32_t target;
@@ -627,12 +625,12 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
 
     /* The exits funnel into the shared snap-hit tail at `finish`; in the
      * target's block order these need gotos. */
-    if (g_wldcore_route_travel.flags & WLDCORE_ROUTE_TRAVEL_ACTIVE) {
+    if (g_travel.flags & TRAVEL_ACTIVE) {
         g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
         goto finish;
     }
 
-    if (level->map_cursor.wide_view == 0 && !(g_wldcore_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP)) {
+    if (level->map_cursor.wide_view == 0 && !(g_world_map_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP)) {
         if (level->map_cursor.pending_mode != 0) {
             flags = g_main_system_flags;
             if (flags & MAIN_SYSTEM_FLAG_FADING) {
@@ -648,50 +646,47 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
             /* Skips the zoom handling and the wide-view toggle below. */
             goto scroll;
         }
-        if (!(g_wldcore_map_zoom_motion.flags
-                & (WLDCORE_PROJECTION_MOTION_ACTIVE | WLDCORE_PROJECTION_MOTION_ZOOMED_OUT))
-            && g_wldcore_audio_queue.count == 0) {
-            if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
+        if (!(g_world_map_zoom.flags & (WORLD_MAP_PAN_ACTIVE | WORLD_MAP_PAN_ZOOMED_OUT)) && g_audio_queue.count == 0) {
+            if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
                 /* The hit test returns a one-based dot index, 0 for no dot. */
-                hit = wldcore_map_find_dot_at_point(g_wldcore_window_records[level->map_cursor.window_index].position);
+                hit = world_map_find_dot_at(g_window_records[level->map_cursor.window_index].position);
                 if (hit != 0) {
-                    wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
+                    sound_play_effect(MAIN_SFX_CONFIRM);
                     hit--;
 
                     /* A dot other than the marker's walks the marker there; the marker's own dot opens its menu. */
-                    if (hit != g_wldcore_map_projection_state.marker.kind) {
-                        wldcore_location_start_travel(g_wldcore_map_projection_state.marker.kind, hit);
+                    if (hit != g_world_map_projection_state.marker.kind) {
+                        travel_start(g_world_map_projection_state.marker.kind, hit);
                         return;
                     }
-                    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count
-                        = wldcore_map_build_location_menu_entries(
-                            hit, g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entries);
-                    if (g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count != 0) {
-                        wldcore_menu_suspend_root_level(level);
-                        wldcore_menu_push_location_menu_level(hit);
+                    g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count
+                        = location_build_menu_entries(hit, g_menu_stack_records_next[g_menu_stack_depth].panel.entries);
+                    if (g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count != 0) {
+                        world_map_suspend_cursor_level(level);
+                        location_push_menu_level(hit);
                         return;
                     }
                 } else {
-                    g_wldcore_window_records[level->map_cursor.window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-                    wldcore_menu_push_focus_location_level(g_wldcore_map_projection_state.marker.kind);
+                    g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+                    world_map_push_focus_level(g_world_map_projection_state.marker.kind);
                     return;
                 }
             }
 
-            buttons = g_wldcore_input_new_button_presses;
+            buttons = g_world_map_input_new_button_presses;
             if (buttons & (PSX_PAD_TRIANGLE | PSX_PAD_START)) {
-                wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
-                wldcore_menu_suspend_root_level(level);
-                wldcore_menu_push_entry_window_level();
+                sound_play_effect(MAIN_SFX_CONFIRM);
+                world_map_suspend_cursor_level(level);
+                world_map_push_menu_level();
                 return;
             }
             if (buttons & PSX_PAD_SELECT) {
-                hit = wldcore_map_find_dot_at_point(g_wldcore_window_records[level->map_cursor.window_index].position);
+                hit = world_map_find_dot_at(g_window_records[level->map_cursor.window_index].position);
                 if (hit != 0) {
                     hit--;
-                    wldcore_menu_suspend_root_level(level);
-                    wldcore_gfx_toggle_captured_world_frame(1);
-                    wldcore_menu_push_message_level(hit + 0x8000, 1);
+                    world_map_suspend_cursor_level(level);
+                    world_map_toggle_captured_frame(1);
+                    menu_stack_push_message_level(hit + 0x8000, 1);
                     return;
                 }
             }
@@ -699,68 +694,66 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
     }
 
     /* L1 or R1 starts a zoom; while one runs, interpolate it and skip the cursor. */
-    motion = g_wldcore_map_zoom_motion.flags;
-    if (!(motion & WLDCORE_PROJECTION_MOTION_ACTIVE)) {
-        if (level->map_cursor.wide_view == 0 && (g_wldcore_input_new_button_presses & (PSX_PAD_L1 | PSX_PAD_R1))) {
-            g_wldcore_window_records[level->map_cursor.window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-            g_wldcore_map_zoom_motion.duration = 0x20;
-            g_wldcore_map_zoom_motion.frame = 0;
-            g_wldcore_map_zoom_motion.flags = (g_wldcore_map_zoom_motion.flags ^ WLDCORE_PROJECTION_MOTION_ZOOMED_OUT)
-                | WLDCORE_PROJECTION_MOTION_ACTIVE;
+    motion = g_world_map_zoom.flags;
+    if (!(motion & WORLD_MAP_PAN_ACTIVE)) {
+        if (level->map_cursor.wide_view == 0 && (g_world_map_input_new_button_presses & (PSX_PAD_L1 | PSX_PAD_R1))) {
+            g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_world_map_zoom.duration = 0x20;
+            g_world_map_zoom.frame = 0;
+            g_world_map_zoom.flags = (g_world_map_zoom.flags ^ WORLD_MAP_PAN_ZOOMED_OUT) | WORLD_MAP_PAN_ACTIVE;
 
             /* Zooming out remembers the view origin so zooming back in can return to it. */
-            if (g_wldcore_map_zoom_motion.flags & WLDCORE_PROJECTION_MOTION_ZOOMED_OUT) {
-                g_wldcore_map_zoom_motion.origin = g_wldcore_map_projection_view.origin;
+            if (g_world_map_zoom.flags & WORLD_MAP_PAN_ZOOMED_OUT) {
+                g_world_map_zoom.origin = g_world_map_projection_view.origin;
             }
             level->map_cursor.snap_hit = 0;
-            if (g_wldcore_map_zoom_motion.flags & WLDCORE_PROJECTION_MOTION_ZOOMED_OUT) {
-                wldcore_sound_play_effect(MAIN_SFX_WORLD_MAP_ZOOM_OUT);
+            if (g_world_map_zoom.flags & WORLD_MAP_PAN_ZOOMED_OUT) {
+                sound_play_effect(MAIN_SFX_WORLD_MAP_ZOOM_OUT);
             } else {
-                wldcore_sound_play_effect(MAIN_SFX_WORLD_MAP_ZOOM_IN);
+                sound_play_effect(MAIN_SFX_WORLD_MAP_ZOOM_IN);
             }
             goto finish;
         }
     } else {
         /* The scale moves between ONE and 0x800 (half size); the zoomed-out view is centered at (0, 8). */
-        frame = g_wldcore_map_zoom_motion.frame;
-        duration = g_wldcore_map_zoom_motion.duration;
+        frame = g_world_map_zoom.frame;
+        duration = g_world_map_zoom.duration;
         step_x = (frame << 11) / duration;
-        if (motion & WLDCORE_PROJECTION_MOTION_ZOOMED_OUT) {
-            g_wldcore_map_projection_view.origin.vx
-                = g_wldcore_map_zoom_motion.origin.vx + ((0 - g_wldcore_map_zoom_motion.origin.vx) * frame) / duration;
-            g_wldcore_map_projection_view.origin.vy
-                = g_wldcore_map_zoom_motion.origin.vy + ((8 - g_wldcore_map_zoom_motion.origin.vy) * frame) / duration;
-            g_wldcore_map_projection_view.scale.vx = g_wldcore_map_projection_view.scale.vy = ONE - step_x;
-            g_wldcore_map_zoom_motion.frame = frame + 1;
+        if (motion & WORLD_MAP_PAN_ZOOMED_OUT) {
+            g_world_map_projection_view.origin.vx
+                = g_world_map_zoom.origin.vx + ((0 - g_world_map_zoom.origin.vx) * frame) / duration;
+            g_world_map_projection_view.origin.vy
+                = g_world_map_zoom.origin.vy + ((8 - g_world_map_zoom.origin.vy) * frame) / duration;
+            g_world_map_projection_view.scale.vx = g_world_map_projection_view.scale.vy = ONE - step_x;
+            g_world_map_zoom.frame = frame + 1;
             g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES;
             if (frame + 1 == duration) {
-                g_wldcore_map_projection_view.scale.vy = 0x800;
-                g_wldcore_map_projection_view.scale.vx = 0x800;
-                g_wldcore_map_projection_view.origin.vx = 0;
-                g_wldcore_map_projection_view.origin.vy = 8;
-                g_wldcore_map_zoom_motion.flags = motion ^ WLDCORE_PROJECTION_MOTION_ACTIVE;
+                g_world_map_projection_view.scale.vy = 0x800;
+                g_world_map_projection_view.scale.vx = 0x800;
+                g_world_map_projection_view.origin.vx = 0;
+                g_world_map_projection_view.origin.vy = 8;
+                g_world_map_zoom.flags = motion ^ WORLD_MAP_PAN_ACTIVE;
             }
         } else {
-            g_wldcore_map_projection_view.origin.vx = (g_wldcore_map_zoom_motion.origin.vx * frame) / duration;
-            g_wldcore_map_projection_view.origin.vy
-                = ((g_wldcore_map_zoom_motion.origin.vy - 8) * frame) / duration + 8;
-            g_wldcore_map_projection_view.scale.vx = g_wldcore_map_projection_view.scale.vy = step_x + 0x800;
-            g_wldcore_map_zoom_motion.frame = frame + 1;
+            g_world_map_projection_view.origin.vx = (g_world_map_zoom.origin.vx * frame) / duration;
+            g_world_map_projection_view.origin.vy = ((g_world_map_zoom.origin.vy - 8) * frame) / duration + 8;
+            g_world_map_projection_view.scale.vx = g_world_map_projection_view.scale.vy = step_x + 0x800;
+            g_world_map_zoom.frame = frame + 1;
             if (frame + 1 == duration) {
-                g_wldcore_map_projection_view.scale.vy = ONE;
-                g_wldcore_map_projection_view.scale.vx = ONE;
-                g_wldcore_map_projection_view.origin = g_wldcore_map_zoom_motion.origin;
-                g_wldcore_map_zoom_motion.flags ^= WLDCORE_PROJECTION_MOTION_ACTIVE;
+                g_world_map_projection_view.scale.vy = ONE;
+                g_world_map_projection_view.scale.vx = ONE;
+                g_world_map_projection_view.origin = g_world_map_zoom.origin;
+                g_world_map_zoom.flags ^= WORLD_MAP_PAN_ACTIVE;
                 g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES);
             }
         }
 
         g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
-        g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
+        g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
         goto finish;
     }
 
-    if (g_wldcore_map_zoom_motion.flags & WLDCORE_PROJECTION_MOTION_ZOOMED_OUT) {
+    if (g_world_map_zoom.flags & WORLD_MAP_PAN_ZOOMED_OUT) {
         goto finish;
     }
 
@@ -768,19 +761,19 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
     if (!(g_input_current_buttons & PSX_PAD_SQUARE)) {
         if (level->map_cursor.wide_view != 0) {
             level->map_cursor.wide_view = 0;
-            g_wldcore_window_records[level->map_cursor.alt_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
+            g_window_records[level->map_cursor.alt_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         }
-        g_wldcore_window_records[level->map_cursor.window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
+        g_window_records[level->map_cursor.window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else if (level->map_cursor.wide_view != 1) {
         level->map_cursor.wide_view = 1;
-        g_wldcore_window_records[level->map_cursor.window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-        g_wldcore_window_records[level->map_cursor.alt_window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-        g_wldcore_window_records[level->map_cursor.alt_window_index].anim_counter
-            = g_wldcore_window_records[level->map_cursor.alt_window_index].frame_index = 0;
-        g_wldcore_map_cursor_scroll_y.value = 0;
-        g_wldcore_map_cursor_scroll_x.value = 0;
-        g_wldcore_map_cursor_scroll_y.output = 0;
-        g_wldcore_map_cursor_scroll_x.output = 0;
+        g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->map_cursor.alt_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->map_cursor.alt_window_index].anim_counter
+            = g_window_records[level->map_cursor.alt_window_index].frame_index = 0;
+        g_world_map_scroll_y.value = 0;
+        g_world_map_scroll_x.value = 0;
+        g_world_map_scroll_y.output = 0;
+        g_world_map_scroll_x.output = 0;
     }
 
 scroll:
@@ -788,64 +781,64 @@ scroll:
         held = g_input_current_buttons;
         if (held & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
             if (held & PSX_PAD_LEFT) {
-                wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_x, -1);
+                world_map_update_scroll_axis(&g_world_map_scroll_x, -1);
             } else {
-                wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_x, 1);
+                world_map_update_scroll_axis(&g_world_map_scroll_x, 1);
             }
         } else {
-            wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_x, 0);
+            world_map_update_scroll_axis(&g_world_map_scroll_x, 0);
         }
 
         held = g_input_current_buttons;
         if (held & (PSX_PAD_UP | PSX_PAD_DOWN)) {
             if (held & PSX_PAD_UP) {
-                wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_y, -1);
+                world_map_update_scroll_axis(&g_world_map_scroll_y, -1);
             } else {
-                wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_y, 1);
+                world_map_update_scroll_axis(&g_world_map_scroll_y, 1);
             }
         } else {
-            wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_y, 0);
+            world_map_update_scroll_axis(&g_world_map_scroll_y, 0);
         }
 
         /* Pull the move toward the nearest dot, then scroll the map when the cursor nears a screen edge. */
-        amount.x = g_wldcore_map_cursor_scroll_x.output;
-        amount.y = g_wldcore_map_cursor_scroll_y.output;
-        if (!(g_wldcore_map_zoom_motion.flags & WLDCORE_PROJECTION_MOTION_ZOOMED_OUT)) {
-            target.x = g_wldcore_window_records[level->map_cursor.window_index].position.x + amount.x;
-            target.y = g_wldcore_window_records[level->map_cursor.window_index].position.y + amount.y;
-            level->map_cursor.snap_hit = wldcore_map_get_dot_snap_step(target, &step_x, &step_y);
+        amount.x = g_world_map_scroll_x.output;
+        amount.y = g_world_map_scroll_y.output;
+        if (!(g_world_map_zoom.flags & WORLD_MAP_PAN_ZOOMED_OUT)) {
+            target.x = g_window_records[level->map_cursor.window_index].position.x + amount.x;
+            target.y = g_window_records[level->map_cursor.window_index].position.y + amount.y;
+            level->map_cursor.snap_hit = world_map_get_dot_snap_step(target, &step_x, &step_y);
             amount.x += step_x;
             amount.y += step_y;
 
-            target.x = g_wldcore_window_records[level->map_cursor.window_index].position.x + amount.x;
-            target.y = g_wldcore_window_records[level->map_cursor.window_index].position.y + amount.y;
-            saved = g_wldcore_map_projection_view.origin;
+            target.x = g_window_records[level->map_cursor.window_index].position.x + amount.x;
+            target.y = g_window_records[level->map_cursor.window_index].position.y + amount.y;
+            saved = g_world_map_projection_view.origin;
             if ((amount.x < 0 && target.x < -0x40) || (amount.x > 0 && target.x >= 0x49)) {
-                wldcore_map_apply_clamped_horizontal_scroll(&amount.x, &g_wldcore_map_projection_view.origin.vx);
+                world_map_apply_clamped_horizontal_scroll(&amount.x, &g_world_map_projection_view.origin.vx);
             }
             if ((amount.y < 0 && target.y < -0x40) || (amount.y > 0 && target.y >= 0x41)) {
-                wldcore_map_apply_clamped_vertical_scroll(&amount, &g_wldcore_map_projection_view.origin);
+                world_map_apply_clamped_vertical_scroll(&amount, &g_world_map_projection_view.origin);
             }
-            if (saved.vx != g_wldcore_map_projection_view.origin.vx
-                || saved.vy != g_wldcore_map_projection_view.origin.vy) {
+            if (saved.vx != g_world_map_projection_view.origin.vx
+                || saved.vy != g_world_map_projection_view.origin.vy) {
                 g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
-                g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
+                g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
             }
         }
 
-        g_wldcore_window_records[level->map_cursor.window_index].position.x += amount.x;
-        g_wldcore_window_records[level->map_cursor.window_index].position.y += amount.y;
-        if (g_wldcore_window_records[level->map_cursor.window_index].position.x < -0x70) {
-            g_wldcore_window_records[level->map_cursor.window_index].position.x = -0x70;
+        g_window_records[level->map_cursor.window_index].position.x += amount.x;
+        g_window_records[level->map_cursor.window_index].position.y += amount.y;
+        if (g_window_records[level->map_cursor.window_index].position.x < -0x70) {
+            g_window_records[level->map_cursor.window_index].position.x = -0x70;
         }
-        if (g_wldcore_window_records[level->map_cursor.window_index].position.x >= 0x79) {
-            g_wldcore_window_records[level->map_cursor.window_index].position.x = 0x78;
+        if (g_window_records[level->map_cursor.window_index].position.x >= 0x79) {
+            g_window_records[level->map_cursor.window_index].position.x = 0x78;
         }
-        if (g_wldcore_window_records[level->map_cursor.window_index].position.y < -0x68) {
-            g_wldcore_window_records[level->map_cursor.window_index].position.y = -0x68;
+        if (g_window_records[level->map_cursor.window_index].position.y < -0x68) {
+            g_window_records[level->map_cursor.window_index].position.y = -0x68;
         }
-        if (g_wldcore_window_records[level->map_cursor.window_index].position.y >= 0x69) {
-            g_wldcore_window_records[level->map_cursor.window_index].position.y = 0x68;
+        if (g_window_records[level->map_cursor.window_index].position.y >= 0x69) {
+            g_window_records[level->map_cursor.window_index].position.y = 0x68;
         }
     } else {
         /* In wide view the d-pad scrolls the map 4 units a frame instead of moving the cursor. */
@@ -866,40 +859,39 @@ scroll:
                 amount.y = 4;
             }
 
-            saved = g_wldcore_map_projection_view.origin;
-            wldcore_map_apply_clamped_scroll(&amount, &g_wldcore_map_projection_view.origin);
-            if (saved.vx != g_wldcore_map_projection_view.origin.vx
-                || saved.vy != g_wldcore_map_projection_view.origin.vy) {
+            saved = g_world_map_projection_view.origin;
+            world_map_apply_clamped_scroll(&amount, &g_world_map_projection_view.origin);
+            if (saved.vx != g_world_map_projection_view.origin.vx
+                || saved.vy != g_world_map_projection_view.origin.vy) {
                 g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
-                g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
+                g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
             }
         }
     }
 
 finish:
     if (level->map_cursor.wide_view == 0 && (hit = level->map_cursor.snap_hit) != 0) {
-        g_wldcore_map_selected_location = hit;
+        g_location_selected = hit;
         return;
     }
 
-    g_wldcore_map_selected_location = 0;
+    g_location_selected = 0;
 }
 
 /* Push a map-dot focus level and hide its parent window during the projection move.
  * Keeping the render pointer as the base preserves the two related call addresses. */
-static void wldcore_menu_push_focus_location_level(s32 dot_index) {
-    world_animated_render_record_t* render;
+static void world_map_push_focus_level(s32 dot_index) {
+    display_object_animated_t* render;
 
-    render = &g_wldcore_map_dots[dot_index].render;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].focus_dot_index = dot_index;
-    wldcore_map_start_projection_motion_if_outside_bounds(&render->position, &g_wldcore_map_dots[dot_index].position);
-    if (g_wldcore_map_projection_motion.flags & WLDCORE_PROJECTION_MOTION_ACTIVE) {
+    render = &g_world_map_dots[dot_index].render;
+    g_menu_stack_records_next[g_menu_stack_depth].focus_dot_index = dot_index;
+    world_map_start_pan_if_outside(&render->position, &g_world_map_dots[dot_index].position);
+    if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
         g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].window_index].flags
-            |= WORLD_RENDER_RECORD_HIDDEN;
+        g_window_records[g_menu_stack_records_next[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     }
-    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_FOCUS_LOCATION;
-    g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
+    g_menu_stack_types[g_menu_stack_depth + 1] = MENU_STACK_LEVEL_WORLD_MAP_FOCUS;
+    g_menu_stack_depth = g_menu_stack_depth + 1;
 }
 
 /* Step of the focus-location level. While the view pans it advances the pan
@@ -910,45 +902,45 @@ static void wldcore_menu_push_focus_location_level(s32 dot_index) {
  * The entry must be a struct pointer: the target hoists its reload above the
  * scalar g_main_system_flags store, which GCC only allows for an in-struct
  * access. */
-void wldcore_map_step_projection_motion_then_pop_level(wldcore_menu_stack_record_t* entry) {
-    wldcore_projection_state_t* state;
+void world_map_step_focus_level(menu_stack_record_t* entry) {
+    world_map_projection_state_t* state;
     s32 level;
 
-    if (g_wldcore_map_projection_motion.flags & WLDCORE_PROJECTION_MOTION_ACTIVE) {
-        wldcore_map_step_projection_motion();
-        state = &g_wldcore_map_projection_state;
-        state->flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
+    if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
+        world_map_step_pan();
+        state = &g_world_map_projection_state;
+        state->flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
         g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
         return;
     }
-    level = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_depth = level - 1;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[level - 2].window_index].position.x
-        = g_wldcore_map_dots[entry->focus_dot_index].render.position.x;
+    level = g_menu_stack_depth;
+    g_menu_stack_depth = level - 1;
+    g_window_records[g_menu_stack_records_next[level - 2].window_index].position.x
+        = g_world_map_dots[entry->focus_dot_index].render.position.x;
     g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[level - 2].window_index].position.y
-        = g_wldcore_map_dots[entry->focus_dot_index].render.position.y - 4;
-    wldcore_menu_dispatch_resume_handler();
+    g_window_records[g_menu_stack_records_next[level - 2].window_index].position.y
+        = g_world_map_dots[entry->focus_dot_index].render.position.y - 4;
+    menu_stack_dispatch_resume();
 }
 
 /* Start drawing or erasing the map route between locations `from` and `to`
  * and hide the parent window until the animation finishes. Indexed stores
  * keep their named globals to preserve the original address sequences. */
-static void wldcore_menu_push_map_path_level(s32 from, s32 to, s32 erase) {
+static void world_map_push_path_level(s32 from, s32 to, s32 erase) {
     s32 depth;
     s32 window_index;
 
-    wldcore_map_prepare_path_animation(from, to);
-    depth = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[depth].path.path_id = from;
-    g_wldcore_menu_stack_records_next[depth].path.path_id_hi = to;
-    g_wldcore_menu_stack_records_next[depth].path.erase = erase;
-    g_wldcore_menu_stack_records_next[depth].path.pending_sound = 1;
+    world_map_prepare_path_animation(from, to);
+    depth = g_menu_stack_depth;
+    g_menu_stack_records_next[depth].path.path_id = from;
+    g_menu_stack_records_next[depth].path.path_id_hi = to;
+    g_menu_stack_records_next[depth].path.erase = erase;
+    g_menu_stack_records_next[depth].path.pending_sound = 1;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    window_index = g_wldcore_menu_stack_records_next[depth - 1].window_index;
-    g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_MAP_PATH;
-    g_wldcore_window_records[window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-    g_wldcore_menu_stack_depth = depth + 1;
+    window_index = g_menu_stack_records_next[depth - 1].window_index;
+    g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_WORLD_MAP_PATH;
+    g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_menu_stack_depth = depth + 1;
 }
 
 /*
@@ -958,7 +950,7 @@ static void wldcore_menu_push_map_path_level(s32 from, s32 to, s32 erase) {
  * the route (setting the visible variable once all pages are drawn) or
  * backwards to erase it; afterwards the level pops and its parent resumes.
  */
-void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
+void world_map_step_path_level(world_map_path_level_t* level) {
     s32 depth;
     s32 window_index;
 
@@ -967,35 +959,35 @@ void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
             return;
         }
         if (level->erase != 0) {
-            script_set_variable(g_wldcore_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 0);
-            g_wldcore_map_path_animation.segment_index = g_wldcore_map_path_animation.segment_count - 1;
-            g_wldcore_map_path_animation.frame_timer
-                = g_wldcore_map_path_animation.segment_frames[g_wldcore_map_path_animation.segment_count - 1] - 1;
-            wldcore_sound_play_effect(MAIN_SFX_WORLD_MAP_PATH);
+            script_set_variable(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 0);
+            g_world_map_path_animation.segment_index = g_world_map_path_animation.segment_count - 1;
+            g_world_map_path_animation.frame_timer
+                = g_world_map_path_animation.segment_frames[g_world_map_path_animation.segment_count - 1] - 1;
+            sound_play_effect(MAIN_SFX_WORLD_MAP_PATH);
         } else {
-            wldcore_sound_play_effect(MAIN_SFX_WORLD_MAP_PATH);
+            sound_play_effect(MAIN_SFX_WORLD_MAP_PATH);
         }
         level->pending_sound = 0;
     }
 
-    if (g_wldcore_map_path_animation.flags & WLDCORE_MAP_PATH_ANIMATION_RUNNING) {
+    if (g_world_map_path_animation.flags & WORLD_MAP_PATH_ANIMATION_RUNNING) {
         if (level->erase == 0) {
-            g_wldcore_map_path_animation.frame_timer++;
-            if (g_wldcore_map_path_animation.frame_timer
-                >= g_wldcore_map_path_animation.segment_frames[g_wldcore_map_path_animation.segment_index]) {
-                g_wldcore_map_path_animation.segment_index++;
-                g_wldcore_map_path_animation.frame_timer = 0;
-                if (g_wldcore_map_path_animation.segment_index >= g_wldcore_map_path_animation.segment_count) {
-                    script_set_variable(g_wldcore_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 1);
+            g_world_map_path_animation.frame_timer++;
+            if (g_world_map_path_animation.frame_timer
+                >= g_world_map_path_animation.segment_frames[g_world_map_path_animation.segment_index]) {
+                g_world_map_path_animation.segment_index++;
+                g_world_map_path_animation.frame_timer = 0;
+                if (g_world_map_path_animation.segment_index >= g_world_map_path_animation.segment_count) {
+                    script_set_variable(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 1);
                 }
             }
         } else {
-            g_wldcore_map_path_animation.frame_timer--;
-            if (g_wldcore_map_path_animation.frame_timer <= 0) {
-                g_wldcore_map_path_animation.segment_index--;
-                if (g_wldcore_map_path_animation.segment_index >= 0) {
-                    g_wldcore_map_path_animation.frame_timer
-                        = g_wldcore_map_path_animation.segment_frames[g_wldcore_map_path_animation.segment_index];
+            g_world_map_path_animation.frame_timer--;
+            if (g_world_map_path_animation.frame_timer <= 0) {
+                g_world_map_path_animation.segment_index--;
+                if (g_world_map_path_animation.segment_index >= 0) {
+                    g_world_map_path_animation.frame_timer
+                        = g_world_map_path_animation.segment_frames[g_world_map_path_animation.segment_index];
                 }
             }
         }
@@ -1003,32 +995,32 @@ void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
         return;
     }
 
-    wldcore_sound_play_effect(MAIN_SFX_NONE);
+    sound_play_effect(MAIN_SFX_NONE);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
-    depth = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_depth = depth - 1;
-    window_index = g_wldcore_menu_stack_records_next[depth - 2].window_index;
+    depth = g_menu_stack_depth;
+    g_menu_stack_depth = depth - 1;
+    window_index = g_menu_stack_records_next[depth - 2].window_index;
     g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    g_wldcore_window_records[window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-    wldcore_menu_dispatch_resume_handler();
+    g_window_records[window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    menu_stack_dispatch_resume();
 }
 
 /* Start a delayed map-location visibility change and hide the parent window
  * until it finishes. Indexed stores keep their named globals to preserve
  * the original address sequences. */
-static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_set) {
-    s32 depth = g_wldcore_menu_stack_depth;
+static void world_map_push_location_visibility_level(s32 dot_index, s32 was_set) {
+    s32 depth = g_menu_stack_depth;
     s32 window_index;
 
-    g_wldcore_menu_stack_records_next[depth].visibility.dot_index = dot_index;
-    g_wldcore_menu_stack_records_next[depth].visibility.was_set = was_set;
-    g_wldcore_menu_stack_records_next[depth].visibility.delay = 0x10;
-    g_wldcore_menu_stack_records_next[depth].visibility.pending_sound = 1;
+    g_menu_stack_records_next[depth].visibility.dot_index = dot_index;
+    g_menu_stack_records_next[depth].visibility.was_set = was_set;
+    g_menu_stack_records_next[depth].visibility.delay = 0x10;
+    g_menu_stack_records_next[depth].visibility.pending_sound = 1;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    window_index = g_wldcore_menu_stack_records_next[depth - 1].window_index;
-    g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_MAP_LOCATION_VISIBILITY;
-    g_wldcore_window_records[window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-    g_wldcore_menu_stack_depth = depth + 1;
+    window_index = g_menu_stack_records_next[depth - 1].window_index;
+    g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY;
+    g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_menu_stack_depth = depth + 1;
 }
 
 /* Step of the location visibility level, which reveals or erases one
@@ -1039,7 +1031,7 @@ static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_se
  *
  * The window index is read into a local before the flag clear, which keeps
  * the target's load and store order. */
-void wldcore_map_step_location_visibility_change(wldcore_map_visibility_level_t* level) {
+void world_map_step_location_visibility_level(world_map_visibility_level_t* level) {
     s32 index;
 
     if (level->pending_sound != 0) {
@@ -1047,10 +1039,10 @@ void wldcore_map_step_location_visibility_change(wldcore_map_visibility_level_t*
             return;
         }
         if (level->was_set != 0) {
-            wldcore_sound_play_effect(MAIN_SFX_CANCEL);
+            sound_play_effect(MAIN_SFX_CANCEL);
         } else {
             script_set_variable(level->dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 1);
-            wldcore_sound_play_effect(MAIN_SFX_WORLD_MAP_LOCATION_APPEAR);
+            sound_play_effect(MAIN_SFX_WORLD_MAP_LOCATION_APPEAR);
         }
         level->pending_sound = 0;
     }
@@ -1060,49 +1052,49 @@ void wldcore_map_step_location_visibility_change(wldcore_map_visibility_level_t*
         return;
     }
     if (level->was_set != 0) {
-        g_wldcore_map_dots[level->dot_index].render.flags |= WORLD_RENDER_RECORD_HIDDEN;
+        g_world_map_dots[level->dot_index].render.flags |= DISPLAY_OBJECT_HIDDEN;
         script_set_variable(level->dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 0);
     }
     g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
-    g_wldcore_menu_stack_depth--;
-    index = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].window_index;
+    g_menu_stack_depth--;
+    index = g_menu_stack_records_next[g_menu_stack_depth - 1].window_index;
     g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    g_wldcore_window_records[index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-    wldcore_menu_dispatch_resume_handler();
+    g_window_records[index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    menu_stack_dispatch_resume();
 }
 
 /* Open the entry window and push its world-map return level. */
-void wldcore_menu_push_entry_window_level(void) {
+void world_map_push_menu_level(void) {
     u32 flags;
     s32 depth;
     s32* counter;
 
     g_menu_blocked_buttons = -1;
-    world_menu_open_entry_window(4, -0x30, -0x38);
-    g_wldcore_context_value_display_mode = WLDCORE_VALUE_DISPLAY_FUNDS;
-    g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    depth = g_wldcore_menu_stack_depth;
+    screen_open_entry_window(4, -0x30, -0x38);
+    g_hud_value_mode = HUD_VALUE_FUNDS;
+    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    depth = g_menu_stack_depth;
     flags = g_main_system_flags;
-    g_wldcore_menu_stack_records_next[depth].return_level.delay = 3;
-    g_wldcore_menu_stack_records_next[depth].return_level.pending = 0;
+    g_menu_stack_records_next[depth].return_level.delay = 3;
+    g_menu_stack_records_next[depth].return_level.pending = 0;
     g_main_system_flags = flags & ~MAIN_SYSTEM_FLAG_SCREEN_CLEARED;
     if ((flags & MAIN_SYSTEM_FLAG_FADING) != 0) {
         g_main_system_flags = (flags & ~MAIN_SYSTEM_FLAG_SCREEN_CLEARED) | MAIN_SYSTEM_FLAG_FREEZE_ANIMATION;
-        counter = &g_wldcore_screen_fade_state.elapsed;
+        counter = &g_world_map_fade.elapsed;
         *counter = *counter - 4;
     }
     {
         s32 last;
-        last = g_wldcore_menu_stack_depth;
-        g_wldcore_menu_stack_types[last + 1] = WLDCORE_MENU_LEVEL_RETURN;
-        g_wldcore_menu_stack_depth = last + 1;
+        last = g_menu_stack_depth;
+        g_menu_stack_types[last + 1] = MENU_STACK_LEVEL_WORLD_MENU;
+        g_menu_stack_depth = last + 1;
     }
 }
 
 /* Per-frame handler of the world-map return level: waits out its own delay,
  * then pops the level and dispatches whichever pending system-flag request
  * asked for the return. */
-void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
+void world_map_step_menu_level(world_map_menu_level_t* level) {
     s32 flags;
     s32 cleared;
     s32 location;
@@ -1114,7 +1106,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_FADING) {
         if (level->pending != 0) {
             level->pending = 0;
-            wldcore_gfx_toggle_captured_world_frame(0);
+            world_map_toggle_captured_frame(0);
             level->delay = 3;
             g_main_system_flags |= MAIN_SYSTEM_FLAG_FADING | MAIN_SYSTEM_FLAG_FREEZE_ANIMATION;
         }
@@ -1125,7 +1117,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
     if (level->delay != 0) {
         level->delay -= 1;
         if (level->delay == 0) {
-            wldcore_gfx_toggle_captured_world_frame(1);
+            world_map_toggle_captured_frame(1);
         }
         return;
     }
@@ -1135,41 +1127,41 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         return;
     }
 
-    wldcore_input_init_repeat_state();
+    world_map_init_input_repeat();
     flags = g_main_system_flags;
-    wldcore_gfx_toggle_captured_world_frame(0);
+    world_map_toggle_captured_frame(0);
     cleared = g_main_system_flags & ~MAIN_SYSTEM_FLAG_FREEZE_ANIMATION;
     g_main_system_flags = cleared;
-    g_wldcore_menu_stack_depth -= 1;
+    g_menu_stack_depth -= 1;
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_BRAVE_STORY) {
         g_main_system_flags = cleared ^ MAIN_SYSTEM_FLAG_DRAW_MAP;
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_BRAVE_STORY, 0, 0);
+        screen_transition_push_level(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
         return;
     }
 
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_DESTINATION) {
         location = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
-        wldcore_gfx_capture_map_backdrop();
-        wldcore_menu_dispatch_resume_handler();
-        if (g_wldcore_map_projection_state.marker.kind != location) {
-            wldcore_location_start_travel(g_wldcore_map_projection_state.marker.kind, location);
+        world_map_capture_backdrop();
+        menu_stack_dispatch_resume();
+        if (g_world_map_projection_state.marker.kind != location) {
+            travel_start(g_world_map_projection_state.marker.kind, location);
         }
         return;
     }
 
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL) {
         g_main_system_flags = cleared ^ MAIN_SYSTEM_FLAG_DRAW_MAP;
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES, 0, 1);
+        screen_transition_push_level(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
         return;
     }
 
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST) {
-        wldcore_menu_push_variable_list_level();
+        debug_push_variable_list_level();
         return;
     }
 
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL) {
-        wldcore_menu_push_fixed_number_panel_level();
+        debug_push_party_number_level();
         return;
     }
 
@@ -1185,13 +1177,13 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         return;
     }
 
-    wldcore_menu_dispatch_resume_handler();
+    menu_stack_dispatch_resume();
 }
 
-/* Pushes the self-sizing message window (WLDCORE_MENU_LEVEL_TEXT_WINDOW), the
- * windowed sibling of wldcore_menu_push_message_level. It stores the reload
+/* Pushes the self-sizing message window (MENU_STACK_LEVEL_TEXT_WINDOW), the
+ * windowed sibling of menu_stack_push_message_level. It stores the reload
  * flag and, when set, re-points the text formatter at
- * g_world_text_section_offsets; appends the window's label record (priority
+ * g_screen_text_section_offsets; appends the window's label record (priority
  * 1); measures the entry, clamped to three rows; fills the shared scrollable
  * window and centers it and the label on the measured box; then saves
  * g_menu_blocked_buttons in the level, blocks every button, plays
@@ -1202,12 +1194,12 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
  * priority over `text` in global allocation (s1/s2 as in the target). The
  * combined-away address pseudo of that store keeps a reload stack slot, part
  * of the target's 40-byte locals area. `box` is an aggregate so its 32-bit values stay
- * in memory across wldcore_text_init_scrollable_window; `dims` is an array so
+ * in memory across text_window_open; `dims` is an array so
  * it is laid out in declaration order at 32(sp). `unused_point` and `unused`
  * are sized from the target frame only; their original types are unknown. */
-void wldcore_menu_push_text_window_level(s32 text, s32 reload_text) {
-    wldcore_text_scrollable_window_t* window;
-    world_animated_render_record_t* records;
+void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
+    text_window_t* window;
+    display_object_animated_t* records;
     point32_t* positions;
     point32_t* position;
     s32* text_id;
@@ -1218,18 +1210,18 @@ void wldcore_menu_push_text_window_level(s32 text, s32 reload_text) {
     s32 unused[2];
     u8* entry;
 
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.reload_text = reload_text;
+    g_menu_stack_records_next[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_world_text_section_offsets);
+        text_relocate_pointer_table(g_screen_text_section_offsets);
     }
 
-    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.window_index = index;
-    g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_MESSAGE_LABEL;
-    g_wldcore_window_records[index].priority = 1;
-    g_wldcore_window_records[index].anim_counter = 0;
-    records = g_wldcore_window_records;
+    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records_next[g_menu_stack_depth].message.window_index = index;
+    g_window_records[index].sequence = WINDOW_ANIM_MESSAGE_LABEL;
+    g_window_records[index].priority = 1;
+    g_window_records[index].anim_counter = 0;
+    records = g_window_records;
     records[index].frame_index = 0;
 
     entry = text_find_entry(text);
@@ -1238,76 +1230,74 @@ void wldcore_menu_push_text_window_level(s32 text, s32 reload_text) {
         dims[1] = 3;
     }
 
-    text_id = &g_wldcore_scrollable_text_window.text_id;
-    window = &g_wldcore_scrollable_text_window;
+    text_id = &g_text_window.text_id;
+    window = &g_text_window;
 
     *text_id = text;
     window->image_x = 0;
-    g_wldcore_scrollable_text_window.image_y = 0xC0;
+    g_text_window.image_y = 0xC0;
     box.x = (dims[0] + 24) & 0xFFFC;
     box.y = (dims[1] << 4) + 16;
-    g_wldcore_scrollable_text_window.base.x = -(box.x / 2);
-    g_wldcore_scrollable_text_window.base.y = -(box.y >> 1);
-    g_wldcore_scrollable_text_window.text_width = dims[0];
-    g_wldcore_scrollable_text_window.rows_per_page = dims[1];
-    g_wldcore_scrollable_text_window.priority = 1;
-    g_wldcore_scrollable_text_window.image_coordinate_mode = 0;
-    g_wldcore_scrollable_text_window.extra_render_index = -1;
-    g_wldcore_scrollable_text_window.text_substitutions[1] = -1;
-    g_wldcore_scrollable_text_window.text_substitutions[0] = -1;
-    wldcore_text_init_scrollable_window(window);
+    g_text_window.base.x = -(box.x / 2);
+    g_text_window.base.y = -(box.y >> 1);
+    g_text_window.text_width = dims[0];
+    g_text_window.rows_per_page = dims[1];
+    g_text_window.priority = 1;
+    g_text_window.image_coordinate_mode = 0;
+    g_text_window.extra_render_index = -1;
+    g_text_window.text_substitutions[1] = -1;
+    g_text_window.text_substitutions[0] = -1;
+    text_window_open(window);
 
-    index = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.window_index;
+    index = g_menu_stack_records_next[g_menu_stack_depth].message.window_index;
     positions = &records[0].position;
     /* This byte-view stride retains the target addiu of &records[0].x;
      * &records[index].x removes it and breaks the exact match. */
-    position = (point32_t*)((u8*)positions + index * sizeof(world_animated_render_record_t));
+    position = (point32_t*)((u8*)positions + index * sizeof(display_object_animated_t));
     position->x = -(box.x / 2) + 2;
     position->y = -(box.y / 2) - 2;
-    wldcore_sound_play_effect(MAIN_SFX_WINDOW_OPEN);
+    sound_play_effect(MAIN_SFX_WINDOW_OPEN);
 
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.saved_blocked_buttons
-        = g_menu_blocked_buttons;
+    g_menu_stack_records_next[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
     g_menu_blocked_buttons = -1;
-    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_TEXT_WINDOW;
-    g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
+    g_menu_stack_types[g_menu_stack_depth + 1] = MENU_STACK_LEVEL_TEXT_WINDOW;
+    g_menu_stack_depth = g_menu_stack_depth + 1;
 }
 
 /* Steps a message level: once the text window has popped in and
- * wldcore_text_step_scrollable_window reports it closed, pops the level, restores the
+ * text_window_step reports it closed, pops the level, restores the
  * blocked-button mask it saved and (when asked) the text section pointers,
  * and resumes the level underneath. */
-void wldcore_menu_wait_text_then_pop_level(wldcore_menu_message_level_t* level) {
-    if (g_wldcore_window_render_records[g_wldcore_scrollable_text_window.render_record_index].flags
-        & WORLD_RENDER_RECORD_POP_IN) {
+void menu_stack_wait_text_then_pop(menu_stack_message_level_t* level) {
+    if (g_window_render_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
-    if (wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) != 0) {
+    if (text_window_step(&g_text_window) != 0) {
         return;
     }
     g_input_current_buttons = 0;
     g_menu_blocked_buttons = level->saved_blocked_buttons;
-    g_wldcore_window_record_count -= 1;
-    g_wldcore_window_render_object_count -= 1;
-    g_wldcore_menu_stack_depth -= 1;
+    g_window_record_count -= 1;
+    g_window_render_object_count -= 1;
+    g_menu_stack_depth -= 1;
     if (level->reload_text != 0) {
         text_restore_section_pointers();
     }
-    wldcore_menu_dispatch_resume_handler();
+    menu_stack_dispatch_resume();
 }
 
-/* Pushes WLDCORE_MENU_LEVEL_MESSAGE, a dialog box on message `text`:
+/* Pushes MENU_STACK_LEVEL_MESSAGE, a dialog box on message `text`:
  * optionally points the text formatter at WORLD's sections, starts the dialog
  * thread (mode 0x3b while MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS is set, else
  * 0x33), saves the blocked buttons in the level and blocks them all, and
  * plays MAIN_SFX_WINDOW_OPEN. */
-void wldcore_menu_push_message_level(s32 text, s32 reload_text) {
+void menu_stack_push_message_level(s32 text, s32 reload_text) {
     s32 index;
 
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.reload_text = reload_text;
+    g_menu_stack_records_next[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_world_text_section_offsets);
+        text_relocate_pointer_table(g_screen_text_section_offsets);
     }
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread);
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS) {
@@ -1315,15 +1305,14 @@ void wldcore_menu_push_message_level(s32 text, s32 reload_text) {
     } else {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, text, 0);
     }
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.saved_blocked_buttons
-        = g_menu_blocked_buttons;
+    g_menu_stack_records_next[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
     g_menu_blocked_buttons = -1;
-    wldcore_sound_play_effect(MAIN_SFX_WINDOW_OPEN);
-    index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[index].message._unknown_0c = 8;
-    g_wldcore_menu_stack_records_next[index].message.window_index = 0;
-    g_wldcore_menu_stack_types[index + 1] = WLDCORE_MENU_LEVEL_MESSAGE;
-    g_wldcore_menu_stack_depth = index + 1;
+    sound_play_effect(MAIN_SFX_WINDOW_OPEN);
+    index = g_menu_stack_depth;
+    g_menu_stack_records_next[index].message._unknown_0c = 8;
+    g_menu_stack_records_next[index].message.window_index = 0;
+    g_menu_stack_types[index + 1] = MENU_STACK_LEVEL_MESSAGE;
+    g_menu_stack_depth = index + 1;
 }
 
 /* Steps a level that waits for the message box to close: once the message
@@ -1331,26 +1320,26 @@ void wldcore_menu_push_message_level(s32 text, s32 reload_text) {
  * the level underneath and (when asked) restores the text section pointers.
  * Over the Brave Story or proposition category level it keeps the displayed
  * play time current while waiting. */
-void wldcore_menu_wait_message_then_pop_level(wldcore_menu_message_level_t* level) {
-    if (g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth - 1] == WLDCORE_MENU_LEVEL_BRAVE_STORY
-        || g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth - 1] == WLDCORE_MENU_LEVEL_PROPOSITION_CATEGORY) {
-        g_wldcore_displayed_numeric_value = g_main_system_play_time_hours;
-        g_wldcore_displayed_numeric_value_secondary = g_main_system_play_time_minutes;
-        g_wldcore_displayed_numeric_value_tertiary = g_main_system_play_time_seconds;
+void menu_stack_wait_message_then_pop(menu_stack_message_level_t* level) {
+    if (g_menu_stack_types[g_menu_stack_depth - 1] == MENU_STACK_LEVEL_BRAVE_STORY
+        || g_menu_stack_types[g_menu_stack_depth - 1] == MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS) {
+        g_hud_value = g_main_system_play_time_hours;
+        g_hud_value_secondary = g_main_system_play_time_minutes;
+        g_hud_value_tertiary = g_main_system_play_time_seconds;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
         g_menu_blocked_buttons = level->saved_blocked_buttons;
-        g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth - 1;
-        wldcore_menu_dispatch_resume_handler();
+        g_menu_stack_depth = g_menu_stack_depth - 1;
+        menu_stack_dispatch_resume();
         if (level->reload_text != 0) {
             text_restore_section_pointers();
         }
     }
 }
 
-/* Pushes the debug script-variable list (WLDCORE_MENU_LEVEL_VARIABLE_LIST):
+/* Pushes the debug script-variable list (MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST):
  * one cursor window record and one render record, laid out by
- * wldcore_menu_render_debug_variable_list and then positioned from the render
+ * debug_draw_variable_list and then positioned from the render
  * record's origin.
  *
  * Both appended indices share one local, which is what holds them in $a2.
@@ -1359,47 +1348,43 @@ void wldcore_menu_wait_message_then_pop_level(wldcore_menu_message_level_t* leve
  * of the stack record rather than kept in locals; the `- -` keeps the row
  * offset's constant on the multiply chain, which a plain `+` reassociates
  * onto base_y. */
-static void wldcore_menu_push_variable_list_level(void) {
+static void debug_push_variable_list_level(void) {
     s32 index;
     s32 record_index;
     u8 unused_locals[0x10];
 
-    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_list.window_index = index;
-    g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
-    g_wldcore_window_records[index].priority = 3;
-    g_wldcore_window_records[index].anim_counter = 0;
-    g_wldcore_window_records[index].frame_index = 0;
-    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_list.render_index = index;
-    g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_POP_IN;
-    g_wldcore_window_render_records[index].priority = 3;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_list.first_variable = 0;
-    wldcore_menu_render_debug_variable_list(
-        &g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_list);
-    record_index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[record_index].variable_list.cursor = 0;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[record_index].variable_list.window_index].position.x
-        = g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[record_index].variable_list.render_index]
-              .base.x
-        + 8;
-    g_wldcore_menu_stack_depth = record_index + 1;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[record_index].variable_list.window_index].position.y
-        = g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[record_index].variable_list.render_index]
-              .base.y
-        - -(g_wldcore_menu_stack_records_next[record_index].variable_list.cursor * 0x10 + 0xC);
-    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_VARIABLE_LIST;
+    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records_next[g_menu_stack_depth].variable_list.window_index = index;
+    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
+    g_window_records[index].priority = 3;
+    g_window_records[index].anim_counter = 0;
+    g_window_records[index].frame_index = 0;
+    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records_next[g_menu_stack_depth].variable_list.render_index = index;
+    g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+    g_window_render_records[index].priority = 3;
+    g_menu_stack_records_next[g_menu_stack_depth].variable_list.first_variable = 0;
+    debug_draw_variable_list(&g_menu_stack_records_next[g_menu_stack_depth].variable_list);
+    record_index = g_menu_stack_depth;
+    g_menu_stack_records_next[record_index].variable_list.cursor = 0;
+    g_window_records[g_menu_stack_records_next[record_index].variable_list.window_index].position.x
+        = g_window_render_records[g_menu_stack_records_next[record_index].variable_list.render_index].base.x + 8;
+    g_menu_stack_depth = record_index + 1;
+    g_window_records[g_menu_stack_records_next[record_index].variable_list.window_index].position.y
+        = g_window_render_records[g_menu_stack_records_next[record_index].variable_list.render_index].base.y
+        - -(g_menu_stack_records_next[record_index].variable_list.cursor * 0x10 + 0xC);
+    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST;
 }
 
 /* Renders up to 10 rows of the debug variable list, from first_variable on
- * (script variables 0 to 1023). WLDCORE_TEXT_ID_DEBUG_VARIABLE_VALUE shows a
+ * (script variables 0 to 1023). TEXT_ID_DEBUG_VARIABLE_VALUE shows a
  * variable and its value; a value of 10000 or more uses
- * WLDCORE_TEXT_ID_DEBUG_VARIABLE, which shows the variable alone. The entry is
+ * TEXT_ID_DEBUG_VARIABLE, which shows the variable alone. The entry is
  * chosen first and its section added at the call.
  *
  * `value` first holds the row count for the panel height and then each
  * variable's value: one register (v1) in the target. */
-static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level) {
+static void debug_draw_variable_list(debug_variable_list_level_t* level) {
     RECT bounds;
     point32_t point;
     s32 index;
@@ -1421,11 +1406,11 @@ static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_l
     bounds.y = 0;
     bounds.w = 0x68;
     bounds.h = value * 0x10 + 0x10;
-    wldcore_window_build_render_record_image(index, bounds, 0, g_wldcore_window_image_buffer);
+    window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     /* Direct record indexing moves the symbol load after the index scaling
      * and breaks the exact match. Retain the target's biased base and stride. */
-    records = &g_wldcore_window_render_records[0].base;
-    base = (point32_t*)((u8*)records + index * sizeof(wldcore_window_render_record_t));
+    records = &g_window_render_records[0].base;
+    base = (point32_t*)((u8*)records + index * sizeof(window_render_record_t));
     base->x = -(bounds.w / 2);
     base->y = -88;
     point.x = 8;
@@ -1435,16 +1420,16 @@ static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_l
         if (value < 10000) {
             g_text_substitution_values[0] = variable;
             g_text_substitution_values[1] = value;
-            text_id = WLDCORE_TEXT_ID_DEBUG_VARIABLE_VALUE & TEXT_ID_ENTRY_MASK;
+            text_id = TEXT_ID_DEBUG_VARIABLE_VALUE & TEXT_ID_ENTRY_MASK;
         } else {
             g_text_substitution_values[0] = variable;
-            text_id = WLDCORE_TEXT_ID_DEBUG_VARIABLE & TEXT_ID_ENTRY_MASK;
+            text_id = TEXT_ID_DEBUG_VARIABLE & TEXT_ID_ENTRY_MASK;
         }
-        window_display_text_entry(index, text_id | TEXT_ID_WORLD_MENU_BASE, point, g_wldcore_window_image_buffer);
+        window_display_text_entry(index, text_id | TEXT_ID_WORLD_MENU_BASE, point, g_window_image_buffer);
         point.y += 0x10;
         variable++;
     }
-    wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);
+    window_load_render_record_image(index, g_window_image_buffer);
 }
 
 /* Input handler for the debug script-variable list.
@@ -1453,7 +1438,7 @@ static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_l
  * level. Up/down move the cursor, or scroll the first displayed variable by
  * 100 with Triangle held and by 10 with Square held (Square wraps between 0
  * and 1020). Scrolling redraws the rows through
- * wldcore_menu_render_debug_variable_list and clamps the cursor; a plain cursor move only repositions
+ * debug_draw_variable_list and clamps the cursor; a plain cursor move only repositions
  * the cursor window.
  *
  * Every scroll arm falls into the one redraw, which clamps the cursor and
@@ -1461,35 +1446,34 @@ static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_l
  * move in the target, so it and the move are reached by goto: a redraw
  * repeated in each arm is not merged back (its clamp store is cross-jumped
  * into the cursor-down arm first). */
-void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_level_t* level) {
+void debug_handle_variable_list_input(debug_variable_list_level_t* level) {
     s32 variable;
     s32 dead[2];
 
-    if (g_wldcore_window_render_records[level->render_index].flags & WORLD_RENDER_RECORD_POP_IN) {
+    if (g_window_render_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
-    if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
-        g_wldcore_window_records[level->window_index].palette = 0xA;
-        g_wldcore_window_render_records[level->render_index].palette = 2;
-        g_wldcore_window_records[level->window_index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
-        g_wldcore_window_records[level->window_index].anim_counter
-            = g_wldcore_window_records[level->window_index].frame_index = 0;
+    if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
+        g_window_records[level->window_index].palette = 0xA;
+        g_window_render_records[level->render_index].palette = 2;
+        g_window_records[level->window_index].sequence = WINDOW_ANIM_CURSOR_PRESS;
+        g_window_records[level->window_index].anim_counter = g_window_records[level->window_index].frame_index = 0;
         variable = level->first_variable + level->cursor;
-        wldcore_menu_push_variable_edit_level(variable, script_get_variable(variable));
+        debug_push_variable_edit_level(variable, script_get_variable(variable));
         return;
     }
 
-    if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
-        g_wldcore_window_record_count -= 1;
-        g_wldcore_window_render_record_count -= 1;
-        g_wldcore_window_render_object_count -= 2;
-        g_wldcore_menu_stack_depth -= 1;
-        wldcore_menu_dispatch_resume_handler();
+    if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
+        g_window_record_count -= 1;
+        g_window_render_record_count -= 1;
+        g_window_render_object_count -= 2;
+        g_menu_stack_depth -= 1;
+        menu_stack_dispatch_resume();
         return;
     }
 
-    if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
+    if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
         if (g_input_current_buttons & PSX_PAD_TRIANGLE) {
             if (level->first_variable < 0x64) {
                 level->first_variable = 0;
@@ -1510,7 +1494,7 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
             }
             goto move_cursor;
         }
-    } else if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
+    } else if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
         if (g_input_current_buttons & PSX_PAD_TRIANGLE) {
             if (level->first_variable + 0x64 < 0x3fd) {
                 level->first_variable += 0x64;
@@ -1530,7 +1514,7 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
         return;
     }
 
-    wldcore_menu_render_debug_variable_list(level);
+    debug_draw_variable_list(level);
     if (level->cursor < level->row_count) {
         return;
     }
@@ -1544,29 +1528,28 @@ cursor_down:
         level->cursor++;
     }
 move_cursor:
-    g_wldcore_window_records[level->window_index].position.x
-        = g_wldcore_window_render_records[level->render_index].base.x + 8;
-    g_wldcore_window_records[level->window_index].position.y
-        = g_wldcore_window_render_records[level->render_index].base.y - -(level->cursor * 0x10 + 0xC);
+    g_window_records[level->window_index].position.x = g_window_render_records[level->render_index].base.x + 8;
+    g_window_records[level->window_index].position.y
+        = g_window_render_records[level->render_index].base.y - -(level->cursor * 0x10 + 0xC);
 }
 
-/* Pushes WLDCORE_MENU_LEVEL_VARIABLE_EDIT, a number panel (0 to
+/* Pushes MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT, a number panel (0 to
  * 9999) that edits script variable `variable_id`, starting at `value`. */
-static void wldcore_menu_push_variable_edit_level(s32 variable_id, s32 value) {
+static void debug_push_variable_edit_level(s32 variable_id, s32 value) {
     point32_t origin;
     s32 record_index;
 
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
-    g_wldcore_menu_ordering_table_offset = 2;
-    g_wldcore_active_menu_value = value;
+    g_menu_stack_ot_offset = 2;
+    g_window_panel_value = value;
     origin.x = 0x20;
     origin.y = 0x20;
-    wldcore_window_init_number_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 9999 << 16, 0, &origin);
-    record_index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
-    g_wldcore_menu_stack_records_next[record_index].panel.variable_id = variable_id;
-    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_VARIABLE_EDIT;
-    g_wldcore_menu_stack_depth = record_index + 1;
+    window_start_number_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 9999 << 16, 0, &origin);
+    record_index = g_menu_stack_depth;
+    g_menu_stack_records_next[record_index].panel.result = 0;
+    g_menu_stack_records_next[record_index].panel.variable_id = variable_id;
+    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT;
+    g_menu_stack_depth = record_index + 1;
 }
 
 /* Step handler of the variable number panel. While the panel runs it accepts
@@ -1580,112 +1563,109 @@ static void wldcore_menu_push_variable_edit_level(s32 variable_id, s32 value) {
  * Reading the parent window index before the render-record store is what
  * lets the scheduler place that load inside the render index's multiply
  * sequence, as the target does. */
-void wldcore_menu_step_variable_edit_level(wldcore_menu_panel_level_t* level) {
+void debug_step_variable_edit_level(menu_stack_panel_level_t* level) {
     s32 depth;
     s32 parent;
     s32 slot;
-    world_animated_render_record_t* record;
+    display_object_animated_t* record;
     u32 buttons;
 
-    if (level->result != 0 && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if (level->result != 0 && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
-        g_wldcore_menu_ordering_table_offset = 1;
-        depth = g_wldcore_menu_stack_depth - 1;
-        g_wldcore_menu_stack_depth = depth;
+        g_menu_stack_ot_offset = 1;
+        depth = g_menu_stack_depth - 1;
+        g_menu_stack_depth = depth;
         if (level->result == 1) {
-            wldcore_menu_render_debug_variable_list(&g_wldcore_menu_stack_records[depth].variable_list);
+            debug_draw_variable_list(&g_menu_stack_records[depth].variable_list);
         }
-        parent = g_wldcore_menu_stack_depth - 1;
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[parent].window_render.window_index].sequence
-            = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
-        slot = g_wldcore_menu_stack_records_next[parent].window_render.window_index;
-        g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[parent].window_render.render_index].palette
-            = 0;
-        record = &g_wldcore_window_records[slot];
+        parent = g_menu_stack_depth - 1;
+        g_window_records[g_menu_stack_records_next[parent].window_render.window_index].sequence
+            = WINDOW_ANIM_CURSOR_IDLE;
+        slot = g_menu_stack_records_next[parent].window_render.window_index;
+        g_window_render_records[g_menu_stack_records_next[parent].window_render.render_index].palette = 0;
+        record = &g_window_records[slot];
         record->palette = 0;
         record->frame_index = 0;
-        g_wldcore_window_records[slot].anim_counter = 0;
+        g_window_records[slot].anim_counter = 0;
         return;
     }
-    buttons = g_wldcore_input_new_button_presses;
+    buttons = g_world_map_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
         level->result = 2;
     } else if (buttons & PSX_PAD_CIRCLE) {
-        wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(MAIN_SFX_CONFIRM);
         level->result = 1;
-        script_set_variable(level->variable_id, g_wldcore_active_menu_value);
+        script_set_variable(level->variable_id, g_window_panel_value);
     } else {
         return;
     }
-    thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
 }
 
-/* Appends a window-list record: saves g_wldcore_menu_ordering_table_offset into it, allocates a window
+/* Appends a window-list record: saves g_menu_stack_ot_offset into it, allocates a window
  * record from the render-object queue, initializes that window's delay and
  * counters, and applies layout 0 to it before advancing the list count.
  *
- * Writing the window columns as fields of g_wldcore_window_records (not separate stride
+ * Writing the window columns as fields of g_window_records (not separate stride
  * arrays) keeps the scheduler from sinking the record's window_index store
  * below them. */
-void wldcore_menu_push_layout_window_level(void) {
+void unit_panel_push_help_level(void) {
     s32 window;
 
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].layout_window.saved_state
-        = g_wldcore_menu_ordering_table_offset;
-    g_wldcore_menu_ordering_table_offset = 1;
-    window = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].layout_window.window_index = window;
-    g_wldcore_window_records[window].sequence = WLDCORE_ANIM_SEQUENCE_LAYOUT_CURSOR_IDLE;
-    g_wldcore_window_records[window].priority = 2;
-    g_wldcore_window_records[window].anim_counter = 0;
-    g_wldcore_window_records[window].frame_index = 0;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].layout_window.layout = 0;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].layout_window.cached_layout_kind = 1;
-    wldcore_window_apply_layout(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].layout_window);
-    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_LAYOUT_WINDOW;
-    g_wldcore_menu_stack_depth++;
+    g_menu_stack_records_next[g_menu_stack_depth].layout_window.saved_state = g_menu_stack_ot_offset;
+    g_menu_stack_ot_offset = 1;
+    window = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records_next[g_menu_stack_depth].layout_window.window_index = window;
+    g_window_records[window].sequence = WINDOW_ANIM_LAYOUT_CURSOR_IDLE;
+    g_window_records[window].priority = 2;
+    g_window_records[window].anim_counter = 0;
+    g_window_records[window].frame_index = 0;
+    g_menu_stack_records_next[g_menu_stack_depth].layout_window.layout = 0;
+    g_menu_stack_records_next[g_menu_stack_depth].layout_window.cached_layout_kind = 1;
+    unit_panel_move_help_cursor(&g_menu_stack_records_next[g_menu_stack_depth].layout_window);
+    g_menu_stack_types[g_menu_stack_depth + 1] = MENU_STACK_LEVEL_UNIT_PANEL_HELP;
+    g_menu_stack_depth++;
 }
 
 /* Move the layout window's cursor onto row `layout` of
- * g_wldcore_window_layout_rows, switching the cursor's sequence when the
+ * g_unit_panel_help_rows, switching the cursor's sequence when the
  * row's kind differs from the last one.
  *
  * Routing both stores through one base variable (rather than
- * `&g_wldcore_window_record_positions[index]`) is what reproduces the target's separate base register
+ * `&g_window_record_positions[index]`) is what reproduces the target's separate base register
  * held in $a0 across the whole function. */
-static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request) {
-    wldcore_window_xy_t* xy = g_wldcore_window_record_positions;
+static void unit_panel_move_help_cursor(unit_panel_help_level_t* request) {
+    window_xy_t* xy = g_window_record_positions;
     s32 index = request->window_index;
     s32 layout = request->layout;
     s32 kind;
 
-    xy[index].x = g_wldcore_window_layout_rows[layout].x + 14;
-    xy[index].y = g_wldcore_window_layout_rows[layout].y + 12;
-    kind = g_wldcore_window_layout_rows[layout].kind;
+    xy[index].x = g_unit_panel_help_rows[layout].x + 14;
+    xy[index].y = g_unit_panel_help_rows[layout].y + 12;
+    kind = g_unit_panel_help_rows[layout].kind;
     if (kind != request->cached_layout_kind) {
         request->cached_layout_kind = kind;
-        g_wldcore_window_records[index].sequence
-            = (kind != 0) ? WLDCORE_ANIM_SEQUENCE_LAYOUT_CURSOR_IDLE : WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
-        g_wldcore_window_records[index].anim_counter = 0;
-        g_wldcore_window_records[index].frame_index = 0;
+        g_window_records[index].sequence = (kind != 0) ? WINDOW_ANIM_LAYOUT_CURSOR_IDLE : WINDOW_ANIM_CURSOR_IDLE;
+        g_window_records[index].anim_counter = 0;
+        g_window_records[index].frame_index = 0;
     }
 }
 
 /* Clear the text-task flag and move a window record to the sequence after
  * its current one, restarting the animation with the default palette. */
-void wldcore_menu_resume_layout_window_level(wldcore_menu_stack_record_t* level) {
+void unit_panel_resume_help_level(menu_stack_record_t* level) {
     s32 index = level->layout_window.window_index;
-    world_animated_render_record_t* entry = &g_wldcore_window_records[index];
+    display_object_animated_t* entry = &g_window_records[index];
 
     g_menu_input_lock_mode = 0;
-    entry->sequence = g_wldcore_window_records[index].sequence + 1;
-    g_wldcore_window_records[index].palette = 0;
+    entry->sequence = g_window_records[index].sequence + 1;
+    g_window_records[index].palette = 0;
     entry->anim_counter = 0;
-    g_wldcore_window_records[index].frame_index = 0;
+    g_window_records[index].frame_index = 0;
 }
 
-/* The g_wldcore_menu_suspend_handlers entry of WLDCORE_MENU_LEVEL_LAYOUT_WINDOW: nothing to suspend. */
-void wldcore_menu_suspend_layout_window_level(void) {
+/* The g_menu_stack_suspend_handlers entry of MENU_STACK_LEVEL_UNIT_PANEL_HELP: nothing to suspend. */
+void unit_panel_suspend_help_level(void) {
 }
 
 /* Input handler for a layout-window menu level.
@@ -1694,87 +1674,87 @@ void wldcore_menu_suspend_layout_window_level(void) {
  * to the neighboring layout named by the row. A row with a counter pointer
  * adds the counter to the base message id, and suppresses the message entirely
  * when the counter reads 0 or -1 (except for layout 0x0b). */
-void wldcore_menu_handle_layout_window_input(wldcore_window_layout_request_t* request) {
+void unit_panel_handle_help_input(unit_panel_help_level_t* request) {
     s32 layout;
     s16* counter;
     s16 message;
-    world_animated_render_record_t* record;
+    display_object_animated_t* record;
     s32 window;
 
-    if ((g_wldcore_input_new_button_presses & PSX_PAD_CROSS) != 0) {
-        g_wldcore_window_record_count -= 1;
-        g_wldcore_window_render_object_count -= 1;
-        g_wldcore_menu_ordering_table_offset = request->saved_state;
-        g_wldcore_menu_stack_depth -= 1;
-        wldcore_menu_dispatch_resume_handler();
-        wldcore_sound_play_effect(MAIN_SFX_CANCEL);
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) != 0) {
+        g_window_record_count -= 1;
+        g_window_render_object_count -= 1;
+        g_menu_stack_ot_offset = request->saved_state;
+        g_menu_stack_depth -= 1;
+        menu_stack_dispatch_resume();
+        sound_play_effect(MAIN_SFX_CANCEL);
         return;
     }
 
-    if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) != 0) {
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) != 0) {
         layout = request->layout;
-        counter = g_wldcore_window_layout_rows[layout].counter;
+        counter = g_unit_panel_help_rows[layout].counter;
         if (counter != 0) {
             if (layout != 0xB && *counter >= -1 && *counter < 1) {
                 return;
             }
-            message = g_wldcore_window_layout_rows[layout].message_base + *counter;
+            message = g_unit_panel_help_rows[layout].message_base + *counter;
         } else {
-            message = g_wldcore_window_layout_rows[layout].message_base;
+            message = g_unit_panel_help_rows[layout].message_base;
         }
-        wldcore_menu_push_message_level(message, 1);
+        menu_stack_push_message_level(message, 1);
         g_menu_input_lock_mode = 1;
         window = request->window_index;
-        record = &g_wldcore_window_records[window];
-        record->sequence = g_wldcore_window_records[window].sequence - 1;
-        g_wldcore_window_records[window].palette = 0xA;
+        record = &g_window_records[window];
+        record->sequence = g_window_records[window].sequence - 1;
+        g_window_records[window].palette = 0xA;
         record->anim_counter = 0;
-        g_wldcore_window_records[window].frame_index = 0;
+        g_window_records[window].frame_index = 0;
         return;
     }
 
-    if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
-        if (g_wldcore_window_layout_rows[request->layout].up != request->layout) {
-            wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
-            request->layout = g_wldcore_window_layout_rows[request->layout].up;
-            wldcore_window_apply_layout(request);
+    if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
+        if (g_unit_panel_help_rows[request->layout].up != request->layout) {
+            sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+            request->layout = g_unit_panel_help_rows[request->layout].up;
+            unit_panel_move_help_cursor(request);
             return;
         }
     }
-    if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
-        if (g_wldcore_window_layout_rows[request->layout].down != request->layout) {
-            wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
-            request->layout = g_wldcore_window_layout_rows[request->layout].down;
-            wldcore_window_apply_layout(request);
+    if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
+        if (g_unit_panel_help_rows[request->layout].down != request->layout) {
+            sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+            request->layout = g_unit_panel_help_rows[request->layout].down;
+            unit_panel_move_help_cursor(request);
             return;
         }
     }
-    if (wldcore_input_update_repeat(PSX_PAD_RIGHT) != 0) {
-        if (g_wldcore_window_layout_rows[request->layout].right != request->layout) {
-            wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
-            request->layout = g_wldcore_window_layout_rows[request->layout].right;
-            wldcore_window_apply_layout(request);
+    if (world_map_update_input_repeat(PSX_PAD_RIGHT) != 0) {
+        if (g_unit_panel_help_rows[request->layout].right != request->layout) {
+            sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+            request->layout = g_unit_panel_help_rows[request->layout].right;
+            unit_panel_move_help_cursor(request);
             return;
         }
     }
-    if (wldcore_input_update_repeat(PSX_PAD_LEFT) != 0) {
-        if (g_wldcore_window_layout_rows[request->layout].left != request->layout) {
-            wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
-            request->layout = g_wldcore_window_layout_rows[request->layout].left;
-            wldcore_window_apply_layout(request);
+    if (world_map_update_input_repeat(PSX_PAD_LEFT) != 0) {
+        if (g_unit_panel_help_rows[request->layout].left != request->layout) {
+            sound_play_effect(MAIN_SFX_CURSOR_MOVE);
+            request->layout = g_unit_panel_help_rows[request->layout].left;
+            unit_panel_move_help_cursor(request);
         }
     }
 }
 
-/* Pushes the location menu (WLDCORE_MENU_LEVEL_LOCATION_MENU) for menu id `menu`.
+/* Pushes the location menu (MENU_STACK_LEVEL_LOCATION) for menu id `menu`.
  *
  * Loads the location's picture, appends the cursor window (window kind
  * menu + 0x37) and, when a picture is present, uploads the frame TIM and the
- * location's picture at g_wldcore_picture_buffer to VRAM, binds a render
+ * location's picture at g_picture_buffer to VRAM, binds a render
  * record to the picture and adds its border window at (-8, 0x10). It then
  * measures every
  * entry's text through text_find_entry / text_measure_pixels to
- * size the panel, copies the entry values into g_wldcore_list_entry_values with
+ * size the panel, copies the entry values into g_menu_stack_entry_values with
  * cleared row flags, clamps the cursor to at most four visible rows, and
  * starts the panel render state centered on the measured width.
  *
@@ -1784,11 +1764,11 @@ void wldcore_menu_handle_layout_window_input(wldcore_window_layout_request_t* re
  * stored through a stride-36 view based at &records->x, as the target forms
  * (records + 0x18) + index * 36. The unused array reproduces the 0xb8 frame.
  */
-void wldcore_menu_push_location_menu_level(s32 menu) {
+void location_push_menu_level(s32 menu) {
     GsIMAGE image;
     RECT bounds;
     point32_t origin;
-    wldcore_window_panel_layout_t layout;
+    window_panel_layout_t layout;
     s16 text_width;
     s16 text_rows;
     s32 index;
@@ -1800,15 +1780,14 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     u32 flags;
     s32 i;
     CVECTOR* color;
-    world_animated_render_record_t* records;
-    wldcore_location_list_level_t* level;
+    display_object_animated_t* records;
+    location_menu_level_t* level;
     point32_t* base;
-    wldcore_window_xy_t* position;
+    window_xy_t* position;
 
     /* menu + 0x37 is the cursor window's sequence; the identical arms are explained above. */
-    g_wldcore_map_projection_state.marker.sub_kind
-        = wldcore_gfx_load_location_picture(g_wldcore_map_projection_state.marker.kind);
-    if (g_wldcore_map_projection_state.marker.sub_kind != 0) {
+    g_world_map_projection_state.marker.sub_kind = location_load_picture(g_world_map_projection_state.marker.kind);
+    if (g_world_map_projection_state.marker.sub_kind != 0) {
         menu += 0x37;
     } else {
         menu += 0x37;
@@ -1816,75 +1795,74 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     file_wait_for_pending();
 
     flags = g_main_system_flags | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    level = &g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list;
+    level = &g_menu_stack_records_next[g_menu_stack_depth].location_list;
     level->extra_render = -1;
     level->label_window = -1;
     level->frame_render = -1;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.cursor_window = -1;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.mode = 0;
+    g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window = -1;
+    g_menu_stack_records_next[g_menu_stack_depth].location_list.mode = 0;
     g_main_system_flags = flags;
 
-    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.cursor_window = index;
-    records = g_wldcore_window_records;
+    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window = index;
+    records = g_window_records;
     /* Direct record.color access changes the column base and instruction scheduling. */
     color = &records->color;
-    g_wldcore_window_records[index].priority = 0xB;
-    g_wldcore_window_records[index].sequence = menu;
-    g_wldcore_window_records[index].anim_counter = 0;
-    g_wldcore_window_records[index].frame_index = 0;
+    g_window_records[index].priority = 0xB;
+    g_window_records[index].sequence = menu;
+    g_window_records[index].anim_counter = 0;
+    g_window_records[index].frame_index = 0;
 
     /* The windows start black; the step reads `mode` as its fade level and brightens them from 8. */
-    ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->r = 0;
-    ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->g = 0;
-    ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->b = 0;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.mode = 8;
+    ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
+    ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
+    ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;
+    g_menu_stack_records_next[g_menu_stack_depth].location_list.mode = 8;
 
     /* With a picture: upload the frame and picture TIMs, then add the picture and its border window. */
-    if (g_wldcore_map_projection_state.marker.sub_kind != 0) {
-        GsGetTimInfo(g_wldcore_location_frame_tim + 1, &image);
+    if (g_world_map_projection_state.marker.sub_kind != 0) {
+        GsGetTimInfo(g_location_picture_frame_tim + 1, &image);
         LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
         LoadClut(image.clut, image.cx, image.cy);
-        GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);
+        GsGetTimInfo(g_picture_buffer + 1, &image);
         LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
         LoadClut(image.clut, image.cx, image.cy);
 
-        index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.frame_render = index;
+        index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+        g_menu_stack_records_next[g_menu_stack_depth].location_list.frame_render = index;
         bounds.x = image.px;
         bounds.y = image.py;
         bounds.w = image.pw;
         bounds.h = image.ph;
         origin.x = image.cx;
         origin.y = image.cy;
-        wldcore_window_init_vram_render_record(index, bounds, origin, WORLD_RENDER_RECORD_8BIT_CLUT);
-        base = &g_wldcore_window_render_records[index].base;
-        g_wldcore_window_render_records[index].priority = 0xB;
+        window_init_vram_render_record(index, bounds, origin, DISPLAY_OBJECT_8BIT_CLUT);
+        base = &g_window_render_records[index].base;
+        g_window_render_records[index].priority = 0xB;
         base->x = -0x40;
         base->y = -0x4C;
-        g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_POP_IN;
+        g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
 
-        index = window_append_animated_record(
-            g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.label_window = index;
-        g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_LOCATION_PICTURE_BORDER;
-        g_wldcore_window_records[index].priority = 0xB;
+        index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+        g_menu_stack_records_next[g_menu_stack_depth].location_list.label_window = index;
+        g_window_records[index].sequence = WINDOW_ANIM_LOCATION_PICTURE_BORDER;
+        g_window_records[index].priority = 0xB;
         records[index].anim_counter = 0;
-        g_wldcore_window_records[index].frame_index = 0;
-        position = (wldcore_window_xy_t*)&records->position.x;
+        g_window_records[index].frame_index = 0;
+        position = (window_xy_t*)&records->position.x;
         position[index].x = -8;
         position[index].y = 0x10;
-        ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->r = 0;
-        ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->g = 0;
-        ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->b = 0;
+        ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
+        ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
+        ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;
     }
 
     /* Size the panel to the widest entry plus an 8-pixel margin. */
     widest = 0;
-    count = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.entry_count;
+    count = g_menu_stack_records_next[g_menu_stack_depth].location_list.entry_count;
     for (i = 0; i < count; i++) {
         text_measure_pixels(&text_width, &text_rows,
-            text_find_entry(g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.entries[i]));
+            text_find_entry(g_menu_stack_records_next[g_menu_stack_depth].location_list.entries[i]));
         if (widest < text_width) {
             widest = text_width;
         }
@@ -1892,9 +1870,9 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     widest += 8;
 
     for (i = 0; i < count; i++) {
-        value = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.entries[i];
-        g_wldcore_list_entry_values[i] = value;
-        g_wldcore_list_row_flags[i] = 0;
+        value = g_menu_stack_records_next[g_menu_stack_depth].location_list.entries[i];
+        g_menu_stack_entry_values[i] = value;
+        g_menu_stack_row_flags[i] = 0;
     }
 
     /* At most four rows show; the panel is centered on x, and without a picture it rises 8 pixels a row. */
@@ -1905,56 +1883,49 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     layout.text_width = widest;
     layout.visible_rows = i;
     origin.x = 0x80 - (((layout.text_width + 0x18) & 0xFFFC) >> 1);
-    if (g_wldcore_map_projection_state.marker.sub_kind != 0) {
+    if (g_world_map_projection_state.marker.sub_kind != 0) {
         origin.y = 0x80;
     } else {
         origin.y = 0x70 - i * 8;
     }
-    wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_LOCATION_MENU, count, i);
-    wldcore_window_init_panel_render_state(
-        0xC, g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.entry_count, &layout, &origin);
-    g_wldcore_window_panel_render_state.vram_origin.x = 0x240;
-    g_wldcore_window_panel_render_state.header_id = 0;
-    g_wldcore_window_panel_render_state.vram_origin.y = 0x100;
+    menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_LOCATION, count, i);
+    window_init_panel_state(
+        0xC, g_menu_stack_records_next[g_menu_stack_depth].location_list.entry_count, &layout, &origin);
+    g_window_panel_render_state.vram_origin.x = 0x240;
+    g_window_panel_render_state.header_id = 0;
+    g_window_panel_render_state.vram_origin.y = 0x100;
 
-    if (g_wldcore_map_projection_state.marker.sub_kind != 0) {
+    if (g_world_map_projection_state.marker.sub_kind != 0) {
         s32 unused[6]; /* frame padding: the target frame is 0xb8 */
 
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
-                                     .location_list.cursor_window]
-            .position.x = -4;
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
-                                     .location_list.cursor_window]
-            .position.y = 0;
+        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
+        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.y = 0;
     } else {
         /* Here `index` is still the cursor window's record index, yet it reads the render record pool (retail). */
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
-                                     .location_list.cursor_window]
-            .position.x = -4;
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
-                                     .location_list.cursor_window]
-            .position.y = g_wldcore_window_render_records[index].base.y - 8;
+        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
+        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.y
+            = g_window_render_records[index].base.y - 8;
     }
 
-    depth = g_wldcore_menu_stack_depth;
+    depth = g_menu_stack_depth;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    g_wldcore_menu_stack_records_next[depth].location_list.delay = 8;
+    g_menu_stack_records_next[depth].location_list.delay = 8;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_FREEZE_ANIMATION;
-    g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_LOCATION_MENU;
-    g_wldcore_menu_stack_depth = depth + 1;
+    g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_LOCATION;
+    g_menu_stack_depth = depth + 1;
 }
 
 /* Restore the location list's optional renderer palette. */
-void wldcore_menu_resume_location_menu_level(wldcore_menu_stack_record_t* level) {
+void location_resume_menu_level(menu_stack_record_t* level) {
     if (level->location_list.extra_render != -1) {
-        g_wldcore_window_render_records[level->location_list.extra_render].palette = 0;
+        g_window_render_records[level->location_list.extra_render].palette = 0;
     }
 }
 
 /* Sets the second owned render record's palette selector when its slot is present. */
-void wldcore_menu_suspend_location_menu_level(wldcore_menu_slot_set_t* slots) {
+void location_suspend_menu_level(menu_stack_slot_set_t* slots) {
     if (slots->render_b != -1) {
-        g_wldcore_window_render_records[slots->render_b].palette = 2;
+        g_window_render_records[slots->render_b].palette = 2;
     }
 }
 
@@ -1963,15 +1934,15 @@ void wldcore_menu_suspend_location_menu_level(wldcore_menu_slot_set_t* slots) {
  * the bar, a shop, a deep-dungeon battle chosen by the location's conditional
  * set or the selected destination map; the help button shows the entry's
  * message and cancel closes the level. */
-void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* level) {
+void location_step_menu_level(location_menu_state_t* level) {
     s16* selected;
     u8 unused[0x28];
     s16* values;
     s32 value;
     s32 text;
     s32 offset;
-    wldcore_deep_dungeon_battle_t* records;
-    wldcore_deep_dungeon_battle_t* record;
+    deep_dungeon_battle_t* records;
+    deep_dungeon_battle_t* record;
 
     /* Fade both windows in by 7 a frame. Without a picture window_b is -1, so the
      * second set of stores lands one record before the pool (retail). */
@@ -1979,15 +1950,15 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
         if (level->fade >= 0x80) {
             level->fade = 0x80;
         }
-        g_wldcore_window_records[level->slots.window_a].color.r = level->fade;
-        g_wldcore_window_records[level->slots.window_a].color.g = level->fade;
-        g_wldcore_window_records[level->slots.window_a].color.b = level->fade;
-        g_wldcore_window_records[level->slots.window_b].color.r = level->fade;
-        g_wldcore_window_records[level->slots.window_b].color.g = level->fade;
-        g_wldcore_window_records[level->slots.window_b].color.b = level->fade;
+        g_window_records[level->slots.window_a].color.r = level->fade;
+        g_window_records[level->slots.window_a].color.g = level->fade;
+        g_window_records[level->slots.window_a].color.b = level->fade;
+        g_window_records[level->slots.window_b].color.r = level->fade;
+        g_window_records[level->slots.window_b].color.g = level->fade;
+        g_window_records[level->slots.window_b].color.b = level->fade;
         if (level->fade == 0x80) {
             level->fade = 0;
-            wldcore_gfx_toggle_captured_world_frame(1);
+            world_map_toggle_captured_frame(1);
         } else {
             level->fade += 7;
         }
@@ -1997,8 +1968,8 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
     /* Start the panel thread on the first delay frame, then ignore input until the delay ends. */
     if (level->delay != 0) {
         if (level->delay == 8) {
-            thread_start(WLDCORE_THREAD_SLOT_WINDOW_PANEL, world_screen_text_list_thread);
-            thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, (s32)&g_wldcore_window_panel_render_state, 0, 0);
+            thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
         }
         level->delay--;
         return;
@@ -2010,14 +1981,14 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
 
     /* A confirm or cancel below closed the panel; act on slots.result once its thread has finished. */
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
-        wldcore_gfx_toggle_captured_world_frame(0);
+        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+        world_map_toggle_captured_frame(0);
         g_main_system_flags = (g_main_system_flags | MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
             & ~(MAIN_SYSTEM_FLAG_DRAW_MAP | MAIN_SYSTEM_FLAG_FREEZE_ANIMATION);
         if (level->slots.result != 0) {
-            wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_LOCATION_MENU);
-            selected = &g_wldcore_window_panel_render_state.selected_index;
-            values = g_wldcore_list_entry_values;
+            menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_LOCATION);
+            selected = &g_window_panel_render_state.selected_index;
+            values = g_menu_stack_entry_values;
             value = values[*selected];
 
             /* World-menu entries are services and deep-dungeon floors; anything else names a map. */
@@ -2025,99 +1996,99 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
                 g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
                 value &= TEXT_ID_ENTRY_MASK;
                 switch (value) {
-                case WLDCORE_TEXT_ID_BAR& TEXT_ID_ENTRY_MASK:
-                    wldcore_menu_close_level_and_release_records(&level->slots, 0);
-                    wldcore_sound_enqueue_music_start(WLDCORE_AUDIO_MUSIC(2, MAIN_MUSIC_BAR));
-                    wldcore_bar_push_menu_level();
+                case TEXT_ID_BAR& TEXT_ID_ENTRY_MASK:
+                    menu_stack_pop_and_release_records(&level->slots, 0);
+                    audio_queue_start_music(AUDIO_MUSIC(2, MAIN_MUSIC_BAR));
+                    bar_push_level();
                     return;
-                case WLDCORE_TEXT_ID_SHOP& TEXT_ID_ENTRY_MASK:
-                    wldcore_menu_close_level_and_release_records(&level->slots, 0);
-                    wldcore_menu_run_shop_and_rebuild_screen(0);
+                case TEXT_ID_SHOP& TEXT_ID_ENTRY_MASK:
+                    menu_stack_pop_and_release_records(&level->slots, 0);
+                    location_run_shop(0);
                     return;
-                case WLDCORE_TEXT_ID_SOLDIER_OFFICE& TEXT_ID_ENTRY_MASK:
-                    wldcore_menu_close_level_and_release_records(&level->slots, 0);
-                    wldcore_menu_run_shop_and_rebuild_screen(WORLD_MENU_CONTEXT_SOLDIER_OFFICE);
+                case TEXT_ID_SOLDIER_OFFICE& TEXT_ID_ENTRY_MASK:
+                    menu_stack_pop_and_release_records(&level->slots, 0);
+                    location_run_shop(SCREEN_CONTEXT_SOLDIER_OFFICE);
                     return;
-                case WLDCORE_TEXT_ID_FUR_SHOP& TEXT_ID_ENTRY_MASK:
-                    wldcore_menu_close_level_and_release_records(&level->slots, 0);
-                    wldcore_menu_run_shop_and_rebuild_screen(WORLD_MENU_CONTEXT_FUR_SHOP);
+                case TEXT_ID_FUR_SHOP& TEXT_ID_ENTRY_MASK:
+                    menu_stack_pop_and_release_records(&level->slots, 0);
+                    location_run_shop(SCREEN_CONTEXT_FUR_SHOP);
                     return;
                 default:
                     script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION,
-                        value - (WLDCORE_TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK));
-                    wldcore_menu_close_level_and_release_records(&level->slots, 0);
-                    if (wldcore_script_process_conditional_set(
-                            g_wldcore_map_projection_state.marker.kind, WLDCORE_SCRIPT_ACTION_DEEP_DUNGEON_ENTRY)
+                        value - (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK));
+                    menu_stack_pop_and_release_records(&level->slots, 0);
+                    if (location_script_run(
+                            g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_DEEP_DUNGEON_ENTRY)
                         != 0) {
                         /* rand() is 15 bits: pick one of the battle's eight ENTDs and an exit below args[2]. */
-                        offset = g_wldcore_script_state.args[0] * sizeof(wldcore_deep_dungeon_battle_t);
-                        records = g_wldcore_deep_dungeon_battles;
-                        record = &records[g_wldcore_script_state.args[0]];
-                        g_wldcore_next_map_id[0] = record->map_id;
+                        offset = g_location_script_state.args[0] * sizeof(deep_dungeon_battle_t);
+                        records = g_deep_dungeon_battles;
+                        record = &records[g_location_script_state.args[0]];
+                        g_travel_next_map_id[0] = record->map_id;
                         /* Direct ENTD indexing folds the table base and removes a retail addition. */
                         script_set_variable(
                             EVENT_SCRIPT_VAR_CURRENT_ENTD, (&records->entd_ids[0])[((rand() * 8) >> 15) + offset]);
                         script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
                         script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, record->squad_id);
-                        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_wldcore_script_state.args[1]);
+                        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[1]);
                         script_set_variable(
-                            EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, (rand() * g_wldcore_script_state.args[2]) >> 15);
+                            EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, (rand() * g_location_script_state.args[2]) >> 15);
                         g_main_system_flags
                             = (g_main_system_flags | MAIN_SYSTEM_FLAG_DEEP_DUNGEON_BATTLE) ^ MAIN_SYSTEM_FLAG_RUNNING;
                     } else {
-                        wldcore_fade_start_screen(0, 0x10);
-                        wldcore_sound_enqueue_music_start(WLDCORE_AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
+                        world_map_fade_start(0, 0x10);
+                        audio_queue_start_music(AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
                     }
                     return;
                 }
             }
 
             /* A map entry runs the row's event and travels to map entry + 1. */
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_wldcore_script_state.args[*selected]);
+            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[*selected]);
             g_main_system_flags ^= MAIN_SYSTEM_FLAG_RUNNING;
             value = values[*selected] & TEXT_ID_ENTRY_MASK;
-            g_wldcore_next_map_id[0] = value + 1;
+            g_travel_next_map_id[0] = value + 1;
             return;
         }
 
         g_main_system_flags = (g_main_system_flags | MAIN_SYSTEM_FLAG_DRAW_MAP) & ~MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
-        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_LOCATION_MENU);
-        wldcore_menu_close_level_and_release_records(&level->slots, 1);
+        menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_LOCATION);
+        menu_stack_pop_and_release_records(&level->slots, 1);
         return;
     }
 
     /* Cancel only works while the cursor is on a world-menu entry, not a map name. */
-    if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
-        value = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index];
+    if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
+        value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index];
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_WORLD_MENU_BASE) {
-            wldcore_sound_play_effect(MAIN_SFX_CANCEL);
+            sound_play_effect(MAIN_SFX_CANCEL);
             level->slots.result = 0;
-            thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
             g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         }
-    } else if (g_wldcore_input_new_button_presses & PSX_PAD_SELECT) {
+    } else if (g_world_map_input_new_button_presses & PSX_PAD_SELECT) {
         /* Help: map names, services and deep-dungeon floors each have their own message range. */
-        wldcore_menu_suspend_location_menu_level(&level->slots);
-        value = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index];
+        location_suspend_menu_level(&level->slots);
+        value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index];
         /* A map's help is 0x8801 + map, a service's 0x104b on and a floor's 0x1090 on. */
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_MAP_NAME_BASE) {
-            wldcore_menu_push_message_level((value & TEXT_ID_ENTRY_MASK) + 0x8801, 1);
+            menu_stack_push_message_level((value & TEXT_ID_ENTRY_MASK) + 0x8801, 1);
         } else {
             value &= TEXT_ID_ENTRY_MASK;
             text = value + 0xFEE;
-            if (value >= (WLDCORE_TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK)) {
+            if (value >= (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK)) {
                 text = value + 0xFA3;
             }
-            wldcore_menu_push_message_level(text, 1);
+            menu_stack_push_message_level(text, 1);
         }
-    } else if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
         && g_main_file_still_loading == 0) {
-        wldcore_fade_start_screen(WLDCORE_SCREEN_FADE_OUT, 0x10);
-        wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_OUT, 0x10);
-        wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_UNLOAD, 2);
-        wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
+        world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
+        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
+        audio_queue_add(AUDIO_COMMAND_UNLOAD, 2);
+        sound_play_effect(MAIN_SFX_CONFIRM);
         level->slots.result = 1;
-        thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
@@ -2126,72 +2097,71 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
  * each of the four slots that is not -1 releases one window or render record
  * and its queue entry. With `restore` the level underneath is resumed. Also
  * unblocks the menu buttons and re-shows the location label. */
-static void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots, s32 restore) {
+static void menu_stack_pop_and_release_records(menu_stack_slot_set_t* slots, s32 restore) {
     g_menu_blocked_buttons = 0;
     if (slots->window_a != -1) {
-        g_wldcore_window_record_count -= 1;
-        g_wldcore_window_render_object_count -= 1;
+        g_window_record_count -= 1;
+        g_window_render_object_count -= 1;
     }
     if (slots->render_a != -1) {
-        g_wldcore_window_render_record_count -= 1;
-        g_wldcore_window_render_object_count -= 1;
+        g_window_render_record_count -= 1;
+        g_window_render_object_count -= 1;
     }
     if (slots->window_b != -1) {
-        g_wldcore_window_record_count -= 1;
-        g_wldcore_window_render_object_count -= 1;
+        g_window_record_count -= 1;
+        g_window_render_object_count -= 1;
     }
     if (slots->render_b != -1) {
-        g_wldcore_window_render_record_count -= 1;
-        g_wldcore_window_render_object_count -= 1;
+        g_window_render_record_count -= 1;
+        g_window_render_object_count -= 1;
     }
-    g_wldcore_menu_stack_depth -= 1;
+    g_menu_stack_depth -= 1;
     if (restore != 0) {
-        wldcore_menu_dispatch_resume_handler();
+        menu_stack_dispatch_resume();
     }
     g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
 }
 
 /* At full brightness, run WORLD's shop, soldier office or fur shop screen
- * (world_shop_run_screen), then reload the war funds, reset the parent
+ * (shop_run_screen), then reload the war funds, reset the parent
  * level's window, push the location menu again, fade in, blank the backdrop
  * image and restart the world-map music.
  *
  * The local alias for the current location id reproduces the target's
  * saved-register base for its two loads. */
-static void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id) {
+static void location_run_shop(s32 shop_id) {
     s32* selected;
     u32* clear;
     s32 i;
 
-    world_menu_set_brightness(0x80, 0x80, 0x80);
-    wldcore_sound_wait_for_queue_drain();
-    world_shop_run_screen(shop_id);
-    g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1]);
-    selected = &g_wldcore_map_projection_state.marker.kind;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count
-        = wldcore_map_build_location_menu_entries(
-            *selected, g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entries);
-    wldcore_menu_push_location_menu_level(*selected);
-    wldcore_fade_start_screen(WLDCORE_SCREEN_FADE_REDRAW_MAP, 0x10);
-    wldcore_clear_screen_and_set_map_clip_rect(0);
+    screen_set_brightness(0x80, 0x80, 0x80);
+    audio_queue_wait_until_empty();
+    shop_run_screen(shop_id);
+    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    world_map_suspend_cursor_level(&g_menu_stack_records_next[g_menu_stack_depth - 1]);
+    selected = &g_world_map_projection_state.marker.kind;
+    g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count
+        = location_build_menu_entries(*selected, g_menu_stack_records_next[g_menu_stack_depth].panel.entries);
+    location_push_menu_level(*selected);
+    world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
+    world_map_clear_screen_and_set_clip_rect(0);
     /* Blank the backdrop image from the end. */
     i = WLDCORE_BACKDROP_WORDS - 1;
-    clear = &g_wldcore_scratch_buffer[WLDCORE_BACKDROP_WORDS - 1];
+    clear = &g_world_map_scratch_buffer[WLDCORE_BACKDROP_WORDS - 1];
     for (; i >= 0; i--) {
         *clear = 0;
         clear--;
     }
-    wldcore_sound_enqueue_music_start(WLDCORE_AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
+    audio_queue_start_music(AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
 }
 
-/* Pushes g_wldcore_scrollable_text_window on message `text` as
- * WLDCORE_MENU_LEVEL_SCROLLABLE_TEXT_WINDOW: it appends one window record for
+/* Pushes g_text_window on message `text` as
+ * MENU_STACK_LEVEL_SCROLLABLE_TEXT: it appends one window record for
  * the header, measures the text, sizes the window around it (at most four
  * rows), initializes the scrollable text state, hides the text render record
  * and the parent level's window until the step shows them, and hides the
  * location label and freezes the map animation. */
-void wldcore_menu_push_scrollable_text_window_level(s32 text) {
+void menu_stack_push_scrollable_text_level(s32 text) {
     s16 width;
     s16 rows;
 
@@ -2207,93 +2177,87 @@ void wldcore_menu_push_scrollable_text_window_level(s32 text) {
         s32 index;
         s32 depth;
 
-        index = window_append_animated_record(
-            g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_index = index;
-        g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CHOICE_PANEL_HEADER;
-        g_wldcore_window_records[index].priority = 3;
-        g_wldcore_window_records[index].anim_counter = 0;
-        g_wldcore_window_records[index].frame_index = 0;
-        g_wldcore_window_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
+        index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+        g_menu_stack_records_next[g_menu_stack_depth].window_index = index;
+        g_window_records[index].sequence = WINDOW_ANIM_CHOICE_PANEL_HEADER;
+        g_window_records[index].priority = 3;
+        g_window_records[index].anim_counter = 0;
+        g_window_records[index].frame_index = 0;
+        g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
 
-        g_wldcore_scrollable_text_window.text_id = text;
-        g_wldcore_scrollable_text_window.image_x = 0;
-        g_wldcore_scrollable_text_window.image_y = 0x60;
-        g_wldcore_scrollable_text_window.base.x = -(((width + 24) & 0xFFFC) >> 1);
-        g_wldcore_scrollable_text_window.base.y = -((rows << 3) + 8);
-        g_wldcore_scrollable_text_window.text_width = width;
-        g_wldcore_scrollable_text_window.rows_per_page = rows;
-        g_wldcore_scrollable_text_window.priority = 3;
-        g_wldcore_scrollable_text_window.image_coordinate_mode = 0;
-        g_wldcore_scrollable_text_window.extra_render_index = -1;
-        g_wldcore_scrollable_text_window.text_substitutions[1] = -1;
-        g_wldcore_scrollable_text_window.text_substitutions[0] = -1;
-        wldcore_text_init_scrollable_window(&g_wldcore_scrollable_text_window);
+        g_text_window.text_id = text;
+        g_text_window.image_x = 0;
+        g_text_window.image_y = 0x60;
+        g_text_window.base.x = -(((width + 24) & 0xFFFC) >> 1);
+        g_text_window.base.y = -((rows << 3) + 8);
+        g_text_window.text_width = width;
+        g_text_window.rows_per_page = rows;
+        g_text_window.priority = 3;
+        g_text_window.image_coordinate_mode = 0;
+        g_text_window.extra_render_index = -1;
+        g_text_window.text_substitutions[1] = -1;
+        g_text_window.text_substitutions[0] = -1;
+        text_window_open(&g_text_window);
 
-        g_wldcore_window_render_records[g_wldcore_scrollable_text_window.render_record_index].flags
-            |= WORLD_RENDER_RECORD_HIDDEN;
-        depth = g_wldcore_menu_stack_depth;
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].window_index].position.x
-            = g_wldcore_scrollable_text_window.base.x + 3;
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].window_index].position.y
-            = g_wldcore_scrollable_text_window.base.y - 2;
+        g_window_render_records[g_text_window.render_record_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        depth = g_menu_stack_depth;
+        g_window_records[g_menu_stack_records_next[depth].window_index].position.x = g_text_window.base.x + 3;
+        g_window_records[g_menu_stack_records_next[depth].window_index].position.y = g_text_window.base.y - 2;
         g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL | MAIN_SYSTEM_FLAG_FREEZE_ANIMATION;
-        g_wldcore_menu_stack_depth = depth + 1;
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth - 1].window_index].flags
-            |= WORLD_RENDER_RECORD_HIDDEN;
-        g_wldcore_menu_stack_records_next[depth].scrollable_text._unknown_20 = 0x28;
-        g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_SCROLLABLE_TEXT_WINDOW;
+        g_menu_stack_depth = depth + 1;
+        g_window_records[g_menu_stack_records_next[depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_menu_stack_records_next[depth].scrollable_text._unknown_20 = 0x28;
+        g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_SCROLLABLE_TEXT;
     }
 }
 
-/* Menu-level step for the scrollable text window g_wldcore_scrollable_text_window.
+/* Menu-level step for the scrollable text window g_text_window.
  * While its render record is hidden, the first frame without a screen fade
  * plays MAIN_SFX_WINDOW_OPEN and shows the header window and the text.
- * Otherwise, once wldcore_text_step_scrollable_window reports the window
+ * Otherwise, once text_window_step reports the window
  * closed, it releases the header window, pops the level, shows the location label
  * and unfreezes the map, shows the parent level's window and resumes the
  * parent level. */
-void wldcore_menu_step_scrollable_text_window_level(wldcore_menu_stack_record_t* level) {
-    s32* index = &g_wldcore_scrollable_text_window.render_record_index;
+void menu_stack_step_scrollable_text_level(menu_stack_record_t* level) {
+    s32* index = &g_text_window.render_record_index;
     s32 depth;
 
-    if (g_wldcore_window_render_records[*index].flags & WORLD_RENDER_RECORD_HIDDEN) {
+    if (g_window_render_records[*index].flags & DISPLAY_OBJECT_HIDDEN) {
         if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
-            wldcore_sound_play_effect(MAIN_SFX_WINDOW_OPEN);
-            g_wldcore_window_records[level->window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-            g_wldcore_window_render_records[*index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
+            sound_play_effect(MAIN_SFX_WINDOW_OPEN);
+            g_window_records[level->window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_render_records[*index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         }
-    } else if (!(g_wldcore_window_render_records[*index].flags & WORLD_RENDER_RECORD_POP_IN)
-        && wldcore_text_step_scrollable_window(&g_wldcore_scrollable_text_window) == 0) {
-        g_wldcore_window_record_count--;
-        g_wldcore_window_render_object_count--;
-        depth = g_wldcore_menu_stack_depth;
-        g_wldcore_menu_stack_depth = depth - 1;
+    } else if (!(g_window_render_records[*index].flags & DISPLAY_OBJECT_POP_IN)
+        && text_window_step(&g_text_window) == 0) {
+        g_window_record_count--;
+        g_window_render_object_count--;
+        depth = g_menu_stack_depth;
+        g_menu_stack_depth = depth - 1;
         g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL | MAIN_SYSTEM_FLAG_FREEZE_ANIMATION);
-        g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth - 2].window_index].flags
-            &= ~WORLD_RENDER_RECORD_HIDDEN;
-        wldcore_menu_dispatch_resume_handler();
+        g_window_records[g_menu_stack_records_next[depth - 2].window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        menu_stack_dispatch_resume();
     }
 }
 
 /* Push the debug "Party number" panel (MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL):
  * a number from 0 to 999, starting at 0. Sibling of
- * wldcore_menu_push_variable_edit_level. */
-static void wldcore_menu_push_fixed_number_panel_level(void) {
+ * debug_push_variable_edit_level. */
+static void debug_push_party_number_level(void) {
     point32_t origin;
     s32 record_index;
 
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
-    g_wldcore_menu_ordering_table_offset = 3;
+    g_menu_stack_ot_offset = 3;
     origin.x = -0x28;
     origin.y = -0x16;
-    g_wldcore_active_menu_value = 0;
-    wldcore_window_init_number_panel_render_thread(
-        WLDCORE_THREAD_SLOT_WINDOW_PANEL, 999 << 16, WLDCORE_TEXT_ID_PARTY_NUMBER_LABEL, &origin);
-    record_index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
-    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_FIXED_NUMBER_PANEL;
-    g_wldcore_menu_stack_depth = record_index + 1;
+    g_window_panel_value = 0;
+    window_start_number_panel_thread(
+        WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 999 << 16, TEXT_ID_PARTY_NUMBER_LABEL, &origin);
+    record_index = g_menu_stack_depth;
+    g_menu_stack_records_next[record_index].panel.result = 0;
+    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER;
+    g_menu_stack_depth = record_index + 1;
 }
 
 /* Step of the debug party number panel: Circle or Cross closes it, and once
@@ -2301,151 +2265,150 @@ static void wldcore_menu_push_fixed_number_panel_level(void) {
  * main_entd_init_event_unit_data and the roster names are rebuilt.
  *
  * level->result is 0 while waiting, 1 on confirm and -1 on cancel. */
-void wldcore_menu_step_fixed_number_panel_level(wldcore_menu_panel_level_t* level) {
+void debug_step_party_number_level(menu_stack_panel_level_t* level) {
     u32 buttons;
 
-    if ((level->result != 0) && (thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0)) {
+    if ((level->result != 0) && (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0)) {
         g_menu_blocked_buttons = 0;
-        g_wldcore_menu_ordering_table_offset = 1;
-        g_wldcore_menu_stack_depth--;
+        g_menu_stack_ot_offset = 1;
+        g_menu_stack_depth--;
         if (level->result == 1) {
-            if (g_wldcore_active_menu_value < 0x200) {
-                main_entd_init_event_unit_data(g_wldcore_active_menu_value);
-                world_text_build_roster_name_list();
+            if (g_window_panel_value < 0x200) {
+                main_entd_init_event_unit_data(g_window_panel_value);
+                formation_build_roster_names();
                 g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
             }
         }
-        wldcore_menu_dispatch_resume_handler();
+        menu_stack_dispatch_resume();
         return;
     }
 
-    buttons = g_wldcore_input_new_button_presses;
+    buttons = g_world_map_input_new_button_presses;
     if ((buttons & PSX_PAD_CROSS) != 0) {
-        wldcore_sound_play_effect(MAIN_SFX_CANCEL);
+        sound_play_effect(MAIN_SFX_CANCEL);
         level->result = -1;
-        thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     } else if ((buttons & PSX_PAD_CIRCLE) != 0) {
-        wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
+        sound_play_effect(MAIN_SFX_CONFIRM);
         level->result = 1;
-        thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     }
 }
 
-/* Opens the bar (WLDCORE_MENU_LEVEL_BAR_MENU): hides the map, loads the bar
+/* Opens the bar (MENU_STACK_LEVEL_BAR): hides the map, loads the bar
  * background (set 0x16 or 0x17 by EVENT_SCRIPT_VAR_TOWN_BACKGROUND, else 0),
- * starts the message box on WLDCORE_TEXT_ID_BAR_WELCOME, and allocates two
+ * starts the message box on TEXT_ID_BAR_WELCOME, and allocates two
  * window records and one render record for the level before
- * wldcore_bar_build_menu_rows fills it. */
-static void wldcore_bar_push_menu_level(void) {
+ * bar_build_rows fills it. */
+static void bar_push_level(void) {
     s32 value;
     s32 set;
     s32 record_index;
 
-    wldcore_clear_screen_and_set_map_clip_rect(1);
-    wldcore_window_set_render_objects_visible(0);
-    wldcore_fade_start_screen(0, 0x10);
+    world_map_clear_screen_and_set_clip_rect(1);
+    window_set_render_objects_visible(0);
+    world_map_fade_start(0, 0x10);
     value = script_get_variable(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
     set = value == 1 ? 0x16 : 0;
     if (value == 2) {
         set = 0x17;
     }
-    wldcore_gfx_load_background_set(set);
+    picture_load_background_set(set);
     file_wait_for_pending();
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
-    thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BAR_WELCOME, 0);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.first_window
-        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.second_window
-        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.render_index
-        = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    wldcore_bar_build_menu_rows(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window);
-    record_index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[record_index].window_pair_render.panel_rows = 0;
-    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_BAR_MENU;
-    g_wldcore_menu_stack_depth = record_index + 1;
+    thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
+    g_menu_stack_records_next[g_menu_stack_depth].window_pair_render.first_window
+        = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records_next[g_menu_stack_depth].window_pair_render.second_window
+        = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records_next[g_menu_stack_depth].window_pair_render.render_index
+        = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    bar_build_rows(&g_menu_stack_records_next[g_menu_stack_depth].list_window);
+    record_index = g_menu_stack_depth;
+    g_menu_stack_records_next[record_index].window_pair_render.panel_rows = 0;
+    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_BAR;
+    g_menu_stack_depth = record_index + 1;
 }
 
 /* Fill the bar menu: Rumors always, Propositions once EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED is
  * set, the job report while jobs have returned to this town, the in-progress list while some
  * accepted job has not returned, then Leave; draw the rows into the frame window. */
-void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level) {
+void bar_build_rows(menu_stack_window_level_t* level) {
     s32 index;
     point32_t point;
     RECT bounds;
     s32 unused[8];
     menu_cursor_state_t* cursor;
     point32_t* base;
-    wldcore_window_render_record_t* render;
+    window_render_record_t* render;
     s32 i;
 
     index = level->main_window;
-    g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
-    g_wldcore_window_records[index].priority = 0xA;
-    g_wldcore_window_records[index].anim_counter = 0;
-    g_wldcore_window_records[index].frame_index = 0;
+    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
+    g_window_records[index].priority = 0xA;
+    g_window_records[index].anim_counter = 0;
+    g_window_records[index].frame_index = 0;
     index = level->side_window;
-    g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_LIST_SIDE_LABEL;
-    g_wldcore_window_records[index].priority = 0xA;
-    g_wldcore_window_records[index].anim_counter = 0;
-    g_wldcore_window_records[index].frame_index = 0;
-    level->entries[0] = WLDCORE_BAR_MENU_ROW_RUMORS;
+    g_window_records[index].sequence = WINDOW_ANIM_LIST_SIDE_LABEL;
+    g_window_records[index].priority = 0xA;
+    g_window_records[index].anim_counter = 0;
+    g_window_records[index].frame_index = 0;
+    level->entries[0] = BAR_ROW_RUMORS;
     level->entry_count = 1;
     if (script_get_variable(EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED) != 0) {
-        level->entries[1] = WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS;
+        level->entries[1] = BAR_ROW_AVAILABLE_PROPOSITIONS;
         level->entry_count++;
     }
 
-    if (wldcore_proposition_count_returned(g_wldcore_map_projection_state.marker.kind) != 0) {
-        level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_RETURNED_PROPOSITIONS;
+    if (proposition_count_returned(g_world_map_projection_state.marker.kind) != 0) {
+        level->entries[level->entry_count] = BAR_ROW_RETURNED;
         level->entry_count++;
     }
 
-    if (g_main_save_proposition_count != wldcore_proposition_count_returned(-1)) {
-        level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_ACTIVE_PROPOSITIONS;
+    if (g_main_save_proposition_count != proposition_count_returned(-1)) {
+        level->entries[level->entry_count] = BAR_ROW_ACTIVE_PROPOSITIONS;
         level->entry_count++;
     }
 
-    level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_LEAVE;
+    level->entries[level->entry_count] = BAR_ROW_LEAVE;
     level->entry_count++;
     index = level->frame_render;
     bounds.x = 0;
     bounds.y = 0;
     bounds.w = 0x48;
     bounds.h = level->entry_count * 0x10 + 0x10;
-    wldcore_window_build_render_record_image(index, bounds, 0, g_wldcore_window_image_buffer);
-    g_wldcore_window_render_records[index].priority = 0xA;
-    g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_POP_IN;
-    base = &g_wldcore_window_render_records[index].base;
+    window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
+    g_window_render_records[index].priority = 0xA;
+    g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_window_render_records[index].base;
     base->x = -0x78;
     base->y = -0x28;
     point.x = 8;
     point.y = 8;
     for (i = 0; i < level->entry_count; i++) {
-        window_display_text_entry(
-            index, level->entries[i] + TEXT_ID_WORLD_MENU_BASE, point, g_wldcore_window_image_buffer);
+        window_display_text_entry(index, level->entries[i] + TEXT_ID_WORLD_MENU_BASE, point, g_window_image_buffer);
         point.y += 0x10;
     }
 
-    wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);
-    cursor = &g_wldcore_menu_cursor_states[WLDCORE_CURSOR_SLOT_BAR_MENU];
+    window_load_render_record_image(index, g_window_image_buffer);
+    cursor = &g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR];
     if (level->entry_count < cursor->selected_index + 1) {
         cursor->selected_index = 0;
     }
 
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.selected_entry = cursor->selected_index;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.mode = WLDCORE_LIST_WINDOW_MODE_BROWSE;
-    render = &g_wldcore_window_render_records[index];
-    g_wldcore_window_records[level->main_window].position.x = g_wldcore_window_render_records[index].base.x + 6;
-    g_wldcore_window_records[level->main_window].position.y
-        = g_wldcore_window_render_records[index].base.y + cursor->selected_index * 0x10 + 0xE;
-    g_wldcore_window_records[level->side_window].position.x = render->base.x + 3;
-    g_wldcore_window_records[level->side_window].position.y = g_wldcore_window_render_records[index].base.y - 2;
+    g_menu_stack_records_next[g_menu_stack_depth].list_window.selected_entry = cursor->selected_index;
+    g_menu_stack_records_next[g_menu_stack_depth].list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
+    render = &g_window_render_records[index];
+    g_window_records[level->main_window].position.x = g_window_render_records[index].base.x + 6;
+    g_window_records[level->main_window].position.y
+        = g_window_render_records[index].base.y + cursor->selected_index * 0x10 + 0xE;
+    g_window_records[level->side_window].position.x = render->base.x + 3;
+    g_window_records[level->side_window].position.y = g_window_render_records[index].base.y - 2;
 }
 
 /* Restore the bar list's palettes and cursor animation, then show its welcome text. */
-void wldcore_menu_resume_bar_menu_level(wldcore_menu_stack_record_t* level) {
+void bar_resume_level(menu_stack_record_t* level) {
     s32 main_window;
     s32 side_window;
     s32 slot;
@@ -2454,13 +2417,13 @@ void wldcore_menu_resume_bar_menu_level(wldcore_menu_stack_record_t* level) {
 
     main_window = level->list_window.main_window;
     side_window = level->list_window.side_window;
-    g_wldcore_window_render_records[level->list_window.frame_render].palette = 0;
-    g_wldcore_window_records[side_window].palette = 0;
-    g_wldcore_window_records[main_window].palette = 0;
+    g_window_render_records[level->list_window.frame_render].palette = 0;
+    g_window_records[side_window].palette = 0;
+    g_window_records[main_window].palette = 0;
     slot = level->list_window.main_window;
-    g_wldcore_window_records[slot].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
+    g_window_records[slot].sequence = WINDOW_ANIM_CURSOR_IDLE;
     slot = level->list_window.main_window;
-    g_wldcore_window_records[slot].anim_counter = 0;
-    g_wldcore_window_records[slot].frame_index = 0;
-    thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BAR_WELCOME, 0);
+    g_window_records[slot].anim_counter = 0;
+    g_window_records[slot].frame_index = 0;
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
 }

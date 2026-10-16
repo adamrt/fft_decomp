@@ -59,7 +59,7 @@ s32 jobstts_ability_build_list(
 extern u16 g_jobstts_menu_list_cursor_anim_state;
 extern s16 g_jobstts_menu_list_scroll_entry_ids;
 extern u8 g_jobstts_menu_palette_image[];
-/* Window right edge; WORLD's twin stores it to g_world_menu_window_right_x. */
+/* Window right edge; WORLD's twin stores it to g_screen_window_right_x. */
 extern s16 g_jobstts_menu_window_right_x;
 
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);

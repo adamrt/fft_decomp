@@ -16,13 +16,13 @@
 typedef enum main_music {
     MAIN_MUSIC_NONE = 0,       /* the *_sound_play_music_tracks functions and the WLDCORE audio queue skip it */
     MAIN_MUSIC_ALTIMA = 19,    /* EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC */
-    MAIN_MUSIC_MILESTONE = 20, /* wldcore_menu_step_discovery_level, in the bar */
+    MAIN_MUSIC_MILESTONE = 20, /* proposition_step_discovery_level, in the bar */
     MAIN_MUSIC_TUTORIAL = 26,  /* the world menu's tutorial screen */
     MAIN_MUSIC_WORLD_MAP = 27,
-    MAIN_MUSIC_SHOP = 28,                         /* world_shop_run_screen: the item shop */
-    MAIN_MUSIC_SOLDIER_OFFICE = 29,               /* world_shop_run_screen */
-    MAIN_MUSIC_FUR_SHOP = 30,                     /* world_shop_run_screen */
-    MAIN_MUSIC_FORMATION = 31,                    /* world_formation_run_screen */
+    MAIN_MUSIC_SHOP = 28,                         /* shop_run_screen: the item shop */
+    MAIN_MUSIC_SOLDIER_OFFICE = 29,               /* shop_run_screen */
+    MAIN_MUSIC_FUR_SHOP = 30,                     /* shop_run_screen */
+    MAIN_MUSIC_FORMATION = 31,                    /* formation_run_screen */
     MAIN_MUSIC_BRAVE_STORY = 32,                  /* the Brave Story screens */
     MAIN_MUSIC_BAR = 33,                          /* the bar of a town */
     MAIN_MUSIC_NEW_GAME = 34,                     /* name and birthday entry of a new game */
@@ -117,11 +117,11 @@ s32 main_sound_update_tunes(void);
 typedef enum main_sound_resource_id {
     MAIN_SOUND_RESOURCE_SYSTEM = 0,        /* SOUND/SYSTEM.SED: main_sfx_e */
     MAIN_SOUND_RESOURCE_ENV = 1,           /* SOUND/ENV.SED: main_env_sfx_e */
-    MAIN_SOUND_RESOURCE_SOUND_NOVEL = 225, /* g_wldcore_sound_novel_sound_resource, 81 sounds */
+    MAIN_SOUND_RESOURCE_SOUND_NOVEL = 225, /* g_sound_novel_sound_resource, 81 sounds */
 } main_sound_resource_id_e;
 
 /* Sound-effect ids passed to main_sound_play_sfx and the module queues that
- * feed it (wldcore_sound_play_effect, world_sound_dispatch_effect and the
+ * feed it (sound_play_effect, screen_sound_dispatch_effect and the
  * g_*_sound_*effect_id globals); every path reaches suzuki_sound_start_sfx with
  * MAIN_SOUND_RESOURCE_SYSTEM in the high 16 bits, so this is one id space.
  * SYSTEM.SED holds MAIN_SFX_COUNT sounds; the ones named here are named
@@ -131,7 +131,7 @@ typedef enum main_sound_resource_id {
 typedef enum main_sfx {
     /* Nothing queued. SYSTEM.SED entry 0 has no streams, so playing it stops
      * the channel pair main_sound_play_sfx uses;
-     * wldcore_menu_step_map_path_level plays it when the path animation ends. */
+     * world_map_step_path_level plays it when the path animation ends. */
     MAIN_SFX_NONE = 0,
     MAIN_SFX_CONFIRM = 1,
     MAIN_SFX_CANCEL = 2,
@@ -151,8 +151,8 @@ typedef enum main_sfx {
      * follows the zoom-target comment in battle_camera_toggle_zoom. The
      * ATTACK deploy screen also plays 0x11 when a placed unit is moved. */
     MAIN_SFX_CAMERA_ZOOM_IN = 14,
-    /* L1/R1 on the world map (wldcore_menu_step_map_cursor_level): 0x10 when
-     * the toggle sets the zoomed-out bit of g_wldcore_map_zoom_motion, 0xf
+    /* L1/R1 on the world map (world_map_step_cursor_level): 0x10 when
+     * the toggle sets the zoomed-out bit of g_world_map_zoom, 0xf
      * when it clears it. */
     MAIN_SFX_WORLD_MAP_ZOOM_IN = 15,
     MAIN_SFX_WORLD_MAP_ZOOM_OUT = 16,
@@ -206,7 +206,7 @@ typedef enum main_sfx {
     MAIN_SFX_DEATH_MONSTER = 70,
     MAIN_SFX_SHIELD_DEFLECT_BULLET = 71, /* gun */
     MAIN_SFX_SHIELD_DEFLECT_ARROW = 73,  /* crossbow, bow */
-    /* Proposition result (g_wldcore_proposition_report.result): 0 plays the
+    /* Proposition result (g_proposition_report.result): 0 plays the
      * 0x4d/0x4e pair through suzuki_sound_play_2_sfx, 1 the 0x4f/0x50 pair,
      * 2 plays 0x51. */
     MAIN_SFX_PROPOSITION_SUCCESS_A = 77,
@@ -221,7 +221,7 @@ typedef enum main_sfx {
     MAIN_SFX_TELEPORT_OUT = 106,
     MAIN_SFX_TELEPORT_IN = 107,
     /* Animation step 4 of the world event-transition sprite
-     * (wldcore_menu_step_event_transition_level): 0x6c in mode 0, which a
+     * (event_transition_step_level): 0x6c in mode 0, which a
      * random encounter pushes, 0x6d in the other spinning modes. */
     MAIN_SFX_EVENT_TRANSITION_MODE_0 = 108,
     MAIN_SFX_EVENT_TRANSITION_MODE_1 = 109,

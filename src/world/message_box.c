@@ -30,15 +30,15 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static u16 g_world_unit_summary_value_cluts[4][2]
+static u16 g_formation_summary_value_cluts[4][2]
     = { 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
 
-static u16 g_world_unit_summary_label_cluts[7][2] = { 0x7efc, 0x7efc, 0x7f3c, 0x7f3c, 0x7f7c, 0x7f7c, 0x7ebd, 0x7efd,
+static u16 g_formation_summary_label_cluts[7][2] = { 0x7efc, 0x7efc, 0x7f3c, 0x7f3c, 0x7f7c, 0x7f7c, 0x7ebd, 0x7efd,
     0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
-static image_load_parameters_t g_world_unit_summary_mode_row_params[4] = { { 0, 0, 2, 2, 0x200, 0 },
+static image_load_parameters_t g_formation_summary_mode_row_params[4] = { { 0, 0, 2, 2, 0x200, 0 },
     { 228, 144, 28, 10, 0xfffe, 0xfffc }, { 204, 144, 24, 10, 0xffff, 0xfffd }, { 232, 64, 24, 8, 0, 0xfffc } };
-static RECT g_world_selected_unit_portrait_rect = { 0, 510, 16, 1 };
-static RECT g_world_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
+static RECT g_formation_selected_unit_portrait_rect = { 0, 510, 16, 1 };
+static RECT g_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
 
 /*
  * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the unit status banner
@@ -105,31 +105,31 @@ void menu_run_unit_status_thread(void) {
     thread = (menu_status_panel_display_thread_t*)g_threads[thread_id].function_parameter_1;
 
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
-        panel = g_world_selected_unit_status_packets;
-        editor = g_world_selected_unit_summary_packets;
-        number_pixels = g_world_selected_unit_stat_text_image;
-        number_images = &g_world_selected_unit_number_text_images;
-        name_image = g_world_selected_unit_name_text_image;
-        number_entries = g_world_selected_unit_number_entries;
+        panel = g_formation_selected_unit_status_packets;
+        editor = g_formation_selected_unit_summary_packets;
+        number_pixels = g_formation_selected_unit_stat_text_image;
+        number_images = &g_formation_selected_unit_number_text_images;
+        name_image = g_formation_selected_unit_name_text_image;
+        number_entries = g_formation_selected_unit_number_entries;
         state = &g_menu_selected_unit_stat_summary;
-        identity = &g_world_selected_unit_identity;
-        transition = &g_world_selected_unit_portrait_rect;
+        identity = &g_formation_selected_unit_identity;
+        transition = &g_formation_selected_unit_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_world_selected_unit_portrait_palettes;
+        portrait_palettes = g_formation_selected_unit_portrait_palettes;
     } else {
-        panel = g_world_comparison_unit_status_packets;
-        editor = g_world_comparison_unit_summary_packets;
-        number_pixels = g_world_comparison_unit_stat_text_image;
-        number_images = &g_world_comparison_unit_number_text_images;
-        name_image = g_world_comparison_unit_name_text_image;
-        number_entries = g_world_comparison_unit_number_entries;
-        state = &g_world_comparison_unit_stat_summary;
-        identity = &g_world_comparison_unit_identity;
-        transition = &g_world_comparison_unit_portrait_rect;
+        panel = g_formation_comparison_unit_status_packets;
+        editor = g_formation_comparison_unit_summary_packets;
+        number_pixels = g_formation_comparison_unit_stat_text_image;
+        number_images = &g_formation_comparison_unit_number_text_images;
+        name_image = g_formation_comparison_unit_name_text_image;
+        number_entries = g_formation_comparison_unit_number_entries;
+        state = &g_formation_comparison_unit_stat_summary;
+        identity = &g_formation_comparison_unit_identity;
+        transition = &g_formation_comparison_unit_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_world_comparison_unit_portrait_palettes;
+        portrait_palettes = g_formation_comparison_unit_portrait_palettes;
     }
     shake = 0;
 
@@ -146,7 +146,7 @@ void menu_run_unit_status_thread(void) {
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
         gfx_init_image_loading(&editor->value_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
-            &g_world_unit_summary_value_sprite_params[frame]);
+            &g_formation_summary_value_sprite_params[frame]);
     }
 
     /* Label 6 is the mode row, chosen by team kind; the unit-join screen always uses row 0. */
@@ -154,22 +154,22 @@ void menu_run_unit_status_thread(void) {
         state->team_kind = 0;
     }
     if (g_menu_post_battle_unit_changes_active == 0) {
-        mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6],
-            &g_world_unit_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
+        mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6],
+            &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
     } else {
-        mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6], g_world_unit_summary_mode_row_params,
+        mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params,
             sizeof(image_load_parameters_t));
     }
     for (frame = 0; frame < 7; frame++) {
         gfx_init_image_loading(&editor->label_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
-            &g_world_unit_summary_label_sprite_params[frame]);
+            &g_formation_summary_label_sprite_params[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
 
     /* The same for the status panel packets. */
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_init_numeric_display_frame_primitives(&g_world_unit_status_panel_origin, &panel->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_formation_status_panel_origin, &panel->numeric_frame);
     menu_init_sprite_array(panel->sprites, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&panel->portrait);
     text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel->sprites, 0);
@@ -177,11 +177,11 @@ void menu_run_unit_status_thread(void) {
     text_configure_sprite_vram(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
     text_configure_sprite_vram(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&panel->sprites[frame], g_editor_numeric_geometry, &g_world_unit_status_panel_origin,
-            &g_world_unit_status_sprite_params[frame]);
+        gfx_init_image_loading(&panel->sprites[frame], g_editor_numeric_geometry, &g_formation_status_panel_origin,
+            &g_formation_status_sprite_params[frame]);
     }
-    gfx_init_image_loading(&panel->portrait, g_editor_numeric_geometry, &g_world_unit_status_panel_origin,
-        &g_world_unit_status_portrait_params);
+    gfx_init_image_loading(&panel->portrait, g_editor_numeric_geometry, &g_formation_status_panel_origin,
+        &g_formation_status_portrait_params);
     if (state->team_kind == 1) {
         panel->portrait.clut = 0x7FFD;
     } else {
@@ -204,14 +204,14 @@ void menu_run_unit_status_thread(void) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
         if (g_menu_post_battle_unit_changes_active == 0) {
-            mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6],
-                &g_world_unit_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
+            mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6],
+                &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
         } else {
-            mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6], g_world_unit_summary_mode_row_params,
+            mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params,
                 sizeof(image_load_parameters_t));
         }
         gfx_init_image_loading(&editor->label_sprites[6], g_editor_numeric_geometry, &g_menu_portrait_origin,
-            &g_world_unit_summary_label_sprite_params[6]);
+            &g_formation_summary_label_sprite_params[6]);
         if (state->team_kind == 1) {
             panel->portrait.clut = 0x7FFD;
         } else {
@@ -227,10 +227,10 @@ void menu_run_unit_status_thread(void) {
             dimmed = 1;
         }
         for (i = 0; i < 4; i++) {
-            editor->value_sprites[i].clut = g_world_unit_summary_value_cluts[i][dimmed];
+            editor->value_sprites[i].clut = g_formation_summary_value_cluts[i][dimmed];
         }
         for (i = 0; i < 7; i++) {
-            editor->label_sprites[i].clut = g_world_unit_summary_label_cluts[i][dimmed];
+            editor->label_sprites[i].clut = g_formation_summary_label_cluts[i][dimmed];
         }
         for (i = 0; i < 7; i++) {
             if (dimmed != 0) {
@@ -354,7 +354,7 @@ void menu_run_unit_status_thread(void) {
         {
             CVECTOR* color;
 
-            color = g_world_unit_panel_bar_colors;
+            color = g_formation_panel_bar_colors;
             for (i = 0; i < 3; i++) {
                 s32 x0;
                 s32 y;
@@ -404,7 +404,7 @@ void menu_run_unit_status_thread(void) {
         if ((frame == 0) || (thread->work != 0)) {
             /* WORLD keeps its identity view (unit index, roster slot) in the shared record. */
             menu_copy_billboard_data_in(&g_menu_selected_unit_stat_summary,
-                (const menu_active_unit_t*)&g_world_selected_unit_identity, &g_world_selected_unit_stat_detail);
+                (const menu_active_unit_t*)&g_formation_selected_unit_identity, &g_formation_selected_unit_stat_detail);
             if (state->list_index < 0) {
                 number_entries[6].format = 0xC00;
             } else {
@@ -413,7 +413,7 @@ void menu_run_unit_status_thread(void) {
             menu_clear_render_buffer(number_pixels, 0x700);
             {
                 g_menu_text_state.pen.stride = 0x38;
-                if (g_world_preview_stats_window_active == 0) {
+                if (g_formation_preview_stats_window_active == 0) {
                     menu_draw_numeric_display_entries(number_pixels, number_entries, &g_menu_text_state.pen, 6);
                 } else {
                     menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], &g_menu_text_state.pen, 1);
@@ -520,7 +520,7 @@ void menu_run_unit_status_thread(void) {
 
 /* Render a message box's lines into its window image with the pen at (8, 8) and upload it; a
  * portrait box builds its tailed window image first, and centered boxes are skipped. */
-static void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record) {
+static void message_box_render_text_image(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
             record->buffer = menu_build_window_image(
@@ -542,13 +542,13 @@ static void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* r
 }
 
 /* Free the message box text slot owned by the current thread, if any, and reset its glyph counter. */
-static void world_text_release_current_message_box_slot(void) {
+static void message_box_release_slot(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        if (g_thread_current_id == g_world_text_message_box_slot_threads[i]) {
-            g_world_text_message_box_slot_threads[i] = 0;
-            g_world_text_message_box_slot_glyph_counters[i] = 0;
+        if (g_thread_current_id == g_message_box_slot_threads[i]) {
+            g_message_box_slot_threads[i] = 0;
+            g_message_box_slot_glyph_counters[i] = 0;
             return;
         }
     }
@@ -560,7 +560,7 @@ static void world_text_release_current_message_box_slot(void) {
  * script counters. The ring byte is read before the phase and the inner bound
  * is `width / 2`, which keeps the per-row recomputation of the target.
  */
-static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y, s32 wait) {
+static void message_box_draw_glyph(s32 x, s32 y, s32 wait) {
     s32 slot;
     s32 i;
     s32 j;
@@ -572,8 +572,8 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
     s32 offset;
 
     /* Only portrait, Check and centered (mode 0) boxes type glyph by glyph; the others just yield. */
-    if (g_world_text_message_box_glyph.mode != DIALOG_BOX_TYPE_PORTRAIT
-        && g_world_text_message_box_glyph.mode != DIALOG_BOX_TYPE_CHECK && g_world_text_message_box_glyph.mode != 0) {
+    if (g_message_box_glyph.mode != DIALOG_BOX_TYPE_PORTRAIT && g_message_box_glyph.mode != DIALOG_BOX_TYPE_CHECK
+        && g_message_box_glyph.mode != 0) {
         thread_yield();
         return;
     }
@@ -582,19 +582,19 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
     for (;;) {
         slot = 0x10;
         for (i = 0; i < 3; i++) {
-            if (g_thread_current_id == g_world_text_message_box_slot_threads[i]) {
+            if (g_thread_current_id == g_message_box_slot_threads[i]) {
                 slot = i;
-                g_world_text_message_box_slot_threads[i] = g_thread_current_id;
+                g_message_box_slot_threads[i] = g_thread_current_id;
                 break;
             }
         }
         if (i == 3) {
             for (j = 0; j < 3; j++) {
-                if (g_world_text_message_box_slot_threads[j] == 0) {
+                if (g_message_box_slot_threads[j] == 0) {
                     slot = j;
-                    g_world_text_message_box_slot_threads[j] = g_thread_current_id;
-                    g_world_text_message_box_slot_carry_offset[slot] = 0;
-                    g_world_text_message_box_slot_prev_width[slot] = 0;
+                    g_message_box_slot_threads[j] = g_thread_current_id;
+                    g_message_box_slot_carry_offset[slot] = 0;
+                    g_message_box_slot_prev_width[slot] = 0;
                     break;
                 }
             }
@@ -605,138 +605,134 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
         thread_yield();
     }
 
-    ring = g_world_text_message_box_slot_glyph_counters[slot];
-    phase = g_world_text_message_box_glyph.x & 3;
-    dst = g_world_text_message_box_glyph_images[slot][ring];
-    src = g_world_text_message_box_previous_images[slot];
+    ring = g_message_box_slot_glyph_counters[slot];
+    phase = g_message_box_glyph.x & 3;
+    dst = g_message_box_glyph_images[slot][ring];
+    src = g_message_box_previous_images[slot];
 
     /* VRAM x counts 4-pixel words: upload enough of them to cover the glyph from its phase in the first. */
-    if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 4
-        || g_world_text_message_box_glyph.glyph == TEXT_SPACE) {
+    if (g_text_glyph_widths[g_message_box_glyph.glyph] == 4 || g_message_box_glyph.glyph == TEXT_SPACE) {
         if (phase == 2) {
             width = 8;
-            g_world_text_message_box_vram_rect.w = 2;
+            g_message_box_vram_rect.w = 2;
         } else {
             width = 4;
-            g_world_text_message_box_vram_rect.w = 1;
+            g_message_box_vram_rect.w = 1;
         }
-    } else if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 2) {
+    } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 2) {
         width = 4;
-        g_world_text_message_box_vram_rect.w = 1;
-    } else if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 6) {
+        g_message_box_vram_rect.w = 1;
+    } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 6) {
         width = 8;
-        g_world_text_message_box_vram_rect.w = 2;
+        g_message_box_vram_rect.w = 2;
     } else {
         width = 12;
-        g_world_text_message_box_vram_rect.w = 3;
+        g_message_box_vram_rect.w = 3;
     }
 
     /* At phase 2 the first word is shared with the previous glyph: carry its byte over. */
     if (phase == 2) {
         for (i = 0; i < 14; i++) {
-            g_world_text_message_box_column_scratch[i]
-                = *(src + (i * g_world_text_message_box_slot_prev_width[slot]) / 2
-                    + g_world_text_message_box_slot_carry_offset[slot]);
+            g_message_box_column_scratch[i]
+                = *(src + (i * g_message_box_slot_prev_width[slot]) / 2 + g_message_box_slot_carry_offset[slot]);
         }
         for (i = 0; i < 14; i++) {
-            dst[i * width / 2] = g_world_text_message_box_column_scratch[i];
+            dst[i * width / 2] = g_message_box_column_scratch[i];
         }
     }
 
     /* Record which byte of this image the next glyph will carry over. */
-    if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 4
-        || g_world_text_message_box_glyph.glyph == TEXT_SPACE) {
+    if (g_text_glyph_widths[g_message_box_glyph.glyph] == 4 || g_message_box_glyph.glyph == TEXT_SPACE) {
         if (phase == 2) {
-            g_world_text_message_box_slot_carry_offset[slot] = 2;
+            g_message_box_slot_carry_offset[slot] = 2;
         } else {
-            g_world_text_message_box_slot_carry_offset[slot] = 1;
+            g_message_box_slot_carry_offset[slot] = 1;
         }
-    } else if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 2) {
+    } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 2) {
         if (phase == 2) {
-            g_world_text_message_box_slot_carry_offset[slot] = 1;
+            g_message_box_slot_carry_offset[slot] = 1;
         } else {
-            g_world_text_message_box_slot_carry_offset[slot] = 0;
+            g_message_box_slot_carry_offset[slot] = 0;
         }
-    } else if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 6) {
+    } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 6) {
         if (phase == 2) {
-            g_world_text_message_box_slot_carry_offset[slot] = 3;
+            g_message_box_slot_carry_offset[slot] = 3;
         } else {
-            g_world_text_message_box_slot_carry_offset[slot] = 2;
+            g_message_box_slot_carry_offset[slot] = 2;
         }
     } else {
         if (phase == 2) {
-            g_world_text_message_box_slot_carry_offset[slot] = 5;
+            g_message_box_slot_carry_offset[slot] = 5;
         } else {
-            g_world_text_message_box_slot_carry_offset[slot] = 4;
+            g_message_box_slot_carry_offset[slot] = 4;
         }
     }
-    g_world_text_message_box_slot_prev_width[slot] = width;
+    g_message_box_slot_prev_width[slot] = width;
 
     /* Fill the rest of the image with background pixels from the glyph sheet, or zero in mode 0. */
     for (j = 0; j < 14; j++) {
         offset = j * width;
         for (i = phase >> 1; i < width / 2; i++) {
-            if (g_world_text_message_box_glyph.mode == 0) {
+            if (g_message_box_glyph.mode == 0) {
                 (dst + i)[offset / 2] = 0;
             } else {
                 (dst + i)[offset / 2] = (g_menu_glyph_sheet->pixels
-                    + ((((g_world_text_message_box_glyph.x + (i << 1)) & 0xF) + 8) / 2))[(j << 7) + 0x400];
+                    + ((((g_message_box_glyph.x + (i << 1)) & 0xF) + 8) / 2))[(j << 7) + 0x400];
             }
         }
     }
 
-    if (g_world_text_message_box_glyph.glyph != TEXT_SPACE) {
-        g_world_text_message_box_state.rect.x = phase;
-        g_world_text_message_box_state.rect.y = 0;
-        g_world_text_message_box_state.stride = width;
-        text_render_glyph_to_4bpp_image(
-            g_text_glyph_bitmap_data + g_world_text_message_box_glyph.glyph * TEXT_GLYPH_BYTES, dst,
-            &g_world_text_message_box_state, g_world_text_message_box_glyph.palette);
-        g_world_text_message_box_vram_rect.x = (x >> 2) + 0x1c0;
-        g_world_text_message_box_vram_rect.y = y;
-        g_world_text_message_box_vram_rect.h = 14;
-        LoadImage(&g_world_text_message_box_vram_rect, (u32*)dst);
+    if (g_message_box_glyph.glyph != TEXT_SPACE) {
+        g_message_box_state.rect.x = phase;
+        g_message_box_state.rect.y = 0;
+        g_message_box_state.stride = width;
+        text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + g_message_box_glyph.glyph * TEXT_GLYPH_BYTES, dst,
+            &g_message_box_state, g_message_box_glyph.palette);
+        g_message_box_vram_rect.x = (x >> 2) + 0x1c0;
+        g_message_box_vram_rect.y = y;
+        g_message_box_vram_rect.h = 14;
+        LoadImage(&g_message_box_vram_rect, (u32*)dst);
     }
     /* Keep this image (14 rows of up to 12 pixels) for the next glyph's carry. */
-    g_world_text_message_box_slot_glyph_counters[slot]++;
+    g_message_box_slot_glyph_counters[slot]++;
     mem_copy_bytes_nonempty(src, dst, 84);
 
     /* Wait 0 only syncs; 2 or more waits that many steps; 1 pauses after every few glyphs as the
      * message speed option sets (holding Circle counts as fast). */
     if (wait == 0) {
         DrawSync(0);
-        g_world_text_message_box_slot_glyph_counters[slot] = 0;
+        g_message_box_slot_glyph_counters[slot] = 0;
     } else if (wait >= 2) {
         for (i = 0; i < wait * (3 - g_script_event_speed); i++) {
             thread_wait_frames(1);
         }
-        g_world_text_message_box_slot_glyph_counters[slot] = 0;
+        g_message_box_slot_glyph_counters[slot] = 0;
     } else {
         if (PadRead(1) & PSX_PAD_CIRCLE) {
-            g_world_text_message_box_glyph_delay = 8;
+            g_message_box_glyph_delay = 8;
         } else if (g_main_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_FAST) {
-            g_world_text_message_box_glyph_delay = 8;
+            g_message_box_glyph_delay = 8;
         } else if (g_main_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_REGULAR) {
-            g_world_text_message_box_glyph_delay = 2;
+            g_message_box_glyph_delay = 2;
         } else {
-            g_world_text_message_box_glyph_delay = 1;
+            g_message_box_glyph_delay = 1;
         }
-        if (g_world_text_message_box_slot_glyph_counters[slot] >= g_world_text_message_box_glyph_delay) {
+        if (g_message_box_slot_glyph_counters[slot] >= g_message_box_glyph_delay) {
             for (i = 0; i < 3 - g_script_event_speed; i++) {
                 thread_wait_frames(1);
             }
-            g_world_text_message_box_slot_glyph_counters[slot] = 0;
+            g_message_box_slot_glyph_counters[slot] = 0;
         }
     }
 
-    if (g_world_text_message_box_glyph.mode != 0) {
+    if (g_message_box_glyph.mode != 0) {
         g_sound_pending_sfx_id = MAIN_SFX_TEXT_GLYPH;
     }
 }
 
 /* Mirror a POLY_FT4 texture horizontally when direction is negative: u0/u1
  * and u2/u3 trade places, each shifted by one texel. */
-static void world_gfx_flip_poly_ft4_u_if_negative(POLY_FT4* poly, s32 direction) {
+static void screen_flip_poly_ft4_u(POLY_FT4* poly, s32 direction) {
     s32 step;
     u8 u;
 
@@ -757,18 +753,17 @@ static void world_gfx_flip_poly_ft4_u_if_negative(POLY_FT4* poly, s32 direction)
 }
 
 /* The menu-screen library's copy of menu_lerp_q12 (the same routine compiled twice). */
-static s32 world_screen_menu_lerp_q12(s32 from, s32 to, s32 t) {
+static s32 screen_lerp_q12(s32 from, s32 to, s32 t) {
     return ((to - from) * t) / ONE + from;
 }
 
 /* Interpolate the four corners of a textured quad between two RECTs. The menu-screen library's copy of
- * menu_lerp_rect_to_poly_ft4; world_menu_animate_window_quads_to_rects calls this one. */
-static void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t) {
-    setXY4(poly, world_screen_menu_lerp_q12(from->x, to->x, t), world_screen_menu_lerp_q12(from->y, to->y, t),
-        world_screen_menu_lerp_q12(from->x + from->w, to->x + to->w, t), world_screen_menu_lerp_q12(from->y, to->y, t),
-        world_screen_menu_lerp_q12(from->x, to->x, t), world_screen_menu_lerp_q12(from->y + from->h, to->y + to->h, t),
-        world_screen_menu_lerp_q12(from->x + from->w, to->x + to->w, t),
-        world_screen_menu_lerp_q12(from->y + from->h, to->y + to->h, t));
+ * menu_lerp_rect_to_poly_ft4; screen_animate_window_quads_to_rects calls this one. */
+static void screen_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t) {
+    setXY4(poly, screen_lerp_q12(from->x, to->x, t), screen_lerp_q12(from->y, to->y, t),
+        screen_lerp_q12(from->x + from->w, to->x + to->w, t), screen_lerp_q12(from->y, to->y, t),
+        screen_lerp_q12(from->x, to->x, t), screen_lerp_q12(from->y + from->h, to->y + to->h, t),
+        screen_lerp_q12(from->x + from->w, to->x + to->w, t), screen_lerp_q12(from->y + from->h, to->y + to->h, t));
 }
 
 /*
@@ -778,7 +773,7 @@ static void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* 
  * growing (its quad area is smaller than the destination area) the sweep runs
  * a little past 0x1000 and then settles back down to it.
  */
-static void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon) {
+static void screen_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon) {
     RECT from_main;
     RECT from_icon;
     s32 quad_area;
@@ -819,11 +814,9 @@ static void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffe
     for (; t <= limit; t += step) {
         for (frame = 0; frame < 3 - g_script_event_speed; frame++) {
             thread_yield();
-            world_screen_menu_lerp_rect_to_poly_ft4(
-                &buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
+            screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
             if (to_icon->x != 0) {
-                world_screen_menu_lerp_rect_to_poly_ft4(
-                    &buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
+                screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
             }
         }
         if (quad_area < target_area) {
@@ -838,11 +831,9 @@ static void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffe
         for (t = limit; t >= ONE; t -= 32) {
             for (frame = 0; frame < 3 - g_script_event_speed; frame++) {
                 thread_yield();
-                world_screen_menu_lerp_rect_to_poly_ft4(
-                    &buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
+                screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
                 if (to_icon->x != 0) {
-                    world_screen_menu_lerp_rect_to_poly_ft4(
-                        &buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
+                    screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
                 }
             }
         }
@@ -851,10 +842,9 @@ static void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffe
     t = ONE;
     for (frame = 0; frame < 3 - g_script_event_speed; frame++) {
         thread_yield();
-        world_screen_menu_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
+        screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
         if (to_icon->x != 0) {
-            world_screen_menu_lerp_rect_to_poly_ft4(
-                &buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
+            screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
         }
     }
 }
@@ -865,7 +855,7 @@ static void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffe
  * center: each frame crops a sprite of the rectangle by the level's
  * percentage and copies the cropped bounds into the quad's corners.
  */
-static void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
+static void screen_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
     SPRT sprite;
     void* source; /* never assigned: a stale $s5 the callee never reads, as in menu_animate_window_quad_crop */
     s32 level;
@@ -913,7 +903,7 @@ static void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffe
  * the loop so loop.c hoists it as an invariant: the resulting spilled
  * constant is what reproduces the target's 0xFFFF reloads and its reload
  * register rotation. */
-void world_text_message_box_thread(void) {
+void message_box_thread(void) {
     text_dialog_record_t rec;
     RECT from;
     RECT to;
@@ -952,7 +942,7 @@ void world_text_message_box_thread(void) {
     thread_set_current_task_id(THREAD_TASK_MESSAGE_BOX);
     value_index = 0;
     script_variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
-    g_world_menu_dialog_waiting = 0;
+    g_screen_dialog_waiting = 0;
     param = thread_get_current_parameter_1();
     rec.box_type = param & 0x70;
     rec.dialog_type = param;
@@ -1037,7 +1027,7 @@ void world_text_message_box_thread(void) {
         to.y = y + 7;
         to.w = 0x1F;
         to.h = 0x30;
-        world_gfx_flip_poly_ft4_u_if_negative(&win->quads[1], -1);
+        screen_flip_poly_ft4_u(&win->quads[1], -1);
     } else {
         to.x = x + rec.width - 0x30;
         to.y = y + 8;
@@ -1050,9 +1040,9 @@ void world_text_message_box_thread(void) {
     win[0].active = 1;
     win[1].active = 1;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-        world_menu_animate_window_quads_to_rects(win, &from, &to);
+        screen_animate_window_quads_to_rects(win, &from, &to);
     } else {
-        world_menu_animate_window_quad_crop_full(win, &from, &to);
+        screen_animate_window_quad_crop(win, &from, &to);
     }
 
     /* From here x and y address the window's image in VRAM, not the screen. */
@@ -1088,7 +1078,7 @@ void world_text_message_box_thread(void) {
             }
             message = thread_get_current_parameter_2();
             if ((message & no_value) == no_value) {
-                g_world_menu_dialog_waiting = 0;
+                g_screen_dialog_waiting = 0;
                 break;
             }
             text = text_find_entry(message);
@@ -1108,7 +1098,7 @@ void world_text_message_box_thread(void) {
             rec.color = 0;
             rec.mark = -1;
             rec.line = 0;
-            g_world_menu_dialog_waiting = 0;
+            g_screen_dialog_waiting = 0;
             width_override = no_value;
             rec.text = message;
             repeat = 0;
@@ -1130,7 +1120,7 @@ void world_text_message_box_thread(void) {
                 break;
             }
             if (code == TEXT_END_WAIT_FOR_CONFIRM) {
-                g_world_menu_dialog_waiting = 1;
+                g_screen_dialog_waiting = 1;
                 /* The end of a substituted string returns to the text that named it. */
                 if (saved != (u8*)-1) {
                     text = saved;
@@ -1195,7 +1185,7 @@ void world_text_message_box_thread(void) {
                                     WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0;
                                     rec.first_line++;
                                     rec.last_line = rec.first_line + rec.lines;
-                                    world_menu_render_text_image_at_fixed_origin(&rec);
+                                    message_box_render_text_image(&rec);
                                 } else {
                                     break;
                                 }
@@ -1310,19 +1300,19 @@ void world_text_message_box_thread(void) {
                     width_override = no_value;
                 }
                 for (i = digits - 1; i >= 0; i--) {
-                    code = value / g_world_text_message_box_digit_divisors[i];
-                    if (value < g_world_text_message_box_digit_divisors[i] && i != 0 && started == 0) {
+                    code = value / g_message_box_digit_divisors[i];
+                    if (value < g_message_box_digit_divisors[i] && i != 0 && started == 0) {
                         code = TEXT_SPACE;
                     } else {
                         started = 1;
-                        value -= code * g_world_text_message_box_digit_divisors[i];
+                        value -= code * g_message_box_digit_divisors[i];
                     }
-                    g_world_text_message_box_glyph.glyph = code;
-                    g_world_text_message_box_glyph.x = cursor_x;
-                    g_world_text_message_box_glyph.y = cursor_y;
-                    g_world_text_message_box_glyph.mode = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;
-                    g_world_text_message_box_glyph.palette = rec.color;
-                    world_text_message_box_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
+                    g_message_box_glyph.glyph = code;
+                    g_message_box_glyph.x = cursor_x;
+                    g_message_box_glyph.y = cursor_y;
+                    g_message_box_glyph.mode = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;
+                    g_message_box_glyph.palette = rec.color;
+                    message_box_draw_glyph(cursor_x, cursor_y, delay);
                     if (code == TEXT_SPACE) {
                         cursor_x += 4;
                     } else {
@@ -1351,12 +1341,12 @@ void world_text_message_box_thread(void) {
                     code = code + *text;
                 }
 
-                g_world_text_message_box_glyph.glyph = code;
-                g_world_text_message_box_glyph.mode = rec.box_type;
-                g_world_text_message_box_glyph.palette = rec.color;
-                g_world_text_message_box_glyph.x = cursor_x;
-                g_world_text_message_box_glyph.y = cursor_y;
-                world_text_message_box_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
+                g_message_box_glyph.glyph = code;
+                g_message_box_glyph.mode = rec.box_type;
+                g_message_box_glyph.palette = rec.color;
+                g_message_box_glyph.x = cursor_x;
+                g_message_box_glyph.y = cursor_y;
+                message_box_draw_glyph(cursor_x, cursor_y, delay);
                 if (code == TEXT_SPACE) {
                     cursor_x += 4;
                 } else {
@@ -1374,12 +1364,12 @@ void world_text_message_box_thread(void) {
         from.x = right;
         from.y = bottom;
         mem_copy_bytes_nonempty(&to, &from, sizeof(to));
-        world_menu_animate_window_quads_to_rects(win, &from, &to);
+        screen_animate_window_quads_to_rects(win, &from, &to);
     }
     win->active = 0;
     menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
-    world_text_release_current_message_box_slot();
+    message_box_release_slot();
     thread_yield();
     thread_exit_current();
 }

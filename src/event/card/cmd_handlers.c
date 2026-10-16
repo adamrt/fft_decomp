@@ -37,7 +37,7 @@ u8* card_draw_textured_quad(u8* command) {
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
  * the interior through menu_opcode_11_draw_tiled_rectangle.
  *
- * CARD copy of world_menu_opcode_00_draw_window_frame: source 2 takes the signed
+ * CARD copy of menu_opcode_00_draw_window_frame: source 2 takes the signed
  * rectangle from the shared window record, other sources use the command's
  * byte operands, and source 1 selects the alternate border texture
  * coordinates. Returns the command that follows.

@@ -12,8 +12,8 @@
 #include "psx/types.h"
 
 /* item lists */
-/* The category argument of world_item_build_category_list,
- * world_shop_build_item_list and equip_item_build_filtered_list. 0 to 4
+/* The category argument of formation_item_build_list,
+ * shop_build_stock_list and equip_item_build_filtered_list. 0 to 4
  * select what fits that equipment slot. The item menus pass their tab + 1 for
  * the first four tabs and OTHER for the fifth; the best-fit builders pass
  * WEAPON or SHIELD for the left hand. */
@@ -27,7 +27,7 @@ typedef enum item_list_filter {
     ITEM_LIST_FILTER_OTHER = 7,
 } item_list_filter_e;
 
-/* The item menus' tabs (g_menu_selected_slot there, g_world_shop_item_category): tabs 0 to 3 (hand, head,
+/* The item menus' tabs (g_menu_selected_slot there, g_shop_item_category): tabs 0 to 3 (hand, head,
  * body, accessory) list filter tab + 1, and this last tab lists ITEM_LIST_FILTER_OTHER. */
 enum { ITEM_MENU_TAB_OTHER = 4 };
 
@@ -37,11 +37,11 @@ typedef enum item_list_mode {
     ITEM_LIST_MODE_MARK_UNEQUIPPABLE = 1,       /* 0x4000 on entries the unit cannot equip; taken as
                                                    EQUIPPABLE unless Show Unequippable Items is on */
     ITEM_LIST_MODE_EQUIPPABLE = 2,              /* entries the unit cannot equip are left out */
-    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3, /* world_item_build_category_list only: as
+    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3, /* formation_item_build_list only: as
                                                    EQUIPPABLE, counting no equipped copies */
 } item_list_mode_e;
 
-/* A key in the list equip_item_sort_id_list and world_item_sort_id_list
+/* A key in the list equip_item_sort_id_list and item_sort_id_list
  * sort by (g_item_type_order_lists); -1 ends
  * the list. TYPE sorts ascending, the others descending. */
 typedef enum item_sort_key {
@@ -53,7 +53,7 @@ typedef enum item_sort_key {
     ITEM_SORT_KEY_HELD_COUNT = 5, /* inventory plus equipped copies */
 } item_sort_key_e;
 
-/* State of the item list screen (g_world_item_menu_mode in the formation
+/* State of the item list screen (g_formation_item_menu_mode in the formation
  * screen, g_equip_menu_substate in EQUIP). Each state's handler returns the
  * next state. */
 typedef enum menu_item_list_state {

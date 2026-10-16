@@ -87,7 +87,7 @@ void text_build_display_message(s32 offset, s32 flags, s32* out_width) {
  * the shared initial/repeat/secondary key-repeat delays. During a tutorial
  * with `EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set the
  * repeat counters restart. */
-void world_menu_input_update_dialog_state(void) {
+void screen_input_update_dialog_state(void) {
     u32 input;
     s32 initial_delay;
     s32 repeat_delay;

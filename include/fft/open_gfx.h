@@ -29,13 +29,13 @@ void open_gfx_restore_frame_bin_page(void);
 
 /* render records */
 /* Render records. window_dispatch_record_list dispatches on flags
- * (world_render_record_flag_e): ANIMATED is a 36-byte record, IMAGE a
+ * (display_object_flag_e): ANIMATED is a 36-byte record, IMAGE a
  * 56-byte record, and a record with BLANK or HIDDEN set is skipped. Each pool
  * holds OPEN_GFX_RENDER_RECORD_CAPACITY entries, and both publish record
  * pointers to one queue, whose leading 32-bit flags select the layout. */
 enum { OPEN_GFX_RENDER_RECORD_CAPACITY = 16 };
 
-/* world_animated_render_record_t.palette of the selected menu entry. */
+/* display_object_animated_t.palette of the selected menu entry. */
 enum { OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE = 9 };
 
 /* CLUT position and source rectangle at +0x24 of a 56-byte record.
@@ -79,15 +79,15 @@ typedef struct open_sprite_prim {
 } open_sprite_prim_t;
 typedef char open_sprite_prim_size_must_be_32[(sizeof(open_sprite_prim_t) == 32) ? 1 : -1];
 
-extern world_animated_render_record_t g_open_gfx_render_records_36[OPEN_GFX_RENDER_RECORD_CAPACITY];
+extern display_object_animated_t g_open_gfx_render_records_36[OPEN_GFX_RENDER_RECORD_CAPACITY];
 extern open_render_record_56_t g_open_gfx_render_records_56[OPEN_GFX_RENDER_RECORD_CAPACITY];
 extern open_render_record_56_position_t g_open_gfx_record_translation[OPEN_GFX_RENDER_RECORD_CAPACITY];
 extern s32 g_open_gfx_next_render_record_36;
 extern s32 g_open_gfx_next_render_record_56;
 extern void* g_open_gfx_render_record_pointers[]; /* the queue both pools publish to */
 extern s32 g_open_gfx_render_record_pointer_count;
-extern world_sprite_animation_sequence_t** g_open_gfx_record_36_animations;
-extern world_sprite_cel_header_t** g_open_gfx_record_36_sprites;
+extern display_object_sequence_t** g_open_gfx_record_36_animations;
+extern display_object_cel_header_t** g_open_gfx_record_36_sprites;
 extern open_sprite_prim_t g_open_gfx_sprite_primitive_pool[2][32];
 extern s32 g_open_gfx_primitive_count;
 

@@ -253,7 +253,7 @@ void equip_text_show_message_with_sound(s32 message_id, s32 sound_id);
 
 /* threads */
 /* Slots of the equip screen's own threads. The WORLD formation screen runs
- * the same threads in other slots (world_thread_slot_e and
+ * the same threads in other slots (screen_thread_slot_e and
  * thread_screen_slot_e); here BATTLE's suspended menu threads stay in 7 and 8. */
 typedef enum equip_thread_slot {
     EQUIP_THREAD_SLOT_POPUP_MENU = 3,         /* the item action and type order menus */

@@ -34,7 +34,7 @@ typedef char map_tile_coordinates_size_must_be_6[sizeof(map_tile_coordinates_t) 
  * g_battle_map_gns_lba. Each is named as its map name text spells it
  * (TEXT_ID_MAP_NAME_BASE + id - 1); a map whose name repeats an earlier one
  * ends in its id. The ten floors of the Deep Dungeon
- * (g_wldcore_deep_dungeon_battles) have one-word names and take that prefix.
+ * (g_deep_dungeon_battles) have one-word names and take that prefix.
  * Maps 0, 116-119 and 125 have a file on the disc and no name; 120-124, 126
  * and 127 have neither. */
 typedef enum map_id {

@@ -280,10 +280,10 @@ void open_title_push_menu_controller(s32 argument) {
     s32 record;
     s32 y;
     s32 controller;
-    wldcore_window_xy_t* positions;
+    window_xy_t* positions;
     point32_t* position;
-    world_animated_render_record_t* records;
-    world_animated_render_record_t* entry;
+    display_object_animated_t* records;
+    display_object_animated_t* entry;
     s32* field;
 
     g_open_system_runtime_flags
@@ -303,7 +303,7 @@ void open_title_push_menu_controller(s32 argument) {
     entry = g_open_gfx_render_records_36;
     records = entry;
     field = &records->position.x;
-    positions = (wldcore_window_xy_t*)field;
+    positions = (window_xy_t*)field;
     g_open_title_menu_states[g_open_current_controller_index].records_36[0] = record;
     g_open_gfx_render_records_36[record].sequence = 0x11;
     g_open_gfx_render_records_36[record].priority = 4;
@@ -332,7 +332,7 @@ void open_title_push_menu_controller(s32 argument) {
     g_open_gfx_render_records_36[record].priority = 4;
     g_open_gfx_render_records_36[record].anim_counter = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
-    g_open_gfx_render_records_36[record].flags |= WORLD_RENDER_RECORD_HIDDEN;
+    g_open_gfx_render_records_36[record].flags |= DISPLAY_OBJECT_HIDDEN;
     position = &g_open_gfx_render_records_36[record].position;
     position->x = 0x60;
     position->y = 0x58;
@@ -356,18 +356,18 @@ void open_title_push_menu_controller(s32 argument) {
 
 /* Show the four title menu entries. */
 static void open_gfx_show_four_render_records(open_title_controller_t* title) {
-    g_open_gfx_render_records_36[title->records_36[1]].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-    g_open_gfx_render_records_36[title->records_36[2]].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-    g_open_gfx_render_records_36[title->records_36[3]].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-    g_open_gfx_render_records_36[title->records_36[4]].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[1]].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[2]].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[3]].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[4]].flags &= ~DISPLAY_OBJECT_HIDDEN;
 }
 
 /* Hide the four title menu entries. */
 static void open_gfx_hide_four_render_records(open_title_controller_t* title) {
-    g_open_gfx_render_records_36[title->records_36[1]].flags |= WORLD_RENDER_RECORD_HIDDEN;
-    g_open_gfx_render_records_36[title->records_36[2]].flags |= WORLD_RENDER_RECORD_HIDDEN;
-    g_open_gfx_render_records_36[title->records_36[3]].flags |= WORLD_RENDER_RECORD_HIDDEN;
-    g_open_gfx_render_records_36[title->records_36[4]].flags |= WORLD_RENDER_RECORD_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[1]].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[2]].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[3]].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_open_gfx_render_records_36[title->records_36[4]].flags |= DISPLAY_OBJECT_HIDDEN;
 }
 
 /* Per-frame handler for the OPEN title menu controller.
@@ -518,7 +518,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             SetDispMask(1);
 
             /* Nothing was loaded: rebuild the title screen and its menu controller. */
-            if (world_card_run_menu_screen(0) == 0) {
+            if (save_run_screen(0) == 0) {
                 g_open_file_current_openbk_image_id = -1;
                 open_file_request_openbk_image(0, g_open_file_destination);
                 file_wait_for_pending();
@@ -773,7 +773,7 @@ void open_title_step_new_game_start(open_controller_record_t* record) {
 
     if (state->step == 4) {
         open_title_init_new_game_party(0, 0);
-        world_menu_init_with_open_text();
+        screen_init_with_open_text();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */
         if (g_main_gfx_active_buffer_index != 0) {
@@ -805,7 +805,7 @@ void open_title_step_new_game_start(open_controller_record_t* record) {
         DrawSync(0);
 
         g_open_file_current_openbk_image_id = -1;
-        name = world_name_run_entry_screen(text_find_entry(TEXT_ID_UNIT_NAME_SPECIAL_BASE), g_open_file_destination);
+        name = name_entry_run_screen(text_find_entry(TEXT_ID_UNIT_NAME_SPECIAL_BASE), g_open_file_destination);
         party = main_party_get_unit(0);
         memcpy(party->name, name, sizeof(party->name));
         g_open_current_controller_index -= 1;
@@ -874,7 +874,7 @@ static void open_birthday_push_date_controller(void) {
 
     controller = g_open_current_controller_index;
     g_open_gfx_render_records_56[g_open_controller_records_next[controller].birthday_date.window_record_56].flags
-        |= WORLD_RENDER_RECORD_POP_IN;
+        |= DISPLAY_OBJECT_POP_IN;
     g_open_gfx_render_records_36[g_open_controller_records_next[controller].birthday_date.cursor_record_36].position.x
         = g_open_gfx_render_records_56[g_open_controller_records_next[controller].birthday_date.window_record_56].x
         + 0x46;
@@ -930,7 +930,7 @@ static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     translation->x = -(quad.w / 2);
     translation->y = -0x10;
     g_open_gfx_render_records_56[index].ot_layer = 4;
-    g_open_gfx_render_records_56[index].flags &= ~WORLD_RENDER_RECORD_POP_IN;
+    g_open_gfx_render_records_56[index].flags &= ~DISPLAY_OBJECT_POP_IN;
 }
 
 /* Restore the date-selection records after leaving the confirmation prompt. */
@@ -1004,7 +1004,7 @@ static void open_birthday_build_confirmation_menu(open_birthday_date_state_t* st
  * entered. */
 void open_birthday_handle_menu_input(open_controller_record_t* record) {
     open_birthday_date_state_t* menu = &record->birthday_date;
-    if (g_open_gfx_render_records_56[menu->window_record_56].flags & WORLD_RENDER_RECORD_POP_IN) {
+    if (g_open_gfx_render_records_56[menu->window_record_56].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -1225,7 +1225,7 @@ void open_gfx_init_window_frame_record(s32 index, RECT quad, s32 depth, u16* ima
     s32 scaled;
 
     g_open_gfx_render_records_56[index].flags
-        &= ~(WORLD_RENDER_RECORD_8BIT_CLUT | WORLD_RENDER_RECORD_BLANK | WORLD_RENDER_RECORD_HIDDEN);
+        &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
     g_open_gfx_render_records_56[index].x = quad.x - 0x80;
     g_open_gfx_render_records_56[index].y = quad.y - 0x78;
     g_open_gfx_render_records_56[index].depth = depth;
@@ -1240,7 +1240,7 @@ void open_gfx_init_window_frame_record(s32 index, RECT quad, s32 depth, u16* ima
     color = &g_open_gfx_render_records_56[index].color;
     color->b = color->g = color->r = 0x80;
     g_open_gfx_render_records_56[index].pop_in_step = 0;
-    world_menu_build_window_frame_image(quad.w, quad.h, image);
+    screen_build_window_frame_image(quad.w, quad.h, image);
 }
 
 /* Upload a window record's image to its place in VRAM.

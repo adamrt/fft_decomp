@@ -1208,37 +1208,37 @@ static void script_route_event_input(void) {
     u32 previous_input;
     u32 counter;
 
-    if (g_thread_current_id != WORLD_THREAD_SLOT_TUTORIAL_TEXT) {
+    if (g_thread_current_id != SCREEN_THREAD_SLOT_TUTORIAL_TEXT) {
         return;
     }
-    input = world_input_get_tutorial_buttons();
+    input = tutorial_get_buttons();
     if (input == 0) {
-        g_world_event_initial_repeat_counter = 0;
-        g_world_event_repeat_counter = 0;
-        g_world_event_secondary_repeat_counter = 0;
+        g_script_initial_repeat_counter = 0;
+        g_script_repeat_counter = 0;
+        g_script_secondary_repeat_counter = 0;
     }
 
-    previous_input = g_world_event_current_input;
-    g_world_event_current_input = input;
+    previous_input = g_script_current_input;
+    g_script_current_input = input;
     g_script_event_current_input = input;
     g_script_event_input = 0;
-    g_world_event_previous_input = previous_input;
+    g_script_previous_input = previous_input;
 
     if (previous_input != input || (input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK)) == 0) {
         g_script_event_input = ~previous_input & input;
-        g_world_event_initial_repeat_counter = 0;
+        g_script_initial_repeat_counter = 0;
     } else {
         initial_delay = g_main_input_repeat_initial_delay / g_script_event_speed;
-        counter = ++g_world_event_initial_repeat_counter;
+        counter = ++g_script_initial_repeat_counter;
         if (counter == initial_delay) {
             g_script_event_input = input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK);
         }
         if (counter >= initial_delay) {
             repeat_delay = g_main_input_repeat_period / g_script_event_speed;
-            counter = ++g_world_event_repeat_counter;
-            g_world_event_secondary_repeat_counter++;
+            counter = ++g_script_repeat_counter;
+            g_script_secondary_repeat_counter++;
             if (counter >= repeat_delay) {
-                g_world_event_repeat_counter = 0;
+                g_script_repeat_counter = 0;
                 if ((input & PSX_PAD_SQUARE) != 0) {
                     g_script_event_input = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
@@ -1246,18 +1246,18 @@ static void script_route_event_input(void) {
                 }
             }
             secondary_repeat_delay = g_main_input_secondary_repeat_period / g_script_event_speed;
-            if (g_world_event_secondary_repeat_counter >= secondary_repeat_delay) {
-                g_world_event_secondary_repeat_counter = 0;
-                if ((g_world_event_current_input & PSX_PAD_SQUARE) != 0) {
+            if (g_script_secondary_repeat_counter >= secondary_repeat_delay) {
+                g_script_secondary_repeat_counter = 0;
+                if ((g_script_current_input & PSX_PAD_SQUARE) != 0) {
                     g_script_event_input
-                        |= g_world_event_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
+                        |= g_script_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
-                    g_script_event_input |= g_world_event_current_input & (PSX_PAD_L1 | PSX_PAD_R1);
+                    g_script_event_input |= g_script_current_input & (PSX_PAD_L1 | PSX_PAD_R1);
                 }
             }
         } else {
-            g_world_event_repeat_counter = 0;
-            g_world_event_secondary_repeat_counter = 0;
+            g_script_repeat_counter = 0;
+            g_script_secondary_repeat_counter = 0;
         }
     }
 }
@@ -1503,7 +1503,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         LoadImage(&rect, (u32*)g_main_heap_high_overlay_load_address);
     }
     g_gfx_current_otag_entry = ot;
-    gfx_submit_screen_fade_overlay(&g_world_screen_tint_tiles[g_menu_packet_buffer_index], g_gfx_screen_fade);
+    gfx_submit_screen_fade_overlay(&g_screen_tint_tiles[g_menu_packet_buffer_index], g_gfx_screen_fade);
     camera_store_state_to_script_variables();
     menu_draw_active_window_frames();
 
@@ -1557,7 +1557,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
         g_script_unfiltered_controller_input = g_script_event_input;
         script_apply_input_overrides(&g_script_event_input);
-        g_world_script_saved_event_input = g_script_event_input;
+        g_script_saved_event_input = g_script_event_input;
         script_set_variable(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
     }
     if (g_world_map_reload_state >= 3) {
@@ -1581,8 +1581,8 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     g_event_pending_unit_vram_copy = -1;
     g_event_pending_reserved_vram_release_slot = -1;
     g_event_map_jump_in_request = 0;
-    g_world_3d_object_use_request = 0;
-    g_world_field_object_use_request = 0;
+    g_script_3d_object_use_request = 0;
+    g_script_field_object_use_request = 0;
 
     if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
         ordering_table = jobstts_entrypoint(g_menu_selected_unit.battle_id, 0);

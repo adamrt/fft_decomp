@@ -18,7 +18,7 @@
  * A normal shop selects items whose big-endian availability mask contains the
  * requested shop bit and whose required progression does not exceed the
  * shop item availability script variable. Shop ids from
- * WORLD_MENU_CONTEXT_FUR_SHOP (100) up select the poached items in stock.
+ * SCREEN_CONTEXT_FUR_SHOP (100) up select the poached items in stock.
  * Entries the selected unit cannot equip are hidden or marked with 0x4000,
  * according to mode and the Show Unequippable Items option.
  *
@@ -39,7 +39,7 @@
  *     computes `ori s0,s2,0x4000` with distinct source and destination; the
  *     compound form makes the destination self-referencing (`ori s0,s0`).
  */
-s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode) {
+s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode) {
     s32 count;
     s32 item_id;
     register s32 entry __asm__("$16");
@@ -79,7 +79,7 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
         }
     }
 
-    if (shop_id < WORLD_MENU_CONTEXT_FUR_SHOP) {
+    if (shop_id < SCREEN_CONTEXT_FUR_SHOP) {
         s32 progression;
         s32 shop_mask;
 
@@ -93,7 +93,7 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
             if (primary_category != item_category && secondary_category != item_category) {
                 continue;
             }
-            if (!((g_world_shop_item_availability[item_id].low | (g_world_shop_item_availability[item_id].high << 8))
+            if (!((g_shop_item_availability[item_id].low | (g_shop_item_availability[item_id].high << 8))
                     & shop_mask)) {
                 continue;
             }
@@ -101,7 +101,7 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
                 continue;
             }
             if (mode != ITEM_LIST_MODE_ALL) {
-                can_equip = world_unit_can_equip_item_id(unit_id, item_id);
+                can_equip = equipment_can_equip_item(unit_id, item_id);
                 if (mode == ITEM_LIST_MODE_EQUIPPABLE && can_equip == -1) {
                     continue;
                 }
@@ -119,11 +119,11 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
             if (primary_category != item_category && secondary_category != item_category) {
                 continue;
             }
-            if (world_shop_adjust_poached_item_quantity(item_id, 0) == 0) {
+            if (fur_shop_adjust_stock(item_id, 0) == 0) {
                 continue;
             }
             if (mode != ITEM_LIST_MODE_ALL) {
-                can_equip = world_unit_can_equip_item_id(unit_id, item_id);
+                can_equip = equipment_can_equip_item(unit_id, item_id);
                 if (mode == ITEM_LIST_MODE_EQUIPPABLE && can_equip == -1) {
                     continue;
                 }
@@ -137,6 +137,6 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
     }
 
     entries[count] = -1;
-    world_item_sort_id_list(6, entries);
+    item_sort_id_list(6, entries);
     return count;
 }

@@ -15,13 +15,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static u32 g_world_tutorial_repeat_counters[16] = { 0 };
-static u16 g_world_tutorial_previous_input = 0;
+static u32 g_tutorial_repeat_counters[16] = { 0 };
+static u16 g_tutorial_previous_input = 0;
 
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
  *
- * Twin of world_input_update_controller (card_save.c) with its own edge latch,
+ * Twin of screen_input_update_pad (card_save.c) with its own edge latch,
  * single-button latch, activation timer, previous-state and counter arrays;
  * the secondary repeat period is two frames longer.
  *
@@ -31,7 +31,7 @@ static u16 g_world_tutorial_previous_input = 0;
  * the activation timer reaches 4 (VSyncs), except a D-pad press, which counts
  * at once.
  */
-static void world_tutorial_update_controller_input(void) {
+static void tutorial_update_input(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -46,37 +46,37 @@ static void world_tutorial_update_controller_input(void) {
     initial_delay = g_main_input_repeat_initial_delay / speed;
     repeat_period = g_main_input_repeat_period / speed;
     secondary_repeat_period = g_main_input_secondary_repeat_period / speed + 2;
-    current_input = world_menu_input_read_tutorial_or_controller(0);
+    current_input = screen_input_read(0);
     if (current_input & PSX_PAD_TRIANGLE) {
-        if (g_world_input_triangle_latched != 0) {
+        if (g_screen_input_triangle_latched != 0) {
             menu_input_clear_state();
         } else {
-            g_world_input_triangle_latched = 1;
+            g_screen_input_triangle_latched = 1;
             g_menu_input_newly_pressed = PSX_PAD_TRIANGLE;
             g_menu_input_secondary_repeat = PSX_PAD_TRIANGLE;
             g_menu_input_primary_repeat = PSX_PAD_TRIANGLE;
         }
     } else {
-        g_world_input_triangle_latched = 0;
+        g_screen_input_triangle_latched = 0;
         {
-            u16 previous_latch = g_world_tutorial_latched_button;
+            u16 previous_latch = g_tutorial_latched_button;
             u32 latched_input = current_input & previous_latch;
             if (latched_input != 0) {
                 current_input = latched_input;
             } else if (current_input == 0) {
-                g_world_tutorial_latched_button = 0;
-                g_world_tutorial_activation_timer += speed;
+                g_tutorial_latched_button = 0;
+                g_tutorial_activation_timer += speed;
             } else {
-                if (g_world_tutorial_activation_timer < 4) {
+                if (g_tutorial_activation_timer < 4) {
                     u32 priority_input = current_input & PSX_PAD_DPAD_MASK;
 
                     if (priority_input != 0) {
                         current_input = priority_input;
-                        g_world_tutorial_activation_timer = 10;
+                        g_tutorial_activation_timer = 10;
                     }
                 }
-                if (g_world_tutorial_activation_timer >= 4) {
-                    g_world_tutorial_activation_timer = 0;
+                if (g_tutorial_activation_timer >= 4) {
+                    g_tutorial_activation_timer = 0;
                     index = 0;
                     {
                         s32 bit_base = 1;
@@ -87,38 +87,38 @@ static void world_tutorial_update_controller_input(void) {
                             index++;
                             if (matched_input != 0) {
                                 current_input = matched_input;
-                                g_world_tutorial_latched_button = bit;
+                                g_tutorial_latched_button = bit;
                             }
                         } while (index < 16);
                     }
                 } else {
                     current_input = 0;
-                    g_world_tutorial_latched_button = 0;
+                    g_tutorial_latched_button = 0;
                 }
             }
         }
         filtered_input = current_input;
-        if (g_world_tutorial_activation_timer >= 10) {
-            g_world_tutorial_activation_timer = 10;
+        if (g_tutorial_activation_timer >= 10) {
+            g_tutorial_activation_timer = 10;
         }
         g_menu_input_newly_pressed = filtered_input;
         for (index = 0; index < 16; index++) {
             s32 mask = 1U << index;
 
             if (mask & g_menu_input_newly_pressed) {
-                if (mask & g_world_tutorial_previous_input) {
+                if (mask & g_tutorial_previous_input) {
                     g_menu_input_newly_pressed &= ~mask;
                 } else {
-                    g_world_tutorial_previous_input |= mask;
+                    g_tutorial_previous_input |= mask;
                 }
             } else {
-                g_world_tutorial_previous_input &= ~mask;
+                g_tutorial_previous_input &= ~mask;
             }
         }
         /* Auto-repeat for the shoulder buttons (bits 0-3) and the D-pad (bits 12-15); the
          * face buttons, Select and Start (bits 4-11) skip the counters and report only new
          * presses. Bits 16-31 flag a button held past the initial delay. */
-        counter_base = g_world_tutorial_repeat_counters;
+        counter_base = g_tutorial_repeat_counters;
         for (index = 0; index < 16; index++) {
             if (index == 4) {
                 index = 12;
@@ -150,8 +150,8 @@ static void world_tutorial_update_controller_input(void) {
             g_menu_input_secondary_repeat = filtered_input;
         }
     }
-    g_world_input_primary_repeat_latched = g_menu_input_primary_repeat;
-    g_world_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
+    g_screen_input_primary_repeat_latched = g_menu_input_primary_repeat;
+    g_screen_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
 }
 
 /*
@@ -165,38 +165,38 @@ static void world_tutorial_update_controller_input(void) {
  * thread is not running, the input lock and the held-loop sound release are
  * cleared.
  */
-void world_menu_input_update_with_message_state(void) {
+void menu_input_update_with_message_state(void) {
     s32 running = 0;
     s32 step;
     u8 value;
 
-    world_tutorial_update_controller_input();
+    tutorial_update_input();
     step = menu_get_window_scale_step();
     if (step >= 1 && step <= 3) {
         menu_input_clear_state();
     } else {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
-        if (running != 0 || g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
+        if (running != 0 || g_screen_grid_id != MENU_GRID_HELP_NONE) {
             menu_input_clear_state();
             if (running != 0 && g_menu_input_lock_mode != 0) {
                 value = 1;
-                if (g_world_text_task_phase != 0) {
+                if (g_screen_text_task_phase != 0) {
                     value = 2;
                 }
-                g_world_text_task_phase = value;
+                g_screen_text_task_phase = value;
             } else {
-                g_world_text_task_phase = 0;
+                g_screen_text_task_phase = 0;
             }
-        } else if (g_world_text_task_phase != 0 || world_gfx_get_fade_state() != WORLD_FADE_STATE_NONE) {
-            g_world_text_task_phase = 0;
+        } else if (g_screen_text_task_phase != 0 || screen_fade_get_state() != SCREEN_FADE_STATE_NONE) {
+            g_screen_text_task_phase = 0;
             menu_input_clear_state();
         }
     }
     if (running == 0) {
         g_menu_input_lock_mode = 0;
-        g_world_sound_release_held_loop = 0;
+        g_screen_sound_release_held_loop = 0;
     }
-    if (g_world_text_task_phase == 1) {
+    if (g_screen_text_task_phase == 1) {
         g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
     }
 }

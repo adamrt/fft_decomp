@@ -36,46 +36,46 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void wldcore_finalize_loop(void);
-static void wldcore_gfx_draw_world_frame_with_map(void);
-static void wldcore_gfx_init_subsystem(void);
-static s32 wldcore_handle_exit_request(void);
-static void wldcore_init_runtime_state(void);
-static void wldcore_init_subsystems(void);
-static void wldcore_init_world_map_state(void);
-static void wldcore_menu_restore_level_on_world_entry(void);
-static void wldcore_gfx_update_map_backdrop(void);
+static void world_map_finalize_loop(void);
+static void world_map_draw_frame_with_map(void);
+static void world_map_init_gfx(void);
+static s32 world_map_handle_exit_request(void);
+static void world_map_init_screen(void);
+static void world_map_init_subsystems(void);
+static void world_map_init_state(void);
+static void world_map_restore_entry_level(void);
+static void world_map_update_backdrop(void);
 
 /* WLDCORE's main loop: set up, fade in and run world-map frames until a menu level
  * stops it, then return why as a main_world_result_e. A card-menu restart loops
  * instead. */
-s32 wldcore_entrypoint(void) {
+s32 world_map_entrypoint(void) {
     s32 buffer_index;
 
     for (;;) {
-        if (wldcore_handle_exit_request() != 0) {
+        if (world_map_handle_exit_request() != 0) {
             return 0;
         }
-        wldcore_init_subsystems();
-        wldcore_fade_start_screen(0, 0x10);
+        world_map_init_subsystems();
+        world_map_fade_start(0, 0x10);
         for (;;) {
             if ((g_main_system_flags & MAIN_SYSTEM_FLAG_RUNNING) == 0) {
                 break;
             }
             main_file_poll_load(&g_main_file_cd_state);
-            wldcore_sound_process_audio_queue();
+            audio_queue_process();
             /* Each display buffer has its own 0xE000-byte GS packet area. */
             buffer_index = GsGetActiveBuff();
             g_main_gfx_active_buffer_index = buffer_index;
-            GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
-            wldcore_fade_step_screen();
-            wldcore_map_pulse_dot_colors();
-            wldcore_menu_dispatch_idle_handler();
-            wldcore_gfx_update_map_backdrop();
+            GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
+            world_map_fade_step();
+            world_map_pulse_dots();
+            menu_stack_dispatch_idle();
+            world_map_update_backdrop();
             if (g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) {
-                wldcore_gfx_draw_world_frame_with_map();
+                world_map_draw_frame_with_map();
             } else {
-                wldcore_gfx_draw_world_frame();
+                world_map_draw_frame();
             }
             if (g_main_system_flags & MAIN_SYSTEM_FLAG_DISPLAY_OFF) {
                 SetDispMask(0);
@@ -87,7 +87,7 @@ s32 wldcore_entrypoint(void) {
         if (g_main_system_flags & MAIN_SYSTEM_FLAG_RESTART) {
             continue;
         }
-        wldcore_finalize_loop();
+        world_map_finalize_loop();
         {
             s32 flags = g_main_system_flags;
 
@@ -118,21 +118,21 @@ s32 wldcore_entrypoint(void) {
 }
 
 /* When MAIN_SYSTEM_FLAG_DRAW_MAP goes from set to clear, capture the map
- * backdrop again (wldcore_gfx_capture_map_backdrop) for the frames that no longer redraw the
+ * backdrop again (world_map_capture_backdrop) for the frames that no longer redraw the
  * map. */
-static void wldcore_gfx_update_map_backdrop(void) {
+static void world_map_update_backdrop(void) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) == 0
-        && (g_wldcore_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) != 0) {
-        wldcore_gfx_capture_map_backdrop();
+        && (g_world_map_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) != 0) {
+        world_map_capture_backdrop();
     }
-    g_wldcore_previous_system_flags = g_main_system_flags;
+    g_world_map_previous_system_flags = g_main_system_flags;
 }
 
 /* Capture the map backdrop: draw the map tiles, routes, dots and auxiliary
- * records once, store the drawn image in g_wldcore_scratch_buffer (which
- * wldcore_gfx_draw_world_frame uploads behind each later frame), then draw
+ * records once, store the drawn image in g_world_map_scratch_buffer (which
+ * world_map_draw_frame uploads behind each later frame), then draw
  * the menu frame over it. */
-void wldcore_gfx_capture_map_backdrop(void) {
+void world_map_capture_backdrop(void) {
     RECT rect;
     s32 buffer_index;
 
@@ -141,34 +141,34 @@ void wldcore_gfx_capture_map_backdrop(void) {
     GsSwapDispBuff();
     buffer_index = GsGetActiveBuff();
     g_main_gfx_active_buffer_index = buffer_index;
-    GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
-    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_menu_draw_event_transition_sprite(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
+    GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    event_transition_draw_sprite(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     /* The map passes run with the stack moved into the 1 KB scratchpad, starting
      * at its last word. */
-    wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_project_and_cull_dots();
-    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index],
-        g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    wldcore_restore_previous_stack();
-    GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_switch_to_stack(getScratchAddr(255));
+    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_project_dots();
+    window_dispatch_record_list(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index],
+        g_window_aux_render_object_queue, g_window_aux_render_object_count);
+    world_map_restore_previous_stack();
+    GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
-    wldcore_gfx_set_display_rect(g_main_gfx_active_buffer_index, &rect);
-    StoreImage(&rect, g_wldcore_scratch_buffer);
+    world_map_set_display_rect(g_main_gfx_active_buffer_index, &rect);
+    StoreImage(&rect, g_world_map_scratch_buffer);
     DrawSync(0);
-    g_wldcore_loaded_background_set = -1;
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_update_camera_direction_and_projection();
-    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_draw_location_label(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
-        g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    g_picture_background_loaded_set = -1;
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_update_camera();
+    world_map_run_world_menus(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    hud_draw_value(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index],
+        g_window_render_object_queue, g_window_render_object_count);
+    GsDrawOt(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
 }
 
@@ -177,39 +177,39 @@ void wldcore_gfx_capture_map_backdrop(void) {
  * map dots and menus into the main one, then sorts the auxiliary table's
  * clear, draws both tables and clears MAIN_SYSTEM_FLAG_DRAW_MAP. The map and
  * HUD passes run on the scratchpad stack. Sibling of
- * wldcore_gfx_draw_world_frame. */
-static void wldcore_gfx_draw_world_frame_with_map(void) {
-    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_menu_draw_event_transition_sprite(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_map_project_and_cull_tiles();
-    wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_restore_previous_stack();
-    wldcore_map_step_route_travel();
-    wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_draw_path_animation(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_project_and_cull_dots();
-    wldcore_map_update_camera_direction_and_projection();
-    wldcore_restore_previous_stack();
-    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_draw_location_label(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index],
-        g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
-        g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
-    wldcore_restore_previous_stack();
+ * world_map_draw_frame. */
+static void world_map_draw_frame_with_map(void) {
+    GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    event_transition_draw_sprite(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_switch_to_stack(getScratchAddr(255));
+    world_map_project_tiles();
+    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_restore_previous_stack();
+    travel_step();
+    world_map_switch_to_stack(getScratchAddr(255));
+    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_draw_path_animation(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_project_dots();
+    world_map_update_camera();
+    world_map_restore_previous_stack();
+    world_map_run_world_menus(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_switch_to_stack(getScratchAddr(255));
+    hud_draw_value(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index],
+        g_window_aux_render_object_queue, g_window_aux_render_object_count);
+    window_dispatch_record_list(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index],
+        g_window_render_object_queue, g_window_render_object_count);
+    world_map_restore_previous_stack();
     DrawSync(0);
-    wldcore_input_update_controller();
+    world_map_read_pad();
     VSync(0);
     GsSwapDispBuff();
-    GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
     g_main_system_flags &= ~MAIN_SYSTEM_FLAG_DRAW_MAP;
 }
 
@@ -218,55 +218,55 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
  * VSync and, unless MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE is set, uploads the
  * captured map backdrop to the new draw buffer before drawing the ordering
  * table over it. */
-void wldcore_gfx_draw_world_frame(void) {
+void world_map_draw_frame(void) {
     RECT rect;
 
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
-    wldcore_menu_draw_event_transition_sprite(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_draw_location_label(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
-        g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
-    wldcore_fade_draw_screen_overlays();
-    wldcore_restore_previous_stack();
+    event_transition_draw_sprite(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_run_world_menus(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_switch_to_stack(getScratchAddr(255));
+    hud_draw_value(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index],
+        g_window_render_object_queue, g_window_render_object_count);
+    world_map_fade_draw_boxes();
+    world_map_restore_previous_stack();
     DrawSync(0);
-    wldcore_input_update_controller();
+    world_map_read_pad();
     VSync(0);
     GsSwapDispBuff();
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE)) {
-        wldcore_gfx_set_display_rect(g_main_gfx_active_buffer_index == 0, &rect);
-        LoadImage(&rect, g_wldcore_scratch_buffer);
+        world_map_set_display_rect(g_main_gfx_active_buffer_index == 0, &rect);
+        LoadImage(&rect, g_world_map_scratch_buffer);
     }
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
 }
 
 /* Initialize the WLDCORE subsystems before entering the world loop, ending
  * with the menu level the world entry opens. */
-static void wldcore_init_subsystems(void) {
+static void world_map_init_subsystems(void) {
     SetDispMask(0);
-    wldcore_init_world_map_state();
-    wldcore_input_init_repeat_state();
-    wldcore_map_load_texture();
-    wldcore_gfx_init_subsystem();
+    world_map_init_state();
+    world_map_init_input_repeat();
+    world_map_load_texture();
+    world_map_init_gfx();
     window_init_record_pools();
-    wldcore_map_init_tile_atlas();
-    wldcore_system_init_world_menus_and_date();
-    wldcore_map_init_dots();
-    wldcore_map_init_stub();
-    wldcore_map_init_location_marker_and_camera();
-    wldcore_menu_reset_stack();
-    wldcore_init_runtime_state();
-    wldcore_menu_restore_level_on_world_entry();
+    world_map_init_tile_atlas();
+    world_map_init_menus_and_date();
+    world_map_init_dots();
+    world_map_init_stub();
+    world_map_init_marker_and_camera();
+    menu_stack_reset();
+    world_map_init_screen();
+    world_map_restore_entry_level();
 }
 
 /* Clear the whole 256x480 frame buffer, then install the draw-clip rectangle
  * for the requested world-map layout: mode 0 leaves an 8-pixel top margin and
  * a 252x228 area, any other mode uses the full 256x238 screen. */
-void wldcore_clear_screen_and_set_map_clip_rect(s32 mode) {
+void world_map_clear_screen_and_set_clip_rect(s32 mode) {
     RECT rect;
 
     rect.x = 0;
@@ -298,23 +298,23 @@ void wldcore_clear_screen_and_set_map_clip_rect(s32 mode) {
  * length is a power of two: the auxiliary tables have 4 entries and the main
  * tables 16.
  */
-static void wldcore_gfx_init_subsystem(void) {
+static void world_map_init_gfx(void) {
     SetDispMask(0);
     GsInitGraph2(256, 240, 4, 0, 0);
     GsDefDispBuff(0, 0, 0, 240);
     GsInit3D();
     SetGeomOffset(0, 0);
-    wldcore_clear_screen_and_set_map_clip_rect(0);
+    world_map_clear_screen_and_set_clip_rect(0);
 
-    g_wldcore_gfx_aux_ordering_tables[1].length = 2;
-    g_wldcore_gfx_aux_ordering_tables[0].length = 2;
-    g_wldcore_gfx_aux_ordering_tables[0].org = g_wldcore_gfx_aux_ot_tags[0];
-    g_wldcore_gfx_aux_ordering_tables[1].org = g_wldcore_gfx_aux_ot_tags[1];
+    g_world_map_aux_ordering_tables[1].length = 2;
+    g_world_map_aux_ordering_tables[0].length = 2;
+    g_world_map_aux_ordering_tables[0].org = g_world_map_aux_ot_tags[0];
+    g_world_map_aux_ordering_tables[1].org = g_world_map_aux_ot_tags[1];
 
-    g_wldcore_gfx_ordering_tables[1].length = 4;
-    g_wldcore_gfx_ordering_tables[0].length = 4;
-    g_wldcore_gfx_ordering_tables[0].org = g_wldcore_gfx_ot_tags[0];
-    g_wldcore_gfx_ordering_tables[1].org = g_wldcore_gfx_ot_tags[1];
+    g_world_map_ordering_tables[1].length = 4;
+    g_world_map_ordering_tables[0].length = 4;
+    g_world_map_ordering_tables[0].org = g_world_map_ot_tags[0];
+    g_world_map_ordering_tables[1].org = g_world_map_ot_tags[1];
 }
 
 /* Resets state used when entering the world map.
@@ -322,7 +322,7 @@ static void wldcore_gfx_init_subsystem(void) {
  * The target derives each fade box's 32-bit attribute through the record base
  * while it walks the rectangle fields separately.
  */
-static void wldcore_init_world_map_state(void) {
+static void world_map_init_state(void) {
     menu_cursor_state_t* cursor;
     GsBOXF* box;
     party_unit_t* party;
@@ -333,34 +333,34 @@ static void wldcore_init_world_map_state(void) {
     s32 day;
     s32 i;
 
-    g_wldcore_scratch_buffer = (u32*)0x801d0000;
-    g_wldcore_loaded_message_block = -1;
-    g_wldcore_loaded_picture_set = -1;
-    g_wldcore_menu_ordering_table_offset = 1;
-    g_wldcore_screen_brightness_rgb.r = 0x80;
-    g_wldcore_screen_brightness_rgb.g = 0x80;
-    g_wldcore_screen_brightness_rgb.b = 0x80;
-    g_wldcore_previous_system_flags = 0;
+    g_world_map_scratch_buffer = (u32*)0x801d0000;
+    g_message_block_loaded = -1;
+    g_picture_loaded_set = -1;
+    g_menu_stack_ot_offset = 1;
+    g_world_map_brightness_rgb.r = 0x80;
+    g_world_map_brightness_rgb.g = 0x80;
+    g_world_map_brightness_rgb.b = 0x80;
+    g_world_map_previous_system_flags = 0;
     g_main_gfx_active_buffer_index = 0;
-    g_wldcore_map_zoom_motion.flags = 0;
-    g_wldcore_random_battle_squad_id = 0;
-    g_wldcore_random_battle_entd_id = 0;
+    g_world_map_zoom.flags = 0;
+    g_random_battle_squad_id = 0;
+    g_random_battle_entd_id = 0;
     g_menu_blocked_buttons = 0;
     g_main_system_flags
         = (g_main_system_flags
               & (MAIN_SYSTEM_FLAG_RESTART | MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY | MAIN_SYSTEM_FLAG_TITLE_TUTORIAL
                   | MAIN_SYSTEM_FLAG_TUTORIAL_EVENT | MAIN_SYSTEM_FLAG_UNLOCK_ALL | MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY))
         | MAIN_SYSTEM_FLAG_RUNNING;
-    g_wldcore_script_base = g_wldcore_default_script_base;
-    g_wldcore_sound_novel_sound_resource = g_wldcore_default_sound_novel_sound_resource;
+    g_location_script_base = g_location_script_default_base;
+    g_sound_novel_sound_resource = g_sound_novel_default_sound_resource;
     /* Tile descriptors share the buffer later used for picture TIMs. */
-    g_wldcore_picture_buffer = (u32*)g_wldcore_map_tile_descriptors;
+    g_picture_buffer = (u32*)g_world_map_tile_descriptors;
 
     for (i = 0; i < 2; i++) {
-        g_wldcore_screen_fade_state.flags[i] = 0;
-        g_wldcore_screen_fade_state.priorities[i] = 0xf;
-        g_wldcore_screen_fade_state.boxes[i].attribute = 0x60000000;
-        box = &g_wldcore_screen_fade_state.boxes[i];
+        g_world_map_fade.flags[i] = 0;
+        g_world_map_fade.priorities[i] = 0xf;
+        g_world_map_fade.boxes[i].attribute = 0x60000000;
+        box = &g_world_map_fade.boxes[i];
         box->x = -0x80;
         box->y = -0x78;
         box->w = 0x100;
@@ -369,38 +369,38 @@ static void wldcore_init_world_map_state(void) {
         box->g = 0;
         box->b = 0;
     }
-    g_wldcore_screen_fade_state.flags[0] = WLDCORE_SCREEN_FADE_OUT;
+    g_world_map_fade.flags[0] = WORLD_MAP_FADE_OUT;
 
-    cursor = g_wldcore_menu_cursor_states;
-    for (i = 0; i < WLDCORE_CURSOR_SLOT_COUNT; i++) {
+    cursor = g_menu_stack_cursor_states;
+    for (i = 0; i < MENU_STACK_CURSOR_SLOT_COUNT; i++) {
         cursor->scroll_offset = 0;
-        g_wldcore_menu_cursor_states[i].selected_index = 0;
+        g_menu_stack_cursor_states[i].selected_index = 0;
         cursor++;
     }
 
-    g_wldcore_hud_color.r = 0x80;
-    g_wldcore_hud_color.g = 0x80;
-    g_wldcore_hud_color.b = 0x80;
-    g_wldcore_calendar_display_x = -0x78;
-    g_wldcore_calendar_display_y = -0x64;
-    g_wldcore_location_label_shade = 0x80;
-    g_wldcore_map_selected_location = 0;
+    g_hud_color.r = 0x80;
+    g_hud_color.g = 0x80;
+    g_hud_color.b = 0x80;
+    g_calendar_display_x = -0x78;
+    g_calendar_display_y = -0x64;
+    g_location_label_shade = 0x80;
+    g_location_selected = 0;
 
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_TUTORIAL_EVENT)) {
         main_sound_unload_scenario_music_and_tunes();
     }
 
-    g_wldcore_audio_queue.volume = 0x7f;
-    g_wldcore_context_value_display_position.x = 0x30;
-    g_wldcore_context_value_display_position.y = 0x54;
-    g_wldcore_hud_ot_priority = 4;
-    g_wldcore_audio_queue.count = 0;
-    g_wldcore_audio_queue.music.flags = 0;
-    g_wldcore_audio_queue.music.tracks[1] = 0;
-    g_wldcore_audio_queue.music.tracks[0] = 0;
-    g_wldcore_audio_queue.current_command = WLDCORE_AUDIO_COMMAND_NONE;
-    g_wldcore_sound_novel_countdown_frames = 0;
-    g_wldcore_route_travel.flags = 0;
+    g_audio_queue.volume = 0x7f;
+    g_hud_value_position.x = 0x30;
+    g_hud_value_position.y = 0x54;
+    g_hud_ot_priority = 4;
+    g_audio_queue.count = 0;
+    g_audio_queue.music.flags = 0;
+    g_audio_queue.music.tracks[1] = 0;
+    g_audio_queue.music.tracks[0] = 0;
+    g_audio_queue.current_command = AUDIO_COMMAND_NONE;
+    g_sound_novel_countdown_frames = 0;
+    g_travel.flags = 0;
 
     /* Debug unlock (nothing sets MAIN_SYSTEM_FLAG_UNLOCK_ALL): every profile,
      * rumor, route, location and story event; unless Start is held, every
@@ -413,9 +413,9 @@ static void wldcore_init_world_map_state(void) {
             script_set_variable(EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST + i, 1);
         for (i = 0; i < EVENT_SCRIPT_VAR_RUMOR_COUNT; i++)
             script_set_variable(EVENT_SCRIPT_VAR_RUMOR_FIRST + i, 1);
-        for (i = 0; i < WLDCORE_ROUTE_COUNT; i++)
+        for (i = 0; i < WORLD_MAP_ROUTE_COUNT; i++)
             script_set_variable(EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + i, 1);
-        for (i = 0; i < WORLD_LOCATION_COUNT; i++)
+        for (i = 0; i < LOCATION_COUNT; i++)
             script_set_variable(EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST + i, 1);
         for (i = 0; i < EVENT_SCRIPT_VAR_STORY_EVENT_COUNT; i++)
             script_set_variable(EVENT_SCRIPT_VAR_STORY_EVENT_FIRST + i, 1);
@@ -425,11 +425,11 @@ static void wldcore_init_world_map_state(void) {
             date.day = 1;
             for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
                 script_set_variable(EVENT_SCRIPT_VAR_TREASURE_FIRST + i, 1);
-                wldcore_calendar_write_date(g_main_treasure_acquisition_date_bits, i, &date);
+                calendar_write_date(g_main_treasure_acquisition_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
                 script_set_variable(EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST + i, 1);
-                wldcore_calendar_write_date(g_main_land_discovery_date_bits, i, &date);
+                calendar_write_date(g_main_land_discovery_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++)
                 script_set_variable(EVENT_SCRIPT_VAR_PROPOSITION_FIRST + i, 4);
@@ -445,7 +445,7 @@ static void wldcore_init_world_map_state(void) {
         script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, 1);
         script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
         day_of_year = unit_birthday_calculate_day_of_year(month, day);
-        wldcore_calendar_convert_date_to_zodiac(&month, &day);
+        calendar_convert_date_to_zodiac(&month, &day);
         party = main_party_get_unit(0);
         party->birthday_day = day_of_year;
         /* The separate s32 temp keeps the `month` reload a full 32-bit value: folding
@@ -456,37 +456,36 @@ static void wldcore_init_world_map_state(void) {
 }
 
 /* Finalize one WLDCORE loop pass and publish the world status. */
-static void wldcore_finalize_loop(void) {
+static void world_map_finalize_loop(void) {
     DrawSync(0);
     VSync(0);
     SetDispMask(0);
-    wldcore_sound_wait_for_queue_drain();
+    audio_queue_wait_until_empty();
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_TUTORIAL_EVENT) == 0) {
         main_sound_unload_scenario_music_and_tunes();
     }
-    script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_wldcore_next_map_id[0]);
+    script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_travel_next_map_id[0]);
 }
 
 /* Load the picture for the marker's location, capture the first map backdrop,
  * then reset the GPU, clear both ordering tables and VRAM, and swap buffers
  * with the display still off. */
-static void wldcore_init_runtime_state(void) {
+static void world_map_init_screen(void) {
     s32 reserved_stack_words[2];
     s32 buffer_index;
 
     SetDispMask(0);
-    g_wldcore_map_projection_state.marker.sub_kind
-        = wldcore_gfx_load_location_picture(g_wldcore_map_projection_state.marker.kind);
+    g_world_map_projection_state.marker.sub_kind = location_load_picture(g_world_map_projection_state.marker.kind);
     file_wait_for_pending();
     buffer_index = GsGetActiveBuff();
     g_main_gfx_active_buffer_index = buffer_index;
-    GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
-    wldcore_gfx_capture_map_backdrop();
+    GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
+    world_map_capture_backdrop();
     VSync(0);
     ResetGraph(1);
-    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_gfx_clear_vram_and_scratch(0);
+    GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_clear_vram_and_scratch(0);
     GsSwapDispBuff();
     SetDispMask(0);
 }
@@ -504,8 +503,8 @@ static void wldcore_init_runtime_state(void) {
  * restores the weather script variable saved before the event and reopens the
  * list it was chosen from (the tutorial with its two music tracks queued). The
  * title's tutorial and Brave Story requests open those screens. These all go
- * through wldcore_menu_push_screen_transition_level. */
-static void wldcore_menu_restore_level_on_world_entry(void) {
+ * through screen_transition_push_level. */
+static void world_map_restore_entry_level(void) {
     s32 flags = g_main_system_flags & ~MAIN_SYSTEM_FLAG_RESTART;
 
     g_main_system_flags = flags;
@@ -513,45 +512,41 @@ static void wldcore_menu_restore_level_on_world_entry(void) {
             & (MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY | MAIN_SYSTEM_FLAG_TITLE_TUTORIAL | MAIN_SYSTEM_FLAG_TUTORIAL_EVENT
                 | MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY))
         == 0) {
-        if (wldcore_script_process_conditional_set(
-                g_wldcore_map_projection_state.marker.kind, WLDCORE_SCRIPT_ACTION_TEXT)
-            != 0) {
-            wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
-            wldcore_menu_push_scrollable_text_window_level(
-                g_wldcore_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);
+        if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_TEXT) != 0) {
+            world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+            menu_stack_push_scrollable_text_level(g_location_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);
         } else {
-            wldcore_menu_dispatch_pending_script_requests();
+            location_script_dispatch_requests();
         }
-        wldcore_sound_enqueue_audio_command(
-            WLDCORE_AUDIO_COMMAND_PLAY_MUSIC, WLDCORE_AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
-        wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 4);
+        audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
+        audio_queue_add(AUDIO_COMMAND_FADE_IN, 4);
         return;
     }
     if (flags & MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY) {
         g_main_system_flags = flags ^ MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY;
         script_set_variable(EVENT_SCRIPT_VAR_WEATHER, g_main_saved_weather_variable);
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_STORY_EVENTS, 0, 0);
+        screen_transition_push_level(MENU_STACK_LEVEL_BRAVE_STORY_EVENTS, 0, 0);
     } else if (flags & MAIN_SYSTEM_FLAG_TUTORIAL_EVENT) {
         g_main_system_flags = flags ^ MAIN_SYSTEM_FLAG_TUTORIAL_EVENT;
         script_set_variable(EVENT_SCRIPT_VAR_WEATHER, g_main_saved_weather_variable);
-        g_wldcore_audio_queue.music.tracks[0] = 0x1B;
-        g_wldcore_audio_queue.music.tracks[1] = 0x1A;
-        g_wldcore_audio_queue.current_slot = 2;
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS, 1, 0);
+        g_audio_queue.music.tracks[0] = 0x1B;
+        g_audio_queue.music.tracks[1] = 0x1A;
+        g_audio_queue.current_slot = 2;
+        screen_transition_push_level(MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST, 1, 0);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_TUTORIAL) {
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES, 0, 1);
+        screen_transition_push_level(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) {
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_BRAVE_STORY, 0, 0);
+        screen_transition_push_level(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
     }
 }
 
-/* Called at the top of wldcore_entrypoint's loop. A nonzero
+/* Called at the top of world_map_entrypoint's loop. A nonzero
  * EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT clears MAIN_SYSTEM_FLAG_RESTART,
  * restores WORLD's formation menu and makes the entrypoint return 0. */
-static s32 wldcore_handle_exit_request(void) {
+static s32 world_map_handle_exit_request(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
         g_main_system_flags &= ~MAIN_SYSTEM_FLAG_RESTART;
-        world_formation_restore_menu_after_core_exit();
+        formation_reopen_after_world_map();
         return 1;
     }
 

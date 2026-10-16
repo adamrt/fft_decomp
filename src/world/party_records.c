@@ -25,12 +25,12 @@
  * One scratch variable `i` also carries the monster flag, the second evade
  * operand and the unlocked-job mask; separate locals reallocate a0/v1.
  */
-void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* record, const party_unit_t* party) {
+void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* record, const party_unit_t* party) {
     s16* abilities;
     s32 i;
     u32 evade;
 
-    memset(record, 0, sizeof(world_unit_t));
+    memset(record, 0, sizeof(formation_unit_t));
     record->status.level = party->level <= UNIT_LEVEL_MAX ? party->level : UNIT_LEVEL_MAX;
     if (unit->formation_index >= PARTY_GUEST_SLOT_FIRST) {
         record->status.team_kind = 2; /* guests show the neutral team icon */
@@ -162,9 +162,9 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
  * monster skillset and special-monster jobs; MONSTERS drops eggs and humans.
  * A nonzero item id keeps only units with that item equipped. Returns the
  * record count. The list argument is unused here;
- * world_formation_sort_roster fills g_world_unit_pointers.
+ * formation_sort_roster fills g_formation_unit_pointers.
  */
-s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s32 mode) {
+s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, s32 mode) {
     unit_stats_t unit;
     s32 slot = 0;
     s32 count = 0;
@@ -176,33 +176,33 @@ s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s
         if (main_unit_init_from_party_slot(&unit, slot, 1) != 0) {
             continue;
         }
-        world_formation_build_unit_record(&unit, &g_world_unit_records[count], main_party_get_unit(slot));
-        if (mode == WORLD_FORMATION_RECORD_LIST_AVAILABLE_HUMANS) {
-            if (g_world_unit_records[count].proposition_status != 0) {
+        formation_build_unit_record(&unit, &g_formation_unit_records[count], main_party_get_unit(slot));
+        if (mode == FORMATION_RECORD_LIST_AVAILABLE_HUMANS) {
+            if (g_formation_unit_records[count].proposition_status != 0) {
                 continue;
             }
-            if (g_world_unit_records[count].gender_flags & UNIT_FLAG_EGG) {
+            if (g_formation_unit_records[count].gender_flags & UNIT_FLAG_EGG) {
                 continue;
             }
-            if (g_world_unit_records[count].uses_monster_skillset != 0) {
+            if (g_formation_unit_records[count].uses_monster_skillset != 0) {
                 continue;
             }
-            if (job_is_special_monster(g_world_unit_records[count].identity.job_id) != 0) {
+            if (job_is_special_monster(g_formation_unit_records[count].identity.job_id) != 0) {
                 continue;
             }
-        } else if (mode == WORLD_FORMATION_RECORD_LIST_MONSTERS) {
-            if (g_world_unit_records[count].gender_flags & UNIT_FLAG_EGG) {
+        } else if (mode == FORMATION_RECORD_LIST_MONSTERS) {
+            if (g_formation_unit_records[count].gender_flags & UNIT_FLAG_EGG) {
                 continue;
             }
             /* The male and female bits, 0x80 and 0x40. */
-            if ((g_world_unit_records[count].gender_flags >> 6) != 0) {
+            if ((g_formation_unit_records[count].gender_flags >> 6) != 0) {
                 continue;
             }
         }
         if (id > 0) {
             found = 0;
             for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                if (g_world_unit_records[count].equipment[i] == id) {
+                if (g_formation_unit_records[count].equipment[i] == id) {
                     found = 1;
                 }
             }
@@ -210,12 +210,12 @@ s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s
                 continue;
             }
         }
-        g_world_formation_record_order[count] = count;
+        g_formation_record_order[count] = count;
         count++;
     }
-    g_world_formation_record_count = count;
-    world_formation_sort_roster(0);
-    return g_world_formation_record_count;
+    g_formation_record_count = count;
+    formation_sort_roster(0);
+    return g_formation_record_count;
 }
 
 /*
@@ -225,7 +225,7 @@ s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s
  * Records using monster skillsets keep their party equipment, learned
  * abilities, and JP. Shields go to the hand's shield byte.
  */
-void world_formation_save_records_to_party(void) {
+void formation_save_records(void) {
     unit_stats_t unit;
     party_unit_t* party;
     s32 i;
@@ -233,20 +233,20 @@ void world_formation_save_records_to_party(void) {
     u32 item;
     u8 value;
 
-    for (i = 0; i < g_world_formation_record_count; i++) {
-        slot = g_world_unit_pointers[i]->identity.roster_slot;
+    for (i = 0; i < g_formation_record_count; i++) {
+        slot = g_formation_unit_pointers[i]->identity.roster_slot;
         party = main_party_get_unit(slot);
-        party->job_id = g_world_unit_pointers[i]->identity.job_id;
-        party->gender_flags = g_world_unit_pointers[i]->gender_flags;
-        party->secondary_skillset = g_world_unit_pointers[i]->abilities.fields.secondary_skillset;
-        party->reaction_ability[0] = g_world_unit_pointers[i]->abilities.fields.reaction_ability;
-        party->reaction_ability[1] = g_world_unit_pointers[i]->abilities.fields.reaction_ability >> 8;
-        party->support_ability[0] = g_world_unit_pointers[i]->abilities.fields.support_ability;
-        party->support_ability[1] = g_world_unit_pointers[i]->abilities.fields.support_ability >> 8;
-        party->movement_ability[0] = g_world_unit_pointers[i]->abilities.fields.movement_ability;
-        party->movement_ability[1] = g_world_unit_pointers[i]->abilities.fields.movement_ability >> 8;
-        if (g_world_unit_pointers[i]->uses_monster_skillset == 0) {
-            item = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+        party->job_id = g_formation_unit_pointers[i]->identity.job_id;
+        party->gender_flags = g_formation_unit_pointers[i]->gender_flags;
+        party->secondary_skillset = g_formation_unit_pointers[i]->abilities.fields.secondary_skillset;
+        party->reaction_ability[0] = g_formation_unit_pointers[i]->abilities.fields.reaction_ability;
+        party->reaction_ability[1] = g_formation_unit_pointers[i]->abilities.fields.reaction_ability >> 8;
+        party->support_ability[0] = g_formation_unit_pointers[i]->abilities.fields.support_ability;
+        party->support_ability[1] = g_formation_unit_pointers[i]->abilities.fields.support_ability >> 8;
+        party->movement_ability[0] = g_formation_unit_pointers[i]->abilities.fields.movement_ability;
+        party->movement_ability[1] = g_formation_unit_pointers[i]->abilities.fields.movement_ability >> 8;
+        if (g_formation_unit_pointers[i]->uses_monster_skillset == 0) {
+            item = g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
             if (item != ITEM_ID_NOTHING) {
@@ -256,7 +256,7 @@ void world_formation_save_records_to_party(void) {
                     party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item;
                 }
             }
-            item = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+            item = g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
             party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
             party->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = ITEM_ID_NONE;
             if (item != ITEM_ID_NOTHING) {
@@ -267,28 +267,28 @@ void world_formation_save_records_to_party(void) {
                 }
             }
             value = ITEM_ID_NONE;
-            if (g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_HEAD] != ITEM_ID_NOTHING) {
-                value = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_HEAD];
+            if (g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_HEAD] != ITEM_ID_NOTHING) {
+                value = g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_HEAD];
             }
             party->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = value;
             value = ITEM_ID_NONE;
-            if (g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_BODY] != ITEM_ID_NOTHING) {
-                value = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_BODY];
+            if (g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_BODY] != ITEM_ID_NOTHING) {
+                value = g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_BODY];
             }
             party->equipment[UNIT_EQUIPMENT_SLOT_BODY] = value;
             value = ITEM_ID_NONE;
-            if (g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != ITEM_ID_NOTHING) {
-                value = g_world_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
+            if (g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != ITEM_ID_NOTHING) {
+                value = g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
             }
             party->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY] = value;
-            bcopy(g_world_unit_pointers[i]->learned_abilities, party->career.learned_abilities,
+            bcopy(g_formation_unit_pointers[i]->learned_abilities, party->career.learned_abilities,
                 sizeof(party->career.learned_abilities));
-            bcopy(&g_world_unit_pointers[i]->job_points.current, &party->career.job_points.current,
+            bcopy(&g_formation_unit_pointers[i]->job_points.current, &party->career.job_points.current,
                 sizeof(party->career.job_points.current));
-            bcopy(&g_world_unit_pointers[i]->job_points.total, &party->career.job_points.total,
+            bcopy(&g_formation_unit_pointers[i]->job_points.total, &party->career.job_points.total,
                 sizeof(party->career.job_points.total));
         }
         main_unit_init_from_party_slot(&unit, slot, 1);
-        world_formation_build_unit_record(&unit, g_world_unit_pointers[i], party);
+        formation_build_unit_record(&unit, g_formation_unit_pointers[i], party);
     }
 }

@@ -20,15 +20,15 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static RECT g_world_equipment_panel_draw_area = { 132, 126, 141, 108 };
-static RECT g_world_ability_panel_draw_area = { 247, 126, 133, 108 };
+static RECT g_formation_equipment_panel_draw_area = { 132, 126, 141, 108 };
+static RECT g_formation_ability_panel_draw_area = { 247, 126, 133, 108 };
 
 /*
  * Equipment panel thread (task THREAD_TASK_STATUS_PANEL), the equipment twin
  * of menu_run_ability_list_thread (same 0x3d8-byte frame pair, thread record
  * and callee sequence). It lists the five equipment names of an item
  * stat-detail record and draws their item icons: in the equip/ability panel
- * slot g_world_selected_unit_stat_detail, in any other slot (the stat preview)
+ * slot g_formation_selected_unit_stat_detail, in any other slot (the stat preview)
  * g_item_preview_stat_detail. The panel layout (0-3) comes from the record's
  * Two Hands and generic-monster flags; the text image is rebuilt on the first
  * frame or on request. Runs until parameter 3 is set.
@@ -55,25 +55,25 @@ void menu_run_equipment_list_thread(void) {
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    if (g_thread_current_id == WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
+    if (g_thread_current_id == SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
         text = g_menu_equipment_panel_item_text_image;
         screen = g_menu_equipment_panel_frames;
-        state = &g_world_selected_unit_stat_detail.state;
+        state = &g_formation_selected_unit_stat_detail.state;
         base = g_menu_equipment_panel_frames;
         upload = &g_menu_equipment_panel_item_text_rect;
         u = 0;
     } else {
         text = g_menu_equipment_panel_ability_text_image;
-        screen = g_world_stat_preview_panel_frames;
+        screen = g_formation_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
         upload = &g_menu_equipment_panel_ability_text_rect;
-        base = g_world_stat_preview_panel_frames;
+        base = g_formation_stat_preview_panel_frames;
         u = 0x50;
     }
 
     menu_init_numeric_display_frame_primitives(&g_menu_equipment_panel_origin, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
-    world_panel_gfx_init_scaled_draw_area_packets(&screen->portrait);
+    screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->tiles[0].x0 += g_menu_equipment_panel_origin.x;
     screen->tiles[0].y0 += g_menu_equipment_panel_origin.y;
     for (i = 0; i < 4; i++) {
@@ -122,7 +122,7 @@ void menu_run_equipment_list_thread(void) {
             menu_set_text_origin(0, 0);
             for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                    color_bits = state->equipment[i] & WORLD_EQUIPMENT_PALETTE_MASK;
+                    color_bits = state->equipment[i] & FORMATION_PALETTE_MASK;
                     g_menu_text_palette_offset = color_bits >> 12;
                     menu_display_text_entry(
                         (state->equipment[i] & ITEM_ID_MASK) | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_text_state.pen);
@@ -159,7 +159,7 @@ void menu_run_equipment_list_thread(void) {
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_world_equipment_panel_draw_area, frame, g_frame_arg, thread);
+            &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_frame_arg, thread);
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
 
@@ -201,7 +201,7 @@ void menu_run_equipment_list_thread(void) {
 /*
  * Ability panel thread (task THREAD_TASK_STATUS_PANEL): a two-column status
  * panel that lists five ability labels of an item stat-detail record. The
- * equip/ability panel slot draws g_world_selected_unit_stat_detail into the
+ * equip/ability panel slot draws g_formation_selected_unit_stat_detail into the
  * first frame pair, other slots draw g_item_preview_stat_detail into the
  * second. A trimmed relative of menu_run_status_panel_thread (same 0x3d8-byte
  * frame layout and callee sequence). Runs until parameter 3 is set.
@@ -225,25 +225,25 @@ void menu_run_ability_list_thread(void) {
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    if (g_thread_current_id == WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
+    if (g_thread_current_id == SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
         text = g_menu_equipment_panel_item_text_image;
         screen = g_menu_equipment_panel_frames;
-        state = &g_world_selected_unit_stat_detail.state;
+        state = &g_formation_selected_unit_stat_detail.state;
         base = g_menu_equipment_panel_frames;
         upload = &g_menu_equipment_panel_item_text_rect;
         u = 0;
     } else {
         text = g_menu_equipment_panel_ability_text_image;
-        screen = g_world_stat_preview_panel_frames;
+        screen = g_formation_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
         upload = &g_menu_equipment_panel_ability_text_rect;
-        base = g_world_stat_preview_panel_frames;
+        base = g_formation_stat_preview_panel_frames;
         u = 0x50;
     }
 
-    menu_init_numeric_display_frame_primitives(&g_world_ability_panel_origin, &screen->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_formation_ability_panel_origin, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
-    world_panel_gfx_init_scaled_draw_area_packets(&screen->portrait);
+    screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->tiles[1].x0 += g_menu_equipment_panel_origin.x;
     screen->tiles[1].y0 += g_menu_equipment_panel_origin.y;
     for (i = 4; i < 8; i++) {
@@ -329,7 +329,7 @@ void menu_run_ability_list_thread(void) {
         offset[0] = thread->x - 0x73;
         offset[1] = thread->y;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_world_ability_panel_draw_area, frame, g_frame_arg, offset);
+            &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_frame_arg, offset);
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
 

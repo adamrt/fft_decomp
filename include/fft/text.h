@@ -124,7 +124,7 @@ typedef enum text_id_base {
     TEXT_ID_UNIT_NAME_GENERIC_FEMALE_BASE = 0x4200,
     TEXT_ID_UNIT_NAME_GENERIC_MONSTER_BASE = 0x4300,
     TEXT_ID_ABILITY_NAME_BASE = 0x7000,
-    /* By world_location_id_e. ATTACK binds its deployment messages to this
+    /* By location_id_e. ATTACK binds its deployment messages to this
      * section instead. */
     TEXT_ID_LOCATION_NAME_BASE = 0x9000,
     TEXT_ID_SKILLSET_NAME_SOURCE_BASE = 0xb000, /* section 22, which SMALL also binds as section 2 */
@@ -137,7 +137,7 @@ typedef enum text_id_base {
     TEXT_ID_WORLD_MESSAGE_BASE = 0x8800, /* the block of WORLD/WLDMES.BIN that is loaded */
     TEXT_ID_FACT_NAME_BASE = 0x9800,
     TEXT_ID_MAP_NAME_BASE = 0xa800,   /* by map_id_e less one */
-    TEXT_ID_WORLD_MENU_BASE = 0xb800, /* wldcore_text_id_e */
+    TEXT_ID_WORLD_MENU_BASE = 0xb800, /* world_map_text_id_e */
     TEXT_ID_TUTORIAL_NAME_BASE = 0xc000,
     TEXT_ID_RUMOR_NAME_BASE = 0xc800,
     TEXT_ID_PROPOSITION_NAME_BASE = 0xd000,
@@ -145,13 +145,13 @@ typedef enum text_id_base {
     TEXT_ID_TREASURE_NAME_BASE = 0xe000,
     TEXT_ID_STORY_EVENT_NAME_BASE = 0xe800,         /* the Brave Story's Record list */
     TEXT_ID_PERSON_PROFILE_NAME_BASE = 0xf000,      /* by person * 16 + profile */
-    TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE = 0xf800, /* by wldcore_proposition_fields_t::name_text less one */
+    TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE = 0xf800, /* by proposition_fields_t::name_text less one */
 } text_id_base_e;
 
 /* Index into g_text_section_pointers: a text id's top five bits. Only the
  * sections the code binds or reads by a fixed role are named. A screen
  * rebinds a slot to its own text while it is up: help_text_section_e here,
- * world_text_section_e and require_text_section_e map those bindings. */
+ * screen_text_section_e and require_text_section_e map those bindings. */
 typedef enum text_section {
     TEXT_SECTION_EVENT_MESSAGES = 0,      /* the loaded event's text; BUNIT binds its menu text here */
     TEXT_SECTION_SKILLSET_NAMES_COPY = 2, /* TEXT_ID_SKILLSET_NAME_BASE; a copy of section 22 */
@@ -372,7 +372,7 @@ typedef enum dialog_options {
 } dialog_options_e;
 
 /* Text window record of the dialog and message-box threads, rendered by
- * menu_render_text_image_at_record_origin and WORLD's world_menu_render_text_image_at_fixed_origin: they build an
+ * menu_render_text_image_at_record_origin and WORLD's message_box_render_text_image: they build an
  * image buffer (the window builder when box_type is 0x10), draw `text` into
  * it and upload `rect`. */
 typedef struct text_dialog_record {
@@ -431,8 +431,8 @@ void text_run_spell_quote_thread(void);
 
 /* typewriter glyphs */
 /* One pending text glyph: g_text_typewriter_glyph, which text_run_dialog_thread fills and
- * text_draw_glyph_with_typewriter_delay draws, and WORLD's message-box glyph g_world_text_message_box_glyph
- * (world_text_message_box_thread). The typewriter's menu text state and VRAM rectangle follow it in memory but
+ * text_draw_glyph_with_typewriter_delay draws, and WORLD's message-box glyph g_message_box_glyph
+ * (message_box_thread). The typewriter's menu text state and VRAM rectangle follow it in memory but
  * are separate globals. */
 typedef struct text_glyph_state {
     u16 x;            /* 0x00: pen x; the low two bits select the sub-byte pixel phase */

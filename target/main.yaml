@@ -1385,14 +1385,14 @@ data:
   - {addr: 0x80066308, name: g_main_party_highest_level}
   - {addr: 0x800670f0, name: open_system_run_main_loop}
   - {addr: 0x8006720c, name: open_system_run_ending_cutscene}
-  - {addr: 0x800672f8, name: wldcore_entrypoint}
+  - {addr: 0x800672f8, name: world_map_entrypoint}
   - {addr: 0x80079a98, name: battle_state_run_game_loop}
   - {addr: 0x80093170, name: battle_map_color_field}
   - {addr: 0x800a778c, name: g_battle_game_flow_state}
-  - {addr: 0x800d0bbc, name: g_wldcore_sound_novel_script}
+  - {addr: 0x800d0bbc, name: g_sound_novel_script}
   - {addr: 0x800e6edc, name: world_text_find_entry}
   - {addr: 0x800fc55c, name: g_battle_render_buffers}
-  - {addr: 0x8010656c, name: world_menu_init_with_world_text}
+  - {addr: 0x8010656c, name: screen_init_with_world_text}
   - {addr: 0x8011a2d4, name: g_battle_gfx_current_render_buffer}
   - {addr: 0x80132824, name: battle_text_find_entry}
   - {addr: 0x8013b590, name: script_get_variable}

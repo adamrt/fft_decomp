@@ -17,63 +17,63 @@
  * loop: frame state, what the frame leaves out, requests left by WORLD and
  * OPENING, and the reason the loop ends. */
 typedef enum main_system_flags {
-    /* wldcore_entrypoint runs frames while set; wldcore_init_world_map_state sets it, a level clears it to leave. */
+    /* world_map_entrypoint runs frames while set; world_map_init_state sets it, a level clears it to leave. */
     MAIN_SYSTEM_FLAG_RUNNING = 0x00000001,
-    /* Draw this frame with the 3D map; wldcore_gfx_draw_world_frame_with_map clears it after drawing. */
+    /* Draw this frame with the 3D map; world_map_draw_frame_with_map clears it after drawing. */
     MAIN_SYSTEM_FLAG_DRAW_MAP = 0x00000002,
-    /* A level waits for a thread or a fade: wldcore_input_update_controller publishes no pad input. */
+    /* A level waits for a thread or a fade: world_map_read_pad publishes no pad input. */
     MAIN_SYSTEM_FLAG_INPUT_BLOCKED = 0x00000004,
-    /* Set by wldcore_fade_start_screen, cleared by wldcore_fade_step_screen one step before the fade ends. */
+    /* Set by world_map_fade_start, cleared by world_map_fade_step one step before the fade ends. */
     MAIN_SYSTEM_FLAG_FADING = 0x00000008,
-    /* wldcore_map_project_and_cull_dots hides every map dot. */
+    /* world_map_project_dots hides every map dot. */
     MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS = 0x00000010,
-    /* wldcore_map_draw_visible_routes draws no route. */
+    /* world_map_draw_routes draws no route. */
     MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES = 0x00000020,
-    /* wldcore_entrypoint masks the display for the frame. */
+    /* world_map_entrypoint masks the display for the frame. */
     MAIN_SYSTEM_FLAG_DISPLAY_OFF = 0x00000040,
-    /* wldcore_menu_run_world_frame returns without running the menu frame; no code sets it. */
+    /* world_map_run_world_menus returns without running the menu frame; no code sets it. */
     MAIN_SYSTEM_FLAG_SKIP_MENU_FRAME = 0x00000080,
-    /* Set by world_map_update_brave_story_request: the return level opens the Brave Story screen. */
+    /* Set by world_map_step_brave_story_request: the return level opens the Brave Story screen. */
     MAIN_SYSTEM_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
-    /* wldcore_gfx_draw_world_frame does not load the scratch image into the display buffer. */
+    /* world_map_draw_frame does not load the scratch image into the display buffer. */
     MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
-    /* window_dispatch_record_list draws nothing and wldcore_map_pulse_dot_colors returns. */
+    /* window_dispatch_record_list draws nothing and world_map_pulse_dots returns. */
     MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
-    /* wldcore_gfx_draw_context_value_display draws nothing. */
+    /* hud_draw_value draws nothing. */
     MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,
-    /* wldcore_gfx_draw_calendar_date draws nothing. */
+    /* calendar_draw_date draws nothing. */
     MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE = 0x00001000,
-    /* wldcore_map_draw_location_label draws no label; set while a level moves or covers the map view. */
+    /* location_draw_label draws no label; set while a level moves or covers the map view. */
     MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL = 0x00002000,
     /* WORLD's menu chose a map (script variable CURRENT_MAP): the return level restarts the core and travels there. */
     MAIN_SYSTEM_FLAG_REQUEST_DESTINATION = 0x00004000,
-    /* wldcore_map_step_route_travel rolled an encounter: wldcore_entrypoint returns 1. */
+    /* travel_step rolled an encounter: world_map_entrypoint returns 1. */
     MAIN_SYSTEM_FLAG_RANDOM_BATTLE = 0x00008000,
-    /* Set after the card menu returns 1: wldcore_entrypoint restarts its loop instead of returning. */
+    /* Set after the card menu returns 1: world_map_entrypoint restarts its loop instead of returning. */
     MAIN_SYSTEM_FLAG_RESTART = 0x00010000,
     /* The unit-panel threads (8, 9 and 12) run: the menu frame draws their windows, not the formation menu. */
     MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS = 0x00020000,
-    /* A story event replays: wldcore_entrypoint returns 2 and the next entry reopens the story-event list. */
+    /* A story event replays: world_map_entrypoint returns 2 and the next entry reopens the story-event list. */
     MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY = 0x00040000,
     /* Set by open_title_update_menu: the world entry opens the tutorial menu, which leaves through RETURN_TO_TITLE. */
     MAIN_SYSTEM_FLAG_TITLE_TUTORIAL = 0x00080000,
-    /* Set by world_map_update_tutorial_categories_request: the return level opens the tutorial menu. */
+    /* Set by world_map_step_tutorial_request: the return level opens the tutorial menu. */
     MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL = 0x00100000,
-    /* A tutorial event plays: wldcore_entrypoint returns 2 with the music kept; the next entry reopens its list. */
+    /* A tutorial event plays: world_map_entrypoint returns 2 with the music kept; the next entry reopens its list. */
     MAIN_SYSTEM_FLAG_TUTORIAL_EVENT = 0x00200000,
-    /* wldcore_init_world_map_state sets the rumor, path, location and story-event variables; no code sets it. */
+    /* world_map_init_state sets the rumor, path, location and story-event variables; no code sets it. */
     MAIN_SYSTEM_FLAG_UNLOCK_ALL = 0x00400000,
-    /* Set by world_map_update_debug_variable_list_request: the return level opens the variable list. */
+    /* Set by world_map_step_debug_variable_list_request: the return level opens the variable list. */
     MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST = 0x00800000,
-    /* Set by world_map_update_fixed_number_panel_request: the return level opens the fixed number panel. */
+    /* Set by world_map_step_fixed_number_panel_request: the return level opens the fixed number panel. */
     MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL = 0x01000000,
-    /* The location menu chose a deep-dungeon battle: wldcore_entrypoint returns 4. */
+    /* The location menu chose a deep-dungeon battle: world_map_entrypoint returns 4. */
     MAIN_SYSTEM_FLAG_DEEP_DUNGEON_BATTLE = 0x02000000,
-    /* Set by wldcore_clear_screen_and_set_map_clip_rect; the return level then recaptures the world frame. */
+    /* Set by world_map_clear_screen_and_set_clip_rect; the return level then recaptures the world frame. */
     MAIN_SYSTEM_FLAG_SCREEN_CLEARED = 0x04000000,
-    /* Map dots stop pulsing and wldcore_gfx_draw_animated_display_object stops advancing frames. */
+    /* Map dots stop pulsing and window_draw_animated_record stops advancing frames. */
     MAIN_SYSTEM_FLAG_FREEZE_ANIMATION = 0x08000000,
-    /* wldcore_entrypoint returns 5: main_system_run_game_loop goes back to OPENING. */
+    /* world_map_entrypoint returns 5: main_system_run_game_loop goes back to OPENING. */
     MAIN_SYSTEM_FLAG_RETURN_TO_TITLE = 0x10000000,
     /* The world entry opens the Brave Story screen, which leaves through RETURN_TO_TITLE; no code sets it. */
     MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY = 0x20000000,
@@ -88,7 +88,7 @@ typedef enum main_game_flow_state {
     MAIN_GAME_FLOW_ENDING = 3, /* run the ending, then restart */
 } main_game_flow_state_e;
 
-/* g_main_system_frontend_world_result: why wldcore_entrypoint returned, which tells BATTLE.BIN what
+/* g_main_system_frontend_world_result: why world_map_entrypoint returned, which tells BATTLE.BIN what
  * to run next. */
 typedef enum main_world_result {
     MAIN_WORLD_RESULT_NONE = 0, /* no special case: the current scenario's event or battle */

@@ -67,7 +67,7 @@ typedef char help_navigation_record_size_must_be_16[(sizeof(help_navigation_reco
 
 /* The grid help cursor over a unit's status display. A value above the text
  * ids in the pending description id (g_text_selection_id) selects one; it is latched in
- * g_world_grid_menu_id / g_bunit_help_screen_id instead of showing a
+ * g_screen_grid_id / g_bunit_help_screen_id instead of showing a
  * description. */
 typedef enum menu_grid_help_id {
     MENU_GRID_HELP_NONE = 0,

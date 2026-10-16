@@ -59,7 +59,7 @@ typedef enum menu_job_list_step {
 } menu_job_list_step_e;
 
 /* Ability list tab of the WORLD, BUNIT and JOBSTTS ability menus
- * (g_world_ability_category and g_menu_ability_category) and the kind
+ * (g_formation_ability_category and g_menu_ability_category) and the kind
  * argument of their list builders. */
 typedef enum menu_ability_category {
     MENU_ABILITY_CATEGORY_ACTION = 0,

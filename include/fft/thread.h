@@ -72,7 +72,7 @@ extern u8 g_thread_status_snapshot[16];
  * own in the same slots while it is up, and a menu thread starts its child
  * menu one slot below itself. Each enum below maps the slots of one of them;
  * world.h, wldcore.h and the overlay headers map the slots their own screens
- * use (world_thread_slot_e, wldcore_thread_slot_e, attack_thread_slot_e,
+ * use (screen_thread_slot_e, world_map_thread_slot_e, attack_thread_slot_e,
  * bunit_thread_slot_e, equip_thread_slot_e, require_thread_slot_e). */
 
 /* The battle and world programs, which share the event library's threads. */
@@ -130,7 +130,7 @@ typedef enum thread_borrowed_slot {
  * another thread stores 3. Ids without a known setter stay literal. */
 typedef enum thread_task {
     /* No task: thread_start and thread_exit_current store it, and
-     * world_menu_start_thread_group stores it into thread 12 when the location changes. */
+     * world_map_menu_start_group stores it into thread 12 when the location changes. */
     THREAD_TASK_NONE = 0,
     THREAD_TASK_RESUME = 1,
     THREAD_TASK_WAIT_FOR_RESUME = 2,
@@ -150,7 +150,7 @@ typedef enum thread_task {
     THREAD_TASK_ATTACK_CASTER_STATS = 19,
     THREAD_TASK_UNIT_SUMMARY_PANEL = 20,
     THREAD_TASK_STATUS_SCREEN = 21,
-    /* g_world_menu_thread_groups gives its three text windows the ids 0x20,
+    /* g_world_map_menu_groups gives its three text windows the ids 0x20,
      * 0x21 and 0x22 (threads 9, 10 and 11); the window thread slides only the
      * second one with the main scroll. */
     THREAD_TASK_MENU_GROUP_SECOND_WINDOW = 33,
@@ -158,7 +158,7 @@ typedef enum thread_task {
     THREAD_TASK_MESSAGE_BOX = 38,
     THREAD_TASK_MENU_WINDOW_BUILD = 49,
     /* Text thread waiting for its next message; Change Dialog and
-     * world_text_resume_printing swap in new text and store 1. */
+     * screen_text_resume_printing swap in new text and store 1. */
     THREAD_TASK_DIALOG_AWAIT_TEXT = 51,
     THREAD_TASK_LOAD_EVTCHR = 52,
     THREAD_TASK_BG_SOUND = 53,

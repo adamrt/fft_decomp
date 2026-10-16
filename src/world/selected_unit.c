@@ -17,7 +17,7 @@
  * the cursor moves to the row that holds that id (low ten bits), keeping the
  * scroll base, or both reset to 0 when the id is gone.
  */
-void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
     s32 entry_id;
     s32 found_end;
     s32 i;
@@ -47,24 +47,24 @@ void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll
 /* Steps the formation roster cursor one slot backwards (L1) or forwards (R1),
  * wrapping at either end and skipping over egg units. Plays the page-switch
  * sound on either move. */
-void world_formation_cycle_selected_unit(s16 pad_buttons) {
+void formation_cycle_selected_unit(s16 pad_buttons) {
     u16 index;
 
     if (pad_buttons & PSX_PAD_L1) {
         g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
         do {
             if (g_unit_selected_index == 0) {
-                index = g_world_formation_unit_count - 1;
+                index = g_formation_unit_count - 1;
             } else {
                 index = g_unit_selected_index - 1;
             }
             g_unit_selected_index = index;
-        } while (g_world_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG);
+        } while (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG);
     } else if (pad_buttons & PSX_PAD_R1) {
         g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
         do {
-            index = (g_unit_selected_index != g_world_formation_unit_count - 1) ? g_unit_selected_index + 1 : 0;
+            index = (g_unit_selected_index != g_formation_unit_count - 1) ? g_unit_selected_index + 1 : 0;
             g_unit_selected_index = index;
-        } while (g_world_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG);
+        } while (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG);
     }
 }

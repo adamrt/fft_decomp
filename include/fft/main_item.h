@@ -39,7 +39,7 @@ s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle);
 /* sort orders */
 extern item_type_order_tables_t g_main_item_type_order_tables;
 /* Views of g_main_item_type_order_tables.order_1..6 for the WORLD save-image
- * copies (world_card_build_save_image, world_card_load_globals_from_save_image),
+ * copies (save_build_image, save_restore_image),
  * whose code the member spelling changes. */
 extern s8 g_main_item_type_order_1[8];
 extern u8 g_main_item_type_order_2[7];

@@ -19,19 +19,19 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static VECTOR g_wldcore_map_projection_scale = { 0 };
-static SVECTOR g_wldcore_map_projection_rotation = { 0 };
+static VECTOR g_world_map_projection_scale = { 0 };
+static SVECTOR g_world_map_projection_rotation = { 0 };
 
 /* The map is a grid of 12x16 tiles, projected through its 13x17 corners. */
-#define WLDCORE_MAP_TILE_ROWS    12
-#define WLDCORE_MAP_TILE_COLUMNS 16
-#define WLDCORE_MAP_ROW_STRIDE   17
-#define WLDCORE_MAP_CORNER_COUNT ((WLDCORE_MAP_TILE_ROWS + 1) * WLDCORE_MAP_ROW_STRIDE)
-#define WLDCORE_MAP_TILE_CLUT_Y  0x1e0
+#define WORLD_MAP_TILE_ROWS    12
+#define WORLD_MAP_TILE_COLUMNS 16
+#define WORLD_MAP_ROW_STRIDE   17
+#define WORLD_MAP_CORNER_COUNT ((WORLD_MAP_TILE_ROWS + 1) * WORLD_MAP_ROW_STRIDE)
+#define WORLD_MAP_TILE_CLUT_Y  0x1e0
 
 /* 0-based day-of-year index (party_unit_t.birthday_day) to 1-based month
  * and day. */
-void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day) {
+void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day) {
     s32 month = 0;
     s32 days_in_month;
 
@@ -53,13 +53,13 @@ void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month
 /* Freeze the world map behind a full-screen menu, or release it.
  *
  * With `capture` set it draws one whole map frame into both ordering tables,
- * stores the image in g_wldcore_scratch_buffer as the backdrop and draws the
+ * stores the image in g_world_map_scratch_buffer as the backdrop and draws the
  * menu frame over it; then it saves the system flags and hides the map and
  * root menu windows and everything the map pass draws (routes, display
  * objects, context value, date and marker). With `capture` 0 the two windows
  * are shown again and the saved flags come back with MAIN_SYSTEM_FLAG_DRAW_MAP
  * set, so the next frame redraws the map. */
-void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
+void world_map_toggle_captured_frame(s32 capture) {
     RECT display_rect;
     s32 buffer_index;
 
@@ -67,11 +67,11 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
         s32 map_window_index;
         s32 menu_window_index;
 
-        map_window_index = g_wldcore_map_window_index;
-        menu_window_index = g_wldcore_menu_root_window_index;
-        g_wldcore_window_records[map_window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
-        g_main_system_flags = g_wldcore_saved_system_flags | MAIN_SYSTEM_FLAG_DRAW_MAP;
-        g_wldcore_window_records[menu_window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
+        map_window_index = g_world_map_window_index;
+        menu_window_index = g_world_map_cursor_window;
+        g_window_records[map_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_main_system_flags = g_world_map_saved_system_flags | MAIN_SYSTEM_FLAG_DRAW_MAP;
+        g_window_records[menu_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         return;
     }
 
@@ -80,69 +80,69 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
     GsSwapDispBuff();
     buffer_index = GsGetActiveBuff();
     g_main_gfx_active_buffer_index = buffer_index;
-    GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
-    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_map_project_and_cull_tiles();
-    wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_project_and_cull_dots();
-    wldcore_map_update_camera_direction_and_projection();
-    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_map_draw_location_label(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index],
-        g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
-        g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
-    wldcore_restore_previous_stack();
-    GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
+    GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_switch_to_stack(getScratchAddr(255));
+    world_map_project_tiles();
+    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_project_dots();
+    world_map_update_camera();
+    hud_draw_value(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index],
+        g_window_aux_render_object_queue, g_window_aux_render_object_count);
+    window_dispatch_record_list(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index],
+        g_window_render_object_queue, g_window_render_object_count);
+    world_map_restore_previous_stack();
+    GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
-    wldcore_gfx_set_display_rect(g_main_gfx_active_buffer_index, &display_rect);
-    StoreImage(&display_rect, g_wldcore_scratch_buffer);
+    world_map_set_display_rect(g_main_gfx_active_buffer_index, &display_rect);
+    StoreImage(&display_rect, g_world_map_scratch_buffer);
     DrawSync(0);
-    g_wldcore_loaded_background_set = -1;
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    g_picture_background_loaded_set = -1;
+    GsClearOt(0, 0, &g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
+    world_map_run_world_menus(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
     {
         s32 map_window_index;
         s32 menu_window_index;
         u32 saved_system_flags;
 
         saved_system_flags = g_main_system_flags;
-        menu_window_index = g_wldcore_menu_root_window_index;
-        map_window_index = g_wldcore_map_window_index;
-        g_wldcore_saved_system_flags = saved_system_flags;
-        g_wldcore_window_records[map_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
+        menu_window_index = g_world_map_cursor_window;
+        map_window_index = g_world_map_window_index;
+        g_world_map_saved_system_flags = saved_system_flags;
+        g_window_records[map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         g_main_system_flags = saved_system_flags | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES
             | MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS | MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE
             | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-        g_wldcore_window_records[menu_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-        window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
-            g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
+        g_window_records[menu_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        window_dispatch_record_list(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index],
+            g_window_render_object_queue, g_window_render_object_count);
     }
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_world_map_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
 }
 
-/* World-map tile atlas setup, run once from wldcore_init_subsystems between
+/* World-map tile atlas setup, run once from world_map_init_subsystems between
  * window_init_record_pools() and
- * wldcore_system_init_world_menus_and_date(). Because the pools were just
+ * world_map_init_menus_and_date(). Because the pools were just
  * zeroed, the two append calls here return records 0 and 1.
  *
  * Layout:
- *  - Origin, scale and rotation form g_wldcore_map_projection_view. Their
+ *  - Origin, scale and rotation form g_world_map_projection_view. Their
  *    aliases retain this initializer's absolute stores;
  *    the projection routine anchors its shared record view at rotation.
  *  - The 24-byte tile source table is reached through the pointer cell
- *    g_wldcore_map_tile_descriptors. The target indexes it by 32-bit value
+ *    g_world_map_tile_descriptors. The target indexes it by 32-bit value
  *    (base + k*4, k += 6), not by record, so it is an s32* with a 32-bit element index.
- *  - g_wldcore_menu_root_window_index, which receives the root menu window's
+ *  - g_world_map_cursor_window, which receives the root menu window's
  *    record index, shares its address with element 0 of
- *    g_wldcore_menu_stack_types (the root level's type slot).
+ *    g_menu_stack_types (the root level's type slot).
  *
  * Shapes the bytes depend on:
  *  - `.map_x`/`.map_y` are written through one loop-invariant s32* to element
@@ -164,12 +164,12 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
  *  - `y` is initialized before `k` and `i`: the target emits `li t3,-192`
  *    first in the outer preheader.
  */
-void wldcore_map_init_tile_atlas(void) {
+void world_map_init_tile_atlas(void) {
     s32* descriptor;
     point32_t* wpos;
     point32_t* wpos2;
-    world_animated_render_record_t* rec;
-    world_animated_render_record_t* rec2;
+    display_object_animated_t* rec;
+    display_object_animated_t* rec2;
     s32* pos;
     s32 map_window_index;
     s32 menu_window_index;
@@ -186,25 +186,25 @@ void wldcore_map_init_tile_atlas(void) {
     s32 tpage_x;
     s32 tpage_y;
 
-    g_wldcore_map_projection_scale.vx = ONE;
-    g_wldcore_map_projection_scale.vy = ONE;
-    g_wldcore_map_projection_scale.vz = ONE;
-    g_wldcore_map_projection_origin.vx = 0;
-    g_wldcore_map_projection_origin.vy = 0;
-    g_wldcore_map_projection_origin.vz = 0;
-    g_wldcore_map_projection_rotation.vx = 0;
-    g_wldcore_map_projection_rotation.vy = 0;
-    g_wldcore_map_projection_rotation.vz = 0;
+    g_world_map_projection_scale.vx = ONE;
+    g_world_map_projection_scale.vy = ONE;
+    g_world_map_projection_scale.vz = ONE;
+    g_world_map_projection_origin.vx = 0;
+    g_world_map_projection_origin.vy = 0;
+    g_world_map_projection_origin.vz = 0;
+    g_world_map_projection_rotation.vx = 0;
+    g_world_map_projection_rotation.vy = 0;
+    g_world_map_projection_rotation.vz = 0;
 
-    descriptor = g_wldcore_map_tile_descriptors;
+    descriptor = g_world_map_tile_descriptors;
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_RESTART)) {
         y = -192;
         k = 0;
         i = 0;
-        pos = &g_wldcore_map_projected_tiles[0].map_x;
-        for (row = 0; row < WLDCORE_MAP_TILE_ROWS + 1; row++) {
+        pos = &g_world_map_projected_tiles[0].map_x;
+        for (row = 0; row < WORLD_MAP_TILE_ROWS + 1; row++) {
             x = -256;
-            for (col = 0; col < WLDCORE_MAP_ROW_STRIDE; col++) {
+            for (col = 0; col < WORLD_MAP_ROW_STRIDE; col++) {
                 tpage_x = descriptor[k];
                 tpage_y = descriptor[k + 1];
                 clut_x = descriptor[k + 2];
@@ -214,11 +214,11 @@ void wldcore_map_init_tile_atlas(void) {
                 pos[i * 6] = x;
                 pos[i * 6 + 1] = y;
                 if (width != 0 && height != 0) {
-                    g_wldcore_map_projected_tiles[i].flags = GetTPage(1, 0, tpage_x, tpage_y) & 0xff;
-                    g_wldcore_map_projected_tiles[i].texture
+                    g_world_map_projected_tiles[i].flags = GetTPage(1, 0, tpage_x, tpage_y) & 0xff;
+                    g_world_map_projected_tiles[i].texture
                         = (clut_x << 24) | ((clut_y & 0xff) << 16) | ((width & 0xff) << 8) | (height & 0xff);
                 } else {
-                    g_wldcore_map_projected_tiles[i].flags = WLDCORE_MAP_TILE_EMPTY;
+                    g_world_map_projected_tiles[i].flags = WORLD_MAP_TILE_EMPTY;
                 }
                 i++;
                 x += width;
@@ -228,53 +228,51 @@ void wldcore_map_init_tile_atlas(void) {
         }
     }
 
-    map_window_index
-        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_map_window_index = map_window_index;
-    g_wldcore_window_records[map_window_index].sequence = WLDCORE_ANIM_SEQUENCE_MAP_FRAME;
-    g_wldcore_window_records[map_window_index].priority = 13;
-    wpos = &g_wldcore_window_records[map_window_index].position;
-    rec = &g_wldcore_window_records[map_window_index];
+    map_window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_world_map_window_index = map_window_index;
+    g_window_records[map_window_index].sequence = WINDOW_ANIM_MAP_FRAME;
+    g_window_records[map_window_index].priority = 13;
+    wpos = &g_window_records[map_window_index].position;
+    rec = &g_window_records[map_window_index];
     wpos->x = 0;
     wpos->y = 8;
     rec->anim_counter = 0;
-    g_wldcore_window_records[map_window_index].frame_index = 0;
+    g_window_records[map_window_index].frame_index = 0;
 
-    menu_window_index
-        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_root_window_index = menu_window_index;
-    g_wldcore_window_records[menu_window_index].sequence = WLDCORE_ANIM_SEQUENCE_ROOT_MENU_FRAME;
-    g_wldcore_window_records[menu_window_index].priority = 13;
-    wpos2 = &g_wldcore_window_records[menu_window_index].position;
-    rec2 = &g_wldcore_window_records[menu_window_index];
+    menu_window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_world_map_cursor_window = menu_window_index;
+    g_window_records[menu_window_index].sequence = WINDOW_ANIM_ROOT_MENU_FRAME;
+    g_window_records[menu_window_index].priority = 13;
+    wpos2 = &g_window_records[menu_window_index].position;
+    rec2 = &g_window_records[menu_window_index];
     wpos2->x = -4;
     wpos2->y = 8;
     rec2->anim_counter = 0;
-    g_wldcore_window_records[menu_window_index].frame_index = 0;
+    g_window_records[menu_window_index].frame_index = 0;
 
-    wldcore_map_project_and_cull_tiles();
+    world_map_project_tiles();
 }
 
 /* Builds the map camera matrix and projects the 13x17 grid of tile corners,
- * storing each screen position and setting WLDCORE_MAP_TILE_OFF_SCREEN on
+ * storing each screen position and setting WORLD_MAP_TILE_OFF_SCREEN on
  * corners that fall outside the visible window; empty tiles
- * (WLDCORE_MAP_TILE_EMPTY) keep their flags. */
-void wldcore_map_project_and_cull_tiles(void) {
+ * (WORLD_MAP_TILE_EMPTY) keep their flags. */
+void world_map_project_tiles(void) {
     MATRIX matrix;
     SVECTOR position;
     VECTOR projected;
     long flag;
     s32 i;
-    wldcore_projected_entry_t* entry;
-    wldcore_map_projection_view_t* view;
+    world_map_projected_tile_t* entry;
+    world_map_projection_view_t* view;
     SVECTOR* rotation;
     s32 flags;
     s32 updated;
     s32 coordinate;
 
     /* Retail keeps the camera base at rotation; the record base changes its argument instructions. */
-    rotation = &g_wldcore_map_projection_rotation;
-    view = (wldcore_map_projection_view_t*)((u8*)rotation - offsetof(wldcore_map_projection_view_t, rotation));
+    rotation = &g_world_map_projection_rotation;
+    view = (world_map_projection_view_t*)((u8*)rotation - offsetof(world_map_projection_view_t, rotation));
     RotMatrix(rotation, &matrix);
     TransMatrix(&matrix, &view->origin);
     ScaleMatrix(&matrix, &view->scale);
@@ -282,22 +280,22 @@ void wldcore_map_project_and_cull_tiles(void) {
     SetTransMatrix(&matrix);
 
     i = 0;
-    entry = g_wldcore_map_projected_tiles;
-    for (; i < WLDCORE_MAP_CORNER_COUNT; i++) {
-        coordinate = g_wldcore_map_projected_tiles[i].map_x;
+    entry = g_world_map_projected_tiles;
+    for (; i < WORLD_MAP_CORNER_COUNT; i++) {
+        coordinate = g_world_map_projected_tiles[i].map_x;
         position.vx = coordinate;
-        coordinate = g_wldcore_map_projected_tiles[i].map_y;
+        coordinate = g_world_map_projected_tiles[i].map_y;
         position.vz = 0;
         position.vy = coordinate;
         RotTrans(&position, &projected, &flag);
-        g_wldcore_map_projected_tiles[i].screen_x = projected.vx;
-        g_wldcore_map_projected_tiles[i].screen_y = projected.vy;
+        g_world_map_projected_tiles[i].screen_x = projected.vx;
+        g_world_map_projected_tiles[i].screen_y = projected.vy;
         flags = entry->flags;
-        if (!(flags & WLDCORE_MAP_TILE_EMPTY)) {
+        if (!(flags & WORLD_MAP_TILE_EMPTY)) {
             if (projected.vx < -0xa0 || projected.vx > 0x80 || projected.vy < -0x98 || projected.vy > 0x78) {
-                updated = flags | WLDCORE_MAP_TILE_OFF_SCREEN;
+                updated = flags | WORLD_MAP_TILE_OFF_SCREEN;
             } else {
-                updated = flags & ~WLDCORE_MAP_TILE_OFF_SCREEN;
+                updated = flags & ~WORLD_MAP_TILE_OFF_SCREEN;
             }
             entry->flags = updated;
         }
@@ -317,7 +315,7 @@ void wldcore_map_project_and_cull_tiles(void) {
  * `addiu at,at,<offset>` under 2.21 and lose it under 2.34. Each tile reads
  * its own entry and the next one's .screen_x, so the accesses are written
  * against `index` and `index + 1`. */
-void wldcore_gfx_draw_projected_map_tiles(GsOT* ot) {
+void world_map_draw_tiles(GsOT* ot) {
     POLY_FT4 poly;
     CVECTOR color;
     s32 row;
@@ -328,32 +326,32 @@ void wldcore_gfx_draw_projected_map_tiles(GsOT* ot) {
     color.r = 0x80;
     color.g = 0x80;
     color.b = 0x80;
-    wldcore_gfx_copy_color_with_tint(&color, &color);
+    world_map_fade_tint_color(&color, &color);
     setRGB0(&poly, color.r, color.g, color.b);
-    poly.clut = GetClut(0, WLDCORE_MAP_TILE_CLUT_Y);
+    poly.clut = GetClut(0, WORLD_MAP_TILE_CLUT_Y);
 
-    for (row = 0; row < WLDCORE_MAP_TILE_ROWS; row++) {
-        index = row * WLDCORE_MAP_ROW_STRIDE;
+    for (row = 0; row < WORLD_MAP_TILE_ROWS; row++) {
+        index = row * WORLD_MAP_ROW_STRIDE;
 
-        poly.y0 = poly.y1 = g_wldcore_map_projected_tiles[index].screen_y;
-        poly.y2 = poly.y3 = g_wldcore_map_projected_tiles[index + WLDCORE_MAP_ROW_STRIDE].screen_y;
+        poly.y0 = poly.y1 = g_world_map_projected_tiles[index].screen_y;
+        poly.y2 = poly.y3 = g_world_map_projected_tiles[index + WORLD_MAP_ROW_STRIDE].screen_y;
 
-        for (column = 0; column < WLDCORE_MAP_TILE_COLUMNS; column++, index++) {
-            s32 flags = g_wldcore_map_projected_tiles[index].flags;
+        for (column = 0; column < WORLD_MAP_TILE_COLUMNS; column++, index++) {
+            s32 flags = g_world_map_projected_tiles[index].flags;
             u32 texture;
             s32 u;
             s32 v;
             s32 w;
             s32 h;
 
-            if (flags & (WLDCORE_MAP_TILE_OFF_SCREEN | WLDCORE_MAP_TILE_EMPTY)) {
+            if (flags & (WORLD_MAP_TILE_OFF_SCREEN | WORLD_MAP_TILE_EMPTY)) {
                 continue;
             }
-            poly.tpage = flags & WLDCORE_MAP_TILE_TPAGE_MASK;
-            poly.x0 = poly.x2 = g_wldcore_map_projected_tiles[index].screen_x;
-            poly.x1 = poly.x3 = g_wldcore_map_projected_tiles[index + 1].screen_x;
+            poly.tpage = flags & WORLD_MAP_TILE_TPAGE_MASK;
+            poly.x0 = poly.x2 = g_world_map_projected_tiles[index].screen_x;
+            poly.x1 = poly.x3 = g_world_map_projected_tiles[index + 1].screen_x;
 
-            texture = g_wldcore_map_projected_tiles[index].texture;
+            texture = g_world_map_projected_tiles[index].texture;
             u = (texture & 0xff000000) >> 24;
             v = (texture & 0x00ff0000) >> 16;
             w = (texture & 0x0000ff00) >> 8;
@@ -375,15 +373,15 @@ void wldcore_gfx_draw_projected_map_tiles(GsOT* ot) {
 
 /* Scroll `position` by `amount` on both axes within the scroll limits, leaving
  * the part that could not be applied in `amount`. */
-void wldcore_map_apply_clamped_scroll(point32_t* amount, VECTOR* position) {
-    wldcore_map_apply_clamped_horizontal_scroll(&amount->x, &position->vx);
-    wldcore_map_apply_clamped_vertical_scroll(amount, position);
+void world_map_apply_clamped_scroll(point32_t* amount, VECTOR* position) {
+    world_map_apply_clamped_horizontal_scroll(&amount->x, &position->vx);
+    world_map_apply_clamped_vertical_scroll(amount, position);
 }
 
 /* Apply a (negated) scroll amount to a position clamped to [-116, 128] (the
- * same x range wldcore_map_negate_and_clamp_coordinates clamps to) and leave the unapplied
+ * same x range world_map_negate_and_clamp clamps to) and leave the unapplied
  * remainder in *amount. */
-void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
+void world_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
     s32 delta = -(*amount);
     s32 old_position;
     s32 value;
@@ -392,8 +390,8 @@ void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
     if (delta < 0) {
         old_position = *position;
         value = old_position + delta;
-        if (value < WLDCORE_SCROLL_MIN_X) {
-            value = WLDCORE_SCROLL_MIN_X;
+        if (value < WORLD_MAP_SCROLL_MIN_X) {
+            value = WORLD_MAP_SCROLL_MIN_X;
         }
         (*amount) = delta - (value - old_position);
         (*position) = value;
@@ -402,8 +400,8 @@ void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
     if ((*amount) > 0) {
         old_position = *position;
         value = old_position + (*amount);
-        if (value >= (WLDCORE_SCROLL_MAX_X + 1)) {
-            value = WLDCORE_SCROLL_MAX_X;
+        if (value >= (WORLD_MAP_SCROLL_MAX_X + 1)) {
+            value = WORLD_MAP_SCROLL_MAX_X;
         }
         (*amount) -= value - old_position;
         (*position) = value;
@@ -412,10 +410,10 @@ void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
     (*amount) = -(*amount);
 }
 
-/* Vertical counterpart of wldcore_map_apply_clamped_horizontal_scroll: the
+/* Vertical counterpart of world_map_apply_clamped_horizontal_scroll: the
  * same shape applied to the vertical amount and projection origin,
- * clamped to [-64, 80], the y range wldcore_map_negate_and_clamp_coordinates uses. */
-void wldcore_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* position) {
+ * clamped to [-64, 80], the y range world_map_negate_and_clamp uses. */
+void world_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* position) {
     s32 delta = -amount->y;
     s32 old_position;
     s32 value;
@@ -424,8 +422,8 @@ void wldcore_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* positi
     if (delta < 0) {
         old_position = position->vy;
         value = old_position + delta;
-        if (value < WLDCORE_SCROLL_MIN_Y) {
-            value = WLDCORE_SCROLL_MIN_Y;
+        if (value < WORLD_MAP_SCROLL_MIN_Y) {
+            value = WORLD_MAP_SCROLL_MIN_Y;
         }
         amount->y = delta - (value - old_position);
         position->vy = value;
@@ -434,8 +432,8 @@ void wldcore_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* positi
     if (amount->y > 0) {
         old_position = position->vy;
         value = old_position + amount->y;
-        if (value >= (WLDCORE_SCROLL_MAX_Y + 1)) {
-            value = WLDCORE_SCROLL_MAX_Y;
+        if (value >= (WORLD_MAP_SCROLL_MAX_Y + 1)) {
+            value = WORLD_MAP_SCROLL_MAX_Y;
         }
         amount->y -= value - old_position;
         position->vy = value;

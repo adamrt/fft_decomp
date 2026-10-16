@@ -16,7 +16,7 @@
  * library) or <program>_menu_opcode_NN_<name> (a program's own copy); CARD has no table and calls its few
  * drawing routines directly. Opcode 8 has no handler anywhere. BUNIT also leaves 3 and 7 empty, EQUIP leaves
  * 0x19-0x1b empty, and JOBSTTS leaves 3, 6, 7, 0x0b and 0x16-0x1b empty. Each module ends a stream with its
- * own opcode, the first one past its table (WORLD_MENU_SCRIPT_END, BUNIT_CMD_END, EQUIP_CMD_END,
+ * own opcode, the first one past its table (SCREEN_SCRIPT_END, BUNIT_CMD_END, EQUIP_CMD_END,
  * JOBSTTS_CMD_END). */
 typedef enum menu_script_opcode {
     MENU_SCRIPT_OP_WINDOW_FRAME = 0x00,
@@ -87,14 +87,14 @@ typedef struct menu_draw_number_command {
 } menu_draw_number_command_t;
 
 /* Variable-length list command (0x10) in the menu display stream: the layout
- * world_menu_load_scrollable_list_layout reads and the placement
+ * screen_load_list_layout reads and the placement
  * each program's *_menu_opcode_10_draw_scrollable_list draws with. */
 typedef struct menu_list_record {
     u8 opcode;          /* 0x00: 0x10 = list layout */
     u8 length;          /* 0x01: byte length of this record */
     u8 show_cursor;     /* 0x02 */
     u8 _unused_03;      /* 0x03 */
-    u8 skip_count;      /* 0x04: row records that follow (g_world_menu_list_row_record_count) */
+    u8 skip_count;      /* 0x04: row records that follow (g_screen_list_row_record_count) */
     u8 row_height;      /* 0x05 */
     u8 visible_rows;    /* 0x06 */
     u8 x;               /* 0x07 */

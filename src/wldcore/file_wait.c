@@ -17,22 +17,22 @@ void file_wait_then_request_read(main_file_load_descriptor_t* header, s32 sector
 }
 
 #ifdef FFT_WLDCORE
-/* Read the map texture WLDTEX.TM2 (134 sectors) into g_wldcore_scratch_buffer,
- * polling with wldcore_file_poll_vram_image_stream until the read completes.
+/* Read the map texture WLDTEX.TM2 (134 sectors) into g_world_map_scratch_buffer,
+ * polling with world_map_poll_texture_stream until the read completes.
  * Skipped when the core is restarting (MAIN_SYSTEM_FLAG_RESTART).
  *
  * The target frame is 0x20 rather than the 0x18 this body needs: 16 bytes of
  * outgoing arguments plus the ra/s0 save pair leave 8 bytes of unreferenced
  * locals, so the original declared an 8-byte stack object it never used. Its
  * type is unknown; the array below reproduces the slot exactly. */
-void wldcore_map_load_texture(void) {
+void world_map_load_texture(void) {
     s32 unused_stack_slot[2];
 
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_RESTART) == 0) {
         file_wait_then_request_read(
-            &g_main_file_cd_state, DISC_SECTOR_WORLD_WLDTEX_TM2, 0x86, g_wldcore_scratch_buffer);
+            &g_main_file_cd_state, DISC_SECTOR_WORLD_WLDTEX_TM2, 0x86, g_world_map_scratch_buffer);
         while (g_main_file_cd_state.state != MAIN_FILE_LOAD_STATE_IDLE) {
-            wldcore_file_poll_vram_image_stream(&g_main_file_cd_state);
+            world_map_poll_texture_stream(&g_main_file_cd_state);
         }
     }
 }
@@ -44,7 +44,7 @@ void wldcore_map_load_texture(void) {
 void file_wait_for_pending(void) {
     while (g_main_file_cd_state.state != MAIN_FILE_LOAD_STATE_IDLE) {
         main_file_poll_load(&g_main_file_cd_state);
-        wldcore_sound_process_audio_queue();
+        audio_queue_process();
         VSync(0);
     }
 }

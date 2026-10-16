@@ -25,7 +25,7 @@
 
 /*
  * Options-menu thread, OPTION's body: WORLD's code with its own globals and callees, without the
- * g_world_menu_thread_result stores. The first thread parameter is the menu entry.
+ * g_screen_thread_result stores. The first thread parameter is the menu entry.
  *
  * The option names scroll through a 256-line ring of text rows in VRAM, drawn from two
  * double-buffered copies of the page primitives. Below the list a panel shows the selected
