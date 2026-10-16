@@ -20,11 +20,11 @@ extern wldcore_menu_stack_record_t g_wldcore_menu_stack_records[];
  * the 0x03c0-0x03ff variable lists). */
 extern s32 g_wldcore_menu_stack_types_next[];
 extern wldcore_menu_stack_record_t g_wldcore_menu_stack_records_next[];
-/* Handlers by level type. Idle runs the top level each frame; publish runs just before another level opens over it
+/* Handlers by level type. Idle runs the top level each frame; suspend runs just before another level opens over it
  * (list levels withhold every button, window levels dim their windows); resume undoes that when the level above
  * closes. */
 extern void (*g_wldcore_menu_idle_handlers[])(wldcore_menu_stack_record_t*);
-extern void (*g_wldcore_menu_publish_handlers[])(wldcore_menu_stack_record_t*);
+extern void (*g_wldcore_menu_suspend_handlers[])(wldcore_menu_stack_record_t*);
 extern void (*g_wldcore_menu_resume_handlers[])(wldcore_menu_stack_record_t*);
 extern s32 g_wldcore_menu_ordering_table_offset;
 extern s32 g_wldcore_menu_root_window_index;
@@ -34,7 +34,7 @@ extern GsSPRITE g_wldcore_menu_indicator_sprite;
 void wldcore_menu_reset_stack(void);
 void wldcore_menu_run_world_frame(GsOT* context);
 void wldcore_menu_dispatch_idle_handler(void);
-void wldcore_menu_dispatch_publish_handler(void);
+void wldcore_menu_dispatch_suspend_handler(void);
 void wldcore_menu_dispatch_resume_handler(void);
 void wldcore_menu_dispatch_pending_script_requests(void);
 void wldcore_menu_resume_root_level(wldcore_menu_stack_record_t* level);
@@ -116,7 +116,7 @@ extern s32 g_wldcore_bar_menu_saved_cursor;
 extern u8 g_wldcore_bar_row_help_text_ids[];
 extern s32* g_wldcore_rumor_location_masks;
 void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level);
-void wldcore_bar_restore_list_and_show_welcome(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_bar_menu_level(wldcore_menu_stack_record_t* level);
 void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* level);
 void wldcore_list_open_available_propositions(void);
 void wldcore_list_open_completed_propositions(void);
@@ -169,6 +169,6 @@ extern s32 g_wldcore_tutorial_category_saved_cursor;
 extern menu_cursor_state_t g_wldcore_tutorial_entries_cursor_state;
 extern s32 g_wldcore_tutorial_event_ids[];
 void wldcore_list_open_tutorial_topics(void);
-void wldcore_tutorial_restore_list_and_show_welcome(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_tutorial_categories_level(wldcore_menu_stack_record_t* level);
 
 #endif

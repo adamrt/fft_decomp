@@ -782,7 +782,7 @@ static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_le
 
 /* Undo wldcore_window_set_states_and_blue_tint when a sub-level closes:
  * default palettes on the send-unit windows and a neutral preview portrait. */
-void wldcore_window_clear_states_and_restore_tint(wldcore_menu_send_unit_level_t* level) {
+void wldcore_menu_resume_proposition_send_unit_level(wldcore_menu_send_unit_level_t* level) {
     CVECTOR* color;
 
     g_wldcore_window_records[level->list_frame.window_index].palette
@@ -802,7 +802,7 @@ void wldcore_window_clear_states_and_restore_tint(wldcore_menu_send_unit_level_t
 /* Gray out the send-unit windows (palettes 6, 10 and 2) and tint the preview
  * portrait blue (0x40, 0x50, 0x70) while a sub-level runs over them; undone by
  * wldcore_window_clear_states_and_restore_tint. */
-void wldcore_window_set_states_and_blue_tint(wldcore_menu_send_unit_level_t* level) {
+void wldcore_menu_suspend_proposition_send_unit_level(wldcore_menu_send_unit_level_t* level) {
     s32 pad[4];
 
     g_wldcore_window_records[level->list_frame.window_index].palette = 6;
@@ -856,7 +856,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
             g_main_system_flags &= ~MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
             g_wldcore_menu_stack_depth--;
             wldcore_proposition_push_detail_level(g_wldcore_selected_proposition_row[0].id - 1);
-            wldcore_window_set_render_palette_2(&level->list_frame);
+            wldcore_menu_suspend_proposition_detail_level(&level->list_frame);
             wldcore_menu_push_number_panel_level();
         }
         return;
@@ -883,7 +883,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
 
     buttons = g_wldcore_input_new_button_presses;
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_window_set_states_and_blue_tint(level);
+        wldcore_menu_suspend_proposition_send_unit_level(level);
         wldcore_menu_push_message_level(0x109A, 1);
         return;
     }

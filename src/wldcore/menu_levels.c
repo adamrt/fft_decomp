@@ -458,13 +458,13 @@ void wldcore_menu_dispatch_resume_handler(void) {
     g_wldcore_menu_resume_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
 }
 
-/* Run the top level's publish handler, called just before another level opens over it: list levels
+/* Run the top level's suspend handler, called just before another level opens over it: list levels
  * withhold every button, window levels dim their windows (palettes 10, 6, 2 and the pressed
  * cursor). The resume handler undoes it. */
-void wldcore_menu_dispatch_publish_handler(void) {
+void wldcore_menu_dispatch_suspend_handler(void) {
     s32 index = g_wldcore_menu_stack_depth;
 
-    g_wldcore_menu_publish_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
+    g_wldcore_menu_suspend_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
 }
 
 /* Pushes a two-window menu level: appends two window records, points the new
@@ -545,7 +545,7 @@ void wldcore_menu_resume_root_level(wldcore_menu_stack_record_t* level) {
 
 /* Reset the window palette and both map-cursor scroll axes. The scroll fields
  * preserve the original store order after the indexed window store. */
-void wldcore_window_reset_state_and_scroll(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_suspend_root_level(wldcore_menu_stack_record_t* level) {
     g_wldcore_window_records[level->window_index].palette = 10;
     g_wldcore_map_cursor_scroll_y.value = 0;
     g_wldcore_map_cursor_scroll_x.value = 0;
@@ -568,15 +568,15 @@ void wldcore_menu_dispatch_pending_script_requests(void) {
     }
     flags = &g_wldcore_script_state.flags;
     if (*flags & WLDCORE_SCRIPT_ACTION_PATH_MASK) {
-        wldcore_window_reset_state_and_scroll(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
+        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
         wldcore_menu_push_map_path_level(g_wldcore_script_state.args[0], g_wldcore_script_state.args[1],
             (*flags & WLDCORE_SCRIPT_ACTION_ERASE_PATH) > 0);
     } else if (*flags & WLDCORE_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK) {
-        wldcore_window_reset_state_and_scroll(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
+        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
         wldcore_push_map_location_visibility_level(
             g_wldcore_script_state.args[0], (*flags & WLDCORE_SCRIPT_ACTION_ERASE_LOCATION) > 0);
     } else if (*flags & WLDCORE_SCRIPT_ACTION_FOCUS_LOCATION) {
-        wldcore_window_reset_state_and_scroll(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
+        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
         id = g_wldcore_script_state.args[0];
         if (id == 0xFF) {
             id = *location;
@@ -668,7 +668,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
                         = wldcore_map_build_location_menu_entries(
                             hit, g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entries);
                     if (g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count != 0) {
-                        wldcore_window_reset_state_and_scroll(level);
+                        wldcore_menu_suspend_root_level(level);
                         wldcore_menu_push_location_menu_level(hit);
                         return;
                     }
@@ -682,7 +682,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
             buttons = g_wldcore_input_new_button_presses;
             if (buttons & (PSX_PAD_TRIANGLE | PSX_PAD_START)) {
                 wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
-                wldcore_window_reset_state_and_scroll(level);
+                wldcore_menu_suspend_root_level(level);
                 wldcore_menu_push_entry_window_level();
                 return;
             }
@@ -690,7 +690,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
                 hit = wldcore_map_find_dot_at_point(g_wldcore_window_records[level->map_cursor.window_index].position);
                 if (hit != 0) {
                     hit--;
-                    wldcore_window_reset_state_and_scroll(level);
+                    wldcore_menu_suspend_root_level(level);
                     wldcore_gfx_toggle_captured_world_frame(1);
                     wldcore_menu_push_message_level(hit + 0x8000, 1);
                     return;
@@ -1673,7 +1673,7 @@ static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request
 
 /* Clear the text-task flag and move a window record to the sequence after
  * its current one, restarting the animation with the default palette. */
-void wldcore_window_finalize_record_and_stop_task(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_layout_window_level(wldcore_menu_stack_record_t* level) {
     s32 index = level->layout_window.window_index;
     world_animated_render_record_t* entry = &g_wldcore_window_records[index];
 
@@ -1684,8 +1684,8 @@ void wldcore_window_finalize_record_and_stop_task(wldcore_menu_stack_record_t* l
     g_wldcore_window_records[index].frame_index = 0;
 }
 
-/* The g_wldcore_menu_publish_handlers entry of WLDCORE_MENU_LEVEL_LAYOUT_WINDOW: nothing to publish. */
-void wldcore_menu_publish_layout_window_level(void) {
+/* The g_wldcore_menu_suspend_handlers entry of WLDCORE_MENU_LEVEL_LAYOUT_WINDOW: nothing to suspend. */
+void wldcore_menu_suspend_layout_window_level(void) {
 }
 
 /* Input handler for a layout-window menu level.
@@ -1945,14 +1945,14 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
 }
 
 /* Restore the location list's optional renderer palette. */
-void wldcore_window_restore_location_list_palette(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_location_menu_level(wldcore_menu_stack_record_t* level) {
     if (level->location_list.extra_render != -1) {
         g_wldcore_window_render_records[level->location_list.extra_render].palette = 0;
     }
 }
 
 /* Sets the second owned render record's palette selector when its slot is present. */
-void wldcore_window_set_secondary_render_palette_2(wldcore_menu_slot_set_t* slots) {
+void wldcore_menu_suspend_location_menu_level(wldcore_menu_slot_set_t* slots) {
     if (slots->render_b != -1) {
         g_wldcore_window_render_records[slots->render_b].palette = 2;
     }
@@ -2097,7 +2097,7 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
         }
     } else if (g_wldcore_input_new_button_presses & PSX_PAD_SELECT) {
         /* Help: map names, services and deep-dungeon floors each have their own message range. */
-        wldcore_window_set_secondary_render_palette_2(&level->slots);
+        wldcore_menu_suspend_location_menu_level(&level->slots);
         value = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index];
         /* A map's help is 0x8801 + map, a service's 0x104b on and a floor's 0x1090 on. */
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_MAP_NAME_BASE) {
@@ -2167,7 +2167,7 @@ static void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id) {
     wldcore_sound_wait_for_queue_drain();
     world_shop_run_screen(shop_id);
     g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    wldcore_window_reset_state_and_scroll(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1]);
+    wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1]);
     selected = &g_wldcore_map_projection_state.marker.kind;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count
         = wldcore_map_build_location_menu_entries(
@@ -2444,7 +2444,7 @@ void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level) {
 }
 
 /* Restore the bar list's palettes and cursor animation, then show its welcome text. */
-void wldcore_bar_restore_list_and_show_welcome(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_bar_menu_level(wldcore_menu_stack_record_t* level) {
     s32 main_window;
     s32 side_window;
     s32 slot;

@@ -515,7 +515,7 @@ static void wldcore_menu_restore_level_on_world_entry(void) {
         if (wldcore_script_process_conditional_set(
                 g_wldcore_map_projection_state.marker.kind, WLDCORE_SCRIPT_ACTION_TEXT)
             != 0) {
-            wldcore_window_reset_state_and_scroll(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
+            wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
             wldcore_menu_push_scrollable_text_window_level(
                 g_wldcore_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);
         } else {

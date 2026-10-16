@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* level types */
-/* The type of a menu level: it selects the level's idle, publish and resume handlers. Push routines fill the level
+/* The type of a menu level: it selects the level's idle, suspend and resume handlers. Push routines fill the level
  * record; RETURN bridges the entry window and a pending world-map transition. */
 typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_ROOT = 0,

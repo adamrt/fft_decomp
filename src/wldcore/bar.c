@@ -1,5 +1,5 @@
-/* The bar, including the window publish slot, rumor and proposition lists, rumor and proposition detail levels, the
- * accept confirmation, the number panel level and its dispatch-days step. */
+/* The bar, including the bar menu's suspend handler, rumor and proposition lists, rumor and proposition detail levels,
+ * the accept confirmation, the number panel level and its dispatch-days step. */
 
 #include "fft/gfx.h"
 #include "fft/main.h"
@@ -41,7 +41,7 @@ static void wldcore_list_open_rumors(void);
  * stored. The record stores may alias `level`, so they invalidate the cached
  * parameter loads and reproduce the target's reloads; `index` shares one
  * address computation between the last two. */
-void wldcore_menu_publish_bar_menu_level(wldcore_menu_list_window_level_t* level) {
+void wldcore_menu_suspend_bar_menu_level(wldcore_menu_list_window_level_t* level) {
     s32 index;
 
     g_wldcore_window_records[level->main_window].palette = 10;
@@ -62,7 +62,7 @@ static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_l
     wldcore_window_set_render_objects_visible(1);
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth - 1;
     g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER);
-    wldcore_menu_dispatch_publish_handler();
+    wldcore_menu_dispatch_suspend_handler();
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count
         = wldcore_map_build_location_menu_entries(
             *selected, g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entries);
@@ -124,7 +124,7 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_menu_publish_bar_menu_level(level);
+        wldcore_menu_suspend_bar_menu_level(level);
         wldcore_menu_push_message_level(
             g_wldcore_bar_row_help_text_ids[level->entries[level->selected_entry]] | 0x1000, 1);
         return;
@@ -140,20 +140,20 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
         switch (level->entries[level->selected_entry]) {
         case WLDCORE_BAR_MENU_ROW_RUMORS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_RUMORS);
-            wldcore_menu_publish_bar_menu_level(level);
+            wldcore_menu_suspend_bar_menu_level(level);
             wldcore_list_open_rumors();
             return;
         case WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_PROPOSITIONS);
-            wldcore_menu_publish_bar_menu_level(level);
+            wldcore_menu_suspend_bar_menu_level(level);
             wldcore_list_open_available_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS:
-            wldcore_menu_publish_bar_menu_level(level);
+            wldcore_menu_suspend_bar_menu_level(level);
             wldcore_list_open_completed_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_PROPOSITIONS:
-            wldcore_menu_publish_bar_menu_level(level);
+            wldcore_menu_suspend_bar_menu_level(level);
             wldcore_list_open_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_LEAVE:
@@ -451,7 +451,7 @@ void wldcore_list_open_available_propositions(void) {
                                             .list_window.frame_render]
             .flags &= ~WORLD_RENDER_RECORD_HIDDEN;
         wldcore_bar_build_menu_rows(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
-        wldcore_menu_publish_bar_menu_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
+        wldcore_menu_suspend_bar_menu_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
         index = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].list_window.main_window;
         record = &g_wldcore_window_records[index];
         record->anim_counter = 0;
@@ -642,12 +642,12 @@ void wldcore_proposition_push_detail_level(s32 value) {
 }
 
 /* Restore the proposition detail renderer's palette. */
-void wldcore_window_restore_proposition_detail_palette(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_proposition_detail_level(wldcore_menu_stack_record_t* level) {
     g_wldcore_window_render_records[level->window_render.render_index].palette = 0;
 }
 
 /* Select palette 2 for the window's render record. */
-void wldcore_window_set_render_palette_2(wldcore_window_render_pair_t* pair) {
+void wldcore_menu_suspend_proposition_detail_level(wldcore_window_render_pair_t* pair) {
     g_wldcore_window_render_records[pair->render_index].palette = 2;
 }
 
@@ -680,7 +680,7 @@ void wldcore_proposition_handle_accept_input(wldcore_window_render_pair_t* owner
         } else {
             thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_ACCEPT_JOB_PROMPT, 0);
         }
-        wldcore_window_set_render_palette_2(owner);
+        wldcore_menu_suspend_proposition_detail_level(owner);
         origin.x = 0x48;
         origin.y = 0x20;
         wldcore_window_build_yes_no_panel(origin);

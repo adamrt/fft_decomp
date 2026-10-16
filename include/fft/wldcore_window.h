@@ -99,8 +99,8 @@ void wldcore_window_init_vram_render_record(s32 index, RECT bounds, point32_t cl
 void wldcore_window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
 void wldcore_window_load_image_record_to_vram(s32 index, u32* image);
 void wldcore_window_draw_centered_text(s32 window_index, s32 text_id);
-void wldcore_window_set_render_palette_2(wldcore_window_render_pair_t* pair);
-void wldcore_window_set_secondary_render_palette_2(wldcore_menu_slot_set_t* slots);
+void wldcore_menu_suspend_proposition_detail_level(wldcore_window_render_pair_t* pair);
+void wldcore_menu_suspend_location_menu_level(wldcore_menu_slot_set_t* slots);
 
 /* display object queues */
 extern s32 g_wldcore_window_render_object_count;
@@ -157,24 +157,24 @@ void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_va
 
 /* level windows */
 /* The window state of menu levels. The resume handlers take the stack record and read the view its level type
- * selects; the rest dim, tint or publish the windows of one kind of level. */
-void wldcore_window_clear_layout_states(wldcore_menu_stack_record_t* level);
-void wldcore_window_clear_pair_state(wldcore_menu_stack_record_t* level);
-void wldcore_window_clear_slot_state(wldcore_menu_stack_record_t* level);
-void wldcore_window_reset_slot_state(wldcore_menu_save_confirm_level_t* level);
-void wldcore_window_reset_state_and_scroll(wldcore_menu_stack_record_t* level);
-void wldcore_window_finalize_record_and_stop_task(wldcore_menu_stack_record_t* level);
-void wldcore_window_restore_location_list_palette(wldcore_menu_stack_record_t* level);
-void wldcore_window_restore_proposition_detail_palette(wldcore_menu_stack_record_t* level);
-void wldcore_window_set_layout_states(wldcore_menu_proposition_list_level_t* level);
-void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* state);
+ * selects; the rest dim, tint or restore the windows of one kind of level. */
+void wldcore_menu_resume_active_propositions_level(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_participant_detail_level(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_sound_novel_quit_level(wldcore_menu_stack_record_t* level);
+void wldcore_menu_suspend_sound_novel_quit_level(wldcore_menu_save_confirm_level_t* level);
+void wldcore_menu_suspend_root_level(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_layout_window_level(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_location_menu_level(wldcore_menu_stack_record_t* level);
+void wldcore_menu_resume_proposition_detail_level(wldcore_menu_stack_record_t* level);
+void wldcore_menu_suspend_active_propositions_level(wldcore_menu_proposition_list_level_t* level);
+void wldcore_menu_suspend_brave_story_level(wldcore_menu_list_window_level_t* state);
 /* Publish handler of the bar menu level: dim its windows (palettes 10, 6, 2) and show the pressed cursor. */
-void wldcore_menu_publish_bar_menu_level(wldcore_menu_list_window_level_t* level);
+void wldcore_menu_suspend_bar_menu_level(wldcore_menu_list_window_level_t* level);
 /* Publish handler of the tutorial categories level; a second copy of the bar menu body. */
-void wldcore_menu_publish_tutorial_categories_level(wldcore_menu_list_window_level_t* level);
-void wldcore_window_begin_tint_transition(wldcore_menu_list_window_level_t* level);
-void wldcore_window_end_tint_transition(wldcore_menu_list_window_level_t* level);
-void wldcore_window_set_states_and_blue_tint(wldcore_menu_send_unit_level_t* level);
-void wldcore_window_clear_states_and_restore_tint(wldcore_menu_send_unit_level_t* level);
+void wldcore_menu_suspend_tutorial_categories_level(wldcore_menu_list_window_level_t* level);
+void wldcore_menu_suspend_proposition_category_level(wldcore_menu_list_window_level_t* level);
+void wldcore_menu_resume_proposition_category_level(wldcore_menu_list_window_level_t* level);
+void wldcore_menu_suspend_proposition_send_unit_level(wldcore_menu_send_unit_level_t* level);
+void wldcore_menu_resume_proposition_send_unit_level(wldcore_menu_send_unit_level_t* level);
 
 #endif

@@ -1123,8 +1123,8 @@ void wldcore_menu_resume_sound_novel_level(wldcore_menu_stack_record_t* level) {
     thread_resume(WLDCORE_THREAD_SLOT_MESSAGE);
 }
 
-/* The g_wldcore_menu_publish_handlers entry of WLDCORE_MENU_LEVEL_SOUND_NOVEL: nothing to publish. */
-void wldcore_menu_publish_sound_novel_level(void) {
+/* The g_wldcore_menu_suspend_handlers entry of WLDCORE_MENU_LEVEL_SOUND_NOVEL: nothing to suspend. */
+void wldcore_menu_suspend_sound_novel_level(void) {
 }
 
 /*
@@ -1345,7 +1345,7 @@ static void wldcore_menu_push_sound_novel_quit_level(void) {
 
 /* Resume handler of the Quit/Continue menu: default palettes and the idle
  * cursor again. */
-void wldcore_window_clear_slot_state(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_sound_novel_quit_level(wldcore_menu_stack_record_t* level) {
     s32 first = level->save_confirm.cursor_window;
     s32 second = level->save_confirm.second_window;
     s32 index;
@@ -1363,7 +1363,7 @@ void wldcore_window_clear_slot_state(wldcore_menu_stack_record_t* level) {
 
 /* Gray out the Quit/Continue menu (palettes 10, 6 and 2) and still its cursor
  * while a help message opens over it. */
-void wldcore_window_reset_slot_state(wldcore_menu_save_confirm_level_t* level) {
+void wldcore_menu_suspend_sound_novel_quit_level(wldcore_menu_save_confirm_level_t* level) {
     s32 index;
 
     g_wldcore_window_records[level->cursor_window].palette = 10;
@@ -1493,7 +1493,7 @@ void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t*
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_window_reset_slot_state(level);
+        wldcore_menu_suspend_sound_novel_quit_level(level);
         wldcore_menu_push_text_window_level(g_wldcore_sound_novel_quit_help_text_ids[level->choice] | 0x1000, 1);
         return;
     }

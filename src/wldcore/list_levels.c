@@ -1,6 +1,6 @@
 /* List levels, including tint transitions, proposition categories and active propositions, participant lists and
- * details, Brave Story propositions and attempt details, screen transitions, the window publish slot, and the tutorial
- * category, formation and mask 1 lists. */
+ * details, Brave Story propositions and attempt details, screen transitions, the bar menu's suspend handler, and the
+ * tutorial category, formation and mask 1 lists. */
 
 #include "fft/data.h"
 #include "fft/data_item.h"
@@ -54,7 +54,7 @@ static void wldcore_window_close_parent_list_frame_windows(void);
 /* The proposition-category level's resume handler, undoing
  * wldcore_window_begin_tint_transition: default palettes, the idle cursor, and the
  * list content record shown again (popping in) if the transition hid it. */
-void wldcore_window_end_tint_transition(wldcore_menu_list_window_level_t* level) {
+void wldcore_menu_resume_proposition_category_level(wldcore_menu_list_window_level_t* level) {
     g_wldcore_window_records[level->main_window].palette = g_wldcore_window_render_records[level->side_window].palette
         = g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 2]
                                               .list_window.content_render]
@@ -80,7 +80,7 @@ void wldcore_window_end_tint_transition(wldcore_menu_list_window_level_t* level)
  * palette 10 and its render record palette 2, the window's three 32-bit scratch fields are
  * cleared, and the current menu level's list content render record is hidden
  * while the transition runs. */
-void wldcore_window_begin_tint_transition(wldcore_menu_list_window_level_t* level) {
+void wldcore_menu_suspend_proposition_category_level(wldcore_menu_list_window_level_t* level) {
     g_wldcore_window_records[level->main_window].palette = 10;
     g_wldcore_window_render_records[level->side_window].palette = 2;
     g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_STILL;
@@ -148,12 +148,12 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
         entry = level->entries[level->selected_entry];
         switch (entry) {
         case WLDCORE_PROPOSITION_CATEGORY_ROW_ACTIVE:
-            wldcore_window_begin_tint_transition(level);
+            wldcore_menu_suspend_proposition_category_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_active_propositions();
             break;
         case WLDCORE_PROPOSITION_CATEGORY_ROW_BRAVE_STORY:
-            wldcore_window_begin_tint_transition(level);
+            wldcore_menu_suspend_proposition_category_level(level);
             g_wldcore_window_records[level->main_window].sequence = entry;
             wldcore_list_open_brave_story_propositions();
             break;
@@ -368,7 +368,7 @@ static void wldcore_list_open_active_propositions(void) {
 
 /* Resume handler of the active-proposition list: restore the palettes of its four windows and
  * render record and idle the cursor, undoing wldcore_window_set_layout_states. */
-void wldcore_window_clear_layout_states(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_active_propositions_level(wldcore_menu_stack_record_t* level) {
     g_wldcore_window_records[level->proposition_list.cursor_window].palette
         = g_wldcore_window_records[level->proposition_list.title_window].palette
         = g_wldcore_window_records[level->proposition_list.count_window].palette
@@ -380,7 +380,7 @@ void wldcore_window_clear_layout_states(wldcore_menu_stack_record_t* level) {
 }
 
 /* Select the palettes for the active-proposition list and its four windows. */
-void wldcore_window_set_layout_states(wldcore_menu_proposition_list_level_t* level) {
+void wldcore_menu_suspend_active_propositions_level(wldcore_menu_proposition_list_level_t* level) {
     g_wldcore_window_records[level->cursor_window].palette = 10;
     g_wldcore_window_records[level->title_window].palette = g_wldcore_window_records[level->count_window].palette
         = g_wldcore_window_records[level->days_window].palette = 6;
@@ -407,7 +407,7 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
         window = level->cursor_window;
         g_wldcore_window_records[window].anim_counter = 0;
         g_wldcore_window_records[window].frame_index = 0;
-        wldcore_window_set_layout_states(level);
+        wldcore_menu_suspend_active_propositions_level(level);
         wldcore_menu_push_message_level(0x105A, 1);
         return;
     }
@@ -803,15 +803,15 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
 }
 
 /* Restore the participant detail windows' palettes. */
-void wldcore_window_clear_pair_state(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_participant_detail_level(wldcore_menu_stack_record_t* level) {
     s32 second = level->participant.left_window;
 
     g_wldcore_window_records[level->participant.right_window].palette = 0;
     g_wldcore_window_records[second].palette = 0;
 }
 
-/* The g_wldcore_menu_publish_handlers entry of WLDCORE_MENU_LEVEL_PARTICIPANT_DETAIL: nothing to publish. */
-void wldcore_menu_publish_participant_detail_level(void) {
+/* The g_wldcore_menu_suspend_handlers entry of WLDCORE_MENU_LEVEL_PARTICIPANT_DETAIL: nothing to suspend. */
+void wldcore_menu_suspend_participant_detail_level(void) {
 }
 
 /*
@@ -982,8 +982,8 @@ static void wldcore_list_open_brave_story_propositions(void) {
 void wldcore_menu_resume_brave_story_propositions_level(void) {
 }
 
-/* The g_wldcore_menu_publish_handlers entry of WLDCORE_MENU_LEVEL_BRAVE_STORY_PROPOSITIONS: nothing to publish. */
-void wldcore_menu_publish_brave_story_propositions_level(void) {
+/* The g_wldcore_menu_suspend_handlers entry of WLDCORE_MENU_LEVEL_BRAVE_STORY_PROPOSITIONS: nothing to suspend. */
+void wldcore_menu_suspend_brave_story_propositions_level(void) {
 }
 
 /* Input step of the completed jobs list opened by
@@ -1140,7 +1140,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
         count = 0;
         wldcore_sound_wait_for_queue_drain();
         wldcore_sound_enqueue_music_start(WLDCORE_AUDIO_MUSIC(2, MAIN_MUSIC_BRAVE_STORY));
-        wldcore_window_reset_state_and_scroll(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
+        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
         if (script_get_variable(EVENT_SCRIPT_VAR_FACTS_ENABLED) != 0) {
             for (i = 0; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
                 if (script_get_variable(i + EVENT_SCRIPT_VAR_FACT_FIRST) != 0) {
@@ -1173,7 +1173,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
     case WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES:
         wldcore_window_set_render_objects_visible(0);
         world_menu_set_slot_4_cursor_index(3);
-        wldcore_window_reset_state_and_scroll(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
+        wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
         wldcore_list_open_tutorial_categories(1, 0);
         wldcore_window_close_parent_list_frame_windows();
         g_wldcore_tutorial_entries_cursor_state = g_main_saved_list_cursor_state;
@@ -1465,7 +1465,7 @@ static void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_p
 }
 
 /* Restore the tutorial list's palettes and cursor animation, then show its welcome text. */
-void wldcore_tutorial_restore_list_and_show_welcome(wldcore_menu_stack_record_t* level) {
+void wldcore_menu_resume_tutorial_categories_level(wldcore_menu_stack_record_t* level) {
     s32 main_window;
     s32 side_window;
     s32 slot;
@@ -1486,9 +1486,9 @@ void wldcore_tutorial_restore_list_and_show_welcome(wldcore_menu_stack_record_t*
 }
 
 /* Gray out the tutorial category menu while a sub-level opens over it. The
- * original wrote the body of wldcore_menu_publish_bar_menu_level a second time
+ * original wrote the body of wldcore_menu_suspend_bar_menu_level a second time
  * here; see there for the matching notes. */
-void wldcore_menu_publish_tutorial_categories_level(wldcore_menu_list_window_level_t* level) {
+void wldcore_menu_suspend_tutorial_categories_level(wldcore_menu_list_window_level_t* level) {
     s32 index;
 
     g_wldcore_window_records[level->main_window].palette = 10;
@@ -1524,7 +1524,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
                 g_main_system_flags = g_main_system_flags
                     & ~(MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
                         | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER);
-                wldcore_menu_dispatch_publish_handler();
+                wldcore_menu_dispatch_suspend_handler();
                 if (g_main_system_flags & MAIN_SYSTEM_FLAG_TITLE_TUTORIAL) {
                     g_main_system_flags
                         = (g_main_system_flags ^ (MAIN_SYSTEM_FLAG_RUNNING | MAIN_SYSTEM_FLAG_TITLE_TUTORIAL))
@@ -1571,7 +1571,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_menu_publish_tutorial_categories_level(level);
+        wldcore_menu_suspend_tutorial_categories_level(level);
         wldcore_menu_push_message_level(level->entries[level->selected_entry] + 0x108B, 1);
         return;
     }
@@ -1582,18 +1582,18 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         g_wldcore_tutorial_category_saved_cursor = *selected_entry;
         switch (level->entries[*selected_entry]) {
         case WLDCORE_TUTORIAL_CATEGORY_ROW_FORMATION:
-            wldcore_menu_publish_tutorial_categories_level(level);
+            wldcore_menu_suspend_tutorial_categories_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_formation_tutorials();
             return;
         case WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES:
-            wldcore_menu_publish_tutorial_categories_level(level);
+            wldcore_menu_suspend_tutorial_categories_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_battle_tutorials();
             return;
         case WLDCORE_TUTORIAL_CATEGORY_ROW_TOPICS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_TUTORIAL_TOPICS);
-            wldcore_menu_publish_tutorial_categories_level(level);
+            wldcore_menu_suspend_tutorial_categories_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_tutorial_topics();
             return;
