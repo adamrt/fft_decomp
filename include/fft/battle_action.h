@@ -455,7 +455,7 @@ s32 battle_action_find_unit_turn_index(const unit_stats_t* unit);
 void battle_action_clear_at_list_active(void);
 void battle_action_clear_at_list_id(void);
 void battle_action_get_next_acting_unit(s32 arg);
-u32 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries);
+u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries);
 void battle_action_open_status_menu_at_list_start(void);
 s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_at_entry_t* at_list);
 void battle_action_set_at_list_active(void);

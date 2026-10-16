@@ -830,7 +830,7 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
 
 /* Count the AT-list entries that resolve before an action by battle_id
  * charging for ct; returns 0xff when no such position exists within 40. */
-u32 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries) {
+u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries) {
     s32 count;
     if (g_battle_between_turn_resume_state == BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE && ct != 0) {
         ct += 1;
