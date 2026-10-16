@@ -1004,7 +1004,7 @@ static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
     }
 }
 
-/* Advances one unit's status bubble by g_main_system_animation_speed frames.
+/* Advances one unit's status bubble by g_main_system_vsync_interval frames.
  *
  * Every 16 timer ticks the bubble id walks forward to the next status the unit
  * carries, wrapping at 0x16, and the bubble's x/y offsets are chosen from the

@@ -24,7 +24,7 @@
  * because height is negative upward. edge_height is the slope_type height
  * of the side crossed (0 low, 1 sloping, 2 high), so a low side
  * lies below the center and a high side above it. VectorNormal reduces the vector
- * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
+ * to unit length (ONE) and g_main_system_vsync_interval scales it; the caller
  * applies the walk speed with move_interpolate_partial. */
 static void battle_move_set_unit_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
@@ -105,7 +105,7 @@ static void battle_move_set_unit_step_delta_edge_to_center(
  * because height is negative upward. edge_height is the slope_type height
  * of the side crossed (0 low, 1 sloping, 2 high), so a low side
  * lies below the center and a high side above it. VectorNormal reduces the vector
- * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
+ * to unit length (ONE) and g_main_system_vsync_interval scales it; the caller
  * applies the walk speed with move_interpolate_partial. */
 static void battle_move_set_float_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {

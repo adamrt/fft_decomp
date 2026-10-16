@@ -313,7 +313,7 @@ extern menu_input_state_t g_world_formation_menu_input_state;
 /* Alias for the first 32-bit field retained for the target's separate absolute store. */
 extern s32 g_world_formation_menu_new_buttons;
 extern u32* g_world_formation_ordering_table;
-/* g_main_system_flags as saved by world_formation_save_and_set_system_flags (main_system_flags_e). */
+/* g_main_system_flags as saved by world_menu_hide_world_map (main_system_flags_e). */
 extern u32 g_world_formation_saved_system_flags;
 /* Set while the selected unit is in the upper rows of the grid: the unit banner
  * then sits at the bottom of the screen and the stat bar at the top (BUNIT's

@@ -1965,7 +1965,7 @@ static void battle_gfx_release_unit_vram_slot(battle_unit_t* unit) {
  * holds it, which is left on its rest frame. Without a request, a change of
  * sixteenth turns the standing pose or swaps the running sequence for its
  * other side; otherwise the sequence and the three weapon/effect blocks
- * count their waits down by g_main_system_animation_speed.
+ * count their waits down by g_main_system_vsync_interval.
  *
  * unit is initialized in its declaration so its copy precedes the table
  * copies, and the unread unused_10 sizes the target's frame. */

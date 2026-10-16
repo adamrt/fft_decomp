@@ -22,7 +22,7 @@
 #include "psx/types.h"
 
 /* Show the map cursor and its tile glow again; the counterpart of
- * battle_action_clear_at_list_active. */
+ * battle_target_hide_cursor. */
 void battle_target_show_cursor(void) {
     g_battle_action_at_list_active = 1;
 }
@@ -356,7 +356,7 @@ static void battle_unit_resolve_projectile_hit(battle_unit_t* attacker, battle_u
     }
 }
 
-/* battle_unit_set_bow_hardcoding for two battle ids. No retail code calls it. */
+/* battle_unit_resolve_projectile_hit for two battle ids. No retail code calls it. */
 void battle_unit_call_bow_hardcoding_by_battle_id(u16 attacker_id, u16 target_id) {
     battle_unit_t* attacker = battle_unit_get_by_battle_id(attacker_id);
     battle_unit_t* target = battle_unit_get_by_battle_id(target_id);
@@ -364,7 +364,7 @@ void battle_unit_call_bow_hardcoding_by_battle_id(u16 attacker_id, u16 target_id
     battle_unit_resolve_projectile_hit(attacker, target);
 }
 
-/* battle_unit_set_bow_hardcoding for two runtime ids: called by the arrow-arc
+/* battle_unit_resolve_projectile_hit for two runtime ids: called by the arrow-arc
  * and linear projectile effects for the unit the projectile hits. */
 void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id) {
     battle_unit_t* attacker = battle_unit_get_by_runtime_id(attacker_id);

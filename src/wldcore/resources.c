@@ -791,7 +791,7 @@ void wldcore_calendar_write_date(u32* bits, s32 record, calendar_date_t* source)
 
 /* Reads one nine-bit record: bits 0-4 into dest->day, bits 5-8 into dest->month.
  * Records are packed nine bits apart in the bit array, matching
- * wldcore_write_nine_bit_record. A field that decodes to zero or beyond its
+ * wldcore_calendar_write_date. A field that decodes to zero or beyond its
  * range falls back to 1. */
 void wldcore_calendar_read_date(u32* bits, s32 record, calendar_date_t* dest) {
     s32 base = record * 9;

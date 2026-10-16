@@ -706,7 +706,7 @@ void battle_state_handle_open_sp2_files_state(void) {
 }
 
 /* StartEffectFileOpen game-state handler: step the effect-file load
- * (battle_effect_init_data); when no work remains, resolve the strike and pick
+ * (battle_effect_update_file_load); when no work remains, resolve the strike and pick
  * the attacker's animation. */
 void battle_state_handle_start_effect_file_open_state(void) {
     if (battle_effect_update_file_load() != 0) {
@@ -774,7 +774,7 @@ void battle_state_update_action_execute_mode(void) {
     battle_target_update_cursor();
 
     unit = battle_unit_get_casting();
-    /* The target reads the 16-bit value of g_main_system_animation_speed. */
+    /* The target reads the 16-bit value of g_main_system_vsync_interval. */
     unit->state_frame_counter += g_main_system_vsync_interval;
     if (unit->strike.target_count != 0) {
         for (i = 0; i < unit->strike.target_count; i++) {

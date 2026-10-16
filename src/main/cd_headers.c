@@ -8,7 +8,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* main_file_build_header with the Now Loading message turned off (NNL: no Now Loading); returns
+/* main_file_request_read with the Now Loading message turned off (NNL: no Now Loading); returns
  * its result. */
 int main_file_request_read_quiet(main_file_load_descriptor_t* header, int sector, int sectors, void* destination) {
     return main_file_request_read(header, sector, sectors, destination, MAIN_FILE_LOADING_DISPLAY_OFF);

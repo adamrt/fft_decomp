@@ -1392,7 +1392,7 @@ void battle_formula_calculate_stolen_gil(void) {
  * Steal Exp.: take attacker Speed + Y EXP, at most 100 and at most the target's
  * EXP; nothing to take is a forced miss. The attacker gains the amount; the
  * target's exp_change carries it with bit 0x80, the loss flag
- * battle_action_handle_steal_exp tests.
+ * battle_action_apply_exp_change tests.
  */
 void battle_formula_set_exp_stolen(void) {
     u8 amount

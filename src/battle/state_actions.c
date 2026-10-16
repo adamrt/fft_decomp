@@ -1189,7 +1189,7 @@ void battle_state_handle_active_turn_state(void) {
 }
 
 /* UnitMove game-state handler: command 7 goes on to choosing a destination
- * (battle_menu_close_move_help); 8 or 0xff returns to the idle action menu. */
+ * (battle_state_enter_select_move_tile); 8 or 0xff returns to the idle action menu. */
 void battle_state_handle_unit_move_state(void) {
     s32 selected_command;
 
@@ -1295,7 +1295,7 @@ void battle_state_handle_move_range_exception_state(void) {
 }
 
 /* IllegalMoveMenu game-state handler: when the message closes (command 7, 8 or
- * 0xff), return to choosing a destination (battle_menu_close_move_help). */
+ * 0xff), return to choosing a destination (battle_state_enter_select_move_tile). */
 void battle_state_handle_illegal_move_menu_state(void) {
     s32 selected_command;
 

@@ -23,7 +23,7 @@ void main_system_handle_error(int error_code) {
 }
 
 /* Error hook BATTLE calls, mostly when a unit lookup by id fails: the code is
- * dropped (main_system_handle_malloc_exception is empty) and
+ * dropped (main_system_report_error is empty) and
  * g_main_system_graphics_error is cleared. */
 void main_system_handle_pointer_exception(int error_code) {
     main_system_report_error(0, error_code);

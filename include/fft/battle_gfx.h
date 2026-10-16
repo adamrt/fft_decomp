@@ -652,7 +652,7 @@ extern palette_t g_battle_gfx_map_selection_cursor_palette;
 extern s32 g_battle_gfx_selection_cursor_bob_frame;
 /* Frame counter and frame index of the selection cursor's bob animation. */
 extern s32 g_battle_gfx_selection_cursor_bob_timer;
-/* Advanced by g_main_system_animation_speed once per call and sampled with bit 5 to blink
+/* Advanced by g_main_system_vsync_interval once per call and sampled with bit 5 to blink
  * the highlighted arrow. */
 extern u32 g_battle_gfx_wait_arrow_blink_timer;
 extern palette_t g_battle_gfx_wait_direction_arrow_palette;

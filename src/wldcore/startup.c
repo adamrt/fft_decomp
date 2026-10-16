@@ -104,7 +104,7 @@ s32 wldcore_entrypoint(void) {
 }
 
 /* When MAIN_SYSTEM_FLAG_DRAW_MAP goes from set to clear, capture the map
- * backdrop again (wldcore_init_core) for the frames that no longer redraw the
+ * backdrop again (wldcore_gfx_capture_map_backdrop) for the frames that no longer redraw the
  * map. */
 static void wldcore_process_frame_gate(void) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) == 0
@@ -279,7 +279,7 @@ void wldcore_clear_screen_and_set_map_clip_rect(s32 mode) {
  * buffered ordering-table descriptors are pointed at their tag arrays.
  *
  * The descriptor stride of 0x14 matches the libgs GsOT record already assumed
- * by wldcore_init_core, which indexes these same globals
+ * by wldcore_gfx_capture_map_backdrop, which indexes these same globals
  * with `g_active_graphics_buffer_index * 0x14`.
  */
 static void wldcore_gfx_init_subsystem(void) {

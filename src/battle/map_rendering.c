@@ -2106,7 +2106,7 @@ s32 battle_map_configure_effect_data_state(map_effect_data_command_e command) {
  * battle_map_draw_mesh_and_weather.
  *
  * A part whose running instruction row has a successor (states[0][1].next) adds
- * (speed >> 4) * g_main_system_animation_speed to its elapsed time. When that
+ * (speed >> 4) * g_main_system_vsync_interval to its elapsed time. When that
  * passes the keyframe's duration the part asks for its next instruction; an
  * instruction of duration 0 ends the animation. For a new keyframe the current
  * rotation, translation and scale become the start values and each of the nine
@@ -2573,7 +2573,7 @@ s32 battle_map_dispatch_map_data_command(map_data_command_e command, u32 index, 
  * palette modes (3 loops, 4/0x81 ping-pong, 0xD-0x14 play once) reload
  * CLUT canvas_x / 16 of the map row from palette frame frame_x + frame. Mode 0x1D
  * starts a rotation of the map row's colors canvas_x..canvas_x + width - 1.
- * Only the low byte of g_main_system_animation_speed is read (lbu), and the start call
+ * Only the low byte of g_main_system_vsync_interval is read (lbu), and the start call
  * passes the color range unmasked, as the target does.
  */
 static void battle_map_update_texture_animations(void) {

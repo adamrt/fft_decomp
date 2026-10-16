@@ -116,7 +116,7 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
 
 /* World-map tile atlas setup, run once from wldcore_init_subsystems between
  * window_init_record_pools_variant() and
- * wldcore_load_formation_unit_name_and_face(). Because the pools were just
+ * wldcore_system_init_world_menus_and_date(). Because the pools were just
  * zeroed, the two append calls here return records 0 and 1.
  *
  * Layout:

@@ -455,7 +455,7 @@ enum {
 
 /* Serialized unit-career layout shared by party records and battle stats.
  * main_unit_generate_out_of_battle (0x80059ffc) clears the 0x96-byte span,
- * while main_job_add_proposition_jp and main_unit_init_battle_data establish
+ * while main_job_add_proposition_jp and main_unit_copy_party_record establish
  * the little-endian byte order of each serialized JP value. Each packed level
  * byte stores the even career index in its high nibble and the following odd
  * index in its low nibble. */

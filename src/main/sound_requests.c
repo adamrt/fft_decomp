@@ -227,7 +227,7 @@ s32 main_sound_load_music_into_slot(s32 music_id, s32 slot) {
     return 0;
 }
 
-/* main_sound_open_and_play_music into the first free scenario slot (1 or
+/* main_sound_load_music_into_slot into the first free scenario slot (1 or
  * 2); returns 0 when both are taken. */
 int main_sound_open_music_into_free_slot(int music_id) {
     int i;
@@ -326,7 +326,7 @@ int main_sound_poll_scenario_smd_load(void) {
     return 0;
 }
 
-/* Blocking form of main_sound_open_scenario_smd_files: polls the loader each
+/* Blocking form of main_sound_start_music_load_into_free_slot: polls the loader each
  * frame until the music record exists. Returns the slot, or 0 when no load
  * started. */
 s32 main_sound_wait_for_scenario_smd_load(s32 music_id) {

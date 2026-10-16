@@ -42,13 +42,13 @@ s32 main_overlay_open_world_and_wldcore(s32 load_world) {
 }
 
 /* Load WORLD.BIN alone. mode - 1 is the loading display mode of
- * main_file_build_header, so mode 1 shows the "Now Loading" screen. */
+ * main_file_request_read, so mode 1 shows the "Now Loading" screen. */
 void main_overlay_open_world_bin(s32 mode) {
     main_file_load_data_from_disc(DISC_SECTOR_WORLD_WORLD_BIN, 0x1E0, g_main_heap_world_overlay_load_address, mode - 1);
 }
 
 /* Blocking read of whole sectors to destination through the shared loader. The
- * last argument is main_file_build_header's loading display mode: 0 blanks the
+ * last argument is main_file_request_read's loading display mode: 0 blanks the
  * screen and sets up the "Now Loading" message, 1 leaves the display state alone,
  * and -1 turns the message off. */
 static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode) {

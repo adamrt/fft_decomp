@@ -39,7 +39,7 @@ extern main_file_load_descriptor_t g_main_file_cd_state;
 /* g_main_file_cd_state.state under a second name: nonzero (not
  * MAIN_FILE_LOAD_STATE_IDLE) while a load is in progress. */
 extern u32 g_main_file_still_loading;
-/* File-header wrapper at 0x80011bd0 forwards main_file_build_header's result. */
+/* File-header wrapper at 0x80011bd0 forwards main_file_request_read's result. */
 s32 main_file_request_read_quiet(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
 s32 main_file_call_build_header(s32 sector, u32 size, void* destination);
 int main_file_is_still_loading(void);

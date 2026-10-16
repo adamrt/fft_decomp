@@ -692,7 +692,7 @@ void battle_effect_start_new(s32 ability_id, s32 target_mode, effect_start_targe
     battle_effect_set_ability_animation(0, ability_id, &effect_data);
 }
 
-/* battle_effect_init_data as a 0 or 1 result: the event script's EffectStart
+/* battle_effect_update_file_load as a 0 or 1 result: the event script's EffectStart
  * instruction calls it on the main stack each frame until it returns 0. */
 s32 battle_effect_try_init_data(void) {
     /* The target loads no argument; the parameter is the $a0 value unhandled states return. */

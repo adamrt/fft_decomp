@@ -405,7 +405,7 @@ typedef enum effect_element_index {
     EFFECT_ELEMENT_INDEX_LIGHTNING = 8,
 } effect_element_index_e;
 
-/* g_battle_effect_load_state: the steps of battle_effect_init_data, which loads the ability's effect file
+/* g_battle_effect_load_state: the steps of battle_effect_update_file_load, which loads the ability's effect file
  * while its charge secondary effect plays. */
 typedef enum effect_load_state {
     EFFECT_LOAD_START = 0,            /* start reading the file */

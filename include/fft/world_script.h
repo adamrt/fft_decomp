@@ -127,7 +127,7 @@ extern u32 g_world_input_frame_new;
 extern u32 g_world_input_frame_previous;
 extern u32 g_world_input_frame_repeat_counter;
 extern u32 g_world_input_frame_secondary_repeat_counter;
-/* Countdown maintained by world_menu_update_thread_7_idle_countdown. Volatile:
+/* Countdown maintained by world_input_update_lockout_timer. Volatile:
  * that routine reloads it after the zero test and again before the running
  * check instead of reusing the first load. */
 extern volatile u8 g_world_input_lockout_timer;

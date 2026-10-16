@@ -2191,10 +2191,10 @@ void battle_state_init_deployment_display(s32 width, s32 height, s32 projection,
  * which the game loop keeps as the frame's hsync count.
  *
  * At animation speed 1 the wait is one vertical blank. Otherwise it is
- * g_main_system_animation_speed blanks, except in the effect and action-execute
+ * g_main_system_vsync_interval blanks, except in the effect and action-execute
  * states: there it is 2 blanks, or 3 while g_battle_frame_pacing_timer runs (4 while it
- * is 16 or more), with the timer counting down each frame, and g_battle_frame_pacing
- * replaces it when larger. The test for a g_battle_frame_pacing of 1 cannot succeed,
+ * is 16 or more), with the timer counting down each frame, and g_main_system_min_vsync_interval
+ * replaces it when larger. The test for a g_main_system_min_vsync_interval of 1 cannot succeed,
  * since the value it is compared with is at least 2. */
 s32 battle_state_sync_frame(u32* ordering_table) {
     s32 wait;

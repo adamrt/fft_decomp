@@ -30,7 +30,7 @@ void world_input_update_lockout_timer(void) {
     }
 }
 
-/* Countdown maintained by world_menu_update_thread_7_idle_countdown; while it is non-zero the formation
+/* Countdown maintained by world_input_update_lockout_timer; while it is non-zero the formation
    screen's per-frame handler returns before reading controller input. */
 s32 world_input_get_lockout_timer(void) {
     return g_world_input_lockout_timer;

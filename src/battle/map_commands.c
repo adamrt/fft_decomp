@@ -80,13 +80,13 @@ void battle_menu_leave_status_screen_selection(void) {
     g_battle_menu_status_screen_selected = 0;
 }
 
-/* Return g_main_system_animation_speed, the vertical blanks per frame (1, or 2 during effects and
+/* Return g_main_system_vsync_interval, the vertical blanks per frame (1, or 2 during effects and
  * events); event waits divide their frame counts by it. */
 s32 battle_state_get_vsync_interval(void) {
     return g_main_system_vsync_interval;
 }
 
-/* Set g_main_system_animation_speed, the number of vertical blanks per frame, to
+/* Set g_main_system_vsync_interval, the number of vertical blanks per frame, to
  * 1 or 2. Returns 0, or -1 for any other value. */
 s32 battle_state_set_animation_speed(s32 speed) {
     if (speed == 1 || speed == 2) {
@@ -234,7 +234,7 @@ s32 battle_state_get_frame_measurement(void) {
     return g_main_system_battle_frame_hsync_count;
 }
 
-/* Set g_battle_frame_pacing, the minimum number of vertical blanks
+/* Set g_main_system_min_vsync_interval, the minimum number of vertical blanks
  * battle_state_sync_frame waits per frame in the effect and action-execute
  * states. Values outside 1-9 are ignored. */
 void battle_state_set_min_vsync_interval(s32 value) {
@@ -243,7 +243,7 @@ void battle_state_set_min_vsync_interval(s32 value) {
     }
 }
 
-/* Remove the minimum frame wait battle_state_set_time_scale set. */
+/* Remove the minimum frame wait battle_state_set_min_vsync_interval set. */
 void battle_state_clear_frame_pacing(void) {
     g_main_system_min_vsync_interval = 0;
 }

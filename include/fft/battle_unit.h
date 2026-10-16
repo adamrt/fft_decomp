@@ -149,7 +149,7 @@ typedef enum battle_unit_animation {
     = 9, /* in water two or more deep (move_get_water_depth); also the crystal sprite */
     BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE_HASTE = 10,
     BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE_SLOW = 11,
-    BATTLE_UNIT_ANIMATION_WALK = 12, /* a movement step on foot (battle_unit_set_idle_animation_for_movement) */
+    BATTLE_UNIT_ANIMATION_WALK = 12, /* a movement step on foot (battle_unit_set_walk_animation) */
     BATTLE_UNIT_ANIMATION_WALK_FAST = 13,
     BATTLE_UNIT_ANIMATION_WALK_SLOW = 14,
     BATTLE_UNIT_ANIMATION_FLY = 18,      /* a flying unit's movement step */
@@ -784,7 +784,7 @@ typedef struct battle_unit {
     s16 attack_facing;            /* 0x072 */
     s16 depth_height_offset;      /* 0x074 */
     u16 float_bob_offset;         /* 0x076; from the float bob table */
-    u16 float_bob_phase;          /* 0x078; advanced by g_main_system_animation_speed at 0x8007ea98 */
+    u16 float_bob_phase;          /* 0x078; advanced by g_main_system_vsync_interval at 0x8007ea98 */
     u16 special_graphic_y_offset; /* 0x07a; added to the v of each part: a status sheet's rows in OTHER.SPR */
     u8 map_x;                     /* 0x07c */
     u8 map_y;                     /* 0x07d */

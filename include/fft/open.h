@@ -151,7 +151,7 @@ typedef enum open_controller_handler {
     OPEN_CONTROLLER_FFTEND_MOVIE = 9,          /* open_movie_finish_fftend_controller_if_ready_or_skipped */
     OPEN_CONTROLLER_SCRIPT = 10,               /* open_script_update_controller */
     OPEN_CONTROLLER_TITLE_DEMO_MOVIE = 11,     /* open_movie_start_fftst_or_skip_controller */
-    OPEN_CONTROLLER_TITLE_EXIT = 12,           /* open_title_update_exit_transition */
+    OPEN_CONTROLLER_TITLE_EXIT = 12,           /* open_title_update_card_warning */
 } open_controller_handler_e;
 
 /* open_title_controller_t.cursor: the four title menu entries. */
@@ -169,7 +169,7 @@ typedef enum open_title_state {
     OPEN_TITLE_STATE_DEMO_MOVIE = 3, /* idle timeout: starts the next demo movie once the screen has faded */
 } open_title_state_e;
 
-/* 32-bit state of the title-exit controller (open_title_update_exit_transition). */
+/* 32-bit state of the title-exit controller (open_title_update_card_warning). */
 typedef enum open_title_exit_state_id {
     OPEN_TITLE_EXIT_INPUT = 0,
     OPEN_TITLE_EXIT_CANCEL = 1,  /* cross: back to the title menu */

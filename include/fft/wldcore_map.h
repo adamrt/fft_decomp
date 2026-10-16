@@ -67,7 +67,7 @@ typedef struct wldcore_map_projection_view {
 } wldcore_map_projection_view_t;
 typedef char wldcore_map_projection_view_size_must_be_40[sizeof(wldcore_map_projection_view_t) == 40 ? 1 : -1];
 
-/* Packed eight-byte source row used by wldcore_map_color_and_draw_dots.
+/* Packed eight-byte source row used by wldcore_map_init_dots.
  * The low 16 bits of the first 32-bit value hold x; its high bytes select the animation. */
 typedef struct wldcore_map_dot_source {
     s32 position_and_kind;

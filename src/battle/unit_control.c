@@ -80,7 +80,7 @@ void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_animation_based_on_mounted_state(battle_unit_get_by_runtime_id(runtime_id));
 }
 
-/* battle_unit_set_idle_animation_for_movement by runtime id. No retail code
+/* battle_unit_set_walk_animation by runtime id. No retail code
  * calls it. */
 void battle_unit_set_walk_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_walk_animation(battle_unit_get_by_runtime_id(runtime_id));

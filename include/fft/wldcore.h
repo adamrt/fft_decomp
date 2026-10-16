@@ -246,7 +246,7 @@ typedef char wldcore_sortbox_state_size_must_be_56[sizeof(wldcore_sortbox_state_
 
 /* libgs GsOT descriptor: the 20-byte ordering-table records at 0x800bb364
  * (main) and 0x800bb3c4 (auxiliary), one per display buffer. The 0x14 stride
- * is what wldcore_init_core indexes these globals with. */
+ * is what wldcore_gfx_capture_map_backdrop indexes these globals with. */
 /* The ordering-table handle is libgs GsOT; see include/psx/libgs.h. */
 /* Heterogeneous display-object queues: each object's leading 32-bit flags
  * selects the handler in window_dispatch_record_list_variant:

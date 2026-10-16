@@ -2951,7 +2951,7 @@ static s32 battle_target_set_ability_range_flags(void) {
  *
  * battle_target_set_ability_panels ends with it for abilities that have the
  * vertical-fixed or a unit-panels flag; the others end with
- * battle_target_set_all_panels_targeted_if_targetable, which tests the panel's
+ * battle_target_set_ability_range_flags, which tests the panel's
  * range instead of its mark. */
 static s32 battle_target_clear_selection_state_of_all_panels(void) {
     map_tile_t* tile;

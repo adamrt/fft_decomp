@@ -685,7 +685,7 @@ void script_opcode_reset_palette(const event_unit_parameters_t* parameters) {
 
 /* Jump: cancel the unit's accumulated event offset, then build its one-step path
  * of length_plus_one - 1 tiles in the encoded direction through
- * battle_unit_prepare_rider_dismount. The unit's Jump stat is 6 while that runs
+ * battle_move_start_unit_jump_by_runtime_id. The unit's Jump stat is 6 while that runs
  * and is restored afterwards. A unit id that does not resolve does nothing. */
 void script_opcode_jump(const event_jump_parameters_t* parameters) {
     SVECTOR vec;

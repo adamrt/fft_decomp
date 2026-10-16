@@ -186,7 +186,7 @@ entd_encounter_t* main_entd_get_encounter(void) {
 
 /* Rebuild the party roster from an event's ENTD: load the ENTD file that holds
  * event_id (blocking), empty the roster, save each of the encounter's 16 unit
- * slots into it through main_unit_init, and free the file. */
+ * slots into it through main_unit_save_entd_unit_to_party, and free the file. */
 void main_entd_init_event_unit_data(int event_id) {
     entd_encounter_t* entd;
     int unit_id;
