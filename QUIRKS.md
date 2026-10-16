@@ -128,30 +128,33 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   and the direction-times-spread products over `scale` in
   `battle_effect_spawn_particle_motion`.
 - Locals read before any assignment, so the value is whatever the caller left
-  in a register: `menu_icon_timed_thread` (BATTLE and WORLD) tests `unset` (`$s6`) and, when it is nonnegative, lowers `g_thread_current_id` around `menu_select_icon_cluts`, as `menu_icon_linked_entry_thread` does for its linked entry; `battle_effect_update_file_load` tests `result` (`$a0`) for a load
-  state outside 0-3, which nothing sets; `battle_camera_get_input_direction`
-  tests `input` (`$a1`) when `mode` or the controller mode is outside 0-2;
-  `main_status_set_action_state` leaves `status` unset for an action state
-  other than 0 and 5-8 (its `switch` has no default; no caller passes one);
-  `battle_map_dispatch_gns_resource` returns a local no path assigns (`$s8`);
-  both copies of `menu_get_cursor_bob_offset`
-  walk an unset table pointer for a mode other than 0 or 1; `battle_effect_summon_charge_secondary_handler` returns
-  `result` (`$a1`) unset when the phase is not 1-3, as does
+  in a register: `menu_icon_timed_thread` (BATTLE and WORLD) tests `unset`
+  (`$s6`) and, when it is nonnegative, lowers `g_thread_current_id` around
+  `menu_select_icon_cluts`, as `menu_icon_linked_entry_thread` does for its
+  linked entry; `battle_effect_update_file_load` tests `result` (`$a0`) for a
+  load state outside 0-3, which nothing sets;
+  `battle_camera_get_input_direction` tests `input` (`$a1`) when `mode` or the
+  controller mode is outside 0-2; `main_status_set_action_state` leaves
+  `status` unset for an action state other than 0 and 5-8 (its `switch` has no
+  default; no caller passes one); `battle_map_dispatch_gns_resource` returns a
+  local no path assigns (`$s8`); both copies of `menu_get_cursor_bob_offset`
+  walk an unset table pointer for a mode other than 0 or 1;
+  `battle_effect_summon_charge_secondary_handler` returns `result` (`$a1`)
+  unset when the phase is not 1-3, as does
   `battle_effect_linear_projectile_secondary_handler`;
   `bunit_unit_get_current_stat`, `bunit_unit_get_max_stat` and
   `world_get_formation_unit_stat_by_mode` return `value` (`$a1`) for a stat
   mode outside 0-2; `battle_move_start_unit_step` leaves `facing` (`$a2`, the
   destination tile its callers pass) unset for a direction outside 0-3;
-  `battle_map_load_mesh_animation_record` returns `next` (`$a1`) for record type
-  0; `world_formation_run_set_ability_menu` indexes the entry ids with
-  `cursor` when the list is empty; `world_menu_build_location_list`
-  uses `selected` when no entry matches the current item;
-  both copies of `menu_run_battle_help` read
-  `node`, `x` and `y` in the cursor loop when the text thread is already
-  running on the first frame, and `navigation` when the unit view mode is
-  not 1-4; `menu_init_system_function` passes `ptr` on unset for
-  SCENARIO_CHECK and CLOSE; `battle_gfx_init_numeric_sprite_display` leaves
-  `display` unset for a section outside 0-2 (its caller passes 0-2);
+  `battle_map_load_mesh_animation_record` returns `next` (`$a1`) for record
+  type 0; `world_formation_run_set_ability_menu` indexes the entry ids with
+  `cursor` when the list is empty; `world_menu_build_location_list` uses
+  `selected` when no entry matches the current item; both copies of
+  `menu_run_battle_help` read `node`, `x` and `y` in the cursor loop when the
+  text thread is already running on the first frame, and `navigation` when the
+  unit view mode is not 1-4; `menu_init_system_function` passes `ptr` on unset
+  for SCENARIO_CHECK and CLOSE; `battle_gfx_init_numeric_sprite_display`
+  leaves `display` unset for a section outside 0-2 (its caller passes 0-2);
   `battle_map_update_mesh_part_animations` indexes the instructions with
   `next`, assigned only when a keyframe expires in the same pass, for a part
   whose animation state is set and whose keyframe is 0;
@@ -161,8 +164,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `open_card_poll_info_until_stable` has the same empty-loop result for a
   nonpositive retry limit (its callers pass 3);
   `battle_effect_select_sound_id` returns `sound` (`$a2`) for a channel mode
-  above 4; `wldcore_proposition_select_report_speaker` returns `selected` for a
-  speaker mode outside 1-4 when more than one unit went;
+  above 4; `wldcore_proposition_select_report_speaker` returns `selected` for
+  a speaker mode outside 1-4 when more than one unit went;
   `battle_sound_stop_weather_sfx` returns an unset `result` no caller reads.
 - `world_card_read_file_chunked` sets `result` to -1 when the last read was
   short and then returns `total`; the test has no effect.
@@ -506,17 +509,23 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `<= ABILITY_ID_MOVEMENT_FIRST`, so Move+1 (486) is filed as a support ability;
   every caller asks for action abilities or for all four classes, so nothing
   sees the difference.
-- Tests that cannot succeed: `battle_unit_init` runs `battle_gfx_run_wep_eff_seq_script` for the new unit's blocks only for a sheet id below `BATTLE_SPRITESHEET_ID_VELIUS` (60) and at least `BATTLE_SPRITESHEET_ID_BOY` (74); `wldcore_proposition_advance_daily_counters` caps waiting days above 32, and its only writer, `wldcore_proposition_step_result_level`, stores 32 or 16. `battle_state_sync_frame` zeroes a
-  `g_main_system_min_vsync_interval` of 1 under `wait < g_main_system_min_vsync_interval` with `wait` at least 2;
+- Tests that cannot succeed: `battle_unit_init` runs
+  `battle_gfx_run_wep_eff_seq_script` for the new unit's blocks only for a
+  sheet id below `BATTLE_SPRITESHEET_ID_VELIUS` (60) and at least
+  `BATTLE_SPRITESHEET_ID_BOY` (74);
+  `wldcore_proposition_advance_daily_counters` caps waiting days above 32, and
+  its only writer, `wldcore_proposition_step_result_level`, stores 32 or 16;
+  `battle_state_sync_frame` zeroes a `g_main_system_min_vsync_interval` of 1
+  under `wait < g_main_system_min_vsync_interval` with `wait` at least 2;
   `battle_state_run_deployment` loops until
   `battle_state_update_deployment_controller_input` returns -1, and it always
   returns 1; the first `switch` of `battle_move_apply_unit_step_velocity`
   repeats the layer test that the statement before it has just made false;
   `battle_status_calculate_turn_flags` cannot report Sleep, whose
   `g_main_status_effect_data` record carries the freeze-CT flag tested first;
-  `battle_unit_set_mounted_animation` tests a depth masked to a
-  byte for `< 0` and a nonzero animation for 0; `menu_get_thread_activity`
-  tests `i != 3` inside its scan of threads 4-9;
+  `battle_unit_set_mounted_animation` tests a depth masked to a byte for `< 0`
+  and a nonzero animation for 0; `menu_get_thread_activity` tests `i != 3`
+  inside its scan of threads 4-9;
   `battle_camera_rotate_when_unit_tile_not_visible` adjusts a negative
   `direction` after masking it to 0-0xfff; selector 15 of
   `battle_map_set_tile_data_value` retries `battle_map_tile_data_15_stub`,
@@ -524,13 +533,14 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `battle_gfx_run_unit_seq_script`, `battle_gfx_run_wep_eff_seq_script` and
   `battle_gfx_load_trap_and_unit_frame_parts` test sequence and frame pointers
   for -1, which the unpackers replace with the start of the data, and the last
-  tests a three-bit part count plus one for `> 8`. The weapon interpreter's own
-  bounds (`sequence_id > 0x100`, `frame > 0x200`) admit the index one past each
-  table. `battle_ai_select_action_autobattle` falls back from the recovery
-  policy to retreat on a -2 result, which `battle_ai_select_action_recovery`
-  never returns (only 0 or -1); `battle_action_run_between_turn_events` has a
-  case for turn event 0x400 (`BATTLE_TURN_EVENT_UNKNOWN_0400`), which its only
-  source, `battle_action_run_between_turn_control`, never returns;
+  tests a three-bit part count plus one for `> 8`. The weapon interpreter's
+  own bounds (`sequence_id > 0x100`, `frame > 0x200`) admit the index one past
+  each table. `battle_ai_select_action_autobattle` falls back from the
+  recovery policy to retreat on a -2 result, which
+  `battle_ai_select_action_recovery` never returns (only 0 or -1);
+  `battle_action_run_between_turn_events` has a case for turn event 0x400
+  (`BATTLE_TURN_EVENT_UNKNOWN_0400`), which its only source,
+  `battle_action_run_between_turn_control`, never returns;
   `menu_run_icon_selection_loop` clears both icon records' `_unknown_78` when
   one holds 0 and the other 2, but their only writer,
   `menu_build_window_sprites`, stores 0.
