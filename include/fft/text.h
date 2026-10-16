@@ -5,11 +5,10 @@
  * substitutions, measuring, drawing text and numbers into images, the dialog window record, the typewriter's glyph
  * slots and the menu text threads. */
 
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/screen.h"
 #include "psx/libgpu.h"
-#include "psx/libgs.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 struct action_command;

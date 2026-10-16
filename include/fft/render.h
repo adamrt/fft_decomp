@@ -4,7 +4,6 @@
 /* BATTLE's render buffers. */
 
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* Primitive pool sizes of a render buffer. The map mesh's position records (battle_map_mesh.h)

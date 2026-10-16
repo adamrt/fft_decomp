@@ -7,8 +7,6 @@
 #include "fft/animation.h"
 #include "fft/skillset.h"
 #include "fft/unit.h"
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* ability ids */

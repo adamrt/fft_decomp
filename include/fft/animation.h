@@ -4,9 +4,8 @@
 /* BATTLE unit animations: SEQ sequence opcodes and the animation state, animation ids, the charge, attack and reaction
  * animations of actions, and the distortion motions (teleport, rise, settle). */
 
+#include "fft/status.h"
 #include "fft/unit.h"
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 struct sprite_display;

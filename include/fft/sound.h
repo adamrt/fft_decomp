@@ -5,7 +5,6 @@
  * background-sound wrappers, the event library's queued menu effects and background sound threads, OPEN's CD audio fade
  * and WLDCORE's audio queue. */
 
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* music requests */

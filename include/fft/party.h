@@ -9,7 +9,6 @@
 #include "fft/unit_entd.h"
 #include "fft/unit_party.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* roster */

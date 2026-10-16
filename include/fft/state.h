@@ -4,9 +4,6 @@
 /* BATTLE's game state machine: the frame loop, the handler and entry function of each game state, the map jumps and the
  * battle's close, and the game options word. */
 
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 /* game state */

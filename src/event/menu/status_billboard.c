@@ -9,10 +9,12 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_editor.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
+#ifdef FFT_EVENT_DEBUGCHR
+#    include "fft/unit_editor.h"
+#endif
 
 static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output);
 

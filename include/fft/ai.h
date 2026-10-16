@@ -10,7 +10,6 @@
 #include "fft/script.h"
 #include "fft/status.h"
 #include "fft/unit.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* workspace capacities */

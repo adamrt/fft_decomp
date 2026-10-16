@@ -5,8 +5,11 @@
  * step and its input, packet buffers, fades, palettes and window frames, the main menu entries, the display script's
  * lists, cursors, grid menus, number entries, text sections and sound requests. */
 
+#include "fft/gfx.h"
+#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_script.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

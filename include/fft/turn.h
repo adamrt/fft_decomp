@@ -4,7 +4,6 @@
 /* Turn order: the CT clock, whose turn it is, Act and Move taken, ending a turn. */
 
 #include "fft/unit.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* Modes of turn_run_clock. */

@@ -5,7 +5,6 @@
  * (announcement_), and the blocks of WLDCORE's message file WLDMES.BIN. */
 
 #include "fft/text.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* dialog */

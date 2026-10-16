@@ -4,6 +4,7 @@
 /* The battle map: map ids, the terrain tiles and their lookups, the terrain tables, the selected tile, tile marks,
  * background gradient colors, the map data commands and title card, and the event library's map routines. */
 
+#include "fft/gfx.h"
 #include "fft/render.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"

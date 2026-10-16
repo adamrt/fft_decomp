@@ -9,9 +9,6 @@
 #include "fft/sprite.h"
 #include "fft/status.h"
 #include "fft/unit.h"
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 struct action_data;

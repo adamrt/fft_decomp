@@ -4,8 +4,6 @@
 /* Loading the BIN programs from MAIN, and the companion EVENT overlays that BATTLE and WORLD load beside the scene:
  * their requests, load tables and the per-frame drivers. */
 
-#include "psx/libcd.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* programs */

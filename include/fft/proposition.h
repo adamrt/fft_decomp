@@ -7,9 +7,6 @@
 
 #include "fft/menu_stack.h"
 #include "fft/window.h"
-#include "psx/libgpu.h"
-#include "psx/libgs.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* active propositions */

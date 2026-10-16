@@ -6,13 +6,13 @@
  * bytecode is in script_instruction.h and the script variables in script_variable.h. */
 
 #include "fft/battle_map.h"
+#include "fft/gfx.h"
+#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/script_instruction.h"
 #include "fft/unit.h"
-#include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 /* overlay workspace */

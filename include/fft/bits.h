@@ -4,7 +4,6 @@
 /* Bit streams and bit arrays: the primary and secondary streams the menu overlays and WORLD share (the primary is read
  * and written most significant bit first), BUNIT's unit-list reader and WLDCORE's bit-array helpers. */
 
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* primary and secondary streams */

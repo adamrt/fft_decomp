@@ -6,11 +6,11 @@
  * icons, portraits and cell layouts, and each overlay's own panel state. */
 
 #include "fft/battle_map.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_stack.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
-#include "psx/libgs.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

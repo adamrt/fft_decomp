@@ -4,6 +4,7 @@
 /* Menu entry threads: starting, polling and stopping them, the thread bodies of simple menu windows, rows drawn as text
  * columns and the packet pages of scrolling text lists. */
 
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_window.h"
 #include "psx/libgpu.h"

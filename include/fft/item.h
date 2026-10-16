@@ -4,8 +4,11 @@
 /* Items: their types, ids and records, the party's inventory, and the item lists, sort orders, stat previews, icons and
  * rearrange mode of the item screens that EQUIP and WORLD share. */
 
+#include "fft/gfx.h"
+#include "fft/job.h"
+#include "fft/status.h"
+#include "fft/unit.h"
 #include "fft/unit_panel.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* item types */

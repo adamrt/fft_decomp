@@ -5,7 +5,6 @@
  * and zoom, and the event library's script camera for BATTLE and WORLD with its fusion tracks and fixed-point math. */
 
 #include "fft/script_instruction.h"
-#include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

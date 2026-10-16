@@ -6,7 +6,6 @@
  * The primitive and image routines are in gfx_primitive.h and gfx_image.h. */
 
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* colors */

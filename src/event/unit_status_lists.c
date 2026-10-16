@@ -24,7 +24,6 @@
 #include "fft/party.h"
 #include "fft/portrait.h"
 #include "fft/result.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
@@ -46,6 +45,9 @@
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/screen.h"
+#endif
 
 static u8 g_status_screen_line_colors[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
     1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,

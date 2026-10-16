@@ -5,7 +5,6 @@
  * routines, the remembered list cursors and the list panels' row columns. */
 
 #include "fft/menu_selection.h"
-#include "psx/libgs.h"
 #include "psx/types.h"
 
 /* menu stack */

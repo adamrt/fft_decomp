@@ -4,7 +4,6 @@
 /* The battle heap that effects allocate from: a first-fit allocator of 8-byte blocks with per-owner lists, and its
  * debug statistics. */
 
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* allocator */

@@ -4,8 +4,6 @@
 /* OPEN's new-game prologue: text pages over crossfading pictures. */
 
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* New-game prologue entry: a packed line count, texture-page position and image operation, followed by four-byte

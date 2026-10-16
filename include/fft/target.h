@@ -6,7 +6,6 @@
 
 #include "fft/battle_map.h"
 #include "fft/unit.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* range panels */

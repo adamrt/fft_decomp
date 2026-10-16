@@ -6,13 +6,13 @@
  * pushes, and WORLD's world map menu. */
 
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/menu_list.h"
 #include "fft/menu_stack.h"
 #include "fft/window.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 /* entry */

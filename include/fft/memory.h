@@ -4,11 +4,7 @@
 /* Memory utilities: MAIN's byte copies and page heaps, the event library's forward copy, ATTACK's unaligned load, and
  * MAIN's random-roll and vector setters. */
 
-#include "psx/libcd.h"
-#include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* byte copies */

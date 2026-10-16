@@ -6,7 +6,6 @@
 
 #include "fft/movie.h"
 #include "fft/title.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Rows of g_controller_handlers: the value a push stores in

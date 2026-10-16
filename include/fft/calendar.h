@@ -5,10 +5,7 @@
  * screen shares its date-to-zodiac routine. */
 
 #include "fft/unit.h"
-#include "psx/libgpu.h"
 #include "psx/libgs.h"
-#include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Calendar month and day, stored as separate bytes. */

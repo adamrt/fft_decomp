@@ -9,7 +9,6 @@
 #include "fft/menu_script.h"
 #include "fft/unit_panel.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* screen */

@@ -6,7 +6,6 @@
 
 #include "fft/controller.h"
 #include "psx/libgpu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* ending sequence */

@@ -5,9 +5,6 @@
  * handlers. */
 
 #include "fft/menu_stack.h"
-#include "psx/libgpu.h"
-#include "psx/libgs.h"
-#include "psx/libgte.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"
 

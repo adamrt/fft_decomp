@@ -8,7 +8,6 @@
 #include "fft/ai_command.h"
 #include "fft/menu.h"
 #include "fft/unit.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* turn menu */

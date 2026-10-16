@@ -5,6 +5,7 @@
  * weapon and effect sprite blocks, frames, afterimages, shadows and palettes. */
 
 #include "fft/gfx.h"
+#include "fft/status.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

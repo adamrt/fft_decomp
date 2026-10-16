@@ -4,9 +4,6 @@
 /* The Bar in a town: its menu rows and level handlers, and the rumor list's detail level. */
 
 #include "fft/menu_stack.h"
-#include "psx/libgpu.h"
-#include "psx/libgs.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* bar menu */

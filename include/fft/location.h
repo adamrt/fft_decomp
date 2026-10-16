@@ -6,7 +6,6 @@
  * script machine that decides what happens at a location (events, choices, paths), with its opcode handlers. */
 
 #include "fft/menu_stack.h"
-#include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

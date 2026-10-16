@@ -4,9 +4,6 @@
 /* Values of the event library's unit records for BATTLE and WORLD: the status staging flags, states, inflict modes and
  * removal mask rows, and the facing rotate modes. */
 
-#include "psx/libgte.h"
-#include "psx/types.h"
-
 /* status staging */
 /* unit_status_staging_t.jump_float_flags: a staged change removes the status from some unit. */
 enum {

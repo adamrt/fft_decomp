@@ -4,7 +4,6 @@
 /* OPEN's FMV movies (opening, title demo, ending): their controllers and the CD stream and MDEC decoding pipeline. */
 
 #include "psx/libgpu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 union controller_record;

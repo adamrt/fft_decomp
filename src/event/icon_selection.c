@@ -12,7 +12,6 @@
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/target.h"
@@ -25,6 +24,9 @@
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/screen.h"
+#endif
 
 /* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
 static s16 g_auto_battle_row_actions[8] = { 1000, 2, 2, 2, 2, 0, -3, -3 };

@@ -31,7 +31,6 @@
 #include "fft/music.h"
 #include "fft/overlay.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
@@ -52,11 +51,14 @@
 #include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
 #include "fft/weather.h"
-#include "fft/world_map.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/screen.h"
+#    include "fft/world_map.h"
+#endif
 
 static void camera_load_state_from_script_variables(void);
 static void script_process_pending_requests(void);

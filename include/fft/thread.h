@@ -4,8 +4,6 @@
 /* Cooperative game threads: the thread context, the BATTLE and WORLD schedulers that run them, the slot and task ids
  * the programs and screens give them, and the main-stack call. */
 
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* context */

@@ -4,8 +4,10 @@
 /* Zodiac signs: their compatibility, the tables that give a birthday its sign, and the scaled zodiac pictures. */
 
 #include "fft/calendar.h"
+#include "fft/gfx.h"
+#include "fft/job.h"
+#include "fft/unit.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* signs */

@@ -5,7 +5,6 @@
  * action menu (Item, Throw, Math Skill, Elemental, Monster Skill, Draw Out, Charge). */
 
 #include "fft/unit.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* skillset records */

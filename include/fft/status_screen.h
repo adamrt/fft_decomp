@@ -9,7 +9,6 @@
 #include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* status panel */

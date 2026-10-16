@@ -7,7 +7,6 @@
 #include "fft/gfx.h"
 #include "fft/text.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 extern glyph_blit_t g_message_box_state;

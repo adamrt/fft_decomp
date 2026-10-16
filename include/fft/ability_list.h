@@ -8,7 +8,6 @@
 #include "fft/job.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* scrolling ability list */

@@ -4,10 +4,7 @@
 /* Pad input state that no screen owns: the overlays' per-frame event input and key repeat, MAIN's repeat timing and
  * button edges, and OPEN's directional repeat. */
 
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* event input */

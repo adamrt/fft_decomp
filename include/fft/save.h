@@ -5,6 +5,7 @@
  * screen, with the globals both of those define; the card BIOS layer is in memcard.h. */
 
 #include "fft/calendar.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
@@ -14,8 +15,6 @@
 #include "fft/unit_party.h"
 #include "psx/kernel.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 /* play time */

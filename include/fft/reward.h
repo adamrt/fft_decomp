@@ -6,7 +6,6 @@
 
 #include "fft/action.h"
 #include "fft/unit.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* action rewards */

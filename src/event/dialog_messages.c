@@ -2,14 +2,12 @@
  * text measurement. */
 
 #include "fft/gfx.h"
-#include "fft/input.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_window.h"
 #include "fft/message.h"
 #include "fft/party.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
@@ -17,13 +15,17 @@
 #include "fft/state.h"
 #include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/tutorial.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/input.h"
+#    include "fft/screen.h"
+#    include "fft/tutorial.h"
+#endif
 
 static menu_text_state_t g_message_typewriter_state = { 0 };
 static RECT g_message_typewriter_vram_rect = { 0 };

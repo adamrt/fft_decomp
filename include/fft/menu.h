@@ -5,11 +5,10 @@
  * their icon and number records, drawing and input routines, BATTLE's command menus and system functions, and the unit
  * status panels' records, packets, draw areas, portraits, fades and indicators. */
 
+#include "fft/gfx.h"
 #include "fft/menu_script.h"
-#include "psx/kernel.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 struct unit_panel_thread;

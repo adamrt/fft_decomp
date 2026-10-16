@@ -4,6 +4,7 @@
 /* Menu and message windows: their frame images, the window buffers the dialog threads draw into, window scaling, the
  * icon sprites menu windows draw cursors and arrows with, and the window frame panels. */
 
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "psx/libgpu.h"

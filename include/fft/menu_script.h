@@ -6,7 +6,6 @@
 
 #include "fft/gfx.h"
 #include "fft/menu_gfx.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 struct menu_icon_source;

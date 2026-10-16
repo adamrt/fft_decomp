@@ -6,6 +6,7 @@
 #include "fft/effect.h"
 #include "fft/effect_file.h"
 #include "fft/gfx.h"
+#include "fft/status.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

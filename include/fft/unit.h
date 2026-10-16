@@ -8,7 +8,6 @@
 #include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/status.h"
-#include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
