@@ -1,4 +1,5 @@
-/* The menu command that draws a literal value as zero-padded digits. */
+/* CARD's own menu commands: texture page, ordering-table entry and
+ * zero-padded number. */
 
 #include "fft/event_card.h"
 #include "fft/gfx.h"
@@ -8,6 +9,21 @@
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+/* Stream command: set the texture page from the command (color mode
+ * data[4], x data[3] * 16, y data[2] * 256, blend rate 0) and return the
+ * next command. */
+const u8* card_cmd_set_tpage_handler(const u8* data) {
+    g_card_gfx_texture_page = GetTPage(data[4], 0, data[3] << 4, data[2] << 8);
+    return data + data[1];
+}
+
+/* Menu script command: select the ordering-table slot later primitives go to (byte 3) and return
+ * the next command (byte 1 holds this command's length). */
+const u8* card_cmd_set_otag_index_handler(const u8* data) {
+    g_menu_gfx_otag_index = data[3];
+    return data + data[1];
+}
 
 /* Draw the literal value as zero-padded digits at the requested position. */
 menu_draw_number_command_t* card_cmd_draw_decimal_number_handler(menu_draw_number_command_t* command) {

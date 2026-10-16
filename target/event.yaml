@@ -884,6 +884,7 @@ defines: {VARIANT_TEXT_ID_ROW_FORMAT: 235}
 units:
   - {name: card_io, source: src/event/menu/card_io.c, profile: gcc-2.6.3_O0_aspsx-2.34}
   - {name: cmd_handlers, source: src/event/card/cmd_handlers.c}
+  - {name: command_handlers, source: src/event/card/command_handlers.c}
   - {name: gfx_contexts, source: src/event/card/gfx_contexts.c}
   - {name: gfx_image_transfer_wait, source: src/event/menu/gfx_image_transfer_wait.c}
   - {name: graphic_thread, source: src/event/card/graphic_thread.c}
@@ -950,9 +951,9 @@ functions:
   - {addr: 0x801c5a04, size: 180, name: card_cmd_draw_textured_quad_handler, hash: 80bb4d6a52a62e83, unit: cmd_handlers}
   - {addr: 0x801c5ab8, size: 1832, name: card_cmd_draw_window_frame_handler, hash: 0f8c1fe24c89ed4f, unit: cmd_handlers}
   - {addr: 0x801c61e0, size: 816, name: menu_cmd_draw_tiled_rectangle_handler, hash: 6bf11123f13510a0, source: src/event/menu/menu_cmd_draw_tiled_rectangle_handler.c}
-  - {addr: 0x801c6510, size: 84, name: card_cmd_set_tpage_handler, hash: c033f758528baa4e}
-  - {addr: 0x801c6564, size: 24, name: card_cmd_set_otag_index_handler, hash: 866b1fe58b80beba}
-  - {addr: 0x801c657c, size: 400, name: card_cmd_draw_decimal_number_handler, hash: 86de3729d1341209}
+  - {addr: 0x801c6510, size: 84, name: card_cmd_set_tpage_handler, hash: c033f758528baa4e, unit: command_handlers}
+  - {addr: 0x801c6564, size: 24, name: card_cmd_set_otag_index_handler, hash: 866b1fe58b80beba, unit: command_handlers}
+  - {addr: 0x801c657c, size: 400, name: card_cmd_draw_decimal_number_handler, hash: 86de3729d1341209, unit: command_handlers}
   - {addr: 0x801c670c, size: 652, name: menu_update_and_draw_sliding_cursor_variant, hash: d2bf3388d465f9d3, source: src/event/menu/menu_update_and_draw_sliding_cursor_variant.c}
   - {addr: 0x801c6998, size: 44, name: gfx_set_draw_color_variant, hash: 56f9f1312189e13e, source: src/event/menu/gfx_set_draw_color_variant.c}
   - {addr: 0x801c69c4, size: 16, name: gfx_set_otag_index, hash: e32615753d53f066, source: src/event/menu/gfx_set_otag_index.c}
@@ -1351,6 +1352,7 @@ units:
   - {name: slot_items, source: src/event/equip/slot_items.c}
   - {name: text_id_lists, source: src/event/menu/text_id_lists.c}
   - {name: textured_quads, source: src/event/menu/textured_quads.c}
+  - {name: unit_comparison, source: src/event/equip/unit_comparison.c}
   - {name: unit_loadout, source: src/event/equip/unit_loadout.c}
 
 functions:
@@ -1449,9 +1451,9 @@ functions:
   - {addr: 0x801c8860, size: 36, name: item_get_type, hash: 0d110fc92f07954c, source: src/event/menu/item_get_type.c}
   - {addr: 0x801c8884, size: 56, name: item_get_type_icon_rect, hash: 1b6bfb5cb4770f34, source: src/event/menu/item_get_type_icon_rect.c}
   - {addr: 0x801c88bc, size: 96, name: item_get_menu_category, hash: 234911d51d5b0f1c, source: src/event/menu/item_get_menu_category.c}
-  - {addr: 0x801c891c, size: 48, name: equip_unit_copy_data_to_compare_slot, hash: 7721b3f4a2b21f57}
-  - {addr: 0x801c894c, size: 36, name: equip_unit_has_two_swords, hash: 1dd41e4a0efc124e}
-  - {addr: 0x801c8970, size: 36, name: equip_unit_has_two_hands, hash: c15e201267b4bcbf}
+  - {addr: 0x801c891c, size: 48, name: equip_unit_copy_data_to_compare_slot, hash: 7721b3f4a2b21f57, unit: unit_comparison}
+  - {addr: 0x801c894c, size: 36, name: equip_unit_has_two_swords, hash: 1dd41e4a0efc124e, unit: unit_comparison}
+  - {addr: 0x801c8970, size: 36, name: equip_unit_has_two_hands, hash: c15e201267b4bcbf, unit: unit_comparison}
   - {addr: 0x801c8994, size: 308, name: menu_text_render_glyph_to_4bpp_image_variant, hash: b67461b2eb78e979, source: src/event/menu/menu_text_render_glyph_to_4bpp_image_variant.c}
   - {addr: 0x801c8ac8, size: 92, name: menu_text_find_entry_by_index, hash: b89f5b2fce3c6266, unit: text_id_lists}
   - {addr: 0x801c8b24, size: 648, name: menu_text_render_encoded_ids_to_image, hash: 7182fd970e4c014a, unit: text_id_lists}
