@@ -1,6 +1,8 @@
 /* The SMD and game heap allocators, and file loading to the heap or to an address, checked or not. */
 
 #include "fft/main.h"
+#include "psx/libetc.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Allocate size bytes from the music heap: 16 pages of 0x800 bytes at

@@ -1,5 +1,6 @@
-#include "fft/event_bunit.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
 
 /* Stream command closing a zoomed window: when the zoom transition queued a
  * cropped draw area, queue the full draw area again at the next

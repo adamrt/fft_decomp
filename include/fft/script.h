@@ -4,8 +4,10 @@
 /* Scenario bytecode, interpreter APIs and shared helpers for BATTLE and WORLD. */
 
 #include "fft/gfx.h"
+#include "fft/map.h"
 #include "fft/menu.h"
 #include "fft/unit.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* bytecode */

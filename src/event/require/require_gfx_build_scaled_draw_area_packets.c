@@ -1,4 +1,5 @@
 #include "fft/event_require.h"
+#include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"

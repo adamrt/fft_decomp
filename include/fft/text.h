@@ -5,6 +5,7 @@
  * and the message strings they print. */
 
 #include "fft/gfx.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* glyph positions and bounds */

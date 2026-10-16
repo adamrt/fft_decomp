@@ -1,4 +1,3 @@
-#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Two identity functions back to back, at 0x80133494 and 0x8013349c. No code

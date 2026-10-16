@@ -1,10 +1,19 @@
 /* WLDCORE entry, the frame gate, core and subsystem init, world frame drawing, the clip rect, world map state, loop
  * finalization and the restored menu level. */
 
+#include "fft/data.h"
+#include "fft/file.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/unit.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgs.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

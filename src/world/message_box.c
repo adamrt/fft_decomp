@@ -2,12 +2,16 @@
  * fixed-point lerps and window quad animations. */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"

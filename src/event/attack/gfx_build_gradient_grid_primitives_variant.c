@@ -1,5 +1,7 @@
 #include "fft/event_attack.h"
 #include "fft/gfx.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Build the 4x8 grid of shaded, textured quads behind the panel: each row is
  * one step brighter than the one above, and every cell shows the same 64x32

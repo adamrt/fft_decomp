@@ -1,5 +1,6 @@
-#include "fft/event_equip.h"
+#include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/types.h"
 
 /* A dimmed palette also withholds input from the display script. */
 void menu_run_script_with_palette_mode_variant(menu_instruction_t* script, s32 input, s32 mode) {

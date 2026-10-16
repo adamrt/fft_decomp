@@ -1,4 +1,6 @@
 #include "fft/main.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Called by main_file_poll_load on every poll of an unfinished read. Unless the
  * counter is -1 (message off), the 64th call unmasks the display and from then on

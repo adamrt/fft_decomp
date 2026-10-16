@@ -1,5 +1,5 @@
-#include "fft/event_jobstts.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "psx/types.h"
 
 /* Point the scrollable list menu at a new -1 terminated entry list and reset

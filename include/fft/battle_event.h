@@ -1,10 +1,8 @@
+#include "psx/types.h"
 #ifndef BATTLE_EVENT_H
-#define BATTLE_EVENT_H
+#    define BATTLE_EVENT_H
 
 /* Battle scenario orchestration and deferred commands produced by scripts. */
-
-#include "fft/map.h"
-#include "fft/script.h"
 
 /* scenario state */
 extern s32 g_battle_event_frame_counter;

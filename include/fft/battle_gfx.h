@@ -4,7 +4,12 @@
 /* Battle rendering buffers, sprite resources and graphics helpers. */
 
 #include "fft/battle_unit.h"
+#include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/unit.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* resources */
 /* Serialized SHP/SEQ values are little-endian byte sequences. These file

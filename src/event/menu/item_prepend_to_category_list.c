@@ -1,4 +1,6 @@
 #include "fft/event_equip.h"
+#include "fft/item.h"
+#include "psx/types.h"
 
 /* Prepend an item to the selected category list.
  *

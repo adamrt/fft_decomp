@@ -1,12 +1,14 @@
-#include "fft/battle_menu.h"
-#include "fft/battle_script.h"
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* The packet, state and thread layouts are the shared fft/menu.h

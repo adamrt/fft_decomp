@@ -1,6 +1,5 @@
-#include "fft/event_bunit.h"
 #include "fft/menu.h"
-#include "psx/pad.h"
+#include "fft/sound.h"
 #include "psx/types.h"
 
 /* Update a wrapped selection, request the supplied menu state on change and

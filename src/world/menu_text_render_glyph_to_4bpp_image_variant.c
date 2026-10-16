@@ -1,5 +1,6 @@
-#include "fft/battle_text.h"
-#include "fft/world.h"
+#include "fft/bits.h"
+#include "fft/menu.h"
+#include "fft/text.h"
 #include "psx/types.h"
 
 /* Decodes glyph `glyph` from the packed 2bpp font into a 4bpp image at

@@ -1,6 +1,7 @@
-#include "fft/battle_text.h"
 #include "fft/menu.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "psx/types.h"
 
 /* Starts the text character handling thread on thread_id with the given
  * parameters when no text is pending. Returns 0 once the pending text

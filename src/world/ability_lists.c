@@ -1,11 +1,19 @@
 /* Ability category checks, the learn and view ability lists, unit ordering, text entry waits, the dismiss unit step and
  * gil adjustment. */
 
+#include "fft/data.h"
+#include "fft/item.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libc.h"
+#include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

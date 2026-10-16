@@ -1,4 +1,6 @@
 #include "fft/event_equip.h"
+#include "fft/item.h"
+#include "psx/types.h"
 
 /* Remove the first matching item from a category list. */
 void item_remove_from_category_list(s32 item_id, s32 category_index) {

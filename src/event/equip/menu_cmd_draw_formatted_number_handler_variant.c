@@ -1,6 +1,8 @@
 #include "fft/event_equip.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/libc.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Draw the getter's signed decimal value or dashes in the requested digit style. */

@@ -1,5 +1,5 @@
-#include "fft/event_bunit.h"
 #include "fft/menu.h"
+#include "psx/types.h"
 
 /* Save a list's cursor row and scroll base in selection record `index`,
  * together with the id (low ten bits) of the entry under the cursor. */

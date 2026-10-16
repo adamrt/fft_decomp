@@ -1,7 +1,11 @@
 /* The zodiac graphic, FRAME.BIN VRAM loading, the WORLD.BIN and WLDCORE.BIN opens and data loading from disc. */
 
+#include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/wldcore.h"
+#include "psx/libetc.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);

@@ -1,4 +1,5 @@
-#include "fft/world.h"
+#include "fft/menu.h"
+#include "psx/types.h"
 
 /* world_menu_run_thread, first setting the entry's selected index when no menu thread is running.
  * Never called. */

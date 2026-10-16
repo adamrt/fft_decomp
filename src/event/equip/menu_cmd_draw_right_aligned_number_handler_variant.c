@@ -1,6 +1,9 @@
 #include "fft/event_equip.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/libc.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Draw record: print a callback-supplied number right-aligned in a field of

@@ -1,7 +1,12 @@
 /* A no-op and the search for fieldable units. */
 
+#include "fft/battle_unit.h"
 #include "fft/event_attack.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/text.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 void attack_noop_801c3070(void) {

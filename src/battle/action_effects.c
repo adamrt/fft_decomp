@@ -13,7 +13,11 @@
 #include "fft/battle_unit.h"
 #include "fft/data.h"
 #include "fft/main.h"
+#include "fft/map.h"
+#include "fft/menu.h"
 #include "fft/sound.h"
+#include "fft/unit.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 void battle_action_set_at_list_active(void) {

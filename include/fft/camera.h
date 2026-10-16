@@ -4,7 +4,6 @@
 /* Camera routines and script camera state shared by the BATTLE and WORLD event
  * systems. Each scene links its own copy against its own camera state. */
 
-#include "fft/gfx.h"
 #include "psx/types.h"
 
 /* script camera */

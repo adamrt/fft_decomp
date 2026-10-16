@@ -1,7 +1,8 @@
 /* Card info with retries, info result polling, polling until stable and slot checks. */
 
-#include "fft/main.h"
+#include "fft/card.h"
 #include "fft/open.h"
+#include "psx/libapi.h"
 #include "psx/types.h"
 
 /* Issue _card_info on `port` up to retry_limit times, waiting for its BIOS event

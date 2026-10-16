@@ -1,7 +1,11 @@
 /* Item order tables, card event init and the OPEN.BIN main loop and ending calls. */
 
+#include "fft/data.h"
 #include "fft/main.h"
 #include "fft/open.h"
+#include "psx/kernel.h"
+#include "psx/libapi.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 void main_item_init_order_tables(void) {

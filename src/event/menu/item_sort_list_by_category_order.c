@@ -1,4 +1,7 @@
 #include "fft/event_equip.h"
+#include "fft/item.h"
+#include "psx/libc.h"
+#include "psx/types.h"
 
 /* Reorder the selected items according to their category's display order. */
 s32 item_sort_list_by_category_order(s32 category_index, s16* list) {

@@ -1,5 +1,8 @@
 /* Tutorial controller input and input with message state. */
 
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/pad.h"

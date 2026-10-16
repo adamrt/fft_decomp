@@ -3,14 +3,13 @@
 #include "fft/battle_action.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_unit.h"
+#include "fft/data.h"
 #include "fft/event_debugchr.h"
-#include "fft/event_require.h"
 #include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output);

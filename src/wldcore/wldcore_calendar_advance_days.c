@@ -1,5 +1,8 @@
+#include "fft/main.h"
 #include "fft/script.h"
+#include "fft/unit.h"
 #include "fft/wldcore.h"
+#include "psx/types.h"
 
 /*
  * Advance the calendar by a script-requested number of days.

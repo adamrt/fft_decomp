@@ -1,10 +1,16 @@
 /* Unit ability slots and locks, learning, unit graphic entries, roster lookups, unit copies, zodiac by date, monster
  * breeding and packet buffer swaps. */
 
+#include "fft/data.h"
+#include "fft/gfx.h"
+#include "fft/item.h"
 #include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/libc.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

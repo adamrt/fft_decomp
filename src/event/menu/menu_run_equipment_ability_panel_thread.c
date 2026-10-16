@@ -1,4 +1,4 @@
-#include "fft/battle_script.h"
+#include "fft/data.h"
 #include "fft/event_bunit.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"

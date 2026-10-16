@@ -1,13 +1,17 @@
 /* Post-battle party changes, including congratulations text, brave and faith updates, low brave and high faith
  * departures, join candidates, the bugged ready condition, selection waits and the JOBSTTS overlay open. */
 
-#include "fft/battle_menu.h"
-#include "fft/battle_script.h"
+#include "fft/battle_unit.h"
 #include "fft/event_require.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

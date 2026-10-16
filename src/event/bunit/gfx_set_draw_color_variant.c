@@ -1,4 +1,4 @@
-#include "fft/event_bunit.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 
 void gfx_set_draw_color_variant(const rgb24_t* color) {

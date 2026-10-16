@@ -1,4 +1,3 @@
-#include "fft/battle_menu.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/script.h"
@@ -13,9 +12,11 @@
  * packet, state and thread layouts are the shared fft/menu.h records,
  * proven by this function's own accesses and the primitive strides it walks.
  */
-#include "fft/battle_script.h"
 #include "fft/event_debugchr.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/text.h"
+#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

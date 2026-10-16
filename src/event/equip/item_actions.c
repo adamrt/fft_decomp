@@ -1,7 +1,13 @@
 /* Item action state, the type order mode and the equipment slot marker. */
 
 #include "fft/event_equip.h"
+#include "fft/gfx.h"
+#include "fft/item.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "fft/sound.h"
+#include "fft/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

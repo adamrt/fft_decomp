@@ -1,22 +1,15 @@
 /* Dialog helpers: text entry lookup, digit counting, window quad tweens and crops, the pause instruction and unit
  * screen projection. */
 
-#include "fft/battle.h"
 #include "fft/battle_camera.h"
-#include "fft/battle_event.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_script.h"
-#include "fft/battle_text.h"
 #include "fft/battle_unit.h"
 #include "fft/gfx.h"
-#include "fft/memory.h"
 #include "fft/menu.h"
-#include "fft/open.h"
 #include "fft/script.h"
-#include "fft/sound.h"
 #include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/unit.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

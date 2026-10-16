@@ -1,5 +1,10 @@
+#include "fft/bits.h"
+#include "fft/data.h"
 #include "fft/event_jobstts.h"
 #include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
+#include "psx/types.h"
 
 /* Build the selected job's ability list for one menu category.
  *

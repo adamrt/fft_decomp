@@ -1,13 +1,22 @@
 /* Proposition dispatch confirmation, daily counters, the send unit level and browser, completed propositions, report
  * and result levels, and report speaker and message selection. */
 
+#include "fft/data.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void wldcore_menu_push_proposition_report_level(s32 argument);

@@ -1,17 +1,14 @@
 /* Display message building, dialog input state, thread slot release, typewriter glyph drawing, format string ids and
  * text measurement. */
 
-#include "fft/battle_menu.h"
-#include "fft/battle_text.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
-#include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/unit.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

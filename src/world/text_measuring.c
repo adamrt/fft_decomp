@@ -1,5 +1,6 @@
 /* Entry pixel width and the encoded character at a position. */
 
+#include "fft/menu.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

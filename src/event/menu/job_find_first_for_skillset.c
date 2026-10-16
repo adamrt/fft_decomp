@@ -1,4 +1,6 @@
+#include "fft/data.h"
 #include "fft/main.h"
+#include "psx/types.h"
 
 /* Return the lowest job ID with this skillset, or -1. */
 s32 job_find_first_for_skillset(s32 skillset) {

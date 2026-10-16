@@ -3,16 +3,15 @@
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"
+#include "fft/battle_ai.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
-#include "fft/battle_event.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_move.h"
-#include "fft/battle_script.h"
-#include "fft/battle_text.h"
 #include "fft/battle_unit.h"
+#include "fft/camera.h"
 #include "fft/data.h"
 #include "fft/event_attack.h"
 #include "fft/gfx.h"
@@ -26,8 +25,7 @@
 #include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"
-#include "psx/pad.h"
-#include "psx/stddef.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 static s32 camera_step_track(camera_track_t* track, s32 component);

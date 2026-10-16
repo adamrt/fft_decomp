@@ -1,4 +1,7 @@
 #include "fft/gfx.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Build a 4bpp sprite quad; fixed-point geometry truncates toward zero. */
 void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page, const RECT* position,

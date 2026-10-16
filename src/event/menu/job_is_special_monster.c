@@ -1,4 +1,6 @@
+#include "fft/data.h"
 #include "fft/main.h"
+#include "psx/types.h"
 
 /* Returns 1 for a job id in either special-monster range: from
  * JOB_ID_SPECIAL_MONSTER_1_FIRST up to the first generic job, or the

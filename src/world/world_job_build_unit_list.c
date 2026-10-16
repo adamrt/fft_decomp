@@ -1,5 +1,9 @@
+#include "fft/bits.h"
+#include "fft/data.h"
 #include "fft/main.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/types.h"
 
 /* Declared s32 here: the target uses the returned register without the
  * re-extension an s16 prototype makes GCC emit (the callee already extends). */

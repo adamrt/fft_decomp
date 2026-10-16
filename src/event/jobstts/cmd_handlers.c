@@ -1,7 +1,11 @@
 /* The window frame command handler and border tiles with a transition clip. */
 
 #include "fft/event_jobstts.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
  * interior through jobstts_cmd_draw_background_tiles_handler.

@@ -1,5 +1,7 @@
-#include "fft/battle_gfx.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Build the two-column status-panel frame and its texture draw modes. */
 void menu_init_status_panel_primitives(menu_status_panel_buffer_t* menu) {

@@ -1,9 +1,14 @@
 /* CD mix and volume, opening and ending movie init, frame VRAM page restore, screen environments and runtime state
  * init. */
 
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/open.h"
+#include "fft/window.h"
+#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void open_system_init_runtime_state(void);

@@ -1,8 +1,7 @@
-#include "fft/battle_event.h"
-#include "fft/battle_text.h"
-#include "fft/event_equip.h"
 #include "fft/menu.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "psx/types.h"
 
 /* Start the help text thread for the current help message, if one is set:
  * save the text section pointers, bind the help text table and lock the menu

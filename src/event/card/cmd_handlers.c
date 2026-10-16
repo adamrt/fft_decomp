@@ -1,7 +1,10 @@
 /* The textured quad and window frame command handlers. */
 
 #include "fft/event_card.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Stream command: draw a textured quad of size (command[5], command[6]) at

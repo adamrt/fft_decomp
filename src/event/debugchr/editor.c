@@ -1,15 +1,16 @@
 /* The unit editor, including applying values to a battle unit, the unit thread and the session. */
 
-#include "fft/battle_menu.h"
-#include "fft/battle_script.h"
+#include "fft/battle_unit.h"
 #include "fft/event_debugchr.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

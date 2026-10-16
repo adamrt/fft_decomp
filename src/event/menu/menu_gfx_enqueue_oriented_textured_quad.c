@@ -1,4 +1,7 @@
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Queue a textured quad for `descriptor` at ordering-table entry `otag_index`,
  * its texture cell mirrored by `orientation` (TEXTURE_UV_FLIP_*). A non-null

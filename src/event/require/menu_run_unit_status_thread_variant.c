@@ -1,4 +1,3 @@
-#include "fft/battle_menu.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/script.h"
@@ -7,9 +6,11 @@
  * 0x30C editor / 0x1D8 panel packets (fft/menu.h), without the shake
  * offsets, the bar division and the zodiac branch.
  */
-#include "fft/battle_script.h"
 #include "fft/event_require.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/text.h"
+#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

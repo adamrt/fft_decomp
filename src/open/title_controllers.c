@@ -1,13 +1,22 @@
 /* Title screen controllers, including file loading, the OPNTEX frame buffer, movie streams, the title menu, sound type,
  * the new game transition and the birthday date and confirmation menus. */
 
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/open.h"
 #include "fft/script.h"
-#include "fft/thread.h"
+#include "fft/unit.h"
+#include "fft/window.h"
+#include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libcd.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void open_birthday_build_menu_text(open_birthday_date_state_t* menu);

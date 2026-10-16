@@ -1,4 +1,5 @@
 #include "fft/event_option.h"
+#include "fft/text.h"
 #include "psx/types.h"
 
 void text_set_blit_destination(s16 destination_x, s16 destination_y) {

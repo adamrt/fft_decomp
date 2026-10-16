@@ -1,7 +1,8 @@
 #include "fft/menu.h"
 #include "fft/menu_script.h"
-#include "fft/sound.h"
 #include "fft/text.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Draw the visible rows of a scrollable list.
  *

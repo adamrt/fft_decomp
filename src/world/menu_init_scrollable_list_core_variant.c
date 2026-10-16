@@ -1,4 +1,8 @@
+#include "fft/gfx.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "fft/world.h"
+#include "psx/types.h"
 
 /* Initialize a -1 terminated scrollable list and reset its rendering state. */
 void menu_init_scrollable_list_core_variant(const s16* values, s32 value, u8* text_table) {

@@ -1,6 +1,7 @@
 /* Event input state updates and the thread running check. */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"

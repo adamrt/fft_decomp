@@ -1,6 +1,8 @@
 /* If and if/else command group handlers. */
 
+#include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/types.h"
 
 menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* cmd) {
     s32 (*callback)(s32);

@@ -1,4 +1,5 @@
-#include "fft/event_bunit.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "psx/types.h"
 
 /* Command 0x16: step the portrait transition, then skip the one-byte command. */

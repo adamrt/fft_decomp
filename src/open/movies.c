@@ -1,10 +1,18 @@
 /* The main loop and ending cutscene, MDEC movie streaming and frame decoding, fade overlays, input repeat, new game
  * party init and birthday zodiac conversion. */
 
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/open.h"
+#include "fft/unit.h"
+#include "fft/window.h"
+#include "fft/world.h"
 #include "psx/libcd.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libpress.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void open_input_update_buttons_and_check_game_reset(void);

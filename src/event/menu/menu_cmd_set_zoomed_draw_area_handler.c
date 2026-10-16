@@ -1,6 +1,8 @@
-#include "fft/event_bunit.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Stream command for a window frame that zooms open: during the first four
  * transition frames it first queues a draw area cropped about the window's

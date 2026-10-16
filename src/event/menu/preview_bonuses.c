@@ -1,6 +1,7 @@
 /* Previewed HP and MP bonus display callbacks. */
 
-#include "fft/event_equip.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "psx/types.h"
 
 s32 menu_get_preview_hp_bonus_display(s32 unused_row) {

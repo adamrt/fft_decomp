@@ -1,4 +1,5 @@
-#include "fft/event_equip.h"
+#include "fft/item.h"
+#include "psx/types.h"
 
 void menu_load_sort_key_list(s32 list_index, s16* destination) {
     s8* source;

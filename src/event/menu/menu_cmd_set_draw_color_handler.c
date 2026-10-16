@@ -1,5 +1,6 @@
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/types.h"
 
 /* Select the normal or alternate sprite color. */
 menu_instruction_t* menu_cmd_set_draw_color_handler(menu_instruction_t* data) {

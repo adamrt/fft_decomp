@@ -3,16 +3,13 @@
 
 /* EVENT/REQUIRE.OUT: menu screen overlay that runs with BATTLE. */
 
-#include "fft/battle.h"
-#include "fft/bits.h"
-#include "fft/card.h"
-#include "fft/file.h"
+#include "fft/battle_unit.h"
 #include "fft/gfx.h"
-#include "fft/item.h"
 #include "fft/job.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* post battle */
 extern menu_entry_t g_require_join_menu_descriptor[];

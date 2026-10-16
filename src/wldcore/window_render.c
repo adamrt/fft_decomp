@@ -1,10 +1,15 @@
 /* VRAM render records, panel render threads, list cursor state, scrollable text windows and the sound queue. */
 
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
-#include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

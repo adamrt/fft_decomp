@@ -2,9 +2,13 @@
  * indices and messages with sound. */
 
 #include "fft/event_equip.h"
+#include "fft/item.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

@@ -1,4 +1,4 @@
-#include "fft/event_equip.h"
+#include "fft/bits.h"
 #include "psx/types.h"
 
 /* Reads a `count`-bit value, most significant bit first, from the secondary

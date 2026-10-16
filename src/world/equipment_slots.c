@@ -1,7 +1,14 @@
 /* Item availability, prices and counts, poached item quantities, best fit equipment, equipping items to slots, equip
  * checks, job changes, loadout validation and item category lists. */
 
+#include "fft/bits.h"
+#include "fft/data.h"
+#include "fft/item.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 /* Test for inventory or equipment entries in the current menu.

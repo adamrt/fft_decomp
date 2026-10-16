@@ -1,4 +1,6 @@
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Takes the next DR_MOVE packet from the pool, sets it up to copy `rect`
  * to (u, v) and links it into ordering-table entry otag_index. */

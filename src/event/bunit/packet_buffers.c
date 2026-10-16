@@ -2,6 +2,7 @@
 
 #include "fft/event_bunit.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

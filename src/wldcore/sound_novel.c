@@ -1,13 +1,21 @@
 /* Sound novel saved state, script execution, pending sounds, the countdown timer and the sound novel opcodes. */
 
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void wldcore_opcode_branch_if_dialog_option(s32 branch_if_equal);

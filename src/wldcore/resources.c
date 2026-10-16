@@ -1,11 +1,21 @@
 /* VRAM image streams, picture and background loading, message blocks, sound novel files, display rects, input repeat,
  * render object visibility, screen fades, proposition rows and availability, the calendar and nine-bit records. */
 
+#include "fft/data.h"
+#include "fft/file.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/unit.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
 #include "psx/libcd.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgs.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void wldcore_advance_brave_story_birthdays(void);

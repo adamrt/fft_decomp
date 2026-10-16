@@ -1,4 +1,6 @@
+#include "fft/main.h"
 #include "fft/world.h"
+#include "psx/libetc.h"
 #include "psx/types.h"
 
 /* Return the tutorial's scripted 16-bit button mask while a tutorial runs, pad 0

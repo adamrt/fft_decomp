@@ -1,6 +1,5 @@
 /* 6-byte selection record clears, one and all. */
 
-#include "fft/event_bunit.h"
 #include "fft/menu.h"
 #include "psx/libc.h"
 #include "psx/types.h"

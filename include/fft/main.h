@@ -5,18 +5,15 @@
 
 #include "fft/data.h"
 #include "fft/gfx.h"
-#include "fft/map.h"
 #include "fft/menu.h"
-#include "fft/menu_script.h"
 #include "fft/script.h"
-#include "fft/thread.h"
 #include "fft/unit.h"
-#include "psx/crt.h"
-#include "psx/libapi.h"
 #include "psx/libcd.h"
-#include "psx/libspu.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/suzuki.h"
+#include "psx/types.h"
 
 /* ability */
 typedef struct main_ability_human_skillset {

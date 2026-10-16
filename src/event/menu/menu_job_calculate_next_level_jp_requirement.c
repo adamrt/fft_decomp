@@ -1,5 +1,7 @@
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* JP needed for the next level of the job whose level

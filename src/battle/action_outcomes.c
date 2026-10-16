@@ -5,13 +5,17 @@
 #include "fft/battle_ai.h"
 #include "fft/battle_formula.h"
 #include "fft/battle_map.h"
-#include "fft/battle_script.h"
 #include "fft/battle_status.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
+#include "fft/data.h"
 #include "fft/main.h"
+#include "fft/map.h"
 #include "fft/memory.h"
+#include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 /* Enter AI action simulation, save the current attacker and clear Hamedo state. */

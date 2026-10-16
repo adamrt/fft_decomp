@@ -1,4 +1,5 @@
 #include "fft/event_bunit.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* Returns 1 while the unit list is scrolling, or when the selected unit lies

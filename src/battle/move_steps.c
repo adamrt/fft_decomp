@@ -11,6 +11,7 @@
 #include "fft/main.h"
 #include "fft/map.h"
 #include "fft/sound.h"
+#include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

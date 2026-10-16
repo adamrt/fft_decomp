@@ -4,6 +4,7 @@
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "psx/libetc.h"
+#include "psx/types.h"
 
 void sound_wait_for_music_stub(void) {
     do {

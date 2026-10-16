@@ -1,5 +1,4 @@
-#include "fft/battle_gfx.h"
-#include "fft/battle_menu.h"
+#include "fft/data.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/memory.h"

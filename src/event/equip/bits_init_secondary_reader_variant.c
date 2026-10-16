@@ -1,5 +1,4 @@
 #include "fft/bits.h"
-#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void bits_init_secondary_reader_variant(const u8* data) {

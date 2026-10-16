@@ -4,8 +4,10 @@
 /* BATTLE status infliction, upkeep and display state. Shared status IDs and
  * stored status sets are defined in unit.h. */
 
-#include "fft/status.h"
+#include "fft/data.h"
 #include "fft/unit.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* status indices */
 /* Event infliction helpers number bits LSB-first, unlike stored status IDs. */

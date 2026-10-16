@@ -1,7 +1,11 @@
 /* Unit job data copies and init, the base job and the unit job list. */
 
+#include "fft/bits.h"
+#include "fft/data.h"
 #include "fft/event_jobstts.h"
 #include "fft/main.h"
+#include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 /* Copy the battle unit's job data into the compact JOBSTTS working record.

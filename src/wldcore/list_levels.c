@@ -2,12 +2,21 @@
  * details, Brave Story propositions and attempt details, screen transitions, the window publish slot, and the tutorial
  * category, formation and mask 1 lists. */
 
+#include "fft/data.h"
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t* panel);

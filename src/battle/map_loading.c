@@ -1,11 +1,12 @@
 /* Map data and mesh loading, mesh render record init, and weather sound effects. */
 
 #include "fft/battle.h"
+#include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
-#include "fft/battle_script.h"
 #include "fft/main.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data);

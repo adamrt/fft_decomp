@@ -1,5 +1,7 @@
-#include "fft/battle_text.h"
-#include "fft/event_card.h"
+#include "fft/bits.h"
+#include "fft/menu.h"
+#include "fft/text.h"
+#include "psx/types.h"
 
 /* Draw one 10x14 font glyph into a 4bpp image at `position` and return the
  * glyph's width.

@@ -1,6 +1,8 @@
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "psx/libetc.h"
 #include "psx/pad.h"
+#include "psx/types.h"
 
 /*
  * Publish newly pressed buttons and two repeat rates for menus.

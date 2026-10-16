@@ -1,4 +1,6 @@
 #include "fft/battle_unit.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Widens a unit's integer world position 16-bit values into three 32-bit components. A missing unit is
  * not tested for: the copy then reads address 0. */

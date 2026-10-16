@@ -1,6 +1,8 @@
 /* Unit records built from the party, the record list and saving records back to the party. */
 
+#include "fft/data.h"
 #include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/libc.h"

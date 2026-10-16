@@ -1,6 +1,5 @@
 /* The render ordering table and the save menu graphic thread. */
 
-#include "fft/battle_menu.h"
 #include "fft/event_card.h"
 #include "fft/menu.h"
 #include "fft/script.h"

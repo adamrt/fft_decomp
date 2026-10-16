@@ -1,4 +1,6 @@
 #include "fft/event_equip.h"
+#include "fft/item.h"
+#include "psx/types.h"
 
 /* Returns whether an item occurs in a 0xFF-terminated category list. */
 s32 item_is_in_category_list(s32 item_id, s32 category_index) {

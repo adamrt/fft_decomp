@@ -1,13 +1,11 @@
 /* Text entries of window records, shared by the opening and the world map with their own record layouts. */
 
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/open.h"
-#include "fft/script.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "psx/libcd.h"
+#include "fft/world.h"
 #include "psx/libgpu.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 #ifdef FFT_WLDCORE

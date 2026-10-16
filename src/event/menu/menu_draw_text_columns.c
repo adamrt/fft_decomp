@@ -1,5 +1,5 @@
-#include "fft/battle_menu.h"
 #include "fft/menu.h"
+#include "psx/types.h"
 
 /* Draw the visible text or number entries in a page's three columns. */
 void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {

@@ -1,7 +1,11 @@
 /* The formation screen, including the menu input filter, unit selection slides, the screen run, sound dispatch, menu
  * state, frame processing and unit selection staging. */
 
+#include "fft/data.h"
 #include "fft/gfx.h"
+#include "fft/item.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"

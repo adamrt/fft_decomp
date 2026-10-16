@@ -1,12 +1,15 @@
 /* BUNIT entry, including VRAM init and fade, the input lock timer, pad reading, menu results and the unit browser
  * frame. */
 
-#include "fft/battle_gfx.h"
 #include "fft/event_bunit.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/sound.h"
+#include "fft/status.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

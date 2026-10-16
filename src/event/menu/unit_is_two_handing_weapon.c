@@ -1,5 +1,7 @@
+#include "fft/data.h"
 #include "fft/main.h"
 #include "fft/unit.h"
+#include "psx/types.h"
 
 /* Returns 1 when the unit holds a single weapon in two hands: exactly one of
  * the two hand slots is occupied, its item is below the throwable range, and

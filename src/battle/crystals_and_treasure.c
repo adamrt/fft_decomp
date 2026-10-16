@@ -1,17 +1,18 @@
 /* Crystal and treasure generation, enemy level data, unit stat lookups and the unit action menu set. */
 
-#include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_move.h"
-#include "fft/battle_script.h"
 #include "fft/battle_status.h"
 #include "fft/battle_unit.h"
+#include "fft/data.h"
 #include "fft/main.h"
 #include "fft/memory.h"
+#include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save);

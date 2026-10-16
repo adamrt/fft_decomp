@@ -1,4 +1,6 @@
 #include "fft/main.h"
+#include "fft/unit.h"
+#include "psx/types.h"
 
 /* Store generic-job unlocks in the party record's big-endian byte order. */
 void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]) {

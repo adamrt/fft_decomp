@@ -3,6 +3,10 @@
 #include "fft/battle.h"
 #include "fft/main.h"
 #include "fft/script.h"
+#include "psx/libetc.h"
+#include "psx/libgpu.h"
+#include "psx/libspu.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void main_system_stop_display_and_audio_for_game_reset(void) {

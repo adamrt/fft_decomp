@@ -1,15 +1,17 @@
 /* Skillset ability loading for the item, throw, math skill, elemental, monster skill, draw out and charge menus, and
  * the AT list and turn order. */
 
-#include "fft/battle.h"
 #include "fft/battle_action.h"
+#include "fft/battle_ai.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_status.h"
 #include "fft/battle_unit.h"
+#include "fft/data.h"
 #include "fft/main.h"
-#include "fft/memory.h"
+#include "fft/menu.h"
 #include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag);

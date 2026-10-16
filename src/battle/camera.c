@@ -1,22 +1,8 @@
 /* The battle camera, with saved state, deltas and animation steps for real coordinates, screen offset, zoom and
  * rotation (the real-coordinate and zoom delta setters are written twice in the original). */
 
-#include "fft/battle.h"
-#include "fft/battle_action.h"
 #include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_map.h"
-#include "fft/battle_move.h"
-#include "fft/battle_script.h"
-#include "fft/battle_target.h"
-#include "fft/battle_unit.h"
-#include "fft/data.h"
-#include "fft/event_attack.h"
 #include "fft/main.h"
-#include "fft/map.h"
-#include "fft/script.h"
-#include "fft/sound.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

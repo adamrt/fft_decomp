@@ -1,6 +1,7 @@
 /* Stat deltas of swapping equipment and the scaled preview subtraction. */
 
 #include "fft/event_equip.h"
+#include "fft/item.h"
 #include "fft/menu.h"
 #include "psx/types.h"
 

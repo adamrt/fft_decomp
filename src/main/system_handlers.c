@@ -3,6 +3,7 @@
 #include "fft/battle_gfx.h"
 #include "fft/main.h"
 #include "fft/script.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Empty report hook. Callers pass a source number (0 from main_system_handle_error, 1 the effect

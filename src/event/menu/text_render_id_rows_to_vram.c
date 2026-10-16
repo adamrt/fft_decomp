@@ -1,6 +1,6 @@
-#include "fft/battle_text.h"
-#include "fft/event_bunit.h"
 #include "fft/gfx.h"
+#include "fft/text.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

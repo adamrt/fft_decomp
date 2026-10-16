@@ -1,4 +1,6 @@
-#include "fft/event_equip.h"
+#include "fft/data.h"
+#include "fft/item.h"
+#include "psx/types.h"
 
 /* Reconcile one sorted item category list (0 weapons and shields, then
  * headgear, body armour, accessories and other: the menu category minus one)

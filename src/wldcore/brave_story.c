@@ -1,12 +1,17 @@
 /* Brave Story levels, including story events and their text, script variable lists and details, and tutorial topics and
  * their text. */
 
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

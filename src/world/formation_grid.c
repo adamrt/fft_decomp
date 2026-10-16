@@ -1,9 +1,17 @@
 /* The formation unit grid, including the stat and change banner panel toggles, unit stat accessors, egg hatch progress,
  * grid rows, scrolling, the cursor, transitions, portrait slides and sprites, and graphics drawn below the sprite. */
 
+#include "fft/gfx.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

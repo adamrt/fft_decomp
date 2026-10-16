@@ -1,11 +1,14 @@
 /* Formula helpers for brave and speed changes, elemental and weather modifiers, faith, HP and MP absorption, undead
  * reversal, status procs, equipment breaks, poach, catch, and hit and evade calculations. */
 
-#include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"
 #include "fft/battle_map.h"
+#include "fft/battle_status.h"
+#include "fft/data.h"
+#include "fft/main.h"
 #include "fft/memory.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* Effect of each talk skill: Negotiate takes gil, Persuade zeroes CT, Praise

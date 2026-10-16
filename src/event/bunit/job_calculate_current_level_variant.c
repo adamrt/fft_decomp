@@ -1,6 +1,7 @@
 #include "fft/event_bunit.h"
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* Job level of the selected unit in the job list's `index`th job, also left

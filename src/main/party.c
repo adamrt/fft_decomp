@@ -2,8 +2,10 @@
  * from ENTD, RSM flags, actual stats, abilities, equipment, character names and the highest party level. */
 
 #include "fft/battle_text.h"
+#include "fft/data.h"
 #include "fft/main.h"
 #include "fft/memory.h"
+#include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/libc.h"

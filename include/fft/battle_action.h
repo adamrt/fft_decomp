@@ -4,8 +4,12 @@
 /* Battle action preparation, execution and result processing. */
 
 #include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/main.h"
+#include "fft/battle_unit.h"
+#include "fft/data.h"
+#include "fft/gfx.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
+#include "psx/types.h"
 
 /* turn types */
 /* action_run_between_turn_control modes. */

@@ -1,6 +1,8 @@
-#include "fft/event_bunit.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "psx/libetc.h"
 #include "psx/pad.h"
+#include "psx/types.h"
 
 /*
  * Read Square-modified vertical input with the configured repeat timing.

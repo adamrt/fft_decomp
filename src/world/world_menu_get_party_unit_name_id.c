@@ -1,4 +1,7 @@
+#include "fft/main.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/types.h"
 
 /* Returns the name index combined with its name class. */
 s32 world_menu_get_party_unit_name_id(void) {

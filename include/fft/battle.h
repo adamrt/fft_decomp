@@ -3,25 +3,11 @@
 
 /* BATTLE.BIN: the battle engine. Event and effect overlays run alongside it. */
 
-#include "fft/battle_action.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_event.h"
-#include "fft/battle_formula.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_map.h"
-#include "fft/battle_menu.h"
-#include "fft/battle_move.h"
-#include "fft/battle_script.h"
-#include "fft/battle_status.h"
-#include "fft/battle_target.h"
-#include "fft/battle_text.h"
 #include "fft/battle_unit.h"
-#include "fft/main.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
-#include "psx/libc.h"
+#include "fft/gfx.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* engine state */
 /*

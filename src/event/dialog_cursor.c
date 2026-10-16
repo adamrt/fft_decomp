@@ -1,22 +1,7 @@
 /* The dialog text cursor: advancing it with separate backreference state and printing FNT values. */
 
-#include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_event.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_script.h"
-#include "fft/battle_text.h"
-#include "fft/battle_unit.h"
-#include "fft/gfx.h"
-#include "fft/memory.h"
 #include "fft/menu.h"
-#include "fft/open.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/libgpu.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor) {

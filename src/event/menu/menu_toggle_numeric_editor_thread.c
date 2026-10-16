@@ -1,5 +1,5 @@
+#include "fft/menu.h"
 #include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Starts thread 12 on menu_run_numeric_editor_frame_thread (parameter

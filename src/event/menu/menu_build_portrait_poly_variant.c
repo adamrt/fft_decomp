@@ -1,5 +1,6 @@
-#include "fft/battle_menu.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Texture a quad with a portrait: a unit portrait when neither bit 0x100 nor
  * 0x200 of `portrait_id` is set; otherwise the quad is left alone. */

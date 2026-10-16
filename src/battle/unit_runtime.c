@@ -7,7 +7,12 @@
 #include "fft/battle_move.h"
 #include "fft/battle_script.h"
 #include "fft/battle_unit.h"
+#include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/map.h"
+#include "fft/unit.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* The original wrote the body of battle_unit_add_event_offset_by_runtime_id a second time as

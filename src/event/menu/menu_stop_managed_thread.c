@@ -1,5 +1,5 @@
-#include "fft/event_card.h"
 #include "fft/menu.h"
+#include "psx/types.h"
 
 /* Request stop, then clear this screen's managed-thread state. */
 void menu_stop_managed_thread(s32 thread_id) {

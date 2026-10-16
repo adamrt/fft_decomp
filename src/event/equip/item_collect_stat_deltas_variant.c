@@ -1,5 +1,8 @@
+#include "fft/data.h"
 #include "fft/event_equip.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "psx/types.h"
 
 /*
  * Extract an item's equipment stats and attribute bonuses for comparison.

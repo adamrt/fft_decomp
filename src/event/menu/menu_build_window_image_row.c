@@ -1,4 +1,5 @@
 #include "fft/menu.h"
+#include "psx/types.h"
 
 /* Fill the borders and repeating interior from an eight-pattern row.
  * The caller fills the final two destination cells. */

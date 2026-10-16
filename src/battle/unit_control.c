@@ -7,8 +7,10 @@
 #include "fft/battle_map.h"
 #include "fft/battle_move.h"
 #include "fft/battle_unit.h"
+#include "fft/gfx.h"
 #include "fft/main.h"
-#include "psx/libgpu.h"
+#include "fft/map.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 void battle_map_copy_background_color(void) {

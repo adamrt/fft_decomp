@@ -1,7 +1,7 @@
 /* Text entry seek and -1 terminated text-id list image rendering. */
 
-#include "fft/battle_text.h"
 #include "fft/menu.h"
+#include "fft/text.h"
 #include "psx/types.h"
 
 const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2) {

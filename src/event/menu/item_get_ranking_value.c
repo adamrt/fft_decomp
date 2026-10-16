@@ -1,4 +1,7 @@
-#include "fft/event_equip.h"
+#include "fft/data.h"
+#include "fft/item.h"
+#include "fft/main.h"
+#include "psx/types.h"
 
 /* Return the item category's primary stat for descending menu sorts. */
 s32 item_get_ranking_value(s32 item_id) {

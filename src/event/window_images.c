@@ -1,13 +1,12 @@
 /* Byte copies, packed nibble access, 4bpp rect mirroring and pixel access, and window image and frame image building
  * and upload. */
 
-#include "fft/battle.h"
 #include "fft/battle_menu.h"
-#include "fft/battle_text.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

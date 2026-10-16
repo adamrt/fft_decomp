@@ -1,4 +1,4 @@
-#include "fft/event_card.h"
+#include "fft/menu.h"
 #include "psx/types.h"
 
 /* Select the ordering-table bucket used by subsequent menu packets. */

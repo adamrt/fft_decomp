@@ -1,5 +1,7 @@
 /* Shop background TIM loading, text section binding, resident data and tutorial file loading. */
 
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

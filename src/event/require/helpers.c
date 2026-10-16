@@ -1,12 +1,12 @@
 /* A 16-frame thread stop, the bio variable by unit class, bonus image loading, frame waits with skip and a 31-frame RGB
  * fade. */
 
-#include "fft/battle_script.h"
 #include "fft/event_require.h"
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

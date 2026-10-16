@@ -1,5 +1,7 @@
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Fill a background rectangle with 16-pixel textured tiles.
  *

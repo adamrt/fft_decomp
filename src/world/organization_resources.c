@@ -2,6 +2,7 @@
  * control, palettes, the main menu threads, the card menu, and the formation open requests and screen dispatch. */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
@@ -9,6 +10,7 @@
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "fft/world.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

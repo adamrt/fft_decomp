@@ -1,4 +1,6 @@
 #include "fft/event_equip.h"
+#include "fft/item.h"
+#include "psx/types.h"
 
 /* Compact a -1-terminated s16 item list and append its byte terminator. */
 void item_store_category_list(s32 category_index, const s16* source) {

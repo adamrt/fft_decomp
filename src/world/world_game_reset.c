@@ -1,3 +1,4 @@
+#include "fft/main.h"
 #include "fft/world.h"
 
 void world_game_reset(void) {

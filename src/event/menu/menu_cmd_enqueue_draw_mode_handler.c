@@ -1,5 +1,6 @@
-#include "fft/event_bunit.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "psx/libgpu.h"
 
 /* Queue a draw mode with the requested blend rate at the current OT entry. */
 menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* data) {

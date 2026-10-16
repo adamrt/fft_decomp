@@ -6,7 +6,14 @@
  * and their work records are declared in effect.h. */
 
 #include "fft/battle_unit.h"
+#include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/map.h"
+#include "fft/unit.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/suzuki.h"
+#include "psx/types.h"
 
 /* callbacks */
 /* Native effect handlers receive the record, callback slot, emitter and frame.

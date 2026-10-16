@@ -1,4 +1,5 @@
-#include "fft/event_equip.h"
+#include "fft/item.h"
+#include "psx/types.h"
 
 /* Store the overlay's working item-type order in its packed table.
  *

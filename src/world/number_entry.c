@@ -2,10 +2,12 @@
  * signed numbers and entry chains. */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"

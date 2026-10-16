@@ -1,7 +1,10 @@
 /* Frame submission, primitive lists and graphics context init. */
 
 #include "fft/event_card.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

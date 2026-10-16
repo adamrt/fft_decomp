@@ -1,6 +1,7 @@
 /* LoadImage/StoreImage followed by a drawing wait. */
 
 #include "fft/gfx.h"
+#include "psx/libgpu.h"
 
 void gfx_load_image_and_wait(RECT* rect, void* data) {
     LoadImage(rect, data);

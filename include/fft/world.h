@@ -2,19 +2,17 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "fft/bits.h"
-#include "fft/camera.h"
 #include "fft/card.h"
-#include "fft/file.h"
+#include "fft/data.h"
 #include "fft/gfx.h"
-#include "fft/item.h"
 #include "fft/job.h"
 #include "fft/main.h"
-#include "fft/sound.h"
-#include "fft/status.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "psx/libgs.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "fft/unit.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* dead unit */
 

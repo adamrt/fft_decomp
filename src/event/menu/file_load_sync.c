@@ -1,4 +1,4 @@
-#include "fft/event_attack.h"
+#include "fft/main.h"
 #include "fft/thread.h"
 #include "psx/types.h"
 

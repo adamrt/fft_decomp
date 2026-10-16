@@ -1,7 +1,12 @@
 /* Unit records built from stats, the data list, sorting by order keys and copying between order lists. */
 
+#include "fft/battle_action.h"
+#include "fft/battle_menu.h"
+#include "fft/battle_unit.h"
+#include "fft/data.h"
 #include "fft/event_bunit.h"
 #include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/unit.h"
 #include "psx/libc.h"
 #include "psx/types.h"

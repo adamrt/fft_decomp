@@ -1,6 +1,7 @@
-#include "fft/event_equip.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Draw a textured quad at its literal position or current list row. */

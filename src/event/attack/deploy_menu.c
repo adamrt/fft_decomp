@@ -1,12 +1,14 @@
 /* The deployment select menu, deployment strings, shaded panel strips and the map title graphic. */
 
-#include "fft/battle_script.h"
 #include "fft/event_attack.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

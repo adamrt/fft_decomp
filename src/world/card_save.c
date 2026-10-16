@@ -1,15 +1,23 @@
 /* Controller reading and update, input with message state, and the memory card screen, including slot, mode, load and
  * save steps, the save image, slot scans, playtime, descriptions and the slot list. */
 
+#include "fft/bits.h"
+#include "fft/card.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "fft/script.h"
+#include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/kernel.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void world_card_build_save_file_header(s32 slot, s32 level, card_save_header_t* header);

@@ -1,17 +1,21 @@
 /* The save screen, including slot selection, slot scans, writes, the save buffer, playtime, descriptions and the
  * scrolling slot list. */
 
-#include "fft/battle_gfx.h"
-#include "fft/battle_script.h"
-#include "fft/battle_text.h"
+#include "fft/bits.h"
+#include "fft/card.h"
 #include "fft/event_card.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "psx/kernel.h"
 #include "psx/libc.h"
+#include "psx/libetc.h"
+#include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

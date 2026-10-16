@@ -1,4 +1,7 @@
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Draw the sliding 16x16 marker and its semi-transparent shadow. State packs
  * the active flag in bit 15 and the frame counter in bits 0-6. Mode 0 cancels

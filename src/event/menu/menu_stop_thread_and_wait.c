@@ -1,4 +1,3 @@
-#include "fft/event_card.h"
 #include "fft/menu.h"
 #include "fft/thread.h"
 #include "psx/types.h"

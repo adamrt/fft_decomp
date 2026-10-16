@@ -1,6 +1,7 @@
-#include "fft/event_bunit.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/types.h"
 
 /* Queue the full draw area at the next ordering-table slot when unlocked. */
 menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler_variant(menu_instruction_t* data) {

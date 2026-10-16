@@ -3,16 +3,12 @@
 
 /* EVENT/EQUIP.OUT: menu screen overlay that runs with BATTLE. */
 
-#include "fft/battle.h"
-#include "fft/bits.h"
-#include "fft/card.h"
-#include "fft/file.h"
 #include "fft/gfx.h"
-#include "fft/item.h"
 #include "fft/job.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* screen */
 extern s8 g_equip_remove_mode_initialized;

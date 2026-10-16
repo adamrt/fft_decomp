@@ -1,13 +1,13 @@
 /* Icon list, text entry wait and icon strip threads. */
 
-#include "fft/battle_menu.h"
-#include "fft/battle_script.h"
-#include "fft/battle_text.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "psx/libgpu.h"
 #include "psx/pad.h"
+#include "psx/types.h"
 
 void menu_icon_list_thread(void) {
     RECT rect;

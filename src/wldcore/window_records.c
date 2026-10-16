@@ -2,8 +2,10 @@
  * layouts (56 and 52 bytes). */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/open.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"

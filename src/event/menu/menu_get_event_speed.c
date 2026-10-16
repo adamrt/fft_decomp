@@ -1,4 +1,5 @@
 #include "fft/menu.h"
+#include "psx/types.h"
 
 s32 menu_get_event_speed(void) {
     s32 speed;

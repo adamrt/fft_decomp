@@ -1,5 +1,6 @@
 #include "fft/event_bunit.h"
 #include "fft/menu.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* Caches and returns whether the `index`th job's skillset has nothing left

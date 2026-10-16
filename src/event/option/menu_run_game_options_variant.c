@@ -1,6 +1,5 @@
-#include "fft/battle_script.h"
-#include "fft/event_option.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
@@ -8,6 +7,7 @@
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /*

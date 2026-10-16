@@ -1,13 +1,21 @@
 /* Music test menus, text message controllers, title demo streams, transitions and crossfades, the opening script state,
  * XA audio, the ending movie and the script opcodes. */
 
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/open.h"
 #include "fft/script.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/window.h"
+#include "fft/world.h"
 #include "psx/libcd.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void open_controller_start_text_message(s32 parameter, s32 run_followup);

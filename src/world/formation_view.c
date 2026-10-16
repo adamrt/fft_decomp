@@ -1,8 +1,13 @@
 /* The view zoom thread, the unit palette index, formation sprites and redraw requests. */
 
+#include "fft/data.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 void world_formation_view_zoom_thread(void) {

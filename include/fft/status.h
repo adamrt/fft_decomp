@@ -1,10 +1,9 @@
+#include "psx/types.h"
 #ifndef STATUS_H
-#define STATUS_H
+#    define STATUS_H
 
 /* Status-effect routines shared by the BATTLE and WORLD event systems. Status
  * IDs and stored status sets are defined in unit.h. */
-
-#include "fft/unit.h"
 
 /* event status changes */
 

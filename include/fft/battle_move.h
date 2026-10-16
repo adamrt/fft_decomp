@@ -5,7 +5,9 @@
 
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
-#include "fft/main.h"
+#include "fft/map.h"
+#include "fft/unit.h"
+#include "psx/types.h"
 
 /* post movement types */
 /* Eight-byte result copied whole into the post-movement item display. */

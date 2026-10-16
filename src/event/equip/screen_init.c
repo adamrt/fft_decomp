@@ -2,8 +2,11 @@
 
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
+#include "fft/item.h"
 #include "fft/menu.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 static void equip_menu_load_images_and_reset_lists(void) {

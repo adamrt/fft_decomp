@@ -1,5 +1,5 @@
-#include "fft/event_equip.h"
 #include "fft/menu.h"
+#include "fft/sound.h"
 #include "psx/types.h"
 
 /* Update a wrapping vertical menu selection, queue `sound_id` when it moves

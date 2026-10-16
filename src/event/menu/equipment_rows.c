@@ -1,7 +1,9 @@
 /* Frame-wait idle and the equipment menu row item counts and icon sources. */
 
 #include "fft/event_equip.h"
+#include "fft/item.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "fft/thread.h"
 #include "psx/types.h"
 

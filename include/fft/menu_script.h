@@ -3,7 +3,9 @@
 
 /* Byte-aligned display instructions shared by WORLD, BUNIT, EQUIP and JOBSTTS. */
 
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/types.h"
 
 /* opcodes */
 /* Opcode byte of a menu script command, the index of its handler in the

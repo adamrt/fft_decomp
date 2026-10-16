@@ -2,7 +2,13 @@
  * semi-transparency, colors and draw priority, formatted and right-aligned numbers, the sliding and bouncing cursors,
  * instruction groups, scrollable list layouts and bodies, and sprite color. */
 
+#include "fft/gfx.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "fft/sound.h"
 #include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

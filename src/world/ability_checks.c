@@ -1,7 +1,11 @@
 /* Secondary skillset listing, the Two Swords, Two Hands and Secret Hunt checks, and the ability and equippable RSM
  * lists. */
 
+#include "fft/bits.h"
+#include "fft/data.h"
 #include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

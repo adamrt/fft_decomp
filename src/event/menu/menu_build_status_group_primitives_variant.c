@@ -1,6 +1,7 @@
-#include "fft/battle_gfx.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Render the animated status groups of a menu panel.
  *

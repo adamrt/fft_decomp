@@ -1,11 +1,14 @@
 /* The map script conditional and request opcodes, Ramza checks, bit access, save completion percent, and the script
  * flag list and detail levels. */
 
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/wldcore.h"
-#include "psx/libgpu.h"
+#include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

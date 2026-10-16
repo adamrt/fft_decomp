@@ -1,8 +1,15 @@
 /* The formation ability menu, including the idle thread, set, remove and clear-all abilities, learning, equip support
  * changes, and job level, learn JP and total JP calculations. */
 
+#include "fft/data.h"
+#include "fft/gfx.h"
+#include "fft/item.h"
 #include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/libc.h"
 #include "psx/pad.h"

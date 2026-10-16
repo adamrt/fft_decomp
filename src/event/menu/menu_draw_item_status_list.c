@@ -1,3 +1,5 @@
+#include "fft/bits.h"
+#include "fft/data.h"
 #include "fft/event_equip.h"
 #include "fft/main.h"
 #include "fft/menu.h"

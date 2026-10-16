@@ -1,6 +1,7 @@
-#include "fft/event_bunit.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/types.h"
 
 /* Point the scrollable list menu at a new -1 terminated entry list and reset
  * its render state. The scroll base is reset only when the selected index

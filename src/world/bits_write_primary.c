@@ -1,4 +1,4 @@
-#include "fft/event_card.h"
+#include "fft/bits.h"
 #include "psx/types.h"
 
 /* Writes one bit (set when the low byte of `value` is nonzero) through the

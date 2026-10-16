@@ -1,7 +1,13 @@
 /* Textured quad submission and inventory totals. */
 
+#include "fft/data.h"
 #include "fft/event_equip.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/unit.h"
+#include "psx/libc.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Takes one POLY_FT4 from the pool, fills it as the rect->w x rect->h quad at

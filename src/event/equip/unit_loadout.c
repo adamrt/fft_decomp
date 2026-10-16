@@ -1,6 +1,12 @@
 /* Two-handed weapon checks and unit data built from, loaded from and committed to stats. */
 
+#include "fft/battle_action.h"
+#include "fft/data.h"
 #include "fft/event_equip.h"
+#include "fft/item.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

@@ -2,6 +2,9 @@
 
 #include "fft/main.h"
 #include "psx/libcd.h"
+#include "psx/libetc.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 int main_file_build_header_nnl(main_file_load_descriptor_t* header, int sector, int sectors, void* destination) {
     return main_file_build_header(header, sector, sectors, destination, MAIN_FILE_LOADING_DISPLAY_OFF);

@@ -4,7 +4,13 @@
 /* Battle unit records, deployment, animation and display state. */
 
 #include "fft/battle_ai.h"
-#include "fft/main.h"
+#include "fft/data.h"
+#include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* sequence and animation types */
 /* SEQ sequence bytes, as battle_gfx_run_unit_seq_script (unit sheets) and

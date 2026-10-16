@@ -1,4 +1,7 @@
-#include "fft/event_attack.h"
+#include "fft/gfx.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Build a centered sprite-cell quad using rounded 4.12 fixed-point geometry.
  *

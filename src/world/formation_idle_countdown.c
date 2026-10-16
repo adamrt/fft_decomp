@@ -1,5 +1,6 @@
 /* The idle countdown and the input lockout timer. */
 
+#include "fft/menu.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"

@@ -1,6 +1,8 @@
 /* The equipment and ability list threads. */
 
+#include "fft/data.h"
 #include "fft/gfx.h"
+#include "fft/item.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"

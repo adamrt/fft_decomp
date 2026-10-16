@@ -1,6 +1,8 @@
 /* CLUT, layout CLUT and texture page command handlers. */
 
+#include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/libgpu.h"
 
 menu_instruction_t* menu_cmd_set_clut_handler(menu_instruction_t* data) {
     g_menu_gfx_clut_id

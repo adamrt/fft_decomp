@@ -1,4 +1,6 @@
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Queue a drawing-area primitive, shifting it to the back buffer when needed. */
 void menu_gfx_enqueue_draw_area(RECT* rect, s32 idx) {

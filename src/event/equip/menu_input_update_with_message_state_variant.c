@@ -1,5 +1,8 @@
 #include "fft/event_equip.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/pad.h"
 #include "psx/types.h"

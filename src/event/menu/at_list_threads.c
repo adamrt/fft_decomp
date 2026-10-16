@@ -1,14 +1,12 @@
 /* Yield-then-stop, crystal/treasure result threads and AT list build/select threads. */
 
 #include "fft/battle_action.h"
-#include "fft/battle_menu.h"
 #include "fft/event_option.h"
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

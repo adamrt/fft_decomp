@@ -1,13 +1,23 @@
 /* Proposition participant messages, success and rewards, countdown and sequence messages, discovery announcements,
  * active propositions and cancel confirmation, sound novel levels, unexplored lands and treasures. */
 
+#include "fft/data.h"
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void wldcore_gfx_prepare_play_time_display(void);

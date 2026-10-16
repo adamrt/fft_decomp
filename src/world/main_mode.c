@@ -1,6 +1,7 @@
 /* The main menu mode and game options. */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
@@ -9,6 +10,7 @@
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Options-menu values: g_menu_option_values holds the 13 options unpacked from

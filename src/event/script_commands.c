@@ -1,34 +1,19 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_map.h"
-#include "fft/battle_menu.h"
-#include "fft/battle_move.h"
 #include "fft/battle_script.h"
-#include "fft/battle_status.h"
 #include "fft/battle_text.h"
-#include "fft/battle_unit.h"
-#include "fft/camera.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
-#include "fft/map.h"
-#include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/status.h"
+#include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/world.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-static void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text);
-static void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
 static s32 script_get_rand16(void);
 static s32 script_get_variable_bit_position(s32 value);
 static s32* script_get_variable_word_pointer_from_id(s32 variable_id);

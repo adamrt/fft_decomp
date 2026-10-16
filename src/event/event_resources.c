@@ -2,20 +2,17 @@
  * display conditions, the dark screen and spell quote threads, and the openers for the option, BUNIT, help, JOBSTTS,
  * EQUIP and DEBUGCHR menus. */
 
-#include "fft/battle.h"
-#include "fft/battle_action.h"
 #include "fft/battle_ai.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_event.h"
-#include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_script.h"
 #include "fft/battle_text.h"
 #include "fft/battle_unit.h"
+#include "fft/camera.h"
 #include "fft/event_debugchr.h"
 #include "fft/event_etc.h"
-#include "fft/event_helpmenu.h"
 #include "fft/event_option.h"
 #include "fft/event_require.h"
 #include "fft/event_small.h"
@@ -26,14 +23,14 @@
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-static void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 
 void text_set_message_duration_frames(u16 frames) {
     g_text_message_duration_frames = frames;

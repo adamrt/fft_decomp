@@ -1,5 +1,8 @@
-#include "fft/event_bunit.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "fft/sound.h"
+#include "psx/types.h"
 
 /* Move the list viewport by one visible page.
  *

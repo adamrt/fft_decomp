@@ -1,10 +1,11 @@
 /* Fullscreen graphics for the chapter title and game over screens. */
 
-#include "fft/battle_gfx.h"
 #include "fft/event_etc.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 static void etc_graphic_open(s32 graphic_id) {

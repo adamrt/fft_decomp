@@ -1,5 +1,7 @@
 #include "fft/main.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Restart the GPU and set up double-buffered drawing at width x height with the
  * second buffer 240 lines below the first (an interlaced 480-line mode uses one).

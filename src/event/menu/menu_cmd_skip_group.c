@@ -1,4 +1,5 @@
 #include "fft/menu_script.h"
+#include "psx/types.h"
 
 /* Skip a command plus, for group opcodes 1 and 2, the child commands it counts;
  * return the command that follows. */

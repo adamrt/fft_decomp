@@ -1,10 +1,18 @@
 /* CD-ROM and CPU RAM reset, the zodiac frame, startup and game state reset, ENTD files and encounters, new game
  * inventory and party, and SVECTOR setting. */
 
+#include "fft/data.h"
 #include "fft/main.h"
 #include "fft/script.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libapi.h"
+#include "psx/libc.h"
+#include "psx/libcd.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/libspu.h"
 #include "psx/types.h"
 
 static void main_file_reset_cdrom_cpu_ram(void) {

@@ -1,4 +1,6 @@
 #include "fft/gfx.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Build and submit the panel background's 4x8 gradient grid. */
 void gfx_build_gradient_grid_primitives_variant(POLY_GT4* poly) {

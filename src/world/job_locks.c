@@ -1,7 +1,11 @@
 /* The base job and the all-units job lock check. */
 
+#include "fft/bits.h"
+#include "fft/data.h"
 #include "fft/main.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/types.h"
 
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value

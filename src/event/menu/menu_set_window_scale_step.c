@@ -1,4 +1,4 @@
-#include "fft/event_equip.h"
+#include "fft/menu.h"
 #include "psx/types.h"
 
 void menu_set_window_scale_step(s32 value) {

@@ -1,4 +1,8 @@
 #include "fft/event_jobstts.h"
+#include "fft/gfx.h"
+#include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Queue a textured quad whose texture cell is mirrored by orientation. */
 void jobstts_gfx_enqueue_oriented_textured_quad(

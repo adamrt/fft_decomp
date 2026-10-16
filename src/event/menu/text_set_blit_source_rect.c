@@ -1,4 +1,4 @@
-#include "fft/event_option.h"
+#include "fft/text.h"
 #include "psx/types.h"
 
 void text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height) {

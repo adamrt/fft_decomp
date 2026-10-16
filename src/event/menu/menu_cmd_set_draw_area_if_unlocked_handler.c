@@ -1,6 +1,7 @@
-#include "fft/event_bunit.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "psx/libgpu.h"
 
 /* Queue the instruction draw area unless the zoom transition already queued one. */
 menu_instruction_t* menu_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* data) {

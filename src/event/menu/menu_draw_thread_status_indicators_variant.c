@@ -1,4 +1,3 @@
-#include "fft/battle_gfx.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/thread.h"

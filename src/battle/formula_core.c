@@ -1,19 +1,20 @@
 /* Tile data access and the core formulas, including misses, evasion, zodiac, elements, XA and YA setup, supports and
  * the dance abilities. */
 
-#include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"
 #include "fft/battle_map.h"
 #include "fft/battle_move.h"
-#include "fft/battle_script.h"
 #include "fft/battle_status.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
+#include "fft/data.h"
 #include "fft/main.h"
+#include "fft/map.h"
 #include "fft/memory.h"
 #include "fft/script.h"
 #include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 static s32 battle_map_tile_data_15_stub(void);

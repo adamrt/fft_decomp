@@ -5,7 +5,10 @@
 
 #include "fft/card.h"
 #include "fft/main.h"
+#include "psx/kernel.h"
 #include "psx/libapi.h"
+#include "psx/libc.h"
+#include "psx/libetc.h"
 #include "psx/types.h"
 
 static void card_io_consume_bios_events(void);

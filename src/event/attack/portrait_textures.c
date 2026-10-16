@@ -1,9 +1,13 @@
 /* Party portrait textures and formation sprites. */
 
-#include "fft/battle_script.h"
+#include "fft/data.h"
 #include "fft/event_attack.h"
+#include "fft/file.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

@@ -1,7 +1,11 @@
 /* Wrapped horizontal selection and textured quad rects. */
 
 #include "fft/event_jobstts.h"
+#include "fft/gfx.h"
+#include "fft/menu.h"
+#include "psx/libgpu.h"
 #include "psx/pad.h"
+#include "psx/types.h"
 
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons) {
     if (buttons & PSX_PAD_LEFT) {

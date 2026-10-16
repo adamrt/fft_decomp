@@ -3,6 +3,7 @@
  * state setter and the battle load exception handler. */
 
 #include "fft/battle_status.h"
+#include "fft/data.h"
 #include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/script.h"

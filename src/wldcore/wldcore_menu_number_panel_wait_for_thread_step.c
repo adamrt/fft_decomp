@@ -1,8 +1,8 @@
-#include "fft/script.h"
+#include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-#include "psx/types.h"
 
 /* Input step of a number-panel level that waits on WORLD thread 12: once the
  * thread finishes, the pending result (level->result) selects which resume

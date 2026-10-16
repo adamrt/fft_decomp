@@ -1,12 +1,17 @@
 /* Scenario conditionals, the music resync with map darkness, and marking other squads' units undeployable. */
 
-#include "fft/battle_script.h"
+#include "fft/battle_event.h"
+#include "fft/battle_map.h"
+#include "fft/battle_unit.h"
 #include "fft/event_attack.h"
 #include "fft/main.h"
 #include "fft/memory.h"
+#include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "psx/libgte.h"
 #include "psx/types.h"
 
 typedef struct attack_scenario {

@@ -1,11 +1,20 @@
 /* Unit list panels, including stat accessors, list scrolling, the pressable button, the unit grid, falloff shading, the
  * rhombus cursor trail, sprite and name plates, and index lists. */
 
+#include "fft/battle_gfx.h"
+#include "fft/battle_unit.h"
 #include "fft/event_bunit.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

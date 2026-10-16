@@ -3,8 +3,11 @@
  * copies. */
 
 #include "fft/battle_status.h"
+#include "fft/data.h"
 #include "fft/main.h"
 #include "fft/memory.h"
+#include "fft/unit.h"
+#include "psx/libc.h"
 #include "psx/types.h"
 
 static void main_status_init_ct(unit_stats_t* unit);

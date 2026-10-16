@@ -1,6 +1,11 @@
 #include "fft/event_jobstts.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
+#include "fft/sound.h"
+#include "fft/text.h"
 #include "psx/pad.h"
+#include "psx/types.h"
 
 /* Run the job list menu; on Circle, record the chosen job and return 1 to advance the menu state. */
 s32 menu_run_job_list_variant(void) {

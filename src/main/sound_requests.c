@@ -2,7 +2,11 @@
  * callbacks, music loading, playback and parameters, tunes, and sound effects. */
 
 #include "fft/main.h"
+#include "psx/libc.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* The original wrote the body of main_set_display_draw a second time as main_set_display_draw_new_game. */

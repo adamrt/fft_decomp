@@ -1,7 +1,10 @@
 /* Controller input, suppressed during fades. */
 
 #include "fft/event_card.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
+#include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

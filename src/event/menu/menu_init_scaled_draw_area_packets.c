@@ -1,3 +1,4 @@
+#include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 

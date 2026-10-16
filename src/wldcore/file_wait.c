@@ -1,13 +1,9 @@
 /* Waiting for file loads, shared by the opening and the world map; the world map adds a blocking scratch load. */
 
-#include "fft/menu.h"
-#include "fft/open.h"
-#include "fft/script.h"
-#include "fft/thread.h"
+#include "fft/file.h"
+#include "fft/main.h"
 #include "fft/wldcore.h"
-#include "psx/libcd.h"
-#include "psx/libgpu.h"
-#include "psx/pad.h"
+#include "psx/libetc.h"
 #include "psx/types.h"
 
 /* Start an asynchronous read of sector_count sectors at `sector` into

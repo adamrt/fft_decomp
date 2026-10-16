@@ -3,17 +3,18 @@
 
 /* WORLD/WLDCORE.BIN: the world core that runs with WORLD. */
 
-#include "fft/bits.h"
-#include "fft/card.h"
-#include "fft/file.h"
+#include "fft/data.h"
 #include "fft/gfx.h"
-#include "fft/item.h"
 #include "fft/job.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/window.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libgpu.h"
+#include "psx/libgs.h"
+#include "psx/libgte.h"
+#include "psx/suzuki.h"
+#include "psx/types.h"
 
 /* calendar */
 

@@ -3,18 +3,15 @@
 
 /* OPEN/OPEN.BIN: opening and title. */
 
-#include "fft/bits.h"
-#include "fft/card.h"
-#include "fft/file.h"
 #include "fft/gfx.h"
-#include "fft/item.h"
 #include "fft/job.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/window.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "fft/world.h"
-#include "psx/libpress.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/suzuki.h"
+#include "psx/types.h"
 
 /* card */
 s32 open_card_check_slots(void);

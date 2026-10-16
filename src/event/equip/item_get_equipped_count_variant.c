@@ -1,4 +1,5 @@
 #include "fft/event_equip.h"
+#include "fft/item.h"
 #include "psx/types.h"
 
 /* EQUIP.OUT 001c8188 - Number of copies of the item the party has equipped: the total held

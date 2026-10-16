@@ -1,8 +1,13 @@
 /* Tutorial buttons, tutorial start and the tutorial command handlers with highlight rings and quads. */
 
+#include "fft/gfx.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/libc.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

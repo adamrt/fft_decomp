@@ -6,6 +6,12 @@
 
 #include "fft/battle_gfx.h"
 #include "fft/battle_move.h"
+#include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/unit.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* item and terrain types */
 /* Four serialized move-find item/trap entries per map. */

@@ -1,5 +1,6 @@
-#include "fft/event_jobstts.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "psx/types.h"
 
 /* Stream command closing a zoomed window: when the zoom transition queued a

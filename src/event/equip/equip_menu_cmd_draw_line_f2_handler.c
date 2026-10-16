@@ -1,5 +1,7 @@
 #include "fft/event_equip.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_script.h"
 
 /* EQUIP.OUT 001caf14 - Stream command: draw a LINE_F2 from (x0, y0) to
    (x1, y1) with the RGB that follows the endpoints in the command. */

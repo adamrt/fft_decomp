@@ -1,14 +1,18 @@
 /* Map dots, location menus, routes and path animation, route travel, projection motion and scrolling, random
  * encounters, the location marker and camera, and render record images. */
 
+#include "fft/file.h"
+#include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgs.h"
 #include "psx/libgte.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 static void wldcore_map_negate_and_clamp_coordinates(const SVECTOR* input, VECTOR* output);

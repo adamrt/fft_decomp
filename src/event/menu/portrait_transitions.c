@@ -1,9 +1,11 @@
 /* Portrait polygon clips and the status banner cross-fade primitives. */
 
-#include "fft/event_attack.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"
+#include "fft/menu.h"
 #include "fft/script.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 static void gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount) {
     if (poly->u0 != poly->u1) {

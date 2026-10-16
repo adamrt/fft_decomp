@@ -1,4 +1,6 @@
 #include "fft/gfx.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Texture a quad with formation portrait `index`: a 31x48 cell from the 7
  * column sheet on the texture page at (0x100, 0), starting at v 0x28, with

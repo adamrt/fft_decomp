@@ -6,8 +6,11 @@
  * byte-identical apart from addresses). Layout notes below are the OPTION
  * twin's; the WORLD helpers are the same routines.
  */
+#include "fft/main.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* One libgpu texture window per DR_MODE packet. The static table already

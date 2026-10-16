@@ -1,6 +1,7 @@
 /* Text page redraws on scroll and AT list building for the screen. */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"

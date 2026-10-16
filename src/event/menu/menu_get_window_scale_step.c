@@ -1,4 +1,4 @@
-#include "fft/event_bunit.h"
+#include "fft/menu.h"
 #include "psx/types.h"
 
 s32 menu_get_window_scale_step(void) {

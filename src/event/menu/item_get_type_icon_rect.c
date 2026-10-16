@@ -1,4 +1,6 @@
-#include "fft/event_equip.h"
+#include "fft/item.h"
+#include "fft/menu.h"
+#include "psx/types.h"
 
 /* Texture cell of an item type's 12x12 icon. */
 void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output) {

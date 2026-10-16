@@ -1,13 +1,19 @@
 /* Value, cursor, number and date drawing, the world frame, level dispatch, and the root, map cursor, focus, path,
  * visibility, entry, text, message, variable list, number panel, layout window and location menu levels. */
 
+#include "fft/file.h"
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/open.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/window.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"

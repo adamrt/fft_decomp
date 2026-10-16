@@ -1,6 +1,7 @@
-#include "fft/event_attack.h"
 #include "fft/gfx.h"
+#include "fft/menu.h"
 #include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* Texture a quad with a portrait: a unit portrait when neither bit 0x100 nor
  * 0x200 of `portrait_id` is set, and the formation portrait named by the low byte

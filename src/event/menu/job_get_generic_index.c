@@ -1,4 +1,6 @@
+#include "fft/data.h"
 #include "fft/main.h"
+#include "psx/types.h"
 
 /* Map Squire through Mime to zero-based indexes; unique jobs map to zero. */
 s32 job_get_generic_index(s32 job_id) {

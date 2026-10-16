@@ -1,9 +1,8 @@
 /* Status panel primitive colors and signed decimal value rendering. */
 
-#include "fft/battle_event.h"
-#include "fft/battle_menu.h"
-#include "fft/battle_text.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);

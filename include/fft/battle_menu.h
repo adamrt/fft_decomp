@@ -4,7 +4,11 @@
 /* Battle menus, window resources and event-overlay menu interfaces. */
 
 #include "fft/battle_ai.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/unit.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /* menu state */
 extern s32 g_battle_menu_help_opening;

@@ -1,6 +1,7 @@
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Draw the two endpoint coordinates with an x bias of 0x80. */

@@ -1,7 +1,10 @@
 /* Move and jump increases, stat changes due to equipment and item stat deltas. */
 
+#include "fft/data.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/world.h"
+#include "psx/types.h"
 
 /*
  * Populate the Move and Jump bonuses granted by a movement ability.

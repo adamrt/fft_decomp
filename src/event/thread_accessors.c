@@ -1,6 +1,7 @@
 /* Thread accessors for the current global pointer, parameters 1 to 3 and running checks. */
 
 #include "fft/thread.h"
+#include "psx/types.h"
 
 /* Capture $gp for a new native thread's saved context. */
 void* thread_get_current_global_pointer(void) {

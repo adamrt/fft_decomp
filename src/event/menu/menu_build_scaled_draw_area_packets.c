@@ -1,6 +1,9 @@
+#include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /*
  * Build the double-buffered draw-area pair of a window's open/close zoom.

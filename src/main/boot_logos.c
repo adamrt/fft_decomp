@@ -1,7 +1,9 @@
 /* The Squaresoft and SCE boot logos, their drawing and fade out. */
 
 #include "fft/main.h"
+#include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/types.h"
 
 static int main_boot_draw_squaresoft_logo(u32* otag, u32* image) {
     RECT destination;

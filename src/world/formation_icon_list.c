@@ -1,8 +1,10 @@
 /* The formation icon list thread, unit name strings, the display mode and the ordering table pointer. */
 
+#include "fft/main.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -1,6 +1,11 @@
 /* The palette mode and the temporary and next ordering table draw areas. */
 
+#include "fft/gfx.h"
+#include "fft/menu.h"
+#include "fft/menu_script.h"
 #include "fft/world.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
 /*
  * Select the normal or alternate menu-render palette.

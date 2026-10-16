@@ -1,5 +1,6 @@
-#include "fft/battle_script.h"
 #include "fft/menu.h"
+#include "fft/script.h"
+#include "psx/types.h"
 
 /* Store the raw menu/VSync mode; zero uses script event speed 1. */
 void menu_set_vsync_mode_and_event_speed(s32 speed) {

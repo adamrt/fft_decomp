@@ -1,6 +1,13 @@
 /* Item id list sorting and roster sorting. */
 
+#include "fft/data.h"
+#include "fft/item.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/libc.h"
+#include "psx/types.h"
 
 /* Sort a -1 terminated item-id list in place for a shop or equipment menu.
  *

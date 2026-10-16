@@ -4,6 +4,11 @@
 /* Battle ability range, target panels, cursor selection and tile highlights. */
 
 #include "fft/battle_gfx.h"
+#include "fft/battle_unit.h"
+#include "fft/map.h"
+#include "fft/unit.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* range and selection types */
 /* Five-byte range/targeting work entry at 0x80192dd8, 256 entries per level.

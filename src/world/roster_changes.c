@@ -1,6 +1,11 @@
 /* Dismissing units, generating units and setting unit names. */
 
+#include "fft/data.h"
+#include "fft/main.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "fft/world.h"
+#include "psx/types.h"
 
 /* Ramza's sprite sets and guest roster slots cannot be
  * dismissed. */

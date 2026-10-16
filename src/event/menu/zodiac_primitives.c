@@ -2,10 +2,13 @@
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 #if defined(FFT_EVENT_CARD) || defined(FFT_EVENT_DEBUGCHR) || defined(FFT_EVENT_REQUIRE) || defined(FFT_WORLD)
 /* Build an 8bpp sprite quad, rounding positive fixed-point remainders at half a pixel. */
-static void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
+void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
     const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset) {
     s32 xoff = uv_rect->offset.x * scale->x;
     s32 yoff = uv_rect->offset.y * scale->y;

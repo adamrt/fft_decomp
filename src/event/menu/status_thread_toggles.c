@@ -1,6 +1,7 @@
 /* Unit status and comparison status thread toggles. */
 
-#include "fft/event_bunit.h"
+#include "fft/gfx.h"
+#include "fft/menu.h"
 #include "fft/thread.h"
 #include "psx/types.h"
 

@@ -1,5 +1,6 @@
 #include "fft/menu.h"
 #include "fft/thread.h"
+#include "psx/types.h"
 
 /* Start-or-poll helper for a menu thread: the first call starts `thread_id`
  * on the descriptor's thread function with the descriptor as parameter 1
