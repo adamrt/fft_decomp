@@ -71,7 +71,7 @@ typedef enum wldcore_cursor_slot {
     WLDCORE_CURSOR_SLOT_PARTICIPANT_LIST = 15,
     WLDCORE_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS = 16,
     WLDCORE_CURSOR_SLOT_FORMATION_TUTORIALS = 18,
-    WLDCORE_CURSOR_SLOT_BATTLE_TUTORIALS = 19,
+    WLDCORE_CURSOR_SLOT_TUTORIAL_MASK_1_ENTRIES = 19,
     WLDCORE_CURSOR_SLOT_FACTS = 20,
 } wldcore_cursor_slot_e;
 
@@ -160,7 +160,7 @@ void wldcore_list_open_treasures(void);
 /* Row kinds of the tutorial category list (wldcore_list_open_tutorial_categories). */
 typedef enum wldcore_tutorial_category_row {
     WLDCORE_TUTORIAL_CATEGORY_ROW_FORMATION = 0,
-    WLDCORE_TUTORIAL_CATEGORY_ROW_BATTLE = 1,
+    WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES = 1,
     WLDCORE_TUTORIAL_CATEGORY_ROW_TOPICS = 2,
     WLDCORE_TUTORIAL_CATEGORY_ROW_LEAVE = 3,
 } wldcore_tutorial_category_row_e;

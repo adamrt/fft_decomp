@@ -537,7 +537,7 @@ static void wldcore_menu_restore_level_on_world_entry(void) {
         g_wldcore_audio_queue.music.tracks[0] = 0x1B;
         g_wldcore_audio_queue.music.tracks[1] = 0x1A;
         g_wldcore_audio_queue.current_slot = 2;
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS, 1, 0);
+        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES, 1, 0);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_TUTORIAL) {
         wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES, 0, 1);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) {
