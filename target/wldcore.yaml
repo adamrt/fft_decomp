@@ -161,7 +161,7 @@ functions:
   - {addr: 0x80073778, size: 948, name: wldcore_window_build_yes_no_panel, hash: c841fa104d3e8cc2, unit: bar}
   - {addr: 0x80073b2c, size: 972, name: wldcore_proposition_handle_accept_confirm_input, hash: 71bf0da24cf8ba22, unit: bar}
   - {addr: 0x80073ef8, size: 248, name: wldcore_menu_push_number_panel_level, hash: 2c7c0fe19fe5cc44, unit: bar}
-  - {addr: 0x80073ff0, size: 324, name: wldcore_menu_number_panel_wait_for_thread_step, hash: 8df00d2ef4888cf8}
+  - {addr: 0x80073ff0, size: 324, name: wldcore_menu_number_panel_wait_for_thread_step, hash: 8df00d2ef4888cf8, unit: bar}
   - {addr: 0x80074134, size: 1620, name: wldcore_proposition_push_dispatch_confirm_level, hash: 47106833c249f4b5, unit: proposition_dispatch}
   - {addr: 0x80074788, size: 936, name: wldcore_proposition_handle_dispatch_confirm_input, hash: 2c4bfafc1c4ee158, unit: proposition_dispatch}
   - {addr: 0x80074b30, size: 272, name: wldcore_proposition_advance_daily_counters, hash: c1fc1299f41ccd9d, unit: proposition_dispatch}
