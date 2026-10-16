@@ -543,63 +543,59 @@ void map_light_thread(void) {
     union {
         struct {
             struct {
-                s32 rotation[3];
+                s32 angles[3];
                 s32 scale[3];
             } start, target;
         } vectors;
-        s32 values[12];
+        s32 values[12]; /* the operand loop fills target through values[6] to [11] */
     } light_values;
-    SVECTOR color;
-    MATRIX rotation;
-    MATRIX matrix;
-    VECTOR translation;
+    SVECTOR angles;
+    MATRIX direction;
+    MATRIX color;
+    VECTOR scale;
     s32 step;
     s32 frames;
     const u8* script;
-    s32* target;
 
     thread_set_current_task_id(THREAD_TASK_MAP_LIGHT);
     step = 0;
     script = (const u8*)thread_get_current_parameter_1();
-    /* Indexed operand fields retain a separate base and add four bytes. */
-    target = light_values.values;
     do {
-        target[6] = script_read_s16(script);
+        light_values.values[step + 6] = script_read_s16(script);
         script += 2;
         step++;
-        target++;
     } while (step < 6);
     /* The six-target scan leaves the cursor at duration_le. */
     frames = script_read_s16(script);
     step = 0;
-    light_values.vectors.start.rotation[0] = g_script_light_angles.vx;
-    light_values.vectors.start.rotation[1] = g_script_light_angles.vy;
-    light_values.vectors.start.rotation[2] = g_script_light_angles.vz;
+    light_values.vectors.start.angles[0] = g_script_light_angles.vx;
+    light_values.vectors.start.angles[1] = g_script_light_angles.vy;
+    light_values.vectors.start.angles[2] = g_script_light_angles.vz;
     light_values.vectors.start.scale[0] = g_script_light_scale.vx;
     light_values.vectors.start.scale[1] = g_script_light_scale.vy;
     light_values.vectors.start.scale[2] = g_script_light_scale.vz;
     for (; step <= frames; step++) {
-        color.vx = (light_values.vectors.target.rotation[0] - light_values.vectors.start.rotation[0]) * step / frames
-            + light_values.vectors.start.rotation[0];
-        color.vy = (light_values.vectors.target.rotation[1] - light_values.vectors.start.rotation[1]) * step / frames
-            + light_values.vectors.start.rotation[1];
-        color.vz = (light_values.vectors.target.rotation[2] - light_values.vectors.start.rotation[2]) * step / frames
-            + light_values.vectors.start.rotation[2];
-        RotMatrix(&color, &rotation);
-        MulMatrix(&rotation, &g_script_light_base_direction_matrix);
-        script_copy_matrix(&matrix, &g_script_light_base_color_matrix);
-        translation.vx = (light_values.vectors.target.scale[0] - light_values.vectors.start.scale[0]) * step / frames
+        angles.vx = (light_values.vectors.target.angles[0] - light_values.vectors.start.angles[0]) * step / frames
+            + light_values.vectors.start.angles[0];
+        angles.vy = (light_values.vectors.target.angles[1] - light_values.vectors.start.angles[1]) * step / frames
+            + light_values.vectors.start.angles[1];
+        angles.vz = (light_values.vectors.target.angles[2] - light_values.vectors.start.angles[2]) * step / frames
+            + light_values.vectors.start.angles[2];
+        RotMatrix(&angles, &direction);
+        MulMatrix(&direction, &g_script_light_base_direction_matrix);
+        script_copy_matrix(&color, &g_script_light_base_color_matrix);
+        scale.vx = (light_values.vectors.target.scale[0] - light_values.vectors.start.scale[0]) * step / frames
             + light_values.vectors.start.scale[0];
-        translation.vy = (light_values.vectors.target.scale[1] - light_values.vectors.start.scale[1]) * step / frames
+        scale.vy = (light_values.vectors.target.scale[1] - light_values.vectors.start.scale[1]) * step / frames
             + light_values.vectors.start.scale[1];
-        translation.vz = (light_values.vectors.target.scale[2] - light_values.vectors.start.scale[2]) * step / frames
+        scale.vz = (light_values.vectors.target.scale[2] - light_values.vectors.start.scale[2]) * step / frames
             + light_values.vectors.start.scale[2];
-        ScaleMatrixL(&matrix, &translation);
-        battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_SET, &matrix, &rotation, 0);
+        ScaleMatrixL(&color, &scale);
+        battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_SET, &color, &direction, 0);
         thread_wait_frames(1);
     }
-    mem_copy_bytes_nonempty(&g_script_light_angles, &color, sizeof(g_script_light_angles));
-    mem_copy_bytes_nonempty(&g_script_light_scale, &translation, sizeof(g_script_light_scale));
+    mem_copy_bytes_nonempty(&g_script_light_angles, &angles, sizeof(g_script_light_angles));
+    mem_copy_bytes_nonempty(&g_script_light_scale, &scale, sizeof(g_script_light_scale));
     thread_exit_current();
 }
 
