@@ -1,7 +1,7 @@
 /* Running a menu command stream up to its terminator. */
 
-#include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"
 

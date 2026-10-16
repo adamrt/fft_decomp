@@ -2,14 +2,13 @@
 
 #include "fft/data_job.h"
 #include "fft/event_require.h"
-#include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
 #include "fft/menu_panel.h"
 #include "fft/script.h"
 #include "fft/thread.h"
-#include "fft/unit.h"
+#include "fft/unit_identity.h"
+#include "fft/unit_party.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

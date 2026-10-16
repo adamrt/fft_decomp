@@ -2,8 +2,11 @@
 
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
+#include "fft/battle_effect_file.h"
+#include "fft/battle_effect_geometry.h"
 #include "fft/battle_effect_particle.h"
-#include "fft/battle_map.h"
+#include "fft/battle_effect_script.h"
+#include "fft/battle_map_palette.h"
 #include "fft/effect.h"
 #include "fft/main_gfx.h"
 #include "psx/libetc.h"

@@ -1,8 +1,8 @@
 /* The change banner and stat preview panel thread toggles. */
 
-#include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "fft/menu_overlay.h"
+#include "fft/menu_panel.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "fft/world_menu.h"

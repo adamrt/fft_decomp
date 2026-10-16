@@ -1,92 +1,99 @@
 #ifndef MENU_LIST_H
 #define MENU_LIST_H
 
-/* Menu library lists: menu entries, scrollable lists, list threads and the AT list. */
+/* Menu entry threads: starting, polling and stopping them, the thread bodies of simple menu windows, rows
+ * drawn as text columns and the packet pages of scrolling text lists. */
 
+#include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_window.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* menu entries */
+/* entry threads */
 /* Each scene keeps its own current table; event screens save and restore it. */
 extern menu_entry_t* g_menu_thread_menu_data;
+/* Whether the thread a screen manages is still running, as menu_start_or_poll_thread last saw it. */
 extern s32 g_menu_managed_thread_state;
-extern s16 g_menu_wait_row_actions[4];
-extern u16 g_menu_at_list_selection_finished;
-extern s32 g_menu_help_open;
 extern s32 g_menu_building_thread_started;
+
+/* Starts thread_id on the entry's thread and returns 1 on the first call; later calls return whether the
+ * thread still runs. */
 s32 menu_start_managed_thread(s32 thread_id, menu_entry_t* descriptor);
 void menu_request_thread_stop(s32 thread_id);
 void menu_stop_managed_thread(s32 thread_id);
+/* Requests a stop and runs input-update frames until the thread has ended. */
+void menu_stop_thread_and_wait(s32 thread_id);
+void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
+s32 menu_thread_is_running(s32 thread_id);
 void menu_init_stub(void);
-void menu_wait_thread(void);
-void menu_input_thread(void);
-void menu_build_main(void);
-void menu_start_help_menu_thread(void);
-/* BATTLE and WORLD each link their own bodies of the next four. */
+/* Acts on Circle for a row: starts the row's entry one thread slot below, clears the selection, or (for a
+ * negative action -n) closes n menu threads; stores the row as the entry's result. */
 void menu_handle_action(menu_entry_t* entry, s32 row_index);
 void menu_handle_cancel_input(menu_entry_t* context);
 void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* cursor);
-void menu_record_selection_for_selected_unit(void);
-void menu_clear_entry_selections(void);
-void menu_finish_at_list_selection(void);
-s32 menu_get_entry_item_count(s32 row);
-s32 menu_get_entry_item_equipped_count(s32 row);
-void menu_draw_item_status_list(s16 item_id);
 
-/* list threads */
-extern u32* g_menu_input_controller;
-extern s16 g_menu_confirm_stored_unit_row_actions;
-extern s16 g_menu_set_auto_battle_row_actions;
-extern menu_status_thread_t g_menu_comparison_display_thread_params;
-extern menu_status_thread_t g_menu_status_display_thread_params;
-extern menu_status_thread_t g_menu_numeric_panel_params;
-extern menu_status_thread_t g_menu_preview_stats_thread_params;
-extern menu_entry_t g_menu_at_list_state;
-void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
-void menu_icon_linked_entry_thread(void);
-void menu_confirm_move_command_thread(void);
-void menu_confirm_auto_battle_selection_thread(void);
+/* entry window threads */
+/* Thread bodies a menu entry names as its thread_entry. */
+
+/* An entry with nothing to draw: handles Circle on row 0 and cancel with the menu sounds muted. */
+void menu_input_thread(void);
+/* A refused command: queues the invalid-choice sound and exits. */
+void menu_run_invalid_choice_thread(void);
+/* A simple menu window: its text in the frame, a wrapping cursor and an animated cursor icon. */
 void menu_icon_list_thread(void);
+/* A window without a cursor whose text image is rebuilt every seventh frame. */
 void menu_icon_strip_thread(void);
+/* One text entry shown until input arrives or g_text_message_duration_frames runs out. */
 void menu_icon_timed_thread(void);
+/* An icon window that also opens the entry named by row_actions[0] below itself. */
+void menu_icon_linked_entry_thread(void);
+/* An entry that shows a message through its menu_text_binding_t, then waits for the text thread. */
 void menu_text_entry_wait_thread(void);
-void menu_stop_thread_and_wait(s32 thread_id);
-void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
-void menu_toggle_comparison_status_thread(s32 enable);
-void menu_toggle_unit_status_thread(s32 enable);
-void menu_toggle_numeric_editor_thread(s32 enable);
-void menu_thin_window_frame_thread(void);
-void menu_window_frame_thread(void);
+/* A wrapping icon menu; nonzero thread parameter 2 makes it return instead of exiting. */
+void menu_run_icon_selection_loop(void);
 
-/* menu state */
-extern menu_scroll_text_layout_t g_menu_at_list_layout;
+/* text lists */
+/* A text layout followed by the first visible row, as bound to a scrolling
+ * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread and the AT list
+ * built by menu_build_ability_preview_at_list). */
+typedef struct menu_scroll_text_layout {
+    menu_text_layout_t columns; /* 0x00 */
+    s16 row_offset;             /* 0x28 */
+} menu_scroll_text_layout_t;
 
-/* scrollable lists */
-extern s16 g_menu_list_row_group_count;
-extern s16 g_menu_list_row_height;
-extern s16 g_menu_list_visible_rows;
-extern u8 g_menu_list_glyph_width;
-extern u8 g_menu_list_text_columns;
-extern u16 g_menu_list_vram_width;
-extern s16 g_menu_list_entry_count;
-extern u8* g_menu_list_text_table;
-extern s16* g_menu_list_entries;
-extern s8 g_menu_list_scroll_direction; /* read with lb */
-extern s8
-    g_menu_list_redraw_pending; /* read with lb (the per-program menu_cmd_draw_scrollable_list_body_handler copies) */
-extern s16 g_menu_list_selected_index;
-extern s16 g_menu_scroll_base_index;
-void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
-extern u16 g_menu_list_scroll_progress;
+/* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
+ * helper redraws the page once and clears the request, which
+ * world_thread_request_redraw sets. */
+enum {
+    MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4,
+};
 
-/* list */
-extern u8 g_menu_at_list_text[];
-extern menu_text_layout_t g_menu_at_list_entry_table[1];
-extern menu_list_page_t g_at_list_pages[2];
-extern s16 g_menu_at_list_indices[];
-extern s16 g_menu_at_list_primary_values[];
-extern s16 g_menu_at_list_secondary_values[];
-extern s16 g_menu_at_list_flags[];
-void menu_preview_ability_turn_at_list(void);
+void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
+/* Applies scroll input, rebuilds the entry's text image and uploads the rows that changed. */
+u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
+
+/* list pages */
+/* One of the two 0x134-byte packet pages a scrolling text list alternates between frames
+ * (g_world_ability_list_pages, g_at_list_pages, g_world_text_list_pages). Provisional. */
+typedef struct menu_list_page {
+    SPRT frame;                         /* 0x00: text image / cursor frame */
+    SPRT arrows[2];                     /* 0x14: scroll arrows */
+    SPRT arrow_marks[2];                /* 0x3c */
+    SPRT thumb;                         /* 0x64: scroll-bar thumb */
+    DR_MODE text_mode;                  /* 0x78 */
+    DR_MODE icon_mode;                  /* 0x84 */
+    menu_icon_record_t icons;           /* 0x90 */
+    scaled_draw_area_pair_t draw_areas; /* 0x10c */
+} menu_list_page_t;
+typedef char menu_list_page_size_must_be_308[sizeof(menu_list_page_t) == 308 ? 1 : -1];
+
+/* Text image placement: the upload rectangle plus the screen offsets
+ * gfx_init_image_loading reads. */
+typedef struct menu_text_window {
+    RECT rect;
+    s16 x_screen_offset;
+    s16 y_screen_offset;
+} menu_text_window_t;
 
 #endif

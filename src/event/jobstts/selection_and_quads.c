@@ -3,6 +3,7 @@
 #include "fft/event_jobstts.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

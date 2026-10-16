@@ -1,10 +1,9 @@
 /* The menu command that draws a row callback's signed value, or dashes, in a digit style. */
 
 #include "fft/event_equip.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
+#include "fft/menu_text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

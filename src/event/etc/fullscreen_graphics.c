@@ -2,6 +2,7 @@
 
 #include "fft/event_etc.h"
 #include "fft/gfx.h"
+#include "fft/gfx_primitive.h"
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_sound.h"

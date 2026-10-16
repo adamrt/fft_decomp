@@ -1,7 +1,7 @@
 /* Setting the menu text color, unless the color is null. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 
 /* Set the menu text color from an RGB triple; a null color leaves it unchanged. */
 void bunit_gfx_set_draw_color(const rgb24_t* color) {

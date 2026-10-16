@@ -1,7 +1,7 @@
 /* Queuing a textured menu quad with its texture cell mirrored by an orientation. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

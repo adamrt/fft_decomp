@@ -1,8 +1,8 @@
 /* The menu command that selects the ordering-table entry for later primitives unless it is locked. */
 
 #include "fft/event_jobstts.h"
-#include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 
 /* Menu script command: select the ordering-table slot for later primitives unless the slot is

@@ -1,12 +1,13 @@
 /* The item detail panel's status column of immunity and innate or starting status icons. */
 
 #include "fft/bits.h"
-#include "fft/data.h"
 #include "fft/data_item.h"
+#include "fft/data_status.h"
+#include "fft/item.h"
 #include "fft/main_item.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_panel.h"
+#include "fft/menu_cursor.h"
+#include "fft/menu_gfx.h"
+#include "fft/menu_status.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

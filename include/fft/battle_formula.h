@@ -1,35 +1,11 @@
 #ifndef BATTLE_FORMULA_H
 #define BATTLE_FORMULA_H
 
-/* Ability formulas and the modifiers that calculate action accuracy and damage. */
+/* Ability formulas: the handler of each formula id and the steps they share to work out an
+ * action's damage, accuracy, elements and statuses. They take no arguments and work on
+ * g_battle_action_current_ability and the target's action data (battle_action.h). */
 
 #include "psx/types.h"
-
-/* zodiac compatibility */
-/* The compatibility table is indexed by absolute zodiac-ID difference, not
- * by a particular sign. Value 3 is resolved from sex and monster flags. */
-typedef enum zodiac_compatibility {
-    ZODIAC_COMPATIBILITY_NEUTRAL = 0,
-    ZODIAC_COMPATIBILITY_BAD = 1,
-    ZODIAC_COMPATIBILITY_GOOD = 2,
-    ZODIAC_COMPATIBILITY_GENDER_DEPENDENT = 3,
-    ZODIAC_COMPATIBILITY_WORST = 4,
-    ZODIAC_COMPATIBILITY_BEST = 5,
-} zodiac_compatibility_e;
-
-/* facing modifiers */
-typedef enum battle_ability_facing_modifier {
-    BATTLE_ABILITY_FACING_FRONT = 0,
-    BATTLE_ABILITY_FACING_SIDE = 1,
-    BATTLE_ABILITY_FACING_BACK = 2,
-} battle_ability_facing_modifier_e;
-
-/* rates */
-/* Chances in 100 of a critical hit and of a weapon's added effect. */
-enum {
-    BATTLE_FORMULA_CRITICAL_HIT_CHANCE = 4,
-    BATTLE_FORMULA_ADDED_EFFECT_CHANCE = 19,
-};
 
 /* damage and stat modifiers */
 void battle_formula_apply_attack_up_and_martial_arts(void);
@@ -67,6 +43,29 @@ void battle_formula_store_xa_times_ya_damage(void);
 void battle_formula_apply_poach_and_train(void);
 
 /* accuracy and evasion */
+/* Chances in 100 of a critical hit and of a weapon's added effect. */
+enum {
+    BATTLE_FORMULA_CRITICAL_HIT_CHANCE = 4,
+    BATTLE_FORMULA_ADDED_EFFECT_CHANCE = 19,
+};
+
+typedef enum battle_ability_facing_modifier {
+    BATTLE_ABILITY_FACING_FRONT = 0,
+    BATTLE_ABILITY_FACING_SIDE = 1,
+    BATTLE_ABILITY_FACING_BACK = 2,
+} battle_ability_facing_modifier_e;
+
+/* The compatibility table is indexed by absolute zodiac-ID difference, not
+ * by a particular sign. Value 3 is resolved from sex and monster flags. */
+typedef enum zodiac_compatibility {
+    ZODIAC_COMPATIBILITY_NEUTRAL = 0,
+    ZODIAC_COMPATIBILITY_BAD = 1,
+    ZODIAC_COMPATIBILITY_GOOD = 2,
+    ZODIAC_COMPATIBILITY_GENDER_DEPENDENT = 3,
+    ZODIAC_COMPATIBILITY_WORST = 4,
+    ZODIAC_COMPATIBILITY_BEST = 5,
+} zodiac_compatibility_e;
+
 /* Zodiac compatibility by the absolute difference of the two signs, 12 entries:
  * 3 and 9 apart are bad, 4 and 8 good, 6 (the opposite sign) depends on sex,
  * the rest neutral. Serpentarius returns before the table is read. */
@@ -149,7 +148,8 @@ s32 battle_formula_roll_random_at_least(s32 limit, s32 threshold);
 void battle_formula_queue_weapon_spell(void);
 
 /* formula handlers */
-extern void (*g_battle_formula_handlers[])(void); /* by formula id less 1: formula 0 has no handler */
+/* The handlers in table order, indexed by formula id less 1: formula 0 has no handler. */
+extern void (*g_battle_formula_handlers[])(void);
 
 void battle_formula_weapon_damage(void);
 void battle_formula_weapon_damage_with_proc(void);
@@ -251,8 +251,7 @@ void battle_formula_lower_brave_y(void);
 void battle_formula_lower_brave_y_without_faith(void);
 void battle_formula_damage_sp_times_wp(void);
 void battle_formula_damage_pa_times_wp(void);
-
-/* unused entry */
+/* A second entry to formula 0x49's handler that the table does not point to and nothing calls. */
 void battle_formula_49_unused_with_extra_steps(void);
 
 #endif

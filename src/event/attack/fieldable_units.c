@@ -1,15 +1,14 @@
 /* A no-op and the search for fieldable units. */
 
-#include "fft/battle_unit.h"
 #include "fft/battle_unit_encounter.h"
 #include "fft/event_attack.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
 #include "fft/menu_text.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/text.h"
 #include "fft/unit.h"
+#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Empty and unreferenced. */

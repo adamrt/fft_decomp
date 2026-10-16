@@ -2,9 +2,11 @@
 
 #include "fft/data_item.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
+#include "fft/menu_status.h"
 #include "fft/menu_text.h"
 #include "fft/unit.h"
+#include "fft/unit_identity.h"
+#include "fft/unit_party.h"
 #include "fft/world_formation.h"
 #include "fft/world_text.h"
 #include "psx/types.h"

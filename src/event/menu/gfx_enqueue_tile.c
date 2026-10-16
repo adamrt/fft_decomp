@@ -1,7 +1,8 @@
 /* Appending a flat-colored menu rectangle to an ordering-table entry. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

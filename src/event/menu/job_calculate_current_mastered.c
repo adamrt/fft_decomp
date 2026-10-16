@@ -1,9 +1,7 @@
 /* Whether a listed job's skillset has no ability left to learn for the selected unit, cached for row callbacks. */
 
 #include "fft/job.h"
-#include "fft/menu.h"
-#include "fft/menu_panel.h"
-#include "fft/unit.h"
+#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Caches and returns whether the `index`th job's skillset has nothing left

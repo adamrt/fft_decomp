@@ -1,7 +1,6 @@
 /* Battle text pointer init and a zero return. */
 
 #include "fft/event_small.h"
-#include "fft/menu.h"
 #include "fft/menu_text.h"
 #include "fft/script_variable.h"
 #include "psx/types.h"

@@ -1,11 +1,13 @@
 /* Unit job data copies and init, the base job and the unit job list. */
 
+#include "fft/battle_unit.h"
 #include "fft/bits.h"
 #include "fft/data_job.h"
 #include "fft/event_jobstts.h"
 #include "fft/main.h"
 #include "fft/main_unit.h"
 #include "fft/unit.h"
+#include "fft/unit_identity.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

@@ -1,7 +1,7 @@
 /* Selecting the normal or alternate menu palette. */
 
-#include "fft/menu.h"
-#include "fft/menu_input.h"
+#include "fft/menu_cursor.h"
+#include "fft/menu_gfx.h"
 #include "psx/types.h"
 
 /* Select the normal (0) or alternate menu palette: the sprite color and the six CLUT selections

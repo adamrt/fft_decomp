@@ -1,6 +1,6 @@
 /* The menu command that selects the ordering-table entry for later primitives. */
 
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 
 /* Menu script command: select the ordering-table slot for later primitives and continue with the

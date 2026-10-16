@@ -1,7 +1,7 @@
 #ifndef EVENT_ETC_H
 #define EVENT_ETC_H
 
-/* EVENT/ETC.OUT: menu screen overlay that runs with BATTLE. */
+/* EVENT/ETC.OUT: the BATTLE overlay of the full-screen chapter title, Game Over and ending images. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -19,7 +19,9 @@ typedef enum etc_graphic_id {
     ETC_GRAPHIC_END5 = 12,
 } etc_graphic_id_e;
 
-/* The game-over renderer swaps the screen axes of the chapter-title regions. */
+/* One image of g_etc_graphics: its file, frame-buffer rectangle, tile
+ * dimensions and texture mode. The game-over renderer swaps the screen axes
+ * of the chapter-title regions. */
 typedef struct etc_graphic {
     const char* path;
     s32 lba;
@@ -32,11 +34,11 @@ typedef struct etc_graphic {
 } etc_graphic_t;
 typedef char etc_graphic_size_check[sizeof(etc_graphic_t) == 32 ? 1 : -1];
 
-extern const char g_etc_allocation_wait_message[];
+extern etc_graphic_t g_etc_graphics[13];
 extern POLY_GT4 g_etc_graphic_chapter_primitives_a[2][4];
 extern POLY_GT4 g_etc_graphic_chapter_primitives_b[2][4];
 extern RECT g_etc_graphic_game_over_palette_rect;
-extern etc_graphic_t g_etc_graphics[13];
+extern const char g_etc_allocation_wait_message[];
 
 void etc_graphic_show_async(void);
 

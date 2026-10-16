@@ -1,9 +1,9 @@
 /* An effect callback that starts the timed map transform for the rest of the child timeline. */
 
 #include "fft/battle_effect.h"
-#include "fft/battle_effect_particle.h"
 #include "fft/battle_effect_script.h"
-#include "fft/battle_map.h"
+#include "fft/battle_effect_timeline.h"
+#include "fft/battle_map_weather.h"
 #include "fft/effect.h"
 #include "psx/types.h"
 

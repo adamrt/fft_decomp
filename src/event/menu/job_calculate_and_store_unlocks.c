@@ -3,6 +3,7 @@
 #include "fft/main.h"
 #include "fft/main_unit.h"
 #include "fft/unit.h"
+#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Store generic-job unlocks in the party record's big-endian byte order. */

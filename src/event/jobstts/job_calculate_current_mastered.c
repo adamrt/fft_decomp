@@ -2,8 +2,6 @@
 
 #include "fft/event_jobstts.h"
 #include "fft/job.h"
-#include "fft/menu.h"
-#include "fft/menu_panel.h"
 #include "psx/types.h"
 
 /* Caches and returns whether the `index`th job's skillset has nothing left

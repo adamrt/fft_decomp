@@ -1,29 +1,31 @@
 #ifndef BATTLE_MENU_H
 #define BATTLE_MENU_H
 
-/* Battle menus, window resources and event-overlay menu interfaces. */
+/* BATTLE's menus: the action menus and the command they select, the ability lists of each
+ * skillset, the unit panels and the status screen. */
 
-#include "fft/battle_ai.h"
+#include "fft/battle_ai_command.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_command.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* menu state */
 extern s32 g_battle_menu_help_opening;
-
-void battle_menu_clear_status_menu_state(void);
+extern s32 g_battle_option_menu_state; /* cleared when the option overlay opens; nothing reads it */
 
 /* action menus */
 extern u8 g_battle_menu_idle_action_entry_labels[];
 /* The selected command: its kind, then the action command staged for
- * action_preview_at_list. Both scenes alias the action at +4 under its own name. */
+ * battle_action_preview_at_list. Both scenes alias the action at +4 under its own name. */
 extern ai_command_t g_menu_selected_command;
 extern action_command_t g_menu_selected_action;
+extern u8 g_action_menu_row_types[];        /* per-row skillset kind; 13 keeps the row active */
+extern u8 g_menu_skillset_disabled_flags[]; /* per-row grayed flag */
 
 s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
-void battle_state_enter_select_move_tile(void);
 void battle_menu_dispatch_idle_action_menu(void);
 battle_menu_id_e battle_menu_get_idle_action_menu_id(s32 battle_id);
 ai_command_t* menu_get_selected_command_address(void);
@@ -38,14 +40,12 @@ void battle_menu_open_move_confirm(void);
 void battle_menu_open_non_active_unit_idle_action_menu(void);
 void battle_menu_set_next_script_action_menus(void);
 
-/* abilities */
-/* Ability-list window layout at 0x80166994. Column modes: 0 text, 1 number,
- * 2 hidden, 3 alternate number. The columns read the work buffer's u16 text
- * ids and values through the layout's s16 pointers. */
+/* ability lists */
+/* The CLUT the outermost scrolling ability list saves, derives four more from and blinks while it
+ * runs. */
 extern RECT g_battle_menu_ability_list_clut_rect;
 extern u8 g_battle_menu_calculator_skillsets[4];
 extern s32 g_battle_menu_scroll_list_depth;
-extern u8 g_menu_skillset_disabled_flags[]; /* per-row grayed flag */
 
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids);
 s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
@@ -64,24 +64,24 @@ s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_a
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
 s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
 
+/* Shared with the per-program event interpreter and dialog thread. */
+u8* battle_menu_redraw_text_page_on_scroll_in_rect(
+    menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
+
 /* unit panels */
 /* The final two entries of g_menu_attack_caster_stats_setup. */
 extern menu_number_entry_t g_battle_menu_projected_value_panel[2];
+/* Live caster-panel image parameters followed by their defaults. */
+extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][5];
 
 /* status screen */
 extern s32 g_battle_menu_status_enabled;
 extern s32 g_battle_menu_status_requested;
 extern s32 g_battle_menu_status_screen_selected;
+extern s32 g_battle_status_menu_open;
 
+void battle_menu_clear_status_menu_state(void);
 void battle_menu_enter_status_screen_selection(void);
 void battle_menu_leave_status_screen_selection(void);
-
-/* windows and sprites */
-/* Live caster-panel image parameters followed by their defaults. */
-extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][5];
-
-/* shared with the per-program event interpreter and dialog thread */
-u8* battle_menu_redraw_text_page_on_scroll_in_rect(
-    menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
 
 #endif

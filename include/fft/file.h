@@ -4,6 +4,7 @@
 /* File loading helpers shared by the overlays, OPEN and WLDCORE around the resident loader. */
 
 #include "fft/main.h"
+#include "fft/main_file.h"
 #include "psx/types.h"
 
 /* loading */

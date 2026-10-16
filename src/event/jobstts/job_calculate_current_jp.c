@@ -3,7 +3,6 @@
 #include "fft/event_jobstts.h"
 #include "fft/job.h"
 #include "fft/main.h"
-#include "fft/menu_panel.h"
 #include "psx/types.h"
 
 /* Also returns the value: callers read it through g_menu_row_callbacks. */

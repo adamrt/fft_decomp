@@ -1,11 +1,12 @@
 #ifndef EVENT_SMALL_H
 #define EVENT_SMALL_H
 
-/* EVENT/SMALL.OUT: menu screen overlay that runs with BATTLE. */
+/* EVENT/SMALL.OUT: the small BATTLE overlay that binds the unit and job name text. */
 
 #include "psx/types.h"
 
 /* text */
+/* Offsets of the two name sections in g_small_text_name_data. */
 typedef struct small_text_name_section_offsets {
     u32 unit_names;
     u32 job_names;

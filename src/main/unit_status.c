@@ -3,14 +3,16 @@
  * state setter and the battle load exception handler. */
 
 #include "fft/battle_status.h"
-#include "fft/data.h"
+#include "fft/battle_unit.h"
 #include "fft/data_job.h"
+#include "fft/data_status.h"
 #include "fft/main.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"
-#include "fft/memory.h"
 #include "fft/script_variable.h"
 #include "fft/unit.h"
+#include "fft/unit_entd.h"
+#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* The original wrote the body of main_mem_copy_bytes_source_first a second time as

@@ -2,7 +2,8 @@
 
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 
 /* Stream command: draw a LINE_F2 from (x0, y0) to

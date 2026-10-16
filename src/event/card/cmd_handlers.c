@@ -2,9 +2,10 @@
 
 #include "fft/event_card.h"
 #include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
+#include "fft/menu_window.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

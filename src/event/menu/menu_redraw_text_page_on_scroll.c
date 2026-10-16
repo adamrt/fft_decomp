@@ -1,9 +1,10 @@
 /* Paging a text window by input, redrawing its columns and uploading the image. */
 
 #include "fft/gfx.h"
-#include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_text.h"
 #include "fft/script.h"

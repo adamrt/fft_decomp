@@ -1,7 +1,9 @@
 /* Screen fade state, fade starts and per-tile fade updates. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_primitive.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "fft/world_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

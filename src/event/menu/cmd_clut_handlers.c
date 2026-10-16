@@ -1,6 +1,6 @@
 /* CLUT, layout CLUT and texture page command handlers. */
 
-#include "fft/menu_input.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "psx/libgpu.h"
 

@@ -1,6 +1,6 @@
 /* A wrapping vertical selection that queues a sound when it moves. */
 
-#include "fft/menu_input.h"
+#include "fft/menu_selection.h"
 #include "fft/sound.h"
 #include "psx/types.h"
 

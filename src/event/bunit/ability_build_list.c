@@ -6,9 +6,7 @@
 #include "fft/job.h"
 #include "fft/main.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
 #include "fft/unit.h"
-#include "psx/stddef.h"
 #include "psx/types.h"
 
 /*

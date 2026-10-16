@@ -1,12 +1,13 @@
 #ifndef GFX_H
 #define GFX_H
 
-/* Graphics records shared across modules: points, rectangles, textures and sprites. */
+/* Graphics records shared across programs: colors, points and rectangles, texture coordinates, sprites, textured
+ * primitive sources and the primitive buffers. The routines are in gfx_image.h and gfx_primitive.h. */
 
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* color */
+/* colors */
 /* Three byte-sized RGB channels, used for colors and per-channel values.
  * CVECTOR adds a fourth byte; these records have a three-byte stride. */
 typedef struct rgb24 {
@@ -67,6 +68,7 @@ typedef char ranges32_size_must_be_8[sizeof(ranges32_t) == 8 ? 1 : -1];
  * The point types below cover other field widths and signedness. Battle world
  * positions use VECTOR for 20.12 values and SVECTOR for integer values
  * (vx = x, vy = height, vz = map depth). Rotations also use SVECTOR. */
+
 /* Signed 16-bit x/y pair: screen offsets, sprite positions and per-axis
  * factors that are not GTE output. */
 typedef struct point16 {
@@ -121,10 +123,6 @@ typedef struct urect16 {
 } urect16_t;
 typedef char assert_urect16_size[sizeof(urect16_t) == 8 ? 1 : -1];
 
-void gfx_enqueue_tile(const RECT* rect, const rgb24_t* color, u8 semi, s32 idx);
-
-void gfx_enqueue_line_f2(const point16_t endpoints[2], const rgb24_t* color, u8 semitrans, s32 otag_index);
-
 /* texture coordinates */
 /* Eight-bit texture coordinates within a PS1 texture page. */
 typedef struct uv8 {
@@ -155,10 +153,21 @@ typedef struct sprite_draw_offset {
 } sprite_draw_offset_t;
 typedef char sprite_draw_offset_size_must_be_12[sizeof(sprite_draw_offset_t) == 12 ? 1 : -1];
 
-/* image surfaces */
+/* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
+typedef struct zodiac_draw_context {
+    u32* ot;             /* 0x00: ordering table entry the primitives link into */
+    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_world_menu_color_red */
+    s32 link_primitives; /* 0x08: nonzero: link each sprite into the OT */
+    s16 scale_x;         /* 0x0c: signed scale with 12 fractional bits; ONE = 1.0 */
+    s16 scale_y;         /* 0x0e: signed scale with 12 fractional bits; ONE = 1.0 */
+    u8 _unused_10[8];
+    sprite_draw_offset_t offset; /* 0x18 */
+} zodiac_draw_context_t;
+
+/* glyph images */
 /* The 0x10-byte glyph blit descriptor used by the window frame threads and filled
- * by world_gfx_set_image_blit_source_rect / _destination_origin. The stride is
- * the surface width in pixels. */
+ * by world_gfx_set_image_blit_source_rect, text_set_blit_source_rect and
+ * text_set_blit_destination. The stride is the surface width in pixels. */
 typedef struct glyph_blit {
     RECT rect;  /* 0x00 */
     s32 stride; /* 0x08 */
@@ -167,7 +176,7 @@ typedef struct glyph_blit {
 } glyph_blit_t;
 typedef char glyph_blit_size_must_be_16[sizeof(glyph_blit_t) == 16 ? 1 : -1];
 
-/* textures */
+/* textured primitive sources */
 /* Texture primitive used by the WORLD/BATTLE image-loading and
  * texture-page allocation helpers: a SPRT
  * (code 0x64-0x67) or a POLY_FT4. Both carry the CLUT at 0x0e, which the icon
@@ -177,7 +186,7 @@ typedef union texture_primitive {
     POLY_FT4 ft4;
 } texture_primitive_t;
 
-/* Textured menu quad source for gfx_enqueue_textured_quad_corners (0x8012ccd0):
+/* Textured menu quad source for gfx_enqueue_textured_quad_corners:
  * four screen points, four texture points (only the low byte of each
  * 16-bit value is used), then the CLUT and texture page. */
 typedef struct textured_quad_source {
@@ -196,8 +205,6 @@ typedef struct textured_quad_source {
     u16 clut;   /* 0x20 */
     u16 tpage;  /* 0x22 */
 } textured_quad_source_t;
-
-void gfx_enqueue_textured_quad_corners(const textured_quad_source_t* src, const rgb24_t* color, s32 semi, s32 idx);
 
 /* Twelve-byte texture cell copied by the formation portrait producers and
  * embedded in oriented menu quads. */
@@ -221,11 +228,10 @@ typedef struct oriented_quad {
 } oriented_quad_t;
 typedef char oriented_quad_size_must_be_20[sizeof(oriented_quad_t) == 20 ? 1 : -1];
 
-/* Gouraud-textured rectangle source for gfx_enqueue_gouraud_textured_quad
- * (0x8012cfd4) and gfx_enqueue_gouraud_textured_quad: screen rectangle,
- * texture origin (only the low byte of u/v is used; the texture extent is the
- * screen extent), CLUT and texture page. The caller also passes four RGB
- * triples, one per corner. */
+/* Gouraud-textured rectangle source for gfx_enqueue_gouraud_textured_quad:
+ * screen rectangle, texture origin (only the low byte of u/v is used; the
+ * texture extent is the screen extent), CLUT and texture page. The caller also
+ * passes four RGB triples, one per corner. */
 typedef struct textured_rect_source {
     s16 x, y;  /* 0x00 */
     s16 w, h;  /* 0x04 */
@@ -236,15 +242,8 @@ typedef struct textured_rect_source {
 } textured_rect_source_t;
 typedef char textured_rect_source_size_must_be_16[sizeof(textured_rect_source_t) == 16 ? 1 : -1];
 
-void gfx_enqueue_gouraud_textured_quad(
-    const textured_rect_source_t* rect, const rgb24_t* color, s32 semitrans, s32 otag_index);
-
-/* image loading */
-/* Scene-local GPU texture window; also the default draw-area rectangle. */
-extern RECT g_gfx_texture_window;
-
 /* Texture and screen placement for gfx_init_image_loading (12 bytes).
- * BATTLE's table at 0x80155838 holds one per menu sprite. */
+ * g_menu_sprite_page_image_params holds one per menu sprite. */
 typedef struct image_load_parameters {
     s16 x_load;
     s16 y_load;
@@ -254,56 +253,14 @@ typedef struct image_load_parameters {
     u16 y_screen_offset;
 } image_load_parameters_t;
 
-void gfx_init_image_loading(
-    void* primitive, const point16_t* base_load, const RECT* base_screen, const image_load_parameters_t* parameters);
-void gfx_load_image_and_wait(RECT* rect, void* data);
-void gfx_move_image_and_wait(RECT* rect, s16 x, s16 y);
-void gfx_store_image_and_wait(RECT* rect, void* data);
-void gfx_load_evtchr_thread(void);
-
-/* scene texture allocation */
-/* Independent 15-row, 16-column grids for BATTLE and WORLD. */
-extern u8 g_gfx_texture_allocation_grid[15][16];
-extern s32 g_gfx_free_rect_pixels[4];
-extern s32 g_gfx_free_rect_cells[4];
-
-void gfx_alloc_texture_rect(RECT* rect, void* primitive, u32* image);
-void gfx_free_texture_rect(RECT* rect);
-void gfx_clear_texture_allocation_grid(void);
-
-/* Round x, y, width and height from texture pixels to 16-pixel cells. */
-static inline void texture_rect_pixels_to_cells(const s32 pixels[4], s32 cells[4]) {
-    s32 i;
-    s32 value;
-
-    for (i = 0; i < 4; i++) {
-        value = pixels[i] >> 4;
-        cells[i] = value;
-        if (pixels[i] & 0xf) {
-            cells[i] = value + 1;
-        }
-    }
-}
-
-/* primitives */
-/* Scene-local primitive submission state. */
-extern u16 g_gfx_draw_primitives_immediately;
-extern u32* g_gfx_current_otag_entry;
-
-void gfx_draw_or_append_gpu_primitive(void* primitive);
-void gfx_append_gpu_primitive_to_secondary_otag(void* primitive);
-
+/* primitive buffers */
 /* Two DR_AREA packets and their corresponding rectangles.
  * Builders choose scaling percentages and rectangle placement. */
 typedef struct scaled_draw_area_pair {
     DR_AREA areas[2]; /* 0x00 */
     RECT rects[2];    /* 0x18 */
 } scaled_draw_area_pair_t;
-
 typedef char scaled_draw_area_pair_size_must_be_40[sizeof(scaled_draw_area_pair_t) == 40 ? 1 : -1];
-
-void gfx_build_scaled_draw_area_pair_swapped(
-    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 flag);
 
 /* Menu frame buffer: primitive pools followed by drawing/display state.
  * BUNIT uses the environments; EQUIP owns the same 236-byte buffers without
@@ -338,7 +295,6 @@ typedef struct menu_gfx_context {
     DISPENV disp_env;                     /* 0xc0 */
     u8 _unused_d4[0x18];                  /* 0xd4 */
 } menu_gfx_context_t;
-
 typedef char menu_gfx_context_size_must_be_236[(sizeof(menu_gfx_context_t) == 236) ? 1 : -1];
 
 /* Full-screen fade primitive pair: a TILE followed by the DR_MODE that
@@ -347,115 +303,7 @@ typedef struct fade_overlay {
     TILE tile;    /* 0x00 */
     DR_MODE mode; /* 0x10 */
 } fade_overlay_t;
-
 typedef char fade_overlay_size_must_be_28[(sizeof(fade_overlay_t) == 28) ? 1 : -1];
-
-/* Gray level the screen-covering fade tile subtracts: 0 is clear, 255 is black. */
-extern s32 g_gfx_screen_fade;
-extern RECT g_gfx_tiled_rect;
-extern u16 g_gfx_poly_g4_count;
-extern u16 g_gfx_tile_count;
-extern u16 g_gfx_otag_count;
-extern s8 g_gfx_otag_index_locked;
-extern RECT g_gfx_draw_area;
-extern point16_t g_editor_numeric_geometry[];
-extern image_load_parameters_t g_editor_numeric_texture[];
-extern oriented_quad_t g_gfx_blank_cell_rect;
-extern DR_AREA g_gfx_draw_area_buffer[];
-extern u16 g_gfx_draw_mode_capacity;
-extern DR_MOVE g_gfx_draw_move_buffer[];
-extern u16 g_gfx_draw_offset_y;
-extern u16 g_gfx_line_f2_capacity;
-extern u16 g_gfx_line_f3_capacity;
-extern u16 g_gfx_line_f4_capacity;
-extern u16 g_gfx_line_g4_capacity;
-extern u32 g_gfx_otag_buffer[];
-extern u16 g_gfx_otag_length;
-extern u16 g_gfx_poly_f3_capacity;
-extern u16 g_gfx_poly_f4_capacity;
-extern u16 g_gfx_poly_ft3_capacity;
-extern POLY_FT4 g_gfx_poly_ft4_buffer[];
-extern u16 g_gfx_poly_ft4_capacity;
-extern u16 g_gfx_poly_g3_capacity;
-extern u16 g_gfx_poly_g4_capacity;
-extern u16 g_gfx_poly_gt3_capacity;
-extern u16 g_gfx_poly_gt4_capacity;
-extern u16 g_gfx_sprite_16_capacity;
-extern u16 g_gfx_sprite_8_capacity;
-extern u16 g_gfx_sprite_capacity;
-extern u16 g_gfx_tile_16_capacity;
-extern u16 g_gfx_tile_1_capacity;
-extern u16 g_gfx_tile_8_capacity;
-extern u16 g_gfx_tile_capacity;
-extern s16 g_gfx_window_zoom_percent[];
-extern image_load_parameters_t g_panel_editor_label_cells[];
-extern image_load_parameters_t g_panel_editor_mode_cell[];
-extern image_load_parameters_t g_panel_editor_mode_cells[];
-extern image_load_parameters_t g_panel_editor_value_cells[];
-extern image_load_parameters_t g_panel_item_icon_layouts[];
-extern point16_t g_panel_item_icon_texture[];
-extern image_load_parameters_t g_panel_label_layouts_mode0[];
-extern image_load_parameters_t g_panel_label_layouts_mode1[];
-extern image_load_parameters_t g_panel_label_layouts_mode2[];
-extern image_load_parameters_t g_panel_label_layouts_mode3[];
-extern image_load_parameters_t g_panel_portrait_cell[];
-extern image_load_parameters_t g_panel_sprite_cells[];
-extern s16 g_gfx_line_f3_count;
-extern s16 g_gfx_line_f4_count;
-extern s16 g_gfx_line_g2_count;
-extern s16 g_gfx_line_g3_count;
-extern s16 g_gfx_line_g4_count;
-extern s16 g_gfx_poly_f3_count;
-extern s16 g_gfx_poly_ft3_count;
-extern POLY_FT4 g_gfx_poly_ft4_buffers[2][30];
-extern s16 g_gfx_poly_g3_count;
-extern s16 g_gfx_poly_gt3_count;
-extern s16 g_gfx_poly_gt4_count;
-extern s16 g_gfx_sprite_16_count;
-extern s16 g_gfx_sprite_8_count;
-extern s16 g_gfx_sprite_count;
-extern s16 g_gfx_tile_16_count;
-extern s16 g_gfx_tile_1_count;
-extern s16 g_gfx_tile_8_count;
-extern image_load_parameters_t g_menu_icon_strip_image_params[20];
-extern image_load_parameters_t g_menu_single_icon_image_params[5];
-
-void gfx_ramp_screen_overlay_intensity_to_max(void);
-void gfx_ramp_screen_overlay_intensity_to_zero(void);
-void gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 page);
-void gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
-void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
-void gfx_set_formation_icon_uv(POLY_FT4* poly, s32 index);
-void gfx_set_clut_rect_from_id(RECT* rect, u16 clut_id);
-void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page, const RECT* position,
-    const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base);
-void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
-    const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
-void attack_gfx_build_gradient_grid_primitives(POLY_GT4* poly);
-void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
-void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction);
-void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
-    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
-void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
-void bunit_gfx_set_draw_color(const rgb24_t* color);
-void gfx_set_draw_color(const rgb24_t* color);
-void menu_run_unit_status_thread(void);
-void gfx_set_otag_index(s32 value);
-
-/* portrait transitions */
-void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition, const s32* first_portrait,
-    const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
-
-/* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
-typedef struct zodiac_draw_context {
-    u32* ot;             /* 0x00: ordering table entry the primitives link into */
-    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_world_menu_color_red */
-    s32 link_primitives; /* 0x08: nonzero: link each sprite into the OT */
-    s16 scale_x;         /* 0x0c: signed scale with 12 fractional bits; ONE = 1.0 */
-    s16 scale_y;         /* 0x0e: signed scale with 12 fractional bits; ONE = 1.0 */
-    u8 _unused_10[8];
-    sprite_draw_offset_t offset; /* 0x18 */
-} zodiac_draw_context_t;
 
 /* event character graphics */
 /* One of the 137 fixed-size blocks in EVTCHR.BIN. No native pointer tables
@@ -470,56 +318,5 @@ typedef struct evtchr_file_record {
     u8 _unused_6d80[0xa80];       /* unread tail of the 0x7800-byte block */
 } evtchr_file_record_t;
 typedef char evtchr_file_record_size_must_be_30720[sizeof(evtchr_file_record_t) == 30720 ? 1 : -1];
-
-/* camera */
-enum {
-    CAMERA_FUSION_HOLD_SENTINEL = 0x2710,
-};
-/* Provisional camera interpolation key: frame time and target value. */
-typedef struct camera_key {
-    s32 time;  /* 0x00; cumulative frame of this key */
-    s32 value; /* 0x04 */
-    u8 _unused_08[8];
-} camera_key_t;
-typedef char camera_key_size_must_be_16[sizeof(camera_key_t) == 16 ? 1 : -1];
-
-/* Provisional per-component camera fusion track (0xa4 bytes), seeded by the
- * *_camera_fusion_thread and advanced by *_camera_step_track. */
-typedef struct camera_track {
-    camera_key_t keys[8]; /* 0x00 */
-    s32 key_count;        /* 0x80 */
-    s32 segment;          /* 0x84; first key of the active segment */
-    s32 frame;            /* 0x88; frames since the track started */
-    s32 segment_frame;    /* 0x8c; frames into the active segment */
-    s32 prev_time;        /* 0x90; Q12 */
-    s32 prev_value;       /* 0x94; Q12 */
-    s32 start_value;      /* 0x98; Q12 */
-    s32 segment_duration; /* 0x9c */
-    s32 finished;         /* 0xa0 */
-} camera_track_t;
-typedef char camera_track_size_must_be_164[sizeof(camera_track_t) == 164 ? 1 : -1];
-
-/* item icons */
-extern point16_t g_gfx_item_icon_image_location;
-extern s16 g_gfx_item_icon_clut_base_x;
-extern s16 g_gfx_item_icon_clut_base_y;
-
-void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
-
-/* fades */
-extern u8 g_gfx_increasing_fade_active;
-extern s16 g_gfx_fade_intensity;
-extern RECT g_gfx_fade_rect[];
-extern rgb24_t g_gfx_fade_color;
-extern u8 g_gfx_decreasing_fade_active;
-
-s32 gfx_update_increasing_fade(void);
-s32 gfx_update_decreasing_fade(void);
-void gfx_start_decreasing_fade(void);
-s32 gfx_get_fade_state(void);
-void gfx_start_increasing_fade(void);
-
-/* shared between programs: each program that links the code defines its own copy */
-extern u16 g_gfx_line_f2_count;
 
 #endif

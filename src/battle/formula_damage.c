@@ -5,8 +5,10 @@
 #include "fft/battle_formula.h"
 #include "fft/data_item.h"
 #include "fft/data_job.h"
+#include "fft/data_status.h"
 #include "fft/main_item.h"
 #include "fft/unit.h"
+#include "fft/unit_identity.h"
 #include "psx/types.h"
 
 /* Formula 0x2A: talk skill, hit (MA+X)%: gil (Level * SP), CT to 0, +/-Brave

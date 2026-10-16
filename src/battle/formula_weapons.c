@@ -3,6 +3,7 @@
 
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"
+#include "fft/data_status.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 

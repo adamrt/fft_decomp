@@ -1,113 +1,116 @@
 #ifndef MENU_OVERLAY_H
 #define MENU_OVERLAY_H
 
-/* Menu library screens and overlays: companion overlays, screen starters, help menus, options and the dead unit menu.
- */
+/* Companion overlays: the EVENT overlays (OPTION, BUNIT, EQUIP, JOBSTTS and the others) that BATTLE and WORLD
+ * load beside the scene, their requests and loading, the thread entries that open their screens, and the scene's
+ * menu setup. */
 
-#include "fft/gfx.h"
-#include "fft/map.h"
-#include "fft/menu.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* scene lifecycle */
 /* 0: normal, 1: companion/editor transition, 2: AT-list selection. */
 extern u16 g_menu_overlay_state;
+/* Nonzero while a screen transition holds the menus (4 during the unit list fade-out). */
+extern u16 g_menu_transition_state;
+
+/* Loads the default menu palettes and rebuilds the text section pointers. */
 void menu_init_palette_and_text(s32 unused_0);
+/* Binds the scene's working pointers and clears its menu-session flags. */
 void menu_init_subsystem_pointers(void);
+/* Loads ATTACK.OUT with its scenario conditions and graphics and starts the deployment screen (returns 0), or
+ * starts the map-load thread when deployment is skipped (returns 1). */
 s32 menu_init_attack_resources_and_threads(void);
+/* Frees every window buffer pair, the tpage-7 VRAM grid and the menu arena, and resets the thread scheduler. */
 void menu_reset_subsystems(void);
-s32 menu_poll_small_load(void);
+/* 2 while a menu is being built, 4 while a menu thread runs, 0 when idle; BATTLE's body first returns
+ * g_menu_transition_state when it is set. */
+s32 menu_get_thread_activity(void);
 
 /* companion overlays */
-void menu_run_companion_overlay_stub(void);
-extern u8* g_menu_companion_data_file_buffer;
-extern s32 g_menu_companion_data_file_loading;
-extern s32 g_menu_companion_data_file_lbas[];
-extern s32 g_menu_companion_data_file_sizes[];
+/* Companion overlay requests: index into the overlay LBA, size and load offset
+ * tables (g_menu_companion_executable_lbas). */
+typedef enum companion_overlay {
+    COMPANION_OVERLAY_OPTION = 1,             /* EVENT/OPTION.OUT */
+    COMPANION_OVERLAY_BUNIT = 2,              /* EVENT/BUNIT.OUT, first half */
+    COMPANION_OVERLAY_HELPMENU = 3,           /* EVENT/HELPMENU.OUT */
+    COMPANION_OVERLAY_EVTOOL = 4,             /* EVENT/EVTOOL.OUT; no request in retail */
+    COMPANION_OVERLAY_DEBUGMAP = 5,           /* EVENT/DEBUGMAP.OUT; no request in retail */
+    COMPANION_OVERLAY_REQUIRE = 6,            /* EVENT/REQUIRE.OUT */
+    COMPANION_OVERLAY_JOBSTTS = 7,            /* EVENT/JOBSTTS.OUT */
+    COMPANION_OVERLAY_SMALL = 8,              /* EVENT/SMALL.OUT */
+    COMPANION_OVERLAY_EQUIP = 9,              /* EVENT/EQUIP.OUT, first half */
+    COMPANION_OVERLAY_EQUIP_SECOND_HALF = 10, /* loaded above the heap reservation */
+    COMPANION_OVERLAY_DEBUGCHR = 11,          /* EVENT/DEBUGCHR.OUT */
+    COMPANION_OVERLAY_ETC = 12,               /* EVENT/ETC.OUT */
+    COMPANION_OVERLAY_ATTACK = 13,            /* EVENT/ATTACK.OUT */
+    COMPANION_OVERLAY_CARD = 14,              /* EVENT/CARD.OUT */
+    COMPANION_OVERLAY_BUNIT_SECOND_HALF = 15, /* loaded above the heap reservation */
+} companion_overlay_e;
+
+/* Companion data file requests (the second LBA and size tables). */
+typedef enum battle_companion_file {
+    BATTLE_COMPANION_FILE_WIN001 = 2,    /* EVENT/WIN001.BIN */
+    BATTLE_COMPANION_FILE_BONUS = 3,     /* EVENT/BONUS.BIN */
+    BATTLE_COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
+} battle_companion_file_e;
+
+/* g_menu_companion_overlay_state: the overlay entry the frame driver calls, cleared when the overlay
+ * returns. */
+typedef enum companion_overlay_state {
+    COMPANION_OVERLAY_STATE_IDLE = 0,
+    COMPANION_OVERLAY_STATE_STUB = 1,      /* an empty function */
+    COMPANION_OVERLAY_STATE_BUNIT = 2,     /* bunit_entrypoint */
+    COMPANION_OVERLAY_STATE_JOBSTTS = 3,   /* jobstts_entrypoint */
+    COMPANION_OVERLAY_STATE_EQUIP = 4,     /* equip_entrypoint */
+    COMPANION_OVERLAY_STATE_CARD_SAVE = 5, /* card_save_run_menu */
+} companion_overlay_state_e;
+
+extern s32 g_menu_companion_overlay_state;
+extern s32 g_menu_companion_overlay_primitives;
+extern s32 g_menu_companion_executable_request_index;
 extern s32 g_menu_companion_executable_loading;
 extern s32 g_menu_companion_executable_lbas[];
 extern s32 g_menu_companion_executable_sizes[];
 extern s32 g_menu_companion_executable_offsets[];
-void menu_open_companion_data_file(void);
-void menu_open_companion_executable(void);
-extern s32 g_menu_companion_overlay_state;
-extern char g_menu_wait_for_file_allocation_message[];
-extern s32 g_menu_companion_executable_request_index;
 extern s32 g_menu_companion_data_file_request_index;
+extern s32 g_menu_companion_data_file_loading;
+extern s32 g_menu_companion_data_file_lbas[];
+extern s32 g_menu_companion_data_file_sizes[];
+extern u8* g_menu_companion_data_file_buffer;
+extern char g_menu_wait_for_file_allocation_message[];
+
+/* Publishes an executable request and waits for it to clear. */
+void menu_request_open_companion_executable(s32 request_index);
+/* The per-frame drivers of the executable and data file requests: they start the disc read on the main stack,
+ * poll until it finishes and clear the request. */
+void menu_open_companion_executable(void);
+void menu_open_companion_data_file(void);
+/* Requests SMALL.OUT without waiting; menu_poll_small_load drives the load during map initialization and returns
+ * 1 while it is pending. */
+void menu_request_open_small(void);
+s32 menu_poll_small_load(void);
+/* The overlay entry of COMPANION_OVERLAY_STATE_STUB. */
+void menu_run_companion_overlay_stub(void);
+
+/* screen starters */
+/* Thread entries of the menu rows that open an overlay screen. */
+void menu_open_bunit(void);
+void menu_open_debugchr(void);
+void menu_open_debugchr_unit_editor(void);
 void menu_open_option_at_list(void);
 void menu_open_option_dead_unit_panel(void);
 void menu_open_option_game_options(void);
-void menu_request_open_companion_executable(s32 request_index);
-void menu_request_open_small(void);
-
-/* menu screen starters */
-void menu_open_debugchr(void);
-void menu_open_debugchr_unit_editor(void);
-void menu_open_bunit(void);
-void menu_start_mini_menu_display_thread(void);
-void menu_run_triangle_selection(void);
 void menu_run_equip_thread(void);
 void menu_run_jobstts_thread(void);
-void menu_start_at_list_thread(void);
+void menu_start_mini_menu_display_thread(void);
+/* Waits for the camera and the menu transition, then runs the Triangle mini menu. */
+void menu_run_triangle_selection(void);
 
-/* help menus */
-extern menu_unit_status_record_t g_menu_help_active_banner;
-extern menu_active_unit_t g_menu_help_active_unit_data;
-extern menu_status_panel_slot_storage_t g_menu_help_billboard;
-extern map_selected_tile_t g_menu_help_menu_cursor_tile;
-extern u8 g_menu_help_data_base[];
-extern help_navigation_record_t g_menu_help_require_navigation[];
-extern u32* g_menu_help_controller_state_ptr;
-extern u16* const g_menu_help_menu_text_id_tables[23];
-extern u16* g_menu_help_topic_text_ids;
-extern help_navigation_record_t g_menu_help_terrain_navigation[];
-extern help_navigation_record_t g_menu_help_unit_box_navigation[];
-extern help_navigation_record_t g_menu_help_attack_preview_navigation[];
-void menu_run_battle_help(void);
-void menu_run_require_help(void);
-extern s32 g_menu_help_message_text_id;
-extern u32 g_help_text_table[];
-
-/* per-module bodies: each module links its own copy under the shared name. */
-s32 menu_get_thread_activity(void);
+/* overlay list threads */
+/* EQUIP, the menu library and WORLD each build their own bodies of these. */
 void menu_run_ability_list_thread(void);
 void menu_run_equipment_list_thread(void);
-s32 bunit_menu_ability_update_list_menu(void);
-s32 jobstts_menu_ability_update_list_menu(void);
-menu_vertical_scroll_direction_e bunit_menu_input_read_page_scroll_direction(void);
-menu_vertical_scroll_direction_e world_menu_input_read_page_scroll_direction(void);
-s32 bunit_menu_run_job_list(void);
-s32 jobstts_menu_run_job_list(void);
-void equip_menu_input_update_with_message_state(void);
-void jobstts_menu_input_update_with_message_state(void);
-void world_menu_input_update_with_message_state(void);
+/* EQUIP and WORLD each build their own body. */
 s32 menu_update_equipment(void);
-void menu_run_at_list(void);
-void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
-void world_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
-void option_menu_run_game_options(void);
-void world_menu_run_game_options(void);
-/* Scrollable list core: BUNIT, EQUIP, JOBSTTS and WORLD each link their own body. */
-void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* text_table);
-
-/* overlay */
-extern menu_entry_t g_menu_option_icon_thread_param;
-extern s32 g_menu_option_choice_widths[];
-extern s32 g_menu_option_choice_counts[];
-extern s32 g_menu_option_values[GAME_OPTION_UNCHANGED + 1];
-extern s32 g_menu_option_value_text_id_bases[];
-extern menu_icon_record_t g_menu_option_picker_icon_records[2];
-extern s32 g_menu_option_reference_values[];
-extern options_menu_page_t g_menu_option_pages[2];
-extern menu_text_layout_t g_menu_option_entry_table[1];
-extern RECT g_menu_option_title_image_rect;
-extern RECT g_menu_option_entry_panel_rect;
-extern RECT g_menu_option_value_image_rect;
-void menu_run_option_choice(void);
-extern u32* g_dead_unit_controller_input;
-extern menu_entry_t g_dead_unit_menu[DEAD_UNIT_MENU_ENTRY_COUNT];
-extern menu_text_layout_t g_dead_unit_menu_entries;
-extern s16 g_dead_unit_menu_flags[];
 
 #endif

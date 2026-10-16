@@ -1,11 +1,15 @@
 /* Formation menu display init, unit list rebuilds, the map busy check and unit messages with sound. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_image.h"
 #include "fft/item.h"
 #include "fft/main_sound.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
+#include "fft/menu_help.h"
 #include "fft/menu_input.h"
-#include "fft/menu_overlay.h"
+#include "fft/menu_script.h"
+#include "fft/menu_selection.h"
 #include "fft/menu_text.h"
 #include "fft/thread.h"
 #include "fft/world.h"

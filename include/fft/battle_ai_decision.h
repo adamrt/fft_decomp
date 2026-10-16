@@ -1,0 +1,317 @@
+#ifndef BATTLE_AI_DECISION_H
+#define BATTLE_AI_DECISION_H
+
+/* How the battle AI decides a turn: action selection, targets, movement, ability evaluation,
+ * ranking, simulation and facing. Each pass may suspend on its frame budget and resume next frame
+ * from the stage it saved in the workspace. */
+
+#include "fft/battle_ai.h"
+#include "fft/data.h"
+#include "fft/data_item.h"
+#include "fft/map.h"
+#include "fft/unit.h"
+#include "psx/types.h"
+
+/* frame budget */
+/* Scanlines since vertical blank at which each search yields. */
+enum {
+    AI_TURN_SIMULATION_SCANLINE_LIMIT = 313,
+    AI_PATHFIND_SCANLINE_LIMIT = 325,
+    AI_DECISION_SCANLINE_LIMIT = 441,
+};
+
+s32 battle_ai_is_pathfinding_budget_exhausted(void);
+
+/* action selection */
+/* Byte-sized resume labels for initial action selection; the gaps are not dispatched. */
+typedef enum ai_initial_selection_stage {
+    AI_INITIAL_SELECTION_STATUS = 0,
+    AI_INITIAL_SELECTION_RETREAT = 2,
+    AI_INITIAL_SELECTION_AUTOBATTLE = 3,
+    AI_INITIAL_SELECTION_GENERAL = 7,
+} ai_initial_selection_stage_e;
+
+typedef enum ai_status_selection_stage {
+    AI_STATUS_SELECTION_CHICKEN = 0,
+    AI_STATUS_SELECTION_TARGET_DISTANCE = 1,
+} ai_status_selection_stage_e;
+
+/* These three suspend points use their own byte; other values resume abilities. */
+typedef enum ai_autobattle_stage {
+    AI_AUTOBATTLE_CHARGING = 2,
+    AI_AUTOBATTLE_MOVEMENT = 4,
+    AI_AUTOBATTLE_ABILITIES = 7,
+} ai_autobattle_stage_e;
+
+typedef enum ai_targeted_selection_stage {
+    AI_TARGETED_SELECTION_SCORE_TILES = 0,
+    AI_TARGETED_SELECTION_MOVEMENT = 1,
+    AI_TARGETED_SELECTION_CHARGING = 2,
+    AI_TARGETED_SELECTION_TARGET_ABILITIES = 3,
+    AI_TARGETED_SELECTION_OTHER_ABILITIES = 4,
+} ai_targeted_selection_stage_e;
+
+/* No pass saves stage 5; it follows the same ally-search fallback as stage 6. */
+typedef enum ai_recovery_selection_stage {
+    AI_RECOVERY_SELECTION_SCORE_TILES = 0,
+    AI_RECOVERY_SELECTION_MOVEMENT = 1,
+    AI_RECOVERY_SELECTION_CHARGING = 2,
+    AI_RECOVERY_SELECTION_TARGET_ABILITIES = 3,
+    AI_RECOVERY_SELECTION_ENEMY_ABILITIES = 4,
+    AI_RECOVERY_SELECTION_ALLY_ABILITIES = 6,
+    AI_RECOVERY_SELECTION_CANCEL_STATUS = 7,
+} ai_recovery_selection_stage_e;
+
+typedef enum ai_retreat_stage {
+    AI_RETREAT_MOVEMENT = 0,
+    AI_RETREAT_SELF_ABILITIES = 1,
+    AI_RETREAT_CHARGING = 2,
+    AI_RETREAT_OTHER_ABILITIES = 3,
+} ai_retreat_stage_e;
+
+enum {
+    AI_RECOVERY_STATUS_COUNT = 3,
+};
+
+extern u8 g_battle_ai_recovery_status_ids[AI_RECOVERY_STATUS_COUNT];
+extern s32 g_battle_ai_recovery_status_index; /* status-list cursor preserved for resume */
+extern s32 g_battle_ai_recovery_status_retry; /* skip status pass after one failed attempt */
+extern s32 g_battle_ai_retreat_stage;         /* ai_retreat_stage_e */
+
+/* target selection */
+typedef enum ai_unit_filter {
+    AI_UNIT_FILTER_ANY = 0,
+    AI_UNIT_FILTER_ENEMIES = 1,
+    AI_UNIT_FILTER_ALLIES = 2,
+    AI_UNIT_FILTER_SPECIFIC = 3,
+    AI_UNIT_FILTER_STATUS = 4,
+} ai_unit_filter_e;
+
+typedef enum ai_nearest_target_mode {
+    AI_NEAREST_WITHOUT_BLOOD_SUCK = 0,
+    AI_NEAREST_IMMINENT_ENEMY = 1,
+    AI_NEAREST_ENEMY = 2,
+    AI_NEAREST_UNIT = 3,
+    AI_NEAREST_ELIGIBLE_ENEMY = 4,
+    AI_NEAREST_HEALER_OR_CRYSTAL = 5,
+} ai_nearest_target_mode_e;
+
+/* Classification from the acting unit's side, not the sign of HP damage.
+ * A useful effect may include deliberately hitting an ally to affect status. */
+typedef enum ai_ability_effect {
+    AI_ABILITY_EFFECT_NONE = 0,
+    AI_ABILITY_EFFECT_USEFUL = 1,
+    AI_ABILITY_EFFECT_ADVERSE = 2,
+} ai_ability_effect_e;
+
+ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_reflect);
+s32 battle_ai_find_nearest_target(ai_nearest_target_mode_e mode);
+s32 battle_ai_find_unit_at_coordinates(const ai_coords_t* coords);
+s32 battle_ai_is_unit_untargetable(s32 unit_id);
+
+/* status and turn timing */
+/* Declared without parameters: callers pass only the unit, and the definition takes two more
+ * that it overwrites before use. */
+s32 battle_ai_calculate_clockticks_until_death_counter_expires();
+s32 battle_ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit);
+s32 battle_ai_is_status_active_through_delay(s32 delay, const unit_stats_t* unit, s32 status_id);
+
+/* movement */
+typedef enum ai_movement_stage {
+    AI_MOVEMENT_TARGET_DISTANCE = 0,
+    AI_MOVEMENT_SCORE_TILES = 1,
+} ai_movement_stage_e;
+
+typedef enum ai_cowardly_movement_stage {
+    AI_COWARDLY_MOVEMENT_SCORE_TILES = 0,
+    AI_COWARDLY_MOVEMENT_TARGET_DISTANCE = 1,
+} ai_cowardly_movement_stage_e;
+
+typedef enum ai_destination_order {
+    AI_DESTINATION_PRIORITY_FIRST = 0,
+    AI_DESTINATION_DISTANCE_FIRST = 1,
+} ai_destination_order_e;
+
+extern ai_cowardly_movement_stage_e g_battle_ai_cowardly_movement_stage;
+extern s32 g_battle_ai_propagation_resume_pass;
+
+s32 battle_ai_propagate_target_movement(
+    s32 unit_id, s32 target_x, s32 target_y, s32 target_elevation, s32 initialize, s32* suspended, s32 check_budget);
+void battle_ai_record_triggered_trap_coords(s32 x, s32 y, s32 level);
+
+/* target geometry */
+typedef enum ai_tile_mask_mode {
+    AI_TILE_MASK_RANGE = 0,
+    AI_TILE_MASK_AOE = 1,
+    AI_TILE_MASK_RANGE_PLUS_AOE = 2,
+    AI_TILE_MASK_EXPLICIT = 3,
+} ai_tile_mask_mode_e;
+
+extern u16 g_battle_ai_range_row_masks[];
+
+void battle_ai_build_attack_origin_masks(void);
+s32 battle_ai_calculate_distance_between_units(const unit_stats_t* a, const unit_stats_t* b);
+s32 battle_ai_calculate_height_difference_between_units(const ai_coords_t* coords, const unit_stats_t* unit);
+void battle_ai_copy_unit_coordinates(s32 unit_index, ai_coords_t* destination);
+s32 battle_ai_count_flagged_tiles_within_map_bounds(u16 rows[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]);
+s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coordinates);
+
+/* ability evaluation */
+typedef enum ai_ability_evaluation_stage {
+    AI_ABILITY_EVALUATION_REFLECTED_TARGETS = 0,
+    AI_ABILITY_EVALUATION_SELF_TARGET_RANGE = 1,
+    AI_ABILITY_EVALUATION_UNIT_TARGETS = 2,
+    AI_ABILITY_EVALUATION_FIRST_CT_GROUP = 3,
+    AI_ABILITY_EVALUATION_SECOND_CT_GROUP = 4,
+    AI_ABILITY_EVALUATION_TILE_TARGETS = 5,
+    AI_ABILITY_EVALUATION_MATH_TARGETS = 6,
+    AI_ABILITY_EVALUATION_PREPARE = 7,
+    AI_ABILITY_EVALUATION_MAP_TARGETS = 8,
+} ai_ability_evaluation_stage_e;
+
+typedef enum ai_origin_evaluation_stage {
+    AI_ORIGIN_EVALUATION_PREPARE = 0,
+    AI_ORIGIN_EVALUATION_RANKED = 1,
+    AI_ORIGIN_EVALUATION_SCANNED = 2,
+} ai_origin_evaluation_stage_e;
+
+typedef enum ai_cast_origin_stage {
+    AI_CAST_ORIGIN_ACT_BEFORE_MOVE = 0,
+    AI_CAST_ORIGIN_MOVE_BEFORE_ACT = 1,
+} ai_cast_origin_stage_e;
+
+typedef enum ai_charging_stage {
+    AI_CHARGING_SONG_DANCE = 0,
+    AI_CHARGING_WITH_CHARGE = 1,
+    AI_CHARGING_WITHOUT_CHARGE = 2,
+} ai_charging_stage_e;
+
+extern s32 g_battle_ai_self_target_origin_stage;
+
+s32 battle_ai_evaluate_ability_outcome(void);
+s32 battle_ai_evaluate_cast_origins(void);
+s32 battle_ai_evaluate_current_action(void);
+
+/* math skill */
+enum {
+    AI_MATH_SOURCE_SKILLSET_COUNT = 4,
+    AI_MATH_EXTRA_KNOWN_ABILITY_COUNT = 10,
+};
+
+extern s32 g_battle_ai_math_ability_index;
+extern u16* g_battle_ai_math_ability_list; /* borrowed from main's temporary skillset list */
+extern u8 g_battle_ai_math_extra_known_ability_ids[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
+extern s32 g_battle_ai_math_skillset_id;
+extern s32 g_battle_ai_math_skillset_index;
+extern u8 g_battle_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
+
+/* status cancellation */
+/* Cancellation-search accounting survives suspension. */
+extern s32 g_battle_ai_status_candidate_count;
+extern s32 g_battle_ai_status_insufficient_mp;
+extern s32 g_battle_ai_status_sufficient_mp;
+
+/* action ranking */
+typedef enum ai_rank_order {
+    AI_RANK_BELOW = 0,
+    AI_RANK_EQUAL = 1,
+    AI_RANK_ABOVE = 2,
+} ai_rank_order_e;
+
+void battle_ai_init_selected_action(void);
+void battle_ai_insert_ranked_action(void);
+s32 battle_ai_is_action_higher_ranked(const ai_action_data_t* a, const ai_action_data_t* b);
+void battle_ai_reset_action_ranking_fields(ai_action_data_t* action);
+
+/* simulation */
+/* Turn-event iteration limit for one simulated action. */
+enum {
+    AI_SIMULATED_TURN_LIMIT = 256,
+};
+
+/* Baseline records include action/equipment data; simulated status uses the compact records. */
+typedef enum ai_snapshot_mode {
+    AI_SNAPSHOT_BASELINE = 0,
+    AI_SNAPSHOT_SIMULATED_STATUS = 1,
+} ai_snapshot_mode_e;
+
+typedef enum ai_simulation_phase {
+    AI_SIMULATION_PREPARE_ACTION = 0,
+    AI_SIMULATION_ADVANCE_TURNS = 1,
+    AI_SIMULATION_SCORE_STATE = 2,
+} ai_simulation_phase_e;
+
+/* Pickup occupant on the current action tile; treasure takes precedence. */
+typedef enum ai_tile_pickup_kind {
+    AI_TILE_PICKUP_NONE = 0,
+    AI_TILE_PICKUP_CRYSTAL = 1,
+    AI_TILE_PICKUP_TREASURE = 2,
+} ai_tile_pickup_kind_e;
+
+/* Selected unit state saved by battle_ai_save_unit_state and restored by
+ * battle_ai_restore_unit_state. HP occupies unaligned bytes 0x1b..0x1c; max HP/MP are not saved. */
+typedef struct ai_extended_snapshot {
+    ai_status_snapshot_t status;              /* 0x00 */
+    u8 status_ct[BATTLE_TIMED_STATUS_COUNT];  /* 0x08 */
+    u8 team_flags;                            /* 0x18 */
+    u8 faith;                                 /* 0x19 */
+    u8 transparent_removal_flag;              /* 0x1a */
+    u8 hp_bytes[2];                           /* 0x1b */
+    u8 _padding_1d;                           /* aligns mp */
+    u16 mp;                                   /* 0x1e */
+    u8 charged_ability_ct;                    /* 0x20 */
+    u8 base_attributes[UNIT_ATTRIBUTE_COUNT]; /* 0x21; unit_attribute_index_e */
+    u8 attributes[UNIT_ATTRIBUTE_COUNT];      /* 0x24; unit_attribute_index_e */
+    u8 ct;                                    /* 0x27 */
+    u8 x;                                     /* 0x28 */
+    u8 position_bytes[2];                     /* 0x29; packed unit position */
+    u8 has_turn;                              /* 0x2b */
+    u8 movement_taken;
+    u8 action_taken;
+    u8 auto_battle_setting; /* 0x2e */
+    u8 auto_battle_target;
+    u8 initial_team_flags;
+    u8 inflicted_status[STATUS_BYTE_COUNT];  /* 0x31 */
+    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT]; /* 0x36 */
+    u8 brave;                                /* 0x3d */
+    u8 mount_info;
+    u8 _padding_3f; /* tail padding to 2-byte alignment */
+} ai_extended_snapshot_t;
+typedef char ai_extended_snapshot_must_be_64[sizeof(ai_extended_snapshot_t) == 64 ? 1 : -1];
+
+/* Unit snapshots share the scratchpad-save arena used during movement propagation. */
+extern ai_extended_snapshot_t g_battle_ai_unit_snapshot_storage[];
+extern ai_extended_snapshot_t* g_battle_ai_unit_snapshots;
+
+void battle_ai_begin_action_simulation(void);
+void battle_ai_end_action_simulation(void);
+void battle_ai_move_temp_unit_to_coords(const ai_coords_t* coordinates);
+s32 battle_ai_simulate_action_and_score(void);
+void battle_ai_update_tile_pickup(void);
+
+/* facing */
+/* Only the four cardinal hints index the tile-delta table. */
+enum {
+    AI_CARDINAL_DIRECTION_COUNT = 4,
+};
+
+typedef enum ai_direction {
+    AI_DIRECTION_SOUTH = 0,
+    AI_DIRECTION_WEST = 1,
+    AI_DIRECTION_NORTH = 2,
+    AI_DIRECTION_EAST = 3,
+    AI_DIRECTION_OVERLAP = 4,
+    AI_DIRECTION_CHOOSE_AT_WAIT = 5,
+} ai_direction_e;
+
+/* Cardinal map-tile deltas stored as wrapping unsigned bytes. */
+typedef struct ai_facing_tile_offsets {
+    u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
+} ai_facing_tile_offsets_t;
+
+extern ai_facing_tile_offsets_t g_battle_ai_facing_tile_offsets;
+
+s32 battle_ai_choose_wait_facing(void);
+ai_direction_e battle_ai_find_direction_of_target(const ai_coords_t* target, const ai_coords_t* origin);
+
+#endif

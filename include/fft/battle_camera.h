@@ -1,8 +1,9 @@
 #ifndef BATTLE_CAMERA_H
 #define BATTLE_CAMERA_H
 
-/* BATTLE camera state, player input and scripted motion. WORLD declares its
- * separate camera state and entry points in world.h. */
+/* The BATTLE camera: its position, rotation, tilt and zoom, each animated toward a destination,
+ * the player's camera controls, and the motion event scripts and effects give it. The camera code
+ * the event systems of both programs share is in camera.h. */
 
 #include "fft/battle_unit.h"
 #include "fft/script_instruction.h"
@@ -69,7 +70,6 @@ s32 battle_camera_is_active(void);
 void battle_camera_restore_current_real_coords(void);
 void battle_camera_save_current_real_coords(void);
 void battle_camera_set_current_real_coords(const VECTOR* coords);
-/* Some routines address these components as separate linker symbols. */
 void battle_camera_update_cursor_tile_vector(void);
 void battle_camera_update_real_coord_animation(void);
 void battle_camera_update_vector_from_game_state(void);

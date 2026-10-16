@@ -1,22 +1,29 @@
 #ifndef BATTLE_UNIT_ENCOUNTER_H
 #define BATTLE_UNIT_ENCOUNTER_H
 
-/* BATTLE unit encounters, deployment, progression and pickups. */
+/* BATTLE unit encounters: ENTD units, party deployment, and rewards, crystals, treasure and war trophies. */
 
 #include "fft/battle_unit.h"
 #include "fft/map.h"
 #include "fft/menu.h"
+#include "fft/menu_dead_unit.h"
 #include "fft/unit.h"
+#include "fft/unit_entd.h"
 #include "psx/types.h"
 
 /* encounters and deployment */
-extern s32 g_main_entd_selection_mode; /* battle_entd_selection_e */
-/* Count and coordinates of the tiles already handed out as dismount
- * destinations this action. */
-extern s32 g_battle_relocated_unit_count;
-extern battle_tile_coordinates_t g_battle_relocated_unit_coords[];
+/* g_main_entd_selection_mode: which ENTD battle_unit_select_and_open_entd opens. */
+typedef enum battle_entd_selection {
+    BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE = 0, /* EVENT_SCRIPT_VAR_CURRENT_ENTD */
+    BATTLE_ENTD_SELECTION_ENTD_250 = 1,
+    BATTLE_ENTD_SELECTION_RANDOM_75_TO_79 = 2,
+    BATTLE_ENTD_SELECTION_RANDOM_1_TO_59 = 3,
+    BATTLE_ENTD_SELECTION_MAP_ID = 4, /* the map's own id when it is not 0 */
+} battle_entd_selection_e;
+
 extern s16 g_battle_unit_entd_spritesheet_ids[];
 extern s32 g_battle_unit_entd_spritesheet_count;
+
 unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battle_id);
 void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode);
 s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id);
@@ -29,6 +36,26 @@ void battle_unit_init_deployed_units_data_for_debug_red_team(unit_deployment_coo
 void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit);
 
 /* progression and pickups */
+/* battle_unit_learn_from_crystal flags. */
+enum {
+    BATTLE_CRYSTAL_LEARN_ABILITIES = 0x1,
+    BATTLE_CRYSTAL_RESTORE_HP_MP = 0x2,
+    BATTLE_CRYSTAL_TAKE_TREASURE = 0x4, /* add the treasure's item instead */
+};
+
+/* War trophies and bonus money of the battle's units, filled by
+ * battle_unit_find_war_trophies_and_bonus_money; REQUIRE fills
+ * g_require_reward_war_trophy_search_result with it for the war trophy screen. */
+typedef struct battle_war_result {
+    u8 item_ids[BATTLE_UNIT_SLOT_COUNT]; /* 0x00 */
+    u8 item_count;                       /* 0x15 */
+    u8 _padding_16[2];                   /* 0x16; aligns bonus_money */
+    s32 bonus_money;                     /* 0x18; sum of bonus-money modifiers * 100 */
+    s32 level_sum_money;                 /* 0x1c; g_battle_enemy_level_sum * 100 */
+    s32 level_bonus_money;               /* 0x20; (highest enemy level - lowest level) * 100 */
+} battle_war_result_t;
+typedef char battle_war_result_size_must_be_36[(sizeof(battle_war_result_t) == 36) ? 1 : -1];
+
 void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit);
 u8 battle_unit_calculate_move_exp_jp_up_to_earn(const unit_stats_t* unit);
 s32 battle_unit_count_crystals(void);

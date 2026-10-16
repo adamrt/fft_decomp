@@ -1,7 +1,7 @@
 /* Whether the unit list is scrolling or has to scroll to show the selected unit. */
 
 #include "fft/event_bunit.h"
-#include "fft/unit.h"
+#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Returns 1 while the unit list is scrolling, or when the selected unit lies

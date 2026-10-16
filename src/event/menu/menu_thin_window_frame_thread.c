@@ -1,11 +1,16 @@
 /* The thread drawing a window frame of nine thin border sprites until asked to stop. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_image.h"
+#include "fft/gfx_primitive.h"
 #include "fft/main_gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
+#include "fft/menu_input.h"
 #include "fft/menu_panel.h"
 #include "fft/menu_text.h"
+#include "fft/menu_window.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"

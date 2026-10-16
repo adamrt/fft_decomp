@@ -1,6 +1,7 @@
 /* Portrait polygon clips and the status banner cross-fade primitives. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_image.h"
 #include "fft/memory.h"
 #include "fft/menu_panel.h"
 #include "fft/script.h"

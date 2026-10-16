@@ -1,12 +1,13 @@
 #ifndef MAP_H
 #define MAP_H
 
-/* Tactical-level data shared by BATTLE and WORLD: map IDs, terrain tiles and
- * surface records. The map engine is declared in battle_map.h. */
+/* Map data and state shared by BATTLE and WORLD: map ids, terrain tiles, the selected tile, background colors and
+ * the event library's map routines. The battle map engine is declared in battle_map.h. */
 
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* geometry */
 /* Horizontal X/Z extent of one terrain tile in map geometry units. */
 enum { MAP_TILE_SIZE = 28 };
 
@@ -20,7 +21,6 @@ enum {
     MAP_TILE_COUNT = MAP_TERRAIN_LAYER_COUNT * MAP_TILES_PER_LAYER,
 };
 
-/* coordinates */
 /* Map x, terrain layer and map y, shared by unit placement and obstacle tests. */
 typedef struct map_tile_coordinates {
     s16 x;     /* 0x00 */
@@ -211,7 +211,7 @@ typedef enum map_surface_type {
 
 enum { MAP_SURFACE_MASK = 0x3f };
 
-/* Selectors accepted by battle_map_get_tile_data_value and its setter twin.
+/* Selectors accepted by battle_map_get_tile_data_value and battle_map_set_tile_data_value.
  * Selector 14 is unsupported; setter selector 15 performs a separate operation
  * whose relationship to tile data is not established. No caller passes
  * selector 1 or 10. */
@@ -251,7 +251,7 @@ enum {
 };
 
 /* Tile byte 0x05. Retail reads the depth as a bitfield: its zero test and
- * its value are separate loads (BATTLE 0x801af948..0x801af970). */
+ * its value are separate loads (battle_effect_test_position_for_obstacle). */
 typedef struct map_tile_marks {
     u8 ceiling_depth : 5;
     u8 move_destination : 1;
@@ -329,12 +329,12 @@ enum {
     MAP_TILE_CAMERA_BLOCK_STEEP_MASK = 0xf0,
 };
 
-/* Eight-byte terrain record: battle_map_get_tile_data_pointer (0x80183fb4)
- * indexes (layer * 256 + y * width + x) * 8. Scenario opcode 0x40 at
- * BATTLE 0x801451c8 / WORLD 0x800f84f0 modifies bytes 0, 2 and 6.
- * Opcode 0x40 replaces the untargetable bit and clears the blocked bit. Its
- * bitfield accesses reproduce the separate surface-byte reload and
- * flag-update order at BATTLE 0x801451e4..0x80145244. */
+/* Eight-byte terrain record: battle_map_get_tile_data_pointer indexes
+ * (layer * 256 + y * width + x) * 8. The SetTileHeight instruction
+ * (EVENT_OPCODE_SET_TILE_HEIGHT) in script_execute_event modifies bytes 0, 2
+ * and 6: it replaces the untargetable bit and clears the blocked bit. Its
+ * bitfield accesses reproduce that handler's separate surface-byte reload and
+ * flag-update order. */
 typedef struct map_tile {
     map_tile_surface_t surface;               /* 0x00 */
     u8 _unknown_01;                           /* 0x01; 0 in every terrain file; reached only by tile data selector 1 */
@@ -350,13 +350,11 @@ typedef struct map_tile {
 typedef char map_tile_size_must_be_8[(sizeof(map_tile_t) == 8) ? 1 : -1];
 
 /* selection */
-/* Provisional 0xa-byte selected-tile record: BATTLE's at 0x8014d02c, filled by
- * map_store_selected_tile_data, and WORLD's at 0x8013a310, filled by
- * map_store_selected_tile_data and saved whole by
- * menu_copy_billboard_data_out.
- * _unknown_02/_unknown_04 are the two bytes of the per-surface-type main table
- * g_main_terrain_tile_info_pairs, 25 and 25 for all 64 surface types; nothing
- * reads them back. */
+/* Provisional 0xa-byte selected-tile record, filled by
+ * map_store_selected_tile_data and copied whole by
+ * menu_copy_billboard_data_out. _unknown_02/_unknown_04 are the two bytes of
+ * the per-surface-type main table g_main_terrain_tile_info_pairs, 25 and 25
+ * for all 64 surface types; nothing reads them back. */
 typedef struct map_selected_tile {
     s16 surface_type;   /* 0x00 */
     s16 _unknown_02;    /* 0x02 */
@@ -364,6 +362,8 @@ typedef struct map_selected_tile {
     s16 display_height; /* 0x06: half height + height * 2 + depth * 2 */
     s16 depth;          /* 0x08 */
 } map_selected_tile_t;
+
+extern map_selected_tile_t g_map_selected_tile_data;
 
 /* background */
 /* Map backgrounds use two four-byte runtime color slots. The fourth byte
@@ -380,26 +380,24 @@ typedef struct map_background_gradient_colors {
 } map_background_gradient_colors_t;
 typedef char map_background_gradient_colors_size_must_be_8[(sizeof(map_background_gradient_colors_t) == 8) ? 1 : -1];
 
-/* script state */
+/* The gradient colors of the Background instruction. */
+extern map_background_gradient_colors_t g_event_background_colors;
+
+/* event state */
 /* Map-destruction handshake between the event interpreter and the frame loop. */
 extern s16 g_map_destruction_wait_state;
+extern u16 g_map_refresh_pending;
 
 /* The raw weather script variable, before indoor and snow flags apply. */
 s32 map_get_weather(void);
+void map_wait_for_refresh(void);
 
-/* map state */
-extern map_selected_tile_t g_map_selected_tile_data;
-extern u16 g_map_refresh_pending;
+/* script lighting */
+/* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
+void map_light_thread(void);
+void map_reset_script_light_transform(void);
 
 /* unreferenced stubs, neutral names */
 s32 map_return_zero_1(void);
-
-void map_reset_script_light_transform(void);
-
-/* shared between programs */
-extern map_background_gradient_colors_t g_event_background_colors;
-
-/* shared with the per-program event interpreter and dialog thread */
-void map_wait_for_refresh(void);
 
 #endif

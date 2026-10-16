@@ -2,8 +2,7 @@
 
 #include "fft/data_item.h"
 #include "fft/main_item.h"
-#include "fft/menu.h"
-#include "fft/menu_panel.h"
+#include "fft/menu_status.h"
 #include "psx/types.h"
 
 /*

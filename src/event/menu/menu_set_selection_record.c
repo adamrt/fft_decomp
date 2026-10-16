@@ -1,7 +1,6 @@
 /* Saving a list's cursor row, scroll base and the entry under the cursor in a selection record. */
 
-#include "fft/menu.h"
-#include "fft/menu_input.h"
+#include "fft/menu_selection.h"
 #include "psx/types.h"
 
 /* Save a list's cursor row and scroll base in selection record `index`,

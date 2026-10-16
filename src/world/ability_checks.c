@@ -8,9 +8,7 @@
 #include "fft/job.h"
 #include "fft/main.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
 #include "fft/unit.h"
-#include "fft/world.h"
 #include "fft/world_formation.h"
 #include "psx/types.h"
 

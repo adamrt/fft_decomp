@@ -2,8 +2,9 @@
 
 #include "fft/data_job.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
-#include "fft/unit.h"
+#include "fft/menu_panel.h"
+#include "fft/unit_identity.h"
+#include "fft/unit_party.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

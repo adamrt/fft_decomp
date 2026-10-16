@@ -2,7 +2,7 @@
  * the AT list and turn order. */
 
 #include "fft/battle_action.h"
-#include "fft/battle_ai.h"
+#include "fft/battle_ai_decision.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_status.h"
@@ -13,10 +13,12 @@
 #include "fft/data_item.h"
 #include "fft/data_job.h"
 #include "fft/data_skillset.h"
+#include "fft/data_status.h"
 #include "fft/main.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
+#include "fft/menu_at_list.h"
+#include "fft/menu_command.h"
 #include "fft/unit.h"
 #include "psx/libc.h"
 #include "psx/types.h"

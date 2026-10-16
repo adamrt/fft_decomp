@@ -3,6 +3,7 @@
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
+#include "fft/menu_script.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"

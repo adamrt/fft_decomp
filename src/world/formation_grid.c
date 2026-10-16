@@ -2,16 +2,23 @@
  * grid rows, scrolling, the cursor, transitions, portrait slides and sprites, and graphics drawn below the sprite. */
 
 #include "fft/gfx.h"
-#include "fft/main.h"
+#include "fft/gfx_primitive.h"
+#include "fft/main_sound.h"
 #include "fft/menu.h"
+#include "fft/menu_cursor.h"
+#include "fft/menu_gfx.h"
+#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_overlay.h"
 #include "fft/menu_panel.h"
 #include "fft/menu_script.h"
+#include "fft/menu_selection.h"
+#include "fft/menu_status.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_party.h"
 #include "fft/world.h"
 #include "fft/world_formation.h"
 #include "fft/world_gfx.h"
@@ -21,7 +28,6 @@
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
-#include "psx/stddef.h"
 #include "psx/types.h"
 
 static s32 world_formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor);

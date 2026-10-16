@@ -3,7 +3,6 @@
 #include "fft/data_item.h"
 #include "fft/item.h"
 #include "fft/main_item.h"
-#include "fft/menu.h"
 #include "psx/types.h"
 
 /* Sort a -1 terminated item list in place (EQUIP's body).

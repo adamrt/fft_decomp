@@ -2,8 +2,7 @@
 
 #include "fft/data_item.h"
 #include "fft/item.h"
-#include "fft/menu.h"
-#include "fft/menu_panel.h"
+#include "fft/menu_status.h"
 #include "psx/types.h"
 
 static void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* out,

@@ -1,9 +1,7 @@
 /* The menu command that draws a textured quad at its own position or on the current list row. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

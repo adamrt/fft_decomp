@@ -1,7 +1,7 @@
 /* The menu command that queues its draw area unless a zoom transition already queued one. */
 
-#include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "psx/libgpu.h"
 

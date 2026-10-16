@@ -1,7 +1,7 @@
 /* Setting the menu text color. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 
 /* Set the menu text color from an RGB triple. Unlike BUNIT's body there is no null
  * check; nothing in CARD.OUT or EQUIP.OUT calls this copy. */

@@ -4,11 +4,10 @@
 #include "fft/data_ability.h"
 #include "fft/data_skillset.h"
 #include "fft/event_jobstts.h"
+#include "fft/job.h"
 #include "fft/main.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
 #include "fft/unit.h"
-#include "psx/stddef.h"
 #include "psx/types.h"
 
 /* Fill `list` with the abilities of job `job_id`'s skillset in `ability_category` for unit

@@ -1,6 +1,7 @@
 /* Scaled 8bpp POLY_FT4 setup and the zodiac primitives. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_primitive.h"
 #include "fft/menu_panel.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

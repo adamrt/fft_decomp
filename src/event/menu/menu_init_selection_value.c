@@ -1,6 +1,6 @@
 /* Storing a menu selection value as the menu opens. */
 
-#include "fft/menu_input.h"
+#include "fft/menu_selection.h"
 #include "psx/types.h"
 
 /* The same routine as menu_set_selection_value, compiled twice. menu_update_equipment

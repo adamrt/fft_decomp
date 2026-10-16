@@ -2,7 +2,7 @@
 
 #include "fft/data_item.h"
 #include "fft/main_item.h"
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

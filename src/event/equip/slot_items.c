@@ -6,7 +6,8 @@
 #include "fft/item.h"
 #include "fft/main.h"
 #include "fft/main_item.h"
-#include "fft/menu.h"
+#include "fft/menu_option.h"
+#include "fft/menu_status.h"
 #include "psx/types.h"
 
 static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id);

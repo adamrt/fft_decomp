@@ -1,9 +1,8 @@
 /* The menu command that draws a flat-colored tile, following the list row while one is rendered. */
 
 #include "fft/event_equip.h"
-#include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_list.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

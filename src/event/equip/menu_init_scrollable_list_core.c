@@ -1,9 +1,10 @@
 /* Pointing the scrollable list menu at a new entry list and resetting its render state. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_list.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
+#include "fft/menu_window.h"
 #include "psx/types.h"
 
 /* Point the scrollable list menu at a new -1 terminated entry list and reset

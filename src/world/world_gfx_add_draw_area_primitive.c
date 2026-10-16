@@ -1,6 +1,6 @@
 /* Queuing a drawing area primitive, moved to the second frame buffer when needed. */
 
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "fft/world_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

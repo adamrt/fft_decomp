@@ -1,10 +1,13 @@
 /* The options overlay entry, loading the saved options and starting the game options, AT list or dead unit menus. */
 
+#include "fft/battle_menu.h"
 #include "fft/event_option.h"
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_at_list.h"
+#include "fft/menu_dead_unit.h"
 #include "fft/menu_input.h"
-#include "fft/menu_overlay.h"
+#include "fft/menu_option.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "psx/types.h"

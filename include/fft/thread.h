@@ -7,10 +7,10 @@
 
 /* context */
 /* Native cooperative scheduler context, not scenario bytecode or its operand
- * buffer. BATTLE 0x8014c8a0 and WORLD 0x800ffd70 initialize the same layout;
- * both index slots with thread_id << 10 and start SP/FP at slot + 0x3f0.
- * The parameter stores at BATTLE 0x8014ca38 and WORLD's corresponding
- * three/four-parameter helpers establish full 32-bit payload values.
+ * buffer. thread_start initializes the same layout in BATTLE and WORLD: both
+ * index slots with thread_id << 10 and start SP/FP at slot + 0x3f0.
+ * thread_set_parameters and thread_set_four_parameters store full 32-bit
+ * payload values.
  * The seven 32-bit task values at 0x50 are zeroed by thread_start; each task gives them its own meaning, named
  * beside its thread functions: DIALOG_THREAD_WORD_* (text.h), SPRITE_MOVE_THREAD_WORD_* (script.h), and the
  * menu cursor bob and scrolling text list words MENU_CURSOR_THREAD_WORD_* and MENU_LIST_THREAD_WORD_* (menu.h).
@@ -59,6 +59,11 @@ extern thread_t g_thread_contexts[];
 extern thread_t* g_threads;
 extern s32 g_thread_current_id;
 
+/* Per-thread running flags that the BUNIT, CARD and WORLD input loops sample
+ * before a yield and compare after it; g_event_thread_status_snapshot is the
+ * event interpreter's. */
+extern u8 g_thread_status_snapshot[16];
+
 /* slots */
 /* Slot numbers of the cooperative threads: the index into g_threads
  * and the first argument of the thread calls. Slot 0 is the
@@ -70,10 +75,10 @@ extern s32 g_thread_current_id;
  * use (world_thread_slot_e, wldcore_thread_slot_e, attack_thread_slot_e,
  * bunit_thread_slot_e, equip_thread_slot_e, require_thread_slot_e). */
 
-/* The battle and world programs (twin code). */
+/* The battle and world programs, which share the event library's threads. */
 typedef enum thread_slot {
     THREAD_SLOT_MAIN = 0,
-    THREAD_SLOT_EVENT = 1,           /* the event script: script_run_next_event and its twin */
+    THREAD_SLOT_EVENT = 1,           /* the event script: script_run_next_event */
     THREAD_SLOT_UNIT_VIEW = 2,       /* the unit view supervisor that starts the four panels below */
     THREAD_SLOT_MENU_BUILDING = 3,   /* the menu entry starter and the help menu thread */
     THREAD_SLOT_SYSTEM_FUNCTION = 4, /* the system function thread and the spell quote it dispatches */
@@ -86,7 +91,7 @@ typedef enum thread_slot {
     THREAD_SLOT_UNIT_SUMMARY_PANEL = 11, /* unit summary */
     THREAD_SLOT_RIGHT_UNIT_STATS = 12,   /* right unit stats or attack caster stats */
     THREAD_SLOT_HOVERED_UNIT_STATS = 13, /* hovered unit stats or attack target stats */
-    /* Passed to the resolve_id functions, which return a slot below 16
+    /* Passed to the thread_resolve_id functions, which return a slot below 16
      * unchanged and otherwise the first idle slot. */
     THREAD_SLOT_FIRST_IDLE = 16,
 } thread_slot_e;
@@ -118,13 +123,13 @@ typedef enum thread_borrowed_slot {
 
 /* tasks */
 /* task_id values shared by the BATTLE and WORLD schedulers. Each named id is
- * set by one family of twin thread functions (set_current_task_id or a
- * direct task_id store) and is looked up with *_thread_find_running_by_task.
+ * set by one thread function (thread_set_current_task_id or a direct task_id
+ * store) and is looked up with thread_find_running_by_task.
  * 1/2/3 are the dialogue text threads' handshake: a text thread runs as 1,
  * sets 2 to wait until another thread stores 1 to resume it, and stops when
  * another thread stores 3. Ids without a known setter stay literal. */
 typedef enum thread_task {
-    /* No task: *_thread_start and *_thread_exit_current store it, and
+    /* No task: thread_start and thread_exit_current store it, and
      * world_menu_start_thread_group stores it into thread 12 when the location changes. */
     THREAD_TASK_NONE = 0,
     THREAD_TASK_RESUME = 1,
@@ -175,19 +180,6 @@ typedef enum thread_task {
     THREAD_TASK_UNIT_MESSAGE = 70,
 } thread_task_e;
 
-/* thread ids */
-s32 thread_find_running_by_task(s32 task_id);
-s32 thread_resolve_id(s32 requested_thread_id);
-s32 thread_resolve_id_after_current(s32 requested_thread_id);
-
-/* task parameters */
-void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
-void thread_set_four_parameters(s32 thread_id, s32 first, s32 second, s32 third, s32 fourth);
-
-/* task state */
-s32 thread_get_current_task_id(void);
-void thread_set_current_task_id(s32 task_id);
-
 /* lifecycle */
 void thread_start(s32 thread_id, void (*function)(void));
 void thread_resume(s32 thread_id);
@@ -195,9 +187,18 @@ void thread_suspend(s32 thread_id);
 void thread_exit_current(void);
 s32 thread_is_running(s32 thread_id);
 void thread_reset_scheduler(void);
+s32 thread_find_running_by_task(s32 task_id);
+s32 thread_resolve_id(s32 requested_thread_id);
+s32 thread_resolve_id_after_current(s32 requested_thread_id);
 
-/* accessors: original assembly; BATTLE adds the record offset with addu,
- * WORLD with the trapping add */
+/* parameters and task ids */
+void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
+void thread_set_four_parameters(s32 thread_id, s32 first, s32 second, s32 third, s32 fourth);
+s32 thread_get_current_task_id(void);
+void thread_set_current_task_id(s32 task_id);
+
+/* Original assembly accessors: BATTLE adds the record offset with addu,
+ * WORLD with the trapping add. */
 s32 thread_get_current_parameter_1(void);
 s32 thread_get_current_parameter_2(void);
 s32 thread_get_current_parameter_3(void);
@@ -231,9 +232,7 @@ void* thread_get_current_global_pointer(void);
  * arguments beyond those registers are not copied across the stack switch.
  * The argument list stays unspecified because callback signatures differ. */
 extern void (*g_thread_call_target)(void);
-s32 thread_call_on_main_stack();
 
-/* thread status snapshot */
-extern u8 g_thread_status_snapshot[16];
+s32 thread_call_on_main_stack();
 
 #endif

@@ -1,7 +1,7 @@
 /* A menu callback returning whether an ability list entry is not disabled. */
 
 #include "fft/data_ability.h"
-#include "fft/menu_panel.h"
+#include "fft/job.h"
 #include "psx/types.h"
 
 /* Menu callback: 1 unless the entry's disabled bit (0x4000) is set. */

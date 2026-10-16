@@ -5,6 +5,7 @@
 
 #include "psx/types.h"
 
+/* ability ids */
 /*
  * Ability id classes, as main_ability_calculate_pointers_and_type splits
  * them: default 0x000-0x16f, item 0x170-0x17d, throw 0x17e-0x189, jump
@@ -26,29 +27,6 @@ enum {
      * any smaller id unchanged. */
     ABILITY_ID_RANDOM_FIRST = 510,
 };
-
-/* The random R/S/M selector uses a different legacy bit assignment from the
- * skillset-list filter: support and movement are reversed. */
-typedef enum rsm_ability_filter {
-    RSM_ABILITY_FILTER_REACTION = 0x02,
-    RSM_ABILITY_FILTER_SUPPORT = 0x04,
-    RSM_ABILITY_FILTER_MOVEMENT = 0x08,
-} rsm_ability_filter_e;
-
-/* Packed entries shared by the WORLD, BUNIT, and JOBSTTS ability menus. The
- * low-ten-bit mask is intentionally wider than ABILITY_ID_MASK: bit 9 is
- * unused by supported IDs, while bits 10 and 11 remain outside the ID. */
-enum {
-    ABILITY_LIST_ENTRY_ID_MASK = 0x03ff,
-    ABILITY_LIST_ENTRY_DISABLED_SHIFT = 14,
-    ABILITY_LIST_ENTRY_END = -1,
-};
-
-typedef enum ability_list_entry_flag {
-    ABILITY_LIST_ENTRY_LEARNED = 0x1000,
-    ABILITY_LIST_ENTRY_HIDE_DETAILS = 0x2000,
-    ABILITY_LIST_ENTRY_DISABLED = 0x4000,
-} ability_list_entry_flag_e;
 
 /* Ability ids, ABILITY_ID_<SKILLSET>_<NAME>. NAME is the ability's name in the
  * game's text. SKILLSET is the lowest-numbered named skillset whose row lists
@@ -557,9 +535,34 @@ typedef enum ability_id {
     ABILITY_ID_KNOCKBACK = 512, /* past the id space: the strike that resolves a knockback */
 } ability_id_e;
 
-/* Primary ability-record byte 3 at 0x8005ebf0. Learn-on-hit is consumed at
- * 0x8018e6b8; WORLD 0x80122b08 and JOBSTTS 0x801e03bc prove the JP-learning
- * flag's negative polarity. */
+/* ability lists */
+/* The random R/S/M selector uses a different legacy bit assignment from the
+ * skillset-list filter: support and movement are reversed. */
+typedef enum rsm_ability_filter {
+    RSM_ABILITY_FILTER_REACTION = 0x02,
+    RSM_ABILITY_FILTER_SUPPORT = 0x04,
+    RSM_ABILITY_FILTER_MOVEMENT = 0x08,
+} rsm_ability_filter_e;
+
+/* Packed entries shared by the WORLD, BUNIT, and JOBSTTS ability menus. The
+ * low-ten-bit mask is intentionally wider than ABILITY_ID_MASK: bit 9 is
+ * unused by supported IDs, while bits 10 and 11 remain outside the ID. */
+enum {
+    ABILITY_LIST_ENTRY_ID_MASK = 0x03ff,
+    ABILITY_LIST_ENTRY_DISABLED_SHIFT = 14,
+    ABILITY_LIST_ENTRY_END = -1,
+};
+
+typedef enum ability_list_entry_flag {
+    ABILITY_LIST_ENTRY_LEARNED = 0x1000,
+    ABILITY_LIST_ENTRY_HIDE_DETAILS = 0x2000,
+    ABILITY_LIST_ENTRY_DISABLED = 0x4000,
+} ability_list_entry_flag_e;
+
+/* ability records */
+/* ability_data_t.type_flags. battle_ability_find_learn_on_hit_unit consumes
+ * learn-on-hit; ability_build_list and jobstts_ability_build_list prove the
+ * JP-learning flag's negative polarity. */
 typedef enum ability_type_flag {
     ABILITY_TYPE_FLAG_LEARN_ON_HIT = 0x20,
     ABILITY_TYPE_FLAG_SHOW_NAME = 0x40, /* the announcement shows the ability's name when the option is on */
@@ -584,6 +587,27 @@ typedef enum ability_type {
     ABILITY_TYPE_MOVEMENT = 8,
 } ability_type_e;
 
+/* Static AI behavior bytes. The AI working record replaces flags_4 with
+ * skillset usage flags after copying these four bytes. */
+typedef struct ability_ai_flags {
+    u8 flags_1;
+    u8 flags_2;
+    u8 flags_3;
+    u8 flags_4;
+} ability_ai_flags_t;
+typedef char ability_ai_flags_size_must_be_4[(sizeof(ability_ai_flags_t) == 4) ? 1 : -1];
+
+/* Eight-byte ability records, g_main_ability_data. AI loaders copy the four
+ * flag bytes with the generic 16-bit-copy helper. */
+typedef struct ability_data {
+    u16 jp_cost;                 /* 0x00 */
+    u8 learn_rate;               /* 0x02; learn-on-hit roll out of 100 */
+    u8 type_flags;               /* 0x03; ability_type_flag_e high bits; serialized class in the low nibble */
+    ability_ai_flags_t ai_flags; /* 0x04 */
+} ability_data_t;
+typedef char ability_data_size_must_be_8[(sizeof(ability_data_t) == 8) ? 1 : -1];
+
+/* secondary records */
 /* Four flag bytes of ability_secondary_data_t, with only confirmed meanings named. */
 typedef enum ability_secondary_flags_1 {
     ABILITY_SECONDARY_FLAG_1_CANNOT_TARGET_SELF = 0x01,
@@ -648,15 +672,16 @@ enum {
     ABILITY_FORMULA_ID_LIMIT = 101,
 };
 
-/* Default-ability secondary records at 0x8005fbf0.
- * The 14-byte stride/range are used by main_ability_get_range; BATTLE
- * 0x8018b738 reads flags_1, 0x8019e6b8 reads flags_2, and 0x80195c70
- * copies element into the considered AI ability. Its loader reads CT at
- * 0x80195c64 and AoE at 0x80195cec. Other bytes stay provisional. */
+/* Default-ability secondary records, g_main_ability_range_data.
+ * main_ability_get_range uses the 14-byte stride and the range;
+ * battle_action_run_pre_formula_setup reads flags_1,
+ * battle_ai_classify_ability_effect reads flags_2, and
+ * battle_ai_load_ability_entry copies the element, CT and AoE into the
+ * considered AI ability. Other bytes stay provisional. */
 typedef struct ability_secondary_data {
     u8 range;                /* 0x00; ABILITY_RANGE_WHOLE_MAP covers the whole map */
     u8 aoe;                  /* 0x01; ABILITY_RANGE_WHOLE_MAP covers the whole map */
-    u8 vertical;             /* 0x02; passed as the vertical tolerance at 0x8017a47c */
+    u8 vertical;             /* 0x02; vertical tolerance (battle_target_set_ability_panels) */
     u8 flags_1;              /* 0x03; ability_secondary_flags_1_e */
     u8 flags_2;              /* 0x04; ability_secondary_flags_2_e */
     u8 flags_3;              /* 0x05; ability_secondary_flags_3_e */
@@ -665,9 +690,9 @@ typedef struct ability_secondary_data {
     u8 formula;              /* 0x08; ability_formula_e */
     u8 x;                    /* 0x09; multi-hit formulas take the hit count from it */
     u8 y;                    /* 0x0a */
-    u8 status_infliction_id; /* 0x0b; selects the six-byte status record at 0x8019bd78 */
+    u8 status_infliction_id; /* 0x0b; selects a status_infliction_data_t record */
     u8 ct;                   /* 0x0c; charge clockticks; masked 0x7f except by the AI; no retail record sets bit 7 */
-    u8 mp_cost;              /* 0x0d; ability-list eligibility compares this with max MP at 0x8019a89c */
+    u8 mp_cost;              /* 0x0d; AI ability-list eligibility compares this with max MP */
 } ability_secondary_data_t;
 typedef char ability_secondary_data_size_must_be_14[(sizeof(ability_secondary_data_t) == 14) ? 1 : -1];
 
@@ -699,26 +724,7 @@ typedef union main_ability_secondary_pointer {
 } main_ability_secondary_pointer_t;
 typedef char main_ability_secondary_pointer_size_must_be_4[(sizeof(main_ability_secondary_pointer_t) == 4) ? 1 : -1];
 
-/* Static AI behavior bytes. The AI working record replaces flags_4 with
- * skillset usage flags after copying these four bytes. */
-typedef struct ability_ai_flags {
-    u8 flags_1;
-    u8 flags_2;
-    u8 flags_3;
-    u8 flags_4;
-} ability_ai_flags_t;
-typedef char ability_ai_flags_size_must_be_4[(sizeof(ability_ai_flags_t) == 4) ? 1 : -1];
-
-/* Eight-byte ability records at 0x8005ebf0. AI loaders copy the four flag
- * bytes with the generic 16-bit-copy helper. */
-typedef struct ability_data {
-    u16 jp_cost;                 /* 0x00 */
-    u8 learn_rate;               /* 0x02; learn-on-hit roll out of 100 (0x8018e6b8) */
-    u8 type_flags;               /* 0x03; ability_type_flag_e high bits; serialized class in the low nibble */
-    ability_ai_flags_t ai_flags; /* 0x04 */
-} ability_data_t;
-typedef char ability_data_size_must_be_8[(sizeof(ability_data_t) == 8) ? 1 : -1];
-
+/* status infliction */
 /* Bit flags in status_infliction_data_t.type and the active-ability copy. The
  * target status applicator checks these in descending-bit precedence. */
 typedef enum status_infliction_type {
@@ -728,8 +734,8 @@ typedef enum status_infliction_type {
     STATUS_INFLICTION_TYPE_ALL_OR_NOTHING = 0x80,
 } status_infliction_type_e;
 
-/* Six-byte status-infliction records at 0x80063fc4; byte 0 selects how the
- * five-byte status set is applied. */
+/* Six-byte status-infliction records, g_main_status_infliction_data; byte 0
+ * selects how the five-byte status set is applied. */
 typedef struct status_infliction_data {
     u8 type; /* status_infliction_type_e bit flags */
     u8 statuses[5];

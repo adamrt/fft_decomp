@@ -1,6 +1,6 @@
 /* A row callback returning the JP the selected job needs for its next level. */
 
-#include "fft/menu_panel.h"
+#include "fft/job.h"
 #include "psx/types.h"
 
 /* Row callback: return the JP the selected job needs for its next level; the row is ignored. */

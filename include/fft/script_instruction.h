@@ -1,12 +1,12 @@
 #ifndef SCRIPT_INSTRUCTION_H
 #define SCRIPT_INSTRUCTION_H
 
-/* Event script bytecode: opcodes, built-in commands and instruction formats. */
+/* Event script bytecode: the opcodes, their operand values, and the event file, instruction and operand records. */
 
 #include "fft/gfx.h"
 #include "psx/types.h"
 
-/* bytecode */
+/* block sizes and unit selectors */
 enum {
     EVENT_BLOCK_BYTES = 8192,
     EVENT_BLOCK_SECTORS = 4,
@@ -18,7 +18,7 @@ enum {
     EVENT_UNIT_SELECTOR_IMPORTANT_UNIT = 0x68,
     EVENT_UNIT_SELECTOR_ACTIVE_TURN = 0x69,
     /* First unit-group selector. The instructions that take a unit group pass
-     * selector - 0xfe to *_script_filter_unit_id_by_mode as its mode (2 up);
+     * selector - 0xfe to script_filter_unit_id_by_mode as its mode (2 up);
      * unit id 0 selects mode 1, every unit. */
     EVENT_UNIT_GROUP_FIRST = 0x100,
     /* Five ordinary deployed-unit IDs; the end value is exclusive. */
@@ -32,9 +32,8 @@ enum {
     EVENT_UNIT_SLOT_EMPTY = 1000,
 };
 
-#define EVENT_TEXT_OFFSET_PROCESSED 0xf2f2f2f2U
-
-/* Retail scenario bytecode, reviewed against BATTLE 0x80143bd8..0x80145f78 and
+/* opcodes */
+/* Retail scenario bytecode, reviewed against BATTLE's script_execute_event and
  * the shared BATTLE/WORLD operand-length table g_script_event_instruction_sizes.
  *
  * Encoding: one opcode byte, then the operand bytes the length table counts
@@ -280,7 +279,7 @@ typedef enum event_opcode {
     EVENT_OPCODE_NOP = 0xf2,                  /* 0 */
 } event_opcode_e;
 
-/* built-in commands */
+/* operand values */
 /* Built-in operation selected by EVENT_OPCODE_CALL_FUNCTION. The PSX domain
  * is 0x01..0x12 and is shared by the structurally parallel BATTLE and WORLD
  * interpreters. BLOCK_START handles only the mute/unmute selectors. */
@@ -354,7 +353,7 @@ typedef enum event_scenario_condition {
     EVENT_SCENARIO_CONDITION_DATE_ON_OR_AFTER = 17,    /* month id, day value */
     EVENT_SCENARIO_CONDITION_CASUALTIES_AT_LEAST = 18, /* compares with id, not value */
     EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST = 19,  /* compares with id, not value */
-    EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED = 22,    /* action_check_battle_outcome() returns 0 */
+    EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED = 22,    /* battle_action_check_battle_outcome returns 0 */
     EVENT_SCENARIO_CONDITION_UNIT_AT_TILE = 24,        /* unit id stands on x value, the y and the elevation */
     /* Stores id as the current event; the result is always RUN_EVENT. */
     EVENT_SCENARIO_CONDITION_RUN_EVENT = 25,
@@ -388,7 +387,10 @@ typedef enum event_inflict_status {
     EVENT_INFLICT_STATUS_POISON = 0x02,
 } event_inflict_status_e;
 
-/* instruction formats */
+/* event file */
+/* event_file_block_t.text_offset_or_marker once script_load_event has processed the block. */
+#define EVENT_TEXT_OFFSET_PROCESSED 0xf2f2f2f2U
+
 /* EVENT/TEST.EVT record. The first 32-bit value is relative to the block base, not
  * data[]. script_load_event converts it to a text pointer, then overwrites
  * it with EVENT_TEXT_OFFSET_PROCESSED. This is not a decoded instruction
@@ -400,6 +402,7 @@ typedef struct event_file_block {
 } event_file_block_t;
 typedef char event_file_block_size_must_be_8192[(sizeof(event_file_block_t) == EVENT_BLOCK_BYTES) ? 1 : -1];
 
+/* dialog instructions */
 /* Dialogue commands are byte-aligned records in the event instruction stream. */
 typedef struct event_display_message_instruction {
     u8 opcode;
@@ -432,6 +435,36 @@ static inline event_change_dialog_instruction_t* event_change_dialog_at(u8* base
     return (event_change_dialog_instruction_t*)(base + byte_offset);
 }
 
+/* unit operands */
+/* Operand records start after the opcode byte. 16-bit values stay in
+ * little-endian byte arrays because the interpreter may address them at any
+ * byte alignment. */
+typedef struct event_unit_parameters {
+    u8 unit_id_le[2];
+} event_unit_parameters_t;
+
+typedef struct event_unit_placement {
+    u8 x;
+    u8 y;
+    u8 elevation;
+    u8 facing;
+} event_unit_placement_t;
+
+/* Direct battle-slot placement bypasses the renderer update performed by WarpUnit. */
+typedef struct event_set_battle_unit_position_instruction {
+    u8 opcode;
+    u8 battle_id;
+    u8 _unused_02;
+    event_unit_placement_t placement;
+} event_set_battle_unit_position_instruction_t;
+typedef char event_set_battle_unit_position_instruction_size_must_be_7
+    [sizeof(event_set_battle_unit_position_instruction_t) == 7 ? 1 : -1];
+
+typedef struct event_warp_unit_parameters {
+    u8 unit_id_le[2];
+    event_unit_placement_t placement;
+} event_warp_unit_parameters_t;
+
 /* Eight-byte operand payload of EVENT_OPCODE_WALK_TO. Multi-byte values
  * remain byte arrays because event scripts are not guaranteed to be aligned. */
 typedef struct event_walk_to_parameters {
@@ -444,8 +477,104 @@ typedef struct event_walk_to_parameters {
 } event_walk_to_parameters_t;
 typedef char event_walk_to_parameters_size_must_be_8[sizeof(event_walk_to_parameters_t) == 8 ? 1 : -1];
 
-/* Fixed event operand records. 16-bit values stay in little-endian byte arrays
- * because the interpreter may address them at any byte alignment. */
+/* Jump operands: unit id, encoded path length, and direction. */
+typedef struct event_jump_parameters {
+    u8 unit_id_le[2];
+    u8 length_plus_one;
+    u8 direction;
+} event_jump_parameters_t;
+
+typedef struct event_march_parameters {
+    u8 unit_id_le[2];
+    u8 wait_frames;
+} event_march_parameters_t;
+
+/* SpriteMove uses duration_or_speed_le as frames; SpriteMoveBeta as speed. */
+typedef struct event_sprite_move_parameters {
+    u8 unit_id_le[2];
+    u8 destination_le[3][2];
+    u8 curve;
+    u8 weight;
+    u8 duration_or_speed_le[2];
+} event_sprite_move_parameters_t;
+typedef char event_sprite_move_parameters_size_must_be_12[sizeof(event_sprite_move_parameters_t) == 12 ? 1 : -1];
+
+typedef struct event_unit_anim_parameters {
+    u8 unit_id_le[2];
+    u8 animation_le[2];
+    u8 facing_update_mode;
+} event_unit_anim_parameters_t;
+
+/* The animation's high byte also controls facing-update suppression. */
+typedef struct event_unit_anim_rotate_parameters {
+    u8 unit_id_le[2];
+    u8 rotation;
+    u8 animation_le[2];
+} event_unit_anim_rotate_parameters_t;
+
+typedef struct event_rotate_unit_parameters {
+    u8 unit_id_le[2];
+    u8 facing;
+    u8 mode;
+    u8 speed;
+    u8 delay;
+} event_rotate_unit_parameters_t;
+
+typedef struct event_face_tile_parameters {
+    u8 unit_id_le[2];
+    u8 x;
+    u8 y;
+    u8 _unused_04;
+    u8 mode;
+    u8 speed;
+    u8 delay;
+} event_face_tile_parameters_t;
+
+typedef struct event_face_unit_parameters {
+    u8 first_unit_id_le[2];
+    u8 second_unit_id_le[2];
+    u8 mode;
+    u8 speed;
+    u8 delay;
+} event_face_unit_parameters_t;
+
+typedef struct event_mirror_sprite_parameters {
+    u8 unit_id_le[2];
+    u8 mode;
+} event_mirror_sprite_parameters_t;
+
+typedef struct event_unit_color {
+    u8 mode;
+    rgb_s8_t rgb;
+    u8 duration;
+} event_unit_color_t;
+
+typedef struct event_color_unit_parameters {
+    u8 unit_id_le[2];
+    event_unit_color_t color;
+} event_color_unit_parameters_t;
+typedef char event_color_unit_parameters_size_must_be_7[sizeof(event_color_unit_parameters_t) == 7 ? 1 : -1];
+
+typedef struct event_movement_effect_parameters {
+    u8 unit_id_le[2];
+    u8 suppressed;
+} event_movement_effect_parameters_t;
+
+typedef struct event_change_stats_parameters {
+    u8 unit_id_le[2];
+    u8 stat; /* event_change_stats_e */
+    u8 delta_le[2];
+} event_change_stats_parameters_t;
+typedef char event_change_stats_parameters_size_must_be_5[sizeof(event_change_stats_parameters_t) == 5 ? 1 : -1];
+
+typedef struct event_inflict_status_parameters {
+    u8 unit_id_le[2];
+    u8 mode; /* event_inflict_status_e */
+    u8 wait_frames_le[2];
+} event_inflict_status_parameters_t;
+typedef char event_inflict_status_parameters_size_must_be_5[sizeof(event_inflict_status_parameters_t) == 5 ? 1 : -1];
+
+/* screen, sound and wait operands */
 typedef struct event_background_sound_parameters {
     u8 sound_id;
     u8 volume_from;
@@ -455,13 +584,6 @@ typedef struct event_background_sound_parameters {
 } event_background_sound_parameters_t;
 typedef char
     event_background_sound_parameters_size_must_be_5[sizeof(event_background_sound_parameters_t) == 5 ? 1 : -1];
-
-typedef struct event_inflict_status_parameters {
-    u8 unit_id_le[2];
-    u8 mode; /* event_inflict_status_e */
-    u8 wait_frames_le[2];
-} event_inflict_status_parameters_t;
-typedef char event_inflict_status_parameters_size_must_be_5[sizeof(event_inflict_status_parameters_t) == 5 ? 1 : -1];
 
 typedef struct event_earthquake_parameters {
     struct {
@@ -489,120 +611,12 @@ typedef struct event_map_light_parameters {
 } event_map_light_parameters_t;
 typedef char event_map_light_parameters_size_must_be_14[sizeof(event_map_light_parameters_t) == 14 ? 1 : -1];
 
-typedef struct event_unit_color {
-    u8 mode;
-    rgb_s8_t rgb;
-    u8 duration;
-} event_unit_color_t;
-
-typedef struct event_color_unit_parameters {
-    u8 unit_id_le[2];
-    event_unit_color_t color;
-} event_color_unit_parameters_t;
-typedef char event_color_unit_parameters_size_must_be_7[sizeof(event_color_unit_parameters_t) == 7 ? 1 : -1];
-
-typedef struct event_change_stats_parameters {
-    u8 unit_id_le[2];
-    u8 stat; /* event_change_stats_e */
-    u8 delta_le[2];
-} event_change_stats_parameters_t;
-typedef char event_change_stats_parameters_size_must_be_5[sizeof(event_change_stats_parameters_t) == 5 ? 1 : -1];
-
-typedef struct event_mirror_sprite_parameters {
-    u8 unit_id_le[2];
-    u8 mode;
-} event_mirror_sprite_parameters_t;
-
-typedef struct event_movement_effect_parameters {
-    u8 unit_id_le[2];
-    u8 suppressed;
-} event_movement_effect_parameters_t;
-
-typedef struct event_march_parameters {
-    u8 unit_id_le[2];
-    u8 wait_frames;
-} event_march_parameters_t;
-
-typedef struct event_unit_anim_parameters {
-    u8 unit_id_le[2];
-    u8 animation_le[2];
-    u8 facing_update_mode;
-} event_unit_anim_parameters_t;
-
-/* The animation's high byte also controls facing-update suppression. */
-typedef struct event_unit_anim_rotate_parameters {
-    u8 unit_id_le[2];
-    u8 rotation;
-    u8 animation_le[2];
-} event_unit_anim_rotate_parameters_t;
-
 typedef struct event_wait_value_parameters {
     u8 variable_id_le[2];
     u8 test_value_le[2];
 } event_wait_value_parameters_t;
 
-typedef struct event_rotate_unit_parameters {
-    u8 unit_id_le[2];
-    u8 facing;
-    u8 mode;
-    u8 speed;
-    u8 delay;
-} event_rotate_unit_parameters_t;
-
-typedef struct event_unit_parameters {
-    u8 unit_id_le[2];
-} event_unit_parameters_t;
-
-typedef struct event_unit_placement {
-    u8 x;
-    u8 y;
-    u8 elevation;
-    u8 facing;
-} event_unit_placement_t;
-
-/* Direct battle-slot placement bypasses the renderer update performed by WarpUnit. */
-typedef struct event_set_battle_unit_position_instruction {
-    u8 opcode;
-    u8 battle_id;
-    u8 _unused_02;
-    event_unit_placement_t placement;
-} event_set_battle_unit_position_instruction_t;
-typedef char event_set_battle_unit_position_instruction_size_must_be_7
-    [sizeof(event_set_battle_unit_position_instruction_t) == 7 ? 1 : -1];
-
-typedef struct event_warp_unit_parameters {
-    u8 unit_id_le[2];
-    event_unit_placement_t placement;
-} event_warp_unit_parameters_t;
-
-typedef struct event_face_tile_parameters {
-    u8 unit_id_le[2];
-    u8 x;
-    u8 y;
-    u8 _unused_04;
-    u8 mode;
-    u8 speed;
-    u8 delay;
-} event_face_tile_parameters_t;
-
-typedef struct event_face_unit_parameters {
-    u8 first_unit_id_le[2];
-    u8 second_unit_id_le[2];
-    u8 mode;
-    u8 speed;
-    u8 delay;
-} event_face_unit_parameters_t;
-
-/* SpriteMove uses duration_or_speed_le as frames; SpriteMoveBeta as speed. */
-typedef struct event_sprite_move_parameters {
-    u8 unit_id_le[2];
-    u8 destination_le[3][2];
-    u8 curve;
-    u8 weight;
-    u8 duration_or_speed_le[2];
-} event_sprite_move_parameters_t;
-typedef char event_sprite_move_parameters_size_must_be_12[sizeof(event_sprite_move_parameters_t) == 12 ? 1 : -1];
-
+/* camera operands */
 typedef enum event_camera_component {
     EVENT_CAMERA_COMPONENT_X = 0,
     EVENT_CAMERA_COMPONENT_Z,
@@ -664,12 +678,5 @@ typedef struct event_focus_speed_instruction {
     event_focus_speed_parameters_t parameters;
 } event_focus_speed_instruction_t;
 typedef char event_focus_speed_instruction_size_must_be_3[sizeof(event_focus_speed_instruction_t) == 3 ? 1 : -1];
-
-/* Jump operands: unit id, encoded path length, and direction. */
-typedef struct event_jump_parameters {
-    u8 unit_id_le[2];
-    u8 length_plus_one;
-    u8 direction;
-} event_jump_parameters_t;
 
 #endif

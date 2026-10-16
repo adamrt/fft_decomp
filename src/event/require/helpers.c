@@ -2,9 +2,8 @@
  * fade. */
 
 #include "fft/event_require.h"
-#include "fft/main.h"
 #include "fft/main_file.h"
-#include "fft/menu_list.h"
+#include "fft/menu_input.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/thread.h"

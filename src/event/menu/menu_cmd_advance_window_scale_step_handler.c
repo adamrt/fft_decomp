@@ -1,7 +1,7 @@
 /* The menu command that advances the transition frame. */
 
-#include "fft/menu.h"
 #include "fft/menu_script.h"
+#include "fft/menu_window.h"
 #include "psx/types.h"
 
 /* Command 0x16: advance the window zoom transition frame (up to 4, the open window), then skip

@@ -4,7 +4,8 @@
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/wldcore.h"
-#include "fft/wldcore_script.h"
+#include "fft/wldcore_gfx.h"
+#include "fft/wldcore_sound.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

@@ -1,6 +1,5 @@
 /* One row of a window image, built from an eight-tile border and interior pattern. */
 
-#include "fft/menu.h"
 #include "psx/types.h"
 
 /* Build one row of a window image from eight 4-pixel tiles at tiles[index]: tiles 0-1 are the

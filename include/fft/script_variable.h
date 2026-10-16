@@ -6,10 +6,10 @@
 #include "fft/script_instruction.h"
 #include "psx/types.h"
 
-/* variables */
+/* variable ids */
 /* Event-script variable ids shared by the BATTLE and WORLD interpreters.
  * The calendar and location ids are also serialized into the memory-card
- * slot description by CARD 0x801c01ac. */
+ * slot description by card_save_build_buffer. */
 typedef enum event_script_variable_id {
     /* 32-bit result tested by the conditional-jump opcodes. */
     EVENT_SCRIPT_VAR_COMPARISON_RESULT = 0x00,
@@ -212,47 +212,6 @@ enum {
     EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT = 64,
 };
 
-/* Event ids: EVENT_SCRIPT_VAR_CURRENT_EVENT, the 0x2000-byte block of
- * EVENT/TEST.EVT that holds the event's script and text, and the index of
- * g_main_scenario_event_finish_operations. The game has no names for its
- * events; the ones the code singles out are named here for what their own
- * script and text show. */
-typedef enum event_id {
-    /* CallFunction JOIN_UNITS_SILENTLY also restores the new-game inventory
-     * in the events below this one. */
-    EVENT_ID_NEW_GAME_INVENTORY_END = 0x4e,
-    /* A Zodiac Stone speaks in these two. Their centered messages start at
-     * the box's left edge while ETC's graphics are off. */
-    EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9,
-    /* Also the event the ending leaves current, with the next scenario
-     * requested, so that ATTACK steps on from it. */
-    EVENT_ID_MALAK_REVIVED = 0x12a,
-    /* King Delita and Ovelia. Its save does not request the next scenario. */
-    EVENT_ID_EPILOGUE = 0x12c,
-    /* REQUIRE congratulates the player on completing the game after it. */
-    EVENT_ID_FINAL_BATTLE_WON = 0x145,
-    /* *_script_run_event_frame returns 0x13 when it ends. */
-    EVENT_ID_FUNERAL = 0x147,
-    /* A unit the event draws also gets its status graphics. */
-    EVENT_ID_LIMBERRY_CEMETERY_BATTLE = 0x18c,
-    /* The 0x1a events no scenario names, through TUTORIAL_LAST:
-     * SCENARIO_CHECK starts the first four, and the sixteen tutorials follow. */
-    EVENT_ID_COMMON_FIRST = 0x190,
-    EVENT_ID_GAME_OVER = 0x190,    /* the battle is lost */
-    EVENT_ID_BATTLE_START = 0x191, /* while EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED is set */
-    EVENT_ID_BATTLE_WON = 0x192,
-    EVENT_ID_DEBUG_BATTLE_START = 0x193, /* BATTLE_START under EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE */
-    /* The same script as GAME_OVER; while it runs, every unit selector
-     * resolves to the first unit that is a Ramza. */
-    EVENT_ID_GAME_OVER_RAMZA = 0x194,
-    EVENT_ID_TUTORIAL_FIRST = 0x19a,
-    EVENT_ID_TUTORIAL_LAST = 0x1a9,
-    /* These two scenes carry on in the event that follows; the EVTCHR sprites
-     * stay loaded after them. */
-    EVENT_ID_OLAN_WOUNDED = 0x1ad,
-    EVENT_ID_BEOWULF_INVITATION = 0x1d1,
-} event_id_e;
-
 /* The Deep Dungeon location menu stores the chosen floor in the pending
  * sound effect's variable before it runs the entry script. */
 enum {
@@ -278,13 +237,53 @@ enum {
     EVENT_SCRIPT_PACKED_NIBBLE_WORD_FIRST = 0x97,
 };
 
+/* event ids */
+/* Event ids: EVENT_SCRIPT_VAR_CURRENT_EVENT, the 0x2000-byte block of
+ * EVENT/TEST.EVT that holds the event's script and text, and the index of
+ * g_main_scenario_event_finish_operations. The game has no names for its
+ * events; the ones the code singles out are named here for what their own
+ * script and text show. */
+typedef enum event_id {
+    /* CallFunction JOIN_UNITS_SILENTLY also restores the new-game inventory
+     * in the events below this one. */
+    EVENT_ID_NEW_GAME_INVENTORY_END = 0x4e,
+    /* A Zodiac Stone speaks in these two. Their centered messages start at
+     * the box's left edge while ETC's graphics are off. */
+    EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9,
+    /* Also the event the ending leaves current, with the next scenario
+     * requested, so that ATTACK steps on from it. */
+    EVENT_ID_MALAK_REVIVED = 0x12a,
+    /* King Delita and Ovelia. Its save does not request the next scenario. */
+    EVENT_ID_EPILOGUE = 0x12c,
+    /* REQUIRE congratulates the player on completing the game after it. */
+    EVENT_ID_FINAL_BATTLE_WON = 0x145,
+    /* script_run_event_frame returns 0x13 when it ends. */
+    EVENT_ID_FUNERAL = 0x147,
+    /* A unit the event draws also gets its status graphics. */
+    EVENT_ID_LIMBERRY_CEMETERY_BATTLE = 0x18c,
+    /* The 0x1a events no scenario names, through TUTORIAL_LAST:
+     * SCENARIO_CHECK starts the first four, and the sixteen tutorials follow. */
+    EVENT_ID_COMMON_FIRST = 0x190,
+    EVENT_ID_GAME_OVER = 0x190,    /* the battle is lost */
+    EVENT_ID_BATTLE_START = 0x191, /* while EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED is set */
+    EVENT_ID_BATTLE_WON = 0x192,
+    EVENT_ID_DEBUG_BATTLE_START = 0x193, /* BATTLE_START under EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE */
+    /* The same script as GAME_OVER; while it runs, every unit selector
+     * resolves to the first unit that is a Ramza. */
+    EVENT_ID_GAME_OVER_RAMZA = 0x194,
+    EVENT_ID_TUTORIAL_FIRST = 0x19a,
+    EVENT_ID_TUTORIAL_LAST = 0x1a9,
+    /* These two scenes carry on in the event that follows; the EVTCHR sprites
+     * stay loaded after them. */
+    EVENT_ID_OLAN_WOUNDED = 0x1ad,
+    EVENT_ID_BEOWULF_INVITATION = 0x1d1,
+} event_id_e;
+
+/* variable bank */
 /* Each scene points to the resident script-variable bank. */
 extern s32* g_script_variables;
 /* Suppress recursive write filtering while getters use comparison variable 0. */
 extern u8 g_script_variable_write_guard;
-
-/* Four unit bindings used by the scenario's slot selectors. */
-extern s16 g_script_unit_slots[EVENT_UNIT_SELECTOR_SLOT_COUNT];
 
 /* Read through the resident scene's variable commands, preserving the comparison
  * result. Reading weather/time first rebuilds it from the separate variables. */

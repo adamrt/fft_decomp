@@ -1,7 +1,6 @@
 /* The zodiac graphic, FRAME.BIN VRAM loading, the WORLD.BIN and WLDCORE.BIN opens and data loading from disc. */
 
 #include "fft/gfx.h"
-#include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_gfx.h"
 #include "fft/menu_panel.h"

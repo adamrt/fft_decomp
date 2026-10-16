@@ -1,51 +1,88 @@
 #ifndef WLDCORE_PROPOSITION_H
 #define WLDCORE_PROPOSITION_H
 
-/* WLDCORE's propositions: dispatch, participants, reports and rewards. */
+/* WLDCORE's propositions: the proposition data file and its rows, the lists and dispatch, daily progress, and the
+ * report with its rewards. */
 
-#include "fft/wldcore.h"
+#include "fft/wldcore_menu_level.h"
 #include "psx/libgs.h"
 #include "psx/types.h"
 
-/* Outcome of a proposition (wldcore_proposition_report_t.result), from the
- * participants' total score. Only SUCCESS completes the proposition and earns
- * its reward. */
-typedef enum wldcore_proposition_result {
-    WLDCORE_PROPOSITION_RESULT_SUCCESS = 0,     /* score of 99 or more, or the preferred-job roll */
-    WLDCORE_PROPOSITION_RESULT_FAILURE = 1,     /* score of 59 to 98: a tenth of the JP, a fifth of the gil */
-    WLDCORE_PROPOSITION_RESULT_BAD_FAILURE = 2, /* lower score, or recalled: a twentieth of both */
-} wldcore_proposition_result_e;
+/* proposition data */
+/* Records of the proposition data file (wldcore_proposition_get_data_pointer). */
+typedef enum wldcore_proposition_data_record {
+    WLDCORE_PROPOSITION_DATA_ROWS = 0,                /* 23-byte proposition rows */
+    WLDCORE_PROPOSITION_DATA_FEES = 1,                /* 16-bit values behind the rows' two fee indices */
+    WLDCORE_PROPOSITION_DATA_MESSAGE_ADJUSTMENTS = 2, /* by faith and bravery band */
+    WLDCORE_PROPOSITION_DATA_CATEGORY_JOB_SCORES = 3,
+    WLDCORE_PROPOSITION_DATA_JOB_LIST_JOB_SCORES = 4,
+    WLDCORE_PROPOSITION_DATA_BRAVERY_LEVEL_SCORES = 5,
+    WLDCORE_PROPOSITION_DATA_FAITH_SCORES = 6,
+    WLDCORE_PROPOSITION_DATA_JP_AMOUNTS = 8,
+    WLDCORE_PROPOSITION_DATA_GIL_AMOUNTS = 9,
+    WLDCORE_PROPOSITION_DATA_DISCOVERY_REWARDS = 10,
+    WLDCORE_PROPOSITION_DATA_RANDOM_REWARDS = 11,
+    WLDCORE_PROPOSITION_DATA_EXTRA_DAY_JP_SCALES = 12,
+    WLDCORE_PROPOSITION_DATA_EXTRA_DAY_GIL_SCALES = 13,
+    WLDCORE_PROPOSITION_DATA_JOB_LISTS = 14, /* nine job ids per job list */
+} wldcore_proposition_data_record_e;
 
-/* What a successful proposition brought back (wldcore_proposition_report_t.reward_type);
- * TREASURE and UNEXPLORED_LAND are also the proposition row's discovery_kind. */
-typedef enum wldcore_proposition_reward {
-    WLDCORE_PROPOSITION_REWARD_NONE = 0,
-    WLDCORE_PROPOSITION_REWARD_TREASURE = 1,
-    WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND = 2,
-    WLDCORE_PROPOSITION_REWARD_RANDOM_BONUS = 3, /* the three-tier random reward */
-} wldcore_proposition_reward_e;
+/* A row of records DISCOVERY_REWARDS and RANDOM_REWARDS: one entry of each reward-amount table. */
+typedef struct wldcore_proposition_reward_pair {
+    u8 gil_index;
+    u8 jp_index;
+} wldcore_proposition_reward_pair_t;
 
-/* Provisional: proposition-resolution work record at 0x8009f1ec. One object:
- * wldcore_proposition_find_preferred_job_unit reads excluded_party_index at
- * -0xc from its &proposition_index base, and calculate_base_jp_and_gil and
- * step_result_level reach -0x10..+0x24 from single bases. */
-typedef struct wldcore_proposition_report {
-    s32 excluded_party_index; /* 0x00 */
-    s32 speaker_party_index;  /* 0x04; chosen and read back by wldcore_proposition_step_participant_message */
-    s32 preferred_unit;       /* 0x08; fixed speaker passed to wldcore_proposition_step_participant_message */
-    s32 proposition_index;    /* 0x0c; index into g_main_active_propositions */
-    s32 result;               /* 0x10; wldcore_proposition_result_e */
-    s32 reward_type;          /* 0x14; wldcore_proposition_reward_e */
-    s32 reward_index;         /* 0x18 */
-    s32 reward_value;         /* 0x1c */
-    s32 recalled;             /* 0x20; reward calculation is skipped after a recall */
-    u8 _unused_24[0x10];
-    s32 participant_jp[3];     /* 0x34; JP awarded to each participant */
-    s32 participant_scores[3]; /* 0x40; success-score contribution */
-    s32 participant_gil[3];    /* 0x4c; contribution to the total gil reward */
-} wldcore_proposition_report_t;
-typedef char wldcore_proposition_report_size_must_be_88[sizeof(wldcore_proposition_report_t) == 88 ? 1 : -1];
+/* Which participant reports (proposition row speaker_mode). */
+typedef enum wldcore_proposition_speaker {
+    WLDCORE_PROPOSITION_SPEAKER_HIGHEST_BRAVERY = 1,
+    WLDCORE_PROPOSITION_SPEAKER_LOWEST_BRAVERY = 2,
+    WLDCORE_PROPOSITION_SPEAKER_HIGHEST_FAITH = 3,
+    WLDCORE_PROPOSITION_SPEAKER_LOWEST_FAITH = 4,
+} wldcore_proposition_speaker_e;
 
+/* wldcore_proposition_fields_t.condition_flags: what must hold for the proposition to be offered. */
+typedef enum wldcore_proposition_condition_flag {
+    WLDCORE_PROPOSITION_CONDITION_SHOP_AVAILABILITY = 0x01, /* EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY >= minimum */
+    WLDCORE_PROPOSITION_CONDITION_ZODIAC_SIGN = 0x02,       /* today's zodiac sign (1 = Aries) == condition_value */
+    WLDCORE_PROPOSITION_CONDITION_STATUS = 0x04,
+} wldcore_proposition_condition_flag_e;
+
+/* One 23-byte proposition row expanded to named 16-bit fields by
+ * wldcore_unpack_proposition_row. */
+typedef struct wldcore_proposition_fields {
+    u16 category_index;  /* 0x00; 1-based row of records CATEGORY_JOB_SCORES, DISCOVERY_REWARDS, RANDOM_REWARDS */
+    u16 job_list_index;  /* 0x02 */
+    u16 id;              /* 0x04 */
+    u16 _unused_06;      /* 0x06 */
+    u16 fee_a;           /* 0x08; remapped through record FEES */
+    u16 fee_b;           /* 0x0a; remapped through record FEES */
+    u16 min_days;        /* 0x0c */
+    u16 max_days;        /* 0x0e */
+    u16 name_text;       /* 0x10; 1-based errand name, text TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1 + n */
+    u16 jp_reward;       /* 0x12 */
+    u16 discovery_kind;  /* 0x14; wldcore_proposition_reward_e TREASURE or UNEXPLORED_LAND, else see random_bonus */
+    u16 random_bonus;    /* 0x16; 1 enables the three-tier random reward */
+    u16 gil_reward;      /* 0x18 */
+    u16 _unused_1a[3];   /* 0x1a */
+    u16 location;        /* 0x20; 0 for any location */
+    u16 condition_flags; /* 0x22; WLDCORE_PROPOSITION_CONDITION_* */
+    u16 _unused_24;      /* 0x24 */
+    u16 speaker_mode;    /* 0x26; wldcore_proposition_speaker_e */
+    u16 preferred_job;   /* 0x28 */
+    u16 required_shop_availability; /* 0x2a; minimum EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY */
+    u16 condition_value;            /* 0x2c; zodiac sign or proposition status index */
+} wldcore_proposition_fields_t;
+typedef char wldcore_proposition_fields_size_must_be_46[sizeof(wldcore_proposition_fields_t) == 46 ? 1 : -1];
+
+extern s32* g_wldcore_proposition_data_base; /* the loaded proposition data file */
+extern wldcore_proposition_fields_t g_wldcore_selected_proposition_row[];
+/* File records have different layouts; the selected record determines the table type. */
+void* wldcore_proposition_get_data_pointer(wldcore_proposition_data_record_e record);
+void wldcore_unpack_proposition_row(wldcore_proposition_fields_t* out, s32 index);
+s32 wldcore_proposition_is_available_at_location(s32 index, s32 location);
+
+/* progress */
 /* wldcore_proposition_progress_t.flags of an active proposition. */
 typedef enum wldcore_proposition_progress_flag {
     WLDCORE_PROPOSITION_PROGRESS_DISPATCHED = 0x01,
@@ -68,99 +105,89 @@ typedef enum wldcore_proposition_state {
     WLDCORE_PROPOSITION_STATE_BAD_FAILURE = 0x80,
 } wldcore_proposition_state_e;
 
-/* Records of the proposition data file (wldcore_proposition_get_data_pointer). */
-typedef enum wldcore_proposition_data_record {
-    WLDCORE_PROPOSITION_DATA_ROWS = 0,                /* 23-byte proposition rows */
-    WLDCORE_PROPOSITION_DATA_FEES = 1,                /* 16-bit values behind the rows' two fee indices */
-    WLDCORE_PROPOSITION_DATA_MESSAGE_ADJUSTMENTS = 2, /* by faith and bravery band */
-    WLDCORE_PROPOSITION_DATA_CATEGORY_JOB_SCORES = 3,
-    WLDCORE_PROPOSITION_DATA_JOB_LIST_JOB_SCORES = 4,
-    WLDCORE_PROPOSITION_DATA_BRAVERY_LEVEL_SCORES = 5,
-    WLDCORE_PROPOSITION_DATA_FAITH_SCORES = 6,
-    WLDCORE_PROPOSITION_DATA_JP_AMOUNTS = 8,
-    WLDCORE_PROPOSITION_DATA_GIL_AMOUNTS = 9,
-    WLDCORE_PROPOSITION_DATA_DISCOVERY_REWARDS = 10,
-    WLDCORE_PROPOSITION_DATA_RANDOM_REWARDS = 11,
-    WLDCORE_PROPOSITION_DATA_EXTRA_DAY_JP_SCALES = 12,
-    WLDCORE_PROPOSITION_DATA_EXTRA_DAY_GIL_SCALES = 13,
-    WLDCORE_PROPOSITION_DATA_JOB_LISTS = 14, /* nine job ids per job list */
-} wldcore_proposition_data_record_e;
+void wldcore_proposition_advance_daily_counters(void);
+s32 wldcore_proposition_count_returned(s32 location);
 
-/* Records 10 and 11 select one entry from each reward-amount table. */
-typedef struct wldcore_proposition_reward_pair {
-    u8 gil_index;
-    u8 jp_index;
-} wldcore_proposition_reward_pair_t;
-
-/* wldcore_proposition_report_level_t.load_phase. */
-typedef enum wldcore_proposition_report_load {
-    WLDCORE_PROPOSITION_REPORT_LOAD_DONE = 0,
-    WLDCORE_PROPOSITION_REPORT_LOAD_MESSAGES = 1, /* waits for the audio queue, then loads the message block */
-    WLDCORE_PROPOSITION_REPORT_LOAD_PICTURE = 2,  /* waits for it, then loads the reward's picture set */
-} wldcore_proposition_report_load_e;
-
-/* wldcore_proposition_result_level_t.phase. */
-typedef enum wldcore_proposition_result_phase {
-    WLDCORE_PROPOSITION_RESULT_PHASE_INPUT = 0,
-    WLDCORE_PROPOSITION_RESULT_PHASE_CLOSING = 1, /* waits for the audio queue and the message thread */
-    WLDCORE_PROPOSITION_RESULT_PHASE_DONE = 2,    /* waits for the audio queue, then pops */
-} wldcore_proposition_result_phase_e;
-
-/* Which participant reports (proposition row speaker_mode). */
-typedef enum wldcore_proposition_speaker {
-    WLDCORE_PROPOSITION_SPEAKER_HIGHEST_BRAVERY = 1,
-    WLDCORE_PROPOSITION_SPEAKER_LOWEST_BRAVERY = 2,
-    WLDCORE_PROPOSITION_SPEAKER_HIGHEST_FAITH = 3,
-    WLDCORE_PROPOSITION_SPEAKER_LOWEST_FAITH = 4,
-} wldcore_proposition_speaker_e;
-
-typedef enum wldcore_proposition_condition_flag {
-    WLDCORE_PROPOSITION_CONDITION_SHOP_AVAILABILITY = 0x01, /* EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY >= minimum */
-    WLDCORE_PROPOSITION_CONDITION_ZODIAC_SIGN = 0x02,       /* today's zodiac sign (1 = Aries) == condition_value */
-    WLDCORE_PROPOSITION_CONDITION_STATUS = 0x04,
-} wldcore_proposition_condition_flag_e;
-
-/* Row kinds of the brave-story proposition category list
- * (wldcore_menu_push_proposition_category_level). */
+/* lists and dispatch */
+/* Row kinds of the Brave Story's proposition category list (wldcore_menu_push_proposition_category_level). */
 typedef enum wldcore_proposition_category_row {
     WLDCORE_PROPOSITION_CATEGORY_ROW_ACTIVE = 0,
     WLDCORE_PROPOSITION_CATEGORY_ROW_BRAVE_STORY = 1,
 } wldcore_proposition_category_row_e;
 
-/* proposition */
-extern wldcore_proposition_report_t g_wldcore_proposition_report;
-extern s32* g_wldcore_proposition_data_base;
+/* Saved proposition-list cursor row. Declared as an array: GCC's alias heuristic needs an in-struct object to keep
+ * the target's load order in wldcore_list_handle_active_propositions_input; a scalar does not. */
+extern s32 g_wldcore_active_propositions_saved_cursor[];
+/* Saved category row, declared as an array for the same reason. */
+extern s32 g_wldcore_proposition_category_saved_cursor[];
+extern s32 g_wldcore_participant_list_saved_cursor;
 extern s32 g_wldcore_proposition_selected_entry;
-extern s32 g_wldcore_proposition_send_unit_count;
 extern s32 g_wldcore_proposition_gil_amount;
+extern s32 g_wldcore_proposition_send_unit_count;
 extern s32 g_wldcore_proposition_send_units[];
 extern s16 g_wldcore_proposition_candidate_levels[];
 extern s32 g_wldcore_proposition_dispatch_days;
-/* Saved brave-story row, declared as an array for the same reason as
- * g_wldcore_active_propositions_saved_cursor. */
-extern s32 g_wldcore_proposition_category_saved_cursor[];
 extern u32 g_wldcore_proposition_detail_image_buffer[];
+void wldcore_proposition_push_detail_level(s32 value);
+void wldcore_list_build_proposition_detail_panel_image(
+    wldcore_menu_stack_record_t* level, s32 proposition, s32 coordinate_mode);
+void wldcore_proposition_push_dispatch_confirm_level(void);
+void wldcore_proposition_push_send_unit_level(void);
+void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t* level);
+void wldcore_menu_handle_participant_list_input(wldcore_menu_stack_record_t* level);
+
+/* report and rewards */
+/* Outcome of a proposition (wldcore_proposition_report_t.result), from the
+ * participants' total score. Only SUCCESS completes the proposition and earns
+ * its reward. */
+typedef enum wldcore_proposition_result {
+    WLDCORE_PROPOSITION_RESULT_SUCCESS = 0,     /* score of 99 or more, or the preferred-job roll */
+    WLDCORE_PROPOSITION_RESULT_FAILURE = 1,     /* score of 59 to 98: a tenth of the JP, a fifth of the gil */
+    WLDCORE_PROPOSITION_RESULT_BAD_FAILURE = 2, /* lower score, or recalled: a twentieth of both */
+} wldcore_proposition_result_e;
+
+/* What a successful proposition brought back (wldcore_proposition_report_t.reward_type);
+ * TREASURE and UNEXPLORED_LAND are also the proposition row's discovery_kind. */
+typedef enum wldcore_proposition_reward {
+    WLDCORE_PROPOSITION_REWARD_NONE = 0,
+    WLDCORE_PROPOSITION_REWARD_TREASURE = 1,
+    WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND = 2,
+    WLDCORE_PROPOSITION_REWARD_RANDOM_BONUS = 3, /* the three-tier random reward */
+} wldcore_proposition_reward_e;
+
+/* Provisional: the outcome of a returned proposition (g_wldcore_proposition_report), worked out while its report
+ * runs. It is one object: wldcore_proposition_find_preferred_job_unit reads excluded_party_index at -0xc from its
+ * &proposition_index base, and calculate_base_jp_and_gil and step_result_level reach -0x10..+0x24 from single
+ * bases. */
+typedef struct wldcore_proposition_report {
+    s32 excluded_party_index; /* 0x00 */
+    s32 speaker_party_index;  /* 0x04; chosen and read back by wldcore_proposition_step_participant_message */
+    s32 preferred_unit;       /* 0x08; fixed speaker passed to wldcore_proposition_step_participant_message */
+    s32 proposition_index;    /* 0x0c; index into g_main_active_propositions */
+    s32 result;               /* 0x10; wldcore_proposition_result_e */
+    s32 reward_type;          /* 0x14; wldcore_proposition_reward_e */
+    s32 reward_index;         /* 0x18 */
+    s32 reward_value;         /* 0x1c */
+    s32 recalled;             /* 0x20; reward calculation is skipped after a recall */
+    u8 _unused_24[0x10];
+    s32 participant_jp[3];     /* 0x34; JP awarded to each participant */
+    s32 participant_scores[3]; /* 0x40; success-score contribution */
+    s32 participant_gil[3];    /* 0x4c; contribution to the total gil reward */
+} wldcore_proposition_report_t;
+typedef char wldcore_proposition_report_size_must_be_88[sizeof(wldcore_proposition_report_t) == 88 ? 1 : -1];
+
+extern wldcore_proposition_report_t g_wldcore_proposition_report;
 void wldcore_proposition_handle_report_confirm_input(wldcore_proposition_report_confirm_level_t* level);
 void wldcore_proposition_determine_success(void);
-void wldcore_proposition_calculate_base_jp_and_gil(void);
-void wldcore_proposition_roll_bonus_reward(void);
-void wldcore_proposition_apply_extra_days_multiplier(void);
+s32 wldcore_proposition_find_preferred_job_unit(void);
+s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_level_t* state, s32 message, s32 speaker);
 s32 wldcore_proposition_adjust_message_index(s32 base, s32 party_index);
-void wldcore_proposition_advance_daily_counters(void);
-s32 wldcore_proposition_count_returned(s32 location);
-/* File records have different layouts; the selected record determines the table type. */
-void* wldcore_proposition_get_data_pointer(wldcore_proposition_data_record_e record);
+void wldcore_proposition_calculate_base_jp_and_gil(void);
+void wldcore_proposition_apply_extra_days_multiplier(void);
+void wldcore_proposition_roll_bonus_reward(void);
+s32 wldcore_get_completion_milestone_rank(void);
 s32 wldcore_proposition_load_picture(s32 index);
 void wldcore_proposition_load_picture_data_set(s32 value);
 void wldcore_proposition_submit_marker_request(GsOT* ot);
-void wldcore_proposition_push_detail_level(s32 value);
-s32 wldcore_proposition_is_available_at_location(s32 index, s32 location);
-void wldcore_proposition_push_dispatch_confirm_level(void);
-void wldcore_proposition_push_send_unit_level(void);
-s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_level_t* state, s32 message, s32 speaker);
-s32 wldcore_proposition_find_preferred_job_unit(void);
-
-/* menu */
-void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t* level);
 
 #endif

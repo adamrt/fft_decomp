@@ -3,12 +3,14 @@
  * instruction groups, scrollable list layouts and bodies, and sprite color. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_primitive.h"
 #include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_overlay.h"
+#include "fft/menu_cursor.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
+#include "fft/menu_window.h"
 #include "fft/sound.h"
 #include "fft/world_gfx.h"
 #include "fft/world_menu.h"

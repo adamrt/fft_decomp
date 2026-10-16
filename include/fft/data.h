@@ -1,8 +1,8 @@
 #ifndef DATA_H
 #define DATA_H
 
-/* Small game data shared across modules: calendar dates, calculator, elements and statuses. Abilities, items,
- * jobs and skillsets have their own data_*.h headers. */
+/* Small game data shared across programs: calendar dates, the calculator's ability flags and elements. Abilities,
+ * items, jobs, skillsets and statuses have their own data_*.h headers. */
 
 #include "psx/types.h"
 
@@ -15,8 +15,9 @@ typedef struct calendar_date {
 typedef char calendar_date_size_must_be_2[sizeof(calendar_date_t) == 2 ? 1 : -1];
 
 /* calculator */
-/* Flags stored by the eight Math Skill abilities at 0x80061054. The first
- * four select a unit attribute; the last four select its divisor test. */
+/* Flags stored by the eight Math Skill abilities in g_main_math_rsm_ability_data.
+ * The first four select a unit attribute; the last four select its divisor
+ * test. */
 enum {
     CALCULATOR_ATTRIBUTE_CT = 0x80,
     CALCULATOR_ATTRIBUTE_LEVEL = 0x40,
@@ -38,7 +39,7 @@ enum {
     CALCULATOR_PRIME_COUNT = 54,
 };
 
-/* element */
+/* elements */
 /* Element bits shared by abilities, equipment, jobs and unit affinity sets. */
 typedef enum element_flags {
     BATTLE_ELEMENT_DARK = 0x01,
@@ -63,43 +64,5 @@ typedef enum elemental_affinity_index {
 } elemental_affinity_index_e;
 
 enum { ELEMENTAL_AFFINITY_COUNT = 5 };
-
-/* status */
-enum {
-    STATUS_COUNT = 40,
-    STATUS_BYTE_COUNT = 5,
-    BATTLE_TIMED_STATUS_COUNT = 16, /* Poison through Death Sentence keep a CT byte each */
-};
-
-typedef struct status_effect_data {
-    u8 _unused_00[2];
-    u8 order;
-    u8 ct;
-    u8 flags_1;
-    u8 flags_2;
-    u8 cancels[STATUS_BYTE_COUNT];    /* 0x06; statuses removed when this one is inflicted */
-    u8 cant_stack[STATUS_BYTE_COUNT]; /* 0x0b; current statuses that block this one */
-} status_effect_data_t;
-typedef char status_effect_data_size_must_be_16[(sizeof(status_effect_data_t) == 16) ? 1 : -1];
-
-/* Flags that build the shared status-check sets during main initialization
- * (main_status_check_set_e). The records also set bits 0x08, 0x10, 0x20 and
- * 0x40 of flags_1 and 0x20 of flags_2, which nothing reads. */
-typedef enum status_effect_flags_1 {
-    STATUS_EFFECT_FLAG_1_KO = 0x01,
-    STATUS_EFFECT_FLAG_1_UNIT_LOST = 0x02,
-    STATUS_EFFECT_FLAG_1_CHECK_SET_2 = 0x04,
-    STATUS_EFFECT_FLAG_1_FREEZE_CT = 0x80,
-} status_effect_flags_1_e;
-
-typedef enum status_effect_flags_2 {
-    STATUS_EFFECT_FLAG_2_IMMORTAL_IMMUNITY = 0x01,
-    STATUS_EFFECT_FLAG_2_FORMATION_IMMUNITY = 0x02,
-    STATUS_EFFECT_FLAG_2_CHECK_SET_7 = 0x04,
-    STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED = 0x08,
-    STATUS_EFFECT_FLAG_2_MOUNT_REMOVAL = 0x10,
-    STATUS_EFFECT_FLAG_2_IGNORE_ATTACKS = 0x20,
-    STATUS_EFFECT_FLAG_2_PREVENT_REACTION = 0x80,
-} status_effect_flags_2_e;
 
 #endif

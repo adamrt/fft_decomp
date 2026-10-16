@@ -3,6 +3,7 @@
 
 /* Skillset data: skillset ids and the skillset records. */
 
+/* skillset records */
 /* Human skillsets contain 16 action slots followed by six reaction/support/movement
  * slots. Monster records contain four ids; the shared scratch list reserves 24. */
 enum {
@@ -12,6 +13,7 @@ enum {
     SKILLSET_ABILITY_LIST_COUNT = 24,
 };
 
+/* skillset ids */
 /* Skillset ids: the rows of g_main_ability_human_skillset_abilities and, from
  * SKILLSET_ID_MONSTER_FIRST, of g_main_ability_monster_skillset_abilities. A
  * name is the skillset's name in the game's text. Where rows share a name, a
@@ -185,6 +187,9 @@ enum {
     SKILLSET_ID_END = 224,
 };
 
+/* ability filters */
+/* Ability classes main_ability_store_skillset_abilities collects from a
+ * skillset; the random R/S/M selector uses rsm_ability_filter_e instead. */
 typedef enum skillset_ability_filter {
     SKILLSET_ABILITY_FILTER_ACTION = 0x01,
     SKILLSET_ABILITY_FILTER_REACTION = 0x02,

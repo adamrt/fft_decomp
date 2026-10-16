@@ -18,4 +18,4 @@ void window_init_text_record(s32 record_index, RECT quad, s32 depth, s32 combine
 void window_display_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u32* image);
 void window_init_record_pools(void);
 
-#endif /* WINDOW_H */
+#endif

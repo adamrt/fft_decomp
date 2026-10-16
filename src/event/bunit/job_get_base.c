@@ -2,7 +2,7 @@
 
 #include "fft/data_job.h"
 #include "fft/event_bunit.h"
-#include "fft/unit.h"
+#include "fft/unit_identity.h"
 #include "psx/types.h"
 
 /* The job that heads a unit's job list: a monster's own job, Squire for a

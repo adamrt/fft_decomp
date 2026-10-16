@@ -1,7 +1,9 @@
 /* The option menu's value picker thread for one game option. */
 
+#include "fft/main_sound.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 /* Two dead-store conditionals are zero-instruction allocation devices: flow deletes each body,
@@ -15,7 +17,8 @@
  *   supplies the first). */
 #include "fft/main.h"
 #include "fft/menu_input.h"
-#include "fft/menu_overlay.h"
+#include "fft/menu_option.h"
+#include "fft/menu_window.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

@@ -1,10 +1,10 @@
 /* The selection record lookup and cycling the selected unit. */
 
-#include "fft/main.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
+#include "fft/main_sound.h"
+#include "fft/menu_selection.h"
 #include "fft/sound.h"
 #include "fft/unit.h"
+#include "fft/unit_party.h"
 #include "fft/world_formation.h"
 #include "psx/pad.h"
 #include "psx/types.h"

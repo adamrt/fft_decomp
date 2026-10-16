@@ -1,9 +1,12 @@
 /* Tutorial buttons, tutorial start and the tutorial command handlers with highlight rings and quads. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_primitive.h"
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
+#include "fft/menu_option.h"
 #include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/thread.h"

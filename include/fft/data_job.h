@@ -1,11 +1,13 @@
 #ifndef DATA_JOB_H
 #define DATA_JOB_H
 
-/* Job data: job ids and the job records. */
+/* Job data: the job records and job ids. */
 
-#include "fft/data_item.h"
+#include "fft/data_status.h"
 #include "psx/types.h"
 
+/* job records */
+/* job_data_t.jump: the jump value and the stepping-stone flag. */
 enum {
     JOB_JUMP_VALUE_MASK = 0x7f,
     JOB_JUMP_STEPPING_STONE = 0x80,
@@ -40,6 +42,11 @@ typedef struct job_data {
 } job_data_t;
 typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 
+/* The job record the ATTACK and REQUIRE party portrait builders last looked
+ * up; each overlay defines its own. */
+extern job_data_t* g_formation_job_data;
+
+/* job ids */
 /* Job ids index the 160 records of g_main_job_data. A name is the job's name
  * in the game's text. Where records share a name, a suffix names the
  * character: the unit name the game's text has at the same index, which is
@@ -47,10 +54,9 @@ typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
  * are told apart by the chapter, by the role the ENTD gives the unit (GUEST,
  * JOIN, ENEMY) or by the record's status sets (UNDEAD, INNATE_KO and
  * STARTING_KO are its innate and starting statuses). A numbered suffix marks a
- * record that repeats a
- * name with nothing but its id to name it: 0x35-0x38 repeat four generic jobs
- * for ENTD units that can equip every item type, and 0x98 is an empty second
- * Holy Dragon. Records without name text (0x00, 0x39-0x3b, 0x9b-0x9f) and
+ * record that repeats a name with nothing but its id to name it: 0x35-0x38
+ * repeat four generic jobs for ENTD units that can equip every item type, and
+ * 0x98 is an empty second Holy Dragon. Records without name text (0x00, 0x39-0x3b, 0x9b-0x9f) and
  * those the text calls "None" (0x8e, 0x8f, 0x92-0x95) have no enumerator. */
 typedef enum job_id {
     JOB_ID_SQUIRE_RAMZA_CHAPTER_1 = 1,
@@ -223,8 +229,5 @@ enum {
     JOB_ID_SPECIAL_MONSTER_2_COUNT = 11,
     JOB_ID_COUNT = 160,
 };
-
-/* globals */
-extern job_data_t* g_formation_job_data; /* shared between programs */
 
 #endif

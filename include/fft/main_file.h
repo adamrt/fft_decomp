@@ -1,12 +1,74 @@
 #ifndef MAIN_FILE_H
 #define MAIN_FILE_H
 
-/* Resident file loading, the heaps and overlay loading. */
+/* Resident file loading: disc sectors, the CD loader, the heaps and overlay loading. */
 
-#include "fft/main.h"
+#include "psx/libcd.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* disc files */
+/* Sector and byte length of a resource read through the resident file loader. */
+typedef struct file_extent {
+    s32 sector;
+    s32 size;
+} file_extent_t;
+typedef char file_extent_size_must_be_8[(sizeof(file_extent_t) == 8) ? 1 : -1];
+
+/* First sector of each disc file the code reads at a fixed sector, named as
+ * the disc directory names the file. The other files are found through
+ * sector tables in the data. */
+typedef enum disc_sector {
+    DISC_SECTOR_SCEAP_DAT = 0xc6,
+    DISC_SECTOR_BATTLE_BIN = 0x3e8,
+    DISC_SECTOR_EVENT_ATTACK_OUT = 0x990,
+    DISC_SECTOR_EVENT_MAPTITLE_BIN = 0xdac, /* five sectors for each four maps */
+    DISC_SECTOR_EVENT_FRAME_BIN = 0xe68,
+    DISC_SECTOR_EVENT_TEST_EVT = 0xe7b,     /* EVENT_BLOCK_SECTORS per event_id_e */
+    DISC_SECTOR_EVENT_EVTFACE_BIN = 0x164b, /* four sectors per portrait */
+    DISC_SECTOR_EVENT_UNIT_BIN = 0x166b,
+    DISC_SECTOR_EVENT_BONUS_BIN = 0x16c0, /* thirteen sectors per image */
+    DISC_SECTOR_EVENT_ITEM_BIN = 0x1899,
+    DISC_SECTOR_EVENT_WLDFACE_BIN = 0x18ba,
+    DISC_SECTOR_EVENT_ATCHELP_LZW = 0x1a3a,
+    DISC_SECTOR_EVENT_WORLD_LZW = 0x1bd8,
+    DISC_SECTOR_EVENT_OPEN_LZW = 0x1c18,
+    DISC_SECTOR_EVENT_EVTCHR_BIN = 0x1d4c, /* fifteen sectors per block */
+    DISC_SECTOR_BATTLE_EFC_FNT_TIM = 0xdea8,
+    DISC_SECTOR_BATTLE_WEP_SPR = 0xdefa,
+    DISC_SECTOR_BATTLE_OTHER_SPR = 0xdf24,
+    DISC_SECTOR_BATTLE_ENTD1_ENT = 0xebc1,
+    DISC_SECTOR_BATTLE_ENTD2_ENT = 0xebe9,
+    DISC_SECTOR_BATTLE_ENTD3_ENT = 0xec11,
+    DISC_SECTOR_BATTLE_ENTD4_ENT = 0xec39,
+    DISC_SECTOR_BATTLE_ZODIAC_BIN = 0xec61,
+    DISC_SECTOR_MENU_FFTSAVE_DAT = 0x11a7f,
+    DISC_SECTOR_WORLD_WLDTEX_TM2 = 0x11d28,
+    DISC_SECTOR_WORLD_WLDPIC_BIN = 0x11dae,  /* by g_wldcore_picture_sector_offsets */
+    DISC_SECTOR_WORLD_WLDMES_BIN = 0x11f59,  /* by g_wldcore_message_block_sector_offsets */
+    DISC_SECTOR_WORLD_SNPLBIN_BIN = 0x128f9, /* by g_wldcore_sound_novel_script_sector_offsets */
+    DISC_SECTOR_WORLD_SNPLMES_BIN = 0x1291d, /* by g_wldcore_sound_novel_text_sector_offsets */
+    DISC_SECTOR_WORLD_WLDBK_BIN = 0x12995,   /* by g_wldcore_background_sector_offsets */
+    DISC_SECTOR_WORLD_WLDCORE_BIN = 0x14849,
+    DISC_SECTOR_WORLD_WORLD_BIN = 0x14925,
+    DISC_SECTOR_SOUND_ENV_SED = 0x14c08,
+    DISC_SECTOR_SOUND_SYSTEM_SED = 0x14c0a,
+    DISC_SECTOR_SOUND_WAVESET_WD = 0x14c0f,
+    DISC_SECTOR_OPEN_OPEN_BIN = 0x14ff0,
+    DISC_SECTOR_OPEN_OPNTEX_BIN = 0x1505d,
+    DISC_SECTOR_OPEN_OPNBK_BIN = 0x15243, /* the title backgrounds, by sector offset */
+    DISC_SECTOR_OPEN_FFTST_STR = 0x153d6,
+    DISC_SECTOR_OPEN_FFTOP_STR = 0x17b60,
+    DISC_SECTOR_OPEN_FFTPRE_STR = 0x1e038,
+    DISC_SECTOR_OPEN_FFTEND_STR = 0x21908,
+    DISC_SECTOR_OPEN_FFTPR_STR = 0x25160,
+    DISC_SECTOR_OPEN_FFTUNIT_STR = 0x26ec0,
+    DISC_SECTOR_OPEN_ENDING_XA = 0x2f551,
+} disc_sector_e;
+
+extern s32 g_main_battle_bin_sector;
+
+/* CD loader */
 /* Loading-display mode passed to the shared file-header builder. */
 typedef enum main_file_loading_display_mode {
     MAIN_FILE_LOADING_DISPLAY_OFF = -1,
@@ -26,6 +88,42 @@ typedef enum main_file_load_state {
     MAIN_FILE_LOAD_STATE_UPLOAD_VRAM = 7, /* WLDCORE image stream only */
 } main_file_load_state_e;
 
+/* Asynchronous CD read state advanced by main_file_poll_load. */
+typedef struct main_file_load_descriptor {
+    s32 _unknown_00;
+    s32 state; /* main_file_load_state_e */
+    s32 error_count;
+    s32 wait_frames;
+    s32 sector_count;
+    s32 lba;
+    s32 sector_index; /* 0x18; sector being read by wldcore_file_poll_vram_image_stream */
+    CdlLOC position;
+    u8* destination;
+} main_file_load_descriptor_t;
+typedef char main_file_load_descriptor_size_must_be_36[sizeof(main_file_load_descriptor_t) == 36 ? 1 : -1];
+
+extern main_file_load_descriptor_t g_main_file_cd_state;
+/* g_main_file_cd_state.state under a second name: nonzero (not
+ * MAIN_FILE_LOAD_STATE_IDLE) while a load is in progress. */
+extern u32 g_main_file_still_loading;
+
+int main_file_request_read(
+    main_file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
+/* Forwards main_file_request_read's result. */
+s32 main_file_request_read_quiet(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
+s32 main_file_call_build_header(s32 sector, u32 size, void* destination);
+void main_file_poll_load(main_file_load_descriptor_t* state);
+int main_file_is_still_loading(void);
+void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state);
+void main_file_reset_cd_subsystems(void);
+void main_file_handle_cd_read_callback(u8 event, u8* result);
+void main_file_handle_cd_ready_callback(u8 event, u8* result);
+void* main_file_load_to_address(int sector, u32 size, void* destination);
+void* main_file_load_checked_to_address(int sector, int size, void* destination);
+void* main_file_load_checked_to_heap(int sector, int size);
+suzuki_smd_header_t* main_file_get_smd(int sector, u32 size);
+
+/* heaps */
 /* Game and music heaps allocate whole pages, tagged by these byte tables. */
 enum {
     MAIN_HEAP_PAGE_SHIFT = 11,
@@ -34,46 +132,27 @@ enum {
     MAIN_HEAP_SMD_PAGE_COUNT = 16,
 };
 
-/* file */
-extern main_file_load_descriptor_t g_main_file_cd_state;
-/* g_main_file_cd_state.state under a second name: nonzero (not
- * MAIN_FILE_LOAD_STATE_IDLE) while a load is in progress. */
-extern u32 g_main_file_still_loading;
-/* File-header wrapper at 0x80011bd0 forwards main_file_request_read's result. */
-s32 main_file_request_read_quiet(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
-s32 main_file_call_build_header(s32 sector, u32 size, void* destination);
-int main_file_is_still_loading(void);
-void main_file_reset_cd_subsystems(void);
-void main_file_handle_cd_read_callback(u8 event, u8* result);
-void main_file_handle_cd_ready_callback(u8 event, u8* result);
-int main_file_request_read(
-    main_file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
-void* main_file_load_checked_to_heap(int sector, int size);
-void* main_file_load_checked_to_address(int sector, int size, void* destination);
-suzuki_smd_header_t* main_file_get_smd(int sector, u32 size);
-void* main_file_load_to_address(int sector, u32 size, void* destination);
-void main_file_poll_load(main_file_load_descriptor_t* state);
-void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state);
-
-/* overlay */
-int main_overlay_exec_open_bin_main_loop(int mode);
-void main_overlay_exec_open_bin_ending(void);
-int main_overlay_open_world_and_wldcore(int load_world);
-void main_overlay_open_world_bin(s32 mode);
-
 extern u8 g_main_heap_smd_allocator_table[MAIN_HEAP_SMD_PAGE_COUNT];
 extern u8 g_main_heap_smd_base[];
+extern u32 g_main_battle_heap_end_address;
 extern u8* g_main_heap_high_overlay_load_address;
 extern u8* g_main_heap_low_overlay_load_address;
 extern u8* g_main_heap_world_overlay_load_address;
 extern u8* g_main_heap_companion_overlay_load_address;
+
 void* main_heap_alloc(u32 size);
-void* main_heap_alloc_smd(u32 size);
-void main_heap_call_free(void* allocation);
-void main_heap_clear_game_allocator_table(void);
 s32 main_heap_free(void* allocation);
+void main_heap_call_free(void* allocation);
 u8* main_heap_reserve_at(u8* allocation, u32 size);
+void main_heap_clear_game_allocator_table(void);
+void* main_heap_alloc_smd(u32 size);
 s32 main_heap_free_smd(void* allocation);
 void main_heap_clear_smd_allocator_table(void);
+
+/* overlays */
+int main_overlay_exec_open_bin_main_loop(int mode);
+void main_overlay_exec_open_bin_ending(void);
+int main_overlay_open_world_and_wldcore(int load_world);
+void main_overlay_open_world_bin(s32 mode);
 
 #endif

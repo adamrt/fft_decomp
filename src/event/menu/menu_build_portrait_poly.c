@@ -1,6 +1,6 @@
 /* Texturing a quad with a unit portrait unless the portrait id suppresses it. */
 
-#include "fft/menu.h"
+#include "fft/menu_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

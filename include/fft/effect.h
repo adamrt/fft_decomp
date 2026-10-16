@@ -1,8 +1,7 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-/* Native ability-effect callbacks and their work records in EFFECT/E*.BIN.
- * The resident runtime and shared effect layouts are declared in battle_effect.h. */
+/* Native ability-effect handlers of the effect overlays (EFFECT/E###.BIN) and their work records. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -18,7 +17,8 @@
  * and frame counts from the start of the keyframe. The slot's phase
  * (effect_record_t.callback_phase, effect_callback_phase_e) starts at INIT, where the
  * handler allocates its work block into work_slots; it then stays at UPDATE
- * until the channel sets DESTROY two frames before the keyframe ends. */
+ * until the channel sets DESTROY two frames before the keyframe ends. A handler reads its emitter
+ * record through its own view of battle_effect_geometry.h. */
 
 /* map control */
 s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
@@ -32,7 +32,7 @@ s32 effect_map_split_mesh_and_set_3d_objects_state_3(
 s32 effect_map_unfreeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_emitter_index, s32 unused_frame);
 
-/* helpers */
+/* texture pages */
 /* Fixed texture-page bits shared by the native effect renderers. */
 enum {
     EFFECT_RENDER_TEXTURE_PAGE_BASE = 0x86,
@@ -228,8 +228,6 @@ typedef char assert_effect_polar_mesh_work_size[sizeof(effect_polar_mesh_work_t)
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
  * the row, the ring (0-5) the column. */
 extern u32 g_effect_anchored_polar_mesh_brightness_table[][6];
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
- * the row, the ring (0-5) the column. */
 extern u32 g_effect_polar_mesh_brightness_table[][6];
 
 s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
@@ -369,7 +367,7 @@ s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emit
 s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* dome mesh */
-/* Work block of the spinning dome renderer. */
+/* Lattice of the spinning dome renderer: eight rows of sixteen segments. */
 enum {
     DOME_MESH_ROWS = 8,
     DOME_MESH_SEGMENTS = 16,

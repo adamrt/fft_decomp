@@ -1,7 +1,6 @@
 /* VRAM render records, panel render threads, list cursor state, scrollable text windows and the sound queue. */
 
 #include "fft/gfx.h"
-#include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_sound.h"
 #include "fft/menu.h"
@@ -11,10 +10,11 @@
 #include "fft/window.h"
 #include "fft/wldcore.h"
 #include "fft/wldcore_menu.h"
-#include "fft/wldcore_script.h"
+#include "fft/wldcore_sound.h"
+#include "fft/wldcore_text.h"
 #include "fft/wldcore_window.h"
-#include "fft/world.h"
 #include "fft/world_menu.h"
+#include "fft/world_sprite.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

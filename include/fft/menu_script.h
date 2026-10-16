@@ -1,10 +1,13 @@
 #ifndef MENU_SCRIPT_H
 #define MENU_SCRIPT_H
 
-/* Byte-aligned display instructions shared by WORLD, BUNIT, EQUIP and JOBSTTS. */
+/* The menu script: byte-aligned display instructions that WORLD, BUNIT, EQUIP and JOBSTTS run through their
+ * handler tables, the row callbacks the instructions call, and the scrollable lists the list instruction
+ * draws. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "psx/types.h"
 
 /* opcodes */
@@ -14,10 +17,10 @@
  * module ends a stream with its own opcode, the first one past its table
  * (WORLD_MENU_SCRIPT_END, BUNIT_CMD_END, EQUIP_CMD_END, JOBSTTS_CMD_END). */
 typedef enum menu_script_opcode {
-    MENU_SCRIPT_OP_IF_GROUP = 0x01,        /* *_cmd_run_if_group_handler */
-    MENU_SCRIPT_OP_IF_ELSE_GROUP = 0x02,   /* *_cmd_run_if_else_group_handler */
+    MENU_SCRIPT_OP_IF_GROUP = 0x01,        /* menu_cmd_run_if_group_handler */
+    MENU_SCRIPT_OP_IF_ELSE_GROUP = 0x02,   /* menu_cmd_run_if_else_group_handler */
     MENU_SCRIPT_OP_UNCOLORED_QUAD = 0x04,  /* *_cmd_draw_textured_quad_handler; opcode 5 applies the draw color */
-    MENU_SCRIPT_OP_SCROLLABLE_LIST = 0x10, /* the list geometry *_menu_draw_scrollable_list reads */
+    MENU_SCRIPT_OP_SCROLLABLE_LIST = 0x10, /* the list geometry menu_draw_scrollable_list reads */
     /* The "draw number" opcodes of the WORLD and BUNIT scripts that
      * *_menu_script_draw_formatted_number tells apart from its plain form (0x0d). */
     MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS = 0x19, /* sprite color; leading zeros not drawn */
@@ -229,59 +232,20 @@ typedef union menu_callback {
 } menu_callback_t;
 typedef char menu_callback_size_must_be_4[sizeof(menu_callback_t) == 4 ? 1 : -1];
 
-/* drawing color */
-menu_instruction_t* menu_cmd_set_draw_color_handler(menu_instruction_t* command);
+/* running scripts */
+/* menu_cmd_run_stream calls the handler of each instruction's opcode until the module's terminator; each handler
+ * returns the next instruction. */
 
-/* command dispatch */
-extern menu_callback_t g_menu_row_callbacks[16];
-extern s16 g_menu_list_row_mode;
-extern s16 g_menu_list_scroll_offset;
-extern s32 g_menu_list_row_index;
+/* Input the stream's instructions see; a dimmed palette or a zooming window withholds it. */
 extern u32 g_menu_cmd_stream_input;
 extern menu_instruction_t* (*g_menu_cmd_handlers[])(menu_instruction_t* instruction);
-extern menu_sprite_command_t g_menu_cmd_row_quad;
 
+/* JOBSTTS builds its own body. */
+void menu_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
+void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
+menu_instruction_t* menu_cmd_skip_group(menu_instruction_t* command);
 menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* command);
 menu_instruction_t* menu_cmd_run_if_else_group_handler(menu_instruction_t* command);
-menu_window_command_t* menu_cmd_draw_tiled_rectangle_handler(menu_window_command_t* command);
-void menu_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
-menu_instruction_t* menu_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
-menu_instruction_t* bunit_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_set_otag_index_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_set_semitrans_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_menu_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-
-/* palette commands */
-menu_instruction_t* menu_cmd_set_clut_handler(menu_instruction_t* command);
-menu_instruction_t* menu_cmd_set_layout_clut_handler(menu_instruction_t* command);
-menu_instruction_t* menu_cmd_set_tpage_handler(menu_instruction_t* command);
-
-/* window drawing */
-extern menu_window_command_t g_menu_window_interior_command;
-extern s16 g_menu_window_right_x;
-
-menu_instruction_t* menu_cmd_draw_background_tiles_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* command);
-menu_instruction_t* menu_cmd_draw_textured_quad_handler(menu_instruction_t* instruction);
-
-/* draw area commands */
-menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* instruction);
-
-/* instruction cursors */
-menu_instruction_t* menu_cmd_skip_group(menu_instruction_t* command);
 
 static __inline__ menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
     return (menu_instruction_t*)((u8*)instruction + instruction->header.length);
@@ -291,24 +255,76 @@ static __inline__ const menu_instruction_t* menu_next_const_instruction(const me
     return (const menu_instruction_t*)((const u8*)instruction + instruction->header.length);
 }
 
-/* list scripts */
-void menu_draw_scrollable_list(const menu_instruction_t* script);
-void menu_init_and_draw_scrollable_list_simple(
-    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
+/* drawing commands */
+extern menu_callback_t g_menu_row_callbacks[16];
+extern menu_sprite_command_t g_menu_cmd_row_quad;
+extern menu_window_command_t g_menu_window_interior_command;
+/* The JOBSTTS and CARD window-frame handlers' copy of g_menu_window_interior_command. */
+extern menu_window_command_t g_cmd_window_interior_command;
+extern s16 g_menu_window_right_x;
 
-menu_instruction_t* bunit_menu_script_draw_formatted_number(menu_instruction_t* instruction);
-menu_instruction_t* world_menu_script_draw_formatted_number(menu_instruction_t* instruction);
-void jobstts_menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
-void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
+menu_instruction_t* menu_cmd_set_draw_color_handler(menu_instruction_t* command);
+menu_instruction_t* menu_cmd_draw_textured_quad_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_draw_background_tiles_handler(menu_instruction_t* instruction);
+menu_window_command_t* menu_cmd_draw_tiled_rectangle_handler(menu_window_command_t* command);
+menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* command);
+menu_instruction_t* menu_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
+
+/* draw state commands */
+menu_instruction_t* menu_cmd_set_clut_handler(menu_instruction_t* command);
+menu_instruction_t* menu_cmd_set_layout_clut_handler(menu_instruction_t* command);
+menu_instruction_t* menu_cmd_set_tpage_handler(menu_instruction_t* command);
+menu_instruction_t* menu_cmd_set_semitrans_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_set_otag_index_handler(menu_instruction_t* instruction);
+/* JOBSTTS builds its own body. */
+menu_instruction_t* menu_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* instruction);
+
+/* scrollable lists */
+/* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of
+ * a list record (menu_list_record_t). Each program draws the rows with its own
+ * *_menu_cmd_draw_scrollable_list_body_handler. */
+
+/* Page scroll direction of the overlay unit, item and job lists. */
+typedef enum menu_vertical_scroll_direction {
+    MENU_VERTICAL_SCROLL_UP = -1,
+    MENU_VERTICAL_SCROLL_NONE = 0,
+    MENU_VERTICAL_SCROLL_DOWN = 1,
+    MENU_VERTICAL_SCROLL_WAIT = 2,
+} menu_vertical_scroll_direction_e;
+
+extern s16* g_menu_list_entries;
+extern s16 g_menu_list_entry_count;
+extern u8* g_menu_list_text_table;
+extern s16 g_menu_list_selected_index;
+extern s16 g_menu_scroll_base_index;
+extern s16 g_menu_list_visible_rows;
+extern s16 g_menu_list_row_height;
+extern s16 g_menu_list_row_group_count;
+extern u8 g_menu_list_glyph_width;
+extern u8 g_menu_list_text_columns;
+extern u16 g_menu_list_vram_width;
+extern s8 g_menu_list_scroll_direction; /* read with lb */
+extern u16 g_menu_list_scroll_progress;
+extern s8
+    g_menu_list_redraw_pending; /* read with lb (the per-program menu_cmd_draw_scrollable_list_body_handler copies) */
+/* The row being drawn, its row mode and its scroll offset, which the row instructions read. */
+extern s32 g_menu_list_row_index;
+extern s16 g_menu_list_row_mode;
+extern s16 g_menu_list_scroll_offset;
+
+void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
+/* BUNIT, EQUIP, JOBSTTS and WORLD each build their own body. */
+void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* text_table);
+void menu_draw_scrollable_list(const menu_instruction_t* script);
 void menu_init_and_draw_scrollable_list(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
-void world_menu_init_and_draw_scrollable_list(
-    const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
+void menu_init_and_draw_scrollable_list_simple(
+    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
-void world_menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 
-/* script data */
-extern menu_window_command_t g_cmd_window_interior_command;
-extern menu_instruction_t g_equip_item_menu_script;
-
-#endif /* MENU_SCRIPT_H */
+#endif

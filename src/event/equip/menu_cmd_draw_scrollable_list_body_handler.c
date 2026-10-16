@@ -2,9 +2,9 @@
 
 #include "fft/event_equip.h"
 #include "fft/main.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
+#include "fft/main_sound.h"
+#include "fft/menu_cursor.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/sound.h"
 #include "fft/text.h"

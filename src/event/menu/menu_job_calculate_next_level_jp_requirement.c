@@ -1,8 +1,8 @@
 /* The JP the last looked-up job needs for its next level, as a row callback. */
 
+#include "fft/job.h"
 #include "fft/main.h"
 #include "fft/main_unit.h"
-#include "fft/menu_panel.h"
 #include "fft/menu_script.h"
 #include "fft/unit.h"
 #include "psx/types.h"

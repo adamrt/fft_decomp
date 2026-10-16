@@ -1,6 +1,6 @@
 /* Storing a menu selection value to put a tab cursor on its first entry. */
 
-#include "fft/menu_input.h"
+#include "fft/menu_selection.h"
 #include "psx/types.h"
 
 /* The same routine as menu_init_selection_value, compiled twice. The list steps call this copy

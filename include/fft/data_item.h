@@ -3,30 +3,16 @@
 
 /* Item data: item ids, types and the item, weapon, shield, armor, accessory and attribute records. */
 
+#include "fft/data_status.h"
 #include "psx/types.h"
 
-enum {
-    ITEM_ID_MASK = 0xff,
-    ITEM_ID_COUNT = 256,
-    ITEM_TYPE_FILTER_ANY = 255,
-};
-
-/* Physical attack, magic attack and speed, in the order units and item
- * attribute records store them. */
-typedef enum unit_attribute_index {
-    UNIT_ATTRIBUTE_PHYSICAL_ATTACK = 0,
-    UNIT_ATTRIBUTE_MAGIC_ATTACK = 1,
-    UNIT_ATTRIBUTE_SPEED = 2,
-    UNIT_ATTRIBUTE_COUNT = 3,
-} unit_attribute_index_e;
-
+/* item types */
 /* Item categories stored in item_data_t.type and in the four-byte job/unit
- * equippable-type set.  The table layout starts at 0x80062eb8. A name is the
- * type word that ends the help text of the type's items ("Ninja sword",
- * "Hammer", "Dictionary", "Spear", "Stick", "Clothes", "Gauntlet", "Mantle",
- * "Women's ribbon"; INSTRUMENT is "Mus inst" there) or, for the two thrown
- * types, the name of the Throw ability that g_main_throw_ability_item_types
- * maps to it. */
+ * equippable-type set. A name is the type word that ends the help text of the
+ * type's items ("Ninja sword", "Hammer", "Dictionary", "Spear", "Stick",
+ * "Clothes", "Gauntlet", "Mantle", "Women's ribbon"; INSTRUMENT is "Mus inst"
+ * there) or, for the two thrown types, the name of the Throw ability that
+ * g_main_throw_ability_item_types maps to it. */
 typedef enum item_type {
     ITEM_TYPE_UNARMED = 0,
     ITEM_TYPE_KNIFE = 1,
@@ -66,6 +52,7 @@ typedef enum item_type {
     ITEM_TYPE_COUNT = 35,
 } item_type_e;
 
+/* item_data_t.type_flags. */
 typedef enum item_type_flag {
     ITEM_TYPE_FLAG_UNREMOVABLE = 0x01,
     ITEM_TYPE_FLAG_RARE = 0x02,
@@ -77,18 +64,20 @@ typedef enum item_type_flag {
     ITEM_TYPE_FLAG_WEAPON = 0x80,
 } item_type_flag_e;
 
-typedef enum weapon_flag {
-    WEAPON_FLAG_FORCED_TWO_HANDS = 0x01,
-    WEAPON_FLAG_THROWABLE = 0x02,
-    WEAPON_FLAG_TWO_HANDS_COMPATIBLE = 0x04,
-    WEAPON_FLAG_TWO_SWORDS_COMPATIBLE = 0x08,
-    WEAPON_FLAG_ARC = 0x10,
-    WEAPON_FLAG_DIRECT = 0x20,
-    WEAPON_FLAG_LUNGING = 0x40,
-    WEAPON_FLAG_STRIKING = 0x80,
-} weapon_flag_e;
+/* The four equippable-type bytes use MSB-first bit order for item types
+ * 0x00..0x1f (job_data_t.equipment_categories). */
+#define EQUIPPABLE_ITEM_TYPE_BYTE_INDEX(type) ((type) >> 3)
 
-/* Item ids index the 256-row primary item table at 0x80062eb8. A name is the
+#define EQUIPPABLE_ITEM_TYPE_BYTE_MASK(type) (0x80 >> ((type) & 7))
+
+/* item ids */
+enum {
+    ITEM_ID_MASK = 0xff,
+    ITEM_ID_COUNT = 256,
+    ITEM_TYPE_FILTER_ANY = 255,
+};
+
+/* Item ids index the 256 rows of g_main_item_primary_data. A name is the
  * item's name in the game's text; the second Javelin and the second
  * Escutcheon, which repeat a name and are never sold, end in _RARE. Item 0 is
  * Nothing, the unarmed item record. Rows 0xfe and 0xff otherwise contain zero
@@ -387,11 +376,16 @@ typedef enum item_id {
     ITEM_ID_NONE = 255,
 } item_id_e;
 
-/* The four equippable-type bytes use MSB-first bit order for item types
- * 0x00..0x1f (the Job Data table at 0x800610b8). */
-#define EQUIPPABLE_ITEM_TYPE_BYTE_INDEX(type) ((type) >> 3)
-
-#define EQUIPPABLE_ITEM_TYPE_BYTE_MASK(type) (0x80 >> ((type) & 7))
+/* Item table and equipment-category boundaries. */
+enum {
+    ITEM_ID_THROWABLE_FIRST = ITEM_ID_SHURIKEN,
+    ITEM_ID_SHIELD_FIRST = ITEM_ID_ESCUTCHEON,
+    ITEM_ID_HEADGEAR_FIRST = ITEM_ID_LEATHER_HELMET,
+    ITEM_ID_BODY_ARMOR_FIRST = ITEM_ID_LEATHER_ARMOR,
+    ITEM_ID_ACCESSORY_FIRST = ITEM_ID_BATTLE_BOOTS,
+    ITEM_ID_CONSUMABLE_FIRST = ITEM_ID_POTION,
+    ITEM_ID_END = 254, /* one past the last item; ENTD's Random and None follow */
+};
 
 /* world_unit_t.equipment 16-bit values carry the item id in the low ten
  * bits and flags above (bit 14 is tested by world_shop_buy_from_fitting_room
@@ -406,17 +400,6 @@ enum {
     WORLD_EQUIPMENT_SHOP_ITEM = 0x8000, /* equipment 16-bit values: an unpaid shop item tried on in the fitting room */
 };
 
-/* Item table and equipment-category boundaries. */
-enum {
-    ITEM_ID_THROWABLE_FIRST = ITEM_ID_SHURIKEN,
-    ITEM_ID_SHIELD_FIRST = ITEM_ID_ESCUTCHEON,
-    ITEM_ID_HEADGEAR_FIRST = ITEM_ID_LEATHER_HELMET,
-    ITEM_ID_BODY_ARMOR_FIRST = ITEM_ID_LEATHER_ARMOR,
-    ITEM_ID_ACCESSORY_FIRST = ITEM_ID_BATTLE_BOOTS,
-    ITEM_ID_CONSUMABLE_FIRST = ITEM_ID_POTION,
-    ITEM_ID_END = 254, /* one past the last item; ENTD's Random and None follow */
-};
-
 /* Broad item categories shared by the WORLD and EQUIP menu classifiers.
  * Throwable weapons and consumables both use OTHER because neither maps to a
  * normal equipment slot category. */
@@ -429,6 +412,8 @@ typedef enum item_menu_category {
     ITEM_MENU_CATEGORY_OTHER = 5,
 } item_menu_category_e;
 
+/* records */
+/* Primary item record, one per item id. */
 typedef struct item_data {
     u8 palette;
     u8 sprite_id;
@@ -444,9 +429,20 @@ typedef struct item_data {
 } item_data_t;
 typedef char item_data_size_must_be_12[(sizeof(item_data_t) == 12) ? 1 : -1];
 
-/* Secondary item records selected by item_data_t.secondary_data_id. Offsets
- * are fixed by main_unit_set_equipment_stats and
- * main_unit_calculate_entd_equipment. */
+/* weapon_data_t.flags. */
+typedef enum weapon_flag {
+    WEAPON_FLAG_FORCED_TWO_HANDS = 0x01,
+    WEAPON_FLAG_THROWABLE = 0x02,
+    WEAPON_FLAG_TWO_HANDS_COMPATIBLE = 0x04,
+    WEAPON_FLAG_TWO_SWORDS_COMPATIBLE = 0x08,
+    WEAPON_FLAG_ARC = 0x10,
+    WEAPON_FLAG_DIRECT = 0x20,
+    WEAPON_FLAG_LUNGING = 0x40,
+    WEAPON_FLAG_STRIKING = 0x80,
+} weapon_flag_e;
+
+/* Weapon record selected by item_data_t.secondary_data_id. Offsets are fixed
+ * by main_unit_set_equipment_stats and main_unit_calculate_entd_equipment. */
 typedef struct weapon_data {
     u8 range;      /* 0x00 */
     u8 flags;      /* 0x01; weapon_flag_e */
@@ -459,9 +455,9 @@ typedef struct weapon_data {
 } weapon_data_t;
 typedef char weapon_data_size_must_be_8[(sizeof(weapon_data_t) == 8) ? 1 : -1];
 
-/* Three-byte item ability records at 0x80063f98. Item abilities select these
- * records directly; formula handlers use z and ability setup uses the status
- * infliction id. */
+/* Three-byte item ability records, g_main_item_secondary_data. Item abilities
+ * select these records directly; formula handlers use z and ability setup uses
+ * the status infliction id. */
 typedef struct item_secondary_data {
     u8 formula;
     u8 z;
@@ -489,19 +485,18 @@ typedef struct armor_data {
     u8 mp_bonus; /* 0x01; added to unit_stats_t.max_mp */
 } armor_data_t;
 
-/* Static innate, immunity and starting-status masks embedded in item and job
- * records. This differs from status_sets_t, whose third set is the
- * mutable current-status mask. */
-typedef struct initial_status_sets {
-    u8 innate[5];
-    u8 immunity[5];
-    u8 starting[5];
-} initial_status_sets_t;
-typedef char initial_status_sets_size_must_be_15[(sizeof(initial_status_sets_t) == 15) ? 1 : -1];
+/* Physical attack, magic attack and speed, in the order units and item
+ * attribute records store them. */
+typedef enum unit_attribute_index {
+    UNIT_ATTRIBUTE_PHYSICAL_ATTACK = 0,
+    UNIT_ATTRIBUTE_MAGIC_ATTACK = 1,
+    UNIT_ATTRIBUTE_SPEED = 2,
+    UNIT_ATTRIBUTE_COUNT = 3,
+} unit_attribute_index_e;
 
-/* 25-byte item Attribute record at 0x800642c4. MAIN applies these bonuses
- * to battle units; WORLD 0x80122f9c reads the same first five bytes for
- * equipment previews. */
+/* 25-byte item Attribute record (g_main_item_attributes). MAIN applies these
+ * bonuses to battle units; WORLD's item_collect_stat_deltas reads the same
+ * first five bytes for equipment previews. */
 typedef struct item_attribute {
     u8 attributes[UNIT_ATTRIBUTE_COUNT]; /* 0x00; unit_attribute_index_e */
     u8 move;                             /* 0x03 */
@@ -522,7 +517,7 @@ typedef struct main_item_attribute_flat {
     u8 elemental_affinity[5];
 } main_item_attribute_flat_t;
 
-/* 0x80057b20..0x80057b5b: seven independent signed-byte order lists.
+/* g_main_item_type_order_tables: seven independent signed-byte order lists.
  * main_item_init_order_tables establishes capacities 12/8/8/8/8/8/8 with -1
  * terminators; member categories remain unproven. */
 typedef struct item_type_order_tables {

@@ -1,6 +1,6 @@
 /* Queuing a draw mode packet at an ordering-table entry. */
 
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

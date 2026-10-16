@@ -1,6 +1,6 @@
 /* Moving a grid cursor with row wrapping, clamped on a partial last row. */
 
-#include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/sound.h"
 #include "psx/pad.h"
 #include "psx/types.h"

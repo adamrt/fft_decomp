@@ -1,13 +1,14 @@
 #ifndef BATTLE_UNIT_ANIMATION_H
 #define BATTLE_UNIT_ANIMATION_H
 
-/* BATTLE unit animation, display position and world coordinates. */
+/* BATTLE unit animation: animation ids, ability and distortion animations, facing and display position. */
 
 #include "fft/battle_unit.h"
 #include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* animation ids */
 /* Unit animation ids: the ones the code and the two animation tables of
  * BATTLE.BIN select by number. Animation n is sequences 2n (seen from the
  * front) and 2n + 1 (from behind) of the sheet's SEQ file; the comments
@@ -22,7 +23,7 @@ typedef enum battle_unit_animation {
     BATTLE_UNIT_ANIMATION_IDLE_FLYING_HASTE = 7,
     BATTLE_UNIT_ANIMATION_IDLE_FLYING_SLOW = 8,
     BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE
-    = 9, /* in water two or more deep (move_get_water_depth); also the crystal sprite */
+    = 9, /* in water two or more deep (battle_move_get_water_animation_mode); also the crystal sprite */
     BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE_HASTE = 10,
     BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE_SLOW = 11,
     BATTLE_UNIT_ANIMATION_WALK = 12, /* a movement step on foot (battle_unit_set_walk_animation) */
@@ -100,71 +101,123 @@ typedef enum battle_unit_animation {
     BATTLE_UNIT_ANIMATION_CLOTH_LOW = 121,
 } battle_unit_animation_e;
 
-/* animation */
-extern battle_ability_animation_data_t g_battle_ability_animation_data[BATTLE_ABILITY_ANIMATION_COUNT];
-/* Two battle_unit_animation_e for each set: the one that starts a charge and
- * the one held while the unit charges or performs; 0 for none. */
-extern u8 g_battle_ability_charge_animation_sets[BATTLE_CHARGE_ANIMATION_SET_COUNT]
-                                                [BATTLE_CHARGE_ANIMATION_VARIANT_COUNT];
-extern battle_distortion_animation_handler_t
-    g_battle_unit_distortion_animation_handlers[BATTLE_DISTORTION_ANIMATION_COUNT];
-extern s32 g_battle_unit_palette_animation_offset;
-extern s32 g_battle_unit_palette_animation_timer;
-/* WalkToAnim: requested animation applied after movement stops; 0 means none. */
-extern u16 g_unit_pending_animation_ids[];
-extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
-extern s8 g_battle_unit_float_bob_offsets[24];
-/* Event-script rotation state for each runtime unit slot. */
-extern unit_animation_state_t g_unit_animation_states[];
-void battle_unit_clear_distortion_animation_id_10(battle_unit_t* unit);
-void battle_unit_clear_distortion_animation_id_11(battle_unit_t* unit);
-void battle_unit_clear_facing_update_suppression(u32 runtime_id);
-void battle_unit_decide_facing_direction(battle_unit_t* unit, s32 facing);
-s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit);
-void battle_unit_dispatch_distortion_animation(battle_unit_t* unit);
-void battle_unit_face_toward_cursor(battle_unit_t* unit);
-s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id);
-void battle_unit_set_facing_update_suppression(u32 runtime_id);
-s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id);
-void battle_unit_set_mounted_animation(battle_unit_t* unit);
-void battle_unit_set_animation_based_on_status(battle_unit_t* unit);
-void battle_unit_set_walk_animation(battle_unit_t* unit);
-void battle_unit_set_level_up_animation(battle_unit_t* unit);
-void unit_set_facing(s32 runtime_id, s32 facing);
-void battle_unit_snap_all_facings_to_quadrants(void);
+/* ability animations */
+/* One row of the ability animation table, indexed by ability id: the ability's charge animation
+ * set, its attack animation and the message shown when it hits. */
+typedef struct battle_ability_animation_data {
+    u8 charge_animation_set_id; /* row of g_battle_ability_charge_animation_sets */
+    u8 attack_animation;        /* battle_unit_animation_e, or BATTLE_ATTACK_ANIMATION_USE_WEAPON or _USE_ITEM */
+    u8 text_display; /* low byte of the message text id (0x1800 | this) shown when the ability hits; 0 none */
+} battle_ability_animation_data_t;
+typedef char battle_ability_animation_data_size_must_be_3[(sizeof(battle_ability_animation_data_t) == 3) ? 1 : -1];
+
+/* Rows of the ability animation table, and the charge animation sets with their two animations. */
+enum {
+    BATTLE_ABILITY_ANIMATION_COUNT = 454,
+    BATTLE_CHARGE_ANIMATION_SET_COUNT = 20,
+    BATTLE_CHARGE_ANIMATION_VARIANT_COUNT = 2,
+};
+
+/* Selectors in attack_animation; other values are battle_unit_animation_e IDs. */
+enum {
+    BATTLE_ATTACK_ANIMATION_USE_WEAPON = 0,
+    BATTLE_ATTACK_ANIMATION_USE_ITEM = 1,
+};
+
 void battle_unit_start_ability_charge_animation(battle_unit_t* unit);
 void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit);
+void battle_unit_select_attack_animation_for_ability(battle_unit_t* attacker, battle_unit_t* target);
+void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_unit_t* target);
+void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id);
+void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* target);
+s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id);
+
+/* animation */
+extern s32 g_battle_unit_palette_animation_offset;
+extern s32 g_battle_unit_palette_animation_timer;
+extern s8 g_battle_unit_float_bob_offsets[24];
+
+void battle_unit_set_animation_based_on_status(battle_unit_t* unit);
+void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit);
+void battle_unit_update_animation_for_status_changes(battle_unit_t* unit);
+void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id);
+void battle_unit_set_mounted_animation(battle_unit_t* unit);
+void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id);
+void battle_unit_set_walk_animation(battle_unit_t* unit);
+void battle_unit_set_level_up_animation(battle_unit_t* unit);
+void battle_unit_set_specific_animation_by_runtime_id(u32 runtime_id, u32 animation);
+s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibble);
 void battle_unit_store_animation_facing(u32 animation, s32 facing, battle_unit_t* unit);
-void battle_unit_settle_on_tile(battle_unit_t* unit);
+void battle_unit_force_animation_facing(s32 animation, s32 facing, battle_unit_t* unit);
 void battle_unit_update_and_animate_units(void);
 void battle_unit_update_target_displays(battle_unit_t* unit);
 void battle_unit_end_command(battle_unit_t* unit);
-void battle_unit_update_animation_for_status_changes(battle_unit_t* unit);
-void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* target);
-s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id);
-void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id);
-void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit);
-void battle_unit_clear_horizontal_flip_flag(u32 runtime_id);
-void battle_unit_clear_movement_effect_suppression(u32 runtime_id);
-void battle_unit_clear_palette_update_suppression(u32 runtime_id);
+void battle_unit_settle_on_tile(battle_unit_t* unit);
+
+/* distortion animations */
+/* battle_unit_t.distortion_animation_id: the motion that
+ * battle_unit_dispatch_distortion_animation steps once an animation frame
+ * until its handler clears the id. BATTLE_SEQ_OP_START_DISTORTION gives the
+ * id less 2 and, for most, the frames it takes (distortion_timer). */
+typedef enum battle_distortion_animation {
+    BATTLE_DISTORTION_ANIMATION_NONE = 0,
+    BATTLE_DISTORTION_ANIMATION_SCALE_PULSE = 1,      /* squeezes the sprite thin and tall; nothing starts it */
+    BATTLE_DISTORTION_ANIMATION_RISE = 2,             /* 0x24 up */
+    BATTLE_DISTORTION_ANIMATION_SETTLE = 3,           /* back to the height of where the unit stands */
+    BATTLE_DISTORTION_ANIMATION_MOVE_TO_TARGET = 4,   /* to the first target, or to the targeted panel */
+    BATTLE_DISTORTION_ANIMATION_MOVE_TO_OWN_TILE = 5, /* to the center of the unit's own tile */
+    BATTLE_DISTORTION_ANIMATION_JUMP_TO_TARGET = 6,   /* the same two along a jump arc */
+    BATTLE_DISTORTION_ANIMATION_JUMP_TO_OWN_TILE = 7,
+    BATTLE_DISTORTION_ANIMATION_MOVE_TO_TARGET_LEVEL = 8, /* 4 and 5 without the change of height */
+    BATTLE_DISTORTION_ANIMATION_MOVE_TO_OWN_TILE_LEVEL = 9,
+    BATTLE_DISTORTION_ANIMATION_CLEAR = 10, /* 10 and 11 clear the id at once */
+    BATTLE_DISTORTION_ANIMATION_CLEAR_2 = 11,
+    BATTLE_DISTORTION_ANIMATION_JUMP_START = 12,     /* straight up to 0x120 above the ground, trailing copies */
+    BATTLE_DISTORTION_ANIMATION_FALL_TO_TARGET = 13, /* down onto the target's tile */
+    BATTLE_DISTORTION_ANIMATION_TELEPORT = 14,       /* fade out, move to the step's destination, fade in */
+    BATTLE_DISTORTION_ANIMATION_BACK_AWAY = 15,      /* part of a tile away from the target */
+    BATTLE_DISTORTION_ANIMATION_JUMP_TO_OWN_TILE_FADED = 16, /* 7, blended, and dark until four frames remain */
+    BATTLE_DISTORTION_ANIMATION_JUMP_RISE = 17, /* 12 with the jump sound, unless the unit is that high already */
+} battle_distortion_animation_e;
+
+enum {
+    BATTLE_DISTORTION_ANIMATION_COUNT = 18, /* the handlers of g_battle_unit_distortion_animation_handlers */
+};
+
+typedef void (*battle_distortion_animation_handler_t)(battle_unit_t* unit);
+
+extern battle_distortion_animation_handler_t
+    g_battle_unit_distortion_animation_handlers[BATTLE_DISTORTION_ANIMATION_COUNT];
+
+void battle_unit_dispatch_distortion_animation(battle_unit_t* unit);
+s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit);
+void battle_unit_clear_distortion_animation_id_10(battle_unit_t* unit);
+void battle_unit_clear_distortion_animation_id_11(battle_unit_t* unit);
+
+/* facing */
+void battle_unit_decide_facing_direction(battle_unit_t* unit, s32 facing);
+void battle_unit_face_toward_cursor(battle_unit_t* unit);
 void battle_unit_face_towards_action_target(battle_unit_t* unit, battle_unit_t* target);
+s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id);
+s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id);
 s32 battle_unit_get_facing_nibble_by_runtime_id(u32 runtime_id);
-void battle_unit_select_attack_animation_for_ability(battle_unit_t* attacker, battle_unit_t* target);
-void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_unit_t* target);
-s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibble);
+void battle_unit_snap_all_facings_to_quadrants(void);
 void battle_unit_set_horizontal_flip_flag(u32 runtime_id);
-void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id);
+void battle_unit_clear_horizontal_flip_flag(u32 runtime_id);
+
+/* update suppression */
+/* Set and clear the battle_motion_flags_e that suppress a unit's facing, movement-effect and
+ * palette updates. */
+void battle_unit_set_facing_update_suppression(u32 runtime_id);
+void battle_unit_clear_facing_update_suppression(u32 runtime_id);
 void battle_unit_set_movement_effect_suppression(u32 runtime_id);
+void battle_unit_clear_movement_effect_suppression(u32 runtime_id);
 void battle_unit_set_palette_update_suppression(u32 runtime_id);
-void battle_unit_set_specific_animation_by_runtime_id(u32 runtime_id, u32 animation);
-void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id);
-void battle_unit_force_animation_facing(s32 animation, s32 facing, battle_unit_t* unit);
+void battle_unit_clear_palette_update_suppression(u32 runtime_id);
 
 /* world coordinates */
 SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id);
 SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id);
-void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
-void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void battle_unit_set_real_coords_from_world_coords(struct battle_unit* unit);
 void battle_unit_set_world_coords_from_real_coords(struct battle_unit* unit);
 void battle_unit_set_move_and_world_coords(battle_unit_t* unit);
@@ -172,13 +225,11 @@ void battle_unit_set_move_and_world_coords(battle_unit_t* unit);
 /* position and display */
 battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_data_t* out, s32 unit_id);
 battle_unit_t* battle_unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
-void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
 battle_unit_t* battle_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z);
 void battle_unit_update_display_by_runtime_id(s32 runtime_id);
 void battle_unit_update_float_and_jump_height(battle_unit_t* unit);
 void battle_unit_update_graphics_by_runtime_id(u32 runtime_id);
 s32 battle_unit_set_tile_position(s32 battle_id, u8 map_x, u8 map_y, u8 map_z, u8 facing);
-void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* runtime);
 void battle_unit_dismount_rider_and_update_display(battle_unit_t* rider);
 SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id);
@@ -186,5 +237,18 @@ s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 battle_unit_t* battle_unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z);
 s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords);
 s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
+
+/* event library */
+/* WalkToAnim: requested animation applied after movement stops; 0 means none. */
+extern u16 g_unit_pending_animation_ids[];
+extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
+/* Event-script rotation state for each runtime unit slot. */
+extern unit_animation_state_t g_unit_animation_states[];
+
+void unit_set_facing(s32 runtime_id, s32 facing);
+void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
+void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
+void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
+void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 
 #endif

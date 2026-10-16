@@ -1,6 +1,6 @@
 /* The menu command that turns semi-transparency on or off for later primitives. */
 
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 
 /* Menu script command: turn semi-transparency on or off for later primitives and continue with the

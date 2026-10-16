@@ -1,10 +1,12 @@
 /* The thread drawing the numeric editor panel. */
 
 #include "fft/gfx.h"
+#include "fft/gfx_image.h"
+#include "fft/gfx_primitive.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
-#include "fft/menu_list.h"
 #include "fft/menu_panel.h"
 #include "fft/menu_text.h"
 #include "fft/script.h"

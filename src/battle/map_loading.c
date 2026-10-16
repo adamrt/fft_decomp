@@ -2,12 +2,15 @@
 
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
-#include "fft/battle_map.h"
+#include "fft/battle_map_mesh.h"
+#include "fft/battle_map_palette.h"
+#include "fft/battle_map_resource.h"
+#include "fft/battle_map_weather.h"
+#include "fft/battle_sound.h"
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_sound.h"
 #include "fft/script_variable.h"
-#include "fft/sound.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

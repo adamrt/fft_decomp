@@ -1,8 +1,9 @@
 /* The animated status groups of a menu panel, fading in as they appear. */
 
 #include "fft/event_attack.h"
-#include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/gfx_image.h"
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

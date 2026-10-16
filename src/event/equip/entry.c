@@ -1,16 +1,17 @@
 /* EQUIP entry, including the item numeric thread toggle, state flags, thread stops, selected unit data, selection
  * indices and messages with sound. */
 
+#include "fft/battle_unit.h"
 #include "fft/event_equip.h"
 #include "fft/item.h"
-#include "fft/main.h"
 #include "fft/main_sound.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
+#include "fft/menu_gfx.h"
+#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
-#include "fft/menu_overlay.h"
 #include "fft/menu_panel.h"
+#include "fft/menu_status.h"
 #include "fft/menu_text.h"
 #include "fft/sound.h"
 #include "fft/thread.h"

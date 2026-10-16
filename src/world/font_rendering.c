@@ -1,8 +1,7 @@
 /* Text id list rendering to image rows, kerning into the command buffer, glyph image upload and entry advance by
  * character count. */
 
-#include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/gfx_image.h"
 #include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/world_text.h"
