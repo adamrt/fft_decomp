@@ -308,13 +308,11 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         n = entry->brightness_row;
         if (entry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-            red = g_battle_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
-                (entry->color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][frame];
+            red = g_battle_effect_animation_curve_data
+                      ->curves[((entry->color_curves & 0xfff) >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][frame];
             k = (entry->color_curves & 0xfff);
-            green = g_battle_effect_animation_curve_data
-                        ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_GREEN_SHIFT)][frame];
-            blue = g_battle_effect_animation_curve_data
-                       ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_BLUE_SHIFT)][frame];
+            green = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][frame];
+            blue = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][frame];
         } else {
             red = green = blue = EFFECT_COLOR_NEUTRAL;
         }

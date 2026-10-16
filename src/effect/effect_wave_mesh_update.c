@@ -126,11 +126,11 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         if (geometry->textured_quad.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             row = (geometry->textured_quad.color_curves & 0xfff);
             red = g_battle_effect_animation_curve_data
-                      ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
+                      ->curves[(row >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][work->frame];
             green = g_battle_effect_animation_curve_data
-                        ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_GREEN_SHIFT)][work->frame];
+                        ->curves[(row >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][work->frame];
             blue = g_battle_effect_animation_curve_data
-                       ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_BLUE_SHIFT)][work->frame];
+                       ->curves[(row >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][work->frame];
         } else {
             blue = EFFECT_COLOR_NEUTRAL;
             green = EFFECT_COLOR_NEUTRAL;

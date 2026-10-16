@@ -156,8 +156,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
         target_bindings = entry->particle_ribbon.target_curve_bindings;
         target_index = record->timeline.target_index;
         spawn_bindings = entry->particle_ribbon.spawn_curve_bindings;
-        EFFECT_READ_CURVE(j, factor,
-            effect_get_cached_curve_binding(target_bindings, EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT), frame);
+        EFFECT_READ_CURVE(j, factor, (target_bindings >> EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT) & 0xf, frame);
         if (i
                 % battle_lerp_fixed8(
                     entry->particle_ribbon.spawn_interval_start, entry->particle_ribbon.spawn_interval_end, factor)
@@ -181,13 +180,11 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
                 g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index,
                 &g_battle_effect_context, &target);
 
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(target_bindings, EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT), frame);
+            EFFECT_READ_CURVE(j, factor, (target_bindings >> EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT) & 0xf, frame);
             count = battle_lerp_fixed8(
                 entry->particle_ribbon.particle_count_start, entry->particle_ribbon.particle_count_end, factor);
 
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT), frame);
+            EFFECT_READ_CURVE(j, factor, (spawn_bindings >> EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT) & 0xf, frame);
             battle_effect_interpolate_emitter_spawn_position(entry, factor, &origin);
             switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
             case EFFECT_EMITTER_ORIGIN_WORLD:
@@ -218,8 +215,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
                 break;
             }
 
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_SPAWN_SPREAD_SHIFT), frame);
+            EFFECT_READ_CURVE(j, factor, (spawn_bindings >> EFFECT_SPAWN_CURVE_SPAWN_SPREAD_SHIFT) & 0xf, frame);
             battle_effect_interpolate_emitter_spawn_spread(entry, factor, &spread);
             if (rotate) {
                 SetRotMatrix(&facing);
@@ -229,7 +225,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
                 RotTrans(&vector, &spread, &result.pad);
             }
 
-            j = effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_RADIAL_SPEED_SHIFT);
+            j = (spawn_bindings >> EFFECT_SPAWN_CURVE_RADIAL_SPEED_SHIFT) & 0xf;
             j--;
             if (j != -1) {
                 factor = g_battle_effect_animation_curve_data->curves[j][frame];
@@ -242,16 +238,13 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
                 speed_max = entry->particle_ribbon.radial_speed_start.max;
             }
 
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT),
-                frame);
+            EFFECT_READ_CURVE(
+                j, factor, (spawn_bindings >> EFFECT_SPAWN_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT) & 0xf, frame);
             battle_effect_interpolate_emitter_velocity_direction_spread(entry, factor, &angle_spread);
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_VELOCITY_BASE_ANGLE_SHIFT), frame);
+            EFFECT_READ_CURVE(j, factor, (spawn_bindings >> EFFECT_SPAWN_CURVE_VELOCITY_BASE_ANGLE_SHIFT) & 0xf, frame);
             battle_effect_interpolate_emitter_velocity_base_angles(entry, factor, &angle_base);
 
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(target_bindings, EFFECT_EMITTER_CURVE_TARGET_OFFSET_SHIFT), frame);
+            EFFECT_READ_CURVE(j, factor, (target_bindings >> EFFECT_EMITTER_CURVE_TARGET_OFFSET_SHIFT) & 0xf, frame);
             target_base.vx = battle_lerp_fixed8(
                 entry->particle_ribbon.target_offset_start.x, entry->particle_ribbon.target_offset_end.x, factor);
             target_base.vy = battle_lerp_fixed8(
@@ -287,9 +280,8 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
                 break;
             }
 
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(target_bindings, EFFECT_PARTICLE_RIBBON_CURVE_TARGET_SPREAD_SHIFT),
-                frame);
+            EFFECT_READ_CURVE(
+                j, factor, (target_bindings >> EFFECT_PARTICLE_RIBBON_CURVE_TARGET_SPREAD_SHIFT) & 0xf, frame);
             target_spread.vx = battle_lerp_fixed8(
                 entry->particle_ribbon.target_spread_start_x, entry->particle_ribbon.target_spread_end_x, factor);
             target_spread.vy = battle_lerp_fixed8(
@@ -297,8 +289,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
             target_spread.vz = battle_lerp_fixed8(
                 entry->particle_ribbon.target_spread_start_z, entry->particle_ribbon.target_spread_end_z, factor);
 
-            EFFECT_READ_CURVE(j, factor,
-                effect_get_cached_curve_binding(target_bindings, EFFECT_EMITTER_CURVE_LIFETIME_SHIFT), frame);
+            EFFECT_READ_CURVE(j, factor, (target_bindings >> EFFECT_EMITTER_CURVE_LIFETIME_SHIFT) & 0xf, frame);
             lifetime_min = battle_lerp_fixed8(
                 entry->particle_ribbon.lifetime_start.min, entry->particle_ribbon.lifetime_end.min, factor);
             lifetime_max = battle_lerp_fixed8(
@@ -446,13 +437,13 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
             }
             if (entry->particle_ribbon.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
                 factor = (entry->particle_ribbon.color_curves & 0xfff);
-                red = g_battle_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
-                    (entry->particle_ribbon.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][slot->age];
-                green
-                    = g_battle_effect_animation_curve_data
-                          ->curves[effect_get_cached_curve_binding(factor, EFFECT_COLOR_CURVE_GREEN_SHIFT)][slot->age];
+                red = g_battle_effect_animation_curve_data
+                          ->curves[((entry->particle_ribbon.color_curves & 0xfff) >> EFFECT_COLOR_CURVE_RED_SHIFT)
+                              & 0xf][slot->age];
+                green = g_battle_effect_animation_curve_data
+                            ->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][slot->age];
                 blue = g_battle_effect_animation_curve_data
-                           ->curves[effect_get_cached_curve_binding(factor, EFFECT_COLOR_CURVE_BLUE_SHIFT)][slot->age];
+                           ->curves[(factor >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][slot->age];
             } else {
                 blue = EFFECT_COLOR_NEUTRAL;
                 green = EFFECT_COLOR_NEUTRAL;

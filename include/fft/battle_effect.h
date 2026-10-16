@@ -1375,12 +1375,6 @@ enum {
     EFFECT_COLOR_CURVE_BLUE_SHIFT = 8,
 };
 
-/* Native callbacks cache signed packed words. Unsigned field copies change
- * the arithmetic shifts and shared extraction temporaries. */
-static __inline__ u32 effect_get_cached_curve_binding(s32 packed, s32 shift) {
-    return (packed >> shift) & 0xf;
-}
-
 /* One-based bindings for the emitter's initial motion. */
 typedef struct effect_emitter_spawn_curve_bindings {
     u32 position : 4;
@@ -1395,8 +1389,9 @@ typedef struct effect_emitter_spawn_curve_bindings {
 typedef char
     effect_emitter_spawn_curve_bindings_size_must_be_4[sizeof(effect_emitter_spawn_curve_bindings_t) == 4 ? 1 : -1];
 
-/* The same fields as bit positions, for the native renderers that read the
- * word as a signed integer (effect_get_cached_curve_binding). */
+/* The same fields as bit positions. The native renderers copy each binding
+ * word into a signed local and extract a field as (word >> SHIFT) & 0xf;
+ * unsigned copies change the shifts. */
 enum {
     EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT = 0,
     EFFECT_SPAWN_CURVE_SPAWN_SPREAD_SHIFT = 4,
@@ -1895,9 +1890,12 @@ typedef struct effect_animation_curve_table {
 } effect_animation_curve_table_t;
 typedef char effect_animation_curve_table_size_must_be_4[(sizeof(effect_animation_curve_table_t) == 4) ? 1 : -1];
 
-/* Motion bindings are one-based; zero disables the curve. The caller's index
- * also serves as a loop temporary; retaining it preserves register allocation.
- * A do-while wrapper changes allocation; use this block as a standalone statement. */
+/* Read a curve value for a one-based binding; zero disables the curve and
+ * reads as 0. BATTLE's emitter and the effect overlays share this idiom.
+ * The decrement-then-compare-with--1 test is the original's: a zero test or a
+ * post-decrement changes over 180 functions. The caller's index doubles as a
+ * loop temporary, and a do-while wrapper changes register allocation, so use
+ * the block as a standalone statement. */
 #define EFFECT_READ_CURVE(index, result, binding, frame)                                                               \
     {                                                                                                                  \
         index = (binding);                                                                                             \
