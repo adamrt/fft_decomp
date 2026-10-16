@@ -50,7 +50,7 @@ void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         }
         return;
     }
-    if (g_menu_hide_numeric_values == 0) {
+    if (g_unit_panel_hide_numeric_values == 0) {
         if ((format & 0x200) && value == 100) {
             format = work + 3;
         }

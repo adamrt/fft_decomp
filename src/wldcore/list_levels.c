@@ -630,11 +630,11 @@ static void brave_story_push_participant_level(s32 proposition, s32 participant)
     g_unit_panel_banner_params.y = 0;
     g_unit_panel_panel_params.y = 0;
     g_unit_panel_numbers_params.y = 0;
-    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_unit_panel_banner_params, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_frame_thread);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
+    thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
     g_system_flags |= SYSTEM_FLAG_UNIT_PANEL_THREADS;
 
@@ -652,7 +652,7 @@ static void brave_story_push_participant_level(s32 proposition, s32 participant)
  * skillset's first five abilities instead of their equipped ability set. */
 void unit_panel_build_unit_data(s32 party_index) {
     unit_stats_t* unit;
-    menu_unit_status_record_t* gauges;
+    unit_panel_summary_t* gauges;
     menu_unit_status_identity_t* identity;
     menu_status_panel_slot_state_t* detail;
     u16* abilities;
@@ -666,7 +666,7 @@ void unit_panel_build_unit_data(s32 party_index) {
     }
 
     unit = &g_unit_panel_unit;
-    gauges = &g_menu_selected_unit_stat_summary;
+    gauges = &g_unit_panel_selected_unit_stat_summary;
     identity = &g_formation_selected_unit_identity;
     detail = &g_formation_selected_unit_stat_detail.state;
 

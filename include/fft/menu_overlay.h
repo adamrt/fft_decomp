@@ -19,7 +19,7 @@ void menu_init_palette_and_text(s32 unused_0);
 void menu_init_subsystem_pointers(void);
 /* Loads ATTACK.OUT with its scenario conditions and graphics and starts the deployment screen (returns 0), or
  * starts the map-load thread when deployment is skipped (returns 1). */
-s32 menu_init_attack_resources_and_threads(void);
+s32 deploy_open(void);
 /* Frees every window buffer pair, the tpage-7 VRAM grid and the menu arena, and resets the thread scheduler. */
 void menu_reset_subsystems(void);
 /* 2 while a menu is being built, 4 while a menu thread runs, 0 when idle; BATTLE's body first returns
@@ -28,7 +28,7 @@ s32 menu_get_thread_activity(void);
 
 /* companion overlays */
 /* Companion overlay requests: index into the overlay LBA, size and load offset
- * tables (g_menu_companion_executable_lbas). */
+ * tables (g_overlay_companion_executable_lbas). */
 typedef enum companion_overlay {
     COMPANION_OVERLAY_OPTION = 1,             /* EVENT/OPTION.OUT */
     COMPANION_OVERLAY_BUNIT = 2,              /* EVENT/BUNIT.OUT, first half */
@@ -45,16 +45,16 @@ typedef enum companion_overlay {
     COMPANION_OVERLAY_ATTACK = 13,            /* EVENT/ATTACK.OUT */
     COMPANION_OVERLAY_CARD = 14,              /* EVENT/CARD.OUT */
     COMPANION_OVERLAY_BUNIT_SECOND_HALF = 15, /* loaded above the heap reservation */
-} companion_overlay_e;
+} overlay_companion_e;
 
 /* Companion data file requests (the second LBA and size tables). */
 typedef enum companion_file {
     COMPANION_FILE_WIN001 = 2,    /* EVENT/WIN001.BIN */
     COMPANION_FILE_BONUS = 3,     /* EVENT/BONUS.BIN */
     COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
-} companion_file_e;
+} overlay_companion_file_e;
 
-/* g_menu_companion_overlay_state: the overlay entry the frame driver calls, cleared when the overlay
+/* g_overlay_companion_overlay_state: the overlay entry the frame driver calls, cleared when the overlay
  * returns. */
 typedef enum companion_overlay_state {
     COMPANION_OVERLAY_STATE_IDLE = 0,
@@ -63,54 +63,54 @@ typedef enum companion_overlay_state {
     COMPANION_OVERLAY_STATE_JOBSTTS = 3,   /* status_screen_entrypoint */
     COMPANION_OVERLAY_STATE_EQUIP = 4,     /* equipment_entrypoint */
     COMPANION_OVERLAY_STATE_CARD_SAVE = 5, /* save_run_menu */
-} companion_overlay_state_e;
+} overlay_companion_state_e;
 
-extern s32 g_menu_companion_overlay_state;
-extern s32 g_menu_companion_overlay_primitives;
-extern s32 g_menu_companion_executable_request_index;
-extern s32 g_menu_companion_executable_loading;
-extern s32 g_menu_companion_executable_lbas[];
-extern s32 g_menu_companion_executable_sizes[];
-extern s32 g_menu_companion_executable_offsets[];
-extern s32 g_menu_companion_data_file_request_index;
-extern s32 g_menu_companion_data_file_loading;
-extern s32 g_menu_companion_data_file_lbas[];
-extern s32 g_menu_companion_data_file_sizes[];
-extern u8* g_menu_companion_data_file_buffer;
+extern s32 g_overlay_companion_overlay_state;
+extern s32 g_overlay_companion_overlay_primitives;
+extern s32 g_overlay_companion_executable_request_index;
+extern s32 g_overlay_companion_executable_loading;
+extern s32 g_overlay_companion_executable_lbas[];
+extern s32 g_overlay_companion_executable_sizes[];
+extern s32 g_overlay_companion_executable_offsets[];
+extern s32 g_overlay_companion_data_file_request_index;
+extern s32 g_overlay_companion_data_file_loading;
+extern s32 g_overlay_companion_data_file_lbas[];
+extern s32 g_overlay_companion_data_file_sizes[];
+extern u8* g_overlay_companion_data_file_buffer;
 extern char g_menu_wait_for_file_allocation_message[];
 
 /* Publishes an executable request and waits for it to clear. */
-void menu_request_open_companion_executable(s32 request_index);
+void overlay_request_companion(s32 request_index);
 /* The per-frame drivers of the executable and data file requests: they start the disc read on the main stack,
  * poll until it finishes and clear the request. */
-void menu_poll_companion_executable_load(void);
-void menu_poll_companion_data_file_load(void);
-/* Requests SMALL.OUT without waiting; menu_poll_small_load drives the load during map initialization and returns
+void overlay_poll_companion(void);
+void overlay_poll_companion_file(void);
+/* Requests SMALL.OUT without waiting; overlay_poll_small drives the load during map initialization and returns
  * 1 while it is pending. */
-void menu_request_open_small(void);
-s32 menu_poll_small_load(void);
+void overlay_request_small(void);
+s32 overlay_poll_small(void);
 /* The overlay entry of COMPANION_OVERLAY_STATE_STUB. */
-void menu_run_companion_overlay_stub(void);
+void overlay_companion_stub(void);
 
 /* screen starters */
 /* Thread entries of the menu rows that open an overlay screen. */
-void menu_open_bunit(void);
-void menu_open_debugchr(void);
-void menu_open_mounted_unit_status_screen(void);
-void menu_open_option_at_list(void);
-void menu_open_option_crystal_pickup_panel(void);
-void menu_open_option_game_options(void);
-void menu_run_equip_thread(void);
-void menu_run_jobstts_thread(void);
-void menu_start_mini_menu_display_thread(void);
+void unit_list_open(void);
+void unit_editor_open(void);
+void status_screen_open_mounted_unit(void);
+void at_list_open(void);
+void crystal_open_pickup_panel(void);
+void option_open(void);
+void equipment_thread(void);
+void status_screen_jobs_thread(void);
+void mini_menu_start(void);
 /* Waits for the camera and the menu transition, then runs the Triangle mini menu. */
-void menu_run_triangle_selection(void);
+void mini_menu_select(void);
 
 /* overlay list threads */
 /* EQUIP, the menu library and WORLD each build their own bodies of these. */
-void menu_run_ability_list_thread(void);
-void menu_run_equipment_list_thread(void);
+void unit_panel_ability_thread(void);
+void unit_panel_equipment_thread(void);
 /* EQUIP and WORLD each build their own body. */
-s32 menu_update_equipment(void);
+s32 equipment_update_menu(void);
 
 #endif

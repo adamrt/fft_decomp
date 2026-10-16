@@ -22,7 +22,7 @@ extern s32 g_unit_editor_field_edit_active;
 extern ranges32_t g_unit_editor_template[21];
 extern u8 g_unit_editor_template_normal[];
 extern u8 g_unit_editor_template_special[];
-/* Views of g_panel_selected_billboard.gauges[i].value (values[3 * i])
+/* Views of g_unit_panel_selected_billboard.gauges[i].value (values[3 * i])
  * and gauges[i].max (the *_max 16-bit values): unit_editor_apply_values
  * reaches the values from their own base register and the limits by absolute
  * address, which the member spelling does not reproduce. */
@@ -41,13 +41,13 @@ void unit_panel_numbers_thread(void);
 /* unit panels */
 /* The selected-unit panel record; the comparison panel's record follows 0x10
  * bytes later. */
-extern menu_active_unit_t g_unit_panel_selected_unit_data;
+extern unit_panel_unit_t g_unit_panel_selected_unit_data;
 extern palette_t g_unit_panel_selected_portrait_palettes[2];
-extern menu_active_unit_t g_unit_panel_comparison_unit_data;
+extern unit_panel_unit_t g_unit_panel_comparison_unit_data;
 extern palette_t g_unit_panel_comparison_portrait_palettes[2];
-extern menu_status_thread_t g_unit_editor_status_display_thread_params;
-extern menu_status_thread_t g_unit_panel_character_status_frame_config;
-extern menu_status_thread_t g_unit_panel_numbers_thread_params;
+extern unit_panel_thread_t g_unit_editor_status_display_thread_params;
+extern unit_panel_thread_t g_unit_panel_character_status_frame_config;
+extern unit_panel_thread_t g_unit_panel_numbers_thread_params;
 
 /* graphics */
 

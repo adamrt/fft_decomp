@@ -443,7 +443,7 @@ static void world_map_init_state(void) {
         day = 1;
         script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, 1);
         script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
-        day_of_year = unit_birthday_calculate_day_of_year(month, day);
+        day_of_year = calendar_calculate_day_of_year(month, day);
         calendar_convert_date_to_zodiac(&month, &day);
         party = party_get_unit(0);
         party->birthday_day = day_of_year;

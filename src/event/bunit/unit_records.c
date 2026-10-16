@@ -21,7 +21,7 @@ static unit_list_record_t g_unit_list_records[21] = { 0 };
 
 /* Builds a BUNIT unit-data record from a battle unit: clamps level, HP/MP
  * and CT for display, lists up to four monster-skillset abilities (the fourth
- * only when battle_menu_count_monster_skill_supporters passes) or the equipment and
+ * only when skillset_monster_count_supporters passes) or the equipment and
  * ability slots, and copies the job and ability tables with JP capped at 9999.
  *
  * BUNIT twin of formation_build_unit_record. `count` indexes the output
@@ -53,7 +53,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     }
 
     /* 1-based place in the AT (turn order) list, or -1 when the unit is not listed. */
-    i = battle_action_find_unit_turn_index(unit);
+    i = at_list_find_unit(unit);
     list_index = -1;
     if (i >= 0) {
         list_index = i + 1;
@@ -124,7 +124,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
             found = 0;
             if (i == 3) {
                 if (abilities[3] != 0) {
-                    found = battle_menu_count_monster_skill_supporters(unit) != 0;
+                    found = skillset_monster_count_supporters(unit) != 0;
                 }
             } else if (abilities[i] != 0) {
                 found = 1;
@@ -157,11 +157,11 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
         record->abilities[4] = unit->abilities.movement;
     }
 
-    record->runtime_id = battle_unit_get_runtime_id_by_battle_id(unit->entd_slot);
+    record->runtime_id = unit_get_runtime_id_by_battle_id(unit->entd_slot);
     record->initial_team_flags = unit->initial_team_flags;
     record->mount_info = unit->mount_info;
-    record->two_handed = unit_is_two_handing_weapon(
-        record->equipment, unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);
+    record->two_handed
+        = unit_is_two_handing_weapon(record->equipment, unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS);
     record->gender_flags = unit->unit_flags;
     record->character_identity = unit->character_identity;
 
@@ -201,9 +201,9 @@ s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode) {
     s32 total = 0;
 
     /* Keep status-byte reads separate; GCC otherwise merges the two tests into one 16-bit load. */
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = battle_unit_get_stats_from_battle_id(i);
-        if ((unit != 0) && (unit->entd_slot != BATTLE_ENTD_SLOT_NONE)) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = unit_get_stats(i);
+        if ((unit != 0) && (unit->entd_slot != UNIT_ENTD_SLOT_NONE)) {
             if (unit->unit_flags & UNIT_FLAG_EGG) {
                 total++;
             } else if (!(*&unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]

@@ -194,7 +194,7 @@ ramza_placed:
     thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, deploy_render_thread);
     thread_set_parameters(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
     deploy_select_first_deployable_unit();
-    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_deploy_status_display_thread_params, 0, 0);
 
     /* transition: 0 for the first squad, 1 after CROSS went back a squad, 2 after START moved on. */
@@ -624,9 +624,9 @@ ramza_placed:
                 if (g_unit_panel_status_animation[4] < 2) {
                     g_unit_panel_status_animation[4] = 1;
                 }
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_polarity_thread);
                 thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)g_deploy_numbers_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
+                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)g_deploy_character_status_frame_config, 0, 0);
                 thread_start(DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER, thread_wait_forever);
@@ -794,14 +794,14 @@ ramza_placed:
         }
     }
 
-    battle_deployment_mark_finished();
+    deploy_mark_finished();
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
     thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, battle_map_title_thread);
     thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
     thread_wait_until_inactive(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS);
 
     /* Fade the music to volume 0 (low half) over fade time 0x1e (high half). */
-    g_battle_sound_music_volume_transition_request = 0x1e0000;
+    g_sound_music_volume_transition_request = 0x1e0000;
     thread_wait_frames(0x20);
     g_gfx_screen_fade = 0;
     do {
@@ -877,12 +877,12 @@ static void deploy_select_first_deployable_unit(void) {
 
 /* ATTACK twin of unit_panel_load_party_unit. Load a party roster unit into the ATTACK status/editor display.
  *
- * Party counterpart of menu_load_selected_unit: the unit is
+ * Party counterpart of unit_panel_load_selected: the unit is
  * rebuilt from the roster into a scratch unit_stats_t, shown at full HP/MP
  * and CT, and without the monster-skill or name-text refresh.
  *
  * team_kind (0 player-controlled, 1 another team, 2 the player's team without player
- * control) is stored through `gauges`: written as g_panel_selected_billboard.team_kind, GCC keeps the
+ * control) is stored through `gauges`: written as g_unit_panel_selected_billboard.team_kind, GCC keeps the
  * field's address in a register across the three stores (4 bytes longer than the
  * target). */
 void unit_panel_load_party_unit(s32 unused, s32 party_index) {
@@ -896,12 +896,12 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     u8 field_value;
     u16 maximum_hp;
     u16 maximum_mp;
-    menu_unit_status_record_t* gauges;
+    unit_panel_summary_t* gauges;
 
-    unit_init_from_party_slot(&g_editor_party_unit_stats, party_index, 0);
-    editor = &g_menu_selected_unit_fields.state;
-    unit = &g_editor_party_unit_stats;
-    gauges = &g_panel_selected_billboard;
+    unit_init_from_party_slot(&g_unit_panel_editor_party_unit_stats, party_index, 0);
+    editor = &g_unit_panel_selected_unit_fields.state;
+    unit = &g_unit_panel_editor_party_unit_stats;
+    gauges = &g_unit_panel_selected_billboard;
 
     g_unit_panel_selected_unit_data.name_id = party_index;
     g_unit_panel_selected_unit_data.battle_id = party_index;
@@ -917,30 +917,30 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         gauges->team_kind = 2;
     }
 
-    g_panel_selected_billboard.list_index = 0;
-    g_panel_selected_billboard.unit_count = 0;
+    g_unit_panel_selected_billboard.list_index = 0;
+    g_unit_panel_selected_billboard.unit_count = 0;
     /* Offset keeps party slots apart from other unit indices; the status thread
      * starts a portrait transition whenever this index changes. */
-    g_panel_selected_billboard.unit_index = party_index + 0x200;
-    g_panel_selected_billboard.level = unit->level;
-    g_panel_selected_billboard.experience = unit->experience;
+    g_unit_panel_selected_billboard.unit_index = party_index + 0x200;
+    g_unit_panel_selected_billboard.level = unit->level;
+    g_unit_panel_selected_billboard.experience = unit->experience;
 
     maximum_hp = unit->max_hp;
-    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
+    g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
     if (maximum_hp == 0) {
-        g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
+        g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
     }
-    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
-        = g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
+    g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
+        = g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
     maximum_mp = unit->max_mp;
-    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
+    g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
     if (maximum_mp == 0) {
-        g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
+        g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
     }
-    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
-        = g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
-    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
-    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
+    g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
+        = g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
+    g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
+    g_unit_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
 
     editor->move = unit->move;
     editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -1000,7 +1000,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
             editor->ability_ids[i] = *innate_items++;
             i++;
         } while (i < 5);
-        /* No monster skill check runs here (unlike menu_load_selected_unit),
+        /* No monster skill check runs here (unlike unit_panel_load_selected),
          * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
     } else {
@@ -1009,11 +1009,11 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         /* A missing skillset blanks its name with a terminator; the secondary name
          * takes it at byte 1, as in every copy of this loader. */
         if (field_value == 0)
-            g_editor_primary_skillset_name[0] = 0xfe;
+            g_unit_panel_editor_primary_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_editor_secondary_skillset_name[1] = 0xfe;
+            g_unit_panel_editor_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;
@@ -1034,7 +1034,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
             item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
-                || ((unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS)
+                || ((unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS)
                     && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
                 editor->two_hands = 1;
         }
@@ -1064,8 +1064,8 @@ static void deploy_next_roster_unit_thread(void) {
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
     g_deploy_roster_navigation_direction = 1;
     g_deploy_status_display_thread_params = 0;
-    g_numeric_panel_redraw_request = 1;
-    g_character_status_redraw_request = 1;
+    g_unit_panel_numbers_redraw_request = 1;
+    g_unit_panel_character_status_redraw_request = 1;
     g_deploy_selected_unit_deployed = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_exit_current();
@@ -1098,8 +1098,8 @@ static void deploy_previous_roster_unit_thread(void) {
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
     g_deploy_roster_navigation_direction = 2;
     g_deploy_status_display_thread_params = 0;
-    g_numeric_panel_redraw_request = 1;
-    g_character_status_redraw_request = 1;
+    g_unit_panel_numbers_redraw_request = 1;
+    g_unit_panel_character_status_redraw_request = 1;
     g_deploy_selected_unit_deployed = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_exit_current();

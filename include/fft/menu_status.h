@@ -23,10 +23,10 @@ typedef enum menu_equipment_slot {
 } menu_equipment_slot_e;
 
 /* unit status records */
-/* The unit a status panel shows (g_menu_selected_unit; DEBUGCHR's g_unit_panel_selected_unit_data, ATTACK's
- * g_unit_panel_selected_unit_data), saved and restored whole by menu_copy_billboard_data_out and
- * menu_copy_billboard_data_in. menu_load_selected_unit fills job_id..zodiac for the unit named by battle_id; the
- * overlays' status panels keep a second record for the comparison unit (g_menu_comparison_unit_data).
+/* The unit a status panel shows (g_unit_panel_selected_unit; DEBUGCHR's g_unit_panel_selected_unit_data, ATTACK's
+ * g_unit_panel_selected_unit_data), saved and restored whole by unit_panel_copy_billboard_out and
+ * unit_panel_copy_billboard_in. unit_panel_load_selected fills job_id..zodiac for the unit named by battle_id; the
+ * overlays' status panels keep a second record for the comparison unit (g_unit_panel_comparison_unit_data).
  * Provisional. */
 typedef struct menu_active_unit {
     /* 0x00: unit name text id less TEXT_ID_UNIT_NAME_BASE (DEBUGCHR, REQUIRE);
@@ -38,13 +38,13 @@ typedef struct menu_active_unit {
     s16 zodiac;     /* 0x08 */
     s16 battle_id;  /* 0x0a: selected unit */
     s16 _unused_0c; /* 0x0c */
-} menu_active_unit_t;
-typedef char menu_active_unit_size_must_be_14[(sizeof(menu_active_unit_t) == 14) ? 1 : -1];
+} unit_panel_unit_t;
+typedef char menu_active_unit_size_must_be_14[(sizeof(unit_panel_unit_t) == 14) ? 1 : -1];
 
 /* Name, job and identity values copied into WORLD and EQUIP status panels.
  * The last displayed value is the roster slot, distinct from a battle id. */
 typedef struct menu_unit_status_identity {
-    s16 unit_index;  /* 0x00: name text 0x4000 + value (menu_run_unit_status_thread) */
+    s16 unit_index;  /* 0x00: name text 0x4000 + value (unit_panel_banner_thread) */
     s16 job_id;      /* 0x02: job name text 0x3000 + value */
     s16 brave;       /* 0x04 */
     s16 faith;       /* 0x06 */
@@ -97,8 +97,8 @@ typedef char menu_status_panel_slot_state_size_must_be_56[(sizeof(menu_status_pa
 typedef struct menu_status_panel_slot_storage {
     menu_status_panel_slot_state_t state;
     u8 _unused_38[8]; /* preserves the copied 0x40-byte record */
-} menu_status_panel_slot_storage_t;
-typedef char menu_status_panel_slot_storage_size_must_be_64[(sizeof(menu_status_panel_slot_storage_t) == 64) ? 1 : -1];
+} unit_panel_record_t;
+typedef char menu_status_panel_slot_storage_size_must_be_64[(sizeof(unit_panel_record_t) == 64) ? 1 : -1];
 
 enum {
     MENU_UNIT_STATUS_GAUGE_HP = 0,
@@ -117,12 +117,12 @@ typedef struct menu_unit_status_gauge {
 } menu_unit_status_gauge_t;
 typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gauge_t) == 6) ? 1 : -1];
 
-/* A unit's status summary: g_menu_selected_unit_status (BATTLE's AT banner) and g_menu_comparison_unit_status
- * (its status billboard), WORLD's formation records g_menu_selected_unit_stat_summary and
- * g_formation_comparison_unit_stat_summary, and each overlay's pair of panel billboards, each pair 0x24 apart.
- * menu_copy_unit_data_to_status_billboard and unit_panel_build_unit_data fill the first 0x1e bytes,
- * menu_run_unit_stats_panel and the overlays' menu_run_unit_status_thread draw it, and
- * menu_copy_billboard_data_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
+/* A unit's status summary: g_unit_panel_selected_unit_status (BATTLE's AT banner) and
+ * g_unit_panel_comparison_unit_status (its status billboard), WORLD's formation records
+ * g_unit_panel_selected_unit_stat_summary and g_formation_comparison_unit_stat_summary, and each overlay's pair of
+ * panel billboards, each pair 0x24 apart. unit_panel_fill_billboard and unit_panel_build_unit_data fill the first 0x1e
+ * bytes, unit_view_stats_panel_thread and the overlays' unit_panel_banner_thread draw it, and
+ * unit_panel_copy_billboard_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
  * fields. Provisional. */
 typedef struct menu_unit_status_record {
     s16 level;      /* 0x00; unit_editor_apply_values writes it back */
@@ -136,49 +136,49 @@ typedef struct menu_unit_status_record {
     menu_unit_status_gauge_t gauges[3]; /* 0x0c: MENU_UNIT_STATUS_GAUGE_*; CT max is always 100 */
     s16 projected_display_value;        /* 0x1e */
     u16 projected_hit_percent;          /* 0x20 */
-} menu_unit_status_record_t;
-typedef char menu_unit_status_record_size_must_be_34[(sizeof(menu_unit_status_record_t) == 34) ? 1 : -1];
+} unit_panel_summary_t;
+typedef char menu_unit_status_record_size_must_be_34[(sizeof(unit_panel_summary_t) == 34) ? 1 : -1];
 
 /* selected and comparison units */
 /* The selected panel unit can differ from the unit whose turn is active. Its record, status summary and
  * equipment and ability rows come first, then the comparison unit's. */
-extern menu_active_unit_t g_menu_selected_unit;
-extern menu_unit_status_record_t g_menu_selected_unit_status;
-extern menu_status_panel_slot_storage_t g_menu_selected_unit_fields;
-extern menu_unit_status_record_t g_menu_selected_unit_stat_summary;
+extern unit_panel_unit_t g_unit_panel_selected_unit;
+extern unit_panel_summary_t g_unit_panel_selected_unit_status;
+extern unit_panel_record_t g_unit_panel_selected_unit_fields;
+extern unit_panel_summary_t g_unit_panel_selected_unit_stat_summary;
 /* The unit shown beside the selected one in the comparison panels; REQUIRE
  * holds the same record. */
-extern menu_active_unit_t g_menu_comparison_unit_data;
-extern menu_unit_status_record_t g_menu_comparison_unit_status;
+extern unit_panel_unit_t g_unit_panel_comparison_unit_data;
+extern unit_panel_summary_t g_unit_panel_comparison_unit_status;
 /* Target preview copies only generic_monster and the reaction ability here. */
-extern menu_status_panel_slot_storage_t g_menu_comparison_unit_fields;
-/* The selected unit's names, as menu_load_selected_unit copies them for the panels. */
-extern u8 g_menu_billboard_unit_name[];               /* name text window */
-extern u8 g_menu_billboard_job_name[];                /* job name text window */
-extern u8 g_menu_billboard_skillset_name[];           /* primary skillset name text window */
-extern u8 g_menu_billboard_secondary_skillset_name[]; /* secondary skillset name text window */
+extern unit_panel_record_t g_unit_panel_comparison_unit_fields;
+/* The selected unit's names, as unit_panel_load_selected copies them for the panels. */
+extern u8 g_unit_panel_billboard_unit_name[];               /* name text window */
+extern u8 g_unit_panel_billboard_job_name[];                /* job name text window */
+extern u8 g_unit_panel_billboard_skillset_name[];           /* primary skillset name text window */
+extern u8 g_unit_panel_billboard_secondary_skillset_name[]; /* secondary skillset name text window */
 
-/* The battle unit stats of g_menu_selected_unit. */
+/* The battle unit stats of g_unit_panel_selected_unit. */
 struct unit_stats* menu_get_selected_unit_stats(void);
 /* Fills the selected and comparison records, stats, equipment and ability names. */
-void menu_load_selected_unit(void);
+void unit_panel_load_selected(void);
 
 /* billboards and previews */
 /* Copies the selected unit's records and the cursor tile into the caller's buffers; _in restores them without
  * the tile. */
-void menu_copy_billboard_data_out(menu_unit_status_record_t* banner, menu_active_unit_t* unit,
-    menu_status_panel_slot_storage_t* billboard, map_selected_tile_t* cursor_tile);
-void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const menu_active_unit_t* unit,
-    const menu_status_panel_slot_storage_t* billboard);
+void unit_panel_copy_billboard_out(unit_panel_summary_t* banner, unit_panel_unit_t* unit,
+    unit_panel_record_t* billboard, battle_map_selected_tile_t* cursor_tile);
+void unit_panel_copy_billboard_in(
+    const unit_panel_summary_t* banner, const unit_panel_unit_t* unit, const unit_panel_record_t* billboard);
 /* Clears the HP and MP preview bonuses and the equipment-detail stats. */
-void menu_clear_stat_preview(menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail);
+void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail);
 /* The stat changes of swapping item_before for item_after in a slot: the HP and MP bonus differences into delta
  * and the equipment-detail differences into output. */
-void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
-    s16 item_before, s16 item_after, s32 slot);
+void equipment_calculate_swap_stat_delta(
+    unit_panel_record_t* output, unit_panel_summary_t* delta, s16 item_before, s16 item_after, s32 slot);
 /* Row callbacks: the previewed HP or MP bonus, or MENU_NUMBER_VALUE_DASHES when it is 0. */
-s32 menu_get_preview_hp_bonus_display(s32 unused_row);
-s32 menu_get_preview_mp_bonus_display(s32 unused_row);
+s32 equipment_get_preview_hp_bonus_display(s32 unused_row);
+s32 equipment_get_preview_mp_bonus_display(s32 unused_row);
 
 /* unit grid readouts */
 /* What the unit grids draw below a unit (formation_draw_unit_readout,

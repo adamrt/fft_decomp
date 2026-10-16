@@ -1160,7 +1160,7 @@ void brave_story_step_person_level(brave_story_detail_level_t* level) {
         value = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
         render_index = level->render_index;
         if (value != 0xFF) {
-            menu_build_unit_portrait_poly(&portrait, value);
+            portrait_build_unit_poly(&portrait, value);
             page_x = 0x280;
             g_window_render_records[render_index].clut.x = ((value / 40) << 6) + ((value % 4) * 0x10 + page_x);
             g_window_render_records[render_index].clut.y = ((value % 40) / 4) + 0x1F0;

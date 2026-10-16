@@ -18,8 +18,8 @@ typedef enum crystal_pickup_kind {
     CRYSTAL_PICKUP_TREASURE = 0x4,
 } crystal_pickup_kind_e;
 
-/* Crystal/treasure pickup result (g_crystal_pickup_result) that battle_unit_resolve_crystal_pickup
- * builds on the main thread stack and returns; each program keeps the pointer in g_menu_crystal_pickup_context. The
+/* Crystal/treasure pickup result (g_crystal_pickup_result) that crystal_build_pickup_result
+ * builds on the main thread stack and returns; each program keeps the pointer in g_crystal_pickup_context. The
  * crystal pickup panels pick their variant from `result` and show `treasure_item`. */
 typedef struct crystal_pickup_result {
     s32 result;                 /* 0x00; crystal_pickup_kind_e */
@@ -30,11 +30,11 @@ typedef struct crystal_pickup_result {
     u8 learned_abilities[0x40]; /* 0x53 */
 } crystal_pickup_result_t;
 
-extern crystal_pickup_result_t* g_menu_crystal_pickup_context;
+extern crystal_pickup_result_t* g_crystal_pickup_context;
 
-/* Runs battle_unit_resolve_crystal_pickup for the unit on the main stack, keeps the result in
- * g_menu_crystal_pickup_context and returns the treasure item when there is one, otherwise -1. */
-s32 menu_resolve_crystal_pickup(s32 battle_id);
+/* Runs crystal_build_pickup_result for the unit on the main stack, keeps the result in
+ * g_crystal_pickup_context and returns the treasure item when there is one, otherwise -1. */
+s32 crystal_resolve_pickup(s32 battle_id);
 
 /* crystal pickup panel */
 /* Seven menu entries form the crystal/treasure result panel. The AT-list
@@ -46,22 +46,22 @@ typedef enum menu_crystal_pickup_entry {
     MENU_CRYSTAL_PICKUP_MESSAGE = 5,
     MENU_CRYSTAL_PICKUP_CHOICE = 6,
     MENU_CRYSTAL_PICKUP_ENTRY_COUNT = 7,
-} menu_crystal_pickup_entry_e;
+} crystal_pickup_entry_e;
 
-extern menu_entry_t g_menu_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_ENTRY_COUNT];
-extern menu_text_layout_t g_menu_crystal_pickup_list_layout;
-extern s16 g_menu_crystal_pickup_row_colors[];
-extern u32* g_menu_crystal_pickup_controller_input;
+extern menu_entry_t g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_ENTRY_COUNT];
+extern menu_text_layout_t g_crystal_pickup_list_layout;
+extern s16 g_crystal_pickup_row_colors[];
+extern u32* g_crystal_pickup_controller_input;
 /* Handed to the crystal pickup panel thread as its second parameter. Nothing stores to it and the thread
  * does not read the parameter. */
-extern s32 g_menu_crystal_pickup_panel_parameter;
-extern s16 g_menu_crystal_pickup_menu_result;
-extern s16 g_menu_crystal_pickup_choice_result;
+extern s32 g_crystal_pickup_panel_parameter;
+extern s16 g_crystal_pickup_menu_result;
+extern s16 g_crystal_pickup_choice_result;
 /* The command the panel resolves to (4 for a treasure, 0 for nothing) and the treasure item. */
-extern s32 g_menu_crystal_pickup_action;
-extern s32 g_menu_crystal_pickup_item;
+extern s32 g_crystal_pickup_action;
+extern s32 g_crystal_pickup_item;
 
 /* Runs the crystal/treasure result panel and its list and choice threads. */
-void menu_start_crystal_pickup_threads(void);
+void crystal_start_pickup_threads(void);
 
 #endif

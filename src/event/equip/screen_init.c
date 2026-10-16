@@ -71,7 +71,7 @@ static void equipment_load_images(void) {
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
     menu_clear_selection_values();
-    g_menu_help_message_text_id = 0;
+    g_help_message_text_id = 0;
     equipment_reset_selection();
     item_build_inventory_totals();
     item_rebuild_category_list(0);
@@ -119,16 +119,16 @@ void equipment_init(s32 battle_id) {
     equipment_load_selected_unit();
     unit_panel_toggle_banner_thread(1);
     unit_panel_toggle_equipment_threads(1);
-    menu_toggle_numeric_panel_thread(1);
+    unit_panel_toggle_numbers_thread(1);
 }
 
-/* Starts the unit status thread on menu_run_unit_status_thread
+/* Starts the unit status thread on unit_panel_banner_thread
  * (parameter g_unit_panel_unit_status_panel_params) when `enable` is set and the
  * thread is idle; stops it otherwise. */
 void unit_panel_toggle_banner_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) == 0) {
-            thread_start(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
+            thread_start(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, unit_panel_banner_thread);
             thread_set_parameters(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)g_unit_panel_unit_status_panel_params, 0, 0);
         }
     } else {
@@ -141,10 +141,10 @@ void unit_panel_toggle_banner_thread(s32 enable) {
 void unit_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) == 0) {
-            thread_start(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, menu_run_equipment_list_thread);
+            thread_start(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, unit_panel_equipment_thread);
             thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)g_equipment_equipment_panel_params, 0, 0);
         }
-        menu_toggle_numeric_panel_thread(enable);
+        unit_panel_toggle_numbers_thread(enable);
         return;
     }
     menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST);

@@ -48,7 +48,7 @@ void calendar_advance_days(s32 days) {
     days %= 365;
     month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
     day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
-    today = unit_birthday_calculate_day_of_year(month, day);
+    today = calendar_calculate_day_of_year(month, day);
     for (i = 0; i < 64; i++) {
         g_brave_story_character_ages[i] += years;
         if (i == 0) {
@@ -60,7 +60,7 @@ void calendar_advance_days(s32 days) {
         }
         /* Only birthdays later in this year count: an advance that runs past
          * 31 December misses those early in the new year (retail quirk). */
-        until_birthday = unit_birthday_calculate_day_of_year(month, day) - today;
+        until_birthday = calendar_calculate_day_of_year(month, day) - today;
         if (until_birthday > 0 && days >= until_birthday) {
             g_brave_story_character_ages[i] += 1;
         }

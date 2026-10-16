@@ -280,7 +280,7 @@ static void controller_start_text_message(s32 parameter, s32 use_world_text) {
         text_relocate_pointer_table(g_screen_text_section_offsets);
     }
 
-    thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread);
+    thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, parameter, 0);
 
     {

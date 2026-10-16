@@ -55,8 +55,7 @@ void save_backdrop_thread(void) {
             g_save_input_display_state.scale_y -= delta;
         }
         g_save_input_display_state.brightness = 0x80;
-        menu_build_zodiac_primitives(
-            &g_save_input_display_state, g_save_gfx_scaled_sprite_primitive_buffers[frame & 1]);
+        zodiac_build_primitives(&g_save_input_display_state, g_save_gfx_scaled_sprite_primitive_buffers[frame & 1]);
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             thread_exit_current();

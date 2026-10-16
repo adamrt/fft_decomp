@@ -51,8 +51,8 @@ s32 item_get_total_quantity(u8 item_id, s32 include_battle) {
         }
         if (include_battle != 0) {
             deployed = 0;
-            for (j = 0; j < BATTLE_UNIT_SLOT_COUNT; j++) {
-                unit = &g_battle_unit_stats[j];
+            for (j = 0; j < UNIT_SLOT_COUNT; j++) {
+                unit = &g_unit_stats[j];
                 if (unit->existence != UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
                     && unit->formation_index == party_id) {
                     deployed = 1;
@@ -74,8 +74,8 @@ s32 item_get_total_quantity(u8 item_id, s32 include_battle) {
         return total;
     }
 
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = &g_battle_unit_stats[i];
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = &g_unit_stats[i];
         if (unit->existence != UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
             && !(unit->initial_team_flags & UNIT_TEAM_MASK) && unit->job_id != JOB_ID_MIME) {
             for (j = 0; j < UNIT_EQUIPMENT_SLOT_COUNT; j++) {
@@ -269,9 +269,9 @@ void status_set_action_state(unit_stats_t* unit, u8 action_state) {
         status_id++) {
         if (changed & mask) {
             if ((old_status & mask) != 0) {
-                battle_status_queue_graphics_change_if_executing(status_id, 0, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, 0, battle_id);
             } else {
-                battle_status_queue_graphics_change_if_executing(status_id, 1, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, 1, battle_id);
             }
         }
         mask >>= 1;

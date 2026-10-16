@@ -12,19 +12,19 @@
  * writes the saved fields; unit_apply_staged_status_data restores them and
  * applies intervening status differences through BATTLE callbacks. */
 typedef struct unit_status_staging {
-    u8 innate[BATTLE_UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];
-    u8 current[BATTLE_UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];           /* 0x069 */
-    u8 inflicted[BATTLE_UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];         /* 0x0d2 */
-    u8 removed[BATTLE_UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];           /* 0x13b */
-    u8 added[BATTLE_UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];             /* 0x1a4 */
-    u8 status_ct[BATTLE_UNIT_SLOT_COUNT][BATTLE_TIMED_STATUS_COUNT]; /* 0x20d */
-    u8 charged_ability_ct[BATTLE_UNIT_SLOT_COUNT];                   /* 0x35d */
-    u8 death_counter[BATTLE_UNIT_SLOT_COUNT];                        /* 0x372 */
-    u8 team_flags[BATTLE_UNIT_SLOT_COUNT];                           /* 0x387 */
-    u8 state[BATTLE_UNIT_SLOT_COUNT];                                /* 0x39c; 0 not staged, 1 saved, 2 restored */
-    u8 inflict_status_mode[BATTLE_UNIT_SLOT_COUNT];                  /* 0x3b1; unit_inflict_status_mode_e */
-    u16 hp[BATTLE_UNIT_SLOT_COUNT];                                  /* 0x3c6 */
-    u16 jump_float_flags;                                            /* 0x3f0; UNIT_STATUS_STAGING_*_REMOVED */
+    u8 innate[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];
+    u8 current[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];    /* 0x069 */
+    u8 inflicted[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];  /* 0x0d2 */
+    u8 removed[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];    /* 0x13b */
+    u8 added[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];      /* 0x1a4 */
+    u8 status_ct[UNIT_SLOT_COUNT][STATUS_TIMED_COUNT]; /* 0x20d */
+    u8 charged_ability_ct[UNIT_SLOT_COUNT];            /* 0x35d */
+    u8 death_counter[UNIT_SLOT_COUNT];                 /* 0x372 */
+    u8 team_flags[UNIT_SLOT_COUNT];                    /* 0x387 */
+    u8 state[UNIT_SLOT_COUNT];                         /* 0x39c; 0 not staged, 1 saved, 2 restored */
+    u8 inflict_status_mode[UNIT_SLOT_COUNT];           /* 0x3b1; unit_inflict_status_mode_e */
+    u16 hp[UNIT_SLOT_COUNT];                           /* 0x3c6 */
+    u16 jump_float_flags;                              /* 0x3f0; UNIT_STATUS_STAGING_*_REMOVED */
 } unit_status_staging_t;
 typedef char unit_status_staging_size_must_be_1010[sizeof(unit_status_staging_t) == 1010 ? 1 : -1];
 

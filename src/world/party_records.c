@@ -151,7 +151,7 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
     record->birthday = unit->birthday.birthday;
     record->egg_color = party->egg_color;
     record->two_handed = unit_is_two_handing_weapon(
-        (s16*)record->equipment, record->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);
+        (s16*)record->equipment, record->support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_HANDS);
 }
 
 /*

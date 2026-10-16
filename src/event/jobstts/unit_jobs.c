@@ -63,7 +63,7 @@ static void status_screen_copy_unit_jobs(unit_stats_t* unit, status_screen_unit_
 /* Copy battle unit `unit_id`'s job data into the overlay's single unit
  * record and make it unit 0. */
 void status_screen_init_unit_jobs(s32 unit_id) {
-    status_screen_copy_unit_jobs(battle_unit_get_stats_from_battle_id(unit_id), &g_status_screen_unit_job_data);
+    status_screen_copy_unit_jobs(unit_get_stats(unit_id), &g_status_screen_unit_job_data);
     g_status_screen_unit_data[0] = &g_status_screen_unit_job_data;
 }
 

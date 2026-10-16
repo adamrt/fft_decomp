@@ -57,20 +57,20 @@ static void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     u8 field_value;
     u16 maximum_hp;
     u16 maximum_mp;
-    menu_unit_status_record_t* gauges;
+    unit_panel_summary_t* gauges;
 
-    unit_init_from_party_slot(&g_editor_party_unit_stats, party_index, 0);
-    editor = &g_menu_selected_unit_fields.state;
-    unit = &g_editor_party_unit_stats;
-    gauges = &g_menu_selected_unit_status;
+    unit_init_from_party_slot(&g_unit_panel_editor_party_unit_stats, party_index, 0);
+    editor = &g_unit_panel_selected_unit_fields.state;
+    unit = &g_unit_panel_editor_party_unit_stats;
+    gauges = &g_unit_panel_selected_unit_status;
 
-    g_menu_selected_unit.name_id = party_index;
-    g_menu_selected_unit.battle_id = party_index;
+    g_unit_panel_selected_unit.name_id = party_index;
+    g_unit_panel_selected_unit.battle_id = party_index;
     gauges->team_kind = 0;
-    g_menu_selected_unit.job_id = unit->job_id;
-    g_menu_selected_unit.brave = unit->brave;
-    g_menu_selected_unit.faith = unit->faith;
-    g_menu_selected_unit.zodiac = unit->birthday.zodiac;
+    g_unit_panel_selected_unit.job_id = unit->job_id;
+    g_unit_panel_selected_unit.brave = unit->brave;
+    g_unit_panel_selected_unit.faith = unit->faith;
+    g_unit_panel_selected_unit.zodiac = unit->birthday.zodiac;
     if (unit->initial_team_flags & UNIT_TEAM_MASK) {
         gauges->team_kind = 1;
     }
@@ -78,30 +78,30 @@ static void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         gauges->team_kind = 2;
     }
 
-    g_menu_selected_unit_status.list_index = 0;
-    g_menu_selected_unit_status.unit_count = 0;
+    g_unit_panel_selected_unit_status.list_index = 0;
+    g_unit_panel_selected_unit_status.unit_count = 0;
     /* Offset keeps party slots apart from other unit indices; the status thread
      * starts a portrait transition whenever this index changes. */
-    g_menu_selected_unit_status.unit_index = party_index + 0x100;
-    g_menu_selected_unit_status.level = unit->level;
-    g_menu_selected_unit_status.experience = unit->experience;
+    g_unit_panel_selected_unit_status.unit_index = party_index + 0x100;
+    g_unit_panel_selected_unit_status.level = unit->level;
+    g_unit_panel_selected_unit_status.experience = unit->experience;
 
     maximum_hp = unit->max_hp;
-    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
+    g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
     if (maximum_hp == 0) {
-        g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
+        g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
     }
-    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
-        = g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
+    g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
+        = g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
     maximum_mp = unit->max_mp;
-    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
+    g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
     if (maximum_mp == 0) {
-        g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
+        g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
     }
-    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
-        = g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
-    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
-    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
+    g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
+        = g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
+    g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
+    g_unit_panel_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
 
     editor->move = unit->move;
     editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -161,7 +161,7 @@ static void unit_panel_load_party_unit(s32 unused, s32 party_index) {
             editor->ability_ids[i] = *innate_items++;
             i++;
         } while (i < 5);
-        /* No monster skill check runs here (unlike menu_load_selected_unit),
+        /* No monster skill check runs here (unlike unit_panel_load_selected),
          * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
     } else {
@@ -170,11 +170,11 @@ static void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         /* A missing skillset blanks its name with a terminator; the secondary name
          * takes it at byte 1, as in every copy of this loader. */
         if (field_value == 0)
-            g_menu_billboard_skillset_name[0] = 0xfe;
+            g_unit_panel_billboard_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_menu_billboard_secondary_skillset_name[1] = 0xfe;
+            g_unit_panel_billboard_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;
@@ -195,7 +195,7 @@ static void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
             item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
-                || ((unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS)
+                || ((unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS)
                     && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
                 editor->two_hands = 1;
         }
@@ -226,7 +226,7 @@ s32 party_sell_equipment_over_limit(s32 unit_id) {
     s32 sold_equipment = 0;
     s32 equipment_slot;
 
-    unit = battle_unit_get_stats_from_battle_id(unit_id);
+    unit = unit_get_stats(unit_id);
     equipment_slot = 0;
     do {
         u8 item_id = unit->equipment[equipment_slot];
@@ -254,7 +254,7 @@ s32 party_store_or_sell_equipment(s32 unit_id) {
     s32 sold_equipment = 0;
     s32 equipment_slot;
 
-    unit = battle_unit_get_stats_from_battle_id(unit_id);
+    unit = unit_get_stats(unit_id);
     equipment_slot = 0;
     do {
         u8 item_id = unit->equipment[equipment_slot];
@@ -288,7 +288,7 @@ s32 party_store_or_sell_equipment(s32 unit_id) {
  */
 static s32 party_get_join_status(s32 unit_id) {
     party_unit_t* party;
-    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(unit_id);
+    unit_stats_t* unit = unit_get_stats(unit_id);
     s32 index;
 
     if (unit->unit_flags & UNIT_FLAG_SAVE_FORMATION) {
@@ -382,10 +382,11 @@ static s32 party_select_unit_to_dismiss(void) {
         break;
     }
 
-    menu_copy_billboard_data_in(&g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
-    g_status_display_redraw_request = 1;
-    g_numeric_panel_redraw_request = 1;
-    g_character_status_redraw_request = 1;
+    unit_panel_copy_billboard_in(
+        &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
+    g_unit_panel_status_display_redraw_request = 1;
+    g_unit_panel_numbers_redraw_request = 1;
+    g_unit_panel_character_status_redraw_request = 1;
     thread_yield();
 
     thread_start(AFTER_BATTLE_THREAD_SLOT_TRANSITION, unit_panel_transition_thread);
@@ -434,7 +435,7 @@ static s32 party_select_unit_to_dismiss(void) {
         goto selection_menu;
 
     show_unit_message:
-        thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
+        thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, message_dialog_thread);
         thread_set_four_parameters(
             AFTER_BATTLE_THREAD_SLOT_MESSAGE, 0x19, message_id, selected_battle_unit->unit_id, should_restore);
         g_threads[AFTER_BATTLE_THREAD_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = 0x18;
@@ -460,39 +461,39 @@ static s32 party_select_unit_to_dismiss(void) {
             /* R1 and L1 step to the next or previous removable unit. The status redraw
              * request doubles as the portrait slide direction: 1 (should_restore) for R1, 2 for L1. */
             if (*g_menu_input_controller & PSX_PAD_R1) {
-                g_menu_panel_status_animation[1] = 7;
+                g_unit_panel_panel_status_animation[1] = 7;
                 for (;;) {
                     selected_party_index++;
                     if (selected_party_index == PARTY_ROSTER_SLOT_COUNT)
                         selected_party_index = 0;
                     if (g_party_removable_flags[selected_party_index] != 0) {
                         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-                        g_status_display_redraw_request = should_restore;
-                        g_numeric_panel_redraw_request = should_restore;
-                        g_character_status_redraw_request = should_restore;
+                        g_unit_panel_status_display_redraw_request = should_restore;
+                        g_unit_panel_numbers_redraw_request = should_restore;
+                        g_unit_panel_character_status_redraw_request = should_restore;
                         unit_panel_load_party_unit(1, selected_party_index);
                         PARTY_MOVE_PARTY_PORTRAIT(
                             selected_party_index, portrait_rect, portrait_destination, palette_rect);
-                        menu_copy_billboard_data_in(
-                            &g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
+                        unit_panel_copy_billboard_in(&g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit,
+                            &g_unit_panel_selected_unit_fields);
                         break;
                     }
                 }
             } else if (*g_menu_input_controller & PSX_PAD_L1) {
-                g_menu_panel_status_animation[0] = 7;
+                g_unit_panel_panel_status_animation[0] = 7;
                 do {
                     selected_party_index--;
                     if (selected_party_index == -1)
                         selected_party_index = PARTY_ROSTER_SLOT_COUNT - 1;
                 } while (g_party_removable_flags[selected_party_index] == 0);
                 g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-                g_status_display_redraw_request = 2;
-                g_numeric_panel_redraw_request = should_restore;
-                g_character_status_redraw_request = should_restore;
+                g_unit_panel_status_display_redraw_request = 2;
+                g_unit_panel_numbers_redraw_request = should_restore;
+                g_unit_panel_character_status_redraw_request = should_restore;
                 unit_panel_load_party_unit(1, selected_party_index);
                 PARTY_MOVE_PARTY_PORTRAIT(selected_party_index, portrait_rect, portrait_destination, palette_rect);
-                menu_copy_billboard_data_in(
-                    &g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
+                unit_panel_copy_billboard_in(&g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit,
+                    &g_unit_panel_selected_unit_fields);
             }
             if (*g_menu_input_controller & PSX_PAD_CIRCLE)
                 break;
@@ -503,11 +504,10 @@ static s32 party_select_unit_to_dismiss(void) {
 
             /* Find the first battle unit still on the field (its own first ENTD match) to
              * speak the dialog; message_id holds the lookup's index until it is set below. */
-            for (party_index = 0; party_index < BATTLE_UNIT_SLOT_COUNT; party_index++) {
-                battle_unit = battle_unit_get_stats_from_battle_id(party_index);
-                selected_battle_unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &message_id);
-                if (message_id >= 0 && party_index == message_id
-                    && battle_unit_get_runtime_id_by_battle_id(party_index) != -1)
+            for (party_index = 0; party_index < UNIT_SLOT_COUNT; party_index++) {
+                battle_unit = unit_get_stats(party_index);
+                selected_battle_unit = unit_entd_find_stats(battle_unit->unit_id, &message_id);
+                if (message_id >= 0 && party_index == message_id && unit_get_runtime_id_by_battle_id(party_index) != -1)
                     break;
             }
         }
@@ -555,7 +555,7 @@ static s32 party_select_unit_to_dismiss(void) {
         if (party_unit->sprite_set < CHARACTER_IDENTITY_RAMZA_END)
             goto show_unit_message;
         g_after_battle_menu_selection_result = 0xff;
-        thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
+        thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, message_dialog_thread);
         thread_set_four_parameters(
             AFTER_BATTLE_THREAD_SLOT_MESSAGE, 0x19, message_id, selected_battle_unit->unit_id, should_restore);
         g_threads[AFTER_BATTLE_THREAD_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = 0x18;
@@ -577,8 +577,8 @@ static s32 party_select_unit_to_dismiss(void) {
 
         /* Put the battle units' names back into the shared name text. */
         text = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
-        for (party_index = 0; party_index < BATTLE_UNIT_SLOT_COUNT; party_index++) {
-            selected_battle_unit = battle_unit_get_stats_from_battle_id(party_index);
+        for (party_index = 0; party_index < UNIT_SLOT_COUNT; party_index++) {
+            selected_battle_unit = unit_get_stats(party_index);
             for (name_character_index = 0; name_character_index < UNIT_NAME_SIZE; name_character_index++) {
                 *text = selected_battle_unit->name[name_character_index];
                 if ((*text & 0xfe) == 0xfe) {
@@ -625,11 +625,11 @@ static void party_apply_post_battle_changes(void) {
     s32 transition;
     s32* initial_unit_index_ptr;
     s32* unit_index_ptr;
-    menu_active_unit_t* initial_unit_data;
+    unit_panel_unit_t* initial_unit_data;
     s32* selected_unit_index_ptr;
     menu_entry_t* menu_base;
     u8* menu_fields;
-    menu_active_unit_t* unit_display_data;
+    unit_panel_unit_t* unit_display_data;
     s32 one;
     unit_stats_t* unit;
     s32 input;
@@ -661,12 +661,12 @@ static void party_apply_post_battle_changes(void) {
     affected_index = 0;
     text_build_battle_unit_names();
     initial_unit_index_ptr = g_party_affected_battle_unit_indices;
-    initial_unit_data = &g_menu_selected_unit;
-    battle_unit_get_stats_from_battle_id(*initial_unit_index_ptr);
-    g_menu_selected_unit.battle_id = *initial_unit_index_ptr;
+    initial_unit_data = &g_unit_panel_selected_unit;
+    unit_get_stats(*initial_unit_index_ptr);
+    g_unit_panel_selected_unit.battle_id = *initial_unit_index_ptr;
     initial_unit_data->name_id = *initial_unit_index_ptr;
-    menu_load_selected_unit();
-    g_menu_selected_unit_status.unit_index = *initial_unit_index_ptr;
+    unit_panel_load_selected();
+    g_unit_panel_selected_unit_status.unit_index = *initial_unit_index_ptr;
 
     /* `affected_index < count` (not `count > 0`): combine folds the known
      * zero into a `blez` and leaves the eliminated compare pseudo with a
@@ -686,8 +686,8 @@ static void party_apply_post_battle_changes(void) {
             g_unit_panel_status_display_origin_x = -0x100;
             g_unit_panel_numbers_origin_x = -0x100;
             *transition_c_ptr = -0x100;
-            menu_copy_billboard_data_in(
-                &g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
+            unit_panel_copy_billboard_in(
+                &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
 
             /* This zero feeds the else-arm fade and fills the `bnez` delay
              * slot; the separate zero before the second fade is copied into
@@ -696,12 +696,12 @@ static void party_apply_post_battle_changes(void) {
              * call slot on reorg's second pass. */
             transition = 0;
             if (affected_index == 0) {
-                thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
+                thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_unit_panel_status_display_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_polarity_thread);
                 thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_numbers_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
+                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)transition_c_ptr, 0, 0);
             } else {
                 u16 index_value;
@@ -715,18 +715,18 @@ static void party_apply_post_battle_changes(void) {
                     thread_yield();
                 } while (transition < 0x101);
 
-                battle_unit_get_stats_from_battle_id(*unit_index_ptr);
+                unit_get_stats(*unit_index_ptr);
                 index_value = *unit_index_ptr;
                 unit_display_data->battle_id = index_value;
                 unit_display_data->name_id = index_value;
-                menu_load_selected_unit();
-                menu_copy_billboard_data_in(
-                    &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
+                unit_panel_load_selected();
+                unit_panel_copy_billboard_in(
+                    &g_unit_panel_selected_unit_status, unit_display_data, &g_unit_panel_selected_unit_fields);
                 index_value = *unit_index_ptr;
-                g_status_display_redraw_request = one;
-                g_numeric_panel_redraw_request = one;
-                g_character_status_redraw_request = one;
-                g_menu_selected_unit_status.unit_index = index_value;
+                g_unit_panel_status_display_redraw_request = one;
+                g_unit_panel_numbers_redraw_request = one;
+                g_unit_panel_character_status_redraw_request = one;
+                g_unit_panel_selected_unit_status.unit_index = index_value;
                 thread_yield();
             }
 
@@ -743,7 +743,7 @@ static void party_apply_post_battle_changes(void) {
             /* The removal retry re-enters the selection loop and the
              * not-joining retry re-enters the removal loop from outside, so
              * loop.c treats both loops as having multiple entries and hoists
-             * nothing out of them (the g_menu_selected_unit_status.unit_index address stays in the
+             * nothing out of them (the g_unit_panel_selected_unit_status.unit_index address stays in the
              * remove path), while flow still weights their references by
              * depth. The not-joining retry repeats the selected-unit
              * assignment; jump2 cross-jumps it into this one, so the
@@ -799,7 +799,7 @@ static void party_apply_post_battle_changes(void) {
                         thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, menu_icon_strip_thread);
                         thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MESSAGE,
                             (s32)(menu_fields - (unsigned long)&((menu_entry_t*)0)->inner_width), 0, 0);
-                        if (g_menu_selected_unit_fields.state.generic_monster != 0) {
+                        if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
                             thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
                                 (s32)(menu_fields + 8 * sizeof(*menu_base)
@@ -851,24 +851,24 @@ static void party_apply_post_battle_changes(void) {
                     g_party_removal_result = removal_result;
                     g_menu_post_battle_unit_changes_active = one;
 
-                    battle_unit_get_stats_from_battle_id(removal_unit_index);
+                    unit_get_stats(removal_unit_index);
                     /* The target reads the index into v0 here and reloads it
                      * into v1 after the call; one shared local is one allocno
                      * and takes v1 at both sites. */
                     display_index = *selected_unit_index_ptr;
                     unit_display_data->battle_id = display_index;
                     unit_display_data->name_id = display_index;
-                    menu_load_selected_unit();
+                    unit_panel_load_selected();
                     index_value = *selected_unit_index_ptr;
-                    g_status_display_redraw_request = one;
-                    g_numeric_panel_redraw_request = one;
-                    g_character_status_redraw_request = one;
-                    g_menu_selected_unit_status.unit_index = index_value;
+                    g_unit_panel_status_display_redraw_request = one;
+                    g_unit_panel_numbers_redraw_request = one;
+                    g_unit_panel_character_status_redraw_request = one;
+                    g_unit_panel_selected_unit_status.unit_index = index_value;
                     if (g_party_removal_result == 0) {
                         unit_panel_set_transition(1);
                     }
-                    menu_copy_billboard_data_in(
-                        &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
+                    unit_panel_copy_billboard_in(
+                        &g_unit_panel_selected_unit_status, unit_display_data, &g_unit_panel_selected_unit_fields);
                     g_gfx_screen_fade = screen_fade_max;
                     do {
                         thread_yield();
@@ -894,7 +894,7 @@ static void party_apply_post_battle_changes(void) {
             thread_wait_until_inactive(AFTER_BATTLE_THREAD_SLOT_MENU);
             unit_panel_set_transition(0);
 
-            unit = battle_unit_get_stats_from_battle_id(*selected_unit_index_ptr);
+            unit = unit_get_stats(*selected_unit_index_ptr);
             unit_index_ptr++;
             party_save_unit(unit, unit->unit_flags & UNIT_FLAG_SAVE_FORMATION);
             thread_wait_frames(20);
@@ -907,7 +907,7 @@ static void party_apply_post_battle_changes(void) {
             }
             unit_panel_set_transition(0);
             thread_wait_frames(10);
-            unit = battle_unit_get_stats_from_battle_id(*selected_unit_index_ptr);
+            unit = unit_get_stats(*selected_unit_index_ptr);
             unit_index_ptr++;
             party_set_class_variable(unit->character_identity, PARTY_BIO_STATE_DISMISSED);
         next_unit:
@@ -943,7 +943,7 @@ static void party_apply_post_battle_changes(void) {
  * Builds the war-trophy entry list and pays the trophies out.
  *
  * The bonus money (when nonzero) is the first entry, followed by one entry
- * per trophy item found by battle_unit_find_war_trophies_and_bonus_money.
+ * per trophy item found by reward_find_war_trophies_and_bonus_money.
  * Money entries are added to the war funds. An item entry adds one to the
  * inventory, unless 99 are already held or equipped: the item is then sold
  * for a quarter of its price, rounded toward zero.
@@ -963,7 +963,7 @@ static void war_trophy_collect(void) {
     s32* it;
 
     g_war_trophy_entry_count = 0;
-    battle_unit_find_war_trophies_and_bonus_money(&g_war_trophy_search_result);
+    reward_find_war_trophies_and_bonus_money(&g_war_trophy_search_result);
 
     {
         s32 j;
@@ -1260,7 +1260,7 @@ static void war_trophy_run_gil_ticker(void) {
     POLY_FT4* sign;
 
     g_war_trophy_entry_count = 0;
-    battle_unit_find_war_trophies_and_bonus_money(&g_war_trophy_search_result);
+    reward_find_war_trophies_and_bonus_money(&g_war_trophy_search_result);
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS,
         script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_war_trophy_search_result.level_sum_money);
     money = g_war_trophy_search_result.level_sum_money;
@@ -2295,24 +2295,24 @@ void conditions_dispatch(void) {
 
 /* Thread body that runs the HELPMENU overlay from the REQUIRE screen: waits
  * until 0x10000 bytes can be reserved at the high overlay address, loads the
- * overlay and runs menu_run_require_help in the first idle slot,
+ * overlay and runs help_run_after_battle in the first idle slot,
  * with the panel's two animation flags set while it runs. */
 static void help_open_after_battle(void) {
     s32 thread_id;
 
     thread_set_current_task_id(THREAD_TASK_HELP_MENU);
     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-    g_menu_panel_status_animation[0] = 1;
-    g_menu_panel_status_animation[1] = 1;
+    g_unit_panel_panel_status_animation[0] = 1;
+    g_unit_panel_panel_status_animation[1] = 1;
     while (heap_reserve_at(g_heap_high_overlay_load_address, 0x10000) != g_heap_high_overlay_load_address) {
         thread_yield();
     }
-    menu_request_open_companion_executable(COMPANION_OVERLAY_HELPMENU);
+    overlay_request_companion(COMPANION_OVERLAY_HELPMENU);
     thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-    thread_start(thread_id, menu_run_require_help);
+    thread_start(thread_id, help_run_after_battle);
     thread_wait_until_inactive(thread_id);
-    g_menu_panel_status_animation[0] = 0;
-    g_menu_panel_status_animation[1] = 0;
+    g_unit_panel_panel_status_animation[0] = 0;
+    g_unit_panel_panel_status_animation[1] = 0;
     thread_exit_current();
 }
 
@@ -2323,8 +2323,8 @@ static void text_build_battle_unit_names(void) {
     u8* output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     s32 unit_id;
 
-    for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
-        unit_stats_t* unit = battle_unit_get_stats_from_battle_id(unit_id);
+    for (unit_id = 0; unit_id < UNIT_SLOT_COUNT; unit_id++) {
+        unit_stats_t* unit = unit_get_stats(unit_id);
         s32 length = 0;
 
         do {

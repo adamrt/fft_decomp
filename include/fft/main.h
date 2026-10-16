@@ -79,10 +79,10 @@ typedef enum system_flags {
     SYSTEM_FLAG_TITLE_BRAVE_STORY = 0x20000000,
 } system_flags_e;
 
-/* g_battle_game_flow_state: what follows when the BATTLE.BIN loop closes a
+/* g_game_flow_state: what follows when the BATTLE.BIN loop closes a
  * battle or event. */
 typedef enum system_game_flow {
-    SYSTEM_GAME_FLOW_BATTLE = 0, /* stay in battle_state_run_game_loop for the next event */
+    SYSTEM_GAME_FLOW_BATTLE = 0, /* stay in state_run_game_loop for the next event */
     SYSTEM_GAME_FLOW_WORLD = 1,  /* back to the world map */
     SYSTEM_GAME_FLOW_RESET = 2,  /* stop display and audio and restart from the opening */
     SYSTEM_GAME_FLOW_ENDING = 3, /* run the ending, then restart */
@@ -134,7 +134,7 @@ extern s32 g_save_play_time_seconds;
 typedef enum system_error {
     SYSTEM_ERROR_HEAP_ALLOC = 1,            /* file_load_to_heap got no block */
     SYSTEM_ERROR_FILE_LOAD = 2,             /* a checked file load returned 0 */
-    SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT = 6,  /* battle_unit_claim_slot found none free */
+    SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT = 6,  /* unit_claim_slot found none free */
     SYSTEM_ERROR_SHP_FRAME = 8,             /* frame index above 0x200 or frame pointer -1 */
     SYSTEM_ERROR_SEQ_ANIMATION = 9,         /* animation index above 0x100 or sequence pointer -1 */
     SYSTEM_ERROR_FRAME_PART_COUNT = 10,     /* more than eight parts in a unit frame */
@@ -152,7 +152,7 @@ typedef enum system_pointer_exception {
 } system_pointer_exception_e;
 
 /* system_handle_battle_load_exception values: a failure base plus the battle id of the unit
- * being set up, or MAP_RETRY alone. */
+ * being set up, or BATTLE_MAP_RETRY alone. */
 typedef enum system_battle_load_exception {
     SYSTEM_BATTLE_LOAD_EXCEPTION_MAP_RETRY = 0x80, /* a map tile-data retry gave up after 1000 tries */
     SYSTEM_BATTLE_LOAD_EXCEPTION_NO_SPRITESHEET_SLOT = 100,

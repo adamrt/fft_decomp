@@ -81,12 +81,12 @@ s32 unit_is_moving(s32 runtime_id) {
     s32 i;
 
     if (runtime_id != -1) {
-        if (battle_move_is_unit_moving_by_runtime_id(runtime_id) != 0) {
+        if (move_is_unit_moving_by_runtime_id(runtime_id) != 0) {
             return 1;
         }
     } else {
-        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-            if ((battle_unit_has_runtime_id(i) != 0) && (battle_move_is_unit_moving_by_runtime_id(i) != 0)) {
+        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+            if ((unit_has_runtime_id(i) != 0) && (move_is_unit_moving_by_runtime_id(i) != 0)) {
                 return 1;
             }
         }
@@ -108,11 +108,11 @@ static void script_write_s16(u8* destination, s16 value) {
 }
 
 /* Yield until this scene's pending map refresh clears. */
-void map_wait_for_refresh(void) {
-    if (g_map_refresh_pending != 0) {
+void battle_map_wait_for_refresh(void) {
+    if (g_battle_map_refresh_pending != 0) {
         do {
             thread_yield();
-        } while (g_map_refresh_pending != 0);
+        } while (g_battle_map_refresh_pending != 0);
     }
 }
 
@@ -323,7 +323,7 @@ void script_opcode_1a_map_darkness(void) {
 
     thread_set_current_task_id(THREAD_TASK_MAP_DARKNESS);
     parameters = (event_unit_color_t*)thread_get_current_parameter_1();
-    battle_map_start_ambient_light_blend(
+    battle_map_ambient_start_blend(
         parameters->mode, parameters->duration, parameters->rgb.r, parameters->rgb.g, parameters->rgb.b);
     thread_wait_frames(g_script_map_darkness_durations[parameters->duration]);
     thread_exit_current();
@@ -387,12 +387,12 @@ void script_opcode_3e_color_screen_thread(void) {
             s32 start = color.start_and_end[j];
             color.current[j] = (end - start) * i / duration + start;
         }
-        battle_gfx_start_screen_color_modulation_fade(mode, color.current[0], color.current[1], color.current[2], 2);
+        fade_tint_start_fade(mode, color.current[0], color.current[1], color.current[2], 2);
     }
     for (j = 0; j < 3; j++) {
         color.current[j] = color.start_and_end[j + 3];
     }
-    battle_gfx_start_screen_color_modulation_fade(mode, color.current[0], color.current[1], color.current[2], 2);
+    fade_tint_start_fade(mode, color.current[0], color.current[1], color.current[2], 2);
     thread_yield();
     thread_yield();
     thread_exit_current();
@@ -440,7 +440,7 @@ static void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s3
         return;
     }
     g_thread_contexts[g_thread_current_id].task_words[SPRITE_MOVE_THREAD_WORD_RUNTIME_ID] = runtime_id;
-    coords = battle_unit_get_event_offset_by_runtime_id(runtime_id);
+    coords = unit_get_event_offset_by_runtime_id(runtime_id);
     parameters += sizeof(arg->unit_id_le);
     pos[0][0] = coords->vx;
     pos[0][1] = coords->vy;
@@ -507,32 +507,32 @@ static void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s3
                 }
             }
         }
-        if (battle_unit_has_runtime_id(runtime_id) == 0) {
+        if (unit_has_runtime_id(runtime_id) == 0) {
             thread_exit_current();
         }
         vec.vx = pos[3][0];
         vec.vy = pos[3][1];
         vec.vz = pos[3][2];
-        battle_unit_add_event_offset_by_runtime_id(runtime_id, &vec);
+        unit_add_event_offset_by_runtime_id(runtime_id, &vec);
         vec.vx = pos[2][0] / 256;
         vec.vy = pos[2][1] / 256;
         vec.vz = pos[2][2] / 256;
-        battle_unit_add_event_offset_by_runtime_id(runtime_id, &vec);
+        unit_add_event_offset_by_runtime_id(runtime_id, &vec);
         pos[3][0] = -vec.vx;
         pos[3][1] = -vec.vy;
         pos[3][2] = -vec.vz;
     }
-    if (battle_unit_has_runtime_id(runtime_id) == 0) {
+    if (unit_has_runtime_id(runtime_id) == 0) {
         thread_exit_current();
     }
     vec.vx = pos[3][0];
     vec.vy = pos[3][1];
     vec.vz = pos[3][2];
-    battle_unit_add_event_offset_by_runtime_id(runtime_id, &vec);
+    unit_add_event_offset_by_runtime_id(runtime_id, &vec);
     vec.vx = pos[1][0] / 256;
     vec.vy = pos[1][1] / 256;
     vec.vz = pos[1][2] / 256;
-    battle_unit_add_event_offset_by_runtime_id(runtime_id, &vec);
+    unit_add_event_offset_by_runtime_id(runtime_id, &vec);
     if (total == 1) {
         thread_yield();
     }
@@ -589,7 +589,7 @@ static void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
  * the script's frame count, rebuilding the GTE light matrix each frame, then
  * commits the final values back to the live light state.
  */
-void map_light_thread(void) {
+void battle_map_light_thread(void) {
     /* One keyframe: three rotation angles and three color scale factors.
      * The original reads all six operands in one loop, so the target also
      * needs a six-word view; stores through the named fields do not match. */
@@ -636,7 +636,7 @@ void map_light_thread(void) {
         scale.vy = (target.light.scale[1] - start.light.scale[1]) * step / frames + start.light.scale[1];
         scale.vz = (target.light.scale[2] - start.light.scale[2]) * step / frames + start.light.scale[2];
         ScaleMatrixL(&color, &scale);
-        battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_SET, &color, &direction, 0);
+        battle_map_light_matrix_command(BATTLE_MAP_LIGHT_MATRIX_COMMAND_SET, &color, &direction, 0);
         thread_wait_frames(1);
     }
     mem_copy_bytes_nonempty(&g_script_light_angles, &angles, sizeof(g_script_light_angles));
@@ -683,12 +683,12 @@ static s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b)
     unit_copy_map_coords_by_runtime_id(runtime_id_a, &g_unit_scratch_coords);
     /* The raw result is assigned before it is masked: combine then knows
      * nothing about the mask's high bits and the loop test keeps its sll 16. */
-    mask = battle_map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
+    mask = battle_map_tile_get_value(BATTLE_MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
         g_unit_scratch_coords.vz, g_unit_scratch_coords.vy);
     mask &= 0xFF;
     unit_copy_map_coords_by_runtime_id(runtime_id_b, &g_unit_scratch_coords);
     mask = (mask
-               | battle_map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
+               | battle_map_tile_get_value(BATTLE_MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
                    g_unit_scratch_coords.vz, g_unit_scratch_coords.vy))
         & 0xF;
     bit = 1;
@@ -922,16 +922,16 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
         return 1;
     }
     *out_id = *in_id;
-    if (battle_unit_has_runtime_id(*out_id) != 0) {
-        index = battle_unit_get_battle_id_by_runtime_id(*out_id);
+    if (unit_has_runtime_id(*out_id) != 0) {
+        index = unit_get_battle_id_by_runtime_id(*out_id);
         if (index != -1) {
-            unit = battle_unit_get_stats_from_battle_id(index);
+            unit = unit_get_stats(index);
         }
     }
     if (*mode == 1) {
-        return battle_unit_has_runtime_id(*out_id);
+        return unit_has_runtime_id(*out_id);
     }
-    if (battle_unit_has_runtime_id(*out_id) == 0) {
+    if (unit_has_runtime_id(*out_id) == 0) {
         return 0;
     }
     query = *mode;
@@ -999,16 +999,16 @@ void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
         return;
     }
     g_sound_pending_sfx_id = SOUND_SFX_TELEPORT_OUT;
-    g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
+    g_thread_call_target = (void (*)(void))effect_secondary_set_teleport_by_runtime_id;
     thread_call_on_main_stack(unit);
-    idx = battle_unit_get_battle_id_by_runtime_id(unit);
-    unit_set_animation(unit, BATTLE_UNIT_ANIMATION_RAISE_HANDS);
-    battle_gfx_start_event_unit_fade_out(unit, 2, 0x1F, 0x1F, 0x1F);
+    idx = unit_get_battle_id_by_runtime_id(unit);
+    unit_set_animation(unit, ANIMATION_RAISE_HANDS);
+    unit_fade_out_start_for_event(unit, 2, 0x1F, 0x1F, 0x1F);
     thread_wait_frames(0x3C);
-    battle_gfx_start_event_unit_fade_out(unit, 2, -0x1F, -0x1F, -0x1F);
+    unit_fade_out_start_for_event(unit, 2, -0x1F, -0x1F, -0x1F);
     thread_wait_frames(0x3C);
     if (remove != 0) {
-        battle_unit_set_off_field(idx);
+        unit_set_off_field(idx);
     }
 }
 
@@ -1017,7 +1017,7 @@ void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
 void script_opcode_98_teleport_in(s32 unit_id, s32 unused) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-        g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
+        g_thread_call_target = (void (*)(void))effect_secondary_set_teleport_by_runtime_id;
         thread_call_on_main_stack(runtime_id);
     }
 }
@@ -1032,14 +1032,14 @@ void script_blue_remove_all_enemy_units(void) {
     unit_stats_t* stats;
     unit_stats_t* found;
 
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (battle_unit_has_runtime_id(i) != 0) {
-            idx = battle_unit_get_battle_id_by_runtime_id(i);
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        if (unit_has_runtime_id(i) != 0) {
+            idx = unit_get_battle_id_by_runtime_id(i);
             if (idx != -1) {
-                stats = battle_unit_get_stats_from_battle_id(idx);
-                found = battle_unit_find_stats_by_entd_unit_id(stats->unit_id, &out_index);
+                stats = unit_get_stats(idx);
+                found = unit_entd_find_stats(stats->unit_id, &out_index);
                 if ((found->initial_team_flags & UNIT_TEAM_MASK) && out_index != -2) {
-                    battle_gfx_start_event_unit_fade_out(i, 2, -0x1F, -0x1F, 0);
+                    unit_fade_out_start_for_event(i, 2, -0x1F, -0x1F, 0);
                 }
             }
         }
@@ -1057,16 +1057,15 @@ void script_opcode_99_blue_remove_unit(s32 unit_id) {
     unit_stats_t* unit;
     s32 found_battle_id[2];
 
-    for (runtime_id = 0; runtime_id < BATTLE_UNIT_SLOT_COUNT; runtime_id++) {
-        if (battle_unit_has_runtime_id(runtime_id) == 0) {
+    for (runtime_id = 0; runtime_id < UNIT_SLOT_COUNT; runtime_id++) {
+        if (unit_has_runtime_id(runtime_id) == 0) {
             continue;
         }
-        battle_index = battle_unit_get_battle_id_by_runtime_id(runtime_id);
+        battle_index = unit_get_battle_id_by_runtime_id(runtime_id);
         if (battle_index == -1) {
             continue;
         }
-        unit = battle_unit_find_stats_by_entd_unit_id(
-            battle_unit_get_stats_from_battle_id(battle_index)->unit_id, found_battle_id);
+        unit = unit_entd_find_stats(unit_get_stats(battle_index)->unit_id, found_battle_id);
         if ((unit->team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE) {
             continue;
         }
@@ -1076,7 +1075,7 @@ void script_opcode_99_blue_remove_unit(s32 unit_id) {
         if (unit->unit_id != unit_id) {
             continue;
         }
-        battle_gfx_start_event_unit_fade_out(runtime_id, 2, -0x1F, -0x1F, 0);
+        unit_fade_out_start_for_event(runtime_id, 2, -0x1F, -0x1F, 0);
     }
 }
 
@@ -1097,19 +1096,19 @@ void script_warp_unit(const event_warp_unit_parameters_t* instruction) {
     s32 runtime_id;
     s32 result;
     s16 unit_id;
-    map_tile_coordinates_t tile;
+    battle_map_tile_coordinates_t tile;
     unit_animation_state_t* rotation_state;
 
     cursor.instruction = instruction;
     unit_id = script_read_s16(cursor.instruction->unit_id_le);
     cursor.placement = &cursor.instruction->placement;
-    unit = battle_unit_find_stats_by_entd_unit_id(unit_id, &result);
+    unit = unit_entd_find_stats(unit_id, &result);
     battle_id = 0;
     if (result != -2 && result < 0) {
         return;
     }
-    for (; battle_id < BATTLE_UNIT_SLOT_COUNT; battle_id++) {
-        if (battle_unit_get_stats_from_battle_id(battle_id) == unit) {
+    for (; battle_id < UNIT_SLOT_COUNT; battle_id++) {
+        if (unit_get_stats(battle_id) == unit) {
             break;
         }
     }
@@ -1117,7 +1116,7 @@ void script_warp_unit(const event_warp_unit_parameters_t* instruction) {
     unit->position.y = cursor.placement->y;
     unit->position.higher_elevation = cursor.placement->elevation;
     unit->position.facing = cursor.placement->facing;
-    runtime_id = battle_unit_get_runtime_id_by_battle_id(battle_id);
+    runtime_id = unit_get_runtime_id_by_battle_id(battle_id);
     if (runtime_id == -1) {
         return;
     }
@@ -1128,7 +1127,7 @@ void script_warp_unit(const event_warp_unit_parameters_t* instruction) {
     rotation_state->target_facing = cursor.placement->facing * 4;
     rotation_state->delay = 0;
     rotation_state->rotating = 0;
-    battle_unit_place_in_new_location(runtime_id, &tile, cursor.placement->facing);
+    unit_place_in_new_location(runtime_id, &tile, cursor.placement->facing);
     unit_set_facing(runtime_id, cursor.placement->facing * 4);
 }
 
@@ -1146,9 +1145,9 @@ void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t
     call_runtime_id = script_resolve_runtime_id(runtime_id);
     runtime_id = call_runtime_id;
     if (parameters->animation_le[1] == 0) {
-        battle_unit_clear_facing_update_suppression(call_runtime_id);
+        unit_clear_facing_update_suppression(call_runtime_id);
     } else {
-        battle_unit_set_facing_update_suppression(call_runtime_id);
+        unit_set_facing_update_suppression(call_runtime_id);
     }
     index = runtime_id;
     rotation_state = &g_unit_animation_states[index];
@@ -1187,7 +1186,7 @@ void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         runtime_id = script_resolve_runtime_id(runtime_id);
         if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
                 if (script_filter_unit_id_by_mode(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0
                     && runtime_id != unit_id) {
                     unit_copy_world_coords(runtime_id, &position);
@@ -1248,12 +1247,12 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
 
     unit_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
-        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
             if (script_filter_unit_id_by_mode(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0) {
                 facing = parameters->facing;
                 if (facing >= EVENT_ROTATE_UNIT_FACING_RELATIVE_FIRST && facing < EVENT_ROTATE_UNIT_FACING_RESTORE) {
                     facing = facing & 0xF;
-                    facing = battle_unit_get_facing_nibble_by_runtime_id(unit_id) + facing * 4;
+                    facing = unit_facing_get_sixteenth_by_runtime_id(unit_id) + facing * 4;
                     facing = facing & 0xF;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_CAMERA) {
                     facing = g_unit_rotation_speed_frames[4 + ((camera_wrap_yaw_angle() & 0xC00) >> 10)] * 4;
@@ -1294,11 +1293,11 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
  * the main stack; the Draw event instruction runs this only for the Zalera
  * event. */
 void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
-    unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
+    unit_stats_t* stats = unit_get_stats(battle_id);
     s32 i;
     s32 mask;
 
-    g_thread_call_target = (void (*)(void))battle_status_queue_runtime_graphics_flag_change;
+    g_thread_call_target = (void (*)(void))status_queue_display_flag_change;
     for (i = 0; i < STATUS_COUNT; i++) {
         mask = 0x80 >> (i % 8);
         if ((stats->status_sets.current[i / 8] & mask) != 0) {
@@ -1310,7 +1309,7 @@ void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
 /* Resets every unit slot's status staging state and inflict-status mode to none. */
 void unit_clear_status_staging_data(void) {
     s32 i;
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         g_unit_status_staging_data->state[i] = UNIT_STATUS_STAGING_NONE;
         g_unit_status_staging_data->inflict_status_mode[i] = UNIT_INFLICT_STATUS_MODE_NONE;
     }
@@ -1333,13 +1332,13 @@ s32 unit_save_staged_status_data(s32 battle_id) {
     unit_status_staging_t* st;
 
     if (g_unit_status_staging_data->state[battle_id] == UNIT_STATUS_STAGING_NONE) {
-        stats = battle_unit_get_stats_from_battle_id(battle_id);
+        stats = unit_get_stats(battle_id);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             g_unit_status_staging_data->innate[battle_id][i] = stats->status_sets.innate[i];
             g_unit_status_staging_data->inflicted[battle_id][i] = stats->inflicted_status[i];
             g_unit_status_staging_data->current[battle_id][i] = stats->status_sets.current[i];
         }
-        for (i = 0; i < BATTLE_TIMED_STATUS_COUNT; i++) {
+        for (i = 0; i < STATUS_TIMED_COUNT; i++) {
             g_unit_status_staging_data->status_ct[battle_id][i] = stats->status_ct[i];
         }
         g_unit_status_staging_data->charged_ability_ct[battle_id] = stats->charged_ability_ct;
@@ -1390,7 +1389,7 @@ s32 unit_save_staged_status_data(s32 battle_id) {
             stats->team_flags = stats->initial_team_flags;
         }
         /* WORLD's copy targets this BATTLE address too (see QUIRKS.md). */
-        g_thread_call_target = (void (*)(void))battle_status_apply_unit_action_removal;
+        g_thread_call_target = (void (*)(void))status_apply_unit_action_removal;
         thread_call_on_main_stack(stats);
         g_unit_status_staging_data->state[battle_id] = UNIT_STATUS_STAGING_SAVED;
         return 1;
@@ -1413,9 +1412,9 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
     s32 byte_index;
     s32 mask;
     u8 inflict_status_mode;
-    if (!(script_get_current_scenario_finish_operation() & 0x8000)
+    if (!(scenario_get_finish_operation() & 0x8000)
         && g_unit_status_staging_data->state[battle_id] == UNIT_STATUS_STAGING_SAVED) {
-        unit = battle_unit_get_stats_from_battle_id(battle_id);
+        unit = unit_get_stats(battle_id);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             g_unit_status_staging_data->added[battle_id][i]
                 = unit->status_sets.current[i] ^ g_unit_status_staging_data->current[battle_id][i];
@@ -1428,7 +1427,7 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
             unit->inflicted_status[i] = g_unit_status_staging_data->inflicted[battle_id][i];
             unit->status_sets.current[i] = g_unit_status_staging_data->current[battle_id][i];
         }
-        for (i = 0; i < BATTLE_TIMED_STATUS_COUNT; i++) {
+        for (i = 0; i < STATUS_TIMED_COUNT; i++) {
             unit->status_ct[i] = g_unit_status_staging_data->status_ct[battle_id][i];
         }
         unit->hp = g_unit_status_staging_data->hp[battle_id];
@@ -1437,7 +1436,7 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
         /* Restoring the snapshot undoes the event's changes: the status graphics the event
          * added are switched off and the ones it removed back on.
          * WORLD's copy targets this BATTLE address too (see QUIRKS.md). */
-        g_thread_call_target = (void (*)(void))battle_status_queue_runtime_graphics_flag_change;
+        g_thread_call_target = (void (*)(void))status_queue_display_flag_change;
         for (i = 0; i < STATUS_COUNT; i++) {
             byte_index = i / 8;
             mask = 0x80 >> (i % 8);
@@ -1471,7 +1470,7 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
                 unit->action.status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
                     |= STATUS_BYTE_MASK(STATUS_ID_DEAD);
             }
-            g_thread_call_target = (void (*)(void))battle_status_resolve_unit_changes;
+            g_thread_call_target = (void (*)(void))status_resolve_unit_changes;
             thread_call_on_main_stack(battle_id, 1);
         }
         if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)]
@@ -1482,7 +1481,7 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
             unit->charged_ability_ct = g_unit_status_staging_data->charged_ability_ct[battle_id];
         }
         g_unit_status_staging_data->state[battle_id] = UNIT_STATUS_STAGING_RESTORED;
-        g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+        g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
         thread_call_on_main_stack(runtime_id);
     }
 }
@@ -1505,16 +1504,15 @@ void unit_update_staged_status_data(u16 unit_id, u16 restore) {
     if (g_menu_input_mode == MENU_INPUT_PLAYER && script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         unit_index = 0;
         g_unit_status_staging_data->jump_float_flags = 0;
-        for (; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+        for (; unit_index < UNIT_SLOT_COUNT; unit_index++) {
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
-                battle_unit_index = battle_unit_get_battle_id_by_runtime_id(unit_id);
+                battle_unit_index = unit_get_battle_id_by_runtime_id(unit_id);
                 if (battle_unit_index != -1) {
-                    battle_unit_find_stats_by_entd_unit_id(
-                        battle_unit_get_stats_from_battle_id(battle_unit_index)->unit_id, &battle_id);
+                    unit_entd_find_stats(unit_get_stats(battle_unit_index)->unit_id, &battle_id);
                     if (battle_id >= 0) {
                         if (restore == 0) {
                             if (unit_save_staged_status_data(battle_unit_index) != 0) {
-                                g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+                                g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
                                 thread_call_on_main_stack(unit_id);
                             }
                         } else {
@@ -1534,7 +1532,7 @@ void unit_update_staged_status_data(u16 unit_id, u16 restore) {
             thread_wait_frames(40);
         }
         if (restore == 0) {
-            g_thread_call_target = battle_gfx_hide_jumping_units;
+            g_thread_call_target = unit_hide_all_jumping;
             thread_call_on_main_stack();
         }
     }
@@ -1566,7 +1564,7 @@ void script_inflict_status_thread(void) {
         thread_exit_current();
     }
     unit_update_staged_status_data(unit_id, 0);
-    unit = battle_unit_get_stats_from_battle_id(battle_unit_index);
+    unit = unit_get_stats(battle_unit_index);
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD)) {
         health = 0;
     } else {
@@ -1578,15 +1576,15 @@ void script_inflict_status_thread(void) {
     if (mode == EVENT_INFLICT_STATUS_POISON) {
         status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_POISON), 1, 1);
         g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_POISON;
-        g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+        g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
         thread_call_on_main_stack(runtime_id);
-        unit_set_animation(runtime_id, BATTLE_UNIT_ANIMATION_KNEEL);
+        unit_set_animation(runtime_id, ANIMATION_KNEEL);
     } else if (mode == EVENT_INFLICT_STATUS_CRYSTAL) {
         status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
         status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 0, 1);
         status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRYSTAL), 1, 1);
         g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_CRYSTAL;
-        g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+        g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
         thread_call_on_main_stack(runtime_id);
     } else if (mode == EVENT_INFLICT_STATUS_REVIVE) {
         if (health == 0) {
@@ -1594,11 +1592,11 @@ void script_inflict_status_thread(void) {
             status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
             unit->hp = 1;
             status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 1, 1);
-            g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+            g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
             thread_call_on_main_stack(runtime_id);
             g_sound_pending_sfx_id = SOUND_SFX_EVENT_REVIVE;
         } else if (health == 2) {
-            g_thread_call_target = (void (*)(void))battle_unit_set_mounted_animation_by_runtime_id;
+            g_thread_call_target = (void (*)(void))animation_set_mounted_by_runtime_id;
             thread_call_on_main_stack(runtime_id);
         }
     }
@@ -1612,7 +1610,7 @@ void script_inflict_status_thread(void) {
  * unit an event unit id resolves to.
  *
  * The unit's pending infliction and removal bytes are cleared, the one status bit
- * is set and battle_status_resolve_unit_changes runs on the main stack with
+ * is set and status_resolve_unit_changes runs on the main stack with
  * removal_only. Nothing happens when the id resolves to no unit on the field. */
 static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
     s32 idx = unit_get_battle_id_by_event_unit_id(event_unit_id);
@@ -1624,7 +1622,7 @@ static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 w
     if (idx == EVENT_BATTLE_ID_NONE) {
         return;
     }
-    unit = battle_unit_get_stats_from_battle_id(idx);
+    unit = unit_get_stats(idx);
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         unit->action.status_changes.infliction[i] = 0;
         unit->action.status_changes.removal[i] = 0;
@@ -1638,7 +1636,7 @@ static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 w
     } else {
         unit->action.status_changes.removal[byte] = bit;
     }
-    g_thread_call_target = (void (*)(void))battle_status_resolve_unit_changes;
+    g_thread_call_target = (void (*)(void))status_resolve_unit_changes;
     thread_call_on_main_stack(idx, removal_only);
 }
 
@@ -1659,12 +1657,11 @@ void script_opcode_83_change_stats(const event_change_stats_parameters_t* parame
 
     unit_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
-        for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+        for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
-                battle_unit_index = battle_unit_get_battle_id_by_runtime_id(unit_id);
+                battle_unit_index = unit_get_battle_id_by_runtime_id(unit_id);
                 if (battle_unit_index != -1) {
-                    unit = battle_unit_find_stats_by_entd_unit_id(
-                        battle_unit_get_stats_from_battle_id(battle_unit_index)->unit_id, &battle_id);
+                    unit = unit_entd_find_stats(unit_get_stats(battle_unit_index)->unit_id, &battle_id);
                     if (battle_id >= 0) {
                         if (parameters->stat == EVENT_CHANGE_STATS_HP) {
                             value = unit->hp + delta;
@@ -1711,17 +1708,17 @@ void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
     if (script_prepare_unit_filter(&unit_id, &filter_mode) == 0) {
         return;
     }
-    for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+    for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
         if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
             move_flag_mode = parameters->facing_update_mode;
             if (move_flag_mode == 0) {
-                battle_unit_clear_facing_update_suppression(unit_id);
+                unit_clear_facing_update_suppression(unit_id);
             } else if (move_flag_mode == 1) {
-                battle_unit_set_facing_update_suppression(unit_id);
+                unit_set_facing_update_suppression(unit_id);
             }
             animation = script_read_s16(parameters->animation_le);
             unit_set_animation(unit_id, animation);
-            if (animation >= BATTLE_UNIT_ANIMATION_BOW_HIGH && animation <= BATTLE_UNIT_ANIMATION_BOW_LOW) {
+            if (animation >= ANIMATION_BOW_HIGH && animation <= ANIMATION_BOW_LOW) {
                 script_play_effect_and_wait();
             }
             if (filter_mode == 0) {
@@ -1744,9 +1741,9 @@ void script_opcode_80_march(const event_march_parameters_t* parameters) {
     if (script_prepare_unit_filter(&unit_id, &filter_mode) == 0) {
         return;
     }
-    for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+    for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
         if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
-            battle_unit_set_status_animation_by_runtime_id(unit_id);
+            animation_set_status_by_runtime_id(unit_id);
             thread_wait_frames(parameters->wait_frames);
             if (filter_mode == 0) {
                 return;
@@ -1766,12 +1763,12 @@ void script_opcode_81_set_unit_movement_effect_suppression(const event_movement_
     s32 unit_index;
 
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
-        for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+        for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
                 if (parameters->suppressed != 0) {
-                    battle_unit_set_movement_effect_suppression(unit_id);
+                    unit_set_movement_effect_suppression(unit_id);
                 } else {
-                    battle_unit_clear_movement_effect_suppression(unit_id);
+                    unit_clear_movement_effect_suppression(unit_id);
                 }
                 if (filter_mode == 0) {
                     break;
@@ -1796,9 +1793,9 @@ void script_opcode_32_color_unit(const event_color_unit_parameters_t* parameters
 
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         color = &parameters->color;
-        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &filter_mode) != 0) {
-                battle_gfx_apply_unit_palette_modulation_to_units(
+                sprite_palette_apply_modulation_to_units(
                     color->mode, color->duration, unit_id, color->rgb.r, color->rgb.g, color->rgb.b);
                 if (filter_mode == 0) {
                     return;
@@ -1820,12 +1817,12 @@ void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable) 
     s32 i;
 
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
-        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &filter_mode) != 0) {
                 if (enable == 0) {
-                    battle_unit_clear_palette_update_suppression(unit_id);
+                    unit_clear_palette_update_suppression(unit_id);
                 } else {
-                    battle_unit_set_palette_update_suppression(unit_id);
+                    unit_set_palette_update_suppression(unit_id);
                 }
                 if (filter_mode == 0) {
                     return;
@@ -1845,7 +1842,7 @@ s32 unit_check_facing_relative_to_camera(s32 event_unit_id) {
     camera_facing &= 0xf00;
     /* Preserve the retail arithmetic shift after the masked camera angle. */
     camera_facing >>= 8;
-    camera_facing += battle_unit_get_facing_nibble_by_runtime_id(runtime_id);
+    camera_facing += unit_facing_get_sixteenth_by_runtime_id(runtime_id);
     camera_facing &= 0xf;
     camera_facing -= 7;
     return camera_facing < 6U;
@@ -1872,13 +1869,13 @@ void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) 
     s32 dx;
     s32 dy;
 
-    tile.vx = parameters->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-    tile.vz = parameters->y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    tile.vx = parameters->x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+    tile.vz = parameters->y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
     unit_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &filter_mode) == 0) {
         return;
     }
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         if (script_filter_unit_id_by_mode(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0) {
             unit_copy_world_coords(unit_id, &screen);
             dx = tile.vx - screen.vx;
@@ -1906,12 +1903,12 @@ void script_opcode_65_wait_rotate_all(s32 unit_id) {
     if (unit_id == -1) {
         do {
             thread_yield();
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
                 if (g_unit_animation_states[i].rotating != 0) {
                     break;
                 }
             }
-        } while (i != BATTLE_UNIT_SLOT_COUNT);
+        } while (i != UNIT_SLOT_COUNT);
     } else {
         index = script_resolve_runtime_id(unit_id);
         if (index != EVENT_RUNTIME_ID_NONE) {

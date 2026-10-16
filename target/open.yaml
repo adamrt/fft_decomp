@@ -48,7 +48,7 @@ functions:
   - {addr: 0x80068384, size: 156, name: new_game_init_party, hash: 3b01ce90b00a6557, unit: movies}
   - {addr: 0x80068420, size: 300, name: calendar_convert_date_to_zodiac, hash: 9aaa68be5ea32880, unit: movies}
   - {addr: 0x8006854c, size: 160, name: music_test_run_world_menu_frame, hash: b27c035b144dee4f, unit: movies}
-  - {addr: 0x800685ec, size: 76, name: unit_birthday_calculate_day_of_year, hash: e796a8582427e794, source: src/wldcore/unit_birthday_calculate_day_of_year.c}
+  - {addr: 0x800685ec, size: 76, name: calendar_calculate_day_of_year, hash: e796a8582427e794, source: src/wldcore/calendar_calculate_day_of_year.c}
   - {addr: 0x80068638, size: 76, name: sound_set_cd_mix_and_volume, hash: 3fcd975cc8b2da0c, unit: init}
   - {addr: 0x80068684, size: 88, name: title_init_sequence, hash: 7f2fe3e68306a213, unit: init}
   - {addr: 0x800686dc, size: 132, name: ending_init, hash: c5005cd2d64378db, unit: init}
@@ -190,7 +190,7 @@ data:
   - {addr: 0x80070d88, name: g_ending_script_initial_data_base}
   - {addr: 0x80073b9c, name: g_psyq_press_vlc_limit_halfwords}
   - {addr: 0x80073f10, name: g_psyq_press_vlc_state}
-  - {addr: 0x80073f34, name: g_unit_birthday_month_lengths}
+  - {addr: 0x80073f34, name: g_calendar_month_lengths}
   - {addr: 0x80073f40, name: g_birthday_zodiac_start_dates}
   - {addr: 0x80073f58, name: g_file_openbk_start_sector_offsets}
   - {addr: 0x80073f5c, name: g_file_openbk_end_sector_offsets}

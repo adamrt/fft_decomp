@@ -18,7 +18,7 @@
  * placed in the buffer at y 0xF0.
  */
 void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
-    s32 lower_half, const menu_status_thread_t* thread) {
+    s32 lower_half, const unit_panel_thread_t* thread) {
     s32 percent;
     s32 w;
     s32 h;

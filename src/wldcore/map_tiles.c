@@ -36,7 +36,7 @@ void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* o
     s32 days_in_month;
 
     while (1) {
-        days_in_month = g_unit_birthday_month_lengths[month];
+        days_in_month = g_calendar_month_lengths[month];
         if (day_of_year < days_in_month) {
             break;
         }

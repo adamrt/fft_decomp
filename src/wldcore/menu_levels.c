@@ -1299,7 +1299,7 @@ void menu_stack_push_message_level(s32 text, s32 reload_text) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_screen_text_section_offsets);
     }
-    thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread);
+    thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
     if (g_system_flags & SYSTEM_FLAG_UNIT_PANEL_THREADS) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x3B, text, 0);
     } else {

@@ -229,9 +229,9 @@ void portrait_load_party(void);
 void portrait_prepare_party_textures(void);
 
 /* unit panels */
-extern menu_active_unit_t g_unit_panel_selected_unit_data;
+extern unit_panel_unit_t g_unit_panel_selected_unit_data;
 extern palette_t g_unit_panel_selected_portrait_palettes[2];
-extern menu_active_unit_t g_unit_panel_comparison_unit_data;
+extern unit_panel_unit_t g_unit_panel_comparison_unit_data;
 extern palette_t g_unit_panel_comparison_portrait_palettes[2];
 extern u8 g_deploy_character_status_frame_config[];
 extern s32 g_deploy_status_display_thread_params;
@@ -252,7 +252,7 @@ void unit_panel_build_status_groups(POLY_FT4* poly);
 
 /* numeric panel */
 /* Five name ids and five ability/skillset ids of the unit loaded into the
- * editor (g_menu_selected_unit_fields + 0x24). The target walks them from this
+ * editor (g_unit_panel_selected_unit_fields + 0x24). The target walks them from this
  * standalone address: indexing the editor record instead folds 0x24 into each
  * load and allocates the walk from the record base. */
 extern s16 g_unit_panel_editor_item_and_ability_ids[10];

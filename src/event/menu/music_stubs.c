@@ -8,7 +8,7 @@
 
 /* Wait one vertical blank at a time while the music is loading, checking on the main stack. The
  * check (music_is_loading_stub) always reports done, so this waits a single VSync. */
-void sound_wait_for_music_load(void) {
+void music_wait_for_load(void) {
     do {
         VSync(0);
         g_thread_call_target = music_is_loading_stub;
@@ -17,19 +17,19 @@ void sound_wait_for_music_load(void) {
 
 /* Load requested music IDs into slots 1 and 2, wait one VSync after each
  * load, and play slot 1 when its ID is nonzero. */
-void sound_play_music_tracks(s32 slot_1_music_id, s32 slot_2_music_id) {
+void music_play_tracks(s32 slot_1_music_id, s32 slot_2_music_id) {
     music_unload_scenario_and_tunes();
 
     if (slot_1_music_id != 0) {
         g_thread_call_target = (void (*)(void))music_load_into_slot;
         thread_call_on_main_stack(slot_1_music_id, 1);
-        sound_wait_for_music_load();
+        music_wait_for_load();
     }
 
     if (slot_2_music_id != 0) {
         g_thread_call_target = (void (*)(void))music_load_into_slot;
         thread_call_on_main_stack(slot_2_music_id, 2);
-        sound_wait_for_music_load();
+        music_wait_for_load();
     }
 
     if (slot_1_music_id != 0) {

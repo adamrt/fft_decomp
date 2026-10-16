@@ -50,7 +50,7 @@ void unit_list_start_text_thread(s32 thread_data) {
     }
     text_save_section_pointers();
     text_relocate_pointer_table(g_help_text_table);
-    thread_start(THREAD_SCREEN_SLOT_TEXT, text_run_dialog_thread);
+    thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, thread_data + 0x38, g_text_selection_id, 0);
     g_menu_input_lock_mode = 1;
 }
@@ -125,7 +125,7 @@ void unit_list_update_help_cursor(s16 mode) {
             node_index = g_unit_list_help_nodes[node_index].destination[3];
         }
         /* Off the player's team, node 6 is skipped: 2 and 7 lead to each other. */
-        if (g_panel_selected_billboard.team_kind != 0) {
+        if (g_unit_panel_selected_billboard.team_kind != 0) {
             if (g_unit_list_help_node_index == 2 && node_index == 6) {
                 node_index = 7;
             }

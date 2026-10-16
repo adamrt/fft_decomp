@@ -92,14 +92,14 @@ void script_execute_event(void) {
     unit_stats_t* unit;
     u8* instruction;
     u8* ghost_parameters;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     unit_stats_t* copy_destination;
     u8* effect_instruction;
     thread_t* thread;
     thread_t* threads;
 
     thread_set_current_task_id(THREAD_TASK_EXECUTE_EVENT);
-    if (script_is_tutorial_event_slot() != 0) {
+    if (tutorial_is_current_event() != 0) {
         gfx_ramp_screen_overlay_intensity_to_zero();
     }
 
@@ -110,10 +110,10 @@ void script_execute_event(void) {
         }
         camera_wait_until_idle();
     } else {
-        g_menu_hovered_unit_stats_rect.y = 0xAA;
-        g_menu_attack_caster_stats_rect.y = 0xAA;
-        g_menu_attack_target_stats_rect.y = 0xAA;
-        g_menu_right_unit_stats_rect.y = 0xAA;
+        g_unit_view_hovered_stats_rect.y = 0xAA;
+        g_unit_view_attack_caster_stats_rect.y = 0xAA;
+        g_unit_view_attack_target_stats_rect.y = 0xAA;
+        g_unit_view_right_stats_rect.y = 0xAA;
     }
 
     /* Before the battle starts, snapshot every unit's statuses; after, apply the staged inflictions. */
@@ -180,7 +180,7 @@ restart_script:
                     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) < EVENT_ID_NEW_GAME_INVENTORY_END) {
                         item_init_new_game_inventory();
                     }
-                    script_join_units_silently();
+                    party_join_event_units();
                 }
                 if (operand_1 == EVENT_CALL_FUNCTION_OPEN_SAVE_MENU) {
                     /* Stop helper slots 2..14 around the CARD overlay's save screen. */
@@ -196,11 +196,11 @@ restart_script:
                         script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
                     }
                     script_set_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
-                    menu_request_open_companion_executable(COMPANION_OVERLAY_CARD);
-                    g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_CARD_SAVE;
+                    overlay_request_companion(COMPANION_OVERLAY_CARD);
+                    g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_CARD_SAVE;
                     do {
                         thread_yield();
-                    } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
+                    } while (g_overlay_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
                     script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
 
                     operand_1 = 2;
@@ -216,7 +216,7 @@ restart_script:
             /* The remaining selectors run even when progress effects are suppressed. */
             if ((operand_1 == EVENT_CALL_FUNCTION_ADVANCE_YEAR)
                 || (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_YEAR_ALTERNATE)) {
-                script_advance_date_by_one_year();
+                calendar_advance_one_year();
             }
             if (operand_1 == EVENT_CALL_FUNCTION_INCREASE_BLUE_TEAM_BRAVE) {
                 unit_increase_blue_team_brave_by_10();
@@ -240,25 +240,25 @@ restart_script:
             }
             if (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT) {
                 script_set_specialized_map_destroyed();
-                if (g_map_destruction_wait_state != 0) {
+                if (g_battle_map_destruction_wait_state != 0) {
                     do {
                         thread_yield();
-                    } while (g_map_destruction_wait_state != 0);
+                    } while (g_battle_map_destruction_wait_state != 0);
                 }
             }
             if (operand_1 == EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC) {
                 g_screen_sound_current_music_track_index = 0;
                 g_sound_music_track_1_id = MUSIC_ALTIMA;
                 g_sound_music_track_2_id = 0;
-                sound_play_music_tracks(MUSIC_ALTIMA, MUSIC_NONE);
+                music_play_tracks(MUSIC_ALTIMA, MUSIC_NONE);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_COPY_UNIT_8_POSITION_TO_UNIT_9_AND_RELOAD_GRAPHICS) {
-                unit = battle_unit_get_stats_from_battle_id(7);
-                copy_destination = battle_unit_get_stats_from_battle_id(8);
+                unit = unit_get_stats(7);
+                copy_destination = unit_get_stats(8);
                 copy_destination->x = unit->x;
                 copy_destination->position.y = unit->position.y;
                 copy_destination->position.higher_elevation = unit->position.higher_elevation;
-                battle_gfx_load_unit_graphics_by_battle_id(8, 1);
+                sprite_load_unit_graphics_by_battle_id(8, 1);
                 g_unit_graphics_load_pending = 1;
                 do {
                     thread_yield();
@@ -270,29 +270,29 @@ restart_script:
                 /* The region is two tile rectangles: x 0..3, y 0..10 and x 4..6, y 2..7. */
                 region_runtime_id = 0;
                 do {
-                    if (battle_unit_has_runtime_id(region_runtime_id) != 0) {
-                        operand_1 = battle_unit_get_battle_id_by_runtime_id(region_runtime_id);
+                    if (unit_has_runtime_id(region_runtime_id) != 0) {
+                        operand_1 = unit_get_battle_id_by_runtime_id(region_runtime_id);
                         if (operand_1 != -1U) {
-                            unit = battle_unit_get_stats_from_battle_id(operand_1);
+                            unit = unit_get_stats(operand_1);
                             if ((unit->x < 4U) && (unit->position.y < 0xBU)) {
-                                battle_gfx_hide_unit_by_runtime_id(region_runtime_id);
+                                unit_hide_by_runtime_id(region_runtime_id);
                             }
                             if (((unit->x - 4) < 3U) && ((unit->position.y - 2) < 6U)) {
-                                battle_gfx_hide_unit_by_runtime_id(region_runtime_id);
+                                unit_hide_by_runtime_id(region_runtime_id);
                             }
                         }
                     }
                     region_runtime_id += 1;
-                } while (region_runtime_id < BATTLE_UNIT_SLOT_COUNT);
+                } while (region_runtime_id < UNIT_SLOT_COUNT);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_COPY_UNIT_2_POSITION_AND_FACING_TO_UNIT_8_AND_RELOAD_GRAPHICS) {
-                unit = battle_unit_get_stats_from_battle_id(1);
-                copy_destination = battle_unit_get_stats_from_battle_id(7);
+                unit = unit_get_stats(1);
+                copy_destination = unit_get_stats(7);
                 copy_destination->x = unit->x;
                 copy_destination->position.y = unit->position.y;
                 copy_destination->position.higher_elevation = unit->position.higher_elevation;
                 copy_destination->position.facing = unit->position.facing;
-                battle_gfx_load_unit_graphics_by_battle_id(7, 1);
+                sprite_load_unit_graphics_by_battle_id(7, 1);
                 g_unit_graphics_load_pending = 1U;
                 do {
                     thread_yield();
@@ -306,8 +306,8 @@ restart_script:
             if (operand_1 == EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS) {
                 draw_runtime_id = script_resolve_runtime_id(CHARACTER_IDENTITY_ZALERA);
                 if (draw_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(draw_runtime_id), 0);
-                    g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+                    status_queue_current_status_graphics(unit_get_battle_id_by_runtime_id(draw_runtime_id), 0);
+                    g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
                     thread_call_on_main_stack(draw_runtime_id);
                 }
             }
@@ -315,7 +315,7 @@ restart_script:
             script_opcode_99_blue_remove_unit(first_operand);
         } else if ((opcode == EVENT_OPCODE_END) || (opcode == EVENT_OPCODE_END_2)) {
             /* Let the map, the event-block threads and any file loads finish first. */
-            map_wait_for_refresh();
+            battle_map_wait_for_refresh();
             do {
                 thread_yield();
             } while (thread_find_running_by_task(THREAD_TASK_EVENT_BLOCK) != 0);
@@ -325,11 +325,11 @@ restart_script:
             thread_yield();
 
             /* A tutorial restores the player's saved options and closes its battle. */
-            if (script_is_tutorial_event_slot() != 0) {
+            if (tutorial_is_current_event() != 0) {
                 gfx_ramp_screen_overlay_intensity_to_max();
-                g_game_options = g_menu_saved_game_options;
+                g_game_options = g_game_options_saved;
                 script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
-                battle_state_start_close_battle(0x20);
+                state_enter_close_battle_to_world(0x20);
             }
             if (g_menu_input_mode == MENU_INPUT_PLAYER) {
                 for (work_index = 2; work_index < 0xE; work_index++) {
@@ -340,7 +340,7 @@ restart_script:
             operand_1 = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
             if (operand_1 != EVENT_ID_OLAN_WOUNDED) {
                 if (operand_1 != EVENT_ID_BEOWULF_INVITATION) {
-                    battle_gfx_init_evtchr_vram_slots();
+                    sprite_evtchr_init_slots();
                 }
             }
             script_set_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED, 0);
@@ -350,8 +350,8 @@ restart_script:
             event_flags = (g_scenario_event_finish_operations[operand_1] & ~0x0CFF) >> 8;
             if (g_menu_input_mode == MENU_INPUT_PLAYER && event_flags == 0
                 && (operand_1 - EVENT_ID_COMMON_FIRST) >= 0x1AU && operand_1 != 0) {
-                g_script_condition_unit_battle_id = 0xFF;
-                script_run_scenario_conditions();
+                g_scenario_condition_unit_battle_id = 0xFF;
+                scenario_run_conditions();
                 if (script_load_next_event() != 0) {
                     goto restart_script;
                 }
@@ -359,14 +359,14 @@ restart_script:
 
             /* Otherwise the event ends: replay the staged statuses and store each shown unit's facing. */
             work_index = 0;
-            battle_unit_snap_all_facings_to_quadrants();
+            unit_facing_snap_all_to_quadrants();
             unit_update_staged_status_data(0, 1);
-            for (; work_index < BATTLE_UNIT_SLOT_COUNT; work_index++) {
-                if (battle_unit_has_runtime_id(work_index) != 0) {
-                    operand_1 = battle_unit_get_battle_id_by_runtime_id(work_index);
+            for (; work_index < UNIT_SLOT_COUNT; work_index++) {
+                if (unit_has_runtime_id(work_index) != 0) {
+                    operand_1 = unit_get_battle_id_by_runtime_id(work_index);
                     if (operand_1 >= 0) {
-                        unit = battle_unit_get_stats_from_battle_id(operand_1);
-                        unit->position.facing = battle_unit_get_facing_quadrant_by_runtime_id(work_index);
+                        unit = unit_get_stats(operand_1);
+                        unit->position.facing = unit_facing_get_quadrant_by_runtime_id(work_index);
                     }
                 }
             }
@@ -402,8 +402,8 @@ restart_script:
         /* ---- Dialogue and portraits ---- */
         else if (opcode == EVENT_OPCODE_DISPLAY_MESSAGE) {
             operand_1 = thread_resolve_id(operand_1);
-            thread_start(operand_1, text_run_dialog_thread);
-            text_build_display_message(
+            thread_start(operand_1, message_dialog_thread);
+            message_build_display(
                 instruction_offset, operand_2, &g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_TEXT_WIDTH]);
 
             /* Hand the dialog thread its parameters; operands 3-4 hold a one-based text id. */
@@ -482,7 +482,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_SET_FIRST_UNIT) {
             operand_1 = script_resolve_runtime_id(first_operand);
             if (operand_1 != EVENT_RUNTIME_ID_NONE) {
-                battle_unit_move_to_head(operand_1);
+                unit_move_to_head(operand_1);
             }
         } else if (opcode == EVENT_OPCODE_UNIT_ANIM) {
             script_unit_anim((const event_unit_anim_parameters_t*)parameters);
@@ -501,19 +501,19 @@ restart_script:
         else if (opcode == EVENT_OPCODE_CHANGE_MAP_BETA) {
             g_event_pending_map_jump_out_id = first_operand;
             thread_wait_frames(2);
-            map_reset_script_light_transform();
+            battle_map_reset_script_light_transform();
         } else if (opcode == EVENT_OPCODE_CHANGE_MAP) {
             g_event_pending_map_jump_out_2_id = first_operand;
             thread_wait_frames(2);
-            map_reset_script_light_transform();
+            battle_map_reset_script_light_transform();
         } else if (opcode == EVENT_OPCODE_SET_DAYTIME) {
             g_event_pending_map_state = operand_1;
             thread_wait_frames(2);
-            map_wait_for_refresh();
+            battle_map_wait_for_refresh();
         } else if (opcode == EVENT_OPCODE_WEATHER) {
             g_event_weather_request = first_operand;
             thread_wait_frames(2);
-            map_wait_for_refresh();
+            battle_map_wait_for_refresh();
         } else if (opcode == EVENT_OPCODE_RELOAD_MAP_STATE) {
             g_world_map_reload_state = 1;
             do {
@@ -553,7 +553,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_EFFECT_START) {
             do {
                 thread_yield();
-                g_thread_call_target = (void (*)(void))battle_effect_poll_file_load;
+                g_thread_call_target = (void (*)(void))effect_file_poll_load;
             } while (thread_call_on_main_stack() != 0);
         } else if (opcode == EVENT_OPCODE_EFFECT_END) {
             thread_start(thread_resolve_id(THREAD_SLOT_FIRST_IDLE), &script_opcode_8b_effect_end_thread);
@@ -633,8 +633,8 @@ restart_script:
             thread_wait_frames(1);
             thread_suspend(thread_find_running_by_task(THREAD_TASK_EARTHQUAKE));
         } else if (opcode == EVENT_OPCODE_SET_SPEAKER_PAIR) {
-            g_text_speaker_swap_unit_a = first_operand;
-            g_text_speaker_swap_unit_b = script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3);
+            g_message_speaker_swap_unit_a = first_operand;
+            g_message_speaker_swap_unit_b = script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3);
         } else if (opcode == EVENT_OPCODE_MAP_DARKNESS) {
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
             thread_start(operand_1, &script_opcode_1a_map_darkness);
@@ -662,21 +662,22 @@ restart_script:
             script_opcode_6f_wait_sprite_move(first_operand);
         } else if (opcode == EVENT_OPCODE_MAP_LIGHT) {
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, map_light_thread);
+            thread_start(operand_1, battle_map_light_thread);
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
         }
         /* ---- Background, palettes, and terrain ---- */
         else if (opcode == EVENT_OPCODE_BACKGROUND) {
-            mem_copy_bytes_nonempty(&g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_TOP], parameters, 3);
             mem_copy_bytes_nonempty(
-                &g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM], parameters + 3, 3);
+                &g_event_background_colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP], parameters, 3);
+            mem_copy_bytes_nonempty(
+                &g_event_background_colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM], parameters + 3, 3);
             if (parameters[7] == 0) {
-                battle_map_transition_and_store_background_gradient(parameters[6], &g_event_background_colors);
+                battle_map_background_transition_and_store(parameters[6], &g_event_background_colors);
             } else {
-                battle_map_set_background_gradient(parameters[6], &g_event_background_colors);
+                battle_map_background_set(parameters[6], &g_event_background_colors);
             }
         } else if (opcode == EVENT_OPCODE_COLOR_BG_BETA) {
-            battle_map_modify_background_gradient(
+            battle_map_background_modify(
                 parameters[0], parameters[4], (s8)(parameters)[1], (s8)(parameters)[2], (s8)(parameters)[3]);
         } else if (opcode == EVENT_OPCODE_COLOR_UNIT) {
             script_opcode_32_color_unit((const event_color_unit_parameters_t*)parameters);
@@ -688,14 +689,14 @@ restart_script:
             battle_map_color_field(
                 parameters[0], parameters[4], (s8)(parameters)[1], (s8)(parameters)[2], (s8)(parameters)[3]);
         } else if (opcode == EVENT_OPCODE_STORE_MODIFIED_MAP_PALETTE) {
-            battle_map_store_modified_palette_colors(0, 0, 1);
+            battle_map_palette_store_modified_colors(0, 0, 1);
         } else if (opcode == EVENT_OPCODE_SET_TILE_CAMERA_BLOCK) {
-            battle_map_set_tile_data_value(
-                MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, parameters[0], parameters[1], parameters[2], parameters[3]);
+            battle_map_tile_set_value(BATTLE_MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, parameters[0], parameters[1],
+                parameters[2], parameters[3]);
         } else if (opcode == EVENT_OPCODE_SET_TILE_HEIGHT) {
-            tile = battle_map_get_tile_data_pointer(parameters[0], parameters[1], parameters[2]);
-            if ((tile->surface.type - MAP_SURFACE_GRASSLAND) >= 2U) {
-                tile->surface.type = MAP_SURFACE_STONE_FLOOR;
+            tile = battle_map_tile_get_pointer(parameters[0], parameters[1], parameters[2]);
+            if ((tile->surface.type - BATTLE_MAP_SURFACE_GRASSLAND) >= 2U) {
+                tile->surface.type = BATTLE_MAP_SURFACE_STONE_FLOOR;
             }
             tile->height = parameters[3];
             tile->flags.untargetable = parameters[4];
@@ -705,7 +706,7 @@ restart_script:
         else if (opcode == EVENT_OPCODE_EVENT_SPEED) {
             script_set_event_speed(operand_1);
         } else if (opcode == EVENT_OPCODE_DARK_SCREEN) {
-            g_menu_hide_numeric_values = 0;
+            g_unit_panel_hide_numeric_values = 0;
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
             thread_start(operand_1, &script_dark_screen_thread);
             thread_set_parameters(operand_1, 0, (s32)parameters, 0);
@@ -735,11 +736,11 @@ restart_script:
             g_sound_pending_sfx_id = first_operand;
         } else if (opcode == EVENT_OPCODE_BG_SOUND) {
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, sound_run_background_sfx_thread);
+            thread_start(operand_1, sound_background_thread);
             thread_set_parameters(operand_1, (s32)parameters, 0, 0);
         } else if (opcode == EVENT_OPCODE_EDIT_BG_SOUND) {
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, sound_run_background_fade_thread);
+            thread_start(operand_1, sound_background_fade_thread);
             thread_set_parameters(operand_1, (s32)parameters, 0, 0);
         } else if (opcode == EVENT_OPCODE_SWITCH_TRACK) {
             g_screen_sound_music_switch_request = operand_1;
@@ -790,27 +791,27 @@ restart_script:
                 }
                 /* Retail repeats the check made above. */
                 if (removed_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                    operand_1 = battle_unit_get_battle_id_by_runtime_id(removed_runtime_id);
-                    battle_unit_remove_by_runtime_id(removed_runtime_id);
+                    operand_1 = unit_get_battle_id_by_runtime_id(removed_runtime_id);
+                    unit_remove_by_runtime_id(removed_runtime_id);
                     if (operand_1 >= 0) {
-                        battle_unit_set_off_field(operand_1);
+                        unit_set_off_field(operand_1);
                     }
                 }
             }
         } else if (opcode == EVENT_OPCODE_DRAW) {
             draw_runtime_id = script_resolve_runtime_id(first_operand);
             if (draw_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_unit_draw_and_activate_by_runtime_id(draw_runtime_id);
+                unit_draw_and_activate_by_runtime_id(draw_runtime_id);
                 if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_LIMBERRY_CEMETERY_BATTLE) {
-                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(draw_runtime_id), 1);
-                    g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+                    status_queue_current_status_graphics(unit_get_battle_id_by_runtime_id(draw_runtime_id), 1);
+                    g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
                     thread_call_on_main_stack(draw_runtime_id);
                 }
             }
         } else if (opcode == EVENT_OPCODE_ERASE) {
             erased_runtime_id = script_resolve_runtime_id(first_operand);
             if (erased_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_gfx_hide_unit_by_runtime_id(erased_runtime_id);
+                unit_hide_by_runtime_id(erased_runtime_id);
             }
         } else if (opcode == EVENT_OPCODE_ADD_GHOST_UNIT) {
             ghost_parameters = (u8*)g_script_event_block + instruction_offset + 3;
@@ -821,14 +822,14 @@ restart_script:
             } while (ghost_runtime_id >= 0);
 
             /* Take the first free runtime slot; with none free, `continue` reruns this instruction unyielding. */
-            for (ghost_runtime_id = 0; ghost_runtime_id < BATTLE_UNIT_SLOT_COUNT; ghost_runtime_id++) {
-                if (battle_unit_has_runtime_id(ghost_runtime_id) == 0) {
+            for (ghost_runtime_id = 0; ghost_runtime_id < UNIT_SLOT_COUNT; ghost_runtime_id++) {
+                if (unit_has_runtime_id(ghost_runtime_id) == 0) {
                     g_script_unit_slots[ghost_parameters[0]] = ghost_runtime_id;
                     break;
                 }
             }
-            if (ghost_runtime_id != BATTLE_UNIT_SLOT_COUNT) {
-                battle_script_opcode_47_add_ghost_unit(ghost_parameters[1], ghost_parameters[2], ghost_parameters[3],
+            if (ghost_runtime_id != UNIT_SLOT_COUNT) {
+                script_opcode_47_add_ghost_unit(ghost_parameters[1], ghost_parameters[2], ghost_parameters[3],
                     ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]], ghost_parameters[5]);
                 g_unit_graphics_load_pending = 1U;
             } else {
@@ -838,27 +839,27 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
             script_opcode_45_add_unit();
             /* Only a present unit or one off the field is added; crystals, treasure and disabled units are not. */
-            appearance_unit = battle_unit_find_stats_by_entd_unit_id(first_operand, &added_unit_state);
+            appearance_unit = unit_entd_find_stats(first_operand, &added_unit_state);
             if ((added_unit_state == -2) || (added_unit_state >= 0)) {
-                for (added_battle_id = 0; added_battle_id < BATTLE_UNIT_SLOT_COUNT; added_battle_id++) {
-                    if (battle_unit_get_stats_from_battle_id(added_battle_id) == appearance_unit) {
+                for (added_battle_id = 0; added_battle_id < UNIT_SLOT_COUNT; added_battle_id++) {
+                    if (unit_get_stats(added_battle_id) == appearance_unit) {
                         break;
                     }
                 }
 
                 /* Not shown yet: load its graphics. Already shown: draw it unless operand 3 is set,
                  * and refresh its graphics when staging removed statuses. */
-                operand_1 = battle_unit_get_runtime_id_by_battle_id(added_battle_id);
+                operand_1 = unit_get_runtime_id_by_battle_id(added_battle_id);
                 if (operand_1 == -1) {
                     unit_save_staged_status_data(added_battle_id);
-                    battle_gfx_load_unit_graphics_by_battle_id(added_battle_id, operand_3);
+                    sprite_load_unit_graphics_by_battle_id(added_battle_id, operand_3);
                     g_unit_graphics_load_pending = 1U;
                 } else {
                     if (operand_3 == 0) {
-                        battle_unit_draw_and_activate_by_runtime_id(operand_1);
+                        unit_draw_and_activate_by_runtime_id(operand_1);
                     }
                     if (unit_save_staged_status_data(added_battle_id) != 0) {
-                        g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+                        g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
                         thread_call_on_main_stack(operand_1);
                     }
                 }
@@ -867,7 +868,7 @@ restart_script:
             script_warp_unit((const event_warp_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_UNKNOWN_61) {
         } else if (opcode == EVENT_OPCODE_SET_BATTLE_UNIT_POSITION) {
-            unit = battle_unit_get_stats_from_battle_id(operand_1);
+            unit = unit_get_stats(operand_1);
             position_instruction
                 = (event_set_battle_unit_position_instruction_t*)((u8*)g_script_event_block + instruction_offset);
             unit->x = position_instruction->placement.x;
@@ -911,8 +912,8 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_YIELD) {
             thread_yield();
         } else if (opcode == EVENT_OPCODE_WAIT) {
-            if (script_is_tutorial_event_slot() != 0 && first_operand >= 3) {
-                thread_wait_frames(first_operand / battle_state_get_vsync_interval());
+            if (tutorial_is_current_event() != 0 && first_operand >= 3) {
+                thread_wait_frames(first_operand / system_get_vsync_interval());
             } else {
                 thread_wait_frames(first_operand);
             }
@@ -928,9 +929,9 @@ restart_script:
             shadow_runtime_id = script_resolve_runtime_id(first_operand);
             if (shadow_runtime_id != EVENT_RUNTIME_ID_NONE) {
                 if (operand_3 != 0) {
-                    battle_gfx_hide_unit_shadow_by_runtime_id(shadow_runtime_id);
+                    sprite_shadow_hide_by_runtime_id(shadow_runtime_id);
                 } else {
-                    battle_gfx_show_unit_shadow_by_runtime_id(shadow_runtime_id);
+                    sprite_shadow_show_by_runtime_id(shadow_runtime_id);
                 }
             }
         } else if (opcode == EVENT_OPCODE_DEBUG_PAUSE) {
@@ -940,7 +941,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_EVTCHR_PALETTE) {
             runtime_id_for_7f = script_resolve_runtime_id(first_operand);
             if (runtime_id_for_7f != EVENT_RUNTIME_ID_NONE) {
-                battle_gfx_set_evtchr_palette_by_runtime_id(runtime_id_for_7f, operand_3, operand_4);
+                sprite_evtchr_set_palette_by_runtime_id(runtime_id_for_7f, operand_3, operand_4);
             }
         } else if (opcode == EVENT_OPCODE_LOAD_ATTACK_GRAPHICS) {
             script_opcode_82_load_attack_graphics();
@@ -957,17 +958,17 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_TEMP_WEAPON) {
             palette_runtime_id = script_resolve_runtime_id(first_operand);
             if (palette_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_gfx_set_thrown_item_palette_by_runtime_id(operand_3, palette_runtime_id);
+                sprite_palette_set_thrown_item_by_runtime_id(operand_3, palette_runtime_id);
             }
         } else if (opcode == EVENT_OPCODE_ARROW) {
             /* WORLD only resolves the two units; BATTLE sets an arrow trajectory between them. */
             first_runtime_id = script_resolve_runtime_id(first_operand);
             if (first_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_unit_get_battle_id_by_runtime_id(first_runtime_id);
+                unit_get_battle_id_by_runtime_id(first_runtime_id);
                 second_runtime_id
                     = script_resolve_runtime_id(script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3));
                 if (second_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                    battle_unit_get_battle_id_by_runtime_id(second_runtime_id);
+                    unit_get_battle_id_by_runtime_id(second_runtime_id);
                 }
             }
         } else if (opcode == EVENT_OPCODE_MAP_FREEZE) {
@@ -987,7 +988,7 @@ restart_script:
             g_menu_input_lock_mode = operand_1;
         } else if (opcode == EVENT_OPCODE_TUTORIAL_COORDINATE_CONFIRM) {
             /* Wait for Circle, without a d-pad direction, while the cursor is on the given tile. */
-            while (g_battle_cursor_x != operand_1 || g_battle_cursor_y != operand_2
+            while (g_cursor_x != operand_1 || g_cursor_y != operand_2
                 || ((initial_buttons = g_script_unfiltered_controller_input) & PSX_PAD_CIRCLE) == 0
                 || (initial_buttons & PSX_PAD_DPAD_MASK) != 0) {
                 thread_yield();
@@ -996,7 +997,7 @@ restart_script:
         /* ---- Map title, dates, teleports, and status ---- */
         else if (opcode == EVENT_OPCODE_SHOW_MAP_TITLE) {
             operand_4 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            menu_request_open_companion_executable(COMPANION_OVERLAY_ATTACK);
+            overlay_request_companion(COMPANION_OVERLAY_ATTACK);
             battle_map_title_load_graphic();
             thread_start(operand_4, battle_map_title_thread);
             thread_set_parameters(operand_4, (s8)operand_1, (s8)operand_2, (s8)operand_3);

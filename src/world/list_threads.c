@@ -25,7 +25,7 @@ static RECT g_formation_ability_panel_draw_area = { 247, 126, 133, 108 };
 
 /*
  * Equipment panel thread (task THREAD_TASK_STATUS_PANEL), the equipment twin
- * of menu_run_ability_list_thread (same 0x3d8-byte frame pair, thread record
+ * of unit_panel_ability_thread (same 0x3d8-byte frame pair, thread record
  * and callee sequence). It lists the five equipment names of an item
  * stat-detail record and draws their item icons: in the equip/ability panel
  * slot g_formation_selected_unit_stat_detail, in any other slot (the stat preview)
@@ -38,14 +38,14 @@ static RECT g_formation_ability_panel_draw_area = { 247, 126, 133, 108 };
  * through a signed temporary because the target shifts it with sra. The empty
  * icon store's odd indexing also matches the target's address arithmetic.
  */
-void menu_run_equipment_list_thread(void) {
+void unit_panel_equipment_thread(void) {
     u8* text;
     s32 u;
-    menu_status_panel_buffer_t* base;
+    unit_panel_buffer_t* base;
     menu_status_panel_slot_state_t* state;
     RECT* upload;
-    menu_status_thread_t* thread;
-    menu_status_panel_buffer_t* screen;
+    unit_panel_thread_t* thread;
+    unit_panel_buffer_t* screen;
     s32 frame;
     s32 mode;
     s32 color_bits;
@@ -53,41 +53,41 @@ void menu_run_equipment_list_thread(void) {
     s32 i;
 
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
-    thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
+    thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
-        text = g_menu_equipment_panel_item_text_image;
-        screen = g_menu_equipment_panel_frames;
+        text = g_unit_panel_equipment_item_text_image;
+        screen = g_unit_panel_equipment_frames;
         state = &g_formation_selected_unit_stat_detail.state;
-        base = g_menu_equipment_panel_frames;
-        upload = &g_menu_equipment_panel_item_text_rect;
+        base = g_unit_panel_equipment_frames;
+        upload = &g_unit_panel_equipment_item_text_rect;
         u = 0;
     } else {
-        text = g_menu_equipment_panel_ability_text_image;
+        text = g_unit_panel_equipment_ability_text_image;
         screen = g_formation_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
-        upload = &g_menu_equipment_panel_ability_text_rect;
+        upload = &g_unit_panel_equipment_ability_text_rect;
         base = g_formation_stat_preview_panel_frames;
         u = 0x50;
     }
 
-    menu_init_numeric_display_frame_primitives(&g_menu_equipment_panel_origin, &screen->numeric_frame);
-    menu_init_status_panel_primitives(screen);
+    status_screen_init_numbers_frame(&g_unit_panel_equipment_origin, &screen->numeric_frame);
+    unit_panel_init_primitives(screen);
     screen_panel_init_scaled_draw_area_packets(&screen->portrait);
-    screen->tiles[0].x0 += g_menu_equipment_panel_origin.x;
-    screen->tiles[0].y0 += g_menu_equipment_panel_origin.y;
+    screen->tiles[0].x0 += g_unit_panel_equipment_origin.x;
+    screen->tiles[0].y0 += g_unit_panel_equipment_origin.y;
     for (i = 0; i < 4; i++) {
-        screen->lines[i].x0 += g_menu_equipment_panel_origin.x;
-        screen->lines[i].y0 += g_menu_equipment_panel_origin.y;
-        screen->lines[i].x1 += g_menu_equipment_panel_origin.x;
-        screen->lines[i].y1 += g_menu_equipment_panel_origin.y;
+        screen->lines[i].x0 += g_unit_panel_equipment_origin.x;
+        screen->lines[i].y0 += g_unit_panel_equipment_origin.y;
+        screen->lines[i].x1 += g_unit_panel_equipment_origin.x;
+        screen->lines[i].y1 += g_unit_panel_equipment_origin.y;
     }
 
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
     menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
     screen->sprites[0].clut = 0x7cbc;
     screen->sprites[1].clut = 0x7cbc;
-    mem_copy_bytes_nonempty(&screen[1], screen, sizeof(menu_status_panel_buffer_t));
+    mem_copy_bytes_nonempty(&screen[1], screen, sizeof(unit_panel_buffer_t));
 
     frame = 0;
     for (;;) {
@@ -99,20 +99,20 @@ void menu_run_equipment_list_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
-                    &g_menu_equipment_panel_sprite_params_0[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                    &g_unit_panel_equipment_origin, &g_unit_panel_equipment_sprite_params_0[i]);
             }
             if (mode == 1) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
-                    &g_menu_equipment_panel_sprite_params_1[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                    &g_unit_panel_equipment_origin, &g_unit_panel_equipment_sprite_params_1[i]);
             }
             if (mode == 2) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
-                    &g_menu_equipment_panel_sprite_params_2[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                    &g_unit_panel_equipment_origin, &g_unit_panel_equipment_sprite_params_2[i]);
             }
             if (mode == 3) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
-                    &g_menu_equipment_panel_sprite_params_3[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                    &g_unit_panel_equipment_origin, &g_unit_panel_equipment_sprite_params_3[i]);
             }
         }
 
@@ -137,8 +137,8 @@ void menu_run_equipment_list_thread(void) {
         screen->sprites[13].u0 = u;
         menu_init_sprite_array(&screen->sprites[19], MENU_EQUIPMENT_SLOT_COUNT, 0x7cfc);
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture, &g_menu_equipment_panel_origin,
-                &g_menu_equipment_panel_icon_params[i]);
+            gfx_init_image_loading(&screen->sprites[19 + i], g_unit_panel_item_icon_texture,
+                &g_unit_panel_equipment_origin, &g_unit_panel_equipment_icon_params[i]);
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
@@ -160,8 +160,8 @@ void menu_run_equipment_list_thread(void) {
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_frame_arg, thread);
-        menu_set_status_panel_primitive_colors(screen, thread);
-        menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
+        unit_panel_set_colors(screen, thread);
+        unit_panel_select_palette(&screen->numeric_frame, thread);
 
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
@@ -183,7 +183,7 @@ void menu_run_equipment_list_thread(void) {
         for (i = 0; i < 4; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->lines[i]);
         }
-        menu_submit_numeric_display_frame_primitives(&screen->numeric_frame);
+        status_screen_submit_numbers_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
@@ -203,61 +203,61 @@ void menu_run_equipment_list_thread(void) {
  * panel that lists five ability labels of an item stat-detail record. The
  * equip/ability panel slot draws g_formation_selected_unit_stat_detail into the
  * first frame pair, other slots draw g_item_preview_stat_detail into the
- * second. A trimmed relative of menu_run_status_panel_thread (same 0x3d8-byte
+ * second. A trimmed relative of unit_panel_equipment_ability_thread (same 0x3d8-byte
  * frame layout and callee sequence). Runs until parameter 3 is set.
  */
-void menu_run_ability_list_thread(void) {
+void unit_panel_ability_thread(void) {
     s32 offset[2];
     /* Never referenced: the target frame has these 16 bytes between the
      * offset pair and the spill slots of u/base/upload. */
     s32 unused[4];
     s32 u;
-    menu_status_panel_buffer_t* base;
+    unit_panel_buffer_t* base;
     RECT* upload;
-    menu_status_thread_t* thread;
+    unit_panel_thread_t* thread;
     u8* text;
-    menu_status_panel_buffer_t* screen;
+    unit_panel_buffer_t* screen;
     menu_status_panel_slot_state_t* state;
     s32 frame;
     s32 i;
     s32 id;
 
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
-    thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
+    thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
-        text = g_menu_equipment_panel_item_text_image;
-        screen = g_menu_equipment_panel_frames;
+        text = g_unit_panel_equipment_item_text_image;
+        screen = g_unit_panel_equipment_frames;
         state = &g_formation_selected_unit_stat_detail.state;
-        base = g_menu_equipment_panel_frames;
-        upload = &g_menu_equipment_panel_item_text_rect;
+        base = g_unit_panel_equipment_frames;
+        upload = &g_unit_panel_equipment_item_text_rect;
         u = 0;
     } else {
-        text = g_menu_equipment_panel_ability_text_image;
+        text = g_unit_panel_equipment_ability_text_image;
         screen = g_formation_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
-        upload = &g_menu_equipment_panel_ability_text_rect;
+        upload = &g_unit_panel_equipment_ability_text_rect;
         base = g_formation_stat_preview_panel_frames;
         u = 0x50;
     }
 
-    menu_init_numeric_display_frame_primitives(&g_formation_ability_panel_origin, &screen->numeric_frame);
-    menu_init_status_panel_primitives(screen);
+    status_screen_init_numbers_frame(&g_formation_ability_panel_origin, &screen->numeric_frame);
+    unit_panel_init_primitives(screen);
     screen_panel_init_scaled_draw_area_packets(&screen->portrait);
-    screen->tiles[1].x0 += g_menu_equipment_panel_origin.x;
-    screen->tiles[1].y0 += g_menu_equipment_panel_origin.y;
+    screen->tiles[1].x0 += g_unit_panel_equipment_origin.x;
+    screen->tiles[1].y0 += g_unit_panel_equipment_origin.y;
     for (i = 4; i < 8; i++) {
-        screen->lines[i].x0 += g_menu_equipment_panel_origin.x;
-        screen->lines[i].y0 += g_menu_equipment_panel_origin.y;
-        screen->lines[i].x1 += g_menu_equipment_panel_origin.x;
-        screen->lines[i].y1 += g_menu_equipment_panel_origin.y;
+        screen->lines[i].x0 += g_unit_panel_equipment_origin.x;
+        screen->lines[i].y0 += g_unit_panel_equipment_origin.y;
+        screen->lines[i].x1 += g_unit_panel_equipment_origin.x;
+        screen->lines[i].y1 += g_unit_panel_equipment_origin.y;
     }
 
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
     menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
     screen->sprites[0].clut = 0x7cbc;
     screen->sprites[1].clut = 0x7cbc;
-    mem_copy_bytes_nonempty(&screen[1], screen, sizeof(menu_status_panel_buffer_t));
+    mem_copy_bytes_nonempty(&screen[1], screen, sizeof(unit_panel_buffer_t));
 
     frame = 0;
     for (;;) {
@@ -265,13 +265,13 @@ void menu_run_ability_list_thread(void) {
 
         if (state->generic_monster == 0) {
             for (i = 0; i < 19; i++) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
-                    &g_menu_equipment_panel_sprite_params_0[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                    &g_unit_panel_equipment_origin, &g_unit_panel_equipment_sprite_params_0[i]);
             }
         } else {
             for (i = 0; i < 19; i++) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
-                    &g_menu_equipment_panel_sprite_params_1[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                    &g_unit_panel_equipment_origin, &g_unit_panel_equipment_sprite_params_1[i]);
             }
         }
 
@@ -330,8 +330,8 @@ void menu_run_ability_list_thread(void) {
         offset[1] = thread->y;
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_frame_arg, offset);
-        menu_set_status_panel_primitive_colors(screen, thread);
-        menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
+        unit_panel_set_colors(screen, thread);
+        unit_panel_select_palette(&screen->numeric_frame, thread);
 
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
@@ -346,7 +346,7 @@ void menu_run_ability_list_thread(void) {
         for (i = 4; i < 8; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->lines[i]);
         }
-        menu_submit_numeric_display_frame_primitives(&screen->numeric_frame);
+        status_screen_submit_numbers_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 

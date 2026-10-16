@@ -431,7 +431,7 @@ void sound_novel_opcode_03_start_text_thread_and_push_history(void) {
     u16 flags;
     s32 operand = (u8)(g_sound_novel_reading.instruction >> 8);
 
-    thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
+    thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_dialog_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     history_1 = g_sound_novel_reading.text_history_1;
     history_2 = g_sound_novel_reading.text_history_2;
@@ -595,7 +595,7 @@ void sound_novel_opcode_0c_set_parent_windows_visible(void) {
 void sound_novel_opcode_0d_start_text_thread(void) {
     s32 operand = (u8)(g_sound_novel_reading.instruction >> 8);
 
-    thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
+    thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_dialog_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     g_sound_novel_reading.text_id = operand;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;

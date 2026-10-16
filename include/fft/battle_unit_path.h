@@ -6,16 +6,16 @@
 #include "psx/types.h"
 
 /* destination */
-/* Masks of the motion flags in the 32-bit view of battle_unit_t.movement (move_destination_t),
+/* Masks of the motion flags in the 32-bit view of unit_t.movement (move_destination_t),
  * whose high byte is runtime-unit +0x83. */
-typedef enum battle_motion_flags {
-    BATTLE_MOTION_FLAG_SUPPRESS_FACING_UPDATE = 0x01000000,
-    BATTLE_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS = 0x02000000,
-    BATTLE_MOTION_FLAG_SUPPRESS_PALETTE_UPDATE = 0x04000000,
-    BATTLE_MOTION_FLAG_ALTERNATE_SHORT_HOP = 0x08000000,
-    BATTLE_MOTION_FLAG_FLOAT = 0x10000000,
-    BATTLE_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000, /* set with each stored animation request */
-} battle_motion_flags_e;
+typedef enum unit_motion_flags {
+    UNIT_MOTION_FLAG_SUPPRESS_FACING_UPDATE = 0x01000000,
+    UNIT_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS = 0x02000000,
+    UNIT_MOTION_FLAG_SUPPRESS_PALETTE_UPDATE = 0x04000000,
+    UNIT_MOTION_FLAG_ALTERNATE_SHORT_HOP = 0x08000000,
+    UNIT_MOTION_FLAG_FLOAT = 0x10000000,
+    UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000, /* set with each stored animation request */
+} unit_motion_flags_e;
 
 /* Destination bytes and motion flags share one 32-bit movement record. */
 typedef struct move_destination {
@@ -45,7 +45,7 @@ typedef enum move_step_direction {
  * the movement code is working on. */
 typedef struct move_step {
     u8 length : 2;    /* extra tiles covered: the jump length */
-    u8 slow : 1;      /* start the step at climb speed (battle_move_update_path_step) */
+    u8 slow : 1;      /* start the step at climb speed (move_step_update) */
     u8 climb : 1;     /* continue with a climb-speed step */
     u8 mount : 1;     /* the step ends on another unit */
     u8 higher : 1;    /* destination on the higher elevation */
@@ -53,8 +53,8 @@ typedef struct move_step {
 } move_step_t;
 typedef char move_step_size_must_be_1[sizeof(move_step_t) == 1 ? 1 : -1];
 
-/* Packed half-height offsets (g_battle_move_path_height_offsets). A missing presence flag keeps
- * that side's previous value when battle_move_apply_selected_candidate applies a saved candidate. */
+/* Packed half-height offsets (g_move_path_height_offsets). A missing presence flag keeps
+ * that side's previous value when move_path_apply_selected_candidate applies a saved candidate. */
 typedef struct move_height_offsets {
     u8 destination_present : 1;
     u8 destination_height_offset : 3;
@@ -64,44 +64,44 @@ typedef struct move_height_offsets {
 typedef char move_height_offsets_size_must_be_1[(sizeof(move_height_offsets_t) == 1) ? 1 : -1];
 
 /* Tile coordinates stored in teleport paths and relocation reservations. */
-typedef struct battle_tile_coordinates {
+typedef struct move_tile_coordinates {
     u8 x;
     u8 y;
     u8 elevation;
-} battle_tile_coordinates_t;
-typedef char battle_tile_coordinates_size_must_be_3[(sizeof(battle_tile_coordinates_t) == 3) ? 1 : -1];
+} move_tile_coordinates_t;
+typedef char battle_tile_coordinates_size_must_be_3[(sizeof(move_tile_coordinates_t) == 3) ? 1 : -1];
 
-/* The complete movement record, copied from g_battle_move_path into battle_unit_t.path.
+/* The complete movement record, copied from g_move_path into unit_t.path.
  * Count 0xfe selects the explicit teleport destination; 0xff is a failed
  * teleport. Ordinary counts select packed steps, each spanning one or more
  * tiles. Byte alignment preserves the original whole-record copies. */
-typedef struct battle_walk_path {
+typedef struct move_path {
     u8 count; /* 0x00; step count or MOVE_PATH_TELEPORT/TELEPORT_FAILED */
     union {
         move_step_t steps[0x7c]; /* 0x01; packed direction, elevation and length */
-        battle_tile_coordinates_t teleport;
+        move_tile_coordinates_t teleport;
     } data;
     u8 flags;                             /* 0x7d; move_effective_flags_e */
     move_height_offsets_t height_offsets; /* 0x7e; source/destination offsets */
-    u8 pending_mount;                     /* 0x7f; BATTLE_PENDING_MOUNT_SET | battle id */
-} battle_walk_path_t;
-typedef char battle_walk_path_size_must_be_128[sizeof(battle_walk_path_t) == 128 ? 1 : -1];
+    u8 pending_mount;                     /* 0x7f; MOVE_PENDING_MOUNT_SET | battle id */
+} move_path_t;
+typedef char battle_walk_path_size_must_be_128[sizeof(move_path_t) == 128 ? 1 : -1];
 
-/* battle_walk_path_t.count values that are not a step count
- * (battle_move_build_path_to_tile). */
+/* move_path_t.count values that are not a step count
+ * (move_path_build_to_tile). */
 enum {
     MOVE_PATH_TELEPORT = 0xfe, /* the path bytes hold the destination x, y and level */
     MOVE_PATH_TELEPORT_FAILED = 0xff,
 };
 
-/* battle_walk_path_t.pending_mount: the mount standing on the path's destination tile. */
+/* move_path_t.pending_mount: the mount standing on the path's destination tile. */
 enum {
-    BATTLE_PENDING_MOUNT_ID_MASK = 0x7f,
-    BATTLE_PENDING_MOUNT_SET = 0x80,
+    MOVE_PENDING_MOUNT_ID_MASK = 0x7f,
+    MOVE_PENDING_MOUNT_SET = 0x80,
 };
 
 /* steps */
-/* Travel direction of the step in progress, as battle_move_get_direction derives it from the
+/* Travel direction of the step in progress, as move_step_get_direction derives it from the
  * unit's tile and its destination tile. */
 typedef enum move_direction {
     MOVE_DIRECTION_SOUTH = 0, /* -y */
@@ -110,7 +110,7 @@ typedef enum move_direction {
     MOVE_DIRECTION_WEST = 3,  /* -x */
 } move_direction_e;
 
-/* battle_unit_t.step_phase: the stage of the movement step in progress. Every stage has one
+/* unit_t.step_phase: the stage of the movement step in progress. Every stage has one
  * value per move_direction_e direction, in that order. The handlers dispatch on the stage and
  * take the direction from the unit's coordinates, and the stores that change stage in the middle of
  * a step write the NORTH value whatever the direction. */

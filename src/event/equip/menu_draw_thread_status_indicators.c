@@ -21,8 +21,8 @@
  */
 void menu_draw_thread_status_indicators(void) {
     menu_gradient_panel_prims_t* prims;
-    menu_status_thread_t* display;
-    menu_status_thread_t* descriptor;
+    unit_panel_thread_t* display;
+    unit_panel_thread_t* descriptor;
     s32 active = 0;
     s32 i;
     s32 j;
@@ -32,13 +32,13 @@ void menu_draw_thread_status_indicators(void) {
 
     if (menu_thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) != 0) {
         if (g_threads[EQUIPMENT_THREAD_SLOT_UNIT_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
-            display = (menu_status_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_UNIT_STATUS].function_parameter_1;
+            display = (unit_panel_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_UNIT_STATUS].function_parameter_1;
             active = (-(display->x == 0)) & 13;
         }
     }
     if (menu_thread_is_running(EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS) != 0) {
         if (g_threads[EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
-            descriptor = (menu_status_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS].function_parameter_1;
+            descriptor = (unit_panel_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS].function_parameter_1;
             if (descriptor->x == 0) {
                 active = 14;
                 display = descriptor;

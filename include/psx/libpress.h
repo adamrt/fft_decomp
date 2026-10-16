@@ -80,7 +80,7 @@ typedef struct {
 } psyq_press_ac_entry_t;
 
 extern u32 g_psyq_press_vlc_limit_halfwords;
-/* The last 32-bit value aliases g_unit_birthday_month_lengths[0..3] in retail. */
+/* The last 32-bit value aliases g_calendar_month_lengths[0..3] in retail. */
 extern psyq_press_vlc_state_t g_psyq_press_vlc_state;
 extern const psyq_press_dc_entry_t g_psyq_press_dc_luma_table[];
 extern const psyq_press_dc_entry_t g_psyq_press_dc_chroma_table[];

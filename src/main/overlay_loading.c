@@ -15,10 +15,10 @@ static RECT g_gfx_frame_palette_tail_rect = { 976, 506, 16, 6 };
 
 static void file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
 
-/* Call MAIN's own menu_build_zodiac_primitives; ATTACK.OUT's deployment screen draws its
+/* Call MAIN's own zodiac_build_primitives; ATTACK.OUT's deployment screen draws its
  * zodiac sprites through this wrapper rather than its own copy. */
 void zodiac_call_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
-    menu_build_zodiac_primitives(context, poly);
+    zodiac_build_primitives(context, poly);
 }
 
 /* Load EVENT/FRAME.BIN and upload its pixels and its two palette blocks. */

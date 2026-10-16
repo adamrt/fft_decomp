@@ -214,7 +214,7 @@ static s32 formation_ability_remove_menu(void) {
         lock_state = 0;
     }
     if (lock_state != 0) {
-        g_menu_help_message_text_id = 0;
+        g_help_message_text_id = 0;
         formation_toggle_preview_stats_window(0);
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
@@ -235,7 +235,7 @@ static s32 formation_ability_remove_menu(void) {
         formation_ability_diff_movement_stats(&g_item_preview_stat_detail, g_formation_ability_remove_slots[4], 0);
         formation_toggle_preview_stats_window(1);
         g_formation_ability_remove_all_prompt_active = 1;
-        g_menu_preview_stats_thread_params.redraw_request = 1;
+        g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
     slot = menu_update_vertical_selection_and_mark_change(
@@ -249,13 +249,13 @@ static s32 formation_ability_remove_menu(void) {
         &g_formation_ability_remove_cursor_point, &g_formation_ability_remove_cursor_anim, g_menu_input_lock_mode);
     /* Slot 1 holds a skillset id, the others ability ids; each kind has its own help text block. */
     ability = g_formation_unit_pointers[g_unit_selected_index]->abilities.slots[slot_index];
-    g_menu_help_message_text_id = ability;
+    g_help_message_text_id = ability;
     if (ability == 0) {
-        g_menu_help_message_text_id = -1;
+        g_help_message_text_id = -1;
     } else if (slot_index >= 2) {
-        g_menu_help_message_text_id = ability + HELP_TEXT_ID_ABILITY_BASE;
+        g_help_message_text_id = ability + HELP_TEXT_ID_ABILITY_BASE;
     } else {
-        g_menu_help_message_text_id = ability + HELP_TEXT_ID_SKILLSET_BASE;
+        g_help_message_text_id = ability + HELP_TEXT_ID_SKILLSET_BASE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         saved_slots = g_formation_ability_remove_slots;
@@ -283,7 +283,7 @@ static s32 formation_ability_remove_menu(void) {
             if (movement_ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                 && movement_ability <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3) {
                 formation_ability_diff_movement_stats(&g_item_preview_stat_detail, movement_ability, 0);
-                g_menu_preview_stats_thread_params.redraw_request = 1;
+                g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 preview = 1;
             }
         }
@@ -301,7 +301,7 @@ static s32 formation_ability_remove_all_prompt(void) {
     s32 i;
     s32 changed;
 
-    g_menu_help_message_text_id = -1;
+    g_help_message_text_id = -1;
     gfx_set_otag_index(0x28);
     g_formation_ability_remove_all_blink_counter = g_formation_ability_remove_all_blink_counter + 1;
     if (g_formation_ability_remove_all_blink_counter & 1) {
@@ -340,7 +340,7 @@ static s32 formation_ability_remove_all_prompt(void) {
  * Run the formation Set Ability menu for the selected unit.
  *
  * Return 0 when canceled and 1 while active. With the list closed the cursor
- * picks an ability slot and opens its candidate list (ability_build_list for the
+ * picks an ability slot and opens its candidate list (ability_list_build for the
  * secondary skillset, formation_ability_build_rsm_list otherwise);
  * with it open, the chosen ability is written to the slot and the Move+N
  * stat preview is refreshed.
@@ -397,7 +397,7 @@ static s32 formation_ability_set_menu(void) {
     }
     if (lock_state != 0) {
         formation_toggle_preview_stats_window(0);
-        g_menu_help_message_text_id = 0;
+        g_help_message_text_id = 0;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
             return 1;
@@ -410,13 +410,13 @@ static s32 formation_ability_set_menu(void) {
         current = g_formation_unit_pointers[g_unit_selected_index]->abilities.slots[slot];
         g_formation_unit_cycle_mode = 2;
         /* Slot 1 holds a skillset id, the others ability ids; each kind has its own help text block. */
-        g_menu_help_message_text_id = current;
+        g_help_message_text_id = current;
         if (current == 0) {
-            g_menu_help_message_text_id = -1;
+            g_help_message_text_id = -1;
         } else if (slot >= 2) {
-            g_menu_help_message_text_id = current + HELP_TEXT_ID_ABILITY_BASE;
+            g_help_message_text_id = current + HELP_TEXT_ID_ABILITY_BASE;
         } else {
-            g_menu_help_message_text_id = current + HELP_TEXT_ID_SKILLSET_BASE;
+            g_help_message_text_id = current + HELP_TEXT_ID_SKILLSET_BASE;
         }
 
         slot = menu_update_vertical_selection_and_mark_change(
@@ -426,7 +426,7 @@ static s32 formation_ability_set_menu(void) {
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             if (slot == 1) {
-                g_formation_ability_set_entry_count = ability_build_list(g_unit_selected_index,
+                g_formation_ability_set_entry_count = ability_list_build(g_unit_selected_index,
                     g_formation_unit_pointers[g_unit_selected_index]->identity.job_id, MENU_ABILITY_CATEGORY_ACTION,
                     g_item_list_entries, slot);
             } else {
@@ -454,7 +454,7 @@ static s32 formation_ability_set_menu(void) {
             if (g_formation_ability_set_slot == 1) {
                 value = HELP_TEXT_ID_SKILLSET_BASE;
             }
-            g_menu_help_message_text_id = value + (g_item_list_entries[cursor] & ABILITY_LIST_ENTRY_ID_MASK);
+            g_help_message_text_id = value + (g_item_list_entries[cursor] & ABILITY_LIST_ENTRY_ID_MASK);
             if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
                 selected = g_item_list_entries[cursor];
                 if (selected & ABILITY_LIST_ENTRY_DISABLED) {
@@ -473,7 +473,7 @@ static s32 formation_ability_set_menu(void) {
                 }
             }
         } else {
-            g_menu_help_message_text_id = -1;
+            g_help_message_text_id = -1;
             if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
                 if (g_formation_ability_set_slot != 1) {
                     message_box_show_with_sound(0xC006, SOUND_SFX_ERROR_MESSAGE);
@@ -494,7 +494,7 @@ static s32 formation_ability_set_menu(void) {
                 formation_ability_diff_movement_stats(&g_item_preview_stat_detail,
                     g_formation_unit_pointers[g_unit_selected_index]->abilities.slots[g_formation_ability_set_slot],
                     g_item_list_entries[g_menu_list_selected_index]);
-                g_menu_preview_stats_thread_params.redraw_request = 1;
+                g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 g_formation_ability_set_show_stat_preview = 1;
             } else {
                 g_formation_ability_set_show_stat_preview = 0;
@@ -511,7 +511,7 @@ static s32 formation_ability_set_menu(void) {
         g_formation_unit_cycle_mode = 2;
         menu_set_vsync_mode_and_event_speed(0);
         g_formation_ability_set_show_stat_preview = 0;
-        g_menu_status_display_thread_params.redraw_request = 1;
+        g_unit_panel_status_display_thread_params.redraw_request = 1;
         menu_set_selection_record(g_formation_ability_set_slot + 4, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_item_list_entries);
         thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
@@ -586,20 +586,20 @@ s32 screen_thread_is_task_active(s32 unused_0) {
 /* Job level of the selected unit in the Learn Abilities menu's `index`th
  * unlocked job; levels are packed two per byte (odd jobs in the low nibble). */
 s32 job_list_calculate_level(s32 index) {
-    s32 job_index = job_get_generic_index(g_menu_job_ids[index]);
+    s32 job_index = job_get_generic_index(g_job_list_job_ids[index]);
 
-    g_menu_job_current_level = g_formation_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
+    g_job_list_job_current_level = g_formation_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
     if (job_index & 1) {
-        g_menu_job_current_level = g_menu_job_current_level & 0xF;
+        g_job_list_job_current_level = g_job_list_job_current_level & 0xF;
     } else {
-        g_menu_job_current_level = g_menu_job_current_level >> 4;
+        g_job_list_job_current_level = g_job_list_job_current_level >> 4;
     }
-    return g_menu_job_current_level;
+    return g_job_list_job_current_level;
 }
 
 /* JP the selected unit has in the Learn Abilities menu's `index`th unlocked job. */
 s32 formation_ability_learn_job_jp(s32 index) {
-    s32 job_index = job_get_generic_index(g_menu_job_ids[index]);
+    s32 job_index = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_formation_unit_pointers[g_unit_selected_index]->job_points.current.values[job_index];
 }
@@ -608,7 +608,7 @@ s32 formation_ability_learn_job_jp(s32 index) {
  * menu's `index`th unlocked job; the job list's menu script reads it as a
  * number callback. */
 s32 job_list_calculate_total_jp(s32 index) {
-    s32 generic_job = job_get_generic_index(g_menu_job_ids[index]);
+    s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_formation_ability_learn_job_total_jp
         = g_formation_unit_pointers[g_unit_selected_index]->job_points.total.values[generic_job];

@@ -12,7 +12,7 @@
  * every handler adds half the map geometry width and depth there. */
 typedef enum effect_emitter_origin {
     EFFECT_EMITTER_ORIGIN_WORLD = 0x000,
-    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* center of g_battle_effect_target_tile */
+    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* center of g_effect_target_tile */
     EFFECT_EMITTER_ORIGIN_CASTER = 0x400,
     EFFECT_EMITTER_ORIGIN_TARGET = 0x600,
     EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE = 0x800, /* position of the spawning work record */
@@ -61,7 +61,7 @@ typedef enum effect_work_kind {
  * 0x10) and align_to_unit_facing bit (byte 0x07 mask 0x04) of the emitter's
  * 16-bit child/velocity flags. OUTWARD scatters around the base angles, INWARD aims at
  * the spawn point, CASTER_FACING rotates OUTWARD by the caster's facing, and
- * TOWARD_TARGET (battle_effect_spawn_particle_motion) rotates it along the
+ * TOWARD_TARGET (effect_slot_spawn_motion) rotates it along the
  * caster-to-target direction. */
 typedef enum effect_emitter_velocity {
     EFFECT_EMITTER_VELOCITY_OUTWARD = 0x000,
@@ -386,7 +386,7 @@ typedef struct effect_polar_mesh_geometry_view {
     u16 flags;                                    /* 0x06: bit 6 = per-channel color curves */
     effect_polar_curve_bindings_t curve_bindings; /* 0x08 */
     u32 color_curves;                             /* 0x10: nibbles 0-2 = r/g/b */
-    vec3s16_t center_start; /* 0x14: spawn position, read by battle_effect_interpolate_emitter_spawn_position */
+    vec3s16_t center_start; /* 0x14: spawn position, read by effect_interpolate_emitter_spawn_position */
     vec3s16_t center_end;   /* 0x1a */
     s16 radius_start;       /* 0x20: spawn spread x */
     u8 _unused_22[0x04];
@@ -624,8 +624,8 @@ typedef char assert_effect_geometry_record_size[sizeof(effect_geometry_record_t)
 typedef struct effect_geometry_table {
     u16 _unused_00;        /* 2, or 1 in seven shipped files */
     u16 entry_count;       /* 0x02 */
-    vec3s32_t gravity;     /* 0x04: copied to g_battle_effect_gravity by effect script opcode 0x27 */
-    s32 inertia_threshold; /* 0x10: passed to battle_effect_set_inertia_threshold by opcode 0x27 */
+    vec3s32_t gravity;     /* 0x04: copied to g_effect_gravity by effect script opcode 0x27 */
+    s32 inertia_threshold; /* 0x10: passed to effect_set_inertia_threshold by opcode 0x27 */
     /* One 0xc4-byte record per emitter or mesh. The slots keep their curve
      * bindings, but each native EFFECT renderer gives them its own meanings,
      * so a record is read through the member of the renderer that owns it. */
@@ -633,6 +633,6 @@ typedef struct effect_geometry_table {
 } effect_geometry_table_t;
 typedef char assert_effect_geometry_table_prefix_size[sizeof(effect_geometry_table_t) == 20 ? 1 : -1];
 
-extern const effect_geometry_table_t* g_battle_effect_geometry_table;
+extern const effect_geometry_table_t* g_effect_geometry_table;
 
 #endif

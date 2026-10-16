@@ -91,7 +91,7 @@ extern s32 g_war_trophy_entry_count;
 extern s32 g_war_trophy_entry_types[];
 extern s32 g_war_trophy_entry_values[];
 extern u8 g_war_trophy_item_count;
-extern battle_war_result_t g_war_trophy_search_result;
+extern reward_war_result_t g_war_trophy_search_result;
 extern war_trophy_primitives_t g_war_trophy_primitives[2];
 /* Upload rectangle for the current entry's text image. */
 extern RECT g_war_trophy_image_rect;
@@ -166,9 +166,9 @@ extern palette_t g_unit_panel_comparison_portrait_palettes[2];
 extern s32 g_unit_panel_dim_a;
 extern s32 g_unit_panel_dim_b;
 extern s32 g_unit_panel_dim_c;
-extern menu_status_thread_t g_unit_panel_status_display_thread_params;
-extern menu_status_thread_t g_unit_panel_character_status_frame_config;
-extern menu_status_thread_t g_unit_panel_numbers_thread_params;
+extern unit_panel_thread_t g_unit_panel_status_display_thread_params;
+extern unit_panel_thread_t g_unit_panel_character_status_frame_config;
+extern unit_panel_thread_t g_unit_panel_numbers_thread_params;
 /* Scalar x aliases of the three panels' origins; they preserve the retail
  * transition-store scheduling. */
 extern s32 g_unit_panel_status_display_origin_x;
@@ -195,7 +195,7 @@ extern u8 g_after_battle_gfx_fade_rgb[3];
 extern u8 g_after_battle_gfx_formation_sprite_groups[][3];
 
 void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
-    s32 lower_half, const menu_status_thread_t* thread);
+    s32 lower_half, const unit_panel_thread_t* thread);
 void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
 
 /* text */

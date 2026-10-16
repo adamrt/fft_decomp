@@ -55,7 +55,7 @@ static RECT g_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
  *  - runs the slide-down or slide-up table once when the display flags ask
  *    for it, leaving only MENU_STATUS_PANEL_HIDDEN set at the end;
  *  - cross-fades the portrait when the shown unit changes
- *    (gfx_build_portrait_transition_primitives);
+ *    (portrait_build_transition);
  *  - redraws the number and name images on the first frame and whenever
  *    display->work is set. While the preview-stats window is open the first
  *    number block is drawn by five separate calls.
@@ -63,7 +63,7 @@ static RECT g_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
  * row is always row 0 and the roster number is left blank. The thread runs
  * until its third parameter is set, then frees its six text images.
  */
-void menu_run_unit_status_thread(void) {
+void unit_panel_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
     s32 cur_unit;
@@ -72,7 +72,7 @@ void menu_run_unit_status_thread(void) {
     u8* number_pixels;                              /* sp60 */
     menu_status_panel_editor_packet_t* editor_base; /* sp68 */
     menu_number_entry_t* number_entries;            /* sp70 */
-    menu_unit_status_record_t* state;               /* sp78 */
+    unit_panel_summary_t* state;                    /* sp78 */
     s32 portrait_arg;                               /* sp80 */
     const RECT* transition;                         /* sp88 */
     palette_t* portrait_palettes;                   /* sp90 */
@@ -111,7 +111,7 @@ void menu_run_unit_status_thread(void) {
         number_images = &g_formation_selected_unit_number_text_images;
         name_image = g_formation_selected_unit_name_text_image;
         number_entries = g_formation_selected_unit_number_entries;
-        state = &g_menu_selected_unit_stat_summary;
+        state = &g_unit_panel_selected_unit_stat_summary;
         identity = &g_formation_selected_unit_identity;
         transition = &g_formation_selected_unit_portrait_rect;
         panel_base = panel;
@@ -134,7 +134,7 @@ void menu_run_unit_status_thread(void) {
     shake = 0;
 
     /* Build the summary packets once, then copy them for the second frame buffer. */
-    menu_init_numeric_display_frame_primitives(&g_menu_portrait_origin, &editor->numeric_frame);
+    status_screen_init_numbers_frame(&g_menu_portrait_origin, &editor->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -145,8 +145,8 @@ void menu_run_unit_status_thread(void) {
     text_configure_sprite_vram(&rects[0], 0x38, 0x28, &editor->value_sprites[0], 2);
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
-        gfx_init_image_loading(&editor->value_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
-            &g_formation_summary_value_sprite_params[frame]);
+        gfx_init_image_loading(&editor->value_sprites[frame], g_unit_panel_editor_numeric_geometry,
+            &g_menu_portrait_origin, &g_formation_summary_value_sprite_params[frame]);
     }
 
     /* Label 6 is the mode row, chosen by team kind; the unit-join screen always uses row 0. */
@@ -161,15 +161,15 @@ void menu_run_unit_status_thread(void) {
             sizeof(image_load_parameters_t));
     }
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&editor->label_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
-            &g_formation_summary_label_sprite_params[frame]);
+        gfx_init_image_loading(&editor->label_sprites[frame], g_unit_panel_editor_numeric_geometry,
+            &g_menu_portrait_origin, &g_formation_summary_label_sprite_params[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
 
     /* The same for the status panel packets. */
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_init_numeric_display_frame_primitives(&g_formation_status_panel_origin, &panel->numeric_frame);
+    status_screen_init_numbers_frame(&g_formation_status_panel_origin, &panel->numeric_frame);
     menu_init_sprite_array(panel->sprites, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&panel->portrait);
     text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel->sprites, 0);
@@ -177,10 +177,10 @@ void menu_run_unit_status_thread(void) {
     text_configure_sprite_vram(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
     text_configure_sprite_vram(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&panel->sprites[frame], g_editor_numeric_geometry, &g_formation_status_panel_origin,
-            &g_formation_status_sprite_params[frame]);
+        gfx_init_image_loading(&panel->sprites[frame], g_unit_panel_editor_numeric_geometry,
+            &g_formation_status_panel_origin, &g_formation_status_sprite_params[frame]);
     }
-    gfx_init_image_loading(&panel->portrait, g_editor_numeric_geometry, &g_formation_status_panel_origin,
+    gfx_init_image_loading(&panel->portrait, g_unit_panel_editor_numeric_geometry, &g_formation_status_panel_origin,
         &g_formation_status_portrait_params);
     if (state->team_kind == 1) {
         panel->portrait.clut = 0x7FFD;
@@ -210,7 +210,7 @@ void menu_run_unit_status_thread(void) {
             mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params,
                 sizeof(image_load_parameters_t));
         }
-        gfx_init_image_loading(&editor->label_sprites[6], g_editor_numeric_geometry, &g_menu_portrait_origin,
+        gfx_init_image_loading(&editor->label_sprites[6], g_unit_panel_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_formation_summary_label_sprite_params[6]);
         if (state->team_kind == 1) {
             panel->portrait.clut = 0x7FFD;
@@ -286,7 +286,7 @@ void menu_run_unit_status_thread(void) {
         }
         if (shake != 0) {
             if (shake < 0xA) {
-                thread->shake_y = g_panel_slide_down_y[shake];
+                thread->shake_y = g_unit_panel_slide_down_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -295,7 +295,7 @@ void menu_run_unit_status_thread(void) {
                     thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
-                thread->shake_y = g_panel_slide_up_y[shake];
+                thread->shake_y = g_unit_panel_slide_up_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -347,7 +347,7 @@ void menu_run_unit_status_thread(void) {
                 anim_state = 2;
             }
         }
-        gfx_build_portrait_transition_primitives(
+        portrait_build_transition(
             transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
 
         /* The three gauge bars have a fixed width and a 3-pixel slant; dimming halves red and green. */
@@ -403,8 +403,8 @@ void menu_run_unit_status_thread(void) {
 
         if ((frame == 0) || (thread->work != 0)) {
             /* WORLD keeps its identity view (unit index, roster slot) in the shared record. */
-            menu_copy_billboard_data_in(&g_menu_selected_unit_stat_summary,
-                (const menu_active_unit_t*)&g_formation_selected_unit_identity, &g_formation_selected_unit_stat_detail);
+            unit_panel_copy_billboard_in(&g_unit_panel_selected_unit_stat_summary,
+                (const unit_panel_unit_t*)&g_formation_selected_unit_identity, &g_formation_selected_unit_stat_detail);
             if (state->list_index < 0) {
                 number_entries[6].format = 0xC00;
             } else {
@@ -482,7 +482,7 @@ void menu_run_unit_status_thread(void) {
                 }
                 gfx_draw_or_append_gpu_primitive(&editor->portrait[0]);
             }
-            menu_submit_numeric_display_frame_primitives(&editor->numeric_frame);
+            status_screen_submit_numbers_frame(&editor->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
             panel_portrait = &panel->portrait;
@@ -496,7 +496,7 @@ void menu_run_unit_status_thread(void) {
                 gfx_draw_or_append_gpu_primitive(&panel->sprites[i]);
             }
             gfx_draw_or_append_gpu_primitive(&panel->draw_mode_a);
-            menu_submit_numeric_display_frame_primitives(&panel->numeric_frame);
+            status_screen_submit_numbers_frame(&panel->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
 
@@ -556,7 +556,7 @@ static void message_box_release_slot(void) {
 
 /* Draw the message box's pending glyph into VRAM and hold it for the typewriter delay.
  *
- * Cousin of text_draw_glyph_with_typewriter_delay without the request pointer, task-id checks or
+ * Cousin of message_draw_glyph_with_delay without the request pointer, task-id checks or
  * script counters. The ring byte is read before the phase and the inner bound
  * is `width / 2`, which keeps the per-row recomputation of the target.
  */

@@ -23,7 +23,7 @@ enum {
 };
 
 /* coordinates */
-/* X / map elevation / Y / zero, written in that order by battle_ai_copy_unit_coordinates
+/* X / map elevation / Y / zero, written in that order by ai_copy_unit_coordinates
  * and read as one 32-bit value for equality tests. */
 typedef union ai_coords {
     u32 word;
@@ -113,7 +113,7 @@ typedef union ai_ability_flags {
 
 /* considered ability */
 /* AI ability +0x04..0x0b: byte parameters and an aligned 32-bit status tail.
- * battle_ai_classify_ability_effect loads status bytes 1..4 together; reading only one byte
+ * ai_target_classify_ability_effect loads status bytes 1..4 together; reading only one byte
  * would silently lose the high status bits tested by the decision evaluator. */
 typedef union ai_ability_parameters {
     struct {
@@ -152,7 +152,7 @@ enum {
 };
 
 /* The ranking tail of an action, compared by
- * battle_ai_compare_target_priority_and_hit_rate. */
+ * ai_rank_compare. */
 typedef struct ai_action_rank {
     /* AI_ACTION_DECIDED on the selected action once the turn's action is
      * chosen, 0 on every candidate; the first comparison key. */
@@ -217,8 +217,8 @@ typedef struct ai_ability_entry {
 } ai_ability_entry_t;
 typedef char ai_ability_entry_must_be_4[sizeof(ai_ability_entry_t) == 4 ? 1 : -1];
 
-void battle_ai_init_unit_abilities(s32 unit_id);
-s32 battle_ai_is_ability_known(s32 unit_id, s32 skillset_id, s32 bit);
+void ai_init_unit_abilities(s32 unit_id);
+s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit);
 
 /* unit records */
 /* Shared prefix of the baseline and suspended AI unit snapshots.
@@ -242,7 +242,7 @@ typedef enum ai_weapon_formula_flags {
     AI_WEAPON_FORMULA_HEAL = 0x04,
 } ai_weapon_formula_flags_e;
 
-/* Per-compact-unit weapon summary. battle_ai_build_unit_ability_list clears two
+/* Per-compact-unit weapon summary. ai_ability_build_list clears two
  * 32-bit values, then merges weapon properties through named fields. */
 typedef union ai_weapon_data {
     u32 words[2];
@@ -291,7 +291,7 @@ typedef enum ai_targeting_flags_1 {
 } ai_targeting_flags_1_e;
 
 /* Targeting policy copied from ENTD AI Flags 2 to decision +0x07. The low
- * policy bits survive battle_ai_refresh_unit_decision_flags; the remaining
+ * policy bits survive ai_decision_refresh_flags; the remaining
  * target-state bits are rebuilt there before action simulation. */
 typedef enum ai_targeting_flags_2 {
     AI_TARGET_HP_BELOW_HALF = 0x01,
@@ -311,7 +311,7 @@ typedef struct ai_unit_decision {
     u8 flags;                   /* 0x04; ai_decision_flags_e */
     u8 main_target_id;          /* 0x05 */
     u8 targeting_flags_1;       /* 0x06; ai_targeting_flags_1_e. MOSTLY_SUPPORT is cleared again for the
-                                   nonenemy with the lowest share (battle_ai_set_ability_considerations) */
+                                   nonenemy with the lowest share (ai_ability_set_considerations) */
     u8 targeting_flags_2;       /* 0x07; ai_targeting_flags_2_e */
     u8 enemy_flag;              /* 0x08 */
     u8 highest_mp_cost;         /* 0x09 */
@@ -334,20 +334,20 @@ typedef enum ai_target_setting_flags {
 
 /* ai_data_t.targetability, +0x0c78..0x0cb7. The 21-byte save of unit_targetable at +0xca2
  * overlaps the low three bytes of target_setting_flags at +0xcb4; the save and restore loops in
- * battle_ai_evaluate_ability_outcome establish the span. The CONSUME_EVALUATED_AIM_TILES flag lies
+ * ai_ability_evaluate_outcome establish the span. The CONSUME_EVALUATED_AIM_TILES flag lies
  * in the fourth byte, outside the saved array. Preserve both views and 32-bit alignment; this is
  * not a 16-byte backup. */
 typedef union ai_targetability {
     struct {
-        u8 unit_active[BATTLE_UNIT_SLOT_COUNT];
-        u8 unit_targetable[BATTLE_UNIT_SLOT_COUNT];
+        u8 unit_active[UNIT_SLOT_COUNT];
+        u8 unit_targetable[UNIT_SLOT_COUNT];
         u8 saved_prefix[16];
         u8 _padding_3a[2]; /* aligns target_setting_flags */
         u32 target_setting_flags;
     } live;
     struct {
         u8 _unused_00[42];
-        u8 unit_targetable_saved[BATTLE_UNIT_SLOT_COUNT];
+        u8 unit_targetable_saved[UNIT_SLOT_COUNT];
         u8 _unused_3f;
     } snapshot;
 } ai_targetability_t;
@@ -356,28 +356,30 @@ typedef char ai_targetability_size_must_be_64[(sizeof(ai_targetability_t) == 64)
 /* The whole AI state, kept across the frames a decision is suspended over. The stage bytes hold
  * the resume points of the AI's passes (battle_ai_command.h, battle_ai_decision.h). */
 typedef struct ai_data {
-    ai_considered_ability_t considered_ability;                                                /* 0x0000 */
-    ai_action_data_t current_action;                                                           /* 0x0014 */
-    ai_action_data_t best_action;                                                              /* 0x0034 */
-    ai_action_data_t ranked_actions[AI_RANKED_ACTION_COUNT];                                   /* 0x0054 */
-    ai_action_data_t move_baseline_action;                                                     /* 0x0154 */
-    u8 tile_foe_proximity[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT][AI_GRID_COLUMN_COUNT];   /* 0x0174; level/y/x */
-    u8 tile_target_distance[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT][AI_GRID_COLUMN_COUNT]; /* 0x03b4; level/y/x */
-    s16 tile_priority[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT][AI_GRID_COLUMN_COUNT];       /* 0x05f4; level/y/x */
+    ai_considered_ability_t considered_ability;              /* 0x0000 */
+    ai_action_data_t current_action;                         /* 0x0014 */
+    ai_action_data_t best_action;                            /* 0x0034 */
+    ai_action_data_t ranked_actions[AI_RANKED_ACTION_COUNT]; /* 0x0054 */
+    ai_action_data_t move_baseline_action;                   /* 0x0154 */
+    u8 tile_foe_proximity[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]
+                         [AI_GRID_COLUMN_COUNT]; /* 0x0174; level/y/x */
+    u8 tile_target_distance[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]
+                           [AI_GRID_COLUMN_COUNT];                                              /* 0x03b4; level/y/x */
+    s16 tile_priority[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT][AI_GRID_COLUMN_COUNT]; /* 0x05f4; level/y/x */
     /* Scenario/level/y; row bits 15..0 represent x=0..15. */
-    u16 reachable_tiles[AI_MOVEMENT_SCENARIO_COUNT][MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]; /* 0x0a74 */
-    u16 targetable_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                            /* 0x0b4c */
-    u16 cast_origin_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                           /* 0x0b94 */
-    u16 aim_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                                   /* 0x0bdc */
-    u16 walkable_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                              /* 0x0c24 */
+    u16 reachable_tiles[AI_MOVEMENT_SCENARIO_COUNT][BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]; /* 0x0a74 */
+    u16 targetable_tiles[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                            /* 0x0b4c */
+    u16 cast_origin_tiles[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                           /* 0x0b94 */
+    u16 aim_tiles[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                                   /* 0x0bdc */
+    u16 walkable_tiles[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                              /* 0x0c24 */
     u8 _unused_0c6c;
     u8 initial_selection_stage; /* 0x0c6d; ai_initial_selection_stage_e */
     u8 action_selection_phase;  /* 0x0c6e; status, targeted and recovery selection stages */
     u8 _unused_0c6f;
     u8 outcome_evaluation_state;        /* 0x0c70; ai_ability_evaluation_stage_e */
     u8 movement_decision_state;         /* 0x0c71; ai_movement_stage_e */
-    u8 search_resume_flag;              /* 0x0c72; initialize/resume flag of battle_ai_fill_target_distance_grid;
-                                         * battle_ai_evaluate_target_tiles reuses it as a phase flag */
+    u8 search_resume_flag;              /* 0x0c72; initialize/resume flag of ai_move_fill_target_distance_grid;
+                                         * ai_origin_evaluate_aim_tiles reuses it as a phase flag */
     u8 _padding_0c73;                   /* aligns considered_unit_coords */
     ai_coords_t considered_unit_coords; /* 0x0c74 */
     ai_targetability_t targetability;   /* 0x0c78 */
@@ -395,22 +397,22 @@ typedef struct ai_data {
     action_command_t unit_action_records[AI_COMPACT_UNIT_COUNT]; /* 0x0cd4 */
     u16 throw_ability_id;                                        /* 0x0e14 */
     u8 throw_weapon_id;                                          /* 0x0e16 */
-    /* All slots with entd_slot != 0xff, capped at 255 by battle_ai_init_workspace. */
-    u8 present_unit_average_max_hp;                 /* 0x0e17 */
-    u8 unit_acts_before_me[BATTLE_UNIT_SLOT_COUNT]; /* 0x0e18; all slots cleared by the action simulation */
-    u8 movement_scenario;                           /* 0x0e2d; 0..2 */
-    u8 acting_unit_id;                              /* 0x0e2e */
-    u8 acting_unit_compact_index;                   /* 0x0e2f; unit_compact_indices[acting_unit_id] */
-    ai_coords_t acting_unit_coords;                 /* 0x0e30 */
-    ai_unit_decision_t* acting_unit_decision;       /* 0x0e34 */
-    u8 acting_unit_move;                            /* 0x0e38 */
-    u8 acting_unit_team;                            /* 0x0e39 */
-    u8 map_max_x;                                   /* 0x0e3a */
-    u8 map_max_y;                                   /* 0x0e3b */
-    u16 team_golem[UNIT_TEAM_COUNT];                /* 0x0e3c; scored as 16-bit values by the action simulation */
-    u8 status_to_cancel[STATUS_BYTE_COUNT]; /* 0x0e44; the statuses the actor's usable abilities cancel, built by
-                                                      battle_ai_set_ability_considerations */
-    /* Resumable reflected-origin search (battle_ai_evaluate_reflected_target_origins).
+    /* All slots with entd_slot != 0xff, capped at 255 by ai_init_workspace. */
+    u8 present_unit_average_max_hp;           /* 0x0e17 */
+    u8 unit_acts_before_me[UNIT_SLOT_COUNT];  /* 0x0e18; all slots cleared by the action simulation */
+    u8 movement_scenario;                     /* 0x0e2d; 0..2 */
+    u8 acting_unit_id;                        /* 0x0e2e */
+    u8 acting_unit_compact_index;             /* 0x0e2f; unit_compact_indices[acting_unit_id] */
+    ai_coords_t acting_unit_coords;           /* 0x0e30 */
+    ai_unit_decision_t* acting_unit_decision; /* 0x0e34 */
+    u8 acting_unit_move;                      /* 0x0e38 */
+    u8 acting_unit_team;                      /* 0x0e39 */
+    u8 map_max_x;                             /* 0x0e3a */
+    u8 map_max_y;                             /* 0x0e3b */
+    u16 team_golem[UNIT_TEAM_COUNT];          /* 0x0e3c; scored as 16-bit values by the action simulation */
+    u8 status_to_cancel[STATUS_BYTE_COUNT];   /* 0x0e44; the statuses the actor's usable abilities cancel, built by
+                                                        ai_ability_set_considerations */
+    /* Resumable reflected-origin search (ai_origin_evaluate_reflected).
      * Candidate x/y = 2 * reflector position - intended target position. */
     u8 reflector_unit_index;                                         /* 0x0e49 */
     u8 reflected_target_unit_index;                                  /* 0x0e4a */
@@ -425,28 +427,28 @@ typedef struct ai_data {
     u8 saved_inflicted_status;                                       /* 0x0ed2 */
     u8 _unused_0ed3;
     u8 main_ai_state;          /* 0x0ed4; ai_command_build_stage_e */
-    u8 autobattle_state;       /* 0x0ed5; ai_autobattle_stage_e */
+    u8 autobattle_state;       /* 0x0ed5; ai_general_stage_e */
     u8 charging_state;         /* 0x0ed6; ai_charging_stage_e */
     u8 cast_origin_stage;      /* 0x0ed7; ai_cast_origin_stage_e */
     u8 reflected_origin_phase; /* 0x0ed8; set and cleared by the reflected-origin search */
     u8 highest_priority_state; /* 0x0ed9; ai_origin_evaluation_stage_e */
     u8 max_possibilities;      /* 0x0eda; byte-truncated combination count, then the scan x of
-                                * battle_ai_evaluate_movement_origins */
+                                * ai_origin_evaluate_reachable */
     u8 y_counter;              /* 0x0edb */
     u8 map_level_counter;      /* 0x0edc */
-    /* Calculator search counters (battle_ai_evaluate_math_targets) survive suspension. */
+    /* Calculator search counters (ai_math_evaluate_targets) survive suspension. */
     u8 math_ability_id;       /* 0x0edd; low byte of the selected ability entry */
     u8 math_type_index;       /* 0x0ede; 0..3 */
     u8 math_multiplier_index; /* 0x0edf; 4..7 */
     /* Turn-controller globals saved and restored around the action simulation. */
-    s32 saved_between_turn_state;        /* 0x0ee0; g_battle_between_turn_state during the simulation */
-    s32 saved_between_turn_resume_state; /* 0x0ee4; g_battle_between_turn_resume_state */
-    s32 saved_turn_unit_id;              /* 0x0ee8; g_battle_turn_unit_id */
+    s32 saved_between_turn_state;        /* 0x0ee0; g_turn_clock_state during the simulation */
+    s32 saved_between_turn_resume_state; /* 0x0ee4; g_turn_clock_resume_state */
+    s32 saved_turn_unit_id;              /* 0x0ee8; g_turn_unit_id */
     u16 simulated_turn_events;           /* 0x0eec; interturn loop stops at 256 */
     u8 action_simulation_phase;          /* 0x0eee; ai_simulation_phase_e */
     u8 _padding_0eef;                    /* aligns ability_lists */
     ai_ability_entry_t ability_lists[AI_COMPACT_UNIT_COUNT][AI_ABILITY_LIST_COUNT]; /* 0x0ef0; 0x88 bytes per unit */
-    /* Blood Suck/Frog IDs start without unit bits; battle_ai_select_action_status ORs the
+    /* Blood Suck/Frog IDs start without unit bits; ai_select_status_imposed ORs the
      * acting physical slot into bits 10..15 before loading the entry. */
     ai_ability_entry_t hardcoded_status_abilities[2];         /* 0x1770 */
     ai_weapon_data_t unit_weapon_data[AI_COMPACT_UNIT_COUNT]; /* 0x1778 */
@@ -454,37 +456,37 @@ typedef struct ai_data {
     ai_action_data_t selected_action;                         /* 0x17fc */
     /* Triggered trap tiles are excluded from movement choices unless
      * the acting unit has Confusion or Berserk. */
-    ai_coords_t known_trap_coords[AI_KNOWN_TRAP_COUNT];        /* 0x181c; x == 0xff terminates the list */
-    ai_unit_decision_t unit_decisions[BATTLE_UNIT_SLOT_COUNT]; /* 0x182c */
-    /* battle_ai_select_action_initial saves the complete decision before retreat and restores
+    ai_coords_t known_trap_coords[AI_KNOWN_TRAP_COUNT]; /* 0x181c; x == 0xff terminates the list */
+    ai_unit_decision_t unit_decisions[UNIT_SLOT_COUNT]; /* 0x182c */
+    /* ai_select_action saves the complete decision before retreat and restores
      * it only after the retreat pass finishes, not when it suspends. */
-    ai_unit_decision_t saved_acting_unit_decision;    /* 0x197c */
-    u8 unit_compact_indices[BATTLE_UNIT_SLOT_COUNT];  /* 0x198c; slot -> index among present units (0..15) */
-    u8 unit_autobattle_modes[BATTLE_UNIT_SLOT_COUNT]; /* 0x19a1; ai_autobattle_mode_e from ENTD AI flags */
-    u8 autobattle_setting;                            /* 0x19b6 */
-    u8 resume_pending;                                /* 0x19b7; an AI routine suspended on its frame budget */
-    u8 random_use_threshold;                          /* 0x19b8; floor(128 * random-use entries / eligible
-                                                       * entries), from battle_ai_set_ability_considerations.
-                                                       * A zero denominator leaves the prior byte unchanged. */
-    u8 water_penalty;                                 /* 0x19b9 */
-    u8 valuable_target_hit;                           /* 0x19ba; set by battle_ai_simulate_strikes for a
-                                                       * counted hit on a unit_targetable unit */
-    u8 single_enemy_remaining;                        /* 0x19bb; exactly one enemy counted */
-    u8 ability_processing_done;                       /* 0x19bc */
-    u8 action_taken;                                  /* 0x19bd */
-    u8 movement_taken;                                /* 0x19be */
+    ai_unit_decision_t saved_acting_unit_decision; /* 0x197c */
+    u8 unit_compact_indices[UNIT_SLOT_COUNT];      /* 0x198c; slot -> index among present units (0..15) */
+    u8 unit_autobattle_modes[UNIT_SLOT_COUNT];     /* 0x19a1; ai_autobattle_mode_e from ENTD AI flags */
+    u8 autobattle_setting;                         /* 0x19b6 */
+    u8 resume_pending;                             /* 0x19b7; an AI routine suspended on its frame budget */
+    u8 random_use_threshold;                       /* 0x19b8; floor(128 * random-use entries / eligible
+                                                    * entries), from ai_ability_set_considerations.
+                                                    * A zero denominator leaves the prior byte unchanged. */
+    u8 water_penalty;                              /* 0x19b9 */
+    u8 valuable_target_hit;                        /* 0x19ba; set by ai_simulate_strikes for a
+                                                    * counted hit on a unit_targetable unit */
+    u8 single_enemy_remaining;                     /* 0x19bb; exactly one enemy counted */
+    u8 ability_processing_done;                    /* 0x19bc */
+    u8 action_taken;                               /* 0x19bd */
+    u8 movement_taken;                             /* 0x19be */
     u8 _unused_19bf[8];
     u8 _padding_19c7; /* 0x19c7; last documented byte; tail padding to 4-byte alignment */
 } ai_data_t;
 typedef char ai_data_size_must_be_6600[(sizeof(ai_data_t) == 6600) ? 1 : -1];
 
 /* The workspace lives in BATTLE; EVENT, EFFECT and WORLD code also use its pointer.
- * battle_ai_init_workspace points g_ai_workspace at g_battle_ai_data_base, and the menus borrow
+ * ai_init_workspace points g_ai_workspace at g_ai_data, and the menus borrow
  * the same memory through g_ai_workspace_ptr as their work block. */
-extern ai_data_t g_battle_ai_data_base;
+extern ai_data_t g_ai_data;
 extern ai_data_t* g_ai_workspace;
 extern event_work_t* g_ai_workspace_ptr; /* pointer cell reloaded per subsystem */
 
-void battle_ai_init_workspace(void);
+void ai_init_workspace(void);
 
 #endif

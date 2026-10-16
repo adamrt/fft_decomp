@@ -36,10 +36,10 @@
 #include "psx/types.h"
 
 /* Menu palette color of each of the numeric display frame's twelve lines. */
-static u8 g_menu_numeric_display_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
+static u8 g_status_screen_numbers_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
 
 /* Twelve menu_line_layout_t records, walked by byte offset. */
-static s8 g_menu_numeric_display_frame_offsets[96]
+static s8 g_status_screen_numbers_frame_offsets[96]
     = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, 0, 1, 0, 1, -2, 1, 0, 0, 1, 0, 1, 1, 1, -2, 0, 0, 0, 1, 1, -1, 1, -1,
           0, 1, 0, 1, -1, 2, -1, -2, 1, 0, 1, 1, -1, 1, -1, 1, 1, 0, 1, 0, 1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
           1, 1, 1, 2, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, -1, 1, 0, 1, 1 };
@@ -62,11 +62,11 @@ void script_process_inflict_status_commands(void) {
         if (instruction[instruction_offset] == EVENT_OPCODE_INFLICT_STATUS) {
             runtime_id = script_resolve_runtime_id(script_read_s16(instruction + instruction_offset + 1));
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_id = battle_unit_get_battle_id_by_runtime_id(runtime_id);
+                battle_id = unit_get_battle_id_by_runtime_id(runtime_id);
                 /* EVENT_BATTLE_ID_NONE is unit_get_battle_id_by_event_unit_id's "no unit" value;
                  * this lookup fails with -1 instead, so the test never rejects anything. */
                 if (battle_id != EVENT_BATTLE_ID_NONE) {
-                    unit = battle_unit_get_stats_from_battle_id(battle_id);
+                    unit = unit_get_stats(battle_id);
                     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
                             & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
                         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
@@ -88,7 +88,7 @@ void script_process_inflict_status_commands(void) {
  * EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY is set, a unit that rides or carries
  * another gets its status animation instead, and a unit standing in water of depth 2
  * or more its mounted animation; both run on the main stack. Animations from
- * BATTLE_SEQUENCE_EVTCHR_SLOT_0 up are always played as requested. */
+ * ANIMATION_SEQUENCE_EVTCHR_SLOT_0 up are always played as requested. */
 void unit_set_animation(s32 runtime_id, u32 animation) {
     s32 battle_id;
     unit_stats_t* stats;
@@ -96,24 +96,24 @@ void unit_set_animation(s32 runtime_id, u32 animation) {
 
     if ((script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0)
         && (script_get_variable(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) != 0)) {
-        battle_id = battle_unit_get_battle_id_by_runtime_id(runtime_id);
-        if ((battle_id >= 0) && (animation < BATTLE_SEQUENCE_EVTCHR_SLOT_0)) {
-            stats = battle_unit_get_stats_from_battle_id(battle_id);
-            depth = battle_map_get_tile_data_value(
-                MAP_TILE_DATA_DEPTH, stats->x, stats->position.y, stats->position.higher_elevation);
+        battle_id = unit_get_battle_id_by_runtime_id(runtime_id);
+        if ((battle_id >= 0) && (animation < ANIMATION_SEQUENCE_EVTCHR_SLOT_0)) {
+            stats = unit_get_stats(battle_id);
+            depth = battle_map_tile_get_value(
+                BATTLE_MAP_TILE_DATA_DEPTH, stats->x, stats->position.y, stats->position.higher_elevation);
             if ((stats->mount_info & UNIT_MOUNT_INFO_ROLE_MASK) != 0) {
-                g_thread_call_target = (void (*)(void))battle_unit_set_status_animation_by_runtime_id;
+                g_thread_call_target = (void (*)(void))animation_set_status_by_runtime_id;
             } else if ((depth & 0xFF) >= 2) {
-                g_thread_call_target = (void (*)(void))battle_unit_set_mounted_animation_by_runtime_id;
+                g_thread_call_target = (void (*)(void))animation_set_mounted_by_runtime_id;
             } else {
-                battle_unit_set_specific_animation_by_runtime_id(runtime_id, animation);
+                animation_set_specific_by_runtime_id(runtime_id, animation);
                 return;
             }
             thread_call_on_main_stack(runtime_id);
             return;
         }
     }
-    battle_unit_set_specific_animation_by_runtime_id(runtime_id, animation);
+    animation_set_specific_by_runtime_id(runtime_id, animation);
 }
 
 /* Faces a unit, and its mount partner when one is linked, in a direction given in
@@ -124,17 +124,17 @@ void unit_set_facing(s32 runtime_id, s32 facing) {
     unit_stats_t* stats;
 
     if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
-        battle_id = battle_unit_get_battle_id_by_runtime_id(runtime_id);
+        battle_id = unit_get_battle_id_by_runtime_id(runtime_id);
         if (battle_id >= 0) {
-            stats = battle_unit_get_stats_from_battle_id(battle_id);
+            stats = unit_get_stats(battle_id);
             if (stats->mount_info != 0) {
-                battle_unit_set_facing_nibble_by_runtime_id(
-                    battle_unit_get_runtime_id_by_battle_id(stats->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK),
+                unit_facing_set_sixteenth_by_runtime_id(
+                    unit_get_runtime_id_by_battle_id(stats->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK),
                     facing & 0xFFFF);
             }
         }
     }
-    battle_unit_set_facing_nibble_by_runtime_id(runtime_id, facing & 0xFFFF);
+    unit_facing_set_sixteenth_by_runtime_id(runtime_id, facing & 0xFFFF);
 }
 
 /* Map script volume 0..96 to driver volume 0..127; values above 96 saturate. */
@@ -174,7 +174,7 @@ void gfx_ramp_screen_overlay_intensity_to_max(void) {
 
 /* 1 while the current event id is one of the sixteen tutorial events,
  * 0x19a..0x1a9; WORLD has no tutorial events and always returns 0. */
-s32 script_is_tutorial_event_slot(void) {
+s32 tutorial_is_current_event(void) {
 #ifdef FFT_BATTLE
     return (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) - EVENT_ID_TUTORIAL_FIRST) < 0x10U;
 #else
@@ -187,7 +187,7 @@ s32 script_is_tutorial_event_slot(void) {
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
     s32 runtime_id = script_resolve_runtime_id(event_unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-        s32 idx = battle_unit_get_battle_id_by_runtime_id(runtime_id);
+        s32 idx = unit_get_battle_id_by_runtime_id(runtime_id);
         if (idx != -1) {
             return idx;
         }
@@ -235,12 +235,12 @@ void menu_run_invalid_choice_thread(void) {
 }
 
 /* Yields the thread at least once, then until the camera stops moving. WORLD's
- * copy calls BATTLE's battle_camera_is_active address (0x8008e17c), which with
+ * copy calls BATTLE's camera_is_active address (0x8008e17c), which with
  * WLDCORE loaded lies inside travel_find_best_path. */
 void camera_wait_until_idle(void) {
     do {
         thread_yield();
-    } while (battle_camera_is_active() != 0);
+    } while (camera_is_active() != 0);
 }
 
 /* Reduce the yaw script variable to one turn [0, ONE). Adding ten whole turns first keeps
@@ -291,8 +291,8 @@ void camera_init_tilt_and_zoom(void) {
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = target_tilt;
     }
 
-    g_battle_map_tilt_target = tilt_target_mode + 1;
-    g_battle_map_zoom_target = MAP_ZOOM_IN;
+    g_camera_tilt_target = tilt_target_mode + 1;
+    g_camera_zoom_target = BATTLE_MAP_ZOOM_IN;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = ONE;
 }
 
@@ -308,7 +308,7 @@ s32 camera_wrap_yaw_angle(void) {
 
 /* Return the stats for the menu's selected battle slot. */
 unit_stats_t* menu_get_selected_unit_stats(void) {
-    return battle_unit_get_stats_from_battle_id(g_menu_selected_unit.battle_id);
+    return unit_get_stats(g_unit_panel_selected_unit.battle_id);
 }
 
 /* Clamp a signed value, testing the lower bound first. */
@@ -347,7 +347,7 @@ void script_update_event_input_state(u32 input) {
     u32 counter;
 
     if (input == 0
-        || (script_is_tutorial_event_slot() != 0
+        || (tutorial_is_current_event() != 0
             && (script_get_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & (PSX_PAD_UP | PSX_PAD_DOWN)) != 0)) {
         g_script_event_initial_repeat_counter = 0;
         g_script_event_repeat_counter = 0;
@@ -686,12 +686,12 @@ void menu_draw_active_window_frames(void) {
             window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
             window->quads[1].clut = GetClut(window->portrait_code % 4 * 16 + 0x1C0, window->portrait_code / 4 + 0xFE);
 #else
-            menu_build_unit_portrait_poly(&window->quads[1], window->portrait_code);
+            portrait_build_unit_poly(&window->quads[1], window->portrait_code);
 #endif
         }
 #ifdef FFT_BATTLE
         else {
-            menu_build_unit_portrait_poly(&window->quads[1], window->portrait_battle_id);
+            portrait_build_unit_poly(&window->quads[1], window->portrait_battle_id);
         }
         gfx_flip_poly_ft4_uv_if_negative(&window->quads[1], -window->portrait_flipped);
 #endif
@@ -888,7 +888,7 @@ void* menu_alloc_memory(s32 size) {
         }
     fail:
         if (g_debug_font_print_enabled != 0) {
-            FntPrint(g_text_wait_for_allocation_message, g_thread_current_id, size);
+            FntPrint(g_message_wait_for_allocation_message, g_thread_current_id, size);
         }
         thread_yield();
     }
@@ -942,9 +942,9 @@ void menu_free_memory(void* buffer_pointer) {
 }
 
 /* Build the numeric display frame around box: twelve lines placed by
- * g_menu_numeric_display_frame_offsets relative to the box's corners and colored from
+ * g_status_screen_numbers_frame_offsets relative to the box's corners and colored from
  * the normal menu palette, the two draw modes and a sprite covering the box. */
-void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitives_t* menu) {
+void status_screen_init_numbers_frame(RECT* box, menu_palette_primitives_t* menu) {
     LINE_F2* line = menu->lines;
     s32 i;
     s32 offset;
@@ -957,26 +957,26 @@ void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitiv
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {
-        line->x0 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_X0] + box->x;
-        line->y0 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_Y0] + box->y;
-        line->x1 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_X1] + box->x;
-        line->y1 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_Y1] + box->y;
-        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W0] != 0) {
+        line->x0 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_X0] + box->x;
+        line->y0 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_Y0] + box->y;
+        line->x1 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_X1] + box->x;
+        line->y1 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_Y1] + box->y;
+        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W0] != 0) {
             line->x0 += box->w;
         }
-        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H0] != 0) {
+        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H0] != 0) {
             line->y0 += box->h;
         }
-        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W1] != 0) {
+        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W1] != 0) {
             line->x1 += box->w;
         }
-        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H1] != 0) {
+        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H1] != 0) {
             line->y1 += box->h;
         }
         offset += MENU_LINE_LAYOUT_SIZE;
         line++;
     }
-    SetDrawMode(&menu->draw_mode_menu, 1, 0, GetTPage(0, 0, 0x3c0, 0x100), &g_menu_numeric_display_texture_window);
+    SetDrawMode(&menu->draw_mode_menu, 1, 0, GetTPage(0, 0, 0x3c0, 0x100), &g_status_screen_numbers_texture_window);
     SetDrawMode(&menu->draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
     menu_init_sprt(&menu->sprite);
     menu->sprite.x0 = box->x;
@@ -986,7 +986,7 @@ void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitiv
 }
 
 /* Submit the frame's twelve lines, sprite and draw modes. */
-void menu_submit_numeric_display_frame_primitives(menu_palette_primitives_t* display) {
+void status_screen_submit_numbers_frame(menu_palette_primitives_t* display) {
     s32 index;
 
     for (index = 0; index < 12; index++) {
@@ -1005,7 +1005,7 @@ void menu_init_primitive_colors_normal(menu_palette_primitives_t* menu) {
     LINE_F2* line;
 
     for (index = 0, line = menu->lines; index < 12; index++, line++) {
-        palette_index = g_menu_numeric_display_palette_indices[index];
+        palette_index = g_status_screen_numbers_palette_indices[index];
         line->r0 = g_menu_palette_colors.colors[palette_index].red << 3;
         line->g0 = g_menu_palette_colors.colors[palette_index].green << 3;
         line->b0 = g_menu_palette_colors.colors[palette_index].blue << 3;
@@ -1021,7 +1021,7 @@ void menu_init_primitive_colors_dimmed(menu_palette_primitives_t* menu) {
     LINE_F2* line;
 
     for (index = 0, line = menu->lines; index < 12; index++, line++) {
-        palette_index = (g_menu_numeric_display_palette_indices[index] + PALETTE_COLOR_COUNT);
+        palette_index = (g_status_screen_numbers_palette_indices[index] + PALETTE_COLOR_COUNT);
         line->r0 = g_menu_palette_colors.colors[palette_index].red << 3;
         line->g0 = g_menu_palette_colors.colors[palette_index].green << 3;
         line->b0 = g_menu_palette_colors.colors[palette_index].blue << 3;

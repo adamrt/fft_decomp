@@ -174,7 +174,7 @@ u8 party_calculate_highest_level(void);
 extern s32 g_encounter_current_event_id;
 extern entd_file_t* g_encounter_set;
 extern entd_unit_t* g_encounter_current_unit;
-extern s32 g_encounter_selection_mode; /* battle_entd_selection_e */
+extern s32 g_encounter_selection_mode; /* unit_entd_selection_e */
 extern unit_deployment_coordinates_t* g_unit_deployed_coords;
 extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
 
@@ -203,15 +203,15 @@ extern u8 g_portrait_special_unit_id;
 extern u8 g_portrait_special_wldface_id;
 
 /* terrain */
-/* g_terrain_status_flags has one byte per map_surface_type_e; only
- * MAP_SURFACE_POISONED_MARSH has a bit. */
+/* g_terrain_status_flags has one byte per battle_map_surface_type_e; only
+ * BATTLE_MAP_SURFACE_POISONED_MARSH has a bit. */
 enum {
-    TERRAIN_STATUS_FLAG_POISON = 0x80, /* battle_status_prepare_terrain_poison poisons a unit standing there */
+    TERRAIN_STATUS_FLAG_POISON = 0x80, /* status_prepare_terrain_poison poisons a unit standing there */
 };
 
 /* Rows of g_terrain_movement_cost_tables, chosen from the unit's movement
- * abilities by battle_move_store_unit_movement_to_scratchpad; each has one
- * cost per map_surface_type_e. */
+ * abilities by move_spread_store_unit_to_scratchpad; each has one
+ * cost per battle_map_surface_type_e. */
 typedef enum terrain_cost_table {
     TERRAIN_COST_TABLE_DEFAULT = 0,
     TERRAIN_COST_TABLE_FLY_TELEPORT = 1, /* every surface costs 1 */
@@ -223,14 +223,14 @@ typedef enum terrain_cost_table {
 
 /* Costs in those rows that are not a number of Move points. */
 enum {
-    TERRAIN_COST_WEATHER = 0,    /* replaced by battle_move_get_weather_terrain_cost */
+    TERRAIN_COST_WEATHER = 0,    /* replaced by move_get_weather_terrain_cost */
     TERRAIN_COST_BLOCKED = 0xff, /* stays so under Any Ground */
 };
 
 extern const u8 g_terrain_movement_cost_tables[][64];
 extern const u8 g_terrain_status_flags[64];
 extern const u8 g_terrain_geomancy_abilities[];
-/* Two bytes per map_surface_type_e; all 64 pairs are 0x19, 0x19. */
+/* Two bytes per battle_map_surface_type_e; all 64 pairs are 0x19, 0x19. */
 extern u8 g_terrain_tile_info_pairs[64][2];
 
 #endif

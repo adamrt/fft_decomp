@@ -30,9 +30,9 @@ static s32* script_get_variable_word_pointer_from_id(s32 variable_id);
  * when find_channel is set and as the remembered background sound otherwise, and
  * set its volume (0 becomes 1).
  *
- * It then continues in sound_run_background_fade_thread, which reads the same
+ * It then continues in sound_background_fade_thread, which reads the same
  * parameter record to fade from volume_from to volume_to over frames yields. */
-void sound_run_background_sfx_thread(void) {
+void sound_background_thread(void) {
     event_background_sound_parameters_t* request;
     s32 sound_id;
     s32 sound;
@@ -58,7 +58,7 @@ void sound_run_background_sfx_thread(void) {
         volume = 1;
     }
     sound_set_sfx_echo(sound_id | resource, volume);
-    sound_run_background_fade_thread();
+    sound_background_fade_thread();
 }
 
 /* Thread task 0x35: ramp the volume of an environment sound from volume_from to
@@ -67,8 +67,8 @@ void sound_run_background_sfx_thread(void) {
  *
  * A step's volume is never 0, which would stop the sound: a negative level is
  * negated and 0 becomes 1. The event script's edit-background-sound instruction
- * starts it as a thread, and sound_run_background_sfx_thread continues in it. */
-void sound_run_background_fade_thread(void) {
+ * starts it as a thread, and sound_background_thread continues in it. */
+void sound_background_fade_thread(void) {
     event_background_sound_parameters_t* request;
     s32 sound_id;
     s32 volume_from;
@@ -478,7 +478,7 @@ static s32 script_get_rand16(void) {
 
 /* Yield while the unit-ready test returns zero. */
 void script_wait_for_unit_ready(s32 runtime_id) {
-    while (battle_return_one(runtime_id) == 0) {
+    while (unit_is_ready(runtime_id) == 0) {
         thread_yield();
     }
 }
@@ -748,7 +748,7 @@ void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
     for (i = 0; i < (digits & 0xFF); i++) {
         src->rect.y = 0;
         src->rect.x = (value % 10) * 8 + 0x78;
-        if (g_menu_hide_numeric_values != 0) {
+        if (g_unit_panel_hide_numeric_values != 0) {
             src->rect.x = 0x48;
             src->rect.y = 0x10;
         }

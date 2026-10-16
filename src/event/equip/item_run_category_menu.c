@@ -40,18 +40,18 @@ s32 equipment_run_item_list(void) {
         menu_get_selection_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        g_menu_row_callbacks[0].value = menu_get_entry_item_equipped_count;
-        g_menu_row_callbacks[1].value = menu_get_entry_item_count;
-        g_menu_row_callbacks[2].icon = menu_build_item_type_icon_source;
-        g_menu_row_callbacks[3].icon = menu_get_entry_item_icon_source;
-        g_menu_row_callbacks[4].value = menu_get_preview_hp_bonus_display;
-        g_menu_row_callbacks[5].value = menu_get_preview_mp_bonus_display;
+        g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
+        g_menu_row_callbacks[1].value = equipment_get_row_item_count;
+        g_menu_row_callbacks[2].icon = item_build_type_icon_source;
+        g_menu_row_callbacks[3].icon = equipment_get_row_icon_source;
+        g_menu_row_callbacks[4].value = equipment_get_preview_hp_bonus_display;
+        g_menu_row_callbacks[5].value = equipment_get_preview_mp_bonus_display;
         g_menu_row_callbacks[6].value = equipment_get_preview_hp_bonus;
         g_menu_row_callbacks[7].value = equipment_get_preview_mp_bonus;
     }
     unit_panel_toggle_item_numbers_thread(1);
     /* The help text is the item's entry in HELP_TEXT_SECTION_ITEMS. */
-    g_menu_help_message_text_id
+    g_help_message_text_id
         = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] + HELP_TEXT_ID_ITEM_BASE : -1;
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CROSS) {
@@ -90,9 +90,9 @@ s32 equipment_run_item_list(void) {
             slot = 0;
         }
         g_equipment_slot_item_browser_previewed_index = g_menu_list_selected_index;
-        item_collect_stat_deltas(slot, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_collect_stat_deltas(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_unit_status_panel_redraw = 1;
-        g_menu_preview_stats_thread_params.redraw_request = 1;
+        g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
     return MENU_ITEM_LIST_STATE_BROWSE;
 }

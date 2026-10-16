@@ -29,7 +29,7 @@
 #include "psx/types.h"
 
 /* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
-static s16 g_menu_auto_battle_row_actions[8] = { 1000, 2, 2, 2, 2, 0, -3, -3 };
+static s16 g_auto_battle_row_actions[8] = { 1000, 2, 2, 2, 2, 0, -3, -3 };
 
 /* Draw or queue an icon frame's six packets: sprites 3, 1 and 2, the draw mode, sprite 0, then the
  * first draw mode. Queued into one ordering-table entry they run in the reverse order. */
@@ -50,7 +50,7 @@ void menu_submit_icon_primitives(menu_icon_sprites_t* frame) {
  * when that changes which menu the unit gets. A policy row only becomes the highlighted one;
  * its row action leads to AUTO_BATTLE_CONFIRM, or for rows 1 and 2 chosen again to
  * AUTO_BATTLE_TARGET. Text palette 8 marks the active row. */
-void menu_auto_battle_setting_thread(void) {
+void auto_battle_settings_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     s32 cursor;
@@ -86,7 +86,7 @@ void menu_auto_battle_setting_thread(void) {
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
     fresh = 0;
     i = 0;
-    color = g_menu_auto_battle_option_colors;
+    color = g_auto_battle_option_colors;
     for (;; i++) {
         record = &records[i & 1];
         if (i == 0 || (g_script_event_input & PSX_PAD_CIRCLE)) {
@@ -95,18 +95,18 @@ void menu_auto_battle_setting_thread(void) {
             if (((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_previous_running() == 0) || i == 0) {
                 selected = cursor;
                 if (selected == 0) {
-                    before = battle_menu_get_idle_action_menu_id(g_menu_selected_unit.battle_id);
+                    before = menu_action_get_menu_id(g_unit_panel_selected_unit.battle_id);
                     stats->auto_battle_setting = AI_AUTOBATTLE_MANUAL;
-                    g_menu_pending_selection[0] = 0x12;
+                    g_command_pending_selection[0] = 0x12;
                     color[0] = 8;
                     color[1] = 4;
                     color[2] = 4;
                     color[3] = 4;
                     color[4] = 4;
-                    after = battle_menu_get_idle_action_menu_id(g_menu_selected_unit.battle_id);
+                    after = menu_action_get_menu_id(g_unit_panel_selected_unit.battle_id);
                     if (before != after) {
                         thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
-                        menu_build_idle_action_menu(after);
+                        command_open_menu(after);
                     }
                 } else {
                     color[0] = 4;
@@ -116,13 +116,13 @@ void menu_auto_battle_setting_thread(void) {
                     color[4] = 0;
                     color[selected] = 8;
                 }
-                g_menu_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                g_menu_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                g_menu_auto_battle_row_actions[3] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                g_menu_auto_battle_row_actions[4] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                g_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                g_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                g_auto_battle_row_actions[3] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                g_auto_battle_row_actions[4] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
                 if (cursor == previous) {
-                    g_menu_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
-                    g_menu_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
+                    g_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
+                    g_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
                 }
                 previous = cursor;
                 g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE_TARGET].selected_index = 0;
@@ -211,14 +211,14 @@ void menu_run_icon_selection_loop(void) {
 
 /* Preview where the highlighted ability or item would fall in the turn order.
  *
- * battle_action_preview_at_list runs on the main stack for the selected unit and fills the
+ * at_list_preview runs on the main stack for the selected unit and fills the
  * AT list work area in the companion overlay space. The names of the listed units are written
  * into the AT list text section, and the ABILITY_PREVIEW_AT_LIST entry is laid out with
  * number, unit and action columns (the action column and wide window only when an action row
  * is listed), scrolled so the previewed row shows. When the action gets no turn, this
  * thread shows ABILITY_PREVIEW_MESSAGE (text 0x1023) instead and exits there. */
-static void menu_build_ability_preview_at_list(void) {
-    menu_at_list_work_t* work;
+static void at_list_build_ability_preview(void) {
+    at_list_work_t* work;
     menu_entry_t* entry;
     unit_stats_t* stats;
     u8* text;
@@ -232,32 +232,32 @@ static void menu_build_ability_preview_at_list(void) {
     u16 text_id;
     const u16* at_table = g_ai_workspace_ptr->ability_list.ids;
 
-    work = (menu_at_list_work_t*)g_heap_companion_overlay_load_address;
+    work = (at_list_work_t*)g_heap_companion_overlay_load_address;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].select_text_table = 0x13;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].context = &g_menu_at_list_layout;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].context = &g_at_list_layout;
     text_id = at_table[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index];
-    g_menu_selected_action.targeting_type = BATTLE_TARGETING_TYPE_TILE;
+    g_command_selected_action.targeting_type = TARGET_TYPE_TILE;
     entry = &g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST];
 
     if ((text_id & 0xf800) == TEXT_ID_ABILITY_NAME_BASE) {
         staged_item = 0;
-        g_menu_selected_action.ability_id = text_id - TEXT_ID_ABILITY_NAME_BASE;
+        g_command_selected_action.ability_id = text_id - TEXT_ID_ABILITY_NAME_BASE;
     } else {
         staged_item = 1;
         /* Item selection updates only the low byte of the 16-bit command field. */
-        *(u8*)&g_menu_selected_action.item_or_equipment = text_id;
+        *(u8*)&g_command_selected_action.item_or_equipment = text_id;
     }
 
-    action = &g_menu_selected_action;
-    action->actor_id = g_menu_selected_unit.battle_id;
+    action = &g_command_selected_action;
+    action->actor_id = g_unit_panel_selected_unit.battle_id;
     stats = menu_get_selected_unit_stats();
-    g_thread_call_target = (void (*)(void))battle_action_preview_at_list;
+    g_thread_call_target = (void (*)(void))at_list_preview;
     turn = thread_call_on_main_stack(stats, action, work->entries);
     /* An item preview marks the first entry as the item action; the loop below names it
      * from the item text. */
     if (staged_item != 0) {
         work->entries[1].unit_code |= AT_ACTION_ENTRY;
-        work->entries[1].action_id_low = g_menu_selected_action.item_or_equipment;
+        work->entries[1].action_id_low = g_command_selected_action.item_or_equipment;
     }
 
     /* Without an AT position for the action, this thread shows preview message 0x1023
@@ -296,7 +296,7 @@ static void menu_build_ability_preview_at_list(void) {
             break;
         }
         work->entry_numbers[index] = index + 1;
-        stats = battle_unit_get_stats_from_battle_id(slot->unit_code & AT_UNIT_ID_MASK);
+        stats = unit_get_stats(slot->unit_code & AT_UNIT_ID_MASK);
         /* Action rows wrap the unit name in the 0xd9be/0xd9bf glyph pair. */
         if ((slot->unit_code & AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
@@ -360,9 +360,9 @@ static void menu_build_ability_preview_at_list(void) {
     /* Color the previewed action's row. */
     work->primary_colors[turn] = 4;
     work->secondary_colors[turn] = 4;
-    g_menu_at_list_layout.columns.mode[0] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
-    g_menu_at_list_layout.columns.mode[1] = MENU_TEXT_COLUMN_TEXT;
-    g_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_TEXT;
+    g_at_list_layout.columns.mode[0] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
+    g_at_list_layout.columns.mode[1] = MENU_TEXT_COLUMN_TEXT;
+    g_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_TEXT;
     /* Action rows need the wide window and the second text column. */
     if (bracketed != 0) {
         menu_scroll_text_layout_t* layout = entry->context;
@@ -382,7 +382,7 @@ static void menu_build_ability_preview_at_list(void) {
         entry->window.w = 0x84;
         entry->text_image.width = 0x84;
         entry->inner_width = 0x84;
-        g_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
+        g_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
     }
 
     if (count < 6) {
@@ -416,21 +416,21 @@ static void menu_build_ability_preview_at_list(void) {
         layout->row_offset = turn - 3;
     }
 
-    g_menu_at_list_layout.columns.text_ids[0] = work->entry_numbers;
-    g_menu_at_list_layout.columns.text_ids[2] = work->secondary_values;
-    g_menu_at_list_layout.columns.text_colors[0] = work->primary_colors;
-    g_menu_at_list_layout.columns.text_ids[1] = work->primary_values;
-    g_menu_at_list_layout.columns.text_colors[1] = work->secondary_colors;
-    g_menu_at_list_layout.columns.text_colors[2] = work->secondary_colors;
+    g_at_list_layout.columns.text_ids[0] = work->entry_numbers;
+    g_at_list_layout.columns.text_ids[2] = work->secondary_values;
+    g_at_list_layout.columns.text_colors[0] = work->primary_colors;
+    g_at_list_layout.columns.text_ids[1] = work->primary_values;
+    g_at_list_layout.columns.text_colors[1] = work->secondary_colors;
+    g_at_list_layout.columns.text_colors[2] = work->secondary_colors;
 }
 
 /* Thread body started from the ability list: build the AT list preview for the
  * highlighted ability, pulse SCRIPT_TUTORIAL_WAIT_ABILITY_AT_LIST and run it as a
  * scrolling list. */
-void menu_preview_ability_turn_at_list(void) {
-    menu_build_ability_preview_at_list();
-    script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_ABILITY_AT_LIST);
-    menu_run_scrolling_ability_list_thread();
+void at_list_ability_preview_thread(void) {
+    at_list_build_ability_preview();
+    tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_ABILITY_AT_LIST);
+    ability_list_scrolling_thread();
 }
 
 /* Draw the visible rows of a three-column menu text layout (text 8 pixels
@@ -531,11 +531,10 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
  * on the running thread's redraw request), redraws the page into an image
  * buffer and uploads it to the caller-supplied rectangle (x and w in
  * framebuffer pixels, divided by four; the image row is fixed at y = 0x80).
- * At g_battle_menu_scroll_list_depth 2 the buffer is placed 0x2000 bytes past the companion
+ * At g_menu_scrolling_list_depth 2 the buffer is placed 0x2000 bytes past the companion
  * overlay load address instead of being allocated. Returns that buffer when the page was
  * redrawn, else 0. */
-u8* battle_menu_redraw_text_page_on_scroll_in_rect(
-    menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area) {
+u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
     u32* pressed;
     u32* held;
@@ -577,7 +576,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
             g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 0;
         }
         if (changed != 0) {
-            if (g_battle_menu_scroll_list_depth == 2) {
+            if (g_menu_scrolling_list_depth == 2) {
                 buffer = g_heap_companion_overlay_load_address + 0x2000;
             } else {
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
@@ -607,7 +606,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
  * fixed at y = 0x80). Pages the row window on Square+Up/Down (or on the running
  * thread's redraw request), redraws the page into a freshly allocated image
  * buffer and uploads it. Returns that buffer when the page was redrawn, else 0. */
-u8* menu_redraw_text_page_on_scroll_in_rect(
+u8* screen_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
     u32* pressed;

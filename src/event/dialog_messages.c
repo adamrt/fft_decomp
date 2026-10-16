@@ -23,14 +23,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static menu_text_state_t g_text_typewriter_state = { 0 };
-static RECT g_text_typewriter_vram_rect = { 0 };
+static menu_text_state_t g_message_typewriter_state = { 0 };
+static RECT g_message_typewriter_vram_rect = { 0 };
 
-static u8 g_text_typewriter_glyph_images[3][8][0x54] = { 0 };
+static u8 g_message_typewriter_glyph_images[3][8][0x54] = { 0 };
 
-static u8 g_text_typewriter_previous_images[3][0x54] = { 0 };
+static u8 g_message_typewriter_previous_images[3][0x54] = { 0 };
 
-static u8 g_text_typewriter_column_scratch[14] = { 0 };
+static u8 g_message_typewriter_column_scratch[14] = { 0 };
 
 /* For a dialog kept open for ChangeDialog (DIALOG_TYPE_KEEP_OPEN), measure the widest text the
  * window will show: the DisplayMessage at offset and each later ChangeDialog for the same window
@@ -39,7 +39,7 @@ static u8 g_text_typewriter_column_scratch[14] = { 0 };
  *
  * Every access re-reads g_script_event_block as retail does; instruction pointer
  * temporaries make the function 16 bytes shorter. */
-void text_build_display_message(s32 offset, s32 flags, s32* out_width) {
+void message_build_display(s32 offset, s32 flags, s32* out_width) {
     s16 width;
     s16 height;
     s32 max_width;
@@ -100,7 +100,7 @@ void screen_input_update_dialog_state(void) {
     thread_yield();
     input = PadRead(1);
     if (input == 0
-        || (script_is_tutorial_event_slot() != 0
+        || (tutorial_is_current_event() != 0
             && (script_get_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & 0x5000))) {
         g_script_event_initial_repeat_counter = 0;
         g_script_event_repeat_counter = 0;
@@ -153,7 +153,7 @@ void screen_input_update_dialog_state(void) {
 
 /* Free the typewriter slot (one of three) the current thread owns, if any, and reset its
  * glyph count; a closing dialog thread calls it. */
-void text_release_typewriter_slot(void) {
+void message_release_typewriter_slot(void) {
     s32 index = 0;
     s32 current_thread_id = g_thread_current_id;
     s32* owner_thread_id;
@@ -180,11 +180,11 @@ s32 thread_get_current_task_id(void) {
     return g_thread_contexts[g_thread_current_id].task_id;
 }
 
-/* Draw the glyph in g_text_typewriter_glyph straight into VRAM at the pen position through one of
+/* Draw the glyph in g_message_typewriter_glyph straight into VRAM at the pen position through one of
  * three per-thread staging slots, then pace the message: delay 0 waits for the draw, 2 or more
  * waits that many steps per glyph, and 1 follows the message speed option (Circle held or Fast
  * shows 8 glyphs per wait). Queues the text sound unless muted. */
-void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
+void message_draw_glyph_with_delay(s32 pen_x, s32 pen_y, s32 delay) {
     s32 slot;
     s32 i;
     s32 j;
@@ -199,10 +199,10 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
     u8* previous;
     s32 row;
     s32 offset;
-    text_glyph_state_t* request = &g_text_typewriter_glyph;
+    text_glyph_state_t* request = &g_message_typewriter_glyph;
     s32 column;
 
-    if (g_text_typewriter_glyph.mode == DIALOG_BOX_TYPE_PORTRAIT || g_text_typewriter_glyph.mode == 0) {
+    if (g_message_typewriter_glyph.mode == DIALOG_BOX_TYPE_PORTRAIT || g_message_typewriter_glyph.mode == 0) {
         /* Use the staging slot this thread owns or claim a free one (16 means none);
          * with all three taken, wait a frame and retry. */
         for (;;) {
@@ -235,8 +235,8 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
          * `phase` is the glyph's pixel within a 4-pixel VRAM word. */
         ring = g_text_slot_glyph_counts[slot];
         phase = request->x & 3;
-        image = g_text_typewriter_glyph_images[slot][ring];
-        previous = g_text_typewriter_previous_images[slot];
+        image = g_message_typewriter_glyph_images[slot][ring];
+        previous = g_message_typewriter_previous_images[slot];
 
         /* The upload covers whole VRAM words: `pitch` pixels across, `w` words. */
         glyph = request->glyph;
@@ -244,20 +244,20 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
         if (kind == 4 || glyph == TEXT_SPACE) {
             if (phase == 2) {
                 pitch = 8;
-                g_text_typewriter_vram_rect.w = 2;
+                g_message_typewriter_vram_rect.w = 2;
             } else {
                 pitch = 4;
-                g_text_typewriter_vram_rect.w = 1;
+                g_message_typewriter_vram_rect.w = 1;
             }
         } else if (kind == 2) {
             pitch = 4;
-            g_text_typewriter_vram_rect.w = 1;
+            g_message_typewriter_vram_rect.w = 1;
         } else if (kind == 6) {
             pitch = 8;
-            g_text_typewriter_vram_rect.w = 2;
+            g_message_typewriter_vram_rect.w = 2;
         } else {
             pitch = 12;
-            g_text_typewriter_vram_rect.w = 3;
+            g_message_typewriter_vram_rect.w = 3;
         }
 
         /* At phase 2 the upload starts two pixels left of the glyph; copy those pixels from the
@@ -267,10 +267,10 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
             for (i = 0; i < 14; i++) {
                 j = offset / 2;
                 offset += g_text_slot_row_pitches[slot];
-                g_text_typewriter_column_scratch[i] = (previous + j)[g_text_slot_source_columns[slot]];
+                g_message_typewriter_column_scratch[i] = (previous + j)[g_text_slot_source_columns[slot]];
             }
             for (i = 0; i < 14; i++) {
-                image[i * pitch / 2] = g_text_typewriter_column_scratch[i];
+                image[i * pitch / 2] = g_message_typewriter_column_scratch[i];
             }
         }
 
@@ -307,18 +307,18 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
         }
 
         if (request->glyph != TEXT_SPACE) {
-            g_text_typewriter_state.pen.rect.x = phase;
-            g_text_typewriter_state.pen.rect.y = 0;
-            g_text_typewriter_state.pen.stride = pitch;
+            g_message_typewriter_state.pen.rect.x = phase;
+            g_message_typewriter_state.pen.rect.y = 0;
+            g_message_typewriter_state.pen.stride = pitch;
             script_set_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT,
                 script_get_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT) + 1);
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + request->glyph * TEXT_GLYPH_BYTES, image,
-                &g_text_typewriter_state.pen, request->palette);
-            g_text_typewriter_vram_rect.x
+                &g_message_typewriter_state.pen, request->palette);
+            g_message_typewriter_vram_rect.x
                 = (pen_x >> 2) + (s16)(script_get_variable(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET) + 0x1C0);
-            g_text_typewriter_vram_rect.y = pen_y;
-            g_text_typewriter_vram_rect.h = 14;
-            LoadImage(&g_text_typewriter_vram_rect, (u32*)image);
+            g_message_typewriter_vram_rect.y = pen_y;
+            g_message_typewriter_vram_rect.h = 14;
+            LoadImage(&g_message_typewriter_vram_rect, (u32*)image);
         }
 
         g_text_slot_glyph_counts[slot] = g_text_slot_glyph_counts[slot] + 1;
@@ -625,7 +625,7 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
  * A portrait dialog gets the window with its tail, every other type the plain
  * frame; a centered box is skipped. The thread yields once between the upload and
  * the free. */
-void menu_render_text_image_at_record_origin(text_dialog_record_t* record) {
+void message_render_record_image(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
             record->buffer = menu_build_window_image(

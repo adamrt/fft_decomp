@@ -46,19 +46,21 @@ void formation_toggle_preview_stats_window(s32 flag) {
 
     if (stored != 0) {
         stored = 1;
-        if (!(g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
+        if (!(g_unit_panel_status_display_thread_params.flags
+                & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(SCREEN_THREAD_SLOT_PREVIEW_STATS) == 0) {
-            thread_start(SCREEN_THREAD_SLOT_PREVIEW_STATS, menu_run_numeric_panel_frame_thread);
-            thread_set_parameters(SCREEN_THREAD_SLOT_PREVIEW_STATS, (s32)&g_menu_preview_stats_thread_params, 0, 0);
+            thread_start(SCREEN_THREAD_SLOT_PREVIEW_STATS, unit_panel_numbers_thread);
+            thread_set_parameters(
+                SCREEN_THREAD_SLOT_PREVIEW_STATS, (s32)&g_unit_panel_preview_stats_thread_params, 0, 0);
         }
     } else {
         menu_request_thread_stop(SCREEN_THREAD_SLOT_PREVIEW_STATS);
     }
-    g_menu_numeric_panel_params.style = stored;
+    g_unit_panel_numeric_panel_params.style = stored;
     g_formation_preview_stats_window_active = stored;
 }
 
-/* With `enable` set, start menu_run_ability_list_thread in the equip/ability panel slot (with
+/* With `enable` set, start unit_panel_ability_thread in the equip/ability panel slot (with
  * g_formation_ability_panel_thread_params) unless that slot or the character status slot already
  * runs, show the unit banner and open the numeric panel; otherwise stop the panel and the
  * numeric panel. */
@@ -67,12 +69,12 @@ void formation_toggle_ability_panel(s32 enable) {
         enable = 1;
         if (thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0
             && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
-            thread_start(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, menu_run_ability_list_thread);
+            thread_start(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_ability_thread);
             thread_set_parameters(
                 SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_ability_panel_thread_params, 0, 0);
         }
         g_formation_unit_banner_enabled = 1;
-        menu_toggle_numeric_panel_thread(enable);
+        unit_panel_toggle_numbers_thread(enable);
     } else {
         menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
@@ -86,25 +88,25 @@ void formation_open_equipment_panel(s32 enabled) {
         return;
     }
     enabled = 1;
-    if (g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
+    if (g_unit_panel_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
         return;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
         && thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
-        thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
+        thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
         thread_set_parameters(
             THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_formation_equipment_panel_thread_params, 0, 0);
     }
-    menu_toggle_numeric_panel_thread(enabled);
+    unit_panel_toggle_numbers_thread(enabled);
 }
 
 /* Request a redraw from all eight formation panel threads. */
 void formation_redraw_panels(void) {
-    g_menu_status_display_thread_params.redraw_request = 1;
-    g_menu_comparison_display_thread_params.redraw_request = 1;
+    g_unit_panel_status_display_thread_params.redraw_request = 1;
+    g_unit_panel_comparison_display_thread_params.redraw_request = 1;
     g_formation_equipment_panel_thread_params.redraw_request = 1;
-    g_menu_numeric_panel_params.redraw_request = 1;
-    g_menu_preview_stats_thread_params.redraw_request = 1;
+    g_unit_panel_numeric_panel_params.redraw_request = 1;
+    g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     g_formation_change_banner_thread_params.redraw_request = 1;
     g_formation_stat_preview_panel_thread_params.redraw_request = 1;
     g_formation_ability_panel_thread_params.redraw_request = 1;
@@ -120,7 +122,7 @@ void formation_stop_panels(void) {
     menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     formation_toggle_preview_stats_window(0);
     formation_toggle_stat_preview_panel(0);
-    g_menu_preview_stats_thread_params.style = 0;
+    g_unit_panel_preview_stats_thread_params.style = 0;
     g_formation_stat_preview_panel_thread_params.style = 0;
     g_formation_equipment_panel_thread_params.style = 0;
     g_formation_ability_panel_thread_params.style = 0;
@@ -404,9 +406,9 @@ void formation_init_grid_cursor(s32 formation_index) {
     g_formation_stat_display_mode = MENU_UNIT_READOUT_HP;
     g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
     if (g_formation_unit_banner_at_bottom != 0) {
-        g_menu_status_display_thread_params.y = 0x90;
+        g_unit_panel_status_display_thread_params.y = 0x90;
     } else {
-        g_menu_status_display_thread_params.y = 0;
+        g_unit_panel_status_display_thread_params.y = 0;
     }
     g_formation_unit_banner_enabled = 1;
     g_formation_saved_banner_enabled = 1;
@@ -552,7 +554,7 @@ s32 formation_update_grid(s16 background_y, s16 toggle_banner, s16 allow_browse,
     /* Draw the visible unit slots row by row; rows the banner covers are dimmed. */
     for (row = 0; row < 5; row++, y += 0x3c) {
         value = 0;
-        if (g_formation_unit_banner_enabled != 0 && g_menu_status_display_thread_params.flags == 0) {
+        if (g_formation_unit_banner_enabled != 0 && g_unit_panel_status_display_thread_params.flags == 0) {
             if (g_formation_unit_banner_at_bottom != 0) {
                 value = y > 0x8f;
             } else if (y < 0x47) {

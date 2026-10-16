@@ -20,14 +20,14 @@
 /* Open the pending menu description in a Help dialog at the requested position.
  * Grid-menu ids above 0x1ffff are latched without opening a text thread. */
 void screen_start_help_text(s32 position) {
-    if (g_menu_help_message_text_id > 0x1ffff) {
-        g_screen_grid_id = g_menu_help_message_text_id;
+    if (g_help_message_text_id > 0x1ffff) {
+        g_screen_grid_id = g_help_message_text_id;
         return;
     }
-    if (g_menu_help_message_text_id > 0) {
-        thread_start(THREAD_SCREEN_SLOT_TEXT, text_run_dialog_thread);
+    if (g_help_message_text_id > 0) {
+        thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, position + (DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL),
-            g_menu_help_message_text_id, 0);
+            g_help_message_text_id, 0);
         g_menu_input_lock_mode = 1;
     }
 }
@@ -80,12 +80,11 @@ void screen_update_grid_cursor(s16 alternate) {
             g_screen_grid_id = MENU_GRID_HELP_NONE;
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_screen_grid_initialized = 0;
-            g_menu_help_message_text_id = menu_id;
+            g_help_message_text_id = menu_id;
         } else if (input & PSX_PAD_CIRCLE) {
             text_id = g_screen_grid_active_cells[cell].text_id != 0 ? *g_screen_grid_active_cells[cell].text_id : 0;
             if (g_screen_grid_selected_cell < 0x12 || g_screen_grid_selected_cell >= 0x1C || text_id != 0) {
-                g_menu_help_message_text_id
-                    = text_id + g_screen_grid_active_cells[g_screen_grid_selected_cell].text_offset;
+                g_help_message_text_id = text_id + g_screen_grid_active_cells[g_screen_grid_selected_cell].text_offset;
                 screen_start_help_text(DIALOG_POSITION_CENTER);
             }
         } else if (input & PSX_PAD_UP) {

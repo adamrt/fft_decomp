@@ -107,7 +107,7 @@ typedef struct menu_entry {
      * with them. */
     image_load_parameters_t text_image;
     s16 text_id;                 /* 0x1c: passed to text_find_entry */
-    s16 max_row_index;           /* 0x1e: row count - 1 (menu_build_skillset_entries) */
+    s16 max_row_index;           /* 0x1e: row count - 1 (command_build_act_menu) */
     s16 thread_count;            /* 0x20: threads menu_handle_cancel_input stops, -1 when there is no thread
                                     group; set from the system-function table by menu_run_system_function_thread */
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
@@ -172,7 +172,7 @@ extern s32 g_formation_screen_active;
 extern u16 g_frame_arg;
 /* Advanced once per frame by the menu frame update. */
 extern s32 g_frame_counter;
-extern u8 g_monster_formation_sprite_table[20]; /* indexed by sprite code - 0x3f */
+extern u8 g_formation_monster_sprite_table[20]; /* indexed by sprite code - 0x3f */
 extern s32 g_menu_formation_display_mode;
 extern s32 g_menu_post_battle_unit_changes_active;
 

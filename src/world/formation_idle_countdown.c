@@ -14,7 +14,7 @@ void screen_input_update_lockout(void) {
 
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
         value = 10;
-    } else if (g_menu_status_display_thread_params.flags
+    } else if (g_unit_panel_status_display_thread_params.flags
         & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
         value = 10;
     } else {

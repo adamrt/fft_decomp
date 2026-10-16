@@ -51,9 +51,9 @@ s8 formation_item_action_menu(void) {
 
     if (g_formation_item_action_menu_initialized == 0) {
         g_formation_item_category_input_lock = 0;
-        g_menu_help_message_text_id = 0;
+        g_help_message_text_id = 0;
         screen_reset_selection_results();
-        g_menu_preview_stats_thread_params.style = 0;
+        g_unit_panel_preview_stats_thread_params.style = 0;
 
         /* Each option line starts with a palette code (0xE3) whose operand 4 grays the line out;
          * option states of 0x1000 and up refuse Circle. */
@@ -113,7 +113,7 @@ s8 formation_item_action_menu(void) {
     selected = item;
     if (selected != -1) {
         if (selected == 0) {
-            g_menu_preview_stats_thread_params.style = 1;
+            g_unit_panel_preview_stats_thread_params.style = 1;
             if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
                 return MENU_ITEM_LIST_STATE_ACTION;
             }
@@ -130,17 +130,17 @@ s8 formation_item_action_menu(void) {
                     menu_set_window_scale_step(10);
                     item_rebuild_category_list(g_menu_selected_slot);
                     item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index],
-                        &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
-                    g_menu_preview_stats_thread_params.redraw_request = 1;
+                        &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+                    g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 }
             }
             g_formation_item_action_menu_initialized = 0;
             screen_reset_selection_results();
-            g_menu_preview_stats_thread_params.style = 0;
+            g_unit_panel_preview_stats_thread_params.style = 0;
             g_formation_item_quantity_change_menu.selected_index = 0;
             return MENU_ITEM_LIST_STATE_ACTION;
         } else if (selected == 1) {
-            g_menu_preview_stats_thread_params.style = selected;
+            g_unit_panel_preview_stats_thread_params.style = selected;
             item = g_item_list_entries[g_menu_list_selected_index];
             if (g_formation_item_action_menu_initialized == selected) {
                 g_sound_suppressed = 1;
@@ -166,7 +166,7 @@ s8 formation_item_action_menu(void) {
             }
             g_sound_suppressed = 0;
             screen_reset_selection_results();
-            g_menu_preview_stats_thread_params.style = 0;
+            g_unit_panel_preview_stats_thread_params.style = 0;
             g_formation_item_unequip_all_menu.selected_index = 0;
         } else {
             if (result == 0) {
@@ -200,9 +200,9 @@ s8 formation_item_action_menu(void) {
         } else {
             result = 0;
         }
-        item_collect_stat_deltas(result, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
-        g_menu_status_display_thread_params.redraw_request = 1;
-        g_menu_preview_stats_thread_params.redraw_request = 1;
+        item_collect_stat_deltas(result, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        g_unit_panel_status_display_thread_params.redraw_request = 1;
+        g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
 
     g_formation_item_action_menu_initialized = 0;
@@ -227,7 +227,7 @@ s8 formation_item_sort_menu(void) {
     if (g_formation_item_sort_order_initialized == 0) {
         g_formation_item_category_icon_strip_a.selected_index = 0;
         g_formation_item_category_icon_strip_b.selected_index = 0;
-        menu_load_sort_key_list(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
+        item_load_type_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
         i = 0;
         while ((text_ids[i] = g_formation_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
@@ -251,7 +251,7 @@ s8 formation_item_sort_menu(void) {
     if (i == 5) {
         i = 0x39;
     }
-    g_menu_help_message_text_id = i + HELP_TEXT_ID_MENU_COMMAND_BASE;
+    g_help_message_text_id = i + HELP_TEXT_ID_MENU_COMMAND_BASE;
     index = g_screen_selection_results[7];
     if (index != -1) {
         selected = g_formation_item_category_strip_text_ids[index];
@@ -260,7 +260,7 @@ s8 formation_item_sort_menu(void) {
         }
         g_formation_item_category_strip_text_ids[0] = selected;
         screen_reset_selection_results();
-        menu_store_sort_key_list(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
+        item_store_type_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
         i = 0;
         while ((text_ids[i] = g_formation_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
@@ -277,9 +277,9 @@ s8 formation_item_sort_menu(void) {
         menu_init_scrollable_list_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
-        item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index], &g_menu_selected_unit_stat_summary,
-            &g_item_preview_stat_detail, 0);
-        g_menu_preview_stats_thread_params.redraw_request = 1;
+        item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index],
+            &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
     if (menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_formation_item_category_icon_strip) == 0) {
         g_formation_item_sort_order_initialized = 0;
@@ -303,7 +303,7 @@ s32 formation_item_show_equipping_units(void) {
         formation_save_records();
         g_formation_unit_count = formation_build_record_list(
             g_item_list_entries[g_menu_list_selected_index], g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-        g_menu_help_message_text_id = MENU_GRID_HELP_UNIT_BROWSE;
+        g_help_message_text_id = MENU_GRID_HELP_UNIT_BROWSE;
         g_formation_unit_browse_enabled = 1;
         g_formation_unit_banner_enabled = 1;
         formation_toggle_preview_stats_window(0);

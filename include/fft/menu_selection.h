@@ -34,20 +34,20 @@ typedef char menu_selection_remap_size_must_be_5[sizeof(menu_selection_remap_t) 
 
 extern menu_unit_selection_record_t g_menu_unit_selection_records[];
 extern menu_selection_remap_t g_menu_selection_remaps[8];
-/* When the idle action menu opens again for g_menu_restore_unit_id with a restore pending, it reopens the
+/* When the idle action menu opens again for g_command_restore_unit_id with a restore pending, it reopens the
  * skillset list and the ability list down to g_menu_restore_depth. */
 extern u8 g_menu_restore_pending;
 extern u8 g_menu_restore_depth;
-extern u8 g_menu_restore_unit_id;
+extern u8 g_command_restore_unit_id;
 
 /* Clears one unit's records, only for a unit under manual control. */
-void menu_reset_unit_record(s32 battle_id);
-void menu_reset_unit_records(void);
-/* Calls menu_reset_unit_records; nothing calls it. */
-void menu_reset_unit_records_wrapper(void);
+void command_reset_unit_record(s32 battle_id);
+void command_reset_unit_records(void);
+/* Calls command_reset_unit_records; nothing calls it. */
+void command_reset_unit_records_wrapper(void);
 /* Restores the selected unit's command row, applying g_menu_selection_remaps. */
-void menu_restore_selection_for_selected_unit(s32 menu_id);
-void menu_record_selection_for_selected_unit(void);
+void command_restore_unit_selection(s32 menu_id);
+void command_record_unit_selection(void);
 void menu_clear_entry_selections(void);
 
 /* remembered list cursors */
@@ -69,7 +69,7 @@ typedef char menu_selection_record_size_must_be_6[sizeof(menu_selection_record_t
 
 /* VARIANT_MENU_SELECTION_RECORD_COUNT records: 14 in BUNIT and WORLD, 5 in EQUIP and JOBSTTS. */
 extern menu_selection_record_t g_menu_selection_records[];
-extern s16 g_menu_pending_selection[4];
+extern s16 g_command_pending_selection[4];
 
 void menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_index, s16* entries);
 void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);

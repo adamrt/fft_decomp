@@ -15,127 +15,127 @@
 #include "psx/types.h"
 
 /* turns */
-/* battle_action_run_between_turn_control modes. */
-typedef enum battle_between_turn_mode {
-    BATTLE_BETWEEN_TURN_MODE_RUN = 0,
-    BATTLE_BETWEEN_TURN_MODE_RESET = 1,
-    BATTLE_BETWEEN_TURN_MODE_FIND_ACTIVE_UNIT = 2,
-} battle_between_turn_mode_e;
+/* turn_run_clock modes. */
+typedef enum turn_clock_mode {
+    TURN_CLOCK_MODE_RUN = 0,
+    TURN_CLOCK_MODE_RESET = 1,
+    TURN_CLOCK_MODE_FIND_ACTIVE_UNIT = 2,
+} turn_clock_mode_e;
 
-/* g_battle_between_turn_state and g_battle_between_turn_resume_state: the phases of
- * battle_action_run_between_turn_control. */
-typedef enum battle_between_turn_state {
-    BATTLE_BETWEEN_TURN_STATE_ADD_CT = 0,         /* every unit gains CT by its speed */
-    BATTLE_BETWEEN_TURN_STATE_PICK_UNIT = 1,      /* the highest CT of 100 or more takes a turn */
-    BATTLE_BETWEEN_TURN_STATE_TICK_CHARGES = 2,   /* count down every charged_ability_ct */
-    BATTLE_BETWEEN_TURN_STATE_RESOLVE_CHARGE = 3, /* a charge that reached 0 resolves */
-    BATTLE_BETWEEN_TURN_STATE_EXPIRE_STATUSES = 4,
-    BATTLE_BETWEEN_TURN_STATE_COLLECT_PENDING_ACTIONS = 5, /* note the units whose action has an attack type */
-    BATTLE_BETWEEN_TURN_STATE_RUN_PENDING_ACTIONS = 6,
-    BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE = 9, /* a unit whose CT is 0xff takes a turn at once */
-    BATTLE_BETWEEN_TURN_STATE_UNIT_TURN = 10,             /* end the turn of each unit that has one */
-    BATTLE_BETWEEN_TURN_STATE_MARK_MIMES = 13,
-    BATTLE_BETWEEN_TURN_STATE_RUN_MIMES = 14,
-    BATTLE_BETWEEN_TURN_STATE_TERRAIN_POISON = 15,
-    BATTLE_BETWEEN_TURN_STATE_REMOVE_TRANSPARENT = 17,
-    BATTLE_BETWEEN_TURN_STATE_POISON_AND_REGEN = 19,
-} battle_between_turn_state_e;
+/* g_turn_clock_state and g_turn_clock_resume_state: the phases of
+ * turn_run_clock. */
+typedef enum turn_clock_state {
+    TURN_CLOCK_STATE_ADD_CT = 0,         /* every unit gains CT by its speed */
+    TURN_CLOCK_STATE_PICK_UNIT = 1,      /* the highest CT of 100 or more takes a turn */
+    TURN_CLOCK_STATE_TICK_CHARGES = 2,   /* count down every charged_ability_ct */
+    TURN_CLOCK_STATE_RESOLVE_CHARGE = 3, /* a charge that reached 0 resolves */
+    TURN_CLOCK_STATE_EXPIRE_STATUSES = 4,
+    TURN_CLOCK_STATE_COLLECT_PENDING_ACTIONS = 5, /* note the units whose action has an attack type */
+    TURN_CLOCK_STATE_RUN_PENDING_ACTIONS = 6,
+    TURN_CLOCK_STATE_PICK_UNIT_AFTER_CHARGE = 9, /* a unit whose CT is 0xff takes a turn at once */
+    TURN_CLOCK_STATE_UNIT_TURN = 10,             /* end the turn of each unit that has one */
+    TURN_CLOCK_STATE_MARK_MIMES = 13,
+    TURN_CLOCK_STATE_RUN_MIMES = 14,
+    TURN_CLOCK_STATE_TERRAIN_POISON = 15,
+    TURN_CLOCK_STATE_REMOVE_TRANSPARENT = 17,
+    TURN_CLOCK_STATE_POISON_AND_REGEN = 19,
+} turn_clock_state_e;
 
-typedef enum battle_turn_status_flags {
-    BATTLE_TURN_STATUS_CT_FROZEN = 0x01,
-    BATTLE_TURN_STATUS_INCAPACITATED = 0x02,
-    BATTLE_TURN_STATUS_DEAD = 0x04,
-    BATTLE_TURN_STATUS_SLEEP = 0x08,
-    BATTLE_TURN_STATUS_HASTE = 0x10,
-    BATTLE_TURN_STATUS_SLOW = 0x20,
-    BATTLE_TURN_STATUS_BLOCKS_WAIT_MENU_MASK = 0x0f,
-    BATTLE_TURN_STATUS_BLOCKS_TURN_MASK = 0x0d,
-} battle_turn_status_flags_e;
+typedef enum turn_status_flags {
+    TURN_STATUS_CT_FROZEN = 0x01,
+    TURN_STATUS_INCAPACITATED = 0x02,
+    TURN_STATUS_DEAD = 0x04,
+    TURN_STATUS_SLEEP = 0x08,
+    TURN_STATUS_HASTE = 0x10,
+    TURN_STATUS_SLOW = 0x20,
+    TURN_STATUS_BLOCKS_WAIT_MENU_MASK = 0x0f,
+    TURN_STATUS_BLOCKS_TURN_MASK = 0x0d,
+} turn_status_flags_e;
 
-typedef enum battle_turn_event {
-    BATTLE_TURN_EVENT_UNIT_READY = 0x0100,
-    BATTLE_TURN_EVENT_ABILITY_READY = 0x0200,
-    BATTLE_TURN_EVENT_ACTION_RESULT = 0x0300,
-    BATTLE_TURN_EVENT_UNKNOWN_0400 = 0x0400,
-    BATTLE_TURN_EVENT_MIME = 0x0500,
-    BATTLE_TURN_EVENT_NONE = 0xff00,
-} battle_turn_event_e;
+typedef enum turn_event {
+    TURN_EVENT_UNIT_READY = 0x0100,
+    TURN_EVENT_ABILITY_READY = 0x0200,
+    TURN_EVENT_ACTION_RESULT = 0x0300,
+    TURN_EVENT_UNKNOWN_0400 = 0x0400,
+    TURN_EVENT_MIME = 0x0500,
+    TURN_EVENT_NONE = 0xff00,
+} turn_event_e;
 
 /* End of turn: CT gains 20 for an unused move and 20 for an unused action, and
  * the result is capped at 60. */
 enum {
-    BATTLE_TURN_UNUSED_CT_REFUND = 20,
-    BATTLE_TURN_END_CT_MAX = 60,
+    TURN_UNUSED_CT_REFUND = 20,
+    TURN_END_CT_MAX = 60,
 };
 
-extern s32 g_battle_action_turn_event_type;
-extern u8 g_battle_acting_unit_elevation;
-extern s32 g_battle_acting_unit_id;
-extern u8 g_battle_acting_unit_x;
-extern u8 g_battle_acting_unit_y;
-extern s32 g_battle_between_turn_resume_state;
-extern s32 g_battle_between_turn_state;
-extern s32 g_battle_state_wait_direction_facing;
-extern s32 g_battle_turn_unit_id;
+extern s32 g_turn_event_type;
+extern u8 g_action_actor_elevation;
+extern s32 g_action_actor_id;
+extern u8 g_action_actor_x;
+extern u8 g_action_actor_y;
+extern s32 g_turn_clock_resume_state;
+extern s32 g_turn_clock_state;
+extern s32 g_state_wait_direction_facing;
+extern s32 g_turn_unit_id;
 
-s32 battle_action_check_battle_outcome(void);
-void battle_action_start_next_turn_event(void);
-s32 battle_action_check_change_of_turn(s32 unit_id);
-void battle_state_enter_wait_direction(void);
-void battle_state_enter_wait_menu(void);
-s32 battle_action_end_turn(s32 unit_id);
-s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode);
-void battle_action_set_only_action_taken(s32 unit_id);
-void battle_action_set_only_movement_taken(s32 unit_id);
+s32 event_check_battle_outcome(void);
+void turn_start_next_event(void);
+s32 turn_is_over(s32 unit_id);
+void state_enter_wait_direction(void);
+void state_enter_wait_menu(void);
+s32 turn_end(s32 unit_id);
+s32 turn_run_clock(turn_clock_mode_e mode);
+void turn_set_act_taken(s32 unit_id);
+void turn_set_move_taken(s32 unit_id);
 
 /* active time list */
-/* battle_action_calculate_at_list modes. */
-typedef enum battle_at_list_mode {
-    BATTLE_AT_LIST_MODE_ALL = 0,
-    BATTLE_AT_LIST_MODE_TURNS_ONLY = 1,   /* leave out the charged and performing actions */
-    BATTLE_AT_LIST_MODE_ACTIONS_ONLY = 2, /* leave out the active unit and the simulated turns */
-    BATTLE_AT_LIST_MODE_PREVIEW = 3,      /* as ALL, with the acting unit's new charge counted from this tick */
-} battle_at_list_mode_e;
+/* at_list_build modes. */
+typedef enum at_list_mode {
+    AT_LIST_MODE_ALL = 0,
+    AT_LIST_MODE_TURNS_ONLY = 1,   /* leave out the charged and performing actions */
+    AT_LIST_MODE_ACTIONS_ONLY = 2, /* leave out the active unit and the simulated turns */
+    AT_LIST_MODE_PREVIEW = 3,      /* as ALL, with the acting unit's new charge counted from this tick */
+} at_list_mode_e;
 
-/* battle_action_get_at_list_entry_unit_id results: the low byte is the unit's battle id, and a
- * charged-action entry adds BATTLE_AT_LIST_ENTRY_CHARGED_ACTION. */
+/* at_list_get_entry_unit_id results: the low byte is the unit's battle id, and a
+ * charged-action entry adds AT_LIST_ENTRY_CHARGED_ACTION. */
 enum {
-    BATTLE_AT_LIST_ENTRY_EMPTY = -4,
-    BATTLE_AT_LIST_ENTRY_BATTLE_ID_MASK = 0xff,
-    BATTLE_AT_LIST_ENTRY_CHARGED_ACTION = 0x100,
+    AT_LIST_ENTRY_EMPTY = -4,
+    AT_LIST_ENTRY_BATTLE_ID_MASK = 0xff,
+    AT_LIST_ENTRY_CHARGED_ACTION = 0x100,
 };
 
-extern s32 g_battle_target_cursor_visible;
-extern s32 g_battle_action_at_list_cursor;
+extern s32 g_cursor_visible;
+extern s32 g_at_list_cursor;
 
-s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode);
-s32 battle_action_get_at_list_entry_unit_id(s32 at_index);
-s32 battle_action_find_unit_turn_index(const unit_stats_t* unit);
-void battle_action_clear_at_list_cursor(void);
-void battle_action_show_at_list_entry(s32 at_index);
-u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries);
-void battle_action_open_status_menu_at_list_start(void);
-s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, at_entry_t* at_list);
-void battle_action_show_next_at_list_entry(void);
+s32 at_list_build(at_entry_t* list, at_list_mode_e mode);
+s32 at_list_get_entry_unit_id(s32 at_index);
+s32 at_list_find_unit(const unit_stats_t* unit);
+void at_list_reset_cursor(void);
+void at_list_show_entry(s32 at_index);
+u8 at_list_count_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries);
+void menu_status_open(void);
+s32 at_list_preview(unit_stats_t* unit, action_command_t* action, at_entry_t* at_list);
+void at_list_show_next_entry(void);
 
 /* preparation */
-/* Result of battle_action_prepare_attack, kept in battle_unit_t.attack_phase_state. */
-typedef enum battle_attack_preparation {
-    BATTLE_ATTACK_PREPARATION_INVALID = -1,
-    BATTLE_ATTACK_PREPARATION_CHARGE = 0, /* the action has a charge time; also Defend */
-    BATTLE_ATTACK_PREPARATION_IMMEDIATE = 1,
-    BATTLE_ATTACK_PREPARATION_CHANGE_EQUIPMENT = 2,
-    BATTLE_ATTACK_PREPARATION_JUMP = 3,
-} battle_attack_preparation_e;
+/* Result of action_prepare, kept in unit_t.attack_phase_state. */
+typedef enum action_preparation {
+    ACTION_PREPARATION_INVALID = -1,
+    ACTION_PREPARATION_CHARGE = 0, /* the action has a charge time; also Defend */
+    ACTION_PREPARATION_IMMEDIATE = 1,
+    ACTION_PREPARATION_CHANGE_EQUIPMENT = 2,
+    ACTION_PREPARATION_JUMP = 3,
+} action_preparation_e;
 
-void battle_action_call_attack_preparation(action_command_t* action);
-s32 battle_action_commit_attack_preparation(action_command_t* command);
-void battle_state_enter_confirm_action(void);
-s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit);
-void battle_state_enter_unit_move(void);
-s32 battle_action_prepare_attack(action_command_t* source, action_command_t* dest, s32 phase);
-void battle_state_enter_event_at_battle_start(void);
-void battle_action_switch_ability_to_default_attack(void);
+void action_prepare_in_place(action_command_t* action);
+s32 action_commit_preparation(action_command_t* command);
+void state_enter_confirm_action(void);
+s32 ability_get_elemental_id(const unit_stats_t* unit);
+void state_enter_unit_move(void);
+s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase);
+void state_enter_event_at_battle_start(void);
+void action_switch_ability_to_default_attack(void);
 
 /* action outcomes */
 /* Bitset in action_data_t.attack_type; one result can affect HP and MP. */
@@ -208,7 +208,7 @@ typedef enum action_state {
     ACTION_STATE_PREVIEW = 2,
 } action_state_e;
 
-/* Why battle_action_init_current_data rejects an action; battle_gfx_queue_charge_failure_message
+/* Why action_init_current_data rejects an action; result_queue_charge_failure_message
  * shows a pop-up for the codes below 4. */
 typedef enum action_rejection {
     ACTION_REJECTION_NONE = 0,
@@ -217,13 +217,13 @@ typedef enum action_rejection {
     ACTION_REJECTION_NOT_ENOUGH_MP = 3,
     ACTION_REJECTION_FROG = 5,   /* a Frog using Charge or an ability other than Attack, Frog Attack or Frog */
     ACTION_REJECTION_HAMEDO = 6, /* a Hamedo reaction pre-empted the action */
-    /* A battle_unit_action_restriction_e plus this offset. */
+    /* A unit_action_restriction_e plus this offset. */
     ACTION_REJECTION_RESTRICTION_OFFSET = 6,
     ACTION_REJECTION_CANNOT_ACT = 7,
     ACTION_REJECTION_DEEP_WATER = 8,
 } action_rejection_e;
 
-/* g_battle_action_phase: which unit's action the attack phase is announcing. */
+/* g_action_phase: which unit's action the attack phase is announcing. */
 typedef enum action_phase {
     ACTION_PHASE_PRE_ACTION = 0,    /* a reaction that pre-empts the pending action (Hamedo) */
     ACTION_PHASE_ACTING_UNIT = 1,   /* the acting unit's own action */
@@ -232,11 +232,11 @@ typedef enum action_phase {
 
 enum { ACTION_PHASE_COUNT = 3 };
 
-/* g_battle_action_current_ability: the attacker/target pair, weapons, formula
+/* g_action_current_ability: the attacker/target pair, weapons, formula
  * inputs and results of the strike being resolved, with copies of the ability's
  * secondary data, the weapon's data and the status-infliction record that
- * battle_action_calculate_target_result loads. */
-typedef struct battle_current_ability {
+ * action_calculate_target_result loads. */
+typedef struct action_current_ability {
     u8 attacker_id;                             /* 0x00 */
     u8 target_id;                               /* 0x01 */
     u8 strike_count;                            /* 0x02 */
@@ -276,7 +276,7 @@ typedef struct battle_current_ability {
     u8 defaulted_to_attack;                     /* 0x29 */
     u8 random_damage_factor;                    /* 0x2a */
     u8 mp_cost;                                 /* 0x2b: effective cost recorded before the MP checks of
-                                                 * battle_action_check_and_consume_mp; reaction
+                                                 * action_check_and_consume_mp; reaction
                                                  * eligibility reads it even when no MP was subtracted */
     u8 target_count;                            /* 0x2c */
     u8 knockback_flags;                         /* 0x2d */
@@ -289,94 +289,94 @@ typedef struct battle_current_ability {
     u8 job_level_gained_flag;                   /* 0x4d */
     u8 post_action_message;                     /* 0x4e; 6 poached, 9 trained */
     u8 random_fire_flag;                        /* 0x4f */
-} battle_current_ability_t;
-typedef char battle_current_ability_size_must_be_80[(sizeof(battle_current_ability_t) == 80) ? 1 : -1];
+} action_current_ability_t;
+typedef char action_current_ability_size_must_be_80[(sizeof(action_current_ability_t) == 80) ? 1 : -1];
 
-/* battle_current_ability_t.knockback_flags: the kind of knockback found by
- * battle_formula_calculate_knockback, with PENDING set until it is applied. */
-typedef enum battle_knockback_kind {
-    BATTLE_KNOCKBACK_FALL_DAMAGE = 1,    /* a grounded target: the fall height can hurt */
-    BATTLE_KNOCKBACK_NO_FALL_DAMAGE = 2, /* a flying target */
-} battle_knockback_kind_e;
+/* action_current_ability_t.knockback_flags: the kind of knockback found by
+ * move_knockback_calculate, with PENDING set until it is applied. */
+typedef enum move_knockback_kind {
+    MOVE_KNOCKBACK_FALL_DAMAGE = 1,    /* a grounded target: the fall height can hurt */
+    MOVE_KNOCKBACK_NO_FALL_DAMAGE = 2, /* a flying target */
+} move_knockback_kind_e;
 
 /* Encoding of the kind and pending marker in the same byte. */
 enum {
-    BATTLE_KNOCKBACK_KIND_MASK = 0x7f,
-    BATTLE_KNOCKBACK_PENDING = 0x80,
+    MOVE_KNOCKBACK_KIND_MASK = 0x7f,
+    MOVE_KNOCKBACK_PENDING = 0x80,
 };
 
-/* battle_current_ability_t.post_action_message, copied to the strike work and
+/* action_current_ability_t.post_action_message, copied to the strike work and
  * the runtime unit record: the message the post-action state opens. */
-typedef enum battle_post_action_message {
-    BATTLE_POST_ACTION_MESSAGE_NONE = 0,
-    BATTLE_POST_ACTION_MESSAGE_POACHED = 6,
-    BATTLE_POST_ACTION_MESSAGE_TRAINED = 9,
-} battle_post_action_message_e;
+typedef enum action_post_message {
+    ACTION_POST_MESSAGE_NONE = 0,
+    ACTION_POST_MESSAGE_POACHED = 6,
+    ACTION_POST_MESSAGE_TRAINED = 9,
+} action_post_message_e;
 
-extern unit_stats_t* g_battle_action_attacker;
-extern action_data_t g_battle_action_attacker_action_data;
-extern action_data_t* g_battle_action_attacker_data;
-extern u8 g_battle_action_canceled_statuses[];
-extern action_context_e g_battle_action_context;
-extern battle_current_ability_t g_battle_action_current_ability;
-extern s32 g_battle_action_phase;
-extern action_command_t g_battle_action_saved_command;
-extern action_state_e g_battle_action_state;
-extern unit_stats_t* g_battle_action_target;
-extern action_data_t* g_battle_action_target_data;
-extern s16 g_battle_acting_unit_used_ability_id;
-extern s32 g_battle_casting_runtime_id;
-extern s32 g_battle_distribute_target_count;
+extern unit_stats_t* g_action_attacker;
+extern action_data_t g_action_attacker_action_data;
+extern action_data_t* g_action_attacker_data;
+extern u8 g_action_canceled_statuses[];
+extern action_context_e g_action_context;
+extern action_current_ability_t g_action_current_ability;
+extern s32 g_action_phase;
+extern action_command_t g_action_saved_command;
+extern action_state_e g_action_state;
+extern unit_stats_t* g_action_target;
+extern action_data_t* g_action_target_data;
+extern s16 g_action_actor_used_ability_id;
+extern s32 g_unit_casting_runtime_id;
+extern s32 g_reaction_distribute_target_count;
 /* Golem barrier HP per team, shared by action resolution and AI snapshots. */
-extern u16 g_battle_team_golem[UNIT_TEAM_COUNT];
+extern u16 g_action_team_golem[UNIT_TEAM_COUNT];
 /* Count and coordinates of the tiles already handed out as dismount
  * destinations this action. */
-extern s32 g_battle_relocated_unit_count;
-extern battle_tile_coordinates_t g_battle_relocated_unit_coords[];
+extern s32 g_unit_relocated_count;
+extern move_tile_coordinates_t g_unit_relocated_coords[];
 
 /* Preview action calculation entry run on the main stack. */
-s32 battle_action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command);
-void battle_action_clear_current_data(action_data_t* action);
-void battle_action_clear_knockback_flag(void);
-void battle_action_execute_ability(void);
-void battle_action_finalize_target_current_action(void);
-s32 battle_action_init_current_data(s32 unit_id);
-s32 battle_action_apply_target_result(s32 battle_id);
-s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* work);
-s32 battle_action_calculate_target_result(const action_command_t* source, u8 target_id);
-void battle_action_apply_strike_results(void);
-void battle_action_store_acting_unit_data(unit_stats_t* unit);
-void battle_action_store_target_ids(u8* src);
-s32 battle_action_apply_attacker_result(s32 unit_id);
-void battle_action_store_used_weapon(action_command_t* action);
+s32 action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command);
+void action_clear_current_data(action_data_t* action);
+void move_knockback_cancel(void);
+void action_execute_ability(void);
+void action_finalize_target_result(void);
+s32 action_init_current_data(s32 unit_id);
+s32 action_apply_target_result(s32 battle_id);
+s32 action_resolve_strike(s32 battle_id, action_strike_work_t* work);
+s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
+void action_apply_strike_results(void);
+void action_store_actor_data(unit_stats_t* unit);
+void action_store_target_ids(u8* src);
+s32 action_apply_attacker_result(s32 unit_id);
+void action_store_used_weapon(action_command_t* action);
 
 /* reactions */
 /* Reaction behavior flags (g_ability_reaction_behavior_flags). */
-typedef enum battle_reaction_behavior_flag {
-    BATTLE_REACTION_BEHAVIOR_FLAG_TRIGGER_ABILITY = 0x01,
-    BATTLE_REACTION_BEHAVIOR_FLAG_ABILITY = 0x02,
-    BATTLE_REACTION_BEHAVIOR_FLAG_TARGET_SELF = 0x04,
-    BATTLE_REACTION_BEHAVIOR_FLAG_TARGET_ATTACKER = 0x08,
-    BATTLE_REACTION_BEHAVIOR_FLAG_PASSIVE = 0x10,
-    BATTLE_REACTION_BEHAVIOR_FLAG_ACTIVE = 0x20,
-} battle_reaction_behavior_flag_e;
+typedef enum reaction_behavior_flag {
+    REACTION_BEHAVIOR_FLAG_TRIGGER_ABILITY = 0x01,
+    REACTION_BEHAVIOR_FLAG_ABILITY = 0x02,
+    REACTION_BEHAVIOR_FLAG_TARGET_SELF = 0x04,
+    REACTION_BEHAVIOR_FLAG_TARGET_ATTACKER = 0x08,
+    REACTION_BEHAVIOR_FLAG_PASSIVE = 0x10,
+    REACTION_BEHAVIOR_FLAG_ACTIVE = 0x20,
+} reaction_behavior_flag_e;
 
-extern s32 g_battle_action_hamedo_flag;
-extern s16 g_battle_current_reaction_ability_id;
-/* Separate link name for g_battle_action_saved_command.ability_id. */
-extern s16 g_battle_action_saved_ability_id;
+extern s32 g_reaction_hamedo_flag;
+extern s16 g_reaction_ability_id;
+/* Separate link name for g_action_saved_command.ability_id. */
+extern s16 g_action_saved_ability_id;
 
-s32 battle_action_fails_reaction_roll(const unit_stats_t* unit);
-s32 battle_action_is_reaction_blocked(const unit_stats_t* unit);
-s32 battle_action_is_reaction_prevented(const unit_stats_t* unit);
-s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability);
-s32 battle_reaction_prepare_next(s16* out_ability);
+s32 reaction_fails_brave_roll(const unit_stats_t* unit);
+s32 reaction_is_blocked(const unit_stats_t* unit);
+s32 reaction_is_prevented(const unit_stats_t* unit);
+s32 reaction_prepare_hamedo(s32 id, s16* out_ability);
+s32 reaction_prepare_next(s16* out_ability);
 
 /* mimic */
-/* g_battle_action_current_attacker, filled by battle_action_set_current_attacker_data and read
- * by battle_action_set_mimic_ability. The AI saves and restores it whole as 30 bytes
- * (battle_ai_begin_action_simulation and battle_ai_end_action_simulation). */
-typedef struct battle_current_attacker_data {
+/* g_action_mimic_attacker, filled by action_mimic_record and read
+ * by action_mimic_set_ability. The AI saves and restores it whole as 30 bytes
+ * (ai_simulate_begin and ai_simulate_end). */
+typedef struct action_mimic_attacker {
     u8 facing;               /* 0x00 */
     u8 mimic_pending;        /* 0x01: a non-Mime action was recorded; state 13 queues the Mimes */
     u8 right_hand_weapon_id; /* 0x02 */
@@ -386,19 +386,19 @@ typedef struct battle_current_attacker_data {
     s16 target_delta_x;      /* 0x06 */
     s16 target_delta_y;      /* 0x08 */
     action_command_t action; /* 0x0a: copy of unit_stats_t +0x16e */
-} battle_current_attacker_data_t;
-typedef char battle_current_attacker_data_size_must_be_30[(sizeof(battle_current_attacker_data_t) == 30) ? 1 : -1];
+} action_mimic_attacker_t;
+typedef char action_mimic_attacker_size_must_be_30[(sizeof(action_mimic_attacker_t) == 30) ? 1 : -1];
 
-extern battle_current_attacker_data_t g_battle_action_current_attacker;
-extern battle_current_attacker_data_t g_battle_ai_current_attacker_backup;
+extern action_mimic_attacker_t g_action_mimic_attacker;
+extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
 
-void battle_action_set_current_attacker_data(unit_stats_t* unit);
-s32 battle_action_set_mimic_ability(unit_stats_t* unit);
+void action_mimic_record(unit_stats_t* unit);
+s32 action_mimic_set_ability(unit_stats_t* unit);
 
 /* result displays */
 /* Pending post-action displays are queued as one little-endian 32-bit value in runtime
- * Unit Data 0x1b8..0x1bb. battle_gfx_build_next_action_result_display and
- * battle_gfx_build_next_special_action_result_display consume one bit at a time in ascending
+ * Unit Data 0x1b8..0x1bb. result_build_next_display and
+ * result_build_next_special_display consume one bit at a time in ascending
  * order. */
 typedef enum action_display_flag {
     ACTION_DISPLAY_FLAG_HP_DAMAGE = 0x00000001,
@@ -441,50 +441,50 @@ enum {
 
 /* The low 9 bits select a result graphic; bit 9 alters its motion for a
  * critical hit. Values below 0x10 are also indices into
- * g_battle_action_display_values. */
-typedef enum battle_numeric_display_selector {
-    BATTLE_NUMERIC_DISPLAY_HP_DAMAGE = 0x000,
-    BATTLE_NUMERIC_DISPLAY_HP_HEALING = 0x001,
-    BATTLE_NUMERIC_DISPLAY_MP_DAMAGE = 0x002,
-    BATTLE_NUMERIC_DISPLAY_MP_HEALING = 0x003,
-    BATTLE_NUMERIC_DISPLAY_SPEED_DAMAGE = 0x004,
-    BATTLE_NUMERIC_DISPLAY_SPEED_GAIN = 0x005,
-    BATTLE_NUMERIC_DISPLAY_CT_DAMAGE = 0x006,
-    BATTLE_NUMERIC_DISPLAY_CT_GAIN = 0x007,
-    BATTLE_NUMERIC_DISPLAY_BRAVE_DAMAGE = 0x008,
-    BATTLE_NUMERIC_DISPLAY_BRAVE_GAIN = 0x009,
-    BATTLE_NUMERIC_DISPLAY_FAITH_DAMAGE = 0x00a,
-    BATTLE_NUMERIC_DISPLAY_FAITH_GAIN = 0x00b,
-    BATTLE_NUMERIC_DISPLAY_PA_DAMAGE = 0x00c,
-    BATTLE_NUMERIC_DISPLAY_PA_GAIN = 0x00d,
-    BATTLE_NUMERIC_DISPLAY_MA_DAMAGE = 0x00e,
-    BATTLE_NUMERIC_DISPLAY_MA_GAIN = 0x00f,
-    BATTLE_NUMERIC_DISPLAY_MISSED = 0x010,
-    BATTLE_NUMERIC_DISPLAY_GUARDED = 0x020,
-    BATTLE_NUMERIC_DISPLAY_CAUGHT = 0x030,
-    BATTLE_NUMERIC_DISPLAY_GAINED_EXP = 0x040,
-    BATTLE_NUMERIC_DISPLAY_GAINED_JP = 0x050,
-    BATTLE_NUMERIC_DISPLAY_STATUS_INFLICTED = 0x060,
-    BATTLE_NUMERIC_DISPLAY_STATUS_REMOVED = 0x070,
-    BATTLE_NUMERIC_DISPLAY_LEVEL_DOWN = 0x080,
-    BATTLE_NUMERIC_DISPLAY_LEVEL_UP = 0x090,
-    BATTLE_NUMERIC_DISPLAY_STOLEN = 0x0a0,
-    BATTLE_NUMERIC_DISPLAY_BROKEN = 0x0b0,
-    BATTLE_NUMERIC_DISPLAY_QUICK = 0x0c0,
-    BATTLE_NUMERIC_DISPLAY_CT_ZERO = 0x0d0,
-    BATTLE_NUMERIC_DISPLAY_NO_TARGET = 0x0e0,
-    BATTLE_NUMERIC_DISPLAY_SILENCED = 0x0f0,
-    BATTLE_NUMERIC_DISPLAY_NO_MP = 0x100,
-} battle_numeric_display_selector_e;
+ * g_result_display_values. */
+typedef enum result_numeric_display_selector {
+    RESULT_NUMERIC_DISPLAY_HP_DAMAGE = 0x000,
+    RESULT_NUMERIC_DISPLAY_HP_HEALING = 0x001,
+    RESULT_NUMERIC_DISPLAY_MP_DAMAGE = 0x002,
+    RESULT_NUMERIC_DISPLAY_MP_HEALING = 0x003,
+    RESULT_NUMERIC_DISPLAY_SPEED_DAMAGE = 0x004,
+    RESULT_NUMERIC_DISPLAY_SPEED_GAIN = 0x005,
+    RESULT_NUMERIC_DISPLAY_CT_DAMAGE = 0x006,
+    RESULT_NUMERIC_DISPLAY_CT_GAIN = 0x007,
+    RESULT_NUMERIC_DISPLAY_BRAVE_DAMAGE = 0x008,
+    RESULT_NUMERIC_DISPLAY_BRAVE_GAIN = 0x009,
+    RESULT_NUMERIC_DISPLAY_FAITH_DAMAGE = 0x00a,
+    RESULT_NUMERIC_DISPLAY_FAITH_GAIN = 0x00b,
+    RESULT_NUMERIC_DISPLAY_PA_DAMAGE = 0x00c,
+    RESULT_NUMERIC_DISPLAY_PA_GAIN = 0x00d,
+    RESULT_NUMERIC_DISPLAY_MA_DAMAGE = 0x00e,
+    RESULT_NUMERIC_DISPLAY_MA_GAIN = 0x00f,
+    RESULT_NUMERIC_DISPLAY_MISSED = 0x010,
+    RESULT_NUMERIC_DISPLAY_GUARDED = 0x020,
+    RESULT_NUMERIC_DISPLAY_CAUGHT = 0x030,
+    RESULT_NUMERIC_DISPLAY_GAINED_EXP = 0x040,
+    RESULT_NUMERIC_DISPLAY_GAINED_JP = 0x050,
+    RESULT_NUMERIC_DISPLAY_STATUS_INFLICTED = 0x060,
+    RESULT_NUMERIC_DISPLAY_STATUS_REMOVED = 0x070,
+    RESULT_NUMERIC_DISPLAY_LEVEL_DOWN = 0x080,
+    RESULT_NUMERIC_DISPLAY_LEVEL_UP = 0x090,
+    RESULT_NUMERIC_DISPLAY_STOLEN = 0x0a0,
+    RESULT_NUMERIC_DISPLAY_BROKEN = 0x0b0,
+    RESULT_NUMERIC_DISPLAY_QUICK = 0x0c0,
+    RESULT_NUMERIC_DISPLAY_CT_ZERO = 0x0d0,
+    RESULT_NUMERIC_DISPLAY_NO_TARGET = 0x0e0,
+    RESULT_NUMERIC_DISPLAY_SILENCED = 0x0f0,
+    RESULT_NUMERIC_DISPLAY_NO_MP = 0x100,
+} result_numeric_display_selector_e;
 
 /* Encoding in action_result_display_t.selector. */
 enum {
-    BATTLE_NUMERIC_DISPLAY_SELECTOR_MASK = 0x1ff,
-    BATTLE_NUMERIC_DISPLAY_MODIFIER_CRITICAL = 0x200,
+    RESULT_NUMERIC_DISPLAY_SELECTOR_MASK = 0x1ff,
+    RESULT_NUMERIC_DISPLAY_MODIFIER_CRITICAL = 0x200,
 };
 
 /* Image IDs used by the projected-action display. These index the 49-entry
- * g_battle_action_display_image_rects; they are not battle status IDs. */
+ * g_result_image_rects; they are not battle status IDs. */
 typedef enum action_display_image_id {
     ACTION_DISPLAY_IMAGE_DEAD = 0,
     ACTION_DISPLAY_IMAGE_UNDEAD = 1,
@@ -556,68 +556,68 @@ enum {
     ACTION_EXP_CHANGE_LOSS = 0x80,
 };
 
-/* g_battle_action_post_action_display_phase: the reports shown one after another once an action
+/* g_reward_report_phase: the reports shown one after another once an action
  * has resolved. The post-movement reports use the first two. */
-typedef enum battle_post_action_display_phase {
-    BATTLE_POST_ACTION_DISPLAY_LEVEL_UP = 0,
-    BATTLE_POST_ACTION_DISPLAY_JOB_LEVEL_UP = 1,
-    BATTLE_POST_ACTION_DISPLAY_LEARN_ON_HIT = 2,
-} battle_post_action_display_phase_e;
+typedef enum reward_report_phase {
+    REWARD_REPORT_LEVEL_UP = 0,
+    REWARD_REPORT_JOB_LEVEL_UP = 1,
+    REWARD_REPORT_LEARN_ON_HIT = 2,
+} reward_report_phase_e;
 
-/* Queue of post-action "effect message" popups (g_battle_action_post_effect_msgs), filled by
- * battle_action_queue_post_effect_messages_for_unit and drained newest first by
- * battle_action_show_next_effect_message. */
-typedef struct battle_post_effect_msg {
+/* Queue of post-action "effect message" popups (g_action_messages), filled by
+ * action_message_queue_for_unit and drained newest first by
+ * action_message_show_next. */
+typedef struct action_post_effect_msg {
     u8 code;           /* 0x00 action_display_image_id_e of the popup */
     u8 unit;           /* 0x01 battle id of the reported unit */
     u8 _padding_02[2]; /* 0x02; aligns value */
     s32 value;         /* 0x04 reported amount */
-} battle_post_effect_msg_t;
-typedef char battle_post_effect_msg_size_must_be_8[(sizeof(battle_post_effect_msg_t) == 8) ? 1 : -1];
+} action_post_effect_msg_t;
+typedef char battle_post_effect_msg_size_must_be_8[(sizeof(action_post_effect_msg_t) == 8) ? 1 : -1];
 
 enum { BATTLE_POST_EFFECT_MSG_CAPACITY = 16 };
 
-extern action_display_image_rect_t g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
-extern const u8 g_battle_action_display_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
-extern u16 g_battle_action_display_values[ACTION_DISPLAY_VALUE_COUNT];
-extern s32 g_battle_action_learn_on_hit_unit_id;
-extern s32 g_battle_state_window_closed;
-extern s32 g_battle_action_post_action_display_phase; /* battle_post_action_display_phase_e */
-extern battle_post_effect_msg_t g_battle_action_post_effect_msgs[BATTLE_POST_EFFECT_MSG_CAPACITY];
-extern const palette_t g_battle_action_result_palette;
+extern action_display_image_rect_t g_result_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
+extern const u8 g_result_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
+extern u16 g_result_display_values[ACTION_DISPLAY_VALUE_COUNT];
+extern s32 g_ability_learn_on_hit_unit_id;
+extern s32 g_state_window_closed;
+extern s32 g_reward_report_phase; /* reward_report_phase_e */
+extern action_post_effect_msg_t g_action_messages[BATTLE_POST_EFFECT_MSG_CAPACITY];
+extern const palette_t g_result_palette;
 /* Eight per status_changes mask byte, indexed from the byte's high bit. */
-extern u8 g_battle_action_status_display_image_ids[STATUS_BYTE_COUNT][8];
+extern u8 g_result_status_image_ids[STATUS_BYTE_COUNT][8];
 
-void battle_state_enter_learn_ability_on_hit(void);
-void battle_action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
-void battle_action_show_caster_post_effect_messages(void);
-s32 battle_action_show_next_effect_message(void);
-void battle_action_start_next_strike_display(void);
+void state_enter_learn_ability_on_hit(void);
+void action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
+void action_message_show_for_caster(void);
+s32 action_message_show_next(void);
+void action_start_next_strike(void);
 
 /* rewards and items */
 /* Action result limits: HP and MP damage and healing stop at 999. The EXP an
  * action earns starts at 10 for a success or 20 divided by the KO count for a
  * kill, and ends within 1..99. Poach yields the rare item 31 times in 256. */
 enum {
-    BATTLE_ACTION_VALUE_MAX = 999,
-    BATTLE_EXP_SUCCESS_BASE = 10,
-    BATTLE_EXP_KILL_BASE = 20,
-    BATTLE_EXP_MAX = 99,
-    BATTLE_POACH_RARE_ITEM_CHANCE = 31,
+    ACTION_VALUE_MAX = 999,
+    REWARD_EXP_SUCCESS_BASE = 10,
+    REWARD_EXP_KILL_BASE = 20,
+    REWARD_EXP_MAX = 99,
+    ITEM_POACH_RARE_ITEM_CHANCE = 31,
 };
 
 /* Sum and highest level of the units of any team but blue, counted as the ENTD units load and as
  * an off-field unit is added; later level changes are not counted. They set the level-sum and
  * level-bonus money. */
-extern u16 g_battle_enemy_level_sum;
-extern u8 g_battle_highest_enemy_level;
+extern u16 g_reward_enemy_level_sum;
+extern u8 g_reward_highest_enemy_level;
 
-s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id);
-void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount);
-s32 battle_action_apply_tile_trap(unit_stats_t* unit);
-s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id, s32 spend);
-s32 battle_action_give_item(unit_stats_t* unit, u8 item);
-void battle_action_grant_rewards(void);
-s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit);
+s32 reward_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id);
+void reward_apply_exp_change(unit_stats_t* unit, u8 amount);
+s32 move_find_apply_trap(unit_stats_t* unit);
+s32 item_decrement_party_quantity(unit_stats_t* unit, s32 item_id, s32 spend);
+s32 item_give(unit_stats_t* unit, u8 item);
+void reward_grant(void);
+s32 move_init_ability_benefit(unit_stats_t* unit);
 
 #endif

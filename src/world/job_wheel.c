@@ -293,7 +293,7 @@ void formation_job_wheel_menu(void) {
                                 formation_job_get_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK)
                                     + WORLD_TEXT_ID_FORMATION_TEXT_BASE,
                                 SOUND_SFX_ERROR_MESSAGE);
-                            g_menu_status_display_thread_params.style = 1;
+                            g_unit_panel_status_display_thread_params.style = 1;
                         } else {
                             g_sound_queued_effect_id = SOUND_SFX_INVALID;
                         }
@@ -305,7 +305,7 @@ void formation_job_wheel_menu(void) {
                             if (i >= 0) {
                                 message_box_show_with_sound(
                                     i + WORLD_TEXT_ID_FORMATION_TEXT_BASE, SOUND_SFX_WINDOW_OPEN);
-                                g_menu_status_display_thread_params.style = 1;
+                                g_unit_panel_status_display_thread_params.style = 1;
                             }
                         }
                     }
@@ -339,7 +339,7 @@ void formation_job_wheel_menu(void) {
                 formation_job_draw_wheel_sprites(angle, ONE, ONE);
             }
             if (g_menu_input_lock_mode == 0) {
-                g_menu_status_display_thread_params.style = 0;
+                g_unit_panel_status_display_thread_params.style = 0;
             }
         }
     }
@@ -595,7 +595,7 @@ static void formation_job_build_wheel_availability(void) {
         id = entry & FORMATION_JOB_LIST_ENTRY_ID_MASK;
         if (id == g_formation_unit_pointers[unit]->identity.job_id || !(entry & FORMATION_JOB_LIST_ENTRY_UNAVAILABLE)) {
             g_formation_job_wheel_mastered_jobs[i]
-                = ability_build_list(unit, id, MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED) == 0;
+                = ability_list_build(unit, id, MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED) == 0;
         } else {
             g_formation_job_wheel_mastered_jobs[i] = 0;
         }

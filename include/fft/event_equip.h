@@ -21,7 +21,7 @@ typedef enum equipment_state {
     EQUIPMENT_STATE_STATE_COMMAND_MENU = 1,
     EQUIPMENT_STATE_STATE_EQUIP = 2,     /* equipment_run_equip_mode */
     EQUIPMENT_STATE_STATE_REMOVE = 4,    /* equipment_run_remove_mode */
-    EQUIPMENT_STATE_STATE_ITEM_LIST = 5, /* menu_update_equipment */
+    EQUIPMENT_STATE_STATE_ITEM_LIST = 5, /* equipment_update_menu */
     EQUIPMENT_STATE_STATE_CLOSED = 0xff, /* equipment_entrypoint returns its result */
 } equipment_state_e;
 
@@ -172,9 +172,9 @@ extern menu_unit_status_identity_t g_equipment_selected_unit_data;
 extern palette_t g_unit_panel_selected_portrait_palettes[2];
 extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
 extern palette_t g_unit_panel_comparison_portrait_palettes[2];
-extern menu_status_panel_buffer_t g_unit_panel_frames_b[];
-/* RECT[1] (right panel) of g_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
- * GCC derive the table base from this address and changes menu_run_ability_list_thread. */
+extern unit_panel_buffer_t g_unit_panel_frames_b[];
+/* RECT[1] (right panel) of g_unit_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
+ * GCC derive the table base from this address and changes unit_panel_ability_thread. */
 extern RECT g_equipment_right_panel_frame_rect;
 extern u8 g_unit_panel_unit_status_panel_params[];
 extern s32 g_unit_panel_unit_status_panel_flags;
@@ -256,9 +256,9 @@ typedef enum equipment_thread_slot {
     EQUIPMENT_THREAD_SLOT_POPUP_MENU = 3,         /* the item action and type order menus */
     EQUIPMENT_THREAD_SLOT_COMMAND_MENU_CHILD = 4, /* a wait-forever thread while a command's mode runs */
     EQUIPMENT_THREAD_SLOT_COMMAND_MENU = 5,       /* menu_icon_list_thread */
-    EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST = 10,    /* menu_run_equipment_list_thread */
+    EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST = 10,    /* unit_panel_equipment_thread */
     EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC = 11,      /* the numeric panel thread of the item panel */
-    EQUIPMENT_THREAD_SLOT_UNIT_STATUS = 13,       /* menu_run_unit_status_thread */
+    EQUIPMENT_THREAD_SLOT_UNIT_STATUS = 13,       /* unit_panel_banner_thread */
     EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS = 14, /* the second banner slot the indicator draw watches */
 } equipment_thread_slot_e;
 

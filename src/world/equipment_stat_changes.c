@@ -12,10 +12,10 @@
  * IDs 0x1E6-0x1E8 grant Move +1/+2/+3; 0x1E9-0x1EB grant Jump +1/+2/+3.
  * Other abilities leave both bonuses at 0.
  */
-static void formation_ability_get_move_jump_bonus(s16 ability, menu_status_panel_slot_storage_t* out) {
-    menu_unit_status_record_t summary;
+static void formation_ability_get_move_jump_bonus(s16 ability, unit_panel_record_t* out) {
+    unit_panel_summary_t summary;
 
-    menu_clear_stat_preview(&summary, out);
+    equipment_clear_stat_preview(&summary, out);
     if (ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1 && ability <= ABILITY_ID_MOVEMENT_MOVE_PLUS_3) {
         out->state.move = ability - (ABILITY_ID_MOVEMENT_MOVE_PLUS_1 - 1);
     } else {
@@ -31,13 +31,12 @@ static void formation_ability_get_move_jump_bonus(s16 ability, menu_status_panel
 /* Stat preview for swapping one movement ability for another: clears
  * `stat_diff` and stores the difference in the Move and Jump bonuses the two
  * abilities give. */
-void formation_ability_diff_movement_stats(
-    menu_status_panel_slot_storage_t* stat_diff, s32 old_ability, s32 new_ability) {
-    menu_unit_status_record_t summary;
-    menu_status_panel_slot_storage_t old_stats;
-    menu_status_panel_slot_storage_t new_stats;
+void formation_ability_diff_movement_stats(unit_panel_record_t* stat_diff, s32 old_ability, s32 new_ability) {
+    unit_panel_summary_t summary;
+    unit_panel_record_t old_stats;
+    unit_panel_record_t new_stats;
 
-    menu_clear_stat_preview(&summary, stat_diff);
+    equipment_clear_stat_preview(&summary, stat_diff);
     formation_ability_get_move_jump_bonus(old_ability, &old_stats);
     formation_ability_get_move_jump_bonus(new_ability, &new_stats);
     stat_diff->state.move = new_stats.state.move - old_stats.state.move;
@@ -54,14 +53,13 @@ void formation_ability_diff_movement_stats(
  * attribute set's Move, Jump, Speed, PA and MA bonuses. Invalid item IDs
  * leave the cleared preview unchanged.
  */
-void item_collect_stat_deltas(
-    s16 item_id, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 alternate) {
+void item_collect_stat_deltas(s16 item_id, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
     s32 attribute;
     s32 secondary;
     u8 power;
     u8 evade;
 
-    menu_clear_stat_preview(summary, detail);
+    equipment_clear_stat_preview(summary, detail);
     item_id &= ITEM_ENTRY_ID_MASK;
     if (item_id >= 1 && item_id <= ITEM_ID_END - 1) {
         attribute = g_item_primary_data[item_id].attributes;

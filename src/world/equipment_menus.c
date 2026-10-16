@@ -38,7 +38,7 @@
  * and retargets the branch past its own slot instruction. `busy` is not an
  * argument to that call -- it is only read by the script call below -- so the
  * later position is the natural one. */
-s32 menu_update_equipment(void) {
+s32 equipment_update_menu(void) {
     s32 input;
     s32 disabled;
     s32 busy;
@@ -53,8 +53,8 @@ s32 menu_update_equipment(void) {
         menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_formation_item_menu_mode = MENU_ITEM_LIST_STATE_BROWSE;
         g_formation_unit_banner_enabled = 0;
-        g_menu_preview_stats_thread_params.x = 0;
-        g_menu_preview_stats_thread_params.y = -0x49;
+        g_unit_panel_preview_stats_thread_params.x = 0;
+        g_unit_panel_preview_stats_thread_params.y = -0x49;
     }
     g_formation_cursor_ot_override = 9;
     if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_CLOSE) {
@@ -63,8 +63,8 @@ s32 menu_update_equipment(void) {
         g_formation_item_submenu_initialized = 0;
         g_formation_unit_banner_enabled = 1;
         thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
-        g_menu_preview_stats_thread_params.x = 2;
-        g_menu_preview_stats_thread_params.y = 2;
+        g_unit_panel_preview_stats_thread_params.x = 2;
+        g_unit_panel_preview_stats_thread_params.y = 2;
         g_formation_unit_cycle_mode = 2;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return 0;
@@ -108,13 +108,13 @@ s32 menu_update_equipment(void) {
     screen_draw_item_tabs(0, g_menu_selected_slot, busy);
     if (g_menu_list_entry_count != 0) {
         if (g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_THROWABLE_FIRST) {
-            menu_draw_weapon_hand_icons(g_item_list_entries[g_menu_list_selected_index]);
+            item_draw_weapon_hand_icons(g_item_list_entries[g_menu_list_selected_index]);
         }
         if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_ACCESSORY_FIRST) {
             menu_run_script_with_palette_mode(&g_formation_item_hp_mp_bonus_window_script, 0, 0);
         }
-        menu_draw_item_status_list(g_item_list_entries[g_menu_list_selected_index]);
+        item_draw_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }
     return 1;
 }
@@ -142,12 +142,12 @@ s32 equipment_run_item_list(void) {
         menu_get_selection_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        g_screen_script_callbacks[0].value = menu_get_entry_item_equipped_count;
-        g_screen_script_callbacks[1].value = menu_get_entry_item_count;
-        g_screen_script_callbacks[2].icon = menu_build_item_type_icon_source;
-        g_screen_script_callbacks[3].icon = menu_get_entry_item_icon_source;
-        g_screen_script_callbacks[4].value = menu_get_preview_hp_bonus_display;
-        g_screen_script_callbacks[5].value = menu_get_preview_mp_bonus_display;
+        g_screen_script_callbacks[0].value = equipment_get_row_equipped_count;
+        g_screen_script_callbacks[1].value = equipment_get_row_item_count;
+        g_screen_script_callbacks[2].icon = item_build_type_icon_source;
+        g_screen_script_callbacks[3].icon = equipment_get_row_icon_source;
+        g_screen_script_callbacks[4].value = equipment_get_preview_hp_bonus_display;
+        g_screen_script_callbacks[5].value = equipment_get_preview_mp_bonus_display;
         g_screen_script_callbacks[6].value = formation_item_get_hp_bonus;
         g_screen_script_callbacks[7].value = formation_item_get_mp_bonus;
     }
@@ -158,7 +158,7 @@ s32 equipment_run_item_list(void) {
         description = -1;
     }
     input = g_menu_input_primary_repeat;
-    g_menu_help_message_text_id = description;
+    g_help_message_text_id = description;
     if (input & PSX_PAD_CROSS) {
         menu_set_selection_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
@@ -203,9 +203,9 @@ s32 equipment_run_item_list(void) {
             slot = 0;
         }
         g_formation_item_category_previewed_cursor = g_menu_list_selected_index;
-        item_collect_stat_deltas(slot, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
-        g_menu_status_display_thread_params.redraw_request = 1;
-        g_menu_preview_stats_thread_params.redraw_request = 1;
+        item_collect_stat_deltas(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        g_unit_panel_status_display_thread_params.redraw_request = 1;
+        g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
     return MENU_ITEM_LIST_STATE_BROWSE;
 }

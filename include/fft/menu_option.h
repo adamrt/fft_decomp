@@ -103,7 +103,7 @@ typedef union game_options {
 typedef char game_options_size_must_be_4[sizeof(game_options_t) == 4 ? 1 : -1];
 
 /* The player's options, saved while a tutorial event forces its own and restored when it ends. */
-extern game_options_t g_menu_saved_game_options;
+extern game_options_t g_game_options_saved;
 
 /* options screen */
 /* The argument of option_entrypoint and option_entrypoint: which of
@@ -112,9 +112,9 @@ typedef enum menu_option_type {
     MENU_OPTION_TYPE_GAME_OPTIONS = 0,
     MENU_OPTION_TYPE_AT_LIST = 1,
     MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2, /* crystal and treasure panel */
-} menu_option_type_e;
+} option_screen_e;
 
-/* One of the two 0x190-byte packet pages of the options screen (g_menu_option_pages), alternated by frame.
+/* One of the two 0x190-byte packet pages of the options screen (g_option_pages), alternated by frame.
  * Provisional. */
 typedef struct options_menu_page {
     SPRT title;                         /* 0x000: window title image */
@@ -129,24 +129,24 @@ typedef struct options_menu_page {
     SPRT arrows[2];                     /* 0x12c: scroll arrows */
     SPRT arrow_marks[2];                /* 0x154 */
     SPRT thumb;                         /* 0x17c: scroll-bar thumb */
-} options_menu_page_t;
-typedef char options_menu_page_size_must_be_400[(sizeof(options_menu_page_t) == 400) ? 1 : -1];
+} option_page_t;
+typedef char options_menu_page_size_must_be_400[(sizeof(option_page_t) == 400) ? 1 : -1];
 
-extern options_menu_page_t g_menu_option_pages[2];
-extern menu_text_layout_t g_menu_option_entry_table[1];
-extern menu_entry_t g_menu_option_icon_thread_param;
-extern menu_icon_record_t g_menu_option_picker_icon_records[2];
+extern option_page_t g_option_pages[2];
+extern menu_text_layout_t g_option_entry_table[1];
+extern menu_entry_t g_option_icon_thread_param;
+extern menu_icon_record_t g_option_picker_icon_records[2];
 /* The values being edited, one per game_option_index_e. */
-extern s32 g_menu_option_values[GAME_OPTION_UNCHANGED + 1];
-extern s32 g_menu_option_reference_values[];
-extern s32 g_menu_option_choice_counts[];
-extern s32 g_menu_option_choice_widths[];
-extern s32 g_menu_option_value_text_id_bases[];
-extern RECT g_menu_option_title_image_rect;
-extern RECT g_menu_option_entry_panel_rect;
-extern RECT g_menu_option_value_image_rect;
+extern s32 g_option_values[GAME_OPTION_UNCHANGED + 1];
+extern s32 g_option_reference_values[];
+extern s32 g_option_choice_counts[];
+extern s32 g_option_choice_widths[];
+extern s32 g_option_value_text_id_bases[];
+extern RECT g_option_title_image_rect;
+extern RECT g_option_entry_panel_rect;
+extern RECT g_option_value_image_rect;
 
 /* The value picker thread of one game option. */
-void menu_run_option_choice(void);
+void option_choice_thread(void);
 
 #endif

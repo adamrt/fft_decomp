@@ -560,8 +560,8 @@ typedef enum ability_list_entry_flag {
 } ability_list_entry_flag_e;
 
 /* ability records */
-/* ability_data_t.type_flags. battle_ability_find_learn_on_hit_unit consumes
- * learn-on-hit; ability_build_list and ability_list_build prove the
+/* ability_data_t.type_flags. ability_find_learn_on_hit_unit consumes
+ * learn-on-hit; ability_list_build and ability_list_build prove the
  * JP-learning flag's negative polarity. */
 typedef enum ability_type_flag {
     ABILITY_TYPE_FLAG_LEARN_ON_HIT = 0x20,
@@ -653,7 +653,7 @@ typedef enum ability_secondary_flags_4 {
 } ability_secondary_flags_4_e;
 
 /* One-based formula IDs of abilities, weapons and items: BATTLE resolves an
- * action through g_battle_formula_handlers[id - 1]. Only IDs tested by the
+ * action through g_formula_handlers[id - 1]. Only IDs tested by the
  * code are named, after their handlers. */
 typedef enum ability_formula {
     ABILITY_FORMULA_WEAPON_DAMAGE = 1, /* also stands in for 0 and for ids past the table */
@@ -674,14 +674,14 @@ enum {
 
 /* Default-ability secondary records, g_ability_range_data.
  * ability_get_range uses the 14-byte stride and the range;
- * battle_action_calculate_target_result reads flags_1,
- * battle_ai_classify_ability_effect reads flags_2, and
- * battle_ai_load_ability_entry copies the element, CT and AoE into the
+ * action_calculate_target_result reads flags_1,
+ * ai_target_classify_ability_effect reads flags_2, and
+ * ai_ability_load_entry copies the element, CT and AoE into the
  * considered AI ability. Other bytes stay provisional. */
 typedef struct ability_secondary_data {
     u8 range;                /* 0x00; ABILITY_RANGE_WHOLE_MAP covers the whole map */
     u8 aoe;                  /* 0x01; ABILITY_RANGE_WHOLE_MAP covers the whole map */
-    u8 vertical;             /* 0x02; vertical tolerance (battle_target_set_ability_panels) */
+    u8 vertical;             /* 0x02; vertical tolerance (target_range_set_for_ability) */
     u8 flags_1;              /* 0x03; ability_secondary_flags_1_e */
     u8 flags_2;              /* 0x04; ability_secondary_flags_2_e */
     u8 flags_3;              /* 0x05; ability_secondary_flags_3_e */

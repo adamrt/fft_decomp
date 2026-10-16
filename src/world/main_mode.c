@@ -31,63 +31,63 @@
  * and exits once it ends, MENU_OPTION_TYPE_AT_LIST starts the AT list and MENU_OPTION_TYPE_CRYSTAL_PICKUP the
  * crystal pickup threads.
  *
- * g_menu_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
- * option equals its g_menu_option_reference_values entry. */
+ * g_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
+ * option equals its g_option_reference_values entry. */
 void option_entrypoint(s32 mode) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     game_options_fields_t options = g_game_options.fields;
     s32 i;
     s32 last_mode;
 
-    g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
-    g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
-    g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED] = options.multi_height_cursor_speed;
-    g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED] = options.finger_cursor_repeat_speed;
-    g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED] = options.message_display_speed;
-    g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES] = options.navigation_messages;
-    g_menu_option_values[GAME_OPTION_ABILITY_NAMES] = options.ability_names;
-    g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES] = options.effect_messages;
-    g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP] = options.display_gained_exp_jp;
-    g_menu_option_values[GAME_OPTION_TARGET_FLASHING] = options.target_flashing;
-    g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
-    g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
-    g_menu_option_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
-    g_menu_option_values[GAME_OPTION_UNCHANGED] = 1;
+    g_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
+    g_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
+    g_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED] = options.multi_height_cursor_speed;
+    g_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED] = options.finger_cursor_repeat_speed;
+    g_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED] = options.message_display_speed;
+    g_option_values[GAME_OPTION_NAVIGATION_MESSAGES] = options.navigation_messages;
+    g_option_values[GAME_OPTION_ABILITY_NAMES] = options.ability_names;
+    g_option_values[GAME_OPTION_EFFECT_MESSAGES] = options.effect_messages;
+    g_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP] = options.display_gained_exp_jp;
+    g_option_values[GAME_OPTION_TARGET_FLASHING] = options.target_flashing;
+    g_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
+    g_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
+    g_option_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
+    g_option_values[GAME_OPTION_UNCHANGED] = 1;
     for (i = 0; i < GAME_OPTION_COUNT; i++) {
-        if (g_menu_option_values[i] != g_menu_option_reference_values[i]) {
-            g_menu_option_values[GAME_OPTION_UNCHANGED] = 0;
+        if (g_option_values[i] != g_option_reference_values[i]) {
+            g_option_values[GAME_OPTION_UNCHANGED] = 0;
         }
     }
     g_menu_modal_open = 0;
-    g_menu_hide_numeric_values = 0;
+    g_unit_panel_hide_numeric_values = 0;
     /* The target keeps this constant in a callee-saved register across the
      * mode 0 and mode 1 calls, so it is its own variable. */
     last_mode = MENU_OPTION_TYPE_CRYSTAL_PICKUP;
     if (mode == MENU_OPTION_TYPE_GAME_OPTIONS) {
-        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
+        tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
         thread_start(g_thread_current_id - 1, option_game_options_thread);
         entry->select_text_table = 1;
-        entry->context = &g_menu_option_entry_table;
+        entry->context = &g_option_entry_table;
         thread_set_parameters(g_thread_current_id - 1, (s32)entry, 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_exit_current();
     }
     if (mode == MENU_OPTION_TYPE_AT_LIST) {
-        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
-        menu_start_at_list_thread();
+        tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
+        at_list_start_thread();
     }
     if (mode == last_mode) {
-        menu_start_crystal_pickup_threads();
+        crystal_start_pickup_threads();
     }
 }
 
 /*
  * Options-menu thread started by option_entrypoint (MENU_OPTION_TYPE_GAME_OPTIONS) with
- * entry->context = &g_menu_option_entry_table.
+ * entry->context = &g_option_entry_table.
  *
- * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread, shows the
- * selected option's value text (g_menu_option_value_text_id_bases[i] + g_menu_option_values[i]),
- * starts menu_run_option_choice on confirm, and each frame packs the option
+ * Scrolls the two-column option list like ability_list_scrolling_thread, shows the
+ * selected option's value text (g_option_value_text_id_bases[i] + g_option_values[i]),
+ * starts option_choice_thread on confirm, and each frame packs the option
  * values back into g_game_options, applies the sound mode on the main
  * stack and reloads the input-repeat timings for the finger-cursor speed.
  *
@@ -111,8 +111,8 @@ void option_game_options_thread(void) {
     s32 accum;
     s32 timer;
     menu_entry_t* entry;
-    options_menu_page_t* page;
-    options_menu_page_t* base;
+    option_page_t* page;
+    option_page_t* base;
     menu_text_layout_t* layout;
     s32 delta;
     s32 i;
@@ -136,8 +136,8 @@ void option_game_options_thread(void) {
         entry = (menu_entry_t*)thread->function_parameter_1;
     } while (0);
 
-    page = g_menu_option_pages;
-    layout = g_menu_option_entry_table;
+    page = g_option_pages;
+    layout = g_option_entry_table;
     entry->window.h = layout->row_count * 16 + 0x10;
     entry->inner_height = layout->row_count * 16 + 0x10;
     entry->text_image.height = layout->row_count * 16 + 0x10;
@@ -151,7 +151,7 @@ void option_game_options_thread(void) {
 
     menu_build_window_sprites(&image_rect, entry, &page->icons);
     buffer = menu_alloc_memory(0x1E0);
-    g_menu_option_pages[0].icons.base.sprites[3].y0 -= 2;
+    g_option_pages[0].icons.base.sprites[3].y0 -= 2;
 
     /* The window sprite starts two lines above the first row (v0 = ring * 16 + accum - 2), so the
      * two lines above the text ring's first row must stay blank. */
@@ -184,7 +184,7 @@ void option_game_options_thread(void) {
         arrow_u += 8;
     }
 
-    base = g_menu_option_pages;
+    base = g_option_pages;
     base->arrows[0].y0 += 4;
     menu_init_sprt(&base->thumb);
     base->thumb.u0 = 0x10;
@@ -224,15 +224,15 @@ void option_game_options_thread(void) {
     menu_init_scaled_draw_area_packets(&page->title_area);
     menu_init_scaled_draw_area_packets(&page->value_area);
     menu_init_sprt(&base->title);
-    text_configure_sprite_vram(&g_menu_option_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
+    text_configure_sprite_vram(&g_option_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
     image = menu_build_and_upload_window_frame_image(
-        entry->inner_width, 0x2C, &g_menu_option_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
+        entry->inner_width, 0x2C, &g_option_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
     base->title.x0 = entry->window.x;
     base->title.y0 = entry->window.y + entry->window.h + 1;
     g_menu_text_state.pen.stride = entry->inner_width;
     menu_set_text_origin(0x18, 0xE);
     menu_display_text_entry(0x502B, image, &g_menu_text_state.pen);
-    LoadImage(&g_menu_option_title_image_rect, (u32*)image);
+    LoadImage(&g_option_title_image_rect, (u32*)image);
     thread_wait_frames(1);
     menu_free_memory(image);
 
@@ -240,27 +240,27 @@ void option_game_options_thread(void) {
     value_rect.y = base->title.y0;
     value_rect.w = base->title.w;
     value_rect.h = base->title.h;
-    mem_copy_bytes_nonempty(&g_menu_option_entry_panel_rect, &entry->window.x, sizeof(g_menu_option_entry_panel_rect));
+    mem_copy_bytes_nonempty(&g_option_entry_panel_rect, &entry->window.x, sizeof(g_option_entry_panel_rect));
     thread_start(g_thread_current_id + 1, menu_window_frame_thread);
-    g_menu_option_entry_panel_rect.h += 0xC;
-    g_menu_option_entry_panel_rect.y -= 2;
-    thread_set_parameters(g_thread_current_id + 1, (s32)&g_menu_option_entry_panel_rect, 0, 0);
+    g_option_entry_panel_rect.h += 0xC;
+    g_option_entry_panel_rect.y -= 2;
+    thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_entry_panel_rect, 0, 0);
     thread_yield();
 
     menu_init_sprt(&base->value);
-    text_configure_sprite_vram(&g_menu_option_value_image_rect, 0x3C, 0x10, &base->value, 0);
+    text_configure_sprite_vram(&g_option_value_image_rect, 0x3C, 0x10, &base->value, 0);
     base->value.x0 = entry->window.x + 0x5C;
     base->value.y0 = entry->window.y + entry->window.h + 0xF;
     menu_clear_render_buffer(buffer, 0x1E0);
     g_menu_text_state.pen.stride = 0x3C;
     menu_set_text_origin(0, 0);
     menu_display_text_entry(0x5021, buffer, &g_menu_text_state.pen);
-    LoadImage(&g_menu_option_value_image_rect, (u32*)buffer);
+    LoadImage(&g_option_value_image_rect, (u32*)buffer);
 
     /* The loop draws from the two pages alternately. */
-    mem_copy_bytes_nonempty(&base[1], base, sizeof(options_menu_page_t));
+    mem_copy_bytes_nonempty(&base[1], base, sizeof(option_page_t));
     for (;;) {
-        page = &g_menu_option_pages[i & 1];
+        page = &g_option_pages[i & 1];
         if (delta == 0 && menu_can_accept_input() != 0) {
             /* Square with up or down pages through the list instead (menu_redraw_text_page_on_scroll). */
             if ((*input0 & PSX_PAD_UP) && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
@@ -323,7 +323,7 @@ void option_game_options_thread(void) {
                 if (menu_can_accept_input() != 0) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
-                    thread_start(g_thread_current_id - 1, menu_run_option_choice);
+                    thread_start(g_thread_current_id - 1, option_choice_thread);
                     thread_set_parameters(g_thread_current_id - 1, index, 0, 0);
                 }
             }
@@ -338,8 +338,8 @@ void option_game_options_thread(void) {
             g_menu_text_state.pen.stride = 0x3C;
             menu_set_text_origin(0, 0);
             menu_display_text_entry(
-                g_menu_option_value_text_id_bases[index] + g_menu_option_values[index], buffer, &g_menu_text_state.pen);
-            LoadImage(&g_menu_option_value_image_rect, (u32*)buffer);
+                g_option_value_text_id_bases[index] + g_option_values[index], buffer, &g_menu_text_state.pen);
+            LoadImage(&g_option_value_image_rect, (u32*)buffer);
         }
 
         thread_yield();
@@ -434,35 +434,35 @@ void option_game_options_thread(void) {
         /* Apply the option values every frame. g_thread_call_target is the callback that
          * thread_call_on_main_stack runs below with the sound mode. */
         g_thread_call_target = (void (*)(void))suzuki_sound_set_type;
-        g_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
-        g_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
-        g_game_options.fields.multi_height_cursor_speed = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
-        g_game_options.fields.finger_cursor_repeat_speed = g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
-        g_game_options.fields.message_display_speed = g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
-        g_game_options.fields.navigation_messages = g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
-        g_game_options.fields.ability_names = g_menu_option_values[GAME_OPTION_ABILITY_NAMES];
-        g_game_options.fields.effect_messages = g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES];
-        g_game_options.fields.display_gained_exp_jp = g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
-        g_game_options.fields.target_flashing = g_menu_option_values[GAME_OPTION_TARGET_FLASHING];
-        g_game_options.fields.show_unequippable_items = g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
-        g_game_options.fields.max_equip_at_job_change = g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
-        g_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
-        thread_call_on_main_stack(g_menu_option_values[GAME_OPTION_SOUND_MODE]);
+        g_game_options.fields.cursor_movement = g_option_values[GAME_OPTION_CURSOR_MOVEMENT];
+        g_game_options.fields.cursor_repeat_speed = g_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
+        g_game_options.fields.multi_height_cursor_speed = g_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
+        g_game_options.fields.finger_cursor_repeat_speed = g_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
+        g_game_options.fields.message_display_speed = g_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
+        g_game_options.fields.navigation_messages = g_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
+        g_game_options.fields.ability_names = g_option_values[GAME_OPTION_ABILITY_NAMES];
+        g_game_options.fields.effect_messages = g_option_values[GAME_OPTION_EFFECT_MESSAGES];
+        g_game_options.fields.display_gained_exp_jp = g_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
+        g_game_options.fields.target_flashing = g_option_values[GAME_OPTION_TARGET_FLASHING];
+        g_game_options.fields.show_unequippable_items = g_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
+        g_game_options.fields.max_equip_at_job_change = g_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
+        g_game_options.fields.sound_mode = g_option_values[GAME_OPTION_SOUND_MODE];
+        thread_call_on_main_stack(g_option_values[GAME_OPTION_SOUND_MODE]);
         i++;
 
         /* `column` is reused as the input-repeat timing profile index. */
         column = g_game_options.fields.finger_cursor_repeat_speed;
-        g_input_repeat_initial_delay = g_menu_option_input_repeat_timings[column].initial_delay;
-        g_input_repeat_period = g_menu_option_input_repeat_timings[column].repeat_period;
-        g_input_secondary_repeat_period = g_menu_option_input_repeat_timings[column].secondary_repeat_period;
-        g_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[column].scroll_accel_delay;
-        g_menu_scroll_slow_step = g_menu_option_input_repeat_timings[column].scroll_slow_step;
-        g_menu_scroll_fast_step = g_menu_option_input_repeat_timings[column].scroll_fast_step;
+        g_input_repeat_initial_delay = g_option_input_repeat_timings[column].initial_delay;
+        g_input_repeat_period = g_option_input_repeat_timings[column].repeat_period;
+        g_input_secondary_repeat_period = g_option_input_repeat_timings[column].secondary_repeat_period;
+        g_menu_scroll_accel_delay = g_option_input_repeat_timings[column].scroll_accel_delay;
+        g_menu_scroll_slow_step = g_option_input_repeat_timings[column].scroll_slow_step;
+        g_menu_scroll_fast_step = g_option_input_repeat_timings[column].scroll_fast_step;
     }
 
     menu_free_memory(buffer);
-    gfx_free_texture_rect(&g_menu_option_title_image_rect);
-    gfx_free_texture_rect(&g_menu_option_value_image_rect);
+    gfx_free_texture_rect(&g_option_title_image_rect);
+    gfx_free_texture_rect(&g_option_value_image_rect);
     thread_wait_frames(1);
     g_screen_thread_result = 2;
     /* A nonzero third parameter ends the frame thread. */

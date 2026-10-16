@@ -32,9 +32,9 @@ typedef enum world_map_thread_slot {
 
 /* Parameter blocks of WORLD's status banner, numeric panel and equipment/ability panel threads, which WLDCORE runs
  * in thread slots 8, 9 and 12. */
-extern menu_status_thread_t g_unit_panel_banner_params;
-extern menu_status_thread_t g_unit_panel_numbers_params;
-extern menu_status_thread_t g_unit_panel_panel_params;
+extern unit_panel_thread_t g_unit_panel_banner_params;
+extern unit_panel_thread_t g_unit_panel_numbers_params;
+extern unit_panel_thread_t g_unit_panel_panel_params;
 
 /* controller input */
 extern u32 g_world_map_input_new_button_presses;

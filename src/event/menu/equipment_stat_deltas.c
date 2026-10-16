@@ -5,17 +5,17 @@
 #include "fft/menu_status.h"
 #include "psx/types.h"
 
-static void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* out,
-    const menu_status_panel_slot_storage_t* scaled, const menu_status_panel_slot_storage_t* base, s32 scale);
+static void equipment_subtract_scaled_stat_preview(
+    unit_panel_record_t* out, const unit_panel_record_t* scaled, const unit_panel_record_t* base, s32 scale);
 
 /* Compute the stat changes of swapping item_before for item_after in a slot: the HP and MP bonus
  * differences into delta and the equipment-detail differences into output. */
-void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
-    s16 item_before, s16 item_after, s32 slot) {
-    menu_unit_status_record_t summary_before;
-    menu_unit_status_record_t summary_after;
-    menu_status_panel_slot_storage_t detail_before;
-    menu_status_panel_slot_storage_t detail_after;
+void equipment_calculate_swap_stat_delta(
+    unit_panel_record_t* output, unit_panel_summary_t* delta, s16 item_before, s16 item_after, s32 slot) {
+    unit_panel_summary_t summary_before;
+    unit_panel_summary_t summary_after;
+    unit_panel_record_t detail_before;
+    unit_panel_record_t detail_after;
 
     item_collect_stat_deltas(item_before, &summary_before, &detail_before, slot);
     item_collect_stat_deltas(item_after, &summary_after, &detail_after, slot);
@@ -23,12 +23,12 @@ void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, me
         - summary_before.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
     delta->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus
         - summary_before.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;
-    menu_subtract_scaled_stat_preview(output, &detail_before, &detail_after, 1);
+    equipment_subtract_scaled_stat_preview(output, &detail_before, &detail_after, 1);
 }
 
 /* Store base minus scaled detail stats; inputs may alias the output. */
-static void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* out,
-    const menu_status_panel_slot_storage_t* scaled, const menu_status_panel_slot_storage_t* base, s32 scale) {
+static void equipment_subtract_scaled_stat_preview(
+    unit_panel_record_t* out, const unit_panel_record_t* scaled, const unit_panel_record_t* base, s32 scale) {
     out->state.move = base->state.move - (scale * scaled->state.move);
     out->state.speed = base->state.speed - (scale * scaled->state.speed);
     out->state.jump = base->state.jump - (scale * scaled->state.jump);
@@ -50,28 +50,29 @@ static void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* 
 }
 
 /* Sum the stat changes of swapping each of the five equipment slots from `from_items` to `to_items`. */
-void item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_storage_t* detail_total,
-    menu_unit_status_record_t* summary_total, const u16* from_items, const u16* to_items) {
-    menu_unit_status_record_t summary_delta;
-    menu_status_panel_slot_storage_t detail_delta;
-    menu_status_panel_slot_storage_t unused; /* unreferenced in the target; needed for the frame size */
+void equipment_calculate_total_swap_delta(unit_panel_record_t* detail_total, unit_panel_summary_t* summary_total,
+    const u16* from_items, const u16* to_items) {
+    unit_panel_summary_t summary_delta;
+    unit_panel_record_t detail_delta;
+    unit_panel_record_t unused; /* unreferenced in the target; needed for the frame size */
     s32 i;
 
-    menu_clear_stat_preview(summary_total, detail_total);
+    equipment_clear_stat_preview(summary_total, detail_total);
 
     for (i = 0; i < 5; i++) {
-        menu_calculate_swap_stat_delta(&detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);
-        menu_subtract_scaled_stat_preview(detail_total, detail_total, &detail_delta, -1);
+        equipment_calculate_swap_stat_delta(
+            &detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);
+        equipment_subtract_scaled_stat_preview(detail_total, detail_total, &detail_delta, -1);
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;
     }
 }
 
 /* Sum the stat bonuses of the five equipped items listed in `equipment`. */
-void item_sum_equipment_stat_details(menu_status_panel_slot_storage_t* total, const u16* equipment) {
-    menu_unit_status_record_t summary;
-    menu_status_panel_slot_storage_t detail;
-    menu_status_panel_slot_storage_t unused; /* unreferenced in the target; needed for the frame size */
+void equipment_sum_stat_details(unit_panel_record_t* total, const u16* equipment) {
+    unit_panel_summary_t summary;
+    unit_panel_record_t detail;
+    unit_panel_record_t unused; /* unreferenced in the target; needed for the frame size */
     s32 i;
 
     total->state.right_weapon_power = 0;

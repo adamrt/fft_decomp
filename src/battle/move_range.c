@@ -29,65 +29,65 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
-static void battle_move_apply_selected_candidate(move_spread_state_t* state);
-static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x,
-    s32 target_y, u32 target_level, s32 initialize, s32* suspended, s32 check_budget);
-static void battle_move_spread_horizontal_jumps(void);
-static s32 battle_move_roll_teleport(void);
-static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height);
-static void battle_move_check_and_spread_one_tile_around(void);
-static void battle_move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span);
-static void battle_move_encode_path_steps(void);
-static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span);
-static void battle_move_set_reachable_tile_flags(void);
-static void battle_move_set_tile_flags_for_pathfinding(s32 mode);
-static void battle_move_spread_horizontal_jump(void);
-static void battle_move_spread_to_neighbors(void);
-static void battle_move_load_tile_height_for_spread(void);
-static void battle_target_apply_unit_team_eligibility(
+static void move_path_apply_selected_candidate(move_spread_state_t* state);
+static move_path_t* move_path_calculate(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x, s32 target_y,
+    u32 target_level, s32 initialize, s32* suspended, s32 check_budget);
+static void move_path_spread_horizontal_jumps(void);
+static s32 move_teleport_roll(void);
+static u8 move_spread_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height);
+static void move_spread_check_one_tile_around(void);
+static void move_spread_check_occupied_tile_standing_height(s32 record_index, s32 extra_span);
+static void move_path_encode_steps(void);
+static void move_path_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span);
+static void move_range_set_tile_flags(void);
+static void move_spread_set_frontier_flags(s32 mode);
+static void move_spread_horizontal_jump(void);
+static void move_path_spread_to_neighbors(void);
+static void move_spread_load_tile_height(void);
+static void target_area_apply_unit_team_eligibility(
     s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_whole_map);
-static void battle_target_apply_vertical_fixed(s32 x, s32 y);
-static void battle_target_build_directional_attack_panels(const action_command_t* source, u8 mode);
-static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi);
-static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y);
-static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags);
-static void battle_target_clear_range_on_untargetable_tiles(void);
-static s32 battle_target_set_ability_range_flags_from_marks(void);
-static s32 battle_target_keep_only_target_tile(const action_command_t* action);
-static s32 battle_target_run_calculator(const action_command_t* source);
-static s32 battle_target_set_ability_range_flags(void);
-static s32 battle_target_set_green_panels_for_action(const action_command_t* action);
-static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags);
-static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x);
-static s32 battle_target_validate_height_overlap(
+static void target_range_apply_vertical_fixed(s32 x, s32 y);
+static void target_area_build_directional_attack_panels(const action_command_t* source, u8 mode);
+static void target_range_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi);
+static void target_area_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y);
+static void target_range_calculate_strike_lunge(const unit_stats_t* unit, u8 flags);
+static void target_range_clear_untargetable_tiles(void);
+static s32 target_range_set_flags_from_marks(void);
+static s32 target_area_keep_only_target_tile(const action_command_t* action);
+static s32 target_area_run_calculator(const action_command_t* source);
+static s32 target_range_set_flags(void);
+static s32 target_area_set_for_ability(const action_command_t* action);
+static void target_range_mark_unit_panels(const unit_stats_t* unit, s32 flags);
+static s32 target_spread_panel_to_neighbors(s32 y, s32 x);
+static s32 target_validate_height_overlap(
     s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id);
-static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
+static s32 target_validate_lunge(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
 
 /* Movement cost of the weather-dependent terrains: 1 in clear weather, rain or snow,
  * 2 in a storm or snowstorm, 3 in the strong ones. */
-static s32 battle_move_get_weather_terrain_cost(void) {
-    s32 weather = battle_map_get_effective_weather();
+static s32 move_get_weather_terrain_cost(void) {
+    s32 weather = weather_get_effective();
 
-    if (weather < BATTLE_WEATHER_STORM || weather == BATTLE_WEATHER_SNOW) {
+    if (weather < WEATHER_STORM || weather == WEATHER_SNOW) {
         return 1;
     }
-    if (weather == BATTLE_WEATHER_STORM || weather == BATTLE_WEATHER_SNOWSTORM) {
+    if (weather == WEATHER_STORM || weather == WEATHER_SNOWSTORM) {
         return 2;
     }
     return 3;
 }
 
-/* Whether a unit is a chocobo that can be ridden: BATTLE_CHOCOBO_MOUNT_NONE for
+/* Whether a unit is a chocobo that can be ridden: UNIT_CHOCOBO_MOUNT_NONE for
  * any other job or a chocobo with a status of the unmountable set, PAIRED when
  * its mount_info is set, else FREE. */
-battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stats_t* unit) {
+unit_chocobo_mount_state_e unit_mount_get_chocobo_state(const unit_stats_t* unit) {
     if (unit->job_id < JOB_ID_CHOCOBO || unit->job_id > JOB_ID_RED_CHOCOBO)
-        return BATTLE_CHOCOBO_MOUNT_NONE;
+        return UNIT_CHOCOBO_MOUNT_NONE;
     if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_UNMOUNTABLE) != 0)
-        return BATTLE_CHOCOBO_MOUNT_NONE;
+        return UNIT_CHOCOBO_MOUNT_NONE;
     if (unit->mount_info != 0)
-        return BATTLE_CHOCOBO_MOUNT_PAIRED;
-    return BATTLE_CHOCOBO_MOUNT_FREE;
+        return UNIT_CHOCOBO_MOUNT_PAIRED;
+    return UNIT_CHOCOBO_MOUNT_FREE;
 }
 
 /* Fills the pathfinding scratch pad for `unit_id`: its movement, jump and
@@ -103,16 +103,16 @@ battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stat
  * constants and `g_terrain_movement_cost_tables[cost_table]` let sched1 reorder the pre-loop
  * `li s2`/`li a3`/`lbu` sequence.
  */
-static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
+static void move_spread_store_unit_to_scratchpad(s32 unit_id) {
     move_pathfind_scratch_t* config;
     move_record_t* record;
     move_record_t* current;
     unit_stats_t* unit;
     unit_stats_t* other;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     /* Byte access retains the original packed load and field-extraction order. */
     u8 movement[3];
-    battle_unit_height_data_t height_data;
+    unit_height_data_t height_data;
     s32 i;
     s32 count;
     s32 weather;
@@ -128,10 +128,10 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     s32 depth;
     s32 blocked;
 
-    config = g_battle_move_config_ptr;
-    record = g_battle_move_records_ptr;
-    battle_unit_calculate_height_data(&height_data, unit_id);
-    unit = &g_battle_unit_stats[unit_id];
+    config = g_move_config_ptr;
+    record = g_move_records_ptr;
+    unit_calculate_height_data(&height_data, unit_id);
+    unit = &g_unit_stats[unit_id];
     for (i = 0; i < 3; i++) {
         movement[i] = unit->ability_flags.movement[i];
     }
@@ -148,7 +148,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     config->will_sink = 1;
     config->fly_or_teleport = 0;
     config->stepping_stone = unit->position.stepping_stone;
-    if (movement[2] & (BATTLE_MOVEMENT_SET_3_MOVE_ON_LAVA | BATTLE_MOVEMENT_SET_3_FLOAT)) {
+    if (movement[2] & (UNIT_MOVEMENT_SET_3_MOVE_ON_LAVA | UNIT_MOVEMENT_SET_3_FLOAT)) {
         config->can_pass_lava = 1;
     } else {
         config->can_pass_lava = 0;
@@ -157,53 +157,53 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     /* value keeps the status byte with Chicken, Frog and Float for the tests below. */
     value = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHICKEN)];
     if (value & (STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG))) {
-        movement[1] &= ~(BATTLE_MOVEMENT_SET_2_TELEPORT_2 | BATTLE_MOVEMENT_SET_2_TELEPORT);
-        movement[2] &= ~BATTLE_MOVEMENT_SET_3_FLY;
+        movement[1] &= ~(UNIT_MOVEMENT_SET_2_TELEPORT_2 | UNIT_MOVEMENT_SET_2_TELEPORT);
+        movement[2] &= ~UNIT_MOVEMENT_SET_3_FLY;
         config->unit_size = 4;
     } else {
         config->unit_size = 6;
     }
-    if (!(movement[2] & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_FLOAT))
-        && (movement[1] & BATTLE_MOVEMENT_SET_2_CANNOT_ENTER_WATER)) {
+    if (!(movement[2] & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_FLOAT))
+        && (movement[1] & UNIT_MOVEMENT_SET_2_CANNOT_ENTER_WATER)) {
         config->cannot_stay_on_water = 1;
     }
-    if (movement[2] & BATTLE_MOVEMENT_SET_3_FLOAT) {
+    if (movement[2] & UNIT_MOVEMENT_SET_3_FLOAT) {
         config->unit_size += 2;
-        config->movement_set_3 = movement[2] | BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER;
+        config->movement_set_3 = movement[2] | UNIT_MOVEMENT_SET_3_MOVE_IN_WATER;
     } else {
         config->movement_set_3 = movement[2];
     }
     if (value & STATUS_BYTE_MASK(STATUS_ID_FLOAT)) {
-        movement[2] |= BATTLE_MOVEMENT_SET_3_FLOAT;
+        movement[2] |= UNIT_MOVEMENT_SET_3_FLOAT;
     }
-    if (movement[1] & BATTLE_MOVEMENT_SET_2_CANNOT_ENTER_WATER) {
-        movement[2] &= ~(BATTLE_MOVEMENT_SET_3_MOVE_UNDERWATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER);
+    if (movement[1] & UNIT_MOVEMENT_SET_2_CANNOT_ENTER_WATER) {
+        movement[2] &= ~(UNIT_MOVEMENT_SET_3_MOVE_UNDERWATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER);
     }
 
-    weather = battle_move_get_weather_terrain_cost();
-    if (movement[2] & BATTLE_MOVEMENT_SET_3_FLY) {
+    weather = move_get_weather_terrain_cost();
+    if (movement[2] & UNIT_MOVEMENT_SET_3_FLY) {
         config->cost_table = TERRAIN_COST_TABLE_FLY_TELEPORT;
         config->move_type = MOVE_CLASS_FLY;
         config->fly_or_teleport = 1;
-    } else if (movement[1] & (BATTLE_MOVEMENT_SET_2_TELEPORT | BATTLE_MOVEMENT_SET_2_TELEPORT_2)) {
+    } else if (movement[1] & (UNIT_MOVEMENT_SET_2_TELEPORT | UNIT_MOVEMENT_SET_2_TELEPORT_2)) {
         config->cost_table = TERRAIN_COST_TABLE_FLY_TELEPORT;
         config->movement_set_2 = movement[1];
         config->move_type = MOVE_CLASS_TELEPORT;
         config->fly_or_teleport = 1;
     } else {
-        if (movement[2] & BATTLE_MOVEMENT_SET_3_FLOAT) {
+        if (movement[2] & UNIT_MOVEMENT_SET_3_FLOAT) {
             config->cost_table = TERRAIN_COST_TABLE_FLOAT;
             config->move_type = MOVE_CLASS_FLOAT;
-        } else if (movement[2] & BATTLE_MOVEMENT_SET_3_MOVE_ON_LAVA) {
+        } else if (movement[2] & UNIT_MOVEMENT_SET_3_MOVE_ON_LAVA) {
             config->cost_table = TERRAIN_COST_TABLE_LAVA;
             config->move_type = MOVE_CLASS_LAVA;
-        } else if (movement[2] & BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER) {
+        } else if (movement[2] & UNIT_MOVEMENT_SET_3_MOVE_IN_WATER) {
             config->cost_table = TERRAIN_COST_TABLE_WATER;
             config->move_type = MOVE_CLASS_WATER_SURFACE;
-        } else if (movement[2] & BATTLE_MOVEMENT_SET_3_WALK_ON_WATER) {
+        } else if (movement[2] & UNIT_MOVEMENT_SET_3_WALK_ON_WATER) {
             config->cost_table = TERRAIN_COST_TABLE_WATER;
             config->move_type = MOVE_CLASS_WATER_DEPTH_ONE;
-        } else if (movement[2] & BATTLE_MOVEMENT_SET_3_MOVE_UNDERWATER) {
+        } else if (movement[2] & UNIT_MOVEMENT_SET_3_MOVE_UNDERWATER) {
             config->cost_table = TERRAIN_COST_TABLE_UNDERWATER;
             config->move_type = MOVE_CLASS_UNDERWATER;
         } else {
@@ -212,27 +212,27 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         }
     }
 
-    if (config->movement_set_3 & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER)) {
+    if (config->movement_set_3 & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER)) {
         config->will_sink = 0;
     }
     if (config->movement_set_3
-        & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER
-            | BATTLE_MOVEMENT_SET_3_MOVE_UNDERWATER)) {
+        & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER
+            | UNIT_MOVEMENT_SET_3_MOVE_UNDERWATER)) {
         config->will_drown = 0;
     }
-    if (!(movement[2] & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_FLOAT | BATTLE_MOVEMENT_SET_3_FLY))
-        && (movement[1] & BATTLE_MOVEMENT_SET_2_CANNOT_ENTER_WATER)) {
+    if (!(movement[2] & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_FLOAT | UNIT_MOVEMENT_SET_3_FLY))
+        && (movement[1] & UNIT_MOVEMENT_SET_2_CANNOT_ENTER_WATER)) {
         config->cannot_enter_water = 1;
     }
 
     config->movement_3 = movement[2];
-    if (movement[1] & BATTLE_MOVEMENT_SET_2_ANY_WEATHER) {
+    if (movement[1] & UNIT_MOVEMENT_SET_2_ANY_WEATHER) {
         weather = 1;
     }
 
     /* Copy the class's 64 terrain costs, substituting the weather cost and, with
      * Any Ground, 1 for every passable surface. */
-    ignore_terrain = movement[1] & BATTLE_MOVEMENT_SET_2_ANY_GROUND;
+    ignore_terrain = movement[1] & UNIT_MOVEMENT_SET_2_ANY_GROUND;
     i = 0;
     blocked = TERRAIN_COST_BLOCKED;
     table = g_terrain_movement_cost_tables[0];
@@ -244,7 +244,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         } else if (ignore_terrain && byte != blocked) {
             byte = 1;
         }
-        g_battle_move_terrain_costs_ptr[i] = byte;
+        g_move_terrain_costs_ptr[i] = byte;
     }
 
     /* jump_half is taken before Fly or Ignore Height raises the jump to 0x1F. */
@@ -253,13 +253,13 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         value = 7;
     }
     config->jump_half = value >> 1;
-    if (config->move_type == MOVE_CLASS_FLY || (movement[0] & BATTLE_MOVEMENT_SET_1_IGNORE_HEIGHT)) {
+    if (config->move_type == MOVE_CLASS_FLY || (movement[0] & UNIT_MOVEMENT_SET_1_IGNORE_HEIGHT)) {
         value = 0x1F;
     }
     config->jump_times_two = value * 2;
     config->jump_or_1f = value;
 
-    if (battle_unit_get_chocobo_mount_state(unit) != BATTLE_CHOCOBO_MOUNT_NONE) {
+    if (unit_mount_get_chocobo_state(unit) != UNIT_CHOCOBO_MOUNT_NONE) {
         config->mountable_chocobo = 1;
     } else {
         config->mountable_chocobo = 0;
@@ -282,7 +282,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     }
 
     team = unit->initial_team_flags;
-    config->_unknown_1a = g_battle_move_config_unknown_1a_value;
+    config->_unknown_1a = g_move_config_unknown_1a_value;
     mount = MOVE_RECORD_NONE;
     for (i = MOVE_RECORD_COUNT - 1; i >= 0; i--) {
         record[i].unit_id_flags = mount;
@@ -290,12 +290,12 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
 
     /* One record per other unit on the map that is not crystal, dead, jumping or treasure. */
     count = 0;
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         if (count >= MOVE_RECORD_COUNT) {
             break;
         }
-        other = &g_battle_unit_stats[i];
-        if (other->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+        other = &g_unit_stats[i];
+        if (other->entd_slot == UNIT_ENTD_SLOT_NONE) {
             continue;
         }
         if (other->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
@@ -318,7 +318,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         }
 
         value = i;
-        if (battle_unit_get_chocobo_mount_state(other) != BATTLE_CHOCOBO_MOUNT_FREE
+        if (unit_mount_get_chocobo_state(other) != UNIT_CHOCOBO_MOUNT_FREE
             && other->mount_info != (config->unit_id | UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             value = i | MOVE_RECORD_FLAG_NOT_MOUNTABLE;
         }
@@ -348,18 +348,18 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         /* Standing height in half steps: the tile's surface, raised for Float and for
          * water depth by movement type. */
         movement_3 = other->ability_flags.movement[2];
-        tile = &g_battle_map_tile_data[battle_map_calculate_location(other)];
-        base = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK);
+        tile = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(other)];
+        base = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & BATTLE_MAP_TILE_HALF_HEIGHT_MASK);
         depth = (*(u8*)&tile->depth_half_height) >> 5;
         byte = base;
         if (depth != 0) {
             if (other->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)] & STATUS_BYTE_MASK(STATUS_ID_FLOAT)) {
                 adjust = depth * 2 + 2;
                 byte = base + adjust;
-            } else if (movement_3 & BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER) {
+            } else if (movement_3 & UNIT_MOVEMENT_SET_3_MOVE_IN_WATER) {
                 adjust = depth * 2;
                 byte = base + adjust;
-            } else if (movement_3 & BATTLE_MOVEMENT_SET_3_WALK_ON_WATER) {
+            } else if (movement_3 & UNIT_MOVEMENT_SET_3_WALK_ON_WATER) {
                 adjust = depth * 2 - 2;
                 byte = base + adjust;
             }
@@ -379,28 +379,28 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
  * propagation and marks the whole grid reachable.  Returns -1 for an absent
  * unit, otherwise the reachable tile count.
  *
- * The AI twin battle_ai_propagate_target_movement (0x80178ca4) does the same
+ * The AI twin ai_move_propagate_from_target (0x80178ca4) does the same
  * with a suspendable time budget and a snapshot of the frontier; this one
  * clears frontier_max_remaining_range up front and visits the live frontier
  * directly, so it needs only one set of nested level/y/x loops.
  * The callers also pass map coordinates in a1-a3; the target callee does not
  * read them, but retaining the parameters preserves the original calls.
  */
-s32 battle_move_set_reachable_tiles(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_z) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
+s32 move_range_build(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_z) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
     s32 pass;
 
-    if (g_battle_unit_stats[unit_id].entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    if (g_unit_stats[unit_id].entd_slot == UNIT_ENTD_SLOT_NONE) {
         return -1;
     }
-    battle_move_store_unit_movement_to_scratchpad(unit_id);
-    battle_move_set_tile_flags_for_pathfinding(MOVE_TILE_FLAGS_MODE_START_SPREAD);
+    move_spread_store_unit_to_scratchpad(unit_id);
+    move_spread_set_frontier_flags(MOVE_TILE_FLAGS_MODE_START_SPREAD);
     if (config->move_type == MOVE_CLASS_TELEPORT) {
         u8 remaining_range = 1;
-        target_panel_t* fill_panels = g_battle_target_panels;
-        for (pass = MAP_TILE_COUNT - 1; pass >= 0; pass--) {
+        target_panel_t* fill_panels = g_target_panels;
+        for (pass = BATTLE_MAP_TILE_COUNT - 1; pass >= 0; pass--) {
             fill_panels[pass].remaining_range = remaining_range;
         }
     } else {
@@ -409,19 +409,19 @@ s32 battle_move_set_reachable_tiles(s32 unit_id, s32 unused_map_x, s32 unused_ma
                 break;
             }
             state->frontier_max_remaining_range = 0;
-            for (state->tile_level = 0; state->tile_level < MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
-                state->level_offset = state->tile_level * MAP_TILES_PER_LAYER;
+            for (state->tile_level = 0; state->tile_level < BATTLE_MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
+                state->level_offset = state->tile_level * BATTLE_MAP_TILES_PER_LAYER;
                 for (state->tile_y = 0; state->tile_y < config->map_max_y; state->tile_y++) {
                     state->row_offset = state->level_offset + state->tile_y * config->map_max_x;
                     for (state->tile_x = 0; state->tile_x < config->map_max_x; state->tile_x++) {
                         state->tile_index = state->row_offset + state->tile_x;
                         state->current_tile = &g_battle_map_tile_data[state->tile_index];
-                        state->current_panel = &g_battle_target_panels[state->tile_index];
+                        state->current_panel = &g_target_panels[state->tile_index];
                         if (frontier[state->tile_index] & FRONTIER_FLAG_QUEUED) {
                             frontier[state->tile_index] &= ~FRONTIER_FLAG_QUEUED;
-                            battle_move_check_and_spread_one_tile_around();
+                            move_spread_check_one_tile_around();
                             if (!config->fly_or_teleport) {
-                                battle_move_spread_horizontal_jump();
+                                move_spread_horizontal_jump();
                             }
                             state->outer_count = 8;
                         }
@@ -430,24 +430,24 @@ s32 battle_move_set_reachable_tiles(s32 unit_id, s32 unused_map_x, s32 unused_ma
             }
         }
     }
-    battle_move_set_reachable_tile_flags();
-    g_battle_move_reachable_tiles_valid = 1;
-    g_battle_move_reachable_unit_id = config->unit_id;
+    move_range_set_tile_flags();
+    g_move_range_valid = 1;
+    g_move_range_unit_id = config->unit_id;
     return state->reachable_count;
 }
 
 /* Clears the enterable flag on the tile of every dead or jumping unit. */
-static void battle_move_clear_enterable_flags_under_dead_or_jumping_units(void) {
+static void move_range_clear_enterable_flags_under_dead_or_jumping_units(void) {
     s32 unit_id;
 
-    for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
-        unit_stats_t* unit = &g_battle_unit_stats[unit_id];
+    for (unit_id = 0; unit_id < UNIT_SLOT_COUNT; unit_id++) {
+        unit_stats_t* unit = &g_unit_stats[unit_id];
 
-        if ((unit->entd_slot != BATTLE_ENTD_SLOT_NONE)
+        if ((unit->entd_slot != UNIT_ENTD_SLOT_NONE)
             && ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
                     & (STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_JUMP)))
                 != 0)) {
-            g_battle_move_frontier_flags_ptr[battle_map_calculate_location(unit)] &= ~FRONTIER_FLAG_ENTERABLE;
+            g_move_frontier_flags_ptr[battle_map_tile_calculate_unit_index(unit)] &= ~FRONTIER_FLAG_ENTERABLE;
         }
     }
 }
@@ -463,28 +463,28 @@ static void battle_move_clear_enterable_flags_under_dead_or_jumping_units(void) 
  * START_SPREAD queues the mover's own tile with Move + 1 range (and the unit
  * record on that tile when it is mountable); TERRAIN_ONLY leaves the units
  * out. */
-static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
+static void move_spread_set_frontier_flags(s32 mode) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
+    move_record_t* records = g_move_records_ptr;
     move_record_t* record;
     target_panel_t* panel;
     target_panel_t* aux;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     s32 i;
     s32 index;
     s32 height;
     u8* frontier_cell;
     u8* unit_cell;
     u8 slope;
-    map_tile_flags_t tile_flags;
+    battle_map_tile_flags_t tile_flags;
     u8 flags;
     u8 depth;
     u8 value;
 
     for (i = 0, frontier_cell = frontier; i < MOVE_PANEL_COUNT; frontier_cell++, i++) {
-        panel = &g_battle_target_panels[i];
+        panel = &g_target_panels[i];
         panel->mark = 0;
         panel->unit_record_index = 0;
         if (mode & 1) {
@@ -492,7 +492,7 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
             panel->ride_remaining_range = 0;
             panel->max_height_delta = 0xff;
         }
-        if (i < MAP_TILE_COUNT) {
+        if (i < BATTLE_MAP_TILE_COUNT) {
             tile = &g_battle_map_tile_data[i];
             frontier[i] = 0;
 
@@ -519,7 +519,7 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
             if (tile_flags.blocked) {
                 *frontier_cell |= FRONTIER_FLAG_BLOCKED;
             } else if (!config->move_type && (tile_flags.untargetable)
-                && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
+                && (tile->surface.type) != BATTLE_MAP_SURFACE_CROSS_SECTION) {
                 *frontier_cell |= FRONTIER_FLAG_ENTERABLE;
             }
         }
@@ -530,11 +530,11 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
             flags = record->unit_id_flags;
             if (flags != MOVE_RECORD_NONE) {
                 index = (record->higher_elevation << 8) + record->y * config->map_max_x + record->x;
-                if (g_battle_unit_stats[flags & MOVE_RECORD_UNIT_ID_MASK].character_identity
+                if (g_unit_stats[flags & MOVE_RECORD_UNIT_ID_MASK].character_identity
                     == CHARACTER_IDENTITY_ALTIMA_SECOND_FORM) {
                     frontier[index] = (frontier[index] | FRONTIER_FLAG_BLOCKED) & ~FRONTIER_FLAG_ENTERABLE;
                 }
-                g_battle_target_panels[index].unit_record_index = i;
+                g_target_panels[index].unit_record_index = i;
                 unit_cell = &frontier[index];
                 *unit_cell |= FRONTIER_FLAG_UNIT_ON_TILE;
                 if (!(flags & MOVE_RECORD_FLAG_OTHER_TEAM)) {
@@ -565,13 +565,13 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
         index = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
     }
     if (mode == MOVE_TILE_FLAGS_MODE_START_SPREAD) {
-        panel = &g_battle_target_panels[index];
+        panel = &g_target_panels[index];
         if (frontier[index] & FRONTIER_FLAG_MOUNTABLE_UNIT) {
             /* A riding mover shares its tile with its mount's record: also spread from the
-             * mount's top and standing heights (battle_move_check_and_spread_one_tile_around),
+             * mount's top and standing heights (move_spread_check_one_tile_around),
              * seeding the record's panel. */
             state->outer_count = 0x24;
-            aux = g_battle_target_panels + MAP_TILE_COUNT + panel->unit_record_index;
+            aux = g_target_panels + BATTLE_MAP_TILE_COUNT + panel->unit_record_index;
             aux->remaining_range = config->move + 1;
             aux->max_height_delta = 0;
         } else {
@@ -591,25 +591,25 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
  * any mountable panel. Otherwise the tile needs remaining range, a low
  * enough slope, a passable surface and depth the unit tolerates, and must be
  * crossable and either empty or a valid destination the unit can ride onto. */
-static void battle_move_set_reachable_tile_flags(void) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
-    u8* flags = g_battle_move_frontier_flags_ptr;
+static void move_range_set_tile_flags(void) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* spread = g_move_scratch_pad_ptr;
+    u8* flags = g_move_frontier_flags_ptr;
     s32 self = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
     s32 i;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     target_panel_t* panel;
     s32 half_height;
     s32 surface;
-    map_tile_flags_t tile_flags;
-    map_tile_depth_t water_depth;
+    battle_map_tile_flags_t tile_flags;
+    battle_map_tile_depth_t water_depth;
     s32 frontier;
 
-    battle_move_clear_enterable_flags_under_dead_or_jumping_units();
-    for (i = 0; i < MAP_TILE_COUNT; i++) {
+    move_range_clear_enterable_flags_under_dead_or_jumping_units();
+    for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
         tile->ceiling_depth_and_marks.move_destination = 0;
-        panel = &g_battle_target_panels[i];
+        panel = &g_target_panels[i];
         if (i == self) {
             continue;
         }
@@ -630,7 +630,7 @@ static void battle_move_set_reachable_tile_flags(void) {
                 continue;
             }
             surface = tile->surface.type;
-            if (surface == MAP_SURFACE_OBSTACLE) {
+            if (surface == BATTLE_MAP_SURFACE_OBSTACLE) {
                 continue;
             }
             water_depth = tile->depth_half_height;
@@ -643,7 +643,7 @@ static void battle_move_set_reachable_tile_flags(void) {
             if ((tile->depth_half_height.depth >= 4) && (config->will_sink != 0)) {
                 continue;
             }
-            if ((surface == MAP_SURFACE_LAVA) && (config->can_pass_lava == 0)) {
+            if ((surface == BATTLE_MAP_SURFACE_LAVA) && (config->can_pass_lava == 0)) {
                 continue;
             }
             if (tile_flags.untargetable) {
@@ -666,8 +666,8 @@ static void battle_move_set_reachable_tile_flags(void) {
 
 /* Step +x: the slope shifts select the source's exit side and the
  * destination's entry side. */
-void battle_move_spread_to_east_preset(void) {
-    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
+void move_spread_preset_east(void) {
+    move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->x_step = 1;
     spread->y_step = 0;
     spread->source_side_shift = 0;
@@ -676,8 +676,8 @@ void battle_move_spread_to_east_preset(void) {
 
 /* Step +y: the slope shifts select the source's exit side and the
  * destination's entry side. */
-void battle_move_spread_to_north_preset(void) {
-    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
+void move_spread_preset_north(void) {
+    move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->y_step = 1;
     spread->source_side_shift = 6;
     spread->x_step = 0;
@@ -686,8 +686,8 @@ void battle_move_spread_to_north_preset(void) {
 
 /* Step -x: the slope shifts select the source's exit side and the
  * destination's entry side. */
-void battle_move_spread_to_west_preset(void) {
-    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
+void move_spread_preset_west(void) {
+    move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->x_step = -1;
     spread->y_step = 0;
     spread->source_side_shift = 2;
@@ -696,8 +696,8 @@ void battle_move_spread_to_west_preset(void) {
 
 /* Step -y: the slope shifts select the source's exit side and the
  * destination's entry side. */
-void battle_move_spread_to_south_preset(void) {
-    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
+void move_spread_preset_south(void) {
+    move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->y_step = -1;
     spread->source_side_shift = 4;
     spread->x_step = 0;
@@ -706,28 +706,28 @@ void battle_move_spread_to_south_preset(void) {
 
 /* Reset the best-candidate fields of the spread state and load the current
  * tile's heights. */
-static void battle_move_init_spread_scratch(void) {
-    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
+static void move_path_init_spread_scratch(void) {
+    move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->best_height_delta = 0xFF;
     spread->best_fly_height_delta = 0xFF;
     spread->budget_matches = 0;
     spread->candidate_saved = 0;
     spread->best_extra_span = 0x7F;
-    battle_move_load_tile_height_for_spread();
+    move_spread_load_tile_height();
 }
 
 /* Load the current tile's base height (doubled, in half-height units), half
  * height and slope into the spread state. */
-static void battle_move_load_tile_height_for_spread(void) {
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
+static void move_spread_load_tile_height(void) {
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
     state->source_base_height_times_two = state->current_tile->height << 1;
     state->source_half_height = state->current_tile->depth_half_height.half_height;
     state->source_slope = state->current_tile->slope_type;
 }
 
 /* Work tile = current tile + one step of the preset direction. */
-static void battle_move_set_spreading_tile_x_and_y_coordinates(void) {
-    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
+static void move_spread_set_tile_coordinates(void) {
+    move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->work_x = spread->tile_x + spread->x_step;
     spread->work_y = spread->tile_y + spread->y_step;
 }
@@ -737,9 +737,9 @@ static void battle_move_set_spreading_tile_x_and_y_coordinates(void) {
  *
  * Return 1 for an invalid coordinate, or 0 for an in-bounds tile.
  */
-static s32 battle_move_check_spreading_tile_coordinates(void) {
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
+static s32 move_spread_check_tile_coordinates(void) {
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_pathfind_scratch_t* config = g_move_config_ptr;
     s32 x = state->work_x;
     s32 y;
     if (x >= 0) {
@@ -765,11 +765,11 @@ static s32 battle_move_check_spreading_tile_coordinates(void) {
  * a steep slope is left toward its high side, and 4 when the source panel has
  * less than 2 range left.
  */
-static s32 battle_move_init_source_panel(s32 direction) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
+static s32 move_spread_init_source_panel(s32 direction) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_record_t* records = g_move_records_ptr;
 
     if (direction >= 8 || state->source_unit_record_flag != 0) {
         s32 panel_index;
@@ -789,28 +789,28 @@ static s32 battle_move_init_source_panel(s32 direction) {
         }
         state->source_side_height_delta = 0;
         state->source_opposite_height = state->source_exit_height;
-        state->source_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->source_ceiling_height = move_spread_calculate_tile_ceiling(
             state->tile_x, state->tile_y, state->source_side_shift, (state->source_exit_height - 1));
-        panel_index = state->source_unit_record_index + MAP_TILE_COUNT;
+        panel_index = state->source_unit_record_index + BATTLE_MAP_TILE_COUNT;
         state->source_panel_index = panel_index;
-        state->source_panel = &g_battle_target_panels[panel_index];
+        state->source_panel = &g_target_panels[panel_index];
     } else {
         state->source_exit_height = state->source_base_height_times_two
             + state->source_half_height * ((state->source_slope >> state->source_side_shift) & 3);
         state->source_opposite_height = state->source_base_height_times_two
             + state->source_half_height * ((state->source_slope >> state->destination_side_shift) & 3);
         state->source_side_height_delta = state->source_exit_height - state->source_opposite_height;
-        state->source_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->source_ceiling_height = move_spread_calculate_tile_ceiling(
             state->tile_x, state->tile_y, state->source_side_shift, state->source_exit_height);
         if (state->source_side_height_delta >= 0 && (frontier[state->tile_index] & FRONTIER_FLAG_STEEP))
             return 3;
         if (state->current_tile->depth_half_height.depth
-            && (config->movement_set_3 & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER))) {
+            && (config->movement_set_3 & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER))) {
             state->source_exit_height += state->current_tile->depth_half_height.depth * 2;
-            if (config->movement_set_3 & BATTLE_MOVEMENT_SET_3_WALK_ON_WATER)
+            if (config->movement_set_3 & UNIT_MOVEMENT_SET_3_WALK_ON_WATER)
                 state->source_exit_height -= 2;
         }
-        state->source_panel = &g_battle_target_panels[state->source_panel_index = state->tile_index];
+        state->source_panel = &g_target_panels[state->source_panel_index = state->tile_index];
     }
     return (state->source_panel->remaining_range < 2) * 4;
 }
@@ -821,19 +821,19 @@ static s32 battle_move_init_source_panel(s32 direction) {
  * Return 0 for an accepted path, otherwise a numeric rejection reason.
  * The mount helper can update separate state before a later rejection.
  */
-static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    u8* flags = g_battle_move_frontier_flags_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
-    u8* terrain_costs = g_battle_move_terrain_costs_ptr;
+static s32 move_spread_propagate_destination(s32 candidate, s32 extra_span) {
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    u8* flags = g_move_frontier_flags_ptr;
+    move_record_t* records = g_move_records_ptr;
+    u8* terrain_costs = g_move_terrain_costs_ptr;
     u8* destination_flags;
 
     state->work_level = candidate & 1;
     state->destination_unit_record_flag = candidate / 2;
     state->destination_tile = &g_battle_map_tile_data[state->destination_index
-        = state->work_level * MAP_TILES_PER_LAYER + state->work_y * config->map_max_x + state->work_x];
-    state->destination_panel = &g_battle_target_panels[state->destination_index];
+        = state->work_level * BATTLE_MAP_TILES_PER_LAYER + state->work_y * config->map_max_x + state->work_x];
+    state->destination_panel = &g_target_panels[state->destination_index];
     state->destination_base_height_times_two = state->destination_tile->height * 2;
     state->destination_half_height = state->destination_tile->depth_half_height.half_height;
     state->destination_slope = state->destination_tile->slope_type;
@@ -843,10 +843,10 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
             return 1; /* no unit there to mount or stand on */
         state->destination_unit_record_index = state->destination_panel->unit_record_index;
         state->destination_entry_height = records[state->destination_unit_record_index].top_height;
-        state->destination_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->destination_ceiling_height = move_spread_calculate_tile_ceiling(
             state->work_x, state->work_y, state->destination_side_shift, (state->destination_entry_height - 1));
         if (*destination_flags & FRONTIER_FLAG_MOUNTABLE_UNIT)
-            battle_move_check_occupied_tile_standing_height(state->destination_unit_record_index, extra_span);
+            move_spread_check_occupied_tile_standing_height(state->destination_unit_record_index, extra_span);
         if (!(*destination_flags & FRONTIER_FLAG_STAND_ON_UNIT))
             return 17; /* the unit cannot be stood on (a mount was handled by the helper) */
     } else {
@@ -857,7 +857,7 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
         state->destination_opposite_height = state->destination_base_height_times_two
             + state->destination_half_height * ((state->destination_slope >> state->source_side_shift) & 3);
         state->destination_side_height_delta = state->destination_opposite_height - state->destination_entry_height;
-        state->destination_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->destination_ceiling_height = move_spread_calculate_tile_ceiling(
             state->work_x, state->work_y, state->destination_side_shift, state->destination_entry_height);
         if (state->destination_side_height_delta > 0 && (*destination_flags & FRONTIER_FLAG_STEEP))
             return 3; /* a steep slope entered from its low side */
@@ -889,16 +889,16 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
         if (state->candidate_remaining_range <= 0)
             return 11; /* no range left to step onto the unit */
         if ((u8)state->candidate_remaining_range
-            < g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range)
+            < g_target_panels[state->destination_unit_record_index + BATTLE_MAP_TILE_COUNT].remaining_range)
             return 12; /* the unit top is already reached with more range left */
         if ((u8)state->candidate_remaining_range
-                == g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range
+                == g_target_panels[state->destination_unit_record_index + BATTLE_MAP_TILE_COUNT].remaining_range
             && state->height_delta
-                >= g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].max_height_delta)
+                >= g_target_panels[state->destination_unit_record_index + BATTLE_MAP_TILE_COUNT].max_height_delta)
             return 13; /* same range left, and no smaller height difference */
-        g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range
+        g_target_panels[state->destination_unit_record_index + BATTLE_MAP_TILE_COUNT].remaining_range
             = state->candidate_remaining_range;
-        g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].max_height_delta
+        g_target_panels[state->destination_unit_record_index + BATTLE_MAP_TILE_COUNT].max_height_delta
             = state->height_delta;
     } else {
         state->candidate_remaining_range
@@ -914,7 +914,7 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
         state->destination_panel->max_height_delta = state->height_delta;
     }
     if (state->candidate_remaining_range >= 2) {
-        g_battle_move_frontier_flags_ptr[state->destination_index] |= FRONTIER_FLAG_QUEUED;
+        g_move_frontier_flags_ptr[state->destination_index] |= FRONTIER_FLAG_QUEUED;
         if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range)
             state->frontier_max_remaining_range = state->candidate_remaining_range;
     }
@@ -926,19 +926,19 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
  * unit on the tile, and 8 and up (outer_count 0x24) from that unit's standing
  * height + i / 4 - 2. Each source whose neighbor is on the map tries
  * inner_count destinations: either level, on the ground or on a unit. */
-static void battle_move_check_and_spread_one_tile_around(void) {
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
+static void move_spread_check_one_tile_around(void) {
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
     s32 i;
     s32 j;
 
-    battle_move_load_tile_height_for_spread();
+    move_spread_load_tile_height();
     for (i = 0; i < state->outer_count; i++) {
         state->source_unit_record_flag = i >= 4;
-        g_battle_move_spread_preset_table[i % 4]();
-        battle_move_set_spreading_tile_x_and_y_coordinates();
-        if ((battle_move_check_spreading_tile_coordinates() == 0) && (battle_move_init_source_panel(i) == 0)) {
+        g_move_spread_preset_table[i % 4]();
+        move_spread_set_tile_coordinates();
+        if ((move_spread_check_tile_coordinates() == 0) && (move_spread_init_source_panel(i) == 0)) {
             for (j = 0; j < state->inner_count; j++) {
-                battle_move_propagate_destination(j, 0);
+                move_spread_propagate_destination(j, 0);
             }
         }
     }
@@ -956,7 +956,7 @@ static void battle_move_check_and_spread_one_tile_around(void) {
  * one register. The budget stays an s32 read through u8 casts: a u8 local is
  * born one RTL copy later, and that shorter live range outranks extra_span in
  * global allocation, swapping their registers. */
-static void battle_move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span) {
+static void move_spread_check_occupied_tile_standing_height(s32 record_index, s32 extra_span) {
     move_spread_state_t* state;
     move_pathfind_scratch_t* config;
     move_record_t* records;
@@ -968,9 +968,9 @@ static void battle_move_check_occupied_tile_standing_height(s32 record_index, s3
     u8 limit;
     u8 top;
 
-    state = g_battle_move_scratch_pad_ptr;
-    config = g_battle_move_config_ptr;
-    records = g_battle_move_records_ptr;
+    state = g_move_scratch_pad_ptr;
+    config = g_move_config_ptr;
+    records = g_move_records_ptr;
 
     if (state->destination_ceiling_height < state->source_exit_height + config->unit_size) {
         return;
@@ -1026,15 +1026,15 @@ enum {
  * exit side's two slope bits; exit_height is the exit side height (or tile
  * height plus unit size).
  */
-static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height) {
+static u8 move_spread_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height) {
     s32 elevation;
-    map_tile_t* tile;
-    map_tile_depth_t depth;
+    battle_map_tile_t* tile;
+    battle_map_tile_depth_t depth;
     u8 ceiling = TILE_CEILING_NONE;
     u8 tile_ceiling;
 
-    for (elevation = 0; elevation < MAP_TERRAIN_LAYER_COUNT; elevation++) {
-        tile = &g_battle_map_tile_data[elevation * MAP_TILES_PER_LAYER + y * g_battle_move_config_ptr->map_max_x + x];
+    for (elevation = 0; elevation < BATTLE_MAP_TERRAIN_LAYER_COUNT; elevation++) {
+        tile = &g_battle_map_tile_data[elevation * BATTLE_MAP_TILES_PER_LAYER + y * g_move_config_ptr->map_max_x + x];
         if ((tile->flags.blocked) == 0) {
             depth = tile->depth_half_height;
             tile_ceiling = (tile->height << 1) + (depth.half_height) * ((tile->slope_type >> exit_slope_shift) & 3)
@@ -1063,11 +1063,11 @@ static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift,
  * Matching: the a>b arm stages the stored ceiling bound in `high` with the
  * depth term loaded before the store, and the other arm's split `low`
  * assignment keeps `low` ahead of `high` in allocation priority. */
-static s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shift_b, u8 height) {
+static s32 move_spread_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shift_b, u8 height) {
     move_spread_state_t* state;
     move_record_t* records;
     u8* frontier;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     s32 index;
     s32 layer;
     s32 low;
@@ -1077,20 +1077,20 @@ static s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shif
     s32 height_b;
     s32 depth;
 
-    frontier = g_battle_move_frontier_flags_ptr;
-    state = g_battle_move_scratch_pad_ptr;
-    records = g_battle_move_records_ptr;
-    state->jump_unit_size = g_battle_move_config_ptr->unit_size;
+    frontier = g_move_frontier_flags_ptr;
+    state = g_move_scratch_pad_ptr;
+    records = g_move_records_ptr;
+    state->jump_unit_size = g_move_config_ptr->unit_size;
     /* Even passes test a layer's terrain span, odd passes an enemy standing on it. */
     for (layer = 0; layer < 4; layer++) {
-        index = (layer / 2) * MAP_TILES_PER_LAYER + tile_index;
+        index = (layer / 2) * BATTLE_MAP_TILES_PER_LAYER + tile_index;
         tile = &g_battle_map_tile_data[index];
         if (layer & 1) {
             if ((frontier[index] & (FRONTIER_FLAG_UNIT_ON_TILE | FRONTIER_FLAG_STAND_ON_UNIT))
                 != FRONTIER_FLAG_UNIT_ON_TILE) {
                 continue;
             }
-            state->work_height = g_battle_target_panels[index].unit_record_index;
+            state->work_height = g_target_panels[index].unit_record_index;
             if (!(records[state->work_height].unit_id_flags & MOVE_RECORD_FLAG_OTHER_TEAM)) {
                 continue;
             }
@@ -1150,39 +1150,39 @@ static s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shif
  * The first four directions spread from the tile and the rest from above the
  * unit (source_unit_record_flag). Each pass continues only while the source panel's remaining
  * range minus the jump span stays at least 2 and both spans are clear. */
-static void battle_move_spread_horizontal_jump(void) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
+static void move_spread_horizontal_jump(void) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
     s32 outer_index;
     s32 inner_index;
     s32 pass_index;
 
-    battle_move_load_tile_height_for_spread();
+    move_spread_load_tile_height();
     for (outer_index = 0; outer_index < state->outer_count; outer_index++) {
         state->source_unit_record_flag = outer_index >= 4;
-        g_battle_move_spread_preset_table[outer_index % 4]();
-        if (battle_move_init_source_panel(outer_index) == 0) {
-            battle_move_set_spreading_tile_x_and_y_coordinates();
+        g_move_spread_preset_table[outer_index % 4]();
+        if (move_spread_init_source_panel(outer_index) == 0) {
+            move_spread_set_tile_coordinates();
             for (pass_index = 1; pass_index <= config->jump_half; pass_index++) {
                 state->jump_remaining_range = state->source_panel->remaining_range - pass_index;
                 if (state->jump_remaining_range < 2) {
                     break;
                 }
-                if (battle_move_check_spreading_tile_coordinates() != 0) {
+                if (move_spread_check_tile_coordinates() != 0) {
                     break;
                 }
-                if (battle_move_check_horizontal_jump(state->work_y * config->map_max_x + state->work_x,
+                if (move_spread_check_horizontal_jump(state->work_y * config->map_max_x + state->work_x,
                         state->source_side_shift, state->destination_side_shift, state->source_exit_height)
                     != 0) {
                     break;
                 }
                 state->work_x = state->tile_x + state->x_step * (pass_index + 1);
                 state->work_y = state->tile_y + state->y_step * (pass_index + 1);
-                if (battle_move_check_spreading_tile_coordinates() != 0) {
+                if (move_spread_check_tile_coordinates() != 0) {
                     break;
                 }
                 for (inner_index = 0; inner_index < state->inner_count; inner_index++) {
-                    battle_move_propagate_destination(inner_index, pass_index);
+                    move_spread_propagate_destination(inner_index, pass_index);
                 }
             }
         }
@@ -1196,17 +1196,17 @@ static void battle_move_spread_horizontal_jump(void) {
  * is not a valid destination. Teleport movers get the explicit-destination
  * form (0xfe, x, y, elevation) after the teleport roll, or 0xff on failure.
  * Other movers trace remaining-range values back from the target toward the
- * unit before battle_move_encode_path_steps builds the step list. Either way the result is
- * the path buffer at g_battle_move_path.
+ * unit before move_path_encode_steps builds the step list. Either way the result is
+ * the path buffer at g_move_path.
  *
- * g_battle_move_effective_flags is written through a pointer loaded twice: the
+ * g_move_path_effective_flags is written through a pointer loaded twice: the
  * target materializes its address in a register in both blocks. */
-battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
+move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
     move_height_offsets_t no_offsets = { 0 };
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_record_t* records = g_move_records_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
     s32 index;
     u8 flags;
     u8 source_flags;
@@ -1221,23 +1221,23 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
     state->tile_x = config->target_x = x;
     state->tile_y = config->target_y = y;
     state->tile_level = config->target_level = elevation;
-    battle_move_store_unit_movement_to_scratchpad(unit_id);
+    move_spread_store_unit_to_scratchpad(unit_id);
     index = (config->target_level << 8) + config->target_y * config->map_max_x + config->target_x;
     if (!g_battle_map_tile_data[index].ceiling_depth_and_marks.move_destination) {
         return 0;
     }
-    if (g_battle_move_reachable_tiles_valid == 0) {
+    if (g_move_range_valid == 0) {
         return 0;
     }
-    if (unit_id != g_battle_move_reachable_unit_id) {
+    if (unit_id != g_move_range_unit_id) {
         return 0;
     }
-    if (g_battle_unit_stats[unit_id].entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    if (g_unit_stats[unit_id].entd_slot == UNIT_ENTD_SLOT_NONE) {
         return 0;
     }
-    battle_move_set_tile_flags_for_pathfinding(MOVE_TILE_FLAGS_MODE_KEEP_RANGES);
-    g_battle_move_path_height_offsets = no_offsets;
-    g_battle_move_destination_unit_record = 0;
+    move_spread_set_frontier_flags(MOVE_TILE_FLAGS_MODE_KEEP_RANGES);
+    g_move_path_height_offsets = no_offsets;
+    g_move_path_destination_unit_record = 0;
     config->source_tile_occupied = 0;
     config->destination_tile_occupied = 0;
     state->source_unit_record_flag = 0;
@@ -1250,10 +1250,10 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
             return 0;
         }
         config->destination_tile_occupied = 1;
-        state->source_unit_record_index = g_battle_target_panels[index].unit_record_index;
-        g_battle_move_destination_unit_record
+        state->source_unit_record_index = g_target_panels[index].unit_record_index;
+        g_move_path_destination_unit_record
             = (records[state->source_unit_record_index].unit_id_flags & MOVE_RECORD_UNIT_ID_MASK)
-            + BATTLE_PENDING_MOUNT_SET;
+            + MOVE_PENDING_MOUNT_SET;
         state->outer_count = 0x1c;
     }
     index = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
@@ -1265,27 +1265,27 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
         config->source_tile_occupied = 1;
     }
     if (config->move_type == MOVE_CLASS_TELEPORT) {
-        move_flags = &g_battle_move_effective_flags;
-        *move_flags = BATTLE_EFFECTIVE_MOVEMENT_TELEPORT;
+        move_flags = &g_move_path_effective_flags;
+        *move_flags = MOVE_EFFECTIVE_TELEPORT;
         value = config->movement_3;
-        if (value & BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER) {
-            *move_flags = BATTLE_EFFECTIVE_MOVEMENT_TELEPORT | BATTLE_EFFECTIVE_MOVEMENT_ON_WATER;
-        } else if (value & BATTLE_MOVEMENT_SET_3_WALK_ON_WATER) {
-            *move_flags = BATTLE_EFFECTIVE_MOVEMENT_TELEPORT | BATTLE_EFFECTIVE_MOVEMENT_IN_WATER;
+        if (value & UNIT_MOVEMENT_SET_3_MOVE_IN_WATER) {
+            *move_flags = MOVE_EFFECTIVE_TELEPORT | MOVE_EFFECTIVE_ON_WATER;
+        } else if (value & UNIT_MOVEMENT_SET_3_WALK_ON_WATER) {
+            *move_flags = MOVE_EFFECTIVE_TELEPORT | MOVE_EFFECTIVE_IN_WATER;
         }
-        if (value & BATTLE_MOVEMENT_SET_3_SILENT_WALK) {
-            move_flags = &g_battle_move_effective_flags;
-            *move_flags |= BATTLE_EFFECTIVE_MOVEMENT_SILENT_WALK;
+        if (value & UNIT_MOVEMENT_SET_3_SILENT_WALK) {
+            move_flags = &g_move_path_effective_flags;
+            *move_flags |= MOVE_EFFECTIVE_SILENT_WALK;
         }
-        if (battle_move_roll_teleport() != 0) {
-            g_battle_move_path.count = MOVE_PATH_TELEPORT;
-            g_battle_move_path.data.teleport.x = x;
-            g_battle_move_path.data.teleport.y = y;
-            g_battle_move_path.data.teleport.elevation = elevation;
+        if (move_teleport_roll() != 0) {
+            g_move_path.count = MOVE_PATH_TELEPORT;
+            g_move_path.data.teleport.x = x;
+            g_move_path.data.teleport.y = y;
+            g_move_path.data.teleport.elevation = elevation;
         } else {
-            g_battle_move_path.count = MOVE_PATH_TELEPORT_FAILED;
+            g_move_path.count = MOVE_PATH_TELEPORT_FAILED;
         }
-        return &g_battle_move_path;
+        return &g_move_path;
     }
     state->candidate_remaining_range = 0xff;
     state->path_length = 0;
@@ -1299,15 +1299,16 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
     while (state->candidate_remaining_range != 0) {
         state->previous_source_side_shift = state->selected_source_side_shift;
         pass = state->path_length + 1;
-        state->tile_index = state->tile_level * MAP_TILES_PER_LAYER + state->tile_y * config->map_max_x + state->tile_x;
+        state->tile_index
+            = state->tile_level * BATTLE_MAP_TILES_PER_LAYER + state->tile_y * config->map_max_x + state->tile_x;
         state->current_tile = &g_battle_map_tile_data[state->tile_index];
-        state->current_panel = &g_battle_target_panels[state->tile_index];
+        state->current_panel = &g_target_panels[state->tile_index];
         state->path_length = pass;
         if (state->outer_count >= 5) {
             value = state->current_panel->ride_remaining_range;
             range = state->current_panel->remaining_range;
             if (range < value) {
-                g_battle_target_panels[state->source_unit_record_index + MAP_TILE_COUNT].ride_remaining_range = pass;
+                g_target_panels[state->source_unit_record_index + BATTLE_MAP_TILE_COUNT].ride_remaining_range = pass;
             } else {
                 value = range;
                 state->source_unit_record_flag = 0;
@@ -1315,8 +1316,8 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
                 state->current_panel->mark = state->path_length;
             }
         } else if (state->source_unit_record_flag != 0) {
-            value = g_battle_target_panels[state->source_unit_record_index + MAP_TILE_COUNT].remaining_range;
-            g_battle_target_panels[state->source_unit_record_index + MAP_TILE_COUNT].mark = pass;
+            value = g_target_panels[state->source_unit_record_index + BATTLE_MAP_TILE_COUNT].remaining_range;
+            g_target_panels[state->source_unit_record_index + BATTLE_MAP_TILE_COUNT].mark = pass;
         } else {
             value = state->current_panel->remaining_range;
             state->current_panel->mark = pass;
@@ -1325,13 +1326,13 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
         if (state->tile_x == config->x && state->tile_y == config->y && state->tile_level == config->high_elevation) {
             break;
         }
-        battle_move_spread_to_neighbors();
+        move_path_spread_to_neighbors();
         previous = state->candidate_remaining_range;
         if (previous != value) {
             state->outer_count = 4;
             continue;
         }
-        battle_move_spread_horizontal_jumps();
+        move_path_spread_horizontal_jumps();
         current = state->candidate_remaining_range;
         if (current != previous) {
             state->outer_count = 4;
@@ -1339,29 +1340,29 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
         }
         if (config->source_tile_occupied != 0) {
             state->inner_count = 7;
-            battle_move_spread_to_neighbors();
+            move_path_spread_to_neighbors();
             previous = state->candidate_remaining_range;
             if (previous != current) {
                 continue;
             }
-            battle_move_spread_horizontal_jumps();
+            move_path_spread_horizontal_jumps();
             if (state->candidate_remaining_range != previous) {
                 continue;
             }
         }
         return 0;
     }
-    battle_move_encode_path_steps();
-    return &g_battle_move_path;
+    move_path_encode_steps();
+    return &g_move_path;
 }
 
 /* 1 when the teleport succeeds: always with Teleport 2, otherwise it fails
  * with a 10 in 100 chance per tile of distance beyond Move. */
-static s32 battle_move_roll_teleport(void) {
-    move_pathfind_scratch_t* ctx = g_battle_move_config_ptr;
+static s32 move_teleport_roll(void) {
+    move_pathfind_scratch_t* ctx = g_move_config_ptr;
     s32 dy, dx;
 
-    if (ctx->movement_set_2 & BATTLE_MOVEMENT_SET_2_TELEPORT_2) {
+    if (ctx->movement_set_2 & UNIT_MOVEMENT_SET_2_TELEPORT_2) {
         return 1;
     }
     dx = ctx->target_x - ctx->x;
@@ -1375,18 +1376,18 @@ static s32 battle_move_roll_teleport(void) {
 
 /* padding */
 
-/* Encode the traced path as move_step_t bytes in g_battle_move_path,
+/* Encode the traced path as move_step_t bytes in g_move_path,
  * count holding the number of encoded steps. Starting from the unit's tile, step n goes to
  * the tile or unit record the back-trace marked with path_length - n; the byte
  * records the direction, the distance, the level, whether the step ends on a
  * unit and whether either end is a climb. */
-static void battle_move_encode_path_steps(void) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
+static void move_path_encode_steps(void) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_record_t* records = g_move_records_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
     move_record_t* record;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     s32 step;
     s32 path_index;
     u8 level;
@@ -1401,27 +1402,28 @@ static void battle_move_encode_path_steps(void) {
 
     state->source_unit_record_index = 0;
     for (step = 0; step < state->path_length - 1; step++) {
-        state->tile_index = state->tile_level * MAP_TILES_PER_LAYER + state->tile_y * config->map_max_x + state->tile_x;
+        state->tile_index
+            = state->tile_level * BATTLE_MAP_TILES_PER_LAYER + state->tile_y * config->map_max_x + state->tile_x;
         state->current_tile = &g_battle_map_tile_data[state->tile_index];
-        state->current_panel = &g_battle_target_panels[state->tile_index];
+        state->current_panel = &g_target_panels[state->tile_index];
         path_index = step + 1;
         target = state->path_length - path_index;
         for (i = 0; i < MOVE_PANEL_COUNT; i++) {
             /* A record panel whose ride range holds the step number is a mount ridden onto. */
-            if (i >= MAP_TILE_COUNT && g_battle_target_panels[i].ride_remaining_range == target) {
+            if (i >= BATTLE_MAP_TILE_COUNT && g_target_panels[i].ride_remaining_range == target) {
                 ride = 1;
-                record = &records[i - MAP_TILE_COUNT];
-            } else if (g_battle_target_panels[i].mark == target) {
+                record = &records[i - BATTLE_MAP_TILE_COUNT];
+            } else if (g_target_panels[i].mark == target) {
                 ride = 0;
-                if (i < MAP_TILE_COUNT) {
+                if (i < BATTLE_MAP_TILE_COUNT) {
                     state->destination_unit_record_index = 0;
-                    state->work_level = (u8)(i / MAP_TILES_PER_LAYER);
-                    rem = i - (i / MAP_TILES_PER_LAYER) * MAP_TILES_PER_LAYER;
+                    state->work_level = (u8)(i / BATTLE_MAP_TILES_PER_LAYER);
+                    rem = i - (i / BATTLE_MAP_TILES_PER_LAYER) * BATTLE_MAP_TILES_PER_LAYER;
                     state->work_y = (u8)(rem / config->map_max_x);
                     state->work_x = (u8)(rem % config->map_max_x);
                 } else {
                     state->destination_unit_record_index = 1;
-                    record = &records[i - MAP_TILE_COUNT];
+                    record = &records[i - BATTLE_MAP_TILE_COUNT];
                 }
             } else {
                 continue;
@@ -1492,7 +1494,7 @@ static void battle_move_encode_path_steps(void) {
             level = state->work_level * 32;
             state->source_unit_record_index = state->destination_unit_record_index;
             flag = state->destination_unit_record_index << 4;
-            if (step == state->path_length - 2 && g_battle_move_path_height_offsets.source_present) {
+            if (step == state->path_length - 2 && g_move_path_height_offsets.source_present) {
                 flag = 0x10;
             }
             source_bit = state->source_climb << 2;
@@ -1501,7 +1503,7 @@ static void battle_move_encode_path_steps(void) {
              * (destination climb), mount, higher and direction. Individual field stores add
              * truncation and change scheduling. The final step also sets the mount bit when
              * the back-trace began on a mount at the target (source height offset present). */
-            *(u8*)&g_battle_move_path.data.steps[step]
+            *(u8*)&g_move_path.data.steps[step]
                 = (state->step_distance - 1) | (source_bit | (destination_bit | (flag | (dir | level))));
             state->tile_x = state->work_x;
             state->tile_y = state->work_y;
@@ -1509,11 +1511,11 @@ static void battle_move_encode_path_steps(void) {
             break;
         }
     }
-    g_battle_move_path.count = state->path_length - 1;
-    if (config->unit_id >= BATTLE_UNIT_SLOT_COUNT) {
-        g_battle_move_effective_flags = 0;
+    g_move_path.count = state->path_length - 1;
+    if (config->unit_id >= UNIT_SLOT_COUNT) {
+        g_move_path_effective_flags = 0;
     } else {
-        g_battle_move_effective_flags = battle_move_get_effective_flags(&g_battle_unit_stats[config->unit_id]);
+        g_move_path_effective_flags = move_get_effective_flags(&g_unit_stats[config->unit_id]);
     }
 }
 
@@ -1524,21 +1526,21 @@ static void battle_move_encode_path_steps(void) {
  * Extended unit records and ordinary terrain use different height checks;
  * only the terrain path adds water depth after finding the ceiling.
  */
-static s32 battle_move_init_source_geometry(s32 direction) {
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
+static s32 move_path_init_source_geometry(s32 direction) {
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
+    move_record_t* records = g_move_records_ptr;
     s32 difference;
 
     if (state->outer_count >= 5) {
         /* Typed pointer addition reverses the target's address operands. */
         move_record_t* record = (move_record_t*)(state->source_unit_record_index * sizeof(*records) + (u32)records);
-        state->source_exit_height = record->standing_height + g_battle_move_height_offsets[6 - direction / 4];
+        state->source_exit_height = record->standing_height + g_move_height_offsets[6 - direction / 4];
         state->work_height = state->source_base_height_times_two
             + state->source_half_height * ((state->source_slope >> state->source_side_shift) & 3);
         if (state->source_exit_height < state->work_height)
             return 1;
-        state->source_ceiling_height = battle_move_calculate_tile_ceiling(state->tile_x, state->tile_y,
+        state->source_ceiling_height = move_spread_calculate_tile_ceiling(state->tile_x, state->tile_y,
             state->source_side_shift, (records[state->source_unit_record_index].standing_height + 5));
         state->source_side_height_delta = 0;
     } else if (state->source_unit_record_flag != 0) {
@@ -1546,7 +1548,7 @@ static s32 battle_move_init_source_geometry(s32 direction) {
             return 1;
         state->source_exit_height = records[state->source_unit_record_index].top_height;
         state->source_opposite_height = state->source_exit_height;
-        state->source_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->source_ceiling_height = move_spread_calculate_tile_ceiling(
             state->tile_x, state->tile_y, state->source_side_shift, (state->source_exit_height - 1));
         state->source_side_height_delta = 0;
     } else {
@@ -1554,7 +1556,7 @@ static s32 battle_move_init_source_geometry(s32 direction) {
             + state->source_half_height * ((state->source_slope >> state->source_side_shift) & 3);
         state->source_opposite_height = state->source_base_height_times_two
             + state->source_half_height * ((state->source_slope >> state->destination_side_shift) & 3);
-        state->source_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->source_ceiling_height = move_spread_calculate_tile_ceiling(
             state->tile_x, state->tile_y, state->source_side_shift, state->source_exit_height);
         difference = state->source_opposite_height - state->source_exit_height;
         state->source_side_height_delta = difference;
@@ -1573,20 +1575,20 @@ static s32 battle_move_init_source_geometry(s32 direction) {
  * record's heights and its record panel. Returns 0 for a usable candidate,
  * otherwise a rejection code (1-5).
  */
-static s32 battle_move_init_destination_geometry(s32 candidate) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    u8* tile_flags = g_battle_move_frontier_flags_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
+static s32 move_path_init_destination_geometry(s32 candidate) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    u8* tile_flags = g_move_frontier_flags_ptr;
+    move_record_t* records = g_move_records_ptr;
 
     state->destination_unit_record_flag = candidate >= 2;
     state->work_level = candidate & 1;
     if (state->inner_count >= 5)
         state->work_level = config->high_elevation;
     state->destination_index
-        = state->work_level * MAP_TILES_PER_LAYER + state->work_y * config->map_max_x + state->work_x;
+        = state->work_level * BATTLE_MAP_TILES_PER_LAYER + state->work_y * config->map_max_x + state->work_x;
     state->destination_tile = &g_battle_map_tile_data[state->destination_index];
-    state->destination_panel = &g_battle_target_panels[state->destination_index];
+    state->destination_panel = &g_target_panels[state->destination_index];
     state->destination_base_height_times_two = state->destination_tile->height * 2;
     state->destination_half_height = state->destination_tile->depth_half_height.half_height;
     state->destination_slope = state->destination_tile->slope_type;
@@ -1596,8 +1598,8 @@ static s32 battle_move_init_destination_geometry(s32 candidate) {
             state->destination_unit_record_flag = 1;
             if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_MOUNTABLE_UNIT))
                 return 1;
-            state->destination_entry_height = records[state->destination_unit_record_index].standing_height
-                + g_battle_move_height_offsets[candidate];
+            state->destination_entry_height
+                = records[state->destination_unit_record_index].standing_height + g_move_height_offsets[candidate];
             state->work_height = state->destination_base_height_times_two
                 + state->destination_half_height * ((state->destination_slope >> state->destination_side_shift) & 3);
             if (state->destination_entry_height < state->work_height)
@@ -1609,10 +1611,10 @@ static s32 battle_move_init_destination_geometry(s32 candidate) {
         }
         state->destination_side_height_delta = 0;
         state->destination_opposite_height = state->destination_entry_height;
-        state->destination_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->destination_ceiling_height = move_spread_calculate_tile_ceiling(
             state->work_x, state->work_y, state->destination_side_shift, (state->destination_entry_height - 1));
-        state->destination_panel_index = state->destination_unit_record_index + MAP_TILE_COUNT;
-        state->effective_destination_panel = &g_battle_target_panels[state->destination_panel_index];
+        state->destination_panel_index = state->destination_unit_record_index + BATTLE_MAP_TILE_COUNT;
+        state->effective_destination_panel = &g_target_panels[state->destination_panel_index];
     } else {
         if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_ENTERABLE))
             return 4;
@@ -1621,19 +1623,19 @@ static s32 battle_move_init_destination_geometry(s32 candidate) {
         state->destination_opposite_height = state->destination_base_height_times_two
             + state->destination_half_height * ((state->destination_slope >> state->source_side_shift) & 3);
         state->destination_side_height_delta = state->destination_entry_height - state->destination_opposite_height;
-        state->destination_ceiling_height = battle_move_calculate_tile_ceiling(
+        state->destination_ceiling_height = move_spread_calculate_tile_ceiling(
             state->work_x, state->work_y, state->destination_side_shift, state->destination_entry_height);
         if (state->destination_side_height_delta >= 0 && (tile_flags[state->destination_index] & FRONTIER_FLAG_STEEP))
             return 5;
         state->clearance_height = state->source_exit_height;
         if (state->destination_tile->depth_half_height.depth
-            && (config->movement_set_3 & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER))) {
+            && (config->movement_set_3 & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER))) {
             state->destination_entry_height += state->destination_tile->depth_half_height.depth * 2;
-            if (config->movement_set_3 & BATTLE_MOVEMENT_SET_3_WALK_ON_WATER)
+            if (config->movement_set_3 & UNIT_MOVEMENT_SET_3_WALK_ON_WATER)
                 state->destination_entry_height -= 2;
         }
         state->destination_panel_index = state->destination_index;
-        state->effective_destination_panel = &g_battle_target_panels[state->destination_panel_index];
+        state->effective_destination_panel = &g_target_panels[state->destination_panel_index];
     }
     return 0;
 }
@@ -1644,10 +1646,10 @@ static s32 battle_move_init_destination_geometry(s32 candidate) {
  * budgets by the smaller immediate height difference. Non-AI mode returns 0
  * after geometry checks and sets budget_matches only when the budget matches.
  */
-static s32 battle_move_update_candidate(s32 extra_span) {
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    u8* terrain_costs = g_battle_move_terrain_costs_ptr;
+static s32 move_path_update_candidate(s32 extra_span) {
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    u8* terrain_costs = g_move_terrain_costs_ptr;
     s32 step_cost;
 
     if (state->source_ceiling_height < state->destination_entry_height + config->unit_size)
@@ -1679,7 +1681,7 @@ static s32 battle_move_update_candidate(s32 extra_span) {
         state->destination_panel->remaining_range = state->candidate_remaining_range;
         state->destination_panel->max_height_delta = state->height_delta;
         if (state->candidate_remaining_range >= 2) {
-            g_battle_move_frontier_flags_ptr[state->destination_index] |= FRONTIER_FLAG_QUEUED;
+            g_move_frontier_flags_ptr[state->destination_index] |= FRONTIER_FLAG_QUEUED;
             if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range)
                 state->frontier_max_remaining_range = state->candidate_remaining_range;
         }
@@ -1692,7 +1694,7 @@ static s32 battle_move_update_candidate(s32 extra_span) {
     } else {
         if (state->candidate_remaining_range
             == state->effective_destination_panel->remaining_range
-                - g_battle_move_terrain_costs_ptr[state->current_tile->surface.type] - extra_span)
+                - g_move_terrain_costs_ptr[state->current_tile->surface.type] - extra_span)
             state->budget_matches = 1;
     }
     return 0;
@@ -1701,34 +1703,34 @@ static s32 battle_move_update_candidate(s32 extra_span) {
 /* One-tile steps from the current tile to its four neighbors.
  *
  * In AI propagation an accepted step gives the neighbor this tile's range less
- * the step cost when that is more than it has (battle_move_update_candidate).
+ * the step cost when that is more than it has (move_path_update_candidate).
  * In a back-trace, the best neighbor whose range accounts for the step is saved
  * and becomes the next traced tile.
  */
-static void battle_move_spread_to_neighbors(void) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
+static void move_path_spread_to_neighbors(void) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
     s32 direction;
     s32 candidate;
     s32 callback;
 
-    battle_move_init_spread_scratch();
+    move_path_init_spread_scratch();
     for (direction = 0; direction < state->outer_count; direction++) {
         callback = direction % 4;
-        g_battle_move_spread_preset_table[callback]();
-        battle_move_set_spreading_tile_x_and_y_coordinates();
-        if (battle_move_check_spreading_tile_coordinates() == 0 && battle_move_init_source_geometry(direction) == 0) {
+        g_move_spread_preset_table[callback]();
+        move_spread_set_tile_coordinates();
+        if (move_spread_check_tile_coordinates() == 0 && move_path_init_source_geometry(direction) == 0) {
             if (state->inner_count > 4 && (config->x != state->work_x || config->y != state->work_y))
                 continue;
             for (candidate = 0; candidate < state->inner_count; candidate++) {
-                if (battle_move_init_destination_geometry(candidate) == 0 && battle_move_update_candidate(0) == 0
+                if (move_path_init_destination_geometry(candidate) == 0 && move_path_update_candidate(0) == 0
                     && state->budget_matches != 0)
-                    battle_move_save_selected_candidate(direction, candidate, 0);
+                    move_path_save_selected_candidate(direction, candidate, 0);
             }
         }
     }
     if (config->ai_propagation_mode == 0 && state->candidate_saved != 0)
-        battle_move_apply_selected_candidate(state);
+        move_path_apply_selected_candidate(state);
 }
 
 /*
@@ -1738,13 +1740,13 @@ static void battle_move_spread_to_neighbors(void) {
  * when their saved presence bits are set. The destination update uses byte
  * masks because its equivalent bitfield assignments change register allocation.
  */
-static void battle_move_apply_selected_candidate(move_spread_state_t* state) {
+static void move_path_apply_selected_candidate(move_spread_state_t* state) {
     state->candidate_remaining_range = state->saved_remaining_range;
     state->tile_x = state->saved_x;
     state->tile_y = state->saved_y;
     state->tile_level = state->saved_level;
     if (state->saved_height_offset_flags & MOVE_SAVED_SOURCE_HEIGHT) {
-        move_height_offsets_t* offsets = &g_battle_move_path_height_offsets;
+        move_height_offsets_t* offsets = &g_move_path_height_offsets;
         move_height_offsets_t packed = *offsets;
         packed.source_height_offset = state->saved_source_height_offset;
         packed.source_present = 1;
@@ -1752,7 +1754,7 @@ static void battle_move_apply_selected_candidate(move_spread_state_t* state) {
     }
     if (state->saved_height_offset_flags & MOVE_SAVED_DESTINATION_HEIGHT) {
         /* Bit 0 is destination_present, bits 1-3 destination_height_offset. */
-        u8* offsets = (u8*)&g_battle_move_path_height_offsets;
+        u8* offsets = (u8*)&g_move_path_height_offsets;
         u32 selected = state->saved_destination_height_offset;
         u32 packed = *offsets;
         selected &= 7;
@@ -1766,35 +1768,35 @@ static void battle_move_apply_selected_candidate(move_spread_state_t* state) {
 
 /* Horizontal jumps: from the current tile, in each direction, try landing 2 to
  * jump_half + 1 tiles away, provided every tile in between can be jumped over
- * at the landing height (battle_move_check_horizontal_jump). The best
+ * at the landing height (move_spread_check_horizontal_jump). The best
  * candidate is saved and, outside AI propagation, applied to the spread state. */
-static void battle_move_spread_horizontal_jumps(void) {
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
+static void move_path_spread_horizontal_jumps(void) {
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
     s32 outer_index;
     s32 inner_index;
     s32 pass_index;
     s32 path_index;
     s32 callback_index;
 
-    battle_move_init_spread_scratch();
+    move_path_init_spread_scratch();
     for (outer_index = 0; outer_index < state->outer_count; outer_index++) {
         callback_index = outer_index % 4;
-        g_battle_move_spread_preset_table[callback_index]();
-        if (battle_move_init_source_geometry(outer_index) == 0) {
+        g_move_spread_preset_table[callback_index]();
+        if (move_path_init_source_geometry(outer_index) == 0) {
             pass_index = 1;
-            battle_move_set_spreading_tile_x_and_y_coordinates();
+            move_spread_set_tile_coordinates();
             if (config->jump_half != 0) {
                 do {
-                    if (battle_move_check_spreading_tile_coordinates() == 0) {
+                    if (move_spread_check_tile_coordinates() == 0) {
                         state->work_x = state->tile_x + state->x_step * (pass_index + 1);
                         state->work_y = state->tile_y + state->y_step * (pass_index + 1);
-                        if (battle_move_check_spreading_tile_coordinates() == 0) {
+                        if (move_spread_check_tile_coordinates() == 0) {
                             for (inner_index = 0; inner_index < state->inner_count; inner_index++) {
-                                if (battle_move_init_destination_geometry(inner_index) == 0) {
+                                if (move_path_init_destination_geometry(inner_index) == 0) {
                                     state->placement_failed = 0;
                                     for (path_index = 1; path_index <= pass_index; path_index++) {
-                                        if (battle_move_check_horizontal_jump(
+                                        if (move_spread_check_horizontal_jump(
                                                 (state->work_y - state->y_step * path_index) * config->map_max_x
                                                     + (state->work_x - state->x_step * path_index),
                                                 state->source_side_shift, state->destination_side_shift,
@@ -1804,9 +1806,9 @@ static void battle_move_spread_horizontal_jumps(void) {
                                             break;
                                         }
                                     }
-                                    if (state->placement_failed == 0 && battle_move_update_candidate(pass_index) == 0
+                                    if (state->placement_failed == 0 && move_path_update_candidate(pass_index) == 0
                                         && state->budget_matches != 0) {
-                                        battle_move_save_selected_candidate(outer_index, inner_index, pass_index);
+                                        move_path_save_selected_candidate(outer_index, inner_index, pass_index);
                                     }
                                 }
                             }
@@ -1822,7 +1824,7 @@ static void battle_move_spread_horizontal_jumps(void) {
         }
     }
     if (config->ai_propagation_mode == 0 && state->candidate_saved != 0) {
-        battle_move_apply_selected_candidate(state);
+        move_path_apply_selected_candidate(state);
     }
 }
 
@@ -1831,8 +1833,8 @@ static void battle_move_spread_horizontal_jumps(void) {
  * Every attempt clears budget_matches; accepted candidates replace the saved
  * coordinates, selectors and predecessor budget, then set candidate_saved.
  */
-static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span) {
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
+static void move_path_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span) {
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
     u8 height_delta;
 
     state->budget_matches = 0;
@@ -1840,7 +1842,7 @@ static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s3
         state->saved_remaining_range = state->effective_destination_panel->remaining_range;
     } else {
         state->work_height = state->effective_destination_panel->max_height_delta;
-        if (g_battle_move_config_ptr->move_type == MOVE_CLASS_FLY) {
+        if (g_move_config_ptr->move_type == MOVE_CLASS_FLY) {
             if (state->best_fly_height_delta != 0xff) {
                 if (state->selected_source_side_shift == state->previous_source_side_shift
                     && state->source_side_shift != state->previous_source_side_shift)
@@ -1878,11 +1880,11 @@ static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s3
     /* Extended candidates carry source/destination height selectors. */
     if (state->outer_count >= 5) {
         state->saved_height_offset_flags = MOVE_SAVED_SOURCE_HEIGHT;
-        state->saved_source_height_offset = g_battle_move_height_offsets[6 - direction / 4];
+        state->saved_source_height_offset = g_move_height_offsets[6 - direction / 4];
     }
     if (state->inner_count >= 5) {
         state->saved_height_offset_flags |= MOVE_SAVED_DESTINATION_HEIGHT;
-        state->saved_destination_height_offset = g_battle_move_height_offsets[candidate];
+        state->saved_destination_height_offset = g_move_height_offsets[candidate];
     }
     if (state->destination_unit_record_flag != 0) {
         state->saved_unit_record_flag = 1;
@@ -1894,19 +1896,19 @@ static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s3
     state->candidate_saved = 1;
 }
 
-/* battle_move_calculate_pathing with the per-call search budget enabled, so a
+/* move_path_calculate with the per-call search budget enabled, so a
  * long search can suspend and resume through `suspended`. */
-void battle_move_calculate_pathing_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
+void move_path_calculate_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
     s32 target_level, s32 initialize, s32* suspended) {
-    battle_move_calculate_pathing(flags, jump, x, y, level, target_x, target_y, target_level, initialize, suspended, 1);
+    move_path_calculate(flags, jump, x, y, level, target_x, target_y, target_level, initialize, suspended, 1);
 }
 
-/* Falls off the end: battle_move_calculate_pathing leaves the path block pointer in $v0 and
+/* Falls off the end: move_path_calculate leaves the path block pointer in $v0 and
  * the caller consumes it, so the result type belongs on this definition. */
-battle_walk_path_t* battle_move_calculate_walkto_pathing(
+move_path_t* move_path_calculate_walk_to(
     s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y, s32 target_level) {
     s32 suspended;
-    battle_move_calculate_pathing(flags, jump, x, y, level, target_x, target_y, target_level, 1, &suspended, 0);
+    move_path_calculate(flags, jump, x, y, level, target_x, target_y, target_level, 1, &suspended, 0);
 }
 
 /* Pathfinding pass for a generic unit (id 0x7f) from (x, y, level) to the target
@@ -1915,24 +1917,24 @@ battle_walk_path_t* battle_move_calculate_walkto_pathing(
  * The 0xff record fill is an s32 local: a literal fill becomes a single-set
  * hoisted pseudo that sched1 places after `li s2,0xf`.
  */
-static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x,
-    s32 target_y, u32 target_level, s32 initialize, s32* suspended, s32 check_budget) {
-    u8 frontier_snapshot[MAP_TILE_COUNT];
+static move_path_t* move_path_calculate(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x, s32 target_y,
+    u32 target_level, s32 initialize, s32* suspended, s32 check_budget) {
+    u8 frontier_snapshot[BATTLE_MAP_TILE_COUNT];
     move_height_offsets_t no_offsets = { 0 };
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_record_t* records = g_move_records_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
     s32 completed_pass = 0;
     s32 i;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     s32 empty_flags;
 
     *suspended = 0;
     if (initialize) {
-        if (x < 0 || x >= g_battle_map_max_x || y < 0 || y >= g_battle_map_max_y || level >= MAP_TERRAIN_LAYER_COUNT
-            || target_x < 0 || target_x >= g_battle_map_max_x || target_y < 0 || target_y >= g_battle_map_max_y
-            || target_level >= MAP_TERRAIN_LAYER_COUNT) {
+        if (x < 0 || x >= g_battle_map_max_x || y < 0 || y >= g_battle_map_max_y
+            || level >= BATTLE_MAP_TERRAIN_LAYER_COUNT || target_x < 0 || target_x >= g_battle_map_max_x || target_y < 0
+            || target_y >= g_battle_map_max_y || target_level >= BATTLE_MAP_TERRAIN_LAYER_COUNT) {
             return 0;
         }
         config->ai_propagation_mode = 0;
@@ -1944,9 +1946,9 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         config->target_level = target_level;
         config->map_max_x = g_battle_map_max_x;
         config->map_max_y = g_battle_map_max_y;
-        g_battle_move_pathing_tile_index = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
-        if (g_battle_map_tile_data[g_battle_move_pathing_tile_index].flags.blocked
-            || g_battle_map_tile_data[g_battle_move_pathing_tile_index].flags.untargetable) {
+        g_move_path_tile_index = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
+        if (g_battle_map_tile_data[g_move_path_tile_index].flags.blocked
+            || g_battle_map_tile_data[g_move_path_tile_index].flags.untargetable) {
             return 0;
         }
         config->target_index = (config->target_level << 8) + config->target_y * config->map_max_x + config->target_x;
@@ -1960,99 +1962,97 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         config->fly_or_teleport = 0;
         config->unit_size = 6;
         config->movement_set_3 = 0;
-        g_battle_move_weather_terrain_cost = battle_move_get_weather_terrain_cost();
+        g_move_weather_terrain_cost = move_get_weather_terrain_cost();
         config->cost_table = TERRAIN_COST_TABLE_DEFAULT;
         config->move_type = MOVE_CLASS_NORMAL;
         config->movement_3 = 0;
-        g_battle_move_pathing_ignore_terrain = 0;
+        g_move_path_ignore_terrain = 0;
 
-        /* g_battle_move_pathing_scratch holds the cost-table row here, the capped jump
+        /* g_move_path_scratch holds the cost-table row here, the capped jump
          * next and each traced panel's range in the back-trace. Retail copies 256 costs
          * (four rows) into the 64-byte block, and its Ignore Terrain Cost test compares
          * the row index instead of the cost with 0xff, so blocked surfaces cost 1 too
          * (QUIRKS.md). */
-        g_battle_move_pathing_scratch = config->cost_table;
+        g_move_path_scratch = config->cost_table;
         for (i = 0; i < 256; i++) {
-            g_battle_move_terrain_cost = g_terrain_movement_cost_tables[g_battle_move_pathing_scratch][i];
-            if (g_battle_move_terrain_cost == TERRAIN_COST_WEATHER) {
-                g_battle_move_terrain_cost = g_battle_move_weather_terrain_cost;
+            g_move_terrain_cost = g_terrain_movement_cost_tables[g_move_path_scratch][i];
+            if (g_move_terrain_cost == TERRAIN_COST_WEATHER) {
+                g_move_terrain_cost = g_move_weather_terrain_cost;
             }
-            if ((flags & MOVE_PATHFIND_IGNORE_TERRAIN_COST) && g_battle_move_pathing_scratch != 0xFF) {
-                g_battle_move_terrain_cost = 1;
+            if ((flags & MOVE_PATHFIND_IGNORE_TERRAIN_COST) && g_move_path_scratch != 0xFF) {
+                g_move_terrain_cost = 1;
             }
-            g_battle_move_terrain_costs_ptr[i] = g_battle_move_terrain_cost;
+            g_move_terrain_costs_ptr[i] = g_move_terrain_cost;
         }
-        g_battle_move_pathing_scratch = jump;
-        if (g_battle_move_pathing_scratch >= 8) {
-            g_battle_move_pathing_scratch = 7;
+        g_move_path_scratch = jump;
+        if (g_move_path_scratch >= 8) {
+            g_move_path_scratch = 7;
         }
-        config->jump_times_two = g_battle_move_pathing_scratch * 2;
-        config->jump_or_1f = g_battle_move_pathing_scratch;
-        config->jump_half = g_battle_move_pathing_scratch >> 1;
+        config->jump_times_two = g_move_path_scratch * 2;
+        config->jump_or_1f = g_move_path_scratch;
+        config->jump_half = g_move_path_scratch >> 1;
         config->mountable_chocobo = 0;
         config->move = MOVE_PATHFIND_RANGE;
         config->can_ride = 0;
-        g_battle_move_pathing_team = 0;
-        config->_unknown_1a = g_battle_move_config_unknown_1a_value;
+        g_move_path_team = 0;
+        config->_unknown_1a = g_move_config_unknown_1a_value;
         empty_flags = MOVE_RECORD_NONE;
         for (i = MOVE_RECORD_COUNT - 1; i >= 0; i--) {
             records[i].unit_id_flags = empty_flags;
         }
-        g_battle_move_pathing_unit_record_count = 0;
-        battle_move_set_tile_flags_for_pathfinding(MOVE_TILE_FLAGS_MODE_TERRAIN_ONLY);
+        g_move_path_unit_record_count = 0;
+        move_spread_set_frontier_flags(MOVE_TILE_FLAGS_MODE_TERRAIN_ONLY);
         state->outer_count = 4;
-        g_battle_target_panels[g_battle_move_pathing_tile_index].remaining_range = config->move + 1;
-        g_battle_target_panels[g_battle_move_pathing_tile_index].max_height_delta = 0;
+        g_target_panels[g_move_path_tile_index].remaining_range = config->move + 1;
+        g_target_panels[g_move_path_tile_index].max_height_delta = 0;
         state->inner_count = 2;
-        frontier[g_battle_move_pathing_tile_index] |= FRONTIER_FLAG_QUEUED;
+        frontier[g_move_path_tile_index] |= FRONTIER_FLAG_QUEUED;
         state->frontier_max_remaining_range = config->move + 1;
-        g_battle_move_pathing_resume_pass = 0;
+        g_move_path_resume_pass = 0;
     } else {
-        mem_copy_byte_data_source_first(
-            g_battle_ai_unit_snapshot_storage, getScratchAddr(0), PSX_SCRATCHPAD_BYTE_COUNT);
+        mem_copy_byte_data_source_first(g_ai_unit_snapshot_storage, getScratchAddr(0), PSX_SCRATCHPAD_BYTE_COUNT);
     }
     /* Each pass snapshots and clears the queued flags first, so tiles queued while
      * spreading wait for the next pass. */
-    for (i = g_battle_move_pathing_resume_pass; i < config->move; i++) {
-        if (check_budget && battle_ai_is_pathfinding_budget_exhausted() && completed_pass) {
-            g_battle_move_pathing_resume_pass = i;
+    for (i = g_move_path_resume_pass; i < config->move; i++) {
+        if (check_budget && ai_is_pathfinding_budget_exhausted() && completed_pass) {
+            g_move_path_resume_pass = i;
             *suspended = 1;
-            mem_copy_byte_data_source_first(
-                getScratchAddr(0), g_battle_ai_unit_snapshot_storage, PSX_SCRATCHPAD_BYTE_COUNT);
-            return &g_battle_move_path;
+            mem_copy_byte_data_source_first(getScratchAddr(0), g_ai_unit_snapshot_storage, PSX_SCRATCHPAD_BYTE_COUNT);
+            return &g_move_path;
         }
         if (!state->frontier_max_remaining_range) {
             break;
         }
-        if (g_battle_target_panels[config->target_index].remaining_range >= state->frontier_max_remaining_range) {
+        if (g_target_panels[config->target_index].remaining_range >= state->frontier_max_remaining_range) {
             break;
         }
-        for (state->tile_level = 0; state->tile_level < MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
-            state->level_offset = state->tile_level * MAP_TILES_PER_LAYER;
+        for (state->tile_level = 0; state->tile_level < BATTLE_MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
+            state->level_offset = state->tile_level * BATTLE_MAP_TILES_PER_LAYER;
             for (state->tile_y = 0; state->tile_y < config->map_max_y; state->tile_y++) {
                 state->row_offset = state->level_offset + state->tile_y * config->map_max_x;
                 for (state->tile_x = 0; state->tile_x < config->map_max_x; state->tile_x++) {
                     state->tile_index = state->row_offset + state->tile_x;
                     state->current_tile = &g_battle_map_tile_data[state->tile_index];
-                    state->current_panel = &g_battle_target_panels[state->tile_index];
+                    state->current_panel = &g_target_panels[state->tile_index];
                     frontier_snapshot[state->tile_index] = frontier[state->tile_index] & FRONTIER_FLAG_QUEUED;
                     frontier[state->tile_index] &= ~FRONTIER_FLAG_QUEUED;
                 }
             }
         }
         state->frontier_max_remaining_range = 0;
-        for (state->tile_level = 0; state->tile_level < MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
-            state->level_offset = state->tile_level * MAP_TILES_PER_LAYER;
+        for (state->tile_level = 0; state->tile_level < BATTLE_MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
+            state->level_offset = state->tile_level * BATTLE_MAP_TILES_PER_LAYER;
             for (state->tile_y = 0; state->tile_y < config->map_max_y; state->tile_y++) {
                 state->row_offset = state->level_offset + state->tile_y * config->map_max_x;
                 for (state->tile_x = 0; state->tile_x < config->map_max_x; state->tile_x++) {
                     state->tile_index = state->row_offset + state->tile_x;
                     state->current_tile = &g_battle_map_tile_data[state->tile_index];
-                    state->current_panel = &g_battle_target_panels[state->tile_index];
+                    state->current_panel = &g_target_panels[state->tile_index];
                     if (frontier_snapshot[state->tile_index]) {
-                        battle_move_check_and_spread_one_tile_around();
+                        move_spread_check_one_tile_around();
                         if (!config->fly_or_teleport) {
-                            battle_move_spread_horizontal_jump();
+                            move_spread_horizontal_jump();
                         }
                     }
                 }
@@ -2061,40 +2061,39 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         completed_pass = 1;
     }
 
-    /* The destination filter of battle_move_set_reachable_tile_flags, except that lava
+    /* The destination filter of move_range_set_tile_flags, except that lava
      * is refused only to a flier, which this generic walker never is, so a path may end
      * on lava. */
-    for (i = 0; i < MAP_TILE_COUNT; i++) {
+    for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
         tile->ceiling_depth_and_marks.move_destination = 0;
-        if (g_battle_target_panels[i].ride_remaining_range != 0
+        if (g_target_panels[i].ride_remaining_range != 0
             || ((g_battle_map_tile_data[i].depth_half_height.half_height < 3 || !(frontier[i] & FRONTIER_FLAG_CORNER))
-                && g_battle_target_panels[i].remaining_range != 0 && tile->depth_half_height.half_height < 4
-                && g_battle_map_tile_data[i].surface.type != MAP_SURFACE_OBSTACLE
+                && g_target_panels[i].remaining_range != 0 && tile->depth_half_height.half_height < 4
+                && g_battle_map_tile_data[i].surface.type != BATTLE_MAP_SURFACE_OBSTACLE
                 && (tile->depth_half_height.depth == 0 || !config->cannot_stay_on_water)
                 && (tile->depth_half_height.depth != 3 || !config->will_drown)
                 && (tile->depth_half_height.depth < 4 || !config->will_sink)
-                && (tile->surface.type != MAP_SURFACE_LAVA || config->move_type != MOVE_CLASS_FLY)
+                && (tile->surface.type != BATTLE_MAP_SURFACE_LAVA || config->move_type != MOVE_CLASS_FLY)
                 && (frontier[i] & FRONTIER_FLAG_ENTERABLE))) {
             state->reachable_count++;
             tile->ceiling_depth_and_marks.move_destination = 1;
         }
     }
-    g_battle_move_reachable_tiles_valid = 1;
-    g_battle_move_reachable_unit_id = config->unit_id;
+    g_move_range_valid = 1;
+    g_move_range_unit_id = config->unit_id;
     state->tile_x = config->target_x;
     state->tile_y = config->target_y;
     state->tile_level = config->target_level;
     state->selected_source_side_shift = 0;
-    g_battle_move_pathing_tile_index
-        = (config->target_level << 8) + config->target_y * config->map_max_x + config->target_x;
-    if (!(g_battle_map_tile_data[g_battle_move_pathing_tile_index].ceiling_depth_and_marks.move_destination)) {
+    g_move_path_tile_index = (config->target_level << 8) + config->target_y * config->map_max_x + config->target_x;
+    if (!(g_battle_map_tile_data[g_move_path_tile_index].ceiling_depth_and_marks.move_destination)) {
         return 0;
     }
-    g_battle_move_pathing_frontier = frontier;
-    battle_target_clear_panel_spread_flags();
-    g_battle_move_path_height_offsets = no_offsets;
-    g_battle_move_destination_unit_record = 0;
+    g_move_path_frontier = frontier;
+    target_clear_panel_spread_flags();
+    g_move_path_height_offsets = no_offsets;
+    g_move_path_destination_unit_record = 0;
     config->source_tile_occupied = 0;
     config->destination_tile_occupied = 0;
     state->outer_count = 4;
@@ -2108,26 +2107,27 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
      * until the start tile is reached; a tile with no predecessor means no path. */
     while (state->candidate_remaining_range != 0) {
         state->previous_source_side_shift = state->selected_source_side_shift;
-        state->tile_index = state->tile_level * MAP_TILES_PER_LAYER + state->tile_y * config->map_max_x + state->tile_x;
+        state->tile_index
+            = state->tile_level * BATTLE_MAP_TILES_PER_LAYER + state->tile_y * config->map_max_x + state->tile_x;
         state->current_tile = &g_battle_map_tile_data[state->tile_index];
-        state->current_panel = &g_battle_target_panels[state->tile_index];
+        state->current_panel = &g_target_panels[state->tile_index];
         state->path_length++;
-        g_battle_move_pathing_scratch = state->current_panel->remaining_range;
+        g_move_path_scratch = state->current_panel->remaining_range;
         state->current_panel->mark = state->path_length;
-        state->candidate_remaining_range = g_battle_move_pathing_scratch;
+        state->candidate_remaining_range = g_move_path_scratch;
         if (state->tile_x == config->x && state->tile_y == config->y && state->tile_level == config->high_elevation) {
             break;
         }
-        battle_move_spread_to_neighbors();
-        if (state->candidate_remaining_range == g_battle_move_pathing_scratch) {
-            battle_move_spread_horizontal_jumps();
-            if (state->candidate_remaining_range == g_battle_move_pathing_scratch) {
+        move_path_spread_to_neighbors();
+        if (state->candidate_remaining_range == g_move_path_scratch) {
+            move_path_spread_horizontal_jumps();
+            if (state->candidate_remaining_range == g_move_path_scratch) {
                 return 0;
             }
         }
     }
-    battle_move_encode_path_steps();
-    return &g_battle_move_path;
+    move_path_encode_steps();
+    return &g_move_path;
 }
 
 /* Propagate the acting unit's movement budget outward from a target tile.
@@ -2137,13 +2137,13 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
  * Return -1 for an absent unit on initialization, or the reachable count
  * on completion. The caller must check suspension before using that count.
  */
-s32 battle_ai_propagate_target_movement(
+s32 ai_move_propagate_from_target(
     s32 unit_id, s32 target_x, s32 target_y, s32 target_elevation, s32 initialize, s32* suspended, s32 check_budget) {
-    u8 frontier_snapshot[MAP_TILE_COUNT];
-    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
-    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
-    move_record_t* records = g_battle_move_records_ptr;
-    u8* frontier = g_battle_move_frontier_flags_ptr;
+    u8 frontier_snapshot[BATTLE_MAP_TILE_COUNT];
+    move_pathfind_scratch_t* config = g_move_config_ptr;
+    move_spread_state_t* state = g_move_scratch_pad_ptr;
+    move_record_t* records = g_move_records_ptr;
+    u8* frontier = g_move_frontier_flags_ptr;
     s32 completed_pass = 0;
     s32 pass;
     s32 index;
@@ -2151,15 +2151,15 @@ s32 battle_ai_propagate_target_movement(
 
     *suspended = 0;
     if (initialize) {
-        if (g_battle_unit_stats[unit_id].entd_slot == BATTLE_ENTD_SLOT_NONE)
+        if (g_unit_stats[unit_id].entd_slot == UNIT_ENTD_SLOT_NONE)
             return -1;
-        battle_move_store_unit_movement_to_scratchpad(unit_id);
+        move_spread_store_unit_to_scratchpad(unit_id);
         config->move = MOVE_PATHFIND_RANGE;
         for (pass = MOVE_RECORD_COUNT - 1; pass >= 0; pass--)
             records[pass].unit_id_flags = MOVE_RECORD_NONE;
-        battle_move_set_tile_flags_for_pathfinding(MOVE_TILE_FLAGS_MODE_START_SPREAD);
-        index = (config->high_elevation * MAP_TILES_PER_LAYER) + config->y * config->map_max_x + config->x;
-        panel = &g_battle_target_panels[index];
+        move_spread_set_frontier_flags(MOVE_TILE_FLAGS_MODE_START_SPREAD);
+        index = (config->high_elevation * BATTLE_MAP_TILES_PER_LAYER) + config->y * config->map_max_x + config->x;
+        panel = &g_target_panels[index];
         panel->ride_remaining_range = 0;
         panel->remaining_range = 0;
         frontier[index] &= ~FRONTIER_FLAG_QUEUED;
@@ -2167,63 +2167,62 @@ s32 battle_ai_propagate_target_movement(
         state->inner_count = 4;
         panel->remaining_range = 0;
         panel->max_height_delta = 0xff;
-        index = (target_elevation * MAP_TILES_PER_LAYER) + target_y * config->map_max_x + target_x;
-        panel = &g_battle_target_panels[index];
+        index = (target_elevation * BATTLE_MAP_TILES_PER_LAYER) + target_y * config->map_max_x + target_x;
+        panel = &g_target_panels[index];
         panel->remaining_range = MOVE_PATHFIND_RANGE + 1;
         frontier[index] |= FRONTIER_FLAG_QUEUED;
         panel->max_height_delta = 0;
-        g_battle_ai_propagation_resume_pass = 0;
+        g_ai_move_propagation_resume_pass = 0;
         config->ai_propagation_mode = 1;
     } else {
         /* A direct scratchpad address avoids an extra linker-address addiu. */
-        mem_copy_byte_data_source_first(
-            g_battle_ai_unit_snapshot_storage, getScratchAddr(0), PSX_SCRATCHPAD_BYTE_COUNT);
+        mem_copy_byte_data_source_first(g_ai_unit_snapshot_storage, getScratchAddr(0), PSX_SCRATCHPAD_BYTE_COUNT);
     }
     if (config->move_type == MOVE_CLASS_TELEPORT) {
         /* Teleport and Teleport 2 bypass propagation, not destination filtering. */
         u8 remaining_range = 1;
-        target_panel_t* fill_panels = g_battle_target_panels;
-        for (pass = MAP_TILE_COUNT - 1; pass >= 0; pass--)
+        target_panel_t* fill_panels = g_target_panels;
+        for (pass = BATTLE_MAP_TILE_COUNT - 1; pass >= 0; pass--)
             fill_panels[pass].remaining_range = remaining_range;
     } else {
-        for (pass = g_battle_ai_propagation_resume_pass; pass < config->move; pass++) {
-            if (check_budget && battle_ai_is_pathfinding_budget_exhausted() && completed_pass) {
-                g_battle_ai_propagation_resume_pass = pass;
+        for (pass = g_ai_move_propagation_resume_pass; pass < config->move; pass++) {
+            if (check_budget && ai_is_pathfinding_budget_exhausted() && completed_pass) {
+                g_ai_move_propagation_resume_pass = pass;
                 *suspended = 1;
                 mem_copy_byte_data_source_first(
-                    getScratchAddr(0), g_battle_ai_unit_snapshot_storage, PSX_SCRATCHPAD_BYTE_COUNT);
+                    getScratchAddr(0), g_ai_unit_snapshot_storage, PSX_SCRATCHPAD_BYTE_COUNT);
                 return 0;
             }
             if (!state->frontier_max_remaining_range)
                 break;
-            for (state->tile_level = 0; state->tile_level < MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
-                state->level_offset = state->tile_level * MAP_TILES_PER_LAYER;
+            for (state->tile_level = 0; state->tile_level < BATTLE_MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
+                state->level_offset = state->tile_level * BATTLE_MAP_TILES_PER_LAYER;
                 for (state->tile_y = 0; state->tile_y < config->map_max_y; state->tile_y++) {
                     state->row_offset = state->level_offset + state->tile_y * config->map_max_x;
                     for (state->tile_x = 0; state->tile_x < config->map_max_x; state->tile_x++) {
                         state->tile_index = state->row_offset + state->tile_x;
                         state->current_tile = &g_battle_map_tile_data[state->tile_index];
-                        state->current_panel = &g_battle_target_panels[state->tile_index];
+                        state->current_panel = &g_target_panels[state->tile_index];
                         frontier_snapshot[state->tile_index] = frontier[state->tile_index] & FRONTIER_FLAG_QUEUED;
                         frontier[state->tile_index] &= ~FRONTIER_FLAG_QUEUED;
                     }
                 }
             }
             state->frontier_max_remaining_range = 0;
-            for (state->tile_level = 0; state->tile_level < MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
-                state->level_offset = state->tile_level * MAP_TILES_PER_LAYER;
+            for (state->tile_level = 0; state->tile_level < BATTLE_MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
+                state->level_offset = state->tile_level * BATTLE_MAP_TILES_PER_LAYER;
                 for (state->tile_y = 0; state->tile_y < config->map_max_y; state->tile_y++) {
                     state->row_offset = state->level_offset + state->tile_y * config->map_max_x;
                     for (state->tile_x = 0; state->tile_x < config->map_max_x; state->tile_x++) {
                         state->tile_index = state->row_offset + state->tile_x;
                         state->current_tile = &g_battle_map_tile_data[state->tile_index];
-                        state->current_panel = &g_battle_target_panels[state->tile_index];
+                        state->current_panel = &g_target_panels[state->tile_index];
                         if (frontier_snapshot[state->tile_index]) {
                             state->source_unit_record_flag = 0;
-                            battle_move_spread_to_neighbors();
+                            move_path_spread_to_neighbors();
                             if (!config->fly_or_teleport) {
                                 state->source_unit_record_flag = 0;
-                                battle_move_spread_horizontal_jumps();
+                                move_path_spread_horizontal_jumps();
                             }
                         }
                     }
@@ -2232,23 +2231,23 @@ s32 battle_ai_propagate_target_movement(
             completed_pass = 1;
         }
     }
-    battle_move_set_reachable_tile_flags();
-    g_battle_move_reachable_tiles_valid = 1;
-    g_battle_move_reachable_unit_id = config->unit_id;
+    move_range_set_tile_flags();
+    g_move_range_valid = 1;
+    g_move_range_unit_id = config->unit_id;
     return state->reachable_count;
 }
 
 /* Moldball Virus cannot reach water: for that ability only, clear the range of every panel, on
  * both levels, whose tile has depth. */
-static void battle_target_check_moldball_virus_depth(s16 ability_id) {
-    map_tile_t* tile;
+static void target_area_check_moldball_virus_depth(s16 ability_id) {
+    battle_map_tile_t* tile;
     target_panel_t* panel;
     s32 i;
 
     if (ability_id != ABILITY_ID_MONSTER_GREAT_MORBOL_MOLDBALL_VIRUS)
         return;
     i = 0;
-    panel = g_battle_target_panel_data;
+    panel = g_target_panel_data;
     tile = g_battle_map_tile_data;
     do {
         if (tile->depth_half_height.depth) {
@@ -2257,18 +2256,18 @@ static void battle_target_check_moldball_virus_depth(s16 ability_id) {
         tile++;
         i += 1;
         panel++;
-    } while (i < MAP_TILE_COUNT);
+    } while (i < BATTLE_MAP_TILE_COUNT);
 }
 
 /* Clear the range and the mark of each panel whose tile is flagged untargetable.
  * Only the 256 lower-level panels are visited. */
-static void battle_target_clear_panels_on_untargetable_tiles(void) {
+static void target_range_clear_untargetable_panels(void) {
     s32 i = 0;
-    map_tile_t* src;
-    target_panel_t* dst = g_battle_target_panel_data;
+    battle_map_tile_t* src;
+    target_panel_t* dst = g_target_panel_data;
 
     src = g_battle_map_tile_data;
-    for (; i < MAP_TILES_PER_LAYER; src++, i++, dst++) {
+    for (; i < BATTLE_MAP_TILES_PER_LAYER; src++, i++, dst++) {
         if (src->flags.untargetable) {
             dst->remaining_range = 0;
             dst->mark = 0;
@@ -2287,7 +2286,7 @@ static void battle_target_clear_panels_on_untargetable_tiles(void) {
  * the front end fold the 0x100 into the symbol, and the target instead
  * strength-reduces 5 * j and 8 * j against hoisted table bases. Block-scoped
  * depth temporaries keep that value out of global allocation. */
-static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 single_layer) {
+static void target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 single_layer) {
     s32 max_delta = tolerance * 2;
     s32 ref = ref_height;
     s32 i;
@@ -2296,26 +2295,26 @@ static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, 
     s32 upper;
     s32 lower_delta;
     s32 upper_delta;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     target_panel_t* lower_panel;
     target_panel_t* upper_panel;
 
-    for (i = 0; i < MAP_TILES_PER_LAYER; i++) {
+    for (i = 0; i < BATTLE_MAP_TILES_PER_LAYER; i++) {
         tile = &g_battle_map_tile_data[i];
-        lower_panel = &g_battle_target_panel_data[i];
+        lower_panel = &g_target_panel_data[i];
         if (!tile->flags.blocked) {
-            map_tile_depth_t depth = tile->depth_half_height;
+            battle_map_tile_depth_t depth = tile->depth_half_height;
             lower = tile->height * 2 + depth.half_height + depth.depth * 2;
         } else {
             lower = -0xFF;
             lower_panel->remaining_range = 0;
             lower_panel->mark = 0;
         }
-        j = i + MAP_TILES_PER_LAYER;
+        j = i + BATTLE_MAP_TILES_PER_LAYER;
         tile = &g_battle_map_tile_data[j];
-        upper_panel = &g_battle_target_panel_data[j];
+        upper_panel = &g_target_panel_data[j];
         if (!tile->flags.blocked) {
-            map_tile_depth_t depth = tile->depth_half_height;
+            battle_map_tile_depth_t depth = tile->depth_half_height;
             upper = tile->height * 2 + depth.half_height + depth.depth * 2;
         } else {
             upper = -0xFF;
@@ -2358,18 +2357,18 @@ static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, 
 }
 
 /* Clear the mark byte (the spread frontier) of all 512 targeting panels. */
-void battle_target_clear_panel_spread_flags(void) {
+void target_clear_panel_spread_flags(void) {
     s32 i;
     target_panel_t* panel;
 
-    for (i = MAP_TILE_COUNT - 1, panel = &g_battle_target_panels[MAP_TILE_COUNT - 1]; i >= 0; i--, panel--) {
+    for (i = BATTLE_MAP_TILE_COUNT - 1, panel = &g_target_panels[BATTLE_MAP_TILE_COUNT - 1]; i >= 0; i--, panel--) {
         panel->mark = 0;
     }
 }
 
 /* Remove the range from every panel, on both levels, within `range` tiles
  * (Manhattan distance) of (x, y). */
-static void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
+static void target_range_remove_close(s32 x, s32 y, s32 range) {
     s32 i;
     s32 j;
     s32 dy;
@@ -2381,9 +2380,9 @@ static void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
         for (j = 0; j < g_battle_map_max_x; j++) {
             dx = (x < j) ? (j - x) : (x - j);
             if (range >= (dy + dx)) {
-                g_battle_target_panel_data[(i * g_battle_map_max_x) + j].remaining_range = 0;
-                k = j + MAP_TILES_PER_LAYER;
-                g_battle_target_panel_data[(i * g_battle_map_max_x) + k].remaining_range = 0;
+                g_target_panel_data[(i * g_battle_map_max_x) + j].remaining_range = 0;
+                k = j + BATTLE_MAP_TILES_PER_LAYER;
+                g_target_panel_data[(i * g_battle_map_max_x) + k].remaining_range = 0;
             }
         }
     }
@@ -2395,7 +2394,7 @@ static void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
  * clears the mark and spreads from it; passes stop once none spread. A zero
  * count only clears every panel's mark. Every caller passes 0 as the unused
  * second argument. */
-static void battle_target_spread_panels(u8 passes, s32 unused) {
+static void target_spread_panels(u8 passes, s32 unused) {
     s32 y;
     s32 x;
     s32 changed;
@@ -2403,7 +2402,7 @@ static void battle_target_spread_panels(u8 passes, s32 unused) {
     target_panel_t* panel;
 
     if (passes == 0) {
-        battle_target_clear_panel_spread_flags();
+        target_clear_panel_spread_flags();
         return;
     }
     changed = 1;
@@ -2414,10 +2413,10 @@ static void battle_target_spread_panels(u8 passes, s32 unused) {
         changed = 0;
         for (y = 0; y < g_battle_map_max_y; y++) {
             for (x = 0; x < g_battle_map_max_x; x++) {
-                panel = &g_battle_target_panels[y * g_battle_map_max_x + x];
+                panel = &g_target_panels[y * g_battle_map_max_x + x];
                 if (panel->mark != 0) {
                     panel->mark = 0;
-                    changed += battle_target_spread_panel_to_neighbors(y, x);
+                    changed += target_spread_panel_to_neighbors(y, x);
                 }
             }
         }
@@ -2429,7 +2428,7 @@ static void battle_target_spread_panels(u8 passes, s32 unused) {
  * refreshed to one less, on both map levels, and marked as a new frontier when
  * enough budget is left to keep spreading. Returns 1 when any neighbor was
  * marked. */
-static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
+static s32 target_spread_panel_to_neighbors(s32 y, s32 x) {
     target_panel_t* panel;
     s32 changed = 0;
     s32 i;
@@ -2439,7 +2438,7 @@ static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
     s32 next_y;
     s32 index;
     s32 upper_x;
-    s32 range = g_battle_target_panels[y * g_battle_map_max_x + x].remaining_range;
+    s32 range = g_target_panels[y * g_battle_map_max_x + x].remaining_range;
     s32 spread_range = range - 1;
 
     for (i = 0; i < 4; i++) {
@@ -2465,11 +2464,11 @@ static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
         next_y = y + dy;
         if ((next_x >= 0) && (next_y >= 0) && (next_x < g_battle_map_max_x) && (next_y < g_battle_map_max_y)) {
             index = next_y * g_battle_map_max_x + next_x;
-            panel = &g_battle_target_panels[index];
+            panel = &g_target_panels[index];
             if (panel->remaining_range < range) {
                 panel->remaining_range = spread_range;
-                upper_x = next_x + MAP_TILES_PER_LAYER;
-                g_battle_target_panels[next_y * g_battle_map_max_x + upper_x].remaining_range = spread_range;
+                upper_x = next_x + BATTLE_MAP_TILES_PER_LAYER;
+                g_target_panels[next_y * g_battle_map_max_x + upper_x].remaining_range = spread_range;
                 if (range >= 3) {
                     panel->mark = 1;
                     changed = 1;
@@ -2482,39 +2481,39 @@ static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
 
 /* Compute unit height after mount, Float, and water movement adjustments.
  *
- * Float and BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER stand on the water surface;
- * BATTLE_MOVEMENT_SET_3_WALK_ON_WATER stands one level below it. A rider stands
+ * Float and UNIT_MOVEMENT_SET_3_MOVE_IN_WATER stand on the water surface;
+ * UNIT_MOVEMENT_SET_3_WALK_ON_WATER stands one level below it. A rider stands
  * 2 half steps higher, and its mount's Float and movement abilities decide the rest. */
-static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
-    map_tile_t* tile;
-    map_tile_depth_t terrain_depth;
+static u8 unit_get_effective_height(const unit_stats_t* unit) {
+    battle_map_tile_t* tile;
+    battle_map_tile_depth_t terrain_depth;
     s32 height;
     u8 effective_height;
     u8 water_depth;
     u8 ignores_water = 0;
     u8 flags;
 
-    tile = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
+    tile = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)];
     terrain_depth = tile->depth_half_height;
     flags = unit->mount_info;
     height = tile->height * 2 + (terrain_depth.half_height);
     water_depth = tile->depth_half_height.depth * 2;
     effective_height = height;
     if (flags & UNIT_MOUNT_INFO_FLAG_RIDER) {
-        unit = &g_battle_unit_stats[flags & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
+        unit = &g_unit_stats[flags & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         height += 2;
         effective_height = height;
     }
     flags = unit->ability_flags.movement[2];
-    if ((flags & BATTLE_MOVEMENT_SET_3_FLOAT)
+    if ((flags & UNIT_MOVEMENT_SET_3_FLOAT)
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)] & STATUS_BYTE_MASK(STATUS_ID_FLOAT))) {
         effective_height += 2;
         ignores_water = 1;
     }
     if (water_depth != 0) {
-        if (ignores_water || (flags & BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER)) {
+        if (ignores_water || (flags & UNIT_MOVEMENT_SET_3_MOVE_IN_WATER)) {
             effective_height += water_depth;
-        } else if (flags & BATTLE_MOVEMENT_SET_3_WALK_ON_WATER) {
+        } else if (flags & UNIT_MOVEMENT_SET_3_WALK_ON_WATER) {
             effective_height += water_depth - 2;
         }
     }
@@ -2526,8 +2525,8 @@ static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
  * away whose distance, less a quarter of the unit's height advantage, is
  * within range. Both elevation levels of each tile are tested.
  */
-static void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range, u8 flags) {
-    u8 height = battle_unit_get_effective_height(unit);
+static void target_range_calculate_arc(const unit_stats_t* unit, u8 range, u8 flags) {
+    u8 height = unit_get_effective_height(unit);
     u8 tile_height;
     s32 ux;
     s32 uy;
@@ -2537,7 +2536,7 @@ static void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range
     s32 dist;
     s32 level;
     s32 index;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
 
     ux = unit->x;
     uy = unit->position.y;
@@ -2560,7 +2559,7 @@ static void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range
                     tile_height
                         = tile->height * 2 + tile->depth_half_height.half_height + tile->depth_half_height.depth * 2;
                     if (dist - (height - tile_height) / 4 <= range) {
-                        g_battle_target_panels[index].remaining_range = 1;
+                        g_target_panels[index].remaining_range = 1;
                     }
                 }
             }
@@ -2576,7 +2575,7 @@ static void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range
  * weapon flags select the special range shapes; direct also removes the close
  * range.
  */
-static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
+static void target_range_calculate_weapon(const unit_stats_t* unit) {
     s32 y;
     s32 x;
     s32 index;
@@ -2606,20 +2605,20 @@ static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
     data = &g_item_weapon_data[weapon];
     range = data->range;
     flags = data->flags;
-    panel = &g_battle_target_panels[index];
-    upper = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
+    panel = &g_target_panels[index];
+    upper = &g_target_panels[index + BATTLE_MAP_TILES_PER_LAYER];
     panel->remaining_range = range + 1;
     upper->remaining_range = range + 1;
     panel->mark = 1;
     if (flags & (WEAPON_FLAG_STRIKING | WEAPON_FLAG_LUNGING)) {
-        battle_target_calculate_strike_lunge_range(unit, flags);
+        target_range_calculate_strike_lunge(unit, flags);
     } else if (flags & WEAPON_FLAG_DIRECT) {
-        battle_target_spread_panels(range, 0);
-        battle_target_remove_close_range(x, y, 2);
+        target_spread_panels(range, 0);
+        target_range_remove_close(x, y, 2);
     } else {
-        battle_target_calculate_arc_range(unit, range, flags);
+        target_range_calculate_arc(unit, range, flags);
     }
-    battle_target_clear_range_on_untargetable_tiles();
+    target_range_clear_untargetable_tiles();
 }
 
 /*
@@ -2628,8 +2627,8 @@ static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
  * lunging weapon covers the tiles 1 and 2 away in a straight line, from 8 and then
  * 6 half steps below to 7 above.
  */
-static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags) {
-    u8 height = battle_unit_get_effective_height(unit);
+static void target_range_calculate_strike_lunge(const unit_stats_t* unit, u8 flags) {
+    u8 height = unit_get_effective_height(unit);
     s32 x;
     s32 y;
     s32 i;
@@ -2641,18 +2640,18 @@ static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit,
     if (flags & WEAPON_FLAG_STRIKING) {
         lo = height - 6;
         hi = height + 5;
-        battle_target_mark_tile_in_height_band(x - 1, y, lo, hi);
-        battle_target_mark_tile_in_height_band(x + 1, y, lo, hi);
-        battle_target_mark_tile_in_height_band(x, y - 1, lo, hi);
-        battle_target_mark_tile_in_height_band(x, y + 1, lo, hi);
+        target_range_mark_tile_in_height_band(x - 1, y, lo, hi);
+        target_range_mark_tile_in_height_band(x + 1, y, lo, hi);
+        target_range_mark_tile_in_height_band(x, y - 1, lo, hi);
+        target_range_mark_tile_in_height_band(x, y + 1, lo, hi);
     } else {
         for (i = 1; i < 3; i++) {
             lo = height + (i - 5) * 2;
             hi = height + 7;
-            battle_target_mark_tile_in_height_band(x - i, y, lo, hi);
-            battle_target_mark_tile_in_height_band(x + i, y, lo, hi);
-            battle_target_mark_tile_in_height_band(x, y - i, lo, hi);
-            battle_target_mark_tile_in_height_band(x, y + i, lo, hi);
+            target_range_mark_tile_in_height_band(x - i, y, lo, hi);
+            target_range_mark_tile_in_height_band(x + i, y, lo, hi);
+            target_range_mark_tile_in_height_band(x, y - i, lo, hi);
+            target_range_mark_tile_in_height_band(x, y + i, lo, hi);
         }
     }
 }
@@ -2661,13 +2660,13 @@ static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit,
  * height lies in lo..hi. Heights are in half steps (height * 2 + slope half
  * height + depth * 2); a negative lo counts as 0 and a position off the map is
  * ignored. The strike and lunge weapon ranges are built from it. */
-static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi) {
+static void target_range_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi) {
     s32 level;
     s32 idx;
     s32 height;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     target_panel_t* panel;
-    map_tile_depth_t flags;
+    battle_map_tile_depth_t flags;
 
     if ((x >= 0) && (x < g_battle_map_max_x) && (y >= 0) && (y < g_battle_map_max_y)) {
         level = 0;
@@ -2677,7 +2676,7 @@ static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi)
         do {
             idx = (level << 8) + (y * g_battle_map_max_x) + x;
             tile = &g_battle_map_tile_data[idx];
-            panel = &g_battle_target_panel_data[idx];
+            panel = &g_target_panel_data[idx];
             flags = tile->depth_half_height;
             height = (tile->height * 2) + (flags.half_height) + ((flags.depth) * 2);
             level++;
@@ -2690,11 +2689,11 @@ static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi)
 
 /* Remove the range from every panel, on both levels, whose tile is flagged
  * untargetable. */
-static void battle_target_clear_range_on_untargetable_tiles(void) {
+static void target_range_clear_untargetable_tiles(void) {
     s32 i = 0;
-    target_panel_t* dst = g_battle_target_panel_data;
-    map_tile_t* src = g_battle_map_tile_data;
-    for (; i < MAP_TILE_COUNT; i++) {
+    target_panel_t* dst = g_target_panel_data;
+    battle_map_tile_t* src = g_battle_map_tile_data;
+    for (; i < BATTLE_MAP_TILE_COUNT; i++) {
         if (src->flags.untargetable)
             dst->remaining_range = 0;
         src++;
@@ -2714,7 +2713,7 @@ static void battle_target_clear_range_on_untargetable_tiles(void) {
  * t2 = t1 + 0x500). That needs `upper_panels` derived from `panels` and the
  * per-tile panel pointers taken upper layer first, because loop.c keeps its
  * giv list in reverse discovery order. */
-static s32 battle_target_set_jump_ability_panels(const action_command_t* source) {
+static s32 target_range_set_for_jump(const action_command_t* source) {
     u16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 ability_ct[0x48];
@@ -2722,9 +2721,9 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
     u8 turns[0x18];
     action_command_t action;
     unit_stats_t* unit;
-    map_tile_t* tile;
-    map_tile_t* upper;
-    map_tile_t* lower;
+    battle_map_tile_t* tile;
+    battle_map_tile_t* upper;
+    battle_map_tile_t* lower;
     target_panel_t* panel;
     target_panel_t* other_panel;
     target_panel_t* panels;
@@ -2750,17 +2749,17 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
 
     range = 1;
     action_copy_data(source, &action);
-    unit = &g_battle_unit_stats[action.actor_id];
+    unit = &g_unit_stats[action.actor_id];
     vertical = 2;
     if (unit->job_id == JOB_ID_MIME) {
         range = 8;
         vertical = 0x10;
     }
-    location = battle_map_calculate_location(unit);
+    location = battle_map_tile_calculate_unit_index(unit);
     tile = &g_battle_map_tile_data[location];
     tile_height = tile->height;
     height = tile->depth_half_height.half_height + tile_height * 2;
-    count = battle_menu_get_unit_skillset_ability_data(
+    count = skillset_get_unit_ability_data(
         action.actor_id, action.skillset_id, (s16*)abilities, mp_costs, ability_ct, 0, usable, turns);
     for (i = 0; i < count; i++) {
         ability_id = abilities[i];
@@ -2781,22 +2780,22 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
     if (min_height < 0) {
         min_height = 0;
     }
-    battle_target_clear_panel_data();
-    if (location < MAP_TILES_PER_LAYER) {
-        other_location = location + MAP_TILES_PER_LAYER;
+    target_clear_panels();
+    if (location < BATTLE_MAP_TILES_PER_LAYER) {
+        other_location = location + BATTLE_MAP_TILES_PER_LAYER;
     } else {
-        other_location = location - MAP_TILES_PER_LAYER;
+        other_location = location - BATTLE_MAP_TILES_PER_LAYER;
     }
-    panel = &g_battle_target_panels[location];
-    other_panel = &g_battle_target_panels[other_location];
+    panel = &g_target_panels[location];
+    other_panel = &g_target_panels[other_location];
     panel->remaining_range = range + 1;
     other_panel->remaining_range = range + 1;
-    if (location < MAP_TILES_PER_LAYER) {
+    if (location < BATTLE_MAP_TILES_PER_LAYER) {
         panel->mark = 1;
     } else {
         other_panel->mark = 1;
     }
-    battle_target_spread_panels(range, 0);
+    target_spread_panels(range, 0);
     tile = &g_battle_map_tile_data[other_location];
     panel->remaining_range = 0;
     other_panel->remaining_range = 0;
@@ -2805,13 +2804,13 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
         return 0;
     }
     marked = 0;
-    panels = g_battle_target_panels;
-    upper_panels = panels + MAP_TILES_PER_LAYER;
-    for (i = 0; i < MAP_TILES_PER_LAYER; i++) {
+    panels = g_target_panels;
+    upper_panels = panels + BATTLE_MAP_TILES_PER_LAYER;
+    for (i = 0; i < BATTLE_MAP_TILES_PER_LAYER; i++) {
         other_panel = &upper_panels[i];
         panel = &panels[i];
         lower = &g_battle_map_tile_data[i];
-        upper = &g_battle_map_tile_data[i + MAP_TILES_PER_LAYER];
+        upper = &g_battle_map_tile_data[i + BATTLE_MAP_TILES_PER_LAYER];
         if (panel->remaining_range == 0 || (lower->flags.blocked)) {
             lower_height = -1;
         } else {
@@ -2844,34 +2843,34 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
  * Range bits 0-6 seed the unit's panel on both map levels and bit 7 excludes
  * the unit's own tile afterwards. Blocked and untargetable tiles are never
  * marked. Returns the number of marked panels. */
-static s32 battle_target_spread_ability_range(const unit_stats_t* unit, u8 range) {
+static s32 target_range_spread_from_unit(const unit_stats_t* unit, u8 range) {
     target_panel_t* panel;
     target_panel_t* upper;
     target_panel_t* panels;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     s32 index;
     s32 i;
     s32 count;
     u8 remaining;
 
     index = unit->position.y * g_battle_map_max_x + unit->x;
-    battle_target_clear_panel_data();
+    target_clear_panels();
     remaining = (range & 0x7f) + 1;
-    panel = &g_battle_target_panels[index];
-    upper = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
+    panel = &g_target_panels[index];
+    upper = &g_target_panels[index + BATTLE_MAP_TILES_PER_LAYER];
     panel->remaining_range = remaining;
     upper->remaining_range = remaining;
     panel->mark = 1;
-    battle_target_spread_panels(range, 0);
+    target_spread_panels(range, 0);
     if (range & 0x80) {
         panel->remaining_range = 0;
         upper->remaining_range = 0;
     }
     count = 0;
     tile = g_battle_map_tile_data;
-    for (i = 0, panels = g_battle_target_panels; i < MAP_TILE_COUNT; i++) {
+    for (i = 0, panels = g_target_panels; i < BATTLE_MAP_TILE_COUNT; i++) {
         /* A byte collision test retains the original single-mask branch. */
-        if (panels->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
+        if (panels->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & BATTLE_MAP_TILE_COLLISION_MASK))) {
             tile[i].ceiling_depth_and_marks.ability_range = 1;
             count++;
         } else {
@@ -2891,7 +2890,7 @@ static s32 battle_target_spread_ability_range(const unit_stats_t* unit, u8 range
  * of the location index. Direct typed indexing removes that copy and changes
  * the later register allocation; the binding emits no instructions.
  */
-static s32 battle_target_set_ability_panels(const action_command_t* source) {
+static s32 target_range_set_for_ability(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;
     ability_secondary_data_t* ability;
@@ -2899,8 +2898,8 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
     target_panel_t* origin;
     target_panel_t* seed;
     target_panel_t* seed_upper;
-    map_tile_t* tile;
-    map_tile_depth_t terrain_depth;
+    battle_map_tile_t* tile;
+    battle_map_tile_depth_t terrain_depth;
     s32 location;
     s32 index;
     s32 elevation;
@@ -2916,7 +2915,7 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
     u8 y;
 
     action_copy_data(source, &action);
-    unit = &g_battle_unit_stats[action.actor_id];
+    unit = &g_unit_stats[action.actor_id];
     ability = &g_ability_range_data[action.ability_id];
     range = ability->range;
     aoe = ability->aoe;
@@ -2925,35 +2924,35 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
     flags_4 = ability->flags_4;
     x = unit->x;
     y = unit->position.y;
-    location = battle_map_calculate_location(unit);
+    location = battle_map_tile_calculate_unit_index(unit);
     tile = &g_battle_map_tile_data[location];
     terrain_depth = tile->depth_half_height;
     elevation = tile->height * 2 + (terrain_depth.half_height) + tile->depth_half_height.depth * 2;
-    panels = g_battle_target_panels;
+    panels = g_target_panels;
     origin_offset = location * sizeof(target_panel_t);
     origin = (target_panel_t*)((s32)panels + origin_offset);
     index = y * g_battle_map_max_x + x;
     if (range == ABILITY_RANGE_WHOLE_MAP) {
-        for (i = 0; i < MAP_TILE_COUNT; i++) {
+        for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
             panels[i].remaining_range = 1;
             panels[i].mark = 0;
         }
     } else {
-        for (i = 0; i < MAP_TILE_COUNT; i++) {
+        for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
             panels[i].remaining_range = 0;
             panels[i].mark = 0;
         }
-        seed = &g_battle_target_panels[index];
-        seed_upper = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
+        seed = &g_target_panels[index];
+        seed_upper = &g_target_panels[index + BATTLE_MAP_TILES_PER_LAYER];
         seed->remaining_range = range + 1;
         seed_upper->remaining_range = range + 1;
         seed->mark = 1;
         if (flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE) {
-            battle_target_calculate_weapon_range(unit);
+            target_range_calculate_weapon(unit);
             seed->remaining_range = 0;
             seed_upper->remaining_range = 0;
         } else {
-            battle_target_spread_panels(range, 0);
+            target_spread_panels(range, 0);
         }
     }
     if (flags_1 & ABILITY_SECONDARY_FLAG_1_CANNOT_TARGET_SELF) {
@@ -2961,62 +2960,62 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
     }
     if (flags_1 & ABILITY_SECONDARY_FLAG_1_VERTICAL_FIXED) {
         location = x;
-        battle_target_apply_vertical_fixed(location, y);
+        target_range_apply_vertical_fixed(location, y);
     }
     if (flags_1 & ABILITY_SECONDARY_FLAG_1_VERTICAL_TOLERANCE) {
-        battle_target_apply_vertical_tolerance(elevation, vertical, 0);
+        target_apply_vertical_tolerance(elevation, vertical, 0);
     }
     if (aoe == 0 || (flags_4 & ABILITY_SECONDARY_FLAG_4_DIRECT_TARGETING)) {
-        battle_target_clear_panels_on_untargetable_tiles();
+        target_range_clear_untargetable_panels();
     }
     if (flags_1 & (ABILITY_SECONDARY_FLAG_1_ENEMY_UNIT_PANELS | ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS)) {
-        battle_target_set_state_for_all_unit_panels(unit, flags_1);
+        target_range_mark_unit_panels(unit, flags_1);
     }
     if (flags_1
         & (ABILITY_SECONDARY_FLAG_1_VERTICAL_FIXED | ABILITY_SECONDARY_FLAG_1_ENEMY_UNIT_PANELS
             | ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS)) {
-        return battle_target_set_ability_range_flags_from_marks();
+        return target_range_set_flags_from_marks();
     }
-    return battle_target_set_ability_range_flags();
+    return target_range_set_flags();
 }
 
 /* Build the targeting panels for a weapon attack: the weapon's range around the
  * acting unit, without the unit's own tile. Returns the number of tiles in range. */
-static s32 battle_target_set_weapon_attack_panels(const action_command_t* source) {
+static s32 target_range_set_for_weapon(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;
     s32 idx;
 
     action_copy_data(source, &action);
-    unit = &g_battle_unit_stats[action.actor_id];
+    unit = &g_unit_stats[action.actor_id];
     idx = unit->position.y * g_battle_map_max_x + unit->x;
-    battle_target_clear_panel_data();
-    battle_target_calculate_weapon_range(unit);
+    target_clear_panels();
+    target_range_calculate_weapon(unit);
     {
         target_panel_t* panel;
         target_panel_t* upper_panel;
-        panel = &g_battle_target_panel_data[idx];
-        upper_panel = &g_battle_target_panel_data[idx + MAP_TILES_PER_LAYER];
+        panel = &g_target_panel_data[idx];
+        upper_panel = &g_target_panel_data[idx + BATTLE_MAP_TILES_PER_LAYER];
         panel->remaining_range = 0;
         upper_panel->remaining_range = 0;
-        return battle_target_set_ability_range_flags();
+        return target_range_set_flags();
     }
 }
 
 /* Publish the panels in range to the map: a tile whose panel has range left gets
- * MAP_TILE_FLAG_ABILITY_RANGE unless it is blocked or a cross-section surface,
+ * BATTLE_MAP_TILE_FLAG_ABILITY_RANGE unless it is blocked or a cross-section surface,
  * and every other tile loses the flag. Returns the number of flagged tiles. */
-static s32 battle_target_set_ability_range_flags(void) {
-    map_tile_t* tile;
+static s32 target_range_set_flags(void) {
+    battle_map_tile_t* tile;
     target_panel_t* panel;
     s32 count = 0;
     s32 i;
 
-    for (i = 0; i < MAP_TILE_COUNT; i++) {
+    for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
-        panel = &g_battle_target_panel_data[i];
+        panel = &g_target_panel_data[i];
         if (panel->remaining_range != 0 && !(tile->flags.blocked)
-            && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
+            && (tile->surface.type) != BATTLE_MAP_SURFACE_CROSS_SECTION) {
             count++;
             tile->ceiling_depth_and_marks.ability_range = 1;
         } else {
@@ -3027,23 +3026,23 @@ static s32 battle_target_set_ability_range_flags(void) {
 }
 
 /* Publish the marked panels to the map: a tile whose panel mark is set gets
- * MAP_TILE_FLAG_ABILITY_RANGE unless it is blocked or a cross-section surface,
+ * BATTLE_MAP_TILE_FLAG_ABILITY_RANGE unless it is blocked or a cross-section surface,
  * and every other tile loses the flag. Returns the number of flagged tiles.
  *
- * battle_target_set_ability_panels ends with it for abilities that have the
+ * target_range_set_for_ability ends with it for abilities that have the
  * vertical-fixed or a unit-panels flag; the others end with
- * battle_target_set_ability_range_flags, which tests the panel's
+ * target_range_set_flags, which tests the panel's
  * range instead of its mark. */
-static s32 battle_target_set_ability_range_flags_from_marks(void) {
-    map_tile_t* tile;
+static s32 target_range_set_flags_from_marks(void) {
+    battle_map_tile_t* tile;
     target_panel_t* panel;
     s32 count = 0;
     s32 i;
 
-    for (i = 0; i < MAP_TILE_COUNT; i++) {
+    for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
-        panel = &g_battle_target_panel_data[i];
-        if (panel->mark != 0 && !(tile->flags.blocked) && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
+        panel = &g_target_panel_data[i];
+        if (panel->mark != 0 && !(tile->flags.blocked) && (tile->surface.type) != BATTLE_MAP_SURFACE_CROSS_SECTION) {
             count++;
             tile->ceiling_depth_and_marks.ability_range = 1;
         } else {
@@ -3059,7 +3058,7 @@ static s32 battle_target_set_ability_range_flags_from_marks(void) {
  * marks the caster's own panel: under the ally flag when the caster's team
  * matches its initial team, under the enemy flag when it differs.
  */
-static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags) {
+static void target_range_mark_unit_panels(const unit_stats_t* unit, s32 flags) {
     target_panel_t* panel;
     s32 i;
     s32 mark_allies = flags & ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS;
@@ -3068,11 +3067,11 @@ static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit
     s16 team_diff_copy;
     s32 team = unit->team_flags;
 
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
             team_diff = team ^ unit->initial_team_flags;
             team_diff_copy = team_diff;
-            panel = &g_battle_target_panel_data[battle_map_calculate_location(unit)];
+            panel = &g_target_panel_data[battle_map_tile_calculate_unit_index(unit)];
             if (mark_allies != 0 && (team_diff & UNIT_TEAM_MASK) == 0) {
                 panel->mark = 1;
             }
@@ -3084,13 +3083,13 @@ static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit
 }
 
 /* For a vertical-fixed ability, mark the panels in range along the caster's row
- * and column (up to 31 tiles either way), which battle_target_set_ability_panels
+ * and column (up to 31 tiles either way), which target_range_set_for_ability
  * then publishes.
  *
  * Only the lower layer's range is tested, and a hit marks both layers. Sharing
  * the loop index and panel temporaries across the sweeps preserves the target
  * register allocation. */
-static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
+static void target_range_apply_vertical_fixed(s32 x, s32 y) {
     s32 shared;
     s32 vertical;
     s32 tile_index;
@@ -3103,8 +3102,8 @@ static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
         vertical = y;
         for (i = -0x1F; i < 0x20; i++) {
             s32 mx;
-            target_panel_t* base = g_battle_target_panel_data;
-            target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
+            target_panel_t* base = g_target_panel_data;
+            target_panel_t* upper_panels = base + BATTLE_MAP_TILES_PER_LAYER;
             shared = x + i;
             mx = g_battle_map_max_x;
             tile_index = (vertical * mx) + shared;
@@ -3118,8 +3117,8 @@ static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
     {
         shared = x;
         for (i = -0x1F; i < 0x20; i++) {
-            target_panel_t* base = g_battle_target_panel_data;
-            target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
+            target_panel_t* base = g_target_panel_data;
+            target_panel_t* upper_panels = base + BATTLE_MAP_TILES_PER_LAYER;
             vertical = y + i;
             tile_index = (vertical * g_battle_map_max_x) + shared;
             panel = &base[tile_index];
@@ -3140,7 +3139,7 @@ static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
  *
  * The skillset's menu type picks the range. Abilities (the default and monster
  * menus, the Elemental ability of the unit's tile, the Draw Out of the chosen
- * katana) use their range data through battle_target_set_ability_panels. Item
+ * katana) use their range data through target_range_set_for_ability. Item
  * reaches 1 tile, or 4 with Throw Item or for a Mime. Throw reaches the unit's
  * Move and excludes its own tile. Attack and Charge use the weapon's range, Jump
  * the unit's Jump abilities.
@@ -3151,7 +3150,7 @@ static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
  * weapon's range; NONE when no tile is marked; TILE_ONLY when the action cannot
  * follow a unit (always for Item, Throw, Attack, Charge and Jump); otherwise
  * UNIT_OR_TILE. */
-s32 battle_target_set_panels_for_action(const action_command_t* source) {
+s32 target_range_set_for_action(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;
     ability_secondary_data_t* ability;
@@ -3166,11 +3165,11 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
      * directly, bit 7 leaving out the unit's own tile. */
     action_copy_data(source, &action);
     mode = 0;
-    if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
+    if (action.actor_id >= UNIT_SLOT_COUNT) {
         return TARGET_PANELS_INVALID;
     }
-    unit = &g_battle_unit_stats[action.actor_id];
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    unit = &g_unit_stats[action.actor_id];
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return TARGET_PANELS_INVALID;
     }
     switch (g_command_menu_types_by_skillset[action.skillset_id]) {
@@ -3180,8 +3179,8 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
         mode = 1;
         break;
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
-        range = ((unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_THROW_ITEM) || unit->job_id == JOB_ID_MIME) ? 4
-                                                                                                                    : 1;
+        range
+            = ((unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_THROW_ITEM) || unit->job_id == JOB_ID_MIME) ? 4 : 1;
         mode = 2;
         break;
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
@@ -3189,8 +3188,8 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
         range = unit->move | 0x80;
         break;
     case ACTION_MENU_TYPE_ELEMENTS:
-        ability_id
-            = g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
+        ability_id = g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)]
+                .surface.type];
         mode = 1;
         break;
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
@@ -3203,11 +3202,11 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
         break;
     case ACTION_MENU_TYPE_ATTACK:
     case ACTION_MENU_TYPE_CHARGE:
-        result = battle_target_set_weapon_attack_panels(&action);
+        result = target_range_set_for_weapon(&action);
         flags = ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET;
         break;
     case ACTION_MENU_TYPE_JUMP:
-        result = battle_target_set_jump_ability_panels(&action);
+        result = target_range_set_for_jump(&action);
         flags = ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET;
         break;
     case ACTION_MENU_TYPE_BLANK_05:
@@ -3228,10 +3227,10 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
             return TARGET_PANELS_NO_TARGETING;
         }
         action.ability_id = ability_id;
-        result = battle_target_set_ability_panels(&action);
+        result = target_range_set_for_ability(&action);
     }
     if (mode == 2) {
-        result = battle_target_spread_ability_range(unit, range);
+        result = target_range_spread_from_unit(unit, range);
         flags = ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET;
     }
     if (result != 0) {
@@ -3248,7 +3247,7 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
  * and Charge mark only the target tile. Returns 0 when tiles were marked, 1 when none were, 2 for
  * menu types without targeting, and -1 for an invalid actor, target, katana, ability id or target
  * tile. */
-s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
+s32 target_area_set_for_action(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;
     u16 ability_id;
@@ -3260,14 +3259,14 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
      * tile, and mode 0 means the calculator already did the work. */
     action_copy_data(source, &action);
     mode = 1;
-    if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
+    if (action.actor_id >= UNIT_SLOT_COUNT) {
         return -1;
     }
-    unit = &g_battle_unit_stats[action.actor_id];
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    unit = &g_unit_stats[action.actor_id];
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return -1;
     }
-    if (action.targeting_type == BATTLE_TARGETING_TYPE_UNIT && action.target_id >= BATTLE_UNIT_SLOT_COUNT) {
+    if (action.targeting_type == TARGET_TYPE_UNIT && action.target_id >= UNIT_SLOT_COUNT) {
         return -1;
     }
     switch (g_command_menu_types_by_skillset[action.skillset_id]) {
@@ -3283,11 +3282,11 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
         mode = 2;
         break;
     case ACTION_MENU_TYPE_ARITHMETICKS:
-        result = battle_target_run_calculator(&action);
+        result = target_area_run_calculator(&action);
         mode = 0;
         break;
     case ACTION_MENU_TYPE_ELEMENTS:
-        ability_id = battle_action_get_elemental_ability_id(unit);
+        ability_id = ability_get_elemental_id(unit);
         break;
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
         item = action.item_or_equipment;
@@ -3307,10 +3306,10 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
             return -1;
         }
         action.ability_id = ability_id;
-        result = battle_target_set_green_panels_for_action(&action);
+        result = target_area_set_for_ability(&action);
     }
     if (mode == 2) {
-        result = battle_target_keep_only_target_tile(&action);
+        result = target_area_keep_only_target_tile(&action);
     }
     if (result == 0) {
         return 1;
@@ -3321,11 +3320,11 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
 /* Re-validate the acting unit's stored target and mark the target's tile.
  *
  * The weapon's flags select the trajectory test: ARC takes
- * battle_effect_set_and_validate_arc_trajectory, DIRECT the direct-weapon check (skipped
+ * projectile_arc_set_and_validate, DIRECT the direct-weapon check (skipped
  * for an adjacent tile when the skillset menu type is ITEM_INVENTORY), LUNGING
- * battle_target_validate_lunging_target, and anything else the plain height-overlap test.
+ * target_validate_lunge, and anything else the plain height-overlap test.
  * Attack and Charge skillsets, and abilities flagged ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE,
- * use the equipped weapon; other skillsets use DIRECT. For BATTLE_TARGETING_TYPE_UNIT they
+ * use the equipped weapon; other skillsets use DIRECT. For TARGET_TYPE_UNIT they
  * also copy the target unit's position into the local action copy, which nothing reads
  * afterward: the tests use the actor's stored target position.
  * Returns -1 for an absent actor, a shield in a weapon hand or an invalid target id,
@@ -3334,7 +3333,7 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
  * One `hand` variable carries both hands, so the right-hand load stays after
  * the left-hand mask; `target` is reused for the result unit, which keeps it a
  * global pseudo and gives the target's v1 for the copied position. */
-s32 battle_target_validate_weapon_target(const action_command_t* source) {
+s32 target_validate_for_weapon(const action_command_t* source) {
     action_command_t action;
     s16 x;
     unit_stats_t* unit;
@@ -3347,7 +3346,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
     s32 mask;
     u8 weapon;
     u32 weapon_id;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     s16 y;
     s16 elevation;
     s32 target_id;
@@ -3358,11 +3357,11 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
 
     action_copy_data(source, &action);
     unit_id = action.actor_id;
-    if (unit_id >= BATTLE_UNIT_SLOT_COUNT) {
+    if (unit_id >= UNIT_SLOT_COUNT) {
         return -1;
     }
-    unit = &g_battle_unit_stats[unit_id];
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    unit = &g_unit_stats[unit_id];
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return -1;
     }
     menu_type = g_command_menu_types_by_skillset[action.skillset_id];
@@ -3391,11 +3390,11 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
         }
         flags = g_item_weapon_data[weapon_id].flags;
     } else {
-        if (action.targeting_type == BATTLE_TARGETING_TYPE_UNIT) {
-            if (action.target_id >= BATTLE_UNIT_SLOT_COUNT) {
+        if (action.targeting_type == TARGET_TYPE_UNIT) {
+            if (action.target_id >= UNIT_SLOT_COUNT) {
                 return -1;
             }
-            target = &g_battle_unit_stats[action.target_id];
+            target = &g_unit_stats[action.target_id];
             action.target_position.vx = target->x;
             action.target_position.vz = target->position.y;
             action.target_position.vy = target->position.higher_elevation;
@@ -3405,13 +3404,12 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
     x = unit->action_command.target_position.vx;
     y = unit->action_command.target_position.vz;
     elevation = unit->action_command.target_position.vy;
-    target_id = battle_target_find_unit_at_tile(x, y, elevation);
+    target_id = target_find_unit_at_tile(x, y, elevation);
     if (target_id < 0) {
         target_id = -1;
     }
     if (flags & WEAPON_FLAG_ARC) {
-        result
-            = battle_effect_set_and_validate_arc_trajectory(unit_id, &unit->action_command.target_position, target_id);
+        result = projectile_arc_set_and_validate(unit_id, &unit->action_command.target_position, target_id);
     } else if (flags & WEAPON_FLAG_DIRECT) {
         distance_x = x - unit->x;
         if (distance_x < 0) {
@@ -3425,18 +3423,17 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
         if (menu_type == ACTION_MENU_TYPE_ITEM_INVENTORY && distance < 2) {
             result = target_id;
         } else {
-            result = battle_effect_check_direct_trajectory_to_target(
-                unit_id, &unit->action_command.target_position, target_id);
+            result = projectile_direct_check_to_target(unit_id, &unit->action_command.target_position, target_id);
         }
     } else if (flags & WEAPON_FLAG_LUNGING) {
-        result = battle_target_validate_lunging_target(unit_id, x, y, elevation, target_id);
+        result = target_validate_lunge(unit_id, x, y, elevation, target_id);
     } else {
-        result = battle_target_validate_height_overlap(unit_id, x, y, elevation, target_id);
+        result = target_validate_height_overlap(unit_id, x, y, elevation, target_id);
     }
-    battle_target_disable_green_panel_flags();
-    if (result >= 0 && result < BATTLE_UNIT_SLOT_COUNT) {
-        target = &g_battle_unit_stats[result];
-        tile = &g_battle_map_tile_data[battle_map_calculate_location(target)];
+    target_area_clear_flags();
+    if (result >= 0 && result < UNIT_SLOT_COUNT) {
+        target = &g_unit_stats[result];
+        tile = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(target)];
         tile->ceiling_depth_and_marks.targeted = 1;
     }
     return 0;
@@ -3444,7 +3441,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
 
 /* Validates a lunging-weapon target one or two tiles away in a straight line.
  *
- * Called by battle_target_validate_weapon_target for WEAPON_FLAG_LUNGING. Adjacent targets
+ * Called by target_validate_for_weapon for WEAPON_FLAG_LUNGING. Adjacent targets
  * pass the plain height-overlap test. At distance 2 the middle tile's two
  * layers (surface height, or an occupant's total height) must leave part of
  * the attacker/target height window open; otherwise a unit on the middle tile
@@ -3453,11 +3450,11 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
  *
  * `total` doubles as the height swap temporary, and the separate upper_index
  * keeps the target's instruction order for the upper-layer tile address. */
-static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id) {
-    battle_unit_height_data_t height;
-    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
-    map_tile_t* lower;
-    map_tile_t* upper;
+static s32 target_validate_lunge(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id) {
+    unit_height_data_t height;
+    unit_stats_t* unit = &g_unit_stats[unit_id];
+    battle_map_tile_t* lower;
+    battle_map_tile_t* upper;
     s32 unit_x = unit->x;
     s32 unit_y = unit->position.y;
     s32 dx;
@@ -3513,15 +3510,15 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
         return -1;
     }
 
-    battle_unit_calculate_height_data(&height, target_id);
-    if (height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
+    unit_calculate_height_data(&height, target_id);
+    if (height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         target_id = -1;
     }
     target_total = height.total_height;
     target_walking = height.walking_height;
 
-    battle_unit_calculate_height_data(&height, unit_id);
-    if (height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
+    unit_calculate_height_data(&height, unit_id);
+    if (height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         return -1;
     }
     unit_walking = height.walking_height;
@@ -3551,12 +3548,12 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
         /* Both layers of the middle tile. */
         index = mid_y * g_battle_map_max_x + mid_x;
         lower = &g_battle_map_tile_data[index];
-        upper_index = index + MAP_TILES_PER_LAYER;
+        upper_index = index + BATTLE_MAP_TILES_PER_LAYER;
         upper = &g_battle_map_tile_data[upper_index];
         lower_height = lower->height * 2 + lower->depth_half_height.half_height;
         upper_height = upper->height * 2 + upper->depth_half_height.half_height;
-        lower_id = battle_target_find_unit_at_tile(mid_x, mid_y, 0);
-        upper_id = battle_target_find_unit_at_tile(mid_x, mid_y, 1);
+        lower_id = target_find_unit_at_tile(mid_x, mid_y, 0);
+        upper_id = target_find_unit_at_tile(mid_x, mid_y, 1);
         /* A blocked layer counts as absent (0xff) and is skipped below. */
         if (lower->flags.blocked) {
             lower_height = 0xff;
@@ -3575,8 +3572,8 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
         }
 
         if (lower_height != 0xff) {
-            battle_unit_calculate_height_data(&height, lower_id);
-            if (!(height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE)) {
+            unit_calculate_height_data(&height, lower_id);
+            if (!(height.unit_flags & UNIT_HEIGHT_UNAVAILABLE)) {
                 lower_height = height.total_height;
             }
             if (low < lower_height) {
@@ -3588,8 +3585,8 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
         }
 
         if (upper_height != 0xff) {
-            battle_unit_calculate_height_data(&height, upper_id);
-            if (!(height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE)) {
+            unit_calculate_height_data(&height, upper_id);
+            if (!(height.unit_flags & UNIT_HEIGHT_UNAVAILABLE)) {
                 total = height.total_height;
                 if (low >= upper_height && total >= high) {
                     low = 0xff;
@@ -3606,9 +3603,9 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
      * the attacker's mid-height. */
     middle = (u32)(unit_walking + unit_total) >> 1;
     for (layer = 0; layer < 2; layer++) {
-        target_id = battle_target_find_unit_at_tile(mid_x, mid_y, layer);
-        battle_unit_calculate_height_data(&height, target_id);
-        if (!(height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE)) {
+        target_id = target_find_unit_at_tile(mid_x, mid_y, layer);
+        unit_calculate_height_data(&height, target_id);
+        if (!(height.unit_flags & UNIT_HEIGHT_UNAVAILABLE)) {
             target_walking = height.walking_height;
             target_total = height.total_height;
             if (target_walking < middle && middle < target_total) {
@@ -3622,22 +3619,22 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
 /* Return the target only when its vertical span overlaps the attacker's.
  *
  * The coordinate arguments are unused here but are part of the caller ABI. */
-static s32 battle_target_validate_height_overlap(
+static s32 target_validate_height_overlap(
     s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id) {
-    battle_unit_height_data_t height_data;
+    unit_height_data_t height_data;
     u32 target_walking_height;
     u32 target_total_height;
     u32 attacker_total_height;
     u32 attacker_walking_height;
 
-    battle_unit_calculate_height_data(&height_data, target_id);
-    if ((height_data.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) != 0) {
+    unit_calculate_height_data(&height_data, target_id);
+    if ((height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) != 0) {
         return -1;
     }
     target_walking_height = height_data.walking_height;
     target_total_height = height_data.total_height;
-    battle_unit_calculate_height_data(&height_data, attacker_id);
-    if ((height_data.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) != 0) {
+    unit_calculate_height_data(&height_data, attacker_id);
+    if ((height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) != 0) {
         return -1;
     }
     attacker_total_height = height_data.total_height;
@@ -3648,12 +3645,12 @@ static s32 battle_target_validate_height_overlap(
     return -1;
 }
 
-/* Clear MAP_TILE_FLAG_TARGETED on all 512 tiles. */
-void battle_target_disable_green_panel_flags(void) {
-    map_tile_t* tile;
+/* Clear BATTLE_MAP_TILE_FLAG_TARGETED on all 512 tiles. */
+void target_area_clear_flags(void) {
+    battle_map_tile_t* tile;
     s32 i;
 
-    for (i = 0; i < MAP_TILE_COUNT; i++) {
+    for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
         tile->ceiling_depth_and_marks.targeted = 0;
     }
@@ -3668,12 +3665,12 @@ void battle_target_disable_green_panel_flags(void) {
  * mounts carrying a rider are skipped, and a value of 0 never qualifies.
  * Returns the number of marked units, or -1 when the command does not name
  * one type and one multiplier ability. */
-static s32 battle_target_run_calculator(const action_command_t* source) {
-    battle_unit_height_data_t height;
+static s32 target_area_run_calculator(const action_command_t* source) {
+    unit_height_data_t height;
     action_command_t action;
     unit_stats_t* actor;
     unit_stats_t* unit;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     s16 type;
     s16 multiplier;
     u8* type_entry;
@@ -3689,7 +3686,7 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
     action_copy_data(source, &action);
     type = action.calculator_type;
     multiplier = action.calculator_multiplier;
-    actor = &g_battle_unit_stats[action.actor_id];
+    actor = &g_unit_stats[action.actor_id];
     if (type < ABILITY_ID_MATH_FIRST || type >= ABILITY_ID_REACTION_FIRST) {
         return -1;
     }
@@ -3704,10 +3701,10 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
         || (type_flags & CALCULATOR_MULTIPLE_MASK) || (multiplier_flags & CALCULATOR_ATTRIBUTE_MASK)) {
         return -1;
     }
-    battle_target_disable_green_panel_flags();
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = &g_battle_unit_stats[i];
-        if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    target_area_clear_flags();
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = &g_unit_stats[i];
+        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
             continue;
         }
         if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
@@ -3730,7 +3727,7 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
         } else if (type_flags & CALCULATOR_ATTRIBUTE_EXP) {
             value = unit->experience;
         } else {
-            battle_unit_calculate_height_data(&height, i);
+            unit_calculate_height_data(&height, i);
             value = height.walking_height;
             if (value & 1) {
                 continue;
@@ -3756,7 +3753,7 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
             hit = 1;
         }
         if (hit != 0) {
-            tile = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
+            tile = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)];
             count++;
             tile->ceiling_depth_and_marks.targeted = 1;
         }
@@ -3766,12 +3763,12 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
 
 /* Leave only the action's target tile marked as targeted. Returns 1, or -1
  * when that tile is off the map or blocked. */
-static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
+static s32 target_area_keep_only_target_tile(const action_command_t* action) {
     action_command_t action_copy;
     u8 x;
     u8 y;
     u8 level;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
 
     action_copy_data(action, &action_copy);
     /* The byte locals keep only the low byte of each 16-bit coordinate, as retail does. */
@@ -3783,7 +3780,7 @@ static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
             if (level < 2) {
                 tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_max_x + x];
                 if ((tile->flags.blocked) == 0) {
-                    battle_target_disable_green_panel_flags();
+                    target_area_clear_flags();
                     tile->ceiling_depth_and_marks.targeted = 1;
                     return 1;
                 }
@@ -3802,12 +3799,12 @@ static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
  * index pseudo the allocation priority the target needs (a2), while keeping the
  * `(elevation * 256 + y * width) + x` operand order.
  */
-static s32 battle_target_set_green_panels_for_action(const action_command_t* action) {
+static s32 target_area_set_for_ability(const action_command_t* action) {
     action_command_t action_copy;
     ability_secondary_data_t* ability;
     unit_stats_t* unit;
     unit_stats_t* target;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     target_panel_t* panel;
     target_panel_t* other_panel;
     target_panel_t* cursor;
@@ -3833,7 +3830,7 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
     aoe = ability->aoe;
     vertical = ability->vertical;
     unit_id = action_copy.actor_id;
-    unit = &g_battle_unit_stats[unit_id];
+    unit = &g_unit_stats[unit_id];
 
     /* Direct targeting takes the weapon-range path below (no spread) and keeps only
      * these four targeting flags. */
@@ -3847,12 +3844,12 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         x = unit->x;
         y = unit->position.y;
         elevation = unit->position.higher_elevation;
-    } else if (action_copy.targeting_type != BATTLE_TARGETING_TYPE_UNIT) {
+    } else if (action_copy.targeting_type != TARGET_TYPE_UNIT) {
         x = (u8)action_copy.target_position.vx;
         y = (u8)action_copy.target_position.vz;
         elevation = (u8)action_copy.target_position.vy;
     } else {
-        target = &g_battle_unit_stats[action_copy.target_id];
+        target = &g_unit_stats[action_copy.target_id];
         x = target->x;
         y = target->position.y;
         elevation = target->position.higher_elevation;
@@ -3875,55 +3872,54 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
 
     /* Center height in half steps, including the water depth. Byte access retains the
      * original packed load and field-extraction order. */
-    height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK)
+    height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & BATTLE_MAP_TILE_HALF_HEIGHT_MASK)
         + ((*(u8*)&tile->depth_half_height) >> 5) * 2;
 
     if (aoe == ABILITY_RANGE_WHOLE_MAP) {
-        cursor = g_battle_target_panels;
-        for (i = 0; i < MAP_TILE_COUNT; i++) {
+        cursor = g_target_panels;
+        for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
             cursor[i].remaining_range = 1;
             cursor[i].mark = 0;
         }
     } else {
-        cursor = g_battle_target_panels;
-        for (i = 0; i < MAP_TILE_COUNT; i++) {
+        cursor = g_target_panels;
+        for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
             cursor[i].remaining_range = 0;
             cursor[i].mark = 0;
         }
-        panel = &g_battle_target_panels[index];
+        panel = &g_target_panels[index];
         panel->remaining_range = aoe + 1;
         /* Seed the spread from the center position's lower-layer panel, which the spread
          * walks (the trailing `index & 0xff` store marks it a second time). */
-        if (index < MAP_TILES_PER_LAYER) {
-            other_panel = &g_battle_target_panels[index + MAP_TILES_PER_LAYER];
+        if (index < BATTLE_MAP_TILES_PER_LAYER) {
+            other_panel = &g_target_panels[index + BATTLE_MAP_TILES_PER_LAYER];
             panel->mark = 1;
         } else {
-            other_panel = &g_battle_target_panels[index - MAP_TILES_PER_LAYER];
+            other_panel = &g_target_panels[index - BATTLE_MAP_TILES_PER_LAYER];
             other_panel->mark = 1;
         }
-        g_battle_target_panels[index & 0xff].mark = 1;
+        g_target_panels[index & 0xff].mark = 1;
         if (!(flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE)) {
             panel->remaining_range = aoe + 1;
             other_panel->remaining_range = aoe + 1;
-            battle_target_spread_panels(aoe, 0);
-            battle_target_apply_vertical_tolerance(
-                height, vertical, (flags_2 & ABILITY_SECONDARY_FLAG_2_TOP_DOWN) != 0);
-            battle_target_check_moldball_virus_depth(action_copy.ability_id);
+            target_spread_panels(aoe, 0);
+            target_apply_vertical_tolerance(height, vertical, (flags_2 & ABILITY_SECONDARY_FLAG_2_TOP_DOWN) != 0);
+            target_area_check_moldball_virus_depth(action_copy.ability_id);
         }
     }
 
-    cursor = &g_battle_target_panels[battle_map_calculate_location(unit)];
+    cursor = &g_target_panels[battle_map_tile_calculate_unit_index(unit)];
     if (flags_2 & ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER) {
         cursor->remaining_range = 0;
     }
     if (flags_2 & ABILITY_SECONDARY_FLAG_2_LINEAR_ATTACK) {
-        battle_target_build_directional_attack_panels(&action_copy, 1);
+        target_area_build_directional_attack_panels(&action_copy, 1);
     }
     if (flags_2 & ABILITY_SECONDARY_FLAG_2_THREE_DIRECTIONS) {
-        battle_target_build_directional_attack_panels(&action_copy, 3);
+        target_area_build_directional_attack_panels(&action_copy, 3);
     }
     if (flags_2 & (ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES)) {
-        battle_target_apply_unit_team_eligibility(unit_id, flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES,
+        target_area_apply_unit_team_eligibility(unit_id, flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES,
             flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES, aoe == ABILITY_RANGE_WHOLE_MAP);
     }
 
@@ -3932,8 +3928,8 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
     count = 0;
     if (!(flags_2 & (ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES))) {
         tile = g_battle_map_tile_data;
-        for (i = 0, marked = g_battle_target_panels; i < MAP_TILE_COUNT; i++) {
-            if (marked->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
+        for (i = 0, marked = g_target_panels; i < BATTLE_MAP_TILE_COUNT; i++) {
+            if (marked->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & BATTLE_MAP_TILE_COLLISION_MASK))) {
                 count++;
                 tile[i].ceiling_depth_and_marks.targeted = 1;
             } else {
@@ -3944,8 +3940,8 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         return count;
     }
     tile = g_battle_map_tile_data;
-    for (i = 0, marked = g_battle_target_panels; i < MAP_TILE_COUNT; i++) {
-        if (marked->mark != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
+    for (i = 0, marked = g_target_panels; i < BATTLE_MAP_TILE_COUNT; i++) {
+        if (marked->mark != 0 && !(((*(u8*)&tile[i].flags) & BATTLE_MAP_TILE_COLLISION_MASK))) {
             count++;
             tile[i].ceiling_depth_and_marks.targeted = 1;
         } else {
@@ -3962,7 +3958,7 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
  * same-team even if its initial and live team fields differ. `allow_allies`
  * and `allow_enemies` are raw nonzero flag values. Unless the ability AoE covers
  * the whole map, every nonempty panel left after filtering is marked selected. */
-static void battle_target_apply_unit_team_eligibility(
+static void target_area_apply_unit_team_eligibility(
     s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_whole_map) {
     s32 relation;
     u8 team_flags;
@@ -3972,15 +3968,15 @@ static void battle_target_apply_unit_team_eligibility(
     s32 actor_id;
 
     raw_unit_id &= 0xff;
-    team_flags = g_battle_unit_stats[raw_unit_id].team_flags;
+    team_flags = g_unit_stats[raw_unit_id].team_flags;
     actor_id = raw_unit_id;
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (battle_target_is_unit_untargetable_and_store_tile(i, &panel_index) == 0) {
-            relation = team_flags ^ g_battle_unit_stats[i].initial_team_flags;
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        if (target_is_unit_untargetable_and_store_tile(i, &panel_index) == 0) {
+            relation = team_flags ^ g_unit_stats[i].initial_team_flags;
             if (actor_id == i) {
                 relation = 0;
             }
-            panel = &g_battle_target_panels[panel_index];
+            panel = &g_target_panels[panel_index];
             if (panel->remaining_range != 0) {
                 if (relation & UNIT_TEAM_MASK) {
                     if (allow_enemies == 0) {
@@ -3997,8 +3993,8 @@ static void battle_target_apply_unit_team_eligibility(
         }
     }
     if (!aoe_whole_map) {
-        for (i = 0; i < MAP_TILE_COUNT; i++) {
-            panel = &g_battle_target_panels[i];
+        for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
+            panel = &g_target_panels[i];
             if (panel->remaining_range != 0) {
                 panel->mark = 1;
             }
@@ -4007,11 +4003,11 @@ static void battle_target_apply_unit_team_eligibility(
 }
 
 /* Store a unit's tile and report whether targeting must reject the unit. */
-s32 battle_target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index) {
-    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
+s32 target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index) {
+    unit_stats_t* unit = &g_unit_stats[unit_id];
 
-    *tile_index = battle_map_calculate_location(unit);
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    *tile_index = battle_map_tile_calculate_unit_index(unit);
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return 1;
     } else if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
         & (STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
@@ -4033,8 +4029,8 @@ s32 battle_target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_ind
  * direction is kept; mode 3 also keeps the two perpendicular lines. Every panel
  * off the kept lines loses its range, and the marks that identified the lines are
  * cleared. The call also turns on nearest-first ordering of the target list
- * (g_battle_sort_targets_nearest_first). */
-static void battle_target_build_directional_attack_panels(const action_command_t* source, u8 mode) {
+ * (g_target_sort_nearest_first). */
+static void target_area_build_directional_attack_panels(const action_command_t* source, u8 mode) {
     action_command_t action;
     unit_stats_t* unit;
     target_panel_t* panel;
@@ -4045,42 +4041,42 @@ static void battle_target_build_directional_attack_panels(const action_command_t
     s32 i;
 
     action_copy_data(source, &action);
-    g_battle_sort_targets_nearest_first = 1;
-    unit = &g_battle_unit_stats[action.actor_id];
+    g_target_sort_nearest_first = 1;
+    unit = &g_unit_stats[action.actor_id];
     x = unit->x;
     y = unit->position.y;
     target_x = action.target_position.vx;
     target_y = action.target_position.vz;
     if (x < target_x) {
-        battle_target_calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
+        target_area_calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
         if (mode == 3) {
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
         }
     }
     if (target_x < x) {
-        battle_target_calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
+        target_area_calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
         if (mode == 3) {
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
         }
     }
     if (y < target_y) {
-        battle_target_calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
+        target_area_calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
         if (mode == 3) {
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
         }
     }
     if (target_y < y) {
-        battle_target_calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
+        target_area_calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
         if (mode == 3) {
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
-            battle_target_calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
+            target_area_calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
         }
     }
-    for (i = 0; i < MAP_TILE_COUNT; i++) {
-        panel = &g_battle_target_panels[i];
+    for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
+        panel = &g_target_panels[i];
         if (panel->mark == 0) {
             panel->remaining_range = 0;
         } else {
@@ -4093,10 +4089,10 @@ static void battle_target_build_directional_attack_panels(const action_command_t
  * (TARGET_LINE_*), the starting tile included.
  *
  * On both map levels a target_panel_t with remaining_range gets mark set;
- * the table is g_battle_target_panels. The walk stops
+ * the table is g_target_panels. The walk stops
  * at the map edge or after 32 tiles, and any other direction value marks nothing.
  * `dir` is reused as the panel index. */
-static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
+static void target_area_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
     s32 i;
     s32 dx;
     s32 dy;
@@ -4140,12 +4136,12 @@ static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
             return;
         }
         dir = y * map_width + x;
-        panel = &g_battle_target_panel_data[dir];
+        panel = &g_target_panel_data[dir];
         if (panel->remaining_range != 0) {
             panel->mark = 1;
         }
-        dir += MAP_TILES_PER_LAYER;
-        panel = &g_battle_target_panel_data[dir];
+        dir += BATTLE_MAP_TILES_PER_LAYER;
+        panel = &g_target_panel_data[dir];
         y += dy;
         if (panel->remaining_range != 0) {
             panel->mark = 1;

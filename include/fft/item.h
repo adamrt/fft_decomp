@@ -87,8 +87,8 @@ s32 item_sort_list_by_category_order(s32 category_index, s16* list);
 /* Packs a -1 terminated s16 item list into the category's byte list. */
 void item_store_category_list(s32 category_index, const s16* source);
 /* Store and load a category's sort key order as -1 terminated halfwords. */
-void menu_store_sort_key_list(s32 list_index, const s16* source);
-void menu_load_sort_key_list(s32 list_index, s16* destination);
+void item_store_type_order(s32 list_index, const s16* source);
+void item_load_type_order(s32 list_index, s16* destination);
 
 /* inventory counts */
 /* EQUIP and WORLD each build their own bodies of the first two. */
@@ -100,12 +100,11 @@ s32 item_adjust_inventory_count(s16 item_entry, s32 delta);
 extern struct menu_status_panel_slot_storage g_item_preview_stat_detail;
 
 /* Sums the stat bonuses of the five equipped items. */
-void item_sum_equipment_stat_details(menu_status_panel_slot_storage_t* total, const u16* equipment);
+void equipment_sum_stat_details(unit_panel_record_t* total, const u16* equipment);
 /* EQUIP and WORLD each build their own body. */
-void item_collect_stat_deltas(
-    s16 raw_item, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 alternate);
-void item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_storage_t* detail_total,
-    menu_unit_status_record_t* summary_total, const u16* from_items, const u16* to_items);
+void item_collect_stat_deltas(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate);
+void equipment_calculate_total_swap_delta(
+    unit_panel_record_t* detail_total, unit_panel_summary_t* summary_total, const u16* from_items, const u16* to_items);
 
 /* item icons */
 /* Item and item-type icons as menu_icon_source_t, for the icon row callbacks. */
@@ -113,19 +112,19 @@ extern uv8_t g_item_type_icon_origins[];
 
 /* The texture cell of an item type's 12x12 icon. */
 void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
-void menu_build_item_icon_source(menu_icon_source_t* output, u32 item_id);
-menu_icon_source_t* menu_build_item_type_icon_source(s32 index);
+void item_build_icon_source(menu_icon_source_t* output, u32 item_id);
+menu_icon_source_t* item_build_type_icon_source(s32 index);
 /* A weapon's hand marks on the item panel: two-handed, or the Two Hands and Two Swords marks it allows. */
-void menu_draw_weapon_hand_icons(s16 weapon_id);
+void item_draw_weapon_hand_icons(s16 weapon_id);
 
 /* equipment rows */
 /* Row callbacks of the item lists, and the item detail panel's status column. */
-extern RECT g_menu_status_display_image_rects[];
+extern RECT g_unit_panel_status_display_image_rects[];
 
-menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
-s32 menu_get_entry_item_count(s32 row);
-s32 menu_get_entry_item_equipped_count(s32 row);
-void menu_draw_item_status_list(s16 item_id);
+menu_icon_source_t* equipment_get_row_icon_source(s32 row);
+s32 equipment_get_row_item_count(s32 row);
+s32 equipment_get_row_equipped_count(s32 row);
+void item_draw_status_list(s16 item_id);
 
 /* rearranging */
 /* The item screens' rearrange mode: pick an item up and move it within its category list. */

@@ -211,7 +211,7 @@ s32 thread_is_running_asm(s32 thread_id);
 void thread_yield(void);
 void thread_wait_frames(s32 count);
 void thread_wait_until_inactive(s32 thread_id);
-void thread_wait_for_unit_view_panels(void);
+void unit_view_wait_for_panels(void);
 void thread_wait_forever(void);
 void thread_wait_forever_by_frames(void);
 

@@ -362,7 +362,7 @@ static void status_update_unit_flags_and_ct(unit_stats_t* unit) {
     s32 status;
     u8 immunity;
 
-    if (unit->ability_flags.movement[2] & BATTLE_MOVEMENT_SET_3_FLOAT) {
+    if (unit->ability_flags.movement[2] & UNIT_MOVEMENT_SET_3_FLOAT) {
         unit->status_sets.innate[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)] |= STATUS_BYTE_MASK(STATUS_ID_FLOAT);
     }
 
@@ -474,9 +474,9 @@ static void unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 ski
                 if (initializing != 0) {
                     status_set_ct(unit, i, 0);
                 }
-                battle_status_queue_graphics_change_if_executing(status_id, 1, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, 1, battle_id);
             } else {
-                battle_status_queue_graphics_change_if_executing(status_id, 0, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, 0, battle_id);
             }
         }
     }
@@ -612,7 +612,7 @@ s32 status_set_ct(unit_stats_t* unit, s32 status_id, s32 removing) {
     }
 
     ct_index = STATUS_CT_INDEX(status_id);
-    if (ct_index >= BATTLE_TIMED_STATUS_COUNT) {
+    if (ct_index >= STATUS_TIMED_COUNT) {
         return 0;
     }
     stored_index = ct_index;

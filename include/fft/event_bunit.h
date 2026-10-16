@@ -78,7 +78,7 @@ typedef struct unit_list_record {
     s16 magical_accessory_evade; /* 0x52 */
     s16 equipment[5];            /* 0x54 */
     s16 abilities[5];            /* 0x5e; primary skillset, secondary, reaction, support, movement (filled by
-                                  * unit_list_build_record; ability_build_list reads [0]) */
+                                  * unit_list_build_record; ability_list_build reads [0]) */
     u8 _unused_068[8];           /* 0x68; spare tail of the stat-detail block */
     u8 gender_flags;             /* 0x70; Bard/Dancer restrictions */
     u8 runtime_id;               /* 0x71 */
@@ -199,16 +199,16 @@ extern s32 g_unit_panel_comparison_display_offset_y;
 extern s32 g_unit_panel_comparison_display_redraw_request;
 
 /* unit panels */
-extern menu_active_unit_t g_unit_panel_panel_selected_unit_data;
+extern unit_panel_unit_t g_unit_panel_panel_selected_unit_data;
 extern palette_t g_unit_panel_panel_selected_portrait_palettes[2];
-extern menu_active_unit_t g_unit_panel_panel_comparison_unit_data;
+extern unit_panel_unit_t g_unit_panel_panel_comparison_unit_data;
 extern palette_t g_unit_panel_panel_comparison_portrait_palettes[2];
 extern u32 g_unit_panel_status_display_flags; /* menu_status_panel_flags_e */
 extern s32 g_unit_panel_status_display_offset_y;
 extern s32 g_unit_panel_status_display_dimmed;
-extern menu_status_thread_t g_unit_panel_character_status_frame_config;
+extern unit_panel_thread_t g_unit_panel_character_status_frame_config;
 extern s32 g_unit_panel_character_status_dimmed;
-extern menu_status_thread_t g_unit_panel_numbers_thread_params;
+extern unit_panel_thread_t g_unit_panel_numbers_thread_params;
 extern s32 g_unit_panel_numbers_dimmed;
 
 void unit_panel_toggle_equipment_and_numbers(s32 enable);
@@ -220,7 +220,7 @@ extern u8 g_unit_list_status_banner_at_bottom_latch;
 extern s8 g_unit_list_status_banner_slide_step;
 
 /* help */
-extern s32 g_unit_list_help_screen_id; /* menu_grid_help_id_e */
+extern s32 g_unit_list_help_screen_id; /* help_grid_id_e */
 extern help_navigation_record_t* g_unit_list_help_nodes;
 extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];

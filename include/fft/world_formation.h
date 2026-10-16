@@ -52,7 +52,7 @@ enum {
  * a roster-indexed array. The byte fields from 0x70 on mirror the party_unit_t layout. Magical shield and accessory
  * evade are provisionally placed at 0x50/0x52, after the physical fields, to follow the 16-bit sequence. */
 typedef struct formation_unit {
-    menu_unit_status_record_t status;     /* 0x000; copied whole to the status banner */
+    unit_panel_summary_t status;          /* 0x000; copied whole to the status banner */
     menu_unit_status_identity_t identity; /* 0x022 */
     s16 move;                             /* 0x030 */
     s16 speed;                            /* 0x032 */
@@ -326,7 +326,7 @@ extern image_load_parameters_t g_formation_status_portrait_params;
 extern u8 g_formation_banner_active;
 extern menu_entry_t g_formation_banner_menu;
 extern s8 g_formation_banner_state; /* banner state: 0 idle, 1 finishing, else countdown */
-s32 unit_facing_get_sixteenth_by_runtime_id(s32 runtime_id);
+s32 unit_facing_get_sixteenth_by_runtime_id(u32 runtime_id);
 
 /* dismissal */
 /* An entry of the sprite-set to script-variable table the dismissal tail walks (g_formation_dismiss_entries),
@@ -457,7 +457,7 @@ extern u8 g_formation_ability_menu_slots_changed;
 extern u8 g_formation_ability_menu_saved_browse_enabled;
 extern u8 g_formation_ability_submenu_running;
 extern RECT g_formation_ability_panel_origin;
-extern menu_status_thread_t g_formation_ability_panel_thread_params;
+extern unit_panel_thread_t g_formation_ability_panel_thread_params;
 extern menu_instruction_t g_formation_ability_list_script;
 extern menu_list_page_t g_formation_ability_list_pages[][2];
 extern s8 g_formation_ability_view_list_initialized;
@@ -484,14 +484,13 @@ extern point16_t g_formation_ability_remove_all_cursor_point;
 void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id);
 s32 formation_ability_learn_list(void);
 s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out);
-void formation_ability_diff_movement_stats(
-    menu_status_panel_slot_storage_t* stat_diff, s32 old_ability, s32 new_ability);
+void formation_ability_diff_movement_stats(unit_panel_record_t* stat_diff, s32 old_ability, s32 new_ability);
 s32 formation_ability_has_secret_hunt(s32 unit_id);
 s32 formation_ability_has_two_hands(s16 unit_id);
 s32 ability_has_two_swords(s16 unit_id);
 
 /* equipment and items */
-extern menu_status_thread_t g_formation_equipment_panel_thread_params;
+extern unit_panel_thread_t g_formation_equipment_panel_thread_params;
 extern s8 g_formation_item_equip_menu_initialized;
 extern u16 g_formation_item_equip_item_cursor_anim;
 extern point16_t g_formation_item_equip_item_cursor_point;

@@ -16,7 +16,7 @@ static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, gly
 /* Set the status panel's sprite CLUTs and the tint of its last five sprites: the dimmed
  * set with a blue tint for style 1 or while menu input lock mode 1 is on, otherwise the
  * normal set with a neutral 0x80 tint. */
-void menu_set_status_panel_primitive_colors(menu_status_panel_buffer_t* primitives, const menu_status_thread_t* state) {
+void unit_panel_set_colors(unit_panel_buffer_t* primitives, const unit_panel_thread_t* state) {
     s32 i;
     s32 clut;
 
@@ -57,8 +57,7 @@ void menu_set_status_panel_primitive_colors(menu_status_panel_buffer_t* primitiv
 
 /* Select the menu primitives' normal or dimmed colors: dimmed for panel style 1 or while menu
  * input lock mode 1 is on. The palette initializer receives `primitives` unchanged in $a0. */
-void menu_select_status_primitive_color_palette(
-    menu_palette_primitives_t* primitives, const menu_status_thread_t* thread) {
+void unit_panel_select_palette(menu_palette_primitives_t* primitives, const unit_panel_thread_t* thread) {
     if (thread->style == 1 || g_menu_input_lock_mode == 1) {
         menu_init_primitive_colors_dimmed(primitives);
     } else {

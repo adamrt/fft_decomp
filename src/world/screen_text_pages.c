@@ -90,9 +90,9 @@ static u8* screen_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offse
 
 /*
  * Scrolling three-column text list thread (an older sibling of
- * menu_run_scrolling_ability_list_thread with a fixed page pair, g_screen_text_list_pages, and
+ * ability_list_scrolling_thread with a fixed page pair, g_screen_text_list_pages, and
  * screen_window_frame_thread in the frame thread slot). The menu-screen library's
- * variant of menu_run_at_list: the formation screens, the world map menus and the title's music
+ * variant of at_list_run: the formation screens, the world map menus and the title's music
  * test run it.
  *
  * Draws the visible rows into a text image, then runs the input loop on two

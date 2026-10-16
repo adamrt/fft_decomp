@@ -105,7 +105,7 @@ typedef enum screen_thread_slot {
     SCREEN_THREAD_SLOT_TUTORIAL_TEXT = 16,       /* tutorial script text: the slot past the sixteen reset ones */
 } screen_thread_slot_e;
 
-/* menu_run_at_list runs its window frame thread in the upper menu's slot. */
+/* at_list_run runs its window frame thread in the upper menu's slot. */
 enum {
     SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15,
 };

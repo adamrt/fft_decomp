@@ -178,7 +178,7 @@ static void tutorial_opcode_00_press_button(void) {
  * and the target adds the bias to the low byte first. Taking the address of
  * the operand fields preserves the -O0 byte-address steps. */
 static void tutorial_opcode_10_display_message(void) {
-    thread_start(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, text_run_dialog_thread);
+    thread_start(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, message_dialog_thread);
     thread_set_parameters(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
         (s32)((u8*)(*(&((tutorial_message_instruction_t*)g_tutorial_command_ptr)->text_id_le[1]) * 0x100)
             + (*(&((tutorial_message_instruction_t*)g_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),

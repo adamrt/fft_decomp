@@ -56,7 +56,7 @@ void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
     }
-    if (g_menu_hide_numeric_values == 0) {
+    if (g_unit_panel_hide_numeric_values == 0) {
         if ((format & 0x200) && value == 100) {
             format = cursor + 3;
         }
@@ -91,7 +91,7 @@ void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
     cursor = pos->rect.x + 5;
     for (i = 0; i < (format & 0xFF); i++) {
         src->rect.x = (value % 10) * 6 + 0x78;
-        if (g_menu_hide_numeric_values != 0) {
+        if (g_unit_panel_hide_numeric_values != 0) {
             src->rect.x = 0xD0;
         }
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);

@@ -758,8 +758,8 @@ functions:
   - {addr: 0x80044a7c, size: 80, name: gfx_swap_and_clear_battle_otag, hash: 676737da60ea151b, unit: system_handlers}
   - {addr: 0x80044acc, size: 156, name: save_init_state_and_options, hash: 57c6eff374a797aa, unit: system_handlers}
   - {addr: 0x80044b68, size: 56, name: overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: system_handlers}
-  - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f}
-  - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, unit: zodiac_primitives}
+  - {addr: 0x80044ba0, size: 736, name: zodiac_build_sprite_polygon, hash: 37eac014a0b6e39f}
+  - {addr: 0x80044e80, size: 692, name: zodiac_build_primitives, hash: 26ab908a528421ce, unit: zodiac_primitives}
   - {addr: 0x80045134, size: 32, name: zodiac_call_build_primitives, hash: 3e5255b795ac3b4e, unit: overlay_loading}
   - {addr: 0x80045154, size: 120, name: gfx_load_frame_bin, hash: 3d0e02e92a4b71b7, unit: overlay_loading}
   - {addr: 0x800451cc, size: 104, name: overlay_open_world_and_wldcore, hash: 9de0809817ea03b9, unit: overlay_loading}
@@ -1386,25 +1386,25 @@ data:
   - {addr: 0x800670f0, name: title_run_main_loop}
   - {addr: 0x8006720c, name: ending_run}
   - {addr: 0x800672f8, name: world_map_entrypoint}
-  - {addr: 0x80079a98, name: battle_state_run_game_loop}
+  - {addr: 0x80079a98, name: state_run_game_loop}
   - {addr: 0x80093170, name: battle_map_color_field}
-  - {addr: 0x800a778c, name: g_battle_game_flow_state}
+  - {addr: 0x800a778c, name: g_game_flow_state}
   - {addr: 0x800d0bbc, name: g_sound_novel_script}
   - {addr: 0x800e6edc, name: world_text_find_entry}
-  - {addr: 0x800fc55c, name: g_battle_render_buffers}
+  - {addr: 0x800fc55c, name: g_render_buffers}
   - {addr: 0x8010656c, name: screen_init_with_world_text}
-  - {addr: 0x8011a2d4, name: g_battle_gfx_current_render_buffer}
+  - {addr: 0x8011a2d4, name: g_render_current_buffer}
   - {addr: 0x80132824, name: battle_text_find_entry}
   - {addr: 0x8013b590, name: script_get_variable}
   - {addr: 0x8013b644, name: script_set_variable}
   - {addr: 0x8014a81c, name: script_return_zero_1}
-  - {addr: 0x8018e9bc, name: battle_status_queue_graphics_change_if_executing}
-  - {addr: 0x801908cc, name: g_battle_unit_stats}
+  - {addr: 0x8018e9bc, name: status_queue_display_flag_change_if_executing}
+  - {addr: 0x801908cc, name: g_unit_stats}
 
 overrides:
-  - {function: menu_build_zodiac_primitives, name: g_menu_draw_area_template, addr: 0x800473b4}
-  - {function: menu_build_zodiac_primitives, name: gfx_set_scaled_poly_ft4_8bpp, addr: 0x80044ba0}
   - {function: party_init_new_game, name: script_set_variable, addr: 0x800ef25c}
+  - {function: zodiac_build_primitives, name: g_menu_draw_area_template, addr: 0x800473b4}
+  - {function: zodiac_build_primitives, name: gfx_set_scaled_poly_ft4_8bpp, addr: 0x80044ba0}
 
 regions:
   - {addr: 0x80011ba8, end: 0x80011bb0, kind: handwritten, why: "callable jr-ra/nop tail after deprecated-entry padding"}

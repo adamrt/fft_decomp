@@ -680,7 +680,7 @@ void calendar_advance_day(void) {
     s32 month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
     s32 day = script_get_variable(EVENT_SCRIPT_VAR_DAY) + 1;
 
-    if (g_unit_birthday_month_lengths[month - 1] < day) {
+    if (g_calendar_month_lengths[month - 1] < day) {
         month++;
         if (month == 13) {
             month = 1;
@@ -731,7 +731,7 @@ void calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
         previous_dates = g_calendar_zodiac_start_dates;
         previous_month = previous_dates[index].month;
         delta = start_days[index * sizeof(calendar_date_t)];
-        delta = g_unit_birthday_month_lengths[previous_month - 1] - delta + 1;
+        delta = g_calendar_month_lengths[previous_month - 1] - delta + 1;
         *day_ptr += delta;
     } else {
         *month_ptr = index + 1;

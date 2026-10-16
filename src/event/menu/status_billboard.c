@@ -19,7 +19,7 @@
 #    include "fft/event_debugchr.h"
 #endif
 
-static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output);
+static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output);
 
 /* Fill a 16-byte text field with terminators. */
 static void text_fill_field_with_terminators(u8* text) {
@@ -40,7 +40,7 @@ static void text_fill_field_with_terminators(u8* text) {
  * battle. A zero maximum HP or MP is stored as 1. list_index is always 1
  * here; unit_count counts the runtime ids whose battle unit is the first holder
  * of a nonzero ENTD unit id. */
-static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output) {
     s32 resolved_id;
     s32 count;
     s32 i;
@@ -82,13 +82,12 @@ static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_uni
     output->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = ct;
     if (output->list_index >= 0)
         output->list_index++;
-    output->unit_count = BATTLE_UNIT_SLOT_COUNT;
+    output->unit_count = UNIT_SLOT_COUNT;
     count = 0;
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (battle_unit_has_runtime_id(i) != 0) {
-            unit_id = battle_unit_get_battle_id_by_runtime_id(i);
-            unit = battle_unit_find_stats_by_entd_unit_id(
-                battle_unit_get_stats_from_battle_id(unit_id)->unit_id, &resolved_id);
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        if (unit_has_runtime_id(i) != 0) {
+            unit_id = unit_get_battle_id_by_runtime_id(i);
+            unit = unit_entd_find_stats(unit_get_stats(unit_id)->unit_id, &resolved_id);
             if (resolved_id >= 0 && unit_id == resolved_id && unit->unit_id != 0) {
                 count++;
             }
@@ -100,7 +99,7 @@ static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_uni
 
 #if defined(FFT_BATTLE) || defined(FFT_EVENT_DEBUGCHR)
 /* Fill the level, team, AT-list position, HP/MP/CT and live-unit count. */
-static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output) {
     s32 resolved_id;
     s32 count;
     s32 i;
@@ -132,19 +131,19 @@ static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_uni
     output->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = unit->ct;
     output->list_index = 0;
     output->unit_count = 0;
-    g_thread_call_target = (void (*)(void))battle_action_find_unit_turn_index;
+    g_thread_call_target = (void (*)(void))at_list_find_unit;
     output->list_index = thread_call_on_main_stack(unit);
     if (unit->has_turn != 0)
         output->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
     if (output->list_index >= 0)
         output->list_index++;
-    output->unit_count = BATTLE_UNIT_SLOT_COUNT;
+    output->unit_count = UNIT_SLOT_COUNT;
     count = 0;
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (battle_unit_has_runtime_id(i) != 0) {
-            unit_id = battle_unit_get_battle_id_by_runtime_id(i);
-            unit = battle_unit_get_stats_from_battle_id(unit_id);
-            unit = battle_unit_find_stats_by_entd_unit_id(unit->unit_id, &resolved_id);
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        if (unit_has_runtime_id(i) != 0) {
+            unit_id = unit_get_battle_id_by_runtime_id(i);
+            unit = unit_get_stats(unit_id);
+            unit = unit_entd_find_stats(unit->unit_id, &resolved_id);
             if (resolved_id >= 0 && unit_id == resolved_id && unit->unit_id != 0) {
                 count++;
             }
@@ -162,7 +161,7 @@ static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_uni
  * Team kind is 0 for the player's side, 1 for the enemy team, 2 for a unit on
  * neither the enemy team nor under player control, and 3 for a unit on auto
  * battle. A zero maximum HP or MP is stored as 1. */
-static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output) {
     u16 maximum_hp;
     u16 maximum_mp;
     u8 ct;
@@ -205,9 +204,9 @@ static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_uni
 #if defined(FFT_WORLD) || defined(FFT_BATTLE) || defined(FFT_EVENT_REQUIRE)
 /* Fill the selected and comparison billboards and the status panel's stats, equipment and
  * ability rows for the selected battle unit, as the DEBUGCHR body below describes in detail. */
-void menu_load_selected_unit(void) {
-    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
-    menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
+void unit_panel_load_selected(void) {
+    unit_stats_t* unit = unit_get_stats(g_unit_panel_comparison_unit_data.battle_id);
+    menu_status_panel_slot_state_t* editor = &g_unit_panel_selected_unit_fields.state;
     u16* innate_items;
     item_data_t* item;
     s32 i;
@@ -218,19 +217,19 @@ void menu_load_selected_unit(void) {
     s16 list_value;
 
     if (unit != 0) {
-        menu_copy_unit_data_to_status_billboard(unit, &g_menu_comparison_unit_status);
+        unit_panel_fill_billboard(unit, &g_unit_panel_comparison_unit_status);
     }
 
-    unit = battle_unit_get_stats_from_battle_id(g_menu_selected_unit.battle_id);
+    unit = unit_get_stats(g_unit_panel_selected_unit.battle_id);
     if (unit == 0)
         return;
-    menu_copy_unit_data_to_status_billboard(unit, &g_menu_selected_unit_status);
+    unit_panel_fill_billboard(unit, &g_unit_panel_selected_unit_status);
 
-    g_menu_selected_unit.job_id = unit->job_id;
-    g_menu_selected_unit.brave = unit->brave;
-    g_menu_selected_unit.faith = unit->faith;
+    g_unit_panel_selected_unit.job_id = unit->job_id;
+    g_unit_panel_selected_unit.brave = unit->brave;
+    g_unit_panel_selected_unit.faith = unit->faith;
     /* The zodiac sign is the top nibble of the 16-bit birthday value. */
-    g_menu_selected_unit.zodiac = unit->birthday.zodiac;
+    g_unit_panel_selected_unit.zodiac = unit->birthday.zodiac;
 
     editor->move = unit->move;
     editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -290,7 +289,7 @@ void menu_load_selected_unit(void) {
 
         /* The fourth ability (index 3) stays only when the monster skill check passes; the
          * check runs on the main stack. */
-        g_thread_call_target = battle_menu_count_monster_skill_supporters;
+        g_thread_call_target = skillset_monster_count_supporters;
         if (thread_call_on_main_stack(unit) == 0)
             editor->ability_ids[3] = 0;
 
@@ -306,11 +305,11 @@ void menu_load_selected_unit(void) {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
-            g_menu_billboard_skillset_name[0] = 0xfe;
+            g_unit_panel_billboard_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_menu_billboard_secondary_skillset_name[1] = 0xfe;
+            g_unit_panel_billboard_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;
@@ -338,22 +337,22 @@ void menu_load_selected_unit(void) {
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
             item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
-                || ((unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS)
+                || ((unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS)
                     && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
                 editor->two_hands = 1;
         }
     }
 
-    text_fill_field_with_terminators(g_menu_billboard_unit_name);
-    text_fill_field_with_terminators(g_menu_billboard_job_name);
-    text_fill_field_with_terminators(g_menu_billboard_skillset_name);
-    text_fill_field_with_terminators(g_menu_billboard_secondary_skillset_name);
+    text_fill_field_with_terminators(g_unit_panel_billboard_unit_name);
+    text_fill_field_with_terminators(g_unit_panel_billboard_job_name);
+    text_fill_field_with_terminators(g_unit_panel_billboard_skillset_name);
+    text_fill_field_with_terminators(g_unit_panel_billboard_secondary_skillset_name);
     /* The editor uses 16-byte windows at each text destination, including
      * the two eight-byte skillset names; preserve those target copy lengths. */
-    mem_copy_bytes_nonempty(g_menu_billboard_unit_name, unit->name, 0x10);
-    mem_copy_bytes_nonempty(g_menu_billboard_job_name, unit->job_name, 0x10);
-    mem_copy_bytes_nonempty(g_menu_billboard_skillset_name, unit->primary_skillset_name, 0x10);
-    mem_copy_bytes_nonempty(g_menu_billboard_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_panel_billboard_unit_name, unit->name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_panel_billboard_job_name, unit->job_name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_panel_billboard_skillset_name, unit->primary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_panel_billboard_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
 }
 #endif
 
@@ -369,15 +368,15 @@ void menu_load_selected_unit(void) {
  * attack, 16/17 shield and accessory magic evade, 18..22 the equipped items
  * (-1 for none) and 23..27 the ability rows (-1 for none): both skillsets,
  * reaction, support and movement, or a monster's skillset abilities packed to
- * the front, the fourth kept only while battle_menu_count_monster_skill_supporters
+ * the front, the fourth kept only while skillset_monster_count_supporters
  * allows it.
  *
  * An empty secondary skillset marks byte 1 of its name buffer, not byte 0,
  * before the names are cleared and copied.
  */
-void menu_load_selected_unit(void) {
-    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_unit_panel_comparison_unit_data.battle_id);
-    menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
+void unit_panel_load_selected(void) {
+    unit_stats_t* unit = unit_get_stats(g_unit_panel_comparison_unit_data.battle_id);
+    menu_status_panel_slot_state_t* editor = &g_unit_panel_selected_unit_fields.state;
     u16* innate_items;
     item_data_t* item;
     s32 i;
@@ -388,13 +387,13 @@ void menu_load_selected_unit(void) {
     s16 list_value;
 
     if (unit != 0) {
-        menu_copy_unit_data_to_status_billboard(unit, &g_panel_comparison_billboard);
+        unit_panel_fill_billboard(unit, &g_unit_panel_comparison_billboard);
     }
 
-    unit = battle_unit_get_stats_from_battle_id(g_unit_panel_selected_unit_data.battle_id);
+    unit = unit_get_stats(g_unit_panel_selected_unit_data.battle_id);
     if (unit == 0)
         return;
-    menu_copy_unit_data_to_status_billboard(unit, &g_panel_selected_billboard);
+    unit_panel_fill_billboard(unit, &g_unit_panel_selected_billboard);
 
     g_unit_panel_selected_unit_data.job_id = unit->job_id;
     g_unit_panel_selected_unit_data.brave = unit->brave;
@@ -462,7 +461,7 @@ void menu_load_selected_unit(void) {
 
         /* The fourth ability (index 3) stays only when the monster skill check passes; the
          * check runs on the main stack. */
-        g_thread_call_target = battle_menu_count_monster_skill_supporters;
+        g_thread_call_target = skillset_monster_count_supporters;
         if (thread_call_on_main_stack(unit) == 0)
             editor->ability_ids[3] = 0;
 
@@ -478,11 +477,11 @@ void menu_load_selected_unit(void) {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
-            g_editor_primary_skillset_name[0] = 0xfe;
+            g_unit_panel_editor_primary_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_editor_secondary_skillset_name[1] = 0xfe;
+            g_unit_panel_editor_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;
@@ -510,7 +509,7 @@ void menu_load_selected_unit(void) {
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
             item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
-                || ((unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS)
+                || ((unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS)
                     && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
                 editor->two_hands = 1;
         }
@@ -518,13 +517,13 @@ void menu_load_selected_unit(void) {
 
     text_fill_field_with_terminators(g_unit_editor_unit_name);
     text_fill_field_with_terminators(g_unit_editor_job_name);
-    text_fill_field_with_terminators(g_editor_primary_skillset_name);
-    text_fill_field_with_terminators(g_editor_secondary_skillset_name);
+    text_fill_field_with_terminators(g_unit_panel_editor_primary_skillset_name);
+    text_fill_field_with_terminators(g_unit_panel_editor_secondary_skillset_name);
     /* The editor uses 16-byte windows at each text destination, including
      * the two eight-byte skillset names; preserve those target copy lengths. */
     mem_copy_bytes_nonempty(g_unit_editor_unit_name, unit->name, 0x10);
     mem_copy_bytes_nonempty(g_unit_editor_job_name, unit->job_name, 0x10);
-    mem_copy_bytes_nonempty(g_editor_primary_skillset_name, unit->primary_skillset_name, 0x10);
-    mem_copy_bytes_nonempty(g_editor_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_panel_editor_primary_skillset_name, unit->primary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_unit_panel_editor_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
 }
 #endif

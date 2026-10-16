@@ -57,19 +57,19 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
  * which each menu program defines for itself. */
 extern image_load_parameters_t g_menu_icon_strip_image_params[20];
 extern image_load_parameters_t g_menu_single_icon_image_params[5];
-extern image_load_parameters_t g_panel_editor_label_cells[];
-extern image_load_parameters_t g_panel_editor_mode_cell[];
-extern image_load_parameters_t g_panel_editor_mode_cells[];
-extern image_load_parameters_t g_panel_editor_value_cells[];
-extern image_load_parameters_t g_panel_item_icon_layouts[];
-extern point16_t g_panel_item_icon_texture[];
-extern image_load_parameters_t g_panel_label_layouts_mode0[];
-extern image_load_parameters_t g_panel_label_layouts_mode1[];
-extern image_load_parameters_t g_panel_label_layouts_mode2[];
-extern image_load_parameters_t g_panel_label_layouts_mode3[];
-extern image_load_parameters_t g_panel_portrait_cell[];
-extern image_load_parameters_t g_panel_sprite_cells[];
-extern point16_t g_editor_numeric_geometry[];
-extern image_load_parameters_t g_editor_numeric_texture[];
+extern image_load_parameters_t g_unit_panel_editor_label_cells[];
+extern image_load_parameters_t g_unit_panel_editor_mode_cell[];
+extern image_load_parameters_t g_unit_panel_editor_mode_cells[];
+extern image_load_parameters_t g_unit_panel_editor_value_cells[];
+extern image_load_parameters_t g_unit_panel_item_icon_layouts[];
+extern point16_t g_unit_panel_item_icon_texture[];
+extern image_load_parameters_t g_unit_panel_label_layouts_mode0[];
+extern image_load_parameters_t g_unit_panel_label_layouts_mode1[];
+extern image_load_parameters_t g_unit_panel_label_layouts_mode2[];
+extern image_load_parameters_t g_unit_panel_label_layouts_mode3[];
+extern image_load_parameters_t g_unit_panel_portrait_cell[];
+extern image_load_parameters_t g_unit_panel_sprite_cells[];
+extern point16_t g_unit_panel_editor_numeric_geometry[];
+extern image_load_parameters_t g_unit_panel_editor_numeric_texture[];
 
 #endif

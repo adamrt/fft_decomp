@@ -113,7 +113,7 @@ s32 music_update_tunes(void);
 /* Sound resources. A sound id is SUZUKI_SOUND_ID(resource, sound): the id of a
  * loaded suzuki_sound_resource_t in the high 16 bits and the index of a
  * sound in it in the low. Each battle effect file brings a resource of its
- * own (battle_effect_load_sound_section). */
+ * own (effect_file_load_sound_section). */
 typedef enum sound_resource {
     SOUND_RESOURCE_SYSTEM = 0,        /* SOUND/SYSTEM.SED: sound_sfx_e */
     SOUND_RESOURCE_ENV = 1,           /* SOUND/ENV.SED: sound_env_sfx_e */
@@ -140,15 +140,15 @@ typedef enum sound_sfx {
     SOUND_SFX_INVALID = 5,
     SOUND_SFX_PAGE_SWITCH = 6, /* L1/R1 unit and page switches */
     SOUND_SFX_UNEQUIP = 7,     /* remove equipment/abilities */
-    SOUND_SFX_RED_ORBS = 8,    /* battle_effect_red_orbs_secondary_handler starts */
+    SOUND_SFX_RED_ORBS = 8,    /* effect_secondary_red_orbs_handler starts */
     SOUND_SFX_DISMISS = 9,     /* dismiss unit */
     SOUND_SFX_EQUIP = 10,      /* equip, set ability, best fit */
     SOUND_SFX_CAMERA_ROTATE_LEFT = 11,
     SOUND_SFX_CAMERA_ROTATE_RIGHT = 12,
     SOUND_SFX_CAMERA_ROTATE_STOP = 13, /* the rotation reached its target */
-    /* Paired zoom sounds: battle_camera_toggle_zoom and battle_camera_zoom_map
+    /* Paired zoom sounds: camera_zoom_toggle and camera_zoom_start
      * play 0x11 with zoom action 4 and 0xe with action 2; the in/out reading
-     * follows the zoom-target comment in battle_camera_toggle_zoom. The
+     * follows the zoom-target comment in camera_zoom_toggle. The
      * ATTACK deploy screen also plays 0x11 when a placed unit is moved. */
     SOUND_SFX_CAMERA_ZOOM_IN = 14,
     /* L1/R1 on the world map (world_map_step_cursor_level): 0x10 when
@@ -158,10 +158,10 @@ typedef enum sound_sfx {
     SOUND_SFX_WORLD_MAP_ZOOM_OUT = 16,
     SOUND_SFX_CAMERA_ZOOM_OUT = 17,
     SOUND_SFX_WINDOW_OPEN = 18, /* help, message or text window opens */
-    /* The weapon sounds of battle_sound_play_weapon_sfx, by the weapon's
-     * item_type_e: g_battle_sound_weapon_swing_sfx_ids (the swing, played
-     * before the hit is known), g_battle_sound_weapon_hit_sfx_ids and
-     * g_battle_sound_shield_deflect_sfx_ids. */
+    /* The weapon sounds of action_play_weapon_sfx, by the weapon's
+     * item_type_e: g_action_weapon_swing_sfx_ids (the swing, played
+     * before the hit is known), g_action_weapon_hit_sfx_ids and
+     * g_action_shield_deflect_sfx_ids. */
     SOUND_SFX_HIT_BLADE = 19,    /* knife, ninja blade, sword, knight sword, katana */
     SOUND_SFX_HIT_HEAVY = 21,    /* axe, flail; also the deflect of a fist, bag or cloth */
     SOUND_SFX_HIT_UNARMED = 24,  /* fist, bag, cloth */
@@ -172,8 +172,8 @@ typedef enum sound_sfx {
      * stop them with suzuki_sound_stop_sfx_channels when they finish. */
     SOUND_SFX_SPELL_CHARGE = 31,
     SOUND_SFX_SUMMON_CHARGE = 33,
-    SOUND_SFX_TRAP = 34, /* battle_effect_trap_secondary_handler starts */
-    /* battle_sound_play_landing_sfx_by_surface_type: water surfaces play
+    SOUND_SFX_TRAP = 34, /* effect_secondary_trap_handler starts */
+    /* move_step_play_landing_sfx_by_surface_type: water surfaces play
      * 0x23, grassland, thicket and rug 0x28, wooden floor, tree and box 0x3a,
      * every other surface 0x29. A step that ends on another unit also plays
      * 0x28, and mounting a unit named by battle id plays 0x29. */
@@ -186,11 +186,11 @@ typedef enum sound_sfx {
     SOUND_SFX_SHIELD_DEFLECT_HEAVY = 47, /* axe, flail */
     /* An error message opens: a memory-card load, save or scan failure, or a
      * refused equip, dismissal, job change or ability.
-     * battle_sound_play_weapon_sfx plays it for an attack stopped by an
+     * action_play_weapon_sfx plays it for an attack stopped by an
      * accessory or class evade, a forced failure, a blade grasp or a catch,
      * and as the shield deflect of an instrument or book. */
     SOUND_SFX_ERROR_MESSAGE = 48,
-    SOUND_SFX_CAMERA_TILT = 49, /* battle_camera_handle_tilt_request */
+    SOUND_SFX_CAMERA_TILT = 49, /* camera_tilt_start */
     SOUND_SFX_HIT_ROD = 56,     /* rod, staff */
     SOUND_SFX_LAND_WOOD = 58,
     /* Circle on a name-entry character key, or on an occupied tile of the
@@ -200,7 +200,7 @@ typedef enum sound_sfx {
     SOUND_SFX_EVENT_REVIVE = 65,     /* the event script's revive status change (*_script_inflict_status_thread) */
     SOUND_SFX_WORLD_MAP_ARRIVE = 67, /* a route leg ends at a location with no event or encounter */
     /* Dead status added outside an event
-     * (battle_unit_update_animation_for_status_changes), chosen by the unit's
+     * (animation_update_for_status_changes), chosen by the unit's
      * male, female or monster flag; the male sound is 0x9a. */
     SOUND_SFX_DEATH_FEMALE = 69,
     SOUND_SFX_DEATH_MONSTER = 70,
@@ -227,7 +227,7 @@ typedef enum sound_sfx {
     SOUND_SFX_EVENT_TRANSITION_MODE_1 = 109,
     SOUND_SFX_STATUS_MENU_REQUEST
     = 113,                        /* Triangle queues the status menu on another unit's turn; again when it opens */
-    SOUND_SFX_CRITICAL_HIT = 114, /* a weapon hit whose action is critical (battle_sound_play_weapon_sfx) */
+    SOUND_SFX_CRITICAL_HIT = 114, /* a weapon hit whose action is critical (action_play_weapon_sfx) */
     SOUND_SFX_TEXT_GLYPH = 115,   /* typewriter tick after a dialogue glyph */
     SOUND_SFX_HIT_ARROW = 116,    /* crossbow, bow */
     /* World map: 0x76 when a path animation starts, drawing or erasing; 0x77
@@ -249,7 +249,7 @@ typedef enum sound_sfx {
  * holds 27 (0, 0x15, 0x16 and 0x17 are empty); event scripts choose the
  * others through EVENT_OPCODE_BG_SOUND. */
 typedef enum sound_env_sfx {
-    SOUND_ENV_SFX_RAIN = 2,      /* battle_map_run_weather_command: rain without snow, and the thunder command */
+    SOUND_ENV_SFX_RAIN = 2,      /* weather_run_command: rain without snow, and the thunder command */
     SOUND_ENV_SFX_THUNDER_A = 3, /* battle_map_draw_mesh_and_weather picks one of the two for a lightning flash */
     SOUND_ENV_SFX_THUNDER_B = 14,
 } sound_env_sfx_e;

@@ -98,7 +98,7 @@ typedef struct menu_input_timing_profile {
     u8 scroll_fast_step;   /* copied to g_menu_scroll_fast_step */
 } menu_input_timing_profile_t;
 
-extern menu_input_timing_profile_t g_menu_option_input_repeat_timings[];
+extern menu_input_timing_profile_t g_option_input_repeat_timings[];
 
 /* pressable buttons */
 /* The index argument of *_menu_draw_pressable_button: an on-screen button,

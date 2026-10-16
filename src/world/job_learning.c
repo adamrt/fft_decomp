@@ -30,17 +30,17 @@ s32 formation_ability_learn_job_list(void) {
 
     if (g_formation_ability_learn_job_list_initialized == 0) {
         menu_set_vsync_mode_and_event_speed(2);
-        job_list_build(g_unit_selected_index, g_menu_job_ids, 0);
+        job_list_build(g_unit_selected_index, g_job_list_job_ids, 0);
         g_screen_script_callbacks[0].value = job_list_calculate_level;
         g_screen_script_callbacks[2].value = formation_ability_learn_job_jp;
-        g_screen_script_callbacks[5].value = menu_job_calculate_next_level_jp_requirement;
+        g_screen_script_callbacks[5].value = job_list_calculate_next_level_jp;
         g_screen_script_callbacks[6].value = job_list_calculate_total_jp;
-        g_screen_script_callbacks[13].value = job_calculate_current_mastered;
-        menu_get_selection_record(9, &x, &y, g_menu_job_ids);
-        menu_init_scrollable_list(g_menu_job_ids, x, y, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
+        g_screen_script_callbacks[13].value = job_list_calculate_mastered;
+        menu_get_selection_record(9, &x, &y, g_job_list_job_ids);
+        menu_init_scrollable_list(g_job_list_job_ids, x, y, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_formation_ability_learn_job_list_initialized = 1;
     }
-    g_menu_help_message_text_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
+    g_help_message_text_id = g_job_list_job_ids[g_menu_list_selected_index] + 0x6000;
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         menu_set_vsync_mode_and_event_speed(0);
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
@@ -49,16 +49,16 @@ s32 formation_ability_learn_job_list(void) {
     }
     /* A mastered job has nothing left to learn, so only View Abilities may open it. */
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-        if (job_calculate_current_mastered(g_menu_list_selected_index) == 0
+        if (job_list_calculate_mastered(g_menu_list_selected_index) == 0
             || g_formation_current_menu == FORMATION_MENU_VIEW_ABILITIES) {
-            g_formation_ability_learn_selected_job = g_menu_job_ids[g_menu_list_selected_index];
+            g_formation_ability_learn_selected_job = g_job_list_job_ids[g_menu_list_selected_index];
             g_formation_ability_learn_selected_job_index
                 = job_get_generic_index(g_formation_ability_learn_selected_job);
             job_list_calculate_level(g_menu_list_selected_index);
             formation_ability_learn_job_jp(g_menu_list_selected_index);
             job_list_calculate_total_jp(g_menu_list_selected_index);
-            menu_job_calculate_next_level_jp_requirement(g_menu_list_selected_index);
-            menu_set_selection_record(9, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_job_ids);
+            job_list_calculate_next_level_jp(g_menu_list_selected_index);
+            menu_set_selection_record(9, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
             g_formation_ability_learn_job_list_initialized = 0;
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             return MENU_JOB_LIST_STEP_ABILITIES;
@@ -72,7 +72,8 @@ s32 formation_ability_learn_job_list(void) {
 
 /* Store the selected ability-name text ID, then build the prompt. */
 void formation_ability_build_learn_prompt(void) {
-    g_text_substitution_values[0] = g_menu_ability_entries[g_menu_list_selected_index] + TEXT_ID_ABILITY_NAME_BASE;
+    g_text_substitution_values[0]
+        = g_ability_list_ability_entries[g_menu_list_selected_index] + TEXT_ID_ABILITY_NAME_BASE;
     menu_icon_linked_entry_thread();
 }
 
@@ -85,12 +86,12 @@ s32 formation_ability_get_chosen_job_jp(s32 unused_row) {
 
 /* Row callback: return the cached level of the job chosen in the learn menu; the row is ignored. */
 s32 formation_ability_get_chosen_job_level(s32 unused_row) {
-    return g_menu_job_current_level;
+    return g_job_list_job_current_level;
 }
 
 /* Row callback: return the cached JP the chosen job needs for its next level; the row is ignored. */
 s32 formation_ability_get_chosen_job_next_jp(s32 unused_row) {
-    return g_menu_job_next_level_jp_requirement;
+    return g_job_list_job_next_level_jp_requirement;
 }
 
 /* Row callback: return the cached total JP earned in the chosen job; the row is ignored. */

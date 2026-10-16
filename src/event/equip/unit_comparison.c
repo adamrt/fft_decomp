@@ -14,11 +14,11 @@ void equipment_copy_unit_to_comparison(s32 unused_selected_index, s32 unused_1) 
 
 /* Return nonzero when the unit has the Two Swords support ability set. */
 s32 ability_has_two_swords(s16 unit_id) {
-    return g_equipment_unit_data[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_SWORDS;
+    return g_equipment_unit_data[unit_id]->support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_SWORDS;
 }
 
 /* Return nonzero when the unit has the Two Hands support ability set. Nothing in EQUIP.OUT calls
  * it. */
 s32 ability_has_two_hands(s16 unit_id) {
-    return g_equipment_unit_data[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS;
+    return g_equipment_unit_data[unit_id]->support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_HANDS;
 }

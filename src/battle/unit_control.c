@@ -16,125 +16,125 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static rgb24_t g_battle_map_background_color = { 128, 128, 128 };
+static rgb24_t g_battle_map_light_back_color = { 128, 128, 128 };
 
-/* Save the map's ambient (GTE back) color for battle_map_restore_background_color. */
-void battle_map_copy_background_color(void) {
+/* Save the map's ambient (GTE back) color for battle_map_light_restore_back_color. */
+void battle_map_light_copy_back_color(void) {
     /* Component copies retain the original byte loads and separate addresses. */
-    g_battle_map_background_color_backup.r = g_battle_map_background_color.r;
-    g_battle_map_background_color_backup.g = g_battle_map_background_color.g;
-    g_battle_map_background_color_backup.b = g_battle_map_background_color.b;
+    g_battle_map_light_back_color_backup.r = g_battle_map_light_back_color.r;
+    g_battle_map_light_back_color_backup.g = g_battle_map_light_back_color.g;
+    g_battle_map_light_back_color_backup.b = g_battle_map_light_back_color.b;
 }
 
 /* Reload the saved ambient color and load it into the GTE back color. */
-void battle_map_restore_background_color(void) {
-    g_battle_map_background_color.r = g_battle_map_background_color_backup.r;
-    g_battle_map_background_color.g = g_battle_map_background_color_backup.g;
-    g_battle_map_background_color.b = g_battle_map_background_color_backup.b;
-    battle_map_control_gte_background_color(BATTLE_BACKGROUND_COLOR_SET, g_battle_map_background_color.r,
-        g_battle_map_background_color.g, g_battle_map_background_color.b);
+void battle_map_light_restore_back_color(void) {
+    g_battle_map_light_back_color.r = g_battle_map_light_back_color_backup.r;
+    g_battle_map_light_back_color.g = g_battle_map_light_back_color_backup.g;
+    g_battle_map_light_back_color.b = g_battle_map_light_back_color_backup.b;
+    battle_map_light_control_back_color(BATTLE_MAP_LIGHT_BACK_COLOR_SET, g_battle_map_light_back_color.r,
+        g_battle_map_light_back_color.g, g_battle_map_light_back_color.b);
 }
 
-rgb24_t* battle_map_get_background_color(void) {
-    return &g_battle_map_background_color;
+rgb24_t* battle_map_light_get_back_color(void) {
+    return &g_battle_map_light_back_color;
 }
 
 /* Set the map's ambient color and load it into the GTE back color; the GTE load is skipped while
  * the back color is disabled. */
-void battle_map_set_background_color(s32 red, s32 green, s32 blue) {
-    g_battle_map_background_color.r = red;
-    g_battle_map_background_color.g = green;
-    g_battle_map_background_color.b = blue;
-    battle_map_control_gte_background_color(BATTLE_BACKGROUND_COLOR_SET, g_battle_map_background_color.r,
-        g_battle_map_background_color.g, g_battle_map_background_color.b);
+void battle_map_light_set_back_color(s32 red, s32 green, s32 blue) {
+    g_battle_map_light_back_color.r = red;
+    g_battle_map_light_back_color.g = green;
+    g_battle_map_light_back_color.b = blue;
+    battle_map_light_control_back_color(BATTLE_MAP_LIGHT_BACK_COLOR_SET, g_battle_map_light_back_color.r,
+        g_battle_map_light_back_color.g, g_battle_map_light_back_color.b);
 }
 
 /* Add per-component deltas to the map background color and apply it.
  *
  * A component whose tested delta is negative (`current + delta < current`)
  * becomes 0xff instead. The retail routine tests green with red_delta. */
-void battle_map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue_delta) {
-    if (g_battle_map_background_color.r + red_delta < g_battle_map_background_color.r) {
-        g_battle_map_background_color.r = 0xff;
+void battle_map_light_adjust_back_color(s16 red_delta, s16 green_delta, s16 blue_delta) {
+    if (g_battle_map_light_back_color.r + red_delta < g_battle_map_light_back_color.r) {
+        g_battle_map_light_back_color.r = 0xff;
     } else {
-        g_battle_map_background_color.r += red_delta;
+        g_battle_map_light_back_color.r += red_delta;
     }
-    if (g_battle_map_background_color.g + red_delta < g_battle_map_background_color.g) {
-        g_battle_map_background_color.g = 0xff;
+    if (g_battle_map_light_back_color.g + red_delta < g_battle_map_light_back_color.g) {
+        g_battle_map_light_back_color.g = 0xff;
     } else {
-        g_battle_map_background_color.g += green_delta;
+        g_battle_map_light_back_color.g += green_delta;
     }
-    if (g_battle_map_background_color.b + blue_delta < g_battle_map_background_color.b) {
-        g_battle_map_background_color.b = 0xff;
+    if (g_battle_map_light_back_color.b + blue_delta < g_battle_map_light_back_color.b) {
+        g_battle_map_light_back_color.b = 0xff;
     } else {
-        g_battle_map_background_color.b += blue_delta;
+        g_battle_map_light_back_color.b += blue_delta;
     }
-    battle_map_control_gte_background_color(BATTLE_BACKGROUND_COLOR_SET, g_battle_map_background_color.r,
-        g_battle_map_background_color.g, g_battle_map_background_color.b);
+    battle_map_light_control_back_color(BATTLE_MAP_LIGHT_BACK_COLOR_SET, g_battle_map_light_back_color.r,
+        g_battle_map_light_back_color.g, g_battle_map_light_back_color.b);
 }
 
-/* battle_unit_update_display_by_runtime_id as a g_thread_call_target: event threads run it on the
+/* unit_update_display_by_runtime_id as a g_thread_call_target: event threads run it on the
  * main stack. */
-void battle_unit_update_graphics_by_runtime_id(u32 runtime_id) {
-    battle_unit_update_display_by_runtime_id(runtime_id);
+void unit_update_graphics_by_runtime_id(u32 runtime_id) {
+    unit_update_display_by_runtime_id(runtime_id);
 }
 
-/* battle_unit_set_mounted_animation by runtime id; event threads run it on the main
+/* animation_set_mounted by runtime id; event threads run it on the main
  * stack. */
-void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_mounted_animation(battle_unit_get_by_runtime_id(runtime_id));
+void animation_set_mounted_by_runtime_id(u32 runtime_id) {
+    animation_set_mounted(unit_get_by_runtime_id(runtime_id));
 }
 
-/* battle_unit_set_walk_animation by runtime id. No retail code
+/* animation_set_walk by runtime id. No retail code
  * calls it. */
-void battle_unit_set_walk_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_walk_animation(battle_unit_get_by_runtime_id(runtime_id));
+void animation_set_walk_by_runtime_id(u32 runtime_id) {
+    animation_set_walk(unit_get_by_runtime_id(runtime_id));
 }
 
-/* battle_unit_set_status_animation by runtime id, for event scripts. */
-void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_status_animation(battle_unit_get_by_runtime_id(runtime_id));
+/* animation_set_for_status by runtime id, for event scripts. */
+void animation_set_status_by_runtime_id(u32 runtime_id) {
+    animation_set_for_status(unit_get_by_runtime_id(runtime_id));
 }
 
 /* Request `animation` for a unit by runtime id, keeping its facing. */
-void battle_unit_set_specific_animation_by_runtime_id(u32 runtime_id, u32 animation) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+void animation_set_specific_by_runtime_id(u32 runtime_id, u32 animation) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
     if (unit != 0)
-        battle_unit_store_animation_facing(animation, unit->facing, unit);
+        animation_store_facing(animation, unit->facing, unit);
 }
 
 /* Request `animation` on every unit, keeping its camera-facing quadrant. */
-void battle_unit_store_camera_facing_animation_for_all(u32 animation) {
-    battle_unit_t* unit = g_battle_unit_list_head;
+void animation_store_camera_facing_for_all(u32 animation) {
+    unit_t* unit = g_unit_list_head;
 
     while (unit != 0) {
-        battle_unit_store_animation_facing(animation, unit->camera_facing_quadrant, unit);
+        animation_store_facing(animation, unit->camera_facing_quadrant, unit);
         unit = unit->previous;
     }
 }
 
 /* The unit-ready test that script_wait_for_unit_ready polls. It ignores the unit and always
  * reports ready, so that wait never yields. */
-s32 battle_return_one(s32 unused_runtime_id) {
+s32 unit_is_ready(s32 unused_runtime_id) {
     return 1;
 }
 
 /* The unit's facing in quarter turns (0..3), or -1 when no record has the runtime
  * id. */
-s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s16 unit_facing_get_quadrant_by_runtime_id(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
-        return (unit->facing / BATTLE_FACING_QUARTER_TURN) % 4;
+        return (unit->facing / UNIT_FACING_QUARTER_TURN) % 4;
     }
     return -1;
 }
 
 /* Faces a unit in a direction given in quarter turns and restarts its animation
- * with that facing, as battle_unit_set_facing_nibble_by_runtime_id does for
+ * with that facing, as unit_facing_set_sixteenth_by_runtime_id does for
  * sixteenths. No retail code calls it. */
-s32 battle_unit_set_facing_quadrant_by_runtime_id(u32 runtime_id, s32 facing_quadrant) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s32 unit_facing_set_quadrant_by_runtime_id(u32 runtime_id, s32 facing_quadrant) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
     s32 animation;
     s16 facing;
 
@@ -142,10 +142,10 @@ s32 battle_unit_set_facing_quadrant_by_runtime_id(u32 runtime_id, s32 facing_qua
         animation = unit->animation.sequence_id >> 1;
         facing = facing_quadrant << 10;
         unit->facing = facing;
-        if (animation < BATTLE_UNIT_ANIMATION_IDLE) {
-            animation = BATTLE_UNIT_ANIMATION_STAND;
+        if (animation < ANIMATION_IDLE) {
+            animation = ANIMATION_STAND;
         }
-        battle_unit_force_animation_facing(animation, facing, unit);
+        animation_force_facing(animation, facing, unit);
         return runtime_id;
     }
     return -1;
@@ -153,8 +153,8 @@ s32 battle_unit_set_facing_quadrant_by_runtime_id(u32 runtime_id, s32 facing_qua
 
 /* The unit's camera_facing_quadrant modulo 4, or -1 when no record has the runtime
  * id. No retail code calls it. */
-s16 battle_unit_get_camera_facing_quadrant_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s16 unit_facing_get_camera_quadrant_by_runtime_id(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         return unit->camera_facing_quadrant % 4;
@@ -164,8 +164,8 @@ s16 battle_unit_get_camera_facing_quadrant_by_runtime_id(u32 runtime_id) {
 
 /* The unit's camera_facing_quadrant modulo 4, or -1 when no runtime record has the
  * battle id. */
-s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
+s16 unit_facing_get_camera_quadrant_by_battle_id(u32 battle_id) {
+    unit_t* unit = unit_get_by_battle_id(battle_id);
 
     if (unit != 0) {
         return unit->camera_facing_quadrant % 4;
@@ -175,8 +175,8 @@ s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id) {
 
 /* The unit's facing in sixteenths of a turn (0..15), or -1 when no record has the
  * runtime id. */
-s32 battle_unit_get_facing_nibble_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s32 unit_facing_get_sixteenth_by_runtime_id(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         return (unit->facing / 0x100) % 0x10;
@@ -187,8 +187,8 @@ s32 battle_unit_get_facing_nibble_by_runtime_id(u32 runtime_id) {
 /* Faces a unit in a direction given in sixteenths of a turn and restarts its
  * current animation with that facing; an animation below idle becomes standing.
  * Returns the runtime id, or -1 when no record has it. */
-s32 battle_unit_set_facing_nibble_by_runtime_id(u32 runtime_id, s32 facing_nibble) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s32 unit_facing_set_sixteenth_by_runtime_id(u32 runtime_id, s32 facing_nibble) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
     s32 animation;
     s16 facing;
 
@@ -196,10 +196,10 @@ s32 battle_unit_set_facing_nibble_by_runtime_id(u32 runtime_id, s32 facing_nibbl
         animation = unit->animation.sequence_id >> 1;
         facing = facing_nibble << 8;
         unit->facing = facing;
-        if (animation < BATTLE_UNIT_ANIMATION_IDLE) {
-            animation = BATTLE_UNIT_ANIMATION_STAND;
+        if (animation < ANIMATION_IDLE) {
+            animation = ANIMATION_STAND;
         }
-        battle_unit_force_animation_facing(animation, facing, unit);
+        animation_force_facing(animation, facing, unit);
         return runtime_id;
     }
     return -1;
@@ -207,8 +207,8 @@ s32 battle_unit_set_facing_nibble_by_runtime_id(u32 runtime_id, s32 facing_nibbl
 
 /* The unit's camera_facing_sixteenth modulo 16, or -1 when no record has the runtime
  * id. No retail code calls it. */
-s16 battle_unit_get_camera_facing_sixteenth_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s16 unit_facing_get_camera_sixteenth_by_runtime_id(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         return unit->camera_facing_sixteenth % 0x10;
@@ -217,30 +217,30 @@ s16 battle_unit_get_camera_facing_sixteenth_by_runtime_id(u32 runtime_id) {
 }
 
 /* Round every unit's facing to the nearest of the four directions. */
-void battle_unit_snap_all_facings_to_quadrants(void) {
-    battle_unit_t* unit = g_battle_unit_list_head;
+void unit_facing_snap_all_to_quadrants(void) {
+    unit_t* unit = g_unit_list_head;
     s32 facing;
 
     while (unit != 0) {
-        facing = unit->facing & BATTLE_FACING_MASK;
-        if (facing < BATTLE_FACING_SOUTH_WEST) {
-            unit->facing = BATTLE_FACING_SOUTH;
-        } else if (facing < BATTLE_FACING_NORTH_WEST) {
-            unit->facing = BATTLE_FACING_WEST;
-        } else if (facing < BATTLE_FACING_NORTH_EAST) {
-            unit->facing = BATTLE_FACING_NORTH;
-        } else if (facing < BATTLE_FACING_SOUTH_EAST) {
-            unit->facing = BATTLE_FACING_EAST;
+        facing = unit->facing & UNIT_FACING_MASK;
+        if (facing < UNIT_FACING_SOUTH_WEST) {
+            unit->facing = UNIT_FACING_SOUTH;
+        } else if (facing < UNIT_FACING_NORTH_WEST) {
+            unit->facing = UNIT_FACING_WEST;
+        } else if (facing < UNIT_FACING_NORTH_EAST) {
+            unit->facing = UNIT_FACING_NORTH;
+        } else if (facing < UNIT_FACING_SOUTH_EAST) {
+            unit->facing = UNIT_FACING_EAST;
         } else {
-            unit->facing = BATTLE_FACING_SOUTH;
+            unit->facing = UNIT_FACING_SOUTH;
         }
         unit = unit->previous;
     }
 }
 
 /* Shows a unit's shadow (UnitShadow event instruction). Returns 0 when no unit has the runtime id. */
-s32 battle_gfx_show_unit_shadow_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s32 sprite_shadow_show_by_runtime_id(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->shadow_graphic_trigger = 1;
@@ -251,8 +251,8 @@ s32 battle_gfx_show_unit_shadow_by_runtime_id(u32 runtime_id) {
 
 /* Hides a unit's shadow (UnitShadow event instruction). Returns 0 when no unit
  * has the runtime id. */
-s32 battle_gfx_hide_unit_shadow_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s32 sprite_shadow_hide_by_runtime_id(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->shadow_graphic_trigger = 0;
@@ -264,46 +264,46 @@ s32 battle_gfx_hide_unit_shadow_by_runtime_id(u32 runtime_id) {
 /* Start a change to map_id (MapJumpingOut), saving the current game state: the
  * screen darkens by 0x100 / duration per frame (a duration of 0 takes one frame),
  * the map loads, the screen fades back in and the saved state resumes. */
-void battle_state_start_map_jump_out(s32 map_id, s32 duration) {
+void state_start_map_jump_out(s32 map_id, s32 duration) {
     g_battle_map_id = map_id;
-    g_battle_previous_game_state = g_battle_game_state;
-    g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_OUT;
-    g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+    g_game_state_previous = g_game_state;
+    g_game_state = GAME_STATE_MAP_JUMPING_OUT;
+    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Start an event's change to map_id (MapJumpingOut2), saving the current game
  * state: the screen darkens by 0x100 / duration per frame (a duration of 0 takes
  * one frame), the map loads, and the saved state resumes behind a black screen
- * until battle_state_start_change_map_jump_in fades it in. */
-void battle_state_start_change_map_jump_out(s32 map_id, s32 duration) {
+ * until state_start_change_map_jump_in fades it in. */
+void state_start_change_map_jump_out(s32 map_id, s32 duration) {
     g_battle_map_id = map_id;
-    g_battle_previous_game_state = g_battle_game_state;
-    g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_OUT_2;
-    g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+    g_game_state_previous = g_game_state;
+    g_game_state = GAME_STATE_MAP_JUMPING_OUT_2;
+    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Start the fade-in that ends an event's map change (MapJumpingIn2), saving the
  * current game state to return to. The screen lightens by 0x100 / duration per
  * frame; a duration of 0 takes one frame. */
-void battle_state_start_change_map_jump_in(s32 duration) {
-    g_battle_previous_game_state = g_battle_game_state;
-    g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_IN_2;
-    g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+void state_start_change_map_jump_in(s32 duration) {
+    g_game_state_previous = g_game_state;
+    g_game_state = GAME_STATE_MAP_JUMPING_IN_2;
+    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Leave the battle for the world map: enter CloseBattle at two vertical blanks
  * per frame with a fade step of 0x100 / duration (0x100 for a duration of 0). */
-void battle_state_start_close_battle(s32 duration) {
+void state_enter_close_battle_to_world(s32 duration) {
     g_system_vsync_interval = 2;
-    g_battle_game_state = BATTLE_GAME_STATE_CLOSE_BATTLE;
-    g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
-    g_battle_game_flow_state = SYSTEM_GAME_FLOW_WORLD;
+    g_game_state = GAME_STATE_CLOSE_BATTLE;
+    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+    g_game_flow_state = SYSTEM_GAME_FLOW_WORLD;
 }
 
 /* The number of records in the runtime unit list. No retail code calls it. */
-s32 battle_unit_count(void) {
+s32 unit_get_count(void) {
     s32 count = 0;
-    battle_unit_t* unit = g_battle_unit_list_head;
+    unit_t* unit = g_unit_list_head;
     while (unit != 0) {
         unit = unit->previous;
         count++;
@@ -314,8 +314,8 @@ s32 battle_unit_count(void) {
 /* The integer world position of the unit with this runtime id, or 0 for a missing unit.
  * unit_copy_world_coords and unit_project_to_screen test
  * the result against -1 instead. */
-SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+SVECTOR* unit_get_world_coords_by_runtime_id(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
         return 0;
@@ -325,8 +325,8 @@ SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id) {
 
 /* The integer world position of the unit in slot battle_id, or 0. No retail code calls
  * it. */
-SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
+SVECTOR* unit_get_world_coords_by_battle_id(u32 battle_id) {
+    unit_t* unit = unit_get_by_battle_id(battle_id);
 
     if (unit == 0) {
         return 0;
@@ -337,37 +337,34 @@ SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id) {
 /* Store the center of a unit's tile in coords->vx and coords->vz and its world height in
  * coords->vy. Returns 0 when the battle id has no runtime record, otherwise 1. The tile lookup's
  * result is unused, but the call is part of the retail instruction stream. */
-s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
+s32 unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords) {
+    unit_t* unit = unit_get_by_battle_id(battle_id);
 
     if (unit != 0) {
-        battle_map_get_tile_data_pointer(
-            unit->stats->x, unit->stats->position.y, unit->stats->position.higher_elevation);
-        coords->vx = unit->stats->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        coords->vz = unit->stats->position.y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        coords->vy = battle_gfx_calculate_world_height_from_battle_tile(unit);
+        battle_map_tile_get_pointer(unit->stats->x, unit->stats->position.y, unit->stats->position.higher_elevation);
+        coords->vx = unit->stats->x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+        coords->vz = unit->stats->position.y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+        coords->vy = unit_height_calculate_from_battle_tile(unit);
         return 1;
     }
     return 0;
 }
 
-/* The depth point (battle_camera_get_tile_depth_point_unbiased) of a unit's world position. A
+/* The depth point (camera_get_tile_depth_point_unbiased) of a unit's world position. A
  * missing unit is not checked. No retail code calls it. */
-void battle_camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
-    battle_camera_get_tile_depth_point_unbiased(
-        battle_unit_get_world_coords_by_runtime_id(runtime_id & 0xffff), coords);
+void camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
+    camera_get_tile_depth_point_unbiased(unit_get_world_coords_by_runtime_id(runtime_id & 0xffff), coords);
 }
 
 /* Projects a world position to screen x and y. Rebuilds the camera matrices first
  * and leaves them loaded in the GTE. */
-void battle_camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords) {
+void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords) {
     VECTOR transformed_coords;
     s32 result;
 
-    battle_camera_update_matrices(&g_battle_camera_matrix, &g_battle_camera_render_state,
-        &g_battle_camera_current_screen_offset, &g_battle_camera_zoom);
-    SetRotMatrix(&g_battle_camera_matrix);
-    SetTransMatrix(&g_battle_camera_matrix);
+    camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
+    SetRotMatrix(&g_camera_matrix);
+    SetTransMatrix(&g_camera_matrix);
     RotTrans(world_coords, &transformed_coords, &result);
     screen_coords->vx = transformed_coords.vx;
     screen_coords->vy = transformed_coords.vy;
@@ -375,8 +372,8 @@ void battle_camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR
 
 /* Writes a unit's tile as three 16-bit values in the order x, z, y and returns 1. A
  * runtime id without a record raises a pointer exception and returns 0. */
-s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
-    battle_unit_t* unit = g_battle_unit_list_head;
+s32 unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
+    unit_t* unit = g_unit_list_head;
 
     for (; unit != 0; unit = unit->previous) {
         if (unit->runtime_id == (runtime_id & 0xffff)) {
@@ -394,20 +391,19 @@ s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
  * `flags` and `jump` go to the pathfinder; the unit's walk speed is twice `speed`. A riding unit
  * dismounts. Returns 1 when a path was found, 0 when none was; a missing unit raises
  * a pointer exception and returns 0. */
-s32 battle_move_start_unit_walk_to(
-    s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
-    battle_walk_path_t* path;
+s32 move_start_walk_to(s32 runtime_id, battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
+    move_path_t* path;
 
     if (unit != 0) {
-        path = battle_move_calculate_walkto_pathing(
+        path = move_path_calculate_walk_to(
             flags, jump, unit->map_x, unit->map_y, unit->map_z, destination->x, destination->y, destination->layer);
         if (path != 0) {
             unit->path = *path;
             unit->walk_speed = speed * 2;
             unit->step_speed = 0x2000;
             unit->movement_path_offset = 0;
-            battle_unit_dismount_rider_and_update_display(unit);
+            unit_mount_dismount_rider_and_update_display(unit);
             return 1;
         }
     } else {
@@ -419,8 +415,8 @@ s32 battle_move_start_unit_walk_to(
 /* Start a unit on a one-step path: a jump of jump_length extra tiles in `direction` on its own
  * layer, at full speed. The Jump event instruction uses it. A missing unit raises a pointer
  * exception and returns 0. */
-s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
+s32 move_start_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->path.count = 1;
@@ -439,7 +435,7 @@ s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32
         unit->path.data.steps[0].higher = unit->map_z;
         unit->path.data.steps[0].direction = direction;
         unit->path.flags = 0;
-        battle_unit_dismount_rider_and_update_display(unit);
+        unit_mount_dismount_rider_and_update_display(unit);
     } else {
         system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
@@ -447,14 +443,14 @@ s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32
     return 1;
 }
 
-/* Seats one unit on another by runtime id (battle_unit_mount_rider_onto_unit).
+/* Seats one unit on another by runtime id (unit_mount_seat_rider).
  * Returns 0 when either record is missing. No retail code calls it. */
-s32 battle_unit_mount_by_runtime_ids(u32 rider_runtime_id, u32 mount_runtime_id) {
-    battle_unit_t* rider = battle_unit_get_by_runtime_id(rider_runtime_id);
-    battle_unit_t* mount = battle_unit_get_by_runtime_id(mount_runtime_id);
+s32 unit_mount_by_runtime_ids(u32 rider_runtime_id, u32 mount_runtime_id) {
+    unit_t* rider = unit_get_by_runtime_id(rider_runtime_id);
+    unit_t* mount = unit_get_by_runtime_id(mount_runtime_id);
 
     if ((rider != 0) && (mount != 0)) {
-        battle_unit_mount_rider_onto_unit(rider, mount);
+        unit_mount_seat_rider(rider, mount);
         return 1;
     }
     return 0;

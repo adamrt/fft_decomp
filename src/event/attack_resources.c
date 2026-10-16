@@ -58,23 +58,23 @@
 static u8 g_menu_cleared_entry_indices[11] = { 7, 24, 25, 26, 27, 37, 38, 40, 41, 42, 45 };
 
 static s32 camera_step_track(camera_track_t* track, s32 component);
-static void map_store_selected_tile_data(void);
+static void battle_map_store_selected_tile_data(void);
 static void menu_init_subsystems(void);
-static void menu_run_unit_view_supervisor_thread(void);
+static void unit_view_supervisor_thread(void);
 static s32 script_interpolate_range_q12(s32 start, s32 end, s32 fraction, s32 value);
 static void unit_reset_animation_states(void);
 
 /* Load ATTACK.OUT (unless preloaded) with its scenario conditions and graphics, reset menu
  * and unit state and, for a tutorial, fix the game options. Then start the deployment
  * screen and return 0, or start the map-load thread and return 1 when deployment is skipped. */
-s32 menu_init_attack_resources_and_threads(void) {
+s32 deploy_open(void) {
     s32 result;
     s32 return_value;
     game_options_fields_t* options;
-    g_menu_hide_numeric_values = 0;
+    g_unit_panel_hide_numeric_values = 0;
     menu_init_subsystems();
     unit_reset_animation_states();
-    menu_reset_unit_records();
+    command_reset_unit_records();
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOAD_USED;
     } else {
@@ -88,9 +88,9 @@ s32 menu_init_attack_resources_and_threads(void) {
     }
     g_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
     g_menu_panel_fade_intensity = 0;
-    if (script_is_tutorial_event_slot() != 0) {
+    if (tutorial_is_current_event() != 0) {
         g_gfx_screen_fade = 0xff;
-        g_menu_saved_game_options = g_game_options;
+        g_game_options_saved = g_game_options;
         options = &g_game_options.fields;
         options->cursor_movement = GAME_CURSOR_MOVEMENT_TYPE_A;
         options->multi_height_cursor_speed = GAME_MULTI_HEIGHT_CURSOR_SPEED_REGULAR;
@@ -103,12 +103,12 @@ s32 menu_init_attack_resources_and_threads(void) {
     }
     deploy_find_fieldable_units();
     if (result != 0) {
-        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, map_skip_deployment_thread);
+        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, battle_map_skip_deployment_thread);
         return_value = 1;
     } else {
         g_sound_music_track_1_id = 0;
         g_sound_music_track_2_id = 0;
-        sound_play_music_tracks(MUSIC_DEPLOYMENT, MUSIC_NONE);
+        music_play_tracks(MUSIC_DEPLOYMENT, MUSIC_NONE);
         deploy_build_strings();
         battle_map_title_load_graphic();
         thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, deploy_run);
@@ -118,7 +118,7 @@ s32 menu_init_attack_resources_and_threads(void) {
 }
 
 /* Start the mini menu when its slots are idle and menus are active. */
-void menu_start_mini_menu_display_thread(void) {
+void mini_menu_start(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU) != 0) {
         return;
     }
@@ -128,9 +128,9 @@ void menu_start_mini_menu_display_thread(void) {
     if (g_menu_overlay_state != 0) {
         return;
     }
-    g_menu_current_id = MENU_COMMAND_ID_MINI_MENU;
-    g_menu_thread_menu_data = g_menu_idle_action_entries;
-    thread_start(THREAD_SLOT_MENU, menu_run_triangle_selection);
+    g_command_current_id = MENU_COMMAND_ID_MINI_MENU;
+    g_menu_thread_menu_data = g_command_idle_action_entries;
+    thread_start(THREAD_SLOT_MENU, mini_menu_select);
     thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_MINI_MENU], 0, 0);
     g_thread_contexts[THREAD_SLOT_MENU].task_id = THREAD_TASK_MINI_MENU;
 }
@@ -187,21 +187,21 @@ s32 menu_get_thread_activity(void) {
 }
 #endif
 
-/* Raise the flag that releases menu_at_list_select_unit_thread once a unit picked
+/* Raise the flag that releases at_list_select_unit_thread once a unit picked
  * from the AT list has been viewed. */
-void menu_finish_at_list_selection(void) {
-    g_menu_at_list_selection_finished = 1;
+void at_list_finish_selection(void) {
+    g_at_list_selection_finished = 1;
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * menu_finish_at_list_selection and menu_noop_6. Nothing on the disc calls it
+ * at_list_finish_selection and menu_noop_6. Nothing on the disc calls it
  * or points at it; the name is a neutral placeholder until a reference turns
  * up. */
 void menu_noop_5(void) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between menu_noop_5 and
- * menu_start_unit_view_thread. Nothing on the disc calls it or points at it;
+ * unit_view_start. Nothing on the disc calls it or points at it;
  * the name is a neutral placeholder until a reference turns up. */
 void menu_noop_6(void) {
 }
@@ -213,22 +213,22 @@ void menu_noop_6(void) {
  * g_menu_panel_fade_modes[mode]. unit_a becomes the active-turn unit of
  * the banner and unit_b the previewed target of the status billboard; 0xff leaves
  * either unchanged. Ignored while g_menu_overlay_state is 1. */
-void menu_start_unit_view_thread(s32 mode, s32 unit_a, s32 unit_b) {
+void unit_view_start(s32 mode, s32 unit_a, s32 unit_b) {
     if (g_menu_overlay_state == 1) {
         return;
     }
     text_build_unit_name_list();
     g_menu_panel_fade_mode = g_menu_panel_fade_modes[mode];
     if (unit_a != 0xff) {
-        g_menu_selected_unit.battle_id = unit_a;
-        g_menu_selected_unit_status.unit_index = unit_a;
+        g_unit_panel_selected_unit.battle_id = unit_a;
+        g_unit_panel_selected_unit_status.unit_index = unit_a;
     }
     if (unit_b != 0xff) {
-        g_menu_comparison_unit_data.battle_id = unit_b;
-        g_menu_comparison_unit_status.unit_index = unit_b;
+        g_unit_panel_comparison_unit_data.battle_id = unit_b;
+        g_unit_panel_comparison_unit_status.unit_index = unit_b;
     }
     if (thread_is_running_asm(THREAD_SLOT_UNIT_VIEW) == 0) {
-        thread_start(THREAD_SLOT_UNIT_VIEW, menu_run_unit_view_supervisor_thread);
+        thread_start(THREAD_SLOT_UNIT_VIEW, unit_view_supervisor_thread);
     }
     thread_set_parameters(THREAD_SLOT_UNIT_VIEW, mode, 0, 0);
 }
@@ -241,9 +241,9 @@ enum {
 
 /* Starts the requested unit-view panel threads, stops stale panels, and restarts
  * them after they exit. A new parameter replaces the pending view request. */
-static void menu_run_unit_view_supervisor_thread(void) {
+static void unit_view_supervisor_thread(void) {
     s32 states[16];
-    menu_unit_view_thread_set_t* set;
+    unit_view_thread_set_t* set;
     s32 mode;
     s32 i;
     s32 task;
@@ -251,8 +251,8 @@ static void menu_run_unit_view_supervisor_thread(void) {
 
     for (;;) {
         mode = thread_get_current_parameter_1();
-        set = &g_menu_unit_view_thread_sets[mode];
-        g_menu_unit_view_mode = mode;
+        set = &g_unit_view_thread_sets[mode];
+        g_unit_view_mode = mode;
         g_thread_contexts[g_thread_current_id].function_parameter_1 = 0xff;
         for (i = 15; i >= 0; i--) {
             states[i] = MENU_UNIT_VIEW_SLOT_IDLE;
@@ -263,11 +263,11 @@ static void menu_run_unit_view_supervisor_thread(void) {
                 task = thread->task_id;
                 if (task == set->task_ids[i]
                     && (task != THREAD_TASK_HOVERED_UNIT_STATS
-                        || g_menu_unit_view_cached_battle_id == g_menu_selected_unit.battle_id)
+                        || g_unit_view_cached_battle_id == g_unit_panel_selected_unit.battle_id)
                     && (task != THREAD_TASK_RIGHT_UNIT_STATS
-                        || g_menu_unit_view_cached_comparison_id == g_menu_comparison_unit_data.battle_id)
+                        || g_unit_view_cached_comparison_id == g_unit_panel_comparison_unit_data.battle_id)
                     && (task != THREAD_TASK_UNIT_SUMMARY_PANEL
-                        || g_menu_unit_view_cached_battle_id == g_menu_selected_unit.battle_id)) {
+                        || g_unit_view_cached_battle_id == g_unit_panel_selected_unit.battle_id)) {
                     continue;
                 }
                 states[set->thread_ids[i]] = MENU_UNIT_VIEW_SLOT_RESTART;
@@ -279,8 +279,8 @@ static void menu_run_unit_view_supervisor_thread(void) {
                 states[set->thread_ids[i]] = MENU_UNIT_VIEW_SLOT_STARTED;
             }
         }
-        g_menu_unit_view_cached_battle_id = g_menu_selected_unit.battle_id;
-        g_menu_unit_view_cached_comparison_id = g_menu_comparison_unit_data.battle_id;
+        g_unit_view_cached_battle_id = g_unit_panel_selected_unit.battle_id;
+        g_unit_view_cached_comparison_id = g_unit_panel_comparison_unit_data.battle_id;
         for (;;) {
             for (i = 0; i < 4; i++) {
                 if (states[set->thread_ids[i]] == MENU_UNIT_VIEW_SLOT_RESTART
@@ -311,13 +311,13 @@ static void menu_run_unit_view_supervisor_thread(void) {
 void script_set_event_speed(s32 speed) {
     g_script_event_speed = speed;
 #ifdef FFT_BATTLE
-    battle_state_set_vsync_interval(speed);
+    system_set_vsync_interval(speed);
 #endif
 }
 
 /* Yield until the four unit view panel threads (hovered and right unit stats, unit summary, tile
  * info) have stopped. */
-void thread_wait_for_unit_view_panels(void) {
+void unit_view_wait_for_panels(void) {
     thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
     thread_wait_until_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
     thread_wait_until_inactive(THREAD_SLOT_UNIT_SUMMARY_PANEL);
@@ -325,7 +325,7 @@ void thread_wait_for_unit_view_panels(void) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * thread_wait_for_unit_view_panels and script_noop_5. Nothing on the disc
+ * unit_view_wait_for_panels and script_noop_5. Nothing on the disc
  * calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
 void script_noop_4(void) {
@@ -687,14 +687,14 @@ void script_print_debug_message(void) {
  * the path respect terrain costs; 0 ignores them. */
 void script_opcode_28_walk_to(const event_walk_to_parameters_t* parameters) {
     s32 id = script_read_s16(parameters->unit_id_le);
-    map_tile_coordinates_t coordinates;
+    battle_map_tile_coordinates_t coordinates;
 
     id = script_resolve_runtime_id(id);
     if (id != EVENT_RUNTIME_ID_NONE) {
         coordinates.x = parameters->x;
         coordinates.y = parameters->y;
         coordinates.layer = parameters->elevation;
-        battle_move_start_unit_walk_to(id, &coordinates,
+        move_start_walk_to(id, &coordinates,
             MOVE_PATHFIND_IGNORE_TERRAIN_COST - parameters->terrain_cost_flag * MOVE_PATHFIND_IGNORE_TERRAIN_COST, 3,
             script_read_s16(parameters->speed_le));
     }
@@ -709,9 +709,9 @@ void script_opcode_68_mirror_sprite(const event_mirror_sprite_parameters_t* para
     runtime_id = script_resolve_runtime_id(runtime_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         if (mode == 1) {
-            battle_unit_set_horizontal_flip_flag(runtime_id);
+            sprite_set_horizontal_flip_flag(runtime_id);
         } else {
-            battle_unit_clear_horizontal_flip_flag(runtime_id);
+            sprite_clear_horizontal_flip_flag(runtime_id);
         }
     }
 }
@@ -721,13 +721,13 @@ void script_opcode_68_mirror_sprite(const event_mirror_sprite_parameters_t* para
 void script_opcode_97_reset_palette(const event_unit_parameters_t* parameters) {
     s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-        battle_gfx_reset_unit_palette_by_runtime_id(runtime_id);
+        sprite_palette_reset_by_runtime_id(runtime_id);
     }
 }
 
 /* Jump: cancel the unit's accumulated event offset, then build its one-step path
  * of length_plus_one - 1 tiles in the encoded direction through
- * battle_move_start_unit_jump_by_runtime_id. The unit's Jump stat is 6 while that runs
+ * move_start_jump_by_runtime_id. The unit's Jump stat is 6 while that runs
  * and is restored afterwards. A unit id that does not resolve does nothing. */
 void script_opcode_70_jump(const event_jump_parameters_t* parameters) {
     SVECTOR vec;
@@ -737,13 +737,13 @@ void script_opcode_70_jump(const event_jump_parameters_t* parameters) {
     u8 saved;
 
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-        coords = battle_unit_get_event_offset_by_runtime_id(runtime_id);
+        coords = unit_get_event_offset_by_runtime_id(runtime_id);
         setVector(&vec, -coords->vx, -coords->vy, -coords->vz);
-        battle_unit_add_event_offset_by_runtime_id(runtime_id, &vec);
-        stats = battle_unit_get_stats_from_battle_id(battle_unit_get_battle_id_by_runtime_id(runtime_id));
+        unit_add_event_offset_by_runtime_id(runtime_id, &vec);
+        stats = unit_get_stats(unit_get_battle_id_by_runtime_id(runtime_id));
         saved = stats->jump;
         stats->jump = 6;
-        battle_move_start_unit_jump_by_runtime_id(runtime_id, parameters->direction, parameters->length_plus_one - 1);
+        move_start_jump_by_runtime_id(runtime_id, parameters->direction, parameters->length_plus_one - 1);
         stats->jump = saved;
     }
 }
@@ -755,7 +755,7 @@ void script_opcode_29_wait_walk(s32 unit_id) {
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         do {
             thread_yield();
-        } while (battle_move_is_unit_moving_by_runtime_id(runtime_id) != 0);
+        } while (move_is_unit_moving_by_runtime_id(runtime_id) != 0);
     }
 }
 
@@ -767,7 +767,7 @@ void script_opcode_29_wait_walk(s32 unit_id) {
 void script_opcode_82_load_attack_graphics(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOADED;
-        menu_request_open_companion_executable(COMPANION_OVERLAY_ATTACK);
+        overlay_request_companion(COMPANION_OVERLAY_ATTACK);
         thread_yield();
         scenario_load_conditionals();
         formation_build_sprites();
@@ -778,12 +778,12 @@ void script_opcode_82_load_attack_graphics(void) {
 /* Plays the current effect through the inner-subroutine caller, then yields
  * to other threads until the animation continue check reports done. */
 void script_play_effect_and_wait(void) {
-    g_thread_call_target = battle_effect_call_play;
+    g_thread_call_target = effect_call_play;
     thread_call_on_main_stack();
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))battle_state_get_animation_continue_check;
+        g_thread_call_target = (void (*)(void))state_get_animation_continue_check;
     } while (thread_call_on_main_stack());
 }
 
@@ -850,17 +850,17 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_SET_FIRST_UNIT) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_unit_move_to_head(runtime_id);
+                unit_move_to_head(runtime_id);
             }
         } else if (script[0] == EVENT_OPCODE_ERASE) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_gfx_hide_unit_by_runtime_id(runtime_id);
+                unit_hide_by_runtime_id(runtime_id);
             }
         } else if (script[0] == EVENT_OPCODE_DRAW) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_unit_draw_and_activate_by_runtime_id(runtime_id);
+                unit_draw_and_activate_by_runtime_id(runtime_id);
             }
         } else if (script[0] == EVENT_OPCODE_WAIT_UNIT_READY) {
             runtime_id = script_resolve_runtime_id(first_halfword);
@@ -895,7 +895,7 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_COLOR_UNIT) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_gfx_apply_unit_palette_modulation_to_units(
+                sprite_palette_apply_modulation_to_units(
                     script[3], script[7], runtime_id, (s8)script[4], (s8)script[5], (s8)script[6]);
             }
         }
@@ -936,24 +936,24 @@ void script_opcode_49_add_unit_start_thread(void) {
         if (opcode == EVENT_OPCODE_LOAD_ATTACK_GRAPHICS) {
             script_opcode_82_load_attack_graphics();
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
-            unit = battle_unit_find_stats_by_entd_unit_id(unit_id, &index);
+            unit = unit_entd_find_stats(unit_id, &index);
             if (index == -2 || index >= 0) {
-                for (slot = 0; slot < BATTLE_UNIT_SLOT_COUNT; slot++) {
-                    if (battle_unit_get_stats_from_battle_id(slot) == unit) {
+                for (slot = 0; slot < UNIT_SLOT_COUNT; slot++) {
+                    if (unit_get_stats(slot) == unit) {
                         break;
                     }
                 }
-                runtime_id = battle_unit_get_runtime_id_by_battle_id(slot);
+                runtime_id = unit_get_runtime_id_by_battle_id(slot);
                 if (runtime_id == -1) {
                     unit_save_staged_status_data(slot);
-                    battle_gfx_load_unit_graphics_by_battle_id(slot, flag);
+                    sprite_load_unit_graphics_by_battle_id(slot, flag);
                     g_unit_graphics_load_pending = 1;
                 } else {
                     if (flag == 0) {
-                        battle_unit_draw_and_activate_by_runtime_id(runtime_id);
+                        unit_draw_and_activate_by_runtime_id(runtime_id);
                     }
                     if (unit_save_staged_status_data(slot) != 0) {
-                        g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
+                        g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
                         thread_call_on_main_stack(runtime_id);
                     }
                 }
@@ -981,7 +981,7 @@ static void menu_init_subsystems(void) {
     menu_init_palette_and_text(0);
     menu_init_stub();
     menu_reset_subsystems();
-    map_reset_script_light_transform();
+    battle_map_reset_script_light_transform();
     menu_init_panel_fade_tiles();
 }
 
@@ -992,8 +992,8 @@ void menu_init_subsystem_pointers(void) {
     g_menu_glyph_sheet = &g_menu_glyph_image_data;
     g_script_event_block = g_script_event_block_buffer;
     g_script_variables = g_script_variable_storage;
-    g_menu_thread_menu_data = g_menu_idle_action_entries;
-    g_menu_help_active_text_id_tables = (u16* const*)-1;
+    g_menu_thread_menu_data = g_command_idle_action_entries;
+    g_help_active_text_id_tables = (u16* const*)-1;
     g_unit_graphics_load_pending = 0;
     g_script_threads_idle = 0;
     g_script_frame_result_override = 0;
@@ -1011,19 +1011,19 @@ void menu_reset_subsystems(void) {
 }
 
 /* Put the map light transform of the event scripts back to the map's own light: no rotation, unit
- * scale, and the current light direction and color matrices as the base map_light_thread
+ * scale, and the current light direction and color matrices as the base battle_map_light_thread
  * interpolates from. WORLD has no map light, so its copy is empty. */
-void map_reset_script_light_transform(void) {
+void battle_map_reset_script_light_transform(void) {
 #ifdef FFT_BATTLE
     MATRIX* buffer;
 
     setVector(&g_script_light_angles, 0, 0, 0);
     setVector(&g_script_light_scale, ONE, ONE, ONE);
-    buffer = battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_GET_LIGHT, buffer, buffer, 0);
+    buffer = battle_map_light_matrix_command(BATTLE_MAP_LIGHT_MATRIX_COMMAND_GET_LIGHT, buffer, buffer, 0);
     mem_copy_bytes_nonempty(
         &g_script_light_base_direction_matrix, buffer, sizeof(g_script_light_base_direction_matrix));
     mem_copy_bytes_nonempty(&g_script_light_base_color_matrix,
-        battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_GET_COLOR, buffer, buffer, 0),
+        battle_map_light_matrix_command(BATTLE_MAP_LIGHT_MATRIX_COMMAND_GET_COLOR, buffer, buffer, 0),
         sizeof(g_script_light_base_color_matrix));
 #endif
 }
@@ -1035,11 +1035,11 @@ static void unit_reset_animation_states(void) {
     s32 i = 0;
 
     state = g_unit_animation_states;
-    for (; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {
+    for (; i < UNIT_SLOT_COUNT; i++, state++) {
         state->rotating = 0;
         state->delay = 0;
-        if (battle_unit_has_runtime_id(i) != 0) {
-            state->initial_facing = battle_unit_get_facing_nibble_by_runtime_id(i);
+        if (unit_has_runtime_id(i) != 0) {
+            state->initial_facing = unit_facing_get_sixteenth_by_runtime_id(i);
         } else {
             state->initial_facing = 0xff;
         }
@@ -1062,17 +1062,17 @@ void unit_update_facing_and_pending_animations(void) {
     s32 moving;
     unit_animation_state_t* state = g_unit_animation_states;
 
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {
-        if (battle_unit_has_runtime_id(i) != 0) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++, state++) {
+        if (unit_has_runtime_id(i) != 0) {
             if (g_unit_pending_animation_ids[i] != 0) {
-                moving = battle_move_is_unit_moving_by_runtime_id(i);
+                moving = move_is_unit_moving_by_runtime_id(i);
                 if (moving == 0 && g_unit_was_moving_latch[i] != 0) {
                     unit_set_animation(i, g_unit_pending_animation_ids[i]);
                     g_unit_pending_animation_ids[i] = 0;
                 }
                 g_unit_was_moving_latch[i] = moving;
             }
-            current = battle_unit_get_facing_nibble_by_runtime_id(i);
+            current = unit_facing_get_sixteenth_by_runtime_id(i);
             if (state->rotating == 0) {
                 continue;
             }
@@ -1125,14 +1125,14 @@ void script_start_current_event_thread(void) {
     g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
     if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
         camera_store_state_to_script_variables();
-        map_reset_script_light_transform();
+        battle_map_reset_script_light_transform();
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
     }
     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != 0) {
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
-        battle_gfx_start_screen_color_modulation_fade(2, 0, 0, 0, 2);
+        fade_tint_start_fade(2, 0, 0, 0, 2);
         thread_start(THREAD_SLOT_EVENT, script_run_next_event);
     }
 }
@@ -1150,7 +1150,7 @@ void script_reset_event_state(void) {
     unit_reset_animation_states();
     if (thread_is_running_asm(THREAD_SLOT_EVENT) == 0) {
         camera_store_state_to_script_variables();
-        map_reset_script_light_transform();
+        battle_map_reset_script_light_transform();
         g_camera_speed_curve = 0;
         g_camera_position_locked = 0;
     }
@@ -1158,7 +1158,7 @@ void script_reset_event_state(void) {
 
 /* Run one event frame, then return whether the deployment thread (borrowed slot
  * 6) is still running. */
-s32 script_run_frame_and_check_deployment(u32* ot, u32 buttons) {
+s32 deploy_run_frame_and_check(u32* ot, u32 buttons) {
     script_run_event_frame(ot, buttons);
     return thread_is_running(THREAD_BORROWED_SLOT_DEPLOYMENT);
 }
@@ -1176,21 +1176,21 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     if (g_menu_input_mode != MENU_INPUT_PLAYER) {
         controller_input = g_script_unfiltered_controller_input;
     }
-    map_store_selected_tile_data();
+    battle_map_store_selected_tile_data();
     fill = -2;
     for (i = 3; i >= 0; i--) {
-        g_menu_pending_selection[i] = fill;
+        g_command_pending_selection[i] = fill;
     }
     script_run_event_frame(otag, controller_input);
     menu_update_panel_fade();
-    result = menu_resolve_selection();
+    result = command_resolve_selection();
     if ((thread_is_running_asm(THREAD_SLOT_MENU) != 0
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)
         || thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0
         || thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
         if (g_menu_vsync_interval_forced == 0) {
             g_menu_vsync_interval_forced = 1;
-            g_menu_saved_vsync_interval = battle_state_get_vsync_interval();
+            g_menu_saved_vsync_interval = system_get_vsync_interval();
             script_set_event_speed(2);
         }
     } else if (g_menu_vsync_interval_forced == 1) {
@@ -1200,27 +1200,28 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     return result;
 }
 
-/* Fill g_map_selected_tile_data for the tile under the cursor, which the
+/* Fill g_battle_map_selected_tile_data for the tile under the cursor, which the
  * tile information display shows: the surface type, the depth, the displayed
  * height in half-height units (height * 2 + slope half-height + depth * 2) and
  * the surface type's two bytes of g_terrain_tile_info_pairs. */
-static void map_store_selected_tile_data(void) {
+static void battle_map_store_selected_tile_data(void) {
     SVECTOR coords;
     s16* surface_type;
     s32 depth;
 
     battle_map_store_selected_tile_coordinates(&coords);
-    surface_type = &g_map_selected_tile_data.surface_type;
-    *surface_type = battle_map_get_tile_data_value(MAP_TILE_DATA_SURFACE_TYPE, coords.vx, coords.vz, coords.vy) & 0xFF;
-    g_map_selected_tile_data.display_height
-        = battle_map_get_tile_data_value(MAP_TILE_DATA_HALF_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF;
-    g_map_selected_tile_data.display_height
-        += (battle_map_get_tile_data_value(MAP_TILE_DATA_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF) * 2;
-    depth = battle_map_get_tile_data_value(MAP_TILE_DATA_DEPTH, coords.vx, coords.vz, coords.vy) & 0xFF;
-    g_map_selected_tile_data.depth = depth;
-    g_map_selected_tile_data.display_height += depth * 2;
-    g_map_selected_tile_data._unknown_02 = g_terrain_tile_info_pairs[*surface_type][0];
-    g_map_selected_tile_data._unknown_04 = g_terrain_tile_info_pairs[*surface_type][1];
+    surface_type = &g_battle_map_selected_tile_data.surface_type;
+    *surface_type
+        = battle_map_tile_get_value(BATTLE_MAP_TILE_DATA_SURFACE_TYPE, coords.vx, coords.vz, coords.vy) & 0xFF;
+    g_battle_map_selected_tile_data.display_height
+        = battle_map_tile_get_value(BATTLE_MAP_TILE_DATA_HALF_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF;
+    g_battle_map_selected_tile_data.display_height
+        += (battle_map_tile_get_value(BATTLE_MAP_TILE_DATA_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF) * 2;
+    depth = battle_map_tile_get_value(BATTLE_MAP_TILE_DATA_DEPTH, coords.vx, coords.vz, coords.vy) & 0xFF;
+    g_battle_map_selected_tile_data.depth = depth;
+    g_battle_map_selected_tile_data.display_height += depth * 2;
+    g_battle_map_selected_tile_data._unknown_02 = g_terrain_tile_info_pairs[*surface_type][0];
+    g_battle_map_selected_tile_data._unknown_04 = g_terrain_tile_info_pairs[*surface_type][1];
 }
 
 /* Reset the cursor row of the 11 menu entries listed in g_menu_cleared_entry_indices. */
@@ -1233,14 +1234,14 @@ void menu_clear_entry_selections(void) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * menu_clear_entry_selections and menu_restore_selection_for_selected_unit.
+ * menu_clear_entry_selections and command_restore_unit_selection.
  * Nothing on the disc calls it or points at it; the name is a neutral
  * placeholder until a reference turns up. */
 void menu_noop_7(void) {
 }
 
 /* Restore the selected unit's remembered command row, applying menu remaps. */
-void menu_restore_selection_for_selected_unit(s32 menu_id) {
+void command_restore_unit_selection(s32 menu_id) {
     menu_unit_selection_record_t* record;
     s32 i;
     s32 row;
@@ -1248,14 +1249,14 @@ void menu_restore_selection_for_selected_unit(s32 menu_id) {
     menu_selection_remap_t* remap;
 
     for (i = 0; i < 12; i++) {
-        if (g_menu_command_maps[i].menu_id == menu_id) {
+        if (g_command_command_maps[i].menu_id == menu_id) {
             break;
         }
     }
     if (i == 12) {
         return;
     }
-    record = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
+    record = &g_menu_unit_selection_records[g_unit_panel_selected_unit.battle_id];
     for (row = 0, remap = g_menu_selection_remaps; row < 8; remap++, row++) {
         if (menu_id == g_menu_selection_remaps[row].menu_id) {
             /* Keep the signed byte-table index used by the target. */
@@ -1279,7 +1280,7 @@ enum { MENU_UNIT_SELECTION_RECORD_BYTES = (s32)sizeof(menu_unit_selection_record
  * induction variables (84 bytes rather than 76), so retain the byte view.
  * Use an integer countdown: decrementing an element pointer after row[0]
  * would form a pointer before the first row. */
-void menu_reset_unit_records(void) {
+void command_reset_unit_records(void) {
     s32 index;
     u8* row;
     s32 count;
@@ -1296,13 +1297,13 @@ void menu_reset_unit_records(void) {
         ((u8*)g_menu_unit_selection_records)[index + 1] = fill;
         index += MENU_UNIT_SELECTION_RECORD_BYTES;
         row += MENU_UNIT_SELECTION_RECORD_BYTES;
-    } while (index < BATTLE_UNIT_SLOT_COUNT * MENU_UNIT_SELECTION_RECORD_BYTES);
+    } while (index < UNIT_SLOT_COUNT * MENU_UNIT_SELECTION_RECORD_BYTES);
 }
 
-/* Clear one unit's remembered menu rows, as menu_reset_unit_records does for all (byte 1 back to
+/* Clear one unit's remembered menu rows, as command_reset_unit_records does for all (byte 1 back to
  * 0xff), but only for a unit under manual control. The test sits inside the byte loop. */
-void menu_reset_unit_record(s32 battle_id) {
-    unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
+void command_reset_unit_record(s32 battle_id) {
+    unit_stats_t* stats = unit_get_stats(battle_id);
     menu_unit_selection_record_t* records = g_menu_unit_selection_records;
     s32 i;
 
@@ -1314,21 +1315,21 @@ void menu_reset_unit_record(s32 battle_id) {
     }
 }
 
-/* The command record the menus fill when the player picks a command (g_menu_selected_command). */
-ai_command_t* menu_get_selected_command_address(void) {
-    return &g_menu_selected_command;
+/* The command record the menus fill when the player picks a command (g_command_selected_command). */
+ai_command_t* command_get_selected(void) {
+    return &g_command_selected_command;
 }
 
 /* Post the close command after two frames under the mini-menu task id. */
-void menu_mini_menu_cancel_delay_thread(void) {
+void mini_menu_cancel_delay_thread(void) {
     thread_set_current_task_id(THREAD_TASK_MINI_MENU);
     thread_wait_frames(2);
-    g_menu_pending_selection[0] = 7;
+    g_command_pending_selection[0] = 7;
     thread_exit_current();
 }
 
 /* Queue the confirm sound and hold the mini-menu task id for 16 frames. */
-void menu_confirm_sound_delay_thread(void) {
+void mini_menu_confirm_delay_thread(void) {
     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
     thread_set_current_task_id(THREAD_TASK_MINI_MENU);
     thread_wait_frames(16);
@@ -1363,16 +1364,16 @@ static void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
 }
 
 /* Builds the ability list for the active skillset menu entry (menu entry 4's
- * selected_index selects the skillset; g_action_menu_row_types gives its list type). Each type
+ * selected_index selects the skillset; g_menu_skillset_types gives its list type). Each type
  * fills the 0x52-row work buffer at *g_ai_workspace_ptr through its own loader, then
  * the rows are sized, grayed (not enough MP, or silenced for voice abilities)
- * and g_menu_ability_layout is set up for 6 visible rows.
+ * and g_ability_list_ability_layout is set up for 6 visible rows.
  *
  * Matching notes: the layout block is one struct (its x/y are s16, so `-= 4`
  * stays an addiu immediate and the constant is not shared); window_x is a
  * separate local from the unit index, and its updates follow the loader
  * calls in each arm. */
-static void menu_build_ability_list(s32 mode) {
+static void command_build_ability_list(s32 mode) {
     s32 unit_index;
     s32 window_x;
     unit_stats_t* unit;
@@ -1386,15 +1387,15 @@ static void menu_build_ability_list(s32 mode) {
     s32 row_flags;
     menu_ability_list_t* list;
 
-    g_menu_ability_layout.columns.text_ids[0] = (s16*)g_ai_workspace_ptr->ability_list.ids;
-    g_menu_ability_layout.columns.text_ids[1] = (s16*)g_ai_workspace_ptr->ability_list.values;
-    g_menu_ability_layout.columns.text_ids[2] = (s16*)g_ai_workspace_ptr->ability_list.extras;
+    g_ability_list_ability_layout.columns.text_ids[0] = (s16*)g_ai_workspace_ptr->ability_list.ids;
+    g_ability_list_ability_layout.columns.text_ids[1] = (s16*)g_ai_workspace_ptr->ability_list.values;
+    g_ability_list_ability_layout.columns.text_ids[2] = (s16*)g_ai_workspace_ptr->ability_list.extras;
 
-    unit_index = g_menu_selected_unit.battle_id;
+    unit_index = g_unit_panel_selected_unit.battle_id;
     unit = menu_get_selected_unit_stats();
-    type = g_action_menu_row_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
-    skillset = g_menu_skillsets[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
-    g_menu_selected_action.skillset_id = skillset;
+    type = g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
+    skillset = g_command_skillsets[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
+    g_command_selected_action.skillset_id = skillset;
 
     for (i = 0; i < 80; i++) {
         g_ai_workspace_ptr->ability_list.ids[i] = 0xFFFF;
@@ -1405,7 +1406,7 @@ static void menu_build_ability_list(s32 mode) {
         g_ai_workspace_ptr->ability_list.flags[i] = 0;
         g_ai_workspace_ptr->ability_list.turns[i] = 1;
         g_ai_workspace_ptr->ability_list.skill_ct[i] = 0xFF;
-        g_menu_ability_display_flags[i] = 0;
+        g_ability_list_ability_display_flags[i] = 0;
     }
     /* Row 0x50 ends the byte columns with the 0xff terminator the widening copies stop at. */
     g_ai_workspace_ptr->ability_list.mp_costs[0x50] = 0xFF;
@@ -1416,36 +1417,36 @@ static void menu_build_ability_list(s32 mode) {
 
     if (type == ACTION_MENU_TYPE_DEFAULT) {
         list = &g_ai_workspace_ptr->ability_list;
-        battle_menu_get_unit_skillset_ability_data(
+        skillset_get_unit_ability_data(
             unit_index, skillset, (s16*)list->ids, list->mp_costs, list->ct, 0, list->flags, list->turns);
         mem_copy_bytes_nonempty(g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.ct, 0x50);
     }
     if (type == ACTION_MENU_TYPE_ITEM_INVENTORY) {
-        battle_menu_load_item_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
+        skillset_load_item_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
-        battle_menu_load_throw_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
+        skillset_load_throw_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_ARITHMETICKS) {
         if (mode == MENU_ARITHMETICKS_LIST_ATTRIBUTES) {
-            battle_menu_load_math_skill_attributes(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
+            skillset_math_load_attributes(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
         }
         if (mode == MENU_ARITHMETICKS_LIST_MULTIPLES) {
-            battle_menu_load_math_skill_multiples(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
+            skillset_math_load_multiples(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
         }
         if (mode == MENU_ARITHMETICKS_LIST_ABILITIES) {
-            battle_menu_collect_calculator_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
+            skillset_math_collect_calculator_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
         }
     }
     if (type == ACTION_MENU_TYPE_MONSTER) {
-        battle_menu_collect_monster_skill_abilities(
+        skillset_monster_collect_abilities(
             unit_index, skillset, g_ai_workspace_ptr->ability_list.ids, 0, g_ai_workspace_ptr->ability_list.flags);
     }
     if (type == ACTION_MENU_TYPE_KATANA_INVENTORY) {
-        battle_menu_load_draw_out_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
+        skillset_load_draw_out_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_CHARGE) {
-        battle_menu_load_charge_skillset(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids,
+        skillset_load_charge_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids,
             g_ai_workspace_ptr->ability_list.mp_costs, g_ai_workspace_ptr->ability_list.turns);
         mem_copy_bytes_nonempty(
             g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.mp_costs, 0x50);
@@ -1456,12 +1457,12 @@ static void menu_build_ability_list(s32 mode) {
         mode = MENU_ARITHMETICKS_LIST_ABILITIES;
     }
 
-    g_menu_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
-    g_menu_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
-    g_menu_ability_layout.columns.x[1] = 0x6A;
-    g_menu_ability_layout.columns.x[2] = 0x7E;
-    g_menu_ability_layout.columns.mode[0] = MENU_TEXT_COLUMN_TEXT;
-    if (g_menu_action_type_modes[type][1] == 1) { /* lists by id */
+    g_ability_list_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
+    g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
+    g_ability_list_ability_layout.columns.x[1] = 0x6A;
+    g_ability_list_ability_layout.columns.x[2] = 0x7E;
+    g_ability_list_ability_layout.columns.mode[0] = MENU_TEXT_COLUMN_TEXT;
+    if (g_command_action_type_modes[type][1] == 1) { /* lists by id */
         /* Inventory loaders leave item ids in the byte column mp_costs; the value column
          * shows each item's quantity. */
         count = menu_copy_u8_to_u16_terminated(
@@ -1471,7 +1472,7 @@ static void menu_build_ability_list(s32 mode) {
         for (i = 0; i < count; i++) {
             g_ai_workspace_ptr->ability_list.values[i] = g_item_quantities[g_ai_workspace_ptr->ability_list.ids[i]];
             if (g_ai_workspace_ptr->ability_list.values[i] == 0) {
-                g_menu_ability_display_flags[i] = 4;
+                g_ability_list_ability_display_flags[i] = 4;
             } else {
                 found = 1;
             }
@@ -1483,15 +1484,15 @@ static void menu_build_ability_list(s32 mode) {
         if (found != 0) {
             window_x -= 4;
         } else {
-            g_menu_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
+            g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
             menu_copy_u8_to_u16(g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.turns, count);
             window_x = 0x94;
             row_mode = 8;
         }
 
         row_flags = TEXT_ID_ITEM_NAME_BASE;
-        g_menu_ability_layout.columns.x[1] -= 4;
-        g_menu_ability_layout.columns.x[2] -= 4;
+        g_ability_list_ability_layout.columns.x[1] -= 4;
+        g_ability_list_ability_layout.columns.x[2] -= 4;
         columns = 0x11;
         if (type == ACTION_MENU_TYPE_KATANA_INVENTORY) {
             columns = 0x17;
@@ -1516,8 +1517,8 @@ static void menu_build_ability_list(s32 mode) {
 
         if (type == ACTION_MENU_TYPE_ARITHMETICKS && mode > 0) {
             window_x = 0x88;
-            g_menu_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
-            g_menu_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
+            g_ability_list_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
+            g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
             row_mode = 9;
         } else {
             if (found != 0 && type == ACTION_MENU_TYPE_DEFAULT) {
@@ -1527,16 +1528,16 @@ static void menu_build_ability_list(s32 mode) {
                 menu_copy_u8_to_u16(
                     g_ai_workspace_ptr->ability_list.extras, g_ai_workspace_ptr->ability_list.turns, count);
                 row_mode = 6;
-                g_menu_ability_layout.columns.x[1] -= 8;
-                g_menu_ability_layout.columns.x[2] -= 8;
+                g_ability_list_ability_layout.columns.x[1] -= 8;
+                g_ability_list_ability_layout.columns.x[2] -= 8;
             } else {
                 menu_copy_u8_to_u16(
                     g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.turns, count);
                 window_x = 0x94;
                 row_mode = 5;
-                g_menu_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
-                g_menu_ability_layout.columns.x[1] -= 4;
-                g_menu_ability_layout.columns.x[2] -= 4;
+                g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
+                g_ability_list_ability_layout.columns.x[1] -= 4;
+                g_ability_list_ability_layout.columns.x[2] -= 4;
             }
         }
 
@@ -1555,14 +1556,14 @@ static void menu_build_ability_list(s32 mode) {
         if (type == ACTION_MENU_TYPE_DEFAULT) {
             if (unit->mp - g_ai_workspace_ptr->ability_list.mp_costs[i] < 0
                 && g_ai_workspace_ptr->ability_list.skill_ct[i] != 0) {
-                g_menu_ability_display_flags[i] = 8;
+                g_ability_list_ability_display_flags[i] = 8;
             }
         }
         if (type == ACTION_MENU_TYPE_DEFAULT || type == ACTION_MENU_TYPE_MONSTER) {
             if ((g_ai_workspace_ptr->ability_list.flags[i] & 2) && g_ai_workspace_ptr->ability_list.skill_ct[i] != 0
                 && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SILENCE)]
                     & STATUS_BYTE_MASK(STATUS_ID_SILENCE))) {
-                g_menu_ability_display_flags[i] = 8;
+                g_ability_list_ability_display_flags[i] = 8;
             }
         }
     }
@@ -1574,17 +1575,17 @@ static void menu_build_ability_list(s32 mode) {
         g_ai_workspace_ptr->ability_list.ids[0] = TEXT_ID_ABILITY_NAME_BASE;
         g_ai_workspace_ptr->ability_list.values[0] = 0;
         g_ai_workspace_ptr->ability_list.extras[0] = 0;
-        g_menu_ability_display_flags[0] = 4;
+        g_ability_list_ability_display_flags[0] = 4;
     }
 
     /* Six rows show at most; a shorter list's window moves down 8 pixels per missing row. */
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y = 0x30;
     if (count >= 7) {
-        g_menu_ability_layout.columns.hidden_rows = count - 6;
-        g_menu_ability_layout.columns.row_count = 6;
+        g_ability_list_ability_layout.columns.hidden_rows = count - 6;
+        g_ability_list_ability_layout.columns.row_count = 6;
     } else {
-        g_menu_ability_layout.columns.hidden_rows = 0;
-        g_menu_ability_layout.columns.row_count = count;
+        g_ability_list_ability_layout.columns.hidden_rows = 0;
+        g_ability_list_ability_layout.columns.row_count = count;
         g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y += (6 - count) * 8;
     }
 
@@ -1603,15 +1604,15 @@ static void menu_build_ability_list(s32 mode) {
  * Menu entry 4's value and the loop counter share $s0 in the target: the
  * index dies after the two table loads and the register is reused by the
  * `sll s0,v0,0x1` that forms the counter, so they are one variable here.
- * g_menu_action_slot_row_actions is written as an in-loop expression rather than a pre-loop
+ * g_command_action_slot_row_actions is written as an in-loop expression rather than a pre-loop
  * pointer local so that loop.c hoists it into the preheader after the bltz,
  * which is where the target's `lui/addiu s8` pair sits.
  */
-void menu_select_unit_action_slots_thread(void) {
+void command_ability_list_thread(void) {
     s32 i = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
-    s32 menu = g_action_menu_row_types[i];
-    s32 check_unit = g_menu_skillset_disabled_flags[i];
-    menu_unit_selection_record_t* row = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
+    s32 menu = g_menu_skillset_types[i];
+    s32 check_unit = g_command_skillset_disabled_flags[i];
+    menu_unit_selection_record_t* row = &g_menu_unit_selection_records[g_unit_panel_selected_unit.battle_id];
     menu_list_selection_t* slot;
     u8* pair;
     s32 j;
@@ -1619,41 +1620,42 @@ void menu_select_unit_action_slots_thread(void) {
 
     /* Typed list indexing changes the address order; these byte views retain it. */
     for (i = (g_menu_restore_pending == 0) ? 2 : 0; i >= 0; i--) {
-        menu_check_action_slot_restrictions(menu, i, check_unit);
+        command_check_row_restrictions(menu, i, check_unit);
         if (menu == ACTION_MENU_TYPE_ARITHMETICKS) {
             slot = (menu_list_selection_t*)((u8*)row + (i + offsetof(menu_unit_selection_record_t, lists[4])) + i);
             g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index = slot->selected_index;
-            g_menu_ability_layout.row_offset = slot->scroll_offset;
+            g_ability_list_ability_layout.row_offset = slot->scroll_offset;
         } else {
             pair = (u8*)row
                 + g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index * sizeof(menu_list_selection_t);
             g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index
                 = pair[offsetof(menu_unit_selection_record_t, lists[0].selected_index)];
-            g_menu_ability_layout.row_offset = pair[offsetof(menu_unit_selection_record_t, lists[0].scroll_offset)];
+            g_ability_list_ability_layout.row_offset
+                = pair[offsetof(menu_unit_selection_record_t, lists[0].scroll_offset)];
             slot = (menu_list_selection_t*)(pair + offsetof(menu_unit_selection_record_t, lists));
         }
         for (j = 0; j < 6; j++) {
             if (menu != ACTION_MENU_TYPE_ARITHMETICKS || i == 0) {
-                g_menu_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_CONFIRM;
+                g_command_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_CONFIRM;
             } else {
-                g_menu_action_slot_row_actions[j] = -1;
+                g_command_action_slot_row_actions[j] = -1;
             }
         }
-        if (g_action_menu_row_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]
+        if (g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]
             == ACTION_MENU_TYPE_CHANGE_EQUIPMENT) {
             g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index = 0;
-            menu_run_equip_thread();
+            equipment_thread();
         }
-        g_thread_call_target = menu_build_ability_list;
+        g_thread_call_target = command_build_ability_list;
         thread_call_on_main_stack(i);
-        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_ABILITY_LIST);
-        menu_run_scrolling_ability_list_thread();
+        tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_ABILITY_LIST);
+        ability_list_scrolling_thread();
         slot->selected_index = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
-        slot->scroll_offset = g_menu_ability_layout.row_offset;
+        slot->scroll_offset = g_ability_list_ability_layout.row_offset;
         if (menu != ACTION_MENU_TYPE_ARITHMETICKS) {
             thread_exit_current();
         }
-        if (g_menu_action_slot_selected_option == -1) {
+        if (g_command_action_slot_selected_option == -1) {
             if (i == 2) {
                 thread_exit_current();
             }
@@ -1663,13 +1665,13 @@ void menu_select_unit_action_slots_thread(void) {
                        .ids[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index]
                 - 0x7000;
             if (i == 2) {
-                g_menu_selected_action.calculator_type = text;
+                g_command_selected_action.calculator_type = text;
             }
             if (i == 1) {
-                g_menu_selected_action.calculator_multiplier = text;
+                g_command_selected_action.calculator_multiplier = text;
             }
             if (i == 0) {
-                g_menu_selected_action.ability_id = text;
+                g_command_selected_action.ability_id = text;
             }
         }
     }
@@ -1677,27 +1679,26 @@ void menu_select_unit_action_slots_thread(void) {
 }
 
 /* Build the Act submenu (SKILLSET_LIST) for the selected unit: its skillset rows from
- * battle_menu_build_unit_action_menus, every row but type 0x0D disabled in deep water, disabled
+ * skillset_build_menu_list, every row but type 0x0D disabled in deep water, disabled
  * rows grayed and opening the ability list silently, an Anything row when that script variable is
  * set, and the entry sized to the rows. */
-static void menu_build_skillset_entries(void) {
+static void command_build_act_menu(void) {
     menu_text_row_t* rows;
     s32 count = 0;
     s32 i;
     s16 height;
     u8 separator;
 
-    g_menu_selected_skill_ct = 0;
-    g_menu_skillsets[0] = 0;
-    g_menu_skillset_build_result = battle_menu_build_unit_action_menus(
-        g_menu_selected_unit.battle_id, g_menu_skillsets, g_menu_skillset_disabled_flags, g_action_menu_row_types);
+    g_command_selected_skill_ct = 0;
+    g_command_skillsets[0] = 0;
+    g_command_skillset_build_result = skillset_build_menu_list(g_unit_panel_selected_unit.battle_id,
+        g_command_skillsets, g_command_skillset_disabled_flags, g_menu_skillset_types);
     rows = (menu_text_row_t*)text_find_entry(0x5010);
-    if (battle_unit_get_action_restriction(menu_get_selected_unit_stats())
-        == BATTLE_UNIT_ACTION_RESTRICTION_DEEP_WATER) {
+    if (unit_get_action_restriction(menu_get_selected_unit_stats()) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
         for (i = 0; i < 6; i++) {
-            g_menu_skillset_disabled_flags[i] = 1;
-            if (g_action_menu_row_types[i] == ACTION_MENU_TYPE_UNKNOWN_0D) {
-                g_menu_skillset_disabled_flags[i] = 0;
+            g_command_skillset_disabled_flags[i] = 1;
+            if (g_menu_skillset_types[i] == ACTION_MENU_TYPE_UNKNOWN_0D) {
+                g_command_skillset_disabled_flags[i] = 0;
             }
         }
     }
@@ -1709,28 +1710,28 @@ static void menu_build_skillset_entries(void) {
     }
     for (i = 0; i < 6; i++) {
         rows[i].terminator = 0xfa;
-        if (g_menu_skillsets[i] == SKILLSET_ID_NONE) {
+        if (g_command_skillsets[i] == SKILLSET_ID_NONE) {
             break;
         }
-        if (g_menu_skillset_disabled_flags[i] != 0) {
+        if (g_command_skillset_disabled_flags[i] != 0) {
             rows[i].style = 4;
-            g_menu_skillset_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_LIST;
+            g_command_skillset_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_LIST;
         } else {
             rows[i].style = 0;
-            g_menu_skillset_row_actions[i] = MENU_COMMAND_ID_ABILITY_LIST;
+            g_command_skillset_row_actions[i] = MENU_COMMAND_ID_ABILITY_LIST;
         }
-        if (g_menu_skillset_build_result != 0) {
+        if (g_command_skillset_build_result != 0) {
             g_text_substitution_values[count] = TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
         } else {
-            g_text_substitution_values[count] = g_menu_skillsets[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
+            g_text_substitution_values[count] = g_command_skillsets[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
         }
         count++;
     }
     if (script_get_variable(EVENT_SCRIPT_VAR_ANYTHING_ACTION_ENABLED) != 0 && i < 6) {
         rows[i].style = 0;
-        g_menu_skillset_row_actions[i] = 0x16;
-        g_menu_skillsets[i] = ACTION_MENU_PSEUDO_SKILLSET_ANYTHING;
-        g_menu_skillsets[i + 1] = SKILLSET_ID_NONE;
+        g_command_skillset_row_actions[i] = 0x16;
+        g_command_skillsets[i] = ACTION_MENU_PSEUDO_SKILLSET_ANYTHING;
+        g_command_skillsets[i + 1] = SKILLSET_ID_NONE;
         g_text_substitution_values[count++] = TEXT_ID_SKILLSET_NAME_SOURCE_BASE + ACTION_MENU_PSEUDO_SKILLSET_ANYTHING;
     }
     height = count * 16 + 16;
@@ -1745,19 +1746,19 @@ static void menu_build_skillset_entries(void) {
  * The completion value written to the thread's
  * second parameter is materialized before the branch, which puts `li v1,1`
  * in the beqz delay slot ahead of the SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST argument. */
-void menu_run_skillset_thread(void) {
+void command_act_menu_thread(void) {
     s32 param_value;
     menu_unit_selection_record_t* row;
     s32* param;
 
-    menu_check_action_restrictions();
-    g_thread_call_target = menu_build_skillset_entries;
+    command_check_restrictions();
+    g_thread_call_target = command_build_act_menu;
     thread_call_on_main_stack();
     param_value = 1;
-    if (g_menu_skillset_build_result != 0) {
+    if (g_command_skillset_build_result != 0) {
         g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = 0;
         if (g_menu_restore_pending == 0) {
-            thread_start(g_thread_current_id - 1, menu_select_unit_action_slots_thread);
+            thread_start(g_thread_current_id - 1, command_ability_list_thread);
             thread_set_parameters(
                 g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST], 0, 0);
         } else {
@@ -1772,10 +1773,10 @@ void menu_run_skillset_thread(void) {
     }
     param = &g_thread_contexts[g_thread_current_id].function_parameter_2;
     *param = param_value;
-    row = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
+    row = &g_menu_unit_selection_records[g_unit_panel_selected_unit.battle_id];
     g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = row->skillset_index;
     g_menu_restore_depth = 1;
-    script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST);
+    tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST);
     menu_run_icon_selection_loop();
     row->skillset_index = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
     thread_exit_current();
@@ -1783,15 +1784,15 @@ void menu_run_skillset_thread(void) {
 
 /* Record the current menu's selection byte for the selected unit, when that
  * menu appears in the tracked menu-id table. */
-void menu_record_selection_for_selected_unit(void) {
+void command_record_unit_selection(void) {
     menu_unit_selection_record_t* records;
-    s16* selected = &g_menu_selected_unit.battle_id;
+    s16* selected = &g_unit_panel_selected_unit.battle_id;
     s32 i;
 
     records = g_menu_unit_selection_records;
     for (i = 0; i < 12; i++) {
-        if (g_menu_current_id == g_menu_command_maps[i].menu_id) {
-            records[*selected].command_index = g_menu_thread_menu_data[g_menu_current_id].selected_index;
+        if (g_command_current_id == g_command_command_maps[i].menu_id) {
+            records[*selected].command_index = g_menu_thread_menu_data[g_command_current_id].selected_index;
         }
     }
 }
@@ -1799,10 +1800,10 @@ void menu_record_selection_for_selected_unit(void) {
 /* Thread entry of the turn menus (entries 0x00, 0x0e, 0x13, 0x14, 0x20, 0x21 and
  * 0x2e-0x33 of the idle action menu table): run the icon selection loop, then
  * remember the chosen row for the active-turn unit and exit. */
-void menu_run_turn_menu_thread(void) {
+void command_turn_menu_thread(void) {
     menu_entry_t* parameter = (menu_entry_t*)thread_get_current_parameter_1();
     menu_unit_selection_record_t* record;
-    s32 unit_id = g_menu_selected_unit.battle_id;
+    s32 unit_id = g_unit_panel_selected_unit.battle_id;
 
     record = &g_menu_unit_selection_records[unit_id];
     /* A nonzero second parameter makes the icon loop return here instead of exiting. */

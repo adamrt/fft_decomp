@@ -48,7 +48,7 @@ extern s32 g_script_next_event_id;
 void script_load_event(s32 id);
 s32 script_load_next_event(void);
 void script_reset_event_state(void);
-s32 script_get_current_scenario_finish_operation(void);
+s32 scenario_get_finish_operation(void);
 u32 script_get_event_finish_operation(void);
 
 /* interpreter */
@@ -66,7 +66,7 @@ typedef enum script_event_frame_result {
 
 extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
-extern s16 g_script_scenario_event_active;
+extern s16 g_scenario_scenario_event_active;
 extern s16 g_script_threads_idle;
 extern u8 g_event_thread_status_snapshot[]; /* per-thread running flags sampled before the yield, indexed 1..15 */
 
@@ -79,8 +79,8 @@ s32 script_run_event_frame(u32* ot, u32 buttons);
 void script_frame_after_requests_stub(void);
 void script_frame_after_threads_stub(void);
 void script_set_event_speed(s32 speed);
-s32 script_run_frame_and_check_deployment(u32* ot, u32 buttons);
-s32 script_is_tutorial_event_slot(void);
+s32 deploy_run_frame_and_check(u32* ot, u32 buttons);
+s32 tutorial_is_current_event(void);
 
 /* opcode handlers */
 void script_opcode_16_pause(void);
@@ -122,7 +122,7 @@ void script_opcode_99_blue_remove_unit(s32 unit_id);
 typedef enum script_attack_entry_mode {
     SCRIPT_ATTACK_ENTRY_NORMAL = 1,       /* set when an event thread starts */
     SCRIPT_ATTACK_ENTRY_PRELOADED = 2,    /* script_opcode_82_load_attack_graphics ran */
-    SCRIPT_ATTACK_ENTRY_PRELOAD_USED = 3, /* menu_init_attack_resources_and_threads skipped its loads */
+    SCRIPT_ATTACK_ENTRY_PRELOAD_USED = 3, /* deploy_open skipped its loads */
 } script_attack_entry_mode_e;
 
 extern u16 g_script_attack_entry_mode; /* script_attack_entry_mode_e */
@@ -136,10 +136,10 @@ s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 
 s16 script_read_s16(const void* source);
 
 /* scenario conditions */
-extern u8 g_script_condition_param_lengths[];
-extern s32 g_script_condition_unit_battle_id;
+extern u8 g_scenario_condition_param_lengths[];
+extern s32 g_scenario_condition_unit_battle_id;
 
-s32 script_run_scenario_conditions(void);
+s32 scenario_run_conditions(void);
 
 /* values */
 extern s32 g_script_rand16_state;
@@ -149,7 +149,7 @@ void script_clamp_s32_to_range(s32* value, s32 minimum, s32 maximum);
 s32 script_scale_music_volume(s32 volume);
 
 /* calendar */
-void script_advance_date_by_one_year(void);
+void calendar_advance_one_year(void);
 
 /* units */
 /* Four unit bindings used by the scenario's slot selectors. */
@@ -157,14 +157,14 @@ extern s16 g_script_unit_slots[EVENT_UNIT_SELECTOR_SLOT_COUNT];
 
 /* Event-unit lookup uses the resident scene's interpreter state. */
 s32 script_resolve_runtime_id(s32 unit_id);
-void script_join_units_silently(void);
+void party_join_event_units(void);
 void script_blue_remove_all_enemy_units(void);
 void script_inflict_status_thread(void);
 void script_process_inflict_status_commands(void);
 void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
 
 /* unit movement */
-extern map_tile_coordinates_t g_script_warp_coords;
+extern battle_map_tile_coordinates_t g_script_warp_coords;
 
 /* Task words of a sprite-move thread. The SpriteMove instruction and the
  * thread itself store the moving unit's runtime id; WaitSpriteMove matches it. */
@@ -196,7 +196,7 @@ void script_focus(event_focus_parameters_t* parameters);
 void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values);
 
 /* screen and map */
-/* Script-driven map light transform that map_light_thread interpolates. */
+/* Script-driven map light transform that battle_map_light_thread interpolates. */
 extern SVECTOR g_script_light_angles;
 extern VECTOR g_script_light_scale;
 extern MATRIX g_script_light_base_direction_matrix;
@@ -232,7 +232,7 @@ extern s32 g_event_pending_reserved_vram_release_slot;
 extern s32 g_event_pending_unit_vram_copy;
 
 /* controller input */
-/* The values script_pulse_tutorial_wait_value holds in EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu
+/* The values tutorial_pulse_wait_value holds in EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu
  * screen opens, so that a tutorial script can wait for it. A system function pulses its own id
  * instead. */
 typedef enum script_tutorial_wait_value {
@@ -260,7 +260,7 @@ u32 script_get_event_initial_repeat_counter(void);
 void script_set_current_otag_entry_and_update_input(u32* entry, s32 input);
 void script_update_event_input_state(u32 buttons);
 void script_load_event_input_state(const menu_input_state_t* saved);
-void script_pulse_tutorial_wait_value(s32 value);
+void tutorial_pulse_wait_value(s32 value);
 
 /* debug */
 extern const char g_script_pause_message[];

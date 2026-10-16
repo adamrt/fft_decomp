@@ -116,7 +116,7 @@ void formation_init_display(void) {
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
     gfx_load_image_and_wait(&g_formation_status_label_image_rect, g_formation_status_label_image);
-    g_menu_help_message_text_id = 0;
+    g_help_message_text_id = 0;
     menu_init_scrollable_list_core(0, 0, 0);
     screen_fade_start_decreasing();
     menu_clear_selection_values();

@@ -315,7 +315,7 @@ typedef struct world_map_cursor_level {
     s32 pending_mode;     /* 0x10 */
 } world_map_cursor_level_t;
 
-/* The MAP_LOCATION_VISIBILITY level pushed by world_map_push_location_visibility_level and stepped by
+/* The BATTLE_MAP_LOCATION_VISIBILITY level pushed by world_map_push_location_visibility_level and stepped by
  * world_map_step_location_visibility_level; only the first four fields are known. */
 typedef struct world_map_visibility_level {
     s32 dot_index;     /* 0x00; map dot, and script variable 0x200 + dot_index */
@@ -326,7 +326,7 @@ typedef struct world_map_visibility_level {
 } world_map_visibility_level_t;
 typedef char wldcore_map_visibility_level_size_must_be_92[sizeof(world_map_visibility_level_t) == 92 ? 1 : -1];
 
-/* Provisional: the MAP_PATH level pushed by world_map_push_path_level, decoded from the four fields it
+/* Provisional: the BATTLE_MAP_PATH level pushed by world_map_push_path_level, decoded from the four fields it
  * writes. Its step handler world_map_step_path_level reads only the last two. The first two are the script's
  * path arguments, which location_script_dispatch_requests passes from g_location_script_state.args. Only
  * the first four fields of the slot are known. */

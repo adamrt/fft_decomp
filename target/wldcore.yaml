@@ -71,7 +71,7 @@ functions:
   - {addr: 0x80069e58, size: 172, name: calendar_write_date, hash: a100a01dd3458fa8, unit: resources}
   - {addr: 0x80069f04, size: 276, name: calendar_read_date, hash: 337a6e03c2eb3680, unit: resources}
   - {addr: 0x8006a018, size: 148, name: world_map_clear_vram_and_scratch, hash: 6d07a88a3d3e8359, unit: resources}
-  - {addr: 0x8006a0ac, size: 76, name: unit_birthday_calculate_day_of_year, hash: efdeb3089d1c7472}
+  - {addr: 0x8006a0ac, size: 76, name: calendar_calculate_day_of_year, hash: efdeb3089d1c7472}
   - {addr: 0x8006a0f8, size: 72, name: calendar_calculate_month_and_day, hash: 65bc42f96d71e765, unit: map_tiles}
   - {addr: 0x8006a140, size: 1100, name: world_map_toggle_captured_frame, hash: 78cf845743021b10, unit: map_tiles}
   - {addr: 0x8006a58c, size: 764, name: world_map_init_tile_atlas, hash: d59a2e4f5886bb67, unit: map_tiles}
@@ -489,7 +489,7 @@ data:
   - {addr: 0x8009e470, name: g_message_block_sector_offsets}
   - {addr: 0x8009e634, name: g_sound_novel_script_sector_offsets}
   - {addr: 0x8009e650, name: g_sound_novel_text_sector_offsets}
-  - {addr: 0x8009e66c, name: g_unit_birthday_month_lengths}
+  - {addr: 0x8009e66c, name: g_calendar_month_lengths}
   - {addr: 0x8009e678, name: g_calendar_zodiac_start_dates}
   - {addr: 0x8009e690, name: g_menu_stack_idle_handlers}
   - {addr: 0x8009e774, name: g_menu_stack_resume_handlers}

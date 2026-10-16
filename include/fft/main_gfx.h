@@ -87,8 +87,8 @@ typedef char
 
 /* Resident unit-graphics queue, filled and consumed by the BATTLE loader. */
 typedef struct unit_graphics_load_queue {
-    s32 count;                                                                   /* 0x00 */
-    unit_graphics_load_descriptor_t descriptors[BATTLE_UNIT_RUNTIME_SLOT_COUNT]; /* 0x04 */
+    s32 count;                                                            /* 0x00 */
+    unit_graphics_load_descriptor_t descriptors[UNIT_RUNTIME_SLOT_COUNT]; /* 0x04 */
 } unit_graphics_load_queue_t;
 typedef char main_gfx_unit_graphics_load_queue_size_must_be_324[(sizeof(unit_graphics_load_queue_t) == 324) ? 1 : -1];
 

@@ -244,7 +244,7 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
     }
 
     i = 0; /* reused as the swap flag (the target keeps it in i's register) */
-    if (g_formation_unit_pointers[unit_index]->support_abilities[2] & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
+    if (g_formation_unit_pointers[unit_index]->support_abilities[2] & UNIT_SUPPORT_SET_3_MARTIAL_ARTS) {
         equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
         equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
@@ -403,7 +403,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
     }
 
     i = 0; /* reused as the swap flag, as in the sibling */
-    if (g_formation_unit_pointers[unit_index]->support_abilities[2] & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
+    if (g_formation_unit_pointers[unit_index]->support_abilities[2] & UNIT_SUPPORT_SET_3_MARTIAL_ARTS) {
         out[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
         out[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }

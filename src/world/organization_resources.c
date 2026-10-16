@@ -87,7 +87,7 @@ void world_map_destination_list_thread(void) {
     }
     g_menu_thread_menu_data[6].selected_index = selected;
     g_menu_thread_menu_data[6].window.y = (7 - g_world_map_destination_list_layout.columns.row_count) * 8 - 0x48;
-    menu_run_scrolling_ability_list_thread();
+    ability_list_scrolling_thread();
 }
 
 /* Menu action of the location list: unless the current location (row color 4) is chosen,
@@ -96,14 +96,14 @@ void world_map_destination_list_thread(void) {
  *
  * Slot 0 is stored through a plain pointer on purpose: `pending[0]` is a
  * scalar reference there, so the scheduler may sink it below the text-id
- * load as in the target. Writing g_menu_pending_selection[0] marks the
+ * load as in the target. Writing g_command_pending_selection[0] marks the
  * store as an array element and keeps it above that load. */
 void world_map_confirm_destination(void) {
     s32 selection = g_menu_thread_menu_data[6].selected_index;
     s16 value;
 
     if (g_world_map_destination_list_row_colors[selection] != 4) {
-        s16* pending = g_menu_pending_selection;
+        s16* pending = g_command_pending_selection;
 
         g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
         pending[0] = 0;
@@ -138,7 +138,7 @@ void screen_build_submenu_page(void) {
         g_screen_submenu_page_layout.columns.row_count = 7;
         g_screen_submenu_page_layout.columns.hidden_rows = count - 7;
     }
-    menu_run_scrolling_ability_list_thread();
+    ability_list_scrolling_thread();
 }
 
 /* Preset the selected row of default menu entry 4. */
@@ -153,10 +153,10 @@ void screen_noop(void) {
 /* Read WLDFACE.BIN into a heap buffer, upload its four portrait sheets to their VRAM
  * rectangles and free the buffer once the transfers finish. */
 static void screen_load_wldface_portraits(void) {
-    menu_portrait_sheet_t* sheets;
+    portrait_sheet_t* sheets;
 
     g_thread_call_target = file_load_checked_to_heap;
-    sheets = (menu_portrait_sheet_t*)thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE);
+    sheets = (portrait_sheet_t*)thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE);
     LoadImage(&g_screen_wldface_vram_rects, (u32*)sheets[0].pixels);
     LoadImage(&g_screen_wldface_vram_rect_1, (u32*)sheets[1].pixels);
     LoadImage(&g_screen_wldface_vram_rect_2, (u32*)sheets[2].pixels);
@@ -1081,7 +1081,7 @@ extern u32 g_screen_current_input, g_screen_previous_input, g_screen_initial_rep
  * (masked by the allowed-button mask and cleared while any of the six
  * g_formation_open_request_state.. flags is set), runs the formation/memory-card request
  * updates, publishes the input, yields once while tracking thread status
- * changes and returns the menu result slot g_menu_pending_selection[0] (-2 while pending).
+ * changes and returns the menu result slot g_command_pending_selection[0] (-2 while pending).
  * WORLD's sibling of menu_input_update_event_state. */
 s16 screen_menu_frame(u32* otag, u32 input) {
     s32 profile = g_game_options.fields.finger_cursor_repeat_speed;
@@ -1174,7 +1174,7 @@ s16 screen_menu_frame(u32* otag, u32 input) {
     world_map_step_tutorial_request();
     world_map_step_debug_variable_list_request();
     world_map_step_fixed_number_panel_request();
-    g_menu_pending_selection[0] = -2;
+    g_command_pending_selection[0] = -2;
     g_gfx_current_otag_entry = otag;
     g_sound_pending_sfx_id = -1;
     menu_draw_active_window_frames();
@@ -1197,22 +1197,22 @@ s16 screen_menu_frame(u32* otag, u32 input) {
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;
     }
-    if (g_menu_companion_executable_request_index != 0) {
-        g_menu_companion_executable_request_index = 0;
+    if (g_overlay_companion_executable_request_index != 0) {
+        g_overlay_companion_executable_request_index = 0;
     }
     g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_sound_pending_sfx_id != -1) {
         sound_play_sfx_on_free_channel(g_sound_pending_sfx_id);
     }
-    if (g_menu_pending_selection[0] == 0) {
-        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_menu_pending_selection[1]);
+    if (g_command_pending_selection[0] == 0) {
+        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_command_pending_selection[1]);
         g_system_flags |= SYSTEM_FLAG_REQUEST_DESTINATION;
     }
     if (g_menu_input_block_frames != 0) {
         g_menu_input_block_frames--;
     }
-    return g_menu_pending_selection[0];
+    return g_command_pending_selection[0];
 }
 
 /* Opens menu entry `index` in THREAD_SLOT_MENU, first placing its window at the default

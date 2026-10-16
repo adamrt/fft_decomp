@@ -42,14 +42,14 @@ enum {
 /* elements */
 /* Element bits shared by abilities, equipment, jobs and unit affinity sets. */
 typedef enum element_flags {
-    BATTLE_ELEMENT_DARK = 0x01,
-    BATTLE_ELEMENT_HOLY = 0x02,
-    BATTLE_ELEMENT_WATER = 0x04,
-    BATTLE_ELEMENT_EARTH = 0x08,
-    BATTLE_ELEMENT_WIND = 0x10,
-    BATTLE_ELEMENT_ICE = 0x20,
-    BATTLE_ELEMENT_LIGHTNING = 0x40,
-    BATTLE_ELEMENT_FIRE = 0x80,
+    ELEMENT_DARK = 0x01,
+    ELEMENT_HOLY = 0x02,
+    ELEMENT_WATER = 0x04,
+    ELEMENT_EARTH = 0x08,
+    ELEMENT_WIND = 0x10,
+    ELEMENT_ICE = 0x20,
+    ELEMENT_LIGHTNING = 0x40,
+    ELEMENT_FIRE = 0x80,
 } element_flags_e;
 
 /* Shared ordering for job, item-attribute, and runtime unit affinity arrays.

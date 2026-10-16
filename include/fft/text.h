@@ -29,7 +29,7 @@ extern glyph_blit_t g_text_small_number_glyph_rect; /* source of the small 6x10 
 
 /* encoded text */
 /* Encoded menu-string controls. The 0xe2-0xfd meanings come from the dialog
- * interpreter branches (text_run_dialog_thread and its WORLD
+ * interpreter branches (message_dialog_thread and its WORLD
  * twin) and, for 0xe7, the menu text-image renderers; codes with an operand
  * consume the following byte. F5/F6 are the {0xF5xx}{0xF6xx} "Alter String"
  * controls. The 0xe0-0xeb substitution codes are text_format_code_e. */
@@ -136,7 +136,7 @@ typedef enum text_id_base {
     TEXT_ID_TIP_NAME_BASE = 0x8000,
     TEXT_ID_WORLD_MESSAGE_BASE = 0x8800, /* the block of WORLD/WLDMES.BIN that is loaded */
     TEXT_ID_FACT_NAME_BASE = 0x9800,
-    TEXT_ID_MAP_NAME_BASE = 0xa800,   /* by map_id_e less one */
+    TEXT_ID_MAP_NAME_BASE = 0xa800,   /* by battle_map_id_e less one */
     TEXT_ID_WORLD_MENU_BASE = 0xb800, /* world_map_text_id_e */
     TEXT_ID_TUTORIAL_NAME_BASE = 0xc000,
     TEXT_ID_RUMOR_NAME_BASE = 0xc800,
@@ -314,7 +314,7 @@ typedef struct menu_digit_glyph {
 } menu_digit_glyph_t;
 typedef char menu_digit_glyph_size_must_be_16[sizeof(menu_digit_glyph_t) == 16 ? 1 : -1];
 
-extern s32 g_menu_hide_numeric_values;         /* non-zero: draw digits as blanks (0x48, 0x10) */
+extern s32 g_unit_panel_hide_numeric_values;   /* non-zero: draw digits as blanks (0x48, 0x10) */
 extern glyph_blit_t g_menu_large_number_glyph; /* source of the large 8x15 number and sign glyphs */
 extern const char g_text_decimal_format[];
 extern u32 g_text_decimal_divisors[];
@@ -372,7 +372,7 @@ typedef enum dialog_options {
 } dialog_options_e;
 
 /* Text window record of the dialog and message-box threads, rendered by
- * menu_render_text_image_at_record_origin and WORLD's message_box_render_text_image: they build an
+ * message_render_record_image and WORLD's message_box_render_text_image: they build an
  * image buffer (the window builder when box_type is 0x10), draw `text` into
  * it and upload `rect`. */
 typedef struct text_dialog_record {
@@ -407,7 +407,7 @@ typedef struct text_dialog_record {
     s32 y_offset;      /* 0x4c: DisplayMessage Y coordinate, added to y */
 } text_dialog_record_t;
 
-void menu_render_text_image_at_record_origin(text_dialog_record_t* record);
+void message_render_record_image(text_dialog_record_t* record);
 
 /* Task words of a dialog thread, which the DisplayMessage instruction fills
  * before the thread runs; its other starters set only the y offset. */
@@ -420,18 +420,18 @@ enum {
 };
 
 extern s32 g_text_current_line;
-extern u16 g_text_speaker_swap_unit_a;
-extern u16 g_text_speaker_swap_unit_b;
-extern char g_text_wait_for_allocation_message[];
+extern u16 g_message_speaker_swap_unit_a;
+extern u16 g_message_speaker_swap_unit_b;
+extern char g_message_wait_for_allocation_message[];
 
 void text_init_section_pointers(void);
 /* BATTLE and WORLD each have their own body. */
-void text_run_dialog_thread(void);
-void text_run_spell_quote_thread(void);
+void message_dialog_thread(void);
+void announcement_spell_quote_thread(void);
 
 /* typewriter glyphs */
-/* One pending text glyph: g_text_typewriter_glyph, which text_run_dialog_thread fills and
- * text_draw_glyph_with_typewriter_delay draws, and WORLD's message-box glyph g_message_box_glyph
+/* One pending text glyph: g_message_typewriter_glyph, which message_dialog_thread fills and
+ * message_draw_glyph_with_delay draws, and WORLD's message-box glyph g_message_box_glyph
  * (message_box_thread). The typewriter's menu text state and VRAM rectangle follow it in memory but
  * are separate globals. */
 typedef struct text_glyph_state {
@@ -444,7 +444,7 @@ typedef struct text_glyph_state {
 } text_glyph_state_t;
 typedef char text_glyph_state_size_must_be_16[(sizeof(text_glyph_state_t) == 16) ? 1 : -1];
 
-extern text_glyph_state_t g_text_typewriter_glyph;
+extern text_glyph_state_t g_message_typewriter_glyph;
 extern s32 g_text_glyphs_per_wait;
 /* The three per-thread staging slots the typewriter draws glyphs through. */
 extern s32 g_text_slot_owner_thread_ids[3];
@@ -453,21 +453,21 @@ extern u8 g_text_slot_source_columns[];
 extern u8 g_text_slot_row_pitches[];
 
 /* Frees the slot the current thread owns; a closing dialog thread calls it. */
-void text_release_typewriter_slot(void);
-/* Draws g_text_typewriter_glyph into VRAM, then paces the message: delay 0 waits for the draw, 2 or more waits
+void message_release_typewriter_slot(void);
+/* Draws g_message_typewriter_glyph into VRAM, then paces the message: delay 0 waits for the draw, 2 or more waits
  * that many steps per glyph and 1 follows the message speed option. */
-void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay);
+void message_draw_glyph_with_delay(s32 pen_x, s32 pen_y, s32 delay);
 
 /* messages */
-extern u16 g_text_message_duration_frames;
+extern u16 g_message_message_duration_frames;
 extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
-extern s32 g_text_spell_quote_last_ability_id;
-extern u8 g_text_spell_quote_exception_skillsets[];
+extern s32 g_announcement_spell_quote_last_ability_id;
+extern u8 g_announcement_spell_quote_exception_skillsets[];
 
-void text_build_display_message(s32 offset, s32 flags, s32* out_width);
-void text_set_message_duration_frames(u16 frames);
+void message_build_display(s32 offset, s32 flags, s32* out_width);
+void message_set_duration(u16 frames);
 /* Picks the spell quote or the plain ability-name announcement for an action. */
-void text_select_ability_announcement(struct action_command* action, s32 unit_id, s32 enabled);
+void announcement_select(struct action_command* action, s32 unit_id, s32 enabled);
 
 /* text threads */
 extern s32 g_menu_text_active_key;

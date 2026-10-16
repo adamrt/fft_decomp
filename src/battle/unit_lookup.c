@@ -33,30 +33,30 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static SVECTOR g_battle_gte_rtpt_vxy0 = { 0 };
-static SVECTOR g_battle_gte_rtpt_vxy1 = { 0 };
-static SVECTOR g_battle_gte_rtpt_vxy2 = { 0 };
-static SVECTOR g_battle_gte_rtps_vxy0 = { 0 };
+static SVECTOR g_sprite_gte_rtpt_vxy0 = { 0 };
+static SVECTOR g_sprite_gte_rtpt_vxy1 = { 0 };
+static SVECTOR g_sprite_gte_rtpt_vxy2 = { 0 };
+static SVECTOR g_sprite_gte_rtps_vxy0 = { 0 };
 
-static void battle_gfx_init_render_frame(void);
-static void battle_gfx_init_render_state(void);
+static void sprite_init_render_frame(void);
+static void sprite_init_render_state(void);
 
 /* Uploads the fixed CLUTs of the sprite row: 1 and 2 the cursor tile glow palettes,
  * 3 the wait-direction arrow, 4 the map selection cursor, 5 the shadow and 7 the
  * status bubble. */
-static void battle_gfx_load_fixed_sprite_cluts(void) {
+static void sprite_palette_load_fixed_cluts(void) {
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    battle_map_load_palette_data(&g_battle_gfx_tile_glow_palettes[0], MAP_CLUT_ROW_SPRITES, 1, 0);
-    battle_map_load_palette_data(&g_battle_gfx_tile_glow_palettes[1], MAP_CLUT_ROW_SPRITES, 2, 0);
-    battle_map_load_palette_data(&g_battle_gfx_wait_direction_arrow_palette, MAP_CLUT_ROW_SPRITES, 3, 0);
-    battle_map_load_palette_data(&g_battle_gfx_map_selection_cursor_palette, MAP_CLUT_ROW_SPRITES, 4, 0);
-    battle_map_load_palette_data(&g_battle_gfx_shadow_palette, MAP_CLUT_ROW_SPRITES, 5, 0);
-    battle_map_load_palette_data(&g_battle_gfx_status_bubble_palette, MAP_CLUT_ROW_SPRITES, 7, 0);
+    battle_map_palette_load_data(&g_cursor_tile_glow_palettes[0], BATTLE_MAP_CLUT_ROW_SPRITES, 1, 0);
+    battle_map_palette_load_data(&g_cursor_tile_glow_palettes[1], BATTLE_MAP_CLUT_ROW_SPRITES, 2, 0);
+    battle_map_palette_load_data(&g_unit_facing_wait_arrow_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 3, 0);
+    battle_map_palette_load_data(&g_cursor_map_selection_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 4, 0);
+    battle_map_palette_load_data(&g_sprite_shadow_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 5, 0);
+    battle_map_palette_load_data(&g_status_bubble_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 7, 0);
 }
 
-/* Empty. battle_state_run_deployment calls it each frame while the map is still being set up. */
-static void battle_state_deployment_frame_stub(void) {
+/* Empty. state_run_map_load calls it each frame while the map is still being set up. */
+static void deploy_frame_stub(void) {
 }
 
 /* Load the battle map, its units, sprites, event and music, showing a loading screen.
@@ -67,13 +67,13 @@ static void battle_state_deployment_frame_stub(void) {
  * (done), then fades back out to black. Otherwise the NOW LOADING display is
  * drawn instead. The fade polygons subtract their gray level from the screen, so
  * 0xff is black and 0 leaves the picture as drawn. The battle starts from a black
- * screen (g_battle_screen_fade_intensity 0xff).
+ * screen (g_fade_intensity 0xff).
  *
  * banner_p and the loop's fade = 0xff reproduce the target's preheader order and
  * register choice for the hoisted color. The dead fade = 0 before done keeps the
  * step-0xd exit inline ahead of the per-frame path, as in the target; with a
  * plain break GCC moves that block to the loop tail. */
-static void battle_state_run_deployment(void) {
+static void state_run_map_load(void) {
     RECT window = { 0, 0, 0, 0 };
     POLY_FT4 banner[2];
     u8 show_banner;
@@ -81,28 +81,28 @@ static void battle_state_run_deployment(void) {
     s16 fade;
     POLY_FT4* banner_p;
 
-    battle_state_init_deployment_display(0x100, 0xf0, 0x200, 0, 0, 0);
+    deploy_init_display(0x100, 0xf0, 0x200, 0, 0, 0);
     show_banner = g_system_go_straight_to_battle;
     if (script_get_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS) != 0) {
         show_banner = 0;
     }
-    g_battle_deployment_skipped = menu_init_attack_resources_and_threads();
-    loading_build_message_centered(g_battle_deployment_skipped);
+    g_deploy_skipped = deploy_open();
+    loading_build_message_centered(g_deploy_skipped);
     map_id = g_battle_map_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
-    g_battle_state_map_init_step = 0;
-    g_battle_deployment_finished = 0;
+    g_state_map_init_step = 0;
+    g_deploy_finished = 0;
 
-    SetPolyF4(&g_battle_screen_fade_polygons[0]);
-    setRGB0(&g_battle_screen_fade_polygons[0], 0, 0, 0);
-    setXY4(&g_battle_screen_fade_polygons[0], 0x80, 0, 0x180, 0, 0, 0x100, 0x180, 0x100);
-    SetSemiTrans(&g_battle_screen_fade_polygons[0], 1);
-    g_battle_screen_fade_polygons[1] = g_battle_screen_fade_polygons[0];
-    g_battle_gfx_screen_modulation_polygons[0] = g_battle_screen_fade_polygons[0];
-    g_battle_gfx_screen_modulation_polygons[1] = g_battle_screen_fade_polygons[0];
-    SetDrawMode(&g_battle_screen_fade_draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &window);
-    g_battle_screen_fade_draw_modes[1] = g_battle_screen_fade_draw_modes[0];
-    g_battle_gfx_screen_modulation_draw_modes[0] = g_battle_screen_fade_draw_modes[0];
-    g_battle_gfx_screen_modulation_draw_modes[1] = g_battle_screen_fade_draw_modes[0];
+    SetPolyF4(&g_fade_polygons[0]);
+    setRGB0(&g_fade_polygons[0], 0, 0, 0);
+    setXY4(&g_fade_polygons[0], 0x80, 0, 0x180, 0, 0, 0x100, 0x180, 0x100);
+    SetSemiTrans(&g_fade_polygons[0], 1);
+    g_fade_polygons[1] = g_fade_polygons[0];
+    g_fade_tint_polygons[0] = g_fade_polygons[0];
+    g_fade_tint_polygons[1] = g_fade_polygons[0];
+    SetDrawMode(&g_fade_draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &window);
+    g_fade_draw_modes[1] = g_fade_draw_modes[0];
+    g_fade_tint_draw_modes[0] = g_fade_draw_modes[0];
+    g_fade_tint_draw_modes[1] = g_fade_draw_modes[0];
 
     ((P_TAG*)&banner[0])->len = 9;
     banner[0].code = 0x2c;
@@ -121,47 +121,45 @@ static void battle_state_run_deployment(void) {
     if (show_banner != 0) {
         do {
             gfx_swap_and_clear_battle_otag();
-            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
-            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
-            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_gfx_screen_polarity]);
-            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_gfx_screen_polarity]);
+            (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
+            (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
+            (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
+            AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
             AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-            g_system_battle_frame_hsync_count
-                = battle_state_sync_and_submit_deployment_frame(gfx_get_battle_otag() + 0x17f);
+            g_system_battle_frame_hsync_count = deploy_sync_and_submit_frame(gfx_get_battle_otag() + 0x17f);
             fade -= 8;
         } while (fade >= 0);
     }
 
     banner_p = banner;
     fade = 0xff;
-    while (battle_state_update_deployment_controller_input() != -1) {
+    while (deploy_update_controller_input() != -1) {
         gfx_swap_and_clear_battle_otag();
         if (show_banner != 0) {
             AddPrim(gfx_get_battle_otag(), &banner_p[g_gfx_screen_polarity]);
         } else {
             loading_add_to_otag(gfx_get_battle_otag());
         }
-        g_battle_state_map_init_step = battle_map_step_deployment_init_sequence(map_id, g_battle_state_map_init_step,
-            script_run_frame_and_check_deployment(gfx_get_battle_otag(), g_input_current_buttons));
-        if (g_battle_state_map_init_step == 0xd) {
-            battle_gfx_load_fixed_sprite_cluts();
-            battle_state_enter_event_at_battle_start();
-            g_battle_screen_fade_intensity = fade;
+        g_state_map_init_step = battle_map_step_deployment_init_sequence(
+            map_id, g_state_map_init_step, deploy_run_frame_and_check(gfx_get_battle_otag(), g_input_current_buttons));
+        if (g_state_map_init_step == 0xd) {
+            sprite_palette_load_fixed_cluts();
+            state_enter_event_at_battle_start();
+            g_fade_intensity = fade;
             /* Not `break`: jump optimization would move this exit block
              * past the loop end, which the target keeps inline. */
             goto done;
         }
-        battle_state_deployment_frame_stub();
-        (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
-        (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
-        (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-        AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_gfx_screen_polarity]);
-        AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_gfx_screen_polarity]);
+        deploy_frame_stub();
+        (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
+        (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
+        (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
+        AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
+        AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
         g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-        g_system_battle_frame_hsync_count
-            = battle_state_sync_and_submit_deployment_frame(gfx_get_battle_otag() + 0x17f);
+        g_system_battle_frame_hsync_count = deploy_sync_and_submit_frame(gfx_get_battle_otag() + 0x17f);
         file_poll_load(&g_file_cd_state);
         system_frame_stub();
     }
@@ -175,15 +173,14 @@ done:
                 fade = 0xff;
             }
             gfx_swap_and_clear_battle_otag();
-            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
-            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
-            (g_battle_screen_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_gfx_screen_polarity]);
-            AddPrim(gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_gfx_screen_polarity]);
+            (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
+            (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
+            (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
+            AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
             AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-            g_system_battle_frame_hsync_count
-                = battle_state_sync_and_submit_deployment_frame(gfx_get_battle_otag() + 0x17f);
+            g_system_battle_frame_hsync_count = deploy_sync_and_submit_frame(gfx_get_battle_otag() + 0x17f);
             fade += 8;
         } while (fade < 0x100);
     }
@@ -193,8 +190,8 @@ done:
  * renders the map, runs the handler of the current game state, updates the camera,
  * map animations and music, and presents the frame. Entering CloseBattle ends the
  * loop; it starts over with deployment while the game flow is still battle. */
-void battle_state_run_game_loop(void) {
-    battle_gfx_vram_slot_t* timer_field;
+void state_run_game_loop(void) {
+    sprite_evtchr_slot_t* timer_field;
     SVECTOR* camera_integer;
     VECTOR* camera_fixed;
     s32 frame_measurement;
@@ -205,33 +202,33 @@ void battle_state_run_game_loop(void) {
     s32 i;
     s32 timer_offset;
 
-    battle_gfx_init_render_buffers();
-    battle_gfx_init_render_state();
-    battle_effect_init_system();
+    render_init_buffers();
+    sprite_init_render_state();
+    effect_init_system();
 
     /* Clear the spritesheet id (byte 1) of all nine 0x32d6-byte slot records, last
      * first. It walks a byte offset: a reverse slot-index loop changes the reset's
      * original bytes. */
     init_offset = 0x196b0;
     do {
-        g_battle_gfx_spritesheet_ids_by_vram_slot[init_offset] = 0;
+        g_sprite_sheet_ids_by_vram_slot[init_offset] = 0;
         init_offset -= 0x32d6;
     } while (init_offset >= 0);
 
-    camera_integer = &g_battle_camera_integer_coords;
-    camera_fixed = &g_battle_camera_current_real_coords;
+    camera_integer = &g_camera_integer_coords;
+    camera_fixed = &g_camera_real_coords;
 
     do {
-        battle_state_run_deployment();
-        g_battle_menu_status_enabled = 0;
-        g_battle_cursor_input_mode = g_game_options.fields.cursor_movement;
+        state_run_map_load();
+        g_menu_status_enabled = 0;
+        g_cursor_input_mode = g_game_options.fields.cursor_movement;
 
         for (;;) {
-            battle_state_update_controller_input();
-            battle_gfx_init_render_frame();
+            state_update_controller_input();
+            sprite_init_render_frame();
             SetGeomScreen(0x200);
             gfx_swap_and_clear_battle_otag();
-            battle_camera_update_vector_from_game_state();
+            camera_update_vector_from_game_state();
 
             /* Negate the Q12 camera position into whole units; the x conversion spells out the
              * round-toward-zero that / ONE does for y and z. */
@@ -244,214 +241,213 @@ void battle_state_run_game_loop(void) {
             camera_integer->vy = camera_component / ONE;
             camera_integer->vz = -camera_fixed->vz / ONE;
 
-            battle_camera_update_matrices(&g_battle_camera_matrix, &g_battle_camera_render_state,
-                &g_battle_camera_current_screen_offset, &g_battle_camera_zoom);
-            battle_map_draw_mesh_and_weather(&g_battle_camera_matrix);
+            camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
+            battle_map_draw_mesh_and_weather(&g_camera_matrix);
             /* The SEQ wait commands read this: 2 while an effect is updating, 0 otherwise. */
-            if (battle_effect_update_cycle() != 0) {
-                g_battle_state_animation_continue_check = 2;
+            if (effect_update_cycle() != 0) {
+                g_state_animation_continue_check = 2;
             } else {
-                g_battle_state_animation_continue_check = 0;
+                g_state_animation_continue_check = 0;
             }
 
-            switch (g_battle_game_state) {
+            switch (g_game_state) {
             default:
-            case BATTLE_GAME_STATE_FREE_CURSOR:
-                battle_state_handle_free_cursor_state();
+            case GAME_STATE_FREE_CURSOR:
+                state_handle_free_cursor();
                 break;
-            case BATTLE_GAME_STATE_FREE_CURSOR_HELP:
-                battle_state_handle_free_cursor_help_state();
+            case GAME_STATE_FREE_CURSOR_HELP:
+                state_handle_free_cursor_help();
                 break;
-            case BATTLE_GAME_STATE_HIGHLIGHT_UNITS:
-                battle_state_handle_highlight_units_state();
+            case GAME_STATE_HIGHLIGHT_UNITS:
+                state_handle_highlight_units();
                 break;
-            case BATTLE_GAME_STATE_OPEN_ACTION_MENUS:
-                battle_state_handle_open_action_menus_state();
+            case GAME_STATE_OPEN_ACTION_MENUS:
+                state_handle_open_action_menus();
                 break;
-            case BATTLE_GAME_STATE_IDLING_ACTION_MENUS:
-                battle_state_handle_idling_action_menus_state();
+            case GAME_STATE_IDLING_ACTION_MENUS:
+                state_handle_idling_action_menus();
                 break;
-            case BATTLE_GAME_STATE_AI_COMMAND:
-                battle_state_handle_ai_command_state();
+            case GAME_STATE_AI_COMMAND:
+                state_handle_ai_command();
                 break;
-            case BATTLE_GAME_STATE_ACTION_HELP_MENU:
-                battle_state_handle_action_help_menu_state();
+            case GAME_STATE_ACTION_HELP_MENU:
+                state_handle_action_help_menu();
                 break;
-            case BATTLE_GAME_STATE_DISPLAY_MOVE_AREA:
-                battle_state_handle_display_move_area_state();
+            case GAME_STATE_DISPLAY_MOVE_AREA:
+                state_handle_display_move_area();
                 break;
-            case BATTLE_GAME_STATE_MINI_MENU:
-                battle_state_handle_mini_menu_state();
+            case GAME_STATE_MINI_MENU:
+                state_handle_mini_menu();
                 break;
-            case BATTLE_GAME_STATE_MINI_MENU_HELP:
-                battle_state_handle_mini_menu_help_state();
+            case GAME_STATE_MINI_MENU_HELP:
+                state_handle_mini_menu_help();
                 break;
-            case BATTLE_GAME_STATE_ACTIVE_TURN:
-                battle_state_handle_active_turn_state();
+            case GAME_STATE_ACTIVE_TURN:
+                state_handle_active_turn();
                 break;
-            case BATTLE_GAME_STATE_AFTER_COMMAND:
-                battle_state_handle_after_command_state();
+            case GAME_STATE_AFTER_COMMAND:
+                state_handle_after_command();
                 break;
-            case BATTLE_GAME_STATE_CONTINUE_TURN:
-                battle_state_handle_continue_turn_state();
+            case GAME_STATE_CONTINUE_TURN:
+                state_handle_continue_turn();
                 break;
-            case BATTLE_GAME_STATE_CHANGE_TURN:
-                battle_state_handle_change_turn_state();
+            case GAME_STATE_CHANGE_TURN:
+                state_handle_change_turn();
                 break;
-            case BATTLE_GAME_STATE_STATUS_EXECUTE:
-                battle_state_handle_status_execute_state();
+            case GAME_STATE_STATUS_EXECUTE:
+                state_handle_status_execute();
                 break;
-            case BATTLE_GAME_STATE_UNIT_MOVE:
-                battle_state_handle_unit_move_state();
+            case GAME_STATE_UNIT_MOVE:
+                state_handle_unit_move();
                 break;
-            case BATTLE_GAME_STATE_SELECT_MOVE_TILE:
-                battle_state_handle_select_move_tile_state();
+            case GAME_STATE_SELECT_MOVE_TILE:
+                state_handle_select_move_tile();
                 break;
-            case BATTLE_GAME_STATE_MOVE_RANGE_EXCEPTION:
-                battle_state_handle_move_range_exception_state();
+            case GAME_STATE_MOVE_RANGE_EXCEPTION:
+                state_handle_move_range_exception();
                 break;
-            case BATTLE_GAME_STATE_ILLEGAL_MOVE_MENU:
-                battle_state_handle_illegal_move_menu_state();
+            case GAME_STATE_ILLEGAL_MOVE_MENU:
+                state_handle_illegal_move_menu();
                 break;
-            case BATTLE_GAME_STATE_UNIT_MOVING_SETUP:
-                battle_state_handle_unit_moving_setup_state();
+            case GAME_STATE_UNIT_MOVING_SETUP:
+                state_handle_unit_moving_setup();
                 break;
-            case BATTLE_GAME_STATE_UNIT_MOVING:
-                battle_state_handle_unit_moving_state();
+            case GAME_STATE_UNIT_MOVING:
+                state_handle_unit_moving();
                 break;
-            case BATTLE_GAME_STATE_MOVE_CONFIRM_MENU:
-                battle_state_handle_move_confirm_menu_state();
+            case GAME_STATE_MOVE_CONFIRM_MENU:
+                state_handle_move_confirm_menu();
                 break;
-            case BATTLE_GAME_STATE_WAIT_DIRECTION:
-                battle_state_handle_wait_direction_state();
+            case GAME_STATE_WAIT_DIRECTION:
+                state_handle_wait_direction();
                 break;
-            case BATTLE_GAME_STATE_WAIT_MENU:
-                battle_state_handle_wait_menu_state();
+            case GAME_STATE_WAIT_MENU:
+                state_handle_wait_menu();
                 break;
-            case BATTLE_GAME_STATE_CRYSTAL_LEARN:
-                battle_state_handle_crystal_learn_state();
+            case GAME_STATE_CRYSTAL_LEARN:
+                state_handle_crystal_learn();
                 break;
-            case BATTLE_GAME_STATE_TARGETING_PROMPT:
-                battle_state_handle_targeting_prompt_state();
+            case GAME_STATE_TARGETING_PROMPT:
+                state_handle_targeting_prompt();
                 break;
-            case BATTLE_GAME_STATE_TARGETING_RANGE:
-                battle_state_handle_targeting_range_state();
+            case GAME_STATE_TARGETING_RANGE:
+                state_handle_targeting_range();
                 break;
-            case BATTLE_GAME_STATE_ILLEGAL_RANGE:
-                battle_state_handle_illegal_range_state();
+            case GAME_STATE_ILLEGAL_RANGE:
+                state_handle_illegal_range();
                 break;
-            case BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING:
-                battle_state_handle_ability_preview_state();
+            case GAME_STATE_ABILITY_PREVIEW_HANDLING:
+                state_handle_ability_preview();
                 break;
-            case BATTLE_GAME_STATE_ABILITY_PREVIEW_HELP:
-                battle_state_handle_ability_preview_help_state();
+            case GAME_STATE_ABILITY_PREVIEW_HELP:
+                state_handle_ability_preview_help();
                 break;
-            case BATTLE_GAME_STATE_CONFIRM_ACTION:
-                battle_state_handle_confirm_action_state();
+            case GAME_STATE_CONFIRM_ACTION:
+                state_handle_confirm_action();
                 break;
-            case BATTLE_GAME_STATE_PRE_ATTACK_ANIMATION:
-                battle_state_handle_pre_attack_animation_state();
+            case GAME_STATE_PRE_ATTACK_ANIMATION:
+                state_handle_pre_attack_animation();
                 break;
-            case BATTLE_GAME_STATE_ACTION_CAST:
-                battle_state_handle_action_cast_state();
+            case GAME_STATE_ACTION_CAST:
+                state_handle_action_cast();
                 break;
-            case BATTLE_GAME_STATE_COMMENCE_ATTACK_PHASE:
-                battle_state_handle_commence_attack_phase_state();
+            case GAME_STATE_COMMENCE_ATTACK_PHASE:
+                state_handle_commence_attack_phase();
                 break;
-            case BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT:
-                battle_state_handle_action_announcement_state();
+            case GAME_STATE_ACTION_ANNOUNCEMENT:
+                state_handle_action_announcement();
                 break;
-            case BATTLE_GAME_STATE_OPEN_SP2_FILES:
-                battle_state_handle_open_sp2_files_state();
+            case GAME_STATE_OPEN_SP2_FILES:
+                state_handle_open_sp2_files();
                 break;
-            case BATTLE_GAME_STATE_START_EFFECT_FILE_OPEN:
-                battle_state_handle_start_effect_file_open_state();
+            case GAME_STATE_START_EFFECT_FILE_OPEN:
+                state_handle_start_effect_file_open();
                 break;
-            case BATTLE_GAME_STATE_ACTION_EXECUTE_START:
-                battle_state_handle_action_execute_start_state();
+            case GAME_STATE_ACTION_EXECUTE_START:
+                state_handle_action_execute_start();
                 break;
-            case BATTLE_GAME_STATE_ACTION_EXECUTE:
-                battle_state_update_action_execute_mode();
+            case GAME_STATE_ACTION_EXECUTE:
+                state_handle_action_execute();
                 break;
-            case BATTLE_GAME_STATE_BATTLE_MESSAGE_DISPLAY:
-                battle_state_handle_battle_message_display_state();
+            case GAME_STATE_BATTLE_MESSAGE_DISPLAY:
+                state_handle_battle_message_display();
                 break;
-            case BATTLE_GAME_STATE_RESUME_ATTACK_PHASE:
-                battle_state_handle_resume_attack_phase_state();
+            case GAME_STATE_RESUME_ATTACK_PHASE:
+                state_handle_resume_attack_phase();
                 break;
-            case BATTLE_GAME_STATE_LEARN_ABILITY_ON_HIT:
-                battle_state_handle_learn_ability_on_hit_state();
+            case GAME_STATE_LEARN_ABILITY_ON_HIT:
+                state_handle_learn_ability_on_hit();
                 break;
-            case BATTLE_GAME_STATE_DEEP_DUNGEON_MESH_LOAD:
-                battle_state_handle_deep_dungeon_mesh_load_state();
+            case GAME_STATE_DEEP_DUNGEON_MESH_LOAD:
+                state_handle_deep_dungeon_mesh_load();
                 break;
-            case BATTLE_GAME_STATE_DEEP_DUNGEON_MESH_FINISH:
-                battle_state_handle_deep_dungeon_mesh_finish_state();
+            case GAME_STATE_DEEP_DUNGEON_MESH_FINISH:
+                state_handle_deep_dungeon_mesh_finish();
                 break;
-            case BATTLE_GAME_STATE_TARGET_SELECT_START:
-                battle_state_handle_target_select_start_state();
+            case GAME_STATE_TARGET_SELECT_START:
+                state_handle_target_select_start();
                 break;
-            case BATTLE_GAME_STATE_TARGET_SELECT:
-                battle_state_handle_target_select_state();
+            case GAME_STATE_TARGET_SELECT:
+                state_handle_target_select();
                 break;
-            case BATTLE_GAME_STATE_TARGET_SELECT_DENIED:
-                battle_state_handle_target_select_denied_state();
+            case GAME_STATE_TARGET_SELECT_DENIED:
+                state_handle_target_select_denied();
                 break;
-            case BATTLE_GAME_STATE_TARGET_SELECT_CONFIRM:
-                battle_state_handle_target_select_confirm_state();
+            case GAME_STATE_TARGET_SELECT_CONFIRM:
+                state_handle_target_select_confirm();
                 break;
-            case BATTLE_GAME_STATE_TARGET_DISPLAY_START:
-                battle_state_handle_target_display_start_state();
+            case GAME_STATE_TARGET_DISPLAY_START:
+                state_handle_target_display_start();
                 break;
-            case BATTLE_GAME_STATE_TARGET_DISPLAY:
-                battle_state_handle_target_display_state();
+            case GAME_STATE_TARGET_DISPLAY:
+                state_handle_target_display();
                 break;
-            case BATTLE_GAME_STATE_EFFECT:
-                battle_state_handle_effect_state();
+            case GAME_STATE_EFFECT:
+                state_handle_effect();
                 break;
-            case BATTLE_GAME_STATE_EVENT:
-                battle_state_update_event_mode();
+            case GAME_STATE_EVENT:
+                state_handle_event();
                 break;
-            case BATTLE_GAME_STATE_MAP_JUMPING_OUT:
-                battle_state_handle_map_jumping_out_state();
+            case GAME_STATE_MAP_JUMPING_OUT:
+                state_handle_map_jumping_out();
                 break;
-            case BATTLE_GAME_STATE_MAP_INITIALIZE:
-                battle_state_handle_map_init_state();
+            case GAME_STATE_MAP_INITIALIZE:
+                state_handle_map_init();
                 break;
-            case BATTLE_GAME_STATE_MAP_JUMPING_IN:
-                battle_state_handle_map_jumping_in_state();
+            case GAME_STATE_MAP_JUMPING_IN:
+                state_handle_map_jumping_in();
                 break;
-            case BATTLE_GAME_STATE_MAP_JUMPING_OUT_2:
-                battle_state_handle_change_map_jumping_out_state();
+            case GAME_STATE_MAP_JUMPING_OUT_2:
+                state_handle_change_map_jumping_out();
                 break;
-            case BATTLE_GAME_STATE_MAP_INITIALIZE_2:
-                battle_state_handle_change_map_init_state();
+            case GAME_STATE_MAP_INITIALIZE_2:
+                state_handle_change_map_init();
                 break;
-            case BATTLE_GAME_STATE_MAP_JUMPING_IN_2:
-                battle_state_handle_change_map_jumping_in_state();
+            case GAME_STATE_MAP_JUMPING_IN_2:
+                state_handle_change_map_jumping_in();
                 break;
-            case BATTLE_GAME_STATE_CLOSE_BATTLE:
-                battle_state_handle_close_battle_state();
+            case GAME_STATE_CLOSE_BATTLE:
+                state_handle_close_battle();
                 break;
             }
 
-            battle_camera_update_map_pan();
-            battle_camera_update_rotation();
-            battle_camera_update_zoom();
-            battle_camera_update_tilt();
-            battle_map_update_animations();
+            camera_pan_update();
+            camera_rotation_update();
+            camera_zoom_update();
+            camera_tilt_update();
+            battle_map_update_color_animations();
             music_update_tunes();
 
             /* A closing battle leaves before this frame is presented. */
-            if (g_battle_game_state == BATTLE_GAME_STATE_CLOSE_BATTLE) {
+            if (g_game_state == GAME_STATE_CLOSE_BATTLE) {
                 break;
             }
 
             file_poll_load(&g_file_cd_state);
             g_gfx_screen_polarity = !g_gfx_screen_polarity;
             g_frame_counter++;
-            battle_map_upload_clut_rows();
-            frame_measurement = battle_state_sync_frame(gfx_get_battle_otag() + 0x17f);
+            battle_map_clut_upload_rows();
+            frame_measurement = state_sync_frame(gfx_get_battle_otag() + 0x17f);
             g_system_battle_frame_hsync_count = frame_measurement;
             i = 0;
             if (g_system_battle_frame_hsync_count_max < frame_measurement) {
@@ -460,12 +456,12 @@ void battle_state_run_game_loop(void) {
 
             /* Count down the image buffers' upload timers; 0 (free) and BUFFER_EVTCHR are markers,
              * not timers. */
-            empty_timer = BATTLE_GFX_VRAM_SLOT_BUFFER_EVTCHR;
-            timer_field = g_battle_gfx_vram_slots;
+            empty_timer = SPRITE_EVTCHR_SLOT_BUFFER_EVTCHR;
+            timer_field = g_sprite_evtchr_slots;
             timer_offset = 0;
             do {
                 /* The byte offset preserves the target's separate indexed load. */
-                timer = ((battle_gfx_vram_slot_t*)((u8*)g_battle_gfx_vram_slots + timer_offset))->image_buffer_state;
+                timer = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + timer_offset))->image_buffer_state;
                 timer_offset += sizeof(*timer_field);
                 if (timer != 0 && timer != empty_timer) {
                     timer_field->image_buffer_state = timer - 1;
@@ -474,10 +470,9 @@ void battle_state_run_game_loop(void) {
                 timer_field++;
             } while (i < 2);
 
-            /* A frame that ran long during effects arms the pacing timer, which battle_state_sync_frame
+            /* A frame that ran long during effects arms the pacing timer, which state_sync_frame
              * uses to lengthen the following waits. */
-            if (g_battle_game_state == BATTLE_GAME_STATE_EFFECT
-                || g_battle_game_state == BATTLE_GAME_STATE_ACTION_EXECUTE) {
+            if (g_game_state == GAME_STATE_EFFECT || g_game_state == GAME_STATE_ACTION_EXECUTE) {
                 if (g_system_vsync_interval == 1) {
                     g_system_frame_pacing_timer = 0;
                 } else if (g_system_frame_pacing_suppressed == 0) {
@@ -493,9 +488,9 @@ void battle_state_run_game_loop(void) {
             system_frame_stub();
         }
 
-        battle_state_stop_map_animations();
-        battle_unit_clear_all();
-    } while (g_battle_game_flow_state == SYSTEM_GAME_FLOW_BATTLE);
+        battle_map_stop_animations();
+        unit_clear_all();
+    } while (g_game_flow_state == SYSTEM_GAME_FLOW_BATTLE);
 
     /* Let drawing and two vertical blanks finish before leaving. */
     DrawSync(0);
@@ -504,14 +499,14 @@ void battle_state_run_game_loop(void) {
     VSync(0);
 }
 
-/* The runtime record of the casting unit (g_battle_casting_runtime_id), or 0. It is the source
+/* The runtime record of the casting unit (g_unit_casting_runtime_id), or 0. It is the source
  * unit except while a reaction or Hamedo counter resolves, or while a rider's mount takes its
  * move. */
-battle_unit_t* battle_unit_get_casting(void) {
-    battle_unit_t* unit;
+unit_t* unit_get_casting(void) {
+    unit_t* unit;
 
-    for (unit = g_battle_unit_list_head; unit != 0; unit = unit->previous) {
-        if (unit->runtime_id == g_battle_casting_runtime_id) {
+    for (unit = g_unit_list_head; unit != 0; unit = unit->previous) {
+        if (unit->runtime_id == g_unit_casting_runtime_id) {
             return unit;
         }
     }
@@ -519,13 +514,13 @@ battle_unit_t* battle_unit_get_casting(void) {
 }
 
 /* The runtime record of the source unit, whose turn or queued between-turn event is being resolved
- * (g_battle_unit_source_runtime_id), or 0. */
-battle_unit_t* battle_unit_get_source(void) {
-    battle_unit_t* unit = g_battle_unit_list_head;
+ * (g_unit_source_runtime_id), or 0. */
+unit_t* unit_get_source(void) {
+    unit_t* unit = g_unit_list_head;
     s32 source_id;
 
     if (unit != 0) {
-        source_id = g_battle_unit_source_runtime_id;
+        source_id = g_unit_source_runtime_id;
         for (; unit != 0; unit = unit->previous) {
             if (unit->runtime_id == source_id) {
                 return unit;
@@ -537,8 +532,8 @@ battle_unit_t* battle_unit_get_source(void) {
 
 /* The first record in the runtime unit list standing on a tile, whatever its state
  * (crystals, treasures and records without battle stats included), or 0. */
-battle_unit_t* battle_unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z) {
-    battle_unit_t* unit = g_battle_unit_list_head;
+unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z) {
+    unit_t* unit = g_unit_list_head;
 
     while (unit != 0) {
         if (unit->map_x == map_x && unit->map_y == map_y && unit->map_z == map_z) {
@@ -552,23 +547,21 @@ battle_unit_t* battle_unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z)
 /* Returns the unit the cursor selects on a tile: one with battle stats in an
  * occupied slot that is not a crystal, a treasure or in the air from Jump.
  *
- * Among several, the source unit (g_battle_unit_source_runtime_id) is preferred,
+ * Among several, the source unit (g_unit_source_runtime_id) is preferred,
  * then a rider over its mount, then the first in list order. Returns 0 for none.
  * The candidate array holds 16 entries and is filled without a bound check. */
-battle_unit_t* battle_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z) {
-    battle_unit_t* matches[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
-    battle_unit_t* unit;
+unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z) {
+    unit_t* matches[UNIT_RUNTIME_SLOT_COUNT];
+    unit_t* unit;
     s32 count;
     s32 index;
 
     count = 0;
-    unit = g_battle_unit_list_head;
+    unit = g_unit_list_head;
     while (unit != 0) {
         if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_z == map_z) && (unit->stats != 0)
-            && (unit->stats->entd_slot != BATTLE_ENTD_SLOT_NONE)
-            && ((unit->status_flags_5_6
-                    & (BATTLE_UNIT_STATUS_CRYSTAL | BATTLE_UNIT_STATUS_TREASURE | BATTLE_UNIT_STATUS_JUMP))
-                == 0)) {
+            && (unit->stats->entd_slot != UNIT_ENTD_SLOT_NONE)
+            && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP)) == 0)) {
             matches[count++] = unit;
         }
         unit = unit->previous;
@@ -576,12 +569,12 @@ battle_unit_t* battle_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map
     if (count != 0) {
         if (count != 1) {
             for (index = 0; index < count; index++) {
-                if (matches[index]->runtime_id == g_battle_unit_source_runtime_id) {
+                if (matches[index]->runtime_id == g_unit_source_runtime_id) {
                     return matches[index];
                 }
             }
             for (index = 0; index < count; index++) {
-                if (matches[index]->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
+                if (matches[index]->mount_state == UNIT_MOUNT_STATE_RIDER) {
                     return matches[index];
                 }
             }
@@ -592,27 +585,27 @@ battle_unit_t* battle_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map
 }
 
 /* The crystal or treasure lying on a tile, or 0. Among several, the source unit
- * (g_battle_unit_source_runtime_id) is preferred, then the first in list order. The
+ * (g_unit_source_runtime_id) is preferred, then the first in list order. The
  * candidate array holds 16 entries and is filled without a bound check. */
-battle_unit_t* battle_unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z) {
-    battle_unit_t* matches[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
-    battle_unit_t* unit;
+unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z) {
+    unit_t* matches[UNIT_RUNTIME_SLOT_COUNT];
+    unit_t* unit;
     s32 count;
     s32 index;
 
     count = 0;
-    unit = g_battle_unit_list_head;
+    unit = g_unit_list_head;
     while (unit != 0) {
         if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_z == map_z) && (unit->stats != 0)
-            && (unit->stats->entd_slot != BATTLE_ENTD_SLOT_NONE)
-            && ((unit->status_flags_5_6 & (BATTLE_UNIT_STATUS_CRYSTAL | BATTLE_UNIT_STATUS_TREASURE)) != 0)) {
+            && (unit->stats->entd_slot != UNIT_ENTD_SLOT_NONE)
+            && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) != 0)) {
             matches[count++] = unit;
         }
         unit = unit->previous;
     }
     if (count != 0) {
         for (index = 0; index < count; index++) {
-            if (matches[index]->runtime_id == g_battle_unit_source_runtime_id) {
+            if (matches[index]->runtime_id == g_unit_source_runtime_id) {
                 return matches[index];
             }
         }
@@ -623,22 +616,22 @@ battle_unit_t* battle_unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 
 
 /* The first unit drawn with the chocobo sprite sheet on tile (x, y, z) that is
  * neither the source nor the casting unit, or 0: the chocobo a unit arriving on
- * the tile mounts (battle_unit_mount_onto_pending_mount). The candidate array
+ * the tile mounts (unit_mount_onto_pending). The candidate array
  * holds 16 entries and is filled without a bound check. */
-battle_unit_t* battle_unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z) {
-    battle_unit_t* unit;
-    battle_unit_t** cursor;
+unit_t* unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z) {
+    unit_t* unit;
+    unit_t** cursor;
     s32 count;
     s32 id;
     s32 spritesheet_id;
-    battle_unit_t* list[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
-    battle_unit_t* result;
+    unit_t* list[UNIT_RUNTIME_SLOT_COUNT];
+    unit_t* result;
     s32 index;
 
-    unit = g_battle_unit_list_head;
+    unit = g_unit_list_head;
     count = 0;
     if (unit != 0) {
-        spritesheet_id = BATTLE_SPRITESHEET_ID_CHOCOBO;
+        spritesheet_id = SPRITE_SHEET_ID_CHOCOBO;
         cursor = list;
         for (; unit != 0; unit = unit->previous) {
             if (unit->map_x == x && unit->map_y == y && unit->map_z == z && unit->spritesheet_id == spritesheet_id) {
@@ -652,7 +645,7 @@ battle_unit_t* battle_unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z)
         for (index = 0; index < count; index++) {
             result = list[index];
             id = result->runtime_id;
-            if (id != g_battle_unit_source_runtime_id && id != g_battle_casting_runtime_id) {
+            if (id != g_unit_source_runtime_id && id != g_unit_casting_runtime_id) {
                 return result;
             }
         }
@@ -664,23 +657,22 @@ battle_unit_t* battle_unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z)
  * occupied slot, other than self and, when self is mounted or ridden, other than
  * its mount partner.
  *
- * Among several, the source unit (g_battle_unit_source_runtime_id) is preferred,
+ * Among several, the source unit (g_unit_source_runtime_id) is preferred,
  * then the first in list order. Returns 0 for none. The candidate array holds 16
  * entries and is filled without a bound check. */
-battle_unit_t* battle_unit_find_overlapping_at_tile(battle_unit_t* self, s32 x, s32 y, s32 z) {
-    battle_unit_t* list[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
-    battle_unit_t* unit;
+unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 z) {
+    unit_t* list[UNIT_RUNTIME_SLOT_COUNT];
+    unit_t* unit;
     unit_stats_t* stats;
     s32 count;
     s32 i;
 
     count = 0;
-    for (unit = g_battle_unit_list_head; unit != 0; unit = unit->previous) {
+    for (unit = g_unit_list_head; unit != 0; unit = unit->previous) {
         if (unit != self && unit->map_x == x && unit->map_y == y && unit->map_z == z) {
             stats = unit->stats;
-            if (stats != 0 && stats->entd_slot != BATTLE_ENTD_SLOT_NONE) {
-                if (self->mount_state == BATTLE_UNIT_MOUNT_STATE_NONE
-                    || unit->runtime_id != self->mount_partner_runtime_id) {
+            if (stats != 0 && stats->entd_slot != UNIT_ENTD_SLOT_NONE) {
+                if (self->mount_state == UNIT_MOUNT_STATE_NONE || unit->runtime_id != self->mount_partner_runtime_id) {
                     list[count] = unit;
                     count += 1;
                 }
@@ -689,7 +681,7 @@ battle_unit_t* battle_unit_find_overlapping_at_tile(battle_unit_t* self, s32 x, 
     }
     if (count != 0) {
         for (i = 0; i < count; i++) {
-            if (list[i]->runtime_id == g_battle_unit_source_runtime_id) {
+            if (list[i]->runtime_id == g_unit_source_runtime_id) {
                 return list[i];
             }
         }
@@ -699,8 +691,8 @@ battle_unit_t* battle_unit_find_overlapping_at_tile(battle_unit_t* self, s32 x, 
 }
 
 /* The runtime (display) record whose runtime_id matches the requested ID, or 0. */
-battle_unit_t* battle_unit_get_by_runtime_id(u16 runtime_id) {
-    battle_unit_t* unit = g_battle_unit_list_head;
+unit_t* unit_get_by_runtime_id(u16 runtime_id) {
+    unit_t* unit = g_unit_list_head;
 
     while (unit != 0) {
         if (unit->runtime_id == runtime_id) {
@@ -712,8 +704,8 @@ battle_unit_t* battle_unit_get_by_runtime_id(u16 runtime_id) {
 }
 
 /* The runtime (display) record whose battle stats occupy unit slot battle_id, or 0. */
-battle_unit_t* battle_unit_get_by_battle_id(u16 battle_id) {
-    battle_unit_t* unit = g_battle_unit_list_head;
+unit_t* unit_get_by_battle_id(u16 battle_id) {
+    unit_t* unit = g_unit_list_head;
 
     while (unit != 0) {
         if ((unit->stats != 0) && (unit->stats->battle_id == battle_id)) {
@@ -725,13 +717,13 @@ battle_unit_t* battle_unit_get_by_battle_id(u16 battle_id) {
 }
 
 /* Count the runtime records drawn with the crystal sprite sheet. */
-s32 battle_unit_count_crystals(void) {
-    battle_unit_t* unit;
+s32 unit_count_crystals(void) {
+    unit_t* unit;
     s32 count = 0;
 
-    unit = g_battle_unit_list_head;
+    unit = g_unit_list_head;
     while (unit != 0) {
-        if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_CRYSTAL) {
+        if (unit->spritesheet_id == SPRITE_SHEET_ID_CRYSTAL) {
             count++;
         }
         unit = unit->previous;
@@ -741,18 +733,18 @@ s32 battle_unit_count_crystals(void) {
 
 /* Moves a unit's record to the head of the runtime unit list, so list walks reach it
  * first. Returns 1 when moved, 0 when no record has the runtime id. */
-s32 battle_unit_move_to_head(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
-    battle_unit_t* iterator;
-    battle_unit_t* head;
+s32 unit_move_to_head(u32 runtime_id) {
+    unit_t* unit = unit_get_by_runtime_id(runtime_id);
+    unit_t* iterator;
+    unit_t* head;
 
     if (unit != 0) {
         /* The 32-bit list-head pointer serves as a sentinel record: its previous field
          * (0x000) is the head link. */
-        for (iterator = (battle_unit_t*)&g_battle_unit_list_head; iterator != 0; iterator = iterator->previous) {
+        for (iterator = (unit_t*)&g_unit_list_head; iterator != 0; iterator = iterator->previous) {
             if (iterator->previous == unit) {
                 iterator->previous = unit->previous;
-                head = (battle_unit_t*)&g_battle_unit_list_head;
+                head = (unit_t*)&g_unit_list_head;
                 unit->previous = head->previous;
                 head->previous = unit;
                 return 1;
@@ -766,33 +758,33 @@ s32 battle_unit_move_to_head(u32 runtime_id) {
 /* Start reading the SP2 file that holds the attack animation of the unit's SP2 ability into
  * destination. Worker 8 uses its own file table, indexed from animation 0x73. Returns -1 when the
  * animation is in the SP1 range or has no file, else whether the read was queued. */
-s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
+s32 sprite_open_sp2_file(unit_t* unit, u32* destination) {
     s32 spritesheet_id;
     u8 animation_id;
     s32 index;
     s32 lba;
     s32 byte_length;
 
-    spritesheet_id = g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].spritesheet_id;
-    animation_id = g_battle_ability_animation_data[unit->sp2_ability_id].attack_animation;
-    if (spritesheet_id == BATTLE_SPRITESHEET_ID_STEEL_GIANT) {
+    spritesheet_id = g_sprite_sheet_slots[unit->spritesheet_vram_slot].spritesheet_id;
+    animation_id = g_ability_animation_data[unit->sp2_ability_id].attack_animation;
+    if (spritesheet_id == SPRITE_SHEET_ID_STEEL_GIANT) {
         /* Nothing checks for an animation below 0x73, which would read before the table. */
         index = animation_id - 0x73;
-        lba = g_battle_gfx_worker8_sp2_files[index].sector;
+        lba = g_sprite_worker8_sp2_files[index].sector;
         if (lba == 0) {
             return -1;
         }
         if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
-            byte_length = g_battle_gfx_worker8_sp2_files[index].size;
+            byte_length = g_sprite_worker8_sp2_files[index].size;
             return file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     } else {
-        lba = g_battle_gfx_sp2_files[spritesheet_id].sector;
+        lba = g_sprite_sp2_files[spritesheet_id].sector;
         if (lba == 0) {
             return -1;
         }
         if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
-            byte_length = g_battle_gfx_sp2_files[spritesheet_id].size;
+            byte_length = g_sprite_sp2_files[spritesheet_id].size;
             return file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     }
@@ -800,18 +792,18 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
 }
 
 /* Free the EVTCHR slots whose page holds the unit's SP2 image. */
-void battle_gfx_invalidate_sp2_vram_slot(battle_unit_t* unit) {
+void sprite_evtchr_invalidate_sp2(unit_t* unit) {
     u32 invalid; /* loaded before the loop, as in the target */
-    battle_gfx_vram_slot_t* slot;
+    sprite_evtchr_slot_t* slot;
     s32 count = 0;
 
-    invalid = BATTLE_GFX_VRAM_SLOT_OWNER_NONE;
-    slot = g_battle_gfx_vram_slots;
+    invalid = SPRITE_EVTCHR_SLOT_OWNER_NONE;
+    slot = g_sprite_evtchr_slots;
     for (; count < 2; count++, slot++) {
         u32 descriptor = slot->owner;
 
         if (((descriptor & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK) == unit->runtime_id)
-            && ((descriptor & BATTLE_GFX_VRAM_SLOT_OWNER_SP2) != 0)) {
+            && ((descriptor & SPRITE_EVTCHR_SLOT_OWNER_SP2) != 0)) {
             slot->owner = invalid;
         }
     }
@@ -819,18 +811,18 @@ void battle_gfx_invalidate_sp2_vram_slot(battle_unit_t* unit) {
 
 /* The next nibble of the compressed spritesheet stream, the high nibble of each
  * byte first. */
-static u32 battle_gfx_read_compressed_nibble(void) {
+static u32 sprite_read_compressed_nibble(void) {
     u32 nibble;
     u8 value;
 
-    if (g_battle_gfx_compressed_nibble_phase == 0) {
-        nibble = g_battle_gfx_compressed_data[g_battle_gfx_compressed_offset] >> 4;
+    if (g_sprite_compressed_nibble_phase == 0) {
+        nibble = g_sprite_compressed_data[g_sprite_compressed_offset] >> 4;
     } else {
-        value = g_battle_gfx_compressed_data[g_battle_gfx_compressed_offset];
-        g_battle_gfx_compressed_offset++;
+        value = g_sprite_compressed_data[g_sprite_compressed_offset];
+        g_sprite_compressed_offset++;
         nibble = value & 0xf;
     }
-    g_battle_gfx_compressed_nibble_phase ^= 1;
+    g_sprite_compressed_nibble_phase ^= 1;
     return nibble;
 }
 
@@ -840,7 +832,7 @@ static u32 battle_gfx_read_compressed_nibble(void) {
  * (index 0) pixels; the next nibble is the run length itself, except that 0
  * takes the length from one more nibble, and 7 and 8 from two or three more,
  * low nibble first. Decoding stops when the output is full. */
-void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination) {
+void sprite_decompress_attack_image(const u8* source, u8* destination) {
     s32 high = 0;
     s32 count = 0;
     s32 value;
@@ -848,25 +840,25 @@ void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination)
     s32 size = 0x6400;
     u8* out = destination;
 
-    g_battle_gfx_compressed_data = source;
-    g_battle_gfx_compressed_offset = 0;
-    g_battle_gfx_compressed_nibble_phase = 0;
+    g_sprite_compressed_data = source;
+    g_sprite_compressed_offset = 0;
+    g_sprite_compressed_nibble_phase = 0;
     while (1) {
-        value = battle_gfx_read_compressed_nibble();
+        value = sprite_read_compressed_nibble();
         if (value == 0) {
-            value = battle_gfx_read_compressed_nibble();
+            value = sprite_read_compressed_nibble();
             switch (value) {
             case 0:
-                value = battle_gfx_read_compressed_nibble();
+                value = sprite_read_compressed_nibble();
                 break;
             case 7:
-                value = battle_gfx_read_compressed_nibble();
-                value |= battle_gfx_read_compressed_nibble() << 4;
+                value = sprite_read_compressed_nibble();
+                value |= sprite_read_compressed_nibble() << 4;
                 break;
             case 8:
-                value = battle_gfx_read_compressed_nibble();
-                value |= battle_gfx_read_compressed_nibble() << 4;
-                value |= battle_gfx_read_compressed_nibble() << 8;
+                value = sprite_read_compressed_nibble();
+                value |= sprite_read_compressed_nibble() << 4;
+                value |= sprite_read_compressed_nibble() << 8;
                 break;
             }
             for (i = 0; i < value; i++) {
@@ -901,30 +893,30 @@ void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination)
 /* Reset the unit sprite renderer at battle start: the identity third row and column of
  * the sprite display matrix, depth 0x200 in the GTE projection inputs, the frame
  * counters, and the sprite primitive pool, which begins just past the unit slots. */
-static void battle_gfx_init_render_state(void) {
-    g_battle_gfx_sprite_display_matrix.m[2][2] = ONE;
-    g_battle_gte_rtps_vxy0.vz = 0x200;
-    g_battle_gte_rtpt_vxy2.vz = 0x200;
-    g_battle_gte_rtpt_vxy1.vz = 0x200;
-    g_battle_gte_rtpt_vxy0.vz = 0x200;
-    g_battle_gfx_sprite_display_matrix.m[2][1] = 0;
-    g_battle_gfx_sprite_display_matrix.m[2][0] = 0;
-    g_battle_gfx_sprite_display_matrix.m[1][2] = 0;
-    g_battle_gfx_sprite_display_matrix.m[0][2] = 0;
-    g_battle_gfx_sprite_display_matrix.t[2] = 0;
-    g_battle_gfx_sprite_prim_index = 0;
-    g_battle_gfx_frame_start_sprite_prim_index = 0;
-    g_battle_gfx_unread_2 = 0;
-    g_battle_gfx_unread_1 = 0;
-    /* The in-use 32-bit value just past the last g_battle_units record. */
-    g_battle_gfx_sprite_prim_pool = (POLY_FT4*)&g_battle_unit_slot_states[BATTLE_UNIT_RUNTIME_SLOT_COUNT].in_use;
+static void sprite_init_render_state(void) {
+    g_sprite_display_matrix.m[2][2] = ONE;
+    g_sprite_gte_rtps_vxy0.vz = 0x200;
+    g_sprite_gte_rtpt_vxy2.vz = 0x200;
+    g_sprite_gte_rtpt_vxy1.vz = 0x200;
+    g_sprite_gte_rtpt_vxy0.vz = 0x200;
+    g_sprite_display_matrix.m[2][1] = 0;
+    g_sprite_display_matrix.m[2][0] = 0;
+    g_sprite_display_matrix.m[1][2] = 0;
+    g_sprite_display_matrix.m[0][2] = 0;
+    g_sprite_display_matrix.t[2] = 0;
+    g_sprite_prim_index = 0;
+    g_sprite_prim_frame_start_index = 0;
+    g_sprite_unread_2 = 0;
+    g_sprite_unread_1 = 0;
+    /* The in-use 32-bit value just past the last g_units record. */
+    g_sprite_prim_pool = (POLY_FT4*)&g_unit_slot_states[UNIT_RUNTIME_SLOT_COUNT].in_use;
 }
 
 /* Reset a unit's own sprite display: neutral color, no flags on its eight
  * parts and none of them in use. */
-battle_gfx_sprite_display_data_t* battle_gfx_init_unit_sprite_display(s32 runtime_id) {
+sprite_display_t* sprite_display_init_unit(s32 runtime_id) {
     s32 body_part;
-    battle_gfx_sprite_display_data_t* display = &g_battle_units[runtime_id].unit_sprite_display.header;
+    sprite_display_t* display = &g_units[runtime_id].unit_sprite_display.header;
 
     display->color.b = 0x80;
     display->color.g = 0x80;
@@ -938,9 +930,9 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_unit_sprite_display(s32 runtim
 
 /* Reset the display of one of a unit's three sprite blocks: neutral color,
  * no flags on its three parts and none of them in use. */
-battle_gfx_sprite_display_data_t* battle_gfx_init_weapon_sprite_display(s32 unit_index, s32 display_type) {
+sprite_display_t* sprite_display_init_weapon(s32 unit_index, s32 display_type) {
     s32 weapon_part;
-    battle_gfx_sprite_display_data_t* display = &g_battle_units[unit_index].weapon_sprite_displays[display_type].header;
+    sprite_display_t* display = &g_units[unit_index].weapon_sprite_displays[display_type].header;
 
     display->color.b = 0x80;
     display->color.g = 0x80;
@@ -955,19 +947,19 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_weapon_sprite_display(s32 unit
 /* Resets one of a unit's three numeric sprite displays to neutral color and no
  * parts. A display_section outside 0..2 leaves `display` unset; the only caller
  * passes 0, 1 and 2. */
-battle_gfx_sprite_display_data_t* battle_gfx_init_numeric_sprite_display(s32 unit_index, s32 display_section) {
-    battle_gfx_sprite_display_data_t* display;
+sprite_display_t* sprite_display_init_numeric(s32 unit_index, s32 display_section) {
+    sprite_display_t* display;
     s32 i;
 
     switch (display_section) {
     case 0:
-        display = &g_battle_units[unit_index].numeric_sprite_displays[0].header;
+        display = &g_units[unit_index].numeric_sprite_displays[0].header;
         break;
     case 1:
-        display = &g_battle_units[unit_index].numeric_sprite_displays[1].header;
+        display = &g_units[unit_index].numeric_sprite_displays[1].header;
         break;
     case 2:
-        display = &g_battle_units[unit_index].numeric_sprite_displays[2].header;
+        display = &g_units[unit_index].numeric_sprite_displays[2].header;
         break;
     }
 
@@ -982,8 +974,8 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_numeric_sprite_display(s32 uni
 
 /* Resets a unit's status bubble display to one 14 x 12 part at (0, 0xb0) of the
  * FRAME.BIN page with CLUT 7 of the sprite row, neutral color and scale ONE. */
-battle_gfx_sprite_display_data_t* battle_gfx_init_status_bubble_sprite_display(s32 unit_index) {
-    battle_gfx_sprite_display_data_t* display = &g_battle_units[unit_index].status_bubble_sprite_display.header;
+sprite_display_t* sprite_display_init_status_bubble(s32 unit_index) {
+    sprite_display_t* display = &g_units[unit_index].status_bubble_sprite_display.header;
     s32 i;
 
     display->color.b = 0x80;
@@ -991,8 +983,8 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_status_bubble_sprite_display(s
     display->color.r = 0x80;
     display->scale_y = ONE;
     display->scale_x = ONE;
-    display->tpage = BATTLE_GFX_TPAGE_FRAME;
-    display->clut = MAP_CLUT(MAP_CLUT_ROW_SPRITES, 7);
+    display->tpage = SPRITE_TPAGE_FRAME;
+    display->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_SPRITES, 7);
     display->rotation = 0;
     display->part_count = 1;
     for (i = 0; i < 1; i++) {
@@ -1009,8 +1001,8 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_status_bubble_sprite_display(s
 
 /* Resets a unit's item sprite display to one 16 x 16 part of the ITEM.BIN page
  * with CLUT 7 of the sprite row, neutral color and scale ONE. */
-battle_gfx_sprite_display_data_t* battle_gfx_init_item_sprite_display(s32 runtime_id) {
-    battle_gfx_sprite_display_data_t* display = &g_battle_units[runtime_id].item_sprite_display.header;
+sprite_display_t* sprite_display_init_item(s32 runtime_id) {
+    sprite_display_t* display = &g_units[runtime_id].item_sprite_display.header;
     s32 i;
 
     display->color.b = 0x80;
@@ -1018,8 +1010,8 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_item_sprite_display(s32 runtim
     display->color.r = 0x80;
     display->scale_y = ONE;
     display->scale_x = ONE;
-    display->tpage = BATTLE_GFX_TPAGE_ITEM;
-    display->clut = MAP_CLUT(MAP_CLUT_ROW_SPRITES, 7);
+    display->tpage = SPRITE_TPAGE_ITEM;
+    display->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_SPRITES, 7);
     display->rotation = 0;
     display->part_count = 1;
     for (i = 0; i < 1; i++) {
@@ -1032,24 +1024,24 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_item_sprite_display(s32 runtim
     return display;
 }
 
-/* Empty. battle_unit_remove passes the removed unit's sprite display, a member of its
- * g_battle_units record that battle_gfx_init_unit_sprite_display handed out. */
-void battle_gfx_release_unit_sprite_display_stub(battle_gfx_sprite_display_data_t* unused_display) {
+/* Empty. unit_remove passes the removed unit's sprite display, a member of its
+ * g_units record that sprite_display_init_unit handed out. */
+void sprite_display_release_unit_stub(sprite_display_t* unused_display) {
 }
 
 /* Starts a frame of sprite drawing: the GTE offset is reset to (0, 0) and the
  * primitive ring index reached last frame is recorded. */
-static void battle_gfx_init_render_frame(void) {
+static void sprite_init_render_frame(void) {
     SetGeomOffset(0, 0);
     /* The target loads the counter unsigned (lhu). */
-    g_battle_gfx_frame_start_sprite_prim_index = g_battle_gfx_sprite_prim_index;
+    g_sprite_prim_frame_start_index = g_sprite_prim_index;
 }
 
-/* Takes the next of the 256 primitives of g_battle_gfx_sprite_prim_pool, used as
+/* Takes the next of the 256 primitives of g_sprite_prim_pool, used as
  * a ring, and returns its index. */
-s16 battle_gfx_take_sprite_prim(void) {
-    g_battle_gfx_sprite_prim_index = (g_battle_gfx_sprite_prim_index + 1) % 0x100;
-    return g_battle_gfx_sprite_prim_index;
+s16 sprite_take_prim(void) {
+    g_sprite_prim_index = (g_sprite_prim_index + 1) % 0x100;
+    return g_sprite_prim_index;
 }
 
 /* Queue one POLY_FT4 per sprite part in [start, end) of a sprite display.
@@ -1059,7 +1051,7 @@ s16 battle_gfx_take_sprite_prim(void) {
  * a flip bit mirrors each part's place about the sprite's origin, and its
  * picture unless the part's own flip bit is set too. Either one's
  * semi-transparent bit applies, and the blend bits of `mode` are added to
- * the display's texture page. A part flagged BATTLE_SPRITE_DISPLAY_NEARER is
+ * the display's texture page. A part flagged SPRITE_DISPLAY_NEARER is
  * queued ahead of `ot` by the camera pitch and zoom while the pitch is below
  * a quarter turn.
  *
@@ -1067,10 +1059,10 @@ s16 battle_gfx_take_sprite_prim(void) {
  * test with its duplicated `addPrim(ot, prim)` arm is the original shape: jump
  * optimization merges the arms, but the references counted before that merge
  * give `ot` the allocation priority that places it in $s5 ahead of `display`. */
-void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_t* display, s32 end, s32 start,
-    SVECTOR* position, s16 angle, s16 mode, SVECTOR* scale, u32* ot) {
+void sprite_display_construct_polygon_data(
+    sprite_display_t* display, s32 end, s32 start, SVECTOR* position, s16 angle, s16 mode, SVECTOR* scale, u32* ot) {
     VECTOR unused;
-    battle_gfx_sprite_part_display_data_t* part;
+    sprite_display_part_t* part;
     POLY_FT4* prim;
     s32 i;
     s16 flags;
@@ -1081,50 +1073,50 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
     s16 sine;
 
     cosine = rcos(angle + display->rotation);
-    g_battle_gfx_sprite_display_matrix.m[0][0] = ((cosine * scale->vx) >> 12) * display->scale_x >> 12;
-    g_battle_gfx_sprite_display_matrix.m[1][1] = ((cosine * scale->vy) >> 12) * display->scale_y >> 12;
+    g_sprite_display_matrix.m[0][0] = ((cosine * scale->vx) >> 12) * display->scale_x >> 12;
+    g_sprite_display_matrix.m[1][1] = ((cosine * scale->vy) >> 12) * display->scale_y >> 12;
     sine = rsin(angle + display->rotation);
-    g_battle_gfx_sprite_display_matrix.m[0][1] = ((-sine * scale->vy) >> 12) * display->scale_y >> 12;
-    g_battle_gfx_sprite_display_matrix.m[1][0] = ((sine * scale->vx) >> 12) * display->scale_x >> 12;
-    g_battle_gfx_sprite_display_matrix.t[0] = position->vx;
-    g_battle_gfx_sprite_display_matrix.t[1] = position->vy;
-    SetRotMatrix(&g_battle_gfx_sprite_display_matrix);
-    SetTransMatrix(&g_battle_gfx_sprite_display_matrix);
+    g_sprite_display_matrix.m[0][1] = ((-sine * scale->vy) >> 12) * display->scale_y >> 12;
+    g_sprite_display_matrix.m[1][0] = ((sine * scale->vx) >> 12) * display->scale_x >> 12;
+    g_sprite_display_matrix.t[0] = position->vx;
+    g_sprite_display_matrix.t[1] = position->vy;
+    SetRotMatrix(&g_sprite_display_matrix);
+    SetTransMatrix(&g_sprite_display_matrix);
     for (i = start; i < end; i++) {
         part = &display->parts[i];
         flags = part->flags;
-        index = battle_gfx_take_sprite_prim();
+        index = sprite_take_prim();
         flags ^= mode;
-        prim = g_battle_gfx_sprite_prim_pool + index;
+        prim = g_sprite_prim_pool + index;
         setlen(prim, 9);
         prim->code = 0x2c;
-        if (mode & BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP) {
+        if (mode & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
             x = -part->x_shift - part->width;
         } else {
             x = part->x_shift;
         }
-        if (mode & BATTLE_SPRITE_DISPLAY_VERTICAL_FLIP) {
+        if (mode & SPRITE_DISPLAY_VERTICAL_FLIP) {
             y = -part->y_shift - part->height;
         } else {
             y = part->y_shift;
         }
-        if (flags & BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP) {
-            g_battle_gte_rtpt_vxy1.vx = g_battle_gte_rtps_vxy0.vx = x;
-            g_battle_gte_rtpt_vxy0.vx = g_battle_gte_rtpt_vxy2.vx = x + part->width;
+        if (flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
+            g_sprite_gte_rtpt_vxy1.vx = g_sprite_gte_rtps_vxy0.vx = x;
+            g_sprite_gte_rtpt_vxy0.vx = g_sprite_gte_rtpt_vxy2.vx = x + part->width;
         } else {
-            g_battle_gte_rtpt_vxy0.vx = g_battle_gte_rtpt_vxy2.vx = x;
-            g_battle_gte_rtpt_vxy1.vx = g_battle_gte_rtps_vxy0.vx = x + part->width;
+            g_sprite_gte_rtpt_vxy0.vx = g_sprite_gte_rtpt_vxy2.vx = x;
+            g_sprite_gte_rtpt_vxy1.vx = g_sprite_gte_rtps_vxy0.vx = x + part->width;
         }
-        if (flags & BATTLE_SPRITE_DISPLAY_VERTICAL_FLIP) {
-            g_battle_gte_rtpt_vxy2.vy = g_battle_gte_rtps_vxy0.vy = y;
-            g_battle_gte_rtpt_vxy0.vy = g_battle_gte_rtpt_vxy1.vy = y + part->height;
+        if (flags & SPRITE_DISPLAY_VERTICAL_FLIP) {
+            g_sprite_gte_rtpt_vxy2.vy = g_sprite_gte_rtps_vxy0.vy = y;
+            g_sprite_gte_rtpt_vxy0.vy = g_sprite_gte_rtpt_vxy1.vy = y + part->height;
         } else {
-            g_battle_gte_rtpt_vxy0.vy = g_battle_gte_rtpt_vxy1.vy = y;
-            g_battle_gte_rtpt_vxy2.vy = g_battle_gte_rtps_vxy0.vy = y + part->height;
+            g_sprite_gte_rtpt_vxy0.vy = g_sprite_gte_rtpt_vxy1.vy = y;
+            g_sprite_gte_rtpt_vxy2.vy = g_sprite_gte_rtps_vxy0.vy = y + part->height;
         }
-        gte_ldv3_split(&g_battle_gte_rtpt_vxy0, &g_battle_gte_rtpt_vxy1, &g_battle_gte_rtpt_vxy2);
+        gte_ldv3_split(&g_sprite_gte_rtpt_vxy0, &g_sprite_gte_rtpt_vxy1, &g_sprite_gte_rtpt_vxy2);
         gte_rtpt();
-        if ((flags | mode) & BATTLE_SPRITE_DISPLAY_SEMI_TRANSPARENT) {
+        if ((flags | mode) & SPRITE_DISPLAY_SEMI_TRANSPARENT) {
             prim->code |= 2;
         } else {
             prim->code &= ~2;
@@ -1132,7 +1124,7 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
         prim->tpage = display->tpage | (mode & BATTLE_SPRITE_DISPLAY_BLEND_MASK);
         prim->clut = display->clut;
         gte_stsxy3_split(&prim->x0, &prim->x1, &prim->x2);
-        gte_ldv0(&g_battle_gte_rtps_vxy0);
+        gte_ldv0(&g_sprite_gte_rtps_vxy0);
         gte_rtps();
         /* The retail color transfer combines red and green in one 16-bit value. */
         *(u16*)&prim->r0 = *(u16*)&display->color.r;
@@ -1142,10 +1134,9 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
         prim->u1 = prim->u3 = prim->u0 + part->width;
         prim->v0 = prim->v1 = part->v;
         prim->v2 = prim->v3 = prim->v0 + part->height;
-        if (flags & BATTLE_SPRITE_DISPLAY_NEARER) {
-            if ((g_battle_camera_render_state.vx & 0xfff) < 0x400) {
-                addPrim(ot - ((g_battle_camera_render_state.vx & 0xfff) - 0x12e) * g_battle_camera_zoom.vz / 368640 - 1,
-                    prim);
+        if (flags & SPRITE_DISPLAY_NEARER) {
+            if ((g_camera_render_state.vx & 0xfff) < 0x400) {
+                addPrim(ot - ((g_camera_render_state.vx & 0xfff) - 0x12e) * g_camera_zoom.vz / 368640 - 1, prim);
             } else {
                 addPrim(ot, prim);
             }
@@ -1157,9 +1148,9 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
 
 /* Fill in part `index` of a sprite display: its offset from the sprite origin, its texture
  * rectangle and its flags. */
-void battle_gfx_store_sprite_display_data(battle_gfx_sprite_display_data_t* display, s32 index, s16 x_shift,
-    s16 y_shift, s16 u, s16 v, s16 width, s16 height, s16 flags) {
-    battle_gfx_sprite_part_display_data_t* part;
+void sprite_display_store_data(
+    sprite_display_t* display, s32 index, s16 x_shift, s16 y_shift, s16 u, s16 v, s16 width, s16 height, s16 flags) {
+    sprite_display_part_t* part;
 
     part = &display->parts[index];
     part->x_shift = x_shift;
@@ -1171,33 +1162,30 @@ void battle_gfx_store_sprite_display_data(battle_gfx_sprite_display_data_t* disp
     part->flags = flags;
 }
 
-/* Replace the two mirror bits of a sprite part (BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP and
+/* Replace the two mirror bits of a sprite part (SPRITE_DISPLAY_HORIZONTAL_FLIP and
  * _VERTICAL_FLIP) with `flags`. Never called. */
-void battle_gfx_set_sprite_part_flip(battle_gfx_sprite_display_data_t* display, s32 part_index, u32 flags) {
+void sprite_display_set_part_flip(sprite_display_t* display, s32 part_index, u32 flags) {
     display->parts[part_index].flags
-        = (display->parts[part_index].flags
-              & ~(BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP | BATTLE_SPRITE_DISPLAY_VERTICAL_FLIP))
-        | flags;
+        = (display->parts[part_index].flags & ~(SPRITE_DISPLAY_HORIZONTAL_FLIP | SPRITE_DISPLAY_VERTICAL_FLIP)) | flags;
 }
 
 /* Set or clear bit 0 of a sprite part's flags: the part is drawn semi-transparent while it is set. */
-void battle_gfx_set_sprite_part_semi_transparent(
-    battle_gfx_sprite_display_data_t* display, s32 part_index, s32 enabled) {
+void sprite_display_set_part_semi_transparent(sprite_display_t* display, s32 part_index, s32 enabled) {
     if (enabled != 0) {
-        display->parts[part_index].flags |= BATTLE_SPRITE_DISPLAY_SEMI_TRANSPARENT;
+        display->parts[part_index].flags |= SPRITE_DISPLAY_SEMI_TRANSPARENT;
     } else {
-        display->parts[part_index].flags &= ~BATTLE_SPRITE_DISPLAY_SEMI_TRANSPARENT;
+        display->parts[part_index].flags &= ~SPRITE_DISPLAY_SEMI_TRANSPARENT;
     }
 }
 
 /* Move a point half a tile (14 units) on x and z, with signs set by the camera yaw quadrant, back
  * by `offset` on both, and 12 units up: the depth point of a stepping unit. */
-static void battle_camera_get_step_depth_point(const SVECTOR* input, SVECTOR* output, s32 offset) {
+static void camera_get_step_depth_point(const SVECTOR* input, SVECTOR* output, s32 offset) {
     u16 x;
     u16 z;
 
     output->vy = input->vy - 0xc;
-    switch (g_battle_camera_render_state.vy & 0xc00) {
+    switch (g_camera_render_state.vy & 0xc00) {
     case 0:
         x = input->vx + 0xe;
         output->vx = x - offset;
@@ -1225,23 +1213,23 @@ static void battle_camera_get_step_depth_point(const SVECTOR* input, SVECTOR* ou
     }
 }
 
-/* battle_camera_get_step_depth_point with offset 1: the depth point of a stepping unit on a
- * tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output) {
-    battle_camera_get_step_depth_point(input, output, 1);
+/* camera_get_step_depth_point with offset 1: the depth point of a stepping unit on a
+ * tile without BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+void camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output) {
+    camera_get_step_depth_point(input, output, 1);
 }
 
-/* battle_camera_get_step_depth_point with offset 5: the depth point of a stepping unit on a
- * tile with MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output) {
-    battle_camera_get_step_depth_point(input, output, 5);
+/* camera_get_step_depth_point with offset 5: the depth point of a stepping unit on a
+ * tile with BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+void camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output) {
+    camera_get_step_depth_point(input, output, 5);
 }
 
 /*
  * Snap a screen-space point to the 28-unit tile grid for the current camera
  * yaw, writing the result to output.
  *
- * Same shape as battle_camera_get_step_depth_point: each of the x and z
+ * Same shape as camera_get_step_depth_point: each of the x and z
  * components picks up the caller's offset with a sign that depends on the yaw
  * quadrant, and the y component is a plain bias. Here each component is first
  * snapped down to a whole tile, and on the side the camera faces away from it
@@ -1249,57 +1237,57 @@ void battle_camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* ou
  * far_edge temporaries keep the target's add-then-subtract order; written
  * inline, GCC re-associates them into a longer sequence.
  */
-static void battle_camera_get_tile_depth_point(const SVECTOR* input, SVECTOR* output, s32 offset) {
+static void camera_get_tile_depth_point(const SVECTOR* input, SVECTOR* output, s32 offset) {
     s32 yaw;
 
     output->vy = input->vy - 0xb;
-    yaw = g_battle_camera_render_state.vy & 0xc00;
+    yaw = g_camera_render_state.vy & 0xc00;
 
     switch (yaw) {
     case 0: {
-        s32 far_edge = (input->vx / MAP_TILE_SIZE) * MAP_TILE_SIZE + MAP_TILE_SIZE;
+        s32 far_edge = (input->vx / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + BATTLE_MAP_TILE_SIZE;
         output->vx = far_edge - offset;
     }
-        output->vz = (input->vz / MAP_TILE_SIZE) * MAP_TILE_SIZE + offset;
+        output->vz = (input->vz / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + offset;
         break;
     case 0x400: {
-        s32 far_edge = (input->vx / MAP_TILE_SIZE) * MAP_TILE_SIZE + MAP_TILE_SIZE;
+        s32 far_edge = (input->vx / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + BATTLE_MAP_TILE_SIZE;
         output->vx = far_edge - offset;
     }
         {
-            s32 far_edge = (input->vz / MAP_TILE_SIZE) * MAP_TILE_SIZE + MAP_TILE_SIZE;
+            s32 far_edge = (input->vz / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + BATTLE_MAP_TILE_SIZE;
             output->vz = far_edge - offset;
         }
         break;
     case 0x800:
-        output->vx = (input->vx / MAP_TILE_SIZE) * MAP_TILE_SIZE + offset;
+        output->vx = (input->vx / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + offset;
         {
-            s32 far_edge = (input->vz / MAP_TILE_SIZE) * MAP_TILE_SIZE + MAP_TILE_SIZE;
+            s32 far_edge = (input->vz / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + BATTLE_MAP_TILE_SIZE;
             output->vz = far_edge - offset;
         }
         break;
     case 0xc00:
-        output->vx = (input->vx / MAP_TILE_SIZE) * MAP_TILE_SIZE + offset;
-        output->vz = (input->vz / MAP_TILE_SIZE) * MAP_TILE_SIZE + offset;
+        output->vx = (input->vx / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + offset;
+        output->vz = (input->vz / BATTLE_MAP_TILE_SIZE) * BATTLE_MAP_TILE_SIZE + offset;
         break;
     }
 }
 
-/* battle_camera_get_tile_depth_point with offset 1: the depth point of a standing unit,
- * a cursor or a bubble on a tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_get_tile_depth_point_unbiased(const SVECTOR* screen, SVECTOR* destination) {
-    battle_camera_get_tile_depth_point(screen, destination, 1);
+/* camera_get_tile_depth_point with offset 1: the depth point of a standing unit,
+ * a cursor or a bubble on a tile without BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+void camera_get_tile_depth_point_unbiased(const SVECTOR* screen, SVECTOR* destination) {
+    camera_get_tile_depth_point(screen, destination, 1);
 }
 
-/* battle_camera_get_tile_depth_point with offset 5: the depth point on a tile with
- * MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* destination) {
-    battle_camera_get_tile_depth_point(screen, destination, 5);
+/* camera_get_tile_depth_point with offset 5: the depth point on a tile with
+ * BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+void camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* destination) {
+    camera_get_tile_depth_point(screen, destination, 5);
 }
 
 /* The unit's draw position: its world coordinates plus its event and SEQ offsets, with the float
  * bob added to y. */
-void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* unit) {
+void unit_copy_draw_coords(SVECTOR* destination, const unit_t* unit) {
     /* float_bob_offset is read signed (lh) here. */
     vector_set_svector(destination, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx,
         unit->world_coords.vy + unit->event_offset.vy + unit->seq_offset.vy + (s16)unit->float_bob_offset,
@@ -1320,15 +1308,15 @@ void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* uni
  *   offsets from the two sides, and puts the flat quad at that triangle's height
  *   under the unit.
  *
- * battle_gfx_draw_unit_shadow calls it before projecting the quad. */
-void battle_gfx_build_unit_shadow_quad(battle_unit_t* unit) {
+ * sprite_shadow_draw calls it before projecting the quad. */
+void sprite_shadow_build_quad(unit_t* unit) {
     SVECTOR coords;
     SVECTOR unused; /* unreferenced; keeps the 0x30-byte target frame */
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
     SVECTOR* quad;
     u8 layer = unit->map_z;
     u8 height;
-    map_tile_depth_t depth;
+    battle_map_tile_depth_t depth;
     u8 slope_type;
     s32 slope;
     s16 tx;
@@ -1337,8 +1325,8 @@ void battle_gfx_build_unit_shadow_quad(battle_unit_t* unit) {
     s32 rhs;
     s32 rise;
 
-    battle_unit_copy_draw_coords(&coords, unit);
-    tile = battle_map_get_tile_data_pointer((coords.vx / MAP_TILE_SIZE), (coords.vz / MAP_TILE_SIZE), layer);
+    unit_copy_draw_coords(&coords, unit);
+    tile = battle_map_tile_get_pointer((coords.vx / BATTLE_MAP_TILE_SIZE), (coords.vz / BATTLE_MAP_TILE_SIZE), layer);
     depth = tile->depth_half_height;
     height = tile->height + depth.depth;
     slope_type = tile->slope_type;
@@ -1352,7 +1340,7 @@ void battle_gfx_build_unit_shadow_quad(battle_unit_t* unit) {
     quad[2].vz = coords.vz - 10;
     quad[3].vx = coords.vx + 10;
     quad[3].vz = coords.vz - 10;
-    quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -(height * MAP_HEIGHT_STEP);
+    quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -(height * BATTLE_MAP_HEIGHT_STEP);
 
     slope = depth.half_height;
     if (slope == 0) {
@@ -1360,146 +1348,146 @@ void battle_gfx_build_unit_shadow_quad(battle_unit_t* unit) {
     }
 
     switch (slope_type) {
-    case MAP_SLOPE_EDGE_EAST: /* edge up to east */
-        tx = coords.vx % MAP_TILE_SIZE;
-        rise = tx * MAP_HEIGHT_STEP;
-        quad[0].vy = quad[1].vy = quad[3].vy = quad[2].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+    case BATTLE_MAP_SLOPE_EDGE_EAST: /* edge up to east */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        rise = tx * BATTLE_MAP_HEIGHT_STEP;
+        quad[0].vy = quad[1].vy = quad[3].vy = quad[2].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         quad[0].vy = quad[2].vy = quad[2].vy + 6;
         quad[1].vy = quad[3].vy = quad[3].vy - 6;
         break;
-    case MAP_SLOPE_EDGE_WEST: /* edge up to west */
-        tx = coords.vx % MAP_TILE_SIZE;
-        rise = tx * MAP_HEIGHT_STEP;
+    case BATTLE_MAP_SLOPE_EDGE_WEST: /* edge up to west */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        rise = tx * BATTLE_MAP_HEIGHT_STEP;
         quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-            = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+            = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         quad[1].vy = quad[3].vy = quad[3].vy + 6;
         quad[0].vy = quad[2].vy = quad[2].vy - 6;
         break;
-    case MAP_SLOPE_EDGE_SOUTH: /* edge up to south */
-        ty = coords.vz % MAP_TILE_SIZE;
-        rise = ty * MAP_HEIGHT_STEP;
+    case BATTLE_MAP_SLOPE_EDGE_SOUTH: /* edge up to south */
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
+        rise = ty * BATTLE_MAP_HEIGHT_STEP;
         quad[0].vy = quad[2].vy = quad[3].vy = quad[1].vy
-            = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+            = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         quad[0].vy = quad[1].vy = quad[1].vy + 6;
         quad[2].vy = quad[3].vy = quad[3].vy - 6;
         break;
-    case MAP_SLOPE_EDGE_NORTH: /* edge up to north */
-        ty = coords.vz % MAP_TILE_SIZE;
-        rise = ty * MAP_HEIGHT_STEP;
-        quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+    case BATTLE_MAP_SLOPE_EDGE_NORTH: /* edge up to north */
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
+        rise = ty * BATTLE_MAP_HEIGHT_STEP;
+        quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         quad[2].vy = quad[3].vy = quad[3].vy + 6;
         quad[0].vy = quad[1].vy = quad[1].vy - 6;
         break;
-    case MAP_SLOPE_LOW_CORNER_NORTH_EAST: /* low corner, north-east up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
+    case BATTLE_MAP_SLOPE_LOW_CORNER_NORTH_EAST: /* low corner, north-east up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
         lhs = tx;
         rhs = ty;
         if (lhs < rhs) {
-            rise = lhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = lhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         } else {
-            rise = rhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = rhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         }
         break;
-    case MAP_SLOPE_LOW_CORNER_SOUTH_EAST: /* low corner, south-east up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
+    case BATTLE_MAP_SLOPE_LOW_CORNER_SOUTH_EAST: /* low corner, south-east up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
         lhs = tx;
-        rhs = MAP_TILE_SIZE - ty;
+        rhs = BATTLE_MAP_TILE_SIZE - ty;
         if (lhs >= rhs) {
-            rise = ty * MAP_HEIGHT_STEP;
+            rise = ty * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         } else {
-            rise = lhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = lhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         }
         break;
-    case MAP_SLOPE_LOW_CORNER_SOUTH_WEST: /* low corner, south-west up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
-        lhs = MAP_TILE_SIZE - tx;
-        rhs = MAP_TILE_SIZE - ty;
+    case BATTLE_MAP_SLOPE_LOW_CORNER_SOUTH_WEST: /* low corner, south-west up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
+        lhs = BATTLE_MAP_TILE_SIZE - tx;
+        rhs = BATTLE_MAP_TILE_SIZE - ty;
         if (lhs >= rhs) {
-            rise = ty * MAP_HEIGHT_STEP;
+            rise = ty * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         } else {
-            rise = tx * MAP_HEIGHT_STEP;
+            rise = tx * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         }
         break;
-    case MAP_SLOPE_LOW_CORNER_NORTH_WEST: /* low corner, north-west up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
-        lhs = MAP_TILE_SIZE - tx;
+    case BATTLE_MAP_SLOPE_LOW_CORNER_NORTH_WEST: /* low corner, north-west up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
+        lhs = BATTLE_MAP_TILE_SIZE - tx;
         rhs = ty;
         if (lhs >= rhs) {
-            rise = rhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = rhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         } else {
-            rise = tx * MAP_HEIGHT_STEP;
+            rise = tx * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         }
         break;
-    case MAP_SLOPE_HIGH_CORNER_NORTH_EAST: /* high corner, north-east up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
+    case BATTLE_MAP_SLOPE_HIGH_CORNER_NORTH_EAST: /* high corner, north-east up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
         lhs = tx;
         rhs = ty;
         if (lhs >= rhs) {
-            rise = lhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = lhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         } else {
-            rise = rhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = rhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         }
         break;
-    case MAP_SLOPE_HIGH_CORNER_SOUTH_EAST: /* high corner, south-east up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
+    case BATTLE_MAP_SLOPE_HIGH_CORNER_SOUTH_EAST: /* high corner, south-east up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
         lhs = tx;
-        rhs = MAP_TILE_SIZE - ty;
+        rhs = BATTLE_MAP_TILE_SIZE - ty;
         if (lhs >= rhs) {
-            rise = lhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = lhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         } else {
-            rise = ty * MAP_HEIGHT_STEP;
+            rise = ty * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         }
         break;
-    case MAP_SLOPE_HIGH_CORNER_SOUTH_WEST: /* high corner, south-west up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
-        lhs = MAP_TILE_SIZE - tx;
-        rhs = MAP_TILE_SIZE - ty;
+    case BATTLE_MAP_SLOPE_HIGH_CORNER_SOUTH_WEST: /* high corner, south-west up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
+        lhs = BATTLE_MAP_TILE_SIZE - tx;
+        rhs = BATTLE_MAP_TILE_SIZE - ty;
         if (lhs < rhs) {
-            rise = ty * MAP_HEIGHT_STEP;
+            rise = ty * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         } else {
-            rise = tx * MAP_HEIGHT_STEP;
+            rise = tx * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         }
         break;
-    case MAP_SLOPE_HIGH_CORNER_NORTH_WEST: /* high corner, north-west up */
-        tx = coords.vx % MAP_TILE_SIZE;
-        ty = coords.vz % MAP_TILE_SIZE;
-        lhs = MAP_TILE_SIZE - tx;
+    case BATTLE_MAP_SLOPE_HIGH_CORNER_NORTH_WEST: /* high corner, north-west up */
+        tx = coords.vx % BATTLE_MAP_TILE_SIZE;
+        ty = coords.vz % BATTLE_MAP_TILE_SIZE;
+        lhs = BATTLE_MAP_TILE_SIZE - tx;
         rhs = ty;
         if (lhs >= rhs) {
-            rise = tx * MAP_HEIGHT_STEP;
+            rise = tx * BATTLE_MAP_HEIGHT_STEP;
             quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy
-                = quad[3].vy - (slope * MAP_HEIGHT_STEP - rise * slope / MAP_TILE_SIZE);
+                = quad[3].vy - (slope * BATTLE_MAP_HEIGHT_STEP - rise * slope / BATTLE_MAP_TILE_SIZE);
         } else {
-            rise = rhs * MAP_HEIGHT_STEP;
-            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / MAP_TILE_SIZE;
+            rise = rhs * BATTLE_MAP_HEIGHT_STEP;
+            quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = quad[3].vy - rise * slope / BATTLE_MAP_TILE_SIZE;
         }
         break;
     }

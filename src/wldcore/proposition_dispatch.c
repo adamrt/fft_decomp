@@ -549,7 +549,7 @@ static void proposition_show_unit_portrait(proposition_send_unit_level_t* unused
 
     code = formation_get_party_unit_sprite(party_index);
     cell = code;
-    menu_build_unit_portrait_poly(&poly, code);
+    portrait_build_unit_poly(&poly, code);
     g_window_render_records[index].clut.x = (code / 40 << 6) + 0x280 + cell % 4 * 16;
     g_window_render_records[index].clut.y = cell % 40 / 4 + 0x1F0;
     g_window_render_records[index].tpage = poly.tpage;
@@ -640,7 +640,7 @@ static void proposition_step_send_unit_slots(proposition_send_unit_level_t* leve
  * three unit panel threads on it (status banner, numeric panel, equipment
  * and ability panel), raising SYSTEM_FLAG_UNIT_PANEL_THREADS. */
 static void unit_panel_start_threads(s32 party_index) {
-    menu_status_thread_t* thread8;
+    unit_panel_thread_t* thread8;
 
     unit_panel_build_unit_data(party_index);
     thread8 = &g_unit_panel_banner_params;
@@ -648,11 +648,11 @@ static void unit_panel_start_threads(s32 party_index) {
     g_unit_panel_panel_params.y = 0;
     g_unit_panel_banner_params.y = 0;
     thread8->x = 0;
-    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_frame_thread);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
+    thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
     g_system_flags |= SYSTEM_FLAG_UNIT_PANEL_THREADS;
 }

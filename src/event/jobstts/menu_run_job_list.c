@@ -28,27 +28,28 @@ s32 job_list_run(void) {
     if (g_job_list_list_menu_initialized == 0) {
         g_menu_row_callbacks[0].value = job_list_calculate_level;
         g_menu_row_callbacks[2].value = job_list_calculate_jp;
-        g_menu_row_callbacks[5].value = menu_job_calculate_next_level_jp_requirement;
+        g_menu_row_callbacks[5].value = job_list_calculate_next_level_jp;
         g_menu_row_callbacks[6].value = job_list_calculate_total_jp;
         g_menu_row_callbacks[13].value = job_list_calculate_mastered;
-        job_list_build(0, g_menu_job_ids, 0);
-        menu_get_selection_record(4, &selected, &scroll, g_menu_job_ids);
-        menu_init_scrollable_list(g_menu_job_ids, selected, scroll, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
+        job_list_build(0, g_job_list_job_ids, 0);
+        menu_get_selection_record(4, &selected, &scroll, g_job_list_job_ids);
+        menu_init_scrollable_list(
+            g_job_list_job_ids, selected, scroll, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_job_list_list_menu_initialized = 1;
     }
 
-    g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + HELP_TEXT_ID_JOB_BASE;
+    g_text_selection_id = g_job_list_job_ids[g_menu_list_selected_index] + HELP_TEXT_ID_JOB_BASE;
     mask = g_menu_input_primary_repeat;
     if (mask & PSX_PAD_CIRCLE) {
-        g_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];
+        g_job_list_selected_id = g_job_list_job_ids[g_menu_list_selected_index];
         job_list_calculate_level(g_menu_list_selected_index);
         job_list_calculate_jp(g_menu_list_selected_index);
         job_list_calculate_total_jp(g_menu_list_selected_index);
         /* A mastered job has no next level to show. */
         if (job_list_calculate_mastered(g_menu_list_selected_index) == 0) {
-            menu_job_calculate_next_level_jp_requirement(g_menu_list_selected_index);
+            job_list_calculate_next_level_jp(g_menu_list_selected_index);
         }
-        menu_set_selection_record(4, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_job_ids);
+        menu_set_selection_record(4, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
         g_job_list_list_menu_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;

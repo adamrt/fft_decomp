@@ -329,7 +329,7 @@ typedef enum event_rotate_unit_facing {
 } event_rotate_unit_facing_e;
 
 /* First 16-bit value of a scenario condition record, as
- * script_check_scenario_condition tests it. The record's next 16-bit values are
+ * scenario_check_condition tests it. The record's next 16-bit values are
  * called id and value below; the two tile conditions also read a y and an
  * elevation. Other types fail. */
 typedef enum event_scenario_condition {
@@ -353,7 +353,7 @@ typedef enum event_scenario_condition {
     EVENT_SCENARIO_CONDITION_DATE_ON_OR_AFTER = 17,    /* month id, day value */
     EVENT_SCENARIO_CONDITION_CASUALTIES_AT_LEAST = 18, /* compares with id, not value */
     EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST = 19,  /* compares with id, not value */
-    EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED = 22,    /* battle_action_check_battle_outcome returns 0 */
+    EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED = 22,    /* event_check_battle_outcome returns 0 */
     EVENT_SCENARIO_CONDITION_UNIT_AT_TILE = 24,        /* unit id stands on x value, the y and the elevation */
     /* Stores id as the current event; the result is always RUN_EVENT. */
     EVENT_SCENARIO_CONDITION_RUN_EVENT = 25,
@@ -361,8 +361,8 @@ typedef enum event_scenario_condition {
     EVENT_SCENARIO_CONDITION_PALETTE_UNIT_AT_TILE = 37,
 } event_scenario_condition_e;
 
-/* Result of script_check_scenario_condition for one condition record.
- * script_run_scenario_conditions walks a chain of records while they pass,
+/* Result of scenario_check_condition for one condition record.
+ * scenario_run_conditions walks a chain of records while they pass,
  * drops the chain at the first failure and reports an event to run when it
  * reaches the record (type 25) that stores the event id. */
 typedef enum event_scenario_condition_result {

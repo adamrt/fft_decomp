@@ -35,17 +35,17 @@ static s32 formation_ability_list_secondary_skillsets(s16 unit_id, s16* skillset
 
 /* Return nonzero when the formation unit has the Two Swords support ability set. */
 s32 ability_has_two_swords(s16 unit_id) {
-    return g_formation_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_SWORDS;
+    return g_formation_unit_pointers[unit_id]->support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_SWORDS;
 }
 
 /* Return nonzero when the formation unit has the Two Hands support ability set. */
 s32 formation_ability_has_two_hands(s16 unit_id) {
-    return g_formation_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS;
+    return g_formation_unit_pointers[unit_id]->support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_HANDS;
 }
 
 /* Return nonzero when the formation unit has the Secret Hunt support ability set. */
 s32 formation_ability_has_secret_hunt(s32 unit_id) {
-    return g_formation_unit_pointers[(s16)unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_SECRET_HUNT;
+    return g_formation_unit_pointers[(s16)unit_id]->support_abilities[2] & UNIT_SUPPORT_SET_3_SECRET_HUNT;
 }
 
 /*
@@ -69,7 +69,7 @@ s32 formation_ability_has_secret_hunt(s32 unit_id) {
  * the target's cursors are the loop optimizer's reduced induction variables,
  * set after the unit-pointer address is formed.
  */
-s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list, s32 mode) {
+s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_category, s16* list, s32 mode) {
     s32 skillset;
     s16 generic;
     s16* abilities;
@@ -192,10 +192,10 @@ s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out) {
     s32 last;
     s16 job_id = g_formation_unit_pointers[unit_index]->identity.job_id;
 
-    count = ability_build_list(
+    count = ability_list_build(
         unit_index, job_list_get_base(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
     for (i = 1; i < JOB_ID_GENERIC_COUNT - 1; i++) {
-        count += ability_build_list(
+        count += ability_list_build(
             unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], ABILITY_LIST_MODE_LEARNED_ONLY);
     }
 

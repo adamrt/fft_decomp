@@ -10,10 +10,10 @@
 #include "psx/types.h"
 
 /* battle menu ids */
-/* g_menu_current_id: the open battle menu,
- * and the index of its entry in g_menu_idle_action_entries, which is also what a row action from 0 to
+/* g_command_current_id: the open battle menu,
+ * and the index of its entry in g_command_idle_action_entries, which is also what a row action from 0 to
  * 0xff opens. The unit menus are picked by
- * battle_menu_get_idle_action_menu_id. A system function
+ * menu_action_get_menu_id. A system function
  * (menu_system_function_t) shows its text in MESSAGE or in one of the
  * choice entries and sets the current id itself; ids from 0x62 exist only
  * there and have no entry.
@@ -30,10 +30,10 @@ typedef enum menu_command_id {
     MENU_COMMAND_ID_SKILLSET_LIST = 4,       /* the Act row: the unit's commands */
     MENU_COMMAND_ID_STATUS = 5,              /* the Status row: the unit status panel */
     MENU_COMMAND_ID_WAIT = 6,                /* the Wait row */
-    MENU_COMMAND_ID_WAIT_YES_NO = 7,         /* WAIT's row action in the table; menu_wait_thread replaces it */
+    MENU_COMMAND_ID_WAIT_YES_NO = 7,         /* WAIT's row action in the table; command_wait_thread replaces it */
     MENU_COMMAND_ID_STATUS_LIST = 8,         /* the status panel's list of current statuses */
     MENU_COMMAND_ID_EMPTY_MESSAGE = 9,       /* a message entry with empty text 0x8000 */
-    MENU_COMMAND_ID_MINI_MENU = 10,          /* menu_start_mini_menu_display_thread: AT, Unit List, Option */
+    MENU_COMMAND_ID_MINI_MENU = 10,          /* mini_menu_start: AT, Unit List, Option */
     MENU_COMMAND_ID_OPTIONS = 11,            /* MINI_MENU's Option row: OPTION.OUT */
     MENU_COMMAND_ID_UNIT_LIST = 12,          /* MINI_MENU's Unit List row: BUNIT.OUT */
     MENU_COMMAND_ID_PERFORMING_MESSAGE = 13, /* a message entry with text 0x8002 */
@@ -63,9 +63,9 @@ typedef enum menu_command_id {
     /* TURN and TURN_MOVED with the rows Move, Wait and Status only. */
     MENU_COMMAND_ID_TURN_NO_ACT = 32,
     MENU_COMMAND_ID_TURN_NO_ACT_MOVED = 33,
-    MENU_COMMAND_ID_MOVE = 34,                       /* the Move row: menu_confirm_move_command_thread */
+    MENU_COMMAND_ID_MOVE = 34,                       /* the Move row: command_move_thread */
     MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE = 35, /* why the unit cannot act or use the ability */
-    MENU_COMMAND_ID_ABILITY_CONFIRM = 36,            /* an ABILITY_LIST row: menu_validate_skill_selection_thread */
+    MENU_COMMAND_ID_ABILITY_CONFIRM = 36,            /* an ABILITY_LIST row: command_validate_ability_thread */
     /* The same choices under MESSAGE. */
     MENU_COMMAND_ID_MESSAGE_TARGET_KIND = 37,
     MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE = 38,
@@ -74,7 +74,7 @@ typedef enum menu_command_id {
     MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT = 41, /* Attack, Quit under MESSAGE */
     MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT = 42, /* Defend, Quit under MESSAGE */
     MENU_COMMAND_ID_EFFECT_MESSAGE = 43,      /* MENU_SYSTEM_FUNCTION_EFFECT_MESSAGE's entry */
-    MENU_COMMAND_ID_DEBUGCHR = 44,            /* menu_open_debugchr */
+    MENU_COMMAND_ID_DEBUGCHR = 44,            /* unit_editor_open */
     MENU_COMMAND_ID_MESSAGE_EXECUTE = 45,     /* Execute, Quit under MESSAGE */
     MENU_COMMAND_ID_RIDER_TURN = 46,          /* the TURN menus of a mounted unit, with a Stop ride row */
     MENU_COMMAND_ID_RIDER_TURN_MOVED = 47,
@@ -87,9 +87,9 @@ typedef enum menu_command_id {
     MENU_COMMAND_ID_EGG = 54,                     /* replaces OTHER_UNIT and OTHER_UNIT_INSPECT for an egg */
     MENU_COMMAND_ID_EGG_STATUS = 55,              /* EGG's Status row: only the invalid sound */
     MENU_COMMAND_ID_CRYSTAL_PICKUP = 105,         /* crystal or treasure options */
-} menu_command_id_e;
+} command_menu_e;
 
-extern s32 g_menu_current_id; /* menu_command_id_e */
+extern s32 g_command_current_id; /* command_menu_e */
 
 /* turn menus */
 /* Per-skillset menu behavior (g_command_menu_types_by_skillset). Values select specialized
@@ -121,27 +121,27 @@ typedef enum action_menu_pseudo_skillset {
     ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 188,
 } action_menu_pseudo_skillset_e;
 
-/* The scene's menu table; BATTLE's is indexed by menu_command_id_e. */
-extern menu_entry_t g_menu_idle_action_entries[];
-extern s16 g_menu_wait_row_actions[4];
+/* The scene's menu table; BATTLE's is indexed by command_menu_e. */
+extern menu_entry_t g_command_idle_action_entries[];
+extern s16 g_command_wait_row_actions[4];
 
-/* Opens an idle action menu (menu_command_id_e) for the active-turn unit beside it and restores the row it last
+/* Opens an idle action menu (command_menu_e) for the active-turn unit beside it and restores the row it last
  * chose. WORLD's body only clears g_menu_building_thread_started. */
-void menu_build_idle_action_menu(s32 menu_id);
+void command_open_menu(s32 menu_id);
 /* Thread entry of the turn menus: the icon selection loop, then the chosen row remembered for the unit. */
-void menu_run_turn_menu_thread(void);
+void command_turn_menu_thread(void);
 /* Thread entry of the Wait menu. */
-void menu_wait_thread(void);
+void command_wait_thread(void);
 /* Posts the close command after two frames under the mini-menu task id. */
-void menu_mini_menu_cancel_delay_thread(void);
+void mini_menu_cancel_delay_thread(void);
 /* Queues the confirm sound and holds the mini-menu task id for 16 frames. */
-void menu_confirm_sound_delay_thread(void);
+void mini_menu_confirm_delay_thread(void);
 /* Thread entry of the Move row: refuses a unit that cannot move, otherwise confirms the command. */
-void menu_confirm_move_command_thread(void);
+void command_move_thread(void);
 
 /* skillsets and abilities */
 /* The ability list the skillset menus build in the event work block (event_work_t::ability_list): 82 rows of
- * parallel columns. ids, values and extras become the three text-id columns of g_menu_ability_layout.
+ * parallel columns. ids, values and extras become the three text-id columns of g_ability_list_ability_layout.
  * Provisional. */
 typedef struct menu_ability_list {
     u16 ids[82];     /* 0x000; 0xffff terminated; the text id base of the names is ORed in */
@@ -155,7 +155,7 @@ typedef struct menu_ability_list {
 } menu_ability_list_t;
 
 /* Provisional: one 5-byte row of a menu text entry as rewritten by
- * menu_build_skillset_entries: the style byte at +1 is
+ * command_build_act_menu: the style byte at +1 is
  * 4 for a grayed row, the byte at +3 is the row separator (0xfa) or the
  * list terminator (0xff). */
 typedef struct menu_text_row {
@@ -166,87 +166,87 @@ typedef struct menu_text_row {
     u8 _unused_04;
 } menu_text_row_t;
 
-/* The mode argument of menu_build_ability_list: which list an Arithmeticks
+/* The mode argument of command_build_ability_list: which list an Arithmeticks
  * (Math Skill) menu shows. Any other menu type builds its ability list. */
 typedef enum menu_arithmeticks_list {
-    MENU_ARITHMETICKS_LIST_ABILITIES = 0,  /* battle_menu_collect_calculator_abilities */
-    MENU_ARITHMETICKS_LIST_MULTIPLES = 1,  /* battle_menu_load_math_skill_multiples */
-    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2, /* battle_menu_load_math_skill_attributes */
+    MENU_ARITHMETICKS_LIST_ABILITIES = 0,  /* skillset_math_collect_calculator_abilities */
+    MENU_ARITHMETICKS_LIST_MULTIPLES = 1,  /* skillset_math_load_multiples */
+    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2, /* skillset_math_load_attributes */
 } menu_arithmeticks_list_e;
 
-extern u8 g_menu_skillsets[]; /* SKILLSET_ID_NONE terminates the rows. */
-extern s16 g_menu_skillset_row_actions[];
+extern u8 g_command_skillsets[]; /* SKILLSET_ID_NONE terminates the rows. */
+extern s16 g_command_skillset_row_actions[];
 /* -1: missing unit, 1: monster skillset, otherwise 0. */
-extern s32 g_menu_skillset_build_result;
-extern s32 g_menu_selected_skill_ct;
+extern s32 g_command_skillset_build_result;
+extern s32 g_command_selected_skill_ct;
 /* The ability list's layout; its menu entry passes it as the context. */
-extern menu_scroll_text_layout_t g_menu_ability_layout;
-extern u16 g_menu_ability_display_flags[80];
-extern s16 g_menu_action_type_modes[][2];
+extern menu_scroll_text_layout_t g_ability_list_ability_layout;
+extern u16 g_ability_list_ability_display_flags[80];
+extern s16 g_command_action_type_modes[][2];
 
 /* Builds the skillset list, then waits for its submenu or runs the icon selection. */
-void menu_run_skillset_thread(void);
+void command_act_menu_thread(void);
 /* BATTLE and WORLD each build their own body. */
-void menu_run_scrolling_ability_list_thread(void);
+void ability_list_scrolling_thread(void);
 /* Checks the chosen ability (MP, blocking statuses, per-menu restrictions) and shows why it cannot be used. */
-void menu_validate_skill_selection_thread(void);
+void command_validate_ability_thread(void);
 
 /* status list */
 /* The status panel's list of the unit's current statuses, in two columns. */
-extern menu_scroll_text_layout_t g_menu_status_list_layout;
-extern u16 g_menu_status_list_row_actions[8];
-extern s16 g_menu_status_left_text_ids[20];
-extern s16 g_menu_status_right_text_ids[20];
+extern menu_scroll_text_layout_t g_status_screen_status_list_layout;
+extern u16 g_status_screen_status_list_row_actions[8];
+extern s16 g_unit_panel_status_left_text_ids[20];
+extern s16 g_unit_panel_status_right_text_ids[20];
 
-void menu_build_unit_status_list(void);
+void status_screen_build_status_list(void);
 
 /* action restrictions */
-extern s16 g_menu_action_slot_row_actions[6];
-extern s16 g_menu_action_slot_selected_option;
-extern u8 g_menu_restriction_message_ids[];
+extern s16 g_command_action_slot_row_actions[6];
+extern s16 g_command_action_slot_selected_option;
+extern u8 g_command_restriction_message_ids[];
 
 /* Walks the stored unit's menu record slots from the top down to zero, presenting each and writing the chosen
  * entry back into the record. */
-void menu_select_unit_action_slots_thread(void);
+void command_ability_list_thread(void);
 /* Shows the warning that applies when the unit cannot act from this menu. */
-void menu_check_action_restrictions(void);
+void command_check_restrictions(void);
 /* Checks a chosen row before it opens: deep water, Frog or the menu's own restriction shows its message and ends
  * the thread. */
-void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit);
+void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit);
 
 /* command resolution */
-/* One row of the 31-entry menu table at g_menu_command_maps; its first 12 rows are the
+/* One row of the 31-entry menu table at g_command_command_maps; its first 12 rows are the
  * menus whose selection is remembered per unit.
- * menu_restore_selection_for_selected_unit and menu_record_selection_for_selected_unit
+ * command_restore_unit_selection and command_record_unit_selection
  * prove the 8-byte stride and read only the leading menu id;
- * menu_resolve_selection walks all 31 rows. */
+ * command_resolve_selection walks all 31 rows. */
 typedef struct menu_command_map {
     u16 menu_id;
     u16 _padding_02; /* aligns map */
     /* 0x04: per-menu command remap table. map[0] handles the 0xFF selection
-     * and map[n + 1] any other value; named by menu_resolve_selection,
+     * and map[n + 1] any other value; named by command_resolve_selection,
      * its only reader. The other readers use menu_id alone. */
     u8* map;
 } menu_command_map_t;
 typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ? 1 : -1];
 
-extern menu_command_map_t g_menu_command_maps[31];
+extern menu_command_map_t g_command_command_maps[31];
 extern s32 g_menu_active_menu; /* active menu */
 extern s16 g_menu_result;      /* menu result: -4 pending, -1 canceled */
 extern s16 g_menu_selected_option;
-extern s32 g_menu_resolved_command;
-extern s32 g_menu_used_skillset_id;
-extern s32 g_menu_used_item_id;
-extern u16 g_menu_anything_ability_id;
+extern s32 g_command_resolved_command;
+extern s32 g_command_used_skillset_id;
+extern s32 g_command_used_item_id;
+extern u16 g_ability_list_anything_ability_id;
 
 /* Publishes the resolved command, option and item and returns them packed into one value. */
-s32 menu_resolve_selection(void);
+s32 command_resolve_selection(void);
 
 /* system functions */
 /* One row of g_menu_system_function_table (menu_run_system_function_thread,
  * menu_dispatch_system_function). Provisional. */
 typedef struct menu_system_function {
-    s16 menu_id;                /* 0x00; copied to g_menu_current_id */
+    s16 menu_id;                /* 0x00; copied to g_command_current_id */
     u16 text_id;                /* 0x02; menu entry text id */
     s16 menu_entry_index;       /* 0x04; g_menu_thread_menu_data index */
     u16 row_action;             /* 0x06; copied to g_menu_system_function_row_actions */
@@ -340,15 +340,15 @@ extern u16 g_menu_system_function_row_actions[];
 s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
 
 /* auto-battle */
-extern s16 g_menu_auto_battle_option_colors[5]; /* text color per option */
+extern s16 g_auto_battle_option_colors[5]; /* text color per option */
 extern s16 g_menu_set_auto_battle_row_actions;
-extern s16 g_menu_confirm_stored_unit_row_actions;
+extern s16 g_command_confirm_stored_unit_row_actions;
 
 /* The five-policy auto-battle menu. */
-void menu_auto_battle_setting_thread(void);
+void auto_battle_settings_thread(void);
 /* Confirms the current row, recording the auto-battle mode it selects. */
-void menu_confirm_auto_battle_selection_thread(void);
+void auto_battle_confirm_thread(void);
 /* Stores a unit's auto-battle target with the resolved command as its setting. */
-void menu_store_auto_battle_main_target_id(s32 target_id, s32 battle_id);
+void auto_battle_store_target(s32 target_id, s32 battle_id);
 
 #endif

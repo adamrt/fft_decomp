@@ -49,7 +49,7 @@ typedef char
  */
 s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
-    effect_record_t* record = &g_battle_effect_state_records[state_index];
+    effect_record_t* record = &g_effect_state_records[state_index];
     s32 translucent;
     u16 texture_page;
     effect_texture_page_config_t configuration;
@@ -57,7 +57,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
     s32 texture_height;
     u32* ot;
     const effect_textured_quad_geometry_view_t* geometry
-        = &g_battle_effect_geometry_table->entries[emitter_index].textured_quad;
+        = &g_effect_geometry_table->entries[emitter_index].textured_quad;
     effect_textured_quad_grid_4x4_work_t* work;
     POLY_GT4* quad;
     /* Keep unsigned bindings separate from the signed curve-index scratch. */
@@ -84,9 +84,9 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
 
     case EFFECT_CALLBACK_PHASE_INIT:
         if (record->work_slots[callback_slot] != 0) {
-            battle_heap_free_block(record->work_slots[callback_slot]);
+            effect_heap_free_block(record->work_slots[callback_slot]);
         }
-        work = battle_heap_alloc_block(sizeof(effect_textured_quad_grid_4x4_work_t), state_index);
+        work = effect_heap_alloc_block(sizeof(effect_textured_quad_grid_4x4_work_t), state_index);
         record->work_slots[callback_slot] = work;
 
         configuration = geometry->texture_page_config;
@@ -105,7 +105,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = texture_page;
-                quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
+                quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
                 quad->x0 = quad->x2 = column * QUAD_GRID_CELL + MAIN_GFX_BATTLE_SCREEN_X;
                 quad->y0 = quad->y1 = row * QUAD_GRID_CELL;
                 quad->x1 = quad->x3 = column * QUAD_GRID_CELL + MAIN_GFX_BATTLE_SCREEN_X + QUAD_GRID_CELL;
@@ -132,10 +132,10 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         /* Scroll the half-size texture window by the speed and angle curves, wrapping within it. */
         selector = geometry->scroll_curves.scroll_speed;
         EFFECT_READ_CURVE(row, column, selector, work->frame);
-        speed = battle_lerp_q8(geometry->scroll_speed_start, geometry->scroll_speed_end, column) << 4;
+        speed = effect_lerp_q8(geometry->scroll_speed_start, geometry->scroll_speed_end, column) << 4;
         selector = geometry->scroll_curves.scroll_angle;
         EFFECT_READ_CURVE(row, column, selector, work->frame);
-        angle = battle_lerp_q8(geometry->scroll_angle_start, geometry->scroll_angle_end, column);
+        angle = effect_lerp_q8(geometry->scroll_angle_start, geometry->scroll_angle_end, column);
         work->scroll_u += (rcos(angle) * speed) >> 12;
         /* Comparison shifts preserve the original loop scheduling. */
         while (work->scroll_u >= texture_width << 12) {
@@ -155,12 +155,9 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         blue = EFFECT_COLOR_NEUTRAL;
         if (geometry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             row = (geometry->color_curves & 0xfff);
-            red = g_battle_effect_animation_curve_data
-                      ->curves[(row >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][work->frame];
-            green = g_battle_effect_animation_curve_data
-                        ->curves[(row >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][work->frame];
-            blue = g_battle_effect_animation_curve_data
-                       ->curves[(row >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][work->frame];
+            red = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][work->frame];
+            green = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][work->frame];
+            blue = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][work->frame];
         } else {
             green = EFFECT_COLOR_NEUTRAL;
             red = EFFECT_COLOR_NEUTRAL;
@@ -209,7 +206,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
             work->destroy_latched = 1;
         } else {
             if (work != 0) {
-                battle_heap_free_block(work);
+                effect_heap_free_block(work);
                 record->work_slots[callback_slot] = 0;
             }
             record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_IDLE;

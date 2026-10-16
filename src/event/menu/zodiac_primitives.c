@@ -60,7 +60,7 @@ void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, cons
  * brightness, and the dark 255 x 255 backdrop behind them. The sprites are linked into
  * context->ot only when link_primitives is set; otherwise each one is built into the same packet,
  * which the backdrop then overwrites. */
-void menu_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
+void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
     s32 i;
     s32 x;
     s32 y;

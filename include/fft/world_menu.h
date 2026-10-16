@@ -206,7 +206,8 @@ menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
 void screen_draw_item_tabs(s32 wide, s32 row, s32 mode);
 void screen_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 /* Also used by the event library's icon selection and the scrolling ability list thread. */
-u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);
+u8* screen_redraw_text_page_on_scroll_in_rect(
+    menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);
 
 /* cursors, selections and input */
 /* Result slots the shop menus share. */
@@ -265,7 +266,7 @@ extern screen_grid_cell_t* g_screen_grid_active_cells;
 extern u8 g_screen_grid_selected_cell; /* selected cell */
 extern u16 g_screen_grid_cursor_anim;  /* grid cursor animation state */
 extern u8 g_screen_grid_initialized;   /* grid menu initialized */
-extern s32 g_screen_grid_id;           /* menu_grid_help_id_e */
+extern s32 g_screen_grid_id;           /* help_grid_id_e */
 void screen_update_grid_cursor(s16 alternate);
 void screen_start_help_text(s32 position);
 
@@ -301,7 +302,7 @@ extern u8 g_formation_selected_unit_stat_text_image[];
 extern u8 g_formation_selected_unit_name_text_image[];
 extern menu_unit_number_images_t g_formation_selected_unit_number_text_images;
 extern palette_t g_formation_selected_unit_portrait_palettes[2];
-extern menu_unit_status_record_t g_formation_comparison_unit_stat_summary;
+extern unit_panel_summary_t g_formation_comparison_unit_stat_summary;
 extern menu_unit_status_identity_t g_formation_comparison_unit_identity;
 extern menu_number_entry_t g_formation_comparison_unit_number_entries[];
 extern menu_status_panel_editor_packet_t g_formation_comparison_unit_summary_packets[2];
@@ -310,10 +311,10 @@ extern u8 g_formation_comparison_unit_stat_text_image[];
 extern u8 g_formation_comparison_unit_name_text_image[];
 extern menu_unit_number_images_t g_formation_comparison_unit_number_text_images;
 extern palette_t g_formation_comparison_unit_portrait_palettes[2];
-extern menu_status_panel_buffer_t g_formation_stat_preview_panel_frames[2];
-extern menu_status_thread_t g_formation_stat_preview_panel_thread_params;
+extern unit_panel_buffer_t g_formation_stat_preview_panel_frames[2];
+extern unit_panel_thread_t g_formation_stat_preview_panel_thread_params;
 extern s32 g_formation_preview_stats_window_active;
-extern menu_status_thread_t g_formation_change_banner_thread_params;
+extern unit_panel_thread_t g_formation_change_banner_thread_params;
 s32 formation_get_selected_unit_name_id(void);
 s32 formation_item_get_hp_bonus(s32 unused_row);
 s32 formation_item_get_mp_bonus(s32 unused_row);

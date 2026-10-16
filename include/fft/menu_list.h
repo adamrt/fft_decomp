@@ -45,7 +45,7 @@ void menu_run_invalid_choice_thread(void);
 void menu_icon_list_thread(void);
 /* A window without a cursor whose text image is rebuilt every seventh frame. */
 void menu_icon_strip_thread(void);
-/* One text entry shown until input arrives or g_text_message_duration_frames runs out. */
+/* One text entry shown until input arrives or g_message_message_duration_frames runs out. */
 void menu_icon_timed_thread(void);
 /* An icon window that also opens the entry named by row_actions[0] below itself. */
 void menu_icon_linked_entry_thread(void);
@@ -56,8 +56,8 @@ void menu_run_icon_selection_loop(void);
 
 /* text lists */
 /* A text layout followed by the first visible row, as bound to a scrolling
- * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread and the AT list
- * built by menu_build_ability_preview_at_list). */
+ * list's menu_entry_t::context (ability_list_scrolling_thread and the AT list
+ * built by at_list_build_ability_preview). */
 typedef struct menu_scroll_text_layout {
     menu_text_layout_t columns; /* 0x00 */
     s16 row_offset;             /* 0x28 */

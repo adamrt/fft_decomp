@@ -105,7 +105,7 @@ s32 scenario_load_conditionals(void) {
         return;
     }
 
-    g_script_scenario_event_active = 0;
+    g_scenario_scenario_event_active = 0;
     for (i = EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST; i < EVENT_SCRIPT_VAR_SCENARIO_LOCAL_END; i++) {
         script_set_variable(i, 0);
     }
@@ -177,13 +177,13 @@ s32 scenario_load_conditionals(void) {
     }
 
     /* The id, next-scenario and after-event loads below are discarded, as in retail. */
-    g_script_scenario_event_active++;
+    g_scenario_scenario_event_active++;
     mem_load_unaligned_s16(scenario->id);
     map_id = scenario->map_id;
     weather = scenario->weather;
     daytime = scenario->daytime;
-    g_battle_scenario_music_1_id = scenario->music_1;
-    g_battle_scenario_music_2_id = scenario->music_2;
+    g_event_scenario_music_1_id = scenario->music_1;
+    g_event_scenario_music_2_id = scenario->music_2;
     entd = mem_load_unaligned_s16(scenario->entd_id);
     squads[0] = mem_load_unaligned_s16(scenario->squad_1);
     squads[1] = mem_load_unaligned_s16(scenario->squad_2);
@@ -237,7 +237,7 @@ s32 scenario_load_conditionals(void) {
         script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, 0);
     }
 
-    g_encounter_selection_mode = BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE;
+    g_encounter_selection_mode = UNIT_ENTD_SELECTION_SCRIPT_VARIABLE;
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, count);
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
 
@@ -255,7 +255,7 @@ s32 scenario_load_conditionals(void) {
 /* Re-syncs the two battle scenario-music slots with the pending track pair,
  * then applies the map darkness record.
  *
- * The music step is skipped when g_script_scenario_event_active is clear or the current
+ * The music step is skipped when g_scenario_scenario_event_active is clear or the current
  * event is in 410..425. When the playing track is one of the pending pair, only the idle
  * slot ((index ^ 1) + 1) is reloaded, with the pair's track for the playing index;
  * otherwise both tracks restart.
@@ -268,36 +268,36 @@ void scenario_restore_music_and_darkness(void) {
     u16 replacement;
 
     scenario = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
-    if (g_script_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
+    if (g_scenario_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
         if (g_sound_music_track_1_id == 0 && g_sound_music_track_2_id == 0) {
-            g_battle_sound_music_track_index = 0;
-            sound_play_music_tracks(g_battle_scenario_music_1_id, g_battle_scenario_music_2_id);
+            g_sound_current_music_track_index = 0;
+            music_play_tracks(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
         } else {
-            if (g_battle_sound_music_track_index == 0) {
+            if (g_sound_current_music_track_index == 0) {
                 playing = g_sound_music_track_1_id;
-                replacement = g_battle_scenario_music_1_id;
+                replacement = g_event_scenario_music_1_id;
             } else {
                 playing = g_sound_music_track_2_id;
-                replacement = g_battle_scenario_music_2_id;
+                replacement = g_event_scenario_music_2_id;
             }
 
-            if (playing != g_battle_scenario_music_1_id && playing != g_battle_scenario_music_2_id) {
-                g_battle_sound_music_track_index = 0;
-                sound_play_music_tracks(g_battle_scenario_music_1_id, g_battle_scenario_music_2_id);
+            if (playing != g_event_scenario_music_1_id && playing != g_event_scenario_music_2_id) {
+                g_sound_current_music_track_index = 0;
+                music_play_tracks(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
             } else {
                 g_thread_call_target = (void (*)(void))music_unload_scenario_slot;
-                thread_call_on_main_stack((g_battle_sound_music_track_index ^ 1) + 1);
+                thread_call_on_main_stack((g_sound_current_music_track_index ^ 1) + 1);
                 g_thread_call_target = (void (*)(void))music_load_into_slot;
-                thread_call_on_main_stack(replacement, (g_battle_sound_music_track_index ^ 1) + 1);
-                sound_wait_for_music_load();
+                thread_call_on_main_stack(replacement, (g_sound_current_music_track_index ^ 1) + 1);
+                music_wait_for_load();
             }
         }
 
-        g_sound_music_track_1_id = g_battle_scenario_music_1_id;
-        g_sound_music_track_2_id = g_battle_scenario_music_2_id;
+        g_sound_music_track_1_id = g_event_scenario_music_1_id;
+        g_sound_music_track_2_id = g_event_scenario_music_2_id;
     }
 
-    battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
+    battle_map_light_state_command(BATTLE_MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
     text_build_unit_name_list();
 }
 

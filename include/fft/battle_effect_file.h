@@ -13,7 +13,7 @@
  * Event effects follow the action/reaction rows and use the script ID remapping. */
 enum {
     EFFECT_ABILITY_FILE_MASK = 0x1ff, /* the number in the file's name, EFFECT/E###.BIN */
-    EFFECT_ABILITY_FLAG_ITEM = 0x800, /* Item abilities and Throw Ball: battle_effect_is_item_ability */
+    EFFECT_ABILITY_FLAG_ITEM = 0x800, /* Item abilities and Throw Ball: effect_is_item_ability */
 };
 
 /* One resident header and disc-table slot for each 9-bit effect file ID. */
@@ -64,7 +64,7 @@ typedef struct effect_sound_channel {
 
 /* The flags section (effect_file_header_t.flags_section). The engine loads flags as a 32-bit value
  * and tests single bits; spawn_delay_override replaces the timeline's spawn_delay only while
- * g_battle_effect_context.math_skill_flag is set. */
+ * g_effect_context.math_skill_flag is set. */
 typedef struct effect_flags_section {
     u32 flags;                          /* 0x00; EFFECT_FLAG_* bits */
     u8 spawn_delay_override;            /* 0x04 */
@@ -75,17 +75,17 @@ typedef char effect_flags_section_size_must_be_24[(sizeof(effect_flags_section_t
 
 /* effect_flags_section_t.flags bits read by the engine. */
 enum {
-    /* caster and target anchors take the tile's surface height: battle_effect_resolve_target_world_coords */
+    /* caster and target anchors take the tile's surface height: effect_resolve_target_world_coords */
     EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST = 0x08,
     EFFECT_FLAG_QUIET_MUSIC = 0x10,         /* lower the music while the effect loads and plays */
     EFFECT_FLAG_TIMING_CURVE_PHASE1 = 0x20, /* phase 1 of the parent timeline sets the time scale from its curve */
     EFFECT_FLAG_TIMING_CURVE_CHILD = 0x40,  /* a child timeline sets the time scale from its curve */
 };
 
-extern const effect_flags_section_t* g_battle_effect_flags_section;
-extern u8 g_battle_effect_sound_call_counts[]; /* per-channel call counts */
-extern s32 g_battle_effect_sound_data_base;
-extern struct suzuki_sound_resource* g_battle_effect_sound_section_ptr;
+extern const effect_flags_section_t* g_effect_flags_section;
+extern u8 g_effect_sound_call_counts[]; /* per-channel call counts */
+extern s32 g_effect_sound_data_base;
+extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
 
 /* palette and image */
 /* Two palette rows, then a 24-bit image size, width flag and pixel tail. */
@@ -98,11 +98,11 @@ typedef struct effect_palette_section {
 } effect_palette_section_t;
 typedef char effect_palette_section_size_must_be_1028[sizeof(effect_palette_section_t) == 1028 ? 1 : -1];
 
-extern effect_palette_section_t* g_battle_effect_palette_ptr;
+extern effect_palette_section_t* g_effect_palette_ptr;
 
 /* script */
 /* An effect script instruction starts with a 16-bit header, its opcode in the low nine bits
- * (g_battle_effect_instructions holds 120 handlers; retail scripts stay below
+ * (g_effect_script_instructions holds 120 handlers; retail scripts stay below
  * 2e) and small operands in the bits above, followed by up to three operand
  * 16-bit values. Script offsets are bytes from the start of the script. */
 enum { EFFECT_SCRIPT_OPCODE_MASK = 0x1ff };
@@ -168,7 +168,7 @@ typedef union effect_script_instruction {
 } effect_script_instruction_t;
 typedef char effect_script_instruction_size_must_be_8[sizeof(effect_script_instruction_t) == 8 ? 1 : -1];
 
-extern const u8* g_battle_effect_script;
+extern const u8* g_effect_script;
 
 /* sprite frames */
 /* Byte offset to a group's frame-offset table, relative to the group-table base. */
@@ -187,7 +187,7 @@ typedef char effect_sprite_section_size_must_be_4[sizeof(effect_sprite_section_t
 /* flags of a sprite part (effect_sprite_part_t, effect_sprite_frameset_t). */
 enum {
     EFFECT_SPRITE_PART_CLUT_MASK = 0x000f,
-    EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW = 0x0010,  /* the CLUT is of MAP_CLUT_ROW_EFFECT_SECOND */
+    EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW = 0x0010,  /* the CLUT is of BATTLE_MAP_CLUT_ROW_EFFECT_SECOND */
     EFFECT_SPRITE_PART_TPAGE_MODE_MASK = 0x00e0,       /* the tpage's blend rate and 8-bit color bits */
     EFFECT_SPRITE_PART_FLAG_SEMI_TRANSPARENT = 0x0200, /* draw it semi-transparent */
 };
@@ -214,8 +214,8 @@ typedef struct effect_sprite_frameset {
 } effect_sprite_frameset_t;
 typedef char effect_sprite_frameset_size_must_be_4[sizeof(effect_sprite_frameset_t) == 4 ? 1 : -1];
 
-extern u8* g_battle_effect_frame_data;
-extern u8* g_battle_effect_frame_data_start;
+extern u8* g_effect_frame_data;
+extern u8* g_effect_frame_data_start;
 
 /* sprite sequences */
 /* Opcodes in the low seven bits of a sprite-sequence control byte. */
@@ -266,8 +266,8 @@ typedef union effect_sequence_instruction {
 } effect_sequence_instruction_t;
 typedef char effect_sequence_instruction_size_must_be_5[sizeof(effect_sequence_instruction_t) == 5 ? 1 : -1];
 
-extern u8* g_battle_effect_animation_sequences;
-extern u8* g_battle_effect_animation_sequences_start;
+extern u8* g_effect_animation_sequences;
+extern u8* g_effect_animation_sequences_start;
 
 /* animation curves */
 /* Frames in one animation curve: emitter and particle frame counters wrap here. */
@@ -287,7 +287,7 @@ typedef struct effect_animation_curve_table {
 } effect_animation_curve_table_t;
 typedef char effect_animation_curve_table_size_must_be_4[(sizeof(effect_animation_curve_table_t) == 4) ? 1 : -1];
 
-extern const effect_animation_curve_table_t* g_battle_effect_animation_curve_data;
+extern const effect_animation_curve_table_t* g_effect_animation_curve_data;
 
 /* Read a curve value for a one-based binding; zero disables the curve and
  * reads as 0. BATTLE's emitter and the effect overlays share this idiom.
@@ -299,7 +299,7 @@ extern const effect_animation_curve_table_t* g_battle_effect_animation_curve_dat
     {                                                                                                                  \
         index = (binding);                                                                                             \
         if (--index != -1) {                                                                                           \
-            result = g_battle_effect_animation_curve_data->curves[index][frame];                                       \
+            result = g_effect_animation_curve_data->curves[index][frame];                                              \
         } else {                                                                                                       \
             result = 0;                                                                                                \
         }                                                                                                              \

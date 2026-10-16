@@ -102,7 +102,7 @@ void menu_text_entry_wait_thread(void) {
     speaker_id = text_binding->speaker_id;
     *input = PSX_PAD_CIRCLE;
     menu_handle_action(entry, 0);
-    thread_start(text_thread_id, text_run_dialog_thread);
+    thread_start(text_thread_id, message_dialog_thread);
     thread_set_four_parameters(text_thread_id, header_id, text_id, speaker_id, speaker_id);
     thread_wait_until_inactive(g_thread_current_id - 1);
     thread_wait_until_inactive(text_thread_id);

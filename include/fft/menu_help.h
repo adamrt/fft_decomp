@@ -43,11 +43,11 @@ enum {
 
 /* The help text file's section offsets, which text_relocate_pointer_table binds while a help window is open. */
 extern u32 g_help_text_table[];
-extern u16* const* g_menu_help_active_text_id_tables;
-extern u16* const g_menu_help_menu_text_id_tables[23];
-extern u16* g_menu_help_topic_text_ids;
-/* The pending help message, or a menu_grid_help_id_e. */
-extern s32 g_menu_help_message_text_id;
+extern u16* const* g_help_active_text_id_tables;
+extern u16* const g_help_menu_text_id_tables[23];
+extern u16* g_help_topic_text_ids;
+/* The pending help message, or a help_grid_id_e. */
+extern s32 g_help_message_text_id;
 
 /* help navigation */
 /* One cursor-navigation node of the HELPMENU, BUNIT, ATTACK deployment and
@@ -75,31 +75,31 @@ typedef enum menu_grid_help_id {
     MENU_GRID_HELP_BANNER_BOTTOM = 0x20001,
     MENU_GRID_HELP_UNIT_BROWSE = 0x20002,
     MENU_GRID_HELP_RECRUIT_PREVIEW = 0x20003, /* WORLD: the cursor skips cell 7 */
-} menu_grid_help_id_e;
+} help_grid_id_e;
 
-extern help_navigation_record_t g_menu_help_require_navigation[];
-extern help_navigation_record_t g_menu_help_terrain_navigation[];
-extern help_navigation_record_t g_menu_help_unit_box_navigation[];
-extern help_navigation_record_t g_menu_help_attack_preview_navigation[];
+extern help_navigation_record_t g_help_require_navigation[];
+extern help_navigation_record_t g_help_terrain_navigation[];
+extern help_navigation_record_t g_help_unit_box_navigation[];
+extern help_navigation_record_t g_help_attack_preview_navigation[];
 
 /* help screens */
 /* Set while a help window is open; menu input is suppressed meanwhile. */
-extern s32 g_menu_help_open;
-extern u32* g_menu_help_controller_state_ptr;
-extern u8 g_menu_help_data_base[];
-extern menu_unit_status_record_t g_menu_help_active_banner;
-extern menu_active_unit_t g_menu_help_active_unit_data;
-extern menu_status_panel_slot_storage_t g_menu_help_billboard;
-extern map_selected_tile_t g_menu_help_menu_cursor_tile;
+extern s32 g_help_open;
+extern u32* g_help_controller_state_ptr;
+extern u8 g_help_data_base[];
+extern unit_panel_summary_t g_help_active_banner;
+extern unit_panel_unit_t g_help_active_unit_data;
+extern unit_panel_record_t g_help_billboard;
+extern battle_map_selected_tile_t g_help_menu_cursor_tile;
 
 /* Opens the help menu on the menu-building thread slot unless input is held off or another screen is busy. */
-void menu_start_help_menu_thread(void);
+void help_start_menu_thread(void);
 /* Starts the help text thread for the pending help message: binds the help text and locks the menu input. */
 void menu_text_start_help_thread(s32 thread_data);
 /* Opens help for the running menu's pending request, or runs the help cursor over the navigation table of that
  * menu or the unit view. */
-void menu_run_battle_help(void);
+void help_run_battle(void);
 /* The help menu over the REQUIRE screen. */
-void menu_run_require_help(void);
+void help_run_after_battle(void);
 
 #endif

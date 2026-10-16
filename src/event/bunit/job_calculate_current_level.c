@@ -6,16 +6,16 @@
 #include "psx/types.h"
 
 /* Job level of the selected unit in the job list's `index`th job, also left
- * in g_menu_job_current_level; levels are packed two per byte (odd jobs in
+ * in g_job_list_job_current_level; levels are packed two per byte (odd jobs in
  * the low nibble). */
 s32 job_list_calculate_level(s32 index) {
-    s32 generic_job = job_get_generic_index(g_menu_job_ids[index]);
+    s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
-    g_menu_job_current_level = g_unit_list_pointers[g_unit_selected_index]->job_levels[generic_job >> 1];
+    g_job_list_job_current_level = g_unit_list_pointers[g_unit_selected_index]->job_levels[generic_job >> 1];
     if ((generic_job & 1) != 0) {
-        g_menu_job_current_level &= 0xf;
+        g_job_list_job_current_level &= 0xf;
     } else {
-        g_menu_job_current_level >>= 4;
+        g_job_list_job_current_level >>= 4;
     }
-    return g_menu_job_current_level;
+    return g_job_list_job_current_level;
 }

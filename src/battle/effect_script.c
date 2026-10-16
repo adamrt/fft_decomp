@@ -29,24 +29,24 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-static void battle_effect_free_state_record(s16 record_index);
-static s32 battle_effect_run_block(s16 index);
-static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index);
+static void effect_script_free_state_record(s16 record_index);
+static s32 effect_script_run_block(s16 index);
+static s16 effect_script_start_record(const u8* script, s16 start_pc, s16 parent_index);
 
 /* Upload effect file `index`'s two CLUTs to the effect CLUT rows and its texture to
  * VRAM x 0x180, 0x80 bytes a row or 0x100 for a wide image. The section's address is
- * kept in g_battle_effect_palette_ptr, where the effect heap later starts. */
-static void battle_effect_init_palette(s16 index) {
+ * kept in g_effect_palette_ptr, where the effect heap later starts. */
+static void effect_file_init_palette(s16 index) {
     RECT rect;
-    effect_file_header_t* base = g_battle_effect_data_ptrs[index];
+    effect_file_header_t* base = g_effect_file_data_ptrs[index];
     effect_palette_section_t* data = (effect_palette_section_t*)((u8*)base + base->palette_and_texture);
     s32 size;
     s32 raw_size;
     s32 height;
 
-    g_battle_effect_palette_ptr = data;
-    battle_map_load_palette_data(data->primary_clut, MAP_CLUT_ROW_EFFECT, 0, 1);
-    battle_map_load_palette_data(data->secondary_clut, MAP_CLUT_ROW_EFFECT_SECOND, 0, 1);
+    g_effect_palette_ptr = data;
+    battle_map_palette_load_data(data->primary_clut, BATTLE_MAP_CLUT_ROW_EFFECT, 0, 1);
+    battle_map_palette_load_data(data->secondary_clut, BATTLE_MAP_CLUT_ROW_EFFECT_SECOND, 0, 1);
     /* The image size is a 24-bit little-endian byte count; the rows follow from the width. */
     raw_size = data->image_size[0] + (data->image_size[1] << 8);
     raw_size = (data->image_size[2] << 16) + raw_size;
@@ -70,119 +70,118 @@ static void battle_effect_init_palette(s16 index) {
     }
 }
 
-/* Rewind g_battle_effect_frame_data to its saved start for EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT.
+/* Rewind g_effect_frame_data to its saved start for EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT.
  * Nothing stores the start pointer or selects that phase, so retail never runs it. */
-static void battle_effect_reset_frame_data_pointer(void) {
-    g_battle_effect_frame_data = g_battle_effect_frame_data_start;
+static void effect_file_reset_frame_data_pointer(void) {
+    g_effect_frame_data = g_effect_frame_data_start;
 }
 
-/* Rewind g_battle_effect_animation_sequences to its saved start for
+/* Rewind g_effect_animation_sequences to its saved start for
  * EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT, a path retail never takes (see
- * battle_effect_reset_frame_data_pointer). */
-static void battle_effect_reset_animation_sequences_pointer(void) {
-    g_battle_effect_animation_sequences = g_battle_effect_animation_sequences_start;
+ * effect_file_reset_frame_data_pointer). */
+static void effect_file_reset_animation_sequences_pointer(void) {
+    g_effect_animation_sequences = g_effect_animation_sequences_start;
 }
 
-/* Point g_battle_effect_frame_data at the sprite group table of effect file effect_id's frame
+/* Point g_effect_frame_data at the sprite group table of effect file effect_id's frame
  * section, past the section's 4-byte group count. */
-static void battle_effect_set_frame_data_pointer(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+static void effect_file_set_frame_data_pointer(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
     effect_sprite_section_t* section = (effect_sprite_section_t*)((u8*)header + header->frame_data);
 
-    g_battle_effect_frame_data = (u8*)section->groups;
+    g_effect_frame_data = (u8*)section->groups;
 }
 
-/* Point g_battle_effect_animation_sequences 4 bytes into effect file effect_id's animation
+/* Point g_effect_animation_sequences 4 bytes into effect file effect_id's animation
  * sequence section, past its leading 32-bit value. */
-static void battle_effect_set_animation_sequences_pointer(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+static void effect_file_set_animation_sequences_pointer(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
-    g_battle_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
+    g_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
 }
 
-/* Bind effect file effect_id's script section as g_battle_effect_script. */
-static void battle_effect_set_script_pointer(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+/* Bind effect file effect_id's script section as g_effect_script. */
+static void effect_file_set_script_pointer(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
-    g_battle_effect_script = (const u8*)header + header->script;
+    g_effect_script = (const u8*)header + header->script;
 }
 
 /* Bind effect file effect_id's animation curve table as
- * g_battle_effect_animation_curve_data. */
-static void battle_effect_set_animation_curve_data_pointer(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+ * g_effect_animation_curve_data. */
+static void effect_file_set_animation_curve_data_pointer(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
-    g_battle_effect_animation_curve_data
-        = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
+    g_effect_animation_curve_data = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
 }
 
 /* Bind effect file effect_id's particle-system section (gravity, inertia threshold and the emitter
- * records) as g_battle_effect_geometry_table. */
-static void battle_effect_set_particle_system_data_pointer(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+ * records) as g_effect_geometry_table. */
+static void effect_file_set_particle_system_data_pointer(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
-    g_battle_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
+    g_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
 }
 
-/* Bind effect file effect_id's timeline section as g_battle_effect_timeline and its embedded child
- * timeline as g_battle_effect_child_timeline. */
-static void battle_effect_set_timeline_pointers(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+/* Bind effect file effect_id's timeline section as g_effect_timeline and its embedded child
+ * timeline as g_effect_child_timeline. */
+static void effect_file_set_timeline_pointers(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
     effect_timeline_t* timeline;
 
     timeline = (effect_timeline_t*)((u8*)header + header->timeline);
-    g_battle_effect_timeline = timeline;
-    g_battle_effect_child_timeline = &timeline->child;
+    g_effect_timeline = timeline;
+    g_effect_child_timeline = &timeline->child;
 }
 
 /* Replace the effect sounds: unregister the sound resource of the previous effect
  * file, then register this file's sound section and take its id as the base for
  * the effect's sound ids. A file without a sound section clears both globals. */
-static void battle_effect_load_sound_section(s16 index) {
+static void effect_file_load_sound_section(s16 index) {
     effect_file_header_t* base;
     s32 offset;
 
-    if (g_battle_effect_sound_section_ptr != 0) {
-        suzuki_sound_remove_resource(g_battle_effect_sound_section_ptr);
+    if (g_effect_sound_section_ptr != 0) {
+        suzuki_sound_remove_resource(g_effect_sound_section_ptr);
     }
 
-    base = g_battle_effect_data_ptrs[index];
+    base = g_effect_file_data_ptrs[index];
     offset = base->sound_section;
     if (offset != 0) {
-        g_battle_effect_sound_section_ptr = (suzuki_sound_resource_t*)((u8*)base + offset);
-        suzuki_sound_append_resource(g_battle_effect_sound_section_ptr);
-        g_battle_effect_sound_data_base = SUZUKI_SOUND_ID(g_battle_effect_sound_section_ptr->id, 0);
+        g_effect_sound_section_ptr = (suzuki_sound_resource_t*)((u8*)base + offset);
+        suzuki_sound_append_resource(g_effect_sound_section_ptr);
+        g_effect_sound_data_base = SUZUKI_SOUND_ID(g_effect_sound_section_ptr->id, 0);
     } else {
-        g_battle_effect_sound_section_ptr = 0;
-        g_battle_effect_sound_data_base = 0;
+        g_effect_sound_section_ptr = 0;
+        g_effect_sound_data_base = 0;
     }
 }
 
-/* Bind effect file effect_id's flags section as g_battle_effect_flags_section. */
-static void battle_effect_init_flags_section_pointer(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+/* Bind effect file effect_id's flags section as g_effect_flags_section. */
+static void effect_file_init_flags_section_pointer(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
-    g_battle_effect_flags_section = (const effect_flags_section_t*)((u8*)header + header->flags_section);
+    g_effect_flags_section = (const effect_flags_section_t*)((u8*)header + header->flags_section);
 }
 
 /* Bind effect file effect_id's timing-curve section as
- * g_battle_effect_timing_curves; a zero section offset binds the file header
+ * g_effect_timing_curves; a zero section offset binds the file header
  * itself. */
-static void battle_effect_set_timing_curves_pointer(s16 effect_id) {
-    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+static void effect_file_set_timing_curves_pointer(s16 effect_id) {
+    effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
-    g_battle_effect_timing_curves = (const effect_timing_curves_t*)((u8*)header + header->timing_curves);
+    g_effect_timing_curves = (const effect_timing_curves_t*)((u8*)header + header->timing_curves);
 }
 
 /* Time scale of the parent timeline's frame record->timeline.frame: one of the
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
-static s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
+static s32 effect_timeline_get_parent_timing_curve_value(effect_record_t* record) {
     s16 packed_index = record->timeline.frame;
     s32 packed_value;
     s32 offset = packed_index / 2;
 
-    packed_value = g_battle_effect_timing_curves->parent_timeline[offset];
+    packed_value = g_effect_timing_curves->parent_timeline[offset];
     if (packed_index & 1) {
         packed_value >>= 4;
     }
@@ -192,10 +191,10 @@ static s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
 /* Time scale of the child timeline's frame record->timeline.frame: one of the
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
-static s32 battle_effect_get_child_timing_curve_value(effect_record_t* record) {
+static s32 effect_timeline_get_child_timing_curve_value(effect_record_t* record) {
     s16 packed_index = record->timeline.frame;
     s32 offset = packed_index / 2;
-    s32 packed_value = g_battle_effect_timing_curves->child_timeline[offset];
+    s32 packed_value = g_effect_timing_curves->child_timeline[offset];
 
     if (packed_index & 1) {
         packed_value >>= 4;
@@ -204,50 +203,50 @@ static s32 battle_effect_get_child_timing_curve_value(effect_record_t* record) {
 }
 
 /* Look up a native overlay callback by its resident catalog index. */
-static effect_callback_t battle_effect_get_native_callback(s16 callback_id) {
-    return g_battle_effect_native_callbacks[callback_id];
+static effect_callback_t effect_script_get_native_callback(s16 callback_id) {
+    return g_effect_native_callbacks[callback_id];
 }
 
-/* Read effect file effect_id's disc sector and byte length from g_battle_effect_disc_entries; a
+/* Read effect file effect_id's disc sector and byte length from g_effect_file_disc_entries; a
  * length of 0 means the file is missing. */
-static void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length) {
+static void effect_file_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
 
-    *lba = g_battle_effect_disc_entries[effect_id].sector;
-    *byte_length = g_battle_effect_disc_entries[effect_id].size;
+    *lba = g_effect_file_disc_entries[effect_id].sector;
+    *byte_length = g_effect_file_disc_entries[effect_id].size;
 }
 
 /* Report an effect stub and return zero. */
-s32 battle_effect_report_0x320_return_zero(void) {
+s32 effect_report_0x320_return_zero(void) {
     system_report_stub(1, 0x320);
     return 0;
 }
 
 /* Report an effect stub. */
-void battle_effect_report_0x320_1(void) {
+void effect_report_0x320_1(void) {
     system_report_stub(1, 0x320);
 }
 
 /* Calls the empty system_report_stub with (1, 0x320) from a 0x100-byte frame it
  * does not use. No code calls it. */
-void battle_effect_report_0x320_2(void) {
+void effect_report_0x320_2(void) {
     s32 unused[0x40];
     system_report_stub(1, 0x320);
 }
 
-/* Seek the CD to the effect file of g_battle_ability_effect_id: the read request
+/* Seek the CD to the effect file of g_effect_id: the read request
  * has no destination, so the loader only seeks. An effect whose file has no size
- * is replaced by the Cure effect, as in battle_effect_update_file_load's first
+ * is replaced by the Cure effect, as in effect_file_update_load's first
  * state, which requests the same file with a destination. Nothing in the game
  * calls it. */
-void battle_effect_seek_file(void) {
+void effect_file_seek(void) {
     s32 lba;
     s32 byte_length;
 
-    battle_effect_load_lba_and_size(g_battle_ability_effect_id, &lba, &byte_length);
+    effect_file_load_lba_and_size(g_effect_id, &lba, &byte_length);
     if (byte_length == 0) {
-        g_battle_ability_effect_id = EFFECT_FILE_CURE;
-        battle_effect_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
+        g_effect_id = EFFECT_FILE_CURE;
+        effect_file_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
     }
     file_request_read_bytes(lba, byte_length, 0);
 }
@@ -262,61 +261,60 @@ void battle_effect_seek_file(void) {
  * work remains. A load state outside 0-3 leaves `result` unset: the test then
  * reads whatever the caller left in $a0.
  */
-s32 battle_effect_update_file_load(void) {
+s32 effect_file_update_load(void) {
     s32 result;
     s32 lba;
     s32 byte_length;
     u8* destination = g_heap_companion_overlay_load_address + 0x3500;
 
-    if (g_battle_ability_effect_id >= 0) {
-        switch (g_battle_effect_load_state) {
+    if (g_effect_id >= 0) {
+        switch (g_effect_load_state) {
         case EFFECT_LOAD_START:
-            if (g_battle_effect_charge_secondary_id != 0) {
-                g_battle_effect_load_countdown = 60;
+            if (g_effect_secondary_charge_id != 0) {
+                g_effect_load_countdown = 60;
             } else {
-                g_battle_effect_load_countdown = 0;
+                g_effect_load_countdown = 0;
             }
-            battle_effect_load_lba_and_size(g_battle_ability_effect_id, &lba, &byte_length);
+            effect_file_load_lba_and_size(g_effect_id, &lba, &byte_length);
             if (byte_length == 0) {
-                g_battle_ability_effect_id = EFFECT_FILE_CURE;
-                battle_effect_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
+                g_effect_id = EFFECT_FILE_CURE;
+                effect_file_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
             }
             result = file_request_read_bytes(lba, byte_length, destination);
             if (result == 0) {
-                g_battle_effect_load_state = EFFECT_LOAD_READING;
+                g_effect_load_state = EFFECT_LOAD_READING;
                 result = 1;
             }
             break;
         case EFFECT_LOAD_READING:
             result = file_is_still_loading();
             if (result == 0) {
-                g_battle_effect_load_state = EFFECT_LOAD_COUNTDOWN;
+                g_effect_load_state = EFFECT_LOAD_COUNTDOWN;
                 result = 1;
             }
             break;
         case EFFECT_LOAD_COUNTDOWN:
-            if (g_battle_effect_load_countdown != 0) {
+            if (g_effect_load_countdown != 0) {
                 result = 1;
                 break;
             }
-            if (g_battle_effect_charge_secondary_id != 0) {
-                battle_effect_finalize_secondary(g_battle_effect_charge_secondary_id);
+            if (g_effect_secondary_charge_id != 0) {
+                effect_secondary_finalize(g_effect_secondary_charge_id);
             }
-            g_battle_effect_load_state = EFFECT_LOAD_ENDING_SECONDARY;
-            battle_effect_init_flags_section_pointer(g_battle_ability_effect_id);
+            g_effect_load_state = EFFECT_LOAD_ENDING_SECONDARY;
+            effect_file_init_flags_section_pointer(g_effect_id);
             /* An `lw` of the section's leading 32-bit value, not a byte test. */
-            if (g_battle_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
+            if (g_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
                 music_set_volume(0x40, 0xF0);
             }
             result = 1;
             break;
         case EFFECT_LOAD_ENDING_SECONDARY:
-            result = battle_effect_get_secondary_phase(g_battle_effect_charge_secondary_id)
-                != EFFECT_SECONDARY_PHASE_ENDED;
+            result = effect_secondary_get_phase(g_effect_secondary_charge_id) != EFFECT_SECONDARY_PHASE_ENDED;
             break;
         }
-        if (g_battle_effect_load_countdown > 0) {
-            g_battle_effect_load_countdown--;
+        if (g_effect_load_countdown > 0) {
+            g_effect_load_countdown--;
         }
         return result != 0;
     }
@@ -331,60 +329,59 @@ s32 battle_effect_update_file_load(void) {
  * ABILITY_ID_COUNT up, one of the effects past the abilities. A thrown ball
  * (ABILITY_ID_THROW_BALL) takes the Fire, Ice or Bolt effect by the ball's
  * element; a ball of any other element stores no effect id, so
- * g_battle_ability_effect_id keeps the previous one. A negative table entry
+ * g_effect_id keeps the previous one. A negative table entry
  * means the ability has no effect file: only the two fixed secondary
  * animations for the equipment-break and Charge ability ranges are started,
  * and nothing is retained.
  */
-void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_secondary_init_t* source) {
-    g_battle_effect_load_state = EFFECT_LOAD_START;
+void effect_set_ability_animation(u32 packed, s32 ability, effect_secondary_init_t* source) {
+    g_effect_load_state = EFFECT_LOAD_START;
     if (ability < ABILITY_ID_COUNT) {
         if (ability == ABILITY_ID_THROW_BALL) {
-            s32 ball = battle_effect_get_element_index(packed >> 16);
+            s32 ball = effect_get_element_index(packed >> 16);
             if (ball == EFFECT_ELEMENT_INDEX_FIRE)
-                g_battle_ability_effect_id = EFFECT_FILE_FIRE;
+                g_effect_id = EFFECT_FILE_FIRE;
             else if (ball == EFFECT_ELEMENT_INDEX_WATER)
-                g_battle_ability_effect_id = EFFECT_FILE_ICE;
+                g_effect_id = EFFECT_FILE_ICE;
             else if (ball == EFFECT_ELEMENT_INDEX_LIGHTNING)
-                g_battle_ability_effect_id = EFFECT_FILE_BOLT;
+                g_effect_id = EFFECT_FILE_BOLT;
         } else {
-            g_battle_ability_effect_id = g_battle_effect_ability_files[ability];
+            g_effect_id = g_effect_ability_files[ability];
         }
     } else {
         /* Event IDs continue after the action/reaction ability rows. */
-        g_battle_ability_effect_id
-            = g_battle_effect_ability_files[ability - ABILITY_ID_COUNT + ABILITY_ID_SUPPORT_FIRST];
+        g_effect_id = g_effect_ability_files[ability - ABILITY_ID_COUNT + ABILITY_ID_SUPPORT_FIRST];
     }
 
-    if (g_battle_ability_effect_id >= 0) {
-        g_battle_ability_effect_id &= EFFECT_ABILITY_FILE_MASK;
-        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_REQUESTED;
-        if (g_battle_effect_secondary_by_charge_animation[packed & 0xffff] != 0) {
-            g_battle_effect_charge_secondary_id = battle_effect_init_secondary(
-                g_battle_effect_secondary_by_charge_animation[packed & 0xffff], packed >> 16, source);
+    if (g_effect_id >= 0) {
+        g_effect_id &= EFFECT_ABILITY_FILE_MASK;
+        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_REQUESTED;
+        if (g_effect_secondary_by_charge_animation[packed & 0xffff] != 0) {
+            g_effect_secondary_charge_id
+                = effect_secondary_init(g_effect_secondary_by_charge_animation[packed & 0xffff], packed >> 16, source);
         } else {
-            g_battle_effect_charge_secondary_id = 0;
+            g_effect_secondary_charge_id = 0;
         }
-        g_battle_effect_sound_call_counts[3] = 0;
-        g_battle_effect_sound_call_counts[2] = 0;
-        g_battle_effect_sound_call_counts[1] = 0;
-        g_battle_effect_sound_call_counts[0] = 0;
-        g_battle_effect_context = *source;
-        g_battle_effect_request_unread = 0;
+        g_effect_sound_call_counts[3] = 0;
+        g_effect_sound_call_counts[2] = 0;
+        g_effect_sound_call_counts[1] = 0;
+        g_effect_sound_call_counts[0] = 0;
+        g_effect_context = *source;
+        g_effect_request_unread = 0;
         return;
     }
 
     if (ability >= ABILITY_ID_BATTLE_SKILL_HEAD_BREAK && ability <= ABILITY_ID_BATTLE_SKILL_MIND_BREAK)
-        battle_effect_init_secondary(EFFECT_SECONDARY_ANIMATION_EQUIP_BREAK, 0, source);
+        effect_secondary_init(EFFECT_SECONDARY_ANIMATION_EQUIP_BREAK, 0, source);
     if ((ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST)
         || ability == ABILITY_ID_BASIC_SKILL_ACCUMULATE)
-        battle_effect_init_secondary(EFFECT_SECONDARY_ANIMATION_RED_ORBS, 0, source);
+        effect_secondary_init(EFFECT_SECONDARY_ANIMATION_RED_ORBS, 0, source);
 }
 
 /* Returns 1 when the ability has no effect file (effect id 0xffff), 0 for
  * Vertical Jump8, all Charge abilities and Accumulate. The target's range
  * starts at Vertical Jump8 rather than Charge +1. */
-u32 battle_effect_ability_has_no_file(s32 ability_id) {
+u32 effect_ability_has_no_file(s32 ability_id) {
     u32 result;
 
     if (ability_id >= ABILITY_ID_JUMP_VERTICAL_8 && ability_id < ABILITY_ID_MATH_FIRST) {
@@ -393,45 +390,45 @@ u32 battle_effect_ability_has_no_file(s32 ability_id) {
     if (ability_id == ABILITY_ID_BASIC_SKILL_ACCUMULATE) {
         result = 0;
     } else {
-        result = g_battle_effect_ability_files[ability_id] < 0;
+        result = g_effect_ability_files[ability_id] < 0;
     }
     return result;
 }
 
-/* 1 when the ability's entry in g_battle_effect_ability_files carries
+/* 1 when the ability's entry in g_effect_ability_files carries
  * EFFECT_ABILITY_FLAG_ITEM. A negative entry (an ability without an effect
  * file) is complemented before the test. */
-s32 battle_effect_is_item_ability(s32 ability_id) {
-    s32 entry = g_battle_effect_ability_files[ability_id];
+s32 effect_is_item_ability(s32 ability_id) {
+    s32 entry = g_effect_ability_files[ability_id];
     if (entry < 0) {
         entry = ~entry;
     }
     return (entry & EFFECT_ABILITY_FLAG_ITEM) > 0;
 }
 
-/* Releases a requested effect: battle_effect_update_stage starts it on its
+/* Releases a requested effect: effect_update_stage starts it on its
  * next frame. */
-void battle_effect_play(void) {
-    if (g_battle_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
-        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_INIT_PALETTE;
+void effect_play(void) {
+    if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
+        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_INIT_PALETTE;
     }
 }
 
 /* Drops a requested effect that has not been released. */
-void battle_effect_cancel_playback_request(void) {
-    if (g_battle_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
-        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+void effect_cancel_playback_request(void) {
+    if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
+        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
     }
 }
 
 /* The current effect playback phase (effect_playback_phase_e). */
-s32 battle_effect_get_playback_phase(void) {
-    return g_battle_effect_playback_phase;
+s32 effect_get_playback_phase(void) {
+    return g_effect_playback_phase;
 }
 
 /* Runs the loaded effect file one frame and returns 1 while it plays.
  *
- * Once battle_effect_play releases a requested effect, the file's two CLUT
+ * Once effect_play releases a requested effect, the file's two CLUT
  * rows and its texture go to VRAM; the memory from that last section of the
  * file on then becomes the effect heap, the section pointers are bound and
  * the root record starts the script. Each later frame runs every allocated
@@ -439,12 +436,12 @@ s32 battle_effect_get_playback_phase(void) {
  * the effect is over when none is left. Phase 5 has no case and would return
  * `result` unset, but nothing stores 5 or RESTART_SCRIPT (6), so the restart
  * path is dead in retail. */
-static s32 battle_effect_update_stage(void) {
+static s32 effect_update_stage(void) {
     s32 result;
-    s32 id = g_battle_effect_allocated_record_head;
+    s32 id = g_effect_allocated_record_head;
     s32 next;
 
-    switch (g_battle_effect_playback_phase) {
+    switch (g_effect_playback_phase) {
     case EFFECT_PLAYBACK_PHASE_IDLE:
         result = 0;
         break;
@@ -453,78 +450,78 @@ static s32 battle_effect_update_stage(void) {
         break;
     case EFFECT_PLAYBACK_PHASE_INIT_PALETTE:
         battle_map_freeze();
-        menu_suppress_depth_display();
-        battle_effect_init_palette(g_battle_ability_effect_id);
-        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
-        g_battle_effect_script_opcode_05_value = 0;
-        battle_state_reset_frame_pacing_timer();
+        unit_view_hide_tile_depth();
+        effect_file_init_palette(g_effect_id);
+        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
+        g_effect_script_opcode_05_value = 0;
+        system_reset_frame_pacing_timer();
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_START_SCRIPT:
-        battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
-            g_heap_battle_end_address - (u32)g_battle_effect_palette_ptr);
-        battle_effect_reset_subsystems();
-        battle_effect_seed_camera_tracks();
-        battle_state_clear_min_vsync_interval();
-        battle_effect_set_frame_data_pointer(g_battle_ability_effect_id);
-        battle_effect_set_animation_sequences_pointer(g_battle_ability_effect_id);
-        battle_effect_set_script_pointer(g_battle_ability_effect_id);
-        battle_effect_set_animation_curve_data_pointer(g_battle_ability_effect_id);
-        battle_effect_set_particle_system_data_pointer(g_battle_ability_effect_id);
-        battle_effect_set_timeline_pointers(g_battle_ability_effect_id);
-        battle_effect_load_sound_section(g_battle_ability_effect_id);
-        battle_effect_init_flags_section_pointer(g_battle_ability_effect_id);
-        battle_effect_set_timing_curves_pointer(g_battle_ability_effect_id);
-        if (g_battle_effect_context.math_skill_flag != 0) {
-            if (g_battle_effect_flags_section->spawn_delay_override != 0) {
-                g_battle_effect_timeline->spawn_delay = g_battle_effect_flags_section->spawn_delay_override;
+        effect_heap_init(
+            (effect_heap_node_t*)g_effect_palette_ptr, g_heap_battle_end_address - (u32)g_effect_palette_ptr);
+        effect_reset_subsystems();
+        effect_camera_seed_tracks();
+        system_clear_min_vsync_interval();
+        effect_file_set_frame_data_pointer(g_effect_id);
+        effect_file_set_animation_sequences_pointer(g_effect_id);
+        effect_file_set_script_pointer(g_effect_id);
+        effect_file_set_animation_curve_data_pointer(g_effect_id);
+        effect_file_set_particle_system_data_pointer(g_effect_id);
+        effect_file_set_timeline_pointers(g_effect_id);
+        effect_file_load_sound_section(g_effect_id);
+        effect_file_init_flags_section_pointer(g_effect_id);
+        effect_file_set_timing_curves_pointer(g_effect_id);
+        if (g_effect_context.math_skill_flag != 0) {
+            if (g_effect_flags_section->spawn_delay_override != 0) {
+                g_effect_timeline->spawn_delay = g_effect_flags_section->spawn_delay_override;
             } else {
-                g_battle_effect_timeline->spawn_delay = 100;
+                g_effect_timeline->spawn_delay = 100;
             }
         }
-        g_battle_effect_root_record_index = battle_effect_start_script_record(g_battle_effect_script, 0, 0);
-        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
-        battle_map_configure_effect_data_state(MAP_EFFECT_DATA_BEGIN);
+        g_effect_root_record_index = effect_script_start_record(g_effect_script, 0, 0);
+        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
+        battle_map_configure_effect_data_state(BATTLE_MAP_EFFECT_DATA_BEGIN);
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_RUNNING:
-        g_battle_effect_otag = gfx_get_battle_otag();
-        battle_effect_start_render_frame();
+        g_effect_otag = gfx_get_battle_otag();
+        effect_render_start_frame();
         while (id != 0) {
-            next = g_battle_effect_state_records[id].next_index;
-            g_battle_effect_current_record_index = id;
-            g_battle_effect_state_records[id].frame_counter++;
-            if (battle_effect_run_block(id) == 0) {
-                battle_effect_free_state_record(id);
+            next = g_effect_state_records[id].next_index;
+            g_effect_current_record_index = id;
+            g_effect_state_records[id].frame_counter++;
+            if (effect_script_run_block(id) == 0) {
+                effect_script_free_state_record(id);
             }
             id = next;
         }
-        if (g_battle_effect_allocated_record_head != 0) {
+        if (g_effect_allocated_record_head != 0) {
             result = 1;
         } else {
-            if (g_battle_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
+            if (g_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
                 music_set_volume_timed(0x78);
             }
-            if (g_battle_effect_sound_section_ptr != 0) {
-                suzuki_sound_remove_resource(g_battle_effect_sound_section_ptr);
-                g_battle_effect_sound_section_ptr = 0;
+            if (g_effect_sound_section_ptr != 0) {
+                suzuki_sound_remove_resource(g_effect_sound_section_ptr);
+                g_effect_sound_section_ptr = 0;
             }
-            battle_map_configure_effect_data_state(MAP_EFFECT_DATA_END);
+            battle_map_configure_effect_data_state(BATTLE_MAP_EFFECT_DATA_END);
             battle_map_unfreeze();
-            menu_enable_depth_display();
-            battle_state_clear_min_vsync_interval();
-            g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+            unit_view_show_tile_depth();
+            system_clear_min_vsync_interval();
+            g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
             result = 0;
         }
         break;
     case EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT:
-        battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
-            g_heap_battle_end_address - (u32)g_battle_effect_palette_ptr);
-        battle_effect_reset_subsystems();
-        battle_effect_reset_frame_data_pointer();
-        battle_effect_reset_animation_sequences_pointer();
-        g_battle_effect_root_record_index = battle_effect_start_script_record(g_battle_effect_script, 0, 0);
-        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
+        effect_heap_init(
+            (effect_heap_node_t*)g_effect_palette_ptr, g_heap_battle_end_address - (u32)g_effect_palette_ptr);
+        effect_reset_subsystems();
+        effect_file_reset_frame_data_pointer();
+        effect_file_reset_animation_sequences_pointer();
+        g_effect_root_record_index = effect_script_start_record(g_effect_script, 0, 0);
+        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
         return 1;
     }
     return result;
@@ -532,11 +529,11 @@ static s32 battle_effect_update_stage(void) {
 
 /* The effect system's frame: the effect file, the secondary effects and the
  * effect camera moves. Returns 1 while an effect of either kind runs. */
-s32 battle_effect_update_cycle(void) {
-    s32 stage_result = battle_effect_update_stage();
-    s32 related_result = battle_effect_update_secondary_effects();
+s32 effect_update_cycle(void) {
+    s32 stage_result = effect_update_stage();
+    s32 related_result = effect_secondary_update();
 
-    battle_camera_update_effect_tracks();
+    effect_camera_update_tracks();
 
     if (stage_result != 0 || related_result != 0) {
         return 1;
@@ -546,37 +543,37 @@ s32 battle_effect_update_cycle(void) {
 
 /* Chain state records 1-16 into the available list (record 0 is the sentinel), empty the allocated
  * list and set playback idle. */
-void battle_effect_init_state_records(void) {
+void effect_script_init_state_records(void) {
     s32 i;
 
-    g_battle_effect_state_records[0].next_index = 0;
-    g_battle_effect_available_record_head = 1;
+    g_effect_state_records[0].next_index = 0;
+    g_effect_available_record_head = 1;
     for (i = 1; i < EFFECT_STATE_RECORD_CAPACITY; i++) {
-        g_battle_effect_state_records[i].record_index = i;
-        g_battle_effect_state_records[i].next_index = i + 1;
-        g_battle_effect_state_records[i].last_native_callback = 0;
+        g_effect_state_records[i].record_index = i;
+        g_effect_state_records[i].next_index = i + 1;
+        g_effect_state_records[i].last_native_callback = 0;
     }
-    g_battle_effect_state_records[i].next_index = 0;
-    g_battle_effect_state_records[i].record_index = i;
-    g_battle_effect_allocated_record_head = 0;
-    g_battle_effect_current_record_index = 0;
-    g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+    g_effect_state_records[i].next_index = 0;
+    g_effect_state_records[i].record_index = i;
+    g_effect_allocated_record_head = 0;
+    g_effect_current_record_index = 0;
+    g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
 }
 
 /* Allocate one effect record and link it into the in-use list. */
-static s16 battle_effect_alloc_state_record(void) {
-    u16* available = &g_battle_effect_available_record_head;
+static s16 effect_script_alloc_state_record(void) {
+    u16* available = &g_effect_available_record_head;
     s16* allocated;
     s16 index = *available;
-    u16 next_available = g_battle_effect_state_records[index].next_index;
+    u16 next_available = g_effect_state_records[index].next_index;
     u16 next_allocated;
 
-    allocated = &g_battle_effect_allocated_record_head;
+    allocated = &g_effect_allocated_record_head;
     next_allocated = *allocated;
     *available = next_available;
-    g_battle_effect_state_records[index].next_index = next_allocated;
+    g_effect_state_records[index].next_index = next_allocated;
     *allocated = index;
-    g_battle_effect_state_records[index].flags |= EFFECT_RECORD_FLAG_ALLOCATED;
+    g_effect_state_records[index].flags |= EFFECT_RECORD_FLAG_ALLOCATED;
     return index;
 }
 
@@ -584,11 +581,11 @@ static s16 battle_effect_alloc_state_record(void) {
  *
  * Frees every work record on its list, releases the four handler work slots,
  * clears the spawning record's reference to it, then unlinks it from the
- * allocated list; the inverse of battle_effect_alloc_state_record. The
+ * allocated list; the inverse of effect_script_alloc_state_record. The
  * separate `particle` copy keeps the call's work argument loaded at the loop
  * edges, as in the target, and the list-head pointers keep the target's
  * materialized global address. */
-static void battle_effect_free_state_record(s16 record_index) {
+static void effect_script_free_state_record(s16 record_index) {
     effect_work_record_t* work;
     effect_work_record_t* particle;
     s16 head;
@@ -596,56 +593,56 @@ static void battle_effect_free_state_record(s16 record_index) {
     s16 parent;
     s16 cur;
 
-    particle = work = g_battle_effect_state_records[record_index].work_head;
-    head = g_battle_effect_allocated_record_head;
+    particle = work = g_effect_state_records[record_index].work_head;
+    head = g_effect_allocated_record_head;
     /* Retail bug: work->next is read after the record has gone back to the free
      * chain, so it points at the old free head rather than the next record of
      * this list. The walk only ends correctly on an empty list (or a one-record
      * list with no free records), so an effect's records must be gone before
      * its script ends. */
     while (work != 0) {
-        battle_effect_free_work_record(record_index, particle);
+        effect_particle_free_work_record(record_index, particle);
         particle = work = work->next;
     }
     for (i = 0; i < EFFECT_RECORD_CALLBACK_SLOT_COUNT; i++) {
-        if (g_battle_effect_state_records[record_index].work_slots[i] != 0) {
-            battle_heap_free_block(g_battle_effect_state_records[record_index].work_slots[i]);
-            g_battle_effect_state_records[record_index].work_slots[i] = 0;
+        if (g_effect_state_records[record_index].work_slots[i] != 0) {
+            effect_heap_free_block(g_effect_state_records[record_index].work_slots[i]);
+            g_effect_state_records[record_index].work_slots[i] = 0;
         }
-        g_battle_effect_state_records[record_index].callbacks[i] = 0;
+        g_effect_state_records[record_index].callbacks[i] = 0;
     }
-    parent = g_battle_effect_state_records[record_index].parent_index;
-    if (parent != 0 && (g_battle_effect_state_records[parent].flags & EFFECT_RECORD_FLAG_ALLOCATED)) {
+    parent = g_effect_state_records[record_index].parent_index;
+    if (parent != 0 && (g_effect_state_records[parent].flags & EFFECT_RECORD_FLAG_ALLOCATED)) {
         for (i = 0; i < EFFECT_SCRIPT_CHILD_SLOT_COUNT; i++) {
-            if (g_battle_effect_state_records[parent].child_indices[i] == record_index) {
-                g_battle_effect_state_records[parent].child_indices[i] = 0;
+            if (g_effect_state_records[parent].child_indices[i] == record_index) {
+                g_effect_state_records[parent].child_indices[i] = 0;
             }
         }
     }
     if (head == record_index) {
         u16* available;
 
-        g_battle_effect_allocated_record_head = g_battle_effect_state_records[record_index].next_index;
-        available = &g_battle_effect_available_record_head;
-        g_battle_effect_state_records[record_index].next_index = *available;
+        g_effect_allocated_record_head = g_effect_state_records[record_index].next_index;
+        available = &g_effect_available_record_head;
+        g_effect_state_records[record_index].next_index = *available;
         *available = head;
     } else {
         u16* available_after_unlink;
 
-        while ((cur = g_battle_effect_state_records[head].next_index) != record_index) {
+        while ((cur = g_effect_state_records[head].next_index) != record_index) {
             head = cur;
         }
-        g_battle_effect_state_records[head].next_index = g_battle_effect_state_records[cur].next_index;
-        available_after_unlink = &g_battle_effect_available_record_head;
-        g_battle_effect_state_records[cur].next_index = *available_after_unlink;
+        g_effect_state_records[head].next_index = g_effect_state_records[cur].next_index;
+        available_after_unlink = &g_effect_available_record_head;
+        g_effect_state_records[cur].next_index = *available_after_unlink;
         *available_after_unlink = cur;
     }
-    g_battle_effect_state_records[record_index].flags &= ~EFFECT_RECORD_FLAG_ALLOCATED;
+    g_effect_state_records[record_index].flags &= ~EFFECT_RECORD_FLAG_ALLOCATED;
 }
 
 /* Clears a record's child-timeline state and sets the effect target it plays
  * on. */
-static void battle_effect_reset_child_timeline(effect_record_t* record, s16 target_index) {
+static void effect_timeline_reset_child(effect_record_t* record, s16 target_index) {
     s32 index;
 
     for (index = 0; index < EFFECT_CHILD_TRACK_RESET_SLOT_COUNT; index++) {
@@ -658,7 +655,7 @@ static void battle_effect_reset_child_timeline(effect_record_t* record, s16 targ
 }
 
 /* Clear all 26 16-bit values in each bank, including the extra reset slots. */
-static void battle_effect_reset_parent_timeline(effect_record_t* record) {
+static void effect_timeline_reset_parent(effect_record_t* record) {
     s32 index;
 
     for (index = 0; index < EFFECT_PARENT_TRACK_RESET_SLOT_COUNT; index++) {
@@ -673,15 +670,15 @@ static void battle_effect_reset_parent_timeline(effect_record_t* record) {
 
 /* Allocate an effect state record for a script and reset its per-handler state.
  * Returns the record index, or 0 when none is available. */
-static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index) {
-    s16 index = battle_effect_alloc_state_record();
+static s16 effect_script_start_record(const u8* script, s16 start_pc, s16 parent_index) {
+    s16 index = effect_script_alloc_state_record();
     s16 i;
     effect_record_t* record;
 
     if (index == 0) {
         return 0;
     }
-    record = &g_battle_effect_state_records[index];
+    record = &g_effect_state_records[index];
     record->parent_index = parent_index;
     record->script = script;
     record->pc = start_pc;
@@ -698,28 +695,28 @@ static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16
     record->work_head = 0;
     record->work_count = 0;
     record->frame_counter = -1;
-    battle_effect_reset_child_timeline(record, 0);
-    battle_effect_reset_parent_timeline(record);
+    effect_timeline_reset_child(record, 0);
+    effect_timeline_reset_parent(record);
     return index;
 }
 
 /* Handler for opcodes 2e-77: calls the empty stub reporter and returns no defined value. In retail
- * $v0 still holds this handler's address, which battle_effect_run_block treats as 'continue'
+ * $v0 still holds this handler's address, which effect_script_run_block treats as 'continue'
  * without the pc moving, so an invalid opcode hangs the script loop. */
-effect_script_result_e battle_effect_code_script_2e_invalid(effect_record_t* unused_record) {
+effect_script_result_e effect_script_opcode_2e_invalid(effect_record_t* unused_record) {
     system_report_stub(1, 0x22);
     /* Retail leaves the dispatch result undefined after an invalid opcode. */
 }
 
 /* Opcode 00: jump to the script offset in the second 16-bit value and end the
  * record's run for this frame. */
-effect_script_result_e battle_effect_code_script_00_jump_and_yield(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_00_jump_and_yield(effect_record_t* record) {
     record->pc = effect_get_current_script_instruction(record)->immediate.value;
     return EFFECT_SCRIPT_RESULT_YIELD;
 }
 
 /* Opcode 01: jump to the script offset in the second 16-bit value. */
-effect_script_result_e battle_effect_code_script_01_jump(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_01_jump(effect_record_t* record) {
     record->pc = effect_get_current_script_instruction(record)->immediate.value;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -727,7 +724,7 @@ effect_script_result_e battle_effect_code_script_01_jump(effect_record_t* record
 /* Opcode 02: start a child record at the script offset in the second 16-bit value, parented to the
  * running record, and keep its index in the child slot named by the high nibble of the second
  * byte; slots above 3 are not kept. */
-effect_script_result_e battle_effect_code_script_02_spawn_child(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_02_spawn_child(effect_record_t* record) {
     effect_script_parameters_t parameters;
     s16 slot;
     s16 child;
@@ -735,8 +732,7 @@ effect_script_result_e battle_effect_code_script_02_spawn_child(effect_record_t*
 
     parameters = instruction->header.parameters;
     slot = parameters.child.slot;
-    child = battle_effect_start_script_record(
-        record->script, instruction->immediate.value, g_battle_effect_current_record_index);
+    child = effect_script_start_record(record->script, instruction->immediate.value, g_effect_current_record_index);
     if (slot < EFFECT_SCRIPT_CHILD_SLOT_COUNT) {
         record->child_indices[slot] = child;
     }
@@ -746,29 +742,29 @@ effect_script_result_e battle_effect_code_script_02_spawn_child(effect_record_t*
 
 /* Opcode 03: free the child record in the child slot named by bits 4-5 of
  * the instruction's second byte. */
-effect_script_result_e battle_effect_code_script_03_free_child(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_03_free_child(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     s16 child = record->child_indices[parameters.free_child.slot];
     if (child != 0)
-        battle_effect_free_state_record(child);
+        effect_script_free_state_record(child);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 04: end the script; battle_effect_run_block's caller then frees the
+/* Opcode 04: end the script; effect_script_run_block's caller then frees the
  * record. */
-effect_script_result_e battle_effect_code_script_04_end(effect_record_t* unused_record) {
+effect_script_result_e effect_script_opcode_04_end(effect_record_t* unused_record) {
     return EFFECT_SCRIPT_RESULT_ABORT;
 }
 
 /* Opcode 05: store the high nibble of the instruction's second byte.
  * Retail clears this global before the script runs but never reads it. */
-effect_script_result_e battle_effect_code_script_05_store_high_nibble(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_05_store_high_nibble(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
     effect_script_parameters_t parameters = instruction->header.parameters;
-    g_battle_effect_script_opcode_05_value = parameters.opcode_05.high_nibble;
+    g_effect_script_opcode_05_value = parameters.opcode_05.high_nibble;
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -776,11 +772,11 @@ effect_script_result_e battle_effect_code_script_05_store_high_nibble(effect_rec
 /* Opcode 06: put the native callback whose catalog id is the second 16-bit value in the
  * callback slot named by the top six bits of the instruction's second byte.
  * A particle keyframe whose action names the slot binds it to the record. */
-effect_script_result_e battle_effect_code_script_06_register_native_callback(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_06_register_native_callback(effect_record_t* record) {
     const effect_script_instruction_t* command = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = command->header.parameters;
     u32 slot = parameters.callback.slot;
-    g_battle_effect_callback_slots[slot] = battle_effect_get_native_callback(command->immediate.value);
+    g_effect_callback_slots[slot] = effect_script_get_native_callback(command->immediate.value);
     record->pc += 4;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -788,11 +784,11 @@ effect_script_result_e battle_effect_code_script_06_register_native_callback(eff
 /* Opcode 07: call the native callback whose catalog id is the second 16-bit value with
  * the record index and the top six bits of the instruction's second byte as
  * its callback slot, and remember it in the record. */
-effect_script_result_e battle_effect_code_script_07_call_native_callback(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_07_call_native_callback(effect_record_t* record) {
     const effect_script_instruction_t* command = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = command->header.parameters;
     u32 slot = parameters.callback.slot;
-    effect_callback_t handler = battle_effect_get_native_callback(command->immediate.value);
+    effect_callback_t handler = effect_script_get_native_callback(command->immediate.value);
     record->last_native_callback = handler;
     handler(record->record_index, slot, 0, 0);
     record->pc += 4;
@@ -801,80 +797,80 @@ effect_script_result_e battle_effect_code_script_07_call_native_callback(effect_
 
 /* Opcode 08: move the camera to the position in the three 16-bit values that
  * follow (x, y, z in world units). */
-effect_script_result_e battle_effect_code_script_08_set_camera_position(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_08_set_camera_position(effect_record_t* record) {
     VECTOR coords;
 
     setVector(&coords, effect_get_current_script_instruction(record)->vector.x * ONE,
         effect_get_current_script_instruction(record)->vector.y * ONE,
         effect_get_current_script_instruction(record)->vector.z * ONE);
-    battle_camera_set_current_real_coords(&coords);
+    camera_real_coords_set(&coords);
     record->pc += 8;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 09: save the camera position (opcode 0a restores it). */
-effect_script_result_e battle_effect_code_script_09_save_camera_position(effect_record_t* record) {
-    battle_camera_save_current_real_coords();
+effect_script_result_e effect_script_opcode_09_save_camera_position(effect_record_t* record) {
+    camera_real_coords_save();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0a: restore the camera position opcode 09 saved. */
-effect_script_result_e battle_effect_code_script_0a_restore_camera_position(effect_record_t* record) {
-    battle_camera_restore_current_real_coords();
+effect_script_result_e effect_script_opcode_0a_restore_camera_position(effect_record_t* record) {
+    camera_real_coords_restore();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0b: set the camera rotation from the three 16-bit values that follow. */
-effect_script_result_e battle_effect_code_script_0b_set_camera_rotation(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_0b_set_camera_rotation(effect_record_t* record) {
     SVECTOR rotation;
 
     setVector(&rotation, effect_get_current_script_instruction(record)->vector.x,
         effect_get_current_script_instruction(record)->vector.y,
         effect_get_current_script_instruction(record)->vector.z);
-    battle_camera_set_rotation(&rotation);
+    camera_rotation_set(&rotation);
     record->pc += 8;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0c: save the camera rotation (opcode 0d restores it). */
-effect_script_result_e battle_effect_code_script_0c_save_camera_rotation(effect_record_t* record) {
-    battle_camera_save_rotation();
+effect_script_result_e effect_script_opcode_0c_save_camera_rotation(effect_record_t* record) {
+    camera_rotation_save();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0d: restore the camera rotation opcode 0c saved. */
-effect_script_result_e battle_effect_code_script_0d_restore_camera_rotation(effect_record_t* record) {
-    battle_camera_restore_rotation();
+effect_script_result_e effect_script_opcode_0d_restore_camera_rotation(effect_record_t* record) {
+    camera_rotation_restore();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0e: set the camera zoom from the three 16-bit values that follow (ONE is
  * no zoom). */
-effect_script_result_e battle_effect_code_script_0e_set_camera_zoom(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_0e_set_camera_zoom(effect_record_t* record) {
     VECTOR zoom;
 
     setVector(&zoom, effect_get_current_script_instruction(record)->vector.x,
         effect_get_current_script_instruction(record)->vector.y,
         effect_get_current_script_instruction(record)->vector.z);
-    battle_camera_set_zoom(&zoom);
+    camera_zoom_set(&zoom);
     record->pc += 8;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0f: save the camera zoom (opcode 24 restores it). */
-effect_script_result_e battle_effect_code_script_0f_save_camera_zoom(effect_record_t* record) {
-    battle_camera_save_zoom();
+effect_script_result_e effect_script_opcode_0f_save_camera_zoom(effect_record_t* record) {
+    camera_zoom_save();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 10: set the counter selected by the top two bits of the
  * instruction's second byte to the second 16-bit value. */
-effect_script_result_e battle_effect_code_script_10_set_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_10_set_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
@@ -887,7 +883,7 @@ effect_script_result_e battle_effect_code_script_10_set_selected_counter(effect_
 /* Opcode 11: jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte equals the second 16-bit value;
  * otherwise step over the 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_11_jump_if_counter_equal(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_11_jump_if_counter_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] == instruction->branch.comparison) {
@@ -901,7 +897,7 @@ effect_script_result_e battle_effect_code_script_11_jump_if_counter_equal(effect
 /* Opcode 12: jump to the offset in the third 16-bit value when the counter selected by the top two
  * bits of the second byte is at least the second 16-bit value; otherwise step over the 6-byte
  * instruction. */
-effect_script_result_e battle_effect_code_script_12_jump_if_counter_at_least(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_12_jump_if_counter_at_least(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] >= instruction->branch.comparison) {
@@ -915,7 +911,7 @@ effect_script_result_e battle_effect_code_script_12_jump_if_counter_at_least(eff
 /* Opcode 13: jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte exceeds the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_13_jump_if_counter_greater(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_13_jump_if_counter_greater(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] > instruction->branch.comparison) {
@@ -929,7 +925,7 @@ effect_script_result_e battle_effect_code_script_13_jump_if_counter_greater(effe
 /* Opcode 14: jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte is at most the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_14_jump_if_counter_at_most(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_14_jump_if_counter_at_most(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] <= instruction->branch.comparison) {
@@ -943,7 +939,7 @@ effect_script_result_e battle_effect_code_script_14_jump_if_counter_at_most(effe
 /* Opcode 15: jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte is below the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_15_jump_if_counter_less(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_15_jump_if_counter_less(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] < instruction->branch.comparison) {
@@ -957,7 +953,7 @@ effect_script_result_e battle_effect_code_script_15_jump_if_counter_less(effect_
 /* Opcode 16: jump to the offset in the third 16-bit value when the record has exactly as many
  * particles as the second 16-bit value; otherwise step over the 6-byte instruction. Retail scripts
  * test 0 to end once the last particle is gone. */
-effect_script_result_e battle_effect_code_script_16_jump_if_work_count_equal(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_16_jump_if_work_count_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     if (record->work_count == instruction->branch.comparison) {
         record->pc = instruction->branch.target_offset;
@@ -970,7 +966,7 @@ effect_script_result_e battle_effect_code_script_16_jump_if_work_count_equal(eff
 /* Opcode 17: jump to the offset in the third 16-bit value when the record has
  * more particles than the second 16-bit value says; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_17_jump_if_work_count_greater(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_17_jump_if_work_count_greater(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     if (instruction->branch.comparison < record->work_count) {
         record->pc = instruction->branch.target_offset;
@@ -983,7 +979,7 @@ effect_script_result_e battle_effect_code_script_17_jump_if_work_count_greater(e
 /* Opcode 18: jump to the offset in the third 16-bit value when the record has
  * fewer particles than the second 16-bit value says; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_18_jump_if_work_count_less(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_18_jump_if_work_count_less(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     if (record->work_count < instruction->branch.comparison) {
         record->pc = instruction->branch.target_offset;
@@ -996,7 +992,7 @@ effect_script_result_e battle_effect_code_script_18_jump_if_work_count_less(effe
 /* Opcode 19: jump to the offset in the third 16-bit value when the number of
  * occupied child slots equals the second 16-bit value; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_19_jump_if_child_count_equal(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_19_jump_if_child_count_equal(effect_record_t* record) {
     s16 i;
     s16 count;
     s16 target = effect_get_current_script_instruction(record)->branch.comparison;
@@ -1017,7 +1013,7 @@ effect_script_result_e battle_effect_code_script_19_jump_if_child_count_equal(ef
 
 /* Opcode 1a: jump to the offset in the second 16-bit value when the child slot named by the second
  * byte's high nibble holds a record; otherwise step over the 4-byte instruction. */
-effect_script_result_e battle_effect_code_script_1a_jump_if_child_active(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_1a_jump_if_child_active(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
@@ -1033,7 +1029,7 @@ effect_script_result_e battle_effect_code_script_1a_jump_if_child_active(effect_
 /* Opcode 1b: jump to the offset in the second 16-bit value when the child slot
  * named by the second byte's high nibble is empty; otherwise step over the
  * 4-byte instruction. */
-effect_script_result_e battle_effect_code_script_1b_jump_if_child_inactive(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_1b_jump_if_child_inactive(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
@@ -1049,7 +1045,7 @@ effect_script_result_e battle_effect_code_script_1b_jump_if_child_inactive(effec
 /* Opcode 1c: jump to the offset in the third 16-bit value when the counter
  * selected by the second byte's top two bits differs from the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e battle_effect_code_script_1c_jump_if_counter_not_equal(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_1c_jump_if_counter_not_equal(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
@@ -1065,8 +1061,8 @@ effect_script_result_e battle_effect_code_script_1c_jump_if_counter_not_equal(ef
 /* Opcode 1d: jump to the offset in the second 16-bit value once the record's
  * timeline frame reaches the child timeline's duration; otherwise step over
  * the 4-byte instruction. */
-effect_script_result_e battle_effect_code_script_1d_jump_after_child_timeline_duration(effect_record_t* record) {
-    if (record->timeline.frame >= g_battle_effect_child_timeline->duration) {
+effect_script_result_e effect_script_opcode_1d_jump_after_child_timeline_duration(effect_record_t* record) {
+    if (record->timeline.frame >= g_effect_child_timeline->duration) {
         const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
         record->pc = instruction->immediate.value;
@@ -1080,11 +1076,11 @@ effect_script_result_e battle_effect_code_script_1d_jump_after_child_timeline_du
  * timeline frame reaches the end of the parent timeline (phase 1, a spawn
  * delay for each target after the first, the last child's duration and phase
  * 2); otherwise step over the 4-byte instruction. */
-effect_script_result_e battle_effect_code_script_1e_jump_after_total_duration(effect_record_t* record) {
-    effect_timeline_t* timing = g_battle_effect_timeline;
+effect_script_result_e effect_script_opcode_1e_jump_after_total_duration(effect_record_t* record) {
+    effect_timeline_t* timing = g_effect_timeline;
 
     if (record->timeline.frame >= timing->phase1_duration + timing->phase2_duration
-            + (g_battle_effect_context.target_count - 1) * timing->spawn_delay + timing->child.duration) {
+            + (g_effect_context.target_count - 1) * timing->spawn_delay + timing->child.duration) {
         const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
         record->pc = instruction->immediate.value;
@@ -1096,10 +1092,10 @@ effect_script_result_e battle_effect_code_script_1e_jump_after_total_duration(ef
 
 /* Opcode 1f: jump when the target count equals the header's six-bit selector.
  * Retail scripts use zero to end an effect with no targets. */
-effect_script_result_e battle_effect_code_script_1f_jump_if_target_count_equal(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_1f_jump_if_target_count_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
-    if (g_battle_effect_context.target_count == parameters.targets.count) {
+    if (g_effect_context.target_count == parameters.targets.count) {
         record->pc = instruction->immediate.value;
     } else {
         record->pc += 4;
@@ -1109,7 +1105,7 @@ effect_script_result_e battle_effect_code_script_1f_jump_if_target_count_equal(e
 
 /* Opcode 20: add 1 to the counter selected by the top two bits of the
  * instruction's second byte. */
-effect_script_result_e battle_effect_code_script_20_increment_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_20_increment_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
 
     parameters = effect_get_current_script_instruction(record)->header.parameters;
@@ -1120,7 +1116,7 @@ effect_script_result_e battle_effect_code_script_20_increment_selected_counter(e
 
 /* Opcode 21: subtract 1 from the counter selected by the top two bits of the
  * instruction's second byte. */
-effect_script_result_e battle_effect_code_script_21_decrement_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_21_decrement_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
 
     parameters = effect_get_current_script_instruction(record)->header.parameters;
@@ -1131,7 +1127,7 @@ effect_script_result_e battle_effect_code_script_21_decrement_selected_counter(e
 
 /* Opcode 22: add the second 16-bit value to the counter selected by the top two
  * bits of the instruction's second byte. */
-effect_script_result_e battle_effect_code_script_22_add_immediate_to_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_22_add_immediate_to_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     u16 amount;
@@ -1145,7 +1141,7 @@ effect_script_result_e battle_effect_code_script_22_add_immediate_to_selected_co
 
 /* Opcode 23: subtract the second 16-bit value from the counter selected by the
  * top two bits of the instruction's second byte. */
-effect_script_result_e battle_effect_code_script_23_subtract_immediate_from_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_23_subtract_immediate_from_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     u16 amount;
@@ -1158,8 +1154,8 @@ effect_script_result_e battle_effect_code_script_23_subtract_immediate_from_sele
 }
 
 /* Opcode 24: restore the camera zoom opcode 0f saved. */
-effect_script_result_e battle_effect_code_script_24_restore_camera_zoom(effect_record_t* record) {
-    battle_camera_restore_zoom();
+effect_script_result_e effect_script_opcode_24_restore_camera_zoom(effect_record_t* record) {
+    camera_zoom_restore();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1179,12 +1175,12 @@ effect_script_result_e battle_effect_code_script_24_restore_camera_zoom(effect_r
  * whose arms are identical (cross-jumping merges them): `mode == 1 || mode ==
  * 2` is folded into an unsigned range test that the target does not contain.
  */
-effect_script_result_e battle_effect_code_script_25_update_all_particles(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_25_update_all_particles(effect_record_t* record) {
     effect_work_record_t* work = record->work_head;
 
-    gte_SetRotMatrix(&g_battle_camera_matrix);
-    gte_SetTransMatrix(&g_battle_camera_matrix);
-    battle_effect_integrate_particle_motion(record->work_head);
+    gte_SetRotMatrix(&g_camera_matrix);
+    gte_SetTransMatrix(&g_camera_matrix);
+    effect_particle_integrate_motion(record->work_head);
 
     for (;;) {
         effect_work_record_t* node;
@@ -1211,11 +1207,11 @@ effect_script_result_e battle_effect_code_script_25_update_all_particles(effect_
             }
         }
 
-        g_battle_effect_particle_render_handlers[(u16)node->kind_flags >> 12](record, node);
+        g_effect_particle_render_handlers[(u16)node->kind_flags >> 12](record, node);
 
         if ((node->flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) == EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_1
             || (node->flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) == EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_2) {
-            battle_effect_spawn_emitter_particles(
+            effect_particle_spawn_from_emitter(
                 record->record_index, record->frame_counter, node->child_emitter_mid_life, node);
         }
 
@@ -1233,14 +1229,14 @@ effect_script_result_e battle_effect_code_script_25_update_all_particles(effect_
         }
 
         if ((node->flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) == EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MODE_1) {
-            battle_effect_spawn_emitter_particles(
+            effect_particle_spawn_from_emitter(
                 record->record_index, record->frame_counter, node->child_emitter_on_death, node);
         } else if ((node->flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK)
             == EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MODE_2) {
-            battle_effect_spawn_emitter_particles(
+            effect_particle_spawn_from_emitter(
                 record->record_index, record->frame_counter, node->child_emitter_on_death, node);
         }
-        battle_effect_free_work_record(record->record_index, node);
+        effect_particle_free_work_record(record->record_index, node);
     }
 
     record->pc += 2;
@@ -1249,7 +1245,7 @@ effect_script_result_e battle_effect_code_script_25_update_all_particles(effect_
 
 /* Opcode 26: spawn this frame's particles of the emitter named by bits 10-13
  * of the 16-bit instruction header, at the record's frame counter. */
-effect_script_result_e battle_effect_code_script_26_spawn_emitter_particles(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_26_spawn_emitter_particles(effect_record_t* record) {
     /* A 16-bit header cache preserves the address operands; a direct field read changes them. */
     union {
         u16 packed;
@@ -1262,16 +1258,16 @@ effect_script_result_e battle_effect_code_script_26_spawn_emitter_particles(effe
 
     header.packed = effect_get_current_script_header(record);
 
-    battle_effect_spawn_emitter_particles(record->record_index, record->frame_counter, header.fields.emitter_index, 0);
+    effect_particle_spawn_from_emitter(record->record_index, record->frame_counter, header.fields.emitter_index, 0);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 27: take the gravity vector and the inertia threshold from the
  * effect file's particle-system section. */
-effect_script_result_e battle_effect_code_script_27_init_particle_physics(effect_record_t* record) {
-    battle_effect_set_gravity(&g_battle_effect_geometry_table->gravity);
-    battle_effect_set_inertia_threshold(g_battle_effect_geometry_table->inertia_threshold);
+effect_script_result_e effect_script_opcode_27_init_particle_physics(effect_record_t* record) {
+    effect_set_gravity(&g_effect_geometry_table->gravity);
+    effect_set_inertia_threshold(g_effect_geometry_table->inertia_threshold);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1281,72 +1277,72 @@ effect_script_result_e battle_effect_code_script_27_init_particle_physics(effect
  * and 8-15 trigger unit reactions (bit 3 selects the caster entry), bits 0-2
  * register a callback slot.
  */
-static void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_record_t* state) {
+static void effect_timeline_run_keyframe_actions(u16 flags, u8 target, effect_record_t* state) {
     s32 runtime_id;
     u32 animation;
     u16 slot;
 
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
         runtime_id = -1;
-        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
+        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            runtime_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
         }
     } else {
         runtime_id = -1;
-        if (g_battle_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_battle_effect_context.targets[target].data.unit.runtime_id;
+        if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            runtime_id = g_effect_context.targets[target].data.unit.runtime_id;
         }
     }
     if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_POST_ACTION_DISPLAY) && runtime_id != -1) {
-        battle_gfx_prepare_post_action_display_by_runtime_id(runtime_id);
+        result_prepare_display_by_runtime_id(runtime_id);
     }
     if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_UPDATE_DISPLAY) && runtime_id != -1) {
-        battle_unit_update_display_by_runtime_id(runtime_id);
+        unit_update_display_by_runtime_id(runtime_id);
     }
     if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION) && runtime_id != -1) {
-        battle_unit_set_target_animation_by_runtime_id(runtime_id);
+        animation_set_target_by_runtime_id(runtime_id);
     }
     animation = (flags & EFFECT_KEYFRAME_ACTION_ANIMATION_MASK) >> EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT;
     if (animation != 0 && runtime_id != -1) {
-        battle_unit_set_specific_animation_by_runtime_id(runtime_id, animation);
+        animation_set_specific_by_runtime_id(runtime_id, animation);
     }
     if (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) {
         slot = (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) - 1;
         state->callback_phase[slot] = EFFECT_CALLBACK_PHASE_INIT;
-        state->callbacks[slot] = g_battle_effect_callback_slots[slot];
+        state->callbacks[slot] = g_effect_callback_slots[slot];
     }
 }
 
 /* Pick the sound id effect sound channel channel plays next, by the channel's mode and how many
  * times it has been used; each call counts one use. A mode above 4 has no case: retail then
  * returns whatever the caller left in $a2. */
-static s32 battle_effect_select_sound_id(s32 channel) {
-    s32 count = g_battle_effect_sound_call_counts[channel]++;
+static s32 effect_timeline_select_sound_id(s32 channel) {
+    s32 count = g_effect_sound_call_counts[channel]++;
     s32 sound;
 
-    switch (g_battle_effect_flags_section->channels[channel].mode) {
+    switch (g_effect_flags_section->channels[channel].mode) {
     case EFFECT_SOUND_MODE_FIRST:
-        sound = g_battle_effect_flags_section->channels[channel].sound_ids[0];
+        sound = g_effect_flags_section->channels[channel].sound_ids[0];
         break;
     case EFFECT_SOUND_MODE_ALTERNATE:
-        sound = g_battle_effect_flags_section->channels[channel].sound_ids[count & 1];
+        sound = g_effect_flags_section->channels[channel].sound_ids[count & 1];
         break;
     case EFFECT_SOUND_MODE_FIRST_THEN_SECOND:
         if (count == 0) {
-            sound = g_battle_effect_flags_section->channels[channel].sound_ids[0];
+            sound = g_effect_flags_section->channels[channel].sound_ids[0];
         } else {
-            sound = g_battle_effect_flags_section->channels[channel].sound_ids[1];
+            sound = g_effect_flags_section->channels[channel].sound_ids[1];
         }
         break;
     case EFFECT_SOUND_MODE_FIRST_THEN_ALTERNATE:
         if (count != 0) {
-            sound = g_battle_effect_flags_section->channels[channel].sound_ids[1 + (count & 1)];
+            sound = g_effect_flags_section->channels[channel].sound_ids[1 + (count & 1)];
         } else {
-            sound = g_battle_effect_flags_section->channels[channel].sound_ids[0];
+            sound = g_effect_flags_section->channels[channel].sound_ids[0];
         }
         break;
     case EFFECT_SOUND_MODE_CYCLE:
-        sound = g_battle_effect_flags_section->channels[channel].sound_ids[count % 3];
+        sound = g_effect_flags_section->channels[channel].sound_ids[count % 3];
         break;
     }
     return sound;
@@ -1357,8 +1353,8 @@ static s32 battle_effect_select_sound_id(s32 channel) {
  * also drives the camera keyframes, and EFFECT_FLAG_TIMING_CURVE_CHILD sets the time scale. A
  * reflected hit instead starts the Reflect animation on a unit target and jumps to the child
  * timeline's end. */
-effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
-    map_background_gradient_colors_t colors;
+effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record_t* record) {
+    battle_map_background_gradient_colors_t colors;
     effect_secondary_init_t init;
     effect_record_timeline_t* timeline;
     effect_keyframe_table_t* table;
@@ -1389,16 +1385,16 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
     target = record->timeline.target_index;
     timeline = &record->timeline;
 
-    if (g_battle_effect_context.targets[target].data.unit.result_animation != EFFECT_HIT_REFLECTED) {
+    if (g_effect_context.targets[target].data.unit.result_animation != EFFECT_HIT_REFLECTED) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            table = &g_battle_effect_child_timeline->particle[i];
+            table = &g_effect_child_timeline->particle[i];
             if (timeline->state.child.remaining.tracks.particle[i] == 0) {
                 /* Keyframe 0 is the start: enter keyframe 1 and run its actions. */
                 if (timeline->state.child.keyframe.tracks.particle[i] == 0) {
                     timeline->state.child.remaining.tracks.particle[i] = table->frame_start[1] - table->frame_start[0];
                     timeline->state.child.step.tracks.particle[i] = 0;
                     timeline->state.child.keyframe.tracks.particle[i]++;
-                    battle_effect_run_keyframe_actions(table->action[1], target, record);
+                    effect_timeline_run_keyframe_actions(table->action[1], target, record);
                 }
                 /* Pass through keyframes of zero length, running each one's actions. */
                 while (timeline->state.child.remaining.tracks.particle[i] == 0) {
@@ -1407,7 +1403,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     timeline->state.child.remaining.tracks.particle[i]
                         = table->frame_start[k + 1] - table->frame_start[k];
                     timeline->state.child.step.tracks.particle[i] = 0;
-                    battle_effect_run_keyframe_actions(table->action[k + 1], target, record);
+                    effect_timeline_run_keyframe_actions(table->action[k + 1], target, record);
                 }
             }
 
@@ -1425,14 +1421,14 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     }
                     record->callbacks[slot](record->record_index, slot, index - 1, step);
                 } else {
-                    battle_effect_spawn_emitter_particles(record->record_index, step, index - 1, 0);
+                    effect_particle_spawn_from_emitter(record->record_index, step, index - 1, 0);
                 }
             }
 
             timeline->state.child.remaining.tracks.particle[i]--;
         }
 
-        track = &g_battle_effect_child_timeline->surroundings;
+        track = &g_effect_child_timeline->surroundings;
         surroundings_keyframe = timeline->state.child.keyframe.tracks.surroundings;
         if (surroundings_keyframe < track->count - 1) {
             if (timeline->state.child.remaining.tracks.surroundings == 0) {
@@ -1453,13 +1449,13 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     blue = track->color[index].b;
                     battle_map_color_field(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
-                    for (i = 0; i < g_battle_effect_context.spectator_count; i++) {
-                        battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_battle_effect_palette_target_runtime_ids[i], red, green, blue);
+                    for (i = 0; i < g_effect_context.spectator_count; i++) {
+                        sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                            track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
                     }
                     /* The darkness color has 8-bit channels; the offsets are 5-bit palette steps. */
-                    if (!(g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-                        battle_map_start_darkness_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                    if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                        battle_map_darkness_start_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                             track->duration[index], red * 8, green * 8, blue * 8);
                     }
                 }
@@ -1467,7 +1463,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
             timeline->state.child.remaining.tracks.surroundings--;
         }
 
-        track = &g_battle_effect_child_timeline->caster;
+        track = &g_effect_child_timeline->caster;
         caster_keyframe = timeline->state.child.keyframe.tracks.caster;
         if (caster_keyframe < track->count - 1) {
             if (timeline->state.child.remaining.tracks.caster == 0) {
@@ -1485,18 +1481,17 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     red = track->color[index].r;
                     green = track->color[index].g;
                     blue = track->color[index].b;
-                    if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                        battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index],
-                            g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id, red, green,
-                            blue);
+                    if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                        sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                            track->duration[index], g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id,
+                            red, green, blue);
                     }
                 }
             }
             timeline->state.child.remaining.tracks.caster--;
         }
 
-        track = &g_battle_effect_child_timeline->target;
+        track = &g_effect_child_timeline->target;
         target_keyframe = timeline->state.child.keyframe.tracks.target;
         if (target_keyframe < track->count - 1) {
             if (timeline->state.child.remaining.tracks.target == 0) {
@@ -1514,17 +1509,17 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     red = track->color[index].r;
                     green = track->color[index].g;
                     blue = track->color[index].b;
-                    if (g_battle_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                        battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_battle_effect_context.targets[target].data.unit.runtime_id, red,
-                            green, blue);
+                    if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                        sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                            track->duration[index], g_effect_context.targets[target].data.unit.runtime_id, red, green,
+                            blue);
                     }
                 }
             }
             timeline->state.child.remaining.tracks.target--;
         }
 
-        screen = &g_battle_effect_child_timeline->screen;
+        screen = &g_effect_child_timeline->screen;
         screen_keyframe = timeline->state.child.keyframe.tracks.screen;
         if (screen_keyframe < screen->count - 1) {
             if (timeline->state.child.remaining.tracks.screen == 0) {
@@ -1543,22 +1538,22 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     red = screen->color[index].r * 2;
                     green = screen->color[index].g * 2;
                     blue = screen->color[index].b * 2;
-                    battle_map_modify_background_gradient(mode, screen->duration[index], red, green, blue);
+                    battle_map_background_modify(mode, screen->duration[index], red, green, blue);
                     /* Unlike the surroundings track, this one moves the darkness only when weather is ignored. */
-                    if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                        battle_map_start_darkness_blend(mode, screen->duration[index], red, green, blue);
+                    if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                        battle_map_darkness_start_blend(mode, screen->duration[index], red, green, blue);
                     }
                 } else {
-                    colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = screen->color[index].r;
-                    colors.colors[MAP_BACKGROUND_GRADIENT_TOP].g = screen->color[index].g;
-                    colors.colors[MAP_BACKGROUND_GRADIENT_TOP].b = screen->color[index].b;
-                    colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = screen->second_color[index].r;
-                    colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = screen->second_color[index].g;
-                    colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = screen->second_color[index].b;
-                    battle_map_set_background_gradient(screen->duration[index], &colors);
-                    if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                        battle_map_set_darkness_color(
-                            screen->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
+                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].r = screen->color[index].r;
+                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].g = screen->color[index].g;
+                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].b = screen->color[index].b;
+                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].r = screen->second_color[index].r;
+                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].g = screen->second_color[index].g;
+                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].b = screen->second_color[index].b;
+                    battle_map_background_set(screen->duration[index], &colors);
+                    if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                        battle_map_darkness_set(
+                            screen->duration[index], &colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP]);
                     }
                 }
             }
@@ -1566,7 +1561,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
         }
 
         for (i = 0; i < EFFECT_SOUND_TRACK_COUNT; i++) {
-            sound = &g_battle_effect_child_timeline->sound[i];
+            sound = &g_effect_child_timeline->sound[i];
             sound_keyframe = timeline->state.child.keyframe.tracks.sound[i];
             if (sound_keyframe < sound->count) {
                 if (timeline->state.child.remaining.tracks.sound[i] == 0) {
@@ -1576,9 +1571,9 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     kind = sound->channel[index];
                     /* Channel values 0 and 1 play nothing; 2 and up pick effect sound channel kind - 2. */
                     if (kind >= 2) {
-                        sound_index = battle_effect_select_sound_id(kind - 2);
+                        sound_index = effect_timeline_select_sound_id(kind - 2);
                         if (sound_index != 0) {
-                            suzuki_sound_play_sfx(sound_index + g_battle_effect_sound_data_base);
+                            suzuki_sound_play_sfx(sound_index + g_effect_sound_data_base);
                         }
                     }
                 }
@@ -1587,21 +1582,20 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
         }
 
         if (record->parent_index == 0) {
-            battle_camera_start_effect_keyframe_moves(timeline->frame);
+            effect_camera_start_child_keyframe_moves(timeline->frame);
         }
-        if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
-            battle_state_set_min_vsync_interval(battle_effect_get_child_timing_curve_value(record));
+        if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
+            system_set_min_vsync_interval(effect_timeline_get_child_timing_curve_value(record));
         }
         timeline->frame++;
     } else {
         /* A reflected hit shows Reflect on a unit target and skips to the child timeline's end. */
-        if (g_battle_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            init.targets[EFFECT_CASTER_ENTRY] = g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
-            init.targets[0] = g_battle_effect_context.targets[target];
-            battle_effect_init_secondary(
-                EFFECT_SECONDARY_ANIMATION_REFLECT, g_battle_effect_timeline->spawn_delay, &init);
+        if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            init.targets[EFFECT_CASTER_ENTRY] = g_effect_context.targets[EFFECT_CASTER_ENTRY];
+            init.targets[0] = g_effect_context.targets[target];
+            effect_secondary_init(EFFECT_SECONDARY_ANIMATION_REFLECT, g_effect_timeline->spawn_delay, &init);
         }
-        record->timeline.frame = g_battle_effect_child_timeline->duration;
+        record->timeline.frame = g_effect_child_timeline->duration;
     }
 
     record->pc += 2;
@@ -1614,7 +1608,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
  * caster entry instead of the whole target list; bits 0-2 register a callback
  * slot.
  */
-static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state) {
+static void effect_timeline_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state) {
     s32 runtime_id;
     u16 animation;
     u16 slot;
@@ -1622,20 +1616,19 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
 
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
         runtime_id = -1;
-        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
+        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            runtime_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
         }
     }
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_POST_ACTION_DISPLAY) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
             if (runtime_id != -1) {
-                battle_gfx_prepare_post_action_display_by_runtime_id(runtime_id);
+                result_prepare_display_by_runtime_id(runtime_id);
             }
         } else {
-            for (i = 0; i < g_battle_effect_context.target_count; i++) {
-                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    battle_gfx_prepare_post_action_display_by_runtime_id(
-                        g_battle_effect_context.targets[i].data.unit.runtime_id);
+            for (i = 0; i < g_effect_context.target_count; i++) {
+                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    result_prepare_display_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
                 }
             }
         }
@@ -1643,12 +1636,12 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_UPDATE_DISPLAY) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
             if (runtime_id != -1) {
-                battle_unit_update_display_by_runtime_id(runtime_id);
+                unit_update_display_by_runtime_id(runtime_id);
             }
         } else {
-            for (i = 0; i < g_battle_effect_context.target_count; i++) {
-                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    battle_unit_update_display_by_runtime_id(g_battle_effect_context.targets[i].data.unit.runtime_id);
+            for (i = 0; i < g_effect_context.target_count; i++) {
+                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    unit_update_display_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
                 }
             }
         }
@@ -1656,13 +1649,12 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
             if (runtime_id != -1) {
-                battle_unit_set_target_animation_by_runtime_id(runtime_id);
+                animation_set_target_by_runtime_id(runtime_id);
             }
         } else {
-            for (i = 0; i < g_battle_effect_context.target_count; i++) {
-                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    battle_unit_set_target_animation_by_runtime_id(
-                        g_battle_effect_context.targets[i].data.unit.runtime_id);
+            for (i = 0; i < g_effect_context.target_count; i++) {
+                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    animation_set_target_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
                 }
             }
         }
@@ -1671,13 +1663,12 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
     if (animation != 0) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
             if (runtime_id != -1) {
-                battle_unit_set_specific_animation_by_runtime_id(runtime_id, animation);
+                animation_set_specific_by_runtime_id(runtime_id, animation);
             }
         } else {
-            for (i = 0; i < g_battle_effect_context.target_count; i++) {
-                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    battle_unit_set_specific_animation_by_runtime_id(
-                        g_battle_effect_context.targets[i].data.unit.runtime_id, animation);
+            for (i = 0; i < g_effect_context.target_count; i++) {
+                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    animation_set_specific_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id, animation);
                 }
             }
         }
@@ -1685,7 +1676,7 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
     if (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) {
         slot = (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) - 1;
         state->callback_phase[slot] = EFFECT_CALLBACK_PHASE_INIT;
-        state->callbacks[slot] = g_battle_effect_callback_slots[slot];
+        state->callbacks[slot] = g_effect_callback_slots[slot];
     }
 }
 
@@ -1696,7 +1687,7 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
  * told to destroy its work on the call made with two frames of the keyframe
  * left. index, remaining and step are the channel's keyframe, the frames left
  * in it and the frames it has run. */
-static void battle_effect_step_emitter_timeline(
+static void effect_timeline_step_emitter(
     effect_record_t* state, effect_keyframe_table_t* table, s16* index, s16* remaining, s16* step) {
     s16 k;
     s32 sel;
@@ -1709,7 +1700,7 @@ static void battle_effect_step_emitter_timeline(
             k = *index;
             *index = k + 1;
             /* Integer-first pointer addition preserves the native shared-address operands. */
-            battle_effect_run_keyframe_actions_all_targets(*(k + 1 + table->action), state);
+            effect_timeline_run_keyframe_actions_all_targets(*(k + 1 + table->action), state);
             *remaining = table->frame_start[k + 1] - table->frame_start[k];
             *step = 0;
             if (table->last_index < *index) {
@@ -1728,7 +1719,7 @@ static void battle_effect_step_emitter_timeline(
                     }
                     state->callbacks[slot](state->record_index, slot, emitter - 1, *step);
                 } else {
-                    battle_effect_spawn_emitter_particles(state->record_index, *step, emitter - 1, 0);
+                    effect_particle_spawn_from_emitter(state->record_index, *step, emitter - 1, 0);
                 }
                 *step = *step + 1;
             }
@@ -1745,7 +1736,7 @@ static void battle_effect_step_emitter_timeline(
  * scaled to 8-bit channels). The
  * loop counter reuses the frame-count variable, which keeps both in $s0 as in
  * the target. */
-static void battle_effect_advance_surroundings_palette_track(
+static void effect_timeline_advance_surroundings_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
@@ -1774,12 +1765,12 @@ static void battle_effect_advance_surroundings_palette_track(
                 blue = track->color[index].b;
                 battle_map_color_field(
                     preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
-                for (i = 0; i < g_battle_effect_context.spectator_count; i++) {
-                    battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                        track->duration[index], g_battle_effect_palette_target_runtime_ids[i], red, green, blue);
+                for (i = 0; i < g_effect_context.spectator_count; i++) {
+                    sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                        track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
                 }
-                if (!(g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-                    battle_map_start_darkness_blend(
+                if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                    battle_map_darkness_start_blend(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red * 8, green * 8, blue * 8);
                 }
             }
@@ -1790,7 +1781,7 @@ static void battle_effect_advance_surroundings_palette_track(
 
 /* Advance the caster color track one frame: an APPLY keyframe recolors the
  * caster. */
-static void battle_effect_advance_caster_palette_track(
+static void effect_timeline_advance_caster_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames, s32 caster_runtime_id) {
     s16 current;
     s32 index;
@@ -1817,7 +1808,7 @@ static void battle_effect_advance_caster_palette_track(
                 red = track->color[index].r;
                 green = track->color[index].g;
                 blue = track->color[index].b;
-                battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                     track->duration[index], caster_runtime_id, red, green, blue);
             }
         }
@@ -1830,7 +1821,7 @@ static void battle_effect_advance_caster_palette_track(
  *
  * The frame timer and the loop counter are separate locals here: the target
  * keeps the timer in $v0 and the counter in $s1. */
-static void battle_effect_advance_target_palette_track(
+static void effect_timeline_advance_target_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
@@ -1858,11 +1849,10 @@ static void battle_effect_advance_target_palette_track(
                 red = track->color[index].r;
                 green = track->color[index].g;
                 blue = track->color[index].b;
-                for (i = 0; i < g_battle_effect_context.target_count; i++) {
-                    if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                        battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_battle_effect_context.targets[i].data.unit.runtime_id, red, green,
-                            blue);
+                for (i = 0; i < g_effect_context.target_count; i++) {
+                    if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                        sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                            track->duration[index], g_effect_context.targets[i].data.unit.runtime_id, red, green, blue);
                     }
                 }
             }
@@ -1877,9 +1867,9 @@ static void battle_effect_advance_target_palette_track(
  * color (and the darkness color when the map ignores weather); otherwise both
  * colors become the new gradient stops, with the first also driving the
  * darkness color when the map ignores weather. */
-static void battle_effect_advance_map_background_track(
+static void effect_timeline_advance_map_background_track(
     effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
-    map_background_gradient_colors_t colors;
+    battle_map_background_gradient_colors_t colors;
     s16 current;
     s32 index;
     s16 duration;
@@ -1907,20 +1897,20 @@ static void battle_effect_advance_map_background_track(
                 red = track->color[index].r * 2;
                 green = track->color[index].g * 2;
                 blue = track->color[index].b * 2;
-                battle_map_modify_background_gradient(mode, track->duration[index], red, green, blue);
-                if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                    battle_map_start_darkness_blend(mode, track->duration[index], red, green, blue);
+                battle_map_background_modify(mode, track->duration[index], red, green, blue);
+                if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    battle_map_darkness_start_blend(mode, track->duration[index], red, green, blue);
                 }
             } else {
-                colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = track->color[index].r;
-                colors.colors[MAP_BACKGROUND_GRADIENT_TOP].g = track->color[index].g;
-                colors.colors[MAP_BACKGROUND_GRADIENT_TOP].b = track->color[index].b;
-                colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = track->second_color[index].r;
-                colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = track->second_color[index].g;
-                colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = track->second_color[index].b;
-                battle_map_set_background_gradient(track->duration[index], &colors);
-                if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                    battle_map_set_darkness_color(track->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
+                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].r = track->color[index].r;
+                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].g = track->color[index].g;
+                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].b = track->color[index].b;
+                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].r = track->second_color[index].r;
+                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].g = track->second_color[index].g;
+                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].b = track->second_color[index].b;
+                battle_map_background_set(track->duration[index], &colors);
+                if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    battle_map_darkness_set(track->duration[index], &colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP]);
                 }
             }
         }
@@ -1933,10 +1923,10 @@ static void battle_effect_advance_map_background_track(
  * track holds nine 16-bit durations at 0x00, nine channel bytes at 0x12
  * (0 and 1 none, otherwise a sound channel of the flags section + 2) and its
  * entry count at 0x1c; entering an entry plays the channel's next sound.
- * Sound ids are relative to g_battle_effect_sound_data_base, the effect sound
- * section's id set by battle_effect_load_sound_section.
+ * Sound ids are relative to g_effect_sound_data_base, the effect sound
+ * section's id set by effect_file_load_sound_section.
  */
-static void battle_effect_advance_parent_sound_track(
+static void effect_timeline_advance_parent_sound_track(
     effect_sound_track_t* schedule, s16* entry_index, s16* countdown, u8* unused_sound_state) {
     s16 index = *entry_index;
     s32 effect_kind;
@@ -1949,10 +1939,10 @@ static void battle_effect_advance_parent_sound_track(
             effect_kind = schedule->channels[index];
 
             if (effect_kind >= 2) {
-                sound_index = battle_effect_select_sound_id(effect_kind - 2);
+                sound_index = effect_timeline_select_sound_id(effect_kind - 2);
 
                 if (sound_index != 0) {
-                    suzuki_sound_play_sfx(g_battle_effect_sound_data_base + sound_index);
+                    suzuki_sound_play_sfx(g_effect_sound_data_base + sound_index);
                 }
             }
         }
@@ -1969,118 +1959,116 @@ static void battle_effect_advance_parent_sound_track(
  * target is started, spawn_delay frames apart. Phase 2 runs from
  * phase1_duration + (target_count - 1) * spawn_delay + child_duration. The
  * camera tracks advance every frame. */
-effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_record_t* record) {
     effect_record_timeline_t* timeline;
     s32 i;
     s16 child;
     u8 unused_stack[16]; /* Unread locals that size the target's 0x48-byte frame. */
 
     timeline = &record->timeline;
-    if (timeline->frame >= g_battle_effect_timeline->phase1_duration) {
+    if (timeline->frame >= g_effect_timeline->phase1_duration) {
         while (timeline->state.parent.spawn_countdown == 0
-            && timeline->state.parent.spawned_count < g_battle_effect_context.target_count) {
+            && timeline->state.parent.spawned_count < g_effect_context.target_count) {
             const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-            child
-                = battle_effect_start_script_record(record->script, instruction->immediate.value, record->record_index);
-            g_battle_effect_state_records[child].timeline.target_index = timeline->state.parent.spawned_count;
+            child = effect_script_start_record(record->script, instruction->immediate.value, record->record_index);
+            g_effect_state_records[child].timeline.target_index = timeline->state.parent.spawned_count;
             timeline->state.parent.spawned_count++;
-            timeline->state.parent.spawn_countdown += g_battle_effect_timeline->spawn_delay;
+            timeline->state.parent.spawn_countdown += g_effect_timeline->spawn_delay;
         }
         timeline->state.parent.spawn_countdown--;
     } else {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            battle_effect_step_emitter_timeline(record, &g_battle_effect_timeline->particle_channels[0][i],
+            effect_timeline_step_emitter(record, &g_effect_timeline->particle_channels[0][i],
                 &timeline->state.parent.keyframe.tracks.particle[0][i],
                 &timeline->state.parent.remaining.tracks.particle[0][i],
                 &timeline->state.parent.step.tracks.particle[0][i]);
         }
-        battle_effect_advance_surroundings_palette_track(&g_battle_effect_timeline->color_tracks[0].surroundings,
+        effect_timeline_advance_surroundings_palette_track(&g_effect_timeline->color_tracks[0].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[0],
             &timeline->state.parent.remaining.tracks.surroundings[0]);
-        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            battle_effect_advance_caster_palette_track(&g_battle_effect_timeline->color_tracks[0].caster,
+        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            effect_timeline_advance_caster_palette_track(&g_effect_timeline->color_tracks[0].caster,
                 &timeline->state.parent.keyframe.tracks.caster[0], &timeline->state.parent.remaining.tracks.caster[0],
-                g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[0].target,
+        effect_timeline_advance_target_palette_track(&g_effect_timeline->color_tracks[0].target,
             &timeline->state.parent.keyframe.tracks.target[0], &timeline->state.parent.remaining.tracks.target[0]);
-        battle_effect_advance_map_background_track(&g_battle_effect_timeline->color_tracks[0].screen,
+        effect_timeline_advance_map_background_track(&g_effect_timeline->color_tracks[0].screen,
             &timeline->state.parent.keyframe.tracks.screen[0], &timeline->state.parent.remaining.tracks.screen[0]);
-        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][0],
+        effect_timeline_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][0],
             &timeline->state.parent.keyframe.tracks.sound[0][0], &timeline->state.parent.remaining.tracks.sound[0][0],
             &timeline->state.parent.step.tracks.sound[0][0][1]);
-        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][1],
+        effect_timeline_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][1],
             &timeline->state.parent.keyframe.tracks.sound[1][0], &timeline->state.parent.remaining.tracks.sound[1][0],
             &timeline->state.parent.step.tracks.sound[1][0][1]);
-        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][2],
+        effect_timeline_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][2],
             &timeline->state.parent.keyframe.tracks.sound[2][0], &timeline->state.parent.remaining.tracks.sound[2][0],
             &timeline->state.parent.step.tracks.sound[2][0][1]);
-        if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
-            battle_state_set_min_vsync_interval(battle_effect_get_timing_curve_value(record));
+        if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
+            system_set_min_vsync_interval(effect_timeline_get_parent_timing_curve_value(record));
         }
     }
-    i = g_battle_effect_timeline->phase1_duration
-        + (g_battle_effect_context.target_count - 1) * g_battle_effect_timeline->spawn_delay
-        + g_battle_effect_timeline->child.duration;
+    i = g_effect_timeline->phase1_duration + (g_effect_context.target_count - 1) * g_effect_timeline->spawn_delay
+        + g_effect_timeline->child.duration;
     if (timeline->frame >= i) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            battle_effect_step_emitter_timeline(record, &g_battle_effect_timeline->particle_channels[1][i],
+            effect_timeline_step_emitter(record, &g_effect_timeline->particle_channels[1][i],
                 &timeline->state.parent.keyframe.tracks.particle[1][i],
                 &timeline->state.parent.remaining.tracks.particle[1][i],
                 &timeline->state.parent.step.tracks.particle[1][i]);
         }
-        battle_effect_advance_surroundings_palette_track(&g_battle_effect_timeline->color_tracks[1].surroundings,
+        effect_timeline_advance_surroundings_palette_track(&g_effect_timeline->color_tracks[1].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[1],
             &timeline->state.parent.remaining.tracks.surroundings[1]);
-        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            battle_effect_advance_caster_palette_track(&g_battle_effect_timeline->color_tracks[1].caster,
+        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            effect_timeline_advance_caster_palette_track(&g_effect_timeline->color_tracks[1].caster,
                 &timeline->state.parent.keyframe.tracks.caster[1], &timeline->state.parent.remaining.tracks.caster[1],
-                g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[1].target,
+        effect_timeline_advance_target_palette_track(&g_effect_timeline->color_tracks[1].target,
             &timeline->state.parent.keyframe.tracks.target[1], &timeline->state.parent.remaining.tracks.target[1]);
-        battle_effect_advance_map_background_track(&g_battle_effect_timeline->color_tracks[1].screen,
+        effect_timeline_advance_map_background_track(&g_effect_timeline->color_tracks[1].screen,
             &timeline->state.parent.keyframe.tracks.screen[1], &timeline->state.parent.remaining.tracks.screen[1]);
-        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][0],
+        effect_timeline_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][0],
             &timeline->state.parent.keyframe.tracks.sound[0][1], &timeline->state.parent.remaining.tracks.sound[0][1],
             &timeline->state.parent.step.tracks.sound[0][1][1]);
-        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][1],
+        effect_timeline_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][1],
             &timeline->state.parent.keyframe.tracks.sound[1][1], &timeline->state.parent.remaining.tracks.sound[1][1],
             &timeline->state.parent.step.tracks.sound[1][1][1]);
-        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][2],
+        effect_timeline_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][2],
             &timeline->state.parent.keyframe.tracks.sound[2][1], &timeline->state.parent.remaining.tracks.sound[2][1],
             &timeline->state.parent.step.tracks.sound[2][1][1]);
     }
-    battle_camera_start_parent_effect_keyframe_moves(timeline->frame);
+    effect_camera_start_parent_keyframe_moves(timeline->frame);
     timeline->frame++;
     record->pc += 4;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 2a: clear the child-timeline state that opcode 28 steps and select effect target 0. */
-effect_script_result_e battle_effect_code_script_2a_reset_child_timeline(effect_record_t* record) {
-    battle_effect_reset_child_timeline(record, 0);
+effect_script_result_e effect_script_opcode_2a_reset_child_timeline(effect_record_t* record) {
+    effect_timeline_reset_child(record, 0);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 2b: clear the parent-timeline state (frame, spawn counters and
  * keyframe tracks) that opcode 29 steps. */
-effect_script_result_e battle_effect_code_script_2b_reset_parent_timeline(effect_record_t* record) {
-    battle_effect_reset_parent_timeline(record);
+effect_script_result_e effect_script_opcode_2b_reset_parent_timeline(effect_record_t* record) {
+    effect_timeline_reset_parent(record);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 2c: nothing. */
-effect_script_result_e battle_effect_code_script_2c_nop(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_2c_nop(effect_record_t* record) {
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 2d: nothing. */
-effect_script_result_e battle_effect_code_script_2d_nop(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_2d_nop(effect_record_t* record) {
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -2088,14 +2076,14 @@ effect_script_result_e battle_effect_code_script_2d_nop(effect_record_t* record)
 /* Run record `index`'s script from its pc, one opcode handler after another,
  * until a handler yields (returns 1: the record runs on next frame) or ends it
  * (returns 0: the caller frees the record). */
-static s32 battle_effect_run_block(s16 index) {
+static s32 effect_script_run_block(s16 index) {
     effect_record_t* rec;
     /* A narrow result preserves the retail sign extension before the tests. */
     s16 result;
 
-    rec = &g_battle_effect_state_records[index];
+    rec = &g_effect_state_records[index];
     for (;;) {
-        result = g_battle_effect_instructions[effect_get_current_script_header(rec) & EFFECT_SCRIPT_OPCODE_MASK](rec);
+        result = g_effect_script_instructions[effect_get_current_script_header(rec) & EFFECT_SCRIPT_OPCODE_MASK](rec);
         if (result == EFFECT_SCRIPT_RESULT_ABORT) {
             return 0;
         }

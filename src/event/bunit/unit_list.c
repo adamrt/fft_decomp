@@ -44,9 +44,9 @@ void unit_panel_toggle_equipment_and_numbers(s32 enable) {
         if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) != 0) {
             return;
         }
-        thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
+        thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, &g_unit_panel_character_status_frame_config, 0, 0);
-        thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_frame_thread);
+        thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, &g_unit_panel_numbers_thread_params, 0, 0);
     } else {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
@@ -851,12 +851,12 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         s16 v;
         s16 uw;
         s16 vh;
-        battle_unit_sprite_query_t query; /* 0x10 */
+        sprite_unit_query_t query; /* 0x10 */
     } quad;
-    battle_gfx_source_frame_t* frame;
+    sprite_frame_t* frame;
     s32 base_y;
     s32 i;
-    battle_gfx_source_part_t* cells;
+    sprite_frame_part_t* cells;
     s32 tile;
     s32 dx;
     s32 orientation;
@@ -865,17 +865,17 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
 
     i = unit_list_calculate_falloff(x, y, 0xC8, 0x50);
     rgb.r = rgb.g = rgb.b = i > 0x80 ? 0x80 : i;
-    frame = battle_gfx_get_unit_sprite_frame_and_vram_ids(g_unit_list_pointers[unit]->runtime_id, &quad.query);
+    frame = sprite_get_unit_frame_and_vram_ids(g_unit_list_pointers[unit]->runtime_id, &quad.query);
     base_y = (quad.query.graphic_height >> 1) + 0x16;
-    if (frame == (battle_gfx_source_frame_t*)-1) {
+    if (frame == (sprite_frame_t*)-1) {
         return;
     }
     cells = frame->parts;
     for (i = 0; i <= frame->part_count_and_rotation; i++) {
-        size = (cells[i].attributes >> 10) & (BATTLE_SHP_PART_SIZE_MASK >> 10);
+        size = (cells[i].attributes >> 10) & (SPRITE_SHP_PART_SIZE_MASK >> 10);
         quad.uw = quad.w = g_unit_list_sprite_cell_sizes[size][0];
         quad.vh = quad.h = g_unit_list_sprite_cell_sizes[size][1];
-        value = battle_unit_get_camera_facing_quadrant_by_battle_id(g_unit_list_pointers[unit]->battle_id);
+        value = unit_facing_get_camera_quadrant_by_battle_id(g_unit_list_pointers[unit]->battle_id);
         dx = cells[i].x_shift;
         orientation = TEXTURE_UV_FLIP_NONE;
         if (value >= 2) {
@@ -889,10 +889,10 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         if (g_unit_list_pointers[unit]->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
             quad.y -= 8;
         }
-        tile = cells[i].attributes & BATTLE_SHP_PART_TILE_MASK;
+        tile = cells[i].attributes & SPRITE_SHP_PART_TILE_MASK;
         quad.u = tile % 32 * 8;
         /* Both tile reads preserve the separate signed divisions. */
-        tile = cells[i].attributes & BATTLE_SHP_PART_TILE_MASK;
+        tile = cells[i].attributes & SPRITE_SHP_PART_TILE_MASK;
         quad.v = tile / 32 * 8 + quad.query.graphic_y_offset;
         value = 7;
         if (g_unit_list_pointers[unit]->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {

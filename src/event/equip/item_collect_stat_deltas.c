@@ -11,15 +11,14 @@
  * Unlike the WORLD twin, this overlay accepts every positive low-10-bit item
  * ID; preserving that gate is required for the target control flow.
  */
-void item_collect_stat_deltas(
-    s16 raw_item, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 alternate) {
+void item_collect_stat_deltas(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
     s32 item_id;
     s32 attribute;
     s32 secondary;
     s32 power;
     s32 evade;
 
-    menu_clear_stat_preview(summary, detail);
+    equipment_clear_stat_preview(summary, detail);
     item_id = raw_item & ITEM_ENTRY_ID_MASK;
     if (item_id > 0) {
         attribute = g_item_primary_data[item_id].attributes;

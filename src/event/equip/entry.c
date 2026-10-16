@@ -26,8 +26,9 @@
 void unit_panel_toggle_item_numbers_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC) == 0) {
-            thread_start(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC, menu_run_numeric_panel_frame_thread);
-            thread_set_parameters(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_menu_preview_stats_thread_params, 0, 0);
+            thread_start(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC, unit_panel_numbers_thread);
+            thread_set_parameters(
+                EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_unit_panel_preview_stats_thread_params, 0, 0);
         }
     } else {
         menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC);
@@ -41,7 +42,7 @@ void unit_panel_toggle_item_numbers_thread(s32 enable) {
 static void equipment_reset_dirty_flags(void) {
     g_unit_panel_unit_status_panel_redraw = 1;
     g_equipment_numeric_panel_redraw = 1;
-    g_menu_preview_stats_thread_params.redraw_request = 1;
+    g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     g_equipment_equipment_panel_redraw = 1;
 }
 
@@ -52,7 +53,7 @@ void equipment_stop_threads(void) {
     menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST);
     menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     unit_panel_toggle_item_numbers_thread(0);
-    g_menu_preview_stats_thread_params.style = 0;
+    g_unit_panel_preview_stats_thread_params.style = 0;
     g_equipment_equipment_panel_style = 0;
 }
 
@@ -74,14 +75,14 @@ void equipment_load_selected_unit(void) {
         unit->gauges[MENU_UNIT_STATUS_GAUGE_MP].value = unit->gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
     }
 
-    bcopy(g_equipment_unit_data[g_equipment_unit_selected_index], &g_menu_selected_unit_stat_summary,
-        sizeof(g_menu_selected_unit_stat_summary));
+    bcopy(g_equipment_unit_data[g_equipment_unit_selected_index], &g_unit_panel_selected_unit_stat_summary,
+        sizeof(g_unit_panel_selected_unit_stat_summary));
     bcopy(&g_equipment_unit_data[g_equipment_unit_selected_index]->identity, &g_equipment_selected_unit_data,
         sizeof(menu_unit_status_identity_t));
-    bcopy(&g_equipment_unit_data[g_equipment_unit_selected_index]->move, &g_menu_selected_unit_fields,
-        sizeof(g_menu_selected_unit_fields));
-    item_sum_equipment_stat_details(
-        &g_menu_selected_unit_fields, g_equipment_unit_data[g_equipment_unit_selected_index]->equipment);
+    bcopy(&g_equipment_unit_data[g_equipment_unit_selected_index]->move, &g_unit_panel_selected_unit_fields,
+        sizeof(g_unit_panel_selected_unit_fields));
+    equipment_sum_stat_details(
+        &g_unit_panel_selected_unit_fields, g_equipment_unit_data[g_equipment_unit_selected_index]->equipment);
     equipment_copy_unit_to_comparison(g_equipment_unit_selected_index, 1);
     equipment_reset_dirty_flags();
 }
@@ -162,7 +163,7 @@ s32 equipment_entrypoint(s32 unit, u32* otag) {
             break;
         }
     }
-    stats = battle_unit_get_stats_from_battle_id(unit);
+    stats = unit_get_stats(unit);
     if (stats->max_hp < stats->hp) {
         stats->hp = stats->max_hp;
     }

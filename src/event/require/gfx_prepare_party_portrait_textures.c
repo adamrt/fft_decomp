@@ -23,7 +23,7 @@
  * (multi-set temps keep the i / 7 mult after the row * 0x3000 terms), and the
  * palette offset has its own variable. */
 void portrait_prepare_party_textures(void) {
-    menu_portrait_sheet_t* file;
+    portrait_sheet_t* file;
     s32 offset;
     s32 pal_offset;
     s32 i;
@@ -119,7 +119,7 @@ void portrait_prepare_party_textures(void) {
             }
             src += 0x80;
         }
-        LoadImage(i == 20 ? &g_special_portrait_rect : &g_portrait_cell_rect, (u32*)g_portrait_cell_pixels);
+        LoadImage(i == 20 ? &g_portrait_special_rect : &g_portrait_cell_rect, (u32*)g_portrait_cell_pixels);
         /* Upload the palette, three per VRAM line from (0x100, 0): palette n is in row n / 4
          * of the sheet's palette block; a monster's alternate palette is in its row from
          * MENU_WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
@@ -141,7 +141,7 @@ void portrait_prepare_party_textures(void) {
         pal_offset = value * 0x100 + 0xf000 + col * 0x40 >> 1;
         /* Palette member indexing changes the native offset calculation and allocation. */
         if (i == 20) {
-            LoadImage(&g_special_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
+            LoadImage(&g_portrait_special_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         } else {
             LoadImage(&g_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         }

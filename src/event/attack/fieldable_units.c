@@ -69,7 +69,7 @@ void deploy_find_fieldable_units(void) {
         }
     }
 
-    if (g_script_scenario_event_active != 0) {
+    if (g_scenario_scenario_event_active != 0) {
         return;
     }
 
@@ -101,7 +101,7 @@ void deploy_find_fieldable_units(void) {
             EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);
         g_deploy_squad_data[g_deploy_current_squad_id].unit_limit = 4;
     } else {
-        g_encounter_selection_mode = BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE;
+        g_encounter_selection_mode = UNIT_ENTD_SELECTION_SCRIPT_VARIABLE;
         g_deploy_current_squad_id = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
         script_set_variable(
             EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);

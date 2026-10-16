@@ -126,14 +126,14 @@ void deploy_run_help_cursor(void) {
                 if (node->value != 0) {
                     text_id = node->help_base + *node->value;
                     if (node->help_base == (s16)HELP_TEXT_ID_SKILLSET_BASE
-                        && g_menu_selected_unit_fields.state.generic_monster != 0) {
+                        && g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
                         text_id = *node->value | HELP_TEXT_ID_ABILITY_BASE;
                         value_id = *node->value & 0x7ff;
                         if (value_id == 0x7ff || value_id == 0) {
                             *input = 0;
                         } else {
                             g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
-                            thread_start(parent_id, text_run_dialog_thread);
+                            thread_start(parent_id, message_dialog_thread);
                             thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                         }
                     } else if (node->help_base == HELP_TEXT_ID_ABILITY_BASE && (u16)*node->value - 1 >= 0x301U) {
@@ -144,7 +144,7 @@ void deploy_run_help_cursor(void) {
                         *input = 0;
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
-                        thread_start(parent_id, text_run_dialog_thread);
+                        thread_start(parent_id, message_dialog_thread);
                         thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
                 } else {
@@ -153,7 +153,7 @@ void deploy_run_help_cursor(void) {
                     g_thread_call_target = (void (*)(void))text_find_entry;
                     if ((*(u8*)thread_call_on_main_stack(text_id) & 0xfe) != 0xfe) {
                         g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
-                        thread_start(parent_id, text_run_dialog_thread);
+                        thread_start(parent_id, message_dialog_thread);
                         thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
                 }
@@ -369,7 +369,7 @@ void deploy_build_strings(void) {
         for (j = 0; j < 5; j++) {
             APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j], HELP_TEXT_ID_ITEM_BASE);
         }
-        if (g_menu_selected_unit_fields.state.generic_monster != 0) {
+        if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
             for (j = 0; j < 5; j++) {
                 APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
             }

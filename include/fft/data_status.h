@@ -10,7 +10,7 @@
 enum {
     STATUS_COUNT = 40,
     STATUS_BYTE_COUNT = 5,
-    BATTLE_TIMED_STATUS_COUNT = 16, /* Poison through Death Sentence keep a CT byte each */
+    STATUS_TIMED_COUNT = 16, /* Poison through Death Sentence keep a CT byte each */
 };
 
 /* Canonical status IDs. The owning byte is id >> 3 and its MSB-first mask is

@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 /* OPTION.OUT entry, run on the battle menu thread whose first parameter is the menu
- * entry. Copy the saved options into g_menu_option_values and select the defaults row
+ * entry. Copy the saved options into g_option_values and select the defaults row
  * (GAME_OPTION_UNCHANGED = 1) only when every value equals its reference value. Unless opening the crystal
  * pickup panel, ask the four battle info panels to stop and wait for them. Then run
  * `menu_type`'s screen: the game options on the thread slot below this one (waiting for
@@ -27,24 +27,24 @@ void option_entrypoint(s32 menu_type) {
     s32 index;
     game_options_fields_t options = g_game_options.fields;
 
-    g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
-    g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
-    g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED] = options.multi_height_cursor_speed;
-    g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED] = options.finger_cursor_repeat_speed;
-    g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED] = options.message_display_speed;
-    g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES] = options.navigation_messages;
-    g_menu_option_values[GAME_OPTION_ABILITY_NAMES] = options.ability_names;
-    g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES] = options.effect_messages;
-    g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP] = options.display_gained_exp_jp;
-    g_menu_option_values[GAME_OPTION_TARGET_FLASHING] = options.target_flashing;
-    g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
-    g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
-    g_menu_option_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
-    g_menu_option_values[GAME_OPTION_UNCHANGED] = 1;
+    g_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
+    g_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
+    g_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED] = options.multi_height_cursor_speed;
+    g_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED] = options.finger_cursor_repeat_speed;
+    g_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED] = options.message_display_speed;
+    g_option_values[GAME_OPTION_NAVIGATION_MESSAGES] = options.navigation_messages;
+    g_option_values[GAME_OPTION_ABILITY_NAMES] = options.ability_names;
+    g_option_values[GAME_OPTION_EFFECT_MESSAGES] = options.effect_messages;
+    g_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP] = options.display_gained_exp_jp;
+    g_option_values[GAME_OPTION_TARGET_FLASHING] = options.target_flashing;
+    g_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
+    g_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
+    g_option_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
+    g_option_values[GAME_OPTION_UNCHANGED] = 1;
 
     for (index = 0; index < GAME_OPTION_COUNT; index++) {
-        if (g_menu_option_values[index] != g_menu_option_reference_values[index]) {
-            g_menu_option_values[GAME_OPTION_UNCHANGED] = 0;
+        if (g_option_values[index] != g_option_reference_values[index]) {
+            g_option_values[GAME_OPTION_UNCHANGED] = 0;
         }
     }
 
@@ -60,21 +60,21 @@ void option_entrypoint(s32 menu_type) {
     }
 
     g_menu_modal_open = 0;
-    g_menu_hide_numeric_values = 0;
+    g_unit_panel_hide_numeric_values = 0;
     if (menu_type == MENU_OPTION_TYPE_GAME_OPTIONS) {
-        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
+        tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
         thread_start(g_thread_current_id - 1, option_game_options_thread);
         menu->select_text_table = 1;
-        menu->context = g_menu_option_entry_table;
+        menu->context = g_option_entry_table;
         thread_set_parameters(g_thread_current_id - 1, menu, 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_exit_current();
     }
     if (menu_type == MENU_OPTION_TYPE_AT_LIST) {
-        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
-        menu_start_at_list_thread();
+        tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
+        at_list_start_thread();
     }
     if (menu_type == MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
-        menu_start_crystal_pickup_threads();
+        crystal_start_pickup_threads();
     }
 }

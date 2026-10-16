@@ -110,9 +110,9 @@ static s32 party_update_brave_faith(void) {
     s32 value4;
 
     g_party_affected_unit_count = 0;
-    for (battle_index = 0; battle_index < BATTLE_UNIT_SLOT_COUNT; battle_index++) {
-        battle_unit = battle_unit_get_stats_from_battle_id(battle_index);
-        unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &found_battle_index);
+    for (battle_index = 0; battle_index < UNIT_SLOT_COUNT; battle_index++) {
+        battle_unit = unit_get_stats(battle_index);
+        unit = unit_entd_find_stats(battle_unit->unit_id, &found_battle_index);
         if (found_battle_index < 0 || battle_index != found_battle_index
             || unit->formation_index == UNIT_FORMATION_INDEX_NONE || unit->unit_id == 0) {
             continue;
@@ -228,8 +228,8 @@ void unit_panel_set_transition(s32 value) {
     g_unit_panel_dim_a = value;
     g_unit_panel_dim_b = value;
     g_unit_panel_dim_c = value;
-    g_menu_panel_status_animation[0] = value;
-    g_menu_panel_status_animation[1] = value;
+    g_unit_panel_panel_status_animation[0] = value;
+    g_unit_panel_panel_status_animation[1] = value;
 }
 
 /* Empty. Called for each unit that leaves over a Brave below 6, with its battle index, unit id and
@@ -255,9 +255,9 @@ static s32 party_find_departures(void) {
     s32 column;
 
     g_party_affected_unit_count = 0;
-    for (battle_index = 0; battle_index < BATTLE_UNIT_SLOT_COUNT; battle_index++) {
-        battle_unit = battle_unit_get_stats_from_battle_id(battle_index);
-        unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &found_battle_index);
+    for (battle_index = 0; battle_index < UNIT_SLOT_COUNT; battle_index++) {
+        battle_unit = unit_get_stats(battle_index);
+        unit = unit_entd_find_stats(battle_unit->unit_id, &found_battle_index);
         if (found_battle_index < 0 || battle_index != found_battle_index
             || unit->formation_index == UNIT_FORMATION_INDEX_NONE || unit->unit_id == 0) {
             continue;
@@ -382,17 +382,17 @@ s32 party_update_after_battle(void) {
         if (party_unit->party_id != PARTY_ID_NONE) {
             unit_stats_t* unit;
 
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                unit = battle_unit_get_stats_from_battle_id(i);
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                unit = unit_get_stats(i);
                 if (unit->formation_index == party_index && unit->existence != UNIT_EXISTENCE_NONE
                     && unit->unit_id != 0) {
                     break;
                 }
             }
 
-            if (i != BATTLE_UNIT_ID_NONE) {
-                unit = battle_unit_get_stats_from_battle_id(i);
-                unit = battle_unit_find_stats_by_entd_unit_id(unit->unit_id, &found_index);
+            if (i != UNIT_ID_NONE) {
+                unit = unit_get_stats(i);
+                unit = unit_entd_find_stats(unit->unit_id, &found_index);
                 if (unit->existence == UNIT_EXISTENCE_DISABLED || unit->existence == UNIT_EXISTENCE_NONE
                     || found_index == -3) {
                     if (unit->unit_id == 0 || unit->unit_id >= 4) {
@@ -416,12 +416,12 @@ s32 party_update_after_battle(void) {
         }
     }
 
-    for (party_index = 0; party_index < BATTLE_UNIT_SLOT_COUNT; party_index++) {
+    for (party_index = 0; party_index < UNIT_SLOT_COUNT; party_index++) {
         unit_stats_t* unit;
         unit_stats_t* battle_unit;
 
-        battle_unit = battle_unit_get_stats_from_battle_id(party_index);
-        unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &found_index);
+        battle_unit = unit_get_stats(party_index);
+        unit = unit_entd_find_stats(battle_unit->unit_id, &found_index);
         if (found_index >= 0 && party_index == found_index && unit->formation_index == UNIT_FORMATION_INDEX_NONE
             && unit->unit_id != 0) {
             u32 base_class = unit->character_identity;
@@ -502,7 +502,7 @@ void party_brave_faith_report_thread(void) {
     for (i = 0; i < g_party_affected_unit_count; i++) {
         s32 unit_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
         g_text_substitution_values[0] = g_party_affected_battle_unit_indices[i];
-        thread_start(unit_thread, text_run_dialog_thread);
+        thread_start(unit_thread, message_dialog_thread);
         thread_set_parameters(
             unit_thread, 0x1b, g_party_affected_unit_message_ids[i], g_party_affected_unit_message_args[i]);
         thread_wait_until_inactive(unit_thread);
@@ -543,10 +543,10 @@ void party_departures_thread(void) {
         s32 unit_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
         s32 message_thread;
         g_text_substitution_values[0] = g_party_affected_battle_unit_indices[i];
-        thread_start(unit_thread, text_run_dialog_thread);
+        thread_start(unit_thread, message_dialog_thread);
         thread_set_parameters(
             unit_thread, 0x1b, g_party_affected_unit_message_ids[i], g_party_affected_unit_message_args[i]);
-        unit = battle_unit_get_stats_from_battle_id(g_party_affected_battle_unit_indices[i]);
+        unit = unit_get_stats(g_party_affected_battle_unit_indices[i]);
         message_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
         thread_start(message_thread, conditions_special_thread);
         if (unit->unit_flags & UNIT_FLAG_FEMALE) {
@@ -571,7 +571,7 @@ void party_departures_thread(void) {
 void conditions_show_ready_bugged(void) {
     s32 thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
 
-    thread_start(thread_id, menu_refresh_hovered_unit_stats_display);
+    thread_start(thread_id, unit_view_refresh_hovered_stats);
     thread_set_parameters(thread_id, 0, 0, 0);
     input_wait_frames_or_skip(0x3c);
     thread_set_parameters(thread_id, 0, 0, 1);
@@ -626,7 +626,8 @@ void input_wait_skip(void) {
 static void status_screen_open_after_battle(void) {
     void* allocation;
 
-    menu_copy_billboard_data_in(&g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
+    unit_panel_copy_billboard_in(
+        &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
     while (1) {
         allocation = heap_reserve_at(g_heap_high_overlay_load_address, 0x1f000);
         if (allocation == g_heap_high_overlay_load_address) {
@@ -637,14 +638,14 @@ static void status_screen_open_after_battle(void) {
             FntPrint(g_after_battle_text_wait_for_file_allocation_message);
         }
     }
-    menu_request_open_companion_executable(COMPANION_OVERLAY_JOBSTTS);
+    overlay_request_companion(COMPANION_OVERLAY_JOBSTTS);
     thread_wait_frames(2);
-    g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
+    g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
     do {
         g_menu_input_controller = script_get_controller_input_pointer(0);
         *g_menu_input_controller = 0;
         thread_yield();
-    } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
+    } while (g_overlay_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
     *g_menu_input_controller = 0;
     heap_free(allocation);
     thread_wait_frames(2);
@@ -674,11 +675,11 @@ void unit_panel_transition_thread(void) {
     thread_suspend(g_after_battle_thread_suspended_id);
     saved = menu_alloc_memory(THREAD_STRIDE);
     mem_copy_bytes_nonempty(saved, &g_threads[g_after_battle_thread_suspended_id], THREAD_STRIDE);
-    g_menu_panel_status_group_count = 2;
+    g_unit_panel_panel_status_group_count = 2;
     while (1) {
         s32 buffer = frame & 1;
         gfx_build_gradient_grid_primitives(g_gfx_poly_gt4_buffers[buffer]);
-        menu_build_status_group_primitives(g_gfx_poly_ft4_buffers[buffer]);
+        unit_panel_build_status_groups(g_gfx_poly_ft4_buffers[buffer]);
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             break;

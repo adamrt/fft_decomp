@@ -36,7 +36,7 @@ typedef struct effect_keyframe_table {
 typedef char effect_keyframe_table_size_must_be_128[(sizeof(effect_keyframe_table_t) == 128) ? 1 : -1];
 
 /* A particle channel keyframe's 16-bit action value (effect_keyframe_table_t.action), run by
- * battle_effect_run_keyframe_actions when the keyframe is entered. Bit 7 is set in a few retail
+ * effect_timeline_run_keyframe_actions when the keyframe is entered. Bit 7 is set in a few retail
  * files and read by nothing. */
 enum {
     EFFECT_KEYFRAME_ACTION_CALLBACK_MASK = 0x0007,
@@ -51,7 +51,7 @@ enum {
 /* color tracks */
 /* The preset byte of a color track keyframe. */
 enum {
-    EFFECT_COLOR_KEYFRAME_MODE_MASK = 0x7f, /* the map color mode (MAP_COLOR_MODE_*) the color is applied in */
+    EFFECT_COLOR_KEYFRAME_MODE_MASK = 0x7f, /* the map color mode (BATTLE_MAP_COLOR_MODE_*) the color is applied in */
     EFFECT_COLOR_KEYFRAME_APPLY = 0x80,     /* clear on the unit tracks: the keyframe only waits */
 };
 
@@ -132,7 +132,7 @@ typedef enum effect_camera_source {
 
 enum { EFFECT_CAMERA_SOURCE_MASK = 0x1e0 };
 
-/* Bits 0x1e00 of an effect timeline camera command, kept in g_battle_effect_camera_rotation_mode,
+/* Bits 0x1e00 of an effect timeline camera command, kept in g_effect_camera_rotation_mode,
  * _position_mode and _zoom_mode while the move runs: how the track goes from its start to its
  * target over the command's duration. */
 typedef enum effect_camera_mode {
@@ -164,7 +164,7 @@ typedef struct effect_camera_keyframes_21 {
     s16 last_keyframe_index;
 } effect_camera_keyframes_21_t;
 
-/* The camera table battle_camera_find_active_keyframe found its keyframe in: the high half of the
+/* The camera table effect_camera_find_active_keyframe found its keyframe in: the high half of the
  * index it reports. */
 enum {
     EFFECT_CAMERA_TABLE_PHASE1 = 0,
@@ -174,7 +174,7 @@ enum {
 
 /* timeline section */
 /* The child timeline, eight bytes into the timeline section
- * (g_battle_effect_child_timeline): its duration and its channels.
+ * (g_effect_child_timeline): its duration and its channels.
  * effect_timeline_t names the section's other parts. */
 typedef struct effect_child_timeline {
     u16 _unused_000;
@@ -198,7 +198,7 @@ typedef char effect_child_timeline_size_must_be_1706[sizeof(effect_child_timelin
  * (opcode 28 on the root record) runs only the child timeline, once.
  *
  * The child timeline's channels are the effect_child_timeline_t that
- * g_battle_effect_child_timeline addresses at 0x008; its camera table is the
+ * g_effect_child_timeline addresses at 0x008; its camera table is the
  * 17-keyframe one at 0x6b2, laid out like effect_camera_keyframes_21_t. Each
  * phase has five particle channels, three sound tracks, four color tracks
  * and a 21-keyframe camera table. */
@@ -230,9 +230,9 @@ typedef struct effect_timing_curves {
 } effect_timing_curves_t;
 typedef char effect_timing_curves_size_must_be_600[sizeof(effect_timing_curves_t) == 600 ? 1 : -1];
 
-extern effect_child_timeline_t* g_battle_effect_child_timeline;
-extern effect_timeline_t* g_battle_effect_timeline;
-extern const effect_timing_curves_t* g_battle_effect_timing_curves;
+extern effect_child_timeline_t* g_effect_child_timeline;
+extern effect_timeline_t* g_effect_timeline;
+extern const effect_timing_curves_t* g_effect_timing_curves;
 
 /* timeline state */
 /* Steppers use the named tracks; resets clear each complete slot array.
@@ -327,30 +327,30 @@ typedef char effect_record_timeline_size_must_be_170[sizeof(effect_record_timeli
 /* The effect camera's rotation, position and zoom tracks: each has its current value, the start
  * and target of the running move, its mode (effect_camera_mode_e), duration and frame counter,
  * and the copy that EFFECT_CAMERA_SOURCE_SAVED reads. */
-extern VECTOR g_battle_effect_camera_position_current;
-extern s32 g_battle_effect_camera_position_duration;
-extern s32 g_battle_effect_camera_position_frame;
-extern u32 g_battle_effect_camera_position_mode;
-extern VECTOR g_battle_effect_camera_position_saved;
-extern VECTOR g_battle_effect_camera_position_start;
-extern VECTOR g_battle_effect_camera_position_target;
-extern SVECTOR g_battle_effect_camera_rotation_current;
-extern s32 g_battle_effect_camera_rotation_duration;
-/* Reset by battle_camera_execute_angle_command. */
-extern s32 g_battle_effect_camera_rotation_frame;
-extern u32 g_battle_effect_camera_rotation_mode;
-extern SVECTOR g_battle_effect_camera_rotation_saved;
-extern SVECTOR g_battle_effect_camera_rotation_start;
-extern SVECTOR g_battle_effect_camera_rotation_target;
-extern VECTOR g_battle_effect_camera_zoom_current;
-extern s32 g_battle_effect_camera_zoom_duration;
-extern s32 g_battle_effect_camera_zoom_frame;
-extern u32 g_battle_effect_camera_zoom_mode;
-extern VECTOR g_battle_effect_camera_zoom_saved;
-extern VECTOR g_battle_effect_camera_zoom_start;
-extern VECTOR g_battle_effect_camera_zoom_target;
+extern VECTOR g_effect_camera_position_current;
+extern s32 g_effect_camera_position_duration;
+extern s32 g_effect_camera_position_frame;
+extern u32 g_effect_camera_position_mode;
+extern VECTOR g_effect_camera_position_saved;
+extern VECTOR g_effect_camera_position_start;
+extern VECTOR g_effect_camera_position_target;
+extern SVECTOR g_effect_camera_rotation_current;
+extern s32 g_effect_camera_rotation_duration;
+/* Reset by effect_camera_execute_angle_command. */
+extern s32 g_effect_camera_rotation_frame;
+extern u32 g_effect_camera_rotation_mode;
+extern SVECTOR g_effect_camera_rotation_saved;
+extern SVECTOR g_effect_camera_rotation_start;
+extern SVECTOR g_effect_camera_rotation_target;
+extern VECTOR g_effect_camera_zoom_current;
+extern s32 g_effect_camera_zoom_duration;
+extern s32 g_effect_camera_zoom_frame;
+extern u32 g_effect_camera_zoom_mode;
+extern VECTOR g_effect_camera_zoom_saved;
+extern VECTOR g_effect_camera_zoom_start;
+extern VECTOR g_effect_camera_zoom_target;
 
-void battle_effect_seed_camera_tracks(void);
-void battle_effect_init_camera(void);
+void effect_camera_seed_tracks(void);
+void effect_camera_init(void);
 
 #endif

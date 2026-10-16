@@ -54,7 +54,7 @@ void formation_zodiac_backdrop_thread(void) {
             g_formation_view.scale_y -= step;
         }
         g_formation_view.brightness = g_screen_color_red;
-        menu_build_zodiac_primitives(&g_formation_view, g_formation_view_quads[frame & 1]);
+        zodiac_build_primitives(&g_formation_view, g_formation_view_quads[frame & 1]);
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             thread_exit_current();
@@ -67,7 +67,7 @@ void formation_zodiac_backdrop_thread(void) {
  * turns it into the CLUT at (0x140 + (index % 4) * 16, 0xe0 + index / 4).
  *
  * Generic male/female identities derive their sheet from the job (the same
- * sheet numbering menu_build_portrait_poly uses); other selectors take the
+ * sheet numbering portrait_build_poly uses); other selectors take the
  * job's spritesheet. Monster sprites from 0x3e on have three palettes each,
  * and the job's portrait palette picks one. `job` is only loaded for
  * selectors other than the generic humans, so this step assumes no other
@@ -118,7 +118,7 @@ s32 formation_get_unit_palette_index(s32 party_index) {
         return 0x7A;
     }
     if (portrait >= MENU_WLDFACE_FIRST_MONSTER_PORTRAIT) {
-        portrait = g_monster_formation_sprite_table[portrait - MENU_WLDFACE_FIRST_MONSTER_PORTRAIT];
+        portrait = g_formation_monster_sprite_table[portrait - MENU_WLDFACE_FIRST_MONSTER_PORTRAIT];
     } else if (unit->sprite_set & CHARACTER_IDENTITY_HIGH_BIT_MASK) {
         portrait -= 1;
     }

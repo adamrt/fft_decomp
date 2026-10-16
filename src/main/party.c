@@ -171,7 +171,7 @@ s32 party_save_unit(unit_stats_t* unit, s32 allow_guest) {
             return -1;
         }
         slot = index;
-    } else if (unit_slot >= BATTLE_UNIT_SLOT_COUNT) {
+    } else if (unit_slot >= UNIT_SLOT_COUNT) {
         /* GCC cross-jumps this search into the identical one above. */
         index = party_find_free_slot(kind, &palette);
         if (index == -1) {
@@ -1420,11 +1420,11 @@ static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* 
     item = entd->equipment[ENTD_EQUIPMENT_SLOT_RIGHT_HAND];
     flags = unit->ability_flags.support[2];
     if (item == ENTD_VALUE_RANDOM) {
-        if (flags & BATTLE_SUPPORT_SET_3_TWO_HANDS) {
+        if (flags & UNIT_SUPPORT_SET_3_TWO_HANDS) {
             item = unit_calculate_random_equipment(
                 unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_HANDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
         }
-        if (item == ENTD_VALUE_RANDOM && (flags & BATTLE_SUPPORT_SET_3_TWO_SWORDS)) {
+        if (item == ENTD_VALUE_RANDOM && (flags & UNIT_SUPPORT_SET_3_TWO_SWORDS)) {
             item = unit_calculate_random_equipment(
                 unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
         }
@@ -1433,27 +1433,27 @@ static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* 
     /* Then each Equip weapon support in turn, then any weapon. */
     flags = unit->ability_flags.support[0];
     if (item == ENTD_VALUE_RANDOM) {
-        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_SWORD) {
+        if (flags & UNIT_SUPPORT_SET_1_EQUIP_SWORD) {
             item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SWORD);
         }
         if (item == ENTD_VALUE_RANDOM) {
-            if (flags & BATTLE_SUPPORT_SET_1_EQUIP_KATANA) {
+            if (flags & UNIT_SUPPORT_SET_1_EQUIP_KATANA) {
                 item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_KATANA);
             }
             if (item == ENTD_VALUE_RANDOM) {
-                if (flags & BATTLE_SUPPORT_SET_1_EQUIP_CROSSBOW) {
+                if (flags & UNIT_SUPPORT_SET_1_EQUIP_CROSSBOW) {
                     item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_CROSSBOW);
                 }
                 if (item == ENTD_VALUE_RANDOM) {
-                    if (flags & BATTLE_SUPPORT_SET_1_EQUIP_SPEAR) {
+                    if (flags & UNIT_SUPPORT_SET_1_EQUIP_SPEAR) {
                         item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SPEAR);
                     }
                     if (item == ENTD_VALUE_RANDOM) {
-                        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_AXE) {
+                        if (flags & UNIT_SUPPORT_SET_1_EQUIP_AXE) {
                             item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_AXE);
                         }
                         if (item == ENTD_VALUE_RANDOM) {
-                            if (flags & BATTLE_SUPPORT_SET_1_EQUIP_GUN) {
+                            if (flags & UNIT_SUPPORT_SET_1_EQUIP_GUN) {
                                 item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_GUN);
                             }
                             if (item == ENTD_VALUE_RANDOM) {
@@ -1484,12 +1484,12 @@ static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* 
     if (right_weapon != ITEM_ID_NONE
         && ((g_item_weapon_data[g_item_primary_data[right_weapon].secondary_data_id].flags
                 & WEAPON_FLAG_FORCED_TWO_HANDS)
-            || (unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS))) {
+            || (unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS))) {
         item = ITEM_ID_NONE;
     }
 
     flags = unit->ability_flags.support[2];
-    if (item == ENTD_VALUE_RANDOM && (flags & BATTLE_SUPPORT_SET_3_TWO_SWORDS)) {
+    if (item == ENTD_VALUE_RANDOM && (flags & UNIT_SUPPORT_SET_3_TWO_SWORDS)) {
         item = unit_calculate_random_equipment(
             unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
     }
@@ -1514,7 +1514,7 @@ static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* 
     item = entd->equipment[ENTD_EQUIPMENT_SLOT_HEAD];
     flags = unit->ability_flags.support[0];
     if (item == ENTD_VALUE_RANDOM) {
-        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_ARMOR) {
+        if (flags & UNIT_SUPPORT_SET_1_EQUIP_ARMOR) {
             item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_HELMET);
         }
         if (item == ENTD_VALUE_RANDOM) {
@@ -1531,7 +1531,7 @@ static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* 
     if (item == ENTD_VALUE_RANDOM) {
         /* The target reuses Equip Shield here while requesting random Armor;
          * preserve this native equipment-generation quirk. */
-        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_SHIELD) {
+        if (flags & UNIT_SUPPORT_SET_1_EQUIP_SHIELD) {
             item = unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_ARMOR);
         }
         if (item == ENTD_VALUE_RANDOM) {
@@ -1567,34 +1567,34 @@ static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* 
 void unit_set_equippable_items(unit_stats_t* unit) {
     s32 support = unit->ability_flags.support[0];
 
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_ARMOR) {
-        unit->equipment_categories[2] |= BATTLE_EQUIPMENT_SET_3_HELM | BATTLE_EQUIPMENT_SET_3_ARMOR;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_ARMOR) {
+        unit->equipment_categories[2] |= UNIT_EQUIPMENT_SET_3_HELM | UNIT_EQUIPMENT_SET_3_ARMOR;
     }
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_SHIELD) {
-        unit->equipment_categories[2] |= BATTLE_EQUIPMENT_SET_3_SHIELD;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_SHIELD) {
+        unit->equipment_categories[2] |= UNIT_EQUIPMENT_SET_3_SHIELD;
     }
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_SWORD) {
-        unit->equipment_categories[0] |= BATTLE_EQUIPMENT_SET_1_SWORD;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_SWORD) {
+        unit->equipment_categories[0] |= UNIT_EQUIPMENT_SET_1_SWORD;
     }
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_KATANA) {
-        unit->equipment_categories[0] |= BATTLE_EQUIPMENT_SET_1_KATANA;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_KATANA) {
+        unit->equipment_categories[0] |= UNIT_EQUIPMENT_SET_1_KATANA;
     }
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_CROSSBOW) {
-        unit->equipment_categories[1] |= BATTLE_EQUIPMENT_SET_2_CROSSBOW;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_CROSSBOW) {
+        unit->equipment_categories[1] |= UNIT_EQUIPMENT_SET_2_CROSSBOW;
     }
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_SPEAR) {
-        unit->equipment_categories[1] |= BATTLE_EQUIPMENT_SET_2_SPEAR;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_SPEAR) {
+        unit->equipment_categories[1] |= UNIT_EQUIPMENT_SET_2_SPEAR;
     }
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_AXE) {
-        unit->equipment_categories[0] |= BATTLE_EQUIPMENT_SET_1_AXE;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_AXE) {
+        unit->equipment_categories[0] |= UNIT_EQUIPMENT_SET_1_AXE;
     }
-    if (support & BATTLE_SUPPORT_SET_1_EQUIP_GUN) {
-        unit->equipment_categories[1] |= BATTLE_EQUIPMENT_SET_2_GUN;
+    if (support & UNIT_SUPPORT_SET_1_EQUIP_GUN) {
+        unit->equipment_categories[1] |= UNIT_EQUIPMENT_SET_2_GUN;
     }
     support = unit->unit_flags;
     if (support & UNIT_FLAG_FEMALE) {
-        unit->equipment_categories[2] |= BATTLE_EQUIPMENT_SET_3_RIBBON | BATTLE_EQUIPMENT_SET_3_BAG;
-        unit->equipment_categories[3] |= BATTLE_EQUIPMENT_SET_4_PERFUME;
+        unit->equipment_categories[2] |= UNIT_EQUIPMENT_SET_3_RIBBON | UNIT_EQUIPMENT_SET_3_BAG;
+        unit->equipment_categories[3] |= UNIT_EQUIPMENT_SET_4_PERFUME;
     }
 }
 
@@ -1779,22 +1779,22 @@ void unit_calculate_move_jump(unit_stats_t* unit, s32 keep_hp_mp) {
     move = unit->move;
     flags = unit->ability_flags.movement[0];
     jump = unit->jump;
-    if (flags & BATTLE_MOVEMENT_SET_1_MOVE_PLUS_1) {
+    if (flags & UNIT_MOVEMENT_SET_1_MOVE_PLUS_1) {
         move += 1;
     }
-    if (flags & BATTLE_MOVEMENT_SET_1_MOVE_PLUS_2) {
+    if (flags & UNIT_MOVEMENT_SET_1_MOVE_PLUS_2) {
         move += 2;
     }
-    if (flags & BATTLE_MOVEMENT_SET_1_MOVE_PLUS_3) {
+    if (flags & UNIT_MOVEMENT_SET_1_MOVE_PLUS_3) {
         move += 3;
     }
-    if (flags & BATTLE_MOVEMENT_SET_1_JUMP_PLUS_1) {
+    if (flags & UNIT_MOVEMENT_SET_1_JUMP_PLUS_1) {
         jump += 1;
     }
-    if (flags & BATTLE_MOVEMENT_SET_1_JUMP_PLUS_2) {
+    if (flags & UNIT_MOVEMENT_SET_1_JUMP_PLUS_2) {
         jump += 2;
     }
-    if (flags & BATTLE_MOVEMENT_SET_1_JUMP_PLUS_3) {
+    if (flags & UNIT_MOVEMENT_SET_1_JUMP_PLUS_3) {
         jump += 3;
     }
     if (move >= 0xFD) {
@@ -1874,8 +1874,8 @@ static void unit_store_names(unit_stats_t* unit) {
                         }
                     }
                 }
-                for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                    other = &g_battle_unit_stats[i];
+                for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                    other = &g_unit_stats[i];
                     if (gender == (other->unit_flags & NAME_GENDER_MASK)
                         && other->quote_name_id.value == name_id.value) {
                         name_available = 0;

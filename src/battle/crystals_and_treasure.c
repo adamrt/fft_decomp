@@ -25,24 +25,24 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static s32 battle_map_test_or_set_move_find_item_flag(s32 map_id, s32 tile_index, s32 save);
-static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
-static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
-static void battle_status_cancel_charge(unit_stats_t* unit);
-static u8 battle_unit_generate_treasure(unit_stats_t* unit);
+static s32 move_find_test_or_set_item_flag(s32 map_id, s32 tile_index, s32 save);
+static command_menu_e menu_action_get_unit_menu_id(const unit_stats_t* unit);
+static s32 skillset_load(s32 unit_id, u8 skillset, u8 menu);
+static void status_cancel_charge(unit_stats_t* unit);
+static u8 crystal_generate_treasure_item(unit_stats_t* unit);
 
 /* 1 when the unit, or its rider when it is a mount, is charging an attack of
  * the Charge skillset; with cancel set, that unit's charge is also canceled
- * (battle_status_cancel_charge). A move or a knockback cancels a Charge
+ * (status_cancel_charge). A move or a knockback cancels a Charge
  * through this test. */
-s32 battle_status_check_charging_charge(unit_stats_t* unit, s32 cancel) {
+s32 status_check_charging_charge(unit_stats_t* unit, s32 cancel) {
     u8 mount_info;
 
     for (;;) {
         if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)] & STATUS_BYTE_MASK(STATUS_ID_CHARGING))
             && unit->charged_ability_ct != 0xFF && unit->action_command.skillset_id == SKILLSET_ID_CHARGE) {
             if (cancel != 0) {
-                battle_status_cancel_charge(unit);
+                status_cancel_charge(unit);
             }
             return 1;
         }
@@ -50,22 +50,22 @@ s32 battle_status_check_charging_charge(unit_stats_t* unit, s32 cancel) {
         if (!(mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             break;
         }
-        unit = &g_battle_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
+        unit = &g_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
     }
     return 0;
 }
 
 /* Clears the unit's Charging, Jump, Defending and Performing statuses (action state none). */
-static void battle_status_cancel_charge(unit_stats_t* unit) {
+static void status_cancel_charge(unit_stats_t* unit) {
     status_set_action_state(unit, STATUS_ACTION_STATE_NONE);
 }
 
 /* Pick the rare or common move-find item on the unit's tile and mark the tile found.
  *
  * The rare item is chosen with a (100 - Brave)% chance. */
-move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
+move_found_item_t* move_find_determine_item(unit_stats_t* unit) {
     move_find_result_data_t* find_result
-        = battle_map_get_move_find_result(unit->x, unit->position.y, unit->position.higher_elevation);
+        = move_find_get_result(unit->x, unit->position.y, unit->position.higher_elevation);
     u8 item_id;
 
     if (random_roll_pass_fail(100, 100 - unit->brave) == 0) {
@@ -73,11 +73,10 @@ move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
     } else {
         item_id = find_result->common_item_id;
     }
-    g_battle_map_rare_item_result.item_id = item_id;
-    battle_map_test_or_set_move_find_item_flag(
-        script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
-    g_battle_map_rare_item_result._unknown_00 = 0;
-    return &g_battle_map_rare_item_result;
+    g_move_find_rare_item_result.item_id = item_id;
+    move_find_test_or_set_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
+    g_move_find_rare_item_result._unknown_00 = 0;
+    return &g_move_find_rare_item_result;
 }
 
 /*
@@ -91,65 +90,64 @@ move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
  * repeats the same search up to 21 times. The final flag update must go
  * through a pointer to keep the target's register address.
  */
-move_find_result_data_t* battle_map_get_move_find_result(s32 x, u8 y, u8 layer) {
-    map_move_find_item_entry_t* tile;
+move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer) {
+    move_find_entry_t* tile;
     s32 unit;
     s32 i;
-    s32 trap = BATTLE_TRAP_ID_NONE;
+    s32 trap = MOVE_FIND_TRAP_NONE;
     u8* result;
 
-    g_battle_move_find_result_flags = 0;
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = battle_unit_find_at_tile((u8)x, y, layer, BATTLE_UNIT_TILE_FILTER_TRANSPARENT);
+    g_move_find_result_flags = 0;
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = unit_find_at_tile((u8)x, y, layer, UNIT_TILE_FILTER_TRANSPARENT);
         if (unit >= 0) {
             break;
         }
     }
-    if (i != BATTLE_UNIT_SLOT_COUNT) {
-        g_battle_move_find_result_flags = MOVE_FIND_RESULT_OCCUPIED;
-        g_battle_move_find_occupying_unit_id = unit;
+    if (i != UNIT_SLOT_COUNT) {
+        g_move_find_result_flags = MOVE_FIND_RESULT_OCCUPIED;
+        g_move_find_occupying_unit_id = unit;
     }
     for (i = 0; i < 4; i++) {
-        tile = &g_battle_current_map_move_find_item_data.entries[i];
+        tile = &g_move_find_current_map_data.entries[i];
         if (tile->x == (u8)x && tile->y == y && tile->elevation == layer) {
             break;
         }
     }
     if (i != 4) {
-        g_battle_move_find_entry_index = i;
-        if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
-            if (battle_map_test_or_set_move_find_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0)
-                != 0) {
-                g_battle_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
-                g_battle_move_find_rare_item_id = tile->rare_item_id;
-                g_battle_move_find_common_item_id = tile->common_item_id;
+        g_move_find_entry_index = i;
+        if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
+            if (move_find_test_or_set_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
+                g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
+                g_move_find_rare_item_id = tile->rare_item_id;
+                g_move_find_common_item_id = tile->common_item_id;
             }
         }
-        if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
-            if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_DEGENERATOR) {
-                trap = BATTLE_TRAP_ID_DEGENERATOR;
-            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_DEATHTRAP) {
-                trap = BATTLE_TRAP_ID_DEATHTRAP;
-            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS) {
-                trap = BATTLE_TRAP_ID_SLEEPING_GAS;
-            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE) {
-                trap = BATTLE_TRAP_ID_STEEL_NEEDLE;
+        if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
+            if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_DEGENERATOR) {
+                trap = MOVE_FIND_TRAP_DEGENERATOR;
+            } else if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_DEATHTRAP) {
+                trap = MOVE_FIND_TRAP_DEATHTRAP;
+            } else if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS) {
+                trap = MOVE_FIND_TRAP_SLEEPING_GAS;
+            } else if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE) {
+                trap = MOVE_FIND_TRAP_STEEL_NEEDLE;
             }
-            if (trap != BATTLE_TRAP_ID_NONE) {
-                result = &g_battle_move_find_result_flags;
-                g_battle_move_find_trap_id = trap;
+            if (trap != MOVE_FIND_TRAP_NONE) {
+                result = &g_move_find_result_flags;
+                g_move_find_trap_id = trap;
                 *result |= MOVE_FIND_RESULT_TRAP;
             }
         }
     }
-    return &g_battle_move_find_tile_result;
+    return &g_move_find_tile_result;
 }
 
 /* Test (save == 0) or set the found flag of one of a map's four move-find item tiles.
  *
  * Each flag byte holds two maps, four tiles each, MSB first with the even map in
  * the high nibble; the test returns 1 while the item is still unfound. */
-static s32 battle_map_test_or_set_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
+static s32 move_find_test_or_set_item_flag(s32 map_id, s32 tile_index, s32 save) {
     s32 byte_index = map_id / 2;
     s32 bit = 0x80 >> (((map_id & 1) * 4) + tile_index);
 
@@ -165,7 +163,7 @@ static s32 battle_map_test_or_set_move_find_item_flag(s32 map_id, s32 tile_index
  * when neither unit is a monster, each action ability the crystal knows and the mover does not (in
  * the mover's unlocked jobs, and the special job only for the same character) is learned on a roll
  * against its learn rate, adding LEARNED when any is. */
-crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover) {
+crystal_pickup_result_t* crystal_build_pickup_result(unit_stats_t* mover) {
     u8 gained[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 known[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 offered[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
@@ -186,18 +184,18 @@ crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover)
     s32 ability;
     u16 ability_id;
 
-    crystal_index = battle_unit_find_at_tile(mover->x, mover->position.y, mover->position.higher_elevation,
-        BATTLE_UNIT_TILE_FILTER_CRYSTAL | BATTLE_UNIT_TILE_FILTER_TREASURE);
+    crystal_index = unit_find_at_tile(mover->x, mover->position.y, mover->position.higher_elevation,
+        UNIT_TILE_FILTER_CRYSTAL | UNIT_TILE_FILTER_TREASURE);
     if (crystal_index < 0) {
         g_crystal_pickup_result.result = CRYSTAL_PICKUP_NONE;
         return &g_crystal_pickup_result;
     }
     g_crystal_pickup_result.result = CRYSTAL_PICKUP_NOTHING;
     g_crystal_pickup_result.unit_index = crystal_index;
-    crystal = &g_battle_unit_stats[crystal_index];
+    crystal = &g_unit_stats[crystal_index];
     if (crystal->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
         g_crystal_pickup_result.result = CRYSTAL_PICKUP_TREASURE;
-        g_crystal_pickup_result.treasure_item = battle_unit_generate_treasure(crystal);
+        g_crystal_pickup_result.treasure_item = crystal_generate_treasure_item(crystal);
     } else {
         /* The empty loops are measured residue: without them the code differs. */
         do {
@@ -278,7 +276,7 @@ crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover)
  * that heals the missing HP and MP. LEARN_ABILITIES ORs
  * g_crystal_learnable_abilities into the unit's learned-ability bits. These
  * return 0. */
-s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags) {
+s32 crystal_apply_choice(unit_stats_t* unit, s32 flags) {
     s32 i;
     u8* dst;
     u8* src;
@@ -286,20 +284,20 @@ s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags) {
     u8* crystal_bits;
     u8* end;
 
-    battle_action_clear_current_data(&unit->action);
+    action_clear_current_data(&unit->action);
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
-    if (flags & BATTLE_CRYSTAL_TAKE_TREASURE) {
-        return battle_action_give_item(unit, g_crystal_treasure_item_id);
+    if (flags & CRYSTAL_TAKE_TREASURE) {
+        return item_give(unit, g_crystal_treasure_item_id);
     }
-    if (flags & BATTLE_CRYSTAL_RESTORE_HP_MP) {
+    if (flags & CRYSTAL_RESTORE_HP_MP) {
         unit->action.hit = 1;
         unit->action.attack_type = ACTION_TYPE_HP_HEALING | ACTION_TYPE_MP_HEALING;
         unit->action.miss_type = ACTION_MISS_TYPE_HIT;
         unit->action.hp_healing = unit->max_hp - unit->hp;
         unit->action.mp_healing = unit->max_mp - unit->mp;
     }
-    if (flags & BATTLE_CRYSTAL_LEARN_ABILITIES) {
+    if (flags & CRYSTAL_LEARN_ABILITIES) {
         /* OR the crystal's ability bits into learned_abilities, three bytes
          * per job for 19 jobs; walked as raw bytes to keep the biased pointers. */
         i = 0;
@@ -327,13 +325,13 @@ s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags) {
  * or with nothing equipped one of the thirteen consumables other than Elixir.
  * Decided only when executing; in any other state the function returns without
  * a value. */
-static u8 battle_unit_generate_treasure(unit_stats_t* unit) {
+static u8 crystal_generate_treasure_item(unit_stats_t* unit) {
     u8 candidates[UNIT_EQUIPMENT_SLOT_COUNT];
     s32 count;
     s32 i;
     u32 item_id;
 
-    if (g_battle_action_state != ACTION_STATE_EXECUTE) {
+    if (g_action_state != ACTION_STATE_EXECUTE) {
         return;
     }
 
@@ -366,11 +364,11 @@ static u8 battle_unit_generate_treasure(unit_stats_t* unit) {
 
 /* The battle stats in a unit slot, occupied or not; 0 for a battle_id past the last
  * slot. */
-unit_stats_t* battle_unit_get_stats_from_battle_id(u32 battle_id) {
-    if (battle_id >= BATTLE_UNIT_SLOT_COUNT) {
+unit_stats_t* unit_get_stats(u32 battle_id) {
+    if (battle_id >= UNIT_SLOT_COUNT) {
         return 0;
     }
-    return &g_battle_unit_stats[battle_id];
+    return &g_unit_stats[battle_id];
 }
 
 /*
@@ -382,7 +380,7 @@ unit_stats_t* battle_unit_get_stats_from_battle_id(u32 battle_id) {
  * The two status tests must be separate `if`s with their own `return -3`: an
  * `||` lets the delay-slot pass steal `li v0,-3` into the first branch.
  */
-s32 battle_unit_find_slot_by_character_identity(u32 character_identity) {
+s32 unit_find_slot_by_identity(u32 character_identity) {
     unit_stats_t* unit;
     party_unit_t* party;
     s32 i;
@@ -390,41 +388,41 @@ s32 battle_unit_find_slot_by_character_identity(u32 character_identity) {
     u8 identity;
 
     if (character_identity >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
-        return BATTLE_CHARACTER_SLOT_SELECTOR;
+        return UNIT_CHARACTER_SLOT_SELECTOR;
     }
     identity = character_identity;
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = &g_battle_unit_stats[i];
-        if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE && unit->character_identity == identity) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = &g_unit_stats[i];
+        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE && unit->character_identity == identity) {
             status = unit->status_sets.current;
             if (status[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL)) {
-                return BATTLE_CHARACTER_SLOT_UNAVAILABLE;
+                return UNIT_CHARACTER_SLOT_UNAVAILABLE;
             }
             if (status[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
-                return BATTLE_CHARACTER_SLOT_UNAVAILABLE;
+                return UNIT_CHARACTER_SLOT_UNAVAILABLE;
             }
             return i;
         }
     }
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = &g_battle_unit_stats[i];
-        if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE && unit->character_identity == identity
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = &g_unit_stats[i];
+        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE && unit->character_identity == identity
             && unit->existence != UNIT_EXISTENCE_NONE) {
             if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
-                return BATTLE_CHARACTER_SLOT_OFF_FIELD;
+                return UNIT_CHARACTER_SLOT_OFF_FIELD;
             }
             if (unit->existence == UNIT_EXISTENCE_DISABLED) {
-                return BATTLE_CHARACTER_SLOT_UNAVAILABLE;
+                return UNIT_CHARACTER_SLOT_UNAVAILABLE;
             }
         }
     }
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
         party = party_get_unit(i);
         if (party->party_id != PARTY_ID_NONE && party->sprite_set == identity) {
-            return BATTLE_CHARACTER_SLOT_IN_PARTY;
+            return UNIT_CHARACTER_SLOT_IN_PARTY;
         }
     }
-    return BATTLE_CHARACTER_SLOT_ABSENT;
+    return UNIT_CHARACTER_SLOT_ABSENT;
 }
 
 /* Find the battle-stats record whose ENTD unit ID matches unit_id.
@@ -435,15 +433,15 @@ s32 battle_unit_find_slot_by_character_identity(u32 character_identity) {
  * returns 0 with -3. Both loops compare against (unit_id & 0xff): the (u8) cast
  * adds a loop insn and stops loop.c hoisting the constant 2 in the second loop.
  * The second loop's test of existence against entd_slot, just found to be
- * BATTLE_ENTD_SLOT_NONE, is a test against UNIT_EXISTENCE_NONE (both
+ * UNIT_ENTD_SLOT_NONE, is a test against UNIT_EXISTENCE_NONE (both
  * 0xff). */
-unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battle_id) {
+unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id) {
     unit_stats_t* unit;
     s32 i;
 
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = &g_battle_unit_stats[i];
-        if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE && unit->unit_id == (unit_id & 0xff)) {
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = &g_unit_stats[i];
+        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE && unit->unit_id == (unit_id & 0xff)) {
             if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))
                 || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                     & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
@@ -455,9 +453,9 @@ unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battl
         }
     }
 
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = &g_battle_unit_stats[i];
-        if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE && unit->unit_id == (unit_id & 0xff)
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = &g_unit_stats[i];
+        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE && unit->unit_id == (unit_id & 0xff)
             && unit->existence != unit->entd_slot) {
             if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
                 *out_battle_id = -2;
@@ -479,15 +477,15 @@ unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battl
 }
 
 /* Count a unit of any team but blue into the enemy level statistics: its level
- * is added to g_battle_enemy_level_sum and raises g_battle_highest_enemy_level. */
-void battle_unit_count_enemy_level(unit_stats_t* unit) {
+ * is added to g_reward_enemy_level_sum and raises g_reward_highest_enemy_level. */
+void reward_count_enemy_level(unit_stats_t* unit) {
     u8 level;
 
     if (unit->team_flags & UNIT_TEAM_MASK) {
         level = unit->level;
-        g_battle_enemy_level_sum += level;
-        if (g_battle_highest_enemy_level < level) {
-            g_battle_highest_enemy_level = level;
+        g_reward_enemy_level_sum += level;
+        if (g_reward_highest_enemy_level < level) {
+            g_reward_highest_enemy_level = level;
         }
     }
 }
@@ -496,10 +494,10 @@ void battle_unit_count_enemy_level(unit_stats_t* unit) {
  * `result`, zero-filling the unused trophy slots.
  *
  * bonus_money is the sum of each present unit's bonus_money_modifier * 100.
- * level_sum_money is g_battle_enemy_level_sum * 100. level_bonus_money is
+ * level_sum_money is g_reward_enemy_level_sum * 100. level_bonus_money is
  * (highest enemy level - lowest level among the present party units) * 100, or
  * 0 when that is not positive or a player unit has fallen. */
-void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) {
+void reward_find_war_trophies_and_bonus_money(reward_war_result_t* result) {
     s32 count = 0;
     s32 money = 0;
     u8 lowest = UNIT_LEVEL_MAX;
@@ -507,8 +505,8 @@ void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) 
     unit_stats_t* unit;
     u8 value;
 
-    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        unit = &g_battle_unit_stats[i];
+    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+        unit = &g_unit_stats[i];
         if (unit->existence != UNIT_EXISTENCE_NONE && unit->existence != UNIT_EXISTENCE_OFF_FIELD) {
             value = unit->war_trophy;
             if (value != ITEM_ID_NOTHING) {
@@ -525,22 +523,22 @@ void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) 
         }
     }
     result->item_count = count;
-    for (i = count; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+    for (i = count; i < UNIT_SLOT_COUNT; i++) {
         result->item_ids[i] = ITEM_ID_NOTHING;
     }
     result->bonus_money = money;
-    result->level_sum_money = g_battle_enemy_level_sum * 100;
-    if (g_battle_player_unit_fallen != 0 || lowest >= g_battle_highest_enemy_level) {
+    result->level_sum_money = g_reward_enemy_level_sum * 100;
+    if (g_reward_player_unit_fallen != 0 || lowest >= g_reward_highest_enemy_level) {
         result->level_bonus_money = 0;
     } else {
-        result->level_bonus_money = (g_battle_highest_enemy_level - lowest) * 100;
+        result->level_bonus_money = (g_reward_highest_enemy_level - lowest) * 100;
     }
 }
 
 /* Strip a unit of every status: queue each current status's display flag off, then zero the
  * innate, immunity and current sets with the 16 status CTs that follow them (one 0x1F-byte clear
  * from status_sets) and the inflicted statuses. Used before a Morbol transformation. */
-void battle_status_clear_all(unit_stats_t* unit) {
+void status_clear_all(unit_stats_t* unit) {
     s32 i;
     s32 battle_id = unit->battle_id;
 
@@ -548,7 +546,7 @@ void battle_status_clear_all(unit_stats_t* unit) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            battle_status_queue_runtime_graphics_flag_change(STATUS_HANDLER_INDEX(i), 0, battle_id);
+            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
     }
     mem_zero(unit->status_sets.innate, 0x1F);
@@ -557,18 +555,18 @@ void battle_status_clear_all(unit_stats_t* unit) {
 
 /* Enable the renderer status flags for each of a unit's current statuses.
  * Returns -1 for an empty unit slot, otherwise 0. */
-s32 battle_status_init_special_flag_enabling(s32 unit_id) {
-    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
+s32 status_init_display_flags(s32 unit_id) {
+    unit_stats_t* unit = &g_unit_stats[unit_id];
     s32 i;
 
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return -1;
     }
     for (i = 0; i < STATUS_COUNT; i++) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            battle_status_queue_runtime_graphics_flag_change(STATUS_HANDLER_INDEX(i), 1, unit_id);
+            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), 1, unit_id);
         }
     }
     return 0;
@@ -576,7 +574,7 @@ s32 battle_status_init_special_flag_enabling(s32 unit_id) {
 
 /* Index of the unit's tile in g_battle_map_tile_data: layer * 256 + y * map width
  * + x, with the layer in bit 15 of the packed position. */
-s32 battle_map_calculate_location(const unit_stats_t* unit) {
+s32 battle_map_tile_calculate_unit_index(const unit_stats_t* unit) {
     u8 y = unit->position.y;
     u16 elevation = unit->position.higher_elevation;
     u8 x = unit->x;
@@ -585,11 +583,11 @@ s32 battle_map_calculate_location(const unit_stats_t* unit) {
 
 /* The battle stats of an occupied unit slot, or 0 for an empty slot or an id past
  * the last slot. */
-unit_stats_t* battle_unit_get_existing_pointer(u32 battle_id) {
+unit_stats_t* unit_get_present_stats(u32 battle_id) {
     unit_stats_t* unit = 0;
-    if (battle_id < BATTLE_UNIT_SLOT_COUNT) {
-        unit = &g_battle_unit_stats[battle_id];
-        if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    if (battle_id < UNIT_SLOT_COUNT) {
+        unit = &g_unit_stats[battle_id];
+        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
             unit = 0;
         }
     }
@@ -597,10 +595,10 @@ unit_stats_t* battle_unit_get_existing_pointer(u32 battle_id) {
 }
 
 /* The first unit whose has_turn is set (the unit taking its turn), or 0. */
-unit_stats_t* battle_unit_find_active_data_pointer(void) {
+unit_stats_t* unit_find_active(void) {
     s32 i = 0;
-    unit_stats_t* unit = g_battle_unit_stats;
-    for (; i < BATTLE_UNIT_SLOT_COUNT; i++, unit++) {
+    unit_stats_t* unit = g_unit_stats;
+    for (; i < UNIT_SLOT_COUNT; i++, unit++) {
         if (unit->has_turn != 0) {
             return unit;
         }
@@ -608,17 +606,17 @@ unit_stats_t* battle_unit_find_active_data_pointer(void) {
     return 0;
 }
 
-/* The idle action menu for a unit id: battle_menu_get_unit_action_menu_id, with
+/* The idle action menu for a unit id: menu_action_get_unit_menu_id, with
  * the four TURN menus replaced by their RIDER_TURN variants for a rider. Returns
  * MENU_COMMAND_ID_NONE for an empty slot. */
-menu_command_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
-    unit_stats_t* unit = battle_unit_get_existing_pointer(battle_id);
+command_menu_e menu_action_get_menu_id(s32 battle_id) {
+    unit_stats_t* unit = unit_get_present_stats(battle_id);
     s32 menu;
 
     if (unit == 0) {
         return MENU_COMMAND_ID_NONE;
     }
-    menu = battle_menu_get_unit_action_menu_id(unit);
+    menu = menu_action_get_unit_menu_id(unit);
     if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) != 0) {
         switch (menu) {
         case MENU_COMMAND_ID_TURN:
@@ -640,7 +638,7 @@ menu_command_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
     return menu;
 }
 
-/* Pick a unit's idle action menu (menu_command_id_e), before the rider variants.
+/* Pick a unit's idle action menu (command_menu_e), before the rider variants.
  *
  * While the unit taking its turn is not a manually controlled player unit, every
  * unit gets an inspect menu: PLAYER_UNIT_INSPECT or OTHER_UNIT_INSPECT. Otherwise
@@ -649,7 +647,7 @@ menu_command_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
  * restriction), and any other unit gets PLAYER_UNIT or OTHER_UNIT.
  *
  */
-static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit) {
+static command_menu_e menu_action_get_unit_menu_id(const unit_stats_t* unit) {
     unit_stats_t* active;
     s32 inspect_only = 0;
     s32 player_controlled;
@@ -659,7 +657,7 @@ static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t*
     u8 moved;
     u8 acted;
 
-    active = battle_unit_find_active_data_pointer();
+    active = unit_find_active();
     if (active != 0) {
         if ((active->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0
             || active->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
@@ -675,7 +673,7 @@ static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t*
         return MENU_COMMAND_ID_OTHER_UNIT_INSPECT;
     }
     dont_move = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)];
-    restriction = battle_unit_get_action_restriction(unit);
+    restriction = unit_get_action_restriction(unit);
     moved = unit->movement_taken | (dont_move & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE));
     acted = unit->action_taken | restriction;
     if (unit->has_turn != 0) {
@@ -696,36 +694,36 @@ static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t*
     return MENU_COMMAND_ID_OTHER_UNIT;
 }
 
-/* Return the unit's battle_unit_action_restriction_e.
+/* Return the unit's unit_action_restriction_e.
  *
  * CANNOT_ACT for Don't Act or a ridden mount. DEEP_WATER on a tile of depth 2 or
  * more, unless the unit has Float, Chicken or Frog, one of the Move in Water,
  * Walk on Water or Float movement abilities, or is a rider; the last test
  * computes DEEP_WATER (2) as the rider test shifted left once. */
-battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_stats_t* unit) {
+unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit) {
     s32 depth;
 
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
         != 0) {
-        return BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
+        return UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
     if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
-        return BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
+        return UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
-    depth = g_battle_map_tile_data[battle_map_calculate_location(unit)].depth_half_height.depth;
+    depth = g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)].depth_half_height.depth;
     if (depth < 2) {
-        return BATTLE_UNIT_ACTION_RESTRICTION_NONE;
+        return UNIT_ACTION_RESTRICTION_NONE;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
             & (STATUS_BYTE_MASK(STATUS_ID_FLOAT) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN)
                 | STATUS_BYTE_MASK(STATUS_ID_FROG)))
         != 0) {
-        return BATTLE_UNIT_ACTION_RESTRICTION_NONE;
+        return UNIT_ACTION_RESTRICTION_NONE;
     }
     if ((unit->ability_flags.movement[2]
-            & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER | BATTLE_MOVEMENT_SET_3_FLOAT))
+            & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER | UNIT_MOVEMENT_SET_3_FLOAT))
         != 0) {
-        return BATTLE_UNIT_ACTION_RESTRICTION_NONE;
+        return UNIT_ACTION_RESTRICTION_NONE;
     }
     return ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) == 0) << 1;
 }
@@ -734,7 +732,7 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
  * entry's abilities.
  *
  * `menu_types` receives each entry's low-nibble menu type and `empty` is set
- * to 1 where battle_menu_load_skillset returned 0. A monster skillset in either
+ * to 1 where skillset_load returned 0. A monster skillset in either
  * slot yields a single unloaded primary entry and returns 1; a unit that cannot
  * act or is carrying a rider gets an empty list. Returns -1 when the unit does
  * not exist, otherwise 0.
@@ -743,8 +741,8 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
  * loop: that keeps `entries` as CSE's canonical copy, so the list stores use
  * the incremented pointer instead of offsets from the saved base. `supports`
  * is declared first so it wins the allocation tie with `primary`. */
-s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types) {
-    unit_stats_t* unit = battle_unit_get_existing_pointer(unit_id);
+s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types) {
+    unit_stats_t* unit = unit_get_present_stats(unit_id);
     u8* list;
     u8 supports;
     u8 primary;
@@ -782,10 +780,10 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
     if (secondary != 0) {
         *entries++ = secondary;
     }
-    if (supports & BATTLE_SUPPORT_SET_4_DEFEND) {
+    if (supports & UNIT_SUPPORT_SET_4_DEFEND) {
         *entries++ = SKILLSET_ID_DEFEND;
     }
-    if (supports & BATTLE_SUPPORT_SET_4_EQUIP_CHANGE) {
+    if (supports & UNIT_SUPPORT_SET_4_EQUIP_CHANGE) {
         *entries++ = SKILLSET_ID_EQUIP_CHANGE;
     }
     *entries = SKILLSET_ID_NONE;
@@ -797,7 +795,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
         }
         menu_type = g_command_menu_types_by_skillset[id] & 0xf;
         menu_types[i] = menu_type;
-        if (battle_menu_load_skillset(unit_id, id, menu_type) == 0) {
+        if (skillset_load(unit_id, id, menu_type) == 0) {
             empty[i] = 1;
         } else {
             empty[i] = 0;
@@ -811,7 +809,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
  * A frog only keeps the default, blank, monster and attack menus. Returns the
  * menu loader's result, or whether the menu type is below 15 for menus without
  * a loader. */
-static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
+static s32 skillset_load(s32 unit_id, u8 skillset, u8 menu) {
     u8 items[0x58];
     s16 abilities[0x44];
     u8 mp_costs[0x18];
@@ -820,7 +818,7 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
     u8 turns[0x18];
     s32 result;
 
-    if ((g_battle_unit_stats[unit_id].status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)]
+    if ((g_unit_stats[unit_id].status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)]
             & STATUS_BYTE_MASK(STATUS_ID_FROG))
         && menu != ACTION_MENU_TYPE_DEFAULT && menu != ACTION_MENU_TYPE_MONSTER && menu != ACTION_MENU_TYPE_ATTACK
         && menu != ACTION_MENU_TYPE_BLANK_05) {
@@ -828,27 +826,27 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
     }
     switch (menu) {
     case ACTION_MENU_TYPE_DEFAULT:
-        return battle_menu_get_unit_skillset_ability_data(
+        return skillset_get_unit_ability_data(
             unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
-        return battle_menu_collect_item_abilities(unit_id, skillset, items);
+        return skillset_collect_item_abilities(unit_id, skillset, items);
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
-        return battle_menu_collect_throwable_items(unit_id, skillset, items);
+        return skillset_collect_throwable_items(unit_id, skillset, items);
     case ACTION_MENU_TYPE_ARITHMETICKS:
-        result = battle_menu_load_math_skill_attributes(unit_id, skillset, abilities);
+        result = skillset_math_load_attributes(unit_id, skillset, abilities);
         if (result != 0) {
-            result = battle_menu_load_math_skill_multiples(unit_id, skillset, abilities);
+            result = skillset_math_load_multiples(unit_id, skillset, abilities);
             if (result != 0) {
-                result = battle_menu_collect_calculator_abilities(unit_id, skillset, abilities);
+                result = skillset_math_collect_calculator_abilities(unit_id, skillset, abilities);
             }
         }
         return result;
     case ACTION_MENU_TYPE_ELEMENTS:
-        return battle_menu_get_elemental_ability(unit_id, skillset);
+        return skillset_get_elemental_ability(unit_id, skillset);
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
-        return battle_menu_collect_draw_out_katanas(unit_id, skillset, items);
+        return skillset_collect_draw_out_katanas(unit_id, skillset, items);
     case ACTION_MENU_TYPE_CHARGE:
-        return battle_menu_call_load_charge_skillset(unit_id, skillset, abilities);
+        return skillset_load_charge_ability_ids(unit_id, skillset, abilities);
     default:
         return menu < 15;
     }
@@ -861,10 +859,10 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
  * after only another unit's charged action with a lower battle id. Between the
  * charge pass and the next tick (PICK_UNIT_AFTER_CHARGE) a nonzero charge lands
  * one tick later. */
-u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries) {
+u8 at_list_count_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries) {
     s32 count;
 
-    if (g_battle_between_turn_resume_state == BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE && ct != 0) {
+    if (g_turn_clock_resume_state == TURN_CLOCK_STATE_PICK_UNIT_AFTER_CHARGE && ct != 0) {
         ct += 1;
     }
     ct <<= 8;

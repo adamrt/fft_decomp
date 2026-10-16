@@ -39,7 +39,7 @@ static void overlay_call_battle_entrypoint(void) {
 /* Load BATTLE.BIN (sector 1000) into the whole low overlay area, which ends at
  * the high overlay address, and call system_zero_padding. That is not BATTLE
  * code but MAIN's 4 KB of zero words ending in `jr ra`; BATTLE runs when the
- * caller then calls battle_state_run_game_loop. */
+ * caller then calls state_run_game_loop. */
 static void overlay_exec_battle(void) {
     file_load_checked_to_address(DISC_SECTOR_BATTLE_BIN,
         g_heap_high_overlay_load_address - g_heap_low_overlay_load_address, g_heap_low_overlay_load_address);
@@ -55,7 +55,7 @@ static void overlay_exec_battle(void) {
  * with WORLD_MAP_RESULT_TITLE, which also skips the opening movie). An OPEN.BIN result of 0
  * goes straight into BATTLE.BIN; otherwise WLDCORE and WORLD run first and leave
  * their result in g_system_frontend_world_result. World map and BATTLE.BIN
- * then alternate until g_battle_game_flow_state asks for a reset or the
+ * then alternate until g_game_flow_state asks for a reset or the
  * ending. The ending sets event 0x12a, plays OPEN.BIN's ending cutscene and runs
  * BATTLE.BIN once more. */
 static void system_run_game_loop(void) {
@@ -90,17 +90,17 @@ static void system_run_game_loop(void) {
             }
 
             overlay_exec_battle();
-            battle_state_run_game_loop();
+            state_run_game_loop();
             sound_stop_weather_music();
             g_system_go_straight_to_battle = 0;
 
-            if (g_battle_game_flow_state == SYSTEM_GAME_FLOW_RESET) {
+            if (g_game_flow_state == SYSTEM_GAME_FLOW_RESET) {
                 system_stop_display_and_audio();
                 break;
             }
-        } while (g_battle_game_flow_state != SYSTEM_GAME_FLOW_ENDING);
+        } while (g_game_flow_state != SYSTEM_GAME_FLOW_ENDING);
 
-        if (g_battle_game_flow_state == SYSTEM_GAME_FLOW_ENDING) {
+        if (g_game_flow_state == SYSTEM_GAME_FLOW_ENDING) {
             sound_stop_weather_music();
             music_unload_scenario_and_tunes();
             script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
@@ -108,7 +108,7 @@ static void system_run_game_loop(void) {
             overlay_exec_open_ending();
             overlay_exec_battle();
             zodiac_load_frame();
-            battle_state_run_game_loop();
+            state_run_game_loop();
             system_stop_display_and_audio();
         }
     }

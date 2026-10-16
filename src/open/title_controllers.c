@@ -990,7 +990,7 @@ static void birthday_build_confirmation_menu(birthday_date_state_t* state) {
  * last one allocated) and rebuilds it. Left selects the month field and Right the
  * day field, moving the cursor 0x20 pixels.
  *
- * February has 28 days in g_unit_birthday_month_lengths, so 29 February cannot be
+ * February has 28 days in g_calendar_month_lengths, so 29 February cannot be
  * entered. */
 void birthday_update_date_menu(controller_record_t* record) {
     birthday_date_state_t* menu = &record->birthday_date;
@@ -1008,7 +1008,7 @@ void birthday_update_date_menu(controller_record_t* record) {
     if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (menu->selecting_month == 0) {
             menu->day += 1;
-            if (g_unit_birthday_month_lengths[menu->month - 1] < menu->day) {
+            if (g_calendar_month_lengths[menu->month - 1] < menu->day) {
                 menu->month += 1;
                 if (menu->month > BIRTHDAY_MONTH_COUNT) {
                     menu->month = 1;
@@ -1020,8 +1020,8 @@ void birthday_update_date_menu(controller_record_t* record) {
             if (menu->month > BIRTHDAY_MONTH_COUNT) {
                 menu->month = 1;
             }
-            if (g_unit_birthday_month_lengths[menu->month - 1] < menu->day) {
-                menu->day = g_unit_birthday_month_lengths[menu->month - 1];
+            if (g_calendar_month_lengths[menu->month - 1] < menu->day) {
+                menu->day = g_calendar_month_lengths[menu->month - 1];
             }
         }
         g_window_render_record_pointer_count -= 1;
@@ -1036,15 +1036,15 @@ void birthday_update_date_menu(controller_record_t* record) {
                 if (menu->month <= 0) {
                     menu->month = BIRTHDAY_MONTH_COUNT;
                 }
-                menu->day = g_unit_birthday_month_lengths[menu->month - 1];
+                menu->day = g_calendar_month_lengths[menu->month - 1];
             }
         } else {
             menu->month -= 1;
             if (menu->month <= 0) {
                 menu->month = BIRTHDAY_MONTH_COUNT;
             }
-            if (g_unit_birthday_month_lengths[menu->month - 1] < menu->day) {
-                menu->day = g_unit_birthday_month_lengths[menu->month - 1];
+            if (g_calendar_month_lengths[menu->month - 1] < menu->day) {
+                menu->day = g_calendar_month_lengths[menu->month - 1];
             }
         }
         g_window_render_record_pointer_count -= 1;
@@ -1163,7 +1163,7 @@ void birthday_update_confirmation(controller_record_t* record) {
             day = g_controller_records_next[g_controller_current_index - 2].birthday_date.day;
             script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, month);
             script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
-            value = unit_birthday_calculate_day_of_year(month, day);
+            value = calendar_calculate_day_of_year(month, day);
             calendar_convert_date_to_zodiac(&month, &day);
             member = party_get_unit(0);
             member->birthday_day = value;

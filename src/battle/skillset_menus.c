@@ -23,15 +23,15 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static u8 g_battle_between_turn_pending_flags[21] = { 0 };
+static u8 g_turn_pending_flags[21] = { 0 };
 
-static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag);
-static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit);
-static s32 battle_action_insert_at_list_entry(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list);
-static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask);
-static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
-static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
-static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit);
+static s32 turn_set_move_act_taken(s32 idx, s32 move_flag, s32 act_flag);
+static s32 turn_should_end(const unit_stats_t* unit);
+static s32 at_list_insert_entry(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list);
+static s32 skillset_math_collect_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask);
+static s32 skillset_monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
+static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
+static s32 at_list_is_unit_excluded(const unit_stats_t* unit);
 
 /* Build the parallel ability lists for one of a unit's skillsets.
  *
@@ -47,7 +47,7 @@ static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit)
  *
  * The two flag bytes need separate locals: sharing one keeps the attribute
  * byte in a globally allocated register, which the target does not. */
-s32 battle_menu_get_unit_skillset_ability_data(
+s32 skillset_get_unit_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out) {
     at_entry_t at_list[AT_LIST_CAPACITY];
     unit_stats_t* unit;
@@ -75,22 +75,22 @@ s32 battle_menu_get_unit_skillset_ability_data(
     charge = 0;
     half_mp = 0;
     frog = 0;
-    unit = battle_unit_get_existing_pointer(unit_id);
+    unit = unit_get_present_stats(unit_id);
     if (unit == 0) {
         return 0;
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) { /* Frog */
         frog = 1;
     }
-    if (unit->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_HALF_MP) {
+    if (unit->ability_flags.support[1] & UNIT_SUPPORT_SET_2_HALF_MP) {
         half_mp = 1;
     }
-    if (unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_NON_CHARGE) {
+    if (unit->ability_flags.support[3] & UNIT_SUPPORT_SET_4_NON_CHARGE) {
         charge = 2;
-    } else if (unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_SHORT_CHARGE) {
+    } else if (unit->ability_flags.support[3] & UNIT_SUPPORT_SET_4_SHORT_CHARGE) {
         charge = 1;
     }
-    battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_ALL);
+    at_list_build(at_list, AT_LIST_MODE_ALL);
     if (unit->equipped_flags & UNIT_EQUIPPED_FLAG_MATERIA_BLADE) {
         materia_blade = 1;
     }
@@ -147,14 +147,14 @@ s32 battle_menu_get_unit_skillset_ability_data(
                     ct = 0;
                 }
             }
-            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
+            turns = at_list_count_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = mp;
             ct_out[count] = ct;
             flags_out[count] = kind;
             turns_out[count] = turns;
         } else if (ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST) {
             ct = (g_ability_charge_data - ABILITY_ID_CHARGE_FIRST)[ability].ct;
-            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
+            turns = at_list_count_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = 0;
             ct_out[count] = ct;
             flags_out[count] = 0;
@@ -167,10 +167,10 @@ s32 battle_menu_get_unit_skillset_ability_data(
     return count;
 }
 
-/* Load the unit's Item skillset entries through battle_menu_collect_item_abilities and return the
+/* Load the unit's Item skillset entries through skillset_collect_item_abilities and return the
  * low byte of its result (the entry count). */
-s32 battle_menu_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
-    return battle_menu_collect_item_abilities(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
+s32 skillset_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
+    return skillset_collect_item_abilities(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /*
@@ -184,7 +184,7 @@ s32 battle_menu_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids)
  * masked `id + 0xfe90` sum the range test already holds (the two differ only
  * above bit 15); spelled as one expression it is one instruction short.
  */
-s32 battle_menu_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
+s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
     unit_stats_t* unit;
     u16 abilities[0x14];
     u8 mp_costs[0x18];
@@ -198,7 +198,7 @@ s32 battle_menu_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_id
     s16 item_index;
 
     found = 0;
-    unit = battle_unit_get_existing_pointer(unit_id);
+    unit = unit_get_present_stats(unit_id);
     if (unit == 0) {
         return 0;
     }
@@ -206,7 +206,7 @@ s32 battle_menu_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_id
         *out_item_ids = ITEM_ID_NONE;
         return 0;
     }
-    count = battle_menu_get_unit_skillset_ability_data(
+    count = skillset_get_unit_ability_data(
         unit_id, SKILLSET_ID_ITEM, (s16*)abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     if (count == 0) {
         *out_item_ids = ITEM_ID_NONE;
@@ -226,10 +226,10 @@ s32 battle_menu_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_id
     return found + 0x100;
 }
 
-/* The number of items battle_menu_collect_throwable_items lists in out_item_ids:
+/* The number of items skillset_collect_throwable_items lists in out_item_ids:
  * its result without the 0x100 marker. */
-s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
-    return battle_menu_collect_throwable_items(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
+s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
+    return skillset_collect_throwable_items(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /* Collect the item ids the unit may throw into `out`, terminated with
@@ -237,10 +237,10 @@ s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids
  * skillset is wrong or no Throw ability is learned).
  *
  * The skillset's abilities select item types through g_ability_throw_item_types; every item of
- * a selected type that is throwable and in stock is listed (battle_action_decrement_player_item_quantity:
+ * a selected type that is throwable and in stock is listed (item_decrement_party_quantity:
  * only a player-team unit can run out).
  */
-s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
+s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     u16 abilities[0x14];
     u8 item_types[0x14];
     u8 mp_costs[0x14];
@@ -260,12 +260,12 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     u8 item_id;
 
     count = 0;
-    unit = battle_unit_get_existing_pointer(unit_id);
+    unit = unit_get_present_stats(unit_id);
     if (unit == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_THROW
-        || (ability_count = battle_menu_get_unit_skillset_ability_data(
+        || (ability_count = skillset_get_unit_ability_data(
                 unit_id, SKILLSET_ID_THROW, (s16*)abilities, mp_costs, charge_times, 0, ability_flags, turn_counts))
             == 0) {
         *out = ITEM_ID_NONE;
@@ -292,7 +292,7 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
         if (found != 0 && (item->type_flags & ITEM_TYPE_FLAG_WEAPON) != 0
             && (g_item_weapon_data[item->secondary_data_id].flags & WEAPON_FLAG_THROWABLE) != 0) {
             item_id = i;
-            if (battle_action_decrement_player_item_quantity(unit, item_id, 0) == 0) {
+            if (item_decrement_party_quantity(unit, item_id, 0) == 0) {
                 *out = item_id;
                 out++;
                 count++;
@@ -305,22 +305,20 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
 
 /* Collect the unit's learned Math Skill attribute abilities (CT, Level, Exp,
  * Height) into out_ability_ids. */
-s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids) {
-    return battle_menu_collect_math_skill_abilities_by_flags(
-        unit_id, skillset, out_ability_ids, CALCULATOR_ATTRIBUTE_MASK);
+s32 skillset_math_load_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids) {
+    return skillset_math_collect_by_flags(unit_id, skillset, out_ability_ids, CALCULATOR_ATTRIBUTE_MASK);
 }
 
 /* Collect the unit's learned Math Skill divisor abilities (Prime, 5, 4, 3)
  * into out_ability_ids. */
-s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids) {
-    return battle_menu_collect_math_skill_abilities_by_flags(
-        unit_id, skillset, out_ability_ids, CALCULATOR_MULTIPLE_MASK);
+s32 skillset_math_load_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids) {
+    return skillset_math_collect_by_flags(unit_id, skillset, out_ability_ids, CALCULATOR_MULTIPLE_MASK);
 }
 
 /* Collect the unit's learned Math Skill abilities whose
  * g_ability_math_rsm_data flags intersect mask into out, -1-terminated,
  * and return the count. An empty list writes no terminator. */
-static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask) {
+static s32 skillset_math_collect_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask) {
     u16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 charge_times[0x18];
@@ -334,14 +332,14 @@ static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 ski
     u8 flag_bits;
 
     count = 0;
-    if (battle_unit_get_existing_pointer(unit_id) == 0) {
+    if (unit_get_present_stats(unit_id) == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_MATH_SKILL) {
         *out = -1;
         return 0;
     }
-    ability_count = battle_menu_get_unit_skillset_ability_data(
+    ability_count = skillset_get_unit_ability_data(
         unit_id, SKILLSET_ID_MATH_SKILL, (s16*)abilities, mp_costs, charge_times, 0, ability_flags, turn_counts);
     if (ability_count == 0) {
         return 0;
@@ -363,13 +361,13 @@ static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 ski
 
 /*
  * Collect the unit's Calculator-eligible abilities from the four skillsets
- * in g_battle_menu_calculator_skillsets into out, -1-terminated, and return the
+ * in g_skillset_math_sources into out, -1-terminated, and return the
  * count. Only a request for the Math Skill skillset collects anything.
  *
  * The record pointer must be taken inside the inner loop: hoisting the table
  * base into a local before the loop swaps the two preheader address setups.
  */
-s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out) {
+s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out) {
     s16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 charge_times[0x18];
@@ -384,8 +382,8 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
     ability_secondary_data_t* secondary;
 
     count = 0;
-    memcpy(skillsets, g_battle_menu_calculator_skillsets, sizeof(skillsets));
-    if (battle_unit_get_existing_pointer(unit_id) == 0) {
+    memcpy(skillsets, g_skillset_math_sources, sizeof(skillsets));
+    if (unit_get_present_stats(unit_id) == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_MATH_SKILL) {
@@ -393,7 +391,7 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
         return 0;
     }
     for (i = 0; i < 4; i++) {
-        ability_count = battle_menu_get_unit_skillset_ability_data(
+        ability_count = skillset_get_unit_ability_data(
             unit_id, skillsets[i], abilities, mp_costs, charge_times, 1, ability_flags, turn_counts);
         if (ability_count != 0) {
             for (j = 0; j < ability_count; j++) {
@@ -412,7 +410,7 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
 
 /* Return the Elemental (Geomancy) ability for the surface under the unit when
  * the unit knows and can use it, otherwise 0. */
-u16 battle_menu_get_elemental_ability(s32 unit_id, u8 skillset) {
+u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
     unit_stats_t* unit;
     s16 abilities[0x14];
     u8 mp_costs[0x18];
@@ -423,20 +421,20 @@ u16 battle_menu_get_elemental_ability(s32 unit_id, u8 skillset) {
     s32 i;
     s16 terrain_ability;
 
-    unit = battle_unit_get_existing_pointer(unit_id);
+    unit = unit_get_present_stats(unit_id);
     if (unit == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_ELEMENTAL) {
         return 0;
     }
-    count = battle_menu_get_unit_skillset_ability_data(
+    count = skillset_get_unit_ability_data(
         unit_id, SKILLSET_ID_ELEMENTAL, abilities, mp_costs, ability_ct, 1, ability_flags, turns);
     if (count == 0) {
         return 0;
     }
     terrain_ability
-        = g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
+        = g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)].surface.type];
     for (i = 0; i < count; i++) {
         if (abilities[i] == terrain_ability) {
             return terrain_ability;
@@ -460,7 +458,7 @@ u16 battle_menu_get_elemental_ability(s32 unit_id, u8 skillset) {
  * carries the value the `sh` store writes and is shared with the Frog arm's
  * Frog Attack.
  */
-s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out) {
+s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out) {
     unit_stats_t* unit;
     s32 count = 3;
     s32 frog = 0;
@@ -469,7 +467,7 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
     s16 ability;
     u8 flags;
 
-    unit = battle_unit_get_existing_pointer(unit_id);
+    unit = unit_get_present_stats(unit_id);
     if (unit == 0) {
         return 0;
     }
@@ -485,7 +483,7 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
         *out = ability;
         out++;
     }
-    if (battle_menu_count_monster_skill_supporters(unit) != 0) {
+    if (skillset_monster_count_supporters(unit) != 0) {
         count = MONSTER_SKILLSET_ABILITY_COUNT;
     }
     for (i = 0; i < count; i++) {
@@ -503,33 +501,33 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
 /* Monster Skill check: the number of the four tiles adjacent to the unit that
  * hold a same-team Monster Skill supporter within 5 of the unit's total
  * height. Returns 0 for an empty slot. */
-s32 battle_menu_count_monster_skill_supporters(const unit_stats_t* unit) {
-    battle_unit_height_data_t height_data;
+s32 skillset_monster_count_supporters(const unit_stats_t* unit) {
+    unit_height_data_t height_data;
     s32 team;
     s32 x;
     s32 y;
     s32 height;
     s32 sum;
 
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return 0;
     }
-    battle_unit_calculate_height_data(&height_data, unit->battle_id);
+    unit_calculate_height_data(&height_data, unit->battle_id);
     team = unit->team_flags;
     x = unit->x;
     y = unit->position.y;
     height = height_data.total_height;
-    sum = battle_menu_has_monster_skill_supporter_at_tile(team, x - 1, y, height)
-        + battle_menu_has_monster_skill_supporter_at_tile(team, x + 1, y, height);
-    sum += battle_menu_has_monster_skill_supporter_at_tile(team, x, y - 1, height);
-    return sum + battle_menu_has_monster_skill_supporter_at_tile(team, x, y + 1, height);
+    sum = skillset_monster_has_supporter_at_tile(team, x - 1, y, height)
+        + skillset_monster_has_supporter_at_tile(team, x + 1, y, height);
+    sum += skillset_monster_has_supporter_at_tile(team, x, y - 1, height);
+    return sum + skillset_monster_has_supporter_at_tile(team, x, y + 1, height);
 }
 
 /* Return whether a unit on the team of `team_flags` that has the Monster Skill
  * support ability and can react stands on the tile, with a total height within
  * 5 of `total_height` (taken as a byte). */
-static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height) {
-    battle_unit_height_data_t height;
+static s32 skillset_monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height) {
+    unit_height_data_t height;
     u8 reference_height;
     s32 unit_index;
     s32 unit_team_flags = team_flags;
@@ -544,16 +542,16 @@ static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x
 
         unit_index = 0;
         reference_height = total_height;
-        for (; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
-            unit_stats_t* unit = &g_battle_unit_stats[unit_index];
+        for (; unit_index < UNIT_SLOT_COUNT; unit_index++) {
+            unit_stats_t* unit = &g_unit_stats[unit_index];
 
-            if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE || unit->x != x || unit->position.y != y
-                || battle_action_is_reaction_prevented(unit) != 0
-                || !(unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_MONSTER_SKILL)
+            if (unit->entd_slot == UNIT_ENTD_SLOT_NONE || unit->x != x || unit->position.y != y
+                || reaction_is_prevented(unit) != 0
+                || !(unit->ability_flags.support[3] & UNIT_SUPPORT_SET_4_MONSTER_SKILL)
                 || ((unit->team_flags ^ unit_team_flags) & UNIT_TEAM_MASK)) {
                 continue;
             }
-            battle_unit_calculate_height_data(&height, unit->battle_id);
+            unit_calculate_height_data(&height, unit->battle_id);
             if ((reference_height - height.total_height) >= -5 && (reference_height - height.total_height) <= 5) {
                 return 1;
             }
@@ -563,17 +561,17 @@ static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x
     return 0;
 }
 
-/* The number of katanas battle_menu_collect_draw_out_katanas lists in
+/* The number of katanas skillset_collect_draw_out_katanas lists in
  * out_item_ids: its result without the 0x100 marker. */
-s32 battle_menu_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
-    return battle_menu_collect_draw_out_katanas(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
+s32 skillset_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
+    return skillset_collect_draw_out_katanas(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /* Collect the katana item id of each of the unit's learned Draw Out abilities
  * into out_item_ids, terminated by ITEM_ID_NONE, and return 0x100 plus their
  * count (0 when the unit or skillset is wrong or the list is empty). Draw Out
  * abilities run in the same order as their katanas. */
-s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) {
+s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) {
     u16 abilities[0x10];
     u8 mp_costs[0x10];
     u8 ability_flags[0x10];
@@ -586,14 +584,14 @@ s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_
     u32 item_id;
 
     count = 0;
-    if (battle_unit_get_existing_pointer(unit_id) == 0) {
+    if (unit_get_present_stats(unit_id) == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_DRAW_OUT) {
         *out_item_ids = ITEM_ID_NONE;
         return 0;
     }
-    ability_count = battle_menu_get_unit_skillset_ability_data(
+    ability_count = skillset_get_unit_ability_data(
         unit_id, SKILLSET_ID_DRAW_OUT, (s16*)abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     if (ability_count == 0) {
         *out_item_ids = ITEM_ID_NONE;
@@ -612,31 +610,30 @@ s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_
     return count + 0x100;
 }
 
-/* battle_menu_load_charge_skillset for a caller that only wants the ability ids;
+/* skillset_load_charge_abilities for a caller that only wants the ability ids;
  * the charge times and turn counts go to scratch arrays. */
-s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids) {
+s32 skillset_load_charge_ability_ids(s32 unit_id, u8 skillset_id, s16* ability_ids) {
     u8 charge_times[16];
     u8 turn_counts[16];
 
-    return battle_menu_load_charge_skillset(unit_id, skillset_id, ability_ids, charge_times, turn_counts);
+    return skillset_load_charge_abilities(unit_id, skillset_id, ability_ids, charge_times, turn_counts);
 }
 
 /* Load the skillset's usable abilities with their CT and turn counts into the
  * caller's lists; the MP-cost and silence/reflect flag lists are scratch. */
-s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns) {
+s32 skillset_load_charge_abilities(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns) {
     u8 mp_costs[16];
     u8 ability_flags[16];
 
-    return battle_menu_get_unit_skillset_ability_data(
-        unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
+    return skillset_get_unit_ability_data(unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
 }
 
 /* The clocktick loop between turns. RESET clears every unit's CT and turn state; FIND_ACTIVE_UNIT
  * returns 0xd000 | the first unit not Dead, Crystal, Jumping, Petrified or Treasure (0xdf00 if
  * none). Otherwise it steps the between-turn states (CT gain, the 100-CT pick, charge and status
- * countdowns, poison and regen, mimes) until one yields a battle_turn_event_e | unit id, giving up
- * with BATTLE_TURN_EVENT_NONE after 1201 steps. */
-s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
+ * countdowns, poison and regen, mimes) until one yields a turn_event_e | unit id, giving up
+ * with TURN_EVENT_NONE after 1201 steps. */
+s32 turn_run_clock(turn_clock_mode_e mode) {
     unit_stats_t* unit;
     s32 result = 0;
     s32 count = 0;
@@ -649,30 +646,30 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
     u16 ct;
     u8 value;
 
-    if (mode == BATTLE_BETWEEN_TURN_MODE_RESET) {
-        g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_ADD_CT;
-        g_battle_turn_unit_id = -1;
+    if (mode == TURN_CLOCK_MODE_RESET) {
+        g_turn_clock_state = TURN_CLOCK_STATE_ADD_CT;
+        g_turn_unit_id = -1;
         for (i = UNIT_TEAM_COUNT - 1; i >= 0; i--) {
-            g_battle_team_golem[i] = 0;
+            g_action_team_golem[i] = 0;
         }
-        g_battle_action_current_attacker.mimic_pending = 0;
+        g_action_mimic_attacker.mimic_pending = 0;
 
-        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-            unit = &g_battle_unit_stats[i];
+        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+            unit = &g_unit_stats[i];
             unit->ct = 0;
             unit->has_turn = 0;
             unit->ability_outcome = 0;
             unit->charged_ability_ct = 0xff;
         }
 
-        battle_ai_end_action_simulation();
+        ai_simulate_end();
         return 0xe000;
     }
 
-    if (mode == BATTLE_BETWEEN_TURN_MODE_FIND_ACTIVE_UNIT) {
-        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-            unit = &g_battle_unit_stats[i];
-            if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
+    if (mode == TURN_CLOCK_MODE_FIND_ACTIVE_UNIT) {
+        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+            unit = &g_unit_stats[i];
+            if (unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
                 if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                         & (STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD)
                             | STATUS_BYTE_MASK(STATUS_ID_JUMP)))) {
@@ -687,16 +684,16 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
     }
 
     while (result == 0) {
-        switch (g_battle_between_turn_state) {
-        case BATTLE_BETWEEN_TURN_STATE_ADD_CT:
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                unit = &g_battle_unit_stats[i];
-                flags = battle_status_calculate_turn_flags(unit);
-                if (!(flags & BATTLE_TURN_STATUS_CT_FROZEN)) {
+        switch (g_turn_clock_state) {
+        case TURN_CLOCK_STATE_ADD_CT:
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                unit = &g_unit_stats[i];
+                flags = turn_calculate_status_flags(unit);
+                if (!(flags & TURN_STATUS_CT_FROZEN)) {
                     speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
-                    if (flags & BATTLE_TURN_STATUS_SLOW) {
+                    if (flags & TURN_STATUS_SLOW) {
                         speed >>= 1;
-                    } else if (flags & BATTLE_TURN_STATUS_HASTE) {
+                    } else if (flags & TURN_STATUS_HASTE) {
                         speed += speed >> 1;
                     }
                     ct = unit->ct + speed;
@@ -708,15 +705,15 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 }
             }
 
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_PICK_UNIT;
+            g_turn_clock_state = TURN_CLOCK_STATE_PICK_UNIT;
             break;
-        case BATTLE_BETWEEN_TURN_STATE_PICK_UNIT:
+        case TURN_CLOCK_STATE_PICK_UNIT:
             max_ct = UNIT_TURN_CT_THRESHOLD - 1;
             best = 0xff;
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                unit = &g_battle_unit_stats[i];
-                flags = battle_status_calculate_turn_flags(unit);
-                if (!(flags & BATTLE_TURN_STATUS_CT_FROZEN)) {
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                unit = &g_unit_stats[i];
+                flags = turn_calculate_status_flags(unit);
+                if (!(flags & TURN_STATUS_CT_FROZEN)) {
                     if (max_ct < unit->ct) {
                         best = i;
                         max_ct = unit->ct;
@@ -725,7 +722,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             }
 
             if (best != 0xff) {
-                unit = &g_battle_unit_stats[best];
+                unit = &g_unit_stats[best];
                 /* A jumping unit waits at 99 CT, ready to act once it lands; pick again. */
                 if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)] & STATUS_BYTE_MASK(STATUS_ID_JUMP)) {
                     unit->ct = UNIT_TURN_CT_THRESHOLD - 1;
@@ -739,9 +736,9 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     unit->ct = max_ct % UNIT_TURN_CT_THRESHOLD;
                 }
 
-                ret = battle_status_build_upkeep_action(best, unit);
+                ret = status_build_upkeep_action(best, unit);
                 if (ret != 0) {
-                    result = best | BATTLE_TURN_EVENT_ACTION_RESULT;
+                    result = best | TURN_EVENT_ACTION_RESULT;
                     /* A crystal or treasure (1) or an expired Death Sentence (3) ends here without
                      * a turn; only the first counts as a casualty. */
                     if (ret & 1) {
@@ -753,33 +750,31 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 }
 
                 /* A staged revival or other change (2) gets its turn even when the unit can't act. */
-                flags = battle_status_calculate_turn_flags(unit);
-                if (!(flags
-                        & (BATTLE_TURN_STATUS_CT_FROZEN | BATTLE_TURN_STATUS_INCAPACITATED | BATTLE_TURN_STATUS_DEAD))
-                    || ret == 2) {
+                flags = turn_calculate_status_flags(unit);
+                if (!(flags & (TURN_STATUS_CT_FROZEN | TURN_STATUS_INCAPACITATED | TURN_STATUS_DEAD)) || ret == 2) {
                     unit->has_turn = 1;
                     unit->movement_taken = 0;
                     unit->action_taken = 0;
                     unit->transparent_removal_flag = 1;
                     if (ret == 0) {
-                        result = best | BATTLE_TURN_EVENT_UNIT_READY;
+                        result = best | TURN_EVENT_UNIT_READY;
                     }
-                    g_battle_between_turn_resume_state = g_battle_between_turn_state;
-                    g_battle_turn_unit_id = best;
-                    g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_UNIT_TURN;
+                    g_turn_clock_resume_state = g_turn_clock_state;
+                    g_turn_unit_id = best;
+                    g_turn_clock_state = TURN_CLOCK_STATE_UNIT_TURN;
                     return result;
                 }
                 continue;
             }
 
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_TICK_CHARGES;
+            g_turn_clock_state = TURN_CLOCK_STATE_TICK_CHARGES;
             break;
-        case BATTLE_BETWEEN_TURN_STATE_TICK_CHARGES:
+        case TURN_CLOCK_STATE_TICK_CHARGES:
             i = 0;
             do {
-                unit = &g_battle_unit_stats[i];
-                flags = battle_status_calculate_turn_flags(unit);
-                if (!(flags & BATTLE_TURN_STATUS_BLOCKS_WAIT_MENU_MASK)) {
+                unit = &g_unit_stats[i];
+                flags = turn_calculate_status_flags(unit);
+                if (!(flags & TURN_STATUS_BLOCKS_WAIT_MENU_MASK)) {
                     value = unit->charged_ability_ct;
                     if (value != 0xff && value != 0) {
                         value--;
@@ -787,14 +782,14 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     }
                 }
                 /* clang-format off */
-            } while (++i < BATTLE_UNIT_SLOT_COUNT); g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_RESOLVE_CHARGE;
+            } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RESOLVE_CHARGE;
             /* clang-format on */
             break;
-        case BATTLE_BETWEEN_TURN_STATE_RESOLVE_CHARGE:
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                unit = &g_battle_unit_stats[i];
-                flags = battle_status_calculate_turn_flags(unit);
-                if (!(flags & BATTLE_TURN_STATUS_BLOCKS_WAIT_MENU_MASK) && unit->charged_ability_ct == 0) {
+        case TURN_CLOCK_STATE_RESOLVE_CHARGE:
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                unit = &g_unit_stats[i];
+                flags = turn_calculate_status_flags(unit);
+                if (!(flags & TURN_STATUS_BLOCKS_WAIT_MENU_MASK) && unit->charged_ability_ct == 0) {
                     /* A performer's song or dance starts charging again instead of ending. */
                     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                         & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
@@ -803,171 +798,171 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     } else {
                         unit->charged_ability_ct = 0xff;
                     }
-                    g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE;
-                    result = i | BATTLE_TURN_EVENT_ABILITY_READY;
+                    g_turn_clock_state = TURN_CLOCK_STATE_PICK_UNIT_AFTER_CHARGE;
+                    result = i | TURN_EVENT_ABILITY_READY;
                     return result;
                 }
             }
 
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_EXPIRE_STATUSES;
+            g_turn_clock_state = TURN_CLOCK_STATE_EXPIRE_STATUSES;
             break;
-        case BATTLE_BETWEEN_TURN_STATE_EXPIRE_STATUSES:
+        case TURN_CLOCK_STATE_EXPIRE_STATUSES:
             i = 0;
             do {
-                unit = &g_battle_unit_stats[i];
-                if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE
+                unit = &g_unit_stats[i];
+                if (unit->entd_slot != UNIT_ENTD_SLOT_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
-                    battle_status_update_expiring(i);
+                    status_update_expiring(i);
                 }
                 /* clang-format off */
-            } while (++i < BATTLE_UNIT_SLOT_COUNT); g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_COLLECT_PENDING_ACTIONS;
+            } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_COLLECT_PENDING_ACTIONS;
             /* clang-format on */
             break;
-        case BATTLE_BETWEEN_TURN_STATE_COLLECT_PENDING_ACTIONS:
+        case TURN_CLOCK_STATE_COLLECT_PENDING_ACTIONS:
             /* The pending flags list the units whose expiring statuses left an
              * action result to apply; MARK_MIMES reuses them for Mimes. */
             i = 0;
             do {
-                unit = &g_battle_unit_stats[i];
-                g_battle_between_turn_pending_flags[i] = 0;
-                if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE
+                unit = &g_unit_stats[i];
+                g_turn_pending_flags[i] = 0;
+                if (unit->entd_slot != UNIT_ENTD_SLOT_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
-                    g_battle_between_turn_pending_flags[i] = unit->action.attack_type;
+                    g_turn_pending_flags[i] = unit->action.attack_type;
                 }
                 /* clang-format off */
-            } while (++i < BATTLE_UNIT_SLOT_COUNT); g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_RUN_PENDING_ACTIONS;
+            } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_PENDING_ACTIONS;
             /* clang-format on */
             break;
-        case BATTLE_BETWEEN_TURN_STATE_RUN_PENDING_ACTIONS:
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                if (g_battle_between_turn_pending_flags[i] != 0) {
-                    g_battle_between_turn_pending_flags[i] = 0;
-                    result = i | BATTLE_TURN_EVENT_ACTION_RESULT;
+        case TURN_CLOCK_STATE_RUN_PENDING_ACTIONS:
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                if (g_turn_pending_flags[i] != 0) {
+                    g_turn_pending_flags[i] = 0;
+                    result = i | TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
             }
 
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_ADD_CT;
+            g_turn_clock_state = TURN_CLOCK_STATE_ADD_CT;
             break;
-        case BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE:
+        case TURN_CLOCK_STATE_PICK_UNIT_AFTER_CHARGE:
             /* Only a Quick target (CT 0xFF, above the tick's 0xFE cap) takes its turn here. */
             max_ct = 0xfe;
             best = 0xff;
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                flags = battle_status_calculate_turn_flags(&g_battle_unit_stats[i]);
-                if (!(flags & BATTLE_TURN_STATUS_CT_FROZEN)) {
-                    if (max_ct < g_battle_unit_stats[i].ct) {
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                flags = turn_calculate_status_flags(&g_unit_stats[i]);
+                if (!(flags & TURN_STATUS_CT_FROZEN)) {
+                    if (max_ct < g_unit_stats[i].ct) {
                         best = i;
-                        max_ct = g_battle_unit_stats[i].ct;
+                        max_ct = g_unit_stats[i].ct;
                     }
                 }
             }
 
             if (best != 0xff) {
-                unit = &g_battle_unit_stats[best];
+                unit = &g_unit_stats[best];
                 unit->has_turn = 1;
                 unit->transparent_removal_flag = 1;
                 unit->ct = 0;
                 unit->movement_taken = 0;
                 unit->action_taken = 0;
-                g_battle_between_turn_resume_state = BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE;
-                g_battle_turn_unit_id = best;
-                g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_UNIT_TURN;
-                result = best | BATTLE_TURN_EVENT_UNIT_READY;
+                g_turn_clock_resume_state = TURN_CLOCK_STATE_PICK_UNIT_AFTER_CHARGE;
+                g_turn_unit_id = best;
+                g_turn_clock_state = TURN_CLOCK_STATE_UNIT_TURN;
+                result = best | TURN_EVENT_UNIT_READY;
                 return result;
             }
 
-            g_battle_between_turn_resume_state = BATTLE_BETWEEN_TURN_STATE_RESOLVE_CHARGE;
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_MARK_MIMES;
+            g_turn_clock_resume_state = TURN_CLOCK_STATE_RESOLVE_CHARGE;
+            g_turn_clock_state = TURN_CLOCK_STATE_MARK_MIMES;
             break;
-        case BATTLE_BETWEEN_TURN_STATE_UNIT_TURN:
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                unit = &g_battle_unit_stats[i];
+        case TURN_CLOCK_STATE_UNIT_TURN:
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                unit = &g_unit_stats[i];
                 if (unit->has_turn != 0) {
                     s32 unit_status;
                     s32 end_turn;
 
-                    unit_status = battle_status_calculate_turn_flags(unit);
-                    end_turn = battle_action_should_end_unit_turn(unit);
-                    if ((unit_status & BATTLE_TURN_STATUS_CT_FROZEN) || end_turn != 0) {
-                        battle_action_end_turn(i);
+                    unit_status = turn_calculate_status_flags(unit);
+                    end_turn = turn_should_end(unit);
+                    if ((unit_status & TURN_STATUS_CT_FROZEN) || end_turn != 0) {
+                        turn_end(i);
                         unit->has_turn = 0;
                     } else {
-                        result = i | BATTLE_TURN_EVENT_UNIT_READY;
+                        result = i | TURN_EVENT_UNIT_READY;
                         return result;
                     }
                 }
             }
 
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_POISON_AND_REGEN;
+            g_turn_clock_state = TURN_CLOCK_STATE_POISON_AND_REGEN;
             break;
-        case BATTLE_BETWEEN_TURN_STATE_POISON_AND_REGEN:
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_TERRAIN_POISON;
-            if (g_battle_turn_unit_id != -1) {
-                unit = &g_battle_unit_stats[g_battle_turn_unit_id];
-                if (battle_status_apply_poison_and_regen(unit)) {
-                    result = g_battle_turn_unit_id | BATTLE_TURN_EVENT_ACTION_RESULT;
+        case TURN_CLOCK_STATE_POISON_AND_REGEN:
+            g_turn_clock_state = TURN_CLOCK_STATE_TERRAIN_POISON;
+            if (g_turn_unit_id != -1) {
+                unit = &g_unit_stats[g_turn_unit_id];
+                if (status_apply_poison_and_regen(unit)) {
+                    result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
             }
             break;
-        case BATTLE_BETWEEN_TURN_STATE_TERRAIN_POISON:
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_REMOVE_TRANSPARENT;
-            if (g_battle_turn_unit_id != -1) {
-                unit = &g_battle_unit_stats[g_battle_turn_unit_id];
-                if (battle_status_prepare_terrain_poison(unit)) {
-                    result = g_battle_turn_unit_id | BATTLE_TURN_EVENT_ACTION_RESULT;
+        case TURN_CLOCK_STATE_TERRAIN_POISON:
+            g_turn_clock_state = TURN_CLOCK_STATE_REMOVE_TRANSPARENT;
+            if (g_turn_unit_id != -1) {
+                unit = &g_unit_stats[g_turn_unit_id];
+                if (status_prepare_terrain_poison(unit)) {
+                    result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
             }
             break;
-        case BATTLE_BETWEEN_TURN_STATE_REMOVE_TRANSPARENT:
-            g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_MARK_MIMES;
-            if (g_battle_turn_unit_id != -1) {
-                unit = &g_battle_unit_stats[g_battle_turn_unit_id];
-                if (battle_status_remove_transparent(unit)) {
-                    result = g_battle_turn_unit_id | BATTLE_TURN_EVENT_ACTION_RESULT;
+        case TURN_CLOCK_STATE_REMOVE_TRANSPARENT:
+            g_turn_clock_state = TURN_CLOCK_STATE_MARK_MIMES;
+            if (g_turn_unit_id != -1) {
+                unit = &g_unit_stats[g_turn_unit_id];
+                if (status_remove_transparent(unit)) {
+                    result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
             }
             break;
-        case BATTLE_BETWEEN_TURN_STATE_MARK_MIMES:
-            if (g_battle_action_current_attacker.mimic_pending != 0) {
+        case TURN_CLOCK_STATE_MARK_MIMES:
+            if (g_action_mimic_attacker.mimic_pending != 0) {
                 i = 0;
                 do {
-                    unit = &g_battle_unit_stats[i];
-                    g_battle_between_turn_pending_flags[i] = 0;
-                    if (unit->job_id == JOB_ID_MIME && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
-                        g_battle_between_turn_pending_flags[i] = 1;
+                    unit = &g_unit_stats[i];
+                    g_turn_pending_flags[i] = 0;
+                    if (unit->job_id == JOB_ID_MIME && unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
+                        g_turn_pending_flags[i] = 1;
                     }
                     /* clang-format off */
-                } while (++i < BATTLE_UNIT_SLOT_COUNT); g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_RUN_MIMES;
+                } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_MIMES;
                 /* clang-format on */
             } else {
-                g_battle_between_turn_state = g_battle_between_turn_resume_state;
+                g_turn_clock_state = g_turn_clock_resume_state;
             }
             break;
-        case BATTLE_BETWEEN_TURN_STATE_RUN_MIMES:
-            g_battle_action_current_attacker.mimic_pending = 0;
-            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                unit = &g_battle_unit_stats[i];
-                if (g_battle_between_turn_pending_flags[i] != 0 && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
-                    g_battle_between_turn_pending_flags[i] = 0;
-                    ret = battle_action_set_mimic_ability(unit);
+        case TURN_CLOCK_STATE_RUN_MIMES:
+            g_action_mimic_attacker.mimic_pending = 0;
+            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+                unit = &g_unit_stats[i];
+                if (g_turn_pending_flags[i] != 0 && unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
+                    g_turn_pending_flags[i] = 0;
+                    ret = action_mimic_set_ability(unit);
                     if (ret == 1) {
-                        result = i | BATTLE_TURN_EVENT_ABILITY_READY;
+                        result = i | TURN_EVENT_ABILITY_READY;
                         return result;
                     }
                     if (ret == -1) {
-                        result = i | BATTLE_TURN_EVENT_MIME;
+                        result = i | TURN_EVENT_MIME;
                         return result;
                     }
                 }
             }
 
-            g_battle_between_turn_state = g_battle_between_turn_resume_state;
+            g_turn_clock_state = g_turn_clock_resume_state;
             break;
         }
 
@@ -977,7 +972,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
         }
     }
 
-    return BATTLE_TURN_EVENT_NONE;
+    return TURN_EVENT_NONE;
 }
 
 /*
@@ -993,13 +988,13 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
  * runs out revives on a coin flip with 1 to max HP. Outside the execute action
  * state (previews and AI simulations) a dead unit's counter does not move.
  */
-static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
+static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
     action_data_t* action = &unit->action;
     s32 roll;
     s32 mask;
     u8 counter;
 
-    battle_action_clear_current_data(action);
+    action_clear_current_data(action);
     roll = rand();
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
             & (STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_UNDEAD)))
@@ -1012,7 +1007,7 @@ static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
         return 2;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD))
-        && g_battle_action_state == ACTION_STATE_EXECUTE) {
+        && g_action_state == ACTION_STATE_EXECUTE) {
         if (unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL) {
             return 0;
         }
@@ -1084,34 +1079,33 @@ static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
  * a ridden mount; INCAPACITATED | DEAD for a dead unit; otherwise INCAPACITATED |
  * SLEEP for Sleep plus the HASTE and SLOW bits. The retail status data puts Sleep
  * in the freeze-CT set, which leaves the SLEEP result unreachable. */
-s32 battle_status_calculate_turn_flags(const unit_stats_t* unit) {
+s32 turn_calculate_status_flags(const unit_stats_t* unit) {
     s32 status1;
     s32 status4;
     s32 status5;
     s32 flags;
 
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
-        return BATTLE_TURN_STATUS_CT_FROZEN;
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+        return TURN_STATUS_CT_FROZEN;
     }
     if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_FREEZE_CT) != 0) {
-        return BATTLE_TURN_STATUS_CT_FROZEN;
+        return TURN_STATUS_CT_FROZEN;
     }
     if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
-        return BATTLE_TURN_STATUS_CT_FROZEN;
+        return TURN_STATUS_CT_FROZEN;
     }
     status1 = unit->status_sets.current[0];
     status4 = unit->status_sets.current[3];
     status5 = unit->status_sets.current[4];
     if ((status1 & STATUS_BYTE_MASK(STATUS_ID_DEAD)) != 0) {
-        return BATTLE_TURN_STATUS_INCAPACITATED | BATTLE_TURN_STATUS_DEAD;
+        return TURN_STATUS_INCAPACITATED | TURN_STATUS_DEAD;
     }
-    flags = -((status5 & STATUS_BYTE_MASK(STATUS_ID_SLEEP)) != 0)
-        & (BATTLE_TURN_STATUS_INCAPACITATED | BATTLE_TURN_STATUS_SLEEP);
+    flags = -((status5 & STATUS_BYTE_MASK(STATUS_ID_SLEEP)) != 0) & (TURN_STATUS_INCAPACITATED | TURN_STATUS_SLEEP);
     if ((status4 & STATUS_BYTE_MASK(STATUS_ID_HASTE)) != 0) {
-        flags |= BATTLE_TURN_STATUS_HASTE;
+        flags |= TURN_STATUS_HASTE;
     }
     if ((status4 & STATUS_BYTE_MASK(STATUS_ID_SLOW)) != 0) {
-        flags |= BATTLE_TURN_STATUS_SLOW;
+        flags |= TURN_STATUS_SLOW;
     }
     return flags;
 }
@@ -1123,15 +1117,15 @@ s32 battle_status_calculate_turn_flags(const unit_stats_t* unit) {
  * loss decides the battle) that is disabled or lost decides it at once:
  * defeat for a player-team unit, victory for any other. Otherwise the side
  * left with no unit free of the KO status set loses, the player side first. */
-s32 battle_action_check_battle_outcome(void) {
+s32 event_check_battle_outcome(void) {
     s32 player_unit_count = 0;
     s32 enemy_unit_count = 0;
     s32 unit_index;
     s32 selected;
     unit_stats_t* unit;
 
-    for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
-        unit = &g_battle_unit_stats[unit_index];
+    for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
+        unit = &g_unit_stats[unit_index];
         if ((unit->initial_team_flags & UNIT_TEAM_IMPORTANCE_MASK) == UNIT_TEAM_IMPORTANCE_MASK) {
             if (unit->existence != UNIT_EXISTENCE_NONE) {
                 selected = unit->existence == UNIT_EXISTENCE_DISABLED;
@@ -1154,9 +1148,9 @@ s32 battle_action_check_battle_outcome(void) {
         return 0;
     }
 
-    for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
-        unit = &g_battle_unit_stats[unit_index];
-        if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
+    for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
+        unit = &g_unit_stats[unit_index];
+        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
             selected = unit->initial_team_flags & UNIT_TEAM_MASK;
             if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_KO) == 0) {
                 if (selected != 0) {
@@ -1179,18 +1173,18 @@ s32 battle_action_check_battle_outcome(void) {
  * Returns -1 for an empty slot, -3 for a unit the AT list leaves out (Dead,
  * Crystal, Petrify, Treasure or a ridden mount) and -2 when the unit is not on
  * the list. */
-s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
+s32 at_list_find_unit(const unit_stats_t* unit) {
     at_entry_t at_list[AT_LIST_CAPACITY];
     s32 i;
     at_entry_t* entry;
     u8 battle_id;
 
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE)
         return -1;
-    if (battle_status_is_unit_excluded_from_at_list(unit) != 0)
+    if (at_list_is_unit_excluded(unit) != 0)
         return -3;
     battle_id = unit->battle_id;
-    battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_TURNS_ONLY);
+    at_list_build(at_list, AT_LIST_MODE_TURNS_ONLY);
     for (i = 0; i < AT_LIST_CAPACITY; i++) {
         entry = &at_list[i];
         if ((entry->unit_code & AT_UNIT_ID_MASK) == battle_id) {
@@ -1202,29 +1196,29 @@ s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
 
 /* Rebuild the AT list and return the unit id of the chosen entry.
  *
- * Returns BATTLE_AT_LIST_ENTRY_EMPTY for an empty entry; a charged-action
+ * Returns AT_LIST_ENTRY_EMPTY for an empty entry; a charged-action
  * entry (AT_ACTION_ENTRY) returns its unit id plus
- * BATTLE_AT_LIST_ENTRY_CHARGED_ACTION. */
-s32 battle_action_get_at_list_entry_unit_id(s32 at_index) {
+ * AT_LIST_ENTRY_CHARGED_ACTION. */
+s32 at_list_get_entry_unit_id(s32 at_index) {
     at_entry_t at_list[AT_LIST_CAPACITY];
     u32 entry;
     u32 unit_id;
 
-    battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_ALL);
+    at_list_build(at_list, AT_LIST_MODE_ALL);
     entry = at_list[at_index].unit_code;
     unit_id = entry & AT_UNIT_ID_MASK;
     if (unit_id == AT_END_OF_LIST) {
-        return BATTLE_AT_LIST_ENTRY_EMPTY;
+        return AT_LIST_ENTRY_EMPTY;
     }
     if (entry & AT_ACTION_ENTRY) {
-        unit_id += BATTLE_AT_LIST_ENTRY_CHARGED_ACTION;
+        unit_id += AT_LIST_ENTRY_CHARGED_ACTION;
     }
     return unit_id;
 }
 
 /* Return 1 when the unit cannot participate in the AT list. */
-static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit) {
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+static s32 at_list_is_unit_excluded(const unit_stats_t* unit) {
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return 1;
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
@@ -1246,7 +1240,7 @@ static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit)
  * Runs the attack preparation for action in the preview state, rebuilds
  * at_list and counts the turns until the action resolves, then restores the
  * unit's action data, CT, move/act flags and statuses. */
-s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, at_entry_t* at_list) {
+s32 at_list_preview(unit_stats_t* unit, action_command_t* action, at_entry_t* at_list) {
     action_command_t saved_action;
     action_command_t* action_data = &unit->action_command;
     s32 old_state;
@@ -1261,16 +1255,16 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
     old_inflicted_status = unit->inflicted_status[0];
     old_movement_taken = unit->movement_taken;
     old_action_taken = unit->action_taken;
-    old_state = g_battle_action_state;
-    g_battle_action_state = ACTION_STATE_PREVIEW;
-    if (battle_action_commit_attack_preparation(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE) {
+    old_state = g_action_state;
+    g_action_state = ACTION_STATE_PREVIEW;
+    if (action_commit_preparation(action) == ACTION_PREPARATION_IMMEDIATE) {
         unit->charged_ability_ct = 0;
     }
-    turns = battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_PREVIEW);
+    turns = at_list_build(at_list, AT_LIST_MODE_PREVIEW);
     if (turns != -1) {
-        turns = battle_action_get_number_of_turns_to_resolve(unit->battle_id, unit->charged_ability_ct, at_list);
+        turns = at_list_count_turns_to_resolve(unit->battle_id, unit->charged_ability_ct, at_list);
     }
-    g_battle_action_state = old_state;
+    g_action_state = old_state;
     unit->movement_taken = old_movement_taken;
     unit->action_taken = old_action_taken;
     unit->inflicted_status[0] = old_inflicted_status;
@@ -1292,7 +1286,7 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
  * be a multi-set u32: a single-set shift temporary gets sched1's birth boost
  * and lands after the a1 load. The 0x50-byte array is the unreferenced frame
  * area the target reserves. */
-s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode) {
+s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
     unit_stats_t* unit;
     u8 unused[0x50];
     s32 placed;
@@ -1313,24 +1307,24 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
     u32 key;
 
     placed = 0;
-    phase_tick = g_battle_between_turn_resume_state == BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE;
+    phase_tick = g_turn_clock_resume_state == TURN_CLOCK_STATE_PICK_UNIT_AFTER_CHARGE;
     for (slot = 0; slot < AT_LIST_CAPACITY; slot++) {
         list[slot].unit_code = 0xff;
         list[slot].action_id_low = 0xff;
         list[slot].sort_key = 0xffff;
     }
 
-    if (mode != BATTLE_AT_LIST_MODE_ACTIONS_ONLY) {
+    if (mode != AT_LIST_MODE_ACTIONS_ONLY) {
         /* The unit taking its turn heads the list with key 0. */
-        unit = battle_unit_find_active_data_pointer();
+        unit = unit_find_active();
         if (unit != 0) {
-            battle_action_insert_at_list_entry(unit->battle_id, 0, 0, list);
+            at_list_insert_entry(unit->battle_id, 0, 0, list);
         }
     }
 
-    for (slot = 0; slot < BATTLE_UNIT_SLOT_COUNT; slot++) {
-        unit = &g_battle_unit_stats[slot];
-        if (battle_status_is_unit_excluded_from_at_list(unit) != 0) {
+    for (slot = 0; slot < UNIT_SLOT_COUNT; slot++) {
+        unit = &g_unit_stats[slot];
+        if (at_list_is_unit_excluded(unit) != 0) {
             continue;
         }
 
@@ -1347,12 +1341,12 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
         }
 
         value = unit->charged_ability_ct;
-        if (value != 0xff && mode != BATTLE_AT_LIST_MODE_TURNS_ONLY) {
+        if (value != 0xff && mode != AT_LIST_MODE_TURNS_ONLY) {
             tick = value + wait;
-            if (value != 0 || unit->has_turn == 0 || mode != BATTLE_AT_LIST_MODE_PREVIEW) {
+            if (value != 0 || unit->has_turn == 0 || mode != AT_LIST_MODE_PREVIEW) {
                 tick += phase_tick;
             }
-            placed += battle_action_insert_at_list_entry(slot, 1, (tick << 8) & 0xff00, list);
+            placed += at_list_insert_entry(slot, 1, (tick << 8) & 0xff00, list);
 
             /* A performer repeats its song or dance every ability_ct ticks while the tick fits
              * the key's high byte. */
@@ -1366,12 +1360,12 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
                         break;
                     }
                     key <<= 8;
-                    placed += battle_action_insert_at_list_entry(slot, 1, key & 0xff00, list);
+                    placed += at_list_insert_entry(slot, 1, key & 0xff00, list);
                 }
             }
         }
 
-        if (mode == BATTLE_AT_LIST_MODE_ACTIONS_ONLY) {
+        if (mode == AT_LIST_MODE_ACTIONS_ONLY) {
             continue;
         }
 
@@ -1443,8 +1437,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
             remainder %= UNIT_TURN_CT_THRESHOLD;
             ct = remainder;
             /* Within a tick, the unit that overshoots 100 CT further sorts first. */
-            added = battle_action_insert_at_list_entry(
-                slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
+            added = at_list_insert_entry(slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
             if (added == 0) {
                 break;
             }
@@ -1462,7 +1455,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
  * + AT_JUMP for Jump. For an ability id of 0x100 or more the code is battle
  * ID - 0x40, which as a byte is battle ID + 0xc0: the action entry plus
  * AT_ABILITY_ID_HIGH_BIT. Returns 1 when the entry was placed. */
-static s32 battle_action_insert_at_list_entry(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list) {
+static s32 at_list_insert_entry(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list) {
     unit_stats_t* unit;
     s32 i;
     s32 j;
@@ -1472,7 +1465,7 @@ static s32 battle_action_insert_at_list_entry(s32 battle_id, s32 mode, s32 sort_
     s32 cmp;
     u16 key = sort_key;
 
-    unit = &g_battle_unit_stats[battle_id];
+    unit = &g_unit_stats[battle_id];
     for (i = 0; i < AT_LIST_CAPACITY; i++) {
         cmp = key < list[i].sort_key;
         ability_code = battle_id + AT_ACTION_ENTRY;
@@ -1503,23 +1496,23 @@ static s32 battle_action_insert_at_list_entry(s32 battle_id, s32 mode, s32 sort_
 
 /* Mark the unit's action as taken (its move flag is left as is) and end its turn if nothing is
  * left to do. */
-void battle_action_set_only_action_taken(s32 unit_id) {
-    battle_action_set_move_act_flags(unit_id, 0, 1);
+void turn_set_act_taken(s32 unit_id) {
+    turn_set_move_act_taken(unit_id, 0, 1);
 }
 
 /* Mark the unit's move as taken (its action flag is left as is) and end its turn if nothing is
  * left to do. */
-void battle_action_set_only_movement_taken(s32 unit_id) {
-    battle_action_set_move_act_flags(unit_id, 1, 0);
+void turn_set_move_taken(s32 unit_id) {
+    turn_set_move_act_taken(unit_id, 1, 0);
 }
 
 /* Mark the unit's move and/or action as taken and end its turn once nothing is
  * left to do. -1 for an absent unit, 1 when the turn ended, otherwise 0. */
-static s32 battle_action_set_move_act_flags(s32 unit_id, s32 move_flag, s32 act_flag) {
-    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
+static s32 turn_set_move_act_taken(s32 unit_id, s32 move_flag, s32 act_flag) {
+    unit_stats_t* unit = &g_unit_stats[unit_id];
     s32 ret;
 
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE)
         return -1;
     if (move_flag != 0) {
         unit->movement_taken = 1;
@@ -1527,9 +1520,9 @@ static s32 battle_action_set_move_act_flags(s32 unit_id, s32 move_flag, s32 act_
     if (act_flag != 0) {
         unit->action_taken = 1;
     }
-    ret = battle_action_should_end_unit_turn(unit);
+    ret = turn_should_end(unit);
     if (ret != 0) {
-        ret = battle_action_end_turn(unit_id);
+        ret = turn_end(unit_id);
     }
     return ret;
 }
@@ -1539,15 +1532,15 @@ static s32 battle_action_set_move_act_flags(s32 unit_id, s32 move_flag, s32 act_
  * capped at 60. As the turn start already left CT % 100, a turn costs 100 CT,
  * 80 with the move or the action unused, or 60 with both unused, and never
  * leaves more than 60. Always returns 1. */
-s32 battle_action_end_turn(s32 unit_id) {
-    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
+s32 turn_end(s32 unit_id) {
+    unit_stats_t* unit = &g_unit_stats[unit_id];
     u16 ct;
     u8 status5;
     u8 movement_check;
     u8 action_check;
     u32 result;
 
-    if (g_battle_unit_stats[unit_id].entd_slot == BATTLE_ENTD_SLOT_NONE)
+    if (g_unit_stats[unit_id].entd_slot == UNIT_ENTD_SLOT_NONE)
         return 1;
     if (unit->has_turn == 0)
         return 1;
@@ -1557,15 +1550,15 @@ s32 battle_action_end_turn(s32 unit_id) {
     action_check = (status5 & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT)) | unit->action_taken
         | (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)] & STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
     if (movement_check == 0) {
-        ct += BATTLE_TURN_UNUSED_CT_REFUND;
+        ct += TURN_UNUSED_CT_REFUND;
     }
     result = ct;
     if (action_check == 0) {
-        ct += BATTLE_TURN_UNUSED_CT_REFUND;
+        ct += TURN_UNUSED_CT_REFUND;
         result = ct;
     }
-    if (result > BATTLE_TURN_END_CT_MAX)
-        ct = BATTLE_TURN_END_CT_MAX;
+    if (result > TURN_END_CT_MAX)
+        ct = TURN_END_CT_MAX;
     unit->ct = ct;
     unit->has_turn = 0;
     return 1;
@@ -1574,8 +1567,8 @@ s32 battle_action_end_turn(s32 unit_id) {
 /* Return 1 when the unit's turn should end: it can no longer move (moved, or
  * Don't Move) nor act (acted, or an action restriction), and it has used at
  * least one of the two. */
-static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit) {
-    s32 cannot_act = battle_unit_get_action_restriction(unit);
+static s32 turn_should_end(const unit_stats_t* unit) {
+    s32 cannot_act = unit_get_action_restriction(unit);
     u8 no_move;
     u8 no_action;
     u8 taken;
@@ -1591,13 +1584,13 @@ static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit) {
 }
 
 /* 1 when the unit's turn is over. A status that blocks turns
- * (battle_status_calculate_turn_flags) ends it here. */
-s32 battle_action_check_change_of_turn(s32 unit_id) {
-    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
+ * (turn_calculate_status_flags) ends it here. */
+s32 turn_is_over(s32 unit_id) {
+    unit_stats_t* unit = &g_unit_stats[unit_id];
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
         return 1;
     }
-    if (!(battle_status_calculate_turn_flags(unit) & BATTLE_TURN_STATUS_BLOCKS_TURN_MASK)) {
+    if (!(turn_calculate_status_flags(unit) & TURN_STATUS_BLOCKS_TURN_MASK)) {
         return unit->has_turn == 0;
     }
     unit->has_turn = 0;
@@ -1605,29 +1598,29 @@ s32 battle_action_check_change_of_turn(s32 unit_id) {
 }
 
 /* End the unit's Charging, Jump, Defending and Performing statuses and drop its charged ability
- * (action state none). Same body as crystals_and_treasure.c's static battle_status_cancel_charge. */
-void battle_status_clear_action_state(unit_stats_t* unit) {
+ * (action state none). Same body as crystals_and_treasure.c's static status_cancel_charge. */
+void status_clear_action_state(unit_stats_t* unit) {
     status_set_action_state(unit, STATUS_ACTION_STATE_NONE);
 }
 
 /* Put the unit in the Defending action state, which ends Charging, Jump and Performing and drops
  * any charged ability. Used by the Defend command and the AI's simulation of it; always returns 0. */
-s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {
-    status_set_action_state(&g_battle_unit_stats[unit_id], STATUS_ACTION_STATE_DEFENDING);
+s32 status_inflict_defending(s32 unit_id) {
+    status_set_action_state(&g_unit_stats[unit_id], STATUS_ACTION_STATE_DEFENDING);
     return 0;
 }
 
 /* Marks a present unit that has a formation index for removal: the slot is
  * emptied and its existence set to pending removal. Returns -1 when the slot is
  * empty or has no formation index, else 0. No retail code calls it. */
-s32 battle_unit_mark_pending_removal(s32 unit_id) {
-    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
+s32 unit_mark_pending_removal(s32 unit_id) {
+    unit_stats_t* unit = &g_unit_stats[unit_id];
 
-    if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
+    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE)
         return -1;
     if (unit->formation_index == UNIT_FORMATION_INDEX_NONE)
         return -1;
-    unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
+    unit->entd_slot = UNIT_ENTD_SLOT_NONE;
     unit->existence = UNIT_EXISTENCE_PENDING_REMOVAL;
     return 0;
 }

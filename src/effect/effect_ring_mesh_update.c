@@ -64,11 +64,11 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     u32 blue;
     u32 green;
     u32 red;
-    map_tile_t* tile;
+    battle_map_tile_t* tile;
 
     record_index = (s16)record_index;
-    record = &g_battle_effect_state_records[record_index];
-    entry = &g_battle_effect_geometry_table->entries[emitter_index];
+    record = &g_effect_state_records[record_index];
+    entry = &g_effect_geometry_table->entries[emitter_index];
     placement = entry->radial_mesh.placement_flags;
     ot = gfx_get_battle_otag();
     scratch = (effect_ring_mesh_scratch_t*)getScratchAddr(0);
@@ -79,9 +79,9 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
     case EFFECT_CALLBACK_PHASE_INIT:
         if (record->work_slots[callback_slot] != 0) {
-            battle_heap_free_block(record->work_slots[callback_slot]);
+            effect_heap_free_block(record->work_slots[callback_slot]);
         }
-        work = battle_heap_alloc_block(sizeof(effect_ring_mesh_work_t), record_index);
+        work = effect_heap_alloc_block(sizeof(effect_ring_mesh_work_t), record_index);
         record->work_slots[callback_slot] = work;
 
         configuration = entry->radial_mesh.texture_page_config;
@@ -96,7 +96,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = tpage;
-                quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
+                quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
             }
         }
 
@@ -112,32 +112,30 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
         /* Indexed again rather than read through record, as the target does. */
-        target_index = g_battle_effect_state_records[record_index].timeline.target_index;
+        target_index = g_effect_state_records[record_index].timeline.target_index;
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
-        battle_effect_interpolate_emitter_spawn_position(entry, j, &origin);
+        effect_interpolate_emitter_spawn_position(entry, j, &origin);
         switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
         case EFFECT_EMITTER_ORIGIN_WORLD:
             break;
         case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-            tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
-                g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
-            origin.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-            origin.vy -= tile->height * MAP_HEIGHT_STEP;
-            origin.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            tile = battle_map_tile_get_pointer(g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz,
+                g_effect_target_tile.data.tile.vy);
+            origin.vx += g_effect_target_tile.data.tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+            origin.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
+            origin.vz += g_effect_target_tile.data.tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
             break;
         case EFFECT_EMITTER_ORIGIN_CASTER:
-            battle_effect_resolve_target_world_coords(
-                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, EFFECT_TARGET_INDEX_CASTER,
-                &g_battle_effect_context, &scratch->vertex);
+            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+                EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &scratch->vertex);
             origin.vx += scratch->vertex.vx;
             origin.vy += scratch->vertex.vy;
             origin.vz += scratch->vertex.vz;
             break;
         case EFFECT_EMITTER_ORIGIN_TARGET:
-            battle_effect_resolve_target_world_coords(
-                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index,
-                &g_battle_effect_context, &scratch->vertex);
+            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+                target_index, &g_effect_context, &scratch->vertex);
             origin.vx += scratch->vertex.vx;
             origin.vy += scratch->vertex.vy;
             origin.vz += scratch->vertex.vz;
@@ -146,19 +144,19 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             break;
         case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
             battle_map_store_max_coordinates(&map_max);
-            origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
-            origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
+            origin.vx += map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
+            origin.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
             break;
         }
 
         radius_binding = entry->radial_mesh.shape_curves.radius;
         EFFECT_READ_CURVE(i, j, radius_binding, frame);
-        radius = battle_lerp_q8(entry->radial_mesh.radius_start, entry->radial_mesh.radius_end, j);
+        radius = effect_lerp_q8(entry->radial_mesh.radius_start, entry->radial_mesh.radius_end, j);
 
         texture_selector = entry->radial_mesh.motion_curves.texture;
         EFFECT_READ_CURVE(i, j, texture_selector, frame);
-        u = battle_lerp_q8(entry->radial_mesh.u_start, entry->radial_mesh.u_end, j);
-        v = battle_lerp_q8(entry->radial_mesh.v_start, entry->radial_mesh.v_end, j);
+        u = effect_lerp_q8(entry->radial_mesh.u_start, entry->radial_mesh.u_end, j);
+        v = effect_lerp_q8(entry->radial_mesh.v_start, entry->radial_mesh.v_end, j);
         u_span = entry->radial_mesh.u_span;
         v_span = entry->radial_mesh.v_span;
         work->v_scroll += entry->radial_mesh.v_scroll_speed;
@@ -170,21 +168,21 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.shape_curves.growth, frame);
-        growth.vx = battle_lerp_q8(entry->radial_mesh.growth_start, entry->radial_mesh.growth_end, j);
-        growth.vy = battle_lerp_q8(entry->radial_mesh.height_start, entry->radial_mesh.height_end, j) << 2;
-        growth.vz = battle_lerp_q8(entry->radial_mesh.row_radius_start, entry->radial_mesh.row_radius_end, j);
+        growth.vx = effect_lerp_q8(entry->radial_mesh.growth_start, entry->radial_mesh.growth_end, j);
+        growth.vy = effect_lerp_q8(entry->radial_mesh.height_start, entry->radial_mesh.height_end, j) << 2;
+        growth.vz = effect_lerp_q8(entry->radial_mesh.row_radius_start, entry->radial_mesh.row_radius_end, j);
 
         growth_step_selector = entry->radial_mesh.shape_curves.growth_step;
         EFFECT_READ_CURVE(i, j, growth_step_selector, frame);
-        growth_step.vx = battle_lerp_q8(entry->radial_mesh.growth_step_start, entry->radial_mesh.growth_step_end, j);
-        growth_step.vy = battle_lerp_q8(entry->radial_mesh.height_step_start, entry->radial_mesh.height_step_end, j)
+        growth_step.vx = effect_lerp_q8(entry->radial_mesh.growth_step_start, entry->radial_mesh.growth_step_end, j);
+        growth_step.vy = effect_lerp_q8(entry->radial_mesh.height_step_start, entry->radial_mesh.height_step_end, j)
             << 2;
         growth_step.vz
-            = battle_lerp_q8(entry->radial_mesh.row_radius_step_start, entry->radial_mesh.row_radius_step_end, j);
+            = effect_lerp_q8(entry->radial_mesh.row_radius_step_start, entry->radial_mesh.row_radius_step_end, j);
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.spin, frame);
         work->spin
-            = (work->spin + battle_lerp_q8(entry->radial_mesh.spin_speed_start, entry->radial_mesh.spin_speed_end, j))
+            = (work->spin + effect_lerp_q8(entry->radial_mesh.spin_speed_start, entry->radial_mesh.spin_speed_end, j))
             & (ONE - 1);
         /* The target makes these four calls and discards their results. */
         rsin(work->spin);
@@ -215,31 +213,31 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         work->radius_speed += growth_step.vx;
         work->radius_offset += growth.vx + work->radius_speed;
 
-        SetRotMatrix(&g_battle_camera_matrix);
-        SetTransMatrix(&g_battle_camera_matrix);
+        SetRotMatrix(&g_camera_matrix);
+        SetTransMatrix(&g_camera_matrix);
         buffer = work->buffer;
         scratch->origin.vx = origin.vx;
         scratch->origin.vy = origin.vy;
         scratch->origin.vz = origin.vz;
 
         /* Ring 0: quad i - 1 takes lattice rows 1 (x0/x1) and 0 (x2/x3). */
-        battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[0][0], &scratch->vertex);
+        effect_vector_add_to_svector(&scratch->origin, &scratch->points[0][0], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[2], &scratch->screen[2].pad);
         quad = &work->quads[buffer][0];
         quad->x2 = scratch->screen[2].vx;
         quad->y2 = scratch->screen[2].vy;
         scratch->depth[0][0] = scratch->screen[2].vz;
-        battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[0][1], &scratch->vertex);
+        effect_vector_add_to_svector(&scratch->origin, &scratch->points[0][1], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
         quad->x3 = scratch->screen[3].vx;
         quad->y3 = scratch->screen[3].vy;
         scratch->depth[0][1] = scratch->screen[3].vz;
-        battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[1][0], &scratch->vertex);
+        effect_vector_add_to_svector(&scratch->origin, &scratch->points[1][0], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[0], &scratch->screen[0].pad);
         quad->x0 = scratch->screen[0].vx;
         quad->y0 = scratch->screen[0].vy;
         scratch->depth[1][0] = scratch->screen[0].vz;
-        battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[1][1], &scratch->vertex);
+        effect_vector_add_to_svector(&scratch->origin, &scratch->points[1][1], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
         quad->x1 = scratch->screen[1].vx;
         quad->y1 = scratch->screen[1].vy;
@@ -251,12 +249,12 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y0 = scratch->screen[1].vy;
             quad->x2 = scratch->screen[3].vx;
             quad->y2 = scratch->screen[3].vy;
-            battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[0][i], &scratch->vertex);
+            effect_vector_add_to_svector(&scratch->origin, &scratch->points[0][i], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
             quad->x3 = scratch->screen[3].vx;
             quad->y3 = scratch->screen[3].vy;
             scratch->depth[0][i] = scratch->screen[3].vz;
-            battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[1][i], &scratch->vertex);
+            effect_vector_add_to_svector(&scratch->origin, &scratch->points[1][i], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
@@ -270,13 +268,13 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y0 = scratch->screen[1].vy;
             quad->x2 = scratch->screen[3].vx;
             quad->y2 = scratch->screen[3].vy;
-            battle_effect_add_vectors_to_svector_rot_y_270(
+            effect_vector_add_to_svector_rot_y_270(
                 &scratch->origin, &scratch->points[0][i - RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
             quad->x3 = scratch->screen[3].vx;
             quad->y3 = scratch->screen[3].vy;
             scratch->depth[0][i] = scratch->screen[3].vz;
-            battle_effect_add_vectors_to_svector_rot_y_270(
+            effect_vector_add_to_svector_rot_y_270(
                 &scratch->origin, &scratch->points[1][i - RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
@@ -289,13 +287,13 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y0 = scratch->screen[1].vy;
             quad->x2 = scratch->screen[3].vx;
             quad->y2 = scratch->screen[3].vy;
-            battle_effect_add_vectors_to_svector_rot_y_180(
+            effect_vector_add_to_svector_rot_y_180(
                 &scratch->origin, &scratch->points[0][i - 2 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
             quad->x3 = scratch->screen[3].vx;
             quad->y3 = scratch->screen[3].vy;
             scratch->depth[0][i] = scratch->screen[3].vz;
-            battle_effect_add_vectors_to_svector_rot_y_180(
+            effect_vector_add_to_svector_rot_y_180(
                 &scratch->origin, &scratch->points[1][i - 2 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
@@ -308,13 +306,13 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y0 = scratch->screen[1].vy;
             quad->x2 = scratch->screen[3].vx;
             quad->y2 = scratch->screen[3].vy;
-            battle_effect_add_vectors_to_svector_rot_y_90(
+            effect_vector_add_to_svector_rot_y_90(
                 &scratch->origin, &scratch->points[0][i - 3 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
             quad->x3 = scratch->screen[3].vx;
             quad->y3 = scratch->screen[3].vy;
             scratch->depth[0][i] = scratch->screen[3].vz;
-            battle_effect_add_vectors_to_svector_rot_y_90(
+            effect_vector_add_to_svector_rot_y_90(
                 &scratch->origin, &scratch->points[1][i - 3 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
@@ -323,13 +321,13 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
 
         /* Ring 1: corners 2/3 repeat ring 0's corners 0/1, and lattice row 2 gives corners 0/1. */
-        battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[2][0], &scratch->vertex);
+        effect_vector_add_to_svector(&scratch->origin, &scratch->points[2][0], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[0], &scratch->screen[0].pad);
         quads = work->quads[buffer];
         quads[RING_MESH_SEGMENTS].x0 = scratch->screen[0].vx;
         quads[RING_MESH_SEGMENTS].y0 = scratch->screen[0].vy;
         scratch->depth[2][0] = scratch->screen[0].vz;
-        battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[2][1], &scratch->vertex);
+        effect_vector_add_to_svector(&scratch->origin, &scratch->points[2][1], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
         quads[RING_MESH_SEGMENTS].x1 = scratch->screen[1].vx;
         quads[RING_MESH_SEGMENTS].y1 = scratch->screen[1].vy;
@@ -349,7 +347,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y2 = other->y0;
             quad->x3 = other->x1;
             quad->y3 = other->y1;
-            battle_effect_add_vectors_to_svector(&scratch->origin, &scratch->points[2][i], &scratch->vertex);
+            effect_vector_add_to_svector(&scratch->origin, &scratch->points[2][i], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
@@ -364,7 +362,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y2 = other->y0;
             quad->x3 = other->x1;
             quad->y3 = other->y1;
-            battle_effect_add_vectors_to_svector_rot_y_270(
+            effect_vector_add_to_svector_rot_y_270(
                 &scratch->origin, &scratch->points[2][i - RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
@@ -380,7 +378,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y2 = other->y0;
             quad->x3 = other->x1;
             quad->y3 = other->y1;
-            battle_effect_add_vectors_to_svector_rot_y_180(
+            effect_vector_add_to_svector_rot_y_180(
                 &scratch->origin, &scratch->points[2][i - 2 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
@@ -396,7 +394,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y2 = other->y0;
             quad->x3 = other->x1;
             quad->y3 = other->y1;
-            battle_effect_add_vectors_to_svector_rot_y_90(
+            effect_vector_add_to_svector_rot_y_90(
                 &scratch->origin, &scratch->points[2][i - 3 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
@@ -419,9 +417,9 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         blue = EFFECT_COLOR_NEUTRAL;
         if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             k = (entry->radial_mesh.color_curves & 0xfff);
-            red = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][frame];
-            green = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][frame];
-            blue = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][frame];
+            red = g_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][frame];
+            green = g_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][frame];
+            blue = g_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][frame];
         } else {
             green = EFFECT_COLOR_NEUTRAL;
             red = EFFECT_COLOR_NEUTRAL;
@@ -495,7 +493,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             break;
         }
         if (work != 0) {
-            battle_heap_free_block(work);
+            effect_heap_free_block(work);
             record->work_slots[callback_slot] = 0;
         }
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_IDLE;
