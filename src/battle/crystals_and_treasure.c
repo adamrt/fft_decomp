@@ -277,7 +277,7 @@ s32 battle_unit_learn_from_crystal(unit_stats_t* unit, s32 flags) {
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
     if (flags & BATTLE_CRYSTAL_TAKE_TREASURE) {
-        return battle_action_increment_item_quantity_for_steal_break(unit, g_main_crystal_treasure_item_id);
+        return battle_action_give_item(unit, g_main_crystal_treasure_item_id);
     }
     if (flags & BATTLE_CRYSTAL_RESTORE_HP_MP) {
         unit->action.hit = 1;
@@ -593,7 +593,7 @@ unit_stats_t* battle_unit_find_active_data_pointer(void) {
 /* The idle action menu for a unit id: battle_menu_get_unit_action_menu_id, with
  * the four TURN menus replaced by their RIDER_TURN variants for a rider. Returns
  * BATTLE_MENU_ID_NONE for an empty slot. */
-battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id) {
+battle_menu_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
     unit_stats_t* unit = battle_unit_get_existing_pointer(battle_id);
     s32 menu;
 

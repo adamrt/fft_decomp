@@ -75,7 +75,7 @@ void world_menu_formation_icon_list_thread(void) {
  * terminated name per roster slot, empty for a vacant slot, with a terminator
  * appended to a name that fills all 16 bytes. Bumps the name string
  * revision. */
-void world_text_generate_formation_unit_name_string(void) {
+void world_text_build_roster_name_list(void) {
     u8* out = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     party_unit_t* unit;
     s32 i;

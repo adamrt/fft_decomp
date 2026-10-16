@@ -1253,7 +1253,7 @@ void battle_formula_apply_magic_defense_up(void) {
 /* Target statuses on physical XA: Protect * 2/3; Sleep or Charging * 3/2;
  * Chicken or Frog * 3/2. Sleep and Charging share one step: inflicting Sleep
  * cancels Charging (and Jump, Defending and Performing). */
-void battle_formula_apply_target_xa_affecting_statuses(void) {
+void battle_formula_apply_target_physical_statuses(void) {
     unit_stats_t* target;
 
     if (g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PROTECT)]
@@ -1275,7 +1275,7 @@ void battle_formula_apply_target_xa_affecting_statuses(void) {
 }
 
 /* Target statuses on magical XA: Shell * 2/3; Chicken or Frog * 3/2. */
-void battle_formula_apply_target_magical_status_xa_modifiers(void) {
+void battle_formula_apply_target_magical_statuses(void) {
     if (g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SHELL)]
         & STATUS_BYTE_MASK(STATUS_ID_SHELL)) {
         g_battle_action_current_ability.xa = g_battle_action_current_ability.xa * 2 / 3;

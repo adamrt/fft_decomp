@@ -570,7 +570,7 @@ typedef enum main_system_flags {
     MAIN_SYSTEM_FLAG_RUNNING = 0x00000001,
     /* Draw this frame with the 3D map; wldcore_gfx_draw_world_frame_with_map clears it after drawing. */
     MAIN_SYSTEM_FLAG_DRAW_MAP = 0x00000002,
-    /* A level waits for a thread or a fade: wldcore_input_update_buttons_and_check_game_reset publishes no pad input.
+    /* A level waits for a thread or a fade: wldcore_input_update_controller publishes no pad input.
      */
     MAIN_SYSTEM_FLAG_INPUT_BLOCKED = 0x00000004,
     /* Set by wldcore_fade_start_screen, cleared by wldcore_fade_step_screen one step before the fade ends. */

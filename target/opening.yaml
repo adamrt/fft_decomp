@@ -106,7 +106,7 @@ functions:
   - {addr: 0x8006d360, size: 108, name: open_controller_wait_text_message, hash: e623f7328948a829, unit: title_script}
   - {addr: 0x8006d3cc, size: 180, name: open_movie_stream_title_demo_and_push_controller, hash: 29c7eb100bdbc02b, unit: title_script}
   - {addr: 0x8006d480, size: 164, name: open_movie_start_fftst_or_skip_controller, hash: 4e72507cef1a9abd, unit: title_script}
-  - {addr: 0x8006d524, size: 308, name: open_title_start_new_game_or_clear_file_buffer, hash: efa74633bab45d83, unit: title_script}
+  - {addr: 0x8006d524, size: 308, name: open_title_select_new_game, hash: efa74633bab45d83, unit: title_script}
   - {addr: 0x8006d658, size: 340, name: open_title_update_card_warning, hash: 7c3ab8fe1d7d5d9c, unit: title_script}
   - {addr: 0x8006d7ac, size: 64, name: open_gfx_init_transition_request, hash: d59678a277450164, unit: title_script}
   - {addr: 0x8006d7ec, size: 8, name: open_gfx_transition_finished_stub, hash: 6d64edf91449c1b1, unit: title_script}

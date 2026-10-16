@@ -689,8 +689,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     }
     battle_action_dispatch_target_reaction_ability();
     if (g_battle_action_target_data->reaction_id == ABILITY_ID_REACTION_CATCH) {
-        battle_action_increment_item_quantity_for_steal_break(
-            g_battle_action_target, g_battle_action_target_data->last_received_attack);
+        battle_action_give_item(g_battle_action_target, g_battle_action_target_data->last_received_attack);
     }
     if (g_battle_action_target_data->hit == 0) {
         return 0;
@@ -749,8 +748,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
         g_battle_action_target_data->faith_change, &g_battle_action_target->faith, UNIT_BRAVE_FAITH_MAX, 0);
     outcome |= battle_action_remove_broken_or_stolen_equipment();
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN) {
-        battle_action_increment_item_quantity_for_steal_break(
-            g_battle_action_target, g_battle_action_target->action_command.item_or_equipment);
+        battle_action_give_item(g_battle_action_target, g_battle_action_target->action_command.item_or_equipment);
     }
     if (g_battle_action_target_data->gil_change != 0 || g_battle_action_target_data->exp_change != 0) {
         outcome |= 1;
@@ -1352,7 +1350,7 @@ static s32 battle_action_remove_broken_or_stolen_equipment(void) {
                     g_battle_action_target->equipment[i] = ITEM_ID_NONE;
                     count++;
                     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM) {
-                        battle_action_increment_item_quantity_for_steal_break(g_battle_action_attacker, item);
+                        battle_action_give_item(g_battle_action_attacker, item);
                     }
                 }
             }
@@ -1743,7 +1741,7 @@ s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit) {
 /* Simulate the unit's pending action and write the EXP and JP gained and any
  * new level and job level to rewards[0..3]. Returns -1 for an empty unit
  * slot, otherwise the action finalization result. */
-s32 battle_unit_build_gained_exp_jp_level_job_level(unit_stats_t* unit, action_reward_display_t* rewards) {
+s32 battle_unit_build_action_rewards(unit_stats_t* unit, action_reward_display_t* rewards) {
     s32 job_slot[2];
     s32 result;
     s32 unit_id;
@@ -1781,8 +1779,7 @@ static void battle_action_apply_jp_change(unit_stats_t* unit) {
 
     battle_id = unit->battle_id;
     initial_level = battle_unit_load_job_level(unit, job, &jp);
-    battle_unit_store_jp_and_calculate_unlocked_jobs(
-        battle_id, unit->action.jp_change, unit->initial_team_flags & BATTLE_TEAM_MASK, jp);
+    battle_unit_add_job_jp(battle_id, unit->action.jp_change, unit->initial_team_flags & BATTLE_TEAM_MASK, jp);
     if (battle_unit_load_job_level(unit, job, &jp) != initial_level) {
         g_battle_action_current_ability.job_level_gained_flag = 1;
     }

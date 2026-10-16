@@ -217,7 +217,7 @@ extern s8 g_world_set_ability_list_open;   /* ability list open */
 extern s8 g_world_set_ability_entry_count; /* ability list entry count */
 extern u8 g_world_set_ability_unit_index;
 extern u8 g_world_set_ability_cursor;
-void world_ability_find_stat_changes_due_to_equipped(
+void world_ability_find_movement_stat_changes(
     menu_status_panel_slot_storage_t* stat_diff, s32 old_ability, s32 new_ability);
 s32 world_ability_has_secret_hunt(s32 unit_id);
 s32 world_ability_has_two_hands(s16 unit_id);

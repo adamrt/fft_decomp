@@ -76,7 +76,7 @@ void world_text_render_id_list_to_image_rows(u8* font, s16* text_ids, RECT* dest
 u8* world_text_advance_entry_by_char_count(u8* text, s32 count);
 /* MAIN selects the WORLD address of text_find_entry through this existing alias. */
 u8* world_text_find_entry(u32 text_id);
-void world_text_generate_formation_unit_name_string(void);
+void world_text_build_roster_name_list(void);
 s16 world_text_get_encoded_char_at_position(u8* text, s16 position, s32 mode);
 s32 world_text_is_printing(s32 thread_id);
 void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 palette);

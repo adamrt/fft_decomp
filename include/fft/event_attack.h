@@ -169,7 +169,7 @@ void attack_deploy_find_fieldable_units(void);
 unit_deployment_coordinates_t* attack_deploy_get_coordinate_slots(void);
 s32 attack_deploy_has_roster_id_on_tiles(s32 roster_id);
 s32 attack_deploy_is_roster_unit_deployed(s32 roster_id);
-void attack_deploy_mark_other_squad_units_undeployable(void);
+void attack_deploy_find_deployable_units(void);
 void attack_deploy_run_screen(void);
 void attack_deploy_run_select_menu(void);
 void attack_text_build_deployment_strings(void);

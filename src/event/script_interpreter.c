@@ -1474,7 +1474,7 @@ void unit_update_staged_status_data(u16 unit_id, u16 restore) {
             thread_wait_frames(40);
         }
         if (restore == 0) {
-            g_thread_call_target = battle_gfx_reset_jumping_unit_graphic_triggers;
+            g_thread_call_target = battle_gfx_hide_jumping_units;
             thread_call_on_main_stack();
         }
     }

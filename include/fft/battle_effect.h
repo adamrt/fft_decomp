@@ -1976,11 +1976,11 @@ extern u8 g_battle_effect_weapon_projectile_animations[];
 extern u8 g_battle_effect_zodiac_poof_animations[];
 
 s32 battle_effect_unused_07_secondary_handler(void);
-s32 battle_noop_801b2bfc(void);
-s32 battle_noop_801b2c04(void);
-s32 battle_noop_801b2e60(void);
-s32 battle_noop_801b3118(void);
-s32 battle_return_zero_801b0fec(void);
+s32 battle_effect_unused_0a_secondary_handler(void);
+s32 battle_effect_unused_0b_secondary_handler(void);
+s32 battle_effect_unused_0e_secondary_handler(void);
+s32 battle_effect_unused_10_secondary_handler(void);
+s32 battle_effect_none_secondary_handler(void);
 s32 battle_effect_arrow_arc_secondary_handler(void);
 s32 battle_effect_equip_break_secondary_handler(void);
 s32 battle_effect_fall_dust_secondary_handler(void);
@@ -2228,7 +2228,7 @@ extern VECTOR g_battle_effect_camera_zoom_saved;
 extern VECTOR g_battle_effect_camera_zoom_start;
 extern VECTOR g_battle_effect_camera_zoom_target;
 
-void battle_effect_copy_camera_angles_and_world_coords(void);
+void battle_effect_seed_camera_tracks(void);
 void battle_effect_init_camera_and_screen_data(void);
 
 /* palettes */

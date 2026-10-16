@@ -1729,13 +1729,13 @@ static void wldcore_list_open_battle_tutorials(void) {
 
 /* Resume handler of the mask-1 tutorial list: block Circle, Cross and Select from the WORLD menu
  * frame again. */
-void wldcore_list_tutorial_mask_1_restore_blocked_buttons(void) {
+void wldcore_list_battle_tutorials_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
 /* Withhold every button from the WORLD menu frame while a level opened from the mask-1 tutorial
  * list runs. */
-void wldcore_list_tutorial_mask_1_block_all_buttons(wldcore_menu_panel_level_t* unused_level) {
+void wldcore_list_battle_tutorials_block_all_buttons(wldcore_menu_panel_level_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
@@ -1747,7 +1747,7 @@ void wldcore_list_tutorial_mask_1_block_all_buttons(wldcore_menu_panel_level_t* 
  * starts thread 14 (state 2) and a canceled one pops the level. Otherwise
  * cancel (0x40) and confirm (0x20) start thread 12 and record the choice;
  * 0x100 on a non-empty list opens help message 0x108c. */
-void wldcore_list_handle_tutorial_mask_1_entries_input(wldcore_menu_panel_level_t* level) {
+void wldcore_list_handle_battle_tutorials_input(wldcore_menu_panel_level_t* level) {
     s16* selected;
 
     if (level->result == 2) {
@@ -1784,7 +1784,7 @@ void wldcore_list_handle_tutorial_mask_1_entries_input(wldcore_menu_panel_level_
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
-        wldcore_list_tutorial_mask_1_block_all_buttons(level);
+        wldcore_list_battle_tutorials_block_all_buttons(level);
         wldcore_menu_push_message_level(0x108C, 1);
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);

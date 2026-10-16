@@ -182,7 +182,7 @@ s32 battle_state_announce_next_charged_action(void) {
                     }
                 }
                 battle_unit_set_animation_based_on_status(unit);
-                battle_unit_update_post_command_animation_display(unit);
+                battle_unit_end_command(unit);
                 result = -1;
             }
             break;
@@ -399,7 +399,7 @@ void battle_action_execute_ability(void) {
         main_system_handle_pointer_exception(0x13);
         break;
     }
-    battle_unit_update_post_command_animation_display(unit);
+    battle_unit_end_command(unit);
 }
 
 /* Enter the commence-attack phase for the source unit: copy the action command stored in its
@@ -738,14 +738,14 @@ void battle_state_enter_effect_state(void) {
 
 /* Enter the MapJumpingOut game state at two vertical blanks per frame. No code
  * calls it. */
-void battle_state_halve_animation_speed_for_jump_out(void) {
+void battle_state_enter_map_jumping_out(void) {
     g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_OUT;
 }
 
 /* Enter the MapJumpingIn game state at two vertical blanks per frame. No code
  * calls it. */
-void battle_state_halve_animation_speed_for_jump_in(void) {
+void battle_state_enter_map_jumping_in(void) {
     g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_IN;
 }
@@ -779,7 +779,7 @@ void battle_target_update_cursor(void) {
  * drawing the map cursor and tile glow while g_battle_action_at_list_active is
  * set. */
 void battle_state_update_units(void) {
-    battle_gfx_update_all_unit_rotation_and_vectors();
+    battle_gfx_project_all_units();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
     }

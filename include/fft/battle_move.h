@@ -369,8 +369,8 @@ void battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
 void battle_move_apply_unit_step_velocity(battle_unit_t* unit);
 void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit);
 void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit);
-void battle_move_accelerate_unit_to_destination_with_height_change(battle_unit_t* unit);
-void battle_move_accelerate_unit_to_destination_no_height_change(battle_unit_t* unit);
+void battle_move_animate_move_to_target(battle_unit_t* unit);
+void battle_move_animate_move_to_target_level(battle_unit_t* unit);
 void battle_move_update_path_step(battle_unit_t* unit);
 void battle_move_get_current_and_destination_tiles(
     battle_unit_t* unit, map_tile_t** current_tile, map_tile_t** destination_tile);
@@ -388,8 +388,8 @@ s32 battle_move_is_unit_moving_by_runtime_id(u32 runtime_id);
 void battle_move_snap_axis_to_current_tile_exit_edge(s32 direction, battle_unit_t* unit);
 void battle_move_snap_axis_to_destination_tile_center(s32 direction, battle_unit_t* unit);
 s32 battle_move_start_unit_walk_to(s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
-void battle_move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* unit);
-void battle_move_step_unit_to_map_tile_center_with_height_change(battle_unit_t* unit);
+void battle_move_animate_move_to_own_tile_level(battle_unit_t* unit);
+void battle_move_animate_move_to_own_tile(battle_unit_t* unit);
 void battle_move_update_airborne_ascent_phase(battle_unit_t* unit);
 void battle_move_update_unit_step_to_destination_tile_center(battle_unit_t* unit);
 move_direction_e battle_move_get_direction(const battle_unit_t* unit);

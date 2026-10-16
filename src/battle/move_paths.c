@@ -393,7 +393,7 @@ void battle_move_update_knockback_step(battle_unit_t* unit) {
             unit->step_speed = 0x2000;
             battle_move_start_unit_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
         } else {
-            battle_unit_store_coordinate_mount_animation_data(unit);
+            battle_unit_settle_on_tile(unit);
         }
     }
 }

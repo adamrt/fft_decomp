@@ -153,14 +153,14 @@ void wldcore_list_rumors_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_propositions_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_unexplored_lands_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_story_events_block_all_buttons(wldcore_menu_panel_level_t* level);
-void wldcore_list_script_variables_block_all_buttons(wldcore_menu_panel_level_t* level);
+void wldcore_list_persons_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_tutorial_topics_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_formation_tutorials_block_all_buttons(wldcore_menu_panel_level_t* level);
-void wldcore_list_script_flags_block_all_buttons(wldcore_menu_panel_level_t* level);
+void wldcore_list_facts_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_open_available_propositions(void);
 void wldcore_list_open_completed_propositions(void);
 void wldcore_list_open_propositions(void);
-void wldcore_list_tutorial_mask_1_block_all_buttons(wldcore_menu_panel_level_t* unused_level);
+void wldcore_list_battle_tutorials_block_all_buttons(wldcore_menu_panel_level_t* unused_level);
 void wldcore_list_open_unexplored_lands(void);
 void wldcore_list_open_treasures(void);
 
@@ -191,7 +191,7 @@ void wldcore_list_handle_completed_propositions_input(wldcore_menu_stack_record_
 void wldcore_list_completed_propositions_block_all_buttons(wldcore_menu_stack_record_t* unused_level);
 void wldcore_menu_resume_root_level(wldcore_menu_stack_record_t* level);
 void wldcore_menu_push_message_level(s32 text, s32 reload_text);
-void wldcore_menu_reset_window_list_and_store_origin(void);
+void wldcore_menu_reset_stack(void);
 void wldcore_menu_run_world_frame(GsOT* context);
 void wldcore_list_build_proposition_detail_panel_image(
     wldcore_menu_stack_record_t* level, s32 proposition, s32 coordinate_mode);

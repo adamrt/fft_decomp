@@ -1592,7 +1592,7 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
     team = unit->team_flags & BATTLE_TEAM_MASK;
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         if (unit_id != unit_index) {
-            battle_unit_store_jp_and_calculate_unlocked_jobs(unit_id, jp / 4, team, job_slot);
+            battle_unit_add_job_jp(unit_id, jp / 4, team, job_slot);
         }
     }
 
@@ -1600,7 +1600,7 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
         jp = jp * 3 / 2;
     }
     team = unit->initial_team_flags & BATTLE_TEAM_MASK;
-    battle_unit_store_jp_and_calculate_unlocked_jobs(unit_index, jp, team, job_slot);
+    battle_unit_add_job_jp(unit_index, jp, team, job_slot);
 
     new_job_level = battle_unit_load_job_level(unit, job_id, &job_slot);
     if (new_job_level != old_job_level) {
@@ -1641,7 +1641,7 @@ s32 battle_unit_load_job_level(unit_stats_t* unit, s32 job_id, s32* out_slot) {
  * Skips absent, crystal, dead, treasure, monster and other-team units, and
  * the Bard slot for females and the Dancer slot for males. The battle twin of
  * main_job_add_proposition_jp; returns -1 when nothing is stored. */
-s32 battle_unit_store_jp_and_calculate_unlocked_jobs(s32 unit_index, s32 jp, s32 team, s32 slot) {
+s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot) {
     unit_stats_t* unit;
     s32 total;
     s32 level;
@@ -2030,8 +2030,8 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
                     unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
                     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
                 } else {
-                    battle_gfx_append_unit_graphics_load_descriptor(unit->x, unit->position.y,
-                        unit->position.higher_elevation, unit->position.facing, sprite, palette, 0xff, unit, 0);
+                    battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
+                        unit->position.facing, sprite, palette, 0xff, unit, 0);
                     main_unit_init_status_and_rewards(unit, 1);
                     unit->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
                 }
@@ -2243,7 +2243,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             status = 0;
             battle_unit_set_enemy_level_data(unit);
         }
-        battle_gfx_append_unit_graphics_load_descriptor(unit->x, unit->position.y, unit->position.higher_elevation,
+        battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
             unit->position.facing, spritesheet_id, palette_id, unit_id, unit, status);
         if (presence != BATTLE_TEAM_PRESENCE_MASK) {
             enemy_count++;

@@ -2215,7 +2215,7 @@ void battle_effect_reset_subsystems(void) {
 
 /* Seed the effect camera's current, target, start and saved values from the battle camera: its
  * rotation wrapped to one turn, its position in whole units (real coordinates >> 12) and its zoom. */
-void battle_effect_copy_camera_angles_and_world_coords(void) {
+void battle_effect_seed_camera_tracks(void) {
     SVECTOR* rotation = battle_camera_get_rotation();
     VECTOR* coords;
 
@@ -2245,6 +2245,6 @@ void battle_effect_init_camera_and_screen_data(void) {
     g_battle_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
     g_battle_unknown_801b8b1c = 0;
     g_battle_unknown_801b8b18 = 0;
-    battle_effect_copy_camera_angles_and_world_coords();
+    battle_effect_seed_camera_tracks();
     (void)pad;
 }

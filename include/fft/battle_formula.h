@@ -112,14 +112,14 @@ s32 battle_formula_calculate_elemental_xa_times_ya(void);
 
 /* statuses */
 void battle_formula_apply_dance_abilities(void);
-void battle_formula_apply_magical_support_status_compatibility(void);
-void battle_formula_apply_physical_status_support_compatibility(void);
-void battle_formula_apply_physical_xa_modifying_statuses_support(void);
+void battle_formula_apply_magical_modifiers(void);
+void battle_formula_apply_physical_modifiers_without_supports(void);
+void battle_formula_apply_physical_modifiers(void);
 void battle_formula_apply_quick_effect(void);
 void battle_formula_apply_song_abilities(void);
 void battle_formula_apply_status(void);
-void battle_formula_apply_target_magical_status_xa_modifiers(void);
-void battle_formula_apply_target_xa_affecting_statuses(void);
+void battle_formula_apply_target_magical_statuses(void);
+void battle_formula_apply_target_physical_statuses(void);
 void battle_formula_apply_talk_skill(void);
 void battle_formula_check_dragon(void);
 void battle_formula_force_sleeping_target_miss(void);

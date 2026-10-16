@@ -229,7 +229,7 @@ ramza_placed:
         if (transition == 0) {
             g_attack_deploy_pending_roster_index = -1;
         }
-        attack_deploy_mark_other_squad_units_undeployable();
+        attack_deploy_find_deployable_units();
         if (transition != 0
             && (g_attack_deploy_roster_unit_deployable[g_attack_deploy_selected_roster_index] != 1
                 || g_attack_deploy_pending_roster_index != -1)
@@ -789,7 +789,7 @@ static void attack_deploy_handle_roster_navigation_input(void) {
  * current squad may still deploy and load it into the status panels. The
  * search has no exit when no slot is deployable, so the screen would hang. */
 static void attack_deploy_select_unit_for_stats_display(void) {
-    attack_deploy_mark_other_squad_units_undeployable();
+    attack_deploy_find_deployable_units();
     while (1) {
         if (g_attack_deploy_selected_roster_index >= PARTY_ROSTER_SLOT_COUNT) {
             g_attack_deploy_selected_roster_index = 0;
@@ -961,7 +961,7 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
 static void attack_deploy_select_next_roster_unit(void) {
     s32 pending;
 
-    attack_deploy_mark_other_squad_units_undeployable();
+    attack_deploy_find_deployable_units();
     pending = g_attack_deploy_pending_roster_index;
     if (pending != -1) {
         g_attack_deploy_selected_roster_index = pending;
@@ -996,7 +996,7 @@ void attack_noop_801c61dc(void) {
 static void attack_deploy_select_previous_roster_unit(void) {
     s32 pending;
 
-    attack_deploy_mark_other_squad_units_undeployable();
+    attack_deploy_find_deployable_units();
     pending = g_attack_deploy_pending_roster_index;
     if (pending != -1) {
         g_attack_deploy_selected_roster_index = pending;

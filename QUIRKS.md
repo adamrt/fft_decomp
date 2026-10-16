@@ -31,7 +31,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   modulation and per-frame rotation code (`battle_gfx_draw_unit_shadow`,
   `battle_gfx_calculate_sprite_shadow_from_tile_slope`,
   `battle_gfx_apply_unit_palette_modulation`,
-  `battle_gfx_update_all_unit_rotation_and_vectors`) do the same for units
+  `battle_gfx_project_all_units`) do the same for units
   that chapter-end cutscenes walk off the map.
 - `battle_move_animate_fall_to_target_tile`: the event-state
   (`0x34`) path writes the tile-center depth into `real.vy` (not `real.vz`).
@@ -333,7 +333,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `battle_move_store_unit_movement_to_scratchpad` copies 64 and keeps 0xff.
 - `battle_formula_weapon_heal` (formula 0x07, the Healing Staff) applies
   zodiac compatibility twice, once itself and once inside
-  `battle_formula_apply_physical_xa_modifying_statuses_support`, whose Defense
+  `battle_formula_apply_physical_modifiers`, whose Defense
   Up and Protect steps also cut the healing to two thirds.
 - `battle_formula_raise_level_by_one_add_status_on_caster` (formula 0x57,
   Please Eat) stores a full HP and MP heal (max-HP damage for an undead
@@ -349,7 +349,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   but `battle_map_start_clut_cycle` returns slot + 1: it stops the slot
   after the handle's own, and handle 8 clears the byte after the eight slots,
   the first of `g_battle_gfx_cycled_deployed_palettes`.
-- `battle_gfx_append_unit_graphics_load_descriptor` writes its record before it
+- `battle_gfx_queue_unit_graphics_load` writes its record before it
   tests the count, which stops at 16: a seventeenth append lands one past the
   16-entry queue, on the head of `g_main_zodiac_primitives`.
 - `battle_effect_remove_secondary`: removing a record from the middle of the
@@ -371,7 +371,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   only the 256 lower-level panels, so an untargetable upper-level tile keeps
   its range; the weapon-range twin
   `battle_target_clear_range_on_untargetable_tiles` visits all 512.
-- `battle_unit_store_coordinate_mount_animation_data` and
+- `battle_unit_settle_on_tile` and
   `battle_unit_restore_facing_after_attack`: for a mounted pair the second
   `battle_unit_set_tile_position` call names the unit's own battle record again
   (the first function finds its "mount" by the unit's own `unit_id`), so the
@@ -495,7 +495,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   repeats the layer test that the statement before it has just made false;
   `battle_status_calculate_turn_flags` cannot report Sleep, whose
   `g_main_status_effect_data` record carries the freeze-CT flag tested first;
-  `battle_unit_set_animation_based_on_mounted_state` tests a depth masked to a
+  `battle_unit_set_mounted_animation` tests a depth masked to a
   byte for `< 0` and a nonzero animation for 0; `menu_get_thread_activity_variant`
   tests `i != 3` inside its scan of threads 4-9;
   `battle_camera_rotate_when_unit_tile_not_visible` adjusts a negative
@@ -645,7 +645,7 @@ written that way.
 - `g_wldcore_sound_quad_command_bytes` (`0x8009ec18`) starts one row before
   the sound rows, which begin at `0x8009ec1c` for sound id 1: its row 0 is the
   eighth 32-bit entry of `g_wldcore_tutorial_event_ids`, whose eight entries
-  `wldcore_list_handle_tutorial_mask_1_entries_input` indexes.
+  `wldcore_list_handle_battle_tutorials_input` indexes.
 - `g_battle_effect_ending_secondary_function_id` (`0x801b8530`) is
   `g_battle_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_ENDING].function_id`
   under a second name; the table's own symbol covers the 21 records before
@@ -662,7 +662,7 @@ written that way.
 Shared sources compile at each original entrypoint with its own module
 bindings. Distinct entrypoints and genuinely different implementations remain.
 
-- `wldcore_menu_push_script_flag_01a4_detail_level` and
+- `wldcore_menu_push_fact_detail_level` and
   `wldcore_menu_push_story_event_text_level` perform the same operation at menu
   levels `0x2f` and `0x1e`; the latter reserves 8 unused stack bytes.
 - The ambient-light and darkness blend routines operate on different records.

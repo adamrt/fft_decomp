@@ -876,9 +876,9 @@ restart_script:
             shadow_runtime_id = script_resolve_runtime_id(first_operand);
             if (shadow_runtime_id != EVENT_RUNTIME_ID_NONE) {
                 if (operand_3 != 0) {
-                    battle_gfx_clear_shadow_graphic_trigger_by_runtime_id(shadow_runtime_id);
+                    battle_gfx_hide_unit_shadow_by_runtime_id(shadow_runtime_id);
                 } else {
-                    battle_gfx_set_shadow_graphic_trigger_by_runtime_id(shadow_runtime_id);
+                    battle_gfx_show_unit_shadow_by_runtime_id(shadow_runtime_id);
                 }
             }
         } else if (opcode == EVENT_OPCODE_DEBUG_PAUSE) {

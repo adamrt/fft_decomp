@@ -190,7 +190,7 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_restore_previous_stack();
     DrawSync(0);
-    wldcore_input_update_buttons_and_check_game_reset();
+    wldcore_input_update_controller();
     VSync(0);
     GsSwapDispBuff();
     GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
@@ -219,7 +219,7 @@ void wldcore_gfx_draw_world_frame(void) {
     wldcore_fade_draw_screen_overlays();
     wldcore_restore_previous_stack();
     DrawSync(0);
-    wldcore_input_update_buttons_and_check_game_reset();
+    wldcore_input_update_controller();
     VSync(0);
     GsSwapDispBuff();
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE)) {
@@ -243,7 +243,7 @@ static void wldcore_init_subsystems(void) {
     wldcore_map_init_dots();
     wldcore_init_stub();
     wldcore_map_init_location_marker_and_camera();
-    wldcore_menu_reset_window_list_and_store_origin();
+    wldcore_menu_reset_stack();
     wldcore_init_runtime_state();
     wldcore_menu_restore_level_on_world_entry();
 }

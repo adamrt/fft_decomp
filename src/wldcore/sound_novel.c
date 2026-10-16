@@ -779,7 +779,7 @@ void wldcore_opcode_hide_value_display(void) {
 
 /* Sound-novel opcode 0x1E: add the counter delta to the counter, clamp it to 0..0xFFFF, clear the
  * delta and show the counter in the value display. */
-void wldcore_opcode_apply_pending_delta_and_clamp_value(void) {
+void wldcore_opcode_apply_counter_delta(void) {
     s32 delta;
     s32* value = &g_wldcore_active_saved_record.counter;
 

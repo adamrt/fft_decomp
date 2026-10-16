@@ -158,7 +158,7 @@ typedef enum wldcore_sound_novel_phase {
 /* opcode */
 extern wldcore_opcode_state_t g_wldcore_opcode_state;
 extern void (*g_wldcore_opcode_handlers[])(void);
-void wldcore_opcode_apply_pending_delta_and_clamp_value(void);
+void wldcore_opcode_apply_counter_delta(void);
 void wldcore_opcode_map_request_deep_dungeon_entry(void);
 void wldcore_opcode_map_request_draw_path(void);
 void wldcore_opcode_map_request_erase_path(void);

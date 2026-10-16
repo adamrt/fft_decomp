@@ -74,10 +74,10 @@ void battle_unit_update_graphics_by_runtime_id(u32 runtime_id) {
     battle_unit_update_display_by_runtime_id(runtime_id);
 }
 
-/* battle_unit_set_animation_based_on_mounted_state by runtime id; event threads run it on the main
+/* battle_unit_set_mounted_animation by runtime id; event threads run it on the main
  * stack. */
 void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_animation_based_on_mounted_state(battle_unit_get_by_runtime_id(runtime_id));
+    battle_unit_set_mounted_animation(battle_unit_get_by_runtime_id(runtime_id));
 }
 
 /* battle_unit_set_walk_animation by runtime id. No retail code
@@ -140,7 +140,7 @@ s32 battle_unit_set_animation_from_facing_hint(u32 runtime_id, s32 facing_hint) 
         if (animation < BATTLE_UNIT_ANIMATION_IDLE) {
             animation = BATTLE_UNIT_ANIMATION_STAND;
         }
-        battle_unit_store_animation_facing_movement_data(animation, facing, unit);
+        battle_unit_force_animation_facing(animation, facing, unit);
         return runtime_id;
     }
     return -1;
@@ -194,7 +194,7 @@ s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibb
         if (animation < BATTLE_UNIT_ANIMATION_IDLE) {
             animation = BATTLE_UNIT_ANIMATION_STAND;
         }
-        battle_unit_store_animation_facing_movement_data(animation, facing, unit);
+        battle_unit_force_animation_facing(animation, facing, unit);
         return runtime_id;
     }
     return -1;
@@ -234,7 +234,7 @@ void battle_unit_snap_all_facings_to_quadrants(void) {
 }
 
 /* Shows a unit's shadow (UnitShadow event instruction). Returns 0 when no unit has the runtime id. */
-s32 battle_gfx_set_shadow_graphic_trigger_by_runtime_id(u32 runtime_id) {
+s32 battle_gfx_show_unit_shadow_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
@@ -246,7 +246,7 @@ s32 battle_gfx_set_shadow_graphic_trigger_by_runtime_id(u32 runtime_id) {
 
 /* Hides a unit's shadow (UnitShadow event instruction). Returns 0 when no unit
  * has the runtime id. */
-s32 battle_gfx_clear_shadow_graphic_trigger_by_runtime_id(u32 runtime_id) {
+s32 battle_gfx_hide_unit_shadow_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {

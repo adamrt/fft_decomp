@@ -25,7 +25,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void wldcore_list_open_set_script_variables_03c0_03ff(void);
+static void wldcore_list_open_persons(void);
 static void wldcore_list_open_story_events(void);
 static void wldcore_menu_build_brave_story_entries(void);
 static void wldcore_menu_push_proposition_category_level(void);
@@ -645,7 +645,7 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
         case WLDCORE_BRAVE_STORY_ROW_PERSONS:
             wldcore_window_set_list_window_states(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
-            wldcore_list_open_set_script_variables_03c0_03ff();
+            wldcore_list_open_persons();
             return;
         case WLDCORE_BRAVE_STORY_ROW_PROPOSITIONS:
             wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_BRAVE_STORY_PROPOSITIONS);
@@ -758,7 +758,7 @@ void wldcore_list_story_events_block_all_buttons(wldcore_menu_panel_level_t* lev
     g_menu_blocked_buttons = -1;
 }
 
-/* List level input step (cursor slot 10); twin of wldcore_list_handle_set_script_variables_03c0_03ff_input with help
+/* List level input step (cursor slot 10); twin of wldcore_list_handle_persons_input with help
  * message 0x1055. Cancel and confirm wait for file loading to finish; a
  * confirmed entry's value is passed to 0x80082e14. */
 void wldcore_list_handle_story_events_input(wldcore_menu_panel_level_t* level) {
@@ -805,7 +805,7 @@ void wldcore_list_handle_story_events_input(wldcore_menu_panel_level_t* level) {
  * and its frame render record with flag 0x10 and starts WORLD thread 14 on
  * text 0xb849 with substitution value 0xe800 + entry.
  *
- * Masked-identical to wldcore_menu_push_script_flag_01a4_detail_level across all 165 instructions.
+ * Masked-identical to wldcore_menu_push_fact_detail_level across all 165 instructions.
  * The two differ only in the substitution addend (0x9800 there, 0xe800 here),
  * the menu level type (0x2f there, 0x1e here) and the frame size; the text id
  * is value + 0x8800 in both, so 0xe800 is the substitution value and not a
@@ -930,7 +930,7 @@ void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* lev
  * 0xf000 + index * 16 + variable value), shows up to eight rows at
  * (0x80, 0x50) with width 0x60, appends its 0x5c-byte record tagged 0x1f and
  * hides the parent list window's content render record. Twin of 0x80087b94. */
-static void wldcore_list_open_set_script_variables_03c0_03ff(void) {
+static void wldcore_list_open_persons(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -980,13 +980,13 @@ static void wldcore_list_open_set_script_variables_03c0_03ff(void) {
 
 /* Resume handler of the script variables list: block Circle, Cross and Select for the
  * levels underneath and show prompt 0xB848 again. */
-void wldcore_list_script_variables_restore_prompt(void) {
+void wldcore_list_persons_restore_prompt(void) {
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
 /* The caller hands in its menu level; the target reads no argument. */
-void wldcore_list_script_variables_block_all_buttons(wldcore_menu_panel_level_t* level) {
+void wldcore_list_persons_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
@@ -994,7 +994,7 @@ void wldcore_list_script_variables_block_all_buttons(wldcore_menu_panel_level_t*
  * by 0x8008343c; twin of wldcore_list_handle_unexplored_lands_input with help message 0x1056. Canceling
  * restores the parent list window's content render record (flag 0x100); a
  * confirmed entry's value is passed to 0x8008389c. */
-void wldcore_list_handle_set_script_variables_03c0_03ff_input(wldcore_menu_panel_level_t* level) {
+void wldcore_list_handle_persons_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
@@ -1020,7 +1020,7 @@ void wldcore_list_handle_set_script_variables_03c0_03ff_input(wldcore_menu_panel
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
-        wldcore_list_script_variables_block_all_buttons(level);
+        wldcore_list_persons_block_all_buttons(level);
         wldcore_menu_push_message_level(0x1056, 1);
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
@@ -1190,7 +1190,7 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
             g_wldcore_window_render_object_count = g_wldcore_window_render_object_count - 1;
             g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth - 2].list_window.lower_window].flags
                 &= ~WORLD_RENDER_RECORD_HIDDEN;
-            wldcore_list_open_set_script_variables_03c0_03ff();
+            wldcore_list_open_persons();
         }
     }
 }

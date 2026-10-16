@@ -330,7 +330,7 @@ s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id) {
     battle_unit_t* target = battle_unit_get_by_runtime_id(runtime_id);
     battle_unit_t* caster = battle_unit_get_casting();
 
-    battle_unit_set_target_animation_from_attack_type(caster, target);
+    battle_unit_set_target_animation(caster, target);
     return 1;
 }
 
@@ -340,7 +340,7 @@ s32 battle_unit_set_target_anim_by_battle_id(u16 battle_id) {
     battle_unit_t* target = battle_unit_get_by_battle_id(battle_id);
     battle_unit_t* caster = battle_unit_get_casting();
 
-    battle_unit_set_target_animation_from_attack_type(caster, target);
+    battle_unit_set_target_animation(caster, target);
     return 1;
 }
 
@@ -362,7 +362,7 @@ s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id) {
 static void battle_unit_resolve_projectile_hit(battle_unit_t* attacker, battle_unit_t* target) {
     if ((attacker != 0) && (target != 0)) {
         battle_sound_play_weapon_sfx(attacker, 1);
-        battle_unit_set_target_animation_from_attack_type(attacker, target);
+        battle_unit_set_target_animation(attacker, target);
         battle_gfx_prepare_post_action_display_by_runtime_id(target->runtime_id);
         battle_effect_start_weapon_hit_secondary(attacker, 1);
     }
@@ -398,7 +398,7 @@ static void battle_unit_update_display(battle_unit_t* unit) {
         unit->status_flags_5_6 &= ~unit->statuses_to_remove_5_6;
         unit->status_flags_1_4 |= unit->statuses_to_add_1_4;
         unit->status_flags_5_6 |= unit->statuses_to_add_5_6;
-        battle_unit_set_map_coords_after_death_dismount(unit);
+        battle_unit_dismount_dead_rider(unit);
         battle_gfx_update_sprite_transparency_flag(unit);
         battle_gfx_update_status_bubble_graphic_trigger(unit);
         if (g_battle_state_animation_continue_check != 0) {

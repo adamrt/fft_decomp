@@ -477,8 +477,8 @@ extern file_extent_t g_battle_gfx_weapon_seq_files[];
 extern file_extent_t g_battle_gfx_weapon_shp_files[];
 extern file_extent_t g_battle_gfx_worker8_sp2_files[];
 
-void battle_gfx_append_unit_graphics_load_descriptor(s32 map_x, s32 map_y, s32 map_level, s16 facing,
-    s16 spritesheet_id, s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags);
+void battle_gfx_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
+    s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags);
 void battle_gfx_clear_unit_graphics_load_state(s32 unused_map_id);
 void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination);
 s32 battle_gfx_load_unit_attack_image_into_evtchr_slot(s32 runtime_id, s32 slot);
@@ -531,7 +531,7 @@ extern battle_render_buffer_t g_battle_render_buffers[2];
 
 void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_effect_level);
 void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit);
-s32 battle_gfx_clear_shadow_graphic_trigger_by_runtime_id(u32 runtime_id);
+s32 battle_gfx_hide_unit_shadow_by_runtime_id(u32 runtime_id);
 void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_t* display, s32 end, s32 start,
     SVECTOR* position, s16 angle, s16 mode, SVECTOR* scale, u32* ot);
 void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot);
@@ -552,9 +552,9 @@ void battle_gfx_load_trap_and_unit_frame_parts(
     battle_unit_t* unit, battle_unit_anim_state_t* state, u16 frame, u16 sequence_id);
 s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination);
 void battle_gfx_release_unit_sprite_display_stub(battle_gfx_sprite_display_data_t* unused_display);
-void battle_gfx_reset_jumping_unit_graphic_triggers(void);
+void battle_gfx_hide_jumping_units(void);
 s32 battle_gfx_reset_unit_graphic_trigger(u32 runtime_id);
-s32 battle_gfx_set_shadow_graphic_trigger_by_runtime_id(u32 runtime_id);
+s32 battle_gfx_show_unit_shadow_by_runtime_id(u32 runtime_id);
 void battle_gfx_set_sprite_part_flip(battle_gfx_sprite_display_data_t* display, s32 part_index, u32 flags);
 void battle_gfx_set_sprite_part_semi_transparent(
     battle_gfx_sprite_display_data_t* display, s32 part_index, s32 enabled);
@@ -577,7 +577,7 @@ s32 battle_gfx_calculate_world_height_from_move_destination(struct battle_unit* 
  * move_interpolate_height_toward_resting_height re-extend the result; keep s32. */
 s32 battle_gfx_calculate_world_height_from_world_coords(struct battle_unit* unit);
 s32 battle_gfx_calculate_world_height_with_caller_coords(struct battle_unit* unit, const SVECTOR* coords);
-void battle_gfx_update_all_unit_rotation_and_vectors(void);
+void battle_gfx_project_all_units(void);
 
 /* palettes */
 /* First 21 OTHER.SPR palettes copied together; the other three groups also
@@ -600,7 +600,7 @@ extern battle_gfx_other_palettes_t g_battle_gfx_other_palettes;
 extern palette_t g_battle_gfx_shadow_palette;
 extern palette_t g_battle_gfx_treasure_palettes[5];
 
-void battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id(u32 runtime_id);
+void battle_gfx_reset_unit_palette_by_runtime_id(u32 runtime_id);
 void battle_gfx_check_tile_status_palette_mod(struct battle_unit* unit, s32 tile_effect_level, s32 final_value);
 void battle_gfx_start_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
 void battle_gfx_start_unit_fade_out_red(s32 unit_id);
@@ -614,7 +614,7 @@ void battle_gfx_set_thrown_item_palette_by_runtime_id(u32 item_id, u32 runtime_i
 void battle_gfx_apply_unit_palette_modulation_to_units(
     s32 preset_color, s32 time, s32 runtime_id, s16 red, s16 green, s16 blue);
 void battle_gfx_tint_all_units_by_team(void);
-void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 level, s32 final_value);
+void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_value);
 void battle_gfx_update_unit_palette_animation(void);
 void battle_gfx_restore_unit_palettes(void);
 

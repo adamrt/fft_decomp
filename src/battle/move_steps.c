@@ -1185,7 +1185,7 @@ void battle_move_get_current_and_destination_tiles(
  *
  * For a mounted pair the partner lookup uses the unit's own unit_id, so the
  * second battle_unit_set_tile_position call repeats the first for the same unit. */
-void battle_unit_store_coordinate_mount_animation_data(battle_unit_t* unit) {
+void battle_unit_settle_on_tile(battle_unit_t* unit) {
     unit_stats_t* data = unit->stats;
     battle_unit_t* mount;
 
@@ -1216,7 +1216,7 @@ void battle_unit_store_coordinate_mount_animation_data(battle_unit_t* unit) {
 void battle_unit_mount_onto_pending_mount(battle_unit_t* unit) {
     battle_unit_t* other;
 
-    battle_unit_store_coordinate_mount_animation_data(unit);
+    battle_unit_settle_on_tile(unit);
     if (unit->path.pending_mount & BATTLE_PENDING_MOUNT_SET) {
         other = battle_unit_get_by_battle_id(unit->path.pending_mount & BATTLE_PENDING_MOUNT_ID_MASK);
         if (other != 0) {

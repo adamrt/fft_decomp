@@ -199,7 +199,7 @@ s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit) {
  * Phase 0 replaces the frame count in distortion_timer with the per-frame step
  * and stores the destination height in distortion_target; phase 1 steps until the
  * unit reaches it, then snaps and ends the animation. */
-void battle_move_interpolate_height_toward_fixed_rise(battle_unit_t* unit) {
+void battle_move_animate_rise(battle_unit_t* unit) {
     s32 step = unit->distortion_timer;
     s32 target = unit->distortion_target;
     s32 height;
@@ -231,7 +231,7 @@ void battle_move_interpolate_height_toward_fixed_rise(battle_unit_t* unit) {
  * frame count in distortion_timer with the per-frame step; phase 1 steps while
  * the unit is above the ground, then snaps and ends the animation. A unit that
  * starts at or below the ground snaps on the first frame. */
-void battle_move_interpolate_height_toward_resting_height(battle_unit_t* unit) {
+void battle_move_animate_settle(battle_unit_t* unit) {
     s32 step = unit->distortion_timer;
     s32 z = unit->distortion_target;
     s32 real_z;
@@ -367,25 +367,25 @@ static void battle_move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 al
 
 /* Distortion animation 0x04: move toward the action target in equal steps,
  * height included (battle_unit_move_toward_action_target). */
-void battle_move_accelerate_unit_to_destination_with_height_change(battle_unit_t* unit) {
+void battle_move_animate_move_to_target(battle_unit_t* unit) {
     battle_unit_move_toward_action_target(unit, 1);
 }
 
 /* Distortion animation 0x05: move to the center of the unit's map tile in equal
  * steps, height included (move_step_unit_to_map_tile_center). */
-void battle_move_step_unit_to_map_tile_center_with_height_change(battle_unit_t* unit) {
+void battle_move_animate_move_to_own_tile(battle_unit_t* unit) {
     battle_move_step_unit_to_map_tile_center(unit, 1);
 }
 
 /* Distortion animation 0x08: move toward the action target in equal steps without
  * changing height (battle_unit_move_toward_action_target). */
-void battle_move_accelerate_unit_to_destination_no_height_change(battle_unit_t* unit) {
+void battle_move_animate_move_to_target_level(battle_unit_t* unit) {
     battle_unit_move_toward_action_target(unit, 0);
 }
 
 /* Distortion animation 0x09: move to the center of the unit's map tile without
  * changing height. */
-void battle_move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* unit) {
+void battle_move_animate_move_to_own_tile_level(battle_unit_t* unit) {
     battle_move_step_unit_to_map_tile_center(unit, 0);
 }
 
@@ -573,7 +573,7 @@ void battle_move_animate_jump_start(battle_unit_t* unit) {
             unit->position_copies_active = 0;
             unit->shadow_graphic_trigger = 0;
             unit->distortion_animation_id = BATTLE_DISTORTION_ANIMATION_NONE;
-            battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_STAND, unit->facing, unit);
+            battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_STAND, unit->facing, unit);
         }
         timer--;
         break;
@@ -840,7 +840,7 @@ s32 battle_unit_advance_altima_teleport_distortion(battle_unit_t* unit) {
  * velocity.vy in each branch keeps its division, which GCC folds away when the
  * zero is stored once after the branches. `unused_10` reproduces an
  * unreferenced 8-byte frame slot below the velocity copy. */
-void battle_unit_advance_slide_to_target_distortion(battle_unit_t* unit) {
+void battle_move_animate_back_away(battle_unit_t* unit) {
     s32 unused_10[2];
     VECTOR velocity;
     battle_unit_t* target;
@@ -905,7 +905,7 @@ void battle_unit_advance_slide_to_target_distortion(battle_unit_t* unit) {
  * Phase 3 falls to the ground, snaps the unit to the tile, shows the shadow,
  * clears BATTLE_UNIT_STATUS_JUMP_HEIGHT_ACTIVE and the semi-transparency bit, and
  * ends the animation. */
-void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) {
+void battle_move_animate_jump_arc_to_own_tile_faded(battle_unit_t* unit) {
     /* Unreferenced 8-byte frame slot below the target point, like the one in
      * move_animate_jump_arc_to_own_tile; it puts `target` at sp+0x20. */
     SVECTOR unused_18;

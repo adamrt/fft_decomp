@@ -166,11 +166,11 @@ void battle_unit_clear_palette_update_suppression(u32 runtime_id) {
 /* Reloads a unit's palette with its weather and time-of-day tint and no tile
  * effect level, for the ResetPalette event instruction. An absent unit is
  * skipped. */
-void battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id(u32 runtime_id) {
+void battle_gfx_reset_unit_palette_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
-        battle_gfx_tint_unit_palette_for_weather_and_tile(unit, 0, 1);
+        battle_gfx_tint_unit_palette(unit, 0, 1);
     }
 }
 
@@ -290,8 +290,7 @@ s32 battle_script_opcode_add_ghost_unit(
         g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
         g_battle_gfx_unit_graphics_load_state.index = 0;
         g_battle_gfx_unit_graphics_load_state.buffer = 0;
-        battle_gfx_append_unit_graphics_load_descriptor(
-            map_x, map_y, map_level, facing, spritesheet_id, 0, runtime_id, 0, flags);
+        battle_gfx_queue_unit_graphics_load(map_x, map_y, map_level, facing, spritesheet_id, 0, runtime_id, 0, flags);
         ret = 1;
     }
     return ret;
@@ -312,7 +311,7 @@ s32 battle_gfx_load_unit_graphics_by_battle_id(s32 battle_id, s32 flags) {
     g_battle_gfx_unit_graphics_load_state.buffer = 0;
     unit = battle_unit_get_stats_from_battle_id(battle_id);
     battle_unit_set_enemy_level_data_by_battle_id(battle_id);
-    battle_gfx_append_unit_graphics_load_descriptor(unit->x, unit->position.y, unit->position.higher_elevation,
+    battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
         unit->position.facing, unit->spritesheet_id, unit->job_portrait_palette, 0xFF, unit, flags);
     return 1;
 }
@@ -362,7 +361,7 @@ s32 battle_gfx_reset_unit_graphic_trigger(u32 runtime_id) {
 }
 
 /* Hides every unit that has the Jump status. */
-void battle_gfx_reset_jumping_unit_graphic_triggers(void) {
+void battle_gfx_hide_jumping_units(void) {
     battle_unit_t* unit = g_battle_unit_list_head;
 
     while (unit != 0) {

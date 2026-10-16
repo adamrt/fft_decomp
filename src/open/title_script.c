@@ -330,7 +330,7 @@ void open_movie_start_fftst_or_skip_controller(open_controller_record_t* unused_
  * g_open_work_buffer_0 and blanked, animation 0x12 is shown on the black screen
  * and the title-exit controller (handler 12) is pushed: Cross returns to the
  * title menu, Circle or Start starts the prologue anyway. */
-void open_title_start_new_game_or_clear_file_buffer(void) {
+void open_title_select_new_game(void) {
     s32* source;
     s32* destination;
     s32 index;

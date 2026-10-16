@@ -146,7 +146,7 @@ void battle_unit_store_animation_facing(u32 animation, s32 facing, battle_unit_t
 
 /* battle_unit_store_animation_facing with the force flag: the animation
  * starts on the next update, from its beginning even when it is playing. */
-void battle_unit_store_animation_facing_movement_data(s32 animation, s32 facing, battle_unit_t* unit) {
+void battle_unit_force_animation_facing(s32 animation, s32 facing, battle_unit_t* unit) {
     animation++;
     unit->requested_animation = animation;
     unit->facing = facing;
@@ -220,7 +220,7 @@ void battle_unit_set_move_and_world_coords(battle_unit_t* unit) {
  * is unlinked, the unit takes the relocation tile in dismount as its map position
  * and screen position, its battle stats follow, and the pending result is
  * cleared. */
-void battle_unit_set_map_coords_after_death_dismount(battle_unit_t* unit) {
+void battle_unit_dismount_dead_rider(battle_unit_t* unit) {
     /* pending_attack_result is -1 when the action killed a rider on its mount. */
     if (unit->pending_attack_result != 0) {
         battle_unit_dismount_rider_and_update_display(unit);
@@ -290,7 +290,7 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
  * cross-jumping merges them only after register allocation, so the extra
  * references still rank clut_index above unit in global allocation. The two snow
  * (weather bit 0) branches are identical. */
-void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 level, s32 final_value) {
+void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_value) {
     s32 clut_index;
     s32 stored_palette;
     s32 slot = unit->spritesheet_vram_slot;
@@ -498,7 +498,7 @@ static void battle_gfx_modify_unit_palette(battle_unit_t* unit, s32 mode, s32 cl
  * Unless the unit already has a palette modifier, tints its CLUT for the
  * first matching renderer status (mode/RGB pairs below; Undead skips Skeleton
  * and Ghoul spritesheets); otherwise, or with no tinting status, it falls back
- * to battle_gfx_tint_unit_palette_for_weather_and_tile. */
+ * to battle_gfx_tint_unit_palette. */
 static void battle_gfx_update_unit_status_palette(battle_unit_t* unit, s32 tile_effect_level, s32 final_value) {
     u32 status;
     s32 unit_id;
@@ -535,11 +535,11 @@ static void battle_gfx_update_unit_status_palette(battle_unit_t* unit, s32 tile_
             battle_gfx_modify_unit_palette(
                 unit, MAP_COLOR_MODE_BASE_HALF, MAP_CLUT_ROW_UNITS, unit_id, 0, 4, 0, 5, final_value);
         } else {
-            battle_gfx_tint_unit_palette_for_weather_and_tile(unit, tile_effect_level, final_value);
+            battle_gfx_tint_unit_palette(unit, tile_effect_level, final_value);
         }
         return;
     }
-    battle_gfx_tint_unit_palette_for_weather_and_tile(unit, tile_effect_level, final_value);
+    battle_gfx_tint_unit_palette(unit, tile_effect_level, final_value);
 }
 
 /* Refresh the status palette of a unit and of its mount partner, unless suppressed. */

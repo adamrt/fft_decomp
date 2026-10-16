@@ -687,7 +687,7 @@ void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* paramet
 void script_opcode_reset_palette(const event_unit_parameters_t* parameters) {
     s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-        battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id(runtime_id);
+        battle_gfx_reset_unit_palette_by_runtime_id(runtime_id);
     }
 }
 

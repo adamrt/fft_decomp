@@ -185,7 +185,7 @@ extern u32 g_wldcore_previous_system_flags;
 
 void wldcore_restore_previous_stack(void);
 void wldcore_init_stub(void);
-void wldcore_input_update_buttons_and_check_game_reset(void);
+void wldcore_input_update_controller(void);
 
 void wldcore_switch_to_stack(void*);
 s32 wldcore_entrypoint(void);

@@ -588,7 +588,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
 void battle_action_handle_move_command(void);
 void battle_action_grant_rewards(void);
 void battle_action_apply_exp_change(unit_stats_t* unit, u8 amount);
-s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item);
+s32 battle_action_give_item(unit_stats_t* unit, u8 item);
 void battle_action_init_learn_ability_on_hit(void);
 s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit);
 void battle_action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);

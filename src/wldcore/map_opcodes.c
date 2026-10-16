@@ -24,7 +24,7 @@
  * there is none, in which case the MCBrave and MCFaith checks read the first guest slot instead of
  * failing. */
 static s32 wldcore_get_ramza_roster_index(void);
-static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value);
+static void wldcore_menu_push_fact_detail_level(s32 value);
 static void wldcore_script_read_operand_pair(s32* out1, s32* out2);
 static void wldcore_script_read_operand_pair_and_date(
     s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day);
@@ -551,18 +551,18 @@ void wldcore_list_open_facts(void) {
 
 /* Resume handler of the Facts list: block Circle, Cross and Select from the WORLD menu frame
  * again. */
-void wldcore_list_script_flags_restore_blocked_buttons(void) {
+void wldcore_list_facts_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
 /* The caller hands in its menu level; the target reads no argument. */
-void wldcore_list_script_flags_block_all_buttons(wldcore_menu_panel_level_t* level) {
+void wldcore_list_facts_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* List level input step for cursor slot 20; twin of wldcore_list_handle_tutorial_topics_input with help
  * message 0x108f, handing a confirmed entry's value to 0x80092618. */
-void wldcore_list_handle_script_flags_01a4_01bb_input(wldcore_menu_panel_level_t* level) {
+void wldcore_list_handle_facts_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
@@ -571,7 +571,7 @@ void wldcore_list_handle_script_flags_01a4_01bb_input(wldcore_menu_panel_level_t
         g_wldcore_menu_stack_depth--;
         if (level->result != 0) {
             wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_FACTS);
-            wldcore_menu_push_script_flag_01a4_detail_level(
+            wldcore_menu_push_fact_detail_level(
                 g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
@@ -585,7 +585,7 @@ void wldcore_list_handle_script_flags_01a4_01bb_input(wldcore_menu_panel_level_t
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
-        wldcore_list_script_flags_block_all_buttons(level);
+        wldcore_list_facts_block_all_buttons(level);
         wldcore_menu_push_message_level(0x108F, 1);
     } else if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
         && g_main_file_still_loading == 0) {
@@ -597,7 +597,7 @@ void wldcore_list_handle_script_flags_01a4_01bb_input(wldcore_menu_panel_level_t
 }
 
 /* Pushes the script-variable detail text window as menu level 0x2f, the
- * partner of the wldcore_menu_close_script_flag_01a4_detail_level pop: records the entry on the new level, sets
+ * partner of the wldcore_menu_close_fact_detail_level pop: records the entry on the new level, sets
  * up the shared scrollable text window at g_wldcore_scrollable_text_window for text 0x8800 + entry
  * with no substitutions, then hides the parent list-window level's four
  * window records and its frame render record with flag 0x10 and starts WORLD
@@ -612,7 +612,7 @@ void wldcore_list_handle_script_flags_01a4_01bb_input(wldcore_menu_panel_level_t
  *
  * The depth is spelled as the global at every use rather than cached in a
  * local: the target re-reads g_wldcore_menu_stack_depth after each call. */
-static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value) {
+static void wldcore_menu_push_fact_detail_level(s32 value) {
     s32 coordinate_mode = 1;
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_index = value;
@@ -659,7 +659,7 @@ static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value) {
 /* Steps the text window until 0x800903e4 reports it finished, then pops the
  * level, restores the parent list window's windows and frame render record,
  * and reopens the script-variable list of 0x80092208. */
-void wldcore_menu_close_script_flag_01a4_detail_level(void) {
+void wldcore_menu_close_fact_detail_level(void) {
     s32 depth;
 
     if (!(g_wldcore_window_render_records[g_wldcore_scrollable_text_window.render_record_index].flags

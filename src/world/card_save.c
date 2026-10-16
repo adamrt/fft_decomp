@@ -318,7 +318,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
     world_card_close_stub();
     main_sound_unload_scenario_mus(music_handle);
     world_formation_reset_menu_context();
-    world_text_generate_formation_unit_name_string();
+    world_text_build_roster_name_list();
     return g_world_card_menu_result;
 }
 

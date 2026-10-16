@@ -297,8 +297,8 @@ static void battle_camera_init_defaults(void) {
  * A spritesheet id of BATTLE_SPRITESHEET_ID_COUNT or more is replaced by
  * Ramza's chapter 1 sheet. The count stops at 16, the size of the
  * queue, so a seventeenth call writes the record one past its end. */
-void battle_gfx_append_unit_graphics_load_descriptor(s32 map_x, s32 map_y, s32 map_level, s16 facing,
-    s16 spritesheet_id, s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags) {
+void battle_gfx_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
+    s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags) {
     g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].map_x = map_x;
     g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].map_y = map_y;
     g_main_gfx_unit_graphics_load_queue.descriptors[g_main_gfx_unit_graphics_load_queue.count].map_level = map_level;

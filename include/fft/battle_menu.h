@@ -27,7 +27,7 @@ extern action_command_t g_menu_selected_action;
 s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
 void battle_state_enter_select_move_tile(void);
 void battle_menu_dispatch_idle_action_menu(void);
-battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id);
+battle_menu_id_e battle_menu_get_idle_action_menu_id(s32 battle_id);
 ai_command_t* menu_get_selected_command_address(void);
 void battle_menu_open_active_unit_idle_action_menu(void);
 void battle_menu_open_free_cursor_help(void);

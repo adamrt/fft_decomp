@@ -237,7 +237,7 @@ void wldcore_gfx_set_display_rect(s32 buffer_index, RECT* rect) {
  * and the newly pressed ones (both 0 while MAIN_SYSTEM_FLAG_INPUT_BLOCKED is
  * set). Exactly L1 + R1 + Select + Start restores the sound volumes and
  * resets the game. */
-void wldcore_input_update_buttons_and_check_game_reset(void) {
+void wldcore_input_update_controller(void) {
     u32 input;
     u32 previous;
 

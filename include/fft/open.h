@@ -509,7 +509,7 @@ extern s32 g_open_title_demo_movie_index;
 void open_title_push_menu_controller(s32 argument);
 void open_title_init_new_game_party(s32 party_mode, s32 world_load_mode);
 void open_title_start_new_game_transition(void);
-void open_title_start_new_game_or_clear_file_buffer(void);
+void open_title_select_new_game(void);
 
 /* gfx */
 /* New-game prologue entry: a packed line count, texture-page position and

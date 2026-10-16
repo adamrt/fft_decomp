@@ -497,7 +497,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             g_open_gfx_next_render_record_36 -= 6;
             g_open_gfx_render_record_pointer_count -= 6;
             g_open_current_controller_index--;
-            open_title_start_new_game_or_clear_file_buffer();
+            open_title_select_new_game();
             return;
         case OPEN_TITLE_MENU_CONTINUE:
             g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;

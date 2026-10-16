@@ -2361,7 +2361,7 @@ static void battle_effect_update_active_slots(s32 group) {
 
 /* Secondary effect function 0x00 in g_battle_effect_secondary_handlers: returns 0, so a record
  * with no function is removed on its first update. */
-s32 battle_return_zero_801b0fec(void) {
+s32 battle_effect_none_secondary_handler(void) {
     return 0;
 }
 
@@ -2542,7 +2542,7 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
         }
         result = 1;
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
-        battle_effect_copy_camera_angles_and_world_coords();
+        battle_effect_seed_camera_tracks();
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
         state = effect->allocation;
@@ -3166,13 +3166,13 @@ s32 battle_effect_splash_secondary_handler(void) {
 /* Secondary effect function 0x0a in g_battle_effect_secondary_handlers: an empty
  * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
-s32 battle_noop_801b2bfc(void) {
+s32 battle_effect_unused_0a_secondary_handler(void) {
 }
 
 /* Secondary effect function 0x0b in g_battle_effect_secondary_handlers: an empty
  * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
-s32 battle_noop_801b2c04(void) {
+s32 battle_effect_unused_0b_secondary_handler(void) {
 }
 
 /*
@@ -3289,7 +3289,7 @@ s32 battle_effect_level_up_secondary_handler(void) {
 /* Secondary effect function 0x0e in g_battle_effect_secondary_handlers: an empty
  * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
-s32 battle_noop_801b2e60(void) {
+s32 battle_effect_unused_0e_secondary_handler(void) {
 }
 
 enum {
@@ -3403,7 +3403,7 @@ s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) 
 /* Secondary effect function 0x10 in g_battle_effect_secondary_handlers: an empty
  * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
-s32 battle_noop_801b3118(void) {
+s32 battle_effect_unused_10_secondary_handler(void) {
 }
 
 enum {

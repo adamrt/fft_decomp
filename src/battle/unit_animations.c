@@ -135,12 +135,11 @@ void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_
     }
     if (target != 0) {
         if (attacker->spritesheet_id >= BATTLE_SPRITESHEET_ID_CRYSTAL) {
-            battle_unit_store_animation_facing_movement_data(
-                g_battle_weapon_attack_animations[0][1], attacker->facing, attacker);
+            battle_unit_force_animation_facing(g_battle_weapon_attack_animations[0][1], attacker->facing, attacker);
             return;
         }
         if (attacker->equipped_weapon_type == ITEM_TYPE_BOW) {
-            battle_unit_store_animation_facing_movement_data(
+            battle_unit_force_animation_facing(
                 g_battle_weapon_attack_animations[ITEM_TYPE_BOW][battle_effect_get_bow_shot_angle()], attacker->facing,
                 attacker);
             return;
@@ -150,7 +149,7 @@ void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_
             if (miss_type >= ACTION_MISS_TYPE_REFLECTED) {
                 if (miss_type < ACTION_MISS_TYPE_BUGGED_REFLECTION) {
                     if (miss_type >= ACTION_MISS_TYPE_GOLEM_GUARD) {
-                        battle_unit_store_animation_facing_movement_data(
+                        battle_unit_force_animation_facing(
                             g_battle_weapon_attack_animations[attacker->equipped_weapon_type][0], attacker->facing,
                             attacker);
                         return;
@@ -165,17 +164,17 @@ void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_
             = battle_gfx_get_unit_spritesheet_height_by_runtime_id(target->runtime_id) / 2 - target->world_coords.vy;
         difference = attacker_center - target_center;
         if (difference < -11) {
-            battle_unit_store_animation_facing_movement_data(
+            battle_unit_force_animation_facing(
                 g_battle_weapon_attack_animations[attacker->equipped_weapon_type][0], attacker->facing, attacker);
             return;
         }
         if (difference >= 12) {
-            battle_unit_store_animation_facing_movement_data(
+            battle_unit_force_animation_facing(
                 g_battle_weapon_attack_animations[attacker->equipped_weapon_type][2], attacker->facing, attacker);
             return;
         }
     }
-    battle_unit_store_animation_facing_movement_data(
+    battle_unit_force_animation_facing(
         g_battle_weapon_attack_animations[attacker->equipped_weapon_type][1], attacker->facing, attacker);
 }
 
@@ -204,7 +203,7 @@ static void battle_unit_set_animation_for_item_abilities(battle_unit_t* unit, ba
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_HOLD_ITEM, unit->facing, unit);
     } else {
         unit->item_display_active = 0;
-        battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_THROW_ITEM, unit->facing, unit);
+        battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_THROW_ITEM, unit->facing, unit);
     }
 }
 
@@ -291,7 +290,7 @@ void battle_unit_set_level_up_animation(battle_unit_t* unit) {
  * the submerged idle in water two or more deep; a mount on land also puts
  * its rider back in the riding animation. The depth is a byte, so its
  * negative test never holds. */
-void battle_unit_set_animation_based_on_mounted_state(battle_unit_t* unit) {
+void battle_unit_set_mounted_animation(battle_unit_t* unit) {
     s32 anim = BATTLE_UNIT_ANIMATION_RIDING;
     s32 selected;
     s32 water_depth;
@@ -545,12 +544,12 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
     unit_stats_t* stats;
 
     if (unit->statuses_to_add_5_6 & BATTLE_UNIT_STATUS_CHICKEN) {
-        battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
+        battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & BATTLE_UNIT_STATUS_CHICKEN) {
         battle_unit_set_animation_based_on_status(unit);
     }
     if (unit->statuses_to_add_5_6 & BATTLE_UNIT_STATUS_FROG) {
-        battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
+        battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & BATTLE_UNIT_STATUS_FROG) {
         battle_unit_set_animation_based_on_status(unit);
     }
@@ -577,19 +576,18 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
     }
     if (g_battle_game_state == BATTLE_GAME_STATE_EVENT) {
         if (unit->statuses_to_add_5_6 & BATTLE_UNIT_STATUS_JUMP) {
-            battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_JUMP_DEPART, unit->facing, unit);
+            battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_JUMP_DEPART, unit->facing, unit);
         } else if (unit->statuses_to_remove_5_6 & BATTLE_UNIT_STATUS_JUMP) {
             battle_unit_draw_and_activate_by_runtime_id(unit->runtime_id);
-            battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_JUMP_LAND, unit->facing, unit);
+            battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_JUMP_LAND, unit->facing, unit);
         }
         if (battle_move_get_water_animation_mode(unit) >= 2) {
             if (unit->statuses_to_add_1_4 & BATTLE_UNIT_STATUS_DEAD) {
-                battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_DEAD, unit->facing, unit);
+                battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_DEAD, unit->facing, unit);
                 unit->animation.sequence_id = BATTLE_UNIT_ANIMATION_DEAD << 1;
                 unit->animation.wait = 0;
             } else if (unit->statuses_to_remove_1_4 & BATTLE_UNIT_STATUS_DEAD) {
-                battle_unit_store_animation_facing_movement_data(
-                    BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+                battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
                 unit->animation.sequence_id = BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE << 1;
                 unit->animation.wait = 0;
             }
@@ -601,11 +599,11 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_REVIVE, unit->facing, unit);
         }
     } else if (unit->statuses_to_add_1_4 & BATTLE_UNIT_STATUS_DEAD) {
-        battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_DEAD, unit->facing, unit);
+        battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_DEAD, unit->facing, unit);
         unit->animation.sequence_id = BATTLE_UNIT_ANIMATION_DEAD << 1;
         unit->animation.wait = 0;
     } else if (unit->statuses_to_remove_1_4 & BATTLE_UNIT_STATUS_DEAD) {
-        battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+        battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
         unit->animation.sequence_id = BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE << 1;
         unit->animation.wait = 0;
     }
@@ -645,7 +643,7 @@ void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit) {
     tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
     battle_gfx_check_tile_status_palette_mod(unit, tile->flags.shading, 1);
     /* The target reads the u16 facing field signed (lh). */
-    battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
+    battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
     battle_unit_transform_into_morbol(unit->stats);
     battle_ai_init_unit_abilities(unit->stats->battle_id);
 }
@@ -686,7 +684,7 @@ void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_ef
             unit->animation.shp = battle_gfx_get_unit_shp_by_spritesheet_id(spritesheet_id);
             unit->animation.seq = battle_gfx_get_unit_seq_by_spritesheet_id(spritesheet_id);
             unit->spritesheet_id = spritesheet_id;
-            battle_gfx_tint_unit_palette_for_weather_and_tile(unit, tile_effect_level, 1);
+            battle_gfx_tint_unit_palette(unit, tile_effect_level, 1);
             battle_unit_set_animation_based_on_status(unit);
             battle_gfx_load_trap_and_unit_frame_parts(
                 unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
@@ -794,7 +792,7 @@ static void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* a
     }
     if (anim != 0) {
         /* The target reads the u16 facing field signed (lh). */
-        battle_unit_store_animation_facing_movement_data(anim, attacker->facing, attacker);
+        battle_unit_force_animation_facing(anim, attacker->facing, attacker);
     }
 }
 
@@ -802,7 +800,7 @@ static void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* a
  * Pick and start the reaction animation a target plays after an action
  * resolves, then apply the action's special-effect side effects.
  */
-void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, battle_unit_t* target) {
+void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* target) {
     unit_stats_t* stats;
     action_data_t* action;
     s32 animation;
@@ -878,10 +876,9 @@ void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, 
 
             if (animation != 0) {
                 if (target->spritesheet_id < BATTLE_SPRITESHEET_ID_CRYSTAL) {
-                    battle_unit_store_animation_facing_movement_data(animation, target->facing, target);
+                    battle_unit_force_animation_facing(animation, target->facing, target);
                 } else if (animation == BATTLE_UNIT_ANIMATION_HURT) {
-                    battle_unit_store_animation_facing_movement_data(
-                        BATTLE_UNIT_ANIMATION_HURT, target->facing, target);
+                    battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_HURT, target->facing, target);
                 }
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_KNOCKBACK) {
@@ -907,7 +904,7 @@ void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, 
 }
 
 /* Refresh the display of every unit in the strike's target list. */
-void battle_unit_update_anim_display_for_all_targets(battle_unit_t* unit) {
+void battle_unit_update_target_displays(battle_unit_t* unit) {
     s32 counter;
     battle_unit_t* target;
 
@@ -1382,7 +1379,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                         for (i = 0; i < unit->strike.target_count; i++) {
                             target = battle_unit_get_by_battle_id(unit->strike.target_list[i]);
                             if (target != 0) {
-                                battle_unit_set_target_animation_from_attack_type(unit, target);
+                                battle_unit_set_target_animation(unit, target);
                                 battle_unit_set_attacker_animation_for_shield_block(unit, target);
                                 battle_gfx_prepare_post_action_display_by_runtime_id(target->runtime_id);
                                 battle_effect_start_weapon_hit_secondary(unit, 0);
@@ -2367,7 +2364,7 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
  * Refreshes each item-effect origin and ordering-table depth. Terrain depth
  * lowers grounded units, while In Water, Float, and Walk on Water select
  * their original exceptions. */
-void battle_gfx_update_all_unit_rotation_and_vectors(void) {
+void battle_gfx_project_all_units(void) {
     VECTOR transformed;
     SVECTOR screen;
     SVECTOR adjusted;

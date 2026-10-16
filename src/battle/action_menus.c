@@ -34,7 +34,7 @@
 void battle_state_enter_event(void) {
     g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_EVENT;
-    battle_gfx_reset_jumping_unit_graphic_triggers();
+    battle_gfx_hide_jumping_units();
     script_reset_event_state();
     battle_target_hide_cursor();
     g_battle_menu_status_enabled = 0;
@@ -237,14 +237,14 @@ static void battle_action_run_between_turn_events(void) {
         unit->pending_attack_result = battle_action_apply_target_result(runtime_id);
         if (unit->pending_attack_result == -1) {
             battle_unit_find_relocation_tile(runtime_id, &unit->dismount);
-            battle_unit_set_map_coords_after_death_dismount(unit);
+            battle_unit_dismount_dead_rider(unit);
         }
         break;
     case BATTLE_TURN_EVENT_UNKNOWN_0400:
         unit->pending_attack_result = battle_action_apply_target_result(runtime_id);
         if (unit->pending_attack_result == -1) {
             battle_unit_find_relocation_tile(runtime_id, &unit->dismount);
-            battle_unit_set_map_coords_after_death_dismount(unit);
+            battle_unit_dismount_dead_rider(unit);
         }
         battle_gfx_prepare_post_action_display_by_runtime_id(unit->runtime_id);
         battle_unit_update_display_by_runtime_id(unit->runtime_id);
@@ -331,7 +331,7 @@ void battle_state_enter_status_execute(void) {
         text_set_message_duration_frames(0x3C);
         menu_init_system_function(
             BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183A, unit->stats->battle_id, unit->stats->battle_id, 1);
-        battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_KNEEL, unit->facing, unit);
+        battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_KNEEL, unit->facing, unit);
         return;
     }
     text_set_message_duration_frames(0xB4);
@@ -390,7 +390,7 @@ void battle_menu_open_active_unit_idle_action_menu(void) {
     if (unit != 0 && unit->stats != 0) {
         menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->stats->battle_id, 0);
     }
-    menu_build_idle_action_menu(battle_menu_get_id_based_on_mount_moveable_actable(unit->stats->battle_id));
+    menu_build_idle_action_menu(battle_menu_get_idle_action_menu_id(unit->stats->battle_id));
 }
 
 /* Opens the non-active-unit idle action menu for the unit under the cursor;
@@ -408,7 +408,7 @@ void battle_menu_open_non_active_unit_idle_action_menu(void) {
     unit = runtime->stats;
     g_battle_game_state = BATTLE_GAME_STATE_IDLING_ACTION_MENUS;
     menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->battle_id, 0);
-    menu_id = battle_menu_get_id_based_on_mount_moveable_actable(runtime->stats->battle_id);
+    menu_id = battle_menu_get_idle_action_menu_id(runtime->stats->battle_id);
     if (g_battle_status_menu_open != 0) {
         if (menu_id == BATTLE_MENU_ID_PLAYER_UNIT) {
             menu_id = BATTLE_MENU_ID_PLAYER_UNIT_INSPECT;
@@ -826,7 +826,7 @@ s32 battle_move_start_next_post_movement_step(void) {
             battle_gfx_store_item_display_data(source, item);
             animation = BATTLE_UNIT_ANIMATION_HOLD_ITEM;
         }
-        battle_unit_store_animation_facing_movement_data(animation, source->facing, source);
+        battle_unit_force_animation_facing(animation, source->facing, source);
         if (item == -1) {
             stats = source->stats;
             if (!(stats->initial_team_flags & BATTLE_TEAM_MASK)
@@ -864,7 +864,7 @@ s32 battle_move_start_next_post_movement_step(void) {
         switch (g_battle_action_post_action_display_phase) {
         case BATTLE_POST_ACTION_DISPLAY_LEVEL_UP:
             battle_action_init_movement_ability_benefit(casting->stats);
-            battle_unit_build_gained_exp_jp_level_job_level(casting->stats, &casting->strike.action_rewards);
+            battle_unit_build_action_rewards(casting->stats, &casting->strike.action_rewards);
             battle_gfx_prepare_post_action_display(casting);
             battle_gfx_init_earned_exp_jp_display(casting);
             battle_action_report_level_up(casting);
@@ -878,7 +878,7 @@ s32 battle_move_start_next_post_movement_step(void) {
     if (g_battle_move_find_result & MOVE_POST_EVENT_ITEM_FOUND) {
         g_battle_move_find_display_item = *battle_map_determine_rare_common_item(casting->stats);
         battle_gfx_store_item_display_data(source, g_battle_move_find_display_item.item_id);
-        battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_FOUND_ITEM, source->facing, source);
+        battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_FOUND_ITEM, source->facing, source);
         if (!(source->team_flags & BATTLE_TEAM_MASK)) {
             menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM,
                 g_battle_move_find_display_item.item_id, source->stats->battle_id, 0, 1);
@@ -893,10 +893,10 @@ s32 battle_move_start_next_post_movement_step(void) {
         trap = battle_action_apply_tile_trap(casting->stats);
         if ((source->pending_attack_result = battle_action_apply_target_result(source->stats->battle_id)) == -1) {
             battle_unit_find_relocation_tile(source->stats->battle_id, &source->dismount);
-            battle_unit_set_map_coords_after_death_dismount(source);
+            battle_unit_dismount_dead_rider(source);
         }
         battle_gfx_prepare_post_action_display(source);
-        battle_unit_set_target_animation_from_attack_type(0, source);
+        battle_unit_set_target_animation(0, source);
         battle_effect_set_secondary_venom_trap(source);
         menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TRAP_RESULT, trap, source->stats->battle_id, 0, 1);
         battle_ai_record_triggered_trap_coords(casting->map_x, casting->map_z, casting->map_y);
@@ -1193,7 +1193,7 @@ void battle_state_enter_continue_turn(void) {
 
 /* Ends a unit's command: the cursor returns to the unit, its display is updated
  * and the game enters the after-command state. */
-void battle_unit_update_post_command_animation_display(battle_unit_t* unit) {
+void battle_unit_end_command(battle_unit_t* unit) {
     battle_target_move_cursor_to_unit(unit);
     battle_unit_update_display_by_runtime_id(unit->runtime_id);
     battle_state_enter_after_command();
@@ -1459,7 +1459,7 @@ static void battle_unit_update_attack_result_animation(battle_unit_t* unit) {
     unit->pending_attack_result = battle_action_store_target_stats_pointer_data(unit->stats->battle_id);
     if (unit->pending_attack_result == -1) {
         battle_unit_find_relocation_tile(unit->stats->battle_id, &unit->dismount);
-        battle_unit_set_map_coords_after_death_dismount(unit);
+        battle_unit_dismount_dead_rider(unit);
     }
     battle_gfx_prepare_post_action_display_by_runtime_id(unit->runtime_id);
     battle_unit_update_display_by_runtime_id(unit->runtime_id);

@@ -31,7 +31,7 @@ static void world_ability_get_move_and_jump_increase_values(s16 ability, menu_st
 /* Stat preview for swapping one movement ability for another: clears
  * `stat_diff` and stores the difference in the Move and Jump bonuses the two
  * abilities give. */
-void world_ability_find_stat_changes_due_to_equipped(
+void world_ability_find_movement_stat_changes(
     menu_status_panel_slot_storage_t* stat_diff, s32 old_ability, s32 new_ability) {
     menu_unit_status_record_t summary;
     menu_status_panel_slot_storage_t old_stats;

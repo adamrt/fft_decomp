@@ -123,7 +123,7 @@ void battle_formula_damage_pa_plus_y_half_times_pa(void) {
         battle_formula_store_pa_and_pa_plus_y_divided_by_two();
         battle_formula_apply_elemental_strengthen();
         battle_formula_apply_attack_up_and_martial_arts();
-        battle_formula_apply_physical_status_support_compatibility();
+        battle_formula_apply_physical_modifiers_without_supports();
         battle_formula_calculate_critical_hit();
         battle_formula_store_xa_times_ya_damage();
         battle_formula_apply_weather_elemental_effects();
@@ -147,7 +147,7 @@ void battle_formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
         return;
     battle_formula_store_pa_and_pa_plus_y_divided_by_two();
     battle_formula_apply_attack_up_and_martial_arts();
-    battle_formula_apply_physical_status_support_compatibility();
+    battle_formula_apply_physical_modifiers_without_supports();
     battle_formula_calculate_critical_hit();
     battle_formula_store_hit_chance();
     rnd = battle_formula_get_random_0_7fff();
@@ -210,7 +210,7 @@ void battle_formula_damage_random_y_times_pa(void) {
     if (battle_formula_calculate_physical_evade() == 0) {
         battle_formula_store_pa_and_y();
         battle_formula_apply_attack_up_and_martial_arts();
-        battle_formula_apply_physical_status_support_compatibility();
+        battle_formula_apply_physical_modifiers_without_supports();
         battle_formula_apply_damage_and_knockback();
     }
 }
@@ -232,7 +232,7 @@ void battle_formula_damage_target_hp_minus_one_always_hit(void) {
 /* Formula 0x3F: hit (SP+X)%. */
 void battle_formula_hit_sp_x_percent(void) {
     battle_formula_store_speed_and_x();
-    battle_formula_apply_physical_xa_modifying_statuses_support();
+    battle_formula_apply_physical_modifiers();
     battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_battle_action_target_data->hit != 0) {
@@ -243,7 +243,7 @@ void battle_formula_hit_sp_x_percent(void) {
 /* Formula 0x40: undead targets only, hit (SP+X)%. */
 void battle_formula_undead_hit_sp_x_percent(void) {
     battle_formula_store_speed_and_x();
-    battle_formula_apply_physical_xa_modifying_statuses_support();
+    battle_formula_apply_physical_modifiers();
     battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_battle_action_target_data->hit != 0) {
@@ -627,7 +627,7 @@ void battle_formula_damage_sp_times_wp(void) {
     }
     g_battle_action_current_ability.xa = g_battle_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED];
     g_battle_action_current_ability.ya = g_battle_action_current_ability.weapon_data.power;
-    battle_formula_apply_physical_status_support_compatibility();
+    battle_formula_apply_physical_modifiers_without_supports();
     battle_formula_store_xa_times_ya_damage();
     battle_formula_modify_elemental_damage();
     if (g_battle_action_target_data->hit == 0) {
@@ -640,6 +640,6 @@ void battle_formula_damage_sp_times_wp(void) {
  * (PA * (PA * Brave / 100)). No evade roll here. */
 void battle_formula_damage_pa_times_wp(void) {
     battle_formula_init_weapon_xa_ya();
-    battle_formula_apply_physical_status_support_compatibility();
+    battle_formula_apply_physical_modifiers_without_supports();
     battle_formula_store_xa_times_ya_damage();
 }

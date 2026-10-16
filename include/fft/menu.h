@@ -1169,7 +1169,7 @@ typedef enum menu_system_dispatch_result {
 /* g_menu_current_id: the open battle menu,
  * and the index of its entry in g_menu_idle_action_entries, which is also what a row action from 0 to
  * 0xff opens. The unit menus are picked by
- * battle_menu_get_id_based_on_mount_moveable_actable. A system function
+ * battle_menu_get_idle_action_menu_id. A system function
  * (menu_system_function_t) shows its text in MESSAGE or in one of the
  * choice entries and sets the current id itself; ids from 0x62 exist only
  * there and have no entry.

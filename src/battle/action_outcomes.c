@@ -210,7 +210,7 @@ void battle_status_queue_graphics_change_if_executing(s32 status_id, s32 enabled
 /* Give a player-team unit one of item (Steal, Catch, an unbroken Draw Out katana, a treasure
  * chest): with 99 already in stock, the item becomes a quarter of its price in war funds instead.
  * Items 0 and 0xFF, other teams and non-executing states do nothing. */
-s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item) {
+s32 battle_action_give_item(unit_stats_t* unit, u8 item) {
     u8 item_id;
 
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {

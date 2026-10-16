@@ -62,7 +62,7 @@ void world_script_start_tutorial(s32 index) {
         g_world_load_work_buffer->options.sound_mode = g_main_game_options.fields.sound_mode;
         world_card_load_globals_from_save_image(1);
         g_world_script_tutorial_command_active = 0;
-        world_text_generate_formation_unit_name_string();
+        world_text_build_roster_name_list();
     }
 }
 
@@ -125,7 +125,7 @@ static s32 world_script_handle_tutorial_command_end(void) {
             bcopy(&g_world_tutorial_state.saved_game, g_world_load_work_buffer,
                 sizeof(g_world_tutorial_state.saved_game));
             world_card_load_globals_from_save_image(1);
-            world_text_generate_formation_unit_name_string();
+            world_text_build_roster_name_list();
             main_heap_call_free(g_world_load_work_buffer);
             world_formation_build_record_list(
                 0, (world_unit_t**)&g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);

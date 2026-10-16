@@ -88,5 +88,5 @@ void world_formation_set_unit_name(s16 formation_index, const u8* name) {
         }
         name++;
     }
-    world_text_generate_formation_unit_name_string();
+    world_text_build_roster_name_list();
 }

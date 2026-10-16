@@ -40,7 +40,7 @@ static void battle_move_return_to_previous_map_square(battle_unit_t* unit) {
     battle_unit_set_move_and_world_coords(unit);
     battle_unit_set_tile_position(
         unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, (unit->facing / BATTLE_FACING_QUARTER_TURN));
-    battle_unit_store_animation_facing_movement_data(unit->animation.sequence_id >> 1, unit->facing, unit);
+    battle_unit_force_animation_facing(unit->animation.sequence_id >> 1, unit->facing, unit);
 }
 
 /* Cancel a move at the confirm prompt. The unit returns to its previous tile;
@@ -208,7 +208,7 @@ void battle_state_handle_wait_direction_state(void) {
     battle_unit_t* unit = battle_unit_get_source();
     battle_unit_t* mounted_unit;
 
-    battle_gfx_update_all_unit_rotation_and_vectors();
+    battle_gfx_project_all_units();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
     }
@@ -622,7 +622,7 @@ void battle_state_handle_commence_attack_phase_state(void) {
     if (unit->attack_phase_state == BATTLE_ATTACK_PREPARATION_JUMP) {
         if (unit->animation.wait == 0) {
             battle_action_set_only_action_taken(unit->stats->battle_id);
-            battle_unit_update_post_command_animation_display(unit);
+            battle_unit_end_command(unit);
         }
     } else {
         g_battle_action_phase = ACTION_PHASE_PRE_ACTION;
@@ -735,7 +735,7 @@ void battle_state_handle_secondary_effect_state(void) {
  * display; nothing happens when either unit is missing. */
 static void battle_unit_start_post_attack_animation_display(battle_unit_t* attacker, battle_unit_t* target) {
     if (attacker != 0 && target != 0) {
-        battle_unit_set_target_animation_from_attack_type(attacker, target);
+        battle_unit_set_target_animation(attacker, target);
         battle_gfx_prepare_post_action_display_by_runtime_id(target->runtime_id);
     }
 }
@@ -761,7 +761,7 @@ void battle_state_update_action_execute_mode(void) {
     battle_unit_t* target;
     s32 i;
 
-    battle_gfx_update_all_unit_rotation_and_vectors();
+    battle_gfx_project_all_units();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();
@@ -904,7 +904,7 @@ void battle_state_handle_resume_attack_phase_state(void) {
         }
         battle_action_store_acting_unit_data(unit->stats);
         battle_unit_call_set_animation_based_on_status(unit);
-        battle_unit_update_anim_display_for_all_targets(unit);
+        battle_unit_update_target_displays(unit);
         battle_unit_get_source();
         if (g_battle_action_phase != ACTION_PHASE_PRE_ACTION) {
             if (g_battle_action_phase != ACTION_PHASE_REACTING_UNIT) {
@@ -977,7 +977,7 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
             if (skip_animation == 0) {
                 casting_unit = battle_unit_get_source();
                 battle_unit_call_set_animation_based_on_status(casting_unit);
-                battle_unit_update_post_command_animation_display(casting_unit);
+                battle_unit_end_command(casting_unit);
             }
         }
     }
@@ -1287,7 +1287,7 @@ void battle_state_handle_status_execute_state(void) {
  * restored. Neither function that stores this state has a caller, so the
  * handler does not run. */
 void battle_state_handle_effect_state(void) {
-    battle_gfx_update_all_unit_rotation_and_vectors();
+    battle_gfx_project_all_units();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();
@@ -1314,7 +1314,7 @@ void battle_state_update_event_mode(void) {
     u16 level;
     char unused[24];
 
-    battle_gfx_update_all_unit_rotation_and_vectors();
+    battle_gfx_project_all_units();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();
@@ -1529,7 +1529,7 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     u16 intensity;
     char unused[24];
 
-    battle_gfx_update_all_unit_rotation_and_vectors();
+    battle_gfx_project_all_units();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();

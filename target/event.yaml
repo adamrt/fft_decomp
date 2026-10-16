@@ -57,7 +57,7 @@ functions:
   - {addr: 0x801c340c, size: 168, name: sound_play_music_tracks, hash: 27dd3fb89e7b80d9, unit: music_stubs}
   - {addr: 0x801c34b4, size: 1612, name: attack_load_scenario_conditionals, hash: bba39fd5570c99b6, unit: scenario_setup}
   - {addr: 0x801c3b00, size: 424, name: attack_scenario_restore_music_and_darkness, hash: 7e9cd3acb0241ad1, unit: scenario_setup}
-  - {addr: 0x801c3ca8, size: 148, name: attack_deploy_mark_other_squad_units_undeployable, hash: 5cd7505bb7bab58e, unit: scenario_setup}
+  - {addr: 0x801c3ca8, size: 148, name: attack_deploy_find_deployable_units, hash: 5cd7505bb7bab58e, unit: scenario_setup}
   - {addr: 0x801c3d3c, size: 80, name: attack_deploy_is_roster_unit_deployed, hash: 5d2d6845961ff568}
   - {addr: 0x801c3d8c, size: 40, name: thread_wait_forever, hash: 1784b8534b53f3ba, source: src/event/menu/thread_wait_forever.c}
   - {addr: 0x801c3db4, size: 80, name: attack_deploy_has_roster_id_on_tiles, hash: 5d2d6845961ff568, source: src/event/attack/attack_deploy_is_roster_unit_deployed.c, source_symbol: attack_deploy_is_roster_unit_deployed}

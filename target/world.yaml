@@ -590,7 +590,7 @@ functions:
   - {addr: 0x8010849c, size: 260, name: world_menu_build_window_frame_image, hash: b673fa5ffbc1fa63, unit: organization_resources}
   - {addr: 0x801085a0, size: 256, name: world_screen_menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/event/menu/menu_build_window_image_row.c, source_symbol: menu_build_window_image_row}
   - {addr: 0x801086a0, size: 640, name: world_menu_formation_icon_list_thread, hash: 7c9eea9172dca7e4, unit: formation_icon_list}
-  - {addr: 0x80108920, size: 216, name: world_text_generate_formation_unit_name_string, hash: 96223aeecf91b09d, unit: formation_icon_list}
+  - {addr: 0x80108920, size: 216, name: world_text_build_roster_name_list, hash: 96223aeecf91b09d, unit: formation_icon_list}
   - {addr: 0x801089f8, size: 16, name: world_formation_set_display_mode, hash: 47216740e98df636, unit: formation_icon_list}
   - {addr: 0x80108a08, size: 16, name: world_formation_set_ordering_table_pointer, hash: 268b8898cf44a43e, unit: formation_icon_list}
   - {addr: 0x80108a18, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: zodiac_primitives}
@@ -827,7 +827,7 @@ functions:
   - {addr: 0x80122c20, size: 544, name: world_ability_build_equippable_rsm_list, hash: e568d793cd50e453, unit: ability_checks}
   - {addr: 0x80122e40, size: 72, name: menu_clear_stat_preview, hash: 740a9e32a9c766bb, source: src/event/menu/menu_clear_stat_preview.c}
   - {addr: 0x80122e88, size: 132, name: world_ability_get_move_and_jump_increase_values, hash: 15a592818d5c12ca, unit: equipment_stat_changes}
-  - {addr: 0x80122f0c, size: 144, name: world_ability_find_stat_changes_due_to_equipped, hash: 1f6bb186e388a569, unit: equipment_stat_changes}
+  - {addr: 0x80122f0c, size: 144, name: world_ability_find_movement_stat_changes, hash: 1f6bb186e388a569, unit: equipment_stat_changes}
   - {addr: 0x80122f9c, size: 560, name: item_collect_stat_deltas_variant, hash: 610e237773cc8653, unit: equipment_stat_changes}
   - {addr: 0x801231cc, size: 188, name: menu_calculate_swap_stat_delta, hash: 9c961874f326897c, unit: equipment_stat_deltas}
   - {addr: 0x80123288, size: 424, name: menu_subtract_scaled_stat_preview, hash: 7621477fabb93d49, unit: equipment_stat_deltas}

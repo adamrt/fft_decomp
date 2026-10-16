@@ -921,11 +921,11 @@ s32 battle_formula_calculate_magical_evade(void) {
 /* Physical modifiers on XA, in order: attacker supports (Two Hands, Attack Up,
  * Martial Arts), Berserk or Frog, Defense Up, the target's statuses, zodiac
  * compatibility. */
-void battle_formula_apply_physical_xa_modifying_statuses_support(void) {
+void battle_formula_apply_physical_modifiers(void) {
     battle_formula_apply_physical_attack_supports();
     battle_formula_apply_attacker_berserk_frog();
     battle_formula_apply_defense_up();
-    battle_formula_apply_target_xa_affecting_statuses();
+    battle_formula_apply_target_physical_statuses();
     battle_formula_apply_zodiac_compatibility();
 }
 
@@ -948,7 +948,7 @@ s32 battle_formula_calculate_weapon_damage(void) {
 
 /* Physical damage: XA * YA after the physical modifiers and the critical roll. */
 void battle_formula_calculate_physical_damage(void) {
-    battle_formula_apply_physical_xa_modifying_statuses_support();
+    battle_formula_apply_physical_modifiers();
     battle_formula_calculate_critical_hit();
     battle_formula_store_xa_times_ya_damage();
 }
@@ -956,7 +956,7 @@ void battle_formula_calculate_physical_damage(void) {
 /* Hit chance (XA+YA)% with every physical modifier on XA, Two Hands included.
  * Returns 1 on a miss. */
 s32 battle_formula_calculate_physical_accuracy(void) {
-    battle_formula_apply_physical_xa_modifying_statuses_support();
+    battle_formula_apply_physical_modifiers();
     battle_formula_store_hit_chance();
     battle_formula_use_hp_damage_as_action_hit_percent();
     return g_battle_action_target_data->hit == 0;
@@ -971,10 +971,10 @@ s32 battle_formula_apply_elemental_absorption_and_status_proc(void) {
 
 /* Magical modifiers on XA, in order: Magic Attack Up, Magic Defense Up, the
  * target's statuses (Shell, Frog or Chicken), zodiac compatibility. */
-void battle_formula_apply_magical_support_status_compatibility(void) {
+void battle_formula_apply_magical_modifiers(void) {
     battle_formula_apply_magic_attack_up();
     battle_formula_apply_magic_defense_up();
-    battle_formula_apply_target_magical_status_xa_modifiers();
+    battle_formula_apply_target_magical_statuses();
     battle_formula_apply_zodiac_compatibility();
 }
 

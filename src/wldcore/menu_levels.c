@@ -374,7 +374,7 @@ void wldcore_system_init_world_menus_and_date(void) {
     s32 value;
 
     world_menu_load_text_1bd8_with_face();
-    world_text_generate_formation_unit_name_string();
+    world_text_build_roster_name_list();
     value = script_get_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE);
     if (value != 0) {
         wldcore_calendar_advance_days(value);
@@ -419,7 +419,7 @@ void wldcore_menu_run_world_frame(GsOT* context) {
 
 /* Empty the menu stack, push the root level and place its window at the
  * projected location marker (4 pixels above it). */
-void wldcore_menu_reset_window_list_and_store_origin(void) {
+void wldcore_menu_reset_stack(void) {
     g_wldcore_menu_stack_depth = 0;
     wldcore_menu_push_root_level();
     g_wldcore_window_records[g_wldcore_menu_stack_records[1].window_index].position.x
@@ -2226,7 +2226,7 @@ void wldcore_menu_step_unit_browser_panel(wldcore_menu_panel_level_t* level) {
         if (level->result == 1) {
             if (g_wldcore_active_menu_value < 0x200) {
                 main_entd_init_event_unit_data(g_wldcore_active_menu_value);
-                world_text_generate_formation_unit_name_string();
+                world_text_build_roster_name_list();
                 g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
             }
         }
