@@ -154,13 +154,13 @@ void menu_run_equipment_list_thread_variant(void) {
         for (i = 14; i < 19; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->sprites[i]);
         }
-        gfx_draw_or_append_gpu_primitive(&screen->draw_modes[0]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame_draw_mode);
         gfx_draw_or_append_gpu_primitive(&screen->sprites[12]);
-        gfx_draw_or_append_gpu_primitive(&screen->draw_modes[1]);
+        gfx_draw_or_append_gpu_primitive(&screen->text_draw_mode);
         for (i = 0; i < 5; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->sprites[19 + i]);
         }
-        gfx_draw_or_append_gpu_primitive(&screen->draw_modes[2]);
+        gfx_draw_or_append_gpu_primitive(&screen->image_draw_mode);
         gfx_draw_or_append_gpu_primitive(&screen->tiles[0]);
         for (i = 0; i < 4; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->lines[i]);

@@ -43,7 +43,7 @@ void menu_init_status_panel_primitives(menu_status_panel_buffer_t* menu) {
     setXY2(&menu->lines[5], 0x7b, 1, 0x7b, 0x5a);
     setXY2(&menu->lines[6], 0x8c, 1, 0x8c, 0x5a);
     setXY2(&menu->lines[7], 0x8d, 1, 0x8d, 0x5a);
-    gfx_set_draw_mode_for_texture_page(&menu->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
-    gfx_set_draw_mode_for_texture_page(&menu->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    gfx_set_draw_mode_for_texture_page(&menu->draw_modes[2], MENU_TEXTURE_PAGE_ITEM_ICONS);
+    gfx_set_draw_mode_for_texture_page(&menu->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&menu->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&menu->image_draw_mode, MENU_TEXTURE_PAGE_ITEM_ICONS);
 }

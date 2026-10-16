@@ -53,9 +53,9 @@ void debugchr_editor_run_numeric_thread(void) {
         upload_c = &g_editor_numeric_entries_f;
         entries = g_editor_numeric_descriptor_b;
     }
-    gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
-    gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[2], MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&buffer->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&buffer->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&buffer->image_draw_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_numeric_display_frame_primitives(&g_editor_numeric_table.texture_rect, &buffer->numeric_frame);
     menu_init_scaled_draw_area_packets(&buffer->portrait);
     i = 0;
@@ -140,14 +140,14 @@ void debugchr_editor_run_numeric_thread(void) {
             gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
         gfx_draw_or_append_gpu_primitive(&buffer->sprites[17]);
-        gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[0]);
+        gfx_draw_or_append_gpu_primitive(&buffer->frame_draw_mode);
         for (; i < 17; i++) {
             gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
         if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
-            gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[1]);
+            gfx_draw_or_append_gpu_primitive(&buffer->text_draw_mode);
         } else {
-            gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[2]);
+            gfx_draw_or_append_gpu_primitive(&buffer->image_draw_mode);
         }
         menu_submit_numeric_display_frame_primitives(&buffer->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&buffer->draw_offsets[0]);

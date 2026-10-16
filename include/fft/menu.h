@@ -224,7 +224,9 @@ typedef struct battle_menu_status_panel_numeric_geometry {
  * *_gfx_init_scaled_draw_area_packets, and the draw offsets follow from the
  * SetDrawOffset(packet, position) pairs. */
 typedef struct menu_status_panel_numeric_buffer {
-    DR_MODE draw_modes[3];                           /* 0x000 */
+    DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
+    DR_MODE text_draw_mode;                          /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
+    DR_MODE image_draw_mode;                         /* 0x018; item icons or allocated images */
     SPRT sprites[18];                                /* 0x024 */
     menu_palette_primitives_t numeric_frame;         /* 0x18c */
     menu_status_panel_draw_offset_t draw_offsets[2]; /* 0x278 */
@@ -456,7 +458,9 @@ typedef struct menu_status_panel_display_thread {
  *    *_gfx_init_scaled_draw_area_packets / *_gfx_build_scaled_draw_area_packets
  *    pair. */
 typedef struct menu_status_panel_buffer {
-    DR_MODE draw_modes[3];                           /* 0x000 */
+    DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
+    DR_MODE text_draw_mode;                          /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
+    DR_MODE image_draw_mode;                         /* 0x018; item icons or allocated images */
     SPRT sprites[24];                                /* 0x024 */
     TILE tiles[2];                                   /* 0x204 */
     LINE_F2 lines[8];                                /* 0x224 */
@@ -1886,7 +1890,9 @@ typedef char text_glyph_state_size_must_be_16[(sizeof(text_glyph_state_t) == 16)
  * as menu_status_panel_buffer_t (draw modes, sprites, tiles and lines),
  * and the trailing draw-area pair follows menu_panel_frame_t. */
 typedef struct menu_unit_editor_frame {
-    DR_MODE draw_modes[3];              /* 0x000: image pages 0, 2 and 4 */
+    DR_MODE frame_draw_mode;            /* 0x000; MENU_TEXTURE_PAGE_FRAME */
+    DR_MODE text_draw_mode;             /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
+    DR_MODE image_draw_mode;            /* 0x018; MENU_TEXTURE_PAGE_ITEM_ICONS */
     SPRT sprites[24];                   /* 0x024: 19 panel sprites, then 5 item icons */
     TILE tiles[2];                      /* 0x204 */
     LINE_F2 lines[8];                   /* 0x224 */

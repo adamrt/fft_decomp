@@ -1520,9 +1520,9 @@ void menu_run_unit_editor_panel_thread(void) {
     menu_init_scaled_draw_area_packets(&frame_record->draw_areas);
     g_menu_hovered_unit_stats_rect.y = 0x1A;
     g_menu_unit_summary_panel_rect.y = 0x1A;
-    gfx_set_draw_mode_for_texture_page(&frame_record->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
-    gfx_set_draw_mode_for_texture_page(&frame_record->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    gfx_set_draw_mode_for_texture_page(&frame_record->draw_modes[2], MENU_TEXTURE_PAGE_ITEM_ICONS);
+    gfx_set_draw_mode_for_texture_page(&frame_record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&frame_record->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&frame_record->image_draw_mode, MENU_TEXTURE_PAGE_ITEM_ICONS);
     SetTile(&frame_record->tiles[0]);
     SetSemiTrans(&frame_record->tiles[0], 1);
     setRGB0(&frame_record->tiles[0], 0x30, 0x30, 0x30);
@@ -1700,16 +1700,16 @@ void menu_run_unit_editor_panel_thread(void) {
         for (i = 14; i < 19; i++) {
             gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
-        gfx_draw_or_append_gpu_primitive(&frame_record->draw_modes[0]);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame_draw_mode);
         gfx_draw_or_append_gpu_primitive(&frame_record->sprites[12]);
         gfx_draw_or_append_gpu_primitive(&frame_record->sprites[13]);
-        gfx_draw_or_append_gpu_primitive(&frame_record->draw_modes[1]);
+        gfx_draw_or_append_gpu_primitive(&frame_record->text_draw_mode);
         for (i = 0; i < 5; i++) {
             if ((u16)g_menu_selected_unit_fields.state.equipment[i] != 0xFFFF) {
                 gfx_draw_or_append_gpu_primitive(&frame_record->sprites[19 + i]);
             }
         }
-        gfx_draw_or_append_gpu_primitive(&frame_record->draw_modes[2]);
+        gfx_draw_or_append_gpu_primitive(&frame_record->image_draw_mode);
         gfx_draw_or_append_gpu_primitive(&frame_record->tiles[0]);
         gfx_draw_or_append_gpu_primitive(&frame_record->tiles[1]);
         for (i = 0; i < 8; i++) {
