@@ -23,6 +23,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static u8 g_world_name_entry_text[17] = { 0 };
+
 static void world_name_apply_entry_key(s16 key);
 static void world_name_init_entry(const u8* name);
 static void world_name_update_entry_cursor(void);

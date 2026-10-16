@@ -21,6 +21,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+static u8 g_battle_mimic_pending_flags[21] = { 0 };
+
 static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag);
 static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit);
 static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t* list);

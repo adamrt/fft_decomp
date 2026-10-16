@@ -6,6 +6,8 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static u8 g_main_heap_game_allocator_table[MAIN_HEAP_GAME_PAGE_COUNT] = { 0 };
+
 /* Allocate size bytes from the music heap: 16 pages of 0x800 bytes at
  * g_main_heap_smd_base, tagged in g_main_heap_smd_allocator_table. The algorithm
  * is main_heap_alloc's; returns 0 when no run of free pages is long enough. */

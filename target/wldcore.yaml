@@ -19,7 +19,7 @@ units:
   - {name: map_tiles, source: src/wldcore/map_tiles.c}
   - {name: menu_levels, source: src/wldcore/menu_levels.c}
   - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c}
-  - {name: proposition_results, source: src/wldcore/proposition_results.c}
+  - {name: proposition_results, source: src/wldcore/proposition_results.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
   - {name: resources, source: src/wldcore/resources.c}
   - {name: sound_novel, source: src/wldcore/sound_novel.c}
   - {name: startup, source: src/wldcore/startup.c}

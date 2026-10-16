@@ -19,6 +19,14 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* Write-only: zeroed with the map render state and never read anywhere on
+ * the disc. The 150 x 14-byte shape suggests per-instruction parameter
+ * storage (an event opcode takes at most 14 parameters), but no code proves
+ * it, so the names stay provisional. */
+static u8 g_battle_unknown_800f70b4[150][14] = { 0 };
+
+static u8 g_battle_unknown_800f78e8[150] = { 0 };
+
 static void battle_map_init_weather_particles(map_weather_command_e command);
 static void battle_map_update_mesh_part_animations(void);
 static void battle_map_update_texture_animations(void);

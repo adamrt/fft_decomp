@@ -19,6 +19,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static u8 g_text_typewriter_glyph_images[3][8][0x54] = { 0 };
+
+static u8 g_text_typewriter_previous_images[3][0x54] = { 0 };
+
+static u8 g_text_typewriter_column_scratch[14] = { 0 };
+
 /* Measure the widest text before this dialog window closes. */
 void text_build_display_message(s32 offset, s32 flags, s32* out_width) {
     s16 width;

@@ -12,6 +12,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static u32 g_world_script_tutorial_repeat_counters[16] = { 0 };
+
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
  *

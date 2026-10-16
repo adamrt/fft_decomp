@@ -11,7 +11,7 @@ defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 53, VARIANT_THREAD_TABLE_SLOT_COUNT: 1
 units:
   - {name: action_effects, source: src/battle/action_effects.c}
   - {name: action_menus, source: src/battle/action_menus.c}
-  - {name: action_outcomes, source: src/battle/action_outcomes.c}
+  - {name: action_outcomes, source: src/battle/action_outcomes.c, data: [{addr: 0x80193868, size: 16, hash: 374708fff7719dd5}]}
   - {name: action_preparation, source: src/battle/action_preparation.c}
   - {name: action_resolution, source: src/battle/action_resolution.c}
   - {name: ai_commands, source: src/battle/ai_commands.c, rodata: [{addr: 0x80193d70, size: 8, hash: 14bca7e1bfd5b8a9}]}
@@ -22,7 +22,7 @@ units:
   - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c}
   - {name: dialog_cursor, source: src/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/event/dialog_helpers.c}
-  - {name: dialog_messages, source: src/event/dialog_messages.c}
+  - {name: dialog_messages, source: src/event/dialog_messages.c, data: [{addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: effect_renderer, source: src/battle/effect_renderer.c}
   - {name: effect_script, source: src/battle/effect_script.c}
   - {name: effect_system, source: src/battle/effect_system.c}
@@ -37,7 +37,7 @@ units:
   - {name: map_gns, source: src/battle/map_gns.c}
   - {name: map_loading, source: src/battle/map_loading.c}
   - {name: map_palettes, source: src/battle/map_palettes.c, data: [{addr: 0x800956e4, size: 2016, hash: 0cd1d40758dc1bed}, {addr: 0x80095ec4, size: 504, hash: 40a6fe7cfd29ed44}]}
-  - {name: map_rendering, source: src/battle/map_rendering.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}]}
+  - {name: map_rendering, source: src/battle/map_rendering.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}], data: [{addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}]}
   - {name: move_paths, source: src/battle/move_paths.c}
   - {name: move_range, source: src/battle/move_range.c}
   - {name: move_steps, source: src/battle/move_steps.c}
@@ -45,7 +45,7 @@ units:
   - {name: script_commands, source: src/event/script_commands.c}
   - {name: script_helpers, source: src/event/script_helpers.c, data: [{addr: 0x80167838, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80167844, size: 96, hash: 54145c650f08eb0b}]}
   - {name: script_interpreter, source: src/event/script_interpreter.c, data: [{addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
-  - {name: skillset_menus, source: src/battle/skillset_menus.c}
+  - {name: skillset_menus, source: src/battle/skillset_menus.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
   - {name: spritesheets, source: src/battle/spritesheets.c}
   - {name: state_actions, source: src/battle/state_actions.c}
   - {name: state_handlers, source: src/battle/state_handlers.c}

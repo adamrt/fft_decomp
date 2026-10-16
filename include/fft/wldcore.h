@@ -268,7 +268,6 @@ extern CVECTOR g_wldcore_hud_color;
 extern s32 g_wldcore_hud_ot_priority;
 
 extern u16* g_wldcore_dissolve_band_order;
-extern u8 g_wldcore_dissolve_band_progress[16];
 
 /* Destination image buffer (read back as a TIM by wldcore_opcode_load_picture). */
 extern u32* g_wldcore_picture_buffer;

@@ -17,6 +17,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Scratch list filled by main_ability_store_skillset_abilities. */
+static u16 g_main_ability_temp_list[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
+
 static s32 main_job_get_random_unlocked(const unit_stats_t* unit);
 static void main_unit_apply_equipment_move_jump_and_name(unit_stats_t* unit);
 static void main_unit_calculate_abilities(unit_stats_t* unit, entd_unit_t* entd);

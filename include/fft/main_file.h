@@ -61,8 +61,6 @@ void main_overlay_exec_open_bin_ending(void);
 int main_overlay_open_world_and_wldcore(int load_world);
 void main_overlay_open_world_bin(s32 mode);
 
-/* heap */
-extern u8 g_main_heap_game_allocator_table[MAIN_HEAP_GAME_PAGE_COUNT];
 extern u8 g_main_heap_smd_allocator_table[MAIN_HEAP_SMD_PAGE_COUNT];
 extern u8 g_main_heap_smd_base[];
 extern u8* g_main_heap_high_overlay_load_address;

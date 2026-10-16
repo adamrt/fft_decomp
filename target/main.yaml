@@ -13,10 +13,10 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 units:
   - {name: cd_headers, source: src/main/cd_headers.c}
   - {name: game_loop, source: src/main/game_loop.c}
-  - {name: heap, source: src/main/heap.c}
+  - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: open_overlay, source: src/main/open_overlay.c}
   - {name: overlay_loading, source: src/main/overlay_loading.c}
-  - {name: party, source: src/main/party.c}
+  - {name: party, source: src/main/party.c, data: [{addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
   - {name: sound_requests, source: src/main/sound_requests.c}
   - {name: startup, source: src/main/startup.c}
   - {name: system_handlers, source: src/main/system_handlers.c}

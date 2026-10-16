@@ -24,6 +24,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s16 g_world_remove_ability_slots[5] = { 0 };
+
 static s32 world_ability_is_equip_support_change(s16 unit_id, s16 ability_id);
 static s32 world_formation_run_set_ability_menu(void);
 static s32 world_menu_run_learn(void);

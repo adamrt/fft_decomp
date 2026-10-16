@@ -582,7 +582,6 @@ extern battle_post_effect_msg_t g_battle_action_post_effect_msgs[];
 extern const palette_t g_battle_action_result_palette;
 /* Eight per status_changes mask byte, indexed from the byte's high bit. */
 extern u8 g_battle_action_status_display_image_ids[STATUS_BYTE_COUNT][8];
-extern u8 g_battle_mimic_pending_flags[21];
 
 s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id);
 s32 battle_action_apply_tile_trap(unit_stats_t* unit);

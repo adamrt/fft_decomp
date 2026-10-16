@@ -23,6 +23,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+static u8 g_battle_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT] = { 0 };
+
 /* Enter AI action simulation, save the current attacker and clear Hamedo state. */
 void battle_ai_begin_action_simulation(void) {
     g_battle_action_state = ACTION_STATE_AI_SIMULATION;

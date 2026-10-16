@@ -30,6 +30,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static u8 g_world_formation_thread_status_snapshot[16] = { 0 };
+
 static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 static void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* record, SPRT* primitive);
 static void world_menu_start_thread_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y);

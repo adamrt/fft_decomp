@@ -211,7 +211,6 @@ extern menu_list_page_t g_world_ability_list_pages[][2];
 extern u8 g_world_ability_menu_saved_browse_enabled;
 extern s8 g_world_remove_ability_cursor;
 extern s8 g_world_clear_abilities_prompt_active;
-extern s16 g_world_remove_ability_slots[5];
 extern volatile u16 g_world_clear_abilities_blink_counter;
 extern s8 g_world_set_ability_list_open;   /* ability list open */
 extern s8 g_world_set_ability_entry_count; /* ability list entry count */
@@ -398,7 +397,6 @@ extern s16 g_world_formation_dismiss_prompt_text_id;
 extern s16 g_world_formation_dismiss_prompt_kind;
 extern s16 g_world_formation_dismiss_anim_timer;
 extern s8 g_world_formation_sort_field_indices[];
-extern u8 g_world_formation_thread_status_snapshot[16];
 extern POLY_FT4 g_world_formation_view_quads[2][30];
 extern point16_t g_world_formation_cursor_target;
 /* Cursor trail position history at 0x801c8344, reset by

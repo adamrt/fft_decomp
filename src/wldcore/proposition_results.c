@@ -33,6 +33,8 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static u8 g_wldcore_dissolve_band_progress[16] = { 0 };
+
 static void wldcore_gfx_prepare_play_time_display(void);
 static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step);
 static void wldcore_menu_push_sound_novel_history_level(void);

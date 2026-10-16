@@ -19,7 +19,7 @@ units:
   - {name: command_menus, source: src/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: dialog_cursor, source: src/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/event/dialog_helpers.c}
-  - {name: dialog_messages, source: src/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: dialog_messages, source: src/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: draw_areas, source: src/world/draw_areas.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: equipment_menus, source: src/world/equipment_menus.c}
   - {name: equipment_rows, source: src/event/menu/equipment_rows.c}
@@ -29,7 +29,7 @@ units:
   - {name: event_resources, source: src/event/event_resources.c}
   - {name: event_unit_lookup, source: src/event/event_unit_lookup.c}
   - {name: font_rendering, source: src/world/font_rendering.c}
-  - {name: formation_ability_menu, source: src/world/formation_ability_menu.c}
+  - {name: formation_ability_menu, source: src/world/formation_ability_menu.c, data: [{addr: 0x801c8528, size: 10, hash: 01d448afd9280654}]}
   - {name: formation_ability_slots, source: src/world/formation_ability_slots.c}
   - {name: formation_display_init, source: src/world/formation_display_init.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: formation_grid, source: src/world/formation_grid.c, profile: gcc-2.6.3_O1_aspsx-2.34}
@@ -55,9 +55,9 @@ units:
   - {name: menu_window_threads, source: src/event/menu/menu_window_threads.c}
   - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018ae8c, size: 16, hash: 5ad8dff169073b4e}, {addr: 0x8018ae9c, size: 28, hash: 2c65651a7bb2a2c9}]}
   - {name: music_stubs, source: src/event/menu/music_stubs.c}
-  - {name: name_entry, source: src/world/name_entry.c}
+  - {name: name_entry, source: src/world/name_entry.c, data: [{addr: 0x801cd144, size: 17, hash: 0a88111852095cae}]}
   - {name: number_entry, source: src/world/number_entry.c}
-  - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}]}
   - {name: panel_text, source: src/event/menu/panel_text.c}
   - {name: panel_toggles, source: src/world/panel_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: party_records, source: src/world/party_records.c}
@@ -84,7 +84,7 @@ units:
   - {name: thread_accessors, source: src/event/thread_accessors.c}
   - {name: thread_state, source: src/world/thread_state.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: tutorial, source: src/world/tutorial.c, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {name: tutorial_controller_input, source: src/world/tutorial_controller_input.c}
+  - {name: tutorial_controller_input, source: src/world/tutorial_controller_input.c, data: [{addr: 0x801ca6f8, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: unit_name_list, source: src/event/unit_name_list.c}
   - {name: unit_status_lists, source: src/event/unit_status_lists.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156198, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x801561d0, size: 76, hash: ec0d1125a0b03828}]}
   - {name: window_images, source: src/event/window_images.c}

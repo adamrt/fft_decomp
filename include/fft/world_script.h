@@ -81,7 +81,6 @@ extern u16 g_world_script_tutorial_latched_button;
 extern u8 g_world_script_tutorial_activation_timer;
 extern s16 g_world_script_tutorial_buttons;
 extern s32 g_world_script_saved_event_input;
-extern u32 g_world_script_tutorial_repeat_counters[16];
 extern u16 g_world_script_tutorial_previous_input;
 extern u8* g_world_script_tutorial_command_ptr;
 extern s16 g_world_event_effect_target_runtime_id;

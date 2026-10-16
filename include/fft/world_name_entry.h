@@ -48,7 +48,6 @@ extern u8 g_world_name_entry_saved_state;
 extern u8 g_world_name_entry_cursor_index;
 extern u8 g_world_name_entry_list_cursor;
 extern u8 g_world_name_entry_cursor;
-extern u8 g_world_name_entry_text[17];
 extern const u8* g_world_name_entry_original_name;
 extern s16 g_world_name_confirm_result;
 void world_name_run_confirmation_menu(void);

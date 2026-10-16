@@ -89,8 +89,6 @@ s32 battle_target_find_unit_at_tile(s32 x, s32 y, s32 level);
 s32 battle_target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index);
 s32 battle_target_validate_weapon_target(const action_command_t* source);
 
-/* target lists */
-extern u8 g_battle_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
 
 s32 battle_target_copy_ability_targets(u8* out);
 void battle_target_remove_ability_target(s32 target_battle_id);

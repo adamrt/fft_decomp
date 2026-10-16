@@ -63,8 +63,6 @@ extern ability_secondary_data_t g_main_ability_range_data[];
 extern ability_data_t g_main_ability_data[];
 extern main_ability_human_skillset_t g_main_ability_human_skillset_abilities[];
 extern main_ability_monster_skillset_t g_main_ability_monster_skillset_abilities[];
-/* Scratch list filled by main_ability_store_skillset_abilities. */
-extern u16 g_main_ability_temp_list[SKILLSET_ABILITY_LIST_COUNT];
 s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* main_ability_store_skillset_abilities(s32 skillset, s32 flags);
 s32 main_ability_calculate_pointers_and_type(

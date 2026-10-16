@@ -270,12 +270,6 @@ s32 battle_return_one(s32 unused_runtime_id);
 
 /* unknown state */
 extern s32 g_battle_unknown_800f668c;
-/* Write-only: zeroed with the map render state and never read anywhere on
- * the disc. The 150 x 14-byte shape suggests per-instruction parameter
- * storage (an event opcode takes at most 14 parameters), but no code proves
- * it, so the names stay provisional. */
-extern u8 g_battle_unknown_800f70b4[150][14];
-extern u8 g_battle_unknown_800f78e8[150];
 extern s16 g_battle_unknown_800b628c;
 extern s16 g_battle_unknown_800b6290;
 extern u8 g_battle_unknown_8018f4fc;

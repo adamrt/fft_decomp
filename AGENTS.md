@@ -35,7 +35,8 @@ preserving every original byte.
   script dumps) or text copied from outside references (wikis, guides, SDK
   sources). Data tables recovered while decompiling the code belong in
   source; write a table as the rule that produces it when one reproduces
-  every byte.
+  every byte. A zero-filled buffer the original kept in `.data` needs an
+  explicit `= {0}`; without it the compiler moves it to `.bss`.
 - Stage explicit paths and inspect the staged diff. Preserve pushed history;
   make coherent commits with short subject lines when the user authorizes them.
 
