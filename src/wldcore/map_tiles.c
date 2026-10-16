@@ -18,6 +18,13 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* The map is a grid of 12x16 tiles, projected through its 13x17 corners. */
+#define WLDCORE_MAP_TILE_ROWS    12
+#define WLDCORE_MAP_TILE_COLUMNS 16
+#define WLDCORE_MAP_ROW_STRIDE   17
+#define WLDCORE_MAP_CORNER_COUNT ((WLDCORE_MAP_TILE_ROWS + 1) * WLDCORE_MAP_ROW_STRIDE)
+#define WLDCORE_MAP_TILE_CLUT_Y  0x1e0
+
 /* 0-based day-of-year index (party_unit_t.birthday_day) to 1-based month
  * and day. */
 void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day) {
@@ -39,12 +46,15 @@ void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month
     *output_day = day_of_year + 1;
 }
 
-/* World render/present pass with the 3D map, plus the menu-window handoff.
+/* Freeze the world map behind a full-screen menu, or release it.
  *
- * With `capture` == 0 it only drops the 0x10 visibility bit on the two active
- * window records and restores the saved system flags; otherwise it renders a
- * whole frame into both ordering tables, stores the composed image into the
- * scratch buffer, and re-arms the menu windows behind flag mask 0x3c20. */
+ * With `capture` set it draws one whole map frame into both ordering tables,
+ * stores the image in g_wldcore_scratch_buffer as the backdrop and draws the
+ * menu frame over it; then it saves the system flags and hides the map and
+ * root menu windows and everything the map pass draws (routes, display
+ * objects, context value, date and marker). With `capture` 0 the two windows
+ * are shown again and the saved flags come back with MAIN_SYSTEM_FLAG_DRAW_MAP
+ * set, so the next frame redraws the map. */
 void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
     RECT display_rect;
     s32 buffer_index;
@@ -54,7 +64,7 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
         s32 menu_window_index;
 
         map_window_index = g_wldcore_map_window_index;
-        menu_window_index = g_wldcore_menu_stack_types[0];
+        menu_window_index = g_wldcore_menu_root_window_index;
         g_wldcore_window_records[map_window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
         g_main_system_flags = g_wldcore_saved_system_flags | MAIN_SYSTEM_FLAG_DRAW_MAP;
         g_wldcore_window_records[menu_window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
@@ -99,7 +109,7 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
         u32 saved_system_flags;
 
         saved_system_flags = g_main_system_flags;
-        menu_window_index = g_wldcore_menu_stack_types[0];
+        menu_window_index = g_wldcore_menu_root_window_index;
         map_window_index = g_wldcore_map_window_index;
         g_wldcore_saved_system_flags = saved_system_flags;
         g_wldcore_window_records[map_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
@@ -120,14 +130,15 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
  * zeroed, the two append calls here return records 0 and 1.
  *
  * Layout:
- *  - Origin, scale and rotation form g_wldcore_map_projection_view at
- *    0x8009f2c0. Their aliases retain this initializer's absolute stores;
+ *  - Origin, scale and rotation form g_wldcore_map_projection_view. Their
+ *    aliases retain this initializer's absolute stores;
  *    the projection routine anchors its shared record view at rotation.
  *  - The 24-byte tile source table is reached through the pointer cell
  *    g_wldcore_map_tile_descriptors. The target indexes it by 32-bit value
  *    (base + k*4, k += 6), not by record, so it is an s32* with a 32-bit element index.
- *  - Element 0 of g_wldcore_menu_stack_types (0x800d4580) receives the second
- *    window-record index; why a record index is stored there is unknown.
+ *  - g_wldcore_menu_root_window_index, which receives the root menu window's
+ *    record index, shares its address with element 0 of
+ *    g_wldcore_menu_stack_types (the root level's type slot).
  *
  * Shapes the bytes depend on:
  *  - `.map_x`/`.map_y` are written through one loop-invariant s32* to element
@@ -187,9 +198,9 @@ void wldcore_map_init_tile_atlas(void) {
         k = 0;
         i = 0;
         pos = &g_wldcore_map_projected_tiles[0].map_x;
-        for (row = 0; row < 13; row++) {
+        for (row = 0; row < WLDCORE_MAP_TILE_ROWS + 1; row++) {
             x = -256;
-            for (col = 0; col < 17; col++) {
+            for (col = 0; col < WLDCORE_MAP_ROW_STRIDE; col++) {
                 tpage_x = descriptor[k];
                 tpage_y = descriptor[k + 1];
                 clut_x = descriptor[k + 2];
@@ -227,7 +238,7 @@ void wldcore_map_init_tile_atlas(void) {
 
     menu_window_index
         = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_types[0] = menu_window_index;
+    g_wldcore_menu_root_window_index = menu_window_index;
     g_wldcore_window_records[menu_window_index].sequence = WLDCORE_ANIM_SEQUENCE_ROOT_MENU_FRAME;
     g_wldcore_window_records[menu_window_index].priority = 13;
     wpos2 = &g_wldcore_window_records[menu_window_index].position;
@@ -241,8 +252,9 @@ void wldcore_map_init_tile_atlas(void) {
 }
 
 /* Builds the map camera matrix and projects the 13x17 grid of tile corners,
- * storing each screen position and setting flag 0x100 on corners that fall
- * outside the visible window; empty tiles (flag 0x200) keep their flags. */
+ * storing each screen position and setting WLDCORE_MAP_TILE_OFF_SCREEN on
+ * corners that fall outside the visible window; empty tiles
+ * (WLDCORE_MAP_TILE_EMPTY) keep their flags. */
 void wldcore_map_project_and_cull_tiles(void) {
     MATRIX matrix;
     SVECTOR position;
@@ -267,7 +279,7 @@ void wldcore_map_project_and_cull_tiles(void) {
 
     i = 0;
     entry = g_wldcore_map_projected_tiles;
-    for (; i < 221; i++) {
+    for (; i < WLDCORE_MAP_CORNER_COUNT; i++) {
         coordinate = g_wldcore_map_projected_tiles[i].map_x;
         position.vx = coordinate;
         coordinate = g_wldcore_map_projected_tiles[i].map_y;
@@ -289,26 +301,18 @@ void wldcore_map_project_and_cull_tiles(void) {
     }
 }
 
-/* Needs aspsx 2.21: four sites that reach the typed global array keep their
- * `addiu at,at,<offset>` under 2.21 and lose it under 2.34.
- *
- * Walks g_wldcore_map_projected_tiles, the table that
- * wldcore_map_project_and_cull_tiles fills: each tile reads its own entry's
- * flags, texture and .screen_x/.screen_y, and the .screen_x of the next
- * entry, so the accesses are written against `index` and `index + 1`.
- *
- * The 32-bit texture value packs u, v, width and height from the top byte down; a
- * width or height that would run past texel 255 is shortened by one. */
-
-#define WLDCORE_MAP_TILE_ROWS    12
-#define WLDCORE_MAP_TILE_COLUMNS 16
-#define WLDCORE_MAP_ROW_STRIDE   17
-#define WLDCORE_MAP_DOT_CLUT_Y   0x1e0
-
 /* Sorts the world map's projected tile grid into `ot` as textured quads.
  * Each tile spans from its own projected corner to the next column's x and
  * the next row's y; a tile flagged off screen or empty is skipped. All tiles
- * share the map CLUT and the current screen tint. */
+ * share the map CLUT and the current screen tint.
+ *
+ * The 32-bit texture value packs u, v, width and height from the top byte
+ * down; a width or height that would run past texel 255 is shortened by one.
+ *
+ * Needs aspsx 2.21: four sites that reach the typed global array keep their
+ * `addiu at,at,<offset>` under 2.21 and lose it under 2.34. Each tile reads
+ * its own entry and the next one's .screen_x, so the accesses are written
+ * against `index` and `index + 1`. */
 void wldcore_gfx_draw_projected_map_tiles(GsOT* ot) {
     POLY_FT4 poly;
     CVECTOR color;
@@ -322,7 +326,7 @@ void wldcore_gfx_draw_projected_map_tiles(GsOT* ot) {
     color.b = 0x80;
     wldcore_gfx_copy_color_with_tint(&color, &color);
     setRGB0(&poly, color.r, color.g, color.b);
-    poly.clut = GetClut(0, WLDCORE_MAP_DOT_CLUT_Y);
+    poly.clut = GetClut(0, WLDCORE_MAP_TILE_CLUT_Y);
 
     for (row = 0; row < WLDCORE_MAP_TILE_ROWS; row++) {
         index = row * WLDCORE_MAP_ROW_STRIDE;
@@ -365,7 +369,8 @@ void wldcore_gfx_draw_projected_map_tiles(GsOT* ot) {
     }
 }
 
-/* Target 0x8006abc8. */
+/* Scroll `position` by `amount` on both axes within the scroll limits, leaving
+ * the part that could not be applied in `amount`. */
 void wldcore_map_apply_clamped_scroll(point32_t* amount, VECTOR* position) {
     wldcore_map_apply_clamped_horizontal_scroll(&amount->x, &position->vx);
     wldcore_map_apply_clamped_vertical_scroll(amount, position);
@@ -403,8 +408,8 @@ void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
     (*amount) = -(*amount);
 }
 
-/* Vertical counterpart of wldcore_map_apply_clamped_horizontal_scroll at
- * 0x8006ac08: the same shape applied to the vertical amount and projection origin,
+/* Vertical counterpart of wldcore_map_apply_clamped_horizontal_scroll: the
+ * same shape applied to the vertical amount and projection origin,
  * clamped to [-64, 80], the y range wldcore_map_negate_and_clamp_coordinates uses. */
 void wldcore_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* position) {
     s32 delta = -amount->y;

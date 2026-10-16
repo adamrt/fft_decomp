@@ -31,6 +31,7 @@ static void open_movie_start_cd_stream_read(const CdlLOC* location);
 static void open_movie_update_stream_frame(void);
 static void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* state, s32 unused);
 
+/* Each graphics buffer's ordering table holds 16 32-bit entries. */
 #define OPEN_OTAG_BUFFER_BYTES 64
 
 /* Entry point of OPEN.BIN for the title sequence. Runs until a controller clears
@@ -82,9 +83,6 @@ s32 open_system_run_main_loop(s32 skip_movie) {
     open_sound_set_cd_mix_and_volume(0xc0, 0x78);
     return g_open_system_result;
 }
-
-/* Each graphics buffer's ordering table holds 16 32-bit entries. */
-#define OPEN_OTAG_BUFFER_BYTES 64
 
 /* Entry point of OPEN.BIN for the ending: play FFTEND.STR, then run the ending
  * script until it finishes.
@@ -306,6 +304,8 @@ static void open_movie_handle_mdec_output_slice(void) {
         DecDCTout(
             g_open_movie_mdec_stream_state.output_buffers[g_open_movie_mdec_stream_state.output_buffer_index], size);
     } else {
+        /* The last slice of the picture is uploaded: the next frame decodes into
+         * the other frame buffer. */
         g_open_movie_mdec_stream_state.output_ready = 1;
         g_open_movie_mdec_stream_state.frame_rect_index = !g_open_movie_mdec_stream_state.frame_rect_index;
         rect->x = g_open_movie_mdec_stream_state.frame_rects[g_open_movie_mdec_stream_state.frame_rect_index].x;
@@ -366,6 +366,7 @@ static u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state)
         ClearImage(&clear_rect, 0, 0, 0);
         g_open_movie_width = header->width;
         g_open_movie_height = header->height;
+        /* The MDEC decodes whole 16x16 macroblocks. */
         g_open_movie_aligned_height = (header->height + 15) & 0xfff0;
     }
 
@@ -458,7 +459,7 @@ static void open_movie_present_frame(void) {
         }
     }
 
-    SetDispMask(((g_open_system_runtime_flags >> 6) ^ 1) & 1);
+    SetDispMask((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED) == 0);
 }
 
 /* Read the pad and derive the held and newly pressed buttons, both 0 while
@@ -538,6 +539,7 @@ void open_gfx_update_fade_overlay(u32* ot) {
             g_open_gfx_overlay_fade.flags &= ~(OPEN_OVERLAY_FADE_OUT | OPEN_OVERLAY_FADE_ACTIVE);
         }
     }
+
     if (g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_IN) {
         s32 duration = g_open_gfx_overlay_fade.duration;
         s32 frame = g_open_gfx_overlay_fade.frame;
@@ -553,6 +555,7 @@ void open_gfx_update_fade_overlay(u32* ot) {
             g_open_gfx_overlay_fade.flags &= ~(OPEN_OVERLAY_FADE_IN | OPEN_OVERLAY_FADE_ACTIVE);
         }
     }
+
     if (g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE) {
         TILE* tiles = g_open_gfx_overlay_fade.tiles;
         SetTile(&tiles[g_main_gfx_active_buffer_index]);
@@ -623,6 +626,8 @@ u32 open_input_update_repeat(u32 buttons) {
             s32 old_counter;
             s32 down_next;
 
+            /* Spelled apart from the Up branch: separate old and next values give
+             * this branch the retail register assignment. */
             old_counter = *down_counter;
             if (g_open_input_directional_repeat_initial_delay < (*down_counter = down_next = old_counter + 1)) {
                 old_counter = down_next - g_open_input_directional_repeat_period;

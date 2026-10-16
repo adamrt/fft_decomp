@@ -20,9 +20,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Return the first of the 16 party slots holding one of Ramza's sprite sets (1 to 3), or 16 when
- * there is none, in which case the MCBrave and MCFaith checks read the first guest slot instead of
- * failing. */
 static s32 wldcore_get_ramza_roster_index(void);
 static void wldcore_menu_push_fact_detail_level(s32 value);
 static void wldcore_script_read_operand_pair(s32* out1, s32* out2);
@@ -260,7 +257,8 @@ void wldcore_opcode_map_check_casualties_at_most(void) {
     }
 }
 
-/* Stage the two 32-bit fields of the event identifier for a deferred LoadEvent request. */
+/* Stage a deferred LoadEvent request: the event to play and its transition
+ * mode (wldcore_menu_push_event_transition_level). */
 void wldcore_opcode_map_request_load_event(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
@@ -281,7 +279,8 @@ void wldcore_opcode_map_request_choice(void) {
     g_wldcore_script_state.flags |= WLDCORE_SCRIPT_REQUEST_CHOICE;
 }
 
-/* World Map Script 0x1C - SetVar: read next two script args and set a variable. */
+/* Map script opcode 0x1C (SetVar): set the script variable named by the first
+ * operand to the second. */
 void wldcore_opcode_map_set_var(void) {
     s32 variable_id;
     s32 value;
@@ -405,7 +404,9 @@ void wldcore_opcode_map_check_ramza_brave_at_least(void) {
 }
 
 /* Return the first party slot holding Ramza (any of his chapter sprite sets), or
- * PARTY_MEMBER_SLOT_COUNT when none does; callers use the result unchecked. */
+ * PARTY_MEMBER_SLOT_COUNT when none does. Callers use the result unchecked, so
+ * without Ramza the MCBrave and MCFaith checks read roster slot 16, the first
+ * guest slot, instead of failing (retail quirk). */
 static s32 wldcore_get_ramza_roster_index(void) {
     s32 i;
     for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
@@ -489,7 +490,7 @@ s32 wldcore_test_bit(u32* bits, s32 index) {
 }
 
 /* Count the set bits among the first 0x1000 saved-data bits and return that
- * count as a percentage of 76. */
+ * count as a percentage of 76, the number retail treats as complete. */
 s32 wldcore_script_calculate_save_data_completion_percent(void) {
     s32 count = 0;
     s32 i;
@@ -555,13 +556,15 @@ void wldcore_list_facts_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_facts_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* List level input step for cursor slot 20; twin of wldcore_list_handle_tutorial_topics_input with help
- * message 0x108f, handing a confirmed entry's value to 0x80092618. */
+/* Input step of the Facts list; twin of wldcore_list_handle_tutorial_topics_input
+ * with help message 0x108f, handing a confirmed entry's value to
+ * wldcore_menu_push_fact_detail_level. */
 void wldcore_list_handle_facts_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -596,12 +599,13 @@ void wldcore_list_handle_facts_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
-/* Pushes the script-variable detail text window as menu level 0x2f, the
- * partner of the wldcore_menu_close_fact_detail_level pop: records the entry on the new level, sets
- * up the shared scrollable text window at g_wldcore_scrollable_text_window for text 0x8800 + entry
- * with no substitutions, then hides the parent list-window level's four
- * window records and its frame render record with flag 0x10 and starts WORLD
- * thread 14 on text 0xb849 with substitution value 0x9800 + entry.
+/* Pushes WLDCORE_MENU_LEVEL_FACT_DETAIL, the text of one fact, which
+ * wldcore_menu_close_fact_detail_level closes: records the entry on the new
+ * level, sets up g_wldcore_scrollable_text_window on its text
+ * (TEXT_ID_WORLD_MESSAGE_BASE + entry) with no substitutions, hides the Brave
+ * Story menu's four windows and frame, and says
+ * WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the fact's name
+ * (TEXT_ID_FACT_NAME_BASE + entry).
  *
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
@@ -654,11 +658,9 @@ static void wldcore_menu_push_fact_detail_level(s32 value) {
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
-/* Scrollable text window also stepped by wldcore_menu_wait_tutorial_topic_text_then_pop_level. */
-
-/* Steps the text window until 0x800903e4 reports it finished, then pops the
- * level, restores the parent list window's windows and frame render record,
- * and reopens the script-variable list of 0x80092208. */
+/* Steps a fact's text window until wldcore_text_is_window_finished reports it
+ * finished, then pops the level, shows the Brave Story menu's windows and
+ * frame again and reopens the Facts list (wldcore_list_open_facts). */
 void wldcore_menu_close_fact_detail_level(void) {
     s32 depth;
 

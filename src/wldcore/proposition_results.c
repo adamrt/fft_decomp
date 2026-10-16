@@ -45,8 +45,6 @@ static void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* co
 static void wldcore_proposition_push_cancel_confirm_level(s32 proposition);
 static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_level_t* level, s32 index);
 
-/* The switch jump table lives at .rodata 0x800671dc (0x18 bytes). */
-
 /*
  * Run the proposition speaker-selection and message sequence.
  *
@@ -54,6 +52,7 @@ static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_le
  * proposition's participants other than the excluded one; a proposition with a
  * single participant has nobody else to speak and returns 1 at once. Returns 1
  * once the message has been acknowledged and the phase reset, 0 while running.
+ * The phase switch's six-entry jump table is this unit's .rodata.
  */
 s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_level_t* state, s32 message, s32 speaker) {
     switch (state->phase) {
@@ -116,6 +115,7 @@ s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_leve
         state->phase = 0;
         return 1;
     }
+
     return 0;
 }
 
@@ -133,14 +133,13 @@ static s32 wldcore_map_job_id_to_category_index(s32 job_id) {
 
 /* Scores the current proposition's success chance.
  *
- * A recalled proposition (progress flag 0x02) clears the JP and gil awards and
- * reports result 2. Otherwise each participant's score accumulates
- * four proposition data tables (records 3..6) keyed on the proposition's
- * fields, the participant's job category and its bravery, faith and level
- * tiers; the total maps onto result 0 (>= 0x63), 1 (>= 0x3b) or 2. A named
- * preferred job then gives a 61 in 100 roll to promote the result back to 0. The
- * preferred-job scan reads the party record once, with the scoring loop's
- * leftover index, as the target does. The target builds the row walk pointers
+ * A recalled proposition (WLDCORE_PROPOSITION_PROGRESS_RECALLED) clears the JP
+ * and gil awards and reports a bad failure. Otherwise each participant's score
+ * accumulates four proposition data tables (records 3..6) keyed on the
+ * proposition's fields, the participant's job category and its bravery, faith
+ * and level tiers; a total of 99 or more is a success, 59 or more a failure,
+ * anything less a bad failure. A named preferred job then gives a 61 in 100
+ * roll to promote the result to success. The target builds the row walk pointers
  * from the proposition_index address, which needs the arrays and that 32-bit value to be
  * members of one object (g_wldcore_proposition_report). */
 void wldcore_proposition_determine_success(void) {
@@ -231,6 +230,9 @@ void wldcore_proposition_determine_success(void) {
         return;
     }
 
+    /* Retail bug: the unit is fetched once, with the scoring loop's leftover
+     * index (one past the last participant), so every pass tests that same
+     * stale slot instead of each participant's job. */
     unit = wldcore_get_party_unit(
         g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_indices[i]);
     for (i = 0; i < participant_count; i++) {
@@ -289,11 +291,12 @@ void wldcore_proposition_calculate_base_jp_and_gil(void) {
 
 /* Rolls the reward of a successful proposition.
  *
- * Reward kind 1 or 2 (proposition field 10) picks a random script variable
- * still clear in 0x321..0x33f or 0x350..0x35f, falling back to any index;
- * otherwise field 11 == 1 rolls a three-tier random reward (60/30/10%).
- * The chosen pair from proposition data records 10/11 then adds its bonus
- * to every participant's JP award and sets the reward value. The target places
+ * A treasure or unexplored-land discovery (the row's discovery_kind) picks one
+ * not yet found at random (among the first 31 treasures or the 16 lands),
+ * falling back to any when all are found; otherwise random_bonus == 1 rolls a
+ * three-tier random reward (60/30/10%). The chosen pair from the discovery or
+ * random reward table then adds its JP bonus to every participant's award and
+ * sets the reward's gil value. The target places
  * the random-reward branch last, hence the goto. */
 void wldcore_proposition_roll_bonus_reward(void) {
     s32 candidates[32];
@@ -318,6 +321,7 @@ void wldcore_proposition_roll_bonus_reward(void) {
     if (g_wldcore_proposition_report.result != WLDCORE_PROPOSITION_RESULT_SUCCESS) {
         return;
     }
+
     discovery_kind = g_wldcore_selected_proposition_row[0].discovery_kind;
     if (discovery_kind == WLDCORE_PROPOSITION_REWARD_TREASURE) {
         g_wldcore_proposition_report.reward_type = WLDCORE_PROPOSITION_REWARD_TREASURE;
@@ -340,6 +344,7 @@ void wldcore_proposition_roll_bonus_reward(void) {
     } else {
         goto random_reward;
     }
+
     if (count != 0) {
         index = (rand() * count) >> 15;
         g_wldcore_proposition_report.reward_index = candidates[index];
@@ -348,12 +353,14 @@ void wldcore_proposition_roll_bonus_reward(void) {
     } else {
         g_wldcore_proposition_report.reward_index = (rand() * 16) >> 15;
     }
+
     participant_count = g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_count;
     index = (g_wldcore_selected_proposition_row[0].category_index - 1) * 2;
     for (i = 0; i < participant_count; i++) {
         bonus = bonus_table[location_pairs[index + 1] - 1];
         g_wldcore_proposition_report.participant_jp[i] += bonus;
     }
+
     g_wldcore_proposition_report.reward_value = value_table[location_pairs[index] - 1];
     return;
 
@@ -361,6 +368,7 @@ random_reward:
     if (g_wldcore_selected_proposition_row[0].random_bonus != 1) {
         return;
     }
+
     g_wldcore_proposition_report.reward_type = WLDCORE_PROPOSITION_REWARD_RANDOM_BONUS;
     index = (rand() * 100) >> 15;
     if (index < 40) {
@@ -372,6 +380,7 @@ random_reward:
     } else {
         index = 0;
     }
+
     index += (g_wldcore_selected_proposition_row[0].category_index - 1) * 3;
     g_wldcore_proposition_report.reward_index = index;
     participant_count = g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_count;
@@ -379,11 +388,13 @@ random_reward:
         bonus = bonus_table[random_pairs[index].jp_index - 1];
         g_wldcore_proposition_report.participant_jp[i] += bonus;
     }
+
     g_wldcore_proposition_report.reward_value = value_table[random_pairs[index].gil_index - 1];
 }
 
-/* Records 0xC and 0xD of the proposition data table are 16-bit percentage
- * ramps indexed by the number of days the proposition has been running. */
+/* Scale each participant's JP and gil by the percentages the two EXTRA_DAY
+ * tables give for the days spent beyond the job's minimum (at most 9 counted).
+ * A recalled job, or one back early, is left alone. */
 void wldcore_proposition_apply_extra_days_multiplier(void) {
     s32 record;
     const u16* reward_scale;
@@ -553,10 +564,12 @@ s32 wldcore_get_completion_milestone_rank(void) {
     if (g_wldcore_proposition_report.result != WLDCORE_PROPOSITION_RESULT_SUCCESS) {
         return 0;
     }
+
     if (g_wldcore_proposition_report.reward_type != WLDCORE_PROPOSITION_REWARD_TREASURE
         && g_wldcore_proposition_report.reward_type != WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND) {
         return 0;
     }
+
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_TREASURE) {
         count = 0;
         for (i = 0; i < 31; i++) {
@@ -574,6 +587,7 @@ s32 wldcore_get_completion_milestone_rank(void) {
         }
         index = i;
     }
+
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND) {
         count = 0;
         for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
@@ -591,13 +605,15 @@ s32 wldcore_get_completion_milestone_rank(void) {
         }
         index = i;
     }
+
     return index + 1;
 }
 
-/* Phase driver for a countdown object: phase 1 waits for the menu event flag
- * and plays the milestone music, phase 2 waits 180 frames and returns to the bar music, phase 3
- * pops the menu level through 0x80077174 once both 32-bit busy fields clear; any
- * other phase steps the countdown on a confirm press (0x20). The 32-bit busy fields
+/* Step of a discovery announcement: Circle shows the next message; after the
+ * last one (LAST_MESSAGE) it waits for the message box and plays the milestone
+ * music, JINGLE waits at least 180 frames and switches back to the bar music,
+ * and CLOSE pops the level into wldcore_list_open_completed_propositions once
+ * the audio queue is idle. The 32-bit busy fields
  * are read as g_wldcore_audio_queue members, not scalars, which keeps the timer store
  * ahead of their loads as in the target. */
 void wldcore_map_step_discovery_announcement(wldcore_menu_countdown_t* countdown) {
@@ -667,12 +683,14 @@ void wldcore_list_open_propositions(void) {
             i++;
         } while (i < total);
     }
+
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count = count;
     if (count < 6) {
         i = count;
     } else {
         i = 6;
     }
+
     layout.text_width = 0x96;
     origin.x = 0x4C;
     layout.visible_rows = i;
@@ -696,28 +714,30 @@ void wldcore_list_open_propositions(void) {
         g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[previous].window_pair_render.render_index]
             .flags |= WORLD_RENDER_RECORD_POP_IN;
     }
+
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.first_window = 0;
     g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_PROPOSITIONS;
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
 /* Resume handler of the active propositions list: block Circle, Cross and
- * Select for the levels underneath and show prompt 0xB81B again. */
+ * Select for the levels underneath and show WLDCORE_TEXT_ID_JOBS_IN_PROGRESS
+ * again. */
 void wldcore_bar_active_propositions_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_JOBS_IN_PROGRESS, 0);
 }
 
-/* Withholds every button from the WORLD menu frame while the next menu level runs. */
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_bar_active_propositions_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* List-menu input step: cancel (0x40) and confirm (0x20) close the level
- * through WORLD thread 12, and 0x100 opens help text 0x1062. Once the thread
- * finishes, a confirmed level dispatches the selected row's value through
- * 0x8007af9c.
+/* Input step of the bar's in-progress list: Cross and Circle close the panel
+ * and Select opens help message 0x1062; Circle on a job already recalled says
+ * WLDCORE_TEXT_ID_RETURN_TOMORROW instead. Once the panel has closed, a
+ * chosen job goes to wldcore_proposition_push_cancel_confirm_level.
  *
  * The target keeps each `level->panel.result` store ahead of the `li $a0,5`
  * argument of the following cursor-state call, which lands in the jal delay
@@ -741,6 +761,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
         }
         return;
     }
+
     buttons = g_wldcore_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
@@ -840,8 +861,8 @@ static void wldcore_proposition_push_cancel_confirm_level(s32 proposition) {
  *
  * Both menu variants share the detail render index and row count.
  *
- * The panel's row count is the measured row count of text g_wldcore_selected_proposition_row[0].name_text +
- * 0xf7ff plus two, kept in the level record at +0x0c.
+ * The panel's row count, the job contents text's measured rows plus two, is
+ * kept in the level (proposition_detail_panel.panel_rows).
  *
  * The target stores base_x/base_y through one pointer to the pair, and reads
  * every progress field through the array form g_main_active_propositions[proposition], which
@@ -918,6 +939,7 @@ void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t
         & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if (level->proposition_cancel_confirm.confirmed != 0) {
         if (g_wldcore_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
@@ -925,6 +947,7 @@ void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t
         }
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         /* Shared tail: the target keeps this copy and the other close paths
@@ -937,6 +960,7 @@ void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t
         wldcore_list_open_propositions();
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0 || wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         choice = level->proposition_cancel_confirm.choice ^ 1;
         level->proposition_cancel_confirm.choice = choice;
@@ -945,16 +969,20 @@ void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t
             - -(choice * 0x10 + 0xE);
         wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
     }
+
     if (!(g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE)) {
         return;
     }
+
     if (level->proposition_cancel_confirm.confirmed != 0) {
         return;
     }
+
     wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
     if (level->proposition_cancel_confirm.choice == 1) {
         goto close;
     }
+
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CALL_BACK_ACCEPTED, 0);
     level->proposition_cancel_confirm.confirmed = 1;
     g_main_active_propositions[level->proposition_cancel_confirm.proposition].flags
@@ -1063,7 +1091,7 @@ static void wldcore_menu_push_sound_novel_level(s32 argument) {
     g_wldcore_screen_fade_state.priorities[0] = 8;
     g_wldcore_screen_fade_state.flags[1] |= WLDCORE_SCREEN_FADE_BOX_VISIBLE;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel._unknown_20 = 1;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.countdown = 0x270F;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.countdown = 9999;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.fade_timer = 0;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.phase = WLDCORE_SOUND_NOVEL_PHASE_RUN;
     g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_SOUND_NOVEL;
@@ -1094,11 +1122,18 @@ void wldcore_menu_publish_sound_novel_level(void) {
 }
 
 /*
- * Per-frame handler for a WLDCORE brightness/fade menu level.
+ * Per-frame step of the sound novel (WLDCORE_MENU_LEVEL_SOUND_NOVEL).
  *
- * The unused array reproduces the target's 0x40-byte frame. The 0x140 state-flag test is a
- * 32-bit load (`lw`) of the u16 g_wldcore_active_saved_record.state_flags in the target, so it
- * reads the flags through an s32 cast; the u16 declaration gives `lhu`.
+ * It runs the novel's script until it yields (wldcore_script_run_until_yield).
+ * L1 and R1 raise and lower the screen brightness, showing the brightness bar
+ * for 60 frames. While the message box waits for a button: Select opens help
+ * message 0x1036, Start (with the side windows up) opens the Quit/Continue
+ * menu and holding Square opens the text history after 8 frames. When the
+ * script ends the message box is stopped and the music and screen fade out;
+ * then (END) the level's records are released and a screen transition reopens
+ * the treasure detail the novel was started from.
+ *
+ * The unused array reproduces the target's 0x40-byte frame.
  */
 void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level) {
     s32 unused[2];
@@ -1237,11 +1272,11 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
     }
 }
 
-/* Pushes the type-0x16 menu level: two window records (sequences 2 and 4)
- * and one render record showing text 0xb83a in a 0x3c x 0x30 image at
- * (-0x1e, -0x18), with the windows offset inside it. Blocks every button
- * (-1), clears the fade box color, sets fade flag 8 and clears the new
- * level's 32-bit values 0x10..0x1c.
+/* Pushes the sound novel's Quit/Continue menu (WLDCORE_MENU_LEVEL_SOUND_NOVEL_QUIT):
+ * the cursor and side label windows and a 0x3c x 0x30 WLDCORE_TEXT_ID_QUIT_CONTINUE
+ * record at (-0x1e, -0x18), with the windows placed on it. Blocks every
+ * button, shows the fade box black (the step dims the screen with it) and
+ * starts on Quit with no fade.
  *
  * The level is written through the save_confirm member of the stack-record
  * union; union field access keeps the target's per-field `$at` bases. The
@@ -1302,7 +1337,8 @@ static void wldcore_menu_push_sound_novel_quit_level(void) {
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_SOUND_NOVEL_QUIT;
 }
 
-/* Restore the save confirmation palettes and cursor animation. */
+/* Resume handler of the Quit/Continue menu: default palettes and the idle
+ * cursor again. */
 void wldcore_window_clear_slot_state(wldcore_menu_stack_record_t* level) {
     s32 first = level->save_confirm.cursor_window;
     s32 second = level->save_confirm.second_window;
@@ -1319,7 +1355,8 @@ void wldcore_window_clear_slot_state(wldcore_menu_stack_record_t* level) {
     g_wldcore_window_records[index].frame_index = 0;
 }
 
-/* Restore the save confirmation windows and restart the cursor animation. */
+/* Gray out the Quit/Continue menu (palettes 10, 6 and 2) and still its cursor
+ * while a help message opens over it. */
 void wldcore_window_reset_slot_state(wldcore_menu_save_confirm_level_t* level) {
     s32 index;
 
@@ -1332,22 +1369,22 @@ void wldcore_window_reset_slot_state(wldcore_menu_save_confirm_level_t* level) {
     g_wldcore_window_records[index].frame_index = 0;
 }
 
-/* Step handler for the save confirmation level.
+/* Step of the sound novel's Quit/Continue menu.
  *
- * Drives the screen dim: fade_in raises the overlay color in steps of 8 and
- * fade_out lowers it again, popping the level when it reaches 0. While no fade
- * runs it takes input: button 0x100 opens the help text for the highlighted
- * row through g_wldcore_sound_novel_quit_help_text_ids, up/down toggle the two rows and move the cursor
- * window, button 0x20 on row 0 starts the save (system flag 4, audio command
- * 2/0x20, main_sound_stop_weather_sfx_music), and button 0x20 on row 1 or
- * button 0x40 begins the fade out. Once the save finishes (WORLD thread 14
- * idle) it shifts the operand history g_wldcore_sound_novel_text_history_0..66, captures the play time
- * and hands off to wldcore_menu_push_screen_transition_level with screen 0x1b.
+ * The screen dims behind it: fade_in raises the black box by 8 a frame to
+ * 0x60, and fade_out (set by Cross or Continue) lowers it again and pops the
+ * level at 0. While no fade runs: Select opens the highlighted row's help
+ * (g_wldcore_sound_novel_quit_help_text_ids), Up and Down toggle the rows,
+ * and Circle on Quit stops the novel: input blocks, the menu's records go, the
+ * message box stops and the music fades. The box then darkens to black; once
+ * the message box has gone, the text history shifts down a slot (the cleared
+ * first slot becomes -1), the play time display comes back and a screen
+ * transition reopens the treasure detail.
  *
  * Every color store rereads the 32-bit fade value through a local: a direct
  * `u8 = level->fade_in` assignment narrows the reload to `lbu`, while the
  * target keeps `lw`. The target stores the -1 history marker with a signed
- * `addiu`, so it is written through an s16 view of the u16 slot. The cursor
+ * `addiu`, so the first history slot is declared s16. The cursor
  * update needs the window pointer, the base_y local and a separate offset
  * local: that keeps base_y as the first `addu` operand and stops fold from
  * reassociating the +0xe. */
@@ -1395,6 +1432,7 @@ void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t*
     if (g_wldcore_window_render_records[level->render_index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     flags = g_main_system_flags;
     if (flags & MAIN_SYSTEM_FLAG_FADING) {
         return;
@@ -1447,11 +1485,13 @@ void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t*
         level->fade_out = level->fade_in;
         return;
     }
+
     if (buttons & PSX_PAD_SELECT) {
         wldcore_window_reset_slot_state(level);
         wldcore_menu_push_text_window_level(g_wldcore_sound_novel_quit_help_text_ids[level->choice] | 0x1000, 1);
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0 || wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         value = level->choice ^ 1;
         level->choice = value;
@@ -1461,6 +1501,7 @@ void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t*
         record->position.y = base + offset;
         wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
         g_wldcore_window_records[level->cursor_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
         window = level->cursor_window;
@@ -1504,16 +1545,15 @@ static void wldcore_gfx_prepare_play_time_display(void) {
     g_wldcore_displayed_numeric_value_tertiary = seconds;
 }
 
-/* Pushes the save-slot selection level (menu type 0x17).
+/* Pushes the sound novel's text history (WLDCORE_MENU_LEVEL_SOUND_NOVEL_HISTORY).
  *
- * Suspends WORLD thread 14, appends the two header windows (kinds 0x6c and
- * 0x6d, the second hidden) and the 0xf8 x 0xb0 panel render record built from
- * g_wldcore_window_image_buffer, centers the newest history entry's name text
- * (0x8800 + g_wldcore_active_saved_record.text_history_3) in it, and copies the four operand-history entries
- * (newest first) into the level at +0x0c..+0x18. It also tints the picture
- * render record to half brightness, clears the screen dim and sets the menu
- * result to -1. The first header window is hidden when the second history
- * entry is empty.
+ * Suspends the message box, appends the upper and lower scroll indicators
+ * (the lower one hidden) and the 0xf8 x 0xb0 text panel, draws the newest
+ * history entry (TEXT_ID_WORLD_MESSAGE_BASE + text_history_3) centered in it,
+ * and copies the four history entries (newest first) into the level. It also
+ * grays the novel's Start button window, sets the picture to full brightness
+ * and shows the black fade box for the dim. The upper indicator is hidden
+ * when there is no older entry.
  *
  * The level is written through the sound_novel_history member of the
  * stack-record union (as in wldcore_menu_push_sound_novel_quit_level).
@@ -1616,14 +1656,17 @@ static void wldcore_menu_push_sound_novel_history_level(void) {
     g_wldcore_menu_stack_depth = depth + 1;
 }
 
-/* Handler of the history-text level (type 0x17).
+/* Step of the sound novel's text history.
  *
- * Phase 1 steps the picture render record (g_wldcore_active_saved_record.picture_render_index) and g_wldcore_hud_color
- * from 0x80 down to 0x60 while the screen fade box brightens, in five steps. Phase 2 runs the reverse ramp and then, if
- * g_wldcore_active_saved_record.text_id names a text, clears the image buffer for the level's render record (width *
- * height / 8 32-bit values), renders text 0x8800 + g_wldcore_active_saved_record.text_id into it, uploads it and clears
- * script variables 0x5c-0x5e; it then pops the level and resumes WORLD thread 14. Phase 0 scrolls the text history with
- * up/down, hiding the arrow window at either end, and starts phase 2 once button bit 0x80 is released.
+ * DIM darkens the picture (g_wldcore_active_saved_record.picture_render_index)
+ * and g_wldcore_hud_color from 0x80 to 0x60 in five steps while the fade box
+ * brightens. BROWSE scrolls the history with Up and Down, hiding each
+ * indicator at its end, until Square is released. RESTORE runs the reverse
+ * ramp and then, if g_wldcore_active_saved_record.text_id names a text,
+ * clears the panel image (width * height / 8 32-bit values), redraws that
+ * text into it past its choice marks, uploads it and clears the pending
+ * sound, weather and music variables; it then pops the level and resumes the
+ * message box.
  *
  * Load-bearing spellings: the nonzero phases are a switch nested under
  * `phase != 0`, matching the target's test order; each fade case holds
@@ -1731,6 +1774,7 @@ void wldcore_menu_step_sound_novel_history_level(wldcore_menu_sound_novel_histor
         }
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->scroll < 3 && level->text_ids[level->scroll] != -1) {
             wldcore_window_draw_indexed_text(level, 4);
@@ -1743,6 +1787,7 @@ void wldcore_menu_step_sound_novel_history_level(wldcore_menu_sound_novel_histor
             g_wldcore_window_records[level->lower_window].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
         }
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0 && level->scroll != 0) {
         wldcore_window_draw_indexed_text(level, 2);
         level->scroll = level->scroll - 1;
@@ -1753,12 +1798,15 @@ void wldcore_menu_step_sound_novel_history_level(wldcore_menu_sound_novel_histor
         }
         g_wldcore_window_records[level->upper_window].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
     }
+
     if (!(g_input_current_buttons & PSX_PAD_SQUARE)) {
         level->phase = WLDCORE_SOUND_NOVEL_HISTORY_PHASE_RESTORE;
     }
 }
 
-/* Skip -1, otherwise draw the history text in text section 17 (0x8800). */
+/* Draw the history entry at 32-bit slot `index + scroll` of the level (counted
+ * from the level's start) centered in the panel; an empty entry (-1) draws
+ * nothing. */
 static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_level_t* level, s32 index) {
     /* Named text-array access reverses the final address-add operands. */
     s32 text_id = ((s32*)level)[index + level->scroll];
@@ -1805,22 +1853,25 @@ void wldcore_list_open_unexplored_lands(void) {
 }
 
 /* Resume handler of the unexplored lands list: block Circle, Cross and Select for the
- * levels underneath and show prompt 0xB848 again. */
+ * levels underneath and show WLDCORE_TEXT_ID_BRAVE_STORY_INTRO again. */
 void wldcore_list_unexplored_lands_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, 0);
 }
 
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_unexplored_lands_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* Twin of wldcore_list_handle_rumors_input for cursor slot 7: closes the level inline, opens
- * help message 0x1058 on 0x100, and hands a confirmed entry to 0x8007e360.
- * Cancel (0x40) is accepted even while a file is loading.
+/* Input step of the unexplored lands list; twin of wldcore_list_handle_rumors_input
+ * that closes the level inline, opens help message 0x1058 on Select, and hands
+ * a confirmed entry to wldcore_menu_push_unexplored_land_detail_level. Cross
+ * is accepted even while a file is loading.
  *
- * The target passes the level to 0x8007e178, which reads no argument. */
+ * The target passes the level to wldcore_list_unexplored_lands_block_all_buttons,
+ * which reads no argument. */
 void wldcore_list_handle_unexplored_lands_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -1856,16 +1907,15 @@ void wldcore_list_handle_unexplored_lands_input(wldcore_menu_panel_level_t* leve
     }
 }
 
-/* Pushes the unexplored-land detail text window as menu level 0x19. Records
- * the land on the new level, loads that land's picture data set, appends a
- * render record for the picture and places it at (-116, -34), decodes the
- * land's discovery date out of the packed nine-bit array at
- * g_main_land_discovery_date_bits (date.month month 1-12, date.day day 1-31), and
- * sets up the shared scrollable text window at g_wldcore_scrollable_text_window for text
- * 0x8800 + land with the month name (0xb84f + month) and the day as its two
- * substitutions. Then hides the parent list-window level's four window records
- * and its frame render record with flag 0x10 and starts WORLD thread 14 on
- * text 0xb849 with substitution value 0xd800 + land.
+/* Pushes WLDCORE_MENU_LEVEL_UNEXPLORED_LAND_DETAIL, the picture and text of
+ * one unexplored land. Records the land on the new level, loads its picture
+ * data set, appends a hidden render record for the picture at (-116, -34),
+ * reads the land's discovery date from g_main_land_discovery_date_bits, and
+ * sets up g_wldcore_scrollable_text_window on the land's text
+ * (TEXT_ID_WORLD_MESSAGE_BASE + land) with the month name
+ * (WLDCORE_TEXT_ID_MONTH_NAME_BASE + month) and the day substituted. Then
+ * hides the Brave Story menu's four windows and frame and says
+ * WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the land's name.
  *
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
@@ -1874,13 +1924,12 @@ void wldcore_list_handle_unexplored_lands_input(wldcore_menu_panel_level_t* leve
  * later stores go through the text_id base register. That only happens when
  * the live case is the last one.
  *
- * The render record's position is written through a pointer to its base_x: the
- * target reaches base_x/base_y at 0 and 4 off one register holding
- * &g_wldcore_window_render_records[index].base_x, while the flags update above
+ * The render record's position is written through a pointer to its base: the
+ * target reaches base.x/base.y at 0 and 4 off one register holding
+ * &g_wldcore_window_render_records[index].base, while the flags update above
  * it still uses the $at absolute form. Spelling both coordinates as ordinary
  * indexed field stores recomputes the $at base twice and costs four
- * instructions. The cast is over adjacent s32 base_x/base_y; the header would
- * express it better as a point32_t member.
+ * instructions.
  *
  * `unused` reproduces eight bytes of locals below the date bytes that the
  * target never touches. */
@@ -1911,6 +1960,7 @@ static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
         g_wldcore_scrollable_text_window.image_y = 0x70;
         break;
     }
+
     g_wldcore_scrollable_text_window.base.x = -122;
     g_wldcore_scrollable_text_window.base.y = -40;
     g_wldcore_scrollable_text_window.text_width = 0xdc;
@@ -1939,17 +1989,16 @@ static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
-/* Handler of the unexplored-land detail level (type 0x19).
+/* Step of the unexplored-land detail level.
  *
- * Phase 1 waits for the render record the 32-bit value at 0x08 names to leave its 0x100 state; no push sets
- * that 32-bit value.
- * Phase 2, once file loading finishes, uploads the land picture's TIM pixels
- * and CLUT, binds the level's render record to the VRAM image at (-116, -34)
- * and makes it the scrollable text window's extra render record (position and
- * image rectangle). Phase 3 waits for that render record. Phase 0 waits for
- * the text window to finish, restores the parent list-window level's windows
- * and frame render record, pops the level and reopens the unexplored-land
- * list.
+ * LOAD waits until render record saved_record_index is not popping in; no
+ * push sets that field (retail). BUILD, once file loading finishes, uploads
+ * the land picture's TIM pixels and CLUT, binds the level's render record to
+ * the VRAM image at (-116, -34) and makes it the scrollable text window's
+ * extra render record (position and image rectangle). POP_IN waits for that
+ * record's pop-in. SHOWN waits for the text window to finish, shows the
+ * Brave Story menu's windows and frame again, pops the level and reopens the
+ * unexplored-land list.
  *
  * The TIM widths are read unsigned (`lhu`), as Psy-Q's GsIMAGE declares
  * pw/ph. The text window's base and image rectangle are each copied as one
@@ -2030,9 +2079,11 @@ void wldcore_menu_step_unexplored_land_detail_level(wldcore_menu_variable_detail
     }
 }
 
-/* Opens a panel list of the set script flags 0x321-0x34f (entry values
- * 0xe000 + flag index), shows up to eight rows at (0x88, 0x50) with width
- * 0x5a, and appends its 0x5c-byte record tagged 0x1a. Twin of 0x8007dfcc. */
+/* Opens the Brave Story's treasure list: every treasure found
+ * (EVENT_SCRIPT_VAR_TREASURE_FIRST + treasure set), by name
+ * (TEXT_ID_TREASURE_NAME_BASE + treasure), up to eight rows at (0x88, 0x50),
+ * 0x5a wide, and pushes WLDCORE_MENU_LEVEL_TREASURES. Twin of
+ * wldcore_list_open_unexplored_lands. */
 void wldcore_list_open_treasures(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
@@ -2068,7 +2119,7 @@ void wldcore_list_open_treasures(void) {
 }
 
 /* Resume handler of the treasures list: block Circle, Cross and Select for the
- * levels underneath and show prompt 0xB848 again. */
+ * levels underneath and show WLDCORE_TEXT_ID_BRAVE_STORY_INTRO again. */
 void wldcore_list_treasures_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, 0);
@@ -2080,13 +2131,14 @@ void wldcore_list_treasures_block_all_buttons(void) {
     g_menu_blocked_buttons = -1;
 }
 
-/* Treasure-list level input step (cursor slot 8); twin of wldcore_list_handle_unexplored_lands_input.
- * Cancel (0x40) and confirm (0x20) wait for file loading, start thread 12's
- * closing animation and record the choice in result; 0x100 on a non-empty
- * list opens help message 0x101f. Once thread 12 finishes, the level closes
- * and a confirmed choice passes the selected entry's value to 0x8007efa0.
+/* Input step of the treasure list; twin of wldcore_list_handle_unexplored_lands_input.
+ * Cross and Circle wait for file loading, close the panel and record the
+ * choice in result; Select on a non-empty list opens help message 0x101f.
+ * Once the panel has closed the level pops, and a confirmed choice passes the
+ * selected entry's value to wldcore_menu_push_treasure_detail_level.
  *
- * The target passes the level to 0x8007e178, which reads no argument. */
+ * The target passes the level to wldcore_list_unexplored_lands_block_all_buttons,
+ * which reads no argument. */
 void wldcore_list_handle_treasures_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -2121,23 +2173,22 @@ void wldcore_list_handle_treasures_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
-/* Pushes the treasure detail text window as menu level 0x1b; the twin of
- * wldcore_menu_push_unexplored_land_detail_level (unexplored lands, level 0x19) and
- * wldcore_menu_push_story_event_text_level (level 0x1e).
+/* Pushes WLDCORE_MENU_LEVEL_TREASURE_DETAIL, the picture and text of one
+ * treasure; the twin of wldcore_menu_push_unexplored_land_detail_level and
+ * wldcore_menu_push_story_event_text_level.
  *
  * Records the treasure on the new level, loads its picture data set from
- * g_wldcore_treasure_picture_sets, appends a render record for the picture and hides it with flag
- * 0x10, decodes the acquisition date out of the packed nine-bit array at
- * g_main_treasure_acquisition_date_bits (date.month month, date.day day) and sets
- * up the shared scrollable text window at g_wldcore_scrollable_text_window for text 0x8800 + value
- * with the month name (0xb84f + month) and the day as its two substitutions.
- * It then hides the parent list-window level's four window records and its
- * frame render record and starts WORLD thread 14 on text 0xb849 with
- * substitution value 0xe000 + value.
+ * g_wldcore_treasure_picture_sets, appends a hidden render record for the
+ * picture, reads the acquisition date from
+ * g_main_treasure_acquisition_date_bits and sets up
+ * g_wldcore_scrollable_text_window on its text (TEXT_ID_WORLD_MESSAGE_BASE +
+ * value) with the month name and the day substituted. It then hides the
+ * Brave Story menu's four windows and frame and says
+ * WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the treasure's name.
  *
- * Unlike wldcore_menu_push_unexplored_land_detail_level this one does not reposition the picture render
- * record, and it clears the new level's timer as well as setting its
- * phase to 1.
+ * Unlike wldcore_menu_push_unexplored_land_detail_level this one does not
+ * place the picture render record (the step does), and it clears the new
+ * level's timer as well as starting it in LOAD.
  *
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
@@ -2171,6 +2222,7 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
         g_wldcore_scrollable_text_window.image_y = 0x70;
         break;
     }
+
     g_wldcore_scrollable_text_window.base.x = -122;
     g_wldcore_scrollable_text_window.base.y = -40;
     g_wldcore_scrollable_text_window.text_width = 0xdc;
@@ -2203,19 +2255,20 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
 /* Handler of the treasure detail level (the treasure's picture and text): the
  * phases mirror wldcore_menu_step_unexplored_land_detail_level.
  *
- * Phase 1 waits for the render record the 32-bit value at 0x08 names to leave its 0x100 state; no push sets
- * that 32-bit value.
- * Phase 2, once file loading finishes, uploads the preview TIM's CLUT, binds
- * the level's render record to the VRAM image with its right edge at x -0x3e
- * and centered on y 0x10, starts the progressive upload
- * (wldcore_gfx_step_dissolve_image_upload) and
- * publishes the record index, position and image rectangle in
- * g_wldcore_scrollable_text_window (extra_render_index, extra_base, extra_bounds). Phase
- * 3 advances that upload one step per frame. Phase 0 tears the level down once the fade started through system flag 4
- * and WORLD thread 14 finish (then opens the treasure's sound novel through
- * wldcore_menu_push_sound_novel_resume_level or wldcore_menu_push_sound_novel_level), restores the parent
- * list-window level and reopens the treasure list when the text window finishes, and on Triangle selects the sound
- * novel named by g_wldcore_treasure_sound_novel_ids[value].
+ * LOAD waits until render record saved_record_index is not popping in; no
+ * push sets that field (retail). BUILD, once file loading finishes, uploads
+ * the picture TIM's CLUT, binds the level's render record to the VRAM image
+ * with its right edge at x -0x3e and centered on y 0x10, starts the dissolve
+ * upload (wldcore_gfx_step_dissolve_image_upload) and publishes the record in
+ * g_wldcore_scrollable_text_window (extra_render_index, extra_base,
+ * extra_bounds). POP_IN advances that upload one step per frame. SHOWN:
+ * Triangle on a treasure with a sound novel (g_wldcore_treasure_sound_novel_ids)
+ * picks it, blocks input and closes the message box, fading the screen out
+ * unless a saved reading exists; once that is done the level is released
+ * and the novel opens (wldcore_menu_push_sound_novel_resume_level for a saved
+ * reading, else wldcore_menu_push_sound_novel_level). When the text window
+ * finishes instead, the Brave Story menu comes back and the treasure list
+ * reopens.
  *
  * The record index is staged in `saved` before the depth store: the target
  * reloads the full 32-bit value for the 16-bit store instead of narrowing the load.
@@ -2325,7 +2378,8 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
     }
 }
 
-#define BLOCK_BUFFER ((u8*)0x801EE000)
+/* Free RAM above WLDCORE's data that the dissolve upload stages its image in. */
+#define DISSOLVE_STAGING_BUFFER ((u8*)0x801EE000)
 
 /*
  * Streams an image into VRAM through the 0x801EE000 staging buffer in 1 KiB
@@ -2340,7 +2394,7 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
 static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
     u8* pixels = (u8*)image->pixel;
     u16* order = g_wldcore_dissolve_band_order;
-    u8* buffer = BLOCK_BUFFER;
+    u8* buffer = DISSOLVE_STAGING_BUFFER;
     s32 i;
     s32 j;
     s32 size;
@@ -2364,9 +2418,11 @@ static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
         }
         return;
     }
+
     if (step >= 50) {
         return 0;
     }
+
     step--;
     size = image->pw * image->ph * 2;
     height = image->ph;
@@ -2376,6 +2432,7 @@ static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
     } else {
         start = 16 - rows;
     }
+
     for (i = start; i < 16; i++) {
         if (i <= step && (count = g_wldcore_dissolve_band_progress[i]) < 32U) {
             base = (15 - i) << 10;
@@ -2394,16 +2451,20 @@ static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
         }
         LoadTPage((u32*)buffer, 0, 0, image->px, image->py, image->pw * 4, image->ph);
     }
+
     return 1;
 }
 
-/* Pushes menu level type 0x14 (driven by wldcore_menu_step_sound_novel_resume_level) with the given mode:
- * appends the cursor window, a VRAM render record for the TIM at g_wldcore_picture_buffer
- * (uploaded progressively through wldcore_gfx_step_dissolve_image_upload, starting at step 0), and
- * two text render records (0xb84c with substitution value 0xe000 + mode, and
- * 0xb84b). The picture record is centered against the first text record from
- * the TIM's width and half height, and the cursor window is placed at the
- * second text record's origin + (0x18, 0x3c).
+/* Pushes WLDCORE_MENU_LEVEL_SOUND_NOVEL_RESUME (stepped by
+ * wldcore_menu_step_sound_novel_resume_level) for treasure `mode`, whose sound
+ * novel has a saved reading: appends the cursor window, a VRAM render record
+ * for the TIM at g_wldcore_picture_buffer (uploaded progressively through
+ * wldcore_gfx_step_dissolve_image_upload, starting at step 0), and two text
+ * records: the treasure's name (WLDCORE_TEXT_ID_SUBSTITUTED_TEXT) and the
+ * resume choices (WLDCORE_TEXT_ID_SOUND_NOVEL_RESUME_CHOICES). The picture
+ * record is placed against the first text record from the TIM's width and
+ * half height, and the cursor window at the second text record's origin +
+ * (0x18, 0x3c).
  *
  * The target reserves 0x10 frame bytes the function never uses. The
  * two offset temporaries keep GCC from folding base_x - (width - 0x3e) into
@@ -2491,13 +2552,14 @@ static void wldcore_menu_push_sound_novel_resume_level(s32 mode) {
     g_wldcore_menu_stack_depth++;
 }
 
-/* Input step for the type-0x14 sound-novel resume level.
+/* Input step of the sound novel resume level.
  *
- * While dissolve_step is set the level is feeding the progressive texture upload at
- * 0x8007f998, one step per frame. Cross tears the level down through thread
- * 14; Circle fades the screen out and defers the teardown to the
- * system-flag-4 path; up and down toggle cursor_row, which moves the owned
- * window record down by 16.
+ * While dissolve_step is set the level feeds the dissolve upload
+ * (wldcore_gfx_step_dissolve_image_upload), one step per frame. Cross
+ * releases the level, restarts the message box and returns to the treasure
+ * detail; Circle fades the screen out, and once the fade is over the level is
+ * released and the novel opens, its saved reading discarded when the second
+ * row was chosen. Up and down toggle cursor_row, moving the cursor by 16.
  *
  * wldcore_reset_selected_saved_record ignores its argument; retail still
  * passes g_wldcore_saved_record_index. */
@@ -2508,6 +2570,7 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
     if (g_wldcore_window_render_records[level->message_render].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if (level->dissolve_step != 0) {
         GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);
         if (wldcore_gfx_step_dissolve_image_upload(&image, level->dissolve_step) == 0) {
@@ -2517,6 +2580,7 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
         level->dissolve_step++;
         return;
     }
+
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) && !(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         g_wldcore_window_record_count--;
@@ -2529,6 +2593,7 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
         wldcore_menu_push_sound_novel_level(level->mode);
         return;
     }
+
     buttons = g_wldcore_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
         g_wldcore_window_record_count--;
@@ -2541,6 +2606,7 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
         wldcore_menu_push_treasure_detail_level(level->mode);
         return;
     }
+
     if (buttons & PSX_PAD_CIRCLE) {
         g_wldcore_window_records[level->cursor_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
         g_wldcore_window_records[level->cursor_window].frame_index
@@ -2550,19 +2616,23 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) == 0 && wldcore_input_update_repeat(PSX_PAD_DOWN) == 0) {
         return;
     }
+
     level->cursor_row ^= 1;
     g_wldcore_window_records[level->cursor_window].position.y
         = g_wldcore_window_render_records[level->option_render].base.y + 0x3c + level->cursor_row * 0x10;
     wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
 }
 
-/* Pushes menu level type 0x23 with the given mode. Mode 2 only starts a
- * screen fade; any other mode copies VRAM (0x100, 0) 0x80x0x100 to
- * (0x200, 0x100), clears (0x100, 0) 0x100x0xf0, sets up the indicator sprite
- * and picks two random values for the level. */
+/* Pushes the event transition level (WLDCORE_MENU_LEVEL_EVENT_TRANSITION)
+ * after starting the seek to BATTLE.BIN. A FADE transition freezes the map
+ * and fades the screen out. The spinning ones hide everything on the map but
+ * the tiles, save VRAM (0x100, 0) 128x256 to (0x200, 0x100) and clear it for
+ * the screen capture, set up the indicator sprite over that area, fade the
+ * music out and pick a random drift and spin direction. */
 void wldcore_menu_push_event_transition_level(s32 mode) {
     RECT rect;
     s32 depth;
@@ -2618,6 +2688,7 @@ void wldcore_menu_push_event_transition_level(s32 mode) {
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].event_transition.fade_phase
             = WLDCORE_EVENT_TRANSITION_FADE_NONE;
     }
+
     depth = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[depth].event_transition.mode = mode;
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_EVENT_TRANSITION;

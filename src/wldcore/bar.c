@@ -26,10 +26,14 @@
 static void wldcore_bar_push_rumor_detail_level(s32 value);
 static void wldcore_list_open_rumors(void);
 
-/* Sibling of the resetter at 0x8007cd78, differing only in the value stored
- * into sequence. The record stores may alias `level`, so they invalidate
- * the cached parameter loads and reproduce the target's
- * reloads; `index` shares one address computation between the last two. */
+/* Gray out the bar menu while a sub-level opens over it: palette 10 on the
+ * cursor, 6 on the side window and 2 on the frame, and restart the cursor's
+ * press animation.
+ *
+ * Sibling of wldcore_window_reset_slot_state, differing only in the sequence
+ * stored. The record stores may alias `level`, so they invalidate the cached
+ * parameter loads and reproduce the target's reloads; `index` shares one
+ * address computation between the last two. */
 void wldcore_window_publish_slot_b806(wldcore_menu_list_window_level_t* level) {
     s32 index;
 
@@ -58,6 +62,7 @@ static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_l
     wldcore_menu_push_location_menu_level(*selected);
     wldcore_fade_start_screen(WLDCORE_SCREEN_FADE_REDRAW_MAP, 0x10);
     wldcore_clear_screen_and_set_map_clip_rect(0);
+    /* Blank the 256x240 backdrop image (0x7800 words) until the map is captured again. */
     for (i = 0x77ff; i >= 0; i--) {
         g_wldcore_scratch_buffer[i] = 0;
     }
@@ -74,10 +79,12 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     if (g_wldcore_window_render_records[level->frame_render].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     flags = g_main_system_flags;
     if (flags & MAIN_SYSTEM_FLAG_FADING) {
         return;
     }
+
     if ((flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         wldcore_menu_pop_level_and_rebuild_screen(level);
@@ -99,7 +106,7 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     buttons = g_wldcore_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
-        /* Same exit as case 4 below; GCC cross-jumps the two copies. */
+        /* Same exit as the Leave row below; GCC cross-jumps the two copies. */
         g_wldcore_bar_menu_saved_cursor = 0;
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BAR_GOODBYE, 0);
         level->mode = WLDCORE_LIST_WINDOW_MODE_LEAVE_MESSAGE;
@@ -108,12 +115,14 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
         g_wldcore_window_render_object_count -= 3;
         return;
     }
+
     if (buttons & PSX_PAD_SELECT) {
         wldcore_window_publish_slot_b806(level);
         wldcore_menu_push_message_level(
             g_wldcore_bar_row_help_text_ids[level->entries[level->selected_entry]] | 0x1000, 1);
         return;
     }
+
     if (buttons & PSX_PAD_CIRCLE) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         selected_entry = &level->selected_entry;
@@ -171,6 +180,7 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     } else {
         return;
     }
+
     wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
     if (level->content_render != 0) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BAR_WELCOME, 0);
@@ -178,12 +188,13 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     }
 }
 
-/* Opens a panel list of the 64 entries whose location mask (32-bit table at
- * g_wldcore_rumor_location_masks) includes the current location and whose script variable
- * 0x2d1 + index is set (entry values 0xc800 + index); shows up to eight rows
- * at (0x4c, 0x50) with width 0x96 and appends its record tagged 6. With no
- * entries it resets the parent window-pair level's records and shows text
- * 0xb80a instead. */
+/* Open the bar's rumors list: every rumor whose location mask in
+ * g_wldcore_rumor_location_masks includes the current town and whose script
+ * variable (EVENT_SCRIPT_VAR_RUMOR_FIRST + index) is set, listed by name
+ * (TEXT_ID_RUMOR_NAME_BASE + index). The panel shows up to eight rows at
+ * (0x4c, 0x50), 0x96 wide, and the WLDCORE_MENU_LEVEL_RUMORS level is pushed.
+ * With no rumors the bar menu's windows are reset instead and
+ * WLDCORE_TEXT_ID_NO_RUMORS is shown. */
 static void wldcore_list_open_rumors(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
@@ -199,6 +210,7 @@ static void wldcore_list_open_rumors(void) {
     flags = g_wldcore_list_row_flags;
     values = g_wldcore_list_entry_values;
     locations = g_wldcore_rumor_location_masks;
+    /* The masks hold one bit per town, location 0 in bit 14. */
     mask = 0x4000 >> g_wldcore_map_projection_state.marker.kind;
     for (; i < EVENT_SCRIPT_VAR_RUMOR_COUNT; i++, locations++) {
         /* A register operand keeps the loaded 32-bit value first in the `and`;
@@ -212,6 +224,7 @@ static void wldcore_list_open_rumors(void) {
             count++;
         }
     }
+
     if (count != 0) {
         g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_RUMORS_INTRO, 0);
@@ -249,6 +262,7 @@ static void wldcore_list_open_rumors(void) {
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].window_pair_render.panel_rows = 1;
         return;
     }
+
     g_wldcore_menu_ordering_table_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     record_index = g_wldcore_menu_stack_depth;
@@ -257,22 +271,21 @@ static void wldcore_list_open_rumors(void) {
 }
 
 /* Resume handler of the rumors list: block Circle, Cross and Select for the
- * levels underneath and show prompt 0xB808 again. */
+ * levels underneath and show WLDCORE_TEXT_ID_RUMORS_INTRO again. */
 void wldcore_list_rumors_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_RUMORS_INTRO, 0);
 }
 
-/* Withholds every button from the WORLD menu frame while the next menu level runs. */
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_rumors_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Pop the rumors list level: toggle the input-blocked system flag and
- * unblock the menu buttons. */
-/* Target 0x80072404. */
-/* The caller hands in its menu level; the target reads no argument. */
+ * unblock the menu buttons. The caller hands in its menu level; the target
+ * reads no argument. */
 static void wldcore_list_rumors_close_level(wldcore_menu_panel_level_t* level) {
     g_wldcore_menu_ordering_table_offset = 1;
     g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
@@ -281,9 +294,9 @@ static void wldcore_list_rumors_close_level(wldcore_menu_panel_level_t* level) {
 }
 
 /* Input step of the bar's rumors list. Cross, or Circle on a non-empty list,
- * starts thread 12's closing animation and records the choice in result;
- * Select on a non-empty list opens help message 0x105e. Once thread 12
- * finishes, the level closes and a chosen rumor's entry value (low 11 bits of
+ * closes the panel thread and records the choice in result; Select on a
+ * non-empty list opens help message 0x105e. Once the panel thread has ended,
+ * the level closes and a chosen rumor's entry value (TEXT_ID_ENTRY_MASK of
  * g_wldcore_list_entry_values) goes to wldcore_bar_push_rumor_detail_level;
  * otherwise the bar menu resumes.
  *
@@ -324,8 +337,9 @@ void wldcore_list_handle_rumors_input(wldcore_menu_panel_level_t* level) {
 }
 
 /* Show rumor `value` in the scrollable text window, titled by the rumor-about message,
- * hide the rumors level's windows and push the rumor detail level. coordinate_mode is
- * always 0, so the switch's mode-1 image row is never used. */
+ * hide the bar menu's windows and push the rumor detail level, which keeps
+ * their indices to show them again. coordinate_mode is always 0, so the
+ * switch's mode-1 image row is never used. */
 static void wldcore_bar_push_rumor_detail_level(s32 value) {
     s32 coordinate_mode = 0;
     s32 depth;
@@ -372,11 +386,11 @@ static void wldcore_bar_push_rumor_detail_level(s32 value) {
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_RUMOR_DETAIL;
 }
 
-/* Close this menu level once its message window is finished.
+/* Close the rumor detail level once its text window is finished.
  *
- * Same wait as wldcore_menu_wait_text_then_pop_level; then toggles flag 0x10 on the
- * level's two windows and render record, pops the stack and marks the render
- * record 0x100 before wldcore_list_open_rumors redraws. */
+ * Same wait as wldcore_menu_wait_text_then_pop_level; then shows the bar
+ * menu's two windows and frame again, pops the stack and replays the frame's
+ * pop-in while wldcore_list_open_rumors rebuilds the list. */
 void wldcore_bar_wait_rumor_text_then_pop_level(wldcore_menu_rumor_detail_level_t* level) {
     s32* index = &g_wldcore_scrollable_text_window.render_record_index;
 
@@ -394,17 +408,19 @@ void wldcore_bar_wait_rumor_text_then_pop_level(wldcore_menu_rumor_detail_level_
     wldcore_list_open_rumors();
 }
 
-/* Opens the town menu's proposition-location list (row kind 1 of
- * wldcore_bar_handle_menu_input). If the parent list level's frame is hidden (render flag
- * 0x10), it first unhides its three records, rebuilds it with wldcore_bar_build_menu_rows,
- * publishes text 0xb806 and resets its main window. It then lists the 96
- * propositions whose script variable 0x360 + i has neither bit 1 nor 2 set,
- * whose g_main_proposition_states entry is 0 in its low six bits and which
- * wldcore_proposition_is_available_at_location accepts for the current location
- * (entry values 0xd000 + i). With entries it shows text 0xb80b and up to six
- * rows at (0x4c, 0x50), width 0x96, and pushes a type-7 level; otherwise it
- * resumes the parent, shows text 0xb80d and marks the parent's content
- * published. */
+/* Open the bar's list of propositions on offer (the Propositions row of
+ * wldcore_bar_handle_menu_input). If the bar menu is hidden (returning from a
+ * proposition's levels) it is first shown again, its rows rebuilt with
+ * wldcore_bar_build_menu_rows and grayed out.
+ *
+ * The list holds every proposition neither in progress nor completed, not
+ * waiting out a failure (its g_main_proposition_states days are 0) and
+ * offered in this town (wldcore_proposition_is_available_at_location), by name
+ * (TEXT_ID_PROPOSITION_NAME_BASE + id). With entries it shows
+ * WLDCORE_TEXT_ID_PROPOSITIONS_INTRO and up to six rows at (0x4c, 0x50), 0x96
+ * wide, and pushes WLDCORE_MENU_LEVEL_AVAILABLE_PROPOSITIONS; otherwise it
+ * resumes the bar menu with WLDCORE_TEXT_ID_NO_PROPOSITIONS, flagging its
+ * content_render so the next cursor move restores the welcome line. */
 void wldcore_list_open_available_propositions(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
@@ -438,6 +454,7 @@ void wldcore_list_open_available_propositions(void) {
                                             .list_window.frame_render]
             .flags |= WORLD_RENDER_RECORD_POP_IN;
     }
+
     count = 0;
     for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
         if (!(script_get_variable(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
@@ -449,6 +466,7 @@ void wldcore_list_open_available_propositions(void) {
             count++;
         }
     }
+
     if (count != 0) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_PROPOSITIONS_INTRO, 0);
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count = count;
@@ -470,6 +488,7 @@ void wldcore_list_open_available_propositions(void) {
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].list_window.content_render = 1;
         return;
     }
+
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_ordering_table_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
@@ -479,22 +498,21 @@ void wldcore_list_open_available_propositions(void) {
 }
 
 /* Resume handler of the propositions list: block Circle, Cross and Select for the
- * levels underneath and show prompt 0xB80B again. */
+ * levels underneath and show WLDCORE_TEXT_ID_PROPOSITIONS_INTRO again. */
 void wldcore_list_propositions_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_PROPOSITIONS_INTRO, 0);
 }
 
-/* Withholds every button from the WORLD menu frame while the next menu level runs. */
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_propositions_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Pop the propositions list level: toggle the input-blocked system flag and
- * unblock the menu buttons. */
-/* Target 0x80072ef4. */
-/* The caller hands in its menu level; the target reads no argument. */
+ * unblock the menu buttons. The caller hands in its menu level; the target
+ * reads no argument. */
 static void wldcore_list_propositions_close_level(wldcore_menu_panel_level_t* level) {
     g_wldcore_menu_ordering_table_offset = 1;
     g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
@@ -525,6 +543,7 @@ void wldcore_list_handle_propositions_input(wldcore_menu_panel_level_t* level) {
         wldcore_menu_dispatch_resume_handler();
         return;
     }
+
     if (level->result == 2) {
         if (g_wldcore_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             level->result = 1;
@@ -625,10 +644,12 @@ void wldcore_window_set_render_palette_2(wldcore_window_render_pair_t* pair) {
     g_wldcore_window_render_records[pair->render_index].palette = 2;
 }
 
-/* Menu input step: cancel (0x40) closes this level and returns through
- * 0x80072a18; confirm (0x20) stores the 0x8009f2f4 + 0x8009f2f6 total, shows
- * message 0xb810 (with the total substituted) or 0xb80f when it is zero,
- * opens the yes/no panel at (0x48, 0x20), and pushes a level tagged 0xa. */
+/* Input step of the proposition detail level. Cross closes it and reopens the
+ * list (wldcore_list_open_available_propositions). Circle stores the job's
+ * total fee (fee_a + fee_b of the selected row) as the gil to pay, asks
+ * WLDCORE_TEXT_ID_JOB_FEE_PROMPT with the fee substituted (or
+ * WLDCORE_TEXT_ID_ACCEPT_JOB_PROMPT when it is free), opens the OK/NO panel
+ * at (0x48, 0x20) and pushes WLDCORE_MENU_LEVEL_PROPOSITION_ACCEPT. */
 void wldcore_proposition_handle_accept_input(wldcore_window_render_pair_t* owner) {
     s32 total;
     point32_t origin;
@@ -710,14 +731,16 @@ void wldcore_window_build_yes_no_panel(point32_t origin) {
 /* Input step of the proposition yes/no confirmation panel.
  *
  * Up/down toggle the highlighted row and move the cursor window by one
- * 16-pixel row. Cancel (0x40) and "no" both tear the panel down and return
- * through wldcore_list_open_available_propositions. "Yes" first checks that at least one non-guest,
- * non-monster, generic party unit is free (the same filter as
- * wldcore_proposition_load_send_unit_candidates) and that script variable 0x2c
- * is at least g_wldcore_proposition_gil_amount; failing either shows message 0xb822 or 0xb811 and
- * parks the level in mode 1 or 3 waiting for a button, and mode 1 then chains
- * message 0xb8e0 before mode 3 closes. A successful confirmation continues
- * into wldcore_proposition_push_send_unit_level.
+ * 16-pixel row. Cross and NO both tear the panel down and return through
+ * wldcore_list_open_available_propositions. OK first checks that at least one
+ * generic, non-monster party member is free (the same filter as
+ * wldcore_proposition_load_send_unit_candidates) and that the war funds cover
+ * g_wldcore_proposition_gil_amount. With no unit it says
+ * WLDCORE_TEXT_ID_CHOOSE_MORE_UNITS, then WLDCORE_TEXT_ID_CHOOSE_HUMAN_UNIT
+ * after a button (NO_UNIT_MESSAGE mode); short of gil it says
+ * WLDCORE_TEXT_ID_NOT_ENOUGH_GIL; either way the next button closes the panel
+ * (CLOSE_MESSAGE mode). A successful confirmation continues into
+ * wldcore_proposition_push_send_unit_level.
  *
  * The gotos are the target's shared tails: the mode 3 close, the "no"
  * dismissal and the no-unit failure jump into the cancel and gil-failure
@@ -731,12 +754,14 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
     if (g_wldcore_window_render_records[level->render_index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if (level->mode == WLDCORE_ACCEPT_CONFIRM_MODE_CLOSE_MESSAGE) {
         if (!(g_wldcore_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS))) {
             return;
         }
         goto close;
     }
+
     if (level->mode == WLDCORE_ACCEPT_CONFIRM_MODE_NO_UNIT_MESSAGE) {
         if (g_wldcore_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CHOOSE_HUMAN_UNIT, 0);
@@ -744,6 +769,7 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
         }
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
     dismiss:
@@ -757,6 +783,7 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
         wldcore_list_open_available_propositions();
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0 || wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         row = level->row ^ 1;
         level->row = row;
@@ -764,13 +791,16 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
             = g_wldcore_window_render_records[level->render_index].base.y - -(row * 0x10 + 0xE);
         wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
     }
+
     if (!(g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE)) {
         return;
     }
+
     if (level->row == 1) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         goto dismiss;
     }
+
     available = 0;
     for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
         unit = wldcore_get_party_unit(i);
@@ -779,11 +809,13 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
             available++;
         }
     }
+
     if (available == 0) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CHOOSE_MORE_UNITS, 0);
         level->mode = WLDCORE_ACCEPT_CONFIRM_MODE_NO_UNIT_MESSAGE;
         goto fail;
     }
+
     if (script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) < g_wldcore_proposition_gil_amount) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_NOT_ENOUGH_GIL, 0);
         level->mode = WLDCORE_ACCEPT_CONFIRM_MODE_CLOSE_MESSAGE;
@@ -794,6 +826,7 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
         g_wldcore_window_render_object_count -= 3;
         return;
     }
+
     wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
     g_wldcore_window_record_count -= 2;
     g_wldcore_window_render_record_count--;
@@ -804,37 +837,38 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
     wldcore_proposition_push_send_unit_level();
 }
 
-/* Pushes the "how many days" number panel of a proposition: shows prompt
- * 0xB813 with the row's minimum and maximum days, starts the number panel
- * thread on that range starting at the minimum, and withholds Circle and
- * Cross from the WORLD menu threads (the level's own step handles them). */
+/* Pushes the "how many days" number panel of a proposition: shows
+ * WLDCORE_TEXT_ID_CHOOSE_DAYS with the row's minimum and maximum days,
+ * starts the number panel thread on that range at the minimum, and withholds
+ * Circle and Cross from the WORLD menu threads (the level's own step handles
+ * them). */
 void wldcore_menu_push_number_panel_level(void) {
     point32_t origin;
     s32 record_index;
-    s32 x = g_wldcore_selected_proposition_row[0].min_days;
-    s32 y = g_wldcore_selected_proposition_row[0].max_days;
+    s32 min_days = g_wldcore_selected_proposition_row[0].min_days;
+    s32 max_days = g_wldcore_selected_proposition_row[0].max_days;
 
-    g_text_substitution_values[0] = x;
-    g_text_substitution_values[1] = y;
+    g_text_substitution_values[0] = min_days;
+    g_text_substitution_values[1] = max_days;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CHOOSE_DAYS, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
     g_wldcore_menu_ordering_table_offset = 8;
     origin.x = 0x38;
     origin.y = 0x20;
-    g_wldcore_active_menu_value = x;
+    g_wldcore_active_menu_value = min_days;
     wldcore_window_init_number_panel_render_thread(
-        WLDCORE_THREAD_SLOT_WINDOW_PANEL, x | (y << 16), WLDCORE_TEXT_ID_DAYS_LABEL, &origin);
+        WLDCORE_THREAD_SLOT_WINDOW_PANEL, min_days | (max_days << 16), WLDCORE_TEXT_ID_DAYS_LABEL, &origin);
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_NUMBER_PANEL;
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
-/* Input step of a number-panel level that waits on WORLD thread 12: once the
- * thread finishes, the pending result (level->result) selects which resume
- * handler runs and two levels are popped. Otherwise cancel arms result -1 and
- * confirm arms result 1, publishing the entered number, and either restarts
- * thread 12. */
+/* Input step of the days number panel, which runs on the panel thread. Cross
+ * arms result -1 and Circle result 1, recording the entered days in
+ * g_wldcore_proposition_dispatch_days; either tells the thread to close. Once
+ * it has, two levels are popped and result 1 goes on to the dispatch
+ * confirmation, -1 back to the propositions list. */
 void wldcore_menu_number_panel_wait_for_thread_step(wldcore_menu_panel_level_t* level) {
     if (level->result != 0 && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;

@@ -55,6 +55,7 @@ s32 wldcore_entrypoint(void) {
             }
             main_file_poll_load(&g_main_file_cd_state);
             wldcore_sound_process_audio_queue();
+            /* Each display buffer has its own 0xE000-byte GS packet area. */
             buffer_index = GsGetActiveBuff();
             g_main_gfx_active_buffer_index = buffer_index;
             GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
@@ -123,16 +124,18 @@ static void wldcore_process_frame_gate(void) {
  * the menu frame over it. */
 void wldcore_gfx_capture_map_backdrop(void) {
     RECT rect;
-    s32 count;
+    s32 buffer_index;
 
     DrawSync(0);
     VSync(0);
     GsSwapDispBuff();
-    count = GsGetActiveBuff();
-    g_main_gfx_active_buffer_index = count;
-    GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + count * 0xE000);
+    buffer_index = GsGetActiveBuff();
+    g_main_gfx_active_buffer_index = buffer_index;
+    GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
     GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    /* The map passes run with the stack moved into the 1 KB scratchpad, starting
+     * at its last word. */
     wldcore_switch_to_stack(getScratchAddr(255));
     wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
@@ -162,7 +165,8 @@ void wldcore_gfx_capture_map_backdrop(void) {
 /* Per-frame WLDCORE render pass with the 3D map: clears both ordering
  * tables, projects and draws the map tiles into the auxiliary table and the
  * map dots and menus into the main one, then sorts the auxiliary table's
- * clear, draws both tables and clears system flag 2. Sibling of
+ * clear, draws both tables and clears MAIN_SYSTEM_FLAG_DRAW_MAP. The map and
+ * HUD passes run on the scratchpad stack. Sibling of
  * wldcore_gfx_draw_world_frame. */
 static void wldcore_gfx_draw_world_frame_with_map(void) {
     GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
@@ -201,8 +205,9 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
 
 /* Per-frame WLDCORE render pass: clears the current ordering table, runs the
  * menu frame and marker/display-object passes, draws screen fades, waits for
- * VSync and, unless system flag 0x200 is set, uploads the scratch image to the
- * other display buffer before drawing the ordering table. */
+ * VSync and, unless MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE is set, uploads the
+ * captured map backdrop to the new draw buffer before drawing the ordering
+ * table over it. */
 void wldcore_gfx_draw_world_frame(void) {
     RECT rect;
 
@@ -229,8 +234,8 @@ void wldcore_gfx_draw_world_frame(void) {
     GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
 }
 
-/* Initialize the WLDCORE subsystems before entering the world loop.
- * The matched range includes the jr delay slot at 0x80067cb0. */
+/* Initialize the WLDCORE subsystems before entering the world loop, ending
+ * with the menu level the world entry opens. */
 static void wldcore_init_subsystems(void) {
     SetDispMask(0);
     wldcore_init_world_map_state();
@@ -279,11 +284,9 @@ void wldcore_clear_screen_and_set_map_clip_rect(s32 mode) {
 /*
  * WORLD-map graphics-subsystem bring-up: display mask off, GS graph init at
  * 256x240, draw offsets/3D init, GTE screen offset, then the two double-
- * buffered ordering-table descriptors are pointed at their tag arrays.
- *
- * The descriptor stride of 0x14 matches the libgs GsOT record already assumed
- * by wldcore_gfx_capture_map_backdrop, which indexes these same globals
- * with `g_active_graphics_buffer_index * 0x14`.
+ * buffered ordering-table descriptors are pointed at their tag arrays. A GsOT
+ * length is a power of two: the auxiliary tables have 4 entries and the main
+ * tables 16.
  */
 static void wldcore_gfx_init_subsystem(void) {
     SetDispMask(0);
@@ -389,6 +392,12 @@ static void wldcore_init_world_map_state(void) {
     g_wldcore_sound_novel_countdown_frames = 0;
     g_wldcore_location_entry_state.flags = 0;
 
+    /* Debug unlock (nothing sets MAIN_SYSTEM_FLAG_UNLOCK_ALL): every profile,
+     * rumor, route, location and story event; unless Start is held, every
+     * treasure and unexplored land found on 1 January and every proposition
+     * variable at 4; then 30,000 war funds, shop stock level 20, propositions
+     * and the fur shop enabled, and a 1 January birthday for the first party
+     * member. */
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_UNLOCK_ALL) {
         for (i = 0; i < EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT; i++)
             script_set_variable(EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST + i, 1);
@@ -416,8 +425,8 @@ static void wldcore_init_world_map_state(void) {
                 script_set_variable(EVENT_SCRIPT_VAR_PROPOSITION_FIRST + i, 4);
         }
 
-        script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, 0x7530);
-        script_set_variable(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY, 0x14);
+        script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, 30000);
+        script_set_variable(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY, 20);
         script_set_variable(EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED, 1);
         script_set_variable(EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED, 1);
 
@@ -431,7 +440,7 @@ static void wldcore_init_world_map_state(void) {
         party->birthday_day = day_of_year;
         /* The separate s32 temp keeps the `month` reload a full 32-bit value: folding
          * the expression straight into the u8 field narrows it to an lbu. */
-        zodiac = ((day_of_year & 0x100) >> 8) | ((month - 1) << 4);
+        zodiac = ((day_of_year & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) | ((month - 1) << PARTY_ZODIAC_SHIFT);
         party->zodiac = zodiac;
     }
 }
@@ -448,18 +457,20 @@ static void wldcore_finalize_loop(void) {
     script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_wldcore_next_map_id[0]);
 }
 
-/* Initialize runtime tables and graphics state used by WLDCORE.
- * The matched range includes the jr delay slot at 0x800683f8. */
+/* Load the picture for the marker's location, capture the first map backdrop,
+ * then reset the GPU, clear both ordering tables and VRAM, and swap buffers
+ * with the display still off. */
 static void wldcore_init_runtime_state(void) {
     s32 reserved_stack_words[2];
-    s32 count;
+    s32 buffer_index;
+
     SetDispMask(0);
     g_wldcore_map_projection_state.marker.sub_kind
         = wldcore_proposition_load_picture(g_wldcore_map_projection_state.marker.kind);
     file_wait_for_pending();
-    count = GsGetActiveBuff();
-    g_main_gfx_active_buffer_index = count;
-    GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + count * 0xE000);
+    buffer_index = GsGetActiveBuff();
+    g_main_gfx_active_buffer_index = buffer_index;
+    GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
     wldcore_gfx_capture_map_backdrop();
     VSync(0);
     ResetGraph(1);
@@ -470,13 +481,20 @@ static void wldcore_init_runtime_state(void) {
     SetDispMask(0);
 }
 
-/* Clear system flag 0x10000 and act on the pending world-menu request flags.
+/* Clear MAIN_SYSTEM_FLAG_RESTART and open the menu level the world entry
+ * starts on.
  *
- * With none of 0x202c0000 pending, a selected proposition with a Text action
- * reopens its menu level and text (0x5800 + script value); otherwise pending
- * script requests are dispatched. Either way two audio commands follow. Flags
- * 0x40000 and 0x200000 are consumed after publishing g_main_saved_weather_variable as script
- * variable 0x23; each request ends in wldcore_menu_push_screen_transition_level. */
+ * On an ordinary entry, a Text action staged by the marker location's map
+ * script opens a scrollable window on help message
+ * TEXT_ID_WORLD_HELP_MESSAGE_BASE + its argument; otherwise the pending script
+ * requests are dispatched. Either way the world map music is queued and faded
+ * in.
+ *
+ * Returning from a story-event replay or a tutorial event consumes its flag,
+ * restores the weather script variable saved before the event and reopens the
+ * list it was chosen from (the tutorial with its two music tracks queued). The
+ * title's tutorial and Brave Story requests open those screens. These all go
+ * through wldcore_menu_push_screen_transition_level. */
 static void wldcore_menu_restore_level_on_world_entry(void) {
     s32 flags = g_main_system_flags & ~MAIN_SYSTEM_FLAG_RESTART;
 
@@ -517,9 +535,9 @@ static void wldcore_menu_restore_level_on_world_entry(void) {
     }
 }
 
-/* Called at the top of wldcore_entrypoint's loop; a nonzero script
- * `EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT` clears system flag 0x10000 and
- * makes the entrypoint return. */
+/* Called at the top of wldcore_entrypoint's loop. A nonzero
+ * EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT clears MAIN_SYSTEM_FLAG_RESTART,
+ * restores WORLD's formation menu and makes the entrypoint return 0. */
 static s32 wldcore_handle_exit_request(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
         g_main_system_flags &= ~MAIN_SYSTEM_FLAG_RESTART;

@@ -84,12 +84,14 @@ void wldcore_map_init_dots(void) {
         g_wldcore_window_render_object_queue[queue_index] = (void*)(i * sizeof(wldcore_map_dot_t) + (s32)flags_base);
         g_wldcore_window_render_object_count = queue_index + 1;
     }
+
     g_wldcore_map_dot_count = WORLD_LOCATION_COUNT;
     wldcore_map_project_and_cull_dots();
 }
 
-/* Projects every world-map dot and marks the ones that are off screen, hidden
- * by system flag 0x10, or disabled by their script variable with flag 0x10.
+/* Projects every world-map dot and hides the ones that are off screen, all of
+ * them while MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS is set, and those whose location
+ * is not yet visible (EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST + location).
  *
  * The screen bounds are written as the target's unsigned range tests: x in
  * [-128, 128] and y in [-116, 120]. */
@@ -112,7 +114,12 @@ void wldcore_map_project_and_cull_dots(void) {
     }
 }
 
-/* The 0x40 compare limit reuses the dead `flags` local. With its own `limit`
+/* Pulse the map dots' brightness. The phase counts up to 0x40 and back down,
+ * a step a frame unless MAIN_SYSTEM_FLAG_FREEZE_ANIMATION is set; dots with a
+ * palette (colored towns and fields) run from 0x60 to 0xe0 with it and the
+ * others the opposite way, so the two kinds pulse out of step.
+ *
+ * The 0x40 compare limit reuses the dead `flags` local. With its own `limit`
  * variable the allocator swaps the g_wldcore_map_dot_pulse_direction snapshot ($a0 in the target) and
  * the limit ($v1); reusing the function-scope allocno reproduces the target
  * pair. */
@@ -129,6 +136,7 @@ void wldcore_map_pulse_dot_colors(void) {
     if (flags & MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
         return;
     }
+
     if (!(flags & MAIN_SYSTEM_FLAG_FREEZE_ANIMATION)) {
         state = g_wldcore_map_dot_pulse_direction;
         flags = 0x40;
@@ -148,6 +156,7 @@ void wldcore_map_pulse_dot_colors(void) {
             }
         }
     }
+
     phase = g_wldcore_map_dot_pulse_phase * 2;
     bright = phase + 0x60;
     dark = -0x20 - phase;
@@ -257,11 +266,11 @@ s32 wldcore_map_get_dot_snap_step(point32_t point, s32* step_x, s32* step_y) {
  * world map location and returns how many were written; the two callers store
  * the result as the panel's entry_count and pass the buffer as entries.
  *
- * Location 0x16 offers a run of consecutive entries 0xb8ed + i, one per unit
- * counted by script variable 0x65, plus one. Every other location offers the
- * three fixed entries 0xb85d-0xb85f when its state record's is_town byte is 1, and
- * appends a fourth entry 0xb860 when script variable 0x90 is set and the
- * location is Dorter, Warjilis or Zarghidas (the fur shop).
+ * The Deep Dungeon offers its floors (WLDCORE_TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST
+ * + i), one more than EVENT_SCRIPT_VAR_DEEP_DUNGEON_LIST_LENGTH. A town offers
+ * the bar, shop and soldier office, and the fur shop as a fourth entry at
+ * Dorter, Warjilis and Zarghidas once EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED is
+ * set. Other locations offer nothing.
  */
 s32 wldcore_map_build_location_menu_entries(s32 location_id, s32* out) {
     s32 count;
@@ -349,8 +358,9 @@ void wldcore_init_stub(void) {
  * in-bounds when x + 127 and y + 111 fall inside 255 x 227. Once four slots
  * are full they become one POLY_FT4 quad, emitted when either edge-leading
  * vertex was in bounds, and the last pair slides down to slots 0 and 1 so the
- * next pair closes the following segment. Gated as a whole by system flag
- * 0x20 and per route by script variable 556 + route.
+ * next pair closes the following segment. Nothing is drawn while
+ * MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES is set, and a route only once it is
+ * revealed (EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + route).
  *
  * The count is sign-extended into count_tmp, which the loop guard tests before
  * the copy into count; the `j < count_tmp` guard leaves an unused compare
@@ -500,6 +510,7 @@ static s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* 
         state->heading = (point_up->heading >> 16);
         state->segment_frames = point_up->distance * 2;
     }
+
     state->segment_frame = 0;
     return record->count - 1;
 }
@@ -542,9 +553,11 @@ void wldcore_map_prepare_path_animation(s32 from, s32 to) {
         }
         records++;
     }
+
     if (i == WLDCORE_ROUTE_COUNT) {
         return;
     }
+
     g_wldcore_map_path_animation.flags |= WLDCORE_SLIDESHOW_RUNNING;
     first = record->count - 1;
     g_wldcore_map_path_animation.frame_timer = 0;
@@ -564,6 +577,7 @@ void wldcore_map_prepare_path_animation(s32 from, s32 to) {
             g_wldcore_map_path_animation.coords[i * 2 + 1] = data[i * 2 + 1];
         }
     }
+
     for (i = 0; i < g_wldcore_map_path_animation.page_count; i++) {
         dx = -g_wldcore_map_path_animation.coords[i * 4] + g_wldcore_map_path_animation.coords[i * 4 + 4];
         dy = -g_wldcore_map_path_animation.coords[i * 4 + 1] + g_wldcore_map_path_animation.coords[i * 4 + 5];
@@ -588,6 +602,7 @@ void wldcore_map_draw_path_animation(GsOT* ot) {
     if (!(g_wldcore_map_path_animation.flags & WLDCORE_SLIDESHOW_RUNNING)) {
         return;
     }
+
     SetPolyFT4(&poly);
     SetSemiTrans(&poly, 1);
     setUV4(&poly, 0x88, 0xE0, 0x97, 0xE0, 0x88, 0xEF, 0x97, 0xEF);
@@ -600,6 +615,7 @@ void wldcore_map_draw_path_animation(GsOT* ot) {
         g_wldcore_map_path_animation.flags &= ~WLDCORE_SLIDESHOW_RUNNING;
         return;
     }
+
     for (i = 0; i < g_wldcore_map_path_animation.page_index + 1; i++) {
         if (i == g_wldcore_map_path_animation.page_index) {
             frames = g_wldcore_map_path_animation.frame_timer;
@@ -630,7 +646,7 @@ void wldcore_map_draw_path_animation(GsOT* ot) {
 
 /* Depth-first search for the cheapest route path between two locations.
  *
- * Tries every unlocked route (script variable 0x22c + route) not already on
+ * Tries every revealed route (EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + route) not already on
  * the path; a route joining from and to completes the path, which is kept
  * when it is shorter, or as long but no more expensive, than the best one.
  * Other routes leaving from recurse from their far end. The frame is kept
@@ -652,6 +668,7 @@ static void wldcore_map_find_best_route_path(s32 from, s32 to) {
     if (g_wldcore_route_search_depth >= WLDCORE_ROUTE_PATH_CAPACITY) {
         return;
     }
+
     table = g_wldcore_map_route_tables;
     for (route = 0; route < WLDCORE_ROUTE_COUNT; route++) {
         if (VSync(1) > 200) {
@@ -720,12 +737,14 @@ static void wldcore_map_find_best_route_path(s32 from, s32 to) {
     }
 }
 
-/* Location-entry step: when the current location's conditional set yields
- * LoadEvent, stores script variable 0x27 and pushes menu level type 0x23;
- * otherwise it applies a pending SetVar2, rescans the location entries
- * through 0x8008df98 and, for a found entry, records it, hides the parent
- * window, starts the projection motion and loads the proposition picture.
- * Returns 0 after the type-0x23 push, else 1.
+/* Start travel from from_location to to_location. When the current location's
+ * map script stages LoadEvent, that event becomes
+ * EVENT_SCRIPT_VAR_CURRENT_EVENT and the event transition level is pushed;
+ * returns 0. Otherwise a staged SetVar2 is applied and
+ * wldcore_map_find_best_route_path searches the cheapest path; when there is
+ * one, its first leg starts: the marker turns to the leg's heading, the menu
+ * window is hidden, the view pans when the marker is off screen and the
+ * destination's picture starts loading. Returns 1.
  *
  * g_wldcore_route_search_depth is a separate scalar: as a field of the entry state it becomes
  * the address anchor that the later &g_wldcore_location_entry_state argument is formed from, and
@@ -792,7 +811,7 @@ s32 wldcore_location_process_entry(s32 from_location, s32 to_location) {
  * either continues to the next route leg or finishes at the location.
  *
  * The two event-push tails are written out in full: GCC 2.7.2 cross-jumps
- * them into the single shared tail at 0x8008e770, and only per-path CSE of
+ * them into the single shared tail the target has, and only per-path CSE of
  * each copy keeps the target's direct g_wldcore_map_projection_state accesses and the &state
  * base register in the flags update. */
 void wldcore_map_step_route_travel(void) {
@@ -805,6 +824,7 @@ void wldcore_map_step_route_travel(void) {
     if (!(g_wldcore_location_entry_state.flags & WLDCORE_ROUTE_TRAVEL_ACTIVE)) {
         return;
     }
+
     if (g_wldcore_map_projection_motion.flags & WLDCORE_PROJECTION_MOTION_ACTIVE) {
         if (wldcore_map_step_projection_motion() == 0) {
             g_wldcore_map_projection_state.flags
@@ -813,6 +833,7 @@ void wldcore_map_step_route_travel(void) {
         g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
         return;
     }
+
     if (g_wldcore_location_entry_state.segment_frame >= g_wldcore_location_entry_state.segment_frames) {
         if (++g_wldcore_location_entry_state.segment_index >= g_wldcore_location_entry_state.segment_count) {
             wldcore_calendar_advance_day();
@@ -903,6 +924,7 @@ void wldcore_map_step_route_travel(void) {
     } else {
         g_wldcore_location_entry_state.segment_frame++;
     }
+
     dx = (g_wldcore_location_entry_state.target_position.vx - g_wldcore_location_entry_state.position.vx)
         * g_wldcore_location_entry_state.segment_frame / g_wldcore_location_entry_state.segment_frames;
     dy = (g_wldcore_location_entry_state.target_position.vy - g_wldcore_location_entry_state.position.vy)
@@ -1020,7 +1042,7 @@ s32 wldcore_map_step_projection_motion(void) {
 
 /* Applies a scroll delta to the projection origin when the resulting window
  * origin would leave [-64, 72] horizontally or [-64, 64] vertically, and
- * raises system flag 0x2 if the origin's x or y changed. */
+ * sets MAIN_SYSTEM_FLAG_DRAW_MAP if the origin's x or y changed. */
 static void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta) {
     point32_t position;
     VECTOR saved = g_wldcore_map_projection_origin;
@@ -1064,6 +1086,7 @@ static s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
     if (location < 0 || location >= WORLD_LOCATION_FIELD_COUNT) {
         return 0;
     }
+
     base = g_wldcore_random_battle_data;
     offset = location * 72;
     for (location = 0; location < 3; location++) {
@@ -1071,9 +1094,11 @@ static s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
             break;
         }
     }
+
     if (location == 3) {
         return 0;
     }
+
     offset += location * 24;
     row = ENTRY_AT(offset);
     g_wldcore_random_battle_squad_id = row->deployment_squad_id + 0x200;
@@ -1087,15 +1112,18 @@ static s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
             break;
         }
     }
+
     if (location == 4) {
         return 0;
     }
+
     tier_column = (u8*)(location * sizeof(wldcore_encounter_tier_t) + offset + (s32)base);
     chance = tier_column[offsetof(wldcore_encounter_entry_t, tiers)
         + offsetof(wldcore_encounter_tier_t, encounter_chance)];
     if (chance == 0) {
         return 0;
     }
+
     pick = rand() * 100 >> 15;
     if (chance >= pick) {
         mask = tier_column[offsetof(wldcore_encounter_entry_t, tiers)
@@ -1121,6 +1149,7 @@ static s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
         g_wldcore_random_battle_map_id = ENTRY_AT(offset)->battle_map_id;
         return 1;
     }
+
     return 0;
 }
 
@@ -1175,9 +1204,9 @@ void wldcore_map_init_location_marker_and_camera(void) {
 /* Apply pending direction and GTE projection updates to the camera state.
  *
  * The 32-bit direction value is the player marker's sequence: the facing octant picks
- * one of eight marker sequences from a base of 0x10, or 0x18 for the alternate
- * set. The projected point is written into the marker's screen_x/screen_y by
- * RotTrans, whose input is the marker's own position. */
+ * one of eight marker sequences from WLDCORE_ANIM_SEQUENCE_MARKER_FIRST, or from
+ * WLDCORE_ANIM_SEQUENCE_MARKER_ALTERNATE_FIRST for the alternate set. The
+ * marker's position is projected with RotTrans into its render position. */
 void wldcore_map_update_camera_direction_and_projection(void) {
     VECTOR output;
     wldcore_projection_state_t* state = &g_wldcore_map_projection_state;
@@ -1236,7 +1265,9 @@ void wldcore_window_build_render_record_image(s32 index, RECT bounds, s32 coordi
     world_menu_build_window_frame_image(bounds.w, bounds.h, (u16*)image);
 }
 
-/* Transform a render position into the coordinate space selected by mode.
+/* The VRAM position of a window image at `bounds` in coordinate mode `mode`.
+ * Images are 4-bit, four texels to a VRAM halfword: modes 0 and 1 put them in
+ * the texture pages at x 0x180 and 0x1c0, mode 2 in the page at (0x240, 0x100).
  *
  * The callee receives the adjacent position and dimensions registers as one
  * eight-byte aggregate. Dimensions are preserved by the ABI but unused here.

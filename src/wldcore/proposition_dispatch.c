@@ -39,11 +39,13 @@ static void wldcore_proposition_push_result_level(s32 proposition);
 static s32 wldcore_proposition_select_report_speaker(s32 index);
 static s32 wldcore_proposition_step_message(wldcore_proposition_report_level_t* state, s32 message);
 
-/* Pushes menu level type 0xd: a cursor window, an upper window, a 0x28x0x30
- * text record (0xb805) and a text record listing text 0xb84e, the errand
- * name (0xf7ff + g_wldcore_selected_proposition_row[0].name_text), text 0xb821 and
- * g_wldcore_proposition_send_unit_count rows of text 0x4000 + g_wldcore_proposition_send_units[i]. World thread 14
- * shows message 0xb814; both windows are placed against the first text record.
+/* Pushes WLDCORE_MENU_LEVEL_PROPOSITION_DISPATCH_CONFIRM, the summary of a job
+ * about to be dispatched: a cursor window, a header window, the OK/NO record
+ * and a summary record with "Job contents:" and the job's contents text
+ * (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1 + name_text), the days and place
+ * labels (WLDCORE_TEXT_ID_JOB_CONDITION_LABELS) and one row per chosen unit.
+ * The message box asks WLDCORE_TEXT_ID_CONFIRM_CONDITIONS; both windows are
+ * placed against the OK/NO record.
  *
  * `unused` reproduces the target's 0x78-byte frame. The row offset uses its
  * own local: reusing `row` (then set twice) schedules the loop's `addiu v1`
@@ -145,11 +147,12 @@ void wldcore_proposition_push_dispatch_confirm_level(void) {
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_PROPOSITION_DISPATCH_CONFIRM;
 }
 
-/* Input step of the proposition-dispatch yes/no panel built by wldcore_window_build_yes_no_panel:
- * up/down toggle the row, cancel (0x40) and "no" close the panel; "yes" pays
- * g_wldcore_proposition_gil_amount from script variable 0x2c, marks the proposition taken, records
- * it in the next g_main_active_propositions slot with its participants, and
- * closes the panel. */
+/* Input step of the dispatch confirmation's OK/NO panel: up/down toggle the
+ * row, Cross and NO close the panel; OK pays g_wldcore_proposition_gil_amount
+ * from the war funds, marks the proposition attempted and in progress,
+ * records it in the next g_main_active_propositions slot with its
+ * participants (each marked busy), and closes the panel. Either way the
+ * propositions list reopens. */
 void wldcore_proposition_handle_dispatch_confirm_input(wldcore_menu_choice_panel_level_t* level) {
     s32 row;
     s32 i;
@@ -157,6 +160,7 @@ void wldcore_proposition_handle_dispatch_confirm_input(wldcore_menu_choice_panel
     if (g_wldcore_window_render_records[level->render_index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         /* Shared tail: the target keeps this copy and both confirm paths
@@ -170,6 +174,7 @@ void wldcore_proposition_handle_dispatch_confirm_input(wldcore_menu_choice_panel
         wldcore_list_open_available_propositions();
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0 || wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         row = level->row ^ 1;
         level->row = row;
@@ -177,6 +182,7 @@ void wldcore_proposition_handle_dispatch_confirm_input(wldcore_menu_choice_panel
             = g_wldcore_window_render_records[level->render_index].base.y - -(row * 0x10 + 0xE);
         wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         if (level->row != 1) {
@@ -213,9 +219,10 @@ void wldcore_proposition_handle_dispatch_confirm_input(wldcore_menu_choice_panel
 /*
  * Advance daily proposition progress and packed countdown bytes.
  *
- * Records without flag 0x04 increment their elapsed byte. Set flag 0x04 when
- * it equals the assigned duration or flag 0x02 is set. Nonzero low-six-bit
- * countdowns decrease from at most 32, retaining their high 2 bits.
+ * Every active proposition not yet returned counts one more elapsed day, and
+ * returns (WLDCORE_PROPOSITION_PROGRESS_RETURNED) when that reaches its
+ * assigned days or it was recalled. Each proposition's days until it is
+ * offered again drop by one, from at most 32, keeping its failure bits.
  */
 void wldcore_proposition_advance_daily_counters(void) {
     s32 i;
@@ -242,14 +249,13 @@ void wldcore_proposition_advance_daily_counters(void) {
             *counter = (value & (WLDCORE_PROPOSITION_STATE_FAILURE | WLDCORE_PROPOSITION_STATE_BAD_FAILURE)) | days;
         }
         counter++;
-    } while ((s32)counter < (s32)(g_main_proposition_states + 96)); /* Target uses signed SLT. */
+    } while ((s32)counter < (s32)(g_main_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
 }
 
 /*
- * Count completed propositions at a location, or at every location.
- *
- * The daily updater sets completion flag 0x04. A location of -1 accepts every
- * completed record; the stored count is not clamped to the save-data capacity.
+ * Count the active propositions that have returned
+ * (WLDCORE_PROPOSITION_PROGRESS_RETURNED) to a location, or to any location
+ * when `location` is -1.
  */
 s32 wldcore_proposition_count_returned(s32 location) {
     s32 i;
@@ -268,14 +274,14 @@ s32 wldcore_proposition_count_returned(s32 location) {
  * the target stores it by symbol. */
 extern s16 g_wldcore_menu_scroll_offset;
 
-/* Push the proposition send-unit menu level (type 0x24).
+/* Push the send-unit level (WLDCORE_MENU_LEVEL_PROPOSITION_SEND_UNIT).
  *
- * Builds the available-unit list into the new level record, starts WORLD
- * thread 12 on the list-panel renderer with the shared panel render state,
- * appends the level's seven window records and five render records, and asks
- * thread 14 for message 0xb812.
+ * Builds the available-unit list into the new level record, starts the panel
+ * thread on it with each unit's level as a second column, appends the level's
+ * seven window records and five render records, and asks
+ * WLDCORE_TEXT_ID_CHOOSE_UNITS.
  *
- * The selected index is written through the panel render state (+0x38):
+ * The selected index is written through the panel render state:
  * the target derives the thread parameter from that field's address. Each
  * record's x/y pair is written through a block-local pointer so the pointer
  * shares the index product's register, and the chained frame_index/anim_counter
@@ -561,10 +567,10 @@ static void wldcore_window_load_party_unit_sprite_record(
 /* Input step of the proposition send-unit level.
  *
  * While the portrait frame is visible, a changed unit in the selected slot is
- * redrawn into the portrait. Cancel (0x40) and confirm (0x20) both close the
- * level; confirm first stores the highlighted list row into the slot, redraws
- * the rows, rebuilds the available-unit list and flags WORLD thread 12. Up and
- * down wrap the slot through 0..2 and move the cursor window.
+ * redrawn into the portrait. Cross and Circle both leave slot editing; Circle
+ * first stores the highlighted list unit into the slot, redraws the names,
+ * rebuilds the available-unit list and asks the panel thread to redraw. Up
+ * and down wrap the slot through 0..2 and move the cursor window.
  *
  * The target's frame holds two 32-bit values no instruction touches, reproduced by
  * the unused point. */
@@ -580,6 +586,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
             wldcore_window_load_party_unit_sprite_record(level, unit, level->portrait_render);
         }
     }
+
     buttons = g_wldcore_input_new_button_presses;
     if ((buttons & PSX_PAD_CROSS) != 0) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
@@ -587,6 +594,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
          * layout, but without this label the scheduler reorders its loads. */
         goto close;
     }
+
     if ((buttons & PSX_PAD_CIRCLE) != 0) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         unit = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
@@ -605,6 +613,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
         level->mode = WLDCORE_SEND_UNIT_MODE_SELECT;
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->slot == 0) {
             level->slot = 2;
@@ -620,6 +629,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
     } else {
         return;
     }
+
     wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
     g_wldcore_window_records[level->cursor_window].position.x
         = g_wldcore_window_render_records[level->list_frame.render_index].base.x + 6;
@@ -762,8 +772,8 @@ static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_le
     }
 }
 
-/* Clears the palette of two window records and two render records, resets one
- * render record's color to neutral gray, then clears two more windows. */
+/* Undo wldcore_window_set_states_and_blue_tint when a sub-level closes:
+ * default palettes on the send-unit windows and a neutral preview portrait. */
 void wldcore_window_clear_states_and_restore_tint(wldcore_menu_send_unit_level_t* level) {
     CVECTOR* color;
 
@@ -781,8 +791,9 @@ void wldcore_window_clear_states_and_restore_tint(wldcore_menu_send_unit_level_t
     g_wldcore_window_records[level->left_arrow].palette = g_wldcore_window_records[level->right_arrow].palette = 0;
 }
 
-/* Counterpart of 0x80076744: sets the two window states to 6 and 10, both
- * render record states to 2, and the render record color to 0x40/0x50/0x70. */
+/* Gray out the send-unit windows (palettes 6, 10 and 2) and tint the preview
+ * portrait blue (0x40, 0x50, 0x70) while a sub-level runs over them; undone by
+ * wldcore_window_clear_states_and_restore_tint. */
 void wldcore_window_set_states_and_blue_tint(wldcore_menu_send_unit_level_t* level) {
     s32 pad[4];
 
@@ -798,20 +809,18 @@ void wldcore_window_set_states_and_blue_tint(wldcore_menu_send_unit_level_t* lev
 /* Top-level step of the proposition send-unit menu level, dispatching on the
  * level's mode.
  *
- * Modes 1 and 6 wait for WORLD thread 12 to go idle and then pop the level,
- * mode 6 continuing into the proposition detail level and its number panel;
- * modes 3, 4 and 5 run wldcore_proposition_step_send_unit_browser and mode 2 runs
+ * CANCEL and ACCEPT wait for the panel thread to close and then pop the level,
+ * ACCEPT continuing into the proposition detail level and its days panel; the
+ * STATUS modes run wldcore_proposition_step_send_unit_browser and REPLACE runs
  * wldcore_proposition_step_send_unit_slot_input.
  *
- * Otherwise it is the unit-list step: while the list render record is visible
- * the highlighted row's unit id (g_wldcore_list_entry_values[cursor] & 0x7ff) is redrawn into
- * the preview record when it changes, then the new button presses are
- * handled - 0x100 opens help message 0x109a, 0x800 (with at least one chosen
- * unit) confirms and leaves through mode 6, 0x40 cancels through mode 1, 0x80
- * hides the six records and parks the level in mode 3, and 0x20 toggles the
- * highlighted unit in or out of the three g_wldcore_proposition_send_units slots (removing it
- * compacts the list, adding it when all three are full instead switches the
- * level into the slot-editing mode 2).
+ * Otherwise (SELECT) the highlighted unit's portrait is shown in the preview
+ * record once the list has popped in, then the new button presses are
+ * handled: Select opens help message 0x109a, Start (with at least one chosen
+ * unit) accepts, Cross cancels, Square hides the list and opens the unit's
+ * status panels, and Circle toggles the highlighted unit in or out of the
+ * three g_wldcore_proposition_send_units slots (removing it compacts the
+ * list; adding one when all three are full switches to REPLACE).
  *
  * The target reserves a 0x30-byte frame but only saves s0 and ra; the unused
  * 16-byte array reproduces that frame. The removal and addition paths each
@@ -832,6 +841,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
         }
         return;
     }
+
     if (level->mode == WLDCORE_SEND_UNIT_MODE_ACCEPT) {
         if (thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
             g_menu_blocked_buttons = 0;
@@ -843,11 +853,13 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
         }
         return;
     }
+
     if (level->mode == WLDCORE_SEND_UNIT_MODE_STATUS_OPEN || level->mode == WLDCORE_SEND_UNIT_MODE_STATUS
         || level->mode == WLDCORE_SEND_UNIT_MODE_STATUS_CLOSE) {
         wldcore_proposition_step_send_unit_browser(level);
         return;
     }
+
     if (level->mode == WLDCORE_SEND_UNIT_MODE_REPLACE) {
         wldcore_proposition_step_send_unit_slot_input(level);
         return;
@@ -867,6 +879,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
         wldcore_menu_push_message_level(0x109A, 1);
         return;
     }
+
     if (buttons & PSX_PAD_START) {
         if (g_wldcore_proposition_send_unit_count == 0) {
             wldcore_sound_play_effect(MAIN_SFX_INVALID);
@@ -880,6 +893,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
          * only partly cross-jumped. */
         goto suspend;
     }
+
     if (buttons & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         level->mode = WLDCORE_SEND_UNIT_MODE_CANCEL;
@@ -891,6 +905,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         return;
     }
+
     if (buttons & PSX_PAD_SQUARE) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0, -1, 0);
@@ -904,6 +919,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
         level->mode = WLDCORE_SEND_UNIT_MODE_STATUS_OPEN;
         return;
     }
+
     if (!(buttons & PSX_PAD_CIRCLE)) {
         return;
     }
@@ -940,6 +956,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
             = g_wldcore_window_render_records[level->list_frame.render_index].base.y + level->slot * 16 + 0xC;
         return;
     }
+
     g_wldcore_proposition_send_units[g_wldcore_proposition_send_unit_count] = value;
     g_wldcore_proposition_send_unit_count++;
 
@@ -974,9 +991,11 @@ void wldcore_list_open_completed_propositions(void) {
         g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[previous].window_pair_render.render_index]
             .flags |= WORLD_RENDER_RECORD_POP_IN;
     }
+
     if (thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
         thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
     }
+
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_JOBS_RETURNED, 0);
     count = 0;
     loaded_count = g_main_save_proposition_count;
@@ -995,6 +1014,7 @@ void wldcore_list_open_completed_propositions(void) {
             i++;
         } while (i < total);
     }
+
     if (count != 0) {
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.entry_count = count;
         if (count < 6) {
@@ -1015,6 +1035,7 @@ void wldcore_list_open_completed_propositions(void) {
         wldcore_menu_dispatch_resume_handler();
         return;
     }
+
     g_wldcore_menu_ordering_table_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_COMPLETED_PROPOSITIONS;
@@ -1022,7 +1043,7 @@ void wldcore_list_open_completed_propositions(void) {
 }
 
 /* Resume handler of the completed propositions list: block Circle, Cross and Select for the
- * levels underneath and show prompt 0xB819 again. */
+ * levels underneath and show WLDCORE_TEXT_ID_JOBS_RETURNED again. */
 void wldcore_list_completed_propositions_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_JOBS_RETURNED, 0);
@@ -1084,13 +1105,11 @@ void wldcore_list_handle_completed_propositions_input(wldcore_menu_stack_record_
     }
 }
 
-/* Job-report confirmation idle handler (one of the g_wldcore_menu_idle_handlers
- * entries, dispatched every frame by wldcore_menu_dispatch_idle_handler): the
- * up/down repeats (0x1000/0x4000) toggle the selected row, moving the cursor
- * window to that row of the render record; cancel (0x40) and a lower-row
- * confirm release the level's records and resume the parent, while an
- * upper-row confirm (0x20) also starts WORLD thread 12 and pushes the
- * type-0x10 level for the stored argument.
+/* Input step of the "Wanna hear about ...?" OK/NO panel over the job report
+ * list: Up and Down toggle the row, moving the cursor window; Cross or NO
+ * releases the panel and resumes the list; OK also closes the list's panel,
+ * pops both levels and pushes the job's report
+ * (wldcore_menu_push_proposition_report_level).
  *
  * The `- -(...)` in the cursor-row expression is load bearing, not a typo.
  * The target's final add is `addu v0,v0,v1` (base_y first, result tied to
@@ -1148,8 +1167,9 @@ void wldcore_proposition_handle_report_confirm_input(wldcore_proposition_report_
     }
 }
 
-/* Hides the parent level's two windows and render record, then pushes a
- * type-0x10 menu level for argument and sets WORLD thread 14's parameters.
+/* Hides the bar menu's windows and pushes WLDCORE_MENU_LEVEL_PROPOSITION_REPORT
+ * for active proposition `argument`, starting the report music, or in state 99
+ * (no report) for a recalled job; then closes the message box.
  */
 static void wldcore_menu_push_proposition_report_level(s32 argument) {
     s32 depth = g_wldcore_menu_stack_depth;
@@ -1537,23 +1557,29 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
     for (i = 0; i < count; i++) {
         g_wldcore_proposition_gil_amount += g_wldcore_proposition_report.participant_gil[i];
     }
+
     g_wldcore_proposition_gil_amount += g_wldcore_proposition_report.reward_value;
     g_text_substitution_values[1] = g_wldcore_proposition_gil_amount;
+    /* The reward names: random bonuses from the base, unexplored lands from
+     * entry 0x1b, treasures from 0x2e; entry 6 when there is no reward. */
     switch (g_wldcore_proposition_report.reward_type) {
     case WLDCORE_PROPOSITION_REWARD_TREASURE:
-        g_text_substitution_values[0] = g_wldcore_proposition_report.reward_index + 0x782E;
+        g_text_substitution_values[0]
+            = g_wldcore_proposition_report.reward_index + TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2E;
         break;
     case WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND:
-        g_text_substitution_values[0] = g_wldcore_proposition_report.reward_index + 0x781B;
+        g_text_substitution_values[0]
+            = g_wldcore_proposition_report.reward_index + TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1B;
         break;
     case WLDCORE_PROPOSITION_REWARD_RANDOM_BONUS:
         g_text_substitution_values[0]
             = g_wldcore_proposition_report.reward_index + TEXT_ID_PROPOSITION_REWARD_NAME_BASE;
         break;
     default:
-        g_text_substitution_values[0] = 0x7806;
+        g_text_substitution_values[0] = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6;
         break;
     }
+
     index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     panel_text = &g_wldcore_selected_proposition_row[0].name_text;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_result.render_index = index;
@@ -1585,6 +1611,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
             g_main_active_propositions[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
             g_wldcore_window_image_buffer);
     }
+
     for (i = 0; i < count; i++) {
         s32 row = i + 2;
 
@@ -1593,6 +1620,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
         g_text_substitution_values[0] = g_wldcore_proposition_report.participant_jp[i];
         window_display_text_entry(index, WLDCORE_TEXT_ID_FOUR_DIGIT_VALUE, point, g_wldcore_window_image_buffer);
     }
+
     wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 9;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_POP_IN;
@@ -1602,6 +1630,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
     if (thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
         thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
     }
+
     party = &g_wldcore_proposition_report.excluded_party_index;
     g_text_substitution_values[0] = *party + TEXT_ID_UNIT_NAME_BASE;
     message = 0x9C;
@@ -1609,9 +1638,11 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
     if (g_wldcore_proposition_report.recalled != 0) {
         message = 0xA2;
     }
+
     if (thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
         thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
     }
+
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19,
         wldcore_proposition_adjust_message_index(message, *party) + TEXT_ID_WORLD_MESSAGE_BASE, 0);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_result.proposition = proposition;
@@ -1628,6 +1659,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
         wldcore_sound_play_effect(MAIN_SFX_PROPOSITION_FAILURE);
         break;
     }
+
     depth = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[depth].proposition_result.phase = WLDCORE_PROPOSITION_RESULT_PHASE_INPUT;
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_PROPOSITION_RESULT;
@@ -1644,9 +1676,9 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
  * packed nine-bit arrays, releases each participant from the
  * proposition and pays them their share, marks the proposition
  * state byte, and finally compacts the participant record out of
- * g_main_active_propositions. Phase 1 waits for WORLD thread 14 and the audio
- * queue to drain and restarts the town music; phase 2 pops the level and hands
- * off to the countdown level or to wldcore_list_open_completed_propositions.
+ * g_main_active_propositions. CLOSING waits for the message box and the audio
+ * queue and restarts the bar music; DONE pops the level and hands off to the
+ * countdown level or to wldcore_list_open_completed_propositions.
  *
  * The proposition, result and share 32-bit fields are read as g_wldcore_proposition_report
  * members: the target keeps that block's address in a register, which GCC
@@ -1662,6 +1694,7 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
     if (g_wldcore_window_render_records[level->render_index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if (level->phase == WLDCORE_PROPOSITION_RESULT_PHASE_DONE) {
         if (g_wldcore_audio_queue.count == 0 && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE) {
             g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth - 1;
@@ -1676,6 +1709,7 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
         }
         return;
     }
+
     if (level->phase == WLDCORE_PROPOSITION_RESULT_PHASE_CLOSING) {
         if (g_wldcore_audio_queue.count == 0 && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE
             && thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
@@ -1694,17 +1728,21 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
             suzuki_sound_play_2_sfx(MAIN_SFX_PROPOSITION_SUCCESS_A, MAIN_SFX_PROPOSITION_SUCCESS_B);
         }
     }
+
     if (!(g_wldcore_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS))) {
         return;
     }
+
     g_wldcore_window_render_record_count = g_wldcore_window_render_record_count - 1;
     g_wldcore_window_render_object_count = g_wldcore_window_render_object_count - 1;
+    /* 0xFFFD clears WLDCORE_PROPOSITION_VARIABLE_IN_PROGRESS from the 16-bit value. */
     proposition_flags = script_get_variable(g_main_active_propositions[level->proposition].proposition_id
                             + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
         & 0xFFFD;
     if (g_wldcore_proposition_report.result == WLDCORE_PROPOSITION_RESULT_SUCCESS) {
         proposition_flags |= WLDCORE_PROPOSITION_VARIABLE_COMPLETED;
     }
+
     script_set_variable(
         g_main_active_propositions[level->proposition].proposition_id + EVENT_SCRIPT_VAR_PROPOSITION_FIRST,
         proposition_flags);
@@ -1712,6 +1750,7 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
     if (war_funds > EVENT_WAR_FUNDS_MAX) {
         war_funds = EVENT_WAR_FUNDS_MAX;
     }
+
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, war_funds);
     g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
@@ -1722,6 +1761,7 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
         wldcore_calendar_write_date(g_main_proposition_last_attempt_date_bits,
             g_main_active_propositions[level->proposition].proposition_id, &date);
     }
+
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_TREASURE) {
         script_set_variable(g_wldcore_proposition_report.reward_index + EVENT_SCRIPT_VAR_TREASURE_FIRST, 1);
         date.day = day;
@@ -1729,12 +1769,14 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
         wldcore_calendar_write_date(
             g_main_treasure_acquisition_date_bits, g_wldcore_proposition_report.reward_index, &date);
     }
+
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND) {
         script_set_variable(g_wldcore_proposition_report.reward_index + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST, 1);
         date.day = day;
         date.month = month;
         wldcore_calendar_write_date(g_main_land_discovery_date_bits, g_wldcore_proposition_report.reward_index, &date);
     }
+
     for (i = 0; i < g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_count; i++) {
         wldcore_get_party_unit(
             g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_indices[i])
@@ -1743,21 +1785,27 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
             g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_indices[i],
             g_wldcore_proposition_report.participant_jp[i]);
     }
+
+    /* A failed job returns to the bar after 32 days, a badly failed one after 16. */
     if (g_wldcore_proposition_report.result == WLDCORE_PROPOSITION_RESULT_FAILURE) {
         g_main_proposition_states[g_main_active_propositions[g_wldcore_proposition_report.proposition_index]
                 .proposition_id] = WLDCORE_PROPOSITION_STATE_FAILURE | 0x20;
     }
+
     if (g_wldcore_proposition_report.result == WLDCORE_PROPOSITION_RESULT_BAD_FAILURE) {
         g_main_proposition_states[g_main_active_propositions[g_wldcore_proposition_report.proposition_index]
                 .proposition_id] = WLDCORE_PROPOSITION_STATE_BAD_FAILURE | 0x10;
     }
+
     for (i = level->proposition; i < g_main_save_proposition_count - 1; i++) {
         g_main_active_propositions[i] = g_main_active_propositions[i + 1];
     }
+
     g_main_save_proposition_count--;
     if (wldcore_get_completion_milestone_rank() == 0 && g_wldcore_proposition_report.recalled == 0) {
         wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_OUT, 0x10);
     }
+
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0, -1, 0);
     level->phase = WLDCORE_PROPOSITION_RESULT_PHASE_CLOSING;
 }
@@ -1776,12 +1824,11 @@ static void wldcore_proposition_prepare_report(s32 proposition_index) {
     wldcore_proposition_apply_extra_days_multiplier();
 }
 
-/* Proposition speaker pick
- * (0x8007920c-0x800793f0). Returns the only participant, else the one with
- * the highest/lowest bravery (mode 1/2) or faith (3/4) by the u16 mode at
- * 0x8009f312 (unpacked proposition row 0x8009f2ec + 0x26). The goto form
- * for the shared bravery/faith tails matches the target, which reloads the
- * stat after the compare. */
+/* Pick the participant who reports on a finished job: the only one, else the
+ * one with the highest or lowest bravery or faith, as the unpacked row's
+ * speaker_mode says. A mode outside 1 to 4 would return `selected` unset. The
+ * goto form for the shared bravery/faith tails matches the target, which
+ * reloads the stat after the compare. */
 static s32 wldcore_proposition_select_report_speaker(s32 index) {
     party_unit_t* unit;
     s32 best;
@@ -1827,10 +1874,10 @@ static s32 wldcore_proposition_select_report_speaker(s32 index) {
     return selected;
 }
 
-/* Bravery/faith bands used to index the 3x3 table in proposition record 2:
- * < 0x24 -> 0, < 0x42 -> 1, < 0x65 -> 2 (a value of 0x65+ leaves the band
- * uninitialized, as in the target). */
-/* Target 0x800793f0. */
+/* Adjust message `base` for the unit who speaks it: add the entry of the 3x3
+ * WLDCORE_PROPOSITION_DATA_MESSAGE_ADJUSTMENTS table for the unit's faith and
+ * bravery bands (below 36, 66 and 101), and 3 more unless the unit is male.
+ * A value of 101 or more would leave its band unset; stats never get there. */
 s32 wldcore_proposition_adjust_message_index(s32 base, s32 party_index) {
     s32 faith_band;
     s32 bravery_band;
@@ -1865,8 +1912,9 @@ s32 wldcore_proposition_adjust_message_index(s32 base, s32 party_index) {
 /*
  * Queue a proposition message and wait for its acknowledgment.
  *
- * Return 1 and clear the caller's phase after a new button-0x20 press
- * with the menu event flag set. Initial setup and continued waiting return 0.
+ * The first call shows message `message`, adjusted for the reporting unit and
+ * with its portrait; return 1 and clear the caller's phase once Circle is
+ * pressed with the message box ready. Until then return 0.
  */
 static s32 wldcore_proposition_step_message(wldcore_proposition_report_level_t* state, s32 message) {
     if (state->phase == 0) {

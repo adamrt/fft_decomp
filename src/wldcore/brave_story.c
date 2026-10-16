@@ -32,7 +32,8 @@ static void wldcore_menu_push_proposition_category_level(void);
 static void wldcore_menu_push_tutorial_topic_text_level(s32 topic);
 static void wldcore_menu_push_variable_detail_level(s32 value);
 
-/* Draws the indicator sprite while the current type-0x23 level's mode is not 2.
+/* Draws the event transition's spinning sprite while that level is on top of
+ * the menu stack, unless it is a plain fade.
  *
  * The level is spelled g_wldcore_menu_stack_records_next[current - 1]; the
  * equivalent g_wldcore_menu_stack_records[current] changes the address
@@ -53,15 +54,19 @@ void wldcore_draw_close_indicator_if_pending(GsOT* ordering_table) {
  * register. */
 extern CVECTOR g_wldcore_screen_fade_box_0_color;
 
-/* Per-frame step of the event-transition menu level (type 0x23) pushed by
- * wldcore_menu_push_event_transition_level.
+/* Per-frame step of the event-transition level (WLDCORE_MENU_LEVEL_EVENT_TRANSITION)
+ * pushed by wldcore_menu_push_event_transition_level: the screen effect that
+ * leads from the map into an event or battle.
  *
- * Mode 2 only toggles the display flag. Otherwise the indicator sprite spins
- * and scales in on phase 0 and back out on phase 1, one update every third
- * frame; anim_step is the animation step. The fade overlay at g_wldcore_screen_fade_box_0_color ramps
- * in 0x10 increments (phase 1) and 8 increments (phase 2), and once it
- * saturates the captured screen is moved back from (0x200,0x100) to
- * (0x100,0). */
+ * In FADE mode it only waits for the screen fade and then ends the world loop
+ * (toggling MAIN_SYSTEM_FLAG_RUNNING off). Otherwise frame 1 copies the screen
+ * to VRAM (0x100, 0) and hides the map and root windows; the sprite drifts a
+ * pixel a frame and, every third frame, spins and shrinks in SPIN_IN, then in
+ * SPIN mode spins back out (SPIN_OUT) textured with the captured screen. The
+ * fade box over g_wldcore_screen_fade_box_0_color flashes up by 0x10 a frame
+ * to 0x80 (FLASH), then whites out by 8 a frame (WHITE_OUT); at full white the
+ * world loop ends and the picture at VRAM (0x200, 0x100) is moved to
+ * (0x100, 0). */
 void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_level_t* level) {
     RECT rect;
     s32 step;
@@ -231,12 +236,13 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
     level->frame = level->frame + 1;
 }
 
-/* Pushes a list menu level (type 0x1C).
+/* Pushes the Brave Story menu (WLDCORE_MENU_LEVEL_BRAVE_STORY).
  *
- * Appends the main, upper, lower and side windows, draws one text row per
- * list entry (text entries[i] + 0xb83f) into a new render record, draws script
- * variables 0x61 and 0x62 (each clamped to 9999) into a second record with
- * text 0xb846, selects the play-time display, clamps the saved cursor row in
+ * Appends the cursor, the two completion stars and the side label, draws one
+ * row per entry (WLDCORE_TEXT_ID_BRAVE_STORY_ROW_FIRST + row) into a new render
+ * record, draws the injured and casualty counts (each capped at 9999) into a
+ * second record with WLDCORE_TEXT_ID_INJURED_CASUALTIES, selects the
+ * play-time display, clamps the saved cursor row in
  * g_wldcore_brave_story_saved_cursor to the entry count and positions the windows relative to the list
  * record before committing the level at depth + 1.
  *
@@ -483,8 +489,10 @@ static void wldcore_menu_build_brave_story_entries(void) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entry_count++;
 }
 
-/* Clears a list level's window states, restores its hidden records, and
- * queues WORLD thread 14 with message 0xb848. */
+/* Return the Brave Story menu to browsing when a sub-level closes: restore
+ * its palettes and the idle cursor, show WLDCORE_TEXT_ID_BRAVE_STORY_INTRO
+ * again and show (with their pop-in) whichever of its records a sub-level
+ * hid. */
 void wldcore_menu_close_list_window_level(wldcore_menu_stack_record_t* level) {
     g_wldcore_window_records[level->list_window.main_window].palette
         = g_wldcore_window_records[level->list_window.side_window].palette
@@ -512,11 +520,11 @@ void wldcore_menu_close_list_window_level(wldcore_menu_stack_record_t* level) {
     level->list_window.mode = WLDCORE_LIST_WINDOW_MODE_BROWSE;
 }
 
-/* Set the window palettes of a list window: main window 10 (with sequence
- * set and frame_index/anim_counter cleared), side window 6, the frame render
- * record 2 and both auxiliary windows 5. Mode 2 also sets the content render
- * palette to 2; otherwise a selected entry of kind other than 2 hides the content
- * render record (flag 0x10) and sets system flag 0x800.
+/* Gray out the Brave Story menu while a sub-level opens over it: the cursor
+ * takes palette 10 and restarts its press animation, the side label 6, the
+ * frame 2 and both stars 5. Under a help message (FADE_OR_HELP) the
+ * injured/casualties record is grayed too; otherwise any row but Persons hides
+ * it and the play-time display (MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE).
  *
  * The chained store keeps one main-window index for both cleared fields. */
 void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* state) {
@@ -552,7 +560,7 @@ void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* sta
  *    opens the highlighted row's list; Up and Down move the cursor with
  *    wrap-around, stepping the window record's y by 16.
  *
- * The cancel path and menu entry 6 each spell out the window-count release;
+ * The cancel path and the Leave row each spell out the window-count release;
  * jump2 cross-jumps them after the two count loads. The target reloads the
  * cursor after storing it to g_wldcore_brave_story_saved_cursor, which needs g_wldcore_brave_story_saved_cursor
  * accessed as an array element (a scalar store does not alias the level field). The wrap-to-bottom step is written `y
@@ -722,9 +730,10 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
     }
 }
 
-/* Opens a panel list of the set script flags 0x1bc-0x1fb (entry values
- * 0xe800 + flag index), shows up to eight rows at (0x4c, 0x4f) with width
- * 0x94, and appends its 0x5c-byte record tagged 0x1d. Twin of
+/* Opens the Brave Story's Record list: every story event whose script
+ * variable (EVENT_SCRIPT_VAR_STORY_EVENT_FIRST + index) is set, by name
+ * (TEXT_ID_STORY_EVENT_NAME_BASE + index), up to eight rows at (0x4c, 0x4f),
+ * 0x94 wide, and pushes WLDCORE_MENU_LEVEL_STORY_EVENTS. Twin of
  * wldcore_list_open_treasures, but walks the output arrays by pointer. */
 static void wldcore_list_open_story_events(void) {
     wldcore_window_panel_layout_t layout;
@@ -771,20 +780,21 @@ static void wldcore_list_open_story_events(void) {
 }
 
 /* Resume handler of the story events list: block Circle, Cross and Select for the
- * levels underneath and show prompt 0xB848 again. */
+ * levels underneath and show WLDCORE_TEXT_ID_BRAVE_STORY_INTRO again. */
 void wldcore_list_story_events_restore_prompt(void) {
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_story_events_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* List level input step (cursor slot 10); twin of wldcore_list_handle_persons_input with help
+/* Input step of the story events list; twin of wldcore_list_handle_persons_input with help
  * message 0x1055. Cancel and confirm wait for file loading to finish; a
- * confirmed entry's value is passed to 0x80082e14. */
+ * confirmed entry's value is passed to wldcore_menu_push_story_event_text_level. */
 void wldcore_list_handle_story_events_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -822,18 +832,15 @@ void wldcore_list_handle_story_events_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
-/* Pushes the shared scrollable text window as menu level 0x1e for a story
- * event entry, the partner of the wldcore_menu_wait_tutorial_topic_text_then_pop_level pop: records the entry on the
- * new level, sets up the window at g_wldcore_scrollable_text_window for text 0x8800 + entry with no
- * substitutions, then hides the parent list-window level's four window records
- * and its frame render record with flag 0x10 and starts WORLD thread 14 on
- * text 0xb849 with substitution value 0xe800 + entry.
+/* Pushes WLDCORE_MENU_LEVEL_STORY_EVENT_TEXT for story event `value`: records
+ * the entry on the new level, sets up g_wldcore_scrollable_text_window on its
+ * text (TEXT_ID_WORLD_MESSAGE_BASE + value, from the story events message
+ * block) with no substitutions, hides the Brave Story menu's four windows and
+ * frame, and says WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the event's name.
  *
- * Masked-identical to wldcore_menu_push_fact_detail_level across all 165 instructions.
- * The two differ only in the substitution addend (0x9800 there, 0xe800 here),
- * the menu level type (0x2f there, 0x1e here) and the frame size; the text id
- * is value + 0x8800 in both, so 0xe800 is the substitution value and not a
- * text id.
+ * Masked-identical to wldcore_menu_push_fact_detail_level across all 165
+ * instructions. The two differ only in the name base substituted
+ * (TEXT_ID_FACT_NAME_BASE there), the menu level type and the frame size.
  *
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
@@ -907,6 +914,7 @@ void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* lev
         != 0) {
         return;
     }
+
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
         flags = g_main_system_flags;
         if ((flags & MAIN_SYSTEM_FLAG_FADING) == 0) {
@@ -918,6 +926,7 @@ void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* lev
             return;
         }
     }
+
     if ((g_wldcore_input_new_button_presses & PSX_PAD_TRIANGLE) != 0) {
         script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_wldcore_story_event_ids[level->story_event_index]);
@@ -928,9 +937,11 @@ void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* lev
         wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_OUT, 0x10);
         return;
     }
+
     if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) != 0) {
         return;
     }
+
     wldcore_sound_play_effect(MAIN_SFX_CANCEL);
     depth = g_wldcore_menu_stack_depth;
     index = depth - 2;
@@ -950,10 +961,12 @@ void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* lev
     wldcore_list_open_story_events();
 }
 
-/* Opens a panel list of the set script variables 0x3c0-0x3ff (entry values
- * 0xf000 + index * 16 + variable value), shows up to eight rows at
- * (0x80, 0x50) with width 0x60, appends its 0x5c-byte record tagged 0x1f and
- * hides the parent list window's content render record. Twin of 0x80087b94. */
+/* Opens the Brave Story's Persons list: every person whose profile variable
+ * (EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST + person) is set, by the name of that
+ * profile (TEXT_ID_PERSON_PROFILE_NAME_BASE + person * 16 + profile), up to
+ * eight rows at (0x80, 0x50), 0x60 wide; hides the injured/casualties record
+ * and pushes WLDCORE_MENU_LEVEL_PERSONS. Twin of
+ * wldcore_list_open_brave_story_propositions. */
 static void wldcore_list_open_persons(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
@@ -972,7 +985,7 @@ static void wldcore_list_open_persons(void) {
     for (; i < EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT; i++) {
         value = script_get_variable(i + EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST);
         if (value != 0) {
-            *values = (i << 4) + (s16)(value - 0x1000);
+            *values = TEXT_ID_PERSON_PROFILE_NAME_BASE + (i << 4) + value;
             *flags = 0;
             flags++;
             values++;
@@ -1002,22 +1015,23 @@ static void wldcore_list_open_persons(void) {
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
-/* Resume handler of the script variables list: block Circle, Cross and Select for the
- * levels underneath and show prompt 0xB848 again. */
+/* Resume handler of the persons list: block Circle, Cross and Select for the
+ * levels underneath and show WLDCORE_TEXT_ID_BRAVE_STORY_INTRO again. */
 void wldcore_list_persons_restore_prompt(void) {
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_persons_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* Script-variable list level input step (cursor slot 11) for the panel opened
- * by 0x8008343c; twin of wldcore_list_handle_unexplored_lands_input with help message 0x1056. Canceling
- * restores the parent list window's content render record (flag 0x100); a
- * confirmed entry's value is passed to 0x8008389c. */
+/* Input step of the persons list opened by wldcore_list_open_persons; twin of
+ * wldcore_list_handle_unexplored_lands_input with help message 0x1056.
+ * Canceling pops the injured/casualties record back in; a confirmed entry's
+ * value is passed to wldcore_menu_push_variable_detail_level. */
 void wldcore_list_handle_persons_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -1054,11 +1068,12 @@ void wldcore_list_handle_persons_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
-/* Opens the detail view (menu level type 0x20) for a script-variable list
- * entry selected in 0x8008368c: value is variable index * 16 + variable
- * value. It loads the chapter data of the variable's group of 16, appends a
- * render record, hides the parent list window's records and starts WORLD
- * thread 14 with text 0xb868 (variable 0, value substituted) or 0xb849.
+/* Opens the detail view (WLDCORE_MENU_LEVEL_VARIABLE_DETAIL) of a person
+ * chosen in wldcore_list_handle_persons_input: value is person * 16 + profile.
+ * It loads the message block of the person's group of 16 (blocks 6 on),
+ * appends a hidden render record for the portrait, hides the Brave Story menu
+ * and says WLDCORE_TEXT_ID_RAMZA_INFO with his title (person 0) or
+ * WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the profile's name.
  *
  * The unused 48-byte local reproduces the target's frame size. */
 static void wldcore_menu_push_variable_detail_level(s32 value) {
@@ -1099,14 +1114,17 @@ static void wldcore_menu_push_variable_detail_level(s32 value) {
     g_wldcore_menu_stack_depth = depth + 1;
 }
 
-/* Per-frame step of the brave-story detail level.
+/* Per-frame step of a person's detail level.
  *
- * Phase 1 waits for the character's portrait file, phase 2 sets up the shared
- * scrollable text window for text 0x8800 + entry and binds the
- * portrait render record to the texture rectangle of the portrait POLY_FT4 (the
- * portrait id selects a 16x16 cell of the 0x280,0x1f0 page). Phase 3 waits for
- * the text window's render record and returns to phase 0, which pops the level
- * back to the brave-story list once the text window has finished scrolling.
+ * LOAD waits for the message block. BUILD (from the eighth frame, once the
+ * message box is ready) sets up the shared scrollable text window on the
+ * profile's text, with Ramza's title and age or the person's age substituted,
+ * and binds the portrait render record to the texture rectangle of the
+ * portrait POLY_FT4. The portrait id also selects its CLUT: four 16-color
+ * CLUTs to a VRAM row from (0x280, 0x1f0), ten rows to a group of 40
+ * portraits, each group 64 pixels further right. POP_IN shows the portrait
+ * once the text window has opened; SHOWN pops the level back to the persons
+ * list once the text window has finished.
  *
  * The loading test reads g_main_file_cd_state.state (the same 32-bit value as
  * g_main_file_still_loading): only a struct-member load stays behind the
@@ -1158,6 +1176,7 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
         }
         g_wldcore_scrollable_text_window.extra_render_index = -1;
         wldcore_text_init_scrollable_window(&g_wldcore_scrollable_text_window);
+        /* Rendering the text stores the portrait it names, if any, over the 0xff. */
         value = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
         render_index = level->render_index;
         if (value != 0xFF) {
@@ -1226,9 +1245,9 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
         count = (count) + 1;                                                                                           \
     } while (0)
 
-/* Opens a 41-entry panel list (16-bit values 0x8000-0x8028), shows up to
- * eight rows at (0x54, 0x50) with width 0x8c, and appends its 0x5c-byte
- * record tagged 0x21.
+/* Opens the list of the 41 tutorial topics (TEXT_ID_TIP_NAME_BASE + topic),
+ * up to eight rows at (0x54, 0x50), 0x8c wide, and pushes
+ * WLDCORE_MENU_LEVEL_TUTORIAL_TOPICS.
  *
  * The list is indexed by `count` rather than `i`; indexing by `i` lets loop.c
  * fold the final count to the constant 41. */
@@ -1269,14 +1288,15 @@ void wldcore_list_tutorial_topics_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_tutorial_topics_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* Tutorial-topic list level input step (cursor slot 12); twin of
- * wldcore_list_handle_treasures_input with help message 0x108d. A confirmed topic's value is
- * passed to 0x80084578, which opens the tutorial text window. */
+/* Input step of the tutorial topics list; twin of
+ * wldcore_list_handle_treasures_input with help message 0x108d. A confirmed
+ * topic's value is passed to wldcore_menu_push_tutorial_topic_text_level. */
 void wldcore_list_handle_tutorial_topics_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -1311,11 +1331,11 @@ void wldcore_list_handle_tutorial_topics_input(wldcore_menu_panel_level_t* level
     }
 }
 
-/* Pushes the tutorial topic text window as menu level 0x22: records the topic
- * id on the new level, sets up the shared scrollable text window at g_wldcore_scrollable_text_window
- * for that topic's text (0x8800 + topic), and hides the parent pair-render
- * level's two windows and its render record with flag 0x10. wldcore_menu_wait_tutorial_topic_text_then_pop_level
- * steps the window and pops the level, restoring all three.
+/* Pushes WLDCORE_MENU_LEVEL_TUTORIAL_TOPIC_TEXT: records the topic on the new
+ * level, sets up g_wldcore_scrollable_text_window on the topic's text
+ * (TEXT_ID_WORLD_MESSAGE_BASE + topic), and hides the tutorial menu's two
+ * windows and frame. wldcore_menu_wait_tutorial_topic_text_then_pop_level
+ * steps the window and pops the level, showing all three again.
  *
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
@@ -1364,11 +1384,10 @@ static void wldcore_menu_push_tutorial_topic_text_level(s32 topic) {
     g_wldcore_menu_stack_types_next[depth] = WLDCORE_MENU_LEVEL_TUTORIAL_TOPIC_TEXT;
 }
 
-/* Tutorial topic text window set up by 0x80084578. */
-
-/* Menu level 0x22 pushed by 0x80084578: steps the tutorial text window
- * until 0x800903e4 reports it finished, then pops the level, restores the
- * parent level's windows and render record, and reopens the topic list. */
+/* Step of the tutorial topic text level pushed by
+ * wldcore_menu_push_tutorial_topic_text_level: once the text window has
+ * finished (wldcore_text_is_window_finished), pop the level, show the
+ * tutorial menu's windows and frame again and reopen the topic list. */
 void wldcore_menu_wait_tutorial_topic_text_then_pop_level(void) {
     s32 depth;
 
@@ -1390,13 +1409,16 @@ void wldcore_menu_wait_tutorial_topic_text_then_pop_level(void) {
     }
 }
 
-/* Push list-window menu level 0x25.
+/* Push the Brave Story's job category menu (WLDCORE_MENU_LEVEL_PROPOSITION_CATEGORY).
  *
- * Entry 0 is listed when g_main_save_proposition_count is nonzero and entry 1
- * when any script variable 0x360-0x3bf has bit 2 set; entries draw text
- * 0xb864 + entry. The cursor is restored from g_wldcore_proposition_category_saved_cursor (reset when out of
- * range). `value` holds the cursor and then the reloaded main-window index:
- * as one multi-set variable it is left to global allocation, which gives the
+ * The active-jobs row is listed while any proposition is dispatched and the
+ * completed-jobs row once any proposition is completed; each draws
+ * WLDCORE_TEXT_ID_PROPOSITION_CATEGORY_ROW_FIRST + row. The Brave Story menu
+ * is hidden underneath. The cursor is restored from
+ * g_wldcore_proposition_category_saved_cursor (reset when out of range).
+ *
+ * `value` holds the cursor and then the reloaded main-window index: as one
+ * multi-set variable it is left to global allocation, which gives the
  * target's v1/v0 assignment in the tail. `unused` reproduces the 0x58 frame.
  */
 static void wldcore_menu_push_proposition_category_level(void) {

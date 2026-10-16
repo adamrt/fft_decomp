@@ -31,10 +31,14 @@
 
 static void wldcore_advance_brave_story_birthdays(void);
 
-/* Streams CD-resident image chunks to VRAM through a retrying state machine.
+/* One step of the CD stream that loads an image file straight into VRAM (the
+ * map texture WLDTEX.TM2): set double speed, seek, then read the sectors into
+ * the two 2048-byte halves of `destination` in turn. Each sector holds a
+ * count of rectangles, each a packed position, a packed size and its pixels,
+ * uploaded with LoadImage. A disc error or a stall restarts from the speed
+ * change at the current sector.
  *
- * The switch jump table occupies 0x80067000-0x80067020, at the start of
- * WLDCORE.BIN. */
+ * The switch's jump table is the first 32 bytes of WLDCORE.BIN. */
 void wldcore_file_poll_vram_image_stream(main_file_load_descriptor_t* stream) {
     RECT rect;
     u8 mode[8];
@@ -109,7 +113,8 @@ void wldcore_file_poll_vram_image_stream(main_file_load_descriptor_t* stream) {
         if (CdDataSync(1) != 0) {
             return;
         }
-        /* Each sector has a count, then pairs of packed 32-bit XY/WH values and 32-bit image data. */
+        /* Each sector holds a rectangle count, then per rectangle a packed
+         * position, a packed size and the pixels. */
         word = (stream->sector_index & 1) * 512;
         rect_count = ((u32*)stream->destination)[(stream->sector_index & 1) * 512];
         word++;
@@ -157,14 +162,12 @@ void wldcore_proposition_load_picture_data_set(s32 set) {
     }
 }
 
-/* g_wldcore_background_sector_offsets is a sector-offset table whose entry i is the start sector of set i
- * relative to the disc LBA below it, so entry i+1 minus entry i is that set's
- * sector count. Same shape as g_wldcore_sound_novel_script_sector_offsets and
- * g_wldcore_sound_novel_text_sector_offsets used by
- * wldcore_load_sound_novel_files. */
-
-/* Load set `set` into the shared scratch buffer, skipping the transfer when it
- * is already resident. */
+/* Load background set `set` of WLDBK.BIN into the shared scratch buffer,
+ * skipping the transfer when it is already resident.
+ *
+ * Entry i of g_wldcore_background_sector_offsets is the start sector of set i
+ * in the file, so entry i+1 minus entry i is that set's sector count; the
+ * other sector-offset tables in this file have the same shape. */
 void wldcore_gfx_load_background_set(s32 set) {
     if (set != g_wldcore_loaded_background_set) {
         file_wait_for_pending();
@@ -213,9 +216,8 @@ void wldcore_load_sound_novel_files(s32 chapter) {
     g_wldcore_loaded_message_block = -1;
 }
 
-/* Queue a one-sector load at BATTLE.BIN's sector with a null destination.
- * Called as the event transition level is pushed. */
-/* Target 0x80068d40. */
+/* Queue a one-sector read of BATTLE.BIN's first sector with no destination,
+ * which seeks the drive there while the event transition plays. */
 void wldcore_file_seek_to_battle_bin(void) {
     file_wait_then_build_header(&g_main_file_cd_state, g_main_battle_bin_sector, 1, 0);
 }
@@ -410,6 +412,8 @@ u32 wldcore_input_update_repeat(u32 buttons) {
             s32 old_counter;
             s32 last_next;
 
+            /* Spelled apart from the other arms: separate old and next values
+             * give this last arm the retail register assignment. */
             old_counter = *counter;
             if (g_wldcore_input_repeat_initial_delay < (*counter = last_next = old_counter + 1)) {
                 old_counter = last_next - g_wldcore_input_secondary_repeat_period;
@@ -532,6 +536,7 @@ s32 wldcore_fade_step_screen(void) {
             return 1;
         }
     }
+
     return 0;
 }
 
@@ -615,8 +620,8 @@ void wldcore_unpack_proposition_row(wldcore_proposition_fields_t* out, s32 index
 }
 
 /* Whether proposition `index` is offered at `location`: the row's location
- * (0 for any), then each condition its flags select. The status condition
- * tests bit 2 of script variable 0x360 + condition_value. */
+ * (0 for any), then each condition its flags select: a shop stock level, the
+ * current zodiac sign, or another proposition (condition_value) completed. */
 s32 wldcore_proposition_is_available_at_location(s32 index, s32 location) {
     wldcore_proposition_fields_t entry;
     s32 month;
@@ -654,8 +659,10 @@ s32 wldcore_proposition_is_available_at_location(s32 index, s32 location) {
 /*
  * Advance the calendar by 1 day and run the daily updates.
  *
- * Script variable 0x67 increases on March 21 and is capped at 99.
- * The target does not validate the incoming month or day.
+ * EVENT_SCRIPT_VAR_UNKNOWN_67 increases on 21 March (the start of Aries) and
+ * is capped at 99; wldcore_calendar_advance_days raises it at the year's end
+ * instead, without the cap. The target does not validate the incoming month
+ * or day.
  */
 void wldcore_calendar_advance_day(void) {
     s32 month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
@@ -683,7 +690,8 @@ void wldcore_calendar_advance_day(void) {
 }
 
 /* Converts a calendar date in place into a zodiac sign number (1 = Aries) and
- * the day within that sign. Invalid dates play sound effect 5 and reset to 1. */
+ * the day within that sign. An invalid date plays MAIN_SFX_INVALID and
+ * becomes 1/1. */
 void wldcore_calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
     s32 index = 0;
     s32 delta;
@@ -725,16 +733,16 @@ void wldcore_calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  * today gets a year older, capped at 99.
  *
  * Entry 0 is the player character. Its row in the birthday table is a
- * placeholder (1/1); the real birthday lives in script variables 0x5f (month)
- * and 0x60 (day), written when the player picks one at game start, so entry 0
- * is compared against those two variables and the remaining 63 entries
- * against the table. The table is a 64 x 2 array of month/day byte pairs
- * reached through the pointer cell at 0x80096a48 (it points at 0x80097028,
- * whose 128 bytes read as plausible month/day pairs throughout).
+ * placeholder (1/1); the real birthday lives in
+ * EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH and _DAY, written when the player picks
+ * one at game start, so entry 0 is compared against those two variables and
+ * the remaining 63 entries against the table. The table is a 64 x 2 array of
+ * month/day byte pairs (g_wldcore_brave_story_birthday_table) reached through
+ * the pointer g_wldcore_brave_story_birthdays.
  *
  * The age column is walked one byte at a time from index 1, which is why the
- * loop's base materializes as the biased constant 0x80057f35; entry 0 is the
- * only absolute access to 0x80057f34.
+ * loop's base materializes as g_main_brave_story_character_ages + 1; entry 0
+ * is the only absolute access to the array.
  */
 static void wldcore_advance_brave_story_birthdays(void) {
     const u8(*birthdays)[2] = g_wldcore_brave_story_birthdays;
@@ -825,7 +833,8 @@ void wldcore_calendar_read_date(u32* bits, s32 record, calendar_date_t* dest) {
 }
 
 /* Clear both frame buffers (256 x 480 at the VRAM origin) to black and, when
- * asked, zero the 0x7800-entry scratch buffer. */
+ * asked, blank the 256x240 backdrop image in g_wldcore_scratch_buffer
+ * (0x7800 words). */
 void wldcore_gfx_clear_vram_and_scratch(s32 clear_scratch) {
     RECT image_rect;
     s32 i;

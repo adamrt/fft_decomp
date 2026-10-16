@@ -16,9 +16,9 @@ void file_wait_then_build_header(main_file_load_descriptor_t* header, s32 sector
 }
 
 #ifdef FFT_WLDCORE
-/* Reads 134 sectors from LBA 0x11d28 into the wldcore scratch buffer unless
- * system flag 0x10000 is set, then spins the overlay's own poll routine until
- * the transfer completes.
+/* Read the map texture WLDTEX.TM2 (134 sectors) into g_wldcore_scratch_buffer,
+ * polling with wldcore_file_poll_vram_image_stream until the read completes.
+ * Skipped when the core is restarting (MAIN_SYSTEM_FLAG_RESTART).
  *
  * The target frame is 0x20 rather than the 0x18 this body needs: 16 bytes of
  * outgoing arguments plus the ra/s0 save pair leave 8 bytes of unreferenced

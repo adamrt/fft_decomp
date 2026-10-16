@@ -55,12 +55,14 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     } else {
         wldcore_reset_saved_record_fields(&g_wldcore_active_saved_record);
     }
+
     g_wldcore_active_saved_record.picture_render_index = render_record;
     g_wldcore_active_saved_record.buffer = &g_wldcore_save_slot_buffer;
     g_wldcore_active_saved_record.state_flags &= ~(WLDCORE_OPCODE_STATE_BRANCH | WLDCORE_OPCODE_STATE_FETCH);
     for (i = 0; i < 1; i++) {
         g_wldcore_sound_novel_local_flags[i] = 0;
     }
+
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
@@ -77,6 +79,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
             | (g_wldcore_active_saved_record.picture_y << 16) | (picture_id << 8);
         wldcore_opcode_load_picture();
     }
+
     transition = g_wldcore_active_saved_record.background_set;
     if (transition != -1) {
         g_wldcore_opcode_state.instruction = transition << 8;
@@ -84,6 +87,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
         g_wldcore_loaded_background_set = -1;
         wldcore_opcode_load_background_set();
     }
+
     if (g_wldcore_active_saved_record.music_selection & 0xFF) {
         wldcore_sound_enqueue_music_start(g_wldcore_active_saved_record.music_selection);
     } else {
@@ -91,6 +95,9 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
         wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_UNLOAD, 2);
         g_wldcore_active_saved_record.music_selection = 0;
     }
+
+    /* Bit 0x4000 marks an environment sound (wldcore_opcode_stop_music_and_play_sound);
+     * otherwise the id names a sound quad. */
     sound = g_wldcore_active_saved_record.sound_id;
     if (sound != 0) {
         if (sound & 0x4000) {
@@ -99,6 +106,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
             wldcore_sound_stop_weather_sfx_and_send_quad(sound);
         }
     }
+
     state_flags = &g_wldcore_active_saved_record.state_flags;
     if (*state_flags & WLDCORE_OPCODE_STATE_PARENT_WINDOWS_VISIBLE) {
         g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair.first_window]
@@ -107,14 +115,17 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
                                      .window_pair.second_window]
             .flags &= ~WORLD_RENDER_RECORD_HIDDEN;
     }
+
     if (*state_flags & WLDCORE_OPCODE_STATE_VALUE_DISPLAY) {
         g_wldcore_opcode_state.instruction = g_wldcore_active_saved_record.value_display_mode << 8;
         wldcore_opcode_start_pending_value_transition();
     }
+
     tint = g_wldcore_active_saved_record.brightness;
     if (tint == 0x100) {
         tint = 0xFF;
     }
+
     g_wldcore_screen_fade_state.boxes[1].r = tint;
     g_wldcore_screen_fade_state.boxes[1].g = tint;
     g_wldcore_screen_fade_state.boxes[1].b = tint;
@@ -163,22 +174,23 @@ static void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record) {
     record->brightness = 0x30;
 }
 
-/* Runs the world-script interpreter until the active record yields. Each turn
- * refreshes the pending script sounds from script variables 0x5c-0x5e, then:
+/* Runs the sound novel's script until it yields. Each turn plays the sounds
+ * pending in the three PENDING script variables and steps the countdown,
+ * then:
  *
- *   flag 0x02 (branch armed) marks the branch's saved-data bit, advances to the
- *   next section, repoints the 32-bit instructions at that section's offset in
- *   the save-slot buffer, and - for the first five maps - publishes the whole
- *   record into g_main_saved_records[g_wldcore_saved_record_index];
+ *   BRANCH marks the reached section's saved-data bit (novel * 256 +
+ *   section), moves on to the next section, points the instructions at that
+ *   section's offset in the save-slot buffer and, for the five saved novels,
+ *   copies the whole record into g_main_saved_records[g_wldcore_saved_record_index];
  *
- *   flag 0x04 (fetch pending) loads the next 32-bit instruction and advances the
- *   32-bit element index, arming flag 0x10;
+ *   FETCH loads the next 32-bit instruction and advances the word index,
+ *   setting FETCHED for the handler's first call;
  *
  *   the opcode byte then selects a handler from g_wldcore_opcode_handlers.
  *
- * The turn loop ends once the handler leaves flag 0x08 (yield) or 0x20 (abort)
- * set. Returns zero when the script aborted, which is how the caller at
- * 0x8007c2d0 tests it; it also clears the yield flag on the way out.
+ * The turn loop ends once a handler sets YIELD or END. Returns 0 when the
+ * script has ended, which is how wldcore_menu_step_sound_novel_level tests
+ * it; it also clears YIELD on the way out.
  *
  * The record holds the loaded script's section-offset table. */
 s32 wldcore_script_run_until_yield(void) {
@@ -363,8 +375,8 @@ extern s32 g_wldcore_sound_novel_countdown_frames_reset;
 static s32 wldcore_sound_novel_update_countdown_timer(void) {
     s32 elapsed;
     s32 remaining;
+    s32 minutes;
     s32 hours;
-    s32 days;
 
     if (g_wldcore_sound_novel_countdown_frames == -1) {
         if (thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) != 0) {
@@ -382,11 +394,11 @@ static s32 wldcore_sound_novel_update_countdown_timer(void) {
         g_wldcore_sound_novel_countdown_elapsed = elapsed;
         remaining = g_wldcore_sound_novel_countdown_frames - elapsed;
         if (g_wldcore_context_value_display_mode == WLDCORE_VALUE_DISPLAY_PLAY_TIME) {
-            days = remaining / 216000;
-            hours = remaining / 3600;
-            g_wldcore_displayed_numeric_value_secondary = hours - days * 60;
-            g_wldcore_displayed_numeric_value_tertiary = remaining / 60 - hours * 60;
-            g_wldcore_displayed_numeric_value = days % 24;
+            hours = remaining / 216000;
+            minutes = remaining / 3600;
+            g_wldcore_displayed_numeric_value_secondary = minutes - hours * 60;
+            g_wldcore_displayed_numeric_value_tertiary = remaining / 60 - minutes * 60;
+            g_wldcore_displayed_numeric_value = hours % 24;
         }
         if (g_wldcore_sound_novel_countdown_frames == elapsed) {
             world_thread_request_stop(WLDCORE_THREAD_SLOT_MESSAGE);
@@ -414,10 +426,10 @@ void wldcore_opcode_nop(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
-/* Start thread 14 on operand_0 | 0x8800 (as
- * wldcore_opcode_start_text_thread does with the opcode operand), then push
- * operand_0 onto the four-entry history
- * g_wldcore_active_saved_record.text_history_0..3. */
+/* Sound-novel opcode 0x03: show message byte 1 of the novel's text
+ * (TEXT_ID_WORLD_MESSAGE_BASE | byte 1) in the message box, as
+ * wldcore_opcode_start_text_thread does, then push it onto the four-entry
+ * history g_wldcore_active_saved_record.text_history_0..3. */
 void wldcore_opcode_start_text_thread_and_push_history(void) {
     u16 history_1;
     u16 history_2;
@@ -474,9 +486,9 @@ void wldcore_opcode_branch_if_dialog_option_equal(void) {
     wldcore_opcode_branch_if_dialog_option(1);
 }
 
-/* Branches the sound-novel script to section operand_0 when the
- * selected dialog option equals operand byte 2 (or differs from it, when `branch_if_equal` is 0); otherwise raises
- * state flag 4. */
+/* Branches the sound-novel script to section byte 1 when the selected dialog
+ * option equals byte 2 (or differs from it, when `branch_if_equal` is 0);
+ * otherwise fetches the next instruction. */
 static void wldcore_opcode_branch_if_dialog_option(s32 branch_if_equal) {
     u8 operand = (g_wldcore_active_saved_record.instruction >> 16);
 
@@ -519,9 +531,10 @@ void wldcore_opcode_wait_frames(void) {
     }
 }
 
-/* World-script opcode: loads picture operand_0 through 0x80068ab4, places
- * its render record at (operand_2 - 0x80, operand_1 - 0x78), uploads the
- * TIM's pixels and CLUT, and binds the render record to the VRAM image. */
+/* Sound-novel opcode: loads picture byte 1 through
+ * wldcore_proposition_load_picture_data_set, places its render record at
+ * (byte 3 - 0x80, byte 2 - 0x78), uploads the TIM's pixels and CLUT, and
+ * binds the render record to the VRAM image. */
 void wldcore_opcode_load_picture(void) {
     GsIMAGE image;
     RECT bounds;
@@ -566,9 +579,8 @@ void wldcore_opcode_hide_picture(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH | WLDCORE_OPCODE_STATE_YIELD;
 }
 
-/* Script opcode: operand byte 0 sets (non-zero) or clears state flag 0x40
- * and shows or hides both windows of the parent menu level (window flag
- * 0x10), then sets state flag 0x04. */
+/* Sound-novel opcode: a nonzero byte 1 shows the novel level's two button
+ * windows and records PARENT_WINDOWS_VISIBLE, zero hides them and clears it. */
 void wldcore_opcode_set_parent_windows_visible(void) {
     if ((u8)(g_wldcore_opcode_state.instruction >> 8) != 0) {
         g_wldcore_opcode_state.state_flags |= WLDCORE_OPCODE_STATE_PARENT_WINDOWS_VISIBLE;
@@ -627,9 +639,9 @@ void wldcore_opcode_branch_if_savedata_bit_set(void) {
     wldcore_opcode_branch_if_savedata_bit(1);
 }
 
-/* Script branch on a save-data bit selected by a 16-bit operand: when the
- * bit equals the expected value the branch target byte is armed at 0x800d484e
- * with state flag 0x02, otherwise only flag 0x04 is raised. */
+/* Branch to section byte 3 when bit (byte 1 << 8 | byte 2) of
+ * g_main_saved_data_bits equals `expected`; otherwise fetch the next
+ * instruction. */
 static void wldcore_opcode_branch_if_savedata_bit(s32 expected) {
     u32* instruction = &g_wldcore_opcode_state.instruction;
     u16 flags;
@@ -656,10 +668,8 @@ void wldcore_opcode_branch_if_saved_bit_set(void) {
     wldcore_opcode_branch_if_saved_bit(1);
 }
 
-/* Script branch on a bit of the second save-data 32-bit array selected by the
- * single operand byte: when the bit equals the expected value the branch
- * target byte is armed at 0x800d484e with state flag 0x02, otherwise only
- * flag 0x04 is raised. */
+/* Branch to section byte 2 when bit byte 1 of g_main_secondary_saved_data_bits
+ * equals `expected`; otherwise fetch the next instruction. */
 static void wldcore_opcode_branch_if_saved_bit(s32 expected) {
     u32* instruction = &g_wldcore_opcode_state.instruction;
     u16 flags;
@@ -685,10 +695,8 @@ void wldcore_opcode_branch_if_local_flag_set(void) {
     wldcore_opcode_branch_if_local_flag(1);
 }
 
-/* Script branch on a bit of the world-local bit array at 0x800d4564 selected
- * by the single operand byte: when the bit equals the expected value the
- * branch target byte is armed at 0x800d484e with state flag 0x02, otherwise
- * only flag 0x04 is raised. */
+/* Branch to section byte 2 when bit byte 1 of g_wldcore_sound_novel_local_flags
+ * equals `expected`; otherwise fetch the next instruction. */
 static void wldcore_opcode_branch_if_local_flag(s32 expected) {
     u32* instruction = &g_wldcore_opcode_state.instruction;
     u16 flags;
@@ -842,7 +850,9 @@ void wldcore_opcode_set_sound_mode(void) {
     g_wldcore_state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
-/* The double negation keeps the native counter/delta add operand order. */
+/* Sound-novel opcode: branch to section byte 3 when the counter plus its
+ * pending delta, clamped to 0..0xffff, equals the 16-bit operand in bytes 1-2.
+ * The double negation keeps the native counter/delta add operand order. */
 void wldcore_opcode_branch_if_equal(void) {
     s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
@@ -864,7 +874,7 @@ void wldcore_opcode_branch_if_equal(void) {
     }
 }
 
-/* The double negation keeps the native counter/delta add operand order. */
+/* As wldcore_opcode_branch_if_equal, branching when the values differ. */
 void wldcore_opcode_branch_if_not_equal(void) {
     s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
@@ -886,7 +896,8 @@ void wldcore_opcode_branch_if_not_equal(void) {
     }
 }
 
-/* The double negation keeps the native counter/delta add operand order. */
+/* As wldcore_opcode_branch_if_equal, branching when the counter is below the
+ * operand. */
 void wldcore_opcode_branch_if_less(void) {
     s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
@@ -908,7 +919,8 @@ void wldcore_opcode_branch_if_less(void) {
     }
 }
 
-/* The double negation keeps the native counter/delta add operand order. */
+/* As wldcore_opcode_branch_if_equal, branching when the counter is above the
+ * operand. */
 void wldcore_opcode_branch_if_greater(void) {
     s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
@@ -982,15 +994,11 @@ void wldcore_opcode_fade_screen_in(void) {
     *flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
-/* Opcode handler 42 of the table at 0x8009ecfc, immediately after
- * wldcore_opcode_fade_screen_in. Drains the GPU and waits a frame, then either
- * arms the full-screen white overlay (sortbox color 0xff/0xff/0xff, state bit
- * 3 set, transfer bits cleared, state flag 0x100 set, menus blacked out) or
- * tears it down again (color cleared, state bits 0/1/3 cleared, flag 0x100
- * cleared, menus back to neutral 0x80 brightness). The operand byte selects:
- * zero arms it, non-zero clears it. boxes[0].r/green/blue are the cataloged
- * fields at g_wldcore_screen_fade_state+0x24..0x26, gating the draw in
- * wldcore_fade_draw_screen_overlays.
+/* Sound-novel opcode 42 of g_wldcore_opcode_handlers. Drains the GPU and
+ * waits a frame, then with byte 1 zero puts up the full-screen white overlay
+ * (fade box white and visible, any fade stopped, WHITE_OVERLAY recorded, the
+ * menus blacked out), or otherwise takes it down again (box black and hidden,
+ * menus back to neutral 0x80 brightness). Yields for the frame.
  *
  * The world_menu_set_brightness call and the 0xc store are written once per
  * arm; jump.c cross-jumps the common tail from the g_wldcore_active_saved_record.state_flags store
@@ -1026,7 +1034,9 @@ void wldcore_opcode_set_white_screen_overlay(void) {
     *flags = *flags | (WLDCORE_OPCODE_STATE_FETCH | WLDCORE_OPCODE_STATE_YIELD);
 }
 
-/* Each block takes its own pointer local so the flag address is materialized
+/* Sound-novel opcode: yield each frame until Circle is pressed.
+ *
+ * Each block takes its own pointer local so the flag address is materialized
  * twice, as in the target. */
 void wldcore_opcode_wait_for_circle_press(void) {
     if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) != 0) {
@@ -1043,10 +1053,8 @@ void wldcore_opcode_wait_for_circle_press(void) {
     }
 }
 
-/* Sound-novel opcode: stop the weather sound and play sound operand 0. A
- * nonzero operand 1 also records the sound so a restored reading replays
- * it. */
-/* Target 0x8008c7ac. */
+/* Sound-novel opcode: stop the weather sound and play sound quad byte 1. A
+ * nonzero byte 2 also records the sound so a restored reading replays it. */
 void wldcore_opcode_play_sound_effect_quad(void) {
     char unused[8];
     s32 sound_id;
@@ -1123,7 +1131,8 @@ void wldcore_opcode_stop_pending_music(void) {
         state->flags &= ~WLDCORE_AUDIO_MUSIC_PLAYING;
         main_sound_stop_current_music();
         main_sound_unload_scenario_mus(*music >> 8);
-        /* Indexed one 32-bit value above the table wldcore_sound_change_scenario_music fills. */
+        /* Retail bug: wldcore_sound_change_scenario_music records the track at
+         * tracks[slot - 1], but this clears tracks[slot], one entry past it. */
         tracks = state->tracks;
         tracks[*music >> 8] = 0;
         g_wldcore_audio_queue.current_slot = 0;
@@ -1167,10 +1176,9 @@ void wldcore_opcode_wait_for_fade(void) {
     }
 }
 
-/* Shift the four-entry history g_wldcore_sound_novel_text_history_0..66 down one slot and push
- * operand_0 at the end (same shape as
- * wldcore_opcode_start_text_thread_and_push_history). */
-/* Target 0x8008cb30. */
+/* Sound-novel opcode: shift the four-entry history
+ * g_wldcore_sound_novel_text_history_0..3 down one slot and push byte 1 at
+ * the end (same shape as wldcore_opcode_start_text_thread_and_push_history). */
 void wldcore_opcode_push_operand_history(void) {
     u16 history_1 = g_wldcore_sound_novel_text_history_1;
     u8 new_entry = (g_wldcore_active_saved_record.instruction & 0xff00) >> 8;

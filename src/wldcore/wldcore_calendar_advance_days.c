@@ -12,19 +12,20 @@
 /*
  * Advance the calendar by a script-requested number of days.
  *
- * The only caller passes script variable 0x54 (DATE_ADVANCE). Whole years
- * are added to script variable 0x67 and to every brave-story age; the
- * remaining days move the month/day variables forward, adding one more to
- * 0x67 when the day-of-year index passes 365. A character whose birthday
- * falls within the remaining days gains a year, and ages are capped at 99.
- * Entry 0 is the player character, whose birthday lives in script variables
- * 0x5f (month) and 0x60 (day), as in wldcore_advance_brave_story_birthdays.
+ * The only caller passes EVENT_SCRIPT_VAR_DATE_ADVANCE. Whole years are added
+ * to EVENT_SCRIPT_VAR_UNKNOWN_67 and to every Brave Story age;
+ * the remaining days move the month/day variables forward, adding one more
+ * year when the day of the year passes 365. A character whose birthday falls
+ * within the remaining days gains a year, and ages are capped at 99. Entry 0
+ * is the player character, whose birthday lives in the
+ * EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH and _DAY variables, as in
+ * wldcore_advance_brave_story_birthdays.
  *
- * Open propositions complete when elapsed plus the advanced days reaches the
- * assigned duration (elapsed is set to the duration); otherwise flag 0x02
- * completes them with elapsed incremented once, and the rest keep their
- * elapsed count unchanged. Nonzero six-bit proposition countdowns drop by the
- * advanced days, floored at 0, keeping their high 2 bits.
+ * Every active proposition not yet returned returns when its elapsed days plus
+ * the advanced days reach its assigned days (elapsed becomes the assigned
+ * count); a recalled one returns with one more elapsed day; the rest keep
+ * counting. Each proposition's days until it is offered again drop by the
+ * advanced days, floored at 0, keeping its failure bits.
  *
  * The birthday table's element type must not be const: a const element makes
  * the reads unchanging, and the scheduler then hoists the second table read
@@ -58,6 +59,8 @@ void wldcore_calendar_advance_days(s32 days) {
             month = birthdays[i][0];
             day = birthdays[i][1];
         }
+        /* Only birthdays later in this year count: an advance that runs past
+         * 31 December misses those early in the new year (retail quirk). */
         until_birthday = unit_birthday_calculate_day_of_year(month, day) - today;
         if (until_birthday > 0 && days >= until_birthday) {
             g_main_brave_story_character_ages[i] += 1;
@@ -66,6 +69,7 @@ void wldcore_calendar_advance_days(s32 days) {
             g_main_brave_story_character_ages[i] = 99;
         }
     }
+
     today += days;
     if (today >= 365) {
         script_set_variable(EVENT_SCRIPT_VAR_UNKNOWN_67, script_get_variable(EVENT_SCRIPT_VAR_UNKNOWN_67) + 1);
@@ -74,6 +78,7 @@ void wldcore_calendar_advance_days(s32 days) {
     wldcore_calendar_calculate_month_and_day(today, &month, &day);
     script_set_variable(EVENT_SCRIPT_VAR_MONTH, month);
     script_set_variable(EVENT_SCRIPT_VAR_DAY, day);
+
     for (i = 0; i < g_main_save_proposition_count; i++) {
         if (!(g_main_active_propositions[i].flags & WLDCORE_PROPOSITION_PROGRESS_RETURNED)) {
             if (g_main_active_propositions[i].elapsed_days + days >= g_main_active_propositions[i].assigned_days) {
@@ -85,6 +90,7 @@ void wldcore_calendar_advance_days(s32 days) {
             }
         }
     }
+
     counter = g_main_proposition_states;
     do {
         if (*counter & WLDCORE_PROPOSITION_STATE_DAYS_MASK) {
@@ -96,5 +102,5 @@ void wldcore_calendar_advance_days(s32 days) {
                 | (day & WLDCORE_PROPOSITION_STATE_DAYS_MASK);
         }
         counter++;
-    } while ((s32)counter < (s32)(g_main_proposition_states + 96)); /* Target uses signed SLT. */
+    } while ((s32)counter < (s32)(g_main_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
 }

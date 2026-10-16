@@ -40,6 +40,18 @@ static void open_script_update_timing_and_record_values(void);
 static void open_script_update_xa_audio(void);
 static s32 open_text_decode_hex_digit(s32 character);
 
+/* The new-game prologue's pictures are 210x180, at rows 43 to 222 of the
+ * 256-pixel-wide frame image. */
+#define OPEN_IMAGE_WIDTH      210
+#define OPEN_IMAGE_HEIGHT     180
+#define OPEN_IMAGE_ROW_STRIDE 256
+
+/* A 256x240 16-bit frame image in 32-bit words. */
+#define OPEN_FRAME_IMAGE_WORDS (256 * 240 / 2)
+
+/* Each OPNTEX frame occupies 23 * 0x800 bytes of the loaded data. */
+#define OPEN_OPNTEX_FRAME_SECTORS 23
+
 /* OPEN twin of wldcore_window_init_vram_render_record for the 56-byte records: it keeps
  * the VRAM position instead of a texture page and also clears the 8-bit CLUT flag.
  * Nothing in OPEN.BIN calls it. */
@@ -153,8 +165,8 @@ void open_menu_start_music_test_controller(void) {
 /* Runs the hidden Music Test menu.
  *
  * Circle fades out any current track and queues the selected entry's music.
- * Cross stops playback or, when idle, closes the menu, reloads OPENBK and
- * returns to the previous controller. Select opens the thread-2 text window
+ * Cross stops playback or, when idle, closes the menu, reloads OPNBK image 0
+ * and returns to the title menu. Select opens the thread-2 text window
  * on text id 0xC800 + entry: the list shows text 0xC000 + entry, section 24
  * of OPEN.LZW (the 96 track titles), and Select the same entry of section 25
  * (the composers' comments); both are still the Japanese text in this
@@ -202,6 +214,8 @@ void open_menu_update_music_test(open_controller_record_t* record) {
             open_gfx_start_overlay_fade_in(0x20);
         }
     } else if (state->delay != 0) {
+        /* A queued change: once the old track has faded, release its slot and
+         * open the new one, which starts on a later frame. */
         if (--state->delay == 0) {
             if (state->music_id != 0) {
                 if (state->music_slot != 0) {
@@ -217,6 +231,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
             }
         }
     } else {
+        /* Idle: release a track that has finished on its own, then take input. */
         if (state->music_slot != 0 && suzuki_smd_is_music_playing(g_open_music_test_sound_handle) == 0) {
             main_sound_unload_scenario_mus(state->music_slot);
             state->music_slot = 0;
@@ -329,7 +344,7 @@ void open_movie_start_fftst_or_skip_controller(open_controller_record_t* unused_
 }
 
 /* New Game on the title menu. With a memory card in either slot the new-game
- * prologue starts at once. With none the frame image (30,720 32-bit values) is saved to
+ * prologue starts at once. With none the frame image is saved to
  * g_open_work_buffer_0 and blanked, animation 0x12 is shown on the black screen
  * and the title-exit controller (handler 12) is pushed: Cross returns to the
  * title menu, Circle or Start starts the prologue anyway. */
@@ -340,19 +355,19 @@ void open_title_select_new_game(void) {
     s32 record;
     point32_t* position;
     s32 controller;
-    s32 _card_status;
+    s32 card_present;
     s32 frame_padding[2];
 
-    _card_status = open_card_check_slots();
+    card_present = open_card_check_slots();
     index = 0;
-    if (_card_status != 0) {
+    if (card_present != 0) {
         open_title_start_new_game_transition();
         return;
     }
 
     source = g_open_file_destination;
     destination = (s32*)g_open_work_buffer_0;
-    for (; index < 30720; index++) {
+    for (; index < OPEN_FRAME_IMAGE_WORDS; index++) {
         *destination = *source;
         *source = 0;
         source++;
@@ -402,7 +417,7 @@ void open_title_update_card_warning(open_controller_record_t* record) {
             source = (s32*)g_open_work_buffer_0;
             g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
             destination = g_open_file_destination;
-            for (index = 0; index < 0x7800; index++) {
+            for (index = 0; index < OPEN_FRAME_IMAGE_WORDS; index++) {
                 destination[index] = source[index];
             }
             open_title_push_menu_controller(0);
@@ -548,9 +563,11 @@ s32 open_gfx_update_transition_sequence(void) {
             (*step)++;
         }
     }
+
     if (++g_open_gfx_transition.timer == g_open_gfx_transition.line_widths[g_open_gfx_transition.step - 1]) {
         g_open_gfx_transition.flags |= OPEN_GFX_TRANSITION_NEXT_STEP;
     }
+
     if (g_open_gfx_transition.flags & OPEN_GFX_TRANSITION_SKIP) {
         if (g_open_gfx_transition.intensity != 0) {
             g_open_gfx_transition.intensity -= 2;
@@ -558,6 +575,7 @@ s32 open_gfx_update_transition_sequence(void) {
             return 0;
         }
     }
+
     open_gfx_draw_transition_line_strips(g_open_gfx_transition.intensity);
     return 1;
 }
@@ -666,9 +684,6 @@ static void open_gfx_draw_transition_line_strips(s32 intensity) {
     }
 }
 
-#define OPEN_IMAGE_COPY_WIDTH  210
-#define OPEN_IMAGE_COPY_HEIGHT 180
-
 /* Prepare the crossfade of the new-game prologue's picture to OPNBK image
  * file_index + 2.
  *
@@ -705,10 +720,10 @@ static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
 
     row = 0;
     source_row = 0;
-    for (; row < OPEN_IMAGE_COPY_HEIGHT; row++) {
+    for (; row < OPEN_IMAGE_HEIGHT; row++) {
         column = 0;
-        source_offset = row << 8;
-        while (column < OPEN_IMAGE_COPY_WIDTH) {
+        source_offset = row * OPEN_IMAGE_ROW_STRIDE;
+        while (column < OPEN_IMAGE_WIDTH) {
             destination_index = source_row + column;
             source_index = source_offset + column++;
             destination_index <<= 1;
@@ -718,16 +733,13 @@ static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
             *(u16*)(destination_index + (u32)g_open_gfx_image_copy_destination_buffer) = value;
         }
         g_open_gfx_image_copy_row_flags[row + 2] = 0;
-        source_row += OPEN_IMAGE_COPY_WIDTH;
+        source_row += OPEN_IMAGE_WIDTH;
     }
 
     g_open_gfx_image_copy_row_flags[0] = 0;
     g_open_gfx_image_copy_row_flags[1] = 0;
 }
 
-#define OPEN_IMAGE_WIDTH             210
-#define OPEN_IMAGE_HEIGHT            180
-#define OPEN_IMAGE_ROW_STRIDE        256
 #define OPEN_IMAGE_BLEND_BAND_HEIGHT 17
 #define OPEN_IMAGE_BLEND_END_ROW     (OPEN_IMAGE_HEIGHT + OPEN_IMAGE_BLEND_BAND_HEIGHT)
 
@@ -936,6 +948,8 @@ static s32 open_script_run_frame(void) {
     return 1;
 }
 
+/* base advanced by byte_offset bytes. Retail keeps this as a call: the
+ * dispatcher and opcode 1 reach script data through it. */
 static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset) {
     return base + byte_offset;
 }
@@ -991,8 +1005,9 @@ void open_script_draw_text_records(u32* otag, s32 graphics_buffer_index) {
  *
  * Claims the first free script record, then walks the text until '@' or 42
  * glyphs. Escape characters followed by one hex digit select the font
- * ('$'), CLUT ('^'), pen adjustments ('<', '>', '+'), the record field at
- * 0x08 ('/') and wide-glyph mode ('*'). Every other character emits a glyph
+ * ('$'), the CLUT ('^'), the skew ('/') and wide-glyph mode ('*'), or move
+ * the pen left ('<') or right ('>') by the digit, or to the digit times 20
+ * ('+'). Every other character emits a glyph
  * record and a POLY_FT4 in both graphics buffers. Returns the record index
  * plus 1, or 0 when all 16 records are busy.
  *
@@ -1025,9 +1040,11 @@ static s32 open_script_build_text_record(u8* text) {
             break;
         }
     }
+
     if (i == 16) {
         return 0;
     }
+
     index = i;
 
     g_open_script_state.records[index].flags = OPEN_SCRIPT_RECORD_ACTIVE;
@@ -1128,6 +1145,7 @@ static s32 open_script_build_text_record(u8* text) {
             }
         }
     }
+
     g_open_script_state.records[index].glyph_count = drawn;
     return index + 1;
 }
@@ -1453,7 +1471,7 @@ static void open_gfx_update_opntex_sequence(void) {
     }
 
     source = g_open_gfx_opntex_data;
-    source += frame * 23 * 512;
+    source += frame * OPEN_OPNTEX_FRAME_SECTORS * (0x800 / sizeof(u32));
     open_gfx_load_opntex_into_frame_buffer(source);
     g_open_script_state.dispatch.flags |= OPEN_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
     g_open_script_state.opntex.fade_elapsed_frames = 0;
@@ -1750,9 +1768,6 @@ void open_opcode_stop_xa_audio(s16* unused_entry) {
         open_sound_set_cd_mix_and_volume(0, 1);
     }
 }
-
-/* Each OPNTEX frame occupies 23 * 0x800 bytes of the loaded data. */
-#define OPEN_OPNTEX_FRAME_SECTORS 23
 
 /* Opcode 11: upload frame command[1] of the loaded OPNTEX data as the picture and
  * set its fade intensity to 0, which hides it. Four bytes. */

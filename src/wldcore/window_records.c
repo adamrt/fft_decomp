@@ -88,9 +88,10 @@ void open_gfx_clear_current_otag(void) {
 #endif
 
 #ifdef FFT_WLDCORE
-/* Dispatch a list of display objects to one of two handlers by object kind.
- * Objects with flags 0x18 are skipped, and the whole pass is suppressed while
- * system flag 0x400 is set. */
+/* Draw the listed display objects into the ordering table: ANIMATED objects
+ * through their animation sequence, IMAGE objects as one sprite. Objects with
+ * BLANK or HIDDEN set are skipped, and nothing is drawn while
+ * MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS is set. */
 void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
     void* object;
     s32* flags;
@@ -155,10 +156,18 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
  * part of the current cel into a libgs sprite primitive and sort it into the
  * ordering table.
  *
- * Flag 0x400 copies the object's color verbatim, otherwise the global fade
- * tint is applied. Flag 0x800, or system flag 0x08000000 being clear, steps the
- * frame counter. Flag 0x20 overrides the part's own blend mode with the
- * object's (flags 0xc0).
+ * UNTINTED uses the object's color as is, otherwise the global fade tint is
+ * applied. The frame counter steps unless MAIN_SYSTEM_FLAG_FREEZE_ANIMATION is
+ * set, or always with ANIMATE_WHILE_PAUSED. SEMI_TRANSPARENT replaces each
+ * part's own blend mode with the object's BLEND_RATE_MASK bits.
+ *
+ * Each part's first 32-bit word holds the world_sprite_part_t bit-fields.
+ * hidden, semi_transparent and blend_rate go into the attribute as they are;
+ * texture_flags moves down two bits to the flip and 8-bit attribute bits. The
+ * part's own palette_index is used when the object has no palette or
+ * use_part_palette is set. Retail adds the cel's CLUT x before shifting that
+ * field down, so the shift drops the cel's x origin and the CLUT x is just
+ * palette_index * 16 (OPEN's twin adds the origin after the shift).
  *
  * The parts are walked back to front as raw 32-bit element indices: the target spells the
  * subscript ((frame_count - i) * 2) | 1 into the cel's 32-bit array, which is the
@@ -204,6 +213,7 @@ void wldcore_gfx_draw_animated_display_object(world_animated_render_record_t* ob
     } else {
         wldcore_gfx_copy_color_with_tint(&object->color, &color);
     }
+
     sprite.r = color.r;
     sprite.g = color.g;
     sprite.b = color.b;
@@ -211,6 +221,7 @@ void wldcore_gfx_draw_animated_display_object(world_animated_render_record_t* ob
         || !(g_main_system_flags & MAIN_SYSTEM_FLAG_FREEZE_ANIMATION)) {
         object->anim_counter = object->anim_counter + 1;
     }
+
     /* A goto loop: as a for/while loop, GCC's loop pass hoists the 0xffff
      * constant into a register, which the target does not. */
 step_frame:
@@ -224,6 +235,7 @@ step_frame:
         }
         goto step_frame;
     }
+
     index = (sequence->frames + object->frame_index)->cel;
     cel = cels[index];
     /* Preserve the reverse 32-bit cursor; a part array changes address computation. */
@@ -259,6 +271,7 @@ step_frame:
         sprite.v = (words[index + 1] & 0xff0000) >> 16;
         palette = object->palette;
         if (palette == 0 || (words[index] & 0x08000000)) {
+            /* The cel's CLUT x is shifted out with the palette field (retail quirk). */
             sprite.cx = (clut_x + (words[index] & 0xff0000)) >> 12;
         } else {
             sprite.cx = clut_x + ((palette - 1) << 4);
@@ -279,11 +292,12 @@ step_frame:
 /* Convert one display object into a libgs sprite primitive and sort it into the
  * ordering table handed down by window_dispatch_record_list.
  *
- * Flag 0x004 selects the 8-bit color mode (attribute 0x01000000); flag 0x400 copies
- * the object's color verbatim, otherwise 0x80069718 applies the global fade
- * tint to it; flag 0x100 selects the animated path, where 0x8006b678 looks up
- * the frame rectangle for anim_counter/2 and the counter is then stepped, the
- * flag clearing itself once the halved counter reaches 4.
+ * 8BIT_CLUT selects the 8-bit texture mode (attribute 0x01000000). UNTINTED
+ * uses the object's color as is, otherwise wldcore_gfx_copy_color_with_tint
+ * applies the global fade tint. A nonzero palette picks the CLUT
+ * (palette - 1) * 16 pixels right of the record's. POP_IN draws the window
+ * growing: gfx_calculate_scaled_rectangle gives the centered part shown at
+ * step anim_counter / 2, and the flag clears itself after the full-size step.
  *
  * A field-to-field copy narrows the load to the store's mode at expand time;
  * routing the value through a named local of the field's own width does not,
@@ -305,23 +319,23 @@ static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_
     GsSPRITE sprite;
     RECT frame;
     CVECTOR color;
-    s32 center_x;
-    s32 center_y;
+    s32 clut_x;
+    s32 clut_y;
     s32 page;
-    s32 step;
+    s32 palette;
 
     if (object->flags & WORLD_RENDER_RECORD_8BIT_CLUT) {
         sprite.attribute = 0x01000000;
     } else {
         sprite.attribute = 0;
     }
-    center_x = object->clut.x;
-    sprite.cx = center_x;
-    center_y = object->clut.y;
-    sprite.cy = center_y;
-    step = object->palette;
-    if (step != 0) {
-        sprite.cx = object->clut.x + ((step - 1) << 4);
+    clut_x = object->clut.x;
+    sprite.cx = clut_x;
+    clut_y = object->clut.y;
+    sprite.cy = clut_y;
+    palette = object->palette;
+    if (palette != 0) {
+        sprite.cx = object->clut.x + ((palette - 1) << 4);
     }
     if (object->flags & WORLD_RENDER_RECORD_UNTINTED) {
         color = object->color;
@@ -487,8 +501,8 @@ loop:
 /* Emits one 56-byte render record as a DR_MODE + SPRT pair from the shared
  * 32-entry per-buffer primitive pool at g_open_gfx_sprite_primitive_pool.
  *
- * Flags bit 2 and bits 6-7 select the texture page, bit 5 enables
- * semi-transparency, and bit 8 runs the pop-in scale: pop_in_step counts the
+ * 8BIT_CLUT and BLEND_RATE_MASK select the texture page mode, SEMI_TRANSPARENT
+ * enables semi-transparency, and POP_IN runs the pop-in scale: pop_in_step counts the
  * animation, gfx_calculate_scaled_rectangle turns half of it into a
  * shrunken source rectangle, and the flag clears once the record is at full
  * size. A nonzero palette picks the CLUT (palette - 1) * 16 pixels right of tail.clut.

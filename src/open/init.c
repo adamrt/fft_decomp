@@ -98,6 +98,7 @@ void open_gfx_init_screen_environments(s32 clear_first) {
     if (clear_first != 0) {
         SetDispMask(0);
     }
+
     if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN) {
         SetDefDrawEnv(&g_open_gfx_screen_environments[0].draw, 0, 0, 0x140, 0xf0);
         SetDefDispEnv(&g_open_gfx_screen_environments[0].disp, 0, 0xf0, 0x140, 0xf0);
@@ -156,10 +157,14 @@ void open_gfx_init_screen_environments(s32 clear_first) {
             rect.h = 0x1e0;
         }
     }
+
     if (clear_first != 0) {
         ClearImage(&rect, 0, 0, 0);
         DrawSync(0);
     }
+
+    /* Retail tests a copy of clear_first here; testing the parameter again
+     * compiles differently. */
     put_envs = clear_first;
     if (put_envs != 0) {
         PutDrawEnv(&g_open_gfx_screen_environments[g_main_gfx_active_buffer_index].draw);

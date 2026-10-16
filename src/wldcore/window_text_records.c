@@ -13,7 +13,10 @@
 #endif
 
 #ifdef FFT_WLDCORE
-/* `point` is passed by value: GCC spills the two 32-bit register values to their
+/* Draw text entry `text_id` into `buffer`, render record `record_index`'s
+ * image, at `point`, with the record's width as the image stride.
+ *
+ * `point` is passed by value: GCC spills the two 32-bit register values to their
  * home slots before narrowing them into the origin record. */
 void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u32* buffer) {
     glyph_blit_t origin;
@@ -67,7 +70,8 @@ void open_text_measure_menu_image(s32 combined_text_index, size32_t* dimensions)
 #endif
 
 #ifdef FFT_WLDCORE
-/* Build and upload a render record, optionally drawing its text label first. */
+/* Build and upload a window render record, drawing text `text_id` inside it
+ * at (8, 8) first unless the id is 0, and start its pop-in animation. */
 void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode, s32 text_id, u32* image) {
     point32_t text_origin;
 
@@ -85,9 +89,8 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
 #ifdef FFT_OPENING
 #    define OPEN_MENU_TEXT_MARGIN 8
 
-/* Build and upload a window render record, drawing text combined_text_index
- * inside it at (8, 8) first unless the index is 0, and start its pop-in
- * animation. */
+/* Build and upload a window render record, drawing text `text_id` inside it
+ * at (8, 8) first unless the id is 0, and start its pop-in animation. */
 void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode, s32 text_id, u32* image) {
     /* The pair is stack-resident (0x18 / 0x1c) because it is passed by value,
      * which also lets the y store fill the beqz delay slot. */

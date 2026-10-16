@@ -157,7 +157,7 @@ void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_va
     g_wldcore_window_panel_number_state._unknown_04[0] = -1;
     g_wldcore_window_panel_number_state._unknown_04[1] = -1;
     g_wldcore_window_panel_number_state.on_change = wldcore_window_number_panel_noop_callback;
-    g_wldcore_list_entry_values[0] = g_wldcore_list_entry_values[1] = 0x7d0;
+    g_wldcore_list_entry_values[0] = g_wldcore_list_entry_values[1] = 2000;
     if (min < 10 && max < 10) {
         width = 1;
     } else {
@@ -169,10 +169,12 @@ void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_va
             width = 2;
         }
     }
+
     text_width = 0;
     if (text_id != 0) {
         text_measure_pixels(&text_width, &text_height, text_find_entry(text_id));
     }
+
     label_width = text_width + 0x18;
     width = (width * 6 + label_width) & 0xfffc;
     g_wldcore_window_panel_render_state.vram_origin.x = 0x200;
@@ -273,8 +275,9 @@ void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state
     wldcore_text_render_scrollable_window_page(state, state->page_start_row);
 }
 
-/* Initializes window record `index`: sets flags 0x810, stores its animation
- * sequence and OT priority, and restarts the animation. */
+/* Initializes window record `index` hidden and animating even while the map is
+ * frozen, with its animation sequence and OT priority, and restarts the
+ * animation. */
 static void wldcore_window_init_record(s32 index, s32 priority, s32 sequence) {
     g_wldcore_window_records[index].sequence = sequence;
     g_wldcore_window_records[index].priority = priority;
@@ -284,9 +287,14 @@ static void wldcore_window_init_record(s32 index, s32 priority, s32 sequence) {
 }
 
 /*
- * Per-frame scrollable text window handler.  State 0 waits for page, cancel or
- * confirm input, state 1 lets the player scroll one row at a time while confirm
- * is held, and state 2 auto-scrolls back to the page start.
+ * Per-frame scrollable text window handler. Returns 1 while the window stays
+ * open and 0 once it has closed.
+ *
+ * PAGING: Circle turns the page and Cross closes the window, as does turning
+ * past the last page; closing releases the four indicator records and the
+ * image record. Square switches to MANUAL, where Up and Down scroll back
+ * through the rows before the page, one row at a time, while Square is held.
+ * On release RETURN scrolls forward a row per frame until the page is back.
  *
  * The state 2 page-start path repeats the update call instead of jumping to
  * the shared tail: its argument copy is then a no-op against the incoming $a0,
@@ -309,6 +317,7 @@ s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* state) {
         wldcore_text_render_scrollable_window_page(state, state->scroll_row);
         return 1;
     }
+
     if (state->scroll_state == WLDCORE_TEXT_SCROLL_MANUAL) {
         if ((g_input_current_buttons & PSX_PAD_SQUARE) == 0) {
             state->scroll_state = WLDCORE_TEXT_SCROLL_RETURN;
@@ -334,6 +343,7 @@ s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* state) {
         wldcore_text_update_scroll_indicators(state);
         return 1;
     }
+
     if (state->scroll_state == WLDCORE_TEXT_SCROLL_PAGING) {
         if (g_wldcore_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
@@ -358,6 +368,7 @@ s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* state) {
         wldcore_text_update_page_prompt_visibility(state);
         return 1;
     }
+
     return 0;
 }
 
@@ -477,10 +488,11 @@ void wldcore_sound_enqueue_audio_command(wldcore_audio_command_e command, s32 va
 /* Services the audio command FIFO: dequeues the next command when idle and
  * runs the current one until it has to wait for loading or a fade.
  *
- * Commands: 1 loads and plays track `value & 0xff` into slot `value >> 8`,
- * 2 fades the current music out when the flag is set, 3 switches to the
- * current slot and fades in to `volume`, 4 unloads a slot (0 = current);
- * 0x10-0x12 wait for the load or the fade timer. The dispatch loop is a
+ * PLAY_MUSIC loads track `value & 0xff` into slot `value >> 8`, or just
+ * switches to it when the slot already holds that track. FADE_OUT fades the
+ * music out when it is playing, FADE_IN switches to the current slot and
+ * fades in to `volume`, and UNLOAD releases a slot (0: the current one); the
+ * WAIT commands wait for the load or count down the fade. The dispatch loop is a
  * backward goto: a `for (;;)` loop lets loop.c hoist the queue addresses
  * into saved registers, which the target never does. The if/else in case 4
  * keeps CSE from carrying the value's address across the join. Cases 2,
@@ -579,6 +591,7 @@ next:
         g_wldcore_audio_queue.music.flags |= WLDCORE_AUDIO_MUSIC_PLAYING;
         break;
     }
+
     goto next;
 }
 
@@ -592,9 +605,10 @@ void wldcore_sound_enqueue_music_start(s32 value) {
     wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 0x10);
 }
 
-/* Twin of file_wait_for_pending (0x800686c8) with the audio-queue depth
- * as the wait condition. The two 32-bit busy fields are read as g_wldcore_audio_queue members
- * rather than as separate scalars. */
+/* Twin of file_wait_for_pending with the audio queue as the wait condition:
+ * run frames until no command is queued or running. The two 32-bit busy
+ * fields are read as g_wldcore_audio_queue members rather than as separate
+ * scalars. */
 void wldcore_sound_wait_for_queue_drain(void) {
     while (g_wldcore_audio_queue.count != 0 || g_wldcore_audio_queue.current_command != WLDCORE_AUDIO_COMMAND_NONE) {
         main_file_poll_load(&g_main_file_cd_state);

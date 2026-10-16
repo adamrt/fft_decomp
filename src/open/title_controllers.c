@@ -904,6 +904,8 @@ static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     quad.h = 0x20;
     open_gfx_init_window_frame_record(index, quad, 0, (u16*)g_open_birthday_window_image);
 
+    /* The month names are text entries 0xB803 (January) to 0xB80E. Entry 0xB801
+     * prints the substituted month name and 0xB802 the substituted day. */
     text_id = menu->month + 0xB802;
     text_measure_pixels(&width, &height, text_find_entry(text_id));
 
@@ -1147,6 +1149,7 @@ void open_birthday_handle_confirmation_input(open_controller_record_t* record) {
 
     if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED)
         && !(g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE)) {
+        /* Release both birthday controllers and their six render records. */
         g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         main_sound_unload_current_scenario_music();
         g_main_gfx_active_buffer_index = 1;
@@ -1162,6 +1165,7 @@ void open_birthday_handle_confirmation_input(open_controller_record_t* record) {
     if (buttons & PSX_PAD_CIRCLE) {
         main_sound_play_sfx(MAIN_SFX_CONFIRM);
         if (menu->selected_option == 0) {
+            /* The date controller sits below this one on the controller stack. */
             month = g_open_controller_records_next[g_open_current_controller_index - 2].birthday_date.month;
             day = g_open_controller_records_next[g_open_current_controller_index - 2].birthday_date.day;
             script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, month);
@@ -1177,6 +1181,7 @@ void open_birthday_handle_confirmation_input(open_controller_record_t* record) {
             g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             return;
         }
+        /* Release this controller's three render records and return to the date menu. */
         g_open_gfx_render_record_pointer_count -= 3;
         g_open_gfx_next_render_record_56 -= 1;
         g_open_gfx_next_render_record_36 -= 2;

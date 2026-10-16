@@ -41,7 +41,7 @@ static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSP
 static void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots, s32 restore);
 static void wldcore_menu_push_fixed_number_panel_level(void);
 static void wldcore_menu_push_focus_location_level(s32 dot_index);
-static void wldcore_menu_push_map_path_level(s32 path_id, s32 path_id_hi, s32 erase);
+static void wldcore_menu_push_map_path_level(s32 from, s32 to, s32 erase);
 static void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value);
 static void wldcore_menu_push_root_level(void);
 static void wldcore_menu_push_variable_list_level(void);
@@ -51,13 +51,15 @@ static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_se
 static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request);
 
 /* Draws the HUD numeric readout at the context-value display position, laid
- * out by g_wldcore_context_value_display_mode: 1 is the labeled, underlined
- * value (war funds), 2 the play time as hours, minutes and seconds with
- * separators, 0 and 3 a plain eight-digit value (3 under a small label
- * sprite) and 4 a labeled five-digit secondary value plus the mode-1 readout.
+ * out by g_wldcore_context_value_display_mode: FUNDS is the labeled,
+ * underlined war funds, PLAY_TIME hours, minutes and seconds with separators,
+ * PLAIN and LABELED an eight-digit value (LABELED under a small label sprite)
+ * and COST_AND_FUNDS a labeled five-digit secondary value plus the FUNDS
+ * readout.
  *
- * Case 3 falls through into case 0, so the case bodies are ordered 1, 2, 3, 0,
- * 4 to follow the jump table at 0x80067020. The color triple stores into
+ * LABELED falls through into PLAIN, so the case bodies are ordered FUNDS,
+ * PLAY_TIME, LABELED, PLAIN, COST_AND_FUNDS to follow the target's jump
+ * table. The color triple stores into
  * `separator` precede those into `sprite`. The position read back at the end
  * of case 4 is a plain 32-bit load narrowed by the store, where the chained
  * assignment before the switch reads only the low 16 bits. */
@@ -149,11 +151,10 @@ void wldcore_gfx_draw_context_value_display(GsOT* ot) {
     }
 }
 
-/* Draws one cursor sprite plus its underline into the ordering table, then
- * hands the sprite to 0x8006bd84 for the trailing decoration.
- *
- * The line is derived from the sprite's current position; the sprite origin is
- * then advanced by (4, 8) so the follow-up draws at the shifted position. */
+/* Draws the FUNDS readout: the 41x8 label sprite at texel (0x9c, 0x78) with a
+ * short black line under its right end, then g_wldcore_displayed_numeric_value
+ * in eight columns offset by (4, 8), through
+ * wldcore_gfx_draw_number_digits_with_fill. */
 static void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, GsLINE* line) {
     /* u16: the target reads GsSPRITE's short x/y with lhu. */
     u16 x;
@@ -183,15 +184,17 @@ static void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* spr
     wldcore_gfx_draw_number_digits_with_fill(g_wldcore_displayed_numeric_value, 8, sprite, ot, 0);
 }
 
-/* The target wraps `value / divisor` in ASPSX's zero and INT_MIN traps
- * (divcheck expansion). Splitting the division and the remainder into two
- * statements gives the target's order; `s32 saved_y` (not s16) makes the
- * saved y load `lh`. */
-
 /* Draws value right-aligned as digits glyphs, one 8x12 or 8x15 cell per
  * digit, stepping the sprite eight pixels right per column. Leading zeros are
  * skipped: a column only draws once the running divisor has dropped to or
- * below value, and the last column always draws. */
+ * below value, and the last column always draws. Digit d's glyph is at
+ * u 0xa8 + 8 * d; 0 to 5 are 12 pixels tall and 6 to 9 are 15, each placed so
+ * the glyphs share a bottom edge.
+ *
+ * The target wraps `value / divisor` in ASPSX's zero and INT_MIN traps
+ * (divcheck expansion). Splitting the division and the remainder into two
+ * statements gives the target's order; `s32 saved_y` (not s16) makes the
+ * saved y load `lh`. */
 static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
     s32 divisor = 1;
     s32 i;
@@ -246,6 +249,7 @@ static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSP
     for (; i < digits - 1; i++) {
         divisor *= 10;
     }
+
     for (i = 0; i < digits; i++) {
         if (value >= divisor || i == digits - 1) {
             digit = value / divisor;
@@ -329,12 +333,14 @@ void wldcore_gfx_draw_calendar_date(GsOT* ot) {
     wldcore_gfx_draw_animated_display_object(&request, ot);
 }
 
-/* Builds the world-map request block for the current entry at 0x800d0bb4 and
- * submits it, unless system flag 0x2000 suppresses it or no entry is active.
+/* Draws the name label of the selected location (g_wldcore_proposition_selected_entry,
+ * location + 1) over its map dot, unless MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER
+ * is set or no location is selected.
  *
- * The color is the 32-bit shade value at 0x8009eef4 replicated across the three
- * channels and tinted in place by 0x80069718. sequence is written after that
- * call because the target reloads 0x800d0bb4 there. */
+ * The color is g_wldcore_location_marker_shade replicated across the three
+ * channels and tinted in place by wldcore_gfx_copy_color_with_tint. sequence
+ * is written after that call because the target reloads the selection
+ * there. */
 void wldcore_proposition_submit_marker_request(GsOT* ot) {
     world_animated_render_record_t request;
     CVECTOR color;
@@ -570,19 +576,21 @@ void wldcore_menu_dispatch_pending_script_requests(void) {
     }
 }
 
-/* Per-frame step of the world map cursor.
+/* Per-frame step of the world map cursor (the root level).
  *
- * While the projection zoom animation (g_wldcore_map_zoom_motion.flags
- * bit 0) is running it interpolates the origin and the projection scale over
- * `duration` frames, in one direction or the other according to bit 1, and
- * raises system flag 0x2 plus projection flag 0x1 each frame.
+ * While route travel runs it only keeps the map redrawn. While a zoom runs
+ * (WLDCORE_PROJECTION_MOTION_ACTIVE) it interpolates the view origin and the
+ * projection scale over `duration` frames, out (ZOOMED_OUT) or back in, and
+ * redraws the map each frame.
  *
- * Otherwise it handles input: confirm (0x20) either walks the marker to
- * another location (0x8008e2bc), opens that location's menu (0x8006faf0) or,
- * with no dot under the cursor, hides the cursor window and hands off to
- * 0x8006d7f4; 0x810 closes the level through 0x8006e0fc; 0x100 opens the
- * location's help message; 0xC starts or ends the zoom animation; holding
- * 0x80 swaps the cursor window for the wide-view window. With no modal state
+ * Otherwise it handles input: Circle on the marker's own dot opens its
+ * location menu, on another dot walks the marker there
+ * (wldcore_location_process_entry), and off every dot hides the cursor and
+ * pans back to the marker (wldcore_menu_push_focus_location_level); Triangle
+ * or Start opens the entry window (wldcore_menu_push_entry_window_level);
+ * Select on a dot shows the location's help message (0x8000 + location) over
+ * a captured frame; L1 or R1 starts or reverses the zoom; holding Square
+ * swaps the cursor window for the wide-view window. With no modal state
  * it accelerates the two scroll axes, snaps the cursor toward the nearest dot
  * through wldcore_map_get_dot_snap_step, scrolls the projection origin when
  * the cursor approaches a screen edge, and finally clamps the cursor window to
@@ -865,6 +873,7 @@ finish:
         g_wldcore_proposition_selected_entry = hit;
         return;
     }
+
     g_wldcore_proposition_selected_entry = 0;
 }
 
@@ -885,11 +894,10 @@ static void wldcore_menu_push_focus_location_level(s32 dot_index) {
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
-/* Closes one menu level. While a projection move is active it advances the
- * move, sets projection-state flag 1 and system flag 2, and returns;
- * otherwise it pops the level, moves the parent level's window to the focused
- * dot's position (y - 4), clears system flag 0x2000, and dispatches the
- * parent level's handler.
+/* Step of the focus-location level. While the view pans it advances the pan
+ * and redraws the map; afterwards it pops the level, moves the parent level's
+ * window (the map cursor) onto the focused dot (y - 4), shows the location
+ * marker again and runs the parent's resume handler.
  *
  * The entry must be a struct pointer: the target hoists its reload above the
  * scalar g_main_system_flags store, which GCC only allows for an in-struct
@@ -915,17 +923,17 @@ void wldcore_map_step_projection_motion_then_pop_level(wldcore_menu_stack_record
     wldcore_menu_dispatch_resume_handler();
 }
 
-/* Start drawing or erasing a map path and hide the parent window until the
- * animation finishes. Indexed stores keep their named globals to preserve
- * the original address sequences. */
-static void wldcore_menu_push_map_path_level(s32 path_id, s32 path_id_hi, s32 erase) {
+/* Start drawing or erasing the map route between locations `from` and `to`
+ * and hide the parent window until the animation finishes. Indexed stores
+ * keep their named globals to preserve the original address sequences. */
+static void wldcore_menu_push_map_path_level(s32 from, s32 to, s32 erase) {
     s32 depth;
     s32 window_index;
 
-    wldcore_map_prepare_path_animation(path_id, path_id_hi);
+    wldcore_map_prepare_path_animation(from, to);
     depth = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[depth].path.path_id = path_id;
-    g_wldcore_menu_stack_records_next[depth].path.path_id_hi = path_id_hi;
+    g_wldcore_menu_stack_records_next[depth].path.path_id = from;
+    g_wldcore_menu_stack_records_next[depth].path.path_id_hi = to;
     g_wldcore_menu_stack_records_next[depth].path.erase = erase;
     g_wldcore_menu_stack_records_next[depth].path.pending_sound = 1;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
@@ -961,6 +969,7 @@ void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
         }
         level->pending_sound = 0;
     }
+
     if (g_wldcore_map_path_animation.flags & WLDCORE_SLIDESHOW_RUNNING) {
         if (level->erase == 0) {
             g_wldcore_map_path_animation.frame_timer++;
@@ -986,6 +995,7 @@ void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
         g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
         return;
     }
+
     wldcore_sound_play_effect(MAIN_SFX_NONE);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
     depth = g_wldcore_menu_stack_depth;
@@ -1014,11 +1024,11 @@ static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_se
     g_wldcore_menu_stack_depth = depth + 1;
 }
 
-/* Menu step that toggles script variable 0x200 + dot_index. Once system
- * flag 0x08 is clear it plays the pending sound (setting the variable to 1
- * when it was clear), waits out the delay with system flag 0x02 raised, then,
- * if the variable was set, flags the map dot 0x10 and clears the variable
- * before closing the level.
+/* Step of the location visibility level, which reveals or erases one
+ * location's dot. Once the screen fade is over it plays the sound; a reveal
+ * sets the location's visible variable (EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST
+ * + dot) at once. The map is redrawn for `delay` frames, then an erase hides
+ * the dot and clears the variable, and the level closes.
  *
  * The window index is read into a local before the flag clear, which keeps
  * the target's load and store order. */
@@ -1062,7 +1072,7 @@ void wldcore_menu_push_entry_window_level(void) {
 
     g_menu_blocked_buttons = -1;
     world_menu_open_entry_window(4, -0x30, -0x38);
-    g_wldcore_context_value_display_mode = 1;
+    g_wldcore_context_value_display_mode = WLDCORE_VALUE_DISPLAY_FUNDS;
     g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     depth = g_wldcore_menu_stack_depth;
     flags = g_main_system_flags;
@@ -1093,6 +1103,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_SCREEN_CLEARED) {
         level->pending = 1;
     }
+
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_FADING) {
         if (level->pending != 0) {
             level->pending = 0;
@@ -1103,6 +1114,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         g_menu_blocked_buttons = -1;
         return;
     }
+
     if (level->delay != 0) {
         level->delay -= 1;
         if (level->delay == 0) {
@@ -1110,10 +1122,12 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         }
         return;
     }
+
     g_menu_blocked_buttons = 0;
     if (menu_get_thread_activity() != 0) {
         return;
     }
+
     wldcore_input_init_repeat_state();
     flags = g_main_system_flags;
     wldcore_gfx_toggle_captured_world_frame(0);
@@ -1125,6 +1139,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_BRAVE_STORY, 0, 0);
         return;
     }
+
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_DESTINATION) {
         location = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
         wldcore_gfx_capture_map_backdrop();
@@ -1134,19 +1149,23 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         }
         return;
     }
+
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL) {
         g_main_system_flags = cleared ^ MAIN_SYSTEM_FLAG_DRAW_MAP;
         wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES, 0, 1);
         return;
     }
+
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST) {
         wldcore_menu_push_variable_list_level();
         return;
     }
+
     if (flags & MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL) {
         wldcore_menu_push_fixed_number_panel_level();
         return;
     }
+
     if (flags & MAIN_SYSTEM_FLAG_RESTART) {
         g_main_system_flags = cleared & ~(MAIN_SYSTEM_FLAG_RUNNING | MAIN_SYSTEM_FLAG_UNLOCK_ALL);
         if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
@@ -1158,17 +1177,18 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         g_main_system_flags |= MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE;
         return;
     }
+
     wldcore_menu_dispatch_resume_handler();
 }
 
-/* Pushes the self-sizing message window as menu level type 2, the windowed
- * sibling of wldcore_menu_push_message_level (0x8006e860, type 3). It stores
- * the reload flag and, when set, re-points the text formatter at
- * g_open_text_section_offsets; appends a window record (sequence 0xe,
- * priority 1); measures the entry, clamped to three rows; fills the shared
- * scrollable window and centers it and the window record on the measured box;
- * then saves g_menu_blocked_buttons in the level, sets it to -1, plays sound
- * 0x12, writes the level type and bumps the depth.
+/* Pushes the self-sizing message window (WLDCORE_MENU_LEVEL_TEXT_WINDOW), the
+ * windowed sibling of wldcore_menu_push_message_level. It stores the reload
+ * flag and, when set, re-points the text formatter at
+ * g_world_text_section_offsets; appends the window's label record (priority
+ * 1); measures the entry, clamped to three rows; fills the shared scrollable
+ * window and centers it and the label on the measured box; then saves
+ * g_menu_blocked_buttons in the level, blocks every button, plays
+ * MAIN_SFX_WINDOW_OPEN and pushes the level.
  *
  * Taking the record base into `records` at the last block-one store lets CSE
  * reuse that register after the measure call, which gives the base
@@ -1269,10 +1289,11 @@ void wldcore_menu_wait_text_then_pop_level(wldcore_menu_message_level_t* level) 
     wldcore_menu_dispatch_resume_handler();
 }
 
-/* Appends a window-list record for a text window: optionally reloads the
- * text-section pointers, starts the text-character thread on `text` (mode
- * 0x3b when system flag 0x20000 is set, else 0x33), saves the blocked
- * buttons in the record and blocks them all, and plays sound 0x12. */
+/* Pushes WLDCORE_MENU_LEVEL_MESSAGE, a dialog box on message `text`:
+ * optionally points the text formatter at WORLD's sections, starts the dialog
+ * thread (mode 0x3b while MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS is set, else
+ * 0x33), saves the blocked buttons in the level and blocks them all, and
+ * plays MAIN_SFX_WINDOW_OPEN. */
 void wldcore_menu_push_message_level(s32 text, s32 reload_text) {
     s32 index;
 
@@ -1320,12 +1341,13 @@ void wldcore_menu_finish_close_request(wldcore_menu_message_level_t* level) {
     }
 }
 
-/* Pushes the debug script-variable list level (type 0xb): one cursor window
- * record and one render record, laid out by 0x8006ed30 and then positioned
- * from the render record's origin.
+/* Pushes the debug script-variable list (WLDCORE_MENU_LEVEL_VARIABLE_LIST):
+ * one cursor window record and one render record, laid out by
+ * wldcore_menu_render_debug_variable_list and then positioned from the render
+ * record's origin.
  *
  * Both appended indices share one local, which is what holds them in $a2.
- * The window position is written after 0x8006ed30 returns, from the render
+ * The window position is written after the render call returns, from the render
  * record origin the callee filled in, so the level fields are read back out
  * of the stack record rather than kept in locals; the `- -` keeps the row
  * offset's constant on the multiply chain, which a plain `+` reassociates
@@ -1362,7 +1384,9 @@ static void wldcore_menu_push_variable_list_level(void) {
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_VARIABLE_LIST;
 }
 
-/* Renders up to 10 script-variable rows in the debug list panel.
+/* Renders up to 10 rows of the debug variable list, from first_variable on
+ * (script variables 0 to 1023). Message 0xb824 shows a variable and its value;
+ * a value of 10000 or more uses 0xb825, which shows the variable alone.
  *
  * `value` first holds the row count for the panel height and then each
  * variable's value: one register (v1) in the target. */
@@ -1414,11 +1438,12 @@ static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_l
     wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);
 }
 
-/* Input handler for the debug script-variable list level (type 0xb).
+/* Input handler for the debug script-variable list.
  *
- * Circle opens the number panel for the selected variable, X pops the level.
- * Up/down move the cursor, or scroll the first displayed variable by 10 with
- * L1 held and by 100 with R1 held. Scrolling redraws the rows through
+ * Circle opens the number panel for the selected variable, Cross pops the
+ * level. Up/down move the cursor, or scroll the first displayed variable by
+ * 100 with Triangle held and by 10 with Square held (Square wraps between 0
+ * and 1020). Scrolling redraws the rows through
  * wldcore_menu_render_debug_variable_list and clamps the cursor; a plain cursor move only repositions
  * the cursor window.
  *
@@ -1434,6 +1459,7 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
     if (g_wldcore_window_render_records[level->render_index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
         g_wldcore_window_records[level->window_index].palette = 0xA;
         g_wldcore_window_render_records[level->render_index].palette = 2;
@@ -1444,6 +1470,7 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
         wldcore_menu_push_number_panel_level_with_argument(variable, script_get_variable(variable));
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         g_wldcore_window_record_count -= 1;
         g_wldcore_window_render_record_count -= 1;
@@ -1452,6 +1479,7 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
         wldcore_menu_dispatch_resume_handler();
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
         if (g_input_current_buttons & PSX_PAD_TRIANGLE) {
             if (level->first_variable < 0x64) {
@@ -1492,10 +1520,12 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
     } else {
         return;
     }
+
     wldcore_menu_render_debug_variable_list(level);
     if (level->cursor < level->row_count) {
         return;
     }
+
     level->cursor = level->row_count - 1;
     goto move_cursor;
 cursor_down:
@@ -1511,8 +1541,8 @@ move_cursor:
         = g_wldcore_window_render_records[level->render_index].base.y - -(level->cursor * 0x10 + 0xC);
 }
 
-/* Pushes the number-panel menu level (type 0x30) that edits script variable
- * `variable_id`, starting the panel at `value`. */
+/* Pushes WLDCORE_MENU_LEVEL_NUMBER_PANEL_WITH_ARGUMENT, a number panel (0 to
+ * 9999) that edits script variable `variable_id`, starting at `value`. */
 static void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value) {
     point32_t origin;
     s32 record_index;
@@ -1522,7 +1552,7 @@ static void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, 
     g_wldcore_active_menu_value = value;
     origin.x = 0x20;
     origin.y = 0x20;
-    wldcore_window_init_number_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0x270F0000, 0, &origin);
+    wldcore_window_init_number_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 9999 << 16, 0, &origin);
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
     g_wldcore_menu_stack_records_next[record_index].panel.variable_id = variable_id;
@@ -1530,10 +1560,10 @@ static void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, 
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
-/* Step handler for the number-panel menu level (type 0x30). While the panel
- * runs it accepts the confirm button (0x20), which plays sound 1 and writes
- * the panel's value to the level's script variable, or the cancel button
- * (0x40); either way it restarts thread 0xC to close the panel. Once the
+/* Step handler of the variable number panel. While the panel runs it accepts
+ * Circle, which plays MAIN_SFX_CONFIRM and writes the panel's value to the
+ * level's script variable, or Cross; either way it tells the panel thread to
+ * close. Once the
  * panel thread has stopped it pops the level, redraws the script-variable
  * list on a confirm, and restores the parent level's window and render
  * records.
@@ -1607,7 +1637,11 @@ void wldcore_menu_push_layout_window_level(void) {
     g_wldcore_menu_stack_depth++;
 }
 
-/* Routing both stores through one base variable (rather than
+/* Move the layout window's cursor onto row `layout` of
+ * g_wldcore_window_layout_rows, switching the cursor's sequence when the
+ * row's kind differs from the last one.
+ *
+ * Routing both stores through one base variable (rather than
  * `&g_wldcore_window_record_positions[index]`) is what reproduces the target's separate base register
  * held in $a0 across the whole function. */
 static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request) {
@@ -1647,7 +1681,7 @@ void wldcore_menu_publish_layout_window_level(void) {
 
 /* Input handler for a layout-window menu level.
  *
- * Circle pops the level, X opens the row's help message, and a direction moves
+ * Cross pops the level, Circle opens the row's help message, and a direction moves
  * to the neighboring layout named by the row. A row with a counter pointer
  * adds the counter to the base message id, and suppresses the message entirely
  * when the counter reads 0 or -1 (except for layout 0x0b). */
@@ -1723,12 +1757,13 @@ void wldcore_menu_handle_layout_window_input(wldcore_window_layout_request_t* re
     }
 }
 
-/* Pushes the town/location service list level (type 4) for menu id `menu`.
+/* Pushes the location menu (WLDCORE_MENU_LEVEL_LOCATION_MENU) for menu id `menu`.
  *
  * Loads the location's picture, appends the cursor window (window kind
- * menu + 0x37) and, when a picture is present, uploads both its TIM and the
- * script picture at g_wldcore_picture_buffer to VRAM, binds a render record to the image
- * and adds a second framing window at (-8, 0x10). It then measures every
+ * menu + 0x37) and, when a picture is present, uploads the frame TIM and the
+ * location's picture at g_wldcore_picture_buffer to VRAM, binds a render
+ * record to the picture and adds its border window at (-8, 0x10). It then
+ * measures every
  * entry's text through text_find_entry / text_measure_pixels to
  * size the panel, copies the entry values into g_wldcore_list_entry_values with
  * cleared row flags, clamps the cursor to at most four visible rows, and
@@ -1959,6 +1994,7 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
         level->delay--;
         return;
     }
+
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_FADING) {
         return;
     }
@@ -2054,6 +2090,7 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
         /* Help: map names, services and deep-dungeon floors each have their own message range. */
         wldcore_window_set_secondary_render_palette_2(&level->slots);
         value = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index];
+        /* A map's help is 0x8801 + map, a service's 0x104b on and a floor's 0x1090 on. */
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_MAP_NAME_BASE) {
             wldcore_menu_push_message_level((value & TEXT_ID_ENTRY_MASK) + 0x8801, 1);
         } else {
@@ -2105,10 +2142,10 @@ static void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t
     g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
 }
 
-/* At full brightness, run the shop / soldier-office loop (0x80133478),
- * then reload the war-funds script variable, reset the parent level's window,
- * rebuild the panel list for the current location, fade in, clear the scratch
- * buffer and restart the world-map music (0x11b).
+/* At full brightness, run WORLD's shop, soldier office or fur shop screen
+ * (world_shop_run_screen), then reload the war funds, reset the parent
+ * level's window, push the location menu again, fade in, blank the backdrop
+ * image and restart the world-map music.
  *
  * The local alias for the current location id reproduces the target's
  * saved-register base for its two loads. */
@@ -2138,11 +2175,12 @@ static void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id) {
     wldcore_sound_enqueue_music_start(WLDCORE_AUDIO_MUSIC(1, MAIN_MUSIC_WORLD_MAP));
 }
 
-/* Pushes the wide scrollable text window (0x8009eef8) as menu level type
- * 0x33: it appends one window record for the frame, measures the text, sizes
- * the window around it (at most four rows), initializes the scrollable text
- * state, hides the text render record and the parent level's window, and sets
- * system flags 0x08002000. */
+/* Pushes g_wldcore_scrollable_text_window on message `text` as
+ * WLDCORE_MENU_LEVEL_SCROLLABLE_TEXT_WINDOW: it appends one window record for
+ * the header, measures the text, sizes the window around it (at most four
+ * rows), initializes the scrollable text state, hides the text render record
+ * and the parent level's window until the step shows them, and hides the
+ * location marker and freezes the map animation. */
 void wldcore_menu_push_scrollable_text_window_level(s32 text) {
     s16 width;
     s16 rows;
@@ -2199,11 +2237,12 @@ void wldcore_menu_push_scrollable_text_window_level(s32 text) {
 }
 
 /* Menu-level step for the scrollable text window g_wldcore_scrollable_text_window.
- * While its render record is hidden (flag 0x10), an unblocked frame plays sound
- * 0x12 and shows the level window and the render record again. Otherwise, once
- * wldcore_text_is_window_finished reports the window finished, it drops one window and one render
- * object, pops the level, clears system flags 0x08002000, shows the parent
- * level's window and resumes the parent level. */
+ * While its render record is hidden, the first frame without a screen fade
+ * plays MAIN_SFX_WINDOW_OPEN and shows the header window and the text.
+ * Otherwise, once wldcore_text_is_window_finished reports the window
+ * finished, it releases the header window, pops the level, shows the marker
+ * and unfreezes the map, shows the parent level's window and resumes the
+ * parent level. */
 void wldcore_menu_step_scrollable_text_window_level(wldcore_menu_stack_record_t* level) {
     s32* index = &g_wldcore_scrollable_text_window.render_record_index;
     s32 depth;
@@ -2227,8 +2266,9 @@ void wldcore_menu_step_scrollable_text_window_level(wldcore_menu_stack_record_t*
     }
 }
 
-/* Queue the fixed "9999"-style number panel used on the world map and append
- * its 0x5c-byte record. Sibling of wldcore_menu_push_number_panel_level_with_argument. */
+/* Push the debug "Party number" panel (MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL):
+ * a number from 0 to 999, starting at 0. Sibling of
+ * wldcore_menu_push_number_panel_level_with_argument. */
 static void wldcore_menu_push_fixed_number_panel_level(void) {
     point32_t origin;
     s32 record_index;
@@ -2239,15 +2279,16 @@ static void wldcore_menu_push_fixed_number_panel_level(void) {
     origin.y = -0x16;
     g_wldcore_active_menu_value = 0;
     wldcore_window_init_number_panel_render_thread(
-        WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0x3E70000, WLDCORE_TEXT_ID_PARTY_NUMBER_LABEL, &origin);
+        WLDCORE_THREAD_SLOT_WINDOW_PANEL, 999 << 16, WLDCORE_TEXT_ID_PARTY_NUMBER_LABEL, &origin);
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_FIXED_NUMBER_PANEL;
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
-/* Poll the confirm/cancel buttons for the world-map unit browser panel and
- * tear it down once the panel's render thread has finished.
+/* Step of the debug party number panel: Circle or Cross closes it, and once
+ * the panel thread has ended a confirmed number below 0x200 is loaded with
+ * main_entd_init_event_unit_data and the roster names are rebuilt.
  *
  * level->result is 0 while waiting, 1 on confirm and -1 on cancel. */
 void wldcore_menu_step_unit_browser_panel(wldcore_menu_panel_level_t* level) {
@@ -2280,10 +2321,11 @@ void wldcore_menu_step_unit_browser_panel(wldcore_menu_panel_level_t* level) {
     }
 }
 
-/* Opens a full-screen menu level (type 5): hides the map, loads data set
- * 0x16 or 0x17 by `EVENT_SCRIPT_VAR_TOWN_BACKGROUND`, starts WORLD thread 14 on
- * 0x8010f250 with text 0xb806, and allocates two window records and one
- * render record for the level before 0x8007148c fills it. */
+/* Opens the bar (WLDCORE_MENU_LEVEL_BAR_MENU): hides the map, loads the bar
+ * background (set 0x16 or 0x17 by EVENT_SCRIPT_VAR_TOWN_BACKGROUND, else 0),
+ * starts the message box on WLDCORE_TEXT_ID_BAR_WELCOME, and allocates two
+ * window records and one render record for the level before
+ * wldcore_bar_build_menu_rows fills it. */
 static void wldcore_bar_push_menu_level(void) {
     s32 value;
     s32 set;
@@ -2344,14 +2386,17 @@ void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level) {
         level->entries[1] = WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS;
         level->entry_count++;
     }
+
     if (wldcore_proposition_count_returned(g_wldcore_map_projection_state.marker.kind) != 0) {
         level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS;
         level->entry_count++;
     }
+
     if (g_main_save_proposition_count != wldcore_proposition_count_returned(-1)) {
         level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_PROPOSITIONS;
         level->entry_count++;
     }
+
     level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_LEAVE;
     level->entry_count++;
     index = level->frame_render;
@@ -2372,11 +2417,13 @@ void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level) {
             index, level->entries[i] + TEXT_ID_WORLD_MENU_BASE, point, g_wldcore_window_image_buffer);
         point.y += 0x10;
     }
+
     wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);
     cursor = &g_wldcore_menu_cursor_states[WLDCORE_CURSOR_SLOT_BAR_MENU];
     if (level->entry_count < cursor->selected_index + 1) {
         cursor->selected_index = 0;
     }
+
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.selected_entry = cursor->selected_index;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.mode = WLDCORE_LIST_WINDOW_MODE_BROWSE;
     render = &g_wldcore_window_render_records[index];

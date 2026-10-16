@@ -86,13 +86,13 @@ void wldcore_window_begin_tint_transition(wldcore_menu_list_window_level_t* leve
         .flags |= WORLD_RENDER_RECORD_HIDDEN;
 }
 
-/* Input step for the brave-story top-level list window.
+/* Input step of the Brave Story's job category menu.
  *
- * Refreshes the displayed play-time copies each frame, then, while the side
- * render record is not pending (flag 0x100): button 0x100 opens the help
- * message for the highlighted row (0x105a + entry), button 0x40 pops the
- * level, button 0x20 dispatches on the row value (0 opens the brave-story
- * submenu at wldcore_list_open_active_propositions, 1 the proposition list), and up/down wrap the
+ * Refreshes the displayed play time each frame, then, once the menu has
+ * popped in: Select opens the highlighted row's help (message 0x105a + row),
+ * Cross pops the level, Circle opens the active jobs list
+ * (wldcore_list_open_active_propositions) or the completed jobs list
+ * (wldcore_list_open_brave_story_propositions), and Up and Down wrap the
  * cursor, moving the cursor window by 16 pixels a row. The wrap-around move
  * is spelled as a subtraction of a negative step to keep the window's y as
  * the first addition operand. */
@@ -109,6 +109,7 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
     if ((g_wldcore_window_render_records[level->side_window].flags & WORLD_RENDER_RECORD_POP_IN) != 0) {
         return;
     }
+
     buttons = g_wldcore_input_new_button_presses;
     if ((buttons & PSX_PAD_SELECT) != 0) {
         g_wldcore_window_records[level->main_window].palette = 0xA;
@@ -123,6 +124,7 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
         wldcore_menu_push_message_level(level->entries[level->selected_entry] + 0x105A, 1);
         return;
     }
+
     if ((buttons & PSX_PAD_CROSS) != 0 && g_main_file_still_loading == 0) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         g_wldcore_proposition_category_saved_cursor[0] = 0;
@@ -133,6 +135,7 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
         wldcore_menu_dispatch_resume_handler();
         return;
     }
+
     if ((g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) != 0 && g_main_file_still_loading == 0) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         g_wldcore_proposition_category_saved_cursor[0] = level->selected_entry;
@@ -151,6 +154,7 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
         }
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->entry_count >= 2) {
             if (level->selected_entry != 0) {
@@ -163,6 +167,7 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
             wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
         }
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         count = level->entry_count;
         if (count >= 2) {
@@ -179,18 +184,18 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
     }
 }
 
-/* Pushes the active-proposition list level (type 0x26).
+/* Pushes the active jobs list (WLDCORE_MENU_LEVEL_ACTIVE_PROPOSITIONS).
  *
- * Starts WORLD thread 14 on entry point 0xb848, re-shows the parent level's
- * cursor window and list panel (popping the panel in) when the panel is
- * hidden, then appends a cursor window and
- * three column-header windows (sequences 2 / 0x63 / 0x64 / 0x65) plus one
- * render record sized to g_main_save_proposition_count rows.  One row is
- * seeded per saved proposition, and the panel image is drawn in three passes:
- * the proposition name at x=8 (text 0xd000 | proposition_id), the participant
- * count at x=0x9c (text 0xb866) and the days remaining at x=0xb6
- * (text 0xb867, assigned_days - elapsed_days); both numeric columns go
- * through g_text_substitution_values[0].  Finally the saved cursor row
+ * Shows WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, shows the category menu's cursor
+ * and panel again (popping the panel in) when they are hidden, then appends a
+ * cursor window and three column-header windows plus one render record sized
+ * to g_main_save_proposition_count rows. One row is seeded per dispatched
+ * proposition, and the panel image is drawn in three passes: the proposition
+ * name at x=8 (TEXT_ID_PROPOSITION_NAME_BASE | proposition_id), the
+ * participant count at x=0x9c (WLDCORE_TEXT_ID_VALUE) and the days remaining
+ * at x=0xb6 (WLDCORE_TEXT_ID_TWO_DIGIT_VALUE, assigned_days - elapsed_days);
+ * both numeric columns go through g_text_substitution_values[0]. Finally the
+ * saved cursor row
  * in g_wldcore_active_propositions_saved_cursor is clamped, the four windows are positioned relative to the
  * render record's origin, and the level is committed at depth + 1.
  *
@@ -376,10 +381,9 @@ void wldcore_window_set_layout_states(wldcore_menu_proposition_list_level_t* lev
     g_wldcore_window_render_records[level->render_index].palette = 2;
 }
 
-/* Input handler for the proposition list level (type 0x26).
- *
- * The level's first five 32-bit values are the window/render indices that
- * wldcore_window_set_layout_states consumes. The wrap-around move is spelled as
+/* Input step of the active jobs list. Select opens help message 0x105a, Cross
+ * pops back to the category menu, and Circle releases the list and pushes the
+ * chosen job's participant list. The wrap-around move is spelled as
  * a subtraction of a negative step: that keeps the window's y operand first
  * in the addition, as the target's register assignment requires. */
 void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list_level_t* level) {
@@ -390,6 +394,7 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
     if ((g_wldcore_window_render_records[level->render_index].flags & WORLD_RENDER_RECORD_POP_IN) != 0) {
         return;
     }
+
     buttons = g_wldcore_input_new_button_presses;
     if ((buttons & PSX_PAD_SELECT) != 0) {
         g_wldcore_window_records[level->cursor_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
@@ -400,6 +405,7 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
         wldcore_menu_push_message_level(0x105A, 1);
         return;
     }
+
     if ((buttons & PSX_PAD_CROSS) != 0) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         g_wldcore_active_propositions_saved_cursor[0] = 0;
@@ -410,6 +416,7 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
         wldcore_menu_dispatch_resume_handler();
         return;
     }
+
     if ((buttons & PSX_PAD_CIRCLE) != 0) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         g_wldcore_active_propositions_saved_cursor[0] = level->cursor;
@@ -420,6 +427,7 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
         wldcore_menu_push_participant_list_level(level->entries[level->cursor]);
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->entry_count >= 2) {
             if (level->cursor != 0) {
@@ -432,6 +440,7 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
             wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
         }
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         count = level->entry_count;
         if (count >= 2) {
@@ -448,8 +457,12 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
     }
 }
 
-/* Pushes the proposition participant list level (type 0x27) for
- * g_main_active_propositions[proposition].
+/* Pushes the participant list (WLDCORE_MENU_LEVEL_PARTICIPANT_LIST) of
+ * g_main_active_propositions[proposition]: hides the job list underneath,
+ * draws the job's detail panel with its units
+ * (wldcore_list_build_proposition_detail_panel_image) and says
+ * WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the job's name. The cursor
+ * starts at the saved participant row.
  *
  * The 0x40 frame needs 32 bytes of locals the body never uses. The `- -`
  * spellings keep the target's operand order (render-record base first) that a
@@ -501,15 +514,15 @@ static void wldcore_menu_push_participant_list_level(s32 proposition) {
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_PARTICIPANT_LIST;
 }
 
-/* Input step of the proposition participant-chooser level.
+/* Input step of the participant list.
  *
- * Nothing happens while the render record is hidden (flag 0x100). Once WORLD
- * thread 14's closing animation has finished, the level hands the selected
- * row to wldcore_menu_push_participant_detail_level. Cancel (0x40) tears the level down and returns to the
- * proposition list; confirm (0x20) records the row in g_wldcore_participant_list_saved_cursor and starts
- * thread 14 instead. Both drop one window record, one entry of g_wldcore_window_render_record_count and
- * two render objects. Up/down wrap the cursor and slide the cursor window by
- * one 16-pixel row, and do nothing when there are fewer than two rows.
+ * Nothing happens while the panel pops in. Cross tears the level down and
+ * returns to the active jobs list; Circle records the row in
+ * g_wldcore_participant_list_saved_cursor and closes the message box, and once
+ * it has gone the level hands the row to
+ * wldcore_menu_push_participant_detail_level. Both release the cursor window
+ * and the panel. Up/down wrap the cursor and slide the cursor window by one
+ * 16-pixel row, and do nothing when there are fewer than two rows.
  *
  * The two directional blocks mirror wldcore_list_handle_active_propositions_input: the up wrap is spelled as
  * a subtraction of a negative step so the window's y stays the first addend,
@@ -520,12 +533,14 @@ void wldcore_menu_handle_participant_list_input(wldcore_menu_stack_record_t* lev
     if (g_wldcore_window_render_records[level->participant_list.render_index].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
         g_wldcore_menu_stack_depth--;
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         wldcore_menu_push_participant_detail_level(level->participant_list.proposition, level->participant_list.cursor);
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         g_wldcore_participant_list_saved_cursor = 0;
@@ -536,6 +551,7 @@ void wldcore_menu_handle_participant_list_input(wldcore_menu_stack_record_t* lev
         wldcore_list_open_active_propositions();
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         g_wldcore_window_record_count--;
@@ -546,6 +562,7 @@ void wldcore_menu_handle_participant_list_input(wldcore_menu_stack_record_t* lev
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->participant_list.entry_count >= 2) {
             if (level->participant_list.cursor != 0) {
@@ -559,6 +576,7 @@ void wldcore_menu_handle_participant_list_input(wldcore_menu_stack_record_t* lev
             wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
         }
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         count = level->participant_list.entry_count;
         if (count >= 2) {
@@ -575,12 +593,15 @@ void wldcore_menu_handle_participant_list_input(wldcore_menu_stack_record_t* lev
     }
 }
 
-/* Push the proposition participant detail level (type 0x28).
+/* Push the participant detail level (WLDCORE_MENU_LEVEL_PARTICIPANT_DETAIL):
+ * the unit status panels of one unit sent on the job.
  *
- * Copies the 0x40x0x100 VRAM block at (0x180, 0) to (0x200, 0x100), appends
- * the two frame windows, draws the selected participant and restarts the
- * three core background threads. Each window has its own pos/window pointer:
- * a single-set pointer keeps its address computation beside its first use.
+ * Saves the 64x256 VRAM strip at (0x180, 0) to (0x200, 0x100) (the panels
+ * draw over it; leaving the level moves it back), appends the L1 and R1
+ * prompt windows, fills the panel data for the selected participant and
+ * starts the three unit panel threads. Each window has its own pos/window
+ * pointer: a single-set pointer keeps its address computation beside its
+ * first use.
  */
 static void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant) {
     RECT rect;
@@ -642,7 +663,7 @@ static void wldcore_menu_push_participant_detail_level(s32 proposition, s32 part
     g_wldcore_menu_stack_depth = depth + 1;
 }
 
-/* Loads party member party_index into the scratch unit at 0x800d467c and
+/* Loads party member party_index into g_wldcore_status_unit and
  * fills the status-panel records the participant detail level draws.
  *
  * Empty hand slots fall back to the shield; empty equipment reads as -1 and
@@ -662,19 +683,25 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
     if (main_unit_init_from_party_slot(&g_wldcore_status_unit, party_index, 1) == -1) {
         return;
     }
+
     unit = &g_wldcore_status_unit;
     gauges = &g_menu_selected_unit_stat_summary;
     identity = &g_world_selected_unit_identity;
     detail = &g_world_selected_unit_stat_detail.state;
+
+    /* Team, level, experience and the HP, MP and CT gauges (a zero maximum
+     * becomes 1), with the job, bravery, faith and zodiac. */
     gauges->team_kind = 0;
     gauges->level = unit->level;
     flags = unit->team_flags;
     if (flags & BATTLE_TEAM_MASK) {
         gauges->team_kind = 1;
     }
+
     if (!(flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
         gauges->team_kind = 2;
     }
+
     gauges->list_index = 0;
     gauges->unit_count = 0;
     gauges->experience = unit->experience;
@@ -683,6 +710,7 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
     if (maximum_hp == 0) {
         gauges->gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
     }
+
     gauges->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = 0;
     gauges->gauges[MENU_UNIT_STATUS_GAUGE_HP].value = unit->hp;
     maximum_mp = unit->max_mp;
@@ -690,6 +718,7 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
     if (maximum_mp == 0) {
         gauges->gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
     }
+
     gauges->gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
     gauges->gauges[MENU_UNIT_STATUS_GAUGE_MP].value = unit->mp;
     gauges->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = unit->ct;
@@ -701,6 +730,8 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
     identity->roster_slot = party_index;
     identity->faith = unit->faith;
     identity->zodiac = unit->birthday.zodiac;
+
+    /* Movement, attack and evasion; each shield evade is the better hand's. */
     detail->move = unit->move;
     detail->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
     detail->jump = unit->jump;
@@ -715,6 +746,7 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
         <= unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE]) {
         detail->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
     }
+
     detail->physical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
     detail->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     detail->magical_class_evade = 0;
@@ -723,7 +755,9 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
         <= unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE]) {
         detail->magical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE];
     }
+
     detail->magical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
+
     detail->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
         = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
         ? unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]
@@ -740,6 +774,7 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
             detail->equipment[i] = -1;
         }
     }
+
     detail->generic_monster = unit->unit_flags & UNIT_FLAG_MONSTER;
     if (detail->generic_monster != 0) {
         abilities = main_ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
@@ -753,6 +788,7 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
         detail->ability_ids[3] = unit->abilities.support;
         detail->ability_ids[4] = unit->abilities.movement;
     }
+
     for (i = 0; i < 5; i++) {
         if (detail->ability_ids[i] == 0) {
             detail->ability_ids[i]--;
@@ -810,6 +846,7 @@ void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level
         wldcore_menu_push_participant_list_level(level->proposition);
         return;
     }
+
     buttons = g_wldcore_input_new_button_presses;
     if (buttons & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
@@ -821,6 +858,7 @@ void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level
         thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
         return;
     }
+
     if (buttons & PSX_PAD_SELECT) {
         g_wldcore_window_records[level->left_window].palette = g_wldcore_window_records[level->right_window].palette
             = 0xA;
@@ -828,6 +866,7 @@ void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level
         wldcore_menu_push_layout_window_level();
         return;
     }
+
     if (!(g_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1))) {
         g_wldcore_window_records[level->left_window].sequence = WLDCORE_ANIM_SEQUENCE_L1_BUTTON;
         g_wldcore_window_records[level->right_window].sequence = WLDCORE_ANIM_SEQUENCE_R1_BUTTON;
@@ -836,6 +875,7 @@ void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level
             = g_wldcore_window_records[level->right_window].frame_index
             = g_wldcore_window_records[level->right_window].anim_counter = 0;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_R1) != 0
         && g_wldcore_window_records[level->left_window].sequence != WLDCORE_ANIM_SEQUENCE_L1_BUTTON_PRESS) {
         g_wldcore_window_records[level->right_window].sequence = WLDCORE_ANIM_SEQUENCE_R1_BUTTON_PRESS;
@@ -873,6 +913,7 @@ void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level
         }
         direction = 2;
     }
+
     g_wldcore_thread8_params.redraw_request = direction;
     wldcore_unit_build_status_panel_data(
         g_main_active_propositions[level->proposition].participant_indices[level->participant]);
@@ -939,11 +980,12 @@ void wldcore_menu_resume_brave_story_propositions_level(void) {
 void wldcore_menu_publish_brave_story_propositions_level(void) {
 }
 
-/* List level input step for cursor slot 16 (the list opened by 0x80087b94):
- * twin of wldcore_list_handle_unexplored_lands_input with help message 0x105b and no file-loading gate.
- * Closing without a selection re-flags the list window's content render
- * record (0x100) before returning to the bar menu; a confirmed entry goes
- * to 0x80087fa4. */
+/* Input step of the completed jobs list opened by
+ * wldcore_list_open_brave_story_propositions: twin of
+ * wldcore_list_handle_unexplored_lands_input with help message 0x105b and no
+ * file-loading gate. Closing without a selection pops the Brave Story menu's
+ * injured/casualties record back in before resuming the category menu; a
+ * confirmed entry goes to wldcore_menu_push_proposition_attempt_detail_level. */
 void wldcore_list_handle_brave_story_propositions_input(wldcore_menu_panel_level_t* level) {
     s32 depth;
 
@@ -981,14 +1023,15 @@ void wldcore_list_handle_brave_story_propositions_input(wldcore_menu_panel_level
     }
 }
 
-/* Pushes the proposition-attempt detail text window as menu level 0x2a, the
- * partner of the 0x80088180 pop. Records the entry on the new level, decodes
- * that entry's completion date out of the packed nine-bit array at
- * g_main_proposition_last_attempt_date_bits (dest[0] month 1-12, dest[1] day
- * 1-31), and sets up the shared scrollable text window at g_wldcore_scrollable_text_window for text
- * 0x8800 + entry with the month name (0xb84f + month) and the day as its two
- * text substitutions. Then hides the parent window-render level's window and
- * render record with flag 0x10 and starts WORLD thread 14 on text 0xb849.
+/* Pushes WLDCORE_MENU_LEVEL_PROPOSITION_ATTEMPT_DETAIL, the text of a
+ * completed job; wldcore_menu_wait_brave_story_text_then_pop_level closes it.
+ * Records the entry on the new level, reads the date the job was last done
+ * from g_main_proposition_last_attempt_date_bits, and sets up
+ * g_wldcore_scrollable_text_window on the job's text
+ * (TEXT_ID_WORLD_MESSAGE_BASE + entry) with the month name
+ * (WLDCORE_TEXT_ID_MONTH_NAME_BASE + month) and the day substituted. Then
+ * hides the category menu's window and frame and says
+ * WLDCORE_TEXT_ID_BRAVE_STORY_ENTRY_INFO with the job's name.
  *
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
@@ -1040,12 +1083,10 @@ static void wldcore_menu_push_proposition_attempt_detail_level(s32 value) {
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
-/* Return from a message level to the window/render level beneath it.
- *
- * Waits until the message render record has left its 0x100 state and
- * wldcore_text_is_window_finished reports the message window finished, then clears flag 0x10 on
- * the parent level's window and render records, pops the stack and marks the
- * render record with 0x100 before wldcore_list_open_brave_story_propositions redraws. Mirrors
+/* Close a completed job's text level once its window has popped in and
+ * wldcore_text_is_window_finished reports it finished: show the category
+ * menu's window and frame again (replaying the frame's pop-in), pop the
+ * stack and reopen the completed jobs list. Mirrors
  * wldcore_menu_wait_text_then_pop_level. */
 void wldcore_menu_wait_brave_story_text_then_pop_level(void) {
     s32* index = &g_wldcore_scrollable_text_window.render_record_index;
@@ -1142,6 +1183,8 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
     default:
         break;
     }
+
+    /* Blank the 256x240 backdrop image (0x7800 words) from the end. */
     i = 0x77FF;
     clear = &g_wldcore_scratch_buffer[0x77FF];
     depth = g_wldcore_menu_stack_depth;
@@ -1152,6 +1195,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
         *clear = 0;
         clear--;
     }
+
     world_menu_set_brightness(0, 0, 0);
     thread_start(WLDCORE_THREAD_SLOT_TRANSITION, world_formation_view_zoom_thread);
     thread_set_parameters(WLDCORE_THREAD_SLOT_TRANSITION, 0, 0, 0);
@@ -1164,7 +1208,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
 /* Closes every window of the list-window level beneath the current one: the
  * main window goes to palette 10 (sequence, frame_index and anim_counter
  * cleared), the side window to palette 6, the frame and content render
- * records to palette 2, and the upper/lower windows to palette 5, each hidden with flag 0x10. */
+ * records to palette 2, and the upper/lower windows to palette 5, each hidden. */
 static void wldcore_window_close_parent_list_all_windows(void) {
     s32 index = g_wldcore_menu_stack_depth - 1;
 
@@ -1194,8 +1238,8 @@ static void wldcore_window_close_parent_list_all_windows(void) {
 
 /* Closes the list window of the level beneath the current one: the main
  * window goes to palette 10 (sequence, frame_index and anim_counter cleared),
- * the side window to palette 6 and the frame render record to palette 2, each hidden with
- * flag 0x10. */
+ * the side window to palette 6 and the frame render record to palette 2, each
+ * hidden. */
 static void wldcore_window_close_parent_list_frame_windows(void) {
     s32 index = g_wldcore_menu_stack_depth - 1;
 
@@ -1221,7 +1265,8 @@ static void wldcore_window_close_parent_list_frame_windows(void) {
  * After `delay` frames it stores the 256x240 frame buffer into the scratch
  * buffer, asks the transition thread to finish and forgets the loaded
  * background set. Once that thread has ended it pops itself, restarts the
- * message box (line 0xB848, or 0xB8DD for the tutorial lists) and pushes the
+ * message box (WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, or
+ * WLDCORE_TEXT_ID_TUTORIAL_WELCOME for the tutorial lists) and pushes the
  * level named by `screen`: Brave Story, a story event text, the tutorial
  * categories, the formation tutorials, the mask-1 tutorial entries or a
  * treasure detail. The two tutorial entry lists first un-hide the parent
@@ -1304,7 +1349,8 @@ void wldcore_menu_step_screen_transition_level(wldcore_menu_screen_transition_le
     }
 }
 
-/* Pushes the tutorial-category list level (type 0x2b).
+/* Pushes the tutorial category menu (WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES)
+ * with the cursor on selected_entry.
  *
  * Appends a cursor window, a header window and the frame render record, seeds
  * the four category entries, and positions both windows relative to the render
@@ -1379,8 +1425,9 @@ static void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset)
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES;
 }
 
-/* Build the image of a 0x44-wide text list panel: one 16-pixel row per text id
- * (text 0xb8d9 + id), anchored at (-0x78, -0x28) in coordinate mode 0xa.
+/* Build the image of the 0x44-wide tutorial category panel: one 16-pixel row
+ * per row id (WLDCORE_TEXT_ID_TUTORIAL_CATEGORY_ROW_FIRST + id), at
+ * (-0x78, -0x28) with OT priority 0xa, popping in.
  *
  * The base coordinates are written through a point view of base_x/base_y; the
  * target addresses them from &base_x, not from the record start. */
@@ -1432,11 +1479,9 @@ void wldcore_tutorial_restore_list_and_show_welcome(wldcore_menu_stack_record_t*
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_TUTORIAL_WELCOME, 0);
 }
 
-/* The original wrote the body of wldcore_window_publish_slot_b806 a second time as wldcore_window_publish_slot_b8dd. */
-/* Sibling of the resetter at 0x8007cd78, differing only in the value stored
- * into sequence. The record stores may alias `level`, so they invalidate
- * the cached parameter loads and reproduce the target's
- * reloads; `index` shares one address computation between the last two. */
+/* Gray out the tutorial category menu while a sub-level opens over it. The
+ * original wrote the body of wldcore_window_publish_slot_b806 a second time
+ * here; see there for the matching notes. */
 void wldcore_window_publish_slot_b8dd(wldcore_menu_list_window_level_t* level) {
     s32 index;
 
@@ -1459,6 +1504,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
     if (g_wldcore_window_render_records[level->frame_render].flags & WORLD_RENDER_RECORD_POP_IN) {
         return;
     }
+
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) {
         if (level->mode == WLDCORE_LIST_WINDOW_MODE_FADE_OR_HELP && !(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
             level->mode = WLDCORE_LIST_WINDOW_MODE_LEAVE_WAIT;
@@ -1485,6 +1531,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         }
         return;
     }
+
     if (level->mode == WLDCORE_LIST_WINDOW_MODE_LEAVE_MESSAGE) {
         if (g_wldcore_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             level->mode = WLDCORE_LIST_WINDOW_MODE_FADE_OR_HELP;
@@ -1501,9 +1548,11 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         }
         return;
     }
+
     if (g_wldcore_audio_queue.count != 0) {
         return;
     }
+
     buttons = g_wldcore_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
@@ -1514,11 +1563,13 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         g_wldcore_window_render_object_count -= 3;
         return;
     }
+
     if (buttons & PSX_PAD_SELECT) {
         wldcore_window_publish_slot_b8dd(level);
         wldcore_menu_push_message_level(level->entries[level->selected_entry] + 0x108B, 1);
         return;
     }
+
     if (buttons & PSX_PAD_CIRCLE) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
         selected_entry = &level->selected_entry;
@@ -1550,6 +1601,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         }
         return;
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->selected_entry != 0) {
             g_wldcore_window_records[level->main_window].position.y -= 0x10;
@@ -1560,6 +1612,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         }
         wldcore_sound_play_effect(MAIN_SFX_CURSOR_MOVE);
     }
+
     if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
         if (level->selected_entry < level->entry_count - 1) {
             g_wldcore_window_records[level->main_window].position.y += 0x10;
@@ -1572,10 +1625,10 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
     }
 }
 
-/* Opens the seven-row list of formation tutorials (entry values 0xc000 + row)
- * whose rows are flagged 8 when the matching bit of
- * g_main_tutorial_progress_masks is set, shown at
- * (0x54, 0x50) with width 0x8c; appends its record tagged 0x2c.
+/* Opens the list of the seven formation tutorials (TEXT_ID_TUTORIAL_NAME_BASE
+ * + row), a row drawn in text color 8 once its bit of
+ * g_main_tutorial_progress_masks[0] shows it was viewed, at (0x54, 0x50),
+ * 0x8c wide, and pushes WLDCORE_MENU_LEVEL_FORMATION_TUTORIALS.
  *
  * The flag value lives in its own variable so the target keeps 8 in a saved
  * register across the loop. */
@@ -1623,16 +1676,19 @@ void wldcore_list_formation_tutorials_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
-/* The caller hands in its menu level; the target reads no argument. */
+/* Withholds every button from the WORLD menu frame while the next menu level
+ * runs. The caller hands in its menu level; the target reads no argument. */
 void wldcore_list_formation_tutorials_block_all_buttons(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = -1;
 }
 
-/* List level input step for cursor slot 18 (help message 0x108b). A confirmed
- * entry starts fade 2 and thread 12's closing animation; once it finishes the
- * level switches to state 2, sets system flag 0x40 and starts thread 14. When
- * thread 14 ends, the selected index is marked in the bitset at 0x8004c6bc,
- * menu brightness is restored and the formation screen opens for it. */
+/* Input step of the formation tutorials list (help message 0x108b). Circle
+ * fades the screen out and closes the panel; once it has closed the level
+ * moves to result 2, turns the display off and closes the message box. When
+ * that has ended, the tutorial is marked viewed in
+ * g_main_tutorial_progress_masks[0], the menu brightness is restored, WORLD's
+ * formation screen runs the tutorial, and a screen transition brings the
+ * list back. */
 void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* level) {
     if (level->result == 2) {
         if (thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
@@ -1649,9 +1705,11 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
         }
         return;
     }
+
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_FADING) {
         return;
     }
+
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
         if (level->result != 0) {
@@ -1669,6 +1727,7 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
         wldcore_menu_dispatch_resume_handler();
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         level->result = 0;
@@ -1686,9 +1745,10 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
     }
 }
 
-/* Opens an eight-row panel list (entry values 0xc010 + row) whose rows are
- * flagged 8 when bit 32 + row of 0x8004c6bc is set, shown at (0x54, 0x50)
- * with width 0x8c; appends its record tagged 0x2d. Sibling of
+/* Opens the list of the eight battle tutorials (TEXT_ID_TUTORIAL_NAME_BASE +
+ * 16 + row), a row drawn in text color 8 once its bit of
+ * g_main_tutorial_progress_masks[1] shows it was viewed, at (0x54, 0x50),
+ * 0x8c wide, and pushes WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES. Sibling of
  * wldcore_list_open_formation_tutorials. */
 static void wldcore_list_open_battle_tutorials(void) {
     wldcore_window_panel_layout_t layout;
@@ -1698,7 +1758,7 @@ static void wldcore_list_open_battle_tutorials(void) {
     s32 record_index;
 
     for (i = 0; i < 8; i++) {
-        g_wldcore_list_entry_values[i] = i - 0x3FF0;
+        g_wldcore_list_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE + 16;
         if (wldcore_test_bit(&g_main_tutorial_progress_masks[1], i) != 0) {
             g_wldcore_list_row_flags[i] = 8;
         } else {
@@ -1739,14 +1799,18 @@ void wldcore_list_battle_tutorials_block_all_buttons(wldcore_menu_panel_level_t*
     g_menu_blocked_buttons = -1;
 }
 
-/* Input step of a list level that hands the chosen entry to the world script.
+/* Input step of the battle tutorials list, which plays the chosen tutorial as
+ * an event.
  *
- * State 2 waits for thread 14, then marks the selected entry in tutorial
- * progress mask 1, sets script variables 0x1fc and 0x27 and requests the event
- * through system flag 0x200000. While flags & 0xc is 4, a confirmed choice
- * starts thread 14 (state 2) and a canceled one pops the level. Otherwise
- * cancel (0x40) and confirm (0x20) start thread 12 and record the choice;
- * 0x100 on a non-empty list opens help message 0x108c. */
+ * Cross and Circle close the panel and record the choice; Circle also fades
+ * the screen out, and Select on a non-empty list opens help message 0x108c.
+ * Once input is blocked and the fade is over, a cancel pops the level and a
+ * choice turns the display off, closes the message box and moves to result 2.
+ * When the message box has gone, the tutorial is marked viewed in
+ * g_main_tutorial_progress_masks[1], its event is set as
+ * EVENT_SCRIPT_VAR_CURRENT_EVENT (with progress effects suppressed), the
+ * list cursor and weather are saved, and the world loop ends with
+ * MAIN_SYSTEM_FLAG_TUTORIAL_EVENT. */
 void wldcore_list_handle_battle_tutorials_input(wldcore_menu_panel_level_t* level) {
     s16* selected;
 
@@ -1763,6 +1827,7 @@ void wldcore_list_handle_battle_tutorials_input(wldcore_menu_panel_level_t* leve
         }
         return;
     }
+
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED) && !(g_main_system_flags & MAIN_SYSTEM_FLAG_FADING)) {
         if (level->result != 0) {
             g_main_system_flags |= MAIN_SYSTEM_FLAG_DISPLAY_OFF;
@@ -1778,6 +1843,7 @@ void wldcore_list_handle_battle_tutorials_input(wldcore_menu_panel_level_t* leve
         wldcore_menu_dispatch_resume_handler();
         return;
     }
+
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         level->result = 0;
