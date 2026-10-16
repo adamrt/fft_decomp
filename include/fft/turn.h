@@ -7,11 +7,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-typedef enum turn_action_flags {
-    TURN_ACTION_MOVED = 0x01,
-    TURN_ACTION_ACTED = 0x02,
-} turn_action_flags_e;
-
+/* Modes of turn_run_clock. */
 typedef enum turn_clock_mode {
     TURN_CLOCK_MODE_RUN = 0,
     TURN_CLOCK_MODE_RESET = 1,
@@ -37,6 +33,7 @@ typedef enum turn_clock_state {
     TURN_CLOCK_STATE_POISON_AND_REGEN = 19,
 } turn_clock_state_e;
 
+/* Returned by turn_calculate_status_flags. */
 typedef enum turn_status_flags {
     TURN_STATUS_CT_FROZEN = 0x01,
     TURN_STATUS_INCAPACITATED = 0x02,
@@ -57,6 +54,12 @@ typedef enum turn_event {
     TURN_EVENT_NONE = 0xff00,
 } turn_event_e;
 
+/* unit_t.turn_action_flags. */
+typedef enum turn_action_flags {
+    TURN_ACTION_MOVED = 0x01,
+    TURN_ACTION_ACTED = 0x02,
+} turn_action_flags_e;
+
 /* End of turn: CT gains 20 for an unused move and 20 for an unused action, and
  * the result is capped at 60. */
 enum {
@@ -64,16 +67,17 @@ enum {
     TURN_END_CT_MAX = 60,
 };
 
-extern s32 g_turn_event_type;
-extern s32 g_turn_clock_resume_state;
 extern s32 g_turn_clock_state;
+extern s32 g_turn_clock_resume_state;
 extern s32 g_turn_unit_id;
+extern s32 g_turn_event_type; /* turn_event_e */
+
+s32 turn_run_clock(turn_clock_mode_e mode);
+s32 turn_calculate_status_flags(const unit_stats_t* unit);
 void turn_start_next_event(void);
+void turn_set_move_taken(s32 unit_id);
+void turn_set_act_taken(s32 unit_id);
 s32 turn_is_over(s32 unit_id);
 s32 turn_end(s32 unit_id);
-s32 turn_run_clock(turn_clock_mode_e mode);
-void turn_set_act_taken(s32 unit_id);
-void turn_set_move_taken(s32 unit_id);
-s32 turn_calculate_status_flags(const unit_stats_t* unit);
 
 #endif

@@ -1,7 +1,8 @@
 #ifndef AI_DECISION_H
 #define AI_DECISION_H
 
-/* Declarations. */
+/* How the battle AI decides a turn: action selection, targets, movement, ability evaluation, ranking, simulation and
+ * facing. Each pass may suspend on its frame budget and resume next frame from the stage it saved in the workspace. */
 
 #include "fft/ai.h"
 #include "fft/battle_map.h"
@@ -9,6 +10,7 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
+/* frame budget */
 /* Scanlines since vertical blank at which each search yields. */
 enum {
     AI_TURN_SIMULATION_SCANLINE_LIMIT = 313,
@@ -18,6 +20,7 @@ enum {
 
 s32 ai_is_pathfinding_budget_exhausted(void);
 
+/* action selection */
 /* Byte-sized resume labels for initial action selection; the gaps are not dispatched. */
 typedef enum ai_initial_selection_stage {
     AI_INITIAL_SELECTION_STATUS = 0,
@@ -70,6 +73,7 @@ enum {
 
 extern u8 g_ai_protect_allies_status_ids[AI_PROTECT_ALLIES_STATUS_COUNT];
 
+/* target selection */
 typedef enum ai_unit_filter {
     AI_UNIT_FILTER_ANY = 0,
     AI_UNIT_FILTER_ENEMIES = 1,
@@ -100,13 +104,15 @@ s32 ai_target_find_nearest(ai_nearest_target_mode_e mode);
 s32 ai_find_unit_at_coordinates(const ai_coords_t* coords);
 s32 ai_target_is_untargetable(s32 unit_id);
 
+/* status and turn timing */
+s32 ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit);
+s32 ai_status_is_active_through_delay(s32 delay, const unit_stats_t* unit, s32 status_id);
+
 /* Declared without parameters: callers pass only the unit, and the definition takes two more
  * that it overwrites before use. */
 s32 ai_calculate_clockticks_until_death_counter_expires();
 
-s32 ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit);
-s32 ai_status_is_active_through_delay(s32 delay, const unit_stats_t* unit, s32 status_id);
-
+/* movement */
 typedef enum ai_movement_stage {
     AI_MOVEMENT_TARGET_DISTANCE = 0,
     AI_MOVEMENT_SCORE_TILES = 1,
@@ -126,9 +132,9 @@ extern s32 g_ai_move_propagation_resume_pass;
 
 s32 ai_move_propagate_from_target(
     s32 unit_id, s32 target_x, s32 target_y, s32 target_elevation, s32 initialize, s32* suspended, s32 check_budget);
-
 void ai_record_triggered_trap_coords(s32 x, s32 y, s32 level);
 
+/* target geometry */
 typedef enum ai_tile_mask_mode {
     AI_TILE_MASK_RANGE = 0,
     AI_TILE_MASK_AOE = 1,
@@ -137,6 +143,7 @@ typedef enum ai_tile_mask_mode {
 } ai_tile_mask_mode_e;
 
 extern u16 g_ai_origin_range_row_masks[];
+
 void ai_origin_build_cast_and_aim_tiles(void);
 s32 ai_calculate_distance_between_units(const unit_stats_t* a, const unit_stats_t* b);
 s32 ai_calculate_height_difference(const ai_coords_t* coords, const unit_stats_t* unit);
@@ -144,6 +151,7 @@ void ai_copy_unit_coordinates(s32 unit_index, ai_coords_t* destination);
 s32 ai_count_flagged_tiles_within_map_bounds(u16 rows[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]);
 s32 ai_origin_is_allowed(const ai_coords_t* coordinates);
 
+/* ability evaluation */
 typedef enum ai_ability_evaluation_stage {
     AI_ABILITY_EVALUATION_REFLECTED_TARGETS = 0,
     AI_ABILITY_EVALUATION_SELF_TARGET_RANGE = 1,
@@ -174,10 +182,12 @@ typedef enum ai_charging_stage {
 } ai_charging_stage_e;
 
 extern s32 g_ai_origin_self_target_stage;
+
 s32 ai_ability_evaluate_outcome(void);
 s32 ai_origin_evaluate_before_and_after_move(void);
 s32 ai_evaluate_current_action(void);
 
+/* math skill */
 enum {
     AI_MATH_SOURCE_SKILLSET_COUNT = 4,
     AI_MATH_EXTRA_KNOWN_ABILITY_COUNT = 10,
@@ -189,8 +199,6 @@ extern u8 g_ai_math_extra_known_ability_ids[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
 extern s32 g_ai_math_skillset_id;
 extern s32 g_ai_math_skillset_index;
 extern u8 g_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
-
-/* Cancellation-search accounting survives suspension. */
 
 /* action ranking */
 typedef enum ai_rank_order {
@@ -204,6 +212,7 @@ void ai_rank_insert_best(void);
 s32 ai_rank_is_higher(const ai_action_data_t* a, const ai_action_data_t* b);
 void ai_rank_reset_action(ai_action_data_t* action);
 
+/* simulation */
 /* Turn-event iteration limit for one simulated action. */
 enum {
     AI_SIMULATED_TURN_LIMIT = 256,
@@ -257,19 +266,19 @@ typedef struct ai_extended_snapshot {
     u8 mount_info;
     u8 _padding_3f; /* tail padding to 2-byte alignment */
 } ai_extended_snapshot_t;
-
 typedef char ai_extended_snapshot_must_be_64[sizeof(ai_extended_snapshot_t) == 64 ? 1 : -1];
 
 /* Unit snapshots share the scratchpad-save arena used during movement propagation. */
 extern ai_extended_snapshot_t g_ai_unit_snapshot_storage[];
-
 extern ai_extended_snapshot_t* g_ai_unit_snapshots;
+
 void ai_simulate_begin(void);
 void ai_simulate_end(void);
 void ai_place_acting_unit(const ai_coords_t* coordinates);
 s32 ai_simulate_action_and_score(void);
 void ai_update_tile_pickup(void);
 
+/* facing */
 /* Only the four cardinal hints index the tile-delta table. */
 enum {
     AI_CARDINAL_DIRECTION_COUNT = 4,
@@ -290,6 +299,7 @@ typedef struct ai_facing_tile_offsets {
 } ai_facing_tile_offsets_t;
 
 extern ai_facing_tile_offsets_t g_ai_facing_tile_offsets;
+
 s32 ai_facing_choose_for_wait(void);
 ai_direction_e ai_facing_find_target_direction(const ai_coords_t* target, const ai_coords_t* origin);
 

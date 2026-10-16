@@ -31,14 +31,14 @@ typedef struct render_buffer {
     u8 _unused_e5b8[0x70];                        /* 0x0e5b8 */
     POLY_FT3 ft3[RENDER_WEATHER_SPRITE_COUNT];    /* 0x0e628 */
 } render_buffer_t;
-
 typedef char render_buffer_size_must_be_60968[(sizeof(render_buffer_t) == 60968) ? 1 : -1];
+
+extern render_buffer_t g_render_buffers[2];
 
 /* The buffer being built this frame; gfx_swap_and_clear_battle_otag alternates
  * it between the two g_render_buffers entries. */
 extern render_buffer_t* g_render_current_buffer;
 
-extern render_buffer_t g_render_buffers[2];
 void render_init_buffers(void);
 
 #endif

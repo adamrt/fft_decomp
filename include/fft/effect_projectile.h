@@ -1,7 +1,8 @@
 #ifndef EFFECT_PROJECTILE_H
 #define EFFECT_PROJECTILE_H
 
-/* Declarations. */
+/* BATTLE's projectile secondary effects: the flight state of arcing arrows and straight shots, and the projectile
+ * models with their polygon buffers. */
 
 #include "fft/gfx.h"
 #include "fft/projectile.h"
@@ -10,20 +11,30 @@
 #include "psx/types.h"
 
 typedef char assert_effect_obstacle_unit_list_size[sizeof(projectile_obstacle_unit_list_t) == 280 ? 1 : -1];
-extern s16 g_effect_arrow_arc_caster_relative_yaw;
-extern s32 g_effect_arrow_arc_distance;
-extern s32 g_effect_arrow_arc_distance_step;
-extern s32 g_effect_arrow_arc_height;
-extern s16 g_effect_arrow_arc_launch_angle;
+
+/* arrow arc */
+/* Flight state of effect_secondary_arrow_arc_handler, set in its first phase from the traced trajectory
+ * (g_projectile_*): heading, launch pitch, distance along the arc, steps left and the yaw rotation matrix. */
 extern s32 g_effect_arrow_arc_length;
 extern u16 g_effect_arrow_arc_yaw;
-extern VECTOR g_effect_projectile_delta;
+extern s16 g_effect_arrow_arc_caster_relative_yaw;
+extern s32 g_effect_arrow_arc_height;
+extern s16 g_effect_arrow_arc_launch_angle;
+extern s32 g_effect_arrow_arc_distance;
+extern s32 g_effect_arrow_arc_distance_step;
+extern s16 g_effect_projectile_step_count;
+extern MATRIX g_effect_projectile_matrix;
+
+/* straight flight */
+/* Flight state of effect_secondary_linear_projectile_handler: the origin-to-destination offset and its length, the
+ * progress and speed along it, and the frames left (spin passes). */
 extern s32 g_effect_projectile_length;
+extern VECTOR g_effect_projectile_delta;
 extern s32 g_effect_projectile_progress;
 extern s32 g_effect_projectile_speed;
 extern s16 g_effect_projectile_spin_passes;
-extern s16 g_effect_projectile_step_count;
 
+/* models */
 /* The projectile models of g_effect_model_files. */
 typedef enum effect_model {
     EFFECT_MODEL_ARROW = 0,
@@ -63,7 +74,6 @@ typedef struct effect_decoded_model_command {
         u16 indices[4];
     } vertices; /* 0x68 */
 } effect_decoded_model_command_t;
-
 typedef char effect_decoded_model_command_size_must_be_112[sizeof(effect_decoded_model_command_t) == 112 ? 1 : -1];
 
 /* 0xc88-byte arrow work buffer of effect_secondary_arrow_arc_handler and
@@ -74,7 +84,6 @@ typedef struct effect_arrow_buffer {
     POLY_G4 g4[2][13]; /* 0x0e0 */
     u8 _unused_488[0x800];
 } effect_arrow_buffer_t;
-
 typedef char effect_arrow_buffer_size_must_be_3208[(sizeof(effect_arrow_buffer_t) == 3208) ? 1 : -1];
 
 /* Double-buffered polygons initialized by the secondary handler and drawn by
@@ -92,14 +101,14 @@ typedef struct effect_reflect_buffer {
     POLY_GT3 prims[2][24];
 } effect_reflect_buffer_t;
 
-extern s32 g_effect_model_command_word_offset;
-extern psyq_tmd_packet_t* g_effect_model_commands;
 extern psyq_tmd_header_t* g_effect_model_files[];
-extern SVECTOR* g_effect_model_normals;
 extern psyq_tmd_object_t* g_effect_model_object;
 extern SVECTOR* g_effect_model_vertices;
-extern MATRIX g_effect_projectile_matrix;
-void effect_model_decode_next_command(effect_decoded_model_command_t* out);
+extern SVECTOR* g_effect_model_normals;
+extern psyq_tmd_packet_t* g_effect_model_commands;
+extern s32 g_effect_model_command_word_offset;
+
 s32 effect_model_init_sections(psyq_tmd_header_t* resource, s32 unused_1);
+void effect_model_decode_next_command(effect_decoded_model_command_t* out);
 
 #endif

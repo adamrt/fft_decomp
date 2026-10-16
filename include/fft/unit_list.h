@@ -1,7 +1,8 @@
 #ifndef UNIT_LIST_H
 #define UNIT_LIST_H
 
-/* The Unit List (BUNIT): the grid, sorting and its job and ability pages. */
+/* The Unit List screen, EVENT/BUNIT.OUT (a BATTLE overlay): its unit records and sorting, the unit grid, the reorder
+ * list, the job page, the status banner, help, cursors, graphics, input and text. */
 
 #include "fft/gfx.h"
 #include "fft/help.h"
@@ -15,9 +16,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* The live units, chained through unit_t.previous. */
-extern unit_t* g_unit_list_head;
-
+/* screen */
+/* g_unit_list_current_menu: what unit_list_entrypoint runs. */
 typedef enum unit_list_menu {
     UNIT_LIST_MENU_UNIT_LIST = -1,   /* unit_list_run_frame: the grid and its triangle menu */
     UNIT_LIST_MENU_REORDER_LIST = 0, /* unit_list_run_sort_menu, the triangle menu's first row */
@@ -25,6 +25,7 @@ typedef enum unit_list_menu {
 } unit_list_menu_e;
 
 enum { UNIT_LIST_SELECTION_RECORD_COUNT = 14 };
+
 extern s32 g_unit_list_current_menu; /* unit_list_menu_e */
 extern s16 g_unit_list_primary_result;
 extern s8 g_unit_list_selected_battle_id;
@@ -32,12 +33,28 @@ extern s16 g_unit_list_comparison_index;
 extern u8 g_unit_list_saved_status_banner_enabled;
 extern u8 g_unit_list_saved_unit_browse_enabled;
 extern clut_t g_unit_list_clut;
+
 s32 unit_list_entrypoint(s32 unused_unit, void* unused_otag);
 void unit_list_reset_results(void);
 s32 unit_list_is_busy(void);
-s32 unit_list_run_menu_thread(s32 id, menu_entry_t* desc);
-void unit_list_update_help_cursor(s16 mode);
 
+/* The event library's thread entry for the menu row that opens the Unit List: it runs the screen's transition in a
+ * child thread slot and waits for it. */
+void unit_list_open(void);
+
+/* menu threads */
+/* Slots of the unit list screen's own menus; thread_screen_slot_e
+ * has the shared ones. */
+typedef enum unit_list_thread_slot {
+    UNIT_LIST_THREAD_SLOT_MENU = 5,          /* the unit list's triangle menu */
+    UNIT_LIST_THREAD_SLOT_REORDER_MENU = 15, /* the reorder list */
+} unit_list_thread_slot_e;
+
+extern u8 g_unit_list_thread_running;
+
+s32 unit_list_run_menu_thread(s32 id, menu_entry_t* desc);
+
+/* unit records */
 /* Unit List menu snapshot built from unit_stats_t, with display values and
  * the battle_id used to return the selected unit. */
 typedef struct unit_list_record {
@@ -90,8 +107,8 @@ typedef struct unit_list_record {
     u8 _padding_0bb;                          /* aligns job_points */
     unit_job_points_t job_points;             /* 0xbc; current JP followed by total JP */
 } unit_list_record_t;
-
 typedef char unit_list_record_size_must_be_268[(sizeof(unit_list_record_t) == 268) ? 1 : -1];
+
 extern unit_list_record_t* g_unit_list_pointers[];
 
 /* 16-bit field index into unit_list_record_t, per sort key, used by
@@ -101,6 +118,8 @@ extern s8 g_unit_list_sort_field_indices[];
 s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode);
 s32 unit_list_find_by_battle_id(s16 battle_id);
 void unit_list_sort(s32 sort_mode);
+
+/* unit list */
 extern u8 g_unit_list_list_initialized;
 extern u8 g_unit_list_list_count;
 extern u8 g_unit_list_list_index_map[];
@@ -109,9 +128,12 @@ extern s8 g_unit_list_list_scroll_step;
 extern u8 g_unit_list_browse_enabled;
 extern menu_entry_t g_unit_list_list_triangle_menu;
 extern u8 g_unit_list_list_triangle_menu_open;
+
 void unit_list_init(s32 unused_selected_index);
 void unit_list_build_index_map(void);
 s32 unit_list_is_scroll_needed(void);
+
+/* unit grid */
 extern u8 g_unit_list_grid_selected_cell;
 extern point16_t g_unit_list_grid_cursor_target;
 extern u8 g_unit_list_stat_mode; /* menu_unit_readout_e */
@@ -143,15 +165,15 @@ extern oriented_quad_t g_unit_list_shadow_sprite;
 extern s8 g_unit_list_dot_glow_direction;
 extern s8 g_unit_list_dot_glow_timer;
 extern menu_button_piece_t g_unit_list_slot_sprite_entries[];
+extern u8 g_unit_list_sprite_cell_sizes[][2];
 
 /* Signed 4.12 x/y scale pair per sprite entry; a negative scale flips the quad. */
 extern s16 g_unit_list_button_piece_scales[][2];
 
-extern u8 g_unit_list_sprite_cell_sizes[][2];
-
 s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_panel, s16 allow_stat_cycle,
     s16 stat_mode, s16 buttons, s16 locked);
 
+/* reorder list */
 extern u8 g_unit_list_reorder_list_initialized;
 extern menu_entry_t g_unit_list_reorder_list_desc[];
 extern s16 g_unit_list_reorder_list_entries[];
@@ -160,54 +182,59 @@ extern s16 g_unit_list_reorder_list_redraw_request;
 extern s16 g_unit_list_reorder_result;
 extern u8 g_unit_list_reorderable_count;
 extern u8 g_unit_list_reorderable_indices[];
+
 void unit_list_run_sort_menu(void);
 s32 unit_list_build_sortable(void);
 void unit_list_load_sort_order(s32 unused, s16* entries);
 void unit_list_store_sort_order(s32 unused, const s16* entries);
+
+/* job page */
 void unit_list_update_job_page(void);
 s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2);
+
+/* status banner */
 extern u8 g_unit_list_status_banner_enabled;
 extern u8 g_unit_list_status_banner_at_bottom;
 extern u8 g_unit_list_status_banner_at_bottom_latch;
 extern s8 g_unit_list_status_banner_slide_step;
+
+/* help */
 extern s32 g_unit_list_help_screen_id; /* help_grid_id_e */
 extern help_navigation_record_t* g_unit_list_help_nodes;
 extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[];
 extern u8 g_unit_list_help_node_index;
+extern u16 g_unit_list_help_cursor_anim_state;
+extern u8 g_unit_list_help_cursor_initialized;
 
 /* Aliases of g_unit_list_help_nodes/g_unit_list_help_node_index; the target reloads them at each use
  * instead of reusing the cached copies, which separate symbols reproduce. */
 extern help_navigation_record_t* g_unit_list_help_nodes_reload;
-
 extern u8 g_unit_list_help_node_index_reload;
 extern u8 g_unit_list_help_node_index_reload_2;
 
 /* g_unit_list_help_nodes_unit_browse[23].help_base and [24].help_base as their own symbols: as element
  * accesses GCC derives the second store and the later table address from one base register. */
 extern s16 g_unit_list_help_node_23_help_base;
-
 extern s16 g_unit_list_help_node_24_help_base;
-extern u16 g_unit_list_help_cursor_anim_state;
-extern u8 g_unit_list_help_cursor_initialized;
+
+void unit_list_update_help_cursor(s16 mode);
+
+/* cursors */
+extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
+extern u16 g_unit_list_list_cursor_anim_state;
 
 /* Oriented-quad descriptors for the two cursor halves. */
 extern oriented_quad_t g_unit_list_cursor_sprite;
-
 extern oriented_quad_t g_unit_list_cursor_shadow_sprite;
 
 /* Rhombus-cursor trail, oldest point first; x == -1 marks an empty slot
  * (unit_list_init_cursor_trail clears all eight). */
 extern point16_t g_unit_list_cursor_trail_points[8];
-
 extern u8 g_unit_list_cursor_trail_brightness[];
-extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
-extern u16 g_unit_list_list_cursor_anim_state;
 
-/* Base of the two frame buffers; g_menu_gfx_context alternates between them. */
-extern menu_gfx_context_t* g_unit_list_gfx_context_base;
-
+/* graphics */
 extern u16 g_unit_list_gfx_draw_area_capacity;
 extern u16 g_unit_list_gfx_draw_move_capacity;
 extern s16 g_unit_list_gfx_line_f2_count;
@@ -216,57 +243,58 @@ extern u16 g_unit_list_gfx_background_tile_layout[2][8]; /* per row parity: four
 extern s16 g_unit_list_gfx_falloff_focus_x;
 extern s16 g_unit_list_gfx_falloff_focus_y;
 
+/* Base of the two frame buffers; g_menu_gfx_context alternates between them. */
+extern menu_gfx_context_t* g_unit_list_gfx_context_base;
+
 void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,
     POLY_GT3* gouraud_textured_triangles, POLY_G4* gouraud_quads, POLY_GT4* gouraud_textured_quads, LINE_F2* flat_lines,
     LINE_F3* flat_lines_3, LINE_F4* flat_lines_4, LINE_G2* gouraud_lines, LINE_G3* gouraud_lines_3,
     LINE_G4* gouraud_lines_4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
-
 void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag);
 void unit_list_draw_shaded_rows(s32 y);
 
-/* Named fields hoist the address; keep the 32-bit event-input alias for scalar accesses. */
-extern menu_input_state_t g_unit_list_input_event_state;
-
+/* input */
 extern u16 g_unit_list_input_latched_button;
 extern u16 g_unit_list_input_previous;
 extern u32 g_unit_list_input_primary_repeat;
 extern u32 g_unit_list_input_secondary_repeat;
-s32 unit_list_get_input_lock(void);
 
+/* Named fields hoist the address; keep the 32-bit event-input alias for scalar accesses. */
+extern menu_input_state_t g_unit_list_input_event_state;
+
+s32 unit_list_get_input_lock(void);
+void unit_list_update_input(void);
+
+/* menu commands */
 /* The opcode that ends a BUNIT menu display stream. */
 enum {
     UNIT_LIST_SCRIPT_END = 0x1c,
 };
 
 extern s16 g_unit_list_list_scroll_entry_ids[];
+
+/* text */
 extern const char g_unit_list_text_decimal_format[];
+extern u8 g_unit_list_help_text_state;
 
 /* Text-section buffers: unit_list_run_sort_menu passes g_unit_list_text_reorder_list_buffer
  * straight to text_concatenate_entries as its u8* output string and
  * g_unit_list_text_menu_section as the text-section base; unit_list_init_vram_and_fade
  * installs both addresses as u8* text-section pointers. */
 extern u8 g_unit_list_text_menu_section[];
-
 extern u8 g_unit_list_text_reorder_list_buffer[];
-extern u8 g_unit_list_help_text_state;
+
 void unit_list_start_text_thread(s32 thread_data);
+
+/* bit streams */
 extern const u8* g_unit_list_bits_cursor;
 extern s32 g_unit_list_bits_index;
 extern u8 g_unit_list_bits_reader_reset;
 
-/* Slots of the unit list screen's own menus; thread_screen_slot_e
- * has the shared ones. */
-typedef enum unit_list_thread_slot {
-    UNIT_LIST_THREAD_SLOT_MENU = 5,          /* the unit list's triangle menu */
-    UNIT_LIST_THREAD_SLOT_REORDER_MENU = 15, /* the reorder list */
-} unit_list_thread_slot_e;
-
-extern u8 g_unit_list_thread_running;
-void unit_list_update_input(void);
-
-/* Thread entries of the menu rows that open an overlay screen. */
-void unit_list_open(void);
+/* live units (BATTLE) */
+/* The live units, chained through unit_t.previous. */
+extern unit_t* g_unit_list_head;
 
 #endif

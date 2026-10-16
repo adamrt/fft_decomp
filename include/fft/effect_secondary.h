@@ -1,7 +1,7 @@
 #ifndef EFFECT_SECONDARY_H
 #define EFFECT_SECONDARY_H
 
-/* Declarations. */
+/* BATTLE secondary effects: their records, animations, handlers, particle groups, effect slots and handler states. */
 
 #include "fft/effect.h"
 #include "fft/effect_file.h"
@@ -11,12 +11,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* secondary effects */
 /* Sixteen secondary effects may run at once; record zero anchors their chains. */
 enum {
     EFFECT_SECONDARY_SLOT_COUNT = 16,
     EFFECT_SECONDARY_RECORD_COUNT = EFFECT_SECONDARY_SLOT_COUNT + 1,
 };
 
+/* The stage a secondary effect's handler runs (effect_secondary_data_t.phase). */
 typedef enum effect_secondary_phase {
     EFFECT_SECONDARY_PHASE_ENDED = 0, /* the slot is free */
     EFFECT_SECONDARY_PHASE_INITIALIZING = 1,
@@ -63,20 +65,29 @@ typedef struct effect_secondary_data {
     u8 slot_ids[0x20]; /* 0x30; its effect slots, 0 for none; cleared when the record is allocated */
     void* allocation;  /* 0x50; the handler's work block; freed when the record is removed */
 } effect_secondary_data_t;
-
 typedef char effect_secondary_data_size_must_be_84[(sizeof(effect_secondary_data_t) == 84) ? 1 : -1];
+
 typedef s32 (*effect_secondary_callback_t)(void);
-extern u16 g_effect_secondary_active_tail;
-extern struct effect_secondary_data* g_effect_secondary_current;
-extern u16 g_effect_secondary_free_head;
+
 extern effect_secondary_data_t g_effect_secondary_data[];
+extern u16 g_effect_secondary_free_head;
+extern u16 g_effect_secondary_active_tail;
+extern u32 g_effect_secondary_current_id;
+extern struct effect_secondary_data* g_effect_secondary_current;
 extern effect_secondary_callback_t g_effect_secondary_handlers[23];
 extern u8 g_effect_secondary_charge_id; /* id of the charge secondary effect started with the ability; 0 none */
-s32 effect_secondary_init(s32 animation_id, s32 parameter, struct effect_secondary_init* source);
-void effect_secondary_finalize(u8 secondary_id);
-effect_secondary_phase_e effect_secondary_get_phase(u8 secondary_id);
-s32 effect_secondary_update(void);
 
+/* Set by effect_secondary_update each frame: the ordering table the secondary effects add their primitives to, and
+ * the display buffer (0 or 1) whose primitives they fill. */
+extern u32* g_effect_polygon_depth_data;
+extern s32 g_effect_buffer_index;
+
+s32 effect_secondary_init(s32 animation_id, s32 parameter, struct effect_secondary_init* source);
+s32 effect_secondary_update(void);
+effect_secondary_phase_e effect_secondary_get_phase(u8 secondary_id);
+void effect_secondary_finalize(u8 secondary_id);
+
+/* animations */
 /* Index into g_effect_secondary_animations: the secondary effects resident in BATTLE.BIN. Those
  * the code does not start by number come from two tables: the weapon type's projectile
  * (g_effect_weapon_projectile_animations) and the ability's charge animation set
@@ -122,8 +133,8 @@ typedef struct effect_secondary_animation {
     s16 parameter;
 } effect_secondary_animation_t;
 
-extern u8 g_effect_secondary_ending_function_id; /* function byte to store; 5 = nothing */
 extern effect_secondary_animation_t g_effect_secondary_animations[];
+extern u8 g_effect_secondary_ending_function_id; /* function byte to store; 5 = nothing */
 
 /* Secondary-animation id per charge animation set, indexed by the low 16 bits of the
  * caller's packed argument. */
@@ -137,6 +148,7 @@ extern u8 g_effect_weapon_projectile_animations[];
  * sprite palette (the secondary effect's parameter). */
 extern u8 g_effect_zodiac_poof_animations[];
 
+/* elements */
 /* What effect_get_element_index makes of an element mask: the position of its first element in
  * g_effect_element_masks, 0 for no element. It picks the CLUT of the weapon hit and
  * spell charge particles and the effect of a thrown ball. */
@@ -153,8 +165,10 @@ typedef enum effect_element_index {
 } effect_element_index_e;
 
 extern u8 g_effect_element_masks[];
+
 s32 effect_get_element_index(s32 elements);
 
+/* particle groups */
 /* Index into g_effect_trap_particle_configs: the particle groups of the secondary effect
  * handlers, named after the handler that spawns each. */
 typedef enum effect_particle_group {
@@ -203,7 +217,6 @@ typedef struct effect_emitter_values {
     s8 lifetime_min;        /* 0x2c */
     s8 lifetime_max;        /* 0x2d */
 } effect_emitter_values_t;
-
 typedef char effect_emitter_values_size_must_be_46[(sizeof(effect_emitter_values_t) == 46) ? 1 : -1];
 
 /* The inertia threshold every secondary effect handler runs its slots under, with a gravity of
@@ -219,20 +232,19 @@ extern effect_emitter_values_t g_effect_trap_particle_configs[17];
 
 s32 effect_slot_spawn_motion(effect_emitter_values_t* values, effect_motion_t* motion);
 
+/* effect slots */
 /* One playback step of the animation script referenced by an effect slot:
  * a hold count and the frame id written to the slot. */
 typedef struct effect_anim_step {
     u8 hold;  /* 0x00 */
     u8 frame; /* 0x01 */
 } effect_anim_step_t;
-
 typedef char effect_anim_step_size_must_be_2[sizeof(effect_anim_step_t) == 2 ? 1 : -1];
 
 typedef struct effect_anim_script {
     s16 count;                  /* 0x00 */
     effect_anim_step_t step[0]; /* 0x02; count steps follow */
 } effect_anim_script_t;
-
 typedef char effect_anim_script_size_must_be_2[sizeof(effect_anim_script_t) == 2 ? 1 : -1];
 
 /* 0xcc-byte effect slots of g_effect_slots, chained through the leading next/prev
@@ -257,12 +269,13 @@ typedef struct effect_slot {
     u8 _padding_96[0x02];         /* aligns motion */
     effect_motion_t motion;       /* 0x98 */
 } effect_slot_t;
-
 typedef char assert_effect_slot_size[sizeof(effect_slot_t) == 204 ? 1 : -1];
-extern u8 g_effect_slot_active_head;
-extern u32 g_effect_secondary_current_id;
-extern u8 g_effect_slot_free_head;
+
 extern effect_slot_t g_effect_slots[];
+extern u8 g_effect_slot_active_head;
+extern u8 g_effect_slot_free_head;
+extern effect_sprite_section_t g_effect_trap_frame_data;
+extern effect_sprite_section_t* g_effect_trap_frame_data_ptr;
 
 /* Self-relative animation script table: each 16-bit value is a byte offset from
  * the table's own base to a effect_anim_script_t. Declared as bytes
@@ -273,17 +286,15 @@ extern effect_slot_t g_effect_slots[];
  * effect_slot_init_trap_animation. */
 extern u8 g_effect_trap_animation_data[];
 
-extern effect_sprite_section_t g_effect_trap_frame_data;
-extern effect_sprite_section_t* g_effect_trap_frame_data_ptr;
 s32 effect_slot_update(s32 id);
 
+/* handler states */
 /* Per-secondary-slot spawn state for the two-particle death poof. */
 typedef struct effect_death_poof_state {
     s32 count;        /* 0x00; slots started so far */
     u16 finish_timer; /* 0x04; reaches 1 when the effect is finished */
     u8 ids[2];        /* 0x06 */
 } effect_death_poof_state_t;
-
 typedef char effect_death_poof_state_size_must_be_8[sizeof(effect_death_poof_state_t) == 8 ? 1 : -1];
 
 /* One trail of the spell charge effect: the recent screen positions of the effect slot it follows. */
@@ -294,6 +305,9 @@ typedef struct effect_charge_trail {
     u8 _padding_1f;    /* tail padding to 2-byte alignment */
 } effect_charge_trail_t;
 
+/* Spell-charge state: the center the trails converge on, two buffers of 96 additive lines (16 trails of 6 segments),
+ * its particle ids and counts, and the parameters copied from its g_effect_charge_line_params row; color is the
+ * charge's element index. */
 typedef struct effect_charge_state {
     s16 x;                            /* 0x0000 */
     s16 y;                            /* 0x0002 */
@@ -332,7 +346,6 @@ typedef struct effect_charge_params {
     u8 max_trails;
     u8 fade_row;
 } effect_charge_params_t;
-
 typedef char effect_charge_params_size_must_be_14[sizeof(effect_charge_params_t) == 14 ? 1 : -1];
 
 /* g_effect_charge_line_fade_levels holds rows of seven fade steps,
@@ -366,58 +379,58 @@ typedef union effect_secondary_state {
     effect_trap_state_24_t zodiac_poof;
 } effect_secondary_state_t;
 
-extern s32 g_effect_buffer_index;
+extern effect_secondary_state_t g_effect_secondary_state;
+extern effect_death_poof_state_t g_effect_death_poof_states[];
+extern effect_charge_params_t g_effect_charge_line_params[2];
 extern DVECTOR g_effect_charge_line_direction_offsets[];
 extern u8 g_effect_charge_line_fade_levels[];
-extern effect_charge_params_t g_effect_charge_line_params[2];
-extern effect_death_poof_state_t g_effect_death_poof_states[];
-extern u32* g_effect_polygon_depth_data;
-
-/* Six RGB byte triples, packed into both CLUT images as 15-bit colors. */
-extern rgb24_t g_effect_reflect_palette_colors[6];
-
-extern effect_secondary_state_t g_effect_secondary_state;
+extern rgb24_t g_effect_trap_colors[]; /* spell-charge trail color of each effect_element_index_e */
 
 /* Brightness (out of 128) of each of a summon-charge ring's ten slots, newest point first. */
 extern u8 g_effect_summon_ring_brightness[];
 
-extern rgb24_t g_effect_trap_colors[];
-s32 effect_secondary_unused_07_handler(void);
-s32 effect_secondary_unused_0a_handler(void);
-s32 effect_secondary_unused_0b_handler(void);
-s32 effect_secondary_unused_0e_handler(void);
-s32 effect_secondary_unused_10_handler(void);
+/* Six RGB byte triples, packed into both CLUT images as 15-bit colors. */
+extern rgb24_t g_effect_reflect_palette_colors[6];
+
+/* handlers */
 s32 effect_secondary_none_handler(void);
 s32 effect_secondary_arrow_arc_handler(void);
-s32 effect_secondary_equip_break_handler(void);
-s32 effect_secondary_fall_dust_handler(void);
+s32 effect_secondary_weapon_hit_handler(void);
 s32 effect_secondary_golem_handler(void);
-s32 effect_secondary_level_up_handler(void);
-s32 effect_secondary_linear_projectile_handler(void);
+s32 effect_secondary_spell_charge_handler(void);
 s32 effect_secondary_null_handler(void);
 s32 effect_secondary_red_orbs_handler(void);
-s32 effect_secondary_reflect_handler(void);
-s32 effect_secondary_spell_charge_handler(void);
+s32 effect_secondary_unused_07_handler(void);
+s32 effect_secondary_fall_dust_handler(void);
 s32 effect_secondary_splash_handler(void);
-s32 effect_secondary_summon_charge_handler(void);
-s32 effect_secondary_teleport_handler(void);
-s32 effect_secondary_death_poof_handler(s32 unused_arg0, s32 passthrough);
+s32 effect_secondary_unused_0a_handler(void);
+s32 effect_secondary_unused_0b_handler(void);
 s32 effect_secondary_trap_handler(void);
-s32 effect_secondary_weapon_hit_handler(void);
+s32 effect_secondary_level_up_handler(void);
+s32 effect_secondary_unused_0e_handler(void);
+s32 effect_secondary_death_poof_handler(s32 unused_arg0, s32 passthrough);
+s32 effect_secondary_unused_10_handler(void);
 s32 effect_secondary_zodiac_poof_handler(void);
-void effect_secondary_build_init(struct unit* unit, struct effect_secondary_init* effect);
-s32 effect_secondary_init_fall_dust(effect_secondary_init_t* source, VECTOR* position);
+s32 effect_secondary_reflect_handler(void);
+s32 effect_secondary_teleport_handler(void);
+s32 effect_secondary_linear_projectile_handler(void);
+s32 effect_secondary_equip_break_handler(void);
+s32 effect_secondary_summon_charge_handler(void);
+
+/* starting secondary effects */
 s32 effect_secondary_init_projectile(s32 animation, struct effect_secondary_init* source);
 s32 effect_secondary_init_weapon_hit(s32 elements, effect_secondary_init_t* source, s32 unused_is_bow);
+s32 effect_secondary_init_fall_dust(effect_secondary_init_t* source, VECTOR* position);
+void effect_secondary_build_init(struct unit* unit, struct effect_secondary_init* effect);
 void effect_secondary_start_weapon_hit(struct unit* unit, s32 is_bow);
 void effect_secondary_start_projectile(unit_t* unit);
+void effect_secondary_set_zodiac_poof(unit_t* unit);
 void effect_secondary_set_death_smoke(unit_t* unit);
-void effect_secondary_set_fall_dust(struct unit* unit);
 void effect_secondary_set_level_up(struct unit* unit);
+void effect_secondary_set_trap(unit_t* unit);
 void effect_secondary_set_splash(struct unit* unit);
+void effect_secondary_set_fall_dust(struct unit* unit);
 void effect_secondary_set_teleport(struct unit* unit);
 s32 effect_secondary_set_teleport_by_runtime_id(u32 runtime_id);
-void effect_secondary_set_trap(unit_t* unit);
-void effect_secondary_set_zodiac_poof(unit_t* unit);
 
 #endif

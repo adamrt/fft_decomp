@@ -1,13 +1,14 @@
 #ifndef ZODIAC_H
 #define ZODIAC_H
 
-/* Zodiac signs and their pictures. */
+/* Zodiac signs: their compatibility, the tables that give a birthday its sign, and the scaled zodiac pictures. */
 
 #include "fft/calendar.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* signs */
 /* The compatibility table is indexed by absolute zodiac-ID difference, not
  * by a particular sign. Value 3 is resolved from sex and monster flags. */
 typedef enum zodiac_compatibility {
@@ -19,26 +20,12 @@ typedef enum zodiac_compatibility {
     ZODIAC_COMPATIBILITY_BEST = 5,
 } zodiac_compatibility_e;
 
-/* The scaled zodiac sprites and their backdrop. */
-void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
-
-void zodiac_build_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
-    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
-
-extern upoint16_t g_zodiac_screen_position;
-extern POLY_FT4 g_zodiac_primitives[2][30];
-void zodiac_load_frame(void);
-void zodiac_call_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
-extern const u16 g_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
-s32 zodiac_calculate_sign(u16 birthday);
-
 /* One inclusive date limit and its zodiac ID. The 13-entry WORLD table has
  * Capricorn at both calendar ends and does not contain Serpentarius. */
 typedef struct zodiac_date_limit {
     calendar_date_t date;
     u8 zodiac;
 } zodiac_date_limit_t;
-
 typedef char zodiac_date_limit_size_must_be_3[(sizeof(zodiac_date_limit_t) == 3) ? 1 : -1];
 
 /* Table sizes; the breeding table has one entry per monster job. */
@@ -48,6 +35,21 @@ enum {
     BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1,
 };
 
+extern const u16 g_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
 extern const zodiac_date_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT];
+
+s32 zodiac_calculate_sign(u16 birthday);
+
+/* zodiac pictures */
+extern upoint16_t g_zodiac_screen_position;
+extern POLY_FT4 g_zodiac_primitives[2][30];
+
+void zodiac_load_frame(void);
+
+/* The scaled zodiac sprites and their backdrop. */
+void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
+void zodiac_call_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
+void zodiac_build_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
+    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
 
 #endif

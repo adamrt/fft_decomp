@@ -1,7 +1,9 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-/* Native ability-effect handlers of the effect overlays (EFFECT/E###.BIN) and their work records. */
+/* Ability effects shared by BATTLE and the effect overlays (EFFECT/E###.BIN): the effect context and its targets,
+ * native callbacks, particles, script records and vector math, and the overlays' native handlers with their work
+ * records. */
 
 #include "fft/effect_file.h"
 #include "fft/effect_timeline.h"
@@ -11,32 +13,19 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern s16 g_effect_id;
+/* playback */
+extern s16 g_effect_id;             /* file id (EFFECT/E###.BIN) of the requested effect */
+extern s32 g_effect_request_unread; /* cleared when an ability effect is requested; nothing reads it */
 
-/* start + (end - start) * factor / 256, the division an arithmetic shift. */
-s32 effect_lerp_q8(s32 start, s32 end, s32 factor);
-
-/* Cleared with the effect camera modes; nothing reads it. */
-extern s32 g_effect_camera_unread_1;
-
-/* Cleared with the effect camera modes; nothing reads it. */
-extern s32 g_effect_camera_unread_2;
-
-/* Provisional: 0x80000000 when an arrow arc ends without a hit; nothing reads it. */
-extern s32 g_effect_arrow_miss_marker;
-
-/* Cleared when the effect work-record chain is built; nothing reads it. */
-extern s32 g_effect_work_records_unread;
-
-/* Cleared when an ability effect is requested; nothing reads it. */
-extern s32 g_effect_request_unread;
-
-void effect_camera_start_parent_keyframe_moves(s16 frame);
-void effect_camera_start_child_keyframe_moves(s16 frame);
-void effect_camera_update_tracks(void);
-
-/* Native effect handlers receive the record, callback slot, emitter and frame.
- * Individual handlers narrow the record index or ignore unused arguments. */
+/* callbacks */
+/* Native effect handlers receive the record, callback slot, emitter and frame. Individual handlers narrow the record
+ * index or ignore unused arguments. Effect script opcode 06 puts a handler in one of the callback slots, and a
+ * particle keyframe whose 16-bit action value names the slot binds it to the record. While a keyframe that names the
+ * slot runs, the particle channel calls the handler once a frame in place of the particle emitter: emitter_index is
+ * the keyframe's emitter record, which the handler reads through its own view of effect_geometry.h, and frame counts
+ * from the start of the keyframe. The slot's phase (effect_record_t.callback_phase, effect_callback_phase_e) starts
+ * at INIT, where the handler allocates its work block into work_slots; it then stays at UPDATE until the channel
+ * sets DESTROY two frames before the keyframe ends. */
 typedef s32 (*effect_callback_t)(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* Resident catalog entries used by effect script opcodes 06 and 07. */
@@ -50,6 +39,10 @@ typedef enum effect_callback_phase {
     EFFECT_CALLBACK_PHASE_DESTROY = 3,
 } effect_callback_phase_e;
 
+/* Native callback at 0x801c44a0 in E000 (catalog ids 0, 24, 73, 92, 121); does nothing and leaves the result unset. */
+s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_emitter_index, s32 unused_frame);
+
+/* targets */
 enum {
     EFFECT_TARGET_COUNT_MAX = UNIT_RUNTIME_SLOT_COUNT,
     EFFECT_CASTER_ENTRY = EFFECT_TARGET_COUNT_MAX, /* index of the caster's record in effect_secondary_init_t.targets */
@@ -57,6 +50,7 @@ enum {
     EFFECT_TARGET_INDEX_CASTER = -1,
 };
 
+/* The target_type of an effect target record. */
 typedef enum effect_target_type {
     EFFECT_TARGET_TYPE_UNIT = 0,
     EFFECT_TARGET_TYPE_TILE = 1,
@@ -76,7 +70,6 @@ typedef struct effect_target {
         SVECTOR tile; /* x, layer, y */
     } data;           /* 0x02 */
 } effect_target_t;
-
 typedef char effect_target_size_must_be_10[(sizeof(effect_target_t) == 10) ? 1 : -1];
 
 /* result_animation of a target in an effect init record. The records built by
@@ -106,8 +99,8 @@ typedef struct effect_secondary_init {
     effect_target_t target_tile; /* 0xbc; post-action destination tile */
     u16 used_weapon_id;          /* 0xc6 */
 } effect_secondary_init_t;
-
 typedef char effect_secondary_init_size_must_be_200[(sizeof(effect_secondary_init_t) == 200) ? 1 : -1];
+
 extern effect_secondary_init_t g_effect_context;
 extern u8 g_effect_palette_target_runtime_ids[];
 
@@ -115,14 +108,16 @@ extern u8 g_effect_palette_target_runtime_ids[];
  * CURSOR_TILE. */
 extern effect_target_t g_effect_target_tile;
 
-void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
+/* Provisional: 0x80000000 when an arrow arc ends without a hit; nothing reads it. */
+extern s32 g_effect_arrow_miss_marker;
 
+void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void effect_get_world_coords_by_battle_id(
     s32 adjust_for_tile_height, u32 battle_id, effect_secondary_init_t* effect_coordinates, SVECTOR* destination);
-
 void effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out);
 
+/* particles */
 /* Motion state of an effect slot (effect_slot_t +0x98) and of a
  * particle (effect_work_record_t +0x08), stepped once a frame by
  * effect_slot_step_motion and effect_particle_integrate_motion:
@@ -138,7 +133,6 @@ typedef struct effect_motion {
     vec3s32_t acceleration;      /* 0x1c */
     vec3s32_t acceleration_step; /* 0x28 */
 } effect_motion_t;
-
 typedef char effect_motion_size_must_be_52[(sizeof(effect_motion_t) == 52) ? 1 : -1];
 
 /* effect_list_node_t.kind: how effect_particle_render_sprite places the sprite, and the
@@ -166,7 +160,6 @@ typedef struct effect_sprite_block {
     u8 _unused_04[4];
     struct effect_sprite_part* frames[0]; /* 0x08; one pointer per sprite part */
 } effect_sprite_block_t;
-
 typedef char assert_effect_sprite_block_prefix_size[sizeof(effect_sprite_block_t) == 8 ? 1 : -1];
 
 /* One 0x24-byte sprite node of g_effect_list_nodes: the animated sprite of one particle
@@ -193,12 +186,11 @@ typedef struct effect_list_node {
     u8 sprite_frame_index;     /* 0x1f: frame id from the sequence opcode */
     effect_sprite_block_t* sprite_block; /* 0x20 */
 } effect_list_node_t;
+typedef char assert_effect_list_node_size[sizeof(effect_list_node_t) == 36 ? 1 : -1];
 
 static inline effect_sequence_instruction_t* effect_get_current_sequence_instruction(effect_list_node_t* node) {
     return (effect_sequence_instruction_t*)(node->sequence_data + node->sequence_offset);
 }
-
-typedef char assert_effect_list_node_size[sizeof(effect_list_node_t) == 36 ? 1 : -1];
 
 /* 0x58-byte particle on an effect record's work list. The emitter initializes
  * its motion, homing and child-emitter state; the integrator advances it. */
@@ -220,8 +212,12 @@ typedef struct effect_work_record {
     u8 child_emitter_mid_life;     /* 0x53 */
     struct effect_list_node* data; /* 0x54; sprite node, or heap work for EFFECT_WORK_KIND_HEAP_BLOCK */
 } effect_work_record_t;
-
 typedef char assert_effect_work_record_size[sizeof(effect_work_record_t) == 88 ? 1 : -1];
+
+extern s32 g_effect_work_records_unread; /* cleared when the effect work-record chain is built; nothing reads it */
+
+/* script records */
+/* The effect_record_t.flags bits. */
 enum { EFFECT_RECORD_FLAG_ALLOCATED = 0x1 };
 
 /* Slots of a script record, and the sizes of the script record, sprite node and work record pools. */
@@ -257,6 +253,7 @@ typedef struct effect_record {
     void* work_slots[EFFECT_RECORD_CALLBACK_SLOT_COUNT];            /* 0xe4: each callback handler's allocated work */
     effect_callback_t last_native_callback; /* 0xf4: callback last called directly by script opcode 07 */
 } effect_record_t;
+typedef char assert_effect_record_size[sizeof(effect_record_t) == 248 ? 1 : -1];
 
 /* pc is a signed byte offset into the shared, 16-bit-aligned script stream. */
 static inline const effect_script_instruction_t* effect_get_current_script_instruction(effect_record_t* record) {
@@ -268,75 +265,66 @@ static inline u16 effect_get_current_script_header(effect_record_t* record) {
     return *(const u16*)(record->script + record->pc);
 }
 
-typedef char assert_effect_record_size[sizeof(effect_record_t) == 248 ? 1 : -1];
-void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination);
-void effect_vector_add_random_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
-void effect_vector_add_random_offsets_and_store_q12(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
-void effect_vector_add_rotations_mod_q12(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
-void effect_vector_add_svectors(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
-void effect_vector_add_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR* out);
+/* vector math */
+void effect_vector_load(const vec3s16_t* src, VECTOR* dst);
+void effect_vector_load_svector(const vec3s16_t* src, SVECTOR* dst);
 void effect_vector_add(const VECTOR* first, const VECTOR* second, VECTOR* out);
+void effect_vector_add_svectors(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
 void effect_vector_add_to_svector(const VECTOR* left, const VECTOR* right, SVECTOR* result);
+void effect_vector_add_to_svector_rot_y_90(const VECTOR* left, const VECTOR* right, SVECTOR* result);
 void effect_vector_add_to_svector_rot_y_180(const VECTOR* left, const VECTOR* right, SVECTOR* result);
 void effect_vector_add_to_svector_rot_y_270(const VECTOR* left, const VECTOR* right, SVECTOR* result);
-void effect_vector_add_to_svector_rot_y_90(const VECTOR* left, const VECTOR* right, SVECTOR* result);
-s32 effect_interpolate_s32_cos(s32 start, s32 end, s32 duration, s32 current);
-void effect_interpolate_svector_cos(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-
-void effect_interpolate_svector_cos_q12(
-    const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-
-void effect_interpolate_svector_linear(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_interpolate_vector_q13_cos(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-
-void effect_interpolate_vector_q13_cos_q12(
-    const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-
-void effect_interpolate_vector_q13_linear(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void effect_vector_load_svector(const vec3s16_t* src, SVECTOR* dst);
-void effect_vector_load(const vec3s16_t* src, VECTOR* dst);
+void effect_vector_add_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR* out);
+void effect_vector_add_rotations_mod_q12(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
+void effect_vector_add_random_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
+void effect_vector_add_random_offsets_and_store_q12(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
+void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination);
+void effect_vector_scale_q12(const VECTOR* src, VECTOR* dst);
+void effect_vector_shift_right_12(const VECTOR* src, VECTOR* dst);
 void effect_vector_mask_low_12_bits(const SVECTOR* src, SVECTOR* dst);
 s16 effect_select_larger_magnitude_s16(s16 first, s16 second);
 s16 effect_select_largest_magnitude_s16(s16 first, s16 second, s16 third);
-void effect_vector_scale_q12(const VECTOR* src, VECTOR* dst);
-void effect_vector_shift_right_12(const VECTOR* src, VECTOR* dst);
+s32 effect_interpolate_s32_cos(s32 start, s32 end, s32 duration, s32 current);
+void effect_interpolate_svector_linear(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
+void effect_interpolate_svector_cos(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
+void effect_interpolate_svector_cos_q12(
+    const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
+void effect_interpolate_vector_q13_linear(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
+void effect_interpolate_vector_q13_cos(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
+void effect_interpolate_vector_q13_cos_q12(
+    const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
 
-/* Effect script opcode 06 puts a handler in one of the callback slots, and a
- * particle keyframe whose 16-bit action value names the slot binds it to the record.
- * While a keyframe that names the slot runs, the particle channel calls
- *     handler(record_index, callback_slot, emitter_index, frame)
- * once a frame in place of the particle emitter: emitter_index is the
- * keyframe's emitter record, which the handler reads through its own view,
- * and frame counts from the start of the keyframe. The slot's phase
- * (effect_record_t.callback_phase, effect_callback_phase_e) starts at INIT, where the
- * handler allocates its work block into work_slots; it then stays at UPDATE
- * until the channel sets DESTROY two frames before the keyframe ends. A handler reads its emitter
- * record through its own view of effect_geometry.h. */
+/* start + (end - start) * factor / 256, the division an arithmetic shift. */
+s32 effect_lerp_q8(s32 start, s32 end, s32 factor);
+
+/* camera */
+/* Cleared with the effect camera modes; nothing reads them. */
+extern s32 g_effect_camera_unread_1;
+extern s32 g_effect_camera_unread_2;
+
+void effect_camera_start_parent_keyframe_moves(s16 frame);
+void effect_camera_start_child_keyframe_moves(s16 frame);
+void effect_camera_update_tracks(void);
 
 /* map control */
-s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-
 s32 effect_map_freeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+s32 effect_map_unfreeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 s32 effect_map_set_3d_objects_state_1(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 s32 effect_map_set_3d_objects_state_2(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-
+s32 effect_map_split_mesh_and_set_3d_objects_state_3(
+    s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 s32 effect_map_set_timed_transform_duration(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 
-s32 effect_map_split_mesh_and_set_3d_objects_state_3(
-    s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-
-s32 effect_map_unfreeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-
-/* Native callback at 0x801c44a0 in E000 (catalog ids 0, 24, 73, 92, 121); does nothing and leaves the result unset. */
-s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_emitter_index, s32 unused_frame);
-
+/* texture pages */
 /* Fixed texture-page bits shared by the native effect renderers. */
 enum {
     EFFECT_RENDER_TEXTURE_PAGE_BASE = 0x86,
     EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT = 5,
 };
 
+/* particle ribbon */
 /* The homing ribbon renderer has short 9-point trails and long 17-point trails. */
 enum {
     EFFECT_PARTICLE_RIBBON_SHORT_SLOTS = 8,
@@ -361,7 +349,6 @@ typedef struct effect_particle_ribbon_short {
     s16 frame_timer;       /* 0x3a8 */
     u8 _padding_3aa[0x02]; /* tail padding to 4-byte alignment */
 } effect_particle_ribbon_short_t;
-
 typedef char assert_effect_particle_ribbon_short_size[sizeof(effect_particle_ribbon_short_t) == 940 ? 1 : -1];
 
 /* One long ribbon: the short layout with 16 quads per buffer and a 17-point
@@ -380,7 +367,6 @@ typedef struct effect_particle_ribbon_long {
     s16 frame_timer;       /* 0x718 */
     u8 _padding_71a[0x02]; /* tail padding to 4-byte alignment */
 } effect_particle_ribbon_long_t;
-
 typedef char assert_effect_particle_ribbon_long_size[sizeof(effect_particle_ribbon_long_t) == 1820 ? 1 : -1];
 
 /* Work block allocated by the short variant. */
@@ -392,7 +378,6 @@ typedef struct effect_particle_ribbon_short_work {
     MATRIX matrix;                                                              /* 0x1d68 */
     s32 destroy_delay;                                                          /* 0x1d88 */
 } effect_particle_ribbon_short_work_t;
-
 typedef char
     assert_effect_particle_ribbon_short_work_size[sizeof(effect_particle_ribbon_short_work_t) == 7564 ? 1 : -1];
 
@@ -405,13 +390,15 @@ typedef struct effect_particle_ribbon_long_work {
     MATRIX matrix;                                                            /* 0x1c78 */
     s32 destroy_delay;                                                        /* 0x1c98 */
 } effect_particle_ribbon_long_work_t;
-
 typedef char assert_effect_particle_ribbon_long_work_size[sizeof(effect_particle_ribbon_long_work_t) == 7324 ? 1 : -1];
-extern u32 g_effect_particle_ribbon_long_brightness_table[][EFFECT_PARTICLE_RIBBON_LONG_POINTS];
-extern u32 g_effect_particle_ribbon_short_brightness_table[][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
-s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
+extern u32 g_effect_particle_ribbon_short_brightness_table[][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
+extern u32 g_effect_particle_ribbon_long_brightness_table[][EFFECT_PARTICLE_RIBBON_LONG_POINTS];
+
+s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
+s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
+
+/* polar mesh */
 enum {
     POLAR_MESH_QUADRANT_COUNT = 4,
     POLAR_MESH_RING_COUNT = 5,
@@ -523,17 +510,16 @@ typedef struct effect_polar_mesh_work {
     s32 frame;         /* 0x20f4: curve column, advanced once per update */
     s32 destroy_delay; /* 0x20f8: the destroy phase waits one call before freeing */
 } effect_polar_mesh_work_t;
-
 typedef char assert_effect_polar_mesh_work_size[sizeof(effect_polar_mesh_work_t) == 8444 ? 1 : -1];
 
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
- * the row, the ring (0-5) the column. */
+/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects the row, the ring (0-5) the column. */
+extern u32 g_effect_polar_mesh_brightness_table[][6];
 extern u32 g_effect_anchored_polar_mesh_brightness_table[][6];
 
-extern u32 g_effect_polar_mesh_brightness_table[][6];
-s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
+s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
+/* textured quad grids */
 /* E230 links a second, 4x4 quad grid after its 8x8 one: vertex brightness rows (12-bit fixed) of that copy,
  * indexed by brightness setting and quad row edge. The shared renderer declares its own table, whose width
  * follows the build's grid size. */
@@ -543,6 +529,7 @@ s32 effect_textured_quad_grid_2x2_update(s32 record_index, s32 callback_slot, s3
 s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
+/* ring and tube meshes */
 enum {
     RING_MESH_SEGMENTS = 32, /* quads around one ring */
     RING_MESH_QUADRANT_COUNT = 4,
@@ -561,7 +548,6 @@ typedef struct effect_ring_mesh_work {
     u8 _unused_1a10[0x08];
     s32 destroy_delay; /* 0x1a18: the destroy phase waits one call before freeing */
 } effect_ring_mesh_work_t;
-
 typedef char assert_effect_ring_mesh_work_size[sizeof(effect_ring_mesh_work_t) == 6684 ? 1 : -1];
 
 /* Scratchpad (0x1f800000) layout while the ring is rebuilt. points[row][0..8]
@@ -586,7 +572,6 @@ typedef struct effect_single_ring_mesh_work {
     u8 _unused_d10[0x08];
     s32 destroy_delay; /* 0xd18: the destroy phase waits one call before freeing */
 } effect_single_ring_mesh_work_t;
-
 typedef char assert_effect_single_ring_mesh_work_size[sizeof(effect_single_ring_mesh_work_t) == 3356 ? 1 : -1];
 
 /* Scratchpad (0x1f800000) layout of the single-ring variant: two lattice
@@ -619,6 +604,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
 s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
+/* dome mesh */
 /* Lattice of the spinning dome renderer: eight rows of sixteen segments. */
 enum {
     DOME_MESH_ROWS = 8,
@@ -640,7 +626,6 @@ typedef struct effect_dome_mesh_work {
     u8 _unused_3410[0x08];
     s32 destroy_delay; /* 0x3418: the destroy phase waits one call before freeing */
 } effect_dome_mesh_work_t;
-
 typedef char assert_effect_dome_mesh_work_size[sizeof(effect_dome_mesh_work_t) == 13340 ? 1 : -1];
 
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
@@ -649,6 +634,7 @@ extern u32 g_effect_dome_mesh_brightness_table[][9];
 
 s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
+/* map vertex particles */
 typedef struct effect_map_vertex_location {
     u8 vertex_index;    /* one of the mesh part's four cached vertices */
     u8 mesh_part_index; /* zero-based among map mesh parts 1-8 */
@@ -662,17 +648,17 @@ enum {
     EFFECT_MAP_VERTEX_WORK_BYTES = EFFECT_MAP_VERTEX_PART_COUNT * EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(VECTOR),
 };
 
+extern effect_map_vertex_location_t g_effect_banish_vertex_locations[12];
+
 /* Three entries, though effect_altima_transformation_map_vertex_particles_update bounds the vertex
  * group by 12 like the Banish handler: groups 4 to 12 would read past the table. */
 extern effect_map_vertex_location_t g_effect_altima_transformation_vertex_locations[3];
 
-extern effect_map_vertex_location_t g_effect_banish_vertex_locations[12];
-
+s32 effect_banish_map_vertex_particles_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame);
 s32 effect_altima_transformation_map_vertex_particles_update(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame);
 
-s32 effect_banish_map_vertex_particles_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame);
-
+/* tentacle mesh */
 /* The tentacle renderer draws textured strips; the related particle-trail
  * renderer tracks points without drawing the strips. Both use the same emitter view. */
 typedef struct effect_tentacle_mesh_segment {
@@ -689,7 +675,6 @@ typedef struct effect_tentacle_mesh_segment {
     s16 frame_timer;       /* 0x6e8 */
     u8 _padding_6ea[0x02]; /* tail padding to 4-byte alignment */
 } effect_tentacle_mesh_segment_t;
-
 typedef char assert_effect_tentacle_mesh_segment_size[sizeof(effect_tentacle_mesh_segment_t) == 1772 ? 1 : -1];
 
 typedef struct effect_tentacle_mesh_work {
@@ -700,7 +685,6 @@ typedef struct effect_tentacle_mesh_work {
     MATRIX matrix;                              /* 0x3768 */
     s32 destroy_delay;                          /* 0x3788 */
 } effect_tentacle_mesh_work_t;
-
 typedef char assert_effect_tentacle_mesh_work_size[sizeof(effect_tentacle_mesh_work_t) == 14220 ? 1 : -1];
 
 /* A 17-point particle trail; spawning seeds only points 0-8 (the target's loop bound is 9). */
@@ -714,7 +698,6 @@ typedef struct effect_trail_segment {
     s16 active;           /* 0x92 */
     u8 _unused_94[0x04];
 } effect_trail_segment_t;
-
 typedef char assert_effect_trail_segment_size[sizeof(effect_trail_segment_t) == 152 ? 1 : -1];
 
 typedef struct effect_trail_work {
@@ -725,12 +708,14 @@ typedef struct effect_trail_work {
     MATRIX matrix;                      /* 0x268 */
     s32 destroy_delay;                  /* 0x288 */
 } effect_trail_work_t;
-
 typedef char assert_effect_trail_work_size[sizeof(effect_trail_work_t) == 652 ? 1 : -1];
-extern u32 g_effect_tentacle_mesh_brightness_table[][9];
-s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
+extern u32 g_effect_tentacle_mesh_brightness_table[][9];
+
+s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
+s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
+
+/* wave mesh */
 /* Work block of the 8x8 wave mesh, allocated in phase 1. The four wave phases
  * are 4096-per-turn angles; the emitter record's spawn spread (x, y) and
  * wave_phase_speed curves advance them once per update. */
@@ -753,7 +738,6 @@ typedef struct effect_wave_mesh_work {
     s32 frame;           /* 0x1a54 */
     s32 destroy_latched; /* 0x1a58 */
 } effect_wave_mesh_work_t;
-
 typedef char assert_effect_wave_mesh_work_size[sizeof(effect_wave_mesh_work_t) == 6748 ? 1 : -1];
 
 /* Scratchpad (0x1f800000) layout while the mesh is rebuilt. */

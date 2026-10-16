@@ -1,17 +1,20 @@
 #ifndef OVERLAY_H
 #define OVERLAY_H
 
-/* Loading the BIN programs and EVENT overlays. */
+/* Loading the BIN programs from MAIN, and the companion EVENT overlays that BATTLE and WORLD load beside the scene:
+ * their requests, load tables and the per-frame drivers. */
 
 #include "psx/libcd.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* programs */
 int overlay_exec_open_title(int mode);
 void overlay_exec_open_ending(void);
 int overlay_open_world_and_wldcore(int load_world);
 void overlay_open_world(s32 mode);
 
+/* companion overlays */
 /* Companion overlay requests: index into the overlay LBA, size and load offset
  * tables (g_overlay_companion_executable_lbas). */
 typedef enum overlay_companion {
@@ -69,13 +72,11 @@ void overlay_request_companion(s32 request_index);
 /* The per-frame drivers of the executable and data file requests: they start the disc read on the main stack,
  * poll until it finishes and clear the request. */
 void overlay_poll_companion(void);
-
 void overlay_poll_companion_file(void);
 
 /* Requests SMALL.OUT without waiting; overlay_poll_small drives the load during map initialization and returns
  * 1 while it is pending. */
 void overlay_request_small(void);
-
 s32 overlay_poll_small(void);
 
 /* The overlay entry of COMPANION_OVERLAY_STATE_STUB. */

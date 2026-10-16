@@ -40,7 +40,7 @@ static s16 g_screen_submenu_page_row_text_ids[12] = { 0 };
 static s32 g_screen_text_file_buffer[16512] = { 0 };
 /* 32-bit substitution values saved around the text calls. */
 static s32 g_screen_text_substitution_values_backup[32] = { 0 };
-static u32 g_formation_saved_system_flags = 0;
+static u32 g_formation_saved_system_flags = 0; /* g_system_flags as saved by world_map_hide (system_flags_e) */
 
 static void screen_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 static void screen_init_quad_from_record(RECT* out, const menu_entry_t* record, SPRT* primitive);

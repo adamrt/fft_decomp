@@ -1,13 +1,15 @@
 #ifndef HELP_H
 #define HELP_H
 
-/* Help: battle help, after-battle help and the field-help cursors. */
+/* Help windows: the help text sections, the help cursor's navigation records and grid ids, and the battle and
+ * after-battle help menus. */
 
 #include "fft/battle_map.h"
 #include "fft/text.h"
 #include "fft/unit_panel.h"
 #include "psx/types.h"
 
+/* help text */
 /* The help text file, which HELPMENU and WORLD's help menu bind section by
  * section while a help window is open. */
 typedef enum help_text_section {
@@ -39,16 +41,14 @@ enum {
     HELP_DIALOG_TYPE_CENTERED = HELP_DIALOG_TYPE | DIALOG_POSITION_CENTER,
 };
 
-/* The help text file's section offsets, which text_relocate_pointer_table binds while a help window is open. */
-extern u32 g_help_text_table[];
-
 extern u16* const* g_help_active_text_id_tables;
 extern u16* const g_help_menu_text_id_tables[23];
 extern u16* g_help_topic_text_ids;
 
-/* The pending help message, or a help_grid_id_e. */
-extern s32 g_help_message_text_id;
+/* The help text file's section offsets, which text_relocate_pointer_table binds while a help window is open. */
+extern u32 g_help_text_table[];
 
+/* help cursor */
 /* One cursor-navigation node of the HELPMENU, BUNIT, ATTACK deployment and
  * DEBUGCHR editor screens (WORLD's help_navigation_record_t has the same
  * layout): the value or text id it refers to, its help-text base, the node
@@ -62,7 +62,6 @@ typedef struct help_navigation_record {
     s16 y;               /* 0x0c */
     s16 vertical_cursor; /* 0x0e: nonzero: the cursor points down and bobs along y */
 } help_navigation_record_t;
-
 typedef char help_navigation_record_size_must_be_16[(sizeof(help_navigation_record_t) == 16) ? 1 : -1];
 
 /* The grid help cursor over a unit's status display. A value above the text
@@ -82,15 +81,19 @@ extern help_navigation_record_t g_help_terrain_navigation[];
 extern help_navigation_record_t g_help_unit_box_navigation[];
 extern help_navigation_record_t g_help_attack_preview_navigation[];
 
-/* Set while a help window is open; menu input is suppressed meanwhile. */
-extern s32 g_help_open;
+/* The pending help message, or a help_grid_id_e. */
+extern s32 g_help_message_text_id;
 
+/* help menus */
 extern u32* g_help_controller_state_ptr;
 extern u8 g_help_data_base[];
 extern unit_panel_summary_t g_help_active_banner;
 extern unit_panel_unit_t g_help_active_unit_data;
 extern unit_panel_record_t g_help_billboard;
 extern battle_map_selected_tile_t g_help_menu_cursor_tile;
+
+/* Set while a help window is open; menu input is suppressed meanwhile. */
+extern s32 g_help_open;
 
 /* Opens the help menu on the menu-building thread slot unless input is held off or another screen is busy. */
 void help_start_menu_thread(void);

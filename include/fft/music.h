@@ -1,19 +1,21 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-/* Music: scenario music slots and tunes. */
+/* Music: MAIN's scenario music slots, playback and tunes over the Suzuki sound driver, and the track requests BATTLE,
+ * WORLD and the overlays make through the main stack. */
 
 #include "fft/file.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* music slots */
 /* Music ids: the index of a MUSIC_NN.SMD file in
  * g_music_scenario_smd_files (MUSIC_COUNT entries). Only the ids
  * the code passes by number are named, after the screen that plays them;
  * event scripts and scenario data choose the others. The music test offers
  * ids 1-96 (g_music_test_music_ids). */
 typedef enum music_id {
-    MUSIC_NONE = 0,       /* the *_sound_play_music_tracks functions and the WLDCORE audio queue skip it */
+    MUSIC_NONE = 0,       /* music_play_tracks and the WLDCORE audio queue skip it */
     MUSIC_ALTIMA = 19,    /* EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC */
     MUSIC_MILESTONE = 20, /* proposition_step_discovery_level, in the bar */
     MUSIC_TUTORIAL = 26,  /* the world menu's tutorial screen */
@@ -61,6 +63,35 @@ typedef struct music {
     music_slots_t slots; /* 0x10 */
 } music_t;
 
+extern music_t g_music;
+extern file_extent_t g_music_scenario_smd_files[];
+
+/* loading */
+s32 music_load_into_slot(s32 music_id, s32 slot);
+s32 music_open_into_slot(s32 music_id, s32 slot);
+s32 music_open_into_free_slot(s32 music_id);
+s32 music_start_load_into_free_slot(s32 music_id);
+s32 music_poll_scenario_load(void);
+s32 music_wait_for_scenario_load(s32 music_id);
+s32 music_is_loading_stub(void);
+void music_unload_current_scenario(void);
+s32 music_unload_scenario_slot(s32 slot);
+void music_unload_scenario_and_tunes(void);
+
+/* playback */
+suzuki_music_t* music_get_handle(s32 slot);
+suzuki_music_t* music_switch_track(s32 slot, s32 volume, s32 fade);
+s32 music_get_current_scenario(void);
+void music_set_track(s32 music_id);
+s32 music_set_target(s32 volume, s32 time);
+s32 music_set_volume(s32 volume, s32 time);
+s32 music_set_volume_timed(s32 time);
+s32 music_set_balance_shift_timed(s32 value, s32 time);
+s32 music_set_pitch_shift_timed(s32 value, s32 time);
+s32 music_set_tempo_scale_timed(s32 value, s32 time);
+s32 music_stop(void);
+
+/* tunes */
 /* Tunes of music_play_tune: short pieces that fade the scenario music
  * out, play once and fade it back in (music_update_tunes). Tune t is
  * MUSIC_(44 + t).SMD, kept loaded in music slot 2 + t. Tune 4 has no caller
@@ -80,32 +111,11 @@ enum {
     MUSIC_TUNE_PENDING = 0x80,
 };
 
-extern music_t g_music;
-extern file_extent_t g_music_scenario_smd_files[];
-s32 music_load_into_slot(s32 music_id, s32 slot);
-s32 music_open_into_slot(s32 music_id, s32 slot);
-s32 music_open_into_free_slot(s32 music_id);
-s32 music_start_load_into_free_slot(s32 music_id);
-s32 music_poll_scenario_load(void);
-s32 music_wait_for_scenario_load(s32 music_id);
-s32 music_is_loading_stub(void);
-suzuki_music_t* music_get_handle(s32 slot);
-suzuki_music_t* music_switch_track(s32 slot, s32 volume, s32 fade);
-s32 music_get_current_scenario(void);
-void music_set_track(s32 music_id);
-s32 music_set_target(s32 volume, s32 time);
-s32 music_set_volume(s32 volume, s32 time);
-s32 music_set_volume_timed(s32 time);
-s32 music_set_balance_shift_timed(s32 value, s32 time);
-s32 music_set_pitch_shift_timed(s32 value, s32 time);
-s32 music_set_tempo_scale_timed(s32 value, s32 time);
-s32 music_stop(void);
-void music_unload_current_scenario(void);
-s32 music_unload_scenario_slot(s32 slot);
-void music_unload_scenario_and_tunes(void);
 s32 music_play_tune(s32 tune);
 s32 music_set_tune_volume(s32 time);
 s32 music_update_tunes(void);
+
+/* track requests */
 void music_play_tracks(s32 slot_1_music_id, s32 slot_2_music_id);
 
 /* Wait while the music loads, checking on the main stack; the check always answers done. */

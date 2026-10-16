@@ -1,7 +1,7 @@
 #ifndef AI_COMMAND_H
 #define AI_COMMAND_H
 
-/* Declarations. */
+/* The turn command: the next thing a unit does, built by the AI or taken from a player's menu choice. */
 
 #include "fft/battle_map.h"
 #include "fft/unit.h"
@@ -42,7 +42,6 @@ typedef struct ai_command {
         action_command_t action;
     } data;
 } ai_command_t;
-
 typedef char ai_command_size_must_be_24[sizeof(ai_command_t) == 24 ? 1 : -1];
 
 /* ai_data_t.main_ai_state: the stage ai_command_build resumes at after it ran out of frame

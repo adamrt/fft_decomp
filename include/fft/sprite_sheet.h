@@ -1,7 +1,8 @@
 #ifndef SPRITE_SHEET_H
 #define SPRITE_SHEET_H
 
-/* Declarations. */
+/* BATTLE spritesheets: the SHP, SEQ and SPR file layouts, spritesheet ids, the frame and sequence tables, item
+ * graphics, the VRAM slots that hold sheets and EVTCHR images, and the loader that fills them. */
 
 #include "fft/file.h"
 #include "fft/gfx.h"
@@ -10,6 +11,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* file layouts */
 /* Serialized SHP/SEQ values are little-endian byte sequences. These file
  * views have byte alignment; their decoded RAM tables remain separate. */
 
@@ -20,7 +22,6 @@ typedef struct sprite_packed_unit_shp_frame_set {
     u8 frame_data_size[2];      /* 0x400; unsigned 16-bit value */
     u8 frame_data[0];           /* 0x402; variable tail */
 } sprite_packed_unit_shp_frame_set_t;
-
 typedef char
     sprite_packed_unit_shp_frame_set_size_must_be_1026[sizeof(sprite_packed_unit_shp_frame_set_t) == 1026 ? 1 : -1];
 
@@ -30,7 +31,6 @@ typedef struct sprite_packed_unit_shp_record {
     u8 first_sp2_frame[2];                                /* 0x006; unsigned 16-bit value */
     sprite_packed_unit_shp_frame_set_t primary_frame_set; /* 0x008 */
 } sprite_packed_unit_shp_record_t;
-
 typedef char sprite_packed_unit_shp_record_size_must_be_1034[sizeof(sprite_packed_unit_shp_record_t) == 1034 ? 1 : -1];
 
 /* WEP/EFF SHP has a different header and twice as many frame offsets. */
@@ -41,7 +41,6 @@ typedef struct sprite_packed_weapon_shp_record {
     u8 frame_data_size[2];      /* 0x844; unsigned 16-bit value */
     u8 frame_data[0];           /* 0x846; variable tail */
 } sprite_packed_weapon_shp_record_t;
-
 typedef char
     sprite_packed_weapon_shp_record_size_must_be_2118[sizeof(sprite_packed_weapon_shp_record_t) == 2118 ? 1 : -1];
 
@@ -52,7 +51,6 @@ typedef struct sprite_packed_offset_table {
     u8 payload_size[2]; /* 0x404; unsigned 16-bit value */
     u8 payload[0];      /* 0x406; variable sequence data */
 } sprite_packed_offset_table_t;
-
 typedef char sprite_packed_offset_table_size_must_be_1030[sizeof(sprite_packed_offset_table_t) == 1030 ? 1 : -1];
 
 /* OTHER.SPR: the palette helper copies only the first 21 of 32 palettes. */
@@ -60,7 +58,6 @@ typedef struct sprite_other_archive {
     palette_t palettes[32]; /* 0x0000 */
     u8 pixels[256 * 128];   /* 0x0400; uncompressed 256x256, 4bpp */
 } sprite_other_archive_t;
-
 typedef char sprite_other_archive_size_must_be_33792[sizeof(sprite_other_archive_t) == 33792 ? 1 : -1];
 
 /* WEP.SPR contains three CLUT/image pairs: weapons, trails and particles. */
@@ -73,6 +70,7 @@ typedef struct sprite_weapon_archive {
     u8 particle_pixels[144][128]; /* 0x10600; 4bpp */
 } sprite_weapon_archive_t;
 
+/* spritesheets */
 /* Spritesheet ids index g_sprite_sheet_data and
  * g_sprite_sheet_files. An id below 0x80 is the character_identity_e
  * value it is loaded for (unit_get_spritesheet_palette returns those
@@ -257,7 +255,6 @@ typedef struct sprite_sheet_data {
     u8 flying_flag;    /* nonzero: the sheet idles with the ANIMATION_IDLE_FLYING animations */
     u8 graphic_height; /* height of the standing sprite in pixels */
 } sprite_sheet_data_t;
-
 typedef char sprite_sheet_data_size_must_be_4[(sizeof(sprite_sheet_data_t) == 4) ? 1 : -1];
 
 /* sprite_sheet_data_t.shp_id: index of the sheet's frame table file in
@@ -286,27 +283,31 @@ typedef enum sprite_seq_type {
 } sprite_seq_type_e;
 
 extern sprite_sheet_data_t g_sprite_sheet_data[SPRITE_SHEET_ID_COUNT];
+
+s32 sprite_sheet_is_loaded(s16 spritesheet_id);
 u32 sprite_sheet_get_flying_flag(u32 spritesheet_id);
 s32 sprite_get_unit_spritesheet_height_by_runtime_id(u32 runtime_id);
 s32 sprite_get_unit_spritesheet_height_by_battle_id(u32 battle_id);
-s32 sprite_sheet_is_loaded(s16 spritesheet_id);
-extern sprite_native_unit_seq_table_t g_sprite_boss_seq_tables;
+
+/* frame and sequence tables */
+extern sprite_unit_shp_frame_tables_t g_sprite_unit_shp_frame_tables[5];
+extern sprite_native_unit_seq_table_t g_sprite_unit_seq_tables[5];
 extern sprite_unit_shp_frame_tables_t g_sprite_boss_shp_frame_tables;
+extern sprite_native_unit_seq_table_t g_sprite_boss_seq_tables;
+extern sprite_wep_eff_graphics_t g_sprite_weapon_graphics[2];
 extern sprite_wep_eff_graphics_t g_sprite_effect_graphics[1];
 
 /* Sprite part width/height in 8-pixel tiles, indexed by SHP size bits. */
 extern size32_t g_sprite_part_sizes[];
 
-extern sprite_native_unit_seq_table_t g_sprite_unit_seq_tables[5];
-extern sprite_unit_shp_frame_tables_t g_sprite_unit_shp_frame_tables[5];
-extern sprite_wep_eff_graphics_t g_sprite_weapon_graphics[2];
-u8** sprite_sheet_get_effect_seq(u32 unused_spritesheet_id);
-sprite_weapon_shp_t* sprite_sheet_get_effect_shp(u32 unused_spritesheet_id);
-sprite_unit_seq_table_t* sprite_sheet_get_unit_seq(u32 spritesheet_id);
 sprite_unit_shp_frame_tables_t* sprite_sheet_get_unit_shp(u32 spritesheet_id);
-u8** sprite_sheet_get_weapon_seq(u32 spritesheet_id);
+sprite_unit_seq_table_t* sprite_sheet_get_unit_seq(u32 spritesheet_id);
 sprite_weapon_shp_t* sprite_sheet_get_weapon_shp(u32 spritesheet_id);
+u8** sprite_sheet_get_weapon_seq(u32 spritesheet_id);
+sprite_weapon_shp_t* sprite_sheet_get_effect_shp(u32 unused_spritesheet_id);
+u8** sprite_sheet_get_effect_seq(u32 unused_spritesheet_id);
 
+/* item graphics */
 /* Where a weapon or item graphic sits in WEP.SPR, per item graphic id. */
 typedef struct sprite_item_graphic {
     u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for BATTLE_MAP_CLUT_ROW_ITEM_A, low for _B */
@@ -332,6 +333,35 @@ enum {
     SPRITE_TPAGE_FRAME = 0x1f, /* FRAME.BIN */
 };
 
+/* The nine spritesheet VRAM slots (g_sprite_sheet_slots), 0x32d6 bytes each;
+ * g_sprite_sheet_ids_by_vram_slot aliases the first record's byte 1. */
+typedef struct sprite_sheet_slot {
+    u8 in_use;                          /* 0x00; cleared when no live unit uses the slot */
+    u8 spritesheet_id;                  /* 0x01 */
+    u8 compressed_attack_image[0x30d4]; /* 0x02; image data copied from SPR data +0x9200 by
+                                         * sprite_sheet_load_into_vram_slot */
+    clut_t clut;                        /* 0x30d6; 16 palettes with the STP bit set */
+} sprite_sheet_slot_t;
+typedef char sprite_sheet_slot_size_must_be_13014[(sizeof(sprite_sheet_slot_t) == 13014) ? 1 : -1];
+
+/* Each spritesheet slot's 64x32 portrait and lower-body block lies in the VRAM area at
+ * (SPRITE_SHEET_STRIP_VRAM_X, SPRITE_SHEET_STRIP_VRAM_Y): column slot / 8, row
+ * slot % 8. */
+enum {
+    SPRITE_SHEET_SLOT_COUNT = 9,
+    SPRITE_SHEET_STRIP_VRAM_X = 0x340,
+    SPRITE_SHEET_STRIP_VRAM_Y = 0x100,
+    SPRITE_SHEET_STRIP_WIDTH = 64,
+    SPRITE_SHEET_STRIP_HEIGHT = 32,
+};
+
+extern sprite_sheet_slot_t g_sprite_sheet_slots[SPRITE_SHEET_SLOT_COUNT];
+extern u8 g_sprite_sheet_ids_by_vram_slot[];
+
+s32 sprite_sheet_claim_slot(s16 spritesheet_id);
+s32 sprite_sheet_get_slot_by_battle_id(u32 battle_id);
+
+/* EVTCHR slots */
 enum {
     SPRITE_SHP_FRAME_EVTCHR_FIRST = 210, /* frame 0 of an EVTCHR slot */
 };
@@ -365,14 +395,7 @@ typedef struct sprite_evtchr_slot {
     clut_t clut;             /* 0x0f64; filled by sprite_evtchr_set_palette_by_runtime_id */
     u8 image_data[0x6400];   /* 0x1164 */
 } sprite_evtchr_slot_t;
-
 typedef char sprite_evtchr_slot_size_must_be_30052[(sizeof(sprite_evtchr_slot_t) == 30052) ? 1 : -1];
-
-/* Per-slot summary written by sprite_evtchr_get_slot_summary. */
-typedef struct sprite_evtchr_slot_summary {
-    u8 spritesheet_id; /* 0xff free, 0xfe saved, 0xfd no unit, else owner's sheet */
-    u8 evtchr_state;   /* 0xff none, 0xfe saved, 0xfd loaded */
-} sprite_evtchr_slot_summary_t;
 
 typedef enum sprite_evtchr_slot_owner_marker {
     SPRITE_EVTCHR_SLOT_OWNER_EVTCHR = 0xfe, /* an EVTCHR image (sprite_evtchr_save_slot) */
@@ -395,43 +418,24 @@ typedef enum sprite_evtchr_slot_buffer_marker {
 /* Other positive buffer values are upload countdowns decremented each frame. */
 enum { SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES = 2 };
 
-/* The nine spritesheet VRAM slots (g_sprite_sheet_slots), 0x32d6 bytes each;
- * g_sprite_sheet_ids_by_vram_slot aliases the first record's byte 1. */
-typedef struct sprite_sheet_slot {
-    u8 in_use;                          /* 0x00; cleared when no live unit uses the slot */
-    u8 spritesheet_id;                  /* 0x01 */
-    u8 compressed_attack_image[0x30d4]; /* 0x02; image data copied from SPR data +0x9200 by
-                                         * sprite_sheet_load_into_vram_slot */
-    clut_t clut;                        /* 0x30d6; 16 palettes with the STP bit set */
-} sprite_sheet_slot_t;
+/* Per-slot summary written by sprite_evtchr_get_slot_summary. */
+typedef struct sprite_evtchr_slot_summary {
+    u8 spritesheet_id; /* 0xff free, 0xfe saved, 0xfd no unit, else owner's sheet */
+    u8 evtchr_state;   /* 0xff none, 0xfe saved, 0xfd loaded */
+} sprite_evtchr_slot_summary_t;
 
-typedef char sprite_sheet_slot_size_must_be_13014[(sizeof(sprite_sheet_slot_t) == 13014) ? 1 : -1];
-
-/* Each spritesheet slot's 64x32 portrait and lower-body block lies in the VRAM area at
- * (SPRITE_SHEET_STRIP_VRAM_X, SPRITE_SHEET_STRIP_VRAM_Y): column slot / 8, row
- * slot % 8. */
-enum {
-    SPRITE_SHEET_SLOT_COUNT = 9,
-    SPRITE_SHEET_STRIP_VRAM_X = 0x340,
-    SPRITE_SHEET_STRIP_VRAM_Y = 0x100,
-    SPRITE_SHEET_STRIP_WIDTH = 64,
-    SPRITE_SHEET_STRIP_HEIGHT = 32,
-};
-
-extern u8 g_sprite_sheet_ids_by_vram_slot[];
-extern sprite_sheet_slot_t g_sprite_sheet_slots[SPRITE_SHEET_SLOT_COUNT];
 extern sprite_evtchr_slot_t g_sprite_evtchr_slots[];
-s32 sprite_sheet_claim_slot(s16 spritesheet_id);
+
+s32 sprite_evtchr_init_slots(void);
+s32 sprite_evtchr_unpack_to_slot(s32 index, const evtchr_file_record_t* file);
+s32 sprite_evtchr_save_slot(s32 slot_index);
 s32 sprite_evtchr_clear_loaded_slot(s32 slot_index);
 s32 sprite_evtchr_clear_saved_slot(s32 slot_index);
-s32 sprite_sheet_get_slot_by_battle_id(u32 battle_id);
-s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary);
-s32 sprite_evtchr_init_slots(void);
-void sprite_evtchr_invalidate_sp2(unit_t* unit);
 s32 sprite_evtchr_release_reserved_slot(s32 slot_index);
-s32 sprite_evtchr_save_slot(s32 slot_index);
-s32 sprite_evtchr_unpack_to_slot(s32 index, const evtchr_file_record_t* file);
+s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary);
+void sprite_evtchr_invalidate_sp2(unit_t* unit);
 
+/* loading */
 /* g_sprite_load_state.phase: the phase of the file being loaded. */
 typedef enum sprite_load_phase {
     SPRITE_LOAD_PHASE_START_READ = 0,
@@ -471,48 +475,45 @@ typedef struct sprite_load_state {
     s32 index;     /* 0x08 */
     void* buffer;  /* 0x0c; allocated until the FINISH phase */
 } sprite_load_state_t;
-
 typedef char sprite_load_state_size_must_be_16[sizeof(sprite_load_state_t) == 16 ? 1 : -1];
+
+extern sprite_load_state_t g_sprite_load_state;
+extern file_extent_t g_sprite_sheet_files[];
+extern file_extent_t g_sprite_shp_files[];
+extern file_extent_t g_sprite_seq_files[];
+extern file_extent_t g_sprite_sp2_files[];
+extern file_extent_t g_sprite_worker8_sp2_files[];
+extern u32* g_sprite_sp2_data;
+extern s32 g_sprite_last_loaded_shp_id;
+extern s32 g_sprite_last_loaded_seq_id;
+extern u8 g_sprite_shp_frame_data_buffer[];
+extern u8 g_sprite_seq_data_buffer[];
+extern u8 g_sprite_fallback_shp_frame_data[];
+extern u8 g_sprite_fallback_seq_data[];
 extern const u8* g_sprite_compressed_data;
 extern s32 g_sprite_compressed_nibble_phase;
 extern s32 g_sprite_compressed_offset;
-extern u8 g_sprite_fallback_seq_data[];
-extern u8 g_sprite_fallback_shp_frame_data[];
-extern s32 g_sprite_last_loaded_seq_id;
-extern s32 g_sprite_last_loaded_shp_id;
 
-/* Byte-granular bump-allocation cursors: the consuming files do raw byte
- * arithmetic on these, so the element type must stay u8. */
+/* Byte-granular bump-allocation cursors: the consuming files do raw byte arithmetic on these, so the element type
+ * must stay u8. */
+extern u8* g_sprite_shp_frame_data_cursor;
 extern u8* g_sprite_seq_data_cursor;
 
-extern u8 g_sprite_shp_frame_data_buffer[];
-extern u8* g_sprite_shp_frame_data_cursor;
-extern u32* g_sprite_sp2_data;
-extern file_extent_t g_sprite_sp2_files[];
-extern file_extent_t g_sprite_seq_files[];
-extern file_extent_t g_sprite_shp_files[];
-extern file_extent_t g_sprite_sheet_files[];
-extern u8 g_sprite_seq_data_buffer[];
-extern sprite_load_state_t g_sprite_load_state;
-extern file_extent_t g_sprite_worker8_sp2_files[];
-
+void sprite_load_reset_state(void);
+void sprite_load_clear_state(s32 unused_map_id);
 void sprite_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
     s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags);
-
-void sprite_load_clear_state(s32 unused_map_id);
-void sprite_decompress_attack_image(const u8* source, u8* destination);
-s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot);
 s32 sprite_load_unit_graphics_by_battle_id(s32, s32);
-s32 sprite_open_sp2_file(unit_t* unit, u32* destination);
 
 /* Drains the immediate loader steps (2); returns 0 when finished or 1 while work remains pending
  * (including an allocation retry). */
 s32 sprite_poll_unit_graphics_load(void);
-
-void sprite_load_reset_state(void);
 s32 sprite_load_step_shp_seq_data(void);
 
 /* 0 finished, 1 pending or deferred, 2 immediate progress. */
 s32 sprite_load_step_queued(void);
+s32 sprite_open_sp2_file(unit_t* unit, u32* destination);
+void sprite_decompress_attack_image(const u8* source, u8* destination);
+s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot);
 
 #endif

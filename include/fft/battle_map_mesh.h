@@ -1,13 +1,15 @@
 #ifndef BATTLE_MAP_MESH_H
 #define BATTLE_MAP_MESH_H
 
-/* Declarations. */
+/* Battle map mesh: polygon geometry and flags, animated mesh parts, texture animations, and the render records and
+ * renderer that draw the map. */
 
 #include "fft/render.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* geometry */
 /* Serialized GNS primary/animated mesh geometry. Counts are unsigned; the
  * variable tail stores unpadded XYZ 16-bit values, normals, materials and terrain
  * coordinates. Native renderer position/normal records have different strides. */
@@ -18,7 +20,6 @@ typedef struct battle_map_mesh_geometry {
     u16 untextured_quad_count;     /* 0x06 */
     u16 payload[0];                /* 0x08; count-dependent sections */
 } battle_map_mesh_geometry_t;
-
 typedef char map_mesh_geometry_prefix_must_be_8[sizeof(battle_map_mesh_geometry_t) == 8 ? 1 : -1];
 
 /* Polygon position and normal records copied from the mesh geometry block.
@@ -56,7 +57,7 @@ typedef struct battle_map_mesh_quad_normals {
 } battle_map_mesh_quad_normals_t;
 
 /* polygon_flags of the textured map polygons (BATTLE_MAP_RESOURCE_POLYGON_FLAGS).
- * The four map_queue_ routines skip a polygon whose hide bit for the
+ * The four battle_map_queue_ routines skip a polygon whose hide bit for the
  * camera yaw is set. No mesh file sets bits 0, 1 or 14. */
 enum {
     /* Working copy of LIT, the bit the queue routines test: the polygon's
@@ -82,6 +83,9 @@ typedef enum battle_map_polygon_flag_command {
     BATTLE_MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT = 0x94, /* repaint the polygons without LIT in the ambient color */
 } battle_map_polygon_flag_command_e;
 
+extern u8 g_battle_map_polygon_flag_clear_countdown;
+
+/* mesh parts */
 /* 0x98-byte map mesh part records of g_battle_map_mesh_parts. Each of the rotation,
  * translation and scale channels has its current value, the start of the
  * running keyframe and its target or step. */
@@ -113,7 +117,6 @@ typedef struct battle_map_mesh_part {
     u16 untextured_triangle_count;
     u16 untextured_quad_count;
 } battle_map_mesh_part_t;
-
 typedef char battle_map_mesh_part_size_must_be_152[(sizeof(battle_map_mesh_part_t) == 152) ? 1 : -1];
 
 /* Channels of a mesh keyframe's per-channel arrays (angle_start, angle_end,
@@ -148,7 +151,6 @@ typedef struct battle_map_mesh_keyframe {
     u16 tween_flags[BATTLE_MAP_MESH_CHANNEL_COUNT]; /* 0x3c */
     u16 _unused_4e;                                 /* 0x4e */
 } battle_map_mesh_keyframe_t;
-
 typedef char battle_map_mesh_keyframe_size_must_be_80[(sizeof(battle_map_mesh_keyframe_t) == 80) ? 1 : -1];
 
 /* battle_map_mesh_keyframe_t.tween_flags: how one channel reaches its keyframe value. */
@@ -174,14 +176,15 @@ typedef struct battle_map_mesh_instruction {
 typedef struct battle_map_mesh_instructions {
     battle_map_mesh_instruction_t states[8][17];
 } battle_map_mesh_instructions_t;
-
 typedef char battle_map_mesh_instructions_size_must_be_544[(sizeof(battle_map_mesh_instructions_t) == 544) ? 1 : -1];
+
 extern battle_map_mesh_part_t g_battle_map_mesh_parts[9];
 extern battle_map_mesh_keyframe_t g_battle_map_mesh_animation_keyframes[];
 extern battle_map_mesh_instructions_t g_battle_map_mesh_animation_instructions[9];
 extern s32 g_battle_map_mesh_part_animation_states[];
 extern const battle_map_mesh_geometry_t* g_battle_map_mesh_part_geometry[9];
 
+/* texture animations */
 /* battle_map_texture_animation_t.mode: the technique of a map texture animation row and, for the
  * values from 128, its playback state. */
 typedef enum battle_map_texture_animation_mode {
@@ -246,39 +249,30 @@ typedef struct battle_map_texture_animation {
     u8 timer;       /* 0x12 */
     u8 active;      /* 0x13 */
 } battle_map_texture_animation_t;
-
 typedef char battle_map_texture_animation_size_must_be_20[(sizeof(battle_map_texture_animation_t) == 20) ? 1 : -1];
+
 extern s32 g_battle_map_texture_animation_cycle_handles[BATTLE_MAP_TEXTURE_ANIMATION_COUNT];
 extern battle_map_texture_animation_t g_battle_map_texture_animations[BATTLE_MAP_TEXTURE_ANIMATION_COUNT];
+
 void battle_map_freeze(void);
 void battle_map_unfreeze(void);
 
-/* Commands of battle_map_configure_effect_data_state: the ordering-table
- * handling of untextured map polygons while an effect draws. */
-typedef enum battle_map_effect_data_command {
-    BATTLE_MAP_EFFECT_DATA_END = 0x87,
-    BATTLE_MAP_EFFECT_DATA_BEGIN = 0x88,
-} battle_map_effect_data_command_e;
-
+/* render records */
+extern battle_map_mesh_triangle_positions_t g_battle_map_textured_triangle_positions[RENDER_TEXTURED_TRIANGLE_COUNT];
+extern battle_map_mesh_quad_positions_t g_battle_map_textured_quad_positions[RENDER_TEXTURED_QUAD_COUNT];
+extern battle_map_mesh_triangle_positions_t
+    g_battle_map_untextured_triangle_positions[RENDER_UNTEXTURED_TRIANGLE_COUNT];
+extern battle_map_mesh_quad_positions_t g_battle_map_untextured_quad_positions[RENDER_UNTEXTURED_QUAD_COUNT];
+extern battle_map_mesh_triangle_normals_t g_battle_map_textured_triangle_normals[];
+extern battle_map_mesh_quad_normals_t g_battle_map_textured_quad_normals[];
 extern s32 g_battle_map_textured_quad_count;
 extern s32 g_battle_map_textured_triangle_count;
 extern s32 g_battle_map_untextured_quad_count;
 extern s32 g_battle_map_untextured_triangle_count;
-extern VECTOR g_battle_map_camera_zoom;
-
-/* Untextured map polygons go to OT slot (otz & mask) | fixed index: {0, 4}
- * normally, {-1, 0} while map effect data is active (command 0x88), so a
- * non-zero mask also marks that state. */
-extern s32 g_battle_map_untextured_fixed_ot_index;
-
-extern s32 g_battle_map_untextured_otz_mask;
-extern CVECTOR g_battle_map_white_cvector;
-
-/* Default vectors shared with battle_map_gns_apply_command, which emits them. */
-extern SVECTOR g_battle_map_zero_svector;
-
-extern VECTOR g_battle_map_unit_scale_vector;
-extern SVECTOR g_battle_map_camera_rotation;
+extern s32 g_battle_map_primary_textured_quad_count;
+extern s32 g_battle_map_primary_textured_triangle_count;
+extern s32 g_battle_map_primary_untextured_quad_count;
+extern s32 g_battle_map_primary_untextured_triangle_count;
 extern battle_map_mesh_triangle_positions_t* g_battle_map_part_textured_triangle_positions;
 extern battle_map_mesh_quad_positions_t* g_battle_map_part_textured_quad_positions;
 extern battle_map_mesh_triangle_positions_t* g_battle_map_part_untextured_triangle_positions;
@@ -289,27 +283,37 @@ extern s32 g_battle_map_part_textured_quad_count;
 extern s32 g_battle_map_part_textured_triangle_count;
 extern s32 g_battle_map_part_untextured_quad_count;
 extern s32 g_battle_map_part_untextured_triangle_count;
-extern battle_map_mesh_triangle_positions_t g_battle_map_textured_triangle_positions[RENDER_TEXTURED_TRIANGLE_COUNT];
-extern battle_map_mesh_quad_positions_t g_battle_map_textured_quad_positions[RENDER_TEXTURED_QUAD_COUNT];
 
-extern battle_map_mesh_triangle_positions_t
-    g_battle_map_untextured_triangle_positions[RENDER_UNTEXTURED_TRIANGLE_COUNT];
-
-extern battle_map_mesh_quad_positions_t g_battle_map_untextured_quad_positions[RENDER_UNTEXTURED_QUAD_COUNT];
-extern battle_map_mesh_triangle_normals_t g_battle_map_textured_triangle_normals[];
-extern battle_map_mesh_quad_normals_t g_battle_map_textured_quad_normals[];
-extern u8 g_battle_map_polygon_flag_clear_countdown;
-extern s32 g_battle_map_primary_textured_quad_count;
-extern s32 g_battle_map_primary_textured_triangle_count;
-extern s32 g_battle_map_primary_untextured_quad_count;
-extern s32 g_battle_map_primary_untextured_triangle_count;
 void battle_map_mesh_append_geometry(const battle_map_mesh_geometry_t* geometry_data, battle_map_mesh_part_t* metadata);
+
+/* rendering */
+/* Commands of battle_map_configure_effect_data_state: the ordering-table
+ * handling of untextured map polygons while an effect draws. */
+typedef enum battle_map_effect_data_command {
+    BATTLE_MAP_EFFECT_DATA_END = 0x87,
+    BATTLE_MAP_EFFECT_DATA_BEGIN = 0x88,
+} battle_map_effect_data_command_e;
+
+extern VECTOR g_battle_map_camera_zoom;
+extern SVECTOR g_battle_map_camera_rotation;
+extern CVECTOR g_battle_map_white_cvector;
+
+/* Untextured map polygons go to OT slot (otz & mask) | fixed index: {0, 4}
+ * normally, {-1, 0} while map effect data is active (command 0x88), so a
+ * non-zero mask also marks that state. */
+extern s32 g_battle_map_untextured_fixed_ot_index;
+extern s32 g_battle_map_untextured_otz_mask;
+
+/* Default vectors shared with battle_map_gns_apply_command, which emits them. */
+extern SVECTOR g_battle_map_zero_svector;
+extern VECTOR g_battle_map_unit_scale_vector;
+
+void battle_map_mesh_reset_render_state(void);
+void battle_map_draw_mesh_and_weather(MATRIX* camera_matrix);
 void battle_map_queue_textured_quads(u32* otag, POLY_GT4* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_textured_triangles(u32* otag, POLY_GT3* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_untextured_quads(u32* otag, POLY_F4* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_untextured_triangles(u32* otag, POLY_F3* prims, s32 yaw, s32* unused_count);
 s32 battle_map_configure_effect_data_state(battle_map_effect_data_command_e command);
-void battle_map_mesh_reset_render_state(void);
-void battle_map_draw_mesh_and_weather(MATRIX* camera_matrix);
 
 #endif

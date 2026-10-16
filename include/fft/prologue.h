@@ -1,31 +1,27 @@
 #ifndef PROLOGUE_H
 #define PROLOGUE_H
 
-/* The new-game prologue: text pages over crossfading pictures. */
+/* OPEN's new-game prologue: text pages over crossfading pictures. */
 
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-void prologue_start(void);
+/* New-game prologue entry: a packed line count, texture-page position and image operation, followed by four-byte
+ * texture-row/width records. */
+typedef struct prologue_entry {
+    u32 header;
+    u8 line_data[0]; /* variable number of encoded prologue_line_t records */
+} prologue_entry_t;
+typedef char prologue_entry_size_must_be_4[sizeof(prologue_entry_t) == 4 ? 1 : -1];
 
-/* New-game prologue entry: a packed line count, texture-page position and
- * image operation, followed by four-byte texture-row/width records. */
 typedef struct prologue_line {
     u8 texture_row;
     u8 width;
     u8 _unused_02[2];
 } prologue_line_t;
-
 typedef char prologue_line_size_must_be_4[sizeof(prologue_line_t) == 4 ? 1 : -1];
-
-typedef struct prologue_entry {
-    u32 header;
-    u8 line_data[0]; /* variable number of encoded prologue_line_t records */
-} prologue_entry_t;
-
-typedef char prologue_entry_size_must_be_4[sizeof(prologue_entry_t) == 4 ? 1 : -1];
 
 /* High nibble of the image command byte in prologue_entry_t.header. */
 typedef enum prologue_image_operation {
@@ -38,6 +34,7 @@ enum {
     PROLOGUE_IMAGE_INDEX_MASK = 0x0f,
 };
 
+/* prologue_t.flags. */
 typedef enum prologue_flag {
     PROLOGUE_NEXT_ENTRY = 0x01,  /* starts the next entry of the table, or ends at the target */
     PROLOGUE_NEXT_STEP = 0x02,   /* starts the next step of the entry */
@@ -63,19 +60,20 @@ typedef struct prologue {
     /* 0x30 */ prologue_entry_t** entry_table;
     /* 0x34 */ prologue_entry_t* entry;
 } prologue_t;
-
 typedef char prologue_size_must_be_56[(sizeof(prologue_t) == 56) ? 1 : -1];
+
 extern prologue_t g_prologue;
 extern prologue_entry_t** g_prologue_entries;
 extern POLY_GT4 g_prologue_line_primitives[2][14];
 extern u16* g_prologue_crossfade_frame_pixels;
 extern u16* g_prologue_crossfade_old_picture;
+extern u8 g_prologue_crossfade_progress;
+extern u8 g_prologue_crossfade_rows[];
 
 /* Volatile: prologue_step_crossfade reloads it every column. */
 extern u16* volatile g_prologue_crossfade_new_picture;
 
-extern u8 g_prologue_crossfade_progress;
-extern u8 g_prologue_crossfade_rows[];
+void prologue_start(void);
 void prologue_init_sequence(s32 target, s32 ot_layer, prologue_entry_t** entry_table);
 s32 prologue_update(void);
 void prologue_finished_stub(void);

@@ -16,9 +16,9 @@
 #include "fft/world_map.h"
 #include "psx/types.h"
 
-/* Provisional: one 0x5c-byte slot of the menu stack (g_menu_stack_records), one per level; the level's type
- * in g_menu_stack_types selects the view. The leading 32-bit value normally names a window; the
- * FOCUS_LOCATION level stores a map-dot index instead. */
+/* Provisional: one 0x5c-byte slot of the menu stack (g_menu_stack_records), one per level; the level's type in
+ * g_menu_stack_types selects the view. The leading 32-bit value normally names a window; the WORLD_MAP_FOCUS level
+ * stores a map-dot index instead. */
 union menu_stack_record {
     s32 window_index;
     s32 focus_dot_index;   /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
@@ -60,9 +60,9 @@ union menu_stack_record {
     sound_novel_level_t sound_novel;
     proposition_result_level_t proposition_result;
 };
+typedef char menu_stack_record_size_must_be_92[sizeof(menu_stack_record_t) == 92 ? 1 : -1];
 
 extern menu_stack_record_t g_menu_stack_records[];
 extern menu_stack_record_t g_menu_stack_records_next[];
-typedef char menu_stack_record_size_must_be_92[sizeof(menu_stack_record_t) == 92 ? 1 : -1];
 
 #endif

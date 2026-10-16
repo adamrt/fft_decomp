@@ -1,8 +1,8 @@
 #ifndef AI_H
 #define AI_H
 
-/* The AI and Auto-Battle (ai_select_fight_for_life ...): commands, decisions, ranking, origins, simulation and
- * movement. */
+/* The battle AI's workspace (ai_data_t) and the records it is built from, with the per-unit ability lists and the AI's
+ * memory copy helpers. */
 
 #include "fft/ability.h"
 #include "fft/action.h"
@@ -13,6 +13,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* workspace capacities */
 /* Fixed workspace capacities and tile-grid storage, independent of map bounds. */
 enum {
     AI_COMPACT_UNIT_COUNT = 16,
@@ -24,6 +25,7 @@ enum {
     AI_GRID_COLUMN_COUNT = 16,
 };
 
+/* coordinates */
 /* X / map elevation / Y / zero, written in that order by ai_copy_unit_coordinates
  * and read as one 32-bit value for equality tests. */
 typedef union ai_coords {
@@ -36,6 +38,7 @@ typedef union ai_coords {
     } fields;
 } ai_coords_t;
 
+/* ability flags */
 /* The four AI flag bytes of an ability, one enum per byte. */
 enum {
     AI_ABILITY_FLAG_1_TARGET_ALLIES = 0x01,
@@ -111,6 +114,7 @@ typedef union ai_ability_flags {
     } groups;
 } ai_ability_flags_t;
 
+/* considered ability */
 /* AI ability +0x04..0x0b: byte parameters and an aligned 32-bit status tail.
  * ai_target_classify_ability_effect loads status bytes 1..4 together; reading only one byte
  * would silently lose the high status bits tested by the decision evaluator. */
@@ -142,9 +146,9 @@ typedef struct ai_considered_ability {
     u8 mp_cost;                         /* 0x11 */
     u8 _padding_12[2];                  /* tail padding to 4-byte alignment */
 } ai_considered_ability_t;
-
 typedef char ai_considered_ability_size_must_be_20[(sizeof(ai_considered_ability_t) == 20) ? 1 : -1];
 
+/* actions */
 /* ai_action_rank_t.decided of the selected action once it is chosen. */
 enum {
     AI_ACTION_DECIDED = 0xff,
@@ -159,7 +163,6 @@ typedef struct ai_action_rank {
     u8 base_hit_percent;
     s16 priority;
 } ai_action_rank_t;
-
 typedef char ai_action_rank_size_must_be_4[(sizeof(ai_action_rank_t) == 4) ? 1 : -1];
 
 /* One considered or recorded action. ai_data_t holds the current one, the best so far, eight
@@ -173,9 +176,9 @@ typedef struct ai_action_data {
     action_command_t command; /* 0x08; copied as the ACT payload */
     ai_action_rank_t rank;    /* 0x1c */
 } ai_action_data_t;
-
 typedef char ai_action_data_size_must_be_32[(sizeof(ai_action_data_t) == 32) ? 1 : -1];
 
+/* ability lists */
 /* The packed 16-bit value combines an ability ID and a physical unit slot. */
 enum {
     AI_ABILITY_ENTRY_ABILITY_MASK = 0x03ff,
@@ -215,11 +218,12 @@ typedef struct ai_ability_entry {
         } policy;
     } usage;
 } ai_ability_entry_t;
-
 typedef char ai_ability_entry_must_be_4[sizeof(ai_ability_entry_t) == 4 ? 1 : -1];
+
 void ai_init_unit_abilities(s32 unit_id);
 s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit);
 
+/* unit records */
 /* Shared prefix of the baseline and suspended AI unit snapshots.
  * Byte 2 holds Death Sentence CT only in the compact suspended record;
  * the baseline uses status_ct[15] and leaves this byte untouched. */
@@ -229,7 +233,6 @@ typedef struct ai_status_snapshot {
     u8 death_sentence_ct;
     u8 current_status[STATUS_BYTE_COUNT];
 } ai_status_snapshot_t;
-
 typedef char ai_status_snapshot_must_be_8[sizeof(ai_status_snapshot_t) == 8 ? 1 : -1];
 
 /* OR-combined categories gathered from both equipped weapon formulas. They
@@ -256,9 +259,9 @@ typedef union ai_weapon_data {
         u8 _unused_06[2];
     } fields;
 } ai_weapon_data_t;
-
 typedef char ai_weapon_data_must_be_8[sizeof(ai_weapon_data_t) == 8 ? 1 : -1];
 
+/* unit decisions */
 /* Per-unit AI behavior flags copied from ENTD data to decision +0x04. The
  * three transient status bits are rebuilt during action simulation. */
 typedef enum ai_decision_flags {
@@ -322,9 +325,9 @@ typedef struct ai_unit_decision {
     u8 enemy_ability_min_reach; /* 0x0e; least range + AoE of the enemy-targeting abilities, plus Move */
     u8 ally_ability_min_reach;  /* 0x0f; least range + AoE of the ally-targeting abilities, plus Move */
 } ai_unit_decision_t;
-
 typedef char ai_unit_decision_size_must_be_16[(sizeof(ai_unit_decision_t) == 16) ? 1 : -1];
 
+/* workspace */
 typedef enum ai_target_setting_flags {
     AI_TARGET_SETTING_REFRESH_UNIT_STATUS_FLAGS = 0x01000000,
     AI_TARGET_SETTING_CONSUME_EVALUATED_AIM_TILES = 0x02000000,
@@ -351,7 +354,6 @@ typedef union ai_targetability {
         u8 _unused_3f;
     } snapshot;
 } ai_targetability_t;
-
 typedef char ai_targetability_size_must_be_64[(sizeof(ai_targetability_t) == 64) ? 1 : -1];
 
 /* The whole AI state, kept across the frames a decision is suspended over. The stage bytes hold
@@ -479,18 +481,22 @@ typedef struct ai_data {
     u8 _unused_19bf[8];
     u8 _padding_19c7; /* 0x19c7; last documented byte; tail padding to 4-byte alignment */
 } ai_data_t;
-
 typedef char ai_data_size_must_be_6600[(sizeof(ai_data_t) == 6600) ? 1 : -1];
 
 /* The workspace lives in BATTLE; EVENT, EFFECT and WORLD code also use its pointer.
  * ai_init_workspace points g_ai_workspace at g_ai_data, and the menus borrow
  * the same memory through g_ai_workspace_ptr as their work block. */
 extern ai_data_t g_ai_data;
-
 extern ai_data_t* g_ai_workspace;
 extern event_work_t* g_ai_workspace_ptr; /* pointer cell reloaded per subsystem */
+
 void ai_init_workspace(void);
 
+/* simulation */
+/* The copy of g_action_mimic_attacker that ai_simulate_begin saves and ai_simulate_end restores. */
+extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
+
+/* memory helpers */
 /* Copy forward using a signed destination-end address; nonpositive counts do nothing. */
 void ai_mem_copy_bytes(void* destination, const void* source, s32 byte_count);
 
@@ -499,7 +505,5 @@ void ai_mem_copy_u16_values(void* destination, const void* source, s32 byte_coun
 
 /* Clear byte_count / 4 signed 32-bit values; leave any trailing bytes unchanged. */
 void ai_mem_zero_32bit_values(void* destination, s32 byte_count);
-
-extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
 
 #endif

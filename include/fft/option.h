@@ -1,7 +1,8 @@
 #ifndef OPTION_H
 #define OPTION_H
 
-/* Option: the game options screen and its values. */
+/* The Options screen, in the OPTION overlay and in WORLD's copy: the screens it runs, its packet pages and the option
+ * values being edited. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
@@ -11,16 +12,20 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern menu_input_timing_profile_t g_option_input_repeat_timings[];
-
-/* The argument of option_entrypoint and option_entrypoint: which of
- * the OPTION overlay's screens to run. */
+/* entry */
+/* The argument of option_entrypoint, both the OPTION overlay's and WORLD's: which of the OPTION overlay's screens to
+ * run. */
 typedef enum option_screen {
     MENU_OPTION_TYPE_GAME_OPTIONS = 0,
     MENU_OPTION_TYPE_AT_LIST = 1,
     MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2, /* crystal and treasure panel */
 } option_screen_e;
 
+void option_open(void);
+void option_entrypoint(s32 menu_type); /* the OPTION overlay's entry */
+void option_entrypoint(s32 mode);      /* WORLD's copy */
+
+/* game options screen */
 /* One of the two 0x190-byte packet pages of the options screen (g_option_pages), alternated by frame.
  * Provisional. */
 typedef struct option_page {
@@ -37,32 +42,28 @@ typedef struct option_page {
     SPRT arrow_marks[2];                /* 0x154 */
     SPRT thumb;                         /* 0x17c: scroll-bar thumb */
 } option_page_t;
-
 typedef char option_page_size_must_be_400[(sizeof(option_page_t) == 400) ? 1 : -1];
+
 extern option_page_t g_option_pages[2];
 extern menu_text_layout_t g_option_entry_table[1];
 extern menu_entry_t g_option_icon_thread_param;
 extern menu_icon_record_t g_option_picker_icon_records[2];
-
-/* The values being edited, one per game_option_index_e. */
-extern s32 g_option_values[GAME_OPTION_UNCHANGED + 1];
-
+extern menu_input_timing_profile_t g_option_input_repeat_timings[];
+extern RECT g_option_title_image_rect;
+extern RECT g_option_entry_panel_rect;
+extern RECT g_option_value_image_rect;
+extern s32 g_option_values[GAME_OPTION_UNCHANGED + 1]; /* the values being edited, one per game_option_index_e */
 extern s32 g_option_reference_values[];
 extern s32 g_option_choice_counts[];
 extern s32 g_option_choice_widths[];
 extern s32 g_option_value_text_id_bases[];
-extern RECT g_option_title_image_rect;
-extern RECT g_option_entry_panel_rect;
-extern RECT g_option_value_image_rect;
 
-/* The value picker thread of one game option. */
-void option_choice_thread(void);
-
-void option_entrypoint(s32 menu_type);
 void option_game_options_thread(void);
-void option_open(void);
-void option_entrypoint(s32 mode);
-void option_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
+void option_choice_thread(void); /* the value picker thread of one game option */
+
+/* WORLD's copy of menu_init_scaled_draw_area_packets for the options screen, and the draw area it installs. */
 extern const RECT g_option_draw_area_template;
+
+void option_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 
 #endif

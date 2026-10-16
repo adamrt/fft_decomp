@@ -1,7 +1,8 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-/* Unit animations and SEQ scripts, including the distortion motions (teleport, rise, settle). */
+/* BATTLE unit animations: SEQ sequence opcodes and the animation state, animation ids, the charge, attack and reaction
+ * animations of actions, and the distortion motions (teleport, rise, settle). */
 
 #include "fft/unit.h"
 #include "psx/libgpu.h"
@@ -12,7 +13,7 @@ struct sprite_display;
 struct sprite_unit_seq_table;
 struct sprite_unit_shp_frame_tables;
 
-/* SEQ sequences */
+/* sequences */
 /* SEQ sequence bytes, as animation_run_unit_seq_script (unit sheets) and
  * animation_run_wep_eff_seq_script (weapon and effect sheets) read them.
  * A sequence is a run of two-byte frame instructions (an SHP frame, then the
@@ -91,8 +92,7 @@ typedef enum animation_seq_opcode {
     ANIMATION_SEQ_OP_REPEAT = 0xfc,               /* offset, count: jump count times, then go on */
     ANIMATION_SEQ_OP_JUMP = 0xfd,                 /* offset */
     ANIMATION_SEQ_OP_END_ANIMATION = 0xfe,        /* stop; a weapon or effect sprite is hidden too */
-    ANIMATION_SEQ_OP_PAUSE_ANIMATION
-    = 0xff, /* stop; either one puts a unit in its g_battle_gfx_targeted_frame_* pose */
+    ANIMATION_SEQ_OP_PAUSE_ANIMATION = 0xff, /* stop; either one puts a unit in its g_animation_targeted_frame_* pose */
 } animation_seq_opcode_e;
 
 /* Animation ids from 500 up are not doubled into a front and a back
@@ -129,9 +129,18 @@ typedef struct animation_state {
     struct sprite_unit_seq_table* saved_seq; /* 0x28 */
     struct sprite_display* display;          /* 0x2c */
 } animation_state_t;
-
 typedef char animation_state_size_must_be_48[sizeof(animation_state_t) == 48 ? 1 : -1];
 
+/* The 24 orders in which sprite_draw_unit_layers queues a unit's
+ * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
+extern s32 g_animation_layer_priorities[][4];
+
+/* By sprite_shp_type_e: the frame a unit is left on when its sequence ends or its attack image is taken away, seen
+ * from behind and from the front. */
+extern u8 g_animation_targeted_frame_back[];
+extern u8 g_animation_targeted_frame_front[];
+
+/* unit animations */
 /* Unit animation ids: the ones the code and the two animation tables of
  * BATTLE.BIN select by number. Animation n is sequences 2n (seen from the
  * front) and 2n + 1 (from behind) of the sheet's SEQ file; the comments
@@ -226,6 +235,19 @@ typedef enum animation {
 /* The teleport animation and the attack animations after it are ATTACK_FIRST and up. */
 enum { ANIMATION_ATTACK_FIRST = ANIMATION_TELEPORT };
 
+void animation_set_specific_by_runtime_id(u32 runtime_id, u32 animation);
+void animation_store_facing(u32 animation, s32 facing, unit_t* unit);
+void animation_force_facing(s32 animation, s32 facing, unit_t* unit);
+void animation_set_walk(unit_t* unit);
+void animation_set_level_up(unit_t* unit);
+void animation_set_mounted(unit_t* unit);
+void animation_set_mounted_by_runtime_id(u32 runtime_id);
+void animation_set_for_status(unit_t* unit);
+void animation_call_set_for_status(struct unit* unit);
+void animation_set_status_by_runtime_id(u32 runtime_id);
+void animation_update_for_status_changes(unit_t* unit);
+
+/* action animations */
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation
  * set, its attack animation and the message shown when it hits. */
 typedef struct animation_ability_data {
@@ -233,7 +255,6 @@ typedef struct animation_ability_data {
     u8 attack_animation;        /* animation_e, or ANIMATION_ATTACK_USE_WEAPON or _USE_ITEM */
     u8 text_display; /* low byte of the message text id (0x1800 | this) shown when the ability hits; 0 none */
 } animation_ability_data_t;
-
 typedef char animation_ability_data_size_must_be_3[(sizeof(animation_ability_data_t) == 3) ? 1 : -1];
 
 /* Rows of the ability animation table, and the charge animation sets with their two animations. */
@@ -249,24 +270,21 @@ enum {
     ANIMATION_ATTACK_USE_ITEM = 1,
 };
 
+/* Two animation_e for each set: the one that starts a charge and
+ * the one held while the unit charges or performs; 0 for none. */
+extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
+
+/* animation_e of each item type's attack at a higher, a level and a lower target. */
+extern u8 g_animation_weapon_attacks[][3];
+
 void animation_start_ability_charge(unit_t* unit);
 void animation_start_ability_charge_hold(unit_t* unit);
 void animation_select_attack_for_ability(unit_t* attacker, unit_t* target);
 void animation_select_weapon_attack(unit_t* attacker, unit_t* target);
 void animation_set_target(unit_t* attacker, unit_t* target);
 s32 animation_set_target_by_runtime_id(s32 runtime_id);
-void animation_set_for_status(unit_t* unit);
-void animation_call_set_for_status(struct unit* unit);
-void animation_update_for_status_changes(unit_t* unit);
-void animation_set_status_by_runtime_id(u32 runtime_id);
-void animation_set_mounted(unit_t* unit);
-void animation_set_mounted_by_runtime_id(u32 runtime_id);
-void animation_set_walk(unit_t* unit);
-void animation_set_level_up(unit_t* unit);
-void animation_set_specific_by_runtime_id(u32 runtime_id, u32 animation);
-void animation_store_facing(u32 animation, s32 facing, unit_t* unit);
-void animation_force_facing(s32 animation, s32 facing, unit_t* unit);
 
+/* distortions */
 /* unit_t.distortion_animation_id: the motion that
  * animation_distortion_dispatch steps once an animation frame
  * until its handler clears the id. ANIMATION_SEQ_OP_START_DISTORTION gives the
@@ -297,31 +315,16 @@ enum {
 };
 
 typedef void (*animation_distortion_handler_t)(unit_t* unit);
+
 extern animation_distortion_handler_t g_animation_distortion_handlers[ANIMATION_DISTORTION_COUNT];
+
 void animation_distortion_dispatch(unit_t* unit);
 s32 animation_distortion_scale_pulse(unit_t* unit);
-void animation_distortion_clear(unit_t* unit);
-void animation_distortion_clear_2(unit_t* unit);
-
-/* Two animation_e for each set: the one that starts a charge and
- * the one held while the unit charges or performs; 0 for none. */
-extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
-
-/* animation_e of each item type's attack at a higher, a level and a lower target. */
-extern u8 g_animation_weapon_attacks[][3];
-
-/* The 24 orders in which sprite_draw_unit_layers queues a unit's
- * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
-extern s32 g_animation_layer_priorities[][4];
-
-/* By sprite_shp_type_e: the frame a unit is left on when its sequence ends
- * or its attack image is taken away, seen from behind and from the front. */
-extern u8 g_animation_targeted_frame_back[];
-
-extern u8 g_animation_targeted_frame_front[];
 void animation_distortion_move_to_target(unit_t* unit);
 void animation_distortion_move_to_target_level(unit_t* unit);
-void animation_distortion_move_to_own_tile_level(unit_t* unit);
 void animation_distortion_move_to_own_tile(unit_t* unit);
+void animation_distortion_move_to_own_tile_level(unit_t* unit);
+void animation_distortion_clear(unit_t* unit);
+void animation_distortion_clear_2(unit_t* unit);
 
 #endif

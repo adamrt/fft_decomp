@@ -1,42 +1,14 @@
 #ifndef SKILLSET_H
 #define SKILLSET_H
 
-/* Skillsets in the battle menu: Item, Throw, Math Skill, Elemental, Draw Out, Charge, Monster Skill. */
+/* Skillsets: their ids and record sizes, and BATTLE's loaders that list a unit's entries for each skillset of the
+ * action menu (Item, Throw, Math Skill, Elemental, Monster Skill, Draw Out, Charge). */
 
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
-extern u8 g_skillset_math_sources[4];
-s32 skillset_load_charge_ability_ids(s32 unit_id, u8 skillset_id, s16* ability_ids);
-s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
-s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
-s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out);
-s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out);
-s32 skillset_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-
-s32 skillset_get_unit_ability_data(
-    s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out);
-
-s32 skillset_monster_count_supporters(const unit_stats_t* unit);
-s32 skillset_load_charge_abilities(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns);
-s32 skillset_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset);
-s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
-s32 skillset_math_load_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
-s32 skillset_math_load_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
-s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-
-/* Human skillsets contain 16 action slots followed by six reaction/support/movement
- * slots. Monster records contain four ids; the shared scratch list reserves 24. */
-enum {
-    HUMAN_SKILLSET_ACTION_SLOT_COUNT = 16,
-    HUMAN_SKILLSET_ABILITY_COUNT = 22,
-    MONSTER_SKILLSET_ABILITY_COUNT = 4,
-    SKILLSET_ABILITY_LIST_COUNT = 24,
-};
-
+/* skillset records */
 /* Skillset ids: the rows of g_ability_human_skillset_abilities and, from
  * SKILLSET_ID_MONSTER_FIRST, of g_ability_monster_skillset_abilities. A
  * name is the skillset's name in the game's text. Where rows share a name, a
@@ -210,6 +182,15 @@ enum {
     SKILLSET_ID_END = 224,
 };
 
+/* Human skillsets contain 16 action slots followed by six reaction/support/movement
+ * slots. Monster records contain four ids; the shared scratch list reserves 24. */
+enum {
+    HUMAN_SKILLSET_ACTION_SLOT_COUNT = 16,
+    HUMAN_SKILLSET_ABILITY_COUNT = 22,
+    MONSTER_SKILLSET_ABILITY_COUNT = 4,
+    SKILLSET_ABILITY_LIST_COUNT = 24,
+};
+
 /* Ability classes ability_store_skillset_abilities collects from a
  * skillset; the random R/S/M selector uses rsm_ability_filter_e instead. */
 typedef enum skillset_ability_filter {
@@ -219,5 +200,26 @@ typedef enum skillset_ability_filter {
     SKILLSET_ABILITY_FILTER_SUPPORT = 0x08,
     SKILLSET_ABILITY_FILTER_ALL = 0x0f,
 } skillset_ability_filter_e;
+
+/* action menu lists */
+extern u8 g_skillset_math_sources[4];
+
+s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
+s32 skillset_get_unit_ability_data(
+    s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out);
+s32 skillset_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
+s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
+s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
+s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out);
+s32 skillset_math_load_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
+s32 skillset_math_load_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
+s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
+u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset);
+s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out);
+s32 skillset_monster_count_supporters(const unit_stats_t* unit);
+s32 skillset_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
+s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
+s32 skillset_load_charge_ability_ids(s32 unit_id, u8 skillset_id, s16* ability_ids);
+s32 skillset_load_charge_abilities(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns);
 
 #endif

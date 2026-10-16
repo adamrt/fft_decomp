@@ -1,13 +1,15 @@
 #ifndef STATE_H
 #define STATE_H
 
-/* BATTLE's game state machine and frame loop (data use game_state). */
+/* BATTLE's game state machine: the frame loop, the handler and entry function of each game state, the map jumps and the
+ * battle's close, and the game options word. */
 
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* game state */
 /*
  * Values dispatched by state_run_game_loop, verified against the
  * target's switch table.  The target has no explicit handler for value 50.
@@ -76,6 +78,7 @@ typedef enum game_state {
 
 extern s32 g_game_state;
 extern s32 g_game_state_previous;
+extern s32 g_state_map_init_step;
 
 /* What MAIN does once state_run_game_loop returns: a system_game_flow_e. */
 extern u32 g_game_flow_state;
@@ -85,17 +88,16 @@ extern u32 g_game_flow_state;
  * script_play_effect_and_wait wait on it. */
 extern s32 g_state_animation_continue_check;
 
-extern s32 g_state_map_init_step;
 void state_run_game_loop(void);
-s32 state_get_animation_continue_check(void);
 s32 state_sync_frame(u32* ordering_table);
 s32 state_update_controller_input(void);
 void state_update_units(void);
+s32 state_get_animation_continue_check(void);
 
+/* state handlers */
 /* The per-frame handler of each game_state_e, in state order. ACTION_EXECUTE and EVENT run
  * an update function instead. */
 void state_handle_free_cursor(void);
-
 void state_handle_free_cursor_help(void);
 void state_handle_highlight_units(void);
 void state_handle_open_action_menus(void);
@@ -154,47 +156,64 @@ void state_handle_change_map_jumping_out(void);
 void state_handle_change_map_init(void);
 void state_handle_change_map_jumping_in(void);
 void state_handle_close_battle(void);
-void state_enter_action_cast(void);
-void state_enter_action_execute(void);
-void state_enter_targeting_prompt(void);
-void state_enter_after_command(void);
-void state_enter_commence_attack_phase(void);
-void state_enter_continue_turn(void);
-void state_enter_event(void);
-void state_enter_highlight_units(void);
-void state_enter_open_sp2_files(void);
-void state_enter_pre_attack_animation(void);
-void state_enter_select_move_tile(void);
-void state_enter_status_execute(void);
-void state_enter_target_display(void);
-void state_enter_illegal_range(void);
-void state_enter_target_select(void);
-void state_enter_target_select_confirm(void);
-void state_enter_target_select_denied(void);
-void state_enter_unit_moving(void);
-void state_enter_unit_moving_setup(void);
+
+/* entering a state */
+extern s32 g_state_in_help;
+extern s32 g_state_wait_direction_facing;
+extern s32 g_state_window_closed;
+
+/* Each sets up a state and switches g_game_state to it. */
 void state_enter_free_cursor(void);
+void state_enter_free_cursor_help(void);
+void state_enter_highlight_units(void);
+void state_enter_open_action_menus(void);
+void state_enter_action_help_menu(void);
+void state_enter_display_move_area(void);
+void state_enter_mini_menu(void);
+void state_return_to_mini_menu(void);
+void state_enter_mini_menu_help(void);
+void state_enter_status_execute(void);
+void state_enter_unit_move(void);
+void state_enter_select_move_tile(void);
+void state_enter_illegal_move_menu(void);
+void state_enter_unit_moving_setup(void);
+void state_enter_unit_moving(void);
+void state_enter_move_confirm_menu(void);
+void state_enter_wait_direction(void);
+void state_enter_wait_menu(void);
+void state_enter_targeting_prompt(void);
+void state_enter_illegal_range(void);
+void state_enter_confirm_action(void);
+void state_enter_pre_attack_animation(void);
+void state_enter_action_cast(void);
+void state_enter_commence_attack_phase(void);
+void state_enter_target_select(void);
+void state_enter_target_select_denied(void);
+void state_enter_target_select_confirm(void);
+void state_enter_target_display(void);
+void state_enter_after_command(void);
+void state_enter_continue_turn(void);
+void state_enter_learn_ability_on_hit(void);
+void state_enter_open_sp2_files(void);
+void state_enter_action_execute(void);
 void state_enter_battle_message_display(void);
-void state_start_change_map_jump_in(s32 duration);
-void state_start_change_map_jump_out(s32 map_id, s32 duration);
-void state_enter_close_battle_to_world(s32 duration);
+void state_enter_event(void);
+void state_enter_event_at_battle_start(void);
+
+/* map jumps and closing the battle */
 void state_start_map_jump_out(s32 map_id, s32 duration);
+void state_start_change_map_jump_out(s32 map_id, s32 duration);
+void state_start_change_map_jump_in(s32 duration);
+void state_enter_close_battle_to_world(s32 duration);
 
 /* Queues CLOSE_BATTLE; the callers always pass transition step 8. */
 void state_enter_close_battle(s32 transition_step, s32 close_flow_state);
 
+/* text lookup */
 /* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
 u8* battle_text_find_entry(u32 text_id);
 
-extern s32 g_state_wait_direction_facing;
-void state_enter_wait_direction(void);
-void state_enter_wait_menu(void);
-void state_enter_confirm_action(void);
-void state_enter_unit_move(void);
-void state_enter_event_at_battle_start(void);
-extern s32 g_state_window_closed;
-void state_enter_learn_ability_on_hit(void);
-
+/* game options */
 /* The live options word is g_game_options. The options screen unpacks its fields in menu order. Toggle
  * settings encode On as 0 and Off as 1; the paired high bit participates in the menu's Customize/Initialize
  * state. */
@@ -284,23 +303,13 @@ typedef union game_options {
     u32 value;
     game_options_fields_t fields;
 } game_options_t;
-
 typedef char game_options_size_must_be_4[sizeof(game_options_t) == 4 ? 1 : -1];
-
-/* The player's options, saved while a tutorial event forces its own and restored when it ends. */
-extern game_options_t g_game_options_saved;
 
 extern game_options_t g_game_options;
 extern game_options_t g_game_options_defaults;
-void state_enter_display_move_area(void);
-extern s32 g_state_in_help;
-void state_enter_free_cursor_help(void);
-void state_enter_mini_menu(void);
-void state_enter_action_help_menu(void);
-void state_enter_illegal_move_menu(void);
-void state_return_to_mini_menu(void);
-void state_enter_mini_menu_help(void);
-void state_enter_move_confirm_menu(void);
-void state_enter_open_action_menus(void);
+
+/* The player's options, saved while a tutorial event forces its own and restored when it ends. BATTLE and WORLD each
+ * define it. */
+extern game_options_t g_game_options_saved;
 
 #endif

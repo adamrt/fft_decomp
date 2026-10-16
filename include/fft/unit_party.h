@@ -62,7 +62,6 @@ typedef struct party_unit {
     u8 egg_color;        /* 0xd2; create/save/generate unit stores */
     u8 _unused_d3[0x2d]; /* 0xd3; saves and loads copy 0xe0 bytes per record, so 0xe0..0xff is not saved */
 } party_unit_t;
-
 typedef char party_unit_size_must_be_256[(sizeof(party_unit_t) == 256) ? 1 : -1];
 
 #endif

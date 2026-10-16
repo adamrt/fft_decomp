@@ -1,23 +1,20 @@
 #ifndef EFFECT_TIMELINE_H
 #define EFFECT_TIMELINE_H
 
-/* Declarations. */
+/* Effect timelines: channels, sound and color tracks, camera keyframes, record counters and the effect camera. */
 
 #include "fft/gfx.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* timeline shape */
 /* Particle channels and sound tracks of each timeline phase. */
 enum {
     EFFECT_PARTICLE_CHANNEL_COUNT = 5,
     EFFECT_SOUND_TRACK_COUNT = 3,
 };
 
-/* Keyframe slots of a color track. */
-enum {
-    EFFECT_PALETTE_TRACK_KEYFRAMES = 33,
-};
-
+/* particle channels */
 /* One 0x80-byte particle channel of an effect timeline. Keyframe k lasts
  * from frame_start[k] to frame_start[k + 1]. Entering it runs its 16-bit action value
  * (unit reactions, and binding a native handler to a callback slot); on each
@@ -31,7 +28,6 @@ typedef struct effect_keyframe_table {
     u8 _unused_7c[2];    /* 0x7c */
     s16 last_index;      /* 0x7e; highest valid keyframe index */
 } effect_keyframe_table_t;
-
 typedef char effect_keyframe_table_size_must_be_128[(sizeof(effect_keyframe_table_t) == 128) ? 1 : -1];
 
 /* A particle channel keyframe's 16-bit action value (effect_keyframe_table_t.action), run by
@@ -45,6 +41,12 @@ enum {
     EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION = 0x0040,
     EFFECT_KEYFRAME_ACTION_ANIMATION_MASK = 0xff00,
     EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT = 8,
+};
+
+/* color tracks */
+/* Keyframe slots of a color track. */
+enum {
+    EFFECT_PALETTE_TRACK_KEYFRAMES = 33,
 };
 
 /* The preset byte of a color track keyframe. */
@@ -62,7 +64,6 @@ typedef struct effect_palette_track {
     u8 preset[EFFECT_PALETTE_TRACK_KEYFRAMES];
     s16 count;
 } effect_palette_track_t;
-
 typedef char effect_palette_track_size_must_be_200[sizeof(effect_palette_track_t) == 200 ? 1 : -1];
 
 /* The screen color track: the palette-track layout with a second color per
@@ -75,7 +76,6 @@ typedef struct effect_background_track {
     u8 preset[EFFECT_PALETTE_TRACK_KEYFRAMES];
     s16 count;
 } effect_background_track_t;
-
 typedef char effect_background_track_size_must_be_300[(sizeof(effect_background_track_t) == 300) ? 1 : -1];
 
 /* One phase's color tracks. The surroundings are the map's field color and
@@ -87,6 +87,7 @@ typedef struct effect_timeline_color_tracks {
     effect_background_track_t screen;    /* 0x258 */
 } effect_timeline_color_tracks_t;
 
+/* sound tracks */
 /* A sound track of the child timeline: up to 17 entries, each naming an
  * effect sound channel to play when it is entered. The parent timeline's
  * tracks hold nine (effect_timeline_t.sound_tracks). */
@@ -106,6 +107,7 @@ typedef struct effect_sound_track {
     s16 entry_count;  /* 0x1c */
 } effect_sound_track_t;
 
+/* camera tables */
 /* Bits 0-2 of an effect timeline camera command: the tracks the keyframe moves. */
 enum {
     EFFECT_CAMERA_TRACK_ROTATION = 0x1,
@@ -170,6 +172,7 @@ enum {
     EFFECT_CAMERA_TABLE_PHASE2 = 2,
 };
 
+/* timeline section */
 /* The child timeline, eight bytes into the timeline section
  * (g_effect_child_timeline): its duration and its channels.
  * effect_timeline_t names the section's other parts. */
@@ -183,7 +186,6 @@ typedef struct effect_child_timeline {
     effect_palette_track_t target;                                   /* 0x4b6 */
     effect_background_track_t screen;                                /* 0x57e */
 } effect_child_timeline_t;
-
 typedef char effect_child_timeline_size_must_be_1706[sizeof(effect_child_timeline_t) == 1706 ? 1 : -1];
 
 /* The timeline section of an effect file (effect_file_header_t.timeline).
@@ -218,7 +220,6 @@ typedef struct effect_timeline {
     effect_camera_keyframes_21_t phase1_camera;                                  /* 0x14e6 */
     effect_camera_keyframes_21_t phase2_camera;                                  /* 0x16b6 */
 } effect_timeline_t;
-
 typedef char effect_timeline_size_must_be_6278[(sizeof(effect_timeline_t) == 6278) ? 1 : -1];
 
 /* Parent and child timeline pacing curves, two four-bit values per byte.
@@ -227,12 +228,13 @@ typedef struct effect_timing_curves {
     u8 parent_timeline[300]; /* 0x000 */
     u8 child_timeline[300];  /* 0x12c */
 } effect_timing_curves_t;
-
 typedef char effect_timing_curves_size_must_be_600[sizeof(effect_timing_curves_t) == 600 ? 1 : -1];
-extern effect_child_timeline_t* g_effect_child_timeline;
+
 extern effect_timeline_t* g_effect_timeline;
+extern effect_child_timeline_t* g_effect_child_timeline;
 extern const effect_timing_curves_t* g_effect_timing_curves;
 
+/* timeline state */
 /* Steppers use the named tracks; resets clear each complete slot array.
  * The reset extents include slots that no track stepper reads. */
 enum {
@@ -267,7 +269,6 @@ typedef struct effect_child_timeline_state {
     effect_child_track_counters_t remaining; /* 0x1a; record +0x44 */
     effect_child_track_steps_t step;         /* 0x34; record +0x5e */
 } effect_child_timeline_state_t;
-
 typedef char effect_child_timeline_state_size_must_be_78[sizeof(effect_child_timeline_state_t) == 78 ? 1 : -1];
 
 /* Parent counters: ten particle tracks, fourteen color/sound tracks and
@@ -312,7 +313,6 @@ typedef union effect_timeline_state {
     effect_child_timeline_state_t child;
     effect_parent_timeline_state_t parent;
 } effect_timeline_state_t;
-
 typedef char effect_timeline_state_size_must_be_166[sizeof(effect_timeline_state_t) == 166 ? 1 : -1];
 
 /* The target and frame travel with the counters of the active timeline. */
@@ -321,38 +321,35 @@ typedef struct effect_record_timeline {
     s16 frame;                     /* 0x02 */
     effect_timeline_state_t state; /* 0x04; opcode 28 child or opcode 29 parent */
 } effect_record_timeline_t;
-
 typedef char effect_record_timeline_size_must_be_170[sizeof(effect_record_timeline_t) == 170 ? 1 : -1];
 
-/* The effect camera's rotation, position and zoom tracks: each has its current value, the start
- * and target of the running move, its mode (effect_camera_mode_e), duration and frame counter,
- * and the copy that EFFECT_CAMERA_SOURCE_SAVED reads. */
-extern VECTOR g_effect_camera_position_current;
-
-extern s32 g_effect_camera_position_duration;
-extern s32 g_effect_camera_position_frame;
-extern u32 g_effect_camera_position_mode;
-extern VECTOR g_effect_camera_position_saved;
-extern VECTOR g_effect_camera_position_start;
-extern VECTOR g_effect_camera_position_target;
+/* camera */
+/* The effect camera's rotation, position and zoom tracks: each has its current value, the start and target of the
+ * running move, its mode (effect_camera_mode_e), duration and frame counter, and the copy that
+ * EFFECT_CAMERA_SOURCE_SAVED reads. */
 extern SVECTOR g_effect_camera_rotation_current;
-extern s32 g_effect_camera_rotation_duration;
-
-/* Reset by effect_camera_execute_angle_command. */
-extern s32 g_effect_camera_rotation_frame;
-
-extern u32 g_effect_camera_rotation_mode;
-extern SVECTOR g_effect_camera_rotation_saved;
 extern SVECTOR g_effect_camera_rotation_start;
 extern SVECTOR g_effect_camera_rotation_target;
+extern u32 g_effect_camera_rotation_mode;
+extern s32 g_effect_camera_rotation_duration;
+extern s32 g_effect_camera_rotation_frame; /* reset by effect_camera_execute_angle_command */
+extern SVECTOR g_effect_camera_rotation_saved;
+extern VECTOR g_effect_camera_position_current;
+extern VECTOR g_effect_camera_position_start;
+extern VECTOR g_effect_camera_position_target;
+extern u32 g_effect_camera_position_mode;
+extern s32 g_effect_camera_position_duration;
+extern s32 g_effect_camera_position_frame;
+extern VECTOR g_effect_camera_position_saved;
 extern VECTOR g_effect_camera_zoom_current;
-extern s32 g_effect_camera_zoom_duration;
-extern s32 g_effect_camera_zoom_frame;
-extern u32 g_effect_camera_zoom_mode;
-extern VECTOR g_effect_camera_zoom_saved;
 extern VECTOR g_effect_camera_zoom_start;
 extern VECTOR g_effect_camera_zoom_target;
-void effect_camera_seed_tracks(void);
+extern u32 g_effect_camera_zoom_mode;
+extern s32 g_effect_camera_zoom_duration;
+extern s32 g_effect_camera_zoom_frame;
+extern VECTOR g_effect_camera_zoom_saved;
+
 void effect_camera_init(void);
+void effect_camera_seed_tracks(void);
 
 #endif

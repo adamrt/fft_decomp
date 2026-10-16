@@ -1,11 +1,12 @@
 #ifndef BATTLE_MAP_PALETTE_H
 #define BATTLE_MAP_PALETTE_H
 
-/* Declarations. */
+/* Battle map palettes: the CLUT rows and their runtime colors, the color modes of fades, and the CLUT cycles. */
 
 #include "fft/gfx.h"
 #include "psx/types.h"
 
+/* color modes */
 /* Map color-transition commands: the source color and treatment of RGB offsets.
  * battle_map_palette_modify_from_other honors modes 5-7; every other value adds the
  * offsets to its supplied colors, including RESTORE. */
@@ -62,6 +63,7 @@ enum {
  * GetClut(clut_index * 16, BATTLE_MAP_CLUT_ROWS_Y + clut_row), as a constant. */
 #define BATTLE_MAP_CLUT(clut_row, clut_index) (((BATTLE_MAP_CLUT_ROWS_Y + (clut_row)) << 6) | (clut_index))
 
+/* palette state */
 /* A signed five-bit channel delta (-31..31), biased for table indexing. */
 enum {
     BATTLE_MAP_PALETTE_DELTA_BIAS = 31,
@@ -77,7 +79,6 @@ typedef struct battle_map_palette_color_components {
     u8 semi_transparent;
     rgb24_t delta_biased; /* target - current + BATTLE_MAP_PALETTE_DELTA_BIAS */
 } battle_map_palette_color_components_t;
-
 typedef char
     battle_map_palette_color_components_size_must_be_7[(sizeof(battle_map_palette_color_components_t) == 7) ? 1 : -1];
 
@@ -89,7 +90,6 @@ typedef struct battle_map_palette_animation_state {
     u8 repeat;            /* 0x04; battle_map_color_repeat_e */
     rgb24_t repeat_color; /* 0x05 */
 } battle_map_palette_animation_state_t;
-
 typedef char
     battle_map_palette_animation_state_size_must_be_8[(sizeof(battle_map_palette_animation_state_t) == 8) ? 1 : -1];
 
@@ -105,7 +105,6 @@ typedef struct battle_map_clut_row_state {
     battle_map_palette_color_components_t components[BATTLE_MAP_CLUT_ROW_COLOR_COUNT];
     u16 packed_colors[BATTLE_MAP_CLUT_ROW_COLOR_COUNT];
 } battle_map_clut_row_state_t;
-
 typedef char battle_map_clut_row_state_size_must_be_2434[(sizeof(battle_map_clut_row_state_t) == 2434) ? 1 : -1];
 
 /* The palette runtime state g_battle_map_palette_state: battle_map_update_color_animations
@@ -116,30 +115,26 @@ typedef struct battle_map_palette_state {
     s32 move_pending;
     battle_map_clut_row_state_t clut_rows[BATTLE_MAP_CLUT_ROW_COUNT];
 } battle_map_palette_state_t;
-
 typedef char battle_map_palette_state_size_must_be_34084[(sizeof(battle_map_palette_state_t) == 34084) ? 1 : -1];
-extern u16 g_battle_map_palette_modified_colors[][BATTLE_MAP_CLUT_ROW_COLOR_COUNT]; /* [battle_map_clut_row_e][color] */
+
 extern battle_map_palette_state_t g_battle_map_palette_state;
+extern u16 g_battle_map_palette_modified_colors[][BATTLE_MAP_CLUT_ROW_COLOR_COUNT]; /* [battle_map_clut_row_e][color] */
 extern clut_t g_battle_map_palette_animation_frames;
+
 void battle_map_palette_init_state(void);
-void battle_map_update_color_animations(void);
-void battle_map_palette_store_modified_colors(s32 clut_row, s32 clut_index, s32 store_all);
-
-void battle_map_palette_modify(
-    s32 command, s32 amount, s32 clut_row, s32 clut_index, s32 all_colors, s16 red, s16 green, s16 blue);
-
-void battle_map_clut_upload_rows(void);
-void battle_map_palette_update_all_from_color_data(s32 mode, const clut_t color_data);
-void battle_map_palette_update_colors_by_index(s32 mode, s32 clut_index, const palette_t* color_data);
-
-void battle_map_palette_update_and_store_colors(
-    s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
-
 void battle_map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all);
 void battle_map_palette_update_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
-
+void battle_map_palette_update_colors_by_index(s32 mode, s32 clut_index, const palette_t* color_data);
+void battle_map_palette_update_all_from_color_data(s32 mode, const clut_t color_data);
+void battle_map_palette_update_and_store_colors(
+    s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
 void battle_map_palette_update_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
     s16 red, s16 green, s16 blue, s32 final_value);
+void battle_map_palette_store_modified_colors(s32 clut_row, s32 clut_index, s32 store_all);
+void battle_map_palette_modify(
+    s32 command, s32 amount, s32 clut_row, s32 clut_index, s32 all_colors, s16 red, s16 green, s16 blue);
+void battle_map_update_color_animations(void);
+void battle_map_clut_upload_rows(void);
 
 /* CLUT cycles */
 /* Eight runtime slots rotate a range of colors of a CLUT row for map texture animations.
@@ -158,9 +153,10 @@ typedef struct battle_map_clut_cycle_state {
     u16 first_color; /* 0x06; color index in the row: the colors first..last rotate one place */
     u16 last_color;  /* 0x08; every frame_duration frames, towards last */
 } battle_map_clut_cycle_state_t;
-
 typedef char battle_map_clut_cycle_state_size_must_be_10[(sizeof(battle_map_clut_cycle_state_t) == 10) ? 1 : -1];
+
 extern battle_map_clut_cycle_state_t g_battle_map_clut_cycle_states[BATTLE_MAP_CLUT_CYCLE_SLOT_COUNT];
+
 s32 battle_map_clut_start_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color);
 s32 battle_map_clut_stop_cycle(s32 handle);
 

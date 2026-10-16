@@ -1084,6 +1084,7 @@ static const u32 g_ai_protect_allies_status_ids_rodata[2] = {
 };
 static s32 g_ai_protect_allies_status_retry = 0; /* skip status pass after one failed attempt */
 static s32 g_ai_protect_allies_status_index = 0; /* status-list cursor preserved for resume */
+/* Cancellation-search accounting survives suspension. */
 static s32 g_ai_status_candidate_count = 0;
 static s32 g_ai_status_insufficient_mp = 0;
 static s32 g_ai_status_sufficient_mp = 0;

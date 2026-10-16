@@ -1,18 +1,19 @@
 #ifndef FILE_H
 #define FILE_H
 
-/* File loading helpers shared by the overlays, OPEN and WLDCORE around the resident loader. */
+/* Disc files and the CD loader: the files read at fixed sectors, MAIN's resident asynchronous loader, the loading
+ * helpers the overlays, OPEN and WLDCORE build around it, and OPEN's title background requests. */
 
 #include "psx/libcd.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* disc files */
 /* Sector and byte length of a resource read through the resident file loader. */
 typedef struct file_extent {
     s32 sector;
     s32 size;
 } file_extent_t;
-
 typedef char file_extent_size_must_be_8[(sizeof(file_extent_t) == 8) ? 1 : -1];
 
 /* First sector of each disc file the code reads at a fixed sector, named as
@@ -68,7 +69,7 @@ typedef enum disc_sector {
 
 extern s32 g_file_battle_sector;
 
-/* CD loader */
+/* resident CD loader */
 /* Loading-display mode passed to the shared file-header builder. */
 typedef enum file_loading_display_mode {
     FILE_LOADING_DISPLAY_OFF = -1,
@@ -100,8 +101,8 @@ typedef struct file_load_descriptor {
     CdlLOC position;
     u8* destination;
 } file_load_descriptor_t;
-
 typedef char file_load_descriptor_size_must_be_36[sizeof(file_load_descriptor_t) == 36 ? 1 : -1];
+
 extern file_load_descriptor_t g_file_cd_state;
 
 /* g_file_cd_state.state under a second name: nonzero (not
@@ -113,7 +114,6 @@ int file_request_read(
 
 /* Forwards file_request_read's result. */
 s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
-
 s32 file_request_read_bytes(s32 sector, u32 size, void* destination);
 void file_poll_load(file_load_descriptor_t* state);
 int file_is_still_loading(void);
@@ -125,13 +125,18 @@ void* file_load_to_address(int sector, u32 size, void* destination);
 void* file_load_checked_to_address(int sector, int size, void* destination);
 void* file_load_checked_to_heap(int sector, int size);
 suzuki_smd_header_t* file_load_smd(int sector, u32 size);
+
+/* loading helpers */
 void file_load_sync(s32 lba, s32 size, void* destination);
 void file_wait_then_request_read(file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination);
 void file_wait_for_pending(void);
+
+/* OPEN title backgrounds */
 extern void* g_file_destination;
 extern s32 g_file_current_openbk_image_id;
 extern const s32 g_file_openbk_start_sector_offsets[];
 extern const s32 g_file_openbk_end_sector_offsets[];
+
 void file_request_openbk_image(s32 image_id, void* destination);
 s32 file_get_cd_sync_state_delta(void);
 

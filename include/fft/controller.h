@@ -1,7 +1,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-/* OPEN's stack of per-frame controllers. */
+/* OPEN's stack of per-frame controllers: the handler table, the 100-byte state record each handler lays out, and the
+ * dispatcher. */
 
 #include "fft/movie.h"
 #include "fft/title.h"
@@ -48,15 +49,17 @@ typedef union controller_record {
     controller_text_message_state_t text_message;
     title_exit_state_t title_exit;
 } controller_record_t;
-
 typedef char controller_record_size_must_be_100[(sizeof(controller_record_t) == 100) ? 1 : -1];
+
 typedef void (*controller_handler_t)(controller_record_t* record);
+
 extern controller_handler_t g_controller_handlers[];
+extern s32 g_controller_handler_indices[]; /* controller_handler_e */
 extern controller_record_t g_controller_records[];
 extern controller_record_t g_controller_records_next[];
-extern s32 g_controller_handler_indices[]; /* controller_handler_e */
-extern s32 g_controller_selected_options[];
 extern s32 g_controller_current_index;
+extern s32 g_controller_selected_options[];
+
 void controller_dispatch_current(void);
 void controller_wait_text_message(controller_record_t* record);
 

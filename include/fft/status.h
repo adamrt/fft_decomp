@@ -1,7 +1,8 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-/* Status effects: inflicting, expiring, poison and regen, and the status bubbles over units (status_bubble_). */
+/* Status effects: the status IDs and sets, the status data and check sets, changing a unit's statuses and the per-turn
+ * upkeep, and the display flags and bubbles a status shows. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -12,24 +13,7 @@ struct action_data;
 struct unit_stats;
 struct unit;
 
-/* Bit flags in status_infliction_data_t.type and the active-ability copy. The
- * target status applicator checks these in descending-bit precedence. */
-typedef enum status_infliction_type {
-    STATUS_INFLICTION_TYPE_CANCEL = 0x10,
-    STATUS_INFLICTION_TYPE_SEPARATE = 0x20,
-    STATUS_INFLICTION_TYPE_RANDOM_ONE = 0x40,
-    STATUS_INFLICTION_TYPE_ALL_OR_NOTHING = 0x80,
-} status_infliction_type_e;
-
-/* Six-byte status-infliction records, g_status_infliction_data; byte 0
- * selects how the five-byte status set is applied. */
-typedef struct status_infliction_data {
-    u8 type; /* status_infliction_type_e bit flags */
-    u8 statuses[5];
-} status_infliction_data_t;
-
-typedef char status_infliction_data_size_must_be_6[(sizeof(status_infliction_data_t) == 6) ? 1 : -1];
-
+/* status IDs */
 enum {
     STATUS_COUNT = 40,
     STATUS_BYTE_COUNT = 5,
@@ -82,22 +66,19 @@ typedef enum status_id {
     STATUS_ID_DEATH_SENTENCE = 39,
 } status_id_e;
 
-#define STATUS_BYTE_INDEX(id) ((id) >> 3)
-
-#define STATUS_BYTE_MASK(id) ((u8)(0x80U >> ((id) & 7)))
+#define STATUS_BYTE_INDEX(id)  ((id) >> 3)
+#define STATUS_BYTE_MASK(id)   ((u8)(0x80U >> ((id) & 7)))
+#define STATUS_PACKED_MASK(id) ((u32)STATUS_BYTE_MASK(id) << (STATUS_BYTE_INDEX(id) * 8))
 
 /* Event infliction helpers number bits LSB-first, unlike stored status IDs. */
 #define STATUS_LSB_INDEX(id) (((id) & ~7) | (7 - ((id) & 7)))
-
-#define STATUS_LSB_MASK(id) ((u8)(1U << ((id) & 7)))
+#define STATUS_LSB_MASK(id)  ((u8)(1U << ((id) & 7)))
 
 /* The special-status callback table reserves index 0; timed slots begin at Poison. */
 #define STATUS_HANDLER_INDEX(id) ((id) + 1)
+#define STATUS_CT_INDEX(id)      ((id) - STATUS_ID_POISON)
 
-#define STATUS_CT_INDEX(id) ((id) - STATUS_ID_POISON)
-
-#define STATUS_PACKED_MASK(id) ((u32)STATUS_BYTE_MASK(id) << (STATUS_BYTE_INDEX(id) * 8))
-
+/* status sets */
 /* A unit's innate, immunity and current statuses, STATUS_BYTE_COUNT bytes
  * each. unit_copy_job_data copies the three sets as one 15-byte block, so
  * they stay one aggregate that a whole-block byte copy can span; status readers
@@ -107,7 +88,6 @@ typedef struct status_sets {
     u8 immunity[5];
     u8 current[5];
 } status_sets_t;
-
 typedef char status_sets_size_must_be_15[(sizeof(status_sets_t) == 15) ? 1 : -1];
 
 /* Static innate, immunity and starting-status masks embedded in item and job
@@ -118,9 +98,9 @@ typedef struct initial_status_sets {
     u8 immunity[5];
     u8 starting[5];
 } initial_status_sets_t;
-
 typedef char initial_status_sets_size_must_be_15[(sizeof(initial_status_sets_t) == 15) ? 1 : -1];
 
+/* status data */
 /* One record per status id in g_status_effect_data. */
 typedef struct status_effect_data {
     u8 _unused_00[2];
@@ -131,7 +111,6 @@ typedef struct status_effect_data {
     u8 cancels[STATUS_BYTE_COUNT];    /* 0x06; statuses removed when this one is inflicted */
     u8 cant_stack[STATUS_BYTE_COUNT]; /* 0x0b; current statuses that block this one */
 } status_effect_data_t;
-
 typedef char status_effect_data_size_must_be_16[(sizeof(status_effect_data_t) == 16) ? 1 : -1];
 
 /* Flags that build the shared status-check sets during main initialization
@@ -191,9 +170,85 @@ typedef enum status_check_set {
     STATUS_CHECK_SET_COUNT = 11,
 } status_check_set_e;
 
-void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
-extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
+/* Bit flags in status_infliction_data_t.type and the active-ability copy. The
+ * target status applicator checks these in descending-bit precedence. */
+typedef enum status_infliction_type {
+    STATUS_INFLICTION_TYPE_CANCEL = 0x10,
+    STATUS_INFLICTION_TYPE_SEPARATE = 0x20,
+    STATUS_INFLICTION_TYPE_RANDOM_ONE = 0x40,
+    STATUS_INFLICTION_TYPE_ALL_OR_NOTHING = 0x80,
+} status_infliction_type_e;
 
+/* Six-byte status-infliction records, g_status_infliction_data; byte 0
+ * selects how the five-byte status set is applied. */
+typedef struct status_infliction_data {
+    u8 type; /* status_infliction_type_e bit flags */
+    u8 statuses[5];
+} status_infliction_data_t;
+typedef char status_infliction_data_size_must_be_6[(sizeof(status_infliction_data_t) == 6) ? 1 : -1];
+
+extern const status_effect_data_t g_status_effect_data[STATUS_COUNT];
+extern status_infliction_data_t g_status_infliction_data[];
+
+/* Built status masks, indexed by status_check_set_e. */
+extern u8 g_status_check_sets[STATUS_CHECK_SET_COUNT][STATUS_BYTE_COUNT];
+
+void status_init_check_data(void);
+s32 status_unit_has_any_in_set(const struct unit_stats* unit, status_check_set_e status_set);
+
+/* status changes */
+/* How status_change_unit changes inflicted_status: OR, AND-not or
+ * replacement. It then merges status_sets.innate into status_sets.current. */
+typedef enum status_change { STATUS_ADD = 0, STATUS_REMOVE = 1, STATUS_REPLACE = 2 } status_change_e;
+
+/* Values accepted by status_set_action_state. */
+typedef enum status_action_state {
+    STATUS_ACTION_STATE_NONE = 0,
+    STATUS_ACTION_STATE_CHARGING = 5,
+    STATUS_ACTION_STATE_JUMPING = 6,
+    STATUS_ACTION_STATE_DEFENDING = 7,
+    /* The Performing status bit (0x01) shifted left 3, which KEEP_PERFORMING relies on. */
+    STATUS_ACTION_STATE_PERFORMING = 8,
+    STATUS_ACTION_STATE_KEEP_PERFORMING = 255
+} status_action_state_e;
+
+/* Packed highest-order action status: a one-based index, or zero for none. */
+enum {
+    STATUS_ACTION_RESULT_INDEX_MASK = 0x7f,
+    STATUS_ACTION_RESULT_REMOVAL = 0x80,
+    STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED = 0x100,
+};
+
+void status_change_unit(struct unit_stats* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
+void status_store_current(struct unit_stats* unit);
+s32 status_set_ct(struct unit_stats* unit, s32 status_id, s32 removing);
+void status_set_action_state(struct unit_stats* unit, u8 action_state);
+void status_clear_action_state(struct unit_stats* unit);
+s32 status_inflict_defending(s32 unit_id);
+s32 status_check_charging_charge(struct unit_stats* unit, s32 cancel);
+s32 status_find_action_highest_order_effect(const struct action_data* action);
+s32 status_modify_inflictions(s32 removal_only);
+s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only);
+void status_apply_unit_action_removal(struct unit_stats* unit);
+s32 status_remove_transparent(struct unit_stats* unit);
+void status_remove_transparent_if_jump_used(struct unit_stats* unit);
+void status_clear_all(struct unit_stats* unit);
+
+/* per-turn upkeep */
+void status_update_expiring(s32 unit_id);
+s32 status_prepare_terrain_poison(struct unit_stats* unit);
+s32 status_apply_poison_and_regen(struct unit_stats* unit);
+
+/* status display */
+extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
+extern const u8 g_status_display_image_ids[STATUS_COUNT];
+
+s32 status_init_display_flags(s32 unit_id);
+s32 status_queue_display_flag_change(s32 status, s32 enabled, s32 battle_id);
+void status_queue_display_flag_change_if_executing(s32 status_id, s32 enabled, s32 battle_id);
+void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
+
+/* status bubbles */
 /* unit_t.status_bubble_id: the bubbles the code names. The others follow the statuses of
  * g_status_bubble_status_masks. */
 typedef enum status_bubble {
@@ -207,66 +262,14 @@ typedef enum status_bubble {
 
 extern s32 g_status_bubble_delay;
 extern palette_t g_status_bubble_palette;
+extern SVECTOR g_status_bubble_zoom;
 
 /* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
  * tested separately by status_bubble_determine_parameters; bubbles 8 and 11 hold 0 too,
  * so they never show. */
 extern s32 g_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT];
 
-void status_bubble_draw(struct unit* unit, const DVECTOR* unused_screen_coords);
 void status_bubble_update_active(struct unit* unit);
-void status_clear_action_state(struct unit_stats* unit);
-s32 status_inflict_defending(s32 unit_id);
-s32 status_init_display_flags(s32 unit_id);
-s32 status_modify_inflictions(s32 removal_only);
-s32 status_prepare_terrain_poison(struct unit_stats* unit);
-void status_clear_all(struct unit_stats* unit);
-s32 status_check_charging_charge(struct unit_stats* unit, s32 cancel);
-s32 status_remove_transparent(struct unit_stats* unit);
-void status_remove_transparent_if_jump_used(struct unit_stats* unit);
-s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only);
-s32 status_apply_poison_and_regen(struct unit_stats* unit);
-void status_apply_unit_action_removal(struct unit_stats* unit);
-void status_update_expiring(s32 unit_id);
-extern SVECTOR g_status_bubble_zoom;
-extern const u8 g_status_display_image_ids[STATUS_COUNT];
-void status_queue_display_flag_change_if_executing(s32 status_id, s32 enabled, s32 battle_id);
-s32 status_queue_display_flag_change(s32 status, s32 enabled, s32 battle_id);
-
-/* Values accepted by status_set_action_state. */
-typedef enum status_action_state {
-    STATUS_ACTION_STATE_NONE = 0,
-    STATUS_ACTION_STATE_CHARGING = 5,
-    STATUS_ACTION_STATE_JUMPING = 6,
-    STATUS_ACTION_STATE_DEFENDING = 7,
-    /* The Performing status bit (0x01) shifted left 3, which KEEP_PERFORMING relies on. */
-    STATUS_ACTION_STATE_PERFORMING = 8,
-    STATUS_ACTION_STATE_KEEP_PERFORMING = 255
-} status_action_state_e;
-
-/* How status_change_unit changes inflicted_status: OR, AND-not or
- * replacement. It then merges status_sets.innate into status_sets.current. */
-typedef enum status_change { STATUS_ADD = 0, STATUS_REMOVE = 1, STATUS_REPLACE = 2 } status_change_e;
-
-/* Packed highest-order action status: a one-based index, or zero for none. */
-enum {
-    STATUS_ACTION_RESULT_INDEX_MASK = 0x7f,
-    STATUS_ACTION_RESULT_REMOVAL = 0x80,
-    STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED = 0x100,
-};
-
-extern status_infliction_data_t g_status_infliction_data[];
-extern const status_effect_data_t g_status_effect_data[STATUS_COUNT];
-
-/* Built status masks, indexed by status_check_set_e. */
-extern u8 g_status_check_sets[STATUS_CHECK_SET_COUNT][STATUS_BYTE_COUNT];
-
-void status_init_check_data(void);
-void status_change_unit(struct unit_stats* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
-void status_store_current(struct unit_stats* unit);
-void status_set_action_state(struct unit_stats* unit, u8 action_state);
-s32 status_set_ct(struct unit_stats* unit, s32 status_id, s32 removing);
-s32 status_find_action_highest_order_effect(const struct action_data* action);
-s32 status_unit_has_any_in_set(const struct unit_stats* unit, status_check_set_e status_set);
+void status_bubble_draw(struct unit* unit, const DVECTOR* unused_screen_coords);
 
 #endif

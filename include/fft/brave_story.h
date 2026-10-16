@@ -11,18 +11,25 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern u32 g_brave_story_treasure_acquisition_date_bits[14];
-extern u32 g_brave_story_land_discovery_date_bits[5];
-extern u8* g_brave_story_ages_source;
-extern u8 g_brave_story_character_ages[0x40];
+/* story list */
+/* Row kinds of the Brave Story list (brave_story_build_rows), named after the level each row
+ * opens. */
+typedef enum brave_story_row {
+    BRAVE_STORY_ROW_FACTS = 0, /* EVENT_SCRIPT_VAR_FACT_FIRST */
+    BRAVE_STORY_ROW_EVENTS = 1,
+    BRAVE_STORY_ROW_PERSONS = 2, /* EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST */
+    BRAVE_STORY_ROW_PROPOSITIONS = 3,
+    BRAVE_STORY_ROW_UNEXPLORED_LANDS = 4,
+    BRAVE_STORY_ROW_TREASURES = 5,
+    BRAVE_STORY_ROW_LEAVE = 6,
+} brave_story_row_e;
 
-/* A story event replayed from the Brave Story list: the event, the list cursor
- * to restore and the weather variable to put back afterwards. */
-extern s32 g_brave_story_replay_story_event_index;
+extern s32 g_brave_story_saved_cursor[];
+extern u8 g_brave_story_help_text_ids[];
 
-extern menu_cursor_state_t g_brave_story_saved_list_cursor_state;
-extern s32 g_brave_story_saved_weather_variable;
+void brave_story_push_level(void);
 
+/* detail levels */
 /* brave_story_detail_level_t.phase, shared by the person,
  * treasure and unexplored-land detail steps. */
 typedef enum brave_story_detail_phase {
@@ -32,7 +39,7 @@ typedef enum brave_story_detail_phase {
     BRAVE_STORY_DETAIL_PHASE_POP_IN = 3, /* waits for the text window's opening animation */
 } brave_story_detail_phase_e;
 
-/* Provisional: the PERSON_DETAIL level pushed by brave_story_push_person_level over the list-window
+/* Provisional: the BRAVE_STORY_PERSON level pushed by brave_story_push_person_level over the list-window
  * level; it keeps the selected entry value (person * 16 + profile) and the render record it appends. The
  * treasure and unexplored-land details use the same record. */
 typedef struct brave_story_detail_level {
@@ -46,7 +53,52 @@ typedef struct brave_story_detail_level {
     s32 timer; /* 0x10; cleared at push; text delay or dissolve step, counted per frame */
 } brave_story_detail_level_t;
 
-/* Provisional: the ACTIVE_PROPOSITIONS level pushed by brave_story_open_advancing_list: a cursor window and
+/* facts and events */
+extern menu_cursor_state_t g_brave_story_event_list_cursor;
+extern u16* g_brave_story_event_ids;
+
+/* A story event replayed from the Brave Story list: the event, the list cursor
+ * to restore and the weather variable to put back afterwards. */
+extern s32 g_brave_story_replay_story_event_index;
+extern menu_cursor_state_t g_brave_story_saved_list_cursor_state;
+extern s32 g_brave_story_saved_weather_variable;
+
+void brave_story_open_fact_list(void);
+void brave_story_block_fact_list_buttons(menu_stack_panel_level_t* level);
+void brave_story_push_event_level(s32 value);
+void brave_story_handle_event_input(menu_stack_record_t* level);
+void brave_story_block_event_list_buttons(menu_stack_panel_level_t* level);
+
+/* persons */
+extern u8 (*g_brave_story_birthdays)[2];
+extern u8* g_brave_story_ages_source;
+extern u8 g_brave_story_character_ages[0x40];
+
+void brave_story_block_person_list_buttons(menu_stack_panel_level_t* level);
+
+/* unexplored lands and treasures */
+extern u8 g_unexplored_land_picture_sets[];
+extern u8 g_treasure_picture_sets[];
+extern u8 g_treasure_sound_novel_ids[];
+
+/* RAM bitmaps indexed by 32-bit values; the save serializer copies only their packed data bytes and omits the
+ * padding at the end of each allocation. */
+extern u32 g_brave_story_land_discovery_date_bits[5];
+extern u32 g_brave_story_treasure_acquisition_date_bits[14];
+
+void brave_story_open_unexplored_land_list(void);
+void brave_story_block_unexplored_land_list_buttons(menu_stack_panel_level_t* level);
+void brave_story_open_treasure_list(void);
+void brave_story_push_treasure_level(s32 value);
+
+/* propositions */
+/* Row kinds of the Brave Story's proposition category list (brave_story_push_propositions_level). */
+typedef enum brave_story_proposition_row {
+    BRAVE_STORY_PROPOSITION_ROW_ADVANCING = 0,
+    BRAVE_STORY_PROPOSITION_ROW_WORK_HISTORY = 1,
+} brave_story_proposition_row_e;
+
+/* Provisional: the BRAVE_STORY_ADVANCING level pushed by brave_story_open_advancing_list: a cursor window and
  * three column-header windows over one render record listing each active proposition's name, participant count and
  * remaining days. */
 typedef struct brave_story_advancing_level {
@@ -62,8 +114,8 @@ typedef struct brave_story_advancing_level {
     s32 entries[10]; /* 0x34; indices into g_proposition_active */
 } brave_story_advancing_level_t;
 
-/* The PARTICIPANT_LIST level. The detail-panel builder fills the render index and row count before the cursor is
- * positioned. */
+/* The BRAVE_STORY_PARTICIPANTS level. The detail-panel builder fills the render index and row count before the cursor
+ * is positioned. */
 typedef struct brave_story_participant_list_level {
     s32 cursor_window; /* 0x00 */
     u8 _unused_04[4];
@@ -77,7 +129,7 @@ typedef struct brave_story_participant_list_level {
     s32 entry_count; /* 0x30 */
 } brave_story_participant_list_level_t;
 
-/* Provisional: the PARTICIPANT_DETAIL level pushed by brave_story_push_participant_level with two frame
+/* Provisional: the BRAVE_STORY_PARTICIPANT level pushed by brave_story_push_participant_level with two frame
  * windows; unit_panel_build_unit_data draws the participant
  * g_proposition_active[proposition].participant_indices[participant]. */
 typedef struct brave_story_participant_level {
@@ -89,45 +141,7 @@ typedef struct brave_story_participant_level {
     s32 participant;  /* 0x14; slot in participant_indices */
 } brave_story_participant_level_t;
 
-void brave_story_block_unexplored_land_list_buttons(menu_stack_panel_level_t* level);
-void brave_story_block_event_list_buttons(menu_stack_panel_level_t* level);
-void brave_story_block_person_list_buttons(menu_stack_panel_level_t* level);
-void brave_story_block_fact_list_buttons(menu_stack_panel_level_t* level);
-
-/* Brave Story */
-/* Row kinds of the Brave Story list (brave_story_build_rows), named after the level each row
- * opens. */
-typedef enum brave_story_row {
-    BRAVE_STORY_ROW_FACTS = 0, /* EVENT_SCRIPT_VAR_FACT_FIRST */
-    BRAVE_STORY_ROW_EVENTS = 1,
-    BRAVE_STORY_ROW_PERSONS = 2, /* EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST */
-    BRAVE_STORY_ROW_PROPOSITIONS = 3,
-    BRAVE_STORY_ROW_UNEXPLORED_LANDS = 4,
-    BRAVE_STORY_ROW_TREASURES = 5,
-    BRAVE_STORY_ROW_LEAVE = 6,
-} brave_story_row_e;
-
-extern s32 g_brave_story_saved_cursor[];
-extern u8 g_brave_story_help_text_ids[];
-extern u8 (*g_brave_story_birthdays)[2];
-extern menu_cursor_state_t g_brave_story_event_list_cursor;
-extern u16* g_brave_story_event_ids;
-extern u8 g_treasure_picture_sets[];
-extern u8 g_unexplored_land_picture_sets[];
-extern u8 g_treasure_sound_novel_ids[];
-void brave_story_push_level(void);
-void brave_story_push_event_level(s32 value);
-void brave_story_handle_event_input(menu_stack_record_t* level);
-void brave_story_push_treasure_level(s32 value);
-void brave_story_open_fact_list(void);
-void brave_story_open_unexplored_land_list(void);
-void brave_story_open_treasure_list(void);
-
-/* Row kinds of the Brave Story's proposition category list (brave_story_push_propositions_level). */
-typedef enum brave_story_proposition_row {
-    BRAVE_STORY_PROPOSITION_ROW_ADVANCING = 0,
-    BRAVE_STORY_PROPOSITION_ROW_WORK_HISTORY = 1,
-} brave_story_proposition_row_e;
+extern s32 g_brave_story_participant_saved_cursor;
 
 /* Saved proposition-list cursor row. Declared as an array: GCC's alias heuristic needs an in-struct object to keep
  * the target's load order in brave_story_handle_advancing_list_input; a scalar does not. */
@@ -136,17 +150,16 @@ extern s32 g_brave_story_advancing_saved_cursor[];
 /* Saved category row, declared as an array for the same reason. */
 extern s32 g_brave_story_propositions_saved_cursor[];
 
-extern s32 g_brave_story_participant_saved_cursor;
 void brave_story_handle_participant_list_input(menu_stack_record_t* level);
 
+/* level window state */
 /* The window state of menu levels. The resume handlers take the stack record and read the view its level type
  * selects; the rest dim, tint or restore the windows of one kind of level. */
-void brave_story_resume_advancing_list(menu_stack_record_t* level);
-
-void brave_story_resume_participant_level(menu_stack_record_t* level);
-void brave_story_suspend_advancing_list(brave_story_advancing_level_t* level);
 void brave_story_suspend_level(menu_stack_window_level_t* state);
-void brave_story_suspend_propositions_level(menu_stack_window_level_t* level);
 void brave_story_resume_propositions_level(menu_stack_window_level_t* level);
+void brave_story_suspend_propositions_level(menu_stack_window_level_t* level);
+void brave_story_resume_advancing_list(menu_stack_record_t* level);
+void brave_story_suspend_advancing_list(brave_story_advancing_level_t* level);
+void brave_story_resume_participant_level(menu_stack_record_t* level);
 
 #endif

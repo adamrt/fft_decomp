@@ -1,7 +1,8 @@
 #ifndef WEATHER_H
 #define WEATHER_H
 
-/* Rain, snow and thunder. */
+/* Battle map weather: the weather values and commands, rain and snow particles, lightning, E458's timed particle
+ * transform and the weather sounds. */
 
 #include "fft/battle_map.h"
 #include "fft/gfx.h"
@@ -9,14 +10,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern s32 g_weather_timed_transform_unread;
-
-/*
- * Script variable 0x23, set by event instruction {3C} Weather.  The same
- * strength scale covers rain and snow; the map's 32-bit palette-mod flags says
- * which one is falling.  weather_get_effective folds that flag in by
- * adding 3, so callers that compare against it see the snow values.
- */
+/* weather */
+/* Script variable 0x23, set by event instruction {3C} Weather. The same strength scale covers rain and snow; the
+ * map's 32-bit palette-mod flags say which one is falling. weather_get_effective folds that flag in by adding 3, so
+ * callers that compare against it see the snow values. */
 typedef enum weather {
     WEATHER_NONE = 0,
     WEATHER_NONE_ALT = 1,
@@ -65,6 +62,14 @@ typedef enum weather_effect_mode {
     BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM = 0x96,
 } weather_effect_mode_e;
 
+/* weather_flags_e bits, with the signed palette modifier above BATTLE_MAP_WEATHER_MODIFIER_SHIFT. */
+extern s32 g_weather_flags;
+extern s16 g_weather_effect_mode; /* weather_effect_mode_e */
+
+s32 weather_get_effective(void);
+void weather_run_command(weather_command_e command);
+
+/* particles */
 /* Weather particles of g_weather_particles: snow
  * (BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES) uses all 64, rain
  * (BATTLE_MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES) fills two sets of 32. */
@@ -77,26 +82,22 @@ typedef struct weather_particle {
     s16 fall_speed;
 } weather_particle_t;
 
-/* weather_flags_e bits, with the signed palette modifier above BATTLE_MAP_WEATHER_MODIFIER_SHIFT. */
-extern s32 g_weather_flags;
-
-extern s16 g_weather_effect_mode; /* weather_effect_mode_e */
+extern weather_particle_t g_weather_particles[64];
+extern weather_particle_t g_weather_rain_splash_particles[32];
 extern palette_t g_weather_particle_palette;
+extern RECT g_weather_drop_uv_rects[3];
+extern RECT g_weather_splash_uv_rects[4];
 extern u8 g_weather_primary_speed;
 extern u8 g_weather_fall_speed;
 extern u8 g_weather_rain_secondary_fall_speed;
-extern weather_particle_t g_weather_particles[64];
-extern weather_particle_t g_weather_rain_splash_particles[32];
-extern RECT g_weather_drop_uv_rects[3];
-extern RECT g_weather_splash_uv_rects[4];
 extern MATRIX g_weather_matrix;
 extern SVECTOR g_weather_rotation;
 extern VECTOR g_weather_scale;
 extern s32 g_weather_sprite_scale;
 extern VECTOR g_weather_translation;
-s32 weather_get_effective(void);
-void weather_run_command(weather_command_e command);
 
+/* lightning */
+/* Values of g_weather_lightning_mode. */
 typedef enum weather_lightning_mode {
     BATTLE_MAP_LIGHTNING_OFF = 0,
     BATTLE_MAP_LIGHTNING_RANDOM = 1,
@@ -113,25 +114,28 @@ typedef struct weather_lightning_state {
     CVECTOR base_colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT]; /* 0x84 */
     CVECTOR colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT];      /* 0x8c */
 } weather_lightning_state_t;
-
 typedef char weather_lightning_state_size_must_be_148[(sizeof(weather_lightning_state_t) == 148) ? 1 : -1];
+
 extern s32 g_weather_lightning_mode;
 extern weather_lightning_state_t g_weather_lightning_state;
 
+/* timed particle transform */
 /* Frame, duration and rotation of E458's timed particle transform
  * (BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */
 extern s32 g_weather_timed_transform_frame;
-
 extern s32 g_weather_timed_transform_duration;
 extern SVECTOR g_weather_timed_transform_rotation;
+extern s32 g_weather_timed_transform_unread; /* weather_set_timed_transform_duration stores 0x95; nothing reads it */
+
 void weather_set_timed_transform_duration(s32 id, s32 value);
 
+/* sound */
 /* The rain sound (primary) and the two thunder sounds, 0 when none plays. */
 extern s32 g_weather_primary_sfx_id;
-
 extern s32 g_weather_secondary_sfx_id;
 extern s32 g_weather_tertiary_sfx_id;
 extern u8 g_weather_sfx_enabled;
+
 void weather_start_sfx(void);
 s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it */
 

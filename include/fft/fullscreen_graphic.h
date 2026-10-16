@@ -1,7 +1,7 @@
 #ifndef FULLSCREEN_GRAPHIC_H
 #define FULLSCREEN_GRAPHIC_H
 
-/* ETC's full-screen graphics: chapter titles (chapter_title_) and Game Over (game_over_). */
+/* ETC's full-screen graphics: chapter titles (chapter_title_), Game Over (game_over_) and the END images. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -31,13 +31,14 @@ typedef struct fullscreen_graphic {
     void* _unused_18;
     s32 texture_mode;
 } fullscreen_graphic_t;
-
 typedef char etc_graphic_size_check[sizeof(fullscreen_graphic_t) == 32 ? 1 : -1];
+
 extern fullscreen_graphic_t g_fullscreen_graphics[13];
 extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_a[2][4];
 extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_b[2][4];
 extern RECT g_fullscreen_graphic_game_over_palette_rect;
 extern const char g_fullscreen_graphic_allocation_wait_message[];
+
 void fullscreen_graphic_thread(void);
 
 #endif

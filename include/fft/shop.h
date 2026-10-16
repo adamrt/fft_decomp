@@ -1,7 +1,8 @@
 #ifndef SHOP_H
 #define SHOP_H
 
-/* The Shop: buy (shop_buy_), sell (shop_sell_) and the fitting room (shop_fitting_), each a mode the player picks. */
+/* WORLD's shops: the outfitter's screen with its buy, sell and fitting-room modes, the fur shop and the soldier office,
+ * and the item prices and stock they use. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
@@ -10,12 +11,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* The half price is clamped to at least one; stock to a byte. */
-s32 shop_get_item_price(s16 item_id);
-
-s32 shop_get_item_half_price(s16 item_id);
-void shop_cash_out_excess_items(void);
-
+/* shop screen */
 /* The shop screen's step: the index of its handler in
  * g_shop_menu_step_handlers. The ordinary shop starts at MAIN_MENU, the
  * fur shop at FUR_MENU and the soldier office at SOLDIER_OFFICE_MENU. */
@@ -57,26 +53,17 @@ extern menu_entry_t g_shop_main_menu_thread_data;
 extern u8 g_shop_main_menu_running;     /* menu open flag */
 extern u8 g_shop_exit_fade_started;     /* fade-out started */
 extern u8 g_shop_exit_step_initialized; /* state initialized */
-
-/* Sector and size pairs, read as flat 32-bit values ([i * 2], [i * 2 + 1]): a record
- * member access changes how the target addresses them. */
 extern u8 g_shop_background_visible;
-
 extern RECT g_shop_background_rect;
 extern RECT g_shop_backdrop_tile_rect;
 extern RECT g_shop_edge_tile_rect;
 extern RECT g_shop_background_vram_rect;
 extern RECT g_shop_vram_backup_rect;
-extern u8 g_shop_fitting_cost_visible;
 
-/* Cleared when the Soldier Office hire menu opens; nothing reads it. */
-extern u8 g_soldier_office_hire_unread_flag_1; /* cleared when the Soldier Office hire menu opens; never read */
-
-extern u8 g_soldier_office_hire_unread_flag_2; /* as g_soldier_office_hire_unread_flag_1 */
 void shop_run_screen(s32 shop_type);
 u32* shop_load_background(s32 index);
-s32 shop_adjust_gil(s32 delta);
 
+/* prices and stock */
 /* Two-byte shop availability mask, stored most significant byte first: bit
  * 0x8000 >> location id is set when that town's outfitter sells the item. */
 typedef struct shop_item_availability {
@@ -85,10 +72,16 @@ typedef struct shop_item_availability {
 } shop_item_availability_t;
 
 extern shop_item_availability_t g_shop_item_availability[];
-extern u8 g_shop_item_category;
-s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode);
-s32 fur_shop_adjust_stock(s16 item_id, s32 delta);
 
+/* The half price is clamped to at least one; the fur shop's stock to a byte. */
+s32 shop_get_item_price(s16 item_id);
+s32 shop_get_item_half_price(s16 item_id);
+s32 fur_shop_adjust_stock(s16 item_id, s32 delta);
+s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode);
+void shop_cash_out_excess_items(void);
+s32 shop_adjust_gil(s32 delta);
+
+/* buying and selling */
 /* Refusals of shop_buy_quantity_prompt and
  * fur_shop_buy_quantity_prompt; otherwise they return whether the
  * quantity prompt is still open. */
@@ -97,6 +90,7 @@ enum {
     SHOP_QUANTITY_CANNOT_AFFORD = -1,
 };
 
+extern u8 g_shop_item_category;
 extern s16 g_shop_quantity_limit;
 extern menu_entry_t g_shop_quantity_menu_data[2];
 extern u8 g_shop_quantity_menu_running;
@@ -122,10 +116,12 @@ extern u8 g_shop_sell_confirm_shown;  /* confirmation prompt shown */
 extern u16 g_shop_sell_quantity_item; /* item being sold */
 extern u8 g_shop_sell_total_shown;    /* confirmation prompt shown */
 extern menu_instruction_t g_shop_sell_confirm_script;
+
 void shop_buy_equip_step(void);
 void shop_sell_list_step(void);
 void shop_sell_confirm_step(void);
 
+/* fitting room */
 /* Result of shop_fitting_checkout_prompt. */
 typedef enum shop_fitting_checkout {
     SHOP_FITTING_CHECKOUT_DONE = -1,    /* bought, or left without buying: back to the shop's main menu */
@@ -134,10 +130,7 @@ typedef enum shop_fitting_checkout {
 } shop_fitting_checkout_e;
 
 extern u8 g_shop_fitting_initialized;
-
-/* Two-entry menu chain: row 3 of [0] opens [1] through [0]'s parent-index table. */
-extern menu_entry_t g_shop_fitting_menu_thread_data[2];
-
+extern u8 g_shop_fitting_cost_visible;
 extern s16 g_shop_fitting_items[PARTY_ROSTER_SLOT_COUNT][MENU_EQUIPMENT_SLOT_COUNT];
 extern s32 g_shop_fitting_cost;
 extern u8 g_shop_fitting_unit_chosen;
@@ -153,22 +146,7 @@ extern menu_instruction_t g_shop_fitting_cost_menu_script;
 extern s8 g_shop_fitting_remove_preview_initialized;
 extern u16 g_shop_fitting_remove_cursor_anim;
 extern point16_t g_shop_fitting_remove_cursor_point;
-
-/* Last equipment slot whose stat preview was built, -1 when none. The
- * ATTACK overlay has an unrelated 16-bit value at this same address. */
-extern s8 g_shop_fitting_remove_previewed_equip_slot;
-
-extern s16 g_shop_fitting_remove_previewed_unit_index;
-
-/* The best-fit confirmation menu entry, followed directly by its open/closed
- * gate byte, as g_shop_fitting_sell_equipped_menu / _open are paired. */
-extern menu_entry_t g_shop_fitting_best_fit_menu;
-
-extern s8 g_shop_fitting_best_fit_menu_open;
-
-/* Second slot-category table of shop_fitting_build_best_fit. */
 extern menu_entry_t g_shop_fitting_sell_equipped_menu;
-
 extern u8 g_shop_fitting_sell_equipped_menu_open;
 extern u16 g_shop_fitting_sell_equipped_cursor_anim;
 extern point16_t g_shop_fitting_sell_equipped_cursor_point;
@@ -185,7 +163,23 @@ extern u8 g_shop_fitting_checkout_prompt_active;
 extern u8 g_shop_fitting_checkout_prompt_result;
 extern u8 g_shop_fitting_checkout_complete;
 extern u8 g_shop_fitting_checkout_insufficient_gil;
+
+/* Two-entry menu chain: row 3 of [0] opens [1] through [0]'s parent-index table. */
+extern menu_entry_t g_shop_fitting_menu_thread_data[2];
+
+/* Last equipment slot whose stat preview was built, -1 when none. The
+ * ATTACK overlay has an unrelated 16-bit value at this same address. */
+extern s8 g_shop_fitting_remove_previewed_equip_slot;
+extern s16 g_shop_fitting_remove_previewed_unit_index;
+
+/* The best-fit confirmation menu entry, followed directly by its open/closed
+ * gate byte, as g_shop_fitting_sell_equipped_menu / _open are paired. */
+extern menu_entry_t g_shop_fitting_best_fit_menu;
+extern s8 g_shop_fitting_best_fit_menu_open;
+
 void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out);
+
+/* fur shop */
 extern menu_entry_t g_fur_shop_menu_thread_data;
 extern u8 g_fur_shop_opened; /* fur shop opened */
 extern s8 g_fur_shop_access_granted;
@@ -204,6 +198,7 @@ extern s8 g_fur_shop_sell_list_initialized;
 extern s16 g_fur_shop_sale_message_wait;
 extern u8 g_fur_shop_quantity_menu_running; /* sell quantity menu thread (menu_start_managed_thread) */
 
+/* soldier office */
 /* Prefix of the shop roster display stream, through its first number command. */
 typedef struct soldier_office_unit_count_script {
     menu_draw_state_command_t priority;       /* 0x00 */
@@ -212,14 +207,12 @@ typedef struct soldier_office_unit_count_script {
     menu_sprite_command_t sprites[2];         /* 0x0e */
     menu_draw_number_command_t unit_count;    /* 0x20 */
 } soldier_office_unit_count_script_t;
-
 typedef char
     soldier_office_unit_count_script_size_must_be_42[(sizeof(soldier_office_unit_count_script_t) == 42) ? 1 : -1];
 
-/* The cursor doubles as the soldier-office mode (soldier_office_get_fee). */
-extern menu_entry_t g_soldier_office_hire_menu_thread_data;
-
 extern u8 g_soldier_office_hire_menu_initialized;
+extern u8 g_soldier_office_hire_unread_flag_1; /* cleared when the Soldier Office hire menu opens; never read */
+extern u8 g_soldier_office_hire_unread_flag_2; /* as g_soldier_office_hire_unread_flag_1 */
 extern menu_entry_t g_soldier_office_hire_confirm_menu;
 extern u8 g_soldier_office_hire_confirm_message_wait;
 extern menu_entry_t g_soldier_office_hire_fee_confirm_menu;
@@ -235,5 +228,8 @@ extern menu_instruction_t g_soldier_office_fee_script;
 extern u32 g_soldier_office_fee;
 extern soldier_office_unit_count_script_t g_soldier_office_unit_count_script;
 extern u8 g_soldier_office_unit_count;
+
+/* The cursor doubles as the soldier-office mode (soldier_office_get_fee). */
+extern menu_entry_t g_soldier_office_hire_menu_thread_data;
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef DEPLOY_H
 #define DEPLOY_H
 
-/* Deployment before a battle: ATTACK's placement screen and BATTLE's side of it. */
+/* Deployment before a battle: BATTLE's side of it and ATTACK's placement screen. */
 
 #include "fft/gfx.h"
 #include "fft/help.h"
@@ -12,19 +12,27 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-s32 deploy_run_frame_and_check(u32* ot, u32 buttons);
-extern const RECT g_deploy_clear_rect;
+/* BATTLE's side */
 extern s32 g_deploy_skipped;
-void deploy_mark_finished(void);
+extern s32 g_deploy_finished;
+extern const RECT g_deploy_clear_rect;
+extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
+
+s32 deploy_run_frame_and_check(u32* ot, u32 buttons);
 void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue);
 s32 deploy_sync_and_submit_frame(u32* ordering_table);
 s32 deploy_update_controller_input(void);
+void deploy_mark_finished(void);
 void deploy_init_and_reset_sprite_load_state(void);
-extern s32 g_deploy_finished;
-s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index);
 s32 deploy_build_units(unit_deployment_coordinates_t* formation, s32 unused_1);
+s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index);
 void deploy_init_units_for_debug_red_team(unit_deployment_coordinates_t* formation, s32 unused_1);
 
+/* Loads ATTACK.OUT with its scenario conditions and graphics and starts the deployment screen (returns 0), or
+ * starts the map-load thread when deployment is skipped (returns 1). */
+s32 deploy_open(void);
+
+/* squads and roster */
 typedef enum deploy_orientation {
     DEPLOY_ORIENTATION_NORMAL = 0,
     DEPLOY_ORIENTATION_ROTATE_90 = 1,
@@ -56,15 +64,79 @@ typedef struct deploy_squad {
     u8 map_id;             /* 0x09 */
     u16 placement_id;      /* 0x0a */
 } deploy_squad_t;
-
 typedef char deploy_squad_size_must_be_12[(sizeof(deploy_squad_t) == 12) ? 1 : -1];
 
+extern deploy_squad_t* g_deploy_squad_data;
+extern deploy_squad_t* g_deploy_current_squad_data;
+extern s32 g_deploy_current_squad;
+extern s32 g_deploy_current_squad_id;
+extern s32 g_deploy_second_pass;
+extern s32 g_deploy_tiles_only_mode;
+extern u8 g_deploy_valid_tiles[5][5];
+extern u8 g_deploy_roster_id_by_tile[5][5];
+extern u8 g_deploy_units_by_squad[4][25];
+extern s32 g_deploy_slot_offsets[5];
+extern unit_deployment_coordinates_t g_deploy_unit_map_coordinates[12];
+extern s32 g_deploy_deployed_unit_count;
+extern s32 g_deploy_fieldable_unit_count;
+extern u8 g_deploy_unit_fieldable[PARTY_ROSTER_SLOT_COUNT];
+extern u8 g_deploy_roster_unit_deployable[PARTY_ROSTER_SLOT_COUNT];
+extern s32 g_deploy_selected_roster_index;
+extern s32 g_deploy_selected_unit_deployed;
+extern s32 g_deploy_pending_roster_index;
+extern s32 g_deploy_roster_navigation_direction;
+extern s16 g_deploy_confirm_result;
+
+/* Cleared with the deployed-unit count when the deploy screen opens; nothing
+ * in ATTACK reads it. */
+extern s32 g_deploy_cleared_word;
+
+void deploy_run(void);
+void deploy_find_fieldable_units(void);
+void deploy_find_deployable_units(void);
+s32 deploy_is_roster_unit_deployed(s32 roster_id);
+s32 deploy_has_roster_unit_on_tiles(s32 roster_id);
+unit_deployment_coordinates_t* deploy_get_coordinate_slots(void);
+
+/* menu and cursors */
+/* g_deploy_menu_state: what the deployment cursor is over. It selects
+ * the button hint deploy_build_button_hint draws. */
+typedef enum deploy_menu_state {
+    DEPLOY_MENU_CLOSED = -1,       /* deploy_run is done */
+    DEPLOY_MENU_EMPTY_TILE = 0,    /* a unit can be placed here */
+    DEPLOY_MENU_BLOCKED_TILE = 1,  /* not a deployment tile, or the squad is full */
+    DEPLOY_MENU_SELECTED_UNIT = 2, /* the tile of the selected roster unit */
+    DEPLOY_MENU_OTHER_UNIT = 3,    /* another placed unit */
+    DEPLOY_MENU_SWAP_UNIT = 4,     /* the second cursor over a unit other than the picked one */
+    DEPLOY_MENU_HIDDEN = 5,        /* between squads and in tiles-only mode: no hint */
+} deploy_menu_state_e;
+
+extern s32 g_deploy_menu_state; /* deploy_menu_state_e */
+extern menu_entry_t g_deploy_menu_entries[];
+extern help_navigation_record_t g_deploy_help_cursor_nodes[];
+extern image_load_parameters_t g_deploy_button_hint_cells[];
+extern s32 g_deploy_active_cursor;
+extern s32 g_deploy_cursor_row[2];
+extern s32 g_deploy_cursor_column[2];
+extern POLY_FT4* g_deploy_cursor_0_poly;
+extern s32 g_deploy_cursor_0_submitted;
+extern POLY_FT4* g_deploy_cursor_1_poly;
+extern s32 g_deploy_cursor_1_submitted;
+extern palette_t g_deploy_cursor_clut;
+extern RECT g_deploy_cursor_clut_rect;
+extern palette_t g_deploy_cursor_palette_cycle[2];
+extern const palette_t g_deploy_cursor_palette_source[2];
+extern u32 g_deploy_cursor_texture_data[];
+extern RECT g_deploy_cursor_texture_rect;
+
+void deploy_run_help_cursor(void);
+
+/* screen graphics */
 /* Textured deployment banner followed by its two triangle packets. */
 typedef struct deploy_arrow_gfx {
     POLY_FT4 poly;  /* 0x00 */
     POLY_F3 tri[2]; /* 0x28 */
 } deploy_arrow_gfx_t;
-
 typedef char deploy_arrow_gfx_size_must_be_80[sizeof(deploy_arrow_gfx_t) == 80 ? 1 : -1];
 
 /* One half of the double-buffered deployment-screen primitive block
@@ -90,75 +162,9 @@ typedef struct deploy_render_buffer {
     DR_OFFSET screen_offset;         /* 0xa1c */
     point16_t screen_position;       /* 0xa28; draw-offset input */
 } deploy_render_buffer_t;
-
 typedef char deploy_render_buffer_size_must_be_2604[(sizeof(deploy_render_buffer_t) == 2604) ? 1 : -1];
 
-/* g_deploy_menu_state: what the deployment cursor is over. It selects
- * the button hint deploy_build_button_hint draws. */
-typedef enum deploy_menu_state {
-    DEPLOY_MENU_CLOSED = -1,       /* deploy_run is done */
-    DEPLOY_MENU_EMPTY_TILE = 0,    /* a unit can be placed here */
-    DEPLOY_MENU_BLOCKED_TILE = 1,  /* not a deployment tile, or the squad is full */
-    DEPLOY_MENU_SELECTED_UNIT = 2, /* the tile of the selected roster unit */
-    DEPLOY_MENU_OTHER_UNIT = 3,    /* another placed unit */
-    DEPLOY_MENU_SWAP_UNIT = 4,     /* the second cursor over a unit other than the picked one */
-    DEPLOY_MENU_HIDDEN = 5,        /* between squads and in tiles-only mode: no hint */
-} deploy_menu_state_e;
-
-extern deploy_squad_t* g_deploy_squad_data;
-extern deploy_squad_t* g_deploy_current_squad_data;
-extern s32 g_deploy_current_squad;
-extern s32 g_deploy_current_squad_id;
-extern s32 g_deploy_second_pass;
-extern s32 g_deploy_tiles_only_mode;
-extern u8 g_deploy_valid_tiles[5][5];
-extern u8 g_deploy_roster_id_by_tile[5][5];
-extern u8 g_deploy_units_by_squad[4][25];
-extern s32 g_deploy_slot_offsets[5];
-extern unit_deployment_coordinates_t g_deploy_unit_map_coordinates[12];
-extern s32 g_deploy_deployed_unit_count;
-extern s32 g_deploy_fieldable_unit_count;
-extern u8 g_deploy_unit_fieldable[PARTY_ROSTER_SLOT_COUNT];
-extern u8 g_deploy_roster_unit_deployable[PARTY_ROSTER_SLOT_COUNT];
-
-/* Cleared with the deployed-unit count when the deploy screen opens; nothing
- * in ATTACK reads it. */
-extern s32 g_deploy_cleared_word;
-
-extern s32 g_deploy_selected_roster_index;
-extern s32 g_deploy_selected_unit_deployed;
-extern s32 g_deploy_pending_roster_index;
-extern s32 g_deploy_roster_navigation_direction;
-extern s16 g_deploy_confirm_result;
-void deploy_run(void);
-void deploy_find_fieldable_units(void);
-void deploy_find_deployable_units(void);
-s32 deploy_is_roster_unit_deployed(s32 roster_id);
-s32 deploy_has_roster_unit_on_tiles(s32 roster_id);
-unit_deployment_coordinates_t* deploy_get_coordinate_slots(void);
-extern s32 g_deploy_menu_state; /* deploy_menu_state_e */
-extern menu_entry_t g_deploy_menu_entries[];
-extern help_navigation_record_t g_deploy_help_cursor_nodes[];
-extern image_load_parameters_t g_deploy_button_hint_cells[];
-extern s32 g_deploy_active_cursor;
-extern s32 g_deploy_cursor_row[2];
-extern s32 g_deploy_cursor_column[2];
-extern POLY_FT4* g_deploy_cursor_0_poly;
-extern s32 g_deploy_cursor_0_submitted;
-extern POLY_FT4* g_deploy_cursor_1_poly;
-extern s32 g_deploy_cursor_1_submitted;
-extern palette_t g_deploy_cursor_clut;
-extern RECT g_deploy_cursor_clut_rect;
-extern palette_t g_deploy_cursor_palette_cycle[2];
-extern const palette_t g_deploy_cursor_palette_source[2];
-extern u32 g_deploy_cursor_texture_data[];
-extern RECT g_deploy_cursor_texture_rect;
-void deploy_run_help_cursor(void);
 extern deploy_render_buffer_t g_deploy_render_buffers[2];
-
-/* Alias of render_buffers[0].screen_arrow, addressed separately by the constructor. */
-extern deploy_arrow_gfx_t g_deploy_screen_arrow;
-
 extern s32 g_deploy_arrow_position_mode;
 extern u32 g_deploy_arrow_clut_data[];
 extern RECT g_deploy_arrow_clut_rect;
@@ -180,13 +186,21 @@ extern POLY_FT4 g_deploy_text_polys[2][9];
 extern s32 g_deploy_text_reveal_heights[9];
 extern s32 g_deploy_text_reveal_steps[9];
 extern RECT g_deploy_text_screen_origin;
+extern POLY_FT4 g_deploy_gfx_frame_ft4[];
 extern zodiac_draw_context_t g_deploy_zodiac_draw_context;
+
+/* Alias of render_buffers[0].screen_arrow, addressed separately by the constructor. */
+extern deploy_arrow_gfx_t g_deploy_screen_arrow;
 
 /* The brightness byte of g_deploy_zodiac_draw_context (+4) as its own s32 symbol: the fade decrements the whole
  * 32-bit value (lw/addiu/sw), which a u8 member access would not reproduce. The array form lets GCC hoist its address
  * out of the fade loop, as the target does. */
 extern s32 g_deploy_zodiac_brightness_word[1];
 
+/* Map darkness uses RGB and ignores the fourth byte. */
+extern const CVECTOR g_deploy_map_darkness_color;
+
+/* threads and panels */
 /* Slots of the deployment screen's own threads; the screen itself runs in
  * THREAD_BORROWED_SLOT_DEPLOYMENT and its panels in the
  * thread_screen_slot_e slots (unit status 8, character status 9,
@@ -206,21 +220,17 @@ typedef enum deploy_prompt_thread_slot {
     DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER = 13,     /* a wait-forever thread while the unit detail panels are open */
 } deploy_prompt_thread_slot_e;
 
-extern u8 g_deploy_character_status_frame_config[];
 extern s32 g_deploy_status_display_thread_params;
 extern s32 g_deploy_status_display_offset_y[];
+extern u8 g_deploy_character_status_frame_config[];
 extern u8 g_deploy_numbers_thread_params[];
-extern POLY_FT4 g_deploy_gfx_frame_ft4[];
 
-/* Map darkness uses RGB and ignores the fourth byte. */
-extern const CVECTOR g_deploy_map_darkness_color;
-
+/* text */
 /* Overlay text file: offsets are relative to the data following the header. */
 typedef struct deploy_text_file {
     s32 section_offsets[32];
     u8 section_data[0];
 } deploy_text_file_t;
-
 typedef char deploy_text_file_size_must_be_128[(sizeof(deploy_text_file_t) == 128) ? 1 : -1];
 
 /* g_scenario_event_condition_blocks help text, installed as TEXT_SECTION_OVERLAY_SCREEN */
@@ -229,14 +239,6 @@ extern u8* g_deploy_help_text_section;
 /* g_scenario_scenario_table string arena, installed as TEXT_SECTION_DEPLOYMENT_UNIT_HELP */
 extern u8* g_deploy_unit_text_section;
 
-/* Entries [1] and [2] of the unit-name text file's section-offset table
- * (0x801cd2b0, s32[32], ending at g_text_data). */
 void deploy_build_strings(void);
-
-extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
-
-/* Loads ATTACK.OUT with its scenario conditions and graphics and starts the deployment screen (returns 0), or
- * starts the map-load thread when deployment is skipped (returns 1). */
-s32 deploy_open(void);
 
 #endif

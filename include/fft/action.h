@@ -1,7 +1,8 @@
 #ifndef ACTION_H
 #define ACTION_H
 
-/* Acting with an ability or attack: preparing it, each strike, its result, effect messages and Mimic. */
+/* Acting with an ability or attack: preparing it, resolving each strike against its targets, the action result fields,
+ * Mimic, the result displays and effect messages, and the weapon sounds. */
 
 #include "fft/ability.h"
 #include "fft/item.h"
@@ -13,6 +14,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+struct action_data;
+
+/* preparation */
 /* Per-skillset menu behavior (g_command_menu_types_by_skillset). Values select specialized
  * inventory, targeting, and ability-loading paths; they are not menu command
  * opcodes. */
@@ -42,85 +46,6 @@ typedef enum action_menu_pseudo_skillset {
     ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 188,
 } action_menu_pseudo_skillset_e;
 
-/* The experience and JP an action earned and the levels it raised, for the result display. */
-typedef struct action_reward_display {
-    u8 earned_experience;     /* +0x0 */
-    u8 earned_jp;             /* +0x1 */
-    u8 level_for_display;     /* +0x2; nonzero selects the "Level UP!" display */
-    u8 job_level_for_display; /* +0x3 */
-} action_reward_display_t;
-
-typedef char action_reward_display_size_must_be_4[(sizeof(action_reward_display_t) == 4) ? 1 : -1];
-
-/* Packed image IDs in the action-result status list. */
-enum {
-    ACTION_STATUS_DISPLAY_IMAGE_MASK = 0x7f,
-    ACTION_STATUS_DISPLAY_REMOVAL = 0x80,
-};
-
-/* Entries of unit_t.status_display_image_list. */
-enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
-
-/* Block view of the numeric display fields at runtime unit data 0x2bc..0x2cf,
- * taken as one pointer by the action result display builders
- * (result_build_next_display, result_build_next_special_display
- * and result_animate_text). */
-typedef struct action_result_display {
-    u8 active;                     /* 0x00 */
-    u8 _padding_01;                /* 0x01; aligns selector */
-    u16 selector;                  /* 0x02; result_numeric_display_selector_e */
-    u16 value;                     /* 0x04 */
-    u16 progress;                  /* 0x06 */
-    sprite_display_t* displays[3]; /* 0x08 */
-} action_result_display_t;
-
-typedef char action_result_display_size_must_be_20[(sizeof(action_result_display_t) == 20) ? 1 : -1];
-
-/* The strike work record, embedded in unit_t.strike (+0x18c)
- * and used as a standalone AI work record. Reaction targeting writes its
- * redirected tile at +0x1c..+0x1e before the strike is processed. */
-typedef struct action_strike_work {
-    u8 actor_id;
-    u8 target_count;
-    u8 target_list[UNIT_RUNTIME_SLOT_COUNT];
-    u8 skip_empty_tile_effect;
-    u8 math_skill_flag;
-    s16 last_attack_id; /* 0x14 */
-    u8 post_action_message;
-    u8 reaction_occurred;
-    u8 continue_attack;
-    u8 current_hit_number;
-    s16 reaction_id;
-    u8 target_new_x;
-    u8 target_new_y;
-    u8 target_new_map_level;
-    u8 used_weapon_id;
-    s16 reaction_ability_id; /* 0x20; runtime 0x1ac */
-    /* 0x22; runtime 0x1ae. g_action_current_ability.knockback_flags & 0x7f, stored with
-     * the knockback destination. */
-    u8 knockback_flags;
-    u8 can_earn_experience;
-    action_reward_display_t action_rewards; /* 0x24; runtime 0x1b0..0x1b3 */
-} action_strike_work_t;
-
-typedef char battle_strike_work_must_be_40[sizeof(action_strike_work_t) == 40 ? 1 : -1];
-void action_resolve_projectile_hit_by_runtime_id(u16 attacker_id, u16 target_id);
-void action_end_command(unit_t* unit);
-
-/* Each sets up a state and switches g_game_state to it; action_announce_next
- * only when a Hamedo, action or reaction is due. */
-s32 action_announce_next(void);
-
-extern u8 g_action_loaded_ability_flags_1;
-
-/* Provisional: written only by the uncalled action_store_acting_unit_value; never read. */
-extern u8 g_action_acting_unit_value;
-
-extern u8 g_action_actor_elevation;
-extern s32 g_action_actor_id;
-extern u8 g_action_actor_x;
-extern u8 g_action_actor_y;
-
 /* Result of action_prepare, kept in unit_t.attack_phase_state. */
 typedef enum action_preparation {
     ACTION_PREPARATION_INVALID = -1,
@@ -130,11 +55,13 @@ typedef enum action_preparation {
     ACTION_PREPARATION_JUMP = 3,
 } action_preparation_e;
 
+void action_copy_data(const action_command_t* source, action_command_t* destination);
+s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase);
 void action_prepare_in_place(action_command_t* action);
 s32 action_commit_preparation(action_command_t* command);
-s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase);
-void action_switch_ability_to_default_attack(void);
+void action_execute_ability(void);
 
+/* action results */
 /* Bitset in action_data_t.attack_type; one result can affect HP and MP. */
 typedef enum action_type_flags {
     ACTION_TYPE_PSEUDO_STATUS = 0x01,
@@ -193,6 +120,37 @@ typedef enum action_equipment_slot_mask {
     ACTION_EQUIPMENT_SLOT_ALL = 0xfe,
 } action_equipment_slot_mask_e;
 
+/* Ordinary SP/PA/MA/Brave/Faith action-result encoding. CT and EXP reuse
+ * these bits with distinct sentinel or sign meanings and are excluded. */
+enum {
+    ACTION_STAT_CHANGE_VALUE_MASK = 0x7f,
+    ACTION_STAT_CHANGE_INCREASE = 0x80,
+};
+
+/* action_data_t.exp_change: the low seven bits are the amount, and the top bit
+ * marks a loss, the opposite sense of ACTION_STAT_CHANGE_INCREASE. */
+enum {
+    ACTION_EXP_CHANGE_VALUE_MASK = 0x7f,
+    ACTION_EXP_CHANGE_LOSS = 0x80,
+};
+
+/* Action result limits: HP and MP damage and healing stop at 999. The EXP an
+ * action earns starts at 10 for a success or 20 divided by the KO count for a
+ * kill, and ends within 1..99. Poach yields the rare item 31 times in 256. */
+enum {
+    ACTION_VALUE_MAX = 999,
+    REWARD_EXP_SUCCESS_BASE = 10,
+    REWARD_EXP_KILL_BASE = 20,
+    REWARD_EXP_MAX = 99,
+    ITEM_POACH_RARE_ITEM_CHANCE = 31,
+};
+
+void action_clear_current_data(action_data_t* action);
+void action_finalize_target_result(void);
+s32 action_apply_target_result(s32 battle_id);
+s32 action_apply_attacker_result(s32 unit_id);
+
+/* strikes */
 typedef enum action_context {
     ACTION_CONTEXT_PRIMARY = 0,
     ACTION_CONTEXT_REACTION_OR_SIMULATION = 1,
@@ -286,7 +244,6 @@ typedef struct action_current_ability {
     u8 post_action_message;                     /* 0x4e; 6 poached, 9 trained */
     u8 random_fire_flag;                        /* 0x4f */
 } action_current_ability_t;
-
 typedef char action_current_ability_size_must_be_80[(sizeof(action_current_ability_t) == 80) ? 1 : -1];
 
 /* action_current_ability_t.post_action_message, copied to the strike work and
@@ -297,41 +254,93 @@ typedef enum action_post_message {
     ACTION_POST_MESSAGE_TRAINED = 9,
 } action_post_message_e;
 
-extern unit_stats_t* g_action_attacker;
-extern action_data_t g_action_attacker_action_data;
-extern action_data_t* g_action_attacker_data;
-extern u8 g_action_canceled_statuses[];
-extern action_context_e g_action_context;
-extern action_current_ability_t g_action_current_ability;
-extern s32 g_action_phase;
-extern action_command_t g_action_saved_command;
+/* The experience and JP an action earned and the levels it raised, for the result display. */
+typedef struct action_reward_display {
+    u8 earned_experience;     /* +0x0 */
+    u8 earned_jp;             /* +0x1 */
+    u8 level_for_display;     /* +0x2; nonzero selects the "Level UP!" display */
+    u8 job_level_for_display; /* +0x3 */
+} action_reward_display_t;
+typedef char action_reward_display_size_must_be_4[(sizeof(action_reward_display_t) == 4) ? 1 : -1];
+
+/* The strike work record, embedded in unit_t.strike (+0x18c)
+ * and used as a standalone AI work record. Reaction targeting writes its
+ * redirected tile at +0x1c..+0x1e before the strike is processed. */
+typedef struct action_strike_work {
+    u8 actor_id;
+    u8 target_count;
+    u8 target_list[UNIT_RUNTIME_SLOT_COUNT];
+    u8 skip_empty_tile_effect;
+    u8 math_skill_flag;
+    s16 last_attack_id; /* 0x14 */
+    u8 post_action_message;
+    u8 reaction_occurred;
+    u8 continue_attack;
+    u8 current_hit_number;
+    s16 reaction_id;
+    u8 target_new_x;
+    u8 target_new_y;
+    u8 target_new_map_level;
+    u8 used_weapon_id;
+    s16 reaction_ability_id; /* 0x20; runtime 0x1ac */
+    /* 0x22; runtime 0x1ae. g_action_current_ability.knockback_flags & 0x7f, stored with
+     * the knockback destination. */
+    u8 knockback_flags;
+    u8 can_earn_experience;
+    action_reward_display_t action_rewards; /* 0x24; runtime 0x1b0..0x1b3 */
+} action_strike_work_t;
+typedef char battle_strike_work_must_be_40[sizeof(action_strike_work_t) == 40 ? 1 : -1];
+
 extern action_state_e g_action_state;
+extern action_context_e g_action_context;
+extern s32 g_action_phase;
+extern action_current_ability_t g_action_current_ability;
+extern u8 g_action_loaded_ability_flags_1;
+extern unit_stats_t* g_action_attacker;
+extern action_data_t* g_action_attacker_data;
+extern action_data_t g_action_attacker_action_data;
 extern unit_stats_t* g_action_target;
 extern action_data_t* g_action_target_data;
+extern u8 g_action_canceled_statuses[];
+extern action_command_t g_action_saved_command;
+extern s32 g_action_actor_id;
+extern u8 g_action_actor_x;
+extern u8 g_action_actor_y;
+extern u8 g_action_actor_elevation;
 extern s16 g_action_actor_used_ability_id;
-
-/* Golem barrier HP per team, shared by action resolution and AI snapshots. */
-extern u16 g_action_team_golem[UNIT_TEAM_COUNT];
-
-/* Preview action calculation entry run on the main stack. */
-s32 action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command);
-
-void action_clear_current_data(action_data_t* action);
-void action_execute_ability(void);
-void action_finalize_target_result(void);
-s32 action_init_current_data(s32 unit_id);
-s32 action_apply_target_result(s32 battle_id);
-s32 action_resolve_strike(s32 battle_id, action_strike_work_t* work);
-s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
-void action_apply_strike_results(void);
-void action_store_actor_data(unit_stats_t* unit);
-void action_store_target_ids(u8* src);
-s32 action_apply_attacker_result(s32 unit_id);
-void action_store_used_weapon(action_command_t* action);
 
 /* Separate link name for g_action_saved_command.ability_id. */
 extern s16 g_action_saved_ability_id;
 
+/* Golem barrier HP per team, shared by action resolution and AI snapshots. */
+extern u16 g_action_team_golem[UNIT_TEAM_COUNT];
+
+/* Provisional: written only by the uncalled action_store_acting_unit_value; never read. */
+extern u8 g_action_acting_unit_value;
+
+s32 action_init_current_data(s32 unit_id);
+void action_store_actor_data(unit_stats_t* unit);
+s32 action_resolve_strike(s32 battle_id, action_strike_work_t* work);
+void action_store_used_weapon(action_command_t* action);
+s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
+void action_switch_ability_to_default_attack(void);
+void action_start_next_strike(void);
+void action_apply_strike_results(void);
+void action_resolve_projectile_hit_by_runtime_id(u16 attacker_id, u16 target_id);
+void action_store_target_ids(u8* src);
+s32 action_copy_ability_targets(u8* out);
+void action_remove_ability_target(s32 target_battle_id);
+void action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
+void action_end_command(unit_t* unit);
+
+/* Preview action calculation entry run on the main stack. */
+s32 action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command);
+
+/* Like the state_enter_ functions (state.h), sets up a state and switches g_game_state to it, but only when a
+ * Hamedo, action or reaction is due. */
+s32 action_announce_next(void);
+
+/* mimic */
 /* g_action_mimic_attacker, filled by action_mimic_record and read
  * by action_mimic_set_ability. The AI saves and restores it whole as 30 bytes
  * (ai_simulate_begin and ai_simulate_end). */
@@ -346,12 +355,14 @@ typedef struct action_mimic_attacker {
     s16 target_delta_y;      /* 0x08 */
     action_command_t action; /* 0x0a: copy of unit_stats_t +0x16e */
 } action_mimic_attacker_t;
-
 typedef char action_mimic_attacker_size_must_be_30[(sizeof(action_mimic_attacker_t) == 30) ? 1 : -1];
+
 extern action_mimic_attacker_t g_action_mimic_attacker;
+
 void action_mimic_record(unit_stats_t* unit);
 s32 action_mimic_set_ability(unit_stats_t* unit);
 
+/* result displays */
 /* Pending post-action displays are queued as one little-endian 32-bit value in runtime
  * Unit Data 0x1b8..0x1bb. result_build_next_display and
  * result_build_next_special_display consume one bit at a time in ascending
@@ -452,23 +463,32 @@ typedef struct action_display_image_rect {
     u8 width;
     u8 height;
 } action_display_image_rect_t;
-
 typedef char action_display_image_rect_size_must_be_4[(sizeof(action_display_image_rect_t) == 4) ? 1 : -1];
 
-/* Ordinary SP/PA/MA/Brave/Faith action-result encoding. CT and EXP reuse
- * these bits with distinct sentinel or sign meanings and are excluded. */
+/* Packed image IDs in the action-result status list. */
 enum {
-    ACTION_STAT_CHANGE_VALUE_MASK = 0x7f,
-    ACTION_STAT_CHANGE_INCREASE = 0x80,
+    ACTION_STATUS_DISPLAY_IMAGE_MASK = 0x7f,
+    ACTION_STATUS_DISPLAY_REMOVAL = 0x80,
 };
 
-/* action_data_t.exp_change: the low seven bits are the amount, and the top bit
- * marks a loss, the opposite sense of ACTION_STAT_CHANGE_INCREASE. */
-enum {
-    ACTION_EXP_CHANGE_VALUE_MASK = 0x7f,
-    ACTION_EXP_CHANGE_LOSS = 0x80,
-};
+/* Entries of unit_t.status_display_image_list. */
+enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
 
+/* Block view of the numeric display fields at runtime unit data 0x2bc..0x2cf,
+ * taken as one pointer by the action result display builders
+ * (result_build_next_display, result_build_next_special_display
+ * and result_animate_text). */
+typedef struct action_result_display {
+    u8 active;                     /* 0x00 */
+    u8 _padding_01;                /* 0x01; aligns selector */
+    u16 selector;                  /* 0x02; result_numeric_display_selector_e */
+    u16 value;                     /* 0x04 */
+    u16 progress;                  /* 0x06 */
+    sprite_display_t* displays[3]; /* 0x08 */
+} action_result_display_t;
+typedef char action_result_display_size_must_be_20[(sizeof(action_result_display_t) == 20) ? 1 : -1];
+
+/* effect messages */
 /* Queue of post-action "effect message" popups (g_action_messages), filled by
  * action_message_queue_for_unit and drained newest first by
  * action_message_show_next. */
@@ -478,37 +498,22 @@ typedef struct action_post_effect_msg {
     u8 _padding_02[2]; /* 0x02; aligns value */
     s32 value;         /* 0x04 reported amount */
 } action_post_effect_msg_t;
-
 typedef char action_post_effect_msg_size_must_be_8[(sizeof(action_post_effect_msg_t) == 8) ? 1 : -1];
+
 enum { ACTION_POST_EFFECT_MSG_CAPACITY = 16 };
+
 extern action_post_effect_msg_t g_action_messages[ACTION_POST_EFFECT_MSG_CAPACITY];
-void action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
+
 void action_message_show_for_caster(void);
 s32 action_message_show_next(void);
-void action_start_next_strike(void);
 
-/* Action result limits: HP and MP damage and healing stop at 999. The EXP an
- * action earns starts at 10 for a success or 20 divided by the KO count for a
- * kill, and ends within 1..99. Poach yields the rare item 31 times in 256. */
-enum {
-    ACTION_VALUE_MAX = 999,
-    REWARD_EXP_SUCCESS_BASE = 10,
-    REWARD_EXP_KILL_BASE = 20,
-    REWARD_EXP_MAX = 99,
-    ITEM_POACH_RARE_ITEM_CHANCE = 31,
-};
-
-void action_copy_data(const action_command_t* source, action_command_t* destination);
-s32 action_copy_ability_targets(u8* out);
-void action_remove_ability_target(s32 target_battle_id);
-
+/* weapon sounds */
 /* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
  * hit, and the hit a shield or Golem stops (action_play_weapon_sfx). */
 extern u8 g_action_weapon_swing_sfx_ids[];
-
 extern u8 g_action_weapon_hit_sfx_ids[];
 extern u8 g_action_shield_deflect_sfx_ids[];
+
 void action_play_weapon_sfx(struct unit* unit, s32 hit);
-struct action_data;
 
 #endif

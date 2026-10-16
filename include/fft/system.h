@@ -1,7 +1,8 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-/* The Now Loading message. */
+/* System: MAIN's game loop and its control flags, frame timing, error reporting, debug switches, the boot logos and the
+ * Now Loading message, BATTLE's frame pacing, and OPEN's main-loop flags. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -10,12 +11,7 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-void system_clear_min_vsync_interval(void);
-s32 system_get_vsync_interval(void);
-void system_reset_frame_pacing_timer(void);
-s32 system_set_vsync_interval(s32 speed);
-void system_set_min_vsync_interval(s32 value);
-
+/* game loop */
 /* Bits of g_system_flags, the 32-bit control flags of the WLDCORE world-map
  * loop: frame state, what the frame leaves out, requests left by WORLD and
  * OPENING, and the reason the loop ends. */
@@ -91,27 +87,39 @@ typedef enum system_game_flow {
     SYSTEM_GAME_FLOW_ENDING = 3, /* run the ending, then restart */
 } system_game_flow_e;
 
-extern u32 g_system_flags;
+extern u32 g_system_flags;                 /* system_flags_e bits; cleared by save_init_data_tables */
 extern s32 g_system_frontend_world_result; /* world_map_result_e */
 extern u32 g_system_game_loop_stack_pointer;
 extern u8 g_system_go_straight_to_battle;
 
-/* Empty (nop, jr ra): every main loop and every blocking wait calls it once per frame. */
-void system_frame_stub(void);
-
 void system_reset_game(void);
 void system_store_stack_pointer(u32* destination);
 void system_restore_game_loop_stack_pointer(u32* source);
+
+/* Empty (nop, jr ra): every main loop and every blocking wait calls it once per frame. */
+void system_frame_stub(void);
+
+/* frame timing */
 extern s32 g_system_session_frames;
 extern s32 g_system_vsync_interval;
 extern s32 g_system_min_vsync_interval;
+extern s32 g_system_saved_vsync_interval;
 extern s32 g_system_frame_pacing_suppressed;
 extern s32 g_system_frame_pacing_timer;
 extern s32 g_system_battle_frame_hsync_count;
 extern s32 g_system_battle_frame_hsync_count_max;
+
 void system_handle_draw_sync(void);
 void system_handle_vsync(void);
 
+/* BATTLE frame pacing */
+s32 system_get_vsync_interval(void);
+s32 system_set_vsync_interval(s32 speed);
+void system_set_min_vsync_interval(s32 value);
+void system_clear_min_vsync_interval(void);
+void system_reset_frame_pacing_timer(void);
+
+/* errors */
 /* Error codes passed to system_handle_error, whose report hook is empty
  * in retail. */
 typedef enum system_error {
@@ -147,6 +155,7 @@ typedef enum system_battle_load_exception {
 } system_battle_load_exception_e;
 
 extern int g_system_graphics_error;
+
 void system_handle_error(int error_code);
 void system_handle_battle_load_exception(s32 value);
 void system_handle_pointer_exception(int error_code);
@@ -156,17 +165,27 @@ void system_report_error(s32 allocator_id, s32 error_code);
  * neither their original meaning nor the hook's original name is proven. */
 void system_report_stub(s32 category, s32 code);
 
+/* debug */
+/* Provisional: the debug VARIABLE_LIST level pushed by debug_push_variable_list_level;
+ * debug_draw_variable_list draws row_count variables from first_variable into the render record. */
+typedef struct debug_variable_list_level {
+    s32 window_index;   /* 0x00; cursor window */
+    s32 render_index;   /* 0x04 */
+    s32 first_variable; /* 0x08 */
+    s32 cursor;         /* 0x0c; cursor row */
+    u8 _unused_10[0x20];
+    s32 row_count; /* 0x30 */
+} debug_variable_list_level_t;
+
 extern s32 g_debug_display_enabled;
-
-/* Cleared with the debug display flag; nothing reads it. */
 extern s32 g_debug_display_unread_flag; /* cleared with the debug display flag; never read */
-
 extern s32 g_debug_font_print_enabled;
 
-/* 4 KB of zero words after the C start-up, run as no-ops; returns at once. */
-void system_zero_padding(void);
+void debug_load_efc_font(void);
 
+/* boot */
 extern u32 g_boot_squaresoft_logo_image_words[];
+
 void boot_run_startup(void);
 void boot_reset_game_state(void);
 int boot_draw_sceap_logo(u32* otag, u32* image);
@@ -174,24 +193,26 @@ void boot_show_sceap_logo(void);
 void boot_fade_in_squaresoft_logo(void);
 void boot_fade_out_squaresoft_logo(void);
 
+/* 4 KB of zero words after the C start-up, run as no-ops; returns at once. */
+void system_zero_padding(void);
+
 /* Now Loading */
 extern palette_t g_loading_palette;
-
 extern u32 g_loading_frame_counter;
+extern s32 g_loading_display_frame_counter;
+extern u32 g_loading_visible;
 extern u32 g_loading_otags[2][2];
 
 /* Seven textured quads for each display buffer. */
 extern POLY_FT4 g_loading_primitives[2][7];
 
-extern u32 g_loading_visible;
-extern s32 g_loading_display_frame_counter;
 void loading_build_message(u32 visible, s32 x, s32 y);
 void loading_build_message_centered(u32 visible);
 void loading_add_to_otag(u32* otag);
 void loading_draw_message(void);
-void debug_load_efc_font(void);
-extern s32 g_system_saved_vsync_interval;
 
+/* runtime flags */
+/* Bits of g_system_runtime_flags. */
 typedef enum system_runtime_flag {
     SYSTEM_RUNTIME_FLAG_RUNNING = 0x00001,          /* the OPEN main loop runs while set */
     SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING = 0x00002,  /* cleared by movie_stop_stream */
@@ -218,16 +239,5 @@ extern s32 g_system_result;
 extern s32 g_system_vsync_mode;
 extern u8 g_system_work_buffer_0[];
 extern u8 g_system_work_buffer_1[];
-
-/* Provisional: the debug VARIABLE_LIST level pushed by debug_push_variable_list_level;
- * debug_draw_variable_list draws row_count variables from first_variable into the render record. */
-typedef struct debug_variable_list_level {
-    s32 window_index;   /* 0x00; cursor window */
-    s32 render_index;   /* 0x04 */
-    s32 first_variable; /* 0x08 */
-    s32 cursor;         /* 0x0c; cursor row */
-    u8 _unused_10[0x20];
-    s32 row_count; /* 0x30 */
-} debug_variable_list_level_t;
 
 #endif

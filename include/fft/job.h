@@ -1,14 +1,14 @@
 #ifndef JOB_H
 #define JOB_H
 
-/* Jobs and abilities shared by the menu overlays and WORLD: the selected job's level, JP and mastery, ability
- * lists, and the row callbacks of the job and ability menus. */
+/* Jobs: the job records and ids, the career a unit keeps for the generic jobs (unlocks, learned abilities, levels and
+ * JP), the job lookups and level, JP and unlock calculations, and the steps and tabs of the job and ability menus. */
 
 #include "fft/status.h"
 #include "psx/types.h"
 
-struct party_unit;
-
+/* job records */
+/* The jump value and the stepping-stone flag of job_data_t.jump. */
 enum {
     JOB_JUMP_VALUE_MASK = 0x7f,
     JOB_JUMP_STEPPING_STONE = 0x80,
@@ -20,7 +20,6 @@ typedef struct job_stat_growth {
     u8 growth;
     u8 multiplier;
 } job_stat_growth_t;
-
 typedef char job_stat_growth_size_must_be_2[(sizeof(job_stat_growth_t) == 2) ? 1 : -1];
 
 /*
@@ -42,9 +41,15 @@ typedef struct job_data {
     u8 job_portrait_palette;           /* 0x2e */
     u8 monster_graphic;                /* 0x2f; copied to unit_stats_t 0x15e */
 } job_data_t;
-
 typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 
+extern job_data_t g_job_data[];
+extern job_data_t* g_job_data_pointer;
+
+job_data_t* job_get_data(s32 job_id);
+s32 job_find_by_skillset(u8 skillset_id);
+
+/* job ids */
 /* Job ids index the 160 records of g_job_data. A name is the job's name
  * in the game's text. Where records share a name, a suffix names the
  * character: the unit name the game's text has at the same index, which is
@@ -240,6 +245,7 @@ enum {
     JOB_SHEET_DANCER = 0x83,
 };
 
+/* unit career */
 /* Career slots follow the generic jobs' order. Slot zero holds the unit's base
  * job, including a special character's job; generic Squire has job ID 74. */
 typedef enum unit_career_job_index {
@@ -320,7 +326,6 @@ typedef union unit_job_point_table {
         u8 high;
     } entries[UNIT_CAREER_JOB_COUNT];
 } unit_job_point_table_t;
-
 typedef char
     unit_job_point_table_size_must_be_40[(sizeof(unit_job_point_table_t) == UNIT_JOB_POINT_BYTE_COUNT) ? 1 : -1];
 
@@ -329,7 +334,6 @@ typedef struct unit_job_points {
     unit_job_point_table_t current;
     unit_job_point_table_t total;
 } unit_job_points_t;
-
 typedef char
     unit_job_points_size_must_be_80[(sizeof(unit_job_points_t) == UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT) ? 1 : -1];
 
@@ -340,38 +344,33 @@ typedef struct unit_career_data {
     u8 job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]; /* 0x3c; two packed nibbles per byte */
     unit_job_points_t job_points;             /* 0x46; current JP followed by total JP */
 } unit_career_data_t;
-
 typedef char unit_career_data_size_must_be_150[(sizeof(unit_career_data_t) == UNIT_CAREER_DATA_BYTE_COUNT) ? 1 : -1];
+
+/* levels, JP and unlocks */
+extern const u16 g_job_level_jp_requirements[UNIT_JOB_LEVEL_MAX];
+extern u16 g_job_jp_requirements_by_level[];
+extern const u8 g_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
+
+u32 job_calculate_level(u16 job_jp);
+u32 job_calculate_unlocked(const u8* packed_job_levels, u32 gender_flags);
+void job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
+s32 job_add_proposition_jp(u32 party_index, s32 jp);
+
+/* menu library helpers */
+struct party_unit;
 
 /* The menu library's job helpers (src/event/menu), compiled into WORLD and the
  * EVENT overlays. */
 void job_calculate_and_store_unlocks(struct party_unit* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
-
 s32 job_find_first_for_skillset(s32 skillset);
 s32 job_get_generic_index(s32 job_id);
 s32 job_get_skillset(s32 job_id);
 s32 job_is_special_monster(s32 job_id);
-extern u32 g_job_current_jp;
-extern u32 g_job_current_total_jp;
-extern s32 g_job_current_mastered;
-
-/* What ability_list_build lists: every ability of the job, the learned
- * ones, the learn menu's rows, or only a count of the unlearned ones. */
-typedef enum ability_list_mode {
-    ABILITY_LIST_MODE_VIEW_ALL = 0,
-    ABILITY_LIST_MODE_LEARNED_ONLY = 1,
-    ABILITY_LIST_MODE_LEARN_MENU = 2,
-    ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
-} ability_list_mode_e;
-
-/* BUNIT and WORLD each build their own body. */
 
 /* job and ability menus */
-/* Step of the job list menus (WORLD learn and view-abilities menus, BUNIT job
- * menu, the JOBSTTS page); each list's handler returns the next step. In
- * JOBSTTS, JOBS is job_list_run, ABILITIES is
- * ability_list_update and CLOSE makes status_screen_entrypoint close
- * the screen. */
+/* Step of the job list menus (WORLD learn and view-abilities menus, BUNIT job menu, the JOBSTTS page); each list's
+ * handler returns the next step. In JOBSTTS, JOBS is job_list_run, ABILITIES is ability_list_update and CLOSE makes
+ * status_screen_entrypoint close the screen. */
 typedef enum menu_job_list_step {
     MENU_JOB_LIST_STEP_CLOSE = -1,
     MENU_JOB_LIST_STEP_JOBS = 0,
@@ -389,16 +388,18 @@ typedef enum menu_ability_category {
     MENU_ABILITY_CATEGORY_ALL = 15, /* the list builders take any other value as all */
 } menu_ability_category_e;
 
-extern job_data_t g_job_data[];
-extern job_data_t* g_job_data_pointer;
-extern const u16 g_job_level_jp_requirements[UNIT_JOB_LEVEL_MAX];
-extern u16 g_job_jp_requirements_by_level[];
-extern const u8 g_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
-job_data_t* job_get_data(s32 job_id);
-s32 job_find_by_skillset(u8 skillset_id);
-u32 job_calculate_level(u16 job_jp);
-u32 job_calculate_unlocked(const u8* packed_job_levels, u32 gender_flags);
-void job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
-s32 job_add_proposition_jp(u32 party_index, s32 jp);
+/* What ability_list_build lists: every ability of the job, the learned
+ * ones, the learn menu's rows, or only a count of the unlearned ones. */
+typedef enum ability_list_mode {
+    ABILITY_LIST_MODE_VIEW_ALL = 0,
+    ABILITY_LIST_MODE_LEARNED_ONLY = 1,
+    ABILITY_LIST_MODE_LEARN_MENU = 2,
+    ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
+} ability_list_mode_e;
+
+/* The JP, total JP and mastery the job list calculators last cached for the row being drawn. */
+extern u32 g_job_current_jp;
+extern u32 g_job_current_total_jp;
+extern s32 g_job_current_mastered;
 
 #endif

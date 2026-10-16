@@ -1,8 +1,9 @@
 #ifndef UNIT_VIEW_H
 #define UNIT_VIEW_H
 
-/* The unit info shown over the battle map: stats panel, summary, tile info and the action preview. Provisional: the
- * game has no name for it. */
+/* The unit view, the event library's panels over the battle map: the supervisor thread that keeps a view mode's panels
+ * running, the unit stats panels, the unit summary and the selected-tile display. Provisional: the game has no name for
+ * it. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
@@ -10,8 +11,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern image_load_parameters_t g_unit_view_summary_portrait_image_params;
-
+/* view modes */
 /* First argument of unit_view_start and value of g_unit_view_mode: the row of
  * g_unit_view_thread_sets the supervisor keeps running. Each mode from 1 up runs the selected-tile
  * display plus the panels named. */
@@ -31,8 +31,8 @@ typedef struct unit_view_thread_set {
     s32 thread_ids[4];        /* 0x10 */
     s32 task_ids[4];          /* 0x20 */
 } unit_view_thread_set_t;
-
 typedef char unit_view_thread_set_size_must_be_48[(sizeof(unit_view_thread_set_t) == 48) ? 1 : -1];
+
 extern unit_view_thread_set_t g_unit_view_thread_sets[];
 extern s32 g_unit_view_mode;
 extern u16 g_unit_view_cached_battle_id;
@@ -41,6 +41,10 @@ extern u16 g_unit_view_cached_comparison_id;
 /* Requests a view mode for the units unit_a and unit_b from the supervisor thread. */
 void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);
 
+/* Yields until the four panel threads (hovered and right unit stats, unit summary, tile info) have stopped. */
+void unit_view_wait_for_panels(void);
+
+/* unit stats panels */
 /* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page
  * comes from g_unit_view_stats_first_page_by_mode). Provisional. */
 typedef struct unit_view_stats_page {
@@ -76,11 +80,11 @@ extern image_load_parameters_t* g_unit_view_stats_sprite_image_params_by_mode[];
 
 /* Each reloads its unit and redraws its panel; a negative list index draws dashes. */
 void unit_view_refresh_hovered_stats(void);
-
 void unit_view_refresh_right_stats(void);
 void unit_view_preview_caster_stats(void);
 void unit_view_preview_target_stats(void);
 
+/* unit summary */
 /* Double-buffered 0xf0-byte frame of the unit summary panel. Provisional. */
 typedef struct unit_view_summary_frame {
     SPRT sprites[7];                    /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
@@ -98,24 +102,24 @@ extern RECT g_unit_view_summary_panel_rect;
 extern menu_unit_number_images_t g_unit_view_summary_digit_images;
 extern menu_palette_slot_t g_unit_view_summary_palettes[];
 extern image_load_parameters_t g_unit_view_summary_sprite_image_params[];
+extern image_load_parameters_t g_unit_view_summary_portrait_image_params;
+
 void unit_view_summary_thread(void);
+
+/* selected-tile display */
 extern menu_quad_colors_t g_unit_view_quad_colors;
 extern u8 g_unit_view_quad_group_starts[]; /* [group + 1] ends each group */
 extern point16_t g_unit_view_quad_origin;
 extern menu_quad_piece_t g_unit_view_quad_pieces[];
 extern menu_quad_page_t g_unit_view_height_display_pages[2];
-
-/* Nonzero while effects hide the tile's depth number in the selected-tile display. */
-extern u16 g_unit_view_depth_display_suppressed;
-
 extern RECT g_unit_view_tile_info_image_location;
 extern image_load_parameters_t g_unit_view_tile_info_image_params[2];
+extern u16 g_unit_view_depth_display_suppressed; /* nonzero while effects hide the tile's depth number */
+
+void unit_view_tile_info_thread(void);
 
 /* BATTLE's effect playback suppresses the tile's depth number for the length of an ability effect. */
 void unit_view_show_tile_depth(void);
-
 void unit_view_hide_tile_depth(void);
-void unit_view_tile_info_thread(void);
-void unit_view_wait_for_panels(void);
 
 #endif

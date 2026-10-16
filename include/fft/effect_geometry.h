@@ -1,11 +1,12 @@
 #ifndef EFFECT_GEOMETRY_H
 #define EFFECT_GEOMETRY_H
 
-/* Declarations. */
+/* Emitter records of the effect particle-system section and each native renderer's view of them. */
 
 #include "fft/gfx.h"
 #include "psx/types.h"
 
+/* placement */
 /* Emitter spawn origin: bits 9-11 of an emitter's 16-bit placement flags (byte 0x03
  * mask 0x0e). 0xa00 is the map center:
  * every handler adds half the map geometry width and depth there. */
@@ -55,6 +56,7 @@ typedef enum effect_work_kind {
     EFFECT_WORK_KIND_HEAP_BLOCK = 0x4000,
 } effect_work_kind_e;
 
+/* motion flags */
 /* Initial particle velocity mode: the velocity_inward bit (byte 0x06 mask
  * 0x10) and align_to_unit_facing bit (byte 0x07 mask 0x04) of the emitter's
  * 16-bit child/velocity flags. OUTWARD scatters around the base angles, INWARD aims at
@@ -87,6 +89,7 @@ enum {
     EFFECT_EMITTER_FLAG_ARRIVAL_DISTANCE_SHIFT = 4,
 };
 
+/* curve bindings */
 /* One-based bindings for the emitter's initial motion. */
 typedef struct effect_emitter_spawn_curve_bindings {
     u32 position : 4;
@@ -98,7 +101,6 @@ typedef struct effect_emitter_spawn_curve_bindings {
     u32 weight : 4;
     u32 radial_speed : 4;
 } effect_emitter_spawn_curve_bindings_t;
-
 typedef char
     effect_emitter_spawn_curve_bindings_size_must_be_4[sizeof(effect_emitter_spawn_curve_bindings_t) == 4 ? 1 : -1];
 
@@ -136,25 +138,25 @@ enum {
     EFFECT_COLOR_CURVE_BLUE_SHIFT = 8,
 };
 
+/* texture pages */
 /* Blend mode and primitive transparency control in a geometry record. */
 typedef struct effect_texture_page_config {
     u16 blend_mode : 2;
     u16 clear_abe : 1;
     u16 _unused_00 : 13;
 } effect_texture_page_config_t;
-
 typedef char assert_effect_texture_page_config_size[sizeof(effect_texture_page_config_t) == 2 ? 1 : -1];
 
+/* The texture_page_flags bits of the effect geometry records. */
 enum {
     EFFECT_TEXTURE_PAGE_ABR_MASK = 0x03, /* the semi-transparency rate, shifted into bits 5-6 of the tpage */
     EFFECT_TEXTURE_PAGE_FLAG_CLEAR_ABE = 0x04,
 };
 
-/* The spawn block at 0x14-0x4b of an emitter record, as the
- * battle_effect_interpolate_emitter_* helpers read it; the native renderers
- * that spawn like the particle emitter embed it. The spread is the ellipsoid
- * or box half-extent around the spawn position and the velocity spread
- * randomizes the base angles. */
+/* particle emitter */
+/* The spawn block at 0x14-0x4b of an emitter record, as the effect_interpolate_emitter_* helpers read it; the native
+ * renderers that spawn like the particle emitter embed it. The spread is the ellipsoid or box half-extent around the
+ * spawn position and the velocity spread randomizes the base angles. */
 typedef struct effect_emitter_geometry_view {
     vec3s16_t spawn_position_start;      /* 0x14 */
     vec3s16_t spawn_position_end;        /* 0x1a */
@@ -167,7 +169,6 @@ typedef struct effect_emitter_geometry_view {
     ranges16_t inertia_start;            /* 0x44 */
     ranges16_t inertia_end;              /* 0x48 */
 } effect_emitter_geometry_view_t;
-
 typedef char assert_effect_emitter_geometry_view_size[sizeof(effect_emitter_geometry_view_t) == 56 ? 1 : -1];
 
 /* Minimum and maximum components of a particle-motion vector. */
@@ -176,7 +177,6 @@ typedef struct effect_xyz_min_max {
     ranges16_t y;
     ranges16_t z;
 } effect_xyz_min_max_t;
-
 typedef char effect_xyz_min_max_size_must_be_12[sizeof(effect_xyz_min_max_t) == 12 ? 1 : -1];
 
 /* One 196-byte record in the effect file's particle-system section.
@@ -220,9 +220,9 @@ typedef struct effect_geometry_entry {
     u8 child_emitter_mid_life;        /* 0xc1: see EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK */
     u8 _padding_c2[0x02];             /* tail padding to 4-byte alignment */
 } effect_geometry_entry_t;
-
 typedef char assert_effect_geometry_entry_size[sizeof(effect_geometry_entry_t) == 196 ? 1 : -1];
 
+/* textured quad grids and wave mesh */
 /* One-based curve bindings for texture scroll and wave phase rates. */
 typedef struct effect_textured_quad_scroll_curves {
     u32 _unused_00 : 4;
@@ -232,7 +232,6 @@ typedef struct effect_textured_quad_scroll_curves {
     u32 _unused_02 : 12;
     u32 scroll_speed : 4;
 } effect_textured_quad_scroll_curves_t;
-
 typedef char assert_effect_textured_quad_scroll_curves_size[sizeof(effect_textured_quad_scroll_curves_t) == 4 ? 1 : -1];
 
 /* One curve controls the shape parameters of both waves. */
@@ -240,7 +239,6 @@ typedef struct effect_wave_shape_curves {
     u32 shape : 4;
     u32 _unused_00 : 28;
 } effect_wave_shape_curves_t;
-
 typedef char assert_effect_wave_shape_curves_size[sizeof(effect_wave_shape_curves_t) == 4 ? 1 : -1];
 
 /* One wave of the wave mesh: the view holds a start and an end set for each axis, between which
@@ -253,7 +251,6 @@ typedef struct effect_wave_parameters {
     s16 phase_step;
     u8 _unused_0a[2];
 } effect_wave_parameters_t;
-
 typedef char effect_wave_parameters_size_must_be_12[sizeof(effect_wave_parameters_t) == 12 ? 1 : -1];
 
 /* The scrolling textured quad grids' (2x2, 4x4 and 8x8) and wave mesh's
@@ -296,10 +293,10 @@ typedef struct effect_textured_quad_geometry_view {
     s16 texture_height; /* 0xaa */
     u8 _unused_ac[0x18];
 } effect_textured_quad_geometry_view_t;
-
 typedef char
     assert_effect_textured_quad_geometry_view_size[sizeof(effect_textured_quad_geometry_view_t) == 196 ? 1 : -1];
 
+/* particle ribbon */
 /* The ribbon binds target spread at bit 4 of motion_curve_selectors, where the
  * emitter binds acceleration step; its other curves keep the emitter's places. */
 enum {
@@ -315,7 +312,7 @@ typedef struct effect_particle_ribbon_geometry_view {
     u32 spawn_curve_bindings;                         /* 0x08 */
     u32 target_curve_bindings;                        /* 0x0c */
     u32 color_curves;                                 /* 0x10 */
-    effect_emitter_geometry_view_t emitter;           /* 0x14: read by battle_effect_interpolate_emitter_* */
+    effect_emitter_geometry_view_t emitter;           /* 0x14: read by effect_interpolate_emitter_* */
     effect_texture_page_config_t texture_page_config; /* 0x4c */
     s16 brightness_row;                               /* 0x4e */
     u8 _unused_50[0x04];
@@ -358,10 +355,10 @@ typedef struct effect_particle_ribbon_geometry_view {
     u8 child_emitter_mid_life; /* 0xc1 */
     u8 _padding_c2[0x02];      /* tail padding to 4-byte alignment */
 } effect_particle_ribbon_geometry_view_t;
-
 typedef char
     assert_effect_particle_ribbon_geometry_view_size[sizeof(effect_particle_ribbon_geometry_view_t) == 196 ? 1 : -1];
 
+/* polar mesh */
 /* Polar motion bindings use one-based curve selectors; zero keeps the starting value. */
 typedef struct effect_polar_curve_bindings {
     u16 center : 4;
@@ -379,7 +376,6 @@ typedef struct effect_polar_curve_bindings {
     u8 angle_step_delta : 4;
     u8 _unused_07 : 4;
 } effect_polar_curve_bindings_t;
-
 typedef char effect_polar_curve_bindings_size_must_be_8[sizeof(effect_polar_curve_bindings_t) == 8 ? 1 : -1];
 
 /* The polar renderer gives the particle emitter's parameter slots its own meanings. */
@@ -445,9 +441,9 @@ typedef struct effect_polar_mesh_geometry_view {
     u16 texture_v;              /* 0xba: maximum start homing strength */
     u8 _unused_bc[0x08];
 } effect_polar_mesh_geometry_view_t;
-
 typedef char assert_effect_polar_mesh_geometry_view_size[sizeof(effect_polar_mesh_geometry_view_t) == 196 ? 1 : -1];
 
+/* ring, tube and dome meshes */
 /* Radial motion bindings use one-based curve selectors; zero keeps the starting value. */
 typedef struct effect_radial_motion_curve_bindings {
     u32 origin : 4;
@@ -456,6 +452,8 @@ typedef struct effect_radial_motion_curve_bindings {
     u32 _unused_01 : 16;
     u32 spin : 4;
 } effect_radial_motion_curve_bindings_t;
+typedef char
+    effect_radial_motion_curve_bindings_size_must_be_4[sizeof(effect_radial_motion_curve_bindings_t) == 4 ? 1 : -1];
 
 typedef struct effect_radial_shape_curve_bindings {
     u16 growth : 4;
@@ -464,10 +462,6 @@ typedef struct effect_radial_shape_curve_bindings {
     u16 radius : 4;
     u16 _unused_02 : 12;
 } effect_radial_shape_curve_bindings_t;
-
-typedef char
-    effect_radial_motion_curve_bindings_size_must_be_4[sizeof(effect_radial_motion_curve_bindings_t) == 4 ? 1 : -1];
-
 typedef char
     effect_radial_shape_curve_bindings_size_must_be_4[sizeof(effect_radial_shape_curve_bindings_t) == 4 ? 1 : -1];
 
@@ -528,9 +522,9 @@ typedef struct effect_radial_mesh_geometry {
     s16 radius_end; /* 0xac */
     u8 _unused_ae[0x16];
 } effect_radial_mesh_geometry_t;
-
 typedef char assert_effect_radial_mesh_geometry_size[sizeof(effect_radial_mesh_geometry_t) == 196 ? 1 : -1];
 
+/* tentacle mesh */
 /* The tentacle reads bits 4 to 15 of motion_curve_selectors as its tip's
  * curves; particle count and spawn interval keep the emitter's places. */
 enum {
@@ -549,7 +543,7 @@ typedef struct effect_tentacle_mesh_geometry_view {
     u32 spawn_curve_bindings;                         /* 0x08 */
     u32 tip_curve_bindings;                           /* 0x0c */
     u32 color_curves;                                 /* 0x10 */
-    effect_emitter_geometry_view_t emitter;           /* 0x14: read by battle_effect_interpolate_emitter_* */
+    effect_emitter_geometry_view_t emitter;           /* 0x14: read by effect_interpolate_emitter_* */
     effect_texture_page_config_t texture_page_config; /* 0x4c */
     s16 brightness_row;                               /* 0x4e */
     u8 _unused_50[0x04];
@@ -592,10 +586,10 @@ typedef struct effect_tentacle_mesh_geometry_view {
     u8 child_emitter_mid_life; /* 0xc1: spawned at the trailing point each frame */
     u8 _padding_c2[0x02];      /* tail padding to 4-byte alignment */
 } effect_tentacle_mesh_geometry_view_t;
-
 typedef char
     assert_effect_tentacle_mesh_geometry_view_size[sizeof(effect_tentacle_mesh_geometry_view_t) == 196 ? 1 : -1];
 
+/* map vertex particles */
 /* The E454 and E464 particle handlers use the renderer-specific meanings of
  * the emitter record's 0x4c and 0xa8 fields. */
 typedef struct effect_particle_vertex_emitter_view {
@@ -606,10 +600,10 @@ typedef struct effect_particle_vertex_emitter_view {
     s16 end_frame;   /* 0xaa */
     u8 _unused_ac[0x18];
 } effect_particle_vertex_emitter_view_t;
-
 typedef char
     assert_effect_particle_vertex_emitter_view_size[sizeof(effect_particle_vertex_emitter_view_t) == 196 ? 1 : -1];
 
+/* particle-system section */
 /* One 0xc4-byte emitter record, read through the view of the renderer that owns it. The
  * interpolation helpers read the particle-emitter slots these layouts share; renderer-specific
  * fields keep their own names. */
@@ -622,7 +616,6 @@ typedef union effect_geometry_record {
     effect_tentacle_mesh_geometry_view_t tentacle_mesh;
     effect_particle_vertex_emitter_view_t particle_vertex_emitter;
 } effect_geometry_record_t;
-
 typedef char assert_effect_geometry_record_size[sizeof(effect_geometry_record_t) == 196 ? 1 : -1];
 
 /* The particle-system section (effect_file_header_t.particle_system). */
@@ -636,8 +629,8 @@ typedef struct effect_geometry_table {
      * so a record is read through the member of the renderer that owns it. */
     effect_geometry_record_t entries[0];
 } effect_geometry_table_t;
-
 typedef char assert_effect_geometry_table_prefix_size[sizeof(effect_geometry_table_t) == 20 ? 1 : -1];
+
 extern const effect_geometry_table_t* g_effect_geometry_table;
 
 #endif

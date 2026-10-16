@@ -1,17 +1,19 @@
 #ifndef MENU_STACK_H
 #define MENU_STACK_H
 
-/* WLDCORE's stack of menu levels, its cursor slots and list windows. */
+/* WLDCORE's stack of menu levels: the level types, the level records several screens share, the handler tables and push
+ * routines, the remembered list cursors and the list panels' row columns. */
 
 #include "fft/menu_selection.h"
 #include "psx/libgs.h"
 #include "psx/types.h"
 
+/* menu stack */
 /* One level's record on the menu stack, defined in menu_stack_records.h as the union of every level record. */
 typedef union menu_stack_record menu_stack_record_t;
 
 /* The type of a menu level: it selects the level's idle, suspend and resume handlers. Push routines fill the level
- * record; RETURN bridges the entry window and a pending world-map transition. */
+ * record; WORLD_MENU bridges the entry window and a pending world-map transition. */
 typedef enum menu_stack_level {
     MENU_STACK_LEVEL_WORLD_MAP = 0,
     MENU_STACK_LEVEL_WORLD_MENU = 1,
@@ -72,6 +74,29 @@ typedef enum menu_stack_level {
     MENU_STACK_LEVEL_UNIT_PANEL_HELP = 56,
 } menu_stack_level_e;
 
+extern s32 g_menu_stack_depth;
+extern s32 g_menu_stack_types[]; /* menu_stack_level_e of each level */
+extern s32 g_menu_stack_ot_offset;
+
+/* The record and type arrays offset by one level, which the push routines index by the current depth: spelling
+ * that as g_menu_stack_records[depth + 1] changes their address arithmetic. The type view is kept only
+ * where types[depth + 1] reschedules the push routine (proposition detail, tutorial topic text, the Brave Story and
+ * the persons list). */
+extern s32 g_menu_stack_types_next[];
+
+/* Handlers by level type. Idle runs the top level each frame; suspend runs just before another level opens over it
+ * (list levels withhold every button, window levels dim their windows); resume undoes that when the level above
+ * closes. */
+extern void (*g_menu_stack_idle_handlers[])(menu_stack_record_t*);
+extern void (*g_menu_stack_suspend_handlers[])(menu_stack_record_t*);
+extern void (*g_menu_stack_resume_handlers[])(menu_stack_record_t*);
+
+void menu_stack_reset(void);
+void menu_stack_dispatch_idle(void);
+void menu_stack_dispatch_suspend(void);
+void menu_stack_dispatch_resume(void);
+
+/* levels */
 /* Leading 32-bit fields of a menu level that owns up to two window/render record
  * pairs; menu_stack_pop_and_release_records releases each index
  * that is not -1. */
@@ -91,7 +116,7 @@ typedef struct menu_stack_message_level {
     s32 _unknown_0c;           /* 0x0c; set to 8 at push */
 } menu_stack_message_level_t;
 
-/* The SCROLLABLE_TEXT_WINDOW level, pushed by menu_stack_push_scrollable_text_level and stepped by
+/* The SCROLLABLE_TEXT level, pushed by menu_stack_push_scrollable_text_level and stepped by
  * menu_stack_step_scrollable_text_level. */
 typedef struct menu_stack_scrollable_text_level {
     s32 window_index; /* 0x00; window record of the frame */
@@ -139,35 +164,15 @@ typedef struct menu_stack_window_level {
     s32 lower_window;   /* 0x24; Brave Story: completion star of the treasures row */
     u8 _unused_28[8];
     s32 entry_count; /* 0x30; rows drawn by brave_story_push_level */
-    s32 entries[10]; /* 0x34; row kinds of the owning list (wldcore_*_row_e); Brave Story text is
-                      * TEXT_ID_BRAVE_STORY_ROW_FIRST + kind */
+    s32 entries[10]; /* 0x34; row kinds of the owning list (bar_row_e, brave_story_row_e, tutorial_menu_row_e); Brave
+                      * Story text is TEXT_ID_BRAVE_STORY_ROW_FIRST + kind */
 } menu_stack_window_level_t;
 
-extern s32 g_menu_stack_depth;
-extern s32 g_menu_stack_types[]; /* menu_stack_level_e of each level */
-
-/* The record and type arrays offset by one level, which the push routines index by the current depth: spelling
- * that as g_menu_stack_records[depth + 1] changes their address arithmetic. The type view is kept only
- * where types[depth + 1] reschedules the push routine (proposition detail, tutorial topic text, the Brave Story and
- * the persons list). */
-extern s32 g_menu_stack_types_next[];
-
-/* Handlers by level type. Idle runs the top level each frame; suspend runs just before another level opens over it
- * (list levels withhold every button, window levels dim their windows); resume undoes that when the level above
- * closes. */
-extern void (*g_menu_stack_idle_handlers[])(menu_stack_record_t*);
-
-extern void (*g_menu_stack_suspend_handlers[])(menu_stack_record_t*);
-extern void (*g_menu_stack_resume_handlers[])(menu_stack_record_t*);
-extern s32 g_menu_stack_ot_offset;
-void menu_stack_reset(void);
-void menu_stack_dispatch_idle(void);
-void menu_stack_dispatch_suspend(void);
-void menu_stack_dispatch_resume(void);
 void menu_stack_push_message_level(s32 text, s32 reload_text);
 void menu_stack_push_text_window_level(s32 text, s32 reload_text);
 void menu_stack_push_scrollable_text_level(s32 text_id);
 
+/* remembered cursors */
 /* Slots of g_menu_stack_cursor_states: the remembered row of each list. */
 typedef enum menu_stack_cursor_slot {
     MENU_STACK_CURSOR_SLOT_LOCATION = 0,
@@ -189,11 +194,14 @@ typedef enum menu_stack_cursor_slot {
 } menu_stack_cursor_slot_e;
 
 enum { MENU_STACK_CURSOR_SLOT_COUNT = 21 };
+
 extern menu_cursor_state_t g_menu_stack_cursor_states[];
+
 void menu_stack_clamp_cursor(s32 index, s32 count, s32 visible);
 void menu_stack_clear_cursor(s32 index);
 void menu_stack_store_cursor(s32 index);
 
+/* list panels */
 /* Per-row flag column of the list panels; the list steps compare it signed, and the two writers that only store
  * into it agree on the width. */
 extern s16 g_menu_stack_row_flags[];

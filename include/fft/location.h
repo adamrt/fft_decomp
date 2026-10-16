@@ -1,9 +1,9 @@
 #ifndef LOCATION_H
 #define LOCATION_H
 
-/* A town, castle or battlefield on the World Map: its menu (Bar, Shop, Fur Shop, Soldier Office), its name label and
- * its picture. location_script_ is the world map's own script machine that decides what happens at a location (events,
- * choices, paths), with its opcode handlers. */
+/* A town, castle or battlefield on the World Map: its menu (Bar, Shop, Fur Shop, Soldier Office), name label and
+ * picture, route travel between locations, random and Deep Dungeon battles, and location_script_, the world map's own
+ * script machine that decides what happens at a location (events, choices, paths), with its opcode handlers. */
 
 #include "fft/menu_stack.h"
 #include "psx/libgpu.h"
@@ -11,6 +11,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* locations */
 /* World-map location ids (EVENT_SCRIPT_VAR_LOCATION), named as the location
  * name text (TEXT_ID_LOCATION_NAME_BASE + id) spells them. The first fifteen
  * are the towns; a town's id is also its outfitter's shop id and its bit,
@@ -69,8 +70,24 @@ enum {
     LOCATION_COUNT = 43,
 };
 
-s32 location_load_picture(s32 index);
+/* Provisional: four-byte per-location records reached through g_location_records. */
+typedef struct location_record {
+    u8 _unused_00[2];
+    u8 picture; /* 0x02; location picture set + 1, 0 for none */
+    u8 is_town; /* 0x03; 1 offers the town entries TEXT_ID_BAR to _SOLDIER_OFFICE in the location menu */
+} location_record_t;
 
+extern location_record_t* g_location_records;
+extern s32 g_location_label_shade;
+extern u32* g_location_picture_frame_tim;
+
+/* The location whose name label is drawn over its map dot. */
+extern s32 g_location_selected;
+
+s32 location_load_picture(s32 index);
+void location_draw_label(GsOT* ot);
+
+/* location menu */
 /* Provisional: the location menu level as its step handler
  * location_step_menu_level sees it. */
 typedef struct location_menu_state {
@@ -81,7 +98,7 @@ typedef struct location_menu_state {
     s32 entry_count; /* 0x30 */
 } location_menu_state_t;
 
-/* Provisional: the LOCATION_MENU level as location_push_menu_level fills it (the step handler's view
+/* Provisional: the LOCATION level as location_push_menu_level fills it (the step handler's view
  * is location_menu_state_t). */
 typedef struct location_menu_level {
     s32 window_index;  /* 0x00 */
@@ -97,6 +114,16 @@ typedef struct location_menu_level {
     s32 entries[10]; /* 0x34 */
 } location_menu_level_t;
 
+/* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
+ * choice from the location menu (location_build_menu_entries). */
+extern u8 g_location_choice_hidden_offsets[];
+
+s32 location_build_menu_entries(s32 location_id, s32* out);
+void location_push_menu_level(s32 menu);
+void location_suspend_menu_level(menu_stack_slot_set_t* slots);
+void location_resume_menu_level(menu_stack_record_t* level);
+
+/* travel */
 /* Provisional: the level a route travel runs under. travel_step uses the leading window index,
  * the location id, the pending result, and the choice text ids it collects when the travel ends. */
 typedef struct travel_level {
@@ -107,20 +134,14 @@ typedef struct travel_level {
     s32 pending_result;      /* 0x30 */
     s32 choice_text_ids[10]; /* 0x34; retained as location_list.entries after arrival */
 } travel_level_t;
-
 typedef char travel_level_size_must_be_92[sizeof(travel_level_t) == 92 ? 1 : -1];
 
-/* The location whose name label is drawn over its map dot. */
-extern s32 g_location_selected;
-
-void location_draw_label(GsOT* ot);
 enum { TRAVEL_PATH_CAPACITY = 16 };
 
 /* A path of route legs, as the route search finds it. */
 typedef struct travel_path {
     s32 routes[TRAVEL_PATH_CAPACITY];
 } travel_path_t;
-
 typedef char travel_path_size_must_be_64[sizeof(travel_path_t) == 64 ? 1 : -1];
 
 /* A path entry packs the route id in its low byte and the direction in bit 8. */
@@ -129,17 +150,7 @@ enum {
     TRAVEL_PATH_REVERSED = 0x100,
 };
 
-extern s32 g_travel_search_depth;
-extern s32 g_travel_search_cost;
-extern travel_path_t g_travel_search_path;
-
-/* Provisional: four-byte per-location records reached through g_location_records. */
-typedef struct location_record {
-    u8 _unused_00[2];
-    u8 picture; /* 0x02; location picture set + 1, 0 for none */
-    u8 is_town; /* 0x03; 1 offers the town entries TEXT_ID_BAR to _SOLDIER_OFFICE in the location menu */
-} location_record_t;
-
+/* Values of travel_t.flags. */
 typedef enum travel_flag {
     TRAVEL_ACTIVE = 0x01,   /* a path was found and is being traveled */
     TRAVEL_REVERSED = 0x02, /* the current leg runs its route end to start */
@@ -152,7 +163,7 @@ typedef enum travel_flag {
 typedef struct travel {
     s32 flags;                 /* 0x00; travel_flag_e */
     s32 route_id;              /* 0x04; route & 0xff, index into g_world_map_routes */
-    s32 segment_index;         /* 0x08; current segment of the leg, the step for begin_route_segment */
+    s32 segment_index;         /* 0x08; current segment of the leg, the step for travel_begin_segment */
     s32 segment_count;         /* 0x0c; travel_begin_segment result (record count - 1) */
     s32 segment_frame;         /* 0x10; frames into the segment, interpolation numerator */
     s32 segment_frames;        /* 0x14; point distance * 2, interpolation denominator */
@@ -170,25 +181,21 @@ typedef struct travel {
     SVECTOR target_position;   /* 0x88 */
     s32 arrival_location;      /* 0x90; arrival location id + 1 */
 } travel_t;
-
 typedef char travel_size_must_be_148[sizeof(travel_t) == 148 ? 1 : -1];
-extern location_record_t* g_location_records;
-extern travel_t g_travel;
-extern s32 g_location_label_shade;
-extern u32* g_location_picture_frame_tim;
 
-/* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
- * choice from the location menu (location_build_menu_entries). */
-extern u8 g_location_choice_hidden_offsets[];
+extern s32 g_travel_search_depth;
+extern s32 g_travel_search_cost;
+extern travel_path_t g_travel_search_path;
+extern travel_t g_travel;
 
 /* Indexed so the store in travel_start stays behind the
  * window-flag store (MEM_IN_STRUCT_P). */
 extern s32 g_travel_next_map_id[];
 
 s32 travel_start(s32 from_location, s32 to_location);
-s32 location_build_menu_entries(s32 location_id, s32* out);
 void travel_step(void);
 
+/* random battles */
 /* One random-encounter tier: the story-progress threshold that selects it,
  * the chance an encounter happens (a roll of 0..99 at or below it), and the
  * high-bit-first mask of which of the entry's eight ENTDs may be drawn. */
@@ -220,9 +227,8 @@ extern s32 g_random_battle_entd_id;
 extern s32 g_random_battle_map_id;
 extern s32 g_random_battle_squad_id;
 extern deep_dungeon_battle_t* g_deep_dungeon_battles;
-void location_script_dispatch_requests(void);
-void location_push_menu_level(s32 menu);
 
+/* location script */
 /* location_script_state_t.flags. The interpreter clears them before each block. Comparisons set CONDITION_FAILED
  * when their predicate rejects the block; action opcodes set ACTION_REACHED to end the block and an action bit when
  * they stage a request. */
@@ -279,12 +285,12 @@ typedef struct location_script_state {
     /* 0x20: script request arguments; the staged Choice values share them. */
     s32 args[4];
 } location_script_state_t;
-
 typedef char location_script_state_size_must_be_48[sizeof(location_script_state_t) == 48 ? 1 : -1];
+
+extern void (*g_location_script_opcodes[])(void); /* by opcode */
 
 /* The loaded world map script: a 16-bit offset per location to its list of conditional blocks. */
 extern u16* g_location_script_default_base;
-
 extern u16* g_location_script_base;
 extern location_script_state_t g_location_script_state;
 
@@ -294,15 +300,13 @@ extern location_script_state_t g_location_script_state;
  * The load_* opcode handlers declare volatile views of flags/data/ip locally. */
 extern s32 g_location_script_flags;
 
-extern void (*g_location_script_opcodes[])(void); /* by opcode */
 s32 location_script_run(s32 location, s32 action_mask);
+void location_script_dispatch_requests(void);
 void location_script_opcode_19_request_load_event(void);
 void location_script_opcode_1d_request_text(void);
 void location_script_opcode_1e_request_deep_dungeon_entry(void);
 void location_script_opcode_1f_request_set_var_2(void);
 void location_script_opcode_20_request_draw_path(void);
 void location_script_opcode_21_request_erase_path(void);
-void location_suspend_menu_level(menu_stack_slot_set_t* slots);
-void location_resume_menu_level(menu_stack_record_t* level);
 
 #endif

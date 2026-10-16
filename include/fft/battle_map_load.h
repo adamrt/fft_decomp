@@ -1,7 +1,8 @@
 #ifndef BATTLE_MAP_LOAD_H
 #define BATTLE_MAP_LOAD_H
 
-/* Declarations. */
+/* Battle map loading: the MAPnnn.GNS records that pick a map's resource files for its state, the mesh-file chunks those
+ * files hold, and the loader that reads them and applies the results. */
 
 #include "fft/battle_map.h"
 #include "fft/battle_map_mesh.h"
@@ -50,24 +51,16 @@ typedef union battle_map_gns_load_info {
     } fields;
     u8 bytes[14];
 } battle_map_gns_load_info_t;
-
 typedef char battle_map_gns_load_info_size_must_be_14[sizeof(battle_map_gns_load_info_t) == 14 ? 1 : -1];
 
-/*
- * A 20-byte row from the file section of MAPnnn.GNS, before the 0x80
- * separator. Resource type 0x31 marks repeated filler rows. For mesh records,
- * the loader compares map_state against a request assembled from the low 12
- * bits of the script variable at offset 0, weather in bits 12-14, and
- * time-of-day in bit 15.
- *
- * The two bytes at 4 also form the conventional little-endian GNS record type
- * (for example, 0x2e01 for a primary mesh).  The game reads them separately:
- * the low byte selects the state comparison and the high byte selects the
- * resource type. In all 2,987 pre-separator rows of the USA disc, +0x06 is
- * 0x3333 and +0x10..+0x13 are 55 66 77 88. The loader compares those bytes
- * when checking whether a file changed, and tests +0x13 for a nonzero marker.
- */
-/* Record copies use lwl/lwr pairs; keep the record aligned to 16 bits. */
+/* A 20-byte row from the file section of MAPnnn.GNS, before the 0x80 separator. Resource type 0x31 marks repeated
+ * filler rows. For mesh records, the loader compares map_state against a request assembled from the low 12 bits of
+ * the script variable at offset 0, weather in bits 12-14, and time-of-day in bit 15. The two bytes at 4 also form
+ * the conventional little-endian GNS record type (for example, 0x2e01 for a primary mesh); the game reads them
+ * separately: the low byte selects the state comparison and the high byte selects the resource type. In all 2,987
+ * pre-separator rows of the USA disc, +0x06 is 0x3333 and +0x10..+0x13 are 55 66 77 88. The loader compares those
+ * bytes when checking whether a file changed, and tests +0x13 for a nonzero marker. Record copies use lwl/lwr pairs;
+ * keep the record aligned to 16 bits. */
 typedef struct battle_map_gns_record {
     s16 script_variable_id;
     s16 map_state;
@@ -75,7 +68,6 @@ typedef struct battle_map_gns_record {
     u8 resource_type;        /* 0x05; file resource or command type, or GNS_RECORD_COMMAND_SEPARATOR */
     battle_map_gns_load_info_t load_info;
 } battle_map_gns_record_t;
-
 typedef char battle_map_gns_record_size_must_be_20[(sizeof(battle_map_gns_record_t) == 20) ? 1 : -1];
 
 /* Command rows after the 0x80 separator reuse the 20-byte prefix, but +0x08
@@ -93,11 +85,11 @@ typedef struct battle_map_gns_command_record_prefix {
     u16 _unused_0a;
     SVECTOR payload; /* 0x0c; followed by more bytes for 0x1c rows */
 } battle_map_gns_command_record_prefix_t;
-
 typedef char battle_map_gns_command_record_prefix_size_must_be_20[(sizeof(battle_map_gns_command_record_prefix_t) == 20)
         ? 1
         : -1];
 
+/* map resources */
 /* Map resource IDs used by both GNS file rows and mesh chunk dispatch.
  * Mesh chunk IDs index a 49-entry table of 32-bit values, so each entry's
  * header byte position is ID * sizeof(u32): LIGHTING (0x19) is at 0x64,
@@ -153,7 +145,6 @@ typedef enum battle_map_resource_apply_command {
  * Reserved offsets are zero on the USA disc. MAP000.5 alone has an embedded
  * texture quarter at resource ID 0x13. */
 typedef u32 battle_map_mesh_file_header_t[GNS_RESOURCE_TABLE_COUNT];
-
 typedef char battle_map_mesh_file_header_size_must_be_196[(sizeof(battle_map_mesh_file_header_t) == 196) ? 1 : -1];
 
 /* Terrain chunk: two dimensions followed by two fixed 256-tile layers. */
@@ -162,7 +153,6 @@ typedef struct battle_map_terrain_resource {
     u8 depth;                          /* 0x0001; map y dimension */
     battle_map_tile_t tiles[2][0x100]; /* 0x0002; tile levels 0 and 1 */
 } battle_map_terrain_resource_t;
-
 typedef char battle_map_terrain_resource_size_must_be_4098[sizeof(battle_map_terrain_resource_t) == 4098 ? 1 : -1];
 
 /* Packed lighting: two matrices of nine 16-bit entries followed by three RGB colors. */
@@ -182,7 +172,6 @@ typedef struct battle_map_polygon_flags_resource {
     u16 untextured_triangles[64]; /* 0x0d80 */
     u16 untextured_quads[256];    /* 0x0e00 */
 } battle_map_polygon_flags_resource_t;
-
 typedef char
     battle_map_polygon_flags_resource_size_must_be_4096[sizeof(battle_map_polygon_flags_resource_t) == 4096 ? 1 : -1];
 
@@ -220,20 +209,7 @@ typedef union battle_map_resource {
     u8 bytes[0];          /* Byte offsets in files and variable-length command payloads. */
 } battle_map_resource_t;
 
-/* Resources read but not yet applied: the palette and lighting data wait for
- * BATTLE_MAP_RESOURCE_APPLY_PALETTES and BATTLE_MAP_RESOURCE_APPLY_LIGHTING, and the texture flags mark the whole
- * texture or the quarters read into the load buffer, uploaded at BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE. */
-extern u8 g_battle_map_palette_pending;
-
-extern u8 g_battle_map_pending_palette_data[0x200];
-extern u8 g_battle_map_lighting_pending;
-extern u8 g_battle_map_pending_lighting_data[0x2d];
-extern u8 g_battle_map_texture_pending;
-extern u8 g_battle_map_texture_quarter_0_pending;
-extern u8 g_battle_map_texture_quarter_1_pending;
-extern u8 g_battle_map_texture_quarter_2_pending;
-extern u8 g_battle_map_texture_quarter_3_pending;
-
+/* loader */
 /* Commands of battle_map_load_data, read only while the GNS phase is idle. */
 typedef enum battle_map_load_command {
     BATTLE_MAP_LOAD_COMMAND_LOAD_GNS = 0x73, /* always read the GNS; no current caller issues this */
@@ -266,43 +242,56 @@ typedef enum battle_map_gns_load_phase {
     BATTLE_MAP_GNS_LOAD_PHASE_START = 15,    /* choose the resources once the GNS is in */
 } battle_map_gns_load_phase_e;
 
-extern battle_map_resource_t* g_battle_map_data_load_buffer;
-extern s32 g_battle_map_deep_dungeon_load_in_progress;
+extern s32 g_battle_map_loaded_id;
 extern char g_battle_map_directory_path[];
 extern u32 g_battle_map_gns_lba[BATTLE_MAP_ID_COUNT]; /* 0 where the map id has no file */
-extern u32 g_battle_map_gns_record_cursor;
-extern battle_map_gns_record_t g_battle_map_gns_records[150];
+extern battle_map_resource_t* g_battle_map_data_load_buffer;
 extern battle_map_resource_t* g_battle_map_mesh_load_buffer;
-extern s32 g_battle_map_mesh_load_state;
+extern RECT g_battle_map_vram_load_rect;
 extern s32 g_battle_map_resource_load_state; /* battle_map_resource_load_state_e */
-extern battle_map_gns_record_t g_battle_map_selected_mesh_record;
+extern s32 g_battle_map_gns_load_phase;      /* battle_map_gns_load_phase_e */
+extern s32 g_battle_map_mesh_load_state;
 extern u16 g_battle_map_append_state;
+extern u16 g_battle_map_reload_state; /* 1 starts, 2 polls, >=3 is reset to zero by the outer update */
+extern s32 g_battle_map_deep_dungeon_load_in_progress;
 
-/* 1 starts, 2 polls, >=3 is reset to zero by the outer update. */
-extern u16 g_battle_map_reload_state;
+s32 battle_map_load_data(s32 map_id, s32 command);
+s32 battle_map_load_start(void);
+s32 battle_map_load_poll(void);
+void* battle_map_load_start_file(const char* unused_directory_path, const battle_map_gns_load_info_t* load_info,
+    void* destination, s32 unused_resource_type);
+s32 battle_map_load_alternate_mesh(s32 palette_mode);
+battle_map_gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id);
+s32 battle_map_step_init_sequence(s32 map_id, s32 step);
+s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running);
+
+/* GNS dispatch */
+extern battle_map_gns_record_t g_battle_map_gns_records[150];
+extern u32 g_battle_map_gns_record_cursor;
+extern battle_map_gns_record_t g_battle_map_selected_mesh_record;
 
 /* GNS records selected for loading and the ones currently loaded, indexed by
  * resource type. */
 extern battle_map_gns_record_t g_battle_map_pending_gns_records[GNS_RESOURCE_TABLE_COUNT];
-
 extern battle_map_gns_record_t g_battle_map_loaded_gns_records[GNS_RESOURCE_TABLE_COUNT];
 extern u8 g_battle_map_gns_dispatch_held;
-extern s32 g_battle_map_gns_load_phase; /* battle_map_gns_load_phase_e */
-extern s32 g_battle_map_loaded_id;
-extern RECT g_battle_map_vram_load_rect;
+
 s32 battle_map_gns_dispatch_resource(u8 resource_type, battle_map_resource_t* data);
-s32 battle_map_load_start(void);
-s32 battle_map_load_poll(void);
-s32 battle_map_step_init_sequence(s32 map_id, s32 step);
-s32 battle_map_load_data(s32 map_id, s32 command);
 s32 battle_map_gns_apply_command(s32 phase, battle_map_resource_t* record);
 s16 battle_map_gns_is_record_matching_state(s32 comparison, s16 record_state, s16 requested_state);
 
-void* battle_map_load_start_file(const char* unused_directory_path, const battle_map_gns_load_info_t* load_info,
-    void* destination, s32 unused_resource_type);
-
-s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running);
-s32 battle_map_load_alternate_mesh(s32 palette_mode);
-battle_map_gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id);
+/* pending resources */
+/* Resources read but not yet applied: the palette and lighting data wait for BATTLE_MAP_RESOURCE_APPLY_PALETTES and
+ * BATTLE_MAP_RESOURCE_APPLY_LIGHTING, and the texture flags mark the whole texture or the quarters read into the
+ * load buffer, uploaded at BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE. */
+extern u8 g_battle_map_palette_pending;
+extern u8 g_battle_map_pending_palette_data[0x200];
+extern u8 g_battle_map_lighting_pending;
+extern u8 g_battle_map_pending_lighting_data[0x2d];
+extern u8 g_battle_map_texture_pending;
+extern u8 g_battle_map_texture_quarter_0_pending;
+extern u8 g_battle_map_texture_quarter_1_pending;
+extern u8 g_battle_map_texture_quarter_2_pending;
+extern u8 g_battle_map_texture_quarter_3_pending;
 
 #endif

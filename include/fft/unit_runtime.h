@@ -1,7 +1,8 @@
 #ifndef UNIT_RUNTIME_H
 #define UNIT_RUNTIME_H
 
-/* BATTLE's units on the field: the unit record, its slots, lookups, facing, mounting and height. */
+/* BATTLE's units on the field: the runtime unit record and its status mirror, the unit slots and lookups, tile queries,
+ * mounts, facing, animation updates and coordinates, and placing the ENTD units on the field. */
 
 #include "fft/action.h"
 #include "fft/ai_command.h"
@@ -14,32 +15,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* A facing is an angle with 0x1000 to the turn. Units rest on the four
- * cardinals; the diagonals are the boundaries a free angle is snapped at. */
-typedef enum unit_facing {
-    UNIT_FACING_SOUTH = 0x000,
-    UNIT_FACING_SOUTH_WEST = 0x200,
-    UNIT_FACING_WEST = 0x400,
-    UNIT_FACING_NORTH_WEST = 0x600,
-    UNIT_FACING_NORTH = 0x800,
-    UNIT_FACING_NORTH_EAST = 0xa00,
-    UNIT_FACING_EAST = 0xc00,
-    UNIT_FACING_SOUTH_EAST = 0xe00,
-} unit_facing_e;
-
-enum {
-    UNIT_FACING_QUARTER_TURN = 0x400,
-    UNIT_FACING_MASK = 0x0fff,
-};
-
-/* Facing values shifted to position bit 8 for the evasion comparisons. */
-enum {
-    UNIT_POSITION_FACING_SOUTH = 0x0000,
-    UNIT_POSITION_FACING_WEST = 0x0100,
-    UNIT_POSITION_FACING_NORTH = 0x0200,
-    UNIT_POSITION_FACING_EAST = 0x0300,
-};
-
+/* unit record */
 /* Manual targeting and GAME_STATE_WAIT_DIRECTION reuse the AI command storage.
  * The 32-bit facing value overlaps the action's item/type/target-ID bytes. Cursor
  * coordinate readers use signed 16-bit values over the action's target fields. */
@@ -51,7 +27,6 @@ typedef union unit_command_state {
         SVECTOR target_panel; /* vx = panel x, vy = map level, vz = panel y */
     } cursor;
 } unit_command_state_t;
-
 typedef char unit_command_state_size_must_be_24[sizeof(unit_command_state_t) == 24 ? 1 : -1];
 
 /* Live on-map units own movement, animation, commands and displays.
@@ -221,9 +196,9 @@ struct unit {
     sprite_single_part_display_t item_sprite_display;          /* 0x426 */
     u8 _unused_43c[4]; /* 0x43c; the next slot's in-use 32-bit value (g_unit_slot_states) */
 };
-
 typedef char unit_size_must_be_1088[(sizeof(unit_t) == 1088) ? 1 : -1];
 
+/* unit_t.fade_out_phase: the fade-out removal's progress. */
 typedef enum unit_fade_out_phase {
     UNIT_FADE_OUT_NONE = 0,
     UNIT_FADE_OUT_FLASH = 1,
@@ -231,6 +206,7 @@ typedef enum unit_fade_out_phase {
     UNIT_FADE_OUT_REMOVED = 3,
 } unit_fade_out_phase_e;
 
+/* unit_t.mount_state (runtime record 0x130): identifies which role mount_partner_runtime_id (0x131) links. */
 typedef enum unit_mount_state {
     UNIT_MOUNT_STATE_NONE = 0,
     UNIT_MOUNT_STATE_RIDER = 1,
@@ -302,13 +278,13 @@ typedef enum unit_status_flags_5_6 {
     UNIT_STATUS_TRANSFORMATION_MASK = 0x0000000f,
 } unit_status_flags_5_6_e;
 
+/* unit slots and lookups */
 /* The in-use 32-bit values of g_unit_slot_states, stride 0x440: each sits four bytes ahead
  * of its g_units record, in the previous record's last four bytes. */
 typedef struct unit_slot_state {
     s32 in_use;
     u8 _unused_004[0x43c];
 } unit_slot_state_t;
-
 typedef char unit_slot_state_size_must_be_1088[(sizeof(unit_slot_state_t) == 1088) ? 1 : -1];
 
 /* Results of unit_find_slot_by_identity that are not a stats slot. */
@@ -320,35 +296,34 @@ typedef enum unit_character_slot {
     UNIT_CHARACTER_SLOT_ABSENT = -5,
 } unit_character_slot_e;
 
-/* The battle's unit stats, indexed by battle id (unit_stats_t.battle_id). */
-extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT];
-
+extern unit_t g_units[UNIT_RUNTIME_SLOT_COUNT];    /* the live units, indexed by runtime id */
+extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT]; /* indexed by battle id (unit_stats_t.battle_id) */
 extern unit_slot_state_t g_unit_slot_states[];
+extern s32 g_unit_source_runtime_id; /* the acting unit, which unit_get_source finds; 0xff for none */
 
-/* Runtime id of the acting unit, which unit_get_source finds; 0xff for none. */
-extern s32 g_unit_source_runtime_id;
-
-s32 unit_draw_and_activate_by_runtime_id(u32 runtime_id);
-s32 unit_disable(s32 battle_id);
-s32 unit_get_battle_id_by_runtime_id(u32 runtime_id);
-unit_t* unit_get_casting(void);
-unit_t* unit_get_by_battle_id(u16 battle_id);
 unit_t* unit_get_by_runtime_id(u16 runtime_id);
+unit_t* unit_get_by_battle_id(u16 battle_id);
 s32 unit_get_runtime_id_by_battle_id(u32 battle_id);
-unit_t* unit_get_source(void);
+s32 unit_get_battle_id_by_runtime_id(u32 runtime_id);
 s32 unit_has_runtime_id(u32 runtime_id);
-s32 unit_move_to_head(u32 runtime_id);
-s32 unit_remove_by_runtime_id(u32 runtime_id);
-s32 unit_set_off_field(s32 battle_id);
+unit_stats_t* unit_get_stats(u32 battle_id);
+unit_stats_t* unit_get_present_stats(u32 battle_id);
 unit_stats_t* unit_find_active(void);
+s32 unit_find_slot_by_identity(u32 character_identity);
+unit_t* unit_get_source(void);
+unit_t* unit_get_casting(void);
 action_command_t* unit_get_action_command(s32 battle_id);
 action_command_t* unit_get_runtime_action_command_by_battle_id(u32 battle_id);
+s32 unit_move_to_head(u32 runtime_id);
+s32 unit_draw_and_activate_by_runtime_id(u32 runtime_id);
+s32 unit_set_off_field(s32 battle_id);
+s32 unit_disable(s32 battle_id);
 void unit_remove(unit_t* unit);
+s32 unit_remove_by_runtime_id(u32 runtime_id);
 void unit_clear_all(void);
-s32 unit_find_slot_by_identity(u32 character_identity);
-unit_stats_t* unit_get_present_stats(u32 battle_id);
-unit_stats_t* unit_get_stats(u32 battle_id);
 
+/* tile queries */
+/* unit_height_data_t.unit_flags: the unit id in the low bits and these flags, set by unit_calculate_height_data. */
 typedef enum unit_height_flags {
     UNIT_HEIGHT_NON_CHOCOBO = 0x20,
     UNIT_HEIGHT_SHARED_TILE = 0x40,
@@ -368,7 +343,12 @@ typedef enum unit_tile_filter {
 
 s32 unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters);
 unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 z);
+unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z);
+unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z);
+unit_t* unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
+unit_height_data_t* unit_calculate_height_data(unit_height_data_t* out, s32 unit_id);
 
+/* mounts and statuses */
 /* Result of unit_mount_get_chocobo_state. */
 typedef enum unit_chocobo_mount_state {
     UNIT_CHOCOBO_MOUNT_NONE = 0, /* not a chocobo, or one in an unmountable status */
@@ -387,52 +367,81 @@ typedef enum unit_action_restriction {
 } unit_action_restriction_e;
 
 void unit_mount_dismount_rider(unit_t* unit);
+void unit_mount_dismount_rider_and_update_display(unit_t* rider);
 void unit_mount_seat_rider(unit_t* rider, unit_t* mount);
 void unit_dismount_dead_rider(unit_t* unit);
 unit_chocobo_mount_state_e unit_mount_get_chocobo_state(const unit_stats_t* unit);
 void unit_mount_onto_pending(unit_t* unit);
 unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit);
-extern s8 g_unit_float_bob_offsets[24];
-s32 unit_facing_set_sixteenth_by_runtime_id(u32 runtime_id, s32 facing_nibble);
-void unit_update_and_animate_all(void);
-void unit_update_target_displays(unit_t* unit);
+
+/* facing */
+/* A facing is an angle with 0x1000 to the turn. Units rest on the four
+ * cardinals; the diagonals are the boundaries a free angle is snapped at. */
+typedef enum unit_facing {
+    UNIT_FACING_SOUTH = 0x000,
+    UNIT_FACING_SOUTH_WEST = 0x200,
+    UNIT_FACING_WEST = 0x400,
+    UNIT_FACING_NORTH_WEST = 0x600,
+    UNIT_FACING_NORTH = 0x800,
+    UNIT_FACING_NORTH_EAST = 0xa00,
+    UNIT_FACING_EAST = 0xc00,
+    UNIT_FACING_SOUTH_EAST = 0xe00,
+} unit_facing_e;
+
+enum {
+    UNIT_FACING_QUARTER_TURN = 0x400,
+    UNIT_FACING_MASK = 0x0fff,
+};
+
+/* Facing values shifted to position bit 8 for the evasion comparisons. */
+enum {
+    UNIT_POSITION_FACING_SOUTH = 0x0000,
+    UNIT_POSITION_FACING_WEST = 0x0100,
+    UNIT_POSITION_FACING_NORTH = 0x0200,
+    UNIT_POSITION_FACING_EAST = 0x0300,
+};
+
 void unit_facing_set_cardinal(unit_t* unit, s32 facing);
 void unit_facing_turn_to_cursor(unit_t* unit);
 void unit_facing_turn_to_target(unit_t* unit, unit_t* target);
 s16 unit_facing_get_quadrant_by_runtime_id(u32 runtime_id);
 s16 unit_facing_get_camera_quadrant_by_battle_id(u32 battle_id);
 s32 unit_facing_get_sixteenth_by_runtime_id(u32 runtime_id);
+s32 unit_facing_set_sixteenth_by_runtime_id(u32 runtime_id, s32 facing_nibble);
 void unit_facing_snap_all_to_quadrants(void);
+
+/* animation and display */
+extern s8 g_unit_float_bob_offsets[24];
+
+void unit_update_and_animate_all(void);
+void unit_update_target_displays(unit_t* unit);
+void unit_update_display_by_runtime_id(s32 runtime_id);
+void unit_update_graphics_by_runtime_id(u32 runtime_id);
+void unit_update_float_and_jump_height(unit_t* unit);
 
 /* Set and clear the unit_motion_flags_e that suppress a unit's facing, movement-effect and
  * palette updates. */
 void unit_set_facing_update_suppression(u32 runtime_id);
-
 void unit_clear_facing_update_suppression(u32 runtime_id);
 void unit_set_movement_effect_suppression(u32 runtime_id);
 void unit_clear_movement_effect_suppression(u32 runtime_id);
 void unit_set_palette_update_suppression(u32 runtime_id);
 void unit_clear_palette_update_suppression(u32 runtime_id);
+
+/* coordinates */
 SVECTOR* unit_get_world_coords_by_runtime_id(u32 runtime_id);
 SVECTOR* unit_get_world_coords_by_battle_id(u32 battle_id);
 void unit_set_real_coords_from_world_coords(struct unit* unit);
 void unit_set_world_coords_from_real_coords(struct unit* unit);
 void unit_set_move_and_world_coords(unit_t* unit);
-unit_height_data_t* unit_calculate_height_data(unit_height_data_t* out, s32 unit_id);
-unit_t* unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
-unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z);
-void unit_update_display_by_runtime_id(s32 runtime_id);
-void unit_update_float_and_jump_height(unit_t* unit);
-void unit_update_graphics_by_runtime_id(u32 runtime_id);
 s32 unit_set_tile_position(s32 battle_id, u8 map_x, u8 map_y, u8 map_z, u8 facing);
-void unit_copy_draw_coords(SVECTOR* destination, const unit_t* runtime);
-void unit_mount_dismount_rider_and_update_display(unit_t* rider);
-SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id);
 s32 unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
-unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z);
 s32 unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords);
+void unit_copy_draw_coords(SVECTOR* destination, const unit_t* runtime);
+SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id);
 s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
 
+/* encounters and deployment */
 /* g_encounter_selection_mode: which ENTD unit_entd_select_and_open opens. */
 typedef enum unit_entd_selection {
     UNIT_ENTD_SELECTION_SCRIPT_VARIABLE = 0, /* EVENT_SCRIPT_VAR_CURRENT_ENTD */
@@ -444,18 +453,18 @@ typedef enum unit_entd_selection {
 
 extern s16 g_unit_entd_spritesheet_ids[];
 extern s32 g_unit_entd_spritesheet_count;
+
 unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id);
 void unit_entd_load(entd_encounter_t* entd_data, s32 mode);
 s32 unit_put_on_field(u32 battle_id);
 s32 unit_place_in_new_location(u32 runtime_id, battle_map_tile_coordinates_t* tile, s32 facing);
 s32 unit_find_relocation_tile(s32 unit_index, battle_map_tile_coordinates_t* destination);
 void unit_store_team_flags(unit_t* unit);
-void unit_apply_poach_morbol_transformation(unit_t* unit);
+
+/* crystals, treasure and transformations */
 s32 unit_count_crystals(void);
 unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
+void unit_apply_poach_morbol_transformation(unit_t* unit);
 void unit_transform_into_morbol(unit_stats_t* unit);
-
-/* The live units, indexed by runtime id. */
-extern unit_t g_units[UNIT_RUNTIME_SLOT_COUNT];
 
 #endif

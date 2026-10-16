@@ -1,17 +1,20 @@
 #ifndef UNIT_EVENT_H
 #define UNIT_EVENT_H
 
-/* Event library unit routines for BATTLE and WORLD: status staging, facing animation and event-unit lookups. */
+/* Values of the event library's unit records for BATTLE and WORLD: the status staging flags, states, inflict modes and
+ * removal mask rows, and the facing rotate modes. */
 
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* status staging */
 /* unit_status_staging_t.jump_float_flags: a staged change removes the status from some unit. */
 enum {
     UNIT_STATUS_STAGING_JUMP_REMOVED = 0x1,
     UNIT_STATUS_STAGING_FLOAT_REMOVED = 0x2,
 };
 
+/* unit_status_staging_t.state of one unit. */
 typedef enum unit_status_staging_state {
     UNIT_STATUS_STAGING_NONE = 0,
     UNIT_STATUS_STAGING_SAVED = 1,
@@ -40,6 +43,7 @@ typedef enum unit_status_staging_mask {
 
 enum { UNIT_STATUS_STAGING_MASK_COUNT = 3 };
 
+/* facing */
 /* unit_animation_state_t.rotate_mode: how the facing nibble steps toward target_facing. */
 typedef enum unit_rotate_mode {
     UNIT_ROTATE_MODE_SHORTEST = 0,  /* the direction with fewer steps */

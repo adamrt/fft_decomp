@@ -1,10 +1,11 @@
 #ifndef MEMCARD_H
 #define MEMCARD_H
 
-/* The memory card library compiled into the CARD overlay, OPEN and WORLD. */
+/* The memory card library compiled into the CARD overlay, OPEN and WORLD, and the card BIOS events MAIN opens. */
 
 #include "psx/types.h"
 
+/* card events */
 /* Memory-card BIOS event handles opened by memcard_init_events; the CARD,
  * OPEN and WORLD pollers test them by these indices. */
 enum {
@@ -19,12 +20,6 @@ enum {
     MEMCARD_EVENT_COUNT
 };
 
-extern s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT];
-extern u8 g_memcard_bios_events_opened;
-void memcard_init_events(void);
-struct DIRENTRY;
-struct save_image;
-
 /* The BIOS and hardware card pollers return the first event observed in the
  * IOE, ERROR, TIMOUT, NEW order installed by memcard_init_events. */
 typedef enum memcard_result {
@@ -35,21 +30,33 @@ typedef enum memcard_result {
     MEMCARD_RESULT_NEW_CARD = 3,
 } memcard_result_e;
 
-extern u8 g_memcard_slot;
-extern u8 g_memcard_info_pending;
-extern s32 g_memcard_file_open_descriptor;
-void memcard_set_selected_slot(s32 slot);
+extern s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT];
+extern u8 g_memcard_bios_events_opened;
+
+void memcard_init_events(void);
 void memcard_consume_all_events(void);
 s32 memcard_poll_bios_event_result(void);
 s32 memcard_wait_for_bios_event(void);
 
-/* OPEN builds its own bodies of the first two. */
-s32 memcard_get_info_with_retries(s32 port, s32 retry_limit);
+/* card operations */
+extern u8 g_memcard_slot;
+extern u8 g_memcard_info_pending;
 
-s32 memcard_poll_operation_result(void);
+void memcard_set_selected_slot(s32 slot);
 s32 memcard_wait_operation_result(s32 retry_limit);
 s32 memcard_open_or_create_selected_card(void);
 s32 memcard_format_selected_slot(void);
+
+/* OPEN builds its own bodies of these two. */
+s32 memcard_get_info_with_retries(s32 port, s32 retry_limit);
+s32 memcard_poll_operation_result(void);
+
+/* files */
+struct DIRENTRY;
+struct save_image;
+
+extern s32 g_memcard_file_open_descriptor;
+
 s32 memcard_file_enumerate_saves(struct DIRENTRY* entries, s32 all_files);
 s32 memcard_file_count_free_blocks(const struct DIRENTRY* entries, s32 entry_count);
 s32 memcard_file_open_selected_with_retries(const char* filename, s32 mode);

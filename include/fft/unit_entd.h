@@ -23,10 +23,6 @@ enum {
     DEPLOY_UNIT_SLOT_COUNT = 5,
 };
 
-enum {
-    ENTD_VALUE_RANDOM = 254, /* in an ENTD equipment, level or secondary skillset byte: pick one at random */
-};
-
 /* Y, facing and tile-layer fields of an entry; unit_position_t has a
  * wider facing field. */
 typedef struct entd_unit_position {
@@ -37,7 +33,6 @@ typedef struct entd_unit_position {
     u16 stepping_stone : 1;
     u16 higher_elevation : 1;
 } entd_unit_position_t;
-
 typedef char entd_unit_position_size_must_be_2[(sizeof(entd_unit_position_t) == 2) ? 1 : -1];
 
 /* ENTD equipment order: head, body, accessory, then one slot per hand
@@ -50,6 +45,10 @@ typedef enum entd_equipment_slot {
     ENTD_EQUIPMENT_SLOT_LEFT_HAND = 4,
     ENTD_EQUIPMENT_SLOT_COUNT = 5,
 } entd_equipment_slot_e;
+
+enum {
+    ENTD_VALUE_RANDOM = 254, /* in an ENTD equipment, level or secondary skillset byte: pick one at random */
+};
 
 /*
  * An ENTD entry is the static 0x28-byte encounter definition read from an
@@ -97,19 +96,16 @@ typedef struct entd_unit {
     u8 ai_targeting_flags_2;  /* 0x26; ai_targeting_flags_2_e */
     u8 ai_initial_enemy_flag; /* 0x27 */
 } entd_unit_t;
-
 typedef char entd_unit_size_must_be_40[(sizeof(entd_unit_t) == 40) ? 1 : -1];
 
 typedef struct entd_encounter {
     entd_unit_t units[ENTD_UNITS_PER_ENCOUNTER];
 } entd_encounter_t;
-
 typedef char entd_encounter_size_must_be_640[(sizeof(entd_encounter_t) == 640) ? 1 : -1];
 
 typedef struct entd_file {
     entd_encounter_t encounters[ENTD_ENCOUNTERS_PER_FILE];
 } entd_file_t;
-
 typedef char entd_file_size_must_be_81920[(sizeof(entd_file_t) == 81920) ? 1 : -1];
 
 #endif

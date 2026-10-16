@@ -1,8 +1,8 @@
 #ifndef ABILITY_H
 #define ABILITY_H
 
-/* Abilities themselves: their data, learning one, Two Swords and Two Hands checks; ability_list_ is the ability page of
- * the Unit List and the Status screen. */
+/* Abilities: their ids, records and secondary data, the skillset rows that list them, the Math Skill flags, elements,
+ * learning abilities and the Two Swords and Two Hands checks. */
 
 #include "fft/animation.h"
 #include "fft/skillset.h"
@@ -11,55 +11,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Flags stored by the eight Math Skill abilities in g_ability_math_rsm_data.
- * The first four select a unit attribute; the last four select its divisor
- * test. */
-enum {
-    CALCULATOR_ATTRIBUTE_CT = 0x80,
-    CALCULATOR_ATTRIBUTE_LEVEL = 0x40,
-    CALCULATOR_ATTRIBUTE_EXP = 0x20,
-    CALCULATOR_ATTRIBUTE_HEIGHT = 0x10,
-    CALCULATOR_ATTRIBUTE_MASK = 0xf0,
-    CALCULATOR_MULTIPLE_PRIME = 0x08,
-    CALCULATOR_MULTIPLE_FIVE = 0x04,
-    CALCULATOR_MULTIPLE_FOUR = 0x02,
-    CALCULATOR_MULTIPLE_THREE = 0x01,
-    CALCULATOR_MULTIPLE_MASK = 0x0f,
-};
-
-/* Attribute abilities occupy the first four slots, followed by four divisor tests. */
-enum {
-    CALCULATOR_ATTRIBUTE_ABILITY_COUNT = 4,
-    CALCULATOR_MULTIPLE_ABILITY_COUNT = 4,
-    CALCULATOR_ABILITY_COUNT = CALCULATOR_ATTRIBUTE_ABILITY_COUNT + CALCULATOR_MULTIPLE_ABILITY_COUNT,
-    CALCULATOR_PRIME_COUNT = 54,
-};
-
-/* Element bits shared by abilities, equipment, jobs and unit affinity sets. */
-typedef enum element_flags {
-    ELEMENT_DARK = 0x01,
-    ELEMENT_HOLY = 0x02,
-    ELEMENT_WATER = 0x04,
-    ELEMENT_EARTH = 0x08,
-    ELEMENT_WIND = 0x10,
-    ELEMENT_ICE = 0x20,
-    ELEMENT_LIGHTNING = 0x40,
-    ELEMENT_FIRE = 0x80,
-} element_flags_e;
-
-/* Shared ordering for job, item-attribute, and runtime unit affinity arrays.
- * Job records contain only the first four entries; item and runtime records
- * also contain Strengthen. */
-typedef enum elemental_affinity_index {
-    ELEMENTAL_AFFINITY_ABSORB = 0,
-    ELEMENTAL_AFFINITY_NULLIFY = 1,
-    ELEMENTAL_AFFINITY_HALF = 2,
-    ELEMENTAL_AFFINITY_WEAK = 3,
-    ELEMENTAL_AFFINITY_STRENGTHEN = 4,
-} elemental_affinity_index_e;
-
-enum { ELEMENTAL_AFFINITY_COUNT = 5 };
-
+/* ability ids */
 /*
  * Ability id classes, as ability_get_data_and_type splits
  * them: default 0x000-0x16f, item 0x170-0x17d, throw 0x17e-0x189, jump
@@ -589,17 +541,9 @@ typedef enum ability_id {
     ABILITY_ID_KNOCKBACK = 512, /* past the id space: the strike that resolves a knockback */
 } ability_id_e;
 
-/* The random R/S/M selector uses a different legacy bit assignment from the
- * skillset-list filter: support and movement are reversed. */
-typedef enum rsm_ability_filter {
-    RSM_ABILITY_FILTER_REACTION = 0x02,
-    RSM_ABILITY_FILTER_SUPPORT = 0x04,
-    RSM_ABILITY_FILTER_MOVEMENT = 0x08,
-} rsm_ability_filter_e;
-
-/* ability_data_t.type_flags. ability_find_learn_on_hit_unit consumes
- * learn-on-hit; ability_list_build and ability_list_build prove the
- * JP-learning flag's negative polarity. */
+/* ability records */
+/* ability_data_t.type_flags. ability_find_learn_on_hit_unit consumes learn-on-hit; the WORLD and JOBSTTS bodies of
+ * ability_list_build prove the JP-learning flag's negative polarity. */
 typedef enum ability_type_flag {
     ABILITY_TYPE_FLAG_LEARN_ON_HIT = 0x20,
     ABILITY_TYPE_FLAG_SHOW_NAME = 0x40, /* the announcement shows the ability's name when the option is on */
@@ -632,7 +576,6 @@ typedef struct ability_ai_flags {
     u8 flags_3;
     u8 flags_4;
 } ability_ai_flags_t;
-
 typedef char ability_ai_flags_size_must_be_4[(sizeof(ability_ai_flags_t) == 4) ? 1 : -1];
 
 /* Eight-byte ability records, g_ability_data. AI loaders copy the four
@@ -643,9 +586,12 @@ typedef struct ability_data {
     u8 type_flags;               /* 0x03; ability_type_flag_e high bits; serialized class in the low nibble */
     ability_ai_flags_t ai_flags; /* 0x04 */
 } ability_data_t;
-
 typedef char ability_data_size_must_be_8[(sizeof(ability_data_t) == 8) ? 1 : -1];
 
+extern ability_data_t g_ability_data[];
+extern animation_ability_data_t g_ability_animation_data[ANIMATION_ABILITY_COUNT];
+
+/* secondary records */
 /* Four flag bytes of ability_secondary_data_t, with only confirmed meanings named. */
 typedef enum ability_secondary_flags_1 {
     ABILITY_SECONDARY_FLAG_1_CANNOT_TARGET_SELF = 0x01,
@@ -732,7 +678,6 @@ typedef struct ability_secondary_data {
     u8 ct;                   /* 0x0c; charge clockticks; masked 0x7f except by the AI; no retail record sets bit 7 */
     u8 mp_cost;              /* 0x0d; AI ability-list eligibility compares this with max MP */
 } ability_secondary_data_t;
-
 typedef char ability_secondary_data_size_must_be_14[(sizeof(ability_secondary_data_t) == 14) ? 1 : -1];
 
 /* An ability_secondary_data_t range or AoE that covers every panel of the map. */
@@ -744,7 +689,6 @@ typedef struct ability_jump_record {
     u8 range;    /* 0x00 */
     u8 vertical; /* 0x01 */
 } ability_jump_record_t;
-
 typedef char ability_jump_record_size_must_be_2[(sizeof(ability_jump_record_t) == 2) ? 1 : -1];
 
 /* Charge ability record, 8 of them at g_ability_charge_data. */
@@ -762,16 +706,26 @@ typedef union ability_secondary_pointer {
     ability_charge_record_t* charge;
     u8* math_rsm;
 } ability_secondary_pointer_t;
-
 typedef char ability_secondary_pointer_size_must_be_4[(sizeof(ability_secondary_pointer_t) == 4) ? 1 : -1];
-extern animation_ability_data_t g_ability_animation_data[ANIMATION_ABILITY_COUNT];
-s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id);
-s32 ability_get_elemental_id(const unit_stats_t* unit);
-extern s32 g_ability_learn_on_hit_unit_id;
-void ability_learn_used(unit_stats_t* unit);
-s32 ability_has_two_hands(s16 unit_index);
-s32 ability_has_two_swords(s16 unit_index);
 
+extern ability_secondary_data_t g_ability_range_data[];
+
+/* The item_type_e each Throw ability throws, indexed by ability id - ABILITY_ID_THROW_FIRST. */
+extern u8 g_ability_throw_item_types[];
+extern ability_jump_record_t g_ability_jump_data[12];
+extern ability_charge_record_t g_ability_charge_data[8];
+
+/* One secondary-data byte per ability from ABILITY_ID_MATH_FIRST on (math,
+ * reaction, support, movement). */
+extern u8 g_ability_math_rsm_data[ABILITY_ID_COUNT - ABILITY_ID_MATH_FIRST];
+
+/* Indexed by reaction ability id - ABILITY_ID_REACTION_FIRST. */
+extern const u8 g_ability_reaction_behavior_flags[ABILITY_ID_SUPPORT_FIRST - ABILITY_ID_REACTION_FIRST];
+
+s32 ability_get_data_and_type(
+    s32 id, ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data);
+
+/* skillset rows */
 typedef struct ability_human_skillset {
     u8 high_id_bits[3];
     u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
@@ -782,32 +736,87 @@ typedef struct ability_monster_skillset {
     u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
 } ability_monster_skillset_t;
 
-extern ability_data_t g_ability_data[];
-extern ability_secondary_data_t g_ability_range_data[];
+/* The random R/S/M selector uses a different legacy bit assignment from the
+ * skillset-list filter: support and movement are reversed. */
+typedef enum rsm_ability_filter {
+    RSM_ABILITY_FILTER_REACTION = 0x02,
+    RSM_ABILITY_FILTER_SUPPORT = 0x04,
+    RSM_ABILITY_FILTER_MOVEMENT = 0x08,
+} rsm_ability_filter_e;
+
 extern ability_human_skillset_t g_ability_human_skillset_abilities[];
 extern ability_monster_skillset_t g_ability_monster_skillset_abilities[];
 
-/* One secondary-data byte per ability from ABILITY_ID_MATH_FIRST on (math,
- * reaction, support, movement). */
-extern u8 g_ability_math_rsm_data[ABILITY_ID_COUNT - ABILITY_ID_MATH_FIRST];
-
-/* The item_type_e each Throw ability throws, indexed by ability id - ABILITY_ID_THROW_FIRST. */
-extern u8 g_ability_throw_item_types[];
-
-extern ability_jump_record_t g_ability_jump_data[12];
-extern ability_charge_record_t g_ability_charge_data[8];
-
-/* Indexed by reaction ability id - ABILITY_ID_REACTION_FIRST. */
-extern const u8 g_ability_reaction_behavior_flags[ABILITY_ID_SUPPORT_FIRST - ABILITY_ID_REACTION_FIRST];
-
-extern u8 g_ability_calculator_primes[CALCULATOR_PRIME_COUNT];
 s32 ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* ability_store_skillset_abilities(s32 skillset, s32 flags);
 
-s32 ability_get_data_and_type(
-    s32 id, ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data);
+/* The Elemental ability that the surface type of the unit's tile selects. */
+s32 ability_get_elemental_id(const unit_stats_t* unit);
+
+/* calculator */
+/* Flags stored by the eight Math Skill abilities in g_ability_math_rsm_data.
+ * The first four select a unit attribute; the last four select its divisor
+ * test. */
+enum {
+    CALCULATOR_ATTRIBUTE_CT = 0x80,
+    CALCULATOR_ATTRIBUTE_LEVEL = 0x40,
+    CALCULATOR_ATTRIBUTE_EXP = 0x20,
+    CALCULATOR_ATTRIBUTE_HEIGHT = 0x10,
+    CALCULATOR_ATTRIBUTE_MASK = 0xf0,
+    CALCULATOR_MULTIPLE_PRIME = 0x08,
+    CALCULATOR_MULTIPLE_FIVE = 0x04,
+    CALCULATOR_MULTIPLE_FOUR = 0x02,
+    CALCULATOR_MULTIPLE_THREE = 0x01,
+    CALCULATOR_MULTIPLE_MASK = 0x0f,
+};
+
+/* Attribute abilities occupy the first four slots, followed by four divisor tests. */
+enum {
+    CALCULATOR_ATTRIBUTE_ABILITY_COUNT = 4,
+    CALCULATOR_MULTIPLE_ABILITY_COUNT = 4,
+    CALCULATOR_ABILITY_COUNT = CALCULATOR_ATTRIBUTE_ABILITY_COUNT + CALCULATOR_MULTIPLE_ABILITY_COUNT,
+    CALCULATOR_PRIME_COUNT = 54,
+};
+
+extern u8 g_ability_calculator_primes[CALCULATOR_PRIME_COUNT];
+
+/* elements */
+/* Element bits shared by abilities, equipment, jobs and unit affinity sets. */
+typedef enum element_flags {
+    ELEMENT_DARK = 0x01,
+    ELEMENT_HOLY = 0x02,
+    ELEMENT_WATER = 0x04,
+    ELEMENT_EARTH = 0x08,
+    ELEMENT_WIND = 0x10,
+    ELEMENT_ICE = 0x20,
+    ELEMENT_LIGHTNING = 0x40,
+    ELEMENT_FIRE = 0x80,
+} element_flags_e;
+
+/* Shared ordering for job, item-attribute, and runtime unit affinity arrays.
+ * Job records contain only the first four entries; item and runtime records
+ * also contain Strengthen. */
+typedef enum elemental_affinity_index {
+    ELEMENTAL_AFFINITY_ABSORB = 0,
+    ELEMENTAL_AFFINITY_NULLIFY = 1,
+    ELEMENTAL_AFFINITY_HALF = 2,
+    ELEMENTAL_AFFINITY_WEAK = 3,
+    ELEMENTAL_AFFINITY_STRENGTHEN = 4,
+} elemental_affinity_index_e;
+
+enum { ELEMENTAL_AFFINITY_COUNT = 5 };
+
+/* learning */
+extern s32 g_ability_learn_on_hit_unit_id;
 
 u32 ability_get_learned(const unit_stats_t* unit, u32 job_index);
+s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id);
+void ability_learn_used(unit_stats_t* unit);
+
+/* support ability checks */
+/* EQUIP builds both checks; WORLD builds its own ability_has_two_swords. */
+s32 ability_has_two_hands(s16 unit_index);
+s32 ability_has_two_swords(s16 unit_index);
 s32 ability_has_two_swords(s16 unit_id);
 
 #endif

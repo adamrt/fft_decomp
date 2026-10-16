@@ -1,7 +1,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-/* Pad input where no concept owns it. */
+/* Pad input state that no screen owns: the overlays' per-frame event input and key repeat, MAIN's repeat timing and
+ * button edges, and OPEN's directional repeat. */
 
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -9,6 +10,7 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* event input */
 extern u32* g_input_controller;
 extern u32 g_input_current;
 extern u32 g_input_current_buttons;
@@ -26,6 +28,9 @@ extern u16 g_input_page_scroll_hold_frames;
 /* Defined by OPEN, WLDCORE and MAIN rather than by the menu library. */
 extern u32 g_input_previous_buttons;
 
+void input_wait_frames_or_skip(s32 frames);
+
+/* repeat timing and button edges */
 /* L1 + R1 + Select + Start restarts the game. */
 enum {
     INPUT_RESET_BUTTONS = PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_SELECT | PSX_PAD_START,
@@ -45,7 +50,8 @@ extern u32 g_input_previous_copy_1;
 extern u32 g_input_previous_copy_2;
 extern u32 g_input_previous_copy_3;
 extern u32 g_input_stable_frames;
-void input_wait_frames_or_skip(s32 frames);
+
+/* OPEN directional repeat */
 extern s32 g_input_directional_repeat_initial_delay;
 extern s32 g_input_directional_repeat_period;
 extern s32 g_input_up_repeat_counter;

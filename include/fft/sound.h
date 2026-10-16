@@ -1,28 +1,33 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-/* Event library sound for BATTLE and WORLD: the scenario music tracks, the queued menu sound effects and the
- * background sound threads. Resident music loading and the sound-driver adapters are declared in music.h. */
+/* Sound: the event scripts' music requests and the scenario's music tracks, the sound-effect ids and MAIN's effect and
+ * background-sound wrappers, the event library's queued menu effects and background sound threads, OPEN's CD audio fade
+ * and WLDCORE's audio queue. */
 
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* music requests */
 /* Left by the event script's music instructions for script_process_pending_requests, which
  * carries them out once per event frame; -1 means no request. The switch request is a trigger,
  * not a track: it toggles g_sound_current_music_track_index and starts the track in that slot
  * (g_sound_music_track_1_id or _2_id) with the volume and fade of
  * g_event_music_switch_volume and g_event_music_switch_fade (script.h). */
 extern s16 g_sound_music_set_track_request;
-
 extern s16 g_sound_music_switch_request;
 extern s16 g_sound_music_unload_slot_request;
 
 /* The target volume in the low 16 bits; the fade time is (packed >> 14) & 0x3ffc, not a linear
  * field. */
 extern s32 g_sound_music_volume_transition_request;
-
 extern u16 g_sound_current_music_track_index; /* zero-based music slot */
 
+/* The scenario's music tracks in main music slots 1 and 2; 0 is none. */
+extern u16 g_sound_music_track_1_id;
+extern u16 g_sound_music_track_2_id;
+
+/* sound effects */
 /* Sound resources. A sound id is SUZUKI_SOUND_ID(resource, sound): the id of a
  * loaded suzuki_sound_resource_t in the high 16 bits and the index of a
  * sound in it in the low. Each battle effect file brings a resource of its
@@ -170,36 +175,39 @@ typedef enum sound_env_sfx {
 extern u8 g_sound_system_sed_data[];
 extern u8 g_sound_env_sed_data[];
 extern s32 g_sound_weather_sfx_id; /* the background sound sound_play_background started, 0 for none */
+
 void sound_open_generic_sfx(void);
 void sound_play_sfx(s32 sound_id);
 void sound_play_sfx_on_free_channel(s32 sound_id);
-
-/* battle_map_step_init_sequence calls this without loading $a0, but the body reads sound_id. */
-void sound_stop_sfx(int sound_id);
-
 void sound_set_sfx_echo(int sound_id, int volume);
 void sound_play_background(s32 sound_id);
 void sound_replay_background(void);
 void sound_stop_weather(void);
 void sound_stop_weather_music(void);
 
-/* Fades the CD audio in at the given mix level (suzuki_sound_put_type), or out when it is 0. */
-void sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration);
+/* battle_map_step_init_sequence calls this without loading $a0, but the body reads sound_id. */
+void sound_stop_sfx(int sound_id);
 
-/* The scenario's music tracks in main music slots 1 and 2; 0 is none. */
-extern u16 g_sound_music_track_1_id;
-
-extern u16 g_sound_music_track_2_id;
+/* queued effects */
 extern s32 g_sound_pending_sfx_id; /* sound_sfx_e; -1 means no request */
 extern s32 g_sound_suppressed;
 extern u8 g_sound_queued_effect_id; /* sound_sfx_e */
+
 void sound_queue_sfx_cancel(void);
 void sound_queue_sfx_confirm(void);
 void sound_queue_sfx_cursor_move(void);
 void sound_queue_sfx_invalid(void);
+
+/* background sound threads */
 void sound_background_fade_thread(void);
 void sound_background_thread(void);
 
+/* CD audio */
+/* Fades the CD audio in at the given mix level (suzuki_sound_put_type), or out when it is 0. */
+void sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration);
+
+/* audio queue */
+/* Flags of audio_music_slots_t. */
 typedef enum audio_music_flag {
     AUDIO_MUSIC_PLAYING = 0x01, /* the current slot's music is audible: a new start fades it out first */
 } audio_music_flag_e;
@@ -244,9 +252,10 @@ typedef struct audio_queue {
     s32 current_slot;                /* 0x98 */
     s32 volume;                      /* 0x9c */
 } audio_queue_t;
-
 typedef char audio_queue_size_must_be_160[sizeof(audio_queue_t) == 160 ? 1 : -1];
+
 extern audio_queue_t g_audio_queue;
+
 void audio_queue_add(audio_command_e command, s32 value);
 void audio_queue_start_music(s32 value);
 void audio_queue_process(void);

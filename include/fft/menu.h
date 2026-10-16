@@ -1,8 +1,9 @@
 #ifndef MENU_H
 #define MENU_H
 
-/* The menu library compiled into BATTLE, WORLD and the EVENT overlays. This base header holds frame timing, the
- * menu arena, menu entries and the icon and number records that the topic headers (menu_*.h) share. */
+/* The menu library compiled into BATTLE, WORLD and the EVENT overlays: frame timing, the menu arena, menu entries with
+ * their icon and number records, drawing and input routines, BATTLE's command menus and system functions, and the unit
+ * status panels' records, packets, draw areas, portraits, fades and indicators. */
 
 #include "fft/menu_script.h"
 #include "psx/kernel.h"
@@ -13,17 +14,19 @@
 
 struct unit_panel_thread;
 
+/* frame timing */
 /* Raw VSync mode; animation and script steps use 1 when this is zero. */
 extern s8 g_menu_event_speed;
 
 /* Set while a menu thread forces event speed 2; the previous speed is saved. */
 extern u16 g_menu_vsync_interval_forced;
-
 extern u16 g_menu_saved_vsync_interval;
+
 s32 menu_get_event_speed(void);
 void menu_set_vsync_mode_and_event_speed(s32 speed);
 s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
+/* menu arena */
 /* A first-fit allocator over 256-byte pages with sixteen allocation slots. Each program has its own arena of
  * VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD); menu_alloc_memory yields until a run of
  * free pages and a free slot exist. */
@@ -37,19 +40,20 @@ typedef struct menu_allocation {
     u8* buffer;     /* 0x00 */
     s32 page_count; /* 0x04 */
 } menu_allocation_t;
-
 typedef char menu_allocation_size_must_be_8[(sizeof(menu_allocation_t) == 8) ? 1 : -1];
+
+extern u8 g_menu_buffer_arena[][MENU_BUFFER_PAGE_SIZE];
+extern menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
 
 /* Nonzero for each arena page in use. */
 extern u8 g_menu_buffer_allocation_map[];
 
-extern menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
-extern u8 g_menu_buffer_arena[][MENU_BUFFER_PAGE_SIZE];
 void* menu_alloc_memory(s32 size);
 void menu_free_memory(void* buffer);
 void menu_init_buffer_allocator(void);
 void* menu_alloc_buffer(s32 bytes);
 
+/* menu entries */
 /* A scene's menus are a table of menu entries, one per window: its size and text image, its rows and their
  * actions, and the thread that runs it. The thread receives the entry as its first parameter and reads its
  * own record type through context. */
@@ -75,6 +79,7 @@ enum {
     MENU_ROW_ACTION_NONE = 0x7d0,
 };
 
+/* Values of menu_text_layout_t.mode[]: what a column of the layout draws. */
 typedef enum menu_text_column_mode {
     MENU_TEXT_COLUMN_TEXT = 0,          /* text ids, drawn by menu_display_text_entry */
     MENU_TEXT_COLUMN_NUMBER = 1,        /* two-digit numbers, drawn by menu_display_number_entry */
@@ -94,7 +99,6 @@ typedef struct menu_text_layout {
     s16* text_ids[3];    /* 0x10 */
     s16* text_colors[3]; /* 0x1c */
 } menu_text_layout_t;
-
 typedef char menu_text_layout_size_must_be_40[sizeof(menu_text_layout_t) == 40 ? 1 : -1];
 
 /* One menu window, shared by BATTLE, WORLD and the overlays; g_menu_thread_menu_data points at the scene's
@@ -134,7 +138,6 @@ typedef struct menu_entry {
                               thread's entry. The AT-list and option-list builders park their
                               scroll row offset here instead. */
 } menu_entry_t;
-
 typedef char menu_entry_size_must_be_60[(sizeof(menu_entry_t) == 60) ? 1 : -1];
 
 /* Numeric-entry and action-selection threads use value as a 16-bit result cell. */
@@ -142,6 +145,7 @@ static inline s16* menu_entry_result(menu_entry_t* entry) {
     return entry->value;
 }
 
+/* icons and numbers */
 /* Texture rectangle, CLUT and texture page of an icon, as the menu row callbacks return it. */
 typedef struct menu_icon_source {
     s16 u;     /* 0x00 */
@@ -151,7 +155,6 @@ typedef struct menu_icon_source {
     u16 clut;  /* 0x08 */
     u16 tpage; /* 0x0a */
 } menu_icon_source_t;
-
 typedef char menu_icon_source_size_must_be_12[sizeof(menu_icon_source_t) == 12 ? 1 : -1];
 
 /* One positioned number: a text position, a pointer to the live value and the decimal format.
@@ -166,8 +169,13 @@ typedef struct menu_number_entry {
                    (0x400/0x800/0x1000; 0xc00/0xe00 draw dashes) */
     s16 kind;   /* 0x0a */
 } menu_number_entry_t;
-
 typedef char menu_number_entry_size_must_be_12[(sizeof(menu_number_entry_t) == 12) ? 1 : -1];
+
+/* scene state */
+extern s32 g_menu_formation_display_mode;
+extern s32 g_menu_post_battle_unit_changes_active;
+extern u8 g_menu_common_graphics_loaded;
+extern char g_menu_wait_for_file_allocation_message[];
 
 /* The field y (0 or 0xf0) handed to menu_input_update_event_state each frame; the panels draw into the other
  * frame-buffer half. */
@@ -176,12 +184,48 @@ extern u16 g_frame_arg;
 /* Advanced once per frame by the menu frame update. */
 extern s32 g_frame_counter;
 
-extern s32 g_menu_formation_display_mode;
-extern s32 g_menu_post_battle_unit_changes_active;
+/* 0: normal, 1: companion/editor transition, 2: AT-list selection. */
+extern u16 g_menu_overlay_state;
 
+/* Nonzero while a screen transition holds the menus (4 during the unit list fade-out). */
+extern u16 g_menu_transition_state;
+
+/* Loads the default menu palettes and rebuilds the text section pointers. */
+void menu_init_palette_and_text(s32 unused_0);
+
+/* Binds the scene's working pointers and clears its menu-session flags. */
+void menu_init_subsystem_pointers(void);
+
+/* Frees every window buffer pair, the tpage-7 VRAM grid and the menu arena, and resets the thread scheduler. */
+void menu_reset_subsystems(void);
+
+/* 2 while a menu is being built, 4 while a menu thread runs, 0 when idle; BATTLE's body first returns
+ * g_menu_transition_state when it is set. */
+s32 menu_get_thread_activity(void);
+
+/* drawing routines */
+menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command);
+menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command);
+void menu_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
+    u16 texture_page, u16 clut, s32 unused_priority);
+void menu_gfx_enqueue_textured_quad_rect(
+    RECT* rect, menu_icon_source_t* tex, rgb24_t* color, s32 semitrans, s32 ot_index);
+void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
+void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
+
+/* input */
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
+void menu_input_update_with_message_state(void);
+
+/* menu threads */
+void menu_wait_selection_threads(void);
+
+/* Starts the help text thread for the pending help message: binds the help text and locks the menu input. */
+void menu_text_start_help_thread(s32 thread_data);
+
+/* unreferenced stubs */
 /* Empty functions that nothing on the disc calls or points at; the names are neutral placeholders. */
 void menu_noop_1(void);
-
 void menu_noop_2(void);
 void menu_noop_3(void);
 void menu_noop_4(void);
@@ -189,170 +233,7 @@ void menu_noop_5(void);
 void menu_noop_6(void);
 void menu_noop_7(void);
 
-/* The ability list the skillset menus build in the event work block (event_work_t::ability_list): 82 rows of
- * parallel columns. ids, values and extras become the three text-id columns of g_ability_list_ability_layout.
- * Provisional. */
-typedef struct menu_ability_list {
-    u16 ids[82];     /* 0x000; 0xffff terminated; the text id base of the names is ORed in */
-    u16 values[82];  /* 0x0a4 */
-    u16 extras[82];  /* 0x148 */
-    u8 mp_costs[82]; /* 0x1ec; 0xff terminated */
-    u8 ct[82];       /* 0x23e; CT */
-    u8 flags[82];    /* 0x290; bit 1 = blocked by unit flag 0x59 & 8 */
-    u8 turns[82];    /* 0x2e2 */
-    u8 skill_ct[82]; /* 0x334 */
-} menu_ability_list_t;
-
-/* Provisional: one 5-byte row of a menu text entry as rewritten by
- * command_build_act_menu: the style byte at +1 is
- * 4 for a grayed row, the byte at +3 is the row separator (0xfa) or the
- * list terminator (0xff). */
-typedef struct menu_text_row {
-    u8 _unused_00;
-    u8 style; /* 0x01 */
-    u8 _unused_02;
-    u8 terminator; /* 0x03: 0xfa continues, 0xff ends */
-    u8 _unused_04;
-} menu_text_row_t;
-
-/* The mode argument of command_build_ability_list: which list an Arithmeticks
- * (Math Skill) menu shows. Any other menu type builds its ability list. */
-typedef enum menu_arithmeticks_list {
-    MENU_ARITHMETICKS_LIST_ABILITIES = 0,  /* skillset_math_collect_calculator_abilities */
-    MENU_ARITHMETICKS_LIST_MULTIPLES = 1,  /* skillset_math_load_multiples */
-    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2, /* skillset_math_load_attributes */
-} menu_arithmeticks_list_e;
-
-/* One row of the 31-entry menu table at g_command_command_maps; its first 12 rows are the
- * menus whose selection is remembered per unit.
- * command_restore_unit_selection and command_record_unit_selection
- * prove the 8-byte stride and read only the leading menu id;
- * command_resolve_selection walks all 31 rows. */
-typedef struct menu_command_map {
-    u16 menu_id;
-    u16 _padding_02; /* aligns map */
-    /* 0x04: per-menu command remap table. map[0] handles the 0xFF selection
-     * and map[n + 1] any other value; named by command_resolve_selection,
-     * its only reader. The other readers use menu_id alone. */
-    u8* map;
-} menu_command_map_t;
-
-typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ? 1 : -1];
-extern s32 g_menu_active_menu; /* active menu */
-extern s16 g_menu_result;      /* menu result: -4 pending, -1 canceled */
-extern s16 g_menu_selected_option;
-
-/* One row of g_menu_system_function_table (menu_run_system_function_thread,
- * menu_dispatch_system_function). Provisional. */
-typedef struct menu_system_function {
-    s16 menu_id;                /* 0x00; copied to g_command_current_id */
-    u16 text_id;                /* 0x02; menu entry text id */
-    s16 menu_entry_index;       /* 0x04; g_menu_thread_menu_data index */
-    u16 row_action;             /* 0x06; copied to g_menu_system_function_row_actions */
-    u16 thread_count;           /* 0x08; menu entry thread_count */
-    u8 _padding_0a[2];          /* aligns thread_entry */
-    void (*thread_entry)(void); /* 0x0c; started as thread 8 */
-    s16 alternate_id;           /* 0x10; replaces the id when navigation messages are not On */
-    u8 _padding_12[2];          /* tail padding to 4-byte alignment */
-} menu_system_function_t;
-
-typedef char menu_system_function_size_must_be_20[(sizeof(menu_system_function_t) == 20) ? 1 : -1];
-
-/* First argument of menu_init_system_function and
- * menu_dispatch_system_function; `option` selects the variant. */
-typedef enum menu_system_command {
-    MENU_SYSTEM_COMMAND_TARGETING_PROMPT = 1, /* prompt for the resolved menu command */
-    MENU_SYSTEM_COMMAND_MOVE_FEEDBACK = 2,    /* option: menu_move_feedback_option_e */
-    MENU_SYSTEM_COMMAND_WAIT_MENU = 3,
-    MENU_SYSTEM_COMMAND_ACTION_CONFIRM = 4,
-    MENU_SYSTEM_COMMAND_SPELL_QUOTE = 5,
-    MENU_SYSTEM_COMMAND_CLOSE = 6,
-    MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT = 7,
-    MENU_SYSTEM_COMMAND_SCENARIO_CHECK = 8, /* may start event 0x190-0x193; otherwise closes */
-    MENU_SYSTEM_COMMAND_TARGET_CONFIRM = 9,
-    MENU_SYSTEM_COMMAND_EFFECT_MESSAGE = 10,  /* option: text id */
-    MENU_SYSTEM_COMMAND_ABILITY_LEARNED = 11, /* option: ability id */
-    MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE = 12,
-    MENU_SYSTEM_COMMAND_MOVE_CONFIRM = 13,
-    MENU_SYSTEM_COMMAND_TRAP_RESULT = 14,    /* option: trap id */
-    MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM = 15, /* option: item id */
-    MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT = 16,
-    MENU_SYSTEM_COMMAND_POST_ACTION_RESULT = 17, /* option: action_display_image_id_e */
-} menu_system_command_e;
-
-/* MENU_SYSTEM_COMMAND_TARGETING_PROMPT options. */
-typedef enum menu_targeting_prompt_option {
-    MENU_TARGETING_PROMPT_DEFAULT = 0,
-    MENU_TARGETING_PROMPT_NO_TARGET = 1,     /* the ability preview marked no tile */
-    MENU_TARGETING_PROMPT_NO_MOVE_RANGE = 2, /* the moving unit has no reachable tile */
-} menu_targeting_prompt_option_e;
-
-/* MENU_SYSTEM_COMMAND_MOVE_FEEDBACK options. Any option not named here rejects the move with the
- * invalid sound and system function option + 13. */
-typedef enum menu_move_feedback_option {
-    MENU_MOVE_FEEDBACK_CLOSE = 0,
-    MENU_MOVE_FEEDBACK_MOUNT = 1,        /* confirm mounting the unit on the destination */
-    MENU_MOVE_FEEDBACK_ILLEGAL_MOVE = 2, /* reject the chosen destination */
-    MENU_MOVE_FEEDBACK_CRYSTAL = 4,      /* confirm a step onto a crystal */
-} menu_move_feedback_option_e;
-
-/* MENU_SYSTEM_COMMAND_SCENARIO_CHECK options. */
-typedef enum menu_scenario_check_option {
-    MENU_SCENARIO_CHECK_START = 0, /* start the event the check finds */
-    MENU_SCENARIO_CHECK_SKIP = 1,  /* skip the checks and close */
-    MENU_SCENARIO_CHECK_TEST = 2,  /* only record the event in g_script_next_event_id */
-} menu_scenario_check_option_e;
-
-/* Result of menu_dispatch_system_function (and of
- * menu_init_system_function, which returns it). */
-typedef enum menu_system_dispatch_result {
-    MENU_SYSTEM_DISPATCH_UNKNOWN_COMMAND = 0, /* the CLOSE function was started instead */
-    MENU_SYSTEM_DISPATCH_DONE = 1,            /* a system function was started, or nothing had to run */
-    MENU_SYSTEM_DISPATCH_EVENT = 2,           /* SCENARIO_CHECK started an event, or queued it for option 2 */
-} menu_system_dispatch_result_e;
-
-/* Indices of g_menu_system_function_table that the dispatcher names; the rest are message variants. */
-typedef enum menu_system_function_id {
-    MENU_SYSTEM_FUNCTION_WAIT_MENU = 1,
-    MENU_SYSTEM_FUNCTION_CLOSE = 8,
-    MENU_SYSTEM_FUNCTION_ABILITY_ANNOUNCEMENT = 10,
-    MENU_SYSTEM_FUNCTION_EFFECT_MESSAGE = 29,
-    MENU_SYSTEM_FUNCTION_ABILITY_LEARNED = 30,
-    MENU_SYSTEM_FUNCTION_CRYSTAL_OR_TREASURE = 31,
-    MENU_SYSTEM_FUNCTION_MOVE_CONFIRM = 33,
-    MENU_SYSTEM_FUNCTION_TRAP_RESULT_FIRST = 34,
-    MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM_SOLD = 38,
-    MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM = 39,
-    MENU_SYSTEM_FUNCTION_MOVE_CONFIRM_SILENT = 40,
-    MENU_SYSTEM_FUNCTION_ARITHMETICKS_ANNOUNCEMENT = 44,
-    MENU_SYSTEM_FUNCTION_POST_ACTION_RESULT = 50,
-} menu_system_function_id_e;
-
-/* Array view: as a scalar, GCC hoists the menu-index reload above its store
- * in menu_run_system_function_thread. */
-extern menu_system_function_t g_menu_system_function_table[];
-
-extern s32 g_menu_system_function_thread_busy;
-extern s32 g_menu_system_function_command;
-extern s32 g_menu_system_function_option;
-extern u16 g_menu_system_function_row_actions[];
-
-/* Runs a system function (menu_system_command_e) for unit_id. */
-s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
-
-extern s16 g_menu_set_auto_battle_row_actions;
-void menu_status_open(void);
-
-/* Set to 1 with the menu scroll timings; nothing reads it. */
-extern u8 g_menu_scroll_unread_setting; /* set to 1 with the input repeat timings; never read */
-
-extern u8 g_menu_scroll_accel_delay;
-extern u8 g_menu_scroll_slow_step;
-extern u8 g_menu_scroll_fast_step;
-extern u8 g_menu_idle_action_window_x[];
-extern u8 g_menu_skillset_types[]; /* per-row skillset kind; 13 keeps the row active */
-void menu_action_dispatch(void);
-
+/* battle menu ids */
 /* g_command_current_id: the open battle menu,
  * and the index of its entry in g_command_idle_action_entries, which is also what a row action from 0 to
  * 0xff opens. The unit menus are picked by
@@ -432,33 +313,191 @@ typedef enum command_menu {
     MENU_COMMAND_ID_CRYSTAL_PICKUP = 105,         /* crystal or treasure options */
 } command_menu_e;
 
+extern u8 g_menu_idle_action_window_x[];
+extern u8 g_menu_skillset_types[]; /* per-row skillset kind; 13 keeps the row active */
+
+void menu_action_dispatch(void);
 command_menu_e menu_action_get_menu_id(s32 battle_id);
 void menu_action_open_active_unit(void);
 void menu_action_open_non_active_unit(void);
+
+/* command resolution */
+/* One row of the 31-entry menu table at g_command_command_maps; its first 12 rows are the menus whose selection is
+ * remembered per unit. command_restore_unit_selection and command_record_unit_selection prove the 8-byte stride and
+ * read only the leading menu id; command_resolve_selection walks all 31 rows. */
+typedef struct menu_command_map {
+    u16 menu_id;
+    u16 _padding_02; /* aligns map */
+    /* 0x04: per-menu command remap table. map[0] handles the 0xFF selection
+     * and map[n + 1] any other value; named by command_resolve_selection,
+     * its only reader. The other readers use menu_id alone. */
+    u8* map;
+} menu_command_map_t;
+typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ? 1 : -1];
+
+extern s32 g_menu_active_menu; /* active menu */
+extern s16 g_menu_result;      /* menu result: -4 pending, -1 canceled */
+extern s16 g_menu_selected_option;
+extern s16 g_menu_set_auto_battle_row_actions;
+
+/* skillsets and abilities */
+/* The ability list the skillset menus build in the event work block (event_work_t::ability_list): 82 rows of
+ * parallel columns. ids, values and extras become the three text-id columns of g_ability_list_ability_layout.
+ * Provisional. */
+typedef struct menu_ability_list {
+    u16 ids[82];     /* 0x000; 0xffff terminated; the text id base of the names is ORed in */
+    u16 values[82];  /* 0x0a4 */
+    u16 extras[82];  /* 0x148 */
+    u8 mp_costs[82]; /* 0x1ec; 0xff terminated */
+    u8 ct[82];       /* 0x23e; CT */
+    u8 flags[82];    /* 0x290; bit 1 = blocked by unit flag 0x59 & 8 */
+    u8 turns[82];    /* 0x2e2 */
+    u8 skill_ct[82]; /* 0x334 */
+} menu_ability_list_t;
+
+/* Provisional: one 5-byte row of a menu text entry as rewritten by command_build_act_menu: the style byte at +1 is 4
+ * for a grayed row, the byte at +3 is the row separator (0xfa) or the list terminator (0xff). */
+typedef struct menu_text_row {
+    u8 _unused_00;
+    u8 style; /* 0x01 */
+    u8 _unused_02;
+    u8 terminator; /* 0x03: 0xfa continues, 0xff ends */
+    u8 _unused_04;
+} menu_text_row_t;
+
+/* The mode argument of command_build_ability_list: which list an Arithmeticks
+ * (Math Skill) menu shows. Any other menu type builds its ability list. */
+typedef enum menu_arithmeticks_list {
+    MENU_ARITHMETICKS_LIST_ABILITIES = 0,  /* skillset_math_collect_calculator_abilities */
+    MENU_ARITHMETICKS_LIST_MULTIPLES = 1,  /* skillset_math_load_multiples */
+    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2, /* skillset_math_load_attributes */
+} menu_arithmeticks_list_e;
+
+extern s32 g_menu_scrolling_list_depth;
 
 /* The CLUT the outermost scrolling ability list saves, derives four more from and blinks while it
  * runs. */
 extern RECT g_menu_ability_list_clut_rect;
 
-extern s32 g_menu_scrolling_list_depth;
-
 /* Shared with the per-program event interpreter and dialog thread. */
 u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
 
-/* The final two entries of g_unit_view_attack_caster_stats_setup. */
-extern menu_number_entry_t g_menu_projected_value_panel[2];
+/* system functions */
+/* One row of g_menu_system_function_table (menu_run_system_function_thread,
+ * menu_dispatch_system_function). Provisional. */
+typedef struct menu_system_function {
+    s16 menu_id;                /* 0x00; copied to g_command_current_id */
+    u16 text_id;                /* 0x02; menu entry text id */
+    s16 menu_entry_index;       /* 0x04; g_menu_thread_menu_data index */
+    u16 row_action;             /* 0x06; copied to g_menu_system_function_row_actions */
+    u16 thread_count;           /* 0x08; menu entry thread_count */
+    u8 _padding_0a[2];          /* aligns thread_entry */
+    void (*thread_entry)(void); /* 0x0c; started as thread 8 */
+    s16 alternate_id;           /* 0x10; replaces the id when navigation messages are not On */
+    u8 _padding_12[2];          /* tail padding to 4-byte alignment */
+} menu_system_function_t;
+typedef char menu_system_function_size_must_be_20[(sizeof(menu_system_function_t) == 20) ? 1 : -1];
 
-/* Live caster-panel image parameters followed by their defaults. */
-extern image_load_parameters_t g_menu_attack_caster_quad_image_params[2][5];
+/* First argument of menu_init_system_function and
+ * menu_dispatch_system_function; `option` selects the variant. */
+typedef enum menu_system_command {
+    MENU_SYSTEM_COMMAND_TARGETING_PROMPT = 1, /* prompt for the resolved menu command */
+    MENU_SYSTEM_COMMAND_MOVE_FEEDBACK = 2,    /* option: menu_move_feedback_option_e */
+    MENU_SYSTEM_COMMAND_WAIT_MENU = 3,
+    MENU_SYSTEM_COMMAND_ACTION_CONFIRM = 4,
+    MENU_SYSTEM_COMMAND_SPELL_QUOTE = 5,
+    MENU_SYSTEM_COMMAND_CLOSE = 6,
+    MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT = 7,
+    MENU_SYSTEM_COMMAND_SCENARIO_CHECK = 8, /* may start event 0x190-0x193; otherwise closes */
+    MENU_SYSTEM_COMMAND_TARGET_CONFIRM = 9,
+    MENU_SYSTEM_COMMAND_EFFECT_MESSAGE = 10,  /* option: text id */
+    MENU_SYSTEM_COMMAND_ABILITY_LEARNED = 11, /* option: ability id */
+    MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE = 12,
+    MENU_SYSTEM_COMMAND_MOVE_CONFIRM = 13,
+    MENU_SYSTEM_COMMAND_TRAP_RESULT = 14,    /* option: trap id */
+    MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM = 15, /* option: item id */
+    MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT = 16,
+    MENU_SYSTEM_COMMAND_POST_ACTION_RESULT = 17, /* option: action_display_image_id_e */
+} menu_system_command_e;
 
+/* MENU_SYSTEM_COMMAND_TARGETING_PROMPT options. */
+typedef enum menu_targeting_prompt_option {
+    MENU_TARGETING_PROMPT_DEFAULT = 0,
+    MENU_TARGETING_PROMPT_NO_TARGET = 1,     /* the ability preview marked no tile */
+    MENU_TARGETING_PROMPT_NO_MOVE_RANGE = 2, /* the moving unit has no reachable tile */
+} menu_targeting_prompt_option_e;
+
+/* MENU_SYSTEM_COMMAND_MOVE_FEEDBACK options. Any option not named here rejects the move with the
+ * invalid sound and system function option + 13. */
+typedef enum menu_move_feedback_option {
+    MENU_MOVE_FEEDBACK_CLOSE = 0,
+    MENU_MOVE_FEEDBACK_MOUNT = 1,        /* confirm mounting the unit on the destination */
+    MENU_MOVE_FEEDBACK_ILLEGAL_MOVE = 2, /* reject the chosen destination */
+    MENU_MOVE_FEEDBACK_CRYSTAL = 4,      /* confirm a step onto a crystal */
+} menu_move_feedback_option_e;
+
+/* MENU_SYSTEM_COMMAND_SCENARIO_CHECK options. */
+typedef enum menu_scenario_check_option {
+    MENU_SCENARIO_CHECK_START = 0, /* start the event the check finds */
+    MENU_SCENARIO_CHECK_SKIP = 1,  /* skip the checks and close */
+    MENU_SCENARIO_CHECK_TEST = 2,  /* only record the event in g_script_next_event_id */
+} menu_scenario_check_option_e;
+
+/* Result of menu_dispatch_system_function (and of
+ * menu_init_system_function, which returns it). */
+typedef enum menu_system_dispatch_result {
+    MENU_SYSTEM_DISPATCH_UNKNOWN_COMMAND = 0, /* the CLOSE function was started instead */
+    MENU_SYSTEM_DISPATCH_DONE = 1,            /* a system function was started, or nothing had to run */
+    MENU_SYSTEM_DISPATCH_EVENT = 2,           /* SCENARIO_CHECK started an event, or queued it for option 2 */
+} menu_system_dispatch_result_e;
+
+/* Indices of g_menu_system_function_table that the dispatcher names; the rest are message variants. */
+typedef enum menu_system_function_id {
+    MENU_SYSTEM_FUNCTION_WAIT_MENU = 1,
+    MENU_SYSTEM_FUNCTION_CLOSE = 8,
+    MENU_SYSTEM_FUNCTION_ABILITY_ANNOUNCEMENT = 10,
+    MENU_SYSTEM_FUNCTION_EFFECT_MESSAGE = 29,
+    MENU_SYSTEM_FUNCTION_ABILITY_LEARNED = 30,
+    MENU_SYSTEM_FUNCTION_CRYSTAL_OR_TREASURE = 31,
+    MENU_SYSTEM_FUNCTION_MOVE_CONFIRM = 33,
+    MENU_SYSTEM_FUNCTION_TRAP_RESULT_FIRST = 34,
+    MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM_SOLD = 38,
+    MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM = 39,
+    MENU_SYSTEM_FUNCTION_MOVE_CONFIRM_SILENT = 40,
+    MENU_SYSTEM_FUNCTION_ARITHMETICKS_ANNOUNCEMENT = 44,
+    MENU_SYSTEM_FUNCTION_POST_ACTION_RESULT = 50,
+} menu_system_function_id_e;
+
+extern s32 g_menu_system_function_thread_busy;
+extern s32 g_menu_system_function_command;
+extern s32 g_menu_system_function_option;
+extern u16 g_menu_system_function_row_actions[];
+
+/* Array view: as a scalar, GCC hoists the menu-index reload above its store
+ * in menu_run_system_function_thread. */
+extern menu_system_function_t g_menu_system_function_table[];
+
+/* Runs a system function (menu_system_command_e) for unit_id. */
+s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
+
+/* status screen */
 extern s32 g_menu_status_enabled;
 extern s32 g_menu_status_requested;
 extern s32 g_menu_status_screen_selected;
 extern s32 g_menu_status_open;
+
+void menu_status_open(void);
 void menu_status_clear(void);
 void menu_enter_status_screen_selection(void);
 void menu_leave_status_screen_selection(void);
 
+/* menu scrolling */
+extern u8 g_menu_scroll_unread_setting; /* set to 1 with the input repeat timings; never read */
+extern u8 g_menu_scroll_accel_delay;
+extern u8 g_menu_scroll_slow_step;
+extern u8 g_menu_scroll_fast_step;
+
+/* unit status records */
 /* The five equipment slots in the order the equipment screens list them (not
  * the order of a unit record's equipment array). */
 typedef enum menu_equipment_slot {
@@ -482,7 +521,6 @@ typedef struct menu_unit_status_identity {
     s16 roster_slot; /* 0x0a: party slot (formation_get_selected_unit_name_id); shown as value + 1 */
     u8 _unused_0c[2];
 } menu_unit_status_identity_t;
-
 typedef char menu_unit_status_identity_size_must_be_14[sizeof(menu_unit_status_identity_t) == 14 ? 1 : -1];
 
 /* u16 view of the -1 stored in an empty menu_status_panel_slot_state_t.ability_ids row. */
@@ -522,7 +560,6 @@ typedef struct menu_status_panel_slot_state {
                                   * the skillset-name or ability-name text section by mode,
                                   * and the remaining rows use ability names */
 } menu_status_panel_slot_state_t;
-
 typedef char menu_status_panel_slot_state_size_must_be_56[(sizeof(menu_status_panel_slot_state_t) == 56) ? 1 : -1];
 
 enum {
@@ -540,11 +577,7 @@ typedef struct menu_unit_status_gauge {
     s16 bonus; /* 0x02; equipment contribution or preview delta for HP/MP */
     s16 max;   /* 0x04 */
 } menu_unit_status_gauge_t;
-
 typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gauge_t) == 6) ? 1 : -1];
-
-/* The battle unit stats of g_unit_panel_selected_unit. */
-struct unit_stats* menu_get_selected_unit_stats(void);
 
 /* What the unit grids draw below a unit (formation_draw_unit_readout,
  * unit_list_update_grid). L2/R2 step g_formation_stat_display_mode and
@@ -562,9 +595,10 @@ typedef enum menu_unit_readout {
     MENU_UNIT_READOUT_MISSING = 11,
 } menu_unit_readout_e;
 
-/* Starts the help text thread for the pending help message: binds the help text and locks the menu input. */
-void menu_text_start_help_thread(s32 thread_data);
+/* The battle unit stats of g_unit_panel_selected_unit. */
+struct unit_stats* menu_get_selected_unit_stats(void);
 
+/* panel threads */
 /* Flags of a unit status panel (menu_status_panel_display_thread_t and
  * the WORLD status display's unit_panel_thread_t). */
 typedef enum menu_status_panel_flags {
@@ -588,6 +622,7 @@ typedef struct menu_status_panel_display_thread {
                            g_unit_panel_status_display_dimmed and the WORLD display globals */
 } menu_status_panel_display_thread_t;
 
+/* panel packets */
 /* Battle menu status and character-editor panel records. The EVENT overlays
  * (ATTACK, BUNIT, DEBUGCHR, EQUIP, REQUIRE) each link their own copy of the
  * panel code, and the WORLD unit-editor panels reuse the packet layouts. Each panel keeps two copies of its
@@ -599,7 +634,6 @@ typedef struct menu_status_panel_draw_offset {
     DR_OFFSET packet;   /* 0x00 */
     point16_t position; /* 0x0c */
 } menu_status_panel_draw_offset_t;
-
 typedef char menu_status_panel_draw_offset_size_must_be_16[(sizeof(menu_status_panel_draw_offset_t) == 16) ? 1 : -1];
 
 /* Double-buffered panel packets: a center tile and nine-scanline top and
@@ -610,7 +644,6 @@ typedef struct menu_gradient_panel_prims {
     TILE top[9];       /* 0x1c */
     TILE bottom[9];    /* 0xac */
 } menu_gradient_panel_prims_t;
-
 typedef char menu_gradient_panel_prims_size_must_be_316[(sizeof(menu_gradient_panel_prims_t) == 316) ? 1 : -1];
 
 /* The numeric display frame, built by status_screen_init_numbers_frame: two DR_MODE
@@ -622,7 +655,6 @@ typedef struct menu_palette_primitives {
     LINE_F2 lines[12];      /* 0x18 */
     SPRT sprite;            /* 0xd8 */
 } menu_palette_primitives_t;
-
 typedef char menu_palette_primitives_size_must_be_236[(sizeof(menu_palette_primitives_t) == 236) ? 1 : -1];
 
 /* Placement of one of the twelve frame lines (menu_palette_primitives_t.lines): signed endpoint offsets from the
@@ -648,12 +680,26 @@ enum menu_line_layout_offset {
     MENU_LINE_LAYOUT_SIZE = 8
 };
 
+/* Color and endpoint offsets of the Status screen panel's eight frame lines, relative to the panel box, seven bytes
+ * per line (g_status_screen_line_colors). The loop walks the table with a byte offset stepping by 7 (the
+ * target's induction variable and exit test), so the fields are addressed by
+ * offset, as for menu_line_layout_t. */
+enum menu_status_screen_line_layout_offset {
+    MENU_STATUS_SCREEN_LINE_R = 0,
+    MENU_STATUS_SCREEN_LINE_G = 1,
+    MENU_STATUS_SCREEN_LINE_B = 2,
+    MENU_STATUS_SCREEN_LINE_X0 = 3,
+    MENU_STATUS_SCREEN_LINE_Y0 = 4,
+    MENU_STATUS_SCREEN_LINE_X1 = 5,
+    MENU_STATUS_SCREEN_LINE_Y1 = 6,
+    MENU_STATUS_SCREEN_LINE_SIZE = 7
+};
+
 /* One 0x100-byte slot holding a panel's palette primitive set. */
 typedef struct menu_palette_slot {
     menu_palette_primitives_t primitives; /* 0x00 */
     u8 _padding_ec[0x14];                 /* preserves the 0x100-byte allocation stride */
 } menu_palette_slot_t;
-
 typedef char menu_palette_slot_size_must_be_256[(sizeof(menu_palette_slot_t) == 256) ? 1 : -1];
 
 /* Status-panel packet block (0x1d8 bytes), doubled the same way as the editor
@@ -668,7 +714,6 @@ typedef struct menu_status_panel_packet {
     menu_status_panel_draw_offset_t draw_offset_b; /* 0x1a0 */
     POLY_FT4 portrait;                             /* 0x1b0 */
 } menu_status_panel_packet_t;
-
 typedef char menu_status_panel_packet_size_must_be_472[(sizeof(menu_status_panel_packet_t) == 472) ? 1 : -1];
 
 /* Character-editor packet block (0x30c bytes) built by the overlays' unit_panel_banner_thread. Two copies
@@ -687,15 +732,14 @@ typedef struct menu_status_panel_editor_packet {
     menu_status_panel_draw_offset_t draw_offset_a; /* 0x2ec */
     menu_status_panel_draw_offset_t draw_offset_b; /* 0x2fc */
 } menu_status_panel_editor_packet_t;
-
 typedef char
     menu_status_panel_editor_packet_size_must_be_780[(sizeof(menu_status_panel_editor_packet_t) == 780) ? 1 : -1];
 
 /* The frame lines in the normal or dimmed menu colors and the covering sprite in the matching CLUT. */
 void menu_init_primitive_colors_normal(menu_palette_primitives_t* menu);
-
 void menu_init_primitive_colors_dimmed(menu_palette_primitives_t* menu);
 
+/* number images */
 /* Three 16x10 packed 4bpp images for the numbers below a unit's name:
  * Brave, Faith and the roster slot. */
 typedef struct menu_unit_number_images {
@@ -703,7 +747,6 @@ typedef struct menu_unit_number_images {
     u8 faith[16 * 10 / 2];
     u8 roster_slot[16 * 10 / 2];
 } menu_unit_number_images_t;
-
 typedef char menu_unit_number_images_size_must_be_240[sizeof(menu_unit_number_images_t) == 240 ? 1 : -1];
 
 /* Packed 4-bit images for the status panel's three numeric groups. */
@@ -712,27 +755,74 @@ typedef struct menu_unit_stat_number_images {
     u8 weapons[64 * 24 / 2];  /* Weapon power and evade. */
     u8 combat[100 * 24 / 2];  /* Physical/magical attack and class/shield/accessory evade. */
 } menu_unit_stat_number_images_t;
-
 typedef char menu_unit_stat_number_images_size_must_be_2328[sizeof(menu_unit_stat_number_images_t) == 2328 ? 1 : -1];
 
+/* numeric panel */
+/* The numeric panel's two adjacent rectangles: the first is the panel frame
+ * and the screen origin handed to image loading, the second places the
+ * portrait. */
+typedef struct menu_status_panel_numeric_geometry {
+    RECT texture_rect;   /* 0x00 */
+    RECT draw_area_rect; /* 0x08 */
+} menu_status_panel_numeric_geometry_t;
+
+/* Numeric panel buffer (0x2c0 bytes), double buffered by unit_panel_numbers_thread, which copies it with sizeof. The
+ * draw modes are set up with gfx_set_draw_mode_for_texture_page / SetDrawMode, the 18 SPRTs by the
+ * gfx_init_image_loading walk, +0x18c and +0x298 are the arguments of status_screen_init_numbers_frame and
+ * menu_init_scaled_draw_area_packets, and the draw offsets follow from the SetDrawOffset(packet, position) pairs. */
+typedef struct menu_status_panel_numeric_buffer {
+    DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
+    DR_MODE text_draw_mode;                          /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
+    DR_MODE image_draw_mode;                         /* 0x018; item icons or allocated images */
+    SPRT sprites[18];                                /* 0x024 */
+    menu_palette_primitives_t numeric_frame;         /* 0x18c */
+    menu_status_panel_draw_offset_t draw_offsets[2]; /* 0x278 */
+    scaled_draw_area_pair_t portrait;                /* 0x298 */
+} menu_status_panel_numeric_buffer_t;
+typedef char
+    menu_status_panel_numeric_buffer_size_must_be_704[(sizeof(menu_status_panel_numeric_buffer_t) == 704) ? 1 : -1];
+
+/* unit stats panels */
+/* A stats panel's two draw offsets (unit_view_stats_panel_thread). */
+typedef struct menu_unit_status_offsets {
+    menu_status_panel_draw_offset_t a; /* 0x00 */
+    menu_status_panel_draw_offset_t b; /* 0x10 */
+} menu_unit_status_offsets_t;
+
+/* The sprite page the stats panels draw their labels with (menu_sprite_page_t). */
+extern RECT g_menu_sprite_page_texture_windows[5];
+extern image_load_parameters_t g_menu_sprite_page_image_params[30];
+
+/* Entries 5..7 of g_menu_sprite_page_image_params; a separate alias preserves the original
+ * template base. */
+extern image_load_parameters_t g_menu_sprite_page_image_param_bases[];
+
+/* The final two entries of g_unit_view_attack_caster_stats_setup. */
+extern menu_number_entry_t g_menu_projected_value_panel[2];
+
+/* Live caster-panel image parameters followed by their defaults. */
+extern image_load_parameters_t g_menu_attack_caster_quad_image_params[2][5];
+
+/* scaled draw areas */
 /* A panel that zooms open draws through a pair of draw areas: the panel's rectangle at the thread's position,
  * cropped about its center to g_menu_draw_area_scale_percent[scale_index] percent, and the frame buffer's own
  * area. */
 extern const u16 g_menu_draw_area_scale_percent[12];
-
 extern RECT g_menu_draw_area_template;
-
-/* Clears the first draw area's width and installs the default second draw area. */
-void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 
 void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const struct unit_panel_thread* thread);
 
+/* Clears the first draw area's width and installs the default second draw area. */
+void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
+
+/* status icons and zodiac */
 extern u8 g_menu_gfx_scaled_sprite_count;
 extern point16_t g_menu_gfx_scaled_sprite_scale[];
 extern point16_t g_menu_gfx_scaled_sprite_texture_page;
 extern sprite_sheet_frame_t g_menu_gfx_scaled_sprite_uv_rects[];
 
+/* portraits */
 enum {
     MENU_WLDFACE_SHEET_COUNT = 4,
     MENU_WLDFACE_SHEET_SIZE = 32768,
@@ -750,6 +840,7 @@ extern RECT g_menu_portrait_origin;
 extern RECT g_menu_portrait_pixel_rect;
 extern RECT g_menu_portrait_palette_rect;
 
+/* panel fades */
 /* g_menu_panel_fade_mode: what menu_update_panel_fade does to the panel's
  * dimming tiles. */
 typedef enum menu_panel_fade_mode {
@@ -763,11 +854,12 @@ extern s32 g_menu_panel_fade_intensity;
 extern u8 g_menu_panel_fade_modes[];
 extern menu_gradient_panel_prims_t g_menu_panel_fade_frames[];
 
+void menu_update_panel_fade(void);
+
 /* A black semi-transparent 256x50 center tile with nine one-line tiles above and below for the graded edges. */
 void menu_init_panel_fade_tiles(void);
 
-void menu_update_panel_fade(void);
-
+/* thread status indicators */
 /* g_menu_indicator_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two translucent
  * panels menu_draw_thread_status_indicators draws behind the unit status banners. */
 typedef enum menu_indicator_state {
@@ -781,103 +873,10 @@ extern s32 g_menu_indicator_brightness[2];
 extern s32 g_menu_indicator_fade_work[2];
 extern s32 g_menu_indicator_packet_index[2];
 extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];
+
 void menu_draw_thread_status_indicators(void);
 
-/* The numeric panel's two adjacent rectangles: the first is the panel frame
- * and the screen origin handed to image loading, the second places the
- * portrait. */
-typedef struct menu_status_panel_numeric_geometry {
-    RECT texture_rect;   /* 0x00 */
-    RECT draw_area_rect; /* 0x08 */
-} menu_status_panel_numeric_geometry_t;
-
-/* Numeric panel buffer (0x2c0 bytes), double buffered by unit_panel_numbers_thread, which
- * copies it with sizeof. The draw modes are set up with gfx_set_draw_mode_for_texture_page /
- * SetDrawMode, the 18 SPRTs by the gfx_init_image_loading walk,
- * +0x18c and +0x298 are the arguments of
- * status_screen_init_numbers_frame and
- * menu_init_scaled_draw_area_packets, and the draw offsets follow from the
- * SetDrawOffset(packet, position) pairs. */
-typedef struct menu_status_panel_numeric_buffer {
-    DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
-    DR_MODE text_draw_mode;                          /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
-    DR_MODE image_draw_mode;                         /* 0x018; item icons or allocated images */
-    SPRT sprites[18];                                /* 0x024 */
-    menu_palette_primitives_t numeric_frame;         /* 0x18c */
-    menu_status_panel_draw_offset_t draw_offsets[2]; /* 0x278 */
-    scaled_draw_area_pair_t portrait;                /* 0x298 */
-} menu_status_panel_numeric_buffer_t;
-
-typedef char
-    menu_status_panel_numeric_buffer_size_must_be_704[(sizeof(menu_status_panel_numeric_buffer_t) == 704) ? 1 : -1];
-
-/* Color and endpoint offsets of the Status screen panel's eight frame lines, relative to the panel box, seven bytes
- * per line (g_status_screen_line_colors). The loop walks the table with a byte offset stepping by 7 (the
- * target's induction variable and exit test), so the fields are addressed by
- * offset, as for menu_line_layout_t. */
-enum menu_status_screen_line_layout_offset {
-    MENU_STATUS_SCREEN_LINE_R = 0,
-    MENU_STATUS_SCREEN_LINE_G = 1,
-    MENU_STATUS_SCREEN_LINE_B = 2,
-    MENU_STATUS_SCREEN_LINE_X0 = 3,
-    MENU_STATUS_SCREEN_LINE_Y0 = 4,
-    MENU_STATUS_SCREEN_LINE_X1 = 5,
-    MENU_STATUS_SCREEN_LINE_Y1 = 6,
-    MENU_STATUS_SCREEN_LINE_SIZE = 7
-};
-
-void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
-menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command);
-menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command);
-
-void menu_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
-    u16 texture_page, u16 clut, s32 unused_priority);
-
-void menu_input_update_with_message_state(void);
-
-void menu_gfx_enqueue_textured_quad_rect(
-    RECT* rect, menu_icon_source_t* tex, rgb24_t* color, s32 semitrans, s32 ot_index);
-
-void menu_wait_selection_threads(void);
-extern u8 g_menu_common_graphics_loaded;
-
-/* 0: normal, 1: companion/editor transition, 2: AT-list selection. */
-extern u16 g_menu_overlay_state;
-
-/* Nonzero while a screen transition holds the menus (4 during the unit list fade-out). */
-extern u16 g_menu_transition_state;
-
-/* Loads the default menu palettes and rebuilds the text section pointers. */
-void menu_init_palette_and_text(s32 unused_0);
-
-/* Binds the scene's working pointers and clears its menu-session flags. */
-void menu_init_subsystem_pointers(void);
-
-/* Frees every window buffer pair, the tpage-7 VRAM grid and the menu arena, and resets the thread scheduler. */
-void menu_reset_subsystems(void);
-
-/* 2 while a menu is being built, 4 while a menu thread runs, 0 when idle; BATTLE's body first returns
- * g_menu_transition_state when it is set. */
-s32 menu_get_thread_activity(void);
-
-extern char g_menu_wait_for_file_allocation_message[];
-
-/* A stats panel's two draw offsets (unit_view_stats_panel_thread). */
-typedef struct menu_unit_status_offsets {
-    menu_status_panel_draw_offset_t a; /* 0x00 */
-    menu_status_panel_draw_offset_t b; /* 0x10 */
-} menu_unit_status_offsets_t;
-
-/* The sprite page the stats panels draw their labels with (menu_sprite_page_t). */
-extern RECT g_menu_sprite_page_texture_windows[5];
-
-extern image_load_parameters_t g_menu_sprite_page_image_params[30];
-
-/* Entries 5..7 of g_menu_sprite_page_image_params; a separate alias preserves the original
- * template base. */
-extern image_load_parameters_t g_menu_sprite_page_image_param_bases[];
-
+/* selected-tile display */
 /* The panel describing the tile under the cursor. */
 
 /* 12-byte textured-quad piece (g_unit_view_quad_pieces) that unit_view_build_height_pieces turns into a POLY_GT4:
@@ -907,8 +906,6 @@ typedef struct menu_quad_page {
     SPRT sprites[2];   /* 0x104 */
     DR_MODE modes[2];  /* 0x12c */
 } menu_quad_page_t;
-
 typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1 : -1];
-void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 
 #endif

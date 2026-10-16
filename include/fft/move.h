@@ -1,7 +1,8 @@
 #ifndef MOVE_H
 #define MOVE_H
 
-/* Moving a unit: range, paths, steps, jumps, Teleport, knockback, Move-Find items and traps. */
+/* Moving a unit: the movement records and paths, movement classes and terrain costs, pathfinding, walks and jumps,
+ * knockback, Move-Find items and traps, and the events after a move. */
 
 #include "fft/battle_map.h"
 #include "fft/target.h"
@@ -10,6 +11,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* movement records */
 /* Destination bytes and motion flags share one 32-bit movement record. */
 typedef struct move_destination {
     u8 destination_x;
@@ -23,20 +25,9 @@ typedef struct move_destination {
     u32 force_animation_update : 1;
     u32 : 2;
 } move_destination_t;
-
 typedef char move_destination_size_must_be_4[sizeof(move_destination_t) == 4 ? 1 : -1];
 
-/* Packed half-height offsets (g_move_path_height_offsets). A missing presence flag keeps
- * that side's previous value when move_path_apply_selected_candidate applies a saved candidate. */
-typedef struct move_height_offsets {
-    u8 destination_present : 1;
-    u8 destination_height_offset : 3;
-    u8 source_present : 1;
-    u8 source_height_offset : 3;
-} move_height_offsets_t;
-
-typedef char move_height_offsets_size_must_be_1[(sizeof(move_height_offsets_t) == 1) ? 1 : -1];
-
+/* move_step_t.direction. */
 typedef enum move_step_direction {
     MOVE_STEP_DIRECTION_EAST = 0,  /* +x */
     MOVE_STEP_DIRECTION_WEST = 1,  /* -x */
@@ -54,8 +45,17 @@ typedef struct move_step {
     u8 higher : 1;    /* destination on the higher elevation */
     u8 direction : 2; /* move_step_direction_e */
 } move_step_t;
-
 typedef char move_step_size_must_be_1[sizeof(move_step_t) == 1 ? 1 : -1];
+
+/* Packed half-height offsets (g_move_path_height_offsets). A missing presence flag keeps
+ * that side's previous value when move_path_apply_selected_candidate applies a saved candidate. */
+typedef struct move_height_offsets {
+    u8 destination_present : 1;
+    u8 destination_height_offset : 3;
+    u8 source_present : 1;
+    u8 source_height_offset : 3;
+} move_height_offsets_t;
+typedef char move_height_offsets_size_must_be_1[(sizeof(move_height_offsets_t) == 1) ? 1 : -1];
 
 /* The complete movement record, copied from g_move_path into unit_t.path.
  * Count 0xfe selects the explicit teleport destination; 0xff is a failed
@@ -71,7 +71,6 @@ typedef struct move_path {
     move_height_offsets_t height_offsets; /* 0x7e; source/destination offsets */
     u8 pending_mount;                     /* 0x7f; MOVE_PENDING_MOUNT_SET | battle id */
 } move_path_t;
-
 typedef char move_path_size_must_be_128[sizeof(move_path_t) == 128 ? 1 : -1];
 
 /* move_path_t.count values that are not a step count
@@ -96,28 +95,7 @@ typedef enum move_direction {
     MOVE_DIRECTION_WEST = 3,  /* -x */
 } move_direction_e;
 
-void move_settle_on_tile(unit_t* unit);
-
-/* Provisional: always 0; copied into the move config byte 0x1a, which nothing reads. */
-extern u8 g_move_config_unknown_1a_value;
-
-/* action_current_ability_t.knockback_flags: the kind of knockback found by
- * move_knockback_calculate, with PENDING set until it is applied. */
-typedef enum move_knockback_kind {
-    MOVE_KNOCKBACK_FALL_DAMAGE = 1,    /* a grounded target: the fall height can hurt */
-    MOVE_KNOCKBACK_NO_FALL_DAMAGE = 2, /* a flying target */
-} move_knockback_kind_e;
-
-/* Encoding of the kind and pending marker in the same byte. */
-enum {
-    MOVE_KNOCKBACK_KIND_MASK = 0x7f,
-    MOVE_KNOCKBACK_PENDING = 0x80,
-};
-
-void move_knockback_cancel(void);
-s32 move_find_apply_trap(unit_stats_t* unit);
-s32 move_init_ability_benefit(unit_stats_t* unit);
-
+/* movement classes and terrain */
 /* Ordered class selection in move_spread_store_unit_to_scratchpad, not movement ability
  * flags or the separate cost-table selector. Water names describe standing
  * height. The UNIT_MOVEMENT_SET_3 bits carry the retail ability names, which
@@ -146,10 +124,12 @@ typedef enum move_effective_flags {
 extern u8* g_move_terrain_costs_ptr;
 extern u8 g_move_terrain_cost;
 extern u8 g_move_weather_terrain_cost;
+
 move_effective_flags_e move_get_effective_flags(const unit_stats_t* unit);
 s32 move_get_ability_events(const unit_stats_t* unit);
 s32 move_get_water_standing_offset(unit_t* unit, battle_map_tile_t* tile);
 
+/* pathfinding */
 /* Compact movement records have auxiliary panels after the terrain panels. */
 enum {
     MOVE_RECORD_COUNT = 16,
@@ -336,9 +316,9 @@ typedef struct move_spread_state {
     u8 previous_source_side_shift;
     u8 clearance_height; /* 0x74; ceilings below this plus unit size block the step (move_path_update_candidate) */
 } move_spread_state_t;
-
 typedef char move_spread_state_size_must_be_120[(sizeof(move_spread_state_t) == 120) ? 1 : -1];
 
+/* move_record_t.unit_id_flags. */
 enum {
     MOVE_RECORD_UNIT_ID_MASK = 0x1f,
     MOVE_RECORD_FLAG_NOT_MOUNTABLE = 0x20,
@@ -361,63 +341,74 @@ typedef struct move_record {
     u8 standing_height; /* 0x05 */
     u8 top_height;      /* 0x06 */
 } move_record_t;
-
 typedef char move_record_size_must_be_7[(sizeof(move_record_t) == 7) ? 1 : -1];
+
 extern s32 g_move_range_valid;
 extern s32 g_move_range_unit_id;
 extern move_path_t g_move_path;
 extern u8 g_move_path_scratch;
 extern move_pathfind_scratch_t* g_move_config_ptr;
-extern u8* g_move_frontier_flags_ptr;
-
-/* Seven proven half-height offsets; the following byte is not
- * established as another element. Extended callers select indices 0..6. */
-extern u8 g_move_height_offsets[7];
-
-extern move_record_t* g_move_records_ptr;
 extern move_spread_state_t* g_move_scratch_pad_ptr;
+extern move_record_t* g_move_records_ptr;
+extern u8* g_move_frontier_flags_ptr;
 extern move_height_offsets_t g_move_path_height_offsets;
 extern u8 g_move_path_destination_unit_record;
 extern u8 g_move_path_effective_flags;
 extern u8* g_move_path_frontier;
 extern s32 g_move_path_resume_pass;
 extern s32 g_move_path_tile_index;
+extern void (*g_move_spread_preset_table[])(void);
+
+/* Provisional: always 0; copied into the move config byte 0x1a, which nothing reads. */
+extern u8 g_move_config_unknown_1a_value;
+
+/* Seven proven half-height offsets; the following byte is not
+ * established as another element. Extended callers select indices 0..6. */
+extern u8 g_move_height_offsets[7];
 
 /* Zeroed by move_path_calculate and never read. That pass keeps in statics what
  * move_spread_store_unit_to_scratchpad keeps in locals; these three stand where it sets
  * its team, ignore_terrain and count locals (the generic unit has no team, terrain rule or units). */
 extern u8 g_move_path_team;
-
 extern u8 g_move_path_ignore_terrain;
 extern s32 g_move_path_unit_record_count;
-extern void (*g_move_spread_preset_table[])(void);
-
-void move_path_calculate_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
-    s32 target_level, s32 initialize, s32* suspended);
 
 s32 move_range_build(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_z);
-
+void move_path_calculate_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
+    s32 target_level, s32 initialize, s32* suspended);
 move_path_t* move_path_calculate_walk_to(
     s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y, s32 target_level);
-
 move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation);
+
+/* walks and jumps */
 extern s32 g_move_jump_gravity;
-s32 move_is_unit_moving_by_runtime_id(u32 runtime_id);
-s32 move_start_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length);
+
 s32 move_start_walk_to(s32 runtime_id, battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
+s32 move_start_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length);
+s32 move_is_unit_moving_by_runtime_id(u32 runtime_id);
+void move_settle_on_tile(unit_t* unit);
+
+/* knockback */
+/* action_current_ability_t.knockback_flags: the kind of knockback found by
+ * move_knockback_calculate, with PENDING set until it is applied. */
+typedef enum move_knockback_kind {
+    MOVE_KNOCKBACK_FALL_DAMAGE = 1,    /* a grounded target: the fall height can hurt */
+    MOVE_KNOCKBACK_NO_FALL_DAMAGE = 2, /* a flying target */
+} move_knockback_kind_e;
+
+/* Encoding of the kind and pending marker in the same byte. */
+enum {
+    MOVE_KNOCKBACK_KIND_MASK = 0x7f,
+    MOVE_KNOCKBACK_PENDING = 0x80,
+};
+
 extern s32 g_move_displacement_direction;
+
 void move_knockback_start(const unit_t* src, unit_t* dst);
 void move_knockback_update(unit_t* unit);
+void move_knockback_cancel(void);
 
-/* Eight-byte result copied whole into the post-movement item display. */
-typedef struct move_found_item {
-    s32 _unknown_00;   /* 0x00; reset when an item is selected */
-    u8 item_id;        /* 0x04 */
-    u8 _padding_05[3]; /* tail padding to four-byte alignment */
-} move_found_item_t;
-
-typedef char move_found_item_size_must_be_8[sizeof(move_found_item_t) == 8 ? 1 : -1];
-
+/* Move-Find items and traps */
 typedef enum move_find_trap_id {
     MOVE_FIND_TRAP_DEGENERATOR = 0,
     MOVE_FIND_TRAP_DEATHTRAP = 1,
@@ -425,61 +416,6 @@ typedef enum move_find_trap_id {
     MOVE_FIND_TRAP_STEEL_NEEDLE = 3,
     MOVE_FIND_TRAP_NONE = 255,
 } move_find_trap_id_e;
-
-typedef enum move_find_result_flags {
-    MOVE_FIND_RESULT_ITEM = 0x01,
-    MOVE_FIND_RESULT_TRAP = 0x02,
-    MOVE_FIND_RESULT_OCCUPIED = 0x04,
-} move_find_result_flags_e;
-
-typedef struct move_find_result_data {
-    u8 flags; /* move_find_result_flags_e */
-    u8 entry_index;
-    u8 rare_item_id;
-    u8 common_item_id;
-    u8 trap_id; /* move_find_trap_id_e */
-    s8 occupying_unit_id;
-} move_find_result_data_t;
-
-typedef char move_find_result_data_size_must_be_6[(sizeof(move_find_result_data_t) == 6) ? 1 : -1];
-
-/* Composite event work produced after movement. This is separate from the
- * tile-query flags in move_find_result_data_t and the learned movement
- * ability bitsets. Bit 0x0200 has readers but no proven producer. */
-typedef enum move_post_event_flags {
-    MOVE_POST_EVENT_CRYSTAL_OR_TREASURE = 0x0001,
-    MOVE_POST_EVENT_MOVEMENT_BENEFIT = 0x0002,
-    MOVE_POST_EVENT_ITEM_FOUND = 0x0004,
-    MOVE_POST_EVENT_TRAP_TRIGGERED = 0x0008,
-    MOVE_POST_EVENT_CHARGING_CANCEL = 0x0010,
-    MOVE_POST_EVENT_MOVE_HP_UP = 0x0020,
-    MOVE_POST_EVENT_MOVE_MP_UP = 0x0040,
-    MOVE_POST_EVENT_MOVE_GET_EXP = 0x0080,
-    MOVE_POST_EVENT_MOVE_GET_JP = 0x0100,
-    MOVE_POST_EVENT_SOURCE_DISPLAY = 0x0200, /* runs the source unit's post-action display */
-    MOVE_POST_EVENT_MOUNT_STATUS_CHANGE = 0x0400,
-} move_post_event_flags_e;
-
-/* Contiguous result bytes returned as move_find_result_data_t. Keep
- * distinct symbols: the target reloads their absolute addresses separately. */
-extern move_found_item_t g_move_find_display_item;
-
-/* The scalar first-byte alias retains the retail absolute read/write addresses. */
-extern move_find_result_data_t g_move_find_tile_result;
-
-extern u8 g_move_find_result_flags;
-extern u8 g_move_find_entry_index;
-extern u8 g_move_find_rare_item_id;
-extern u8 g_move_find_common_item_id;
-extern u8 g_move_find_trap_id;
-extern s8 g_move_find_occupying_unit_id;
-
-/* Pending move_post_event_flags_e bits, dispatched in priority order. */
-extern s32 g_move_post_events;
-
-s32 move_start_next_post_event(void);
-void move_start_post_events(void);
-u32 move_get_post_events(unit_stats_t* unit);
 
 /* Four serialized move-find item/trap entries per map. */
 typedef enum move_find_entry_flags {
@@ -499,22 +435,86 @@ typedef struct move_find_entry {
     u8 rare_item_id;
     u8 common_item_id;
 } move_find_entry_t;
-
 typedef char move_find_entry_size_must_be_4[(sizeof(move_find_entry_t) == 4) ? 1 : -1];
 
 typedef struct move_find_map_data {
     move_find_entry_t entries[4];
 } move_find_map_data_t;
-
 typedef char move_find_map_data_size_must_be_16[(sizeof(move_find_map_data_t) == 16) ? 1 : -1];
+
+/* Eight-byte result copied whole into the post-movement item display. */
+typedef struct move_found_item {
+    s32 _unknown_00;   /* 0x00; reset when an item is selected */
+    u8 item_id;        /* 0x04 */
+    u8 _padding_05[3]; /* tail padding to four-byte alignment */
+} move_found_item_t;
+typedef char move_found_item_size_must_be_8[sizeof(move_found_item_t) == 8 ? 1 : -1];
+
+typedef enum move_find_result_flags {
+    MOVE_FIND_RESULT_ITEM = 0x01,
+    MOVE_FIND_RESULT_TRAP = 0x02,
+    MOVE_FIND_RESULT_OCCUPIED = 0x04,
+} move_find_result_flags_e;
+
+typedef struct move_find_result_data {
+    u8 flags; /* move_find_result_flags_e */
+    u8 entry_index;
+    u8 rare_item_id;
+    u8 common_item_id;
+    u8 trap_id; /* move_find_trap_id_e */
+    s8 occupying_unit_id;
+} move_find_result_data_t;
+typedef char move_find_result_data_size_must_be_6[(sizeof(move_find_result_data_t) == 6) ? 1 : -1];
+
 extern move_find_map_data_t g_move_find_map_data[BATTLE_MAP_ID_COUNT];
+extern move_found_item_t g_move_find_rare_item_result;
+extern move_found_item_t g_move_find_display_item;
 
 /* The current map's entries, copied from g_move_find_map_data when the map loads. */
 extern move_find_map_data_t g_move_find_current_map_data;
 
-extern move_found_item_t g_move_find_rare_item_result;
+/* The result bytes below as one record, at the address of g_move_find_result_flags; that scalar first-byte alias
+ * retains the retail absolute read/write addresses. */
+extern move_find_result_data_t g_move_find_tile_result;
+
+/* Contiguous result bytes returned as move_find_result_data_t. Keep distinct symbols: the target reloads their
+ * absolute addresses separately. */
+extern u8 g_move_find_result_flags;
+extern u8 g_move_find_entry_index;
+extern u8 g_move_find_rare_item_id;
+extern u8 g_move_find_common_item_id;
+extern u8 g_move_find_trap_id;
+extern s8 g_move_find_occupying_unit_id;
+
 void move_find_load_item_data(move_find_map_data_t* map_data);
-move_found_item_t* move_find_determine_item(unit_stats_t* unit);
 move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer);
+move_found_item_t* move_find_determine_item(unit_stats_t* unit);
+s32 move_find_apply_trap(unit_stats_t* unit);
+
+/* post movement */
+/* Composite event work produced after movement. This is separate from the
+ * tile-query flags in move_find_result_data_t and the learned movement
+ * ability bitsets. Bit 0x0200 has readers but no proven producer. */
+typedef enum move_post_event_flags {
+    MOVE_POST_EVENT_CRYSTAL_OR_TREASURE = 0x0001,
+    MOVE_POST_EVENT_MOVEMENT_BENEFIT = 0x0002,
+    MOVE_POST_EVENT_ITEM_FOUND = 0x0004,
+    MOVE_POST_EVENT_TRAP_TRIGGERED = 0x0008,
+    MOVE_POST_EVENT_CHARGING_CANCEL = 0x0010,
+    MOVE_POST_EVENT_MOVE_HP_UP = 0x0020,
+    MOVE_POST_EVENT_MOVE_MP_UP = 0x0040,
+    MOVE_POST_EVENT_MOVE_GET_EXP = 0x0080,
+    MOVE_POST_EVENT_MOVE_GET_JP = 0x0100,
+    MOVE_POST_EVENT_SOURCE_DISPLAY = 0x0200, /* runs the source unit's post-action display */
+    MOVE_POST_EVENT_MOUNT_STATUS_CHANGE = 0x0400,
+} move_post_event_flags_e;
+
+/* Pending move_post_event_flags_e bits, dispatched in priority order. */
+extern s32 g_move_post_events;
+
+u32 move_get_post_events(unit_stats_t* unit);
+void move_start_post_events(void);
+s32 move_start_next_post_event(void);
+s32 move_init_ability_benefit(unit_stats_t* unit);
 
 #endif

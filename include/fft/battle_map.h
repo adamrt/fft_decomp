@@ -1,7 +1,8 @@
 #ifndef BATTLE_MAP_H
 #define BATTLE_MAP_H
 
-/* Declarations. */
+/* The battle map: map ids, the terrain tiles and their lookups, the terrain tables, the selected tile, tile marks,
+ * background gradient colors, the map data commands and title card, and the event library's map routines. */
 
 #include "fft/render.h"
 #include "fft/unit.h"
@@ -9,6 +10,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* geometry */
 /* Horizontal X/Z extent of one terrain tile in map geometry units. */
 enum { BATTLE_MAP_TILE_SIZE = 28 };
 
@@ -28,9 +30,9 @@ typedef struct battle_map_tile_coordinates {
     s16 layer; /* 0x02 */
     s16 y;     /* 0x04 */
 } battle_map_tile_coordinates_t;
-
 typedef char battle_map_tile_coordinates_size_must_be_6[sizeof(battle_map_tile_coordinates_t) == 6 ? 1 : -1];
 
+/* maps */
 /* Battle map ids: EVENT_SCRIPT_VAR_CURRENT_MAP and the index of
  * g_battle_map_gns_lba. Each is named as its map name text spells it
  * (TEXT_ID_MAP_NAME_BASE + id - 1); a map whose name repeats an earlier one
@@ -157,6 +159,16 @@ typedef enum battle_map_id {
     BATTLE_MAP_ID_COUNT = 128,
 } battle_map_id_e;
 
+extern s32 g_battle_map_id;
+
+/* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
+ * one at rand() / 0x2000. */
+extern u8 g_battle_map_random_battle_music_tracks[];
+
+void battle_map_stop_animations(void);
+s32 battle_map_stop_clut_cycles_and_weather_sfx(void);
+
+/* terrain */
 /* Low six bits of a terrain tile's first byte. */
 typedef enum battle_map_surface_type {
     BATTLE_MAP_SURFACE_NATURAL = 0x00,
@@ -210,27 +222,6 @@ typedef enum battle_map_surface_type {
 } battle_map_surface_type_e;
 
 enum { BATTLE_MAP_SURFACE_MASK = 0x3f };
-
-/* Selectors accepted by battle_map_tile_get_value and battle_map_tile_set_value.
- * Selector 14 is unsupported; setter selector 15 performs a separate operation
- * whose relationship to tile data is not established. No caller passes
- * selector 1 or 10. */
-typedef enum battle_map_tile_data_selector {
-    BATTLE_MAP_TILE_DATA_SURFACE_TYPE = 0,
-    BATTLE_MAP_TILE_DATA_UNKNOWN_01 = 1,
-    BATTLE_MAP_TILE_DATA_HEIGHT = 2,
-    BATTLE_MAP_TILE_DATA_HALF_HEIGHT = 3,
-    BATTLE_MAP_TILE_DATA_DEPTH = 4,
-    BATTLE_MAP_TILE_DATA_SLOPE_TYPE = 5,
-    BATTLE_MAP_TILE_DATA_CEILING_DEPTH = 6,
-    BATTLE_MAP_TILE_DATA_BLOCKED = 7,
-    BATTLE_MAP_TILE_DATA_UNTARGETABLE = 8,
-    BATTLE_MAP_TILE_DATA_SHADING = 9,
-    BATTLE_MAP_TILE_DATA_UNKNOWN_FLAGS_4_6 = 10,
-    BATTLE_MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK = 11,
-    BATTLE_MAP_TILE_DATA_MOVE_DESTINATION_MARK = 12,
-    BATTLE_MAP_TILE_DATA_ABILITY_RANGE_MARK = 13,
-} battle_map_tile_data_selector_e;
 
 /* Depth-bias flag in terrain tile byte0; the low six bits use BATTLE_MAP_SURFACE_MASK. */
 enum {
@@ -347,111 +338,29 @@ typedef struct battle_map_tile {
      * holds the same direction bits for a steep pitch. */
     u8 camera_block_masks;
 } battle_map_tile_t;
-
 typedef char battle_map_tile_size_must_be_8[(sizeof(battle_map_tile_t) == 8) ? 1 : -1];
 
-/* Provisional 0xa-byte selected-tile record, filled by
- * battle_map_store_selected_tile_data and copied whole by
- * unit_panel_copy_billboard_out. _unknown_02/_unknown_04 are the two bytes of
- * the per-surface-type main table g_terrain_tile_info_pairs, 25 and 25
- * for all 64 surface types; nothing reads them back. */
-typedef struct battle_map_selected_tile {
-    s16 surface_type;   /* 0x00 */
-    s16 _unknown_02;    /* 0x02 */
-    s16 _unknown_04;    /* 0x04 */
-    s16 display_height; /* 0x06: half height + height * 2 + depth * 2 */
-    s16 depth;          /* 0x08 */
-} battle_map_selected_tile_t;
+/* Selectors accepted by battle_map_tile_get_value and battle_map_tile_set_value.
+ * Selector 14 is unsupported; setter selector 15 performs a separate operation
+ * whose relationship to tile data is not established. No caller passes
+ * selector 1 or 10. */
+typedef enum battle_map_tile_data_selector {
+    BATTLE_MAP_TILE_DATA_SURFACE_TYPE = 0,
+    BATTLE_MAP_TILE_DATA_UNKNOWN_01 = 1,
+    BATTLE_MAP_TILE_DATA_HEIGHT = 2,
+    BATTLE_MAP_TILE_DATA_HALF_HEIGHT = 3,
+    BATTLE_MAP_TILE_DATA_DEPTH = 4,
+    BATTLE_MAP_TILE_DATA_SLOPE_TYPE = 5,
+    BATTLE_MAP_TILE_DATA_CEILING_DEPTH = 6,
+    BATTLE_MAP_TILE_DATA_BLOCKED = 7,
+    BATTLE_MAP_TILE_DATA_UNTARGETABLE = 8,
+    BATTLE_MAP_TILE_DATA_SHADING = 9,
+    BATTLE_MAP_TILE_DATA_UNKNOWN_FLAGS_4_6 = 10,
+    BATTLE_MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK = 11,
+    BATTLE_MAP_TILE_DATA_MOVE_DESTINATION_MARK = 12,
+    BATTLE_MAP_TILE_DATA_ABILITY_RANGE_MARK = 13,
+} battle_map_tile_data_selector_e;
 
-extern battle_map_selected_tile_t g_battle_map_selected_tile_data;
-
-/* Map backgrounds use two four-byte runtime color slots. The fourth byte
- * is copied with each CVECTOR but is not an alpha channel; mesh-file RGB
- * triples have a separate three-byte layout. */
-typedef enum battle_map_background_gradient_color {
-    BATTLE_MAP_BACKGROUND_GRADIENT_TOP = 0,
-    BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM = 1,
-    BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT = 2,
-} battle_map_background_gradient_color_e;
-
-typedef struct battle_map_background_gradient_colors {
-    CVECTOR colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT];
-} battle_map_background_gradient_colors_t;
-
-typedef char battle_map_background_gradient_colors_size_must_be_8[(sizeof(battle_map_background_gradient_colors_t) == 8)
-        ? 1
-        : -1];
-
-/* Map-destruction handshake between the event interpreter and the frame loop. */
-extern s16 g_battle_map_destruction_wait_state;
-
-extern u16 g_battle_map_refresh_pending;
-
-/* The raw weather script variable, before indoor and snow flags apply. */
-s32 battle_map_get_weather(void);
-
-void battle_map_wait_for_refresh(void);
-
-/* Thread body: marks the deployment finished, for a battle that skips the deployment screen. */
-void battle_map_skip_deployment_thread(void);
-
-/* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
-void battle_map_light_thread(void);
-
-void battle_map_reset_script_light_transform(void);
-s32 battle_map_return_zero_1(void);
-void battle_map_stop_animations(void);
-
-/* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
- * one at rand() / 0x2000. */
-extern u8 g_battle_map_random_battle_music_tracks[];
-
-/* g_camera_tilt_target values the tilt code tests; the target is a tilt band plus one, and
- * bands 3 and 4 have no pitch here. */
-enum {
-    BATTLE_MAP_TILT_LOW = 1,  /* pitch 0x12e */
-    BATTLE_MAP_TILT_HIGH = 2, /* pitch 0x1c0 */
-};
-
-enum {
-    BATTLE_MAP_ZOOM_IN = 1,  /* scale ONE */
-    BATTLE_MAP_ZOOM_OUT = 4, /* scale 0xc00 */
-};
-
-void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
-    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value);
-
-/* Commands of battle_map_light_control_back_color, which stores RGB and controls the GTE
- * background color. */
-typedef enum battle_map_light_back_color_command {
-    BATTLE_MAP_LIGHT_BACK_COLOR_SET = 9,
-    BATTLE_MAP_LIGHT_BACK_COLOR_GET = 10,
-    BATTLE_MAP_LIGHT_BACK_COLOR_DISABLE = 11,
-    BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE = 12
-} battle_map_light_back_color_command_e;
-
-/* target_set_tile_mark_colors modes and the g_battle_map_tile_mark_modes states:
- * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
- * request recolors the current render buffer; battle_map_draw_mesh_and_weather then does the
- * other buffer and leaves the layer SHOWN or NONE. */
-typedef enum battle_map_tile_mark_mode {
-    BATTLE_MAP_TILE_MARK_NONE = 0, /* as a mode: restore every polygon and request the three HIDEs */
-    BATTLE_MAP_TILE_MARK_SHOW_MOVE = 1,
-    BATTLE_MAP_TILE_MARK_SHOW_RANGE = 2,
-    BATTLE_MAP_TILE_MARK_HIDE_RANGE = 3,
-    BATTLE_MAP_TILE_MARK_HIDE_MOVE = 5,
-    BATTLE_MAP_TILE_MARK_SHOW_TARGETS = 7,
-    BATTLE_MAP_TILE_MARK_HIDE_TARGETS = 8,
-    BATTLE_MAP_TILE_MARK_MOVE_SHOWN = 10,
-    BATTLE_MAP_TILE_MARK_RANGE_SHOWN = 11,
-    BATTLE_MAP_TILE_MARK_TARGETS_SHOWN = 12,
-} battle_map_tile_mark_mode_e;
-
-extern u16 g_battle_map_tile_mark_x;
-extern s16 g_battle_map_tile_mark_y;
-extern s16 g_battle_map_tile_mark_modes[3]; /* battle_map_tile_mark_mode_e, one per tile mark */
-extern render_buffer_t* g_battle_map_tile_mark_color_buffer;
-extern s32 g_battle_map_id;
 extern u8 g_battle_map_max_x;
 extern u8 g_battle_map_max_y;
 
@@ -459,73 +368,25 @@ extern u8 g_battle_map_max_y;
  * (layer * 256 + y * width + x). Callers that walk it with raw byte offsets
  * cast to u8*; the record shape is battle_map_tile_t. */
 extern battle_map_tile_t g_battle_map_tile_data[BATTLE_MAP_TILE_COUNT];
-
 extern s32 g_battle_map_lowest_surface_y;
 extern battle_map_tile_t* g_battle_map_tile_data_ptr;
 extern u8 g_battle_map_tile_depth;
 extern u8 g_battle_map_tile_width;
-s32 battle_map_tile_calculate_unit_index(const unit_stats_t* unit);
-s32 battle_map_tile_get_value(battle_map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
+
 battle_map_tile_t* battle_map_tile_get_pointer(s32 x, s32 y, u32 layer);
+s32 battle_map_tile_get_value(battle_map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
 s32 battle_map_tile_set_value(battle_map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value);
+s32 battle_map_tile_calculate_unit_index(const unit_stats_t* unit);
+battle_map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
 battle_map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id);
-void battle_map_store_selected_tile_coordinates(SVECTOR* destination);
+battle_map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id);
 s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z);
 void battle_map_store_max_coordinates(SVECTOR* destination);
 
 /* A typed terrain parameter loses the first retail byte-cursor increment. */
 void battle_map_tile_copy_size_and_data(u8* data);
 
-battle_map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
-battle_map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id);
-
-/* Commands of battle_map_dispatch_data_command, which switches on command
- * - 0x6a. This is its own id space: event Use3DObject (0x54) reaches command
- * 0x80. Names come from the case bodies. */
-typedef enum battle_map_data_command {
-    BATTLE_MAP_DATA_COMMAND_DISABLE_TEXTURE_ANIMATION = 0x6a,
-    BATTLE_MAP_DATA_COMMAND_RESTORE_TEXTURE_ANIMATION = 0x6b,
-    BATTLE_MAP_DATA_COMMAND_DISABLE_ALL_TEXTURE_ANIMATIONS = 0x71,
-    BATTLE_MAP_DATA_COMMAND_RESTORE_ALL_TEXTURE_ANIMATIONS = 0x72,
-    BATTLE_MAP_DATA_COMMAND_DISABLE_OVERLAY_DITHER = 0x7a, /* SetDrawMode dtd 0 */
-    BATTLE_MAP_DATA_COMMAND_ENABLE_OVERLAY_DITHER = 0x7b,  /* SetDrawMode dtd 1 */
-    BATTLE_MAP_DATA_COMMAND_SET_3D_OBJECT_STATE = 0x80,
-    BATTLE_MAP_DATA_COMMAND_GET_3D_OBJECT_STATE = 0x81,
-    BATTLE_MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE = 0x82,
-    BATTLE_MAP_DATA_COMMAND_START_TEXTURE_ANIMATION = 0x83,
-    BATTLE_MAP_DATA_COMMAND_SPLIT_MESH_PARTS = 0x98,
-    BATTLE_MAP_DATA_COMMAND_RELEASE_GNS_HOLD = 0x9a,
-    BATTLE_MAP_DATA_COMMAND_SET_TEXTURE_ANIMATION_DURATION = 0x9d,
-} battle_map_data_command_e;
-
-s32 battle_map_dispatch_data_command(battle_map_data_command_e command, u32 index, s32 object_state, s32 flag);
-s32 battle_map_get_3d_object_state(s32 value);
-s32 battle_map_set_3d_object_state(s32 value_a, s32 value_b);
-s32 battle_map_texture_get_animation_active(s32 value);
-s32 battle_map_texture_start_animation(s32 value_a, s32 value_b);
-
-/* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
-enum {
-    BATTLE_MAP_WEATHER_MODIFIER_SHIFT = 7,
-    BATTLE_MAP_WEATHER_LOW_FLAGS_MASK = 0x7f,
-};
-
-s32 battle_map_stop_clut_cycles_and_weather_sfx(void);
-
-/* The title card of the battle map. The BATTLE and WORLD event interpreters
- * (script_execute_event) also load and show it. */
-extern s32 g_battle_map_title_image_rect;
-
-extern s32 g_battle_map_title_palette_data;
-extern s32 g_battle_map_title_palette_rect;
-extern s32 g_battle_map_title_closing_past_midpoint;
-
-/* Two buffers of the four shaded title-panel strips. */
-extern POLY_GT4 g_battle_map_title_sprites[2][4];
-
-void battle_map_title_load_graphic(void);
-void battle_map_title_thread(void);
-
+/* terrain tables */
 /* g_terrain_status_flags has one byte per battle_map_surface_type_e; only
  * BATTLE_MAP_SURFACE_POISONED_MARSH has a bit. */
 enum {
@@ -556,5 +417,156 @@ extern const u8 g_terrain_geomancy_abilities[];
 
 /* Two bytes per battle_map_surface_type_e; all 64 pairs are 0x19, 0x19. */
 extern u8 g_terrain_tile_info_pairs[64][2];
+
+/* selected tile */
+/* Provisional 0xa-byte selected-tile record, filled by
+ * battle_map_store_selected_tile_data and copied whole by
+ * unit_panel_copy_billboard_out. _unknown_02/_unknown_04 are the two bytes of
+ * the per-surface-type main table g_terrain_tile_info_pairs, 25 and 25
+ * for all 64 surface types; nothing reads them back. */
+typedef struct battle_map_selected_tile {
+    s16 surface_type;   /* 0x00 */
+    s16 _unknown_02;    /* 0x02 */
+    s16 _unknown_04;    /* 0x04 */
+    s16 display_height; /* 0x06: half height + height * 2 + depth * 2 */
+    s16 depth;          /* 0x08 */
+} battle_map_selected_tile_t;
+
+extern battle_map_selected_tile_t g_battle_map_selected_tile_data;
+
+void battle_map_store_selected_tile_coordinates(SVECTOR* destination);
+
+/* tile marks */
+/* target_set_tile_mark_colors modes and the g_battle_map_tile_mark_modes states:
+ * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
+ * request recolors the current render buffer; battle_map_draw_mesh_and_weather then does the
+ * other buffer and leaves the layer SHOWN or NONE. */
+typedef enum battle_map_tile_mark_mode {
+    BATTLE_MAP_TILE_MARK_NONE = 0, /* as a mode: restore every polygon and request the three HIDEs */
+    BATTLE_MAP_TILE_MARK_SHOW_MOVE = 1,
+    BATTLE_MAP_TILE_MARK_SHOW_RANGE = 2,
+    BATTLE_MAP_TILE_MARK_HIDE_RANGE = 3,
+    BATTLE_MAP_TILE_MARK_HIDE_MOVE = 5,
+    BATTLE_MAP_TILE_MARK_SHOW_TARGETS = 7,
+    BATTLE_MAP_TILE_MARK_HIDE_TARGETS = 8,
+    BATTLE_MAP_TILE_MARK_MOVE_SHOWN = 10,
+    BATTLE_MAP_TILE_MARK_RANGE_SHOWN = 11,
+    BATTLE_MAP_TILE_MARK_TARGETS_SHOWN = 12,
+} battle_map_tile_mark_mode_e;
+
+extern u16 g_battle_map_tile_mark_x;
+extern s16 g_battle_map_tile_mark_y;
+extern s16 g_battle_map_tile_mark_modes[3]; /* battle_map_tile_mark_mode_e, one per tile mark */
+extern render_buffer_t* g_battle_map_tile_mark_color_buffer;
+
+/* background */
+/* Map backgrounds use two four-byte runtime color slots. The fourth byte
+ * is copied with each CVECTOR but is not an alpha channel; mesh-file RGB
+ * triples have a separate three-byte layout. */
+typedef enum battle_map_background_gradient_color {
+    BATTLE_MAP_BACKGROUND_GRADIENT_TOP = 0,
+    BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM = 1,
+    BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT = 2,
+} battle_map_background_gradient_color_e;
+
+typedef struct battle_map_background_gradient_colors {
+    CVECTOR colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT];
+} battle_map_background_gradient_colors_t;
+typedef char battle_map_background_gradient_colors_size_must_be_8[(sizeof(battle_map_background_gradient_colors_t) == 8)
+        ? 1
+        : -1];
+
+/* colors */
+/* Commands of battle_map_light_control_back_color, which stores RGB and controls the GTE
+ * background color. */
+typedef enum battle_map_light_back_color_command {
+    BATTLE_MAP_LIGHT_BACK_COLOR_SET = 9,
+    BATTLE_MAP_LIGHT_BACK_COLOR_GET = 10,
+    BATTLE_MAP_LIGHT_BACK_COLOR_DISABLE = 11,
+    BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE = 12
+} battle_map_light_back_color_command_e;
+
+void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
+    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value);
+
+/* weather */
+/* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
+enum {
+    BATTLE_MAP_WEATHER_MODIFIER_SHIFT = 7,
+    BATTLE_MAP_WEATHER_LOW_FLAGS_MASK = 0x7f,
+};
+
+/* camera tilt and zoom */
+/* g_camera_tilt_target values the tilt code tests; the target is a tilt band plus one, and
+ * bands 3 and 4 have no pitch here. */
+enum {
+    BATTLE_MAP_TILT_LOW = 1,  /* pitch 0x12e */
+    BATTLE_MAP_TILT_HIGH = 2, /* pitch 0x1c0 */
+};
+
+/* g_camera_zoom_target values. */
+enum {
+    BATTLE_MAP_ZOOM_IN = 1,  /* scale ONE */
+    BATTLE_MAP_ZOOM_OUT = 4, /* scale 0xc00 */
+};
+
+/* map data commands */
+/* Commands of battle_map_dispatch_data_command, which switches on command
+ * - 0x6a. This is its own id space: event Use3DObject (0x54) reaches command
+ * 0x80. Names come from the case bodies. */
+typedef enum battle_map_data_command {
+    BATTLE_MAP_DATA_COMMAND_DISABLE_TEXTURE_ANIMATION = 0x6a,
+    BATTLE_MAP_DATA_COMMAND_RESTORE_TEXTURE_ANIMATION = 0x6b,
+    BATTLE_MAP_DATA_COMMAND_DISABLE_ALL_TEXTURE_ANIMATIONS = 0x71,
+    BATTLE_MAP_DATA_COMMAND_RESTORE_ALL_TEXTURE_ANIMATIONS = 0x72,
+    BATTLE_MAP_DATA_COMMAND_DISABLE_OVERLAY_DITHER = 0x7a, /* SetDrawMode dtd 0 */
+    BATTLE_MAP_DATA_COMMAND_ENABLE_OVERLAY_DITHER = 0x7b,  /* SetDrawMode dtd 1 */
+    BATTLE_MAP_DATA_COMMAND_SET_3D_OBJECT_STATE = 0x80,
+    BATTLE_MAP_DATA_COMMAND_GET_3D_OBJECT_STATE = 0x81,
+    BATTLE_MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE = 0x82,
+    BATTLE_MAP_DATA_COMMAND_START_TEXTURE_ANIMATION = 0x83,
+    BATTLE_MAP_DATA_COMMAND_SPLIT_MESH_PARTS = 0x98,
+    BATTLE_MAP_DATA_COMMAND_RELEASE_GNS_HOLD = 0x9a,
+    BATTLE_MAP_DATA_COMMAND_SET_TEXTURE_ANIMATION_DURATION = 0x9d,
+} battle_map_data_command_e;
+
+s32 battle_map_dispatch_data_command(battle_map_data_command_e command, u32 index, s32 object_state, s32 flag);
+s32 battle_map_get_3d_object_state(s32 value);
+s32 battle_map_set_3d_object_state(s32 value_a, s32 value_b);
+s32 battle_map_texture_get_animation_active(s32 value);
+s32 battle_map_texture_start_animation(s32 value_a, s32 value_b);
+
+/* map title */
+/* The title card of the battle map. The BATTLE and WORLD event interpreters
+ * (script_execute_event) also load and show it. */
+extern s32 g_battle_map_title_image_rect;
+extern s32 g_battle_map_title_palette_data;
+extern s32 g_battle_map_title_palette_rect;
+extern s32 g_battle_map_title_closing_past_midpoint;
+
+/* Two buffers of the four shaded title-panel strips. */
+extern POLY_GT4 g_battle_map_title_sprites[2][4];
+
+void battle_map_title_load_graphic(void);
+void battle_map_title_thread(void);
+
+/* event state */
+/* Map-destruction handshake between the event interpreter and the frame loop. */
+extern s16 g_battle_map_destruction_wait_state;
+extern u16 g_battle_map_refresh_pending;
+
+void battle_map_wait_for_refresh(void);
+s32 battle_map_return_zero_1(void); /* unreferenced stub */
+
+/* The raw weather script variable, before indoor and snow flags apply. */
+s32 battle_map_get_weather(void);
+
+/* Thread body: marks the deployment finished, for a battle that skips the deployment screen. */
+void battle_map_skip_deployment_thread(void);
+
+/* script lighting */
+/* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
+void battle_map_light_thread(void);
+void battle_map_reset_script_light_transform(void);
 
 #endif

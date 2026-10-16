@@ -1,9 +1,9 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-/* Text: the font, the encoded text format and its sections, substitutions, measuring, drawing text and numbers
- * into images, dialog windows and their threads, the typewriter and the message text threads. Shared by BATTLE,
- * WORLD and the menu overlays. */
+/* Text shared by BATTLE, WORLD and the overlays: the font, the encoded text format, text sections and ids,
+ * substitutions, measuring, drawing text and numbers into images, the dialog window record, the typewriter's glyph
+ * slots and the menu text threads. */
 
 #include "fft/menu.h"
 #include "fft/screen.h"
@@ -12,9 +12,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern s32 g_text_awaiting_input;
 struct action_command;
 
+/* font */
 /* The font, EVENT/FONT.BIN: 2200 glyphs of 14 rows of 10 two-bit pixels. A
  * byte from TEXT_EXTENDED_GLYPH_PREFIX_FIRST selects a page of glyphs and
  * the byte after it the glyph: (prefix & 0xf) * TEXT_GLYPHS_PER_PREFIX + byte. */
@@ -25,11 +25,11 @@ enum {
 
 /* Glyph pixel widths, TEXT_GLYPHS_PER_PREFIX entries per prefix page. */
 extern const u8 g_text_glyph_widths[];
-
 extern u8 g_text_glyph_bitmaps[];
 extern u8* g_text_glyph_bitmap_data;
 extern glyph_blit_t g_text_small_number_glyph_rect; /* source of the small 6x10 number glyphs */
 
+/* encoded text */
 /* Encoded menu-string controls. The 0xe2-0xfd meanings come from the dialog
  * interpreter branches (message_dialog_thread and its WORLD
  * twin) and, for 0xe7, the menu text-image renderers; codes with an operand
@@ -80,7 +80,6 @@ typedef struct text_backref {
     u8 length_low : 3;
     u8 offset_low;
 } text_backref_t;
-
 typedef char text_backref_size_must_be_3[sizeof(text_backref_t) == 3 ? 1 : -1];
 
 /* Text-stream cursor state used by measurement and menu rendering. The
@@ -109,6 +108,8 @@ u8* menu_text_advance_cursor_with_backreferences(text_reader_state_t* state, u8*
  * separate variables. */
 u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor);
 
+/* text sections */
+/* A text id selects a section in its upper five bits and an entry in the lower eleven. */
 enum {
     TEXT_SECTION_COUNT = 32,
     TEXT_ID_SECTION_MASK = 0xf800,
@@ -152,9 +153,18 @@ typedef enum text_id_base {
     TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE = 0xf800, /* by proposition_fields_t::name_text less one */
 } text_id_base_e;
 
-/* Index into g_text_section_pointers: a text id's top five bits. Only the
- * sections the code binds or reads by a fixed role are named. A screen
- * rebinds a slot to its own text while it is up: help_text_section_e here,
+/* Reward names in the TEXT_ID_PROPOSITION_REWARD_NAME_BASE section: the random bonuses from the base,
+ * then the no-reward name, the unexplored lands and the treasures, each by reward_index. */
+enum {
+    TEXT_ID_REWARD_NONE = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6,
+    TEXT_ID_REWARD_LAND_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1b,
+    TEXT_ID_REWARD_TREASURE_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2e,
+};
+
+enum { TEXT_ID_FORMATION_TEXT_BASE = SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
+
+/* Index into g_text_section_pointers: a text id's top five bits. Only the sections the code binds or reads by a
+ * fixed role are named. A screen rebinds a slot to its own text while it is up: help_text_section_e,
  * screen_text_section_e and after_battle_text_section_e map those bindings. */
 typedef enum text_section {
     TEXT_SECTION_EVENT_MESSAGES = 0,      /* the loaded event's text; BUNIT binds its menu text here */
@@ -176,29 +186,38 @@ typedef enum text_section {
     TEXT_SECTION_AT_LIST = 31,              /* the AT list's text, built when the list opens */
 } text_section_e;
 
-/* A text id selects a section in its upper five bits and an entry in the lower eleven. */
 extern s32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
-
 extern u8* g_text_section_pointers[TEXT_SECTION_COUNT];
 extern u8* g_text_saved_section_pointers[TEXT_SECTION_COUNT];
+extern u8* g_text_saved_pointers[32];
 extern s32 g_text_section_backup_active;
-void text_save_section_pointers(void);
-void text_restore_section_pointers(void);
-
-/* Points g_text_section_pointers at the sections of a text file that starts with its table of offsets. */
-void text_relocate_pointer_table(const u32* offsets);
-
-u8* text_find_entry(u32 text_id);
-const u8* text_skip_to_entry(const u8* text, s32 entry_index);
-const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2);
 
 /* The text file an overlay loaded. */
 extern u8 g_text_data[];
 
-extern u8* g_text_saved_pointers[32];
-extern s32 g_text_selection_id;
-extern u8 g_text_thread_running_state;
+void text_init_section_pointers(void);
+void text_save_section_pointers(void);
+void text_restore_section_pointers(void);
+u8* text_find_entry(u32 text_id);
+const u8* text_skip_to_entry(const u8* text, s32 entry_index);
+const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2);
 
+/* Points g_text_section_pointers at the sections of a text file that starts with its table of offsets. */
+void text_relocate_pointer_table(const u32* offsets);
+
+/* battle name text */
+/* Offsets of the two name sections in g_text_name_data. */
+typedef struct text_name_section_offsets {
+    u32 unit_names;
+    u32 job_names;
+} text_name_section_offsets_t;
+
+extern u8 g_text_name_data[];
+extern const text_name_section_offsets_t g_text_name_section_offsets;
+
+void text_init_battle_pointers(void);
+
+/* substitutions */
 /* Player-name substitution, padded to 20 bytes with TEXT_END_WAIT_FOR_CONFIRM. */
 extern u8 g_text_player_name_buffer[20];
 
@@ -214,18 +233,17 @@ void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height);
 /* The text id a substitution code (text_format_code_e) prints for value. */
 s32 text_resolve_format_string_id(s32 format_code, s32 value);
 
-/* Prints value and value + 1 to the debug font stream. */
-void text_print_fnt_value_and_next(s32 value);
-
 /* Packs the names of the battle units into TEXT_SECTION_ROSTER_UNIT_NAMES. */
 void text_build_unit_name_list(void);
 
+/* measuring */
 /* Pixel width of each line from the last text_measure_pixels call. */
 extern s32 g_text_line_widths[];
 
 void text_measure(s16* columns, s16* rows, const u8* text);
 void text_measure_pixels(s16* width, s16* rows, const u8* text);
 
+/* text images */
 /* The scene's menu text state (g_menu_text_state): the script-variable pointer, then the pen the glyph
  * renderers receive. */
 typedef struct menu_text_state {
@@ -237,35 +255,6 @@ typedef struct menu_text_state {
     glyph_blit_t pen;
 } menu_text_state_t;
 
-extern menu_text_state_t g_menu_text_state;
-extern glyph_blit_t g_menu_text_pen;
-
-/* Added to glyph palette indices while menu text is drawn. */
-extern s32 g_menu_text_palette_offset;
-
-extern s32 g_menu_text_param_22; /* line limits copied from the text record (+0x22, +0x24) */
-extern s32 g_menu_text_param_24;
-extern s32 g_text_glyph_first_row;
-extern s32 g_text_glyph_row_limit;
-
-/* Text image buffer of the options and AT list screens and of menu_redraw_text_page_on_scroll. */
-extern u8 g_menu_render_buffer[];
-
-void menu_set_text_origin(s32 x, s32 y);
-void menu_clear_render_buffer(void* buffer, u32 bytes);
-void text_set_blit_destination(s16 destination_x, s16 destination_y);
-
-/* Allocates text image VRAM for the sprite or quad and gives it the normal menu CLUT plus clut_offset rows. */
-void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
-
-void text_render_glyph_to_4bpp_image(const u8* glyph_bitmap, u8* image, glyph_blit_t* origin, s32 palette_offset);
-void text_blit_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
-void menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text);
-void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
-void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
-void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
-void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
-
 /* Pen of menu_text_render_glyph_to_4bpp_image: x in pixels (two per byte), y in rows, and the image's row stride in
  * 16-bit values. */
 typedef struct text_image_position {
@@ -273,7 +262,6 @@ typedef struct text_image_position {
     s16 y;          /* 0x02 */
     s16 row_stride; /* 0x04 */
 } text_image_position_t;
-
 typedef char text_image_position_size_must_be_6[(sizeof(text_image_position_t) == 6) ? 1 : -1];
 
 /* Origin and row geometry of the image menu_text_render_encoded_ids_to_image draws into. */
@@ -284,19 +272,44 @@ typedef struct text_image_bounds {
     s16 line_height;
 } text_image_bounds_t;
 
+extern menu_text_state_t g_menu_text_state;
+extern glyph_blit_t g_menu_text_pen;
+extern s32 g_menu_text_param_22; /* line limits copied from the text record (+0x22, +0x24) */
+extern s32 g_menu_text_param_24;
+extern s32 g_text_glyph_first_row;
+extern s32 g_text_glyph_row_limit;
+
+/* Added to glyph palette indices while menu text is drawn. */
+extern s32 g_menu_text_palette_offset;
+
+/* Text image buffer of the options and AT list screens and of menu_redraw_text_page_on_scroll. */
+extern u8 g_menu_render_buffer[];
+
 /* The source and destination rectangles of the next glyph blit. */
 extern glyph_blit_t g_text_glyph_source;
-
 extern glyph_blit_t g_text_glyph_dest;
-void text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height);
-s32 menu_text_render_glyph_to_4bpp_image(s32 glyph_id, u8* image, const text_image_position_t* position, s32 style);
 
+void menu_set_text_origin(s32 x, s32 y);
+void menu_clear_render_buffer(void* buffer, u32 bytes);
+void text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height);
+void text_set_blit_destination(s16 destination_x, s16 destination_y);
+void text_render_glyph_to_4bpp_image(const u8* glyph_bitmap, u8* image, glyph_blit_t* origin, s32 palette_offset);
+void text_blit_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
+s32 menu_text_render_glyph_to_4bpp_image(s32 glyph_id, u8* image, const text_image_position_t* position, s32 style);
+void menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text);
+void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
+void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
+void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
+void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void menu_text_render_encoded_ids_to_image(u8* image, text_image_bounds_t* rect, s32 unused, s32 max_chars, u8* font,
     s16* ids, s32 count, s16 glyph, s32 unused_flags);
-
 void text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
 void text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 separate);
 
+/* Allocates text image VRAM for the sprite or quad and gives it the normal menu CLUT plus clut_offset rows. */
+void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
+
+/* numbers */
 /* The sign flags of a number format (menu_number_entry_t::format). */
 typedef enum menu_decimal_sign_flag {
     MENU_DECIMAL_SIGN_PLUS = 0x0400,
@@ -328,18 +341,18 @@ typedef struct menu_digit_glyph {
     s16 w;
     u16 h;
 } menu_digit_glyph_t;
-
 typedef char menu_digit_glyph_size_must_be_16[sizeof(menu_digit_glyph_t) == 16 ? 1 : -1];
+
 extern glyph_blit_t g_menu_large_number_glyph; /* source of the large 8x15 number and sign glyphs */
 extern const char g_text_decimal_format[];
 extern u32 g_text_decimal_divisors[];
+
 s32 text_count_decimal_digits(s32 value);
 void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
 
 /* The battle ability lists draw this pair in the number column instead of a value of 0 or 1 when the ability's
  * skill_ct is 0 or 0xff. */
 void menu_draw_stacked_glyph_pair(u8* pixels, glyph_blit_t* position);
-
 void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin);
 void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count);
 void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
@@ -348,6 +361,13 @@ void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* en
 /* BATTLE and WORLD each have their own body. */
 void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos);
 
+/* debug font output */
+extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
+
+/* Prints value and value + 1 to the debug font stream. */
+void text_print_fnt_value_and_next(s32 value);
+
+/* dialog windows */
 /* Box type: the 0x70 bits of a DisplayMessage dialog type byte. */
 typedef enum dialog_box_type {
     DIALOG_BOX_TYPE_CENTERED = 0x00,
@@ -433,8 +453,9 @@ enum {
 };
 
 extern s32 g_text_current_line;
-void text_init_section_pointers(void);
+extern s32 g_text_awaiting_input;
 
+/* typewriter glyphs */
 /* One pending text glyph: g_message_typewriter_glyph, which message_dialog_thread fills and
  * message_draw_glyph_with_delay draws, and WORLD's message-box glyph g_message_box_glyph
  * (message_box_thread). The typewriter's menu text state and VRAM rectangle follow it in memory but
@@ -447,17 +468,19 @@ typedef struct text_glyph_state {
     s16 mode;         /* 0x0c: 0 blanks the image, 0x10 draws it; the message box also accepts 0x20 */
     s16 palette;      /* 0x0e */
 } text_glyph_state_t;
-
 typedef char text_glyph_state_size_must_be_16[(sizeof(text_glyph_state_t) == 16) ? 1 : -1];
+
 extern s32 g_text_glyphs_per_wait;
 
 /* The three per-thread staging slots the typewriter draws glyphs through. */
 extern s32 g_text_slot_owner_thread_ids[3];
-
 extern s32 g_text_slot_glyph_counts[3];
 extern u8 g_text_slot_source_columns[];
 extern u8 g_text_slot_row_pitches[];
-extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
+
+/* text threads */
+extern s32 g_text_selection_id;
+extern u8 g_text_thread_running_state;
 extern s32 g_menu_text_active_key;
 
 /* Starts the text thread on thread_id only when its scheduler slot is idle. */
@@ -466,25 +489,5 @@ void menu_text_start_thread_if_idle(s32 thread_id, s32 first, s32 second, s32 th
 /* Starts the text thread when no text is pending and returns 1; returns 0 once the pending text matches key and
  * has finished, otherwise the running status. */
 s32 menu_text_start_or_poll_thread(s32 thread_id, s32 parameter_0, s32 key, s32 parameter_2, s32 y_offset);
-
-/* Offsets of the two name sections in g_text_name_data. */
-typedef struct text_name_section_offsets {
-    u32 unit_names;
-    u32 job_names;
-} text_name_section_offsets_t;
-
-extern u8 g_text_name_data[];
-extern const text_name_section_offsets_t g_text_name_section_offsets;
-void text_init_battle_pointers(void);
-
-/* Reward names in the TEXT_ID_PROPOSITION_REWARD_NAME_BASE section: the random bonuses from the base,
- * then the no-reward name, the unexplored lands and the treasures, each by reward_index. */
-enum {
-    TEXT_ID_REWARD_NONE = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6,
-    TEXT_ID_REWARD_LAND_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1b,
-    TEXT_ID_REWARD_TREASURE_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2e,
-};
-
-enum { TEXT_ID_FORMATION_TEXT_BASE = SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
 
 #endif
