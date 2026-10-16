@@ -53,7 +53,7 @@ s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
             deployed = 0;
             for (j = 0; j < BATTLE_UNIT_SLOT_COUNT; j++) {
                 unit = &g_battle_unit_stats[j];
-                if (unit->existence != BATTLE_UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
+                if (unit->existence != UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
                     && unit->formation_index == party_id) {
                     deployed = 1;
                     break;
@@ -76,8 +76,8 @@ s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
-        if (unit->existence != BATTLE_UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
-            && !(unit->initial_team_flags & BATTLE_TEAM_MASK) && unit->job_id != JOB_ID_MIME) {
+        if (unit->existence != UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
+            && !(unit->initial_team_flags & UNIT_TEAM_MASK) && unit->job_id != JOB_ID_MIME) {
             for (j = 0; j < UNIT_EQUIPMENT_SLOT_COUNT; j++) {
                 if (unit->equipment[j] == item_id) {
                     total++;
@@ -173,8 +173,8 @@ void main_unit_increase_casualty_counters(unit_stats_t* unit) {
     s32 id;
     s32 count;
 
-    id = (unit->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE ? EVENT_SCRIPT_VAR_INJURED
-                                                                           : EVENT_SCRIPT_VAR_CASUALTIES;
+    id = (unit->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE ? EVENT_SCRIPT_VAR_INJURED
+                                                                       : EVENT_SCRIPT_VAR_CASUALTIES;
     count = script_get_variable(id);
     if (count < EVENT_CASUALTY_COUNT_MAX) {
         count++;

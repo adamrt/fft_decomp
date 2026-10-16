@@ -112,7 +112,7 @@ static s32 require_party_update_brave_faith_and_collect_warnings(void) {
         battle_unit = battle_unit_get_stats_from_battle_id(battle_index);
         unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &found_battle_index);
         if (found_battle_index < 0 || battle_index != found_battle_index
-            || unit->formation_index == BATTLE_FORMATION_INDEX_NONE || unit->unit_id == 0) {
+            || unit->formation_index == UNIT_FORMATION_INDEX_NONE || unit->unit_id == 0) {
             continue;
         }
 
@@ -257,7 +257,7 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
         battle_unit = battle_unit_get_stats_from_battle_id(battle_index);
         unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &found_battle_index);
         if (found_battle_index < 0 || battle_index != found_battle_index
-            || unit->formation_index == BATTLE_FORMATION_INDEX_NONE || unit->unit_id == 0) {
+            || unit->formation_index == UNIT_FORMATION_INDEX_NONE || unit->unit_id == 0) {
             continue;
         }
         if (unit->formation_index >= PARTY_GUEST_SLOT_FIRST
@@ -382,7 +382,7 @@ s32 require_party_update_after_battle(void) {
 
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 unit = battle_unit_get_stats_from_battle_id(i);
-                if (unit->formation_index == party_index && unit->existence != BATTLE_UNIT_EXISTENCE_NONE
+                if (unit->formation_index == party_index && unit->existence != UNIT_EXISTENCE_NONE
                     && unit->unit_id != 0) {
                     break;
                 }
@@ -391,7 +391,7 @@ s32 require_party_update_after_battle(void) {
             if (i != BATTLE_UNIT_ID_NONE) {
                 unit = battle_unit_get_stats_from_battle_id(i);
                 unit = battle_unit_find_stats_by_entd_unit_id(unit->unit_id, &found_index);
-                if (unit->existence == BATTLE_UNIT_EXISTENCE_DISABLED || unit->existence == BATTLE_UNIT_EXISTENCE_NONE
+                if (unit->existence == UNIT_EXISTENCE_DISABLED || unit->existence == UNIT_EXISTENCE_NONE
                     || found_index == -3) {
                     if (unit->unit_id == 0 || unit->unit_id >= 4) {
                         if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
@@ -407,7 +407,7 @@ s32 require_party_update_after_battle(void) {
                 } else if (!(unit->unit_flags & UNIT_FLAG_SAVE_FORMATION)
                     && unit->formation_index >= PARTY_GUEST_SLOT_FIRST) {
                     main_party_remove_unit(unit->formation_index);
-                    unit->formation_index = BATTLE_FORMATION_INDEX_NONE;
+                    unit->formation_index = UNIT_FORMATION_INDEX_NONE;
                 } else {
                     main_party_save_unit(unit, unit->unit_flags & UNIT_FLAG_SAVE_FORMATION);
                 }
@@ -421,7 +421,7 @@ s32 require_party_update_after_battle(void) {
 
         battle_unit = battle_unit_get_stats_from_battle_id(party_index);
         unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &found_index);
-        if (found_index >= 0 && party_index == found_index && unit->formation_index == BATTLE_FORMATION_INDEX_NONE
+        if (found_index >= 0 && party_index == found_index && unit->formation_index == UNIT_FORMATION_INDEX_NONE
             && unit->unit_id != 0) {
             u32 base_class = unit->character_identity;
             if ((base_class == CHARACTER_IDENTITY_ENTD_NONE || base_class >= CHARACTER_IDENTITY_RAMZA_END)

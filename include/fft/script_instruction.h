@@ -14,7 +14,7 @@ enum {
     /* External unit-id selectors used by scenario commands. */
     EVENT_UNIT_SELECTOR_SLOT_FIRST = 0x64,
     EVENT_UNIT_SELECTOR_SLOT_COUNT = 4,
-    /* The first ENTD unit whose team flags have a nonzero BATTLE_TEAM_IMPORTANCE_MASK. */
+    /* The first ENTD unit whose team flags have a nonzero UNIT_TEAM_IMPORTANCE_MASK. */
     EVENT_UNIT_SELECTOR_IMPORTANT_UNIT = 0x68,
     EVENT_UNIT_SELECTOR_ACTIVE_TURN = 0x69,
     /* First unit-group selector. The instructions that take a unit group pass

@@ -99,7 +99,7 @@ typedef struct status_effect_data {
 typedef char status_effect_data_size_must_be_16[(sizeof(status_effect_data_t) == 16) ? 1 : -1];
 
 /* Flags that build the shared status-check sets during main initialization
- * (main_status_check_set_e). The records also set bits 0x08, 0x10, 0x20 and
+ * (status_check_set_e). The records also set bits 0x08, 0x10, 0x20 and
  * 0x40 of flags_1 and 0x20 of flags_2, which nothing reads. */
 typedef enum status_effect_flags_1 {
     STATUS_EFFECT_FLAG_1_KO = 0x01,
@@ -123,37 +123,37 @@ typedef enum status_effect_flags_2 {
  * to 9 from the flag bytes of g_main_status_effect_data and writes row 10
  * itself. Each enumerator's comment lists the statuses its row holds in this
  * release, then what the row is used for. */
-typedef enum main_status_check_set {
+typedef enum status_check_set {
     /* Crystal, Dead, Petrify, Invite, Blood Suck, Treasure. A unit with none of them still fights for its side. */
-    MAIN_STATUS_CHECK_SET_KO = 0,
+    STATUS_CHECK_SET_KO = 0,
     /* Crystal, Invite, Treasure. On an importance-3 unit of either team it decides the battle. */
-    MAIN_STATUS_CHECK_SET_UNIT_LOST = 1,
+    STATUS_CHECK_SET_UNIT_LOST = 1,
     /* Crystal, Treasure. Built; no code reads it. */
-    MAIN_STATUS_CHECK_SET_UNREAD_2 = 2,
+    STATUS_CHECK_SET_UNREAD_2 = 2,
     /* Crystal, Petrify, Treasure, Stop, Sleep. The unit's CT does not advance. */
-    MAIN_STATUS_CHECK_SET_FREEZE_CT = 3,
+    STATUS_CHECK_SET_FREEZE_CT = 3,
     /* Crystal, Dead, Jump, Petrify, Confusion, Blood Suck, Treasure, Berserk, Chicken, Frog, Stop, Sleep, Don't Act.
      * No reaction, no learning on hit, no movement-ability benefit. */
-    MAIN_STATUS_CHECK_SET_PREVENT_REACTION = 4,
+    STATUS_CHECK_SET_PREVENT_REACTION = 4,
     /* Crystal, Dead, Undead, Petrify, Invite, Confusion, Blood Suck, Treasure, Chicken, Frog, Charm, Sleep,
      * Don't Act, Death Sentence. Added to the immunities of an immortal unit with a save- or load-formation flag. */
-    MAIN_STATUS_CHECK_SET_IMMORTAL_IMMUNITY = 5,
+    STATUS_CHECK_SET_IMMORTAL_IMMUNITY = 5,
     /* Crystal, Dead, Undead, Petrify, Invite, Blood Suck, Treasure, Chicken, Frog, Charm, Death Sentence.
      * Added with set 5, and never inflicted on an immortal unit. */
-    MAIN_STATUS_CHECK_SET_FORMATION_IMMUNITY = 6,
+    STATUS_CHECK_SET_FORMATION_IMMUNITY = 6,
     /* Darkness, Confusion, Silence, Transparent, Berserk, Chicken, Frog, Stop, Charm, Sleep, Don't Move, Don't Act.
      * Built; no code reads it. */
-    MAIN_STATUS_CHECK_SET_UNREAD_7 = 7,
+    STATUS_CHECK_SET_UNREAD_7 = 7,
     /* Crystal, Dead, Undead, Jump, Petrify, Invite, Treasure, Critical. Script unit filters 3 and 5 leave out a
      * unit with one of them (filter 5 lets Undead through). */
-    MAIN_STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED = 8,
+    STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED = 8,
     /* Confusion, Berserk, Poison, Stop, Sleep, Don't Move, Don't Act, Death Sentence. Removed from a mount when its
      * rider ends a move. */
-    MAIN_STATUS_CHECK_SET_MOUNT_REMOVAL = 9,
+    STATUS_CHECK_SET_MOUNT_REMOVAL = 9,
     /* Crystal, Dead, Petrify, Blood Suck, Treasure, Berserk, Chicken, Frog, Charm; set in code, not from the status
      * data. A chocobo with one of them cannot be mounted. */
-    MAIN_STATUS_CHECK_SET_UNMOUNTABLE = 10,
-    MAIN_STATUS_CHECK_SET_COUNT = 11,
-} main_status_check_set_e;
+    STATUS_CHECK_SET_UNMOUNTABLE = 10,
+    STATUS_CHECK_SET_COUNT = 11,
+} status_check_set_e;
 
 #endif

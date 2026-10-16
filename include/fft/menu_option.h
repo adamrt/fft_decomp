@@ -108,11 +108,11 @@ extern game_options_t g_menu_saved_game_options;
 /* options screen */
 /* The argument of option_entrypoint and world_menu_run_main_mode: which of
  * the OPTION overlay's screens to run. */
-typedef enum option_menu_type {
-    OPTION_MENU_GAME_OPTIONS = 0,
-    OPTION_MENU_AT_LIST = 1,
-    OPTION_MENU_DEAD_UNIT = 2, /* crystal and treasure panel */
-} option_menu_type_e;
+typedef enum menu_option_type {
+    MENU_OPTION_TYPE_GAME_OPTIONS = 0,
+    MENU_OPTION_TYPE_AT_LIST = 1,
+    MENU_OPTION_TYPE_DEAD_UNIT = 2, /* crystal and treasure panel */
+} menu_option_type_e;
 
 /* One of the two 0x190-byte packet pages of the options screen (g_menu_option_pages), alternated by frame.
  * Provisional. */

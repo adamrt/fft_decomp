@@ -649,11 +649,11 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
             }
             bunit_gfx_draw_unit_sprite_and_name_plate(g_bunit_unit_reorderable_indices[unit], cell.x, cell.y);
             if (g_bunit_unit_pointers[g_bunit_unit_reorderable_indices[unit]]->mount_info
-                & BATTLE_MOUNT_INFO_FLAG_RIDER) {
+                & UNIT_MOUNT_INFO_FLAG_RIDER) {
                 bunit_gfx_draw_unit_sprite_and_name_plate(
                     bunit_unit_find_index_by_battle_id(
                         g_bunit_unit_pointers[g_bunit_unit_reorderable_indices[unit]]->mount_info
-                        - BATTLE_MOUNT_INFO_FLAG_RIDER),
+                        - UNIT_MOUNT_INFO_FLAG_RIDER),
                     cell.x, cell.y);
             }
         }
@@ -899,7 +899,7 @@ static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
          * reassociate it onto x. */
         quad.x = x + (s16)(dx + 0x1C);
         quad.y = cells[i].y_shift + (y + base_y);
-        if (g_bunit_unit_pointers[unit]->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
+        if (g_bunit_unit_pointers[unit]->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
             quad.y -= 8;
         }
         tile = cells[i].attributes & BATTLE_SHP_PART_TILE_MASK;
@@ -908,7 +908,7 @@ static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         tile = cells[i].attributes & BATTLE_SHP_PART_TILE_MASK;
         quad.v = tile / 32 * 8 + quad.query.graphic_y_offset;
         value = 7;
-        if (g_bunit_unit_pointers[unit]->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
+        if (g_bunit_unit_pointers[unit]->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
             value = 8;
             if (i >= 3) {
                 value = 6;
@@ -916,7 +916,7 @@ static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         }
         menu_gfx_enqueue_oriented_textured_quad((oriented_quad_t*)&quad, &rgb, orientation, 0, value);
     }
-    if (g_bunit_unit_pointers[unit]->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
+    if (g_bunit_unit_pointers[unit]->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
         return;
     }
     g_bunit_unit_shadow_sprite.position.x = x + 0x12;
@@ -947,7 +947,7 @@ static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
 }
 
 /* Map each listed unit to a grid cell: an ordinary unit takes the next cell in list
- * order; a mount (BATTLE_MOUNT_INFO_FLAG_MOUNT) gets the list index of its rider, found
+ * order; a mount (UNIT_MOUNT_INFO_FLAG_MOUNT) gets the list index of its rider, found
  * through the partner battle id in its mount info. The rider's list index equals its
  * cell only while no mount precedes it in the list.
  */
@@ -958,12 +958,12 @@ void bunit_unit_build_list_index_map(void) {
     for (unit_index = 0; unit_index < g_bunit_unit_list_count; unit_index++) {
         bunit_unit_t* unit = g_bunit_unit_pointers[unit_index];
 
-        if (!(unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT)) {
+        if (!(unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             g_bunit_unit_list_index_map[unit_index] = reorderable_index;
             reorderable_index++;
         } else {
             g_bunit_unit_list_index_map[unit_index]
-                = bunit_unit_find_index_by_battle_id((unit->mount_info - BATTLE_MOUNT_INFO_FLAG_MOUNT));
+                = bunit_unit_find_index_by_battle_id((unit->mount_info - UNIT_MOUNT_INFO_FLAG_MOUNT));
         }
     }
 }
@@ -976,7 +976,7 @@ s32 bunit_unit_build_reorderable_index_list(void) {
     s32 i;
 
     for (i = 0; i < g_bunit_unit_list_count; i++) {
-        if ((g_bunit_unit_pointers[i]->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) == 0) {
+        if ((g_bunit_unit_pointers[i]->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) == 0) {
             g_bunit_unit_reorderable_indices[count] = i;
             count++;
         }

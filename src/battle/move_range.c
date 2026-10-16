@@ -83,7 +83,7 @@ static s32 battle_move_get_weather_terrain_cost(void) {
 battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stats_t* unit) {
     if (unit->job_id < JOB_ID_CHOCOBO || unit->job_id > JOB_ID_RED_CHOCOBO)
         return BATTLE_CHOCOBO_MOUNT_NONE;
-    if (main_unit_has_status_in_set(unit, MAIN_STATUS_CHECK_SET_UNMOUNTABLE) != 0)
+    if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_UNMOUNTABLE) != 0)
         return BATTLE_CHOCOBO_MOUNT_NONE;
     if (unit->mount_info != 0)
         return BATTLE_CHOCOBO_MOUNT_PAIRED;
@@ -312,18 +312,18 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
 
         /* A rider on this unit makes it taller instead of getting a record. */
         mount = other->mount_info;
-        if ((mount & BATTLE_MOUNT_INFO_FLAG_RIDER) && (mount & BATTLE_MOUNT_INFO_PARTNER_ID_MASK) == config->unit_id) {
+        if ((mount & UNIT_MOUNT_INFO_FLAG_RIDER) && (mount & UNIT_MOUNT_INFO_PARTNER_ID_MASK) == config->unit_id) {
             config->unit_size += 2;
             continue;
         }
 
         value = i;
         if (battle_unit_get_chocobo_mount_state(other) != BATTLE_CHOCOBO_MOUNT_FREE
-            && other->mount_info != (config->unit_id | BATTLE_MOUNT_INFO_FLAG_MOUNT)) {
+            && other->mount_info != (config->unit_id | UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             value = i | MOVE_RECORD_FLAG_NOT_MOUNTABLE;
         }
         byte = other->team_flags;
-        if ((team ^ byte) & BATTLE_TEAM_MASK) {
+        if ((team ^ byte) & UNIT_TEAM_MASK) {
             value |= MOVE_RECORD_FLAG_OTHER_TEAM;
         }
 
@@ -341,7 +341,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
             current->body_height = 6;
         }
         value = other->mount_info;
-        if ((value & BATTLE_MOUNT_INFO_FLAG_MOUNT) && (value & BATTLE_MOUNT_INFO_PARTNER_ID_MASK) != config->unit_id) {
+        if ((value & UNIT_MOUNT_INFO_FLAG_MOUNT) && (value & UNIT_MOUNT_INFO_PARTNER_ID_MASK) != config->unit_id) {
             current->body_height += 2;
         }
 
@@ -2501,8 +2501,8 @@ static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
     height = tile->height * 2 + (terrain_depth.half_height);
     water_depth = tile->depth_half_height.depth * 2;
     effective_height = height;
-    if (flags & BATTLE_MOUNT_INFO_FLAG_RIDER) {
-        unit = &g_battle_unit_stats[flags & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
+    if (flags & UNIT_MOUNT_INFO_FLAG_RIDER) {
+        unit = &g_battle_unit_stats[flags & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         height += 2;
         effective_height = height;
     }
@@ -2736,7 +2736,7 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
     s32 other_height;
     s32 jump_index;
     u16 ability_id;
-    main_ability_jump_record_t* jump;
+    ability_jump_record_t* jump;
     s32 location;
     s32 other_location;
     s16 height;
@@ -3074,10 +3074,10 @@ static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit
             team_diff = team ^ unit->initial_team_flags;
             team_diff_copy = team_diff;
             panel = &g_battle_target_panel_data[battle_map_calculate_location(unit)];
-            if (mark_allies != 0 && (team_diff & BATTLE_TEAM_MASK) == 0) {
+            if (mark_allies != 0 && (team_diff & UNIT_TEAM_MASK) == 0) {
                 panel->mark = 1;
             }
-            if (mark_enemies != 0 && (team_diff_copy & BATTLE_TEAM_MASK) != 0) {
+            if (mark_enemies != 0 && (team_diff_copy & UNIT_TEAM_MASK) != 0) {
                 panel->mark = 1;
             }
         }
@@ -3718,7 +3718,7 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
         if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
             continue;
         }
-        if (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
+        if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
             continue;
         }
         if (type_flags & CALCULATOR_ATTRIBUTE_CT) {
@@ -3983,7 +3983,7 @@ static void battle_target_apply_unit_team_eligibility(
             }
             panel = &g_battle_target_panels[panel_index];
             if (panel->remaining_range != 0) {
-                if (relation & BATTLE_TEAM_MASK) {
+                if (relation & UNIT_TEAM_MASK) {
                     if (allow_enemies == 0) {
                         panel->remaining_range = 0;
                     } else {
@@ -4020,7 +4020,7 @@ s32 battle_target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_ind
     } else if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
         & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
         return 1;
-    } else if (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
+    } else if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
         return 1;
     }
     return 0;

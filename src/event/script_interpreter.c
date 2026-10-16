@@ -930,20 +930,19 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
         if (index == -1) {
             return 1;
         }
-        return (unit->team_flags & BATTLE_TEAM_MASK) == BATTLE_TEAM_BLUE;
+        return (unit->team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE;
     }
     if (query == 3) {
         if (index == -1) {
             return 1;
         }
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-            if ((unit->status_sets.current[i]
-                    & g_main_status_check_sets[MAIN_STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i])
+            if ((unit->status_sets.current[i] & g_main_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i])
                 != 0) {
                 break;
             }
         }
-        if ((unit->team_flags & BATTLE_TEAM_MASK) == BATTLE_TEAM_BLUE && i == STATUS_BYTE_COUNT) {
+        if ((unit->team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE && i == STATUS_BYTE_COUNT) {
             return 1;
         }
         return 0;
@@ -952,13 +951,13 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
         if (index == -1) {
             return 0;
         }
-        return (unit->team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE;
+        return (unit->team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE;
     }
     if (query == 5) {
         if (index == -1) {
             return 0;
         }
-        first = g_main_status_check_sets[MAIN_STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][0];
+        first = g_main_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][0];
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             if (i == 0) {
                 s32 status = unit->status_sets.current[0] & (0xff ^ STATUS_BYTE_MASK(STATUS_ID_UNDEAD));
@@ -966,13 +965,13 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
                 blocked = first & status;
             } else {
                 blocked = unit->status_sets.current[i]
-                    & g_main_status_check_sets[MAIN_STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i];
+                    & g_main_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][i];
             }
             if (blocked != 0) {
                 break;
             }
         }
-        if ((unit->team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE && i == STATUS_BYTE_COUNT) {
+        if ((unit->team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE && i == STATUS_BYTE_COUNT) {
             return 1;
         }
         return 0;
@@ -1031,7 +1030,7 @@ void script_blue_remove_all_enemy_units(void) {
             if (idx != -1) {
                 stats = battle_unit_get_stats_from_battle_id(idx);
                 found = battle_unit_find_stats_by_entd_unit_id(stats->unit_id, &out_index);
-                if ((found->initial_team_flags & BATTLE_TEAM_MASK) && out_index != -2) {
+                if ((found->initial_team_flags & UNIT_TEAM_MASK) && out_index != -2) {
                     battle_gfx_start_event_unit_fade_out(i, 2, -0x1F, -0x1F, 0);
                 }
             }
@@ -1060,7 +1059,7 @@ void script_opcode_99_blue_remove_unit(s32 unit_id) {
         }
         unit = battle_unit_find_stats_by_entd_unit_id(
             battle_unit_get_stats_from_battle_id(battle_index)->unit_id, found_battle_id);
-        if ((unit->team_flags & BATTLE_TEAM_MASK) == BATTLE_TEAM_BLUE) {
+        if ((unit->team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE) {
             continue;
         }
         if (found_battle_id[0] == -2) {

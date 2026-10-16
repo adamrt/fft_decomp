@@ -187,8 +187,8 @@ void battle_formula_apply_elemental(void) {
     }
     unit = g_battle_action_target;
     mount_info = unit->mount_info;
-    if (mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
-        unit = &g_battle_unit_stats[mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
+    if (mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
+        unit = &g_battle_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
     }
     /* Float nullifies earth. */
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)] & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
@@ -636,7 +636,7 @@ void battle_formula_apply_poach_and_train(void) {
     if (target->unit_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE)) {
         return;
     }
-    if ((g_battle_team_golem[(target->initial_team_flags & BATTLE_TEAM_MASK) >> BATTLE_TEAM_SHIFT] != 0)
+    if ((g_battle_team_golem[(target->initial_team_flags & UNIT_TEAM_MASK) >> UNIT_TEAM_SHIFT] != 0)
         && (g_battle_action_current_ability.range_data.flags_3 & ABILITY_SECONDARY_FLAG_3_BLOCKED_BY_GOLEM)) {
         return;
     }
@@ -651,7 +651,7 @@ void battle_formula_apply_poach_and_train(void) {
             || (action->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
                 & STATUS_BYTE_MASK(STATUS_ID_DEAD)))
         && (g_battle_action_attacker->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_SECRET_HUNT)
-        && !(target->team_flags & BATTLE_TEAM_FLAG_IMMORTAL)) {
+        && !(target->team_flags & UNIT_TEAM_FLAG_IMMORTAL)) {
         if (target->job_id < JOB_ID_MONSTER_FIRST || target->job_id > JOB_ID_MONSTER_LAST) {
             return;
         }

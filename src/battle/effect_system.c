@@ -1782,7 +1782,7 @@ static void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, 
         unit = battle_unit_get_stats_from_battle_id(i);
         if (unit->entd_slot != first && unit->entd_slot != second && unit->entd_slot != BATTLE_ENTD_SLOT_NONE
             && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)] & STATUS_BYTE_MASK(STATUS_ID_JUMP))
-            && !(unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT)) {
+            && !(unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             slot = (*out)->count++;
             (*out)->battle_ids[slot] = unit->entd_slot;
             battle_unit_get_tile_center_and_height_by_battle_id(unit->entd_slot, &position);
@@ -2065,7 +2065,7 @@ s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_p
             stats = battle_unit_get_stats_from_battle_id(source_id);
             if (first_unit != -1
                 && (other = battle_unit_get_stats_from_battle_id(first_unit),
-                    (stats->team_flags & BATTLE_TEAM_MASK) != (other->initial_team_flags & BATTLE_TEAM_MASK))) {
+                    (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
                 g_battle_effect_trajectory_step = first_step;
                 g_battle_effect_trajectory_position = first_position;
                 height = arc_b;
@@ -2074,7 +2074,7 @@ s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_p
                 g_battle_effect_trajectory_step_count = first_count;
             } else if (second_unit != -1
                 && (other = battle_unit_get_stats_from_battle_id(second_unit),
-                    (stats->team_flags & BATTLE_TEAM_MASK) != (other->initial_team_flags & BATTLE_TEAM_MASK))) {
+                    (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
                 height = arc_a;
                 g_battle_effect_trajectory_step_count = second_count;
                 g_battle_effect_trajectory_hit_unit_id = second_unit;

@@ -393,7 +393,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
     u32 item;
     s32 quantity;
 
-    if ((unit->initial_team_flags & BATTLE_TEAM_MASK) == BATTLE_TEAM_BLUE) {
+    if ((unit->initial_team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE) {
         item = item_id & 0xFF;
         quantity = g_main_item_quantities[item];
         if (quantity == 0) {
@@ -496,8 +496,8 @@ static s32 battle_action_build_reaction_targets(
         }
         unit = &unit_base[target_or_count];
         mount_info = unit->mount_info;
-        if (mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
-            target_or_count = mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK;
+        if (mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
+            target_or_count = mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
         }
         if (battle_target_is_unit_untargetable_and_store_tile(target_or_count, &tile_index) != 0) {
             *target_count = 0;
@@ -513,7 +513,7 @@ static s32 battle_action_build_reaction_targets(
         s32 actor_team;
 
         target_or_count = 0;
-        actor_team = actor->team_flags & BATTLE_TEAM_MASK;
+        actor_team = actor->team_flags & UNIT_TEAM_MASK;
         for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
             if (unit_id == actor_id) {
                 continue;
@@ -522,7 +522,7 @@ static s32 battle_action_build_reaction_targets(
             if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
                 continue;
             }
-            if (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
+            if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
                 continue;
             }
             if (unit->hp == unit->max_hp) {
@@ -538,7 +538,7 @@ static s32 battle_action_build_reaction_targets(
                 continue;
             }
             /* Retail keeps the candidate's team in the tile-index stack slot. */
-            tile_index = unit->initial_team_flags & BATTLE_TEAM_MASK;
+            tile_index = unit->initial_team_flags & UNIT_TEAM_MASK;
             if (tile_index == actor_team) {
                 target_ids[target_or_count++] = unit_id;
             }
@@ -1198,8 +1198,8 @@ s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
         }
 
         mount_info = unit->mount_info;
-        if (mount_info >= BATTLE_MOUNT_INFO_FLAG_RIDER) {
-            return mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK;
+        if (mount_info >= UNIT_MOUNT_INFO_FLAG_RIDER) {
+            return mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
         }
         return unit_index;
     }
@@ -1595,7 +1595,7 @@ static s32 battle_action_store_counter_ability(
  * party has in stock, or -1 with none. A unit that did not start on the blue team
  * always uses a Potion, without spending it. */
 static s32 battle_action_select_auto_potion_item(unit_stats_t* unit) {
-    if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
+    if (unit->initial_team_flags & UNIT_TEAM_MASK) {
         return ITEM_ID_POTION;
     }
     if (g_main_item_quantities[ITEM_ID_POTION] != 0) {
@@ -1679,7 +1679,7 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
         jp = 0;
     }
 
-    team = unit->team_flags & BATTLE_TEAM_MASK;
+    team = unit->team_flags & UNIT_TEAM_MASK;
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         if (unit_id != unit_index) {
             battle_unit_add_job_jp(unit_id, jp / 4, team, job_slot);
@@ -1689,7 +1689,7 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
     if (unit->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_GAINED_JP_UP) {
         jp = jp * 3 / 2;
     }
-    team = unit->initial_team_flags & BATTLE_TEAM_MASK;
+    team = unit->initial_team_flags & UNIT_TEAM_MASK;
     battle_unit_add_job_jp(unit_index, jp, team, job_slot);
 
     new_job_level = battle_unit_load_job_level(unit, job_id, &job_slot);
@@ -1759,7 +1759,7 @@ s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot) {
     if (flags & UNIT_FLAG_MONSTER) {
         return -1;
     }
-    if ((unit->initial_team_flags & BATTLE_TEAM_MASK) != (team & 0xff)) {
+    if ((unit->initial_team_flags & UNIT_TEAM_MASK) != (team & 0xff)) {
         return -1;
     }
     if (slot == UNIT_CAREER_JOB_INDEX_BARD && (flags & UNIT_FLAG_FEMALE)) {
@@ -2109,7 +2109,7 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
         unit->battle_id = battle_id;
         if (g_main_unit_deployed_coords[i].party_id != PARTY_ID_NONE) {
             unit->entd_slot = battle_id;
-            unit->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
+            unit->existence = UNIT_EXISTENCE_ACTIVE;
             if (main_unit_init_from_party_slot(unit, g_main_unit_deployed_coords[i].party_id, 0) != 0) {
                 main_system_handle_battle_load_exception(battle_id + 0x1f4);
             } else if (battle_unit_set_placement_and_validate(battle_id, &g_main_unit_deployed_coords[i]) != 0) {
@@ -2123,32 +2123,32 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
                 }
                 unit->unit_id = identity;
                 if (is_red_team_debug) {
-                    unit->team_flags = BATTLE_TEAM_RED | BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
-                    unit->initial_team_flags = BATTLE_TEAM_RED | BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+                    unit->team_flags = UNIT_TEAM_RED | UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
+                    unit->initial_team_flags = UNIT_TEAM_RED | UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
                     unit->sprite_palette = 1;
                 }
                 if (g_main_unit_deployed_coords[i].flags.off_field) {
-                    unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
+                    unit->existence = UNIT_EXISTENCE_OFF_FIELD;
                     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
                 } else {
                     battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
                         unit->position.facing, sprite, palette, 0xff, unit, 0);
                     main_unit_init_status_and_rewards(unit, 1);
-                    unit->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
+                    unit->existence = UNIT_EXISTENCE_ACTIVE;
                 }
                 continue;
             }
             failures += weight;
         }
         unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-        unit->existence = BATTLE_UNIT_EXISTENCE_NONE;
+        unit->existence = UNIT_EXISTENCE_NONE;
     }
     if (is_red_team_debug) {
         for (i = 5; i < ENTD_UNITS_PER_ENCOUNTER; i++) {
             unit_stats_t* unit = &g_battle_unit_stats[i];
             unit->battle_id = i;
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-            unit->existence = BATTLE_UNIT_EXISTENCE_NONE;
+            unit->existence = UNIT_EXISTENCE_NONE;
         }
     }
     return failures;
@@ -2277,12 +2277,12 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
         g_main_entd_current_unit = entd;
         if (entd->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-            unit->existence = BATTLE_UNIT_EXISTENCE_NONE;
+            unit->existence = UNIT_EXISTENCE_NONE;
             continue;
         }
 
         unit->entd_slot = battle_id;
-        unit->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
+        unit->existence = UNIT_EXISTENCE_ACTIVE;
         status = main_unit_init_from_entd(unit, g_main_entd_current_unit, 0, 0);
         if (status != 0) {
             main_system_handle_battle_load_exception(battle_id + 600);
@@ -2297,10 +2297,10 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
         }
         unit->unit_id = unit_id;
 
-        presence = unit->team_flags & BATTLE_TEAM_PRESENCE_MASK;
-        if (presence == 0 || (presence == BATTLE_TEAM_FLAG_RANDOMLY_PRESENT && (rand() & 1))) {
+        presence = unit->team_flags & UNIT_TEAM_PRESENCE_MASK;
+        if (presence == 0 || (presence == UNIT_TEAM_FLAG_RANDOMLY_PRESENT && (rand() & 1))) {
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-            unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
+            unit->existence = UNIT_EXISTENCE_OFF_FIELD;
             main_unit_init_position_and_rewards(unit, g_main_entd_current_unit);
             continue;
         }
@@ -2309,7 +2309,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
         if (battle_unit_validate_placement(battle_id) != 0) {
             main_system_handle_battle_load_exception(battle_id + 300);
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-            unit->existence = BATTLE_UNIT_EXISTENCE_NONE;
+            unit->existence = UNIT_EXISTENCE_NONE;
             continue;
         }
         if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
@@ -2317,7 +2317,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
         }
         if (battle_unit_add_unique_entd_spritesheet(battle_id, spritesheet_id, free_spritesheets) != 0) {
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-            unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
+            unit->existence = UNIT_EXISTENCE_OFF_FIELD;
             if (duplicate_message_shown != 0) {
                 continue;
             }
@@ -2326,9 +2326,9 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             continue;
         }
 
-        if (presence != BATTLE_TEAM_PRESENCE_MASK && enemy_count >= enemy_limit) {
+        if (presence != UNIT_TEAM_PRESENCE_MASK && enemy_count >= enemy_limit) {
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-            unit->existence = BATTLE_UNIT_EXISTENCE_NONE;
+            unit->existence = UNIT_EXISTENCE_NONE;
             if (limit_message_shown != 0) {
                 continue;
             }
@@ -2337,9 +2337,9 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             enemy_count++;
             continue;
         }
-        if (presence == BATTLE_TEAM_PRESENCE_MASK) {
+        if (presence == UNIT_TEAM_PRESENCE_MASK) {
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-            unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
+            unit->existence = UNIT_EXISTENCE_OFF_FIELD;
             status = 1;
         } else {
             status = 0;
@@ -2347,7 +2347,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
         }
         battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
             unit->position.facing, spritesheet_id, palette_id, unit_id, unit, status);
-        if (presence != BATTLE_TEAM_PRESENCE_MASK) {
+        if (presence != UNIT_TEAM_PRESENCE_MASK) {
             enemy_count++;
         }
     }
@@ -2388,13 +2388,13 @@ static s32 battle_unit_add_unique_entd_spritesheet(s32 mode, s16 value, s32 limi
 }
 
 /* Take a present unit out of the battle: the slot is emptied and its existence
- * set to BATTLE_UNIT_EXISTENCE_DISABLED. Always returns 0. */
+ * set to UNIT_EXISTENCE_DISABLED. Always returns 0. */
 s32 battle_unit_disable_remove(s32 battle_id) {
     unit_stats_t* unit = &g_battle_unit_stats[battle_id];
 
     if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
         unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-        unit->existence = BATTLE_UNIT_EXISTENCE_DISABLED;
+        unit->existence = UNIT_EXISTENCE_DISABLED;
     }
     return 0;
 }
@@ -2410,11 +2410,11 @@ s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id) {
 
     if (stats->entd_slot != BATTLE_ENTD_SLOT_NONE)
         return 0;
-    if (stats->existence != BATTLE_UNIT_EXISTENCE_OFF_FIELD)
+    if (stats->existence != UNIT_EXISTENCE_OFF_FIELD)
         return -1;
     stats->entd_slot = battle_id;
-    stats->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
-    if (stats->team_flags & BATTLE_TEAM_MASK) {
+    stats->existence = UNIT_EXISTENCE_ACTIVE;
+    if (stats->team_flags & UNIT_TEAM_MASK) {
         battle_unit_set_enemy_level_data(stats);
     }
     return 0;
@@ -2426,7 +2426,7 @@ s32 battle_unit_set_cannot_exist(s32 battle_id) {
     unit_stats_t* unit = &g_battle_unit_stats[battle_id];
 
     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-    unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
+    unit->existence = UNIT_EXISTENCE_OFF_FIELD;
     return 0;
 }
 
@@ -2436,14 +2436,14 @@ s32 battle_unit_erase_pending_party_removal(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
 
     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
-    unit->existence = BATTLE_UNIT_EXISTENCE_PENDING_REMOVAL;
+    unit->existence = UNIT_EXISTENCE_PENDING_REMOVAL;
     return 0;
 }
 
 /* Move a unit to (x, y, level) with a new facing, carrying its mounted partner.
  *
  * A mountable Chocobo already on the destination becomes this unit's mount: this
- * unit takes BATTLE_MOUNT_INFO_FLAG_RIDER and the Chocobo BATTLE_MOUNT_INFO_FLAG_MOUNT.
+ * unit takes UNIT_MOUNT_INFO_FLAG_RIDER and the Chocobo UNIT_MOUNT_INFO_FLAG_MOUNT.
  * A unit that is not a mount drops its old link first; a mount carries its rider
  * along. Returns -1 without moving anything when the destination tile is blocked
  * or untargetable, 0 otherwise. */
@@ -2472,16 +2472,16 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
     }
 
     mount_info = unit->mount_info;
-    if (!(mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT)) {
+    if (!(mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
         unit->mount_info = 0;
         if (mount_info != 0) {
-            partner = &g_battle_unit_stats[mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
+            partner = &g_battle_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
             partner->mount_info = 0;
         }
     }
     if (has_mount != 0) {
-        unit->mount_info = mount_id + BATTLE_MOUNT_INFO_FLAG_RIDER;
-        g_battle_unit_stats[mount_id].mount_info = battle_id + BATTLE_MOUNT_INFO_FLAG_MOUNT;
+        unit->mount_info = mount_id + UNIT_MOUNT_INFO_FLAG_RIDER;
+        g_battle_unit_stats[mount_id].mount_info = battle_id + UNIT_MOUNT_INFO_FLAG_MOUNT;
     }
 
     unit->position.y = y;
@@ -2489,8 +2489,8 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
     unit->position.higher_elevation = level;
     unit->position.facing = facing;
 
-    if (mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
-        partner = &g_battle_unit_stats[mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
+    if (mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
+        partner = &g_battle_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         partner->position.y = y;
         partner->x = x;
         partner->position.higher_elevation = level;
@@ -2516,16 +2516,16 @@ u32 battle_move_get_post_move_events(unit_stats_t* unit) {
                  BATTLE_UNIT_TILE_FILTER_CRYSTAL | BATTLE_UNIT_TILE_FILTER_TREASURE)
                 >> 31)
         & 1;
-    if (!(unit->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER)) {
+    if (!(unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER)) {
         target = unit;
     } else {
-        target = &g_battle_unit_stats[unit->mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
+        target = &g_battle_unit_stats[unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         g_battle_action_target = target;
         g_battle_action_target_data = &target->action;
         battle_action_clear_current_data(&target->action);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             g_battle_action_target_data->status_changes.removal[i]
-                = g_main_status_check_sets[MAIN_STATUS_CHECK_SET_MOUNT_REMOVAL][i];
+                = g_main_status_check_sets[STATUS_CHECK_SET_MOUNT_REMOVAL][i];
         }
         if (battle_status_modify_inflictions(0) != 0) {
             g_battle_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;

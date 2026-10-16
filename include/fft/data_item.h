@@ -507,7 +507,7 @@ typedef struct item_attribute {
 typedef char item_attribute_size_must_be_25[(sizeof(item_attribute_t) == 25) ? 1 : -1];
 
 /* Flat byte view of item attributes used by the status-icon renderers. */
-typedef struct main_item_attribute_flat {
+typedef struct item_attribute_flat {
     u8 attributes[UNIT_ATTRIBUTE_COUNT];
     u8 move;
     u8 jump;
@@ -515,7 +515,7 @@ typedef struct main_item_attribute_flat {
     u8 immunity[5];
     u8 starting[5];
     u8 elemental_affinity[5];
-} main_item_attribute_flat_t;
+} item_attribute_flat_t;
 
 /* g_main_item_type_order_tables: seven independent signed-byte order lists.
  * main_item_init_order_tables establishes capacities 12/8/8/8/8/8/8 with -1

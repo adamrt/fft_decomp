@@ -26,7 +26,7 @@
 #include "psx/types.h"
 
 static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save);
-static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
+static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
 static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
 static void battle_status_disable_acting(unit_stats_t* unit);
 static u8 battle_unit_generate_treasure(unit_stats_t* unit);
@@ -47,10 +47,10 @@ s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable)
             return 1;
         }
         mount_info = unit->mount_info;
-        if (!(mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT)) {
+        if (!(mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             break;
         }
-        unit = &g_battle_unit_stats[mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
+        unit = &g_battle_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
     }
     return 0;
 }
@@ -378,7 +378,7 @@ unit_stats_t* battle_unit_get_stats_from_battle_id(u32 battle_id) {
 /*
  * Classify a character identity for battle entry: the stats slot when
  * an active unit has it (-3 if it is crystallized or a treasure), -2/-3 for an
- * absent unit whose existence is BATTLE_UNIT_EXISTENCE_OFF_FIELD/DISABLED, -4
+ * absent unit whose existence is UNIT_EXISTENCE_OFF_FIELD/DISABLED, -4
  * when a party roster entry has it, else -5; -1 for selector identities.
  *
  * The two status tests must be separate `if`s with their own `return -3`: an
@@ -411,11 +411,11 @@ s32 battle_unit_find_slot_by_character_identity(u32 character_identity) {
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
         if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE && unit->character_identity == identity
-            && unit->existence != BATTLE_UNIT_EXISTENCE_NONE) {
-            if (unit->existence == BATTLE_UNIT_EXISTENCE_OFF_FIELD) {
+            && unit->existence != UNIT_EXISTENCE_NONE) {
+            if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
                 return BATTLE_CHARACTER_SLOT_OFF_FIELD;
             }
-            if (unit->existence == BATTLE_UNIT_EXISTENCE_DISABLED) {
+            if (unit->existence == UNIT_EXISTENCE_DISABLED) {
                 return BATTLE_CHARACTER_SLOT_UNAVAILABLE;
             }
         }
@@ -437,7 +437,7 @@ s32 battle_unit_find_slot_by_character_identity(u32 character_identity) {
  * returns 0 with -3. Both loops compare against (unit_id & 0xff): the (u8) cast
  * adds a loop insn and stops loop.c hoisting the constant 2 in the second loop.
  * The second loop's test of existence against entd_slot, just found to be
- * BATTLE_ENTD_SLOT_NONE, is a test against BATTLE_UNIT_EXISTENCE_NONE (both
+ * BATTLE_ENTD_SLOT_NONE, is a test against UNIT_EXISTENCE_NONE (both
  * 0xff). */
 unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battle_id) {
     unit_stats_t* unit;
@@ -461,15 +461,15 @@ unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battl
         unit = &g_battle_unit_stats[i];
         if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE && unit->unit_id == (unit_id & 0xff)
             && unit->existence != unit->entd_slot) {
-            if (unit->existence == BATTLE_UNIT_EXISTENCE_OFF_FIELD) {
+            if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
                 *out_battle_id = -2;
                 return unit;
             }
-            if (unit->existence == BATTLE_UNIT_EXISTENCE_DISABLED) {
+            if (unit->existence == UNIT_EXISTENCE_DISABLED) {
                 *out_battle_id = -3;
                 return unit;
             }
-            if (unit->existence == BATTLE_UNIT_EXISTENCE_PENDING_REMOVAL) {
+            if (unit->existence == UNIT_EXISTENCE_PENDING_REMOVAL) {
                 *out_battle_id = -6;
                 return unit;
             }
@@ -485,7 +485,7 @@ unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battl
 void battle_unit_set_enemy_level_data(unit_stats_t* unit) {
     u8 level;
 
-    if (unit->team_flags & BATTLE_TEAM_MASK) {
+    if (unit->team_flags & UNIT_TEAM_MASK) {
         level = unit->level;
         g_battle_enemy_level_sum += level;
         if (g_battle_highest_enemy_level < level) {
@@ -511,14 +511,14 @@ void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) 
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
-        if (unit->existence != BATTLE_UNIT_EXISTENCE_NONE && unit->existence != BATTLE_UNIT_EXISTENCE_OFF_FIELD) {
+        if (unit->existence != UNIT_EXISTENCE_NONE && unit->existence != UNIT_EXISTENCE_OFF_FIELD) {
             value = unit->war_trophy;
             if (value != ITEM_ID_NOTHING) {
                 result->item_ids[count] = value;
                 count++;
             }
             money += unit->bonus_money_modifier * 100;
-            if (unit->formation_index != BATTLE_FORMATION_INDEX_NONE) {
+            if (unit->formation_index != UNIT_FORMATION_INDEX_NONE) {
                 value = unit->level;
                 if (value < lowest) {
                     lowest = value;
@@ -612,28 +612,28 @@ unit_stats_t* battle_unit_find_active_data_pointer(void) {
 
 /* The idle action menu for a unit id: battle_menu_get_unit_action_menu_id, with
  * the four TURN menus replaced by their RIDER_TURN variants for a rider. Returns
- * BATTLE_MENU_ID_NONE for an empty slot. */
-battle_menu_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
+ * MENU_COMMAND_ID_NONE for an empty slot. */
+menu_command_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
     unit_stats_t* unit = battle_unit_get_existing_pointer(battle_id);
     s32 menu;
 
     if (unit == 0) {
-        return BATTLE_MENU_ID_NONE;
+        return MENU_COMMAND_ID_NONE;
     }
     menu = battle_menu_get_unit_action_menu_id(unit);
-    if ((unit->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) != 0) {
+    if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) != 0) {
         switch (menu) {
-        case BATTLE_MENU_ID_TURN:
-            menu = BATTLE_MENU_ID_RIDER_TURN;
+        case MENU_COMMAND_ID_TURN:
+            menu = MENU_COMMAND_ID_RIDER_TURN;
             break;
-        case BATTLE_MENU_ID_TURN_MOVED:
-            menu = BATTLE_MENU_ID_RIDER_TURN_MOVED;
+        case MENU_COMMAND_ID_TURN_MOVED:
+            menu = MENU_COMMAND_ID_RIDER_TURN_MOVED;
             break;
-        case BATTLE_MENU_ID_TURN_ACTED:
-            menu = BATTLE_MENU_ID_RIDER_TURN_ACTED;
+        case MENU_COMMAND_ID_TURN_ACTED:
+            menu = MENU_COMMAND_ID_RIDER_TURN_ACTED;
             break;
-        case BATTLE_MENU_ID_TURN_MOVED_ACTED:
-            menu = BATTLE_MENU_ID_RIDER_TURN_MOVED_ACTED;
+        case MENU_COMMAND_ID_TURN_MOVED_ACTED:
+            menu = MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED;
             break;
         default:
             return menu;
@@ -642,7 +642,7 @@ battle_menu_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
     return menu;
 }
 
-/* Pick a unit's idle action menu (battle_menu_id_e), before the rider variants.
+/* Pick a unit's idle action menu (menu_command_id_e), before the rider variants.
  *
  * While the unit taking its turn is not a manually controlled player unit, every
  * unit gets an inspect menu: PLAYER_UNIT_INSPECT or OTHER_UNIT_INSPECT. Otherwise
@@ -651,7 +651,7 @@ battle_menu_id_e battle_menu_get_idle_action_menu_id(s32 battle_id) {
  * restriction), and any other unit gets PLAYER_UNIT or OTHER_UNIT.
  *
  */
-static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit) {
+static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit) {
     unit_stats_t* active;
     s32 inspect_only = 0;
     s32 player_controlled;
@@ -663,18 +663,18 @@ static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* 
 
     active = battle_unit_find_active_data_pointer();
     if (active != 0) {
-        if ((active->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) == 0
+        if ((active->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0
             || active->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
             inspect_only = 1;
         }
     }
-    player_flag = unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+    player_flag = unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
     player_controlled = player_flag != 0;
     if (inspect_only != 0) {
         if (player_controlled != 0) {
-            return BATTLE_MENU_ID_PLAYER_UNIT_INSPECT;
+            return MENU_COMMAND_ID_PLAYER_UNIT_INSPECT;
         }
-        return BATTLE_MENU_ID_OTHER_UNIT_INSPECT;
+        return MENU_COMMAND_ID_OTHER_UNIT_INSPECT;
     }
     dont_move = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)];
     restriction = battle_unit_get_action_restriction(unit);
@@ -682,20 +682,20 @@ static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* 
     acted = unit->action_taken | restriction;
     if (unit->has_turn != 0) {
         if (moved == 0 && acted == 0) {
-            return BATTLE_MENU_ID_TURN;
+            return MENU_COMMAND_ID_TURN;
         }
         if (moved != 0 && acted == 0) {
-            return BATTLE_MENU_ID_TURN_MOVED;
+            return MENU_COMMAND_ID_TURN_MOVED;
         }
         if (moved == 0 && acted != 0) {
-            return BATTLE_MENU_ID_TURN_ACTED;
+            return MENU_COMMAND_ID_TURN_ACTED;
         }
-        return BATTLE_MENU_ID_TURN_MOVED_ACTED;
+        return MENU_COMMAND_ID_TURN_MOVED_ACTED;
     }
     if (player_controlled != 0) {
-        return BATTLE_MENU_ID_PLAYER_UNIT;
+        return MENU_COMMAND_ID_PLAYER_UNIT;
     }
-    return BATTLE_MENU_ID_OTHER_UNIT;
+    return MENU_COMMAND_ID_OTHER_UNIT;
 }
 
 /* Return the unit's battle_unit_action_restriction_e.
@@ -711,7 +711,7 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
         != 0) {
         return BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
-    if ((unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) != 0) {
+    if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
         return BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
     depth = g_battle_map_tile_data[battle_map_calculate_location(unit)].depth_half_height.depth;
@@ -729,7 +729,7 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
         != 0) {
         return BATTLE_UNIT_ACTION_RESTRICTION_NONE;
     }
-    return ((unit->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) == 0) << 1;
+    return ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) == 0) << 1;
 }
 
 /* Build a unit's 0xff-terminated action-menu skillset list and load each
@@ -773,7 +773,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
         supports = 0;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
-        || (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT)) {
+        || (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
         *entries = SKILLSET_ID_NONE;
         return 0;
     }
@@ -863,19 +863,19 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
  * after only another unit's charged action with a lower battle id. Between the
  * charge pass and the next tick (PICK_UNIT_AFTER_CHARGE) a nonzero charge lands
  * one tick later. */
-u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries) {
+u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries) {
     s32 count;
 
     if (g_battle_between_turn_resume_state == BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE && ct != 0) {
         ct += 1;
     }
     ct <<= 8;
-    for (count = 0; count < BATTLE_AT_LIST_CAPACITY; count++, entries++) {
+    for (count = 0; count < AT_LIST_CAPACITY; count++, entries++) {
         s32 entry_unit = entries->unit_code;
-        s32 is_action = entry_unit & BATTLE_AT_ACTION_ENTRY;
+        s32 is_action = entry_unit & AT_ACTION_ENTRY;
         s32 entry_ct;
-        entry_unit &= BATTLE_AT_UNIT_ID_MASK;
-        if (entry_unit == BATTLE_AT_END_OF_LIST)
+        entry_unit &= AT_UNIT_ID_MASK;
+        if (entry_unit == AT_END_OF_LIST)
             return 0xFF;
         entry_ct = entries->sort_key;
         if (entry_ct >= ct) {

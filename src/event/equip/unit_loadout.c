@@ -59,10 +59,10 @@ static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_dat
 
     memset(unit, 0, sizeof(equip_unit_data_t));
     unit->level = stats->level <= UNIT_LEVEL_MAX ? stats->level : UNIT_LEVEL_MAX;
-    if (stats->team_flags & BATTLE_TEAM_MASK) {
+    if (stats->team_flags & UNIT_TEAM_MASK) {
         unit->team_kind = 1;
     }
-    if (!(stats->team_flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
+    if (!(stats->team_flags & UNIT_TEAM_OR_PLAYER_CONTROL_MASK)) {
         unit->team_kind = 2;
     }
     i = battle_action_find_unit_turn_index(stats);
@@ -107,30 +107,30 @@ static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_dat
     unit->move = stats->move;
     unit->speed = stats->attributes[UNIT_ATTRIBUTE_SPEED];
     unit->jump = stats->jump;
-    unit->right_weapon_power = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
-    unit->left_weapon_power = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
-    unit->right_weapon_evade = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE];
-    unit->left_weapon_evade = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
+    unit->right_weapon_power = stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
+    unit->left_weapon_power = stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
+    unit->right_weapon_evade = stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE];
+    unit->left_weapon_evade = stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
     unit->physical_attack = stats->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
-    unit->physical_class_evade = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
-    larger = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
-    other = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
+    unit->physical_class_evade = stats->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
+    larger = stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
+    other = stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
     if (larger < other) {
         larger = other;
     }
     unit->physical_shield_evade = larger;
     /* Retail stores the magic accessory evade here where the physical one belongs, so
      * physical_accessory_evade stays 0 (QUIRKS.md). */
-    unit->magical_accessory_evade = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
+    unit->magical_accessory_evade = stats->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
     unit->magic_attack = stats->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     unit->magical_class_evade = 0;
-    larger = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
-    other = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE];
+    larger = stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
+    other = stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE];
     if (larger < other) {
         larger = other;
     }
     unit->magical_shield_evade = larger;
-    unit->magical_accessory_evade = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
+    unit->magical_accessory_evade = stats->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
     if (stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE) {
         unit->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
     } else {
@@ -258,10 +258,10 @@ void equip_unit_commit_loadout_to_stats(void) {
     max = stats->max_mp;
     stats->mp = mp > max ? max : mp;
     item_sum_equipment_stat_details(&bonuses, g_equip_unit_data[0]->equipment);
-    stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = bonuses.state.right_weapon_power;
-    stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = bonuses.state.left_weapon_power;
-    stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = bonuses.state.right_weapon_evade;
-    stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE] = bonuses.state.left_weapon_evade;
+    stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = bonuses.state.right_weapon_power;
+    stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = bonuses.state.left_weapon_power;
+    stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = bonuses.state.right_weapon_evade;
+    stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE] = bonuses.state.left_weapon_evade;
     saved = g_equip_unit_data[0]->unit_count;
     equip_unit_build_data_from_stats(stats, g_equip_unit_data[0]);
     g_equip_unit_data[0]->unit_count = saved;

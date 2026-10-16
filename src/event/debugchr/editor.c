@@ -115,7 +115,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         selected_id = unit_ids[0];
         comparison_id = unit_ids[0];
         type_id = unit_ids[0];
-        unit_ids[1] = partner_id & BATTLE_MOUNT_INFO_PARTNER_ID_MASK;
+        unit_ids[1] = partner_id & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
         g_debugchr_panel_selected_unit_data.battle_id = selected_id;
         g_debugchr_panel_selected_unit_data.name_id = comparison_id;
         g_panel_selected_billboard.unit_index = type_id;
@@ -221,7 +221,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 g_debugchr_character_status_frame_config.style = one;
                 thread_start(g_thread_current_id - 1, menu_build_unit_status_list);
                 thread_set_parameters(
-                    g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_STATUS_LIST], 0, 0);
+                    g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST], 0, 0);
                 animation[0] = one;
                 animation_second[0] = one;
                 animation_third[0] = one;

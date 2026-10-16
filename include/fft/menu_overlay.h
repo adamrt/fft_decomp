@@ -48,11 +48,11 @@ typedef enum companion_overlay {
 } companion_overlay_e;
 
 /* Companion data file requests (the second LBA and size tables). */
-typedef enum battle_companion_file {
-    BATTLE_COMPANION_FILE_WIN001 = 2,    /* EVENT/WIN001.BIN */
-    BATTLE_COMPANION_FILE_BONUS = 3,     /* EVENT/BONUS.BIN */
-    BATTLE_COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
-} battle_companion_file_e;
+typedef enum companion_file {
+    COMPANION_FILE_WIN001 = 2,    /* EVENT/WIN001.BIN */
+    COMPANION_FILE_BONUS = 3,     /* EVENT/BONUS.BIN */
+    COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
+} companion_file_e;
 
 /* g_menu_companion_overlay_state: the overlay entry the frame driver calls, cleared when the overlay
  * returns. */

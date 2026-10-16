@@ -106,12 +106,26 @@ typedef char menu_palette_primitives_size_must_be_236[(sizeof(menu_palette_primi
 
 /* Placement of one of the twelve frame lines (menu_palette_primitives_t.lines): signed endpoint offsets from the
  * box origin and, per coordinate, a flag selecting whether the box width or height is added. The table,
- * g_menu_numeric_display_frame_offsets, is walked by byte offset (WORLD_MENU_LINE_LAYOUT_*), so nothing uses
+ * g_menu_numeric_display_frame_offsets, is walked by byte offset (MENU_LINE_LAYOUT_*), so nothing uses
  * this type. Provisional. */
-typedef struct world_menu_line_layout {
+typedef struct menu_line_layout {
     s8 x0, y0, x1, y1;                 /* 0x00 */
     s8 add_w0, add_h0, add_w1, add_h1; /* 0x04 */
-} world_menu_line_layout_t;
+} menu_line_layout_t;
+
+/* The builder walks the table with a byte offset stepping by 8 (the
+ * target's induction variable), so it addresses these fields by offset. */
+enum menu_line_layout_offset {
+    MENU_LINE_LAYOUT_X0 = 0,
+    MENU_LINE_LAYOUT_Y0 = 1,
+    MENU_LINE_LAYOUT_X1 = 2,
+    MENU_LINE_LAYOUT_Y1 = 3,
+    MENU_LINE_LAYOUT_ADD_W0 = 4,
+    MENU_LINE_LAYOUT_ADD_H0 = 5,
+    MENU_LINE_LAYOUT_ADD_W1 = 6,
+    MENU_LINE_LAYOUT_ADD_H1 = 7,
+    MENU_LINE_LAYOUT_SIZE = 8
+};
 
 /* One 0x100-byte slot holding a panel's palette primitive set. */
 typedef struct menu_palette_slot {
@@ -396,10 +410,10 @@ void menu_run_equipment_ability_panel_thread(void);
 /* The numeric editor's two adjacent rectangles: the first is the panel frame
  * and the screen origin handed to image loading, the second places the
  * portrait. */
-typedef struct battle_menu_status_panel_numeric_geometry {
+typedef struct menu_status_panel_numeric_geometry {
     RECT texture_rect;   /* 0x00 */
     RECT draw_area_rect; /* 0x08 */
-} battle_menu_status_panel_numeric_geometry_t;
+} menu_status_panel_numeric_geometry_t;
 
 /* Numeric editor panel buffer (0x2c0 bytes), double buffered by menu_run_numeric_editor_frame_thread, which
  * copies it with sizeof. The draw modes are set up with gfx_set_draw_mode_for_texture_page /
@@ -421,7 +435,7 @@ typedef char
     menu_status_panel_numeric_buffer_size_must_be_704[(sizeof(menu_status_panel_numeric_buffer_t) == 704) ? 1 : -1];
 
 extern s32 g_numeric_editor_redraw_request;
-extern battle_menu_status_panel_numeric_geometry_t g_editor_numeric_table;
+extern menu_status_panel_numeric_geometry_t g_editor_numeric_table;
 extern menu_status_panel_numeric_buffer_t g_editor_numeric_state[2];
 extern menu_status_panel_numeric_buffer_t g_editor_numeric_state_a[2];
 extern menu_status_panel_numeric_buffer_t g_editor_numeric_state_b[2];
@@ -490,7 +504,7 @@ typedef char menu_unit_editor_frame_size_must_be_720[sizeof(menu_unit_editor_fra
 /* Color and endpoint offsets of the unit editor panel's eight frame lines, relative to the panel box, seven bytes
  * per line (g_menu_unit_editor_line_colors). The loop walks the table with a byte offset stepping by 7 (the
  * target's induction variable and exit test), so the fields are addressed by
- * offset, as for world_menu_line_layout_t. */
+ * offset, as for menu_line_layout_t. */
 enum menu_unit_editor_line_layout_offset {
     MENU_UNIT_EDITOR_LINE_R = 0,
     MENU_UNIT_EDITOR_LINE_G = 1,

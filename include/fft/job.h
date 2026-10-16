@@ -76,7 +76,7 @@ extern s16 g_menu_ability_category;  /* menu_ability_category_e; BUNIT and JOBST
 extern s16 g_menu_ability_entries[]; /* Packed ability IDs/flags; -1 terminates the list. */
 extern s32 g_menu_ability_type;
 extern ability_data_t* g_menu_selected_ability_data;
-extern main_ability_secondary_pointer_t g_menu_selected_ability_secondary_data;
+extern ability_secondary_pointer_t g_menu_selected_ability_secondary_data;
 
 /* 1 unless the entry's disabled bit (0x4000) is set. */
 s32 menu_ability_is_learned(s32 index);

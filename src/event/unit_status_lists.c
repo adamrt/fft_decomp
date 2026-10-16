@@ -111,7 +111,7 @@ void menu_build_unit_status_list(void) {
         if (*flag_a != 0 || *flag_b == 1) {
             g_menu_status_list_row_actions[i] = 0x7D0;
         } else {
-            g_menu_status_list_row_actions[i] = MENU_ROW_ACTION_SILENT | BATTLE_MENU_ID_JOBSTTS;
+            g_menu_status_list_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_JOBSTTS;
         }
     }
     unit = battle_unit_get_stats_from_battle_id(g_menu_selected_unit.battle_id);
@@ -240,7 +240,7 @@ void script_join_units_silently(void) {
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = battle_unit_find_stats_by_entd_unit_id(battle_unit_get_stats_from_battle_id(i)->unit_id, &out_idx);
         if (out_idx >= 0 && i == out_idx) {
-            if (unit->formation_index == BATTLE_FORMATION_INDEX_NONE
+            if (unit->formation_index == UNIT_FORMATION_INDEX_NONE
                 || ((first = unit->character_identity) != CHARACTER_IDENTITY_ENTD_NONE
                     && first <= CHARACTER_IDENTITY_RAMZA_CHAPTER_4)) {
                 flags = unit->unit_flags;
@@ -265,7 +265,7 @@ void unit_increase_blue_team_brave_by_10(void) {
 
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         unit = battle_unit_get_stats_from_battle_id(unit_id);
-        if ((unit->team_flags & BATTLE_TEAM_MASK) == BATTLE_TEAM_BLUE) {
+        if ((unit->team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE) {
             unit->brave += 10;
             if (unit->brave >= UNIT_BRAVE_FAITH_MAX) {
                 unit->brave = UNIT_BRAVE_FAITH_MAX;
@@ -902,10 +902,10 @@ static void menu_run_unit_stats_panel(
             setRGB0(&page->portrait, 0x80, 0x80, 0x80);
         }
         status->team_kind = 0;
-        if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
+        if (unit->initial_team_flags & UNIT_TEAM_MASK) {
             status->team_kind = 1;
         }
-        if (!(unit->initial_team_flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
+        if (!(unit->initial_team_flags & UNIT_TEAM_OR_PLAYER_CONTROL_MASK)) {
             status->team_kind = 2;
         }
         if (unit->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
@@ -1101,7 +1101,7 @@ void menu_preview_attack_caster_stats(void) {
     unit_stats_t* target = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
     action_command_t* action;
     ability_data_t* ability_data;
-    main_ability_secondary_pointer_t secondary;
+    ability_secondary_pointer_t secondary;
     s16* selected;
 
     /* One address register serves both reads, as in the target. */
@@ -1190,7 +1190,7 @@ void menu_run_unit_summary_panel_thread(void) {
     }
     gfx_init_image_loading(&frames[0].portrait, &g_menu_texture_origin, &g_menu_unit_summary_panel_rect,
         &g_menu_unit_summary_portrait_image_params);
-    if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
+    if (unit->initial_team_flags & UNIT_TEAM_MASK) {
         frames[0].portrait.clut = 0x7FFD;
     } else {
         frames[0].portrait.clut = 0x7FBD;
@@ -1768,7 +1768,7 @@ void menu_run_unit_editor_panel_thread(void) {
                         && g_menu_selected_unit_status.team_kind != 1))) {
                 thread_start(g_thread_current_id - 1, menu_build_unit_status_list);
                 thread_set_parameters(
-                    g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_STATUS_LIST], 0, 0);
+                    g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST], 0, 0);
             }
         }
 

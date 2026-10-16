@@ -357,7 +357,7 @@ static s32 bunit_menu_run_unit_list_frame(void) {
             g_bunit_unit_list_triangle_menu_open = 1;
         } else if ((input & PSX_PAD_CIRCLE) && g_bunit_unit_browse_enabled != 0) {
             unit = g_bunit_unit_pointers[g_unit_selected_index];
-            if (unit->uses_monster_skillset != 0 || (unit->initial_team_flags & BATTLE_TEAM_MASK)) {
+            if (unit->uses_monster_skillset != 0 || (unit->initial_team_flags & UNIT_TEAM_MASK)) {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;
             } else {
                 g_bunit_status_display_dimmed = 1;

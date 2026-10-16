@@ -108,10 +108,10 @@ s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
     do {
         if (attacker_id != i) {
             unit = &g_battle_unit_stats[i];
-            if (unit->ability_outcome & BATTLE_ABILITY_OUTCOME_AFFECTED) {
-                unit->ability_outcome = BATTLE_ABILITY_OUTCOME_LEARN_CHECKED;
+            if (unit->ability_outcome & UNIT_ABILITY_OUTCOME_AFFECTED) {
+                unit->ability_outcome = UNIT_ABILITY_OUTCOME_LEARN_CHECKED;
                 if (!(unit->unit_flags & UNIT_FLAG_MONSTER)
-                    && main_unit_has_status_in_set(unit, MAIN_STATUS_CHECK_SET_PREVENT_REACTION) == 0) {
+                    && main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION) == 0) {
                     skillset = unit->primary_skillset;
                     row = unit->job_id;
                     if (row < JOB_ID_SQUIRE) {
@@ -226,7 +226,7 @@ s32 battle_action_give_item(unit_stats_t* unit, u8 item) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
-    if ((unit->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE) {
+    if ((unit->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE) {
         return 0;
     }
     item_id = item;
@@ -253,7 +253,7 @@ s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
-    if (unit->team_flags & BATTLE_TEAM_MASK) {
+    if (unit->team_flags & UNIT_TEAM_MASK) {
         return 0;
     }
     if (item_id != ITEM_ID_NOTHING) {
@@ -436,7 +436,7 @@ void battle_action_set_current_attacker_data(unit_stats_t* unit) {
     g_battle_action_current_attacker.target_delta_x = x - unit->x;
     g_battle_action_current_attacker.target_delta_y = y - unit->position.y;
     g_battle_action_current_attacker.facing = unit->position.facing;
-    g_battle_action_current_attacker.team = unit->team_flags & BATTLE_TEAM_MASK;
+    g_battle_action_current_attacker.team = unit->team_flags & UNIT_TEAM_MASK;
     g_battle_action_current_attacker.right_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
     g_battle_action_current_attacker.left_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
     g_battle_action_current_attacker.mimic_pending = 1;
@@ -479,7 +479,7 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     if (battle_action_is_reaction_prevented(unit) != 0) {
         return 0;
     }
-    if ((unit->team_flags & BATTLE_TEAM_MASK) != g_battle_action_current_attacker.team) {
+    if ((unit->team_flags & UNIT_TEAM_MASK) != g_battle_action_current_attacker.team) {
         return 0;
     }
     if (unit->battle_id == current->actor_id) {

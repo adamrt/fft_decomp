@@ -129,10 +129,10 @@ void menu_start_mini_menu_display_thread(void) {
     if (g_menu_overlay_state != 0) {
         return;
     }
-    g_menu_current_id = BATTLE_MENU_ID_MINI_MENU;
+    g_menu_current_id = MENU_COMMAND_ID_MINI_MENU;
     g_menu_thread_menu_data = g_menu_idle_action_entries;
     thread_start(THREAD_SLOT_MENU, menu_run_triangle_selection);
-    thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_MINI_MENU], 0, 0);
+    thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_MINI_MENU], 0, 0);
     g_thread_contexts[THREAD_SLOT_MENU].task_id = THREAD_TASK_MINI_MENU;
 }
 
@@ -1393,8 +1393,8 @@ static void menu_build_ability_list(s32 mode) {
 
     unit_index = g_menu_selected_unit.battle_id;
     unit = menu_get_selected_unit_stats();
-    type = g_action_menu_row_types[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index];
-    skillset = g_menu_skillsets[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index];
+    type = g_action_menu_row_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
+    skillset = g_menu_skillsets[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
     g_menu_selected_action.skillset_id = skillset;
 
     for (i = 0; i < 80; i++) {
@@ -1546,11 +1546,11 @@ static void menu_build_ability_list(s32 mode) {
         columns = 5;
     }
 
-    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].inner_width = window_x;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].window.w = window_x;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].text_image.width = window_x;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].header_id = row_mode;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].select_text_table = columns;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].inner_width = window_x;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.w = window_x;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].text_image.width = window_x;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].header_id = row_mode;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].select_text_table = columns;
 
     for (i = 0; i < count; i++) {
         g_ai_workspace_ptr->ability_list.ids[i] |= row_flags;
@@ -1572,7 +1572,7 @@ static void menu_build_ability_list(s32 mode) {
     /* An empty list shows one disabled row for ability 0. */
     if (count == 0) {
         count = 1;
-        g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].header_id = 0;
+        g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].header_id = 0;
         g_ai_workspace_ptr->ability_list.ids[0] = TEXT_ID_ABILITY_NAME_BASE;
         g_ai_workspace_ptr->ability_list.values[0] = 0;
         g_ai_workspace_ptr->ability_list.extras[0] = 0;
@@ -1580,14 +1580,14 @@ static void menu_build_ability_list(s32 mode) {
     }
 
     /* Six rows show at most; a shorter list's window moves down 8 pixels per missing row. */
-    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].window.y = 0x30;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y = 0x30;
     if (count >= 7) {
         g_menu_ability_layout.columns.hidden_rows = count - 6;
         g_menu_ability_layout.columns.row_count = 6;
     } else {
         g_menu_ability_layout.columns.hidden_rows = 0;
         g_menu_ability_layout.columns.row_count = count;
-        g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].window.y += (6 - count) * 8;
+        g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y += (6 - count) * 8;
     }
 
     /* The menu thread's redraw, cursor and refresh parameters. */
@@ -1610,7 +1610,7 @@ static void menu_build_ability_list(s32 mode) {
  * which is where the target's `lui/addiu s8` pair sits.
  */
 void menu_select_unit_action_slots_thread(void) {
-    s32 i = g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index;
+    s32 i = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
     s32 menu = g_action_menu_row_types[i];
     s32 check_unit = g_menu_skillset_disabled_flags[i];
     menu_unit_selection_record_t* row = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
@@ -1624,33 +1624,33 @@ void menu_select_unit_action_slots_thread(void) {
         menu_check_action_slot_restrictions(menu, i, check_unit);
         if (menu == ACTION_MENU_TYPE_ARITHMETICKS) {
             slot = (menu_list_selection_t*)((u8*)row + (i + offsetof(menu_unit_selection_record_t, lists[4])) + i);
-            g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index = slot->selected_index;
+            g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index = slot->selected_index;
             g_menu_ability_layout.row_offset = slot->scroll_offset;
         } else {
             pair = (u8*)row
-                + g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index * sizeof(menu_list_selection_t);
-            g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index
+                + g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index * sizeof(menu_list_selection_t);
+            g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index
                 = pair[offsetof(menu_unit_selection_record_t, lists[0].selected_index)];
             g_menu_ability_layout.row_offset = pair[offsetof(menu_unit_selection_record_t, lists[0].scroll_offset)];
             slot = (menu_list_selection_t*)(pair + offsetof(menu_unit_selection_record_t, lists));
         }
         for (j = 0; j < 6; j++) {
             if (menu != ACTION_MENU_TYPE_ARITHMETICKS || i == 0) {
-                g_menu_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | BATTLE_MENU_ID_ABILITY_CONFIRM;
+                g_menu_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_CONFIRM;
             } else {
                 g_menu_action_slot_row_actions[j] = -1;
             }
         }
-        if (g_action_menu_row_types[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index]
+        if (g_action_menu_row_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]
             == ACTION_MENU_TYPE_CHANGE_EQUIPMENT) {
-            g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index = 0;
+            g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index = 0;
             menu_run_equip_thread();
         }
         g_thread_call_target = menu_build_ability_list;
         thread_call_on_main_stack(i);
         script_pulse_tutorial_wait_value(0xFB);
         menu_run_scrolling_ability_list_thread();
-        slot->selected_index = g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index;
+        slot->selected_index = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
         slot->scroll_offset = g_menu_ability_layout.row_offset;
         if (menu != ACTION_MENU_TYPE_ARITHMETICKS) {
             thread_exit_current();
@@ -1662,7 +1662,7 @@ void menu_select_unit_action_slots_thread(void) {
             i += 2;
         } else {
             text = g_ai_workspace_ptr->ability_list
-                       .ids[g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index]
+                       .ids[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index]
                 - 0x7000;
             if (i == 2) {
                 g_menu_selected_action.calculator_type = text;
@@ -1716,10 +1716,10 @@ static void menu_build_skillset_entries(void) {
         }
         if (g_menu_skillset_disabled_flags[i] != 0) {
             rows[i].style = 4;
-            g_menu_skillset_row_actions[i] = MENU_ROW_ACTION_SILENT | BATTLE_MENU_ID_ABILITY_LIST;
+            g_menu_skillset_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_LIST;
         } else {
             rows[i].style = 0;
-            g_menu_skillset_row_actions[i] = BATTLE_MENU_ID_ABILITY_LIST;
+            g_menu_skillset_row_actions[i] = MENU_COMMAND_ID_ABILITY_LIST;
         }
         if (g_menu_skillset_build_result != 0) {
             g_text_substitution_values[count] = TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
@@ -1737,10 +1737,10 @@ static void menu_build_skillset_entries(void) {
     }
     height = count * 16 + 16;
     rows[count - 1].terminator = 0xff;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].max_row_index = count - 1;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].text_image.height = height;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].window.h = height;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].inner_height = height;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].max_row_index = count - 1;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].text_image.height = height;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].window.h = height;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].inner_height = height;
 }
 
 /* Build the skillset list, then wait for its submenu or run icon selection.
@@ -1757,11 +1757,11 @@ void menu_run_skillset_thread(void) {
     thread_call_on_main_stack();
     param_value = 1;
     if (g_menu_skillset_build_result != 0) {
-        g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index = 0;
+        g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = 0;
         if (g_menu_restore_pending == 0) {
             thread_start(g_thread_current_id - 1, menu_select_unit_action_slots_thread);
             thread_set_parameters(
-                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST], 0, 0);
+                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST], 0, 0);
         } else {
             thread_wait_frames(2);
         }
@@ -1775,11 +1775,11 @@ void menu_run_skillset_thread(void) {
     param = &g_thread_contexts[g_thread_current_id].function_parameter_2;
     *param = param_value;
     row = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
-    g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index = row->skillset_index;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = row->skillset_index;
     g_menu_restore_depth = 1;
     script_pulse_tutorial_wait_value(0xFC);
     menu_run_icon_selection_loop();
-    row->skillset_index = g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index;
+    row->skillset_index = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
     thread_exit_current();
 }
 

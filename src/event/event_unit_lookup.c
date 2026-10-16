@@ -57,7 +57,7 @@ s32 script_resolve_runtime_id(s32 unit_id) {
     if (unit_id == EVENT_UNIT_SELECTOR_IMPORTANT_UNIT) {
         for (battle_id = 0; battle_id < ENTD_UNITS_PER_ENCOUNTER; battle_id++) {
             unit = battle_unit_get_stats_from_battle_id(battle_id);
-            if (unit->team_flags & BATTLE_TEAM_IMPORTANCE_MASK)
+            if (unit->team_flags & UNIT_TEAM_IMPORTANCE_MASK)
                 break;
         }
         if (battle_id == ENTD_UNITS_PER_ENCOUNTER) {

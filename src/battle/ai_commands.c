@@ -198,13 +198,12 @@ static void battle_ai_init_acting_unit_data(void) {
     g_battle_ai_data_base.acting_unit_coords.fields.elevation = unit->position.higher_elevation;
     g_battle_ai_data_base.acting_unit_coords.fields.zero = 0;
     g_battle_ai_data_base.acting_unit_compact_index = ai->unit_compact_indices[id];
-    g_battle_ai_data_base.acting_unit_team = unit->team_flags & BATTLE_TEAM_MASK;
+    g_battle_ai_data_base.acting_unit_team = unit->team_flags & UNIT_TEAM_MASK;
     g_battle_ai_data_base.acting_unit_remaining_clockticks = battle_ai_calculate_clockticks_until_unit_acts(unit);
     acting = g_battle_ai_data_base.acting_unit;
     mount_info = acting->mount_info;
-    if (mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
-        g_battle_ai_data_base.acting_unit_move
-            = g_battle_unit_stats[mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK].move;
+    if (mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
+        g_battle_ai_data_base.acting_unit_move = g_battle_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK].move;
     } else {
         g_battle_ai_data_base.acting_unit_move = acting->move;
     }
@@ -239,7 +238,7 @@ static s32 battle_ai_refresh_unit_decision_flags(void) {
                 decision->targeting_flags_2 |= AI_TARGET_UNTARGETABLE;
                 continue;
             }
-            if (unit_id != ai->acting_unit_id && (unit->initial_team_flags & BATTLE_TEAM_MASK) != ai->acting_unit_team)
+            if (unit_id != ai->acting_unit_id && (unit->initial_team_flags & UNIT_TEAM_MASK) != ai->acting_unit_team)
                 decision->enemy_flag = 1;
             else
                 decision->enemy_flag = 0;
@@ -353,7 +352,7 @@ static void battle_ai_init_target_consideration(void) {
     decision = g_battle_ai_data_base.acting_unit_decision;
     if (g_battle_ai_data_base.acting_unit_team == 0) {
         acting = g_battle_ai_data_base.acting_unit;
-        if (acting->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) {
+        if (acting->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
             ai->autobattle_setting = acting->auto_battle_setting;
             return;
         }
@@ -480,8 +479,8 @@ static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
             return 0;
         }
         mount_info = ai->acting_unit->mount_info;
-        if (mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
-            i = mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK;
+        if (mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
+            i = mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
         } else {
             i = ai->acting_unit_id;
         }
@@ -498,7 +497,7 @@ static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
             for (x = 0; x < ai->map_max_x; x++) {
                 tile = &g_battle_map_tile_data[level * MAP_TILES_PER_LAYER + y * ai->map_max_x + x];
                 if (ai->acting_unit->ability_flags.movement[1] & BATTLE_MOVEMENT_SET_2_TELEPORT) {
-                    if (!(ai->acting_unit->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER)) {
+                    if (!(ai->acting_unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER)) {
                         i = ai->acting_unit_coords.fields.x - x;
                         if (i < 0) {
                             i = -i;
@@ -654,7 +653,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                 menu = g_main_action_menu_types_by_skillset[entry->skillset];
                 if (menu == ACTION_MENU_TYPE_ITEM_INVENTORY || menu == ACTION_MENU_TYPE_KATANA_INVENTORY
                     || ability_id == ABILITY_ID_THROW_SHURIKEN || ability_id == ABILITY_ID_THROW_BALL) {
-                    if (!(unit->initial_team_flags & BATTLE_TEAM_MASK)) {
+                    if (!(unit->initial_team_flags & UNIT_TEAM_MASK)) {
                         if (g_main_item_quantities[ability->parameters.fields.item_id] == 0) {
                             continue;
                         }
@@ -679,7 +678,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                                 if (g_main_item_primary_data[item_id].type == item_type) {
                                     level = g_main_item_primary_data[item_id].required_level;
                                     if (level >= best_level) {
-                                        if (!(unit->initial_team_flags & BATTLE_TEAM_MASK)) {
+                                        if (!(unit->initial_team_flags & UNIT_TEAM_MASK)) {
                                             lacking = g_main_item_quantities[item_id] < 5;
                                         } else {
                                             lacking = unit->level < level;
@@ -1663,14 +1662,14 @@ s32 battle_ai_is_unit_untargetable(s32 unit_idx) {
         return 1;
     }
     mount = unit->mount_info;
-    if (mount & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
+    if (mount & UNIT_MOUNT_INFO_FLAG_MOUNT) {
         return 1;
     }
     if (ai->unit_decisions[unit_idx].enemy_flag == 0) {
         return 0;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)] & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT))
-        && (!(mount & BATTLE_MOUNT_INFO_FLAG_RIDER)
+        && (!(mount & UNIT_MOUNT_INFO_FLAG_RIDER)
             || !(g_battle_unit_stats[mount & 0xf].status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
                 & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT)))) {
         return 1;
@@ -2407,13 +2406,13 @@ static s32 battle_ai_select_action_targeted(void) {
     if (battle_ai_is_unit_out_of_play(target) || !ai->unit_decisions[target].enemy_flag) {
         g_battle_ai_data_base.acting_unit_decision->flags &= ~AI_DECISION_SPECIAL_BEHAVIOR;
         unit = &g_battle_unit_stats[target];
-        if (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
+        if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
             if (!((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
                       & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT))
-                    && (g_battle_unit_stats[unit->mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK]
+                    && (g_battle_unit_stats[unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK]
                             .status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
                         & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT))))
-                target = unit->mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK;
+                target = unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
         } else {
             /* A direct member pointer folds the target's base cursor and field
              * displacement together. Derive the member offset to retain its stores. */
@@ -2797,7 +2796,7 @@ static s32 battle_ai_select_peril_target(void) {
         }
         distance_score = 255 - battle_ai_calculate_distance_between_units(ai->acting_unit, unit);
         missing_hp = 128 - ((unit->hp << 7) / unit->max_hp);
-        team_bits = unit->team_flags & BATTLE_TEAM_IMPORTANCE_MASK;
+        team_bits = unit->team_flags & UNIT_TEAM_IMPORTANCE_MASK;
         if (battle_ai_can_cancel_current_status(unit, STATUS_ID_DEAD)
             && (decision->targeting_flags_2 & AI_TARGET_DEAD_WITHOUT_RERAISE)) {
             status_score = 0x78;
@@ -3165,7 +3164,7 @@ static s32 battle_ai_fill_target_distance_grid(const ai_coords_t* target) {
     else
         g_battle_ai_data_base.search_resume_flag = 1;
     use_manhattan = 0;
-    if (!(ai->acting_unit->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER)
+    if (!(ai->acting_unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER)
         && (ai->acting_unit->ability_flags.movement[1]
             & (BATTLE_MOVEMENT_SET_2_TELEPORT | BATTLE_MOVEMENT_SET_2_TELEPORT_2))) {
         use_manhattan = 1;
@@ -3603,8 +3602,8 @@ void battle_ai_init_unit_abilities(s32 unit_id) {
             return;
         }
         unit->auto_battle_target = i;
-        if ((g_battle_unit_stats[i].initial_team_flags & BATTLE_TEAM_MASK)
-            != (unit->initial_team_flags & BATTLE_TEAM_MASK)) {
+        if ((g_battle_unit_stats[i].initial_team_flags & UNIT_TEAM_MASK)
+            != (unit->initial_team_flags & UNIT_TEAM_MASK)) {
             ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_TARGETED;
         } else {
             ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_RECOVERY;
@@ -3841,11 +3840,11 @@ static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s3
             }
             flags = g_main_ability_range_data[ability_id].flags_4;
             if (flags & ABILITY_SECONDARY_FLAG_4_REQUIRES_SWORD) {
-                if (!(unit->equipped_flags & BATTLE_UNIT_EQUIPPED_FLAG_SWORD)) {
+                if (!(unit->equipped_flags & UNIT_EQUIPPED_FLAG_SWORD)) {
                     continue;
                 }
             } else if (flags & ABILITY_SECONDARY_FLAG_4_REQUIRES_MATERIA_BLADE) {
-                if (!(unit->equipped_flags & BATTLE_UNIT_EQUIPPED_FLAG_MATERIA_BLADE)) {
+                if (!(unit->equipped_flags & UNIT_EQUIPPED_FLAG_MATERIA_BLADE)) {
                     continue;
                 }
             }

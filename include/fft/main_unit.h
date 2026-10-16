@@ -35,8 +35,8 @@ extern u8 g_main_action_menu_types_by_skillset[0xe0];
 extern u8 g_main_math_rsm_ability_data[ABILITY_ID_COUNT - ABILITY_ID_MATH_FIRST];
 /* The item_type_e each Throw ability throws, indexed by ability id - ABILITY_ID_THROW_FIRST. */
 extern u8 g_main_throw_ability_item_types[];
-extern main_ability_jump_record_t g_main_jump_ability_data[12];
-extern main_ability_charge_record_t g_main_charge_ability_data[8];
+extern ability_jump_record_t g_main_jump_ability_data[12];
+extern ability_charge_record_t g_main_charge_ability_data[8];
 /* Indexed by reaction ability id - ABILITY_ID_REACTION_FIRST. */
 extern const u8 g_main_reaction_behavior_flags[ABILITY_ID_SUPPORT_FIRST - ABILITY_ID_REACTION_FIRST];
 extern u8 g_main_calculator_primes[CALCULATOR_PRIME_COUNT];
@@ -44,7 +44,7 @@ extern u8 g_main_calculator_primes[CALCULATOR_PRIME_COUNT];
 s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* main_ability_store_skillset_abilities(s32 skillset, s32 flags);
 s32 main_ability_calculate_pointers_and_type(
-    s32 id, ability_data_t** out_ability_data, main_ability_secondary_pointer_t* out_secondary_data);
+    s32 id, ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data);
 u32 main_ability_get_known(const unit_stats_t* unit, u32 job_index);
 
 /* jobs */
@@ -89,8 +89,8 @@ enum {
 
 extern status_infliction_data_t g_main_status_infliction_data[];
 extern const status_effect_data_t g_main_status_effect_data[STATUS_COUNT];
-/* Built status masks, indexed by main_status_check_set_e. */
-extern u8 g_main_status_check_sets[MAIN_STATUS_CHECK_SET_COUNT][STATUS_BYTE_COUNT];
+/* Built status masks, indexed by status_check_set_e. */
+extern u8 g_main_status_check_sets[STATUS_CHECK_SET_COUNT][STATUS_BYTE_COUNT];
 
 void main_status_init_check_data(void);
 void main_status_change_unit(unit_stats_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
@@ -98,7 +98,7 @@ void main_status_store_current(unit_stats_t* unit);
 void main_status_set_action_state(unit_stats_t* unit, u8 action_state);
 s32 main_status_set_ct(unit_stats_t* unit, s32 status_id, s32 removing);
 s32 main_status_find_action_highest_order_effect(const action_data_t* action);
-s32 main_unit_has_status_in_set(const unit_stats_t* unit, main_status_check_set_e status_set);
+s32 main_unit_has_status_in_set(const unit_stats_t* unit, status_check_set_e status_set);
 
 /* unit generation */
 /* Selects the rows of g_main_unit_generation_base_data and

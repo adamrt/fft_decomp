@@ -610,7 +610,7 @@ void world_main_menu_text_window_thread(void) {
 
 /* Thread body that opens the game options screen through world_menu_run_main_mode. */
 static void world_menu_run_main_mode_0_thread(void) {
-    world_menu_run_main_mode(OPTION_MENU_GAME_OPTIONS);
+    world_menu_run_main_mode(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
 /* Runs the main-menu mode-0 thread in the slot below the current thread,

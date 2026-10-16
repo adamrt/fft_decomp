@@ -525,7 +525,7 @@ void battle_formula_set_morbol(void) {
     if (action->hit == 0)
         return;
     target = g_battle_action_target;
-    if (!(target->team_flags & BATTLE_TEAM_FLAG_IMMORTAL) && target->mount_info == 0
+    if (!(target->team_flags & UNIT_TEAM_FLAG_IMMORTAL) && target->mount_info == 0
         && target->character_identity >= CHARACTER_IDENTITY_GENERIC_MALE
         && target->character_identity <= CHARACTER_IDENTITY_MONSTER
         && (target->job_id < JOB_ID_MORBOL || target->job_id > JOB_ID_MORBOL_FAMILY_LAST)) {

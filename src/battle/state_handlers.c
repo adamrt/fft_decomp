@@ -114,7 +114,7 @@ static void battle_move_confirm_unit_move(battle_unit_t* unit, battle_unit_t* mo
     }
     unit->turn_action_flags |= BATTLE_UNIT_TURN_ACTION_MOVED;
     battle_action_set_only_movement_taken(unit->stats->battle_id);
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)
         && !(unit->path.flags & BATTLE_EFFECTIVE_MOVEMENT_TELEPORT)) {
         main_sound_play_sfx(MAIN_SFX_CONFIRM);
     }
@@ -221,12 +221,12 @@ void battle_state_handle_wait_direction_state(void) {
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
     }
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_gfx_draw_wait_direction_unit();
     }
     battle_gfx_update_status_bubbles_and_graphics();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_camera_handle_rotation_input();
         battle_camera_update_zoom_input();
         battle_camera_update_tilt_input();
@@ -400,7 +400,7 @@ void battle_state_handle_targeting_range_state(void) {
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_target_move_cursor_by_input();
         battle_camera_handle_rotation_input();
         battle_camera_update_zoom_input();
@@ -486,7 +486,7 @@ void battle_state_handle_ability_preview_state(void) {
     u16 frame;
     battle_unit_t* unit = battle_unit_get_source();
 
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_camera_handle_rotation_input();
         battle_camera_update_zoom_input();
         battle_camera_update_tilt_input();
@@ -536,7 +536,7 @@ void battle_state_handle_confirm_action_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     unit = battle_unit_get_source();
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         selected_command = selected_command_address->kind;
         switch (selected_command) {
         case 5:
@@ -1071,13 +1071,13 @@ void battle_state_handle_target_select_state(void) {
         if (target == 0) {
             battle_state_enter_target_select_denied();
         } else if (caster->target_select_command == AI_COMMAND_AUTOBATTLE_TARGETED_SELECT) {
-            if ((caster->stats->team_flags & BATTLE_TEAM_MASK) == (target->stats->team_flags & BATTLE_TEAM_MASK)) {
+            if ((caster->stats->team_flags & UNIT_TEAM_MASK) == (target->stats->team_flags & UNIT_TEAM_MASK)) {
                 battle_state_enter_target_select_denied();
             } else {
                 battle_state_enter_target_select_confirm();
             }
         } else if (caster->target_select_command == AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT) {
-            if ((caster->stats->team_flags & BATTLE_TEAM_MASK) == (target->stats->team_flags & BATTLE_TEAM_MASK)) {
+            if ((caster->stats->team_flags & UNIT_TEAM_MASK) == (target->stats->team_flags & UNIT_TEAM_MASK)) {
                 battle_state_enter_target_select_confirm();
             } else {
                 battle_state_enter_target_select_denied();
@@ -1208,10 +1208,10 @@ void battle_state_handle_jp_exp_gain_state(void) {
         return;
     }
     if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ABILITY_READY) {
-        if (menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1) == 2
+        if (menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1) == 2
             && script_get_event_finish_operation() != 0) {
             g_battle_previous_game_state = g_battle_game_state;
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
             battle_state_enter_event();
             return;
         }

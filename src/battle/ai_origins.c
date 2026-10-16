@@ -522,9 +522,9 @@ s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coords) {
                 continue;
             if (!(unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_MONSTER_SKILL))
                 continue;
-            if ((unit->initial_team_flags & BATTLE_TEAM_MASK) != ai->acting_unit_team)
+            if ((unit->initial_team_flags & UNIT_TEAM_MASK) != ai->acting_unit_team)
                 continue;
-            if (main_unit_has_status_in_set(unit, MAIN_STATUS_CHECK_SET_PREVENT_REACTION))
+            if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
                 continue;
             dx = unit->x - coords->fields.x;
             if (dx < 0)
@@ -1156,9 +1156,9 @@ static void battle_ai_build_monster_skill_tile_mask(void) {
             continue;
         if (!(unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_MONSTER_SKILL))
             continue;
-        if ((unit->initial_team_flags & BATTLE_TEAM_MASK) != ai->acting_unit_team)
+        if ((unit->initial_team_flags & UNIT_TEAM_MASK) != ai->acting_unit_team)
             continue;
-        if (main_unit_has_status_in_set(unit, MAIN_STATUS_CHECK_SET_PREVENT_REACTION))
+        if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
             continue;
         height = g_battle_map_tile_data[unit->position.higher_elevation * MAP_TILES_PER_LAYER
             + unit->position.y * ai->map_max_x + unit->x]
@@ -1664,7 +1664,7 @@ score_state:
                 u32 golem;
                 s32 team;
 
-                team = (unit->team_flags >> BATTLE_TEAM_SHIFT) & BATTLE_TEAM_INDEX_MASK;
+                team = (unit->team_flags >> UNIT_TEAM_SHIFT) & UNIT_TEAM_INDEX_MASK;
                 weight_offset = g_battle_team_golem[team];
                 golem = weight_offset;
                 weight_offset *= AI_GOLEM_SCORE_SCALE;

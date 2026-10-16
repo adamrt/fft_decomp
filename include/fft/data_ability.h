@@ -701,28 +701,28 @@ enum { ABILITY_RANGE_WHOLE_MAP = 0xff };
 
 /* Jump ability record, 12 of them at g_main_jump_ability_data: horizontal
  * range and vertical reach. */
-typedef struct main_ability_jump_record {
+typedef struct ability_jump_record {
     u8 range;    /* 0x00 */
     u8 vertical; /* 0x01 */
-} main_ability_jump_record_t;
-typedef char main_ability_jump_record_size_must_be_2[(sizeof(main_ability_jump_record_t) == 2) ? 1 : -1];
+} ability_jump_record_t;
+typedef char ability_jump_record_size_must_be_2[(sizeof(ability_jump_record_t) == 2) ? 1 : -1];
 
 /* Charge ability record, 8 of them at g_main_charge_ability_data. */
-typedef struct main_ability_charge_record {
+typedef struct ability_charge_record {
     u8 ct;    /* 0x00 */
     u8 power; /* 0x01 */
-} main_ability_charge_record_t;
+} ability_charge_record_t;
 
 /* Pointer returned for ability_type_e: the record extent depends on the type. */
-typedef union main_ability_secondary_pointer {
+typedef union ability_secondary_pointer {
     ability_secondary_data_t* range;
     u8* item_id;
     u8* throw_item_type;
-    main_ability_jump_record_t* jump;
-    main_ability_charge_record_t* charge;
+    ability_jump_record_t* jump;
+    ability_charge_record_t* charge;
     u8* math_rsm;
-} main_ability_secondary_pointer_t;
-typedef char main_ability_secondary_pointer_size_must_be_4[(sizeof(main_ability_secondary_pointer_t) == 4) ? 1 : -1];
+} ability_secondary_pointer_t;
+typedef char ability_secondary_pointer_size_must_be_4[(sizeof(ability_secondary_pointer_t) == 4) ? 1 : -1];
 
 /* status infliction */
 /* Bit flags in status_infliction_data_t.type and the active-ability copy. The

@@ -10,7 +10,7 @@
  * upload the rows to VRAM from the top of `destination` down. */
 void text_render_id_rows_to_vram(u8* text_table, s16* text_ids, RECT* destination, s32 flags) {
     u8 image[0x800];
-    battle_menu_text_image_bounds_t bounds;
+    text_image_bounds_t bounds;
     RECT upload_rect;
     s16 row_text_ids[2];
 

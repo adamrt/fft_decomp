@@ -147,20 +147,6 @@ rgb24_t* world_menu_gfx_get_draw_color(void);
 /* display script commands */
 enum { WORLD_MENU_SCRIPT_END = 0x1c };
 
-/* The builder walks the table with a byte offset stepping by 8 (the
- * target's induction variable), so it addresses these fields by offset. */
-enum world_menu_line_layout_offset {
-    WORLD_MENU_LINE_LAYOUT_X0 = 0,
-    WORLD_MENU_LINE_LAYOUT_Y0 = 1,
-    WORLD_MENU_LINE_LAYOUT_X1 = 2,
-    WORLD_MENU_LINE_LAYOUT_Y1 = 3,
-    WORLD_MENU_LINE_LAYOUT_ADD_W0 = 4,
-    WORLD_MENU_LINE_LAYOUT_ADD_H0 = 5,
-    WORLD_MENU_LINE_LAYOUT_ADD_W1 = 6,
-    WORLD_MENU_LINE_LAYOUT_ADD_H1 = 7,
-    WORLD_MENU_LINE_LAYOUT_SIZE = 8
-};
-
 typedef char world_menu_line_f2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
 
 extern menu_callback_t g_world_menu_script_callbacks[16];

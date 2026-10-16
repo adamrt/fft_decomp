@@ -446,7 +446,7 @@ void menu_run_unit_status_thread(void) {
                 stats = battle_unit_get_stats_from_battle_id(unit_info->battle_id);
                 if (unit_info->battle_id >= 0x10) {
                     s32 id = stats->formation_index;
-                    if (id == BATTLE_FORMATION_INDEX_NONE) {
+                    if (id == UNIT_FORMATION_INDEX_NONE) {
                         id = 0;
                     }
                     text_draw_large_number_glyphs(id + 1, 0x4002, value_pixels + 0xA0, text_position);

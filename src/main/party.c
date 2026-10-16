@@ -59,34 +59,34 @@ void main_status_init_check_data(void) {
         byte = status / 8;
         mask = 0x80 >> (status & 7);
         if (flags4 & STATUS_EFFECT_FLAG_1_KO)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_KO][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_KO][byte] |= mask;
         if (flags4 & STATUS_EFFECT_FLAG_1_UNIT_LOST)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_UNIT_LOST][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_UNIT_LOST][byte] |= mask;
         if (flags4 & STATUS_EFFECT_FLAG_1_CHECK_SET_2)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_UNREAD_2][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_UNREAD_2][byte] |= mask;
         if (flags4 & STATUS_EFFECT_FLAG_1_FREEZE_CT)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_FREEZE_CT][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_FREEZE_CT][byte] |= mask;
         if (flags5 & STATUS_EFFECT_FLAG_2_PREVENT_REACTION)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_PREVENT_REACTION][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_PREVENT_REACTION][byte] |= mask;
         if (flags5 & STATUS_EFFECT_FLAG_2_IMMORTAL_IMMUNITY)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_IMMORTAL_IMMUNITY][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_IMMORTAL_IMMUNITY][byte] |= mask;
         if (flags5 & STATUS_EFFECT_FLAG_2_FORMATION_IMMUNITY)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_FORMATION_IMMUNITY][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_FORMATION_IMMUNITY][byte] |= mask;
         if (flags5 & STATUS_EFFECT_FLAG_2_CHECK_SET_7)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_UNREAD_7][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_UNREAD_7][byte] |= mask;
         if (flags5 & STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][byte] |= mask;
         if (flags5 & STATUS_EFFECT_FLAG_2_MOUNT_REMOVAL)
-            g_main_status_check_sets[MAIN_STATUS_CHECK_SET_MOUNT_REMOVAL][byte] |= mask;
+            g_main_status_check_sets[STATUS_CHECK_SET_MOUNT_REMOVAL][byte] |= mask;
     }
-    g_main_status_check_sets[MAIN_STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
+    g_main_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
         = STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD);
-    g_main_status_check_sets[MAIN_STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_PETRIFY)]
+    g_main_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_PETRIFY)]
         = STATUS_BYTE_MASK(STATUS_ID_PETRIFY) | STATUS_BYTE_MASK(STATUS_ID_BLOOD_SUCK)
         | STATUS_BYTE_MASK(STATUS_ID_TREASURE);
-    g_main_status_check_sets[MAIN_STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
+    g_main_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
         = STATUS_BYTE_MASK(STATUS_ID_BERSERK) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG);
-    g_main_status_check_sets[MAIN_STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_CHARM)]
+    g_main_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_CHARM)]
         = STATUS_BYTE_MASK(STATUS_ID_CHARM);
 }
 
@@ -129,8 +129,8 @@ s32 main_unit_save_entd_unit_to_party(entd_encounter_t* entd, s32 unit_id, s32 g
 
         unit_data->battle_id = 0xff;
         unit_data->entd_slot = 0x20;
-        unit_data->existence = BATTLE_UNIT_EXISTENCE_ACTIVE;
-        unit_data->formation_index = BATTLE_FORMATION_INDEX_NONE;
+        unit_data->existence = UNIT_EXISTENCE_ACTIVE;
+        unit_data->formation_index = UNIT_FORMATION_INDEX_NONE;
         main_unit_init_from_entd(unit_data, entd_unit, initialize_for_battle, 0);
         return main_party_save_unit(unit_data, guest_id);
     }
@@ -600,7 +600,7 @@ u16* main_ability_store_skillset_abilities(s32 skillset_id, s32 filters) {
  * Jump or Charge record, or the one-byte record shared by Math, reaction, support
  * and movement abilities. The result is the matching ability_type_e. */
 s32 main_ability_calculate_pointers_and_type(
-    s32 ability_id, ability_data_t** out_ability_data, main_ability_secondary_pointer_t* out_secondary_data) {
+    s32 ability_id, ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data) {
     ability_id &= ABILITY_ID_MASK;
     /* 0x8005ebf0: Ability Data 1, 8 bytes each. */
     *out_ability_data = &g_main_ability_data[ability_id];
@@ -714,12 +714,12 @@ s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_worl
     main_unit_enable_rsm_flags(unit);
     main_unit_generate_raw_stats(unit);
     main_unit_copy_job_growths_and_multipliers(unit);
-    if (unit->formation_index == BATTLE_FORMATION_INDEX_NONE) {
-        unit->formation_index = BATTLE_FORMATION_INDEX_GENERATED_UNIT;
+    if (unit->formation_index == UNIT_FORMATION_INDEX_NONE) {
+        unit->formation_index = UNIT_FORMATION_INDEX_GENERATED_UNIT;
     }
     main_unit_calculate_actual_stats(unit, 0);
-    if (unit->formation_index == BATTLE_FORMATION_INDEX_GENERATED_UNIT) {
-        unit->formation_index = BATTLE_FORMATION_INDEX_NONE;
+    if (unit->formation_index == UNIT_FORMATION_INDEX_GENERATED_UNIT) {
+        unit->formation_index = UNIT_FORMATION_INDEX_NONE;
     }
     main_unit_set_equippable_items(unit);
     if (kind != 0x82) {
@@ -848,7 +848,7 @@ static s32 main_unit_calculate_entd_data(unit_stats_t* unit, entd_unit_t* entd) 
 
     unit->unit_flags = value;
     sprite = entd->sprite_set;
-    unit->formation_index = BATTLE_FORMATION_INDEX_NONE;
+    unit->formation_index = UNIT_FORMATION_INDEX_NONE;
     unit->character_identity = sprite;
 
     value = entd->level;
@@ -932,16 +932,16 @@ static s32 main_unit_init_from_entd_party_member(unit_stats_t* unit, entd_unit_t
 /*
  * Fills an in-battle unit record from its persistent party record. The unit
  * is a player-controlled blue unit; Ramza's identities also get importance 3
- * (the whole BATTLE_TEAM_IMPORTANCE_MASK), so losing him decides the battle. A
+ * (the whole UNIT_TEAM_IMPORTANCE_MASK), so losing him decides the battle. A
  * roster member (slot below 16) gets palette 0, while a guest keeps its saved palette.
  */
 static void main_unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party) {
-    s32 team = BATTLE_TEAM_BLUE | BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+    s32 team = UNIT_TEAM_BLUE | UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
     s32 i;
     s32 value;
 
     if (party->sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
-        team = BATTLE_TEAM_BLUE | BATTLE_TEAM_FLAG_PLAYER_CONTROLLED | BATTLE_TEAM_IMPORTANCE_MASK;
+        team = UNIT_TEAM_BLUE | UNIT_TEAM_FLAG_PLAYER_CONTROLLED | UNIT_TEAM_IMPORTANCE_MASK;
     }
     unit->team_flags = team;
     unit->initial_team_flags = team;
@@ -1146,16 +1146,16 @@ static void main_unit_copy_job_data(unit_stats_t* unit) {
     }
     main_mem_copy_byte_data_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
 
-    flag_a = unit->team_flags & BATTLE_TEAM_FLAG_IMMORTAL;
+    flag_a = unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL;
     flag_b = unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION);
     if (flag_a != 0 && flag_b != 0) {
         u8* statuses = unit->status_sets.immunity;
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             if (flag_a != 0) {
-                statuses[i] |= g_main_status_check_sets[MAIN_STATUS_CHECK_SET_IMMORTAL_IMMUNITY][i];
+                statuses[i] |= g_main_status_check_sets[STATUS_CHECK_SET_IMMORTAL_IMMUNITY][i];
             }
             if (flag_b != 0) {
-                statuses[i] |= g_main_status_check_sets[MAIN_STATUS_CHECK_SET_FORMATION_IMMUNITY][i];
+                statuses[i] |= g_main_status_check_sets[STATUS_CHECK_SET_FORMATION_IMMUNITY][i];
             }
         }
     }
@@ -1235,7 +1235,7 @@ static void main_unit_calculate_actual_stats(unit_stats_t* unit, s32 mode) {
 
     for (i = 0; i < UNIT_RAW_STAT_COUNT; i++) {
         value = raw[i].low + (raw[i].middle << 8) + (raw[i].high << 16);
-        if (mode == 0 && unit->formation_index == BATTLE_FORMATION_INDEX_GENERATED_UNIT) {
+        if (mode == 0 && unit->formation_index == UNIT_FORMATION_INDEX_GENERATED_UNIT) {
             divisor = mult[i].growth;
             divisor = divisor ? divisor : 1;
             for (j = 2; j <= level; j++) {
@@ -1611,8 +1611,7 @@ void main_unit_set_equipment_stats(unit_stats_t* unit) {
     weapon_data_t* weapon;
 
     main_mem_zero(unit->equipment_stats, sizeof(unit->equipment_stats));
-    unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE]
-        = g_main_job_data_pointer[unit->job_id].class_evade;
+    unit->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE] = g_main_job_data_pointer[unit->job_id].class_evade;
     if (unit->unit_flags & UNIT_FLAG_MONSTER) {
         return;
     }
@@ -1622,34 +1621,34 @@ void main_unit_set_equipment_stats(unit_stats_t* unit) {
         item_evade_t* accessory
             = &g_main_item_accessory_data[g_main_item_secondary_data_ids[unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]
                 * sizeof(item_data_t)]];
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE] = accessory->physical_evade;
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE] = accessory->magic_evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE] = accessory->physical_evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE] = accessory->magic_evade;
     }
     item = &g_main_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]];
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
         shield = &g_main_item_shield_data[g_main_item_secondary_data_ids
                 [unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] * sizeof(item_data_t)]];
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE] = shield->physical_evade;
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE] = shield->magic_evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE] = shield->physical_evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE] = shield->magic_evade;
     }
     item = &g_main_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]];
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
         shield = &g_main_item_shield_data[g_main_item_secondary_data_ids
                 [unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] * sizeof(item_data_t)]];
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE] = shield->physical_evade;
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE] = shield->magic_evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE] = shield->physical_evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE] = shield->magic_evade;
     }
     item = &g_main_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]];
     if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
         weapon = &g_main_item_weapon_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]];
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = weapon->power;
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = weapon->evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = weapon->power;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = weapon->evade;
     }
     item = &g_main_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]];
     if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
         weapon = &g_main_item_weapon_data[unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]];
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = weapon->power;
-        unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE] = weapon->evade;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = weapon->power;
+        unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE] = weapon->evade;
     }
 }
 
@@ -1684,12 +1683,12 @@ void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) 
         for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
             item_id = unit->equipment[i];
             if (item_id == ITEM_ID_MATERIA_BLADE) {
-                unit->equipped_flags |= BATTLE_UNIT_EQUIPPED_FLAG_MATERIA_BLADE;
+                unit->equipped_flags |= UNIT_EQUIPPED_FLAG_MATERIA_BLADE;
             }
             if (item_id < ITEM_ID_SHIELD_FIRST) {
                 if (g_main_item_primary_data[item_id].type == ITEM_TYPE_SWORD
                     || g_main_item_primary_data[item_id].type == ITEM_TYPE_KNIGHT_SWORD) {
-                    unit->equipped_flags |= BATTLE_UNIT_EQUIPPED_FLAG_SWORD;
+                    unit->equipped_flags |= UNIT_EQUIPPED_FLAG_SWORD;
                 }
             }
             if (item_id == ITEM_ID_NONE) {

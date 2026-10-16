@@ -407,7 +407,7 @@ typedef struct ai_data {
     u8 acting_unit_team;                            /* 0x0e39 */
     u8 map_max_x;                                   /* 0x0e3a */
     u8 map_max_y;                                   /* 0x0e3b */
-    u16 team_golem[BATTLE_TEAM_COUNT];              /* 0x0e3c; scored as 16-bit values by the action simulation */
+    u16 team_golem[UNIT_TEAM_COUNT];                /* 0x0e3c; scored as 16-bit values by the action simulation */
     u8 status_to_cancel[STATUS_BYTE_COUNT]; /* 0x0e44; the statuses the actor's usable abilities cancel, built by
                                                       battle_ai_set_ability_considerations */
     /* Resumable reflected-origin search (battle_ai_evaluate_reflected_target_origins).

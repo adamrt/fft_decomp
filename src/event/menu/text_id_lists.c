@@ -32,9 +32,9 @@ const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2)
  * `colors` and `colors2` are distinct copies of &ids[k]: one shared local
  * changes the register assignment. The caller also passes its row flags as a
  * ninth argument, which is never read. */
-void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused, s32 max_chars,
-    u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags) {
-    battle_text_image_position_t position;
+void menu_text_render_encoded_ids_to_image(u8* image, text_image_bounds_t* rect, s32 unused, s32 max_chars, u8* font,
+    s16* ids, s32 count, s16 glyph, s32 unused_flags) {
+    text_image_position_t position;
     s32 line;
     s32 col;
     s32 style;

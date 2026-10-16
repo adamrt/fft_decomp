@@ -29,8 +29,8 @@ static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data
     out->primary_skillset = unit->primary_skillset;
 
     flags = unit->initial_team_flags;
-    team_kind = (flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE;
-    if (!(flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
+    team_kind = (flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE;
+    if (!(flags & UNIT_TEAM_OR_PLAYER_CONTROL_MASK)) {
         team_kind = 2;
     }
 

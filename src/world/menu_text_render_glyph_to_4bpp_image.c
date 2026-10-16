@@ -14,8 +14,7 @@
  * An odd x starts mid-byte: the first pixel fills the high nibble of the
  * existing byte, and the row's last byte is stored whole, clearing the pixel
  * to the right of the glyph. */
-s32 menu_text_render_glyph_to_4bpp_image(
-    s32 glyph, u8* image, const battle_text_image_position_t* target, s32 palette) {
+s32 menu_text_render_glyph_to_4bpp_image(s32 glyph, u8* image, const text_image_position_t* target, s32 palette) {
     s32 row;
     s32 col;
     u8* dst;

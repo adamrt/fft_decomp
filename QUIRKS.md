@@ -247,7 +247,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   so `world_formation_step_unit_portrait_slide` never runs. Menu input mode 1
   is tested in four places and never stored.
 - Both copies of `menu_wait_thread` store -2 over the
-  Wait entry's row action (7, `BATTLE_MENU_ID_WAIT_YES_NO`) before confirming,
+  Wait entry's row action (7, `MENU_COMMAND_ID_WAIT_YES_NO`) before confirming,
   so the Yes/No entry of the menu table never opens. No code, row action or
   system function opens entries 0x09, 0x0d, 0x16, 0x17 (the only way to 0x18)
   or the four no-act turn menus (0x20, 0x21, 0x32, 0x33), yet the confirm-move
@@ -869,7 +869,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   0x1fe and 0x1ff) and nothing reads it, because
   `main_ability_calculate_pointers_and_type` derives the type from the id.
 - `main_status_init_check_data` builds eleven status check sets; sets 2 and 7
-  (`MAIN_STATUS_CHECK_SET_UNREAD_2`, `_UNREAD_7`) are read by nothing.
+  (`STATUS_CHECK_SET_UNREAD_2`, `_UNREAD_7`) are read by nothing.
 - WORLD's copies of BATTLE's action-menu and tile-info routines
   (`menu_build_ability_list`, `menu_build_skillset_entries`,
   `menu_run_selected_tile_info_display_thread` and nine more) keep BATTLE's

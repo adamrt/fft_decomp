@@ -101,14 +101,14 @@ typedef enum battle_at_list_mode {
 extern s32 g_battle_action_at_list_active;
 extern s32 g_battle_action_at_list_id;
 
-s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode);
+s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode);
 s32 battle_action_get_at_list_entry_unit_id(s32 at_index);
 s32 battle_action_find_unit_turn_index(const unit_stats_t* unit);
 void battle_action_clear_at_list_id(void);
 void battle_action_show_at_list_entry(s32 at_index);
-u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries);
+u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries);
 void battle_action_open_status_menu_at_list_start(void);
-s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_at_entry_t* at_list);
+s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, at_entry_t* at_list);
 void battle_action_show_next_at_list_entry(void);
 
 /* preparation */
@@ -321,7 +321,7 @@ extern s16 g_battle_acting_unit_used_ability_id;
 extern s32 g_battle_casting_runtime_id;
 extern s32 g_battle_distribute_target_count;
 /* Golem barrier HP per team, shared by action resolution and AI snapshots. */
-extern u16 g_battle_team_golem[BATTLE_TEAM_COUNT];
+extern u16 g_battle_team_golem[UNIT_TEAM_COUNT];
 /* Count and coordinates of the tiles already handed out as dismount
  * destinations this action. */
 extern s32 g_battle_relocated_unit_count;

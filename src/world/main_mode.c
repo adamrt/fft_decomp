@@ -27,8 +27,8 @@
 #include "psx/types.h"
 
 /* Unpacks the configured options into the options-menu value table, then runs a main-menu mode:
- * OPTION_MENU_GAME_OPTIONS runs world_menu_run_game_options in the thread slot before this one
- * and exits once it ends, OPTION_MENU_AT_LIST starts the AT list and OPTION_MENU_DEAD_UNIT the
+ * MENU_OPTION_TYPE_GAME_OPTIONS runs world_menu_run_game_options in the thread slot before this one
+ * and exits once it ends, MENU_OPTION_TYPE_AT_LIST starts the AT list and MENU_OPTION_TYPE_DEAD_UNIT the
  * dead unit threads.
  *
  * g_menu_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
@@ -62,8 +62,8 @@ void world_menu_run_main_mode(s32 mode) {
     g_menu_hide_numeric_values = 0;
     /* The target keeps this constant in a callee-saved register across the
      * mode 0 and mode 1 calls, so it is its own variable. */
-    last_mode = OPTION_MENU_DEAD_UNIT;
-    if (mode == OPTION_MENU_GAME_OPTIONS) {
+    last_mode = MENU_OPTION_TYPE_DEAD_UNIT;
+    if (mode == MENU_OPTION_TYPE_GAME_OPTIONS) {
         script_pulse_tutorial_wait_value(0xFD);
         thread_start(g_thread_current_id - 1, world_menu_run_game_options);
         entry->select_text_table = 1;
@@ -72,7 +72,7 @@ void world_menu_run_main_mode(s32 mode) {
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_exit_current();
     }
-    if (mode == OPTION_MENU_AT_LIST) {
+    if (mode == MENU_OPTION_TYPE_AT_LIST) {
         script_pulse_tutorial_wait_value(0xF9);
         menu_start_at_list_thread();
     }

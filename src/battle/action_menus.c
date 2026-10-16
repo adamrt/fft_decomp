@@ -58,7 +58,7 @@ void battle_state_enter_event(void) {
  * deployment screen does when it finishes. */
 void battle_action_set_casting_unit_id_ff_and_init(void) {
     battle_state_enter_event();
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, 0xff, 0, 1);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, 0xff, 0, 1);
 }
 
 /* Run the scenario check for the unit's turn event. A unit-ready or empty event may start a
@@ -73,23 +73,21 @@ s32 battle_state_try_enter_scenario_event(battle_unit_t* unit) {
 
     if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY
         || g_battle_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
-        result = menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+        result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
     } else if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ABILITY_READY
         || g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ACTION_RESULT) {
-        result = menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1);
+        result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1);
         if (result == MENU_SYSTEM_DISPATCH_EVENT && script_get_event_finish_operation() != 0) {
             if (unit->spritesheet_id < BATTLE_SPRITESHEET_ID_RAMZA_END) {
-                result = menu_init_system_function(
-                    BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
+                result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
             } else {
-                menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+                menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
             }
         } else {
-            result
-                = menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
+            result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
         }
     } else {
-        result = menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
+        result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
     }
     if (result == MENU_SYSTEM_DISPATCH_EVENT) {
         g_battle_previous_game_state = g_battle_game_state;
@@ -100,7 +98,7 @@ s32 battle_state_try_enter_scenario_event(battle_unit_t* unit) {
 }
 
 /* Copy the team flags from the unit's battle stats into its runtime record,
- * dropping BATTLE_TEAM_FLAG_PLAYER_CONTROLLED unless its auto-battle setting is
+ * dropping UNIT_TEAM_FLAG_PLAYER_CONTROLLED unless its auto-battle setting is
  * manual. A mounted unit's partner gets the same treatment. */
 void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit) {
     u8 entd_flags = unit->stats->team_flags;
@@ -109,14 +107,14 @@ void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit) {
 
     unit->team_flags = entd_flags;
     if (unit->stats->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
-        unit->team_flags = entd_flags & ~BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+        unit->team_flags = entd_flags & ~UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
     }
     if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
         mount = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
         mount_entd_flags = mount->stats->team_flags;
         mount->team_flags = mount_entd_flags;
         if (mount->stats->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
-            mount->team_flags = mount_entd_flags & ~BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+            mount->team_flags = mount_entd_flags & ~UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
         }
     }
 }
@@ -313,7 +311,7 @@ void battle_action_check_between_turn_events(void) {
     if (unit->stats != 0) {
         menu_reset_unit_record(unit->stats->battle_id);
         battle_unit_store_entd_flags_without_control_flag(unit); /* again, as retail does */
-        if (g_battle_menu_status_requested != 0 && !(unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)
+        if (g_battle_menu_status_requested != 0 && !(unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)
             && g_battle_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY) {
             battle_unit_update_display_by_runtime_id(unit->runtime_id);
             main_sound_play_sfx(MAIN_SFX_STATUS_MENU_REQUEST);
@@ -357,7 +355,7 @@ void battle_state_enter_status_execute(void) {
     if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_MIME) {
         text_set_message_duration_frames(0x3C);
         menu_init_system_function(
-            BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183A, unit->stats->battle_id, unit->stats->battle_id, 1);
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183A, unit->stats->battle_id, unit->stats->battle_id, 1);
         battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_KNEEL, unit->facing, unit);
         return;
     }
@@ -365,12 +363,12 @@ void battle_state_enter_status_execute(void) {
     statuses = unit->statuses_to_add_5_6;
     if (statuses & BATTLE_UNIT_STATUS_CRYSTAL) {
         menu_init_system_function(
-            BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183D, unit->stats->battle_id, unit->stats->battle_id, 1);
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183D, unit->stats->battle_id, unit->stats->battle_id, 1);
     } else if (statuses & BATTLE_UNIT_STATUS_TREASURE) {
         menu_init_system_function(
-            BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183C, unit->stats->battle_id, unit->stats->battle_id, 1);
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183C, unit->stats->battle_id, unit->stats->battle_id, 1);
     } else {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     }
     battle_unit_update_display_by_runtime_id(unit->runtime_id);
     battle_gfx_prepare_post_action_display_by_runtime_id(unit->runtime_id);
@@ -438,10 +436,10 @@ void battle_menu_open_non_active_unit_idle_action_menu(void) {
     menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, stats->battle_id, 0);
     menu_id = battle_menu_get_idle_action_menu_id(unit->stats->battle_id);
     if (g_battle_status_menu_open != 0) {
-        if (menu_id == BATTLE_MENU_ID_PLAYER_UNIT) {
-            menu_id = BATTLE_MENU_ID_PLAYER_UNIT_INSPECT;
-        } else if (menu_id == BATTLE_MENU_ID_OTHER_UNIT) {
-            menu_id = BATTLE_MENU_ID_OTHER_UNIT_INSPECT;
+        if (menu_id == MENU_COMMAND_ID_PLAYER_UNIT) {
+            menu_id = MENU_COMMAND_ID_PLAYER_UNIT_INSPECT;
+        } else if (menu_id == MENU_COMMAND_ID_OTHER_UNIT) {
+            menu_id = MENU_COMMAND_ID_OTHER_UNIT_INSPECT;
         }
     }
     menu_build_idle_action_menu(menu_id);
@@ -461,7 +459,7 @@ void battle_menu_dispatch_idle_action_menu(void) {
     }
     g_battle_casting_runtime_id = unit->runtime_id;
     if (g_battle_status_menu_open == 0 && unit->runtime_id == g_battle_unit_source_runtime_id) {
-        if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+        if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
             battle_menu_open_active_unit_idle_action_menu();
         } else {
             battle_state_restart_menu_to_targeting();
@@ -557,8 +555,8 @@ void battle_action_handle_move_command(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_UNIT_MOVE;
     unit = battle_unit_get_source();
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, unit->stats->battle_id, 0,
-        unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, unit->stats->battle_id, 0,
+        unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
 /* Enter the move-range-exception state, reached when the casting unit has no
@@ -569,8 +567,8 @@ static void battle_state_enter_move_range_exception(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_MOVE_RANGE_EXCEPTION;
     unit = battle_unit_get_source();
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 2, unit->stats->battle_id, 0,
-        unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 2, unit->stats->battle_id, 0,
+        unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
 /* Return to choosing a move destination: recompute the source unit's reachable
@@ -584,7 +582,7 @@ void battle_state_enter_select_move_tile(void) {
     battle_camera_disable_map_pan();
     unit = battle_unit_get_source();
     casting = battle_unit_get_casting();
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_target_show_cursor();
     } else {
         battle_target_hide_cursor();
@@ -609,8 +607,8 @@ void battle_menu_open_illegal_move_help(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ILLEGAL_MOVE_MENU;
     unit = battle_unit_get_source();
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 2, unit->stats->battle_id, 0,
-        unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 2, unit->stats->battle_id, 0,
+        unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
 /* Enter the unit-moving-setup state for the chosen destination and start the source unit's move
@@ -629,32 +627,32 @@ void battle_state_enter_unit_moving_setup(void) {
     casting = battle_unit_get_casting();
 
     if (casting->path.pending_mount & BATTLE_PENDING_MOUNT_SET) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 1, source->stats->battle_id, 0,
-            source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 1, source->stats->battle_id, 0,
+            source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
         return;
     }
     path_count = casting->path.count + 2;
     if (path_count < 2) {
         if (g_main_game_options.fields.navigation_messages != GAME_OPTION_ON) {
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 0, source->stats->battle_id, 0,
-                source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 0, source->stats->battle_id, 0,
+                source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
             return;
         }
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0,
-            source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0,
+            source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
         return;
     }
     at_tile
         = battle_unit_get_crystal_or_treasure_at_map_coords(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (at_tile != 0) {
         if (at_tile->status_flags_5_6 & BATTLE_UNIT_STATUS_CRYSTAL) {
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 4, source->stats->battle_id, 0,
-                source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 4, source->stats->battle_id, 0,
+                source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
             return;
         }
     }
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 0, source->stats->battle_id, 0,
-        source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 0, source->stats->battle_id, 0,
+        source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
 /* Save the unit's tile, facing, mount link and stood-on unit before it moves;
@@ -719,24 +717,23 @@ void battle_menu_open_move_confirm(void) {
     text_set_message_duration_frames(0x3C);
     if (caster->path.flags & BATTLE_EFFECTIVE_MOVEMENT_TELEPORT) {
         if (caster->last_path_count == MOVE_PATH_TELEPORT_FAILED) {
-            menu_init_system_function(
-                BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183B, source->stats->battle_id, 0, 1);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183B, source->stats->battle_id, 0, 1);
         } else {
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0, 0);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0, 0);
         }
         caster->last_path_count = 0;
     } else {
         if (g_main_game_options.fields.navigation_messages != GAME_OPTION_ON) {
             battle_gfx_modify_palette_based_on_team(source, 2);
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT, 0, source->stats->battle_id, 0,
-                source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT, 0, source->stats->battle_id, 0,
+                source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
         } else {
             battle_gfx_modify_palette_based_on_team(source, 2);
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0,
-                source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0,
+                source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
         }
     }
-    if (source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) {
+    if (source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         battle_target_show_cursor();
     } else {
         battle_target_hide_cursor();
@@ -750,7 +747,7 @@ void battle_state_enter_after_command(void) {
     g_battle_game_state = BATTLE_GAME_STATE_AFTER_COMMAND;
     g_battle_action_post_action = 0;
     battle_target_move_cursor_to_unit(battle_unit_get_source());
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CLOSE, 0, 0, 0, 0);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_CLOSE, 0, 0, 0, 0);
 }
 
 /* Turn a unit to one of the four cardinal facings and restart its animation.
@@ -800,7 +797,7 @@ static s32 battle_action_report_level_up(battle_unit_t* unit) {
 
         text_set_message_duration_frames(0xB4);
         battle_id = unit->stats->battle_id;
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183F, battle_id, battle_id, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183F, battle_id, battle_id, 1);
         battle_unit_set_level_up_animation(unit);
         battle_target_move_cursor_to_unit(unit);
         battle_effect_set_secondary_level_up(unit);
@@ -819,7 +816,7 @@ static s32 battle_action_report_job_level_up(battle_unit_t* unit) {
 
         text_set_message_duration_frames(0xB4);
         battle_id = unit->stats->battle_id;
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183E, battle_id, battle_id, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183E, battle_id, battle_id, 1);
         battle_unit_set_level_up_animation(unit);
         battle_target_move_cursor_to_unit(unit);
         battle_effect_set_secondary_level_up(unit);
@@ -847,7 +844,7 @@ s32 battle_move_start_next_post_movement_step(void) {
     s32 animation;
     s32 trap;
 
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
     g_battle_game_state = BATTLE_GAME_STATE_CRYSTAL_LEARN;
     g_battle_action_post_action = 0;
     casting->state_frame_counter = 0;
@@ -866,28 +863,28 @@ s32 battle_move_start_next_post_movement_step(void) {
             /* A player-controlled unit of the player team picks from the
              * crystal menu; any other unit takes the HP/MP restore at once. */
             stats = source->stats;
-            if (!(stats->initial_team_flags & BATTLE_TEAM_MASK)
-                && (stats->initial_team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)) {
+            if (!(stats->initial_team_flags & UNIT_TEAM_MASK)
+                && (stats->initial_team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)) {
                 menu_init_system_function(
-                    BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, stats->battle_id, stats->battle_id, 0, 1);
+                    MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, stats->battle_id, stats->battle_id, 0, 1);
             } else {
                 menu_init_system_function(
-                    BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, stats->battle_id, stats->battle_id, 0, 0);
+                    MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, stats->battle_id, stats->battle_id, 0, 0);
                 battle_unit_learn_from_crystal(source->stats, BATTLE_CRYSTAL_RESTORE_HP_MP);
                 battle_action_apply_target_result(source->stats->battle_id);
                 battle_gfx_prepare_post_action_display(source);
                 battle_unit_update_display_by_runtime_id(source->runtime_id);
             }
         } else {
-            if (!(source->stats->initial_team_flags & BATTLE_TEAM_MASK)) {
-                menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, source->stats->battle_id,
-                    source->stats->battle_id, 0, 1);
+            if (!(source->stats->initial_team_flags & UNIT_TEAM_MASK)) {
+                menu_init_system_function(
+                    MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, source->stats->battle_id, source->stats->battle_id, 0, 1);
             } else {
-                menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, source->stats->battle_id,
-                    source->stats->battle_id, 0, 0);
+                menu_init_system_function(
+                    MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, source->stats->battle_id, source->stats->battle_id, 0, 0);
             }
-            if ((source->stats->initial_team_flags & BATTLE_TEAM_MASK)
-                || !(source->stats->initial_team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)) {
+            if ((source->stats->initial_team_flags & UNIT_TEAM_MASK)
+                || !(source->stats->initial_team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)) {
                 battle_unit_learn_from_crystal(source->stats, BATTLE_CRYSTAL_TAKE_TREASURE);
             }
         }
@@ -916,13 +913,13 @@ s32 battle_move_start_next_post_movement_step(void) {
         g_battle_move_find_display_item = *battle_map_determine_rare_common_item(casting->stats);
         battle_gfx_store_item_display_data(source, g_battle_move_find_display_item.item_id);
         battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_FOUND_ITEM, source->facing, source);
-        if (!(source->team_flags & BATTLE_TEAM_MASK)) {
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM,
-                g_battle_move_find_display_item.item_id, source->stats->battle_id, 0, 1);
+        if (!(source->team_flags & UNIT_TEAM_MASK)) {
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_battle_move_find_display_item.item_id,
+                source->stats->battle_id, 0, 1);
             main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
             return 1;
         }
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_battle_move_find_display_item.item_id,
+        menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_battle_move_find_display_item.item_id,
             source->stats->battle_id, 0, 0);
         return 1;
     }
@@ -935,23 +932,23 @@ s32 battle_move_start_next_post_movement_step(void) {
         battle_gfx_prepare_post_action_display(source);
         battle_unit_set_target_animation(0, source);
         battle_effect_set_secondary_venom_trap(source);
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TRAP_RESULT, trap, source->stats->battle_id, 0, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_TRAP_RESULT, trap, source->stats->battle_id, 0, 1);
         battle_ai_record_triggered_trap_coords(casting->map_x, casting->map_z, casting->map_y);
         return 1;
     }
     if (g_battle_move_find_result & MOVE_POST_EVENT_CHARGING_CANCEL) {
         battle_status_remove_charging_ability_ct(casting->stats, 1);
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         return 1;
     }
     if (g_battle_move_find_result & MOVE_POST_EVENT_SOURCE_DISPLAY) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         battle_gfx_prepare_post_action_display_by_runtime_id(source->runtime_id);
         battle_unit_update_display_by_runtime_id(source->runtime_id);
         return 1;
     }
     if (g_battle_move_find_result & MOVE_POST_EVENT_MOUNT_STATUS_CHANGE) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         if (source->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
             target = battle_unit_get_by_runtime_id(source->mount_partner_runtime_id);
             if (target != 0) {
@@ -1017,7 +1014,7 @@ void battle_action_choose_facing_for_wait(void) {
             }
         }
     }
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) == 0) {
+    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0) {
         unit->command_state.cursor.facing_hint = battle_ai_choose_wait_facing();
     }
 }
@@ -1034,10 +1031,10 @@ void battle_action_choose_wait(void) {
 
     battle_camera_disable_map_pan();
     unit = battle_unit_get_source();
-    if (menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1) == 2
+    if (menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1) == 2
         && script_get_event_finish_operation() != 0) {
         g_battle_previous_game_state = g_battle_game_state;
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
         battle_state_enter_event();
         return;
     }
@@ -1046,10 +1043,10 @@ void battle_action_choose_wait(void) {
     } else {
         g_battle_game_state = BATTLE_GAME_STATE_WAIT_MENU;
         battle_target_store_cursor_unit_name_and_data();
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_WAIT_MENU, 0, unit->stats->battle_id, 0,
-            unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_WAIT_MENU, 0, unit->stats->battle_id, 0,
+            unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
     }
-    if (unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) {
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         battle_target_show_cursor();
     } else {
         battle_target_hide_cursor();
@@ -1254,12 +1251,12 @@ void battle_state_enter_action_execution_setup(void) {
     g_battle_game_state = BATTLE_GAME_STATE_ACTION_EXECUTE_SETUP;
     unit = battle_unit_get_source();
     if (unit->ability_preview_phase == TARGET_PANELS_NONE)
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 1, unit->stats->battle_id, 0,
-            unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 1, unit->stats->battle_id, 0,
+            unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
     else
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, unit->stats->battle_id, 0,
-            unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
-    if (unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)
+        menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, unit->stats->battle_id, 0,
+            unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)
         battle_target_show_cursor();
     else
         battle_target_hide_cursor();
@@ -1330,9 +1327,8 @@ s32 battle_action_show_next_effect_message(void) {
     if (index != 0) {
         index -= 1;
         g_battle_action_post_effect_msg_counter = index;
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_POST_ACTION_RESULT,
-            g_battle_action_post_effect_msgs[index].code, g_battle_action_post_effect_msgs[index].unit,
-            g_battle_action_post_effect_msgs[index].value, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_POST_ACTION_RESULT, g_battle_action_post_effect_msgs[index].code,
+            g_battle_action_post_effect_msgs[index].unit, g_battle_action_post_effect_msgs[index].value, 1);
         g_battle_action_post_action = 0;
         return 1;
     }
@@ -1506,7 +1502,7 @@ void battle_action_show_caster_post_effect_messages(void) {
         g_battle_action_post_effect_msg_counter = 0;
     }
     if (battle_action_show_next_effect_message() == 0) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     }
 }
 
@@ -1552,11 +1548,11 @@ void battle_state_start_battle_message_display(void) {
     switch (unit->strike.post_action_message) {
     case BATTLE_POST_ACTION_MESSAGE_POACHED:
         main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x1838, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x1838, unit->stats->battle_id, 0, 1);
         return;
     case BATTLE_POST_ACTION_MESSAGE_TRAINED:
         main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x1828, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x1828, unit->stats->battle_id, 0, 1);
         return;
     }
 
@@ -1580,13 +1576,12 @@ void battle_state_start_battle_message_display(void) {
     }
 
     if (message == 6 || message == 0x2b) {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | 0x1800, unit->stats->battle_id,
-            target->stats->battle_id, 1);
-    } else if (message != 0) {
         menu_init_system_function(
-            BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | 0x1800, unit->stats->battle_id, 0, 1);
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | 0x1800, unit->stats->battle_id, target->stats->battle_id, 1);
+    } else if (message != 0) {
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | 0x1800, unit->stats->battle_id, 0, 1);
     } else {
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     }
 }
 
@@ -1602,7 +1597,7 @@ void battle_action_init_learn_ability_on_hit(void) {
     g_battle_game_state = BATTLE_GAME_STATE_LEARN_ABILITY_ON_HIT;
     g_main_system_vsync_interval = 1;
     unit = battle_unit_get_source();
-    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     text_set_message_duration_frames(0x1E);
     switch (g_battle_action_post_action_display_phase) {
     case BATTLE_POST_ACTION_DISPLAY_LEVEL_UP:
@@ -1616,8 +1611,8 @@ void battle_action_init_learn_ability_on_hit(void) {
             = battle_ability_find_learn_on_hit_unit(unit->stats->battle_id, &ability_id);
         if (g_battle_action_learn_on_hit_unit_id != -1) {
             learner = battle_unit_get_by_battle_id(g_battle_action_learn_on_hit_unit_id);
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ABILITY_LEARNED, ability_id, unit->stats->battle_id, 0,
-                learner->stats->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_ABILITY_LEARNED, ability_id, unit->stats->battle_id, 0,
+                learner->stats->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
             battle_target_move_cursor_to_unit(learner);
             battle_target_show_cursor();
         } else {

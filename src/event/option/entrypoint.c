@@ -47,7 +47,7 @@ void option_entrypoint(s32 menu_type) {
         }
     }
 
-    if (menu_type != OPTION_MENU_DEAD_UNIT) {
+    if (menu_type != MENU_OPTION_TYPE_DEAD_UNIT) {
         thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
         thread_set_parameters(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
         thread_set_parameters(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
@@ -60,7 +60,7 @@ void option_entrypoint(s32 menu_type) {
 
     g_menu_modal_open = 0;
     g_battle_option_menu_state = 0;
-    if (menu_type == OPTION_MENU_GAME_OPTIONS) {
+    if (menu_type == MENU_OPTION_TYPE_GAME_OPTIONS) {
         script_pulse_tutorial_wait_value(0xfd);
         thread_start(g_thread_current_id - 1, option_menu_run_game_options);
         menu->select_text_table = 1;
@@ -69,11 +69,11 @@ void option_entrypoint(s32 menu_type) {
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_exit_current();
     }
-    if (menu_type == OPTION_MENU_AT_LIST) {
+    if (menu_type == MENU_OPTION_TYPE_AT_LIST) {
         script_pulse_tutorial_wait_value(0xf9);
         menu_start_at_list_thread();
     }
-    if (menu_type == OPTION_MENU_DEAD_UNIT) {
+    if (menu_type == MENU_OPTION_TYPE_DEAD_UNIT) {
         menu_start_dead_unit_threads();
     }
 }

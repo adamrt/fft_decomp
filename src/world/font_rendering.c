@@ -135,7 +135,7 @@ void world_font_upload_glyph_image(u16 code, s32 x, s32 y, s32 style) {
         glyph = code;
     }
     /* The rect doubles as the glyph's image position: x and y 0, a row stride of w. */
-    menu_text_render_glyph_to_4bpp_image(glyph, image, (const battle_text_image_position_t*)&rect, style);
+    menu_text_render_glyph_to_4bpp_image(glyph, image, (const text_image_position_t*)&rect, style);
     rect.x = x;
     rect.y = y;
     LoadImage(&rect, image);

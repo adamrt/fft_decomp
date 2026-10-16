@@ -26,7 +26,7 @@ enum {
     ENTD_VALUE_RANDOM = 254, /* in an ENTD equipment, level or secondary skillset byte: pick one at random */
 };
 
-/* Y, facing and tile-layer fields of an entry; battle_unit_position_t has a
+/* Y, facing and tile-layer fields of an entry; unit_position_t has a
  * wider facing field. */
 typedef struct entd_unit_position {
     u16 y : 8;

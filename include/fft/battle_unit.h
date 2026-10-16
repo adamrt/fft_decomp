@@ -466,10 +466,10 @@ typedef enum battle_chocobo_mount_state {
 /* Result of battle_unit_get_action_restriction. */
 typedef enum battle_unit_action_restriction {
     BATTLE_UNIT_ACTION_RESTRICTION_NONE = 0,
-    /* Don't Act status or BATTLE_MOUNT_INFO_FLAG_MOUNT. */
+    /* Don't Act status or UNIT_MOUNT_INFO_FLAG_MOUNT. */
     BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT = 1,
     /* Tile depth 2 or more, unless the unit has Float, Chicken or Frog status,
-     * a water movement ability or BATTLE_MOUNT_INFO_FLAG_RIDER. */
+     * a water movement ability or UNIT_MOUNT_INFO_FLAG_RIDER. */
     BATTLE_UNIT_ACTION_RESTRICTION_DEEP_WATER = 2,
 } battle_unit_action_restriction_e;
 

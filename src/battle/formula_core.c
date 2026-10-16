@@ -241,10 +241,10 @@ static void battle_formula_calculate_knockback(void) {
         return;
     }
     target = g_battle_action_target;
-    if (target->team_flags & BATTLE_TEAM_FLAG_IMMORTAL) {
+    if (target->team_flags & UNIT_TEAM_FLAG_IMMORTAL) {
         return;
     }
-    if ((target->team_flags & BATTLE_TEAM_IMPORTANCE_MASK) == BATTLE_TEAM_IMPORTANCE_MASK) {
+    if ((target->team_flags & UNIT_TEAM_IMPORTANCE_MASK) == UNIT_TEAM_IMPORTANCE_MASK) {
         return;
     }
     attacker = g_battle_action_attacker;
@@ -535,8 +535,8 @@ s32 battle_status_modify_inflictions(s32 removal_only) {
     s32 byte;
     s32 mask;
 
-    immortal = g_battle_action_target->team_flags & BATTLE_TEAM_FLAG_IMMORTAL;
-    if (g_battle_action_target->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
+    immortal = g_battle_action_target->team_flags & UNIT_TEAM_FLAG_IMMORTAL;
+    if (g_battle_action_target->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             g_battle_action_target_data->status_changes.infliction[i] &= g_battle_rider_status_infliction_mask[i];
         }
@@ -563,7 +563,7 @@ s32 battle_status_modify_inflictions(s32 removal_only) {
             }
             if (immortal) {
                 g_battle_action_target_data->status_changes.infliction[i]
-                    &= ~g_main_status_check_sets[MAIN_STATUS_CHECK_SET_FORMATION_IMMUNITY][i];
+                    &= ~g_main_status_check_sets[STATUS_CHECK_SET_FORMATION_IMMUNITY][i];
             }
         }
         g_battle_action_target_data->status_changes.removal[i] = g_battle_action_target_data->status_changes.removal[i]
@@ -687,7 +687,7 @@ void battle_formula_store_physical_evade_values(void) {
     g_battle_action_current_ability.right_hand_evade = 0;
     g_battle_action_current_ability.left_hand_evade = 0;
     g_battle_action_current_ability.class_evade
-        = g_battle_action_target->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
+        = g_battle_action_target->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
     if ((g_battle_action_target->unit_flags & UNIT_FLAG_MONSTER) != 0) {
         return;
     }
@@ -1384,7 +1384,7 @@ void battle_formula_calculate_stolen_gil(void) {
     s32 available;
     s16 stolen;
 
-    if (!(g_battle_action_target->team_flags & BATTLE_TEAM_MASK)) {
+    if (!(g_battle_action_target->team_flags & UNIT_TEAM_MASK)) {
         available = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
         if (available < amount) {
             amount = available;

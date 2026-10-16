@@ -39,7 +39,7 @@
 /* Menu palette color of each of the numeric display frame's twelve lines. */
 static u8 g_menu_numeric_display_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
 
-/* Twelve world_menu_line_layout_t records, walked by byte offset. */
+/* Twelve menu_line_layout_t records, walked by byte offset. */
 static s8 g_menu_numeric_display_frame_offsets[96]
     = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, 0, 1, 0, 1, -2, 1, 0, 0, 1, 0, 1, 1, 1, -2, 0, 0, 0, 1, 1, -1, 1, -1,
           0, 1, 0, 1, -1, 2, -1, -2, 1, 0, 1, 1, -1, 1, -1, 1, 1, 0, 1, 0, 1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
@@ -102,7 +102,7 @@ void unit_set_animation(s32 runtime_id, u32 animation) {
             stats = battle_unit_get_stats_from_battle_id(battle_id);
             depth = battle_map_get_tile_data_value(
                 MAP_TILE_DATA_DEPTH, stats->x, stats->position.y, stats->position.higher_elevation);
-            if ((stats->mount_info & BATTLE_MOUNT_INFO_ROLE_MASK) != 0) {
+            if ((stats->mount_info & UNIT_MOUNT_INFO_ROLE_MASK) != 0) {
                 g_thread_call_target = (void (*)(void))battle_unit_set_status_animation_by_runtime_id;
             } else if ((depth & 0xFF) >= 2) {
                 g_thread_call_target = (void (*)(void))battle_unit_set_mounted_animation_by_runtime_id;
@@ -130,7 +130,7 @@ void unit_set_facing(s32 runtime_id, s32 facing) {
             stats = battle_unit_get_stats_from_battle_id(battle_id);
             if (stats->mount_info != 0) {
                 battle_unit_set_animation_from_facing_nibble(
-                    battle_unit_get_runtime_id_by_battle_id(stats->mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK),
+                    battle_unit_get_runtime_id_by_battle_id(stats->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK),
                     facing & 0xFFFF);
             }
         }
@@ -958,23 +958,23 @@ void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitiv
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {
-        line->x0 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_X0] + box->x;
-        line->y0 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_Y0] + box->y;
-        line->x1 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_X1] + box->x;
-        line->y1 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_Y1] + box->y;
-        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_W0] != 0) {
+        line->x0 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_X0] + box->x;
+        line->y0 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_Y0] + box->y;
+        line->x1 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_X1] + box->x;
+        line->y1 = g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_Y1] + box->y;
+        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W0] != 0) {
             line->x0 += box->w;
         }
-        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_H0] != 0) {
+        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H0] != 0) {
             line->y0 += box->h;
         }
-        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_W1] != 0) {
+        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W1] != 0) {
             line->x1 += box->w;
         }
-        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_H1] != 0) {
+        if (g_menu_numeric_display_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H1] != 0) {
             line->y1 += box->h;
         }
-        offset += WORLD_MENU_LINE_LAYOUT_SIZE;
+        offset += MENU_LINE_LAYOUT_SIZE;
         line++;
     }
     SetDrawMode(&menu->draw_mode_menu, 1, 0, GetTPage(0, 0, 0x3c0, 0x100), &g_menu_numeric_display_texture_window);

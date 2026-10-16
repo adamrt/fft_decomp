@@ -350,7 +350,7 @@ static void main_status_init_unit(unit_stats_t* unit) {
  * an immortal unit and for one with a save- or load-formation flag. */
 static void main_status_init_ct(unit_stats_t* unit) {
     main_mem_zero(unit->status_ct, sizeof(unit->status_ct));
-    if ((unit->team_flags & BATTLE_TEAM_FLAG_IMMORTAL)
+    if ((unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL)
         || (unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION))) {
         unit->death_counter = 0xff;
     } else {
@@ -451,7 +451,7 @@ static void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s3
     }
 
     formation_index = unit->formation_index;
-    unit->formation_index = BATTLE_FORMATION_INDEX_NONE;
+    unit->formation_index = UNIT_FORMATION_INDEX_NONE;
     main_status_update_unit_flags_and_ct(unit);
     unit->formation_index = formation_index;
     main_status_store_current(unit);
@@ -605,7 +605,7 @@ s32 main_status_set_ct(unit_stats_t* unit, s32 status_id, s32 removing) {
     s32 stored_index;
 
     if (status_id == STATUS_ID_DEAD) {
-        if ((unit->team_flags & BATTLE_TEAM_FLAG_IMMORTAL)
+        if ((unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL)
             || (unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION))) {
             unit->death_counter = 0xff;
         } else {
@@ -887,7 +887,7 @@ static u8 main_unit_get_spritesheet_palette(const unit_stats_t* unit, u8* palett
 }
 
 /* Return 1 when the unit currently has any status in one row of g_main_status_check_sets, else 0. */
-s32 main_unit_has_status_in_set(const unit_stats_t* unit, main_status_check_set_e status_set_index) {
+s32 main_unit_has_status_in_set(const unit_stats_t* unit, status_check_set_e status_set_index) {
     const u8* status_set = g_main_status_check_sets[0];
     s32 index = 0;
 

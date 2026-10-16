@@ -531,7 +531,7 @@ void text_run_spell_quote_thread(void) {
     }
     message_id = thread_get_current_parameter_2() | 0xA800;
     g_menu_companion_data_file_buffer = main_heap_alloc(0x4000);
-    menu_request_open_companion_data_file(BATTLE_COMPANION_FILE_SPELL_MES);
+    menu_request_open_companion_data_file(COMPANION_FILE_SPELL_MES);
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_menu_companion_data_file_buffer;
     thread_start(THREAD_SLOT_MENU, text_run_dialog_thread);
     thread_set_parameters(THREAD_SLOT_MENU, window_mode, message_id, id);
@@ -548,14 +548,14 @@ void text_run_spell_quote_thread(void) {
 void menu_open_option_game_options(void) {
     menu_set_modal_open();
     menu_request_open_companion_executable(COMPANION_OVERLAY_OPTION);
-    option_entrypoint(OPTION_MENU_GAME_OPTIONS);
+    option_entrypoint(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
 /* Thread entry of menu entry 0x1d: load OPTION.OUT and open its AT list. */
 void menu_open_option_at_list(void) {
     menu_set_modal_open();
     menu_request_open_companion_executable(COMPANION_OVERLAY_OPTION);
-    option_entrypoint(OPTION_MENU_AT_LIST);
+    option_entrypoint(MENU_OPTION_TYPE_AT_LIST);
 }
 
 /* Thread started for system function 0x1f (crystal or treasure): load OPTION.OUT
@@ -563,7 +563,7 @@ void menu_open_option_at_list(void) {
 void menu_open_option_dead_unit_panel(void) {
     menu_set_modal_open();
     menu_request_open_companion_executable(COMPANION_OVERLAY_OPTION);
-    option_entrypoint(OPTION_MENU_DEAD_UNIT);
+    option_entrypoint(MENU_OPTION_TYPE_DEAD_UNIT);
 }
 
 /* Wait for the camera and menu transition, then run Triangle-menu selection. */
@@ -1006,9 +1006,9 @@ static void menu_start_entry_thread(void) {
         thread_wait_frames(2);
     }
     script_pulse_tutorial_wait_value(0xFF);
-    if (menu_id == BATTLE_MENU_ID_OTHER_UNIT || menu_id == BATTLE_MENU_ID_OTHER_UNIT_INSPECT) {
+    if (menu_id == MENU_COMMAND_ID_OTHER_UNIT || menu_id == MENU_COMMAND_ID_OTHER_UNIT_INSPECT) {
         if (menu_get_selected_unit_stats()->unit_flags & UNIT_FLAG_EGG) {
-            menu_id = BATTLE_MENU_ID_EGG;
+            menu_id = MENU_COMMAND_ID_EGG;
         }
     }
     thread_start(THREAD_SLOT_MENU, g_menu_thread_menu_data[menu_id].thread_entry);
@@ -1021,13 +1021,13 @@ static void menu_start_entry_thread(void) {
         if (restore_depth > 0) {
             thread_start(THREAD_SLOT_MENU_CHILD, menu_run_skillset_thread);
             thread_set_parameters(
-                THREAD_SLOT_MENU_CHILD, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST], 0, 0);
+                THREAD_SLOT_MENU_CHILD, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST], 0, 0);
         }
         thread_wait_frames(2);
         if (restore_depth >= 2) {
             thread_start(THREAD_SLOT_MENU_GRANDCHILD, menu_select_unit_action_slots_thread);
             thread_set_parameters(
-                THREAD_SLOT_MENU_GRANDCHILD, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST], 0, 0);
+                THREAD_SLOT_MENU_GRANDCHILD, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST], 0, 0);
         }
         thread_wait_frames(2);
         g_menu_restore_pending = 0;
@@ -1043,14 +1043,14 @@ enum {
     IDLE_ACTION_MENU_ENTRY_COUNT = 0x34,
 };
 
-/* Open an idle action menu (battle_menu_id_e) for the active-turn unit: place the
+/* Open an idle action menu (menu_command_id_e) for the active-turn unit: place the
  * entry windows beside the unit, restore the row the unit last chose and start
  * the menu-building thread on menu_start_entry_thread.
  *
  * Nothing happens while menu input is blocked. The menu is also skipped while the
  * menus are suspended, a help window is open,
  * g_menu_building_thread_started is set (it is cleared here either way) or
- * menu_id is BATTLE_MENU_ID_NONE.
+ * menu_id is MENU_COMMAND_ID_NONE.
  *
  * g_battle_menu_idle_action_entry_labels holds two window x bytes per entry, each
  * 0x80 less than the screen x; the second is used when the unit's projected x is
@@ -1067,7 +1067,7 @@ void menu_build_idle_action_menu(s32 menu_id) {
 
     if (g_menu_input_mode != MENU_INPUT_BLOCKED) {
         if ((g_menu_overlay_state == 0) && (g_menu_help_open == 0) && (g_menu_building_thread_started == 0)
-            && (menu_id != BATTLE_MENU_ID_NONE)) {
+            && (menu_id != MENU_COMMAND_ID_NONE)) {
             g_menu_current_id = menu_id;
             g_menu_thread_menu_data = g_menu_idle_action_entries;
             unit_project_to_screen(
@@ -1089,7 +1089,7 @@ void menu_build_idle_action_menu(s32 menu_id) {
                 entry += 1;
             } while (i < IDLE_ACTION_MENU_ENTRY_COUNT);
             menu_restore_selection_for_selected_unit(menu_id);
-            selected_index = &g_menu_thread_menu_data[BATTLE_MENU_ID_STATUS_LIST].selected_index;
+            selected_index = &g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST].selected_index;
             *selected_index = 0;
             g_menu_status_list_layout.row_offset = 0;
             menu_clear_entry_selections();
@@ -1109,7 +1109,7 @@ void menu_build_idle_action_menu(s32 menu_id) {
  * skipped. */
 void menu_start_help_menu_thread(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU) != 0 || thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
-        if (g_menu_current_id != BATTLE_MENU_ID_MINI_MENU) {
+        if (g_menu_current_id != MENU_COMMAND_ID_MINI_MENU) {
             g_menu_building_thread_started = 1;
         }
     }

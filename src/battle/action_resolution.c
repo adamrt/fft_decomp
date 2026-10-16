@@ -615,7 +615,7 @@ void battle_action_finalize_target_current_action(void) {
         battle_action_clear_knockback_flag();
         battle_formula_clear_pending_proc();
     }
-    team = (g_battle_action_target->initial_team_flags & BATTLE_TEAM_MASK) >> BATTLE_TEAM_SHIFT;
+    team = (g_battle_action_target->initial_team_flags & UNIT_TEAM_MASK) >> UNIT_TEAM_SHIFT;
     action = g_battle_action_target_data;
     if ((action->attack_type != 0) && (action->hit != 0) && (g_battle_action_context == ACTION_CONTEXT_PRIMARY)
         && (g_battle_team_golem[team] != 0)
@@ -740,7 +740,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     }
 
     if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
-        g_battle_action_target->ability_outcome = BATTLE_ABILITY_OUTCOME_TARGETED;
+        g_battle_action_target->ability_outcome = UNIT_ABILITY_OUTCOME_TARGETED;
     }
     battle_action_dispatch_target_reaction_ability();
     if (g_battle_action_target_data->reaction_id == ABILITY_ID_REACTION_CATCH) {
@@ -755,8 +755,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_GOLEM_GUARD) {
         u16* golem;
 
-        golem = &g_battle_team_golem[(g_battle_action_target->initial_team_flags & BATTLE_TEAM_MASK)
-            >> BATTLE_TEAM_SHIFT];
+        golem = &g_battle_team_golem[(g_battle_action_target->initial_team_flags & UNIT_TEAM_MASK) >> UNIT_TEAM_SHIFT];
         hp = *golem - g_battle_action_target_data->hp_damage;
         if (hp < 0) {
             hp = 0;
@@ -767,7 +766,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
 
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_SET_GOLEM) {
         outcome = 1;
-        g_battle_team_golem[(g_battle_action_target->team_flags & BATTLE_TEAM_MASK) >> BATTLE_TEAM_SHIFT]
+        g_battle_team_golem[(g_battle_action_target->team_flags & UNIT_TEAM_MASK) >> UNIT_TEAM_SHIFT]
             = g_battle_action_target->max_hp;
     }
 
@@ -808,7 +807,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
         &g_battle_action_target->base_attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK], UNIT_ATTACK_STAT_MAX, 1);
     outcome |= battle_unit_apply_stat_increment_decrement(g_battle_action_target_data->brave_change,
         &g_battle_action_target->brave, UNIT_BRAVE_FAITH_MAX,
-        (g_battle_action_target->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) ? 10 : 0);
+        (g_battle_action_target->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) ? 10 : 0);
     outcome |= battle_unit_apply_stat_increment_decrement(
         g_battle_action_target_data->faith_change, &g_battle_action_target->faith, UNIT_BRAVE_FAITH_MAX, 0);
 
@@ -905,12 +904,12 @@ s32 battle_action_apply_target_result(s32 unit_id) {
 
     battle_unit_update_attacker_earned_experience(outcome);
     if (outcome != 0) {
-        g_battle_action_target->ability_outcome = BATTLE_ABILITY_OUTCOME_AFFECTED;
+        g_battle_action_target->ability_outcome = UNIT_ABILITY_OUTCOME_AFFECTED;
     }
 
     battle_action_check_stat_save_and_restore_reaction_usability();
     if (g_battle_action_target->status_sets.current[0] & (STATUS_MASK(CRYSTAL) | STATUS_MASK(DEAD))) {
-        if (g_battle_action_target->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
+        if (g_battle_action_target->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
             return -1;
         }
     }
@@ -979,7 +978,7 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     y = unit->position.y;
     higher_elevation = unit->position.higher_elevation;
     facing = unit->position.facing;
-    unit->formation_index = BATTLE_FORMATION_INDEX_GENERATED_UNIT;
+    unit->formation_index = UNIT_FORMATION_INDEX_GENERATED_UNIT;
     main_unit_init_from_entd(unit, 0, 0, 0x82);
     unit->x = x;
     unit->position.y = y;
@@ -1045,7 +1044,7 @@ s32 battle_action_is_reaction_prevented(const unit_stats_t* unit) {
     if (g_battle_action_context != ACTION_CONTEXT_PRIMARY) {
         return 1;
     }
-    return main_unit_has_status_in_set(unit, MAIN_STATUS_CHECK_SET_PREVENT_REACTION);
+    return main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION);
 }
 
 /* Whether a reaction is already in play: 1 while a weapon's proc ability is
@@ -1716,10 +1715,10 @@ s32 battle_status_prepare_terrain_poison(unit_stats_t* unit) {
     mount_info = unit->mount_info;
     if (battle_status_is_unit_out_of_action(unit))
         return 0;
-    if (mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT)
+    if (mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)
         return 0;
-    if (mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
-        if (g_battle_unit_stats[mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK]
+    if (mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
+        if (g_battle_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK]
                 .status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
             & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
             return 0;
@@ -1752,8 +1751,8 @@ s32 battle_action_apply_tile_trap(unit_stats_t* unit) {
     u8 trap = battle_map_get_move_find_result(unit->x, unit->position.y, unit->position.higher_elevation)->trap_id;
     action_data_t* action;
 
-    if (unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) {
-        unit = &g_battle_unit_stats[unit->mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
+    if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
+        unit = &g_battle_unit_stats[unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
     }
     g_battle_action_current_ability.target_id = unit->battle_id;
     g_battle_action_target = unit;
@@ -1812,7 +1811,7 @@ s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit) {
     g_battle_action_target_data = &unit->action;
     g_battle_action_current_ability.target_id = unit_id;
     battle_action_clear_current_data(&unit->action);
-    if (main_unit_has_status_in_set(unit, MAIN_STATUS_CHECK_SET_PREVENT_REACTION))
+    if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
         return -1;
     flags = battle_move_get_support_flags(unit);
     if (flags & MOVE_POST_EVENT_MOVE_HP_UP) {
@@ -1881,7 +1880,7 @@ static void battle_action_apply_jp_change(unit_stats_t* unit) {
 
     battle_id = unit->battle_id;
     initial_level = battle_unit_load_job_level(unit, job, &job_slot);
-    battle_unit_add_job_jp(battle_id, unit->action.jp_change, unit->initial_team_flags & BATTLE_TEAM_MASK, job_slot);
+    battle_unit_add_job_jp(battle_id, unit->action.jp_change, unit->initial_team_flags & UNIT_TEAM_MASK, job_slot);
     if (battle_unit_load_job_level(unit, job, &job_slot) != initial_level) {
         g_battle_action_current_ability.job_level_gained_flag = 1;
     }
@@ -1929,12 +1928,12 @@ static void battle_status_remove_control(unit_stats_t* unit) {
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
             & (STATUS_BYTE_MASK(STATUS_ID_BERSERK) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN)))
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARM)] & STATUS_BYTE_MASK(STATUS_ID_CHARM))) {
-        unit->team_flags &= ~BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+        unit->team_flags &= ~UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
     } else {
-        unit->team_flags |= unit->initial_team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
+        unit->team_flags |= unit->initial_team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARM)] & STATUS_BYTE_MASK(STATUS_ID_CHARM)) == 0) {
-        unit->team_flags = (unit->team_flags & ~BATTLE_TEAM_MASK) | (unit->initial_team_flags & BATTLE_TEAM_MASK);
+        unit->team_flags = (unit->team_flags & ~UNIT_TEAM_MASK) | (unit->initial_team_flags & UNIT_TEAM_MASK);
     }
 }
 
@@ -2018,19 +2017,19 @@ static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only
             g_battle_action_target->transparent_removal_flag = 0;
         }
         if (i == STATUS_ID_INVITE || i == STATUS_ID_CHARM) {
-            previous = (g_battle_action_target->team_flags & ~BATTLE_TEAM_MASK)
-                | (g_battle_action_attacker->team_flags & BATTLE_TEAM_MASK);
+            previous = (g_battle_action_target->team_flags & ~UNIT_TEAM_MASK)
+                | (g_battle_action_attacker->team_flags & UNIT_TEAM_MASK);
             g_battle_action_target->team_flags = previous;
             if (i == STATUS_ID_INVITE) {
-                previous = (g_battle_action_target->initial_team_flags & ~BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)
-                    | (g_battle_action_attacker->team_flags & BATTLE_TEAM_MASK);
+                previous = (g_battle_action_target->initial_team_flags & ~UNIT_TEAM_OR_PLAYER_CONTROL_MASK)
+                    | (g_battle_action_attacker->team_flags & UNIT_TEAM_MASK);
                 g_battle_action_target_data->reaction_id = 0;
                 g_battle_action_target->initial_team_flags = previous;
                 g_battle_action_target->auto_battle_setting = AI_AUTOBATTLE_MANUAL;
                 g_battle_action_target->auto_battle_target = 0;
             }
         }
-        if (!(g_battle_action_target->initial_team_flags & BATTLE_TEAM_MASK)
+        if (!(g_battle_action_target->initial_team_flags & UNIT_TEAM_MASK)
             && (i == STATUS_ID_CRYSTAL || i == STATUS_ID_DEAD)) {
             g_battle_player_unit_fallen = 1;
         }
