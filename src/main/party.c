@@ -128,12 +128,11 @@ s32 main_party_save_unit(unit_stats_t* unit, s32 allow_guest) {
     s32 slot;
     s32 index;
     u32 unit_slot;
-    u8 kind;
+    u8 kind = unit->unit_flags & UNIT_FLAG_SAVE_FORMATION;
     u8 palette;
     u16 birthday;
     s32 sprite_set;
 
-    kind = unit->unit_flags & UNIT_FLAG_SAVE_FORMATION;
     if (unit->character_identity >= CHARACTER_IDENTITY_SELECTOR_FIRST || allow_guest == 0) {
         kind = 0;
     }
@@ -231,12 +230,11 @@ s32 main_party_find_free_slot(s32 save_formation, u8* palette) {
  * and the zodiac sign is derived from it; the breeding code passes the same value
  * in both nibbles. */
 s32 main_party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color) {
-    s32 party_index;
+    s32 party_index = main_party_generate_unit(MAIN_UNIT_TYPE_MONSTER);
     party_unit_t* party;
     u16 birthday;
     s32 zodiac;
 
-    party_index = main_party_generate_unit(MAIN_UNIT_TYPE_MONSTER);
     if (party_index == -1) {
         return party_index;
     }
@@ -879,9 +877,8 @@ static s32 main_unit_calculate_entd_data(unit_stats_t* unit, entd_unit_t* entd) 
  * Preserve the party unit's kind flags while taking the ENTD persistence
  * controls and team assignment. Returns -1 when no matching party slot exists. */
 static s32 main_unit_init_job_data_from_entd(unit_stats_t* unit, entd_unit_t* entd_unit) {
-    s32 slot;
+    s32 slot = main_party_find_slot_by_sprite_set(entd_unit->sprite_set);
 
-    slot = main_party_find_slot_by_sprite_set(entd_unit->sprite_set);
     if (slot != -1) {
         main_unit_init_job_data(unit, slot, g_main_unit_name_uses_world_text);
         /* Keep the party unit's kind flags and take the two persistence
@@ -899,11 +896,10 @@ static s32 main_unit_init_job_data_from_entd(unit_stats_t* unit, entd_unit_t* en
  * Fills an in-battle unit record from its persistent party record.
  */
 static void main_unit_init_battle_data(unit_stats_t* unit, const party_unit_t* party) {
-    s32 team;
+    s32 team = 8;
     s32 i;
     s32 value;
 
-    team = 8;
     if (party->sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
         team = 0xb;
     }
@@ -1142,12 +1138,10 @@ void main_unit_enable_rsm_flags(unit_stats_t* unit) {
  * IDs 0x1a6..0x1fd map contiguously into the unit's MSB-first active flags.
  * A reaction ID also becomes the unit's currently equipped reaction ability. */
 static void main_unit_set_rsm_flag(unit_stats_t* unit, u32 ability_id) {
-    u16 index;
-    u16 original_ability_id;
+    u16 index = ability_id - ABILITY_ID_REACTION_FIRST;
+    u16 original_ability_id = ability_id;
     u8* rsm_flags;
 
-    index = ability_id - ABILITY_ID_REACTION_FIRST;
-    original_ability_id = ability_id;
     ability_id = index;
     if (index < ABILITY_ID_RANDOM_FIRST - ABILITY_ID_REACTION_FIRST) {
         if (original_ability_id < ABILITY_ID_SUPPORT_FIRST) {
@@ -1170,20 +1164,17 @@ static void main_unit_set_rsm_flag(unit_stats_t* unit, u32 ability_id) {
 static void main_unit_calculate_actual_stats(unit_stats_t* unit, s32 mode) {
     u32 value;
     u32 multiplier;
-    s32 cap;
-    s32 max;
+    s32 cap = 100;
+    s32 max = UNIT_HP_MP_MAX;
     s32 i;
     s32 j;
     u8 level;
-    s32 brave_flag;
+    s32 brave_flag = mode & 1;
     s32 divisor;
     s32 is_low;
     job_stat_growth_t* mult;
     unit_raw_stat_t* raw;
 
-    cap = 100;
-    max = UNIT_HP_MP_MAX;
-    brave_flag = mode & 1;
     if (unit->unit_flags & UNIT_FLAG_EGG) {
         cap = 10;
         max = 0xffff;
@@ -1853,11 +1844,10 @@ static void main_unit_store_character_names(unit_stats_t* unit) {
 /* Return the highest level in the roster, capped at 99, and store it in
  * g_main_party_highest_level. */
 u8 main_party_calculate_highest_level(void) {
-    u8 highest;
+    u8 highest = 0;
     s32 i;
     party_unit_t* unit;
 
-    highest = 0;
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
         unit = main_party_get_unit(i);
         if (unit->party_id != PARTY_ID_NONE && highest < unit->level) {

@@ -470,9 +470,8 @@ static void wldcore_init_runtime_state(void) {
  * 0x40000 and 0x200000 are consumed after publishing g_main_saved_weather_variable as script
  * variable 0x23; each request ends in wldcore_menu_push_screen_transition_level. */
 static void wldcore_menu_restore_level_on_world_entry(void) {
-    s32 flags;
+    s32 flags = g_main_system_flags & ~MAIN_SYSTEM_FLAG_RESTART;
 
-    flags = g_main_system_flags & ~MAIN_SYSTEM_FLAG_RESTART;
     g_main_system_flags = flags;
     if ((flags
             & (MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY | MAIN_SYSTEM_FLAG_TITLE_TUTORIAL | MAIN_SYSTEM_FLAG_TUTORIAL_EVENT

@@ -1708,15 +1708,13 @@ void battle_gfx_init_render_buffers(void) {
 }
 
 void battle_map_reset_mesh_render_state(void) {
-    SVECTOR zero_vector;
-    VECTOR unit_scale;
+    SVECTOR zero_vector = g_battle_map_zero_svector;
+    VECTOR unit_scale = g_battle_map_unit_scale_vector;
     s32 i;
     s16 no_tile;
     s32 j;
     s32* weather_flags;
 
-    zero_vector = g_battle_map_zero_svector;
-    unit_scale = g_battle_map_unit_scale_vector;
     g_battle_map_tile_width = 1;
     g_battle_map_tile_depth = 1;
     g_battle_target_color_tile_x = 1;

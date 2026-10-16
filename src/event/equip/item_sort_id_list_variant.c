@@ -16,7 +16,7 @@
  * `diff *= -1` keeps the negation in int on the sign-extended difference, and
  * the offset-first address sum keeps the target's addu operand order. */
 void item_sort_id_list_variant(s32 mode, s16* list) {
-    s16 count;
+    s16 count = 0;
     s16* entry;
     s32 j;
     s32 passes;
@@ -29,7 +29,6 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
     s32 key_b;
     s16 diff;
 
-    count = 0;
     while (list[count] != -1) {
         entry = (s16*)(count * 2 + (s32)list);
         item_a = *entry & 0x3ff;

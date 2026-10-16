@@ -58,9 +58,8 @@ s32 world_formation_set_unit_ability_slot(s16 unit_id, s16 slot, s16 ability, s3
  * value: away on a proposition, a monster, an egg or a Mime, tested in that
  * order; WORLD_FORMATION_UNIT_UNLOCKED otherwise. */
 s32 world_formation_get_unit_lock(s32 unit_id) {
-    world_unit_t* unit;
+    world_unit_t* unit = g_world_unit_pointers[unit_id];
 
-    unit = g_world_unit_pointers[unit_id];
     if (unit->proposition_status != 0)
         return WORLD_FORMATION_UNIT_LOCK_PROPOSITION;
     if (unit->uses_monster_skillset != 0)
@@ -75,19 +74,15 @@ s32 world_formation_get_unit_lock(s32 unit_id) {
 }
 
 void world_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
-    s32 skillset;
-    s16 generic_job;
-    s16* list;
-    s32 i;
+    s32 skillset = job_get_skillset(job_id);
+    s16 generic_job = job_get_generic_index(job_id);
+    s16* list = (s16*)main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    s32 i = 0;
     s32 byte;
     s32 bit;
     s32 mask;
     u8* learned_abilities;
 
-    skillset = job_get_skillset(job_id);
-    generic_job = job_get_generic_index(job_id);
-    list = (s16*)main_ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
-    i = 0;
     while (list[i] != ability_id) {
         i++;
     }
@@ -106,13 +101,12 @@ void world_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
  * job and gender. The third argument is retained because all known callers
  * pass it even though this function does not consume it. */
 void world_formation_build_unit_graphic_entry(s16 formation_index, texture_source_t* destination, s32 unused) {
-    world_unit_t* unit;
+    world_unit_t* unit = g_world_unit_pointers[formation_index];
     s16 job_id;
     s32 index;
     s32 palette;
     s16 clut_x;
 
-    unit = g_world_unit_pointers[formation_index];
     job_id = unit->identity.job_id;
     if (job_id == JOB_ID_BYBLOS) {
         index = 0x4E;

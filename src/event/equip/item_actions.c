@@ -149,14 +149,12 @@ enum {
  * the same window/marker pair for the world-map menu.
  */
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override) {
-    s16 x;
-    s16 width;
+    s16 x = g_equip_menu_slot_marker_x[slot];
+    s16 width = 0x40;
     oriented_quad_t* marker;
     oriented_quad_t* secondary;
     s32 secondary_x;
 
-    x = g_equip_menu_slot_marker_x[slot];
-    width = 0x40;
     menu_run_script_with_palette_mode_variant(
         &g_equip_menu_slot_marker_window, EQUIP_SLOT_MARKER_WINDOW_STATE, override);
     marker = &g_equip_menu_slot_marker_rects[slot];

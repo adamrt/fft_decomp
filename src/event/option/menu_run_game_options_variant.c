@@ -30,13 +30,13 @@ void menu_run_game_options_variant(void) {
     RECT clear;
     RECT texture_window;
     RECT value_rect;
-    s32 row_offset;
-    s32 ring;
-    s32 cursor;
+    s32 row_offset = 0;
+    s32 ring = 0;
+    s32 cursor = 0;
     thread_t* thread;
     u8* buffer;
-    u32* input0;
-    u32* input1;
+    u32* input0 = script_get_controller_input_pointer(0);
+    u32* input1 = script_get_controller_input_pointer(1);
     s32 accum;
     s32 timer;
     menu_entry_t* entry;
@@ -57,11 +57,6 @@ void menu_run_game_options_variant(void) {
     SPRT* frame;
     u8* image;
 
-    row_offset = 0;
-    ring = 0;
-    cursor = 0;
-    input0 = script_get_controller_input_pointer(0);
-    input1 = script_get_controller_input_pointer(1);
     do {
         thread = &g_threads[g_thread_current_id];
         entry = (menu_entry_t*)thread->function_parameter_1;

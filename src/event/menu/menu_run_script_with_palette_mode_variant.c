@@ -4,9 +4,8 @@
 
 /* A dimmed palette also withholds input from the display script. */
 void menu_run_script_with_palette_mode_variant(menu_instruction_t* script, s32 input, s32 mode) {
-    s32 value;
+    s32 value = input;
 
-    value = input;
     if (mode != 0) {
         value = 0;
     }

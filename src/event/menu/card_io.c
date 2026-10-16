@@ -266,9 +266,8 @@ s32 card_file_enumerate_saves(DIRENTRY* entries, s32 all_files) {
  * size rounded up to 8192-byte blocks. */
 s32 card_file_count_free_blocks(const DIRENTRY* entries, s32 entry_count) {
     s32 i;
-    s32 used_blocks;
+    s32 used_blocks = 0;
 
-    used_blocks = 0;
     for (i = 0; i < entry_count; i++) {
         used_blocks += entries[i].size >> 13;
         used_blocks += !!(entries[i].size % 0x2000);
@@ -495,10 +494,9 @@ s32 card_file_delete_selected_with_retries(const char* filename) {
  * returns the bytes read. */
 s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size) {
     u32 total;
-    s32 result;
+    s32 result = card_file_open_selected_with_retries(filename, 1);
     s32 i;
 
-    result = card_file_open_selected_with_retries(filename, 1);
     if (result < 0) {
         return -1;
     }
@@ -539,9 +537,8 @@ s32 card_file_read_with_retries(s32 descriptor, void* destination, s32 size) {
     s32 error;
     s32 result;
     s32 i;
-    s32 initial_position;
+    s32 initial_position = card_file_seek_with_retries(descriptor, 0, 1);
 
-    initial_position = card_file_seek_with_retries(descriptor, 0, 1);
     if (initial_position < 0) {
         return -1;
     }
@@ -573,9 +570,8 @@ s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size) {
     s32 error;
     s32 result;
     s32 i;
-    s32 initial_position;
+    s32 initial_position = card_file_seek_with_retries(descriptor, 0, 1);
 
-    initial_position = card_file_seek_with_retries(descriptor, 0, 1);
     if (initial_position < 0) {
         return -1;
     }

@@ -24,11 +24,9 @@
  * zodiac sign (the top nibble of the birthday 16-bit value), move, speed and
  * jump. */
 static void debugchr_editor_apply_values_to_battle_unit(s32 unit_id) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(unit_id);
     s32 zodiac;
     u32 unit_flags;
-
-    unit = battle_unit_get_stats_from_battle_id(unit_id);
 
     if (g_debugchr_editor_hp_max < g_debugchr_editor_values[0])
         g_debugchr_editor_values[0] = g_debugchr_editor_hp_max;

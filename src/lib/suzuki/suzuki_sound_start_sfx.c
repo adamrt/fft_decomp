@@ -17,7 +17,7 @@
  * constants, the scheduler orders the branch's first instructions
  * differently from the target. */
 void suzuki_sound_start_sfx(s16 channel_id, s32 sound_id, s16 volume, s16 balance) {
-    suzuki_sound_resource_t* resource;
+    suzuki_sound_resource_t* resource = g_suzuki_sound_resource_list;
     suzuki_waveset_t* waveset;
     suzuki_music_t* music;
     suzuki_music_channel_t* channel;
@@ -25,7 +25,7 @@ void suzuki_sound_start_sfx(s16 channel_id, s32 sound_id, s16 volume, s16 balanc
     s32 count;
     u32 bit;
     u32 started;
-    u32 voices;
+    u32 voices = 0;
     u32 stopped;
     u8 priority;
     s32 index;
@@ -33,8 +33,6 @@ void suzuki_sound_start_sfx(s16 channel_id, s32 sound_id, s16 volume, s16 balanc
     u8* data;
     u16 flags;
 
-    resource = g_suzuki_sound_resource_list;
-    voices = 0;
     started = 0;
     music = g_suzuki_sound_sfx_music;
     stopped = 0;

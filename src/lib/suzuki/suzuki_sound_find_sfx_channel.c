@@ -10,11 +10,11 @@
  * mask is reused for the search mask: a separate variable changes the
  * register allocation of the stop loop. */
 s32 suzuki_sound_find_sfx_channel(s32 sound_id, s32 voice_count) {
-    suzuki_music_t* music;
+    suzuki_music_t* music = g_suzuki_sound_sfx_music;
     suzuki_music_channel_t* channel;
     u32 mask;
     u32 channels;
-    u32 voices;
+    u32 voices = 0;
     s32 count;
     s32 index;
     u32 group;
@@ -22,8 +22,6 @@ s32 suzuki_sound_find_sfx_channel(s32 sound_id, s32 voice_count) {
     u32 oldest;
     s32 best;
 
-    music = g_suzuki_sound_sfx_music;
-    voices = 0;
     channels = 0;
     mask = 1;
     count = SUZUKI_SFX_CHANNEL_COUNT;

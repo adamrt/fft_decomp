@@ -10,9 +10,8 @@
  * Screen x coordinates use the menu's +0x80 origin.
  */
 void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx) {
-    POLY_G4* poly;
+    POLY_G4* poly = &g_menu_gfx_context->gouraud_quads[g_gfx_poly_g4_count++];
 
-    poly = &g_menu_gfx_context->gouraud_quads[g_gfx_poly_g4_count++];
     SetSemiTrans(poly, semi);
     setXY4(poly, pts[0].x + 0x80, pts[0].y, pts[1].x + 0x80, pts[1].y, pts[2].x + 0x80, pts[2].y, pts[3].x + 0x80,
         pts[3].y);

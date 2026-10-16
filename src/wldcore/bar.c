@@ -187,12 +187,10 @@ static void wldcore_list_open_rumors(void) {
     s32* locations;
     s32 mask;
     s32 entry;
-    s32 count;
-    s32 i;
+    s32 count = 0;
+    s32 i = 0;
     s32 record_index;
 
-    count = 0;
-    i = 0;
     flags = g_wldcore_list_row_flags;
     values = g_wldcore_list_entry_values;
     locations = g_wldcore_rumor_location_masks;
@@ -563,11 +561,10 @@ void wldcore_proposition_push_detail_level(s32 value) {
     s32 chance;
     s32 index;
     s32 depth;
-    u8 state;
+    u8 state = g_main_proposition_states[value];
     RECT bounds;
     point32_t* base;
 
-    state = g_main_proposition_states[value];
     chance = (state & WLDCORE_PROPOSITION_STATE_FAILURE) ? 0x14 : 0;
     if (state & WLDCORE_PROPOSITION_STATE_BAD_FAILURE) {
         chance = 0x28;
@@ -801,11 +798,9 @@ void wldcore_proposition_handle_accept_confirm_input(wldcore_menu_choice_panel_l
 void wldcore_menu_push_number_panel_level(void) {
     point32_t origin;
     s32 record_index;
-    s32 x;
-    s32 y;
+    s32 x = g_wldcore_selected_proposition_row[0].min_days;
+    s32 y = g_wldcore_selected_proposition_row[0].max_days;
 
-    x = g_wldcore_selected_proposition_row[0].min_days;
-    y = g_wldcore_selected_proposition_row[0].max_days;
     g_text_substitution_values[0] = x;
     g_text_substitution_values[1] = y;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CHOOSE_DAYS, 0);

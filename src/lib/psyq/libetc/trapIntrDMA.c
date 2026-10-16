@@ -3,8 +3,7 @@
 
 void trapIntrDMA(void) {
     s32 channel;
-    u32 pending;
-    pending = (*g_psyq_etc_dma_dicr >> PSYQ_DMA_IRQ_FLAG_SHIFT) & PSYQ_DMA_IRQ_CHANNEL_MASK;
+    u32 pending = (*g_psyq_etc_dma_dicr >> PSYQ_DMA_IRQ_FLAG_SHIFT) & PSYQ_DMA_IRQ_CHANNEL_MASK;
     while (pending) {
         for (channel = 0; pending && channel < PSYQ_DMA_CHANNEL_COUNT; channel++, pending >>= 1) {
             if (pending & 1) {

@@ -76,13 +76,11 @@ void battle_formula_add_brave_x_stats_y(void) {
 /* Formula 3C: damage the caster for MaxHP/5 and heal the target for twice
  * that amount. */
 void battle_formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths(void) {
-    u16 amount;
+    u16 amount = g_battle_action_attacker->max_hp / 5;
     s32 dealt;
-    action_data_t* action;
+    action_data_t* action = g_battle_action_attacker_data;
     action_data_t* target;
 
-    amount = g_battle_action_attacker->max_hp / 5;
-    action = g_battle_action_attacker_data;
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
     action->hp_damage = amount;
     action = g_battle_action_attacker_data;
@@ -328,10 +326,9 @@ void battle_formula_apply_undead_absorb_attack(void) {
  * lands, the attacker recovers the same amount of MP. */
 void battle_formula_apply_mp_recovery(void) {
     u16 mp_amount;
-    action_data_t* action;
+    action_data_t* action = g_battle_action_target_data;
     action_data_t* action_after;
 
-    action = g_battle_action_target_data;
     mp_amount = action->hp_damage;
     action->hp_damage = 0;
     action->attack_type = ACTION_TYPE_MP_DAMAGE;
@@ -347,10 +344,9 @@ void battle_formula_apply_mp_recovery(void) {
 }
 
 void battle_formula_convert_hp_damage_to_mp_recovery(void) {
-    action_data_t* action;
+    action_data_t* action = g_battle_action_target_data;
     u16 hp_damage;
 
-    action = g_battle_action_target_data;
     hp_damage = action->hp_damage;
     action->hp_damage = 0;
     action->attack_type = ACTION_TYPE_MP_HEALING;
@@ -366,9 +362,8 @@ void battle_formula_use_hp_damage_as_action_hit_percent(void) {
     s32 amount;
     s32 state;
     s32 xa;
-    action_data_t* act;
+    action_data_t* act = g_battle_action_target_data;
 
-    act = g_battle_action_target_data;
     pct = act->hp_damage;
     if (pct >= 100) {
         act->hp_damage = 0;
@@ -487,9 +482,8 @@ void battle_formula_apply_quick_effect(void) {
 /* Lower PA (Power Break, Power Ruin), MA (Mind Break, Mind Ruin) or Speed
  * (Speed Break, Speed Ruin) by X; other abilities change nothing. */
 void battle_formula_determine_reduced_stat(void) {
-    u16 ability;
+    u16 ability = g_battle_action_current_ability.ability_id;
 
-    ability = g_battle_action_current_ability.ability_id;
     if (ability == ABILITY_ID_BATTLE_SKILL_POWER_BREAK || ability == ABILITY_ID_DESTROY_SWORD_POWER_RUIN) {
         g_battle_action_target_data->pa_change
             = g_battle_action_current_ability.range_data.x & ACTION_STAT_CHANGE_VALUE_MASK;
@@ -615,11 +609,10 @@ s32 battle_formula_apply_steal_break_might_sword_hardcoding(void) {
  * target; a hit leaving the target at or below 1/5 max HP lets a Train
  * attacker inflict Invite. */
 void battle_formula_apply_poach_and_train(void) {
-    action_data_t* action;
+    action_data_t* action = g_battle_action_target_data;
     unit_stats_t* target;
     s32 remaining;
 
-    action = g_battle_action_target_data;
     if (!(action->attack_type & ACTION_TYPE_HP_DAMAGE)) {
         return;
     }
@@ -780,12 +773,10 @@ void battle_formula_apply_status_to_action(void) {
 
 /* Formula 0x49: heal (Z * 10) MP. */
 void battle_formula_heal_mp_z_times_ten(void) {
-    s32 index;
+    s32 index = g_battle_action_current_ability.used_item_id;
     s32 amount;
-    action_data_t* action;
+    action_data_t* action = g_battle_action_target_data;
 
-    index = g_battle_action_current_ability.used_item_id;
-    action = g_battle_action_target_data;
     amount = g_main_item_secondary_data[index].z;
     action->attack_type = ACTION_TYPE_MP_HEALING;
     action->mp_healing = amount * 10;

@@ -26,14 +26,12 @@ static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16
 
 static void battle_effect_init_palette(s16 index) {
     RECT rect;
-    effect_file_header_t* base;
-    effect_palette_section_t* data;
+    effect_file_header_t* base = g_battle_effect_data_ptrs[index];
+    effect_palette_section_t* data = (effect_palette_section_t*)((u8*)base + base->palette_and_texture);
     s32 size;
     s32 raw_size;
     s32 height;
 
-    base = g_battle_effect_data_ptrs[index];
-    data = (effect_palette_section_t*)((u8*)base + base->palette_and_texture);
     g_battle_effect_palette_ptr = data;
     battle_map_load_palette_data(data->primary_clut, MAP_CLUT_ROW_EFFECT, 0, 1);
     battle_map_load_palette_data(data->secondary_clut, MAP_CLUT_ROW_EFFECT_SECOND, 0, 1);
@@ -68,48 +66,41 @@ static void battle_effect_reset_animation_sequences_pointer(void) {
 }
 
 static void battle_effect_set_frame_data_pointer(s16 effect_id) {
-    effect_file_header_t* header;
-    effect_sprite_section_t* section;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
+    effect_sprite_section_t* section = (effect_sprite_section_t*)((u8*)header + header->frame_data);
 
-    header = g_battle_effect_data_ptrs[effect_id];
-    section = (effect_sprite_section_t*)((u8*)header + header->frame_data);
     g_battle_effect_frame_data = (u8*)section->groups;
 }
 
 static void battle_effect_set_animation_sequences_pointer(s16 effect_id) {
-    effect_file_header_t* header;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
-    header = g_battle_effect_data_ptrs[effect_id];
     g_battle_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
 }
 
 static void battle_effect_set_script_pointer(s16 effect_id) {
-    effect_file_header_t* header;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
-    header = g_battle_effect_data_ptrs[effect_id];
     g_battle_effect_script = (const u8*)header + header->script;
 }
 
 static void battle_effect_set_animation_curve_data_pointer(s16 effect_id) {
-    effect_file_header_t* header;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
-    header = g_battle_effect_data_ptrs[effect_id];
     g_battle_effect_animation_curve_data
         = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
 }
 
 static void battle_effect_set_particle_system_data_pointer(s16 effect_id) {
-    effect_file_header_t* header;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
-    header = g_battle_effect_data_ptrs[effect_id];
     g_battle_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
 }
 
 static void battle_effect_set_timeline_pointers(s16 effect_id) {
-    effect_file_header_t* header;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
     effect_timeline_t* timeline;
 
-    header = g_battle_effect_data_ptrs[effect_id];
     timeline = (effect_timeline_t*)((u8*)header + header->timeline);
     g_battle_effect_timeline = timeline;
     g_battle_effect_child_timeline = &timeline->child;
@@ -139,17 +130,15 @@ static void battle_effect_load_sound_section(s16 index) {
 }
 
 static void battle_effect_init_flags_section_pointer(s16 effect_id) {
-    effect_file_header_t* header;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
-    header = g_battle_effect_data_ptrs[effect_id];
     g_battle_effect_flags_section = (const effect_flags_section_t*)((u8*)header + header->flags_section);
 }
 
 /* A zero section offset binds the pointer to the file header. */
 static void battle_effect_set_timing_curves_pointer(s16 effect_id) {
-    effect_file_header_t* header;
+    effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
-    header = g_battle_effect_data_ptrs[effect_id];
     g_battle_effect_timing_curves = (const effect_timing_curves_t*)((u8*)header + header->timing_curves);
 }
 
@@ -157,12 +146,10 @@ static void battle_effect_set_timing_curves_pointer(s16 effect_id) {
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
 static s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
-    s16 packed_index;
+    s16 packed_index = record->timeline.frame;
     s32 packed_value;
-    s32 offset;
+    s32 offset = packed_index / 2;
 
-    packed_index = record->timeline.frame;
-    offset = packed_index / 2;
     packed_value = g_battle_effect_timing_curves->parent_timeline[offset];
     if (packed_index & 1) {
         packed_value >>= 4;
@@ -174,13 +161,10 @@ static s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
 static s32 battle_effect_get_animation_timing_curve_value(effect_record_t* record) {
-    s16 packed_index;
-    s32 offset;
-    s32 packed_value;
+    s16 packed_index = record->timeline.frame;
+    s32 offset = packed_index / 2;
+    s32 packed_value = g_battle_effect_timing_curves->child_timeline[offset];
 
-    packed_index = record->timeline.frame;
-    offset = packed_index / 2;
-    packed_value = g_battle_effect_timing_curves->child_timeline[offset];
     if (packed_index & 1) {
         packed_value >>= 4;
     }
@@ -246,9 +230,8 @@ s32 battle_effect_init_data(void) {
     s32 result;
     s32 lba;
     s32 byte_length;
-    u8* destination;
+    u8* destination = g_main_heap_companion_overlay_load_address + 0x3500;
 
-    destination = g_main_heap_companion_overlay_load_address + 0x3500;
     if (g_battle_ability_effect_id >= 0) {
         switch (g_battle_effect_load_state) {
         case EFFECT_LOAD_START:
@@ -381,8 +364,7 @@ u32 battle_effect_load_ability(s32 ability_id) {
  * EFFECT_ABILITY_FLAG_ITEM. A negative entry (an ability without an effect
  * file) is complemented before the test. */
 s32 battle_effect_is_item_ability(s32 ability_id) {
-    s32 entry;
-    entry = g_battle_effect_ability_files[ability_id];
+    s32 entry = g_battle_effect_ability_files[ability_id];
     if (entry < 0) {
         entry = ~entry;
     }
@@ -418,10 +400,9 @@ s32 battle_effect_get_playback_phase(void) {
  * the effect is over when none is left. */
 static s32 battle_effect_update_stage(void) {
     s32 result;
-    s32 id;
+    s32 id = g_battle_effect_allocated_record_head;
     s32 next;
 
-    id = g_battle_effect_allocated_record_head;
     switch (g_battle_effect_playback_phase) {
     case EFFECT_PLAYBACK_PHASE_IDLE:
         result = 0;
@@ -511,11 +492,9 @@ static s32 battle_effect_update_stage(void) {
 /* The effect system's frame: the effect file, the secondary effects and the
  * effect camera moves. Returns 1 while an effect of either kind runs. */
 s32 battle_effect_update_cycle(void) {
-    s32 stage_result;
-    s32 related_result;
+    s32 stage_result = battle_effect_update_stage();
+    s32 related_result = battle_effect_update_secondary_effects();
 
-    stage_result = battle_effect_update_stage();
-    related_result = battle_effect_update_secondary_effects();
     battle_camera_update_effect_rotation_and_zoom();
 
     if (stage_result != 0 || related_result != 0) {
@@ -543,15 +522,12 @@ void battle_effect_init_state_records(void) {
 
 /* Allocate one effect record and link it into the in-use list. */
 static s16 battle_effect_alloc_state_record(void) {
-    u16* available;
+    u16* available = &g_battle_effect_available_record_head;
     s16* allocated;
-    s16 index;
-    u16 next_available;
+    s16 index = *available;
+    u16 next_available = g_battle_effect_state_records[index].next_index;
     u16 next_allocated;
 
-    available = &g_battle_effect_available_record_head;
-    index = *available;
-    next_available = g_battle_effect_state_records[index].next_index;
     allocated = &g_battle_effect_allocated_record_head;
     next_allocated = *allocated;
     *available = next_available;
@@ -650,11 +626,10 @@ static void battle_effect_reset_parent_timeline(effect_record_t* record) {
 /* Allocate an effect state record for a script and reset its per-handler state.
  * Returns the record index, or 0 when none is available. */
 static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index) {
-    s16 index;
+    s16 index = battle_effect_alloc_state_record();
     s16 i;
     effect_record_t* record;
 
-    index = battle_effect_alloc_state_record();
     if (index == 0) {
         return 0;
     }
@@ -702,9 +677,8 @@ effect_script_result_e battle_effect_code_script_02_spawn_child(effect_record_t*
     effect_script_parameters_t parameters;
     s16 slot;
     s16 child;
-    const effect_script_instruction_t* instruction;
+    const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-    instruction = effect_get_current_script_instruction(record);
     parameters = instruction->header.parameters;
     slot = parameters.child.slot;
     child = battle_effect_start_script_record(
@@ -847,9 +821,8 @@ effect_script_result_e battle_effect_code_script_0f_save_camera_zoom(effect_reco
  * instruction's second byte to the second 16-bit value. */
 effect_script_result_e battle_effect_code_script_10_set_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
-    const effect_script_instruction_t* instruction;
+    const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-    instruction = effect_get_current_script_instruction(record);
     parameters = instruction->header.parameters;
     record->counters[parameters.counter.slot] = instruction->immediate.value;
     record->pc += 4;
@@ -965,9 +938,8 @@ effect_script_result_e battle_effect_code_script_18_jump_if_work_count_less(effe
 effect_script_result_e battle_effect_code_script_19_jump_if_child_count_equal(effect_record_t* record) {
     s16 i;
     s16 count;
-    s16 target;
+    s16 target = effect_get_current_script_instruction(record)->branch.comparison;
 
-    target = effect_get_current_script_instruction(record)->branch.comparison;
     count = 0;
     for (i = 0; i < EFFECT_SCRIPT_CHILD_SLOT_COUNT; i++) {
         if (record->child_indices[i] != 0) {
@@ -984,9 +956,8 @@ effect_script_result_e battle_effect_code_script_19_jump_if_child_count_equal(ef
 
 effect_script_result_e battle_effect_code_script_1a_jump_if_child_active(effect_record_t* record) {
     effect_script_parameters_t parameters;
-    const effect_script_instruction_t* instruction;
+    const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-    instruction = effect_get_current_script_instruction(record);
     parameters = instruction->header.parameters;
     if (record->child_indices[parameters.child.slot] != 0) {
         record->pc = instruction->immediate.value;
@@ -1001,9 +972,8 @@ effect_script_result_e battle_effect_code_script_1a_jump_if_child_active(effect_
  * 4-byte instruction. */
 effect_script_result_e battle_effect_code_script_1b_jump_if_child_inactive(effect_record_t* record) {
     effect_script_parameters_t parameters;
-    const effect_script_instruction_t* instruction;
+    const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-    instruction = effect_get_current_script_instruction(record);
     parameters = instruction->header.parameters;
     if (record->child_indices[parameters.child.slot] == 0) {
         record->pc = instruction->immediate.value;
@@ -1018,9 +988,8 @@ effect_script_result_e battle_effect_code_script_1b_jump_if_child_inactive(effec
  * 16-bit value; otherwise step over the 6-byte instruction. */
 effect_script_result_e battle_effect_code_script_1c_jump_if_counter_not_equal(effect_record_t* record) {
     effect_script_parameters_t parameters;
-    const effect_script_instruction_t* instruction;
+    const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-    instruction = effect_get_current_script_instruction(record);
     parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] != instruction->branch.comparison) {
         record->pc = instruction->branch.target_offset;
@@ -1049,9 +1018,8 @@ effect_script_result_e battle_effect_code_script_1d_jump_after_child_timeline_du
  * delay for each target after the first, the last child's duration and phase
  * 2); otherwise step over the 4-byte instruction. */
 effect_script_result_e battle_effect_code_script_1e_jump_after_total_duration(effect_record_t* record) {
-    effect_timeline_t* timing;
+    effect_timeline_t* timing = g_battle_effect_timeline;
 
-    timing = g_battle_effect_timeline;
     if (record->timeline.frame >= timing->phase1_duration + timing->phase2_duration
             + (g_battle_effect_context.target_count - 1) * timing->spawn_delay + timing->child.duration) {
         const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
@@ -1102,10 +1070,9 @@ effect_script_result_e battle_effect_code_script_21_decrement_selected_counter(e
  * bits of the instruction's second byte. */
 effect_script_result_e battle_effect_code_script_22_add_immediate_to_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
-    const effect_script_instruction_t* instruction;
+    const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     u16 amount;
 
-    instruction = effect_get_current_script_instruction(record);
     parameters = instruction->header.parameters;
     amount = instruction->immediate.value;
     record->counters[parameters.counter.slot] += amount;
@@ -1117,10 +1084,9 @@ effect_script_result_e battle_effect_code_script_22_add_immediate_to_selected_co
  * top two bits of the instruction's second byte. */
 effect_script_result_e battle_effect_code_script_23_subtract_immediate_from_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
-    const effect_script_instruction_t* instruction;
+    const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     u16 amount;
 
-    instruction = effect_get_current_script_instruction(record);
     parameters = instruction->header.parameters;
     amount = instruction->immediate.value;
     record->counters[parameters.counter.slot] -= amount;
@@ -1151,9 +1117,8 @@ effect_script_result_e battle_effect_code_script_24_restore_camera_zoom(effect_r
  * 2` is folded into an unsigned range test that the target does not contain.
  */
 effect_script_result_e battle_effect_code_script_25_update_all_particles(effect_record_t* record) {
-    effect_work_record_t* work;
+    effect_work_record_t* work = record->work_head;
 
-    work = record->work_head;
     gte_SetRotMatrix(&g_battle_camera_matrix);
     gte_SetTransMatrix(&g_battle_camera_matrix);
     battle_effect_integrate_particle_motion(record->work_head);
@@ -1290,10 +1255,9 @@ static void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_reco
 }
 
 static s32 battle_effect_select_sound_id(s32 channel) {
-    s32 count;
+    s32 count = g_battle_effect_sound_call_counts[channel]++;
     s32 sound;
 
-    count = g_battle_effect_sound_call_counts[channel]++;
     switch (g_battle_effect_flags_section->channels[channel].mode) {
     case EFFECT_SOUND_MODE_FIRST:
         sound = g_battle_effect_flags_section->channels[channel].sound_ids[0];

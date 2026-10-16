@@ -173,11 +173,9 @@ static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_u
 s32 bunit_unit_build_data_list(s32 mode, s32 unit_data, s32 sort_mode) {
     unit_stats_t* unit;
     s32 i;
-    s32 shown;
-    s32 total;
+    s32 shown = 0;
+    s32 total = 0;
 
-    shown = 0;
-    total = 0;
     /* Keep status-byte reads separate; GCC otherwise merges the two tests into one 16-bit load. */
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = battle_unit_get_stats_from_battle_id(i);

@@ -253,13 +253,11 @@ void attack_deploy_run_select_menu(void) {
  * followed by the section data they are relative to. The event-message
  * section is left as it is. */
 static void attack_text_init_battle_pointers(attack_text_file_t* file) {
-    s32* offsets;
-    s32 i;
+    s32* offsets = file->section_offsets;
+    s32 i = 0;
     u8* data;
     u8** table;
 
-    offsets = file->section_offsets;
-    i = 0;
     /* Section data follows the 32-entry offset header. */
     data = file->section_data;
     table = g_text_section_pointers;
@@ -303,16 +301,14 @@ static void attack_text_init_battle_pointers(attack_text_file_t* file) {
  * the 0x1400-byte help text.
  */
 void attack_text_build_deployment_strings(void) {
-    u8* dst;
-    attack_text_file_t* file;
+    u8* dst = g_attack_scenario_table;
+    attack_text_file_t* file = main_heap_alloc(0x18000);
     s32 i;
     s32 j;
     u8* src;
     s32 k;
     party_unit_t* unit;
 
-    dst = g_attack_scenario_table;
-    file = main_heap_alloc(0x18000);
     g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_ATCHELP_LZW, 0x16800, file);
     text_save_section_pointers();
@@ -372,16 +368,14 @@ static void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32
     POLY_GT4* poly;
     s32 row;
     s32 rest;
-    s32 x;
-    s32 y;
+    s32 x = thread_get_current_parameter_1();
+    s32 y = thread_get_current_parameter_2();
     s32 col;
     s32 dx;
     s32 dy;
     s32 edge;
     s32 height;
 
-    x = thread_get_current_parameter_1();
-    y = thread_get_current_parameter_2();
     poly = polys;
     height = 0x14;
     for (row = 0; row < 2; row++) {
@@ -468,12 +462,10 @@ static void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32
  * primitives: widen it by the thread's step, hold it, then sweep it again
  * with `reverse` set. The hold phase reuses `width` as its frame counter. */
 void attack_map_show_title(void) {
-    s32 step;
-    s32 buffer;
+    s32 step = thread_get_current_parameter_3();
+    s32 buffer = 0;
     s32 width;
 
-    step = thread_get_current_parameter_3();
-    buffer = 0;
     if (step == 0) {
         step = 1;
     }
@@ -518,15 +510,11 @@ void attack_map_show_title(void) {
  */
 void attack_map_load_title_graphic(void) {
     s32 group;
-    u8* image;
-    s32 title;
-    s32 adjusted;
-    s32 group_input;
+    u8* image = menu_alloc_memory(0x2800);
+    s32 title = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
+    s32 adjusted = title - 1;
+    s32 group_input = adjusted;
 
-    image = menu_alloc_memory(0x2800);
-    title = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
-    adjusted = title - 1;
-    group_input = adjusted;
     if (adjusted < 0) {
         group_input = title + 2;
     }

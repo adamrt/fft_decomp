@@ -66,9 +66,8 @@ void open_menu_init_render_record_fields(
  * AT list thread on them. The window is the extent's width plus a 24-pixel
  * margin, rounded down to a multiple of four; its height fields start at 0. */
 static void open_menu_start_music_test_list_thread(s32 thread_id, s32 limit, point32_t* extent, point32_t* origin) {
-    s32 width;
+    s32 width = (extent->x + 0x18) & 0xFFFC;
 
-    width = (extent->x + 0x18) & 0xFFFC;
     g_open_music_test_list_state.row_count = extent->y;
     g_open_music_test_list_state.hidden_rows = limit - extent->y;
     g_open_music_test_list_state.x[1] = 4;
@@ -995,7 +994,7 @@ static s32 open_script_build_text_record(u8* text) {
     s32 pen;
     s32 width;
     s32 height;
-    open_font_metrics_t* font;
+    open_font_metrics_t* font = g_open_script_font_metrics;
     open_font_metrics_t* mt;
     open_font_metrics_t* mt2;
     s32 value;
@@ -1007,7 +1006,6 @@ static s32 open_script_build_text_record(u8* text) {
     u8 ch;
     u16 tpage;
 
-    font = g_open_script_font_metrics;
     for (i = 0; i < 16; i++) {
         if (!(g_open_script_state.records[i].flags & OPEN_SCRIPT_RECORD_ACTIVE)) {
             break;
@@ -1127,11 +1125,10 @@ static s32 open_script_build_text_record(u8* text) {
  * distance, to the external counter opcode 6 waits on. A record that leaves y
  * 0x10..0x100 is released. */
 static void open_script_update_timing_and_record_values(void) {
-    s32 step;
+    s32 step = g_open_script_state.dispatch.timing_step;
     s32 work;
     s32 index;
 
-    step = g_open_script_state.dispatch.timing_step;
     if (step == 0) {
         return;
     }
@@ -1321,9 +1318,8 @@ static void open_script_update_xa_audio(void) {
 
 /* Value of a hexadecimal digit character, or 0 for any other character. */
 static s32 open_text_decode_hex_digit(s32 character) {
-    u32 value;
+    u32 value = character - '0';
 
-    value = character - '0';
     if (value < 10) {
         return value;
     }
@@ -1607,9 +1603,8 @@ void open_opcode_start_overlay_fade_in(s16* command) {
 void open_opcode_wait_counted(s16* entry) {
     u32 flags;
     s32 counter;
-    open_script_dispatch_state_t* state;
+    open_script_dispatch_state_t* state = &g_open_script_state.dispatch;
 
-    state = &g_open_script_state.dispatch;
     flags = state->flags;
     entry++;
     if (flags & OPEN_SCRIPT_DISPATCH_WAITING) {
@@ -1631,9 +1626,8 @@ void open_opcode_wait_counted(s16* entry) {
  * call that arms the wait. Four bytes. */
 void open_opcode_wait_for_external_counter(s16* entry) {
     u32 flags;
-    open_script_dispatch_state_t* state;
+    open_script_dispatch_state_t* state = &g_open_script_state.dispatch;
 
-    state = &g_open_script_state.dispatch;
     flags = state->flags;
     entry++;
     if (flags & OPEN_SCRIPT_DISPATCH_WAITING) {

@@ -22,15 +22,13 @@
 static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
 
 void world_menu_announce_entry_value_thread(void) {
-    menu_entry_t* entry;
+    menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     thread_t* thread;
-    s32 kind;
+    s32 kind = entry->select_text_table;
     s32 index;
     s32 value;
     s32 next;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1();
-    kind = entry->select_text_table;
     if (kind == 2 || kind == -1) {
         next = g_thread_current_id + 1;
         thread = &g_threads[next];
@@ -500,10 +498,9 @@ void world_menu_labeled_number_entry_thread(void) {
  * `digits` arrives as a full 32-bit value and only its low byte is used.
  */
 static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen) {
-    s32 original;
+    s32 original = value;
     s32 i;
 
-    original = value;
     pen->rect.x += ((u8)digits - 1) * 6;
     if (original < 0) {
         value = -value;
@@ -576,16 +573,14 @@ void world_menu_text_entry_thread(void) {
 /* Resize the current thread's menu entry's first parent entry to fit a
  * decimal number, keeping its right edge fixed. */
 void world_menu_resize_parent_entry_to_digits(void) {
-    menu_entry_t* entry;
-    u32 index;
+    menu_entry_t* entry = (menu_entry_t*)g_threads[g_thread_current_id].function_parameter_1;
+    u32 index = entry->row_actions[0];
     s32 digits;
     s32 value;
     s32 width;
     s32 old_width;
     s32 margin;
 
-    entry = (menu_entry_t*)g_threads[g_thread_current_id].function_parameter_1;
-    index = entry->row_actions[0];
     if (index < 1000) {
         entry = &g_menu_thread_menu_data[index];
         /* Preserve the original caller's unset argument. */

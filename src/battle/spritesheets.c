@@ -152,9 +152,8 @@ void battle_unit_store_animation_facing_movement_data(s32 animation, s32 facing,
 }
 
 battle_gfx_unit_shp_frame_tables_t* battle_gfx_get_unit_shp_by_spritesheet_id(u32 spritesheet_id) {
-    s32 value;
+    s32 value = g_battle_gfx_spritesheet_data[spritesheet_id & 0xffff].shp_id;
 
-    value = g_battle_gfx_spritesheet_data[spritesheet_id & 0xffff].shp_id;
     if (value < 5) {
         return &g_battle_gfx_unit_shp_frame_tables[value];
     }
@@ -164,9 +163,8 @@ battle_gfx_unit_shp_frame_tables_t* battle_gfx_get_unit_shp_by_spritesheet_id(u3
 /* The SEQ table of a sheet: one of the five resident ones, or the table of
  * the battle's RUKA, ARUTE or KANZEN file. */
 battle_gfx_unit_seq_table_t* battle_gfx_get_unit_seq_by_spritesheet_id(u32 spritesheet_id) {
-    s32 value;
+    s32 value = g_battle_gfx_spritesheet_data[spritesheet_id & 0xffff].seq_id;
 
-    value = g_battle_gfx_spritesheet_data[spritesheet_id & 0xffff].seq_id;
     if (value < BATTLE_SEQ_RUKA) {
         return &g_battle_gfx_unit_seq_tables[value].header;
     }
@@ -244,9 +242,8 @@ s32 battle_gfx_is_spritesheet_id_loaded(s16 spritesheet_id) {
  * already holds it, otherwise take the first free one, and report error 0xB when all nine are taken. */
 s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
     s32 slot;
-    s32 found;
+    s32 found = 0xFF;
 
-    found = 0xFF;
     for (slot = 0; slot < 9; slot++) {
         if (g_battle_gfx_spritesheet_slots[slot].spritesheet_id == spritesheet_id) {
             g_battle_gfx_spritesheet_slots[slot].in_use = spritesheet_id;
@@ -287,14 +284,13 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
 void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 level, s32 final_value) {
     s32 clut_index;
     s32 stored_palette;
-    s32 slot;
+    s32 slot = unit->spritesheet_vram_slot;
     s32 weather;
     s32 blue;
     s32 green;
     s32 red;
     s16 screen_z;
 
-    slot = unit->spritesheet_vram_slot;
     stored_palette = unit->stored_palette;
     clut_index = unit->runtime_id;
 

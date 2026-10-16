@@ -7,9 +7,8 @@
 #include "psx/types.h"
 
 void small_text_init_battle_pointers(void) {
-    u8* string_data;
+    u8* string_data = g_small_text_name_data;
 
-    string_data = g_small_text_name_data;
     g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES]
         = string_data + g_small_text_name_section_offsets.unit_names;
     g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = string_data + g_small_text_name_section_offsets.job_names;

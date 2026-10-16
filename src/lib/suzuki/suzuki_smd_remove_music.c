@@ -9,10 +9,9 @@
  * that read. */
 s32 suzuki_smd_remove_music(suzuki_music_t* music) {
     suzuki_music_t* entry;
-    suzuki_music_t* previous;
+    suzuki_music_t* previous = 0;
     s16 status;
 
-    previous = 0;
     entry = g_suzuki_sound_active_music_list;
     while (entry != 0) {
         if (entry == music) {

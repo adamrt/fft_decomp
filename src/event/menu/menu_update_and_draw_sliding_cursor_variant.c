@@ -10,7 +10,7 @@
 void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     s32 active;
-    s32 active_bit;
+    s32 active_bit = *state >> 15;
     s32 timer;
     s32 offset;
     s8 raw_offset;
@@ -18,7 +18,6 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32
     u16 front_clut;
     u16 shadow_clut;
 
-    active_bit = *state >> 15;
     active = active_bit;
     if (mode == 0) {
         if (active_bit != 0) {

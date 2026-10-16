@@ -10,10 +10,9 @@
  * direct 0x101 mask test compiles to `lhu`. */
 u32 suzuki_smd_retrigger_held_voices(suzuki_music_t* music) {
     suzuki_music_channel_t* channel;
-    s32 count;
+    s32 count = music->channel_count;
     u32 voices;
 
-    count = music->channel_count;
     channel = music->channels;
     voices = 0;
     do {

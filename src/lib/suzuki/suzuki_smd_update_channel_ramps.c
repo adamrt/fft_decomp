@@ -11,12 +11,11 @@
  * event is a note (SUZUKI_CHANNEL_NOTE_FOLLOWS) the release rate is forced
  * to 6, so the voice has faded by the key-on. */
 void suzuki_smd_update_channel_ramps(suzuki_music_t* music, suzuki_music_channel_t* channel, s16 channel_count) {
-    u16 count;
+    u16 count = music->tempo_step_count;
     u16 active;
     u16 voice_update_flags;
     u16 flags;
 
-    count = music->tempo_step_count;
     if (count != 0) {
         if (--count != 0)
             music->tempo += music->tempo_step;

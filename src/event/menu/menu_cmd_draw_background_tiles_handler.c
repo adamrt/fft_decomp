@@ -19,13 +19,11 @@ menu_instruction_t* menu_cmd_draw_background_tiles_handler(menu_instruction_t* d
     s32 partial_height;
     s32 otag_index;
     u16 clut_id;
-    u32 packed_height;
-    u32 packed_width;
+    u32 packed_height = desc->window.height;
+    u32 packed_width = desc->window.width;
     s32 row;
     s32 column;
 
-    packed_height = desc->window.height;
-    packed_width = desc->window.width;
     otag_index = g_menu_gfx_otag_index;
     clut_id = g_menu_palette_clut;
     full_columns = packed_width >> 4;

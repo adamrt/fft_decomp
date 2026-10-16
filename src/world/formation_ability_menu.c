@@ -166,7 +166,7 @@ void world_menu_run_ability(void) {
  * confirmation; individual changes refresh the ability and stat previews.
  */
 static s32 world_menu_run_remove_ability(void) {
-    s16 unit_index;
+    s16 unit_index = g_unit_selected_index;
     u8 lock_state;
     u8 slot;
     u32 slot_index;
@@ -178,7 +178,6 @@ static s32 world_menu_run_remove_ability(void) {
     s16 movement_ability;
     s32 preview;
 
-    unit_index = g_unit_selected_index;
     if (g_world_remove_ability_unit_index != unit_index) {
         g_world_remove_ability_initialized = 0;
         g_world_remove_ability_unit_index = (u8)g_unit_selected_index;
@@ -561,9 +560,8 @@ s32 world_thread_is_task_active(s32 unused_0) {
 /* Job level of the selected unit in the Learn Abilities menu's `index`th
  * unlocked job; levels are packed two per byte (odd jobs in the low nibble). */
 s32 job_calculate_current_level_variant(s32 index) {
-    s32 job_index;
+    s32 job_index = job_get_generic_index(g_menu_job_ids[index]);
 
-    job_index = job_get_generic_index(g_menu_job_ids[index]);
     g_menu_job_current_level = g_world_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
     if (job_index & 1) {
         g_menu_job_current_level = g_menu_job_current_level & 0xF;
@@ -575,9 +573,8 @@ s32 job_calculate_current_level_variant(s32 index) {
 
 /* JP the selected unit has in the Learn Abilities menu's `index`th unlocked job. */
 s32 world_menu_get_learn_job_jp(s32 index) {
-    s32 job_index;
+    s32 job_index = job_get_generic_index(g_menu_job_ids[index]);
 
-    job_index = job_get_generic_index(g_menu_job_ids[index]);
     return g_world_unit_pointers[g_unit_selected_index]->job_points.current.values[job_index];
 }
 
@@ -585,9 +582,8 @@ s32 world_menu_get_learn_job_jp(s32 index) {
  * menu's `index`th unlocked job; the job list's menu script reads it as a
  * number callback. */
 s32 job_calculate_current_total_jp_variant(s32 index) {
-    s32 generic_job;
+    s32 generic_job = job_get_generic_index(g_menu_job_ids[index]);
 
-    generic_job = job_get_generic_index(g_menu_job_ids[index]);
     return g_world_job_cached_total_jp
         = g_world_unit_pointers[g_unit_selected_index]->job_points.total.values[generic_job];
 }

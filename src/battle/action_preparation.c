@@ -137,11 +137,9 @@ void battle_action_call_attack_preparation(action_command_t* action) {
  * Defending and Performing statuses, but only in the primary action context.
  * Returns the battle_attack_preparation_e result. */
 s32 battle_action_call_attack_preparation_at_preview(action_command_t* command) {
-    unit_stats_t* unit;
-    s32 result;
+    unit_stats_t* unit = &g_battle_unit_stats[command->actor_id];
+    s32 result = battle_action_prepare_attack(command, &unit->action_command, 1);
 
-    unit = &g_battle_unit_stats[command->actor_id];
-    result = battle_action_prepare_attack(command, &unit->action_command, 1);
     if (result == BATTLE_ATTACK_PREPARATION_IMMEDIATE && g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
         battle_status_enable_disable_acting(unit);
     }
@@ -545,14 +543,12 @@ static s32 battle_action_build_reaction_targets(
 static s32 battle_target_calculate_map_for_action(const action_command_t* action, u8* flags_3) {
     ability_secondary_data_t* ability;
     u8 menu_type;
-    u8 flags_4;
-    u8 flags_1;
+    u8 flags_4 = 0;
+    u8 flags_1 = 0;
     u8 flags_2;
     s32 result;
     s16 ability_id;
 
-    flags_4 = 0;
-    flags_1 = 0;
     menu_type = g_main_action_menu_types_by_skillset[action->skillset_id];
     flags_2 = 0;
     *flags_3 = 0;
@@ -887,7 +883,7 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
  * index, so upper-level candidates are recognized by their list position.
  */
 static void battle_target_select_random_tile_for_random_fire_abilities(void) {
-    s32 count;
+    s32 count = 0;
     s32 lower_count;
     s32 i;
     s32 index;
@@ -896,7 +892,6 @@ static void battle_target_select_random_tile_for_random_fire_abilities(void) {
     map_tile_t* tile_data;
     target_panel_t* panel;
 
-    count = 0;
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile_data = &g_battle_map_tile_data[i];
         if (i == 0x100) {
@@ -1423,7 +1418,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
  * of it. -1 when the caster stands on the unit's tile or that tile is off the
  * map or blocked. */
 static s32 battle_target_apply_reflect(unit_stats_t* unit) {
-    action_command_t* act;
+    action_command_t* act = &unit->action_command;
     s32 x;
     s32 y;
     s32 z;
@@ -1431,7 +1426,6 @@ static s32 battle_target_apply_reflect(unit_stats_t* unit) {
     s32 dy;
     s32 last_attack;
 
-    act = &unit->action_command;
     dx = unit->x - g_battle_acting_unit_x;
     dy = unit->position.y - g_battle_acting_unit_y;
     if (dx == 0 && dy == 0) {
@@ -1834,9 +1828,8 @@ move_effective_flags_e battle_move_get_effective_flags(const unit_stats_t* unit)
     u8 flags;
     s32 movement_abilities_2;
     s32 movement_abilities_3;
-    s32 current_status_3;
+    s32 current_status_3 = unit->status_sets.current[2];
 
-    current_status_3 = unit->status_sets.current[2];
     movement_abilities_3 = unit->ability_flags.movement[2];
     movement_abilities_2 = unit->ability_flags.movement[1];
 
@@ -1949,11 +1942,9 @@ s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit) {
 }
 
 s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit_index) {
-    unit_stats_t* unit;
-    s32 formation_id;
+    unit_stats_t* unit = &g_battle_unit_stats[unit_index];
+    s32 formation_id = g_main_unit_deployed_coords->party_id;
 
-    unit = &g_battle_unit_stats[unit_index];
-    formation_id = g_main_unit_deployed_coords->party_id;
     unit->battle_id = unit_index;
     if (main_unit_init_job_data(unit, formation_id, 0) != 0) {
         return -1;
@@ -2307,8 +2298,7 @@ s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id) {
 /* Empties a unit slot and marks it off the field (defined but not placed). Always
  * returns 0. */
 s32 battle_unit_set_cannot_exist(s32 battle_id) {
-    unit_stats_t* unit;
-    unit = &g_battle_unit_stats[battle_id];
+    unit_stats_t* unit = &g_battle_unit_stats[battle_id];
     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
     unit->existence = BATTLE_UNIT_EXISTENCE_OFF_FIELD;
     return 0;
@@ -2333,11 +2323,10 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
     unit_stats_t* partner;
     s32 occupant;
     u8 rider;
-    s32 has_rider;
+    s32 has_rider = 0;
     u8 mount_info;
     map_tile_flags_t tile_flags;
 
-    has_rider = 0;
     unit = &g_battle_unit_stats[battle_id];
     occupant = battle_unit_find_at_tile(x, y, level, BATTLE_UNIT_TILE_FILTER_MOUNTABLE_CHOCOBO);
     if (occupant >= 0 && occupant != battle_id) {

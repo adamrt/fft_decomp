@@ -9,14 +9,13 @@
  * separate pseudo (combine does not merge across the call), which places
  * the reset argument where the target has it. */
 u8* suzuki_smd_pitch_shift_waveform(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    const suzuki_smd_waveform_parameters_t* parameters;
+    const suzuki_smd_waveform_parameters_t* parameters = (const suzuki_smd_waveform_parameters_t*)note_data;
     s32 depth;
     s16 speed;
     u16 waveform;
     s32 flags;
     suzuki_modulator_t* modulator;
 
-    parameters = (const suzuki_smd_waveform_parameters_t*)note_data;
     depth = parameters->depth;
     waveform = parameters->waveform_flags;
     speed = parameters->speed;

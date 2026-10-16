@@ -4,9 +4,8 @@
  * nothing if it is not in g_suzuki_sound_waveset_list. */
 void suzuki_sound_free_waveset(suzuki_waveset_t* waveset) {
     suzuki_waveset_t* node;
-    suzuki_waveset_t* previous;
+    suzuki_waveset_t* previous = 0;
 
-    previous = 0;
     node = g_suzuki_sound_waveset_list;
     while (node != 0) {
         if (node == waveset) {

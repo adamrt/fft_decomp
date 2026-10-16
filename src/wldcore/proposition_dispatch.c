@@ -475,11 +475,10 @@ void wldcore_proposition_push_send_unit_level(void) {
  * Units already assigned to a proposition, absent roster entries, monsters,
  * and special-character sprite sets are excluded. */
 static s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_level_t* level) {
-    s32 i;
+    s32 i = 0;
     s32 j;
     party_unit_t* unit;
 
-    i = 0;
     level->unit_count = 0;
     for (; i < PARTY_MEMBER_SLOT_COUNT; i++) {
         unit = wldcore_get_party_unit(i);
@@ -519,10 +518,9 @@ static s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_
 
 static void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level) {
     point32_t point;
-    s32 index;
+    s32 index = level->list_frame.render_index;
     s32 i;
 
-    index = level->list_frame.render_index;
     world_menu_build_window_frame_image(g_wldcore_window_render_records[index].bounds.w,
         g_wldcore_window_render_records[index].bounds.h, (u16*)g_wldcore_window_image_buffer);
     point.x = 8;
@@ -959,12 +957,11 @@ void wldcore_list_open_completed_propositions(void) {
     s32 count;
     s32 i;
     s32 total;
-    s32 previous;
+    s32 previous = g_wldcore_menu_stack_depth - 1;
     s32 loaded_count;
     s32* location;
     s32 entry_value_base;
 
-    previous = g_wldcore_menu_stack_depth - 1;
     if (g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[previous].window_pair_render.render_index]
             .flags
         & WORLD_RENDER_RECORD_HIDDEN) {
@@ -1151,9 +1148,8 @@ void wldcore_proposition_handle_report_confirm_input(wldcore_proposition_report_
  * type-0x10 menu level for argument and sets WORLD thread 14's parameters.
  */
 static void wldcore_menu_push_proposition_report_level(s32 argument) {
-    s32 depth;
+    s32 depth = g_wldcore_menu_stack_depth;
 
-    depth = g_wldcore_menu_stack_depth;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth - 1].window_pair_render.first_window].flags
         |= WORLD_RENDER_RECORD_HIDDEN;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth - 1].window_pair_render.second_window].flags
@@ -1497,14 +1493,13 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
     s32 index;
     s32 i;
     s32 message;
-    s32 count;
+    s32 count = g_main_active_propositions[proposition].participant_count;
     s32 depth;
     u16* panel_text;
     s32* party;
     point32_t* base;
     s32 rows;
 
-    count = g_main_active_propositions[proposition].participant_count;
     g_wldcore_proposition_gil_amount = 0;
     for (i = 0; i < count; i++) {
         g_wldcore_proposition_gil_amount += g_wldcore_proposition_report.participant_gil[i];
@@ -1807,10 +1802,9 @@ s32 wldcore_proposition_adjust_message_index(s32 base, s32 party_index) {
     s32 faith_band;
     s32 bravery_band;
     u32 is_not_male;
-    party_unit_t* party;
+    party_unit_t* party = wldcore_get_party_unit(party_index);
     const u8* adjustments;
 
-    party = wldcore_get_party_unit(party_index);
     if (party->bravery < 0x65) {
         bravery_band = 2;
     }

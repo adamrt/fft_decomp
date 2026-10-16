@@ -201,10 +201,9 @@ void battle_state_handle_wait_direction_state(void) {
     s32 facing;
     s32 facing_hint;
     u16 frame_data;
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
     battle_unit_t* mounted_unit;
 
-    unit = battle_unit_get_source();
     battle_gfx_update_all_unit_rotation_and_vectors();
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
@@ -371,10 +370,9 @@ void battle_state_handle_action_execute_setup_state(void) {
 
 void battle_state_handle_targeting_range_state(void) {
     u16 frame_data;
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
     battle_unit_t* target;
 
-    unit = battle_unit_get_source();
     battle_state_handle_free_cursor_input();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
@@ -460,9 +458,8 @@ void battle_state_handle_ability_preview_help_state(void) {
  * unit confirms by itself once its state frame counter reaches 0x1f. */
 void battle_state_handle_ability_preview_state(void) {
     u16 frame_data;
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
 
-    unit = battle_unit_get_source();
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_camera_handle_rotation_input();
         battle_camera_update_zoom_input();
@@ -640,7 +637,7 @@ void battle_state_handle_action_announcement_state(void) {
  * free the state waits. */
 void battle_state_handle_open_sp2_files_state(void) {
     RECT image_rect;
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_casting();
     s32 open_result;
     s32 counter;
     s32 empty_slot;
@@ -648,7 +645,6 @@ void battle_state_handle_open_sp2_files_state(void) {
     RECT* image_rect_address;
     u32* sp2_data;
 
-    unit = battle_unit_get_casting();
     if (g_battle_gfx_sp2_data == 0) {
         g_battle_gfx_sp2_data = main_heap_alloc(0x8000);
         open_result = battle_gfx_open_sp2_file(unit, g_battle_gfx_sp2_data);
@@ -707,9 +703,8 @@ void battle_state_handle_start_effect_file_open_state(void) {
 /* SecondaryEffect game-state handler: count the frame and enter the
  * action-execute state (action_set_item_throw_stone_ability_display). */
 void battle_state_handle_secondary_effect_state(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_casting();
 
-    unit = battle_unit_get_casting();
     unit->state_frame_counter++;
     battle_action_set_item_throw_stone_ability_display();
     battle_state_handle_free_cursor_input();

@@ -10,8 +10,8 @@
  * preserves the original register allocation. */
 void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s32 mode) {
     RECT rect;
-    s32 active;
-    s32 active_test;
+    s32 active = *state >> 15;
+    s32 active_test = active;
     s32 frame;
     s32 i;
     s8 raw_offset;
@@ -19,8 +19,6 @@ void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s
     u16 clut;
     u16 shadow_clut;
 
-    active = *state >> 15;
-    active_test = active;
     if (mode == 0) {
         if (active != 0) {
             *state = 0;

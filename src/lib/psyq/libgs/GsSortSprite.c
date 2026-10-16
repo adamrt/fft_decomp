@@ -36,7 +36,7 @@ void GsSortSprite(GsSPRITE* sp, GsOT* ot, u16 pri) {
     DR_TPAGE* draw_mode;
     POLY_FT4* poly;
     u32* words;
-    u32 attr;
+    u32 attr = sp->attribute;
     u32 code;
     u32 mode;
     u32 shade;
@@ -53,7 +53,6 @@ void GsSortSprite(GsSPRITE* sp, GsOT* ot, u16 pri) {
     u8 v_top;
     u8 v_bottom;
 
-    attr = sp->attribute;
     if (!(attr & GsDOFF) && sp->w != 0 && sp->h != 0) {
         packet = GsOUT_PACKET_P;
         if (((attr >> 27) & 1)

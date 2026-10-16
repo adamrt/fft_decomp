@@ -22,16 +22,14 @@ void menu_draw_item_status_list(s16 item_id) {
     RECT rect;
     u16 icon_tpage;
     u16 tpage;
-    s16 count;
-    s32 attribute;
+    s16 count = 0;
+    s32 attribute = g_main_item_primary_data[item_id].attributes;
     s32 drawn;
     s32 bit;
     s32 i;
     s32 x;
     s32 y;
 
-    count = 0;
-    attribute = g_main_item_primary_data[item_id].attributes;
     bits_init_primary_reader_variant(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (bits_read_primary(1) != 0) {

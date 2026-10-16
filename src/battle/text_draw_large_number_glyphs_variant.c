@@ -13,9 +13,8 @@
 void text_draw_large_number_glyphs_variant(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
-    glyph_blit_t* src;
+    glyph_blit_t* src = &g_text_large_number_glyph_rect;
 
-    src = &g_text_large_number_glyph_rect;
     cursor = digits & 0xFF00;
     if (cursor == 0xC00 || cursor == 0xE00) {
         g_text_large_number_glyph_rect.rect.y = 0x10;

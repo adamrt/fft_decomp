@@ -15,14 +15,11 @@
 u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor) {
     RECT source;
     RECT clear_strip;
-    menu_text_layout_t* layout;
-    u32* primary_input;
-    u32* secondary_input;
+    menu_text_layout_t* layout = menu->context;
+    u32* primary_input = script_get_controller_input_pointer(0);
+    u32* secondary_input = script_get_controller_input_pointer(1);
     s32 changed;
 
-    layout = menu->context;
-    primary_input = script_get_controller_input_pointer(0);
-    secondary_input = script_get_controller_input_pointer(1);
     source.x = menu->vram_origin.x;
     source.y = menu->vram_origin.y;
     source.w = menu->inner_width >> 2;

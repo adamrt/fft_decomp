@@ -11,9 +11,8 @@
  * shaded with that color; otherwise texture shading is disabled.
  */
 void gfx_enqueue_textured_quad_corners(const textured_quad_source_t* src, const rgb24_t* color, s32 semi, s32 idx) {
-    POLY_FT4* poly;
+    POLY_FT4* poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
 
-    poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
     if (color != 0) {
         SetShadeTex(poly, 0);
         setRGB0(poly, color->r, color->g, color->b);

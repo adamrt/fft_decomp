@@ -143,10 +143,9 @@ void world_font_upload_glyph_image(u16 code, s32 x, s32 y, s32 style) {
  * TEXT_EXTENDED_GLYPH_PREFIX_FIRST..TEXT_EXTENDED_GLYPH_PREFIX_LAST carry a one-byte operand. */
 u8* world_text_advance_entry_by_char_count(u8* text, s32 count) {
     s32 i;
-    s32 offset;
+    s32 offset = 0;
     u8* cursor;
 
-    offset = 0;
     for (i = 0; i < count; i++) {
         cursor = &text[offset];
         if (*cursor == TEXT_END_WAIT_FOR_CONFIRM) {

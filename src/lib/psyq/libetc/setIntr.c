@@ -2,9 +2,8 @@
 #include "psx/libetc.h"
 
 psyq_interrupt_callback_t setIntr(s32 slot, psyq_interrupt_callback_t callback) {
-    psyq_interrupt_callback_t old;
+    psyq_interrupt_callback_t old = g_psyq_etc_interrupt_state.callbacks[slot];
     s32 saved_mask;
-    old = g_psyq_etc_interrupt_state.callbacks[slot];
     if (callback != old && g_psyq_etc_interrupt_state.initialized) {
         saved_mask = *g_psyq_etc_irq_mask;
         *g_psyq_etc_irq_mask = 0;

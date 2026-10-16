@@ -72,10 +72,9 @@ s32 battle_ai_build_command(s32 unit_id, ai_command_t* command) {
     ai_command_t* last_command;
     ai_command_t* history;
     s32 i;
-    s32 ticks;
+    s32 ticks = VSync(1);
     u8 moved;
 
-    ticks = VSync(1);
     ai = &g_battle_ai_data_base;
     if (ticks >= AI_DECISION_SCANLINE_LIMIT)
         return -1;
@@ -175,14 +174,12 @@ preserve:
  * A mounted rider uses its mount's movement allowance.
  */
 static void battle_ai_init_acting_unit_data(void) {
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit;
     unit_stats_t* acting;
     s32 mount_info;
-    s32 id;
+    s32 id = g_battle_ai_data_base.acting_unit_id;
 
-    ai = &g_battle_ai_data_base;
-    id = g_battle_ai_data_base.acting_unit_id;
     unit = &g_battle_unit_stats[id];
     g_battle_ai_data_base.acting_unit = unit;
     g_battle_ai_data_base.acting_unit_decision = &ai->unit_decisions[id];
@@ -330,14 +327,13 @@ static void battle_ai_update_team_targeting_flags(void) {
  */
 static void battle_ai_init_target_consideration(void) {
     ai_unit_decision_t* decision;
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* acting;
     s32 flags;
     u8 targeting_flags;
     ai_nearest_target_mode_e mode;
     s32 target;
 
-    ai = &g_battle_ai_data_base;
     decision = g_battle_ai_data_base.acting_unit_decision;
     if (g_battle_ai_data_base.acting_unit_team == 0) {
         acting = g_battle_ai_data_base.acting_unit;
@@ -542,15 +538,15 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
     ai_data_t* ai;
     ai_considered_ability_t* ability;
     s32 delay;
-    s32 enemy_harmful;
-    s32 enemy_magical;
-    s32 enemy_physical;
-    s32 enemy_reflectable;
-    s32 enemy_earth;
+    s32 enemy_harmful = 0;
+    s32 enemy_magical = 0;
+    s32 enemy_physical = 0;
+    s32 enemy_reflectable = 0;
+    s32 enemy_earth = 0;
     s32 unit_harmful;
     s32 unit_helpful;
-    s32 lowest_ratio;
-    s32 lowest_unit;
+    s32 lowest_ratio = 0xff;
+    s32 lowest_unit = 0xff;
     s32 unit_id;
     s32 i;
     ai_unit_decision_t* decision;
@@ -572,13 +568,6 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
     s32 random_use;
     s32 range;
 
-    enemy_harmful = 0;
-    enemy_magical = 0;
-    enemy_physical = 0;
-    enemy_reflectable = 0;
-    enemy_earth = 0;
-    lowest_ratio = 0xff;
-    lowest_unit = 0xff;
     ai = &g_battle_ai_data_base;
     ability = &g_battle_ai_data_base.considered_ability;
     unit_id = 0;
@@ -1269,14 +1258,12 @@ enum {
  * the stored 16-bit pattern before negating them.
  */
 static void battle_ai_invert_target_priority(void) {
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     ai_coords_t* coords;
     u8* level_row;
-    u8 scenario;
+    u8 scenario = g_battle_ai_data_base.movement_scenario;
     u32 row;
 
-    ai = &g_battle_ai_data_base;
-    scenario = g_battle_ai_data_base.movement_scenario;
     g_battle_ai_data_base.inverted_priority_action.rank.decided = 0;
     g_battle_ai_data_base.inverted_priority_action.rank.base_hit_percent = AI_BASE_HIT_PERCENT;
     coords = &ai->candidate_coords[scenario];
@@ -1299,13 +1286,12 @@ extern s32 g_battle_ai_stay_near_destination_fixed; /* 1 after a reachable Stay 
  */
 static s32 battle_ai_build_movement_scenarios(void) {
     ai_unit_decision_t* decision;
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit;
     s32 limit;
     s32 low;
     s32 high;
 
-    ai = &g_battle_ai_data_base;
     g_battle_ai_data_base.movement_scenario = 1;
     decision = g_battle_ai_data_base.acting_unit_decision;
     if (g_battle_ai_data_base.resume_pending) {
@@ -1653,9 +1639,8 @@ s32 battle_ai_is_action_higher_ranked(const ai_action_data_t* first, const ai_ac
  * and, when the action's destination tile differs and allows the ability, cast
  * from there (move, then act). -1 suspends. */
 s32 battle_ai_evaluate_cast_origins(void) {
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
 
-    ai = &g_battle_ai_data_base;
     if (g_battle_ai_data_base.resume_pending != 0) {
         /* Resume: re-enter the step that suspended. */
         if (g_battle_ai_data_base.cast_origin_stage != AI_CAST_ORIGIN_ACT_BEFORE_MOVE) {
@@ -2115,13 +2100,12 @@ static s32 battle_ai_take_random_tile(
  */
 s32 battle_ai_count_flagged_tiles_within_map_bounds(u16 rows[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]) {
     ai_data_t* ai;
-    s32 count;
+    s32 count = 0;
     s32 level;
     s32 y;
     s32 x;
     u16 row;
 
-    count = 0;
     ai = &g_battle_ai_data_base;
     for (level = 0; level < MAP_TERRAIN_LAYER_COUNT; level++) {
         for (y = 0; y < ai->map_max_y; y++) {
@@ -2199,10 +2183,9 @@ static s32 battle_ai_select_active_units(ai_unit_filter_e mode, s32 target_id) {
  * most, ended early by SKILLSET_ID_NONE. -1 suspends, and the next call
  * resumes inside the loop. */
 static s32 battle_ai_evaluate_ability_list(void) {
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     ai_ability_entry_t* entry;
 
-    ai = &g_battle_ai_data_base;
     if (g_battle_ai_data_base.resume_pending != 0) {
         goto retry; /* resume the suspended evaluation inside the loop */
     }
@@ -3246,14 +3229,11 @@ static s32 battle_ai_score_reachable_tiles(void) {
  * Reraise (from its decision record). Don't Act and Don't Move are not looked
  * at. */
 s32 battle_ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit) {
-    ai_data_t* ai;
-    s32 speed;
-    s32 ticks;
+    ai_data_t* ai = &g_battle_ai_data_base;
+    s32 speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
+    s32 ticks = 0;
     s32 rem;
 
-    ai = &g_battle_ai_data_base;
-    speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
-    ticks = 0;
     if (speed == 0) {
         return 0x7FFFFFFF;
     }
@@ -3629,7 +3609,7 @@ static void battle_ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_i
  * set-up order and signed comparison. */
 static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
     s32 jump_found;
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     u16* abilities;
     s32 menu;
     s32 list_id;
@@ -3644,7 +3624,6 @@ static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s3
     s32 max_mp;
     u8 flags;
 
-    ai = &g_battle_ai_data_base;
     if (skillset == 0) {
         return count;
     }

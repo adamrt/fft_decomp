@@ -73,13 +73,12 @@ void world_menu_formation_icon_list_thread(void) {
  * appended to a name that fills all 16 bytes. Bumps the name string
  * revision. */
 void world_text_generate_formation_unit_name_string(void) {
-    u8* out;
+    u8* out = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     party_unit_t* unit;
     s32 i;
     s32 j;
     u8 character;
 
-    out = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
         unit = main_party_get_unit(i);
         if (unit->party_id == PARTY_ID_NONE) {

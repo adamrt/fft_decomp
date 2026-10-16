@@ -336,9 +336,8 @@ void world_menu_reset_selection_results(void) {
  * Run one frame of the formation screen.
  */
 void world_formation_process_frame(void) {
-    u32 input;
+    u32 input = g_menu_input_primary_repeat;
 
-    input = g_menu_input_primary_repeat;
     if (g_world_formation_current_menu == WORLD_FORMATION_MENU_UNIT_GRID) {
         if (g_world_formation_main_menu_initialized == 0) {
             g_world_formation_unit_banner_enabled = g_world_formation_saved_banner_enabled;

@@ -16,14 +16,12 @@
  * the weapon either forces two hands or allows them while `two_hands_support`
  * (the Two Hands support ability) is set. */
 static s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
-    s32 result;
+    s32 result = 0;
     s32 item_id;
-    s16 w0;
+    s16 w0 = slots[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     s16 w1;
     u8 flags;
 
-    result = 0;
-    w0 = slots[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     item_id = 0;
     if (w0 != 0) {
         if (slots[MENU_EQUIPMENT_SLOT_LEFT_HAND] == 0) {
@@ -156,13 +154,12 @@ static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_dat
 
 /* Build the equipment data and HP/MP for `battle_id` and count the units still present on the field. */
 void equip_unit_load_data_from_stats(s32 battle_id) {
-    unit_stats_t* stats;
+    unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     s32 i;
     s32 unit_count;
     u16 hp;
     u16 mp;
 
-    stats = battle_unit_get_stats_from_battle_id(battle_id);
     equip_unit_build_data_from_stats(stats, g_equip_unit_records);
     unit_count = 0;
     hp = stats->hp;
@@ -203,14 +200,13 @@ void equip_unit_load_data_from_stats(s32 battle_id) {
 void equip_unit_commit_loadout_to_stats(void) {
     menu_status_panel_slot_storage_t bonuses;
     unit_stats_t* stats;
-    s16 unit_id;
+    s16 unit_id = g_equip_unit_data[0]->battle_id;
     s32 item_id;
     s32 saved;
     s32 hp;
     s32 mp;
     s32 max;
 
-    unit_id = g_equip_unit_data[0]->battle_id;
     stats = battle_unit_get_stats_from_battle_id(unit_id);
     item_id = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;

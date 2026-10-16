@@ -13,14 +13,11 @@ menu_window_command_t* menu_cmd_draw_tiled_rectangle_handler(menu_window_command
     s32 full_rows;
     s32 partial_width;
     s32 partial_height;
-    s32 otag_index;
-    u16 clut;
+    s32 otag_index = g_menu_gfx_otag_index;
+    u16 clut = g_menu_palette_clut;
     s32 full_columns;
     s32 row;
     s32 column;
-
-    otag_index = g_menu_gfx_otag_index;
-    clut = g_menu_palette_clut;
 
     if (command->rectangle_source == 2) {
         base_x = g_gfx_tiled_rect.x;

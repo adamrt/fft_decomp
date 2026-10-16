@@ -10,10 +10,9 @@
  * cursor returns to the byte following the command. */
 u8* text_advance_cursor_with_backreferences(text_reader_state_t* state, u8* cursor) {
     text_backref_t* backref;
-    s32 remaining;
+    s32 remaining = state->remaining_bytes;
     u8 command;
 
-    remaining = state->remaining_bytes;
     cursor += 1;
     if (remaining > 0) {
         remaining -= 1;

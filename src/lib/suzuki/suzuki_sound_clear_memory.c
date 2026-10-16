@@ -2,11 +2,10 @@
 
 /* Zeroes size bytes: 16-byte blocks, then 32-bit values, then bytes. */
 void suzuki_sound_clear_memory(void* destination, s32 size) {
-    u32* words;
+    u32* words = destination;
     u8* bytes;
     s32 count;
 
-    words = destination;
     for (count = size >> 4; count != 0; count--) {
         words[0] = words[1] = words[2] = words[3] = 0;
         words += 4;

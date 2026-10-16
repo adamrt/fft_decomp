@@ -29,7 +29,7 @@ static void wldcore_window_transform_point_for_mode(s32 mode, RECT bounds, point
 
 void wldcore_map_color_and_draw_dots(void) {
     wldcore_map_dot_source_t* src;
-    wldcore_map_dot_t* dots;
+    wldcore_map_dot_t* dots = g_wldcore_map_dots;
     wldcore_map_dot_t* dot;
     s32* flags_base;
     CVECTOR* color;
@@ -38,7 +38,6 @@ void wldcore_map_color_and_draw_dots(void) {
     s32 queue_index;
     s32 i;
 
-    dots = g_wldcore_map_dots;
     /* Queue entries are built from the flags column base; &dots[i].render.flags does not match. */
     flags_base = &dots->render.flags;
     dot = dots;
@@ -115,7 +114,7 @@ void wldcore_map_project_and_cull_dots(void) {
  * the limit ($v1); reusing the function-scope allocno reproduces the target
  * pair. */
 void wldcore_map_pulse_dot_colors(void) {
-    s32 flags;
+    s32 flags = g_main_system_flags;
     s32 i;
     s32 phase;
     s32 bright;
@@ -124,7 +123,6 @@ void wldcore_map_pulse_dot_colors(void) {
     s32 counter;
     CVECTOR* color;
 
-    flags = g_main_system_flags;
     if (flags & MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
         return;
     }
@@ -173,13 +171,11 @@ void wldcore_map_pulse_dot_colors(void) {
  * The point is passed by value in a0/a1; the target reads both members back
  * from the incoming argument home slots. */
 s32 wldcore_map_find_dot_at_point(point32_t point) {
-    s32 best;
+    s32 best = 0xFFFFFF;
     s32 i;
-    s32 hit;
+    s32 hit = 0;
     s32 value;
 
-    best = 0xFFFFFF;
-    hit = 0;
     for (i = 0; i < g_wldcore_map_dot_count; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
             continue;
@@ -956,11 +952,9 @@ s32 wldcore_map_is_point_outside_projection_bounds(const point32_t* point) {
 
 /* Negate and clamp a signed coordinate pair to the world-scroll limits. */
 static void wldcore_map_negate_and_clamp_coordinates(const SVECTOR* input, VECTOR* output) {
-    s32 x;
-    s32 y;
+    s32 x = -input->vx;
+    s32 y = -input->vy;
 
-    x = -input->vx;
-    y = -input->vy;
     if (x < WLDCORE_SCROLL_MIN_X) {
         x = WLDCORE_SCROLL_MIN_X;
     }
@@ -995,13 +989,11 @@ extern s32 g_wldcore_map_projection_motion_target_x;
 s32 wldcore_map_step_projection_motion(void) {
     s32 progress;
     s32 distance;
-    s32 target_x;
-    s32 origin_x;
+    s32 target_x = g_wldcore_map_projection_motion_target_x;
+    s32 origin_x = g_wldcore_map_projection_motion_origin_x;
     s32 delta_x;
     s32 origin_y;
 
-    target_x = g_wldcore_map_projection_motion_target_x;
-    origin_x = g_wldcore_map_projection_motion_origin_x;
     progress = g_wldcore_map_projection_motion_progress;
     distance = g_wldcore_map_projection_motion.distance;
     target_x = (target_x - origin_x) * progress;
@@ -1024,9 +1016,8 @@ s32 wldcore_map_step_projection_motion(void) {
  * raises system flag 0x2 if the origin's x or y changed. */
 static void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta) {
     point32_t position;
-    VECTOR saved;
+    VECTOR saved = g_wldcore_map_projection_origin;
 
-    saved = g_wldcore_map_projection_origin;
     position.x = g_wldcore_map_projection_state.marker.render.position.x + delta->x;
     position.y = g_wldcore_map_projection_state.marker.render.position.y + delta->y;
     if ((delta->x < 0 && position.x < -0x40) || (delta->x > 0 && position.x >= 0x49)) {
@@ -1136,11 +1127,10 @@ void wldcore_map_init_location_marker_and_camera(void) {
     VECTOR unused; /* unreferenced; reproduces the target's 0x38-byte frame */
     wldcore_map_dot_t* marker;
     SVECTOR* position;
-    s32 index;
+    s32 index = script_get_variable(EVENT_SCRIPT_VAR_LOCATION);
     s32 count;
     s32 value;
 
-    index = script_get_variable(EVENT_SCRIPT_VAR_LOCATION);
     /* Only the kind, position and flags go through the pointer, as in the
      * target; the other fields are addressed through the symbol. */
     marker = &g_wldcore_map_projection_state.marker;
@@ -1183,13 +1173,12 @@ void wldcore_map_init_location_marker_and_camera(void) {
  * RotTrans, whose input is the marker's own position. */
 void wldcore_map_update_camera_direction_and_projection(void) {
     VECTOR output;
-    wldcore_projection_state_t* state;
+    wldcore_projection_state_t* state = &g_wldcore_map_projection_state;
     long transform_flag;
     s32 angle_direction;
     s32 direction;
     s32 flags;
 
-    state = &g_wldcore_map_projection_state;
     flags = state->flags;
     if (flags & WLDCORE_PROJECTION_FLAG_UPDATE_DIRECTION) {
         angle_direction = ((state->angle + 0x100) >> 9) & 7;

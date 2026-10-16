@@ -48,11 +48,10 @@ void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
  * g_bunit_unit_stat_mode selects. For any other mode the value returned is
  * never assigned. */
 static s32 bunit_unit_get_current_stat(s32 unit_index) {
-    menu_unit_readout_e mode;
+    menu_unit_readout_e mode = g_bunit_unit_stat_mode;
     bunit_unit_t* entry;
     s32 value;
 
-    mode = g_bunit_unit_stat_mode;
     if (mode == MENU_UNIT_READOUT_HP) {
         entry = g_bunit_unit_pointers[unit_index];
         value = entry->gauges[MENU_UNIT_STATUS_GAUGE_HP].value;
@@ -103,10 +102,9 @@ static s32 bunit_unit_get_max_stat(s32 unit_index) {
  * of the screen. Returns 0 while browsing units. */
 static s32 bunit_menu_is_selected_unit_in_upper_rows(s32 page_offset) {
     s32 in_upper_rows;
-    s8 offset;
+    s8 offset = page_offset;
     s32 scroll_step;
 
-    offset = page_offset;
     if (g_bunit_unit_browse_enabled == 0) {
         in_upper_rows = 1;
         scroll_step = g_bunit_unit_list_scroll_step;
@@ -144,10 +142,9 @@ static s32 bunit_menu_is_selected_unit_in_upper_rows(s32 page_offset) {
  * (0, -0x3C, -0x78 = pages of four units); once a step reaches +/-0x3C,
  * commit it to the offset and stop. */
 static void bunit_menu_update_unit_list_scroll(s8* step, s8* offset) {
-    s8 cur;
+    s8 cur = *step;
     s8 next;
 
-    cur = *step;
     if (cur == 0) {
         switch (*offset) {
         case -0x78:
@@ -661,10 +658,9 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
  * matching the menu renderer's non-square coordinate scale. `dx` also holds
  * the result. */
 static s32 bunit_gfx_calculate_distance_falloff(s32 x, s32 y, s32 base_value, s32 minimum) {
-    s32 dx;
+    s32 dx = abs(g_bunit_gfx_falloff_focus_x - x);
     s32 dy;
 
-    dx = abs(g_bunit_gfx_falloff_focus_x - x);
     dx *= dx;
     dy = abs(g_bunit_gfx_falloff_focus_y - y);
     dy *= 2;
@@ -952,10 +948,9 @@ void bunit_unit_build_list_index_map(void) {
  * through their encoded roster ID, so they are omitted from this direct list.
  */
 s32 bunit_unit_build_reorderable_index_list(void) {
-    s32 count;
+    s32 count = 0;
     s32 i;
 
-    count = 0;
     for (i = 0; i < g_bunit_unit_list_count; i++) {
         if ((g_bunit_unit_pointers[i]->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) == 0) {
             g_bunit_unit_reorderable_indices[count] = i;

@@ -322,11 +322,10 @@ void battle_move_start_fly_step(
 void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to) {
     move_step_t* step;
     move_step_t current_step;
-    s32 edge_height;
+    s32 edge_height = unit->current_edge_height;
     s16 facing;
     u8 next;
 
-    edge_height = unit->current_edge_height;
     step = &unit->current_path_step;
     /* The byte copy prevents a wider direction load. */
     current_step = unit->current_path_step;
@@ -503,13 +502,12 @@ static void battle_move_start_unit_jump_step(
 static void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     VECTOR unused_10;
     battle_unit_height_data_t height_data;
-    move_step_t* step;
+    move_step_t* step = &unit->current_path_step;
     s32 height;
     s32 speed;
     s32 time;
     u8 next;
 
-    step = &unit->current_path_step;
     if (unit->standing_on_battle_id_plus_one != 0
         && (battle_unit_calculate_height_data(&height_data, unit->standing_on_battle_id_plus_one - 1),
             (height_data.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) == 0)) {
@@ -1184,10 +1182,9 @@ void battle_move_get_current_and_destination_tiles(
  * For a mounted pair the partner lookup uses the unit's own unit_id, so the
  * second battle_unit_set_tile_position call repeats the first for the same unit. */
 void battle_unit_store_coordinate_mount_animation_data(battle_unit_t* unit) {
-    unit_stats_t* data;
+    unit_stats_t* data = unit->stats;
     battle_unit_t* mount;
 
-    data = unit->stats;
     if (data != 0) {
         /* facing is read signed (lh) here. */
         battle_unit_set_tile_position(data->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing / 1024);
@@ -1293,13 +1290,12 @@ static void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, 
  * carries movement flag 0x10. The case order and per-case center temporaries
  * reproduce the target's cross-jumped tails. */
 static void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
-    battle_unit_t* other;
+    battle_unit_t* other = battle_unit_find_overlapping_at_tile(unit, unit->map_x, unit->map_y, unit->map_z);
     s32 dist;
     s32 x;
     s32 y;
     s32 center;
 
-    other = battle_unit_find_overlapping_at_tile(unit, unit->map_x, unit->map_y, unit->map_z);
     if (unit->movement_path_offset < 2) {
         return;
     }
@@ -1447,9 +1443,8 @@ move_direction_e battle_move_get_direction(const battle_unit_t* unit) {
  * the step (at climb speed when the step byte's climb bit is set) and enter its
  * to-center stage for the direction of travel. */
 static void battle_move_advance_display_unit_step(battle_unit_t* unit) {
-    s32 direction;
+    s32 direction = battle_move_get_direction(unit);
 
-    direction = battle_move_get_direction(unit);
     switch (g_battle_move_step_value.climb) {
     case 0:
         battle_move_start_unit_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
@@ -1683,10 +1678,9 @@ void battle_move_snap_axis_to_destination_tile_center(s32 direction, battle_unit
  * the horizontal motion stops; once the unit is also down at the ground height
  * there, it takes the destination tile as its map position and the step ends. */
 void battle_move_update_unit_step_to_destination_tile_center(battle_unit_t* unit) {
-    s32 direction;
+    s32 direction = battle_move_get_direction(unit);
     s16 screen_z;
 
-    direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
         battle_move_displace_unit_at_destination_tile(unit, direction);
@@ -1734,10 +1728,9 @@ s32 battle_move_has_reached_current_tile_exit_edge(s32 direction, battle_unit_t*
  * starts move_start_unit_climb_hop_step, and anything higher
  * move_start_unit_climb_jump_step. */
 void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
-    s32 direction;
+    s32 direction = battle_move_get_direction(unit);
     u8 rider;
 
-    direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
         battle_move_displace_overlapping_unit(unit, direction);
@@ -1821,9 +1814,8 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
  * 0x2000 vertical-motion path through battle_move_start_float_climb_jump_step.
  */
 void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit) {
-    s32 direction;
+    s32 direction = battle_move_get_direction(unit);
 
-    direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
         battle_move_displace_overlapping_unit(unit, direction);
@@ -1855,10 +1847,9 @@ void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit
  * the horizontal motion stops; once the unit is also down at the ground height
  * there, it takes the destination tile as its map position and the step ends. */
 void battle_move_update_float_step_to_destination_tile_center(battle_unit_t* unit) {
-    s32 direction;
+    s32 direction = battle_move_get_direction(unit);
     s16 screen_z;
 
-    direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
         battle_move_displace_overlapping_unit(unit, direction);

@@ -3,10 +3,9 @@
 /* Appends a loaded SED/SMD block to the end of the Suzuki driver's sound
  * resource list. */
 void suzuki_sound_append_resource(suzuki_sound_resource_t* resource) {
-    suzuki_sound_resource_t** slot;
+    suzuki_sound_resource_t** slot = &g_suzuki_sound_resource_list;
     suzuki_sound_resource_t* node;
 
-    slot = &g_suzuki_sound_resource_list;
     if (g_suzuki_sound_resource_list != 0) {
         do {
             node = *slot;

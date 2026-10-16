@@ -37,10 +37,9 @@
  * critical hit plays sound 0x72. */
 void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
     battle_unit_t* target;
-    s32 weapon_type;
+    s32 weapon_type = main_item_get_data_pointer(unit->strike.used_weapon_id)->type;
     s32 i;
 
-    weapon_type = main_item_get_data_pointer(unit->strike.used_weapon_id)->type;
     if (weapon_type >= ITEM_TYPE_SHURIKEN) {
         weapon_type = ITEM_TYPE_KNIFE;
     }
@@ -246,9 +245,8 @@ void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit) {
  * animation, which may ask for the weapon's attack or the item animation. */
 void battle_unit_select_attack_animation_for_ability(battle_unit_t* attacker, battle_unit_t* target) {
     s32 animation;
-    s32 seq_type;
+    s32 seq_type = g_battle_gfx_spritesheet_data[attacker->spritesheet_id].seq_id;
 
-    seq_type = g_battle_gfx_spritesheet_data[attacker->spritesheet_id].seq_id;
     if (seq_type < 8) {
         if (seq_type >= BATTLE_SEQ_RUKA) {
             /* facing is loaded signed (lh) here. */
@@ -294,12 +292,11 @@ void battle_unit_set_level_up_animation(battle_unit_t* unit) {
  * its rider back in the riding animation. The depth is a byte, so its
  * negative test never holds. */
 void battle_unit_set_animation_based_on_mounted_state(battle_unit_t* unit) {
-    s32 anim;
+    s32 anim = BATTLE_UNIT_ANIMATION_RIDING;
     s32 selected;
     s32 water_depth;
     battle_unit_t* other;
 
-    anim = BATTLE_UNIT_ANIMATION_RIDING;
     if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_RIDER) {
         water_depth = battle_move_get_water_depth(unit) & 0xFF;
         if (water_depth < 0) {
@@ -396,10 +393,9 @@ void battle_unit_set_idle_animation_for_movement(battle_unit_t* unit) {
  */
 void battle_unit_set_animation_based_on_status(battle_unit_t* unit) {
     s32 animation;
-    u8 water_depth;
+    u8 water_depth = battle_move_get_water_depth(unit);
     u8 spritesheet_id;
 
-    water_depth = battle_move_get_water_depth(unit);
     animation = 0;
     switch (water_depth) {
     case 0:
@@ -624,10 +620,9 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
  * tile palette and the idle animation, then rewrites the battle stats as a Morbol
  * and reinitializes the unit's AI ability data. */
 void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit) {
-    u32 flags;
+    u32 flags = unit->status_flags_5_6;
     map_tile_t* tile;
 
-    flags = unit->status_flags_5_6;
     if ((flags & (BATTLE_UNIT_STATUS_POACHED | BATTLE_UNIT_STATUS_MORBOL)) == 0) {
         return;
     }
@@ -656,11 +651,10 @@ void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit) {
 }
 
 void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_effect_level) {
-    u32 flags;
+    u32 flags = unit->status_flags_5_6;
     u16 spritesheet_id;
     u8 original_id;
 
-    flags = unit->status_flags_5_6;
     if (flags & BATTLE_UNIT_STATUS_TRANSFORMATION_MASK) {
         if (flags & BATTLE_UNIT_STATUS_CRYSTAL) {
             spritesheet_id = BATTLE_SPRITESHEET_ID_CRYSTAL;
@@ -1619,9 +1613,8 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
 
 /* Rebuilds the casting unit's sprite parts for its current animation and frame. */
 static void battle_gfx_load_casting_unit_graphics(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_casting();
 
-    unit = battle_unit_get_casting();
     if (unit != 0) {
         /* The sprite data block starts at the graphic trigger; 0x1e0 is the
          * current frame. */
@@ -2478,9 +2471,8 @@ void battle_gfx_update_status_bubbles_and_graphics(void) {
 
 void battle_unit_remove(battle_unit_t* unit) {
     battle_unit_t* it;
-    s32 shared;
+    s32 shared = 0;
 
-    shared = 0;
     battle_gfx_release_unit_sprite_display_stub(unit->animation.display);
     g_battle_unit_slot_states[unit->runtime_id].in_use = 0;
     /* The 32-bit list-head pointer doubles as a sentinel record (previous is at 0x000);
@@ -2503,9 +2495,8 @@ void battle_unit_remove(battle_unit_t* unit) {
 }
 
 void battle_unit_clear_all(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = g_battle_unit_list_head;
 
-    unit = g_battle_unit_list_head;
     while (unit != 0) {
         battle_unit_remove(unit);
         unit = unit->previous;
@@ -2519,9 +2510,8 @@ void battle_unit_clear_all(void) {
  * battle unit slot, removes the runtime record and returns 1; for the source unit it
  * only resets the graphic trigger. Every other path returns 0. */
 static s32 battle_unit_update_fade_out_removal(battle_unit_t* unit) {
-    u8 phase;
+    u8 phase = unit->fade_out_phase;
 
-    phase = unit->fade_out_phase;
     if (phase == BATTLE_UNIT_FADE_OUT_NONE) {
         return 0;
     }
@@ -2552,9 +2542,8 @@ static s32 battle_unit_update_fade_out_removal(battle_unit_t* unit) {
 /* Per-frame update of every unit record: its animation with the weapon and effect
  * sprites, its status bubble and its fade-out removal. */
 void battle_unit_update_and_animate_units(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = g_battle_unit_list_head;
 
-    unit = g_battle_unit_list_head;
     while (unit != 0) {
         battle_gfx_update_and_animate_unit_wep_eff(unit);
         battle_gfx_init_status_bubble(unit);
@@ -2801,9 +2790,8 @@ static void battle_gfx_load_spritesheet_into_vram_slot(
  * CLUTs in their CPU tables; the particle CLUTs use the map palette manager. */
 static void battle_gfx_load_wep_spr_data(battle_gfx_weapon_sprite_archive_t* archive) {
     s32 i;
-    u8* cursor;
+    u8* cursor = (u8*)archive->weapon_clut;
 
-    cursor = (u8*)archive->weapon_clut;
     for (i = 0; i < (s32)sizeof(archive->weapon_clut); i++) {
         ((u8*)g_battle_gfx_weapon_clut)[i] = *cursor++;
     }
@@ -3350,10 +3338,9 @@ void battle_gfx_init_deployment_and_reset_unit_graphics_state(void) {
  * an already loaded spritesheet skip the read. Returns 0 once every
  * descriptor is done, otherwise 1 inside a step and 2 after a step boundary. */
 s32 battle_gfx_step_queued_unit_graphics_load(void) {
-    s32 result;
+    s32 result = 1;
     s32 id;
 
-    result = 1;
     switch (g_battle_gfx_unit_graphics_load_state.phase) {
     case BATTLE_GFX_UNIT_LOAD_PHASE_START_READ:
         switch (g_battle_gfx_unit_graphics_load_state.file_kind) {

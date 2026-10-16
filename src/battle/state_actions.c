@@ -139,13 +139,12 @@ static void battle_effect_store_targets_and_display_types(s32 ability, battle_un
  * had nothing pending. */
 s32 battle_state_announce_next_charged_action(void) {
     action_command_t command;
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
     battle_unit_t* actor;
     s32 result;
     s32 ability_id;
     unit_stats_t* actor_stats;
 
-    unit = battle_unit_get_source();
     do {
         switch (g_battle_action_phase) {
         case ACTION_PHASE_PRE_ACTION:
@@ -437,11 +436,10 @@ void battle_menu_start_help_thread(void) {
  * unit and stops game flow, and -1 returns to the idle action menu.
  */
 void battle_target_select_tile(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
     s32 result;
     s32 prev;
 
-    unit = battle_unit_get_source();
     unit->state_frame_counter = 0;
     if (unit->ability_preview_phase == TARGET_PANELS_NO_TARGETING) {
         main_util_set_svector(
@@ -502,9 +500,8 @@ void battle_state_enter_target_out_of_range(void) {
  * targeting selects its tile at once. With no valid panels the idle action menu
  * reopens. */
 s32 battle_target_set_boxes_red(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
 
-    unit = battle_unit_get_source();
     unit->state_frame_counter = 0;
     switch (unit->ability_preview_phase) {
     case TARGET_PANELS_UNIT_OR_TILE:
@@ -581,11 +578,10 @@ void battle_action_confirm(void) {
  * team for AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT. Other modes tint
  * nothing. */
 static void battle_gfx_highlight_all_units_blue_or_red(s32 mode) {
-    battle_unit_t* caster;
+    battle_unit_t* caster = battle_unit_get_casting();
     battle_unit_t* unit;
     s32 i;
 
-    caster = battle_unit_get_casting();
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
         unit = battle_unit_get_by_runtime_id(i);
         if (unit == 0) {
@@ -1144,9 +1140,8 @@ void battle_state_handle_display_move_area_state(void) {
  * (closed) restores the cursor movement option and returns to the free cursor; a
  * result of 0x64 or more shows the unit of AT-list entry result - 0x64. */
 void battle_state_handle_mini_menu_state(void) {
-    s32 menu_result;
+    s32 menu_result = menu_get_thread_activity_variant();
 
-    menu_result = menu_get_thread_activity_variant();
     if (g_main_input_pressed_buttons & PSX_PAD_SELECT) {
         battle_menu_open_mini_menu_help();
     } else if (menu_result == 0) {
@@ -1173,9 +1168,8 @@ void battle_state_handle_mini_menu_help_state(void) {
 /* ActiveTurn game-state handler, the view of a unit picked from the AT list:
  * circle or cross returns to the mini menu. */
 void battle_state_handle_active_turn_state(void) {
-    s32 controller_input;
+    s32 controller_input = g_main_input_pressed_buttons;
 
-    controller_input = g_main_input_pressed_buttons;
     if ((controller_input & PSX_PAD_CIRCLE) || (controller_input & PSX_PAD_CROSS)) {
         battle_menu_open_mini_menu();
     }
@@ -1208,8 +1202,8 @@ void battle_state_handle_unit_move_state(void) {
  * enters the moving state. Without player control the same happens from the
  * unit's own stored target after 0x1f frames. */
 void battle_state_handle_close_move_help_state(void) {
-    battle_unit_t* source;
-    battle_unit_t* casting;
+    battle_unit_t* source = battle_unit_get_source();
+    battle_unit_t* casting = battle_unit_get_casting();
     battle_walk_path_t* path;
     s32 buttons;
     u16 frame;
@@ -1218,8 +1212,6 @@ void battle_state_handle_close_move_help_state(void) {
     s32 y;
     battle_unit_command_state_t scratch;
 
-    source = battle_unit_get_source();
-    casting = battle_unit_get_casting();
     battle_state_handle_free_cursor_input();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if (source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) {

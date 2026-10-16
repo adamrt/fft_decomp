@@ -559,9 +559,8 @@ void world_formation_run_dismiss_unit_menu_step(void) {
 /* Add `delta` to the war funds, clamped to 0..99,999,999, and return the new
  * amount. */
 s32 world_shop_adjust_gil(s32 delta) {
-    s32 gil;
+    s32 gil = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + delta;
 
-    gil = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + delta;
     if (gil < 0) {
         gil = 0;
     }
@@ -577,13 +576,11 @@ s32 world_shop_adjust_gil(s32 delta) {
  * Equipped copies count toward 99; only inventory quantities are reduced.
  */
 void world_item_cash_out_excess_inventory(void) {
-    s32 item_id;
+    s32 item_id = 0;
     s32 excess;
     s32 price;
-    u8* quantity;
+    u8* quantity = g_main_item_quantities;
 
-    item_id = 0;
-    quantity = g_main_item_quantities;
     for (; item_id < ITEM_ID_END - 1; item_id++) {
         excess = item_get_total_count_variant(item_id);
         if (excess >= 100) {

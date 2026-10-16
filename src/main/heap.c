@@ -49,12 +49,10 @@ void* main_heap_alloc_smd(u32 size) {
 
 /* Free the music-heap block that starts at ptr; the rules are main_heap_free's. */
 s32 main_heap_free_smd(void* ptr) {
-    u32 index;
-    s32 tag;
+    u32 index = ((u32)ptr - (u32)g_main_heap_smd_base) >> MAIN_HEAP_PAGE_SHIFT;
+    s32 tag = g_main_heap_smd_allocator_table[index];
     u8* entry;
 
-    index = ((u32)ptr - (u32)g_main_heap_smd_base) >> MAIN_HEAP_PAGE_SHIFT;
-    tag = g_main_heap_smd_allocator_table[index];
     if (((index == 0) | (tag != g_main_heap_smd_allocator_table[index - 1])) == 0) {
         return 0;
     }
@@ -123,17 +121,14 @@ void* main_heap_alloc(u32 size) {
  * Only the starting address is bounds-checked; the page range may extend
  * beyond the heap. Returns the page-aligned address, or 0 on failure. */
 u8* main_heap_reserve_at(u8* allocation, u32 size) {
-    u32 addr;
-    u32 base;
+    u32 addr = (u32)allocation;
+    u32 base = (u32)g_main_heap_high_overlay_load_address;
     s32 start;
     u32 nblocks;
-    s32 id;
+    s32 id = 1;
     u32 i;
     u32 j;
 
-    addr = (u32)allocation;
-    base = (u32)g_main_heap_high_overlay_load_address;
-    id = 1;
     start = (allocation - g_main_heap_high_overlay_load_address) / MAIN_HEAP_PAGE_SIZE;
     nblocks = size >> MAIN_HEAP_PAGE_SHIFT;
     if ((size & (MAIN_HEAP_PAGE_SIZE - 1)) != 0) {
@@ -216,10 +211,9 @@ int main_file_is_still_loading(void) {
  * MAIN_SYSTEM_ERROR_SMD_LOAD and returns 0; the loader then only seeks, because
  * it skips the read for a null destination. */
 suzuki_smd_header_t* main_file_get_smd(int sector, u32 size) {
-    suzuki_smd_header_t* buffer;
+    suzuki_smd_header_t* buffer = main_heap_alloc_smd(size);
     main_file_load_descriptor_t* header;
 
-    buffer = main_heap_alloc_smd(size);
     if (buffer == 0) {
         main_system_handle_error(MAIN_SYSTEM_ERROR_SMD_LOAD);
     }
@@ -243,10 +237,9 @@ suzuki_smd_header_t* main_file_get_smd(int sector, u32 size) {
  * queues the read and blocks until the file has landed.  Twin of
  * main_file_get_smd, which draws from the SMD allocator instead. */
 static void* main_file_load_to_heap(s32 sector, u32 size) {
-    void* destination;
+    void* destination = main_heap_alloc(size);
     main_file_load_descriptor_t* header;
 
-    destination = main_heap_alloc(size);
     if (destination == 0) {
         main_system_handle_error(MAIN_SYSTEM_ERROR_HEAP_ALLOC);
     }

@@ -56,9 +56,8 @@ static s32 battle_target_validate_height_overlap(
 static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
 
 static s32 battle_move_get_weather_terrain_cost(void) {
-    s32 weather;
+    s32 weather = battle_map_get_effective_weather();
 
-    weather = battle_map_get_effective_weather();
     if (weather < BATTLE_WEATHER_STORM || weather == BATTLE_WEATHER_SNOW) {
         return 1;
     }
@@ -552,10 +551,10 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
  * enough slope, a passable surface and depth the unit tolerates, and must be
  * crossable and either empty or a valid destination the unit can ride onto. */
 static void battle_move_set_reachable_tile_flags(void) {
-    move_pathfind_scratch_t* config;
-    move_spread_state_t* spread;
-    u8* flags;
-    s32 self;
+    move_pathfind_scratch_t* config = g_battle_move_config_ptr;
+    move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;
+    u8* flags = g_battle_move_frontier_flags_ptr;
+    s32 self = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
     s32 i;
     map_tile_t* tile;
     target_panel_t* panel;
@@ -565,10 +564,6 @@ static void battle_move_set_reachable_tile_flags(void) {
     map_tile_depth_t water_depth;
     s32 frontier;
 
-    config = g_battle_move_config_ptr;
-    spread = g_battle_move_scratch_pad_ptr;
-    flags = g_battle_move_frontier_flags_ptr;
-    self = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
     battle_move_clear_enterable_flags_under_dead_or_jumping_units();
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
@@ -886,11 +881,10 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
  * height + i / 4 - 2. Each source whose neighbor is on the map tries
  * inner_count destinations: either level, on the ground or on a unit. */
 static void battle_move_check_and_spread_one_tile_around(void) {
-    move_spread_state_t* state;
+    move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
     s32 i;
     s32 j;
 
-    state = g_battle_move_scratch_pad_ptr;
     battle_move_load_tile_height_for_spread();
     for (i = 0; i < state->outer_count; i++) {
         state->source_unit_record_flag = i >= 4;
@@ -923,12 +917,11 @@ static void battle_move_check_occupied_tile_standing_height(s32 record_index, s3
     target_panel_t* panel;
     s32 step_cost;
     s32 remaining;
-    u8 height;
+    u8 height = record_index;
     u8 value;
     u8 limit;
     u8 top;
 
-    height = record_index;
     state = g_battle_move_scratch_pad_ptr;
     config = g_battle_move_config_ptr;
     records = g_battle_move_records_ptr;
@@ -991,10 +984,9 @@ static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift,
     s32 elevation;
     map_tile_t* tile;
     map_tile_depth_t depth;
-    u8 ceiling;
+    u8 ceiling = TILE_CEILING_NONE;
     u8 tile_ceiling;
 
-    ceiling = TILE_CEILING_NONE;
     for (elevation = 0; elevation < MAP_TERRAIN_LAYER_COUNT; elevation++) {
         tile = &g_battle_map_tile_data[elevation * MAP_TILES_PER_LAYER + y * g_battle_move_config_ptr->map_max_x + x];
         if ((tile->flags.blocked) == 0) {
@@ -1033,12 +1025,11 @@ static s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shif
     s32 layer;
     s32 low;
     u8 high;
-    s32 lowest;
+    s32 lowest = 0x7f;
     s32 height_a;
     s32 height_b;
     s32 depth;
 
-    lowest = 0x7f;
     frontier = g_battle_move_frontier_flags_ptr;
     state = g_battle_move_scratch_pad_ptr;
     records = g_battle_move_records_ptr;
@@ -2188,12 +2179,10 @@ static void battle_target_check_moldball_virus_depth(s16 ability_id) {
 /* Clear the range and the mark of each panel whose tile is flagged untargetable.
  * Only the 256 lower-level panels are visited. */
 static void battle_target_clear_panels_on_untargetable_tiles(void) {
-    s32 i;
+    s32 i = 0;
     map_tile_t* src;
-    target_panel_t* dst;
+    target_panel_t* dst = g_battle_target_panel_data;
 
-    i = 0;
-    dst = g_battle_target_panel_data;
     src = g_battle_map_tile_data;
     for (; i < 256; src++, i++, dst++) {
         if (src->flags.untargetable) {
@@ -2215,8 +2204,8 @@ static void battle_target_clear_panels_on_untargetable_tiles(void) {
  * strength-reduces 5 * j and 8 * j against hoisted table bases. Block-scoped
  * depth temporaries keep that value out of global allocation. */
 static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 single_layer) {
-    s32 max_delta;
-    s32 ref;
+    s32 max_delta = tolerance * 2;
+    s32 ref = ref_height;
     s32 i;
     s32 j;
     s32 lower;
@@ -2227,8 +2216,6 @@ static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, 
     target_panel_t* lower_panel;
     target_panel_t* upper_panel;
 
-    max_delta = tolerance * 2;
-    ref = ref_height;
     for (i = 0; i < 0x100; i++) {
         tile = &g_battle_map_tile_data[i];
         lower_panel = &g_battle_target_panel_data[i];
@@ -2360,7 +2347,7 @@ static void battle_target_spread_panels(u8 passes, s32 unused) {
  * marked. */
 static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
     target_panel_t* panel;
-    s32 changed;
+    s32 changed = 0;
     s32 i;
     s32 dx;
     s32 dy;
@@ -2368,12 +2355,9 @@ static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
     s32 next_y;
     s32 index;
     s32 upper_x;
-    s32 range;
-    s32 spread_range;
+    s32 range = g_battle_target_panels[y * g_battle_map_max_x + x].remaining_range;
+    s32 spread_range = range - 1;
 
-    changed = 0;
-    range = g_battle_target_panels[y * g_battle_map_max_x + x].remaining_range;
-    spread_range = range - 1;
     for (i = 0; i < 4; i++) {
         switch (i) {
         case 0:
@@ -2422,10 +2406,9 @@ static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
     s32 height;
     u8 effective_height;
     u8 water_depth;
-    u8 ignores_water;
+    u8 ignores_water = 0;
     u8 flags;
 
-    ignores_water = 0;
     tile = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
     terrain_depth = tile->depth_half_height;
     flags = unit->mount_info;
@@ -2459,7 +2442,7 @@ static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
  * within range. Both elevation levels of each tile are tested.
  */
 static void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range, u8 flags) {
-    u8 height;
+    u8 height = battle_unit_get_effective_height(unit);
     u8 tile_height;
     s32 ux;
     s32 uy;
@@ -2471,7 +2454,6 @@ static void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range
     s32 index;
     map_tile_t* tile;
 
-    height = battle_unit_get_effective_height(unit);
     ux = unit->x;
     uy = unit->position.y;
     for (y = 0; y < g_battle_map_max_y; y++) {
@@ -2561,14 +2543,13 @@ static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
  * the two rings at distance 1 and 2 use a band that widens with distance.
  */
 static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags) {
-    u8 height;
+    u8 height = battle_unit_get_effective_height(unit);
     s32 x;
     s32 y;
     s32 i;
     s32 lo;
     s32 hi;
 
-    height = battle_unit_get_effective_height(unit);
     x = unit->x;
     y = unit->position.y;
     if (flags & 0x80) {
@@ -2942,10 +2923,9 @@ static s32 battle_target_set_weapon_attack_panels(const action_command_t* source
 static s32 battle_target_set_all_panels_targeted_if_targetable(void) {
     map_tile_t* tile;
     target_panel_t* panel;
-    s32 count;
+    s32 count = 0;
     s32 i;
 
-    count = 0;
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
         panel = &g_battle_target_panel_data[i];
@@ -2971,10 +2951,9 @@ static s32 battle_target_set_all_panels_targeted_if_targetable(void) {
 static s32 battle_target_clear_selection_state_of_all_panels(void) {
     map_tile_t* tile;
     target_panel_t* panel;
-    s32 count;
+    s32 count = 0;
     s32 i;
 
-    count = 0;
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
         panel = &g_battle_target_panel_data[i];
@@ -2996,15 +2975,12 @@ static s32 battle_target_clear_selection_state_of_all_panels(void) {
 static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags) {
     target_panel_t* panel;
     s32 i;
-    s32 mark_allies;
-    s32 mark_enemies;
+    s32 mark_allies = flags & ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS;
+    s32 mark_enemies = flags & ABILITY_SECONDARY_FLAG_1_ENEMY_UNIT_PANELS;
     s32 team_diff;
     s16 team_diff_copy;
-    s32 team;
+    s32 team = unit->team_flags;
 
-    mark_allies = flags & ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS;
-    mark_enemies = flags & ABILITY_SECONDARY_FLAG_1_ENEMY_UNIT_PANELS;
-    team = unit->team_flags;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
             team_diff = team ^ unit->initial_team_flags;
@@ -3377,11 +3353,11 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
  * keeps the target's instruction order for the upper-layer tile address. */
 static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id) {
     battle_unit_height_data_t height;
-    unit_stats_t* unit;
+    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     map_tile_t* lower;
     map_tile_t* upper;
-    s32 unit_x;
-    s32 unit_y;
+    s32 unit_x = unit->x;
+    s32 unit_y = unit->position.y;
     s32 dx;
     s32 dy;
     s32 distance;
@@ -3405,9 +3381,6 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
     s32 upper_index;
     s32 limit;
 
-    unit = &g_battle_unit_stats[unit_id];
-    unit_x = unit->x;
-    unit_y = unit->position.y;
     if (unit_x < x) {
         dx = x - unit_x;
     } else {
@@ -3591,12 +3564,11 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
     u8 type_flags;
     u8 multiplier_flags;
     u8 value;
-    s32 count;
+    s32 count = 0;
     s32 hit;
     s32 i;
     s32 j;
 
-    count = 0;
     main_util_copy_action_data(source, &action);
     type = action.calculator_type;
     multiplier = action.calculator_multiplier;

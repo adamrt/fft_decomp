@@ -73,10 +73,9 @@ static void attack_deploy_swap_roster_unit_tile(s32 column, s32 row, s32 roster_
 /* Empty the deployment tables: the 5x5 grid of roster ids by tile and the
  * four squads' 25-entry unit lists. */
 static void attack_deploy_reset_tables(void) {
-    s32 row;
+    s32 row = 0;
     s32 column;
 
-    row = 0;
     do {
         column = 4;
         do {
@@ -117,7 +116,7 @@ static void attack_deploy_reset_tables(void) {
  * hoisted register order and its `move a0,s7` row-pointer start. */
 void attack_deploy_run_screen(void) {
     s32 transition;
-    s32 first_pass;
+    s32 first_pass = 1;
     s32 i;
     s32 row;
     s32 column;
@@ -133,7 +132,6 @@ void attack_deploy_run_screen(void) {
     unit_deployment_coordinates_t* slots;
     u8* tiles;
 
-    first_pass = 1;
     g_menu_thread_menu_data = g_attack_deploy_menu_entries;
     MoveImage(&g_attack_deploy_vram_copy_rect, g_attack_deploy_vram_copy_x, g_attack_deploy_vram_copy_y);
     LoadImage(&g_attack_deploy_arrow_clut_rect, g_attack_deploy_arrow_clut_data);
@@ -770,9 +768,8 @@ s32 attack_return_zero(void) {
 /* L1 and R1 on the deployment screen: start the previous- or next-unit
  * thread in the roster step slot, unless one is still running. */
 static void attack_deploy_handle_roster_navigation_input(void) {
-    u32* flags;
+    u32* flags = script_get_controller_input_pointer(0);
 
-    flags = script_get_controller_input_pointer(0);
     if ((*flags & PSX_PAD_L1) && (thread_is_running(ATTACK_THREAD_SLOT_ROSTER_STEP) == 0)) {
         g_attack_panel_status_animation[0] = 7;
         g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
@@ -1345,12 +1342,11 @@ static void attack_deploy_run_render_thread(void) {
 static void attack_deploy_prepare_valid_tiles(SPRT* sprites) {
     s32 x;
     s32 y;
-    s32 bit;
+    s32 bit = 1;
     s32 orientation;
     s32 index;
     s32 lift;
 
-    bit = 1;
     if (g_attack_deploy_tiles_only_mode == 0) {
         orientation = g_attack_deploy_current_squad_data->orientation_flags & ATTACK_DEPLOYMENT_ORIENTATION_MASK;
         if (orientation == ATTACK_DEPLOYMENT_ORIENTATION_NORMAL) {
@@ -1524,16 +1520,14 @@ static void attack_gfx_init_frame_ft4_array(void) {
  * marker under it. Each quad is written in libgpu setXYWH/setUVWH field order,
  * which the target's store order and constant offsets follow. */
 static void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
-    s32 u;
-    s32 v;
+    s32 u = (index % 5) * 0x30;
+    s32 v = (index / 5) * 0x30;
     s32 x;
     s32 y;
     s32 marker_y;
     s32 x0;
     s32 y0;
 
-    u = (index % 5) * 0x30;
-    v = (index / 5) * 0x30;
     setUV4(poly, u, v, u + 0x30, v, u, v + 0x30, u + 0x30, v + 0x30);
     x = row * 20 + 0x100 - column * 20;
     y = 0xc4 - row * 10 - column * 10;
@@ -1562,12 +1556,11 @@ static void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, P
  * copy of the offset after the join below and changes the loop increments. */
 static void attack_deploy_update_screen_graphics(void) {
     s32 i;
-    s32 parity;
+    s32 parity = 0;
     s32 squad;
     s32* value;
     s32 off;
 
-    parity = 0;
     for (i = 0; i < 9; i++) {
         g_attack_deploy_text_reveal_steps[i] = 1;
         g_attack_deploy_text_reveal_heights[i] = 0;

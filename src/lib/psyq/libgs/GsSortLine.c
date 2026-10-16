@@ -6,9 +6,8 @@
 void GsSortLine(GsLINE* line, GsOT* ot, u16 z) {
     LINE_F2* prim;
     DR_TPAGE* draw_mode;
-    s32 attr; /* Attribute packing uses signed right shifts. */
+    s32 attr = line->attribute; /* Attribute packing uses signed right shifts. */
 
-    attr = line->attribute;
     if (!(attr & GsDOFF)) {
         draw_mode = (DR_TPAGE*)GsOUT_PACKET_P;
         /* Share one DMA tag: the 32-bit mode command occupies this primitive view's tag slot. */

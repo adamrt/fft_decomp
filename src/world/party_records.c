@@ -159,15 +159,12 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
  */
 s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s32 mode) {
     unit_stats_t unit;
-    s32 slot;
-    s32 count;
-    s32 id;
+    s32 slot = 0;
+    s32 count = 0;
+    s32 id = item_id & ITEM_ENTRY_ID_MASK;
     s32 found;
     s32 i;
 
-    slot = 0;
-    count = 0;
-    id = item_id & ITEM_ENTRY_ID_MASK;
     for (; slot < PARTY_ROSTER_SLOT_COUNT; slot++) {
         if (main_unit_init_job_data(&unit, slot, 1) != 0) {
             continue;

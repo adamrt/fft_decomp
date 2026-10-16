@@ -30,14 +30,13 @@ static s32 world_menu_run_best_fit_equipment(void);
 static s32 world_menu_run_remove_item(void);
 
 void world_formation_item_menu(void) {
-    s32 state;
+    s32 state = g_world_formation_current_menu;
     s8 running;
     u8 saved;
     s32 done;
     s32 roster_slot;
     s16* selection;
 
-    state = g_world_formation_current_menu;
     if (state == WORLD_FORMATION_MENU_ITEM_ENTER || state == WORLD_FORMATION_MENU_ITEM_ENTER_NO_SLIDE) {
         if (g_world_item_menu_initialized == 0) {
             saved = g_world_formation_unit_browse_enabled;

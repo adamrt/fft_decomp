@@ -5,10 +5,9 @@
  * value become 0x100 / (byte + 1), like 0xD7 does for modulator 0.
  * Byte 0xff leaves both values unchanged. */
 u8* suzuki_smd_tremolo_fade_in(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    u8 duration;
+    u8 duration = note_data[0] + 1;
     s16 step;
 
-    duration = note_data[0] + 1;
     note_data++;
     if (duration != 0) {
         step = 0x100 / duration;

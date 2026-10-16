@@ -75,9 +75,8 @@ static void menu_confirm_action_silently(menu_entry_t* menu) {
 
 /* Menu-opening thread 6: the Wait menu. */
 void menu_wait_thread(void) {
-    menu_entry_t* menu;
+    menu_entry_t* menu = (menu_entry_t*)thread_get_current_parameter_1();
 
-    menu = (menu_entry_t*)thread_get_current_parameter_1();
     g_menu_wait_row_actions[0] = -2;
     g_menu_wait_row_actions[1] = -2;
     menu_confirm_action_silently(menu);
@@ -92,10 +91,9 @@ void menu_wait_thread(void) {
  * is confirmed at once, as a silent Circle press. */
 void menu_confirm_move_command_thread(void) {
     s16* stored_actions;
-    menu_entry_t* entry;
+    menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     s32 menu;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1();
     stored_actions = &g_menu_confirm_stored_unit_row_actions;
     *stored_actions = -2;
     if (menu_get_selected_unit_stats()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
@@ -239,19 +237,16 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
  * for the current menu (MP cost, blocking status, per-menu restrictions) and, when it is not usable, shows the matching
  * message before ending the thread. */
 void menu_validate_skill_selection_thread(void) {
-    s32 skill;
-    menu_entry_t* parameter;
+    s32 skill = g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index;
+    menu_entry_t* parameter = (menu_entry_t*)thread_get_current_parameter_1();
     s32 ct;
     s32 entry;
     s32 mp_cost;
     s32 message;
     s32 blocked;
     unit_stats_t* unit;
-    menu_ability_list_t* skill_tables;
+    menu_ability_list_t* skill_tables = &g_ai_workspace_ptr->ability_list;
 
-    skill = g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index;
-    parameter = (menu_entry_t*)thread_get_current_parameter_1();
-    skill_tables = &g_ai_workspace_ptr->ability_list;
     ct = skill_tables->skill_ct[skill];
     entry = g_menu_ability_layout.columns.text_colors[0][skill];
     mp_cost = skill_tables->mp_costs[skill];
@@ -334,16 +329,13 @@ static s32 text_is_spell_quote_exception_skillset(s32 skillset_id) {
  * the command, option, and item packed into a single value.
  */
 s32 menu_resolve_selection(void) {
-    s32 command;
-    s32 option;
-    u32 item;
+    s32 command = (u8)g_menu_pending_selection[0];
+    s32 option = (u8)g_menu_pending_selection[1];
+    u32 item = (u16)g_menu_pending_selection[2];
     s32 index;
     s32 i;
     s32 menu;
 
-    command = (u8)g_menu_pending_selection[0];
-    option = (u8)g_menu_pending_selection[1];
-    item = (u16)g_menu_pending_selection[2];
     g_menu_selected_command.kind = command;
     index = option;
     if (command != 0x12 && (command & 0xFE) != 0xFE) {
@@ -472,9 +464,8 @@ static void menu_start_system_function_thread(s32 system_function) {
 void menu_confirm_auto_battle_selection_thread(void) {
     unit_stats_t* attacker;
     s32 menu;
-    menu_entry_t* parameter;
+    menu_entry_t* parameter = (menu_entry_t*)thread_get_current_parameter_1();
 
-    parameter = (menu_entry_t*)thread_get_current_parameter_1();
     attacker = menu_get_selected_unit_stats();
     menu = g_menu_thread_menu_data[BATTLE_MENU_ID_AUTO_BATTLE].selected_index;
     if (menu == 3) {
@@ -578,10 +569,9 @@ s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, 
  * keep its record in g_menu_dead_unit_context and return the treasure item when
  * the result is 4, otherwise -1. */
 s32 menu_get_dead_unit_selection(s32 battle_id) {
-    unit_stats_t* stats;
+    unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     crystal_pickup_result_t* result;
 
-    stats = battle_unit_get_stats_from_battle_id(battle_id);
     g_thread_call_target = (void (*)(void))battle_unit_generate_crystal_or_treasure;
     result = (crystal_pickup_result_t*)thread_call_on_main_stack(stats);
     g_menu_dead_unit_context = result;

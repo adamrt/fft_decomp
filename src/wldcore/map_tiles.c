@@ -21,10 +21,9 @@
 /* 0-based day-of-year index (party_unit_t.birthday_day) to 1-based month
  * and day. */
 void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day) {
-    s32 month;
+    s32 month = 0;
     s32 days_in_month;
 
-    month = 0;
     while (1) {
         days_in_month = g_unit_birthday_month_lengths[month];
         if (day_of_year < days_in_month) {
@@ -376,11 +375,10 @@ void wldcore_map_apply_clamped_scroll(point32_t* amount, VECTOR* position) {
  * same x range wldcore_map_negate_and_clamp_coordinates clamps to) and leave the unapplied
  * remainder in *amount. */
 void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
-    s32 delta;
+    s32 delta = -(*amount);
     s32 old_position;
     s32 value;
 
-    delta = -(*amount);
     (*amount) = delta;
     if (delta < 0) {
         old_position = *position;
@@ -409,11 +407,10 @@ void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
  * 0x8006ac08: the same shape applied to the vertical amount and projection origin,
  * clamped to [-64, 80], the y range wldcore_map_negate_and_clamp_coordinates uses. */
 void wldcore_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* position) {
-    s32 delta;
+    s32 delta = -amount->y;
     s32 old_position;
     s32 value;
 
-    delta = -amount->y;
     amount->y = delta;
     if (delta < 0) {
         old_position = position->vy;

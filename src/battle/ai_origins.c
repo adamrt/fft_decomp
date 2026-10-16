@@ -818,9 +818,8 @@ begin_evaluation:
  * scenario's candidate coordinates; other origins clear that flag.
  */
 static void battle_ai_finalize_action_destination(void) {
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
 
-    ai = &g_battle_ai_data_base;
     if (g_battle_ai_data_base.current_action.coords.word != g_battle_ai_data_base.acting_unit_coords.word) {
         g_battle_ai_data_base.current_action.act_before_move = 0;
     } else {
@@ -1617,11 +1616,10 @@ static void battle_ai_clear_current_action_decision(void) {
  * requiring a valuable target. Counted entries are target/strike pairs.
  */
 static s32 battle_ai_simulate_action_hits(action_command_t* action) {
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 base_hit;
     s32 cnt;
 
-    ai = &g_battle_ai_data_base;
     g_battle_ai_data_base.hit_counter = 0xFF;
     if (action->actor_id == g_battle_ai_data_base.acting_unit_id) {
         base_hit = g_battle_ai_data_base.current_action.rank.base_hit_percent;
@@ -1859,10 +1857,9 @@ static void battle_ai_restore_unit_state(ai_snapshot_mode_e mode) {
  * Returns 1 while one is left. */
 static s32 battle_ai_filter_useful_targets(void) {
     ai_data_t* ai;
-    s32 result;
+    s32 result = 0;
     s32 i;
 
-    result = 0;
     ai = &g_battle_ai_data_base;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (ai->targetability.live.unit_targetable[i] != 0) {
@@ -2151,9 +2148,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
  * timed statuses use their duration unless the status is innate.
  */
 s32 battle_ai_is_status_active_through_delay(s32 delay, const unit_stats_t* unit, s32 status_id) {
-    s32 byte_off;
-
-    byte_off = status_id / 8;
+    s32 byte_off = status_id / 8;
 
     if (!(unit->status_sets.current[byte_off] & (0x80 >> (status_id - byte_off * 8)))) {
         return 0;
@@ -2194,13 +2189,11 @@ static s32 battle_ai_can_status_cancellation_affect_turn(const unit_stats_t* uni
 /* For an enemy-targeting ability, drop from the target list each enemy that
  * will act before the ability lands. Returns 1 while a target is left. */
 static s32 battle_ai_exclude_enemies_acting_before_ct(void) {
-    s32 result;
+    s32 result = 0;
     s32 i;
-    ai_data_t* ai;
+    ai_data_t* ai = &g_battle_ai_data_base;
     ai_data_t* walk;
 
-    result = 0;
-    ai = &g_battle_ai_data_base;
     /* The target walks a pointer that starts at the block base and steps by
      * sizeof(ai_unit_decision_t), reaching unit_decisions[i].enemy_flag as a
      * 0x1834 displacement; a pointer started at unit_decisions adds an addiu. */

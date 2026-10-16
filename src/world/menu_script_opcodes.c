@@ -209,18 +209,16 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     s32 full_rows;
     s32 partial_width;
     s32 partial_height;
-    s32 priority;
+    s32 priority = g_menu_gfx_otag_index;
     s16 u_left;
     s16 u_middle;
     s16 u_right;
     s16 v_bottom;
-    u16 clut;
+    u16 clut = g_menu_palette_clut;
     s16 v_top;
     s32 column;
     s32 row;
 
-    priority = g_menu_gfx_otag_index;
-    clut = g_menu_palette_clut;
     if (instruction->window.rectangle_source == 2) {
         left = g_menu_window_rect_source->rect.x - 5;
         top = g_menu_window_rect_source->rect.y - 9;
@@ -392,15 +390,13 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
     s32 full_rows;
     s32 partial_width;
     s32 partial_height;
-    s32 priority;
-    u16 clut;
+    s32 priority = g_menu_gfx_otag_index;
+    u16 clut = g_menu_palette_clut;
     s32 full_columns;
     s32 row;
     s32 column;
     s32 base_y;
 
-    priority = g_menu_gfx_otag_index;
-    clut = g_menu_palette_clut;
     if (instruction->window.rectangle_source == 2) {
         base_x = g_world_menu_window_rect.x;
         base_y = g_world_menu_window_rect.y;
@@ -463,10 +459,9 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
  * of the menu-script handlers (see world_menu_script_* in src/world). The
  * reassigned s32 y defeats plus->ior folding (gives addu). */
 menu_instruction_t* world_menu_script_set_fixed_clut(menu_instruction_t* instruction) {
-    s32 x;
+    s32 x = instruction->fixed_clut.x_div_16;
     s32 y;
 
-    x = instruction->fixed_clut.x_div_16;
     x <<= 4;
     y = instruction->fixed_clut.y_low;
     y += instruction->fixed_clut.y_high << 8;
@@ -810,8 +805,8 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32
  */
 void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode) {
     RECT rect; /* never used; retail reserves its 8 bytes */
-    u32 state_mode;
-    s32 active;
+    u32 state_mode = *state >> 15;
+    s32 active = state_mode;
     s32 timer;
     s32 i;
     s8 bob;
@@ -820,8 +815,6 @@ void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s3
     u16 front_clut;
     u16 shadow_clut;
 
-    state_mode = *state >> 15;
-    active = state_mode;
     if (mode == 0) {
         state_mode = active;
         if (state_mode != 0) {

@@ -25,9 +25,8 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
 
 void battle_heap_init(battle_heap_node_t* buffer, u32 buffer_size) {
     s32 owner;
-    s16 block_count;
+    s16 block_count = (buffer_size >> 3) - 1;
 
-    block_count = (buffer_size >> 3) - 1;
     g_battle_heap_rover = buffer;
     g_battle_heap_base = buffer;
     buffer->size = block_count;
@@ -49,9 +48,8 @@ void battle_heap_init(battle_heap_node_t* buffer, u32 buffer_size) {
 void* battle_heap_alloc_block(u32 size, s32 kind) {
     battle_heap_node_t* prev;
     battle_heap_node_t* node;
-    u32 blocks;
+    u32 blocks = (size + 15) >> 3;
 
-    blocks = (size + 15) >> 3;
     prev = g_battle_heap_rover;
     node = prev->next;
     for (;;) {
@@ -83,15 +81,12 @@ void* battle_heap_alloc_block(u32 size, s32 kind) {
  * K&R free().
  */
 void battle_heap_free_block(void* ptr) {
-    battle_heap_node_t* node;
-    battle_heap_owner_list_t* list;
-    battle_heap_node_t* owned;
+    battle_heap_node_t* node = (battle_heap_node_t*)ptr - 1;
+    battle_heap_owner_list_t* list = &g_battle_heap_owner_lists[node->owner];
+    battle_heap_node_t* owned = list->head;
     battle_heap_node_t* prev;
     battle_heap_node_t* free_node;
 
-    node = (battle_heap_node_t*)ptr - 1;
-    list = &g_battle_heap_owner_lists[node->owner];
-    owned = list->head;
     if (owned == node) {
         list->head = node->next;
     } else {
@@ -130,14 +125,12 @@ void battle_heap_free_block(void* ptr) {
 void battle_heap_print_stats(void) {
     battle_heap_node_t* free_node;
     battle_heap_node_t* node;
-    s32 total;
-    s32 largest;
+    s32 total = 0;
+    s32 largest = 0;
     s32 owner;
     s32 used;
     s32 size;
 
-    total = 0;
-    largest = 0;
     free_node = g_battle_heap_rover->next;
     for (;;) {
         size = free_node->size;
@@ -478,10 +471,9 @@ static void battle_effect_init_record_chain(void) {
  * get no data. g_battle_effect_work_record_peak tracks the peak number of records in use.
  */
 static effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s16 kind) {
-    effect_work_record_t* work;
+    effect_work_record_t* work = g_battle_effect_free_work_record_head;
     effect_record_t* owner;
 
-    work = g_battle_effect_free_work_record_head;
     g_battle_effect_work_record_count++;
     owner = &g_battle_effect_state_records[record_index];
     if (g_battle_effect_work_record_peak < g_battle_effect_work_record_count) {
@@ -518,9 +510,8 @@ static effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s
 /* Unlinks work from state record record_index, releases its data according
  * to the kind in kind_flags, and returns it to the free chain. */
 void battle_effect_free_work_record(s16 record_index, effect_work_record_t* work) {
-    effect_record_t* owner;
+    effect_record_t* owner = &g_battle_effect_state_records[record_index];
 
-    owner = &g_battle_effect_state_records[record_index];
     if (work->next != 0) {
         work->next->prev = work->prev;
     }
@@ -1309,14 +1300,10 @@ static s16 battle_effect_get_random_between_s16(s16 minimum, s16 maximum) {
  *
  * Strict comparisons make earlier arguments win ties. */
 s16 battle_effect_select_largest_magnitude_s16(s16 first, s16 second, s16 third) {
-    s16 first_magnitude;
-    s16 second_magnitude;
-    s16 third_magnitude;
+    s16 first_magnitude = first < 0 ? -first : first;
+    s16 second_magnitude = second < 0 ? -second : second;
+    s16 third_magnitude = third < 0 ? -third : third;
     s16 result;
-
-    first_magnitude = first < 0 ? -first : first;
-    second_magnitude = second < 0 ? -second : second;
-    third_magnitude = third < 0 ? -third : third;
 
     if (first_magnitude < second_magnitude) {
         result = second;
@@ -1339,12 +1326,9 @@ s16 battle_effect_select_largest_magnitude_s16(s16 first, s16 second, s16 third)
  * wraps back to -32768 when stored as s16, matching the target's edge case.
  */
 s16 battle_effect_select_larger_magnitude_s16(s16 first, s16 second) {
-    s16 first_magnitude;
-    s16 second_magnitude;
+    s16 first_magnitude = first < 0 ? -first : first;
+    s16 second_magnitude = second < 0 ? -second : second;
     s16 result;
-
-    first_magnitude = first < 0 ? -first : first;
-    second_magnitude = second < 0 ? -second : second;
 
     if (first_magnitude < second_magnitude) {
         result = second;
@@ -1357,11 +1341,9 @@ s16 battle_effect_select_larger_magnitude_s16(s16 first, s16 second) {
 /* Cosine-eased interpolation from start to end at current/duration; the same
  * curve as battle_effect_interpolate_svector_cos, on a single s32. */
 s32 battle_effect_interpolate_s32_cos(s32 start, s32 end, s32 duration, s32 current) {
-    s32 difference;
-    s32 scaled_difference;
+    s32 difference = end - start;
+    s32 scaled_difference = difference * (ONE - rcos((current << 11) / duration));
 
-    difference = end - start;
-    scaled_difference = difference * (ONE - rcos((current << 11) / duration));
     return start + scaled_difference / (2 * ONE);
 }
 
@@ -1439,9 +1421,8 @@ s32 battle_lerp_fixed8(s32 start, s32 end, s32 factor) {
 /* Store and return the interpolation with an eight-bit fractional factor.
  * The arithmetic right shift rounds negative products down. */
 static s32 battle_lerp_fixed8_and_store(s32 start, s32 end, s32 factor, s32* out) {
-    s32 result;
+    s32 result = ((end - start) * factor >> 8) + start;
 
-    result = ((end - start) * factor >> 8) + start;
     *out = result;
     return result;
 }
@@ -1537,10 +1518,9 @@ s32 battle_effect_init_model_sections(psyq_tmd_header_t* resource, s32 unused_1)
 void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out) {
     psyq_tmd_packet_t* command;
     s32 index;
-    effect_decoded_model_command_t* dst;
+    effect_decoded_model_command_t* dst = out;
     u32 header;
 
-    dst = out;
     index = g_battle_effect_model_command_word_offset;
     command = (psyq_tmd_packet_t*)((u8*)g_battle_effect_model_commands + index * sizeof(u32));
     header = command->id;
@@ -1708,9 +1688,8 @@ static void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECT
 }
 
 void battle_effect_add_random_vector_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
-    u16 range;
+    u16 range = ranges->vx;
 
-    range = ranges->vx;
     destination->vx = source->vx + battle_effect_get_random_between_s16(-range, range);
 
     range = ranges->vy;
@@ -1746,9 +1725,8 @@ void battle_effect_add_vector_and_store_q12(const VECTOR* delta, VECTOR* value, 
 
 /* Add independent random offsets to three packed rotation components. */
 void battle_effect_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination) {
-    u16 range;
+    u16 range = ranges->vx;
 
-    range = ranges->vx;
     destination->vx = source->vx + battle_effect_get_random_between_s16(-range, range);
 
     range = ranges->vy;
@@ -1886,15 +1864,10 @@ void battle_effect_integrate_particle_motion(effect_work_record_t* list) {
     s32 strength;
     s32 track;
     VECTOR delta;
-    s32 threshold;
-    s32 gravity_x;
-    s32 gravity_y;
-    s32 gravity_z;
-
-    threshold = g_battle_effect_inertia_threshold;
-    gravity_x = g_battle_effect_gravity.x;
-    gravity_y = g_battle_effect_gravity.y;
-    gravity_z = g_battle_effect_gravity.z;
+    s32 threshold = g_battle_effect_inertia_threshold;
+    s32 gravity_x = g_battle_effect_gravity.x;
+    s32 gravity_y = g_battle_effect_gravity.y;
+    s32 gravity_z = g_battle_effect_gravity.z;
 
     node = list;
     while (list != 0) {
@@ -2023,12 +1996,11 @@ static void battle_effect_free_list_node(effect_list_node_t* node) {
  * it: clear the sequence position and hold time, store frame_group doubled and
  * set kind bit 0 to mark the frame dirty. */
 static void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index) {
-    u8* sequences;
+    u8* sequences = g_battle_effect_animation_sequences;
     u8* entry;
     s16 offset;
     u16 flags;
 
-    sequences = g_battle_effect_animation_sequences;
     /* Integer addresses preserve the offset/base operand order at both additions. */
     entry = (u8*)((s16)animation_index * 2 + (s32)sequences);
     flags = state->kind | EFFECT_LIST_NODE_FRAME_CHANGED;
@@ -2267,10 +2239,9 @@ void battle_effect_reset_subsystems(void) {
 }
 
 void battle_effect_copy_camera_angles_and_world_coords(void) {
-    SVECTOR* rotation;
+    SVECTOR* rotation = battle_camera_get_rotation();
     VECTOR* coords;
 
-    rotation = battle_camera_get_rotation();
     g_battle_effect_camera_rotation_saved.vx = g_battle_effect_camera_rotation_start.vx
         = g_battle_effect_camera_rotation_target.vx = g_battle_effect_camera_rotation_current.vx = rotation->vx & 0xfff;
     g_battle_effect_camera_rotation_saved.vy = g_battle_effect_camera_rotation_start.vy

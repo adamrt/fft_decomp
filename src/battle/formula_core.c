@@ -51,9 +51,8 @@ map_tile_t* battle_map_get_tile_data_pointer(s32 x, s32 y, u32 layer) {
 /* Returns one packed field of the tile at (x, y, layer), or 0xff for an
  * unknown selector. The tile address is not bounds-checked. */
 s32 battle_map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer) {
-    map_tile_t* tile;
+    map_tile_t* tile = &g_battle_map_tile_data[(layer << 8) + y * g_battle_map_max_x + x];
 
-    tile = &g_battle_map_tile_data[(layer << 8) + y * g_battle_map_max_x + x];
     switch (field) {
     case MAP_TILE_DATA_SURFACE_TYPE:
         return tile->surface.type;
@@ -98,11 +97,9 @@ s32 battle_map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y,
  * can run. */
 s32 battle_map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value) {
     map_tile_t* tile;
-    s32 attempts;
-    s32 result;
+    s32 attempts = 0;
+    s32 result = 0;
 
-    attempts = 0;
-    result = 0;
     tile = &g_battle_map_tile_data[(layer << 8) + y * g_battle_map_max_x + x];
     switch (field) {
     case MAP_TILE_DATA_SURFACE_TYPE:
@@ -511,13 +508,12 @@ s32 battle_status_modify_inflictions(s32 removal_only) {
     action_data_t* action;
     u8 inflicted;
     s32 immortal;
-    s32 total;
+    s32 total = 0;
     s32 i;
     s32 j;
     s32 byte;
     s32 mask;
 
-    total = 0;
     immortal = g_battle_action_target->team_flags & BATTLE_TEAM_FLAG_IMMORTAL;
     if (g_battle_action_target->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
@@ -603,13 +599,11 @@ void battle_formula_nullify_action(void) {
 /* Target affinities on the stored HP damage: absorb flags the action, nullify
  * cancels it, half halves, weak doubles. Half and weak both apply. */
 void battle_formula_modify_damage_for_element(s32 element) {
-    u8 element_mask;
+    u8 element_mask = element;
     unit_stats_t* unit;
     action_data_t* absorb_action;
     action_data_t* half_action;
     action_data_t* weak_action;
-
-    element_mask = element;
 
     if (g_battle_action_target->elemental_affinity[ELEMENTAL_AFFINITY_ABSORB] & element_mask) {
         absorb_action = g_battle_action_target_data;
@@ -653,14 +647,13 @@ void battle_formula_modify_damage_for_element(s32 element) {
  * Spelling the weapon half as a record pointer as well loses three
  * instructions. */
 void battle_formula_store_physical_evade_values(void) {
-    s32 weapon_guard;
+    s32 weapon_guard = 0;
     u8 weapon_flags;
     u8 shield_flags;
     u8 shield_secondary;
     item_data_t* shield_record;
     u8 weapon_secondary;
 
-    weapon_guard = 0;
     if ((g_battle_action_target->ability_flags.reaction[3] & BATTLE_REACTION_SET_4_WEAPON_GUARD) != 0) {
         weapon_guard
             = battle_unit_get_action_restriction(g_battle_action_target) == BATTLE_UNIT_ACTION_RESTRICTION_NONE;
@@ -720,12 +713,11 @@ void battle_formula_store_physical_evade_values(void) {
 /* Reset the base hit to 100 and load the target's accessory and shield
  * magic evades; monsters get no equipment evade. */
 void battle_formula_store_magical_evade_values(void) {
-    unit_stats_t* target;
+    unit_stats_t* target = g_battle_action_target;
     item_data_t* items;
     item_data_t* item;
     s32 secondary;
 
-    target = g_battle_action_target;
     g_battle_action_current_ability.base_hit = 100;
     g_battle_action_current_ability.accessory_evade = 0;
     g_battle_action_current_ability.right_hand_evade = 0;
@@ -786,11 +778,10 @@ void battle_formula_calculate_abandon(void) {
  * or Performing clear all four; Defending halves the base hit, which doubles
  * them. */
 void battle_formula_apply_evasion_changes_due_to_statuses(void) {
-    unit_stats_t* target;
+    unit_stats_t* target = g_battle_action_target;
     u8 flag;
     u8* base_hit;
 
-    target = g_battle_action_target;
     flag = (target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SLEEP)]
                & (STATUS_BYTE_MASK(STATUS_ID_SLEEP) | STATUS_BYTE_MASK(STATUS_ID_DONT_ACT)))
         != 0;
@@ -831,16 +822,14 @@ void battle_formula_calculate_transparent(void) {
  * shared tile counts as the back. Side and back attacks clear class evade,
  * back attacks also both shield evades. */
 void battle_formula_calculate_facing_evade(void) {
-    s32 dx;
+    s32 dx = g_battle_action_target->x - g_battle_action_attacker->x;
     s32 dy;
-    u8 distance_x;
+    u8 distance_x = dx < 0 ? -dx : dx;
     u8 distance_y;
     s32 direction;
     s32 facing;
     u8* result;
 
-    dx = g_battle_action_target->x - g_battle_action_attacker->x;
-    distance_x = dx < 0 ? -dx : dx;
     dy = g_battle_action_target->position.y - g_battle_action_attacker->position.y;
     distance_y = dy < 0 ? -dy : dy;
     direction = BATTLE_ABILITY_FACING_SIDE;
@@ -1293,11 +1282,9 @@ void battle_formula_calculate_critical_hit(void) {
 
 /* Sets the target's result to HP damage XA * YA. */
 void battle_formula_store_xa_times_ya_damage(void) {
-    s16 damage;
-    action_data_t* action;
+    s16 damage = g_battle_action_current_ability.xa * g_battle_action_current_ability.ya;
+    action_data_t* action = g_battle_action_target_data;
 
-    damage = g_battle_action_current_ability.xa * g_battle_action_current_ability.ya;
-    action = g_battle_action_target_data;
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
     action->hp_damage = damage;
 }
@@ -1321,9 +1308,8 @@ void battle_formula_store_xa_plus_ya_status_damage(void) {
 /* HP damage of Y% of the target's max HP, rounded up. */
 void battle_formula_calculate_hp_percent_damage(void) {
     action_data_t* action;
-    s32 damage;
+    s32 damage = (g_battle_action_target->max_hp * g_battle_action_current_ability.range_data.y + 99) / 100;
 
-    damage = (g_battle_action_target->max_hp * g_battle_action_current_ability.range_data.y + 99) / 100;
     action = g_battle_action_target_data;
     action->attack_type |= ACTION_TYPE_HP_DAMAGE;
     action->hp_damage = damage;
@@ -1332,9 +1318,8 @@ void battle_formula_calculate_hp_percent_damage(void) {
 /* MP damage of Y% of the target's max MP, rounded up. */
 void battle_formula_calculate_mp_percent_damage(void) {
     action_data_t* action;
-    s32 damage;
+    s32 damage = (g_battle_action_target->max_mp * g_battle_action_current_ability.range_data.y + 99) / 100;
 
-    damage = (g_battle_action_target->max_mp * g_battle_action_current_ability.range_data.y + 99) / 100;
     action = g_battle_action_target_data;
     action->attack_type = ACTION_TYPE_MP_DAMAGE;
     action->mp_damage = damage;
@@ -1342,9 +1327,8 @@ void battle_formula_calculate_mp_percent_damage(void) {
 
 /* HP damage equal to the target's current HP - 1 (0 when it has none). */
 void battle_formula_calculate_gravi2_damage(void) {
-    unit_stats_t* target;
+    unit_stats_t* target = g_battle_action_target;
 
-    target = g_battle_action_target;
     if (target->hp != 0) {
         g_battle_action_target_data->hp_damage = g_battle_action_target->hp - 1;
     } else {
@@ -1356,16 +1340,14 @@ void battle_formula_calculate_gravi2_damage(void) {
 /* Gil stolen: attacker Level * Speed, capped at the war funds when the target
  * is on team 0 (blue). Nothing to take is a miss. */
 void battle_formula_calculate_stolen_gil(void) {
-    unit_stats_t* attacker;
+    unit_stats_t* attacker = g_battle_action_attacker;
     action_data_t* action;
     action_data_t* target_action;
     action_data_t* other;
-    s32 amount;
+    s32 amount = attacker->attributes[UNIT_ATTRIBUTE_SPEED] * attacker->level;
     s32 available;
     s16 stolen;
 
-    attacker = g_battle_action_attacker;
-    amount = attacker->attributes[UNIT_ATTRIBUTE_SPEED] * attacker->level;
     if (!(g_battle_action_target->team_flags & BATTLE_TEAM_MASK)) {
         available = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
         if (available < amount) {
@@ -1393,10 +1375,10 @@ void battle_formula_calculate_stolen_gil(void) {
  * The target's loss is encoded by adding 0x80 to the amount.
  */
 void battle_formula_set_exp_stolen(void) {
-    u8 amount;
+    u8 amount
+        = g_battle_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED] + g_battle_action_current_ability.range_data.y;
     u8 available_exp;
 
-    amount = g_battle_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED] + g_battle_action_current_ability.range_data.y;
     if (amount > 100) {
         amount = 100;
     }

@@ -768,9 +768,8 @@ s32 battle_map_stop_clut_cycles_and_weather_sfx(void) {
 /* Enable the weather sounds and start the rain sound when the weather has set one
  * (g_battle_sound_primary_weather_sfx_id). */
 void battle_sound_start_weather_sfx(void) {
-    s32 sound_id;
+    s32 sound_id = g_battle_sound_primary_weather_sfx_id;
 
-    sound_id = g_battle_sound_primary_weather_sfx_id;
     g_battle_sound_weather_sfx_enabled = 1;
     if (sound_id != 0) {
         main_sound_play_bg_sfx(sound_id);
@@ -793,9 +792,8 @@ void battle_map_set_command_0x96_duration(s32 id, s32 value) {
  * is an unset local; no caller reads it. */
 s32 battle_sound_stop_weather_sfx(void) {
     s32 result;
-    s32 sound_id;
+    s32 sound_id = g_battle_sound_primary_weather_sfx_id;
 
-    sound_id = g_battle_sound_primary_weather_sfx_id;
     if (sound_id != 0) {
         main_sound_stop_sfx(sound_id);
         g_battle_sound_primary_weather_sfx_id = 0;

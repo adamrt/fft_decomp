@@ -226,10 +226,9 @@ s32 wldcore_script_run_until_yield(void) {
 
 /* Find an opcode in a sound-novel script section; return its whole instruction or zero. */
 u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode) {
-    u32* word;
+    u32* word = &((u32*)&g_main_save_slot_buffer)[g_wldcore_active_saved_record.buffer->offsets[section] / sizeof(u32)];
     s32 i;
 
-    word = &((u32*)&g_main_save_slot_buffer)[g_wldcore_active_saved_record.buffer->offsets[section] / sizeof(u32)];
     for (i = 0; i < 256; i++) {
         u32 value = *word;
         if (opcode == (value & 0xFF)) {
@@ -391,9 +390,8 @@ static s32 wldcore_sound_novel_update_countdown_timer(void) {
 }
 
 void wldcore_opcode_end_script(void) {
-    u16* flags;
+    u16* flags = &g_wldcore_active_saved_record.state_flags;
 
-    flags = &g_wldcore_active_saved_record.state_flags;
     *flags |= WLDCORE_OPCODE_STATE_END;
 }
 
@@ -416,9 +414,8 @@ void wldcore_opcode_start_text_thread_and_push_history(void) {
     u16 history_2;
     u16 history_3;
     u16 flags;
-    s32 operand;
+    s32 operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
 
-    operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
     thread_start(WLDCORE_THREAD_SLOT_MESSAGE, text_run_dialog_thread_variant);
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     history_1 = g_wldcore_active_saved_record.text_history_1;
@@ -445,9 +442,8 @@ void wldcore_opcode_wait_for_text_thread(void) {
 /* Sound-novel opcode: load background set operand 0 unless it is the one
  * already recorded, waiting for the file. */
 void wldcore_opcode_load_background_set(void) {
-    s32 value;
+    s32 value = (u8)(g_wldcore_active_saved_record.instruction >> 8);
 
-    value = (u8)(g_wldcore_active_saved_record.instruction >> 8);
     if (g_wldcore_active_saved_record.background_set != value) {
         DrawSync(0);
         g_wldcore_active_saved_record.background_set = value;
@@ -488,13 +484,11 @@ void wldcore_opcode_branch_if_dialog_option_not_equal(void) {
 }
 
 void wldcore_opcode_wait_frames(void) {
-    u16 flags;
-    u16 updated;
+    u16 flags = g_wldcore_active_saved_record.state_flags;
+    u16 updated = flags | WLDCORE_OPCODE_STATE_YIELD;
     s32 counter;
     s32 operand;
 
-    flags = g_wldcore_active_saved_record.state_flags;
-    updated = flags | WLDCORE_OPCODE_STATE_YIELD;
     g_wldcore_active_saved_record.state_flags = updated;
     if ((updated & WLDCORE_OPCODE_STATE_FETCHED) != 0) {
         g_wldcore_sound_novel_wait_counter = 0;
@@ -581,9 +575,8 @@ void wldcore_opcode_set_parent_windows_visible(void) {
 }
 
 void wldcore_opcode_start_text_thread(void) {
-    s32 operand;
+    s32 operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
 
-    operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
     thread_start(WLDCORE_THREAD_SLOT_MESSAGE, text_run_dialog_thread_variant);
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     g_wldcore_active_saved_record.text_id = operand;
@@ -593,10 +586,9 @@ void wldcore_opcode_start_text_thread(void) {
 /* Sound-novel opcode: branch to one of the three sections named by the
  * operand bytes, chosen by rand() with equal weight. */
 void wldcore_opcode_branch_to_random_section(void) {
-    s32 pick;
+    s32 pick = (rand() * 3) >> 15;
     s32 value;
 
-    pick = (rand() * 3) >> 15;
     if (pick == 0) {
         value = (u8)(g_wldcore_active_saved_record.instruction >> 8);
     }
@@ -812,11 +804,10 @@ void wldcore_opcode_set_sound_mode(void) {
 
 /* The double negation keeps the native counter/delta add operand order. */
 void wldcore_opcode_branch_if_equal(void) {
-    s32 value;
+    s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
     u32 word;
 
-    value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     if (0xffff < value) {
         value = 0xffff;
     }
@@ -835,11 +826,10 @@ void wldcore_opcode_branch_if_equal(void) {
 
 /* The double negation keeps the native counter/delta add operand order. */
 void wldcore_opcode_branch_if_not_equal(void) {
-    s32 value;
+    s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
     u32 word;
 
-    value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     if (0xffff < value) {
         value = 0xffff;
     }
@@ -858,11 +848,10 @@ void wldcore_opcode_branch_if_not_equal(void) {
 
 /* The double negation keeps the native counter/delta add operand order. */
 void wldcore_opcode_branch_if_less(void) {
-    s32 value;
+    s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
     u32 word;
 
-    value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     if (0xffff < value) {
         value = 0xffff;
     }
@@ -881,11 +870,10 @@ void wldcore_opcode_branch_if_less(void) {
 
 /* The double negation keeps the native counter/delta add operand order. */
 void wldcore_opcode_branch_if_greater(void) {
-    s32 value;
+    s32 value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     s32 operand;
     u32 word;
 
-    value = g_wldcore_active_saved_record.counter - (-g_wldcore_active_saved_record.counter_delta);
     if (0xffff < value) {
         value = 0xffff;
     }
@@ -905,10 +893,9 @@ void wldcore_opcode_branch_if_greater(void) {
 /* Sound-novel opcode: fade the music to silence over operand 0 * 3 steps and
  * clear the playing flag and the selected music id (the slot is kept). */
 void wldcore_opcode_fade_out_music(void) {
-    s32* state;
+    s32* state = &g_wldcore_audio_queue.music.flags;
     s32 operand;
 
-    state = &g_wldcore_audio_queue.music.flags;
     *state &= ~WLDCORE_AUDIO_MUSIC_PLAYING;
     operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
     main_sound_set_current_music_target(0, operand * 3);
@@ -1145,15 +1132,11 @@ void wldcore_opcode_wait_for_fade(void) {
  * wldcore_opcode_start_text_thread_and_push_history). */
 /* Target 0x8008cb30. */
 void wldcore_opcode_push_operand_history(void) {
-    u16 history_1;
-    u8 new_entry;
-    u16 history_2;
-    u16 history_3;
+    u16 history_1 = g_wldcore_sound_novel_text_history_1;
+    u8 new_entry = (g_wldcore_active_saved_record.instruction & 0xff00) >> 8;
+    u16 history_2 = g_wldcore_sound_novel_text_history_2;
+    u16 history_3 = g_wldcore_sound_novel_text_history_3;
 
-    history_1 = g_wldcore_sound_novel_text_history_1;
-    new_entry = (g_wldcore_active_saved_record.instruction & 0xff00) >> 8;
-    history_2 = g_wldcore_sound_novel_text_history_2;
-    history_3 = g_wldcore_sound_novel_text_history_3;
     g_wldcore_sound_novel_text_history_0 = history_1;
     g_wldcore_sound_novel_text_history_1 = history_2;
     g_wldcore_sound_novel_text_history_2 = history_3;

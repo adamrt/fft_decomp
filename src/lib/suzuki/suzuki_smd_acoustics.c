@@ -5,11 +5,10 @@
  * with reverb mode 10, for which suzuki_sound_set_reverb_mode only records
  * them. */
 u8* suzuki_smd_acoustics(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    s16 depth;
+    s16 depth = note_data[0] << 8;
     s8 delay;
     s8 feedback;
 
-    depth = note_data[0] << 8;
     music->reverb_depth = depth;
     delay = note_data[1];
     music->reverb_delay = delay;

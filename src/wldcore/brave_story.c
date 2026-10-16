@@ -38,9 +38,8 @@ static void wldcore_menu_push_variable_detail_level(s32 value);
  * equivalent g_wldcore_menu_stack_records[current] changes the address
  * arithmetic. */
 void wldcore_draw_close_indicator_if_pending(GsOT* ordering_table) {
-    s32 current;
+    s32 current = g_wldcore_menu_stack_depth;
 
-    current = g_wldcore_menu_stack_depth;
     if (g_wldcore_menu_stack_types[current] == WLDCORE_MENU_LEVEL_EVENT_TRANSITION
         && g_wldcore_menu_stack_records_next[current - 1].event_transition.mode != WLDCORE_EVENT_TRANSITION_MODE_FADE) {
         GsSortSprite(&g_wldcore_menu_indicator_sprite, ordering_table, 2);
@@ -1210,12 +1209,11 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
 void wldcore_list_open_tutorial_topics(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
-    s32 count;
+    s32 count = 0;
     s32 i;
     s32 visible;
     s32 record_index;
 
-    count = 0;
     for (i = 0; i < 41; i++) {
         append_panel_list_entry(count, i + (s16)TEXT_ID_TIP_NAME_BASE);
     }

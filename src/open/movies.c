@@ -313,9 +313,8 @@ static void open_movie_handle_mdec_output_slice(void) {
 /* Fetch the next movie frame and decode its bitstream into the other VLC buffer,
  * releasing the frame's ring sectors. Returns 0 when no frame arrived. */
 static s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state) {
-    u32* frame_data;
+    u32* frame_data = open_movie_acquire_next_frame(state);
 
-    frame_data = open_movie_acquire_next_frame(state);
     if (frame_data == 0) {
         return 0;
     }
@@ -334,9 +333,8 @@ static s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state) {
 static u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state) {
     u32* frame_data;
     StHEADER* header;
-    s32 attempts;
+    s32 attempts = 0;
 
-    attempts = 0;
     /* Passing header through StGetNext's 32-bit data-pointer slot preserves native header reloads. */
     while (StGetNext(&frame_data, (u32**)&header) != 0) {
         VSync(0);
@@ -417,10 +415,9 @@ static void open_movie_start_cd_stream_read(const CdlLOC* location) {
 static void open_movie_present_frame(void) {
     RECT image_rect;
     RECT move_rect;
-    s32 display_index;
+    s32 display_index = g_active_graphics_buffer_index ^ 1;
     u32 flags;
 
-    display_index = g_active_graphics_buffer_index ^ 1;
     g_active_graphics_buffer_index = display_index;
     PutDrawEnv(&g_open_gfx_screen_environments[display_index].draw);
 
@@ -591,9 +588,8 @@ void open_input_init_directional_state(void) {
  * and Down repeat: the other two counters are cleared and never counted. */
 u32 open_input_update_repeat(u32 buttons) {
     s32 next;
-    u32 pressed;
+    u32 pressed = g_open_input_new_button_presses;
 
-    pressed = g_open_input_new_button_presses;
     pressed &= buttons;
     if (pressed != 0) {
         g_open_input_right_repeat_counter = 0;
@@ -663,11 +659,10 @@ void open_title_init_new_game_party(s32 party_mode, s32 world_load_mode) {
  * days from it to the end of its month; computing it in two steps keeps GCC
  * from folding the `+ 1` into the sum with `*day`. */
 void open_birthday_convert_date_to_zodiac(s32* month, s32* day) {
-    s32 index;
+    s32 index = 0;
     s32 length;
     s32 span;
 
-    index = 0;
     while (g_open_birthday_zodiac_start_dates[index * 2] != *month) {
         index = (index + 1) % ZODIAC_SIGN_ORDINARY_COUNT;
     }

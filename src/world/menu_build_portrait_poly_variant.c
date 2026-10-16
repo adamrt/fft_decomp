@@ -20,15 +20,13 @@
  * is masked out, applies it to the caller's portrait sprite record.
  */
 void menu_build_portrait_poly_variant(s32 roster_slot, POLY_FT4* poly) {
-    party_unit_t* party;
+    party_unit_t* party = main_party_get_unit(roster_slot);
     job_data_t* job;
-    u32 sprite;
+    u32 sprite = party->sprite_set;
     u8 job_id;
     s32 offset;
     s32 current_job;
 
-    party = main_party_get_unit(roster_slot);
-    sprite = party->sprite_set;
     if (sprite >= CHARACTER_IDENTITY_GENERIC_MALE) {
         if (sprite == CHARACTER_IDENTITY_GENERIC_MALE) {
             job_id = party->job_id;

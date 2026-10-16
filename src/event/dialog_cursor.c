@@ -7,11 +7,10 @@
 
 u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor) {
     text_backref_t* backref;
-    s32 remaining;
+    s32 remaining = *remaining_bytes;
     s32 scratch;
     u8 command;
 
-    remaining = *remaining_bytes;
     cursor += 1;
     if (remaining > 0) {
         remaining -= 1;

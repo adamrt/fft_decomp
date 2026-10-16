@@ -325,9 +325,8 @@ int main_sound_poll_scenario_smd_load(void) {
  * frame until the music record exists. Returns the slot, or 0 when no load
  * started. */
 s32 main_sound_wait_for_scenario_smd_load(s32 music_id) {
-    s32 result;
+    s32 result = main_sound_open_scenario_smd_files(music_id);
 
-    result = main_sound_open_scenario_smd_files(music_id);
     if (result != 0) {
         while (main_sound_poll_scenario_smd_load() != 0) {
             VSync(0);

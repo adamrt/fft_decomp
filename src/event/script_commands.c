@@ -113,10 +113,9 @@ void sound_run_background_fade_thread(void) {
 void script_toggle_message_portrait_flip(const u8* parameters) {
     s32 i;
     s32 record_index;
-    s16 record_id;
+    s16 record_id = script_read_s16(parameters);
     menu_window_buffer_t* record;
 
-    record_id = script_read_s16(parameters);
     for (i = 0; i < 6; i++) {
         if (g_menu_window_buffers[record_index].message_id == record_id) {
             record = &g_menu_window_buffers[record_index];
@@ -196,10 +195,9 @@ void thread_set_current_task_id(s32 task_id) {
 s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id) {
     u8* base;
     s32 offset;
-    s32 found;
+    s32 found = -1;
     s32 opcode;
 
-    found = -1;
     if (target_opcode == EVENT_OPCODE_BACK_TARGET) {
         for (offset = 0; offset < limit_offset; offset += 1 + g_script_event_instruction_sizes[opcode]) {
             base = (u8*)g_script_event_block;
@@ -420,9 +418,8 @@ static s32* script_get_variable_word_pointer_from_id(s32 variable_id) {
 
 /* Return the packed variable field position, or -1 for a full word; invalid ids exit the thread. */
 static s32 script_get_variable_bit_position(s32 value) {
-    s32 result;
+    s32 result = -1;
 
-    result = -1;
     if (value >= EVENT_SCRIPT_VAR_PACKED_BIT_FIRST) {
         if (value < EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
             result = value & 0x1f;
@@ -437,11 +434,9 @@ static s32 script_get_variable_bit_position(s32 value) {
 
 /* Wait until the variable reaches the signed 16-bit test value. */
 void script_wait_value_event_instruction(const event_wait_value_parameters_t* parameters) {
-    s32 variable_id;
-    s32 test_value;
+    s32 variable_id = script_read_s16(parameters->variable_id_le);
+    s32 test_value = script_read_s16(parameters->test_value_le);
 
-    variable_id = script_read_s16(parameters->variable_id_le);
-    test_value = script_read_s16(parameters->test_value_le);
     while (script_get_variable(variable_id) < test_value) {
         thread_yield();
     }

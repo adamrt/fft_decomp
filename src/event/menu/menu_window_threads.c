@@ -76,7 +76,7 @@ void menu_icon_list_thread(void) {
  * thread slot and the text thread to end.
  */
 void menu_text_entry_wait_thread(void) {
-    menu_entry_t* obj;
+    menu_entry_t* obj = (menu_entry_t*)g_threads[g_thread_current_id].function_parameter_1;
     menu_text_binding_t* task;
     u32* ctl;
     u16 id;
@@ -84,7 +84,6 @@ void menu_text_entry_wait_thread(void) {
     u16 header_id;
     u16 text_id;
 
-    obj = (menu_entry_t*)g_threads[g_thread_current_id].function_parameter_1;
     {
         menu_text_binding_t* binding = obj->context;
 

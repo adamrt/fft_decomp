@@ -1155,9 +1155,8 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
  * cleared), the side window to palette 6, the frame and content render
  * records to palette 2, and the upper/lower windows to palette 5, each hidden with flag 0x10. */
 static void wldcore_window_close_parent_list_all_windows(void) {
-    s32 index;
+    s32 index = g_wldcore_menu_stack_depth - 1;
 
-    index = g_wldcore_menu_stack_depth - 1;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[index].list_window.main_window].palette = 10;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[index].list_window.main_window].sequence
         = WLDCORE_ANIM_SEQUENCE_CURSOR_STILL;
@@ -1187,9 +1186,8 @@ static void wldcore_window_close_parent_list_all_windows(void) {
  * the side window to palette 6 and the frame render record to palette 2, each hidden with
  * flag 0x10. */
 static void wldcore_window_close_parent_list_frame_windows(void) {
-    s32 index;
+    s32 index = g_wldcore_menu_stack_depth - 1;
 
-    index = g_wldcore_menu_stack_depth - 1;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[index].list_window.main_window].palette = 10;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[index].list_window.main_window].sequence
         = WLDCORE_ANIM_SEQUENCE_CURSOR_STILL;
@@ -1378,11 +1376,10 @@ static void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset)
 static void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t* panel) {
     RECT bounds;
     point32_t point;
-    s32 index;
+    s32 index = panel->render_index;
     point32_t* base;
     s32 i;
 
-    index = panel->render_index;
     bounds.x = 0;
     bounds.y = 0;
     bounds.w = 0x44;
@@ -1570,13 +1567,11 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
 static void wldcore_list_open_formation_tutorials(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
-    s32 i;
+    s32 i = 0;
     s32 count;
     s32 record_index;
-    s32 enabled;
+    s32 enabled = 8;
 
-    i = 0;
-    enabled = 8;
     for (; i < 7; i++) {
         g_wldcore_list_entry_values[i] = i + (s16)TEXT_ID_TUTORIAL_NAME_BASE;
         if (wldcore_test_bit(g_main_tutorial_progress_masks, i) != 0) {

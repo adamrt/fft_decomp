@@ -25,7 +25,7 @@ void main_mem_copy_byte_data_source_first(const void* source, void* destination,
 }
 
 s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
-    s32 total;
+    s32 total = g_main_item_quantities[item_id];
     s32 i;
     s32 j;
     party_unit_t* party;
@@ -33,7 +33,6 @@ s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
     s32 deployed;
     s32 party_id;
 
-    total = g_main_item_quantities[item_id];
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
         party = main_party_get_unit(i);
         party_id = party->party_id;
@@ -98,15 +97,13 @@ void main_unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd) 
  * one-based status index, 0x80 marks removal, and 0x100 reflects flags_2 bit 3.
  */
 s32 main_status_find_action_highest_order_effect(const action_data_t* action) {
-    s32 highest_order;
-    s32 result;
+    s32 highest_order = -1;
+    s32 result = 0;
     s32 status_index;
     u8 mask;
     s32 byte_index;
     u8 current_order;
 
-    highest_order = -1;
-    result = 0;
     for (status_index = 0; status_index < STATUS_COUNT; status_index++) {
         byte_index = status_index / 8;
         mask = 0x80 >> (status_index & 7);
@@ -140,10 +137,9 @@ s32 main_status_find_action_highest_order_effect(const action_data_t* action) {
  * Counts the sign boundaries at or before the day, then rotates the count
  * into zodiac order with (count + 9) % 12. */
 s32 main_unit_calculate_zodiac_symbol(u16 birthday) {
-    s32 zodiac;
+    s32 zodiac = 0;
     s32 i;
 
-    zodiac = 0;
     for (i = 0; i < ZODIAC_SIGN_ORDINARY_COUNT; i++) {
         zodiac += birthday >= g_main_zodiac_day_limits[i];
     }
@@ -212,7 +208,7 @@ void main_unit_copy_last_ability_ct(unit_stats_t* unit) {
 }
 
 void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
-    u8 old_status;
+    u8 old_status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
     s32 battle_id;
     u8 status;
     u8 cleared;
@@ -220,7 +216,6 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
     u8 mask;
     u8 changed;
 
-    old_status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
     battle_id = unit->battle_id;
     if (action_state == MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING) {
         action_state = (old_status & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) << 3;

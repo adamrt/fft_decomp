@@ -128,9 +128,8 @@ s32 bunit_input_get_lock_timer(void) {
 
 /* BUNIT.OUT 001c3150 - Return the pad-1 input, or 0 while the input lock timer is active. */
 static s32 bunit_input_read_pad1_unless_locked(void) {
-    u32 input;
+    u32 input = PadRead(0);
 
-    input = PadRead(0);
     if (bunit_input_get_lock_timer() != 0) {
         input = 0;
     }
@@ -272,12 +271,11 @@ s32 bunit_menu_is_active_or_transitioning(void) {
 
 /* Unit-list menu frame handler (g_bunit_menu_current_menu state -1 / 0). */
 static s32 bunit_menu_run_unit_list_frame(void) {
-    s32 input;
+    s32 input = g_menu_input_primary_repeat;
     bunit_unit_t* unit;
     u8 mode_b3;
     u8 mode_b4;
 
-    input = g_menu_input_primary_repeat;
     if (g_bunit_menu_current_menu == BUNIT_MENU_UNIT_LIST) {
         if (g_bunit_unit_list_initialized == 0) {
             g_bunit_status_banner_enabled = g_bunit_saved_status_banner_enabled;

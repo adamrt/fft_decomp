@@ -29,9 +29,8 @@ void battle_camera_set_current_real_coords(const VECTOR* coords) {
  * frame_count frames (divided by the animation speed), applied by
  * battle_camera_update_real_coord_animation. No retail code calls it. */
 void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destination, s32 frame_count) {
-    s32 animation_frames;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
     g_battle_camera_real_coord_countdown = animation_frames;
     animation_frames = g_battle_camera_real_coord_countdown;
     setVector(&g_battle_camera_real_coord_delta,
@@ -43,9 +42,8 @@ void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destinati
 /* Starts a linear move of the camera position by the vector `values` (20.12) over
  * frame_count frames (divided by the animation speed). No retail code calls it. */
 void battle_camera_set_real_coord_delta_from_values(const VECTOR* values, s32 frame_count) {
-    s32 animation_frames;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
     g_battle_camera_real_coord_countdown = animation_frames;
     animation_frames = g_battle_camera_real_coord_countdown;
     setVector(&g_battle_camera_real_coord_delta, values->vx / animation_frames, values->vy / animation_frames,
@@ -90,16 +88,12 @@ void battle_camera_set_screen_offset(const VECTOR* coords) {
  * The per-frame step is stored in g_battle_camera_real_coord_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
 void battle_camera_start_screen_offset_move_uniform(const s32* destination_value, s32 frame_count) {
-    s32 animation_frames;
-    s32 current_x;
-    s32 current_z;
-    s32 current_y;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
+    s32 current_x = g_battle_camera_current_screen_offset.vx;
+    s32 current_z = g_battle_camera_current_screen_offset.vy;
+    s32 current_y = g_battle_camera_current_screen_offset.vz;
     s32 delta_x;
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
-    current_x = g_battle_camera_current_screen_offset.vx;
-    current_z = g_battle_camera_current_screen_offset.vy;
-    current_y = g_battle_camera_current_screen_offset.vz;
     setVector(&g_battle_camera_screen_offset_fixed, current_x * ONE, current_z * ONE, current_y * ONE);
     delta_x = *destination_value - current_x;
     g_battle_camera_screen_offset_countdown = animation_frames;
@@ -115,9 +109,8 @@ void battle_camera_start_screen_offset_move_uniform(const s32* destination_value
  * The per-frame step is stored in g_battle_camera_real_coord_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
 void battle_camera_start_screen_offset_move_relative(const VECTOR* values, s32 frame_count) {
-    s32 animation_frames;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
     setVector(&g_battle_camera_screen_offset_fixed, g_battle_camera_current_screen_offset.vx * ONE,
         g_battle_camera_current_screen_offset.vy * ONE, g_battle_camera_current_screen_offset.vz * ONE);
     g_battle_camera_screen_offset_countdown = animation_frames;
@@ -168,11 +161,9 @@ void battle_camera_set_zoom(const VECTOR* zoom) {
  * *destination_value over frame_count frames (divided by the animation speed),
  * applied by battle_camera_update_zoom_animation. No retail code calls it. */
 void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 frame_count) {
-    s32 animation_frames;
-    s32 delta_x;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
+    s32 delta_x = *destination_value - g_battle_camera_zoom.vx;
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
-    delta_x = *destination_value - g_battle_camera_zoom.vx;
     g_battle_camera_zoom_countdown = animation_frames;
     animation_frames = g_battle_camera_zoom_countdown;
     setVector(&g_battle_camera_zoom_delta, delta_x / animation_frames,
@@ -185,9 +176,8 @@ void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 f
 /* Starts a linear move of the camera position by the vector `values` (20.12) over
  * frame_count frames (divided by the animation speed). No retail code calls it. */
 void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_count) {
-    s32 animation_frames;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
     g_battle_camera_zoom_countdown = animation_frames;
     animation_frames = g_battle_camera_zoom_countdown;
     setVector(&g_battle_camera_zoom_delta, values->vx / animation_frames, values->vy / animation_frames,
@@ -228,11 +218,9 @@ void battle_camera_set_rotation(const SVECTOR* rotation) {
  * *destination_value over frame_count frames (divided by the animation speed),
  * applied by battle_camera_update_rotation_animation. No retail code calls it. */
 void battle_camera_set_rotation_delta_from_value(const s16* destination_value, s32 frame_count) {
-    s32 animation_frames;
-    s32 delta_x;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
+    s32 delta_x = *destination_value - g_battle_camera_render_state.vx;
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
-    delta_x = *destination_value - g_battle_camera_render_state.vx;
     g_battle_camera_rotation_countdown = animation_frames;
     animation_frames = g_battle_camera_rotation_countdown;
     setVector(&g_battle_camera_rotation_delta, delta_x / animation_frames,
@@ -243,11 +231,9 @@ void battle_camera_set_rotation_delta_from_value(const s16* destination_value, s
 /* Starts a linear turn of the camera angles by values[0..2] over frame_count
  * frames (divided by the animation speed). No retail code calls it. */
 void battle_camera_set_rotation_delta_from_values(const s16* values, s32 frame_count) {
-    s32 animation_frames;
-    s32 value_x;
+    s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
+    s32 value_x = values[0];
 
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
-    value_x = values[0];
     g_battle_camera_rotation_countdown = animation_frames;
     animation_frames = g_battle_camera_rotation_countdown;
     setVector(&g_battle_camera_rotation_delta, value_x / animation_frames, values[1] / animation_frames,

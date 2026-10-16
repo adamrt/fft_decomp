@@ -193,12 +193,11 @@ static void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* spr
  * skipped: a column only draws once the running divisor has dropped to or
  * below value, and the last column always draws. */
 static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
-    s32 divisor;
+    s32 divisor = 1;
     s32 i;
     s32 digit;
     s32 saved_y;
 
-    divisor = 1;
     sprite->w = 8;
     sprite->v = 0x31;
     saved_y = sprite->y;
@@ -236,13 +235,11 @@ static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* spri
  * first significant digit: a zero glyph when `zero_pad` is set, otherwise the
  * 8x8 filler glyph at (0xd0, 0x28). */
 static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad) {
-    s32 divisor;
+    s32 divisor = 1;
     s32 y;
     s32 digit;
-    s32 i;
+    s32 i = 0;
 
-    divisor = 1;
-    i = 0;
     sprite->w = 8;
     y = sprite->y;
     sprite->h = 0x10;
@@ -430,23 +427,20 @@ void wldcore_menu_reset_window_list_and_store_origin(void) {
 }
 
 void wldcore_menu_dispatch_idle_handler(void) {
-    s32 index;
+    s32 index = g_wldcore_menu_stack_depth;
 
-    index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_idle_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
 }
 
 void wldcore_menu_dispatch_resume_handler(void) {
-    s32 index;
+    s32 index = g_wldcore_menu_stack_depth;
 
-    index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_resume_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
 }
 
 void wldcore_menu_dispatch_publish_handler(void) {
-    s32 index;
+    s32 index = g_wldcore_menu_stack_depth;
 
-    index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_publish_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
 }
 
@@ -979,10 +973,9 @@ void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
  * until it finishes. Indexed stores keep their named globals to preserve
  * the original address sequences. */
 static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_set) {
-    s32 depth;
+    s32 depth = g_wldcore_menu_stack_depth;
     s32 window_index;
 
-    depth = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[depth].visibility.dot_index = dot_index;
     g_wldcore_menu_stack_records_next[depth].visibility.was_set = was_set;
     g_wldcore_menu_stack_records_next[depth].visibility.delay = 0x10;
@@ -1354,12 +1347,11 @@ static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_l
     s32 index;
     point32_t* base;
     point32_t* records;
-    s32 variable;
+    s32 variable = level->first_variable;
     s32 text_id;
     u32 value;
     s32 i;
 
-    variable = level->first_variable;
     if (variable + 10 >= 1024) {
         level->row_count = 1024 - variable;
     } else {

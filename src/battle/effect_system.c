@@ -23,9 +23,8 @@
 #include "psx/types.h"
 
 static void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {
-    map_tile_t* tile;
+    map_tile_t* tile = battle_map_get_tile_data_pointer(in->vx, in->vz, in->vy);
 
-    tile = battle_map_get_tile_data_pointer(in->vx, in->vz, in->vy);
     out->vx = in->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     out->vz = in->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     out->vy = -(tile->height * 12);
@@ -35,14 +34,12 @@ static void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTO
  * of the tile is not blocked. The camera angles are read as an SVECTOR: the
  * quadrant is a signed short division, which unsigned 16-bit values do not emit. */
 static void battle_camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile_coords, SVECTOR* rotation_out) {
-    map_tile_t* tile;
+    map_tile_t* tile = battle_map_get_tile_data_pointer(tile_coords->vx, tile_coords->vz, tile_coords->vy);
     SVECTOR* rotation;
-    s32 mask;
+    s32 mask = tile->camera_block_masks & MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK;
     s32 quadrant;
     s32 yaw;
 
-    tile = battle_map_get_tile_data_pointer(tile_coords->vx, tile_coords->vz, tile_coords->vy);
-    mask = tile->camera_block_masks & MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK;
     rotation = battle_camera_get_rotation();
     rotation_out->vx = rotation->vx;
     rotation_out->vz = rotation->vz;
@@ -66,8 +63,7 @@ static void battle_camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile
  * and returns. Taking their addresses reproduces those stores; it does not
  * establish what the original source body contained. */
 void battle_noop_801aad30(s32 ignored_1, s32 ignored_2) {
-    s32* unused;
-    unused = &ignored_1;
+    s32* unused = &ignored_1;
     unused = &ignored_2;
 }
 
@@ -759,10 +755,9 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
 }
 
 static s32 battle_effect_find_next_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
-    effect_timeline_t* data;
+    effect_timeline_t* data = g_battle_effect_timeline;
     s32 i;
 
-    data = g_battle_effect_timeline;
     if (frame < data->child.duration) {
         i = 0;
         if (data->last_keyframe_index >= 0) {
@@ -791,7 +786,7 @@ static s32 battle_effect_find_next_keyframe(s16 frame, s16 mask, s32* out_index,
  * The conditional-expression header reads keep the entry block from caching
  * the unit-data pointer. */
 static s32 battle_camera_find_active_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
-    s32 phase1;
+    s32 phase1 = g_battle_effect_timeline->phase1_duration;
     s32 spawn_delay;
     s32 child_duration;
     s32 i;
@@ -800,7 +795,6 @@ static s32 battle_camera_find_active_keyframe(s16 frame, s16 mask, s32* out_inde
     s32 elapsed;
     s32 start;
 
-    phase1 = g_battle_effect_timeline->phase1_duration;
     spawn_delay = g_battle_effect_context.target_count != 0 ? g_battle_effect_timeline->spawn_delay : 0;
     child_duration = g_battle_effect_context.target_count != 0 ? g_battle_effect_timeline->child.duration : 0;
 
@@ -1054,12 +1048,10 @@ void battle_effect_init_system(void) {
  * v0,s0` instead of a folded 0. Writing previous_slot_id before the next_slot_id
  * clear reproduces the target's early g_battle_effect_secondary_active_tail load. */
 static u8 battle_effect_allocate_secondary_slot(void) {
-    s32 id;
-    s32 slot;
+    s32 id = (u8)g_battle_effect_secondary_free_head;
+    s32 slot = id & 0xff;
     s32 i;
 
-    id = (u8)g_battle_effect_secondary_free_head;
-    slot = id & 0xff;
     if (slot != 0) {
         g_battle_effect_secondary_free_head = g_battle_effect_secondary_data[slot].previous_slot_id;
         g_battle_effect_secondary_data[g_battle_effect_secondary_free_head].next_slot_id = 0;
@@ -1090,10 +1082,9 @@ static u8 battle_effect_allocate_secondary_slot(void) {
  *
  * The free-chain walk index is an s32: a u16 adds an `andi 0xffff` per load. */
 static void battle_effect_remove_secondary(u8 id) {
-    effect_secondary_data_t* slot;
+    effect_secondary_data_t* slot = &g_battle_effect_secondary_data[id];
     s32 tail;
 
-    slot = &g_battle_effect_secondary_data[id];
     if (id != 0 && id < EFFECT_SECONDARY_RECORD_COUNT) {
         if (slot->allocation != 0) {
             main_heap_free(slot->allocation);
@@ -1135,12 +1126,10 @@ void battle_effect_finalize_secondary(u8 secondary_id) {
  * chain. Returns its id, or 0 (the null sentinel) when no slot is free; the
  * slot's life is cleared either way. */
 static s32 battle_effect_alloc_slot(void) {
-    u8 head;
+    u8 head = g_battle_effect_slot_free_head;
     u8 tail;
-    s32 id;
+    s32 id = head;
 
-    head = g_battle_effect_slot_free_head;
-    id = head;
     if (id != 0) {
         g_battle_effect_slot_free_head = g_battle_effect_slots[id].next;
         g_battle_effect_slots[g_battle_effect_slots[id].next].prev = 0;
@@ -1179,9 +1168,8 @@ static void battle_effect_free_slot(u8 id) {
  * init record and return its id. parameter is the animation's own: an
  * element mask, a sprite palette or a duration. */
 s32 battle_effect_init_secondary(s32 animation_id, s32 parameter, effect_secondary_init_t* source) {
-    s32 secondary_id;
+    s32 secondary_id = battle_effect_allocate_secondary_slot();
 
-    secondary_id = battle_effect_allocate_secondary_slot();
     g_battle_effect_secondary_data[secondary_id].animation_id = animation_id;
     g_battle_effect_secondary_data[secondary_id].timer = 0;
     g_battle_effect_secondary_data[secondary_id].parameter = parameter;
@@ -1199,9 +1187,8 @@ s32 battle_effect_init_secondary(s32 animation_id, s32 parameter, effect_seconda
  * stored alongside it. Returns its id; phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
 s32 battle_effect_init_projectile_secondary(s32 animation, effect_secondary_init_t* source) {
-    u8 secondary_id;
+    u8 secondary_id = battle_effect_allocate_secondary_slot();
 
-    secondary_id = battle_effect_allocate_secondary_slot();
     g_battle_effect_secondary_data[secondary_id].animation_id = animation;
     g_battle_effect_secondary_data[secondary_id].timer = 0;
     g_battle_effect_secondary_data[secondary_id].parameter = animation >> 16;
@@ -1278,9 +1265,8 @@ s32 battle_effect_init_weapon_hit_secondary(s32 elements, effect_secondary_init_
  * given position and return its id. Phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
 s32 battle_effect_init_fall_dust_secondary(effect_secondary_init_t* source, VECTOR* position) {
-    s32 secondary_id;
+    s32 secondary_id = battle_effect_allocate_secondary_slot();
 
-    secondary_id = battle_effect_allocate_secondary_slot();
     g_battle_effect_secondary_data[secondary_id].timer = 0;
     g_battle_effect_secondary_data[secondary_id].animation_id = EFFECT_SECONDARY_ANIMATION_FALL_DUST;
     g_battle_effect_secondary_data[secondary_id].function_id
@@ -1565,7 +1551,7 @@ static void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32
     VECTOR position;
     s32 sxy;
     s32 flag;
-    effect_slot_t* slot;
+    effect_slot_t* slot = &g_battle_effect_slots[g_battle_effect_current_secondary->slot_ids[0]];
     POLY_FT4* prim;
     s32 depth;
     s32 sine;
@@ -1577,7 +1563,6 @@ static void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32
     s16 right;
     s16 bottom;
 
-    slot = &g_battle_effect_slots[g_battle_effect_current_secondary->slot_ids[0]];
     gfx_set_item_icon_sprite(&sprite, item_id);
     prim = &slot->quads[g_battle_effect_buffer_index];
     SetRotMatrix(&g_battle_camera_matrix);
@@ -1648,9 +1633,8 @@ static s32 battle_effect_calculate_arcing_trajectory(battle_arc_query_t* query, 
     s32 root;
     s32 gravity;
     s32 distance;
-    s32 result;
+    s32 result = 0;
 
-    result = 0;
     tile = battle_map_get_tile_data_ptr_from_battle_id(query->target.unit_id);
     tile_height = tile->height + tile->depth_half_height.depth;
     floor = (tile_height * 3) << 14;
@@ -1696,12 +1680,11 @@ static s32 battle_effect_calculate_arcing_trajectory(battle_arc_query_t* query, 
  * (0xa8000).
  */
 static s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress) {
-    s32 divisor;
+    s32 divisor = (g_battle_effect_gravity_modifier * 2) >> 12;
     s32 height_sq;
     s32 progress_sq;
     s32 linear;
 
-    divisor = (g_battle_effect_gravity_modifier * 2) >> 12;
     if (height >= -0x7fff && height <= 0x7fff) {
         height_sq = (height * height) >> 12;
         if (progress >= -0xfffff && progress <= 0xfffff) {
@@ -1732,9 +1715,8 @@ static s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress)
 /* Offset of a point current along a straight path of length total: dst is src,
  * the whole path's delta, scaled by current / total (a Q12 fraction). */
 static void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
-    s32 progress;
+    s32 progress = (current << 8) / (total >> 4);
 
-    progress = (current << 8) / (total >> 4);
     dst->vx = (progress * src->vx) >> 12;
     dst->vy = (progress * src->vy) >> 12;
     dst->vz = (progress * src->vz) >> 12;
@@ -2256,10 +2238,9 @@ s32 battle_effect_check_direct_trajectory_to_target(s32 source_id, SVECTOR* tile
 void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id) {
     VECTOR delta;
     map_tile_t* tile;
-    s32 source_height;
+    s32 source_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(source_id) * 2 / 3;
     s32 target_height;
 
-    source_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(source_id) * 2 / 3;
     if (target_id != -1) {
         target_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(target_id) * 3 / 4;
     }
@@ -3887,11 +3868,10 @@ s32 battle_effect_equip_break_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_secondary_data_t* current;
     vec3s32_t gravity;
-    s32 group;
+    s32 group = EFFECT_PARTICLE_GROUP_EQUIP_BREAK;
     s32 result;
     s16 finish_timer;
 
-    group = EFFECT_PARTICLE_GROUP_EQUIP_BREAK;
     effect = g_battle_effect_current_secondary;
     /* Preserve the target's unsigned phase-dispatch comparison. */
     switch (effect->phase) {

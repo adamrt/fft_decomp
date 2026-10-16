@@ -75,11 +75,10 @@ s32 world_formation_generate_unit(s16 unit_type) {
  * Rebuild the menu's name strings after updating both records.
  */
 void world_formation_set_unit_name(s16 formation_index, const u8* name) {
-    party_unit_t* party;
+    party_unit_t* party = main_party_get_unit(g_world_unit_pointers[formation_index]->identity.roster_slot);
     s32 i;
     u8 character;
 
-    party = main_party_get_unit(g_world_unit_pointers[formation_index]->identity.roster_slot);
     for (i = 0; i < UNIT_NAME_SIZE; i++) {
         character = *name;
         g_world_unit_pointers[formation_index]->name[i] = character;

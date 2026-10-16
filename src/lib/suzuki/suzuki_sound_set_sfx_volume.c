@@ -10,9 +10,8 @@
 void suzuki_sound_set_sfx_volume(int sound_id, s16 volume) {
     suzuki_music_t* music;
     suzuki_music_channel_t* channel;
-    s32 count;
+    s32 count = SUZUKI_SFX_CHANNEL_COUNT;
 
-    count = SUZUKI_SFX_CHANNEL_COUNT;
     music = g_suzuki_sound_sfx_music;
     channel = music->channels;
     if (volume != 0) {

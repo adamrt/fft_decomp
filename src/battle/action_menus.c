@@ -84,11 +84,10 @@ s32 battle_state_try_enter_scenario_event(battle_unit_t* unit) {
    0x08 (player-controllable) bit when the unit's stats mark it as
    AI-only. Also propagates to the linked mount unit, if any. */
 void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit) {
-    u8 entd_flags;
+    u8 entd_flags = unit->stats->team_flags;
     u8 mount_entd_flags;
     battle_unit_t* mount;
 
-    entd_flags = unit->stats->team_flags;
     unit->team_flags = entd_flags;
     if (unit->stats->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
         unit->team_flags = entd_flags & ~BATTLE_TEAM_FLAG_PLAYER_CONTROLLED;
@@ -211,11 +210,9 @@ static s32 battle_map_refresh_deep_dungeon(void) {
  * the queued per-unit result. The meaning of 0x400 remains uncertain. */
 static void battle_action_run_between_turn_events(void) {
     battle_unit_t* unit;
-    s32 action;
-    s32 runtime_id;
+    s32 action = battle_action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RUN);
+    s32 runtime_id = action & 0xff;
 
-    action = battle_action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RUN);
-    runtime_id = action & 0xff;
     g_battle_action_turn_event_type = action & 0xff00;
     if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
         return;
@@ -390,11 +387,11 @@ void battle_menu_open_active_unit_idle_action_menu(void) {
 /* Opens the non-active-unit idle action menu for the unit under the cursor;
  * g_battle_status_menu_open switches menu ids 0xf/0x10 to 0x11/0x12. */
 void battle_menu_open_non_active_unit_idle_action_menu(void) {
-    battle_unit_t* runtime;
+    battle_unit_t* runtime
+        = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     unit_stats_t* unit;
     s32 menu_id;
 
-    runtime = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (runtime == 0) {
         return;
     }
@@ -420,9 +417,8 @@ void battle_menu_open_non_active_unit_idle_action_menu(void) {
  * player controls it and otherwise restarts the menu-to-targeting state. Any
  * other unit gets the non-active-unit menu. An empty tile does nothing. */
 void battle_menu_dispatch_idle_action_menu(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
 
-    unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (unit == 0) {
         return;
     }
@@ -785,16 +781,14 @@ static s32 battle_action_report_job_level_up(battle_unit_t* unit) {
  * started, otherwise refreshes both units, re-enters the after-command state
  * unless the Deep Dungeon map refresh takes over, and returns 0. */
 s32 battle_move_start_next_post_movement_step(void) {
-    battle_unit_t* source;
-    battle_unit_t* casting;
+    battle_unit_t* source = battle_unit_get_source();
+    battle_unit_t* casting = battle_unit_get_casting();
     battle_unit_t* target;
     unit_stats_t* stats;
     s32 item;
     s32 animation;
     s32 trap;
 
-    source = battle_unit_get_source();
-    casting = battle_unit_get_casting();
     menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
     g_battle_game_state = BATTLE_GAME_STATE_CRYSTAL_LEARN;
     g_battle_action_post_action = 0;
@@ -1420,9 +1414,8 @@ static void battle_action_build_targets_post_action_message(void) {
  * effect messages turned off, or nothing to report, an effect message with text
  * id 0 is requested instead. */
 void battle_action_show_caster_post_effect_messages(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_casting();
 
-    unit = battle_unit_get_casting();
     battle_action_queue_post_effect_messages_for_unit(unit);
     if (g_main_game_options.fields.effect_messages != GAME_OPTION_ON) {
         g_battle_action_post_effect_msg_counter = 0;
@@ -1552,10 +1545,9 @@ void battle_action_init_learn_ability_on_hit(void) {
  * awarded), start the earned EXP/JP display and enter the level-up phase of
  * action_init_learn_ability_on_hit. */
 void battle_action_handle_post_action_xp_jp_ability(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
     unit_stats_t* stats;
 
-    unit = battle_unit_get_source();
     battle_unit_restore_all_facings_after_attack();
     if (unit != 0) {
         stats = unit->stats;

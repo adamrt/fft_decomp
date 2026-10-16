@@ -33,7 +33,7 @@
  */
 void menu_run_option_choice(void) {
     RECT rect;
-    u32* input;
+    u32* input = script_get_controller_input_pointer(0);
     thread_t* thread;
     s32 kind;
     s32 height;
@@ -44,7 +44,6 @@ void menu_run_option_choice(void) {
     s32 cursor;
     menu_icon_sprites_t* record;
 
-    input = script_get_controller_input_pointer(0);
     script_get_controller_input_pointer(1);
     thread = &g_threads[g_thread_current_id];
     kind = thread->function_parameter_1;

@@ -43,10 +43,9 @@ static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly);
 static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
 
 s32 unit_has_any_current_status(s32 battle_id) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(battle_id);
     s32 index;
 
-    unit = battle_unit_get_stats_from_battle_id(battle_id);
     for (index = 0; index < STATUS_BYTE_COUNT; index++) {
         if (unit->status_sets.current[index] != 0) {
             return 1;
@@ -142,11 +141,9 @@ void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const 
 }
 
 void text_relocate_pointer_table(const u32* offsets) {
-    s32 index;
-    const u8* text_data;
+    s32 index = 0;
+    const u8* text_data = (const u8*)offsets + sizeof(u32) * 32;
 
-    index = 0;
-    text_data = (const u8*)offsets + sizeof(u32) * 32;
     do {
         g_text_section_pointers[index] = (u8*)(text_data + offsets[index]);
         index++;
@@ -375,9 +372,8 @@ static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly) {
     menu_quad_piece_t* piece;
     s32 count;
     s32 i;
-    menu_quad_colors_t* colors;
+    menu_quad_colors_t* colors = &g_menu_quad_colors;
 
-    colors = &g_menu_quad_colors;
     piece = &g_menu_quad_pieces[g_menu_quad_group_starts[group]];
     count = g_menu_quad_group_starts[group + 1] - g_menu_quad_group_starts[group];
     for (i = 0; i < count; i++) {
@@ -1050,15 +1046,13 @@ void menu_refresh_right_unit_stats_display(void) {
 
 /* Preview the pending action, then display its caster panel. */
 void menu_preview_attack_caster_stats(void) {
-    unit_stats_t* attacker;
-    unit_stats_t* target;
+    unit_stats_t* attacker = menu_get_selected_unit_stats();
+    unit_stats_t* target = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
     action_command_t* action;
     ability_data_t* ability_data;
     main_ability_secondary_pointer_t secondary;
     s16* selected;
 
-    attacker = menu_get_selected_unit_stats();
-    target = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
     /* One address register serves both reads, as in the target. */
     selected = &g_menu_selected_unit.battle_id;
     action = battle_unit_get_runtime_action_command_by_battle_id(*selected);
@@ -1292,12 +1286,11 @@ exit:
 
 /* Fill the texture coordinates, CLUT and size of a 16x16 item icon sprite. */
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
-    item_data_t* item;
+    item_data_t* item = main_item_get_data_pointer(item_id);
     s32 sprite_id;
     s32 palette;
     s32 column;
 
-    item = main_item_get_data_pointer(item_id);
     sprite_id = item->sprite_id;
     palette = item->palette;
     column = sprite_id % 15;
@@ -1356,20 +1349,16 @@ void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 battle_id) {
  * `code` is reused for the cell number that selects the CLUT.
  */
 void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 code) {
-    s32 index;
-    s32 palette;
-    s32 page;
-    s32 cell;
+    s32 index = code & 0xFF;
+    s32 palette = (code & 0xC00) >> 10;
+    s32 page = index / 40;
+    s32 cell = index % 40;
     s32 u;
     s32 v;
     s32 clut_x;
     s32 clut_y;
     s32 page_x;
 
-    index = code & 0xFF;
-    palette = (code & 0xC00) >> 10;
-    page = index / 40;
-    cell = index % 40;
     code = cell;
     u = (cell % 8) << 5;
     v = (cell / 8) * 48;
@@ -1397,12 +1386,11 @@ void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 code) {
 
 void menu_run_numeric_display_panel_thread(void) {
     menu_panel_record_t* records;
-    menu_panel_record_t* record;
+    menu_panel_record_t* record = g_menu_numeric_display_panel_records;
     menu_unit_stat_number_images_t* number_images;
     s32 i;
     s32 frame;
 
-    record = g_menu_numeric_display_panel_records;
     records = record;
     thread_set_current_task_id(THREAD_TASK_NUMERIC_DISPLAY_PANEL);
     gfx_set_draw_mode_for_texture_page(&record->mode0, MENU_TEXTURE_PAGE_FRAME);
@@ -2066,10 +2054,9 @@ void menu_select_icon_cluts(menu_icon_sprites_t* frame) {
  * The two signed threshold tables produce the idle and active cursor curves. */
 s32 menu_get_cursor_bob_offset(s32 mode) {
     menu_cursor_bob_entry_t* entry;
-    s32 counter;
+    s32 counter = g_thread_contexts[g_thread_current_id].task_words[0];
     s32 threshold;
 
-    counter = g_thread_contexts[g_thread_current_id].task_words[0];
     if (mode == 0) {
         entry = g_menu_cursor_bob_thresholds;
         counter %= entry->threshold;

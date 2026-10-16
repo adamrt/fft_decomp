@@ -6,11 +6,9 @@
  * first loaded waveset when none matches. id is s16 like the parameter of
  * suzuki_sound_find_waveset, whose search loop this repeats. */
 u8* suzuki_smd_select_sound_font(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    suzuki_waveset_t* waveset;
-    s16 id;
+    suzuki_waveset_t* waveset = g_suzuki_sound_waveset_list;
+    s16 id = *note_data++;
 
-    waveset = g_suzuki_sound_waveset_list;
-    id = *note_data++;
     music->waveset_id = id;
     while (waveset != 0 && waveset->id != id) {
         waveset = waveset->next;

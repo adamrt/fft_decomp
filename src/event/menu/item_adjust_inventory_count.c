@@ -4,10 +4,9 @@
 /* EQUIP.OUT 001c684c - Add `delta` to the inventory count for the item id (low
  * 10 bits of `item`); clamped to 0. item id 0 is a no-op sentinel. */
 s32 item_adjust_inventory_count(s16 item_entry, s32 delta) {
-    s32 item_id;
+    s32 item_id = item_entry & 0x3FF;
     s32 new_count;
 
-    item_id = item_entry & 0x3FF;
     if (item_id == 0) {
         return 0;
     }

@@ -195,10 +195,9 @@ static s32 require_party_restore_item_counts(s32 party_index) {
  * the unit. Returns 1 when it sold anything. */
 s32 require_party_sell_equipment_over_limit(s32 unit_id) {
     unit_stats_t* unit;
-    s32 sold_equipment;
+    s32 sold_equipment = 0;
     s32 equipment_slot;
 
-    sold_equipment = 0;
     unit = battle_unit_get_stats_from_battle_id(unit_id);
     equipment_slot = 0;
     do {
@@ -225,10 +224,9 @@ s32 require_party_sell_equipment_over_limit(s32 unit_id) {
  * it sold anything. */
 s32 require_party_store_equipment_or_sell_overflow(s32 unit_id) {
     unit_stats_t* unit;
-    s32 sold_equipment;
+    s32 sold_equipment = 0;
     s32 equipment_slot;
 
-    sold_equipment = 0;
     unit = battle_unit_get_stats_from_battle_id(unit_id);
     equipment_slot = 0;
     do {
@@ -263,10 +261,9 @@ s32 require_party_store_equipment_or_sell_overflow(s32 unit_id) {
  */
 static s32 require_party_get_free_slot_status(s32 unit_id) {
     party_unit_t* party;
-    unit_stats_t* unit;
+    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(unit_id);
     s32 index;
 
-    unit = battle_unit_get_stats_from_battle_id(unit_id);
     if (unit->unit_flags & UNIT_FLAG_SAVE_FORMATION) {
         return 2;
     }
@@ -1468,12 +1465,10 @@ static void require_gfx_scale_poly_gt4_vertex_colors(
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
-    s32 count;
-    s32 enabled;
+    s32 count = 0;
+    s32 enabled = 1;
     s16* palette_origin;
 
-    count = 0;
-    enabled = 1;
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
     palette_origin = &g_require_reward_bonus_palette_rect.y;
     do {
@@ -1496,12 +1491,10 @@ static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
-    s32 count;
-    s32 enabled;
+    s32 count = 0;
+    s32 enabled = 1;
     s16* palette_origin;
 
-    count = 0;
-    enabled = 1;
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
     palette_origin = &g_require_reward_bonus_palette_rect.y;
     do {
@@ -1602,10 +1595,10 @@ static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
 
 static void require_condition_show_general(s32 hold_frames) {
     sprite_sheet_frame_t* quads;
-    u8* range;
-    require_display_condition_colors_t* colors;
-    require_render_condition_tpage_t* tpage;
-    s32 condition;
+    u8* range = g_require_condition_general_quad_ranges;
+    require_display_condition_colors_t* colors = g_require_condition_general_vertex_colors;
+    require_render_condition_tpage_t* tpage = g_require_condition_general_tpages;
+    s32 condition = 0;
     s32 frame;
     s32 quad_count;
     s32 index;
@@ -1615,10 +1608,6 @@ static void require_condition_show_general(s32 hold_frames) {
     s32 hide_offset;
     u32* input;
 
-    range = g_require_condition_general_quad_ranges;
-    colors = g_require_condition_general_vertex_colors;
-    tpage = g_require_condition_general_tpages;
-    condition = 0;
     require_reward_load_bonus_image(thread_get_current_parameter_1() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
     {
         u8* parameters = &range[condition];
@@ -1764,11 +1753,9 @@ void require_condition_run_special_thread(void) {
     s32 scale;
     s32 quad_index;
     sprite_sheet_frame_t* quads;
-    u8* table;
-    require_display_condition_colors_t* color_table;
+    u8* table = g_require_condition_special_quad_ranges;
+    require_display_condition_colors_t* color_table = g_require_condition_special_vertex_colors;
 
-    table = g_require_condition_special_quad_ranges;
-    color_table = g_require_condition_special_vertex_colors;
     parameter_index = thread_get_current_parameter_1();
     use_small_array = thread_get_current_parameter_2();
     {
@@ -2209,10 +2196,9 @@ static void require_overlay_run_helpmenu(void) {
  * terminated name per battle unit slot, with a terminator appended to a name
  * that fills all 16 bytes. */
 static void require_text_build_battle_nicknames(void) {
-    u8* output;
+    u8* output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     s32 unit_id;
 
-    output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         unit_stats_t* unit = battle_unit_get_stats_from_battle_id(unit_id);
         s32 length = 0;

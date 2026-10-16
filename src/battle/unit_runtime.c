@@ -21,9 +21,8 @@
 /* Add `amount` to a unit's event offset. The copy every caller uses;
  * battle_unit_add_event_offset_by_runtime_id_unused is the same routine compiled twice. */
 s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVECTOR* amount) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
     if (unit != 0) {
         unit->event_offset.vx = unit->event_offset.vx + amount->vx;
         unit->event_offset.vy = unit->event_offset.vy + amount->vy;
@@ -38,9 +37,8 @@ s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVEC
 /* Add `amount` to a unit's event offset. The copy every caller uses;
  * battle_unit_add_event_offset_by_runtime_id_unused is the same routine compiled twice. */
 s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
     if (unit != 0) {
         unit->event_offset.vx = unit->event_offset.vx + amount->vx;
         unit->event_offset.vy = unit->event_offset.vy + amount->vy;
@@ -69,9 +67,8 @@ SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id) {
  * recomputes the integer and fixed-point world positions from the tile.
  */
 s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* tile, s32 facing) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
     if (unit != 0) {
         unit->event_offset.vz = 0;
         unit->event_offset.vy = 0;
@@ -255,9 +252,8 @@ s32 battle_move_is_unit_moving_by_runtime_id(u32 runtime_id) {
 /* TempWeapon event instruction: battle_gfx_set_thrown_item_graphic_palette for a
  * runtime id. An absent unit is skipped. */
 void battle_gfx_set_thrown_item_palette_by_runtime_id(u32 item_id, u32 runtime_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0) {
         battle_gfx_set_thrown_item_graphic_palette(item_id, unit);
     }
@@ -317,10 +313,9 @@ s32 battle_gfx_poll_unit_graphics_load(void) {
  * when it has battle stats, runs battle_unit_set_enemy_level_data_by_battle_id.
  * Returns 0 when no record has the runtime id. */
 s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
     unit_stats_t* stats;
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
     if (unit != 0) {
         stats = unit->stats;
         unit->draw_enabled = 1;
@@ -359,9 +354,8 @@ void battle_gfx_reset_jumping_unit_graphic_triggers(void) {
 /* battle_unit_remove by runtime id. Returns 1, or 0 after raising pointer
  * exception 12 when no record has the id. */
 s32 battle_unit_remove_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
     if (unit != 0) {
         battle_unit_remove(unit);
         return 1;
@@ -483,12 +477,11 @@ s32 battle_gfx_clear_loaded_evtchr_slot(s32 slot_index) {
  * slot is in another state or no buffer is free. The buffer marked as
  * uploading is the slot's own, whichever one was used. */
 s32 battle_gfx_load_unit_attack_image_into_evtchr_slot(s32 runtime_id, s32 slot) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     s32 i;
     u8* image_data;
     RECT rect;
 
-    unit = battle_unit_get_by_runtime_id(runtime_id);
     if (g_battle_gfx_vram_slots[slot].owner == BATTLE_GFX_VRAM_SLOT_OWNER_EVTCHR) {
         for (i = 0; i < 2; i++) {
             if (g_battle_gfx_vram_slots[i].image_buffer_state == BATTLE_GFX_VRAM_SLOT_BUFFER_FREE) {

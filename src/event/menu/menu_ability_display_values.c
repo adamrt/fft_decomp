@@ -7,13 +7,11 @@
 #include "psx/types.h"
 
 s32 menu_ability_is_non_action_learned(s32 index) {
-    s16* entries;
-    s16* entry;
+    s16* entries = g_menu_ability_entries;
+    s16* entry = &entries[index];
     s32 result;
     u16 ability;
 
-    entries = g_menu_ability_entries;
-    entry = &entries[index];
     g_menu_ability_type = main_ability_calculate_pointers_and_type(
         *entry & ABILITY_LIST_ENTRY_ID_MASK, &g_menu_selected_ability_data, &g_menu_selected_ability_secondary_data);
     result = 0;
@@ -28,9 +26,8 @@ s32 menu_ability_is_non_action_learned(s32 index) {
  * the type the "learned" callback cached) whose entry has bit 14 or 15 set;
  * 0 otherwise. */
 s32 menu_ability_is_non_action_unlearned(s32 index) {
-    s32 result;
+    s32 result = 0;
 
-    result = 0;
     if (g_menu_ability_type != ABILITY_TYPE_DEFAULT) {
         result = (g_menu_ability_entries[index] >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) != 0;
     }

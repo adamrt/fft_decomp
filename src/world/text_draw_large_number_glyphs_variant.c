@@ -17,10 +17,9 @@
  */
 void text_draw_large_number_glyphs_variant(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     glyph_blit_t* src;
-    s32 work;
+    s32 work = digits & 0xFF00;
     s32 i;
 
-    work = digits & 0xFF00;
     src = &g_text_large_number_glyph_rect;
     if (work == 0xC00 || work == 0xE00) {
         g_text_large_number_glyph_rect.rect.y = 0x10;

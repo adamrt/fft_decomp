@@ -5,11 +5,10 @@
 void GsSortBoxFill(GsBOXF* bp, GsOT* otp, u16 pri) {
     TILE* packet;
     DR_TPAGE* draw_mode;
-    s32 attr; /* Attribute packing uses signed right shifts. */
+    s32 attr = bp->attribute; /* Attribute packing uses signed right shifts. */
     u32 hi;
     u32 lo;
 
-    attr = bp->attribute;
     if (!(attr & GsDOFF)) {
         draw_mode = (DR_TPAGE*)GsOUT_PACKET_P;
         /* Share one DMA tag: the 32-bit mode command occupies this primitive view's tag slot. */

@@ -11,10 +11,9 @@
  * menu_cmd_draw_window_frame_handler. */
 menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* command) {
     RECT area;
-    s32 frame;
+    s32 frame = g_gfx_transition_frame;
     s32 scale;
 
-    frame = g_gfx_transition_frame;
     if (frame < 4) {
         if (frame < 3) {
             g_menu_cmd_stream_input = 0;

@@ -401,8 +401,8 @@ static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_
 #    define PART(index) ((world_sprite_part_t*)&sprite[index])
 
 static void open_gfx_draw_animated_render_record(world_animated_render_record_t* actor, u32* ot) {
-    world_sprite_cel_header_t** sprites;
-    world_sprite_animation_sequence_t* anim;
+    world_sprite_cel_header_t** sprites = g_open_gfx_record_36_sprites;
+    world_sprite_animation_sequence_t* anim = g_open_gfx_record_36_animations[actor->sequence];
     world_sprite_cel_header_t* cel;
     u32* sprite;
     s32 value;
@@ -415,8 +415,6 @@ static void open_gfx_draw_animated_render_record(world_animated_render_record_t*
     s32 x;
     s32 y;
 
-    sprites = g_open_gfx_record_36_sprites;
-    anim = g_open_gfx_record_36_animations[actor->sequence];
     actor->anim_counter++;
     /* A goto loop: as a for/while loop, GCC's loop pass hoists the 0xffff
      * constant into a register, which the target does not. */

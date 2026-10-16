@@ -40,11 +40,9 @@ void battle_ai_end_action_simulation(void) {
  * ignores weather (indoors), otherwise the {3C} strength shifted into the
  * snow range when the map's snow flag is set. */
 s32 battle_map_get_effective_weather(void) {
-    s32 weather;
-    u32 flags;
+    s32 weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
+    u32 flags = g_battle_map_weather_flags;
 
-    weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
-    flags = g_battle_map_weather_flags;
     if (flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
         return BATTLE_WEATHER_NONE;
     }

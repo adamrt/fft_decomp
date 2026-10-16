@@ -8,9 +8,8 @@ void suzuki_sound_calculate_reverb_voices(void) {
     suzuki_music_t* music;
     s32 status;
     u32 excludable_voices;
-    u32 forced_voices;
+    u32 forced_voices = 0;
 
-    forced_voices = 0;
     excludable_voices = 0;
     music = g_suzuki_sound_active_music_list;
     while (music != 0) {

@@ -89,11 +89,10 @@ void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2,
     s32 i;
     u32 step;
     s32 fade;
-    u16 x;
+    u16 x = buffers->quads[0].x0;
     u16 y;
     s32 buffer_index;
 
-    x = buffers->quads[0].x0;
     from.x = x;
     y = buffers->quads[0].y0;
     from.y = y;
@@ -160,10 +159,8 @@ void script_pause_event_instruction(void) {
 }
 
 SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id) {
-    SVECTOR* source;
+    SVECTOR* source = battle_unit_get_world_coords_by_runtime_id(runtime_id);
     SVECTOR* dest;
-
-    source = battle_unit_get_world_coords_by_runtime_id(runtime_id);
 
     if (source != (SVECTOR*)-1) {
         dest = &g_unit_runtime_coords;
@@ -181,9 +178,8 @@ SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id) {
  * battle_unit_get_world_coords_by_runtime_id returns 0 for a missing unit, so the
  * projection then reads address 0. */
 void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coords) {
-    SVECTOR* world_coords;
+    SVECTOR* world_coords = battle_unit_get_world_coords_by_runtime_id(runtime_id);
 
-    world_coords = battle_unit_get_world_coords_by_runtime_id(runtime_id);
     if (world_coords != (SVECTOR*)-1) {
         battle_camera_project_world_coords_to_screen(world_coords, screen_coords);
     }
@@ -195,9 +191,8 @@ void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coords) {
  * battle_unit_get_world_coords_by_runtime_id returns 0 for a missing unit, so the
  * copy then reads address 0. */
 void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords) {
-    SVECTOR* source;
+    SVECTOR* source = battle_unit_get_world_coords_by_runtime_id(runtime_id);
 
-    source = battle_unit_get_world_coords_by_runtime_id(runtime_id);
     if (source != (SVECTOR*)-1) {
         world_coords->vx = source->vx;
         world_coords->vy = source->vy;

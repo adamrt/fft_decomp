@@ -6,9 +6,8 @@
  * instrument of the first loaded waveset (the list head). addr is the
  * instrument's offset within the waveset, not an absolute SPU address. */
 void suzuki_smd_get_instrument_attr(SpuVoiceAttr* attr, s16 index) {
-    suzuki_instrument_t* instrument;
+    suzuki_instrument_t* instrument = &g_suzuki_sound_waveset_list->instruments[index];
 
-    instrument = &g_suzuki_sound_waveset_list->instruments[index];
     attr->addr = instrument->start;
     attr->a_mode = instrument->attack_mode;
     attr->s_mode = instrument->sustain_mode;

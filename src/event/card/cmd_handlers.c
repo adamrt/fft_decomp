@@ -14,11 +14,9 @@
 u8* card_cmd_draw_textured_quad_handler(u8* command) {
     RECT rect;
     const rgb24_t* color;
-    s32 x;
-    s32 y;
+    s32 x = command[3];
+    s32 y = command[4];
 
-    x = command[3];
-    y = command[4];
     rect.x = x;
     rect.y = y;
     rect.w = command[5];
@@ -49,18 +47,16 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
     s32 full_rows;
     s32 partial_width;
     s32 partial_height;
-    s32 priority;
+    s32 priority = g_menu_gfx_otag_index;
     s16 u_left;
     s16 u_middle;
     s16 u_right;
     s16 v_bottom;
-    u16 clut;
+    u16 clut = g_menu_palette_clut;
     s16 v_top;
     s32 column;
     s32 row;
 
-    priority = g_menu_gfx_otag_index;
-    clut = g_menu_palette_clut;
     if (command->rectangle_source == 2) {
         left = g_menu_window_rect_source->rect.x - 5;
         top = g_menu_window_rect_source->rect.y - 9;

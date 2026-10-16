@@ -441,15 +441,13 @@ u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset) {
  */
 s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out) {
     unit_stats_t* unit;
-    s32 count;
-    s32 berserk;
+    s32 count = 3;
+    s32 berserk = 0;
     s32 i;
     s16 id;
     s16 ability;
     u8 flags;
 
-    count = 3;
-    berserk = 0;
     unit = battle_unit_get_existing_pointer(unit_id);
     if (unit == 0) {
         return 0;
@@ -511,9 +509,8 @@ static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x
     battle_unit_height_data_t height;
     u8 reference_height;
     s32 unit_index;
-    s32 unit_team_flags;
+    s32 unit_team_flags = team_flags;
 
-    unit_team_flags = team_flags;
     if (x < 0 || x >= g_battle_map_max_x) {
         return 0;
     }
@@ -611,8 +608,8 @@ s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, 
 
 s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
     unit_stats_t* unit;
-    s32 result;
-    s32 count;
+    s32 result = 0;
+    s32 count = 0;
     s32 i;
     s32 best;
     s32 ret;
@@ -622,8 +619,6 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
     u16 ct;
     u8 value;
 
-    result = 0;
-    count = 0;
     if (mode == BATTLE_BETWEEN_TURN_MODE_RESET) {
         g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_ADD_CT;
         g_battle_turn_unit_id = -1;
@@ -1061,14 +1056,12 @@ s32 battle_status_calculate_turn_flags(const unit_stats_t* unit) {
  * Returns -1 when the blue side is defeated, 0 when all opposing units are
  * defeated, and 1 while both sides can continue. */
 s32 battle_action_check_battle_outcome(void) {
-    s32 player_unit_count;
-    s32 enemy_unit_count;
+    s32 player_unit_count = 0;
+    s32 enemy_unit_count = 0;
     s32 unit_index;
     s32 selected;
     unit_stats_t* unit;
 
-    player_unit_count = 0;
-    enemy_unit_count = 0;
     for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
         unit = &g_battle_unit_stats[unit_index];
         if ((unit->initial_team_flags & BATTLE_TEAM_IMPORTANCE_MASK) == BATTLE_TEAM_IMPORTANCE_MASK) {
@@ -1185,7 +1178,7 @@ static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit)
  * unit's action data, CT, move/act flags and statuses. */
 s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_at_entry_t* at_list) {
     action_command_t saved_action;
-    action_command_t* action_data;
+    action_command_t* action_data = &unit->action_command;
     s32 old_state;
     s32 turns;
     u8 old_charged_ability_ct;
@@ -1193,7 +1186,6 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
     u8 old_movement_taken;
     u8 old_action_taken;
 
-    action_data = &unit->action_command;
     main_util_copy_action_data(action_data, &saved_action);
     old_charged_ability_ct = unit->charged_ability_ct;
     old_inflicted_status = unit->inflicted_status[0];
@@ -1434,9 +1426,8 @@ void battle_action_set_only_movement_taken(s32 unit_id) {
 /* Mark the unit's move and/or action as taken and end its turn once nothing is
  * left to do. -1 for an absent unit, 1 when the turn ended, otherwise 0. */
 static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = &g_battle_unit_stats[idx];
     s32 ret;
-    unit = &g_battle_unit_stats[idx];
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return -1;
     if (move_flag != 0) {
@@ -1456,14 +1447,13 @@ static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag
  * and 20 when it neither acted nor has Don't Act or Performing; the result is
  * capped at 60. Always returns 1. */
 s32 battle_action_end_turn(s32 unit_id) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     u16 ct;
     u8 status4;
     u8 movement_check;
     u8 action_check;
     u32 result;
 
-    unit = &g_battle_unit_stats[unit_id];
     if (g_battle_unit_stats[unit_id].entd_slot == BATTLE_ENTD_SLOT_NONE)
         return 1;
     if (unit->has_turn == 0)
@@ -1490,12 +1480,11 @@ s32 battle_action_end_turn(s32 unit_id) {
 
 /* Returns whether a unit with no remaining move or action should end its turn. */
 static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit) {
-    s32 cannot_act;
+    s32 cannot_act = battle_unit_get_action_restriction(unit);
     u8 no_move;
     u8 no_action;
     u8 taken;
 
-    cannot_act = battle_unit_get_action_restriction(unit);
     no_move = unit->movement_taken
         | (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)] & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE));
     no_action = unit->action_taken | cannot_act;
@@ -1533,9 +1522,8 @@ s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {
  * emptied and its existence set to pending removal. Returns -1 when the slot is
  * empty or has no formation index, else 0. No retail code calls it. */
 s32 battle_unit_check_exists(s32 unit_id) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
 
-    unit = &g_battle_unit_stats[unit_id];
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return -1;
     if (unit->formation_index == BATTLE_FORMATION_INDEX_NONE)

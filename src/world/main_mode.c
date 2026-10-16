@@ -26,13 +26,11 @@
 /* Unpacks the configured options into the options-menu value table, then runs
  * main-menu mode 0 (options thread in the previous slot), 1 or 2. */
 void world_menu_run_main_mode(s32 mode) {
-    menu_entry_t* entry;
-    game_options_fields_t options;
+    menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
+    game_options_fields_t options = g_main_game_options.fields;
     s32 i;
     s32 last_mode;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1();
-    options = g_main_game_options.fields;
     g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
     g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
     g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED] = options.multi_height_cursor_speed;
@@ -95,9 +93,9 @@ void menu_run_game_options_variant(void) {
     RECT clear;
     RECT texture_window;
     RECT value_rect;
-    s32 row_offset;
-    s32 ring;
-    s32 cursor;
+    s32 row_offset = 0;
+    s32 ring = 0;
+    s32 cursor = 0;
     thread_t* thread;
     u8* buffer;
     u32* input0;
@@ -122,9 +120,6 @@ void menu_run_game_options_variant(void) {
     SPRT* frame;
     u8* image;
 
-    row_offset = 0;
-    ring = 0;
-    cursor = 0;
     g_world_menu_thread_result = 1;
     input0 = script_get_controller_input_pointer(0);
     input1 = script_get_controller_input_pointer(1);

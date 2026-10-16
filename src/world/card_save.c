@@ -1491,10 +1491,9 @@ static void world_card_update_and_draw_slot_list(s32 input) {
  * into g_world_card_list_scroll_y and returns to 0.
  */
 static void world_card_scroll_menu_list(s32 row) {
-    s16 velocity;
+    s16 velocity = g_world_card_list_scroll_velocity;
     s16 first;
 
-    velocity = g_world_card_list_scroll_velocity;
     if (velocity == 0) {
         first = g_world_card_list_first_visible_row;
         if (row < first) {

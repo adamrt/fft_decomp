@@ -118,9 +118,8 @@ void open_file_build_openbk_header(s32 image_id, void* destination) {
  * while it runs. open_script_update_xa_audio adds the result to its step, so
  * completion advances the sequence and an error repeats the previous step. */
 s32 open_file_get_cd_sync_state_delta(void) {
-    s32 status;
+    s32 status = CdSync(1, 0);
 
-    status = CdSync(1, 0);
     if (status == 2) {
         return 1;
     }
@@ -178,9 +177,8 @@ void open_movie_start_fftst_or_title_menu(s32 use_alternate) {
  * g_open_controller_handlers[g_open_controller_handler_indices[c - 1]] on record
  * g_open_controller_records[c]. */
 void open_controller_dispatch_current(void) {
-    s32 controller;
+    s32 controller = g_open_current_controller_index;
 
-    controller = g_open_current_controller_index;
     g_open_controller_handlers[g_open_controller_handler_indices[controller - 1]](
         &g_open_controller_records[controller]);
 }
@@ -874,12 +872,12 @@ static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     point32_t position;
     s16 width;
     u16 height;
-    s32 index;
+    s32 index
+        = window_append_record_variant(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     s32 text_id;
     open_render_record_56_position_t* translation;
     s32* substitution;
 
-    index = window_append_record_variant(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     menu->window_record_56 = index;
     quad.x = 0;
     quad.y = 0x40;

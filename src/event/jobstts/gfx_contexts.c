@@ -17,14 +17,12 @@
  * until the scaled initial delay, then accepted at the scaled repeat period.
  */
 menu_vertical_scroll_direction_e jobstts_input_read_page_scroll_direction(void) {
-    menu_vertical_scroll_direction_e page_direction;
-    s32 input;
+    menu_vertical_scroll_direction_e page_direction = MENU_VERTICAL_SCROLL_NONE;
+    s32 input = PadRead(0);
     s32 initial_delay;
     s32 repeat_period;
     u16 held_frames;
 
-    page_direction = MENU_VERTICAL_SCROLL_NONE;
-    input = PadRead(0);
     if ((input & PSX_PAD_UP) && (input & PSX_PAD_SQUARE)) {
         page_direction = MENU_VERTICAL_SCROLL_UP;
         g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;

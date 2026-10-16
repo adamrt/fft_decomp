@@ -21,12 +21,11 @@
 #include "psx/types.h"
 
 static void battle_map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors) {
-    s32 index;
+    s32 index = 0;
     s16 green_for_packing;
     u32 blue_delta;
     u16 red_for_packing;
 
-    index = 0;
     do {
         s32 color_index;
         u16 color;
@@ -1124,9 +1123,8 @@ s32 battle_map_stop_clut_cycle(s32 handle) {
  * touched. The byte-offset loop preserves the original address sequence;
  * indexed active fields add four bytes. */
 static void battle_map_reset_clut_cycles(void) {
-    s32 offset;
+    s32 offset = (MAP_CLUT_CYCLE_SLOT_COUNT - 1) * MAP_CLUT_CYCLE_SLOT_BYTE_COUNT;
 
-    offset = (MAP_CLUT_CYCLE_SLOT_COUNT - 1) * MAP_CLUT_CYCLE_SLOT_BYTE_COUNT;
     do {
         ((u8*)g_battle_map_clut_cycle_states)[offset] = 0;
         offset -= MAP_CLUT_CYCLE_SLOT_BYTE_COUNT;
@@ -1571,8 +1569,8 @@ void battle_map_stop_palette_animation(s32 clut_row, s32 clut_index, s32 stop_al
  * decoded 5-bit components and alpha bit. */
 static void battle_map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index) {
     s32 color_index;
-    s32 selected_clut;
-    s32 i;
+    s32 selected_clut = clut_index;
+    s32 i = 0;
     const u16* palette_ptr;
     u16* upload_palette_base;
     u16* upload_row;
@@ -1581,8 +1579,6 @@ static void battle_map_extract_palette_colors(const palette_t palette, s32 clut_
     u16 color;
     map_palette_color_components_t* components;
 
-    selected_clut = clut_index;
-    i = 0;
     component_row = g_battle_map_palette_state.clut_rows[clut_row].components;
     upload_palette_base = g_battle_map_palette_modified_colors[0];
     upload_row = upload_palette_base + clut_row * MAP_CLUT_ROW_COLOR_COUNT;
@@ -2113,9 +2109,8 @@ s32 battle_state_update_controller_input(void) {
  * -1 that battle_state_run_deployment tests for does not occur. */
 s32 battle_state_update_deployment_controller_input(void) {
     u32 previous;
-    u32 current;
+    u32 current = PadRead(1);
 
-    current = PadRead(1);
     previous = g_input_previous_buttons;
     g_input_current_buttons = current;
     g_input_previous_buttons = current;
@@ -2138,11 +2133,8 @@ s32 battle_state_update_deployment_controller_input(void) {
  * enabled, main_gfx_load_efc_fnt loads the print font again.
  * battle_state_run_deployment calls this with 256 x 240 and projection 0x200. */
 void battle_state_init_deployment_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue) {
-    RECT clear_rect;
-    s32 second_y;
-
-    clear_rect = g_battle_deployment_clear_rect;
-    second_y = -(height != 0x1e0) & 0xf0;
+    RECT clear_rect = g_battle_deployment_clear_rect;
+    s32 second_y = -(height != 0x1e0) & 0xf0;
 
     SetDispMask(0);
     ResetGraph(1);

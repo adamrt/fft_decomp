@@ -18,12 +18,11 @@
  * Any repeat input starts a five-frame timer during which L2 is masked out.
  */
 void menu_input_update_with_message_state_variant(void) {
-    s32 running;
+    s32 running = 0;
     s32 frame;
     u8 state;
     s32 delay;
 
-    running = 0;
     menu_input_update_controller();
     frame = menu_get_window_scale_step();
     if (frame >= 1 && frame <= 3) {

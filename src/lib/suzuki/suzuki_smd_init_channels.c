@@ -19,7 +19,7 @@ void suzuki_smd_init_channels(suzuki_music_t* music) {
     suzuki_smd_header_t* smd;
     u16* offsets;
     suzuki_waveset_t* waveset;
-    s32 count;
+    s32 count = music->channel_count;
     u32 bit;
     u32 channels;
     s32 voice;
@@ -28,7 +28,6 @@ void suzuki_smd_init_channels(suzuki_music_t* music) {
     u8* note_data;
     u8 slot;
 
-    count = music->channel_count;
     channel = music->channels;
     if (count != 0) {
         index = 0xff;

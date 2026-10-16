@@ -12,12 +12,11 @@
  * Iterating a copy of the channels parameter keeps the target's prologue
  * order (the count parameter is copied first). */
 void suzuki_smd_update_modulators(suzuki_music_t* music, suzuki_music_channel_t* channels, s16 channel_count) {
-    suzuki_music_channel_t* channel;
+    suzuki_music_channel_t* channel = channels;
     suzuki_modulator_t* modulator;
     s32 i;
     s32 value;
 
-    channel = channels;
     do {
         if (channel->flags != 0) {
             for (i = SUZUKI_MODULATOR_COUNT, modulator = channel->modulators; i != 0; modulator++, i--) {

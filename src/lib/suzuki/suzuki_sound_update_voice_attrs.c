@@ -14,7 +14,7 @@
  * reverb voice-mask recalculations (g_suzuki_sound_voice_update_requests). The
  * volume/mode call already sets the volume, so VOLUME is dropped after it. */
 void suzuki_sound_update_voice_attrs(void) {
-    suzuki_music_t* music;
+    suzuki_music_t* music = g_suzuki_sound_active_music_list;
     suzuki_music_channel_t* channel;
     s16 status;
     s32 count;
@@ -22,7 +22,6 @@ void suzuki_sound_update_voice_attrs(void) {
     u16 flags;
     s32 voice;
 
-    music = g_suzuki_sound_active_music_list;
     while (music != 0) {
         status = music->status;
         if ((status & (SUZUKI_MUSIC_STATUS_FULL_VOICE_UPDATE | SUZUKI_MUSIC_STATUS_PLAYING)) != 0

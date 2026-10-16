@@ -509,10 +509,9 @@ void script_sprite_move_beta(void) {
  * for the calling event's sprite. A unit id that does not resolve has nothing
  * to wait for. */
 void script_waitspritemove_event_instruction(s32 unit_id) {
-    s32 runtime_id;
+    s32 runtime_id = script_resolve_runtime_id(unit_id);
     s32 i;
 
-    runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id == EVENT_RUNTIME_ID_NONE) {
         return;
     }
@@ -694,16 +693,13 @@ static s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b)
 
 /* Rewrite the following Camera operands, skipping an intervening FocusSpeed instruction. */
 void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values) {
-    u8* source;
-    const s32* deltas;
-    u8* destination;
+    u8* source = parameters->position_le[0];
+    const s32* deltas = camera_values;
+    u8* destination = ((event_camera_instruction_t*)(parameters + 1))->parameters.values.position_le[0];
     s32 index;
     s32 delta;
     s32 value;
 
-    source = parameters->position_le[0];
-    deltas = camera_values;
-    destination = ((event_camera_instruction_t*)(parameters + 1))->parameters.values.position_le[0];
     if (((event_camera_instruction_t*)(parameters + 1))->opcode == EVENT_OPCODE_FOCUS_SPEED) {
         destination = ((event_camera_instruction_t*)((event_focus_speed_instruction_t*)(parameters + 1) + 1))
                           ->parameters.values.position_le[0];
@@ -832,9 +828,8 @@ void script_noop_11(void) {
 
 /* Resolve a single selector in place; groups keep their ID and set the filter mode. */
 static s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode) {
-    u32 id;
+    u32 id = *unit_id;
 
-    id = *unit_id;
     if (id != 0 && id < EVENT_UNIT_GROUP_FIRST) {
         *unit_id = script_resolve_runtime_id(id);
         *filter_mode = 0;
@@ -943,10 +938,9 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
  * battle unit as not existing. A unit id that does not resolve does nothing. The
  * interpreter always passes remove = 1. */
 void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
-    s32 unit;
+    s32 unit = script_resolve_runtime_id(unit_id);
     s32 idx;
 
-    unit = script_resolve_runtime_id(unit_id);
     if (unit == EVENT_RUNTIME_ID_NONE) {
         return;
     }
@@ -1089,11 +1083,10 @@ void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate
     u8 rotation;
     s16 animation;
     s16 call_runtime_id;
-    s16 runtime_id;
+    s16 runtime_id = script_read_s16(parameters->unit_id_le);
     s32 index;
     unit_animation_state_t* rotation_state;
 
-    runtime_id = script_read_s16(parameters->unit_id_le);
     rotation = parameters->rotation;
     animation = script_read_s16(parameters->animation_le);
     call_runtime_id = script_resolve_runtime_id(runtime_id);
@@ -1128,14 +1121,13 @@ void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second
     s32 filter_mode;
     u16 runtime_id;
     s32 i;
-    s32 order;
+    s32 order = 1;
     s32 facing;
     s32 reverse;
     s32 dx;
     s32 dy;
     unit_animation_state_t* state;
 
-    order = 1;
     runtime_id = script_read_s16(parameters->first_unit_id_le);
     unit_id = script_read_s16(parameters->second_unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
@@ -1195,12 +1187,11 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 i;
-    s32 order;
+    s32 order = 1;
     s32 facing;
     s32 saved_filter_mode;
     unit_animation_state_t* state;
 
-    order = 1;
     unit_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
@@ -1249,11 +1240,10 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
  * the main stack; the Draw event instruction runs this only for the Zalera
  * event. */
 void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
-    unit_stats_t* stats;
+    unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     s32 i;
     s32 mask;
 
-    stats = battle_unit_get_stats_from_battle_id(battle_id);
     g_thread_call_target = (void (*)(void))battle_status_queue_runtime_graphics_flag_change;
     for (i = 0; i < STATUS_COUNT; i++) {
         mask = 0x80 >> (i % 8);
@@ -1561,13 +1551,12 @@ void script_inflict_status_thread(void) {
  * is set and battle_status_resolve_unit_changes runs on the main stack with
  * removal_only. Nothing happens when the id resolves to no unit on the field. */
 static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
-    s32 idx;
+    s32 idx = unit_get_battle_id_by_event_unit_id(event_unit_id);
     unit_stats_t* unit;
     s32 i;
     s32 byte;
     s32 bit;
 
-    idx = unit_get_battle_id_by_event_unit_id(event_unit_id);
     if (idx == 0x7D0) {
         return;
     }
@@ -1600,11 +1589,10 @@ void script_change_stats(const event_change_stats_parameters_t* parameters) {
     s32 unit_index;
     s32 battle_id;
     s32 value;
-    s16 delta;
+    s16 delta = script_read_s16(parameters->delta_le);
     s32 battle_unit_index;
     unit_stats_t* unit;
 
-    delta = script_read_s16(parameters->delta_le);
     unit_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
@@ -1651,13 +1639,12 @@ void script_change_stats(const event_change_stats_parameters_t* parameters) {
  * runs over all 21 unit indices.
  */
 void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
-    u16 runtime_id;
+    u16 runtime_id = script_read_s16(parameters->unit_id_le);
     s32 state;
     s32 unit_index;
     s32 animation;
     s32 move_flag_mode;
 
-    runtime_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&runtime_id, &state) == 0) {
         return;
     }
@@ -1688,11 +1675,10 @@ void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
  * runs over all 21 unit indices.
  */
 void script_march_units(const event_march_parameters_t* parameters) {
-    u16 runtime_id;
+    u16 runtime_id = script_read_s16(parameters->unit_id_le);
     s32 state;
     s32 unit_index;
 
-    runtime_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&runtime_id, &state) == 0) {
         return;
     }
@@ -1714,11 +1700,10 @@ void script_march_units(const event_march_parameters_t* parameters) {
  * 21 unit indices.
  */
 void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
-    u16 unit_id;
+    u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 state;
     s32 unit_index;
 
-    unit_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &state) != 0) {
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &state) != 0) {
@@ -1744,11 +1729,10 @@ void script_set_units_movement_effect_suppression(const event_movement_effect_pa
  * not resolve. */
 void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters) {
     const event_unit_color_t* color;
-    u16 unit_id;
+    u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 out;
     s32 i;
 
-    unit_id = script_read_s16(parameters->unit_id_le);
     if (script_prepare_unit_filter(&unit_id, &out) != 0) {
         color = &parameters->color;
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
@@ -1770,11 +1754,10 @@ void script_color_unit_event_instruction(const event_color_unit_parameters_t* pa
  * 0x80149698 stores a0 directly as a 16-bit value. The interpreter passes a
  * zero-extended 32-bit value; signed argument normalization is not part of this ABI. */
 void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable) {
-    u16 unit_id;
+    u16 unit_id = event_unit_id;
     s32 mode;
     s32 i;
 
-    unit_id = event_unit_id;
     if (script_prepare_unit_filter(&unit_id, &mode) != 0) {
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &mode) != 0) {
@@ -1794,11 +1777,9 @@ void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable) 
 /* Nonzero when the unit's facing, relative to the camera yaw quadrant, is
  * one of the six "away from camera" directions 7..12 (of 16). */
 s32 unit_check_facing_relative_to_camera(s32 event_unit_id) {
-    s32 runtime_id;
-    s32 camera_facing;
+    s32 runtime_id = script_resolve_runtime_id(event_unit_id);
+    s32 camera_facing = camera_wrap_yaw_angle();
 
-    runtime_id = script_resolve_runtime_id(event_unit_id);
-    camera_facing = camera_wrap_yaw_angle();
     camera_facing += 0x200;
     camera_facing &= 0xf00;
     /* Preserve the retail arithmetic shift after the masked camera angle. */
@@ -1825,12 +1806,11 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
     s32 state;
     s32 i;
     unit_animation_state_t* rotation_state;
-    s32 order;
+    s32 order = 1;
     s32 facing;
     s32 dx;
     s32 dy;
 
-    order = 1;
     tile.vx = parameters->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     tile.vz = parameters->y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     unit_id = script_read_s16(parameters->unit_id_le);

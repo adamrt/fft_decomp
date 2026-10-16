@@ -105,9 +105,8 @@ void battle_gfx_draw_wait_direction_unit(void) {
  * color. `mode` is the amount battle_map_modify_palette steps the fade by, not a
  * color mode. battle_unit_update_fade_out_removal continues from there. */
 void battle_gfx_start_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0) {
         battle_unit_move_to_head(runtime_id);
         unit->fade_out_phase = BATTLE_UNIT_FADE_OUT_FLASH;
@@ -197,12 +196,10 @@ s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit) {
  * and stores the destination height in distortion_target; phase 1 steps until the
  * unit reaches it, then snaps and ends the animation. */
 void battle_move_interpolate_height_toward_fixed_rise(battle_unit_t* unit) {
-    s32 step;
-    s32 target;
+    s32 step = unit->distortion_timer;
+    s32 target = unit->distortion_target;
     s32 height;
 
-    step = unit->distortion_timer;
-    target = unit->distortion_target;
     switch (unit->distortion_phase) {
     case 0:
         step = -0x24000 / step;
@@ -231,12 +228,10 @@ void battle_move_interpolate_height_toward_fixed_rise(battle_unit_t* unit) {
  * the unit is above the ground, then snaps and ends the animation. A unit that
  * starts at or below the ground snaps on the first frame. */
 void battle_move_interpolate_height_toward_resting_height(battle_unit_t* unit) {
-    s32 step;
-    s32 z;
+    s32 step = unit->distortion_timer;
+    s32 z = unit->distortion_target;
     s32 real_z;
 
-    step = unit->distortion_timer;
-    z = unit->distortion_target;
     switch (unit->distortion_phase) {
     case 0:
         z = battle_gfx_calculate_world_height_from_world_coords(unit) * ONE;
@@ -266,12 +261,10 @@ void battle_move_interpolate_height_toward_resting_height(battle_unit_t* unit) {
 static void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow_height_change) {
     SVECTOR tile_center;
     VECTOR velocity;
-    s32 timer;
-    s32 target_z;
+    s32 timer = unit->distortion_timer;
+    s32 target_z = unit->distortion_target;
     battle_unit_t* target;
 
-    timer = unit->distortion_timer;
-    target_z = unit->distortion_target;
     velocity = unit->velocity;
     switch (unit->distortion_phase) {
     case 0:
@@ -333,11 +326,9 @@ static void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow
 static void battle_move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_change) {
     SVECTOR tile_center;
     VECTOR velocity;
-    s32 timer;
-    s32 target_z;
+    s32 timer = unit->distortion_timer;
+    s32 target_z = unit->distortion_target;
 
-    timer = unit->distortion_timer;
-    target_z = unit->distortion_target;
     velocity = unit->velocity;
     switch (unit->distortion_phase) {
     case 0:
@@ -401,15 +392,12 @@ void battle_move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* un
  * plus 24, one over 24. `out->vy` is the negated speed of the first leg; x and
  * y (stored in vz) cover their distances evenly over the returned frame count. */
 static s32 battle_move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out) {
-    s32 to_z;
-    s32 from_z;
-    s32 height;
+    s32 to_z = to->vy;
+    s32 from_z = from->vy;
+    s32 height = from_z - to_z + 24;
     s32 speed;
     s32 frames;
 
-    to_z = to->vy;
-    from_z = from->vy;
-    height = from_z - to_z + 24;
     height = height * g_battle_move_jump_gravity;
     speed = SquareRoot12(height * 2);
     frames = speed / g_battle_move_jump_gravity;
@@ -560,10 +548,9 @@ void battle_unit_clear_distortion_animation_id_11(battle_unit_t* unit) {
 void battle_move_animate_jump_start(battle_unit_t* unit) {
     VECTOR unused_10;
     VECTOR velocity;
-    s32 timer;
+    s32 timer = unit->distortion_timer;
     s32 speed;
 
-    timer = unit->distortion_timer;
     velocity = unit->velocity;
     switch (unit->distortion_phase) {
     case 0:
@@ -996,11 +983,10 @@ void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) 
 void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
     VECTOR unused_10;
     VECTOR velocity;
-    s32 timer;
+    s32 timer = unit->distortion_timer;
     s32 height;
     s32 speed;
 
-    timer = unit->distortion_timer;
     velocity = unit->velocity;
     switch (unit->distortion_phase) {
     case 0:

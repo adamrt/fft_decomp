@@ -17,7 +17,7 @@
  * The channel pointer is a copy of the parameter so the count parameter is
  * copied first in the prologue, as in the target. */
 void suzuki_smd_update_voices(suzuki_music_t* music, suzuki_music_channel_t* channels, s16 channel_count) {
-    suzuki_music_channel_t* channel;
+    suzuki_music_channel_t* channel = channels;
     u32 key_on;
     u32 key_off;
     u32 allowed;
@@ -27,7 +27,6 @@ void suzuki_smd_update_voices(suzuki_music_t* music, suzuki_music_channel_t* cha
     s32 left;
     s32 right;
 
-    channel = channels;
     if ((music->status & SUZUKI_MUSIC_STATUS_SFX) == 0)
         allowed = ~(g_suzuki_sound_sfx_reserved_voices | g_suzuki_sound_sfx_key_off_voices);
     else

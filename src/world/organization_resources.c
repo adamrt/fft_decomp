@@ -76,10 +76,9 @@ void world_menu_build_location_list(void) {
  * load as in the target. Writing g_menu_pending_selection[0] marks the
  * store as an array element and keeps it above that load. */
 void world_map_confirm_destination(void) {
-    s32 selection;
+    s32 selection = g_menu_thread_menu_data[6].selected_index;
     s16 value;
 
-    selection = g_menu_thread_menu_data[6].selected_index;
     if (g_world_menu_location_list_row_colors[selection] != 4) {
         s16* pending = g_menu_pending_selection;
 
@@ -99,14 +98,11 @@ void world_map_confirm_destination(void) {
 }
 
 void world_menu_build_submenu_text_id_page(void) {
-    s32 selection;
-    s32 count;
+    s32 selection = g_menu_thread_menu_data[9].selected_index;
+    s32 count = g_world_menu_submenu_page_counts[selection];
     s32 i;
-    u8* src;
+    u8* src = g_world_menu_submenu_page_text_ids[selection];
 
-    selection = g_menu_thread_menu_data[9].selected_index;
-    count = g_world_menu_submenu_page_counts[selection];
-    src = g_world_menu_submenu_page_text_ids[selection];
     for (i = 0; i < count; i++) {
         g_world_menu_submenu_page_row_text_ids[i] = src[i] + 0x902B;
     }
@@ -1037,7 +1033,7 @@ extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous
  * changes and returns the menu result slot g_menu_pending_selection[0] (-2 while pending).
  * Formation-menu sibling of menu_input_update_event_state_variant. */
 s16 world_formation_run_menu_frame(u32* otag, u32 input) {
-    s32 profile;
+    s32 profile = g_main_game_options.fields.finger_cursor_repeat_speed;
     u32 previous_input;
     u32 filtered_input;
     s32 initial_delay;
@@ -1047,7 +1043,6 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     s32 thread_id;
     s32 status;
 
-    profile = g_main_game_options.fields.finger_cursor_repeat_speed;
     g_main_input_repeat_initial_delay = g_world_input_timing_profiles[profile].initial_delay;
     g_main_input_repeat_period = g_world_input_timing_profiles[profile].repeat_period;
     g_main_input_secondary_repeat_period = g_world_input_timing_profiles[profile].secondary_repeat_period;

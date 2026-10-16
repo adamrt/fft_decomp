@@ -5,10 +5,9 @@
  * value become 0x100 / (byte + 1). Twin of suzuki_smd_pitch_shift_fade_in;
  * byte 0xff leaves both values unchanged. */
 u8* suzuki_smd_pan_lfo_fade_in(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    u8 duration;
+    u8 duration = note_data[0] + 1;
     s16 step;
 
-    duration = note_data[0] + 1;
     note_data++;
     if (duration != 0) {
         step = 0x100 / duration;

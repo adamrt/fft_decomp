@@ -9,10 +9,9 @@
  * introduce a two-byte glyph index; 0xFA advances a fixed four pixels and
  * 0xE7 carries an explicit one-byte advance. */
 s32 world_text_measure_entry_pixel_width(const u8* text) {
-    s32 width;
+    s32 width = 0;
     s32 code;
 
-    width = 0;
     while (*text != 0xFE) {
         code = *text;
         if (code < TEXT_FORMAT_FIRST) {
@@ -37,11 +36,9 @@ s32 world_text_measure_entry_pixel_width(const u8* text) {
  * Lead bytes 0xd0..TEXT_EXTENDED_GLYPH_PREFIX_LAST introduce a two-byte code; everything else is a
  * single byte. */
 s16 world_text_get_encoded_char_at_position(u8* table, s16 index, s32 position) {
-    u8* cursor;
-    s32 code;
+    u8* cursor = world_text_advance_entry_by_char_count(menu_text_find_entry_by_index(table, index, 2), position);
+    s32 code = *cursor++;
 
-    cursor = world_text_advance_entry_by_char_count(menu_text_find_entry_by_index(table, index, 2), position);
-    code = *cursor++;
     if (code >= TEXT_EXTENDED_GLYPH_PREFIX_FIRST && code <= TEXT_EXTENDED_GLYPH_PREFIX_LAST) {
         code = *cursor | (code << 8);
     }

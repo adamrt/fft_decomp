@@ -131,14 +131,11 @@ void world_menu_input_update_dialog_state(void) {
 #endif
 
 void menu_release_current_thread_slot(void) {
-    s32 index;
-    s32 current_thread_id;
+    s32 index = 0;
+    s32 current_thread_id = g_thread_current_id;
     s32* owner_thread_id;
-    s32* slot_state;
+    s32* slot_state = g_text_slot_glyph_counts;
 
-    index = 0;
-    current_thread_id = g_thread_current_id;
-    slot_state = g_text_slot_glyph_counts;
     owner_thread_id = g_text_slot_owner_thread_ids;
     for (;;) {
         if (current_thread_id == *owner_thread_id) {
@@ -174,9 +171,8 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
     u8* previous;
     s32 row;
     s32 offset;
-    text_glyph_state_t* request;
+    text_glyph_state_t* request = &g_text_typewriter_glyph;
 
-    request = &g_text_typewriter_glyph;
     if (g_text_typewriter_glyph.mode == DIALOG_BOX_TYPE_PORTRAIT || g_text_typewriter_glyph.mode == 0) {
         for (;;) {
             slot = 16;

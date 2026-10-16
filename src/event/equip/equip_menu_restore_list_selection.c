@@ -13,10 +13,9 @@
  */
 void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
     s32 i;
-    s32 found_end;
+    s32 found_end = 0;
     s32 entry_id;
 
-    found_end = 0;
     *selected_index = g_menu_selection_records[index].selected_index;
     *scroll_base_index = g_menu_selection_records[index].scroll_base_index;
     entry_id = g_menu_selection_records[index].entry_id;

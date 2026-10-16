@@ -115,13 +115,12 @@ s32 world_formation_get_unit_palette_index(s32 party_index) {
 /* Resolve a party member's 32-bit formation sprite value: bits 0-9 select the
  * sprite, and for monsters bits 10-11 carry the job's portrait palette. */
 s32 world_get_party_unit_formation_sprite(s32 party_index) {
-    party_unit_t* party_unit;
+    party_unit_t* party_unit = main_party_get_unit(party_index);
     job_data_t* job_data;
     u32 sprite_set;
     s32 portrait_id;
     s32 formation_sprite;
 
-    party_unit = main_party_get_unit(party_index);
     sprite_set = party_unit->sprite_set;
     portrait_id = sprite_set;
     if (sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {

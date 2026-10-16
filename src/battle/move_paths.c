@@ -23,9 +23,8 @@
 #include "psx/types.h"
 
 static void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
-    s32 direction;
+    s32 direction = battle_move_get_direction(unit);
 
-    direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
         battle_move_displace_unit_at_destination_tile(unit, direction);
@@ -49,9 +48,8 @@ static void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_u
  * builds the velocity for the run of contiguous steps and enters the
  * FLY_TO_CENTER stage. */
 static void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
-    s32 direction;
+    s32 direction = battle_move_get_direction(unit);
 
-    direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (battle_move_has_reached_current_tile_exit_edge(direction, unit) != 0) {
         battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
@@ -78,12 +76,10 @@ static void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t
  * coordinates and sets shadow_dirty bit 0.
  */
 static void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit) {
-    s32 done;
-    s32 direction;
+    s32 done = 0;
+    s32 direction = battle_move_get_direction(unit);
     battle_unit_t* mount;
 
-    done = 0;
-    direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (battle_move_has_reached_destination_tile_center(direction, unit) != 0) {
         unit->velocity.vz = 0;
@@ -450,14 +446,13 @@ void battle_move_transfer_target_coordinates(const battle_unit_t* src, battle_un
 }
 
 s32 battle_camera_get_input_direction(s32 source) {
-    s32 direction;
+    s32 direction = -1;
     u32 input;
     u32 previous;
     u32 pressed;
     u32 divisor;
     u32 threshold;
 
-    direction = -1;
     switch (g_battle_cursor_input_mode) {
     case BATTLE_CURSOR_INPUT_OPTION_A:
     case BATTLE_CURSOR_INPUT_OPTION_B:
@@ -819,11 +814,10 @@ s32 battle_camera_get_input_direction(s32 source) {
 /* Start the hovered-unit stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
 void battle_target_store_cursor_unit_name_and_data(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     s32 mode;
     s32 unit_id;
 
-    unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (unit != 0) {
         mode = UNIT_VIEW_MODE_HOVERED_UNIT;
         unit_id = unit->stats->battle_id;
@@ -850,11 +844,10 @@ void battle_target_store_cursor_unit_as_preview_target(void) {
  * source unit against the unit on the cursor tile, or the source unit's own stats
  * when the tile is empty. */
 void battle_target_store_cursor_casting_unit_name_and_data(void) {
-    battle_unit_t* target;
-    battle_unit_t* source;
+    battle_unit_t* target
+        = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
+    battle_unit_t* source = battle_unit_get_source();
 
-    target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-    source = battle_unit_get_source();
     if (target != 0) {
         menu_start_unit_view_thread(UNIT_VIEW_MODE_ATTACK_PREVIEW, source->stats->battle_id, target->stats->battle_id);
     } else {
@@ -869,13 +862,10 @@ void battle_target_store_cursor_casting_unit_name_and_data(void) {
  * game state: the cursor unit's panel in the free-cursor, close-move-help and
  * target-select states, the preview target's panel in the targeting-range state. */
 void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit) {
-    s32 old_x;
-    s32 old_z;
-    s32 old_y;
+    s32 old_x = g_battle_cursor_x;
+    s32 old_z = g_battle_cursor_z;
+    s32 old_y = g_battle_cursor_y;
 
-    old_x = g_battle_cursor_x;
-    old_z = g_battle_cursor_z;
-    old_y = g_battle_cursor_y;
     if (selected_unit != 0) {
         battle_target_move_cursor_to_unit(selected_unit);
     } else {
@@ -912,7 +902,7 @@ void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const
  * 32-bit option value is copied first so the loop note does not stop the load from
  * being scheduled into the prologue. */
 s32 battle_target_move_cursor_by_input(void) {
-    game_options_t options;
+    game_options_t options = g_main_game_options;
     u32 delay;
     s32 direction;
     map_tile_t* current;
@@ -921,7 +911,6 @@ s32 battle_target_move_cursor_by_input(void) {
     s8 lower_rise;
     s8 upper_rise;
 
-    options = g_main_game_options;
     do {
         switch (options.fields.multi_height_cursor_speed) {
         case 0:
@@ -1428,9 +1417,8 @@ void battle_camera_handle_tilt_request(s32 mode) {
 
 /* Toggle the camera tilt and play its sound. */
 static void battle_camera_toggle_tilt(void) {
-    s32 target;
+    s32 target = g_battle_map_tilt_target;
 
-    target = g_battle_map_tilt_target;
     if (target == MAP_TILT_LOW) {
         g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
         g_battle_map_tilt_target = MAP_TILT_HIGH;
@@ -1508,9 +1496,8 @@ void battle_camera_update_tilt(void) {
  * unit-length direction (ONE) with its height component multiplied by four. */
 static void battle_camera_calculate_acting_unit_vector_normal(void) {
     VECTOR delta;
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_source();
 
-    unit = battle_unit_get_source();
     setVector(&delta, unit->world_coords.vx - g_battle_camera_current_real_coords.vx / ONE,
         unit->world_coords.vy - g_battle_camera_current_real_coords.vy / ONE,
         unit->world_coords.vz - g_battle_camera_current_real_coords.vz / ONE);
@@ -1534,13 +1521,12 @@ static void battle_camera_shift_acting_unit_vector(void) {
  * offset is normalized by VectorNormal into g_battle_camera_step_vector and
  * tripled. Returns the negated tile height. */
 static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
-    map_tile_t* tile;
+    map_tile_t* tile = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     SVECTOR tile_position;
     VECTOR delta;
     s32 height;
     map_tile_depth_t depth;
 
-    tile = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
     depth = tile->depth_half_height;
     height = -((tile->height + depth.depth) * MAP_HEIGHT_STEP + depth.half_height * (MAP_HEIGHT_STEP / 2));
@@ -1816,9 +1802,8 @@ void battle_move_update_all_unit_paths(void) {
 void battle_camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) {
     s32 direction;
     u8 flags;
-    map_tile_t* tile;
+    map_tile_t* tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
 
-    tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
     direction = (0 - g_battle_camera_render_state.vy) & 0xFFF;
     if (direction < 0) {
         direction += 0x3FF;

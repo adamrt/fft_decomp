@@ -32,9 +32,8 @@ static void world_formation_draw_graphics_below_sprite(
 static void world_formation_reset_slots_and_frame_tpages(void);
 
 void world_menu_toggle_preview_stats_window(s32 flag) {
-    s32 stored;
+    s32 stored = flag;
 
-    stored = flag;
     if (stored != 0) {
         stored = 1;
         if (!(g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
@@ -275,7 +274,7 @@ s32 world_formation_is_unit_list_scroll_needed(void) {
 void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id) {
     oriented_quad_t sprite;
     menu_button_piece_t* piece;
-    s32 speed;
+    s32 speed = g_menu_event_speed;
     s32 i;
     s32 count;
     s16 piece_index;
@@ -285,7 +284,6 @@ void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 
     u32 flip;
     u16 clut;
 
-    speed = g_menu_event_speed;
     if (speed == 0) {
         speed = 1;
     }
@@ -632,10 +630,9 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
  * formation cursor to (x, y), clamped so it never drops below `floor`.
  * `dx` also holds the result. */
 static s32 world_formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor) {
-    s32 dx;
+    s32 dx = abs(g_world_formation_cursor_position.x - x);
     s32 dy;
 
-    dx = abs(g_world_formation_cursor_position.x - x);
     dx *= dx;
     dy = abs(g_world_formation_cursor_position.y - y);
     dy *= 2;

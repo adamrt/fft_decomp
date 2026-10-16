@@ -7,10 +7,9 @@
 void suzuki_sound_stop_all_sfx(void) {
     suzuki_music_t* music;
     suzuki_music_channel_t* channel;
-    u32 voices;
+    u32 voices = 0;
     s32 i;
 
-    voices = 0;
     music = g_suzuki_sound_sfx_music;
     channel = music->channels;
     for (i = SUZUKI_SFX_CHANNEL_COUNT; i != 0; i--) {

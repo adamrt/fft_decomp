@@ -121,13 +121,12 @@ void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* 
  * the minus flag draws only the sign glyph. Digits are drawn right to left,
  * at most the low byte of `flags` of them. */
 static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position) {
-    s32 saved_color;
+    s32 saved_color = position->color;
     s32 plus;
     s32 digits;
     s32 min_digits;
     s32 i;
 
-    saved_color = position->color;
     position->color = 0;
     if ((flags & MENU_DECIMAL_WIDEN_FOR_100) && value == 100) {
         flags = (flags & 0xff00) + 3;

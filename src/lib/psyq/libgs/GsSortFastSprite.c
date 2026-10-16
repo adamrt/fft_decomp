@@ -7,7 +7,7 @@ void GsSortFastSprite(GsSPRITE* sp, GsOT* ot, u16 pri) {
     SPRT* packet;
     DR_TPAGE* draw_mode;
     GsOT_TAG* tag;
-    u32 attr;
+    u32 attr = sp->attribute;
     u32 shade;
     u32 sprite_code;
     u32 mode; /* semi-transparency (attribute bit 30) in the code byte */
@@ -24,7 +24,6 @@ void GsSortFastSprite(GsSPRITE* sp, GsOT* ot, u16 pri) {
     s32 sum_x;
     s32 sum_y;
 
-    attr = sp->attribute;
     if (!(attr & GsDOFF) && sp->w != 0 && sp->h != 0) {
         draw_mode = (DR_TPAGE*)GsOUT_PACKET_P;
         /* Share one DMA tag: the 32-bit mode command occupies this primitive view's tag slot. */

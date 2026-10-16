@@ -6,11 +6,9 @@
  *
  * The existing entries and their terminator move one byte to the right. */
 void item_prepend_to_category_list(s32 item_id, s32 category_index) {
-    u8* list;
-    s32 i;
+    u8* list = g_item_category_lists[category_index];
+    s32 i = 0;
 
-    list = g_item_category_lists[category_index];
-    i = 0;
     while (list[i] != ITEM_LIST_END) {
         i++;
     }

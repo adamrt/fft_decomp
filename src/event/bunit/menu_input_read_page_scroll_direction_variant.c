@@ -11,13 +11,12 @@
  * WAIT suppresses intermediate held frames without treating them as a direction.
  */
 menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction_variant(void) {
-    menu_vertical_scroll_direction_e direction;
+    menu_vertical_scroll_direction_e direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input;
     s32 initial_delay;
     s32 repeat_period;
     u16 held_frames;
 
-    direction = MENU_VERTICAL_SCROLL_NONE;
     if (g_input_page_scroll_disabled == 0) {
         if (g_menu_input_lock_mode == 0) {
             input = PadRead(0);

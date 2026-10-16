@@ -20,12 +20,11 @@
  * the 0x4000 entry flag.
  */
 s32 world_job_build_unit_list(u8 unit_index, s16* jobs, s32 mode) {
-    s32 count;
+    s32 count = 0;
     s32 job;
     s32 i;
     s32 unlocked;
 
-    count = 0;
     bits_init_primary_reader_variant(g_world_unit_pointers[unit_index]->unlocked_jobs);
     job = job_get_base_variant(unit_index);
     if (mode == WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS

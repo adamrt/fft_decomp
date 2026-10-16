@@ -116,9 +116,8 @@ map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id) {
 
 /* The tile under a unit's integer world position (28 units per tile) on its map layer. */
 map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
     return battle_map_get_tile_data_pointer(
         unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_z);
 }
@@ -171,9 +170,8 @@ s32 battle_camera_is_active(void) {
 /* Move the cursor to the unit with this battle id. Returns 1 when the unit has
  * runtime data, otherwise 0 with the cursor unchanged. */
 s32 battle_target_move_cursor_to_battle_id(u32 battle_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xFFFF);
 
-    unit = battle_unit_get_by_battle_id(battle_id & 0xFFFF);
     if (unit != 0) {
         battle_target_move_cursor_to_unit(unit);
         return 1;
@@ -185,12 +183,10 @@ s32 battle_target_move_cursor_to_battle_id(u32 battle_id) {
  * target's tile and make the target the attacker's only target. Returns 1 when
  * both units exist. Nothing in the game calls it. */
 s32 battle_effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) {
-    battle_unit_t* attacker;
-    battle_unit_t* target;
+    battle_unit_t* attacker = battle_unit_get_by_battle_id(attacker_id);
+    battle_unit_t* target = battle_unit_get_by_battle_id(target_id);
     SVECTOR target_position;
 
-    attacker = battle_unit_get_by_battle_id(attacker_id);
-    target = battle_unit_get_by_battle_id(target_id);
     if (target != 0) {
         main_util_set_svector(&target_position, target->map_x, target->map_y, target->map_z);
         battle_effect_check_direct_trajectory_to_target(attacker_id, &target_position, target_id);
@@ -204,9 +200,8 @@ s32 battle_effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) 
 }
 
 s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
-    unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0) {
         battle_effect_set_secondary_teleport(unit);
         return 1;
@@ -343,9 +338,8 @@ static s32 battle_unit_select_and_open_entd(void) {
  * file. Returns 1 while the file is still loading, else 0 (also when there is no
  * current encounter). */
 static s32 battle_unit_poll_and_load_entd_units(void) {
-    entd_encounter_t* entd_data;
+    entd_encounter_t* entd_data = main_entd_get_encounter();
 
-    entd_data = main_entd_get_encounter();
     if (entd_data != (entd_encounter_t*)-1) {
         if (entd_data == 0) {
             return 1;
@@ -692,13 +686,12 @@ void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 
  * makes GCC hold the base addresses of the current-color and accumulator
  * arrays in registers for element 0. */
 void battle_gfx_update_screen_color_modulation_fade(void) {
-    u16 count;
+    u16 count = g_battle_gfx_screen_color_modulation_fade_frames;
     u16 remaining;
     u16 red;
     u16 green;
     u16 blue;
 
-    count = g_battle_gfx_screen_color_modulation_fade_frames;
     if (count != 0) {
         remaining = count - 1;
         g_battle_gfx_screen_color_modulation_fade_frames = remaining;

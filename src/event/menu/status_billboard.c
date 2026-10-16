@@ -202,8 +202,8 @@ static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, 
 #if defined(FFT_WORLD) || defined(FFT_BATTLE) || defined(FFT_EVENT_REQUIRE)
 /* Fill selected and comparison billboards, stats, equipment and ability names. */
 void menu_load_selected_unit_variant(void) {
-    unit_stats_t* unit;
-    menu_status_panel_slot_state_t* editor;
+    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
+    menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
     u16* innate_items;
     item_data_t* item;
     s32 i;
@@ -213,8 +213,6 @@ void menu_load_selected_unit_variant(void) {
     u8 field_value;
     s16 list_value;
 
-    unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
-    editor = &g_menu_selected_unit_fields.state;
     if (unit != 0) {
         menu_copy_unit_data_to_status_billboard_variant(unit, &g_menu_comparison_unit_status);
     }
@@ -367,8 +365,8 @@ void menu_load_selected_unit_variant(void) {
  * before the names are cleared and copied.
  */
 void menu_load_selected_unit_variant(void) {
-    unit_stats_t* unit;
-    menu_status_panel_slot_state_t* editor;
+    unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_comparison_unit_data.battle_id);
+    menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
     u16* innate_items;
     item_data_t* item;
     s32 i;
@@ -378,8 +376,6 @@ void menu_load_selected_unit_variant(void) {
     u8 field_value;
     s16 list_value;
 
-    unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_comparison_unit_data.battle_id);
-    editor = &g_menu_selected_unit_fields.state;
     if (unit != 0) {
         menu_copy_unit_data_to_status_billboard_variant(unit, &g_panel_comparison_billboard);
     }

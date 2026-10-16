@@ -52,9 +52,8 @@ void thread_exit_current(void) {
  * thread and marks it running. */
 void thread_reset_scheduler(void) {
     s32* word;
-    s32 index;
+    s32 index = (THREAD_ARRAY_BYTES / sizeof(s32)) - 1;
 
-    index = (THREAD_ARRAY_BYTES / sizeof(s32)) - 1;
     word = (s32*)((u8*)g_threads + THREAD_LAST_WORD_OFFSET);
     do {
         *word = 0;

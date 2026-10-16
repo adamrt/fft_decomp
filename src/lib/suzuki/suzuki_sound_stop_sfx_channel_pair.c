@@ -6,13 +6,11 @@
 void suzuki_sound_stop_sfx_channel_pair(s32 index) {
     suzuki_music_t* music;
     suzuki_music_channel_t* channel;
-    u32 bit;
+    u32 bit = 1 << index;
     u32 channels;
-    u32 voices;
+    u32 voices = 0;
     s32 count;
 
-    bit = 1 << index;
-    voices = 0;
     channels = 0;
     count = 2;
     music = g_suzuki_sound_sfx_music;

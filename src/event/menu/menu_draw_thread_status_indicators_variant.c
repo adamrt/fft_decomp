@@ -18,14 +18,13 @@ void menu_draw_thread_status_indicators_variant(void) {
     menu_gradient_panel_prims_t* prims;
     menu_status_thread_t* display;
     menu_status_thread_t* descriptor;
-    s32 active;
+    s32 active = 0;
     s32 i;
     s32 j;
     s32 k;
     s32 flip;
     s16 y;
 
-    active = 0;
     if (menu_thread_is_running_variant(THREAD_SCREEN_SLOT_UNIT_STATUS) != 0) {
         if (g_threads[THREAD_SCREEN_SLOT_UNIT_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             display = (menu_status_thread_t*)g_threads[THREAD_SCREEN_SLOT_UNIT_STATUS].function_parameter_1;

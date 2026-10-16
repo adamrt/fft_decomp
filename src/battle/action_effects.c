@@ -42,9 +42,8 @@ void battle_target_move_cursor_to_unit(const battle_unit_t* unit) {
 /* Move the cursor to the target of the unit's stored action: the target tile, or
  * the tile of the target unit. */
 void battle_target_move_cursor_to_action_target(const battle_unit_t* unit) {
-    unit_stats_t* bd;
+    unit_stats_t* bd = unit->stats;
 
-    bd = unit->stats;
     if (bd->action_command.targeting_type == BATTLE_TARGETING_TYPE_TILE) {
         g_battle_cursor_x = bd->action_command.target_position.vx;
         g_battle_cursor_z = unit->stats->action_command.target_position.vy;
@@ -414,9 +413,8 @@ void battle_unit_update_display_by_battle_id(u16 battle_id) {
  * transition.
  */
 s32 battle_status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
 
-    unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
     if (unit == 0) {
         return 0;
     }
@@ -569,14 +567,12 @@ void battle_unit_dismount_rider_and_update_display(battle_unit_t* rider) {
  * ceiling depth) and a point 3 levels above this tile's surface. Otherwise it is
  * 0x40. */
 static s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {
-    map_tile_t* from;
-    map_tile_t* to;
+    map_tile_t* from = battle_map_get_tile_data_pointer(x, y, layer);
+    map_tile_t* to = battle_map_get_tile_data_pointer(x, y, layer ^ 1);
     s32 from_height;
     s32 to_height;
     s32 limit;
 
-    from = battle_map_get_tile_data_pointer(x, y, layer);
-    to = battle_map_get_tile_data_pointer(x, y, layer ^ 1);
     if ((to->flags.blocked) == 0) {
         from_height = from->height + (from->depth_half_height.depth);
         to_height = to->height + (to->depth_half_height.depth);
@@ -594,16 +590,13 @@ static s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer)
  * upper bound is the tile surface height alone less 0x30.
  */
 static s32 battle_move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer) {
-    map_tile_t* tile;
-    s32 clearance;
+    map_tile_t* tile = battle_map_get_tile_data_pointer(x, y, layer);
+    s32 clearance = battle_move_calculate_tile_layer_step_offset(x, y, layer);
     s32 height;
     s32 lo;
     s32 hi;
-    map_tile_depth_t depth;
+    map_tile_depth_t depth = tile->depth_half_height;
 
-    tile = battle_map_get_tile_data_pointer(x, y, layer);
-    clearance = battle_move_calculate_tile_layer_step_offset(x, y, layer);
-    depth = tile->depth_half_height;
     height = ((tile->height + depth.depth) * 2) + depth.half_height;
     lo = -(height + clearance) * 6;
     if (value < lo) {

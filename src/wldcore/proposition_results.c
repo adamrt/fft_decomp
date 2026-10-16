@@ -491,9 +491,8 @@ s32 wldcore_proposition_find_preferred_job_unit(void) {
 }
 
 void wldcore_menu_push_countdown_level(void) {
-    s32 count;
+    s32 count = wldcore_get_completion_milestone_rank();
 
-    count = wldcore_get_completion_milestone_rank();
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_TREASURE) {
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].countdown.current
             = WLDCORE_TEXT_ID_TREASURE_FOUND_FIRST;
@@ -1761,11 +1760,10 @@ static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_le
 void wldcore_list_open_unexplored_lands(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
-    s32 count;
+    s32 count = 0;
     s32 i; /* reused as the visible-row count, which the target keeps in $s0 */
     s32 record_index;
 
-    count = 0;
     for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
             g_wldcore_list_entry_values[count] = i + (s16)TEXT_ID_UNEXPLORED_LAND_NAME_BASE;
@@ -2025,11 +2023,10 @@ void wldcore_menu_step_unexplored_land_detail_level(wldcore_menu_variable_detail
 void wldcore_list_open_treasures(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
-    s32 count;
+    s32 count = 0;
     s32 i; /* reused as the visible-row count, which the target keeps in $s0 */
     s32 record_index;
 
-    count = 0;
     for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
             g_wldcore_list_entry_values[count] = i + (s16)TEXT_ID_TREASURE_NAME_BASE;
@@ -2324,9 +2321,9 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
  * once step reaches 50, otherwise 1.
  */
 static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
-    u8* pixels;
-    u16* order;
-    u8* buffer;
+    u8* pixels = (u8*)image->pixel;
+    u16* order = g_wldcore_dissolve_band_order;
+    u8* buffer = BLOCK_BUFFER;
     s32 i;
     s32 j;
     s32 size;
@@ -2339,9 +2336,6 @@ static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
     s32 first;
     u8* state;
 
-    pixels = (u8*)image->pixel;
-    order = g_wldcore_dissolve_band_order;
-    buffer = BLOCK_BUFFER;
     if (step == 0) {
         for (i = 0; i < image->pw * (image->ph << 1); i++) {
             buffer[i] = 0xff;

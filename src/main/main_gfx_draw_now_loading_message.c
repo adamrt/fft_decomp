@@ -8,10 +8,9 @@
  * every call draws the blinking message on its own, alternating the two display
  * buffers; the counter stays at 0x40 or 0x41. */
 void main_gfx_draw_now_loading_message(void) {
-    s32 frame;
+    s32 frame = g_main_gfx_loading_display_frame_counter;
     u32* otag;
 
-    frame = g_main_gfx_loading_display_frame_counter;
     if (frame != MAIN_FILE_LOADING_DISPLAY_OFF) {
         frame++;
         g_main_gfx_loading_display_frame_counter = frame;

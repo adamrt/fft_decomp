@@ -9,15 +9,11 @@
  * the read position is returned unchanged, so the parameter bytes are read
  * next as note data. */
 u8* suzuki_smd_play_vfx(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    suzuki_sound_resource_t* resource;
-    s16 sound;
-    s16 id;
-    u8 index;
+    suzuki_sound_resource_t* resource = g_suzuki_sound_resource_list;
+    s16 sound = note_data[0] | (note_data[1] << 8);
+    s16 id = channel->sound_id >> 16;
+    u8 index = note_data[2];
 
-    resource = g_suzuki_sound_resource_list;
-    sound = note_data[0] | (note_data[1] << 8);
-    id = channel->sound_id >> 16;
-    index = note_data[2];
     if (id != 0) {
         while (resource->id != id) {
             resource = resource->next;

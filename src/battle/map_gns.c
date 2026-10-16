@@ -77,11 +77,10 @@ enum {
  * Returns the GNS table when the read started and 0 when it could not start. A
  * map without a GNS sector returns whatever bzero left in $v0. */
 gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id) {
-    u32 selected_map;
+    u32 selected_map = map_id & 0xffff;
     gns_record_t* gns_records;
     u32 lba;
 
-    selected_map = map_id & 0xffff;
     battle_map_load_move_find_item_data(&g_battle_map_move_find_item_data[selected_map]);
 
     gns_records = g_battle_map_gns_records;

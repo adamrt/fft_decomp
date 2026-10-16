@@ -56,10 +56,10 @@ static void battle_status_disable_acting(unit_stats_t* unit) {
  * The rare item is chosen with a (100 - Brave)% chance; the tile is the
  * unit's x and position (y in the low byte, the layer in bit 15). */
 move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
-    move_find_result_data_t* find_result;
+    move_find_result_data_t* find_result
+        = battle_map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation);
     u8 item_id;
 
-    find_result = battle_map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation);
     if (main_util_roll_pass_fail(0x64, 0x64 - unit->brave) == 0) {
         item_id = find_result->rare_item_id;
     } else {
@@ -84,10 +84,9 @@ move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
     map_move_find_item_entry_t* tile;
     s32 unit;
     s32 i;
-    s32 trap;
+    s32 trap = BATTLE_TRAP_ID_NONE;
     u8* result;
 
-    trap = BATTLE_TRAP_ID_NONE;
     g_battle_move_find_result_flags = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = battle_unit_find_at_tile((u8)x, y, layer, BATTLE_UNIT_TILE_FILTER_TRANSPARENT);
@@ -140,11 +139,9 @@ move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
  * Each flag byte holds two maps, four tiles each; the test returns 1 while the item is
  * still unfound. */
 static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
-    s32 byte_index;
-    s32 bit;
+    s32 byte_index = map_id / 2;
+    s32 bit = 0x80 >> (((map_id & 1) * 4) + tile_index);
 
-    byte_index = map_id / 2;
-    bit = 0x80 >> (((map_id & 1) * 4) + tile_index);
     if (save == 0) {
         return (g_main_item_location_flags[byte_index] & bit) == 0;
     }
@@ -481,16 +478,13 @@ void battle_unit_set_enemy_level_data(unit_stats_t* unit) {
  * (highest enemy level - lowest level among the present party units) * 100, or
  * 0 when that is not positive or a player unit has fallen. */
 void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) {
-    s32 count;
-    s32 money;
-    u8 lowest;
+    s32 count = 0;
+    s32 money = 0;
+    u8 lowest = UNIT_LEVEL_MAX;
     s32 i;
     unit_stats_t* unit;
     u8 value;
 
-    count = 0;
-    money = 0;
-    lowest = UNIT_LEVEL_MAX;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
         if (unit->existence != BATTLE_UNIT_EXISTENCE_NONE && unit->existence != BATTLE_UNIT_EXISTENCE_OFF_FIELD) {
@@ -539,10 +533,9 @@ void battle_status_reapply_active_flags(unit_stats_t* unit) {
 /* Enable the renderer status flags for each of a unit's current statuses.
  * Returns -1 for an empty unit slot, otherwise 0. */
 s32 battle_status_init_special_flag_enabling(s32 unit_id) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     s32 i;
 
-    unit = &g_battle_unit_stats[unit_id];
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
@@ -594,10 +587,9 @@ unit_stats_t* battle_unit_find_active_data_pointer(void) {
  * the four TURN menus replaced by their RIDER_TURN variants for a rider. Returns
  * BATTLE_MENU_ID_NONE for an empty slot. */
 battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = battle_unit_get_existing_pointer(battle_id);
     s32 menu;
 
-    unit = battle_unit_get_existing_pointer(battle_id);
     if (unit == 0) {
         return BATTLE_MENU_ID_NONE;
     }
@@ -634,7 +626,7 @@ battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_i
  * The local can_evade holds the action restriction. */
 static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit) {
     unit_stats_t* act;
-    s32 flag;
+    s32 flag = 0;
     s32 player_controlled;
     s32 player_flag;
     s32 dont_move;
@@ -642,7 +634,6 @@ static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* 
     u8 moved;
     u8 acted;
 
-    flag = 0;
     act = battle_unit_find_active_data_pointer();
     if (act != 0) {
         if ((act->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) == 0
@@ -727,7 +718,7 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
  * the incremented pointer instead of offsets from the saved base. `supports`
  * is declared first so it wins the allocation tie with `primary`. */
 s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types) {
-    unit_stats_t* unit;
+    unit_stats_t* unit = battle_unit_get_existing_pointer(unit_id);
     u8* list;
     u8 supports;
     u8 primary;
@@ -736,7 +727,6 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
     u8 id;
     u8 menu_type;
 
-    unit = battle_unit_get_existing_pointer(unit_id);
     if (unit == 0) {
         return -1;
     }

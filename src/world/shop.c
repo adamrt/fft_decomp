@@ -1054,9 +1054,8 @@ void world_shop_run_fitting_room_equip_menu(void) {
 }
 
 static s32 world_shop_get_gil_minus_fitting_room_cost(s32 unused_row) {
-    s32 gil;
+    s32 gil = world_shop_adjust_gil(0);
 
-    gil = world_shop_adjust_gil(0);
     return gil - world_shop_add_fitting_room_cost(0);
 }
 
@@ -1476,12 +1475,11 @@ void world_shop_run_best_fit_preview_step(void) {
  * the slot. Triangle returns to shop step 6.
  */
 void world_shop_run_sell_equipped_item_menu(void) {
-    s32 close;
+    s32 close = 0;
     u32 item;
     s32 text_id;
     u32 input;
 
-    close = 0;
     if (g_world_shop_sell_equipped_menu_open == 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, world_text_message_box_thread);

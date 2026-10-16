@@ -6,7 +6,7 @@
  * depth and blend mode, bit 30 semi-transparency and bit 6 unmodulated texture. */
 void GsSortFlipSprite(GsSPRITE* sp, GsOT* otp, u16 pri) {
     POLY_FT4* p;
-    u32 attr;
+    u32 attr = sp->attribute;
     s32 x;
     s32 y;
     u8 u0;
@@ -16,7 +16,6 @@ void GsSortFlipSprite(GsSPRITE* sp, GsOT* otp, u16 pri) {
     u32 mode; /* semi-transparency (attribute bit 30) in the code byte */
     u32 code; /* shading (attribute bit 6) plus the POLY_FT4 code 0x2c */
 
-    attr = sp->attribute;
     if (!(attr & GsDOFF) && sp->w != 0 && sp->h != 0) {
         p = (POLY_FT4*)GsOUT_PACKET_P;
         x = sp->x + GsORGOFSX - sp->mx;

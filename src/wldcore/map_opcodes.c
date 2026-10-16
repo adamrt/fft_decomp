@@ -30,9 +30,8 @@ s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask) {
     s32 flags;
     u16 i;
     u16 entry;
-    s32 offset;
+    s32 offset = g_wldcore_script_base[location] & 0xFFFE;
 
-    offset = g_wldcore_script_base[location] & 0xFFFE;
     g_wldcore_script_state.list = (u16*)((s32)g_wldcore_script_base - (-offset));
     for (i = 0; (entry = g_wldcore_script_state.list[i]) != 0; i++) {
         g_wldcore_script_state.data = (u16*)((s32)g_wldcore_script_base - (-(entry & 0xFFFE)));
@@ -367,11 +366,10 @@ void wldcore_opcode_map_focus_location(void) {
 }
 
 void wldcore_opcode_map_check_ramza_brave_at_least(void) {
-    party_unit_t* party;
+    party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;
 
-    party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     ip = g_wldcore_script_state.ip;
     val = g_wldcore_script_state.data[ip];
     g_wldcore_script_state.ip = ip + 1;
@@ -394,11 +392,10 @@ static s32 wldcore_get_ramza_roster_index(void) {
 
 /* Reject the MCBrave<= condition when Ramza's Brave is above the operand. */
 void wldcore_opcode_map_check_ramza_brave_at_most(void) {
-    party_unit_t* party;
+    party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;
 
-    party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     ip = g_wldcore_script_state.ip;
     val = g_wldcore_script_state.data[ip];
     g_wldcore_script_state.ip = ip + 1;
@@ -409,11 +406,10 @@ void wldcore_opcode_map_check_ramza_brave_at_most(void) {
 
 /* Reject the MCFaith>= condition when Ramza's Faith is below the operand. */
 void wldcore_opcode_map_check_ramza_faith_at_least(void) {
-    party_unit_t* party;
+    party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;
 
-    party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     ip = g_wldcore_script_state.ip;
     val = g_wldcore_script_state.data[ip];
     g_wldcore_script_state.ip = ip + 1;
@@ -424,11 +420,10 @@ void wldcore_opcode_map_check_ramza_faith_at_least(void) {
 
 /* Reject the MCFaith<= condition when Ramza's Faith is above the operand. */
 void wldcore_opcode_map_check_ramza_faith_at_most(void) {
-    party_unit_t* party;
+    party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
     s32 val;
 
-    party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     ip = g_wldcore_script_state.ip;
     val = g_wldcore_script_state.data[ip];
     g_wldcore_script_state.ip = ip + 1;
@@ -438,12 +433,10 @@ void wldcore_opcode_map_check_ramza_faith_at_most(void) {
 }
 
 void wldcore_set_bit_value(u32* bits, s32 index, s32 set) {
-    u32* base;
+    u32* base = bits;
     u32 mask;
-    s32 word_index;
+    s32 word_index = index / 32;
 
-    base = bits;
-    word_index = index / 32;
     mask = 1U << (index & 31);
     if (set != 0) {
         base[word_index] |= mask;
@@ -485,12 +478,10 @@ void wldcore_list_open_script_flags_01a4_01bb(void) {
     point32_t origin;
     s16* values;
     s16* flags;
-    s32 count;
-    s32 i;
+    s32 count = 0;
+    s32 i = 0;
     s32 record_index;
 
-    count = 0;
-    i = 0;
     flags = g_wldcore_list_row_flags;
     values = g_wldcore_list_entry_values;
     for (; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {

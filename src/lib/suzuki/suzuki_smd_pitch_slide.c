@@ -5,11 +5,9 @@
  * semitones over the given number of ticks; a zero count or amount stops the
  * slide. */
 u8* suzuki_smd_pitch_slide(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    u16 steps;
-    s32 amount;
+    u16 steps = note_data[0];
+    s32 amount = (s8)note_data[1] << 24;
 
-    steps = note_data[0];
-    amount = (s8)note_data[1] << 24;
     if (steps != 0 && amount != 0) {
         channel->pitch_slide_count = steps;
         channel->ramp_flags |= SUZUKI_RAMP_PITCH_SLIDE;

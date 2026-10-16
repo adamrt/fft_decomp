@@ -59,7 +59,7 @@ void text_run_dialog_thread_variant(void) {
     u16 variable_base;
     u16 value_index;
     thread_t* thread;
-    s32 party_name_request;
+    s32 party_name_request = 0;
     menu_window_buffer_t* win;
     menu_window_buffer_t* cursor_window;
     menu_window_buffer_t* arrow_window;
@@ -90,7 +90,6 @@ void text_run_dialog_thread_variant(void) {
     u16 param;
     s32 no_value;
 
-    party_name_request = 0;
     thread_set_current_task_id(THREAD_TASK_RESUME);
     script_set_variable(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET, 0);
     value_index = 0;

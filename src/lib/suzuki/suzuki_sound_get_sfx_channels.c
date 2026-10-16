@@ -7,9 +7,8 @@ u32 suzuki_sound_get_sfx_channels(s32 sound_id) {
     suzuki_music_channel_t* channel;
     u32 bit;
     u32 channels;
-    s32 count;
+    s32 count = SUZUKI_SFX_CHANNEL_COUNT;
 
-    count = SUZUKI_SFX_CHANNEL_COUNT;
     bit = 1;
     channel = g_suzuki_sound_sfx_music->channels;
     channels = 0;

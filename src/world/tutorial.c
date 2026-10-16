@@ -232,9 +232,8 @@ static void world_script_handle_tutorial_command_highlight_ring(void) {
     s32 scale_y;
     s32 unused;
     s32 i;
-    s32 step;
+    s32 step = 0x88;
 
-    step = 0x88;
     radius = *(&((world_tutorial_circle_instruction_t*)g_world_script_tutorial_command_ptr)->radius);
     scale_x = *(&((world_tutorial_circle_instruction_t*)g_world_script_tutorial_command_ptr)->scale_x);
     scale_y = *(&((world_tutorial_circle_instruction_t*)g_world_script_tutorial_command_ptr)->scale_y);

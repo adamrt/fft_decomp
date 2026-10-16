@@ -3,20 +3,16 @@
 /* Copy a polygon to the work area, apply the 2D offset and link it into the OT.
  * Code bits 0x04/0x08/0x10 select 32-bit texture fields, a fourth vertex and vertex colors. */
 void GsSortPoly(void* prim, GsOT* ot, u16 pri) {
-    u32* src;
-    u32* dst;
+    u32* src = prim;
+    u32* dst = (u32*)GsOUT_PACKET_P;
     POLY_F4* source_coordinates;
     POLY_F4* destination_coordinates;
-    s32 len;
-    u8 code;
+    s32 len = PSYQ_GPU_PACKET_WORDS(POLY_F3);
+    u8 code = getcode(src);
     s32 gouraud;
     s32 quad;
     s32 textured;
 
-    src = prim;
-    dst = (u32*)GsOUT_PACKET_P;
-    len = PSYQ_GPU_PACKET_WORDS(POLY_F3);
-    code = getcode(src);
     /* Byte or bitfield locals add normalization to these integer masks. */
     gouraud = code & PSYQ_GPU_POLYGON_GOURAUD;
     quad = code & PSYQ_GPU_POLYGON_QUAD;

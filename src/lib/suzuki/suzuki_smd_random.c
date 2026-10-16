@@ -3,9 +3,8 @@
 
 /* xorshift step; returns the low 15 bits of the new state */
 s32 suzuki_smd_random(void) {
-    s32 state;
+    s32 state = g_suzuki_smd_random_state;
 
-    state = g_suzuki_smd_random_state;
     state ^= state << 17;
     state ^= state >> 15;
     g_suzuki_smd_random_state = state;

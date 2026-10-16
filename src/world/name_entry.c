@@ -239,10 +239,9 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
 
 /* Open the name-entry key list: identity entry ids 0..8 plus a -1 terminator. */
 static void world_menu_open_name_entry_key_list(void) {
-    s32 count;
+    s32 count = 0;
     s32 i;
 
-    count = 0;
     for (i = 8; i >= 0; i--) {
         g_world_name_entry_key_ids[i] = i;
         count++;
@@ -311,10 +310,9 @@ void world_name_handle_entry_confirmed_keys(void) {
  * and a column change requests cursor sound 3. */
 static void world_name_update_entry_cursor(void) {
     point16_t cursor;
-    s32 previous;
+    s32 previous = g_world_name_entry_cursor_index;
     u32 input;
 
-    previous = g_world_name_entry_cursor_index;
     if (g_menu_list_selected_index > 0) {
         if (g_world_name_entry_list_cursor == 0) {
             g_world_name_entry_cursor_index = g_world_name_entry_special_to_char_column[previous];

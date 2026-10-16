@@ -2,16 +2,14 @@
 
 /* Copies size bytes: 16-byte blocks, then 32-bit values, then bytes. */
 void suzuki_sound_copy_memory(void* destination, const void* source, s32 size) {
-    u8* dst;
-    const u8* src;
+    u8* dst = destination;
+    const u8* src = source;
     s32 count;
     u32 word0;
     u32 word1;
     u32 word2;
     u32 word3;
 
-    dst = destination;
-    src = source;
     for (count = size >> 4; count != 0; count--) {
         const u32* source_words = (const u32*)src;
         u32* destination_words = (u32*)dst;

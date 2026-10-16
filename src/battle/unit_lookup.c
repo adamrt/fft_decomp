@@ -477,10 +477,9 @@ battle_unit_t* battle_unit_get_casting(void) {
 }
 
 battle_unit_t* battle_unit_get_source(void) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = g_battle_unit_list_head;
     s32 source_id;
 
-    unit = g_battle_unit_list_head;
     if (unit != 0) {
         source_id = g_battle_unit_source_runtime_id;
         for (; unit != 0; unit = unit->previous) {
@@ -495,9 +494,8 @@ battle_unit_t* battle_unit_get_source(void) {
 /* The first record in the runtime unit list standing on a tile, whatever its state
  * (crystals, treasures and records without battle stats included), or 0. */
 battle_unit_t* battle_unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = g_battle_unit_list_head;
 
-    unit = g_battle_unit_list_head;
     while (unit != 0) {
         if (unit->map_x == map_x && unit->map_y == map_y && unit->map_z == map_z) {
             return unit;
@@ -659,9 +657,8 @@ battle_unit_t* battle_unit_find_overlapping_at_tile(battle_unit_t* self, s32 x, 
 
 /* The runtime (display) record whose runtime_id matches the requested ID, or 0. */
 battle_unit_t* battle_unit_get_by_runtime_id(u16 runtime_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = g_battle_unit_list_head;
 
-    unit = g_battle_unit_list_head;
     while (unit != 0) {
         if (unit->runtime_id == runtime_id) {
             return unit;
@@ -673,9 +670,8 @@ battle_unit_t* battle_unit_get_by_runtime_id(u16 runtime_id) {
 
 /* The runtime (display) record whose battle stats occupy unit slot battle_id, or 0. */
 battle_unit_t* battle_unit_get_by_battle_id(u16 battle_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = g_battle_unit_list_head;
 
-    unit = g_battle_unit_list_head;
     while (unit != 0) {
         if ((unit->stats != 0) && (unit->stats->battle_id == battle_id)) {
             return unit;
@@ -687,9 +683,8 @@ battle_unit_t* battle_unit_get_by_battle_id(u16 battle_id) {
 
 s32 battle_unit_count_crystals(void) {
     battle_unit_t* unit;
-    s32 count;
+    s32 count = 0;
 
-    count = 0;
     unit = g_battle_unit_list_head;
     while (unit != 0) {
         if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_CRYSTAL) {
@@ -703,11 +698,10 @@ s32 battle_unit_count_crystals(void) {
 /* Moves a unit's record to the head of the runtime unit list, so list walks reach it
  * first. Returns 1 when moved, 0 when no record has the runtime id. */
 s32 battle_unit_move_to_head(u32 runtime_id) {
-    battle_unit_t* unit;
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
     battle_unit_t* iterator;
     battle_unit_t* head;
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
     if (unit != 0) {
         /* The 32-bit list-head pointer serves as a sentinel record: its previous field
          * (0x000) is the head link. */
@@ -761,9 +755,8 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
 void battle_gfx_invalidate_sp2_vram_slot(battle_unit_t* unit) {
     u32 invalid;
     battle_gfx_vram_slot_t* slot;
-    s32 count;
+    s32 count = 0;
 
-    count = 0;
     invalid = BATTLE_GFX_VRAM_SLOT_OWNER_NONE;
     slot = g_battle_gfx_vram_slots;
     for (; count < 2; count++, slot++) {
@@ -798,17 +791,13 @@ static u32 battle_gfx_read_compressed_nibble(void) {
  * A zero nibble introduces a run of transparent pixels whose length follows as
  * one nibble, or as two or three nibbles after the markers 7 and 8. */
 void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination) {
-    s32 high;
-    s32 count;
+    s32 high = 0;
+    s32 count = 0;
     s32 value;
     s32 i;
-    s32 size;
-    u8* out;
+    s32 size = 0x6400;
+    u8* out = destination;
 
-    high = 0;
-    count = 0;
-    size = 0x6400;
-    out = destination;
     g_battle_gfx_compressed_data = source;
     g_battle_gfx_compressed_offset = 0;
     g_battle_gfx_compressed_nibble_phase = 0;
@@ -882,9 +871,8 @@ static void battle_gfx_init_render_state(void) {
  * parts and none of them in use. */
 battle_gfx_sprite_display_data_t* battle_gfx_init_unit_sprite_display(s32 runtime_id) {
     s32 body_part;
-    battle_gfx_sprite_display_data_t* display;
+    battle_gfx_sprite_display_data_t* display = &g_battle_units[runtime_id].unit_sprite_display.header;
 
-    display = &g_battle_units[runtime_id].unit_sprite_display.header;
     display->color.b = 0x80;
     display->color.g = 0x80;
     display->color.r = 0x80;
@@ -899,9 +887,8 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_unit_sprite_display(s32 runtim
  * no flags on its three parts and none of them in use. */
 battle_gfx_sprite_display_data_t* battle_gfx_init_weapon_sprite_display(s32 unit_index, s32 display_type) {
     s32 weapon_part;
-    battle_gfx_sprite_display_data_t* display;
+    battle_gfx_sprite_display_data_t* display = &g_battle_units[unit_index].weapon_sprite_displays[display_type].header;
 
-    display = &g_battle_units[unit_index].weapon_sprite_displays[display_type].header;
     display->color.b = 0x80;
     display->color.g = 0x80;
     display->color.r = 0x80;
@@ -943,10 +930,9 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_numeric_sprite_display(s32 uni
 /* Resets a unit's status bubble display to one 14 x 12 part at (0, 0xb0) of the
  * FRAME.BIN page with CLUT 7 of the sprite row, neutral color and scale ONE. */
 battle_gfx_sprite_display_data_t* battle_gfx_init_status_bubble_sprite_display(s32 unit_index) {
-    battle_gfx_sprite_display_data_t* display;
+    battle_gfx_sprite_display_data_t* display = &g_battle_units[unit_index].status_bubble_sprite_display.header;
     s32 i;
 
-    display = &g_battle_units[unit_index].status_bubble_sprite_display.header;
     display->color.b = 0x80;
     display->color.g = 0x80;
     display->color.r = 0x80;
@@ -971,10 +957,9 @@ battle_gfx_sprite_display_data_t* battle_gfx_init_status_bubble_sprite_display(s
 /* Resets a unit's item sprite display to one 16 x 16 part of the ITEM.BIN page
  * with CLUT 7 of the sprite row, neutral color and scale ONE. */
 battle_gfx_sprite_display_data_t* battle_gfx_init_item_sprite_display(s32 runtime_id) {
-    battle_gfx_sprite_display_data_t* display;
+    battle_gfx_sprite_display_data_t* display = &g_battle_units[runtime_id].item_sprite_display.header;
     s32 i;
 
-    display = &g_battle_units[runtime_id].item_sprite_display.header;
     display->color.b = 0x80;
     display->color.g = 0x80;
     display->color.r = 0x80;
@@ -1278,7 +1263,7 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
     SVECTOR unused; /* unreferenced; keeps the 0x30-byte target frame */
     map_tile_t* tile;
     SVECTOR* quad;
-    u8 layer;
+    u8 layer = unit->map_z;
     u8 height;
     map_tile_depth_t depth;
     u8 slope_type;
@@ -1289,7 +1274,6 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
     s32 rhs;
     s32 rise;
 
-    layer = unit->map_z;
     battle_unit_copy_draw_coords(&coords, unit);
     tile = battle_map_get_tile_data_pointer((coords.vx / MAP_TILE_SIZE), (coords.vz / MAP_TILE_SIZE), layer);
     depth = tile->depth_half_height;

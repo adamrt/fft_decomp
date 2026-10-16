@@ -20,11 +20,9 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
  * item and clears that slot. Unit index 1 is the preview record: it is
  * updated without touching the inventory or the battle stats. */
 s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
-    s16 value;
-    equip_item_slot_result_e result;
+    s16 value = item_id & ITEM_ENTRY_ID_MASK;
+    equip_item_slot_result_e result = equip_unit_validate_slot_item(unit_index, slot, value);
 
-    value = item_id & ITEM_ENTRY_ID_MASK;
-    result = equip_unit_validate_slot_item(unit_index, slot, value);
     if (result < 0) {
         return result;
     }
@@ -81,8 +79,8 @@ static s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
  * world_formation_can_equip_item_in_slot). */
 static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id) {
     s32 result;
-    s16 id;
-    s16 new_item;
+    s16 id = item_id & ITEM_ENTRY_ID_MASK;
+    s16 new_item = id;
     s32 other;
     s32 other_slot;
     s32 is_nonstandard_weapon;
@@ -93,8 +91,6 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
     s32 other_two_swords;
     u8 flags;
 
-    id = item_id & ITEM_ENTRY_ID_MASK;
-    new_item = id;
     if (id == ITEM_ID_NOTHING) {
         return EQUIP_SLOT_ITEM_ALLOWED;
     }

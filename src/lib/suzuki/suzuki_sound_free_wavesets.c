@@ -4,9 +4,8 @@
  * resident low-id sets. */
 void suzuki_sound_free_wavesets(void) {
     suzuki_waveset_t* waveset;
-    suzuki_waveset_t* node;
+    suzuki_waveset_t* node = g_suzuki_sound_waveset_list;
 
-    node = g_suzuki_sound_waveset_list;
     while (node != 0) {
         waveset = node;
         node = node->next;

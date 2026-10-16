@@ -337,12 +337,10 @@ static s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, co
  * holds the map layer), evaluated for the mount when the unit is a rider. A
  * rider's result is moved by -10 plus the mount's float bob offset. */
 s32 battle_gfx_calculate_world_height_with_caller_coords(battle_unit_t* unit, const SVECTOR* coords) {
-    battle_unit_t* mount;
+    battle_unit_t* mount = battle_unit_get_mount(unit);
     s32 adjusted_world_height;
-    s32 world_height;
+    s32 world_height = battle_gfx_calculate_world_height_from_coords(mount, coords);
 
-    mount = battle_unit_get_mount(unit);
-    world_height = battle_gfx_calculate_world_height_from_coords(mount, coords);
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
         adjusted_world_height = world_height - 10;
         world_height = mount->float_bob_offset + adjusted_world_height;
@@ -355,11 +353,10 @@ s32 battle_gfx_calculate_world_height_with_caller_coords(battle_unit_t* unit, co
  * moved by -10 plus the mount's float bob offset. */
 s32 battle_gfx_calculate_world_height_from_move_destination(battle_unit_t* unit) {
     SVECTOR coord;
-    battle_unit_t* mount;
+    battle_unit_t* mount = battle_unit_get_mount(unit);
     s32 adjusted_world_height;
     s32 world_height;
 
-    mount = battle_unit_get_mount(unit);
     coord.vx = mount->movement.destination_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     coord.vz = mount->movement.destination_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     coord.vy = mount->movement.destination_z;
@@ -376,11 +373,10 @@ s32 battle_gfx_calculate_world_height_from_move_destination(battle_unit_t* unit)
  * rider's result is moved by -10 plus the mount's float bob offset. */
 s32 battle_gfx_calculate_world_height_from_world_coords(battle_unit_t* unit) {
     SVECTOR coord;
-    battle_unit_t* mount;
+    battle_unit_t* mount = battle_unit_get_mount(unit);
     s32 adjusted_world_height;
     s32 world_height;
 
-    mount = battle_unit_get_mount(unit);
     /* The target loads the s16 world coordinates unsigned (lhu). */
     coord.vx = mount->world_coords.vx;
     coord.vz = mount->world_coords.vz;
@@ -398,11 +394,10 @@ s32 battle_gfx_calculate_world_height_from_world_coords(battle_unit_t* unit) {
  * the mount's float bob offset. */
 s32 battle_gfx_calculate_world_height_from_unit_tile(battle_unit_t* unit) {
     SVECTOR coord;
-    battle_unit_t* mount;
+    battle_unit_t* mount = battle_unit_get_mount(unit);
     s32 adjusted_world_height;
     s32 world_height;
 
-    mount = battle_unit_get_mount(unit);
     coord.vx = mount->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     coord.vz = mount->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     coord.vy = mount->map_z;
@@ -423,11 +418,10 @@ s32 battle_gfx_calculate_world_height_from_unit_tile(battle_unit_t* unit) {
 s32 battle_gfx_calculate_world_height_from_battle_tile(battle_unit_t* unit) {
     SVECTOR coord;
     unit_stats_t* stats;
-    battle_unit_t* mount;
+    battle_unit_t* mount = battle_unit_get_mount(unit);
     s32 adjusted_world_height;
     s32 world_height;
 
-    mount = battle_unit_get_mount(unit);
     stats = mount->stats;
     coord.vx = stats->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     stats = mount->stats;
@@ -1244,9 +1238,8 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
  * except during the four float-jump step phases, then advances its status bubble
  * when one is active. */
 void battle_gfx_init_status_bubble(battle_unit_t* unit) {
-    u8 phase;
+    u8 phase = unit->step_phase;
 
-    phase = unit->step_phase;
     if (phase != MOVE_STEP_PHASE_FLOAT_JUMP_SOUTH && phase != MOVE_STEP_PHASE_FLOAT_JUMP_EAST
         && phase != MOVE_STEP_PHASE_FLOAT_JUMP_WEST && phase != MOVE_STEP_PHASE_FLOAT_JUMP_NORTH) {
         battle_unit_increment_or_decrement_height_mod(unit);

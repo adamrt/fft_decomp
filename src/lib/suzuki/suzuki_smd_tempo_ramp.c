@@ -6,11 +6,10 @@
  * A zero count or an unchanged tempo starts nothing. */
 u8* suzuki_smd_tempo_ramp(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s16 steps;
-    u32 target;
+    u32 target = note_data[1];
     u32 scaled;
     s32 delta;
 
-    target = note_data[1];
     steps = note_data[0];
     music->tempo_target = target;
     scaled = target << 16;

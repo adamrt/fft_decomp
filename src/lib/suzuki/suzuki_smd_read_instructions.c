@@ -27,8 +27,8 @@
  * before the reloads of event_ticks and ramp_flags that the target performs;
  * mod_flags keeps the single flags load the target tests three times. */
 void suzuki_smd_read_instructions(suzuki_music_t* music, suzuki_music_channel_t* channels, s16 channel_count) {
-    suzuki_music_channel_t* channel;
-    u32 voice_bit;
+    suzuki_music_channel_t* channel = channels;
+    u32 voice_bit = 1;
     s32 key_on;
     u16 flags;
     u8* note_data;
@@ -42,8 +42,6 @@ void suzuki_smd_read_instructions(suzuki_music_t* music, suzuki_music_channel_t*
     s32 diff;
     u16 mod_flags;
 
-    channel = channels;
-    voice_bit = 1;
     do {
         if (channel->flags != 0) {
             key_on = 0;

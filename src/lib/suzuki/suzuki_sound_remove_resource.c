@@ -10,9 +10,8 @@
 void suzuki_sound_remove_resource(suzuki_sound_resource_t* resource) {
     suzuki_sound_resource_t* prev;
     suzuki_sound_resource_t* node;
-    suzuki_sound_resource_t* removed;
+    suzuki_sound_resource_t* removed = resource;
 
-    removed = resource;
     prev = 0;
     node = g_suzuki_sound_resource_list;
     while (node != 0) {

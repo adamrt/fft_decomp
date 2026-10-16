@@ -7,10 +7,9 @@
  * second byte 0xff leaves the delay and both fade values unchanged. */
 u8* suzuki_smd_modulator_set_fade_in(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     suzuki_modulator_t* modulator;
-    u8 duration;
+    u8 duration = note_data[1] + 1;
     s16 step;
 
-    duration = note_data[1] + 1;
     modulator = &channel->modulators[channel->modulator_index];
     if (duration != 0) {
         step = 0x100 / duration;

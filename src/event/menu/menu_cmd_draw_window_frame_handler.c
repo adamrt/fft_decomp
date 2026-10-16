@@ -15,7 +15,7 @@ menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* comma
     s32 full_rows;
     s32 partial_width;
     s32 partial_height;
-    s32 priority;
+    s32 priority = g_menu_gfx_otag_index;
     s16 u_left;
     s16 u_middle;
     s16 u_right;
@@ -27,7 +27,6 @@ menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* comma
     u8 width;
     u8 height;
 
-    priority = g_menu_gfx_otag_index;
     left = command->window.x - 5;
     top = command->window.y - 9;
     width = command->window.width;

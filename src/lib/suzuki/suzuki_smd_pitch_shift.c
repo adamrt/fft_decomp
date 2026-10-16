@@ -8,11 +8,10 @@
  * The fields are stored through channel: unlike its twins, a modulator
  * pointer here gets its own base register, which the target does not use. */
 u8* suzuki_smd_pitch_shift(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    const suzuki_smd_modulator_parameters_t* parameters;
+    const suzuki_smd_modulator_parameters_t* parameters = (const suzuki_smd_modulator_parameters_t*)note_data;
     s32 depth;
     s16 speed;
 
-    parameters = (const suzuki_smd_modulator_parameters_t*)note_data;
     depth = parameters->depth;
     speed = parameters->speed;
     if (depth != 0 && speed != 0) {

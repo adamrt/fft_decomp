@@ -323,9 +323,8 @@ void wldcore_input_init_repeat_state(void) {
  * new press clears only the four direction counters, not R1 and L1. */
 u32 wldcore_input_update_repeat(u32 buttons) {
     s32 next;
-    u32 pressed;
+    u32 pressed = g_wldcore_input_new_button_presses;
 
-    pressed = g_wldcore_input_new_button_presses;
     pressed &= buttons;
     if (pressed != 0) {
         g_wldcore_input_repeat_counter_right = 0;
@@ -592,13 +591,11 @@ void* wldcore_proposition_get_data_pointer(wldcore_proposition_data_record_e rec
 /* Expand one 23-byte proposition row into 16-bit fields, then remap the
  * two fee fields through the 16-bit table of record 1. */
 void wldcore_unpack_proposition_row(wldcore_proposition_fields_t* out, s32 index) {
-    u8* rows;
+    u8* rows = wldcore_proposition_get_data_pointer(WLDCORE_PROPOSITION_DATA_ROWS);
     u16* field_lookup;
     s32 i;
-    u16* fields;
+    u16* fields = &out->category_index;
 
-    rows = wldcore_proposition_get_data_pointer(WLDCORE_PROPOSITION_DATA_ROWS);
-    fields = &out->category_index;
     for (i = 0; i < 23; i++) {
         fields[i] = rows[index * 23 + i];
     }
@@ -678,14 +675,13 @@ void wldcore_calendar_advance_day(void) {
 /* Converts a calendar date in place into a zodiac sign number (1 = Aries) and
  * the day within that sign. Invalid dates play sound effect 5 and reset to 1. */
 void wldcore_calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
-    s32 index;
+    s32 index = 0;
     s32 delta;
     s32 previous_month;
     calendar_date_t* start_dates;
     u8* start_days;
     calendar_date_t* previous_dates;
 
-    index = 0;
     if (*month_ptr < 1 || *month_ptr > 12 || *day_ptr < 1 || *day_ptr > 31) {
         wldcore_sound_play_effect(MAIN_SFX_INVALID);
         *day_ptr = 1;

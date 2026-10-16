@@ -205,9 +205,8 @@ static void menu_build_ability_preview_at_list(void) {
     s32 bracketed;
     s32 staged_item;
     u16 text_id;
-    const u16* at_table;
+    const u16* at_table = g_ai_workspace_ptr->ability_list.ids;
 
-    at_table = g_ai_workspace_ptr->ability_list.ids;
     work = (menu_at_list_work_t*)g_main_heap_companion_overlay_load_address;
     g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST].select_text_table = 0x13;
     g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST].context = &g_menu_at_list_layout;

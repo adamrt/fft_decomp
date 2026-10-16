@@ -3,9 +3,8 @@
 /* Stops every queued record that plays SMD music (not the SFX record),
  * queueing the voices of its active channels for key-off. */
 void suzuki_smd_stop_marked_music(void) {
-    suzuki_music_t* music;
+    suzuki_music_t* music = g_suzuki_sound_active_music_list;
 
-    music = g_suzuki_sound_active_music_list;
     while (music != 0) {
         if (music->status & SUZUKI_MUSIC_STATUS_SMD) {
             music->status &= ~SUZUKI_MUSIC_STATUS_PLAYING;

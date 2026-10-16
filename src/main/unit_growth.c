@@ -118,7 +118,7 @@ s32 main_unit_calculate_random_equipment(
 void main_unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_unit_t* entd) {
     s32 job_index;
     s32 skillset;
-    s32 auto_learn;
+    s32 auto_learn = 0;
     s32 learned;
     s32 i;
     u16 ability_id;
@@ -127,7 +127,6 @@ void main_unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_un
     u8 character;
     s32 unit_flags;
 
-    auto_learn = 0;
     job_index = job_id - JOB_ID_SQUIRE;
     if (job_id == JOB_ID_SQUIRE) {
         character = unit->character_identity;
@@ -310,10 +309,9 @@ u16 main_unit_calculate_rsm(unit_stats_t* unit, u16 ability_id, s32 flags, entd_
 /* Return the first job id below JOB_ID_COUNT - 1 whose job record has this
  * skillset. The result is 0 when none has, which is also job 0's id. */
 s32 main_job_find_by_skillset(u8 skillset_id) {
-    u8 job_id;
+    u8 job_id = 0;
     s32 result;
 
-    job_id = 0;
     for (; (result = job_id < JOB_ID_COUNT - 1) != 0; job_id++) {
         if (g_main_job_data_pointer[job_id].skillset == skillset_id) {
             return job_id;
@@ -800,18 +798,16 @@ void main_unit_init_status_and_rewards(unit_stats_t* unit, s32 clear_rewards) {
 /* The range byte of an ordinary ability's range record; 0 for an id from
  * ABILITY_ID_ITEM_FIRST up, which has no such record. */
 u32 main_ability_get_range(u32 ability_id) {
-    u16 index;
+    u16 index = ability_id;
 
-    index = ability_id;
     return index < ABILITY_ID_ITEM_FIRST ? g_main_ability_range_data[index].range : 0;
 }
 
 /* The area-of-effect byte of an ordinary ability's range record; 0 for an id from
  * ABILITY_ID_ITEM_FIRST up, which has no such record. */
 u32 main_ability_get_aoe(u32 ability_id) {
-    u16 index;
+    u16 index = ability_id;
 
-    index = ability_id;
     return index < ABILITY_ID_ITEM_FIRST ? g_main_ability_range_data[index].aoe : 0;
 }
 

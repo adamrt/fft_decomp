@@ -30,14 +30,13 @@
 static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
 
 void script_process_inflict_status_commands(void) {
-    s32 instruction_offset;
+    s32 instruction_offset = 0;
     s32 runtime_id;
     s32 battle_id;
     s32 thread_id;
     const u8* instruction;
     unit_stats_t* unit;
 
-    instruction_offset = 0;
     while ((instruction_offset = script_find_instruction_byte_offset(instruction_offset, EVENT_OPCODE_INFLICT_STATUS))
         != 0) {
         instruction = (const u8*)g_script_event_block;
@@ -215,13 +214,11 @@ void camera_normalize_yaw_angle(void) {
 
 /* Step tilt toward its resting band, yielding each frame, then restore zoom to ONE. */
 void camera_init_tilt_and_zoom(void) {
-    s32 current_tilt;
+    s32 current_tilt = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT];
     s32 target_tilt;
     s32 tilt_step;
-    s32 tilt_target_mode;
+    s32 tilt_target_mode = 0;
 
-    current_tilt = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT];
-    tilt_target_mode = 0;
     if (current_tilt < 0x12e) {
         tilt_step = 0x10;
         target_tilt = 0x12e;
@@ -261,9 +258,8 @@ void camera_init_tilt_and_zoom(void) {
 
 /* Raise negative yaw by whole turns; retain positive values of ONE or greater. */
 s32 camera_wrap_yaw_angle(void) {
-    s32 yaw;
+    s32 yaw = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW];
 
-    yaw = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW];
     while (yaw < 0) {
         yaw += ONE;
     }
@@ -671,19 +667,15 @@ void gfx_clear_texture_allocation_grid(void) {
  * area at x 0x1c0 before image (unless -1) is uploaded. A full grid stops
  * this thread. The allocation grid is local to the active scene. */
 void gfx_alloc_texture_rect(RECT* rect, void* prim, u32* image) {
-    s16 width;
-    s16 height;
-    s32 width_cells;
-    s32 height_cells;
+    s16 width = rect->w;
+    s16 height = rect->h;
+    s32 width_cells = width >> 4;
+    s32 height_cells = height >> 4;
     s32 row;
     s32 column;
     s32 y;
     s32 x;
 
-    width = rect->w;
-    height = rect->h;
-    width_cells = width >> 4;
-    height_cells = height >> 4;
     if (width & 0xF) {
         width_cells++;
     }
@@ -892,11 +884,10 @@ void menu_free_memory(void* buffer_pointer) {
 
 /* Build the twelve line packets, draw modes and covering frame sprite. */
 void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitives_t* menu) {
-    LINE_F2* line;
+    LINE_F2* line = menu->lines;
     s32 i;
     s32 offset;
 
-    line = menu->lines;
     for (i = 0; i < 12; i++) {
         SetLineF2(line);
         line++;

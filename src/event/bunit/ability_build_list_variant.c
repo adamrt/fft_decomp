@@ -14,8 +14,8 @@
  * this one additionally honors the uses_monster_skillset restriction.
  */
 s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category, s16* list, s32 mode) {
-    s32 skillset;
-    s16 generic_index;
+    s32 skillset = job_get_skillset(job_id);
+    s16 generic_index = job_get_generic_index(job_id);
     s16* abilities;
     s32 i;
     s32 count;
@@ -27,8 +27,6 @@ s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category,
     s32 byte_offset;
     bunit_unit_t* unit;
 
-    skillset = job_get_skillset(job_id);
-    generic_index = job_get_generic_index(job_id);
     if (job_find_first_for_skillset(skillset) == -1) {
         skillset = g_bunit_unit_pointers[unit_index]->abilities[0];
     }

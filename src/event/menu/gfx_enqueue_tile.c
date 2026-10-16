@@ -7,9 +7,8 @@
  * (x offset by 0x80) and the RGB triple and links it into ordering-table
  * entry idx. */
 void gfx_enqueue_tile(const RECT* rect, const rgb24_t* color, u8 semi, s32 idx) {
-    TILE* tile;
+    TILE* tile = &g_menu_gfx_context->tiles[g_gfx_tile_count++];
 
-    tile = &g_menu_gfx_context->tiles[g_gfx_tile_count++];
     setRGB0(tile, color->r, color->g, color->b);
     SetSemiTrans(tile, semi);
     tile->x0 = rect->x + 0x80;

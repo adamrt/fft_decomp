@@ -23,15 +23,13 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     s32 full_rows;
     s32 partial_width;
     s32 partial_height;
-    s32 priority;
-    u16 clut;
+    s32 priority = g_menu_gfx_otag_index;
+    u16 clut = g_menu_palette_clut;
     s32 column;
     s32 row;
     u8 width;
     u8 height;
 
-    priority = g_menu_gfx_otag_index;
-    clut = g_menu_palette_clut;
     left = command->window.x - 5;
     top = command->window.y - 9;
     width = command->window.width;

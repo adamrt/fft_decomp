@@ -5,12 +5,11 @@
  * (sound id high half == resource id). suzuki_sound_remove_resource calls
  * it before unlinking the resource. */
 void suzuki_sound_stop_resource_sfx(suzuki_sound_resource_t* resource) {
-    suzuki_music_channel_t* channel;
+    suzuki_music_channel_t* channel = g_suzuki_sound_sfx_music->channels;
     s32 sound_id;
     s16 id;
     s32 i;
 
-    channel = g_suzuki_sound_sfx_music->channels;
     id = resource->id;
     for (i = SUZUKI_SFX_CHANNEL_COUNT; i != 0; i--) {
         if (channel->flags & SUZUKI_CHANNEL_IN_USE) {

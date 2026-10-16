@@ -16,13 +16,12 @@ enum {
 
 /* Read square-modified vertical input with the configured repeat timing. */
 s32 equip_input_read_page_scroll_direction(void) {
-    s32 direction;
+    s32 direction = 0;
     s32 input;
     s32 initial_delay;
     s32 repeat_period;
     u16 held_frames;
 
-    direction = 0;
     if (g_input_page_scroll_disabled == 0 && g_menu_input_lock_mode == 0) {
         input = PadRead(0);
         if ((input & PSX_PAD_UP) && (input & PSX_PAD_SQUARE)) {

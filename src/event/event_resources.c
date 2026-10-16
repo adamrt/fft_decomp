@@ -40,12 +40,11 @@ void text_set_message_duration_frames(u16 frames) {
 
 /* Size a message window to its text and center it on x = 0x102. */
 static void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short) {
-    const u8* text;
+    const u8* text = text_find_entry(entry->text_id);
     u16 padded;
     u16 w;
     u16 h;
 
-    text = text_find_entry(entry->text_id);
     *out_pad = 0;
     text_measure_pixels(width, height, text);
     if (pad_short != 0) {
@@ -200,9 +199,8 @@ void menu_icon_linked_entry_thread(void) {
 }
 
 void menu_input_thread(void) {
-    menu_entry_t* menu;
+    menu_entry_t* menu = (menu_entry_t*)thread_get_current_parameter_1();
 
-    menu = (menu_entry_t*)thread_get_current_parameter_1();
     g_sound_suppressed = 1;
     while (1) {
         thread_yield();
@@ -267,10 +265,8 @@ void script_set_variable(s32 variable_id, s32 value) {
 }
 
 void menu_init_panel_fade_tiles(void) {
-    menu_gradient_panel_prims_t* frame;
+    menu_gradient_panel_prims_t* frame = &g_menu_panel_fade_frames[0];
     s32 i;
-
-    frame = &g_menu_panel_fade_frames[0];
 
     SetDrawMode(&frame->draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
 
@@ -764,12 +760,10 @@ void menu_load_portrait_image(s32 portrait_id) {
  * releasing it. Parameter 2 selects the block; each occupies 15 sectors from 0x1d4c.
  */
 void gfx_load_evtchr_thread(void) {
-    s32 parameter;
-    s32 block;
+    s32 parameter = thread_get_current_parameter_1();
+    s32 block = thread_get_current_parameter_2();
     evtchr_file_record_t* buffer;
 
-    parameter = thread_get_current_parameter_1();
-    block = thread_get_current_parameter_2();
     thread_set_current_task_id(THREAD_TASK_LOAD_EVTCHR);
     buffer = main_heap_alloc(0x7800);
     do {
@@ -856,9 +850,8 @@ void script_load_event(s32 id) {
 }
 
 void menu_set_palette_colors(const menu_palette_pair_t* source) {
-    rgba5551_t* destination;
+    rgba5551_t* destination = g_menu_palette_colors.colors;
 
-    destination = g_menu_palette_colors.colors;
     mem_copy_bytes_nonempty(destination, source->colors, sizeof(palette_t));
     mem_copy_bytes_nonempty(destination + PALETTE_COLOR_COUNT, source->colors + PALETTE_COLOR_COUNT, sizeof(palette_t));
 }
@@ -901,9 +894,8 @@ void menu_open_companion_data_file(void) {
  * companion overlay load address, then poll until the read finishes and clear the
  * request. */
 void menu_open_companion_executable(void) {
-    s32 idx;
+    s32 idx = g_menu_companion_executable_request_index;
 
-    idx = g_menu_companion_executable_request_index;
     if ((idx != 0) && (g_menu_companion_executable_loading == 0)) {
         g_thread_call_target = (void (*)(void))main_file_call_build_header;
         if (thread_call_on_main_stack(g_menu_companion_executable_lbas[idx], g_menu_companion_executable_sizes[idx],

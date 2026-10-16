@@ -21,13 +21,11 @@
  * Mode 0 combines both sources, mode 1 selects inventory, and other modes select equipment.
  */
 s32 world_menu_has_items(s32 mode) {
-    s32 has_inventory;
-    s32 has_equipment;
+    s32 has_inventory = 0;
+    s32 has_equipment = 0;
     s32 i;
     s32 slot;
 
-    has_inventory = 0;
-    has_equipment = 0;
     for (i = 1; i < ITEM_ID_END; i++) {
         if (g_main_item_quantities[i]) {
             has_inventory = 1;
@@ -70,12 +68,11 @@ s32 world_item_get_half_price(s16 item_id) {
  * The comparison uses the stored 16-bit equipment value as-is; only the requested
  * ID is masked. */
 s32 item_get_equipped_count_variant(s32 item_id) {
-    s32 count;
+    s32 count = 0;
     s32 unit_index;
     s32 slot;
     world_unit_t* unit;
 
-    count = 0;
     item_id &= ITEM_ENTRY_ID_MASK;
     for (unit_index = 0; unit_index < g_world_formation_record_count; unit_index++) {
         unit = g_world_unit_pointers[unit_index];
@@ -484,7 +481,7 @@ s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id) {
  * copies of the masked id; an s32 id folds them into one register.
  */
 s32 world_formation_can_equip_item_in_slot(s16 unit_index, s16 slot, s16 item_id) {
-    s32 result;
+    s32 result = world_formation_get_unit_lock(unit_index);
     s16 id;
     s16 new_item;
     s32 other;
@@ -497,7 +494,6 @@ s32 world_formation_can_equip_item_in_slot(s16 unit_index, s16 slot, s16 item_id
     s32 other_two_swords;
     u8 flags;
 
-    result = world_formation_get_unit_lock(unit_index);
     if (result < 0) {
         return result;
     }

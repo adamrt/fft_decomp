@@ -335,12 +335,10 @@ static void script_assign_bitset_flag(u32* bits, s32 index, s32 set) {
 
 /* Store five day bits and four month bits in the indexed nine-bit date record. */
 void script_unlockdate_event_instruction(u32* bits, s32 record, s32 month, s32 day) {
-    s32 base;
+    s32 base = record * 9;
     s32 i;
-    u8 mask;
+    u8 mask = 1;
 
-    base = record * 9;
-    mask = 1;
     for (i = 0; i < 5; i++) {
         script_assign_bitset_flag(bits, base + i, day & mask);
         mask <<= 1;
@@ -638,10 +636,9 @@ void script_print_debug_message(void) {
 
 /* Start movement to the encoded tile with the signed speed and terrain-cost flag. */
 void script_walkto_event_instruction(const event_walk_to_parameters_t* parameters) {
-    s32 id;
+    s32 id = script_read_s16(parameters->unit_id_le);
     map_tile_coordinates_t coordinates;
 
-    id = script_read_s16(parameters->unit_id_le);
     id = script_resolve_runtime_id(id);
     if (id != EVENT_RUNTIME_ID_NONE) {
         coordinates.x = parameters->x;
@@ -656,9 +653,8 @@ void script_walkto_event_instruction(const event_walk_to_parameters_t* parameter
 /* Mirror the unit sprite for mode 1 and restore it for every other mode. */
 void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_t* parameters) {
     s32 mode;
-    s32 runtime_id;
+    s32 runtime_id = script_read_s16(parameters->unit_id_le);
 
-    runtime_id = script_read_s16(parameters->unit_id_le);
     mode = parameters->mode;
     runtime_id = script_resolve_runtime_id(runtime_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -685,12 +681,11 @@ void script_resetpalette_event_instruction(const event_unit_parameters_t* parame
  * and is restored afterwards. A unit id that does not resolve does nothing. */
 void script_jump_event_instruction(const event_jump_parameters_t* parameters) {
     SVECTOR vec;
-    s32 runtime_id;
+    s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     SVECTOR* coords;
     unit_stats_t* stats;
     u8 saved;
 
-    runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         coords = battle_unit_get_event_offset_by_runtime_id(runtime_id);
         setVector(&vec, -coords->vx, -coords->vy, -coords->vz);
@@ -705,9 +700,8 @@ void script_jump_event_instruction(const event_jump_parameters_t* parameters) {
 
 /* Yield at least once, then wait until the resolved unit stops moving. */
 void script_waitwalk_event_instruction(s32 unit_id) {
-    s32 runtime_id;
+    s32 runtime_id = script_resolve_runtime_id(unit_id);
 
-    runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         do {
             thread_yield();
@@ -975,9 +969,8 @@ void map_reset_script_light_transform(void) {
 
 static void unit_reset_animation_states(void) {
     unit_animation_state_t* state;
-    s32 i;
+    s32 i = 0;
 
-    i = 0;
     state = g_unit_animation_states;
     for (; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {
         state->rotating = 0;
@@ -1004,9 +997,8 @@ void unit_update_facing_and_pending_animations(void) {
     s32 current;
     s32 next;
     s32 moving;
-    unit_animation_state_t* state;
+    unit_animation_state_t* state = g_unit_animation_states;
 
-    state = g_unit_animation_states;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {
         if (battle_unit_has_runtime_id(i) != 0) {
             if (g_unit_pending_animation_ids[i] != 0) {
@@ -1222,9 +1214,8 @@ void menu_reset_unit_records(void) {
     s32 index;
     u8* row;
     s32 count;
-    u8 fill;
+    u8 fill = 0xFF;
 
-    fill = 0xFF;
     index = 0;
     row = (u8*)g_menu_unit_selection_records;
     do {
@@ -1240,12 +1231,10 @@ void menu_reset_unit_records(void) {
 }
 
 void menu_reset_unit_record(s32 battle_id) {
-    unit_stats_t* stats;
-    menu_unit_selection_record_t* records;
+    unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
+    menu_unit_selection_record_t* records = g_menu_unit_selection_records;
     s32 i;
 
-    stats = battle_unit_get_stats_from_battle_id(battle_id);
-    records = g_menu_unit_selection_records;
     for (i = 0; i < 17; i++) {
         if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
             ((u8*)&records[battle_id])[i] = 0;
@@ -1595,12 +1584,11 @@ void menu_select_unit_action_slots_thread(void) {
 /* Build skillset selection rows and size the selected unit's menu. */
 static void menu_build_skillset_entries(void) {
     menu_text_row_t* rows;
-    s32 count;
+    s32 count = 0;
     s32 i;
     s16 height;
     u8 separator;
 
-    count = 0;
     g_menu_selected_skill_ct = 0;
     g_menu_skillsets[0] = 0;
     g_menu_skillset_build_result = battle_menu_build_unit_action_menus(g_menu_selected_unit.battle_id, g_menu_skillsets,
@@ -1699,10 +1687,9 @@ void menu_run_skillset_thread(void) {
  * menu appears in the tracked menu-id table. */
 void menu_record_selection_for_selected_unit(void) {
     menu_unit_selection_record_t* records;
-    s16* selected;
+    s16* selected = &g_menu_selected_unit.battle_id;
     s32 i;
 
-    selected = &g_menu_selected_unit.battle_id;
     records = g_menu_unit_selection_records;
     for (i = 0; i < 12; i++) {
         if (g_menu_current_id == g_menu_command_maps[i].menu_id) {
@@ -1715,12 +1702,10 @@ void menu_record_selection_for_selected_unit(void) {
  * 0x2e-0x33 of the idle action menu table): run the icon selection loop, then
  * remember the chosen row for the active-turn unit and exit. */
 void menu_build_main(void) {
-    menu_entry_t* parameter;
+    menu_entry_t* parameter = (menu_entry_t*)thread_get_current_parameter_1();
     menu_unit_selection_record_t* record;
-    s32 unit_id;
+    s32 unit_id = g_menu_selected_unit.battle_id;
 
-    parameter = (menu_entry_t*)thread_get_current_parameter_1();
-    unit_id = g_menu_selected_unit.battle_id;
     record = &g_menu_unit_selection_records[unit_id];
     /* A nonzero second parameter makes the icon loop return here instead of exiting. */
     g_thread_contexts[g_thread_current_id].function_parameter_2 = 1;

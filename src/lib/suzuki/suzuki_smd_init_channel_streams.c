@@ -5,14 +5,11 @@
  * offset or a channel past the header's count gets no stream) and marks the
  * stream set (SUZUKI_CHANNEL_STREAMS_SET). */
 void suzuki_smd_init_channel_streams(suzuki_music_t* music, suzuki_smd_header_t* smd) {
-    suzuki_music_channel_t* channel;
-    u16* offsets;
+    suzuki_music_channel_t* channel = music->channels;
+    u16* offsets = smd->channel_offsets;
     s32 remaining;
-    s32 count;
+    s32 count = music->channel_count;
 
-    channel = music->channels;
-    offsets = smd->channel_offsets;
-    count = music->channel_count;
     remaining = smd->channel_count;
     do {
         channel->flags |= SUZUKI_CHANNEL_STREAMS_SET;

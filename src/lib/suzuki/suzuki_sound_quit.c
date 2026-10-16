@@ -9,9 +9,8 @@
  * The 16-bit status is tested as signed (`lh`); a u16 test loads with `lhu`. */
 void suzuki_sound_quit(void) {
     s32 voice;
-    s16 status;
+    s16 status = g_suzuki_sound_driver_flags;
 
-    status = g_suzuki_sound_driver_flags;
     if (status != 0) {
         EnterCriticalSection();
         CloseEvent(g_suzuki_sound_root_counter_2_event);
