@@ -56,7 +56,7 @@ s32 wldcore_entrypoint(void) {
             main_file_poll_load(&g_main_file_cd_state);
             wldcore_sound_process_audio_queue();
             buffer_index = GsGetActiveBuff();
-            g_active_graphics_buffer_index = buffer_index;
+            g_main_gfx_active_buffer_index = buffer_index;
             GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + buffer_index * 0xE000);
             wldcore_fade_step_screen();
             wldcore_map_pulse_dot_colors();
@@ -129,33 +129,33 @@ void wldcore_gfx_capture_map_backdrop(void) {
     VSync(0);
     GsSwapDispBuff();
     count = GsGetActiveBuff();
-    g_active_graphics_buffer_index = count;
+    g_main_gfx_active_buffer_index = count;
     GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + count * 0xE000);
-    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
+    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
+    wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_map_project_and_cull_dots();
-    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
     wldcore_restore_previous_stack();
-    GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
+    GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
-    wldcore_gfx_set_display_rect(g_active_graphics_buffer_index, &rect);
+    wldcore_gfx_set_display_rect(g_main_gfx_active_buffer_index, &rect);
     StoreImage(&rect, g_wldcore_scratch_buffer);
     DrawSync(0);
     g_wldcore_loaded_background_set = -1;
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_map_update_camera_direction_and_projection();
-    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
 }
 
@@ -165,37 +165,37 @@ void wldcore_gfx_capture_map_backdrop(void) {
  * clear, draws both tables and clears system flag 2. Sibling of
  * wldcore_gfx_draw_world_frame. */
 static void wldcore_gfx_draw_world_frame_with_map(void) {
-    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_switch_to_stack(getScratchAddr(255));
     wldcore_map_project_and_cull_tiles();
-    wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
+    wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_restore_previous_stack();
     wldcore_map_step_route_travel();
     wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_map_draw_path_animation(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
+    wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_map_draw_path_animation(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_map_project_and_cull_dots();
     wldcore_map_update_camera_direction_and_projection();
     wldcore_restore_previous_stack();
-    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
+    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_restore_previous_stack();
     DrawSync(0);
     wldcore_input_update_controller();
     VSync(0);
     GsSwapDispBuff();
-    GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     g_main_system_flags &= ~MAIN_SYSTEM_FLAG_DRAW_MAP;
 }
 
@@ -206,15 +206,15 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
 void wldcore_gfx_draw_world_frame(void) {
     RECT rect;
 
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     DrawSync(0);
-    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_switch_to_stack(getScratchAddr(255));
-    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_fade_draw_screen_overlays();
     wldcore_restore_previous_stack();
@@ -223,10 +223,10 @@ void wldcore_gfx_draw_world_frame(void) {
     VSync(0);
     GsSwapDispBuff();
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE)) {
-        wldcore_gfx_set_display_rect(g_active_graphics_buffer_index == 0, &rect);
+        wldcore_gfx_set_display_rect(g_main_gfx_active_buffer_index == 0, &rect);
         LoadImage(&rect, g_wldcore_scratch_buffer);
     }
-    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
 }
 
 /* Initialize the WLDCORE subsystems before entering the world loop.
@@ -328,7 +328,7 @@ static void wldcore_init_world_map_state(void) {
     g_wldcore_screen_brightness_rgb.g = 0x80;
     g_wldcore_screen_brightness_rgb.b = 0x80;
     g_wldcore_previous_system_flags = 0;
-    g_active_graphics_buffer_index = 0;
+    g_main_gfx_active_buffer_index = 0;
     g_wldcore_map_zoom_motion.flags = 0;
     g_wldcore_random_battle_squad_id = 0;
     g_wldcore_random_battle_entd_id = 0;
@@ -458,13 +458,13 @@ static void wldcore_init_runtime_state(void) {
         = wldcore_proposition_load_picture(g_wldcore_map_projection_state.marker.kind);
     file_wait_for_pending();
     count = GsGetActiveBuff();
-    g_active_graphics_buffer_index = count;
+    g_main_gfx_active_buffer_index = count;
     GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + count * 0xE000);
     wldcore_gfx_capture_map_backdrop();
     VSync(0);
     ResetGraph(1);
-    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
-    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index]);
+    GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_gfx_clear_vram_and_scratch(0);
     GsSwapDispBuff();
     SetDispMask(0);

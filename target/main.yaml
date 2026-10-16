@@ -1291,7 +1291,7 @@ data:
   - {addr: 0x8004d9b4, name: g_main_boot_startup2_has_run}
   - {addr: 0x8004d9b8, name: g_main_sound_env_sed_data}
   - {addr: 0x8004e5b8, name: g_main_gfx_now_loading_frame_counter}
-  - {addr: 0x8004e5bc, name: g_active_graphics_buffer_index}
+  - {addr: 0x8004e5bc, name: g_main_gfx_active_buffer_index}
   - {addr: 0x8004e5c0, name: g_main_heap_smd_allocator_table}
   - {addr: 0x8004e5d0, name: g_main_scenario_event_finish_operations}
   - {addr: 0x8004e9d0, name: g_main_replay_story_event_index}
@@ -1388,8 +1388,8 @@ data:
   - {addr: 0x800672f8, name: wldcore_entrypoint}
   - {addr: 0x80079a98, name: battle_state_run_game_loop}
   - {addr: 0x80093170, name: battle_map_color_field}
-  - {addr: 0x800a778c, name: g_main_system_game_flow_state}
-  - {addr: 0x800d0bbc, name: g_main_save_slot_buffer}
+  - {addr: 0x800a778c, name: g_battle_game_flow_state}
+  - {addr: 0x800d0bbc, name: g_wldcore_save_slot_buffer}
   - {addr: 0x800e6edc, name: world_text_find_entry}
   - {addr: 0x800fc55c, name: g_battle_render_buffers}
   - {addr: 0x8010656c, name: world_menu_load_text_1bd8}

@@ -227,17 +227,7 @@ s32 world_ability_build_equippable_rsm_list(s16 unit_index, s32 slot, s16* out);
 s32 world_ability_run_learn_list(void);
 
 /* equipment */
-extern RECT g_world_equipment_panel_origin;
-extern RECT g_world_equipment_ability_panel_origin;
 extern RECT g_world_equipment_panel_draw_area;
-extern RECT g_world_equipment_ability_panel_draw_area;
-extern RECT g_world_equipment_panel_item_text_rect;
-extern RECT g_world_equipment_panel_ability_text_rect;
-extern image_load_parameters_t g_world_equipment_panel_sprite_params_0[19];
-extern image_load_parameters_t g_world_equipment_panel_sprite_params_1[19];
-extern image_load_parameters_t g_world_equipment_panel_sprite_params_2[19];
-extern image_load_parameters_t g_world_equipment_panel_sprite_params_3[19];
-extern image_load_parameters_t g_world_equipment_panel_icon_params[MENU_EQUIPMENT_SLOT_COUNT];
 extern menu_status_thread_t g_world_equipment_ability_panel_thread_params;
 extern s8 g_world_equip_menu_initialized;
 extern u16 g_world_equip_item_cursor_anim;

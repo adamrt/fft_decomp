@@ -31,23 +31,23 @@ void menu_run_equipment_ability_panel_thread(void) {
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
 
-    screen = g_bunit_character_status_frames;
-    base = g_bunit_character_status_frames;
+    screen = g_menu_equipment_panel_frames;
+    base = g_menu_equipment_panel_frames;
     state = &g_menu_selected_unit_fields.state;
-    menu_init_numeric_display_frame_primitives(&g_bunit_character_status_frame_rect, &screen->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_menu_equipment_panel_frame_rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
 
     /* Move the tiles and lines from panel-relative to screen coordinates. */
     for (i = 0; i < 2; i++) {
-        screen->tiles[i].x0 += g_bunit_character_status_frame_rect.x;
-        screen->tiles[i].y0 += g_bunit_character_status_frame_rect.y;
+        screen->tiles[i].x0 += g_menu_equipment_panel_frame_rect.x;
+        screen->tiles[i].y0 += g_menu_equipment_panel_frame_rect.y;
     }
     for (i = 0; i < 8; i++) {
-        screen->lines[i].x0 += g_bunit_character_status_frame_rect.x;
-        screen->lines[i].y0 += g_bunit_character_status_frame_rect.y;
-        screen->lines[i].x1 += g_bunit_character_status_frame_rect.x;
-        screen->lines[i].y1 += g_bunit_character_status_frame_rect.y;
+        screen->lines[i].x0 += g_menu_equipment_panel_frame_rect.x;
+        screen->lines[i].y0 += g_menu_equipment_panel_frame_rect.y;
+        screen->lines[i].x1 += g_menu_equipment_panel_frame_rect.x;
+        screen->lines[i].y1 += g_menu_equipment_panel_frame_rect.y;
     }
 
     menu_init_sprite_array(&screen->sprites[19], 5, 0x7cfc);
@@ -68,20 +68,20 @@ void menu_run_equipment_ability_panel_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
-                    &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode0[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_0[i]);
             }
             if (mode == 1) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
-                    &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode1[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_1[i]);
             }
             if (mode == 2) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
-                    &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode2[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_2[i]);
             }
             if (mode == 3) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
-                    &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode3[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_3[i]);
             }
         }
 
@@ -97,20 +97,19 @@ void menu_run_equipment_ability_panel_thread(void) {
 
         /* Redraw and upload the equipment and ability names on the first frame or on request. */
         if (frame == 0 || thread->redraw_request == 1) {
-            menu_clear_render_buffer(g_bunit_character_status_equipment_text_image, 0xc80);
+            menu_clear_render_buffer(g_menu_equipment_panel_item_text_image, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 5; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                     menu_display_text_entry(state->equipment[i] + TEXT_ID_ITEM_NAME_BASE,
-                        g_bunit_character_status_equipment_text_image, &g_menu_text_state.pen);
+                        g_menu_equipment_panel_item_text_image, &g_menu_text_state.pen);
                 }
                 g_menu_text_state.pen.rect.y += 0x10;
             }
-            LoadImage(
-                &g_bunit_character_status_equipment_text_rect, (u32*)g_bunit_character_status_equipment_text_image);
+            LoadImage(&g_menu_equipment_panel_item_text_rect, (u32*)g_menu_equipment_panel_item_text_image);
 
-            menu_clear_render_buffer(g_bunit_character_status_ability_text_image, 0xc80);
+            menu_clear_render_buffer(g_menu_equipment_panel_ability_text_image, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 2; i++) {
@@ -123,24 +122,24 @@ void menu_run_equipment_ability_panel_thread(void) {
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
                     g_menu_text_state.pen.rect.y += 0x10;
                 } else {
-                    menu_display_text_entry(mode, g_bunit_character_status_ability_text_image, &g_menu_text_state.pen);
+                    menu_display_text_entry(mode, g_menu_equipment_panel_ability_text_image, &g_menu_text_state.pen);
                     g_menu_text_state.pen.rect.y += 0x10;
                 }
             }
             for (; i < 5; i++) {
                 if (state->ability_ids[i] != -1) {
                     menu_display_text_entry(state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE,
-                        g_bunit_character_status_ability_text_image, &g_menu_text_state.pen);
+                        g_menu_equipment_panel_ability_text_image, &g_menu_text_state.pen);
                 }
                 g_menu_text_state.pen.rect.y += 0x10;
             }
-            LoadImage(&g_bunit_character_status_ability_text_rect, (u32*)g_bunit_character_status_ability_text_image);
+            LoadImage(&g_menu_equipment_panel_ability_text_rect, (u32*)g_menu_equipment_panel_ability_text_image);
             thread->redraw_request = 0;
         }
 
         for (i = 0; i < 5; i++) {
             gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture,
-                &g_bunit_character_status_frame_rect, &g_bunit_character_status_item_icon_layout[i]);
+                &g_menu_equipment_panel_frame_rect, &g_menu_equipment_panel_icon_params[i]);
             if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 gfx_set_item_icon_sprite(&screen->sprites[19 + i], state->equipment[i]);
             } else {

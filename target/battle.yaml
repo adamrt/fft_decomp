@@ -2124,7 +2124,7 @@ data:
   - {addr: 0x800a1c74, name: g_battle_camera_zoom_delta}
   - {addr: 0x800a1c84, name: g_battle_gfx_unit_animation_data}
   - {addr: 0x800a7784, name: g_battle_camera_render_state}
-  - {addr: 0x800a778c, name: g_main_system_game_flow_state}
+  - {addr: 0x800a778c, name: g_battle_game_flow_state}
   - {addr: 0x800a7790, name: g_battle_gte_rtpt_vxy0}
   - {addr: 0x800a7798, name: g_battle_gte_rtpt_vxy1}
   - {addr: 0x800a77a0, name: g_battle_gte_rtpt_vxy2}
@@ -2512,7 +2512,7 @@ data:
   - {addr: 0x80168868, name: g_menu_unit_status_first_page_by_mode}
   - {addr: 0x8016886c, name: g_menu_unit_summary_panel_rect}
   - {addr: 0x80168874, name: g_menu_unit_summary_sprite_image_params}
-  - {addr: 0x801688c8, name: g_battle_unit_summary_portrait_image_params}
+  - {addr: 0x801688c8, name: g_menu_unit_summary_portrait_image_params}
   - {addr: 0x801688d4, name: g_menu_numeric_display_frame_rect}
   - {addr: 0x801688dc, name: g_menu_numeric_display_panel_texture_window}
   - {addr: 0x801688e4, name: g_menu_numeric_display_text_rect_a}
@@ -2669,7 +2669,7 @@ data:
   - {addr: 0x80174010, name: g_script_light_angles}
   - {addr: 0x80174018, name: g_script_light_base_color_matrix}
   - {addr: 0x80174038, name: g_thread_current_id}
-  - {addr: 0x8017403c, name: g_battle_menu_skillset_disabled_flags}
+  - {addr: 0x8017403c, name: g_menu_skillset_disabled_flags}
   - {addr: 0x80174044, name: g_menu_dead_unit_context}
   - {addr: 0x80174048, name: g_ai_workspace_ptr}
   - {addr: 0x8017404c, name: g_action_menu_row_types}

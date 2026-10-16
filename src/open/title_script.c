@@ -259,7 +259,7 @@ static void open_controller_start_text_message(s32 parameter, s32 run_followup) 
     }
     if (run_followup != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_open_text_section_offsets);
+        text_relocate_pointer_table(g_world_text_section_offsets);
     }
 
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread);
@@ -319,7 +319,7 @@ void open_movie_stream_title_demo_and_push_controller(
 void open_movie_start_fftst_or_skip_controller(open_controller_record_t* unused_record) {
     if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
         SetDispMask(0);
-        g_active_graphics_buffer_index = 1;
+        g_main_gfx_active_buffer_index = 1;
         g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
         g_open_current_controller_index--;
         open_movie_stream_fftst_and_push_controller(DISC_SECTOR_OPEN_FFTST_STR, 0x278a, 0x3df, 0x2de);
@@ -594,7 +594,7 @@ static void open_gfx_draw_transition_line_strips(s32 intensity) {
 
     for (i = 0; i < g_open_gfx_transition.step + 1; i++) {
         prim_index = i * 2;
-        prims = g_open_gfx_transition_line_primitives[g_active_graphics_buffer_index];
+        prims = g_open_gfx_transition_line_primitives[g_main_gfx_active_buffer_index];
         SetPolyGT4(&prims[prim_index]);
         SetPolyGT4(&prims[prim_index + 1]);
 
@@ -660,8 +660,8 @@ static void open_gfx_draw_transition_line_strips(s32 intensity) {
 
         SetSemiTrans(&prims[prim_index], 1);
         SetSemiTrans(&prims[prim_index + 1], 1);
-        AddPrim(&g_open_gfx_otags[g_active_graphics_buffer_index][g_open_gfx_transition.ot_layer], &prims[prim_index]);
-        AddPrim(&g_open_gfx_otags[g_active_graphics_buffer_index][g_open_gfx_transition.ot_layer + 1],
+        AddPrim(&g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_gfx_transition.ot_layer], &prims[prim_index]);
+        AddPrim(&g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_gfx_transition.ot_layer + 1],
             &prims[prim_index + 1]);
     }
 }
@@ -1418,7 +1418,7 @@ static void open_script_update_screen_fade(void) {
     }
 
     intensity = g_open_script_state.opntex.fade_intensity;
-    setRGB0(&g_open_gfx_fade_primitives[g_active_graphics_buffer_index], intensity, intensity, intensity);
+    setRGB0(&g_open_gfx_fade_primitives[g_main_gfx_active_buffer_index], intensity, intensity, intensity);
 }
 
 /* Advance the OPNTEX sequence: run down the fade delay of the frame on
@@ -1469,7 +1469,7 @@ static void open_gfx_update_opntex_sequence(void) {
  * controller. */
 void open_movie_play_end(void) {
     g_open_current_controller_index = 0;
-    g_active_graphics_buffer_index = 0;
+    g_main_gfx_active_buffer_index = 0;
     open_movie_stream_fftend(DISC_SECTOR_OPEN_FFTEND_STR, 0x3858, 0x571);
 }
 

@@ -127,10 +127,8 @@ extern menu_unit_number_images_t g_world_comparison_unit_number_text_images;
 extern palette_t g_world_comparison_unit_portrait_palettes[2];
 
 /* gfx */
-extern menu_status_panel_buffer_t g_world_change_banner_panel_frames[2];
 extern menu_status_thread_t g_world_change_banner_panel_thread_params;
 extern textured_quad_source_t g_world_vertical_cursor_quad;
-extern u8 g_world_change_banner_text_image[];
 void world_panel_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 
 /* input */
@@ -153,7 +151,6 @@ extern u8 g_world_selected_unit_stat_text_image[];
 extern u8 g_world_selected_unit_name_text_image[];
 extern menu_unit_number_images_t g_world_selected_unit_number_text_images;
 extern palette_t g_world_selected_unit_portrait_palettes[2];
-extern u8 g_world_stat_preview_text_image[];
 
 /* text */
 extern s16 g_world_fixed_number_panel_request_state;
@@ -248,7 +245,6 @@ extern world_menu_grid_cell_t g_world_grid_menu_shop_scrolled_cells[];
 extern world_menu_grid_cell_t* g_world_active_grid_menu_cells;
 extern u16 g_world_grid_menu_cursor_anim; /* grid cursor animation state */
 extern u8 g_world_grid_menu_initialized;  /* grid menu initialized */
-extern battle_at_entry_t g_world_action_target_list_slots[BATTLE_AT_LIST_CAPACITY];
 extern s16 g_world_menu_submenu_page_row_text_ids[];
 extern u32* g_world_menu_list_controller_input;
 extern u16 g_world_menu_scroll_repeat_timer;

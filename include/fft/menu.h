@@ -2084,4 +2084,9 @@ extern u16 g_frame_arg;
 extern s32 g_frame_counter;
 extern u8 g_monster_formation_sprite_table[20]; /* indexed by sprite code - 0x3f */
 
+/* shared between programs: each program that links the code defines its own copy */
+extern battle_at_entry_t g_menu_at_list_descriptors[BATTLE_AT_LIST_CAPACITY];
+extern s16 g_menu_dead_unit_menu_result;
+extern s16 g_menu_dead_unit_move_result;
+
 #endif

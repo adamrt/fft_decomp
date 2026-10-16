@@ -352,7 +352,7 @@ extern u32 g_main_proposition_last_attempt_date_bits[27]; /* written only for a 
 extern u32 g_main_treasure_acquisition_date_bits[14];
 extern u32 g_main_land_discovery_date_bits[5];
 extern u8 g_main_proposition_states[96]; /* wldcore_proposition_state_e */
-extern struct wldcore_sound_novel_script_file g_main_save_slot_buffer;
+extern struct wldcore_sound_novel_script_file g_wldcore_save_slot_buffer;
 extern u32 g_main_saved_data_bits[40];
 extern menu_cursor_state_t g_main_saved_list_cursor_state;
 extern wldcore_proposition_progress_t g_main_active_propositions[8];
@@ -658,7 +658,7 @@ typedef enum main_system_error {
 extern s32 g_main_unknown_800459d8; /* cleared with the debug display flag; never read */
 
 extern s32 g_main_system_frontend_world_result;
-extern u32 g_main_system_game_flow_state; /* main_game_flow_state_e */
+extern u32 g_battle_game_flow_state; /* main_game_flow_state_e */
 extern u32 g_main_system_game_loop_stack_pointer;
 extern u8 g_main_system_go_straight_to_battle;
 extern int g_main_system_graphics_error;

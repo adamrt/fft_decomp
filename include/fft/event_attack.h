@@ -19,6 +19,9 @@ s32 attack_load_scenario_conditionals(void);
 s16 attack_load_unaligned_s16(const u8* ptr);
 
 /* deployment */
+/* Provisional: cleared with the deployed-unit count when the deploy screen opens; nothing in
+ * ATTACK reads it. */
+extern s32 g_attack_deploy_cleared_word;
 typedef enum attack_deployment_orientation {
     ATTACK_DEPLOYMENT_ORIENTATION_NORMAL = 0,
     ATTACK_DEPLOYMENT_ORIENTATION_ROTATE_90 = 1,

@@ -1227,4 +1227,7 @@ void unit_set_animation(s32 runtime_id, u32 animation);
 void unit_clear_status_staging_data(void);
 void unit_update_staged_status_data(u16 unit_id, u16 restore);
 
+/* shared between programs: each program that links the code defines its own copy */
+extern SVECTOR g_unit_scratch_coords;
+
 #endif

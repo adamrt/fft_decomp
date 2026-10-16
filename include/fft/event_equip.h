@@ -198,7 +198,6 @@ extern u16 g_equip_gfx_draw_area_capacity;
 extern DR_MODE g_equip_gfx_draw_mode_buffer[];
 extern u16 g_equip_gfx_draw_move_capacity;
 extern LINE_F2 g_equip_gfx_line_f2_buffer[];
-extern u16 g_equip_gfx_line_f2_count;
 
 extern volatile u16 g_equip_gfx_line_g2_capacity; /* LINE_G2 capacity; load order matters in 0x801cda80 */
 extern volatile u16 g_equip_gfx_line_g3_capacity; /* LINE_G3 capacity; load order matters in 0x801cda80 */

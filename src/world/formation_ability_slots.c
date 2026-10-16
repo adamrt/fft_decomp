@@ -328,7 +328,7 @@ void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_ota
     g_menu_gfx_poly_ft4_count = 0;
     g_gfx_poly_g4_count = 0;
     g_menu_gfx_poly_gt4_count = 0;
-    g_world_gfx_flat_line_count = 0;
+    g_gfx_line_f2_count = 0;
     g_world_gfx_gradient_line_count = 0;
     g_gfx_tile_count = 0;
     g_menu_gfx_draw_move_count = 0;

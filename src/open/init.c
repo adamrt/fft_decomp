@@ -162,8 +162,8 @@ void open_gfx_init_screen_environments(s32 clear_first) {
     }
     put_envs = clear_first;
     if (put_envs != 0) {
-        PutDrawEnv(&g_open_gfx_screen_environments[g_active_graphics_buffer_index].draw);
-        PutDispEnv(&g_open_gfx_screen_environments[g_active_graphics_buffer_index].disp);
+        PutDrawEnv(&g_open_gfx_screen_environments[g_main_gfx_active_buffer_index].draw);
+        PutDispEnv(&g_open_gfx_screen_environments[g_main_gfx_active_buffer_index].disp);
         SetGeomOffset(0, 0);
     }
 }
@@ -192,5 +192,5 @@ static void open_system_init_runtime_state(void) {
 /* Start a frame: clear the active ordering table and queue the overlay fade. */
 void open_gfx_clear_and_draw_current_frame(void) {
     open_gfx_clear_current_otag();
-    open_gfx_update_fade_overlay(g_open_gfx_otags[g_active_graphics_buffer_index]);
+    open_gfx_update_fade_overlay(g_open_gfx_otags[g_main_gfx_active_buffer_index]);
 }

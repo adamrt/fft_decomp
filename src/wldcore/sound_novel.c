@@ -56,7 +56,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
         wldcore_reset_saved_record_fields(&g_wldcore_active_saved_record);
     }
     g_wldcore_active_saved_record.picture_render_index = render_record;
-    g_wldcore_active_saved_record.buffer = &g_main_save_slot_buffer;
+    g_wldcore_active_saved_record.buffer = &g_wldcore_save_slot_buffer;
     g_wldcore_active_saved_record.state_flags &= ~(WLDCORE_OPCODE_STATE_BRANCH | WLDCORE_OPCODE_STATE_FETCH);
     for (i = 0; i < 1; i++) {
         g_wldcore_sound_novel_local_flags[i] = 0;
@@ -126,7 +126,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     if (section != 0) {
         /* The 32-bit view preserves register order; the named offset field swaps the index and base. */
         g_wldcore_active_saved_record.script_words
-            = &((u32*)&g_main_save_slot_buffer)[((u32*)g_wldcore_active_saved_record.buffer)[section] / sizeof(u32)];
+            = &((u32*)&g_wldcore_save_slot_buffer)[((u32*)g_wldcore_active_saved_record.buffer)[section] / sizeof(u32)];
         /* A struct-field store: as a scalar global the store would be
          * scheduled above the table load (GCC 2.7 alias rule). */
         g_wldcore_active_saved_record.word_index = 0;
@@ -203,7 +203,7 @@ s32 wldcore_script_run_until_yield(void) {
             g_wldcore_active_saved_record.word_index = 0;
             g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
             g_wldcore_active_saved_record.script_words
-                = &((u32*)&g_main_save_slot_buffer)[section_byte_offset / sizeof(u32)];
+                = &((u32*)&g_wldcore_save_slot_buffer)[section_byte_offset / sizeof(u32)];
             if (g_wldcore_saved_record_index < 5) {
                 memcpy(&g_main_saved_records[g_wldcore_saved_record_index], &g_wldcore_active_saved_record,
                     sizeof(wldcore_saved_record_t));
@@ -232,7 +232,8 @@ s32 wldcore_script_run_until_yield(void) {
 
 /* Find an opcode in a sound-novel script section; return its whole instruction or zero. */
 u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode) {
-    u32* word = &((u32*)&g_main_save_slot_buffer)[g_wldcore_active_saved_record.buffer->offsets[section] / sizeof(u32)];
+    u32* word
+        = &((u32*)&g_wldcore_save_slot_buffer)[g_wldcore_active_saved_record.buffer->offsets[section] / sizeof(u32)];
     s32 i;
 
     for (i = 0; i < 256; i++) {

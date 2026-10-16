@@ -148,7 +148,7 @@ void world_screen_menu_window_frame_thread(void) {
     while (thread_get_current_parameter_3() == 0) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
-            &prim->draw_areas, (const RECT*)menu, frame, g_active_graphics_buffer_index);
+            &prim->draw_areas, (const RECT*)menu, frame, g_main_gfx_active_buffer_index);
 
         /* texture_u is reused for the border CLUT: dimmed while parameter 2 is set or input is locked. */
         texture_u = MENU_CLUT_DIMMED;

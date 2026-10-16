@@ -361,7 +361,7 @@ typedef struct open_font_metrics {
     u8 advance;
 } open_font_metrics_t;
 
-extern s32 g_open_text_section_offsets[];
+extern s32 g_world_text_section_offsets[];
 void open_text_measure_menu_image(s32 combined_text_index, size32_t* dimensions);
 
 /* script */

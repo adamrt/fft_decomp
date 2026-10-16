@@ -1083,7 +1083,7 @@ extern u8 g_battle_highest_enemy_level;
 battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_stats_t* unit);
 
 /* unit views */
-extern image_load_parameters_t g_battle_unit_summary_portrait_image_params;
+extern image_load_parameters_t g_menu_unit_summary_portrait_image_params;
 
 /* shared with the per-program event interpreter and dialog thread */
 s32 unit_is_moving(s32 runtime_id);

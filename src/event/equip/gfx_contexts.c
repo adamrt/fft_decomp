@@ -62,7 +62,7 @@ void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
     g_gfx_poly_gt3_count = 0;
     g_equip_gfx_poly_g4_count = 0;
     g_gfx_poly_gt4_count = 0;
-    g_equip_gfx_line_f2_count = 0;
+    g_gfx_line_f2_count = 0;
     g_gfx_line_f3_count = 0;
     g_gfx_line_f4_count = 0;
     g_gfx_line_g2_count = 0;

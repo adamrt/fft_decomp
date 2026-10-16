@@ -147,20 +147,8 @@ extern s32 g_bunit_comparison_display_offset_y;
 extern s32 g_bunit_comparison_display_redraw_request;
 
 /* character status */
-extern u8 g_bunit_character_status_ability_text_image[];
-extern RECT g_bunit_character_status_ability_text_rect;
 extern s32 g_bunit_character_status_dimmed;
-extern u8 g_bunit_character_status_equipment_text_image[];
-extern RECT g_bunit_character_status_equipment_text_rect;
 extern menu_status_thread_t g_bunit_character_status_frame_config;
-extern RECT g_bunit_character_status_frame_rect;
-extern menu_status_panel_buffer_t g_bunit_character_status_frames[2];
-extern image_load_parameters_t g_bunit_character_status_item_icon_layout[5];
-extern image_load_parameters_t g_bunit_character_status_layout_mode0[19];
-extern image_load_parameters_t g_bunit_character_status_layout_mode1[19];
-extern image_load_parameters_t g_bunit_character_status_layout_mode2[19];
-extern image_load_parameters_t g_bunit_character_status_layout_mode3[19];
-extern RECT g_bunit_character_status_sprite_origin;
 
 /* unit panels */
 extern palette_t g_bunit_panel_comparison_portrait_palettes[2];

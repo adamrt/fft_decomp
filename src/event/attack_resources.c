@@ -1586,7 +1586,7 @@ static void menu_build_ability_list(s32 mode) {
 void menu_select_unit_action_slots_thread(void) {
     s32 i = g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index;
     s32 menu = g_action_menu_row_types[i];
-    s32 check_unit = g_battle_menu_skillset_disabled_flags[i];
+    s32 check_unit = g_menu_skillset_disabled_flags[i];
     menu_unit_selection_record_t* row = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
     menu_list_selection_t* slot;
     u8* pair;
@@ -1662,15 +1662,15 @@ static void menu_build_skillset_entries(void) {
 
     g_menu_selected_skill_ct = 0;
     g_menu_skillsets[0] = 0;
-    g_menu_skillset_build_result = battle_menu_build_unit_action_menus(g_menu_selected_unit.battle_id, g_menu_skillsets,
-        g_battle_menu_skillset_disabled_flags, g_action_menu_row_types);
+    g_menu_skillset_build_result = battle_menu_build_unit_action_menus(
+        g_menu_selected_unit.battle_id, g_menu_skillsets, g_menu_skillset_disabled_flags, g_action_menu_row_types);
     rows = (menu_text_row_t*)text_find_entry(0x5010);
     if (battle_unit_get_action_restriction(menu_get_selected_unit_stats())
         == BATTLE_UNIT_ACTION_RESTRICTION_DEEP_WATER) {
         for (i = 0; i < 6; i++) {
-            g_battle_menu_skillset_disabled_flags[i] = 1;
+            g_menu_skillset_disabled_flags[i] = 1;
             if (g_action_menu_row_types[i] == ACTION_MENU_TYPE_UNKNOWN_0D) {
-                g_battle_menu_skillset_disabled_flags[i] = 0;
+                g_menu_skillset_disabled_flags[i] = 0;
             }
         }
     }
@@ -1685,7 +1685,7 @@ static void menu_build_skillset_entries(void) {
         if (g_menu_skillsets[i] == SKILLSET_ID_NONE) {
             break;
         }
-        if (g_battle_menu_skillset_disabled_flags[i] != 0) {
+        if (g_menu_skillset_disabled_flags[i] != 0) {
             rows[i].style = 4;
             g_menu_skillset_row_actions[i] = 0x1003;
         } else {

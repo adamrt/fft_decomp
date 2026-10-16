@@ -761,7 +761,7 @@ void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32
     g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_CLOSE_BATTLE;
     g_battle_state_screen_fade_step = transition_step;
-    g_main_system_game_flow_state = close_flow_state;
+    g_battle_game_flow_state = close_flow_state;
 }
 
 /* Project the cursor tile to the screen; while g_battle_action_at_list_active is set, also draw

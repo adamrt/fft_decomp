@@ -15,9 +15,6 @@
 
 /* dead unit */
 
-extern s16 g_world_dead_unit_menu_result; /* primary menu result */
-extern s16 g_world_dead_unit_move_result; /* secondary (move) menu result */
-
 /* help */
 
 extern u16 g_world_help_portrait_clut_by_sheet_id[];
@@ -94,10 +91,6 @@ void world_map_confirm_destination(void);
 
 /* system */
 
-extern s32 g_menu_companion_executable_lbas[];    /* 0x80156388, indexed by request */
-extern s32 g_menu_companion_executable_sizes[];   /* 0x801563c8 */
-extern s32 g_menu_companion_executable_offsets[]; /* 0x80156408, relative to the overlay load address */
-extern s32 g_menu_companion_executable_loading;   /* 0x801564cc */
 void world_game_reset(void);
 
 /* thread */
@@ -221,7 +214,7 @@ typedef char wldcore_window_xy_size_must_be_36[sizeof(wldcore_window_xy_t) == 36
 
 extern u16 g_world_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-sheet id */
 
-extern s32 g_active_graphics_buffer_index;
+extern s32 g_main_gfx_active_buffer_index;
 
 void text_set_blit_destination(s16 x, s16 y);
 
@@ -309,11 +302,8 @@ void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 
 /* text */
 
-extern SVECTOR g_unit_scratch_coords;
-
 /* menu context */
 
-extern action_command_t g_menu_selected_action;
 /* menu */
 
 typedef char world_menu_line_f2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
@@ -327,9 +317,6 @@ typedef struct world_menu_number_range {
 } world_menu_number_range_t;
 
 /* item */
-
-extern s16 g_gfx_item_icon_clut_base_x; /* item icon CLUT base x */
-extern s16 g_gfx_item_icon_clut_base_y; /* item icon CLUT base y */
 
 /* shop */
 

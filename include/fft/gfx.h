@@ -519,4 +519,7 @@ void gfx_start_decreasing_fade(void);
 s32 gfx_get_fade_state(void);
 void gfx_start_increasing_fade(void);
 
+/* shared between programs: each program that links the code defines its own copy */
+extern u16 g_gfx_line_f2_count;
+
 #endif

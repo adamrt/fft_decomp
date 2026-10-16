@@ -94,13 +94,13 @@ static void main_system_run_game_loop(void) {
             main_sound_stop_weather_sfx_music();
             g_main_system_go_straight_to_battle = 0;
 
-            if (g_main_system_game_flow_state == MAIN_GAME_FLOW_RESET) {
+            if (g_battle_game_flow_state == MAIN_GAME_FLOW_RESET) {
                 main_system_stop_display_and_audio_for_game_reset();
                 break;
             }
-        } while (g_main_system_game_flow_state != MAIN_GAME_FLOW_ENDING);
+        } while (g_battle_game_flow_state != MAIN_GAME_FLOW_ENDING);
 
-        if (g_main_system_game_flow_state == MAIN_GAME_FLOW_ENDING) {
+        if (g_battle_game_flow_state == MAIN_GAME_FLOW_ENDING) {
             main_sound_stop_weather_sfx_music();
             main_sound_unload_scenario_music_and_tunes();
             script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);

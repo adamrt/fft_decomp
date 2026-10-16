@@ -1171,7 +1171,7 @@ void menu_run_unit_summary_panel_thread(void) {
             &g_menu_unit_summary_sprite_image_params[frame]);
     }
     gfx_init_image_loading(&frames[0].portrait, &g_menu_texture_origin, &g_menu_unit_summary_panel_rect,
-        &g_battle_unit_summary_portrait_image_params);
+        &g_menu_unit_summary_portrait_image_params);
     if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
         frames[0].portrait.clut = 0x7FFD;
     } else {

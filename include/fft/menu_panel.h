@@ -260,4 +260,18 @@ extern RECT g_special_portrait_rect;
 extern u16 g_remove_all_equipment_ids[5]; /* weapon, shield, head, body, accessory */
 extern s16 g_remove_item_equipment[5];
 
+/* shared between programs: each program that links the code defines its own copy */
+extern u8 g_menu_equipment_panel_ability_text_image[];
+extern RECT g_menu_equipment_panel_ability_text_rect;
+extern RECT g_menu_equipment_panel_frame_rect;
+extern menu_status_panel_buffer_t g_menu_equipment_panel_frames[2];
+extern image_load_parameters_t g_menu_equipment_panel_icon_params[MENU_EQUIPMENT_SLOT_COUNT];
+extern u8 g_menu_equipment_panel_item_text_image[];
+extern RECT g_menu_equipment_panel_item_text_rect;
+extern RECT g_menu_equipment_panel_origin;
+extern image_load_parameters_t g_menu_equipment_panel_sprite_params_0[19];
+extern image_load_parameters_t g_menu_equipment_panel_sprite_params_1[19];
+extern image_load_parameters_t g_menu_equipment_panel_sprite_params_2[19];
+extern image_load_parameters_t g_menu_equipment_panel_sprite_params_3[19];
+
 #endif

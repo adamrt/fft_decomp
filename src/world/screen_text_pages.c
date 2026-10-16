@@ -396,7 +396,7 @@ void world_screen_build_at_list(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_active_graphics_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_main_gfx_active_buffer_index);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);

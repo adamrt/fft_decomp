@@ -35,16 +35,13 @@ extern RECT g_world_wldface_vram_rects;
 extern RECT g_world_wldface_vram_rect_1;
 extern RECT g_world_wldface_vram_rect_2;
 extern RECT g_world_wldface_vram_rect_3;
-extern const u16 g_world_gfx_panel_draw_area_scale_percent[12];
 extern rgb24_t g_world_gfx_black_tile_color;
 extern RECT g_world_gfx_fade_tile_rect;
-extern u16 g_world_gfx_draw_area_y;
 /* Fade tile RGB channels, set to equal levels by the fade updaters. */
 extern rgb24_t g_world_fade_tile_color;
 extern u16 g_world_gfx_flat_line_capacity;     /* +0x24 line count */
 extern u16 g_world_gfx_gradient_line_capacity; /* gradient line count */
 extern u16 g_world_gfx_line_g3_capacity;
-extern u16 g_world_gfx_flat_line_count;
 extern u16 g_world_gfx_textured_quad_capacity; /* textured quad count */
 extern u16 g_world_gfx_gradient_line_count;
 extern u16 g_world_gfx_textured_gradient_quad_capacity; /* textured gradient quad count */

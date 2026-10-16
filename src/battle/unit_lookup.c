@@ -471,7 +471,7 @@ void battle_state_run_game_loop(void) {
 
         battle_state_stop_map_animations();
         battle_unit_clear_all();
-    } while (g_main_system_game_flow_state == MAIN_GAME_FLOW_BATTLE);
+    } while (g_battle_game_flow_state == MAIN_GAME_FLOW_BATTLE);
 
     /* Let drawing and two vertical blanks finish before leaving. */
     DrawSync(0);

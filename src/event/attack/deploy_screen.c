@@ -151,7 +151,7 @@ void attack_deploy_run_screen(void) {
     /* The grid and the status panel start 0x9c pixels off screen; the first squad slides them in. */
     g_attack_deploy_grid_slide_y = 0x9c;
     g_attack_deploy_deployed_unit_count = 0;
-    g_world_shop_purchase_unit_price = 0;
+    g_attack_deploy_cleared_word = 0;
     g_attack_deploy_selected_roster_index = 0;
     g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_EMPTY_TILE;
     g_attack_deploy_active_cursor = 0;

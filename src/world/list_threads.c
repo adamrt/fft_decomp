@@ -48,31 +48,31 @@ void menu_run_equipment_list_thread(void) {
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
-        text = g_world_change_banner_text_image;
-        screen = g_world_change_banner_panel_frames;
+        text = g_menu_equipment_panel_item_text_image;
+        screen = g_menu_equipment_panel_frames;
         state = &g_world_selected_unit_stat_detail.state;
-        base = g_world_change_banner_panel_frames;
-        upload = &g_world_equipment_panel_item_text_rect;
+        base = g_menu_equipment_panel_frames;
+        upload = &g_menu_equipment_panel_item_text_rect;
         u = 0;
     } else {
-        text = g_world_stat_preview_text_image;
+        text = g_menu_equipment_panel_ability_text_image;
         screen = g_world_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
-        upload = &g_world_equipment_panel_ability_text_rect;
+        upload = &g_menu_equipment_panel_ability_text_rect;
         base = g_world_stat_preview_panel_frames;
         u = 0x50;
     }
 
-    menu_init_numeric_display_frame_primitives(&g_world_equipment_panel_origin, &screen->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_menu_equipment_panel_origin, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     world_panel_gfx_init_scaled_draw_area_packets(&screen->portrait);
-    screen->tiles[0].x0 += g_world_equipment_panel_origin.x;
-    screen->tiles[0].y0 += g_world_equipment_panel_origin.y;
+    screen->tiles[0].x0 += g_menu_equipment_panel_origin.x;
+    screen->tiles[0].y0 += g_menu_equipment_panel_origin.y;
     for (i = 0; i < 4; i++) {
-        screen->lines[i].x0 += g_world_equipment_panel_origin.x;
-        screen->lines[i].y0 += g_world_equipment_panel_origin.y;
-        screen->lines[i].x1 += g_world_equipment_panel_origin.x;
-        screen->lines[i].y1 += g_world_equipment_panel_origin.y;
+        screen->lines[i].x0 += g_menu_equipment_panel_origin.x;
+        screen->lines[i].y0 += g_menu_equipment_panel_origin.y;
+        screen->lines[i].x1 += g_menu_equipment_panel_origin.x;
+        screen->lines[i].y1 += g_menu_equipment_panel_origin.y;
     }
 
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
@@ -91,20 +91,20 @@ void menu_run_equipment_list_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
-                    &g_world_equipment_panel_sprite_params_0[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_0[i]);
             }
             if (mode == 1) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
-                    &g_world_equipment_panel_sprite_params_1[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_1[i]);
             }
             if (mode == 2) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
-                    &g_world_equipment_panel_sprite_params_2[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_2[i]);
             }
             if (mode == 3) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
-                    &g_world_equipment_panel_sprite_params_3[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_3[i]);
             }
         }
 
@@ -130,8 +130,8 @@ void menu_run_equipment_list_thread(void) {
         screen->sprites[13].u0 = u;
         menu_init_sprite_array(&screen->sprites[19], MENU_EQUIPMENT_SLOT_COUNT, 0x7cfc);
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture, &g_world_equipment_panel_origin,
-                &g_world_equipment_panel_icon_params[i]);
+            gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture, &g_menu_equipment_panel_origin,
+                &g_menu_equipment_panel_icon_params[i]);
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
@@ -145,11 +145,11 @@ void menu_run_equipment_list_thread(void) {
         screen->sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->x - 0x80;
-        g_world_gfx_draw_area_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
-        screen->draw_offsets[0].position.y = thread->y + g_world_gfx_draw_area_y;
+        g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
+        screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
-        screen->draw_offsets[1].position.y = g_world_gfx_draw_area_y;
+        screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_world_equipment_panel_draw_area, frame, g_frame_arg, thread);
@@ -218,17 +218,17 @@ void menu_run_ability_list_thread(void) {
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
-        text = g_world_change_banner_text_image;
-        screen = g_world_change_banner_panel_frames;
+        text = g_menu_equipment_panel_item_text_image;
+        screen = g_menu_equipment_panel_frames;
         state = &g_world_selected_unit_stat_detail.state;
-        base = g_world_change_banner_panel_frames;
-        upload = &g_world_equipment_panel_item_text_rect;
+        base = g_menu_equipment_panel_frames;
+        upload = &g_menu_equipment_panel_item_text_rect;
         u = 0;
     } else {
-        text = g_world_stat_preview_text_image;
+        text = g_menu_equipment_panel_ability_text_image;
         screen = g_world_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
-        upload = &g_world_equipment_panel_ability_text_rect;
+        upload = &g_menu_equipment_panel_ability_text_rect;
         base = g_world_stat_preview_panel_frames;
         u = 0x50;
     }
@@ -236,13 +236,13 @@ void menu_run_ability_list_thread(void) {
     menu_init_numeric_display_frame_primitives(&g_world_ability_panel_origin, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     world_panel_gfx_init_scaled_draw_area_packets(&screen->portrait);
-    screen->tiles[1].x0 += g_world_equipment_panel_origin.x;
-    screen->tiles[1].y0 += g_world_equipment_panel_origin.y;
+    screen->tiles[1].x0 += g_menu_equipment_panel_origin.x;
+    screen->tiles[1].y0 += g_menu_equipment_panel_origin.y;
     for (i = 4; i < 8; i++) {
-        screen->lines[i].x0 += g_world_equipment_panel_origin.x;
-        screen->lines[i].y0 += g_world_equipment_panel_origin.y;
-        screen->lines[i].x1 += g_world_equipment_panel_origin.x;
-        screen->lines[i].y1 += g_world_equipment_panel_origin.y;
+        screen->lines[i].x0 += g_menu_equipment_panel_origin.x;
+        screen->lines[i].y0 += g_menu_equipment_panel_origin.y;
+        screen->lines[i].x1 += g_menu_equipment_panel_origin.x;
+        screen->lines[i].y1 += g_menu_equipment_panel_origin.y;
     }
 
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
@@ -257,13 +257,13 @@ void menu_run_ability_list_thread(void) {
 
         if (state->generic_monster == 0) {
             for (i = 0; i < 19; i++) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
-                    &g_world_equipment_panel_sprite_params_0[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_0[i]);
             }
         } else {
             for (i = 0; i < 19; i++) {
-                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
-                    &g_world_equipment_panel_sprite_params_1[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_menu_equipment_panel_origin,
+                    &g_menu_equipment_panel_sprite_params_1[i]);
             }
         }
 
@@ -312,11 +312,11 @@ void menu_run_ability_list_thread(void) {
         screen->sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->x - 0xf3;
-        g_world_gfx_draw_area_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
-        screen->draw_offsets[0].position.y = thread->y + g_world_gfx_draw_area_y;
+        g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
+        screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
-        screen->draw_offsets[1].position.y = g_world_gfx_draw_area_y;
+        screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         offset[0] = thread->x - 0x73;
         offset[1] = thread->y;

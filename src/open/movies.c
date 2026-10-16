@@ -61,13 +61,13 @@ s32 open_system_run_main_loop(s32 skip_movie) {
             open_menu_update_world_formation();
             open_controller_dispatch_current();
 
-            graphics_buffer_index = g_active_graphics_buffer_index;
+            graphics_buffer_index = g_main_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_0);
             window_dispatch_record_list(
                 current_otag, g_open_gfx_render_record_pointers, g_open_gfx_render_record_pointer_count);
 
-            graphics_buffer_index = g_active_graphics_buffer_index;
+            graphics_buffer_index = g_main_gfx_active_buffer_index;
             current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_1);
             DrawOTag(current_otag - 1);
             DrawSync(0);
@@ -111,7 +111,7 @@ void open_system_run_ending_cutscene(void) {
             main_file_poll_load(&g_main_file_cd_state);
             open_gfx_clear_and_draw_current_frame();
             open_movie_update_stream_frame();
-            graphics_buffer_index = g_active_graphics_buffer_index;
+            graphics_buffer_index = g_main_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_0);
             open_script_draw_text_records(current_otag, graphics_buffer_index);
@@ -120,7 +120,7 @@ void open_system_run_ending_cutscene(void) {
             open_input_update_buttons_and_check_game_reset();
             VSync(g_open_system_vsync_mode);
             open_movie_present_frame();
-            current_otag = (u32*)((g_active_graphics_buffer_index ^ 1) * OPEN_OTAG_BUFFER_BYTES + (u32)otag_1);
+            current_otag = (u32*)((g_main_gfx_active_buffer_index ^ 1) * OPEN_OTAG_BUFFER_BYTES + (u32)otag_1);
             DrawOTag(current_otag - 1);
             main_system_frame_stub();
         } while ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
@@ -420,13 +420,13 @@ static void open_movie_start_cd_stream_read(const CdlLOC* location) {
 static void open_movie_present_frame(void) {
     RECT image_rect;
     RECT move_rect;
-    s32 display_index = g_active_graphics_buffer_index ^ 1;
+    s32 display_index = g_main_gfx_active_buffer_index ^ 1;
     u32 flags;
 
-    g_active_graphics_buffer_index = display_index;
+    g_main_gfx_active_buffer_index = display_index;
     PutDrawEnv(&g_open_gfx_screen_environments[display_index].draw);
 
-    display_index = g_active_graphics_buffer_index;
+    display_index = g_main_gfx_active_buffer_index;
     PutDispEnv(&g_open_gfx_screen_environments[display_index].disp);
 
     flags = g_open_system_runtime_flags;
@@ -438,7 +438,7 @@ static void open_movie_present_frame(void) {
         } else {
             image_rect.w = 256;
         }
-        if ((g_active_graphics_buffer_index & 1) != 0) {
+        if ((g_main_gfx_active_buffer_index & 1) != 0) {
             image_rect.y = 240;
         } else {
             image_rect.y = 0;
@@ -555,18 +555,18 @@ void open_gfx_update_fade_overlay(u32* ot) {
     }
     if (g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE) {
         TILE* tiles = g_open_gfx_overlay_fade.tiles;
-        SetTile(&tiles[g_active_graphics_buffer_index]);
-        SetSemiTrans(&tiles[g_active_graphics_buffer_index], 1);
-        SetDrawMode(&g_open_gfx_overlay_fade.modes[g_active_graphics_buffer_index], 1, 0,
+        SetTile(&tiles[g_main_gfx_active_buffer_index]);
+        SetSemiTrans(&tiles[g_main_gfx_active_buffer_index], 1);
+        SetDrawMode(&g_open_gfx_overlay_fade.modes[g_main_gfx_active_buffer_index], 1, 0,
             GetTPage(0, g_open_gfx_overlay_fade.abr, 0x100, 0), 0);
-        g_open_gfx_overlay_fade.tiles[g_active_graphics_buffer_index].x0 = g_open_gfx_overlay_fade.rect.x;
-        g_open_gfx_overlay_fade.tiles[g_active_graphics_buffer_index].y0 = g_open_gfx_overlay_fade.rect.y;
-        g_open_gfx_overlay_fade.tiles[g_active_graphics_buffer_index].w = g_open_gfx_overlay_fade.rect.w;
-        g_open_gfx_overlay_fade.tiles[g_active_graphics_buffer_index].h = g_open_gfx_overlay_fade.rect.h;
-        setRGB0(&tiles[g_active_graphics_buffer_index], g_open_gfx_overlay_fade.level, g_open_gfx_overlay_fade.level,
+        g_open_gfx_overlay_fade.tiles[g_main_gfx_active_buffer_index].x0 = g_open_gfx_overlay_fade.rect.x;
+        g_open_gfx_overlay_fade.tiles[g_main_gfx_active_buffer_index].y0 = g_open_gfx_overlay_fade.rect.y;
+        g_open_gfx_overlay_fade.tiles[g_main_gfx_active_buffer_index].w = g_open_gfx_overlay_fade.rect.w;
+        g_open_gfx_overlay_fade.tiles[g_main_gfx_active_buffer_index].h = g_open_gfx_overlay_fade.rect.h;
+        setRGB0(&tiles[g_main_gfx_active_buffer_index], g_open_gfx_overlay_fade.level, g_open_gfx_overlay_fade.level,
             g_open_gfx_overlay_fade.level);
-        AddPrim(&ot[g_open_gfx_overlay_fade.ot_index], &tiles[g_active_graphics_buffer_index]);
-        AddPrim(&ot[g_open_gfx_overlay_fade.ot_index], &g_open_gfx_overlay_fade.modes[g_active_graphics_buffer_index]);
+        AddPrim(&ot[g_open_gfx_overlay_fade.ot_index], &tiles[g_main_gfx_active_buffer_index]);
+        AddPrim(&ot[g_open_gfx_overlay_fade.ot_index], &g_open_gfx_overlay_fade.modes[g_main_gfx_active_buffer_index]);
     }
 }
 
@@ -723,11 +723,11 @@ static void open_menu_update_world_formation(void) {
     if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME) {
         u32 blocked_buttons = g_menu_blocked_buttons;
 
-        g_active_graphics_buffer_index ^= 1;
+        g_main_gfx_active_buffer_index ^= 1;
         world_formation_set_menu_allowed_buttons(~blocked_buttons);
         world_formation_run_menu_frame(
-            &g_open_gfx_otags[g_active_graphics_buffer_index ^ 1][g_open_menu_formation_otag_index],
+            &g_open_gfx_otags[g_main_gfx_active_buffer_index ^ 1][g_open_menu_formation_otag_index],
             g_input_current_buttons);
-        g_active_graphics_buffer_index ^= 1;
+        g_main_gfx_active_buffer_index ^= 1;
     }
 }

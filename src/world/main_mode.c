@@ -410,8 +410,8 @@ void world_menu_run_game_options(void) {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_active_graphics_buffer_index);
-        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_active_graphics_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_main_gfx_active_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_main_gfx_active_buffer_index);
         gfx_draw_or_append_gpu_primitive(&page->title_area.areas[1]);
         gfx_draw_or_append_gpu_primitive(&page->icon_mode);
         gfx_draw_or_append_gpu_primitive(frame);

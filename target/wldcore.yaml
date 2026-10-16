@@ -612,7 +612,7 @@ data:
   - {addr: 0x800d0b24, name: g_wldcore_location_entry_state}
   - {addr: 0x800d0bb4, name: g_wldcore_proposition_selected_entry}
   - {addr: 0x800d0bb8, name: g_wldcore_route_search_depth}
-  - {addr: 0x800d0bbc, name: g_main_save_slot_buffer}
+  - {addr: 0x800d0bbc, name: g_wldcore_save_slot_buffer}
   - {addr: 0x800d3bbc, name: g_wldcore_map_path_animation}
   - {addr: 0x800d3c48, name: g_wldcore_route_search_path}
   - {addr: 0x800d3c88, name: g_wldcore_saved_system_flags}

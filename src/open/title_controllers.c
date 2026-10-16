@@ -167,7 +167,7 @@ void open_gfx_load_opntex_into_frame_buffer(u32* tim) {
 void open_movie_start_fftst_or_title_menu(s32 use_alternate) {
     g_open_current_controller_index = 0;
     if (use_alternate == 0) {
-        g_active_graphics_buffer_index = 0;
+        g_main_gfx_active_buffer_index = 0;
         open_movie_stream_fftst_and_push_controller(DISC_SECTOR_OPEN_FFTST_STR, 0x278A, 0x3DF, 0x2DE);
     } else {
         open_title_push_menu_controller(0);
@@ -290,7 +290,7 @@ void open_title_push_menu_controller(s32 argument) {
     rect.y = 0;
     rect.w = 0x140;
     rect.h = 0xf0;
-    if (g_active_graphics_buffer_index != 0) {
+    if (g_main_gfx_active_buffer_index != 0) {
         rect.y = 0xf0;
     }
     LoadImage(&rect, g_open_file_destination);
@@ -440,7 +440,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             return;
         }
         /* Drop the menu's six render records and this controller, then play the next of three demos. */
-        g_active_graphics_buffer_index = 1;
+        g_main_gfx_active_buffer_index = 1;
         g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         g_open_gfx_next_render_record_36 -= 6;
         g_open_gfx_render_record_pointer_count -= 6;
@@ -773,7 +773,7 @@ void open_title_step_new_game_start(open_controller_record_t* record) {
         world_menu_load_text_1c18();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */
-        if (g_active_graphics_buffer_index != 0) {
+        if (g_main_gfx_active_buffer_index != 0) {
             rect.x = 0;
             rect.y = 0;
             rect.w = 0x100;
@@ -787,7 +787,7 @@ void open_title_step_new_game_start(open_controller_record_t* record) {
         StoreImage(&rect, g_open_file_destination);
         DrawSync(0);
 
-        if (g_active_graphics_buffer_index == 0) {
+        if (g_main_gfx_active_buffer_index == 0) {
             rect.x = 0;
             rect.y = 0;
             rect.w = 0x100;
@@ -1149,7 +1149,7 @@ void open_birthday_handle_confirmation_input(open_controller_record_t* record) {
         && !(g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE)) {
         g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         main_sound_unload_current_scenario_music();
-        g_active_graphics_buffer_index = 1;
+        g_main_gfx_active_buffer_index = 1;
         g_open_gfx_next_render_record_56 -= 3;
         g_open_gfx_next_render_record_36 -= 3;
         g_open_gfx_render_record_pointer_count -= 6;

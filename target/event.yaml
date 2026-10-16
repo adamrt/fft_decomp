@@ -169,7 +169,7 @@ data:
   - {addr: 0x801cd054, name: g_attack_map_title_closing_past_midpoint}
   - {addr: 0x801cd058, name: g_attack_deploy_deployed_unit_count}
   - {addr: 0x801cd05c, name: g_attack_deploy_fieldable_unit_count}
-  - {addr: 0x801cd060, name: g_world_shop_purchase_unit_price}
+  - {addr: 0x801cd060, name: g_attack_deploy_cleared_word}
   - {addr: 0x801cd064, name: g_attack_deploy_selected_roster_index}
   - {addr: 0x801cd068, name: g_attack_deploy_pending_roster_index}
   - {addr: 0x801cd06c, name: g_attack_deploy_arrow_position_mode}
@@ -544,16 +544,16 @@ data:
   - {addr: 0x801cecec, name: g_panel_selected_portrait_rect}
   - {addr: 0x801cecf4, name: g_panel_comparison_portrait_rect}
   - {addr: 0x801cecfc, name: g_menu_portrait_transition_offsets}
-  - {addr: 0x801ced30, name: g_bunit_character_status_sprite_origin}
-  - {addr: 0x801ced40, name: g_bunit_character_status_frame_rect}
+  - {addr: 0x801ced30, name: g_menu_equipment_panel_origin}
+  - {addr: 0x801ced40, name: g_menu_equipment_panel_frame_rect}
   - {addr: 0x801ced58, name: g_character_status_draw_area_rect}
-  - {addr: 0x801ced60, name: g_bunit_character_status_equipment_text_rect}
-  - {addr: 0x801ced68, name: g_bunit_character_status_ability_text_rect}
-  - {addr: 0x801ced70, name: g_bunit_character_status_layout_mode0}
-  - {addr: 0x801cee54, name: g_bunit_character_status_layout_mode1}
-  - {addr: 0x801cef38, name: g_bunit_character_status_layout_mode2}
-  - {addr: 0x801cf01c, name: g_bunit_character_status_layout_mode3}
-  - {addr: 0x801cf160, name: g_bunit_character_status_item_icon_layout}
+  - {addr: 0x801ced60, name: g_menu_equipment_panel_item_text_rect}
+  - {addr: 0x801ced68, name: g_menu_equipment_panel_ability_text_rect}
+  - {addr: 0x801ced70, name: g_menu_equipment_panel_sprite_params_0}
+  - {addr: 0x801cee54, name: g_menu_equipment_panel_sprite_params_1}
+  - {addr: 0x801cef38, name: g_menu_equipment_panel_sprite_params_2}
+  - {addr: 0x801cf01c, name: g_menu_equipment_panel_sprite_params_3}
+  - {addr: 0x801cf160, name: g_menu_equipment_panel_icon_params}
   - {addr: 0x801cf19c, name: g_editor_numeric_table}
   - {addr: 0x801cf1ac, name: g_editor_numeric_entries_a}
   - {addr: 0x801cf1b4, name: g_editor_numeric_entries_b}
@@ -722,9 +722,9 @@ data:
   - {addr: 0x801e6a20, name: g_panel_comparison_large_number_image}
   - {addr: 0x801e6b10, name: g_bunit_panel_selected_portrait_palettes}
   - {addr: 0x801e6b50, name: g_bunit_panel_comparison_portrait_palettes}
-  - {addr: 0x801e6b90, name: g_bunit_character_status_frames}
-  - {addr: 0x801e7af0, name: g_bunit_character_status_equipment_text_image}
-  - {addr: 0x801e8770, name: g_bunit_character_status_ability_text_image}
+  - {addr: 0x801e6b90, name: g_menu_equipment_panel_frames}
+  - {addr: 0x801e7af0, name: g_menu_equipment_panel_item_text_image}
+  - {addr: 0x801e8770, name: g_menu_equipment_panel_ability_text_image}
   - {addr: 0x801e93f0, name: g_editor_numeric_state_a}
   - {addr: 0x801e9970, name: g_editor_numeric_state_b}
   - {addr: 0x801e9ef0, name: g_editor_numeric_text_a}
@@ -1792,7 +1792,7 @@ data:
   - {addr: 0x801e90a0, name: g_gfx_line_f4_capacity}
   - {addr: 0x801e90a4, name: g_gfx_line_g4_capacity}
   - {addr: 0x801e90a8, name: g_gfx_poly_ft3_capacity}
-  - {addr: 0x801e90ac, name: g_equip_gfx_line_f2_count}
+  - {addr: 0x801e90ac, name: g_gfx_line_f2_count}
   - {addr: 0x801e90b0, name: g_gfx_poly_gt3_capacity}
   - {addr: 0x801e90b4, name: g_gfx_poly_ft4_capacity}
   - {addr: 0x801e90b8, name: g_gfx_line_g2_count}
@@ -2271,9 +2271,9 @@ data:
   - {addr: 0x801ca70c, name: g_menu_at_list_indices}
   - {addr: 0x801ca90c, name: g_dead_unit_menu_flags}
   - {addr: 0x801cad0c, name: g_menu_at_list_flags}
-  - {addr: 0x801caf14, name: g_option_dead_unit_primary_result}
-  - {addr: 0x801caf18, name: g_option_dead_unit_secondary_result}
-  - {addr: 0x801cb6fc, name: g_option_menu_at_list_descriptors}
+  - {addr: 0x801caf14, name: g_menu_dead_unit_menu_result}
+  - {addr: 0x801caf18, name: g_menu_dead_unit_move_result}
+  - {addr: 0x801cb6fc, name: g_menu_at_list_descriptors}
   - {addr: 0x801cb79c, name: g_menu_at_list_text}
   - {addr: 0x801cbc4c, name: g_menu_option_title_image_rect}
   - {addr: 0x801cbc54, name: g_menu_option_value_image_rect}

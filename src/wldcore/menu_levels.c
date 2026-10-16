@@ -407,7 +407,7 @@ void wldcore_menu_run_world_frame(GsOT* context) {
         menu_draw_active_window_frames();
         sprite_entries = (u32*)context->org;
         menu_input_update_event_state(sprite_entries + g_wldcore_menu_ordering_table_offset + 2,
-            g_input_current_buttons, g_active_graphics_buffer_index * 240);
+            g_input_current_buttons, g_main_gfx_active_buffer_index * 240);
         if (g_sound_pending_sfx_id != -1) {
             wldcore_sound_play_effect(g_sound_pending_sfx_id);
         }
@@ -1194,7 +1194,7 @@ void wldcore_menu_push_text_window_level(s32 text, s32 reload_text) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_open_text_section_offsets);
+        text_relocate_pointer_table(g_world_text_section_offsets);
     }
 
     index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
@@ -1279,7 +1279,7 @@ void wldcore_menu_push_message_level(s32 text, s32 reload_text) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_open_text_section_offsets);
+        text_relocate_pointer_table(g_world_text_section_offsets);
     }
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread);
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS) {

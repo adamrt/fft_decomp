@@ -145,7 +145,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         g_gfx_poly_gt3_count = 0;
         g_gfx_poly_g4_count = 0;
         g_menu_gfx_poly_gt4_count = 0;
-        g_world_gfx_flat_line_count = 0;
+        g_gfx_line_f2_count = 0;
         g_gfx_line_f3_count = 0;
         g_gfx_line_f4_count = 0;
         g_world_gfx_gradient_line_count = 0;

@@ -140,14 +140,14 @@ void menu_start_dead_unit_threads(void) {
      * choice between them. */
     for (;;) {
         if (context->result == 3) {
-            g_option_dead_unit_secondary_result = 0xff;
+            g_menu_dead_unit_move_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_run_icon_selection_loop);
             thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_MOVE], 0, 0);
             thread_wait_until_inactive(g_thread_current_id - 1);
         }
 
-        g_option_dead_unit_primary_result = 0xff;
-        if ((context->result == 3 && g_option_dead_unit_secondary_result == 0) || context->result == 1) {
+        g_menu_dead_unit_menu_result = 0xff;
+        if ((context->result == 3 && g_menu_dead_unit_move_result == 0) || context->result == 1) {
             thread_start(g_thread_current_id - 2, menu_run_at_list);
             thread_set_parameters(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
             thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, menu_icon_linked_entry_thread);
@@ -172,24 +172,24 @@ void menu_start_dead_unit_threads(void) {
             thread_wait_until_inactive(g_thread_current_id - 1);
             thread_set_parameters(THREAD_BORROWED_SLOT_AT_LIST_MENU, 0, 0, 1);
             thread_suspend(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD);
-            if (g_option_dead_unit_primary_result == 0) {
+            if (g_menu_dead_unit_menu_result == 0) {
                 g_menu_dead_unit_action = 1;
                 break;
             }
             /* Backing out of the list returns to the choice for result 3. */
-            if (g_option_dead_unit_primary_result == 1 || (g_option_dead_unit_primary_result & 0xff) == 0xff) {
+            if (g_menu_dead_unit_menu_result == 1 || (g_menu_dead_unit_menu_result & 0xff) == 0xff) {
                 if (context->result == 3) {
                     continue;
                 }
             }
         }
 
-        if ((g_option_dead_unit_secondary_result == 1 && context->result == 3) || context->result == 2) {
-            g_option_dead_unit_primary_result = 0xff;
+        if ((g_menu_dead_unit_move_result == 1 && context->result == 3) || context->result == 2) {
+            g_menu_dead_unit_menu_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
             thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_CONFIRM], 0, 0);
             thread_wait_until_inactive(g_thread_current_id - 1);
-            if (g_option_dead_unit_primary_result == 0) {
+            if (g_menu_dead_unit_menu_result == 0) {
                 g_menu_dead_unit_action = 2;
                 break;
             }
@@ -229,7 +229,7 @@ static void menu_init_at_list(menu_entry_t* menu) {
     u8* text;
 
     g_thread_call_target = (void (*)(void))battle_action_calculate_at_list;
-    thread_call_on_main_stack(g_option_menu_at_list_descriptors, 0);
+    thread_call_on_main_stack(g_menu_at_list_descriptors, 0);
 
     for (index = 0; index < 0x100; index++) {
         g_dead_unit_menu_flags[index] = 0;
@@ -245,14 +245,14 @@ static void menu_init_at_list(menu_entry_t* menu) {
         unit_stats_t* unit;
         s32 name_index;
 
-        if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_UNIT_ID_MASK) == BATTLE_AT_END_OF_LIST) {
+        if ((g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_UNIT_ID_MASK) == BATTLE_AT_END_OF_LIST) {
             break;
         }
 
         g_menu_at_list_indices[index] = index + 1;
         unit = battle_unit_get_stats_from_battle_id(
-            g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_UNIT_ID_MASK);
-        if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
+            g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_UNIT_ID_MASK);
+        if ((g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
@@ -266,27 +266,27 @@ static void menu_init_at_list(menu_entry_t* menu) {
             }
             text++;
         }
-        if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
+        if ((g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbf;
         }
         *text++ = 0xfe;
 
-        if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
+        if ((g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
             g_menu_at_list_secondary_values[entry_count] = index - 0x800;
         } else {
             g_menu_at_list_primary_values[entry_count] = index - 0x800;
         }
 
-        if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) == 0) {
+        if ((g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) == 0) {
             g_menu_at_list_secondary_values[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             has_special_entry = 1;
-            if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_JUMP) != 0) {
+            if ((g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_JUMP) != 0) {
                 g_menu_at_list_primary_values[entry_count] = 0xb012;
             } else {
-                s32 value = g_option_menu_at_list_descriptors[index].action_id_low;
-                if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ABILITY_ID_HIGH_BIT) != 0) {
+                s32 value = g_menu_at_list_descriptors[index].action_id_low;
+                if ((g_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ABILITY_ID_HIGH_BIT) != 0) {
                     value += 0x100;
                 }
                 g_menu_at_list_primary_values[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;

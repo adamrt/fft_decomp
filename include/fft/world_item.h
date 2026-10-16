@@ -28,6 +28,13 @@ extern s16 g_world_item_action_option_states[3];
 extern menu_entry_t g_world_item_quantity_change_menu;
 extern menu_entry_t g_world_item_unequip_all_menu;
 extern menu_instruction_t g_world_item_list_window_script;
+/* The formation item menu's copy of the EQUIP screen's item-list state. */
+extern s8 g_world_item_list_open;
+extern s8 g_world_item_list_refresh;
+extern s8 g_world_item_preview_active;
+extern s16 g_world_item_previewed_cursor;
+extern s8 g_world_item_slot;
+extern menu_instruction_t g_world_item_menu_script;
 extern menu_instruction_t g_world_item_hp_mp_bonus_window_script;
 extern s8 g_world_item_menu_mode; /* menu_item_list_state_e */
 /* The two item-category icon strips; the active one is kept in g_world_item_category_icon_strip. */

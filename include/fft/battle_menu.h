@@ -45,7 +45,7 @@ void battle_menu_set_next_script_action_menus(void);
 extern RECT g_battle_menu_ability_list_clut_rect;
 extern u8 g_battle_menu_calculator_skillsets[4];
 extern s32 g_battle_menu_scroll_list_depth;
-extern u8 g_battle_menu_skillset_disabled_flags[]; /* per-row grayed flag */
+extern u8 g_menu_skillset_disabled_flags[]; /* per-row grayed flag */
 
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids);
 s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);

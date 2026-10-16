@@ -264,7 +264,6 @@ extern s32 g_battle_text_awaiting_input;
 extern u32 g_battle_script_saved_event_input; /* the event input held while a script runs */
 extern u8 g_battle_job_level_gained_flag;
 /* Unit coordinates shared by camera tile tests and dialogue positioning. */
-extern SVECTOR g_unit_scratch_coords;
 
 /* stubs */
 s32 battle_return_one(s32 unused_runtime_id);

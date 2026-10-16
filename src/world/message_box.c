@@ -262,7 +262,7 @@ void menu_run_unit_status_thread(void) {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
 
-        g_world_gfx_draw_area_y = (g_frame_arg != 0xF0) ? 0xF0 : 0;
+        g_gfx_draw_offset_y = (g_frame_arg != 0xF0) ? 0xF0 : 0;
 
         /* Slide down through steps 1-6 or up through 11-16, one step every two frames, then keep
          * only the hidden flag. */
@@ -297,20 +297,20 @@ void menu_run_unit_status_thread(void) {
         }
 
         draw_x = thread->x;
-        draw_y = g_world_gfx_draw_area_y;
+        draw_y = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = draw_x - 0x80;
         panel->draw_offset_a.position.y = thread->shake_y + draw_y;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
         panel->draw_offset_b.position.x = -0x80;
-        panel->draw_offset_b.position.y = g_world_gfx_draw_area_y;
+        panel->draw_offset_b.position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
         draw_x = thread->x;
-        draw_y = g_world_gfx_draw_area_y;
+        draw_y = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = draw_x - 0x80;
         editor->draw_offset_a.position.y = thread->shake_y + draw_y;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
         editor->draw_offset_b.position.x = -0x80;
-        editor->draw_offset_b.position.y = g_world_gfx_draw_area_y;
+        editor->draw_offset_b.position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
 
         /* A finished cross-fade (step 10) settles on the new unit; a changed unit, or a redraw

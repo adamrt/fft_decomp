@@ -30,7 +30,7 @@ void main_save_init_data_tables(void) {
         record->_unknown_18 = 0;
         record->text_id = 0;
         g_main_saved_records[i].counter_delta = 0;
-        g_main_saved_records[i].buffer = &g_main_save_slot_buffer;
+        g_main_saved_records[i].buffer = &g_wldcore_save_slot_buffer;
     }
     g_main_saved_records[0].brightness = 0x10;
     g_main_saved_records[1].brightness = 0x10;
