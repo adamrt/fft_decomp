@@ -25,7 +25,7 @@
 void equip_panel_toggle_item_numeric_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIP_THREAD_SLOT_ITEM_NUMERIC) == 0) {
-            thread_start(EQUIP_THREAD_SLOT_ITEM_NUMERIC, menu_run_numeric_editor_frame_thread_variant);
+            thread_start(EQUIP_THREAD_SLOT_ITEM_NUMERIC, menu_run_numeric_editor_frame_thread);
             thread_set_parameters(EQUIP_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_menu_preview_stats_thread_params, 0, 0);
         }
     } else {
@@ -129,7 +129,7 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
         changed = message_idle;
     }
     g_equip_text_restore_pending = changed;
-    menu_input_update_with_message_state_variant();
+    equip_menu_input_update_with_message_state();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
         menu_text_start_help_thread(3);
     }

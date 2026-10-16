@@ -323,7 +323,7 @@ void script_clamp_s32_to_range(s32* value, s32 min, s32 max) {
  * the event speed.
  *
  * No input at all, or a tutorial event that has Up or Down disabled, resets the
- * three repeat counters. script_route_event_input_variant is the WORLD copy;
+ * three repeat counters. script_route_event_input is the WORLD copy;
  * it takes no argument and fetches the buttons itself. */
 void script_update_event_input_state(u32 input) {
     u32 filtered_input;
@@ -666,12 +666,12 @@ void menu_draw_active_window_frames(void) {
             window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
             window->quads[1].clut = GetClut(window->portrait_code % 4 * 16 + 0x1C0, window->portrait_code / 4 + 0xFE);
 #else
-            menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_code);
+            menu_build_unit_portrait_poly(&window->quads[1], window->portrait_code);
 #endif
         }
 #ifdef FFT_BATTLE
         else {
-            menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_battle_id);
+            menu_build_unit_portrait_poly(&window->quads[1], window->portrait_battle_id);
         }
         gfx_flip_poly_ft4_uv_if_negative(&window->quads[1], -window->portrait_flipped);
 #endif

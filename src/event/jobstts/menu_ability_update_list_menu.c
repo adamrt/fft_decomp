@@ -1,10 +1,10 @@
 /* The selected job's ability list, tabbed by category, with the selected ability's description. */
 
+#include "fft/menu.h"
 #include "fft/data_ability.h"
 #include "fft/event_jobstts.h"
 #include "fft/job.h"
 #include "fft/main.h"
-#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_overlay.h"
@@ -20,7 +20,7 @@
 /* Selected job's ability list: tabbed by category, with the selected
  * ability's description text. Returns 1 while open, 0 on cancel, -1 on
  * confirm. */
-s32 menu_ability_update_list_menu_variant(void) {
+s32 jobstts_menu_ability_update_list_menu(void) {
     RECT rect;
     s16 selected;
     s16 scroll;
@@ -58,8 +58,7 @@ s32 menu_ability_update_list_menu_variant(void) {
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_jobstts_ability_list_job_name_ids, &rect, 0);
         g_menu_ability_category = jobstts_menu_update_wrapped_horizontal_selection(4, 5, 0);
         jobstts_ability_build_list(0, g_job_selected_id & 0x3ff, g_menu_ability_category, g_menu_ability_entries, 0);
-        menu_init_scrollable_list_core_variant(
-            g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
+        menu_init_scrollable_list_core(g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_jobstts_ability_list_initialized = 1;
     }
 
@@ -90,13 +89,13 @@ s32 menu_ability_update_list_menu_variant(void) {
             g_menu_ability_category, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
         jobstts_ability_build_list(0, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
-        menu_get_selection_record_variant(g_menu_ability_category, &selected, &scroll, g_menu_ability_entries);
+        menu_get_selection_record(g_menu_ability_category, &selected, &scroll, g_menu_ability_entries);
         menu_init_scrollable_list(
             g_menu_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(0xa);
         g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
     }
-    menu_run_script_with_palette_mode_variant(
+    jobstts_menu_run_script_with_palette_mode(
         &g_jobstts_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     rect.x = 0x26;
     rect.y = 0x27;

@@ -70,19 +70,26 @@ extern s32 g_menu_help_message_text_id;
 extern u32 g_help_text_table[];
 
 /* per-module bodies: each module links its own copy under the shared name. */
-s32 menu_get_thread_activity_variant(void);
-void menu_run_ability_list_thread_variant(void);
-void menu_run_equipment_list_thread_variant(void);
-s32 menu_ability_update_list_menu_variant(void);
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction_variant(void);
-s32 menu_run_job_list_variant(void);
-void menu_input_update_with_message_state_variant(void);
-s32 menu_update_equipment_variant(void);
-void menu_run_at_list_variant(void);
-void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode);
-void menu_run_game_options_variant(void);
+s32 menu_get_thread_activity(void);
+void menu_run_ability_list_thread(void);
+void menu_run_equipment_list_thread(void);
+s32 bunit_menu_ability_update_list_menu(void);
+s32 jobstts_menu_ability_update_list_menu(void);
+menu_vertical_scroll_direction_e bunit_menu_input_read_page_scroll_direction(void);
+menu_vertical_scroll_direction_e world_menu_input_read_page_scroll_direction(void);
+s32 bunit_menu_run_job_list(void);
+s32 jobstts_menu_run_job_list(void);
+void equip_menu_input_update_with_message_state(void);
+void jobstts_menu_input_update_with_message_state(void);
+void world_menu_input_update_with_message_state(void);
+s32 menu_update_equipment(void);
+void menu_run_at_list(void);
+void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
+void world_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
+void option_menu_run_game_options(void);
+void world_menu_run_game_options(void);
 /* Scrollable list core: BUNIT, EQUIP, JOBSTTS and WORLD each link their own body. */
-void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
+void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* text_table);
 
 /* overlay */
 extern menu_entry_t g_menu_option_icon_thread_param;

@@ -192,7 +192,7 @@ void card_save_run_menu(s32 unused) {
         } else if (g_card_save_menu_state == CARD_SAVE_MENU_LEAVE
             || g_card_save_menu_state == CARD_SAVE_MENU_LEAVE_ALT) {
             main_sound_set_current_music_target(0, 0xf0);
-            while (card_io_poll_operation_result_variant() == CARD_IO_RESULT_PENDING) { }
+            while (card_io_poll_operation_result() == CARD_IO_RESULT_PENDING) { }
             gfx_start_increasing_fade();
             g_card_save_menu_state = CARD_SAVE_MENU_CLOSING;
         }
@@ -207,8 +207,7 @@ void card_save_run_menu(s32 unused) {
             && thread_is_running(14) == 0) {
             input &= 0xff00;
         }
-        menu_input_update_event_state_variant(
-            g_card_gfx_context->otag + 0x3c, input, g_card_gfx_drawenv_y == 0 ? 0xf0 : 0);
+        menu_input_update_event_state(g_card_gfx_context->otag + 0x3c, input, g_card_gfx_drawenv_y == 0 ? 0xf0 : 0);
 
         if (g_sound_pending_sfx_id == MAIN_SFX_CURSOR_MOVE || g_sound_pending_sfx_id == MAIN_SFX_CANCEL) {
             g_card_sound_queued_effect_id = g_sound_pending_sfx_id;
@@ -304,7 +303,7 @@ static void card_save_update_slot_scan_result(void) {
     s32 index;
     s32 all_empty;
 
-    if (card_io_poll_operation_result_variant() > CARD_IO_RESULT_COMPLETE) {
+    if (card_io_poll_operation_result() > CARD_IO_RESULT_COMPLETE) {
         g_card_save_slot_scan_prompt_descriptor = 0;
         g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
         menu_stop_thread_and_wait(14);
@@ -520,7 +519,7 @@ static void card_save_build_buffer(s32 slot) {
     bcopy(g_main_active_propositions, g_card_save_buffer_pointer->active_propositions,
         sizeof(g_card_save_buffer_pointer->active_propositions));
 
-    bits_init_primary_reader_variant(g_card_save_buffer_pointer->parity_bits);
+    bits_init_primary_reader(g_card_save_buffer_pointer->parity_bits);
     block = (u8*)g_card_save_buffer_pointer;
     for (i = 0; (u32)i < CARD_SAVE_PARITY_BLOCK_COUNT; i++) {
         parity = 0;
@@ -692,7 +691,7 @@ static void card_save_update_slot_scan(void) {
     }
 
     if (g_card_io_open_result == CARD_IO_RESULT_NEW_CARD) {
-        result = card_io_poll_operation_result_variant();
+        result = card_io_poll_operation_result();
         if (result > CARD_IO_RESULT_COMPLETE) {
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
@@ -715,7 +714,7 @@ static void card_save_update_slot_scan(void) {
     }
 
     if (g_card_io_open_result == CARD_IO_RESULT_ERROR || g_card_io_open_result == CARD_IO_RESULT_TIMEOUT) {
-        result = card_io_poll_operation_result_variant();
+        result = card_io_poll_operation_result();
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_card_save_card_error_prompt_descriptor);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
             menu_stop_managed_thread(THREAD_SCREEN_SLOT_MENU);
@@ -953,7 +952,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
 
         /* `row` briefly holds the card status: after an error or a new card, rescan unless the card
          * still answers. */
-        row = card_io_poll_operation_result_variant();
+        row = card_io_poll_operation_result();
         if (row > CARD_IO_RESULT_COMPLETE) {
             if (card_io_wait_operation_result(3) != CARD_IO_RESULT_COMPLETE) {
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
@@ -1067,13 +1066,13 @@ static void card_save_update_and_draw_slot_list(u16 input) {
         g_card_save_slot_quads[1].position.y++;
         if (g_card_save_slot_quads[0].position.y >= 0 && g_card_save_slot_quads[0].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[0], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[0], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[1], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[1], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[3], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[3], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[4], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[4], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             gfx_set_otag_index(11);
             g_card_save_slot_number_commands[0].number.y = g_card_save_slot_quads[0].position.y;
             g_card_save_slot_number_commands[0].number.value = index + 1;
@@ -1083,7 +1082,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
         g_card_save_slot_quads[2].position.y = g_card_save_slot_quads[0].position.y;
         if (g_card_save_slot_quads[2].position.y >= 0 && g_card_save_slot_quads[2].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[2], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[2], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             g_card_save_slot_number_commands[3].number.y = g_card_save_slot_number_commands[2].number.y
                 = g_card_save_slot_number_commands[1].number.y = g_card_save_slot_quads[0].position.y;
             g_card_save_slot_number_commands[3].number.value = g_main_card_save_slot_playtimes[index].seconds;
@@ -1133,7 +1132,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
         value = 3;
     }
     g_card_save_slot_cursor_position.y = value * 48 + 0x28;
-    menu_update_and_draw_sliding_cursor_variant(
+    menu_update_and_draw_sliding_cursor(
         &g_card_save_slot_cursor_position, &g_card_save_slot_cursor_animation, scrolling);
 
     /* cursor_clut is unused: both arrows below draw with the mode-0 CLUT. */

@@ -114,13 +114,13 @@ void equip_menu_init_screen(s32 battle_id) {
     menu_toggle_numeric_editor_thread(1);
 }
 
-/* Starts the unit status thread on menu_run_unit_status_thread_variant
+/* Starts the unit status thread on menu_run_unit_status_thread
  * (parameter g_equip_unit_status_panel_params) when `enable` is set and the
  * thread is idle; stops it otherwise. */
 void equip_panel_toggle_unit_status_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIP_THREAD_SLOT_UNIT_STATUS) == 0) {
-            thread_start(EQUIP_THREAD_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
+            thread_start(EQUIP_THREAD_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
             thread_set_parameters(EQUIP_THREAD_SLOT_UNIT_STATUS, (s32)g_equip_unit_status_panel_params, 0, 0);
         }
     } else {
@@ -133,7 +133,7 @@ void equip_panel_toggle_unit_status_thread(s32 enable) {
 void equip_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIP_THREAD_SLOT_EQUIPMENT_LIST) == 0) {
-            thread_start(EQUIP_THREAD_SLOT_EQUIPMENT_LIST, menu_run_equipment_list_thread_variant);
+            thread_start(EQUIP_THREAD_SLOT_EQUIPMENT_LIST, menu_run_equipment_list_thread);
             thread_set_parameters(EQUIP_THREAD_SLOT_EQUIPMENT_LIST, (s32)g_equip_equipment_panel_params, 0, 0);
         }
         menu_toggle_numeric_editor_thread(enable);

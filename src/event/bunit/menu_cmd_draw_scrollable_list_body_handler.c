@@ -18,10 +18,10 @@
  * constant 2, as in JOBSTTS's.
  *
  * The padding arrays reproduce the target's frame (only rect and marker are
- * referenced). The scroll-down path follows WORLD's menu_cmd_draw_scrollable_list_body_handler_variant
+ * referenced). The scroll-down path follows WORLD's bunit_menu_cmd_draw_scrollable_list_body_handler
  * spelling.
  */
-menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {
+menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
     point16_t marker;
@@ -57,10 +57,10 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     }
     previous_selected = g_menu_list_selected_index;
     if (g_menu_list_scroll_direction == 0) {
-        j = menu_input_read_page_scroll_direction_variant();
+        j = bunit_menu_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
-                menu_scroll_list_by_page_variant(j, command);
+                menu_scroll_list_by_page(j, command);
             }
         } else {
             input = g_menu_cmd_stream_input;
@@ -204,7 +204,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_sliding_cursor_variant(
+        menu_update_and_draw_sliding_cursor(
             &marker, &g_bunit_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);

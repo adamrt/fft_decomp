@@ -589,7 +589,7 @@ typedef enum main_system_flags {
     MAIN_SYSTEM_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
     /* wldcore_gfx_draw_world_frame does not load the scratch image into the display buffer. */
     MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
-    /* window_dispatch_record_list_variant draws nothing and wldcore_map_pulse_dot_colors returns. */
+    /* window_dispatch_record_list draws nothing and wldcore_map_pulse_dot_colors returns. */
     MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
     /* wldcore_gfx_draw_context_value_display draws nothing. */
     MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,

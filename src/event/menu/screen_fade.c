@@ -40,7 +40,7 @@ s32 gfx_update_decreasing_fade(void) {
             g_gfx_decreasing_fade_active = 0;
             result = 0;
         }
-        menu_gfx_enqueue_draw_mode_variant(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_gfx_otag_count - 2);
+        menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_gfx_otag_count - 2);
         {
             rgb24_t* color = &g_gfx_fade_color;
 
@@ -68,7 +68,7 @@ s32 gfx_update_increasing_fade(void) {
             g_gfx_increasing_fade_active = 0;
             g_gfx_fade_intensity = 0xff;
         }
-        menu_gfx_enqueue_draw_mode_variant(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_gfx_otag_count - 2);
+        menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_gfx_otag_count - 2);
         {
             rgb24_t* color = &g_gfx_fade_color;
 

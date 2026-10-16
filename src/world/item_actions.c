@@ -68,7 +68,7 @@ s8 world_item_run_action_menu(void) {
             text++;
         }
         if (g_menu_list_entry_count != 0
-            && item_get_equipped_count_variant(g_item_list_entries[g_menu_list_selected_index]) != 0) {
+            && item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) != 0) {
             text[1] = 0;
             g_world_item_action_option_states[1] = 4;
         } else {
@@ -116,7 +116,7 @@ s8 world_item_run_action_menu(void) {
                 item_adjust_inventory_count(
                     g_item_list_entries[g_menu_list_selected_index], -g_world_menu_selection_results[4]);
                 /* With none left anywhere, drop the entry from the list and rebuild around it. */
-                if (item_get_total_count_variant(g_item_list_entries[g_menu_list_selected_index]) == 0) {
+                if (item_get_total_count(g_item_list_entries[g_menu_list_selected_index]) == 0) {
                     for (i = g_menu_list_selected_index; i < g_menu_list_entry_count; i++) {
                         g_item_list_entries[i] = g_item_list_entries[i + 1];
                     }
@@ -124,7 +124,7 @@ s8 world_item_run_action_menu(void) {
                         g_text_section_pointers[TEXT_SECTION_ITEM_NAMES], &g_world_item_list_window_script);
                     menu_set_window_scale_step(10);
                     item_rebuild_category_list(g_menu_selected_slot);
-                    item_collect_stat_deltas_variant(g_item_list_entries[g_menu_list_selected_index],
+                    item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index],
                         &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
                     g_menu_preview_stats_thread_params.redraw_request = 1;
                 }
@@ -187,7 +187,7 @@ s8 world_item_run_action_menu(void) {
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
-        menu_get_selection_record_variant(g_menu_selected_slot, &x, &y, g_item_list_entries);
+        world_menu_get_selection_record(g_menu_selected_slot, &x, &y, g_item_list_entries);
         menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
         if (g_menu_list_entry_count != 0) {
@@ -195,7 +195,7 @@ s8 world_item_run_action_menu(void) {
         } else {
             result = 0;
         }
-        item_collect_stat_deltas_variant(result, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_collect_stat_deltas(result, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_menu_status_display_thread_params.redraw_request = 1;
         g_menu_preview_stats_thread_params.redraw_request = 1;
     }
@@ -267,11 +267,11 @@ s8 world_item_run_sort_order_menu(void) {
             g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
-        menu_init_scrollable_list_core_variant(
+        menu_init_scrollable_list_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
-        item_collect_stat_deltas_variant(g_item_list_entries[g_menu_list_selected_index],
-            &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index], &g_menu_selected_unit_stat_summary,
+            &g_item_preview_stat_detail, 0);
         g_menu_preview_stats_thread_params.redraw_request = 1;
     }
     if (menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_world_item_category_icon_strip) == 0) {
@@ -350,12 +350,12 @@ void world_menu_draw_row_window_and_cursor(s32 wide, s32 row, s32 mode) {
         y = 0x4F;
         drawing.script = &g_world_item_category_tabs_wide_script;
     }
-    menu_run_script_with_palette_mode_variant(drawing.script, 0, mode);
+    menu_run_script_with_palette_mode(drawing.script, 0, mode);
     drawing.quad = &g_world_item_category_tab_sprites[row];
     drawing.quad->position.x = x;
     drawing.quad->position.y = y - (row == 0);
     menu_gfx_enqueue_oriented_textured_quad(
-        drawing.quad, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
+        drawing.quad, world_menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
     cursor = &g_world_item_category_tab_cursor_sprite;
     cursor_x = x + 9;
     if (row == 3) {

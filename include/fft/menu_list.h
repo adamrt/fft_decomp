@@ -72,7 +72,8 @@ extern s16 g_menu_list_entry_count;
 extern u8* g_menu_list_text_table;
 extern s16* g_menu_list_entries;
 extern s8 g_menu_list_scroll_direction; /* read with lb */
-extern s8 g_menu_list_redraw_pending;   /* read with lb (menu_cmd_draw_scrollable_list_body_handler_variant) */
+extern s8
+    g_menu_list_redraw_pending; /* read with lb (the per-program menu_cmd_draw_scrollable_list_body_handler copies) */
 extern s16 g_menu_list_selected_index;
 extern s16 g_menu_scroll_base_index;
 void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);

@@ -19,9 +19,9 @@ void bunit_menu_update_job(void) {
         g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
     }
     if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
-        g_bunit_job_menu_phase = menu_run_job_list_variant();
+        g_bunit_job_menu_phase = bunit_menu_run_job_list();
     } else if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_ABILITIES) {
-        g_bunit_job_menu_phase = menu_ability_update_list_menu_variant();
+        g_bunit_job_menu_phase = bunit_menu_ability_update_list_menu();
     }
     if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_CLOSE) {
         g_bunit_menu_current_menu = BUNIT_MENU_UNIT_LIST;

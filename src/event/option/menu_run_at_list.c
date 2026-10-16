@@ -21,7 +21,7 @@
  * OPTION's body. The do/while (0) around the scroll redraw puts its render-buffer
  * references one loop level deeper, which raises the buffer's global-alloc priority above the
  * page pointer's (target: buffer s3, page s4; without it the two swap). */
-void menu_run_at_list_variant(void) {
+void menu_run_at_list(void) {
     image_load_parameters_t image_parameters;
     RECT image_rect;
     RECT clear;

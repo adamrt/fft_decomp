@@ -94,7 +94,7 @@ enum { OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE = 9 };
 
 enum { OPEN_GFX_RENDER_RECORD_CAPACITY = 16 };
 
-/* Render records. window_dispatch_record_list_variant dispatches on flags
+/* Render records. window_dispatch_record_list dispatches on flags
  * (world_render_record_flag_e): ANIMATED is a 36-byte record, IMAGE a
  * 56-byte record, and a record with BLANK or HIDDEN set is skipped.
  * Each pool holds OPEN_GFX_RENDER_RECORD_CAPACITY entries. */

@@ -61,7 +61,7 @@ void world_menu_announce_entry_value_thread(void) {
     }
     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
     thread_set_parameters(g_thread_current_id, 0x3F, value, 0);
-    text_run_dialog_thread_variant();
+    text_run_dialog_thread();
     g_world_formation_menu_new_buttons = 0;
     g_menu_input_lock_mode = 0;
     script_load_event_input_state(&g_world_formation_menu_input_state);
@@ -607,7 +607,7 @@ void world_menu_text_entry_thread(void) {
     binding = entry->context;
     text_thread = binding->text_thread_id;
     speaker_id = binding->speaker_id;
-    thread_start(text_thread, text_run_dialog_thread_variant);
+    thread_start(text_thread, text_run_dialog_thread);
     thread_set_parameters(text_thread, second, text_id, speaker_id);
     thread_wait_until_inactive(text_thread);
     *g_world_menu_list_controller_input = PSX_PAD_CIRCLE;

@@ -18,7 +18,7 @@
 #    include "fft/event_debugchr.h"
 #endif
 
-static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output);
+static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output);
 
 /* Fill a 16-byte text field with terminators. */
 static void text_fill_field_with_terminators(u8* text) {
@@ -39,7 +39,7 @@ static void text_fill_field_with_terminators(u8* text) {
  * battle. A zero maximum HP or MP is stored as 1. list_index is always 1
  * here; unit_count counts the runtime ids whose battle unit is the first holder
  * of a nonzero ENTD unit id. */
-static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output) {
     s32 resolved_id;
     s32 count;
     s32 i;
@@ -99,7 +99,7 @@ static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, 
 
 #if defined(FFT_BATTLE) || defined(FFT_EVENT_DEBUGCHR)
 /* Fill the level, team, AT-list position, HP/MP/CT and live-unit count. */
-static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output) {
     s32 resolved_id;
     s32 count;
     s32 i;
@@ -161,7 +161,7 @@ static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, 
  * Team kind is 0 for the player's side, 1 for the enemy team, 2 for a unit on
  * neither the enemy team nor under player control, and 3 for a unit on auto
  * battle. A zero maximum HP or MP is stored as 1. */
-static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output) {
     u16 maximum_hp;
     u16 maximum_mp;
     u8 ct;
@@ -203,7 +203,7 @@ static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, 
 
 #if defined(FFT_WORLD) || defined(FFT_BATTLE) || defined(FFT_EVENT_REQUIRE)
 /* Fill selected and comparison billboards, stats, equipment and ability names. */
-void menu_load_selected_unit_variant(void) {
+void menu_load_selected_unit(void) {
     unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
     menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
     u16* innate_items;
@@ -216,13 +216,13 @@ void menu_load_selected_unit_variant(void) {
     s16 list_value;
 
     if (unit != 0) {
-        menu_copy_unit_data_to_status_billboard_variant(unit, &g_menu_comparison_unit_status);
+        menu_copy_unit_data_to_status_billboard(unit, &g_menu_comparison_unit_status);
     }
 
     unit = battle_unit_get_stats_from_battle_id(g_menu_selected_unit.battle_id);
     if (unit == 0)
         return;
-    menu_copy_unit_data_to_status_billboard_variant(unit, &g_menu_selected_unit_status);
+    menu_copy_unit_data_to_status_billboard(unit, &g_menu_selected_unit_status);
 
     g_menu_selected_unit.job_id = unit->job_id;
     g_menu_selected_unit.brave = unit->brave;
@@ -373,7 +373,7 @@ void menu_load_selected_unit_variant(void) {
  * An empty secondary skillset marks byte 1 of its name buffer, not byte 0,
  * before the names are cleared and copied.
  */
-void menu_load_selected_unit_variant(void) {
+void menu_load_selected_unit(void) {
     unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_comparison_unit_data.battle_id);
     menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
     u16* innate_items;
@@ -386,13 +386,13 @@ void menu_load_selected_unit_variant(void) {
     s16 list_value;
 
     if (unit != 0) {
-        menu_copy_unit_data_to_status_billboard_variant(unit, &g_panel_comparison_billboard);
+        menu_copy_unit_data_to_status_billboard(unit, &g_panel_comparison_billboard);
     }
 
     unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_selected_unit_data.battle_id);
     if (unit == 0)
         return;
-    menu_copy_unit_data_to_status_billboard_variant(unit, &g_panel_selected_billboard);
+    menu_copy_unit_data_to_status_billboard(unit, &g_panel_selected_billboard);
 
     g_debugchr_panel_selected_unit_data.job_id = unit->job_id;
     g_debugchr_panel_selected_unit_data.brave = unit->brave;

@@ -20,7 +20,7 @@
  * Numbers (0xE4/0xE6) are drawn one digit per 6-pixel column. Indexing the
  * divisor table inside the digit loop, rather than walking a pointer, is
  * what gives the target's strength-reduced pointer and register choice. */
-void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
+void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     party_unit_t* party;
     u8* cursor;
     s32 i;

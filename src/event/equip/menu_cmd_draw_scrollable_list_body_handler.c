@@ -15,11 +15,11 @@
 /* Scrollable-list body command; EQUIP's body: the JOBSTTS and BUNIT command without the event-speed multiplier.
  *
  * The padding arrays reproduce the target's frame (only rect and marker are
- * referenced). The scroll-down path follows WORLD's menu_cmd_draw_scrollable_list_body_handler_variant
+ * referenced). The scroll-down path follows WORLD's equip_menu_cmd_draw_scrollable_list_body_handler
  * spelling; its `(s16)` row-height cast adds the other 8 bytes of frame and
  * keeps the row count in a register of its own.
  */
-menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {
+menu_instruction_t* equip_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
     RECT marker;
@@ -58,7 +58,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
         j = equip_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
-                menu_scroll_list_by_page_variant(j, command);
+                menu_scroll_list_by_page(j, command);
             }
         } else {
             input = g_menu_cmd_stream_input;

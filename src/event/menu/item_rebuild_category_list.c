@@ -22,7 +22,7 @@ void item_rebuild_category_list(s32 category) {
             cat = type - 1;
         }
         if (category == cat) {
-            if (item_get_total_count_variant(item) != 0) {
+            if (item_get_total_count(item) != 0) {
                 if (item_is_in_category_list(i, category) == 0) {
                     item_prepend_to_category_list(i, category);
                 }

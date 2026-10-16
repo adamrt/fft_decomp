@@ -9,7 +9,7 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Operand pairs that one WORLD script_execute_event_variant opcode stores together;
+/* Operand pairs that one WORLD script_execute_event opcode stores together;
  * each second 16-bit value sits off a 32-bit alignment boundary in WORLD bss, so each pair is
  * one object. */
 typedef struct world_event_command_args {
@@ -102,7 +102,7 @@ void world_sound_dispatch_effect(void);
 
 /* gfx */
 /* Scenario interpreter interfaces shared by the BATTLE and WORLD
- * script_execute_event_variant bodies. Signatures are as the interpreters bind them;
+ * script_execute_event bodies. Signatures are as the interpreters bind them;
  * unverified names stay provisional. */
 extern s16 g_world_3d_object_use_request;
 

@@ -15,12 +15,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Same double-buffered menu_status_panel_buffer_t frame as menu_run_equipment_list_thread_variant and the
- * WORLD twin menu_run_ability_list_thread_variant. */
+/* Same double-buffered menu_status_panel_buffer_t frame as menu_run_equipment_list_thread and the
+ * WORLD twin menu_run_ability_list_thread. */
 
 /* Two-column ability panel thread (task 0x3b); EQUIP's body (WORLD has its own). Thread 10 draws the unit editor stats
  * into the first frame pair, other threads draw g_item_preview_stat_detail into the second. */
-void menu_run_ability_list_thread_variant(void) {
+void menu_run_ability_list_thread(void) {
     menu_status_thread_t offset;
     s32 u;
     menu_status_panel_buffer_t* base;

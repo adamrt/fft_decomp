@@ -148,7 +148,7 @@ s32 wldcore_proposition_load_picture(s32 index) {
  * is already resident. */
 void wldcore_proposition_load_picture_data_set(s32 set) {
     if (set != g_wldcore_loaded_picture_set) {
-        file_wait_for_pending_variant();
+        file_wait_for_pending();
         g_wldcore_loaded_picture_set = set;
         file_wait_then_build_header(&g_main_file_cd_state,
             g_wldcore_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
@@ -167,7 +167,7 @@ void wldcore_proposition_load_picture_data_set(s32 set) {
  * is already resident. */
 void wldcore_gfx_load_background_set(s32 set) {
     if (set != g_wldcore_loaded_background_set) {
-        file_wait_for_pending_variant();
+        file_wait_for_pending();
         g_wldcore_loaded_background_set = set;
         file_wait_then_build_header(&g_main_file_cd_state,
             g_wldcore_background_sector_offsets[set] + DISC_SECTOR_WORLD_WLDBK_BIN,
@@ -183,7 +183,7 @@ void wldcore_gfx_load_background_set(s32 set) {
 void wldcore_load_message_block_if_changed(s32 block) {
     g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_wldcore_message_buffer;
     if (block != g_wldcore_loaded_message_block) {
-        file_wait_for_pending_variant();
+        file_wait_for_pending();
         g_wldcore_loaded_message_block = block;
         file_wait_then_build_header(&g_main_file_cd_state,
             g_wldcore_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
@@ -199,12 +199,12 @@ void wldcore_load_message_block_if_changed(s32 block) {
  * start sector of one chapter's data relative to the disc LBA added to it,
  * so entry i+1 minus entry i is that chapter's sector count. */
 void wldcore_load_sound_novel_files(s32 chapter) {
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     file_wait_then_build_header(&g_main_file_cd_state,
         g_wldcore_sound_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
         g_wldcore_sound_novel_script_sector_offsets[chapter + 1] - g_wldcore_sound_novel_script_sector_offsets[chapter],
         &g_main_save_slot_buffer);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     file_wait_then_build_header(&g_main_file_cd_state,
         g_wldcore_sound_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
         g_wldcore_sound_novel_text_sector_offsets[chapter + 1] - g_wldcore_sound_novel_text_sector_offsets[chapter],

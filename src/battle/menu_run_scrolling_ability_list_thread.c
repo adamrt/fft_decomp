@@ -37,7 +37,7 @@
  * thread setup so the scheduler keeps the entry address load ahead of the
  * thread-id load.
  */
-void menu_run_scrolling_ability_list_thread_variant(void) {
+void menu_run_scrolling_ability_list_thread(void) {
     menu_text_window_t window;
     RECT image_rect;
     RECT texture_window;

@@ -162,7 +162,7 @@ static void world_input_update_controller(void) {
     g_world_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
 }
 
-/* The original wrote the body of menu_input_update_with_message_state_variant a second time as
+/* The original wrote the body of world_menu_input_update_with_message_state a second time as
  * world_card_input_update_with_message_state. */
 /*
  * Per-frame input update of the formation, shop and name-entry screens.
@@ -299,7 +299,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
             world_card_run_save_step(g_world_card_active_slot);
         } else if (step == WORLD_CARD_MENU_STEP_LEAVE) {
             main_sound_set_current_music_target(0, 0xf0);
-            while (card_io_poll_operation_result_variant() == CARD_IO_RESULT_PENDING) { }
+            while (card_io_poll_operation_result() == CARD_IO_RESULT_PENDING) { }
             world_gfx_start_increasing_fade();
             g_world_card_menu_step = WORLD_CARD_MENU_STEP_LEFT;
         }
@@ -312,7 +312,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
             && thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU) == 0) {
             buttons &= 0xff00;
         }
-        menu_input_update_event_state_variant(
+        menu_input_update_event_state(
             g_menu_gfx_context->otag + 60, buttons, g_world_gfx_draw_buffer_clip_y == 0 ? 0xf0 : 0);
         world_sound_dispatch_effect();
     }
@@ -381,7 +381,7 @@ static void world_card_run_mode_select_step(void) {
     s32 i;
     s32 all;
 
-    if (card_io_poll_operation_result_variant() > CARD_IO_RESULT_COMPLETE) {
+    if (card_io_poll_operation_result() > CARD_IO_RESULT_COMPLETE) {
         g_world_card_pending_message = 0;
         g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
         menu_stop_thread_and_wait(WORLD_THREAD_SLOT_UPPER_MENU);
@@ -692,11 +692,11 @@ void world_card_build_save_image(s32 slot) {
     bcopy(g_main_active_propositions, g_world_load_work_buffer->active_propositions,
         sizeof(g_world_load_work_buffer->active_propositions));
 
-    bits_init_primary_reader_variant(g_world_load_work_buffer->parity_bits);
+    bits_init_primary_reader(g_world_load_work_buffer->parity_bits);
     block = (u8*)g_world_load_work_buffer;
     for (i = 0; i >= 0 && i < 0x3c; i++) {
         parity = 0;
-        bits_init_secondary_reader_variant(block);
+        bits_init_secondary_reader(block);
         for (j = 0; j < 0x400; j++) {
             parity += bits_read_secondary(1);
         }
@@ -739,13 +739,13 @@ s32 world_card_load_globals_from_save_image(s32 partial_load) {
     }
 
     if (partial_load == 0) {
-        bits_init_primary_reader_variant(g_world_load_work_buffer->parity_bits);
+        bits_init_primary_reader(g_world_load_work_buffer->parity_bits);
         /* The sweep reads the image as raw 128-byte blocks; block 3 starts mid-field. */
         block = (u8*)g_world_load_work_buffer + 3 * 0x80;
         bits_read_primary(3);
         for (i = 3; i >= 0 && i < 0x3c; i++) {
             parity = 0;
-            bits_init_secondary_reader_variant(block);
+            bits_init_secondary_reader(block);
             for (j = 0; j < 0x400; j++) {
                 parity += bits_read_secondary(1);
             }
@@ -1017,7 +1017,7 @@ static void world_card_update_slot_scan(void) {
     }
 
     if (g_world_card_probe_result == CARD_IO_RESULT_NEW_CARD) {
-        if (card_io_poll_operation_result_variant() > CARD_IO_RESULT_COMPLETE) {
+        if (card_io_poll_operation_result() > CARD_IO_RESULT_COMPLETE) {
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
             g_world_card_slot_scan_active = 0;
@@ -1039,7 +1039,7 @@ static void world_card_update_slot_scan(void) {
     }
 
     if (g_world_card_probe_result == CARD_IO_RESULT_ERROR || g_world_card_probe_result == CARD_IO_RESULT_TIMEOUT) {
-        result = card_io_poll_operation_result_variant();
+        result = card_io_poll_operation_result();
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_access_error_message);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
             menu_stop_managed_thread(THREAD_SCREEN_SLOT_MENU);
@@ -1291,7 +1291,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
         }
 
         /* After an error or a new card, rescan unless the card still answers. */
-        if (card_io_poll_operation_result_variant() > CARD_IO_RESULT_COMPLETE) {
+        if (card_io_poll_operation_result() > CARD_IO_RESULT_COMPLETE) {
             if (card_io_wait_operation_result(3) != CARD_IO_RESULT_COMPLETE) {
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
@@ -1442,23 +1442,23 @@ static void world_card_update_and_draw_slot_list(s32 input) {
         g_world_card_slot_quad_1.position.y++;
         if (g_world_card_slot_quad_0.position.y >= 0 && g_world_card_slot_quad_0.position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_world_card_slot_quad_0, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_world_card_slot_quad_0, world_menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_world_card_slot_quad_1, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_world_card_slot_quad_1, world_menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_world_card_slot_quad_3, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_world_card_slot_quad_3, world_menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_world_card_slot_quad_4, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_world_card_slot_quad_4, world_menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             gfx_set_otag_index(11);
             g_world_card_slot_number_command.y = g_world_card_slot_quad_0.position.y;
             g_world_card_slot_number_command.value = i + 1;
-            menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_slot_number_command);
+            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_slot_number_command);
         }
 
         g_world_card_slot_quad_2.position.y = g_world_card_slot_quad_0.position.y;
         if (g_world_card_slot_quad_2.position.y >= 0 && g_world_card_slot_quad_2.position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_world_card_slot_quad_2, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_world_card_slot_quad_2, world_menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             g_world_card_playtime_seconds_command.y = g_world_card_playtime_minutes_command.y
                 = g_world_card_playtime_hours_command.y = g_world_card_slot_quad_0.position.y;
             g_world_card_playtime_seconds_command.value = g_main_card_save_slot_playtimes[i].seconds;
@@ -1467,9 +1467,9 @@ static void world_card_update_and_draw_slot_list(s32 input) {
             if (g_world_card_playtime_hours_command.value >= 100) {
                 g_world_card_playtime_hours_command.value = 99;
             }
-            menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_playtime_hours_command);
-            menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_playtime_minutes_command);
-            menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_playtime_seconds_command);
+            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_hours_command);
+            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_minutes_command);
+            world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_card_playtime_seconds_command);
         }
 
         if (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_AVAILABLE) {
@@ -1508,7 +1508,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
         value = 3;
     }
     g_world_card_slot_cursor_point.y = value * 48 + 0x28;
-    menu_update_and_draw_sliding_cursor_variant(&g_world_card_slot_cursor_point, &g_world_card_slot_cursor_anim, busy);
+    world_menu_update_and_draw_sliding_cursor(&g_world_card_slot_cursor_point, &g_world_card_slot_cursor_anim, busy);
 
     /* Scroll arrows: up once the list has scrolled, down while rows remain below the visible four. */
     if (g_world_card_list_first_visible_row != 0) {

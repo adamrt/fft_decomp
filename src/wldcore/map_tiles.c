@@ -78,9 +78,9 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    window_dispatch_record_list_variant(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
         g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    window_dispatch_record_list_variant(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_restore_previous_stack();
     GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
@@ -107,7 +107,7 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
             | MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS | MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE
             | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
         g_wldcore_window_records[menu_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
-        window_dispatch_record_list_variant(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+        window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
             g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     }
     GsDrawOt(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
@@ -115,7 +115,7 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
 }
 
 /* World-map tile atlas setup, run once from wldcore_init_subsystems between
- * window_init_record_pools_variant() and
+ * window_init_record_pools() and
  * wldcore_system_init_world_menus_and_date(). Because the pools were just
  * zeroed, the two append calls here return records 0 and 1.
  *
@@ -213,8 +213,8 @@ void wldcore_map_init_tile_atlas(void) {
         }
     }
 
-    map_window_index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    map_window_index
+        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_map_window_index = map_window_index;
     g_wldcore_window_records[map_window_index].sequence = WLDCORE_ANIM_SEQUENCE_MAP_FRAME;
     g_wldcore_window_records[map_window_index].priority = 13;
@@ -225,8 +225,8 @@ void wldcore_map_init_tile_atlas(void) {
     rec->anim_counter = 0;
     g_wldcore_window_records[map_window_index].frame_index = 0;
 
-    menu_window_index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    menu_window_index
+        = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_types[0] = menu_window_index;
     g_wldcore_window_records[menu_window_index].sequence = WLDCORE_ANIM_SEQUENCE_ROOT_MENU_FRAME;
     g_wldcore_window_records[menu_window_index].priority = 13;

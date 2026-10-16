@@ -148,7 +148,7 @@ void menu_start_dead_unit_threads(void) {
 
         g_option_dead_unit_primary_result = 0xff;
         if ((context->result == 3 && g_option_dead_unit_secondary_result == 0) || context->result == 1) {
-            thread_start(g_thread_current_id - 2, menu_run_at_list_variant);
+            thread_start(g_thread_current_id - 2, menu_run_at_list);
             thread_set_parameters(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
             thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, menu_icon_linked_entry_thread);
             thread_set_parameters(
@@ -387,7 +387,7 @@ void menu_start_at_list_thread(void) {
     g_menu_thread_menu_data = list;
     g_menu_at_list_state.context = g_menu_at_list_entry_table;
     menu_init_at_list(list);
-    thread_start(g_thread_current_id - 2, menu_run_at_list_variant);
+    thread_start(g_thread_current_id - 2, menu_run_at_list);
     thread_set_parameters(g_thread_current_id - 2, (s32)list, 0, 0);
     do {
         thread_yield();

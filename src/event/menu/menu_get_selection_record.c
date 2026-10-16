@@ -14,7 +14,7 @@
  * original this copy does not check that the cursor row lies before the
  * terminator.
  */
-void menu_get_selection_record_variant(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
     s32 entry_id;
     s32 i;
 

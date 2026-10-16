@@ -70,7 +70,7 @@ s32 world_item_get_half_price(s16 item_id) {
  *
  * The comparison uses the stored 16-bit equipment value as-is; only the requested
  * ID is masked. */
-s32 item_get_equipped_count_variant(s32 item_id) {
+s32 item_get_equipped_count(s32 item_id) {
     s32 count = 0;
     s32 unit_index;
     s32 slot;
@@ -92,9 +92,9 @@ s32 item_get_equipped_count_variant(s32 item_id) {
 }
 
 /* Inventory quantity plus the copies equipped by the party. */
-s32 item_get_total_count_variant(s16 item_id) {
+s32 item_get_total_count(s16 item_id) {
     item_id &= ITEM_ENTRY_ID_MASK;
-    return item_adjust_inventory_count(item_id, 0) + item_get_equipped_count_variant(item_id);
+    return item_adjust_inventory_count(item_id, 0) + item_get_equipped_count(item_id);
 }
 
 /* Add delta to the count of a poached item held for the Fur Shop, keeping it within 0..255, and
@@ -170,7 +170,7 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
             if (held_off_hand < ITEM_ID_THROWABLE_FIRST)
                 list[length++] = held_off_hand;
             list[length] = -1;
-            item_sort_id_list_variant(7, list);
+            world_item_sort_id_list(7, list);
             if (world_ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
@@ -220,12 +220,12 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
                 if (held_off_hand >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = held_off_hand;
                 list[length] = -1;
-                item_sort_id_list_variant(7, list);
+                world_item_sort_id_list(7, list);
             }
         } else {
             list[length++] = g_world_unit_pointers[unit_index]->equipment[slot];
             list[length] = -1;
-            item_sort_id_list_variant(7, list);
+            world_item_sort_id_list(7, list);
         }
         if (list[0] <= ITEM_ID_NOTHING)
             equipment[slot] = ITEM_ID_NOTHING;
@@ -335,7 +335,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
                 list[length++] = (second < ITEM_ID_THROWABLE_FIRST) ? second : ITEM_ID_NOTHING;
             }
             list[length] = -1;
-            item_sort_id_list_variant(7, list);
+            world_item_sort_id_list(7, list);
             if (world_ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
@@ -376,12 +376,12 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
                 if (second >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = second;
                 list[length] = -1;
-                item_sort_id_list_variant(7, list);
+                world_item_sort_id_list(7, list);
             }
         } else {
             list[length++] = g_world_unit_pointers[unit_index]->equipment[slot] & ITEM_ENTRY_ID_MASK;
             list[length] = -1;
-            item_sort_id_list_variant(7, list);
+            world_item_sort_id_list(7, list);
         }
 
         if (list[0] <= ITEM_ID_NOTHING)
@@ -475,7 +475,7 @@ s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id) {
     if (item_get_menu_category(id) == ITEM_MENU_CATEGORY_OTHER) {
         return -1;
     }
-    bits_init_primary_reader_variant(g_world_unit_pointers[unit_index]->equippable_item_types);
+    bits_init_primary_reader(g_world_unit_pointers[unit_index]->equippable_item_types);
     bits_read_primary(item_get_type(id));
     if (bits_read_primary(1) == 0) {
         result = -1;
@@ -692,7 +692,7 @@ s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16*
         if (mode == ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY) {
             result = item_adjust_inventory_count(item, 0);
         } else {
-            result = item_get_total_count_variant(item);
+            result = item_get_total_count(item);
         }
         if (result == 0) {
             continue;
@@ -753,7 +753,7 @@ s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16*
     if (list_index < 5 && sort_mode >= 1 && sort_mode < 6) {
         count = item_sort_list_by_category_order(list_index, entries);
     } else {
-        item_sort_id_list_variant(sort_mode & 0xF, entries);
+        world_item_sort_id_list(sort_mode & 0xF, entries);
     }
     return count;
 }

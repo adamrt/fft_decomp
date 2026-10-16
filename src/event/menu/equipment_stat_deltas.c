@@ -18,8 +18,8 @@ void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, me
     menu_status_panel_slot_storage_t detail_before;
     menu_status_panel_slot_storage_t detail_after;
 
-    item_collect_stat_deltas_variant(item_before, &summary_before, &detail_before, slot);
-    item_collect_stat_deltas_variant(item_after, &summary_after, &detail_after, slot);
+    item_collect_stat_deltas(item_before, &summary_before, &detail_before, slot);
+    item_collect_stat_deltas(item_after, &summary_after, &detail_after, slot);
     delta->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus
         - summary_before.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
     delta->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus
@@ -84,7 +84,7 @@ void item_sum_equipment_stat_details(menu_status_panel_slot_storage_t* total, co
     total->state.magical_shield_evade = 0;
     total->state.magical_accessory_evade = 0;
     for (i = 0; i < 5; i++) {
-        item_collect_stat_deltas_variant(equipment[i] & ITEM_ENTRY_ID_MASK, &summary, &detail, i);
+        item_collect_stat_deltas(equipment[i] & ITEM_ENTRY_ID_MASK, &summary, &detail, i);
         total->state.right_weapon_power += detail.state.right_weapon_power;
         total->state.left_weapon_power += detail.state.left_weapon_power;
         total->state.right_weapon_evade += detail.state.right_weapon_evade;

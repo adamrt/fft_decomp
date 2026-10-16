@@ -12,7 +12,7 @@
  *
  * WAIT suppresses intermediate held frames without treating them as a direction.
  */
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction_variant(void) {
+menu_vertical_scroll_direction_e bunit_menu_input_read_page_scroll_direction(void) {
     menu_vertical_scroll_direction_e direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input;
     s32 initial_delay;

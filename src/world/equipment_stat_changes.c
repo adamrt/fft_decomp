@@ -52,7 +52,7 @@ void world_ability_find_movement_stat_changes(
  * left-weapon fields.
  * Invalid item IDs leave the cleared preview unchanged.
  */
-void item_collect_stat_deltas_variant(
+void item_collect_stat_deltas(
     s16 item_id, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 alternate) {
     s32 attribute;
     s32 secondary;

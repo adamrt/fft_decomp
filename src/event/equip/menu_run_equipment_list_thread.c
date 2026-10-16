@@ -17,7 +17,7 @@
 #include "psx/types.h"
 
 /* The frame is menu_status_panel_buffer_t (0x3d8 bytes, double buffered); the
- * WORLD twin menu_run_equipment_list_thread_variant uses the same layout. */
+ * WORLD twin menu_run_equipment_list_thread uses the same layout. */
 
 /* Equipment panel thread (task 0x3b): lists the five equipped item names and
  * draws their icons; EQUIP's body (WORLD has its own).
@@ -26,7 +26,7 @@
  * is rebuilt on the first frame or on request. The frame offset goes through
  * the `area` local: the target reads it back through that register inside the
  * line loop but folds the tile y read to the absolute address. */
-void menu_run_equipment_list_thread_variant(void) {
+void menu_run_equipment_list_thread(void) {
     u8* text;
     s32 u;
     menu_status_panel_buffer_t* base;

@@ -48,8 +48,8 @@ typedef enum menu_number_value_flags {
 
 /* Ten-byte menu-script "draw number" command: an
  * opcode/length prefix followed by the value getter (a row-callback index),
- * layout and byte position operands. menu_script_draw_formatted_number_variant
- * and the overlay copies advance by `length`. */
+ * layout and byte position operands. Every program's copy of the
+ * formatted-number command advances by `length`. */
 typedef struct menu_draw_number_command {
     u8 opcode;
     u8 length;
@@ -65,7 +65,7 @@ typedef struct menu_draw_number_command {
 
 /* Variable-length list command (0x10) in the menu display stream: the layout
  * world_menu_load_scrollable_list_layout reads and the placement
- * menu_cmd_draw_scrollable_list_body_handler_variant draws with. */
+ * each program's menu_cmd_draw_scrollable_list_body_handler draws with. */
 typedef struct menu_list_record {
     u8 opcode;          /* 0x00: 0x10 = list layout */
     u8 length;          /* 0x01: byte length of this record */
@@ -244,16 +244,22 @@ extern menu_sprite_command_t g_menu_cmd_row_quad;
 menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* command);
 menu_instruction_t* menu_cmd_run_if_else_group_handler(menu_instruction_t* command);
 menu_window_command_t* menu_cmd_draw_tiled_rectangle_handler(menu_window_command_t* command);
-void menu_cmd_run_stream_variant(menu_instruction_t* instruction, s32 flags);
+void menu_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
 menu_instruction_t* menu_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_release_otag_lock_handler_variant(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_draw_right_aligned_number_handler_variant(menu_instruction_t* instruction);
+menu_instruction_t* bunit_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_set_otag_index_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_set_semitrans_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_draw_formatted_number_handler_variant(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
+menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
+menu_instruction_t* equip_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
 
 /* palette commands */
 menu_instruction_t* menu_cmd_set_clut_handler(menu_instruction_t* command);
@@ -269,7 +275,8 @@ menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* comma
 menu_instruction_t* menu_cmd_draw_textured_quad_handler(menu_instruction_t* instruction);
 
 /* draw area commands */
-menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler_variant(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* instruction);
 
@@ -289,11 +296,16 @@ void menu_draw_scrollable_list(const menu_instruction_t* script);
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 
-menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t* instruction);
-void menu_run_script_with_palette_mode_variant(menu_instruction_t* script, s32 flags, s32 event_mode);
-void menu_init_and_draw_scrollable_list_variant(
+menu_instruction_t* bunit_menu_script_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* world_menu_script_draw_formatted_number(menu_instruction_t* instruction);
+void jobstts_menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
+void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
+void menu_init_and_draw_scrollable_list(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
-void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
+void world_menu_init_and_draw_scrollable_list(
+    const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
+void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
+void world_menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 
 /* script data */
 extern menu_window_command_t g_cmd_window_interior_command;

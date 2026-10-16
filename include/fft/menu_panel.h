@@ -45,7 +45,7 @@ extern RECT g_menu_portrait_pixel_rect;
 extern RECT g_menu_portrait_palette_rect;
 /* Unreferenced in both scenes: uploads one EVTFACE.BIN portrait and its palettes. */
 void menu_load_portrait_image(s32 portrait_id);
-void menu_build_portrait_poly_variant(s32 portrait_id, POLY_FT4* poly);
+void menu_build_portrait_poly(s32 portrait_id, POLY_FT4* poly);
 
 /* status panels */
 extern menu_gradient_panel_prims_t g_menu_panel_fade_frames[];
@@ -84,8 +84,8 @@ extern RECT g_panel_text_upload_rect_b;
 void menu_run_status_panel_thread(void);
 void menu_run_equipment_ability_panel_thread(void);
 void menu_run_numeric_editor_thread(void);
-void menu_run_numeric_editor_frame_thread_variant(void);
-void menu_load_selected_unit_variant(void);
+void menu_run_numeric_editor_frame_thread(void);
+void menu_load_selected_unit(void);
 void menu_refresh_hovered_unit_stats_display(void);
 void menu_refresh_right_unit_stats_display(void);
 void menu_run_unit_summary_panel_thread(void);
@@ -109,8 +109,9 @@ extern s32 g_menu_indicator_fade_work[2];
 extern s32 g_menu_indicator_packet_index[2];
 extern s32 g_menu_indicator_state[2];
 extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];
-void menu_draw_thread_status_indicators_variant(void);
-s32 menu_thread_is_running_variant(s32 thread_id);
+void equip_menu_draw_thread_status_indicators(void);
+void menu_draw_thread_status_indicators(void);
+s32 menu_thread_is_running(s32 thread_id);
 
 /* panel drawing */
 extern const u16 g_menu_draw_area_scale_percent[12];
@@ -131,7 +132,8 @@ extern sprite_sheet_frame_t g_menu_panel_status_uv_rects[];
 extern const u16 g_menu_panel_status_y_offsets[];
 void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const menu_status_thread_t* thread);
-void menu_build_status_group_primitives_variant(POLY_FT4* poly);
+void attack_menu_build_status_group_primitives(POLY_FT4* poly);
+void menu_build_status_group_primitives(POLY_FT4* poly);
 void menu_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 

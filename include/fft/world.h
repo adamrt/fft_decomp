@@ -114,7 +114,7 @@ typedef enum world_thread_slot {
     WORLD_THREAD_SLOT_TUTORIAL_TEXT = 16,       /* tutorial script text: the slot past the sixteen reset ones */
 } world_thread_slot_e;
 
-/* menu_run_at_list_variant runs its window frame thread in the upper menu's slot. */
+/* menu_run_at_list runs its window frame thread in the upper menu's slot. */
 enum {
     WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME = 15,
 };

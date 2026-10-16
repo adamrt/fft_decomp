@@ -17,10 +17,10 @@
 #include "psx/types.h"
 
 /* The packet, state and thread layouts are the shared fft/menu.h
- * records of the DEBUGCHR twin menu_run_unit_status_thread_variant. */
+ * records of the DEBUGCHR twin menu_run_unit_status_thread. */
 
 /* Thread task 0x39: the character editor and status panels. BUNIT's body (DEBUGCHR has its own). */
-void menu_run_unit_status_thread_variant(void) {
+void menu_run_unit_status_thread(void) {
     RECT rects[6];
     s32 anim_state;
     s32 cur_unit;
@@ -427,11 +427,11 @@ void menu_run_unit_status_thread_variant(void) {
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs_variant(scroll[2], 0x202, value_pixels, text_position);
+            text_draw_large_number_glyphs(scroll[2], 0x202, value_pixels, text_position);
             LoadImage(&rects[3], (u32*)value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_large_number_glyphs_variant(scroll[3], 0x202, value_pixels_b, text_position);
+            text_draw_large_number_glyphs(scroll[3], 0x202, value_pixels_b, text_position);
             LoadImage(&rects[4], (u32*)value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
@@ -445,7 +445,7 @@ void menu_run_unit_status_thread_variant(void) {
                     if (id == BATTLE_FORMATION_INDEX_NONE) {
                         id = 0;
                     }
-                    text_draw_large_number_glyphs_variant(id + 1, 0x4002, value_pixels + 0xA0, text_position);
+                    text_draw_large_number_glyphs(id + 1, 0x4002, value_pixels + 0xA0, text_position);
                 }
             }
             LoadImage(&rects[5], (u32*)(value_pixels + 0xA0));

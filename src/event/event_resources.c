@@ -506,7 +506,7 @@ void text_run_spell_quote_thread(void) {
     g_menu_companion_data_file_buffer = main_heap_alloc(0x4000);
     menu_request_open_companion_data_file(BATTLE_COMPANION_FILE_SPELL_MES);
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_menu_companion_data_file_buffer;
-    thread_start(THREAD_SLOT_MENU, text_run_dialog_thread_variant);
+    thread_start(THREAD_SLOT_MENU, text_run_dialog_thread);
     thread_set_parameters(THREAD_SLOT_MENU, window_mode, message_id, id);
     thread_wait_until_inactive(THREAD_SLOT_MENU);
     main_heap_free(g_menu_companion_data_file_buffer);

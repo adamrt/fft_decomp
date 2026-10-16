@@ -17,7 +17,7 @@
  * weapon but the weapon's evade for the right one, as in the target.
  * `diff *= -1` keeps the negation in int on the sign-extended difference, and
  * the offset-first address sum keeps the target's addu operand order. */
-void item_sort_id_list_variant(s32 mode, s16* list) {
+void equip_item_sort_id_list(s32 mode, s16* list) {
     s16 count = 0;
     s16* entry;
     s32 j;
@@ -90,7 +90,7 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
                         key_a = 0;
                     }
                 } else if (criterion == ITEM_SORT_KEY_HELD_COUNT) {
-                    key_a = item_get_total_count_variant(item_a);
+                    key_a = item_get_total_count(item_a);
                 }
 
                 if (criterion == ITEM_SORT_KEY_TYPE) {
@@ -127,7 +127,7 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
                         key_b = 0;
                     }
                 } else {
-                    key_b = item_get_total_count_variant(item_b);
+                    key_b = item_get_total_count(item_b);
                 }
 
                 k++;

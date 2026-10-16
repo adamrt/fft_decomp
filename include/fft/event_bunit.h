@@ -56,7 +56,7 @@ typedef struct bunit_unit {
     s16 magical_accessory_evade; /* 0x52 */
     s16 equipment[5];            /* 0x54 */
     s16 abilities[5];            /* 0x5e; primary skillset, secondary, reaction, support, movement (filled by
-                                  * bunit_unit_build_record_from_stats; ability_build_list_variant reads [0]) */
+                                  * bunit_unit_build_record_from_stats; ability_build_list reads [0]) */
     u8 _unused_068[8];           /* 0x68; spare tail of the stat-detail block */
     u8 gender_flags;             /* 0x70; Bard/Dancer restrictions */
     u8 runtime_id;               /* 0x71 */

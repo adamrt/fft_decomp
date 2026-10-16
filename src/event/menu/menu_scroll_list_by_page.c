@@ -12,7 +12,7 @@
  * The selected row retains its offset within the viewport and is clamped when
  * the last page contains fewer entries.
  */
-void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e direction, const menu_instruction_t* menu) {
+void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* menu) {
     u8 unused[8];
     s32 previous_base;
     s16 base;

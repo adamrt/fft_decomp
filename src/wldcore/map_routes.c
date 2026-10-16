@@ -879,7 +879,7 @@ void wldcore_map_step_route_travel(void) {
                 .position.y = g_wldcore_map_projection_state.marker.render.position.y - 4;
             g_main_system_flags &= ~MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
             g_wldcore_location_entry_state.arrival_location = g_wldcore_map_projection_state.marker.kind + 1;
-            file_wait_for_pending_variant();
+            file_wait_for_pending();
             g_wldcore_map_projection_state.angle = 0;
             g_wldcore_map_projection_state.flags &= ~WLDCORE_PROJECTION_FLAG_ALTERNATE_DIRECTION_SET;
             g_wldcore_location_entry_state.flags &= ~(WLDCORE_ROUTE_TRAVEL_ACTIVE | WLDCORE_ROUTE_TRAVEL_REVERSED);

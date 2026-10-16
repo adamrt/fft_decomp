@@ -8,7 +8,7 @@
 /* Issue _card_info on `port` up to retry_limit times, waiting for its BIOS event
  * each time. Returns complete on the first success, otherwise the result of the
  * last attempt (error when _card_info itself refused). */
-s32 card_io_get_info_with_retries_variant(s32 port, s32 retry_limit) {
+s32 card_io_get_info_with_retries(s32 port, s32 retry_limit) {
     s32 i;
     s32 result;
 
@@ -28,7 +28,7 @@ s32 card_io_get_info_with_retries_variant(s32 port, s32 retry_limit) {
  * request is issued again when card status bit 0 is set with no event. A result
  * other than complete is checked again with two blocking attempts, and error is
  * reported as timeout. */
-s32 card_io_poll_operation_result_variant(void) {
+s32 card_io_poll_operation_result(void) {
     s32 status;
     s32 result;
 
@@ -46,7 +46,7 @@ s32 card_io_poll_operation_result_variant(void) {
         g_card_info_pending = 0;
     }
     if (result > CARD_IO_RESULT_COMPLETE) {
-        result = card_io_get_info_with_retries_variant(g_card_slot << 4, 2);
+        result = card_io_get_info_with_retries(g_card_slot << 4, 2);
     }
     if (result == CARD_IO_RESULT_ERROR) {
         result = CARD_IO_RESULT_TIMEOUT;
@@ -64,7 +64,7 @@ static s32 open_card_poll_info_until_stable(s32 retry_limit) {
 
     while (attempts < retry_limit) {
         do {
-            result = card_io_poll_operation_result_variant();
+            result = card_io_poll_operation_result();
         } while (result == CARD_IO_RESULT_PENDING);
 
         if (result == CARD_IO_RESULT_COMPLETE) {

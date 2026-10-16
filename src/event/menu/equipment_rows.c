@@ -21,7 +21,7 @@ void thread_wait_forever_by_frames(void) {
  * MENU_NUMBER_VALUE_DISABLED is set when the unit cannot equip the item. */
 s32 menu_get_entry_item_count(s32 row) {
     u16 entry = g_item_list_entries[row];
-    s32 result = item_get_total_count_variant(entry & ITEM_ENTRY_ID_MASK);
+    s32 result = item_get_total_count(entry & ITEM_ENTRY_ID_MASK);
 
     if (g_item_list_entries[row] & ITEM_ENTRY_UNEQUIPPABLE) {
         result |= MENU_NUMBER_VALUE_DISABLED;
@@ -34,7 +34,7 @@ s32 menu_get_entry_item_count(s32 row) {
  * MENU_NUMBER_VALUE_DISABLED is set when the unit cannot equip the item. */
 s32 menu_get_entry_item_equipped_count(s32 row) {
     u16 entry = g_item_list_entries[row];
-    s32 result = item_get_equipped_count_variant(entry & ITEM_ENTRY_ID_MASK);
+    s32 result = item_get_equipped_count(entry & ITEM_ENTRY_ID_MASK);
     if (g_item_list_entries[row] & ITEM_ENTRY_UNEQUIPPABLE) {
         result |= MENU_NUMBER_VALUE_DISABLED;
     }

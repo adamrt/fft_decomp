@@ -506,8 +506,7 @@ menu_instruction_t* world_menu_script_set_semi_trans(menu_instruction_t* instruc
 /* Menu script command: queue a draw-mode packet that selects the command's blend rate at the
  * current ordering-table slot, then continue with the next command. */
 menu_instruction_t* world_menu_script_add_blend_draw_mode(menu_instruction_t* instruction) {
-    menu_gfx_enqueue_draw_mode_variant(
-        0, 0, GetTPage(0, instruction->blend.blend_rate, 0x100, 0), 0, g_menu_gfx_otag_index);
+    menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, instruction->blend.blend_rate, 0x100, 0), 0, g_menu_gfx_otag_index);
     return menu_next_instruction(instruction);
 }
 
@@ -540,7 +539,7 @@ menu_instruction_t* world_menu_script_set_draw_priority(menu_instruction_t* inst
  * The command selects its value source, width, spacing, palette, and one of
  * three glyph layouts. High value bits request a disabled palette or dashes.
  */
-menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t* command) {
+menu_instruction_t* world_menu_script_draw_formatted_number(menu_instruction_t* command) {
     s8 text[16];
     RECT rect;
     RECT glyph;
@@ -677,7 +676,7 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
  * destination register as the minuend; written as a single subtraction the
  * sign-extended blanks claims $s2 and the operands swap.
  */
-menu_instruction_t* menu_cmd_draw_right_aligned_number_handler_variant(menu_instruction_t* instruction) {
+menu_instruction_t* world_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction) {
     s8 text[16];
     RECT rect;
     s32 value;
@@ -723,7 +722,7 @@ menu_instruction_t* menu_cmd_draw_right_aligned_number_handler_variant(menu_inst
  * Bit 15 selects the alternate animation. The `state_mode` copies are the
  * target's own `move v0,s2` before each test.
  */
-void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32 mode) {
+void world_menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     /* Pin required: unpinned, the roles held in $s2/$s3/$s4 rotate. */
     register s32 active __asm__("$20");
@@ -808,7 +807,7 @@ void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32
  * This variant offsets a shared textured quad vertically before submitting
  * two `POLY_FT4` layers. Bit 15 selects the alternate animation.
  */
-void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode) {
+void world_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
     RECT rect; /* never used; retail reserves its 8 bytes */
     u32 state_mode = *state >> 15;
     s32 active = state_mode;
@@ -983,13 +982,13 @@ void world_menu_load_scrollable_list_layout(menu_instruction_t* script) {
  * definition. */
 void world_menu_init_and_load_scrollable_list(
     const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script) {
-    menu_init_scrollable_list_core_variant(values, selected_index, text_table);
+    menu_init_scrollable_list_core(values, selected_index, text_table);
     world_menu_load_scrollable_list_layout(script);
 }
 
 /* Built at -O1: the unscheduled prologue (sw ra, sw s0, lw s0) is the -O1 signature shared by the
  * neighboring menu-script handlers. */
-void menu_init_and_draw_scrollable_list_variant(
+void world_menu_init_and_draw_scrollable_list(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script) {
     menu_init_scrollable_list(entries, selected_index, scroll_base_index, text_table);
     world_menu_load_scrollable_list_layout(script);
@@ -1002,7 +1001,7 @@ void menu_init_and_draw_scrollable_list_variant(
  * Moves the cursor on Up/Down (bits 0x10000000 and 0x40000000 of the script
  * input, the held-repeat flags of Up and Down, keep a scroll going without
  * moving the cursor) and pages through
- * menu_scroll_list_by_page_variant. Moving past the first or last visible row
+ * world_menu_scroll_list_by_page. Moving past the first or last visible row
  * starts a one-row scroll: the newly exposed row is rendered into the list's
  * VRAM strip at x 0x240, the pixel offset advances by the slow step until the
  * repeat timer reaches g_main_menu_scroll_accel_delay and by the fast step
@@ -1014,7 +1013,7 @@ void menu_init_and_draw_scrollable_list_variant(
  * An empty list skips the list command and its following row group. Returns
  * the record that follows the list.
  */
-menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {
+menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
     RECT rect;
     s32 unused[4];
     point16_t marker;
@@ -1041,10 +1040,10 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     }
     old_cursor = g_menu_list_selected_index;
     if (g_world_menu_list_scroll_direction == 0) {
-        i = menu_input_read_page_scroll_direction_variant();
+        i = world_menu_input_read_page_scroll_direction();
         if (i != 0) {
             if (i != 2) {
-                menu_scroll_list_by_page_variant(i, command);
+                world_menu_scroll_list_by_page(i, command);
             }
         } else if ((g_menu_cmd_stream_input & 0x10000000) || (g_menu_cmd_stream_input & PSX_PAD_UP)) {
             index = g_menu_scroll_base_index;
@@ -1180,7 +1179,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_world_menu_row_height;
-        menu_update_and_draw_sliding_cursor_variant(
+        world_menu_update_and_draw_sliding_cursor(
             &marker, &g_world_menu_list_cursor_anim, g_world_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);

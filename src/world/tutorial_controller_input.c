@@ -146,7 +146,7 @@ static void world_script_update_tutorial_controller_input(void) {
  * sound), 2 after it and 0 otherwise. When the text thread is not running
  * the task-active flag and the held-loop sound release are cleared.
  */
-void menu_input_update_with_message_state_variant(void) {
+void world_menu_input_update_with_message_state(void) {
     s32 running = 0;
     s32 step;
     u8 value;

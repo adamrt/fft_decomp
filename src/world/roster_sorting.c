@@ -18,7 +18,7 @@
  * evade, 5 owned plus equipped count; keys other than 0 sort descending.
  * The magic-evade key reads 0 for the left weapon but the weapon's evade for
  * the right one; the target has this asymmetry. */
-void item_sort_id_list_variant(s32 mode, s16* list) {
+void world_item_sort_id_list(s32 mode, s16* list) {
     s8 counts[0x100];
     s32 count;
     s32 i;

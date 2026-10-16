@@ -37,7 +37,7 @@ void open_system_init_title_sequence(s32 skip_movie) {
     open_system_init_runtime_state();
     open_file_load_main_menu_graphics();
     open_gfx_init_screen_environments(1);
-    window_init_record_pools_variant();
+    window_init_record_pools();
     open_input_init_directional_state();
     open_movie_start_fftst_or_title_menu(skip_movie);
 }
@@ -60,7 +60,7 @@ void open_movie_init_and_play_end(void) {
     g_open_system_vsync_mode = 0;
     open_file_load_end_movie_graphics();
     open_gfx_init_screen_environments(1);
-    window_init_record_pools_variant();
+    window_init_record_pools();
     open_movie_play_end();
 }
 

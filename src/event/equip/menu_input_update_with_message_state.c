@@ -19,7 +19,7 @@
  * and 0 once it has ended, when the message and sound locks are released.
  * Any repeat input starts a five-frame timer during which L2 is masked out.
  */
-void menu_input_update_with_message_state_variant(void) {
+void equip_menu_input_update_with_message_state(void) {
     s32 running = 0;
     s32 frame;
     u8 state;

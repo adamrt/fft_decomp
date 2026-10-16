@@ -29,7 +29,7 @@
  * passed to SetSemiTrans by address, as in the target, which keeps it on the
  * stack.
  */
-void menu_run_scrolling_ability_list_thread_variant(void) {
+void menu_run_scrolling_ability_list_thread(void) {
     menu_text_window_t window;
     RECT image_rect;
     RECT texture_window;

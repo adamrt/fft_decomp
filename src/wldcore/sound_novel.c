@@ -121,7 +121,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     g_wldcore_screen_fade_state.priorities[1] = 0xB;
     wldcore_sound_wait_for_queue_drain();
     wldcore_load_sound_novel_files(g_wldcore_saved_record_index);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     section = g_wldcore_active_saved_record.section;
     if (section != 0) {
         /* The 32-bit view preserves register order; the named offset field swaps the index and base. */
@@ -266,7 +266,7 @@ void wldcore_window_draw_centered_text(s32 window_index, s32 text_id) {
         g_wldcore_window_image_buffer[i] = 0;
     }
     if (text_id != 0) {
-        window_display_text_entry_variant(window_index, text_id, point, g_wldcore_window_image_buffer);
+        window_display_text_entry(window_index, text_id, point, g_wldcore_window_image_buffer);
     }
     wldcore_window_load_image_record_to_vram(window_index, g_wldcore_window_image_buffer);
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
@@ -424,7 +424,7 @@ void wldcore_opcode_start_text_thread_and_push_history(void) {
     u16 flags;
     s32 operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
 
-    thread_start(WLDCORE_THREAD_SLOT_MESSAGE, text_run_dialog_thread_variant);
+    thread_start(WLDCORE_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     history_1 = g_wldcore_active_saved_record.text_history_1;
     history_2 = g_wldcore_active_saved_record.text_history_2;
@@ -456,7 +456,7 @@ void wldcore_opcode_load_background_set(void) {
         DrawSync(0);
         g_wldcore_active_saved_record.background_set = value;
         wldcore_gfx_load_background_set(value);
-        file_wait_for_pending_variant();
+        file_wait_for_pending();
     }
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
@@ -539,7 +539,7 @@ void wldcore_opcode_load_picture(void) {
     g_wldcore_opcode_state.x = x;
     g_wldcore_opcode_state.y = y;
     wldcore_proposition_load_picture_data_set(picture);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     g_wldcore_window_render_records[g_wldcore_opcode_state.render_index].base.x = x - 0x80;
     g_wldcore_window_render_records[g_wldcore_opcode_state.render_index].base.y = y - 0x78;
     GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);
@@ -594,7 +594,7 @@ void wldcore_opcode_set_parent_windows_visible(void) {
 void wldcore_opcode_start_text_thread(void) {
     s32 operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
 
-    thread_start(WLDCORE_THREAD_SLOT_MESSAGE, text_run_dialog_thread_variant);
+    thread_start(WLDCORE_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     g_wldcore_active_saved_record.text_id = operand;
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;

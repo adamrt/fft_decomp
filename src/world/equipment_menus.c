@@ -21,7 +21,7 @@
 #include "psx/types.h"
 
 /* Formation item-menu supervisor: menu 9 of world_formation_item_menu's
- * switch, which calls this as `done = menu_update_equipment_variant()`. Dispatches to the
+ * switch, which calls this as `done = menu_update_equipment()`. Dispatches to the
  * category / rearrange / equip-preview sub-menus and redraws the row window.
  *
  * `busy = 0;` is written after the pressable-button call. The target
@@ -38,13 +38,13 @@
  * redeclared here.
  *
  * g_world_item_submenu_initialized is `u8` in the header while the target reads it with `lb`, so it is reached
- * through an lvalue reinterpretation, as item_run_category_menu_variant does for the
+ * through an lvalue reinterpretation, as world_item_run_category_menu does for the
  * sibling byte g_world_item_category_menu_initialized (`*(s8*)&g_world_item_category_menu_initialized`).
  *
  * 0x801c8518 carries two cataloged names and the store and the reload use
  * different ones, matching that same twin: one symbol for both lets cse
  * forward the stored value. */
-s32 menu_update_equipment_variant(void) {
+s32 menu_update_equipment(void) {
     s32 input;
     s32 disabled;
     s32 busy;
@@ -76,7 +76,7 @@ s32 menu_update_equipment_variant(void) {
         return 0;
     }
     if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_BROWSE) {
-        g_world_item_menu_mode = item_run_category_menu_variant();
+        g_world_item_menu_mode = world_item_run_category_menu();
     } else if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_REARRANGE) {
         g_world_item_menu_mode = item_run_rearrange_mode();
     } else if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_ACTION) {
@@ -100,7 +100,7 @@ s32 menu_update_equipment_variant(void) {
     }
     disabled = 0;
     if (world_map_is_busy() != 0 || g_world_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
-        || item_get_equipped_count_variant(g_item_list_entries[g_menu_list_selected_index]) == 0) {
+        || item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) == 0) {
         disabled = 1;
     }
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE, 0xB8, 0x3C,
@@ -109,7 +109,7 @@ s32 menu_update_equipment_variant(void) {
     if (world_thread_is_task_active(0) != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
         busy = 1;
     }
-    menu_run_script_with_palette_mode_variant(&g_world_item_list_window_script, input, busy);
+    menu_run_script_with_palette_mode(&g_world_item_list_window_script, input, busy);
     world_menu_draw_row_window_and_cursor(0, g_menu_selected_slot, busy);
     if (g_menu_list_entry_count != 0) {
         if (g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_THROWABLE_FIRST) {
@@ -117,7 +117,7 @@ s32 menu_update_equipment_variant(void) {
         }
         if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_ACCESSORY_FIRST) {
-            menu_run_script_with_palette_mode_variant(&g_world_item_hp_mp_bonus_window_script, 0, 0);
+            menu_run_script_with_palette_mode(&g_world_item_hp_mp_bonus_window_script, 0, 0);
         }
         menu_draw_item_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }
@@ -127,7 +127,7 @@ s32 menu_update_equipment_variant(void) {
 /* Item-list menu thread for the formation item screen: builds the item
  * category list on entry, steps the cursor, and refreshes the stat preview.
  */
-s32 item_run_category_menu_variant(void) {
+s32 world_item_run_category_menu(void) {
     s16 selected;
     s16 scroll;
     s32 input;
@@ -141,7 +141,7 @@ s32 item_run_category_menu_variant(void) {
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        menu_get_selection_record_variant(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
+        world_menu_get_selection_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_world_menu_script_callbacks[0].value = menu_get_entry_item_equipped_count;
@@ -177,7 +177,7 @@ s32 item_run_category_menu_variant(void) {
             g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         g_world_item_category_previewed_cursor = -1;
-        menu_get_selection_record_variant(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
+        world_menu_get_selection_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
@@ -190,7 +190,7 @@ s32 item_run_category_menu_variant(void) {
         g_sound_queued_effect_id = MAIN_SFX_INVALID;
     } else if (g_menu_input_primary_repeat & PSX_PAD_TRIANGLE) {
         g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
-        if (item_get_equipped_count_variant(g_item_list_entries[g_menu_list_selected_index]) != 0) {
+        if (item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) != 0) {
             g_world_item_category_menu_initialized = 0;
             menu_set_selection_record(
                 g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
@@ -205,7 +205,7 @@ s32 item_run_category_menu_variant(void) {
             slot = 0;
         }
         g_world_item_category_previewed_cursor = g_menu_list_selected_index;
-        item_collect_stat_deltas_variant(slot, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_collect_stat_deltas(slot, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_menu_status_display_thread_params.redraw_request = 1;
         g_menu_preview_stats_thread_params.redraw_request = 1;
     }

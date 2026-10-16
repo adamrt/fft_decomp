@@ -235,7 +235,7 @@ static s32 world_menu_run_remove_ability(void) {
     slot_index = slot;
     *cursor_y = slot_index * 16 + 0x90;
     gfx_set_otag_index(0x28);
-    menu_update_and_draw_sliding_cursor_variant(
+    world_menu_update_and_draw_sliding_cursor(
         &g_world_remove_ability_cursor_point, &g_world_remove_ability_cursor_anim, g_menu_input_lock_mode);
     ability = g_world_unit_pointers[g_unit_selected_index]->abilities.slots[slot_index];
     g_menu_help_message_text_id = ability;
@@ -297,7 +297,7 @@ static s32 world_menu_update_clear_all_abilities_prompt(void) {
         for (i = 1; i < 5; i++) {
             g_world_clear_abilities_cursor_point.y = i * 0x10 + 0x90;
             value = 0;
-            menu_update_and_draw_sliding_cursor_variant(
+            world_menu_update_and_draw_sliding_cursor(
                 &g_world_clear_abilities_cursor_point, &value, g_menu_input_lock_mode);
         }
     }
@@ -330,7 +330,7 @@ static s32 world_menu_update_clear_all_abilities_prompt(void) {
  * Run the formation Set Ability menu for the selected unit.
  *
  * Return 0 when canceled and 1 while active. With the list closed the cursor
- * picks an ability slot and opens its candidate list (ability_build_list_variant for the
+ * picks an ability slot and opens its candidate list (ability_build_list for the
  * secondary skillset, world_ability_build_equippable_rsm_list otherwise);
  * with it open, the chosen ability is written to the slot and the Move+N
  * stat preview is refreshed.
@@ -416,7 +416,7 @@ static s32 world_formation_run_set_ability_menu(void) {
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             if (slot == 1) {
-                g_world_set_ability_entry_count = ability_build_list_variant(g_unit_selected_index,
+                g_world_set_ability_entry_count = ability_build_list(g_unit_selected_index,
                     g_world_unit_pointers[g_unit_selected_index]->identity.job_id, MENU_ABILITY_CATEGORY_ACTION,
                     g_item_list_entries, slot);
             } else {
@@ -430,7 +430,7 @@ static s32 world_formation_run_set_ability_menu(void) {
             thread_suspend(WORLD_THREAD_SLOT_UPPER_MENU);
             g_world_ability_panel_thread_params.style = 1;
             g_world_set_ability_cursor = 0xFF;
-            menu_get_selection_record_variant(g_world_set_ability_slot + 4, &x, &y, g_item_list_entries);
+            world_menu_get_selection_record(g_world_set_ability_slot + 4, &x, &y, g_item_list_entries);
             value = TEXT_SECTION_ABILITY_NAMES;
             if (g_world_set_ability_slot == 1) {
                 value = TEXT_SECTION_SKILLSET_NAMES;
@@ -489,7 +489,7 @@ static s32 world_formation_run_set_ability_menu(void) {
                 g_world_set_ability_show_stat_preview = 0;
             }
         }
-        menu_run_script_with_palette_mode_variant(
+        menu_run_script_with_palette_mode(
             &g_world_set_ability_window_script, g_menu_input_primary_repeat, world_thread_is_task_active(0));
     }
 
@@ -514,7 +514,7 @@ static s32 world_formation_run_set_ability_menu(void) {
     if (world_thread_is_task_active(0) != 0 || g_world_set_ability_list_open != 0) {
         busy = 1;
     }
-    menu_update_and_draw_sliding_cursor_variant(
+    world_menu_update_and_draw_sliding_cursor(
         &g_world_set_ability_cursor_point, &g_world_set_ability_cursor_anim, busy);
     return 1;
 }
@@ -538,7 +538,7 @@ static s32 world_menu_run_learn(void) {
     if (g_world_learn_menu_step == MENU_JOB_LIST_STEP_JOBS) {
         result = world_menu_run_learn_job_list();
         if (result == MENU_JOB_LIST_STEP_ABILITIES) {
-            menu_init_scrollable_list_core_variant(0, 0, 0);
+            menu_init_scrollable_list_core(0, 0, 0);
             g_world_learn_menu_step = MENU_JOB_LIST_STEP_ABILITIES;
         } else if (result == MENU_JOB_LIST_STEP_CLOSE) {
             g_world_learn_menu_initialized = 0;
@@ -575,7 +575,7 @@ s32 world_thread_is_task_active(s32 unused_0) {
 
 /* Job level of the selected unit in the Learn Abilities menu's `index`th
  * unlocked job; levels are packed two per byte (odd jobs in the low nibble). */
-s32 job_calculate_current_level_variant(s32 index) {
+s32 world_job_calculate_current_level(s32 index) {
     s32 job_index = job_get_generic_index(g_menu_job_ids[index]);
 
     g_menu_job_current_level = g_world_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
@@ -597,7 +597,7 @@ s32 world_menu_get_learn_job_jp(s32 index) {
 /* Caches and returns the selected unit's total JP for the Learn Abilities
  * menu's `index`th unlocked job; the job list's menu script reads it as a
  * number callback. */
-s32 job_calculate_current_total_jp_variant(s32 index) {
+s32 world_job_calculate_current_total_jp(s32 index) {
     s32 generic_job = job_get_generic_index(g_menu_job_ids[index]);
 
     return g_world_job_cached_total_jp

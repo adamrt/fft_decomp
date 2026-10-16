@@ -126,7 +126,7 @@ void menu_start_mini_menu_display_thread(void) {
  * list fade-out), 2 while the menu-building thread runs or while menu input is
  * blocked, 4 when one of threads 4-9 is running, and 0 when all are idle. The `i
  * != 3` test inside the scan of threads 4-9 always passes. */
-s32 menu_get_thread_activity_variant(void) {
+s32 menu_get_thread_activity(void) {
     s32 i;
     s32 result;
 
@@ -156,7 +156,7 @@ s32 menu_get_thread_activity_variant(void) {
 #ifdef FFT_WORLD
 /* Menu activity summary: 2 while the menu-building thread runs, else 4 when
  * any of thread slots 4..8 runs, else 0. */
-s32 menu_get_thread_activity_variant(void) {
+s32 menu_get_thread_activity(void) {
     s32 i;
 
     if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
@@ -1136,7 +1136,7 @@ void script_reset_event_state(void) {
 /* Run one event frame, then return whether the deployment thread (borrowed slot
  * 6) is still running. */
 s32 script_is_deployment_running(u32* ot, u32 buttons) {
-    script_run_event_frame_variant(ot, buttons);
+    script_run_event_frame(ot, buttons);
     return thread_is_running(THREAD_BORROWED_SLOT_DEPLOYMENT);
 }
 
@@ -1158,7 +1158,7 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     for (i = 3; i >= 0; i--) {
         g_menu_pending_selection[i] = fill;
     }
-    script_run_event_frame_variant(otag, controller_input);
+    script_run_event_frame(otag, controller_input);
     menu_update_panel_fade();
     result = menu_resolve_selection();
     if ((thread_is_running_asm(THREAD_SLOT_MENU) != 0
@@ -1623,7 +1623,7 @@ void menu_select_unit_action_slots_thread(void) {
         g_thread_call_target = menu_build_ability_list;
         thread_call_on_main_stack(i);
         script_pulse_tutorial_wait_value(0xFB);
-        menu_run_scrolling_ability_list_thread_variant();
+        menu_run_scrolling_ability_list_thread();
         slot->selected_index = g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index;
         slot->scroll_offset = g_menu_ability_layout.row_offset;
         if (menu != ACTION_MENU_TYPE_ARITHMETICKS) {

@@ -23,9 +23,9 @@
  * group once per visible row, plus one while a scroll offset is in effect.
  * An empty list skips its row command groups. JOBSTTS's body: EQUIP's command with BUNIT's event-speed multiplier. The
  * unused arrays reproduce the target's frame: it references only rect (0x20) and marker (0x38). The scroll-down path
- * follows WORLD's menu_cmd_draw_scrollable_list_body_handler_variant spelling.
+ * follows WORLD's jobstts_menu_cmd_draw_scrollable_list_body_handler spelling.
  */
-menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {
+menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
     RECT rect;
     u8 unused_28[16];
     point16_t marker;
@@ -63,7 +63,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
         j = jobstts_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
-                menu_scroll_list_by_page_variant(j, command);
+                menu_scroll_list_by_page(j, command);
             }
         } else {
             input = g_menu_cmd_stream_input;

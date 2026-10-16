@@ -153,7 +153,7 @@ static void require_editor_load_party_unit(s32 unused, s32 party_index) {
             editor->ability_ids[i] = *innate_items++;
             i++;
         } while (i < 5);
-        /* No monster skill check runs here (unlike menu_load_selected_unit_variant),
+        /* No monster skill check runs here (unlike menu_load_selected_unit),
          * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
     } else {
@@ -428,7 +428,7 @@ static s32 require_party_select_unit_to_remove(void) {
         goto selection_menu;
 
     show_unit_message:
-        thread_start(REQUIRE_THREAD_SLOT_MESSAGE, text_run_dialog_thread_variant);
+        thread_start(REQUIRE_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
         thread_set_four_parameters(
             REQUIRE_THREAD_SLOT_MESSAGE, 0x19, message_id, selected_battle_unit->unit_id, should_restore);
         g_threads[REQUIRE_THREAD_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = 0x18;
@@ -549,7 +549,7 @@ static s32 require_party_select_unit_to_remove(void) {
         if (party_unit->sprite_set < CHARACTER_IDENTITY_RAMZA_END)
             goto show_unit_message;
         g_require_menu_selection_result = 0xff;
-        thread_start(REQUIRE_THREAD_SLOT_MESSAGE, text_run_dialog_thread_variant);
+        thread_start(REQUIRE_THREAD_SLOT_MESSAGE, text_run_dialog_thread);
         thread_set_four_parameters(
             REQUIRE_THREAD_SLOT_MESSAGE, 0x19, message_id, selected_battle_unit->unit_id, should_restore);
         g_threads[REQUIRE_THREAD_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = 0x18;
@@ -659,7 +659,7 @@ static void require_party_apply_post_battle_changes(void) {
     battle_unit_get_stats_from_battle_id(*initial_unit_index_ptr);
     g_menu_selected_unit.battle_id = *initial_unit_index_ptr;
     initial_unit_data->name_id = *initial_unit_index_ptr;
-    menu_load_selected_unit_variant();
+    menu_load_selected_unit();
     g_menu_selected_unit_status.unit_index = *initial_unit_index_ptr;
 
     /* `affected_index < count` (not `count > 0`): combine folds the known
@@ -690,7 +690,7 @@ static void require_party_apply_post_battle_changes(void) {
              * call slot on reorg's second pass. */
             transition = 0;
             if (affected_index == 0) {
-                thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
+                thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_require_status_display_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_thread);
@@ -714,7 +714,7 @@ static void require_party_apply_post_battle_changes(void) {
                 index_value = *unit_index_ptr;
                 unit_display_data->battle_id = index_value;
                 unit_display_data->name_id = index_value;
-                menu_load_selected_unit_variant();
+                menu_load_selected_unit();
                 menu_copy_billboard_data_in(
                     &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
                 index_value = *unit_index_ptr;
@@ -852,7 +852,7 @@ static void require_party_apply_post_battle_changes(void) {
                     display_index = *selected_unit_index_ptr;
                     unit_display_data->battle_id = display_index;
                     unit_display_data->name_id = display_index;
-                    menu_load_selected_unit_variant();
+                    menu_load_selected_unit();
                     index_value = *selected_unit_index_ptr;
                     g_status_display_redraw_request = one;
                     g_numeric_editor_redraw_request = one;

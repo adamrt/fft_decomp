@@ -8,7 +8,7 @@
 
 /* Caches and returns whether the `index`th job's skillset has nothing left
  * to list (an empty ability list in mode 2). */
-s32 job_calculate_current_mastered_variant(s32 index) {
+s32 jobstts_job_calculate_current_mastered(s32 index) {
     s16 ability_list[24];
 
     g_job_current_mastered

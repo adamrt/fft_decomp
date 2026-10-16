@@ -75,7 +75,7 @@ void equip_menu_update_screen_state(void) {
         result = equip_menu_run_remove_mode();
         break;
     case EQUIP_SCREEN_STATE_ITEM_LIST:
-        result = menu_update_equipment_variant();
+        result = menu_update_equipment();
         break;
     }
     if (result == 0) {
@@ -200,7 +200,7 @@ static s32 equip_menu_run_equip_mode(void) {
                 g_equip_unit_status_panel_redraw = 1;
             }
         }
-        menu_cmd_run_stream_variant(&g_equip_item_menu_script, g_menu_input_primary_repeat);
+        menu_cmd_run_stream(&g_equip_item_menu_script, g_menu_input_primary_repeat);
     }
     if (g_equip_item_list_refresh != 0) {
         g_equip_equipment_panel_style = 0;

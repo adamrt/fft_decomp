@@ -41,12 +41,12 @@
  * must not be re-sorted. Handlers that seek (jumps) `continue` without the
  * length step; EventEnd may `goto restart_event` for a chained scenario.
  *
- * BATTLE carries the same interpreter (script_execute_event_variant); the two
+ * BATTLE carries the same interpreter (script_execute_event); the two
  * are kept structurally identical so differences stay visible.
  *
  * The native inner-call trampoline intentionally forwards varying argument
  * counts through its () ABI. */
-void script_execute_event_variant(void) {
+void script_execute_event(void) {
     s32 added_unit_state;
     s32 ghost_runtime_id;
     s32 region_runtime_id;
@@ -393,7 +393,7 @@ restart_script:
         /* ---- Dialogue and portraits ---- */
         else if (opcode == EVENT_OPCODE_DISPLAY_MESSAGE) {
             operand_1 = thread_resolve_id(operand_1);
-            thread_start(operand_1, text_run_dialog_thread_variant);
+            thread_start(operand_1, text_run_dialog_thread);
             text_build_display_message(
                 instruction_offset, operand_2, &g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_TEXT_WIDTH]);
 

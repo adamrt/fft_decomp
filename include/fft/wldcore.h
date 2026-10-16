@@ -249,7 +249,7 @@ typedef char wldcore_sortbox_state_size_must_be_56[sizeof(wldcore_sortbox_state_
  * is what wldcore_gfx_capture_map_backdrop indexes these globals with. */
 /* The ordering-table handle is libgs GsOT; see include/psx/libgs.h. */
 /* Heterogeneous display-object queues: each object's leading 32-bit flags
- * selects the handler in window_dispatch_record_list_variant:
+ * selects the handler in window_dispatch_record_list:
  * bit 0 an animated object (world_animated_render_record_t), bit 1 a sprite
  * (wldcore_window_render_record_t). */
 struct wldcore_window_render_record;

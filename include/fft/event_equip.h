@@ -124,7 +124,7 @@ extern menu_status_panel_buffer_t g_equip_panel_frames_b[];
 extern palette_t g_equip_panel_selected_portrait_palettes[2];
 extern menu_unit_status_identity_t g_equip_panel_selected_unit_data;
 /* RECT[1] (right panel) of g_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
- * GCC derive the table base from this address and changes menu_run_ability_list_thread_variant. */
+ * GCC derive the table base from this address and changes menu_run_ability_list_thread. */
 extern RECT g_equip_right_panel_frame_rect;
 extern u8 g_equip_status_label_image[];
 extern RECT g_equip_status_label_image_rect;
@@ -146,7 +146,7 @@ typedef enum equip_screen_state {
     EQUIP_SCREEN_STATE_COMMAND_MENU = 1,
     EQUIP_SCREEN_STATE_EQUIP = 2,     /* equip_menu_run_equip_mode */
     EQUIP_SCREEN_STATE_REMOVE = 4,    /* equip_menu_run_remove_mode */
-    EQUIP_SCREEN_STATE_ITEM_LIST = 5, /* menu_update_equipment_variant */
+    EQUIP_SCREEN_STATE_ITEM_LIST = 5, /* menu_update_equipment */
     EQUIP_SCREEN_STATE_CLOSED = 0xff, /* equip_entrypoint returns its result */
 } equip_screen_state_e;
 typedef s32 (*equip_row_callback_t)(s32 row);
@@ -249,9 +249,9 @@ typedef enum equip_thread_slot {
     EQUIP_THREAD_SLOT_POPUP_MENU = 3,         /* the item action and type order menus */
     EQUIP_THREAD_SLOT_COMMAND_MENU_CHILD = 4, /* a wait-forever thread while a command's mode runs */
     EQUIP_THREAD_SLOT_COMMAND_MENU = 5,       /* menu_icon_list_thread */
-    EQUIP_THREAD_SLOT_EQUIPMENT_LIST = 10,    /* menu_run_equipment_list_thread_variant */
+    EQUIP_THREAD_SLOT_EQUIPMENT_LIST = 10,    /* menu_run_equipment_list_thread */
     EQUIP_THREAD_SLOT_ITEM_NUMERIC = 11,      /* the numeric editor thread of the item panel */
-    EQUIP_THREAD_SLOT_UNIT_STATUS = 13,       /* menu_run_unit_status_thread_variant */
+    EQUIP_THREAD_SLOT_UNIT_STATUS = 13,       /* menu_run_unit_status_thread */
     EQUIP_THREAD_SLOT_COMPARISON_STATUS = 14, /* the second banner slot the indicator draw watches */
 } equip_thread_slot_e;
 

@@ -64,35 +64,33 @@ void wldcore_proposition_push_dispatch_confirm_level(void) {
 
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CONFIRM_CONDITIONS, 0);
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].choice_panel.cursor_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
     g_wldcore_window_records[index].priority = 8;
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.upper_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CHOICE_PANEL_HEADER;
     g_wldcore_window_records[index].priority = 8;
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].choice_panel.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
-    window_init_text_record_variant(index, bounds, 0, WLDCORE_TEXT_ID_OK_NO, g_wldcore_window_image_buffer);
+    window_init_text_record(index, bounds, 0, WLDCORE_TEXT_ID_OK_NO, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 8;
     position = &g_wldcore_window_render_records[index].base;
     position->x = 0x48;
     position->y = 0x20;
 
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].choice_panel.row = index;
     location = &g_wldcore_selected_proposition_row[0].name_text;
@@ -108,21 +106,20 @@ void wldcore_proposition_push_dispatch_confirm_level(void) {
     wldcore_window_build_render_record_image(index, bounds, 0, &g_wldcore_window_image_buffer[0x200]);
     point.x = 8;
     point.y = size[1] * 0x10 + 8;
-    window_display_text_entry_variant(
+    window_display_text_entry(
         index, WLDCORE_TEXT_ID_JOB_CONDITION_LABELS, point, &g_wldcore_window_image_buffer[0x200]);
     point.x = 8;
     point.y = 8;
-    window_display_text_entry_variant(
-        index, WLDCORE_TEXT_ID_JOB_CONTENTS_LABEL, point, &g_wldcore_window_image_buffer[0x200]);
+    window_display_text_entry(index, WLDCORE_TEXT_ID_JOB_CONTENTS_LABEL, point, &g_wldcore_window_image_buffer[0x200]);
     point.x = 0x44;
     point.y = 8;
-    window_display_text_entry_variant(
+    window_display_text_entry(
         index, *location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, &g_wldcore_window_image_buffer[0x200]);
     for (i = 0; i < g_wldcore_proposition_send_unit_count; i++) {
         point.x = 0x3C;
         line = i + 2;
         point.y = (size[1] + line) * 0x10 + 8;
-        window_display_text_entry_variant(index, g_wldcore_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point,
+        window_display_text_entry(index, g_wldcore_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point,
             &g_wldcore_window_image_buffer[0x200]);
     }
     wldcore_window_load_image_record_to_vram(index, &g_wldcore_window_image_buffer[0x200]);
@@ -316,8 +313,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     thread_start(WLDCORE_THREAD_SLOT_WINDOW_PANEL, world_screen_build_at_list);
     thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, (s32)&g_wldcore_window_panel_render_state, 0, 0);
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.list_frame.window_index = index;
     {
         point32_t* position = &g_wldcore_window_records[index].position;
@@ -328,21 +324,20 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_PROPOSITION_COUNT_LABEL;
     g_wldcore_window_records[index].frame_index = g_wldcore_window_records[index].anim_counter = 0;
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.cursor_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
     g_wldcore_window_records[index].priority = 9;
     g_wldcore_window_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
     g_wldcore_window_records[index].frame_index = g_wldcore_window_records[index].anim_counter = 0;
 
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.list_frame.render_index = index;
     bounds.x = 0x80;
     bounds.y = 0;
     bounds.w = 0x6C;
     bounds.h = 0x40;
-    window_init_text_record_variant(index, bounds, 0, 0, g_wldcore_window_image_buffer);
+    window_init_text_record(index, bounds, 0, 0, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 9;
     {
         point32_t* base = &g_wldcore_window_render_records[index].base;
@@ -351,8 +346,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     }
     DrawSync(0);
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.frame_window_a = index;
     {
         point32_t* position = &g_wldcore_window_records[index].position;
@@ -363,8 +357,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SEND_UNIT_FRAME_A;
     g_wldcore_window_records[index].frame_index = g_wldcore_window_records[index].anim_counter = 0;
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.frame_window_b = index;
     {
         point32_t* position = &g_wldcore_window_records[index].position;
@@ -375,7 +368,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SEND_UNIT_FRAME_B;
     g_wldcore_window_records[index].frame_index = g_wldcore_window_records[index].anim_counter = 0;
 
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.preview_render = index;
     g_wldcore_window_render_records[index].priority = 9;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
@@ -385,13 +378,13 @@ void wldcore_proposition_push_send_unit_level(void) {
         base->y = 0x18;
     }
 
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.list_render = index;
     bounds.x = 0x80;
     bounds.y = 0x40;
     bounds.w = 0x30;
     bounds.h = 0x3B;
-    window_init_text_record_variant(index, bounds, 0, 0, g_wldcore_window_image_buffer);
+    window_init_text_record(index, bounds, 0, 0, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 9;
     {
         point32_t* base = &g_wldcore_window_render_records[index].base;
@@ -400,7 +393,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     }
     DrawSync(0);
 
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.portrait_render = index;
     g_wldcore_window_render_records[index].priority = 9;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
@@ -410,13 +403,13 @@ void wldcore_proposition_push_send_unit_level(void) {
         base->y = 0x18;
     }
 
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.portrait_frame = index;
     bounds.x = 0x80;
     bounds.y = 0x40;
     bounds.w = 0x30;
     bounds.h = 0x3B;
-    window_init_text_record_variant(index, bounds, 0, 0, g_wldcore_window_image_buffer);
+    window_init_text_record(index, bounds, 0, 0, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 9;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
     {
@@ -425,8 +418,7 @@ void wldcore_proposition_push_send_unit_level(void) {
         base->y = 0x14;
     }
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.portrait_window = index;
     {
         point32_t* position = &g_wldcore_window_records[index].position;
@@ -438,8 +430,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SEND_UNIT_PORTRAIT;
     g_wldcore_window_records[index].frame_index = g_wldcore_window_records[index].anim_counter = 0;
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.left_arrow = index;
     {
         point32_t* position = &g_wldcore_window_records[index].position;
@@ -451,8 +442,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_L1_BUTTON;
     g_wldcore_window_records[index].frame_index = g_wldcore_window_records[index].anim_counter = 0;
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.right_arrow = index;
     {
         point32_t* position = &g_wldcore_window_records[index].position;
@@ -531,7 +521,7 @@ static void wldcore_proposition_draw_send_unit_names(wldcore_menu_send_unit_leve
     point.x = 8;
     point.y = 8;
     for (i = 0; i < g_wldcore_proposition_send_unit_count; i++) {
-        window_display_text_entry_variant(
+        window_display_text_entry(
             index, g_wldcore_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, g_wldcore_window_image_buffer);
         point.y += 0x10;
     }
@@ -553,7 +543,7 @@ static void wldcore_window_load_party_unit_sprite_record(
 
     code = world_get_party_unit_formation_sprite(party_index);
     cell = code;
-    menu_build_unit_portrait_poly_variant(&poly, code);
+    menu_build_unit_portrait_poly(&poly, code);
     g_wldcore_window_render_records[index].clut.x = (code / 40 << 6) + 0x280 + cell % 4 * 16;
     g_wldcore_window_render_records[index].clut.y = cell % 40 / 4 + 0x1F0;
     g_wldcore_window_render_records[index].tpage = poly.tpage;
@@ -649,9 +639,9 @@ static void wldcore_unit_start_status_panel_threads(s32 party_index) {
     g_wldcore_threadc_params.y = 0;
     g_wldcore_thread8_params.y = 0;
     thread8->x = 0;
-    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread_variant);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_wldcore_threadc_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_wldcore_thread9_params, 0, 0);
@@ -1391,8 +1381,8 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         if (level->phase == 0) {
             picture = &g_wldcore_proposition_report.reward_type;
             if (*picture == WLDCORE_PROPOSITION_REWARD_TREASURE) {
-                record = window_append_record_variant(
-                    g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+                record
+                    = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 level->render_index = record;
                 GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);
                 LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
@@ -1413,13 +1403,13 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
                     base->y = -(image.ph >> 1) + 0x1A;
                 }
 
-                record = window_append_record_variant(
-                    g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+                record
+                    = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 bounds.x = 0;
                 bounds.y = 0x70;
                 bounds.w = 0x8C;
                 bounds.h = 0x8C;
-                window_init_text_record_variant(record, bounds, 0, 0, g_wldcore_window_image_buffer);
+                window_init_text_record(record, bounds, 0, 0, g_wldcore_window_image_buffer);
                 g_wldcore_window_render_records[record].priority = 9;
                 {
                     point32_t* base = &g_wldcore_window_render_records[record].base;
@@ -1429,8 +1419,8 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
                 wldcore_sound_play_effect(MAIN_SFX_COMPLETE);
             }
             if (*picture == WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND) {
-                record = window_append_record_variant(
-                    g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+                record
+                    = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 level->render_index = record;
                 GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);
                 LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
@@ -1451,13 +1441,13 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
                     base->y = -(image.ph >> 1);
                 }
 
-                record = window_append_record_variant(
-                    g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+                record
+                    = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 bounds.x = 0;
                 bounds.y = 0x80;
                 bounds.w = 0x88;
                 bounds.h = 0x5A;
-                window_init_text_record_variant(record, bounds, 0, 0, g_wldcore_window_image_buffer);
+                window_init_text_record(record, bounds, 0, 0, g_wldcore_window_image_buffer);
                 g_wldcore_window_render_records[record].priority = 9;
                 {
                     point32_t* base = &g_wldcore_window_render_records[record].base;
@@ -1564,7 +1554,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
         g_text_substitution_values[0] = 0x7806;
         break;
     }
-    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     panel_text = &g_wldcore_selected_proposition_row[0].name_text;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_result.render_index = index;
     text_measure_pixels(
@@ -1577,13 +1567,13 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
     wldcore_window_build_render_record_image(index, bounds, 0, g_wldcore_window_image_buffer);
     point.x = 8;
     point.y = text_rows * 0x10 + 8;
-    window_display_text_entry_variant(index, WLDCORE_TEXT_ID_JOB_RESULT_LABELS, point, g_wldcore_window_image_buffer);
+    window_display_text_entry(index, WLDCORE_TEXT_ID_JOB_RESULT_LABELS, point, g_wldcore_window_image_buffer);
     point.x = 8;
     point.y = 8;
-    window_display_text_entry_variant(index, WLDCORE_TEXT_ID_JOB_CONTENTS_LABEL, point, g_wldcore_window_image_buffer);
+    window_display_text_entry(index, WLDCORE_TEXT_ID_JOB_CONTENTS_LABEL, point, g_wldcore_window_image_buffer);
     point.x = 0x44;
     point.y = 8;
-    window_display_text_entry_variant(
+    window_display_text_entry(
         index, *panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, g_wldcore_window_image_buffer);
     for (i = 0; i < count; i++) {
         s32 row = i + 2;
@@ -1591,7 +1581,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
 
         point.y = (text_rows + row) * 0x10 + 8;
         point.x = x;
-        window_display_text_entry_variant(index,
+        window_display_text_entry(index,
             g_main_active_propositions[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
             g_wldcore_window_image_buffer);
     }
@@ -1601,8 +1591,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
         point.x = 0xA0;
         point.y = (text_rows + row) * 0x10 + 8;
         g_text_substitution_values[0] = g_wldcore_proposition_report.participant_jp[i];
-        window_display_text_entry_variant(
-            index, WLDCORE_TEXT_ID_FOUR_DIGIT_VALUE, point, g_wldcore_window_image_buffer);
+        window_display_text_entry(index, WLDCORE_TEXT_ID_FOUR_DIGIT_VALUE, point, g_wldcore_window_image_buffer);
     }
     wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 9;

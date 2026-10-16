@@ -9,8 +9,8 @@
 u32 bits_read_primary(s32 count);
 void bits_write_primary(s32 value);
 s32 bits_read_secondary(s32 count);
-void bits_init_primary_reader_variant(const u8* data);
-void bits_init_secondary_reader_variant(const u8* data);
+void bits_init_primary_reader(const u8* data);
+void bits_init_secondary_reader(const u8* data);
 
 /* stream state */
 extern u8 g_bits_primary_reset;

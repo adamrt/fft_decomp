@@ -21,7 +21,7 @@
  * Resolves a roster slot's sprite sheet to its 16-bit CLUT value and, unless that value
  * is masked out, applies it to the caller's portrait sprite record.
  */
-void menu_build_portrait_poly_variant(s32 roster_slot, POLY_FT4* poly) {
+void menu_build_portrait_poly(s32 roster_slot, POLY_FT4* poly) {
     party_unit_t* party = main_party_get_unit(roster_slot);
     job_data_t* job;
     u32 sprite = party->sprite_set;
@@ -64,6 +64,6 @@ void menu_build_portrait_poly_variant(s32 roster_slot, POLY_FT4* poly) {
         sprite |= job->job_portrait_palette << 10;
     }
     if ((sprite & MENU_PORTRAIT_CLUT_SUPPRESS_MASK) == 0) {
-        menu_build_unit_portrait_poly_variant(poly, sprite);
+        menu_build_unit_portrait_poly(poly, sprite);
     }
 }

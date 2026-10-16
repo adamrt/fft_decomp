@@ -30,7 +30,7 @@
 
 /* Thread task 0x39: draws the character editor and status panels. DEBUGCHR's body; this copy scales each gauge
  * bar by its value/limit and can show the zodiac sign. */
-void menu_run_unit_status_thread_variant(void) {
+void menu_run_unit_status_thread(void) {
     RECT rects[6];
     s32 anim_state;
     s32 cur_unit;
@@ -437,11 +437,11 @@ void menu_run_unit_status_thread_variant(void) {
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs_variant(unit_info->brave, 0x202, value_pixels, text_position);
+            text_draw_large_number_glyphs(unit_info->brave, 0x202, value_pixels, text_position);
             LoadImage(&rects[3], value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_large_number_glyphs_variant(unit_info->faith, 0x202, value_pixels_b, text_position);
+            text_draw_large_number_glyphs(unit_info->faith, 0x202, value_pixels_b, text_position);
             LoadImage(&rects[4], value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
@@ -449,8 +449,7 @@ void menu_run_unit_status_thread_variant(void) {
                 if (g_debugchr_editor_active != 0) {
                     menu_set_text_origin(0, 0);
                     value_pixels_c = value_pixels + 0xA0;
-                    text_draw_large_number_glyphs_variant(
-                        unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);
+                    text_draw_large_number_glyphs(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);
                     LoadImage(&rects[5], value_pixels_c);
                 } else {
                     s32 zodiac;
@@ -459,7 +458,7 @@ void menu_run_unit_status_thread_variant(void) {
                      * `zodiac` holds the battle id. */
                     zodiac = unit_info->battle_id;
                     if (zodiac >= 0x10) {
-                        text_draw_large_number_glyphs_variant(zodiac - 0xF, 0x4002, value_pixels + 0xA0, text_position);
+                        text_draw_large_number_glyphs(zodiac - 0xF, 0x4002, value_pixels + 0xA0, text_position);
                     }
                     LoadImage(&rects[5], value_pixels + 0xA0);
                 }

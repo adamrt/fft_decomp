@@ -14,7 +14,7 @@
  * makes the outer loop keep it as a spilled pointer induction variable
  * (0x30(sp), reloaded into $s4 per entry) as the target does; a plain
  * `g_attack_panel_status_y_offsets[entry][0]` folds the table into each load instead. */
-void menu_build_status_group_primitives_variant(POLY_FT4* poly) {
+void attack_menu_build_status_group_primitives(POLY_FT4* poly) {
     s32 group;
     s32 cell;
     s32 first;

@@ -18,7 +18,7 @@ void world_menu_toggle_change_banner_panel_thread(s32 enable) {
         if (!(g_menu_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
             if (thread_is_running(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
-                thread_start(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, menu_run_equipment_list_thread_variant);
+                thread_start(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, menu_run_equipment_list_thread);
                 thread_set_parameters(
                     WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_world_change_banner_panel_thread_params, 0, 0);
             }
@@ -30,14 +30,14 @@ void world_menu_toggle_change_banner_panel_thread(s32 enable) {
     }
 }
 
-/* Starts thread 9 on menu_run_equipment_list_thread_variant (parameter g_world_stat_preview_panel_thread_params) when
+/* Starts thread 9 on menu_run_equipment_list_thread (parameter g_world_stat_preview_panel_thread_params) when
  * `enable` is set and neither of the g_menu_status_display_thread_params.flags 0x60 bits is set; stops it otherwise.
  * g_world_change_banner_panel_thread_params.style records the normalized enable state. */
 void world_menu_toggle_stat_preview_panel_thread(s32 enable) {
     if (enable != 0) {
         if (!(g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
-            thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_list_thread_variant);
+            thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_list_thread);
             thread_set_parameters(
                 THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_world_stat_preview_panel_thread_params, 0, 0);
         }

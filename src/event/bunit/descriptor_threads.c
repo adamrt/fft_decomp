@@ -46,7 +46,7 @@ void bunit_text_start_selection_thread(s32 thread_data) {
     }
     text_save_section_pointers();
     text_relocate_pointer_table(g_help_text_table);
-    thread_start(THREAD_SCREEN_SLOT_TEXT, text_run_dialog_thread_variant);
+    thread_start(THREAD_SCREEN_SLOT_TEXT, text_run_dialog_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, thread_data + 0x38, g_text_selection_id, 0);
     g_menu_input_lock_mode = 1;
 }
@@ -136,11 +136,11 @@ void bunit_menu_update_node_cursor(s16 mode) {
     pos.y = y;
     if (node->vertical_cursor != 0) {
         pos.y = y + 1;
-        menu_update_and_draw_bouncing_cursor_variant(&pos, &g_bunit_help_cursor_anim_state, running);
+        bunit_menu_update_and_draw_bouncing_cursor(&pos, &g_bunit_help_cursor_anim_state, running);
     } else {
         pos.x = x - 2;
         pos.y = y + 6;
-        menu_update_and_draw_sliding_cursor_variant(&pos, &g_bunit_help_cursor_anim_state, running);
+        menu_update_and_draw_sliding_cursor(&pos, &g_bunit_help_cursor_anim_state, running);
     }
 }
 

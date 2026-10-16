@@ -17,7 +17,7 @@
  * x; sharing one variable reproduces the target's register assignment.
  * BATTLE links its own, longer body under this name.
  */
-void text_draw_large_number_glyphs_variant(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
+void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     glyph_blit_t* src;
     s32 work = digits & 0xFF00;
     s32 i;

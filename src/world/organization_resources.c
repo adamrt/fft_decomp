@@ -72,7 +72,7 @@ void world_menu_build_location_list(void) {
     }
     g_menu_thread_menu_data[6].selected_index = selected;
     g_menu_thread_menu_data[6].window.y = (7 - g_world_menu_location_list_layout.columns.row_count) * 8 - 0x48;
-    menu_run_scrolling_ability_list_thread_variant();
+    menu_run_scrolling_ability_list_thread();
 }
 
 /* Slot 0 is stored through a plain pointer on purpose: `pending[0]` is a
@@ -119,7 +119,7 @@ void world_menu_build_submenu_text_id_page(void) {
         g_world_menu_submenu_page_layout.columns.row_count = 7;
         g_world_menu_submenu_page_layout.columns.hidden_rows = count - 7;
     }
-    menu_run_scrolling_ability_list_thread_variant();
+    menu_run_scrolling_ability_list_thread();
 }
 
 /* Preset the selected row of default menu entry 4. */
@@ -1050,7 +1050,7 @@ void world_formation_set_menu_allowed_buttons(u32 mask) {
 
 /* The six 32-bit input masks at 0x801aed44 are g_world_formation_menu_input_state,
  * but a struct global makes GCC keep a base register for the field accesses
- * (see menu_input_update_event_state_variant), so they are separate scalars here. */
+ * (see menu_input_update_event_state), so they are separate scalars here. */
 extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous_input,
     g_world_formation_menu_initial_repeat_counter, g_world_formation_menu_repeat_counter,
     g_world_formation_menu_secondary_repeat_counter;
@@ -1061,7 +1061,7 @@ extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous
  * g_world_formation_open_request_state.. flags is set), runs the formation/memory-card request
  * updates, publishes the input, yields once while tracking thread status
  * changes and returns the menu result slot g_menu_pending_selection[0] (-2 while pending).
- * Formation-menu sibling of menu_input_update_event_state_variant. */
+ * Formation-menu sibling of menu_input_update_event_state. */
 s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     s32 profile = g_main_game_options.fields.finger_cursor_repeat_speed;
     u32 previous_input;

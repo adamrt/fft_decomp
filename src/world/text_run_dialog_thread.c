@@ -46,7 +46,7 @@
 
 /* Dialog text thread: opens a dialog window and draws the text entry named
  * by thread parameter 2 glyph by glyph, handling the control bytes. */
-void text_run_dialog_thread_variant(void) {
+void text_run_dialog_thread(void) {
     text_dialog_record_t rec;
     RECT from;
     RECT to;

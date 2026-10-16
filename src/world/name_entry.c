@@ -56,14 +56,13 @@ u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1) {
         cursor.y = 0x3B;
         cursor.x = g_world_name_entry_cursor * 6 + 0x54;
         gfx_set_otag_index(0x28);
-        menu_update_and_draw_bouncing_cursor_variant(&cursor, &g_world_name_keyboard_text_cursor_anim, busy);
-        menu_run_script_with_palette_mode_variant(&g_world_name_entry_display_script, 0, busy);
+        world_menu_update_and_draw_bouncing_cursor(&cursor, &g_world_name_keyboard_text_cursor_anim, busy);
+        menu_run_script_with_palette_mode(&g_world_name_entry_display_script, 0, busy);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode_variant(
-            &g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
+        menu_run_script_with_palette_mode(&g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         if (g_world_name_entry_state != g_world_name_keyboard_last_state) {
             g_world_name_keyboard_last_state = g_world_name_entry_state;
         }
@@ -134,7 +133,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
     world_name_init_entry(list);
     g_world_name_entry_last_state = -1;
     world_gfx_set_fade_disabled(1);
-    menu_input_update_with_message_state_variant();
+    world_menu_input_update_with_message_state();
     while (g_world_name_entry_state != 0xFF) {
         world_gfx_update_fade_in_tile();
         main_system_frame_stub();
@@ -180,7 +179,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         gfx_load_image_and_wait(&g_world_name_entry_screen_image_rect, image);
         DrawOTag(otag);
         ClearOTag(g_menu_gfx_context->otag, g_world_ot_length);
-        menu_input_update_with_message_state_variant();
+        world_menu_input_update_with_message_state();
         busy = world_map_is_busy();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
@@ -198,17 +197,16 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         value = g_world_name_entry_cursor * 6 + 0x54;
         cursor.x = value;
         gfx_set_otag_index(0x28);
-        menu_update_and_draw_bouncing_cursor_variant(&cursor, &g_world_name_entry_text_cursor_anim, busy);
-        menu_run_script_with_palette_mode_variant(&g_world_name_entry_display_script, 0, busy);
+        world_menu_update_and_draw_bouncing_cursor(&cursor, &g_world_name_entry_text_cursor_anim, busy);
+        menu_run_script_with_palette_mode(&g_world_name_entry_display_script, 0, busy);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode_variant(
-            &g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
+        menu_run_script_with_palette_mode(&g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
-        menu_input_update_event_state_variant(
+        menu_input_update_event_state(
             g_menu_gfx_context->otag + 63, PadRead(0), g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
         value = g_world_name_entry_state;
         if (value != g_world_name_entry_last_state) {
@@ -356,7 +354,7 @@ static void world_name_update_entry_cursor(void) {
         g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
     gfx_set_otag_index(0x28);
-    menu_update_and_draw_sliding_cursor_variant(&cursor, &g_world_name_entry_key_cursor_anim, g_menu_input_lock_mode);
+    world_menu_update_and_draw_sliding_cursor(&cursor, &g_world_name_entry_key_cursor_anim, g_menu_input_lock_mode);
 }
 
 /* Applies a name-entry key to the encoded name at g_world_name_entry_text and re-kerns it.
@@ -500,7 +498,7 @@ static void world_name_init_entry(const u8* name) {
     g_world_name_entry_list_cursor = 1;
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, world_text_message_box_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
-    menu_init_scrollable_list_core_variant(0, 0, 0);
+    menu_init_scrollable_list_core(0, 0, 0);
     g_menu_list_selected_index = 1;
     world_text_bind_section_data(WORLD_TEXT_DATA_NAME_ENTRY_KEYBOARD);
     g_text_section_pointers[WORLD_TEXT_SECTION_NAME_ENTRY_KEYS] = g_world_text_name_entry_keys_data;

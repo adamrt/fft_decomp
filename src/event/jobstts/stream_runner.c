@@ -11,7 +11,7 @@
  * the end opcode, after resetting the ordering-table index, its lock and the
  * semi-transparency state; `flags` is the input the handlers see. Then
  * advances the transition frame, up to 10. */
-void menu_cmd_run_stream_variant(menu_instruction_t* instruction, s32 flags) {
+void menu_cmd_run_stream(menu_instruction_t* instruction, s32 flags) {
     g_gfx_otag_index_locked = 0;
     g_menu_gfx_otag_index = 0;
     g_menu_gfx_semitransparency = 0;
@@ -25,7 +25,7 @@ void menu_cmd_run_stream_variant(menu_instruction_t* instruction, s32 flags) {
 }
 
 /* Select the palette set for `event_mode` and run the command stream. */
-void menu_run_script_with_palette_mode_variant(menu_instruction_t* script, s32 flags, s32 event_mode) {
+void jobstts_menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode) {
     menu_set_palette_mode(event_mode);
-    menu_cmd_run_stream_variant(script, flags);
+    menu_cmd_run_stream(script, flags);
 }

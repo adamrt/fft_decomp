@@ -409,7 +409,7 @@ static void menu_build_ability_preview_at_list(void) {
 void menu_preview_ability_turn_at_list(void) {
     menu_build_ability_preview_at_list();
     script_pulse_tutorial_wait_value(0xFA);
-    menu_run_scrolling_ability_list_thread_variant();
+    menu_run_scrolling_ability_list_thread();
 }
 
 /* Draw the visible rows of a three-column menu text layout (text 8 pixels

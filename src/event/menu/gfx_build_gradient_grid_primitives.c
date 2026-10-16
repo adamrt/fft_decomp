@@ -5,7 +5,7 @@
 #include "psx/types.h"
 
 /* Build and submit the panel background's 4x8 gradient grid. */
-void gfx_build_gradient_grid_primitives_variant(POLY_GT4* poly) {
+void gfx_build_gradient_grid_primitives(POLY_GT4* poly) {
     s32 row;
     s32 column;
     s32 intensity;

@@ -18,7 +18,7 @@ void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor) {
         thread_start(thread_id, descriptor->thread_entry);
         thread_set_parameters(thread_id, (s32)g_menu_thread_menu_data, 0, 0);
         for (i = 0; i < 20; i++) {
-            menu_input_update_event_state_variant(state, 0, 0);
+            menu_input_update_event_state(state, 0, 0);
         }
         g_menu_managed_thread_state = 1;
     } else {

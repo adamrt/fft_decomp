@@ -132,7 +132,7 @@ void world_font_upload_glyph_image(u16 code, s32 x, s32 y, s32 style) {
         }
         glyph = code;
     }
-    menu_text_render_glyph_to_4bpp_image_variant(glyph, image, (const battle_text_image_position_t*)&rect, style);
+    menu_text_render_glyph_to_4bpp_image(glyph, image, (const battle_text_image_position_t*)&rect, style);
     rect.x = x;
     rect.y = y;
     LoadImage(&rect, image);

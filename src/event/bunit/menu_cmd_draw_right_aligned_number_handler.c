@@ -10,7 +10,7 @@
 #include "psx/types.h"
 
 /* Draw a callback value right-aligned in eight-pixel cells. */
-menu_instruction_t* menu_cmd_draw_right_aligned_number_handler_variant(menu_instruction_t* cmd) {
+menu_instruction_t* bunit_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* cmd) {
     s8 digits[16];
     RECT glyph_rect;
     s32 count;

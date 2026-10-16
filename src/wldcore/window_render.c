@@ -223,24 +223,19 @@ void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state
     s32 columns;
     s32 last_page_row;
 
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->left_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_PAGE_PROMPT);
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->middle_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_SCROLL_UP);
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->right_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_SCROLL_DOWN);
-    index = window_append_animated_record_variant(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->lower_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_SCROLL_THUMB);
-    render_index
-        = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    render_index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->render_record_index = render_index;
     g_wldcore_window_render_records[render_index].flags |= WORLD_RENDER_RECORD_POP_IN;
     g_wldcore_window_render_records[state->render_record_index].priority = state->priority;
@@ -412,7 +407,7 @@ static void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_w
     }
     point.x = 8;
     point.y = 8;
-    window_display_text_entry_variant(state->render_record_index, state->text_id, point, g_wldcore_window_image_buffer);
+    window_display_text_entry(state->render_record_index, state->text_id, point, g_wldcore_window_image_buffer);
     wldcore_window_load_image_record_to_vram(state->render_record_index, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[state->render_record_index].base = state->base;
 }
@@ -597,7 +592,7 @@ void wldcore_sound_enqueue_music_start(s32 value) {
     wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 0x10);
 }
 
-/* Twin of file_wait_for_pending_variant (0x800686c8) with the audio-queue depth
+/* Twin of file_wait_for_pending (0x800686c8) with the audio-queue depth
  * as the wait condition. The two 32-bit busy fields are read as g_wldcore_audio_queue members
  * rather than as separate scalars. */
 void wldcore_sound_wait_for_queue_drain(void) {

@@ -19,7 +19,7 @@ static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_
 
 #ifdef FFT_WLDCORE
 /* Reset both world-map window pools and their allocation counters. */
-void window_init_record_pools_variant(void) {
+void window_init_record_pools(void) {
     /* Member pointers preserve the separate color and CLUT address walks. */
     CVECTOR* color;
     point32_t* clut;
@@ -51,7 +51,7 @@ void window_init_record_pools_variant(void) {
 #ifdef FFT_OPENING
 /* Empty both render record pools and the pointer list. Every record gets its
  * layout flag, ordering-table entry 8 and the neutral color 0x80. */
-void window_init_record_pools_variant(void) {
+void window_init_record_pools(void) {
     s32 i;
     CVECTOR* color;
 
@@ -91,7 +91,7 @@ void open_gfx_clear_current_otag(void) {
 /* Dispatch a list of display objects to one of two handlers by object kind.
  * Objects with flags 0x18 are skipped, and the whole pass is suppressed while
  * system flag 0x400 is set. */
-void window_dispatch_record_list_variant(GsOT* otag, void** list, s32 count) {
+void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
     void* object;
     s32* flags;
     s32 i;
@@ -122,7 +122,7 @@ void window_dispatch_record_list_variant(GsOT* otag, void** list, s32 count) {
  * 56-byte one. Nothing is drawn while
  * OPEN_SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN is set, which no code in
  * OPEN.BIN does. */
-void window_dispatch_record_list_variant(GsOT* otag, void** list, s32 count) {
+void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
     s32 i;
     void* object;
     u32* flags_word;
@@ -277,7 +277,7 @@ step_frame:
 
 #ifdef FFT_WLDCORE
 /* Convert one display object into a libgs sprite primitive and sort it into the
- * ordering table handed down by window_dispatch_record_list_variant.
+ * ordering table handed down by window_dispatch_record_list.
  *
  * Flag 0x004 selects the 8-bit color mode (attribute 0x01000000); flag 0x400 copies
  * the object's color verbatim, otherwise 0x80069718 applies the global fade
@@ -584,7 +584,7 @@ static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot
 
 #ifdef FFT_WLDCORE
 /* Attach the current window record to the caller's list and reset its color. */
-s32 window_append_animated_record_variant(void** queue, s32* count) {
+s32 window_append_animated_record(void** queue, s32* count) {
     CVECTOR* color;
 
     queue[*count] = &g_wldcore_window_records[g_wldcore_window_record_count];
@@ -604,7 +604,7 @@ s32 window_append_animated_record_variant(void** queue, s32* count) {
 #ifdef FFT_OPENING
 /* Appends the next free 36-byte render record to `list`, resets it and
  * returns its pool index. */
-s32 window_append_animated_record_variant(void** list, s32* count) {
+s32 window_append_animated_record(void** list, s32* count) {
     list[*count] = &g_open_gfx_render_records_36[g_open_gfx_next_render_record_36];
     g_open_gfx_render_records_36[g_open_gfx_next_render_record_36].flags
         &= ~(WORLD_RENDER_RECORD_BLANK | WORLD_RENDER_RECORD_HIDDEN | WORLD_RENDER_RECORD_SEMI_TRANSPARENT);
@@ -621,9 +621,9 @@ s32 window_append_animated_record_variant(void** list, s32* count) {
 #ifdef FFT_WLDCORE
 /* Attach the current render record to the caller's list and reset it.
  *
- * Sibling of window_append_animated_record_variant, which performs the same append for the 36-byte
+ * Sibling of window_append_animated_record, which performs the same append for the 36-byte
  * window records. */
-s32 window_append_record_variant(void** queue, s32* count) {
+s32 window_append_record(void** queue, s32* count) {
     CVECTOR* color;
 
     queue[*count] = &g_wldcore_window_render_records[g_wldcore_window_render_record_count];
@@ -647,7 +647,7 @@ s32 window_append_record_variant(void** queue, s32* count) {
 #ifdef FFT_OPENING
 /* Appends the next free 56-byte render record to `list`, resets it and
  * returns its pool index. */
-s32 window_append_record_variant(void** list, s32* count) {
+s32 window_append_record(void** list, s32* count) {
     list[*count] = &g_open_gfx_render_records_56[g_open_gfx_next_render_record_56];
     g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].flags &= ~(WORLD_RENDER_RECORD_8BIT_CLUT
         | WORLD_RENDER_RECORD_BLANK | WORLD_RENDER_RECORD_HIDDEN | WORLD_RENDER_RECORD_SEMI_TRANSPARENT);

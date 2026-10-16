@@ -10,7 +10,7 @@
 /* Point the scrollable list menu at a new -1 terminated entry list and reset
  * its render state. The scroll base is reset only when the selected index
  * is 0. */
-void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table) {
+void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* text_table) {
     s32 first;
 
     g_menu_list_entries = entries;

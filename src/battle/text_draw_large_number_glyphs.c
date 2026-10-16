@@ -12,7 +12,7 @@
  * menu_draw_number_glyphs (0x8014ac30) on the 5-pixel font. WORLD links its
  * own body under this name: it lacks the leading 0x800 glyph and the hidden
  * value check, and draws every digit as 0xba under flag 0x800 instead. */
-void text_draw_large_number_glyphs_variant(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
+void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
     glyph_blit_t* src = &g_text_large_number_glyph_rect;

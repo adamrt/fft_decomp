@@ -10,10 +10,10 @@
 /* Advances the animated cursor at `pos` and draws it, bouncing vertically,
  * with its semi-transparent shadow through the shared sprite descriptor.
  *
- * Same state machine and curves as menu_update_and_draw_sliding_cursor_variant; the
+ * Same state machine and curves as menu_update_and_draw_sliding_cursor; the
  * curve offset moves the quad's y edges instead of its x origin.
  */
-void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode) {
+void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
     u16 unused[4]; /* never accessed; the sibling's rect keeps the 0x38-byte frame */
     s32 bottom;
     s32 active;

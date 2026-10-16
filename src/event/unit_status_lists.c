@@ -136,7 +136,7 @@ void menu_build_unit_status_list(void) {
         g_menu_status_list_layout.columns.row_count = count;
         g_menu_status_list_layout.columns.hidden_rows = 0;
     }
-    menu_run_scrolling_ability_list_thread_variant();
+    menu_run_scrolling_ability_list_thread();
 }
 
 /* Copy the selected panel and tile records into four caller-owned buffers. */
@@ -877,7 +877,7 @@ static void menu_run_unit_stats_panel(
             running = 0;
         }
         page = &g_menu_unit_status_panel_pages[g_menu_unit_status_first_page_by_mode[mode] + (frame & 1)];
-        menu_build_unit_portrait_poly_variant(&page->portrait, unit_id);
+        menu_build_unit_portrait_poly(&page->portrait, unit_id);
         if (running != 0) {
             setRGB0(&page->portrait, 0x40, 0x50, 0x70);
         } else {
@@ -1057,7 +1057,7 @@ exit:
 
 /* Reload the unit and redraw its status panel; a negative list index draws dashes. */
 void menu_refresh_hovered_unit_stats_display(void) {
-    menu_load_selected_unit_variant();
+    menu_load_selected_unit();
     g_menu_hovered_unit_stats_setup[6].format = 2;
     if (g_menu_selected_unit_status.list_index < 0) {
         g_menu_hovered_unit_stats_setup[6].format = 0x0c00;
@@ -1068,7 +1068,7 @@ void menu_refresh_hovered_unit_stats_display(void) {
 
 /* Reload the unit and redraw its status panel; a negative list index draws dashes. */
 void menu_refresh_right_unit_stats_display(void) {
-    menu_load_selected_unit_variant();
+    menu_load_selected_unit();
     g_menu_right_unit_stats_setup[6].format = 2;
     if (g_menu_comparison_unit_status.list_index < 0) {
         g_menu_right_unit_stats_setup[6].format = 0x0c00;
@@ -1104,7 +1104,7 @@ void menu_preview_attack_caster_stats(void) {
     }
     thread_yield();
     thread_yield();
-    menu_load_selected_unit_variant();
+    menu_load_selected_unit();
     menu_run_unit_stats_panel(&g_menu_attack_caster_stats_rect, UNIT_STATS_PANEL_ATTACK_CASTER,
         g_menu_attack_caster_stats_setup, &g_menu_selected_unit_status);
 }
@@ -1121,11 +1121,11 @@ void menu_preview_attack_target_stats(void) {
     saved = g_menu_selected_unit.battle_id;
     /* The target loads the preview unit id unsigned (lhu). */
     g_menu_selected_unit.battle_id = g_menu_comparison_unit_data.battle_id;
-    menu_load_selected_unit_variant();
+    menu_load_selected_unit();
     g_menu_selected_unit.battle_id = saved;
     g_menu_comparison_unit_fields.state.generic_monster = g_menu_selected_unit_fields.state.generic_monster;
     g_menu_comparison_unit_fields.state.ability_ids[2] = g_menu_selected_unit_fields.state.ability_ids[2];
-    menu_load_selected_unit_variant();
+    menu_load_selected_unit();
     menu_run_unit_stats_panel(&g_menu_attack_target_stats_rect, UNIT_STATS_PANEL_ATTACK_TARGET,
         g_menu_attack_target_stats_setup, &g_menu_comparison_unit_status);
 }
@@ -1153,7 +1153,7 @@ void menu_run_unit_summary_panel_thread(void) {
     speed = 0x16;
     slide = 0x84;
     digits = &g_menu_unit_summary_digit_images;
-    menu_load_selected_unit_variant();
+    menu_load_selected_unit();
     unit = menu_get_selected_unit_stats();
     g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
 
@@ -1194,20 +1194,20 @@ void menu_run_unit_summary_panel_thread(void) {
     menu_clear_render_buffer(digits, sizeof(*digits));
     *stride = 0x10;
     menu_set_text_origin(0, 0);
-    text_draw_large_number_glyphs_variant(g_menu_selected_unit.brave, 0x202, digits->brave, origin);
+    text_draw_large_number_glyphs(g_menu_selected_unit.brave, 0x202, digits->brave, origin);
     LoadImage(&rects[1], (u32*)digits->brave);
     menu_set_text_origin(0, 0);
-    text_draw_large_number_glyphs_variant(g_menu_selected_unit.faith, 0x202, digits->faith, origin);
+    text_draw_large_number_glyphs(g_menu_selected_unit.faith, 0x202, digits->faith, origin);
     LoadImage(&rects[2], (u32*)digits->faith);
     menu_set_text_origin(0, 0);
     if (g_main_debug_display_enabled != 0) {
-        text_draw_large_number_glyphs_variant(g_menu_selected_unit.battle_id, 0x4002, digits->roster_slot, origin);
+        text_draw_large_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits->roster_slot, origin);
     } else if (g_menu_selected_unit.battle_id >= 0x10) {
         value = unit->formation_index;
         if (value == 0xFF) {
             value = 0;
         }
-        text_draw_large_number_glyphs_variant(value + 1, 0x4002, digits->roster_slot, origin);
+        text_draw_large_number_glyphs(value + 1, 0x4002, digits->roster_slot, origin);
     }
     LoadImage(&rects[3], (u32*)digits->roster_slot);
 
@@ -1363,7 +1363,7 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
  * select a 32-line band of the spritesheet VRAM slot's page and the CLUT of
  * MAP_CLUT_ROW_UNITS_SECOND indexed by the low nibble of the unit runtime record ID.
  */
-void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 battle_id) {
+void menu_build_unit_portrait_poly(POLY_FT4* poly, s32 battle_id) {
     s32 vram_slot;
     s32 runtime_id;
     u8 v;
@@ -1401,7 +1401,7 @@ void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 battle_id) {
  *
  * `code` is reused for the cell number that selects the CLUT.
  */
-void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 code) {
+void menu_build_unit_portrait_poly(POLY_FT4* poly, s32 code) {
     s32 index = code & 0xFF;
     s32 palette = (code & 0xC00) >> 10;
     s32 page = index / 40;

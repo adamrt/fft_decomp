@@ -648,7 +648,7 @@ void gfx_init_image_loading(
 }
 
 /* Draw count positioned number entries into an image buffer: kind 0 with
- * text_draw_large_number_glyphs_variant, kind 1 with menu_draw_number_glyphs; other kinds draw
+ * text_draw_large_number_glyphs, kind 1 with menu_draw_number_glyphs; other kinds draw
  * nothing. */
 void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
     s32 i;
@@ -657,7 +657,7 @@ void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries,
         position->rect.x = entries->x;
         position->rect.y = entries->y;
         if (entries->kind == 0) {
-            text_draw_large_number_glyphs_variant(*entries->value, entries->format, buffer, position);
+            text_draw_large_number_glyphs(*entries->value, entries->format, buffer, position);
         } else if (entries->kind == 1) {
             menu_draw_number_glyphs(*entries->value, entries->format, buffer, position);
         }

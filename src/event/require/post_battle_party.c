@@ -485,7 +485,7 @@ void require_party_report_brave_faith_changes(void) {
     for (i = 0; i < g_require_party_affected_unit_count; i++) {
         s32 unit_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
         g_text_substitution_values[0] = g_require_party_affected_battle_unit_indices[i];
-        thread_start(unit_thread, text_run_dialog_thread_variant);
+        thread_start(unit_thread, text_run_dialog_thread);
         thread_set_parameters(unit_thread, 0x1b, g_require_party_affected_unit_message_ids[i],
             g_require_party_affected_unit_message_args[i]);
         thread_wait_until_inactive(unit_thread);
@@ -526,7 +526,7 @@ void require_party_remove_low_brave_high_faith_units(void) {
         s32 unit_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
         s32 message_thread;
         g_text_substitution_values[0] = g_require_party_affected_battle_unit_indices[i];
-        thread_start(unit_thread, text_run_dialog_thread_variant);
+        thread_start(unit_thread, text_run_dialog_thread);
         thread_set_parameters(unit_thread, 0x1b, g_require_party_affected_unit_message_ids[i],
             g_require_party_affected_unit_message_args[i]);
         unit = battle_unit_get_stats_from_battle_id(g_require_party_affected_battle_unit_indices[i]);
@@ -660,8 +660,8 @@ void require_gfx_run_suspended_thread_transition(void) {
     g_menu_panel_status_group_count = 2;
     while (1) {
         s32 buffer = frame & 1;
-        gfx_build_gradient_grid_primitives_variant(g_main_poly_gt4_buffers[buffer]);
-        menu_build_status_group_primitives_variant(g_gfx_poly_ft4_buffers[buffer]);
+        gfx_build_gradient_grid_primitives(g_main_poly_gt4_buffers[buffer]);
+        menu_build_status_group_primitives(g_gfx_poly_ft4_buffers[buffer]);
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             break;

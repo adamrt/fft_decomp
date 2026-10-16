@@ -21,7 +21,7 @@
  * Reading each control operand through the byte local and the u8
  * variable_base keep the outer loop large enough that loop.c does not hoist
  * the 0xFFFF pending-width constant, as in the target. */
-void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
+void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     text_reader_state_t* state;
     u8* cursor;
     u8 operand;

@@ -229,7 +229,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         bunit_menu_update_unit_browser();
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 0x3d;
         menu_draw_active_window_frames();
-        menu_input_update_event_state_variant(
+        menu_input_update_event_state(
             g_menu_gfx_context->otag + 9, bunit_input_read_pad1_unless_locked(), g_menu_gfx_drawenv_y);
         sound_request = g_sound_pending_sfx_id;
         if (sound_request == MAIN_SFX_CURSOR_MOVE || sound_request == MAIN_SFX_CANCEL) {

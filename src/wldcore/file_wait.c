@@ -11,7 +11,7 @@
 /* Start an asynchronous read of sector_count sectors at `sector` into
  * destination, once any read still pending has finished. */
 void file_wait_then_build_header(main_file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination) {
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     main_file_request_read_quiet(header, sector, sector_count, destination);
 }
 
@@ -40,7 +40,7 @@ void wldcore_map_load_texture(void) {
 #ifdef FFT_WLDCORE
 /* Poll the CD load to completion, a frame at a time, keeping the audio queue
  * serviced. */
-void file_wait_for_pending_variant(void) {
+void file_wait_for_pending(void) {
     while (g_main_file_cd_state.state != MAIN_FILE_LOAD_STATE_IDLE) {
         main_file_poll_load(&g_main_file_cd_state);
         wldcore_sound_process_audio_queue();
@@ -52,7 +52,7 @@ void file_wait_for_pending_variant(void) {
 #ifdef FFT_OPENING
 /* Poll the pending file load to completion, a frame at a time; unlike the WLDCORE
  * body there is no audio queue to service. */
-void file_wait_for_pending_variant(void) {
+void file_wait_for_pending(void) {
     u32* status = &g_main_file_still_loading;
     main_file_load_descriptor_t* header;
 

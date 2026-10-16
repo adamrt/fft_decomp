@@ -19,7 +19,7 @@
 #include "psx/types.h"
 
 /*
- * Thread task 0x3b: the equipment twin of menu_run_ability_list_thread_variant (same 0x3d8-byte
+ * Thread task 0x3b: the equipment twin of menu_run_ability_list_thread (same 0x3d8-byte
  * frame pair, thread record and callee sequence). It lists the five
  * equipment names of an item stat-detail record and draws their item icons.
  */
@@ -30,7 +30,7 @@
  * The first text loop re-reads equipment[] instead of caching it: the target
  * reloads the slot as a byte after the color store, and the color field goes
  * through a signed temporary because the target shifts it with sra. */
-void menu_run_equipment_list_thread_variant(void) {
+void menu_run_equipment_list_thread(void) {
     u8* text;
     s32 u;
     menu_status_panel_buffer_t* base;
@@ -198,7 +198,7 @@ void menu_run_equipment_list_thread_variant(void) {
  * second. A trimmed relative of menu_run_status_panel_thread
  * (same 0x3d8-byte frame layout and callee sequence).
  */
-void menu_run_ability_list_thread_variant(void) {
+void menu_run_ability_list_thread(void) {
     s32 offset[2];
     /* Never referenced: the target frame has these 16 bytes between the
        offset pair and the spill slots of u/base/upload. */

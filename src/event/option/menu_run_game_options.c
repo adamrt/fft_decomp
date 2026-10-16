@@ -26,7 +26,7 @@
  * loop notes keep the input-1 spill and the entry load ahead of the
  * row-count loads, as in the target.
  */
-void menu_run_game_options_variant(void) {
+void option_menu_run_game_options(void) {
     image_load_parameters_t image_parameters;
     RECT image_rect;
     RECT clear;

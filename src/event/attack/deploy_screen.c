@@ -156,7 +156,7 @@ void attack_deploy_run_screen(void) {
     g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_EMPTY_TILE;
     g_attack_deploy_active_cursor = 0;
     g_attack_status_display_offset_y[0] = -0x9c;
-    /* Prompt icon states (see menu_build_status_group_primitives_variant): 0xff hidden,
+    /* Prompt icon states (see attack_menu_build_status_group_primitives): 0xff hidden,
      * 0 lit, 1 dimmed; 7 shows a press then lights, 0x11 a press then dims, 0xc0 fades in. */
     for (i = 0; i < 5; i++) {
         g_attack_panel_status_animation[i] = 0xff;
@@ -182,7 +182,7 @@ ramza_placed:
     thread_start(ATTACK_THREAD_SLOT_DEPLOY_RENDER, attack_deploy_run_render_thread);
     thread_set_parameters(ATTACK_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
     attack_deploy_select_unit_for_stats_display();
-    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_attack_status_display_thread_params, 0, 0);
 
     /* transition: 0 for the first squad, 1 after CROSS went back a squad, 2 after START moved on. */
@@ -884,7 +884,7 @@ static void attack_deploy_select_unit_for_stats_display(void) {
 
 /* ATTACK twin of require_editor_load_party_unit. Load a party roster unit into the ATTACK status/editor display.
  *
- * Party counterpart of menu_load_selected_unit_variant: the unit is
+ * Party counterpart of menu_load_selected_unit: the unit is
  * rebuilt from the roster into a scratch unit_stats_t, shown at full HP/MP
  * and CT, and without the monster-skill or name-text refresh. */
 void attack_editor_load_party_unit(s32 unused, s32 party_index) {
@@ -1002,7 +1002,7 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
             editor->ability_ids[i] = *innate_items++;
             i++;
         } while (i < 5);
-        /* No monster skill check runs here (unlike menu_load_selected_unit_variant),
+        /* No monster skill check runs here (unlike menu_load_selected_unit),
          * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
     } else {
@@ -1356,7 +1356,7 @@ static void attack_deploy_run_render_thread(void) {
         /* Each primitive is prepended to the current ordering-table entry, so the GPU draws
          * them in reverse: offset and draw-mode packets follow the primitives they govern. */
         if (g_attack_deploy_tiles_only_mode == 0) {
-            menu_build_status_group_primitives_variant(g_attack_deploy_render_buffers[frame & 1].status);
+            attack_menu_build_status_group_primitives(g_attack_deploy_render_buffers[frame & 1].status);
         }
         gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].screen_offset);
         attack_deploy_update_cursor_primitives(frame, &g_attack_deploy_render_buffers[frame & 1]);

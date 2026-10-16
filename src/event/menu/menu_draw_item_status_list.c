@@ -33,14 +33,14 @@ void menu_draw_item_status_list(s16 item_id) {
     s32 x;
     s32 y;
 
-    bits_init_primary_reader_variant(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
+    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (bits_read_primary(1) != 0) {
             count++;
         }
     }
-    bits_init_primary_reader_variant(ITEM_ATTRIBUTES_FLAT[attribute].innate);
-    bits_init_secondary_reader_variant(ITEM_ATTRIBUTES_FLAT[attribute].starting);
+    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].innate);
+    bits_init_secondary_reader(ITEM_ATTRIBUTES_FLAT[attribute].starting);
     for (i = 0; i < STATUS_COUNT; i++) {
         bit = bits_read_primary(1);
         bit |= bits_read_secondary(1);
@@ -60,7 +60,7 @@ void menu_draw_item_status_list(s16 item_id) {
     tpage = GetTPage(0, 0, 0x180, 0);
     drawn = 0;
     icon_tpage = g_menu_cursor_texture_page;
-    bits_init_primary_reader_variant(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
+    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (drawn >= count) {
             break;
@@ -81,8 +81,8 @@ void menu_draw_item_status_list(s16 item_id) {
             drawn++;
         }
     }
-    bits_init_primary_reader_variant(ITEM_ATTRIBUTES_FLAT[attribute].innate);
-    bits_init_secondary_reader_variant(ITEM_ATTRIBUTES_FLAT[attribute].starting);
+    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].innate);
+    bits_init_secondary_reader(ITEM_ATTRIBUTES_FLAT[attribute].starting);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (drawn >= count) {
             break;

@@ -136,7 +136,7 @@ void world_formation_item_menu(void) {
         done = world_menu_run_remove_item();
         break;
     case WORLD_FORMATION_MENU_ITEM_LIST:
-        done = menu_update_equipment_variant();
+        done = menu_update_equipment();
         break;
     }
     if (done == 0) {
@@ -217,7 +217,7 @@ static s32 world_formation_run_equip_item_menu(void) {
             if (g_equip_item_slot != 0) {
                 slot = g_equip_item_slot - 1;
             }
-            menu_get_selection_record_variant(slot, &x, &y, g_item_list_entries);
+            world_menu_get_selection_record(slot, &x, &y, g_item_list_entries);
             menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_world_menu_script_callbacks[0].value = menu_get_entry_item_equipped_count;
             g_world_menu_script_callbacks[1].value = menu_get_entry_item_count;
@@ -277,7 +277,7 @@ static s32 world_formation_run_equip_item_menu(void) {
             }
             g_menu_status_display_thread_params.redraw_request = 1;
         }
-        menu_cmd_run_stream_variant(&g_equip_item_menu_script, g_menu_input_primary_repeat);
+        menu_cmd_run_stream(&g_equip_item_menu_script, g_menu_input_primary_repeat);
     }
 
     if (g_equip_item_list_refresh != 0) {
@@ -302,7 +302,7 @@ static s32 world_formation_run_equip_item_menu(void) {
     gfx_set_otag_index(0x28);
     /* The mode is an argument expression so &g_world_equip_item_cursor_point is formed before its
        branches and derived from cursor_y (addiu a0,s0,-2), as in the target. */
-    menu_update_and_draw_sliding_cursor_variant(&g_world_equip_item_cursor_point, &g_world_equip_item_cursor_anim,
+    world_menu_update_and_draw_sliding_cursor(&g_world_equip_item_cursor_point, &g_world_equip_item_cursor_anim,
         g_equip_item_list_open != 0 || g_menu_input_lock_mode != 0);
     return 1;
 }
@@ -447,7 +447,7 @@ static s32 world_menu_run_remove_item(void) {
     index = slot;
     *cursor_y = index * 16 + 0x90;
     gfx_set_otag_index(0x28);
-    menu_update_and_draw_sliding_cursor_variant(
+    world_menu_update_and_draw_sliding_cursor(
         &g_world_remove_item_cursor_point, &g_world_remove_item_cursor_anim, g_menu_input_lock_mode);
     items = g_remove_item_equipment;
     selected_item = &items[index];
@@ -509,7 +509,7 @@ static s32 world_menu_handle_remove_all_equipment(void) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             g_world_remove_all_equipment_cursor_point.y = i * 0x10 + 0x90;
             value = 0;
-            menu_update_and_draw_sliding_cursor_variant(
+            world_menu_update_and_draw_sliding_cursor(
                 &g_world_remove_all_equipment_cursor_point, &value, g_menu_input_lock_mode);
         }
     }

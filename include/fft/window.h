@@ -11,11 +11,11 @@
 #include "psx/types.h"
 
 /* records */
-s32 window_append_animated_record_variant(void** list, s32* count);
-s32 window_append_record_variant(void** list, s32* count);
-void window_dispatch_record_list_variant(GsOT* otag, void** records, s32 count);
-void window_init_text_record_variant(s32 record_index, RECT quad, s32 depth, s32 combined_text_index, u32* image);
-void window_display_text_entry_variant(s32 record_index, s32 combined_text_index, point32_t position, u32* image);
-void window_init_record_pools_variant(void);
+s32 window_append_animated_record(void** list, s32* count);
+s32 window_append_record(void** list, s32* count);
+void window_dispatch_record_list(GsOT* otag, void** records, s32 count);
+void window_init_text_record(s32 record_index, RECT quad, s32 depth, s32 combined_text_index, u32* image);
+void window_display_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u32* image);
+void window_init_record_pools(void);
 
 #endif /* WINDOW_H */

@@ -11,7 +11,7 @@
  * Each group's animation byte counts down: values above 0x40 step by 2, the
  * 0x0b-0x40 range steps by 1 and then jumps to 1, and 2-0x0a steps down to 0.
  * 0xff marks an inactive group. */
-void menu_build_status_group_primitives_variant(POLY_FT4* poly) {
+void menu_build_status_group_primitives(POLY_FT4* poly) {
     s32 group;
     s32 cell;
     s32 count;

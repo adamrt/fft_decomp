@@ -19,14 +19,14 @@
 
 /* Thread task 0x3b: numeric editor panel.
  *
- * Twin of menu_run_numeric_editor_thread / menu_run_numeric_editor_frame_thread_variant
+ * Twin of menu_run_numeric_editor_thread / menu_run_numeric_editor_frame_thread
  * with EQUIP's own draw-mode setup. Builds the primitive block once, copies it
  * into the second buffer, then each frame re-renders the three text images when
  * requested, rescales the draw area, recolors the sprites for the thread
  * style and submits the block until the thread's third parameter is set.
  * `buffers` is assigned in each branch (not after the if) so the spilled store
  * precedes upload_c's at the join, as in the target. */
-void menu_run_numeric_editor_frame_thread_variant(void) {
+void menu_run_numeric_editor_frame_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;
     menu_status_panel_numeric_buffer_t* buffers;

@@ -22,7 +22,7 @@
  * changes. `category` is u16 so its load is a zero_extend:HI that CSE cannot
  * replace with the value just stored to g_menu_selected_slot: the target
  * reloads the slot after the store. */
-s32 item_run_category_menu_variant(void) {
+s32 equip_item_run_category_menu(void) {
     s16 selected;
     s16 scroll;
     u16 category;
@@ -87,7 +87,7 @@ s32 item_run_category_menu_variant(void) {
             slot = 0;
         }
         g_equip_slot_item_browser_previewed_index = g_menu_list_selected_index;
-        item_collect_stat_deltas_variant(slot, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_collect_stat_deltas(slot, &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_equip_unit_status_panel_redraw = 1;
         g_menu_preview_stats_thread_params.redraw_request = 1;
     }

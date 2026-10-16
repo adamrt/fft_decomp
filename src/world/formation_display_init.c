@@ -82,7 +82,7 @@ void world_formation_init_menu_display(void) {
     gfx_load_image_and_wait(&rect, &palette[4]);
     gfx_load_image_and_wait(&g_world_formation_status_label_image_rect, g_world_formation_status_label_image);
     g_menu_help_message_text_id = 0;
-    menu_init_scrollable_list_core_variant(0, 0, 0);
+    menu_init_scrollable_list_core(0, 0, 0);
     world_gfx_start_decreasing_fade();
     menu_clear_selection_values();
     g_world_formation_unit_cycle_mode = 0;

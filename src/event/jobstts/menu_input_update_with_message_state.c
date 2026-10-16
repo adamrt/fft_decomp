@@ -18,7 +18,7 @@
  * window-open sound), 2 after it and 0 once it has ended. Any repeat input
  * starts a five-frame timer during which L2 is masked out.
  */
-void menu_input_update_with_message_state_variant(void) {
+void jobstts_menu_input_update_with_message_state(void) {
     s32 running = 0;
     s32 frame;
 

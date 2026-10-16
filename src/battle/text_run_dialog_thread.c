@@ -38,7 +38,7 @@
  * keeps each wait's 1 in a saved register. The 0xE4/0xE6 dispatch shares the digit printer through a
  * label; the WORLD twin's `character == 0xE4 || character == 0xE6` form is not threaded here
  * and loses the substitution-table base CSE. */
-void text_run_dialog_thread_variant(void) {
+void text_run_dialog_thread(void) {
     /* dialog_type is the DisplayMessage Dialog Type byte; box_type is its 0x70 bits.
      * The offsets at 0x44..0x4c are the instruction's arrow position and coordinates. */
     text_dialog_record_t rec;

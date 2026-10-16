@@ -57,7 +57,7 @@ void world_menu_run_main_mode(s32 mode) {
     last_mode = OPTION_MENU_DEAD_UNIT;
     if (mode == OPTION_MENU_GAME_OPTIONS) {
         script_pulse_tutorial_wait_value(0xFD);
-        thread_start(g_thread_current_id - 1, menu_run_game_options_variant);
+        thread_start(g_thread_current_id - 1, world_menu_run_game_options);
         entry->select_text_table = 1;
         entry->context = &g_menu_option_entry_table;
         thread_set_parameters(g_thread_current_id - 1, (s32)entry, 0, 0);
@@ -77,7 +77,7 @@ void world_menu_run_main_mode(s32 mode) {
  * Options-menu thread started by world_menu_run_main_mode (mode 0) with
  * entry->context = &g_menu_option_entry_table.
  *
- * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread_variant, shows the
+ * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread, shows the
  * selected option's value text (g_menu_option_value_text_id_bases[i] + g_menu_option_values[i]),
  * starts menu_run_option_choice on confirm, and each frame packs the option
  * values back into g_main_game_options, applies the sound mode on the main
@@ -87,7 +87,7 @@ void world_menu_run_main_mode(s32 mode) {
  * loop notes keep the input-1 spill and the entry load ahead of the
  * row-count loads, as in the target.
  */
-void menu_run_game_options_variant(void) {
+void world_menu_run_game_options(void) {
     image_load_parameters_t image_parameters;
     RECT image_rect;
     RECT clear;

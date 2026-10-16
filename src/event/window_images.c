@@ -12,7 +12,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect);
+static void gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect);
 
 /* Copy a nonempty byte sequence from source to destination.
  *
@@ -100,7 +100,7 @@ static
  *  - `right++` before `col++` puts `col++` in the reload's load shadow and
  *    `right++` in the loop branch's delay slot. */
 #ifdef FFT_BATTLE
-static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
+static void gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect) {
     s32 row;
     s32 col;
     s32 offset;
@@ -122,7 +122,7 @@ static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
 #endif
 #ifdef FFT_WORLD
 /* WORLD's body of the same mirror, with the guarded do/while loop described above. */
-static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
+static void gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect) {
     s32 row;
     s32 col;
     s32 right;
@@ -234,7 +234,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
         text_blit_glyph(
             g_menu_glyph_sheet->pixels, (u8*)buf, &g_menu_window_sprite_glyph, &g_menu_window_sprite_position);
         if (i != 0) {
-            gfx_mirror_4bpp_rect_variant((u8*)buf, &g_menu_window_sprite_position);
+            gfx_mirror_4bpp_rect((u8*)buf, &g_menu_window_sprite_position);
         }
     }
     if (keep != 0) {

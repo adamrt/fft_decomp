@@ -37,19 +37,19 @@ void open_file_load_main_menu_graphics(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
     file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN, 0x11, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
     file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x11, 0x11, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
     file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x22, 0x21, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
     open_file_build_openbk_header(0, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
 }
 
 /* Load the ending's graphics from OPNTEX.BIN and OPNBK.BIN: the TIM at sector
@@ -61,11 +61,11 @@ void open_file_load_end_movie_graphics(void) {
     RECT frame;
 
     file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x65, 0x11, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
     open_file_build_openbk_header(6, g_open_gfx_opntex_data);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
 
     frame.x = 0x200;
     frame.y = 0x100;
@@ -75,7 +75,7 @@ void open_file_load_end_movie_graphics(void) {
     DrawSync(0);
 
     file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x76, 0x170, g_open_gfx_opntex_data);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
 }
 
 /* Upload the two TIMs at sectors 0x43 and 0x54 of OPNTEX.BIN: the text pages at
@@ -85,11 +85,11 @@ static void open_file_load_prologue_text_pages(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
     file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x43, 0x11, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
     file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x54, 0x11, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 }
 
@@ -296,8 +296,7 @@ void open_title_push_menu_controller(s32 argument) {
     LoadImage(&rect, g_open_file_destination);
     DrawSync(0);
 
-    record = window_append_animated_record_variant(
-        g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     entry = g_open_gfx_render_records_36;
     records = entry;
     field = &records->position.x;
@@ -311,8 +310,8 @@ void open_title_push_menu_controller(s32 argument) {
     positions[record].y = 0x64;
 
     for (i = 0, y = 0x1e; i < 4; i++) {
-        record = window_append_animated_record_variant(
-            g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+        record
+            = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
         g_open_title_menu_states[g_open_current_controller_index].records_36[i + 1] = record;
         g_open_gfx_render_records_36[record].sequence = i + 3;
         g_open_gfx_render_records_36[record].priority = 4;
@@ -323,8 +322,7 @@ void open_title_push_menu_controller(s32 argument) {
         positions[record].x = -0x18;
     }
 
-    record = window_append_animated_record_variant(
-        g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_title_menu_states[g_open_current_controller_index].cursor_record_36 = record;
     entry = &g_open_gfx_render_records_36[record];
     entry->sequence = 0x13;
@@ -520,7 +518,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             if (world_card_run_menu_screen(0) == 0) {
                 g_open_file_current_openbk_image_id = -1;
                 open_file_build_openbk_header(0, g_open_file_destination);
-                file_wait_for_pending_variant();
+                file_wait_for_pending();
                 g_open_gfx_next_render_record_36 -= 6;
                 g_open_gfx_render_record_pointer_count -= 6;
                 g_open_current_controller_index--;
@@ -631,8 +629,8 @@ static void open_menu_push_sound_type_controller(void) {
     open_sound_menu_state_t* menu;
 
     for (i = 0; i < OPEN_SOUND_MENU_ENTRY_COUNT; i++) {
-        record = window_append_animated_record_variant(
-            g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+        record
+            = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
         g_open_controller_records_next[g_open_current_controller_index].sound_menu.entry_render_indices[i] = record;
         g_open_gfx_render_records_36[record].priority = 4;
         g_open_gfx_render_records_36[record].sequence = i + 7;
@@ -733,7 +731,7 @@ void open_title_start_new_game_transition(void) {
     suzuki_sound_set_master_volume(0x3fff, 5);
     open_file_load_prologue_text_pages();
     open_file_build_openbk_header(1, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     open_gfx_init_transition_request(12, 3, g_open_new_game_transition_entries);
     open_gfx_start_overlay_fade_out(0x20);
 
@@ -847,21 +845,20 @@ static void open_birthday_push_date_controller(void) {
     s32 half_width;
     open_render_record_56_position_t* position;
 
-    record = window_append_animated_record_variant(
-        g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_records_next[g_open_current_controller_index].birthday_date.cursor_record_36 = record;
     g_open_gfx_render_records_36[record].sequence = 0xC;
     g_open_gfx_render_records_36[record].priority = 4;
     g_open_gfx_render_records_36[record].anim_counter = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
 
-    record = window_append_record_variant(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_records_next[g_open_current_controller_index].birthday_date.title_record_56 = record;
     quad.x = 0;
     quad.y = 0;
     quad.w = 0x80;
     quad.h = 0x40;
-    window_init_text_record_variant(record, quad, 0, 0xB800, g_open_birthday_title_image);
+    window_init_text_record(record, quad, 0, 0xB800, g_open_birthday_title_image);
     position = g_open_gfx_record_translation;
     position += record;
     half_width = quad.w / 2;
@@ -895,8 +892,7 @@ static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     point32_t position;
     s16 width;
     u16 height;
-    s32 index
-        = window_append_record_variant(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    s32 index = window_append_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     s32 text_id;
     open_render_record_56_position_t* translation;
     s32* substitution;
@@ -915,12 +911,12 @@ static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     position.y = 8;
     substitution = g_text_substitution_values;
     *substitution = text_id;
-    window_display_text_entry_variant(index, 0xB801, position, g_open_birthday_window_image);
+    window_display_text_entry(index, 0xB801, position, g_open_birthday_window_image);
 
     position.x = 0x30;
     position.y = 8;
     *substitution = menu->day;
-    window_display_text_entry_variant(index, 0xB802, position, g_open_birthday_window_image);
+    window_display_text_entry(index, 0xB802, position, g_open_birthday_window_image);
 
     open_gfx_load_window_record_image(index, (u32*)g_open_birthday_window_image);
 
@@ -1092,29 +1088,27 @@ static void open_birthday_push_confirmation_controller(void) {
     s32 controller;
     open_render_record_56_position_t* position;
 
-    record = window_append_animated_record_variant(
-        g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_records_next[g_open_current_controller_index].birthday_confirmation.cursor_record_36 = record;
     g_open_gfx_render_records_36[record].sequence = 2;
     g_open_gfx_render_records_36[record].priority = 3;
     g_open_gfx_render_records_36[record].anim_counter = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
 
-    record = window_append_animated_record_variant(
-        g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_records_next[g_open_current_controller_index].birthday_confirmation.label_record = record;
     g_open_gfx_render_records_36[record].sequence = 0xE;
     g_open_gfx_render_records_36[record].priority = 3;
     g_open_gfx_render_records_36[record].anim_counter = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
 
-    record = window_append_record_variant(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_records_next[g_open_current_controller_index].birthday_confirmation.menu_record_56 = record;
     quad.x = 0;
     quad.y = 0x60;
     quad.w = 0x28;
     quad.h = 0x30;
-    window_init_text_record_variant(record, quad, 0, 0xB80F, g_open_birthday_title_image);
+    window_init_text_record(record, quad, 0, 0xB80F, g_open_birthday_title_image);
     controller = g_open_current_controller_index;
     position = g_open_gfx_record_translation;
     position += record;

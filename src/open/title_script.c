@@ -124,7 +124,7 @@ void open_menu_start_music_test_controller(void) {
     s32 controller;
 
     open_file_build_openbk_header(1, g_open_file_destination);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
 
     for (i = 0; i < 96; i++) {
         g_open_music_test_list_entries[i] = i + 0xc000;
@@ -192,7 +192,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
             g_open_system_runtime_flags
                 ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED | OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
             open_file_build_openbk_header(0, g_open_file_destination);
-            file_wait_for_pending_variant();
+            file_wait_for_pending();
             g_open_current_controller_index--;
             open_title_push_menu_controller(0);
         }
@@ -262,7 +262,7 @@ static void open_controller_start_text_message(s32 parameter, s32 run_followup) 
         text_relocate_pointer_table(g_open_text_section_offsets);
     }
 
-    thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread_variant);
+    thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, parameter, 0);
 
     {
@@ -360,8 +360,7 @@ void open_title_select_new_game(void) {
     }
 
     open_gfx_start_overlay_fade_out(0x10);
-    record = window_append_animated_record_variant(
-        g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_animated_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_gfx_render_records_36[record].sequence = 0x12;
     g_open_gfx_render_records_36[record].anim_counter = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
@@ -507,7 +506,7 @@ s32 open_gfx_update_transition_sequence(void) {
                     open_gfx_copy_file_image_to_210x180_buffer(image_command & OPEN_GFX_TRANSITION_IMAGE_INDEX_MASK);
                     break;
                 case OPEN_GFX_TRANSITION_START_CROSSFADE:
-                    file_wait_for_pending_variant();
+                    file_wait_for_pending();
                     g_open_gfx_image_copy_row_flags[0] = 1;
                     break;
                 }

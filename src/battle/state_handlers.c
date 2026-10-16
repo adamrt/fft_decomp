@@ -453,10 +453,10 @@ void battle_state_handle_illegal_range_state(void) {
 }
 
 /* AbilityPreviewHelp game-state handler: when the help window has gone
- * (menu_get_thread_activity_variant returns something other than 2), return to the
+ * (menu_get_thread_activity returns something other than 2), return to the
  * ability preview with map panning. */
 void battle_state_handle_ability_preview_help_state(void) {
-    if (menu_get_thread_activity_variant() != 2) {
+    if (menu_get_thread_activity() != 2) {
         g_battle_menu_help_opening = 0;
         battle_camera_enable_map_pan();
         g_battle_game_state = BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING;
@@ -1328,7 +1328,7 @@ void battle_state_update_event_mode(void) {
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
-    switch (script_run_event_frame_variant(main_gfx_get_otag(), g_input_current_buttons)) {
+    switch (script_run_event_frame(main_gfx_get_otag(), g_input_current_buttons)) {
     case 0:
         battle_gfx_init_evtchr_vram_slots();
         g_battle_menu_status_enabled = 1;
@@ -1543,7 +1543,7 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
-    switch (script_run_event_frame_variant(main_gfx_get_otag(), g_input_current_buttons)) {
+    switch (script_run_event_frame(main_gfx_get_otag(), g_input_current_buttons)) {
     case 1:
         break;
     case 0:

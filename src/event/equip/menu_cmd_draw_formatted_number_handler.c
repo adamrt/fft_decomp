@@ -10,7 +10,7 @@
 #include "psx/types.h"
 
 /* Draw the getter's signed decimal value or dashes in the requested digit style. */
-menu_instruction_t* menu_cmd_draw_formatted_number_handler_variant(menu_instruction_t* data) {
+menu_instruction_t* equip_menu_cmd_draw_formatted_number_handler(menu_instruction_t* data) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     RECT minus_rect;

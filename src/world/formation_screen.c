@@ -131,7 +131,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             if (world_script_handle_tutorial_command() == 0) {
                 break;
             }
-            menu_input_update_with_message_state_variant();
+            world_menu_input_update_with_message_state();
             if (g_world_unit_status_banner_active != 0) {
                 world_menu_run_unit_status_banner_countdown(0, 0);
                 menu_input_clear_state();
@@ -205,7 +205,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             if (g_world_formation_cursor_ot_override != 0) {
                 i = g_world_formation_cursor_ot_override;
             }
-            menu_input_update_event_state_variant(g_menu_gfx_context->otag + i, world_input_filter_menu(),
+            menu_input_update_event_state(g_menu_gfx_context->otag + i, world_input_filter_menu(),
                 g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
 
             /* Entering a new menu resets the per-menu state. */
@@ -235,7 +235,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             buttons = 1;
             world_text_resume_printing(WORLD_THREAD_SLOT_TUTORIAL_TEXT);
         }
-        menu_input_update_event_state_variant(g_menu_gfx_context->otag, 0, 0);
+        menu_input_update_event_state(g_menu_gfx_context->otag, 0, 0);
     } while (buttons != 0);
 
     if (tutorial == 0) {

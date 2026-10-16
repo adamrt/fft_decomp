@@ -20,7 +20,7 @@
  * at +0x4d4 comes from a conditional on `layout` whose body is a dead store: flow deletes
  * the store, the now-empty branch survives until after reload, and the post-reload jump
  * pass deletes the branch but not its operand reload. */
-void menu_run_at_list_variant(void) {
+void menu_run_at_list(void) {
     image_load_parameters_t image_parameters;
     RECT image_rect;
     RECT clear;

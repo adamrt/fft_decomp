@@ -17,11 +17,11 @@
 /* Per-frame event input update: derives the edge/auto-repeat input 32-bit value,
  * publishes it, and yields once while tracking thread status changes.
  *
- * Twin of menu_input_update_event_state_variant; BUNIT additionally latches
- * `frame_arg`, clears g_menu_hide_numeric_values, and calls menu_draw_thread_status_indicators_variant after the
+ * Twin of menu_input_update_event_state; BUNIT additionally latches
+ * `frame_arg`, clears g_menu_hide_numeric_values, and calls menu_draw_thread_status_indicators after the
  * yield. Needs the _divcheck profile for the three repeat-period divisions.
  */
-void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) {
+void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     u32 filtered_input;
     s32 initial_delay;
     s32 repeat_delay;
@@ -110,7 +110,7 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;
     }
-    menu_draw_thread_status_indicators_variant();
+    menu_draw_thread_status_indicators();
     g_battle_event_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {

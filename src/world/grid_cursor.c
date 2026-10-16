@@ -25,7 +25,7 @@ void world_menu_start_description_text_thread(s32 position) {
         return;
     }
     if (g_menu_help_message_text_id > 0) {
-        thread_start(THREAD_SCREEN_SLOT_TEXT, text_run_dialog_thread_variant);
+        thread_start(THREAD_SCREEN_SLOT_TEXT, text_run_dialog_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, position + (DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL),
             g_menu_help_message_text_id, 0);
         g_menu_input_lock_mode = 1;
@@ -114,11 +114,11 @@ void world_menu_update_grid_cursor(s16 alternate) {
     gfx_set_otag_index(0x3C);
     if (g_world_active_grid_menu_cells[g_world_grid_menu_selected_cell].vertical != 0) {
         cursor.y++;
-        menu_update_and_draw_bouncing_cursor_variant(&cursor, &g_world_grid_menu_cursor_anim, busy);
+        world_menu_update_and_draw_bouncing_cursor(&cursor, &g_world_grid_menu_cursor_anim, busy);
     } else {
         cursor.x -= 2;
         cursor.y += 6;
-        menu_update_and_draw_sliding_cursor_variant(&cursor, &g_world_grid_menu_cursor_anim, busy);
+        world_menu_update_and_draw_sliding_cursor(&cursor, &g_world_grid_menu_cursor_anim, busy);
     }
 }
 
@@ -149,13 +149,13 @@ s32 world_menu_run_unit_status_banner_countdown(s32 message_id, s32 frames) {
 }
 
 /* Selects the primary bitstream and resets its next operation to bit 7. */
-void bits_init_primary_reader_variant(const u8* data) {
+void bits_init_primary_reader(const u8* data) {
     g_bits_primary_reset = 1;
     g_bits_primary_cursor = (u8*)data;
 }
 
 /* Selects the secondary read-only bitstream and resets it to bit 7. */
-void bits_init_secondary_reader_variant(const u8* data) {
+void bits_init_secondary_reader(const u8* data) {
     g_bits_reader_2_reset = 1;
     g_bits_reader_2_stream = data;
 }

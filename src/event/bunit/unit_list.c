@@ -40,7 +40,7 @@ void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
         }
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, &g_bunit_character_status_frame_config, 0, 0);
-        thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread_variant);
+        thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, &g_bunit_numeric_editor_thread_params, 0, 0);
     } else {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
@@ -273,7 +273,7 @@ static void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed
 void bunit_menu_init_unit_list(s32 unused_selected_index) {
     s32 ret;
 
-    menu_init_scrollable_list_core_variant(0, 0, 0);
+    menu_init_scrollable_list_core(0, 0, 0);
     g_menu_row_callbacks[0].value = bunit_unit_get_current_stat;
     g_menu_row_callbacks[1].value = bunit_unit_get_max_stat;
     g_menu_row_callbacks[4].value = bunit_unit_get_level;
@@ -445,7 +445,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
         bunit_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R2, 0xC2, top, buttons & PSX_PAD_R2,
             bunit_menu_is_active_or_transitioning() != 0 || g_bunit_help_screen_id != MENU_GRID_HELP_NONE,
             MAIN_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode_variant(menu, 0, 0);
+        menu_run_script_with_palette_mode(menu, 0, 0);
         menu_gfx_enqueue_textured_quad_list(quads, 0, 0, g_menu_cursor_texture_page, g_menu_text_clut_2_mode0, 0xB, 8);
         mode = g_bunit_unit_stat_mode;
         if (mode < 3) {
@@ -468,7 +468,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
     cell.h = 0x30;
     gfx_set_otag_index(8);
     unit = 0;
-    color = menu_gfx_get_draw_color_variant();
+    color = menu_gfx_get_draw_color();
     saved_color.r = color->r;
     saved_color.g = color->g;
     saved_color.b = color->b;
@@ -481,7 +481,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                 top = 1;
             }
         }
-        gfx_set_draw_color_variant(top ? &g_bunit_unit_grid_dimmed_color : &g_bunit_unit_grid_normal_color);
+        bunit_gfx_set_draw_color(top ? &g_bunit_unit_grid_dimmed_color : &g_bunit_unit_grid_normal_color);
         for (col = 0; col < 4; col++, unit++) {
             if (unit >= g_bunit_unit_reorderable_count)
                 break;
@@ -510,11 +510,11 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     g_bunit_unit_grid_max_stat_number.x = cell.x + 40;
                     g_bunit_unit_grid_max_stat_number.y = cell_y + 45;
                     g_bunit_unit_grid_max_stat_number.value = unit_index;
-                    menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_bunit_unit_grid_max_stat_number);
+                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_max_stat_number);
                     g_bunit_unit_grid_stat_number.x = cell.x + 20;
                     g_bunit_unit_grid_stat_number.y = number_y;
                     g_bunit_unit_grid_stat_number.value = unit_index;
-                    menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_bunit_unit_grid_stat_number);
+                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_stat_number);
                     rect.x = cell.x + 35;
                     rect.y = top + 5;
                     rect.w = 6;
@@ -573,12 +573,11 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     g_bunit_unit_grid_level_number.x = cell.x + 13;
                     g_bunit_unit_grid_level_number.y = upper_y3;
                     g_bunit_unit_grid_level_number.value = unit_index;
-                    menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_bunit_unit_grid_level_number);
+                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_level_number);
                     g_bunit_unit_grid_experience_number.x = cell.x + 45;
                     g_bunit_unit_grid_experience_number.y = number_y3;
                     g_bunit_unit_grid_experience_number.value = unit_index;
-                    menu_script_draw_formatted_number_variant(
-                        (menu_instruction_t*)&g_bunit_unit_grid_experience_number);
+                    bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_experience_number);
                 } else if (g_bunit_unit_stat_mode == MENU_UNIT_READOUT_BRAVE_FAITH) {
                     top = cell_y + 45;
                     rect.x = cell.x - 1;
@@ -614,20 +613,20 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     g_bunit_unit_grid_brave_number_wide.value = g_bunit_unit_grid_brave_number.value = unit_index;
                     if (g_bunit_unit_pointers[unit_index]->brave >= 100) {
                         g_bunit_unit_grid_brave_number_wide.x = cell.x + 10;
-                        menu_script_draw_formatted_number_variant(
+                        bunit_menu_script_draw_formatted_number(
                             (menu_instruction_t*)&g_bunit_unit_grid_brave_number_wide);
                     } else
-                        menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_bunit_unit_grid_brave_number);
+                        bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_brave_number);
                     lower_y4 = top;
                     g_bunit_unit_grid_faith_number.x = cell.x + 45;
                     g_bunit_unit_grid_faith_number_wide.y = g_bunit_unit_grid_faith_number.y = lower_y4;
                     g_bunit_unit_grid_faith_number_wide.value = g_bunit_unit_grid_faith_number.value = unit_index;
                     if (g_bunit_unit_pointers[unit_index]->faith >= 100) {
                         g_bunit_unit_grid_faith_number_wide.x = cell.x + 40;
-                        menu_script_draw_formatted_number_variant(
+                        bunit_menu_script_draw_formatted_number(
                             (menu_instruction_t*)&g_bunit_unit_grid_faith_number_wide);
                     } else
-                        menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_bunit_unit_grid_faith_number);
+                        bunit_menu_script_draw_formatted_number((menu_instruction_t*)&g_bunit_unit_grid_faith_number);
                 }
             }
             bunit_gfx_draw_unit_sprite_and_name_plate(g_bunit_unit_reorderable_indices[unit], cell.x, cell.y);
@@ -641,7 +640,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
             }
         }
     }
-    gfx_set_draw_color_variant(&saved_color);
+    bunit_gfx_set_draw_color(&saved_color);
     bunit_gfx_update_rhombus_cursor_trail(&g_bunit_unit_grid_cursor_target);
     focus = &g_bunit_gfx_falloff_focus_x;
     cursor_x = g_bunit_unit_grid_cursor_target.x;

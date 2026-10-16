@@ -848,7 +848,7 @@ void battle_state_handle_free_cursor_state(void) {
 /* FreeCursorHelp game-state handler: when the help window has gone, return to the
  * free cursor. */
 void battle_state_handle_free_cursor_help_state(void) {
-    if (menu_get_thread_activity_variant() != 2) {
+    if (menu_get_thread_activity() != 2) {
         g_battle_menu_help_opening = 0;
         battle_state_set_free_cursor();
     }
@@ -904,7 +904,7 @@ void battle_state_handle_idling_action_menus_state(void) {
     battle_unit_t* unit;
     s32 result;
 
-    if (menu_get_thread_activity_variant() == 0) {
+    if (menu_get_thread_activity() == 0) {
         battle_state_set_free_cursor();
     }
     if (g_main_input_pressed_buttons & PSX_PAD_SELECT) {
@@ -1121,7 +1121,7 @@ void battle_state_handle_menu_to_targeting_state(void) {
 void battle_state_handle_action_help_menu_state(void) {
     battle_unit_t* unit;
 
-    if (menu_get_thread_activity_variant() != 2) {
+    if (menu_get_thread_activity() != 2) {
         g_battle_menu_help_opening = 0;
         unit = battle_unit_get_casting();
         if (unit != 0) {
@@ -1157,7 +1157,7 @@ void battle_state_handle_display_move_area_state(void) {
  * (closed) restores the cursor movement option and returns to the free cursor; a
  * result of 0x64 or more shows the unit of AT-list entry result - 0x64. */
 void battle_state_handle_mini_menu_state(void) {
-    s32 menu_result = menu_get_thread_activity_variant();
+    s32 menu_result = menu_get_thread_activity();
 
     if (g_main_input_pressed_buttons & PSX_PAD_SELECT) {
         battle_menu_open_mini_menu_help();
@@ -1174,7 +1174,7 @@ void battle_state_handle_mini_menu_state(void) {
 /* MiniMenuHelp game-state handler: when the help window has gone, reopen the mini
  * menu. */
 void battle_state_handle_mini_menu_help_state(void) {
-    if (menu_get_thread_activity_variant() != 2) {
+    if (menu_get_thread_activity() != 2) {
         g_battle_menu_help_opening = 0;
         battle_menu_open_free_cursor_mini_menu();
     }

@@ -134,6 +134,6 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
     }
 
     entries[count] = -1;
-    item_sort_id_list_variant(6, entries);
+    world_item_sort_id_list(6, entries);
     return count;
 }

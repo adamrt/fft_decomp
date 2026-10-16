@@ -137,7 +137,7 @@ void wldcore_gfx_capture_map_backdrop(void) {
     wldcore_gfx_draw_projected_map_tiles(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_map_draw_visible_routes(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_map_project_and_cull_dots();
-    window_dispatch_record_list_variant(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
         g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
     wldcore_restore_previous_stack();
     GsSortClear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
@@ -153,7 +153,7 @@ void wldcore_gfx_capture_map_backdrop(void) {
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    window_dispatch_record_list_variant(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     GsDrawOt(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     DrawSync(0);
@@ -184,9 +184,9 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    window_dispatch_record_list_variant(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
         g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    window_dispatch_record_list_variant(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_restore_previous_stack();
     DrawSync(0);
@@ -214,7 +214,7 @@ void wldcore_gfx_draw_world_frame(void) {
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    window_dispatch_record_list_variant(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_fade_draw_screen_overlays();
     wldcore_restore_previous_stack();
@@ -237,7 +237,7 @@ static void wldcore_init_subsystems(void) {
     wldcore_input_init_repeat_state();
     wldcore_map_load_texture();
     wldcore_gfx_init_subsystem();
-    window_init_record_pools_variant();
+    window_init_record_pools();
     wldcore_map_init_tile_atlas();
     wldcore_system_init_world_menus_and_date();
     wldcore_map_init_dots();
@@ -456,7 +456,7 @@ static void wldcore_init_runtime_state(void) {
     SetDispMask(0);
     g_wldcore_map_projection_state.marker.sub_kind
         = wldcore_proposition_load_picture(g_wldcore_map_projection_state.marker.kind);
-    file_wait_for_pending_variant();
+    file_wait_for_pending();
     count = GsGetActiveBuff();
     g_active_graphics_buffer_index = count;
     GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + count * 0xE000);

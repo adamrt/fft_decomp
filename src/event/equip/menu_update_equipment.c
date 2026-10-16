@@ -21,7 +21,7 @@
  * the menu down, resumes thread 5 and returns 0. Otherwise the menu, slot
  * marker and selected-item panels are drawn and 1 is returned.
  */
-s32 menu_update_equipment_variant(void) {
+s32 menu_update_equipment(void) {
     s32 input;
     s32 override;
     s16 item_id;
@@ -34,7 +34,7 @@ s32 menu_update_equipment_variant(void) {
         menu_request_thread_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
         menu_request_thread_stop(EQUIP_THREAD_SLOT_EQUIPMENT_LIST);
-        menu_init_scrollable_list_core_variant(0, 0, 0);
+        menu_init_scrollable_list_core(0, 0, 0);
         g_equip_menu_substate = MENU_ITEM_LIST_STATE_BROWSE;
         g_equip_unit_banner_enabled = 0;
         g_menu_preview_stats_thread_params.x = 0;
@@ -55,7 +55,7 @@ s32 menu_update_equipment_variant(void) {
         return 0;
     }
     if (g_equip_menu_substate == MENU_ITEM_LIST_STATE_BROWSE) {
-        g_equip_menu_substate = item_run_category_menu_variant();
+        g_equip_menu_substate = equip_item_run_category_menu();
     } else if (g_equip_menu_substate == MENU_ITEM_LIST_STATE_REARRANGE) {
         g_equip_menu_substate = item_run_rearrange_mode();
     } else if (g_equip_menu_substate == MENU_ITEM_LIST_STATE_ACTION) {
@@ -75,7 +75,7 @@ s32 menu_update_equipment_variant(void) {
     if (g_menu_input_lock_mode != 0 || thread_is_running(2) != 0) {
         override = 1;
     }
-    menu_run_script_with_palette_mode_variant(&g_equip_equipment_render_commands, input, override);
+    menu_run_script_with_palette_mode(&g_equip_equipment_render_commands, input, override);
     equip_menu_draw_equipment_slot_marker(0, g_menu_selected_slot, g_menu_input_lock_mode);
     if (g_menu_list_entry_count != 0) {
         item_id = g_item_list_entries[g_menu_list_selected_index];
@@ -84,7 +84,7 @@ s32 menu_update_equipment_variant(void) {
         }
         if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_item_list_entries[g_menu_list_selected_index] <= ITEM_ID_ACCESSORY_FIRST - 1) {
-            menu_run_script_with_palette_mode_variant(&g_equip_armor_bonus_render_commands, 0, 0);
+            menu_run_script_with_palette_mode(&g_equip_armor_bonus_render_commands, 0, 0);
         }
         menu_draw_item_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }

@@ -9,7 +9,7 @@
 /* Decodes glyph `glyph` from the packed 2bpp font into a 4bpp image at
  * `image`, using target x/y and a row stride of w 16-bit values, adding `palette * 4`
  * to every non-zero pixel. Returns the glyph's advance width. */
-s32 menu_text_render_glyph_to_4bpp_image_variant(
+s32 menu_text_render_glyph_to_4bpp_image(
     s32 glyph, u8* image, const battle_text_image_position_t* target, s32 palette) {
     s32 row;
     s32 col;
@@ -19,7 +19,7 @@ s32 menu_text_render_glyph_to_4bpp_image_variant(
     u8 byte;
 
     font = g_text_glyph_bitmap_data;
-    bits_init_primary_reader_variant(font + glyph * TEXT_GLYPH_BYTES);
+    bits_init_primary_reader(font + glyph * TEXT_GLYPH_BYTES);
     row = 0;
     if ((target->x & 1) == 0) {
         for (; row < 14; row++) {

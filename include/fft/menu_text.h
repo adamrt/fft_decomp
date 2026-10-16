@@ -28,7 +28,7 @@ void text_restore_section_pointers(void);
 void text_save_section_pointers(void);
 /* shared with the per-program event interpreter and dialog thread */
 u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor);
-void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
+void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
 void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void text_print_fnt_value_and_next(s32 value);
 

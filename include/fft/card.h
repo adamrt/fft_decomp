@@ -31,8 +31,8 @@ s32 card_io_poll_bios_event_result(void);
 s32 card_io_wait_for_bios_event(void);
 
 /* card operations */
-s32 card_io_get_info_with_retries_variant(s32 port, s32 retry_limit);
-s32 card_io_poll_operation_result_variant(void);
+s32 card_io_get_info_with_retries(s32 port, s32 retry_limit);
+s32 card_io_poll_operation_result(void);
 s32 card_io_wait_operation_result(s32 retry_limit);
 s32 card_io_open_or_create_selected_card(void);
 s32 card_io_format_selected_slot(void);

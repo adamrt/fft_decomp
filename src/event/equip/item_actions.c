@@ -117,11 +117,11 @@ s32 equip_item_run_type_order_mode(void) {
             g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
-        menu_init_scrollable_list_core_variant(
+        menu_init_scrollable_list_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
-        item_collect_stat_deltas_variant(g_item_list_entries[g_menu_list_selected_index],
-            &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index], &g_menu_selected_unit_stat_summary,
+            &g_item_preview_stat_detail, 0);
         g_menu_preview_stats_thread_params.redraw_request = 1;
     }
     if (menu_start_managed_thread(EQUIP_THREAD_SLOT_POPUP_MENU, g_equip_item_type_order_active_menu) == 0) {
@@ -155,13 +155,12 @@ void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override) {
     oriented_quad_t* secondary;
     s32 secondary_x;
 
-    menu_run_script_with_palette_mode_variant(
-        &g_equip_menu_slot_marker_window, EQUIP_SLOT_MARKER_WINDOW_STATE, override);
+    menu_run_script_with_palette_mode(&g_equip_menu_slot_marker_window, EQUIP_SLOT_MARKER_WINDOW_STATE, override);
     marker = &g_equip_menu_slot_marker_rects[slot];
     marker->position.x = x;
     marker->position.y = width - (slot == 0);
     menu_gfx_enqueue_oriented_textured_quad(
-        marker, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, EQUIP_SLOT_MARKER_FIRST_OTAG);
+        marker, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, EQUIP_SLOT_MARKER_FIRST_OTAG);
     secondary = &g_equip_menu_secondary_slot_marker;
     secondary_x = x + 9;
     if (slot == 3) {

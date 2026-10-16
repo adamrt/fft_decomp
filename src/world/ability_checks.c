@@ -66,7 +66,7 @@ s32 world_ability_has_secret_hunt(s32 unit_id) {
  * the target's cursors are the loop optimizer's reduced induction variables,
  * set after the unit-pointer address is formed.
  */
-s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s16* list, s32 mode) {
+s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list, s32 mode) {
     s32 skillset;
     s16 generic;
     s16* abilities;
@@ -110,7 +110,7 @@ s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s1
     }
     count = 0;
     jp = g_world_unit_pointers[unit_index]->job_points.current.values[generic];
-    bits_init_primary_reader_variant(g_world_unit_pointers[unit_index]->learned_abilities[generic]);
+    bits_init_primary_reader(g_world_unit_pointers[unit_index]->learned_abilities[generic]);
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_world_unit_pointers[unit_index]->identity.job_id) != 0) {
             kind = 1;
@@ -188,10 +188,10 @@ s32 world_ability_build_equippable_rsm_list(s16 unit_index, s32 slot, s16* out) 
     s32 last;
     s16 job_id = g_world_unit_pointers[unit_index]->identity.job_id;
 
-    count = ability_build_list_variant(
-        unit_index, job_get_base_variant(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
+    count = ability_build_list(
+        unit_index, world_job_get_base(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
     for (i = 1; i < JOB_ID_GENERIC_COUNT - 1; i++) {
-        count += ability_build_list_variant(
+        count += ability_build_list(
             unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], ABILITY_LIST_MODE_LEARNED_ONLY);
     }
 

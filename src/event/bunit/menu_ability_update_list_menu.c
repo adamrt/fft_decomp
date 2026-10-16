@@ -1,10 +1,10 @@
 /* The selected job's ability list, with tabs for action, reaction, support and movement abilities. */
 
+#include "fft/menu.h"
 #include "fft/data_ability.h"
 #include "fft/event_bunit.h"
 #include "fft/job.h"
 #include "fft/main.h"
-#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_overlay.h"
@@ -24,7 +24,7 @@
  * tabs. Cancel returns 0 with menu state 2 and confirm returns -1 with menu
  * state 1; otherwise the list and the job-name header are drawn and 1 is
  * returned. */
-s32 menu_ability_update_list_menu_variant(void) {
+s32 bunit_menu_ability_update_list_menu(void) {
     u8 unused[0x280]; /* never accessed; reserves the target's frame area */
     RECT rect;
     s16 selected;
@@ -62,10 +62,9 @@ s32 menu_ability_update_list_menu_variant(void) {
         text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_bunit_ability_list_job_name_row, &rect, 0);
         g_menu_ability_category = menu_update_wrapped_horizontal_selection(4, 0, 0);
-        ability_build_list_variant(g_unit_selected_index, g_job_selected_id, g_menu_ability_category,
-            g_menu_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_init_scrollable_list_core_variant(
-            g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
+        ability_build_list(g_unit_selected_index, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries,
+            ABILITY_LIST_MODE_VIEW_ALL);
+        menu_init_scrollable_list_core(g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_bunit_ability_list_ready = 1;
     }
     if (g_menu_list_entry_count == 0
@@ -90,14 +89,14 @@ s32 menu_ability_update_list_menu_variant(void) {
         menu_set_selection_record(
             g_menu_ability_category + 10, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
-        ability_build_list_variant(g_unit_selected_index, g_job_selected_id, g_menu_ability_category,
-            g_menu_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_get_selection_record_variant(g_menu_ability_category + 10, &selected, &scroll, g_menu_ability_entries);
+        ability_build_list(g_unit_selected_index, g_job_selected_id, g_menu_ability_category, g_menu_ability_entries,
+            ABILITY_LIST_MODE_VIEW_ALL);
+        menu_get_selection_record(g_menu_ability_category + 10, &selected, &scroll, g_menu_ability_entries);
         menu_init_scrollable_list(
             g_menu_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(10);
     }
-    menu_run_script_with_palette_mode_variant(
+    menu_run_script_with_palette_mode(
         &g_bunit_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     rect.x = 0x26;
     rect.y = 0x2D;

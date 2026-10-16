@@ -37,7 +37,8 @@ void menu_run_skillset_thread(void);
 void menu_select_unit_action_slots_thread(void);
 void menu_clear_selection_record(s32 index);
 void menu_clear_selection_records(void);
-void menu_get_selection_record_variant(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
+void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 void menu_store_sort_key_list(s32 list_index, const s16* source);
 void menu_load_sort_key_list(s32 list_index, s16* destination);
 void menu_clear_selection_values(void);
@@ -88,7 +89,7 @@ extern s32 g_menu_text_palette_offset;
 extern menu_input_timing_profile_t g_menu_option_input_repeat_timings[];
 extern u16 g_menu_input_block_frames;
 void menu_set_text_origin(s32 x, s32 y);
-void menu_input_update_event_state_variant(u32* otag, u32 input, s32 count_frame);
+void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame);
 void menu_input_clear_state(void);
 void world_menu_input_update_dialog_state(void);
 extern u8 g_input_activation_timer;
@@ -116,7 +117,8 @@ extern s8 g_menu_cursor_forward_offset_keyframes[];
 extern s8 g_menu_cursor_reverse_offset_keyframes[];
 extern u16 g_menu_cursor_texture_page;
 void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s32 mode);
-void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32 mode);
+void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode);
+void world_menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode);
 
 /* input and palette state */
 extern u16 g_menu_active_clut_back;

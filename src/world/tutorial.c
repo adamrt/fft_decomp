@@ -164,7 +164,7 @@ static void world_script_handle_tutorial_command_shift(void) {
  * and the target adds the bias to the low byte first. */
 /* Address-of operand fields preserves the -O0 byte-address steps. */
 static void world_script_handle_tutorial_command_display_message(void) {
-    thread_start(WORLD_THREAD_SLOT_TUTORIAL_TEXT, text_run_dialog_thread_variant);
+    thread_start(WORLD_THREAD_SLOT_TUTORIAL_TEXT, text_run_dialog_thread);
     thread_set_parameters(WORLD_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
         (s32)((u8*)(*(&((world_tutorial_message_instruction_t*)g_world_script_tutorial_command_ptr)->text_id_le[1])
                   * 0x100)
@@ -306,7 +306,7 @@ static void world_script_draw_tutorial_highlight_quads(s32 brightness) {
     s32 i;
 
     brightness = brightness * 10;
-    menu_gfx_enqueue_draw_mode_variant(1, 0, GetTPage(0, 1, 0, 0), 0, 0x3C);
+    menu_gfx_enqueue_draw_mode(1, 0, GetTPage(0, 1, 0, 0), 0, 0x3C);
     g_world_tutorial_highlight_colors_a[2].r = g_world_tutorial_highlight_colors_a[0].r = brightness >> 1;
     g_world_tutorial_highlight_colors_a[2].g = g_world_tutorial_highlight_colors_a[0].g = brightness >> 3;
     g_world_tutorial_highlight_colors_a[2].b = g_world_tutorial_highlight_colors_a[0].b = brightness >> 3;

@@ -60,7 +60,7 @@ static s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
     if (item_get_menu_category(item_id) == ITEM_MENU_CATEGORY_OTHER) {
         return EQUIP_SLOT_ITEM_CANNOT_EQUIP;
     }
-    bits_init_primary_reader_variant(g_equip_unit_data[unit_index]->equipment_categories);
+    bits_init_primary_reader(g_equip_unit_data[unit_index]->equipment_categories);
     bits_read_primary(item_get_type(item_id));
     if (bits_read_primary(1) == 0) {
         result = EQUIP_SLOT_ITEM_CANNOT_EQUIP;
@@ -146,7 +146,7 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
  * with ITEM_ENTRY_UNEQUIPPABLE, and 2 omits them; filter 1 is
  * promoted to 2 when Show Unequippable is not On. `sort_mode` 1-5 with a
  * category list index below 5 uses that category order list; anything else falls back to
- * item_sort_id_list_variant. Returns the number of listed items.
+ * equip_item_sort_id_list. Returns the number of listed items.
  */
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter) {
     s32 count;
@@ -164,7 +164,7 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
     count = 0;
     for (; item_id < ITEM_ID_END; item_id++) {
         entry = item_id;
-        if (item_get_total_count_variant(item_id) == 0) {
+        if (item_get_total_count(item_id) == 0) {
             continue;
         }
         item_category = item_get_menu_category(item_id);
@@ -224,7 +224,7 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
     if (category_index < 5 && sort_mode >= 1 && sort_mode < 6) {
         count = item_sort_list_by_category_order(category_index, list);
     } else {
-        item_sort_id_list_variant(sort_mode & 0xF, list);
+        equip_item_sort_id_list(sort_mode & 0xF, list);
     }
     return count;
 }

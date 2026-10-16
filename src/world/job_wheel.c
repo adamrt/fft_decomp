@@ -104,7 +104,7 @@ void world_formation_run_job_wheel_menu(void) {
         g_world_formation_unit_browse_enabled = 0;
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
-        menu_init_scrollable_list_core_variant(0, 0, 0);
+        menu_init_scrollable_list_core(0, 0, 0);
         g_world_menu_script_callbacks[0].value = world_formation_get_job_wheel_cursor_job_level;
         g_world_menu_script_callbacks[1].value = world_formation_is_job_wheel_selection_available;
         g_world_job_wheel_job_selected = 0;
@@ -339,7 +339,7 @@ void world_formation_run_job_wheel_menu(void) {
 
     menu_gfx_enqueue_textured_quad(
         &g_world_job_wheel_name_rect, 0x30, 0x30, 0, 0, g_world_menu_window_tpage, g_world_menu_window_clut, 0x33);
-    menu_run_script_with_palette_mode_variant(&g_world_job_wheel_script, 0, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(&g_world_job_wheel_script, 0, g_menu_input_lock_mode);
 }
 
 /*
@@ -513,7 +513,7 @@ static s32 world_formation_process_job_change(s32 job) {
         scratch.points[1].y++;
         world_menu_add_gradient_line_primitive(&scratch.points[1], g_world_job_change_wave_colors + 1, 1, 0x38);
     }
-    menu_gfx_enqueue_draw_mode_variant(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
+    menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
     g_world_job_change_frame++;
     if (g_world_job_change_skip_requested != 0) {
         if (g_world_job_change_frame >= 40 && g_world_job_change_frame <= 220) {
@@ -587,8 +587,7 @@ static void world_formation_build_job_wheel_availability(void) {
         id = entry & WORLD_JOB_LIST_ENTRY_ID_MASK;
         if (id == g_world_unit_pointers[unit]->identity.job_id || !(entry & WORLD_JOB_LIST_ENTRY_UNAVAILABLE)) {
             g_world_job_wheel_mastered_jobs[i]
-                = ability_build_list_variant(unit, id, MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED)
-                == 0;
+                = ability_build_list(unit, id, MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED) == 0;
         } else {
             g_world_job_wheel_mastered_jobs[i] = 0;
         }

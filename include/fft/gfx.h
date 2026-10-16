@@ -431,13 +431,15 @@ void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page,
     const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base);
 void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
     const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
-void gfx_build_gradient_grid_primitives_variant(POLY_GT4* poly);
+void attack_gfx_build_gradient_grid_primitives(POLY_GT4* poly);
+void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
 void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction);
 void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
     sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
 void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
-void gfx_set_draw_color_variant(const rgb24_t* color);
-void menu_run_unit_status_thread_variant(void);
+void bunit_gfx_set_draw_color(const rgb24_t* color);
+void gfx_set_draw_color(const rgb24_t* color);
+void menu_run_unit_status_thread(void);
 void gfx_set_otag_index(s32 value);
 
 /* portrait transitions */

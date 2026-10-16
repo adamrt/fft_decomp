@@ -11,14 +11,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-rgb24_t* menu_gfx_get_draw_color_variant(void) {
+rgb24_t* world_menu_gfx_get_draw_color(void) {
     return &g_world_menu_sprite_color;
 }
 
 /* Move the list viewport by one visible page (dir -1 up, 1 down), keeping the selected row's
  * offset within the page and clamping it on a short last page. WORLD's body reloads the list
  * layout and plays the cursor sound when the page moves. */
-void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e dir, const menu_instruction_t* menu) {
+void world_menu_scroll_list_by_page(menu_vertical_scroll_direction_e dir, const menu_instruction_t* menu) {
     s32 old;
     s16 delta;
     s32 unused[2]; /* 8 frame bytes no menu uses */
@@ -54,7 +54,7 @@ void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e dir, cons
  * Return -1 for up, 1 for down, 2 while waiting for a repeat, and 0 otherwise.
  * Both directions require input bit 0x80; timing scales with the WORLD rate.
  */
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction_variant(void) {
+menu_vertical_scroll_direction_e world_menu_input_read_page_scroll_direction(void) {
     s32 result = 0;
     s32 value;
     s32 delay;

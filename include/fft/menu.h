@@ -215,7 +215,7 @@ typedef struct battle_menu_status_panel_numeric_geometry {
 } battle_menu_status_panel_numeric_geometry_t;
 
 /* Numeric editor panel buffer (0x2c0 bytes), double buffered by the
- * *_editor_run_numeric_thread routines (EQUIP menu_run_numeric_editor_frame_thread_variant copies it with
+ * *_editor_run_numeric_thread routines (EQUIP menu_run_numeric_editor_frame_thread copies it with
  * sizeof). The draw modes are set up with gfx_set_draw_mode_for_texture_page /
  * SetDrawMode, the 18 SPRTs by the gfx_init_image_loading walk,
  * +0x18c and +0x298 are the arguments of
@@ -287,7 +287,7 @@ struct unit_stats* menu_get_selected_unit_stats(void);
 /* Name, job and identity values copied into WORLD and EQUIP status panels.
  * The last displayed value is the roster slot, distinct from a battle id. */
 typedef struct menu_unit_status_identity {
-    s16 unit_index;  /* 0x00: name text 0x4000 + value (menu_run_unit_status_thread_variant) */
+    s16 unit_index;  /* 0x00: name text 0x4000 + value (menu_run_unit_status_thread) */
     s16 job_id;      /* 0x02: job name text 0x3000 + value */
     s16 brave;       /* 0x04 */
     s16 faith;       /* 0x06 */
@@ -354,7 +354,7 @@ typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gaug
  * 0x8013a31c / 0x8013a340 and formation records at 0x8018aa98 / 0x8018aabc,
  * and each overlay's pair of panel billboards (all
  * 0x24 apart). The *_copy_unit_data_to_status_billboard builders (and
- * menu_copy_unit_data_to_status_billboard_variant, wldcore_unit_build_status_panel_data)
+ * menu_copy_unit_data_to_status_billboard, wldcore_unit_build_status_panel_data)
  * fill the first 0x1e bytes, *_menu_display_hovered_unit_stats and the
  * *_render_unit_status_panel_thread editors draw it, and
  * menu_copy_billboard_data_out saves the banner whole as 0x22 bytes.
@@ -554,7 +554,7 @@ typedef enum option_menu_type {
     OPTION_MENU_DEAD_UNIT = 2, /* crystal and treasure panel */
 } option_menu_type_e;
 
-/* A key in the list *_item_sort_id_list / item_sort_id_list_variant
+/* A key in the list equip_item_sort_id_list and world_item_sort_id_list
  * sorts by (g_item_type_order_lists, g_item_type_order_lists); -1 ends
  * the list. TYPE sorts ascending, the others descending. */
 typedef enum item_sort_key {
@@ -622,8 +622,8 @@ typedef enum menu_unit_readout {
 
 /* Step of the job list menus (WORLD learn and view-abilities menus, BUNIT job
  * menu, the JOBSTTS page); each list's handler returns the next step. In
- * JOBSTTS, JOBS is menu_run_job_list_variant, ABILITIES is
- * menu_ability_update_list_menu_variant and CLOSE makes jobstts_entrypoint close
+ * JOBSTTS, JOBS is jobstts_menu_run_job_list, ABILITIES is
+ * jobstts_menu_ability_update_list_menu and CLOSE makes jobstts_entrypoint close
  * the screen. */
 typedef enum menu_job_list_step {
     MENU_JOB_LIST_STEP_CLOSE = -1,
@@ -701,7 +701,7 @@ enum { MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2 };
 /* Provisional: 60-byte menu entry used by BATTLE, WORLD and OPTION/EQUIP.
  * g_menu_thread_menu_data points to the scene's current table. 0x0c/0x0e are the
  * window size (frame rect 0x0c - 0x12 by 0x0e - 0x1a in WORLD 0x8010088c and
- * menu_run_at_list_variant). The parent table at 0x24 (indexed by selected_index)
+ * menu_run_at_list). The parent table at 0x24 (indexed by selected_index)
  * and the thread entry at 0x28 are known from
  * world_menu_start_entry_chain_threads. The record is also the first parameter
  * of the menu threads it starts: the icon threads read 0x00..0x07 as the text
@@ -833,7 +833,7 @@ typedef struct menu_input_timing_profile {
 
 /* scrolling lists */
 /* A text layout followed by the first visible row, as bound to a scrolling
- * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread_variant and the AT list
+ * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread and the AT list
  * built by menu_build_ability_preview_at_list). */
 typedef struct menu_scroll_text_layout {
     menu_text_layout_t columns; /* 0x00 */
@@ -913,8 +913,8 @@ typedef struct menu_icon_record {
 } menu_icon_record_t;
 
 /* Provisional: one of the two 0x134-byte packet pages a scrolling text list
- * alternates between frames (menu_run_scrolling_ability_list_thread_variant at 0x801a3d58,
- * menu_run_at_list_variant at 0x801ac6b4, world_screen_build_at_list at 0x801bfda4). */
+ * alternates between frames (menu_run_scrolling_ability_list_thread at 0x801a3d58,
+ * menu_run_at_list at 0x801ac6b4, world_screen_build_at_list at 0x801bfda4). */
 typedef struct menu_list_page {
     SPRT frame;                         /* 0x00: text image / cursor frame */
     SPRT arrows[2];                     /* 0x14: scroll arrows */
@@ -967,10 +967,11 @@ extern u16 g_menu_gfx_draw_area_count;
 extern u16 g_menu_gfx_draw_move_count;
 extern u16 g_menu_gfx_drawenv_y;
 
-rgb24_t* menu_gfx_get_draw_color_variant(void);
+rgb24_t* menu_gfx_get_draw_color(void);
+rgb24_t* world_menu_gfx_get_draw_color(void);
 void menu_gfx_enqueue_draw_area(RECT* rect, s32 idx);
 
-void menu_gfx_enqueue_draw_mode_variant(s32 dfe, s32 dtd, s32 tpage, RECT* tw, s32 idx);
+void menu_gfx_enqueue_draw_mode(s32 dfe, s32 dtd, s32 tpage, RECT* tw, s32 idx);
 
 void menu_gfx_enqueue_draw_move(const RECT* rect, s32 u, s32 v, s32 otag_index);
 
@@ -1640,7 +1641,7 @@ enum {
 };
 
 /* Encoded menu-string controls. The 0xe2-0xfd meanings come from the dialog
- * interpreter branches (text_run_dialog_thread_variant and its WORLD
+ * interpreter branches (text_run_dialog_thread and its WORLD
  * twin) and, for 0xe7, the menu text-image renderers; codes with an operand
  * consume the following byte. F5/F6 are the {0xF5xx}{0xF6xx} "Alter String"
  * controls. The 0xe0-0xeb substitution codes are text_format_code_e. */
@@ -1883,7 +1884,7 @@ typedef struct text_dialog_record {
 } text_dialog_record_t;
 
 /* One pending text glyph: BATTLE's dialogue renderer state at 0x8016dad4
- * (filled by text_run_dialog_thread_variant, drawn by
+ * (filled by text_run_dialog_thread, drawn by
  * text_draw_glyph_with_typewriter_delay), WORLD's typewriter request at 0x8019a338
  * (text_draw_glyph_with_typewriter_delay) and message-box glyph at
  * 0x801c3474 (world_text_message_box_thread, ..._delay_2). The menu text state
@@ -2047,11 +2048,11 @@ s32 menu_can_accept_input(void);
 s32 menu_should_close_thread(u32* input);
 u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
 void menu_build_idle_action_menu(s32 unused_menu_id);
-void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 id);
+void menu_build_unit_portrait_poly(POLY_FT4* poly, s32 id);
 void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 void menu_draw_active_window_frames(void);
 void menu_init_sprt(SPRT* sprite);
-void menu_run_scrolling_ability_list_thread_variant(void);
+void menu_run_scrolling_ability_list_thread(void);
 
 /* Page scroll direction of the overlay unit, item and job lists. */
 typedef enum menu_vertical_scroll_direction {

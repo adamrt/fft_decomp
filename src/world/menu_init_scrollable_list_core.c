@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* Initialize a -1 terminated scrollable list and reset its rendering state. */
-void menu_init_scrollable_list_core_variant(const s16* values, s32 value, u8* text_table) {
+void menu_init_scrollable_list_core(const s16* values, s32 value, u8* text_table) {
     g_world_menu_list_entry_ids = values;
     g_world_menu_list_text_table = text_table;
 
