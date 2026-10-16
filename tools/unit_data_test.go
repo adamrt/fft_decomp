@@ -8,7 +8,7 @@ import (
 func TestUnitOwnedDataRendersAndCompares(t *testing.T) {
 	table := []byte{3, 21, 4, 20, 5, 21, 6, 22}
 	m := &moduleSpec{
-		ID: "opening", Profile: "gcc-2.6.3_O2_aspsx-2.34", SourceDir: "src/open",
+		ID: "open", Profile: "gcc-2.6.3_O2_aspsx-2.34", SourceDir: "src/open",
 		Units: []unitDef{{Name: "movies", Source: "src/open/movies.c",
 			Data: []rodataSpec{{Addr: 0x80070000, Size: len(table), Hash: shortHash(table)}}}},
 		Functions: []functionSpec{{Addr: 0x80068000, Size: 8, Name: "a", Unit: "movies"}},

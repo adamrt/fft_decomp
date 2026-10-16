@@ -44,13 +44,13 @@ func TestMarkAnalysisCoverage(t *testing.T) {
 
 func TestDropRegionPoolCandidatesAreModuleQualified(t *testing.T) {
 	config := &projectConfig{byID: map[string]*moduleSpec{
-		"opening": {ID: "opening", Regions: []regionSpec{{Addr: 0x80073b9c, End: 0x80073ba0, Kind: "data", Why: "word"}}},
+		"open": {ID: "open", Regions: []regionSpec{{Addr: 0x80073b9c, End: 0x80073ba0, Kind: "data", Why: "word"}}},
 		"battle":  {ID: "battle"},
 		"world":   {ID: "world"},
 	}}
 	pool := []discoveryPoolCandidate{
 		{Module: "world", Start: 0x800e1000, End: 0x800e1020},
-		{Module: "opening", Start: 0x80073b9c, End: 0x80073ba0},
+		{Module: "open", Start: 0x80073b9c, End: 0x80073ba0},
 		{Module: "battle", Start: 0x80073b9c, End: 0x80073eec},
 	}
 	kept := dropRegionPoolCandidates(pool, config)
@@ -58,7 +58,7 @@ func TestDropRegionPoolCandidatesAreModuleQualified(t *testing.T) {
 		t.Fatalf("expected only OPEN's region to be dropped, got %#v", kept)
 	}
 	for _, candidate := range kept {
-		if candidate.Module == "opening" {
+		if candidate.Module == "open" {
 			t.Fatalf("OPEN region survived: %#v", kept)
 		}
 	}

@@ -32,7 +32,7 @@ type compileCommand struct {
 // editorModuleRank orders the programs whose view an editor shows for a
 // shared source: the two programs that link most shared code first.
 func editorModuleRank(id string) int {
-	for index, program := range []string{"battle", "world", "wldcore", "opening", "main"} {
+	for index, program := range []string{"battle", "world", "wldcore", "open", "main"} {
 		if id == program {
 			return index
 		}

@@ -11,7 +11,7 @@
 #define PSYQ_CPU_STATUS_CACHE_SWAP      0x00020000
 #define PSYQ_PRESS_PADDING_LAST_INDEX   64
 
-/* opening 0x80073bd0–0x80073f10: software VLC expansion and resumable budget. */
+/* open 0x80073bd0–0x80073f10: software VLC expansion and resumable budget. */
 s32 DecDCTvlc(u32* frame_data, u32* decode_buffer) {
     /* The handwritten decoder uses only caller-saved GPRs and no C ABI frame. */
     u16* input = (u16*)frame_data;

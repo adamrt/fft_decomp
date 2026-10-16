@@ -50,7 +50,7 @@ void file_wait_for_pending(void) {
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Poll the pending file load to completion, a frame at a time; unlike the WLDCORE
  * body there is no audio queue to service. */
 void file_wait_for_pending(void) {

@@ -2,7 +2,7 @@
 #include "psx/libpress.h"
 #include "psx/libpress_abi_inline.h"
 
-/* opening 0x80073ba0–0x80073bd0: select VLC budget; return the old 16-bit limit. */
+/* open 0x80073ba0–0x80073bd0: select VLC budget; return the old 16-bit limit. */
 s32 DecDCTvlcSize(s32 words) {
     /* The handwritten body addresses the limit through t0 and tests through at. */
     register u32* limit __asm__("$8");

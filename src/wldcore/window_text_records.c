@@ -7,7 +7,7 @@
 #include "fft/world_sprite.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 #    include "fft/open.h"
 #endif
 
@@ -27,7 +27,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Draw one birthday menu entry into the window's scratch image. */
 void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u32* buffer) {
     glyph_blit_t origin;
@@ -53,7 +53,7 @@ void wldcore_text_get_padded_dimensions(s32 value, size32_t* output) {
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Padded pixel size of the window image for a text entry: 10 pixels per column
  * plus 24, rounded down to a multiple of 4, and 16 pixels per row plus 16. The
  * WLDCORE twin wldcore_text_get_padded_dimensions measures the text in pixels
@@ -85,7 +85,7 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 #    define OPEN_MENU_TEXT_MARGIN 8
 
 /* Build and upload a window render record, drawing text `text_id` inside it

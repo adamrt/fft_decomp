@@ -50,7 +50,7 @@ void window_init_record_pools(void) {
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Empty both render record pools and the pointer list. Every record gets its
  * layout flag, ordering-table entry 8 and the neutral color 0x80. */
 void window_init_record_pools(void) {
@@ -78,7 +78,7 @@ void window_init_record_pools(void) {
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Clear the active buffer's 16-entry ordering table and release the frame's
  * sprite primitives. */
 void open_gfx_clear_current_otag(void) {
@@ -119,7 +119,7 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Draw the listed render records into the ordering table. A record with BLANK or
  * HIDDEN set is skipped; ANIMATED selects the 36-byte layout and IMAGE the
  * 56-byte one. Nothing is drawn while
@@ -393,7 +393,7 @@ static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 #    define PART(index) ((world_sprite_part_t*)&sprite[index])
 
 /* Advances one OPEN sprite actor's animation and emits its parts into an
@@ -499,7 +499,7 @@ loop:
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Emits one 56-byte render record as a DR_MODE + SPRT pair from the shared
  * 32-entry per-buffer primitive pool at g_open_gfx_sprite_primitive_pool.
  *
@@ -617,7 +617,7 @@ s32 window_append_animated_record(void** queue, s32* count) {
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Appends the next free 36-byte render record to `list`, resets it and
  * returns its pool index. */
 s32 window_append_animated_record(void** list, s32* count) {
@@ -660,7 +660,7 @@ s32 window_append_record(void** queue, s32* count) {
 }
 #endif
 
-#ifdef FFT_OPENING
+#ifdef FFT_OPEN
 /* Appends the next free 56-byte render record to `list`, resets it and
  * returns its pool index. */
 s32 window_append_record(void** list, s32* count) {

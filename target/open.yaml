@@ -1,6 +1,6 @@
 # OPEN/OPEN.BIN: the opening and title sequence; it calls WORLD text and
 # menu routines.
-module: opening
+module: open
 file: OPEN/OPEN.BIN
 lba: 86000
 size: 222832

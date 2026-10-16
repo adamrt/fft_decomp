@@ -541,7 +541,7 @@ func (p project) findTwins(config *projectConfig, options twinsOptions) (*twinsR
 
 // moduleTokens are the leading name tokens that mark a module-specific copy.
 var moduleTokens = map[string]bool{
-	"battle": true, "world": true, "wldcore": true, "main": true, "opening": true, "open": true, "effect": true,
+	"battle": true, "world": true, "wldcore": true, "main": true, "open": true, "effect": true,
 	"attack": true, "bunit": true, "card": true, "debugchr": true, "equip": true, "etc": true, "helpmenu": true,
 	"jobstts": true, "option": true, "require": true, "small": true,
 }
@@ -828,8 +828,6 @@ func (p project) twinTrials(config *projectConfig, reportPath string, ids []stri
 // symbols, which a twin trial prepends so substituted names resolve.
 func moduleHeader(id string) string {
 	switch {
-	case id == "opening":
-		return "fft/open.h"
 	case strings.HasPrefix(id, "event-"):
 		return "fft/event_" + strings.TrimPrefix(id, "event-") + ".h"
 	case strings.HasPrefix(id, "effect-"):

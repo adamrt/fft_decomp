@@ -55,7 +55,7 @@ jobs:
           - { name: battle, modules: battle }
           - { name: world, modules: world }
           - { name: wldcore-main-event, modules: wldcore main event }
-          - { name: opening-effect, modules: opening effect }
+          - { name: open-effect, modules: open effect }
     name: check (${{ matrix.shard.name }})
     steps:
       - uses: actions/checkout@v4
