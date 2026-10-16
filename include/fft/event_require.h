@@ -71,25 +71,25 @@ typedef struct require_reward_burst_tile {
     s32 x;             /* 0x3C */
     s32 y;             /* 0x40 */
     s32 initial_delay; /* 0x44 */
-} require_reward_burst_tile_t;
-typedef char require_reward_burst_tile_size_must_be_72[sizeof(require_reward_burst_tile_t) == 72 ? 1 : -1];
+} require_condition_burst_tile_t;
+typedef char require_reward_burst_tile_size_must_be_72[sizeof(require_condition_burst_tile_t) == 72 ? 1 : -1];
 
 /* The mode byte of the bonus-image burst parameters: the distance that sets
  * each tile's start delay. Any other value measures along a rotated x axis. */
 typedef enum require_reward_burst_mode {
-    REQUIRE_REWARD_BURST_FROM_CENTER = 0,
-    REQUIRE_REWARD_BURST_FROM_ORIGIN = 1, /* the top-left corner */
-    REQUIRE_REWARD_BURST_HORIZONTAL = 2,  /* x only */
-} require_reward_burst_mode_e;
+    REQUIRE_CONDITION_BURST_FROM_CENTER = 0,
+    REQUIRE_CONDITION_BURST_FROM_ORIGIN = 1, /* the top-left corner */
+    REQUIRE_CONDITION_BURST_HORIZONTAL = 2,  /* x only */
+} require_condition_burst_mode_e;
 
 /* BONUS.BIN stores a 256x200 4bpp image, followed by eight 16-color palette slots. */
 typedef struct require_reward_bonus_image_file {
     u32 pixels[200][32];   /* 0x0000; eight 4bpp pixels per 32-bit value */
     palette_t palettes[8]; /* 0x6400; four palettes per uploaded VRAM row */
     u8 _unused_6500[0x300];
-} require_reward_bonus_image_file_t;
+} require_condition_bonus_image_file_t;
 typedef char
-    require_reward_bonus_image_file_size_must_be_26624[sizeof(require_reward_bonus_image_file_t) == 26624 ? 1 : -1];
+    require_reward_bonus_image_file_size_must_be_26624[sizeof(require_condition_bonus_image_file_t) == 26624 ? 1 : -1];
 
 extern s32 g_require_reward_war_trophy_entry_count;
 extern s32 g_require_reward_war_trophy_entry_types[];
@@ -113,17 +113,17 @@ extern POLY_FT4 g_require_reward_money_comma_polys[2];
 extern POLY_FT4 g_require_reward_money_sign_polys[2];
 extern RECT g_require_reward_money_clip_rect_0;
 extern RECT g_require_reward_money_clip_rect_1;
-extern RECT g_require_reward_bonus_palette_rect;
-extern require_reward_burst_tile_t g_require_reward_burst_tiles[12][24];
-extern POLY_F4 g_require_reward_burst_flash_polys[2];
-extern DR_MODE g_require_reward_burst_draw_modes[2];
-extern MATRIX g_require_reward_burst_matrix;
-extern SVECTOR g_require_reward_burst_rotation;
-extern VECTOR g_require_reward_burst_offset;
-extern VECTOR g_require_reward_burst_rotated_offset;
+extern RECT g_require_condition_bonus_palette_rect;
+extern require_condition_burst_tile_t g_require_condition_burst_tiles[12][24];
+extern POLY_F4 g_require_condition_burst_flash_polys[2];
+extern DR_MODE g_require_condition_burst_draw_modes[2];
+extern MATRIX g_require_condition_burst_matrix;
+extern SVECTOR g_require_condition_burst_rotation;
+extern VECTOR g_require_condition_burst_offset;
+extern VECTOR g_require_condition_burst_rotated_offset;
 
-void require_reward_load_bonus_image(s32 image_id);
-void require_reward_animate_bonus_image_burst(void);
+void require_condition_load_bonus_image(s32 image_id);
+void require_condition_animate_bonus_image_burst(void);
 
 /* party */
 /* What require_party_update_bio_variable_for_unit_class stores in a character's bio variables. */
@@ -172,12 +172,12 @@ extern s32 g_require_panel_dim_b;
 extern s32 g_require_panel_dim_c;
 extern menu_status_thread_t g_require_status_display_thread_params;
 extern menu_status_thread_t g_require_character_status_frame_config;
-extern menu_status_thread_t g_require_numeric_editor_thread_params;
+extern menu_status_thread_t g_require_numeric_panel_thread_params;
 /* Scalar x aliases of the three panels' origins; they preserve the retail
  * transition-store scheduling. */
 extern s32 g_require_status_display_origin_x;
 extern s32 g_require_character_status_origin_x;
-extern s32 g_require_numeric_editor_origin_x;
+extern s32 g_require_numeric_panel_origin_x;
 
 void require_panel_set_transition_value(s32 value);
 

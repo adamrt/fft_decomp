@@ -835,8 +835,8 @@ functions:
   - {addr: 0x80134224, size: 36, name: script_advance_date_by_one_year, hash: 61f613aa13acf6fa, unit: unit_status_lists}
   - {addr: 0x80134248, size: 132, name: unit_increase_blue_team_brave_by_10, hash: b7469f89289042cf, unit: unit_status_lists}
   - {addr: 0x801342cc, size: 240, name: script_warp_unit_display_to_paired_unit, hash: 69851764a0a0b019, unit: unit_status_lists}
-  - {addr: 0x801343bc, size: 20, name: menu_suppress_height_display, hash: e02cbb3568219362, unit: unit_status_lists}
-  - {addr: 0x801343d0, size: 16, name: menu_enable_height_display, hash: 6863222449fafafb, unit: unit_status_lists}
+  - {addr: 0x801343bc, size: 20, name: menu_suppress_depth_display, hash: e02cbb3568219362, unit: unit_status_lists}
+  - {addr: 0x801343d0, size: 16, name: menu_enable_depth_display, hash: 6863222449fafafb, unit: unit_status_lists}
   - {addr: 0x801343e0, size: 80, name: text_configure_sprite_vram, hash: a1db8ecf1bc831e9, unit: unit_status_lists}
   - {addr: 0x80134430, size: 8, name: menu_noop_1, hash: 6d64edf91449c1b1, unit: unit_status_lists}
   - {addr: 0x80134438, size: 700, name: menu_run_selected_tile_info_display_thread, hash: bee07b3b3a3c9327, unit: unit_status_lists}
@@ -919,8 +919,8 @@ functions:
   - {addr: 0x8013ca70, size: 84, name: menu_set_palette_colors, hash: 545af0be647bdce5, unit: event_resources}
   - {addr: 0x8013cac4, size: 48, name: menu_init_palette_and_text, hash: f67e1aa6ef04200a, unit: event_resources}
   - {addr: 0x8013caf4, size: 8, name: menu_noop_4, hash: 6d64edf91449c1b1, unit: event_resources}
-  - {addr: 0x8013cafc, size: 224, name: menu_open_companion_data_file, hash: 93bbe5220c3b507c, unit: event_resources}
-  - {addr: 0x8013cbdc, size: 240, name: menu_open_companion_executable, hash: 1b8c9a12ae0535a4, unit: event_resources}
+  - {addr: 0x8013cafc, size: 224, name: menu_poll_companion_data_file_load, hash: 93bbe5220c3b507c, unit: event_resources}
+  - {addr: 0x8013cbdc, size: 240, name: menu_poll_companion_executable_load, hash: 1b8c9a12ae0535a4, unit: event_resources}
   - {addr: 0x8013cccc, size: 32, name: menu_reset_unit_records_wrapper, hash: 1ea872deb6618e06, unit: event_resources}
   - {addr: 0x8013ccec, size: 8, name: menu_run_companion_overlay_stub, hash: 6d64edf91449c1b1, unit: event_resources}
   - {addr: 0x8013ccf4, size: 612, name: menu_start_entry_thread, hash: 611133d05022177f, unit: event_resources}
@@ -972,7 +972,7 @@ functions:
   - {addr: 0x8013f3fc, size: 164, name: script_start_current_event_thread, hash: 4d813122369868cd, unit: attack_resources}
   - {addr: 0x8013f4a0, size: 8, name: script_noop_8, hash: 6d64edf91449c1b1, unit: attack_resources}
   - {addr: 0x8013f4a8, size: 80, name: script_reset_event_state, hash: cc154e81b79d8046, unit: attack_resources}
-  - {addr: 0x8013f4f8, size: 40, name: script_is_deployment_running, hash: a5c397fe33bff892, unit: attack_resources}
+  - {addr: 0x8013f4f8, size: 40, name: script_run_frame_and_check_deployment, hash: a5c397fe33bff892, unit: attack_resources}
   - {addr: 0x8013f520, size: 328, name: menu_update_menus_and_event_speed, hash: ec52451103685bc8, unit: attack_resources}
   - {addr: 0x8013f668, size: 260, name: map_store_selected_tile_data, hash: 407beefdbfb22c50, unit: attack_resources}
   - {addr: 0x8013f76c, size: 64, name: menu_clear_entry_selections, hash: 46ac5994ee2ced8c, unit: attack_resources}
@@ -990,7 +990,7 @@ functions:
   - {addr: 0x801404cc, size: 608, name: menu_build_skillset_entries, hash: 8eb75ddae5f9878f, unit: attack_resources}
   - {addr: 0x8014072c, size: 352, name: menu_run_skillset_thread, hash: 0118d3a7350bf25a, unit: attack_resources}
   - {addr: 0x8014088c, size: 124, name: menu_record_selection_for_selected_unit, hash: b4c2ab0905447fd9, unit: attack_resources}
-  - {addr: 0x80140908, size: 120, name: menu_build_main, hash: e61d23b9e437fa0c, unit: attack_resources}
+  - {addr: 0x80140908, size: 120, name: menu_run_turn_menu_thread, hash: e61d23b9e437fa0c, unit: attack_resources}
   - {addr: 0x80140980, size: 36, name: sound_queue_sfx_confirm_unless_restoring, hash: 2747c4df037dcfba, unit: command_menus}
   - {addr: 0x801409a4, size: 72, name: menu_confirm_action_silently, hash: a4b373eda89ab2a4, unit: command_menus}
   - {addr: 0x801409ec, size: 68, name: menu_wait_thread, hash: 05ccdd3e748f0e94, unit: command_menus}
@@ -2481,7 +2481,7 @@ data:
   - {addr: 0x80167948, name: g_menu_auto_battle_option_colors}
   - {addr: 0x80167954, name: g_menu_unit_status_bounce_offsets}
   - {addr: 0x8016796e, name: g_menu_unit_status_bounce_step}
-  - {addr: 0x80167970, name: g_menu_height_display_suppressed}
+  - {addr: 0x80167970, name: g_menu_depth_display_suppressed}
   - {addr: 0x80167972, name: g_menu_hovered_stats_frame_count}
   - {addr: 0x80167974, name: g_menu_tile_info_image_location}
   - {addr: 0x8016797c, name: g_menu_tile_info_image_params}
@@ -2966,7 +2966,7 @@ imports:
   - {addr: 0x801c9488, name: attack_text_build_deployment_strings}
   - {addr: 0x801c9d68, name: attack_map_show_title}
   - {addr: 0x801c9ec0, name: attack_map_load_title_graphic}
-  - {addr: 0x801ca664, name: require_reward_animate_bonus_image_burst}
+  - {addr: 0x801ca664, name: require_condition_animate_bonus_image_burst}
   - {addr: 0x801cafd4, name: require_condition_dispatch}
   - {addr: 0x801d7000, name: small_text_init_battle_pointers}
   - {addr: 0x801df050, name: menu_run_battle_help}

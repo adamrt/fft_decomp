@@ -79,7 +79,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons);
 void script_frame_after_requests_stub(void);
 void script_frame_after_threads_stub(void);
 void script_set_event_speed(s32 speed);
-s32 script_is_deployment_running(u32* ot, u32 buttons);
+s32 script_run_frame_and_check_deployment(u32* ot, u32 buttons);
 s32 script_is_tutorial_event_slot(void);
 
 /* opcode handlers */

@@ -30,7 +30,7 @@ typedef enum wldcore_thread_slot {
     WLDCORE_THREAD_SLOT_MESSAGE = 14,      /* the message box and script text */
 } wldcore_thread_slot_e;
 
-/* Parameter blocks of WORLD's status banner, numeric editor and equipment/ability panel threads, which WLDCORE runs
+/* Parameter blocks of WORLD's status banner, numeric panel and equipment/ability panel threads, which WLDCORE runs
  * in thread slots 8, 9 and 12. */
 extern menu_status_thread_t g_wldcore_thread8_params;
 extern menu_status_thread_t g_wldcore_thread9_params;

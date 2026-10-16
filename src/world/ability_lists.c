@@ -354,7 +354,7 @@ void world_menu_run_order_unit(void) {
         g_world_order_unit_saved_browse_enabled = g_world_formation_unit_browse_enabled;
         g_world_formation_unit_browse_enabled = 0;
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
         g_world_menu_order_unit_cursor = 0;
         g_world_menu_order_unit_open = 1;
     }

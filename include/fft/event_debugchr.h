@@ -47,7 +47,7 @@ extern menu_active_unit_t g_debugchr_panel_comparison_unit_data;
 extern palette_t g_debugchr_panel_comparison_portrait_palettes[2];
 extern menu_status_thread_t g_debugchr_status_display_thread_params;
 extern menu_status_thread_t g_debugchr_character_status_frame_config;
-extern menu_status_thread_t g_debugchr_numeric_editor_thread_params;
+extern menu_status_thread_t g_debugchr_numeric_panel_thread_params;
 
 /* graphics */
 

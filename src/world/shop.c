@@ -2261,7 +2261,7 @@ void world_shop_run_recruit_unit_preview_step(void) {
         g_world_shop_menu_step = WORLD_SHOP_STEP_HIRE_CONFIRM;
         g_world_formation_unit_browse_enabled = 0;
         g_world_formation_unit_banner_enabled = 0;
-        menu_toggle_numeric_editor_thread(0);
+        menu_toggle_numeric_panel_thread(0);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, world_text_message_box_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF826, 0);

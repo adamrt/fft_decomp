@@ -592,7 +592,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         SetTransMatrix(&g_battle_camera_matrix);
         RotTrans(&offset, &transformed, &flag);
         depth = transformed.vz / 4;
-        packet = main_gfx_get_otag() + depth;
+        packet = main_gfx_get_battle_otag() + depth;
     }
     AddPrim(packet, prim);
 }
@@ -1253,7 +1253,7 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
     raised.vy += 12;
     RotTrans(&raised, &transformed, &flag);
     display = unit->status_bubble_display;
-    otag = main_gfx_get_otag();
+    otag = main_gfx_get_battle_otag();
     depth = transformed.vz / 4;
     battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, 0, 0, &zoom, otag + depth);
 }
@@ -1318,7 +1318,7 @@ void battle_gfx_draw_unit_sprite_position_copies(battle_unit_t* unit) {
         copyVector(&zoom, &g_battle_camera_zoom);
         display = unit->animation.display;
         battle_gfx_construct_polygon_data_for_units(
-            display, display->part_count, 0, &position, 0, flags, &zoom, main_gfx_get_otag() + depth);
+            display, display->part_count, 0, &position, 0, flags, &zoom, main_gfx_get_battle_otag() + depth);
     }
 }
 
@@ -1361,7 +1361,7 @@ void battle_gfx_draw_item_display(battle_unit_t* unit) {
     position.vx += unit->camera_relative_x;
     position.vy += unit->camera_relative_y;
     main_util_set_svector(&zoom, ONE, ONE, ONE);
-    otag = main_gfx_get_otag();
+    otag = main_gfx_get_battle_otag();
     otag += unit->otag_depth_index;
     battle_gfx_construct_polygon_data_for_units(
         unit->item_display, unit->item_display->part_count, 0, &position, 0, 0, &zoom, otag);

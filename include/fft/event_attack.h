@@ -72,7 +72,7 @@ typedef struct attack_deploy_render_buffer {
     POLY_FT4 portraits[10];                 /* 0x1f4 */
     POLY_FT4 status[30];                    /* 0x384 */
     attack_deploy_arrow_gfx_t screen_arrow; /* 0x834 */
-    POLY_FT4 menu_cursor[4];                /* 0x884 */
+    POLY_FT4 button_hints[4];               /* 0x884 */
     POLY_FT4 cursor[2][2];                  /* 0x924 */
     DR_MODE draw_mode_9c4;                  /* 0x9c4 */
     DR_MODE draw_mode_9d0;                  /* 0x9d0 */
@@ -88,7 +88,7 @@ typedef struct attack_deploy_render_buffer {
 typedef char attack_deploy_render_buffer_size_must_be_2604[(sizeof(attack_deploy_render_buffer_t) == 2604) ? 1 : -1];
 
 /* g_attack_deploy_menu_state: what the deployment cursor is over. It selects
- * the button hint attack_deploy_build_menu_cursor_primitives draws. */
+ * the button hint attack_deploy_build_button_hint draws. */
 typedef enum attack_deploy_menu_state {
     ATTACK_DEPLOY_MENU_CLOSED = -1,       /* attack_deploy_run_screen is done */
     ATTACK_DEPLOY_MENU_EMPTY_TILE = 0,    /* a unit can be placed here */
@@ -133,8 +133,8 @@ unit_deployment_coordinates_t* attack_deploy_get_coordinate_slots(void);
 /* deployment menu and cursors */
 extern s32 g_attack_deploy_menu_state; /* attack_deploy_menu_state_e */
 extern menu_entry_t g_attack_deploy_menu_entries[];
-extern help_navigation_record_t g_attack_deploy_select_menu_nodes[];
-extern image_load_parameters_t g_attack_deploy_menu_cursor_cells[];
+extern help_navigation_record_t g_attack_deploy_help_cursor_nodes[];
+extern image_load_parameters_t g_attack_deploy_button_hint_cells[];
 extern s32 g_attack_deploy_active_cursor;
 extern s32 g_attack_deploy_cursor_row[2];
 extern s32 g_attack_deploy_cursor_column[2];
@@ -149,7 +149,7 @@ extern const palette_t g_attack_deploy_cursor_palette_source[2];
 extern u32 g_attack_deploy_cursor_texture_data[];
 extern RECT g_attack_deploy_cursor_texture_rect;
 
-void attack_deploy_run_select_menu(void);
+void attack_deploy_run_help_cursor(void);
 
 /* deployment screen graphics */
 extern attack_deploy_render_buffer_t g_attack_deploy_render_buffers[2];
@@ -186,9 +186,9 @@ extern s32 g_attack_deploy_zodiac_brightness_word[1];
 /* Slots of the deployment screen's own threads; the screen itself runs in
  * THREAD_BORROWED_SLOT_DEPLOYMENT and its panels in the
  * thread_screen_slot_e slots (unit status 8, character status 9,
- * numeric editor 12). */
+ * numeric panel 12). */
 typedef enum attack_thread_slot {
-    ATTACK_THREAD_SLOT_SELECT_MENU = 3,      /* attack_deploy_run_select_menu */
+    ATTACK_THREAD_SLOT_HELP_CURSOR = 3,      /* attack_deploy_run_help_cursor */
     ATTACK_THREAD_SLOT_ROSTER_STEP = 4,      /* attack_deploy_select_next_roster_unit and _previous_roster_unit */
     ATTACK_THREAD_SLOT_NOTICE = 13,          /* the notice shown for an invalid deployment input */
     ATTACK_THREAD_SLOT_SCREEN_GRAPHICS = 14, /* attack_deploy_update_screen_graphics, then the map title */
@@ -250,13 +250,13 @@ extern u16 g_attack_panel_status_y_offsets[][2];
 
 void attack_menu_build_status_group_primitives(POLY_FT4* poly);
 
-/* numeric editor */
+/* numeric panel */
 /* Five name ids and five ability/skillset ids of the unit loaded into the
  * editor (g_menu_selected_unit_fields + 0x24). The target walks them from this
  * standalone address: indexing the editor record instead folds 0x24 into each
  * load and allocates the walk from the record base. */
 extern s16 g_attack_editor_item_and_ability_ids[10];
-extern u8 g_attack_numeric_editor_thread_params[];
+extern u8 g_attack_numeric_panel_thread_params[];
 
 void attack_editor_load_party_unit(s32 unused, s32 party_index);
 

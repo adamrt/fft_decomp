@@ -648,7 +648,7 @@ static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit
 }
 
 /* Build the status panel data of party member `party_index` and start the
- * three unit panel threads on it (status banner, numeric editor, equipment
+ * three unit panel threads on it (status banner, numeric panel, equipment
  * and ability panel), raising MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS. */
 static void wldcore_unit_start_status_panel_threads(s32 party_index) {
     menu_status_thread_t* thread8;
@@ -661,8 +661,8 @@ static void wldcore_unit_start_status_panel_threads(s32 party_index) {
     thread8->x = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread);
-    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_wldcore_threadc_params, 0, 0);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_frame_thread);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_wldcore_threadc_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_wldcore_thread9_params, 0, 0);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS;
@@ -697,7 +697,7 @@ static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_le
             g_wldcore_window_records[level->right_arrow].flags |= WORLD_RENDER_RECORD_HIDDEN;
             level->mode = WLDCORE_SEND_UNIT_MODE_STATUS_CLOSE;
             thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-            thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
             thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
             return;
         }
@@ -761,7 +761,7 @@ static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_le
         if (thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) != 0) {
             return;
         }
-        if (thread_is_running(THREAD_SCREEN_SLOT_NUMERIC_EDITOR) != 0) {
+        if (thread_is_running(THREAD_SCREEN_SLOT_NUMERIC_PANEL) != 0) {
             return;
         }
         if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) != 0) {

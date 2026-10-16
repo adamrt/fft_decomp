@@ -83,8 +83,8 @@ extern char g_menu_wait_for_file_allocation_message[];
 void menu_request_open_companion_executable(s32 request_index);
 /* The per-frame drivers of the executable and data file requests: they start the disc read on the main stack,
  * poll until it finishes and clear the request. */
-void menu_open_companion_executable(void);
-void menu_open_companion_data_file(void);
+void menu_poll_companion_executable_load(void);
+void menu_poll_companion_data_file_load(void);
 /* Requests SMALL.OUT without waiting; menu_poll_small_load drives the load during map initialization and returns
  * 1 while it is pending. */
 void menu_request_open_small(void);

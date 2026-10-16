@@ -34,13 +34,13 @@ void main_system_handle_pointer_exception(int error_code) {
 
 /* Return the ordering table of BATTLE's current render buffer; the pointer is a BATTLE.BIN global,
  * so this only works while BATTLE is loaded. */
-u32* main_gfx_get_otag(void) {
+u32* main_gfx_get_battle_otag(void) {
     return g_battle_gfx_current_render_buffer->otag;
 }
 
 /* Make the other of BATTLE's two render buffers the current one and clear its
  * 0x180-entry ordering table. */
-void main_gfx_swap_and_clear_otag(void) {
+void main_gfx_swap_and_clear_battle_otag(void) {
     battle_render_buffer_t* stats = g_battle_render_buffers;
     u32* otag;
 

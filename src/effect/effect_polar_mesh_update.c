@@ -35,7 +35,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
     effect_polar_mesh_scratch_t* scratch = (effect_polar_mesh_scratch_t*)getScratchAddr(0);
     effect_record_t* record = &g_battle_effect_state_records[state_index];
     const effect_geometry_record_t* entry = &g_battle_effect_geometry_table->entries[emitter_index];
-    u32* ot = main_gfx_get_otag();
+    u32* ot = main_gfx_get_battle_otag();
     effect_polar_mesh_work_t* work;
     POLY_GT4* quad;
     POLY_GT4* inner;

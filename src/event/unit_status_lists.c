@@ -309,13 +309,13 @@ void script_warp_unit_display_to_paired_unit(s32 runtime_id) {
 
 /* Hide the depth number of the selected-tile panel; BATTLE's effect playback sets it for the
  * length of an ability effect. */
-void menu_suppress_height_display(void) {
-    g_menu_height_display_suppressed = 1;
+void menu_suppress_depth_display(void) {
+    g_menu_depth_display_suppressed = 1;
 }
 
 /* Show the selected-tile panel's depth number again (effect playback end). */
-void menu_enable_height_display(void) {
-    g_menu_height_display_suppressed = 0;
+void menu_enable_depth_display(void) {
+    g_menu_depth_display_suppressed = 0;
 }
 
 /* Allocate text image VRAM for the sprite or textured quad and give it the normal menu CLUT, GetClut(0x3c0, 0x1f0),
@@ -391,7 +391,7 @@ void menu_run_selected_tile_info_display_thread(void) {
             g_menu_text_state.pen.stride = 0x18;
             menu_set_text_origin(0x10, 0);
             menu_draw_large_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_text_state.pen);
-            if (g_menu_height_display_suppressed == 0) {
+            if (g_menu_depth_display_suppressed == 0) {
                 LoadImage(&rect, buffer);
                 page->sprites[0].clut = 0x7CBC;
                 gfx_draw_or_append_gpu_primitive(&page->sprites[0]);

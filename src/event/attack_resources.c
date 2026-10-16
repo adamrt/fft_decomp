@@ -1158,7 +1158,7 @@ void script_reset_event_state(void) {
 
 /* Run one event frame, then return whether the deployment thread (borrowed slot
  * 6) is still running. */
-s32 script_is_deployment_running(u32* ot, u32 buttons) {
+s32 script_run_frame_and_check_deployment(u32* ot, u32 buttons) {
     script_run_event_frame(ot, buttons);
     return thread_is_running(THREAD_BORROWED_SLOT_DEPLOYMENT);
 }
@@ -1800,7 +1800,7 @@ void menu_record_selection_for_selected_unit(void) {
 /* Thread entry of the turn menus (entries 0x00, 0x0e, 0x13, 0x14, 0x20, 0x21 and
  * 0x2e-0x33 of the idle action menu table): run the icon selection loop, then
  * remember the chosen row for the active-turn unit and exit. */
-void menu_build_main(void) {
+void menu_run_turn_menu_thread(void) {
     menu_entry_t* parameter = (menu_entry_t*)thread_get_current_parameter_1();
     menu_unit_selection_record_t* record;
     s32 unit_id = g_menu_selected_unit.battle_id;

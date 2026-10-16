@@ -166,14 +166,14 @@ extern u8 g_menu_quad_group_starts[]; /* [group + 1] ends each group */
 extern point16_t g_menu_quad_origin;
 extern menu_quad_piece_t g_menu_quad_pieces[];
 extern menu_quad_page_t g_menu_height_display_pages[2];
-/* Nonzero while effects hide the tile height in the selected-tile display. */
-extern u16 g_menu_height_display_suppressed;
+/* Nonzero while effects hide the tile's depth number in the selected-tile display. */
+extern u16 g_menu_depth_display_suppressed;
 extern RECT g_menu_tile_info_image_location;
 extern image_load_parameters_t g_menu_tile_info_image_params[2];
 
 /* BATTLE's effect playback suppresses the tile's depth number for the length of an ability effect. */
-void menu_enable_height_display(void);
-void menu_suppress_height_display(void);
+void menu_enable_depth_display(void);
+void menu_suppress_depth_display(void);
 void menu_run_selected_tile_info_display_thread(void);
 
 #endif

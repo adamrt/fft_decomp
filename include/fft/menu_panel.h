@@ -2,7 +2,7 @@
 #define MENU_PANEL_H
 
 /* Status panels: the panel threads and their parameter blocks, the double-buffered packet layouts, portraits,
- * panel fades and thread indicators, and the character status, equipment, numeric editor and numeric display
+ * panel fades and thread indicators, and the character status, equipment, numeric panel and numeric display
  * panels and the battle Status screen. */
 
 #include "fft/gfx.h"
@@ -22,7 +22,7 @@ typedef enum menu_status_panel_flags {
 } menu_status_panel_flags_e;
 
 /* Parameter block of the task-0x3b status panel threads (WORLD's formation
- * panels and the overlays' character status and numeric editor threads): the
+ * panels and the overlays' character status and numeric panel threads): the
  * panel origin, a redraw request and the frame style read by
  * menu_set_status_panel_primitive_colors. The origin is read as whole 32-bit values (lw) for the
  * draw-area offset; the 16-bit reads that feed the s16 draw-offset stores
@@ -53,7 +53,7 @@ typedef struct menu_status_panel_display_thread {
 } menu_status_panel_display_thread_t;
 
 /* Parameter blocks of the selected unit's and the comparison unit's status panels, the stat preview panel and
- * the numeric editor. */
+ * the numeric panel. */
 extern menu_status_thread_t g_menu_status_display_thread_params;
 extern menu_status_thread_t g_menu_comparison_display_thread_params;
 extern menu_status_thread_t g_menu_preview_stats_thread_params;
@@ -62,7 +62,7 @@ extern menu_status_thread_t g_menu_numeric_panel_params;
 /* Each starts its panel thread when enable is set and the thread is idle, and asks it to stop otherwise. */
 void menu_toggle_unit_status_thread(s32 enable);
 void menu_toggle_comparison_status_thread(s32 enable);
-void menu_toggle_numeric_editor_thread(s32 enable);
+void menu_toggle_numeric_panel_thread(s32 enable);
 
 /* The unit status panel thread; each program that shows the panel links its own body. */
 void menu_run_unit_status_thread(void);
@@ -406,8 +406,8 @@ extern s8 g_remove_item_previewed_slot;
 
 void menu_run_equipment_ability_panel_thread(void);
 
-/* numeric editor */
-/* The numeric editor's two adjacent rectangles: the first is the panel frame
+/* numeric panel */
+/* The numeric panel's two adjacent rectangles: the first is the panel frame
  * and the screen origin handed to image loading, the second places the
  * portrait. */
 typedef struct menu_status_panel_numeric_geometry {
@@ -415,7 +415,7 @@ typedef struct menu_status_panel_numeric_geometry {
     RECT draw_area_rect; /* 0x08 */
 } menu_status_panel_numeric_geometry_t;
 
-/* Numeric editor panel buffer (0x2c0 bytes), double buffered by menu_run_numeric_editor_frame_thread, which
+/* Numeric panel buffer (0x2c0 bytes), double buffered by menu_run_numeric_panel_frame_thread, which
  * copies it with sizeof. The draw modes are set up with gfx_set_draw_mode_for_texture_page /
  * SetDrawMode, the 18 SPRTs by the gfx_init_image_loading walk,
  * +0x18c and +0x298 are the arguments of
@@ -434,7 +434,7 @@ typedef struct menu_status_panel_numeric_buffer {
 typedef char
     menu_status_panel_numeric_buffer_size_must_be_704[(sizeof(menu_status_panel_numeric_buffer_t) == 704) ? 1 : -1];
 
-extern s32 g_numeric_editor_redraw_request;
+extern s32 g_numeric_panel_redraw_request;
 extern menu_status_panel_numeric_geometry_t g_editor_numeric_table;
 extern menu_status_panel_numeric_buffer_t g_editor_numeric_state[2];
 extern menu_status_panel_numeric_buffer_t g_editor_numeric_state_a[2];
@@ -453,9 +453,9 @@ extern struct unit_stats g_editor_party_unit_stats;
 extern u8 g_editor_primary_skillset_name[];
 extern u8 g_editor_secondary_skillset_name[];
 
-void menu_run_numeric_editor_thread(void);
+void menu_run_numeric_panel_thread(void);
 /* EQUIP builds its own body. */
-void menu_run_numeric_editor_frame_thread(void);
+void menu_run_numeric_panel_frame_thread(void);
 
 /* numeric display */
 /* The Status screen's numeric side panel: its fifteen numbers are drawn into three images once, then the frame and

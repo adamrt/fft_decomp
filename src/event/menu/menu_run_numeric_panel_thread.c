@@ -1,4 +1,4 @@
-/* The thread drawing the numeric editor until its task requests a stop. */
+/* The thread drawing the numeric panel until its task requests a stop. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
@@ -15,11 +15,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* The numeric stats panel as menu_run_numeric_editor_frame_thread draws it, except that the
+/* The numeric stats panel as menu_run_numeric_panel_frame_thread draws it, except that the
  * draw offset follows the screen polarity and both slots use g_editor_numeric_state, so a
  * preview panel shares the main panel's primitive buffers (retail). Runs until a stop
  * request. */
-void menu_run_numeric_editor_thread(void) {
+void menu_run_numeric_panel_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;
     menu_status_panel_numeric_buffer_t* buffers;
@@ -40,7 +40,7 @@ void menu_run_numeric_editor_thread(void) {
 
     /* Slot 12 draws the unit's stats; the other slot (a preview panel) has its own number
      * images, VRAM rects and entries. */
-    if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+    if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
         buffer = g_editor_numeric_state;
         buffers = buffer;
         number_images = &g_editor_numeric_text_a;
@@ -75,7 +75,7 @@ void menu_run_numeric_editor_thread(void) {
 
     /* The preview panel uploads its number images 0x4C rows lower (y 204), so its number
      * sprites sample there. */
-    if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+    if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
         buffer->sprites[14].v0 += 0x4C;
         buffer->sprites[15].v0 += 0x4C;
         buffer->sprites[16].v0 += 0x4C;
@@ -93,7 +93,7 @@ void menu_run_numeric_editor_thread(void) {
             /* Each pen stride is its image's width in 4-bit pixels (four per 16-bit VRAM unit). */
             g_menu_text_state.pen.stride = 0x14;
             menu_set_text_origin(0, 0);
-            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
             } else {
                 menu_draw_numeric_display_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
@@ -101,7 +101,7 @@ void menu_run_numeric_editor_thread(void) {
 
             g_menu_text_state.pen.stride = 0x40;
             menu_set_text_origin(0, 0);
-            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
             } else {
                 menu_draw_numeric_display_entries(number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
@@ -109,7 +109,7 @@ void menu_run_numeric_editor_thread(void) {
 
             g_menu_text_state.pen.stride = 0x64;
             menu_set_text_origin(0, 0);
-            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
             } else {
                 menu_draw_numeric_display_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
@@ -167,7 +167,7 @@ void menu_run_numeric_editor_thread(void) {
         for (; i < 17; i++) {
             gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
-        if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+        if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
             gfx_draw_or_append_gpu_primitive(&buffer->text_draw_mode);
         } else {
             gfx_draw_or_append_gpu_primitive(&buffer->image_draw_mode);

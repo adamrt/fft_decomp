@@ -53,7 +53,7 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 
 /* menu cell layouts */
 /* Image placements passed to gfx_init_image_loading: the icon strips of the
- * event library, and the panel and numeric editor cells of the menu library,
+ * event library, and the panel and numeric-panel cells of the menu library,
  * which each menu program defines for itself. */
 extern image_load_parameters_t g_menu_icon_strip_image_params[20];
 extern image_load_parameters_t g_menu_single_icon_image_params[5];

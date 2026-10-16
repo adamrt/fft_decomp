@@ -260,7 +260,7 @@ typedef enum equip_thread_slot {
     EQUIP_THREAD_SLOT_COMMAND_MENU_CHILD = 4, /* a wait-forever thread while a command's mode runs */
     EQUIP_THREAD_SLOT_COMMAND_MENU = 5,       /* menu_icon_list_thread */
     EQUIP_THREAD_SLOT_EQUIPMENT_LIST = 10,    /* menu_run_equipment_list_thread */
-    EQUIP_THREAD_SLOT_ITEM_NUMERIC = 11,      /* the numeric editor thread of the item panel */
+    EQUIP_THREAD_SLOT_ITEM_NUMERIC = 11,      /* the numeric panel thread of the item panel */
     EQUIP_THREAD_SLOT_UNIT_STATUS = 13,       /* menu_run_unit_status_thread */
     EQUIP_THREAD_SLOT_COMPARISON_STATUS = 14, /* the second banner slot the indicator draw watches */
 } equip_thread_slot_e;

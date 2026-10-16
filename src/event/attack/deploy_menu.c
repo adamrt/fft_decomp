@@ -1,4 +1,4 @@
-/* The deployment select menu, deployment strings, shaded panel strips and the map title graphic. */
+/* The deployment field-help cursor, deployment strings, shaded panel strips and the map title graphic. */
 
 #include "fft/event_attack.h"
 #include "fft/gfx_primitive.h"
@@ -24,7 +24,7 @@
 /* Run the deployment screen's field-help cursor: the D-pad moves a bobbing hand between the status
  * panel's fields, Circle opens the help text for the field under it in the parent thread's slot,
  * and Cross closes it. Input waits while that help text is open. */
-void attack_deploy_run_select_menu(void) {
+void attack_deploy_run_help_cursor(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shade[2];
     s32 i;
@@ -65,23 +65,23 @@ void attack_deploy_run_select_menu(void) {
     /* Parameter 1 (Select on the roster view) makes nodes 5, 9 and 10 their own down neighbors; from
      * the unit detail view (0) they lead down to nodes 12 and 17. */
     if (thread_get_current_parameter_1() != 0) {
-        g_attack_deploy_select_menu_nodes[5].destination[1] = 5;
-        g_attack_deploy_select_menu_nodes[9].destination[1] = 9;
-        g_attack_deploy_select_menu_nodes[10].destination[1] = 10;
+        g_attack_deploy_help_cursor_nodes[5].destination[1] = 5;
+        g_attack_deploy_help_cursor_nodes[9].destination[1] = 9;
+        g_attack_deploy_help_cursor_nodes[10].destination[1] = 10;
     } else {
-        g_attack_deploy_select_menu_nodes[5].destination[1] = 12;
-        g_attack_deploy_select_menu_nodes[9].destination[1] = 17;
-        g_attack_deploy_select_menu_nodes[10].destination[1] = 17;
+        g_attack_deploy_help_cursor_nodes[5].destination[1] = 12;
+        g_attack_deploy_help_cursor_nodes[9].destination[1] = 17;
+        g_attack_deploy_help_cursor_nodes[10].destination[1] = 17;
     }
 
     /* Each roster unit owns 11 help entries: nodes 18 to 27 take the first ten, node 8 the last. */
-    g_attack_deploy_select_menu_nodes[8].help_base = g_attack_deploy_selected_roster_index * 11 + 10 - 0x3000;
+    g_attack_deploy_help_cursor_nodes[8].help_base = g_attack_deploy_selected_roster_index * 11 + 10 - 0x3000;
     for (i = 0; i < 10; i++) {
-        g_attack_deploy_select_menu_nodes[i + 18].help_base = g_attack_deploy_selected_roster_index * 11 - 0x3000 + i;
+        g_attack_deploy_help_cursor_nodes[i + 18].help_base = g_attack_deploy_selected_roster_index * 11 - 0x3000 + i;
     }
 
     selected = 0;
-    nodes = g_attack_deploy_select_menu_nodes;
+    nodes = g_attack_deploy_help_cursor_nodes;
     g_text_section_pointers[TEXT_SECTION_DEPLOYMENT_UNIT_HELP] = g_attack_deploy_unit_text_section;
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_attack_deploy_help_text_section;
     parent_id = g_thread_current_id - 1;

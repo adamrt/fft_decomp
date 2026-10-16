@@ -90,7 +90,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
     record = &g_battle_effect_state_records[state_index];
     entry = &g_battle_effect_geometry_table->entries[emitter_index];
     placement = entry->radial_mesh.placement_flags;
-    ot = main_gfx_get_otag();
+    ot = main_gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

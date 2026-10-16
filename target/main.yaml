@@ -678,7 +678,7 @@ functions:
   - {addr: 0x8004146c, size: 300, name: main_gfx_load_efc_fnt, hash: 02911c7008f10711, unit: game_loop}
   - {addr: 0x80041598, size: 476, name: main_set_display_draw, hash: 8715c0b670c3f523, unit: game_loop, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
   - {addr: 0x80041774, size: 284, name: main_boot_draw_squaresoft_logo, hash: 8a5c9395c78d9abc, unit: game_loop}
-  - {addr: 0x80041890, size: 652, name: main_boot_build_and_draw_squaresoft_logo, hash: 429977c5de60ed46, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80041890, size: 652, name: main_boot_fade_in_squaresoft_logo, hash: 429977c5de60ed46, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x80041b1c, size: 612, name: main_boot_fade_out_squaresoft_logo, hash: a75b1f62cd2cc9b5, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x80041d80, size: 280, name: main_boot_draw_sceap_logo, hash: bdee131a2f49829f, unit: game_loop}
   - {addr: 0x80041e98, size: 1004, name: main_boot_build_and_draw_sceap_logo, hash: 34c0ed5f4b6c9b9f, unit: game_loop, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
@@ -754,8 +754,8 @@ functions:
   - {addr: 0x80044a00, size: 8, name: main_system_report_error, hash: 6d64edf91449c1b1, unit: system_handlers}
   - {addr: 0x80044a08, size: 44, name: main_system_handle_error, hash: 0520ba9fd79942b9, unit: system_handlers}
   - {addr: 0x80044a34, size: 44, name: main_system_handle_pointer_exception, hash: c49c56d6a872179f, unit: system_handlers}
-  - {addr: 0x80044a60, size: 28, name: main_gfx_get_otag, hash: 0e1f986e004b6e64, unit: system_handlers}
-  - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_otag, hash: 676737da60ea151b, unit: system_handlers}
+  - {addr: 0x80044a60, size: 28, name: main_gfx_get_battle_otag, hash: 0e1f986e004b6e64, unit: system_handlers}
+  - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_battle_otag, hash: 676737da60ea151b, unit: system_handlers}
   - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, unit: system_handlers}
   - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: system_handlers}
   - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f}

@@ -343,9 +343,9 @@ ramza_placed:
                 = attack_deploy_is_roster_unit_deployed(g_attack_deploy_selected_roster_index);
             input = script_get_controller_input_pointer(0);
             if (*input & PSX_PAD_SELECT) {
-                thread_start(ATTACK_THREAD_SLOT_SELECT_MENU, attack_deploy_run_select_menu);
-                thread_set_parameters(ATTACK_THREAD_SLOT_SELECT_MENU, 1, 0, 0);
-                thread_wait_until_inactive(ATTACK_THREAD_SLOT_SELECT_MENU);
+                thread_start(ATTACK_THREAD_SLOT_HELP_CURSOR, attack_deploy_run_help_cursor);
+                thread_set_parameters(ATTACK_THREAD_SLOT_HELP_CURSOR, 1, 0, 0);
+                thread_wait_until_inactive(ATTACK_THREAD_SLOT_HELP_CURSOR);
             }
 
             /* Update the idle icons (state below 2) for the cursor tile and the unit count. */
@@ -638,9 +638,9 @@ ramza_placed:
                 if (g_attack_panel_status_animation[4] < 2) {
                     g_attack_panel_status_animation[4] = 1;
                 }
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_thread);
                 thread_set_parameters(
-                    THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)g_attack_numeric_editor_thread_params, 0, 0);
+                    THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)g_attack_numeric_panel_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)g_attack_character_status_frame_config, 0, 0);
@@ -648,16 +648,16 @@ ramza_placed:
                 do {
                     thread_yield();
                     if (*input & PSX_PAD_SELECT) {
-                        thread_start(ATTACK_THREAD_SLOT_SELECT_MENU, attack_deploy_run_select_menu);
-                        thread_set_parameters(ATTACK_THREAD_SLOT_SELECT_MENU, 0, 0, 0);
-                        thread_wait_until_inactive(ATTACK_THREAD_SLOT_SELECT_MENU);
+                        thread_start(ATTACK_THREAD_SLOT_HELP_CURSOR, attack_deploy_run_help_cursor);
+                        thread_set_parameters(ATTACK_THREAD_SLOT_HELP_CURSOR, 0, 0, 0);
+                        thread_wait_until_inactive(ATTACK_THREAD_SLOT_HELP_CURSOR);
                     }
                     attack_deploy_handle_roster_navigation_input();
                 } while (!(*input & PSX_PAD_CROSS));
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
-                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, 0, 0, 1);
+                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
-                thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+                thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
                 thread_wait_until_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
                 script_set_event_speed(1);
             }
@@ -1080,7 +1080,7 @@ static void attack_deploy_select_next_roster_unit(void) {
     attack_editor_load_party_unit(1, g_attack_deploy_selected_roster_index);
     g_attack_deploy_roster_navigation_direction = 1;
     g_attack_status_display_thread_params = 0;
-    g_numeric_editor_redraw_request = 1;
+    g_numeric_panel_redraw_request = 1;
     g_character_status_redraw_request = 1;
     g_attack_deploy_selected_unit_deployed
         = attack_deploy_is_roster_unit_deployed(g_attack_deploy_selected_roster_index);
@@ -1115,7 +1115,7 @@ static void attack_deploy_select_previous_roster_unit(void) {
     attack_editor_load_party_unit(1, g_attack_deploy_selected_roster_index);
     g_attack_deploy_roster_navigation_direction = 2;
     g_attack_status_display_thread_params = 0;
-    g_numeric_editor_redraw_request = 1;
+    g_numeric_panel_redraw_request = 1;
     g_character_status_redraw_request = 1;
     g_attack_deploy_selected_unit_deployed
         = attack_deploy_is_roster_unit_deployed(g_attack_deploy_selected_roster_index);
@@ -1164,8 +1164,7 @@ static void attack_deploy_build_screen_arrow(void) {
 /* Build and submit the button hint for the cursor tile's menu state `mode`: hint 0 on an
  * empty tile (dimmed on a blocked one), hint 1 on the selected unit, hints 0 and 1 on
  * another unit and hints 2 and 3 for a swap, the pair dimming in turn every 32 frames. */
-static void attack_deploy_build_menu_cursor_primitives(
-    s32 frame, u32 mode, attack_deploy_render_buffer_t* render_buffer) {
+static void attack_deploy_build_button_hint(s32 frame, u32 mode, attack_deploy_render_buffer_t* render_buffer) {
     s32 i;
     s32 palette;
     POLY_FT4* ptr;
@@ -1173,47 +1172,47 @@ static void attack_deploy_build_menu_cursor_primitives(
     gfx_set_draw_mode_for_texture_page(&render_buffer->menu_draw_mode, MENU_TEXTURE_PAGE_FRAME);
 
     for (i = 0; i < 4; i++) {
-        ptr = &render_buffer->menu_cursor[i];
+        ptr = &render_buffer->button_hints[i];
         menu_init_default_poly_ft4(ptr);
         SetSemiTrans(ptr, 0);
         SetShadeTex(ptr, 1);
         /* The draw area's x/y serve as the screen base point. */
         gfx_init_image_loading(
-            ptr, g_attack_deploy_texture_location, &g_menu_draw_area_template, &g_attack_deploy_menu_cursor_cells[i]);
+            ptr, g_attack_deploy_texture_location, &g_menu_draw_area_template, &g_attack_deploy_button_hint_cells[i]);
     }
 
     if (mode != ATTACK_DEPLOY_MENU_BLOCKED_TILE) {
         palette = 0x7D7C;
         for (i = 3; i >= 0; i--) {
-            render_buffer->menu_cursor[i].clut = palette;
+            render_buffer->button_hints[i].clut = palette;
         }
     } else {
         palette = 0x7DFC;
         for (i = 3; i >= 0; i--) {
-            render_buffer->menu_cursor[i].clut = palette;
+            render_buffer->button_hints[i].clut = palette;
         }
     }
 
     gfx_draw_or_append_gpu_primitive(&render_buffer->menu_draw_mode);
     if (mode < 2) {
-        gfx_draw_or_append_gpu_primitive(&render_buffer->menu_cursor[0]);
+        gfx_draw_or_append_gpu_primitive(&render_buffer->button_hints[0]);
     } else if (mode == ATTACK_DEPLOY_MENU_SELECTED_UNIT) {
-        gfx_draw_or_append_gpu_primitive(&render_buffer->menu_cursor[1]);
+        gfx_draw_or_append_gpu_primitive(&render_buffer->button_hints[1]);
     } else if (mode == ATTACK_DEPLOY_MENU_OTHER_UNIT) {
-        gfx_draw_or_append_gpu_primitive(&render_buffer->menu_cursor[1]);
-        gfx_draw_or_append_gpu_primitive(&render_buffer->menu_cursor[0]);
+        gfx_draw_or_append_gpu_primitive(&render_buffer->button_hints[1]);
+        gfx_draw_or_append_gpu_primitive(&render_buffer->button_hints[0]);
         if ((frame & 0x3F) < 0x20) {
-            render_buffer->menu_cursor[0].clut = 0x7DFC;
+            render_buffer->button_hints[0].clut = 0x7DFC;
         } else {
-            render_buffer->menu_cursor[1].clut = 0x7DFC;
+            render_buffer->button_hints[1].clut = 0x7DFC;
         }
     } else if (mode == ATTACK_DEPLOY_MENU_SWAP_UNIT) {
-        gfx_draw_or_append_gpu_primitive(&render_buffer->menu_cursor[3]);
-        gfx_draw_or_append_gpu_primitive(&render_buffer->menu_cursor[2]);
+        gfx_draw_or_append_gpu_primitive(&render_buffer->button_hints[3]);
+        gfx_draw_or_append_gpu_primitive(&render_buffer->button_hints[2]);
         if ((frame & 0x3F) < 0x20) {
-            render_buffer->menu_cursor[2].clut = 0x7DFC;
+            render_buffer->button_hints[2].clut = 0x7DFC;
         } else {
-            render_buffer->menu_cursor[3].clut = 0x7DFC;
+            render_buffer->button_hints[3].clut = 0x7DFC;
         }
     }
 }
@@ -1235,7 +1234,7 @@ void attack_deploy_set_cursor_tile(s32 column, s32 row) {
 }
 
 /* Choose which of the three places the tiles-only view draws its arrow (0, 1 or 2). Nothing calls
- * it; attack_deploy_init_valid_tiles resets the mode to 0. */
+ * it; attack_deploy_enter_tiles_only_view resets the mode to 0. */
 void attack_deploy_set_arrow_position_mode(s32 mode) {
     g_attack_deploy_arrow_position_mode = mode;
 }
@@ -1243,7 +1242,7 @@ void attack_deploy_set_arrow_position_mode(s32 mode) {
 /* Enter the deployment screen's tiles-only view: hide the menu, reset the
  * cursor and grid slide, prepare the valid-tile primitives and start the
  * deployment render thread. */
-void attack_deploy_init_valid_tiles(void) {
+void attack_deploy_enter_tiles_only_view(void) {
     g_attack_deploy_tiles_only_mode = 1;
     g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_HIDDEN;
     g_attack_deploy_active_cursor = 0;
@@ -1314,7 +1313,7 @@ static void attack_deploy_run_render_thread(void) {
     while (1) {
         thread_yield();
         if (g_attack_deploy_tiles_only_mode == 0 && g_attack_deploy_menu_state != ATTACK_DEPLOY_MENU_HIDDEN) {
-            attack_deploy_build_menu_cursor_primitives(
+            attack_deploy_build_button_hint(
                 frame, g_attack_deploy_menu_state, &g_attack_deploy_render_buffers[frame & 1]);
         }
         gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].draw_mode_9c4);

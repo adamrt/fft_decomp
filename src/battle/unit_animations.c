@@ -2383,11 +2383,11 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
                     }
                     display = unit->sprite_blocks[entry - 1].display;
                     battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, angle,
-                        flags, &zoom, main_gfx_get_otag() + unit->otag_depth_index);
+                        flags, &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
                 } else {
                     display = unit->animation.display;
-                    battle_gfx_construct_polygon_data_for_units(
-                        display, 3, 0, &position, angle, flags, &zoom, main_gfx_get_otag() + unit->otag_depth_index);
+                    battle_gfx_construct_polygon_data_for_units(display, 3, 0, &position, angle, flags, &zoom,
+                        main_gfx_get_battle_otag() + unit->otag_depth_index);
                     rider = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
                     if (rider != 0 && rider->draw_enabled != 0) {
                         rider_position.vx = rider->camera_relative_x;
@@ -2403,21 +2403,21 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
                                 rider_display = rider->sprite_blocks[entry - 1].display;
                                 battle_gfx_construct_polygon_data_for_units(rider_display, rider_display->part_count, 0,
                                     &rider_position, angle, rider_flags, &zoom,
-                                    main_gfx_get_otag() + unit->otag_depth_index);
+                                    main_gfx_get_battle_otag() + unit->otag_depth_index);
                             } else {
                                 rider_display = rider->animation.display;
                                 battle_gfx_construct_polygon_data_for_units(rider_display, rider_display->part_count, 0,
                                     &rider_position, angle, rider_flags, &zoom,
-                                    main_gfx_get_otag() + unit->otag_depth_index);
+                                    main_gfx_get_battle_otag() + unit->otag_depth_index);
                             }
                         }
                     }
                     battle_gfx_construct_polygon_data_for_units(display, display->part_count, 3, &position, angle,
-                        flags, &zoom, main_gfx_get_otag() + unit->otag_depth_index);
+                        flags, &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
                 }
             }
             if (unit->shadow_graphic_trigger) {
-                battle_gfx_draw_unit_shadow(unit, main_gfx_get_otag() + unit->otag_depth_index);
+                battle_gfx_draw_unit_shadow(unit, main_gfx_get_battle_otag() + unit->otag_depth_index);
             }
         }
     } else {
@@ -2429,15 +2429,15 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
                 }
                 display = unit->sprite_blocks[entry - 1].display;
                 battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, angle, flags,
-                    &zoom, main_gfx_get_otag() + unit->otag_depth_index);
+                    &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
             } else {
                 display = unit->animation.display;
                 battle_gfx_construct_polygon_data_for_units(display, display->part_count, 0, &position, angle,
-                    flags ^ unit->animation.flags, &zoom, main_gfx_get_otag() + unit->otag_depth_index);
+                    flags ^ unit->animation.flags, &zoom, main_gfx_get_battle_otag() + unit->otag_depth_index);
             }
         }
         if (unit->shadow_graphic_trigger) {
-            battle_gfx_draw_unit_shadow(unit, main_gfx_get_otag() + unit->otag_depth_index);
+            battle_gfx_draw_unit_shadow(unit, main_gfx_get_battle_otag() + unit->otag_depth_index);
         }
     }
     if (unit->position_copies_active) {

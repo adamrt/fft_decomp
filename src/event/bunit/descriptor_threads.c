@@ -1,5 +1,5 @@
-/* Descriptor threads, the selection thread, node cursor updates, the bits reader, controller input and event thread
- * state. */
+/* Descriptor threads, the selection thread, node cursor updates, the bits reader, controller input and the per-frame
+ * input update. */
 
 #include "fft/event_bunit.h"
 #include "fft/gfx.h"
@@ -300,7 +300,7 @@ static void bunit_input_update_controller(void) {
  * The help text state goes 1 on the text thread's first frame (which queues
  * the window-open sound), 2 after it and 0 otherwise.
  */
-void bunit_menu_update_event_thread_state(void) {
+void bunit_menu_input_update_with_message_state(void) {
     s32 running;
 
     bunit_input_update_controller();

@@ -23,7 +23,7 @@
 #include "psx/types.h"
 
 static void open_input_update_controller(void);
-static void open_menu_update_world_formation(void);
+static void open_menu_run_world_menu_frame(void);
 static u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state);
 static s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state);
 static void open_movie_handle_mdec_output_slice(void);
@@ -62,7 +62,7 @@ s32 open_system_run_main_loop(s32 skip_movie) {
             main_file_poll_load(&g_main_file_cd_state);
             open_gfx_clear_and_draw_current_frame();
             open_movie_update_stream_frame();
-            open_menu_update_world_formation();
+            open_menu_run_world_menu_frame();
             open_controller_dispatch_current();
 
             graphics_buffer_index = g_main_gfx_active_buffer_index;
@@ -725,16 +725,16 @@ void open_birthday_convert_date_to_zodiac(s32* month, s32* day) {
 
 /* While OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME is set (the music test), run
  * one WORLD menu frame with the blocked buttons withheld, drawing from entry
- * g_open_menu_formation_otag_index of the ordering table OPEN is building. The
+ * g_open_menu_world_frame_otag_index of the ordering table OPEN is building. The
  * active buffer index is flipped for the duration of the call. */
-static void open_menu_update_world_formation(void) {
+static void open_menu_run_world_menu_frame(void) {
     if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME) {
         u32 blocked_buttons = g_menu_blocked_buttons;
 
         g_main_gfx_active_buffer_index ^= 1;
         world_formation_set_menu_allowed_buttons(~blocked_buttons);
         world_formation_run_menu_frame(
-            &g_open_gfx_otags[g_main_gfx_active_buffer_index ^ 1][g_open_menu_formation_otag_index],
+            &g_open_gfx_otags[g_main_gfx_active_buffer_index ^ 1][g_open_menu_world_frame_otag_index],
             g_input_current_buttons);
         g_main_gfx_active_buffer_index ^= 1;
     }

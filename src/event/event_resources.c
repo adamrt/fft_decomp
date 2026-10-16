@@ -432,7 +432,7 @@ static void menu_free_high_overlay(void) {
 
 /* Load companion overlay request_index and wait for it: wait until no executable or data-file
  * request is pending, publish this one, and yield until the per-frame driver
- * (menu_open_companion_executable) clears it. The calling thread exits instead of returning
+ * (menu_poll_companion_executable_load) clears it. The calling thread exits instead of returning
  * when the frame result override is 1. */
 void menu_request_open_companion_executable(s32 request_index) {
     while (g_menu_companion_executable_request_index != 0 || g_menu_companion_data_file_request_index != 0) {
@@ -450,7 +450,7 @@ void menu_request_open_companion_executable(s32 request_index) {
 }
 
 /* The data-file counterpart of menu_request_open_companion_executable, driven by
- * menu_open_companion_data_file into g_menu_companion_data_file_buffer. */
+ * menu_poll_companion_data_file_load into g_menu_companion_data_file_buffer. */
 static void menu_request_open_companion_data_file(s32 request_index) {
     while (g_menu_companion_executable_request_index != 0 || g_menu_companion_data_file_request_index != 0) {
         thread_yield();
@@ -489,7 +489,7 @@ void script_dark_screen_thread(void) {
     thread_set_current_task_id(THREAD_TASK_DARK_SCREEN);
 #ifdef FFT_BATTLE
     menu_request_open_companion_executable(COMPANION_OVERLAY_REQUIRE);
-    require_reward_animate_bonus_image_burst();
+    require_condition_animate_bonus_image_burst();
 #endif
 }
 
@@ -920,7 +920,7 @@ void menu_init_palette_and_text(s32 unused_0) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * menu_init_palette_and_text and menu_open_companion_data_file. Nothing on the
+ * menu_init_palette_and_text and menu_poll_companion_data_file_load. Nothing on the
  * disc calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
 void menu_noop_4(void) {
@@ -929,7 +929,7 @@ void menu_noop_4(void) {
 /* Non-blocking two-step file load driven by g_thread_call_target:
  * issue the read for the pending request, then poll until it completes and
  * clear the request. */
-void menu_open_companion_data_file(void) {
+void menu_poll_companion_data_file_load(void) {
     if ((g_menu_companion_data_file_request_index != 0) && (g_menu_companion_data_file_loading == 0)) {
         g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
         if (thread_call_on_main_stack(g_menu_companion_data_file_lbas[g_menu_companion_data_file_request_index],
@@ -951,7 +951,7 @@ void menu_open_companion_data_file(void) {
  * disc read of the requested overlay on the main stack, at its offset from the
  * companion overlay load address, then poll until the read finishes and clear the
  * request. */
-void menu_open_companion_executable(void) {
+void menu_poll_companion_executable_load(void) {
     s32 idx = g_menu_companion_executable_request_index;
 
     if ((idx != 0) && (g_menu_companion_executable_loading == 0)) {
@@ -1149,7 +1149,7 @@ s32 menu_poll_small_load(void) {
     if (g_menu_companion_executable_request_index == 0) {
         return 0;
     }
-    menu_open_companion_executable();
+    menu_poll_companion_executable_load();
     if (g_menu_companion_executable_request_index != 0) {
         return 1;
     }

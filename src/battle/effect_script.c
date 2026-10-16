@@ -453,7 +453,7 @@ static s32 battle_effect_update_stage(void) {
         break;
     case EFFECT_PLAYBACK_PHASE_INIT_PALETTE:
         battle_map_freeze();
-        menu_suppress_height_display();
+        menu_suppress_depth_display();
         battle_effect_init_palette(g_battle_ability_effect_id);
         g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
         g_battle_effect_script_opcode_05_value = 0;
@@ -488,7 +488,7 @@ static s32 battle_effect_update_stage(void) {
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_RUNNING:
-        g_battle_effect_otag = main_gfx_get_otag();
+        g_battle_effect_otag = main_gfx_get_battle_otag();
         battle_effect_start_render_frame();
         while (id != 0) {
             next = g_battle_effect_state_records[id].next_index;
@@ -511,7 +511,7 @@ static s32 battle_effect_update_stage(void) {
             }
             battle_map_configure_effect_data_state(MAP_EFFECT_DATA_END);
             battle_map_unfreeze();
-            menu_enable_height_display();
+            menu_enable_depth_display();
             battle_state_clear_min_vsync_interval();
             g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
             result = 0;

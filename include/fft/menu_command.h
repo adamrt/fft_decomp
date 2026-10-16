@@ -129,7 +129,7 @@ extern s16 g_menu_wait_row_actions[4];
  * chose. WORLD's body only clears g_menu_building_thread_started. */
 void menu_build_idle_action_menu(s32 menu_id);
 /* Thread entry of the turn menus: the icon selection loop, then the chosen row remembered for the unit. */
-void menu_build_main(void);
+void menu_run_turn_menu_thread(void);
 /* Thread entry of the Wait menu. */
 void menu_wait_thread(void);
 /* Posts the close command after two frames under the mini-menu task id. */

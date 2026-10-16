@@ -149,7 +149,7 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
         s32* refresh_c;
 
         refresh_a = &g_debugchr_status_display_thread_params.style;
-        refresh_b = &g_debugchr_numeric_editor_thread_params.style;
+        refresh_b = &g_debugchr_numeric_panel_thread_params.style;
         refresh_c = &g_debugchr_character_status_frame_config.style;
         *refresh_a = 0;
         *refresh_b = 0;
@@ -157,9 +157,9 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
         thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
         thread_set_parameters(
             THREAD_SCREEN_SLOT_UNIT_STATUS, (u8*)refresh_a - offsetof(menu_status_thread_t, style), 0, 0);
-        thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, debugchr_editor_run_numeric_thread);
+        thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, debugchr_editor_run_numeric_thread);
         thread_set_parameters(
-            THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (u8*)refresh_b - offsetof(menu_status_thread_t, style), 0, 0);
+            THREAD_SCREEN_SLOT_NUMERIC_PANEL, (u8*)refresh_b - offsetof(menu_status_thread_t, style), 0, 0);
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
         thread_set_parameters(
             THREAD_SCREEN_SLOT_CHARACTER_STATUS, (u8*)refresh_c - offsetof(menu_status_thread_t, style), 0, 0);
@@ -192,11 +192,11 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
             }
             if (thread_find_running_by_task(THREAD_TASK_RESUME) != 0) {
                 g_debugchr_status_display_thread_params.style = one;
-                g_debugchr_numeric_editor_thread_params.style = one;
+                g_debugchr_numeric_panel_thread_params.style = one;
                 g_debugchr_character_status_frame_config.style = one;
             } else {
                 g_debugchr_status_display_thread_params.style = 0;
-                g_debugchr_numeric_editor_thread_params.style = 0;
+                g_debugchr_numeric_panel_thread_params.style = 0;
                 g_debugchr_character_status_frame_config.style = 0;
             }
             animation[0] = one;
@@ -215,7 +215,7 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
             input = *g_menu_input_controller;
             if ((input & PSX_PAD_CROSS) != 0) {
                 thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, 0, 0, 1);
+                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
@@ -225,7 +225,7 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
                 && (unit_has_any_current_status(g_debugchr_panel_selected_unit_data.battle_id) != 0
                     || g_menu_selected_unit_fields.state.generic_monster == 0)) {
                 g_debugchr_status_display_thread_params.style = one;
-                g_debugchr_numeric_editor_thread_params.style = one;
+                g_debugchr_numeric_panel_thread_params.style = one;
                 g_debugchr_character_status_frame_config.style = one;
                 thread_start(g_thread_current_id - 1, menu_build_unit_status_list);
                 thread_set_parameters(
@@ -253,7 +253,7 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
                 animation[1] = 0;
                 animation[2] = 0;
                 g_debugchr_status_display_thread_params.style = 0;
-                g_debugchr_numeric_editor_thread_params.style = 0;
+                g_debugchr_numeric_panel_thread_params.style = 0;
                 g_debugchr_character_status_frame_config.style = 0;
             }
         }
@@ -280,7 +280,7 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
 
             /* The status display takes its redraw request as the portrait wipe direction; L1 passes 2. */
             g_debugchr_status_display_thread_params.redraw_request = one;
-            g_debugchr_numeric_editor_thread_params.redraw_request = one;
+            g_debugchr_numeric_panel_thread_params.redraw_request = one;
             g_debugchr_character_status_frame_config.redraw_request = one;
         }
 
@@ -306,7 +306,7 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
 
             /* 2 runs the portrait wipe in the opposite direction from R1's. */
             g_debugchr_status_display_thread_params.redraw_request = 2;
-            g_debugchr_numeric_editor_thread_params.redraw_request = one;
+            g_debugchr_numeric_panel_thread_params.redraw_request = one;
             g_debugchr_character_status_frame_config.redraw_request = one;
         }
     }
@@ -338,7 +338,7 @@ void debugchr_status_run_unit_thread(s32 unit_id) {
 
 /* Run the debug unit editor on the battle units present on the field.
  *
- * It opens the status, numeric editor and character panels and alternates between two
+ * It opens the status, numeric and character panels and alternates between two
  * modes. Unit selection: R1 and L1 page through the selectable units, CIRCLE enters the
  * field editor and CROSS closes the panels and returns. Field editor: the D-pad follows
  * each field's links to its neighbors, CIRCLE starts or commits an edit and CROSS commits
@@ -438,12 +438,12 @@ void debugchr_editor_run_session(void) {
     }
 
     g_debugchr_status_display_thread_params.style = 0;
-    g_debugchr_numeric_editor_thread_params.style = 0;
+    g_debugchr_numeric_panel_thread_params.style = 0;
     g_debugchr_character_status_frame_config.style = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_debugchr_status_display_thread_params, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, debugchr_editor_run_numeric_thread);
-    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_debugchr_numeric_editor_thread_params, 0, 0);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, debugchr_editor_run_numeric_thread);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_debugchr_numeric_panel_thread_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_debugchr_character_status_frame_config, 0, 0);
 
@@ -469,7 +469,7 @@ loop_outer:
         }
         if (buttons & PSX_PAD_CROSS) {
             thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-            thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
             thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
             return;
         }
@@ -500,7 +500,7 @@ loop_outer:
 
             /* The status display takes its redraw request as the portrait wipe direction; L1 passes 2. */
             g_debugchr_status_display_thread_params.redraw_request = 1;
-            g_debugchr_numeric_editor_thread_params.redraw_request = 1;
+            g_debugchr_numeric_panel_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
         }
 
@@ -530,7 +530,7 @@ loop_outer:
             __asm__("");
             /* 2 runs the portrait wipe in the opposite direction from R1's. */
             g_debugchr_status_display_thread_params.redraw_request = 2;
-            g_debugchr_numeric_editor_thread_params.redraw_request = 1;
+            g_debugchr_numeric_panel_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
         }
 
@@ -586,7 +586,7 @@ editor:
             debugchr_editor_apply_values_to_battle_unit(g_debugchr_editor_selected_unit_slot);
             menu_load_selected_unit();
             g_debugchr_status_display_thread_params.redraw_request = 1;
-            g_debugchr_numeric_editor_thread_params.redraw_request = 1;
+            g_debugchr_numeric_panel_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
         }
 
@@ -703,7 +703,7 @@ editor:
                 }
 
                 g_debugchr_status_display_thread_params.redraw_request = 1;
-                g_debugchr_numeric_editor_thread_params.redraw_request = 1;
+                g_debugchr_numeric_panel_thread_params.redraw_request = 1;
                 g_debugchr_character_status_frame_config.redraw_request = 1;
             }
         }

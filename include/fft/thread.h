@@ -106,7 +106,7 @@ typedef enum thread_screen_slot {
     THREAD_SCREEN_SLOT_COMPARISON_STATUS = 7, /* the second (comparison) unit status banner */
     THREAD_SCREEN_SLOT_UNIT_STATUS = 8,       /* the unit status banner */
     THREAD_SCREEN_SLOT_CHARACTER_STATUS = 9,  /* the character status or equipment-and-ability panel */
-    THREAD_SCREEN_SLOT_NUMERIC_EDITOR = 12,   /* the numeric editor (stats) panel */
+    THREAD_SCREEN_SLOT_NUMERIC_PANEL = 12,    /* the numeric stats panel */
 } thread_screen_slot_e;
 
 /* Slots one routine takes for a thread of its own while the slot's usual

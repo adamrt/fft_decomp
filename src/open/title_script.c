@@ -31,7 +31,7 @@
 static s16 g_open_music_test_row_actions[16]
     = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
 
-static void open_controller_start_text_message(s32 parameter, s32 run_followup);
+static void open_controller_start_text_message(s32 parameter, s32 use_world_text);
 static void open_prologue_prepare_crossfade(s32 file_index);
 static void open_prologue_draw_text_lines(s32 intensity);
 static void open_prologue_step_crossfade(void);
@@ -149,10 +149,10 @@ void open_menu_start_music_test_controller(void) {
 
     script_set_event_speed(1);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    /* The same 4 is stored twice, as the formation OT index and as OPEN_MUSIC_TEST_STEP_OPEN; the local
+    /* The same 4 is stored twice, as the WORLD menu frame's OT index and as OPEN_MUSIC_TEST_STEP_OPEN; the local
      * keeps it in a saved register across the fade-out call instead of being rematerialized. */
     four = 4;
-    g_open_menu_formation_otag_index = four;
+    g_open_menu_world_frame_otag_index = four;
     g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
     open_gfx_start_overlay_fade_out(0x20);
 
@@ -270,13 +270,13 @@ void open_menu_update_music_test(open_controller_record_t* record) {
 }
 
 /* Start the text message thread and push the controller that waits for it. */
-static void open_controller_start_text_message(s32 parameter, s32 run_followup) {
+static void open_controller_start_text_message(s32 parameter, s32 use_world_text) {
     {
         s32 controller = g_open_current_controller_index;
 
-        g_open_controller_records_next[controller].text_message.run_followup = run_followup;
+        g_open_controller_records_next[controller].text_message.use_world_text = use_world_text;
     }
-    if (run_followup != 0) {
+    if (use_world_text != 0) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_world_text_section_offsets);
     }
@@ -303,7 +303,7 @@ static void open_controller_start_text_message(s32 parameter, s32 run_followup) 
 }
 
 /* Handler 8: once the message thread has ended, give back the blocked buttons,
- * pop the controller and, with run_followup, restore the text section pointers
+ * pop the controller and, with use_world_text, restore the text section pointers
  * open_controller_start_text_message replaced. */
 void open_controller_wait_text_message(open_controller_record_t* record) {
     if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
@@ -311,7 +311,7 @@ void open_controller_wait_text_message(open_controller_record_t* record) {
     }
     g_menu_blocked_buttons = record->text_message.saved_blocked_buttons;
     g_open_current_controller_index--;
-    if (record->text_message.run_followup != 0) {
+    if (record->text_message.use_world_text != 0) {
         text_restore_section_pointers();
     }
 }

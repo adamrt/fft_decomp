@@ -120,16 +120,16 @@ static void battle_state_run_deployment(void) {
     fade = 0xf8;
     if (show_banner != 0) {
         do {
-            main_gfx_swap_and_clear_otag();
+            main_gfx_swap_and_clear_battle_otag();
             (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->r0 = fade;
             (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->g0 = fade;
             (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->b0 = fade;
-            AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_otag(), &banner[g_main_gfx_screen_polarity]);
+            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+            AddPrim(main_gfx_get_battle_otag(), &banner[g_main_gfx_screen_polarity]);
             g_main_gfx_screen_polarity = g_main_gfx_screen_polarity == 0;
             g_main_system_battle_frame_hsync_count
-                = battle_state_sync_and_submit_deployment_frame(main_gfx_get_otag() + 0x17f);
+                = battle_state_sync_and_submit_deployment_frame(main_gfx_get_battle_otag() + 0x17f);
             fade -= 8;
         } while (fade >= 0);
     }
@@ -137,14 +137,14 @@ static void battle_state_run_deployment(void) {
     banner_p = banner;
     fade = 0xff;
     while (battle_state_update_deployment_controller_input() != -1) {
-        main_gfx_swap_and_clear_otag();
+        main_gfx_swap_and_clear_battle_otag();
         if (show_banner != 0) {
-            AddPrim(main_gfx_get_otag(), &banner_p[g_main_gfx_screen_polarity]);
+            AddPrim(main_gfx_get_battle_otag(), &banner_p[g_main_gfx_screen_polarity]);
         } else {
-            main_gfx_add_now_loading_to_otag(main_gfx_get_otag());
+            main_gfx_add_now_loading_to_otag(main_gfx_get_battle_otag());
         }
         g_battle_state_map_init_step = battle_map_step_deployment_init_sequence(map_id, g_battle_state_map_init_step,
-            script_is_deployment_running(main_gfx_get_otag(), g_input_current_buttons));
+            script_run_frame_and_check_deployment(main_gfx_get_battle_otag(), g_input_current_buttons));
         if (g_battle_state_map_init_step == 0xd) {
             battle_gfx_load_fixed_sprite_cluts();
             battle_state_enter_event_at_battle_start();
@@ -157,11 +157,11 @@ static void battle_state_run_deployment(void) {
         (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->r0 = fade;
         (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->g0 = fade;
         (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->b0 = fade;
-        AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-        AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+        AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+        AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
         g_main_gfx_screen_polarity = g_main_gfx_screen_polarity == 0;
         g_main_system_battle_frame_hsync_count
-            = battle_state_sync_and_submit_deployment_frame(main_gfx_get_otag() + 0x17f);
+            = battle_state_sync_and_submit_deployment_frame(main_gfx_get_battle_otag() + 0x17f);
         main_file_poll_load(&g_main_file_cd_state);
         main_system_frame_stub();
     }
@@ -174,16 +174,16 @@ done:
             if (fade >= 0xf8) {
                 fade = 0xff;
             }
-            main_gfx_swap_and_clear_otag();
+            main_gfx_swap_and_clear_battle_otag();
             (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->r0 = fade;
             (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->g0 = fade;
             (g_battle_screen_fade_polygons + g_main_gfx_screen_polarity)->b0 = fade;
-            AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
-            AddPrim(main_gfx_get_otag(), &banner[g_main_gfx_screen_polarity]);
+            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+            AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+            AddPrim(main_gfx_get_battle_otag(), &banner[g_main_gfx_screen_polarity]);
             g_main_gfx_screen_polarity = g_main_gfx_screen_polarity == 0;
             g_main_system_battle_frame_hsync_count
-                = battle_state_sync_and_submit_deployment_frame(main_gfx_get_otag() + 0x17f);
+                = battle_state_sync_and_submit_deployment_frame(main_gfx_get_battle_otag() + 0x17f);
             fade += 8;
         } while (fade < 0x100);
     }
@@ -230,7 +230,7 @@ void battle_state_run_game_loop(void) {
             battle_state_update_controller_input();
             battle_gfx_init_render_frame();
             SetGeomScreen(0x200);
-            main_gfx_swap_and_clear_otag();
+            main_gfx_swap_and_clear_battle_otag();
             battle_camera_update_vector_from_game_state();
 
             /* Negate the Q12 camera position into whole units; the x conversion spells out the
@@ -451,7 +451,7 @@ void battle_state_run_game_loop(void) {
             g_main_gfx_screen_polarity = !g_main_gfx_screen_polarity;
             g_frame_counter++;
             battle_map_upload_clut_rows();
-            frame_measurement = battle_state_sync_frame(main_gfx_get_otag() + 0x17f);
+            frame_measurement = battle_state_sync_frame(main_gfx_get_battle_otag() + 0x17f);
             g_main_system_battle_frame_hsync_count = frame_measurement;
             i = 0;
             if (g_main_system_battle_frame_hsync_count_max < frame_measurement) {

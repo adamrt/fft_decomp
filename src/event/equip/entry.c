@@ -26,7 +26,7 @@
 void equip_panel_toggle_item_numeric_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIP_THREAD_SLOT_ITEM_NUMERIC) == 0) {
-            thread_start(EQUIP_THREAD_SLOT_ITEM_NUMERIC, menu_run_numeric_editor_frame_thread);
+            thread_start(EQUIP_THREAD_SLOT_ITEM_NUMERIC, menu_run_numeric_panel_frame_thread);
             thread_set_parameters(EQUIP_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_menu_preview_stats_thread_params, 0, 0);
         }
     } else {
@@ -45,12 +45,12 @@ static void equip_menu_reset_state_flags(void) {
     g_equip_equipment_panel_redraw = 1;
 }
 
-/* Ask the unit status, equipment list, numeric editor and item numeric
+/* Ask the unit status, equipment list, numeric panel and item numeric
  * panel threads to stop and clear the two panel styles. */
 void equip_menu_stop_threads(void) {
     menu_request_thread_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
     menu_request_thread_stop(EQUIP_THREAD_SLOT_EQUIPMENT_LIST);
-    menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+    menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     equip_panel_toggle_item_numeric_thread(0);
     g_menu_preview_stats_thread_params.style = 0;
     g_equip_equipment_panel_style = 0;

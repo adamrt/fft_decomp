@@ -11,7 +11,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static RECT g_require_reward_bonus_image_rect = { 384, 0, 64, 256 };
+static RECT g_require_condition_bonus_image_rect = { 384, 0, 64, 256 };
 
 /* Thread body that waits 16 frames and exits. Nothing references it. */
 void require_thread_stop_after_16_frames(void) {
@@ -46,8 +46,8 @@ void require_party_update_bio_variable_for_unit_class(s32 unit_class, s32 value)
  * the file there on the main stack, uploads the pixels and the palette that
  * follows them, and frees the buffer after one more frame.
  */
-void require_reward_load_bonus_image(s32 image_id) {
-    require_reward_bonus_image_file_t* allocation;
+void require_condition_load_bonus_image(s32 image_id) {
+    require_condition_bonus_image_file_t* allocation;
     s32 (*read_operation)(s32 sector, u32 size, void* destination);
 
     do {
@@ -71,8 +71,8 @@ void require_reward_load_bonus_image(s32 image_id) {
     }
 
     /* The 256-row upload includes the reserved suffix beyond the 0x6800-byte file. */
-    LoadImage(&g_require_reward_bonus_image_rect, allocation->pixels[0]);
-    LoadImage(&g_require_reward_bonus_palette_rect, (u32*)allocation->palettes);
+    LoadImage(&g_require_condition_bonus_image_rect, allocation->pixels[0]);
+    LoadImage(&g_require_condition_bonus_palette_rect, (u32*)allocation->palettes);
     thread_yield();
     main_heap_free(allocation);
 }

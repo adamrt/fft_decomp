@@ -70,13 +70,13 @@ void battle_target_draw_cursor_with_tile_glow(void) {
     battle_target_project_cursor_tile_to_screen(&projected, &position, &raised);
     /* The projected z is the ordering-table depth for the cursor glow. */
     depth = projected.vz / 4;
-    battle_gfx_draw_map_selection_cursor(&position, main_gfx_get_otag());
+    battle_gfx_draw_map_selection_cursor(&position, main_gfx_get_battle_otag());
     /* The polygon routine reads the same three 16-bit values in renderer x, z, y order. */
     shape = battle_target_calculate_cursor_tile_polygon(&position, g_battle_cursor_z, &corner0);
     tile
         = battle_map_get_tile_data_pointer(position.vx / MAP_TILE_SIZE, position.vz / MAP_TILE_SIZE, g_battle_cursor_z);
     battle_gfx_build_cursor_tile_glow(
-        tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, main_gfx_get_otag() + depth);
+        tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, main_gfx_get_battle_otag() + depth);
 }
 
 /*
@@ -102,7 +102,7 @@ void battle_gfx_draw_wait_direction_unit(void) {
     raised.vy -= 48;
     RotTrans(&raised, &transformed, &flag);
     depth = transformed.vz / 4;
-    ot = main_gfx_get_otag();
+    ot = main_gfx_get_battle_otag();
     battle_gfx_draw_wait_direction_arrows(&base, &ot[depth]);
 }
 

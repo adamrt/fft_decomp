@@ -74,7 +74,7 @@ void main_boot_run_startup(void) {
     main_file_reset_cdrom_cpu_ram();
     main_gfx_reset_display(256, 240, 512, 0, 0, 0);
     main_boot_build_and_draw_sceap_logo();
-    main_boot_build_and_draw_squaresoft_logo();
+    main_boot_fade_in_squaresoft_logo();
     main_card_init_events();
     main_sound_open_generic_sfx();
     main_gfx_load_zodiac_frame();
@@ -108,7 +108,7 @@ void main_boot_reset_game_state(void) {
         SpuInitHot();
         main_file_reset_cdrom_cpu_ram();
         main_gfx_reset_display(256, 240, 512, 0, 0, 0);
-        main_boot_build_and_draw_squaresoft_logo();
+        main_boot_fade_in_squaresoft_logo();
         main_sound_open_generic_sfx();
         main_gfx_load_zodiac_frame();
     }

@@ -323,7 +323,7 @@ s32 world_item_show_units_equipping_selected(void) {
             g_unit_selected_index = g_world_item_saved_selected_unit_index;
             world_formation_stage_selected_unit();
             menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-            menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+            menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
             menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
             g_world_item_equipping_units_initialized = 0;
             g_world_formation_unit_cycle_mode = 0;

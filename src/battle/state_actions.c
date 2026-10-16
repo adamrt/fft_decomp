@@ -815,7 +815,7 @@ void battle_state_handle_free_cursor_state(void) {
     battle_camera_update_tilt_input();
     battle_target_move_cursor_by_input();
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     input = g_main_input_pressed_buttons;
     if (input & PSX_PAD_SELECT) {
         battle_action_clear_at_list_cursor();
@@ -863,7 +863,7 @@ void battle_state_handle_free_cursor_help_state(void) {
         battle_state_set_free_cursor();
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* HighlightUnits game-state handler: releasing square restores the cursor input
@@ -886,7 +886,7 @@ void battle_state_handle_open_action_menus_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -922,7 +922,7 @@ void battle_state_handle_idling_action_menus_state(void) {
         battle_menu_open_help();
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     command = menu_get_selected_command_address();
     unit = battle_unit_get_casting();
     switch ((s32)command->kind) {
@@ -1033,7 +1033,7 @@ void battle_state_handle_ai_command_state(void) {
     u16 frame;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     unit = battle_unit_get_source();
     if (unit->state_frame_counter >= 31 && !unit->command_ready) {
         g_main_system_vsync_interval = 2;
@@ -1149,7 +1149,7 @@ void battle_state_handle_action_help_menu_state(void) {
         }
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* DisplayMoveArea game-state handler, a unit's move range shown from the free
@@ -1166,7 +1166,7 @@ void battle_state_handle_display_move_area_state(void) {
     battle_camera_update_zoom_input();
     battle_camera_update_tilt_input();
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* MiniMenu game-state handler. Select opens the help window. A menu result of 0
@@ -1184,7 +1184,7 @@ void battle_state_handle_mini_menu_state(void) {
         battle_action_show_at_list_entry(menu_result - 0x64);
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* MiniMenuHelp game-state handler: when the help window has gone, reopen the mini
@@ -1195,7 +1195,7 @@ void battle_state_handle_mini_menu_help_state(void) {
         battle_menu_open_free_cursor_mini_menu();
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* ActiveTurn game-state handler, the view of a unit picked from the AT list:
@@ -1207,7 +1207,7 @@ void battle_state_handle_active_turn_state(void) {
         battle_menu_open_mini_menu();
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* UnitMove game-state handler: YES goes on to choosing a destination
@@ -1216,7 +1216,7 @@ void battle_state_handle_unit_move_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     switch (selected_command) {
     case AI_COMMAND_PROMPT_YES:
@@ -1251,7 +1251,7 @@ void battle_state_handle_select_move_tile_state(void) {
     battle_unit_command_state_t scratch; /* never used; retail reserves its frame space */
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     if (source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         battle_target_move_cursor_by_input();
         battle_camera_handle_rotation_input();
@@ -1313,7 +1313,7 @@ void battle_state_handle_move_range_exception_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -1327,7 +1327,7 @@ void battle_state_handle_illegal_move_menu_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -1343,7 +1343,7 @@ void battle_state_handle_unit_moving_setup_state(void) {
     battle_unit_t* casting_unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     casting_unit = battle_unit_get_casting();
     selected_command = selected_command_address->kind;
@@ -1377,5 +1377,5 @@ void battle_state_handle_unit_moving_state(void) {
         battle_menu_open_move_confirm();
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }

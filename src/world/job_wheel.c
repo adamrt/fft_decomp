@@ -108,7 +108,7 @@ void world_formation_run_job_wheel_menu(void) {
         g_world_job_wheel_saved_browse_enabled = g_world_formation_unit_browse_enabled;
         g_world_formation_unit_browse_enabled = 0;
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
         menu_init_scrollable_list_core(0, 0, 0);
         g_world_menu_script_callbacks[0].value = world_formation_get_job_wheel_cursor_job_level;
         g_world_menu_script_callbacks[1].value = world_formation_is_job_wheel_selection_available;

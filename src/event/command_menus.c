@@ -1452,8 +1452,8 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         g_main_gfx_screen_polarity = polarity;
     }
 
-    menu_open_companion_executable();
-    menu_open_companion_data_file();
+    menu_poll_companion_executable_load();
+    menu_poll_companion_data_file_load();
     script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
@@ -1652,8 +1652,8 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         g_main_gfx_screen_polarity = polarity;
     }
 
-    menu_open_companion_executable();
-    menu_open_companion_data_file();
+    menu_poll_companion_executable_load();
+    menu_poll_companion_data_file_load();
     script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {

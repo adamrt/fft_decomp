@@ -834,10 +834,10 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - Overlays share load addresses, so an address match is not an identity
   match. Compare bytes: REQUIRE and EQUIP both have code at `0x801c2dcc`, and
   the two routines differ.
-- `menu_run_numeric_editor_thread` (ATTACK, REQUIRE) points both slot branches
-  at `g_editor_numeric_state`, where `menu_run_numeric_editor_frame_thread`
+- `menu_run_numeric_panel_thread` (ATTACK, REQUIRE) points both slot branches
+  at `g_editor_numeric_state`, where `menu_run_numeric_panel_frame_thread`
   gives the preview slot `g_editor_numeric_state_b`. Both overlays start it
-  only in `THREAD_SCREEN_SLOT_NUMERIC_EDITOR`, so the shared branch never runs.
+  only in `THREAD_SCREEN_SLOT_NUMERIC_PANEL`, so the shared branch never runs.
 
 ## Other surprises
 

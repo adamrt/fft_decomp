@@ -202,7 +202,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     do {
         bunit_gfx_submit_frame_and_swap_buffers(0, 0);
         previous_mode = g_menu_input_lock_mode;
-        bunit_menu_update_event_thread_state();
+        bunit_menu_input_update_with_message_state();
         bunit_input_update_lock_timer();
         gfx_update_decreasing_fade();
         if (g_menu_input_newly_pressed & PSX_PAD_SELECT) {
@@ -253,7 +253,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         g_sound_queued_effect_id = MAIN_SFX_NONE;
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     } while (running != 0);
-    bunit_panel_toggle_equipment_and_numeric_editor_threads(0);
+    bunit_panel_toggle_equipment_and_numeric_threads(0);
     menu_toggle_unit_status_thread(0);
     while (DrawSync(1) != 0) { }
     VSync(0);
@@ -302,7 +302,7 @@ static s32 bunit_menu_run_unit_list_frame(void) {
             g_bunit_unit_grid_selected_cell = g_bunit_unit_list_index_map[g_unit_selected_index];
             bunit_unit_copy_selected_data();
             g_bunit_status_display_dimmed = 0;
-            g_bunit_numeric_editor_thread_params.style = 0;
+            g_bunit_numeric_panel_thread_params.style = 0;
             g_bunit_character_status_frame_config.style = 0;
             bunit_menu_reset_results();
             g_bunit_unit_list_initialized = 1;
@@ -333,7 +333,7 @@ static s32 bunit_menu_run_unit_list_frame(void) {
                     g_bunit_selected_battle_id = g_bunit_unit_pointers[g_unit_selected_index]->battle_id;
                 }
                 g_bunit_character_status_frame_config.style = 0;
-                g_bunit_numeric_editor_thread_params.style = 0;
+                g_bunit_numeric_panel_thread_params.style = 0;
                 return 1;
             }
             return 1;
@@ -352,7 +352,7 @@ static s32 bunit_menu_run_unit_list_frame(void) {
         if ((input & PSX_PAD_TRIANGLE) || (input & PSX_PAD_START)) {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             g_bunit_character_status_frame_config.style = 1;
-            g_bunit_numeric_editor_thread_params.style = 1;
+            g_bunit_numeric_panel_thread_params.style = 1;
             g_bunit_unit_list_triangle_menu_open = 1;
         } else if ((input & PSX_PAD_CIRCLE) && g_bunit_unit_browse_enabled != 0) {
             unit = g_bunit_unit_pointers[g_unit_selected_index];
@@ -360,7 +360,7 @@ static s32 bunit_menu_run_unit_list_frame(void) {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;
             } else {
                 g_bunit_status_display_dimmed = 1;
-                g_bunit_numeric_editor_thread_params.style = 1;
+                g_bunit_numeric_panel_thread_params.style = 1;
                 g_bunit_character_status_frame_config.style = 1;
                 g_bunit_unit_list_initialized = 0;
                 g_bunit_saved_unit_browse_enabled = g_bunit_unit_browse_enabled;
@@ -449,7 +449,7 @@ static void bunit_menu_update_unit_browser(void) {
             g_bunit_status_display_offset_y = 0;
         }
     }
-    bunit_panel_toggle_equipment_and_numeric_editor_threads(g_bunit_unit_browse_enabled);
+    bunit_panel_toggle_equipment_and_numeric_threads(g_bunit_unit_browse_enabled);
     enable = 0;
     if (g_bunit_status_banner_enabled != 0 || g_bunit_unit_browse_enabled != 0) {
         enable = 1;
@@ -488,5 +488,5 @@ static void bunit_unit_copy_selected_data(void) {
     g_status_display_redraw_request = 1;
     g_bunit_comparison_display_redraw_request = 1;
     g_bunit_character_status_frame_config.redraw_request = 1;
-    g_bunit_numeric_editor_thread_params.redraw_request = 1;
+    g_bunit_numeric_panel_thread_params.redraw_request = 1;
 }

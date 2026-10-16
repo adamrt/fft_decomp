@@ -4190,7 +4190,7 @@ s32 battle_effect_update_secondary_effects(void) {
     effect_secondary_data_t* effect;
     u32 previous_slot_id;
 
-    g_battle_effect_polygon_depth_data = main_gfx_get_otag();
+    g_battle_effect_polygon_depth_data = main_gfx_get_battle_otag();
     g_battle_effect_buffer_index = 1 - g_battle_effect_buffer_index;
     g_battle_effect_current_secondary_id = g_battle_effect_secondary_active_tail;
     if (g_battle_effect_secondary_active_tail == 0) {

@@ -12,7 +12,7 @@ menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instructio
     s8 text[16];
     menu_digit_glyph_t glyph;
     u16 unused[8]; /* Preserves the original frame size. */
-    jobstts_condition_t condition;
+    jobstts_row_callback_t callback;
     s32 arg;
     s32 y;
     s32 value;
@@ -26,7 +26,7 @@ menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instructio
     s32 cell;
     u16 clut;
 
-    condition = g_menu_row_callbacks[data->number.getter].value;
+    callback = g_menu_row_callbacks[data->number.getter].value;
     if (g_menu_list_row_mode == 0) {
         arg = data->number.value;
         y = data->number.y;
@@ -39,7 +39,7 @@ menu_instruction_t* jobstts_menu_opcode_0d_draw_formatted_number(menu_instructio
         }
     }
 
-    value = condition(arg);
+    value = callback(arg);
     if (data->number.alternate_palette != 0) {
         clut = g_menu_alternate_number_clut;
     } else {

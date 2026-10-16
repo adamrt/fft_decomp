@@ -19,8 +19,8 @@ extern s32 g_main_gfx_active_buffer_index;
 extern s32 g_main_gfx_screen_polarity;
 extern u32 g_main_gfx_battle_otags[2][0x180];
 
-u32* main_gfx_get_otag(void);
-void main_gfx_swap_and_clear_otag(void);
+u32* main_gfx_get_battle_otag(void);
+void main_gfx_swap_and_clear_battle_otag(void);
 void main_gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void main_set_display_draw(int width, int height, int projection, u8 red, u8 green, u8 blue);
 
@@ -31,7 +31,7 @@ void main_boot_run_startup(void);
 void main_boot_reset_game_state(void);
 int main_boot_draw_sceap_logo(u32* otag, u32* image);
 void main_boot_build_and_draw_sceap_logo(void);
-void main_boot_build_and_draw_squaresoft_logo(void);
+void main_boot_fade_in_squaresoft_logo(void);
 void main_boot_fade_out_squaresoft_logo(void);
 
 /* Now Loading */

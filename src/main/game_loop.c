@@ -303,7 +303,7 @@ static int main_boot_draw_squaresoft_logo(u32* otag, u32* image) {
  * main_boot_draw_squaresoft_logo uploads the logo each frame. The logo stays on
  * screen while the caller loads its files; main_boot_fade_out_squaresoft_logo
  * removes it. */
-void main_boot_build_and_draw_squaresoft_logo(void) {
+void main_boot_fade_in_squaresoft_logo(void) {
     POLY_F4 polygons[2];
     DR_MODE draw_modes[2];
     u32 otags[2][2];
@@ -351,7 +351,7 @@ void main_boot_build_and_draw_squaresoft_logo(void) {
     DrawSync(0);
 }
 
-/* Fade out the Squaresoft logo that main_boot_build_and_draw_squaresoft_logo left
+/* Fade out the Squaresoft logo that main_boot_fade_in_squaresoft_logo left
  * on screen: the subtractive quad steps from 0 to 255 in 32 frames, then both
  * display buffers are cleared. */
 void main_boot_fade_out_squaresoft_logo(void) {

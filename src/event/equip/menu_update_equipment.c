@@ -34,7 +34,7 @@ s32 menu_update_equipment(void) {
         g_menu_selected_slot = menu_init_selection_value(2, 0);
         thread_suspend(EQUIP_THREAD_SLOT_COMMAND_MENU);
         menu_request_thread_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
         menu_request_thread_stop(EQUIP_THREAD_SLOT_EQUIPMENT_LIST);
         menu_init_scrollable_list_core(0, 0, 0);
         g_equip_menu_substate = MENU_ITEM_LIST_STATE_BROWSE;
@@ -46,7 +46,7 @@ s32 menu_update_equipment(void) {
     if (g_equip_menu_substate == MENU_ITEM_LIST_STATE_CLOSE) {
         equip_panel_toggle_item_numeric_thread(0);
         equip_panel_toggle_equipment_threads(1);
-        menu_toggle_numeric_editor_thread(1);
+        menu_toggle_numeric_panel_thread(1);
         equip_panel_toggle_unit_status_thread(1);
         g_equip_menu_ready = 0;
         g_equip_unit_banner_enabled = 1;

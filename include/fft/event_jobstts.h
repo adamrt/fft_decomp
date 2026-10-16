@@ -123,11 +123,11 @@ void jobstts_gfx_enqueue_textured_quad_rect(
 menu_vertical_scroll_direction_e jobstts_input_read_page_scroll_direction(void);
 void jobstts_menu_input_update_with_message_state(void);
 
-/* menu commands */
-/* Render-command stream callbacks: every handler consumes and returns a
- * command pointer; every condition is indexed by a row or literal operand. */
-typedef menu_instruction_t* (*jobstts_command_handler_t)(menu_instruction_t* instruction);
-typedef s32 (*jobstts_condition_t)(s32);
+/* menu opcodes */
+/* Menu display script callbacks: every opcode handler consumes and returns an
+ * command pointer; every row callback is indexed by a row or literal operand. */
+typedef menu_instruction_t* (*jobstts_opcode_handler_t)(menu_instruction_t* instruction);
+typedef s32 (*jobstts_row_callback_t)(s32);
 
 /* The opcode that ends a JOBSTTS menu display stream. */
 enum {

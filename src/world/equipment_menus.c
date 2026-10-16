@@ -49,7 +49,7 @@ s32 menu_update_equipment(void) {
         g_menu_selected_slot = world_menu_init_cursor_position(WORLD_MENU_CURSOR_ITEM_TAB, 0);
         thread_suspend(WORLD_THREAD_SLOT_UPPER_MENU);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
         menu_request_thread_stop(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_world_item_menu_mode = MENU_ITEM_LIST_STATE_BROWSE;
         g_world_formation_unit_banner_enabled = 0;

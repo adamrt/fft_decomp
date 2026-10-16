@@ -48,7 +48,7 @@ void world_menu_toggle_preview_stats_window(s32 flag) {
         stored = 1;
         if (!(g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(WORLD_THREAD_SLOT_PREVIEW_STATS) == 0) {
-            thread_start(WORLD_THREAD_SLOT_PREVIEW_STATS, menu_run_numeric_editor_frame_thread);
+            thread_start(WORLD_THREAD_SLOT_PREVIEW_STATS, menu_run_numeric_panel_frame_thread);
             thread_set_parameters(WORLD_THREAD_SLOT_PREVIEW_STATS, (s32)&g_menu_preview_stats_thread_params, 0, 0);
         }
     } else {
@@ -60,8 +60,8 @@ void world_menu_toggle_preview_stats_window(s32 flag) {
 
 /* With `enable` set, start menu_run_ability_list_thread in the equip/ability panel slot (with
  * g_world_ability_panel_thread_params) unless that slot or the character status slot already
- * runs, show the unit banner and open the numeric editor; otherwise stop the panel and the
- * numeric editor. */
+ * runs, show the unit banner and open the numeric panel; otherwise stop the panel and the
+ * numeric panel. */
 void world_menu_toggle_ability_panel_thread(s32 enable) {
     if (enable != 0) {
         enable = 1;
@@ -72,15 +72,15 @@ void world_menu_toggle_ability_panel_thread(s32 enable) {
                 WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_world_ability_panel_thread_params, 0, 0);
         }
         g_world_formation_unit_banner_enabled = 1;
-        menu_toggle_numeric_editor_thread(enable);
+        menu_toggle_numeric_panel_thread(enable);
     } else {
         menu_request_thread_stop(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }
 
 /* With enabled set, open the equipment/ability panel (unless the status panel is sliding or a
- * panel thread already runs) and the numeric editor; enabled 0 does nothing. */
+ * panel thread already runs) and the numeric panel; enabled 0 does nothing. */
 void world_menu_start_equipment_and_ability_panel_thread(s32 enabled) {
     if (enabled == 0) {
         return;
@@ -95,7 +95,7 @@ void world_menu_start_equipment_and_ability_panel_thread(s32 enabled) {
         thread_set_parameters(
             THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_world_equipment_ability_panel_thread_params, 0, 0);
     }
-    menu_toggle_numeric_editor_thread(enabled);
+    menu_toggle_numeric_panel_thread(enabled);
 }
 
 /* Request a redraw from all eight formation panel threads. */
@@ -111,13 +111,13 @@ void world_menu_request_unit_panel_redraw(void) {
 }
 
 /* Ask the formation screen's panel threads to stop (both status banners, the
- * equipment/ability panel, the numeric editor and the two preview windows)
+ * equipment/ability panel, the numeric panel and the two preview windows)
  * and clear the panel styles. */
 void world_formation_stop_menu_threads(void) {
     menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
     menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
     menu_request_thread_stop(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
-    menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+    menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     world_menu_toggle_preview_stats_window(0);
     world_menu_toggle_stat_preview_panel_thread(0);
     g_menu_preview_stats_thread_params.style = 0;
@@ -479,7 +479,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
                 enabled = 0;
                 g_world_formation_unit_browse_enabled = 0;
                 menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-                menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+                menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
             }
         }
         if (toggle_banner != 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0

@@ -385,7 +385,7 @@ static s32 require_party_select_unit_to_remove(void) {
 
     menu_copy_billboard_data_in(&g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
     g_status_display_redraw_request = 1;
-    g_numeric_editor_redraw_request = 1;
+    g_numeric_panel_redraw_request = 1;
     g_character_status_redraw_request = 1;
     thread_yield();
 
@@ -470,7 +470,7 @@ static s32 require_party_select_unit_to_remove(void) {
                     if (g_require_party_removable_flags[selected_party_index] != 0) {
                         g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
                         g_status_display_redraw_request = should_restore;
-                        g_numeric_editor_redraw_request = should_restore;
+                        g_numeric_panel_redraw_request = should_restore;
                         g_character_status_redraw_request = should_restore;
                         require_editor_load_party_unit(1, selected_party_index);
                         REQUIRE_MOVE_PARTY_PORTRAIT(
@@ -489,7 +489,7 @@ static s32 require_party_select_unit_to_remove(void) {
                 } while (g_require_party_removable_flags[selected_party_index] == 0);
                 g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
                 g_status_display_redraw_request = 2;
-                g_numeric_editor_redraw_request = should_restore;
+                g_numeric_panel_redraw_request = should_restore;
                 g_character_status_redraw_request = should_restore;
                 require_editor_load_party_unit(1, selected_party_index);
                 REQUIRE_MOVE_PARTY_PORTRAIT(selected_party_index, portrait_rect, portrait_destination, palette_rect);
@@ -686,7 +686,7 @@ static void require_party_apply_post_battle_changes(void) {
         do {
             require_panel_set_transition_value(0);
             g_require_status_display_origin_x = -0x100;
-            g_require_numeric_editor_origin_x = -0x100;
+            g_require_numeric_panel_origin_x = -0x100;
             *transition_c_ptr = -0x100;
             menu_copy_billboard_data_in(
                 &g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
@@ -701,9 +701,9 @@ static void require_party_apply_post_battle_changes(void) {
                 thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_require_status_display_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_thread);
                 thread_set_parameters(
-                    THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_require_numeric_editor_thread_params, 0, 0);
+                    THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_require_numeric_panel_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)transition_c_ptr, 0, 0);
             } else {
@@ -712,7 +712,7 @@ static void require_party_apply_post_battle_changes(void) {
                 /* Slide the previous unit's panels off to the right, then load the next unit. */
                 do {
                     g_require_status_display_origin_x = transition;
-                    g_require_numeric_editor_origin_x = transition;
+                    g_require_numeric_panel_origin_x = transition;
                     g_require_character_status_origin_x = transition;
                     transition += 0x20;
                     thread_yield();
@@ -727,7 +727,7 @@ static void require_party_apply_post_battle_changes(void) {
                     &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
                 index_value = *unit_index_ptr;
                 g_status_display_redraw_request = one;
-                g_numeric_editor_redraw_request = one;
+                g_numeric_panel_redraw_request = one;
                 g_character_status_redraw_request = one;
                 g_menu_selected_unit_status.unit_index = index_value;
                 thread_yield();
@@ -737,7 +737,7 @@ static void require_party_apply_post_battle_changes(void) {
             transition = 0;
             do {
                 g_require_status_display_origin_x = transition - 0x100;
-                g_require_numeric_editor_origin_x = transition - 0x100;
+                g_require_numeric_panel_origin_x = transition - 0x100;
                 g_require_character_status_origin_x = transition - 0x100;
                 transition += 0x20;
                 thread_yield();
@@ -863,7 +863,7 @@ static void require_party_apply_post_battle_changes(void) {
                     menu_load_selected_unit();
                     index_value = *selected_unit_index_ptr;
                     g_status_display_redraw_request = one;
-                    g_numeric_editor_redraw_request = one;
+                    g_numeric_panel_redraw_request = one;
                     g_character_status_redraw_request = one;
                     g_menu_selected_unit_status.unit_index = index_value;
                     if (g_require_party_removal_result == 0) {
@@ -920,7 +920,7 @@ static void require_party_apply_post_battle_changes(void) {
     transition = 0;
     do {
         g_require_status_display_origin_x = transition;
-        g_require_numeric_editor_origin_x = transition;
+        g_require_numeric_panel_origin_x = transition;
         g_require_character_status_origin_x = transition;
         transition += 0x20;
         thread_yield();
@@ -928,10 +928,10 @@ static void require_party_apply_post_battle_changes(void) {
 
     /* Stop the three panel threads, then give the event thread its saved block back. */
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, 0, 0, 1);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
     thread_wait_until_inactive(THREAD_SCREEN_SLOT_UNIT_STATUS);
-    thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+    thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     thread_wait_until_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
     g_menu_post_battle_unit_changes_active = 0;
     mem_copy_bytes_nonempty(&g_threads[THREAD_SLOT_EVENT], g_require_saved_thread_block, 0x400);
@@ -1325,10 +1325,10 @@ static void require_reward_run_gil_ticker(void) {
             menu_init_default_poly_ft4(&g_require_reward_money_next_digit_polys[buffer][j]);
             g_require_reward_money_digit_polys[buffer][j].tpage = getTPage(0, 0, 384, 0);
             g_require_reward_money_digit_polys[buffer][j].clut
-                = getClut(g_require_reward_bonus_palette_rect.x, g_require_reward_bonus_palette_rect.y);
+                = getClut(g_require_condition_bonus_palette_rect.x, g_require_condition_bonus_palette_rect.y);
             g_require_reward_money_next_digit_polys[buffer][j].tpage = getTPage(0, 0, 384, 0);
             g_require_reward_money_next_digit_polys[buffer][j].clut
-                = getClut(g_require_reward_bonus_palette_rect.x, g_require_reward_bonus_palette_rect.y);
+                = getClut(g_require_condition_bonus_palette_rect.x, g_require_condition_bonus_palette_rect.y);
             pd = (POLY_FT4*)((s32)g_require_reward_money_digit_polys + (j * 0x28 + buffer * 0xf0));
             setXY4(pd, X0, 0x80, X0 + 13, 0x80, X0, 0x97, X0 + 13, 0x97);
             pn = (POLY_FT4*)((s32)g_require_reward_money_next_digit_polys + (j * 0x28 + buffer * 0xf0));
@@ -1356,7 +1356,7 @@ static void require_reward_run_gil_ticker(void) {
         setUV4(comma_poly, 0x82, 0x40, 0x88, 0x40, 0x82, 0x4a, 0x88, 0x4a);
         g_require_reward_money_comma_polys[i].tpage = getTPage(0, 0, 384, 0);
         g_require_reward_money_comma_polys[i].clut
-            = getClut(g_require_reward_bonus_palette_rect.x, g_require_reward_bonus_palette_rect.y);
+            = getClut(g_require_condition_bonus_palette_rect.x, g_require_condition_bonus_palette_rect.y);
         sign_poly = &g_require_reward_money_sign_polys[i];
         menu_init_default_poly_ft4(sign_poly);
         setXY4(sign_poly, g_require_reward_money_digit_polys[0][0].x0 + 0x11, 0x80,
@@ -1366,7 +1366,7 @@ static void require_reward_run_gil_ticker(void) {
         setUV4(sign_poly, 0x88, 0x32, 0xa8, 0x32, 0x88, 0x49, 0xa8, 0x49);
         g_require_reward_money_sign_polys[i].tpage = getTPage(0, 0, 384, 0);
         g_require_reward_money_sign_polys[i].clut
-            = getClut(g_require_reward_bonus_palette_rect.x, g_require_reward_bonus_palette_rect.y);
+            = getClut(g_require_condition_bonus_palette_rect.x, g_require_condition_bonus_palette_rect.y);
     }
 
     /* Per display buffer, areas 0-1 clip the rolling digits to their window and
@@ -1578,7 +1578,7 @@ static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     s16* palette_origin;
 
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
-    palette_origin = &g_require_reward_bonus_palette_rect.y;
+    palette_origin = &g_require_condition_bonus_palette_rect.y;
     do {
         POLY_GT4* poly = &g_main_poly_gt4_array_32[count];
         SetPolyGT4(poly);
@@ -1605,7 +1605,7 @@ static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
     s16* palette_origin;
 
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
-    palette_origin = &g_require_reward_bonus_palette_rect.y;
+    palette_origin = &g_require_condition_bonus_palette_rect.y;
     do {
         POLY_GT4* poly = &g_main_poly_gt4_array_8[count];
         SetPolyGT4(poly);
@@ -1721,7 +1721,7 @@ static void require_condition_show_general(s32 hold_frames) {
     s32 hide_offset;
     u32* input;
 
-    require_reward_load_bonus_image(thread_get_current_parameter_1() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
+    require_condition_load_bonus_image(thread_get_current_parameter_1() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
     {
         u8* parameters = &range[condition];
 
@@ -2010,7 +2010,7 @@ void require_thread_exit_current(void) {
     thread_exit_current();
 }
 
-/* Animate the reward bonus image as a burst of tiles.
+/* Animate a BONUS.BIN banner image as a burst of tiles.
  *
  * Profile gcc-2.6.3_O2_aspsx-2.34_divcheck: the per-tile delay is an unsigned
  * division whose divisor carries ASPSX's zero check (`bnez`/`break 7`).
@@ -2027,7 +2027,7 @@ void require_thread_exit_current(void) {
  * target keeps, and the extra insns keep it from hoisting the row offset and
  * the RotMatrix/vector addresses out of the column loop.
  */
-void require_reward_animate_bonus_image_burst(void) {
+void require_condition_animate_bonus_image_burst(void) {
     s32 phase;
     s32 max_delay;
     u32 divisor;
@@ -2045,15 +2045,15 @@ void require_reward_animate_bonus_image_burst(void) {
     s32 ox;
     s32 oy;
     u8* params;
-    require_reward_burst_tile_t* tile;
+    require_condition_burst_tile_t* tile;
     POLY_F4* poly;
 
     g_require_thread_suspended_id = g_thread_current_id;
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES_COPY];
     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON) {
-        require_reward_load_bonus_image(0);
+        require_condition_load_bonus_image(0);
     } else {
-        require_reward_load_bonus_image(1);
+        require_condition_load_bonus_image(1);
     }
 
     /* Named operand loads fold the three native cursor advances. */
@@ -2071,36 +2071,36 @@ void require_reward_animate_bonus_image_burst(void) {
     /* Lay out the tiles; odd columns sit half a row higher. */
     for (row = 0; row < 12; row++) {
         for (col = 0; col < 24; col++) {
-            tile = &g_require_reward_burst_tiles[row][col];
+            tile = &g_require_condition_burst_tiles[row][col];
             tile->x = col * 12 - 12;
             tile->y = row * 24 - 12;
             if (col & 1) {
                 tile->y = row * 24 - 24;
             }
-            if (mode == REQUIRE_REWARD_BURST_FROM_CENTER) {
+            if (mode == REQUIRE_CONDITION_BURST_FROM_CENTER) {
                 dx = tile->x - 0x80;
                 dy = tile->y - 0x80;
                 dist = SquareRoot0(dx * dx + dy * dy);
-            } else if (mode == REQUIRE_REWARD_BURST_FROM_ORIGIN) {
+            } else if (mode == REQUIRE_CONDITION_BURST_FROM_ORIGIN) {
                 dx = tile->x;
                 dy = tile->y;
                 dist = SquareRoot0(dx * dx + dy * dy);
-            } else if (mode == REQUIRE_REWARD_BURST_HORIZONTAL) {
+            } else if (mode == REQUIRE_CONDITION_BURST_HORIZONTAL) {
                 dx = tile->x;
                 dist = SquareRoot0(dx * dx);
             } else {
                 dx = tile->x - 0x80;
                 dy = tile->y - 0x80;
-                g_require_reward_burst_rotation.vx = 0;
-                g_require_reward_burst_rotation.vy = 0;
-                g_require_reward_burst_rotation.vz = 0x200;
-                RotMatrix(&g_require_reward_burst_rotation, &g_require_reward_burst_matrix);
-                g_require_reward_burst_offset.vx = dx * ONE;
-                g_require_reward_burst_offset.vy = dy * ONE;
-                g_require_reward_burst_offset.vz = 0;
-                ApplyMatrixLV(&g_require_reward_burst_matrix, &g_require_reward_burst_offset,
-                    &g_require_reward_burst_rotated_offset);
-                dist = abs(g_require_reward_burst_rotated_offset.vx / ONE);
+                g_require_condition_burst_rotation.vx = 0;
+                g_require_condition_burst_rotation.vy = 0;
+                g_require_condition_burst_rotation.vz = 0x200;
+                RotMatrix(&g_require_condition_burst_rotation, &g_require_condition_burst_matrix);
+                g_require_condition_burst_offset.vx = dx * ONE;
+                g_require_condition_burst_offset.vy = dy * ONE;
+                g_require_condition_burst_offset.vz = 0;
+                ApplyMatrixLV(&g_require_condition_burst_matrix, &g_require_condition_burst_offset,
+                    &g_require_condition_burst_rotated_offset);
+                dist = abs(g_require_condition_burst_rotated_offset.vx / ONE);
             }
             /* The delay grows with the square of the distance. */
             dist = (dist * dist) / (divisor << 8);
@@ -2117,8 +2117,8 @@ void require_reward_animate_bonus_image_burst(void) {
         }
     }
 
-    SetDrawMode(&g_require_reward_burst_draw_modes[0], 0, 0, GetTPage(0, 0, 0x180, 0), &g_menu_draw_area_template);
-    SetDrawMode(&g_require_reward_burst_draw_modes[1], 0, 0, GetTPage(0, 0, 0x180, 0), &g_menu_draw_area_template);
+    SetDrawMode(&g_require_condition_burst_draw_modes[0], 0, 0, GetTPage(0, 0, 0x180, 0), &g_menu_draw_area_template);
+    SetDrawMode(&g_require_condition_burst_draw_modes[1], 0, 0, GetTPage(0, 0, 0x180, 0), &g_menu_draw_area_template);
     frame = 0;
     for (phase = 0; phase < 2; phase++) {
         done = 0;
@@ -2127,37 +2127,37 @@ void require_reward_animate_bonus_image_burst(void) {
             thread_yield();
             for (row = 0; row < 12; row++) {
                 for (col = 0; col < 24; col++) {
-                    tile = &g_require_reward_burst_tiles[row][col];
+                    tile = &g_require_condition_burst_tiles[row][col];
                     poly = &tile->poly[frame & 1];
                     /* A started tile is a square turned by its angle: corners on its radius at
                      * angle + 45 and + 135 degrees (0x200, 0x600) and their mirror images. */
                     if (tile->delay == 0) {
-                        g_require_reward_burst_rotation.vx = 0;
-                        g_require_reward_burst_rotation.vy = 0;
-                        g_require_reward_burst_rotation.vz = tile->angle + 0x200;
-                        RotMatrix(&g_require_reward_burst_rotation, &g_require_reward_burst_matrix);
-                        g_require_reward_burst_offset.vx = tile->radius * ONE;
-                        g_require_reward_burst_offset.vy = 0;
-                        g_require_reward_burst_offset.vz = 0;
-                        ApplyMatrixLV(&g_require_reward_burst_matrix, &g_require_reward_burst_offset,
-                            &g_require_reward_burst_rotated_offset);
-                        ox = g_require_reward_burst_rotated_offset.vx / 0x4000;
-                        oy = g_require_reward_burst_rotated_offset.vy / 0x4000;
+                        g_require_condition_burst_rotation.vx = 0;
+                        g_require_condition_burst_rotation.vy = 0;
+                        g_require_condition_burst_rotation.vz = tile->angle + 0x200;
+                        RotMatrix(&g_require_condition_burst_rotation, &g_require_condition_burst_matrix);
+                        g_require_condition_burst_offset.vx = tile->radius * ONE;
+                        g_require_condition_burst_offset.vy = 0;
+                        g_require_condition_burst_offset.vz = 0;
+                        ApplyMatrixLV(&g_require_condition_burst_matrix, &g_require_condition_burst_offset,
+                            &g_require_condition_burst_rotated_offset);
+                        ox = g_require_condition_burst_rotated_offset.vx / 0x4000;
+                        oy = g_require_condition_burst_rotated_offset.vy / 0x4000;
                         poly->x0 = ox + tile->x + 0x80;
                         poly->y0 = oy + tile->y;
                         poly->x3 = tile->x - ox + 0x80;
                         poly->y3 = tile->y - oy;
-                        g_require_reward_burst_rotation.vx = 0;
-                        g_require_reward_burst_rotation.vy = 0;
-                        g_require_reward_burst_rotation.vz = tile->angle + 0x600;
-                        RotMatrix(&g_require_reward_burst_rotation, &g_require_reward_burst_matrix);
-                        g_require_reward_burst_offset.vx = tile->radius * ONE;
-                        g_require_reward_burst_offset.vy = 0;
-                        g_require_reward_burst_offset.vz = 0;
-                        ApplyMatrixLV(&g_require_reward_burst_matrix, &g_require_reward_burst_offset,
-                            &g_require_reward_burst_rotated_offset);
-                        ox = g_require_reward_burst_rotated_offset.vx / 0x4000;
-                        oy = g_require_reward_burst_rotated_offset.vy / 0x4000;
+                        g_require_condition_burst_rotation.vx = 0;
+                        g_require_condition_burst_rotation.vy = 0;
+                        g_require_condition_burst_rotation.vz = tile->angle + 0x600;
+                        RotMatrix(&g_require_condition_burst_rotation, &g_require_condition_burst_matrix);
+                        g_require_condition_burst_offset.vx = tile->radius * ONE;
+                        g_require_condition_burst_offset.vy = 0;
+                        g_require_condition_burst_offset.vz = 0;
+                        ApplyMatrixLV(&g_require_condition_burst_matrix, &g_require_condition_burst_offset,
+                            &g_require_condition_burst_rotated_offset);
+                        ox = g_require_condition_burst_rotated_offset.vx / 0x4000;
+                        oy = g_require_condition_burst_rotated_offset.vy / 0x4000;
                         poly->x1 = ox + tile->x + 0x80;
                         poly->y1 = oy + tile->y;
                         poly->x2 = tile->x - ox + 0x80;
@@ -2205,7 +2205,7 @@ void require_reward_animate_bonus_image_burst(void) {
                 }
             }
 
-            gfx_append_gpu_primitive_to_secondary_otag(&g_require_reward_burst_draw_modes[frame & 1]);
+            gfx_append_gpu_primitive_to_secondary_otag(&g_require_condition_burst_draw_modes[frame & 1]);
             /* One more frame is drawn after every tile has finished. */
             if (done == 1) {
                 break;
@@ -2220,24 +2220,24 @@ void require_reward_animate_bonus_image_burst(void) {
             break;
         }
 
-        SetPolyF4(&g_require_reward_burst_flash_polys[0]);
-        setXY4(&g_require_reward_burst_flash_polys[0], 0x80, 0, 0x180, 0, 0x80, 0x100, 0x180, 0x100);
-        g_require_reward_burst_flash_polys[0].r0 = 0x30;
-        g_require_reward_burst_flash_polys[0].g0 = 0x28;
-        g_require_reward_burst_flash_polys[0].b0 = 0x10;
-        SetSemiTrans(&g_require_reward_burst_flash_polys[0], 1);
+        SetPolyF4(&g_require_condition_burst_flash_polys[0]);
+        setXY4(&g_require_condition_burst_flash_polys[0], 0x80, 0, 0x180, 0, 0x80, 0x100, 0x180, 0x100);
+        g_require_condition_burst_flash_polys[0].r0 = 0x30;
+        g_require_condition_burst_flash_polys[0].g0 = 0x28;
+        g_require_condition_burst_flash_polys[0].b0 = 0x10;
+        SetSemiTrans(&g_require_condition_burst_flash_polys[0], 1);
         mem_copy_bytes_nonempty(
-            &g_require_reward_burst_flash_polys[1], &g_require_reward_burst_flash_polys[0], sizeof(POLY_F4));
+            &g_require_condition_burst_flash_polys[1], &g_require_condition_burst_flash_polys[0], sizeof(POLY_F4));
         frame++;
         /* The controlling thread ends the hold by switching this task to THREAD_TASK_DARK_SCREEN. */
         thread_set_current_task_id(THREAD_TASK_DARK_SCREEN_HOLD);
         for (;;) {
             thread_yield();
-            g_require_reward_burst_flash_polys[frame & 1].r0 = g_require_gfx_fade_rgb[0];
-            g_require_reward_burst_flash_polys[frame & 1].g0 = g_require_gfx_fade_rgb[1];
-            g_require_reward_burst_flash_polys[frame & 1].b0 = g_require_gfx_fade_rgb[2];
-            gfx_append_gpu_primitive_to_secondary_otag(&g_require_reward_burst_flash_polys[frame & 1]);
-            gfx_append_gpu_primitive_to_secondary_otag(&g_require_reward_burst_draw_modes[frame & 1]);
+            g_require_condition_burst_flash_polys[frame & 1].r0 = g_require_gfx_fade_rgb[0];
+            g_require_condition_burst_flash_polys[frame & 1].g0 = g_require_gfx_fade_rgb[1];
+            g_require_condition_burst_flash_polys[frame & 1].b0 = g_require_gfx_fade_rgb[2];
+            gfx_append_gpu_primitive_to_secondary_otag(&g_require_condition_burst_flash_polys[frame & 1]);
+            gfx_append_gpu_primitive_to_secondary_otag(&g_require_condition_burst_draw_modes[frame & 1]);
             if (g_threads[g_thread_current_id].task_id == THREAD_TASK_DARK_SCREEN) {
                 break;
             }
@@ -2248,7 +2248,7 @@ void require_reward_animate_bonus_image_burst(void) {
         /* Restart the delays so phase 1 collapses the tiles in the same order. */
         for (row = 0; row < 12; row++) {
             for (col = 0; col < 24; col++) {
-                tile = &g_require_reward_burst_tiles[row][col];
+                tile = &g_require_condition_burst_tiles[row][col];
                 tile->delay = tile->initial_delay;
             }
         }

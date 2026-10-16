@@ -77,7 +77,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     s32 v;
     s32 u_span;
     s32 v_span;
-    u32* ot = main_gfx_get_otag();
+    u32* ot = main_gfx_get_battle_otag();
     s32 i;
     u32 red;
     u32 green;

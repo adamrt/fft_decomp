@@ -23,7 +23,7 @@ enum {
 };
 
 /* One of the two 60968-byte battle render buffers. The primitive pools are
- * pre-initialized once; main_gfx_swap_and_clear_otag reads the ordering table
+ * pre-initialized once; main_gfx_swap_and_clear_battle_otag reads the ordering table
  * pointer at +0xe5b4. */
 typedef struct battle_render_buffer {
     POLY_GT3 gt3[BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT]; /* 0x00000 */
@@ -38,7 +38,7 @@ typedef struct battle_render_buffer {
 } battle_render_buffer_t;
 typedef char battle_render_buffer_size_must_be_60968[(sizeof(battle_render_buffer_t) == 60968) ? 1 : -1];
 
-/* The buffer being built this frame; main_gfx_swap_and_clear_otag alternates
+/* The buffer being built this frame; main_gfx_swap_and_clear_battle_otag alternates
  * it between the two g_battle_render_buffers entries. */
 extern battle_render_buffer_t* g_battle_gfx_current_render_buffer;
 extern battle_render_buffer_t g_battle_render_buffers[2];

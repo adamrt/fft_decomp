@@ -1,9 +1,8 @@
-/* The thread drawing the numeric editor panel. */
+/* The thread drawing the numeric panel. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
-#include "fft/main_gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
@@ -15,21 +14,14 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Thread task THREAD_TASK_STATUS_PANEL: numeric editor panel.
- *
- * Twin of menu_run_numeric_editor_thread / menu_run_numeric_editor_frame_thread
- * with EQUIP's own draw-mode setup. Builds the primitive block once, copies it
- * into the second buffer, then each frame re-renders the three text images when
- * requested, rescales the draw area, recolors the sprites for the thread
- * style and submits the block until the thread's third parameter is set.
- * The primitive block is menu_status_panel_numeric_buffer_t, double buffered
- * (g_editor_numeric_state_a for THREAD_SCREEN_SLOT_NUMERIC_EDITOR,
- * g_editor_numeric_state_b otherwise); the thread parameter block is
- * menu_status_thread_t.
- *
- * `buffers` is assigned in each branch (not after the if) so the spilled store
- * precedes upload_c's at the join, as in the target. */
-void menu_run_numeric_editor_frame_thread(void) {
+/* Thread body (task THREAD_TASK_STATUS_PANEL) of the numeric stats panel. In slot 12 it shows the
+ * selected unit's numbers; in any other slot it is a preview panel that draws signed values
+ * from its own buffers (g_editor_numeric_state_b and the _b, _d-_f records). Parameter 1 is the
+ * panel's menu_status_thread_t record. The number images upload on the first frame and on the
+ * record's redraw request; the panel zooms open over its first 13 frames, dims while the record's
+ * style is 1 or menu input is locked, and runs until a stop request. Like WORLD, the draw offset
+ * (0 or 0xF0) follows g_frame_arg. */
+void menu_run_numeric_panel_frame_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;
     menu_status_panel_numeric_buffer_t* buffers;
@@ -50,7 +42,7 @@ void menu_run_numeric_editor_frame_thread(void) {
 
     /* Slot 12 draws the unit's stats; the other slot (a preview panel) has its own number
      * images, VRAM rects and entries. */
-    if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+    if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
         buffer = g_editor_numeric_state_a;
         buffers = buffer;
         number_images = &g_editor_numeric_text_a;
@@ -70,7 +62,7 @@ void menu_run_numeric_editor_frame_thread(void) {
 
     gfx_set_draw_mode_for_texture_page(&buffer->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&buffer->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    SetDrawMode(&buffer->image_draw_mode, 0, 0, GetTPage(0, 2, 0x140, 0), &g_menu_draw_area_template);
+    gfx_set_draw_mode_for_texture_page(&buffer->image_draw_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_numeric_display_frame_primitives(&g_editor_numeric_table.texture_rect, &buffer->numeric_frame);
     menu_init_scaled_draw_area_packets(&buffer->portrait);
 
@@ -83,12 +75,12 @@ void menu_run_numeric_editor_frame_thread(void) {
         descriptor++;
     }
 
-    /* EQUIP's preview panel uploads its number images at y 0x6C of the page at x 320, so its
-     * number sprites sample there. */
-    if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
-        buffer->sprites[14].v0 = 0x6C;
-        buffer->sprites[15].v0 = 0x6C;
-        buffer->sprites[16].v0 = 0x6C;
+    /* The preview panel uploads its number images 0x4C rows lower (y 204), so its number
+     * sprites sample there. */
+    if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
+        buffer->sprites[14].v0 += 0x4C;
+        buffer->sprites[15].v0 += 0x4C;
+        buffer->sprites[16].v0 += 0x4C;
     }
     buffer->sprites[10].clut = 0x7D7C;
     mem_copy_bytes_nonempty(&buffer[1], buffer, sizeof(menu_status_panel_numeric_buffer_t));
@@ -103,7 +95,7 @@ void menu_run_numeric_editor_frame_thread(void) {
             /* Each pen stride is its image's width in 4-bit pixels (four per 16-bit VRAM unit). */
             g_menu_text_state.pen.stride = 0x14;
             menu_set_text_origin(0, 0);
-            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
             } else {
                 menu_draw_numeric_display_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
@@ -111,7 +103,7 @@ void menu_run_numeric_editor_frame_thread(void) {
 
             g_menu_text_state.pen.stride = 0x40;
             menu_set_text_origin(0, 0);
-            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
             } else {
                 menu_draw_numeric_display_entries(number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
@@ -119,7 +111,7 @@ void menu_run_numeric_editor_frame_thread(void) {
 
             g_menu_text_state.pen.stride = 0x64;
             menu_set_text_origin(0, 0);
-            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+            if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
             } else {
                 menu_draw_numeric_display_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
@@ -131,7 +123,7 @@ void menu_run_numeric_editor_frame_thread(void) {
         }
 
         /* A field_y of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into the upper half. */
-        field_y = g_main_gfx_screen_polarity * 0xF0;
+        field_y = g_frame_arg;
         use_offset = field_y != 0xF0;
         g_gfx_draw_offset_y = -use_offset & 0xF0;
         menu_build_scaled_draw_area_packets(
@@ -177,7 +169,7 @@ void menu_run_numeric_editor_frame_thread(void) {
         for (; i < 17; i++) {
             gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
-        if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
+        if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
             gfx_draw_or_append_gpu_primitive(&buffer->text_draw_mode);
         } else {
             gfx_draw_or_append_gpu_primitive(&buffer->image_draw_mode);

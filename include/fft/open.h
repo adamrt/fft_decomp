@@ -191,7 +191,7 @@ typedef struct open_menu_sound_test_state {
 
 /* Text message controller state (handler 8). */
 typedef struct open_controller_thread_completion {
-    s32 run_followup;
+    s32 use_world_text;
     s32 saved_blocked_buttons; /* g_menu_blocked_buttons when the message started */
 } open_controller_thread_completion_t;
 
@@ -281,7 +281,7 @@ extern u8 g_open_music_test_music_ids[];               /* music test entry -> sc
 extern suzuki_music_t* g_open_music_test_sound_handle; /* handle of the playing music test track */
 /* Entry of g_open_gfx_otags the WORLD menu frame draws into while
  * OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME is set. */
-extern s32 g_open_menu_formation_otag_index;
+extern s32 g_open_menu_world_frame_otag_index;
 
 void open_menu_start_music_test_controller(void);
 

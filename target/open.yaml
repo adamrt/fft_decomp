@@ -47,7 +47,7 @@ functions:
   - {addr: 0x80068268, size: 284, name: open_input_update_repeat, hash: a82e23c2bd0cb926, unit: movies}
   - {addr: 0x80068384, size: 156, name: open_title_init_new_game_party, hash: 3b01ce90b00a6557, unit: movies}
   - {addr: 0x80068420, size: 300, name: open_birthday_convert_date_to_zodiac, hash: 9aaa68be5ea32880, unit: movies}
-  - {addr: 0x8006854c, size: 160, name: open_menu_update_world_formation, hash: b27c035b144dee4f, unit: movies}
+  - {addr: 0x8006854c, size: 160, name: open_menu_run_world_menu_frame, hash: b27c035b144dee4f, unit: movies}
   - {addr: 0x800685ec, size: 76, name: unit_birthday_calculate_day_of_year, hash: e796a8582427e794, source: src/wldcore/unit_birthday_calculate_day_of_year.c}
   - {addr: 0x80068638, size: 76, name: open_sound_set_cd_mix_and_volume, hash: 3fcd975cc8b2da0c, unit: init}
   - {addr: 0x80068684, size: 88, name: open_system_init_title_sequence, hash: 7f2fe3e68306a213, unit: init}
@@ -238,7 +238,7 @@ data:
   - {addr: 0x800855a8, name: g_open_file_destination}
   - {addr: 0x800855ac, name: g_input_polled_buttons}
   - {addr: 0x800855b4, name: g_open_prologue}
-  - {addr: 0x800855ec, name: g_open_menu_formation_otag_index}
+  - {addr: 0x800855ec, name: g_open_menu_world_frame_otag_index}
   - {addr: 0x800855f0, name: g_open_title_demo_movie_index}
   - {addr: 0x800855f4, name: g_open_music_test_list_entry_flags}
   - {addr: 0x800856f4, name: g_open_system_result}

@@ -657,8 +657,8 @@ static void wldcore_menu_push_participant_detail_level(s32 proposition, s32 part
     g_wldcore_thread9_params.y = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_wldcore_thread8_params, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread);
-    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_wldcore_threadc_params, 0, 0);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_frame_thread);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_wldcore_threadc_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_wldcore_thread9_params, 0, 0);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS;
@@ -860,7 +860,7 @@ void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level
         g_wldcore_window_record_count -= 2;
         g_wldcore_window_render_object_count -= 2;
         thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-        thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, 0, 0, 1);
+        thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
         thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
         return;
     }

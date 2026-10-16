@@ -8,7 +8,7 @@
 #include "fft/world_menu.h"
 #include "psx/types.h"
 
-/* Open or close the equipment-change panel and its numeric editor. While the status panel
+/* Open or close the equipment-change panel and its numeric stats panel. While the status panel
  * slides, an open request does nothing, so per-frame callers open it once the slide ends. */
 void world_menu_toggle_change_banner_panel_thread(s32 enable) {
     s32 state = enable;
@@ -22,11 +22,11 @@ void world_menu_toggle_change_banner_panel_thread(s32 enable) {
                 thread_set_parameters(
                     WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_world_change_banner_panel_thread_params, 0, 0);
             }
-            menu_toggle_numeric_editor_thread(state);
+            menu_toggle_numeric_panel_thread(state);
         }
     } else {
         menu_request_thread_stop(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }
 

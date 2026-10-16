@@ -208,10 +208,10 @@ extern s32 g_bunit_status_display_offset_y;
 extern s32 g_bunit_status_display_dimmed;
 extern menu_status_thread_t g_bunit_character_status_frame_config;
 extern s32 g_bunit_character_status_dimmed;
-extern menu_status_thread_t g_bunit_numeric_editor_thread_params;
-extern s32 g_bunit_numeric_editor_dimmed;
+extern menu_status_thread_t g_bunit_numeric_panel_thread_params;
+extern s32 g_bunit_numeric_panel_dimmed;
 
-void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable);
+void bunit_panel_toggle_equipment_and_numeric_threads(s32 enable);
 
 /* status banner */
 extern u8 g_bunit_status_banner_enabled;
@@ -243,7 +243,7 @@ extern u8 g_bunit_help_cursor_initialized;
 extern oriented_quad_t g_bunit_cursor_sprite;
 extern oriented_quad_t g_bunit_cursor_shadow_sprite;
 /* Rhombus-cursor trail, oldest point first; x == -1 marks an empty slot
- * (bunit_gfx_init_rhombus_cursor_tpages clears all eight). */
+ * (bunit_gfx_init_rhombus_cursor_trail clears all eight). */
 extern point16_t g_bunit_cursor_trail_points[8];
 extern u8 g_bunit_cursor_trail_brightness[];
 extern textured_quad_source_t g_bunit_bouncing_cursor_quad;
@@ -325,6 +325,6 @@ typedef enum bunit_thread_slot {
 
 extern u8 g_bunit_menu_thread_running;
 
-void bunit_menu_update_event_thread_state(void);
+void bunit_menu_input_update_with_message_state(void);
 
 #endif

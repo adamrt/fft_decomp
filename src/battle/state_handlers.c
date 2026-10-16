@@ -132,7 +132,7 @@ void battle_state_handle_move_confirm_menu_state(void) {
     battle_unit_t* casting_unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     source_unit = battle_unit_get_source();
     casting_unit = battle_unit_get_casting();
@@ -161,7 +161,7 @@ void battle_state_handle_wait_menu_state(void) {
     battle_unit_t* source_unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     source_unit = battle_unit_get_source();
     selected_command = selected_command_address->kind;
@@ -225,7 +225,7 @@ void battle_state_handle_wait_direction_state(void) {
         battle_gfx_draw_wait_direction_unit();
     }
     battle_gfx_update_status_bubbles_and_graphics();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_camera_handle_rotation_input();
         battle_camera_update_zoom_input();
@@ -292,7 +292,7 @@ void battle_state_handle_crystal_learn_state(void) {
     u16 counter;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     command = menu_get_selected_command_address();
     source = battle_unit_get_source();
     casting = battle_unit_get_casting();
@@ -375,7 +375,7 @@ void battle_state_handle_targeting_prompt_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     switch (selected_command) {
     case AI_COMMAND_PROMPT_YES:
@@ -399,7 +399,7 @@ void battle_state_handle_targeting_range_state(void) {
     battle_unit_t* target;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         battle_target_move_cursor_by_input();
         battle_camera_handle_rotation_input();
@@ -454,7 +454,7 @@ void battle_state_handle_illegal_range_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -472,7 +472,7 @@ void battle_state_handle_ability_preview_help_state(void) {
         g_battle_game_state = BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING;
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* AbilityPreviewHandling game-state handler: the pending ability's targets are
@@ -518,7 +518,7 @@ void battle_state_handle_ability_preview_state(void) {
         }
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* ConfirmAction game-state handler. The answers double as targeting types. For a player-controlled
@@ -534,7 +534,7 @@ void battle_state_handle_confirm_action_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     unit = battle_unit_get_source();
     if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
@@ -593,7 +593,7 @@ void battle_state_handle_pre_attack_animation_state(void) {
     battle_unit_t* unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     unit = battle_unit_get_source();
     if ((unit->animation.wait == 0 || unit->animation.restart_count != 0 || unit->state_frame_counter >= 0x3d)
         && (g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) == 0
@@ -608,7 +608,7 @@ void battle_state_handle_action_cast_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     /* Any prompt answer marks the window closed (the same test as the
      * BATTLE_MESSAGE_DISPLAY handler). */
@@ -631,7 +631,7 @@ void battle_state_handle_commence_attack_phase_state(void) {
     battle_unit_t* unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     unit = battle_unit_get_source();
     if (unit->attack_phase_state == BATTLE_ATTACK_PREPARATION_JUMP) {
         if (unit->animation.wait == 0) {
@@ -650,7 +650,7 @@ void battle_state_handle_action_announcement_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -718,7 +718,7 @@ void battle_state_handle_open_sp2_files_state(void) {
         } while (slot < 2);
     }
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
 }
 
 /* StartEffectFileOpen game-state handler: step the effect-file load
@@ -834,7 +834,7 @@ void battle_state_update_action_execute_mode(void) {
         }
     } else {
         battle_camera_update_cursor_tile_vector();
-        menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+        menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
         if (g_battle_state_animation_continue_check == 0 && unit->numeric_display.active == 0
             && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < BATTLE_UNIT_ANIMATION_ATTACK_FIRST)) {
             if (unit->strike.target_count != 0) {
@@ -859,7 +859,7 @@ void battle_state_handle_battle_message_display_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -889,7 +889,7 @@ void battle_state_handle_resume_attack_phase_state(void) {
     battle_unit_t* unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -955,7 +955,7 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
     u8 compiler_stack_pad[8];
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     casting_unit = battle_unit_get_casting();
     selected_command = selected_command_address->kind;
@@ -1007,7 +1007,7 @@ static s32 battle_map_update_deep_dungeon_and_animation(void) {
     s32 runtime_id;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     if (battle_map_poll_data_load() != 0) {
         return 0;
     }
@@ -1043,7 +1043,7 @@ void battle_state_handle_target_select_start_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -1065,7 +1065,7 @@ void battle_state_handle_target_select_state(void) {
     battle_camera_update_tilt_input();
     battle_target_move_cursor_by_input();
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     if (g_main_input_pressed_buttons & PSX_PAD_CIRCLE) {
         caster = battle_unit_get_casting();
         target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
@@ -1101,7 +1101,7 @@ void battle_state_handle_target_select_denied_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -1117,7 +1117,7 @@ void battle_state_handle_target_select_confirm_state(void) {
     battle_unit_t* target;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     switch ((s32)menu_get_selected_command_address()->kind) {
     case AI_COMMAND_PROMPT_YES:
         caster = battle_unit_get_casting();
@@ -1139,7 +1139,7 @@ void battle_state_handle_target_display_start_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -1160,7 +1160,7 @@ void battle_state_handle_target_display_state(void) {
     s32 buttons;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     buttons = g_main_input_pressed_buttons;
     if ((buttons & PSX_PAD_CIRCLE) || (buttons & PSX_PAD_CROSS)) {
         battle_target_move_cursor_to_unit(battle_unit_get_casting());
@@ -1176,7 +1176,7 @@ void battle_state_handle_after_command_state(void) {
     battle_unit_t* unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     command_address = menu_get_selected_command_address();
     unit = battle_unit_get_source();
     command = command_address->kind;
@@ -1202,7 +1202,7 @@ void battle_state_handle_continue_turn_state(void) {
     battle_unit_t* unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     unit = battle_unit_get_source();
     if ((g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) != 0) {
         return;
@@ -1249,7 +1249,7 @@ void battle_state_handle_change_turn_state(void) {
     s32 type;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     command = menu_get_selected_command_address()->kind;
     if (command >= AI_COMMAND_PROMPT_YES) {
         if (command <= AI_COMMAND_PROMPT_NO) {
@@ -1285,7 +1285,7 @@ void battle_state_handle_status_execute_state(void) {
     battle_unit_t* unit;
 
     battle_state_update_units();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_battle_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
@@ -1352,7 +1352,7 @@ void battle_state_update_event_mode(void) {
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
-    switch (script_run_event_frame(main_gfx_get_otag(), g_input_current_buttons)) {
+    switch (script_run_event_frame(main_gfx_get_battle_otag(), g_input_current_buttons)) {
     case SCRIPT_EVENT_FRAME_NO_FINISH:
         battle_gfx_init_evtchr_vram_slots();
         g_battle_menu_status_enabled = 1;
@@ -1387,8 +1387,8 @@ void battle_state_update_event_mode(void) {
         g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = level;
         g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = level;
 
-        AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-        AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+        AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+        AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
     }
 }
 
@@ -1416,8 +1416,8 @@ void battle_state_handle_map_jumping_out_state(void) {
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = intensity;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = intensity;
 
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
 
     g_battle_screen_fade_intensity += g_battle_state_screen_fade_step;
     if (g_battle_screen_fade_intensity >= 0x102) {
@@ -1446,8 +1446,8 @@ void battle_state_handle_change_map_jumping_out_state(void) {
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = intensity;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = intensity;
 
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
 
     g_battle_screen_fade_intensity += g_battle_state_screen_fade_step;
     if (g_battle_screen_fade_intensity >= 0x102) {
@@ -1475,8 +1475,8 @@ void battle_state_handle_close_battle_state(void) {
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].r0 = intensity;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = intensity;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = intensity;
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
     g_battle_screen_fade_intensity += g_battle_state_screen_fade_step;
 }
 
@@ -1489,8 +1489,8 @@ void battle_state_handle_map_init_state(void) {
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].r0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = 0xff;
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
     if (g_battle_state_map_init_step == 0xd) {
         g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_IN;
         g_battle_screen_fade_intensity = 0xff;
@@ -1509,8 +1509,8 @@ void battle_state_handle_change_map_init_state(void) {
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].r0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = 0xff;
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
     if (g_battle_state_map_init_step == 0xd) {
         old_state = g_battle_previous_game_state;
         g_battle_previous_game_state = BATTLE_GAME_STATE_FREE_CURSOR;
@@ -1535,8 +1535,8 @@ void battle_state_handle_map_jumping_in_state(void) {
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].r0 = intensity;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = intensity;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = intensity;
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
     g_battle_screen_fade_intensity -= g_battle_state_screen_fade_step;
     if (g_battle_screen_fade_intensity <= 0) {
         previous_state = g_battle_previous_game_state;
@@ -1569,7 +1569,7 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     battle_gfx_draw_screen_color_modulation_overlay();
     /* TO_WORLD and NEXT_EVENT lead the other way round from battle_state_update_event_mode
      * (QUIRKS.md). */
-    switch (script_run_event_frame(main_gfx_get_otag(), g_input_current_buttons)) {
+    switch (script_run_event_frame(main_gfx_get_battle_otag(), g_input_current_buttons)) {
     case SCRIPT_EVENT_FRAME_RUNNING:
         break;
     case SCRIPT_EVENT_FRAME_NO_FINISH:
@@ -1591,8 +1591,8 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = intensity;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = intensity;
 
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
-    AddPrim(main_gfx_get_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_polygons[g_main_gfx_screen_polarity]);
+    AddPrim(main_gfx_get_battle_otag(), &g_battle_screen_fade_draw_modes[g_main_gfx_screen_polarity]);
 
     g_battle_screen_fade_intensity -= g_battle_state_screen_fade_step;
     if (g_battle_screen_fade_intensity <= 0) {

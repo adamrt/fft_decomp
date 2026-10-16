@@ -30,13 +30,13 @@
 #include "psx/types.h"
 
 static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y);
-static void bunit_gfx_init_rhombus_cursor_tpages(void);
+static void bunit_gfx_init_rhombus_cursor_trail(void);
 static void bunit_gfx_update_rhombus_cursor_trail(point16_t* target);
 
-/* With `enable`, start the equipment/ability panel and numeric editor threads unless
+/* With `enable`, start the equipment/ability panel and numeric panel threads unless
  * the status panel is sliding or the panel thread already runs; without it, ask both
  * threads to stop. */
-void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
+void bunit_panel_toggle_equipment_and_numeric_threads(s32 enable) {
     if (enable != 0) {
         if (g_bunit_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
             return;
@@ -46,11 +46,11 @@ void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
         }
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, &g_bunit_character_status_frame_config, 0, 0);
-        thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread);
-        thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, &g_bunit_numeric_editor_thread_params, 0, 0);
+        thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, menu_run_numeric_panel_frame_thread);
+        thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, &g_bunit_numeric_panel_thread_params, 0, 0);
     } else {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }
 
@@ -295,7 +295,7 @@ void bunit_menu_init_unit_list(s32 unused_selected_index) {
     } else {
         g_bunit_status_display_offset_y = 0;
     }
-    bunit_gfx_init_rhombus_cursor_tpages();
+    bunit_gfx_init_rhombus_cursor_trail();
 }
 
 /*
@@ -749,7 +749,7 @@ void bunit_gfx_draw_falloff_shaded_rows(s32 y) {
 
 /* Empty the eight cursor trail points (x = -1) and set the texture pages of
  * the cursor sprite and its shadow. */
-static void bunit_gfx_init_rhombus_cursor_tpages(void) {
+static void bunit_gfx_init_rhombus_cursor_trail(void) {
     s16 term = -1;
     s32 i = 7;
     do {
