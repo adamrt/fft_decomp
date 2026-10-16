@@ -1,6 +1,7 @@
 /* 6-byte selection record clears, one and all. */
 
 #include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

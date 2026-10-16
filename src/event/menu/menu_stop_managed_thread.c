@@ -1,4 +1,4 @@
-#include "fft/menu.h"
+#include "fft/menu_list.h"
 #include "psx/types.h"
 
 /* Request stop, then clear this screen's managed-thread state. */

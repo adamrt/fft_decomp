@@ -4,7 +4,7 @@
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_gfx.h"
-#include "fft/menu.h"
+#include "fft/menu_panel.h"
 #include "fft/wldcore.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

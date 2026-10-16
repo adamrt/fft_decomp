@@ -15,6 +15,8 @@
 #include "fft/main_sound.h"
 #include "fft/map.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_overlay.h"
 #include "fft/script.h"
 #include "fft/unit.h"
 #include "psx/gte_inline.h"

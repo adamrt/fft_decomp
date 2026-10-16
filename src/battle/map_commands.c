@@ -22,6 +22,7 @@
 #include "fft/sound.h"
 #include "psx/libc.h"
 #include "psx/types.h"
+#include "fft/menu_overlay.h"
 
 s32 battle_state_get_animation_continue_check(void) {
     return g_battle_state_animation_continue_check;

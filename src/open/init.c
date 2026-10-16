@@ -2,7 +2,7 @@
  * init. */
 
 #include "fft/main_sound.h"
-#include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "fft/open.h"
 #include "fft/window.h"
 #include "fft/world.h"

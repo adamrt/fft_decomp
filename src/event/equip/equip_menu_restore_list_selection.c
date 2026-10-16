@@ -1,5 +1,6 @@
 #include "fft/event_equip.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "psx/types.h"
 
 /*

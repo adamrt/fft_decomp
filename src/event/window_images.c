@@ -6,6 +6,7 @@
 #include "fft/main_file.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

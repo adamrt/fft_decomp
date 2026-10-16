@@ -3,6 +3,7 @@
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/world_text.h"
 #include "psx/libc.h"

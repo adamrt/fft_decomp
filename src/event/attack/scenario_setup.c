@@ -8,7 +8,7 @@
 #include "fft/main_sound.h"
 #include "fft/main_unit.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"

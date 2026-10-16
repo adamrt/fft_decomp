@@ -1,4 +1,4 @@
-#include "fft/menu.h"
+#include "fft/menu_panel.h"
 #include "psx/types.h"
 
 s32 menu_job_get_next_level_jp_requirement(s32 unused_row) {

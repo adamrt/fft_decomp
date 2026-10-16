@@ -1,4 +1,5 @@
 #include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "psx/types.h"
 
 /* Select the normal (0) or alternate menu palette: the sprite color and the six CLUT selections

@@ -1,6 +1,7 @@
 /* Ability category tab tests. */
 
 #include "fft/menu.h"
+#include "fft/menu_panel.h"
 #include "psx/types.h"
 
 s32 menu_ability_is_action_tab(s32 unused_row) {

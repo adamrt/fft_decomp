@@ -6,6 +6,8 @@
 #include "fft/main_file.h"
 #include "fft/main_unit.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_text.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/window.h"

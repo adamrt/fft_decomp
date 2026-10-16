@@ -2,6 +2,7 @@
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/world_gfx.h"
 #include "fft/world_menu.h"

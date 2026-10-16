@@ -1,4 +1,5 @@
-#include "fft/menu.h"
+#include "fft/menu_list.h"
+#include "fft/menu_overlay.h"
 #include "psx/types.h"
 
 /* Point the scrollable list menu at a new -1 terminated entry list with the

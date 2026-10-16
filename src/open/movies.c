@@ -4,7 +4,7 @@
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_unit.h"
-#include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "fft/open.h"
 #include "fft/unit.h"
 #include "fft/window.h"

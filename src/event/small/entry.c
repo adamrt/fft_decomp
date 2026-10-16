@@ -2,6 +2,7 @@
 
 #include "fft/event_small.h"
 #include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/script.h"
 #include "psx/types.h"
 

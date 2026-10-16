@@ -1,5 +1,6 @@
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_list.h"
 #include "fft/menu_script.h"
 #include "fft/world_menu.h"
 #include "psx/types.h"

@@ -1,6 +1,7 @@
 #include "fft/event_equip.h"
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"

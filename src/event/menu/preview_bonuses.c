@@ -1,6 +1,7 @@
 /* Previewed HP and MP bonus display callbacks. */
 
 #include "fft/menu.h"
+#include "fft/menu_panel.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"
 

@@ -1,6 +1,6 @@
 /* If and if/else command group handlers. */
 
-#include "fft/menu.h"
+#include "fft/menu_list.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"
 

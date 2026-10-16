@@ -1,5 +1,5 @@
 #include "fft/main.h"
-#include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "fft/wldcore_menu.h"

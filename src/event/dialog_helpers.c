@@ -5,6 +5,7 @@
 #include "fft/battle_unit.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/unit.h"

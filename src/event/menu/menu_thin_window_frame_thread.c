@@ -7,6 +7,8 @@
  * twin's; the WORLD helpers are the same routines.
  */
 #include "fft/main_gfx.h"
+#include "fft/menu_panel.h"
+#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"

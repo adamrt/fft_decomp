@@ -8,6 +8,8 @@
  * world_screen_menu_thin_window_frame_thread) and its own texture-window table. Layout
  * notes below are the OPTION twin's; the WORLD helpers are the same routines.
  */
+#include "fft/menu_panel.h"
+#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"

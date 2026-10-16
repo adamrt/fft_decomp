@@ -1,4 +1,4 @@
-#include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "psx/types.h"
 
 /* Concatenate the text for each entry of a -1 terminated id list into `out`,

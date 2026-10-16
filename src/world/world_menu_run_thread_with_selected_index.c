@@ -1,4 +1,5 @@
 #include "fft/menu.h"
+#include "fft/menu_list.h"
 #include "psx/types.h"
 
 /* menu_start_managed_thread, first setting the entry's selected index when no menu thread is running.

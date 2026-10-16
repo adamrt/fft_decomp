@@ -3,6 +3,7 @@
 #include "fft/main.h"
 #include "fft/main_gfx.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"

@@ -1,7 +1,8 @@
 /* Text entries of window records, shared by the opening and the world map with their own record layouts. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_text.h"
 #include "fft/wldcore.h"
 #include "fft/wldcore_window.h"
 #include "fft/world.h"

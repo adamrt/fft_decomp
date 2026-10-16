@@ -1,6 +1,8 @@
 #include "fft/event_option.h"
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_overlay.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "psx/types.h"

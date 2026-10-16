@@ -13,6 +13,8 @@
 #include "fft/main_sound.h"
 #include "fft/map.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_panel.h"
 #include "fft/sound.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"

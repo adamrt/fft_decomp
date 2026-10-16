@@ -1,6 +1,8 @@
 #include "fft/event_bunit.h"
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_overlay.h"
 #include "fft/sound.h"
 
 /* Per-frame handler of the unit list's job page: runs the job list and,

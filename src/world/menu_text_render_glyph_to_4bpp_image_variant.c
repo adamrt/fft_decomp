@@ -1,5 +1,6 @@
 #include "fft/bits.h"
 #include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "psx/types.h"
 

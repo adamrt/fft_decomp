@@ -1,4 +1,4 @@
-#include "fft/menu.h"
+#include "fft/menu_input.h"
 #include "psx/types.h"
 
 /* Clear every saved menu selection value. The table has

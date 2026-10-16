@@ -1,6 +1,7 @@
 /* Two value return stubs and the unit name list. */
 
 #include "fft/menu.h"
+#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/unit.h"
 #include "psx/types.h"

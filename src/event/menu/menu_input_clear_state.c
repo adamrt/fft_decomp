@@ -1,4 +1,4 @@
-#include "fft/menu.h"
+#include "fft/menu_input.h"
 
 /* Reset the three masks consumed by the BUNIT menu-input processor. */
 void menu_input_clear_state(void) {

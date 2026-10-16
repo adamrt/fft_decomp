@@ -1,6 +1,6 @@
 #include "fft/gfx.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
+#include "fft/menu_panel.h"
 
 /* Clear the first draw area's width and install the default second draw area. */
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data) {

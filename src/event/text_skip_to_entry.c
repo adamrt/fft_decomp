@@ -1,6 +1,5 @@
 /* Skipping forward through text to a numbered entry. */
 
-#include "fft/menu.h"
 #include "psx/types.h"
 
 /* Advance to the requested entry in a packed text section.

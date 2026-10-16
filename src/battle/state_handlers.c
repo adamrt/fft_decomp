@@ -18,6 +18,8 @@
 #include "fft/main_gfx.h"
 #include "fft/main_sound.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_overlay.h"
 #include "fft/script.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"

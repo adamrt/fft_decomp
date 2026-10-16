@@ -1,4 +1,4 @@
-#include "fft/menu.h"
+#include "fft/menu_overlay.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"
 

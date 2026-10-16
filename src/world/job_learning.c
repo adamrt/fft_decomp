@@ -2,7 +2,12 @@
 
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "fft/menu_input.h"
+#include "fft/menu_list.h"
+#include "fft/menu_overlay.h"
+#include "fft/menu_panel.h"
 #include "fft/menu_script.h"
+#include "fft/menu_text.h"
 #include "fft/sound.h"
 #include "fft/unit.h"
 #include "fft/world.h"
