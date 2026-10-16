@@ -30,7 +30,7 @@
  * redeclared here.
  *
  * g_world_item_submenu_initialized is `u8` in the header while the target reads it with `lb`, so it is reached
- * through an lvalue reinterpretation, as the twin src/world/item_run_category_menu_variant.c does for the
+ * through an lvalue reinterpretation, as item_run_category_menu_variant does for the
  * sibling byte g_world_item_category_menu_initialized (`*(s8*)&g_world_item_category_menu_initialized`).
  *
  * 0x801c8518 carries two cataloged names and the store and the reload use

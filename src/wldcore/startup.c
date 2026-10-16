@@ -264,7 +264,7 @@ void wldcore_clear_screen_and_set_map_clip_rect(s32 mode) {
  * buffered ordering-table descriptors are pointed at their tag arrays.
  *
  * The descriptor stride of 0x14 matches the libgs GsOT record already assumed
- * by src/wldcore/wldcore_init_core.c, which indexes these same globals
+ * by wldcore_init_core, which indexes these same globals
  * with `g_active_graphics_buffer_index * 0x14`.
  */
 static void wldcore_gfx_init_subsystem(void) {
