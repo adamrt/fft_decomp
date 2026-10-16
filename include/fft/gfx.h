@@ -441,7 +441,6 @@ void menu_run_unit_status_thread_variant(void);
 void gfx_set_otag_index(s32 value);
 
 /* portrait transitions */
-
 void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition, const s32* first_portrait,
     const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
 
@@ -515,8 +514,6 @@ extern u8 g_gfx_decreasing_fade_active;
 s32 gfx_update_increasing_fade(void);
 s32 gfx_update_decreasing_fade(void);
 void gfx_start_decreasing_fade(void);
-
-/* fades */
 s32 gfx_get_fade_state(void);
 void gfx_start_increasing_fade(void);
 

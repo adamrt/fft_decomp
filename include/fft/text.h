@@ -46,11 +46,7 @@ void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bou
 void text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 separate);
 void text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
 void text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height);
-
-/* rendering */
 extern glyph_blit_t g_text_glyph_dest;
-
-/* rendering */
 extern s32 g_text_current_line;
 extern u8 g_text_data[];
 extern s32 g_text_selection_id;
