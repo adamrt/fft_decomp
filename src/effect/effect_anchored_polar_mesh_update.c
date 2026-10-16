@@ -4,7 +4,7 @@
 #include "fft/battle_map.h"
 #include "fft/battle_unit.h"
 #include "fft/effect.h"
-#include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

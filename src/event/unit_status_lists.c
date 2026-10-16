@@ -23,11 +23,13 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/world.h"
-#include "fft/world_menu.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/world_menu.h"
+#endif
 
 static s32 menu_display_projected_action_effect(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_load_parameters_t* unused_parameters);

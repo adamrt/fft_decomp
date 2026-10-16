@@ -34,12 +34,14 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/world.h"
-#include "fft/world_menu.h"
-#include "fft/world_script.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/world_menu.h"
+#    include "fft/world_script.h"
+#endif
 
 static void camera_load_state_from_script_variables(void);
 static void script_process_pending_requests(void);

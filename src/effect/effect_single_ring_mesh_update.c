@@ -3,7 +3,7 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
-#include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "fft/map.h"
 #include "psx/gte_inline.h"
 #include "psx/libetc.h"

@@ -16,11 +16,13 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/world.h"
-#include "fft/world_menu.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/world_menu.h"
+#endif
 
 static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
 
