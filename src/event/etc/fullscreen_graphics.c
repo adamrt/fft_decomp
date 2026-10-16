@@ -10,6 +10,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Wait for the high overlay area, read graphic `graphic_id` into it and upload the image
+ * (with its palette for the game-over screen). The END graphics upload nothing: they fade
+ * the screen in, hold for a per-graphic time and fade out. The buffer is freed after. */
 static void etc_graphic_open(s32 graphic_id) {
     u8* image_buffer;
     s32 frame;
@@ -113,6 +116,7 @@ static void etc_graphic_open(s32 graphic_id) {
     main_heap_free(image_buffer);
 }
 
+/* Empty, and nothing on the disc calls it. */
 void etc_noop_801bf3d8(void) {
 }
 

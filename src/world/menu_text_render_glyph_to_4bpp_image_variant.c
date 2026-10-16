@@ -1,3 +1,5 @@
+/* Drawing one font glyph into a 4bpp image in a text style's palette entries. */
+
 #include "fft/bits.h"
 #include "fft/menu.h"
 #include "fft/menu_text.h"

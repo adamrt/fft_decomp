@@ -1,3 +1,5 @@
+/* The item detail panel's status column of immunity and innate or starting status icons. */
+
 #include "fft/bits.h"
 #include "fft/data.h"
 #include "fft/main_item.h"

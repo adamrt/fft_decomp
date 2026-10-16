@@ -1,3 +1,5 @@
+/* A flaring ring of textured quads, two rows high and 32 around, with scrolling texture. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

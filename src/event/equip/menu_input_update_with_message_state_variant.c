@@ -1,3 +1,5 @@
+/* The equipment screen's per-frame input update, withholding input during transitions and help text. */
+
 #include "fft/event_equip.h"
 #include "fft/main.h"
 #include "fft/menu.h"

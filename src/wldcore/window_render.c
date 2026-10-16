@@ -27,6 +27,9 @@ static void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window
 static void wldcore_window_init_record(s32 index, s32 priority, s32 sequence);
 static void wldcore_window_number_panel_noop_callback(void);
 
+/* Point image render record `index` at a VRAM rectangle given in halfwords: its
+ * texture page, page-relative bounds in 8-bit texels, CLUT and a neutral 0x80 tint.
+ * Clears the blank and hidden flags and adds `flags`. */
 void wldcore_window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 flags) {
     RECT* record_bounds;
     CVECTOR* rgb;
@@ -202,6 +205,9 @@ void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_va
 static void wldcore_window_number_panel_noop_callback(void) {
 }
 
+/* Open the scrollable text window for state->text_id: add the page-prompt, scroll-arrow
+ * and scroll-thumb indicators and a popping-in image record, place the indicators at
+ * the text's right edge, measure the text and render its first page. */
 void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state) {
     s16 text_metrics[0x20];
     s32 index;

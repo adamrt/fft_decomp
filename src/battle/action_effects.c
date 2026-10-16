@@ -33,6 +33,8 @@ void battle_target_hide_cursor(void) {
     g_battle_action_at_list_active = 0;
 }
 
+/* Move the map cursor to a unit's tile and elevation; a null unit leaves it where it
+ * is. */
 void battle_target_move_cursor_to_unit(const battle_unit_t* unit) {
     if (unit != 0) {
         g_battle_cursor_x = unit->map_x;
@@ -55,6 +57,8 @@ void battle_target_move_cursor_to_action_target(const battle_unit_t* unit) {
     battle_target_move_cursor_to_unit(battle_unit_get_by_battle_id(bd->action_command.target_id));
 }
 
+/* Stop every running color animation on the unit CLUT row and restore those palettes
+ * to their original colors. */
 void battle_gfx_restore_unit_palettes(void) {
     s32 palette_index;
 
@@ -284,30 +288,38 @@ static void battle_effect_set_secondary(battle_unit_t* unit, s32 effect_type) {
     }
 }
 
+/* Start the puff a unit gives off as it turns to crystal or treasure. */
 void battle_effect_set_secondary_zodiac_poof(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_ZODIAC_POOF);
 }
 
+/* Start the smoke of a chocobo or monster unit dying. */
 void battle_effect_set_secondary_death_smoke(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_DEATH_SMOKE);
 }
 
+/* Start the level-up effect on a unit, for both level and job level ups. */
 void battle_effect_set_secondary_level_up(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_LEVEL_UP);
 }
 
+/* Start the trap effect on a unit that stepped on a tile trap; every trap kind uses
+ * this one effect. */
 void battle_effect_set_secondary_venom_trap(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_VENOM_TRAP);
 }
 
+/* Start the splash of a unit landing in swamp, marsh or open water. */
 void battle_effect_set_secondary_splash(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_SPLASH);
 }
 
+/* Start the dust of a unit landing on hard ground, a floor or a structure. */
 void battle_effect_set_secondary_fall_dust(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_FALL_DUST);
 }
 
+/* Start the teleport effect on a unit, used both as it leaves and as it arrives. */
 void battle_effect_set_secondary_teleport(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_TELEPORT);
 }

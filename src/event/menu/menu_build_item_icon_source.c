@@ -1,3 +1,5 @@
+/* The texture source of a 16x16 item icon. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"

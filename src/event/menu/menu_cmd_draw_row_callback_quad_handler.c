@@ -1,3 +1,5 @@
+/* The menu command that draws a row callback's icon for a list row. */
+
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"

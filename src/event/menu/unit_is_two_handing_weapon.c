@@ -1,3 +1,5 @@
+/* Whether a unit holds a single weapon in two hands. */
+
 #include "fft/data.h"
 #include "fft/main_item.h"
 #include "fft/unit.h"

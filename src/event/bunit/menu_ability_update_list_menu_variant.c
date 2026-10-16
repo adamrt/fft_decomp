@@ -1,3 +1,5 @@
+/* The selected job's ability list, with tabs for action, reaction, support and movement abilities. */
+
 #include "fft/data.h"
 #include "fft/event_bunit.h"
 #include "fft/job.h"

@@ -1,3 +1,5 @@
+/* Storing a menu selection value as the menu opens. */
+
 #include "fft/menu_input.h"
 #include "psx/types.h"
 

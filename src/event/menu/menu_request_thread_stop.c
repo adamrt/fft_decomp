@@ -1,3 +1,5 @@
+/* Requesting a menu thread to stop. */
+
 #include "fft/thread.h"
 #include "psx/types.h"
 

@@ -7,12 +7,14 @@
 #include "psx/types.h"
 
 #ifdef FFT_WORLD
+/* Return `value` unchanged. Only WORLD has it, and nothing on the disc calls it. */
 s32 world_return_parameter_1(s32 value) {
     return value;
 }
 #endif
 
 #ifdef FFT_WORLD
+/* A second identity function right after the first, equally uncalled. */
 s32 world_return_argument_800e7b54(s32 value) {
     return value;
 }

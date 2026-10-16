@@ -1,3 +1,5 @@
+/* The selected job's ability list for one menu category, optionally only the unlearned abilities. */
+
 #include "fft/bits.h"
 #include "fft/data.h"
 #include "fft/event_jobstts.h"

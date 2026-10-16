@@ -1,3 +1,5 @@
+/* Stopping a menu thread and clearing the managed thread state. */
+
 #include "fft/menu_list.h"
 #include "psx/types.h"
 

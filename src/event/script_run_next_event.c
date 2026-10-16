@@ -1,3 +1,5 @@
+/* The event thread body that loads the selected event and interprets it. */
+
 #include "fft/script.h"
 
 /* Event-thread body started by script_start_current_event_thread or

@@ -1,3 +1,5 @@
+/* The menu command that sets the texture page. */
+
 #include "fft/event_card.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

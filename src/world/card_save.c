@@ -47,6 +47,7 @@ static void world_card_update_save_slot_playtime(s32 slot);
 static void world_card_update_slot_scan(void);
 static void world_free_work_buffer(void);
 
+/* Return the controller buttons from PadRead(0); the argument is ignored. */
 static s32 world_input_read_controller(s32 unused) {
     return PadRead(0);
 }
@@ -863,6 +864,7 @@ void world_card_init_menu_state(void) {
     memset(buffer, 0xFF, 0x1E80);
 }
 
+/* Free the memory card menu's load buffer from world_card_init_menu_state. */
 static void world_free_work_buffer(void) {
     main_heap_free(g_world_load_work_buffer);
 }

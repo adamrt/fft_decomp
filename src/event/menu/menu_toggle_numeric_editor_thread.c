@@ -1,3 +1,5 @@
+/* Starting or stopping the numeric editor panel thread. */
+
 #include "fft/menu_list.h"
 #include "fft/menu_panel.h"
 #include "fft/thread.h"

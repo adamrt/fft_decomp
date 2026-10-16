@@ -1,3 +1,5 @@
+/* The menu command that draws a flat-colored tile, following the list row while one is rendered. */
+
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"

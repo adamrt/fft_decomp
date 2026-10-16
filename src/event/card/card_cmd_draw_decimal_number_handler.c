@@ -1,3 +1,5 @@
+/* The menu command that draws a literal value as zero-padded digits. */
+
 #include "fft/event_card.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"

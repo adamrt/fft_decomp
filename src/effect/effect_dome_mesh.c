@@ -13,6 +13,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Read lattice point `point` of dome row `group` from the scratchpad and add `offset`
+ * to give a vertex ready for projection. */
 static void effect_dome_mesh_load_translated_vertex(s32 group, s32 point, const VECTOR* offset, SVECTOR* output) {
     int point_element = point * DOME_MESH_LATTICE_COMPONENTS;
     int element = group * ((DOME_MESH_SEGMENTS + 1) * DOME_MESH_LATTICE_COMPONENTS) + point_element;

@@ -66,6 +66,9 @@ static s32 battle_ai_take_random_tile(
     u16 tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT], ai_coords_t* coordinates, s32 count);
 static void battle_ai_update_team_targeting_flags(void);
 
+/* Build the acting AI unit's next command (move, act or end turn), deciding a new
+ * action first when none is pending. Returns -1 when the frame's scanline budget runs
+ * out, resuming at the suspended stage on the next call, else 0. */
 s32 battle_ai_build_command(s32 unit_id, ai_command_t* command) {
     ai_data_t* ai;
     unit_stats_t* unit;
@@ -2432,6 +2435,9 @@ static s32 battle_ai_build_targeted_movement(void) {
     return 0;
 }
 
+/* Select an action for the recovery (protect allies) auto-battle mode: move toward the
+ * focus target, try to cancel its listed statuses, then rank abilities on it, on enemies
+ * and on allies before the fallback. Returns -1 to suspend, else 0 (never -2). */
 static s32 battle_ai_select_action_recovery(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* acting = g_battle_ai_data_base.acting_unit;

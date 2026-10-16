@@ -1,3 +1,5 @@
+/* Concatenating the text of a list of entry ids. */
+
 #include "fft/menu_text.h"
 #include "psx/types.h"
 

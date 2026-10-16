@@ -1,3 +1,5 @@
+/* The option menu's value picker thread for one game option. */
+
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"

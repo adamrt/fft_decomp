@@ -1,3 +1,5 @@
+/* Drawing a number right to left in large glyphs, with sign and marker glyphs. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

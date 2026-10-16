@@ -99,6 +99,7 @@ s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* ti
     return 0;
 }
 
+/* Return 1 when a battle unit with this runtime id exists, else 0. */
 s32 battle_unit_has_runtime_id(u32 runtime_id) {
     return battle_unit_get_by_runtime_id(runtime_id) != 0;
 }
@@ -152,6 +153,8 @@ void battle_unit_set_palette_update_suppression(u32 runtime_id) {
     }
 }
 
+/* Let tile and status palette refreshes reach a unit again; the counterpart of
+ * battle_unit_set_palette_update_suppression. */
 void battle_unit_clear_palette_update_suppression(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -181,6 +184,8 @@ void battle_unit_set_movement_effect_suppression(u32 runtime_id) {
     }
 }
 
+/* Restore a unit's movement sounds and landing effects; the counterpart of
+ * battle_unit_set_movement_effect_suppression. */
 void battle_unit_clear_movement_effect_suppression(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -270,6 +275,9 @@ void battle_gfx_set_thrown_item_palette_by_runtime_id(u32 item_id, u32 runtime_i
     }
 }
 
+/* AddGhostUnit: when `runtime_id` is free, restart the unit graphics load queue with one
+ * descriptor for a sprite with no unit stats at the given tile and facing, and return
+ * 1; return 0 when the id is taken. */
 s32 battle_script_opcode_add_ghost_unit(
     s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 runtime_id, s32 flags) {
     s32 ret;
@@ -638,12 +646,16 @@ static u32 battle_gfx_get_unit_spritesheet_height(battle_unit_t* unit) {
     return g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height;
 }
 
+/* The sprite height of the unit with this runtime id, 0 when it is absent, dead,
+ * crystal or treasure. */
 s32 battle_gfx_get_unit_spritesheet_height_by_runtime_id(u32 runtime_id) {
     return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_runtime_id(runtime_id));
 }
 
 struct battle_unit;
 
+/* The sprite height of the unit with this battle id, 0 when it is absent, dead,
+ * crystal or treasure. */
 s32 battle_gfx_get_unit_spritesheet_height_by_unit_id(u32 unit_id) {
     return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_battle_id(unit_id));
 }

@@ -1,3 +1,5 @@
+/* The menu command that draws a row callback's value, or dashes, on the current row. */
+
 #include "fft/event_jobstts.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

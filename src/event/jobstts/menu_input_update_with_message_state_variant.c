@@ -1,3 +1,5 @@
+/* The JOBSTTS screen's per-frame input update, withholding input during transitions and help text. */
+
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

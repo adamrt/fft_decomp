@@ -24,6 +24,9 @@ static void battle_effect_free_state_record(s16 record_index);
 static s32 battle_effect_run_block(s16 index);
 static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index);
 
+/* Upload effect file `index`'s two CLUTs to the effect CLUT rows and its texture to
+ * VRAM x 0x180, 0x80 bytes a row or 0x100 for a wide image. The section's address is
+ * kept in g_battle_effect_palette_ptr, where the effect heap later starts. */
 static void battle_effect_init_palette(s16 index) {
     RECT rect;
     effect_file_header_t* base = g_battle_effect_data_ptrs[index];
@@ -87,12 +90,15 @@ static void battle_effect_set_animation_sequences_pointer(s16 effect_id) {
     g_battle_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
 }
 
+/* Bind effect file effect_id's script section as g_battle_effect_script. */
 static void battle_effect_set_script_pointer(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
     g_battle_effect_script = (const u8*)header + header->script;
 }
 
+/* Bind effect file effect_id's animation curve table as
+ * g_battle_effect_animation_curve_data. */
 static void battle_effect_set_animation_curve_data_pointer(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
@@ -142,6 +148,7 @@ static void battle_effect_load_sound_section(s16 index) {
     }
 }
 
+/* Bind effect file effect_id's flags section as g_battle_effect_flags_section. */
 static void battle_effect_init_flags_section_pointer(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
@@ -403,6 +410,7 @@ void battle_effect_cancel_playback_request(void) {
     }
 }
 
+/* The current effect playback phase (effect_playback_phase_e). */
 s32 battle_effect_get_playback_phase(void) {
     return g_battle_effect_playback_phase;
 }

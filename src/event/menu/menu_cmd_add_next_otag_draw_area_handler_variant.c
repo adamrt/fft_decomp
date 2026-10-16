@@ -1,3 +1,5 @@
+/* The menu command that queues the full draw area at the next ordering-table entry. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"

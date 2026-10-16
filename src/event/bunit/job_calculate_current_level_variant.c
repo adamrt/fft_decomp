@@ -1,3 +1,5 @@
+/* The selected unit's level in a listed job, cached for row callbacks. */
+
 #include "fft/event_bunit.h"
 #include "fft/main.h"
 #include "fft/menu_panel.h"

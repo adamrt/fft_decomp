@@ -1,3 +1,5 @@
+/* Yielding the current thread forever. */
+
 #include "fft/thread.h"
 #include "fft/world.h"
 

@@ -1,3 +1,5 @@
+/* Queuing a drawing area primitive, moved to the back buffer when needed. */
+
 #include "fft/menu.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

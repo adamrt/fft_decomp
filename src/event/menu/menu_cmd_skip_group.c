@@ -1,3 +1,5 @@
+/* Skipping a menu command together with the child commands of a group. */
+
 #include "fft/menu_script.h"
 #include "psx/types.h"
 

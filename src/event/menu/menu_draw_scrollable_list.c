@@ -1,3 +1,5 @@
+/* Drawing the visible rows of a scrollable list. */
+
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"
 #include "fft/text.h"

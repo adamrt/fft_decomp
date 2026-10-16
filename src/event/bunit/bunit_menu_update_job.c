@@ -1,3 +1,5 @@
+/* The per-frame handler of the unit list's job page and the chosen job's ability list. */
+
 #include "fft/event_bunit.h"
 #include "fft/main.h"
 #include "fft/menu.h"

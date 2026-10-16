@@ -1,3 +1,5 @@
+/* Yielding the current thread forever. */
+
 #include "fft/thread.h"
 
 /* Park this event thread while allowing the scheduler to continue. */

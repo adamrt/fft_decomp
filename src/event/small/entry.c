@@ -6,6 +6,9 @@
 #include "fft/script.h"
 #include "psx/types.h"
 
+/* SMALL.OUT's entry point, run once the overlay is loaded: point the roster-name and
+ * job-name text sections at its own name data, copy the skillset-names pointer and
+ * clear the deployment unit limit. */
 void small_text_init_battle_pointers(void) {
     u8* string_data = g_small_text_name_data;
 
@@ -16,6 +19,7 @@ void small_text_init_battle_pointers(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
 }
 
+/* Returns 0; nothing on the disc calls it. */
 s32 small_return_zero(void) {
     return 0;
 }

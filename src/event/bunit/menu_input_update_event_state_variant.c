@@ -1,3 +1,5 @@
+/* The per-frame event input update, with edge and auto-repeat input, a yield and the thread status indicators. */
+
 #include "fft/battle_event.h"
 #include "fft/event_bunit.h"
 #include "fft/gfx.h"

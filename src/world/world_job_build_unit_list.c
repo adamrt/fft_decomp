@@ -1,3 +1,5 @@
+/* The list of jobs a formation unit can select, optionally with jobs other units have unlocked. */
+
 #include "fft/bits.h"
 #include "fft/data.h"
 #include "fft/job.h"

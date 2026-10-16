@@ -31,6 +31,9 @@ static void world_formation_draw_graphics_below_sprite(
     s16 unit_index, s32 mode, s32 x, s32 y, rgb24_t* color, s32 (*get_value)(s32), s32 enabled, s32 priority);
 static void world_formation_reset_slots_and_frame_tpages(void);
 
+/* Show the stat preview window (starting its thread unless the status panel is sliding
+ * or the thread already runs) or ask it to close, and record the state as the numeric
+ * panel style. */
 void world_menu_toggle_preview_stats_window(s32 flag) {
     s32 stored = flag;
 

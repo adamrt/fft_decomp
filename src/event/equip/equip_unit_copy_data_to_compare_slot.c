@@ -1,3 +1,5 @@
+/* Copying unit 0's record to unit 1, the comparison slot. */
+
 #include "fft/event_equip.h"
 #include "psx/libc.h"
 #include "psx/types.h"

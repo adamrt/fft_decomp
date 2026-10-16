@@ -1,3 +1,5 @@
+/* Setting the menu's frame step and the script event speed. */
+
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "psx/types.h"

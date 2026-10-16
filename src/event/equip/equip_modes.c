@@ -22,6 +22,9 @@ static s32 equip_menu_run_equip_mode(void);
 static s32 equip_menu_run_remove_mode(void);
 static s32 equip_menu_update_clear_all_equipment_prompt(void);
 
+/* The g_equip_menu_screen_state_handlers entry of every state past INIT: keep the command
+ * menu thread running, enter the mode its picked row names (row 1 is refused), run that
+ * mode each frame and return to the command menu when it ends. */
 void equip_menu_update_screen_state(void) {
     s32 result;
     s32 state;
@@ -217,6 +220,9 @@ static s32 equip_menu_run_equip_mode(void) {
     return 1;
 }
 
+/* One frame of Remove mode: Circle takes off the item in the chosen slot unless it is
+ * locked, Left offers to remove everything, and the stats preview the highlighted slot
+ * empty. Returns 0 when Cross leaves the mode, else 1. */
 static s32 equip_menu_run_remove_mode(void) {
     /* Never referenced; the target frame reserves these bytes. */
     u8 unused[0x48];

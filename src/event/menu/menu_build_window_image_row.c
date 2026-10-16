@@ -1,3 +1,5 @@
+/* One row of a window image, built from an eight-tile border and interior pattern. */
+
 #include "fft/menu.h"
 #include "psx/types.h"
 

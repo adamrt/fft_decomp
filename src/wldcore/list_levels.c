@@ -43,6 +43,9 @@ static void wldcore_menu_push_proposition_attempt_detail_level(s32 value);
 static void wldcore_window_close_parent_list_all_windows(void);
 static void wldcore_window_close_parent_list_frame_windows(void);
 
+/* The proposition-category level's resume handler, undoing
+ * wldcore_window_begin_tint_transition: default palettes, the idle cursor, and the
+ * list content record shown again (popping in) if the transition hid it. */
 void wldcore_window_end_tint_transition(wldcore_menu_list_window_level_t* level) {
     g_wldcore_window_records[level->main_window].palette = g_wldcore_window_render_records[level->side_window].palette
         = g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 2]
@@ -879,6 +882,9 @@ done:
     wldcore_sound_play_effect(MAIN_SFX_PAGE_SWITCH);
 }
 
+/* Push the Brave Story list of completed propositions: show its intro message, list each
+ * completed proposition's name in a panel of up to 8 visible rows at its saved cursor,
+ * and hide the parent list's content while it is open. */
 static void wldcore_list_open_brave_story_propositions(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;

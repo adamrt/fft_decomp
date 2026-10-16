@@ -615,6 +615,8 @@ u8* world_menu_redraw_text_page_on_scroll_in_rect(
 }
 #endif
 
+/* Frames the current repeatable buttons have been held unchanged (0 after a change);
+ * the scrolling lists pace and repeat their scrolling by it. */
 u32 script_get_event_initial_repeat_counter(void) {
     return g_script_event_initial_repeat_counter;
 }

@@ -1,3 +1,5 @@
+/* A row callback returning the selected job's current JP. */
+
 #include "fft/job.h"
 #include "psx/types.h"
 

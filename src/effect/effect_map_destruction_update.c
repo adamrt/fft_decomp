@@ -1,3 +1,5 @@
+/* An effect callback that releases the GNS dispatch hold and advances the map destruction. */
+
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"

@@ -1,3 +1,5 @@
+/* Restarting a menu thread with new data, or polling the running thread's status. */
+
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"

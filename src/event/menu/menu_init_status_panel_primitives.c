@@ -1,3 +1,5 @@
+/* The two-column status panel frame and its texture draw modes. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"

@@ -1,3 +1,5 @@
+/* Loading an item type order list as halfwords. */
+
 #include "fft/item.h"
 #include "psx/types.h"
 

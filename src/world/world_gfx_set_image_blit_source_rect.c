@@ -1,3 +1,5 @@
+/* Setting the source rectangle of the image blitter. */
+
 #include "fft/world_gfx.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* Reading the page scroll direction from vertical input held with Square, with repeat timing. */
+
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

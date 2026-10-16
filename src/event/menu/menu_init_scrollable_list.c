@@ -1,3 +1,5 @@
+/* Pointing the scrollable list menu at a new entry list. */
+
 #include "fft/menu_list.h"
 #include "fft/menu_overlay.h"
 #include "psx/types.h"

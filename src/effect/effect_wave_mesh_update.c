@@ -1,3 +1,5 @@
+/* An 8x8 textured quad grid distorted by horizontal and vertical sine waves. */
+
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"

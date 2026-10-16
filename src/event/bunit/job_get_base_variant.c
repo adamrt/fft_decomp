@@ -1,3 +1,5 @@
+/* The job that heads a unit's job list. */
+
 #include "fft/data.h"
 #include "fft/event_bunit.h"
 #include "fft/unit.h"

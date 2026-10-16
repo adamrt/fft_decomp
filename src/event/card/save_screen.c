@@ -40,6 +40,8 @@ static void card_save_update_slot_scan_result(void);
 static void card_save_update_slot_scroll(s32 selection);
 static void card_save_update_slot_write(s32 slot);
 
+/* Mark no card menu row and no save slot as selected (-1 each). Nothing on the disc
+ * calls it. */
 void card_save_clear_selection_indices(void) {
     g_card_menu_selection_index = -1;
     g_card_save_slot_index = -1;

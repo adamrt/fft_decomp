@@ -1,3 +1,5 @@
+/* The unit list's job list for the selected unit, with job level and JP row callbacks. */
+
 #include "fft/event_bunit.h"
 #include "fft/job.h"
 #include "fft/main.h"

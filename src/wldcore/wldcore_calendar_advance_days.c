@@ -1,3 +1,5 @@
+/* Advancing the calendar by days, with years, birthdays and ages, and proposition progress. */
+
 #include "fft/main.h"
 #include "fft/main_unit.h"
 #include "fft/script.h"

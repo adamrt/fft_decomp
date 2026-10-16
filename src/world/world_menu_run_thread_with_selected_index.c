@@ -1,3 +1,5 @@
+/* An uncalled menu thread start that first sets the entry's selected index. */
+
 #include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "psx/types.h"

@@ -1,3 +1,5 @@
+/* The menu command that selects the ordering-table entry for later primitives. */
+
 #include "fft/menu.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* Stopping a thread and running input update frames until it has ended. */
+
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/thread.h"

@@ -1,3 +1,5 @@
+/* The menu command that queues a draw mode with a blend rate. */
+
 #include "fft/menu.h"
 #include "fft/menu_script.h"
 #include "psx/libgpu.h"

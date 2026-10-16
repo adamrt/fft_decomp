@@ -55,6 +55,7 @@ s32 battle_state_enter_effect_playback(void) {
     return 0;
 }
 
+/* Empty, and nothing in the game calls it. */
 void battle_noop_8008de88(void) {
 }
 

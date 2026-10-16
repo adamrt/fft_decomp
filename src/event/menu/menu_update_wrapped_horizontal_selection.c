@@ -1,3 +1,5 @@
+/* Stepping a menu selection value left or right, wrapping within its entry count. */
+
 #include "fft/menu_input.h"
 #include "psx/pad.h"
 #include "psx/types.h"

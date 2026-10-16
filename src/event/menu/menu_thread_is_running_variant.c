@@ -1,3 +1,5 @@
+/* Whether a menu thread is running. */
+
 #include "fft/thread.h"
 #include "psx/types.h"
 

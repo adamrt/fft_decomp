@@ -23,6 +23,9 @@ static void battle_map_init_weather_particles(map_weather_command_e command);
 static void battle_map_update_mesh_part_animations(void);
 static void battle_map_update_texture_animations(void);
 
+/* Apply a map_polygon_flag_command_e to the textured map polygons: reset or clear
+ * their per-frame lit flag, or repaint the unlit ones in the ambient color in the
+ * current render buffer. */
 static void battle_map_polygon_flag_command(s32 command) {
     s32 i;
 

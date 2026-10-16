@@ -1,3 +1,5 @@
+/* A row callback returning the selected job's level. */
+
 #include "fft/menu_panel.h"
 #include "psx/types.h"
 

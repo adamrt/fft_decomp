@@ -1,3 +1,5 @@
+/* The item panel's marks for the hands a weapon needs or allows. */
+
 #include "fft/data.h"
 #include "fft/main_item.h"
 #include "fft/menu.h"

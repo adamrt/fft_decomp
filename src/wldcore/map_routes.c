@@ -27,6 +27,9 @@ static s32 wldcore_map_roll_random_encounter(s32 location, s32 route);
 static void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta);
 static void wldcore_window_transform_point_for_mode(s32 mode, RECT bounds, point32_t* output);
 
+/* Build the world-map location dots from their packed source rows and queue them for
+ * drawing. Castles use the next dot sequence, a set color variable selects the town or
+ * field palette, and a clear visibility variable hides the dot. */
 void wldcore_map_init_dots(void) {
     wldcore_map_dot_source_t* src;
     wldcore_map_dot_t* dots = g_wldcore_map_dots;

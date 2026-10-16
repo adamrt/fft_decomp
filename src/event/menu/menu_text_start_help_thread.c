@@ -1,3 +1,5 @@
+/* Starting the help text thread for the current help message. */
+
 #include "fft/menu.h"
 #include "fft/menu_overlay.h"
 #include "fft/menu_text.h"

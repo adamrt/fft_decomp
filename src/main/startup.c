@@ -266,12 +266,14 @@ void main_party_init_new_game(int mode) {
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, STARTING_WAR_FUNDS);
 }
 
+/* Store x, y and z in an SVECTOR, truncated to 16 bits. */
 void main_util_set_svector(SVECTOR* vector, s32 x, s32 y, s32 z) {
     vector->vx = x;
     vector->vy = y;
     vector->vz = z;
 }
 
+/* Store x, y and z in a VECTOR. */
 void main_util_set_vector(VECTOR* vector, s32 x, s32 y, s32 z) {
     vector->vx = x;
     vector->vy = y;

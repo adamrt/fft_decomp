@@ -1,3 +1,6 @@
+/* Background sound threads, thread slot and task lookups, jump target searches, script conditions and variables, the
+ * event random generator, text section pointers, event input, primitive and draw mode helpers and number glyphs. */
+
 #include "fft/battle.h"
 #include "fft/gfx.h"
 #include "fft/main_sound.h"
@@ -467,11 +470,6 @@ void script_wait_for_unit_ready(s32 runtime_id) {
     }
 }
 
-/* Turn the text file's table of section offsets into g_text_section_pointers.
- * The text begins after the table of TEXT_SECTION_COUNT offsets, which are
- * relative to its end. BATTLE leaves the last section alone and, while menu
- * input is disabled, keeps section 0 bound to the event or tutorial text
- * already in use. */
 /* BATTLE leaves the last section alone. */
 #ifdef FFT_BATTLE
 #    define TEXT_RELOCATED_SECTION_COUNT (TEXT_SECTION_COUNT - 1)
@@ -479,6 +477,11 @@ void script_wait_for_unit_ready(s32 runtime_id) {
 #    define TEXT_RELOCATED_SECTION_COUNT TEXT_SECTION_COUNT
 #endif
 
+/* Turn the text file's table of section offsets into g_text_section_pointers.
+ * The text begins after the table of TEXT_SECTION_COUNT offsets, which are
+ * relative to its end. BATTLE leaves the last section alone and, while menu
+ * input is disabled, keeps section 0 bound to the event or tutorial text
+ * already in use. */
 void text_init_section_pointers(void) {
     s32* source;
     u8** destination;

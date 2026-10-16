@@ -50,6 +50,8 @@ void file_wait_for_pending_variant(void) {
 #endif
 
 #ifdef FFT_OPENING
+/* Poll the pending file load to completion, a frame at a time; unlike the WLDCORE
+ * body there is no audio queue to service. */
 void file_wait_for_pending_variant(void) {
     u32* status = &g_main_file_still_loading;
     main_file_load_descriptor_t* header;

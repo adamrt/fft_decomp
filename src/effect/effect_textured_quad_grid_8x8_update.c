@@ -1,3 +1,5 @@
+/* An 8x8 grid of textured quads with a scrolling texture window and tints from color curves. */
+
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"

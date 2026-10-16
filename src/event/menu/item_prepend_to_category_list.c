@@ -1,3 +1,5 @@
+/* Putting an item first in a category list. */
+
 #include "fft/data.h"
 #include "fft/item.h"
 #include "psx/types.h"

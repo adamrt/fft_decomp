@@ -36,6 +36,8 @@ static void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_rend
 static void attack_deploy_update_screen_graphics(void);
 static void attack_gfx_init_frame_ft4_array(void);
 
+/* Take roster unit `roster_id` off the 5x5 deployment grid by clearing the first tile
+ * that holds it. */
 static void attack_deploy_remove_roster_unit_from_tiles(s32 roster_id) {
     s32 row;
     s32 column;

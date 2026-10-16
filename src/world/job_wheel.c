@@ -35,6 +35,8 @@ static void world_formation_step_job_wheel_open_animation(void);
 static void world_formation_update_job_wheel_state(void);
 static void world_formation_draw_job_wheel_mastered_star(s32 x, s32 y, s32 otag_index, s32 value);
 
+/* Job wheel menu-script callback 0: the selected unit's level in the job under the
+ * wheel cursor, from its packed pair of 4-bit levels. The row argument is ignored. */
 static s32 world_formation_get_job_wheel_cursor_job_level(s32 unused_row) {
     s32 index = job_get_generic_index(g_world_job_wheel_jobs[g_world_job_wheel_cursor_index]);
     s32 level = g_world_unit_pointers[g_unit_selected_index]->job_levels[index >> 1];

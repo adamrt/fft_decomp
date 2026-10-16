@@ -1,3 +1,5 @@
+/* Writing one bit through the primary bit cursor, most significant bit first. */
+
 #include "fft/bits.h"
 #include "psx/types.h"
 

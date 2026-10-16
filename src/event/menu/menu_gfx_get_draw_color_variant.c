@@ -1,3 +1,5 @@
+/* The menu text color. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 

@@ -1,3 +1,5 @@
+/* Drawing the visible text and number entries of a page's three columns. */
+
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "psx/types.h"

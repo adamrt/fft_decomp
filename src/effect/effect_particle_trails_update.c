@@ -1,3 +1,5 @@
+/* Unseen particles running from a spawn volume to a tip, spawning child effects from the ends of their trails. */
+
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"

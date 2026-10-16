@@ -1,3 +1,5 @@
+/* Restoring a list's saved cursor and scroll base, checked against the rebuilt entries. */
+
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "psx/types.h"

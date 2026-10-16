@@ -36,6 +36,10 @@ static void wldcore_sound_play_pending_script_sounds(s32 sound_id, s32 weather_s
 static void wldcore_sound_stop_music_and_play_sound(s32 sound_id);
 static void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id);
 
+/* Resume the selected sound novel from its saved reading record (a reset one for
+ * indexes past the five saved slots): restore its picture, background, music, sound, windows,
+ * value display and brightness, load its files and resume at the saved section, or
+ * flag a branch when there is none. */
 void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     u32* word;
     s32 i;

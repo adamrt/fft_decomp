@@ -12,6 +12,8 @@
 
 static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
 
+/* Call MAIN's own menu_build_zodiac_primitives; ATTACK.OUT's deployment screen draws its
+ * zodiac sprites through this wrapper rather than its own copy. */
 void main_gfx_call_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
     menu_build_zodiac_primitives(context, poly);
 }

@@ -37,6 +37,9 @@ static void open_script_update_timing_and_record_values(void);
 static void open_script_update_xa_audio(void);
 static s32 open_text_decode_hex_digit(s32 character);
 
+/* OPEN twin of wldcore_window_init_vram_render_record for the 56-byte records: it keeps
+ * the VRAM position instead of a texture page and also clears the 8-bit CLUT flag.
+ * Nothing in OPEN.BIN calls it. */
 void open_gfx_init_vram_render_record(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags) {
     RECT* quad_base;

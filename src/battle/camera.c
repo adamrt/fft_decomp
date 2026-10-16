@@ -13,6 +13,7 @@ void battle_camera_save_current_real_coords(void) {
     copyVector(&g_battle_camera_saved_real_coords, &g_battle_camera_current_real_coords);
 }
 
+/* Restores the camera position kept by battle_camera_save_current_real_coords. */
 void battle_camera_restore_current_real_coords(void) {
     copyVector(&g_battle_camera_current_real_coords, &g_battle_camera_saved_real_coords);
 }
@@ -21,6 +22,7 @@ VECTOR* battle_camera_get_current_real_coords(void) {
     return &g_battle_camera_current_real_coords;
 }
 
+/* Sets the camera position (20.12 real coordinates) at once. */
 void battle_camera_set_current_real_coords(const VECTOR* coords) {
     copyVector(&g_battle_camera_current_real_coords, coords);
 }
@@ -146,6 +148,7 @@ void battle_camera_save_zoom(void) {
     copyVector(&g_battle_camera_zoom_backup, &g_battle_camera_zoom);
 }
 
+/* Restores the camera zoom kept by battle_camera_save_zoom. */
 void battle_camera_restore_zoom(void) {
     copyVector(&g_battle_camera_zoom, &g_battle_camera_zoom_backup);
 }
@@ -154,6 +157,7 @@ VECTOR* battle_camera_get_zoom(void) {
     return &g_battle_camera_zoom;
 }
 
+/* Sets the camera's three zoom scales at once. */
 void battle_camera_set_zoom(const VECTOR* zoom) {
     copyVector(&g_battle_camera_zoom, zoom);
 }
@@ -205,6 +209,7 @@ void battle_camera_save_rotation(void) {
     copyVector(&g_battle_camera_rotation_backup, &g_battle_camera_render_state);
 }
 
+/* Restores the camera rotation kept by battle_camera_save_rotation. */
 void battle_camera_restore_rotation(void) {
     copyVector(&g_battle_camera_render_state, &g_battle_camera_rotation_backup);
 }
@@ -213,6 +218,7 @@ SVECTOR* battle_camera_get_rotation(void) {
     return &g_battle_camera_render_state;
 }
 
+/* Sets the camera's three rotation angles at once. */
 void battle_camera_set_rotation(const SVECTOR* rotation) {
     copyVector(&g_battle_camera_render_state, rotation);
 }

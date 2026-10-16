@@ -1,3 +1,5 @@
+/* Running a display script in a palette mode, withholding input when dimmed. */
+
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"

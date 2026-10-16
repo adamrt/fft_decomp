@@ -1,3 +1,5 @@
+/* Appending a two-color line to the menu ordering table. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/world_gfx.h"

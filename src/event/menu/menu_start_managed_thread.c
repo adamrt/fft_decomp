@@ -1,3 +1,5 @@
+/* Starting a menu thread on its descriptor, then polling whether it is still running. */
+
 #include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "fft/thread.h"

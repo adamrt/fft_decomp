@@ -1,3 +1,5 @@
+/* The sliding 16x16 cursor marker and its semi-transparent shadow. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

@@ -1,3 +1,5 @@
+/* Adding to an item's held count, never going below zero. */
+
 #include "fft/main_item.h"
 #include "psx/types.h"
 

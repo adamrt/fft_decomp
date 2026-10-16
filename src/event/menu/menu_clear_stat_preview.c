@@ -1,3 +1,5 @@
+/* Clearing the HP and MP preview bonuses and the equipment detail stats. */
+
 #include "fft/menu.h"
 
 /* Clear the HP/MP preview bonuses and equipment-detail stats. */

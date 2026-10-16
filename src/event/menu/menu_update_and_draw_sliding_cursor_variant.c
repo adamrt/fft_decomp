@@ -1,3 +1,5 @@
+/* The animated cursor sliding horizontally, with its semi-transparent shadow. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

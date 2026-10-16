@@ -1,3 +1,5 @@
+/* The menu command that selects the normal or alternate sprite color. */
+
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"

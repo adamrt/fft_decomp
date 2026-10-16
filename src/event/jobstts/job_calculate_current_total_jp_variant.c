@@ -1,3 +1,5 @@
+/* The unit's total JP earned in a listed job, cached for row callbacks. */
+
 #include "fft/event_jobstts.h"
 #include "fft/job.h"
 #include "fft/main.h"

@@ -1,3 +1,5 @@
+/* Pointing the scrollable list menu at a new entry list and resetting its render state. */
+
 #include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"

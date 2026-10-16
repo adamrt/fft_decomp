@@ -1,3 +1,5 @@
+/* Storing a menu selection value to put a tab cursor on its first entry. */
+
 #include "fft/menu_input.h"
 #include "psx/types.h"
 

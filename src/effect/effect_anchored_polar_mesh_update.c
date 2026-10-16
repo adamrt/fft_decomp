@@ -1,3 +1,5 @@
+/* A four-fold polar mesh drawn around an effect target with per-ring colors. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

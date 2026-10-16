@@ -1,3 +1,5 @@
+/* The equipment menu's list category of an item. */
+
 #include "fft/data.h"
 #include "psx/types.h"
 

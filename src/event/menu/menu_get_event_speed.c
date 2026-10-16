@@ -1,3 +1,5 @@
+/* The menu's frame step, treating 0 as 1. */
+
 #include "fft/menu.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* The equipment screen's item browser for one slot, with its stat change preview. */
+
 #include "fft/event_equip.h"
 #include "fft/item.h"
 #include "fft/main.h"

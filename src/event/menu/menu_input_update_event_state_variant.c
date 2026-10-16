@@ -1,3 +1,5 @@
+/* An empty menu input event state update. */
+
 #include "psx/types.h"
 
 /* Empty in ATTACK; BUNIT and CARD carry the body (menu_input_update_event_state_variant). */

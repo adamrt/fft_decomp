@@ -1,3 +1,5 @@
+/* The number panel step for a proposition's dispatch days, confirming or canceling and waiting for its window. */
+
 #include "fft/main.h"
 #include "fft/menu_input.h"
 #include "fft/thread.h"

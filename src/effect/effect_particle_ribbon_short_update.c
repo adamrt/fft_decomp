@@ -1,3 +1,5 @@
+/* Homing particles drawn as textured quad ribbons along their last 9 positions, up to 8 per spawn. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

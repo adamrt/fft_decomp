@@ -1,3 +1,5 @@
+/* A row callback returning whether the selected job is mastered. */
+
 #include "fft/job.h"
 #include "psx/types.h"
 

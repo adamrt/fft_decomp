@@ -1,3 +1,5 @@
+/* Reading a value of a given bit width, most significant bit first, from the secondary bitstream. */
+
 #include "fft/bits.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* Running a menu command stream up to its terminator. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"

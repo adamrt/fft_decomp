@@ -1,3 +1,5 @@
+/* Whether a roster unit stands on one of the current squad's deployment tiles. */
+
 #include "fft/event_attack.h"
 #include "psx/types.h"
 

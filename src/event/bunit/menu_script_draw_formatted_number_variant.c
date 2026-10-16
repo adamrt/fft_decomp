@@ -1,3 +1,5 @@
+/* The menu commands that draw a row callback's value as digit glyphs, with dashes, minus sign and highlight. */
+
 #include "fft/event_bunit.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"

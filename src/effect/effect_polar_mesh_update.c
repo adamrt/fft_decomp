@@ -1,3 +1,5 @@
+/* A four-fold polar mesh built from radius and angle curves, drawn with a drifting center and scrolling texture. */
+
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"

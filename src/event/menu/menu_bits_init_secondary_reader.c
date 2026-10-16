@@ -1,3 +1,5 @@
+/* Starting the secondary bit reader on a new data stream. */
+
 #include "fft/bits.h"
 #include "psx/types.h"
 

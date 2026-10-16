@@ -1,3 +1,5 @@
+/* Rendering a text entry glyph by glyph into a menu window image, with its commands and numbers. */
+
 #include "fft/gfx.h"
 #include "fft/main_unit.h"
 #include "fft/menu.h"

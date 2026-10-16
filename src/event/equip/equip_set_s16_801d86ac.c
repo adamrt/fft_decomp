@@ -1,3 +1,5 @@
+/* An uncalled setter of a variable nothing reads. */
+
 #include "fft/event_equip.h"
 #include "psx/types.h"
 

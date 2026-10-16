@@ -1,3 +1,5 @@
+/* Setting where the next glyph blit lands in the text image. */
+
 #include "fft/event_option.h"
 #include "fft/text.h"
 #include "psx/types.h"

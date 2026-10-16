@@ -1,3 +1,5 @@
+/* Appending a Gouraud-shaded textured menu rectangle to an ordering-table entry. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"

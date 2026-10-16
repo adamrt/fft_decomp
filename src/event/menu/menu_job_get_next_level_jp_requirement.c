@@ -1,3 +1,5 @@
+/* A row callback returning the JP the selected job needs for its next level. */
+
 #include "fft/menu_panel.h"
 #include "psx/types.h"
 

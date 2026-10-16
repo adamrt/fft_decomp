@@ -22,6 +22,8 @@
 
 static s32 thread_find_first_running_menu_thread(void);
 
+/* Leave the help screen: restore the text section pointers saved on entry, free the high
+ * overlay area, clear the help-open flag and end the help thread. */
 static void menu_close(void) {
     mem_copy_bytes_nonempty(g_text_section_pointers, g_text_saved_pointers, 0x80);
     main_heap_free(g_main_heap_high_overlay_load_address);

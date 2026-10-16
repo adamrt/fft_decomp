@@ -1,3 +1,5 @@
+/* The double-buffered draw area pair of a window's open and close zoom. */
+
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"

@@ -1,3 +1,5 @@
+/* Advancing a text cursor one byte, following back-reference runs. */
+
 #include "fft/menu.h"
 #include "psx/types.h"
 

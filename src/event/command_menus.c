@@ -1627,6 +1627,8 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
 }
 #endif
 
+/* Feed `input` to the event input state, make `entry` the current ordering-table entry
+ * and draw the active menu windows. No retail code calls it. */
 void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
     script_update_event_input_state(input);
     g_gfx_current_otag_entry = entry;

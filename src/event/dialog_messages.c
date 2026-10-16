@@ -130,6 +130,8 @@ void world_menu_input_update_dialog_state(void) {
 }
 #endif
 
+/* Free the typewriter slot (one of three) the current thread owns, if any, and reset its
+ * glyph count; a closing dialog thread calls it. */
 void text_release_typewriter_slot(void) {
     s32 index = 0;
     s32 current_thread_id = g_thread_current_id;

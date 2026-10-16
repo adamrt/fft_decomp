@@ -46,6 +46,9 @@ static s32 world_shop_run_item_sell_menu(void);
 static void world_shop_run_obtain_gil_menu(void);
 static void world_shop_run_soldier_office_fee_menu_script(void);
 
+/* Run a shop screen (item shop, Fur Shop or Soldier Office): set the primitive budgets,
+ * load the town's backdrop and the shop music, then run frames through the step handlers
+ * until the exit step, saving the party records and restoring VRAM on the way out. */
 void world_shop_run_screen(s32 shop_type) {
     POLY_FT4 textured_quads[2 * 500];
     POLY_G4 gradient_quads[2 * 90];
@@ -276,6 +279,8 @@ void world_menu_run_exit_fade_step(void) {
     }
 }
 
+/* Run the shop's war-funds menu script with world_shop_adjust_gil installed as the
+ * script callback, then put the previous callback back. The step handlers call it. */
 static void world_shop_run_obtain_gil_menu(void) {
     menu_callback_t* callback_slot;
     s32 (*previous_callback)(s32);

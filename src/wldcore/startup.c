@@ -37,6 +37,9 @@ static void wldcore_init_world_map_state(void);
 static void wldcore_menu_restore_level_on_world_entry(void);
 static void wldcore_process_frame_gate(void);
 
+/* WLDCORE's main loop: set up, fade in and run world-map frames until a menu level
+ * stops it, then return why: 5 back to the title, 4 a deep dungeon battle, 2 an event
+ * replay or tutorial, 1 a random battle, else 0. A card-menu restart loops instead. */
 s32 wldcore_entrypoint(void) {
     s32 buffer_index;
 

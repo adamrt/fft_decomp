@@ -1,3 +1,5 @@
+/* The menu command that tiles a rectangle with 16-pixel textured tiles. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

@@ -1,3 +1,5 @@
+/* The empty effect callback. */
+
 #include "fft/effect.h"
 #include "psx/types.h"
 

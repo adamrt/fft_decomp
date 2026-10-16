@@ -1,3 +1,5 @@
+/* The menu command that advances the transition frame. */
+
 #include "fft/menu.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"

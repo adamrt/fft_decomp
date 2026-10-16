@@ -1,3 +1,5 @@
+/* A spinning, flaring ring of 32 textured quads. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

@@ -325,6 +325,9 @@ void wldcore_list_handle_rumors_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
+/* Show rumor `value` in the scrollable text window, titled by the rumor-about message,
+ * hide the rumors level's windows and push the rumor detail level. coordinate_mode is
+ * always 0, so the switch's mode-1 image row is never used. */
 static void wldcore_bar_push_rumor_detail_level(s32 value) {
     s32 coordinate_mode = 0;
     s32 depth;

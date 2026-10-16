@@ -1,3 +1,5 @@
+/* The menu command that selects the ordering-table entry for later primitives unless it is locked. */
+
 #include "fft/event_jobstts.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"

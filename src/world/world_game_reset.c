@@ -1,3 +1,5 @@
+/* The soft reset of the game. */
+
 #include "fft/main.h"
 #include "fft/world.h"
 

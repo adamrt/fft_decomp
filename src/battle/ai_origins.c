@@ -42,6 +42,8 @@ static void battle_ai_simulate_movement_and_pickup(void);
 static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode);
 static void battle_ai_take_next_movement_origin(void);
 
+/* Copy byte_count bytes as 16-bit values (an odd last byte is dropped); the AI's
+ * copier for its tile maps and action records. */
 void battle_mem_copy_u16_values(void* destination, const void* source, s32 byte_count) {
     u16* dst = destination;
     const u16* src = source;

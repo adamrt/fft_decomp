@@ -1,3 +1,5 @@
+/* A unit's ability list for one job and ability category, honoring the monster skillset restriction. */
+
 #include "fft/data.h"
 #include "fft/event_bunit.h"
 #include "fft/job.h"

@@ -1,3 +1,5 @@
+/* The selected unit's current JP in a listed job, cached for row callbacks. */
+
 #include "fft/event_bunit.h"
 #include "fft/job.h"
 #include "fft/main.h"

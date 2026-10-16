@@ -1,3 +1,5 @@
+/* A closed tube of textured quads mirrored about its middle ring, with scrolling texture and brightness by row. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

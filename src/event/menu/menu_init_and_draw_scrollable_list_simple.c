@@ -1,3 +1,5 @@
+/* Setting up a scrollable list without a scroll base and drawing it. */
+
 #include "fft/menu_overlay.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"

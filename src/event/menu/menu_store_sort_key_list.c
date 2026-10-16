@@ -1,3 +1,5 @@
+/* Storing a working item type order list in its packed table. */
+
 #include "fft/item.h"
 #include "psx/types.h"
 

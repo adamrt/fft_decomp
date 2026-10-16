@@ -766,6 +766,9 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
     }
 }
 
+/* Ask whether to call back the party sent on active proposition `proposition`: hide the
+ * list level's windows, show the call-back prompt, an OK/No choice with its cursor and
+ * frame and the proposition's detail panel, then push the confirm level. */
 static void wldcore_proposition_push_cancel_confirm_level(s32 proposition) {
     RECT bounds;
     u8 unused[0x30];

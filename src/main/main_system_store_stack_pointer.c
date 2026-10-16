@@ -1,3 +1,5 @@
+/* Storing the caller's stack pointer for restoring the game loop's stack. */
+
 #include "fft/main.h"
 #include "psx/types.h"
 

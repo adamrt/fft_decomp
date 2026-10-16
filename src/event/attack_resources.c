@@ -42,6 +42,9 @@ static void menu_run_unit_view_supervisor_thread(void);
 static s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s32 value);
 static void unit_reset_animation_states(void);
 
+/* Load ATTACK.OUT (unless preloaded) with its scenario conditions and graphics, reset menu
+ * and unit state and, for a tutorial, fix the game options. Then start the deployment
+ * screen and return 0, or start the map-load thread and return 1 when deployment is skipped. */
 s32 menu_init_attack_resources_and_threads(void) {
     s32 result;
     s32 return_value;
@@ -162,6 +165,8 @@ s32 menu_get_thread_activity_variant(void) {
 }
 #endif
 
+/* Raise the flag that releases menu_at_list_select_unit_thread once a unit picked
+ * from the AT list has been viewed. */
 void menu_finish_at_list_selection(void) {
     g_menu_at_list_selection_finished = 1;
 }
@@ -314,6 +319,9 @@ void script_noop_5(void) {
 void script_frame_after_threads_stub(void) {
 }
 
+/* Empty in BATTLE and WORLD; in BATTLE it sits between script_frame_after_threads_stub
+ * and script_noop_7. Nothing on the disc calls it or points at it; the name is a
+ * neutral placeholder until a reference turns up. */
 void script_noop_6(void) {
 }
 
@@ -925,6 +933,8 @@ void script_add_unit_start_thread(void) {
     thread_exit_current();
 }
 
+/* Reset the menu library for a battle's setup: subsystem pointers, palette and text, the
+ * menu subsystems, the script light transform and the panel fade tiles. */
 static void menu_init_subsystems(void) {
     menu_init_subsystem_pointers();
     menu_init_palette_and_text(0);
@@ -977,6 +987,8 @@ void map_reset_script_light_transform(void) {
 #endif
 }
 
+/* Stop every unit's event rotation and pending animation, and record each present unit's
+ * facing as its initial facing (0xff for an empty slot). */
 static void unit_reset_animation_states(void) {
     unit_animation_state_t* state;
     s32 i = 0;

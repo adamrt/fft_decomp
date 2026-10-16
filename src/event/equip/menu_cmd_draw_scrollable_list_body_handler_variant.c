@@ -1,3 +1,5 @@
+/* The menu command that draws a scrollable list's body, moving its cursor and scrolling by row or page. */
+
 #include "fft/event_equip.h"
 #include "fft/main.h"
 #include "fft/menu.h"

@@ -23,6 +23,8 @@ static s32 battle_effect_get_random_between(s32 value_a, s32 value_b);
 static void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index);
 static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue);
 
+/* Make `buffer` the battle heap: a single free block of buffer_size / 8 - 1 eight-byte
+ * blocks that forms the free ring by itself, with owner lists 0 to 16 emptied. */
 void battle_heap_init(battle_heap_node_t* buffer, u32 buffer_size) {
     s32 owner;
     s16 block_count = (buffer_size >> 3) - 1;
@@ -575,6 +577,7 @@ void battle_effect_update_node_from_work(s16 record_index, effect_work_record_t*
 void battle_noop_801a6010(void) {
 }
 
+/* Empty and uncalled, like battle_noop_801a6010 before it. */
 void battle_noop_801a6018(void) {
 }
 
@@ -1438,6 +1441,7 @@ static s32 battle_effect_get_random_between(s32 value_a, s32 value_b) {
     return result;
 }
 
+/* Empty, and nothing in the game calls it. */
 void battle_noop_801a8e74(void) {
 }
 
@@ -1583,12 +1587,15 @@ void battle_effect_get_world_coords_by_battle_id(
         adjust_for_tile_height, battle_unit_get_runtime_id_by_battle_id(battle_id), effect_coordinates, destination);
 }
 
+/* Widen a packed 16-bit x, y, z triple (as the effect timeline stores them) into a
+ * VECTOR. */
 void battle_effect_load_vector(const vec3s16_t* src, VECTOR* dst) {
     dst->vx = src->x;
     dst->vy = src->y;
     dst->vz = src->z;
 }
 
+/* Copy a packed 16-bit x, y, z triple into an SVECTOR. */
 void battle_effect_load_svector(const vec3s16_t* src, SVECTOR* dst) {
     dst->vx = src->x;
     dst->vy = src->y;
@@ -1617,18 +1624,21 @@ void battle_effect_mask_vector_low_12_bits(const SVECTOR* src, SVECTOR* dst) {
     dst->vz = src->vz & 0xFFF;
 }
 
+/* out = first + second, component by component. */
 void battle_effect_add_vectors(const VECTOR* first, const VECTOR* second, VECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
     out->vz = first->vz + second->vz;
 }
 
+/* out = first + second for SVECTORs, component by component. */
 void battle_effect_add_svectors(const SVECTOR* first, const SVECTOR* second, SVECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
     out->vz = first->vz + second->vz;
 }
 
+/* out = first + second, widening the SVECTOR's components. */
 static void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
@@ -1770,6 +1780,7 @@ void battle_effect_save_gravity(void) {
     g_battle_effect_saved_gravity = g_battle_effect_gravity;
 }
 
+/* Restore the gravity kept by battle_effect_save_gravity. */
 void battle_effect_restore_gravity(void) {
     g_battle_effect_gravity = g_battle_effect_saved_gravity;
 }
@@ -1780,6 +1791,7 @@ void battle_effect_save_inertia_threshold(void) {
     g_battle_effect_saved_inertia_threshold = g_battle_effect_inertia_threshold;
 }
 
+/* Restore the damping term kept by battle_effect_save_inertia_threshold. */
 void battle_effect_restore_inertia_threshold(void) {
     g_battle_effect_inertia_threshold = g_battle_effect_saved_inertia_threshold;
 }
@@ -1934,6 +1946,8 @@ static effect_list_node_t* battle_effect_alloc_list_node(s16 kind) {
     return node;
 }
 
+/* Release a sprite work record's list node, the reverse of battle_effect_alloc_list_node:
+ * free its sprite block, unlink it from the active list and push it on the free list. */
 static void battle_effect_free_list_node(effect_list_node_t* node) {
     u16* free_head;
 

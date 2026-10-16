@@ -120,6 +120,7 @@ static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
 }
 #endif
 #ifdef FFT_WORLD
+/* WORLD's body of the same mirror, with the guarded do/while loop described above. */
 static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
     s32 row;
     s32 col;
@@ -146,6 +147,8 @@ static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
 }
 #endif
 
+/* Build a dialog window image with menu_build_window_image and upload it to `rect`,
+ * freeing the image a frame later. */
 void menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset) {
     menu_build_window_image(width, height, rect, mode, tail_offset, 0);
 }

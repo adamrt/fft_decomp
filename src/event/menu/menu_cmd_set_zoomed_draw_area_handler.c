@@ -1,3 +1,5 @@
+/* The menu command that draws a window frame zooming open behind a cropped draw area. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"

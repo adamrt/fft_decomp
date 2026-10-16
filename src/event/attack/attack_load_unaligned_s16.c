@@ -1,3 +1,5 @@
+/* Reading a little-endian 16-bit value from an unaligned address. */
+
 #include "fft/event_attack.h"
 #include "psx/types.h"
 

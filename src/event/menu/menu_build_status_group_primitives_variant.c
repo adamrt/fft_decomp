@@ -1,3 +1,5 @@
+/* The animated status groups of a menu panel. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_panel.h"

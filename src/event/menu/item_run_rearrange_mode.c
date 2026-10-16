@@ -1,3 +1,5 @@
+/* The item list's rearrange mode, swapping a picked entry with the entry under the cursor. */
+
 #include "fft/data.h"
 #include "fft/item.h"
 #include "fft/main.h"

@@ -32,6 +32,9 @@
 static void require_overlay_run_helpmenu(void);
 static void require_text_build_battle_nicknames(void);
 
+/* REQUIRE twin of attack_editor_load_party_unit: rebuild party slot `party_index` into a
+ * scratch unit and fill the selected-unit status and editor display from it, at full
+ * HP, MP and CT. */
 static void require_editor_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;

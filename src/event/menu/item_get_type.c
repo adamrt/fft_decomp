@@ -1,3 +1,5 @@
+/* An item's type from the item data table. */
+
 #include "fft/main_item.h"
 #include "psx/types.h"
 

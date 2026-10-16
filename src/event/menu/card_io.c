@@ -11,15 +11,16 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
-/* Clear the four BIOS card events (done, error, timeout, new card) by testing each. */
 static void card_io_consume_bios_events(void);
 static void card_io_consume_hardware_events(void);
 
+/* Choose the memory card slot (0 or 1) that later card operations use. */
 void card_io_set_selected_slot(s32 slot) {
     g_card_slot = slot;
 }
 
 #if defined(FFT_WORLD) || defined(FFT_EVENT_CARD)
+/* The selected memory card slot, which picks the bu00: or bu10: device. */
 static s32 card_io_get_selected_slot(void) {
     return g_card_slot;
 }
@@ -31,6 +32,7 @@ void world_card_close_stub(void) {
 }
 #endif
 
+/* Clear every pending BIOS and hardware card event before a card session starts. */
 void card_io_consume_all_events(void) {
     card_io_consume_bios_events();
     card_io_consume_hardware_events();
@@ -71,6 +73,7 @@ s32 card_io_wait_for_bios_event(void) {
     }
 }
 
+/* Clear the four BIOS card events (done, error, timeout, new card) by testing each. */
 static void card_io_consume_bios_events(void) {
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_DONE]);
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_ERROR]);

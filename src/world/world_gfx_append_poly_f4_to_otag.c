@@ -1,3 +1,5 @@
+/* Appending a flat-colored menu quad to an ordering-table entry. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/world_gfx.h"

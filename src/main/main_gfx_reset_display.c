@@ -1,3 +1,5 @@
+/* Restarting the GPU and setting up double-buffered drawing, cleared VRAM and the debug font. */
+
 #include "fft/main_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

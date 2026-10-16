@@ -1,3 +1,5 @@
+/* One frame of the equipment menu's state machine. */
+
 #include "fft/data.h"
 #include "fft/event_equip.h"
 #include "fft/gfx.h"

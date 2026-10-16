@@ -1,3 +1,5 @@
+/* An effect callback that starts the timed map transform for the rest of the child timeline. */
+
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"

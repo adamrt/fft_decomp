@@ -1,3 +1,5 @@
+/* The zero-based day of the year of a month and day. */
+
 #include "fft/unit.h"
 #include "psx/types.h"
 

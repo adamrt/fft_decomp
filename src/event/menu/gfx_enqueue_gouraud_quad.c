@@ -1,3 +1,5 @@
+/* Appending a four-color menu quad to an ordering-table entry. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"

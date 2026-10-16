@@ -1,3 +1,5 @@
+/* The number of copies of an item the party has in all. */
+
 #include "fft/event_equip.h"
 #include "psx/types.h"
 

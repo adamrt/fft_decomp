@@ -1,3 +1,5 @@
+/* Advancing an asynchronous CD read and keeping the loading indicator current. */
+
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_gfx.h"

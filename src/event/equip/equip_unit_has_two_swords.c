@@ -1,3 +1,5 @@
+/* Whether a unit has the Two Swords support ability set. */
+
 #include "fft/event_equip.h"
 #include "fft/unit.h"
 #include "psx/types.h"

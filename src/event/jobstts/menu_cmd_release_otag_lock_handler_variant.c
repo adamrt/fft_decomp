@@ -1,3 +1,5 @@
+/* The menu command that restores the full draw area after a zoomed window and clears the lock. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"

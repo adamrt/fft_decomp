@@ -1,3 +1,5 @@
+/* Tentacle meshes: up to 8 segments spawned on the emitter interval, each drawn as a strip of shaded textured quads. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

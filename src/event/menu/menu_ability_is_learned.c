@@ -1,3 +1,5 @@
+/* A menu callback returning whether an ability list entry is not disabled. */
+
 #include "fft/data.h"
 #include "fft/menu_panel.h"
 #include "psx/types.h"

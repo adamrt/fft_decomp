@@ -1,3 +1,5 @@
+/* The current frame of the window open and close scaling transition. */
+
 #include "fft/menu.h"
 #include "psx/types.h"
 

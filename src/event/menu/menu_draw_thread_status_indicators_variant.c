@@ -1,3 +1,5 @@
+/* The two fading translucent letterbox panels of the event dialog overlay. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_panel.h"

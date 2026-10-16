@@ -1,3 +1,5 @@
+/* Whether a listed job's skillset has no ability left to learn, cached for row callbacks. */
+
 #include "fft/event_jobstts.h"
 #include "fft/job.h"
 #include "fft/menu.h"

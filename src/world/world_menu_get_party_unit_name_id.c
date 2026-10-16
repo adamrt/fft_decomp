@@ -1,3 +1,5 @@
+/* The selected party unit's name id, combined with its name class. */
+
 #include "fft/main_unit.h"
 #include "fft/unit.h"
 #include "fft/world_menu.h"

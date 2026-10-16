@@ -38,6 +38,9 @@ void window_display_text_entry_variant(s32 record_index, s32 text_id, point32_t 
 #endif
 
 #ifdef FFT_WLDCORE
+/* Padded pixel size of the window image for a text entry: the widest line plus 24,
+ * rounded down to a multiple of 4, and 16 pixels per row plus 16. No retail code
+ * calls it. */
 void wldcore_text_get_padded_dimensions(s32 value, size32_t* output) {
     s16 maximum_line_width;
     s16 line_count;

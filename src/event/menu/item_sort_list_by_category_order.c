@@ -1,3 +1,5 @@
+/* Sorting an item list into its category's display order. */
+
 #include "fft/data.h"
 #include "fft/item.h"
 #include "psx/libc.h"

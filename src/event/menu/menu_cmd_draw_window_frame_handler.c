@@ -1,3 +1,5 @@
+/* The menu command that draws a window's border and tiles its interior. */
+
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"

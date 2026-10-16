@@ -26,6 +26,9 @@ static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y);
 static void bunit_gfx_init_rhombus_cursor_tpages(void);
 static void bunit_gfx_update_rhombus_cursor_trail(point16_t* target);
 
+/* With `enable`, start the equipment/ability panel and numeric editor threads unless
+ * the status panel is sliding or the panel thread already runs; without it, ask both
+ * threads to stop. */
 void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
     if (enable != 0) {
         if (g_bunit_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {

@@ -1,3 +1,5 @@
+/* Appending a flat-colored menu line to an ordering-table entry. */
+
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"

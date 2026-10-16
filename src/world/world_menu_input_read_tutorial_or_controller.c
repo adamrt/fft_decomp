@@ -1,3 +1,5 @@
+/* Reading the tutorial's scripted buttons or the controller, soft resetting on the reset combination. */
+
 #include "fft/main.h"
 #include "fft/world.h"
 #include "fft/world_card.h"

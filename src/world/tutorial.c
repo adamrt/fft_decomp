@@ -31,6 +31,8 @@ static void world_script_handle_tutorial_command_wait_for_button(void);
 static void world_script_handle_tutorial_command_wait_for_message(void);
 static void world_script_handle_tutorial_command_wait_time(void);
 
+/* The pad state world_script_handle_tutorial_command read this frame; the tutorial text
+ * thread takes its button input from it. */
 s32 world_input_get_tutorial_buttons(void) {
     return g_world_script_tutorial_buttons;
 }

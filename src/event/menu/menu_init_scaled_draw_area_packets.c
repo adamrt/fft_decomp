@@ -1,3 +1,5 @@
+/* Resetting a window zoom's draw area pair. */
+
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu_panel.h"

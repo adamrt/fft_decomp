@@ -1,3 +1,5 @@
+/* Selecting the normal or alternate menu palette. */
+
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "psx/types.h"

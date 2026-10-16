@@ -1,3 +1,5 @@
+/* An effect callback that freezes the map when its keyframe starts. */
+
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"

@@ -1,3 +1,5 @@
+/* The item list a normal shop or the poachers' den offers, hiding or marking what the selected unit cannot equip. */
+
 #include "fft/data.h"
 #include "fft/item.h"
 #include "fft/main.h"

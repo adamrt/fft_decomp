@@ -1,3 +1,5 @@
+/* A spinning stack of eight textured rings with scrolling texture and brightness by row. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
