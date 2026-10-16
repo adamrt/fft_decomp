@@ -167,7 +167,7 @@ s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s
 
     slot = 0;
     count = 0;
-    id = item_id & WORLD_ITEM_ID_MASK;
+    id = item_id & ITEM_ENTRY_ID_MASK;
     for (; slot < PARTY_ROSTER_SLOT_COUNT; slot++) {
         if (main_unit_init_job_data(&unit, slot, 1) != 0) {
             continue;

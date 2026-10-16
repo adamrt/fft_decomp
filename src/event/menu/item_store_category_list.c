@@ -13,5 +13,5 @@ void item_store_category_list(s32 category_index, const s16* source) {
         base[count] = *source++;
         count++;
     }
-    base[count] = EQUIP_ITEM_LIST_END;
+    base[count] = ITEM_LIST_END;
 }

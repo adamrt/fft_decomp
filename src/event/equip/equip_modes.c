@@ -155,14 +155,12 @@ static s32 equip_menu_run_equip_mode(void) {
         }
     } else {
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
-            ? (g_item_list_entries[g_menu_list_selected_index] & EQUIP_ITEM_LIST_ENTRY_ITEM_ID_MASK) + 0x6800
+            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + 0x6800
             : -1;
-        item = g_menu_list_entry_count != 0
-            ? g_item_list_entries[g_menu_list_selected_index] & EQUIP_ITEM_LIST_ENTRY_ITEM_ID_MASK
-            : 0;
+        item = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK : 0;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             if (g_menu_list_entry_count != 0
-                && (g_item_list_entries[g_menu_list_selected_index] & EQUIP_ITEM_LIST_ENTRY_UNEQUIPPABLE) == 0) {
+                && (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_UNEQUIPPABLE) == 0) {
                 item_id = item;
                 if (item_adjust_inventory_count(item_id, 0) == 0) {
                     equip_text_show_message_with_sound(0xD809, MAIN_SFX_ERROR_MESSAGE);

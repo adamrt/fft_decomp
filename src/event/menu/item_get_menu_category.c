@@ -8,7 +8,7 @@
 item_menu_category_e item_get_menu_category(s16 item_id) {
     s32 result;
 
-    item_id &= EQUIP_ITEM_ID_MASK;
+    item_id &= ITEM_ENTRY_ID_MASK;
     result = ITEM_MENU_CATEGORY_WEAPON;
     if (item_id >= ITEM_ID_THROWABLE_FIRST) {
         result = ITEM_MENU_CATEGORY_OTHER;

@@ -92,14 +92,6 @@ extern s8 g_equip_equip_mode_initialized;
 /* equipment display */
 extern menu_instruction_t g_equip_equipment_render_commands;
 
-/* item */
-enum {
-    EQUIP_ITEM_LIST_END = 0xFF,
-    EQUIP_ITEM_ID_MASK = 0x3FF,
-    EQUIP_ITEM_LIST_ENTRY_ITEM_ID_MASK = 0x3FF,
-    EQUIP_ITEM_LIST_ENTRY_UNEQUIPPABLE = 0x4000, /* listed, but the unit cannot equip the item */
-};
-
 extern menu_entry_t* g_equip_item_action_active_menu;
 extern u8 g_equip_item_inventory_totals[];
 extern u8 g_equip_item_list_has_multiple_entries;

@@ -82,7 +82,7 @@ void item_sum_equipment_stat_details(menu_status_panel_slot_storage_t* total, co
     total->state.magical_shield_evade = 0;
     total->state.magical_accessory_evade = 0;
     for (i = 0; i < 5; i++) {
-        item_collect_stat_deltas_variant(equipment[i] & EQUIP_ITEM_ID_MASK, &summary, &detail, i);
+        item_collect_stat_deltas_variant(equipment[i] & ITEM_ENTRY_ID_MASK, &summary, &detail, i);
         total->state.right_weapon_power += detail.state.right_weapon_power;
         total->state.left_weapon_power += detail.state.left_weapon_power;
         total->state.right_weapon_evade += detail.state.right_weapon_evade;

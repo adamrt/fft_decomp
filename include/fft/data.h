@@ -1185,8 +1185,9 @@ typedef enum item_id {
  * retail item table: throwable weapons start with Shuriken, followed by
  * shields, headgear, body armor, accessories, and consumables. */
 enum {
-    WORLD_ITEM_ID_MASK = 0x3ff,
-    WORLD_ITEM_LIST_ENTRY_UNEQUIPPABLE = 0x4000, /* item list entries: the unit cannot equip the item */
+    ITEM_ENTRY_ID_MASK = 0x3ff,
+    ITEM_ENTRY_UNEQUIPPABLE = 0x4000,   /* item list entries: listed, but the unit cannot equip the item */
+    ITEM_LIST_END = 0xff,               /* the item id that ends an item list */
     WORLD_EQUIPMENT_SHOP_ITEM = 0x8000, /* equipment 16-bit values: an unpaid shop item tried on in the fitting room */
 };
 

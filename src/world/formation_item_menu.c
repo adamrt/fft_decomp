@@ -225,12 +225,12 @@ static s32 world_formation_run_equip_item_menu(void) {
         g_menu_help_message_text_id = value;
     } else {
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
-            ? (g_item_list_entries[g_menu_list_selected_index] & WORLD_ITEM_ID_MASK) + 0x6800
+            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + 0x6800
             : -1;
-        item = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] & WORLD_ITEM_ID_MASK : 0;
+        item = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK : 0;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             if (g_menu_list_entry_count == 0
-                || (g_item_list_entries[g_menu_list_selected_index] & WORLD_ITEM_LIST_ENTRY_UNEQUIPPABLE)) {
+                || (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_UNEQUIPPABLE)) {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;
             } else {
                 equip = item;

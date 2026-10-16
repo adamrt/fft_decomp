@@ -58,7 +58,7 @@ void item_collect_stat_deltas_variant(
     u8 power;
     u8 evade;
     menu_clear_stat_preview(summary, detail);
-    item_id &= WORLD_ITEM_ID_MASK;
+    item_id &= ITEM_ENTRY_ID_MASK;
     if (item_id >= 1 && item_id <= ITEM_ID_END - 1) {
         attribute = g_main_item_primary_data[item_id].attributes;
         if (item_id < ITEM_ID_SHIELD_FIRST) {

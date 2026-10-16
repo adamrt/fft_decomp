@@ -20,7 +20,7 @@ void item_collect_stat_deltas_variant(
     s32 hi;
 
     menu_clear_stat_preview(summary, detail);
-    item_id = raw_item & EQUIP_ITEM_ID_MASK;
+    item_id = raw_item & ITEM_ENTRY_ID_MASK;
     if (item_id > 0) {
         attribute = g_main_item_primary_data[item_id].attributes;
         if (item_id < ITEM_ID_SHIELD_FIRST) {

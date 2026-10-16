@@ -12,7 +12,7 @@ s32 item_sort_list_by_category_order(s32 category_index, s16* list) {
     s32 category_order_index;
 
     category_order = g_item_category_lists[category_index];
-    for (category_item_count = 0; category_order[category_item_count] != EQUIP_ITEM_LIST_END; category_item_count++) { }
+    for (category_item_count = 0; category_order[category_item_count] != ITEM_LIST_END; category_item_count++) { }
 
     category_order_index = 0;
     sorted_count = 0;

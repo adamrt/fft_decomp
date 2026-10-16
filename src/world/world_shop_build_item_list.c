@@ -101,7 +101,7 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
                     continue;
                 }
                 if (mode == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && can_equip == -1) {
-                    entry = item_id | WORLD_ITEM_LIST_ENTRY_UNEQUIPPABLE;
+                    entry = item_id | ITEM_ENTRY_UNEQUIPPABLE;
                 }
             }
             entries[count] = entry;
@@ -123,7 +123,7 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
                     continue;
                 }
                 if (mode == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && can_equip == -1) {
-                    entry = item_id | WORLD_ITEM_LIST_ENTRY_UNEQUIPPABLE;
+                    entry = item_id | ITEM_ENTRY_UNEQUIPPABLE;
                 }
             }
             entries[count] = entry;

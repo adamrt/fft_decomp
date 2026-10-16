@@ -23,7 +23,7 @@ s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
     s16 value;
     equip_item_slot_result_e result;
 
-    value = item_id & EQUIP_ITEM_ID_MASK;
+    value = item_id & ITEM_ENTRY_ID_MASK;
     result = equip_unit_validate_slot_item(unit_index, slot, value);
     if (result < 0) {
         return result;
@@ -93,7 +93,7 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
     s32 other_two_swords;
     u8 flags;
 
-    id = item_id & EQUIP_ITEM_ID_MASK;
+    id = item_id & ITEM_ENTRY_ID_MASK;
     new_item = id;
     if (id == ITEM_ID_NOTHING) {
         return EQUIP_SLOT_ITEM_ALLOWED;
@@ -113,7 +113,7 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
             two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
         other_slot = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
-        other = g_equip_unit_data[unit]->equipment[other_slot] & EQUIP_ITEM_ID_MASK;
+        other = g_equip_unit_data[unit]->equipment[other_slot] & ITEM_ENTRY_ID_MASK;
         other_is_nonstandard_weapon = other >= ITEM_ID_THROWABLE_FIRST;
         if (other_is_nonstandard_weapon) {
             other_forced_two_hands = 0;
@@ -147,7 +147,7 @@ static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot
 /* Builds the -1-terminated list of owned item IDs in `category`, then sorts it.
  *
  * `equip_filter` 0 lists every owned item, 1 flags items the unit cannot equip
- * with EQUIP_ITEM_LIST_ENTRY_UNEQUIPPABLE, and 2 omits them; filter 1 is
+ * with ITEM_ENTRY_UNEQUIPPABLE, and 2 omits them; filter 1 is
  * promoted to 2 when Show Unequippable is not On. `sort_mode` 1-5 with a
  * category list index below 5 uses that category order list; anything else falls back to
  * item_sort_id_list_variant. Returns the number of listed items.
@@ -209,7 +209,7 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
                 continue;
             }
             if (equip_filter == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && matches == -1) {
-                entry |= EQUIP_ITEM_LIST_ENTRY_UNEQUIPPABLE;
+                entry |= ITEM_ENTRY_UNEQUIPPABLE;
             }
         }
         list[count] = entry;

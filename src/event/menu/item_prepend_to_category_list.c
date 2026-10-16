@@ -11,7 +11,7 @@ void item_prepend_to_category_list(s32 item_id, s32 category_index) {
 
     list = g_item_category_lists[category_index];
     i = 0;
-    while (list[i] != EQUIP_ITEM_LIST_END) {
+    while (list[i] != ITEM_LIST_END) {
         i++;
     }
     for (; i >= 0; i--) {

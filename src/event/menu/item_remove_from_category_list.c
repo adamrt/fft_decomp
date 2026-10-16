@@ -8,7 +8,7 @@ void item_remove_from_category_list(s32 item_id, s32 category_index) {
     s32 i;
 
     for (i = 0; list[i] != item_id; i++) {
-        if (list[i] == EQUIP_ITEM_LIST_END) {
+        if (list[i] == ITEM_LIST_END) {
             return;
         }
     }
@@ -16,5 +16,5 @@ void item_remove_from_category_list(s32 item_id, s32 category_index) {
     do {
         list[i] = list[i + 1];
         i++;
-    } while (list[i] != EQUIP_ITEM_LIST_END);
+    } while (list[i] != ITEM_LIST_END);
 }
