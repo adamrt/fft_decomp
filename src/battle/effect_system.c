@@ -2194,8 +2194,8 @@ s32 battle_effect_check_direct_trajectory_between_units(u8 source_id, u8 target_
 }
 
 /*
- * Sets up an arcing projectile trajectory between a source unit and either a
- * target unit or a bare tile, and reports whether the flight is obstructed.
+ * Traces a straight projectile path from a source unit to either a target
+ * unit or a bare tile, and reports whether the flight is obstructed.
  *
  * Both endpoints are raised by two thirds of their sprite height (12 when the
  * target has none), as in battle_effect_check_direct_trajectory_between_units;

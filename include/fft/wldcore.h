@@ -868,7 +868,7 @@ typedef struct wldcore_menu_participant_level {
     s32 left_window;  /* 0x00 */
     s32 right_window; /* 0x04 */
     s32 _unknown_08;  /* 0x08; cleared at push */
-    s32 _unused_0c;   /* 0x0c; cleared at push */
+    s32 _unused_0c;   /* 0x0c */
     s32 proposition;  /* 0x10; index into g_main_active_propositions */
     s32 participant;  /* 0x14; slot in participant_indices */
 } wldcore_menu_participant_level_t;
