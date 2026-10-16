@@ -2,7 +2,6 @@
  * character count. */
 
 #include "fft/gfx_image.h"
-#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/world_text.h"
 #include "psx/libc.h"

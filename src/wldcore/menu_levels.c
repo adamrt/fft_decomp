@@ -14,7 +14,6 @@
 #include "fft/menu_input.h"
 #include "fft/menu_overlay.h"
 #include "fft/menu_selection.h"
-#include "fft/menu_text.h"
 #include "fft/menu_window.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"

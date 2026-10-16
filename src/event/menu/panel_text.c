@@ -5,7 +5,7 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_panel.h"
-#include "fft/menu_text.h"
+#include "fft/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

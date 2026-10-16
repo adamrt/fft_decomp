@@ -11,7 +11,7 @@
 #include "fft/memory.h"
 #include "fft/menu_panel.h"
 #include "fft/menu_status.h"
-#include "fft/menu_text.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "psx/types.h"

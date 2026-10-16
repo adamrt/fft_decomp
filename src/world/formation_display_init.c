@@ -10,7 +10,7 @@
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
-#include "fft/menu_text.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "fft/world_formation.h"

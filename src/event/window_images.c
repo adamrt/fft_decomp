@@ -7,7 +7,6 @@
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_text.h"
 #include "fft/menu_window.h"
 #include "fft/text.h"
 #include "fft/thread.h"

@@ -1,7 +1,6 @@
 /* Two value return stubs and the unit name list. */
 
 #include "fft/battle_unit.h"
-#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/unit.h"
 #include "psx/types.h"

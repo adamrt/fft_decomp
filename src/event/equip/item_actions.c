@@ -12,7 +12,6 @@
 #include "fft/menu_panel.h"
 #include "fft/menu_script.h"
 #include "fft/menu_status.h"
-#include "fft/menu_text.h"
 #include "fft/menu_window.h"
 #include "fft/sound.h"
 #include "fft/text.h"

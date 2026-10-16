@@ -29,7 +29,6 @@
 #include "fft/menu_input.h"
 #include "fft/menu_option.h"
 #include "fft/menu_overlay.h"
-#include "fft/menu_text.h"
 #include "fft/menu_unit_view.h"
 #include "fft/menu_window.h"
 #include "fft/script.h"

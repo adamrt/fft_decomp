@@ -12,7 +12,7 @@
 #include "fft/main.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"
-#include "fft/menu_text.h"
+#include "fft/text.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "fft/unit_identity.h"

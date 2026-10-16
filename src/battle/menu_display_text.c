@@ -2,8 +2,8 @@
 
 #include "fft/gfx.h"
 #include "fft/main_unit.h"
-#include "fft/menu_text.h"
 #include "fft/script_variable.h"
+#include "fft/text.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

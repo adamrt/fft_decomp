@@ -8,7 +8,6 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_panel.h"
-#include "fft/menu_text.h"
 #include "fft/menu_window.h"
 #include "fft/text.h"
 #include "fft/thread.h"

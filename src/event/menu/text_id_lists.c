@@ -1,6 +1,5 @@
 /* Text entry seek and -1 terminated text-id list image rendering. */
 
-#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "psx/types.h"
 

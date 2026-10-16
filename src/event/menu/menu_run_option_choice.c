@@ -3,9 +3,9 @@
 #include "fft/main_sound.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
-#include "fft/menu_text.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 /* Two dead-store conditionals are zero-instruction allocation devices: flow deletes each body,
  * post-reload jump deletes each branch, but both stay visible to register allocation.
  * - `if (height <= 0)`: the sixth height reference (6 refs/54 insns) ties the render
@@ -15,6 +15,7 @@
  *   `i = 0`, so the slt result pseudo keeps its flow refs, gets no register, and reload gives
  *   it the target's second unreferenced 8-byte slot (frame 0x60; the text loop's entry test
  *   supplies the first). */
+
 #include "fft/main.h"
 #include "fft/menu_input.h"
 #include "fft/menu_option.h"

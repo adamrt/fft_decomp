@@ -9,9 +9,9 @@
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/menu_status.h"
-#include "fft/menu_text.h"
 #include "fft/menu_window.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

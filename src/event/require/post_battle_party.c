@@ -17,7 +17,6 @@
 #include "fft/menu_overlay.h"
 #include "fft/menu_panel.h"
 #include "fft/menu_status.h"
-#include "fft/menu_text.h"
 #include "fft/menu_unit_view.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"

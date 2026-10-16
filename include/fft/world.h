@@ -128,7 +128,6 @@ enum {
 
 extern u16 g_world_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-sheet id */
 extern u16 g_world_help_portrait_clut_by_sheet_id[];
-void text_set_blit_destination(s16 x, s16 y);
 
 /* unit */
 /* Unpadded unsigned 16-bit x/y/z triple (6 bytes). */
@@ -141,6 +140,5 @@ typedef char assert_vec3u16_size[sizeof(vec3u16_t) == 6 ? 1 : -1];
 
 void resolve_unit_status_changes(void);
 s32 unit_has_adjacent_monster_skill_support(struct unit_stats* unit);
-void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 
 #endif

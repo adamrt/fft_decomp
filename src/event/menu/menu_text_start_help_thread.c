@@ -2,7 +2,6 @@
 
 #include "fft/menu_help.h"
 #include "fft/menu_input.h"
-#include "fft/menu_text.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/types.h"
