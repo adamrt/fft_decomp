@@ -12,7 +12,7 @@
 /* light matrices */
 /* Commands of battle_map_light_matrix_command. A START queues its STEP in
  * g_battle_map_light_transition_command, which the map draw loop issues every frame. */
-typedef enum battle_map_light_matrix_command {
+typedef enum map_light_matrix_command {
     MAP_LIGHT_MATRIX_COMMAND_SET = 0x5e,
     MAP_LIGHT_MATRIX_COMMAND_SAVE = 0x5f,
     MAP_LIGHT_MATRIX_COMMAND_RESTORE = 0x60,
@@ -117,8 +117,8 @@ void battle_map_init_ambient_light(void);
 void battle_map_init_background_gradient(void);
 void battle_map_init_darkness(void);
 void* battle_map_light_state_command(map_light_command_e command, void* data);
-void battle_map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth);
-void battle_map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue);
+void battle_map_start_darkness_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
+void battle_map_color_field(s32 mode, s32 amount, s16 red, s16 green, s16 blue);
 void battle_map_modify_background_gradient(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
 void battle_map_set_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);
 void battle_map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);

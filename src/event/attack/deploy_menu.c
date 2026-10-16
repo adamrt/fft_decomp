@@ -122,29 +122,30 @@ void attack_deploy_run_select_menu(void) {
 
             if (buttons & PSX_PAD_CIRCLE) {
                 /* Out-of-range ids and empty entries open no help; zeroing the input drops the press. A help_base
-                 * of -0x6800 is the skillset section (0x9800 as a 16-bit text id). */
+                 * of -0x6800 is the skillset section (HELP_TEXT_ID_SKILLSET_BASE as a 16-bit text id). */
                 if (node->value != 0) {
                     text_id = node->help_base + *node->value;
-                    if (node->help_base == -0x6800 && g_menu_selected_unit_fields.state.generic_monster != 0) {
-                        text_id = *node->value | 0x7800;
+                    if (node->help_base == (s16)HELP_TEXT_ID_SKILLSET_BASE
+                        && g_menu_selected_unit_fields.state.generic_monster != 0) {
+                        text_id = *node->value | HELP_TEXT_ID_ABILITY_BASE;
                         value_id = *node->value & 0x7ff;
                         if (value_id == 0x7ff || value_id == 0) {
                             *input = 0;
                         } else {
                             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                             thread_start(parent_id, text_run_dialog_thread);
-                            thread_set_parameters(parent_id, 0x3b, text_id, 0);
+                            thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                         }
-                    } else if (node->help_base == 0x7800 && (u16)*node->value - 1 >= 0x301U) {
+                    } else if (node->help_base == HELP_TEXT_ID_ABILITY_BASE && (u16)*node->value - 1 >= 0x301U) {
                         *input = 0;
-                    } else if (node->help_base == 0x6800 && (u16)*node->value - 1 >= 0x101U) {
+                    } else if (node->help_base == HELP_TEXT_ID_ITEM_BASE && (u16)*node->value - 1 >= 0x101U) {
                         *input = 0;
-                    } else if (node->help_base == -0x6800 && (u16)*node->value - 1 >= 0x101U) {
+                    } else if (node->help_base == (s16)HELP_TEXT_ID_SKILLSET_BASE && (u16)*node->value - 1 >= 0x101U) {
                         *input = 0;
                     } else {
                         g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                         thread_start(parent_id, text_run_dialog_thread);
-                        thread_set_parameters(parent_id, 0x3b, text_id, 0);
+                        thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
                 } else {
                     /* An entry starting with 0xfe or 0xff is empty. */
@@ -153,7 +154,7 @@ void attack_deploy_run_select_menu(void) {
                     if ((*(u8*)thread_call_on_main_stack(text_id) & 0xfe) != 0xfe) {
                         g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                         thread_start(parent_id, text_run_dialog_thread);
-                        thread_set_parameters(parent_id, 0x3b, text_id, 0);
+                        thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
                 }
             } else if (buttons & PSX_PAD_DPAD_MASK) {
@@ -366,21 +367,21 @@ void attack_text_build_deployment_strings(void) {
         }
         attack_editor_load_party_unit(1, i);
         for (j = 0; j < 5; j++) {
-            APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j], 0x6800);
+            APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j], HELP_TEXT_ID_ITEM_BASE);
         }
         if (g_menu_selected_unit_fields.state.generic_monster != 0) {
             for (j = 0; j < 5; j++) {
-                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], 0x7800);
+                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
             }
         } else {
             for (j = 0; j < 2; j++) {
-                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], 0x9800);
+                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_SKILLSET_BASE);
             }
             for (j = 2; j < 5; j++) {
-                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], 0x7800);
+                APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
             }
         }
-        APPEND_TEXT(g_attack_panel_selected_unit_data.job_id + 0x6000);
+        APPEND_TEXT(g_attack_panel_selected_unit_data.job_id + HELP_TEXT_ID_JOB_BASE);
     }
     g_attack_deploy_unit_text_section = g_attack_scenario_table;
     g_attack_deploy_help_text_section = g_attack_event_condition_blocks;

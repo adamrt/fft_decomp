@@ -6,13 +6,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Draws `value` right to left as `digits & 0xff` large glyphs at `pos`, with
- * the sign and marker glyphs selected by the flag bits of `digits`. Sibling of
+/* Draws `value` right to left as `format & 0xff` large glyphs at `pos`, with
+ * the sign and marker glyphs selected by the flag bits of `format`. Sibling of
  * menu_draw_number_glyphs (0x8014ac30) on the 5-pixel font. WORLD links its
  * own body under this name: it lacks the leading 0x800 glyph and the hidden
  * value check, and draws every digit as 0xba under flag 0x800 instead.
  *
- * The high byte of `digits` selects the extras (glyphs named by their x in the
+ * The high byte of `format` selects the extras (glyphs named by their x in the
  * menu glyph sheet, where the digits sit 6 pixels apart from x 0x78; they
  * draw 5 pixels apart):
  *   0xc00, 0xe00  the whole number becomes three 0xba or 0xd0 placeholders,
@@ -26,17 +26,17 @@
  *   0x2000        a trailing 0xc0 glyph
  * While numeric values are hidden every digit draws as 0xd0 and the 0x200 and
  * 0x400 width rules are skipped. The pen ends 5 pixels past the last digit. */
-void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
+void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
     glyph_blit_t* src = &g_text_large_number_glyph_rect;
 
     /* `cursor` holds the format's high byte first and the pen's final x
      * later; giving the two roles separate locals changes register use. */
-    cursor = digits & 0xFF00;
+    cursor = format & 0xFF00;
     if (cursor == 0xC00 || cursor == 0xE00) {
         g_text_large_number_glyph_rect.rect.y = 0x10;
-        if (digits & 1) {
+        if (format & 1) {
             src->rect.x = 0xB4;
             text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
             pos->rect.x += 5;
@@ -51,32 +51,32 @@ void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
         }
         return;
     }
-    if (digits & 0x800) {
+    if (format & 0x800) {
         src->rect.x = 0xBA;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
     }
     if (g_menu_hide_numeric_values == 0) {
-        if ((digits & 0x200) && value == 100) {
-            digits = cursor + 3;
+        if ((format & 0x200) && value == 100) {
+            format = cursor + 3;
         }
-        if ((digits & 0x400) && value != 100) {
-            digits = (digits & 0xFF00) + 2;
+        if ((format & 0x400) && value != 100) {
+            format = (format & 0xFF00) + 2;
             pos->rect.x += 6;
         }
     }
-    if (digits & 0x1000) {
+    if (format & 0x1000) {
         src->rect.x = 0xB4;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
         pos->rect.x += 5;
     }
-    if (digits & 0x8000) {
+    if (format & 0x8000) {
         pos->rect.x -= 2;
         src->rect.x = 0xB4;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
         pos->rect.x += 7;
     }
-    if (digits & 0x100) {
+    if (format & 0x100) {
         src->rect.x = 0x78;
         src->rect.y = 0x1A;
         src->rect.h = 4;
@@ -87,9 +87,9 @@ void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
         src->rect.y = 0x10;
         src->rect.h = 0xA;
     }
-    pos->rect.x += ((digits & 0xFF) - 1) * 5;
+    pos->rect.x += ((format & 0xFF) - 1) * 5;
     cursor = pos->rect.x + 5;
-    for (i = 0; i < (digits & 0xFF); i++) {
+    for (i = 0; i < (format & 0xFF); i++) {
         src->rect.x = (value % 10) * 6 + 0x78;
         if (g_menu_hide_numeric_values != 0) {
             src->rect.x = 0xD0;
@@ -99,7 +99,7 @@ void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
         pos->rect.x -= 5;
     }
     pos->rect.x = cursor;
-    if (digits & 0x2000) {
+    if (format & 0x2000) {
         src->rect.x = 0xC0;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
         pos->rect.x += 5;

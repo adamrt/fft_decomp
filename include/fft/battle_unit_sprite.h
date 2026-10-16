@@ -282,7 +282,7 @@ typedef char battle_gfx_single_part_sprite_display_size_must_be_22[sizeof(battle
         : -1];
 
 /* Sprite lookup result filled in by battle_gfx_get_unit_sprite_frame_and_vram_ids. */
-typedef struct {
+typedef struct battle_unit_sprite_query {
     s16 clut;             /* 0x00; the unit's CLUT of MAP_CLUT_ROW_UNITS */
     s16 tpage;            /* 0x02 */
     s16 graphic_height;   /* 0x04 */

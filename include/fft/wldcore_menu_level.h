@@ -55,7 +55,7 @@ typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_PROPOSITION_ATTEMPT_DETAIL = 42,
     WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES = 43,
     WLDCORE_MENU_LEVEL_FORMATION_TUTORIALS = 44,
-    WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES = 45,
+    WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS = 45,
     WLDCORE_MENU_LEVEL_FACTS = 46,
     WLDCORE_MENU_LEVEL_FACT_DETAIL = 47,
     WLDCORE_MENU_LEVEL_NUMBER_PANEL_WITH_ARGUMENT = 48,
@@ -576,25 +576,25 @@ typedef enum wldcore_sound_novel_phase {
     WLDCORE_SOUND_NOVEL_PHASE_END = 3,          /* the script ended: waits for thread 14, then leaves */
 } wldcore_sound_novel_phase_e;
 
-/* Provisional: the SOUND_NOVEL level pushed by wldcore_menu_push_sound_novel_level and stepped by
- * wldcore_menu_step_sound_novel_level while the script runs: title, header and footer windows around a bar render
- * record. */
+/* The SOUND_NOVEL level pushed by wldcore_menu_push_sound_novel_level and stepped by
+ * wldcore_menu_step_sound_novel_level while the script runs: the Start and Square button prompts, and the
+ * brightness bar with its overlay, shown for a while after L1 or R1 changes the brightness. */
 typedef struct wldcore_menu_sound_novel_level {
-    s32 left_window;    /* 0x00; title window */
-    s32 right_window;   /* 0x04; header window */
-    s32 render_index;   /* 0x08; bar render record */
-    s32 overlay_window; /* 0x0c; footer window */
+    s32 left_window;    /* 0x00; the Start button prompt (the Quit/Continue menu) */
+    s32 right_window;   /* 0x04; the Square button prompt (the text history) */
+    s32 render_index;   /* 0x08; the brightness bar, a VRAM strip render record */
+    s32 overlay_window; /* 0x0c; the brightness bar's overlay */
     u8 _unused_10[0xc];
-    s32 message;     /* 0x1c; argument of the push */
+    s32 message;     /* 0x1c; the treasure detail reopened when the novel ends */
     s32 _unknown_20; /* 0x20; set to 1 at push */
-    s32 countdown;   /* 0x24; 9999 at push */
-    s32 phase;       /* 0x28; cleared at push */
-    s32 fade_timer;  /* 0x2c; cleared at push */
+    s32 countdown;   /* 0x24; frames before the text history opens (9999 at push) */
+    s32 phase;       /* 0x28; wldcore_sound_novel_phase_e */
+    s32 fade_timer;  /* 0x2c; frames the brightness bar stays up (60 after L1 or R1) */
 } wldcore_menu_sound_novel_level_t;
 
-/* Provisional: the SOUND_NOVEL_QUIT level, which asks whether to save the reading before leaving; pushed by
+/* The SOUND_NOVEL_QUIT level, the sound novel's Quit/Continue menu; pushed by
  * wldcore_menu_push_sound_novel_quit_level and stepped by wldcore_menu_step_sound_novel_quit_level. */
-typedef struct wldcore_menu_save_confirm_level {
+typedef struct wldcore_menu_sound_novel_quit_level {
     s32 cursor_window; /* 0x00 */
     s32 second_window; /* 0x04 */
     s32 render_index;  /* 0x08 */
@@ -603,7 +603,7 @@ typedef struct wldcore_menu_save_confirm_level {
     s32 fade_in;     /* 0x14 */
     s32 _unknown_18; /* 0x18; cleared at push */
     s32 choice;      /* 0x1c */
-} wldcore_menu_save_confirm_level_t;
+} wldcore_menu_sound_novel_quit_level_t;
 
 /* wldcore_menu_sound_novel_history_level_t.phase. */
 typedef enum wldcore_sound_novel_history_phase {
@@ -654,7 +654,7 @@ typedef union wldcore_menu_stack_record {
     wldcore_menu_sound_novel_resume_level_t sound_novel_resume;
     wldcore_menu_screen_transition_level_t screen_transition;
     wldcore_menu_scrollable_text_level_t scrollable_text;
-    wldcore_menu_save_confirm_level_t save_confirm;
+    wldcore_menu_sound_novel_quit_level_t sound_novel_quit;
     wldcore_menu_sound_novel_history_level_t sound_novel_history;
     wldcore_menu_location_transition_level_t location_transition;
     wldcore_menu_send_unit_level_t send_unit;

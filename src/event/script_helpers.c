@@ -403,7 +403,7 @@ void script_update_event_input_state(u32 input) {
     }
 }
 
-/* Empty in BATTLE and WORLD; no source calls it. */
+/* Empty in BATTLE and WORLD; menu_init_subsystems calls it. */
 void menu_init_stub(void) {
 }
 

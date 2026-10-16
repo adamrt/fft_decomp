@@ -119,7 +119,8 @@ void battle_camera_update_rotation_animation(void);
 
 /* tilt */
 /* g_battle_camera_tilt_action and g_battle_camera_zoom_action: the move in progress towards
- * g_battle_map_tilt_target or g_battle_map_zoom_target. */
+ * g_battle_map_tilt_target or g_battle_map_zoom_target. INCREASE equals MAP_TILT_HIGH and DECREASE
+ * equals MAP_ZOOM_OUT, and retail compares a target with the action loaded for that value. */
 typedef enum camera_step_action {
     CAMERA_STEP_NONE = 0,
     CAMERA_STEP_INCREASE = 2, /* tilt up; zoom in */

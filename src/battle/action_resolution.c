@@ -709,7 +709,7 @@ static void battle_action_clear_status_changes(action_data_t* action) {
  * The HP/MP damage and healing fields are read signed (lh), hence the s16
  * casts on the u16 header fields. The KO test's three status-bit checks fold
  * into the target's single 16-bit load of current[0..1] & 0x160. */
-s32 battle_action_apply_target_result(s32 unit_id) {
+s32 battle_action_apply_target_result(s32 battle_id) {
     s32 outcome;
     s32 hp;
     s32 mp;
@@ -720,13 +720,13 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     u8 old_status_ct[BATTLE_TIMED_STATUS_COUNT];
 
     outcome = 0;
-    if (unit_id >= BATTLE_UNIT_SLOT_COUNT) {
+    if (battle_id >= BATTLE_UNIT_SLOT_COUNT) {
         return -1;
     }
 
-    g_battle_action_current_ability.target_id = unit_id;
-    g_battle_action_target = &g_battle_unit_stats[unit_id];
-    g_battle_action_target_data = &g_battle_unit_stats[unit_id].action;
+    g_battle_action_current_ability.target_id = battle_id;
+    g_battle_action_target = &g_battle_unit_stats[battle_id];
+    g_battle_action_target_data = &g_battle_unit_stats[battle_id].action;
     if (g_battle_action_target->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
@@ -735,7 +735,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     if ((g_battle_action_target->status_sets.current[0] & STATUS_MASK(DEAD))
         && ((g_battle_action_target_data->status_changes.infliction[0] & STATUS_MASK(CRYSTAL))
             || (g_battle_action_target_data->status_changes.infliction[1] & STATUS_MASK(TREASURE)))) {
-        battle_status_resolve_unit_changes(unit_id, 0);
+        battle_status_resolve_unit_changes(battle_id, 0);
         return 0;
     }
 
@@ -840,7 +840,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
         && !(g_battle_action_target->status_sets.current[1] & STATUS_MASK(TREASURE))) {
         battle_action_clear_status_changes(g_battle_action_target_data);
         g_battle_action_target_data->status_changes.infliction[0] = STATUS_MASK(DEAD);
-        battle_status_resolve_unit_changes(unit_id, 1);
+        battle_status_resolve_unit_changes(battle_id, 1);
         if (g_battle_action_state == ACTION_STATE_EXECUTE) {
             g_battle_action_target->ko_count++;
         }
@@ -881,7 +881,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
         old_status_ct[i] = g_battle_action_target->status_ct[i];
     }
 
-    battle_status_resolve_unit_changes(unit_id, 0);
+    battle_status_resolve_unit_changes(battle_id, 0);
     if ((g_battle_action_target->status_sets.current[0] & STATUS_MASK(DEAD)) && !(old_status[0] & STATUS_MASK(DEAD))) {
         outcome = 2;
         if (g_battle_action_state == ACTION_STATE_EXECUTE) {
@@ -953,9 +953,9 @@ static s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
 }
 
 /* Transform a unit into a Morbol, keeping its name, unit id, formation index,
- * position and facing. Init kind 0x82 rebuilds the unit's stats for its new job
- * without resetting it or reading ENTD data; the generated-unit formation index
- * meanwhile lets the level growth run. */
+ * position and facing. MAIN_UNIT_ENTD_INIT_TRANSFORM rebuilds the unit's stats
+ * for its new job without resetting it or reading ENTD data; the generated-unit
+ * formation index meanwhile lets the level growth run. */
 void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     u8 saved_name[0x10];
     u8 palette[8];
@@ -979,7 +979,7 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
     higher_elevation = unit->position.higher_elevation;
     facing = unit->position.facing;
     unit->formation_index = UNIT_FORMATION_INDEX_GENERATED_UNIT;
-    main_unit_init_from_entd(unit, 0, 0, 0x82);
+    main_unit_init_from_entd(unit, 0, 0, MAIN_UNIT_ENTD_INIT_TRANSFORM);
     unit->x = x;
     unit->position.y = y;
     unit->formation_index = formation_index;

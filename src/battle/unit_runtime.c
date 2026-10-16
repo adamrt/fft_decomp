@@ -31,7 +31,7 @@ s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVEC
         unit->event_offset.vy = unit->event_offset.vy + amount->vy;
         unit->event_offset.vz = unit->event_offset.vz + amount->vz;
     } else {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return 1;
@@ -47,19 +47,19 @@ s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* am
         unit->event_offset.vy = unit->event_offset.vy + amount->vy;
         unit->event_offset.vz = unit->event_offset.vz + amount->vz;
     } else {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return 1;
 }
 
 /* The unit's event offset (moved by battle_unit_add_event_offset_by_runtime_id). A missing unit
- * raises pointer exception 12 and returns 0. */
+ * raises a pointer exception and returns 0. */
 SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return &unit->event_offset;
@@ -198,7 +198,7 @@ void battle_unit_clear_movement_effect_suppression(u32 runtime_id) {
 }
 
 /* The battle unit slot of a runtime record, or -1 when the record has no battle
- * stats. A runtime id without a record raises pointer exception 12 and also returns
+ * stats. A runtime id without a record raises a pointer exception and also returns
  * -1. */
 s32 battle_unit_get_battle_id_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
@@ -210,7 +210,7 @@ s32 battle_unit_get_battle_id_by_runtime_id(u32 runtime_id) {
             return stats->battle_id;
         }
     } else {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     }
     return -1;
 }
@@ -256,13 +256,13 @@ action_command_t* battle_unit_get_runtime_action_command_by_battle_id(u32 battle
     return &unit->command_state.ai.data.action;
 }
 
-/* 1 while the runtime unit still has a movement path. A missing unit raises pointer
- * exception 12 and reports 0. */
+/* 1 while the runtime unit still has a movement path. A missing unit raises a pointer
+ * exception and reports 0. */
 s32 battle_move_is_unit_moving_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return unit->path.count != 0;
@@ -376,8 +376,8 @@ void battle_gfx_hide_jumping_units(void) {
     }
 }
 
-/* battle_unit_remove by runtime id. Returns 1, or 0 after raising pointer
- * exception 12 when no record has the id. */
+/* battle_unit_remove by runtime id. Returns 1, or 0 after raising a pointer
+ * exception when no record has the id. */
 s32 battle_unit_remove_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -385,7 +385,7 @@ s32 battle_unit_remove_by_runtime_id(u32 runtime_id) {
         battle_unit_remove(unit);
         return 1;
     }
-    main_system_handle_pointer_exception(12);
+    main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     return 0;
 }
 
@@ -518,10 +518,12 @@ s32 battle_gfx_load_unit_attack_image_into_evtchr_slot(s32 runtime_id, s32 slot)
                 LoadImage(&g_battle_gfx_vram_slots[slot].image_rect, (u32*)image_data);
                 /* The unit's 64x32 block in the spritesheet area (its sheet rows below the
                  * first 256, the portrait and lower body) goes 200 lines below the image. */
-                rect.x = (unit->spritesheet_vram_slot >> 3) * 64 + 0x340;
-                rect.y = (unit->spritesheet_vram_slot & 7) * 32 + 0x100;
-                rect.w = 0x40;
-                rect.h = 0x20;
+                rect.x = (unit->spritesheet_vram_slot >> 3) * BATTLE_GFX_SPRITESHEET_STRIP_WIDTH
+                    + BATTLE_GFX_SPRITESHEET_STRIP_VRAM_X;
+                rect.y = (unit->spritesheet_vram_slot & 7) * BATTLE_GFX_SPRITESHEET_STRIP_HEIGHT
+                    + BATTLE_GFX_SPRITESHEET_STRIP_VRAM_Y;
+                rect.w = BATTLE_GFX_SPRITESHEET_STRIP_WIDTH;
+                rect.h = BATTLE_GFX_SPRITESHEET_STRIP_HEIGHT;
                 MoveImage(&rect, g_battle_gfx_vram_slots[slot].image_rect.x,
                     g_battle_gfx_vram_slots[slot].image_rect.y + 200);
                 g_battle_gfx_vram_slots[slot].owner = runtime_id + BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE;

@@ -235,12 +235,12 @@ static s32 world_formation_run_equip_item_menu(void) {
         equipped = g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_item_slot];
         value = -1;
         if (equipped != ITEM_ID_NOTHING) {
-            value = equipped + 0x6800;
+            value = equipped + HELP_TEXT_ID_ITEM_BASE;
         }
         g_menu_help_message_text_id = value;
     } else {
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
-            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + 0x6800
+            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE
             : -1;
         item = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK : 0;
 
@@ -461,7 +461,7 @@ static s32 world_menu_run_remove_item(void) {
     item = *selected_item;
     value = -1;
     if (item != ITEM_ID_NOTHING) {
-        value = item + 0x6800;
+        value = item + HELP_TEXT_ID_ITEM_BASE;
     }
     g_menu_help_message_text_id = value;
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {

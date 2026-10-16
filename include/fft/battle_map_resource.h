@@ -280,7 +280,6 @@ extern s32 g_battle_map_gns_load_phase; /* map_gns_load_phase_e */
 extern s32 g_battle_map_loaded_id;
 extern RECT g_battle_map_vram_load_rect;
 
-void map_data_load_complete_thread(void);
 s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data);
 s32 battle_map_start_data_load(void);
 s32 battle_map_poll_data_load(void);

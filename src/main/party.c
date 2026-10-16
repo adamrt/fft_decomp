@@ -131,7 +131,7 @@ s32 main_unit_save_entd_unit_to_party(entd_encounter_t* entd, s32 unit_id, s32 g
         unit_data->entd_slot = 0x20;
         unit_data->existence = UNIT_EXISTENCE_ACTIVE;
         unit_data->formation_index = UNIT_FORMATION_INDEX_NONE;
-        main_unit_init_from_entd(unit_data, entd_unit, initialize_for_battle, 0);
+        main_unit_init_from_entd(unit_data, entd_unit, initialize_for_battle, MAIN_UNIT_ENTD_INIT_NEW);
         return main_party_save_unit(unit_data, guest_id);
     }
 }
@@ -686,20 +686,19 @@ s32 main_unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_t
  *
  * use_world_text selects the WORLD name provider during the shared final
  * setup. A temporary formation index enables level growth for generated units.
- * Mode 0x82 is the transformed-monster recalculation path and preserves the
- * existing runtime/ENTD-derived state. */
+ * MAIN_UNIT_ENTD_INIT_TRANSFORM is the transformed-monster recalculation path
+ * and preserves the existing runtime/ENTD-derived state. */
 s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind) {
     g_main_unit_name_uses_world_text = use_world_text;
-    /* Kind 0x82 skips the reset and the ENTD calculation. */
-    if (kind != 0x82) {
+    if (kind != MAIN_UNIT_ENTD_INIT_TRANSFORM) {
         main_unit_reset_battle_state(unit);
         if (main_unit_calculate_entd_data(unit, entd) != 0) {
             return -1;
         }
     }
-    /* For kind 0 a load-formation unit, and a Ramza without a birth month, came whole
+    /* For a new unit, a load-formation unit and a Ramza without a birth month came whole
      * from the roster in main_unit_calculate_entd_data. */
-    if (kind == 0) {
+    if (kind == MAIN_UNIT_ENTD_INIT_NEW) {
         if ((entd->unit_flags & UNIT_FLAG_LOAD_FORMATION) != 0) {
             return 0;
         }
@@ -722,7 +721,7 @@ s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_worl
         unit->formation_index = UNIT_FORMATION_INDEX_NONE;
     }
     main_unit_set_equippable_items(unit);
-    if (kind != 0x82) {
+    if (kind != MAIN_UNIT_ENTD_INIT_TRANSFORM) {
         if (unit->formation_index >= PARTY_ROSTER_SLOT_COUNT) {
             main_unit_calculate_entd_equipment(unit, entd);
         }

@@ -29,6 +29,14 @@ typedef struct event_work {
 typedef char event_work_size_must_be_2532[(sizeof(event_work_t) == 2532) ? 1 : -1];
 
 /* event loading */
+/* The finish operation of a scenario's finish word: its high bits, as script_get_event_finish_operation
+ * returns them. Another nonzero value acts as TO_WORLD and also clears the current event and ENTD. */
+enum {
+    SCRIPT_FINISH_TO_WORLD = 0x80,
+    SCRIPT_FINISH_NEXT_EVENT = 0x81,
+    SCRIPT_FINISH_RESET = 0x82,
+};
+
 /* The EVENT/TEST.EVT block of the loaded event. */
 extern event_file_block_t* g_script_event_block;
 
@@ -45,6 +53,18 @@ s32 script_get_current_scenario_finish_operation(void);
 u32 script_get_event_finish_operation(void);
 
 /* interpreter */
+/* script_run_event_frame results: RUNNING (or g_script_frame_result_override) while the script
+ * threads run; once they have all stopped, NO_FINISH or what the scenario's finish operation asks
+ * for. Tutorial input mode reports NO_FINISH every frame. */
+typedef enum script_event_frame_result {
+    SCRIPT_EVENT_FRAME_NO_FINISH = 0, /* the battle goes on */
+    SCRIPT_EVENT_FRAME_RUNNING = 1,
+    SCRIPT_EVENT_FRAME_TO_WORLD = 9,
+    SCRIPT_EVENT_FRAME_NEXT_EVENT = 10,
+    SCRIPT_EVENT_FRAME_RESET = 11,
+    SCRIPT_EVENT_FRAME_ENDING = 19, /* the Funeral event (EVENT_ID_FUNERAL) has ended */
+} script_event_frame_result_e;
+
 extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
 extern s16 g_script_scenario_event_active;
@@ -215,6 +235,19 @@ extern s32 g_event_pending_reserved_vram_release_slot;
 extern s32 g_event_pending_unit_vram_copy;
 
 /* controller input */
+/* The values script_pulse_tutorial_wait_value holds in EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu
+ * screen opens, so that a tutorial script can wait for it. A system function pulses its own id
+ * instead. */
+typedef enum script_tutorial_wait_value {
+    SCRIPT_TUTORIAL_WAIT_AT_LIST = 0xf9,
+    SCRIPT_TUTORIAL_WAIT_ABILITY_AT_LIST = 0xfa, /* the AT list preview of the highlighted ability */
+    SCRIPT_TUTORIAL_WAIT_ABILITY_LIST = 0xfb,
+    SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST = 0xfc,
+    SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS = 0xfd,
+    SCRIPT_TUTORIAL_WAIT_MINI_MENU = 0xfe,  /* the Triangle menu */
+    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff, /* menu_start_entry_thread opened a menu */
+} script_tutorial_wait_value_e;
+
 extern u32 g_script_unfiltered_controller_input;
 extern u32 g_script_event_input;
 extern u32 g_script_event_current_input;

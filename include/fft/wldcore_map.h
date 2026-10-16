@@ -86,7 +86,7 @@ s32 wldcore_map_is_point_outside_projection_bounds(const point32_t* point);
 
 /* scrolling */
 /* The range of the map scroll position. */
-typedef enum wldcore_scroll_limits {
+typedef enum wldcore_map_scroll_limits {
     WLDCORE_SCROLL_MIN_X = -116,
     WLDCORE_SCROLL_MAX_X = 128,
     WLDCORE_SCROLL_MIN_Y = -64,
@@ -287,7 +287,7 @@ extern u8 g_wldcore_choice_hidden_variable_offsets[];
  * window-flag store (MEM_IN_STRUCT_P). */
 extern s32 g_wldcore_next_map_id[];
 s32 wldcore_location_process_entry(s32 from_location, s32 to_location);
-s32 wldcore_map_build_location_menu_entries(s32 proposition_id, s32* out);
+s32 wldcore_map_build_location_menu_entries(s32 location_id, s32* out);
 void wldcore_map_step_route_travel(void);
 
 /* random encounters */

@@ -6,6 +6,7 @@
 
 #include "fft/map.h"
 #include "fft/menu_status.h"
+#include "fft/text.h"
 #include "psx/types.h"
 
 /* help text */
@@ -21,6 +22,24 @@ typedef enum help_text_section {
     HELP_TEXT_SECTION_SKILLSETS = 19,    /* by skillset id */
     HELP_TEXT_SECTION_STATUSES = 20,     /* by status id */
 } help_text_section_e;
+
+/* The first text id of the help text sections the code adds an id to. help_navigation_record_t.help_base
+ * holds the 16-bit form, in which the skillsets' base reads as -0x6800. */
+enum {
+    HELP_TEXT_ID_MENU_COMMAND_BASE = HELP_TEXT_SECTION_MENU_COMMANDS << TEXT_ID_SECTION_SHIFT,
+    HELP_TEXT_ID_TERRAIN_BASE = HELP_TEXT_SECTION_TERRAIN << TEXT_ID_SECTION_SHIFT,
+    HELP_TEXT_ID_JOB_BASE = HELP_TEXT_SECTION_JOBS << TEXT_ID_SECTION_SHIFT,
+    HELP_TEXT_ID_ITEM_BASE = HELP_TEXT_SECTION_ITEMS << TEXT_ID_SECTION_SHIFT,
+    HELP_TEXT_ID_ABILITY_BASE = HELP_TEXT_SECTION_ABILITIES << TEXT_ID_SECTION_SHIFT,
+    HELP_TEXT_ID_SKILLSET_BASE = HELP_TEXT_SECTION_SKILLSETS << TEXT_ID_SECTION_SHIFT,
+    HELP_TEXT_ID_STATUS_BASE = HELP_TEXT_SECTION_STATUSES << TEXT_ID_SECTION_SHIFT,
+};
+
+/* The dialog type of a help window: a Help box without a tail; the help screens center it. */
+enum {
+    HELP_DIALOG_TYPE = DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL,
+    HELP_DIALOG_TYPE_CENTERED = HELP_DIALOG_TYPE | DIALOG_POSITION_CENTER,
+};
 
 /* The help text file's section offsets, which text_relocate_pointer_table binds while a help window is open. */
 extern u32 g_help_text_table[];

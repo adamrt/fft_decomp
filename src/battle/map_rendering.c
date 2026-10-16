@@ -1787,7 +1787,7 @@ void battle_gfx_init_render_buffers(void) {
     g_battle_render_buffers[1].otag = g_main_gfx_battle_otags[1];
     {
         for (buffer_index = 0; buffer_index < 2; buffer_index++) {
-            for (primitive_index = 0; primitive_index < 64; primitive_index++) {
+            for (primitive_index = 0; primitive_index < BATTLE_RENDER_WEATHER_SPRITE_COUNT; primitive_index++) {
                 SetPolyFT3(&g_battle_render_buffers[buffer_index].ft3[primitive_index]);
             }
         }
@@ -1806,28 +1806,28 @@ void battle_gfx_init_render_buffers(void) {
     SetDrawMode(&g_battle_render_buffers[0].overlay_modes[0], 0, 1, 0, 0);
     SetDrawMode(&g_battle_render_buffers[1].overlay_modes[0], 0, 1, 0, 0);
     {
-        for (primitive_index = 0; primitive_index < 360; primitive_index++) {
+        for (primitive_index = 0; primitive_index < BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT; primitive_index++) {
             for (buffer_index = 0; buffer_index < 2; buffer_index++) {
                 SetPolyGT3(&g_battle_render_buffers[buffer_index].gt3[primitive_index]);
             }
         }
     }
     {
-        for (primitive_index = 0; primitive_index < 710; primitive_index++) {
+        for (primitive_index = 0; primitive_index < BATTLE_RENDER_TEXTURED_QUAD_COUNT; primitive_index++) {
             for (buffer_index = 0; buffer_index < 2; buffer_index++) {
                 SetPolyGT4(&g_battle_render_buffers[buffer_index].gt4[primitive_index]);
             }
         }
     }
     {
-        for (primitive_index = 0; primitive_index < 64; primitive_index++) {
+        for (primitive_index = 0; primitive_index < BATTLE_RENDER_UNTEXTURED_TRIANGLE_COUNT; primitive_index++) {
             for (buffer_index = 0; buffer_index < 2; buffer_index++) {
                 SetPolyF3(&g_battle_render_buffers[buffer_index].f3[primitive_index]);
             }
         }
     }
     {
-        for (primitive_index = 0; primitive_index < 256; primitive_index++) {
+        for (primitive_index = 0; primitive_index < BATTLE_RENDER_UNTEXTURED_QUAD_COUNT; primitive_index++) {
             for (buffer_index = 0; buffer_index < 2; buffer_index++) {
                 SetPolyF4(&g_battle_render_buffers[buffer_index].f4[primitive_index]);
             }
@@ -1868,9 +1868,9 @@ void battle_map_reset_mesh_render_state(void) {
     }
     battle_map_run_weather_command(MAP_WEATHER_COMMAND_CLEAR);
     g_battle_map_lightning_mode = MAP_LIGHTNING_OFF;
-    /* Clear MAP_WEATHER_FLAG_IGNORE_WEATHER and bit 7. */
+    /* Clear MAP_WEATHER_FLAG_IGNORE_WEATHER and the palette modifier above the low flags. */
     weather_flags = &g_battle_map_weather_flags;
-    *weather_flags &= 0x7d;
+    *weather_flags &= MAP_WEATHER_LOW_FLAGS_MASK & ~MAP_WEATHER_FLAG_IGNORE_WEATHER;
     SetDrawMode(&g_battle_render_buffers[0].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_battle_render_buffers[1].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_battle_render_buffers[0].overlay_modes[0], 0, 1, 0, 0);
@@ -1878,16 +1878,16 @@ void battle_map_reset_mesh_render_state(void) {
     g_battle_map_ambient_polygon_color.r = 0x80;
     g_battle_map_ambient_polygon_color.g = 0x80;
     g_battle_map_ambient_polygon_color.b = 0x80;
-    for (i = 0; i < 360; i++) {
+    for (i = 0; i < BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT; i++) {
         g_battle_map_textured_triangle_positions[i].polygon_flags = MAP_POLYGON_FLAG_LIT | MAP_POLYGON_FLAG_LIT_ACTIVE;
     }
-    for (i = 0; i < 710; i++) {
+    for (i = 0; i < BATTLE_RENDER_TEXTURED_QUAD_COUNT; i++) {
         g_battle_map_textured_quad_positions[i].polygon_flags = MAP_POLYGON_FLAG_LIT | MAP_POLYGON_FLAG_LIT_ACTIVE;
     }
-    for (i = 0; i < 64; i++) {
+    for (i = 0; i < BATTLE_RENDER_UNTEXTURED_TRIANGLE_COUNT; i++) {
         g_battle_map_untextured_triangle_positions[i].polygon_flags = 0;
     }
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < BATTLE_RENDER_UNTEXTURED_QUAD_COUNT; i++) {
         g_battle_map_untextured_quad_positions[i].polygon_flags = 0;
     }
     for (i = 0; i < MAP_TEXTURE_ANIMATION_COUNT; i++) {
@@ -1896,11 +1896,11 @@ void battle_map_reset_mesh_render_state(void) {
     }
     /* A signed sentinel local retains each array's original -2 constant load. */
     no_tile = MAP_POLYGON_TILE_NONE;
-    for (i = 0; i < 360; i++) {
+    for (i = 0; i < BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT; i++) {
         g_battle_map_textured_triangle_positions[i].terrain_tile = no_tile;
     }
     no_tile = MAP_POLYGON_TILE_NONE;
-    for (i = 0; i < 710; i++) {
+    for (i = 0; i < BATTLE_RENDER_TEXTURED_QUAD_COUNT; i++) {
         g_battle_map_textured_quad_positions[i].terrain_tile = no_tile;
     }
     for (i = 1; i < 9; i++) {
@@ -3248,7 +3248,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         break;
     case MAP_RESOURCE_POLYGON_FLAGS:
         polygon_flags = data->polygon_flags.textured_triangles;
-        for (i = 0; i < 360; i++) {
+        for (i = 0; i < BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT; i++) {
             flags = *polygon_flags++;
             g_battle_map_textured_triangle_positions[i].polygon_flags = flags;
             /* An unlit polygon starts at the neutral color 0x80 in both render buffers. */
@@ -3279,7 +3279,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
             polygon_flags++;
         }
 
-        for (i = 0; i < 710; i++) {
+        for (i = 0; i < BATTLE_RENDER_TEXTURED_QUAD_COUNT; i++) {
             flags = *polygon_flags++;
             g_battle_map_textured_quad_positions[i].polygon_flags = flags;
             if (!(flags & MAP_POLYGON_FLAG_LIT)) {
@@ -3314,10 +3314,10 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
             polygon_flags++;
         }
 
-        for (i = 0; i < 64; i++) {
+        for (i = 0; i < BATTLE_RENDER_UNTEXTURED_TRIANGLE_COUNT; i++) {
             g_battle_map_untextured_triangle_positions[i].polygon_flags = *polygon_flags++;
         }
-        for (i = 0; i < 256; i++) {
+        for (i = 0; i < BATTLE_RENDER_UNTEXTURED_QUAD_COUNT; i++) {
             g_battle_map_untextured_quad_positions[i].polygon_flags = *polygon_flags++;
         }
 

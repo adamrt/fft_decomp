@@ -64,8 +64,12 @@ typedef struct menu_text_binding {
 /* Row actions 0..0xff open that menu entry; this flag suppresses the confirm sound. */
 enum { MENU_ROW_ACTION_SILENT = 0x1000 };
 
-/* Special row action: records no selection without opening another entry. */
-enum { MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2 };
+/* Special row actions. CLEAR_SELECTION records no selection without opening another entry; NONE,
+ * like any other value from 0x100 up, opens nothing, so Circle only records the row. */
+enum {
+    MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2,
+    MENU_ROW_ACTION_NONE = 0x7d0,
+};
 
 /* menu_text_layout_t.mode[]: what a column of the layout draws. */
 typedef enum menu_text_column_mode {

@@ -265,10 +265,10 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         config->mountable_chocobo = 0;
     }
 
-    /* Move is capped at 124, the range of a generic pathfinding search. */
+    /* Move is capped at the range of a generic pathfinding search. */
     value = unit->move;
-    if (value >= 0x7D) {
-        value = 0x7C;
+    if (value > MOVE_PATHFIND_RANGE) {
+        value = MOVE_PATHFIND_RANGE;
     }
     config->move = value;
 
@@ -500,7 +500,7 @@ static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
              * them (1 or 4) marks a corner shape, low or high; flat tiles and edges give 0 or 5. */
             slope = tile->slope_type & 5;
             if (slope == 1 || slope == 4) {
-                *frontier_cell |= FRONTIER_FLAG_LOW_CORNER;
+                *frontier_cell |= FRONTIER_FLAG_CORNER;
                 if (tile->depth_half_height.half_height >= 3) {
                     *frontier_cell |= FRONTIER_FLAG_STEEP;
                 }
@@ -616,7 +616,7 @@ static void battle_move_set_reachable_tile_flags(void) {
         if (!((config->move_type == MOVE_CLASS_TELEPORT) && (flags[i] & FRONTIER_FLAG_MOUNTABLE_UNIT))
             && !((panel->ride_remaining_range != 0) && (config->can_ride != 0))) {
             half_height = tile->depth_half_height.half_height;
-            if ((half_height >= 3) && (flags[i] & FRONTIER_FLAG_LOW_CORNER)) {
+            if ((half_height >= 3) && (flags[i] & FRONTIER_FLAG_CORNER)) {
                 continue;
             }
             if (panel->remaining_range == 0) {
@@ -1472,7 +1472,7 @@ static void battle_move_encode_path_steps(void) {
                 if (config->jump_or_1f < tile->depth_half_height.half_height) {
                     state->destination_climb = 1;
                 }
-                if (tile->depth_half_height.half_height >= 3 && (frontier[i] & FRONTIER_FLAG_LOW_CORNER)) {
+                if (tile->depth_half_height.half_height >= 3 && (frontier[i] & FRONTIER_FLAG_CORNER)) {
                     state->destination_climb = 1;
                 }
                 if (state->destination_side_height_delta >= 0) {
@@ -1485,7 +1485,7 @@ static void battle_move_encode_path_steps(void) {
                     state->source_climb = 1;
                 }
                 if (state->current_tile->depth_half_height.half_height >= 3
-                    && (frontier[state->tile_index] & FRONTIER_FLAG_LOW_CORNER)) {
+                    && (frontier[state->tile_index] & FRONTIER_FLAG_CORNER)) {
                     state->source_climb = 1;
                 }
             }
@@ -2068,8 +2068,7 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         tile = &g_battle_map_tile_data[i];
         tile->ceiling_depth_and_marks.move_destination = 0;
         if (g_battle_target_panels[i].ride_remaining_range != 0
-            || ((g_battle_map_tile_data[i].depth_half_height.half_height < 3
-                    || !(frontier[i] & FRONTIER_FLAG_LOW_CORNER))
+            || ((g_battle_map_tile_data[i].depth_half_height.half_height < 3 || !(frontier[i] & FRONTIER_FLAG_CORNER))
                 && g_battle_target_panels[i].remaining_range != 0 && tile->depth_half_height.half_height < 4
                 && g_battle_map_tile_data[i].surface.type != MAP_SURFACE_OBSTACLE
                 && (tile->depth_half_height.depth == 0 || !config->cannot_stay_on_water)

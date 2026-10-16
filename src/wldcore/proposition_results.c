@@ -1284,7 +1284,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
  * button, shows the fade box black (the step dims the screen with it) and
  * starts on Quit with no fade.
  *
- * The level is written through the save_confirm member of the stack-record
+ * The level is written through the sound_novel_quit member of the stack-record
  * union; union field access keeps the target's per-field `$at` bases. The
  * fade state is written through a pointer, which keeps the
  * target's register base for the offset-0 32-bit flags. The unused array
@@ -1298,19 +1298,19 @@ static void wldcore_menu_push_sound_novel_quit_level(void) {
     wldcore_sortbox_state_t* fade;
 
     index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].save_confirm.cursor_window = index;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel_quit.cursor_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
     g_wldcore_window_records[index].priority = 8;
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
     index = window_append_animated_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].save_confirm.second_window = index;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel_quit.second_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_LIST_SIDE_LABEL;
     g_wldcore_window_records[index].priority = 8;
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
     index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].save_confirm.render_index = index;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel_quit.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x3C;
     bounds.h = 0x30;
@@ -1321,14 +1321,14 @@ static void wldcore_menu_push_sound_novel_quit_level(void) {
     depth = g_wldcore_menu_stack_depth;
     base->x = -(bounds.w / 2);
     base->y = -0x18;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].save_confirm.cursor_window].position.x
+    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].sound_novel_quit.cursor_window].position.x
         = g_wldcore_window_render_records[index].base.x + 6;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].save_confirm.cursor_window].position.y
+    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].sound_novel_quit.cursor_window].position.y
         = g_wldcore_window_render_records[index].base.y + 0xE;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].save_confirm.second_window].position.x
+    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].sound_novel_quit.second_window].position.x
         = g_wldcore_window_render_records[index].base.x + 4;
     g_menu_blocked_buttons = -1;
-    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].save_confirm.second_window].position.y
+    g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].sound_novel_quit.second_window].position.y
         = g_wldcore_window_render_records[index].base.y - 2;
     g_wldcore_menu_stack_depth = depth + 1;
     fade = &g_wldcore_screen_fade_state;
@@ -1336,34 +1336,34 @@ static void wldcore_menu_push_sound_novel_quit_level(void) {
     fade->boxes[0].g = 0;
     fade->boxes[0].b = 0;
     fade->flags[0] |= WLDCORE_SCREEN_FADE_BOX_VISIBLE;
-    g_wldcore_menu_stack_records_next[depth].save_confirm.choice = 0;
-    g_wldcore_menu_stack_records_next[depth].save_confirm._unknown_18 = 0;
-    g_wldcore_menu_stack_records_next[depth].save_confirm.fade_in = 0;
-    g_wldcore_menu_stack_records_next[depth].save_confirm.fade_out = 0;
+    g_wldcore_menu_stack_records_next[depth].sound_novel_quit.choice = 0;
+    g_wldcore_menu_stack_records_next[depth].sound_novel_quit._unknown_18 = 0;
+    g_wldcore_menu_stack_records_next[depth].sound_novel_quit.fade_in = 0;
+    g_wldcore_menu_stack_records_next[depth].sound_novel_quit.fade_out = 0;
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_SOUND_NOVEL_QUIT;
 }
 
 /* Resume handler of the Quit/Continue menu: default palettes and the idle
  * cursor again. */
 void wldcore_menu_resume_sound_novel_quit_level(wldcore_menu_stack_record_t* level) {
-    s32 first = level->save_confirm.cursor_window;
-    s32 second = level->save_confirm.second_window;
+    s32 first = level->sound_novel_quit.cursor_window;
+    s32 second = level->sound_novel_quit.second_window;
     s32 index;
     /* The original frame reserves eight unused bytes. */
     s32 scratch[2];
 
-    g_wldcore_window_render_records[level->save_confirm.render_index].palette = 0;
+    g_wldcore_window_render_records[level->sound_novel_quit.render_index].palette = 0;
     g_wldcore_window_records[second].palette = 0;
     g_wldcore_window_records[first].palette = 0;
-    g_wldcore_window_records[level->save_confirm.cursor_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
-    index = level->save_confirm.cursor_window;
+    g_wldcore_window_records[level->sound_novel_quit.cursor_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
+    index = level->sound_novel_quit.cursor_window;
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 }
 
 /* Gray out the Quit/Continue menu (palettes 10, 6 and 2) and still its cursor
  * while a help message opens over it. */
-void wldcore_menu_suspend_sound_novel_quit_level(wldcore_menu_save_confirm_level_t* level) {
+void wldcore_menu_suspend_sound_novel_quit_level(wldcore_menu_sound_novel_quit_level_t* level) {
     s32 index;
 
     g_wldcore_window_records[level->cursor_window].palette = 10;
@@ -1394,7 +1394,7 @@ void wldcore_menu_suspend_sound_novel_quit_level(wldcore_menu_save_confirm_level
  * update needs the window pointer, the base_y local and a separate offset
  * local: that keeps base_y as the first `addu` operand and stops fold from
  * reassociating the +0xe. */
-void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t* level) {
+void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_sound_novel_quit_level_t* level) {
     u32 flags;
     u32 buttons;
     s32 value;

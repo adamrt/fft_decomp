@@ -2,9 +2,9 @@
 
 #include "fft/event_bunit.h"
 #include "fft/job.h"
-#include "fft/main.h"
 #include "fft/main_sound.h"
 #include "fft/menu.h"
+#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
@@ -40,8 +40,7 @@ s32 bunit_menu_run_job_list(void) {
         g_bunit_job_list_initialized = 1;
     }
 
-    /* The help text is the job's entry in HELP_TEXT_SECTION_JOBS (0x6000 = section 12). */
-    g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
+    g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + HELP_TEXT_ID_JOB_BASE;
     mask = g_menu_input_primary_repeat;
     if (mask & PSX_PAD_CROSS) {
         menu_set_vsync_mode_and_event_speed(0);

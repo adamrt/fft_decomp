@@ -43,6 +43,8 @@ typedef enum world_text_section {
     WORLD_TEXT_SECTION_SHOP_DIALOGUE = 31, /* the shopkeeper's lines */
 } world_text_section_e;
 
+enum { WORLD_TEXT_ID_FORMATION_TEXT_BASE = WORLD_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
+
 extern s32 g_world_text_section_offsets[];
 extern u8* g_world_text_resident_data[9];
 extern u8 g_world_text_skillset_names_data[];
@@ -61,7 +63,7 @@ u8* world_text_bind_section_data(u32 index);
 /* MAIN selects the WORLD address of text_find_entry through this existing alias. */
 u8* world_text_find_entry(u32 text_id);
 u8* world_text_advance_entry_by_char_count(u8* text, s32 count);
-s16 world_text_get_encoded_char_at_position(u8* text, s16 position, s32 mode);
+s16 world_text_get_encoded_char_at_position(u8* table, s16 index, s32 position);
 
 /* message box */
 extern glyph_blit_t g_world_text_message_box_state;

@@ -8,7 +8,6 @@
 #include "fft/battle_menu.h"
 #include "fft/battle_status.h"
 #include "fft/battle_unit.h"
-#include "fft/battle_unit_animation.h"
 #include "fft/battle_unit_encounter.h"
 #include "fft/data_ability.h"
 #include "fft/data_item.h"
@@ -102,13 +101,13 @@ void menu_build_unit_status_list(void) {
     s16* flag_a;
     s16* flag_b;
 
-    /* A generic monster's or team kind 1 unit's rows get the inert action 0x7d0 (Circle only
-     * records the row); other units' rows open JOBSTTS silently. */
+    /* A generic monster's or team kind 1 unit's rows get the inert MENU_ROW_ACTION_NONE (Circle
+     * only records the row); other units' rows open JOBSTTS silently. */
     for (i = 0; i < 8; i++) {
         flag_a = &g_menu_selected_unit_fields.state.generic_monster;
         flag_b = &g_menu_selected_unit_status.team_kind;
         if (*flag_a != 0 || *flag_b == 1) {
-            g_menu_status_list_row_actions[i] = 0x7D0;
+            g_menu_status_list_row_actions[i] = MENU_ROW_ACTION_NONE;
         } else {
             g_menu_status_list_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_JOBSTTS;
         }
@@ -557,6 +556,8 @@ static s32 menu_display_projected_action_effect(
 
         image = ACTION_DISPLAY_IMAGE_EXP;
         value = exp;
+        /* Retail reverses the signs of gil's preview: an EXP loss (Steal Exp.'s target) shows the
+         * plus sign and a gain the minus sign. */
         if (exp & ACTION_EXP_CHANGE_LOSS) {
             value &= ACTION_EXP_CHANGE_VALUE_MASK;
             panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;

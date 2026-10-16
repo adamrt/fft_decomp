@@ -75,14 +75,14 @@ void bunit_menu_update_node_cursor(s16 mode) {
     s32 node_index;
 
     if (g_bunit_help_cursor_initialized == 0) {
-        /* Nodes 23 and 24 show skillset help (HELP_TEXT_SECTION_SKILLSETS, 0x9800 as a 16-bit
-         * id), or ability help (HELP_TEXT_SECTION_ABILITIES) for a unit on a monster skillset. */
+        /* Nodes 23 and 24 show skillset help (HELP_TEXT_ID_SKILLSET_BASE as a 16-bit id), or
+         * ability help for a unit on a monster skillset. */
         if (mode == 0) {
-            g_bunit_help_node_23_help_base = -0x6800;
-            g_bunit_help_node_24_help_base = -0x6800;
+            g_bunit_help_node_23_help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
+            g_bunit_help_node_24_help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
         } else {
-            g_bunit_help_node_23_help_base = 0x7800;
-            g_bunit_help_node_24_help_base = 0x7800;
+            g_bunit_help_node_23_help_base = HELP_TEXT_ID_ABILITY_BASE;
+            g_bunit_help_node_24_help_base = HELP_TEXT_ID_ABILITY_BASE;
         }
         g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         g_bunit_help_cursor_initialized = 1;
@@ -110,7 +110,7 @@ void bunit_menu_update_node_cursor(s16 mode) {
                 text_id = g_bunit_help_nodes[node_index].value[0];
             }
             if ((g_bunit_help_node_index_reload - 0x12) >= 0xAU || text_id != 0) {
-                /* The target zero-extends help_base here (lhu): a -0x6800 base adds 0x9800. */
+                /* The target zero-extends help_base here (lhu): a -0x6800 base adds HELP_TEXT_ID_SKILLSET_BASE. */
                 g_text_selection_id
                     = text_id + (u16)g_bunit_help_nodes_reload[g_bunit_help_node_index_reload_2].help_base;
                 bunit_text_start_selection_thread(3);

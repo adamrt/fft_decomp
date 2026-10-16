@@ -127,7 +127,7 @@ extern s16 g_menu_wait_row_actions[4];
 
 /* Opens an idle action menu (menu_command_id_e) for the active-turn unit beside it and restores the row it last
  * chose. WORLD's body only clears g_menu_building_thread_started. */
-void menu_build_idle_action_menu(s32 unused_menu_id);
+void menu_build_idle_action_menu(s32 menu_id);
 /* Thread entry of the turn menus: the icon selection loop, then the chosen row remembered for the unit. */
 void menu_build_main(void);
 /* Thread entry of the Wait menu. */
@@ -262,7 +262,7 @@ typedef char menu_system_function_size_must_be_20[(sizeof(menu_system_function_t
  * menu_dispatch_system_function; `option` selects the variant. */
 typedef enum menu_system_command {
     MENU_SYSTEM_COMMAND_TARGETING_PROMPT = 1, /* prompt for the resolved menu command */
-    MENU_SYSTEM_COMMAND_MOVE_FEEDBACK = 2,    /* option 0 closes, 1 and 4 confirm, others reject the move */
+    MENU_SYSTEM_COMMAND_MOVE_FEEDBACK = 2,    /* option: menu_move_feedback_option_e */
     MENU_SYSTEM_COMMAND_WAIT_MENU = 3,
     MENU_SYSTEM_COMMAND_ACTION_CONFIRM = 4,
     MENU_SYSTEM_COMMAND_SPELL_QUOTE = 5,
@@ -279,6 +279,29 @@ typedef enum menu_system_command {
     MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT = 16,
     MENU_SYSTEM_COMMAND_POST_ACTION_RESULT = 17, /* option: action_display_image_id_e */
 } menu_system_command_e;
+
+/* MENU_SYSTEM_COMMAND_TARGETING_PROMPT options. */
+typedef enum menu_targeting_prompt_option {
+    MENU_TARGETING_PROMPT_DEFAULT = 0,
+    MENU_TARGETING_PROMPT_NO_TARGET = 1,     /* the ability preview marked no tile */
+    MENU_TARGETING_PROMPT_NO_MOVE_RANGE = 2, /* the moving unit has no reachable tile */
+} menu_targeting_prompt_option_e;
+
+/* MENU_SYSTEM_COMMAND_MOVE_FEEDBACK options. Any option not named here rejects the move with the
+ * invalid sound and system function option + 13. */
+typedef enum menu_move_feedback_option {
+    MENU_MOVE_FEEDBACK_CLOSE = 0,
+    MENU_MOVE_FEEDBACK_MOUNT = 1,        /* confirm mounting the unit on the destination */
+    MENU_MOVE_FEEDBACK_ILLEGAL_MOVE = 2, /* reject the chosen destination */
+    MENU_MOVE_FEEDBACK_CRYSTAL = 4,      /* confirm a step onto a crystal */
+} menu_move_feedback_option_e;
+
+/* MENU_SYSTEM_COMMAND_SCENARIO_CHECK options. */
+typedef enum menu_scenario_check_option {
+    MENU_SCENARIO_CHECK_START = 0, /* start the event the check finds */
+    MENU_SCENARIO_CHECK_SKIP = 1,  /* skip the checks and close */
+    MENU_SCENARIO_CHECK_TEST = 2,  /* only record the event in g_script_next_event_id */
+} menu_scenario_check_option_e;
 
 /* Result of menu_dispatch_system_function (and of
  * menu_init_system_function, which returns it). */

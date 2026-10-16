@@ -19,8 +19,7 @@ void require_thread_stop_after_16_frames(void) {
 
 /* Set to `value` the script variable of every record in
  * g_require_party_bio_update_records that lists `unit_class` among its three
- * identities. REQUIRE stores 12 for a unit dismissed or turned away, 13 and 14
- * for one that left over low Brave or high Faith, and 15 for one lost in battle. */
+ * identities, a require_bio_state_e. */
 void require_party_update_bio_variable_for_unit_class(s32 unit_class, s32 value) {
     s32 i;
     s32 j;

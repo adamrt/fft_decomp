@@ -74,9 +74,10 @@ typedef enum main_sound_tune {
     MAIN_SOUND_TUNE_JOB_CHANGE = 5,
 } main_sound_tune_e;
 
-/* Packed tune-slot id and pending flag. */
+/* Packed tune-slot id and pending flag. PLAYING_MASK drops the pending flag once the tune starts. */
 enum {
     MAIN_SOUND_TUNE_ID_MASK = 0x3f,
+    MAIN_SOUND_TUNE_PLAYING_MASK = 0x7f,
     MAIN_SOUND_TUNE_PENDING = 0x80,
 };
 

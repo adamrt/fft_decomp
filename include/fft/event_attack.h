@@ -262,7 +262,7 @@ void attack_menu_build_status_group_primitives(POLY_FT4* poly);
 extern s16 g_attack_editor_item_and_ability_ids[10];
 extern u8 g_attack_numeric_editor_thread_params[];
 
-void attack_editor_load_party_unit(s32 mode, s32 roster_index);
+void attack_editor_load_party_unit(s32 unused, s32 party_index);
 
 /* graphics */
 extern POLY_FT4 g_attack_gfx_frame_ft4[];

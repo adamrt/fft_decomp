@@ -29,10 +29,10 @@ static u8 g_text_typewriter_previous_images[3][0x54] = { 0 };
 
 static u8 g_text_typewriter_column_scratch[14] = { 0 };
 
-/* For a borderless dialog (DIALOG_TYPE_NO_BOX), measure the widest text the window will show:
- * the DisplayMessage at offset and each later ChangeDialog for the same window position,
- * up to the ChangeDialog with text id 0xFFFF that closes it. Stores the width in *out_width;
- * boxed dialogs leave it alone.
+/* For a dialog kept open for ChangeDialog (DIALOG_TYPE_KEEP_OPEN), measure the widest text the
+ * window will show: the DisplayMessage at offset and each later ChangeDialog for the same window
+ * position, up to the ChangeDialog with text id 0xFFFF that closes it. Stores the width in
+ * *out_width; other dialogs leave it alone.
  *
  * Every access re-reads g_script_event_block as retail does; instruction pointer
  * temporaries make the function 16 bytes shorter. */
@@ -43,7 +43,7 @@ void text_build_display_message(s32 offset, s32 flags, s32* out_width) {
     s32 next;
     s32 size;
 
-    if (flags & DIALOG_TYPE_NO_BOX) {
+    if (flags & DIALOG_TYPE_KEEP_OPEN) {
         flags &= DIALOG_TYPE_POSITION_MASK;
         text_measure_pixels(&width, &height,
             text_find_entry(((event_display_message_at((u8*)g_script_event_block, offset)->text_id_le[1] << 8)

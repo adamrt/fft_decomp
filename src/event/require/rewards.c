@@ -570,7 +570,7 @@ static s32 require_party_select_unit_to_remove(void) {
         should_restore = require_party_restore_item_counts(selected_party_index);
         result = 0;
         main_party_remove_unit(selected_party_index);
-        require_party_update_bio_variable_for_unit_class(party_unit->sprite_set, 0xc);
+        require_party_update_bio_variable_for_unit_class(party_unit->sprite_set, REQUIRE_BIO_STATE_DISMISSED);
         break;
     }
 
@@ -911,7 +911,7 @@ static void require_party_apply_post_battle_changes(void) {
             thread_wait_frames(10);
             unit = battle_unit_get_stats_from_battle_id(*selected_unit_index_ptr);
             unit_index_ptr++;
-            require_party_update_bio_variable_for_unit_class(unit->character_identity, 12);
+            require_party_update_bio_variable_for_unit_class(unit->character_identity, REQUIRE_BIO_STATE_DISMISSED);
         next_unit:
             affected_index++;
         } while (affected_index < g_require_party_affected_unit_count);

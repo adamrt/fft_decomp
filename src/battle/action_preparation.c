@@ -2077,8 +2077,8 @@ s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit
  * slots 0..4 and clears the remaining ENTD slots. Bit i of the result is set
  * when deployment row i names no party member. A unit whose identity is not a
  * Ramza (1..3) gets a generated unit id, from 0x78 upward (from 0xfe downward
- * in the debug mode). Load failures report battle load exceptions 500 and 400
- * plus the slot. The target reloads each row from g_main_unit_deployed_coords
+ * in the debug mode). Load failures report the PARTY_UNIT_LOAD and
+ * PARTY_PLACEMENT battle load exceptions plus the slot. The target reloads each row from g_main_unit_deployed_coords
  * at its distinct uses.
  */
 static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
@@ -2100,7 +2100,7 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
         slot_step = 1;
         slot_start = BATTLE_DEPLOYED_UNIT_SLOT_FIRST;
     }
-    for (i = 0; i < 5; i++, weight *= 2) {
+    for (i = 0; i < BATTLE_DEPLOYED_UNIT_SLOT_COUNT; i++, weight *= 2) {
         s32 battle_id = i + slot_start;
         unit_stats_t* unit = &g_battle_unit_stats[battle_id];
         u8 sprite;
@@ -2111,9 +2111,9 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
             unit->entd_slot = battle_id;
             unit->existence = UNIT_EXISTENCE_ACTIVE;
             if (main_unit_init_from_party_slot(unit, g_main_unit_deployed_coords[i].party_id, 0) != 0) {
-                main_system_handle_battle_load_exception(battle_id + 0x1f4);
+                main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_PARTY_UNIT_LOAD);
             } else if (battle_unit_set_placement_and_validate(battle_id, &g_main_unit_deployed_coords[i]) != 0) {
-                main_system_handle_battle_load_exception(battle_id + 0x190);
+                main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_PARTY_PLACEMENT);
             } else {
                 sprite = main_unit_calculate_palette_spritesheet(unit, &palette);
                 identity = unit->character_identity;
@@ -2144,7 +2144,7 @@ static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* f
         unit->existence = UNIT_EXISTENCE_NONE;
     }
     if (is_red_team_debug) {
-        for (i = 5; i < ENTD_UNITS_PER_ENCOUNTER; i++) {
+        for (i = BATTLE_DEPLOYED_UNIT_SLOT_COUNT; i < ENTD_UNITS_PER_ENCOUNTER; i++) {
             unit_stats_t* unit = &g_battle_unit_stats[i];
             unit->battle_id = i;
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
@@ -2283,9 +2283,9 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
 
         unit->entd_slot = battle_id;
         unit->existence = UNIT_EXISTENCE_ACTIVE;
-        status = main_unit_init_from_entd(unit, g_main_entd_current_unit, 0, 0);
+        status = main_unit_init_from_entd(unit, g_main_entd_current_unit, 0, MAIN_UNIT_ENTD_INIT_NEW);
         if (status != 0) {
-            main_system_handle_battle_load_exception(battle_id + 600);
+            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT);
         }
         spritesheet_id = main_unit_calculate_palette_spritesheet(unit, &palette_id);
         main_unit_init_status_and_rewards(unit, 0);
@@ -2307,7 +2307,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
 
         main_unit_init_position_and_rewards(unit, g_main_entd_current_unit);
         if (battle_unit_validate_placement(battle_id) != 0) {
-            main_system_handle_battle_load_exception(battle_id + 300);
+            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_ENTD_PLACEMENT);
             unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
             unit->existence = UNIT_EXISTENCE_NONE;
             continue;
@@ -2321,7 +2321,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             if (duplicate_message_shown != 0) {
                 continue;
             }
-            main_system_handle_battle_load_exception(battle_id + 100);
+            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_NO_SPRITESHEET_SLOT);
             duplicate_message_shown = 1;
             continue;
         }
@@ -2332,7 +2332,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             if (limit_message_shown != 0) {
                 continue;
             }
-            main_system_handle_battle_load_exception(battle_id + 200);
+            main_system_handle_battle_load_exception(battle_id + MAIN_BATTLE_LOAD_EXCEPTION_ENEMY_LIMIT);
             limit_message_shown = 1;
             enemy_count++;
             continue;

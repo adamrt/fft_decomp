@@ -293,7 +293,8 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
                 g_require_party_affected_unit_message_ids[count] = group + 0x1018;
                 g_require_party_affected_battle_unit_indices[count] = battle_index;
                 g_require_party_affected_unit_count = count + 1;
-                require_party_update_bio_variable_for_unit_class(unit->character_identity, 0xd);
+                require_party_update_bio_variable_for_unit_class(
+                    unit->character_identity, REQUIRE_BIO_STATE_LEFT_LOW_BRAVE);
             } else {
                 s32 count;
 
@@ -332,7 +333,8 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
                 g_require_party_affected_unit_message_ids[count] = group + 0x1062;
                 g_require_party_affected_battle_unit_indices[count] = battle_index;
                 g_require_party_affected_unit_count = count + 1;
-                require_party_update_bio_variable_for_unit_class(unit->character_identity, 0xe);
+                require_party_update_bio_variable_for_unit_class(
+                    unit->character_identity, REQUIRE_BIO_STATE_LEFT_HIGH_FAITH);
             } else {
                 s32 count;
 
@@ -397,8 +399,8 @@ s32 require_party_update_after_battle(void) {
                                 & STATUS_BYTE_MASK(STATUS_ID_TREASURE)))
                             require_party_store_equipment_or_sell_overflow(i);
                         main_party_remove_unit(party_index);
-                        /* Bio variable 0xf: lost in battle. */
-                        require_party_update_bio_variable_for_unit_class(unit->character_identity, 0xf);
+                        require_party_update_bio_variable_for_unit_class(
+                            unit->character_identity, REQUIRE_BIO_STATE_LOST_IN_BATTLE);
                     }
                 } else if (unit->character_identity != CHARACTER_IDENTITY_ENTD_NONE
                     && unit->character_identity < CHARACTER_IDENTITY_RAMZA_END) {

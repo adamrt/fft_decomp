@@ -372,7 +372,7 @@ void battle_camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR
 }
 
 /* Writes a unit's tile as three 16-bit values in the order x, z, y and returns 1. A
- * runtime id without a record raises pointer exception 12 and returns 0. */
+ * runtime id without a record raises a pointer exception and returns 0. */
 s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
     battle_unit_t* unit = g_battle_unit_list_head;
 
@@ -384,14 +384,14 @@ s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
             return 1;
         }
     }
-    main_system_handle_pointer_exception(12);
+    main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     return 0;
 }
 
 /* Path a unit from its tile to `destination` (the WalkTo event instruction) and start it walking.
  * `flags` and `jump` go to the pathfinder; the unit's walk speed is twice `speed`. A riding unit
  * dismounts. Returns 1 when a path was found, 0 when none was; a missing unit raises
- * pointer exception 12 and returns 0. */
+ * a pointer exception and returns 0. */
 s32 battle_move_start_unit_walk_to(
     s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
@@ -409,14 +409,14 @@ s32 battle_move_start_unit_walk_to(
             return 1;
         }
     } else {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     }
     return 0;
 }
 
 /* Start a unit on a one-step path: a jump of jump_length extra tiles in `direction` on its own
- * layer, at full speed. The Jump event instruction uses it. A missing unit raises pointer
- * exception 12 and returns 0. */
+ * layer, at full speed. The Jump event instruction uses it. A missing unit raises a pointer
+ * exception and returns 0. */
 s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -439,7 +439,7 @@ s32 battle_move_start_unit_jump_by_runtime_id(u32 runtime_id, s32 direction, s32
         unit->path.flags = 0;
         battle_unit_dismount_rider_and_update_display(unit);
     } else {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
         return 0;
     }
     return 1;

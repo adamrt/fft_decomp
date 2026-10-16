@@ -20,7 +20,7 @@
  * target: the target's world position plus its unit's event offset is
  * projected through the battle camera, and the spawn-position curve offsets
  * the mesh center from that screen point (projected coordinates already
- * include the draw offset, so no + 0x80 here). It stores each ring's color as
+ * include the draw offset, so no + MAIN_GFX_BATTLE_SCREEN_X here). It stores each ring's color as
  * separate bytes instead of packed words, which shifts its scratchpad layout.
  * Shared index temporaries and the non-void signature preserve register
  * allocation and the phase-dispatch delay slots. */

@@ -5,6 +5,7 @@
 #include "fft/job.h"
 #include "fft/main_sound.h"
 #include "fft/menu_gfx.h"
+#include "fft/menu_help.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
@@ -67,13 +68,13 @@ s32 bunit_menu_ability_update_list_menu(void) {
         menu_init_scrollable_list_core(g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_bunit_ability_list_ready = 1;
     }
-    /* The help text is the ability's entry in HELP_TEXT_SECTION_ABILITIES (0x7800 = section 15);
-     * abilities JP cannot learn show none. */
+    /* The help text is the ability's entry in HELP_TEXT_SECTION_ABILITIES; abilities JP cannot
+     * learn show none. */
     if (g_menu_list_entry_count == 0
         || ((entry = g_menu_ability_entries[g_menu_list_selected_index]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
         g_text_selection_id = -1;
     } else {
-        g_text_selection_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
+        g_text_selection_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + HELP_TEXT_ID_ABILITY_BASE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_bunit_ability_list_ready = 0;

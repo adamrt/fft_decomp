@@ -296,7 +296,6 @@ void battle_mem_zero_32bit_values(void* destination, s32 byte_count);
 
 /* shared state */
 extern u32 g_battle_script_saved_event_input; /* the event input held while a script runs */
-extern u8 g_battle_job_level_gained_flag;
 
 /* The unit-ready test script_wait_for_unit_ready polls: always 1, so the wait never yields. */
 s32 battle_return_one(s32 unused_runtime_id);

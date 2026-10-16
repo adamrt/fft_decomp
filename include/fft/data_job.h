@@ -230,4 +230,16 @@ enum {
     JOB_ID_COUNT = 160,
 };
 
+/* The spritesheet of a generic unit (battle_spritesheet_id_e): (job - JOB_ID_GENERIC_FIRST) * 2 plus the
+ * male or female base, the Mime base for a Mime, whose sheets sit one job lower; Bard and Dancer have
+ * their own sheets. */
+enum {
+    JOB_SHEET_GENERIC_MALE_MIME_BASE = 0x5e,
+    JOB_SHEET_GENERIC_FEMALE_MIME_BASE = 0x5f,
+    JOB_SHEET_GENERIC_MALE_BASE = 0x60,
+    JOB_SHEET_GENERIC_FEMALE_BASE = 0x61,
+    JOB_SHEET_BARD = 0x82,
+    JOB_SHEET_DANCER = 0x83,
+};
+
 #endif

@@ -77,8 +77,8 @@ s32 battle_effect_update_cycle(void);
 
 /* script records */
 extern effect_record_t g_battle_effect_state_records[EFFECT_STATE_RECORD_CAPACITY + 1];
-/* Heads of the allocated and available record lists, chained through effect_record_t.next_index:
- * unsigned 16-bit indexes, which BATTLE's list traversal loads with lhu. */
+/* Heads of the allocated and available record lists, chained through effect_record_t.next_index.
+ * The available head is unsigned; the allocated head matches retail only when declared s16. */
 extern s16 g_battle_effect_allocated_record_head;
 extern u16 g_battle_effect_available_record_head;
 extern s16 g_battle_effect_current_record_index;

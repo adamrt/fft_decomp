@@ -97,19 +97,6 @@ void battle_effect_get_world_coords_by_battle_id(
 void battle_effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out);
 
-/* post-action messages */
-/* Queue of post-action "effect message" popups (g_battle_action_post_effect_msgs), filled by
- * battle_action_queue_post_effect_messages_for_unit and drained newest-first by
- * battle_action_show_next_effect_message. The stride is 8: the producer indexes the array
- * directly and the consumer walks it by `idx * 8`, and only these three fields are ever read or
- * written. */
-typedef struct battle_post_effect_msg {
-    u8 code;           /* 0x00 message code passed to menu_init_system_function */
-    u8 unit;           /* 0x01 runtime ID of the acting unit */
-    u8 _padding_02[2]; /* 0x02; aligns value */
-    s32 value;         /* 0x04 reported amount */
-} battle_post_effect_msg_t;
-
 /* particles */
 /* Motion state of an effect slot (effect_slot_t +0x98) and of a
  * particle (effect_work_record_t +0x08), stepped once a frame by
@@ -180,7 +167,7 @@ typedef struct effect_list_node {
     effect_sprite_block_t* sprite_block; /* 0x20 */
 } effect_list_node_t;
 
-static __inline__ effect_sequence_instruction_t* effect_get_current_sequence_instruction(effect_list_node_t* node) {
+static inline effect_sequence_instruction_t* effect_get_current_sequence_instruction(effect_list_node_t* node) {
     return (effect_sequence_instruction_t*)(node->sequence_data + node->sequence_offset);
 }
 typedef char assert_effect_list_node_size[sizeof(effect_list_node_t) == 36 ? 1 : -1];
@@ -246,11 +233,11 @@ typedef struct effect_record {
 } effect_record_t;
 
 /* pc is a signed byte offset into the shared, 16-bit-aligned script stream. */
-static __inline__ const effect_script_instruction_t* effect_get_current_script_instruction(effect_record_t* record) {
+static inline const effect_script_instruction_t* effect_get_current_script_instruction(effect_record_t* record) {
     return (const effect_script_instruction_t*)(record->script + record->pc);
 }
 
-static __inline__ u16 effect_get_current_script_header(effect_record_t* record) {
+static inline u16 effect_get_current_script_header(effect_record_t* record) {
     /* Loading the 16-bit value here preserves the retail base/offset register order. */
     return *(const u16*)(record->script + record->pc);
 }

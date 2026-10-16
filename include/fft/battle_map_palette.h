@@ -137,10 +137,7 @@ void battle_map_update_palette_from_other(const rgba5551_t* source, s32 clut_row
 /* Eight runtime slots rotate a range of colors of a CLUT row for map texture animations.
  * They are separate from the 32 serialized 0x14-byte animation instructions
  * a map's mesh file carries. */
-enum {
-    MAP_CLUT_CYCLE_SLOT_COUNT = 8,
-    MAP_CLUT_CYCLE_SLOT_BYTE_COUNT = 10,
-};
+enum { MAP_CLUT_CYCLE_SLOT_COUNT = 8 };
 
 /* One slot of g_battle_map_clut_cycle_states: the CLUT row and the range of its colors it
  * rotates, and its frame timing. */
@@ -155,7 +152,7 @@ typedef struct map_clut_cycle_state {
 } map_clut_cycle_state_t;
 typedef char map_clut_cycle_state_size_must_be_10[(sizeof(map_clut_cycle_state_t) == 10) ? 1 : -1];
 
-extern map_clut_cycle_state_t g_battle_map_clut_cycle_states[];
+extern map_clut_cycle_state_t g_battle_map_clut_cycle_states[MAP_CLUT_CYCLE_SLOT_COUNT];
 
 s32 battle_map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color);
 s32 battle_map_stop_clut_cycle(s32 handle);

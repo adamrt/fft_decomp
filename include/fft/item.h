@@ -27,6 +27,10 @@ typedef enum item_list_filter {
     ITEM_LIST_FILTER_OTHER = 7,
 } item_list_filter_e;
 
+/* The item menus' tabs (g_menu_selected_slot there, g_world_shop_item_category): tabs 0 to 3 (hand, head,
+ * body, accessory) list filter tab + 1, and this last tab lists ITEM_LIST_FILTER_OTHER. */
+enum { ITEM_MENU_TAB_OTHER = 4 };
+
 /* The last argument of the same functions: the equip check against the unit. */
 typedef enum item_list_mode {
     ITEM_LIST_MODE_ALL = 0,                     /* no check */

@@ -415,8 +415,19 @@ typedef struct battle_gfx_spritesheet_slot {
 } battle_gfx_spritesheet_slot_t;
 typedef char battle_gfx_spritesheet_slot_size_must_be_13014[(sizeof(battle_gfx_spritesheet_slot_t) == 13014) ? 1 : -1];
 
+/* Each spritesheet slot's 64x32 portrait and lower-body block lies in the VRAM area at
+ * (BATTLE_GFX_SPRITESHEET_STRIP_VRAM_X, BATTLE_GFX_SPRITESHEET_STRIP_VRAM_Y): column slot / 8, row
+ * slot % 8. */
+enum {
+    BATTLE_GFX_SPRITESHEET_SLOT_COUNT = 9,
+    BATTLE_GFX_SPRITESHEET_STRIP_VRAM_X = 0x340,
+    BATTLE_GFX_SPRITESHEET_STRIP_VRAM_Y = 0x100,
+    BATTLE_GFX_SPRITESHEET_STRIP_WIDTH = 64,
+    BATTLE_GFX_SPRITESHEET_STRIP_HEIGHT = 32,
+};
+
 extern u8 g_battle_gfx_spritesheet_ids_by_vram_slot[];
-extern battle_gfx_spritesheet_slot_t g_battle_gfx_spritesheet_slots[];
+extern battle_gfx_spritesheet_slot_t g_battle_gfx_spritesheet_slots[BATTLE_GFX_SPRITESHEET_SLOT_COUNT];
 extern battle_gfx_vram_slot_t g_battle_gfx_vram_slots[];
 
 s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id);

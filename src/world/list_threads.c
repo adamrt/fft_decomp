@@ -119,8 +119,7 @@ void menu_run_equipment_list_thread(void) {
             menu_set_text_origin(0, 0);
             for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                    /* The entry's top two bits pick the name's text palette. */
-                    color_bits = state->equipment[i] & 0xc000;
+                    color_bits = state->equipment[i] & WORLD_EQUIPMENT_PALETTE_MASK;
                     g_menu_text_palette_offset = color_bits >> 12;
                     menu_display_text_entry(
                         (state->equipment[i] & ITEM_ID_MASK) | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_text_state.pen);

@@ -1,6 +1,5 @@
 /* The dialog text thread, opening a dialog window and drawing a text entry glyph by glyph. */
 
-#include "fft/battle_unit_animation.h"
 #include "fft/data_job.h"
 #include "fft/gfx_image.h"
 #include "fft/main_sound.h"
@@ -122,7 +121,7 @@ void text_run_dialog_thread(void) {
     rec.box_type = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;
     rec.position = rec.dialog_type & DIALOG_TYPE_POSITION_MASK;
     rec.options = rec.dialog_type & DIALOG_TYPE_OPTIONS_MASK;
-    rec.no_box = rec.dialog_type & DIALOG_TYPE_NO_BOX;
+    rec.keep_open = rec.dialog_type & DIALOG_TYPE_KEEP_OPEN;
     rec.arrow_offset = thread->task_words[DIALOG_THREAD_WORD_ARROW_OFFSET];
     rec.x_offset = thread->task_words[DIALOG_THREAD_WORD_X_OFFSET];
     rec.y_offset = thread->task_words[DIALOG_THREAD_WORD_Y_OFFSET];
@@ -161,25 +160,25 @@ void text_run_dialog_thread(void) {
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
             if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {
                 s32 sheet_offset = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
-                portrait_id = sheet_offset + 0x60;
+                portrait_id = sheet_offset + JOB_SHEET_GENERIC_MALE_BASE;
                 if (party->job_id == JOB_ID_MIME) {
-                    portrait_id = sheet_offset + 0x5E;
+                    portrait_id = sheet_offset + JOB_SHEET_GENERIC_MALE_MIME_BASE;
                 }
             } else if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_FEMALE) {
                 s32 sheet_offset = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
-                portrait_id = sheet_offset + 0x61;
+                portrait_id = sheet_offset + JOB_SHEET_GENERIC_FEMALE_BASE;
                 if (party->job_id == JOB_ID_MIME) {
-                    portrait_id = sheet_offset + 0x5F;
+                    portrait_id = sheet_offset + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
                 }
             } else {
                 job = main_job_get_data_pointer(party->job_id);
                 portrait_id = job->spritesheet_id;
             }
             if (party->job_id == JOB_ID_BARD) {
-                portrait_id = 0x82;
+                portrait_id = JOB_SHEET_BARD;
             }
             if (party->job_id == JOB_ID_DANCER) {
-                portrait_id = 0x83;
+                portrait_id = JOB_SHEET_DANCER;
             }
         } else {
             portrait_id = party->sprite_set;
@@ -634,7 +633,7 @@ void text_run_dialog_thread(void) {
                 /* With type bit 0x80 the window stays open until ChangeDialog resumes it with new text;
                  * text id 0xFFFF closes it. */
                 if (character == TEXT_END_WAIT_FOR_CONFIRM) {
-                    if (rec.no_box == 0) {
+                    if (rec.keep_open == 0) {
                         break;
                     }
                     thread_set_current_task_id(THREAD_TASK_DIALOG_AWAIT_TEXT);
@@ -752,7 +751,7 @@ void text_run_dialog_thread(void) {
             }
 
             /* A window kept open (type bit 0x80) restarts on the text it was resumed with. */
-            if (rec.no_box != 0) {
+            if (rec.keep_open != 0) {
                 win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                 if ((rec.text & no_value) == no_value) {
                     break;

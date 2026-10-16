@@ -130,14 +130,6 @@ extern u16 g_world_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-
 extern u16 g_world_help_portrait_clut_by_sheet_id[];
 
 /* unit */
-/* Unpadded unsigned 16-bit x/y/z triple (6 bytes). */
-typedef struct vec3u16 {
-    u16 x;
-    u16 y;
-    u16 z;
-} vec3u16_t;
-typedef char assert_vec3u16_size[sizeof(vec3u16_t) == 6 ? 1 : -1];
-
 void resolve_unit_status_changes(void);
 s32 unit_has_adjacent_monster_skill_support(struct unit_stats* unit);
 

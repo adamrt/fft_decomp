@@ -1,6 +1,6 @@
 /* Calculating a party unit's unlocked generic jobs and storing them as three bytes. */
 
-#include "fft/main.h"
+#include "fft/job.h"
 #include "fft/main_unit.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"

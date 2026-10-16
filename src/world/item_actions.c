@@ -189,10 +189,9 @@ s8 world_item_run_action_menu(void) {
         menu_set_selection_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
         g_menu_selected_slot = result;
-        /* Tabs 0-3 (hand, head, body, accessory) are list filters 1-4; tab 4 lists the other items. */
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
-            g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
-            ITEM_LIST_MODE_ALL);
+            g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
+            g_item_list_entries, ITEM_LIST_MODE_ALL);
         world_menu_get_selection_record(g_menu_selected_slot, &x, &y, g_item_list_entries);
         menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
@@ -252,7 +251,7 @@ s8 world_item_run_sort_order_menu(void) {
     if (i == 5) {
         i = 0x39;
     }
-    g_menu_help_message_text_id = i + 0x1000;
+    g_menu_help_message_text_id = i + HELP_TEXT_ID_MENU_COMMAND_BASE;
     index = g_world_menu_selection_results[7];
     if (index != -1) {
         selected = g_world_item_category_strip_text_ids[index];
@@ -272,8 +271,8 @@ s8 world_item_run_sort_order_menu(void) {
         /* Sort mode bit 0x80 makes the builder sort afresh by the new key list instead of
          * keeping the tab's stored order. */
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 0x81,
-            g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
-            ITEM_LIST_MODE_ALL);
+            g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
+            g_item_list_entries, ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
         menu_init_scrollable_list_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);

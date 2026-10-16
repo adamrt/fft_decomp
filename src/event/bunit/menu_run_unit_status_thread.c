@@ -82,7 +82,7 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
-        unit_info = (menu_active_unit_t*)g_bunit_panel_selected_unit_data;
+        unit_info = &g_bunit_panel_selected_unit_data;
         transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
@@ -95,7 +95,7 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
-        unit_info = (menu_active_unit_t*)g_bunit_panel_comparison_unit_data;
+        unit_info = &g_bunit_panel_comparison_unit_data;
         transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;

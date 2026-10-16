@@ -5,7 +5,18 @@
  * lists, and the row callbacks of the job and ability menus. */
 
 #include "fft/data_ability.h"
+#include "fft/unit.h"
+#include "fft/unit_party.h"
 #include "psx/types.h"
+
+/* job lookups */
+/* The menu library's job helpers (src/event/menu), compiled into WORLD and the
+ * EVENT overlays. */
+void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
+s32 job_find_first_for_skillset(s32 skillset);
+s32 job_get_generic_index(s32 job_id);
+s32 job_get_skillset(s32 job_id);
+s32 job_is_special_monster(s32 job_id);
 
 /* job levels and JP */
 /* The job highlighted in the job list, and the JP, total JP and mastery the job calculators last cached for the

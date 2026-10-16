@@ -41,7 +41,7 @@ extern u8 g_menu_restore_depth;
 extern u8 g_menu_restore_unit_id;
 
 /* Clears one unit's records, only for a unit under manual control. */
-void menu_reset_unit_record(s32 record_index);
+void menu_reset_unit_record(s32 battle_id);
 void menu_reset_unit_records(void);
 /* Calls menu_reset_unit_records; nothing calls it. */
 void menu_reset_unit_records_wrapper(void);
@@ -92,8 +92,7 @@ s32 menu_init_selection_value(u8 index, s16 value);
  * D-pad, wrapping within entry_count, and return it; the _and_mark_change forms also queue a sound effect when
  * it moves. The grid stepper moves a grid index instead. */
 s16 menu_update_wrapped_horizontal_selection(u16 entry_count, u8 selection_index, s32 input_mask);
-s32 menu_update_horizontal_selection_and_mark_change(
-    u16 entry_count, u8 selection_index, s32 input_mask, u8 changed_state);
+s32 menu_update_horizontal_selection_and_mark_change(u16 entry_count, u8 selection_index, s32 input_mask, u8 sound_id);
 s16 menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_index, s32 input_mask);
 s32 menu_update_vertical_selection_and_mark_change(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
 s32 menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);

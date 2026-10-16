@@ -113,7 +113,7 @@ enum {
  * reachable-tile and path-propagation helpers. */
 enum {
     FRONTIER_FLAG_QUEUED = 0x01, /* waiting to be spread from in the current pass */
-    FRONTIER_FLAG_LOW_CORNER = 0x02,
+    FRONTIER_FLAG_CORNER = 0x02, /* a corner slope, low or high */
     FRONTIER_FLAG_UNIT_ON_TILE = 0x04,
     FRONTIER_FLAG_STAND_ON_UNIT = 0x08,  /* the unit on the tile can be stood on */
     FRONTIER_FLAG_ENTERABLE = 0x10,      /* the terrain lets the mover in and no enemy stands there */
@@ -190,11 +190,14 @@ typedef struct move_spread_state {
     /* 0x50; height scratch: a side height compared with the exit/entry height,
      * a panel max_height_delta, or a unit record index in the jump check. */
     u8 work_height;
-    u8 jump_half_height;        /* 0x51; intermediate-panel half height (battle_move_check_horizontal_jump) */
-    u8 jump_slope;              /* 0x52; intermediate-panel packed slope */
-    u8 jump_unit_size;          /* 0x53; acting-unit body size, copied by battle_move_check_horizontal_jump */
-    u8 outer_count;             /* 0x54 */
-    u8 inner_count;             /* 0x55 */
+    u8 jump_half_height; /* 0x51; intermediate-panel half height (battle_move_check_horizontal_jump) */
+    u8 jump_slope;       /* 0x52; intermediate-panel packed slope */
+    u8 jump_unit_size;   /* 0x53; acting-unit body size, copied by battle_move_check_horizontal_jump */
+    /* 0x54; step sources, each in direction index % 4: 0-3 leave from the ground, 4-7 from the top of
+     * the unit on the tile, 8 and up from that unit's standing heights (4, 8, 0x1c or 0x24) */
+    u8 outer_count;
+    /* 0x55; destination candidates tried per source: 2, 4, or 7 with a mount's standing heights */
+    u8 inner_count;
     u8 source_half_height;      /* 0x56; tile byte 3, low five bits */
     u8 destination_half_height; /* 0x57 */
     u8 source_slope;            /* 0x58; packed two-bit side multipliers */
@@ -289,9 +292,9 @@ extern battle_unit_height_data_t g_battle_move_tile_occupant_height;
 
 void battle_move_calculate_pathing_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
     s32 target_level, s32 initialize, s32* suspended);
-s32 battle_move_set_reachable_tiles(s32 unit_id, s32 map_x, s32 map_y, s32 map_z);
+s32 battle_move_set_reachable_tiles(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_z);
 battle_walk_path_t* battle_move_calculate_walkto_pathing(
-    s32 a, s32 b, s32 x, s32 y, s32 z, s32 destination_x, s32 destination_y, s32 destination_z);
+    s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y, s32 target_level);
 battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation);
 
 /* steps and velocity */

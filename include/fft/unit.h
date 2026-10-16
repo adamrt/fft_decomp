@@ -581,6 +581,7 @@ typedef char action_data_size_must_be_44[(sizeof(action_data_t) == 44) ? 1 : -1]
 /* action_data_t.miss_display_flags, loaded from the ability's AI flags. */
 typedef enum action_miss_display_flags {
     ACTION_MISS_DISPLAY_TEAM_MASK = 0x03,       /* the AI target-allies / target-enemies pair */
+    ACTION_MISS_DISPLAY_ALLIES_ONLY = 0x01,     /* the team bits of an ability that targets allies only */
     ACTION_MISS_DISPLAY_DODGE_ANIMATION = 0x80, /* the ability's evade-with-motion bit */
 } action_miss_display_flags_e;
 

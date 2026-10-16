@@ -160,11 +160,11 @@ static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, 
     return 1;
 }
 
-/* Resolve what a moving unit picks up on its tile into g_main_crystal_pickup_result: -1 with no
- * crystal or treasure there; 4 and a generated item for a treasure; otherwise 2 for a crystal, and
+/* Resolve what a moving unit picks up on its tile into g_main_crystal_pickup_result: NONE with no
+ * crystal or treasure there; TREASURE and a generated item for a treasure; otherwise CRYSTAL, and
  * when neither unit is a monster, each action ability the crystal knows and the mover does not (in
  * the mover's unlocked jobs, and the special job only for the same character) is learned on a roll
- * against its learn rate, setting bit 0 when any is. */
+ * against its learn rate, adding LEARNED when any is. */
 crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* mover) {
     u8 gained[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 known[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
@@ -189,20 +189,20 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
     crystal_index = battle_unit_find_at_tile(mover->x, mover->position.y, mover->position.higher_elevation,
         BATTLE_UNIT_TILE_FILTER_CRYSTAL | BATTLE_UNIT_TILE_FILTER_TREASURE);
     if (crystal_index < 0) {
-        g_main_crystal_pickup_result.result = -1;
+        g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_NONE;
         return &g_main_crystal_pickup_result;
     }
-    g_main_crystal_pickup_result.result = 0;
+    g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_NOTHING;
     g_main_crystal_pickup_result.unit_index = crystal_index;
     crystal = &g_battle_unit_stats[crystal_index];
     if (crystal->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
-        g_main_crystal_pickup_result.result = 4;
+        g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_TREASURE;
         g_main_crystal_pickup_result.treasure_item = battle_unit_generate_treasure(crystal);
     } else {
         /* The empty loops are measured residue: without them the code differs. */
         do {
             do {
-                g_main_crystal_pickup_result.result = 2;
+                g_main_crystal_pickup_result.result = CRYSTAL_PICKUP_CRYSTAL;
             } while (0);
         } while (0);
         mover_flags = mover->unit_flags;
@@ -264,7 +264,7 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
                 }
             }
             if (learned_count != 0) {
-                g_main_crystal_pickup_result.result |= 1;
+                g_main_crystal_pickup_result.result |= CRYSTAL_PICKUP_LEARNED;
             }
         }
     }

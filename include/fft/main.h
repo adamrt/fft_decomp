@@ -88,9 +88,19 @@ typedef enum main_game_flow_state {
     MAIN_GAME_FLOW_ENDING = 3, /* run the ending, then restart */
 } main_game_flow_state_e;
 
+/* g_main_system_frontend_world_result: why wldcore_entrypoint returned, which tells BATTLE.BIN what
+ * to run next. */
+typedef enum main_world_result {
+    MAIN_WORLD_RESULT_NONE = 0, /* no special case: the current scenario's event or battle */
+    MAIN_WORLD_RESULT_RANDOM_BATTLE = 1,
+    MAIN_WORLD_RESULT_EVENT = 2, /* a story event replay or a tutorial */
+    MAIN_WORLD_RESULT_DEEP_DUNGEON_BATTLE = 4,
+    MAIN_WORLD_RESULT_TITLE = 5, /* back to the title, skipping the opening movie */
+} main_world_result_e;
+
 /* main_system_flags_e bits; cleared by main_save_init_data_tables. */
 extern u32 g_main_system_flags;
-extern s32 g_main_system_frontend_world_result;
+extern s32 g_main_system_frontend_world_result; /* main_world_result_e */
 extern u32 g_main_system_game_loop_stack_pointer;
 extern u8 g_main_system_go_straight_to_battle;
 
@@ -133,6 +143,25 @@ typedef enum main_system_error {
     MAIN_SYSTEM_ERROR_SMD_LOAD = 17,             /* no SMD buffer or the SMD load could not start */
     MAIN_SYSTEM_ERROR_DISTORTION_ANIMATION = 23, /* distortion animation id without a handler */
 } main_system_error_e;
+
+/* Error codes BATTLE passes to main_system_handle_pointer_exception. */
+typedef enum main_system_pointer_exception {
+    MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT = 12,            /* a unit lookup by id found no runtime record */
+    MAIN_SYSTEM_POINTER_EXCEPTION_ATTACK_PREPARATION = 19, /* an attack preparation result with no handler */
+    MAIN_SYSTEM_POINTER_EXCEPTION_TURN_EVENT = 20,         /* a turn event type with no handler */
+} main_system_pointer_exception_e;
+
+/* main_system_handle_battle_load_exception values: a failure base plus the battle id of the unit
+ * being set up, or MAP_RETRY alone. */
+typedef enum main_battle_load_exception {
+    MAIN_BATTLE_LOAD_EXCEPTION_MAP_RETRY = 0x80, /* a map tile-data retry gave up after 1000 tries */
+    MAIN_BATTLE_LOAD_EXCEPTION_NO_SPRITESHEET_SLOT = 100,
+    MAIN_BATTLE_LOAD_EXCEPTION_ENEMY_LIMIT = 200,
+    MAIN_BATTLE_LOAD_EXCEPTION_ENTD_PLACEMENT = 300,  /* an ENTD unit's placement was rejected */
+    MAIN_BATTLE_LOAD_EXCEPTION_PARTY_PLACEMENT = 400, /* a deployed unit's placement was rejected */
+    MAIN_BATTLE_LOAD_EXCEPTION_PARTY_UNIT_LOAD = 500, /* a deployed unit's roster load failed */
+    MAIN_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT = 600,
+} main_battle_load_exception_e;
 
 extern int g_main_system_graphics_error;
 
@@ -187,15 +216,6 @@ extern u16 g_main_scenario_condition_offsets[];
 extern s16 g_main_scenario_condition_data[];
 extern u16 g_main_scenario_event_finish_operations[];
 extern event_file_block_t g_main_script_event_block[];
-
-/* job lookups */
-/* The menu library's job helpers (src/event/menu), compiled into WORLD and the
- * EVENT overlays. */
-void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
-s32 job_find_first_for_skillset(s32 skillset);
-s32 job_get_generic_index(s32 job_id);
-s32 job_get_skillset(s32 job_id);
-s32 job_is_special_monster(s32 job_id);
 
 /* utilities */
 s32 main_util_roll_pass_fail(s32 maximum, s32 threshold);

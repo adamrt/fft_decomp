@@ -66,7 +66,6 @@ extern world_sprite_cel_header_t** g_wldcore_anim_cel_table;
 /* window and render records */
 enum { WLDCORE_WINDOW_RECORD_CAPACITY = 32 };
 
-struct wldcore_window_render_record;
 /* A 52-byte image render record (g_wldcore_window_render_records). window_init_record_pools sets its flags to
  * WORLD_RENDER_RECORD_IMAGE, so window_dispatch_record_list draws it as a sprite through
  * wldcore_gfx_draw_display_object_sprite. */
@@ -161,7 +160,7 @@ void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_va
 void wldcore_menu_resume_active_propositions_level(wldcore_menu_stack_record_t* level);
 void wldcore_menu_resume_participant_detail_level(wldcore_menu_stack_record_t* level);
 void wldcore_menu_resume_sound_novel_quit_level(wldcore_menu_stack_record_t* level);
-void wldcore_menu_suspend_sound_novel_quit_level(wldcore_menu_save_confirm_level_t* level);
+void wldcore_menu_suspend_sound_novel_quit_level(wldcore_menu_sound_novel_quit_level_t* level);
 void wldcore_menu_suspend_root_level(wldcore_menu_stack_record_t* level);
 void wldcore_menu_resume_layout_window_level(wldcore_menu_stack_record_t* level);
 void wldcore_menu_resume_location_menu_level(wldcore_menu_stack_record_t* level);

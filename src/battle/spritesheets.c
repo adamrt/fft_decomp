@@ -91,7 +91,7 @@ void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* scr
             return;
         }
         unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
-            = unit->numeric_display.displays[2]->tpage = 0x3f;
+            = unit->numeric_display.displays[2]->tpage = BATTLE_GFX_TPAGE_FRAME | BATTLE_SPRITE_DISPLAY_BLEND_ADD;
         battle_map_modify_palette(
             MAP_COLOR_MODE_BASE, 2, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0, -31, -31, -31);
         battle_gfx_set_sprite_part_semi_transparent(display_0, 0, 1);
@@ -247,7 +247,7 @@ void battle_unit_dismount_dead_rider(battle_unit_t* unit) {
 s32 battle_gfx_is_spritesheet_id_loaded(s16 spritesheet_id) {
     s32 slot;
 
-    for (slot = 0; slot < 9; slot++) {
+    for (slot = 0; slot < BATTLE_GFX_SPRITESHEET_SLOT_COUNT; slot++) {
         if (g_battle_gfx_spritesheet_slots[slot].spritesheet_id == spritesheet_id) {
             return 1;
         }
@@ -263,7 +263,7 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
     s32 slot;
     u16 found = 0xFF;
 
-    for (slot = 0; slot < 9; slot++) {
+    for (slot = 0; slot < BATTLE_GFX_SPRITESHEET_SLOT_COUNT; slot++) {
         if (g_battle_gfx_spritesheet_slots[slot].spritesheet_id == spritesheet_id) {
             g_battle_gfx_spritesheet_slots[slot].in_use = spritesheet_id;
             found = slot;
@@ -271,7 +271,7 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
         }
     }
     if (found == 0xFF) {
-        for (slot = 0; slot < 9; slot++) {
+        for (slot = 0; slot < BATTLE_GFX_SPRITESHEET_SLOT_COUNT; slot++) {
             if (g_battle_gfx_spritesheet_slots[slot].in_use == 0) {
                 g_battle_gfx_spritesheet_slots[slot].in_use = spritesheet_id;
                 g_battle_gfx_spritesheet_slots[slot].spritesheet_id = spritesheet_id;
@@ -280,7 +280,7 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
             }
         }
     }
-    if (slot >= 9) {
+    if (slot >= BATTLE_GFX_SPRITESHEET_SLOT_COUNT) {
         main_system_handle_error(MAIN_SYSTEM_ERROR_NO_SPRITESHEET_SLOT);
         return 0xFFFF;
     }
@@ -354,7 +354,7 @@ void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_valu
             weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
             /* Weather cools the tint (less red, more blue); at night the shift is stronger and
              * applies in clear weather too. The snow branches match the plain ones. */
-            if (script_get_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY) == 0) {
+            if (script_get_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY) == TIME_OF_DAY_DAY) {
                 if (*weather_flags & MAP_WEATHER_FLAG_SNOW) {
                     switch (weather) {
                     case BATTLE_WEATHER_NONE:

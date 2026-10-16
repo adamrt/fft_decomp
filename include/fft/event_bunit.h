@@ -202,9 +202,9 @@ extern s32 g_bunit_comparison_display_offset_y;
 extern s32 g_bunit_comparison_display_redraw_request;
 
 /* unit panels */
-extern s16 g_bunit_panel_selected_unit_data[];
+extern menu_active_unit_t g_bunit_panel_selected_unit_data;
 extern palette_t g_bunit_panel_selected_portrait_palettes[2];
-extern s16 g_bunit_panel_comparison_unit_data[];
+extern menu_active_unit_t g_bunit_panel_comparison_unit_data;
 extern palette_t g_bunit_panel_comparison_portrait_palettes[2];
 extern u32 g_bunit_status_display_flags; /* menu_status_panel_flags_e */
 extern s32 g_bunit_status_display_offset_y;

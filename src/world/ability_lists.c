@@ -127,8 +127,8 @@ s32 world_ability_run_learn_list(void) {
     if (g_menu_list_entry_count == 0) {
         g_menu_help_message_text_id = -1;
     } else {
-        g_menu_help_message_text_id
-            = (g_menu_ability_entries[g_menu_list_selected_index] & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
+        g_menu_help_message_text_id = (g_menu_ability_entries[g_menu_list_selected_index] & ABILITY_LIST_ENTRY_ID_MASK)
+            + HELP_TEXT_ID_ABILITY_BASE;
     }
     if (g_world_learn_confirm_prompt_state == 0) {
         if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_menu_list_entry_count != 0) {
@@ -295,7 +295,7 @@ static s32 world_ability_run_view_list(void) {
         || ((entry = g_menu_ability_entries[g_menu_list_selected_index]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
         g_menu_help_message_text_id = -1;
     } else {
-        g_menu_help_message_text_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
+        g_menu_help_message_text_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + HELP_TEXT_ID_ABILITY_BASE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_world_ability_view_list_initialized = 0;
@@ -405,7 +405,7 @@ void world_menu_text_entry_wait_thread_for_selected_unit(void) {
  * Otherwise g_world_formation_dismiss_step takes
  * world_formation_can_dismiss_unit's answer: 0 shows the unit's refusal line
  * and returns to the grid, nonzero runs the yes/no confirmation. The line
- * comes from the dismiss-reply text (0xE800 + n): a generic unit (sprite set
+ * comes from the dismiss-reply text (WORLD_TEXT_ID_FORMATION_TEXT_BASE + n): a generic unit (sprite set
  * 0x4B and up) draws one of eight lines for its gender or monster kind with
  * rand(); a special unit uses its sprite set, + 0x17 for the farewell and
  * + 0x61 for the refusal, with sprite set 0x48 sharing 0x49's lines.
@@ -423,7 +423,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
     s32 sprite;
     s32 flags;
     s32 step;
-    /* The sum `value + 0xE800` is its own variable: the target's a0 carries the
+    /* The sum `value + WORLD_TEXT_ID_FORMATION_TEXT_BASE` is its own variable: the target's a0 carries the
      * rand()/sprite accumulation, dies at `addu a1,a0,v0`, and a0 is then reused
      * for the 0x19/0x1a prompt kind. Non-overlapping roles in one register are
      * one variable, so the kind is carried in `value` and only the sum is split
@@ -490,7 +490,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
                     value = sprite + 0x61;
                 }
             }
-            text_id = value + 0xE800;
+            text_id = value + WORLD_TEXT_ID_FORMATION_TEXT_BASE;
 
             /* A refusal is a plain prompt; a dismissable unit gets the yes/no menu with its farewell. */
             if (g_world_formation_dismiss_step == 0) {

@@ -71,8 +71,8 @@ typedef struct menu_status_panel_slot_state {
     s16 left_weapon_evade;        /* 0x0c */
     s16 generic_monster;          /* 0x0e: star icons instead of ability-type icons; selects the
                                    * ability-name text section and gates the per-slot portrait
-                                   * hiding pass; low bit of display_mode */
-    s16 two_hands;                /* 0x10: two-hands flag; high bit of display_mode */
+                                   * hiding pass */
+    s16 two_hands;                /* 0x10: two-hands flag */
     s16 physical_attack;          /* 0x12 */
     s16 physical_class_evade;     /* 0x14 */
     s16 physical_shield_evade;    /* 0x16 */

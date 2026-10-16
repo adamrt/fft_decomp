@@ -96,10 +96,17 @@ typedef char unit_animation_state_size_must_be_7[sizeof(unit_animation_state_t) 
 extern u8 g_unit_rotation_speed_frames[];
 /* Unit graphics load result: 0 done, 1 pending. */
 extern u16 g_unit_graphics_load_pending;
+/* WalkToAnim: requested animation applied after movement stops; 0 means none. */
+extern u16 g_unit_pending_animation_ids[];
+extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
+/* Event-script rotation state for each runtime unit slot. */
+extern unit_animation_state_t g_unit_animation_states[];
 
 void unit_update_facing_and_pending_animations(void);
 void unit_set_animation(s32 runtime_id, u32 animation);
+void unit_set_facing(s32 runtime_id, s32 facing);
 s32 unit_check_facing_relative_to_camera(s32 event_unit_id);
+s32 unit_is_moving(s32 runtime_id);
 
 /* lookups and coordinates */
 /* The position unit_copy_world_coords_to_scratch returns. */
@@ -109,6 +116,10 @@ extern SVECTOR g_unit_scratch_coords;
 
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
+void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
+void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
+void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
+void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 s32 unit_has_any_current_status(s32 battle_id);
 void unit_increase_blue_team_brave_by_10(void);
 

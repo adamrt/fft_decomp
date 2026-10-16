@@ -101,6 +101,9 @@ typedef enum battle_unit_animation {
     BATTLE_UNIT_ANIMATION_CLOTH_LOW = 121,
 } battle_unit_animation_e;
 
+/* The teleport animation and the attack animations after it are ATTACK_FIRST and up. */
+enum { BATTLE_UNIT_ANIMATION_ATTACK_FIRST = BATTLE_UNIT_ANIMATION_TELEPORT };
+
 /* ability animations */
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation
  * set, its attack animation and the message shown when it hits. */
@@ -237,18 +240,5 @@ s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 battle_unit_t* battle_unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z);
 s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords);
 s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
-
-/* event library */
-/* WalkToAnim: requested animation applied after movement stops; 0 means none. */
-extern u16 g_unit_pending_animation_ids[];
-extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
-/* Event-script rotation state for each runtime unit slot. */
-extern unit_animation_state_t g_unit_animation_states[];
-
-void unit_set_facing(s32 runtime_id, s32 facing);
-void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
-void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
-void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
-void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 
 #endif

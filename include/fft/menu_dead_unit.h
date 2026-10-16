@@ -8,11 +8,21 @@
 #include "psx/types.h"
 
 /* crystals and treasure */
+/* crystal_pickup_result_t.result. BATTLE leaves NONE, TREASURE or CRYSTAL, the last with LEARNED added when
+ * the mover learned abilities from the crystal; the dead-unit panels also handle NOTHING and a lone LEARNED. */
+typedef enum crystal_pickup_kind {
+    CRYSTAL_PICKUP_NONE = -1, /* no crystal or treasure on the tile */
+    CRYSTAL_PICKUP_NOTHING = 0,
+    CRYSTAL_PICKUP_LEARNED = 0x1,
+    CRYSTAL_PICKUP_CRYSTAL = 0x2,
+    CRYSTAL_PICKUP_TREASURE = 0x4,
+} crystal_pickup_kind_e;
+
 /* Crystal/treasure pickup result (g_main_crystal_pickup_result) that battle_unit_generate_crystal_or_treasure
  * builds on the main thread stack and returns; each program keeps the pointer in g_menu_dead_unit_context. The
  * dead-unit panels pick their variant from `result` and show `treasure_item`. */
 typedef struct crystal_pickup_result {
-    s32 result;                 /* 0x00; -1 none, 0 idle, 4 treasure, 2 crystal, |1 learned */
+    s32 result;                 /* 0x00; crystal_pickup_kind_e */
     u8 _unused_04[0x14];        /* 0x04 */
     u8 learned[19][3];          /* 0x18 */
     u8 unit_index;              /* 0x51 */

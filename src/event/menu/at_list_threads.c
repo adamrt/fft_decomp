@@ -26,11 +26,11 @@ void thread_stop_after_yield(void) {
 }
 
 /* Run the menus of a crystal or treasure pickup (g_menu_dead_unit_context) and leave the
- * outcome in g_menu_dead_unit_action: result 0 shows the nothing-found message (action 0), 4
- * names the treasure item, sold for a quarter of its price at the 99 limit (action 4). A crystal
- * offers its learned-ability list (result 1, action 1 when one is taken), the confirm menu
- * (result 2, action 2) or a choice between the two (result 3). The previous menu table is
- * restored at the end. */
+ * outcome in g_menu_dead_unit_action: CRYSTAL_PICKUP_NOTHING shows the nothing-found message
+ * (action 0), TREASURE names the treasure item, sold for a quarter of its price at the 99 limit
+ * (action 4). A crystal offers its learned-ability list (LEARNED, action 1 when one is taken),
+ * the confirm menu (CRYSTAL, action 2) or a choice between the two (CRYSTAL | LEARNED). The
+ * previous menu table is restored at the end. */
 void menu_start_dead_unit_threads(void) {
     crystal_pickup_result_t* context = g_menu_dead_unit_context;
     menu_entry_t* previous_menu_descriptor = g_menu_thread_menu_data;
@@ -93,8 +93,8 @@ void menu_start_dead_unit_threads(void) {
         layout->hidden_rows = value_count - 8;
     }
 
-    /* Result 0: nothing to pick up; show message 0x183c and end. */
-    if (context->result == 0) {
+    /* Nothing to pick up: show message 0x183c and end. */
+    if (context->result == CRYSTAL_PICKUP_NOTHING) {
         message_id = 0x183c;
         g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE].text_id = message_id;
         thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
@@ -109,8 +109,7 @@ void menu_start_dead_unit_threads(void) {
     }
 
     g_menu_dead_unit_result = 0;
-    /* Result 4: a treasure item. */
-    if (context->result == 4) {
+    if (context->result == CRYSTAL_PICKUP_TREASURE) {
         /* At the 99 limit, message 0x101b also shows a quarter of the item's price. */
         if (main_item_get_total_equipment_quantity(context->treasure_item, 1) == 0x63) {
             g_text_substitution_values[0] = context->treasure_item;
@@ -145,10 +144,10 @@ void menu_start_dead_unit_threads(void) {
     thread_wait_until_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
     thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
 
-    /* Result 1 shows the learned-ability list, 2 the confirm menu, and 3 first offers the
-     * choice between them. */
+    /* LEARNED shows the learned-ability list, CRYSTAL the confirm menu, and both together first
+     * offer the choice between them. */
     for (;;) {
-        if (context->result == 3) {
+        if (context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED)) {
             g_menu_dead_unit_move_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_run_icon_selection_loop);
             thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_MOVE], 0, 0);
@@ -156,7 +155,8 @@ void menu_start_dead_unit_threads(void) {
         }
 
         g_menu_dead_unit_menu_result = 0xff;
-        if ((context->result == 3 && g_menu_dead_unit_move_result == 0) || context->result == 1) {
+        if ((context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED) && g_menu_dead_unit_move_result == 0)
+            || context->result == CRYSTAL_PICKUP_LEARNED) {
             thread_start(g_thread_current_id - 2, menu_run_at_list);
             thread_set_parameters(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
             thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, menu_icon_linked_entry_thread);
@@ -185,15 +185,16 @@ void menu_start_dead_unit_threads(void) {
                 g_menu_dead_unit_action = 1;
                 break;
             }
-            /* Backing out of the list returns to the choice for result 3. */
+            /* Backing out of the list returns to the choice when both are offered. */
             if (g_menu_dead_unit_menu_result == 1 || (g_menu_dead_unit_menu_result & 0xff) == 0xff) {
-                if (context->result == 3) {
+                if (context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED)) {
                     continue;
                 }
             }
         }
 
-        if ((g_menu_dead_unit_move_result == 1 && context->result == 3) || context->result == 2) {
+        if ((g_menu_dead_unit_move_result == 1 && context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED))
+            || context->result == CRYSTAL_PICKUP_CRYSTAL) {
             g_menu_dead_unit_menu_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
             thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_CONFIRM], 0, 0);

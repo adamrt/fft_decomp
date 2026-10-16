@@ -45,7 +45,7 @@ void equip_menu_reset_selection_indices(void);
 
 /* unit preview */
 /* What equip_unit_validate_slot_item finds for an item in an equipment slot. */
-typedef enum equip_slot_item_result {
+typedef enum equip_item_slot_result {
     EQUIP_SLOT_ITEM_CURRENT_LOCKED = -2,
     EQUIP_SLOT_ITEM_CANNOT_EQUIP = -1,
     EQUIP_SLOT_ITEM_INCOMPATIBLE_PAIR = 0,

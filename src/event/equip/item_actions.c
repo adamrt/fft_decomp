@@ -110,7 +110,7 @@ s32 equip_item_run_type_order_mode(void) {
         i = 0x39;
     }
     picked = g_equip_menu_result_rows[2]; /* type-order row picked in the sub-menu, or -1 */
-    g_menu_help_message_text_id = i + 0x1000;
+    g_menu_help_message_text_id = i + HELP_TEXT_ID_MENU_COMMAND_BASE;
     if (picked != -1) {
         first = g_equip_item_type_order[picked];
         for (i = picked - 1; i >= 0; i--) {
@@ -126,8 +126,8 @@ s32 equip_item_run_type_order_mode(void) {
         category = g_menu_selected_slot;
         g_equip_menu_text_redraw_flag = 1;
         equip_item_build_filtered_list(g_equip_unit_selected_index, category + 0x81,
-            g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? category + 1 : ITEM_LIST_FILTER_OTHER,
-            g_item_list_entries, ITEM_LIST_MODE_ALL);
+            g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+            ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
         menu_init_scrollable_list_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);

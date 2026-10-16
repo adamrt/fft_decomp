@@ -1568,23 +1568,20 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
 
     g_wldcore_proposition_gil_amount += g_wldcore_proposition_report.reward_value;
     g_text_substitution_values[1] = g_wldcore_proposition_gil_amount;
-    /* The reward names: random bonuses from the base, unexplored lands from
-     * entry 0x1b, treasures from 0x2e; entry 6 when there is no reward. */
     switch (g_wldcore_proposition_report.reward_type) {
     case WLDCORE_PROPOSITION_REWARD_TREASURE:
         g_text_substitution_values[0]
-            = g_wldcore_proposition_report.reward_index + TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2E;
+            = g_wldcore_proposition_report.reward_index + WLDCORE_TEXT_ID_REWARD_TREASURE_FIRST;
         break;
     case WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND:
-        g_text_substitution_values[0]
-            = g_wldcore_proposition_report.reward_index + TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1B;
+        g_text_substitution_values[0] = g_wldcore_proposition_report.reward_index + WLDCORE_TEXT_ID_REWARD_LAND_FIRST;
         break;
     case WLDCORE_PROPOSITION_REWARD_RANDOM_BONUS:
         g_text_substitution_values[0]
             = g_wldcore_proposition_report.reward_index + TEXT_ID_PROPOSITION_REWARD_NAME_BASE;
         break;
     default:
-        g_text_substitution_values[0] = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6;
+        g_text_substitution_values[0] = WLDCORE_TEXT_ID_REWARD_NONE;
         break;
     }
 
@@ -1794,15 +1791,16 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
             g_wldcore_proposition_report.participant_jp[i]);
     }
 
-    /* A failed job returns to the bar after 32 days, a badly failed one after 16. */
+    /* A failed job returns to the bar after its cooldown. */
     if (g_wldcore_proposition_report.result == WLDCORE_PROPOSITION_RESULT_FAILURE) {
         g_main_proposition_states[g_main_active_propositions[g_wldcore_proposition_report.proposition_index]
-                .proposition_id] = WLDCORE_PROPOSITION_STATE_FAILURE | 0x20;
+                .proposition_id] = WLDCORE_PROPOSITION_STATE_FAILURE | WLDCORE_PROPOSITION_FAILURE_COOLDOWN_DAYS;
     }
 
     if (g_wldcore_proposition_report.result == WLDCORE_PROPOSITION_RESULT_BAD_FAILURE) {
         g_main_proposition_states[g_main_active_propositions[g_wldcore_proposition_report.proposition_index]
-                .proposition_id] = WLDCORE_PROPOSITION_STATE_BAD_FAILURE | 0x10;
+                .proposition_id]
+            = WLDCORE_PROPOSITION_STATE_BAD_FAILURE | WLDCORE_PROPOSITION_BAD_FAILURE_COOLDOWN_DAYS;
     }
 
     for (i = level->proposition; i < g_main_save_proposition_count - 1; i++) {

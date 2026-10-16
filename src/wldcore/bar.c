@@ -69,8 +69,8 @@ static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_l
     wldcore_menu_push_location_menu_level(*selected);
     wldcore_fade_start_screen(WLDCORE_SCREEN_FADE_REDRAW_MAP, 0x10);
     wldcore_clear_screen_and_set_map_clip_rect(0);
-    /* Blank the 256x240 backdrop image (0x7800 words) until the map is captured again. */
-    for (i = 0x77ff; i >= 0; i--) {
+    /* Blank the backdrop image until the map is captured again. */
+    for (i = WLDCORE_BACKDROP_WORDS - 1; i >= 0; i--) {
         g_wldcore_scratch_buffer[i] = 0;
     }
 }

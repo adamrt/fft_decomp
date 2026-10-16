@@ -68,6 +68,7 @@ typedef enum main_unit_action_state {
     MAIN_UNIT_ACTION_STATE_CHARGING = 5,
     MAIN_UNIT_ACTION_STATE_JUMPING = 6,
     MAIN_UNIT_ACTION_STATE_DEFENDING = 7,
+    /* The Performing status bit (0x01) shifted left 3, which KEEP_PERFORMING relies on. */
     MAIN_UNIT_ACTION_STATE_PERFORMING = 8,
     MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING = 255
 } main_unit_action_state_e;
@@ -128,6 +129,14 @@ extern u8 g_main_unit_generation_raw_stat_variance[MAIN_UNIT_TYPE_COUNT][UNIT_RA
 s32 main_party_generate_unit(main_unit_generation_type_e unit_type);
 
 /* units */
+/* main_unit_init_from_entd kinds. */
+typedef enum main_unit_entd_init_kind {
+    MAIN_UNIT_ENTD_INIT_NEW = 0, /* reset the unit and build it from its ENTD entry */
+    /* Rebuild a transformed unit's stats for its new job in place: no reset, no ENTD data and no
+     * ENTD equipment. */
+    MAIN_UNIT_ENTD_INIT_TRANSFORM = 0x82,
+} main_unit_entd_init_kind_e;
+
 extern u32 g_main_unit_name_uses_world_text;
 
 s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind);

@@ -6,7 +6,6 @@
 #include "fft/battle_ai_command.h"
 #include "fft/battle_ai_decision.h"
 #include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
 #include "fft/battle_effect_script.h"
 #include "fft/battle_effect_secondary.h"
 #include "fft/battle_gfx.h"
@@ -40,6 +39,20 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Effect message texts (MENU_SYSTEM_COMMAND_EFFECT_MESSAGE). An ability's message is the base plus
+ * the text_display entry of its animation data; the others have fixed ids. */
+enum {
+    TEXT_ID_BATTLE_MESSAGE_BASE = 0x1800,
+    TEXT_ID_BATTLE_MESSAGE_TRAINED = 0x1828,
+    TEXT_ID_BATTLE_MESSAGE_POACHED = 0x1838,
+    TEXT_ID_BATTLE_MESSAGE_MIME = 0x183a,
+    TEXT_ID_BATTLE_MESSAGE_TELEPORT_FAILED = 0x183b,
+    TEXT_ID_BATTLE_MESSAGE_TREASURE = 0x183c,
+    TEXT_ID_BATTLE_MESSAGE_CRYSTAL = 0x183d,
+    TEXT_ID_BATTLE_MESSAGE_JOB_LEVEL_UP = 0x183e,
+    TEXT_ID_BATTLE_MESSAGE_LEVEL_UP = 0x183f,
+};
+
 /* Hand the battle over to an event script: enter the event state at animation
  * speed 2, reset the jump graphics and the event state, disable the status menu
  * and clear the casting and source unit ids (0xff). */
@@ -58,36 +71,42 @@ void battle_state_enter_event(void) {
  * deployment screen does when it finishes. */
 void battle_action_set_casting_unit_id_ff_and_init(void) {
     battle_state_enter_event();
-    menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, 0xff, 0, 1);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, 0xff, 0, 1);
 }
 
 /* Run the scenario check for the unit's turn event. A unit-ready or empty event may start a
- * scenario event (option 0); an ability-ready or action-result event first only tests (option 2).
- * When that test finds a pending event with a finish operation, a Ramza unit runs option 1 and any
- * other unit option 0 (whose result is dropped); otherwise, and for every other turn event, option
- * 1 runs. Returns 1 when the check whose result is kept (for a non-Ramza unit after a successful
- * test, the test itself) dispatched an event, after saving the game state and handing the battle
- * to it. */
+ * scenario event (START); an ability-ready or action-result event first only tests (TEST). When
+ * that test finds a pending event with a finish operation, a Ramza unit runs SKIP and any other
+ * unit START (whose result is dropped); otherwise, and for every other turn event, SKIP runs.
+ * Returns 1 when the check whose result is kept (for a non-Ramza unit after a successful test,
+ * the test itself) dispatched an event, after saving the game state and handing the battle to
+ * it. */
 s32 battle_state_try_enter_scenario_event(battle_unit_t* unit) {
     s32 result;
 
     if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY
         || g_battle_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
-        result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+        result = menu_init_system_function(
+            MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, unit->stats->battle_id, 0, 1);
     } else if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ABILITY_READY
         || g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ACTION_RESULT) {
-        result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1);
+        result = menu_init_system_function(
+            MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_TEST, unit->stats->battle_id, 0, 1);
         if (result == MENU_SYSTEM_DISPATCH_EVENT && script_get_event_finish_operation() != 0) {
             if (unit->spritesheet_id < BATTLE_SPRITESHEET_ID_RAMZA_END) {
-                result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
+                result = menu_init_system_function(
+                    MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_SKIP, unit->stats->battle_id, 0, 1);
             } else {
-                menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+                menu_init_system_function(
+                    MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, unit->stats->battle_id, 0, 1);
             }
         } else {
-            result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
+            result = menu_init_system_function(
+                MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_SKIP, unit->stats->battle_id, 0, 1);
         }
     } else {
-        result = menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 1, unit->stats->battle_id, 0, 1);
+        result = menu_init_system_function(
+            MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_SKIP, unit->stats->battle_id, 0, 1);
     }
     if (result == MENU_SYSTEM_DISPATCH_EVENT) {
         g_battle_previous_game_state = g_battle_game_state;
@@ -165,7 +184,7 @@ void battle_menu_open_free_cursor_help(void) {
 
 /* Reload the map when the number of crystals on the field has changed.
  *
- * Only in a Deep Dungeon battle (world result 4), and not while such a reload is
+ * Only in a Deep Dungeon battle (MAIN_WORLD_RESULT_DEEP_DUNGEON_BATTLE), and not while such a reload is
  * running: the crystal count, capped at 4, is compared with script variable
  * EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, the map state that GNS rows of
  * those maps select on. A new count is stored and a map data load started; the
@@ -175,7 +194,7 @@ static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
     s32 crystal_count;
     s32 previous_count;
 
-    if (g_main_system_frontend_world_result == 4) {
+    if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_DEEP_DUNGEON_BATTLE) {
         if (g_battle_map_deep_dungeon_load_in_progress == 0) {
             crystal_count = battle_unit_count_crystals();
             if (crystal_count >= 5) {
@@ -243,7 +262,7 @@ static void battle_action_run_between_turn_events(void) {
     if (unit != 0) {
         g_battle_unit_source_runtime_id = unit->runtime_id;
     } else {
-        main_system_handle_pointer_exception(12);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     }
     switch (g_battle_action_turn_event_type) {
     case BATTLE_TURN_EVENT_UNIT_READY:
@@ -272,7 +291,7 @@ static void battle_action_run_between_turn_events(void) {
                    tree at 0x500 as the target does; nothing compares it, so the
                    original value is not recoverable */
     default:
-        main_system_handle_pointer_exception(20);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_TURN_EVENT);
         break;
     }
     unit = battle_unit_get_source();
@@ -339,10 +358,10 @@ void battle_action_check_between_turn_events(void) {
     }
 }
 
-/* Enter the status-execute state for the source unit. A Mime turn event shows effect message
- * 0x183a for one second and kneels the unit; otherwise a queued Crystal or Treasure transformation
- * shows message 0x183d or 0x183c for three seconds (any other result closes the window), and the
- * unit's queued statuses and post-action display are applied. */
+/* Enter the status-execute state for the source unit. A Mime turn event shows the Mime effect
+ * message for one second and kneels the unit; otherwise a queued Crystal or Treasure
+ * transformation shows its message for three seconds (any other result closes the window), and
+ * the unit's queued statuses and post-action display are applied. */
 void battle_state_enter_status_execute(void) {
     battle_unit_t* unit;
     u32 statuses;
@@ -353,20 +372,20 @@ void battle_state_enter_status_execute(void) {
     battle_target_hide_cursor();
     g_battle_action_post_action = 0;
     if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_MIME) {
-        text_set_message_duration_frames(0x3C);
-        menu_init_system_function(
-            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183A, unit->stats->battle_id, unit->stats->battle_id, 1);
+        text_set_message_duration_frames(60);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_MIME,
+            unit->stats->battle_id, unit->stats->battle_id, 1);
         battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_KNEEL, unit->facing, unit);
         return;
     }
-    text_set_message_duration_frames(0xB4);
+    text_set_message_duration_frames(180);
     statuses = unit->statuses_to_add_5_6;
     if (statuses & BATTLE_UNIT_STATUS_CRYSTAL) {
-        menu_init_system_function(
-            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183D, unit->stats->battle_id, unit->stats->battle_id, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_CRYSTAL,
+            unit->stats->battle_id, unit->stats->battle_id, 1);
     } else if (statuses & BATTLE_UNIT_STATUS_TREASURE) {
-        menu_init_system_function(
-            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183C, unit->stats->battle_id, unit->stats->battle_id, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_TREASURE,
+            unit->stats->battle_id, unit->stats->battle_id, 1);
     } else {
         menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     }
@@ -532,10 +551,9 @@ void battle_action_show_at_list_entry(s32 at_index) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ACTIVE_TURN;
     id = battle_action_get_at_list_entry_unit_id(at_index);
-    /* The low byte is the unit's battle id; 0x100 marks a charged action. */
     if (id >= 0) {
-        unit = battle_unit_get_by_battle_id(id & 0xFF);
-        if ((id & 0x100) != 0) {
+        unit = battle_unit_get_by_battle_id(id & BATTLE_AT_LIST_ENTRY_BATTLE_ID_MASK);
+        if ((id & BATTLE_AT_LIST_ENTRY_CHARGED_ACTION) != 0) {
             battle_target_move_cursor_to_action_target(unit);
             battle_target_calculate_for_menu_types(&unit->stats->action_command);
             battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
@@ -555,20 +573,21 @@ void battle_action_handle_move_command(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_UNIT_MOVE;
     unit = battle_unit_get_source();
-    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, unit->stats->battle_id, 0,
-        unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, MENU_TARGETING_PROMPT_DEFAULT,
+        unit->stats->battle_id, 0, unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
 /* Enter the move-range-exception state, reached when the casting unit has no
- * reachable tile: opens targeting-prompt option 2 for the source unit. */
+ * reachable tile: opens the source unit's targeting prompt with
+ * MENU_TARGETING_PROMPT_NO_MOVE_RANGE. */
 static void battle_state_enter_move_range_exception(void) {
     battle_unit_t* unit;
 
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_MOVE_RANGE_EXCEPTION;
     unit = battle_unit_get_source();
-    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 2, unit->stats->battle_id, 0,
-        unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, MENU_TARGETING_PROMPT_NO_MOVE_RANGE,
+        unit->stats->battle_id, 0, unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
 /* Return to choosing a move destination: recompute the source unit's reachable
@@ -599,22 +618,21 @@ void battle_state_enter_select_move_tile(void) {
     }
 }
 
-/* Enter the illegal-move state and show move feedback option 2, which rejects the
- * chosen destination. */
+/* Enter the illegal-move state and show move feedback that rejects the chosen
+ * destination. */
 void battle_menu_open_illegal_move_help(void) {
     battle_unit_t* unit;
 
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ILLEGAL_MOVE_MENU;
     unit = battle_unit_get_source();
-    menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 2, unit->stats->battle_id, 0,
-        unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, MENU_MOVE_FEEDBACK_ILLEGAL_MOVE,
+        unit->stats->battle_id, 0, unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
 /* Enter the unit-moving-setup state for the chosen destination and start the source unit's move
- * feedback: confirm a pending mount (option 1) or a step onto a crystal (option 4), otherwise
- * close (option 0). A teleport (path count 0xfe or 0xff, the u8 count + 2 < 2 test) asks for move
- * confirmation instead when navigation messages are on. */
+ * feedback: confirm a pending mount or a step onto a crystal, otherwise close. A teleport (path count 0xfe or 0xff, the
+ * u8 count + 2 < 2 test) asks for move confirmation instead when navigation messages are on. */
 void battle_state_enter_unit_moving_setup(void) {
     battle_unit_t* source;
     battle_unit_t* casting;
@@ -627,15 +645,15 @@ void battle_state_enter_unit_moving_setup(void) {
     casting = battle_unit_get_casting();
 
     if (casting->path.pending_mount & BATTLE_PENDING_MOUNT_SET) {
-        menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 1, source->stats->battle_id, 0,
-            source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, MENU_MOVE_FEEDBACK_MOUNT, source->stats->battle_id,
+            0, source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
         return;
     }
     path_count = casting->path.count + 2;
     if (path_count < 2) {
         if (g_main_game_options.fields.navigation_messages != GAME_OPTION_ON) {
-            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 0, source->stats->battle_id, 0,
-                source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, MENU_MOVE_FEEDBACK_CLOSE,
+                source->stats->battle_id, 0, source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
             return;
         }
         menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0,
@@ -646,12 +664,12 @@ void battle_state_enter_unit_moving_setup(void) {
         = battle_unit_get_crystal_or_treasure_at_map_coords(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (at_tile != 0) {
         if (at_tile->status_flags_5_6 & BATTLE_UNIT_STATUS_CRYSTAL) {
-            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 4, source->stats->battle_id, 0,
-                source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, MENU_MOVE_FEEDBACK_CRYSTAL,
+                source->stats->battle_id, 0, source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
             return;
         }
     }
-    menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, 0, source->stats->battle_id, 0,
+    menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, MENU_MOVE_FEEDBACK_CLOSE, source->stats->battle_id, 0,
         source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
@@ -702,7 +720,7 @@ void battle_state_enter_unit_moving(void) {
 /* Enter the move-confirm state once the unit has stopped moving and show the
  * matching prompt, with a one-second message time.
  *
- * A failed Teleport shows effect message 0x183b; a successful one the move
+ * A failed Teleport shows its effect message; a successful one the move
  * confirmation. Other movement tints the unit by team and asks for confirmation,
  * silently when navigation messages are off. The AT-list-active flag follows
  * whether the player controls the unit. */
@@ -714,10 +732,11 @@ void battle_menu_open_move_confirm(void) {
     g_battle_game_state = BATTLE_GAME_STATE_MOVE_CONFIRM_MENU;
     source = battle_unit_get_source();
     caster = battle_unit_get_casting();
-    text_set_message_duration_frames(0x3C);
+    text_set_message_duration_frames(60);
     if (caster->path.flags & BATTLE_EFFECTIVE_MOVEMENT_TELEPORT) {
         if (caster->last_path_count == MOVE_PATH_TELEPORT_FAILED) {
-            menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183B, source->stats->battle_id, 0, 1);
+            menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_TELEPORT_FAILED,
+                source->stats->battle_id, 0, 1);
         } else {
             menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_CONFIRM, 0, source->stats->battle_id, 0, 0);
         }
@@ -788,16 +807,17 @@ void battle_unit_decide_facing_direction(battle_unit_t* unit, s32 facing) {
     battle_unit_set_animation_based_on_status(unit);
 }
 
-/* Report a level up recorded in the unit's rewards: message 0x183f for three
+/* Report a level up recorded in the unit's rewards: its message for three
  * seconds, the level-up animation and effect, the cursor on the unit and the
  * level-up tune. Returns 1 after reporting one, otherwise 0. */
 static s32 battle_action_report_level_up(battle_unit_t* unit) {
     if (unit->strike.action_rewards.level_for_display != 0) {
         u8 battle_id;
 
-        text_set_message_duration_frames(0xB4);
+        text_set_message_duration_frames(180);
         battle_id = unit->stats->battle_id;
-        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183F, battle_id, battle_id, 1);
+        menu_init_system_function(
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_LEVEL_UP, battle_id, battle_id, 1);
         battle_unit_set_level_up_animation(unit);
         battle_target_move_cursor_to_unit(unit);
         battle_effect_set_secondary_level_up(unit);
@@ -807,16 +827,17 @@ static s32 battle_action_report_level_up(battle_unit_t* unit) {
     return 0;
 }
 
-/* Report a job level up recorded in the unit's rewards: message 0x183e for three
+/* Report a job level up recorded in the unit's rewards: its message for three
  * seconds, the level-up animation and effect, the cursor on the unit and the job
  * level-up tune. Returns 1 after reporting one, otherwise 0. */
 static s32 battle_action_report_job_level_up(battle_unit_t* unit) {
     if (unit->strike.action_rewards.job_level_for_display != 0) {
         u8 battle_id;
 
-        text_set_message_duration_frames(0xB4);
+        text_set_message_duration_frames(180);
         battle_id = unit->stats->battle_id;
-        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183E, battle_id, battle_id, 1);
+        menu_init_system_function(
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_JOB_LEVEL_UP, battle_id, battle_id, 1);
         battle_unit_set_level_up_animation(unit);
         battle_target_move_cursor_to_unit(unit);
         battle_effect_set_secondary_level_up(unit);
@@ -1031,10 +1052,13 @@ void battle_action_choose_wait(void) {
 
     battle_camera_disable_map_pan();
     unit = battle_unit_get_source();
-    if (menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1) == 2
+    if (menu_init_system_function(
+            MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_TEST, unit->stats->battle_id, 0, 1)
+            == MENU_SYSTEM_DISPATCH_EVENT
         && script_get_event_finish_operation() != 0) {
         g_battle_previous_game_state = g_battle_game_state;
-        menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(
+            MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, unit->stats->battle_id, 0, 1);
         battle_state_enter_event();
         return;
     }
@@ -1239,10 +1263,10 @@ void battle_unit_end_command(battle_unit_t* unit) {
 }
 
 /*
- * Enter the action-execute-setup state after the ability preview: targeting
- * prompt option 1 when the preview marked no tile (TARGET_PANELS_NONE), option 0
- * otherwise. The AT-list-active flag then follows whether the player controls
- * the unit.
+ * Enter the action-execute-setup state after the ability preview: the
+ * targeting prompt with MENU_TARGETING_PROMPT_NO_TARGET when the preview marked
+ * no tile (TARGET_PANELS_NONE), MENU_TARGETING_PROMPT_DEFAULT otherwise. The AT-list-active flag then follows whether
+ * the player controls the unit.
  */
 void battle_state_enter_action_execution_setup(void) {
     battle_unit_t* unit;
@@ -1251,11 +1275,11 @@ void battle_state_enter_action_execution_setup(void) {
     g_battle_game_state = BATTLE_GAME_STATE_ACTION_EXECUTE_SETUP;
     unit = battle_unit_get_source();
     if (unit->ability_preview_phase == TARGET_PANELS_NONE)
-        menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 1, unit->stats->battle_id, 0,
-            unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, MENU_TARGETING_PROMPT_NO_TARGET,
+            unit->stats->battle_id, 0, unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
     else
-        menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, unit->stats->battle_id, 0,
-            unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, MENU_TARGETING_PROMPT_DEFAULT,
+            unit->stats->battle_id, 0, unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
     if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)
         battle_target_show_cursor();
     else
@@ -1364,7 +1388,7 @@ static void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* uni
     if (unit->stats == 0) {
         return;
     }
-    if (g_battle_action_post_effect_msg_counter >= 0x10) {
+    if (g_battle_action_post_effect_msg_counter >= BATTLE_POST_EFFECT_MSG_CAPACITY) {
         return;
     }
     action = &unit->stats->action;
@@ -1525,11 +1549,11 @@ static void battle_unit_update_attack_result_animation(battle_unit_t* unit) {
  *
  * Queues the targets' post-effect messages, applies the caster's own result and
  * opens the effect message window for one second. A poach or a train shows its
- * fixed message (text 0x1838 or 0x1828) with the item-found tune. Otherwise,
- * when some target was hit, the message is the text_display entry of the
- * ability's animation data, offset into the 0x1800 text block; message 6 also
- * plays the item-found tune, and messages 6 and 0x2b name the first hit target
- * as well as the caster. Without a message the window closes (text id 0). */
+ * fixed message with the item-found tune. Otherwise, when some target was hit,
+ * the message is the text_display entry of the ability's animation data, offset
+ * by TEXT_ID_BATTLE_MESSAGE_BASE; message 6 also plays the item-found tune, and
+ * messages 6 and 0x2b name the first hit target as well as the caster. Without a
+ * message the window closes (text id 0). */
 void battle_state_start_battle_message_display(void) {
     battle_unit_t* unit;
     battle_unit_t* target;
@@ -1544,15 +1568,17 @@ void battle_state_start_battle_message_display(void) {
     battle_action_build_targets_post_action_message();
     battle_unit_update_attack_result_animation(unit);
     unit->item_display_active = 0;
-    text_set_message_duration_frames(0x3c);
+    text_set_message_duration_frames(60);
     switch (unit->strike.post_action_message) {
     case BATTLE_POST_ACTION_MESSAGE_POACHED:
         main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
-        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x1838, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_POACHED, unit->stats->battle_id, 0, 1);
         return;
     case BATTLE_POST_ACTION_MESSAGE_TRAINED:
         main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
-        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x1828, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_TRAINED, unit->stats->battle_id, 0, 1);
         return;
     }
 
@@ -1560,7 +1586,7 @@ void battle_state_start_battle_message_display(void) {
     for (i = 0; i < unit->strike.target_count; i++) {
         target = battle_unit_get_by_battle_id(unit->strike.target_list[i]);
         if (target != 0 && target->stats != 0 && target->stats->action.hit != 0) {
-            text_set_message_duration_frames(0x3c);
+            text_set_message_duration_frames(60);
             /* Taking the row first keeps this loop above loop.c's size limit
              * for hoisting the constant 6 into a saved register. */
             animation = &g_battle_ability_animation_data[unit->sp2_ability_id];
@@ -1576,10 +1602,11 @@ void battle_state_start_battle_message_display(void) {
     }
 
     if (message == 6 || message == 0x2b) {
-        menu_init_system_function(
-            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | 0x1800, unit->stats->battle_id, target->stats->battle_id, 1);
+        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | TEXT_ID_BATTLE_MESSAGE_BASE,
+            unit->stats->battle_id, target->stats->battle_id, 1);
     } else if (message != 0) {
-        menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | 0x1800, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(
+            MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, message | TEXT_ID_BATTLE_MESSAGE_BASE, unit->stats->battle_id, 0, 1);
     } else {
         menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     }
@@ -1598,7 +1625,7 @@ void battle_action_init_learn_ability_on_hit(void) {
     g_main_system_vsync_interval = 1;
     unit = battle_unit_get_source();
     menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
-    text_set_message_duration_frames(0x1E);
+    text_set_message_duration_frames(30);
     switch (g_battle_action_post_action_display_phase) {
     case BATTLE_POST_ACTION_DISPLAY_LEVEL_UP:
         battle_action_report_level_up(unit);

@@ -379,8 +379,8 @@ void battle_state_enter_action_cast(void) {
  * cursor and commits the attack preparation. An immediate or Jump action enters
  * the commence-attack phase, with the charge-hold animation when the ability has a
  * charge set. A charged action starts its charge-hold animation and ends the
- * command until the charge comes due; any other result raises pointer exception
- * 19 and ends the command. */
+ * command until the charge comes due; any other result raises a pointer
+ * exception and ends the command. */
 void battle_action_execute_ability(void) {
     battle_unit_t* unit;
     s32 result;
@@ -408,7 +408,7 @@ void battle_action_execute_ability(void) {
         return;
     case BATTLE_ATTACK_PREPARATION_CHANGE_EQUIPMENT:
     default:
-        main_system_handle_pointer_exception(19);
+        main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_ATTACK_PREPARATION);
         break;
     }
     battle_unit_end_command(unit);
@@ -638,7 +638,8 @@ static void battle_state_enter_target_select_start(void) {
     g_battle_game_state = BATTLE_GAME_STATE_TARGET_SELECT_START;
     unit = battle_unit_get_casting();
     stats = unit->stats;
-    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, stats->battle_id, 0, 1);
+    menu_init_system_function(
+        MENU_SYSTEM_COMMAND_TARGETING_PROMPT, MENU_TARGETING_PROMPT_DEFAULT, stats->battle_id, 0, 1);
     battle_target_show_cursor();
 }
 
@@ -714,8 +715,8 @@ static void battle_state_enter_target_display_start(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_TARGET_DISPLAY_START;
     menu_start_unit_view_thread(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);
-    menu_init_system_function(
-        MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, battle_unit_get_casting()->stats->battle_id, 0, 1);
+    menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, MENU_TARGETING_PROMPT_DEFAULT,
+        battle_unit_get_casting()->stats->battle_id, 0, 1);
     g_battle_action_post_action = 0;
     battle_target_show_cursor();
 }
@@ -878,16 +879,16 @@ void battle_state_handle_highlight_units_state(void) {
     battle_state_update_units();
 }
 
-/* OpenActionMenus game-state handler: once the window has closed (command 7, 8 or
- * 0xff) and the camera has settled, open the idle action menu of the unit under
- * the cursor. */
+/* OpenActionMenus game-state handler: once the window has closed (any answer) and the camera has
+ * settled, open the idle action menu of the unit under the cursor. */
 void battle_state_handle_open_action_menus_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         g_battle_action_post_action = 1;
     }
     if ((g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) == 0
@@ -1208,8 +1209,8 @@ void battle_state_handle_active_turn_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
-/* UnitMove game-state handler: command 7 goes on to choosing a destination
- * (battle_state_enter_select_move_tile); 8 or 0xff returns to the idle action menu. */
+/* UnitMove game-state handler: YES goes on to choosing a destination
+ * (battle_state_enter_select_move_tile); NO or UNRESOLVED_FF returns to the idle action menu. */
 void battle_state_handle_unit_move_state(void) {
     s32 selected_command;
 
@@ -1217,11 +1218,11 @@ void battle_state_handle_unit_move_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     switch (selected_command) {
-    case 7:
+    case AI_COMMAND_PROMPT_YES:
         battle_state_enter_select_move_tile();
         return;
-    case 8:
-    case 0xff:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         battle_menu_open_active_unit_idle_action_menu();
         return;
     }
@@ -1305,34 +1306,36 @@ void battle_state_handle_close_move_help_state(void) {
     battle_menu_set_next_script_action_menus();
 }
 
-/* MoveRangeException game-state handler: when the message closes (command 7, 8 or
- * 0xff), reopen the idle action menu of the unit under the cursor. */
+/* MoveRangeException game-state handler: when the message closes (any answer), reopen the idle
+ * action menu of the unit under the cursor. */
 void battle_state_handle_move_range_exception_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         battle_menu_dispatch_idle_action_menu();
     }
 }
 
-/* IllegalMoveMenu game-state handler: when the message closes (command 7, 8 or
- * 0xff), return to choosing a destination (battle_state_enter_select_move_tile). */
+/* IllegalMoveMenu game-state handler: when the message closes (any answer), return to choosing a
+ * destination (battle_state_enter_select_move_tile). */
 void battle_state_handle_illegal_move_menu_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         battle_state_enter_select_move_tile();
     }
 }
 
-/* UnitMovingSetup game-state handler: command 7 starts the move; 8 or 0xff
- * discards the path and returns to choosing a destination. */
+/* UnitMovingSetup game-state handler: YES starts the move; NO or UNRESOLVED_FF discards the path
+ * and returns to choosing a destination. */
 void battle_state_handle_unit_moving_setup_state(void) {
     ai_command_t* selected_command_address;
     s32 selected_command;
@@ -1344,11 +1347,11 @@ void battle_state_handle_unit_moving_setup_state(void) {
     casting_unit = battle_unit_get_casting();
     selected_command = selected_command_address->kind;
     switch (selected_command) {
-    case 7:
+    case AI_COMMAND_PROMPT_YES:
         battle_state_enter_unit_moving();
         return;
-    case 8:
-    case 0xff:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         casting_unit->path.count = 0;
         battle_state_enter_select_move_tile();
         return;

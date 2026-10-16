@@ -401,7 +401,7 @@ static void bunit_menu_update_unit_browser(void) {
                 bcopy(g_bunit_unit_pointers[g_bunit_unit_comparison_index], &g_panel_comparison_billboard,
                     sizeof(g_panel_comparison_billboard));
                 bcopy(&g_bunit_unit_pointers[g_bunit_unit_comparison_index]->name_index,
-                    g_bunit_panel_comparison_unit_data, sizeof(menu_active_unit_t));
+                    &g_bunit_panel_comparison_unit_data, sizeof(g_bunit_panel_comparison_unit_data));
                 menu_toggle_comparison_status_thread(1);
                 g_bunit_status_banner_at_bottom_latch = g_bunit_status_banner_at_bottom;
                 if (g_bunit_status_banner_slide_step < 0) {
@@ -481,8 +481,8 @@ static void bunit_unit_copy_selected_data(void) {
     g_bunit_unit_comparison_index = g_unit_selected_index;
     comparison = g_bunit_unit_pointers[g_bunit_unit_comparison_index];
     bcopy(comparison, &g_panel_selected_billboard, sizeof(g_panel_selected_billboard));
-    bcopy(&g_bunit_unit_pointers[g_unit_selected_index]->name_index, g_bunit_panel_selected_unit_data,
-        sizeof(menu_active_unit_t));
+    bcopy(&g_bunit_unit_pointers[g_unit_selected_index]->name_index, &g_bunit_panel_selected_unit_data,
+        sizeof(g_bunit_panel_selected_unit_data));
     bcopy(&g_bunit_unit_pointers[g_unit_selected_index]->move, &g_menu_selected_unit_fields,
         sizeof(g_menu_selected_unit_fields));
     g_status_display_redraw_request = 1;

@@ -1933,7 +1933,7 @@ static void battle_gfx_run_wep_eff_seq_script(
  * The unit's compressed spritesheet slot is expanded into `image_slot`'s
  * image buffer and uploaded to `slot`'s rectangle; the unit's 64x32 VRAM
  * block (column spritesheet slot / 8, row spritesheet slot % 8 of the
- * 0x340,0x100 area) is copied 200 lines below it. `slot` is then owned by the unit's attack
+ * BATTLE_GFX_SPRITESHEET_STRIP_VRAM_X/Y area) is copied 200 lines below it. `slot` is then owned by the unit's attack
  * image (runtime id | BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE), and the image
  * buffer stays busy for BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES frames while the
  * upload completes. */
@@ -1944,10 +1944,12 @@ static void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot,
         g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].compressed_attack_image,
         g_battle_gfx_vram_slots[image_slot].image_data);
     LoadImage(&g_battle_gfx_vram_slots[slot].image_rect, (u32*)g_battle_gfx_vram_slots[image_slot].image_data);
-    rect.x = (unit->spritesheet_vram_slot >> 3) * 64 + 0x340;
-    rect.y = (unit->spritesheet_vram_slot & 7) * 32 + 0x100;
-    rect.w = 0x40;
-    rect.h = 0x20;
+    rect.x
+        = (unit->spritesheet_vram_slot >> 3) * BATTLE_GFX_SPRITESHEET_STRIP_WIDTH + BATTLE_GFX_SPRITESHEET_STRIP_VRAM_X;
+    rect.y
+        = (unit->spritesheet_vram_slot & 7) * BATTLE_GFX_SPRITESHEET_STRIP_HEIGHT + BATTLE_GFX_SPRITESHEET_STRIP_VRAM_Y;
+    rect.w = BATTLE_GFX_SPRITESHEET_STRIP_WIDTH;
+    rect.h = BATTLE_GFX_SPRITESHEET_STRIP_HEIGHT;
     MoveImage(&rect, g_battle_gfx_vram_slots[slot].image_rect.x, g_battle_gfx_vram_slots[slot].image_rect.y + 200);
     g_battle_gfx_vram_slots[slot].owner = unit->runtime_id | BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE;
     g_main_frame_pacing_suppressed = 1;
@@ -2818,7 +2820,8 @@ static void battle_gfx_copy_shp_data_to_ram(
  * The file's 16 palettes go to the slot's CLUT copy with the STP bit set on
  * colors 1..15 (color 0 stays transparent). The 256x256 4-bit sprite image
  * goes to VRAM x 0x100 + 64 * index, y 0x100, and the 256x32 portrait and
- * body strip to the 0x340,0x100 area (column index / 8, row index % 8). The
+ * body strip to the BATTLE_GFX_SPRITESHEET_STRIP_VRAM_X/Y area (column
+ * index / 8, row index % 8). The
  * compressed attack image is copied into the slot for
  * battle_gfx_load_unit_into_evtchr_slot to expand later; its fixed length
  * overruns most files (QUIRKS.md). A null file loads nothing, and `unused`
@@ -2854,8 +2857,8 @@ static void battle_gfx_load_spritesheet_into_vram_slot(
         rect.x = column * 64 + 0x100;
         rect.y = 0x100;
         LoadTPage((u32*)data, 0, 0, rect.x, 0x100, 0x100, 0x100);
-        rect.x = (column / 8) * 64 + 0x340;
-        rect.y = (column % 8) * 32 + 0x100;
+        rect.x = (column / 8) * BATTLE_GFX_SPRITESHEET_STRIP_WIDTH + BATTLE_GFX_SPRITESHEET_STRIP_VRAM_X;
+        rect.y = (column % 8) * BATTLE_GFX_SPRITESHEET_STRIP_HEIGHT + BATTLE_GFX_SPRITESHEET_STRIP_VRAM_Y;
         LoadTPage((u32*)(data + sizeof(source->pixels)), 0, 0, rect.x, rect.y, 0x100, 0x20);
         for (byte_index = 0; byte_index < 0x30d4; byte_index++) {
             compressed_attack_image[byte_index]
@@ -3131,7 +3134,7 @@ void battle_gfx_reset_unit_graphics_load_state(void) {
         offset -= sizeof(battle_unit_slot_state_t)) {
         ((battle_unit_slot_state_t*)((u8*)g_battle_unit_slot_states + offset))->in_use = 0;
     }
-    for (offset = 8 * sizeof(battle_gfx_spritesheet_slot_t); offset >= 0;
+    for (offset = (BATTLE_GFX_SPRITESHEET_SLOT_COUNT - 1) * sizeof(battle_gfx_spritesheet_slot_t); offset >= 0;
         offset -= sizeof(battle_gfx_spritesheet_slot_t)) {
         ((battle_gfx_spritesheet_slot_t*)((u8*)g_battle_gfx_spritesheet_slots + offset))->in_use = 0;
     }
@@ -3446,7 +3449,7 @@ void battle_gfx_init_deployment_and_reset_unit_graphics_state(void) {
  *
  * g_battle_gfx_unit_graphics_load_state holds the file kind (0 SHP, 1 SEQ, 2 SPR), the
  * phase (0 read, 1 wait, 2 install, 3 finish), the descriptor index and the
- * heap buffer. SHP/SEQ ids below 5, or equal to the one already resident, and
+ * heap buffer. SHP/SEQ ids up to OTHER, or equal to the one already resident, and
  * an already loaded spritesheet skip the read. Returns 0 once every
  * descriptor is done, otherwise 1 inside a step and 2 after a step boundary. */
 s32 battle_gfx_step_queued_unit_graphics_load(void) {
@@ -3461,8 +3464,8 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                                                    .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                    .spritesheet_id]
                      .shp_id;
-            /* SHP ids below 5 are the shared files the startup loader keeps resident. */
-            if (id < 5 || id == g_battle_gfx_last_loaded_shp_id) {
+            /* SHP ids up to OTHER are the shared files the startup loader keeps resident. */
+            if (id <= BATTLE_SHP_OTHER || id == g_battle_gfx_last_loaded_shp_id) {
                 result = 2;
                 g_battle_gfx_unit_graphics_load_state.buffer = 0;
                 g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_FINISH;
@@ -3487,7 +3490,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                                                    .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                    .spritesheet_id]
                      .seq_id;
-            /* SEQ ids below 5 are likewise resident. */
+            /* SEQ ids up to OTHER are likewise resident. */
             if (id < BATTLE_SEQ_RUKA || id == g_battle_gfx_last_loaded_seq_id) {
                 result = 2;
                 g_battle_gfx_unit_graphics_load_state.buffer = 0;

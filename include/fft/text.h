@@ -333,7 +333,7 @@ void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* 
 void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
 
 /* BATTLE and WORLD each have their own body. */
-void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
+void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos);
 
 /* dialog windows */
 /* Box type: the 0x70 bits of a DisplayMessage dialog type byte. */
@@ -360,7 +360,9 @@ enum {
     DIALOG_TYPE_POSITION_MASK = 0x03,
     DIALOG_TYPE_OPTIONS_MASK = 0x0c,
     DIALOG_TYPE_BOX_TYPE_MASK = 0x70, /* dialog_box_type_e */
-    DIALOG_TYPE_NO_BOX = 0x80,
+    /* The window stays open after its text: ChangeDialog resumes it with a new text id, and
+     * text id 0xFFFF closes it. */
+    DIALOG_TYPE_KEEP_OPEN = 0x80,
 };
 
 /* The DIALOG_TYPE_OPTIONS_MASK field of a portrait box, as
@@ -387,7 +389,7 @@ typedef struct text_dialog_record {
     u16 box_type;      /* 0x18: dialog_type & 0x70 */
     u16 position;      /* 0x1a */
     u16 options;       /* 0x1c: dialog_type & 0x0c (dialog_options_e) */
-    u16 no_box;        /* 0x1e */
+    u16 keep_open;     /* 0x1e: dialog_type & DIALOG_TYPE_KEEP_OPEN */
     u16 line;          /* 0x20 */
     u16 first_line;    /* 0x22 */
     u16 last_line;     /* 0x24 */

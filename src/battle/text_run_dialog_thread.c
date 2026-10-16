@@ -3,7 +3,6 @@
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_unit.h"
-#include "fft/battle_unit_animation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
@@ -39,7 +38,7 @@
  * 3 the speaker's script unit id (portrait boxes) and 4 the portrait index
  * plus one. The DIALOG_THREAD_WORD_* task words add position offsets, a tail
  * shift, the opening tween and a width override. A stop request ends the
- * thread at any wait. With the 0x80 dialog-type bit the window outlives the
+ * thread at any wait. With DIALOG_TYPE_KEEP_OPEN the window outlives the
  * end of its text: the thread waits for a ChangeDialog resume carrying the
  * next text id in parameter 2, and 0xFFFF there closes the window.
  *
@@ -51,7 +50,7 @@
  * and loses the substitution-table base CSE. */
 void text_run_dialog_thread(void) {
     /* rec.dialog_type is the DisplayMessage dialog type byte, split into box_type,
-     * position, options and no_box below. */
+     * position, options and keep_open below. */
     text_dialog_record_t rec;
     RECT from;
     RECT to;
@@ -117,7 +116,7 @@ void text_run_dialog_thread(void) {
     rec.box_type = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;
     rec.position = rec.dialog_type & DIALOG_TYPE_POSITION_MASK;
     rec.options = rec.dialog_type & DIALOG_TYPE_OPTIONS_MASK;
-    rec.no_box = rec.dialog_type & DIALOG_TYPE_NO_BOX;
+    rec.keep_open = rec.dialog_type & DIALOG_TYPE_KEEP_OPEN;
     rec.arrow_offset = thread->task_words[DIALOG_THREAD_WORD_ARROW_OFFSET];
     rec.x_offset = thread->task_words[DIALOG_THREAD_WORD_X_OFFSET];
     rec.y_offset = thread->task_words[DIALOG_THREAD_WORD_Y_OFFSET];
@@ -588,9 +587,9 @@ void text_run_dialog_thread(void) {
                 hidden_window_next->icon_flags = 0;
 
                 if (character == TEXT_END_WAIT_FOR_CONFIRM) {
-                    /* With the 0x80 dialog-type bit the window stays open for ChangeDialog, which
+                    /* With DIALOG_TYPE_KEEP_OPEN the window stays open for ChangeDialog, which
                      * puts the next text id in parameter 2 (0xFFFF closes it) and resumes the thread. */
-                    if (rec.no_box == 0) {
+                    if (rec.keep_open == 0) {
                         break;
                     }
                     thread_set_current_task_id(THREAD_TASK_DIALOG_AWAIT_TEXT);
@@ -741,9 +740,9 @@ void text_run_dialog_thread(void) {
                 thread_yield();
             }
 
-            /* With the 0x80 dialog-type bit a resume also loads the next text from
+            /* With DIALOG_TYPE_KEEP_OPEN a resume also loads the next text from
              * parameter 2, as at 0xFE. */
-            if (rec.no_box != 0) {
+            if (rec.keep_open != 0) {
                 win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                 if ((rec.text & no_value) == no_value) {
                     break;

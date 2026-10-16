@@ -35,8 +35,8 @@ s32 equip_item_run_category_menu(void) {
         category = g_menu_selected_slot;
         g_equip_slot_item_browser_previewed_index = -1;
         equip_item_build_filtered_list(g_equip_unit_selected_index, category + 1,
-            g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? category + 1 : ITEM_LIST_FILTER_OTHER,
-            g_item_list_entries, ITEM_LIST_MODE_ALL);
+            g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+            ITEM_LIST_MODE_ALL);
         equip_menu_restore_list_selection(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
@@ -50,9 +50,9 @@ s32 equip_item_run_category_menu(void) {
         g_menu_row_callbacks[7].value = equip_menu_get_preview_mp_bonus;
     }
     equip_panel_toggle_item_numeric_thread(1);
-    /* The help text is the item's entry in HELP_TEXT_SECTION_ITEMS (0x6800 = section 13). */
+    /* The help text is the item's entry in HELP_TEXT_SECTION_ITEMS. */
     g_menu_help_message_text_id
-        = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] + 0x6800 : -1;
+        = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] + HELP_TEXT_ID_ITEM_BASE : -1;
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CROSS) {
         menu_set_selection_record(
@@ -67,8 +67,8 @@ s32 equip_item_run_category_menu(void) {
         g_menu_selected_slot = slot;
         category = g_menu_selected_slot;
         equip_item_build_filtered_list(g_equip_unit_selected_index, category + 1,
-            g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? category + 1 : ITEM_LIST_FILTER_OTHER,
-            g_item_list_entries, ITEM_LIST_MODE_ALL);
+            g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+            ITEM_LIST_MODE_ALL);
         g_equip_slot_item_browser_previewed_index = -1;
         equip_menu_restore_list_selection(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(

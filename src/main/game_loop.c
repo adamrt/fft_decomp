@@ -53,7 +53,7 @@ static void main_overlay_exec_battle_bin(void) {
  *
  * Each pass empties the inventory to the new-game stock and runs OPEN.BIN (after
  * main_boot_reset_game_state, unless the world map asked for the title screen
- * with result 5, which also skips the opening movie). An OPEN.BIN result of 0
+ * with MAIN_WORLD_RESULT_TITLE, which also skips the opening movie). An OPEN.BIN result of 0
  * goes straight into BATTLE.BIN; otherwise WLDCORE and WORLD run first and leave
  * their result in g_main_system_frontend_world_result. World map and BATTLE.BIN
  * then alternate until g_battle_game_flow_state asks for a reset or the
@@ -62,12 +62,12 @@ static void main_overlay_exec_battle_bin(void) {
 static void main_system_run_game_loop(void) {
     int open_mode;
 
-    g_main_system_frontend_world_result = 0;
+    g_main_system_frontend_world_result = MAIN_WORLD_RESULT_NONE;
 
     for (;;) {
         main_item_init_new_game_inventory();
 
-        if (g_main_system_frontend_world_result == 5) {
+        if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_TITLE) {
             open_mode = 1;
         } else {
             main_boot_reset_game_state();
@@ -76,7 +76,7 @@ static void main_system_run_game_loop(void) {
 
         if (main_overlay_exec_open_bin_main_loop(open_mode) == 0) {
             g_main_system_go_straight_to_battle = 1;
-            g_main_system_frontend_world_result = 0;
+            g_main_system_frontend_world_result = MAIN_WORLD_RESULT_NONE;
         } else {
             g_main_system_go_straight_to_battle = 0;
         }
@@ -86,7 +86,7 @@ static void main_system_run_game_loop(void) {
                 g_main_system_frontend_world_result = main_overlay_open_world_and_wldcore(1);
             }
 
-            if (g_main_system_frontend_world_result == 5) {
+            if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_TITLE) {
                 break;
             }
 

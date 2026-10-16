@@ -264,7 +264,7 @@ typedef struct battle_unit {
      * battle_gfx_update_status_bubble_graphic_trigger sets the flag and clears
      * the timer with a 16-bit store, so the timer is declared u16. */
     u8 status_bubble_active;                                 /* 0x2dc */
-    u8 status_bubble_id;                                     /* 0x2dd */
+    u8 status_bubble_id;                                     /* 0x2dd; battle_status_bubble_e */
     s8 status_bubble_x;                                      /* 0x2de */
     s8 status_bubble_y;                                      /* 0x2df */
     u16 status_bubble_timer;                                 /* 0x2e0 */
@@ -484,8 +484,5 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
 
 /* event library */
 extern image_load_parameters_t g_menu_unit_summary_portrait_image_params;
-
-/* Defined by the event library's script interpreter, in BATTLE as in WORLD. */
-s32 unit_is_moving(s32 runtime_id);
 
 #endif

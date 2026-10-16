@@ -51,14 +51,14 @@ s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* abil
 s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
 s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
 s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out);
-s32 battle_menu_collect_throwable_items(s32 unit_id, u8 ability, u8* items);
+s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out);
 s32 battle_menu_display_item_inventory_ability(s32 unit_id, s32 skillset, u8* out_item_ids);
 s32 battle_menu_get_unit_skillset_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out);
 s32 battle_menu_init_monster_skill_check(const unit_stats_t* unit);
 s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns);
 s32 battle_menu_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-u16 battle_menu_load_elemental_abilities(s32 skillset_slot, u8 unit_id);
+u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset);
 s32 battle_menu_load_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
 s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);

@@ -54,11 +54,11 @@ void world_menu_update_grid_cursor(s16 alternate) {
 
     if (g_world_grid_menu_initialized == 0) {
         if (alternate == 0) {
-            g_world_grid_menu_cell_23_text_offset = -0x6800;
-            g_world_grid_menu_cell_24_text_offset = -0x6800;
+            g_world_grid_menu_cell_23_text_offset = (s16)HELP_TEXT_ID_SKILLSET_BASE;
+            g_world_grid_menu_cell_24_text_offset = (s16)HELP_TEXT_ID_SKILLSET_BASE;
         } else {
-            g_world_grid_menu_cell_23_text_offset = 0x7800;
-            g_world_grid_menu_cell_24_text_offset = 0x7800;
+            g_world_grid_menu_cell_23_text_offset = HELP_TEXT_ID_ABILITY_BASE;
+            g_world_grid_menu_cell_24_text_offset = HELP_TEXT_ID_ABILITY_BASE;
         }
         g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         g_world_grid_menu_initialized = 1;

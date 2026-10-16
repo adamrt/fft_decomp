@@ -6,7 +6,6 @@
 #include "fft/battle_camera.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_unit.h"
-#include "fft/battle_unit_animation.h"
 #include "fft/camera.h"
 #include "fft/event_debugchr.h"
 #include "fft/event_etc.h"
@@ -40,10 +39,15 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_event.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+
+/* What every caller reserves at the high overlay address: room for the second half of BUNIT or
+ * EQUIP, or for HELPMENU or JOBSTTS. */
+enum { MENU_HIGH_OVERLAY_SIZE = 0x20000 };
 
 /* Set the frame budget of the next timed message (menu_icon_timed_thread); adding 0x100 also holds
  * off cancel until it runs out. */
@@ -406,8 +410,8 @@ void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level) {
 }
 
 /* Reserve size bytes of the main heap at the high overlay load address, yielding until that block
- * is free (with a wait message when the debug font is on). Every caller reserves 0x20000 bytes:
- * room for the second half of BUNIT or EQUIP, or for HELPMENU or JOBSTTS. */
+ * is free (with a wait message when the debug font is on). Every caller reserves
+ * MENU_HIGH_OVERLAY_SIZE. */
 static void menu_reserve_high_overlay(u32 size) {
     while (1) {
         if (main_heap_reserve_at(g_main_heap_high_overlay_load_address, size)
@@ -571,7 +575,7 @@ void menu_run_triangle_selection(void) {
     while (battle_camera_is_active() != 0 || g_menu_transition_state != 0) {
         thread_yield();
     }
-    script_pulse_tutorial_wait_value(0xFE);
+    script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_MINI_MENU);
     g_menu_hide_numeric_values = 0;
     menu_run_icon_selection_loop();
 }
@@ -627,7 +631,7 @@ static void menu_run_bunit_transition_thread(void) {
     thread_set_parameters(THREAD_SLOT_HOVERED_UNIT_STATS, 0, 0, 1);
     thread_wait_for_unit_view_panels();
     menu_request_open_companion_executable(COMPANION_OVERLAY_BUNIT);
-    menu_reserve_high_overlay(0x20000);
+    menu_reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     menu_request_open_companion_executable(COMPANION_OVERLAY_BUNIT_SECOND_HALF);
     thread_wait_frames(2);
     g_menu_help_open = 1;
@@ -649,7 +653,7 @@ static void menu_run_help_menu_thread(void) {
         && thread_find_running_by_task(THREAD_TASK_MENU_WINDOW_BUILD) == 0) {
         sound_queue_sfx_confirm();
     }
-    menu_reserve_high_overlay(0x20000);
+    menu_reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     menu_request_open_companion_executable(COMPANION_OVERLAY_HELPMENU);
     menu_run_battle_help();
 }
@@ -664,7 +668,7 @@ void menu_run_jobstts_thread(void) {
     }
     menu_set_modal_open();
     sound_queue_sfx_confirm();
-    menu_reserve_high_overlay(0x20000);
+    menu_reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     menu_request_open_companion_executable(COMPANION_OVERLAY_JOBSTTS);
     thread_wait_frames(2);
     g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
@@ -694,7 +698,7 @@ void menu_run_equip_thread(void) {
     g_menu_overlay_state = 1;
     thread_wait_for_unit_view_panels();
     menu_request_open_companion_executable(COMPANION_OVERLAY_EQUIP);
-    menu_reserve_high_overlay(0x20000);
+    menu_reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     menu_request_open_companion_executable(COMPANION_OVERLAY_EQUIP_SECOND_HALF);
     thread_suspend(THREAD_SLOT_MENU);
     thread_suspend(THREAD_SLOT_MENU_CHILD);
@@ -1004,7 +1008,7 @@ static void menu_start_entry_thread(void) {
     } else {
         thread_wait_frames(2);
     }
-    script_pulse_tutorial_wait_value(0xFF);
+    script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_MENU_ENTRY);
     if (menu_id == MENU_COMMAND_ID_OTHER_UNIT || menu_id == MENU_COMMAND_ID_OTHER_UNIT_INSPECT) {
         if (menu_get_selected_unit_stats()->unit_flags & UNIT_FLAG_EGG) {
             menu_id = MENU_COMMAND_ID_EGG;

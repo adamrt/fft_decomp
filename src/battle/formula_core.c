@@ -22,6 +22,15 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Knockback directions: quarter-turn facings in the BATTLE_FACING_* order, which differs from
+ * move_direction_e. */
+enum {
+    KNOCKBACK_DIRECTION_SOUTH = 0, /* -y */
+    KNOCKBACK_DIRECTION_WEST = 1,  /* -x */
+    KNOCKBACK_DIRECTION_NORTH = 2, /* +y */
+    KNOCKBACK_DIRECTION_EAST = 3,  /* +x */
+};
+
 static s32 battle_map_tile_data_15_stub(void);
 static s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y);
 
@@ -159,7 +168,7 @@ s32 battle_map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y,
             attempts++;
         }
         if (attempts == 1000) {
-            main_system_handle_battle_load_exception(0x80);
+            main_system_handle_battle_load_exception(MAIN_BATTLE_LOAD_EXCEPTION_MAP_RETRY);
         }
         break;
     default:
@@ -263,22 +272,20 @@ static void battle_formula_calculate_knockback(void) {
     }
     x = target->x;
     y = target->position.y;
-    /* direction is the push's facing in quarter turns: 0 south (-y), 1 west
-     * (-x), 2 north (+y), 3 east (+x). */
     if (ady < adx) {
         if (dx > 0) {
-            direction = 3;
+            direction = KNOCKBACK_DIRECTION_EAST;
             x++;
         } else {
-            direction = 1;
+            direction = KNOCKBACK_DIRECTION_WEST;
             x--;
         }
     } else {
         if (dy > 0) {
-            direction = 2;
+            direction = KNOCKBACK_DIRECTION_NORTH;
             y++;
         } else {
-            direction = 0;
+            direction = KNOCKBACK_DIRECTION_SOUTH;
             y--;
         }
     }
@@ -319,8 +326,8 @@ static void battle_formula_calculate_knockback(void) {
 
 /* Check whether the current target can be knocked back onto tile (x, y).
  *
- * direction is 0 south, 1 west, 2 north, 3 east and selects the facing edges
- * of the target's tile and the destination tile (two bits of slope_type per
+ * direction (a KNOCKBACK_DIRECTION_*) selects the facing edges of the
+ * target's tile and the destination tile (two bits of slope_type per
  * edge scale the tile's half height). A destination layer higher
  * than the target's edge is unusable; when only one layer is low enough, the
  * other layer's ceiling must leave at least four half-units of headroom. Of
@@ -346,19 +353,19 @@ static s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y) 
         return -1;
     }
     switch (direction) {
-    case 3:
+    case KNOCKBACK_DIRECTION_EAST:
         source_shift = 0;
         destination_shift = 2;
         break;
-    case 2:
+    case KNOCKBACK_DIRECTION_NORTH:
         source_shift = 6;
         destination_shift = 4;
         break;
-    case 1:
+    case KNOCKBACK_DIRECTION_WEST:
         source_shift = 2;
         destination_shift = 0;
         break;
-    case 0:
+    case KNOCKBACK_DIRECTION_SOUTH:
         source_shift = 4;
         destination_shift = 6;
         break;
@@ -927,7 +934,7 @@ void battle_formula_apply_weather_effects_on_bows(void) {
         || g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type == ITEM_TYPE_BOW) {
         weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
         time_of_day = script_get_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY);
-        if (time_of_day == 1) { /* night */
+        if (time_of_day == TIME_OF_DAY_NIGHT) {
             g_battle_action_current_ability.base_hit = g_battle_action_current_ability.base_hit * 3 / 4;
         }
         /* The raw weather variable, not battle_map_get_effective_weather: a

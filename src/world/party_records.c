@@ -3,7 +3,7 @@
 #include "fft/data_item.h"
 #include "fft/data_job.h"
 #include "fft/data_skillset.h"
-#include "fft/main.h"
+#include "fft/job.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"
 #include "fft/menu_status.h"

@@ -439,9 +439,9 @@ static void battle_weather_randomize_from_calendar(void) {
     script_set_variable(EVENT_SCRIPT_VAR_WEATHER, weather);
 
     if ((rand() * 3) / 0x8000 != 0) {
-        script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, 0);
+        script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, TIME_OF_DAY_DAY);
     } else {
-        script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, 1);
+        script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, TIME_OF_DAY_NIGHT);
     }
 }
 
@@ -516,7 +516,7 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
         step++;
         break;
     case 11:
-        if (g_main_system_frontend_world_result == 1
+        if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_RANDOM_BATTLE
             || script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             main_sound_unload_current_scenario_music();
             /* Called with no argument: the sound id is whatever
@@ -561,7 +561,7 @@ s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 depl
         ((void (*)(void))main_sound_stop_sfx)();
         battle_camera_init_defaults();
         battle_map_init_palette_state();
-        if (g_main_system_frontend_world_result == 1) {
+        if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_RANDOM_BATTLE) {
             battle_weather_randomize_from_calendar();
         }
         step++;
@@ -639,7 +639,7 @@ s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 depl
         }
         break;
     case 11:
-        if (g_main_system_frontend_world_result == 1
+        if (g_main_system_frontend_world_result == MAIN_WORLD_RESULT_RANDOM_BATTLE
             || script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             main_sound_unload_current_scenario_music();
             /* Called with no argument: the sound id is whatever

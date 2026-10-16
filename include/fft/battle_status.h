@@ -9,15 +9,6 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* status indices */
-/* Event infliction helpers number bits LSB-first, unlike stored status IDs. */
-#define STATUS_LSB_INDEX(id) (((id) & ~7) | (7 - ((id) & 7)))
-#define STATUS_LSB_MASK(id)  ((u8)(1U << ((id) & 7)))
-/* The special-status callback table reserves index 0; timed slots begin at Poison. */
-#define STATUS_HANDLER_INDEX(id) ((id) + 1)
-#define STATUS_CT_INDEX(id)      ((id) - STATUS_ID_POISON)
-#define STATUS_PACKED_MASK(id)   ((u32)STATUS_BYTE_MASK(id) << (STATUS_BYTE_INDEX(id) * 8))
-
 /* turn flags */
 s32 battle_status_calculate_turn_flags(const unit_stats_t* unit);
 void battle_status_enable_disable_acting(unit_stats_t* unit);

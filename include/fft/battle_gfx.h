@@ -12,19 +12,29 @@
 #include "psx/types.h"
 
 /* render buffers */
+/* Primitive pool sizes of a render buffer. The map mesh's position records (battle_map_mesh.h)
+ * parallel the four map polygon pools; the weather sprites are the flat-textured triangles. */
+enum {
+    BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT = 360,
+    BATTLE_RENDER_TEXTURED_QUAD_COUNT = 710,
+    BATTLE_RENDER_UNTEXTURED_TRIANGLE_COUNT = 64,
+    BATTLE_RENDER_UNTEXTURED_QUAD_COUNT = 256,
+    BATTLE_RENDER_WEATHER_SPRITE_COUNT = 64,
+};
+
 /* One of the two 60968-byte battle render buffers. The primitive pools are
  * pre-initialized once; main_gfx_swap_and_clear_otag reads the ordering table
  * pointer at +0xe5b4. */
 typedef struct battle_render_buffer {
-    POLY_GT3 gt3[360]; /* 0x00000 */
-    POLY_GT4 gt4[710]; /* 0x03840 */
-    POLY_F3 f3[64];    /* 0x0c878 */
-    POLY_F4 f4[256];   /* 0x0cd78 */
-    POLY_G4 overlay;   /* 0x0e578 */
-    DR_MODE overlay_modes[2] /* 0x0e59c */;
-    u32* otag;             /* 0x0e5b4 */
-    u8 _unused_e5b8[0x70]; /* 0x0e5b8 */
-    POLY_FT3 ft3[64];      /* 0x0e628 */
+    POLY_GT3 gt3[BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT]; /* 0x00000 */
+    POLY_GT4 gt4[BATTLE_RENDER_TEXTURED_QUAD_COUNT];     /* 0x03840 */
+    POLY_F3 f3[BATTLE_RENDER_UNTEXTURED_TRIANGLE_COUNT]; /* 0x0c878 */
+    POLY_F4 f4[BATTLE_RENDER_UNTEXTURED_QUAD_COUNT];     /* 0x0cd78 */
+    POLY_G4 overlay;                                     /* 0x0e578 */
+    DR_MODE overlay_modes[2];                            /* 0x0e59c */
+    u32* otag;                                           /* 0x0e5b4 */
+    u8 _unused_e5b8[0x70];                               /* 0x0e5b8 */
+    POLY_FT3 ft3[BATTLE_RENDER_WEATHER_SPRITE_COUNT];    /* 0x0e628 */
 } battle_render_buffer_t;
 typedef char battle_render_buffer_size_must_be_60968[(sizeof(battle_render_buffer_t) == 60968) ? 1 : -1];
 
@@ -120,7 +130,7 @@ extern palette_t g_battle_gfx_treasure_palettes[5];
 void battle_gfx_reset_unit_palette_by_runtime_id(u32 runtime_id);
 void battle_gfx_check_tile_status_palette_mod(struct battle_unit* unit, s32 tile_effect_level, s32 final_value);
 void battle_gfx_start_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
-void battle_gfx_start_unit_fade_out_red(s32 unit_id);
+void battle_gfx_start_unit_fade_out_red(s32 runtime_id);
 void battle_gfx_start_event_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
 void battle_gfx_modify_palette_based_on_team(struct battle_unit* unit, s32 amount);
 void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
@@ -129,20 +139,31 @@ void battle_gfx_set_evtchr_palette_by_runtime_id(s32 runtime_id, s32 slot_index,
 void battle_gfx_set_thrown_item_graphic_palette(s32 item_id, battle_unit_t* unit);
 void battle_gfx_set_thrown_item_palette_by_runtime_id(u32 item_id, u32 runtime_id);
 void battle_gfx_apply_unit_palette_modulation_to_units(
-    s32 preset_color, s32 time, s32 runtime_id, s16 red, s16 green, s16 blue);
+    s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue);
 void battle_gfx_tint_all_units_by_team(void);
 void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_value);
 void battle_gfx_update_unit_palette_animation(void);
 void battle_gfx_restore_unit_palettes(void);
 
 /* result and status displays */
+/* battle_unit_t.status_bubble_id: the bubbles the code names. The others follow the statuses of
+ * g_battle_gfx_status_bubble_status_masks. */
+typedef enum battle_status_bubble {
+    BATTLE_STATUS_BUBBLE_DEAD = 0, /* the death counter, or the RERAISE image under Reraise */
+    BATTLE_STATUS_BUBBLE_CHARGING = 9,
+    BATTLE_STATUS_BUBBLE_RERAISE = 10,
+    BATTLE_STATUS_BUBBLE_DEATH_SENTENCE = 20, /* its counter */
+    BATTLE_STATUS_BUBBLE_SOURCE_UNIT = 21,    /* the source unit's marker, not a status */
+    BATTLE_STATUS_BUBBLE_COUNT = 22,
+} battle_status_bubble_e;
+
 extern MATRIX g_battle_gfx_numeric_display_matrix;
 extern s32 g_battle_gfx_status_bubble_delay;
 extern palette_t g_battle_gfx_status_bubble_palette;
-/* Status flag shown by each status bubble id, 0x16 entries. Bubbles 0 (KO), 0x14 (Death
- * Sentence) and 0x15 (casting) hold 0 and are tested separately by
- * battle_gfx_determine_status_bubble_parameters. */
-extern s32 g_battle_gfx_status_bubble_status_masks[];
+/* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
+ * tested separately by battle_gfx_determine_status_bubble_parameters; bubbles 8 and 11 hold 0 too,
+ * so they never show. */
+extern s32 g_battle_gfx_status_bubble_status_masks[BATTLE_STATUS_BUBBLE_SOURCE_UNIT];
 extern s16 g_battle_numeric_digit_0_critical_zoom_curve[21];
 extern s16 g_battle_numeric_digit_0_zoom_curve[21];
 extern s16 g_battle_numeric_digit_1_critical_zoom_curve[21];

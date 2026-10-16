@@ -501,7 +501,7 @@ s32 main_sound_update_tunes(void) {
         }
         tune_index = g_main_sound_music.slots.tune & MAIN_SOUND_TUNE_ID_MASK;
         /* Drop MAIN_SOUND_TUNE_PENDING: the tune is now playing. */
-        g_main_sound_music.slots.tune &= 0x7f;
+        g_main_sound_music.slots.tune &= MAIN_SOUND_TUNE_PLAYING_MASK;
         tune_handles = &g_main_sound_music.slots.music[1];
         handle = &tune_handles[tune_index];
         if (*handle == 0) {

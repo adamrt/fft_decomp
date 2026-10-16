@@ -98,8 +98,8 @@ s32 item_get_total_count(s16 item_id) {
 
 /* Add delta to the count of a poached item held for the Fur Shop, keeping it within 0..255, and
  * return the new count; callers pass 0 to read it. */
-s32 world_shop_adjust_poached_item_quantity(s16 index, s32 delta) {
-    s32 slot = index & ITEM_ENTRY_ID_MASK;
+s32 world_shop_adjust_poached_item_quantity(s16 item_id, s32 delta) {
+    s32 slot = item_id & ITEM_ENTRY_ID_MASK;
     s32 value = g_main_item_poached_quantities[slot] + delta;
 
     if (value < 0) {

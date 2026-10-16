@@ -253,9 +253,9 @@ static s32 world_menu_run_remove_ability(void) {
     if (ability == 0) {
         g_menu_help_message_text_id = -1;
     } else if (slot_index >= 2) {
-        g_menu_help_message_text_id = ability + 0x7800;
+        g_menu_help_message_text_id = ability + HELP_TEXT_ID_ABILITY_BASE;
     } else {
-        g_menu_help_message_text_id = ability + 0x9800;
+        g_menu_help_message_text_id = ability + HELP_TEXT_ID_SKILLSET_BASE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         saved_slots = g_world_remove_ability_slots;
@@ -415,9 +415,9 @@ static s32 world_formation_run_set_ability_menu(void) {
         if (current == 0) {
             g_menu_help_message_text_id = -1;
         } else if (slot >= 2) {
-            g_menu_help_message_text_id = current + 0x7800;
+            g_menu_help_message_text_id = current + HELP_TEXT_ID_ABILITY_BASE;
         } else {
-            g_menu_help_message_text_id = current + 0x9800;
+            g_menu_help_message_text_id = current + HELP_TEXT_ID_SKILLSET_BASE;
         }
 
         slot = menu_update_vertical_selection_and_mark_change(
@@ -451,9 +451,9 @@ static s32 world_formation_run_set_ability_menu(void) {
     } else {
         if (g_menu_list_entry_count != 0) {
             cursor = g_menu_list_selected_index;
-            value = 0x7800;
+            value = HELP_TEXT_ID_ABILITY_BASE;
             if (g_world_set_ability_slot == 1) {
-                value = 0x9800;
+                value = HELP_TEXT_ID_SKILLSET_BASE;
             }
             g_menu_help_message_text_id = value + (g_item_list_entries[cursor] & ABILITY_LIST_ENTRY_ID_MASK);
             if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {

@@ -90,11 +90,14 @@ void wldcore_gfx_draw_context_value_display(GsOT* ot);
 void wldcore_gfx_draw_calendar_date(GsOT* ot);
 
 /* pictures and backgrounds */
+enum { WLDCORE_BACKDROP_WORDS = 256 * 240 / 2 };
+
 /* Sector offsets of each picture set in WLDPIC.BIN and each background set in WLDBK.BIN. */
 extern s32 g_wldcore_picture_sector_offsets[];
 extern s32 g_wldcore_background_sector_offsets[];
 /* Destination image buffer (read back as a TIM by wldcore_sound_novel_opcode_0a_load_picture). */
 extern u32* g_wldcore_picture_buffer;
+/* Begins with the 256x240 16-bit backdrop image, WLDCORE_BACKDROP_WORDS 32-bit words. */
 extern u32* g_wldcore_scratch_buffer;
 /* Currently resident picture set, reset to -1 by wldcore_init_world_map_state. */
 extern s32 g_wldcore_loaded_picture_set;

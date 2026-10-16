@@ -287,9 +287,10 @@ void world_formation_run_job_wheel_menu(void) {
                             g_world_formation_current_menu = WORLD_FORMATION_MENU_JOB_CHANGE;
                         } else if ((job & WORLD_JOB_LIST_ENTRY_ID_MASK)
                             != g_world_unit_pointers[g_unit_selected_index]->identity.job_id) {
-                            /* Text 0xE800 starts section 29, which the first call bound to the job texts. */
+                            /* The first call bound the formation text section to the job texts. */
                             world_text_show_message_and_play_sound(
-                                world_job_get_text_index(job & WORLD_JOB_LIST_ENTRY_ID_MASK) + 0xE800,
+                                world_job_get_text_index(job & WORLD_JOB_LIST_ENTRY_ID_MASK)
+                                    + WORLD_TEXT_ID_FORMATION_TEXT_BASE,
                                 MAIN_SFX_ERROR_MESSAGE);
                             g_menu_status_display_thread_params.style = 1;
                         } else {
@@ -301,7 +302,8 @@ void world_formation_run_job_wheel_menu(void) {
                         if (g_world_job_wheel_job_count >= 2) {
                             i = world_job_get_text_index(job & WORLD_JOB_LIST_ENTRY_ID_MASK);
                             if (i >= 0) {
-                                world_text_show_message_and_play_sound(i + 0xE800, MAIN_SFX_WINDOW_OPEN);
+                                world_text_show_message_and_play_sound(
+                                    i + WORLD_TEXT_ID_FORMATION_TEXT_BASE, MAIN_SFX_WINDOW_OPEN);
                                 g_menu_status_display_thread_params.style = 1;
                             }
                         }

@@ -1,7 +1,6 @@
 /* The learn job list, selected ability prompts and cached job level and JP lookups. */
 
 #include "fft/job.h"
-#include "fft/main.h"
 #include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/menu_help.h"

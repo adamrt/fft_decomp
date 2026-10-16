@@ -227,6 +227,13 @@ enum {
     EVENT_CASUALTY_COUNT_MAX = 9999,
 };
 
+/* EVENT_SCRIPT_VAR_TIME_OF_DAY values. Map loading puts the night bit in bit 15 of the GNS map
+ * state. */
+enum {
+    TIME_OF_DAY_DAY = 0,
+    TIME_OF_DAY_NIGHT = 1,
+};
+
 /* Ordinary variables are 32-bit values; the remaining script-variable domains
  * are packed as 32 one-bit values or eight four-bit values per 32-bit value. */
 enum {
@@ -257,7 +264,7 @@ typedef enum event_id {
     EVENT_ID_EPILOGUE = 0x12c,
     /* REQUIRE congratulates the player on completing the game after it. */
     EVENT_ID_FINAL_BATTLE_WON = 0x145,
-    /* script_run_event_frame returns 0x13 when it ends. */
+    /* script_run_event_frame returns SCRIPT_EVENT_FRAME_ENDING when it ends. */
     EVENT_ID_FUNERAL = 0x147,
     /* A unit the event draws also gets its status graphics. */
     EVENT_ID_LIMBERRY_CEMETERY_BATTLE = 0x18c,

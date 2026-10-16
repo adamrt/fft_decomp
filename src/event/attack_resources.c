@@ -10,7 +10,6 @@
 #include "fft/battle_gfx_resource.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_light.h"
-#include "fft/battle_map_resource.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_move.h"
 #include "fft/battle_unit.h"
@@ -1648,7 +1647,7 @@ void menu_select_unit_action_slots_thread(void) {
         }
         g_thread_call_target = menu_build_ability_list;
         thread_call_on_main_stack(i);
-        script_pulse_tutorial_wait_value(0xFB);
+        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_ABILITY_LIST);
         menu_run_scrolling_ability_list_thread();
         slot->selected_index = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
         slot->scroll_offset = g_menu_ability_layout.row_offset;
@@ -1746,7 +1745,7 @@ static void menu_build_skillset_entries(void) {
 /* Build the skillset list, then wait for its submenu or run icon selection.
  * The completion value written to the thread's
  * second parameter is materialized before the branch, which puts `li v1,1`
- * in the beqz delay slot ahead of the 0xFC argument. */
+ * in the beqz delay slot ahead of the SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST argument. */
 void menu_run_skillset_thread(void) {
     s32 param_value;
     menu_unit_selection_record_t* row;
@@ -1777,7 +1776,7 @@ void menu_run_skillset_thread(void) {
     row = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
     g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = row->skillset_index;
     g_menu_restore_depth = 1;
-    script_pulse_tutorial_wait_value(0xFC);
+    script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST);
     menu_run_icon_selection_loop();
     row->skillset_index = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
     thread_exit_current();

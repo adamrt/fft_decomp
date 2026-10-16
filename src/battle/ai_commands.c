@@ -6,7 +6,6 @@
 #include "fft/battle_ai_decision.h"
 #include "fft/battle_map.h"
 #include "fft/battle_move.h"
-#include "fft/battle_status.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
 #include "fft/data.h"

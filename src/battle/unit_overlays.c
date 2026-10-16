@@ -475,10 +475,10 @@ s32 battle_gfx_calculate_world_height_from_battle_tile(battle_unit_t* unit) {
  *
  * The four shadow_quad corners are projected into a semi-transparent POLY_FT4.
  * A unit below the water surface of its tile (world y greater than
- * -(height + depth) * 12, negative y being up) gets the additive (tpage 0x3f)
- * water image, whose UVs turn a quarter every 16 counts of shadow_counter
- * (advanced by the frame interval); any other unit gets the subtractive
- * (tpage 0x5f) shadow image.
+ * -(height + depth) * 12, negative y being up) gets the additive water image of
+ * the FRAME.BIN page, whose UVs turn a quarter every 16 counts of
+ * shadow_counter (advanced by the frame interval); any other unit gets the
+ * subtractive shadow image of the same page.
  *
  * A unit at or below the terrain under its event and SEQ adjusted position uses
  * the caller's ordering-table entry. A unit above it (jumping, floating or on
@@ -530,7 +530,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         && -(tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP < unit->world_coords.vy) {
         unit->shadow_counter += g_main_system_vsync_interval;
         frame = unit->shadow_counter;
-        prim->tpage = 0x3f;
+        prim->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         prim->clut = unit->clut + 0x40; /* the unit's CLUT of MAP_CLUT_ROW_UNIT_SHADOWS */
         prim->r0 = prim->g0 = prim->b0 = 0x80;
         switch (frame & 0x30) {
@@ -560,7 +560,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
             break;
         }
     } else {
-        prim->tpage = 0x5f;
+        prim->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_SUBTRACT;
         prim->clut = unit->clut + 0x40; /* the unit's CLUT of MAP_CLUT_ROW_UNIT_SHADOWS */
         prim->r0 = prim->g0 = prim->b0 = 0x80;
         prim->u0 = prim->u2 = 0x90;
@@ -603,9 +603,9 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
  * The four vertices are projected with the battle camera. Shape 0 (see
  * battle_target_calculate_cursor_tile_polygon) draws a textured quad; shapes 1
  * and 2 split the tile into two textured triangles along the v0-v3 or v1-v2
- * diagonal. Each primitive draws the 13 x 13 glow image additively (tpage 0x3f)
- * with CLUT palette + 1 of the sprite row, and a copy of it fills the same area
- * from a single texel with CLUT 5 at half blend (tpage 0x1f). Both are queued
+ * diagonal. Each primitive draws the 13 x 13 glow image of the FRAME.BIN page
+ * additively with CLUT palette + 1 of the sprite row, and a copy of it fills
+ * the same area from a single texel with CLUT 5 at half blend. Both are queued
  * only when the first three projected vertices face the camera. Every
  * primitive takes a POLY_FT4-sized slot of the pool.
  */
@@ -642,7 +642,7 @@ void battle_gfx_build_cursor_tile_glow(
         quad->x3 = screen.vx;
         quad->y3 = screen.vy;
         quad->code |= 2;
-        quad->tpage = 0x3f;
+        quad->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         quad->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         quad->r0 = quad->g0 = quad->b0 = 0x80;
         quad->u2 = 0;
@@ -654,7 +654,7 @@ void battle_gfx_build_cursor_tile_glow(
         quad->v3 = 0xad;
         quad->v2 = 0xad;
         *quad_glow = *quad;
-        quad_glow->tpage = 0x1f;
+        quad_glow->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_AVERAGE;
         quad_glow->clut = GetClut(0x50, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         quad_glow->u2 = 0xc;
         quad_glow->u0 = 0xc;
@@ -692,7 +692,7 @@ void battle_gfx_build_cursor_tile_glow(
         tri_b->y1 = screen.vy;
         tri_a->code |= 2;
         tri_b->code |= 2;
-        tri_a->tpage = tri_b->tpage = 0x3f;
+        tri_a->tpage = tri_b->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b->r0 = tri_b->g0 = tri_b->b0 = 0x80;
         tri_a->r0 = tri_a->g0 = tri_a->b0 = 0x80;
@@ -710,7 +710,7 @@ void battle_gfx_build_cursor_tile_glow(
         tri_a->v2 = 0xad;
         *tri_a_glow = *tri_a;
         *tri_b_glow = *tri_b;
-        tri_a_glow->tpage = tri_b_glow->tpage = 0x1f;
+        tri_a_glow->tpage = tri_b_glow->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_AVERAGE;
         tri_a_glow->clut = tri_b_glow->clut = GetClut(0x50, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b_glow->u2 = 0xc;
         tri_a_glow->u2 = 0xc;
@@ -758,7 +758,7 @@ void battle_gfx_build_cursor_tile_glow(
         tri_a->y2 = tri_b->y1 = screen.vy;
         tri_a->code |= 2;
         tri_b->code |= 2;
-        tri_a->tpage = tri_b->tpage = 0x3f;
+        tri_a->tpage = tri_b->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b->r0 = tri_b->g0 = tri_b->b0 = 0x80;
         tri_a->r0 = tri_a->g0 = tri_a->b0 = 0x80;
@@ -776,7 +776,7 @@ void battle_gfx_build_cursor_tile_glow(
         tri_a->v2 = 0xad;
         *tri_a_glow = *tri_a;
         *tri_b_glow = *tri_b;
-        tri_a_glow->tpage = tri_b_glow->tpage = 0x1f;
+        tri_a_glow->tpage = tri_b_glow->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_AVERAGE;
         tri_a_glow->clut = tri_b_glow->clut = GetClut(0x50, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b_glow->u2 = 0xc;
         tri_a_glow->u2 = 0xc;
@@ -862,7 +862,7 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     {
         /* Read as a halfword, as the target does, after the half height. */
         u16 screen_y = transformed.vy;
-        prim->tpage = 0x5f;
+        prim->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_SUBTRACT;
         prim->y3 = screen_y + half_height;
     }
     prim->code |= 2;
@@ -914,7 +914,7 @@ void battle_gfx_draw_wait_direction_arrows(SVECTOR* base, u32* ot) {
         prim = g_battle_gfx_sprite_prim_pool + battle_gfx_take_sprite_prim();
         ((P_TAG*)prim)->len = 9;
         prim->code = 0x2e;
-        prim->tpage = 0x3f;
+        prim->tpage = BATTLE_GFX_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         main_util_set_svector(&position, base->vx + dx[i], base->vy - 48, base->vz + dz[i]);
         RotTrans(&position, &transformed, &flag);
         prim->x0 = prim->x2 = transformed.vx - 7;
@@ -1015,13 +1015,14 @@ static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
 
 /* Advances one unit's status bubble by g_main_system_vsync_interval frames.
  *
- * The bubble switches texture rows every 16 timer ticks (bubble 9 every 8).
- * Every 16 ticks the bubble id walks forward to the next of the 22 bubbles
- * that applies, wrapping to 0, and the bubble's x/y offsets are chosen from
- * the unit's SHP type and animation. Bubbles 0 to 0x14 follow statuses
- * (g_battle_gfx_status_bubble_status_masks); bubble 0x15 belongs to the source
- * unit instead. The dead (0) and Death Sentence (0x14) bubbles, which show
- * counters, stay while their status lasts. A unit with no bubble status that
+ * The bubble switches texture rows every 16 timer ticks (CHARGING every 8).
+ * Every 16 ticks the bubble id walks forward to the next of the
+ * BATTLE_STATUS_BUBBLE_COUNT bubbles that applies, wrapping to DEAD, and the
+ * bubble's x/y offsets are chosen from the unit's SHP type and animation. The
+ * bubbles before SOURCE_UNIT follow statuses
+ * (g_battle_gfx_status_bubble_status_masks); SOURCE_UNIT belongs to the source
+ * unit instead. The DEAD and DEATH_SENTENCE bubbles, which show counters, stay
+ * while their status lasts. A unit with no bubble status that
  * is not the source unit loses its bubble.
  *
  * The block-scoped bubble_mask keeps GCC from rotating the loop's leading exit
@@ -1035,7 +1036,7 @@ static void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
 
     for (frame = 0; frame < g_main_system_vsync_interval; frame++) {
         bubble = unit->status_bubble_id;
-        if (bubble == 9) {
+        if (bubble == BATTLE_STATUS_BUBBLE_CHARGING) {
             unit->status_bubble_alternate_row = (unit->status_bubble_timer & 8) >> 3;
         } else {
             unit->status_bubble_alternate_row = (unit->status_bubble_timer & 0x10) >> 4;
@@ -1052,23 +1053,23 @@ static void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
             for (;;) {
                 s32 bubble_mask;
 
-                if (bubble == 0) {
+                if (bubble == BATTLE_STATUS_BUBBLE_DEAD) {
                     if (status_flags & BATTLE_UNIT_STATUS_DEAD) {
                         break;
                     }
-                } else if (bubble == 0x14) {
+                } else if (bubble == BATTLE_STATUS_BUBBLE_DEATH_SENTENCE) {
                     if (status_flags & BATTLE_UNIT_STATUS_DEATH_SENTENCE) {
                         break;
                     }
                 }
                 bubble++;
-                if (bubble >= 0x16) {
-                    bubble = 0;
+                if (bubble >= BATTLE_STATUS_BUBBLE_COUNT) {
+                    bubble = BATTLE_STATUS_BUBBLE_DEAD;
                 }
                 if (bubble == unit->status_bubble_id) {
                     break;
                 }
-                if (bubble != 0x15) {
+                if (bubble != BATTLE_STATUS_BUBBLE_SOURCE_UNIT) {
                     bubble_mask = g_battle_gfx_status_bubble_status_masks[bubble];
                     if (status_flags & bubble_mask) {
                         break;
@@ -1161,10 +1162,10 @@ static const u32 g_status_bubble_zoom_rodata[2] = {
  * Queue the unit's status bubble into the ordering table.
  *
  * The bubble's texture coordinates are chosen from the status bubble id. The
- * dead bubble (id 0) shows the Reraise image (entry 10) on a unit with
- * Reraise, else the digit of its death counter, else (counter 0xff) its own
- * image. The Death Sentence bubble (id 20) shows the digit of that status's
- * count. Ids 0, 9, 10 and 21 have a second texture row, selected by
+ * DEAD bubble shows the RERAISE image on a unit with Reraise, else the digit
+ * of its death counter, else (counter 0xff) its own image. The DEATH_SENTENCE
+ * bubble shows the digit of that status's count. DEAD, CHARGING, RERAISE and
+ * SOURCE_UNIT have a second texture row, selected by
  * status_bubble_alternate_row. The bubble is drawn at status_bubble_y (negative
  * is up) from the unit's feet and status_bubble_x across, one pixel higher
  * while bit 4 of the timer is set, and sorted at the depth of a point 12 units
@@ -1195,17 +1196,17 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
 
     bubble_id = unit->status_bubble_id;
     display = unit->status_bubble_display;
-    if (bubble_id == 21) {
+    if (bubble_id == BATTLE_STATUS_BUBBLE_SOURCE_UNIT) {
         display->parts[0].u = 0x72;
         display->parts[0].v = 0xB0;
         if (unit->status_bubble_alternate_row != 0) {
             display->parts[0].v = 0xBC;
         }
-    } else if (bubble_id == 0) {
+    } else if (bubble_id == BATTLE_STATUS_BUBBLE_DEAD) {
         table_index = unit->stats->death_counter;
         if (unit->status_flags_1_4 & BATTLE_UNIT_STATUS_RERAISE) {
-            display->parts[0].u = g_battle_status_bubble_u[10];
-            flag_row = g_battle_status_bubble_v[10];
+            display->parts[0].u = g_battle_status_bubble_u[BATTLE_STATUS_BUBBLE_RERAISE];
+            flag_row = g_battle_status_bubble_v[BATTLE_STATUS_BUBBLE_RERAISE];
             display->parts[0].v = flag_row;
             if (unit->status_bubble_alternate_row != 0) {
                 display->parts[0].v = flag_row + 12;
@@ -1214,14 +1215,14 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
             display->parts[0].u = g_battle_status_bubble_digit_u[table_index];
             display->parts[0].v = g_battle_status_bubble_digit_v[table_index];
         } else {
-            display->parts[0].u = g_battle_status_bubble_u[0];
-            default_row = g_battle_status_bubble_v[0];
+            display->parts[0].u = g_battle_status_bubble_u[BATTLE_STATUS_BUBBLE_DEAD];
+            default_row = g_battle_status_bubble_v[BATTLE_STATUS_BUBBLE_DEAD];
             display->parts[0].v = default_row;
             if (unit->status_bubble_alternate_row != 0) {
                 display->parts[0].v = default_row + 12;
             }
         }
-    } else if (bubble_id == 20) {
+    } else if (bubble_id == BATTLE_STATUS_BUBBLE_DEATH_SENTENCE) {
         table_index = unit->stats->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] & 3;
         display->parts[0].u = g_battle_status_bubble_digit_u[table_index];
         display->parts[0].v = g_battle_status_bubble_digit_v[table_index];
@@ -1229,7 +1230,7 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
         display->parts[0].u = g_battle_status_bubble_u[bubble_id];
         row = g_battle_status_bubble_v[bubble_id];
         display->parts[0].v = row;
-        if (bubble_id == 9 || bubble_id == 10) {
+        if (bubble_id == BATTLE_STATUS_BUBBLE_CHARGING || bubble_id == BATTLE_STATUS_BUBBLE_RERAISE) {
             if (unit->status_bubble_alternate_row != 0) {
                 display->parts[0].v = row + 12;
             }
@@ -1821,15 +1822,15 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
         }
     } else {
         /* An evade (accessory, either hand, Blade Grasp or Finger Guard) or a forced
-         * failure reads MISSED for an ability that targets allies only (team bits 1,
-         * AI_ABILITY_FLAG_1_TARGET_ALLIES) and GUARDED otherwise; a catch reads
+         * failure reads MISSED for an ability that targets allies only
+         * (ACTION_MISS_DISPLAY_ALLIES_ONLY) and GUARDED otherwise; a catch reads
          * CAUGHT, a canceled or reflected action nothing, any other miss MISSED. */
         miss = action->miss_type;
         if (miss != ACTION_MISS_TYPE_HIT) {
             /* types 1 and 2: accessory and right-hand evade */
             if ((u32)(action->miss_type - 1) < 2 || miss == ACTION_MISS_TYPE_LEFT_HAND_EVADE
                 || miss == ACTION_MISS_TYPE_FORCED_FAILURE || miss == ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD) {
-                if ((action->miss_display_flags & ACTION_MISS_DISPLAY_TEAM_MASK) == 1) {
+                if ((action->miss_display_flags & ACTION_MISS_DISPLAY_TEAM_MASK) == ACTION_MISS_DISPLAY_ALLIES_ONLY) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_MISSED;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_GUARDED;

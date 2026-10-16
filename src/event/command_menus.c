@@ -595,8 +595,8 @@ s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, 
 }
 
 /* Run battle_unit_generate_crystal_or_treasure for the unit on the main stack,
- * keep its record in g_menu_dead_unit_context and return the treasure item when
- * the result is 4, otherwise -1. */
+ * keep its record in g_menu_dead_unit_context and return the treasure item for
+ * CRYSTAL_PICKUP_TREASURE, otherwise -1. */
 s32 menu_get_dead_unit_selection(s32 battle_id) {
     unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     crystal_pickup_result_t* result;
@@ -604,11 +604,11 @@ s32 menu_get_dead_unit_selection(s32 battle_id) {
     g_thread_call_target = (void (*)(void))battle_unit_generate_crystal_or_treasure;
     result = (crystal_pickup_result_t*)thread_call_on_main_stack(stats);
     g_menu_dead_unit_context = result;
-    if (result->result == -1 || result->result == 0) {
+    if (result->result == CRYSTAL_PICKUP_NONE || result->result == CRYSTAL_PICKUP_NOTHING) {
         main_system_report_stub(0x11, 7);
     }
     /* Reload the published context after the call; reusing result changes the frame and registers. */
-    if (g_menu_dead_unit_context->result != 4) {
+    if (g_menu_dead_unit_context->result != CRYSTAL_PICKUP_TREASURE) {
         return -1;
     }
     return g_menu_dead_unit_context->treasure_item;
@@ -616,7 +616,7 @@ s32 menu_get_dead_unit_selection(s32 battle_id) {
 
 /* Dispatch a battle menu system command (menu_system_command_e) for unit_id. The scenario
  * check may start an event (game over, a scenario condition's event, battle start, battle won);
- * with option 2 it only records the event to run next (g_script_next_event_id). Each other
+ * with MENU_SCENARIO_CHECK_TEST it only records the event to run next (g_script_next_event_id). Each other
  * command starts one system function thread, a message or menu, after setting its text values.
  * Returns a MENU_SYSTEM_DISPATCH_* result and remembers the command and option. */
 static s32 menu_dispatch_system_function(
@@ -637,19 +637,19 @@ static s32 menu_dispatch_system_function(
     if (command == MENU_SYSTEM_COMMAND_SCENARIO_CHECK) {
         value = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
         if (value >= EVENT_ID_TUTORIAL_FIRST && value <= EVENT_ID_TUTORIAL_LAST) {
-            if (option != 2) {
+            if (option != MENU_SCENARIO_CHECK_TEST) {
                 menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_CLOSE);
             }
             return MENU_SYSTEM_DISPATCH_DONE;
         } else if (g_menu_input_mode != MENU_INPUT_PLAYER) {
-            if (option != 2) {
+            if (option != MENU_SCENARIO_CHECK_TEST) {
                 menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_CLOSE);
             }
             return MENU_SYSTEM_DISPATCH_DONE;
-        } else if (option != 1) {
+        } else if (option != MENU_SCENARIO_CHECK_SKIP) {
             if (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
                 main_system_report_stub(7, 3);
-                if (option != 2) {
+                if (option != MENU_SCENARIO_CHECK_TEST) {
                     menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_CLOSE);
                 }
                 return MENU_SYSTEM_DISPATCH_DONE;
@@ -663,7 +663,7 @@ static s32 menu_dispatch_system_function(
                 }
                 if ((battle_action_check_battle_outcome() < 0 || count != 0)
                     && script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
-                    if (option != 2) {
+                    if (option != MENU_SCENARIO_CHECK_TEST) {
                         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
                         menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
@@ -676,7 +676,7 @@ static s32 menu_dispatch_system_function(
                 }
                 if (g_script_scenario_event_active != 0) {
                     if (script_run_scenario_conditions() != 0) {
-                        if (option != 2) {
+                        if (option != MENU_SCENARIO_CHECK_TEST) {
                             menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                             g_menu_overlay_state = 1;
                             script_start_current_event_thread();
@@ -686,12 +686,12 @@ static s32 menu_dispatch_system_function(
                         }
                         return MENU_SYSTEM_DISPATCH_EVENT;
                     }
-                    if (option != 2) {
+                    if (option != MENU_SCENARIO_CHECK_TEST) {
                         menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_CLOSE);
                     }
                     return MENU_SYSTEM_DISPATCH_DONE;
                 } else if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
-                    if (option != 2) {
+                    if (option != MENU_SCENARIO_CHECK_TEST) {
                         menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         if (script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
@@ -705,7 +705,7 @@ static s32 menu_dispatch_system_function(
                     }
                     return MENU_SYSTEM_DISPATCH_EVENT;
                 } else if (battle_action_check_battle_outcome() == 0) {
-                    if (option != 2) {
+                    if (option != MENU_SCENARIO_CHECK_TEST) {
                         menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_WON);
@@ -716,7 +716,7 @@ static s32 menu_dispatch_system_function(
                     }
                     return MENU_SYSTEM_DISPATCH_EVENT;
                 } else {
-                    if (option != 2) {
+                    if (option != MENU_SCENARIO_CHECK_TEST) {
                         menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_CLOSE);
                     }
                     return MENU_SYSTEM_DISPATCH_DONE;
@@ -734,13 +734,13 @@ static s32 menu_dispatch_system_function(
         value = 8;
         if (g_menu_resolved_command == 0 || g_menu_resolved_command == 0x19) {
             value = 7;
-            if (option == 2) {
+            if (option == MENU_TARGETING_PROMPT_NO_MOVE_RANGE) {
                 value = 0x31;
             }
         } else if (g_menu_resolved_command == 1) {
             g_menu_restore_pending = 1;
             value = 6;
-            if (option == 1) {
+            if (option == MENU_TARGETING_PROMPT_NO_TARGET) {
                 value = 0x29;
             }
         } else if (g_menu_resolved_command == 0xC) {
@@ -753,18 +753,19 @@ static s32 menu_dispatch_system_function(
         menu_start_system_function_thread(value);
     } else if (command == MENU_SYSTEM_COMMAND_MOVE_FEEDBACK) {
         sound_queue_sfx_confirm();
-        if (option == 0) {
+        if (option == MENU_MOVE_FEEDBACK_CLOSE) {
             menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_CLOSE);
-        } else if (option == 1) {
+        } else if (option == MENU_MOVE_FEEDBACK_MOUNT) {
             menu_start_system_function_thread(0);
-        } else if (option == 4) {
+        } else if (option == MENU_MOVE_FEEDBACK_CRYSTAL) {
             menu_start_system_function_thread(0x30);
         } else {
             sound_queue_sfx_invalid();
             menu_start_system_function_thread(option + 0xD);
         }
     } else if (command == MENU_SYSTEM_COMMAND_WAIT_MENU) {
-        if (g_menu_system_function_command == MENU_SYSTEM_COMMAND_MOVE_FEEDBACK && g_menu_system_function_option == 1) {
+        if (g_menu_system_function_command == MENU_SYSTEM_COMMAND_MOVE_FEEDBACK
+            && g_menu_system_function_option == MENU_MOVE_FEEDBACK_MOUNT) {
             menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_CLOSE);
         } else {
             menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_WAIT_MENU);
@@ -796,7 +797,7 @@ static s32 menu_dispatch_system_function(
         thread_start(THREAD_SLOT_SYSTEM_FUNCTION, text_run_spell_quote_thread);
         thread_set_parameters(THREAD_SLOT_SYSTEM_FUNCTION, unit_id, g_text_spell_quote_last_ability_id, 0);
     } else if (command == MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT) {
-        text_set_message_duration_frames(0x3C);
+        text_set_message_duration_frames(60);
         if (g_main_action_menu_types_by_skillset[unit->action_command.skillset_id] == ACTION_MENU_TYPE_ARITHMETICKS) {
             g_text_substitution_values[1] = unit->action_command.calculator_multiplier + TEXT_ID_ABILITY_NAME_BASE;
             g_text_substitution_values[0] = unit->action_command.calculator_type + TEXT_ID_ABILITY_NAME_BASE;
@@ -1272,10 +1273,7 @@ void script_filter_controller_input(u32* input) {
 #ifdef FFT_BATTLE
 /* Run one frame of BATTLE bookkeeping around the thread scheduler.
  *
- * BATTLE's body: returns the scenario-finish result
- * (9, 0xA, 0xB or 0x13, 0 when no finish operation is pending) once every
- * script thread has stopped, otherwise 1 (or g_script_frame_result_override while it is set, or 0
- * in tutorial input mode). The three BATTLE-only 16-bit clears come
+ * BATTLE's body: returns a script_event_frame_result_e. The three BATTLE-only 16-bit clears come
  * after the 32-bit clears in source; the scheduler still groups them with the
  * other 16-bit stores, and this order keeps the g_menu_companion_overlay_state load
  * below them as in the target.
@@ -1317,15 +1315,15 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
                 if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
                     g_script_threads_idle = 0;
                     script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
-                    return 9;
+                    return SCRIPT_EVENT_FRAME_TO_WORLD;
                 }
             } else {
                 g_script_threads_idle = 0;
                 g_menu_overlay_state = 0;
-                return 0;
+                return SCRIPT_EVENT_FRAME_NO_FINISH;
             }
             if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_FUNERAL) {
-                return 0x13;
+                return SCRIPT_EVENT_FRAME_ENDING;
             }
             /* The finish word holds the next event id in bits 0-7 and 10-11 (its bits 8-9);
              * the remaining high bits give the finish result. */
@@ -1334,19 +1332,19 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
             finish_op = (finish_op & 0xF300) >> 8;
             g_script_threads_idle = 0;
             g_menu_overlay_state = 0;
-            if (finish_op == 0x80) {
-                return 9;
+            if (finish_op == SCRIPT_FINISH_TO_WORLD) {
+                return SCRIPT_EVENT_FRAME_TO_WORLD;
             }
-            if (finish_op == 0x81) {
-                return 0xA;
+            if (finish_op == SCRIPT_FINISH_NEXT_EVENT) {
+                return SCRIPT_EVENT_FRAME_NEXT_EVENT;
             }
-            if (finish_op == 0x82) {
-                return 0xB;
+            if (finish_op == SCRIPT_FINISH_RESET) {
+                return SCRIPT_EVENT_FRAME_RESET;
             }
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, 0);
             g_main_entd_selection_mode = BATTLE_ENTD_SELECTION_MAP_ID;
-            return 9;
+            return SCRIPT_EVENT_FRAME_TO_WORLD;
         }
         g_script_threads_idle = 0;
     }
@@ -1459,10 +1457,10 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
-        return 1;
+        return SCRIPT_EVENT_FRAME_RUNNING;
     }
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
-        return 0;
+        return SCRIPT_EVENT_FRAME_NO_FINISH;
     }
 
     /* Once every thread has stopped, the next frame reports the scenario finish. */
@@ -1474,18 +1472,15 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     if (i == THREAD_ID_COUNT) {
         g_script_threads_idle = 1;
     }
-    return 1;
+    return SCRIPT_EVENT_FRAME_RUNNING;
 }
 #endif
 
 #ifdef FFT_WORLD
 /* Run one frame of WORLD bookkeeping around the thread scheduler.
  *
- * Returns the scenario-finish result (9, 0xA, 0xB or 0x13, 0 when no finish
- * operation is pending) once every script thread has stopped, otherwise 1
- * (or g_script_frame_result_override while it is set, or 0 in tutorial input mode).
- * Unlike BATTLE's, it also checks thread slot 16 for idleness, and before running the threads
- * it passes the event input globals themselves to script_load_event_input_state.
+ * Returns a script_event_frame_result_e. Unlike BATTLE's, it also checks thread slot 16 for idleness, and before
+ * running the threads it passes the event input globals themselves to script_load_event_input_state.
  */
 s32 script_run_event_frame(u32* ot, u32 buttons) {
     RECT rect;
@@ -1524,15 +1519,15 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
                 if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
                     g_script_threads_idle = 0;
                     script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
-                    return 9;
+                    return SCRIPT_EVENT_FRAME_TO_WORLD;
                 }
             } else {
                 g_script_threads_idle = 0;
                 g_menu_overlay_state = 0;
-                return 0;
+                return SCRIPT_EVENT_FRAME_NO_FINISH;
             }
             if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_FUNERAL) {
-                return 0x13;
+                return SCRIPT_EVENT_FRAME_ENDING;
             }
             /* The finish word holds the next event id in bits 0-7 and 10-11 (its bits 8-9);
              * the remaining high bits give the finish result. */
@@ -1541,19 +1536,19 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
             finish_op = (finish_op & 0xF300) >> 8;
             g_script_threads_idle = 0;
             g_menu_overlay_state = 0;
-            if (finish_op == 0x80) {
-                return 9;
+            if (finish_op == SCRIPT_FINISH_TO_WORLD) {
+                return SCRIPT_EVENT_FRAME_TO_WORLD;
             }
-            if (finish_op == 0x81) {
-                return 0xA;
+            if (finish_op == SCRIPT_FINISH_NEXT_EVENT) {
+                return SCRIPT_EVENT_FRAME_NEXT_EVENT;
             }
-            if (finish_op == 0x82) {
-                return 0xB;
+            if (finish_op == SCRIPT_FINISH_RESET) {
+                return SCRIPT_EVENT_FRAME_RESET;
             }
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, 0);
             g_main_entd_selection_mode = BATTLE_ENTD_SELECTION_MAP_ID;
-            return 9;
+            return SCRIPT_EVENT_FRAME_TO_WORLD;
         }
         g_script_threads_idle = 0;
     }
@@ -1662,10 +1657,10 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
-        return 1;
+        return SCRIPT_EVENT_FRAME_RUNNING;
     }
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
-        return 0;
+        return SCRIPT_EVENT_FRAME_NO_FINISH;
     }
 
     /* Once every thread has stopped, the next frame reports the scenario finish. */
@@ -1677,7 +1672,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
         g_script_threads_idle = 1;
     }
-    return 1;
+    return SCRIPT_EVENT_FRAME_RUNNING;
 }
 #endif
 

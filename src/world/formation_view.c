@@ -72,25 +72,25 @@ s32 world_formation_get_unit_palette_index(s32 party_index) {
     if (unit->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
         if (unit->sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {
             s32 base = (unit->job_id - JOB_ID_SQUIRE) * 2;
-            portrait = base + 0x60;
+            portrait = base + JOB_SHEET_GENERIC_MALE_BASE;
             if (unit->job_id == JOB_ID_MIME) {
-                portrait = base + 0x5E;
+                portrait = base + JOB_SHEET_GENERIC_MALE_MIME_BASE;
             }
         } else if (unit->sprite_set == CHARACTER_IDENTITY_GENERIC_FEMALE) {
             s32 base = (unit->job_id - JOB_ID_SQUIRE) * 2;
-            portrait = base + 0x61;
+            portrait = base + JOB_SHEET_GENERIC_FEMALE_BASE;
             if (unit->job_id == JOB_ID_MIME) {
-                portrait = base + 0x5F;
+                portrait = base + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
             }
         } else {
             job = main_job_get_data_pointer(unit->job_id);
             portrait = job->spritesheet_id;
         }
         if (unit->job_id == JOB_ID_BARD) {
-            portrait = 0x82;
+            portrait = JOB_SHEET_BARD;
         }
         if (unit->job_id == JOB_ID_DANCER) {
-            portrait = 0x83;
+            portrait = JOB_SHEET_DANCER;
         }
     } else {
         portrait = unit->sprite_set;
@@ -133,12 +133,12 @@ s32 world_get_party_unit_formation_sprite(s32 party_index) {
     portrait_id = sprite_set;
     if (sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
         if (sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {
-            portrait_id = (party_unit->job_id - JOB_ID_SQUIRE) * 2 + 0x60;
+            portrait_id = (party_unit->job_id - JOB_ID_SQUIRE) * 2 + JOB_SHEET_GENERIC_MALE_BASE;
             if (party_unit->job_id == JOB_ID_MIME) {
                 portrait_id -= 2;
             }
         } else if (sprite_set == CHARACTER_IDENTITY_GENERIC_FEMALE) {
-            portrait_id = (party_unit->job_id - JOB_ID_SQUIRE) * 2 + 0x61;
+            portrait_id = (party_unit->job_id - JOB_ID_SQUIRE) * 2 + JOB_SHEET_GENERIC_FEMALE_BASE;
             if (party_unit->job_id == JOB_ID_MIME) {
                 portrait_id -= 2;
             }
@@ -147,10 +147,10 @@ s32 world_get_party_unit_formation_sprite(s32 party_index) {
             portrait_id = job_data->spritesheet_id;
         }
         if (party_unit->job_id == JOB_ID_BARD) {
-            portrait_id = 0x82;
+            portrait_id = JOB_SHEET_BARD;
         }
         if (party_unit->job_id == JOB_ID_DANCER) {
-            portrait_id = 0x83;
+            portrait_id = JOB_SHEET_DANCER;
         }
     }
 

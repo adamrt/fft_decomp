@@ -189,13 +189,13 @@ extern menu_instruction_t g_world_shop_fur_purchase_menu_script;
 extern s8 g_world_shop_fur_purchase_list_initialized;
 extern s8 g_world_shop_fur_equip_check_pending;
 extern s16 g_world_shop_fur_purchase_message_wait;
-extern u8 g_world_shop_fur_purchase_result;        /* quantity-menu thread result */
+extern u8 g_world_shop_fur_purchase_result;        /* buy quantity menu thread (menu_start_managed_thread) */
 extern u16 g_world_shop_fur_purchase_item;         /* item being bought */
 extern s32 g_world_shop_fur_purchase_price;        /* half the item price */
 extern u8 g_world_shop_fur_purchase_confirm_shown; /* confirmation prompt shown */
 extern s8 g_world_shop_fur_sell_list_initialized;
 extern s16 g_world_shop_fur_sale_message_wait;
-extern u8 g_world_shop_fur_quantity_menu_running; /* sell-menu thread result */
+extern u8 g_world_shop_fur_quantity_menu_running; /* sell quantity menu thread (menu_start_managed_thread) */
 
 /* soldier office */
 /* Prefix of the shop roster display stream, through its first number command. */

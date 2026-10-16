@@ -1393,8 +1393,10 @@ static void wldcore_menu_push_variable_list_level(void) {
 }
 
 /* Renders up to 10 rows of the debug variable list, from first_variable on
- * (script variables 0 to 1023). Message 0xb824 shows a variable and its value;
- * a value of 10000 or more uses 0xb825, which shows the variable alone.
+ * (script variables 0 to 1023). WLDCORE_TEXT_ID_DEBUG_VARIABLE_VALUE shows a
+ * variable and its value; a value of 10000 or more uses
+ * WLDCORE_TEXT_ID_DEBUG_VARIABLE, which shows the variable alone. The entry is
+ * chosen first and its section added at the call.
  *
  * `value` first holds the row count for the panel height and then each
  * variable's value: one register (v1) in the target. */
@@ -1434,10 +1436,10 @@ static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_l
         if (value < 10000) {
             g_text_substitution_values[0] = variable;
             g_text_substitution_values[1] = value;
-            text_id = 0x24;
+            text_id = WLDCORE_TEXT_ID_DEBUG_VARIABLE_VALUE & TEXT_ID_ENTRY_MASK;
         } else {
             g_text_substitution_values[0] = variable;
-            text_id = 0x25;
+            text_id = WLDCORE_TEXT_ID_DEBUG_VARIABLE & TEXT_ID_ENTRY_MASK;
         }
         window_display_text_entry(index, text_id | TEXT_ID_WORLD_MENU_BASE, point, g_wldcore_window_image_buffer);
         point.y += 0x10;
@@ -2174,8 +2176,9 @@ static void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id) {
     wldcore_menu_push_location_menu_level(*selected);
     wldcore_fade_start_screen(WLDCORE_SCREEN_FADE_REDRAW_MAP, 0x10);
     wldcore_clear_screen_and_set_map_clip_rect(0);
-    i = 0x77FF;
-    clear = &g_wldcore_scratch_buffer[0x77FF];
+    /* Blank the backdrop image from the end. */
+    i = WLDCORE_BACKDROP_WORDS - 1;
+    clear = &g_wldcore_scratch_buffer[WLDCORE_BACKDROP_WORDS - 1];
     for (; i >= 0; i--) {
         *clear = 0;
         clear--;

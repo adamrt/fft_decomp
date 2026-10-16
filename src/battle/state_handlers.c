@@ -122,9 +122,9 @@ static void battle_move_confirm_unit_move(battle_unit_t* unit, battle_unit_t* mo
     battle_move_init_post_movement_display();
 }
 
-/* MoveConfirmMenu game-state handler. Command 7 keeps the move and finishes it.
- * Command 8 or 0xff undoes it and returns to choosing a destination, except after
- * a teleport, which is kept like command 7. */
+/* MoveConfirmMenu game-state handler. YES keeps the move and finishes it. NO or UNRESOLVED_FF
+ * undoes it and returns to choosing a destination, except after a teleport, which is kept as with
+ * YES. */
 void battle_state_handle_move_confirm_menu_state(void) {
     ai_command_t* selected_command_address;
     s32 selected_command;
@@ -138,10 +138,10 @@ void battle_state_handle_move_confirm_menu_state(void) {
     casting_unit = battle_unit_get_casting();
     selected_command = selected_command_address->kind;
     switch (selected_command) {
-    case 8:
-    case 0xff:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         if (casting_unit->path.flags & BATTLE_EFFECTIVE_MOVEMENT_TELEPORT) {
-        case 7:
+        case AI_COMMAND_PROMPT_YES:
             battle_move_confirm_unit_move(source_unit, casting_unit);
             return;
         }
@@ -152,9 +152,9 @@ void battle_state_handle_move_confirm_menu_state(void) {
     }
 }
 
-/* WaitMenu game-state handler. Command 7 goes on to choosing a facing. Command 8
- * or 0xff returns to the after-command state, unless the unit's turn is over
- * (battle_action_check_change_of_turn returns 1): then it chooses a facing too. */
+/* WaitMenu game-state handler. YES goes on to choosing a facing. NO or UNRESOLVED_FF returns to the
+ * after-command state, unless the unit's turn is over (battle_action_check_change_of_turn returns
+ * 1): then it chooses a facing too. */
 void battle_state_handle_wait_menu_state(void) {
     ai_command_t* selected_command_address;
     s32 selected_command;
@@ -166,13 +166,13 @@ void battle_state_handle_wait_menu_state(void) {
     source_unit = battle_unit_get_source();
     selected_command = selected_command_address->kind;
     switch (selected_command) {
-    case 8:
-    case 0xff:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         if (battle_action_check_change_of_turn(source_unit->stats->battle_id) != 1) {
             battle_state_enter_after_command();
             return;
         }
-    case 7:
+    case AI_COMMAND_PROMPT_YES:
         battle_action_choose_facing_for_wait();
         return;
     }
@@ -278,9 +278,9 @@ void battle_state_handle_wait_direction_state(void) {
 
 /*
  * CrystalLearn game-state handler: apply the crystal or treasure choice
- * (commands 0, 1 and 4 pass their BATTLE_CRYSTAL_* value to
- * battle_unit_learn_from_crystal, 2 restores HP and MP and finalizes the action,
- * 7, 8 and 0xff only close). Then, once no effect is pending, the casting unit's
+ * (0, LEARN_ABILITIES and TAKE_TREASURE pass their value to
+ * battle_unit_learn_from_crystal, RESTORE_HP_MP restores HP and MP and
+ * finalizes the action, and the prompt answers only close). Then, once no effect is pending, the casting unit's
  * frame counter has reached 0x1f and no numeric display shows, work on the first
  * pending post-movement event of g_battle_move_find_result, clearing it once
  * done, and start the next post-movement step.
@@ -297,7 +297,7 @@ void battle_state_handle_crystal_learn_state(void) {
     source = battle_unit_get_source();
     casting = battle_unit_get_casting();
     switch ((s32)command->kind) {
-    case 2:
+    case BATTLE_CRYSTAL_RESTORE_HP_MP:
         battle_unit_learn_from_crystal(source->stats, BATTLE_CRYSTAL_RESTORE_HP_MP);
         g_battle_action_post_action = 1;
         battle_action_apply_target_result(source->stats->battle_id);
@@ -305,14 +305,14 @@ void battle_state_handle_crystal_learn_state(void) {
         battle_unit_update_display_by_runtime_id(source->runtime_id);
         break;
     case 0:
-    case 1:
-    case 4:
+    case BATTLE_CRYSTAL_LEARN_ABILITIES:
+    case BATTLE_CRYSTAL_TAKE_TREASURE:
         battle_unit_learn_from_crystal(source->stats, command->kind);
         g_battle_action_post_action = 1;
         break;
-    case 7:
-    case 8:
-    case 0xff:
+    case AI_COMMAND_PROMPT_YES:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         g_battle_action_post_action = 1;
         break;
     }
@@ -369,8 +369,8 @@ void battle_state_handle_crystal_learn_state(void) {
     battle_move_start_next_post_movement_step();
 }
 
-/* ActionExecuteSetup game-state handler: command 7 goes on to the range display
- * (battle_target_begin_tile_selection); 8 or 0xff returns to the idle action menu. */
+/* ActionExecuteSetup game-state handler: YES goes on to the range display
+ * (battle_target_begin_tile_selection); NO or UNRESOLVED_FF returns to the idle action menu. */
 void battle_state_handle_action_execute_setup_state(void) {
     s32 selected_command;
 
@@ -378,11 +378,11 @@ void battle_state_handle_action_execute_setup_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     switch (selected_command) {
-    case 7:
+    case AI_COMMAND_PROMPT_YES:
         battle_target_begin_tile_selection();
         return;
-    case 8:
-    case 0xff:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         battle_menu_open_active_unit_idle_action_menu();
         return;
     }
@@ -448,15 +448,16 @@ void battle_state_handle_targeting_range_state(void) {
     }
 }
 
-/* IllegalRange game-state handler: when the message closes (command 7, 8 or
- * 0xff), return to the range display. */
+/* IllegalRange game-state handler: when the message closes (any answer), return to the range
+ * display. */
 void battle_state_handle_illegal_range_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         battle_target_begin_tile_selection();
     }
 }
@@ -520,12 +521,12 @@ void battle_state_handle_ability_preview_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
-/* ConfirmAction game-state handler. For a player-controlled unit, command 5 aims the action at the
- * cursor tile, and 6 or 7 at the unit on it (the tile when it is empty); both store the cursor
- * tile and start the pre-attack animation. 8 or 0xff clears the marks and returns to the range
- * display. An AI unit starts the pre-attack animation on 5-7. The answers double as targeting
- * types (5 is BATTLE_TARGETING_TYPE_TILE, 6 BATTLE_TARGETING_TYPE_UNIT); 7, a plain yes, is
- * stored as it is. */
+/* ConfirmAction game-state handler. The answers double as targeting types. For a player-controlled
+ * unit, BATTLE_TARGETING_TYPE_TILE aims the action at the cursor tile, and BATTLE_TARGETING_TYPE_UNIT
+ * or a plain YES at the unit on it (the tile when it is empty); the answer is stored as the
+ * targeting type as it is, and both store the cursor tile and start the pre-attack animation. NO or
+ * UNRESOLVED_FF clears the marks and returns to the range display. An AI unit starts the pre-attack
+ * animation on TILE, UNIT or YES. */
 void battle_state_handle_confirm_action_state(void) {
     battle_unit_t* unit;
     ai_command_t* selected_command_address;
@@ -539,14 +540,14 @@ void battle_state_handle_confirm_action_state(void) {
     if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         selected_command = selected_command_address->kind;
         switch (selected_command) {
-        case 5:
+        case BATTLE_TARGETING_TYPE_TILE:
             unit->command_state.ai.data.action.targeting_type = selected_command_address->kind;
             main_util_set_svector(
                 &unit->command_state.cursor.target_panel, g_battle_cursor_x, g_battle_cursor_z, g_battle_cursor_y);
             battle_state_enter_pre_attack_animation();
             return;
-        case 6:
-        case 7:
+        case BATTLE_TARGETING_TYPE_UNIT:
+        case AI_COMMAND_PROMPT_YES:
             target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
             if (target != 0) {
                 unit->command_state.ai.data.action.targeting_type = selected_command_address->kind;
@@ -558,8 +559,8 @@ void battle_state_handle_confirm_action_state(void) {
                 &unit->command_state.cursor.target_panel, g_battle_cursor_x, g_battle_cursor_z, g_battle_cursor_y);
             battle_state_enter_pre_attack_animation();
             return;
-        case 8:
-        case 0xff:
+        case AI_COMMAND_PROMPT_NO:
+        case AI_COMMAND_UNRESOLVED_FF:
             battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
             battle_target_begin_tile_selection();
             return;
@@ -569,13 +570,13 @@ void battle_state_handle_confirm_action_state(void) {
     } else {
         selected_command = selected_command_address->kind;
         switch (selected_command) {
-        case 5:
-        case 6:
-        case 7:
+        case BATTLE_TARGETING_TYPE_TILE:
+        case BATTLE_TARGETING_TYPE_UNIT:
+        case AI_COMMAND_PROMPT_YES:
             battle_state_enter_pre_attack_animation();
             return;
-        case 8:
-        case 0xff:
+        case AI_COMMAND_PROMPT_NO:
+        case AI_COMMAND_UNRESOLVED_FF:
             battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
             battle_target_begin_tile_selection();
             return;
@@ -609,10 +610,10 @@ void battle_state_handle_action_cast_state(void) {
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    /* Selections 7, 8 and 0xff are the ones ACTION_EXECUTE_SETUP handles;
-     * they mark the action as finished (same test as the
+    /* Any prompt answer marks the action as finished (the same test as the
      * BATTLE_MESSAGE_DISPLAY handler). */
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         g_battle_action_post_action = 1;
     }
     /* Wait for the camera to settle before handing the action data over. */
@@ -643,15 +644,16 @@ void battle_state_handle_commence_attack_phase_state(void) {
     }
 }
 
-/* ActionAnnouncement game-state handler: when the announcement message closes (command 7, 8 or
- * 0xff), enter the OpenSp2Files state. */
+/* ActionAnnouncement game-state handler: when the announcement message closes (any answer), enter
+ * the OpenSp2Files state. */
 void battle_state_handle_action_announcement_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         battle_state_enter_open_sp2_files();
     }
 }
@@ -759,9 +761,9 @@ static void battle_unit_start_post_attack_animation_display(battle_unit_t* attac
  *
  * The strike has settled when no effect cycle or target step is running
  * (g_battle_state_animation_continue_check), the casting unit shows no numeric
- * display, and its animation countdown is 0 or its animation id is below 0x3c
- * (BATTLE_UNIT_ANIMATION_TELEPORT, where the teleport and attack animations
- * begin): only a teleport or attack animation is waited out.
+ * display, and its animation countdown is 0 or its animation id is below
+ * BATTLE_UNIT_ANIMATION_ATTACK_FIRST: only a teleport or attack animation is
+ * waited out.
  *
  * An ability other than Knockback and Throw Stone follows the cursor tile with
  * the camera only when it has no effect file or is a Charge ability; on settling
@@ -809,7 +811,7 @@ void battle_state_update_action_execute_mode(void) {
             battle_camera_update_cursor_tile_vector();
         }
         if (g_battle_state_animation_continue_check == 0 && unit->numeric_display.active == 0
-            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < 0x3cU)) {
+            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < BATTLE_UNIT_ANIMATION_ATTACK_FIRST)) {
             main_sound_replay_bg_sfx();
             if (unit->strike.target_count != 0) {
                 for (i = 0; i < unit->strike.target_count; i++) {
@@ -834,7 +836,7 @@ void battle_state_update_action_execute_mode(void) {
         battle_camera_update_cursor_tile_vector();
         menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
         if (g_battle_state_animation_continue_check == 0 && unit->numeric_display.active == 0
-            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < 0x3cU)) {
+            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < BATTLE_UNIT_ANIMATION_ATTACK_FIRST)) {
             if (unit->strike.target_count != 0) {
                 for (i = 0; i < unit->strike.target_count; i++) {
                     target = battle_unit_get_by_battle_id(unit->strike.target_list[i]);
@@ -851,15 +853,16 @@ void battle_state_update_action_execute_mode(void) {
     }
 }
 
-/* BattleMessageDisplay game-state handler: when the message closes (command 7, 8
- * or 0xff), queue and show the casting unit's post-effect messages. */
+/* BattleMessageDisplay game-state handler: when the message closes (any answer), queue and show the
+ * casting unit's post-effect messages. */
 void battle_state_handle_battle_message_display_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         g_battle_action_post_action = 1;
     }
     if (g_battle_action_post_action != 0) {
@@ -867,17 +870,15 @@ void battle_state_handle_battle_message_display_state(void) {
     }
 }
 
-/* ResumeAttackPhase game-state handler: show the remaining post-effect messages,
- * then finish the strike.
+/* ResumeAttackPhase game-state handler: show the remaining post-effect messages, then finish the
+ * strike.
  *
- * Each closed message (command 7, 8 or 0xff) lets
- * battle_action_show_next_effect_message open the next queued one. When none
- * remains and the casting unit's numeric display is idle, a continued attack
- * starts its next strike. Otherwise the SP2 buffer and VRAM slot are released,
- * the acting unit's data is stored and the units return to their status
- * animations. Outside the pre-action phase the action phase then advances (up to
- * the reacting-unit phase) and the next due action is announced; when none is
- * due, or in the pre-action phase, the JP and EXP rewards begin.
+ * Each closed message (any answer) lets battle_action_show_next_effect_message open the next queued
+ * one. When none remains and the casting unit's numeric display is idle, a continued attack starts
+ * its next strike. Otherwise the SP2 buffer and VRAM slot are released, the acting unit's data is
+ * stored and the units return to their status animations. Outside the pre-action phase the action
+ * phase then advances (up to the reacting-unit phase) and the next due action is announced; when
+ * none is due, or in the pre-action phase, the JP and EXP rewards begin.
  *
  * The facing computed for the acting unit's own action is passed to
  * battle_action_post_action_facing_stub, which is empty. */
@@ -890,7 +891,8 @@ void battle_state_handle_resume_attack_phase_state(void) {
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         g_battle_action_post_action = 1;
     }
     unit = battle_unit_get_casting();
@@ -934,15 +936,14 @@ void battle_state_handle_resume_attack_phase_state(void) {
     }
 }
 
-/* LearnAbilityOnHit game-state handler: steps through the post-action reports
- * (level up, job level up, learn on hit).
+/* LearnAbilityOnHit game-state handler: steps through the post-action reports (level up, job level
+ * up, learn on hit).
  *
- * Command 7 on the learn-on-hit report teaches the used ability to the unit found
- * for it. Commands 7, 8 and 0xff all advance to the next report, and after the
- * third the action is marked finished. From then on, once no animation is pending
- * and neither the casting unit nor any of its targets still shows a numeric
- * display, the source unit returns to its status animation and the after-command
- * state begins. */
+ * YES on the learn-on-hit report teaches the used ability to the unit found for it. Every answer
+ * advances to the next report, and after the third the action is marked finished. From then on,
+ * once no animation is pending and neither the casting unit nor any of its targets still shows a
+ * numeric display, the source unit returns to its status animation and the after-command state
+ * begins. */
 void battle_state_handle_learn_ability_on_hit_state(void) {
     ai_command_t* selected_command_address;
     s32 selected_command;
@@ -959,13 +960,13 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
     casting_unit = battle_unit_get_casting();
     selected_command = selected_command_address->kind;
     switch (selected_command) {
-    case 7:
+    case AI_COMMAND_PROMPT_YES:
         if (g_battle_action_post_action_display_phase == BATTLE_POST_ACTION_DISPLAY_LEARN_ON_HIT) {
             target_unit = battle_unit_get_by_battle_id(g_battle_action_learn_on_hit_unit_id);
             battle_unit_learn_used_ability(target_unit->stats);
         }
-    case 8:
-    case 0xff:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         g_battle_action_post_action_display_phase += 1;
         if (g_battle_action_post_action_display_phase >= 3) {
             g_battle_action_post_action = 1;
@@ -1036,15 +1037,16 @@ void battle_state_handle_deep_dungeon_mesh_finish_state(void) {
     }
 }
 
-/* TargetSelectStart game-state handler: when the prompt closes (command 7, 8 or
- * 0xff), enter target selection. */
+/* TargetSelectStart game-state handler: when the prompt closes (any answer), enter target
+ * selection. */
 void battle_state_handle_target_select_start_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         battle_state_enter_target_select();
     }
 }
@@ -1093,22 +1095,23 @@ void battle_state_handle_target_select_state(void) {
     }
 }
 
-/* TargetSelectDenied game-state handler: when the message closes (command 7, 8 or
- * 0xff), return to target selection. */
+/* TargetSelectDenied game-state handler: when the message closes (any answer), return to target
+ * selection. */
 void battle_state_handle_target_select_denied_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         battle_state_enter_target_select();
     }
 }
 
-/* TargetSelectConfirm game-state handler: command 7 stores the unit under the
- * cursor as the casting unit's auto-battle target and opens the next action
- * menus; 8 or 0xff returns to target selection. */
+/* TargetSelectConfirm game-state handler: YES stores the unit under the cursor as the casting
+ * unit's auto-battle target and opens the next action menus; NO or UNRESOLVED_FF returns to target
+ * selection. */
 void battle_state_handle_target_select_confirm_state(void) {
     battle_unit_t* caster;
     battle_unit_t* target;
@@ -1116,29 +1119,30 @@ void battle_state_handle_target_select_confirm_state(void) {
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     switch ((s32)menu_get_selected_command_address()->kind) {
-    case 7:
+    case AI_COMMAND_PROMPT_YES:
         caster = battle_unit_get_casting();
         target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
         menu_store_auto_battle_main_target_id(target->stats->battle_id, caster->stats->battle_id);
         battle_target_move_cursor_to_unit(caster);
         battle_menu_set_next_script_action_menus();
         break;
-    case 8:
-    case 0xFF:
+    case AI_COMMAND_PROMPT_NO:
+    case AI_COMMAND_UNRESOLVED_FF:
         battle_state_enter_target_select();
         break;
     }
 }
 
-/* TargetDisplayStart game-state handler: once the prompt has closed (command 7, 8
- * or 0xff) and the camera has settled, enter the target display. */
+/* TargetDisplayStart game-state handler: once the prompt has closed (any answer) and the camera has
+ * settled, enter the target display. */
 void battle_state_handle_target_display_start_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if ((selected_command >= 7) && ((selected_command < 9) || (selected_command == 0xFF))) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         g_battle_action_post_action = 1;
     }
     if ((g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) == 0) {
@@ -1164,9 +1168,8 @@ void battle_state_handle_target_display_state(void) {
     }
 }
 
-/* AfterCommand game-state handler: once the window has closed (command 7, 8 or
- * 0xff) and the source unit's numeric display is idle, enter the JP/EXP gain
- * state. */
+/* AfterCommand game-state handler: once the window has closed (any answer) and the source unit's
+ * numeric display is idle, enter the JP/EXP gain state. */
 void battle_state_handle_after_command_state(void) {
     ai_command_t* command_address;
     s32 command;
@@ -1177,7 +1180,7 @@ void battle_state_handle_after_command_state(void) {
     command_address = menu_get_selected_command_address();
     unit = battle_unit_get_source();
     command = command_address->kind;
-    if ((command >= 7) && ((command < 9) || (command == 0xFF))) {
+    if (command >= AI_COMMAND_PROMPT_YES && (command <= AI_COMMAND_PROMPT_NO || command == AI_COMMAND_UNRESOLVED_FF)) {
         g_battle_action_post_action = 1;
     }
     if ((g_battle_action_post_action != 0) && (unit->numeric_display.active == 0)) {
@@ -1208,10 +1211,13 @@ void battle_state_handle_jp_exp_gain_state(void) {
         return;
     }
     if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ABILITY_READY) {
-        if (menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1) == 2
+        if (menu_init_system_function(
+                MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_TEST, unit->stats->battle_id, 0, 1)
+                == MENU_SYSTEM_DISPATCH_EVENT
             && script_get_event_finish_operation() != 0) {
             g_battle_previous_game_state = g_battle_game_state;
-            menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
+            menu_init_system_function(
+                MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, unit->stats->battle_id, 0, 1);
             battle_state_enter_event();
             return;
         }
@@ -1234,11 +1240,10 @@ void battle_state_handle_jp_exp_gain_state(void) {
     battle_menu_set_next_script_action_menus();
 }
 
-/* ChangeTurn game-state handler. Once the menu layer reports command 7, 8 or 0xff
- * (the message closed) and the camera has settled (no cursor vector, no
- * rotation), the turn event type picks the next state: a ready ability enters the
- * action cast, an action result or a Mime action enters status execution, and
- * anything else opens the next action menus. */
+/* ChangeTurn game-state handler. Once the menu layer reports an answer (the message closed) and the
+ * camera has settled (no cursor vector, no rotation), the turn event type picks the next state: a
+ * ready ability enters the action cast, an action result or a Mime action enters status execution,
+ * and anything else opens the next action menus. */
 void battle_state_handle_change_turn_state(void) {
     s32 command;
     s32 type;
@@ -1246,10 +1251,10 @@ void battle_state_handle_change_turn_state(void) {
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     command = menu_get_selected_command_address()->kind;
-    if (command >= 7) {
-        if (command < 9) {
+    if (command >= AI_COMMAND_PROMPT_YES) {
+        if (command <= AI_COMMAND_PROMPT_NO) {
             g_battle_action_post_action = 1;
-        } else if (command == 0xFF) {
+        } else if (command == AI_COMMAND_UNRESOLVED_FF) {
             g_battle_action_post_action = 1;
         }
     }
@@ -1272,9 +1277,9 @@ void battle_state_handle_change_turn_state(void) {
     }
 }
 
-/* StatusExecute game-state handler: once the message has closed (command 7, 8 or
- * 0xff), no animation is pending and the source unit's numeric display is idle,
- * refresh the unit's display and run the between-turn events. */
+/* StatusExecute game-state handler: once the message has closed (any answer), no animation is
+ * pending and the source unit's numeric display is idle, refresh the unit's display and run the
+ * between-turn events. */
 void battle_state_handle_status_execute_state(void) {
     s32 selected_command;
     battle_unit_t* unit;
@@ -1282,7 +1287,8 @@ void battle_state_handle_status_execute_state(void) {
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    if ((selected_command >= 7) && ((selected_command < 9) || (selected_command == 0xFF))) {
+    if (selected_command >= AI_COMMAND_PROMPT_YES
+        && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         g_battle_action_post_action = 1;
     }
     if (g_battle_action_post_action != 0) {
@@ -1347,25 +1353,25 @@ void battle_state_update_event_mode(void) {
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
     switch (script_run_event_frame(main_gfx_get_otag(), g_input_current_buttons)) {
-    case 0:
+    case SCRIPT_EVENT_FRAME_NO_FINISH:
         battle_gfx_init_evtchr_vram_slots();
         g_battle_menu_status_enabled = 1;
         battle_ai_init_workspace();
         battle_action_check_between_turn_events();
         break;
-    case 9:
+    case SCRIPT_EVENT_FRAME_TO_WORLD:
         battle_gfx_init_evtchr_vram_slots();
         battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_WORLD);
         break;
-    case 10:
+    case SCRIPT_EVENT_FRAME_NEXT_EVENT:
         battle_gfx_init_evtchr_vram_slots();
         battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_BATTLE);
         break;
-    case 11:
+    case SCRIPT_EVENT_FRAME_RESET:
         battle_gfx_init_evtchr_vram_slots();
         battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_RESET);
         break;
-    case 19:
+    case SCRIPT_EVENT_FRAME_ENDING:
         battle_gfx_init_evtchr_vram_slots();
         battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_ENDING);
         break;
@@ -1561,18 +1567,18 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
-    /* Results 9 and 10 lead the other way round from battle_state_update_event_mode
+    /* TO_WORLD and NEXT_EVENT lead the other way round from battle_state_update_event_mode
      * (QUIRKS.md). */
     switch (script_run_event_frame(main_gfx_get_otag(), g_input_current_buttons)) {
-    case 1:
+    case SCRIPT_EVENT_FRAME_RUNNING:
         break;
-    case 0:
+    case SCRIPT_EVENT_FRAME_NO_FINISH:
         battle_action_check_between_turn_events();
         break;
-    case 9:
+    case SCRIPT_EVENT_FRAME_TO_WORLD:
         battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_BATTLE);
         break;
-    case 10:
+    case SCRIPT_EVENT_FRAME_NEXT_EVENT:
         battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_WORLD);
         break;
     }

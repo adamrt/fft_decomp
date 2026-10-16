@@ -31,6 +31,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Deployment messages, which ATTACK binds at text id 0x9000, that the notice entry (menu entry 2)
+ * shows. */
+enum {
+    ATTACK_DEPLOY_NOTICE_NO_UNIT_PLACED = 0x900b,
+    ATTACK_DEPLOY_NOTICE_SQUAD_FULL = 0x900c,
+    ATTACK_DEPLOY_NOTICE_RAMZA_REQUIRED = 0x900d,
+};
+
 static void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);
 static void attack_deploy_handle_roster_navigation_input(void);
 static void attack_deploy_init_cursor_primitives(void);
@@ -435,9 +443,8 @@ ramza_placed:
             if (*input & PSX_PAD_START) {
                 if (g_attack_deploy_deployed_unit_count == 0) {
                     g_sound_pending_sfx_id = MAIN_SFX_INVALID;
-                    /* Notices reuse menu entry 2, retexted with each deployment message (bound
-                     * at text id 0x9000); 0x0b: no unit is placed. */
-                    g_attack_deploy_menu_entries[2].text_id = 0x900b;
+                    /* Notices reuse menu entry 2, retexted with each deployment message. */
+                    g_attack_deploy_menu_entries[2].text_id = ATTACK_DEPLOY_NOTICE_NO_UNIT_PLACED;
                     thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                     thread_set_parameters(ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);
                     thread_wait_until_inactive(ATTACK_THREAD_SLOT_NOTICE);
@@ -533,8 +540,7 @@ ramza_placed:
                                 g_attack_deploy_deployed_unit_count++;
                             } else {
                                 g_sound_pending_sfx_id = MAIN_SFX_INVALID;
-                                /* Deployment message 0x0c: the squad is full. */
-                                g_attack_deploy_menu_entries[2].text_id = 0x900c;
+                                g_attack_deploy_menu_entries[2].text_id = ATTACK_DEPLOY_NOTICE_SQUAD_FULL;
                                 thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_set_parameters(
                                     ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);
@@ -565,8 +571,7 @@ ramza_placed:
                             if (g_attack_deploy_roster_id_by_tile[row][column] == 0
                                 && script_get_variable(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) == 1) {
                                 g_sound_pending_sfx_id = MAIN_SFX_INVALID;
-                                /* Deployment message 0x0d: Ramza must deploy. */
-                                g_attack_deploy_menu_entries[2].text_id = 0x900d;
+                                g_attack_deploy_menu_entries[2].text_id = ATTACK_DEPLOY_NOTICE_RAMZA_REQUIRED;
                                 thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_set_parameters(
                                     ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);

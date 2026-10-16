@@ -267,11 +267,11 @@ menu_instruction_t* menu_script_skip_group(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* command);
 
-static __inline__ menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
+static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
     return (menu_instruction_t*)((u8*)instruction + instruction->header.length);
 }
 
-static __inline__ const menu_instruction_t* menu_next_const_instruction(const menu_instruction_t* instruction) {
+static inline const menu_instruction_t* menu_next_const_instruction(const menu_instruction_t* instruction) {
     return (const menu_instruction_t*)((const u8*)instruction + instruction->header.length);
 }
 

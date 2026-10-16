@@ -278,10 +278,8 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
     }
 }
 
-/* Pass a BATTLE.BIN unit-setup error to the empty main_system_report_error hook as
- * source 3. Callers add a failure base to the battle id: 100 no spritesheet slot left, 200 enemy
- * limit reached, 300 or 400 placement rejected, 500 roster unit load failed, 600 ENTD unit init
- * failed; 0x80 alone marks a map tile-data retry that gave up after 1000 tries. */
+/* Pass a BATTLE.BIN unit-setup error (main_battle_load_exception_e) to the empty
+ * main_system_report_error hook as source 3. */
 void main_system_handle_battle_load_exception(s32 value) {
     main_system_report_error(3, value);
 }

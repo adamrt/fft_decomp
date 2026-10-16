@@ -23,6 +23,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* EQUIP's screen message 9 (TEXT_SECTION_OVERLAY_SCREEN): none of the item is left. */
+enum { EQUIP_TEXT_ID_OUT_OF_STOCK = (TEXT_SECTION_OVERLAY_SCREEN << TEXT_ID_SECTION_SHIFT) + 9 };
+
 static s32 equip_menu_run_equip_mode(void);
 static s32 equip_menu_run_remove_mode(void);
 static s32 equip_menu_update_clear_all_equipment_prompt(void);
@@ -132,11 +135,11 @@ static s32 equip_menu_run_equip_mode(void) {
         g_equip_item_list_refresh = 1;
     }
     if (g_equip_item_list_open == 0) {
-        /* The help text is the slot item's entry in HELP_TEXT_SECTION_ITEMS (0x6800 = section 13). */
+        /* The help text is the slot item's entry in HELP_TEXT_SECTION_ITEMS. */
         entry = g_equip_unit_data[g_equip_unit_selected_index]->equipment[g_equip_item_slot];
         help_id = -1;
         if (entry != 0) {
-            help_id = entry + 0x6800;
+            help_id = entry + HELP_TEXT_ID_ITEM_BASE;
         }
         g_menu_help_message_text_id = help_id;
         selected_slot
@@ -167,16 +170,15 @@ static s32 equip_menu_run_equip_mode(void) {
         }
     } else {
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
-            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + 0x6800
+            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE
             : -1;
         item = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK : 0;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             if (g_menu_list_entry_count != 0
                 && (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_UNEQUIPPABLE) == 0) {
                 item_id = item;
-                /* None left in the inventory: EQUIP's screen message 9 (TEXT_SECTION_OVERLAY_SCREEN). */
                 if (item_adjust_inventory_count(item_id, 0) == 0) {
-                    equip_text_show_message_with_sound(0xD809, MAIN_SFX_ERROR_MESSAGE);
+                    equip_text_show_message_with_sound(EQUIP_TEXT_ID_OUT_OF_STOCK, MAIN_SFX_ERROR_MESSAGE);
                 } else if (equip_unit_set_slot_item(g_equip_unit_selected_index, g_equip_item_slot, item_id)
                     == EQUIP_SLOT_ITEM_ALLOWED) {
                     item_adjust_inventory_count(item_id, -1);
@@ -282,8 +284,9 @@ static s32 equip_menu_run_remove_mode(void) {
     menu_update_and_draw_animated_cursor(
         &g_equip_remove_item_marker_rect, g_equip_remove_item_cursor_anim, g_menu_input_lock_mode);
 
-    g_menu_help_message_text_id
-        = g_remove_item_equipment[selection & 0xFF] != 0 ? g_remove_item_equipment[selection & 0xFF] + 0x6800 : -1;
+    g_menu_help_message_text_id = g_remove_item_equipment[selection & 0xFF] != 0
+        ? g_remove_item_equipment[selection & 0xFF] + HELP_TEXT_ID_ITEM_BASE
+        : -1;
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (g_remove_item_equipment[selection & 0xFF] == 0
             || equip_unit_set_slot_item(g_equip_unit_selected_index, (u8)selection, 0)

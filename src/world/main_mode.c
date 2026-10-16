@@ -64,7 +64,7 @@ void world_menu_run_main_mode(s32 mode) {
      * mode 0 and mode 1 calls, so it is its own variable. */
     last_mode = MENU_OPTION_TYPE_DEAD_UNIT;
     if (mode == MENU_OPTION_TYPE_GAME_OPTIONS) {
-        script_pulse_tutorial_wait_value(0xFD);
+        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
         thread_start(g_thread_current_id - 1, world_menu_run_game_options);
         entry->select_text_table = 1;
         entry->context = &g_menu_option_entry_table;
@@ -73,7 +73,7 @@ void world_menu_run_main_mode(s32 mode) {
         thread_exit_current();
     }
     if (mode == MENU_OPTION_TYPE_AT_LIST) {
-        script_pulse_tutorial_wait_value(0xF9);
+        script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
         menu_start_at_list_thread();
     }
     if (mode == last_mode) {

@@ -127,6 +127,14 @@ void require_reward_load_bonus_image(s32 image_id);
 void require_reward_animate_bonus_image_burst(void);
 
 /* party */
+/* What require_party_update_bio_variable_for_unit_class stores in a character's bio variables. */
+typedef enum require_bio_state {
+    REQUIRE_BIO_STATE_DISMISSED = 12, /* dismissed or turned away */
+    REQUIRE_BIO_STATE_LEFT_LOW_BRAVE = 13,
+    REQUIRE_BIO_STATE_LEFT_HIGH_FAITH = 14,
+    REQUIRE_BIO_STATE_LOST_IN_BATTLE = 15,
+} require_bio_state_e;
+
 /* Three unit ids whose presence selects the event variable at +6. */
 typedef struct require_party_bio_update_record {
     u16 unit_ids[3];

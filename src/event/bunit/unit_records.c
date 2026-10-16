@@ -7,7 +7,7 @@
 #include "fft/data_skillset.h"
 #include "fft/data_status.h"
 #include "fft/event_bunit.h"
-#include "fft/main.h"
+#include "fft/job.h"
 #include "fft/main_item.h"
 #include "fft/main_unit.h"
 #include "fft/menu_status.h"

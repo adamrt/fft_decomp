@@ -839,8 +839,7 @@ void wldcore_calendar_read_date(u32* bits, s32 record, calendar_date_t* dest) {
 }
 
 /* Clear both frame buffers (256 x 480 at the VRAM origin) to black and, when
- * asked, blank the 256x240 backdrop image in g_wldcore_scratch_buffer
- * (0x7800 words). */
+ * asked, blank the 256x240 backdrop image in g_wldcore_scratch_buffer. */
 void wldcore_gfx_clear_vram_and_scratch(s32 clear_scratch) {
     RECT image_rect;
     s32 i;
@@ -853,7 +852,7 @@ void wldcore_gfx_clear_vram_and_scratch(s32 clear_scratch) {
     image_rect.h = 0x1e0;
     ClearImage(&image_rect, 0, 0, 0);
     if (clear_scratch != 0) {
-        for (i = 0x77ff; i >= 0; i--) {
+        for (i = WLDCORE_BACKDROP_WORDS - 1; i >= 0; i--) {
             g_wldcore_scratch_buffer[i] = 0;
         }
     }

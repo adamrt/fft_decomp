@@ -19,7 +19,10 @@ enum {
 };
 
 /* The ENTD slots precede the five deployed-party slots in battle storage. */
-enum { BATTLE_DEPLOYED_UNIT_SLOT_FIRST = ENTD_UNITS_PER_ENCOUNTER };
+enum {
+    BATTLE_DEPLOYED_UNIT_SLOT_FIRST = ENTD_UNITS_PER_ENCOUNTER,
+    BATTLE_DEPLOYED_UNIT_SLOT_COUNT = 5,
+};
 
 /* entries */
 enum {

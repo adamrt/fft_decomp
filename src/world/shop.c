@@ -373,11 +373,13 @@ static void world_menu_switch_item_category(s32 input) {
         if (g_world_shop_menu_step == WORLD_SHOP_STEP_BUY_LIST
             || g_world_shop_menu_step == WORLD_SHOP_STEP_FUR_BUY_LIST) {
             world_shop_build_item_list(-1, g_world_menu_context_id,
-                category != 4 ? (category + 1) : ITEM_LIST_FILTER_OTHER, g_item_list_entries, ITEM_LIST_MODE_ALL);
+                category != ITEM_MENU_TAB_OTHER ? (category + 1) : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+                ITEM_LIST_MODE_ALL);
             cursor_slot = g_world_shop_item_category;
         } else {
             world_item_build_category_list(-1, g_world_shop_item_category + 1,
-                category != 4 ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries, ITEM_LIST_MODE_ALL);
+                category != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+                ITEM_LIST_MODE_ALL);
             cursor_slot = g_world_shop_item_category + 5;
         }
         world_menu_get_selection_record(cursor_slot, &x, &y, g_item_list_entries);
@@ -387,7 +389,7 @@ static void world_menu_switch_item_category(s32 input) {
     world_menu_draw_row_window_and_cursor(1, g_world_shop_item_category, g_menu_input_lock_mode);
     item = g_item_list_entries[g_menu_list_selected_index];
     if (item != -1) {
-        description = (item & ITEM_ENTRY_ID_MASK) + 0x6800;
+        description = (item & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE;
     } else {
         description = 0;
     }
@@ -412,7 +414,7 @@ void world_shop_handle_item_purchase_menu(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF804, 0);
         g_world_shop_purchase_list_initialized = 1;
         world_shop_build_item_list(-1, g_world_menu_context_id,
-            g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
+            g_world_shop_item_category != ITEM_MENU_TAB_OTHER ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         world_menu_get_selection_record(g_world_shop_item_category, &x, &y, g_item_list_entries);
         menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
@@ -444,7 +446,8 @@ void world_shop_handle_item_purchase_menu(void) {
             g_world_shop_purchase_list_initialized = 0;
             g_world_shop_menu_step = WORLD_SHOP_STEP_MAIN_MENU;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF802, 0);
-        } else if ((input & PSX_PAD_TRIANGLE) && g_menu_list_entry_count != 0 && g_world_shop_item_category != 4) {
+        } else if ((input & PSX_PAD_TRIANGLE) && g_menu_list_entry_count != 0
+            && g_world_shop_item_category != ITEM_MENU_TAB_OTHER) {
             g_world_shop_purchase_equip_check_pending = 1;
         } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             if (g_menu_list_entry_count == 0) {
@@ -460,7 +463,7 @@ void world_shop_handle_item_purchase_menu(void) {
     world_menu_switch_item_category(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
         &g_world_shop_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    if (world_map_is_busy() != 0 || g_menu_list_entry_count == 0 || g_world_shop_item_category == 4) {
+    if (world_map_is_busy() != 0 || g_menu_list_entry_count == 0 || g_world_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,
@@ -650,11 +653,11 @@ void world_shop_run_equip_candidate_step(void) {
             i = 0;
             equipped = 0;
             g_world_shop_equip_candidate_last_unit = g_unit_selected_index;
-            /* Bit 15 of an equipment entry draws its name in the highlight palette. */
+            /* Highlight the slots that already hold the candidate. */
             for (; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if (g_world_unit_pointers[g_unit_selected_index]->equipment[i] == g_world_shop_equip_candidate_item) {
                     equipped = 1;
-                    g_world_selected_unit_stat_detail.state.equipment[i] |= 0x8000;
+                    g_world_selected_unit_stat_detail.state.equipment[i] |= WORLD_EQUIPMENT_HIGHLIGHT;
                 }
             }
             if (equipped != 0
@@ -715,7 +718,7 @@ void world_shop_run_item_sell_list_step(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, world_menu_has_items(0) != 0 ? 0xF80C : 0xF80B, 0);
         g_world_shop_item_category = world_menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
         world_item_build_category_list(-1, g_world_shop_item_category + 1,
-            g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
+            g_world_shop_item_category != ITEM_MENU_TAB_OTHER ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         menu_init_scrollable_list_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
@@ -775,7 +778,8 @@ void world_shop_run_item_sell_confirm_step(void) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
             item_rebuild_category_list(g_world_shop_item_category);
             world_item_build_category_list(0, g_world_shop_item_category + 1,
-                g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
+                g_world_shop_item_category != ITEM_MENU_TAB_OTHER ? g_world_shop_item_category + 1
+                                                                  : ITEM_LIST_FILTER_OTHER,
                 g_item_list_entries, ITEM_LIST_MODE_ALL);
             world_menu_init_and_load_scrollable_list(g_item_list_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES], &g_world_shop_sell_list_menu_script);
@@ -987,7 +991,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
             != ITEM_ID_NOTHING) {
             value = (g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_fitting_equip_slot]
                         & ITEM_ENTRY_ID_MASK)
-                + 0x6800;
+                + HELP_TEXT_ID_ITEM_BASE;
         } else {
             value = -1;
         }
@@ -1069,7 +1073,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
         menu_run_script_with_palette_mode(
             &g_world_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, world_map_is_busy());
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
-            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + 0x6800
+            ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE
             : -1;
     }
 
@@ -1177,7 +1181,8 @@ void world_shop_run_fitting_room_remove_step(void) {
     slot = menu_update_vertical_selection_and_mark_change(
         MENU_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
     if (g_world_unit_pointers[g_unit_selected_index]->equipment[(u8)slot] != ITEM_ID_NOTHING) {
-        value = (g_world_unit_pointers[g_unit_selected_index]->equipment[(u8)slot] & ITEM_ENTRY_ID_MASK) + 0x6800;
+        value = (g_world_unit_pointers[g_unit_selected_index]->equipment[(u8)slot] & ITEM_ENTRY_ID_MASK)
+            + HELP_TEXT_ID_ITEM_BASE;
     } else {
         value = -1;
     }
@@ -1552,7 +1557,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
                 != ITEM_ID_NOTHING) {
                 text_id = (g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_sell_equipped_slot]
                               & ITEM_ENTRY_ID_MASK)
-                    + 0x6800;
+                    + HELP_TEXT_ID_ITEM_BASE;
             } else {
                 text_id = -1;
             }
@@ -1818,7 +1823,7 @@ void world_shop_run_fur_sell_list_step(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, message, 0);
         g_world_shop_item_category = world_menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
         world_item_build_category_list(-1, g_world_shop_item_category + 1,
-            g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
+            g_world_shop_item_category != ITEM_MENU_TAB_OTHER ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         menu_init_scrollable_list_core(g_item_list_entries, 0, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_world_menu_script_callbacks[0].value = menu_get_entry_item_equipped_count;
@@ -1879,7 +1884,8 @@ void world_shop_run_fur_sell_confirm_step(void) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF837, 0);
             item_rebuild_category_list(g_world_shop_item_category);
             world_item_build_category_list(0, g_world_shop_item_category + 1,
-                g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
+                g_world_shop_item_category != ITEM_MENU_TAB_OTHER ? g_world_shop_item_category + 1
+                                                                  : ITEM_LIST_FILTER_OTHER,
                 g_item_list_entries, ITEM_LIST_MODE_ALL);
             world_menu_init_and_load_scrollable_list(g_item_list_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES], &g_world_shop_sale_confirm_menu_script);
@@ -1968,7 +1974,7 @@ void world_shop_run_fur_buy_list_step(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF832, 0);
         g_world_shop_fur_purchase_list_initialized = 1;
         world_shop_build_item_list(-1, g_world_menu_context_id,
-            g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
+            g_world_shop_item_category != ITEM_MENU_TAB_OTHER ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         world_menu_get_selection_record(g_world_shop_item_category, &x, &y, g_item_list_entries);
         menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
@@ -2001,7 +2007,8 @@ void world_shop_run_fur_buy_list_step(void) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_MENU;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF830, 0);
             g_sound_queued_effect_id = MAIN_SFX_CANCEL;
-        } else if ((input & PSX_PAD_TRIANGLE) && g_menu_list_entry_count != 0 && g_world_shop_item_category != 4) {
+        } else if ((input & PSX_PAD_TRIANGLE) && g_menu_list_entry_count != 0
+            && g_world_shop_item_category != ITEM_MENU_TAB_OTHER) {
             g_world_shop_fur_equip_check_pending = 1;
         } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             if (g_menu_list_entry_count == 0) {
@@ -2017,7 +2024,7 @@ void world_shop_run_fur_buy_list_step(void) {
     world_menu_switch_item_category(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
         &g_world_shop_fur_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    if (world_map_is_busy() != 0 || g_menu_list_entry_count == 0 || g_world_shop_item_category == 4) {
+    if (world_map_is_busy() != 0 || g_menu_list_entry_count == 0 || g_world_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,
@@ -2051,7 +2058,8 @@ void world_shop_run_fur_buy_confirm_step(void) {
                 -g_world_menu_selection_results[WORLD_MENU_SELECTION_SHOP_QUANTITY]);
             item_rebuild_category_list(g_world_shop_item_category);
             world_shop_build_item_list(-1, g_world_menu_context_id,
-                g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
+                g_world_shop_item_category != ITEM_MENU_TAB_OTHER ? g_world_shop_item_category + 1
+                                                                  : ITEM_LIST_FILTER_OTHER,
                 g_item_list_entries, ITEM_LIST_MODE_ALL);
             world_menu_init_and_load_scrollable_list(g_item_list_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES], &g_world_shop_fur_purchase_menu_script);

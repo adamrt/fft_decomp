@@ -4,7 +4,6 @@
 /* Battle actions: the turn order and its active time list, preparing an action, resolving its
  * strikes, reactions and Mimes, and the results and rewards it shows. */
 
-#include "fft/battle_effect.h"
 #include "fft/battle_unit.h"
 #include "fft/data.h"
 #include "fft/data_ability.h"
@@ -98,6 +97,14 @@ typedef enum battle_at_list_mode {
     BATTLE_AT_LIST_MODE_PREVIEW = 3,      /* as ALL, with the acting unit's new charge counted from this tick */
 } battle_at_list_mode_e;
 
+/* battle_action_get_at_list_entry_unit_id results: the low byte is the unit's battle id, and a
+ * charged-action entry adds BATTLE_AT_LIST_ENTRY_CHARGED_ACTION. */
+enum {
+    BATTLE_AT_LIST_ENTRY_EMPTY = -4,
+    BATTLE_AT_LIST_ENTRY_BATTLE_ID_MASK = 0xff,
+    BATTLE_AT_LIST_ENTRY_CHARGED_ACTION = 0x100,
+};
+
 extern s32 g_battle_action_at_list_active;
 extern s32 g_battle_action_at_list_id;
 
@@ -126,7 +133,7 @@ s32 battle_action_commit_attack_preparation(action_command_t* command);
 void battle_action_confirm(void);
 s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit);
 void battle_action_handle_move_command(void);
-s32 battle_action_prepare_attack(action_command_t* action, action_command_t* target, s32 flag);
+s32 battle_action_prepare_attack(action_command_t* source, action_command_t* dest, s32 phase);
 void battle_action_set_casting_unit_id_ff_and_init(void);
 void battle_action_switch_ability_to_default_attack(void);
 
@@ -334,7 +341,7 @@ void battle_action_clear_knockback_flag(void);
 void battle_action_execute_ability(void);
 void battle_action_finalize_target_current_action(void);
 s32 battle_action_init_current_data(s32 unit_id);
-s32 battle_action_apply_target_result(s32 runtime_id);
+s32 battle_action_apply_target_result(s32 battle_id);
 s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* work);
 s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 target_id);
 void battle_action_set_target_coords_and_attacker_anim(void);
@@ -363,7 +370,7 @@ s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit);
 s32 battle_action_is_reaction_blocked(const unit_stats_t* unit);
 s32 battle_action_is_reaction_prevented(const unit_stats_t* unit);
 s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability);
-s32 battle_reaction_prepare_next(s16* reaction_id);
+s32 battle_reaction_prepare_next(s16* out_ability);
 
 /* mimic */
 /* g_battle_action_current_attacker, filled by battle_action_set_current_attacker_data and read
@@ -557,6 +564,19 @@ typedef enum battle_post_action_display_phase {
     BATTLE_POST_ACTION_DISPLAY_LEARN_ON_HIT = 2,
 } battle_post_action_display_phase_e;
 
+/* Queue of post-action "effect message" popups (g_battle_action_post_effect_msgs), filled by
+ * battle_action_queue_post_effect_messages_for_unit and drained newest first by
+ * battle_action_show_next_effect_message. */
+typedef struct battle_post_effect_msg {
+    u8 code;           /* 0x00 action_display_image_id_e of the popup */
+    u8 unit;           /* 0x01 battle id of the reported unit */
+    u8 _padding_02[2]; /* 0x02; aligns value */
+    s32 value;         /* 0x04 reported amount */
+} battle_post_effect_msg_t;
+typedef char battle_post_effect_msg_size_must_be_8[(sizeof(battle_post_effect_msg_t) == 8) ? 1 : -1];
+
+enum { BATTLE_POST_EFFECT_MSG_CAPACITY = 16 };
+
 extern action_display_image_rect_t g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
 extern const u8 g_battle_action_display_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
 extern u16 g_battle_action_display_values[ACTION_DISPLAY_VALUE_COUNT];
@@ -564,7 +584,7 @@ extern s32 g_battle_action_learn_on_hit_unit_id;
 extern s32 g_battle_action_post_action;
 extern s32 g_battle_action_post_action_display_phase; /* battle_post_action_display_phase_e */
 extern s32 g_battle_action_post_effect_msg_counter;
-extern battle_post_effect_msg_t g_battle_action_post_effect_msgs[];
+extern battle_post_effect_msg_t g_battle_action_post_effect_msgs[BATTLE_POST_EFFECT_MSG_CAPACITY];
 extern const palette_t g_battle_action_result_palette;
 /* Eight per status_changes mask byte, indexed from the byte's high bit. */
 extern u8 g_battle_action_status_display_image_ids[STATUS_BYTE_COUNT][8];

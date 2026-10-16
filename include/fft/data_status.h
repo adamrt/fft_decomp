@@ -63,6 +63,14 @@ typedef enum status_id {
 
 #define STATUS_BYTE_MASK(id) ((u8)(0x80U >> ((id) & 7)))
 
+/* Event infliction helpers number bits LSB-first, unlike stored status IDs. */
+#define STATUS_LSB_INDEX(id) (((id) & ~7) | (7 - ((id) & 7)))
+#define STATUS_LSB_MASK(id)  ((u8)(1U << ((id) & 7)))
+/* The special-status callback table reserves index 0; timed slots begin at Poison. */
+#define STATUS_HANDLER_INDEX(id) ((id) + 1)
+#define STATUS_CT_INDEX(id)      ((id) - STATUS_ID_POISON)
+#define STATUS_PACKED_MASK(id)   ((u32)STATUS_BYTE_MASK(id) << (STATUS_BYTE_INDEX(id) * 8))
+
 /* status sets */
 /* A unit's innate, immunity and current statuses, STATUS_BYTE_COUNT bytes
  * each. main_unit_copy_job_data copies the three sets as one 15-byte block, so

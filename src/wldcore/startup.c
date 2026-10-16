@@ -47,8 +47,8 @@ static void wldcore_menu_restore_level_on_world_entry(void);
 static void wldcore_process_frame_gate(void);
 
 /* WLDCORE's main loop: set up, fade in and run world-map frames until a menu level
- * stops it, then return why: 5 back to the title, 4 a deep dungeon battle, 2 an event
- * replay or tutorial, 1 a random battle, else 0. A card-menu restart loops instead. */
+ * stops it, then return why as a main_world_result_e. A card-menu restart loops
+ * instead. */
 s32 wldcore_entrypoint(void) {
     s32 buffer_index;
 
@@ -92,22 +92,23 @@ s32 wldcore_entrypoint(void) {
             s32 flags = g_main_system_flags;
 
             if (flags & MAIN_SYSTEM_FLAG_RETURN_TO_TITLE) {
-                return 5;
+                return MAIN_WORLD_RESULT_TITLE;
             }
             if (flags & MAIN_SYSTEM_FLAG_DEEP_DUNGEON_BATTLE) {
-                return 4;
+                return MAIN_WORLD_RESULT_DEEP_DUNGEON_BATTLE;
             }
             if (flags & MAIN_SYSTEM_FLAG_TUTORIAL_EVENT) {
-                return 2;
+                return MAIN_WORLD_RESULT_EVENT;
             }
-            /* Returning through a local keeps two separate `return 2`
-             * blocks; a plain `return 2` here cross-jumps into the one above. */
+            /* Returning through a local keeps two separate MAIN_WORLD_RESULT_EVENT
+             * returns; a plain return here cross-jumps into the one above. */
             {
                 s32 result;
 
                 if (flags & MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY) {
-                    result = 2;
+                    result = MAIN_WORLD_RESULT_EVENT;
                 } else {
+                    /* MAIN_WORLD_RESULT_RANDOM_BATTLE or MAIN_WORLD_RESULT_NONE */
                     result = (flags & MAIN_SYSTEM_FLAG_RANDOM_BATTLE) > 0;
                 }
                 return result;
@@ -536,7 +537,7 @@ static void wldcore_menu_restore_level_on_world_entry(void) {
         g_wldcore_audio_queue.music.tracks[0] = 0x1B;
         g_wldcore_audio_queue.music.tracks[1] = 0x1A;
         g_wldcore_audio_queue.current_slot = 2;
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES, 1, 0);
+        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS, 1, 0);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_TUTORIAL) {
         wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES, 0, 1);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) {

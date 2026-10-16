@@ -76,7 +76,7 @@ enum {
 };
 
 /* Commands of battle_map_polygon_flag_command. */
-typedef enum battle_map_polygon_flag_command {
+typedef enum map_polygon_flag_command {
     MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,    /* copy LIT into LIT_ACTIVE on every polygon */
     MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,    /* clear LIT_ACTIVE everywhere */
     MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT = 0x94, /* repaint the polygons without LIT in the ambient color */
@@ -299,10 +299,11 @@ extern s32 g_battle_map_part_textured_quad_count;
 extern s32 g_battle_map_part_textured_triangle_count;
 extern s32 g_battle_map_part_untextured_quad_count;
 extern s32 g_battle_map_part_untextured_triangle_count;
-extern map_mesh_triangle_positions_t g_battle_map_textured_triangle_positions[];
-extern map_mesh_quad_positions_t g_battle_map_textured_quad_positions[];
-extern map_mesh_triangle_positions_t g_battle_map_untextured_triangle_positions[];
-extern map_mesh_quad_positions_t g_battle_map_untextured_quad_positions[];
+extern map_mesh_triangle_positions_t g_battle_map_textured_triangle_positions[BATTLE_RENDER_TEXTURED_TRIANGLE_COUNT];
+extern map_mesh_quad_positions_t g_battle_map_textured_quad_positions[BATTLE_RENDER_TEXTURED_QUAD_COUNT];
+extern map_mesh_triangle_positions_t
+    g_battle_map_untextured_triangle_positions[BATTLE_RENDER_UNTEXTURED_TRIANGLE_COUNT];
+extern map_mesh_quad_positions_t g_battle_map_untextured_quad_positions[BATTLE_RENDER_UNTEXTURED_QUAD_COUNT];
 extern map_mesh_triangle_normals_t g_battle_map_textured_triangle_normals[];
 extern map_mesh_quad_normals_t g_battle_map_textured_quad_normals[];
 extern u8 g_battle_map_polygon_flag_clear_countdown;

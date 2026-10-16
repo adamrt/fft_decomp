@@ -1202,8 +1202,9 @@ s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
 
 /* Rebuild the AT list and return the unit id of the chosen entry.
  *
- * Returns -4 for an empty entry; a charged-action entry (AT_ACTION_ENTRY)
- * returns its unit id plus 0x100. */
+ * Returns BATTLE_AT_LIST_ENTRY_EMPTY for an empty entry; a charged-action
+ * entry (AT_ACTION_ENTRY) returns its unit id plus
+ * BATTLE_AT_LIST_ENTRY_CHARGED_ACTION. */
 s32 battle_action_get_at_list_entry_unit_id(s32 at_index) {
     at_entry_t at_list[AT_LIST_CAPACITY];
     u32 entry;
@@ -1213,10 +1214,10 @@ s32 battle_action_get_at_list_entry_unit_id(s32 at_index) {
     entry = at_list[at_index].unit_code;
     unit_id = entry & AT_UNIT_ID_MASK;
     if (unit_id == AT_END_OF_LIST) {
-        return -4;
+        return BATTLE_AT_LIST_ENTRY_EMPTY;
     }
     if (entry & AT_ACTION_ENTRY) {
-        unit_id += 0x100;
+        unit_id += BATTLE_AT_LIST_ENTRY_CHARGED_ACTION;
     }
     return unit_id;
 }

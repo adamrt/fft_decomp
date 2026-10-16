@@ -56,6 +56,8 @@ typedef enum wldcore_text_id {
     WLDCORE_TEXT_ID_JOB_CONDITION_LABELS = 0xb821,  /* "Days", "Place", "Unit" with the first two filled in */
     WLDCORE_TEXT_ID_CHOOSE_MORE_UNITS = 0xb822,     /* "Who else are you sending?" */
     WLDCORE_TEXT_ID_DAYS_LABEL = 0xb823,            /* "Days:" */
+    WLDCORE_TEXT_ID_DEBUG_VARIABLE_VALUE = 0xb824,  /* the debug list: a script variable and its value */
+    WLDCORE_TEXT_ID_DEBUG_VARIABLE = 0xb825,        /* the same without the value, for values of 10000 up */
     WLDCORE_TEXT_ID_PARTY_NUMBER_LABEL = 0xb826,    /* "Party number:" */
     WLDCORE_TEXT_ID_JOB_RESULT_LABELS = 0xb830,     /* "Bonus", "Total", "Job Point" */
     WLDCORE_TEXT_ID_FOUR_DIGIT_VALUE = 0xb831,      /* a value, four digits wide */

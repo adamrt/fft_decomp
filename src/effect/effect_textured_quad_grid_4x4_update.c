@@ -98,7 +98,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
             = (configuration.blend_mode << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT) | EFFECT_RENDER_TEXTURE_PAGE_BASE;
 
         /* The quads never move, so their positions are set here once, in both buffers. The grid
-         * starts at draw x 128, the left screen edge: BATTLE's draw areas begin at x -128. */
+         * starts at the left screen edge, MAIN_GFX_BATTLE_SCREEN_X. */
         for (row = 0; row < QUAD_GRID_SIZE; row++) {
             for (column = 0; column < QUAD_GRID_SIZE; column++) {
                 quad = &work->quads[0][row * QUAD_GRID_SIZE + column];
@@ -106,9 +106,9 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
                 setSemiTrans(quad, translucent);
                 quad->tpage = texture_page;
                 quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
-                quad->x0 = quad->x2 = column * QUAD_GRID_CELL + 128;
+                quad->x0 = quad->x2 = column * QUAD_GRID_CELL + MAIN_GFX_BATTLE_SCREEN_X;
                 quad->y0 = quad->y1 = row * QUAD_GRID_CELL;
-                quad->x1 = quad->x3 = column * QUAD_GRID_CELL + 128 + QUAD_GRID_CELL;
+                quad->x1 = quad->x3 = column * QUAD_GRID_CELL + MAIN_GFX_BATTLE_SCREEN_X + QUAD_GRID_CELL;
                 quad->y2 = quad->y3 = row * QUAD_GRID_CELL + QUAD_GRID_CELL;
                 work->quads[1][row * QUAD_GRID_SIZE + column] = *quad;
             }

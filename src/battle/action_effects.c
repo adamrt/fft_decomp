@@ -35,7 +35,7 @@ void battle_target_show_cursor(void) {
 }
 
 /* Hide the map cursor and its tile glow: the flag is read only by
- * target_calculate_tile_coords_and_glow_from_at_list. */
+ * battle_target_update_cursor. */
 void battle_target_hide_cursor(void) {
     g_battle_action_at_list_active = 0;
 }
@@ -139,10 +139,9 @@ void battle_action_show_next_at_list_entry(void) {
 
     for (;;) {
         id = battle_action_get_at_list_entry_unit_id(g_battle_action_at_list_id);
-        /* The low byte is the unit's battle id; 0x100 marks a charged action. */
         if (id >= 0) {
-            unit = battle_unit_get_by_battle_id(id & 0xFF);
-            if ((id & 0x100) != 0) {
+            unit = battle_unit_get_by_battle_id(id & BATTLE_AT_LIST_ENTRY_BATTLE_ID_MASK);
+            if ((id & BATTLE_AT_LIST_ENTRY_CHARGED_ACTION) != 0) {
                 battle_target_move_cursor_to_action_target(unit);
                 battle_target_calculate_for_menu_types(&unit->stats->action_command);
                 battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
@@ -358,14 +357,14 @@ s32 battle_unit_set_target_anim_by_battle_id(u16 battle_id) {
 }
 
 /* battle_gfx_prepare_post_action_display for a runtime id. An absent unit raises
- * pointer exception 0xc and returns 0. */
+ * a pointer exception and returns 0. */
 s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0) {
         battle_gfx_prepare_post_action_display(unit);
         return 1;
     }
-    main_system_handle_pointer_exception(0xc);
+    main_system_handle_pointer_exception(MAIN_SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     return 0;
 }
 

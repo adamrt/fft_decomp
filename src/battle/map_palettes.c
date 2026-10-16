@@ -1184,11 +1184,11 @@ s32 battle_map_stop_clut_cycle(s32 handle) {
  * touched. The byte-offset loop preserves the original address sequence;
  * indexed active fields add four bytes. */
 static void battle_map_reset_clut_cycles(void) {
-    s32 offset = (MAP_CLUT_CYCLE_SLOT_COUNT - 1) * MAP_CLUT_CYCLE_SLOT_BYTE_COUNT;
+    s32 offset = (MAP_CLUT_CYCLE_SLOT_COUNT - 1) * sizeof(map_clut_cycle_state_t);
 
     do {
         ((u8*)g_battle_map_clut_cycle_states)[offset] = 0;
-        offset -= MAP_CLUT_CYCLE_SLOT_BYTE_COUNT;
+        offset -= sizeof(map_clut_cycle_state_t);
     } while (offset >= 0);
 }
 
@@ -2235,9 +2235,10 @@ void battle_state_init_deployment_display(s32 width, s32 height, s32 projection,
     SetGeomOffset(width / 2, height / 2);
     SetGeomScreen(projection);
 
-    SetDefDrawEnv(&g_main_gfx_draw_envs[0], -0x80, 0, width + 0x80, height);
+    SetDefDrawEnv(&g_main_gfx_draw_envs[0], -MAIN_GFX_BATTLE_SCREEN_X, 0, width + MAIN_GFX_BATTLE_SCREEN_X, height);
     SetDefDispEnv(&g_main_gfx_display_envs[0], 0, second_y, width, height);
-    SetDefDrawEnv(&g_main_gfx_draw_envs[1], -0x80, second_y, width + 0x80, height);
+    SetDefDrawEnv(
+        &g_main_gfx_draw_envs[1], -MAIN_GFX_BATTLE_SCREEN_X, second_y, width + MAIN_GFX_BATTLE_SCREEN_X, height);
     SetDefDispEnv(&g_main_gfx_display_envs[1], 0, 0, width, height);
 
     g_main_gfx_draw_envs[0].dtd = g_main_gfx_draw_envs[1].dtd = 1;

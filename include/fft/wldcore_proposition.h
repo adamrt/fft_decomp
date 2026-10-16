@@ -4,6 +4,7 @@
 /* WLDCORE's propositions: the proposition data file and its rows, the lists and dispatch, daily progress, and the
  * report with its rewards. */
 
+#include "fft/text.h"
 #include "fft/wldcore_menu_level.h"
 #include "psx/libgs.h"
 #include "psx/types.h"
@@ -105,6 +106,12 @@ typedef enum wldcore_proposition_state {
     WLDCORE_PROPOSITION_STATE_BAD_FAILURE = 0x80,
 } wldcore_proposition_state_e;
 
+/* The days a failed proposition waits before the bar offers it again; a bad failure waits less. */
+enum {
+    WLDCORE_PROPOSITION_FAILURE_COOLDOWN_DAYS = 32,
+    WLDCORE_PROPOSITION_BAD_FAILURE_COOLDOWN_DAYS = 16,
+};
+
 void wldcore_proposition_advance_daily_counters(void);
 s32 wldcore_proposition_count_returned(s32 location);
 
@@ -154,6 +161,14 @@ typedef enum wldcore_proposition_reward {
     WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND = 2,
     WLDCORE_PROPOSITION_REWARD_RANDOM_BONUS = 3, /* the three-tier random reward */
 } wldcore_proposition_reward_e;
+
+/* Reward names in the TEXT_ID_PROPOSITION_REWARD_NAME_BASE section: the random bonuses from the base,
+ * then the no-reward name, the unexplored lands and the treasures, each by reward_index. */
+enum {
+    WLDCORE_TEXT_ID_REWARD_NONE = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6,
+    WLDCORE_TEXT_ID_REWARD_LAND_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1b,
+    WLDCORE_TEXT_ID_REWARD_TREASURE_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2e,
+};
 
 /* Provisional: the outcome of a returned proposition (g_wldcore_proposition_report), worked out while its report
  * runs. It is one object: wldcore_proposition_find_preferred_job_unit reads excluded_party_index at -0xc from its
