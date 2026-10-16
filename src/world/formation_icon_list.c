@@ -86,7 +86,7 @@ void world_text_generate_formation_unit_name_string(void) {
             *out = 0xFE;
             out++;
         } else {
-            for (j = 0; j < 16; j++) {
+            for (j = 0; j < UNIT_NAME_SIZE; j++) {
                 character = unit->name[j];
                 *out = character;
                 if ((character & 0xFE) == 0xFE) {

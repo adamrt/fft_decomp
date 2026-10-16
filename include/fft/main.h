@@ -85,14 +85,14 @@ enum {
 /* What a save slot's line on the save screen shows: the first 0x18 bytes of a
  * save's data block. g_main_card_save_slot_metadata keeps one per slot. */
 typedef struct card_save_summary {
-    u8 slot;              /* 0x00; save slot, 0xff while the buffer is incomplete */
-    u8 name[0x10];        /* 0x01; save-description leader name, 0xfe-terminated */
-    u8 name_terminator;   /* 0x11 */
-    u8 job_id;            /* 0x12 */
-    u8 level;             /* 0x13 */
-    calendar_date_t date; /* 0x14; month/day from script variables 0x2e/0x2f */
-    u8 location;          /* 0x16; script variable 0x31, location text index */
-    u8 format_version;    /* 0x17; CARD writes 4 and WORLD load requires 4 */
+    u8 slot;                 /* 0x00; save slot, 0xff while the buffer is incomplete */
+    u8 name[UNIT_NAME_SIZE]; /* 0x01; save-description leader name, 0xfe-terminated */
+    u8 name_terminator;      /* 0x11 */
+    u8 job_id;               /* 0x12 */
+    u8 level;                /* 0x13 */
+    calendar_date_t date;    /* 0x14; month/day from script variables 0x2e/0x2f */
+    u8 location;             /* 0x16; script variable 0x31, location text index */
+    u8 format_version;       /* 0x17; CARD writes 4 and WORLD load requires 4 */
 } card_save_summary_t;
 typedef char card_save_summary_size_must_be_24[(sizeof(card_save_summary_t) == 24) ? 1 : -1];
 

@@ -265,7 +265,7 @@ static void menu_build_ability_preview_at_list(void) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
-        for (name_index = 0; name_index < 16; name_index++) {
+        for (name_index = 0; name_index < UNIT_NAME_SIZE; name_index++) {
             u8 character = stats->name[name_index];
             *text = character;
             if ((character & 0xfe) == 0xfe) {

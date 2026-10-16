@@ -1734,7 +1734,7 @@ typedef enum skillset_ability_filter {
 enum {
     STATUS_COUNT = 40,
     STATUS_BYTE_COUNT = 5,
-    BATTLE_TIMED_STATUS_COUNT = 16,
+    BATTLE_TIMED_STATUS_COUNT = 16, /* Poison through Death Sentence keep a CT byte each */
 };
 
 typedef struct status_effect_data {

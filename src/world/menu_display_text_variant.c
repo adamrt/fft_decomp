@@ -34,7 +34,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;
     }
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < UNIT_NAME_SIZE; i++) {
         g_text_player_name_buffer[i] = party->name[i];
     }
     if (text == 0 || text == (u8*)1) {

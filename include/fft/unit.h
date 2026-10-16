@@ -416,6 +416,9 @@ typedef enum unit_equipment_slot {
     UNIT_EQUIPMENT_SLOT_COUNT = 7,
 } unit_equipment_slot_e;
 
+/* Bytes of a unit name in the game's text encoding. */
+enum { UNIT_NAME_SIZE = 16 };
+
 s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support);
 
 /* job */
@@ -911,46 +914,46 @@ enum {
  * stores 21 consecutive 448-byte records at 0x801908cc. A live battle_unit_t
  * points to its stats through the member at 0x134. */
 typedef struct unit_stats {
-    u8 character_identity;                               /* 0x000 */
-    u8 entd_slot;                                        /* 0x001; 0xff means absent */
-    u8 formation_index;                                  /* 0x002 */
-    u8 job_id;                                           /* 0x003 */
-    u8 sprite_palette;                                   /* 0x004 */
-    u8 team_flags;                                       /* 0x005 */
-    u8 unit_flags;                                       /* 0x006; mixed sex, monster, guest, and formation flags */
-    u8 death_counter;                                    /* 0x007 */
-    battle_unit_birthday_t birthday;                     /* 0x008; zodiac is the high nibble */
-    u16 innate_abilities[4];                             /* 0x00a */
-    u8 primary_skillset;                                 /* 0x012 */
-    u8 secondary_skillset;                               /* 0x013 */
-    unit_abilities_t abilities;                          /* 0x014; reaction, support, movement */
-    u8 equipment[7];                                     /* 0x01a; unit_equipment_slot_e */
-    u8 experience;                                       /* 0x021 */
-    u8 level;                                            /* 0x022 */
-    u8 original_brave;                                   /* 0x023 */
-    u8 brave;                                            /* 0x024 */
-    u8 original_faith;                                   /* 0x025 */
-    u8 faith;                                            /* 0x026 */
-    u8 transparent_removal_flag;                         /* 0x027 */
-    u16 hp;                                              /* 0x028 */
-    u16 max_hp;                                          /* 0x02a */
-    u16 mp;                                              /* 0x02c */
-    u16 max_mp;                                          /* 0x02e */
-    u8 base_attributes[3];                               /* 0x030; unit_attribute_index_e */
-    u8 equipment_attributes[3];                          /* 0x033; unit_attribute_index_e */
-    u8 attributes[3];                                    /* 0x036; unit_attribute_index_e */
-    u8 ct;                                               /* 0x039 */
-    u8 move;                                             /* 0x03a */
-    u8 jump;                                             /* 0x03b */
-    u8 equipment_stats[11];                              /* 0x03c; battle_unit_equipment_stat_index_e */
-    u8 x;                                                /* 0x047 */
-    battle_unit_position_t position;                     /* 0x048 */
-    u8 equipment_categories[4];                          /* 0x04a */
-    status_sets_t status_sets;                           /* 0x04e; innate / immunity / current */
-    u8 status_ct[16];                                    /* 0x05d */
-    u8 elemental_affinity[5];                            /* 0x06d; elemental_affinity_index_e */
-    unit_raw_stats_t raw_stats;                          /* 0x072 */
-    job_stat_growth_t stat_growths[UNIT_RAW_STAT_COUNT]; /* 0x081; job_data_t.stat_growths */
+    u8 character_identity;                                /* 0x000 */
+    u8 entd_slot;                                         /* 0x001; 0xff means absent */
+    u8 formation_index;                                   /* 0x002 */
+    u8 job_id;                                            /* 0x003 */
+    u8 sprite_palette;                                    /* 0x004 */
+    u8 team_flags;                                        /* 0x005 */
+    u8 unit_flags;                                        /* 0x006; mixed sex, monster, guest, and formation flags */
+    u8 death_counter;                                     /* 0x007 */
+    battle_unit_birthday_t birthday;                      /* 0x008; zodiac is the high nibble */
+    u16 innate_abilities[4];                              /* 0x00a */
+    u8 primary_skillset;                                  /* 0x012 */
+    u8 secondary_skillset;                                /* 0x013 */
+    unit_abilities_t abilities;                           /* 0x014; reaction, support, movement */
+    u8 equipment[7];                                      /* 0x01a; unit_equipment_slot_e */
+    u8 experience;                                        /* 0x021 */
+    u8 level;                                             /* 0x022 */
+    u8 original_brave;                                    /* 0x023 */
+    u8 brave;                                             /* 0x024 */
+    u8 original_faith;                                    /* 0x025 */
+    u8 faith;                                             /* 0x026 */
+    u8 transparent_removal_flag;                          /* 0x027 */
+    u16 hp;                                               /* 0x028 */
+    u16 max_hp;                                           /* 0x02a */
+    u16 mp;                                               /* 0x02c */
+    u16 max_mp;                                           /* 0x02e */
+    u8 base_attributes[3];                                /* 0x030; unit_attribute_index_e */
+    u8 equipment_attributes[3];                           /* 0x033; unit_attribute_index_e */
+    u8 attributes[3];                                     /* 0x036; unit_attribute_index_e */
+    u8 ct;                                                /* 0x039 */
+    u8 move;                                              /* 0x03a */
+    u8 jump;                                              /* 0x03b */
+    u8 equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_COUNT]; /* 0x03c; battle_unit_equipment_stat_index_e */
+    u8 x;                                                 /* 0x047 */
+    battle_unit_position_t position;                      /* 0x048 */
+    u8 equipment_categories[4];                           /* 0x04a */
+    status_sets_t status_sets;                            /* 0x04e; innate / immunity / current */
+    u8 status_ct[BATTLE_TIMED_STATUS_COUNT];              /* 0x05d */
+    u8 elemental_affinity[5];                             /* 0x06d; elemental_affinity_index_e */
+    unit_raw_stats_t raw_stats;                           /* 0x072 */
+    job_stat_growth_t stat_growths[UNIT_RAW_STAT_COUNT];  /* 0x081; job_data_t.stat_growths */
     /* Active R/S/M flags: one contiguous 88-bit set indexed by ability ID. */
     struct {
         u8 reaction[4];        /* 0x00; battle_unit_reaction_set_N_e */
@@ -960,7 +963,7 @@ typedef struct unit_stats {
     unit_career_data_t career; /* 0x096; unlocked jobs, learned abilities, levels and JP */
     /* main_unit_store_character_names (0x8005c984) copies 16/16/8/8
      * bytes to these four destinations. All names use the game's encoding. */
-    u8 name[16];                     /* 0x12c */
+    u8 name[UNIT_NAME_SIZE];         /* 0x12c */
     u8 job_name[16];                 /* 0x13c */
     u8 primary_skillset_name[8];     /* 0x14c */
     u8 secondary_skillset_name[8];   /* 0x154 */
@@ -1161,7 +1164,7 @@ typedef struct party_unit {
     u8 faith;                   /* 0x18 */
     unit_raw_stats_t raw_stats; /* 0x19 */
     unit_career_data_t career;  /* 0x28; unlocked jobs, learned abilities, levels and JP */
-    u8 name[16];                /* 0xbe */
+    u8 name[UNIT_NAME_SIZE];    /* 0xbe */
     unit_name_id_t name_id;     /* 0xce */
     u8 proposition_status;      /* 0xd0; nonzero while unavailable on a proposition */
     u8 _unused_d1;

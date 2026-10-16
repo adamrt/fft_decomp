@@ -104,7 +104,7 @@ typedef struct world_unit {
     u8 job_levels[UNIT_JOB_LEVEL_BYTE_COUNT];                                                 /* 0x0b3 */
     u8 _padding_0bd;                                                                          /* aligns job_points */
     unit_job_points_t job_points; /* 0x0be; current JP followed by total JP */
-    u8 name[0x10];                /* 0x10e; "unit Nickname" */
+    u8 name[UNIT_NAME_SIZE];      /* 0x10e; "unit Nickname" */
     u8 monster_graphic;           /* 0x11e; added to formation graphic entry 0x3d when sprite_set == 0x82
                                      (world_formation_build_unit_graphic_entry) */
     u8 proposition_status;        /* 0x11f; "Proposition Byte": world_formation_unit_proposition_e, 0 when present */

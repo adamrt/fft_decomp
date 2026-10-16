@@ -248,7 +248,7 @@ static void menu_init_at_list(menu_entry_t* menu) {
         }
         /* The pointer must lead the index in the sum to match the target's
            operand order on the address add. */
-        for (name_index = 0; name_index < 0x10; name_index++) {
+        for (name_index = 0; name_index < UNIT_NAME_SIZE; name_index++) {
             u8 character = unit->name[name_index];
             *text = character;
             if ((character & 0xfe) == 0xfe) {

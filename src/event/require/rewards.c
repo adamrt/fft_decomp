@@ -324,16 +324,16 @@ static s32 require_party_select_unit_to_remove(void) {
     {
         s32 name_character_index;
 
-        for (party_index = 0; party_index < 0x14; party_index++) {
+        for (party_index = 0; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
             party_unit = main_party_get_unit(party_index);
-            if (party_unit->party_id == PARTY_ID_NONE || party_index >= 0x10 || party_unit->proposition_status != 0
-                || (party_unit->gender_flags & UNIT_FLAG_EGG) != 0) {
+            if (party_unit->party_id == PARTY_ID_NONE || party_index >= PARTY_MEMBER_SLOT_COUNT
+                || party_unit->proposition_status != 0 || (party_unit->gender_flags & UNIT_FLAG_EGG) != 0) {
                 g_require_party_removable_flags[party_index] = 0;
                 *text = 0xfe;
                 text++;
             } else {
                 g_require_party_removable_flags[party_index] = 1;
-                for (name_character_index = 0; name_character_index < 0x10; name_character_index++) {
+                for (name_character_index = 0; name_character_index < UNIT_NAME_SIZE; name_character_index++) {
                     *text = party_unit->name[name_character_index];
                     if ((*text & 0xfe) == 0xfe) {
                         text++;
@@ -467,7 +467,7 @@ static s32 require_party_select_unit_to_remove(void) {
         {
             unit_stats_t* battle_unit;
 
-            for (party_index = 0; party_index < 0x15; party_index++) {
+            for (party_index = 0; party_index < BATTLE_UNIT_SLOT_COUNT; party_index++) {
                 battle_unit = battle_unit_get_stats_from_battle_id(party_index);
                 selected_battle_unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &message_id);
                 if (message_id >= 0 && party_index == message_id
@@ -534,9 +534,9 @@ static s32 require_party_select_unit_to_remove(void) {
         s32 name_character_index;
 
         text = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
-        for (party_index = 0; party_index < 0x15; party_index++) {
+        for (party_index = 0; party_index < BATTLE_UNIT_SLOT_COUNT; party_index++) {
             selected_battle_unit = battle_unit_get_stats_from_battle_id(party_index);
-            for (name_character_index = 0; name_character_index < 0x10; name_character_index++) {
+            for (name_character_index = 0; name_character_index < UNIT_NAME_SIZE; name_character_index++) {
                 *text = selected_battle_unit->name[name_character_index];
                 if ((*text & 0xfe) == 0xfe) {
                     text++;

@@ -138,7 +138,7 @@ void script_opcode_74_event_instruction(const u8* unused_parameters) {
 s32 thread_resolve_id(s32 requested_thread_id) {
     s32 i;
 
-    if (requested_thread_id < THREAD_RESET_SLOT_COUNT) {
+    if (requested_thread_id < THREAD_ID_COUNT) {
         return requested_thread_id;
     }
     i = 1;
@@ -156,7 +156,7 @@ s32 thread_resolve_id(s32 requested_thread_id) {
 s32 thread_resolve_id_after_current(s32 thread_id) {
     s32 index;
 
-    if (thread_id < THREAD_RESET_SLOT_COUNT) {
+    if (thread_id < THREAD_ID_COUNT) {
         return thread_id;
     }
 

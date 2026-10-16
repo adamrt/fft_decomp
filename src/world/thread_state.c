@@ -90,12 +90,12 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
         g_script_input_suppression_frames = 5;
     }
 
-    for (thread_id = 1; thread_id < 16; thread_id++) {
+    for (thread_id = 1; thread_id < THREAD_ID_COUNT; thread_id++) {
         g_thread_status_snapshot[thread_id] = thread_is_running_asm(thread_id);
     }
 
     thread_yield();
-    for (thread_id = 1; thread_id < 16; thread_id++) {
+    for (thread_id = 1; thread_id < THREAD_ID_COUNT; thread_id++) {
         status = g_thread_status_snapshot[thread_id];
         if (status != thread_is_running_asm(thread_id)) {
             g_script_input_suppression_frames = 5;

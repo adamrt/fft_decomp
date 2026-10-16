@@ -117,7 +117,7 @@ s32 attack_load_scenario_conditionals(void) {
         }
     } else if (g_main_system_go_straight_to_battle != 0) {
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 1);
-        for (i = 1; i < 20; i++) {
+        for (i = 1; i < PARTY_ROSTER_SLOT_COUNT; i++) {
             main_party_remove_unit(i);
         }
     }

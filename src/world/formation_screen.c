@@ -210,7 +210,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
     }
     do {
         buttons = 0;
-        for (i = 1; i < 16; i++) {
+        for (i = 1; i < THREAD_ID_COUNT; i++) {
             if (thread_is_running(i) != 0) {
                 buttons = 1;
                 menu_request_thread_stop(i);

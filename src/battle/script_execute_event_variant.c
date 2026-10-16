@@ -513,7 +513,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_PAUSE) {
             script_pause_event_instruction();
         } else if (opcode == EVENT_OPCODE_RESUME_WAITING_DIALOG) {
-            for (work_index = 1; work_index < 16; work_index++) {
+            for (work_index = 1; work_index < THREAD_ID_COUNT; work_index++) {
                 thread = &g_thread_contexts[work_index];
                 if (thread->is_running != 0 && thread->task_id == THREAD_TASK_WAIT_FOR_RESUME
                     && thread->function_parameter_2 == first_operand) {

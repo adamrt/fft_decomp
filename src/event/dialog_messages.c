@@ -365,7 +365,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;
     }
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < UNIT_NAME_SIZE; i++) {
         g_text_player_name_buffer[i] = party->name[i];
     }
     state = (text_reader_state_t*)getScratchAddr(0);
@@ -475,7 +475,7 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;
     }
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < UNIT_NAME_SIZE; i++) {
         g_text_player_name_buffer[i] = party->name[i];
     }
     state = (text_reader_state_t*)getScratchAddr(0);

@@ -1279,12 +1279,12 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     menu_draw_active_window_frames();
 
     if (g_script_threads_idle != 0) {
-        for (i = 1; i < 16; i++) {
+        for (i = 1; i < THREAD_ID_COUNT; i++) {
             if (thread_is_running_asm(i) != 0) {
                 break;
             }
         }
-        if (i == 16) {
+        if (i == THREAD_ID_COUNT) {
             finish_op = script_get_current_scenario_finish_operation();
             if (finish_op != 0) {
                 if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
@@ -1377,11 +1377,11 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     if (script_is_tutorial_event_slot() == 0 && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
         g_script_input_suppression_frames = 5;
     }
-    for (i = 1; i < 16; i++) {
+    for (i = 1; i < THREAD_ID_COUNT; i++) {
         g_event_thread_status_snapshot[i] = thread_is_running_asm(i);
     }
     thread_yield();
-    for (i = 1; i < 16; i++) {
+    for (i = 1; i < THREAD_ID_COUNT; i++) {
         if (g_event_thread_status_snapshot[i] != thread_is_running_asm(i)) {
             g_script_input_suppression_frames = 5;
         }
@@ -1427,12 +1427,12 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
         return 0;
     }
-    for (i = 1; i < 16; i++) {
+    for (i = 1; i < THREAD_ID_COUNT; i++) {
         if (thread_is_running_asm(i) != 0) {
             break;
         }
     }
-    if (i == 16) {
+    if (i == THREAD_ID_COUNT) {
         g_script_threads_idle = 1;
     }
     return 1;
@@ -1567,11 +1567,11 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     if (script_is_tutorial_event_slot() == 0 && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
         g_script_input_suppression_frames = 5;
     }
-    for (i = 1; i < 16; i++) {
+    for (i = 1; i < THREAD_ID_COUNT; i++) {
         g_event_thread_status_snapshot[i] = thread_is_running_asm(i);
     }
     thread_yield();
-    for (i = 1; i < 16; i++) {
+    for (i = 1; i < THREAD_ID_COUNT; i++) {
         if (g_event_thread_status_snapshot[i] != thread_is_running_asm(i)) {
             g_script_input_suppression_frames = 5;
         }
