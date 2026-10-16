@@ -3174,7 +3174,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         break;
     case MAP_RESOURCE_LIGHTING:
         g_battle_map_lighting_pending = 1;
-        for (i = 0; i < 0x2d; i++) {
+        for (i = 0; i < 45; i++) {
             g_battle_map_pending_lighting_data[i] = data->bytes[i];
         }
         break;

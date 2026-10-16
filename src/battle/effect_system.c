@@ -3554,7 +3554,7 @@ s32 battle_effect_reflect_secondary_handler(void) {
         work = main_heap_alloc(0x798);
         g_battle_effect_current_secondary->allocation = work;
         for (i = 0; i < 2; i++) {
-            for (j = 0; j < 0x18; j++) {
+            for (j = 0; j < 24; j++) {
                 SetPolyGT3(&work->prims[i][j]);
                 SetSemiTrans(&work->prims[i][j], 1);
             }

@@ -47,7 +47,7 @@ void require_gfx_prepare_party_portrait_textures(void) {
         StoreImage(&g_portrait_sheet_rect_3, (u32*)file[3].pixels);
         DrawSync(0);
     }
-    for (i = 0; i < 0x15; i++) {
+    for (i = 0; i < 21; i++) {
         if (i == 20) {
             break;
         }

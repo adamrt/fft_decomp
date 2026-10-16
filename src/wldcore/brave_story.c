@@ -445,7 +445,7 @@ static void wldcore_menu_build_brave_story_entries(void) {
         g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.lower_window]
             .position.y
             = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entry_count * 0x10 + 0xE;
-        for (i = 0; i < 0x1F; i++) {
+        for (i = 0; i < 31; i++) {
             if (script_get_variable(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
                 count++;
             }

@@ -100,7 +100,7 @@ s32 battle_menu_get_unit_skillset_ability_data(
     } else {
         known = main_ability_get_known(unit, skillset_index);
     }
-    for (i = 0; i < 0x10; i++) {
+    for (i = 0; i < 16; i++) {
         if (!(known & (0x800000 >> i))) {
             continue;
         }

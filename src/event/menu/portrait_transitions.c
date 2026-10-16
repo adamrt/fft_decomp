@@ -79,10 +79,10 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         *transition += g_script_event_speed;
     } else if (*transition < 10) {
         if (*transition == 4) {
-            for (i = 0; i < 0x10; i++) {
+            for (i = 0; i < 16; i++) {
                 palettes[0][i].semi_transparent = 1;
             }
-            for (i = 0; i < 0x10; i++) {
+            for (i = 0; i < 16; i++) {
                 palettes[1][i].semi_transparent = 1;
             }
             LoadImage(&first_rect, (u32*)palettes[0]);

@@ -327,7 +327,7 @@ void world_formation_init_menu_state(void) {
 void world_menu_reset_selection_results(void) {
     s32 i;
 
-    for (i = 0; i < 0x10; i++) {
+    for (i = 0; i < 16; i++) {
         g_world_menu_selection_results[i] = -1;
     }
 }

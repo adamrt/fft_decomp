@@ -702,7 +702,7 @@ void text_run_dialog_thread_variant(void) {
             NEXT();
             no_wait = 1;
         } else if (character == TEXT_RELEASE_WAITING_THREADS) {
-            for (i = 0; i < 0x11; i++) {
+            for (i = 0; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
                 if (g_thread_current_id != i && g_thread_contexts[i].task_id == THREAD_TASK_WAIT_FOR_RESUME
                     && thread_is_running_asm(i)) {
                     g_thread_contexts[i].task_id = THREAD_TASK_RESUME;

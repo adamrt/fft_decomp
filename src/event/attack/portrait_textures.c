@@ -55,7 +55,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
         StoreImage(&g_portrait_sheet_rect_3, (u32*)file[3].pixels);
         DrawSync(0);
     }
-    for (i = 0; i < 0x15; i++) {
+    for (i = 0; i < 21; i++) {
         if (i == 20) {
             value = g_main_special_portrait_wldface_id;
         } else {
@@ -214,7 +214,7 @@ void attack_gfx_prepare_formation_sprites(void) {
     } else {
         DrawSync(0);
     }
-    for (i = 0; i < 0x10; i++) {
+    for (i = 0; i < 16; i++) {
         party = main_party_get_unit(i);
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
             if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {

@@ -317,7 +317,7 @@ void attack_text_build_deployment_strings(void) {
     thread_call_on_main_stack(DISC_SECTOR_EVENT_ATCHELP_LZW, 0x16800, file);
     text_save_section_pointers();
     attack_text_init_battle_pointers(file);
-    for (i = 0; i < 0x10; i++) {
+    for (i = 0; i < 16; i++) {
         unit = main_party_get_unit(i);
         if (unit->party_id == PARTY_ID_NONE || i >= 0x10 || unit->proposition_status != 0) {
             for (k = 0; k < 11; k++) {

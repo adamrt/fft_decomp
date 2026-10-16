@@ -135,7 +135,7 @@ static s32 require_party_update_brave_faith_and_collect_warnings(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 column;
 
-                for (brave = 0; brave < 0x49; brave++) {
+                for (brave = 0; brave < 73; brave++) {
                     for (column = 0; column < 3; column++) {
                         if (unit->character_identity == g_require_gfx_formation_sprite_groups[brave][column]) {
                             break;
@@ -257,7 +257,7 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 count;
 
-                for (group = 0; group < 0x49; group++) {
+                for (group = 0; group < 73; group++) {
                     for (column = 0; column < 3; column++) {
                         if (unit->character_identity == g_require_gfx_formation_sprite_groups[group][column]) {
                             break;
@@ -296,7 +296,7 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 count;
 
-                for (group = 0; group < 0x49; group++) {
+                for (group = 0; group < 73; group++) {
                     for (column = 0; column < 3; column++) {
                         if (unit->character_identity == g_require_gfx_formation_sprite_groups[group][column]) {
                             break;
@@ -417,7 +417,7 @@ s32 require_party_update_after_battle(void) {
 
                     /* Retail looks up the unit's formation sprite group and
                      * then does not use it. */
-                    for (i = 0; i < 0x49; i++) {
+                    for (i = 0; i < 73; i++) {
                         for (column = 0; column < 3; column++) {
                             if (unit->character_identity == g_require_gfx_formation_sprite_groups[i][column]) {
                                 break;

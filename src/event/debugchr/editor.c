@@ -367,7 +367,7 @@ void debugchr_editor_run_session(void) {
 
     g_debugchr_editor_active = 1;
     g_menu_panel_status_group_count = 2;
-    for (i = 0; i < 0x15; i++) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         battle_unit_find_stats_by_entd_unit_id(battle_unit_get_stats_from_battle_id(i)->unit_id, &battle_id);
         if ((battle_id >= 0) && (i == battle_id)) {
             g_debugchr_editor_unit_ids[i] = 1;
@@ -375,7 +375,7 @@ void debugchr_editor_run_session(void) {
             g_debugchr_editor_unit_ids[i] = 0;
         }
     }
-    for (i = 0; i < 0x15; i++) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (g_debugchr_editor_unit_ids[i] != 0) {
             g_debugchr_panel_selected_unit_data.battle_id = i;
             g_debugchr_panel_selected_unit_data.name_id = i;

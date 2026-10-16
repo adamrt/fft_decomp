@@ -1330,7 +1330,7 @@ static void menu_build_ability_list(s32 mode) {
     type = g_action_menu_row_types[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index];
     skillset = g_menu_skillsets[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index];
     g_menu_selected_action.skillset_id = skillset;
-    for (i = 0; i < 0x50; i++) {
+    for (i = 0; i < 80; i++) {
         g_ai_workspace_ptr->ability_list.ids[i] = 0xFFFF;
         g_ai_workspace_ptr->ability_list.mp_costs[i] = 0xFF;
         g_ai_workspace_ptr->ability_list.ct[i] = 1;
@@ -1425,7 +1425,7 @@ static void menu_build_ability_list(s32 mode) {
         }
     } else {
         found = 0;
-        for (count = 0; count < 0x40; count++) {
+        for (count = 0; count < 64; count++) {
             if (g_ai_workspace_ptr->ability_list.ids[count] == 0xFFFF) {
                 break;
             }
