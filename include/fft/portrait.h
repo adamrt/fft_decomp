@@ -12,7 +12,7 @@ void portrait_load_party(void);
 void portrait_prepare_party_textures(void);
 
 /* One EVTFACE.BIN block: pixels followed by eight 16-color palettes. */
-typedef struct menu_portrait_image_file {
+typedef struct portrait_image_file {
     u32 pixels[8][48][4];  /* 0x0000; eight 32x48 4bpp portraits */
     palette_t palettes[8]; /* 0x1800; four palettes per uploaded VRAM row */
     u8 _unused_1900[0x700];
@@ -24,7 +24,7 @@ typedef char portrait_image_file_size_must_be_8192[sizeof(portrait_image_file_t)
  * per pixel, eight across and five down, then sixteen rows of four palettes.
  * Palette n is portrait n's; rows 10-15 hold the other palettes of the monster
  * portraits, one row per monster with the palette number as the column. */
-typedef struct menu_portrait_sheet {
+typedef struct portrait_sheet {
     u8 pixels[240][128];       /* 0x0000; 4bpp, 256 pixels per row */
     palette_t palettes[16][4]; /* 0x7800; four 16-color palettes per row */
 } portrait_sheet_t;
@@ -51,7 +51,6 @@ void portrait_build_unit_poly(POLY_FT4* poly, s32 id);
 extern u8 g_portrait_cell_pixels[];
 extern RECT g_portrait_cell_rect;
 extern RECT g_portrait_palette_rect;
-void portrait_prepare_party_textures(void);
 
 void portrait_build_transition(const RECT* texture_rect, s32* transition, const s32* first_portrait,
     const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);

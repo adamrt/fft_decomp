@@ -3,7 +3,6 @@
 #include "fft/equipment.h"
 #include "fft/help.h"
 #include "fft/item.h"
-#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"

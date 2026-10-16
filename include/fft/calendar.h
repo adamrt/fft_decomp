@@ -36,7 +36,6 @@ extern calendar_date_t g_calendar_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT]
 void calendar_advance_day(void);
 void calendar_advance_days(s32 days);
 void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day);
-void calendar_convert_date_to_zodiac(s32* month, s32* day);
 
 /* Dates kept as nine-bit records in a bit array (day in bits 0-4, month in bits 5-8), as the save's acquisition and
  * discovery date bitmaps hold them. */

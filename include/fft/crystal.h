@@ -37,7 +37,7 @@ s32 crystal_resolve_pickup(s32 battle_id);
 
 /* Seven menu entries form the crystal/treasure result panel. The AT-list
  * and confirmation groups each contain a message entry followed by a choice. */
-typedef enum menu_crystal_pickup_entry {
+typedef enum crystal_pickup_entry {
     MENU_CRYSTAL_PICKUP_LIST = 0,
     MENU_CRYSTAL_PICKUP_AT_LIST = 1,
     MENU_CRYSTAL_PICKUP_CONFIRM = 3,

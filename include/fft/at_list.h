@@ -39,7 +39,7 @@ typedef enum at_entry_flags {
  * `text` is published through g_text_section_pointers[TEXT_SECTION_AT_LIST].
  * The main-stack preview fills all 40 AT entries; the menu displays entries
  * 1 through 39. */
-typedef struct menu_at_list_work {
+typedef struct at_list_work {
     s16 primary_values[AT_LIST_CAPACITY];   /* 0x000: turn-value column */
     s16 secondary_values[AT_LIST_CAPACITY]; /* 0x050: unit-name column */
     s16 entry_numbers[AT_LIST_CAPACITY];    /* 0x0a0: ordinal column */

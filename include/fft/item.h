@@ -625,7 +625,7 @@ s32 item_get_total_count(s16 item_id);
 
 s32 item_get_equipped_count(s32 item_entry);
 s32 item_adjust_inventory_count(s16 item_entry, s32 delta);
-extern struct menu_status_panel_slot_storage g_item_preview_stat_detail;
+extern struct unit_panel_record g_item_preview_stat_detail;
 
 /* EQUIP and WORLD each build their own body. */
 void item_collect_stat_deltas(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate);
@@ -688,6 +688,5 @@ extern u8 g_item_armor_page_order[0x25];
 extern u8 g_item_accessory_page_order[0x21];
 extern u8 g_item_page_order[0x15];
 void item_init_order_tables(void);
-void item_sort_id_list(s32 mode, s16* list);
 
 #endif

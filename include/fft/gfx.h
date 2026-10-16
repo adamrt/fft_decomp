@@ -335,8 +335,6 @@ typedef struct evtchr_file_record {
 } evtchr_file_record_t;
 
 typedef char evtchr_file_record_size_must_be_30720[sizeof(evtchr_file_record_t) == 30720 ? 1 : -1];
-void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
-void gfx_set_draw_color(const rgb24_t* color);
 void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
 
 /* BATTLE's draw areas begin 0x80 pixels left of the displayed area, so the left edge of the battle

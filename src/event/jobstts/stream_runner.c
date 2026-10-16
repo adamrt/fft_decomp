@@ -1,7 +1,6 @@
 /* Command stream dispatch and the palette-mode script run. */
 
 #include "fft/gfx_primitive.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"

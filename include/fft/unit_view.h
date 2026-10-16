@@ -26,7 +26,7 @@ typedef enum unit_view_mode {
 
 /* One row of g_unit_view_thread_sets, indexed by the view mode. Each of the four slots names a thread
  * entry (or -1), the scheduler slot it runs in, and the task id it must carry. Provisional. */
-typedef struct menu_unit_view_thread_set {
+typedef struct unit_view_thread_set {
     void (*entries[4])(void); /* 0x00 */
     s32 thread_ids[4];        /* 0x10 */
     s32 task_ids[4];          /* 0x20 */
@@ -43,7 +43,7 @@ void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);
 
 /* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page
  * comes from g_unit_view_stats_first_page_by_mode). Provisional. */
-typedef struct menu_unit_status_page {
+typedef struct unit_view_stats_page {
     POLY_G4 bars[3];                   /* 0x000: HP/MP/CT gauges */
     DR_MODE draw_mode_1;               /* 0x06c */
     DR_MODE draw_mode_0;               /* 0x078 */
@@ -82,7 +82,7 @@ void unit_view_preview_caster_stats(void);
 void unit_view_preview_target_stats(void);
 
 /* Double-buffered 0xf0-byte frame of the unit summary panel. Provisional. */
-typedef struct menu_unit_summary_frame {
+typedef struct unit_view_summary_frame {
     SPRT sprites[7];                    /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
     DR_MODE draw_mode_0;                /* 0x8c */
     DR_MODE draw_mode_1;                /* 0x98 */

@@ -11,7 +11,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-struct menu_status_thread;
+struct unit_panel_thread;
 
 /* Raw VSync mode; animation and script steps use 1 when this is zero. */
 extern s8 g_menu_event_speed;
@@ -364,7 +364,7 @@ void menu_action_dispatch(void);
  * Nothing in the C or in the two tables opens EMPTY_MESSAGE,
  * PERFORMING_MESSAGE, PROMPT_16, PROMPT_17 or the four NO_ACT turn menus,
  * and WAIT_YES_NO is linked only by a row action that is overwritten. */
-typedef enum menu_command_id {
+typedef enum command_menu {
     MENU_COMMAND_ID_NONE = -1,
     MENU_COMMAND_ID_TURN = 0,                /* the unit's turn: it can move and act */
     MENU_COMMAND_ID_AUTO_BATTLE = 1,         /* the Auto-battle row: the five settings */
@@ -726,7 +726,7 @@ extern RECT g_menu_draw_area_template;
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 
 void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
-    s32 lower_half, const struct menu_status_thread* thread);
+    s32 lower_half, const struct unit_panel_thread* thread);
 
 extern u8 g_menu_gfx_scaled_sprite_count;
 extern point16_t g_menu_gfx_scaled_sprite_scale[];
@@ -830,8 +830,6 @@ void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
 menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command);
 menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command);
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
-void menu_draw_thread_status_indicators(void);
 
 void menu_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 unused_priority);
@@ -841,14 +839,7 @@ void menu_input_update_with_message_state(void);
 void menu_gfx_enqueue_textured_quad_rect(
     RECT* rect, menu_icon_source_t* tex, rgb24_t* color, s32 semitrans, s32 ot_index);
 
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
-void menu_input_update_with_message_state(void);
-void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
 void menu_wait_selection_threads(void);
-
-void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
-    s32 lower_half, const struct menu_status_thread* thread);
-
 extern u8 g_menu_common_graphics_loaded;
 
 /* 0: normal, 1: companion/editor transition, 2: AT-list selection. */
@@ -918,10 +909,6 @@ typedef struct menu_quad_page {
 } menu_quad_page_t;
 
 typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1 : -1];
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
-void menu_input_update_with_message_state(void);
-void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 
 #endif

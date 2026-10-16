@@ -17,7 +17,7 @@ extern s32 g_weather_timed_transform_unread;
  * which one is falling.  weather_get_effective folds that flag in by
  * adding 3, so callers that compare against it see the snow values.
  */
-typedef enum battle_map_weather {
+typedef enum weather {
     WEATHER_NONE = 0,
     WEATHER_NONE_ALT = 1,
     WEATHER_RAIN = 2,
@@ -34,13 +34,13 @@ enum {
 };
 
 /* Bits of g_weather_flags ("weather palette mods"). */
-typedef enum battle_map_weather_flags {
+typedef enum weather_flags {
     BATTLE_MAP_WEATHER_FLAG_SNOW = 0x01,
     BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02,
 } weather_flags_e;
 
 /* Commands of weather_run_command and weather_init_particles. */
-typedef enum battle_map_weather_command {
+typedef enum weather_command {
     BATTLE_MAP_WEATHER_COMMAND_SNOW = 0x53,
     BATTLE_MAP_WEATHER_COMMAND_CLEAR = 0x54,
     BATTLE_MAP_WEATHER_COMMAND_RAIN = 0x55,
@@ -58,7 +58,7 @@ typedef enum battle_map_weather_command {
 
 /* Stored renderer selector at g_weather_effect_mode. The ordinary
  * modes reuse command IDs; 0x96 runs E458's timed particle transform. */
-typedef enum battle_map_weather_effect_mode {
+typedef enum weather_effect_mode {
     BATTLE_MAP_WEATHER_EFFECT_SNOW = BATTLE_MAP_WEATHER_COMMAND_SNOW,
     BATTLE_MAP_WEATHER_EFFECT_CLEAR = BATTLE_MAP_WEATHER_COMMAND_CLEAR,
     BATTLE_MAP_WEATHER_EFFECT_RAIN = BATTLE_MAP_WEATHER_COMMAND_RAIN,
@@ -97,7 +97,7 @@ extern VECTOR g_weather_translation;
 s32 weather_get_effective(void);
 void weather_run_command(weather_command_e command);
 
-typedef enum battle_map_lightning_mode {
+typedef enum weather_lightning_mode {
     BATTLE_MAP_LIGHTNING_OFF = 0,
     BATTLE_MAP_LIGHTNING_RANDOM = 1,
     BATTLE_MAP_LIGHTNING_ONCE = 2, /* back to OFF when the flash ends */

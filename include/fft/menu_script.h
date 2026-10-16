@@ -365,18 +365,11 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* inst
 menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
 
 /* Menu display script opcode handlers: each consumes and returns a command pointer. */
 typedef menu_instruction_t* (*menu_opcode_handler_t)(menu_instruction_t* instruction);
 
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
 
 /* WORLD's display-script command handlers (menu_script.h has the shared ones). The CARD and JOBSTTS overlays call
  * menu_opcode_00_draw_window_frame directly. */
@@ -384,24 +377,10 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
 
 menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
 
 #endif

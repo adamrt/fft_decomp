@@ -68,7 +68,6 @@ s32 ability_list_get_jp_cost(s32 index);
 extern u8 g_ability_list_list_initialized;
 extern s16 g_ability_list_list_job_name_ids[];
 extern menu_instruction_t g_ability_list_list_render_commands;
-s32 ability_list_update(void);
 
 s32 ability_list_build(
     s16 unit_index, s16 job_id, menu_ability_category_e ability_category, s16* list, s32 unlearned_only);

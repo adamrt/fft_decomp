@@ -263,7 +263,6 @@ void equipment_thread(void);
 s32 equipment_update_menu(void);
 
 s32 equipment_can_equip_item(s16 unit_index, s16 item_id);
-s32 equipment_run_item_list(void);
 
 /* The texture cell of an item type's 12x12 icon. */
 void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);

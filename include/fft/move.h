@@ -228,7 +228,7 @@ enum {
 };
 
 /* move_spread_set_frontier_flags modes. Bit 0 clears the target panels' ranges. */
-typedef enum move_tile_flags_mode {
+typedef enum move_frontier_mode {
     MOVE_TILE_FLAGS_MODE_START_SPREAD = 1, /* mark the units and queue the mover's own tile */
     MOVE_TILE_FLAGS_MODE_KEEP_RANGES = 2,  /* mark the units only */
     MOVE_TILE_FLAGS_MODE_TERRAIN_ONLY = 3, /* leave the units out */
@@ -482,7 +482,7 @@ void move_start_post_events(void);
 u32 move_get_post_events(unit_stats_t* unit);
 
 /* Four serialized move-find item/trap entries per map. */
-typedef enum battle_map_move_find_item_entry_flags {
+typedef enum move_find_entry_flags {
     BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_DEGENERATOR = 0x01,
     BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_DEATHTRAP = 0x02,
     BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS = 0x04,
@@ -491,7 +491,7 @@ typedef enum battle_map_move_find_item_entry_flags {
     BATTLE_MAP_MOVE_FIND_ENTRY_NO_ITEM = 0x20,
 } move_find_entry_flags_e;
 
-typedef struct battle_map_move_find_item_entry {
+typedef struct move_find_entry {
     u8 y : 4;
     u8 x : 4;
     u8 flags : 7; /* move_find_entry_flags_e */
@@ -502,7 +502,7 @@ typedef struct battle_map_move_find_item_entry {
 
 typedef char move_find_entry_size_must_be_4[(sizeof(move_find_entry_t) == 4) ? 1 : -1];
 
-typedef struct battle_map_move_find_item_data {
+typedef struct move_find_map_data {
     move_find_entry_t entries[4];
 } move_find_map_data_t;
 

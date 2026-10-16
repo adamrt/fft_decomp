@@ -20,7 +20,7 @@ extern s16 g_unit_panel_status_right_text_ids[20];
  * unit_panel_copy_billboard_in. unit_panel_load_selected fills job_id..zodiac for the unit named by battle_id; the
  * overlays' status panels keep a second record for the comparison unit (g_unit_panel_comparison_unit_data).
  * Provisional. */
-typedef struct menu_active_unit {
+typedef struct unit_panel_unit {
     /* 0x00: unit name text id less TEXT_ID_UNIT_NAME_BASE (DEBUGCHR, REQUIRE);
      * in ATTACK the roster index, a row of the names it builds at text 0x5800 */
     s16 name_id;
@@ -35,7 +35,7 @@ typedef struct menu_active_unit {
 typedef char unit_panel_unit_size_must_be_14[(sizeof(unit_panel_unit_t) == 14) ? 1 : -1];
 
 /* Complete status and preview record, copied whole by the billboard routines. */
-typedef struct menu_status_panel_slot_storage {
+typedef struct unit_panel_record {
     menu_status_panel_slot_state_t state;
     u8 _unused_38[8]; /* preserves the copied 0x40-byte record */
 } unit_panel_record_t;
@@ -49,7 +49,7 @@ typedef char unit_panel_record_size_must_be_64[(sizeof(unit_panel_record_t) == 6
  * bytes, unit_view_stats_panel_thread and the overlays' unit_panel_banner_thread draw it, and
  * unit_panel_copy_billboard_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
  * fields. Provisional. */
-typedef struct menu_unit_status_record {
+typedef struct unit_panel_summary {
     s16 level;      /* 0x00; unit_editor_apply_values writes it back */
     s16 team_kind;  /* 0x02: 0 ally, 1 enemy, 2 neutral, 3 auto-battle; selects the status icon,
                        the panel's 0xc-byte geometry row and its CLUT */
@@ -101,9 +101,7 @@ void unit_panel_copy_billboard_in(
     const unit_panel_summary_t* banner, const unit_panel_unit_t* unit, const unit_panel_record_t* billboard);
 
 extern s32 g_unit_panel_hide_numeric_values; /* non-zero: draw digits as blanks (0x48, 0x10) */
-extern unit_panel_unit_t g_unit_panel_selected_unit_data;
 extern palette_t g_unit_panel_selected_portrait_palettes[2];
-extern unit_panel_unit_t g_unit_panel_comparison_unit_data;
 extern palette_t g_unit_panel_comparison_portrait_palettes[2];
 extern u8 g_unit_panel_status_animation[];
 
@@ -134,7 +132,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index);
  * unit_panel_set_colors. The origin is read as whole 32-bit values (lw) for the
  * draw-area offset; the 16-bit reads that feed the s16 draw-offset stores
  * are the compiler narrowing those loads. */
-typedef struct menu_status_thread {
+typedef struct unit_panel_thread {
     s32 x;              /* 0x00 */
     s32 y;              /* 0x04 */
     s32 flags;          /* 0x08: menu_status_panel_flags_e in the status display record */
@@ -183,7 +181,7 @@ extern s32 g_unit_panel_status_display_redraw_request;
  *    status_screen_init_numbers_frame and the
  *    menu_init_scaled_draw_area_packets / menu_build_scaled_draw_area_packets
  *    pair. */
-typedef struct menu_status_panel_buffer {
+typedef struct unit_panel_buffer {
     DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
     DR_MODE text_draw_mode;                          /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
     DR_MODE image_draw_mode;                         /* 0x018; item icons or allocated images */
@@ -216,7 +214,6 @@ extern point16_t g_unit_panel_panel_status_scales[];
 extern const point16_t g_unit_panel_panel_status_texture;
 extern sprite_sheet_frame_t g_unit_panel_panel_status_uv_rects[];
 extern const u16 g_unit_panel_panel_status_y_offsets[];
-void unit_panel_build_status_groups(POLY_FT4* poly);
 extern u8 g_unit_panel_portrait_transition_offsets[];
 
 /* The selected unit's and the comparison unit's status panels, with their billboards, packets, numbers, name
@@ -269,7 +266,6 @@ extern image_load_parameters_t g_unit_panel_equipment_sprite_params_0[19];
 extern image_load_parameters_t g_unit_panel_equipment_sprite_params_1[19];
 extern image_load_parameters_t g_unit_panel_equipment_sprite_params_2[19];
 extern image_load_parameters_t g_unit_panel_equipment_sprite_params_3[19];
-void unit_panel_equipment_ability_thread(void);
 extern s32 g_unit_panel_numbers_redraw_request;
 extern menu_status_panel_numeric_geometry_t g_unit_panel_editor_numeric_table;
 extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state[2];
@@ -308,34 +304,20 @@ extern s32 g_unit_panel_character_status_dimmed;
 extern unit_panel_thread_t g_unit_panel_numbers_thread_params;
 extern s32 g_unit_panel_numbers_dimmed;
 void unit_panel_toggle_equipment_and_numbers(s32 enable);
-void unit_panel_numbers_thread(void);
 
 /* The selected-unit panel record; the comparison panel's record follows 0x10
  * bytes later. */
 extern unit_panel_unit_t g_unit_panel_selected_unit_data;
 
-extern palette_t g_unit_panel_selected_portrait_palettes[2];
-extern unit_panel_unit_t g_unit_panel_comparison_unit_data;
-extern palette_t g_unit_panel_comparison_portrait_palettes[2];
-extern unit_panel_thread_t g_unit_panel_character_status_frame_config;
-extern unit_panel_thread_t g_unit_panel_numbers_thread_params;
-extern palette_t g_unit_panel_selected_portrait_palettes[2];
-extern palette_t g_unit_panel_comparison_portrait_palettes[2];
 extern unit_panel_buffer_t g_unit_panel_frames_b[];
 extern u8 g_unit_panel_unit_status_panel_params[];
 extern s32 g_unit_panel_unit_status_panel_flags;
 extern s32 g_unit_panel_unit_status_panel_redraw;
-void unit_panel_toggle_banner_thread(s32 enable);
 void unit_panel_toggle_equipment_threads(s32 enable);
 void unit_panel_toggle_item_numbers_thread(s32 enable);
-extern palette_t g_unit_panel_selected_portrait_palettes[2];
-extern palette_t g_unit_panel_comparison_portrait_palettes[2];
 extern s32 g_unit_panel_dim_a;
 extern s32 g_unit_panel_dim_b;
 extern s32 g_unit_panel_dim_c;
-extern unit_panel_thread_t g_unit_panel_status_display_thread_params;
-extern unit_panel_thread_t g_unit_panel_character_status_frame_config;
-extern unit_panel_thread_t g_unit_panel_numbers_thread_params;
 
 /* Scalar x aliases of the three panels' origins; they preserve the retail
  * transition-store scheduling. */

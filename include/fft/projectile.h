@@ -39,7 +39,7 @@ typedef struct projectile_arc_query {
 /* Unit list built in the scratchpad at 0x1f800000 by
  * projectile_list_obstacle_units and read by the
  * obstacle tests. */
-typedef struct effect_obstacle_unit_list {
+typedef struct projectile_obstacle_unit_list {
     s32 count;                           /* 0x00 */
     u8 battle_ids[UNIT_SLOT_COUNT];      /* 0x04 */
     u8 _padding_19;                      /* 0x19; aligns the position vectors */

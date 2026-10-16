@@ -1,6 +1,5 @@
 /* The selected job's ability list, with tabs for action, reaction, support and movement abilities. */
 
-#include "fft/menu.h"
 #include "fft/ability_list.h"
 #include "fft/help.h"
 #include "fft/job.h"

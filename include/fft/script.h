@@ -321,7 +321,6 @@ extern script_command_args_t g_script_map_command_83_args;
 extern script_music_switch_t g_script_music_switch;
 extern s16 g_script_field_object_use_request;
 extern s16 g_script_3d_object_use_request;
-extern s16 g_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
 extern u32 g_script_current_input;
 extern u32 g_script_previous_input;
 extern u32 g_script_initial_repeat_counter;

@@ -25,7 +25,7 @@ void status_screen_submit_numbers_frame(menu_palette_primitives_t* display);
 
 /* Double-buffered 0x1ac-byte record of the numeric display panel (g_status_screen_numbers_panel_records).
  * Provisional. */
-typedef struct menu_panel_record {
+typedef struct status_screen_numbers_record {
     DR_MODE mode0; /* 0x000 */
     DR_MODE mode1; /* 0x00c */
     /* 0x018; menu_init_scaled_draw_area_packets */
@@ -49,7 +49,7 @@ void status_screen_numbers_thread(void);
 /* Double-buffered 0x2d0-byte frame of the Status screen panel (g_status_screen_frames). The first 0x2a4
  * bytes are laid out as unit_panel_buffer_t (draw modes, sprites, tiles and lines),
  * and the trailing draw-area pair follows menu_panel_frame_t. Provisional. */
-typedef struct menu_status_screen_frame {
+typedef struct status_screen_frame {
     DR_MODE frame_draw_mode;            /* 0x000; MENU_TEXTURE_PAGE_FRAME */
     DR_MODE text_draw_mode;             /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
     DR_MODE image_draw_mode;            /* 0x018; MENU_TEXTURE_PAGE_ITEM_ICONS */

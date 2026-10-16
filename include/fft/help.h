@@ -69,7 +69,7 @@ typedef char help_navigation_record_size_must_be_16[(sizeof(help_navigation_reco
  * ids in the pending description id (g_text_selection_id) selects one; it is latched in
  * g_screen_grid_id / g_unit_list_help_screen_id instead of showing a
  * description. */
-typedef enum menu_grid_help_id {
+typedef enum help_grid_id {
     MENU_GRID_HELP_NONE = 0,
     MENU_GRID_HELP_BANNER_TOP = 0x20000, /* the status banner is at the top of the screen */
     MENU_GRID_HELP_BANNER_BOTTOM = 0x20001,

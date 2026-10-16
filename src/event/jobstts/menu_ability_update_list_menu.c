@@ -1,6 +1,5 @@
 /* The selected job's ability list, tabbed by category, with the selected ability's description. */
 
-#include "fft/menu.h"
 #include "fft/ability_list.h"
 #include "fft/help.h"
 #include "fft/job.h"

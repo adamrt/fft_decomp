@@ -45,15 +45,7 @@ s32 job_list_get_level(s32 unused_row);
 s32 job_list_get_next_level_jp(s32 unused_row);
 extern s32 g_job_list_list_menu_initialized;
 extern menu_instruction_t g_job_list_list_render_commands;
-s32 job_list_run(void);
 s32 job_list_build(u8 unit_id, s16* job_ids, s32 unused);
-s32 job_list_calculate_level(s32 index);
-s32 job_list_calculate_jp(s32 index);
-s32 job_list_calculate_total_jp(s32 index);
-s32 job_list_calculate_mastered(s32 index);
 s32 job_list_build(u8 unit_index, s16* jobs, s32 mode);
-s32 job_list_get_base(s16 unit_id);
-s32 job_list_calculate_level(s32 index);
-s32 job_list_calculate_total_jp(s32 index);
 
 #endif

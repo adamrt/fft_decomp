@@ -245,7 +245,6 @@ extern s16 g_save_list_scroll_base_y;
 extern s16 g_save_slot_row_y;
 extern u16 g_save_slot_cursor_animation;
 extern point16_t g_save_slot_cursor_position;
-
 extern s16 g_save_slot_text_row_ids[];
 extern save_slot_number_command_t g_save_slot_number_commands[4];
 extern oriented_quad_t g_save_slot_quads[];
@@ -335,14 +334,10 @@ extern s16 g_save_slot_select_timer;
 extern u8 g_save_slot_cursor_row;
 extern menu_entry_t g_save_mode_select_menu;
 extern u8 g_save_mode_select_running;
-extern s8 g_save_slot_scan_active;
-extern s8 g_save_slot_scan_index;
 extern s8 g_save_scan_prompt_active;
 extern s8 g_save_scan_start_frame;
 extern s8 g_save_probe_result;
 extern struct DIRENTRY* g_save_directory_buffer;
-extern s8 g_save_free_block_count;
-extern s8 g_save_file_count;
 extern s8 g_save_selectable_slot_count;
 void save_init_screen(void);
 s32 save_run_screen(s32 mode_select_enabled);
@@ -374,11 +369,9 @@ extern menu_entry_t g_save_load_confirm_prompt[2];
 extern menu_entry_t* g_save_confirm_prompt;
 extern u8 g_save_overwrite_prompt_running;
 extern u8 g_save_load_prompt_running;
-extern s8 g_save_format_delay_counter;
 extern u8 g_save_load_step_state;
 extern u8 g_save_write_step_state;
 extern u8 g_save_load_failed;
-extern u8 g_save_write_failed;
 
 /* Cleared with the load-failed flag when a card load starts; nothing reads it. */
 extern u8 g_save_load_unread_flag; /* cleared with the card load and save failure flags; never read */
@@ -390,7 +383,6 @@ extern const char* g_save_file_names[15];
  * immediately after the 15 save-file pointers at g_save_file_names. */
 extern u8 g_save_slot_text_table[];
 
-extern save_icon_t g_save_icon_records[15];
 /* Encoded description text per memory-card slot: CARD keeps two lines of 80
  * bytes for each slot, WORLD 140 bytes. */
 #ifdef FFT_WORLD
@@ -398,8 +390,8 @@ extern u8 g_save_slot_descriptions[][0x8C];
 #else
 extern u8 g_save_slot_descriptions[SAVE_SLOT_COUNT][0x50];
 #endif
+
 extern s16 g_save_slot_description_row_ids[];
-extern menu_window_command_t g_save_slot_window_command;
 extern menu_window_rect_source_t g_save_slot_window;
 extern menu_draw_number_command_t g_save_slot_number_command;
 extern menu_draw_number_command_t g_save_playtime_hours_command;

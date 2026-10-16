@@ -368,7 +368,7 @@ void breeding_update(s32 unused);
 /* The status panels of the selected unit and of the unit it is compared with, and the stat preview panel. */
 extern menu_unit_status_identity_t g_formation_selected_unit_identity;
 
-extern struct menu_status_panel_slot_storage g_formation_selected_unit_stat_detail;
+extern struct unit_panel_record g_formation_selected_unit_stat_detail;
 extern menu_text_binding_t g_formation_selected_unit_text_binding;
 extern menu_number_entry_t g_formation_selected_unit_number_entries[];
 

@@ -4,7 +4,6 @@
 #include "fft/gfx_image.h"
 #include "fft/input.h"
 #include "fft/item.h"
-#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"

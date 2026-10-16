@@ -454,7 +454,6 @@ void unit_apply_poach_morbol_transformation(unit_t* unit);
 s32 unit_count_crystals(void);
 unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
 void unit_transform_into_morbol(unit_stats_t* unit);
-s32 unit_facing_get_sixteenth_by_runtime_id(u32 runtime_id);
 
 /* The live units, indexed by runtime id. */
 extern unit_t g_units[UNIT_RUNTIME_SLOT_COUNT];

@@ -11,14 +11,14 @@
 #include "psx/types.h"
 
 /* GNS records */
-typedef enum gns_map_state_comparison {
+typedef enum battle_map_gns_state_comparison {
     GNS_MAP_STATE_EQUAL = 1,
     GNS_MAP_STATE_REQUESTED_LESS_THAN_RECORD = 2,
     GNS_MAP_STATE_REQUESTED_GREATER_THAN_RECORD = 3,
 } battle_map_gns_state_comparison_e;
 
 /* GNS command rows follow the file-resource rows and use the same tag byte. */
-typedef enum gns_map_command_type {
+typedef enum battle_map_gns_command_type {
     GNS_COMMAND_SET_CAMERA_POSITION = 0x83,
     GNS_COMMAND_SET_CAMERA_ROTATION = 0x84,
     GNS_COMMAND_SET_INDOOR = 0x85,
@@ -40,7 +40,7 @@ enum {
 /* File-load payload at +0x06 of a GNS row. The loader compares all fourteen
  * bytes, including the fixed markers, before deciding whether to reload.
  * 32-bit fields remain byte arrays so enclosing rows retain 16-bit alignment. */
-typedef union gns_load_info {
+typedef union battle_map_gns_load_info {
     struct {
         u16 _unused_00;         /* 0x3333 in file rows */
         u8 disc_lba_le[4];      /* row +0x08; absolute LBA, including its high 16 bits */
@@ -68,7 +68,7 @@ typedef char battle_map_gns_load_info_size_must_be_14[sizeof(battle_map_gns_load
  * when checking whether a file changed, and tests +0x13 for a nonzero marker.
  */
 /* Record copies use lwl/lwr pairs; keep the record aligned to 16 bits. */
-typedef struct gns_record {
+typedef struct battle_map_gns_record {
     s16 script_variable_id;
     s16 map_state;
     u8 map_state_comparison; /* 0x04; battle_map_gns_state_comparison_e */
@@ -82,7 +82,7 @@ typedef char battle_map_gns_record_size_must_be_20[(sizeof(battle_map_gns_record
  * is a byte stride (0x14 or 0x1c), not a disc LBA. The 0x1c rows have eight
  * more payload bytes after this prefix. +0x06/+0x09..+0x0b are zero in the
  * USA disc's command rows. */
-typedef struct gns_command_record_prefix {
+typedef struct battle_map_gns_command_record_prefix {
     u16 script_variable_id;  /* 0x00 */
     s16 map_state;           /* 0x02 */
     u8 map_state_comparison; /* 0x04; battle_map_gns_state_comparison_e */

@@ -38,7 +38,7 @@ typedef char battle_map_tile_coordinates_size_must_be_6[sizeof(battle_map_tile_c
  * (g_deep_dungeon_battles) have one-word names and take that prefix.
  * Maps 0, 116-119 and 125 have a file on the disc and no name; 120-124, 126
  * and 127 have neither. */
-typedef enum map_id {
+typedef enum battle_map_id {
     BATTLE_MAP_ID_AT_MAIN_GATE_OF_IGROS_CASTLE = 1,
     BATTLE_MAP_ID_BACK_GATE_OF_LESALIA_CASTLE = 2,
     BATTLE_MAP_ID_HALL_OF_ST_MUROND_TEMPLE = 3,

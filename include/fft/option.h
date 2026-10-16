@@ -15,7 +15,7 @@ extern menu_input_timing_profile_t g_option_input_repeat_timings[];
 
 /* The argument of option_entrypoint and option_entrypoint: which of
  * the OPTION overlay's screens to run. */
-typedef enum menu_option_type {
+typedef enum option_screen {
     MENU_OPTION_TYPE_GAME_OPTIONS = 0,
     MENU_OPTION_TYPE_AT_LIST = 1,
     MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2, /* crystal and treasure panel */
@@ -23,7 +23,7 @@ typedef enum menu_option_type {
 
 /* One of the two 0x190-byte packet pages of the options screen (g_option_pages), alternated by frame.
  * Provisional. */
-typedef struct options_menu_page {
+typedef struct option_page {
     SPRT title;                         /* 0x000: window title image */
     SPRT value;                         /* 0x014: selected value image */
     scaled_draw_area_pair_t title_area; /* 0x028 */
@@ -62,7 +62,6 @@ void option_entrypoint(s32 menu_type);
 void option_game_options_thread(void);
 void option_open(void);
 void option_entrypoint(s32 mode);
-void option_game_options_thread(void);
 void option_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 extern const RECT g_option_draw_area_template;
 

@@ -14,7 +14,7 @@ void overlay_open_world(s32 mode);
 
 /* Companion overlay requests: index into the overlay LBA, size and load offset
  * tables (g_overlay_companion_executable_lbas). */
-typedef enum companion_overlay {
+typedef enum overlay_companion {
     COMPANION_OVERLAY_OPTION = 1,             /* EVENT/OPTION.OUT */
     COMPANION_OVERLAY_BUNIT = 2,              /* EVENT/BUNIT.OUT, first half */
     COMPANION_OVERLAY_HELPMENU = 3,           /* EVENT/HELPMENU.OUT */
@@ -33,7 +33,7 @@ typedef enum companion_overlay {
 } overlay_companion_e;
 
 /* Companion data file requests (the second LBA and size tables). */
-typedef enum companion_file {
+typedef enum overlay_companion_file {
     COMPANION_FILE_WIN001 = 2,    /* EVENT/WIN001.BIN */
     COMPANION_FILE_BONUS = 3,     /* EVENT/BONUS.BIN */
     COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
@@ -41,7 +41,7 @@ typedef enum companion_file {
 
 /* g_overlay_companion_overlay_state: the overlay entry the frame driver calls, cleared when the overlay
  * returns. */
-typedef enum companion_overlay_state {
+typedef enum overlay_companion_state {
     COMPANION_OVERLAY_STATE_IDLE = 0,
     COMPANION_OVERLAY_STATE_STUB = 1,      /* an empty function */
     COMPANION_OVERLAY_STATE_BUNIT = 2,     /* unit_list_entrypoint */

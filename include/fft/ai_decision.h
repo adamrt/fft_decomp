@@ -32,13 +32,13 @@ typedef enum ai_status_selection_stage {
 } ai_status_selection_stage_e;
 
 /* These three suspend points use their own byte; other values resume abilities. */
-typedef enum ai_autobattle_stage {
+typedef enum ai_general_stage {
     AI_AUTOBATTLE_CHARGING = 2,
     AI_AUTOBATTLE_MOVEMENT = 4,
     AI_AUTOBATTLE_ABILITIES = 7,
 } ai_general_stage_e;
 
-typedef enum ai_fight_for_life_selection_stage {
+typedef enum ai_fight_for_life_stage {
     AI_FIGHT_FOR_LIFE_SELECTION_SCORE_TILES = 0,
     AI_FIGHT_FOR_LIFE_SELECTION_MOVEMENT = 1,
     AI_FIGHT_FOR_LIFE_SELECTION_CHARGING = 2,
@@ -47,7 +47,7 @@ typedef enum ai_fight_for_life_selection_stage {
 } ai_fight_for_life_stage_e;
 
 /* No pass saves stage 5; it follows the same ally-search fallback as stage 6. */
-typedef enum ai_protect_allies_selection_stage {
+typedef enum ai_protect_allies_stage {
     AI_PROTECT_ALLIES_SELECTION_SCORE_TILES = 0,
     AI_PROTECT_ALLIES_SELECTION_MOVEMENT = 1,
     AI_PROTECT_ALLIES_SELECTION_CHARGING = 2,
@@ -112,7 +112,7 @@ typedef enum ai_movement_stage {
     AI_MOVEMENT_SCORE_TILES = 1,
 } ai_movement_stage_e;
 
-typedef enum ai_cowardly_movement_stage {
+typedef enum ai_move_retreat_stage {
     AI_COWARDLY_MOVEMENT_SCORE_TILES = 0,
     AI_COWARDLY_MOVEMENT_TARGET_DISTANCE = 1,
 } ai_move_retreat_stage_e;

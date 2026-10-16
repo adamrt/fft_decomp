@@ -3,7 +3,6 @@
 #include "fft/help.h"
 #include "fft/job.h"
 #include "fft/job_list.h"
-#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
