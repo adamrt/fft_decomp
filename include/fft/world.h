@@ -630,8 +630,6 @@ extern s16 g_world_learn_selected_job;
 extern s16 g_world_learn_selected_job_index;
 s32 world_job_build_unit_list(u8 unit_index, s16* jobs, s32 mode);
 
-/* Job id -> generic job index 0..0x13, else 0. */
-
 s32 world_job_get_cached_level(s32 unused_row);
 s32 world_job_get_cached_level_jp_requirement(s32 unused_row);
 s32 world_job_get_cached_skillset_empty_flag(s32 unused_row);

@@ -732,7 +732,6 @@ void script_run_next_event_unused(void);
 void script_start_current_event_thread(void);
 void script_frame_after_requests_stub(void);
 void script_frame_after_threads_stub(void);
-/* BATTLE and WORLD each link their own body. */
 s32 script_is_deployment_running(u32* ot, u32 buttons);
 
 /* instruction cursors */
@@ -1047,8 +1046,6 @@ void script_advance_date_by_one_year(void);
 /* Event-unit lookup uses the resident scene's interpreter state. */
 s32 script_resolve_runtime_id(s32 unit_id);
 
-/* Resolve single selectors in place; leave group selectors for the filter loop. */
-
 /* unit instructions */
 extern u16 g_script_unit_face_slot_order[];
 extern map_tile_coordinates_t g_script_warp_coords;
@@ -1058,7 +1055,6 @@ void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second
 void script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
 void script_inflict_status_thread(void);
 
-/* TeleportIn forwards the unit ID; the interpreter's second argument is unused. */
 void script_waitspritemove_event_instruction(s32 unit_id);
 void script_jump_event_instruction(const event_jump_parameters_t* parameters);
 void script_resetpalette_event_instruction(const event_unit_parameters_t* parameters);

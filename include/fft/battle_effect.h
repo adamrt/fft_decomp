@@ -2073,7 +2073,6 @@ s32 battle_effect_check_direct_trajectory_to_target(s32 source_id, SVECTOR* tile
 s32 battle_effect_get_bow_shot_angle(void);
 s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id);
 void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id);
-/* Steps the projectile along its trajectory, testing each obstacle. */
 
 /* models */
 extern s32 g_effect_model_command_word_offset;

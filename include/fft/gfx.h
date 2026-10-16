@@ -505,8 +505,6 @@ extern s16 g_gfx_item_icon_clut_base_y;
 
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 
-/* per-module bodies: each module links its own copy under the shared name. */
-
 /* fades */
 extern u8 g_gfx_increasing_fade_active;
 extern s16 g_gfx_fade_intensity;

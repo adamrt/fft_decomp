@@ -394,7 +394,6 @@ extern u16 g_map_refresh_pending;
 /* unreferenced stubs, neutral names */
 s32 map_return_zero_1(void);
 
-/* per-module bodies: each module links its own copy under the shared name. */
 void map_reset_script_light_transform(void);
 
 /* shared between programs */

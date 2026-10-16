@@ -570,7 +570,6 @@ extern SVECTOR g_battle_gte_rtpt_vxy0;
 extern SVECTOR g_battle_gte_rtpt_vxy1;
 extern SVECTOR g_battle_gte_rtpt_vxy2;
 
-/* World height: coords has integer world x/depth in vx/vz and map layer in vy. */
 s32 battle_gfx_calculate_world_height_from_battle_tile(struct battle_unit* unit);
 s32 battle_gfx_calculate_world_height_from_unit_tile(struct battle_unit* unit);
 s32 battle_gfx_calculate_world_height_from_move_destination(struct battle_unit* unit);

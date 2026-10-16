@@ -166,7 +166,6 @@ extern u16 g_menu_cursor_zoom_percentages[];
 menu_window_buffer_t* menu_alloc_window_buffer_pair(void);
 void menu_reset_window_buffer_slots(void);
 void menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
-/* BATTLE and WORLD each link their own body. */
 void menu_select_sprite_clut(void* packet);
 void menu_select_icon_sprite_clut(SPRT* slot);
 void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step);
@@ -558,7 +557,6 @@ void menu_copy_billboard_data_out(menu_unit_status_record_t* banner, menu_active
     menu_status_panel_slot_storage_t* billboard, map_selected_tile_t* cursor_tile);
 void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const menu_active_unit_t* unit,
     const menu_status_panel_slot_storage_t* billboard);
-/* BATTLE and DEBUGCHR share one body; WORLD links a shorter one of its own. */
 void menu_clear_stat_preview(menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail);
 void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
     s16 item_before, s16 item_after, s32 slot);
