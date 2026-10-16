@@ -5,7 +5,11 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 
 ## Retail bugs the source reproduces
 
-- `battle_unit_calculate_height_data`: the seven-byte result preserves an uninitialized elevation high bit; an unavailable unit leaves the other result fields unset.
+- `battle_unit_calculate_height_data`: the seven-byte result preserves an
+  uninitialized elevation high bit; an unavailable unit leaves the other result
+  fields unset. A non-Chocobo that shares its tile (a rider) takes its
+  statuses, movement abilities and terrain from the other unit, so it is
+  unavailable when its mount is Dead and never for its own Dead status.
 - `DrawOTagEnv`: the diagnostic string uses literal `&08x` for its second item, so it does not format the environment pointer.
 - `StCdInterrupt`: without `CdlModeSize1`, it skips the local disc-position read but still copies the uninitialized four bytes into the ring descriptor.
 - `sprintf`: unchecked precision and zero padding can overrun its 512-byte temporary segment buffer.
@@ -46,8 +50,12 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `battle_map_dispatch_gns_resource` passes the packed lighting colors as a
   `MATRIX` to `battle_map_set_light_matrices`, which also copies its 32-bit translation
   values from the following 16-bit direction components.
-- `battle_map_load_alternate_mesh`: scales the mesh header's color
-  palette byte offset by four, placing the palette read past most mesh files.
+- `battle_map_load_alternate_mesh`: scales the mesh header's color palette byte
+  offset by four, placing the palette read past most mesh files. Its wait step
+  tests `main_file_is_still_loading() != 0`, the reverse of the other loaders:
+  it applies the palette and frees the buffer while the read runs, then never
+  leaves the wait. Its caller runs it only while `g_map_refresh_pending` is
+  set, and nothing sets it.
 - `map_queue_textured_triangles`, `map_queue_textured_quads`
   and their untextured twins pack SXY with the full signed 32-bit MAC1 value; a
   negative X therefore forces the 16-bit screen Y to `0xffff`.
@@ -120,7 +128,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   and the direction-times-spread products over `scale` in
   `battle_effect_spawn_particle_motion`.
 - Locals read before any assignment, so the value is whatever the caller left
-  in a register: `battle_effect_update_file_load` tests `result` (`$a0`) for a load
+  in a register: `menu_icon_timed_thread` (BATTLE and WORLD) tests `unset` (`$s6`) and, when it is nonnegative, lowers `g_thread_current_id` around `menu_select_icon_cluts`, as `menu_icon_linked_entry_thread` does for its linked entry; `battle_effect_update_file_load` tests `result` (`$a0`) for a load
   state outside 0-3, which nothing sets; `battle_camera_get_input_direction`
   tests `input` (`$a1`) when `mode` or the controller mode is outside 0-2;
   `main_status_set_action_state` leaves `status` unset for an action state
@@ -208,6 +216,9 @@ and mark code that a cleanup must not "fix". Details live in the named file.
     units and never sets the trajectory, and ChangeMap calls an empty
     `map_reset_script_light_transform` where BATTLE resets the script light
     transform. WORLD's interpreter never runs (see Other surprises).
+  - FadeSound builds its request as `byte 2 << (byte 1 + 16)`: the low half,
+    the target volume, is always 0, so it only fades the music out, over
+    byte 2's frames doubled for each unit of byte 1.
 - `wldcore_menu_step_location_menu_level` opens the outfitter with shop id 0
   for every town; `world_shop_run_screen` then takes the id from the
   location variable. The fur shop and soldier office pass their own ids.
@@ -378,12 +389,12 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   only the 256 lower-level panels, so an untargetable upper-level tile keeps
   its range; the weapon-range twin
   `battle_target_clear_range_on_untargetable_tiles` visits all 512.
-- `battle_unit_settle_on_tile` and
-  `battle_unit_restore_facing_after_attack`: for a mounted pair the second
+- `battle_unit_settle_on_tile`, `battle_unit_restore_facing_after_attack` and
+  `battle_unit_face_towards_action_target`: for a mounted pair the second
   `battle_unit_set_tile_position` call names the unit's own battle record again
   (the first function finds its "mount" by the unit's own `unit_id`), so the
-  partner's battle stats take no tile or facing here. The second function also
-  writes the partner record's facing with no null test.
+  partner's battle stats take no tile or facing here. The other two also write
+  the partner record's facing with no null test.
 - `battle_gfx_release_reserved_vram_slot` tests owner bit 0x80
   (`BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE`), which the EVTCHR (0xfe) and free
   (0xff) markers also carry, so the event instruction releases a saved EVTCHR
@@ -399,7 +410,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `g_battle_map_pending_gns_records`: it reads
   `g_battle_map_saved_light_matrix` and can overwrite the first 20 bytes of
   `g_battle_map_local_light_matrix`.
-- Both copies of `menu_build_zodiac_primitives`:
+- All six copies of `menu_build_zodiac_primitives` (MAIN, WORLD, ATTACK, CARD, DEBUGCHR,
+  REQUIRE):
   the round-to-nearest step of the sprite scale adds 1, not `ONE`, to the 4.12
   product before dividing, so it only rounds up a remainder of `ONE` - 1.
 - `battle_state_handle_open_sp2_files_state` frees its 0x8000-byte buffer when
@@ -494,7 +506,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `<= ABILITY_ID_MOVEMENT_FIRST`, so Move+1 (486) is filed as a support ability;
   every caller asks for action abilities or for all four classes, so nothing
   sees the difference.
-- Tests that cannot succeed: `battle_state_sync_frame` zeroes a
+- Tests that cannot succeed: `battle_unit_init` runs `battle_gfx_run_wep_eff_seq_script` for the new unit's blocks only for a sheet id below `BATTLE_SPRITESHEET_ID_VELIUS` (60) and at least `BATTLE_SPRITESHEET_ID_BOY` (74); `wldcore_proposition_advance_daily_counters` caps waiting days above 32, and its only writer, `wldcore_proposition_step_result_level`, stores 32 or 16. `battle_state_sync_frame` zeroes a
   `g_main_system_min_vsync_interval` of 1 under `wait < g_main_system_min_vsync_interval` with `wait` at least 2;
   `battle_state_run_deployment` loops until
   `battle_state_update_deployment_controller_input` returns -1, and it always
@@ -522,6 +534,122 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `menu_run_icon_selection_loop` clears both icon records' `_unknown_78` when
   one holds 0 and the other 2, but their only writer,
   `menu_build_window_sprites`, stores 0.
+- `battle_action_queue_post_effect_messages_for_unit` tests the 16-record
+  capacity of `g_battle_action_post_effect_msgs` once, before it walks the
+  unit's 11 reportable outcomes: a unit reached with 15 records queued can
+  append ten more past the array, over `g_battle_gfx_compressed_nibble_phase`
+  and the globals after it.
+- `battle_ai_evaluate_self_target_origins` and
+  `battle_ai_evaluate_reflected_target_origins` run
+  `battle_ai_is_ability_origin_allowed` (deep water, Geomancy terrain, an
+  adjacent Monster Skill holder) on the unit's current tile in both passes, so
+  the starting tile decides the move-then-act pass, which casts from the
+  destination; `battle_ai_evaluate_cast_origins` tests the destination there.
+- `battle_target_select_random_tile_for_random_fire_abilities` has no test for
+  an empty candidate list, and `battle_target_calculate_map_for_action` calls
+  it for any result but -1, including 1 (no tile marked); it then targets the
+  upper-level tile named by the stale `g_battle_target_panels[0].mark`.
+  Whether a retail action gets there is unknown.
+- `battle_effect_free_state_record` follows each freed work record's `next`,
+  which `battle_effect_free_work_record` has just set to the old free-chain
+  head. Only an empty list ends cleanly: with no free record the walk stops
+  after the first and leaves the rest attached; otherwise it frees free-chain
+  records again and then loops between two records forever.
+- `battle_map_light_matrix_command`: the blend and delta steps (0x67, 0x69)
+  start each translation from the start matrix's `m[i][3]` (the next row's
+  first element, or the padding after `m[2][2]`) instead of `t[i]`. Nothing
+  issues the start commands 0x66 and 0x68 that queue them, so they never run.
+- `battle_camera_execute_position_command`, source
+  `EFFECT_CAMERA_SOURCE_TARGET_AVERAGE`, sums the world coordinates of the
+  unit targets only but divides by the whole target count, so tile targets
+  pull the average toward the map origin, and no targets divides by zero. The
+  average is stored only when an offset is given; every caller passes one.
+- `battle_unit_place_in_new_location` (WarpUnit and
+  `script_warp_unit_display_to_paired_unit`) passes `unit->facing`, the
+  quadrant shifted left 10, as the `u8` facing of
+  `battle_unit_set_tile_position`; its other callers divide by
+  `BATTLE_FACING_QUARTER_TURN`. The low byte is 0, so a warped unit's battle
+  stats face south while its sprite faces as asked; facing evade reads the
+  stats.
+- `battle_move_animate_jump_start` and `battle_move_animate_jump_rise_with_sfx`
+  size the rise as `0x120 - ground y`, the altitude above world height 0 of a
+  point 0x120 over the ground, but cover it from the unit's current height:
+  a unit on ground h units up ends 0x120 + h above it. The second function's
+  early exit treats the same value as an absolute altitude.
+- `battle_state_handle_confirm_action_state` stores answer 7 with a unit on the
+  cursor tile as the action's `targeting_type`, which otherwise holds
+  `BATTLE_TARGETING_TYPE_TILE` (5) or `_UNIT` (6): readers that test for UNIT
+  then aim at the stored tile, the two that test for TILE at the unit. The
+  confirm prompts' command maps give only 5, 6 and 8; 7 comes from
+  `menu_resolve_selection`'s fallback for a menu outside its table, and
+  whether that happens here is unknown.
+- `battle_move_calculate_pathing` (WalkTo): the destination filter repeats the
+  water tests of `battle_move_set_reachable_tile_flags`, but refuses lava only
+  when `move_type` is `MOVE_CLASS_FLY`, where that function refuses it unless
+  `can_pass_lava` is set. The walker always uses `MOVE_CLASS_NORMAL`, so lava
+  is never refused as a WalkTo destination.
+- Both copies of `script_opcode_2a_block_start_thread`: the block's WalkToAnim
+  clears `g_unit_was_moving_latch[runtime_id]` outside its absent-unit test,
+  so an absent unit (2000) zeroes the halfword 4000 bytes on, the `w` of
+  `g_menu_window_buffers[5].sprites[3]` in BATTLE and WORLD. The interpreters'
+  own WalkToAnim keeps the store inside the test.
+- `memcard_file_write_buffer` (CARD and WORLD) and
+  `world_card_read_file_chunked` seek before each of their 40 attempts by the
+  bytes transferred so far from the current position (origin 1), not from the
+  start: after a short first transfer of n bytes, the next attempt works at
+  file offset 2n with the data from offset n.
+- `item_get_ranking_value` (EQUIP and WORLD): item 0 is a weapon to
+  `item_get_menu_category`, but the weapon branch excludes it, so it falls
+  into the armor branch with index -144 and reads the range byte of weapon
+  record 96 as its HP bonus. Both sort callers drop item 0 first.
+- Every copy of `menu_build_zodiac_primitives` (MAIN, WORLD, ATTACK, CARD,
+  DEBUGCHR, REQUIRE) tags the backdrop `POLY_F4` but stores its corners at the
+  `POLY_FT4` offsets, so the GPU takes the second and fourth corners from
+  words at 0x0c and 0x14 that nothing here writes; only (0,0) and (255,0) are
+  set. Its unlinked path, which builds every sprite into the backdrop's
+  packet, never runs: no code stores `link_primitives`, and the CARD, WORLD
+  and ATTACK contexts start at 1.
+- `bunit_unit_build_list_index_map` maps a mount to its rider's list index
+  (`bunit_unit_find_index_by_battle_id`), not the rider's grid cell; they
+  differ by the mounts sorted before the rider. Browsing onto such a mount
+  with L1/R1 puts the grid cursor on a later unit's cell (or past the last),
+  and ending the browse there selects that cell's unit.
+- The right-aligned number commands
+  (`bunit_menu_opcode_17_draw_right_aligned_number`,
+  `equip_menu_opcode_17_draw_right_aligned_number`,
+  `world_menu_opcode_17_draw_right_aligned_number`) count their blank cells
+  down to -1 in an `s16` with no lower bound: a value with more digits than
+  the field starts below -1 and queues a blank quad about 65,535 times.
+  Whether any retail field is too narrow is unknown.
+- `world_gfx_update_fade_in_tile` does not clamp its level when the fade-in
+  ends, unlike `world_gfx_update_fade_out_tile`: at a frame step of 2 the
+  level goes from 16 to -16, and the last subtractive tile takes the low byte,
+  240, darkening the screen for one frame. Whether a fade-in runs at step 2
+  is unknown.
+- `world_formation_get_unit_palette_index` treats every formation sprite code
+  from 0x3f up as a monster's: the 28 story sprite sets that map to 0x78-0x93
+  (Zalbag, Dycedarg, Wiegraf, the Lucavi and others) index the 20-entry
+  `g_monster_formation_sprite_table` 37 to 64 bytes past its end. Whether a
+  party unit can carry one of them is unknown.
+- `wldcore_sound_novel_opcode_31_stop_pending_music` clears `tracks[slot]`,
+  but `wldcore_sound_change_scenario_music` and the audio queue keep slot n's
+  track in `tracks[n - 1]`. The novel always uses slot 2, so the store hits
+  `current_slot` (zeroed next) and `tracks[1]` keeps the unloaded id: a later
+  queued play of that track switches to the empty slot without loading it.
+- `wldcore_gfx_draw_animated_display_object`: a part with its own palette gets
+  CLUT x `(clut_x + (word & 0xff0000)) >> 12`, shifting the cel's CLUT x
+  origin out with the palette field; OPEN's
+  `open_gfx_draw_animated_render_record` adds the origin after the shift. All
+  141 WLDCORE cels have CLUT x 0, so nothing shows.
+- `wldcore_get_ramza_roster_index` returns 16 (`PARTY_MEMBER_SLOT_COUNT`) when
+  no formation slot holds Ramza, and the four MCBrave/MCFaith opcodes
+  (`wldcore_script_opcode_25_check_ramza_brave_at_least` through
+  `wldcore_script_opcode_28_check_ramza_faith_at_most`) use it unchecked, so
+  they test roster slot 16, the first guest slot.
+- `main_sound_start_music_load_into_free_slot` allocates the SMD block before
+  it requests the read; when `main_file_call_build_header` refuses (loader
+  busy) it reports `MAIN_SYSTEM_ERROR_SMD_LOAD` and returns 0 without freeing
+  the block. `main_sound_open_music_into_slot` (no caller) does the same.
 
 ## Calls that disagree with the callee
 
@@ -574,9 +702,13 @@ written that way.
   shop's fitting room carries flag bits above the low byte, so sorting the
   list then increments a byte far past the array.
 - `script_resolve_runtime_id`: for the active-turn selector 0x69 with no unit
-  holding the turn, it falls back to ENTD units 1 and 2 and tests the Jump
-  status of whatever the finder returned; with neither on the field that is
-  NULL, so it reads kernel RAM at address 0x58.
+  holding the turn, it falls back to ENTD units 1 and 2 but tests the finder's
+  battle id, not the loop counter, against 3, so a unit found in battle slot 3
+  counts as missing; with neither on the field the Jump test reads the
+  finder's record (NULL when there is none: kernel RAM at 0x58), and if it
+  passes the lookup goes on with ENTD unit 3. In the Ramza game-over event
+  (0x194) with no Ramza in the 21 records it returns -1, not
+  `EVENT_RUNTIME_ID_NONE`, which is what its callers test for.
 - `battle_unit_init`: stores the spritesheet-slot
   claim (0xffff when all nine slots are taken) in the u8
   `spritesheet_vram_slot` and tests the stored 0xff against 0xffff, so the
@@ -636,6 +768,13 @@ written that way.
   starting at `g_script_event_input` to the event input loader. The
   next five 32-bit values include unrelated status-label data; the corresponding held,
   previous and repeat globals reside elsewhere.
+- `battle_menu_collect_monster_skill_abilities` returns 0 from its early exits
+  but falls off its end after building a list, and writes no terminator after
+  it; its one caller, `menu_build_ability_list`, ignores the result and has
+  filled the id column with 0xffff beforehand.
+- `battle_effect_get_world_coords_by_battle_id` passes the unit's runtime id to
+  `battle_effect_resolve_target_world_coords`, which takes an index into the
+  effect's target list. Nothing calls it.
 
 ## Declaration leads
 
@@ -685,6 +824,10 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - Overlays share load addresses, so an address match is not an identity
   match. Compare bytes: REQUIRE and EQUIP both have code at `0x801c2dcc`, and
   the two routines differ.
+- `menu_run_numeric_editor_thread` (ATTACK, REQUIRE) points both slot branches
+  at `g_editor_numeric_state`, where `menu_run_numeric_editor_frame_thread`
+  gives the preview slot `g_editor_numeric_state_b`. Both overlays start it
+  only in `THREAD_SCREEN_SLOT_NUMERIC_EDITOR`, so the shared branch never runs.
 
 ## Other surprises
 
@@ -961,3 +1104,60 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `wldcore_script_opcode_23_request_erase_location`, `wldcore_script_opcode_24_focus_location`)
   read their operand without advancing `ip`; each ends the block, so no opcode
   is read from the operand.
+- `battle_map_get_move_find_result` repeats the same `battle_unit_find_at_tile`
+  call up to 21 times: its occupant loop never uses the counter.
+- `battle_action_check_between_turn_events` calls
+  `battle_unit_store_entd_flags_without_control_flag` twice, around
+  `menu_reset_unit_record`, which leaves team flags alone; the first call
+  reads `unit->stats` before the null test that guards the second.
+- `battle_effect_start_action_projectile_secondary` tests Throw Shuriken (382)
+  on its own before the Item/Throw range 368-393, which already contains it.
+- `battle_formula_steal_exp_hit_sp_x_percent` (formula 0x28) calls
+  `battle_formula_set_exp_stolen` after a failed hit test whenever the action
+  is not executing; outside execution only a 0% chance misses, so the preview
+  shows 0% with an EXP amount. Formula 0x27 (steal gil) fills nothing then.
+- `battle_effect_spawn_emitter_particles`: an emitter with no velocity-spread
+  curve uses half its start spread, but with a curve it uses the lerped spread
+  whole, so a curve at factor 0 gives twice the angle range of no curve. The
+  other spawn values use the start value unchanged when no curve is bound.
+- `battle_map_update_texture_animations`: the two loop modes (1 and 3) add 1
+  per frame and step when the timer reaches `duration`; the other modes add
+  `g_main_system_vsync_interval` and step when it exceeds `duration`, so one
+  duration means `duration` frames in a loop and over `duration` vertical
+  blanks otherwise.
+- Lookups whose result is discarded:
+  `battle_target_store_cursor_unit_as_preview_target`,
+  `battle_state_handle_resume_attack_phase_state` and
+  `battle_state_handle_change_turn_state` call `battle_unit_get_source`;
+  `battle_state_handle_targeting_range_state` (twice),
+  `battle_unit_get_tile_center_and_height_by_battle_id` and
+  `battle_camera_calculate_cursor_tile_vector_normal` (the other level's tile)
+  call `battle_map_get_tile_data_pointer`; and
+  `battle_gfx_draw_wait_direction_unit` runs a `RotTrans` of the unit's feet
+  that the next `RotTrans` overwrites.
+- `equip_menu_update_item_action_state` tests `g_item_action_menu`'s
+  `selected_index` for the sort-order row (2) even while the single-item menu
+  runs; that index was zeroed when the menu opened, so with one item CIRCLE
+  plays the invalid sound on every row. The single menu's row actions agree:
+  row 2 has 0x13e8 like rows 0 and 1, where the full menu has -1.
+- `bunit_gfx_init_double_packet_buffers` and
+  `world_gfx_init_double_packet_buffers` set their draw and display
+  environments 255 pixels wide where MAIN and CARD use 256, so the default
+  drawing area ends at x = 254; `PutDispEnv` still picks the 256-pixel mode.
+- Soldier Office: the hire menu shows 1500 gil for row 0 and 1400 for row 1
+  (`world_shop_get_soldier_office_entry_fee`), but
+  `world_shop_run_soldier_office_hire_menu_step` tests, prompts with (0xF82A)
+  and charges 1000 plus the generated recruit's equipment prices.
+- `world_text_measure_entry_pixel_width` adds the operand of 0xE7
+  (`TEXT_SET_X_POSITION`) to the width as an advance, while
+  `menu_text_render_encoded_ids_to_image` moves the pen to that x. Its only
+  caller centers the job wheel's job name.
+- `gfx_build_zodiac_sprite_polygon` (MAIN, ATTACK) and
+  `gfx_set_scaled_poly_ft4_8bpp` (WORLD, CARD, DEBUGCHR, REQUIRE) round a
+  scaled offset or size by testing the C remainder against half a pixel, so a
+  negative product truncates toward zero: -1.75 pixels gives -1 where 1.75
+  gives 2.
+- `main_file_poll_load` and `wldcore_file_poll_vram_image_stream` count failed
+  seeks, refused reads and stalls in `error_count`, which nothing reads, so a
+  disc error restarts the read indefinitely. `main_file_poll_load` also counts
+  `wait_frames` unread; its stall timeout uses `g_main_system_session_frames`.
