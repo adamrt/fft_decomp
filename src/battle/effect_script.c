@@ -1975,13 +1975,13 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
             &timeline->state.parent.keyframe.tracks.screen[0], &timeline->state.parent.remaining.tracks.screen[0]);
         battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][0],
             &timeline->state.parent.keyframe.tracks.sound[0][0], &timeline->state.parent.remaining.tracks.sound[0][0],
-            &timeline->state.parent.step.tracks._unknown_24[0][0][1]);
+            &timeline->state.parent.step.tracks.sound[0][0][1]);
         battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][1],
             &timeline->state.parent.keyframe.tracks.sound[1][0], &timeline->state.parent.remaining.tracks.sound[1][0],
-            &timeline->state.parent.step.tracks._unknown_24[1][0][1]);
+            &timeline->state.parent.step.tracks.sound[1][0][1]);
         battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][2],
             &timeline->state.parent.keyframe.tracks.sound[2][0], &timeline->state.parent.remaining.tracks.sound[2][0],
-            &timeline->state.parent.step.tracks._unknown_24[2][0][1]);
+            &timeline->state.parent.step.tracks.sound[2][0][1]);
         if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
             battle_state_set_min_vsync_interval(battle_effect_get_timing_curve_value(record));
         }
@@ -2010,13 +2010,13 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
             &timeline->state.parent.keyframe.tracks.screen[1], &timeline->state.parent.remaining.tracks.screen[1]);
         battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][0],
             &timeline->state.parent.keyframe.tracks.sound[0][1], &timeline->state.parent.remaining.tracks.sound[0][1],
-            &timeline->state.parent.step.tracks._unknown_24[0][1][1]);
+            &timeline->state.parent.step.tracks.sound[0][1][1]);
         battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][1],
             &timeline->state.parent.keyframe.tracks.sound[1][1], &timeline->state.parent.remaining.tracks.sound[1][1],
-            &timeline->state.parent.step.tracks._unknown_24[1][1][1]);
+            &timeline->state.parent.step.tracks.sound[1][1][1]);
         battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][2],
             &timeline->state.parent.keyframe.tracks.sound[2][1], &timeline->state.parent.remaining.tracks.sound[2][1],
-            &timeline->state.parent.step.tracks._unknown_24[2][1][1]);
+            &timeline->state.parent.step.tracks.sound[2][1][1]);
     }
     battle_camera_advance_effect_tracks(timeline->frame);
     timeline->frame++;

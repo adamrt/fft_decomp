@@ -20,7 +20,7 @@ typedef struct {
 } psyq_card_interrupt_view_t;
 
 typedef struct {
-    void* _unknown_000[PSYQ_BIOS_B_CHANGE_CLEAR_PAD];
+    void* _unused_000[PSYQ_BIOS_B_CHANGE_CLEAR_PAD];
     u32* change_clear_pad;
 } psyq_card_bios_b0_table_t;
 

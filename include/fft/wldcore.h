@@ -309,7 +309,7 @@ extern u8 g_wldcore_choice_hidden_variable_offsets[];
 /* save */
 /* Section byte offsets at the start of a loaded sound-novel script. */
 typedef struct wldcore_sound_novel_script_file {
-    u32 _unknown_00;
+    u32 _unused_00;
     u32 offsets[0]; /* 0x04; variable-length section byte-offset table */
 } wldcore_sound_novel_script_file_t;
 

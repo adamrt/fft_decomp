@@ -366,7 +366,7 @@ typedef struct psyq_spu_registers {
     u16 reverb_high;
     u16 voice_status_low;
     u16 voice_status_high;
-    u16 _unknown_1a0;
+    u16 _unused_1a0;
     u16 reverb_start;
     u16 irq_address;
     u16 transfer_address;
@@ -380,8 +380,8 @@ typedef struct psyq_spu_registers {
     u16 external_volume_right;
     u16 current_main_volume_left;
     u16 current_main_volume_right;
-    u16 _unknown_1bc;
-    u16 _unknown_1be;
+    u16 _unused_1bc;
+    u16 _unused_1be;
     psyq_spu_reverb_registers_t reverb; /* 0x1c0 */
 } psyq_spu_registers_t;
 

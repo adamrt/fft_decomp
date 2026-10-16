@@ -87,7 +87,7 @@ typedef struct menu_list_record {
 typedef struct menu_sprite_command {
     u8 opcode;
     u8 length;
-    u8 _unknown_02;
+    u8 _unused_02;
     menu_sprite_cell_t sprite;
 } menu_sprite_command_t;
 typedef char menu_sprite_command_size_must_be_9[sizeof(menu_sprite_command_t) == 9 ? 1 : -1];

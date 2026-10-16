@@ -83,7 +83,7 @@ typedef enum {
 /* View of the BIOS C0 dispatch table returned by B(0x56): only entry 6, the
  * exception handler the libcard and libgte patches rewrite, is dereferenced. */
 typedef struct {
-    void* _unknown_00[6];
+    void* _unused_00[6];
     u32* exception_handler;
 } psyq_bios_c0_table_t;
 

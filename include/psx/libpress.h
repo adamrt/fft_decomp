@@ -63,7 +63,7 @@ typedef struct {
     s32 consumed_bits;
     s32 quant_scale_shifted;
     s32 component;
-    s32 _unknown_18;
+    s32 _unused_18;
     s32 predictor_cr;
     s32 predictor_cb;
     s32 predictor_y;

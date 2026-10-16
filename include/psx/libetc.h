@@ -128,7 +128,7 @@ typedef struct {
     volatile u32 address;
     volatile u32 block_control;
     volatile u32 channel_control;
-    u32 _unknown_0c;
+    u32 _unused_0c;
 } psyq_dma_channel_t;
 extern psyq_dma_channel_t* g_psyq_etc_dma_channels;
 psyq_interrupt_callback_t setIntr(s32 slot, psyq_interrupt_callback_t callback);

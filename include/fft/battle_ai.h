@@ -279,7 +279,7 @@ typedef struct ai_ability_entry {
             u8 force_consume_evaluated_origins : 1;
             u8 exhaustive_origin_scan : 1;
             u8 requires_monster_skill : 1;
-            u8 _unknown_00_bit4 : 1;
+            u8 _unused_00_bit4 : 1;
             u8 enemies_only : 1;
             u8 allies_only : 1;
             u8 usable : 1;

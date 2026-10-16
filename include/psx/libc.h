@@ -55,7 +55,7 @@ typedef struct {
         struct {
             u8 flags;
             u8 sign;
-            u8 _unknown_02[2];
+            u8 _unused_02[2];
         } bytes;
     } flags;
     s32 width;

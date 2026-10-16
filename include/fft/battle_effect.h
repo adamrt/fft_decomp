@@ -1099,10 +1099,11 @@ typedef union effect_parent_track_steps {
     struct {
         s16 particle[2][EFFECT_PARTICLE_CHANNEL_COUNT];
         u8 _unused_14[0x10]; /* reset only */
-        /* Six two-byte addresses inside the step array. Opcode 29 passes each
-         * high byte to the sound helper's unused argument; no sound helper reads it. */
-        u8 _unknown_24[EFFECT_SOUND_TRACK_COUNT][2][2]; /* record +0xba; the original purpose is unknown */
-        s16 _unused_30[2];                              /* extra 16-bit values cleared by the parent reset */
+        /* The sound tracks' step slots, at the same offset as the counters'
+         * sound tracks. Opcode 29 passes the address of each high byte to the
+         * sound helper, which never reads it. */
+        u8 sound[EFFECT_SOUND_TRACK_COUNT][2][2]; /* record +0xba */
+        s16 _unused_30[2];                        /* extra 16-bit values cleared by the parent reset */
     } tracks;
 } effect_parent_track_steps_t;
 

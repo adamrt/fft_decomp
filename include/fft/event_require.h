@@ -106,7 +106,7 @@ typedef char require_reward_burst_tile_size_must_be_72[sizeof(require_reward_bur
 typedef struct require_reward_bonus_image_file {
     u32 pixels[200][32];   /* 0x0000; eight 4bpp pixels per 32-bit value */
     palette_t palettes[8]; /* 0x6400; four palettes per uploaded VRAM row */
-    u8 _unknown_6500[0x300];
+    u8 _unused_6500[0x300];
 } require_reward_bonus_image_file_t;
 typedef char
     require_reward_bonus_image_file_size_must_be_26624[sizeof(require_reward_bonus_image_file_t) == 26624 ? 1 : -1];

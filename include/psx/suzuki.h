@@ -621,14 +621,14 @@ typedef u8* (*suzuki_smd_handler_t)(u8* note_data, suzuki_music_t* music, suzuki
 
 /* SMD and WD resources store their total byte size at offset eight. */
 typedef struct suzuki_resource_prefix {
-    u8 _unknown_00[8];
+    u8 _unused_00[8];
     u32 size_bytes; /* 0x08 */
 } suzuki_resource_prefix_t;
 
 /* The transfer controller indexes these records in 16-byte steps. */
 typedef struct suzuki_spu_transfer_status {
     s16 status; /* 0x00 */
-    u8 _unknown_02[14];
+    u8 _unused_02[14];
 } suzuki_spu_transfer_status_t;
 
 /* Elapsed play time filled by suzuki_smd_get_play_time. The root counter runs

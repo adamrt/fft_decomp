@@ -134,7 +134,7 @@ void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step);
 typedef struct menu_portrait_image_file {
     u32 pixels[8][48][4];  /* 0x0000; eight 32x48 4bpp portraits */
     palette_t palettes[8]; /* 0x1800; four palettes per uploaded VRAM row */
-    u8 _unknown_1900[0x700];
+    u8 _unused_1900[0x700];
 } menu_portrait_image_file_t;
 typedef char menu_portrait_image_file_size_must_be_8192[sizeof(menu_portrait_image_file_t) == 8192 ? 1 : -1];
 

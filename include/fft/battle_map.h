@@ -526,10 +526,10 @@ typedef struct map_mesh_quad_normals {
  * 32-bit fields remain byte arrays so enclosing rows retain 16-bit alignment. */
 typedef union gns_load_info {
     struct {
-        u16 _unknown_00;        /* 0x3333 in file rows */
+        u16 _unused_00;         /* 0x3333 in file rows */
         u8 disc_lba_le[4];      /* row +0x08; absolute LBA, including its high 16 bits */
         u8 byte_length_le[4];   /* row +0x0c; sector-rounded byte count */
-        u8 _unknown_0a[3];      /* 55 66 77 in file rows */
+        u8 _unused_0a[3];       /* 55 66 77 in file rows */
         u8 file_present_marker; /* 0x88 in file rows; zero means no file */
     } fields;
     u8 bytes[14];
