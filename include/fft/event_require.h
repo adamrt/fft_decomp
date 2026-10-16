@@ -239,6 +239,4 @@ extern s32 g_require_thread_suspended_id;
 void require_gfx_run_suspended_thread_transition(void);
 void require_thread_exit_current(void);
 
-/* sound */
-
 #endif

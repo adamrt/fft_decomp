@@ -15,8 +15,6 @@ extern s32 g_battle_menu_help_opening;
 
 void battle_menu_clear_status_menu_state(void);
 
-/* input and selection */
-
 /* action menus */
 extern u8 g_battle_menu_idle_action_entry_labels[];
 /* The selected command: its kind, then the action command staged for
@@ -81,12 +79,6 @@ void battle_menu_leave_status_screen_selection(void);
 /* windows and sprites */
 /* Live caster-panel image parameters followed by their defaults. */
 extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][5];
-
-/* text rendering */
-
-/* overlay loading */
-
-/* threads */
 
 /* shared with the per-program event interpreter and dialog thread */
 u8* battle_menu_redraw_text_page_on_scroll_in_rect(

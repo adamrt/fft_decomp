@@ -1122,8 +1122,8 @@ typedef struct entd_file {
 } entd_file_t;
 typedef char entd_file_size_must_be_81920[(sizeof(entd_file_t) == 81920) ? 1 : -1];
 
-/* unit_name_id_t.fields.name_class selects the unit-name text page. */
 /* party */
+/* unit_name_id_t.fields.name_class selects the unit-name text page. */
 typedef enum party_name_class {
     PARTY_NAME_CLASS_SPECIAL = 0,
     PARTY_NAME_CLASS_GENERIC_MALE = 1,

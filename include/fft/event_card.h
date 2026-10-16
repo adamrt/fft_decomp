@@ -179,8 +179,6 @@ extern const char g_card_text_decimal_format[];
 extern const u8 g_card_text_job_name[];
 extern const u8 g_card_text_location_name[];
 
-/* bit streams */
-
 /* threads */
 extern menu_entry_t g_card_save_failure_thread_descriptor[];
 extern menu_entry_t g_card_save_in_progress_thread_descriptor[];
@@ -190,7 +188,7 @@ extern u8 g_card_save_slot_selection_thread_state;
 /* sound */
 extern u8 g_card_sound_queued_effect_id; /* main_sfx_e */
 
-/* unknown */
+/* unknown state */
 extern u8 g_card_unknown_801ca964;
 
 #endif

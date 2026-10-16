@@ -295,7 +295,7 @@ void menu_init_and_draw_scrollable_list_variant(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 
-/* other */
+/* script data */
 extern menu_window_command_t g_cmd_window_interior_command;
 extern menu_instruction_t g_equip_item_menu_script;
 

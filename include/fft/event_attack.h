@@ -233,8 +233,6 @@ extern u8 g_attack_numeric_editor_thread_params[];
 
 void attack_editor_load_party_unit(s32 mode, s32 roster_index);
 
-/* menus */
-
 /* graphics */
 extern POLY_FT4 g_attack_gfx_frame_ft4[];
 /* Map darkness uses RGB and ignores the fourth byte. */
@@ -259,8 +257,6 @@ extern s32 g_attack_text_job_names_offset;
 /* Entries [1] and [2] of the unit-name text file's section-offset table (0x801cd2b0, s32[32], ending at
  * g_text_data). */
 extern s32 g_attack_text_roster_unit_names_offset;
-
-/* input */
 
 /* threads */
 /* Slots of the deployment screen's own threads; the screen itself runs in

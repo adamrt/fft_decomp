@@ -244,6 +244,15 @@ void* battle_heap_alloc_block(u32 size, s32 kind);
 void battle_heap_free_block(void* ptr);
 void battle_heap_init(battle_heap_node_t* buffer, u32 buffer_size);
 void battle_heap_print_stats(void);
+extern const char g_battle_text_heap_dp_format[];     /* "DP %x\n" */
+extern const char g_battle_text_heap_remain_format[]; /* "HEAP REMAIN %x MAX %x\n" */
+extern const char g_battle_text_heap_task_format[];   /* "TASK %d %x\n" */
+extern const char g_battle_text_min_heap_format[];    /* "MIN HEAP %x " */
+
+/* text */
+/* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
+u8* battle_text_find_entry(u32 text_id);
+extern s32 g_battle_text_awaiting_input;
 
 /* arithmetic and copies */
 /* A random value between `min` and `max`, in either order. Spelled with rand()
@@ -252,6 +261,7 @@ void battle_heap_print_stats(void);
     ((min) == (max) ? (min) : (max) < (min) ? rand() % ((min) - (max)) + (max) : rand() % ((max) - (min)) + (min))
 
 /* shared state */
+extern u32 g_battle_script_saved_event_input; /* the event input held while a script runs */
 extern u8 g_battle_job_level_gained_flag;
 /* Unit coordinates shared by camera tile tests and dialogue positioning. */
 extern SVECTOR g_unit_scratch_coords;
@@ -259,7 +269,7 @@ extern SVECTOR g_unit_scratch_coords;
 /* stubs */
 s32 battle_return_one(s32 unused_runtime_id);
 
-/* unnamed */
+/* unknown state */
 extern s32 g_battle_unknown_800f668c;
 /* Write-only: zeroed with the map render state and never read anywhere on
  * the disc. The 150 x 14-byte shape suggests per-instruction parameter

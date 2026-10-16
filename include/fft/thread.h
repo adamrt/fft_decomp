@@ -233,7 +233,7 @@ void* thread_get_current_global_pointer(void);
 extern void (*g_thread_call_target)(void);
 s32 thread_call_on_main_stack();
 
-/* other */
+/* thread status snapshot */
 extern u8 g_thread_status_snapshot[16];
 
 #endif

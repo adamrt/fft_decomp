@@ -840,6 +840,4 @@ extern ai_facing_tile_offsets_t g_battle_ai_facing_tile_offsets; /* 0x8019f358 *
 s32 battle_ai_choose_wait_facing(void);
 ai_direction_e battle_ai_find_direction_of_target(const ai_coords_t* target, const ai_coords_t* origin);
 
-/* arithmetic */
-
 #endif

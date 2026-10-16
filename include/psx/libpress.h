@@ -53,7 +53,7 @@ enum { PSYQ_PRESS_SYNC_POLL_LIMIT = 1048576 };
 
 enum { PSYQ_PRESS_VLC_DEFAULT_HALFWORDS = 0x00ffffff };
 
-/* variable-length decoding */
+/* variable-length decoder state */
 
 /* Resume(NULL) restores this handwritten VLC context; offset0x18 is untouched. */
 typedef struct {

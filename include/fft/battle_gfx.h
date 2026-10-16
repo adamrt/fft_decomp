@@ -663,8 +663,6 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot);
 void battle_gfx_draw_wait_direction_arrows(SVECTOR* vector, u32* ot);
 void battle_gfx_draw_wait_direction_unit(void);
 
-/* item icons */
-
 /* screen effects */
 /* Commands of 0x800e77b8, which stores RGB and controls GTE background color. */
 typedef enum battle_background_color_command {
@@ -692,7 +690,5 @@ extern POLY_F4 g_battle_screen_fade_polygons[2];
 void battle_gfx_draw_screen_color_modulation_overlay(void);
 void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);
 void battle_gfx_update_screen_color_modulation_fade(void);
-
-/* menu primitives */
 
 #endif

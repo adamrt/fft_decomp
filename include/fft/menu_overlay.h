@@ -49,6 +49,7 @@ void menu_start_mini_menu_display_thread(void);
 void menu_run_triangle_selection(void);
 void menu_run_equip_thread(void);
 void menu_run_jobstts_thread(void);
+void menu_start_at_list_thread(void);
 
 /* help menus */
 extern menu_unit_status_record_t g_menu_help_active_banner;
@@ -66,6 +67,8 @@ extern help_navigation_record_t g_menu_help_attack_preview_navigation[];
 void menu_run_battle_help(void);
 void menu_run_require_help(void);
 extern s32 g_menu_help_message_text_id;
+extern u32 g_help_text_table[];
+
 /* per-module bodies: each module links its own copy under the shared name. */
 s32 menu_get_thread_activity_variant(void);
 void menu_run_ability_list_thread_variant(void);
@@ -76,13 +79,10 @@ s32 menu_run_job_list_variant(void);
 void menu_input_update_with_message_state_variant(void);
 s32 menu_update_equipment_variant(void);
 void menu_run_at_list_variant(void);
-void menu_start_at_list_thread(void);
-/* Scrollable list core: BUNIT, EQUIP, JOBSTTS and WORLD each link their own body. */
-void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
-/* per-module bodies: each module links its own copy under the shared name. */
 void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode);
 void menu_run_game_options_variant(void);
-extern u32 g_help_text_table[];
+/* Scrollable list core: BUNIT, EQUIP, JOBSTTS and WORLD each link their own body. */
+void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
 
 /* overlay */
 extern menu_entry_t g_menu_option_icon_thread_param;

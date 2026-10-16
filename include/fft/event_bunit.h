@@ -322,8 +322,6 @@ extern u8 g_bunit_menu_thread_running;
 
 void bunit_menu_update_event_thread_state(void);
 
-/* sound */
-
 /* status */
 extern u8 g_bunit_status_banner_at_bottom;
 extern u8 g_bunit_status_banner_at_bottom_latch;

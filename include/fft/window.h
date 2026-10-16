@@ -10,7 +10,7 @@
 #include "psx/libgs.h"
 #include "psx/types.h"
 
-/* unified */
+/* records */
 s32 window_append_animated_record_variant(void** list, s32* count);
 s32 window_append_record_variant(void** list, s32* count);
 void window_dispatch_record_list_variant(GsOT* otag, void** records, s32 count);

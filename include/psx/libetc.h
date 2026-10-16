@@ -35,8 +35,6 @@ s32 GetIntrMask(void);
 s32 SetIntrMask(s32 mask);
 s32 SetVideoMode(s32 mode);
 
-/* driver internals */
-
 /* pad state */
 extern s32 g_psyq_etc_pad_mode;
 extern u32 g_psyq_etc_pad_buttons;

@@ -92,10 +92,6 @@ extern u8 g_world_location_names_resident[];
 
 void world_map_confirm_destination(void);
 
-/* status */
-
-/* Per-byte status removal masks applied while an event stages a unit. */
-
 /* system */
 
 extern s32 g_menu_companion_executable_lbas[];    /* 0x80156388, indexed by request */
@@ -346,7 +342,7 @@ typedef struct world_shop_roster_count_menu_script {
     menu_draw_number_command_t unit_count;    /* 0x20 */
 } world_shop_roster_count_menu_script_t;
 
-/* unnamed */
+/* unknown state */
 extern s8 g_world_unknown_8018d18a; /* cleared when Set Ability opens; never read */
 extern s8 g_world_unknown_801c833c; /* cleared with the formation scroll velocity; never read */
 extern u8 g_world_unknown_801cc7d0; /* cleared with the card load and save failure flags; never read */

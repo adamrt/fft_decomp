@@ -289,12 +289,12 @@ enum {
     EFFECT_FILE_ICE = 24,
 };
 
+/* particle motion */
 /* One particle group of the secondary effects: a 0x2e-byte record of
  * g_battle_effect_trap_particle_configs. Its leading bytes schedule the
  * group's effect slots (battle_effect_start_group); the rest is a fixed
  * emitter, from which battle_effect_spawn_particle_motion draws each slot's
  * motion as the effect file emitter does a particle's. */
-/* particle motion */
 typedef struct effect_emitter_values {
     u8 trap_animation;      /* 0x00; trap groups: index into g_battle_effect_trap_animation_data */
     u8 _unused_01;          /* 0x01 */
@@ -975,12 +975,12 @@ typedef struct effect_slot {
 } effect_slot_t;
 typedef char assert_effect_slot_size[sizeof(effect_slot_t) == 204 ? 1 : -1];
 
+/* geometry */
 /* The spawn block at 0x14-0x4b of an emitter record, as the
  * effect_interpolate_emitter_* helpers read it; the native renderers
  * that spawn like the particle emitter embed it. The spread is the ellipsoid
  * or box half-extent around the spawn position and the velocity spread
  * randomizes the base angles. */
-/* geometry */
 typedef struct effect_emitter_geometry_view {
     vec3s16_t spawn_position_start;      /* 0x14 */
     vec3s16_t spawn_position_end;        /* 0x1a */
@@ -1514,11 +1514,6 @@ typedef char effect_animation_curve_table_size_must_be_4[(sizeof(effect_animatio
             result = 0;                                                                                                \
         }                                                                                                              \
     }
-
-/* secondary effects */
-
-/* Rows of seven fade steps, indexed flat (row * 7 + step) as the original does. */
-enum { EFFECT_CHARGE_LINE_FADE_STEPS = 7 };
 
 /* particle rendering */
 /* Four-byte alignment preserves the original 32-bit copies into x/y. */

@@ -9,6 +9,7 @@
 #include "psx/types.h"
 
 /* text */
+void text_set_blit_destination(s16 destination_x, s16 destination_y);
 void menu_render_text_image_at_record_origin(text_dialog_record_t* record);
 /* Player-name substitution, padded to 20 bytes with TEXT_END_WAIT_FOR_CONFIRM. */
 extern u8 g_text_player_name_buffer[20];

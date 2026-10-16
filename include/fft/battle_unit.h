@@ -1031,6 +1031,8 @@ enum {
 typedef void (*battle_distortion_animation_handler_t)(battle_unit_t* unit);
 
 /* unit records */
+s32 battle_script_opcode_add_ghost_unit(
+    s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 runtime_id, s32 flags);
 extern battle_unit_t g_battle_units[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
 extern battle_unit_slot_state_t g_battle_unit_slot_states[];
 extern s32 g_battle_unit_graphics_load_complete;

@@ -1,7 +1,7 @@
 /* Party slots and unit generation, raw stats, skillset abilities, item and job data pointers, job and battle data init
  * from ENTD, RSM flags, actual stats, abilities, equipment, character names and the highest party level. */
 
-#include "fft/battle_text.h"
+#include "fft/battle.h"
 #include "fft/data.h"
 #include "fft/data_ability.h"
 #include "fft/data_item.h"

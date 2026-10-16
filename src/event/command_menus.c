@@ -11,7 +11,6 @@
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
-#include "fft/battle_script.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
 #include "fft/battle_unit_encounter.h"

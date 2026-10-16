@@ -72,9 +72,7 @@ void SetMem(s32 mode);
 void _96_remove(void);
 void GPU_cw(u32 command);
 
-/* driver internals */
-
-/* root counters */
+/* root counter registers */
 typedef struct {
     u16 count;
     u16 _padding_02; /* Four-byte register spacing. */

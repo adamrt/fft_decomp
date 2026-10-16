@@ -667,7 +667,7 @@ void open_gfx_transition_finished_stub(void);
 s32 open_system_run_main_loop(s32 skip_movie);
 void open_system_run_ending_cutscene(void);
 
-/* other */
+/* work buffers */
 extern u8 g_open_work_buffer_0[];
 extern u8 g_open_work_buffer_1[];
 

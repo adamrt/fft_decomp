@@ -9,7 +9,6 @@
 #include "fft/battle_effect_script.h"
 #include "fft/battle_effect_secondary.h"
 #include "fft/battle_map.h"
-#include "fft/battle_text.h"
 #include "fft/battle_unit.h"
 #include "fft/battle_unit_animation.h"
 #include "fft/gfx.h"

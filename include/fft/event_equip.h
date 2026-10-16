@@ -104,8 +104,6 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
 void equip_item_build_inventory_totals(void);
 s32 equip_item_run_type_order_mode(void);
 
-/* rearrange */
-
 /* slot */
 /* One-shot entry flag for this mode. */
 extern s8 g_equip_slot_item_browser_initialized;
@@ -137,8 +135,6 @@ extern s32 g_equip_unit_status_panel_redraw;
 void equip_panel_toggle_equipment_threads(s32 enable);
 void equip_panel_toggle_item_numeric_thread(s32 enable);
 void equip_panel_toggle_unit_status_thread(s32 enable);
-
-/* numeric editor */
 
 /* menus */
 /* g_equip_menu_screen_state: the index of the screen's handler in
@@ -194,8 +190,6 @@ void equip_menu_reset_selection_indices(void);
 void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 s32 equip_menu_update_item_action_state(void);
 
-/* help */
-
 /* graphics */
 extern menu_gfx_context_t* g_equip_gfx_context_base;
 extern menu_gfx_context_t g_equip_gfx_contexts[];
@@ -247,8 +241,6 @@ extern u8 g_equip_text_restore_pending;
 
 void equip_text_show_message_with_sound(s32 message_id, s32 sound_id);
 
-/* bit streams */
-
 /* threads */
 /* Slots of the equip screen's own threads. The WORLD formation screen runs
  * the same threads in other slots (world_thread_slot_e and
@@ -273,7 +265,7 @@ extern menu_gradient_panel_prims_t g_equip_thread_indicator_packets[2][2];
 
 extern u8 g_equip_sound_suppress_queued;
 
-/* unknown */
+/* unknown state */
 extern s16 g_equip_unknown_801d86ac;
 
 #endif

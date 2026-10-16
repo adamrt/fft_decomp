@@ -8,10 +8,6 @@
 /* scenario state */
 extern s32 g_battle_event_frame_counter;
 
-/* input */
-
-/* character graphics */
-
 /* effect requests */
 extern u16 g_battle_event_effect_target_runtime_id; /* 0x80165ff8 */
 

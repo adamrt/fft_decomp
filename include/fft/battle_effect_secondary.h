@@ -127,6 +127,10 @@ typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_ENDING = 21,
 } effect_secondary_animation_id_e;
 
+/* g_battle_effect_charge_line_fade_levels holds rows of seven fade steps,
+ * indexed flat (row * 7 + step) as the original does. */
+enum { EFFECT_CHARGE_LINE_FADE_STEPS = 7 };
+
 /* secondary effects */
 extern u16 g_battle_effect_secondary_active_tail;
 extern s32 g_battle_effect_buffer_index;

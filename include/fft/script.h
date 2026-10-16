@@ -91,10 +91,6 @@ s32 script_run_scenario_conditions(void);
 void script_clamp_s32_to_range(s32* value, s32 minimum, s32 maximum);
 s32 script_scale_music_volume(s32 volume);
 
-/* operand arithmetic */
-
-/* input */
-
 /* packed dates */
 void script_opcode_unlock_date(u32* bitset, s32 date_index, s32 month, s32 day);
 
@@ -225,6 +221,7 @@ void script_update_event_input_state(u32 buttons);
 
 /* shared between programs */
 extern u16 g_3d_object_wait_status; /* 0x8016606e */
+extern s32 g_status_display_redraw_request;
 extern s16 g_event_effect_target_mode;
 extern s16 g_event_effect_target_x;
 extern s16 g_event_effect_target_y;
@@ -244,6 +241,8 @@ extern u16 g_field_object_wait_status; /* 0x80166070 */
 
 /* shared with the per-program event interpreter and dialog thread */
 void map_light_thread(void);
+void script_earthquake_start(void);
+void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
 void script_add_unit_stub(void);
 void script_blue_remove_all_enemy_units(void);
 void script_blue_remove_unit(s32 unit_id);

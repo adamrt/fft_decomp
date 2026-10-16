@@ -56,15 +56,7 @@ extern menu_status_thread_t g_debugchr_numeric_editor_thread_params;
 
 void debugchr_editor_run_numeric_thread(void);
 
-/* menus */
-
 /* graphics */
 extern POLY_FT4 g_debugchr_gfx_render_buffers[2][30];
-
-/* text */
-
-/* input */
-
-/* threads */
 
 #endif

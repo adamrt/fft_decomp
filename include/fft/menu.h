@@ -774,7 +774,7 @@ typedef struct menu_text_layout {
 } menu_text_layout_t;
 typedef char menu_text_layout_size_must_be_40[sizeof(menu_text_layout_t) == 40 ? 1 : -1];
 
-/* menu drawing */
+/* sprite pages and icons */
 /* Provisional: one double-buffered menu sprite page (0xa0 bytes) built by
  * menu_build_sprite_page and its BATTLE twin menu_build_sprite_page:
  * five DR_MODE texture-window packets followed by the five SPRTs they apply
@@ -818,6 +818,7 @@ void menu_run_icon_selection_loop(void);
 void menu_auto_battle_setting_thread(void);
 void menu_store_auto_battle_main_target_id(s32 target_id, s32 battle_id);
 
+/* input timing */
 /* Six-byte option row selected by customized-options bits 9-11 in
  * 0x80106660. The first three bytes set the shared initial, primary and
  * secondary input-repeat timings. */
@@ -830,6 +831,7 @@ typedef struct menu_input_timing_profile {
     u8 scroll_fast_step;   /* copied to g_main_menu_scroll_fast_step */
 } menu_input_timing_profile_t;
 
+/* scrolling lists */
 /* A text layout followed by the first visible row, as bound to a scrolling
  * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread_variant and the AT list
  * built by menu_build_ability_preview_at_list). */
@@ -851,6 +853,15 @@ extern s16 g_menu_action_type_modes[][2];
 void menu_build_unit_status_list(void);
 void menu_validate_skill_selection_thread(void);
 
+/* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
+ * helper redraws the page once and clears the request, which
+ * world_thread_request_redraw sets. */
+enum {
+    MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4,
+};
+u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
+
+/* textured quads */
 /* Provisional: 12-byte textured-quad piece record (table at 0x80154e20)
  * consumed by the POLY_GT4 builder at 0x800e8d6c: texture origin, size and
  * screen position relative to g_menu_quad_origin. */
@@ -877,6 +888,7 @@ extern u8 g_menu_quad_group_starts[]; /* [group + 1] ends each group */
 extern point16_t g_menu_quad_origin;
 extern menu_quad_piece_t g_menu_quad_pieces[];
 
+/* list pages */
 /* Provisional: one 5-byte row of a WORLD menu text entry as rewritten by
  * menu_build_skillset_entries (0x800f3d44): the style byte at +1 is
  * 4 for a grayed row, the byte at +3 is the row separator (0xfa) or the
@@ -935,19 +947,13 @@ typedef struct menu_quad_page {
 
 typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1 : -1];
 
+/* selected-tile display */
 /* Nonzero while effects hide the tile height in the selected-tile display. */
 extern u16 g_menu_height_display_suppressed;
 
 void menu_enable_height_display(void);
 void menu_suppress_height_display(void);
 void menu_run_selected_tile_info_display_thread(void);
-/* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
- * helper redraws the page once and clears the request, which
- * world_thread_request_redraw sets. */
-enum {
-    MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4,
-};
-u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 
 /* primitive queues */
 extern rgb24_t g_menu_text_color;
@@ -1017,8 +1023,6 @@ typedef struct menu_at_list_work {
     battle_at_entry_t entries[BATTLE_AT_LIST_CAPACITY]; /* 0x680; entry 0 is omitted from the menu */
 } menu_at_list_work_t;
 typedef char menu_at_list_work_size_must_be_1824[(sizeof(menu_at_list_work_t) == 1824) ? 1 : -1];
-
-/* BATTLE and WORLD each link their own body. */
 
 /* skillset selection */
 extern s32 g_menu_selected_skill_ct;
@@ -1365,9 +1369,9 @@ typedef struct menu_cursor_state {
 } menu_cursor_state_t;
 typedef char menu_cursor_state_size_must_be_8[sizeof(menu_cursor_state_t) == 8 ? 1 : -1];
 
+/* menu selection */
 /* A remembered list cursor, scroll base and entry id. The menu restores the
  * cursor by entry id when the live list has changed. */
-/* menu selection */
 typedef struct menu_selection_record {
     s16 selected_index;    /* 0x00 */
     s16 scroll_base_index; /* 0x02 */
@@ -1894,8 +1898,6 @@ typedef struct text_glyph_state {
 } text_glyph_state_t;
 typedef char text_glyph_state_size_must_be_16[(sizeof(text_glyph_state_t) == 16) ? 1 : -1];
 
-/* Text runtime buffers bound to the resident BATTLE or WORLD copy. */
-
 /* unit */
 /* Provisional 0x2d0-byte double-buffered frame of the unit editor panel
  * (WORLD 0x801a3494, BATTLE 0x801730f8). The first 0x2a4 bytes are laid out
@@ -1985,10 +1987,6 @@ typedef struct menu_unit_view_thread_set {
 } menu_unit_view_thread_set_t;
 typedef char menu_unit_view_thread_set_size_must_be_48[(sizeof(menu_unit_view_thread_set_t) == 48) ? 1 : -1];
 
-/* menu screen starters */
-
-/* Unit portrait transition primitives. */
-
 /* menu state */
 extern s32 g_menu_companion_overlay_primitives;
 /* Array view: as a scalar, GCC hoists the menu-index reload above its store
@@ -2035,10 +2033,6 @@ typedef struct menu_unit_number_images {
 } menu_unit_number_images_t;
 typedef char menu_unit_number_images_size_must_be_240[sizeof(menu_unit_number_images_t) == 240 ? 1 : -1];
 
-/* glyph rendering */
-
-/* The caller leaves 0x16f in $a1, but the body never reads $a1. */
-
 /* unreferenced stubs, neutral names */
 void menu_noop_1(void);
 void menu_noop_2(void);
@@ -2070,26 +2064,23 @@ typedef enum menu_vertical_scroll_direction {
 /* entry item icons */
 menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
 
-/* other */
+/* window frames */
 extern s8 g_gfx_transition_frame;
 extern s16 g_menu_gfx_semitransparency;
 extern RECT g_menu_thin_panel_texture_windows[7];
 extern RECT g_menu_panel_texture_windows[7];
 extern u8 g_menu_window_frame_image[];
+extern menu_window_rect_source_t* g_menu_window_rect_source;
 
 void menu_set_window_scale_step(s32 value);
 s32 menu_get_window_scale_step(void);
+void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
+void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 
-/* other */
+/* shared state */
 extern s32 g_formation_screen_active;
 extern u16 g_frame_arg;
 extern s32 g_frame_counter;
-extern menu_window_rect_source_t* g_menu_window_rect_source;
 extern u8 g_monster_formation_sprite_table[20]; /* indexed by sprite code - 0x3f */
-
-/* other */
-
-void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
-void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 
 #endif

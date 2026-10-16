@@ -121,8 +121,6 @@ extern long ratan2(long y, long x);
 extern s32 rcos(s32 angle);
 extern s32 rsin(s32 angle);
 
-/* driver internals */
-
 /* state */
 extern u32 g_psyq_gte_init_saved_ra;
 extern u32 g_psyq_gte_matrix_stack_saved_ra;

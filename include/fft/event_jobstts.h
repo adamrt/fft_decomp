@@ -64,8 +64,6 @@ extern s16 g_jobstts_menu_window_right_x;
 
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 
-/* help */
-
 /* graphics */
 /* Per-buffer primitive-pool pointers used by JOBSTTS.OUT's renderer. */
 typedef struct jobstts_gfx_context {
@@ -147,11 +145,5 @@ menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruct
 /* The "%d" literal that JOBSTTS.OUT keeps at overlay file offset 0, i.e. the
  * three data bytes ahead of the first function. */
 extern const char g_jobstts_text_decimal_format[];
-
-/* bit streams */
-
-/* threads */
-
-/* sound */
 
 #endif
