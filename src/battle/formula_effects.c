@@ -418,7 +418,7 @@ static void battle_formula_roll_conditional_status_proc_inner(void) {
     if (g_battle_action_state == ACTION_STATE_EXECUTE && main_util_roll_pass_fail(0x64, 0x13) == 0) {
         action_data_t* action = g_battle_action_target_data;
         /* The 16-bit read-modify-write sets the added-effect flag. */
-        action->special_effect = action->special_effect | ACTION_SPECIAL_EFFECT_NULLIFIED;
+        action->special_effect = action->special_effect | ACTION_SPECIAL_EFFECT_ADDED_EFFECT;
     }
 }
 
@@ -875,7 +875,7 @@ s32 battle_formula_roll_conditional_status_proc(void) {
     if (g_battle_action_state == ACTION_STATE_PREVIEW) {
         return 0;
     }
-    if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_NULLIFIED) {
+    if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_ADDED_EFFECT) {
         return 0;
     }
     return 1;

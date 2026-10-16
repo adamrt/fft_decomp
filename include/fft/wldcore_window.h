@@ -23,8 +23,8 @@ typedef struct wldcore_window_layout_row {
     u16 message_base; /* 0x04 */
     u8 up;            /* 0x06 */
     u8 down;          /* 0x07 */
-    u8 left;          /* 0x08 */
-    u8 right;         /* 0x09 */
+    u8 right;         /* 0x08 */
+    u8 left;          /* 0x09 */
     s16 x;            /* 0x0a */
     s16 y;            /* 0x0c */
     s16 kind;         /* 0x0e */
