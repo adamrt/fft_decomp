@@ -45,6 +45,9 @@ s32 menu_set_selection_value(u8 index, s16 value);
 s32 menu_init_selection_value(u8 index, s16 value);
 
 /* horizontal selection */
+/* Stands for "no option" or "no item" in a resolved menu selection. */
+enum { MENU_SELECTION_NONE = 0xFFFE };
+
 extern s16 g_menu_selection_values[];
 s16 menu_update_wrapped_horizontal_selection(u16 entry_count, u8 selection_index, s32 input_mask);
 s32 menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);

@@ -355,10 +355,10 @@ s32 menu_resolve_selection(void) {
                         command = g_menu_dead_unit_action;
                         /* Item selection updates only the low byte of the 16-bit command field. */
                         *(u8*)&g_menu_selected_action.item_or_equipment = g_menu_dead_unit_result;
-                        option = 0xFFFE;
+                        option = MENU_SELECTION_NONE;
                     } else if (menu == 0x19 || menu >= 0x64) {
                         command = *(g_menu_command_maps[i].map + option + 1);
-                        option = 0xFFFE;
+                        option = MENU_SELECTION_NONE;
                     } else {
                         command = *(g_menu_command_maps[i].map + command + 1);
                     }
@@ -388,8 +388,8 @@ s32 menu_resolve_selection(void) {
             } else {
                 command = option + 13;
             }
-            option = 0xFFFE;
-            item = 0xFFFE;
+            option = MENU_SELECTION_NONE;
+            item = MENU_SELECTION_NONE;
             g_menu_resolved_command = command;
         }
         g_menu_selected_command.kind = command;
@@ -398,7 +398,7 @@ s32 menu_resolve_selection(void) {
             if (option == SKILLSET_ID_ATTACK || option == SKILLSET_ID_DEFEND || option == SKILLSET_ID_EQUIP_CHANGE
                 || option == SKILLSET_ID_BLANK_04 || option == SKILLSET_ID_ELEMENTAL || option == SKILLSET_ID_JUMP) {
                 g_menu_selected_action.ability_id = 0;
-                item = 0xFFFE;
+                item = MENU_SELECTION_NONE;
             } else if (option == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING && g_menu_skillset_build_result == 0) {
                 item = g_menu_anything_ability_id;
             } else {
@@ -406,7 +406,7 @@ s32 menu_resolve_selection(void) {
             }
             g_menu_selected_action.skillset_id = option;
             g_menu_used_skillset_id = option;
-            if (item != 0xFFFE) {
+            if (item != MENU_SELECTION_NONE) {
                 if (option == SKILLSET_ID_ITEM || option == SKILLSET_ID_DRAW_OUT || option == SKILLSET_ID_THROW) {
                     *(u8*)&g_menu_selected_action.item_or_equipment = item;
                 } else {
@@ -751,13 +751,13 @@ static s32 menu_dispatch_system_function(
             value = 0xB;
             if (option != 1) {
                 if (option == 2 || option == 4) {
-                    if (g_menu_used_item_id == 0xFFFE || g_menu_selected_skill_ct == 0) {
+                    if (g_menu_used_item_id == MENU_SELECTION_NONE || g_menu_selected_skill_ct == 0) {
                         value = 0x2D;
                     } else {
                         value = 0xC;
                     }
                 } else {
-                    if (g_menu_used_item_id != 0xFFFE || g_menu_selected_skill_ct == 0) {
+                    if (g_menu_used_item_id != MENU_SELECTION_NONE || g_menu_selected_skill_ct == 0) {
                         value = 0x2E;
                     } else {
                         value = 0xD;
