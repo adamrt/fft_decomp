@@ -657,6 +657,37 @@ void open_title_init_new_game_party(s32 party_mode, s32 world_load_mode) {
     }
 }
 
+/* Start date of each ordinary sign as {month, day} byte pairs, Aries first.
+ * open_birthday_convert_date_to_zodiac indexes it flat ([i * 2], [i * 2 + 1]),
+ * and it is not const: that routine reloads a day after storing through its
+ * month pointer. */
+static u8 g_open_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2] = {
+    3,
+    21,
+    4,
+    20,
+    5,
+    21,
+    6,
+    22,
+    7,
+    23,
+    8,
+    23,
+    9,
+    23,
+    10,
+    24,
+    11,
+    23,
+    12,
+    23,
+    1,
+    20,
+    2,
+    19,
+};
+
 /* Convert a calendar month/day into a zodiac sign number (1 = Aries) and the
  * 1-based day within that sign.
  *

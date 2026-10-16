@@ -309,11 +309,6 @@ void open_title_update_card_warning(open_controller_record_t* record);
 extern u8 g_open_birthday_title_image[];
 extern u8 g_open_birthday_window_image[];
 
-/* Start date of each ordinary sign as {month, day} byte pairs, Aries first
- * ({3, 21}, {4, 20}, ...). open_birthday_convert_date_to_zodiac indexes
- * it flat ([i * 2], [i * 2 + 1]), and it is not const: that routine reloads a
- * day after storing through its month pointer. */
-extern u8 g_open_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2];
 void open_birthday_convert_date_to_zodiac(s32* month, s32* day);
 
 void open_gfx_load_window_record_image(s32 record_index, u32* image);

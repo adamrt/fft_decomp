@@ -15,7 +15,7 @@ units:
   - {name: card_io, source: src/event/menu/card_io.c}
   - {name: file_wait, source: src/wldcore/file_wait.c}
   - {name: init, source: src/open/init.c}
-  - {name: movies, source: src/open/movies.c}
+  - {name: movies, source: src/open/movies.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
   - {name: title_controllers, source: src/open/title_controllers.c}
   - {name: title_script, source: src/open/title_script.c}
   - {name: window_records, source: src/wldcore/window_records.c}
