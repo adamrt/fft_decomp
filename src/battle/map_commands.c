@@ -67,7 +67,7 @@ void battle_noop_8008de88(void) {
 /* Stop the slow-down timer the game loop starts when a frame of the effect or
  * action-execute state takes more than 0x200 hsyncs. */
 void battle_state_reset_frame_pacing_timer(void) {
-    g_battle_frame_pacing_timer = 0;
+    g_main_frame_pacing_timer = 0;
 }
 
 /* Count one more entry into the status screen (the DEBUGCHR unit editor). While the count is
@@ -328,12 +328,12 @@ s32 battle_return_zero_8008e6d0(void) {
     return 0;
 }
 
-extern volatile s32 g_battle_entd_selection_mode;
+extern volatile s32 g_main_entd_selection_mode;
 
 /* Chooses the encounter's ENTD id and starts reading its ENTD file.
  *
  * The id is script variable EVENT_SCRIPT_VAR_CURRENT_ENTD unless
- * g_battle_entd_selection_mode overrides it: 250, a random id 75..79, a random id
+ * g_main_entd_selection_mode overrides it: 250, a random id 75..79, a random id
  * 1..59, or the map id when that is not 0. Returns main_entd_open_file's result. */
 static s32 battle_unit_select_and_open_entd(void) {
     volatile s32* current_event_id;
@@ -341,7 +341,7 @@ static s32 battle_unit_select_and_open_entd(void) {
     s32 selection_mode;
 
     event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD);
-    selection_mode = g_battle_entd_selection_mode;
+    selection_mode = g_main_entd_selection_mode;
     current_event_id = &g_main_entd_current_event_id;
     *current_event_id = event_id;
 

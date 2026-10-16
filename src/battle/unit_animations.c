@@ -1932,7 +1932,7 @@ static void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot,
     rect.h = 0x20;
     MoveImage(&rect, g_battle_gfx_vram_slots[slot].image_rect.x, g_battle_gfx_vram_slots[slot].image_rect.y + 200);
     g_battle_gfx_vram_slots[slot].owner = unit->runtime_id | BATTLE_GFX_VRAM_SLOT_OWNER_ATTACK_IMAGE;
-    g_battle_frame_pacing_suppressed = 1;
+    g_main_frame_pacing_suppressed = 1;
     g_battle_gfx_vram_slots[image_slot].image_buffer_state = BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES;
     g_battle_gfx_vram_slots[slot].evtchr_load_state = 1;
 }

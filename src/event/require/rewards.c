@@ -1468,7 +1468,7 @@ static void require_gfx_scale_poly_gt4_vertex_colors(
     setRGB3(poly, r, g, b);
 }
 
-/* Initialize the 32 semi-transparent POLY_GT4s of g_require_gfx_poly_gt4_array_32
+/* Initialize the 32 semi-transparent POLY_GT4s of g_main_poly_gt4_array_32
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
@@ -1479,7 +1479,7 @@ static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
     palette_origin = &g_require_reward_bonus_palette_rect.y;
     do {
-        POLY_GT4* poly = &g_require_gfx_poly_gt4_array_32[count];
+        POLY_GT4* poly = &g_main_poly_gt4_array_32[count];
         SetPolyGT4(poly);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
@@ -1494,7 +1494,7 @@ static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     } while (count < 32);
 }
 
-/* Initialize the 8 semi-transparent POLY_GT4s of g_require_gfx_poly_gt4_array_8
+/* Initialize the 8 semi-transparent POLY_GT4s of g_main_poly_gt4_array_8
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
@@ -1505,7 +1505,7 @@ static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
     palette_origin = &g_require_reward_bonus_palette_rect.y;
     do {
-        POLY_GT4* poly = &g_require_gfx_poly_gt4_array_8[count];
+        POLY_GT4* poly = &g_main_poly_gt4_array_8[count];
         SetPolyGT4(poly);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
@@ -1628,7 +1628,7 @@ static void require_condition_show_general(s32 hold_frames) {
     quads = g_require_condition_general_quads;
 
     for (index = 0; index < quad_count; index++) {
-        POLY_GT4* poly = &g_require_gfx_poly_gt4_buffers[0][index];
+        POLY_GT4* poly = &g_main_poly_gt4_buffers[0][index];
         u8* parameters = &range[condition];
         s32 page;
 
@@ -1640,7 +1640,7 @@ static void require_condition_show_general(s32 hold_frames) {
         poly->tpage = page | 6;
     }
     {
-        POLY_GT4* destination = &g_require_gfx_poly_gt4_buffers[1][0];
+        POLY_GT4* destination = &g_main_poly_gt4_buffers[1][0];
         POLY_GT4* source = destination - 40;
 
         mem_copy_bytes_nonempty(destination, source, 0x820);
@@ -1664,7 +1664,7 @@ static void require_condition_show_general(s32 hold_frames) {
         buffer = (buffer + 1) & 1;
         if (frame >= 9) {
             for (index = 5; index >= 3; index--) {
-                POLY_GT4* poly = &g_require_gfx_poly_gt4_buffers[buffer][index];
+                POLY_GT4* poly = &g_main_poly_gt4_buffers[buffer][index];
 
                 if (QUAD(index).source.h < reveal_offset_top)
                     reveal_offset_top = QUAD(index).source.h;
@@ -1674,7 +1674,7 @@ static void require_condition_show_general(s32 hold_frames) {
             }
         }
         for (index = 2; index >= 0; index--) {
-            POLY_GT4* poly = &g_require_gfx_poly_gt4_buffers[buffer][index];
+            POLY_GT4* poly = &g_main_poly_gt4_buffers[buffer][index];
 
             if (QUAD(index).source.h < reveal_offset_bottom)
                 reveal_offset_bottom = QUAD(index).source.h;
@@ -1709,7 +1709,7 @@ static void require_condition_show_general(s32 hold_frames) {
             }
             buffer = (buffer + 1) & 1;
             for (index = quad_count - 1; index >= 0; index--) {
-                POLY_GT4* poly = &g_require_gfx_poly_gt4_buffers[buffer][index];
+                POLY_GT4* poly = &g_main_poly_gt4_buffers[buffer][index];
                 u8* parameters = &range[condition];
                 require_gfx_scale_poly_gt4_vertex_colors(VERTEX_COLORS(index), 0x80, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
@@ -1726,7 +1726,7 @@ static void require_condition_show_general(s32 hold_frames) {
         thread_yield();
         buffer = (buffer + 1) & 1;
         for (index = quad_count - 1; index >= 0; index--) {
-            POLY_GT4* poly = &g_require_gfx_poly_gt4_buffers[buffer][index];
+            POLY_GT4* poly = &g_main_poly_gt4_buffers[buffer][index];
 
             if (QUAD(index).source.h < hide_offset)
                 hide_offset = QUAD(index).source.h;
@@ -1758,8 +1758,8 @@ void require_noop_801c9fa4(void) {
  * `table` and `color_table` are function-lifetime copies of the table
  * addresses; the target rematerializes them in each loop instead of folding
  * them into the loads. The buffer copy and the small-array address use
- * g_require_gfx_poly_gt4_buffers, the second symbol at the address of
- * g_require_gfx_poly_gt4_array_32: sharing that base lets the hoisted
+ * g_main_poly_gt4_buffers, the second symbol at the address of
+ * g_main_poly_gt4_array_32: sharing that base lets the hoisted
  * small-array address derive from the copy source, which keeps it live in s0. */
 void require_condition_run_special_thread(void) {
     s32 parameter_index;
@@ -1788,8 +1788,7 @@ void require_condition_run_special_thread(void) {
 
     for (quad_index = 0; quad_index < quad_count; quad_index++) {
         u8* parameters = &table[parameter_index];
-        POLY_GT4* poly
-            = &(use_small_array == 0 ? g_require_gfx_poly_gt4_array_32 : g_require_gfx_poly_gt4_array_8)[quad_index];
+        POLY_GT4* poly = &(use_small_array == 0 ? g_main_poly_gt4_array_32 : g_main_poly_gt4_array_8)[quad_index];
 
         setUV4(poly, QUAD.source.x, QUAD.source.y, QUAD.source.x + QUAD.source.w, QUAD.source.y, QUAD.source.x,
             QUAD.source.y + QUAD.source.h, QUAD.source.x + QUAD.source.w, QUAD.source.y + QUAD.source.h);
@@ -1797,7 +1796,7 @@ void require_condition_run_special_thread(void) {
             QUAD.offset.y + 0x78, QUAD.offset.x + 0x100, QUAD.offset.y + 0x78 + QUAD.source.h,
             QUAD.offset.x + 0x100 + QUAD.source.w, QUAD.offset.y + 0x78 + QUAD.source.h);
     }
-    mem_copy_bytes_nonempty(g_require_gfx_poly_gt4_buffers[1], g_require_gfx_poly_gt4_buffers, 40 * sizeof(POLY_GT4));
+    mem_copy_bytes_nonempty(g_main_poly_gt4_buffers[1], g_main_poly_gt4_buffers, 40 * sizeof(POLY_GT4));
 
     buffer = 0;
     scale = 0x30;
@@ -1814,12 +1813,12 @@ void require_condition_run_special_thread(void) {
         }
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
-            POLY_GT4* polys = &g_require_gfx_poly_gt4_buffers[buffer][32];
+            POLY_GT4* polys = &g_main_poly_gt4_buffers[buffer][32];
             u8* parameters = &table[parameter_index];
             const require_display_condition_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
-                POLY_GT4* poly = &(g_require_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
+                POLY_GT4* poly = &(g_main_poly_gt4_array_32 + buffer * 40)[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
@@ -1844,12 +1843,12 @@ void require_condition_run_special_thread(void) {
         }
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
-            POLY_GT4* polys = &g_require_gfx_poly_gt4_buffers[buffer][32];
+            POLY_GT4* polys = &g_main_poly_gt4_buffers[buffer][32];
             u8* parameters = &table[parameter_index];
             const require_display_condition_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
-                POLY_GT4* poly = &(g_require_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
+                POLY_GT4* poly = &(g_main_poly_gt4_array_32 + buffer * 40)[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, 0x80, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
@@ -1870,12 +1869,12 @@ fade_out:
         }
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
-            POLY_GT4* polys = &g_require_gfx_poly_gt4_buffers[buffer][32];
+            POLY_GT4* polys = &g_main_poly_gt4_buffers[buffer][32];
             u8* parameters = &table[parameter_index];
             const require_display_condition_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
-                POLY_GT4* poly = &(g_require_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
+                POLY_GT4* poly = &(g_main_poly_gt4_array_32 + buffer * 40)[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);

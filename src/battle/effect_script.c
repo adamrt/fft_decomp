@@ -452,7 +452,7 @@ static s32 battle_effect_update_stage(void) {
         break;
     case EFFECT_PLAYBACK_PHASE_START_SCRIPT:
         battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
-            g_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
+            g_main_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
         battle_effect_reset_subsystems();
         battle_effect_seed_camera_tracks();
         battle_state_clear_frame_pacing();
@@ -509,7 +509,7 @@ static s32 battle_effect_update_stage(void) {
         break;
     case EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT:
         battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
-            g_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
+            g_main_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
         battle_effect_reset_subsystems();
         battle_effect_reset_frame_data_pointer();
         battle_effect_reset_animation_sequences_pointer();

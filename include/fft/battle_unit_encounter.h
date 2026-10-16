@@ -10,7 +10,7 @@
 #include "psx/types.h"
 
 /* encounters and deployment */
-extern s32 g_battle_entd_selection_mode; /* battle_entd_selection_e */
+extern s32 g_main_entd_selection_mode; /* battle_entd_selection_e */
 /* Count and coordinates of the tiles already handed out as dismount
  * destinations this action. */
 extern s32 g_battle_relocated_unit_count;

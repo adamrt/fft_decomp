@@ -324,7 +324,7 @@ typedef union battle_unit_command_state {
 typedef char battle_unit_command_state_size_must_be_24[sizeof(battle_unit_command_state_t) == 24 ? 1 : -1];
 
 /* encounter and sprite types */
-/* g_battle_entd_selection_mode: which ENTD battle_unit_select_and_open_entd opens. */
+/* g_main_entd_selection_mode: which ENTD battle_unit_select_and_open_entd opens. */
 typedef enum battle_entd_selection {
     BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE = 0, /* EVENT_SCRIPT_VAR_CURRENT_ENTD */
     BATTLE_ENTD_SELECTION_ENTD_250 = 1,

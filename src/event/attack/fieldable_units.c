@@ -100,7 +100,7 @@ void attack_deploy_find_fieldable_units(void) {
             g_attack_deploy_squad_data[g_attack_deploy_current_squad_id].unit_limit);
         g_attack_deploy_squad_data[g_attack_deploy_current_squad_id].unit_limit = 4;
     } else {
-        g_battle_entd_selection_mode = BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE;
+        g_main_entd_selection_mode = BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE;
         g_attack_deploy_current_squad_id = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
         script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT,
             g_attack_deploy_squad_data[g_attack_deploy_current_squad_id].unit_limit);

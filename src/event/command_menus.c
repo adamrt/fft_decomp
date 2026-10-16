@@ -1320,7 +1320,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
             }
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, 0);
-            g_battle_entd_selection_mode = BATTLE_ENTD_SELECTION_MAP_ID;
+            g_main_entd_selection_mode = BATTLE_ENTD_SELECTION_MAP_ID;
             return 9;
         }
         g_script_threads_idle = 0;
@@ -1514,7 +1514,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
             }
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, 0);
-            g_battle_entd_selection_mode = BATTLE_ENTD_SELECTION_MAP_ID;
+            g_main_entd_selection_mode = BATTLE_ENTD_SELECTION_MAP_ID;
             return 9;
         }
         g_script_threads_idle = 0;

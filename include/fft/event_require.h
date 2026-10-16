@@ -198,9 +198,9 @@ extern RECT g_require_portrait_palette_rect;
 /* graphics */
 extern u8 g_require_gfx_fade_rgb[3];
 extern u8 g_require_gfx_formation_sprite_groups[][3];
-extern POLY_GT4 g_require_gfx_poly_gt4_array_32[];
-extern POLY_GT4 g_require_gfx_poly_gt4_array_8[];
-extern POLY_GT4 g_require_gfx_poly_gt4_buffers[2][40];
+extern POLY_GT4 g_main_poly_gt4_array_32[];
+extern POLY_GT4 g_main_poly_gt4_array_8[];
+extern POLY_GT4 g_main_poly_gt4_buffers[2][40];
 
 void require_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const menu_status_thread_t* thread);

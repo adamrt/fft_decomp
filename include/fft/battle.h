@@ -175,8 +175,8 @@ void battle_state_update_event_mode(void);
 
 /* frame timing */
 extern s32 g_main_system_min_vsync_interval;
-extern s32 g_battle_frame_pacing_suppressed;
-extern s32 g_battle_frame_pacing_timer;
+extern s32 g_main_frame_pacing_suppressed;
+extern s32 g_main_frame_pacing_timer;
 
 void battle_state_clear_frame_pacing(void);
 s32 battle_state_get_vsync_interval(void);
@@ -235,7 +235,7 @@ typedef struct battle_heap_owner_list {
 
 extern battle_heap_node_t* g_battle_heap_base;
 extern s16 g_battle_heap_block_count;
-extern u32 g_battle_heap_end_address;
+extern u32 g_main_battle_heap_end_address;
 extern s32 g_battle_heap_min_largest_free; /* Lowest largest-free_node-block size seen, in 8-byte units. */
 extern battle_heap_owner_list_t g_battle_heap_owner_lists[];
 extern battle_heap_node_t* g_battle_heap_rover;

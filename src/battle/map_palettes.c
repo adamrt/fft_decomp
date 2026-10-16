@@ -2270,7 +2270,7 @@ void battle_state_init_deployment_display(s32 width, s32 height, s32 projection,
  *
  * At animation speed 1 the wait is one vertical blank. Otherwise it is
  * g_main_system_vsync_interval blanks, except in the effect and action-execute
- * states: there it is 2 blanks, or 3 while g_battle_frame_pacing_timer runs (4 while it
+ * states: there it is 2 blanks, or 3 while g_main_frame_pacing_timer runs (4 while it
  * is 16 or more), with the timer counting down each frame, and g_main_system_min_vsync_interval
  * replaces it when larger. The test for a g_main_system_min_vsync_interval of 1 cannot succeed,
  * since the value it is compared with is at least 2. */
@@ -2287,13 +2287,13 @@ s32 battle_state_sync_frame(u32* ordering_table) {
         DrawSync(0);
         if (g_battle_game_state == BATTLE_GAME_STATE_EFFECT
             || g_battle_game_state == BATTLE_GAME_STATE_ACTION_EXECUTE) {
-            timer = g_battle_frame_pacing_timer;
+            timer = g_main_frame_pacing_timer;
             if (timer >= 0x10) {
                 wait = 4;
-                g_battle_frame_pacing_timer = timer - 1;
+                g_main_frame_pacing_timer = timer - 1;
             } else if (timer != 0) {
                 wait = 3;
-                g_battle_frame_pacing_timer = timer - 1;
+                g_main_frame_pacing_timer = timer - 1;
             } else {
                 wait = 2;
             }

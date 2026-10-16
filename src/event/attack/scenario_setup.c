@@ -209,7 +209,7 @@ s32 attack_load_scenario_conditionals(void) {
     } else if (script_get_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT) >= 5) {
         script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, 0);
     }
-    g_battle_entd_selection_mode = BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE;
+    g_main_entd_selection_mode = BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE;
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, count);
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
     if (squads[0] == 0) {

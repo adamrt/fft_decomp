@@ -865,7 +865,7 @@ data:
   - {addr: 0x80010000, name: g_psyq_crt_destructor_table}
   - {addr: 0x80010004, name: g_main_heap_world_overlay_load_address}
   - {addr: 0x80010008, name: g_main_heap_companion_overlay_load_address}
-  - {addr: 0x8001000c, name: g_battle_heap_end_address}
+  - {addr: 0x8001000c, name: g_main_battle_heap_end_address}
   - {addr: 0x80010010, name: g_main_heap_high_overlay_load_address}
   - {addr: 0x80010044, name: g_psyq_spu_timeout_format}
   - {addr: 0x80010054, name: g_psyq_spu_init_timeout_name}
@@ -1227,8 +1227,8 @@ data:
   - {addr: 0x80045980, name: g_main_system_vsync_interval}
   - {addr: 0x80045984, name: g_main_system_battle_frame_hsync_count}
   - {addr: 0x80045988, name: g_main_system_battle_frame_hsync_count_max}
-  - {addr: 0x8004598c, name: g_battle_frame_pacing_timer}
-  - {addr: 0x80045990, name: g_battle_frame_pacing_suppressed}
+  - {addr: 0x8004598c, name: g_main_frame_pacing_timer}
+  - {addr: 0x80045990, name: g_main_frame_pacing_suppressed}
   - {addr: 0x80045994, name: g_frame_counter}
   - {addr: 0x80045998, name: g_main_system_min_vsync_interval}
   - {addr: 0x8004599c, name: g_main_sound_weather_sfx_id}
@@ -1241,7 +1241,7 @@ data:
   - {addr: 0x800459cc, name: g_main_debug_display_enabled}
   - {addr: 0x800459d0, name: g_main_font_print_enabled}
   - {addr: 0x800459d8, name: g_main_unknown_800459d8}
-  - {addr: 0x800459dc, name: g_battle_entd_selection_mode}
+  - {addr: 0x800459dc, name: g_main_entd_selection_mode}
   - {addr: 0x800459e0, name: g_main_gfx_now_loading_palette}
   - {addr: 0x80045a00, name: g_main_boot_squaresoft_logo_image_words}
   - {addr: 0x80047080, name: g_main_sound_scenario_smd_files}
@@ -1278,9 +1278,9 @@ data:
   - {addr: 0x8004a6bc, name: g_main_script_event_block}
   - {addr: 0x8004c6bc, name: g_main_tutorial_progress_masks}
   - {addr: 0x8004c6c4, name: g_main_system_graphics_error}
-  - {addr: 0x8004c6c8, name: g_require_gfx_poly_gt4_array_32}
-  - {addr: 0x8004c6c8, name: g_require_gfx_poly_gt4_buffers}
-  - {addr: 0x8004cd48, name: g_require_gfx_poly_gt4_array_8}
+  - {addr: 0x8004c6c8, name: g_main_poly_gt4_array_32}
+  - {addr: 0x8004c6c8, name: g_main_poly_gt4_buffers}
+  - {addr: 0x8004cd48, name: g_main_poly_gt4_array_8}
   - {addr: 0x8004d720, name: g_main_gfx_now_loading_primitives}
   - {addr: 0x8004d950, name: g_main_system_flags}
   - {addr: 0x8004d954, name: g_main_special_portrait_unit_id}
