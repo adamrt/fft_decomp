@@ -1893,7 +1893,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
-  - {name: help_overlay, source: src/event/menu/help_overlay.c}
+  - {name: help_overlay, source: src/event/menu/help_overlay.c, data: [{addr: 0x801e0b30, size: 128, hash: 37edf2b26225cbea}]}
 
 functions:
   - {addr: 0x801df000, size: 80, name: menu_close, hash: af74553ec4c059ff, unit: help_overlay}

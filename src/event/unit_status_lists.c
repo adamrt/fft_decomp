@@ -39,6 +39,15 @@
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+
+static u8 g_menu_unit_editor_line_colors[8 * MENU_UNIT_EDITOR_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
+    1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,
+    123, 90, 32, 32, 32, 140, 1, 140, 90, 16, 16, 16, 141, 1, 141, 90 };
+
+static u16 g_menu_unit_editor_sprite_clut_pairs[19][2]
+    = { 0x7cbc, 0x7c7c, 0x7cbc, 0x7c7c, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc,
+          0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7c3c, 0x7d3c, 0x7c3c,
+          0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c };
 #ifdef FFT_WORLD
 #    include "fft/world_menu.h"
 #endif

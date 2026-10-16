@@ -22,6 +22,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
+static s16 g_menu_auto_battle_row_actions[8] = { 1000, 2, 2, 2, 2, 0, -3, -3 };
+
 /* Draw or queue an icon frame's six packets: sprites 3, 1 and 2, the draw mode, sprite 0, then the
  * first draw mode. Queued into one ordering-table entry they run in the reverse order. */
 void menu_submit_icon_primitives(menu_icon_sprites_t* frame) {

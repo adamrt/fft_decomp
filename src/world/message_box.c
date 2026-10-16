@@ -25,6 +25,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static u16 g_world_unit_summary_value_cluts[4][2]
+    = { 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
+
+static u16 g_world_unit_summary_label_cluts[7][2] = { 0x7efc, 0x7efc, 0x7f3c, 0x7f3c, 0x7f7c, 0x7f7c, 0x7ebd, 0x7efd,
+    0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
+
 /*
  * Thread task 0x39: the unit status banner (portrait, name and job, level,
  * exp, HP/MP/CT bars, Brave, Faith and zodiac). WORLD's body.

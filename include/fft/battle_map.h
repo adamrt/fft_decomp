@@ -912,8 +912,6 @@ extern u16 g_battle_map_palette_modified_colors[][MAP_CLUT_ROW_COLOR_COUNT]; /* 
 extern map_clut_cycle_state_t g_battle_map_clut_cycle_states[];
 extern map_palette_state_t g_battle_map_palette_state;
 extern clut_t g_battle_map_palette_animation_frames;
-extern s8 g_battle_map_palette_blend_steps_32[MAP_PALETTE_DELTA_COUNT][MAP_PALETTE_BLEND_STEP_COUNT];
-extern s8 g_battle_map_palette_blend_steps_8[MAP_PALETTE_DELTA_COUNT][MAP_PALETTE_FAST_BLEND_STEP_COUNT];
 extern u8 g_battle_map_palette_pending;
 extern u8 g_battle_map_pending_palette_data[0x200];
 

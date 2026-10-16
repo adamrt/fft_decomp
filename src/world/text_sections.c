@@ -8,6 +8,13 @@
 #include "fft/world_text.h"
 #include "psx/types.h"
 
+/* Sector and size pairs; flat 32-bit value access preserves the original addressing. */
+static s32 g_world_script_tutorial_message_files[7 * 2]
+    = { 72298, 4096, 72301, 6144, 72305, 6144, 72309, 4096, 72312, 6144, 72316, 2048, 72318, 2048 };
+
+static s32 g_world_script_tutorial_script_files[7 * 2]
+    = { 72297, 2048, 72300, 2048, 72304, 2048, 72308, 2048, 72311, 2048, 72315, 2048, 72317, 2048 };
+
 /* Load shop background image `index` to the heap; the table holds a sector
  * and a size per image. */
 u32* world_shop_load_background_tim(s32 index) {

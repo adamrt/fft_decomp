@@ -335,7 +335,6 @@ enum {
     OPEN_THREAD_SLOT_MUSIC_TEST_LIST = 12,
 };
 
-extern s16 g_open_music_test_row_actions[16];
 extern menu_entry_t g_open_music_test_list_params;
 extern menu_text_layout_t g_open_music_test_list_state;
 extern s16 g_open_music_test_list_entry_flags[96];

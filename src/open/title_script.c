@@ -24,6 +24,9 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static s16 g_open_music_test_row_actions[16]
+    = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
+
 static void open_controller_start_text_message(s32 parameter, s32 run_followup);
 static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index);
 static void open_gfx_draw_transition_line_strips(s32 intensity);

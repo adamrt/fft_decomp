@@ -26,6 +26,14 @@
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+
+static u8 g_menu_numeric_display_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
+
+/* Twelve world_menu_line_layout_t records, walked by byte offset. */
+static s8 g_menu_numeric_display_frame_offsets[96]
+    = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, 0, 1, 0, 1, -2, 1, 0, 0, 1, 0, 1, 1, 1, -2, 0, 0, 0, 1, 1, -1, 1, -1,
+          0, 1, 0, 1, -1, 2, -1, -2, 1, 0, 1, 1, -1, 1, -1, 1, 1, 0, 1, 0, 1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+          1, 1, 1, 2, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, -1, 1, 0, 1, 1 };
 #ifdef FFT_WORLD
 #    include "fft/world_menu.h"
 #endif

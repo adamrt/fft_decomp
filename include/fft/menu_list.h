@@ -11,7 +11,6 @@
 extern menu_entry_t* g_menu_thread_menu_data;
 extern s32 g_menu_managed_thread_state;
 extern s16 g_menu_wait_row_actions[4];
-extern u8 g_menu_cleared_entry_indices[11];
 extern u16 g_menu_at_list_selection_finished;
 extern s32 g_menu_help_open;
 extern s32 g_menu_building_thread_started;

@@ -24,7 +24,7 @@ units:
   - {name: sound_novel, source: src/wldcore/sound_novel.c}
   - {name: startup, source: src/wldcore/startup.c}
   - {name: window_records, source: src/wldcore/window_records.c}
-  - {name: window_render, source: src/wldcore/window_render.c}
+  - {name: window_render, source: src/wldcore/window_render.c, data: [{addr: 0x8009ee30, size: 32, hash: 0ba27e297a0422ae}]}
   - {name: window_text_records, source: src/wldcore/window_text_records.c}
 
 functions:

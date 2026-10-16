@@ -21,6 +21,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s16 g_wldcore_panel_row_actions[16]
+    = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
+
 static void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t* state, s32 row);
 static void wldcore_text_update_page_prompt_visibility(wldcore_text_scrollable_window_t* state);
 static void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window_t* state);

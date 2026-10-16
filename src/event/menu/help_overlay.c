@@ -21,6 +21,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 g_menu_help_text_section_offsets[32] = { 0, 1, 2945, 11970, 11971, 11972, 11973, 11974, 11975, 11976, 11977,
+    11978, 14519, 25984, 51815, 51816, 84669, 84670, 84671, 84672, 90005, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 static s32 thread_find_first_running_menu_thread(void);
 
 /* Leave the help screen: restore the text section pointers saved on entry, free the high

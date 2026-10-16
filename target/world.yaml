@@ -13,9 +13,9 @@ units:
   - {name: ability_checks, source: src/world/ability_checks.c}
   - {name: ability_lists, source: src/world/ability_lists.c}
   - {name: at_list_threads, source: src/event/menu/at_list_threads.c}
-  - {name: attack_resources, source: src/event/attack_resources.c}
+  - {name: attack_resources, source: src/event/attack_resources.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: card_io, source: src/event/menu/card_io.c}
-  - {name: card_save, source: src/world/card_save.c}
+  - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
   - {name: command_menus, source: src/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: dialog_cursor, source: src/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/event/dialog_helpers.c}
@@ -41,8 +41,8 @@ units:
   - {name: gfx_fades, source: src/world/gfx_fades.c}
   - {name: gfx_image_transfer_wait, source: src/event/menu/gfx_image_transfer_wait.c}
   - {name: grid_cursor, source: src/world/grid_cursor.c}
-  - {name: help_overlay, source: src/event/menu/help_overlay.c}
-  - {name: icon_selection, source: src/event/icon_selection.c}
+  - {name: help_overlay, source: src/event/menu/help_overlay.c, data: [{addr: 0x801577e0, size: 128, hash: 37edf2b26225cbea}]}
+  - {name: icon_selection, source: src/event/icon_selection.c, data: [{addr: 0x80153d08, size: 16, hash: 4bb06fad13fd7602}]}
   - {name: item_actions, source: src/world/item_actions.c}
   - {name: job_learning, source: src/world/job_learning.c}
   - {name: job_locks, source: src/world/job_locks.c}
@@ -53,7 +53,7 @@ units:
   - {name: menu_page_scroll_input, source: src/world/menu_page_scroll_input.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: menu_script_opcodes, source: src/world/menu_script_opcodes.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: menu_window_threads, source: src/event/menu/menu_window_threads.c}
-  - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018ae8c, size: 16, hash: 5ad8dff169073b4e}, {addr: 0x8018ae9c, size: 28, hash: 2c65651a7bb2a2c9}]}
   - {name: music_stubs, source: src/event/menu/music_stubs.c}
   - {name: name_entry, source: src/world/name_entry.c}
   - {name: number_entry, source: src/world/number_entry.c}
@@ -67,8 +67,8 @@ units:
   - {name: roster_sorting, source: src/world/roster_sorting.c}
   - {name: screen_text_pages, source: src/world/screen_text_pages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: script_commands, source: src/event/script_commands.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {name: script_helpers, source: src/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {name: script_interpreter, source: src/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: script_helpers, source: src/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
+  - {name: script_interpreter, source: src/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156be8, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: selected_unit, source: src/world/selected_unit.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: selection_records, source: src/event/menu/selection_records.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: shop, source: src/world/shop.c}
@@ -77,7 +77,7 @@ units:
   - {name: text_entries, source: src/event/text_entries.c}
   - {name: text_id_lists, source: src/event/menu/text_id_lists.c}
   - {name: text_measuring, source: src/world/text_measuring.c}
-  - {name: text_sections, source: src/world/text_sections.c}
+  - {name: text_sections, source: src/world/text_sections.c, data: [{addr: 0x80193c40, size: 56, hash: 66b96bc9e2c2be37}, {addr: 0x80193c78, size: 56, hash: c8fe08c26cc2204a}]}
   - {name: text_skip_to_entry, source: src/event/text_skip_to_entry.c}
   - {name: textured_quads, source: src/event/menu/textured_quads.c}
   - {name: thread, source: src/event/thread.c}
@@ -86,7 +86,7 @@ units:
   - {name: tutorial, source: src/world/tutorial.c, profile: gcc-2.6.3_O0_aspsx-2.34}
   - {name: tutorial_controller_input, source: src/world/tutorial_controller_input.c}
   - {name: unit_name_list, source: src/event/unit_name_list.c}
-  - {name: unit_status_lists, source: src/event/unit_status_lists.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: unit_status_lists, source: src/event/unit_status_lists.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156198, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x801561d0, size: 76, hash: ec0d1125a0b03828}]}
   - {name: window_images, source: src/event/window_images.c}
   - {name: zodiac_primitives, source: src/event/menu/zodiac_primitives.c}
 

@@ -492,8 +492,6 @@ extern image_load_parameters_t g_world_unit_summary_value_sprite_params[];
 extern RECT g_world_unit_status_panel_origin;
 extern image_load_parameters_t g_world_unit_status_sprite_params[];
 extern image_load_parameters_t g_world_unit_status_portrait_params;
-extern u16 g_world_unit_summary_value_cluts[4][2]; /* [row][dimmed] */
-extern u16 g_world_unit_summary_label_cluts[7][2]; /* [row][dimmed] */
 extern image_load_parameters_t g_world_unit_summary_mode_row_params[4];
 extern u8 g_world_unit_status_banner_active;
 extern menu_entry_t g_world_unit_status_banner_menu;

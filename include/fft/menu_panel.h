@@ -164,8 +164,6 @@ extern menu_palette_slot_t g_menu_unit_summary_palettes[];
 extern image_load_parameters_t g_menu_unit_summary_sprite_image_params[];
 
 /* numeric display data */
-/* Twelve world_menu_line_layout_t records, walked by byte offset. */
-extern s8 g_menu_numeric_display_frame_offsets[96];
 extern menu_panel_record_t g_menu_numeric_display_panel_records[2];
 extern menu_number_entry_t g_menu_numeric_display_entries[15];
 extern RECT g_menu_numeric_display_frame_rect;
@@ -181,12 +179,10 @@ extern RECT g_menu_numeric_display_texture_window; /* texture window for the men
 extern menu_unit_editor_frame_t g_menu_unit_editor_frames[2];
 extern RECT g_menu_unit_editor_cursor_rect; /* cursor source */
 extern image_load_parameters_t g_menu_unit_editor_item_icon_image_params[5];
-extern u8 g_menu_unit_editor_line_colors[8 * MENU_UNIT_EDITOR_LINE_SIZE];
 extern menu_palette_primitives_t g_menu_unit_editor_palette;
 extern RECT g_menu_unit_editor_panel_rect; /* panel box */
 extern image_load_parameters_t g_menu_unit_editor_row_image_params_a[4];
 extern image_load_parameters_t g_menu_unit_editor_row_image_params_b[4];
-extern u16 g_menu_unit_editor_sprite_clut_pairs[19][2];
 extern image_load_parameters_t g_menu_unit_editor_sprite_image_params_a[19];
 extern image_load_parameters_t g_menu_unit_editor_sprite_image_params_b[19];
 extern RECT g_menu_unit_editor_text_rect_a; /* first text image */

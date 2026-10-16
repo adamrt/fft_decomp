@@ -56,7 +56,6 @@ extern menu_active_unit_t g_menu_help_active_unit_data;
 extern menu_status_panel_slot_storage_t g_menu_help_billboard;
 extern map_selected_tile_t g_menu_help_menu_cursor_tile;
 extern u8 g_menu_help_data_base[];
-extern s32 g_menu_help_text_section_offsets[32];
 extern help_navigation_record_t g_menu_help_require_navigation[];
 extern u32* g_menu_help_controller_state_ptr;
 extern u16* const g_menu_help_menu_text_id_tables[23];

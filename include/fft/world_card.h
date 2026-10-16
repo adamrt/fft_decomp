@@ -31,7 +31,6 @@ extern card_save_buffer_t* g_world_load_work_buffer;
 extern s16 g_world_card_list_scroll_velocity;
 extern u8 g_world_card_menu_step; /* world_card_menu_step_e */
 extern card_save_icon_t g_world_card_save_icon_records[15];
-extern u8 g_world_card_save_title_template[0x16];
 extern u8 g_world_card_slot_cursor_row;
 extern s16 g_world_card_menu_request_state; /* world_screen_request_state_e */
 extern const char* g_world_card_save_file_names[15];

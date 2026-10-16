@@ -711,7 +711,6 @@ typedef enum unit_status_staging_mask {
 
 enum { UNIT_STATUS_STAGING_MASK_COUNT = 3 };
 
-extern u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8];
 extern unit_status_staging_t* g_unit_status_staging_data;
 s32 unit_save_staged_status_data(s32 battle_id);
 

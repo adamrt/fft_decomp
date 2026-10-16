@@ -33,6 +33,9 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static u8 g_world_card_save_title_template[0x16]
+    = { 130, 101, 130, 101, 130, 115, 129, 64, 130, 101, 130, 104, 130, 107, 130, 100, 129, 64, 129, 64, 129, 64 };
+
 static void world_card_build_save_file_header(s32 slot, s32 level, card_save_header_t* header);
 static s32 world_card_build_save_slot_description(s32 mode, u8* destination);
 static s32 world_card_count_selectable_save_slots(void);

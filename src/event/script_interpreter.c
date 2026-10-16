@@ -36,6 +36,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8]
+    = { 20, 176, 22, 12, 49, 0, 0, 0, 31, 188, 254, 255, 255, 0, 0, 0, 15, 188, 190, 255, 255, 0, 0, 0 };
+
 static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only);
 
 /* Wait until no thread runs a task from THREAD_TASK_CAMERA to THREAD_TASK_ADD_UNIT, then

@@ -1160,8 +1160,6 @@ typedef struct wldcore_window_render_record {
 } wldcore_window_render_record_t;
 typedef char wldcore_window_render_record_size_must_be_52[sizeof(wldcore_window_render_record_t) == 52 ? 1 : -1];
 
-extern s16 g_wldcore_panel_row_actions[16];
-
 extern s16 g_wldcore_active_menu_value;
 void wldcore_draw_close_indicator_if_pending(GsOT* ot);
 

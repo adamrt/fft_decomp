@@ -39,6 +39,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static u8 g_menu_cleared_entry_indices[11] = { 7, 24, 25, 26, 27, 37, 38, 40, 41, 42, 45 };
+
 static s32 camera_step_track(camera_track_t* track, s32 component);
 static void map_store_selected_tile_data(void);
 static void menu_init_subsystems(void);

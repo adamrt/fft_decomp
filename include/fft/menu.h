@@ -55,7 +55,6 @@ enum {
     MENU_CLUT_DIMMED = 0x7d3c,
 };
 extern menu_palette_pair_t g_menu_palette_colors;
-extern u8 g_menu_numeric_display_palette_indices[12];
 void menu_set_palette_colors(const menu_palette_pair_t* source);
 
 /* Shared 4bpp menu glyph sheet: 32 rows of 128 packed pixel bytes, then
@@ -2008,8 +2007,6 @@ extern u8 g_menu_restore_unit_id;
 extern u16 g_menu_transition_state;
 extern u16 g_menu_hovered_stats_frame_count;
 extern s16 g_menu_auto_battle_option_colors[5]; /* text color per option */
-/* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
-extern s16 g_menu_auto_battle_row_actions[8];
 /* Tail glyph source and destination records for menu_build_window_image. */
 extern glyph_blit_t g_menu_window_sprite_glyph;
 extern glyph_blit_t g_menu_window_sprite_position;

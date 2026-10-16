@@ -109,9 +109,6 @@ extern s16 g_world_3d_object_use_request;
 /* tutorial */
 extern s16 g_world_tutorial_categories_request_state; /* world_screen_request_state_e */
 extern world_tutorial_state_t g_world_tutorial_state;
-/* Sector and size pairs; flat 32-bit value access preserves the original addressing. */
-extern s32 g_world_script_tutorial_message_files[7 * 2];
-extern s32 g_world_script_tutorial_script_files[7 * 2];
 extern point16_t g_world_tutorial_highlight_corners_a[31][2]; /* outer/middle ring samples */
 extern point16_t g_world_tutorial_highlight_corners_b[31][2]; /* middle/inner ring samples */
 extern rgb24_t g_world_tutorial_highlight_colors_a[4];        /* first quad corner colors */
