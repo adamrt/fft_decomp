@@ -1,7 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 
-/* Menu, window and text records shared across modules. */
+/* Menus, windows and text shared by BATTLE, WORLD and the EVENT overlays; menu_*.h hold the panel, text, input, list
+ * and overlay declarations. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"

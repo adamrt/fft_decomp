@@ -1,7 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-/* WORLD/WORLD.BIN: world map, menus and event scripts. */
+/* WORLD.BIN (formation, shops, memory card and menu screens): the types and declarations its topic headers share. */
 
 #include "fft/data.h"
 #include "fft/gfx.h"

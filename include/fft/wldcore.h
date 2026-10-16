@@ -1,7 +1,8 @@
 #ifndef WLDCORE_H
 #define WLDCORE_H
 
-/* WORLD/WLDCORE.BIN: the world core that runs with WORLD. */
+/* WLDCORE.BIN (the world map, bar, propositions and Brave Story): the types and declarations its topic headers share.
+ */
 
 #include "fft/data.h"
 #include "fft/gfx.h"
