@@ -21,6 +21,7 @@
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 static s32 world_formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor);
@@ -41,7 +42,7 @@ void world_menu_toggle_preview_stats_window(s32 flag) {
         stored = 1;
         if (!(g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(WORLD_THREAD_SLOT_PREVIEW_STATS) == 0) {
-            thread_start(WORLD_THREAD_SLOT_PREVIEW_STATS, menu_run_numeric_editor_frame_thread_variant);
+            thread_start(WORLD_THREAD_SLOT_PREVIEW_STATS, menu_run_numeric_editor_frame_thread);
             thread_set_parameters(WORLD_THREAD_SLOT_PREVIEW_STATS, (s32)&g_menu_preview_stats_thread_params, 0, 0);
         }
     } else {
@@ -51,7 +52,7 @@ void world_menu_toggle_preview_stats_window(s32 flag) {
     g_world_preview_stats_window_active = stored;
 }
 
-/* Starts thread 10 on menu_run_ability_list_thread_variant (parameter g_world_ability_panel_thread_params) when
+/* Starts thread 10 on menu_run_ability_list_thread (parameter g_world_ability_panel_thread_params) when
  * `enable` is set and neither thread 9 nor 10 is running; stops threads 10 and 12 otherwise. */
 void world_menu_toggle_ability_panel_thread(s32 enable) {
 
@@ -59,7 +60,7 @@ void world_menu_toggle_ability_panel_thread(s32 enable) {
         enable = 1;
         if (thread_is_running(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0
             && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
-            thread_start(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, menu_run_ability_list_thread_variant);
+            thread_start(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, menu_run_ability_list_thread);
             thread_set_parameters(
                 WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_world_ability_panel_thread_params, 0, 0);
         }
@@ -357,7 +358,7 @@ void world_formation_init_selection_cursor(s16 formation_index) {
     s32 count;
     s16 x;
 
-    menu_init_scrollable_list_core_variant(0, 0, 0);
+    menu_init_scrollable_list_core(0, 0, 0);
     g_world_menu_script_callbacks[0].value = world_get_formation_unit_stat_by_mode;
     g_world_menu_script_callbacks[1].value = world_get_formation_unit_stat_by_mode;
     g_world_menu_script_callbacks[2].value = world_formation_get_unit_egg_hatch_progress;
@@ -403,10 +404,6 @@ void world_formation_init_cursor_and_scroll_state(s32 formation_index) {
     g_world_formation_unit_banner_enabled = 1;
     g_world_formation_saved_banner_enabled = 1;
 }
-
-#ifndef NULL
-#    define NULL 0
-#endif
 
 /*
  * Formation screen unit grid: L2/R2 cycle the readout under the units, Circle
@@ -515,7 +512,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             MENU_PRESSABLE_BUTTON_L2, 0x26, value, input & PSX_PAD_L2, row, MAIN_SFX_PAGE_SWITCH);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R2, 0xc2, value, input & PSX_PAD_R2, row, MAIN_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode_variant(window, 0, 0);
+        menu_run_script_with_palette_mode(window, 0, 0);
         menu_gfx_enqueue_textured_quad_list(
             cells, 0, 0, g_menu_cursor_texture_page, g_world_menu_palette_clut_normal, 0xb, 8);
         if (g_world_formation_stat_display_mode < 3) {
@@ -540,7 +537,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     y = 0x24 + g_world_formation_scroll_position + g_world_formation_scroll_velocity;
     gfx_set_otag_index(8);
     i = 0;
-    color = menu_gfx_get_draw_color_variant();
+    color = world_menu_gfx_get_draw_color();
     g_world_formation_saved_sprite_color.r = color->r;
     g_world_formation_saved_sprite_color.g = color->g;
     g_world_formation_saved_sprite_color.b = color->b;
@@ -1102,7 +1099,7 @@ void world_formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* r
         if (unit_index == g_unit_selected_index) {
             backdrop_rgb = &g_world_formation_normal_sprite_color;
         } else {
-            backdrop_rgb = menu_gfx_get_draw_color_variant();
+            backdrop_rgb = world_menu_gfx_get_draw_color();
         }
         world_formation_draw_graphics_below_sprite(unit_index,
             g_world_unit_pointers[unit_index]->proposition_status == WORLD_FORMATION_UNIT_PROPOSITION_LEAVING
@@ -1220,7 +1217,7 @@ static void world_formation_draw_graphics_below_sprite(
                 g_world_formation_gauge_max_number.x = num_x;
                 g_world_formation_gauge_max_number.y = num_y;
                 g_world_formation_gauge_max_number.value = unit_index;
-                menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_formation_gauge_max_number);
+                world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_gauge_max_number);
             }
             num_x = x + 20;
             num_y = top;
@@ -1228,7 +1225,7 @@ static void world_formation_draw_graphics_below_sprite(
                 g_world_formation_gauge_value_number.x = num_x;
                 g_world_formation_gauge_value_number.y = num_y;
                 g_world_formation_gauge_value_number.value = unit_index;
-                menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_formation_gauge_value_number);
+                world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_gauge_value_number);
             }
             rect.x = x + 35;
             rect.y = top + 5;
@@ -1287,7 +1284,7 @@ static void world_formation_draw_graphics_below_sprite(
                 g_world_formation_level_number.x = num_x;
                 g_world_formation_level_number.y = num_y;
                 g_world_formation_level_number.value = unit_index;
-                menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_formation_level_number);
+                world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_level_number);
             }
             num_x = x + 45;
             num_y = top;
@@ -1295,7 +1292,7 @@ static void world_formation_draw_graphics_below_sprite(
                 g_world_formation_experience_number.x = num_x;
                 g_world_formation_experience_number.y = num_y;
                 g_world_formation_experience_number.value = unit_index;
-                menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_formation_experience_number);
+                world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_experience_number);
             }
         } else if (g_world_formation_stat_display_mode == MENU_UNIT_READOUT_BRAVE_FAITH) {
             s32 y40;
@@ -1336,10 +1333,9 @@ static void world_formation_draw_graphics_below_sprite(
                 g_world_formation_brave_number_wide.value = g_world_formation_brave_number.value = unit_index;
                 if (g_world_unit_pointers[unit_index]->identity.brave >= 100) {
                     g_world_formation_brave_number_wide.x = num_x - 3;
-                    menu_script_draw_formatted_number_variant(
-                        (menu_instruction_t*)&g_world_formation_brave_number_wide);
+                    world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_brave_number_wide);
                 } else {
-                    menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_formation_brave_number);
+                    world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_brave_number);
                 }
             }
             num_x = x + 45;
@@ -1350,10 +1346,9 @@ static void world_formation_draw_graphics_below_sprite(
                 g_world_formation_faith_number_wide.value = g_world_formation_faith_number.value = unit_index;
                 if (g_world_unit_pointers[unit_index]->identity.faith >= 100) {
                     g_world_formation_faith_number_wide.x = num_x - 5;
-                    menu_script_draw_formatted_number_variant(
-                        (menu_instruction_t*)&g_world_formation_faith_number_wide);
+                    world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_faith_number_wide);
                 } else {
-                    menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_formation_faith_number);
+                    world_menu_script_draw_formatted_number((menu_instruction_t*)&g_world_formation_faith_number);
                 }
             }
         }

@@ -56,7 +56,7 @@
 
 static void camera_load_state_from_script_variables(void);
 static void script_process_pending_requests(void);
-static void script_route_event_input_variant(void);
+static void script_route_event_input(void);
 
 static s32 menu_dispatch_system_function(
     s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
@@ -1154,7 +1154,7 @@ static void script_apply_input_overrides(u32* state) {
 
 #ifdef FFT_BATTLE
 /* Route controller input to the running battle event thread. */
-static void script_route_event_input_variant(void) {
+static void script_route_event_input(void) {
     s32 thread;
 
     if (g_menu_input_mode != MENU_INPUT_TUTORIAL) {
@@ -1179,7 +1179,7 @@ static void script_route_event_input_variant(void) {
 /* WORLD twin of script_update_event_input_state: while the event thread
  * (0x10) is current, latch the pad state and derive the new-press mask with
  * the shared initial/repeat/secondary key-repeat delays. */
-static void script_route_event_input_variant(void) {
+static void script_route_event_input(void) {
     u32 input;
     s32 initial_delay;
     s32 repeat_delay;
@@ -1260,7 +1260,7 @@ void script_filter_controller_input(u32* input) {
  * other 16-bit stores, and this order keeps the g_menu_companion_overlay_state load
  * below them as in the target.
  */
-s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
+s32 script_run_event_frame(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
     s32 finish_op;
@@ -1469,7 +1469,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
  * The finish-operation getter is called through an s32-returning cast: the
  * target uses its return value without the u16 zero extension.
  */
-s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
+s32 script_run_event_frame(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
     s32 finish_op;
@@ -1681,10 +1681,6 @@ void script_set_specialized_map_destroyed(void) {
         g_map_destruction_wait_state = g_map_destruction_wait_state + 1;
     }
 }
-
-#ifndef NULL
-#    define NULL 0
-#endif
 
 /* Advances asynchronous battle-script, map, effect, and graphics requests.
  * WORLD has none of them: its copy is empty. */

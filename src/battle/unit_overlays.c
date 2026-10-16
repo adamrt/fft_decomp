@@ -33,7 +33,6 @@ static u8 g_battle_status_bubble_u[24]
 static u8 g_battle_status_bubble_v[24] = { 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 188, 188, 188, 188,
     188, 188, 188, 188, 200, 176, 0, 0, 0 };
 
-/* graphics */
 static u8 g_battle_status_bubble_digit_u[24]
     = { 142, 128, 114, 100, 86, 142, 128, 142, 128, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
