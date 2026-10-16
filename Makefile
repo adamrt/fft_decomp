@@ -2,7 +2,6 @@ DOCKER ?= docker
 # The tag follows the image inputs, so editing them rebuilds on the next call.
 IMAGE_TAG := $(shell cat Dockerfile .dockerignore tools/go.mod tools/go.sum 2>/dev/null | cksum | cut -d' ' -f1)
 IMAGE ?= fft-decomp-dev:$(IMAGE_TAG)
-BEAR ?= bear
 EDITOR_CC ?= clang
 PCSX_REDUX ?= /Applications/PCSX-Redux.app/Contents/MacOS/PCSX-Redux
 
@@ -165,10 +164,8 @@ run: ## Build the disc and launch PCSX-Redux (PCSX_REDUX=path; default is the ma
 shell: image ## Open an interactive shell in the Docker image
 	@$(DOCKER_RUN) --interactive --tty $(IMAGE) bash
 
-# Runs on the host so paths point into this checkout. Clang rejects a few
-# redeclarations GCC 2.6.3 accepts; those files are still recorded.
+# Each source gets the program macros and VARIANT_ values of the program that
+# links it first, so clangd sees that program's code and includes.
 .PHONY: compile-commands
-compile-commands: ## Create editor compilation metadata (host bear and clang)
-	@command -v "$(BEAR)" >/dev/null || { echo "Bear is required (set BEAR=/path/to/bear)"; exit 2; }
-	@command -v "$(EDITOR_CC)" >/dev/null || { echo "Clang is required (set EDITOR_CC=/path/to/clang)"; exit 2; }
-	$(BEAR) --output compile_commands.json -- /bin/sh -c 'set -eu; find src -type f -name "*.c" -print | sort | while IFS= read -r source; do "$(EDITOR_CC)" -target mipsel-none-elf -march=mips1 -mabi=32 -msoft-float -fsyntax-only -undef -nostdinc -Iinclude -Wno-everything "$$source" >/dev/null 2>&1 || :; done'
+compile-commands: image ## Create editor compilation metadata (compile_commands.json)
+	@$(TOOLS) compile-commands --cc="$(EDITOR_CC)" --directory="$(CURDIR)"
