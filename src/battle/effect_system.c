@@ -1310,6 +1310,7 @@ static s32 battle_effect_end_secondary_on_current_unit(void) {
     s32 record_offset = secondary_id * sizeof(effect_secondary_data_t);
     u8 function_id;
 
+    /* One byte offset serves both stores; indexing the record twice changes the code. */
     *(s16*)((u8*)&g_battle_effect_secondary_data[0].timer + record_offset) = 0;
     *(u16*)((u8*)&g_battle_effect_secondary_data[0].animation_id + record_offset) = EFFECT_SECONDARY_ANIMATION_ENDING;
     function_id = g_battle_effect_ending_secondary_function_id;

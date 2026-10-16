@@ -404,6 +404,7 @@ static void battle_effect_draw_billboard_sprite(effect_slot_t* slot) {
     SetTransMatrix(&g_battle_effect_matrix);
 
     frame_group = g_battle_effect_trap_frame_data.groups;
+    /* The group's frame table starts frame_table_offset bytes into it, one halfword per frame. */
     offset = *(u16*)((u8*)frame_group + (slot->frame * 2 + frame_group->frame_table_offset));
     prim = &slot->quads[g_battle_effect_buffer_index];
     /* Copy RGB and the frame byte; the packet header overwrites that last byte. */
