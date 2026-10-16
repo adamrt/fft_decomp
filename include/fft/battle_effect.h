@@ -1943,6 +1943,8 @@ extern u16 g_battle_effect_secondary_active_tail;
 extern s32 g_battle_effect_buffer_index;
 
 extern DVECTOR g_battle_effect_charge_line_direction_offsets[];
+/* Rows of seven fade steps, indexed flat (row * 7 + step) as the original does. */
+enum { EFFECT_CHARGE_LINE_FADE_STEPS = 7 };
 extern u8 g_battle_effect_charge_line_fade_levels[];
 extern effect_charge_params_t g_battle_effect_charge_line_params[2];
 extern struct effect_secondary_data* g_battle_effect_current_secondary;

@@ -2923,9 +2923,22 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                     line = &state->lines[g_battle_effect_buffer_index][i * 6 + k];
                     line->x0 = state->trails[i].points[head].vx;
                     line->y0 = state->trails[i].points[head].vy;
-                    setRGB0(line, red * g_battle_effect_charge_line_fade_levels[state->fade_row * 7 + fade] >> 8,
-                        green * g_battle_effect_charge_line_fade_levels[state->fade_row * 7 + fade] >> 8,
-                        blue * g_battle_effect_charge_line_fade_levels[state->fade_row * 7 + fade] >> 8);
+                    setRGB0(line,
+                        red
+                                * g_battle_effect_charge_line_fade_levels[state->fade_row
+                                        * EFFECT_CHARGE_LINE_FADE_STEPS
+                                    + fade]
+                            >> 8,
+                        green
+                                * g_battle_effect_charge_line_fade_levels[state->fade_row
+                                        * EFFECT_CHARGE_LINE_FADE_STEPS
+                                    + fade]
+                            >> 8,
+                        blue
+                                * g_battle_effect_charge_line_fade_levels[state->fade_row
+                                        * EFFECT_CHARGE_LINE_FADE_STEPS
+                                    + fade]
+                            >> 8);
                     if (--head < 0) {
                         head = 6;
                     }
@@ -2938,9 +2951,22 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                     }
                     line->x1 = state->trails[i].points[head].vx;
                     line->y1 = state->trails[i].points[head].vy;
-                    setRGB1(line, red * g_battle_effect_charge_line_fade_levels[state->fade_row * 7 + fade] >> 8,
-                        green * g_battle_effect_charge_line_fade_levels[state->fade_row * 7 + fade] >> 8,
-                        blue * g_battle_effect_charge_line_fade_levels[state->fade_row * 7 + fade] >> 8);
+                    setRGB1(line,
+                        red
+                                * g_battle_effect_charge_line_fade_levels[state->fade_row
+                                        * EFFECT_CHARGE_LINE_FADE_STEPS
+                                    + fade]
+                            >> 8,
+                        green
+                                * g_battle_effect_charge_line_fade_levels[state->fade_row
+                                        * EFFECT_CHARGE_LINE_FADE_STEPS
+                                    + fade]
+                            >> 8,
+                        blue
+                                * g_battle_effect_charge_line_fade_levels[state->fade_row
+                                        * EFFECT_CHARGE_LINE_FADE_STEPS
+                                    + fade]
+                            >> 8);
                     if (LINE_G2_XY_WORD(line, 0) != LINE_G2_XY_WORD(line, 1)) {
                         dir = (ratan2(line->y1 - line->y0, line->x1 - line->x0) + 0x900) / 512;
                         line->x1 += offsets[dir * 2];
