@@ -373,7 +373,7 @@ func TestUnitOwnedRodataRoundTripsAndJoinsTheRanges(t *testing.T) {
 	battle.Data = append(battle.Data, symbolSpec{Addr: 0x80067108, Name: "g_b_table"})
 	battle.unit("menu_b").Rodata = []rodataSpec{{Addr: 0x80067108, Size: 8, Hash: "0000000000000003"}}
 	rendered := string(renderModuleConfig(battle))
-	if !strings.Contains(rendered, "{name: menu_b, source: src/battle/menu_b.c, rodata: [{addr: 0x80067108, size: 8, hash: \"0000000000000003\"}]}") {
+	if !strings.Contains(rendered, "{name: menu_b, source: src/battle/menu_b.c, profile: gcc-2.6.3_O1_aspsx-2.34, rodata: [{addr: 0x80067108, size: 8, hash: \"0000000000000003\"}]}") {
 		t.Fatalf("rendered units:\n%s", rendered)
 	}
 	for path, data := range renderConfigFiles(config) {

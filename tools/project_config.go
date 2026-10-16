@@ -73,9 +73,10 @@ type functionSpec struct {
 // per module, whose public functions are the member rows naming it, in
 // address order.
 type unitDef struct {
-	Name   string
-	Source string
-	Rodata []rodataSpec // read-only tables the unit defines between its functions' literals
+	Name    string
+	Source  string
+	Profile string       // empty: each member's own profile; else the profile every member compiles with
+	Rodata  []rodataSpec // read-only tables the unit defines between its functions' literals
 }
 
 type rodataSpec struct {
@@ -202,6 +203,11 @@ func (m *moduleSpec) contains(addr uint32, size int) bool {
 func (m *moduleSpec) profileOf(f *functionSpec) string {
 	if f.Profile != "" {
 		return f.Profile
+	}
+	if f.Unit != "" {
+		if unit := m.unit(f.Unit); unit != nil && unit.Profile != "" {
+			return unit.Profile
+		}
 	}
 	return m.Profile
 }
@@ -404,9 +410,10 @@ type functionYAML struct {
 }
 
 type unitYAML struct {
-	Name   string       `yaml:"name"`
-	Source string       `yaml:"source"`
-	Rodata []rodataYAML `yaml:"rodata"`
+	Name    string       `yaml:"name"`
+	Source  string       `yaml:"source"`
+	Profile string       `yaml:"profile"`
+	Rodata  []rodataYAML `yaml:"rodata"`
 }
 
 type rodataYAML struct {
@@ -457,7 +464,7 @@ func parseModuleConfig(data []byte) (*moduleSpec, error) {
 		module.Defines = append(module.Defines, defineSpec{Name: name, Value: value})
 	}
 	for _, item := range file.Units {
-		unit := unitDef{Name: item.Name, Source: item.Source}
+		unit := unitDef{Name: item.Name, Source: item.Source, Profile: item.Profile}
 		for _, rodata := range item.Rodata {
 			unit.Rodata = append(unit.Rodata, rodataSpec(rodata))
 		}
@@ -506,10 +513,16 @@ func leadingComment(data []byte) string {
 // normalize sorts every list and drops values that restate a default, which is
 // exactly the canonical form renderModuleConfig writes.
 func (m *moduleSpec) normalize() {
+	m.hoistUnitProfiles()
 	for index := range m.Functions {
 		function := &m.Functions[index]
-		if function.Profile == m.Profile {
+		if function.Profile == m.Profile && !m.unitOverridesProfile(function) {
 			function.Profile = ""
+		}
+		if function.Unit != "" {
+			if unit := m.unit(function.Unit); unit != nil && unit.Profile != "" && function.Profile == unit.Profile {
+				function.Profile = ""
+			}
 		}
 		if function.SourceSymbol == function.Name {
 			function.SourceSymbol = ""
@@ -585,6 +598,9 @@ func renderModuleConfig(m *moduleSpec) []byte {
 	section("units", len(m.Units), func(index int) string {
 		item := m.Units[index]
 		text := fmt.Sprintf("name: %s, source: %s", yamlText(item.Name), yamlText(item.Source))
+		if item.Profile != "" {
+			text += ", profile: " + yamlText(item.Profile)
+		}
 		if len(item.Rodata) > 0 {
 			text += ", rodata: [" + renderRodataRanges(item.Rodata) + "]"
 		}
@@ -875,6 +891,14 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 				fail("%s has no member functions", where)
 				continue
 			}
+			if unit.Profile != "" {
+				if _, ok := compilerProfileNamed(unit.Profile); !ok {
+					fail("%s: unknown profile %q", where, unit.Profile)
+				}
+				if unit.Profile == m.Profile {
+					fail("%s: profile restates the module profile", where)
+				}
+			}
 			for _, rodata := range unit.Rodata {
 				if rodata.Size <= 0 || !m.contains(rodata.Addr, rodata.Size) {
 					fail("%s: owned rodata 0x%08x lies outside the module image", where, rodata.Addr)
@@ -961,4 +985,42 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 		return errors.New("config check failed:\n  " + strings.Join(problems, "\n  "))
 	}
 	return nil
+}
+
+// unitOverridesProfile reports whether f belongs to a unit whose own profile
+// differs from the module's, so an explicit module profile on f is meaningful.
+func (m *moduleSpec) unitOverridesProfile(f *functionSpec) bool {
+	if f.Unit == "" {
+		return false
+	}
+	unit := m.unit(f.Unit)
+	return unit != nil && unit.Profile != "" && unit.Profile != m.Profile
+}
+
+// hoistUnitProfiles moves a profile that every member of a unit states
+// explicitly onto the unit row, so the members stop repeating it. Units whose
+// members differ (division checks on some functions only) keep per-member
+// profiles, which record where checked divisions occur.
+func (m *moduleSpec) hoistUnitProfiles() {
+	for index := range m.Units {
+		unit := &m.Units[index]
+		if unit.Profile != "" {
+			continue
+		}
+		members := m.unitMembers(unit.Name)
+		if len(members) == 0 {
+			continue
+		}
+		shared := members[0].Profile
+		for _, f := range members[1:] {
+			if f.Profile != shared {
+				shared = ""
+				break
+			}
+		}
+		if shared == "" || shared == m.Profile {
+			continue
+		}
+		unit.Profile = shared
+	}
 }

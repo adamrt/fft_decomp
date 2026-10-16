@@ -45,7 +45,7 @@ func TestUnitSymbolsCommandMergesContiguousEntries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(rendered), "units:\n  - {name: menu_b, source: src/battle/menu_b.c}") || !strings.Contains(string(rendered), "unit: menu_b") {
+	if !strings.Contains(string(rendered), "units:\n  - {name: menu_b, source: src/battle/menu_b.c, profile: gcc-2.6.3_O1_aspsx-2.34}") || !strings.Contains(string(rendered), "unit: menu_b") {
 		t.Fatalf("rendered config lacks the unit:\n%s", rendered)
 	}
 	if _, err := p.loadCheckedConfig(); err != nil {

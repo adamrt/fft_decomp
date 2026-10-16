@@ -217,6 +217,7 @@ func (p project) runTrial(config *projectConfig, resolver symbolResolver, images
 	relative, _ := filepath.Rel(p.root, copyPath)
 	trial := *f
 	// A unit member is tried on its own: the candidate is a single-function source.
+	trial.Profile = m.profileOf(f)
 	trial.Unit = ""
 	trial.Source = filepath.ToSlash(relative)
 	trial.SourceSymbol = ""

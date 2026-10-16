@@ -92,6 +92,7 @@ func (p project) splitSymbolsCommand(args []string) error {
 		}
 		for _, m := range owners {
 			for _, f := range m.unitMembers(*name) {
+				f.Profile = m.profileOf(f) // keep a profile the unit row carried
 				f.Unit = ""
 				f.Source = folder + "/" + f.Name + ".c"
 				if f.Source == m.defaultSource(f) {
