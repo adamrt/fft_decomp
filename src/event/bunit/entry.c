@@ -137,23 +137,19 @@ static s32 bunit_input_read_pad1_unless_locked(void) {
     return input;
 }
 
-/* Initialize the unit-list gfx capacities and run the BUNIT menu frame loop
- * until the list closes.
- *
- * The capacity stores follow the shared overlay gfx-init order (compare
- * jobstts_entrypoint): 0x1e is first stored just before the 0x3c store, which
- * puts its single-set `li` between the 0x1f4 `li` and its store, in $v1. The
- * globals must not be volatile here: sched2 hoists the 0x40/0x1f4/0x3c stores
- * above the zero stores, as in the target.
- */
-
 /* The double-buffer binder uses a volatile view of these two capacities. */
 extern u16 g_bunit_gfx_line_g2_capacity;
 extern u16 g_bunit_gfx_line_g3_capacity;
 
 /* BUNIT.OUT entry: set up stack-allocated primitive pools and double packet buffers, then run the
  * unit list (or job menu) frame by frame, playing the queued menu sound each frame, until the list
- * closes. Returns the chosen battle unit. */
+ * closes. Returns the chosen battle unit.
+ *
+ * The capacity stores follow the shared overlay gfx-init order (compare
+ * jobstts_entrypoint): 0x1e is first stored just before the 0x3c store, which
+ * puts its single-set `li` between the 0x1f4 `li` and its store, in $v1. The
+ * globals must not be volatile here: sched2 hoists the 0x40/0x1f4/0x3c stores
+ * above the zero stores, as in the target. */
 s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     POLY_FT4 textured_quads[1000];
     POLY_G4 gouraud_quads[60];
@@ -227,6 +223,9 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
                 bunit_menu_is_active_or_transitioning());
         }
         bunit_menu_update_unit_browser();
+
+        /* Window frames, event input, then this frame's sound: a cursor or cancel sound is kept
+         * as the queued effect, and the error message sound takes a free channel. */
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 0x3d;
         menu_draw_active_window_frames();
         menu_input_update_event_state(
@@ -263,8 +262,8 @@ void bunit_menu_reset_results(void) {
     g_bunit_menu_reorder_result = -1;
 }
 
-/* True while a menu transition (thread 15), event mode, or
- * thread 5 is running; used to gate input processing. */
+/* Returns 1 while the reorder list or the triangle menu thread runs, or input is locked
+ * for a message; the unit grid takes no input meanwhile. */
 s32 bunit_menu_is_active_or_transitioning(void) {
     s32 result = 0;
     if (thread_is_running(BUNIT_THREAD_SLOT_REORDER_MENU) || g_menu_input_lock_mode != 0
@@ -274,12 +273,19 @@ s32 bunit_menu_is_active_or_transitioning(void) {
     return result;
 }
 
-/* Unit-list menu frame handler (g_bunit_menu_current_menu state -1 / 0). */
+/* One frame of the unit list (or the reorder list when that is the current menu).
+ * Returns 0 once the closing fade has finished, else 1.
+ *
+ * The first frame rebuilds the unit tables and the panels' data. TRIANGLE or START
+ * opens the triangle menu, whose rows choose the reorder list (0) or the highlighted
+ * unit (1, which fades out and returns its battle id). CIRCLE while browsing opens the
+ * job menu, refused for a unit on a monster skillset or off the player's team; CROSS
+ * outside browsing fades the screen out. */
 static s32 bunit_menu_run_unit_list_frame(void) {
     s32 input = g_menu_input_primary_repeat;
     bunit_unit_t* unit;
-    u8 mode_b3;
-    u8 mode_b4;
+    u8 banner_enabled;
+    u8 browse_enabled;
 
     if (g_bunit_menu_current_menu == BUNIT_MENU_UNIT_LIST) {
         if (g_bunit_unit_list_initialized == 0) {
@@ -303,18 +309,19 @@ static s32 bunit_menu_run_unit_list_frame(void) {
             return 0;
         }
         if (g_bunit_unit_list_triangle_menu_open != 0) {
+            /* Help for the highlighted row, from HELP_TEXT_SECTION_MENU_COMMANDS (0x1000). */
             g_text_selection_id = g_bunit_unit_list_triangle_menu.selected_index != 0 ? 0x1001 : 0x1000;
             if ((g_bunit_unit_list_triangle_menu_open
                     = bunit_menu_run_descriptor_thread(BUNIT_THREAD_SLOT_MENU, &g_bunit_unit_list_triangle_menu))
                 == 0) {
                 if (g_bunit_menu_primary_result == 0) {
-                    mode_b3 = g_bunit_status_banner_enabled;
-                    mode_b4 = g_bunit_unit_browse_enabled;
+                    banner_enabled = g_bunit_status_banner_enabled;
+                    browse_enabled = g_bunit_unit_browse_enabled;
                     g_bunit_menu_current_menu = BUNIT_MENU_REORDER_LIST;
                     g_bunit_status_banner_enabled = 0;
                     g_bunit_unit_browse_enabled = 0;
-                    g_bunit_saved_status_banner_enabled = mode_b3;
-                    g_bunit_saved_unit_browse_enabled = mode_b4;
+                    g_bunit_saved_status_banner_enabled = banner_enabled;
+                    g_bunit_saved_unit_browse_enabled = browse_enabled;
                     bunit_menu_reset_results();
                     g_bunit_unit_list_initialized = 0;
                 } else if (g_bunit_menu_primary_result == 1) {
@@ -375,7 +382,7 @@ static s32 bunit_menu_run_unit_list_frame(void) {
  * When the selected unit differs from g_bunit_unit_comparison_index it republishes that unit's
  * record, restarts the slide animation, and reports the scroll direction in
  * g_status_display_redraw_request; otherwise it advances the g_bunit_status_banner_slide_step slide and stops
- * thread 7 once the slide completes. */
+ * the comparison banner thread once the slide completes. */
 static void bunit_menu_update_unit_browser(void) {
     s32 index;
     s32 enable;
@@ -387,9 +394,10 @@ static void bunit_menu_update_unit_browser(void) {
             g_bunit_comparison_display_flags = BUNIT_REQUEST_FLAGS;
             BUNIT_REQUEST_FLAGS = 0;
             if (g_bunit_status_banner_at_bottom_latch != g_bunit_status_banner_at_bottom) {
-                bcopy(g_bunit_unit_pointers[g_bunit_unit_comparison_index], &g_panel_comparison_billboard, 0x22);
+                bcopy(g_bunit_unit_pointers[g_bunit_unit_comparison_index], &g_panel_comparison_billboard,
+                    sizeof(g_panel_comparison_billboard));
                 bcopy(&g_bunit_unit_pointers[g_bunit_unit_comparison_index]->name_index,
-                    g_bunit_panel_comparison_unit_data, 0xE);
+                    g_bunit_panel_comparison_unit_data, sizeof(menu_active_unit_t));
                 menu_toggle_comparison_status_thread(1);
                 g_bunit_status_banner_at_bottom_latch = g_bunit_status_banner_at_bottom;
                 if (g_bunit_status_banner_slide_step < 0) {
@@ -427,9 +435,9 @@ static void bunit_menu_update_unit_browser(void) {
         g_bunit_status_banner_at_bottom_latch = g_bunit_status_banner_at_bottom;
         if (g_bunit_status_banner_enabled != 0) {
             if (g_bunit_status_banner_at_bottom != 0) {
-                BUNIT_REQUEST_FLAGS |= 0x20;
+                BUNIT_REQUEST_FLAGS |= MENU_STATUS_PANEL_SLIDE_DOWN;
             } else {
-                BUNIT_REQUEST_FLAGS |= 0x40;
+                BUNIT_REQUEST_FLAGS |= MENU_STATUS_PANEL_SLIDE_UP;
             }
         } else if (g_bunit_status_banner_at_bottom != 0) {
             g_bunit_status_display_offset_y = 0x90;
@@ -468,9 +476,11 @@ static void bunit_unit_copy_selected_data(void) {
 
     g_bunit_unit_comparison_index = g_unit_selected_index;
     comparison = g_bunit_unit_pointers[g_bunit_unit_comparison_index];
-    bcopy(comparison, &g_panel_selected_billboard, 0x22);
-    bcopy(&g_bunit_unit_pointers[g_unit_selected_index]->name_index, g_bunit_panel_selected_unit_data, 0xE);
-    bcopy(&g_bunit_unit_pointers[g_unit_selected_index]->move, &g_menu_selected_unit_fields, 0x40);
+    bcopy(comparison, &g_panel_selected_billboard, sizeof(g_panel_selected_billboard));
+    bcopy(&g_bunit_unit_pointers[g_unit_selected_index]->name_index, g_bunit_panel_selected_unit_data,
+        sizeof(menu_active_unit_t));
+    bcopy(&g_bunit_unit_pointers[g_unit_selected_index]->move, &g_menu_selected_unit_fields,
+        sizeof(g_menu_selected_unit_fields));
     g_status_display_redraw_request = 1;
     g_bunit_comparison_display_redraw_request = 1;
     g_bunit_character_status_frame_config.redraw_request = 1;

@@ -10,13 +10,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-enum {
-    EQUIP_SCROLL_REPEAT_WAIT = 2,
-};
-
-/* Read square-modified vertical input with the configured repeat timing. */
+/* Read Square-modified vertical input with the configured repeat timing: a
+ * menu_vertical_scroll_direction_e value, UP or DOWN on the first held frame and on each
+ * repeat, WAIT on the held frames in between, NONE when nothing is held, page scrolling is
+ * disabled or input is locked. */
 s32 equip_input_read_page_scroll_direction(void) {
-    s32 direction = 0;
+    s32 direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input;
     s32 initial_delay;
     s32 repeat_period;
@@ -25,10 +24,10 @@ s32 equip_input_read_page_scroll_direction(void) {
     if (g_input_page_scroll_disabled == 0 && g_menu_input_lock_mode == 0) {
         input = PadRead(0);
         if ((input & PSX_PAD_UP) && (input & PSX_PAD_SQUARE)) {
-            direction = -1;
+            direction = MENU_VERTICAL_SCROLL_UP;
             g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
         } else if ((input & PSX_PAD_DOWN) && (input & PSX_PAD_SQUARE)) {
-            direction = 1;
+            direction = MENU_VERTICAL_SCROLL_DOWN;
             g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
         } else {
             g_input_page_scroll_hold_frames = 0;
@@ -40,10 +39,10 @@ s32 equip_input_read_page_scroll_direction(void) {
         held_frames = g_input_page_scroll_hold_frames;
         if ((held_frames < initial_delay) || ((held_frames % repeat_period) == 0)) {
             if ((held_frames >= 2) && (held_frames < initial_delay)) {
-                return EQUIP_SCROLL_REPEAT_WAIT;
+                return MENU_VERTICAL_SCROLL_WAIT;
             }
         } else {
-            return EQUIP_SCROLL_REPEAT_WAIT;
+            return MENU_VERTICAL_SCROLL_WAIT;
         }
     }
     return direction;

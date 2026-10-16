@@ -34,7 +34,7 @@ void require_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet,
         scale_index = 11;
     }
     percent = g_menu_draw_area_scale_percent[scale_index];
-    mem_copy_bytes_nonempty(&packet->rects[0], source, 8);
+    mem_copy_bytes_nonempty(&packet->rects[0], source, sizeof(RECT));
     w = packet->rects[0].w;
     h = packet->rects[0].h;
     packet->rects[0].x -= 0x80;

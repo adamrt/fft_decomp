@@ -16,11 +16,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* The frame is menu_status_panel_buffer_t (0x3d8 bytes, double buffered); the
- * WORLD twin menu_run_equipment_list_thread uses the same layout. */
-
-/* Equipment panel thread (task 0x3b): lists the five equipped item names and
- * draws their icons; EQUIP's body (WORLD has its own).
+/* Equipment panel thread (task THREAD_TASK_STATUS_PANEL): lists the five equipped item
+ * names and draws their icons; EQUIP's body (WORLD has its own, with the same double-buffered
+ * 0x3d8-byte menu_status_panel_buffer_t frame).
  *
  * The sprite sheet layout (0-3) comes from the two mode flags; the text image
  * is rebuilt on the first frame or on request. The frame offset goes through

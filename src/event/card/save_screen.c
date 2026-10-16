@@ -200,7 +200,7 @@ void card_save_run_menu(s32 unused) {
         card_gfx_set_render_otag(g_card_gfx_context->otag + 1);
         g_gfx_current_otag_entry = g_card_gfx_context->otag + 0x3c;
         menu_draw_active_window_frames();
-        input = PadRead(0) & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
+        input = PadRead(0) & PSX_PAD_DPAD_MASK;
         buttons = g_menu_input_newly_pressed & 0x0fff;
         input |= buttons;
         if (thread_is_running(THREAD_SCREEN_SLOT_TEXT) == 0 && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0
@@ -577,7 +577,18 @@ static void card_save_update_slot_playtime(s32 slot) {
     }
 }
 
-/* Dispatched in scanning state by card_save_run_menu. */
+/*
+ * Save-menu state CARD_SAVE_MENU_SCANNING: classify the selected card's 15 save slots.
+ *
+ * When the stored slot metadata is still current (a slot is recorded as last used
+ * and the card reports no change) the descriptions are rebuilt from it at once.
+ * Otherwise a few setup calls clear VRAM and show the checking message, then the card
+ * is opened and its directory read. A new (unformatted) card runs the format prompt;
+ * an error shows the card error notice. With the card open, each later call looks up
+ * one slot's file: a readable summary makes it occupied; a missing file makes it
+ * available while free blocks remain, else unavailable; an unfinished save is deleted.
+ * After the last slot the state moves to CARD_SAVE_MENU_SCAN_RESULT.
+ */
 static void card_save_update_slot_scan(void) {
     s32 result;
     s32 status;
@@ -892,27 +903,29 @@ static void card_save_render_slot_text(s32 slot) {
     text_render_id_rows_to_vram(g_card_save_slot_descriptions[slot], g_card_save_slot_text_row_ids, &rect, 0);
 }
 
-/* Put the save list cursor on the last used slot and return the number of
- * available slots. The scroll step is then run until it has rested for ten
- * calls in a row, so the list opens already scrolled to the cursor. */
+/* Put the save list cursor on the last used slot and return the number of listed
+ * slots (every slot that is not CARD_SAVE_SLOT_UNAVAILABLE). The scroll step is then
+ * run until it has rested for ten calls in a row, so the list opens already scrolled
+ * to the cursor. */
 static s32 card_save_init_occupied_slot_selection(void) {
     s32 slot;
-    s32 occupied_count;
+    s32 listed_count;
 
     g_card_menu_script_callback = 0;
     slot = 0;
-    occupied_count = 0;
+    listed_count = 0;
     while (slot < 15) {
         if (slot == g_main_card_save_last_used_slot) {
             g_card_save_list_selected_slot = slot;
-            g_card_save_list_cursor_index = occupied_count;
+            g_card_save_list_cursor_index = listed_count;
         }
         if (g_main_card_save_slot_file_states[slot] != CARD_SAVE_SLOT_UNAVAILABLE) {
-            occupied_count++;
+            listed_count++;
         }
         slot++;
     }
 
+    /* `slot` now counts consecutive calls at rest. */
     slot = 0;
     while (slot < 10) {
         card_save_update_slot_scroll(g_card_save_list_cursor_index);
@@ -922,11 +935,20 @@ static s32 card_save_init_occupied_slot_selection(void) {
             slot = 0;
         }
     }
-    return occupied_count;
+    return listed_count;
 }
 
-/* Input is accepted in selection state; rendering also runs
- * during the adjacent confirmation/write states. */
+/*
+ * The save-slot list, run in states CARD_SAVE_MENU_SELECT_SAVE through
+ * CARD_SAVE_MENU_WRITING; only the first takes `input`.
+ *
+ * In the selection state: rescan if the card stops answering, run the overwrite prompt
+ * while it is up (YES goes on to the write), and otherwise handle CIRCLE (write to an
+ * available slot, or ask before overwriting an occupied one), CROSS (back to card
+ * selection) and UP/DOWN. Every call then steps the scroll and draws each listed
+ * slot's window, slot number, play time and description strip, the sliding cursor
+ * and the scroll arrows.
+ */
 static void card_save_update_and_draw_slot_list(u16 input) {
     s32 index;
     s32 value;
@@ -1197,7 +1219,8 @@ static void card_save_update_slot_scroll(s32 selection) {
 
 /* Build the 256-byte PlayStation memory-card header: the title template with
  * the 1-based save slot number and the play time as full-width Shift-JIS
- * digits, then the icon selected by the slot. `level` is not read.
+ * digits (0x82 then 0x4f + digit), then the icon selected by the slot. `level`
+ * is not read.
  */
 static void card_save_build_file_header(s32 slot, s32 level, card_save_header_t* header) {
     s32 value;
@@ -1238,6 +1261,7 @@ static void card_save_build_file_header(s32 slot, s32 level, card_save_header_t*
         divisor = divisor / 10;
     }
 
+    /* Shift-JIS full-width colon. */
     header->title[pos++] = 0x81;
     header->title[pos++] = 0x46;
 

@@ -25,7 +25,9 @@ const u8* card_cmd_set_otag_index_handler(const u8* data) {
     return data + data[1];
 }
 
-/* Draw the literal value as zero-padded digits at the requested position. */
+/* Draw the command's literal value as `width` zero-padded digit glyphs from (x, y),
+ * `spacing` pixels apart, tinted with the menu text color. A style of 2 or more draws
+ * nothing. Returns the next command. */
 menu_draw_number_command_t* card_cmd_draw_decimal_number_handler(menu_draw_number_command_t* command) {
     s8 text[16];
     menu_digit_glyph_t glyph;

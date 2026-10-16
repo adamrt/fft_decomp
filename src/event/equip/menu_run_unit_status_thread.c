@@ -17,18 +17,18 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* The packet, state and thread layouts are the shared fft/menu.h
- * records: the editor packets at g_panel_selected_editor_packets / g_panel_comparison_editor_packets, the
- * status-panel packets at g_panel_selected_packets / g_panel_comparison_packets, the editor states
- * g_menu_selected_unit_stat_summary / g_panel_comparison_billboard, and the per-thread display record.
- * g_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar. */
-
 /*
- * EQUIP's body (DEBUGCHR's is at 0x801bf750): the same unit editor/status display thread, with thread slot
- * 0xD selecting the first packet set. When g_equip_item_numeric_thread_enabled is set, the first
- * numeric block is drawn as five separate entries (two through
- * menu_text_render_decimal_entry_list), as in menu_run_unit_status_thread; the
- * zodiac/g_debugchr_editor_active branch of the DEBUGCHR version is absent.
+ * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. EQUIP's
+ * body (DEBUGCHR, ATTACK and BUNIT have their own): EQUIP_THREAD_SLOT_UNIT_STATUS selects the
+ * first packet set. While the item preview panel is open (g_equip_item_numeric_thread_enabled)
+ * the first numeric block is drawn as five separate entries, two of them signed; the third
+ * large number is always the roster slot + 1 (DEBUGCHR's editor branch is absent).
+ *
+ * The packet, state and thread layouts are the shared fft/menu.h records: the editor packets
+ * at g_panel_selected_editor_packets / g_panel_comparison_editor_packets, the status-panel
+ * packets at g_panel_selected_packets / g_panel_comparison_packets, the editor states
+ * g_menu_selected_unit_stat_summary / g_panel_comparison_billboard, and the per-thread display
+ * record. g_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar.
  */
 void menu_run_unit_status_thread(void) {
     RECT rects[6];
@@ -64,7 +64,7 @@ void menu_run_unit_status_thread(void) {
     s32 panel_y_b;
     s32 editor_y_a;
     s32 editor_y_b;
-    s16 portrait_cell;
+    s16 zodiac;
     glyph_blit_t* text_position;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
@@ -399,10 +399,10 @@ void menu_run_unit_status_thread(void) {
 
         /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
         panel->sprites[6].u0 = (unit_data->zodiac % 7) * 0x18;
-        portrait_cell = unit_data->zodiac;
+        zodiac = unit_data->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
+        panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
         if ((frame == 0) || (thread->work != 0)) {

@@ -16,7 +16,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Update the secondary item-action menu and return its next screen state. */
+/* Run the item list's action menu (a shorter variant when the list holds a single
+ * entry). Only row 2, the sort order, does anything here; CIRCLE on any other row plays
+ * the invalid sound. Returns MENU_ITEM_LIST_STATE_SORT_ORDER when row 2 is picked,
+ * MENU_ITEM_LIST_STATE_BROWSE once the menu closes or when the list is empty, and
+ * MENU_ITEM_LIST_STATE_ACTION otherwise. The row test reads g_item_action_menu even when
+ * the single-entry menu is the one running. */
 s32 equip_menu_update_item_action_state(void) {
     menu_entry_t* menu;
 
@@ -40,6 +45,7 @@ s32 equip_menu_update_item_action_state(void) {
         g_equip_item_action_menu_active = 1;
     }
 
+    /* Each row's help text, from entry 0x2f of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
     g_menu_help_message_text_id = g_equip_item_action_active_menu->selected_index + 0x102F;
     g_equip_item_action_menu_active
         = menu_start_managed_thread(EQUIP_THREAD_SLOT_POPUP_MENU, g_equip_item_action_active_menu);
@@ -60,8 +66,11 @@ s32 equip_menu_update_item_action_state(void) {
 /* Runs the item-type sort sub-menu for the selected equipment slot.
  *
  * A picked item type moves to the front of the slot's type-order list, after
- * which the item list is re-sorted and redrawn. Returns 5 while the sub-menu
- * thread runs and 2 once it closes. */
+ * which the item list is re-sorted and redrawn. The rows show text entry type + 3
+ * of the overlay's text; the right-hand and body slots use one menu descriptor and
+ * the other slots another. Returns
+ * MENU_ITEM_LIST_STATE_SORT_ORDER while the sub-menu thread runs and
+ * MENU_ITEM_LIST_STATE_ACTION once it closes. */
 s32 equip_item_run_type_order_mode(void) {
     s16 names[8];
     s32 i;
@@ -86,7 +95,8 @@ s32 equip_item_run_type_order_mode(void) {
     } else {
         g_equip_item_type_order_active_menu = &g_equip_type_order_menu_other_slots;
     }
-    /* i doubles as the help-text id; the target reuses the same register. */
+    /* i doubles as the help-text id (in HELP_TEXT_SECTION_MENU_COMMANDS: types 0-3 at 0x32 on,
+     * 4 at 0x37, 5 at 0x39); the target reuses the same register. */
     i = g_equip_item_type_order[g_equip_item_type_order_active_menu->selected_index];
     if (i < 4) {
         i += 0x32;

@@ -23,8 +23,9 @@ static s32 equip_menu_run_remove_mode(void);
 static s32 equip_menu_update_clear_all_equipment_prompt(void);
 
 /* The g_equip_menu_screen_state_handlers entry of every state past INIT: keep the command
- * menu thread running, enter the mode its picked row names (row 1 is refused), run that
- * mode each frame and return to the command menu when it ends. */
+ * menu thread running, enter the mode its picked row names (row + EQUIP_SCREEN_STATE_EQUIP;
+ * row 1 would be state 3, which has no mode, and is refused), run that mode each frame and
+ * return to the command menu when it ends. */
 void equip_menu_update_screen_state(void) {
     s32 result;
     s32 state;
@@ -49,6 +50,7 @@ void equip_menu_update_screen_state(void) {
     if (state == EQUIP_SCREEN_STATE_COMMAND_MENU) {
         value_ptr = &g_equip_menu_result_rows[0];
         mode = *value_ptr;
+        /* Each row's help text, from entry 0x29 of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
         g_menu_help_message_text_id = g_equip_command_menu.selected_index + 0x1029;
         if (mode == 1) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
@@ -125,6 +127,7 @@ static s32 equip_menu_run_equip_mode(void) {
         g_equip_item_list_refresh = 1;
     }
     if (g_equip_item_list_open == 0) {
+        /* The help text is the slot item's entry in HELP_TEXT_SECTION_ITEMS (0x6800 = section 13). */
         entry = g_equip_unit_data[g_equip_unit_selected_index]->equipment[g_equip_item_slot];
         help_id = -1;
         if (entry != 0) {
@@ -166,6 +169,7 @@ static s32 equip_menu_run_equip_mode(void) {
             if (g_menu_list_entry_count != 0
                 && (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_UNEQUIPPABLE) == 0) {
                 item_id = item;
+                /* None left in the inventory: EQUIP's screen message 9 (TEXT_SECTION_OVERLAY_SCREEN). */
                 if (item_adjust_inventory_count(item_id, 0) == 0) {
                     equip_text_show_message_with_sound(0xD809, MAIN_SFX_ERROR_MESSAGE);
                 } else if (equip_unit_set_slot_item(g_equip_unit_selected_index, g_equip_item_slot, item_id)
@@ -181,6 +185,7 @@ static s32 equip_menu_run_equip_mode(void) {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;
             }
         }
+        /* Preview the highlighted item on the scratch record g_equip_unit_data[1]. */
         if (g_menu_list_entry_count != 0) {
             index = g_menu_list_selected_index;
             if (g_equip_item_previewed_cursor != index) {
@@ -192,8 +197,8 @@ static s32 equip_menu_run_equip_mode(void) {
                     item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail,
                         &g_menu_selected_unit_stat_summary, g_equip_unit_data[g_equip_unit_selected_index]->equipment,
                         g_equip_unit_data[1]->equipment);
-                    bcopy(
-                        g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_unit_data[1]->equipment, 10);
+                    bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_unit_data[1]->equipment,
+                        sizeof(g_equip_unit_data[1]->equipment));
                 } else {
                     g_equip_item_preview_active = 0;
                 }
@@ -251,7 +256,8 @@ static s32 equip_menu_run_remove_mode(void) {
         g_remove_all_equipment_prompt_active = equip_menu_update_clear_all_equipment_prompt();
         if (g_remove_all_equipment_prompt_active == 0) {
             g_remove_item_previewed_slot = -2;
-            bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_remove_item_equipment, 10);
+            bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_remove_item_equipment,
+                sizeof(g_remove_item_equipment));
         }
         return 1;
     }
@@ -279,7 +285,8 @@ static s32 equip_menu_run_remove_mode(void) {
                 == EQUIP_SLOT_ITEM_CURRENT_LOCKED) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
         } else {
-            bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_remove_item_equipment, 10);
+            bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_remove_item_equipment,
+                sizeof(g_remove_item_equipment));
             equip_unit_load_selected_data();
             g_sound_queued_effect_id = MAIN_SFX_UNEQUIP;
             g_remove_item_previewed_slot = -1;
@@ -292,7 +299,8 @@ static s32 equip_menu_run_remove_mode(void) {
             equip_unit_set_slot_item(1, (u8)selection, 0);
             item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
                 g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_unit_data[1]->equipment);
-            bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_unit_data[1]->equipment, 10);
+            bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_unit_data[1]->equipment,
+                sizeof(g_equip_unit_data[1]->equipment));
             g_menu_preview_stats_thread_params.redraw_request = 1;
         }
         g_equip_unit_status_panel_redraw = 1;

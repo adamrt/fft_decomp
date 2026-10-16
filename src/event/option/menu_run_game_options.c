@@ -20,7 +20,14 @@
 
 /*
  * Options-menu thread, OPTION's body: WORLD's code with its own globals and callees, without the
- * g_world_menu_thread_result stores.
+ * g_world_menu_thread_result stores. The first thread parameter is the menu entry.
+ *
+ * The option names scroll through a 256-line ring of text rows in VRAM, drawn from two
+ * double-buffered copies of the page primitives. Below the list a panel shows the selected
+ * option's current value. CIRCLE runs the value picker (menu_run_option_choice) on the thread
+ * slot below this one, CROSS cancels, and the window frame runs on the slot above. Every frame
+ * the chosen values are written back to g_main_game_options, the sound mode is applied on the
+ * main stack and the input repeat timings follow the finger cursor repeat speed option.
  *
  * The do/while (0) around the thread lookup is a scheduling barrier: its
  * loop notes keep the input-1 spill and the entry load ahead of the

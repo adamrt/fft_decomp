@@ -175,7 +175,7 @@ static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_u
     bcopy(&unit->career.job_points.current, &record->job_points.current, sizeof(record->job_points.current));
     bcopy(&unit->career.job_points.total, &record->job_points.total, sizeof(record->job_points.total));
 
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < UNIT_CAREER_JOB_COUNT; i++) {
         if (record->job_points.current.values[i] > UNIT_JOB_POINT_MAX) {
             record->job_points.current.values[i] = UNIT_JOB_POINT_MAX;
         }
@@ -222,9 +222,11 @@ s32 bunit_unit_build_data_list(s32 mode, s32 unit_data, s32 sort_mode) {
 }
 
 /* Bubble-sort g_bunit_shown_unit_indices (the shown-unit index list) by the
- * successive keys of g_main_item_type_order_tables.order_0, then publish the
- * sorted record pointers into g_bunit_unit_pointers. `sort_mode` is not read.
- * BUNIT twin of world_formation_sort_roster. */
+ * successive keys of g_main_item_type_order_tables.order_0 (the unit sort order the
+ * reorder list edits, each key a record field picked through g_bunit_unit_sort_field_indices; a tie
+ * moves on to the next key), then publish the sorted record pointers into
+ * g_bunit_unit_pointers. Keys 1 and 4 and up sort in descending order. `sort_mode` is
+ * not read. BUNIT twin of world_formation_sort_roster. */
 void bunit_unit_sort_index_list_by_order_keys(s32 sort_mode) {
     s32 count;
     s32 j;
@@ -270,10 +272,9 @@ void bunit_unit_copy_orders_to_reorder_list(s32 unused, s16* entries) {
     }
 }
 
-/* bunit_orders is the first (12-byte, -1 terminated) list of the item type
- * order tables at 0x80057b20 (`orders.order_0` in main). */
-/* Copy the low byte of each 16-bit entry into bunit_orders until the
- * terminator (-1) has been copied. The first parameter is unused. */
+/* Copy the low byte of each 16-bit entry into g_main_item_type_order_tables.order_0
+ * (the first, 12-byte list of those tables) until the terminator (-1) has been copied.
+ * The first parameter is unused. */
 void bunit_unit_copy_reorder_list_to_orders(s32 unused, const s16* entries) {
     s32 index = 0;
     s8 value = *entries;

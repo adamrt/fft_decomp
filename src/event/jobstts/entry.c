@@ -75,8 +75,14 @@ static void jobstts_menu_load_images_and_clear_selection(void) {
     g_text_selection_id = 0;
 }
 
-/* Per-frame JOBSTTS entry: initialize on first call, run the active page,
- * and return the ordering table to draw (0 once the screen closes). */
+/* Per-frame JOBSTTS entry for battle unit `unit`, returning the ordering table to draw, or
+ * 0 once the screen closes.
+ *
+ * The first call sizes the primitive pools (the screen draws only textured quads, draw
+ * moves and draw areas), builds both graphics contexts, loads the menu images and copies
+ * the unit's job data. Every call then swaps contexts, updates input (SELECT opens the
+ * help text, and the text section pointers come back once a message ends) and runs the
+ * active page: the job page, closed by CROSS, or the ability page. */
 u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     u32* result;
 

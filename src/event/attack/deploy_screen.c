@@ -430,7 +430,8 @@ ramza_placed:
             if (*input & PSX_PAD_START) {
                 if (g_attack_deploy_deployed_unit_count == 0) {
                     g_sound_pending_sfx_id = MAIN_SFX_INVALID;
-                    /* Notices reuse menu entry 2, retexted with each message. */
+                    /* Notices reuse menu entry 2, retexted with each deployment message (bound
+                     * at text id 0x9000); 0x0b: no unit is placed. */
                     g_attack_deploy_menu_entries[2].text_id = 0x900b;
                     thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                     thread_set_parameters(ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);
@@ -527,6 +528,7 @@ ramza_placed:
                                 g_attack_deploy_deployed_unit_count++;
                             } else {
                                 g_sound_pending_sfx_id = MAIN_SFX_INVALID;
+                                /* Deployment message 0x0c: the squad is full. */
                                 g_attack_deploy_menu_entries[2].text_id = 0x900c;
                                 thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_set_parameters(
@@ -558,6 +560,7 @@ ramza_placed:
                             if (g_attack_deploy_roster_id_by_tile[row][column] == 0
                                 && script_get_variable(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) == 1) {
                                 g_sound_pending_sfx_id = MAIN_SFX_INVALID;
+                                /* Deployment message 0x0d: Ramza must deploy. */
                                 g_attack_deploy_menu_entries[2].text_id = 0x900d;
                                 thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_set_parameters(
@@ -878,15 +881,16 @@ static void attack_deploy_select_unit_for_stats_display(void) {
     attack_editor_load_party_unit(1, g_attack_deploy_selected_roster_index);
 }
 
-/* gauges->team_kind. Accessed through the struct, GCC keeps its address in
- * a register across the three stores (1276 vs 1280 bytes); the target
- * addresses it as a standalone 16-bit value. */
-
 /* ATTACK twin of require_editor_load_party_unit. Load a party roster unit into the ATTACK status/editor display.
  *
  * Party counterpart of menu_load_selected_unit: the unit is
  * rebuilt from the roster into a scratch unit_stats_t, shown at full HP/MP
- * and CT, and without the monster-skill or name-text refresh. */
+ * and CT, and without the monster-skill or name-text refresh.
+ *
+ * team_kind (0 player-controlled, 1 another team, 2 the player's team without player
+ * control) is stored through `gauges`: written as g_panel_selected_billboard.team_kind, GCC keeps the
+ * field's address in a register across the three stores (4 bytes longer than the
+ * target). */
 void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;
@@ -1147,7 +1151,9 @@ static void attack_deploy_build_screen_arrow(void) {
     SetShadeTex(&g_attack_deploy_screen_arrow.tri[1], 1);
 }
 
-/* Build and submit the deployment menu's animated cursor primitives. */
+/* Build and submit the button hint for the cursor tile's menu state `mode`: hint 0 on an
+ * empty tile (dimmed on a blocked one), hint 1 on the selected unit, hints 0 and 1 on
+ * another unit and hints 2 and 3 for a swap, the pair dimming in turn every 32 frames. */
 static void attack_deploy_build_menu_cursor_primitives(
     s32 frame, u32 mode, attack_deploy_render_buffer_t* render_buffer) {
     s32 i;
@@ -1629,10 +1635,11 @@ static void attack_gfx_init_frame_ft4_array(void) {
 
 /* Build the two POLY_FT4 quads for one deployment roster portrait.
  *
- * The first quad is a 48x48 cell of the portrait sheet (five cells per row,
- * CLUT selected by index % 4 and index / 4) placed over the isometric tile at
- * (column, row), using the same screen projection as the cursor builder at
- * 0x801c7720; a nonzero g_attack_formation_sprite_tall_cell[index] draws it four pixels lower. The
+ * The first quad is a 48x48 cell of the formation sprite sheet (five cells per
+ * row, CLUT selected by index % 4 and index / 4) placed over the isometric tile
+ * at (column, row), using the same screen projection as
+ * attack_deploy_update_cursor_primitives; a nonzero
+ * g_attack_formation_sprite_tall_cell[index] draws it four pixels lower. The
  * second quad squeezes the 20x20 texel cell at (0x90, 0x40) into a 20x10
  * marker under it. Each quad is written in libgpu setXYWH/setUVWH field order,
  * which the target's store order and constant offsets follow. */
@@ -1665,7 +1672,15 @@ static void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, P
     poly->clut = GetClut(0x140, 0xf8);
 }
 
-/* The v/y adjustments and the tpage/clut stores address the current
+/* Thread body that draws the deployment screen's nine text graphics, double buffered:
+ * three groups of three, with the squad caption (first or later squad), the squad's
+ * unit limit and the units it may still take (each digit picked by its x_load,
+ * 8 pixels per digit from 0xc8). Each graphic grows upward one line a frame to its
+ * 12-line height; the units-left group (6-8) shrinks away once the squad is full. A
+ * nonzero third thread parameter shrinks every graphic, and the thread exits once the
+ * first graphic of each group is gone.
+ *
+ * The v/y adjustments and the tpage/clut stores address the current
  * primitive through a byte offset recomputed at the top of each iteration:
  * GCC then strength-reduces that offset last, after the g_attack_deploy_text_graphic_params[i]
  * parameter pointer, which is the target's induction-register order. The

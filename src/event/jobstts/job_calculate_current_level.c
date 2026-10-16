@@ -10,13 +10,8 @@
  * the low nibble). */
 s32 jobstts_job_calculate_current_level(s32 index) {
     s32 generic_job = job_get_generic_index(g_menu_job_ids[index]);
-    jobstts_unit_job_data_t* unit = g_jobstts_unit_data[0];
-    s32 job_level_index = generic_job >> 1;
-    u8 packed_levels;
 
-    packed_levels = unit->career.job_levels[job_level_index];
-
-    g_menu_job_current_level = packed_levels;
+    g_menu_job_current_level = g_jobstts_unit_data[0]->career.job_levels[generic_job >> 1];
     if (generic_job & 1) {
         g_menu_job_current_level &= 0xf;
     } else {

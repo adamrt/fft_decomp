@@ -49,6 +49,7 @@ s32 equip_item_run_category_menu(void) {
         g_menu_row_callbacks[7].value = equip_menu_get_preview_mp_bonus;
     }
     equip_panel_toggle_item_numeric_thread(1);
+    /* The help text is the item's entry in HELP_TEXT_SECTION_ITEMS (0x6800 = section 13). */
     g_menu_help_message_text_id
         = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] + 0x6800 : -1;
     input = g_menu_input_primary_repeat;
@@ -80,6 +81,7 @@ s32 equip_item_run_category_menu(void) {
         }
         g_sound_queued_effect_id = MAIN_SFX_INVALID;
     }
+    /* A new highlighted row: preview its item (`slot` now holds the entry). */
     if (g_menu_list_selected_index != g_equip_slot_item_browser_previewed_index) {
         if (g_menu_list_entry_count != 0) {
             slot = g_item_list_entries[g_menu_list_selected_index];

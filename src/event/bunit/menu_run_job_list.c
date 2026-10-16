@@ -24,8 +24,8 @@
  * MENU_JOB_LIST_STEP_ABILITIES; otherwise the list script runs and the
  * result is MENU_JOB_LIST_STEP_JOBS. */
 s32 bunit_menu_run_job_list(void) {
-    s16 out_a;
-    s16 out_b;
+    s16 selected;
+    s16 scroll;
     s32 mask;
 
     if (g_bunit_job_list_initialized == 0) {
@@ -36,11 +36,12 @@ s32 bunit_menu_run_job_list(void) {
         g_menu_row_callbacks[5].value = menu_job_calculate_next_level_jp_requirement;
         g_menu_row_callbacks[6].value = bunit_job_calculate_current_total_jp;
         g_menu_row_callbacks[13].value = job_calculate_current_mastered;
-        menu_get_selection_record(9, &out_a, &out_b, g_menu_job_ids);
-        menu_init_scrollable_list(g_menu_job_ids, out_a, out_b, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
+        menu_get_selection_record(9, &selected, &scroll, g_menu_job_ids);
+        menu_init_scrollable_list(g_menu_job_ids, selected, scroll, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_bunit_job_list_initialized = 1;
     }
 
+    /* The help text is the job's entry in HELP_TEXT_SECTION_JOBS (0x6000 = section 12). */
     g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
     mask = g_menu_input_primary_repeat;
     if (mask & PSX_PAD_CROSS) {

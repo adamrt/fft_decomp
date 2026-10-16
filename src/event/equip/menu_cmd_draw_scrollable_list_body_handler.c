@@ -12,10 +12,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Scrollable-list body command; EQUIP's body: the JOBSTTS and BUNIT command without the event-speed multiplier.
+/* Scrollable-list body command.
  *
+ * Handles line and page scrolling (animating the VRAM text strip and
+ * rendering the newly exposed row), draws the list image, the arrows, the
+ * scrollbar thumb and the selection marker, then replays the per-row command
+ * group once per visible row, plus one while a scroll offset is in effect.
+ * An empty list skips its row command groups.
+ *
+ * EQUIP's body: the JOBSTTS and BUNIT command without the event-speed multiplier.
  * The padding arrays reproduce the target's frame (only rect and marker are
- * referenced). The scroll-down path follows WORLD's equip_menu_cmd_draw_scrollable_list_body_handler
+ * referenced). The scroll-down path follows WORLD's world_menu_cmd_draw_scrollable_list_body_handler
  * spelling; its `(s16)` row-height cast adds the other 8 bytes of frame and
  * keeps the row count in a register of its own.
  */

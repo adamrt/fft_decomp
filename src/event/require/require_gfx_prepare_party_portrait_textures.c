@@ -13,8 +13,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Uploads the 20 party portraits (sprite and palette cells) from the 0x18ba
- * portrait sheet file to VRAM.
+/* Uploads the 20 party portraits (sprite and palette cells) from EVENT/WLDFACE.BIN to
+ * VRAM; with no entry mode set the sheets are read back from VRAM instead. The loop is
+ * ATTACK's (attack_gfx_prepare_party_portrait_textures) with its slot 20, the special
+ * portrait, cut off by a `break`; the dead i == 20 tests remain.
  *
  * Register allocation and scheduling depend on the variable shapes: `value`
  * doubles as the pixel-row counter, `row` also holds the palette remainder,
@@ -53,6 +55,9 @@ void require_gfx_prepare_party_portrait_textures(void) {
         if (i == 20) {
             break;
         }
+        /* The portrait code: a special character's own, a generic job's male/female pair
+         * from 0x60 (Mime's pair two lower, as Bard and Dancer take one code each), or the
+         * job's sprite sheet for a monster. */
         unit = main_party_get_unit(i);
         if (unit->sprite_set < CHARACTER_IDENTITY_SELECTOR_FIRST) {
             value = unit->sprite_set;
@@ -88,12 +93,15 @@ void require_gfx_prepare_party_portrait_textures(void) {
         if (unit->sprite_set == CHARACTER_IDENTITY_MONSTER) {
             value |= g_formation_job_data->job_portrait_palette << 10;
         }
+        /* The code's low byte is the portrait (cell) index; bits 10-11 pick a monster's palette. */
         cell = value & 0xff;
         palette = (value & 0xc00) >> 10;
         sheet = cell / MENU_WLDFACE_PORTRAITS_PER_SHEET;
         value = cell - sheet * MENU_WLDFACE_PORTRAITS_PER_SHEET;
         row = value / 8;
         col = value % 8;
+        /* Copy the 32x48 cell into the staging buffer and upload it, in rows of seven from
+         * (0x100, 0x28). */
         g_require_portrait_cell_rect.x = (i % 7) * 8 + 0x100;
         g_require_portrait_cell_rect.y = (i / 7) * 0x30 + 0x28;
         g_require_portrait_cell_rect.w = 8;
@@ -114,6 +122,9 @@ void require_gfx_prepare_party_portrait_textures(void) {
         }
         LoadImage(
             i == 20 ? &g_special_portrait_rect : &g_require_portrait_cell_rect, (u32*)g_require_portrait_cell_pixels);
+        /* Upload the palette, three per VRAM line from (0x100, 0): palette n is in row n / 4
+         * of the sheet's palette block; a monster's alternate palette is in its row from
+         * MENU_WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
         g_require_portrait_palette_rect.x = (i % 3) * 0x10 + 0x100;
         g_require_portrait_palette_rect.y = i / 3;
         g_require_portrait_palette_rect.w = 0x10;

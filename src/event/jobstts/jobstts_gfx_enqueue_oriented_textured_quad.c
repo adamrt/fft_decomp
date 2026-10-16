@@ -6,15 +6,17 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Queue a textured quad whose texture cell is mirrored by orientation. */
+/* Queue a POLY_FT4 at `rect` (shifted 0x80 pixels right, like the other menu quads) on
+ * ordering-table entry `ot_index`, textured with `uv`'s cell mirrored as the low byte of
+ * `orientation` selects (TEXTURE_UV_FLIP_*). With a `color` the texture is tinted by it;
+ * without one it draws unshaded.
+ *
+ * The two stack-passed arguments are copied into locals, as the target loads them. */
 void jobstts_gfx_enqueue_oriented_textured_quad(
     RECT* rect, texture_source_t* uv, rgb24_t* color, s32 orientation, s32 semitrans, s32 ot_index) {
     s32 quad_semitrans = semitrans;
-    s32 quad_orientation = orientation;
     s32 quad_ot_index = ot_index;
-    POLY_FT4* poly;
-
-    poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
+    POLY_FT4* poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
 
     if (color != 0) {
         SetShadeTex(poly, 0);
@@ -26,7 +28,7 @@ void jobstts_gfx_enqueue_oriented_textured_quad(
 
     setXYWH(poly, rect->x + 0x80, rect->y, rect->w, rect->h);
 
-    switch (quad_orientation & 0xff) {
+    switch (orientation & 0xff) {
     case TEXTURE_UV_FLIP_NONE:
         setUV4(poly, uv->u, uv->v, uv->u + uv->w, uv->v, uv->u, uv->v + uv->h, uv->u + uv->w, uv->v + uv->h);
         break;

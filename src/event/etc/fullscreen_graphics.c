@@ -10,9 +10,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Wait for the high overlay area, read graphic `graphic_id` into it and upload the image
- * (with its palette for the game-over screen). The END graphics upload nothing: they fade
- * the screen in, hold for a per-graphic time and fade out. The buffer is freed after. */
+/* Wait for the high overlay area, read graphic `graphic_id` into it and upload the image:
+ * texture mode 0 (the 4-bit chapter titles) as is, mode 1 (the 8-bit game-over screen)
+ * with the 256-color palette that ends its file. The END graphics (mode 2) upload
+ * nothing: they fade the screen in, hold for a per-graphic number of frames and fade
+ * out. The buffer is freed after. */
 static void etc_graphic_open(s32 graphic_id) {
     u8* image_buffer;
     s32 frame;
@@ -61,27 +63,28 @@ static void etc_graphic_open(s32 graphic_id) {
         }
         g_gfx_screen_fade = 0;
 
+        /* Hold: 1260 frames for END1, 1440 for END3, 2220 for END4, 600 for END5 and 6120 for END2. */
         if (graphic_id == ETC_GRAPHIC_END1) {
             frame = 0;
             do {
                 frame++;
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
-            } while (frame < 0x4ec);
+            } while (frame < 1260);
         } else if (graphic_id == ETC_GRAPHIC_END3) {
             frame = 0;
             do {
                 frame++;
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
-            } while (frame < 0x5a0);
+            } while (frame < 1440);
         } else if (graphic_id == ETC_GRAPHIC_END4) {
             frame = 0;
             do {
                 frame++;
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
-            } while (frame < 0x8ac);
+            } while (frame < 2220);
         } else {
             frame = 0;
             if (graphic_id == ETC_GRAPHIC_END5) {
@@ -89,16 +92,17 @@ static void etc_graphic_open(s32 graphic_id) {
                     frame++;
                     thread_yield();
                     g_threads[g_thread_current_id].function_parameter_4 = 1;
-                } while (frame < 0x258);
+                } while (frame < 600);
             } else {
                 do {
                     frame++;
                     thread_yield();
                     g_threads[g_thread_current_id].function_parameter_4 = 1;
-                } while (frame < 0x17e8);
+                } while (frame < 6120);
             }
         }
 
+        /* Fade out at half the fade-in speed. */
         g_gfx_screen_fade = 0;
         do {
             thread_yield();

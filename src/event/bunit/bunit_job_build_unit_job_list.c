@@ -39,6 +39,7 @@ s32 bunit_job_build_unit_job_list(s32 unit_id, s16* job_ids, s32 unused_2) {
         return 1;
     }
 
+    /* Skip Squire's bit: the base job above takes Squire's place. */
     bunit_bits_read(1);
     generic_job_index = 1;
     unit_data_cursor = slot;
@@ -47,6 +48,7 @@ s32 bunit_job_build_unit_job_list(s32 unit_id, s16* job_ids, s32 unused_2) {
         s32 job_is_unlocked;
 
         job_is_unlocked = bunit_bits_read(1);
+        /* saved_unit_id now holds the job id; a separate local changes the allocation. */
         saved_unit_id = generic_job_index + JOB_ID_SQUIRE;
         if (saved_unit_id == JOB_ID_BARD && ((*unit_data_cursor)->gender_flags & UNIT_FLAG_FEMALE) != 0) {
             continue;

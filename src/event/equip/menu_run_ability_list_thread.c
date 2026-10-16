@@ -15,11 +15,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Same double-buffered menu_status_panel_buffer_t frame as menu_run_equipment_list_thread and the
- * WORLD twin menu_run_ability_list_thread. */
-
-/* Two-column ability panel thread (task 0x3b); EQUIP's body (WORLD has its own). Thread 10 draws the unit editor stats
- * into the first frame pair, other threads draw g_item_preview_stat_detail into the second. */
+/* Two-column ability panel thread (task THREAD_TASK_STATUS_PANEL); EQUIP's body (WORLD has its
+ * own). In EQUIP_THREAD_SLOT_EQUIPMENT_LIST it draws the selected unit's abilities into the first
+ * frame pair; in any other slot it draws g_item_preview_stat_detail into the second. The rows
+ * name the two skillsets, then the reaction, support and movement abilities; a generic monster's
+ * five rows name its abilities. Same double-buffered menu_status_panel_buffer_t frame as
+ * menu_run_equipment_list_thread and the WORLD twin. */
 void menu_run_ability_list_thread(void) {
     menu_status_thread_t offset;
     s32 u;

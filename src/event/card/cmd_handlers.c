@@ -92,6 +92,7 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
         v_bottom = 0x1C;
     }
 
+    /* Top edge: left corner, the partial piece, the full 16-pixel pieces, right corner. */
     rect.x = left;
     rect.y = top;
     rect.w = 5;
@@ -119,6 +120,8 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
     menu_gfx_enqueue_textured_quad(
         &rect, u_right - 5, v_top, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
 
+    /* Side edges, always from the default border texture: the partial pieces, then one
+     * full piece per side for each 16-pixel row. */
     rect.x = left;
     rect.y = top + 9;
     rect.w = 5;
@@ -159,6 +162,7 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
     }
     menu_cmd_draw_tiled_rectangle_handler(&g_cmd_window_interior_command);
 
+    /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;
     rect.y = top;

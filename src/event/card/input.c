@@ -41,8 +41,8 @@ static void card_input_update_controller(void) {
         g_input_activation_timer += speed;
     } else {
         if (g_input_activation_timer < 4) {
-            if (current_input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT)) {
-                current_input &= PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT;
+            if (current_input & PSX_PAD_DPAD_MASK) {
+                current_input &= PSX_PAD_DPAD_MASK;
                 g_input_activation_timer = 10;
             }
         }
@@ -100,6 +100,8 @@ static void card_input_update_controller(void) {
             filtered_input &= ~(1 << index);
         }
     }
+    /* Only the shoulder buttons and the d-pad repeat (with their repeat flags in bits 16
+     * and up); the face buttons, Select and Start count only when newly pressed. */
     current_input &= 0xf00ff00f;
     filtered_input &= 0xf00ff00f;
     current_input |= g_menu_input_newly_pressed & 0x0ff0;

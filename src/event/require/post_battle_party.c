@@ -76,7 +76,11 @@ void require_text_show_battle_congratulations(void) {
  *
  * Each unit keeps a quarter of the battle's change (delta * 250 / 100 / 10,
  * each division truncating). A unit then at Brave 6..15 or Faith 85..94 gets a
- * warning; guests, Ramza and unit ids 1..3 are exempt.
+ * warning; guests, Ramza and unit ids 1..3 are exempt. The warning lines are in
+ * REQUIRE_TEXT_SECTION_BRAVE_FAITH_WARNINGS (text id 0x800 on): a story character's
+ * by its sprite group (Brave from entry 0x18, Faith from 0x62), a generic unit's four
+ * per job, picked by battle slot (Brave from 0, Faith from 0xc). A story character's
+ * Brave line takes its identity as the argument where every other line takes its unit id.
  *
  * The staged multiplication and divisions preserve the target's two signed
  * constant-division sequences. */
@@ -136,6 +140,8 @@ static s32 require_party_update_brave_faith_and_collect_warnings(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 column;
 
+                /* Find the identity's sprite group (three identities each); an identity in
+                 * none uses group 0, and group 71 shares group 72's line. */
                 for (brave = 0; brave < 73; brave++) {
                     for (column = 0; column < 3; column++) {
                         if (unit->character_identity == g_require_gfx_formation_sprite_groups[brave][column]) {
@@ -146,11 +152,11 @@ static s32 require_party_update_brave_faith_and_collect_warnings(void) {
                         break;
                     }
                 }
-                if (brave == 0x49) {
+                if (brave == 73) {
                     brave = 0;
                 }
-                if (brave == 0x47) {
-                    brave = 0x48;
+                if (brave == 71) {
+                    brave = 72;
                 }
                 value1 = g_require_party_affected_unit_count;
                 g_require_party_affected_unit_message_args[value1] = unit->character_identity;
@@ -168,12 +174,12 @@ static s32 require_party_update_brave_faith_and_collect_warnings(void) {
             warning_count++;
         }
 
-        if (faith >= 0x55 && faith <= 0x5e) {
+        if (faith >= 85 && faith <= 94) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 group_index;
                 s32 column;
 
-                for (group_index = 0; group_index < 0x49; group_index++) {
+                for (group_index = 0; group_index < 73; group_index++) {
                     for (column = 0; column < 3; column++) {
                         if (unit->character_identity == g_require_gfx_formation_sprite_groups[group_index][column]) {
                             break;
@@ -183,11 +189,11 @@ static s32 require_party_update_brave_faith_and_collect_warnings(void) {
                         break;
                     }
                 }
-                if (group_index == 0x49) {
+                if (group_index == 73) {
                     group_index = 0;
                 }
-                if (group_index == 0x47) {
-                    group_index = 0x48;
+                if (group_index == 71) {
+                    group_index = 72;
                 }
                 value3 = g_require_party_affected_unit_count;
                 g_require_party_affected_unit_message_args[value3] = unit->unit_id;
@@ -225,7 +231,10 @@ static void require_party_report_brave_departure_stub(
 
 /* Collect the party members that leave after the battle: Brave below 6 or
  * Faith of 95 and above. Story characters are named by their sprite group's
- * message; generic units by job and battle slot. Returns how many leave. */
+ * message; generic units by job and battle slot. Returns how many leave.
+ * The farewell lines are in REQUIRE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES (text id
+ * 0x1000 on), laid out like the warnings; a departing story character's bio variable
+ * is set to 0xd (low Brave) or 0xe (high Faith). */
 static s32 require_party_find_low_brave_high_faith_departures(void) {
     s32 battle_index;
     s32 departure_count = 0;
@@ -268,11 +277,11 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
                         break;
                     }
                 }
-                if (group == 0x49) {
+                if (group == 73) {
                     group = 0;
                 }
-                if (group == 0x47) {
-                    group = 0x48;
+                if (group == 71) {
+                    group = 72;
                 }
                 count = g_require_party_affected_unit_count;
                 g_require_party_affected_unit_message_args[count] = unit->character_identity;
@@ -293,7 +302,7 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
             /* The target passes three arguments the callee does not take. */
             require_party_report_brave_departure_stub(battle_index, unit->unit_id, unit->character_identity);
             departure_count++;
-        } else if (faith >= 0x5f) {
+        } else if (faith >= 95) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 count;
 
@@ -307,11 +316,11 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
                         break;
                     }
                 }
-                if (group == 0x49) {
+                if (group == 73) {
                     group = 0;
                 }
-                if (group == 0x47) {
-                    group = 0x48;
+                if (group == 71) {
+                    group = 72;
                 }
                 count = g_require_party_affected_unit_count;
                 g_require_party_affected_unit_message_args[count] = unit->unit_id;
@@ -383,6 +392,7 @@ s32 require_party_update_after_battle(void) {
                                 & STATUS_BYTE_MASK(STATUS_ID_TREASURE)))
                             require_party_store_equipment_or_sell_overflow(i);
                         main_party_remove_unit(party_index);
+                        /* Bio variable 0xf: lost in battle. */
                         require_party_update_bio_variable_for_unit_class(unit->character_identity, 0xf);
                     }
                 } else if (unit->character_identity != CHARACTER_IDENTITY_ENTD_NONE
@@ -428,11 +438,11 @@ s32 require_party_update_after_battle(void) {
                             break;
                         }
                     }
-                    if (i == 0x49) {
+                    if (i == 73) {
                         i = 0;
                     }
-                    if (i == 0x47) {
-                        i = 0x48;
+                    if (i == 71) {
+                        i = 72;
                     }
                     require_party_sell_equipment_over_limit(party_index);
                     main_party_save_unit(unit, unit->unit_flags & UNIT_FLAG_SAVE_FORMATION);

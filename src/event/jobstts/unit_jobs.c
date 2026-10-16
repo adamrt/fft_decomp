@@ -11,12 +11,13 @@
 
 /* Copy the battle unit's job data into the compact JOBSTTS working record.
  *
- * Player-controlled units and special monsters preserve the stored unlock
- * bits. Other units recalculate them from job levels and gender. Job-point
- * totals are capped to the four-digit value supported by the menu. */
+ * Units on a team other than the player's, and special monsters, keep their stored
+ * unlock bits; the player's team (team_kind 0, or 2 for a guest without the
+ * player-control flag) has them recalculated from job levels and gender. Current and
+ * total JP are capped at UNIT_JOB_POINT_MAX, the four digits the menu shows. */
 static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data_t* out) {
     s32 i;
-    s32 kind;
+    s32 team_kind;
     s32 flags;
 
     out->job_id = unit->job_id;
@@ -26,13 +27,13 @@ static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data
     out->primary_skillset = unit->primary_skillset;
 
     flags = unit->initial_team_flags;
-    kind = (flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE;
+    team_kind = (flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE;
     if (!(flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
-        kind = 2;
+        team_kind = 2;
     }
 
-    if ((kind == 1) || job_is_special_monster(unit->job_id)) {
-        bcopy(unit->career.unlocked_jobs, out->career.unlocked_jobs, 3);
+    if ((team_kind == 1) || job_is_special_monster(unit->job_id)) {
+        bcopy(unit->career.unlocked_jobs, out->career.unlocked_jobs, sizeof(out->career.unlocked_jobs));
     } else {
         i = main_job_calculate_unlocked(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
         out->career.unlocked_jobs[0] = i >> 16;
@@ -40,12 +41,12 @@ static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data
         out->career.unlocked_jobs[2] = i;
     }
 
-    bcopy(unit->career.learned_abilities, out->career.learned_abilities, 0x39);
-    bcopy(unit->career.job_levels, out->career.job_levels, 0xA);
-    bcopy(&unit->career.job_points.current, &out->career.job_points.current, 0x28);
-    bcopy(&unit->career.job_points.total, &out->career.job_points.total, 0x28);
+    bcopy(unit->career.learned_abilities, out->career.learned_abilities, sizeof(out->career.learned_abilities));
+    bcopy(unit->career.job_levels, out->career.job_levels, sizeof(out->career.job_levels));
+    bcopy(&unit->career.job_points.current, &out->career.job_points.current, sizeof(out->career.job_points.current));
+    bcopy(&unit->career.job_points.total, &out->career.job_points.total, sizeof(out->career.job_points.total));
 
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < UNIT_CAREER_JOB_COUNT; i++) {
         if (out->career.job_points.current.values[i] > UNIT_JOB_POINT_MAX) {
             out->career.job_points.current.values[i] = UNIT_JOB_POINT_MAX;
         }
@@ -105,6 +106,7 @@ s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused) {
         job_ids[1] = -1;
         return 1;
     }
+    /* Skip Squire's bit: the base job above takes Squire's place. */
     bits_read_primary(1);
     count = 1;
     i = 1;

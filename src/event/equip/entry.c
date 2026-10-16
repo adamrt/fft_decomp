@@ -73,10 +73,12 @@ void equip_unit_load_selected_data(void) {
         unit->gauges[MENU_UNIT_STATUS_GAUGE_MP].value = unit->gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
     }
 
-    bcopy(g_equip_unit_data[g_equip_unit_selected_index], &g_menu_selected_unit_stat_summary, 0x22);
+    bcopy(g_equip_unit_data[g_equip_unit_selected_index], &g_menu_selected_unit_stat_summary,
+        sizeof(g_menu_selected_unit_stat_summary));
     bcopy(&g_equip_unit_data[g_equip_unit_selected_index]->identity, &g_equip_panel_selected_unit_data,
         sizeof(menu_unit_status_identity_t));
-    bcopy(&g_equip_unit_data[g_equip_unit_selected_index]->move, &g_menu_selected_unit_fields, 0x40);
+    bcopy(&g_equip_unit_data[g_equip_unit_selected_index]->move, &g_menu_selected_unit_fields,
+        sizeof(g_menu_selected_unit_fields));
     item_sum_equipment_stat_details(
         &g_menu_selected_unit_fields, g_equip_unit_data[g_equip_unit_selected_index]->equipment);
     equip_unit_copy_data_to_compare_slot(g_equip_unit_selected_index, 1);
@@ -111,24 +113,24 @@ void equip_text_show_message_with_sound(s32 message_id, s32 sound_id) {
 s32 equip_entrypoint(s32 unit, u32* otag) {
     s32 result;
     s32 i;
-    u8 changed;
-    s32 message_idle;
+    u8 restore_text;
     unit_stats_t* stats;
 
     if (g_equip_menu_screen_state == EQUIP_SCREEN_STATE_INIT) {
         equip_menu_init_screen(unit);
-        bcopy(g_equip_unit_data[0]->equipment, g_equip_unit_initial_equipment, 0xA);
+        bcopy(g_equip_unit_data[0]->equipment, g_equip_unit_initial_equipment, sizeof(g_equip_unit_data[0]->equipment));
         g_equip_menu_screen_state = EQUIP_SCREEN_STATE_COMMAND_MENU;
     }
     g_equip_gfx_current_ot = otag;
     equip_gfx_swap_context_and_clear_otag(0, -1);
     result = (s32)g_menu_gfx_context->otag;
-    changed = 0;
+    /* While input is locked by text other than an EQUIP message (the SELECT help), the
+     * text sections are restored once the lock ends. */
+    restore_text = 0;
     if (g_menu_input_lock_mode != 0) {
-        message_idle = g_equip_text_message_thread_active == 0;
-        changed = message_idle;
+        restore_text = g_equip_text_message_thread_active == 0;
     }
-    g_equip_text_restore_pending = changed;
+    g_equip_text_restore_pending = restore_text;
     equip_menu_input_update_with_message_state();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
         menu_text_start_help_thread(3);
@@ -150,6 +152,9 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
     if (g_equip_menu_screen_state != EQUIP_SCREEN_STATE_CLOSED) {
         return result;
     }
+
+    /* Closed: report whether any of the five slots changed, after clamping HP and MP to the
+     * new maximums and refreshing the battle unit. */
     for (i = 0; i < 5; i++) {
         if (g_equip_unit_data[0]->equipment[i] != g_equip_unit_initial_equipment[i]) {
             break;

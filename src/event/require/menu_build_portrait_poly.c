@@ -6,8 +6,8 @@
 #include "psx/types.h"
 
 /* Texture a quad with a portrait: a unit portrait when neither bit 0x100 nor
- * 0x200 of `flags` is set, and the formation portrait named by the low byte
- * when bit 0x100 is set. */
+ * 0x200 of `portrait_id` is set, and the formation portrait named by the low
+ * byte when bit 0x100 is set (ATTACK's copy tests bit 0x200 instead). */
 void menu_build_portrait_poly(s32 portrait_id, POLY_FT4* poly) {
     if ((portrait_id & MENU_PORTRAIT_CLUT_SUPPRESS_MASK) == 0) {
         menu_build_unit_portrait_poly(poly, portrait_id);

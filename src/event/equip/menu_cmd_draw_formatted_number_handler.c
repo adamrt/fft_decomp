@@ -9,7 +9,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Draw the getter's signed decimal value or dashes in the requested digit style. */
+/* Draw the getter's signed decimal value or dashes in the requested digit style: 0 the
+ * 6x11 digits, 1 the 8x14 ones, 2 and up the 10x16 digits (eight to a row from u 0x20)
+ * in the window CLUT. The getter is given the command's value, or the list row inside a
+ * scrollable list; a negative result gets a minus sign before the first cell. */
 menu_instruction_t* equip_menu_cmd_draw_formatted_number_handler(menu_instruction_t* data) {
     s8 text[16];
     menu_digit_glyph_t glyph;

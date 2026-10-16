@@ -12,10 +12,12 @@
 
 /* Draw a row-callback value as a row of digit glyphs (opcodes 0x19-0x1B).
  *
- * BUNIT's body: getter/width/spacing/
- * palette/x/y/value come from the command; 0x40000000 in the value selects the
- * highlighted CLUT, 0x20000000 draws dashes, and a negative value gets a minus
- * glyph ahead of the first cell.
+ * BUNIT's body: getter/width/spacing/palette/x/y/value come from the command,
+ * and the getter is given the command's value, or the list row in a scrollable
+ * list. MENU_NUMBER_VALUE_DISABLED in the result selects the disabled CLUT,
+ * MENU_NUMBER_VALUE_DASHES draws dashes, and a negative value gets a minus
+ * glyph ahead of the first cell. Style 0 uses the 6x11 digits, 1 the 8x14 ones;
+ * other styles draw no digits.
  *
  * Register allocation hinges on GCC 2.6.3 allocno priorities: `negative` is
  * an s8 (the promoted subreg gives the target's `move v0,s7` copy before the

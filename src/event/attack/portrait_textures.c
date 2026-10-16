@@ -14,8 +14,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Uploads the party portrait sprite and palette cells from the 0x18ba portrait
- * sheet file to VRAM; slot 20 uses the portrait id in g_main_special_portrait_wldface_id.
+/* Uploads the portraits and palettes of roster slots 0-19 from EVENT/WLDFACE.BIN to VRAM,
+ * plus slot 20, the scenario's special portrait (g_main_special_portrait_wldface_id). With
+ * no entry mode set the sheets are read back from VRAM instead of the disc.
  *
  * Port of require_gfx_prepare_party_portrait_textures. Here `value` is the party
  * index passed to main_party_get_unit, so the pixel-row counter is a
@@ -61,6 +62,9 @@ void attack_gfx_prepare_party_portrait_textures(void) {
         } else {
             value = i;
         }
+        /* A party unit's portrait code comes from its sprite set: a special character's own,
+         * a generic job's male/female pair from 0x60 (Mime's pair two lower, as Bard and
+         * Dancer take one code each), or the job's sprite sheet for a monster. */
         if (i != 20) {
             unit = main_party_get_unit(value);
             if (unit->sprite_set < CHARACTER_IDENTITY_SELECTOR_FIRST) {
@@ -98,12 +102,15 @@ void attack_gfx_prepare_party_portrait_textures(void) {
                 value |= g_formation_job_data->job_portrait_palette << 10;
             }
         }
+        /* The code's low byte is the portrait (cell) index; bits 10-11 pick a monster's palette. */
         cell = value & 0xff;
         palette = (value & 0xc00) >> 10;
         sheet = cell / MENU_WLDFACE_PORTRAITS_PER_SHEET;
         value = cell - sheet * MENU_WLDFACE_PORTRAITS_PER_SHEET;
         row = value / 8;
         col = value % 8;
+        /* Copy the 32x48 cell (16 bytes by 48 rows of the sheet's 128-byte rows) into the
+         * staging buffer and upload it: party slots in rows of seven from (0x100, 0x28). */
         g_attack_portrait_upload_rect.x = (i % 7) * 8 + 0x100;
         g_attack_portrait_upload_rect.y = (i / 7) * 0x30 + 0x28;
         g_attack_portrait_upload_rect.w = 8;
@@ -126,6 +133,9 @@ void attack_gfx_prepare_party_portrait_textures(void) {
             j = 0;
         }
         LoadImage(i == 20 ? &g_special_portrait_rect : &g_attack_portrait_upload_rect, (u32*)g_attack_portrait_staging);
+        /* Upload the portrait's palette, three per VRAM line from (0x100, 0): palette n is in
+         * row n / 4 of the sheet's palette block; a monster's alternate palette is in its row
+         * from MENU_WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
         g_attack_portrait_palette_upload_rect.x = (i % 3) * 0x10 + 0x100;
         g_attack_portrait_palette_upload_rect.y = i / 3;
         g_attack_portrait_palette_upload_rect.w = 0x10;
@@ -157,7 +167,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
     main_heap_call_free(file);
 }
 
-/* Loads file 0x166b (0x10000 bytes) via the entry-mode load paths, uploads its
+/* Loads EVENT/UNIT.BIN (0x10000 bytes) via the entry-mode load paths, uploads its
  * second half, then for the 16 formation slots derives each unit's portrait
  * (inlined world_formation_get_unit_palette_index logic), copies a 0x18x0x30 cell into
  * the g_attack_formation_sprite_staging staging buffer, uploads it to g_attack_portrait_upload_rect and uploads the

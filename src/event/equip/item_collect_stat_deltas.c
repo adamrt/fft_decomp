@@ -17,8 +17,8 @@ void item_collect_stat_deltas(
     s32 item_id;
     s32 attribute;
     s32 secondary;
-    s32 lo;
-    s32 hi;
+    s32 power;
+    s32 evade;
 
     menu_clear_stat_preview(summary, detail);
     item_id = raw_item & ITEM_ENTRY_ID_MASK;
@@ -26,14 +26,14 @@ void item_collect_stat_deltas(
         attribute = g_main_item_primary_data[item_id].attributes;
         if (item_id < ITEM_ID_SHIELD_FIRST) {
             secondary = g_main_item_primary_data[item_id].secondary_data_id;
-            lo = g_main_item_weapon_data[secondary].power;
-            hi = g_main_item_weapon_data[secondary].evade;
+            power = g_main_item_weapon_data[secondary].power;
+            evade = g_main_item_weapon_data[secondary].evade;
             if (alternate != 0) {
-                detail->state.left_weapon_power = lo;
-                detail->state.left_weapon_evade = hi;
+                detail->state.left_weapon_power = power;
+                detail->state.left_weapon_evade = evade;
             } else {
-                detail->state.right_weapon_power = lo;
-                detail->state.right_weapon_evade = hi;
+                detail->state.right_weapon_power = power;
+                detail->state.right_weapon_evade = evade;
             }
         } else if (item_id < ITEM_ID_HEADGEAR_FIRST) {
             detail->state.physical_shield_evade

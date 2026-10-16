@@ -17,9 +17,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Thread task 0x39: the character editor and status panels, REQUIRE's body. Same doubled packets
- * (0x30C editor and 0x1D8 panel packets, fft/menu.h) as the other bodies, without the shake
- * offsets, the bar division and the zodiac branch. */
+/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels, REQUIRE's
+ * body. Same doubled packets (0x30C editor and 0x1D8 panel packets, fft/menu.h) as the other
+ * bodies, without the slide animation (the thread's shake_y is used as it stands), with every
+ * gauge bar at full width, two numeric entries in the second number image, and the battle id + 1
+ * always as the third large number. */
 void menu_run_unit_status_thread(void) {
     RECT rects[6];
     s32 anim_state;
@@ -47,7 +49,7 @@ void menu_run_unit_status_thread(void) {
     s32* window_width;
     s32 panel_x;
     s32 editor_x;
-    s16 portrait_cell;
+    s16 zodiac;
     glyph_blit_t* text_position;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
@@ -99,7 +101,7 @@ void menu_run_unit_status_thread(void) {
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
     menu_init_sprite_array(&editor->value_sprites[0], 4, 0x7CBC);
     for (frame = 0; frame < 4; frame++) {
-        menu_init_default_poly_ft4((&editor->portrait[frame]));
+        menu_init_default_poly_ft4(&editor->portrait[frame]);
     }
     text_configure_sprite_vram(&rects[0], 0x38, 0x28, &editor->value_sprites[0], 2);
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
@@ -334,10 +336,10 @@ void menu_run_unit_status_thread(void) {
 
         /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
         panel->sprites[6].u0 = (unit_info->zodiac % 7) * 0x18;
-        portrait_cell = unit_info->zodiac;
+        zodiac = unit_info->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
+        panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
         if ((frame == 0) || (thread->work != 0)) {

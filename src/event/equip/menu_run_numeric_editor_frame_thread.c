@@ -13,17 +13,18 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* The primitive block is menu_status_panel_numeric_buffer_t, double buffered
- * (g_editor_numeric_state_a for thread 12, g_editor_numeric_state_b otherwise); the thread parameter
- * block is menu_status_thread_t. */
-
-/* Thread task 0x3b: numeric editor panel.
+/* Thread task THREAD_TASK_STATUS_PANEL: numeric editor panel.
  *
  * Twin of menu_run_numeric_editor_thread / menu_run_numeric_editor_frame_thread
  * with EQUIP's own draw-mode setup. Builds the primitive block once, copies it
  * into the second buffer, then each frame re-renders the three text images when
  * requested, rescales the draw area, recolors the sprites for the thread
  * style and submits the block until the thread's third parameter is set.
+ * The primitive block is menu_status_panel_numeric_buffer_t, double buffered
+ * (g_editor_numeric_state_a for THREAD_SCREEN_SLOT_NUMERIC_EDITOR,
+ * g_editor_numeric_state_b otherwise); the thread parameter block is
+ * menu_status_thread_t.
+ *
  * `buffers` is assigned in each branch (not after the if) so the spilled store
  * precedes upload_c's at the join, as in the target. */
 void menu_run_numeric_editor_frame_thread(void) {

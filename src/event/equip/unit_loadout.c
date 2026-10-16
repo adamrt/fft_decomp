@@ -117,6 +117,8 @@ static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_dat
         larger = other;
     }
     unit->physical_shield_evade = larger;
+    /* Retail stores the magic accessory evade here where the physical one belongs, so
+     * physical_accessory_evade stays 0 (QUIRKS.md). */
     unit->magical_accessory_evade = stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
     unit->magic_attack = stats->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     unit->magical_class_evade = 0;
@@ -146,13 +148,14 @@ static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_dat
         }
     }
     unit->party_index = stats->formation_index;
-    bcopy(stats->equipment_categories, unit->equipment_categories, 4);
-    bcopy(stats->ability_flags.support, unit->support_abilities, 4);
+    bcopy(stats->equipment_categories, unit->equipment_categories, sizeof(unit->equipment_categories));
+    bcopy(stats->ability_flags.support, unit->support_abilities, sizeof(unit->support_abilities));
     unit->two_handing = equip_unit_is_two_handing_weapon(
         unit->equipment, stats->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);
 }
 
-/* Build the equipment data and HP/MP for `battle_id` and count the units still present on the field. */
+/* Build the equipment data and HP/MP for `battle_id` and count the units still on the field
+ * (eggs included, crystals and treasure chests not). */
 void equip_unit_load_data_from_stats(s32 battle_id) {
     unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     s32 i;
@@ -194,8 +197,9 @@ void equip_unit_load_data_from_stats(s32 battle_id) {
     g_equip_unit_data[1] = &g_equip_unit_records[1];
 }
 
-/* Write the edited loadout back to the unit's battle stats and party record,
- * refresh its stats, restore HP/MP up to the new maxima and rebuild the
+/* Write the edited loadout back to the unit's battle stats and party record (a
+ * hand's item goes to the hand's shield slot when it is a shield, else to its weapon
+ * slot), refresh its stats, restore HP/MP up to the new maxima and rebuild the
  * EQUIP unit record. */
 void equip_unit_commit_loadout_to_stats(void) {
     menu_status_panel_slot_storage_t bonuses;
@@ -238,7 +242,8 @@ void equip_unit_commit_loadout_to_stats(void) {
         = g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != 0
         ? g_equip_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
         : ITEM_ID_NONE;
-    bcopy(stats->equipment, main_party_get_unit(g_equip_unit_data[0]->party_index)->equipment, 7);
+    bcopy(
+        stats->equipment, main_party_get_unit(g_equip_unit_data[0]->party_index)->equipment, sizeof(stats->equipment));
     main_unit_refresh_stats_and_statuses(stats);
     stats = battle_unit_get_stats_from_battle_id(unit_id);
     hp = g_equip_unit_saved_hp;

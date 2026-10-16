@@ -14,12 +14,18 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Scrollable-list body command; BUNIT's body: unlike EQUIP's, its scroll speed is the event speed rather than a
- * constant 2, as in JOBSTTS's.
+/* Scrollable-list body command.
  *
- * The padding arrays reproduce the target's frame (only rect and marker are
- * referenced). The scroll-down path follows WORLD's bunit_menu_cmd_draw_scrollable_list_body_handler
- * spelling.
+ * Handles line and page scrolling (animating the VRAM text strip and
+ * rendering the newly exposed row), draws the list image, the arrows, the
+ * scrollbar thumb and the selection marker, then replays the per-row command
+ * group once per visible row, plus one while a scroll offset is in effect.
+ * An empty list skips its row command groups.
+ *
+ * BUNIT's body: unlike EQUIP's, its scroll speed is the event speed rather than a
+ * constant 2, as in JOBSTTS's. The padding arrays reproduce the target's frame (only
+ * rect and marker are referenced). The scroll-down path follows WORLD's
+ * world_menu_cmd_draw_scrollable_list_body_handler spelling.
  */
 menu_instruction_t* bunit_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
     RECT rect;

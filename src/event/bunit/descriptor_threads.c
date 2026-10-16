@@ -17,8 +17,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Returns s32: the value is the 0/1 flag g_bunit_menu_thread_running, and
- * both call sites declare and use an s32 result. */
+/* Run menu `desc` on thread slot `id`: on the first call (while
+ * g_bunit_menu_thread_running is clear) publish it as g_menu_thread_menu_data and start
+ * its thread there, unless the slot is busy. Returns 1 while that thread runs and 0 once
+ * it has finished, also kept in g_bunit_menu_thread_running. */
 s32 bunit_menu_run_descriptor_thread(s32 id, menu_entry_t* desc) {
     if (g_bunit_menu_thread_running == 0) {
         if (thread_is_running(id) != 0) {
@@ -51,8 +53,11 @@ void bunit_text_start_selection_thread(s32 thread_data) {
     g_menu_input_lock_mode = 1;
 }
 
-/* Select the menu's node table, handle directional/confirm/cancel input, and
- * draw the selected node's cursor.
+/* The unit list's field-help cursor. The first call picks the node table for the help
+ * screen in g_bunit_help_screen_id; then, while no help text is up, the D-pad follows
+ * the node links, CIRCLE opens the help text for the node's field and CROSS closes the
+ * help screen. The cursor is drawn on the selected node every call. `mode` is the unit's
+ * uses_monster_skillset flag.
  *
  * The target reloads the active table and node index during confirmation.
  * Separate linker aliases preserve those loads; volatile accesses change the
@@ -68,7 +73,8 @@ void bunit_menu_update_node_cursor(s16 mode) {
     s32 node_index;
 
     if (g_bunit_help_cursor_initialized == 0) {
-        /* Monster-ability help bases for the two ability nodes. */
+        /* Nodes 23 and 24 show skillset help (HELP_TEXT_SECTION_SKILLSETS, 0x9800 as a 16-bit
+         * id), or ability help (HELP_TEXT_SECTION_ABILITIES) for a unit on a monster skillset. */
         if (mode == 0) {
             g_bunit_help_node_23_help_base = -0x6800;
             g_bunit_help_node_24_help_base = -0x6800;
@@ -116,6 +122,7 @@ void bunit_menu_update_node_cursor(s16 mode) {
         } else if (flags & PSX_PAD_LEFT) {
             node_index = g_bunit_help_nodes[node_index].destination[3];
         }
+        /* Off the player's team, node 6 is skipped: 2 and 7 lead to each other. */
         if (g_panel_selected_billboard.team_kind != 0) {
             if (g_bunit_help_node_index == 2 && node_index == 6) {
                 node_index = 7;
@@ -212,8 +219,8 @@ static void bunit_input_update_controller(void) {
         g_input_activation_timer += speed;
     } else {
         if (g_input_activation_timer < 4) {
-            if (current_input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT)) {
-                current_input &= PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT;
+            if (current_input & PSX_PAD_DPAD_MASK) {
+                current_input &= PSX_PAD_DPAD_MASK;
                 g_input_activation_timer = 10;
             }
         }
@@ -271,6 +278,8 @@ static void bunit_input_update_controller(void) {
             filtered_input &= ~(1 << index);
         }
     }
+    /* Only the shoulder buttons and the d-pad repeat (with their repeat flags in bits 16
+     * and up); the face buttons, Select and Start count only when newly pressed. */
     current_input &= 0xf00ff00f;
     filtered_input &= 0xf00ff00f;
     current_input |= g_menu_input_newly_pressed & 0x0ff0;

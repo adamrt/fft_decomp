@@ -10,8 +10,10 @@
 #include "psx/types.h"
 
 /* Draw record: print a callback-supplied number right-aligned in a field of
- * eight-pixel cells, then advance past the record. `count` holds
- * the value, then the printed length, then the number of digit cells. */
+ * eight-pixel cells (blank cells, then the digit glyphs on the cursor texture
+ * page), then advance past the record. `count` holds the value, then the printed
+ * length, then the number of digit cells. As in BUNIT's copy, a value wider than
+ * the field would run the blank-cell countdown through the whole 16-bit range. */
 menu_instruction_t* equip_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* cmd) {
     s8 digits[0x10];
     RECT glyph_rect;
@@ -40,6 +42,7 @@ menu_instruction_t* equip_menu_cmd_draw_right_aligned_number_handler(menu_instru
     glyph_rect.w = 8;
     glyph_rect.h = 0x10;
     for (j = 0; j < count; j++) {
+        /* digits[j] * 8 - 0xd8 is (digits[j] - '0') * 8 + 0xa8. */
         menu_gfx_enqueue_textured_quad(&glyph_rect, (digits[j] * 8) - 0xD8, 0x30, 0, 0, g_menu_cursor_texture_page,
             g_menu_text_clut_1_mode0, g_menu_gfx_otag_index);
         glyph_rect.x += 8;

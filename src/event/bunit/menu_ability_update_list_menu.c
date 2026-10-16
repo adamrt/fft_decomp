@@ -18,12 +18,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Runs the selected job's ability list.
+/* Runs the chosen job's ability list (g_job_selected_id) for the selected unit.
  *
  * Left/right switches between the action, reaction, support and movement
- * tabs. Cancel returns 0 with menu state 2 and confirm returns -1 with menu
- * state 1; otherwise the list and the job-name header are drawn and 1 is
- * returned. */
+ * tabs, each keeping its cursor in selection records 10 to 13. The first call
+ * installs the row callbacks the list script reads and renders the job name
+ * into VRAM for the title. CROSS returns MENU_JOB_LIST_STEP_JOBS (back to the
+ * job list) and CIRCLE MENU_JOB_LIST_STEP_CLOSE; otherwise the list and the
+ * job-name title are drawn and MENU_JOB_LIST_STEP_ABILITIES is returned. */
 s32 bunit_menu_ability_update_list_menu(void) {
     u8 unused[0x280]; /* never accessed; reserves the target's frame area */
     RECT rect;
@@ -67,6 +69,8 @@ s32 bunit_menu_ability_update_list_menu(void) {
         menu_init_scrollable_list_core(g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_bunit_ability_list_ready = 1;
     }
+    /* The help text is the ability's entry in HELP_TEXT_SECTION_ABILITIES (0x7800 = section 15);
+     * abilities JP cannot learn show none. */
     if (g_menu_list_entry_count == 0
         || ((entry = g_menu_ability_entries[g_menu_list_selected_index]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
         g_text_selection_id = -1;
@@ -98,6 +102,7 @@ s32 bunit_menu_ability_update_list_menu(void) {
     }
     menu_run_script_with_palette_mode(
         &g_bunit_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x2D;
     rect.w = 0x50;

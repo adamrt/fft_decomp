@@ -40,6 +40,7 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     partial_height = height & 15;
     g_jobstts_menu_window_right_x = command->window.width + left + 5;
 
+    /* Top edge: left corner, the partial piece, the full 16-pixel pieces, right corner. */
     rect.x = left;
     rect.y = top;
     rect.w = 5;
@@ -67,6 +68,7 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     menu_gfx_enqueue_textured_quad(
         &rect, 0xF2, 3, 0, g_menu_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
 
+    /* Side edges: the partial pieces, then one full piece per side for each 16-pixel row. */
     rect.x = left;
     rect.y = top + 9;
     rect.w = 5;
@@ -100,6 +102,7 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     g_cmd_window_interior_command.height = command->window.height;
     menu_cmd_draw_background_tiles_handler((menu_instruction_t*)&g_cmd_window_interior_command);
 
+    /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;
     rect.y = top;
@@ -131,7 +134,11 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     return command;
 }
 
-/* Draw the border tiles through a vertically expanding transition clip. */
+/* Draw a window frame that opens vertically: during the first 8 transition frames, clip
+ * drawing to a band centered on the window whose height follows
+ * g_jobstts_gfx_transition_height_percent, and lock the ordering-table index so later
+ * set-index commands leave it until menu_cmd_release_otag_lock_handler restores the full
+ * draw area. Input is withheld for the first 3 frames. */
 menu_instruction_t* jobstts_menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* command) {
     menu_instruction_t* next;
     RECT rect;

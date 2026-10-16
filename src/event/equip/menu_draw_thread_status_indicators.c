@@ -1,4 +1,4 @@
-/* The two fading translucent letterbox panels of the event dialog overlay. */
+/* The two fading translucent letterbox panels behind the unit status banner. */
 
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
@@ -9,14 +9,15 @@
 #include "psx/types.h"
 
 /*
- * Builds and submits the two translucent letterbox panels used by the event
- * dialogue overlay.
+ * Builds and submits the two translucent letterbox panels behind the unit status
+ * banner: the top band (y 0x1a to 0x5d) and the bottom one (y 0xa9 to 0xec).
  *
- * Banner tasks in slots 13 and 14 request a panel when display->x is zero;
- * display->y selects which of the two opens. Each panel fades its
- * gradient in by 0xc per frame up to 0x78 and back out again, alternating
- * between two primitive buffers so the previous frame stays queued.
- *
+ * A status banner thread (EQUIP_THREAD_SLOT_UNIT_STATUS, or the comparison slot,
+ * which wins) requests a panel while its display x is zero: at y 0 the top band
+ * fades in, at y 0x90 the bottom one, and the other fades out. Each panel's
+ * center fades by 0xc per frame up to 0x78 and back, its nine edge lines fading
+ * further toward the outside, alternating between two primitive buffers so the
+ * previous frame stays queued. Nothing in EQUIP calls it.
  */
 void equip_menu_draw_thread_status_indicators(void) {
     menu_gradient_panel_prims_t* prims;

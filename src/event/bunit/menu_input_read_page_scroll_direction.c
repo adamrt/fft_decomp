@@ -10,7 +10,10 @@
 /*
  * Read Square-modified vertical input with the configured repeat timing.
  *
- * WAIT suppresses intermediate held frames without treating them as a direction.
+ * Returns UP or DOWN on the first held frame and on each repeat after the
+ * initial delay, WAIT on the held frames in between (so they are not taken as no
+ * input), and NONE when nothing is held, page scrolling is disabled or input is
+ * locked.
  */
 menu_vertical_scroll_direction_e bunit_menu_input_read_page_scroll_direction(void) {
     menu_vertical_scroll_direction_e direction = MENU_VERTICAL_SCROLL_NONE;

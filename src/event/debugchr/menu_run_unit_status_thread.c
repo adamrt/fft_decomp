@@ -28,8 +28,9 @@
  * proven by this function's own accesses and the primitive strides it walks.
  */
 
-/* Thread task 0x39: draws the character editor and status panels. DEBUGCHR's body; this copy scales each gauge
- * bar by its value/limit and can show the zodiac sign. */
+/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: draws the character editor and status panels. DEBUGCHR's
+ * body: this copy scales each gauge bar by value / limit, and its third large number is the battle
+ * id + 1 in the editor, or battle id - 15 for ids from 0x10 outside it. */
 void menu_run_unit_status_thread(void) {
     RECT rects[6];
     s32 anim_state;
@@ -64,7 +65,7 @@ void menu_run_unit_status_thread(void) {
     s32 panel_y_b;
     s32 editor_y_a;
     s32 editor_y_b;
-    s16 portrait_cell;
+    s16 zodiac;
     glyph_blit_t* text_position;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
@@ -350,6 +351,8 @@ void menu_run_unit_status_thread(void) {
                 s32 w;
                 s32 y;
 
+                /* A full bar is 32 pixels wide; a zero maximum draws a 4-pixel stub and an
+                 * empty bar collapses at x 0. */
                 SetPolyG4(&editor->bars[i]);
                 x0 = g_menu_portrait_origin.x + 0x2F;
                 if (bar->max == 0) {
@@ -399,10 +402,10 @@ void menu_run_unit_status_thread(void) {
 
         /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
         panel->sprites[6].u0 = (unit_info->zodiac % 7) * 0x18;
-        portrait_cell = unit_info->zodiac;
+        zodiac = unit_info->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
+        panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
         if ((frame == 0) || (thread->work != 0)) {
@@ -452,13 +455,12 @@ void menu_run_unit_status_thread(void) {
                     text_draw_large_number_glyphs(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);
                     LoadImage(&rects[5], value_pixels_c);
                 } else {
-                    s32 zodiac;
+                    s32 battle_id;
                     menu_set_text_origin(0, 0);
-                    /* Outside the editor only battle ids from 0x10 up get a number (id - 15);
-                     * `zodiac` holds the battle id. */
-                    zodiac = unit_info->battle_id;
-                    if (zodiac >= 0x10) {
-                        text_draw_large_number_glyphs(zodiac - 0xF, 0x4002, value_pixels + 0xA0, text_position);
+                    /* Outside the editor only battle ids from 0x10 up get a number (id - 15). */
+                    battle_id = unit_info->battle_id;
+                    if (battle_id >= 0x10) {
+                        text_draw_large_number_glyphs(battle_id - 0xF, 0x4002, value_pixels + 0xA0, text_position);
                     }
                     LoadImage(&rects[5], value_pixels + 0xA0);
                 }

@@ -17,9 +17,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Selected job's ability list: tabbed by category, with the selected
- * ability's description text. Returns 1 while open, 0 on cancel, -1 on
- * confirm. */
+/* JOBSTTS ability page for the chosen job (g_job_selected_id): its abilities in four
+ * category tabs that LEFT and RIGHT cycle through, with the highlighted ability's
+ * description as the help text. The first call installs the row callbacks the render
+ * script reads, clears the four categories' saved cursors and renders the job name into
+ * VRAM for the page title. Returns MENU_JOB_LIST_STEP_ABILITIES while open,
+ * MENU_JOB_LIST_STEP_JOBS on CROSS (back to the job page) and MENU_JOB_LIST_STEP_CLOSE on
+ * CIRCLE; both exits play the cancel sound. */
 s32 jobstts_menu_ability_update_list_menu(void) {
     RECT rect;
     s16 selected;
@@ -62,6 +66,8 @@ s32 jobstts_menu_ability_update_list_menu(void) {
         g_jobstts_ability_list_initialized = 1;
     }
 
+    /* The help text is the ability's entry in HELP_TEXT_SECTION_ABILITIES (0x7800 = section 15);
+     * abilities JP cannot learn show none. */
     entry = g_menu_ability_entries[g_menu_list_selected_index];
     if (g_menu_list_entry_count == 0) {
         g_text_selection_id = -1;
@@ -83,6 +89,7 @@ s32 jobstts_menu_ability_update_list_menu(void) {
         return MENU_JOB_LIST_STEP_CLOSE;
     }
 
+    /* On a tab change, save the old tab's cursor and rebuild the list for the new one. */
     category = jobstts_menu_update_wrapped_horizontal_selection(4, 5, g_menu_input_secondary_repeat);
     if (category != g_menu_ability_category) {
         menu_set_selection_record(
@@ -97,6 +104,7 @@ s32 jobstts_menu_ability_update_list_menu(void) {
     }
     jobstts_menu_run_script_with_palette_mode(
         &g_jobstts_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x27;
     rect.w = 0x50;

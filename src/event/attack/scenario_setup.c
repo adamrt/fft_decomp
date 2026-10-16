@@ -40,8 +40,8 @@ typedef struct attack_scenario {
 /*
  * Advances the scenario flags and loads the current scenario's battle setup.
  *
- * In entry mode 2 only the special portrait and unit of the pending scenario
- * are looked up; that path returns without a value, like the target (v0 keeps
+ * In SCRIPT_ATTACK_ENTRY_PRELOADED mode only the special portrait and unit of the
+ * pending scenario are looked up; that path returns without a value, like the target (v0 keeps
  * whatever the last expression left). Otherwise the event id is advanced, the
  * finish-operation table is rebuilt from every scenario record, and the
  * current scenario's map, music, ENTD, squads and condition script are copied
@@ -137,6 +137,8 @@ s32 attack_load_scenario_conditionals(void) {
     script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
     event = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
 
+    /* Rebuild the finish-operation table from every scenario record (the after-event code from
+     * bit 8, the next scenario encoded as above), then fix the battle-result events' entries. */
     scenario = (attack_scenario_t*)g_attack_scenario_table;
     for (i = 0; i < 500; i++) {
         id = scenario->id[0] + (scenario->id[1] << 8);
@@ -211,6 +213,8 @@ s32 attack_load_scenario_conditionals(void) {
         g_main_scenario_condition_data[i] = (base + ((s16)g_main_scenario_condition_offsets[0] + first) / 2)[i];
     }
 
+    /* Publish the battle setup: map, arrangement, weather, time of day, the ENTD (the story
+     * ENTD while progress effects are suppressed) and the squads. */
     count = 0;
     for (i = 0; i < 2; i++) {
         if (squads[i] != 0) {
@@ -251,9 +255,10 @@ s32 attack_load_scenario_conditionals(void) {
 /* Re-syncs the two battle scenario-music slots with the pending track pair,
  * then applies the map darkness record.
  *
- * Skipped entirely when g_script_scenario_event_active is clear or script variable 0x27 selects a
- * scenario in 410..425. When the currently playing id still appears in the
- * pending pair only that slot is reopened; otherwise both tracks restart.
+ * The music step is skipped when g_script_scenario_event_active is clear or the current
+ * event is in 410..425. When the playing track is one of the pending pair, only the idle
+ * slot ((index ^ 1) + 1) is reloaded, with the pair's track for the playing index;
+ * otherwise both tracks restart.
  * `playing` is s32 rather than u16 because a u16 merge of the two lhu results
  * adds an andi 0xffff that the target does not have. */
 void attack_scenario_restore_music_and_darkness(void) {

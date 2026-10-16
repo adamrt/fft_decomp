@@ -1,4 +1,4 @@
-/* The thread drawing the character editor and status panels, with fixed-width gauge bars and a formation slot
+/* The thread drawing the character editor and status panels, with fixed-width gauge bars and a party slot
  * number. */
 
 #include "fft/event_attack.h"
@@ -17,8 +17,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Thread task 0x39: the character editor and status panels. ATTACK's body (DEBUGCHR and BUNIT have their own); this
- * copy draws fixed-width gauge bars and a formation-slot number instead of the zodiac/unit-id field. */
+/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. ATTACK's body
+ * (DEBUGCHR and BUNIT have their own): this copy draws every gauge bar at full width, puts two
+ * numeric entries in the second number image where DEBUGCHR puts four, and shows the party slot
+ * number (battle_id + 1) as its third large number. */
 void menu_run_unit_status_thread(void) {
     RECT rects[6];
     s32 anim_state;
@@ -53,7 +55,7 @@ void menu_run_unit_status_thread(void) {
     s32 panel_y_b;
     s32 editor_y_a;
     s32 editor_y_b;
-    s16 portrait_cell;
+    s16 zodiac;
     glyph_blit_t* text_position;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
@@ -376,10 +378,10 @@ void menu_run_unit_status_thread(void) {
 
         /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
         panel->sprites[6].u0 = (unit_info->zodiac % 7) * 0x18;
-        portrait_cell = unit_info->zodiac;
+        zodiac = unit_info->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
+        panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
         if ((frame == 0) || (thread->work != 0)) {
@@ -406,7 +408,8 @@ void menu_run_unit_status_thread(void) {
             menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
             menu_set_text_origin(0, 0);
-            /* ATTACK's unit names are the roster name list it builds at text id 0x5800. */
+            /* ATTACK's unit names are the party name list attack_deploy_find_fieldable_units writes to
+             * TEXT_SECTION_PARTY_UNIT_NAMES (section 11, text id 0x5800). */
             menu_display_text_entry(unit_info->name_id + 0x5800, name_image, text_position);
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);

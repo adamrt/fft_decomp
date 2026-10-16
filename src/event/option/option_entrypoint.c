@@ -9,7 +9,15 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
-/* Decode saved option fields and dispatch the requested option-menu mode. */
+/* OPTION.OUT entry, run on the battle menu thread whose first parameter is the menu
+ * entry. Copy the saved options into g_menu_option_values and select the defaults row
+ * (GAME_OPTION_UNCHANGED = 1) only when every value equals its reference value. Unless opening the dead
+ * unit panel, ask the four battle info panels to stop and wait for them. Then run
+ * `menu_type`'s screen: the game options on the thread slot below this one (waiting for
+ * it, then exiting), the AT list, or the dead unit (crystal and treasure) panel.
+ *
+ * The values pulsed for tutorial scripts (0xfd options, 0xf9 AT list) are the same
+ * screen codes WORLD's option entry pulses. */
 void option_entrypoint(s32 menu_type) {
     menu_entry_t* menu = (menu_entry_t*)thread_get_current_parameter_1();
     s32 index;
@@ -50,14 +58,11 @@ void option_entrypoint(s32 menu_type) {
     g_menu_modal_open = 0;
     g_battle_option_menu_state = 0;
     if (menu_type == OPTION_MENU_GAME_OPTIONS) {
-        s32 child_thread;
-
         script_pulse_tutorial_wait_value(0xfd);
         thread_start(g_thread_current_id - 1, option_menu_run_game_options);
-        child_thread = g_thread_current_id;
         menu->select_text_table = 1;
         menu->context = g_menu_option_entry_table;
-        thread_set_parameters(child_thread - 1, menu, 0, 0);
+        thread_set_parameters(g_thread_current_id - 1, menu, 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_exit_current();
     }

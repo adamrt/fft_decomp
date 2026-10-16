@@ -16,9 +16,10 @@
 
 /* Runs one frame of the equipment menu state machine.
  *
- * The first call suspends thread 5 and sets up the list menu. Each frame runs
- * the current sub-state handler, which returns the next state; state -1 tears
- * the menu down, resumes thread 5 and returns 0. Otherwise the menu, slot
+ * The first call suspends the command menu thread, stops the status panels and
+ * sets up the list menu. Each frame runs the current sub-state handler, which
+ * returns the next state; MENU_ITEM_LIST_STATE_CLOSE tears the menu down, restarts
+ * the panels, resumes the command menu and returns 0. Otherwise the menu, slot
  * marker and selected-item panels are drawn and 1 is returned.
  */
 s32 menu_update_equipment(void) {
@@ -64,19 +65,22 @@ s32 menu_update_equipment(void) {
         g_equip_menu_substate = equip_item_run_type_order_mode();
     }
 
+    /* Only browsing and rearranging take list input and page scrolling. */
     input = 0;
-    if (g_equip_menu_substate < 2) {
+    if (g_equip_menu_substate < MENU_ITEM_LIST_STATE_ACTION) {
         input = g_menu_input_primary_repeat;
         g_input_page_scroll_disabled = 0;
     } else {
         g_input_page_scroll_disabled = 1;
     }
     override = 0;
-    if (g_menu_input_lock_mode != 0 || thread_is_running(2) != 0) {
+    if (g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
         override = 1;
     }
     menu_run_script_with_palette_mode(&g_equip_equipment_render_commands, input, override);
     equip_menu_draw_equipment_slot_marker(0, g_menu_selected_slot, g_menu_input_lock_mode);
+    /* Details of the highlighted item: hand icons for a weapon, the HP/MP bonus for armor
+     * and headgear, and its status list. */
     if (g_menu_list_entry_count != 0) {
         item_id = g_item_list_entries[g_menu_list_selected_index];
         if (item_id < ITEM_ID_THROWABLE_FIRST) {

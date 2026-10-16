@@ -13,17 +13,18 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Page-scroll direction latch: -1 up, 1 down, 0 idle. */
-
 /* Scrollable-list body command.
  *
  * Handles line and page scrolling (animating the VRAM text strip and
  * rendering the newly exposed row), draws the list image, the arrows, the
  * scrollbar thumb and the selection marker, then replays the per-row command
  * group once per visible row, plus one while a scroll offset is in effect.
- * An empty list skips its row command groups. JOBSTTS's body: EQUIP's command with BUNIT's event-speed multiplier. The
- * unused arrays reproduce the target's frame: it references only rect (0x20) and marker (0x38). The scroll-down path
- * follows WORLD's jobstts_menu_cmd_draw_scrollable_list_body_handler spelling.
+ * An empty list skips its row command groups.
+ *
+ * JOBSTTS's body: EQUIP's command with BUNIT's event-speed multiplier. The
+ * unused arrays reproduce the target's frame: it references only rect (0x20) and
+ * marker (0x38). The scroll-down path follows WORLD's
+ * world_menu_cmd_draw_scrollable_list_body_handler spelling.
  */
 menu_instruction_t* jobstts_menu_cmd_draw_scrollable_list_body_handler(menu_instruction_t* command) {
     RECT rect;

@@ -358,6 +358,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
     if (locked != 0) {
         buttons = 0;
     }
+    /* L2 and R2 cycle the stat readout: HP, MP, CT, level/experience, Brave/Faith. */
     if (allow_stat_cycle != 0) {
         if (g_bunit_unit_browse_enabled == 0) {
             if (buttons & PSX_PAD_L2) {
@@ -377,6 +378,8 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
     if (allow_stat_cycle == 0) {
         g_bunit_unit_stat_mode = stat_mode;
     }
+    /* CIRCLE starts browsing units with their equipment panels and CROSS ends it; `unit`
+     * drops to 0 on the frame browsing ends. */
     unit = 1;
     if (allow_browse != 0 && bunit_input_get_lock_timer() == 0
         && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
@@ -398,6 +401,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
     if (g_bunit_unit_browse_enabled != 0) {
         buttons &= 0xFFF;
     }
+    /* SQUARE shows or hides the status banner. */
     if (allow_banner_toggle != 0 && g_bunit_unit_browse_enabled == 0 && (buttons & PSX_PAD_SQUARE)
         && bunit_menu_is_unit_list_scroll_needed() == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
         && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
@@ -412,6 +416,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
         g_unit_selected_index = g_bunit_unit_reorderable_indices[g_bunit_unit_grid_selected_cell];
     }
     bunit_menu_update_unit_list_scroll(&g_bunit_unit_list_scroll_step, &g_bunit_unit_list_page_offset);
+    /* While browsing, L1 and R1 step through every listed unit, mounts included. */
     if (g_bunit_unit_browse_enabled != 0) {
         if (buttons & PSX_PAD_L1) {
             g_unit_selected_index
@@ -428,6 +433,8 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
             bunit_menu_is_active_or_transitioning() != 0 || g_bunit_help_screen_id != MENU_GRID_HELP_NONE,
             MAIN_SFX_PAGE_SWITCH);
     }
+    /* The stat-mode bar on the side away from the banner, with its L2 and R2 buttons and the
+     * current mode's labels lit. */
     if (g_bunit_status_banner_slide_step == 0 && bunit_input_get_lock_timer() == 0 && unit != 0 && show_stat_panel != 0
         && g_bunit_status_banner_enabled != 0 && g_bunit_unit_browse_enabled == 0) {
         top = 0xF;
@@ -461,6 +468,8 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
         menu_gfx_enqueue_textured_quad_list(
             quads + row, 0, 0, g_menu_cursor_texture_page, g_menu_text_clut_1_mode0, 0xC, col);
     }
+    /* The grid: up to five rows of four cells, 0x3c apart; rows under the banner are dimmed.
+     * Each cell shows the stat readout, the unit's sprite and plate, and a rider's mount. */
     row = 0;
     g_bunit_status_banner_at_bottom = bunit_menu_is_selected_unit_in_upper_rows(g_bunit_unit_list_page_offset);
     y = 0x24 + g_bunit_unit_list_page_offset + g_bunit_unit_list_scroll_step;
@@ -640,6 +649,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
             }
         }
     }
+    /* The cursor trail and the background's light ease toward the selected cell. */
     bunit_gfx_set_draw_color(&saved_color);
     bunit_gfx_update_rhombus_cursor_trail(&g_bunit_unit_grid_cursor_target);
     focus = &g_bunit_gfx_falloff_focus_x;
@@ -927,10 +937,10 @@ static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
     menu_gfx_enqueue_oriented_textured_quad(&g_bunit_unit_dot_sprite, &rgb, TEXTURE_UV_FLIP_NONE, 1, 8);
 }
 
-/* Build the unit-list selection-to-record index map.
- *
- * Linked entries encode a roster ID in their formation-order key; ordinary
- * entries retain their compact order among directly reorderable units.
+/* Map each listed unit to a grid cell: an ordinary unit takes the next cell in list
+ * order; a mount (BATTLE_MOUNT_INFO_FLAG_MOUNT) gets the list index of its rider, found
+ * through the partner battle id in its mount info. The rider's list index equals its
+ * cell only while no mount precedes it in the list.
  */
 void bunit_unit_build_list_index_map(void) {
     s32 reorderable_index = 0;
@@ -949,10 +959,8 @@ void bunit_unit_build_list_index_map(void) {
     }
 }
 
-/* Build the unit-index list used by the formation reorder menu.
- *
- * Entries tagged with bit 0x40 in their formation-order key are resolved separately
- * through their encoded roster ID, so they are omitted from this direct list.
+/* List the units that get a grid cell of their own, in list order, and return their
+ * count: every listed unit except a mount, which is drawn in its rider's cell.
  */
 s32 bunit_unit_build_reorderable_index_list(void) {
     s32 count = 0;
@@ -987,6 +995,7 @@ void bunit_menu_run_reorder_list(void) {
     if (g_bunit_menu_reorder_list_initialized == 0) {
         g_bunit_menu_reorder_list_index = 0;
         bunit_unit_copy_orders_to_reorder_list(1, g_bunit_menu_reorder_list_entries);
+        /* The rows show text entry key + 1 of the menu section, in priority order. */
         i = 0;
         src = g_bunit_menu_reorder_list_entries;
         dst = opts;
@@ -1006,6 +1015,7 @@ void bunit_menu_run_reorder_list(void) {
         g_bunit_menu_current_menu = BUNIT_MENU_UNIT_LIST;
     }
 
+    /* Each key's help text, from entry 2 of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
     g_text_selection_id = g_bunit_menu_reorder_list_entries[g_bunit_menu_reorder_list_index] + 0x1002;
     result = g_bunit_menu_reorder_result;
     if (result != -1) {

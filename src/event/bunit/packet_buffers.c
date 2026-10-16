@@ -197,6 +197,8 @@ void bunit_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otag
         g_bunit_gfx_context_base[i].draw_areas = draw_areas + g_bunit_gfx_draw_area_capacity * i;
         g_bunit_gfx_context_base[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
         bunit_gfx_init_packet_pools(&g_bunit_gfx_context_base[i]);
+        /* Buffer 0 draws at y 0 while showing y 0xf0, buffer 1 the reverse. Both are 255
+         * pixels wide, as in WORLD (CARD uses 256). */
         SetDefDrawEnv(&g_bunit_gfx_context_base[i].draw_env, 0, i * 0xf0, 0xff, 0xf0);
         SetDefDispEnv(&g_bunit_gfx_context_base[i].disp_env, 0, i == 0 ? 0xf0 : 0, 0xff, 0xf0);
         g_bunit_gfx_context_base[i].draw_env.isbg = 0;

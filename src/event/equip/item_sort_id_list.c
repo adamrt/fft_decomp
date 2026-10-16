@@ -8,13 +8,17 @@
 
 /* Sort a -1 terminated item list in place (EQUIP's body).
  *
- * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed, then the rest
- * are bubble-sorted by the signed-byte criterion list
- * g_item_type_order_lists[mode] (negative ends it): 0 item type (0x13
- * ranks as 100, ascending), 1 price, 2 ranking value (a shield compared with a
+ * Entries whose id (low 10 bits) is 0 or >= ITEM_ID_END are removed, then the
+ * rest are bubble-sorted by the signed-byte criterion list
+ * g_item_type_order_lists[mode] (negative ends it): 0 item type (shields rank
+ * as 100, ascending), 1 price, 2 ranking value (a shield compared with a
  * non-shield ranks 0), 3 physical evade, 4 magic evade, 5 owned count; keys
- * other than 0 sort descending. The magic-evade key reads 0 for the left
- * weapon but the weapon's evade for the right one, as in the target.
+ * other than 0 sort descending. The magic-evade key reads 0 for a weapon in
+ * the earlier entry (item_a) but the weapon's evade in the later one (item_b),
+ * as in the target. The evade keys read the shield records for the throwing
+ * items too and the accessory records for headgear and body armor, by their
+ * secondary data ids (see QUIRKS.md); the ranking's shield test also takes the
+ * throwing items for shields.
  * `diff *= -1` keeps the negation in int on the sign-extended difference, and
  * the offset-first address sum keeps the target's addu operand order. */
 void equip_item_sort_id_list(s32 mode, s16* list) {
@@ -33,7 +37,7 @@ void equip_item_sort_id_list(s32 mode, s16* list) {
 
     while (list[count] != -1) {
         entry = (s16*)(count * 2 + (s32)list);
-        item_a = *entry & 0x3ff;
+        item_a = *entry & ITEM_ENTRY_ID_MASK;
         if (item_a == 0 || item_a >= ITEM_ID_END) {
             while ((*entry = entry[1]) != -1) {
                 entry++;
@@ -53,13 +57,13 @@ void equip_item_sort_id_list(s32 mode, s16* list) {
         for (j = 0; j < passes; j++) {
             k = 0;
             criterion = criteria[k];
-            item_a = list[j] & 0x3ff;
-            item_b = list[j + 1] & 0x3ff;
+            item_a = list[j] & ITEM_ENTRY_ID_MASK;
+            item_b = list[j + 1] & ITEM_ENTRY_ID_MASK;
 
             while (criterion >= 0) {
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_a = g_main_item_primary_data[item_a].type;
-                    if (key_a == 0x13) {
+                    if (key_a == ITEM_TYPE_SHIELD) {
                         key_a = 100;
                     }
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
@@ -95,7 +99,7 @@ void equip_item_sort_id_list(s32 mode, s16* list) {
 
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_b = g_main_item_primary_data[item_b].type;
-                    if (key_b == 0x13) {
+                    if (key_b == ITEM_TYPE_SHIELD) {
                         key_b = 100;
                     }
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {

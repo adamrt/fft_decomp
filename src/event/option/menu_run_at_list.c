@@ -16,9 +16,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Build the AT list.
+/* AT list window thread, OPTION's body (WORLD has its own). The first thread parameter is
+ * the menu entry, whose context is the three-column text layout menu_init_at_list
+ * filled with the turn order. Rows scroll smoothly through a 256-line ring of text rows in
+ * VRAM, drawn from two double-buffered copies of the page primitives; the window frame runs
+ * on the thread slot above, and confirm and cancel go through menu_handle_action and
+ * menu_handle_cancel_input.
  *
- * OPTION's body. The do/while (0) around the scroll redraw puts its render-buffer
+ * The do/while (0) around the scroll redraw puts its render-buffer
  * references one loop level deeper, which raises the buffer's global-alloc priority above the
  * page pointer's (target: buffer s3, page s4; without it the two swap). */
 void menu_run_at_list(void) {

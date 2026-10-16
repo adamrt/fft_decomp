@@ -9,7 +9,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Draw a callback value right-aligned in eight-pixel cells. */
+/* Draw the row callback's value right-aligned in a field of `width` 8x16 cells: blank
+ * cells on the left, then the digit glyphs (u 0xa8 + 8 per digit, v 0x30 on the cursor
+ * texture page). A value with more digits than `width` would start the blank-cell
+ * countdown below -1 and run it through the whole 16-bit range. */
 menu_instruction_t* bunit_menu_cmd_draw_right_aligned_number_handler(menu_instruction_t* cmd) {
     s8 digits[16];
     RECT glyph_rect;

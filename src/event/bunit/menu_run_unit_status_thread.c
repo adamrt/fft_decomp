@@ -16,10 +16,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* The packet, state and thread layouts are the shared fft/menu.h
- * records of the DEBUGCHR twin menu_run_unit_status_thread. */
-
-/* Thread task 0x39: the character editor and status panels. BUNIT's body (DEBUGCHR has its own). */
+/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. BUNIT's body
+ * (DEBUGCHR and ATTACK have their own): the gauge bars scale by value / limit, and the third large
+ * number is the unit's formation slot + 1 for battle ids from 0x10. The packet, state and thread
+ * layouts are the shared fft/menu.h records; g_bunit_panel_*_unit_data, declared as s16 arrays,
+ * hold menu_active_unit_t records. */
 void menu_run_unit_status_thread(void) {
     RECT rects[6];
     s32 anim_state;
@@ -36,7 +37,7 @@ void menu_run_unit_status_thread(void) {
     u8* value_pixels;
     u8* name_image;
     menu_status_panel_packet_t* panel_base;
-    s16* scroll;
+    menu_active_unit_t* unit_info;
     menu_status_panel_display_thread_t* thread;
     s32 shake;
     s32 dimmed;
@@ -46,15 +47,15 @@ void menu_run_unit_status_thread(void) {
     s32 frame;
     s32 i;
     s32* window_width;
-    s32 px1;
-    s32 pya;
-    s32 px2;
-    s32 pyb;
+    s32 panel_x;
+    s32 panel_shake_y;
+    s32 editor_x;
+    s32 editor_shake_y;
     s32 panel_y_a;
     s32 panel_y_b;
     s32 editor_y_a;
     s32 editor_y_b;
-    s16 portrait_cell;
+    s16 zodiac;
     glyph_blit_t* text_position;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
@@ -78,7 +79,7 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
-        scroll = g_bunit_panel_selected_unit_data;
+        unit_info = (menu_active_unit_t*)g_bunit_panel_selected_unit_data;
         transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
@@ -91,7 +92,7 @@ void menu_run_unit_status_thread(void) {
         name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
-        scroll = g_bunit_panel_comparison_unit_data;
+        unit_info = (menu_active_unit_t*)g_bunit_panel_comparison_unit_data;
         transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
@@ -277,22 +278,22 @@ void menu_run_unit_status_thread(void) {
         }
 
         /* Offset a moves each block to the thread's x and shake_y; offset b restores the plain offset after it. */
-        px1 = thread->x;
+        panel_x = thread->x;
         panel_y_a = g_gfx_draw_offset_y;
-        panel->draw_offset_a.position.x = px1 - 0x80;
-        pya = (u16)thread->shake_y;
-        panel->draw_offset_a.position.y = pya + panel_y_a;
+        panel->draw_offset_a.position.x = panel_x - 0x80;
+        panel_shake_y = (u16)thread->shake_y;
+        panel->draw_offset_a.position.y = panel_shake_y + panel_y_a;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
         panel_y_b = g_gfx_draw_offset_y;
         panel->draw_offset_b.position.x = -0x80;
         panel->draw_offset_b.position.y = panel_y_b;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
 
-        px2 = thread->x;
+        editor_x = thread->x;
         editor_y_a = g_gfx_draw_offset_y;
-        editor->draw_offset_a.position.x = px2 - 0x80;
-        pyb = (u16)thread->shake_y;
-        editor->draw_offset_a.position.y = pyb + editor_y_a;
+        editor->draw_offset_a.position.x = editor_x - 0x80;
+        editor_shake_y = (u16)thread->shake_y;
+        editor->draw_offset_a.position.y = editor_shake_y + editor_y_a;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
         editor_y_b = g_gfx_draw_offset_y;
         editor->draw_offset_b.position.x = -0x80;
@@ -386,13 +387,12 @@ void menu_run_unit_status_thread(void) {
             }
         }
 
-        /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A.
-         * scroll[] is laid out as menu_active_unit_t: name, job, brave, faith, zodiac, battle id. */
-        panel->sprites[6].u0 = (scroll[4] % 7) * 0x18;
-        portrait_cell = scroll[4];
+        /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
+        panel->sprites[6].u0 = (unit_info->zodiac % 7) * 0x18;
+        zodiac = unit_info->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
+        panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
         if ((frame == 0) || (thread->work != 0)) {
@@ -419,19 +419,19 @@ void menu_run_unit_status_thread(void) {
             menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(scroll[0] + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
+            menu_display_text_entry(unit_info->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
             menu_set_text_origin(0, 0x10);
-            menu_display_text_entry(scroll[1] + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
+            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
             LoadImage(&rects[2], (u32*)name_image);
 
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs(scroll[2], 0x202, value_pixels, text_position);
+            text_draw_large_number_glyphs(unit_info->brave, 0x202, value_pixels, text_position);
             LoadImage(&rects[3], (u32*)value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_large_number_glyphs(scroll[3], 0x202, value_pixels_b, text_position);
+            text_draw_large_number_glyphs(unit_info->faith, 0x202, value_pixels_b, text_position);
             LoadImage(&rects[4], (u32*)value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
@@ -439,8 +439,8 @@ void menu_run_unit_status_thread(void) {
                 unit_stats_t* stats;
                 menu_set_text_origin(0, 0);
                 /* Only battle ids from 0x10 up get a number: the formation slot + 1, with no slot shown as 1. */
-                stats = battle_unit_get_stats_from_battle_id(scroll[5]);
-                if (scroll[5] >= 0x10) {
+                stats = battle_unit_get_stats_from_battle_id(unit_info->battle_id);
+                if (unit_info->battle_id >= 0x10) {
                     s32 id = stats->formation_index;
                     if (id == BATTLE_FORMATION_INDEX_NONE) {
                         id = 0;

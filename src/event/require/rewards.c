@@ -234,7 +234,7 @@ s32 require_party_sell_equipment_over_limit(s32 unit_id) {
             sold_equipment = 1;
         }
         equipment_slot++;
-    } while (equipment_slot < 7);
+    } while (equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT);
     return sold_equipment;
 }
 
@@ -266,7 +266,7 @@ s32 require_party_store_equipment_or_sell_overflow(s32 unit_id) {
             }
         }
         equipment_slot++;
-    } while (equipment_slot < 7);
+    } while (equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT);
     return sold_equipment;
 }
 
@@ -360,14 +360,14 @@ static s32 require_party_select_unit_to_remove(void) {
                         break;
                     }
                     text++;
-                    if (name_character_index == 0xf)
+                    if (name_character_index == UNIT_NAME_SIZE - 1)
                         *text++ = 0xfe;
                 }
             }
         }
     }
 
-    for (party_index = 0; party_index < 0x14; party_index++) {
+    for (party_index = 0; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
         if (g_require_party_removable_flags[party_index] == 0)
             continue;
         require_editor_load_party_unit(0, party_index);
@@ -457,7 +457,7 @@ static s32 require_party_select_unit_to_remove(void) {
                 g_menu_panel_status_animation[1] = 7;
                 for (;;) {
                     selected_party_index++;
-                    if (selected_party_index == 0x14)
+                    if (selected_party_index == PARTY_ROSTER_SLOT_COUNT)
                         selected_party_index = 0;
                     if (g_require_party_removable_flags[selected_party_index] != 0) {
                         g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
@@ -477,7 +477,7 @@ static s32 require_party_select_unit_to_remove(void) {
                 do {
                     selected_party_index--;
                     if (selected_party_index == -1)
-                        selected_party_index = 0x13;
+                        selected_party_index = PARTY_ROSTER_SLOT_COUNT - 1;
                 } while (g_require_party_removable_flags[selected_party_index] == 0);
                 g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
                 g_status_display_redraw_request = 2;
@@ -528,14 +528,14 @@ static s32 require_party_select_unit_to_remove(void) {
             if (sprite_column == 3) {
                 formation_index++;
                 sprite_group += 3;
-                if (formation_index < 0x49)
+                if (formation_index < 73)
                     goto next_formation;
             }
-            if (formation_index == 0x49)
+            if (formation_index == 73)
                 formation_index = 0;
-            /* Group 0x47 shares group 0x48's message. */
-            if (formation_index == 0x47)
-                formation_index = 0x48;
+            /* Group 71 shares group 72's message. */
+            if (formation_index == 71)
+                formation_index = 72;
             if (sprite_set != CHARACTER_IDENTITY_ENTD_NONE && sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
                 message_id = formation_index + 0x1862;
             } else {
@@ -580,7 +580,7 @@ static s32 require_party_select_unit_to_remove(void) {
                     break;
                 }
                 text++;
-                if (name_character_index == 0xf)
+                if (name_character_index == UNIT_NAME_SIZE - 1)
                     *text++ = 0xfe;
             }
         }
@@ -1246,7 +1246,7 @@ static void require_reward_run_war_trophies(void) {
 #define X0 (0x108 - j * 13 - (5 - digits) * 13 / 2)
 
 /*
- * Post-battle gil ticker: adds the war-result money to script variable 0x2c,
+ * Post-battle gil ticker: adds the war-result money to the war funds (EVENT_SCRIPT_VAR_WAR_FUNDS),
  * starts the display-condition thread, splits the amount into up to six
  * digits and rolls each digit's odometer strip (13-pixel cells, counter << 13
  * fixed point, slowing by 0x44 per step once the target digit comes round)
@@ -1566,7 +1566,7 @@ static void require_gfx_scale_poly_gt4_vertex_colors(
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     s32 count = 0;
-    s32 enabled = 1;
+    s32 one = 1;
     s16* palette_origin;
 
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
@@ -1576,9 +1576,10 @@ static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
         SetPolyGT4(poly);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
-        setUV4(poly, 0, 0, enabled, 0, 0, enabled, enabled, enabled);
+        setUV4(poly, 0, 0, one, 0, 0, one, one, one);
         setXY4(poly, 0, 0, 0, 0, 0, 0, 0, 0);
-        if (GetGraphType() != enabled) {
+        /* The graph type is read, and read again when it is not 1, but never used. */
+        if (GetGraphType() != one) {
             GetGraphType();
         }
         count++;
@@ -1592,7 +1593,7 @@ static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
     s32 count = 0;
-    s32 enabled = 1;
+    s32 one = 1;
     s16* palette_origin;
 
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
@@ -1602,9 +1603,10 @@ static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
         SetPolyGT4(poly);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
-        setUV4(poly, 0, 0, enabled, 0, 0, enabled, enabled, enabled);
+        setUV4(poly, 0, 0, one, 0, 0, one, one, one);
         setXY4(poly, 0, 0, 0, 0, 0, 0, 0, 0);
-        if (GetGraphType() != enabled) {
+        /* The graph type is read, and read again when it is not 1, but never used. */
+        if (GetGraphType() != one) {
             GetGraphType();
         }
         count++;
@@ -2347,7 +2349,7 @@ static void require_text_build_battle_nicknames(void) {
             *output = value;
             if ((value & 0xfe) != 0xfe) {
                 output++;
-                if (length == 15) {
+                if (length == UNIT_NAME_SIZE - 1) {
                     *output++ = 0xfe;
                 }
             } else {
@@ -2355,6 +2357,6 @@ static void require_text_build_battle_nicknames(void) {
                 break;
             }
             length++;
-        } while (length < 16);
+        } while (length < UNIT_NAME_SIZE);
     }
 }

@@ -7,13 +7,20 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Rebuild and submit the scaled sprite quads of every visible editor entry,
- * advancing each entry's fade/blink state by one frame.
+/* Rebuild and submit the deployment panel's prompt icon groups, one scaled quad per
+ * cell, after advancing each group's animation byte by one frame:
+ *   0xff         hidden;
+ *   0            lit (CLUT 0x7d7c);
+ *   1            dimmed (CLUT 0x7dfc);
+ *   2-0x0a       pressed (CLUT 0x7e7c, one pixel lower), counting down to lit;
+ *   0x0b-0x40    pressed, counting down to dimmed;
+ *   above 0x40   fading in, two steps a frame, at brightness 0xc0 minus the value until
+ *                it reaches 0x40 and becomes lit.
  *
- * The y bias is read as `*g_attack_panel_status_y_offsets[entry]`: forming the row address first
+ * The y bias is read as `*g_attack_panel_status_y_offsets[group]`: forming the row address first
  * makes the outer loop keep it as a spilled pointer induction variable
  * (0x30(sp), reloaded into $s4 per entry) as the target does; a plain
- * `g_attack_panel_status_y_offsets[entry][0]` folds the table into each load instead. */
+ * `g_attack_panel_status_y_offsets[group][0]` folds the table into each load instead. */
 void attack_menu_build_status_group_primitives(POLY_FT4* poly) {
     s32 group;
     s32 cell;
