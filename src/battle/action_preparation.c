@@ -1300,7 +1300,7 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
     if (!(target->ability_flags.reaction[3] & BATTLE_REACTION_SET_4_HAMEDO)) {
         return -1;
     }
-    if (battle_action_calculate_chance_to_react(target) != 0) {
+    if (battle_action_fails_reaction_roll(target) != 0) {
         return -1;
     }
     action = &target->action_command;
@@ -2543,13 +2543,13 @@ u32 battle_move_get_post_move_events(unit_stats_t* unit) {
     if (battle_status_remove_charging_ability_ct(unit, 0) != 0) {
         flags |= MOVE_POST_EVENT_CHARGING_CANCEL;
     }
-    flags |= battle_move_get_support_flags(unit);
+    flags |= battle_move_get_movement_ability_events(unit);
     return flags;
 }
 
 /* Post-move benefits of the unit's movement abilities: Move-HP Up, Move-MP Up,
  * Move-Get EXP and Move-Get JP, each with the common benefit bit. */
-s32 battle_move_get_support_flags(const unit_stats_t* unit) {
+s32 battle_move_get_movement_ability_events(const unit_stats_t* unit) {
     u8 flags = unit->ability_flags.movement[1];
     s32 post_event_flags = (0 - (unit->ability_flags.movement[0] & BATTLE_MOVEMENT_SET_1_MOVE_HP_UP))
         & (MOVE_POST_EVENT_MOVEMENT_BENEFIT | MOVE_POST_EVENT_MOVE_HP_UP);

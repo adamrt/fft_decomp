@@ -85,9 +85,9 @@ typedef struct card_save_buffer {
     u8 proposition_last_attempt_date_bits[0x6c]; /* 0x16b; packed 9-bit dates */
     u8 proposition_states[0x60];                 /* 0x1d7; low 6 bits are a remaining-day counter */
     u8 _unused_0237[1];                          /* 0x237; serialized and parity-covered */
-    u8 saved_records[5][0x38];                   /* 0x238; wldcore_saved_record_t: one sound-novel reading state each */
-    u32 saved_data_bits[40];                     /* 0x350 */
-    u32 secondary_saved_data_bits[2];            /* 0x3f0 */
+    u8 sound_novel_saved_records[5][0x38];       /* 0x238; wldcore_saved_record_t: one sound-novel reading state each */
+    u32 sound_novel_read_section_bits[40];       /* 0x350 */
+    u32 sound_novel_saved_flags[2];              /* 0x3f0 */
     u8 brave_story_character_ages[0x40];         /* 0x3f8 */
     u8 proposition_count;                        /* 0x438 */
     u8 active_propositions[8][9];                /* 0x439 */

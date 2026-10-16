@@ -25,20 +25,20 @@
 
 static s32 battle_action_add_poached_item_to_fur_shop_inventory(void);
 static void battle_action_apply_jp_change(unit_stats_t* unit);
-static void battle_action_check_arrow_guard_usability(void);
-static void battle_action_check_blade_grasp_usability(void);
-static void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 mask);
-static void battle_action_check_critical_hp_reaction_usability(s16 reaction_id);
-static void battle_action_check_damage_split_usability(void);
-static void battle_action_check_distribute_usability(void);
-static void battle_action_check_mp_cost_reaction_usability(s16 reaction_id);
-static void battle_action_check_damage_sharing_reaction_usability(void);
-static void battle_action_check_mp_switch_usability(void);
-static void battle_action_check_hp_damage_reaction_usability(s16 reaction_id);
+static void battle_action_try_arrow_guard(void);
+static void battle_action_try_blade_grasp(void);
+static void battle_action_try_counter_reaction(u16 reaction_id, u32 mask);
+static void battle_action_try_critical_hp_reaction(s16 reaction_id);
+static void battle_action_try_damage_split(void);
+static void battle_action_try_distribute(void);
+static void battle_action_try_mp_cost_reaction(s16 reaction_id);
+static void battle_action_check_damage_sharing_reactions(void);
+static void battle_action_try_mp_switch(void);
+static void battle_action_try_hp_damage_reaction(s16 reaction_id);
 static s32 battle_action_check_reaction(const unit_stats_t* unit);
 static void battle_action_check_evasion_reactions(void);
 static void battle_action_check_reflect_reaction(void);
-static void battle_action_check_stat_save_and_restore_reaction_usability(void);
+static void battle_action_check_stat_save_and_restore_reactions(void);
 static void battle_action_clear_status_changes(action_data_t* action);
 static void battle_action_dispatch_target_reaction_ability(void);
 static s32 battle_action_remove_broken_or_stolen_equipment(void);
@@ -770,7 +770,7 @@ s32 battle_action_apply_target_result(s32 battle_id) {
             = g_battle_action_target->max_hp;
     }
 
-    battle_action_check_damage_sharing_reaction_usability();
+    battle_action_check_damage_sharing_reactions();
     old_hp = g_battle_action_target->hp;
     hp = old_hp - g_battle_action_target_data->hp_damage + g_battle_action_target_data->hp_healing;
     if (hp < 0) {
@@ -907,7 +907,7 @@ s32 battle_action_apply_target_result(s32 battle_id) {
         g_battle_action_target->ability_outcome = UNIT_ABILITY_OUTCOME_AFFECTED;
     }
 
-    battle_action_check_stat_save_and_restore_reaction_usability();
+    battle_action_check_stat_save_and_restore_reactions();
     if (g_battle_action_target->status_sets.current[0] & (STATUS_MASK(CRYSTAL) | STATUS_MASK(DEAD))) {
         if (g_battle_action_target->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
             return -1;
@@ -1097,11 +1097,11 @@ static void battle_action_check_evasion_reactions(void) {
     }
     reaction_flags = g_battle_action_target->ability_flags.reaction[3];
     if (reaction_flags & BATTLE_REACTION_SET_4_BLADE_GRASP) {
-        battle_action_check_blade_grasp_usability();
+        battle_action_try_blade_grasp();
         return;
     }
     if (reaction_flags & BATTLE_REACTION_SET_4_ARROW_GUARD) {
-        battle_action_check_arrow_guard_usability();
+        battle_action_try_arrow_guard();
     }
 }
 
@@ -1119,40 +1119,35 @@ static void battle_action_dispatch_target_reaction_ability(void) {
         return;
     unit = g_battle_action_target;
     if (unit->ability_flags.reaction[0] & BATTLE_REACTION_SET_1_SUNKEN_STATE) {
-        battle_action_check_counter_reaction_usability(
+        battle_action_try_counter_reaction(
             ABILITY_ID_REACTION_SUNKEN_STATE, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
     } else if (unit->ability_flags.reaction[0] & BATTLE_REACTION_SET_1_CAUTION) {
-        battle_action_check_counter_reaction_usability(
-            ABILITY_ID_REACTION_CAUTION, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
+        battle_action_try_counter_reaction(ABILITY_ID_REACTION_CAUTION, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
     } else if (unit->ability_flags.reaction[0] & BATTLE_REACTION_SET_1_DRAGON_SPIRIT) {
-        battle_action_check_counter_reaction_usability(
+        battle_action_try_counter_reaction(
             ABILITY_ID_REACTION_DRAGON_SPIRIT, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
     } else if (unit->ability_flags.reaction[0] & BATTLE_REACTION_SET_1_BRAVE_UP) {
-        battle_action_check_counter_reaction_usability(
-            ABILITY_ID_REACTION_BRAVE_UP, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
+        battle_action_try_counter_reaction(ABILITY_ID_REACTION_BRAVE_UP, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
     } else if (unit->ability_flags.reaction[1] & BATTLE_REACTION_SET_2_FAITH_UP) {
-        battle_action_check_mp_cost_reaction_usability(ABILITY_ID_REACTION_FAITH_UP);
+        battle_action_try_mp_cost_reaction(ABILITY_ID_REACTION_FAITH_UP);
     } else if (unit->ability_flags.reaction[1] & BATTLE_REACTION_SET_2_COUNTER_TACKLE) {
-        battle_action_check_counter_reaction_usability(
+        battle_action_try_counter_reaction(
             ABILITY_ID_REACTION_COUNTER_TACKLE, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
     } else if (unit->ability_flags.reaction[1] & BATTLE_REACTION_SET_2_COUNTER_FLOOD) {
-        battle_action_check_counter_reaction_usability(
-            ABILITY_ID_REACTION_COUNTER_FLOOD, ABILITY_SECONDARY_FLAG_4_COUNTER_FLOOD);
+        battle_action_try_counter_reaction(ABILITY_ID_REACTION_COUNTER_FLOOD, ABILITY_SECONDARY_FLAG_4_COUNTER_FLOOD);
     } else if (unit->ability_flags.reaction[2] & BATTLE_REACTION_SET_3_ABSORB_USED_MP) {
-        battle_action_check_mp_cost_reaction_usability(ABILITY_ID_REACTION_ABSORB_USED_MP);
+        battle_action_try_mp_cost_reaction(ABILITY_ID_REACTION_ABSORB_USED_MP);
     } else if (unit->ability_flags.reaction[2] & BATTLE_REACTION_SET_3_COUNTER) {
-        battle_action_check_counter_reaction_usability(
-            ABILITY_ID_REACTION_COUNTER, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
+        battle_action_try_counter_reaction(ABILITY_ID_REACTION_COUNTER, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
     } else if (unit->ability_flags.reaction[1] & BATTLE_REACTION_SET_2_COUNTER_MAGIC) {
-        battle_action_check_counter_reaction_usability(
-            ABILITY_ID_REACTION_COUNTER_MAGIC, ABILITY_SECONDARY_FLAG_4_COUNTER_MAGIC);
+        battle_action_try_counter_reaction(ABILITY_ID_REACTION_COUNTER_MAGIC, ABILITY_SECONDARY_FLAG_4_COUNTER_MAGIC);
     }
 }
 
 /* Check the target's first equipped damage-sharing reaction, in the order MP
  * Switch, Distribute, Damage Split; when its check fails no other is tried.
  * Nothing runs for the Weapon Heal formula or a target that cannot react. */
-static void battle_action_check_damage_sharing_reaction_usability(void) {
+static void battle_action_check_damage_sharing_reactions(void) {
     unit_stats_t* unit;
     u8 flags;
 
@@ -1163,21 +1158,21 @@ static void battle_action_check_damage_sharing_reaction_usability(void) {
     unit = g_battle_action_target;
     flags = unit->ability_flags.reaction[2];
     if (flags & BATTLE_REACTION_SET_3_MP_SWITCH) {
-        battle_action_check_mp_switch_usability();
+        battle_action_try_mp_switch();
         return;
     }
     if (flags & BATTLE_REACTION_SET_3_DISTRIBUTE) {
-        battle_action_check_distribute_usability();
+        battle_action_try_distribute();
         return;
     }
     if (unit->ability_flags.reaction[3] & BATTLE_REACTION_SET_4_DAMAGE_SPLIT) {
-        battle_action_check_damage_split_usability();
+        battle_action_try_damage_split();
     }
 }
 
 /* Dispatch the first active stat-save or resource-restoring reaction. A weapon
  * that heals never triggers them. */
-static void battle_action_check_stat_save_and_restore_reaction_usability(void) {
+static void battle_action_check_stat_save_and_restore_reactions(void) {
     unit_stats_t* target;
     u8 reaction_flags;
 
@@ -1188,29 +1183,29 @@ static void battle_action_check_stat_save_and_restore_reaction_usability(void) {
     target = g_battle_action_target;
     reaction_flags = target->ability_flags.reaction[0];
     if (reaction_flags & BATTLE_REACTION_SET_1_PA_SAVE) {
-        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_PA_SAVE);
+        battle_action_try_hp_damage_reaction(ABILITY_ID_REACTION_PA_SAVE);
     } else if (reaction_flags & BATTLE_REACTION_SET_1_MA_SAVE) {
-        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_MA_SAVE);
+        battle_action_try_hp_damage_reaction(ABILITY_ID_REACTION_MA_SAVE);
     } else if (reaction_flags & BATTLE_REACTION_SET_1_SPEED_SAVE) {
-        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_SPEED_SAVE);
+        battle_action_try_hp_damage_reaction(ABILITY_ID_REACTION_SPEED_SAVE);
     } else if (reaction_flags & BATTLE_REACTION_SET_1_REGENERATOR) {
-        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_REGENERATOR);
+        battle_action_try_hp_damage_reaction(ABILITY_ID_REACTION_REGENERATOR);
     } else {
         reaction_flags = target->ability_flags.reaction[1];
         if (reaction_flags & BATTLE_REACTION_SET_2_HP_RESTORE) {
-            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_HP_RESTORE);
+            battle_action_try_critical_hp_reaction(ABILITY_ID_REACTION_HP_RESTORE);
         } else if (reaction_flags & BATTLE_REACTION_SET_2_MP_RESTORE) {
-            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_MP_RESTORE);
+            battle_action_try_critical_hp_reaction(ABILITY_ID_REACTION_MP_RESTORE);
         } else if (reaction_flags & BATTLE_REACTION_SET_2_CRITICAL_QUICK) {
-            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_CRITICAL_QUICK);
+            battle_action_try_critical_hp_reaction(ABILITY_ID_REACTION_CRITICAL_QUICK);
         } else if (reaction_flags & BATTLE_REACTION_SET_2_MEATBONE_SLASH) {
-            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_MEATBONE_SLASH);
+            battle_action_try_critical_hp_reaction(ABILITY_ID_REACTION_MEATBONE_SLASH);
         } else {
             reaction_flags = target->ability_flags.reaction[2];
             if (reaction_flags & BATTLE_REACTION_SET_3_GILGAME_HEART) {
-                battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_GILGAME_HEART);
+                battle_action_try_hp_damage_reaction(ABILITY_ID_REACTION_GILGAME_HEART);
             } else if (reaction_flags & BATTLE_REACTION_SET_3_AUTO_POTION) {
-                battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_AUTO_POTION);
+                battle_action_try_hp_damage_reaction(ABILITY_ID_REACTION_AUTO_POTION);
             }
         }
     }
@@ -1219,14 +1214,14 @@ static void battle_action_check_stat_save_and_restore_reaction_usability(void) {
 /* Arm a counter-type reaction on the target: the attack must not come through
  * Math Skill, its flags_4 must have a bit of mask, and the target's Brave roll
  * must pass. Records the reaction and the ability it answers. */
-static void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 mask) {
+static void battle_action_try_counter_reaction(u16 reaction_id, u32 mask) {
     action_data_t* action;
 
     if (g_battle_action_current_ability.skillset == SKILLSET_ID_MATH_SKILL)
         return;
     if ((g_battle_action_current_ability.range_data.flags_4 & mask) == 0)
         return;
-    if (battle_action_calculate_chance_to_react(g_battle_action_target) != 0)
+    if (battle_action_fails_reaction_roll(g_battle_action_target) != 0)
         return;
     action = g_battle_action_target_data;
     action->reaction_id = reaction_id;
@@ -1235,11 +1230,11 @@ static void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 
 
 /* Record reaction_id when the action deals HP damage and the target passes its
  * reaction roll; the HP damage is the reaction's amount. */
-static void battle_action_check_hp_damage_reaction_usability(s16 reaction_id) {
+static void battle_action_try_hp_damage_reaction(s16 reaction_id) {
     action_data_t* action;
 
     if ((g_battle_action_target_data->attack_type & ACTION_TYPE_HP_DAMAGE)
-        && battle_action_calculate_chance_to_react(g_battle_action_target) == 0) {
+        && battle_action_fails_reaction_roll(g_battle_action_target) == 0) {
         action = g_battle_action_target_data;
         action->reaction_id = reaction_id;
         action->last_received_attack = action->hp_damage;
@@ -1248,24 +1243,24 @@ static void battle_action_check_hp_damage_reaction_usability(s16 reaction_id) {
 
 /* Record reaction_id for a target that is in Critical, is taking HP damage and
  * passes its reaction roll. */
-static void battle_action_check_critical_hp_reaction_usability(s16 reaction_id) {
+static void battle_action_try_critical_hp_reaction(s16 reaction_id) {
     unit_stats_t* unit = g_battle_action_target;
 
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRITICAL)] & STATUS_BYTE_MASK(STATUS_ID_CRITICAL))
         && (g_battle_action_target_data->attack_type & ACTION_TYPE_HP_DAMAGE)
-        && battle_action_calculate_chance_to_react(unit) == 0) {
+        && battle_action_fails_reaction_roll(unit) == 0) {
         g_battle_action_target_data->reaction_id = reaction_id;
     }
 }
 
 /* Record reaction_id when the ability cost MP and the target passes its reaction
  * roll; the MP cost is the reaction's amount. */
-static void battle_action_check_mp_cost_reaction_usability(s16 reaction_id) {
+static void battle_action_try_mp_cost_reaction(s16 reaction_id) {
     u8* used_mp = &g_battle_action_current_ability.mp_cost;
     action_data_t* action;
 
     if (*used_mp != 0) {
-        if (battle_action_calculate_chance_to_react(g_battle_action_target) == 0) {
+        if (battle_action_fails_reaction_roll(g_battle_action_target) == 0) {
             action = g_battle_action_target_data;
             action->reaction_id = reaction_id;
             action->last_received_attack = *used_mp;
@@ -1297,7 +1292,7 @@ static void battle_action_check_reflect_reaction(void) {
 /* Blade Grasp. An ability flagged Blade Grasp eligible has its accuracy set to
  * 100 - Brave of the target; when the target passes its reaction roll during
  * execution the strike becomes a miss and the reaction is recorded. */
-static void battle_action_check_blade_grasp_usability(void) {
+static void battle_action_try_blade_grasp(void) {
     unit_stats_t* target;
     action_data_t* action;
 
@@ -1307,7 +1302,7 @@ static void battle_action_check_blade_grasp_usability(void) {
     action = g_battle_action_target_data;
     /* 16-bit store covers attack_accuracy and the pad byte after it. */
     action->attack_accuracy = 100 - target->brave;
-    if (battle_action_calculate_chance_to_react(target) != 0)
+    if (battle_action_fails_reaction_roll(target) != 0)
         return;
     if (g_battle_action_state != ACTION_STATE_EXECUTE)
         return;
@@ -1321,7 +1316,7 @@ static void battle_action_check_blade_grasp_usability(void) {
  * The displayed accuracy becomes 100 - Brave; a successful Brave roll while
  * executing changes the target result to the shared class-evade/Arrow Guard
  * miss type. */
-static void battle_action_check_arrow_guard_usability(void) {
+static void battle_action_try_arrow_guard(void) {
     unit_stats_t* target;
     action_data_t* action;
 
@@ -1336,7 +1331,7 @@ static void battle_action_check_arrow_guard_usability(void) {
     action = g_battle_action_target_data;
     /* The accuracy field is written as a 16-bit value (sh) here. */
     action->attack_accuracy = 100 - target->brave;
-    if (battle_action_calculate_chance_to_react(g_battle_action_target) == 0
+    if (battle_action_fails_reaction_roll(g_battle_action_target) == 0
         && g_battle_action_state == ACTION_STATE_EXECUTE) {
         g_battle_action_target_data->hit = 0;
         g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD;
@@ -1348,7 +1343,7 @@ static void battle_action_check_arrow_guard_usability(void) {
  * roll, move the HP damage onto MP (capped at 999) and mark the reaction.
  *
  * Only an executing action (not a preview or simulation) is converted. */
-static void battle_action_check_mp_switch_usability(void) {
+static void battle_action_try_mp_switch(void) {
     unit_stats_t* unit;
     action_data_t* action;
     action_data_t* action2;
@@ -1361,7 +1356,7 @@ static void battle_action_check_mp_switch_usability(void) {
     if (unit->mp == 0) {
         return;
     }
-    if (battle_action_calculate_chance_to_react(g_battle_action_target) != 0) {
+    if (battle_action_fails_reaction_roll(g_battle_action_target) != 0) {
         return;
     }
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
@@ -1383,13 +1378,13 @@ static void battle_action_check_mp_switch_usability(void) {
 
 /* Distribute: when the healing exceeds the target's missing HP and the reaction
  * roll passes, record the reaction with the excess as its amount. */
-static void battle_action_check_distribute_usability(void) {
+static void battle_action_try_distribute(void) {
     unit_stats_t* target = g_battle_action_target;
     action_data_t* action = g_battle_action_target_data;
     /* hp_healing is read signed (lh) here. */
     s32 excess = action->hp_healing - (target->max_hp - target->hp);
 
-    if (excess > 0 && battle_action_calculate_chance_to_react(target) == 0) {
+    if (excess > 0 && battle_action_fails_reaction_roll(target) == 0) {
         g_battle_action_target_data->last_received_attack = excess;
         g_battle_action_target_data->reaction_id = ABILITY_ID_REACTION_DISTRIBUTE;
     }
@@ -1397,11 +1392,11 @@ static void battle_action_check_distribute_usability(void) {
 
 /* Damage Split: when the target takes HP damage and passes its reaction roll,
  * record the reaction with half the damage, rounded up, as its amount. */
-static void battle_action_check_damage_split_usability(void) {
+static void battle_action_try_damage_split(void) {
     u16 hp = g_battle_action_target_data->hp_damage;
     action_data_t* action;
 
-    if (hp != 0 && battle_action_calculate_chance_to_react(g_battle_action_target) == 0) {
+    if (hp != 0 && battle_action_fails_reaction_roll(g_battle_action_target) == 0) {
         hp++;
         hp = hp >> 1;
         action = g_battle_action_target_data;
@@ -1412,7 +1407,7 @@ static void battle_action_check_damage_split_usability(void) {
 
 /* Reaction roll: returns 0 when the unit reacts, a Brave in 100 chance.
  * Outside execution it always returns 0. */
-s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit) {
+s32 battle_action_fails_reaction_roll(const unit_stats_t* unit) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
@@ -1813,7 +1808,7 @@ s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit) {
     battle_action_clear_current_data(&unit->action);
     if (main_unit_has_status_in_set(unit, STATUS_CHECK_SET_PREVENT_REACTION))
         return -1;
-    flags = battle_move_get_support_flags(unit);
+    flags = battle_move_get_movement_ability_events(unit);
     if (flags & MOVE_POST_EVENT_MOVE_HP_UP) {
         amount = (unit->max_hp + 9) / 10;
         action = g_battle_action_target_data;

@@ -91,9 +91,9 @@ void battle_unit_set_walk_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_walk_animation(battle_unit_get_by_runtime_id(runtime_id));
 }
 
-/* battle_unit_set_animation_based_on_status by runtime id, for event scripts. */
+/* battle_unit_set_status_animation by runtime id, for event scripts. */
 void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_animation_based_on_status(battle_unit_get_by_runtime_id(runtime_id));
+    battle_unit_set_status_animation(battle_unit_get_by_runtime_id(runtime_id));
 }
 
 /* Request `animation` for a unit by runtime id, keeping its facing. */
@@ -351,10 +351,10 @@ s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* 
     return 0;
 }
 
-/* The depth point (battle_camera_convert_screen_coords_modify_by_1) of a unit's world position. A
+/* The depth point (battle_camera_get_tile_depth_point_unbiased) of a unit's world position. A
  * missing unit is not checked. No retail code calls it. */
-void battle_camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
-    battle_camera_convert_screen_coords_modify_by_1(
+void battle_camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
+    battle_camera_get_tile_depth_point_unbiased(
         battle_unit_get_world_coords_by_runtime_id(runtime_id & 0xffff), coords);
 }
 

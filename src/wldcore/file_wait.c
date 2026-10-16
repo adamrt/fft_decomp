@@ -11,7 +11,7 @@
 
 /* Start an asynchronous read of sector_count sectors at `sector` into
  * destination, once any read still pending has finished. */
-void file_wait_then_build_header(main_file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination) {
+void file_wait_then_request_read(main_file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination) {
     file_wait_for_pending();
     main_file_request_read_quiet(header, sector, sector_count, destination);
 }
@@ -29,7 +29,7 @@ void wldcore_map_load_texture(void) {
     s32 unused_stack_slot[2];
 
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_RESTART) == 0) {
-        file_wait_then_build_header(
+        file_wait_then_request_read(
             &g_main_file_cd_state, DISC_SECTOR_WORLD_WLDTEX_TM2, 0x86, g_wldcore_scratch_buffer);
         while (g_main_file_cd_state.state != MAIN_FILE_LOAD_STATE_IDLE) {
             wldcore_file_poll_vram_image_stream(&g_main_file_cd_state);

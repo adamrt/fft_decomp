@@ -42,11 +42,11 @@ typedef enum wldcore_sound_novel_state_flag {
 /* The live sound-novel state from the current instruction on: g_wldcore_sound_novel_state views
  * g_wldcore_active_saved_record from its offset 0x08. Handlers must reach it as in-struct references: the target
  * keeps each state_flags store ahead of the window and render-record updates and reloads render_index after them,
- * which GCC only does for in-struct accesses. g_wldcore_state_flags is a separate scalar view for handlers whose
- * flag loads need their own symbol base. */
+ * which GCC only does for in-struct accesses. g_wldcore_sound_novel_state_flags is a separate scalar view for handlers
+ * whose flag loads need their own symbol base. */
 typedef struct wldcore_sound_novel_state {
     u32 instruction; /* 0x00 */
-    u16 state_flags; /* 0x04; g_wldcore_state_flags; wldcore_sound_novel_state_flag_e */
+    u16 state_flags; /* 0x04; g_wldcore_sound_novel_state_flags; wldcore_sound_novel_state_flag_e */
     u8 _unused_06[0x0e];
     s16 render_index; /* 0x14 */
     s16 picture;      /* 0x16 */
@@ -59,7 +59,7 @@ extern wldcore_sound_novel_state_t g_wldcore_sound_novel_state;
 /* Scalar view of g_wldcore_active_saved_record.state_flags for opcode
  * handlers that read-modify-write it beside another record store: the member
  * spelling shares one base register where the target uses absolute addresses. */
-extern u16 g_wldcore_state_flags;
+extern u16 g_wldcore_sound_novel_state_flags;
 extern void (*g_wldcore_sound_novel_opcode_handlers[])(void); /* by the instruction's low byte */
 s32 wldcore_script_run_until_yield(void);
 u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode);
@@ -71,8 +71,8 @@ void wldcore_sound_novel_opcode_1e_apply_counter_delta(void);
 /* saved readings */
 extern wldcore_saved_record_t g_wldcore_active_saved_record;
 /* The sound novel being read: it selects the script files, and below 5 its saved reading in
- * g_main_saved_records. */
-extern s16 g_wldcore_saved_record_index;
+ * g_main_sound_novel_saved_records. */
+extern s16 g_wldcore_sound_novel_index;
 void wldcore_reset_selected_saved_record(s32 unused);
 void wldcore_sound_novel_restore_saved_state(s32 render_index);
 

@@ -237,7 +237,7 @@ typedef struct battle_unit {
      * for each new action. */
     u8 continue_attack_count;
     /* 0x1b6; the auto-battle command kind stored before target select
-     * (AI_COMMAND_AUTOBATTLE_TARGETED_SELECT requires an enemy, _RECOVERY_SELECT an ally) or
+     * (AI_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_SELECT requires an enemy, _PROTECT_ALLIES_SELECT an ally) or
      * target display (the two DISPLAY kinds). */
     u8 target_select_command;
     u8 status_display_image_count; /* 0x1b7; capped at 0x1b */
@@ -249,10 +249,10 @@ typedef struct battle_unit {
     battle_unit_anim_state_t animation;                           /* 0x1d8..0x207 */
     battle_unit_sprite_block_t sprite_blocks[3];                  /* 0x208..0x297 */
     u8 shadow_graphic_trigger;                                    /* 0x298; nonzero: draw the unit's shadow */
-    u8 shadow_dirty;        /* 0x299; bit 0 set when a step lands, cleared on shadow redraw */
-    u8 shadow_counter;      /* 0x29a; shadow animation counter (battle_gfx_draw_unit_shadow) */
-    u8 _padding_29b;        /* aligns shadow_quad */
-    SVECTOR shadow_quad[4]; /* 0x29c; shadow corners written by battle_gfx_calculate_sprite_shadow_from_tile_slope */
+    u8 shadow_dirty;                         /* 0x299; bit 0 set when a step lands, cleared on shadow redraw */
+    u8 shadow_counter;                       /* 0x29a; shadow animation counter (battle_gfx_draw_unit_shadow) */
+    u8 _padding_29b;                         /* aligns shadow_quad */
+    SVECTOR shadow_quad[4];                  /* 0x29c; shadow corners written by battle_gfx_build_unit_shadow_quad */
     action_result_display_t numeric_display; /* 0x2bc..0x2cf */
     u8 item_display_active;                  /* 0x2d0; BATTLE_SEQ_OP_SHOW_ITEM: draw item_display */
     u8 _unused_2d1;                          /* 0x2d1 */

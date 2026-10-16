@@ -29,7 +29,7 @@
 
 static void wldcore_sound_novel_branch_if_dialog_option(s32 branch_if_equal);
 static void wldcore_sound_novel_branch_if_local_flag(s32 expected);
-static void wldcore_sound_novel_branch_if_saved_bit(s32 expected);
+static void wldcore_sound_novel_branch_if_saved_flag(s32 expected);
 static void wldcore_sound_novel_branch_if_section_read_state(s32 expected);
 static void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record);
 static void wldcore_sound_change_scenario_music(s32 music_id);
@@ -52,8 +52,8 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     s32 section;
     u16* state_flags;
 
-    if (g_wldcore_saved_record_index < 5) {
-        g_wldcore_active_saved_record = g_main_saved_records[g_wldcore_saved_record_index];
+    if (g_wldcore_sound_novel_index < 5) {
+        g_wldcore_active_saved_record = g_main_sound_novel_saved_records[g_wldcore_sound_novel_index];
     } else {
         wldcore_reset_saved_record_fields(&g_wldcore_active_saved_record);
     }
@@ -133,7 +133,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     g_wldcore_screen_fade_state.boxes[1].b = tint;
     g_wldcore_screen_fade_state.priorities[1] = 0xB;
     wldcore_sound_wait_for_queue_drain();
-    wldcore_load_sound_novel_files(g_wldcore_saved_record_index);
+    wldcore_load_sound_novel_files(g_wldcore_sound_novel_index);
     file_wait_for_pending();
     section = g_wldcore_active_saved_record.section;
     if (section != 0) {
@@ -152,7 +152,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
 /* Reset the selected sound novel's saved record so the next reading starts from the beginning; the
  * argument is unused. */
 void wldcore_reset_selected_saved_record(s32 unused) {
-    wldcore_reset_saved_record_fields(&g_main_saved_records[g_wldcore_saved_record_index]);
+    wldcore_reset_saved_record_fields(&g_main_sound_novel_saved_records[g_wldcore_sound_novel_index]);
 }
 
 /* Reset a sound-novel record to the start of a reading: no text history, no
@@ -183,7 +183,7 @@ static void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record) {
  *   BRANCH marks the reached section's saved-data bit (novel * 256 +
  *   section), moves on to the next section, points the instructions at that
  *   section's offset in the save-slot buffer and, for the five saved novels,
- *   copies the whole record into g_main_saved_records[g_wldcore_saved_record_index];
+ *   copies the whole record into g_main_sound_novel_saved_records[g_wldcore_sound_novel_index];
  *
  *   FETCH loads the next 32-bit instruction and advances the word index,
  *   setting FETCHED for the handler's first call;
@@ -209,8 +209,8 @@ s32 wldcore_script_run_until_yield(void) {
         wldcore_sound_novel_update_countdown_timer();
 
         if (g_wldcore_active_saved_record.state_flags & WLDCORE_SOUND_NOVEL_STATE_BRANCH) {
-            wldcore_set_bit_value(
-                g_main_saved_data_bits, (g_wldcore_saved_record_index << 8) + g_wldcore_active_saved_record.section, 1);
+            wldcore_set_bit_value(g_main_sound_novel_read_section_bits,
+                (g_wldcore_sound_novel_index << 8) + g_wldcore_active_saved_record.section, 1);
             g_wldcore_active_saved_record.state_flags &= ~WLDCORE_SOUND_NOVEL_STATE_BRANCH;
             section_byte_offset = g_wldcore_active_saved_record.buffer->offsets[g_wldcore_active_saved_record.section];
             g_wldcore_active_saved_record.section++;
@@ -218,8 +218,8 @@ s32 wldcore_script_run_until_yield(void) {
             g_wldcore_active_saved_record.state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
             g_wldcore_active_saved_record.script_words
                 = &((u32*)&g_wldcore_save_slot_buffer)[section_byte_offset / sizeof(u32)];
-            if (g_wldcore_saved_record_index < 5) {
-                memcpy(&g_main_saved_records[g_wldcore_saved_record_index], &g_wldcore_active_saved_record,
+            if (g_wldcore_sound_novel_index < 5) {
+                memcpy(&g_main_sound_novel_saved_records[g_wldcore_sound_novel_index], &g_wldcore_active_saved_record,
                     sizeof(wldcore_saved_record_t));
             }
         }
@@ -479,7 +479,7 @@ void wldcore_sound_novel_opcode_05_load_background_set(void) {
 /* Sound-novel opcode 0x06: branch to the section in instruction byte 1. */
 void wldcore_sound_novel_opcode_06_branch_to_section(void) {
     g_wldcore_active_saved_record.section = (u8)(g_wldcore_active_saved_record.instruction >> 8);
-    g_wldcore_state_flags |= WLDCORE_SOUND_NOVEL_STATE_BRANCH;
+    g_wldcore_sound_novel_state_flags |= WLDCORE_SOUND_NOVEL_STATE_BRANCH;
 }
 
 /* Sound-novel opcode 0x07: branch to the section in byte 1 when the chosen dialog option equals
@@ -535,7 +535,7 @@ void wldcore_sound_novel_opcode_09_wait_frames(void) {
 }
 
 /* Sound-novel opcode: loads picture byte 1 through
- * wldcore_proposition_load_picture_data_set, places its render record at
+ * wldcore_gfx_load_picture_set, places its render record at
  * (byte 3 - 0x80, byte 2 - 0x78), uploads the TIM's pixels and CLUT, and
  * binds the render record to the VRAM image. */
 void wldcore_sound_novel_opcode_0a_load_picture(void) {
@@ -555,7 +555,7 @@ void wldcore_sound_novel_opcode_0a_load_picture(void) {
     g_wldcore_sound_novel_state.picture = picture;
     g_wldcore_sound_novel_state.x = x;
     g_wldcore_sound_novel_state.y = y;
-    wldcore_proposition_load_picture_data_set(picture);
+    wldcore_gfx_load_picture_set(picture);
     file_wait_for_pending();
     g_wldcore_window_render_records[g_wldcore_sound_novel_state.render_index].base.x = x - 0x80;
     g_wldcore_window_render_records[g_wldcore_sound_novel_state.render_index].base.y = y - 0x78;
@@ -636,20 +636,21 @@ void wldcore_sound_novel_opcode_0e_branch_to_random_section(void) {
 }
 
 /* Sound-novel opcode 0x0F: branch to the section in byte 3 when section byte 2 of novel byte 1 has
- * been reached, i.e. bit (byte 1 << 8 | byte 2) of g_main_saved_data_bits that
+ * been reached, i.e. bit (byte 1 << 8 | byte 2) of g_main_sound_novel_read_section_bits that
  * wldcore_script_run_until_yield sets on each branch. */
 void wldcore_sound_novel_opcode_0f_branch_if_section_read(void) {
     wldcore_sound_novel_branch_if_section_read_state(1);
 }
 
 /* Branch to section byte 3 when bit (byte 1 << 8 | byte 2) of
- * g_main_saved_data_bits equals `expected`; otherwise fetch the next
+ * g_main_sound_novel_read_section_bits equals `expected`; otherwise fetch the next
  * instruction. */
 static void wldcore_sound_novel_branch_if_section_read_state(s32 expected) {
     u32* instruction = &g_wldcore_sound_novel_state.instruction;
     u16 flags;
 
-    if (wldcore_test_bit(g_main_saved_data_bits, ((u8)(*instruction >> 8) << 8) | (u8)(*instruction >> 16))
+    if (wldcore_test_bit(
+            g_main_sound_novel_read_section_bits, ((u8)(*instruction >> 8) << 8) | (u8)(*instruction >> 16))
         == expected) {
         flags = g_wldcore_active_saved_record.state_flags | WLDCORE_SOUND_NOVEL_STATE_BRANCH;
         g_wldcore_active_saved_record.section = (*instruction >> 24);
@@ -666,19 +667,19 @@ void wldcore_sound_novel_opcode_10_branch_if_section_unread(void) {
 }
 
 /* Sound-novel opcode 0x11: branch to the section in byte 2 when saved flag byte 1
- * (g_main_secondary_saved_data_bits) is set. */
-void wldcore_sound_novel_opcode_11_branch_if_saved_bit_set(void) {
-    wldcore_sound_novel_branch_if_saved_bit(1);
+ * (g_main_sound_novel_saved_flags) is set. */
+void wldcore_sound_novel_opcode_11_branch_if_saved_flag_set(void) {
+    wldcore_sound_novel_branch_if_saved_flag(1);
 }
 
-/* Branch to section byte 2 when bit byte 1 of g_main_secondary_saved_data_bits
+/* Branch to section byte 2 when bit byte 1 of g_main_sound_novel_saved_flags
  * equals `expected`; otherwise fetch the next instruction. */
-static void wldcore_sound_novel_branch_if_saved_bit(s32 expected) {
+static void wldcore_sound_novel_branch_if_saved_flag(s32 expected) {
     u32* instruction = &g_wldcore_sound_novel_state.instruction;
     u16 flags;
 
     /* Keep the instruction address live across the call for both operand loads. */
-    if (wldcore_test_bit(g_main_secondary_saved_data_bits, (u8)(*instruction >> 8)) == expected) {
+    if (wldcore_test_bit(g_main_sound_novel_saved_flags, (u8)(*instruction >> 8)) == expected) {
         flags = g_wldcore_active_saved_record.state_flags | WLDCORE_SOUND_NOVEL_STATE_BRANCH;
         g_wldcore_active_saved_record.section = (u8)(*instruction >> 16);
     } else {
@@ -688,8 +689,8 @@ static void wldcore_sound_novel_branch_if_saved_bit(s32 expected) {
 }
 
 /* Sound-novel opcode 0x12: branch to the section in byte 2 when saved flag byte 1 is clear. */
-void wldcore_sound_novel_opcode_12_branch_if_saved_bit_clear(void) {
-    wldcore_sound_novel_branch_if_saved_bit(0);
+void wldcore_sound_novel_opcode_12_branch_if_saved_flag_clear(void) {
+    wldcore_sound_novel_branch_if_saved_flag(0);
 }
 
 /* Sound-novel opcode 0x13: branch to the section in byte 2 when local flag byte 1 is set; the
@@ -718,15 +719,15 @@ void wldcore_sound_novel_opcode_14_branch_if_local_flag_clear(void) {
     wldcore_sound_novel_branch_if_local_flag(0);
 }
 
-/* Sound-novel opcode 0x15: set saved flag byte 1 (g_main_secondary_saved_data_bits). */
-void wldcore_sound_novel_opcode_15_set_saved_bit(void) {
-    wldcore_set_bit_value(g_main_secondary_saved_data_bits, (u8)(g_wldcore_active_saved_record.instruction >> 8), 1);
+/* Sound-novel opcode 0x15: set saved flag byte 1 (g_main_sound_novel_saved_flags). */
+void wldcore_sound_novel_opcode_15_set_saved_flag(void) {
+    wldcore_set_bit_value(g_main_sound_novel_saved_flags, (u8)(g_wldcore_active_saved_record.instruction >> 8), 1);
     g_wldcore_active_saved_record.state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode 0x16: clear saved flag byte 1. */
-void wldcore_sound_novel_opcode_16_clear_saved_bit(void) {
-    wldcore_set_bit_value(g_main_secondary_saved_data_bits, (u8)(g_wldcore_active_saved_record.instruction >> 8), 0);
+void wldcore_sound_novel_opcode_16_clear_saved_flag(void) {
+    wldcore_set_bit_value(g_main_sound_novel_saved_flags, (u8)(g_wldcore_active_saved_record.instruction >> 8), 0);
     g_wldcore_active_saved_record.state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -745,7 +746,7 @@ void wldcore_sound_novel_opcode_18_clear_local_flag(void) {
 /* Sound-novel opcode 0x19: set the record's counter to the 16-bit operand in bytes 1-2. */
 void wldcore_sound_novel_opcode_19_set_counter(void) {
     g_wldcore_active_saved_record.counter = (g_wldcore_sound_novel_state.instruction << 8) >> 16;
-    g_wldcore_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
+    g_wldcore_sound_novel_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: add the 16-bit operand (instruction bits 8..23) to the
@@ -851,7 +852,7 @@ static void wldcore_sound_change_scenario_music(s32 music_id) {
  * script variable also changes the track, mode 0 plays only effects and weather sounds. */
 void wldcore_sound_novel_opcode_21_set_sound_mode(void) {
     g_wldcore_active_saved_record.sound_mode = (u8)(g_wldcore_active_saved_record.instruction >> 8);
-    g_wldcore_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
+    g_wldcore_sound_novel_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: branch to section byte 3 when the counter plus its
@@ -1075,7 +1076,7 @@ void wldcore_sound_novel_opcode_2c_play_sound_effect_quad(void) {
 void wldcore_sound_novel_opcode_2d_stop_weather_sound(void) {
     main_sound_stop_weather_sfx_music();
     g_wldcore_active_saved_record.sound_id = 0;
-    g_wldcore_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
+    g_wldcore_sound_novel_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: start a countdown of the 16-bit operand in seconds
@@ -1088,7 +1089,7 @@ void wldcore_sound_novel_opcode_2e_start_countdown_timer(void) {
     g_wldcore_sound_novel_countdown_elapsed = 0;
     g_wldcore_sound_novel_countdown_frames = ((instruction << 8) >> 16) * 60;
     g_wldcore_sound_novel_countdown_section = instruction >> 24;
-    g_wldcore_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
+    g_wldcore_sound_novel_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: stop the weather sound and play environment sound
@@ -1168,7 +1169,7 @@ void wldcore_sound_novel_opcode_33_add_counter_delta_if_choice(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION) == expected) {
         g_wldcore_sound_novel_counter_delta += (s32)((*instruction << 8) >> 16) - 0x8000;
     }
-    g_wldcore_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
+    g_wldcore_sound_novel_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: yield while a screen fade is running. */
@@ -1193,5 +1194,5 @@ void wldcore_sound_novel_opcode_35_push_operand_history(void) {
     g_wldcore_sound_novel_text_history_1 = history_2;
     g_wldcore_sound_novel_text_history_2 = history_3;
     g_wldcore_sound_novel_text_history_3 = new_entry;
-    g_wldcore_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
+    g_wldcore_sound_novel_state_flags |= WLDCORE_SOUND_NOVEL_STATE_FETCH;
 }

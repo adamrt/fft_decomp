@@ -32,7 +32,7 @@ void battle_camera_set_current_real_coords(const VECTOR* coords) {
 }
 
 /* Starts a linear move of the camera position to `destination` (20.12) over
- * frame_count frames (divided by the animation speed), applied by
+ * frame_count frames (divided by the vsync interval), applied by
  * battle_camera_update_real_coord_animation. No retail code calls it.
  *
  * Like every move starter here, it divides by the frame count as read back from
@@ -49,7 +49,7 @@ void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destinati
 }
 
 /* Starts a linear move of the camera position by the vector `values` (20.12) over
- * frame_count frames (divided by the animation speed). No retail code calls it. */
+ * frame_count frames (divided by the vsync interval). No retail code calls it. */
 void battle_camera_set_real_coord_delta_from_values(const VECTOR* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_vsync_interval;
 
@@ -92,7 +92,7 @@ void battle_camera_set_screen_offset(const VECTOR* coords) {
 }
 
 /* Starts a linear move of all three screen-offset components to the one value
- * *destination_value over frame_count frames (divided by the animation speed).
+ * *destination_value over frame_count frames (divided by the vsync interval).
  * battle_camera_update_screen_offset_animation applies it.
  *
  * The per-frame step is stored in g_battle_camera_real_coord_delta, the vector
@@ -115,7 +115,7 @@ void battle_camera_start_screen_offset_move_uniform(const s32* destination_value
 }
 
 /* Starts a linear move of the screen offset by the vector `values` over
- * frame_count frames (divided by the animation speed).
+ * frame_count frames (divided by the vsync interval).
  *
  * The per-frame step is stored in g_battle_camera_real_coord_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
@@ -171,7 +171,7 @@ void battle_camera_set_zoom(const VECTOR* zoom) {
 }
 
 /* Starts a linear change of all three zoom scales to the one value
- * *destination_value over frame_count frames (divided by the animation speed),
+ * *destination_value over frame_count frames (divided by the vsync interval),
  * applied by battle_camera_update_zoom_animation. No retail code calls it. */
 void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_vsync_interval;
@@ -185,7 +185,7 @@ void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 f
 }
 
 /* Starts a linear change of the zoom scales by the vector `values` over
- * frame_count frames (divided by the animation speed), applied by
+ * frame_count frames (divided by the vsync interval), applied by
  * battle_camera_update_zoom_animation. No retail code calls it. The body repeats
  * battle_camera_set_real_coord_delta_from_values with the zoom globals. */
 void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_count) {
@@ -230,7 +230,7 @@ void battle_camera_set_rotation(const SVECTOR* rotation) {
 }
 
 /* Starts a linear turn of all three camera angles to the one value
- * *destination_value over frame_count frames (divided by the animation speed),
+ * *destination_value over frame_count frames (divided by the vsync interval),
  * applied by battle_camera_update_rotation_animation. No retail code calls it. */
 void battle_camera_set_rotation_delta_from_value(const s16* destination_value, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_vsync_interval;
@@ -244,7 +244,7 @@ void battle_camera_set_rotation_delta_from_value(const s16* destination_value, s
 }
 
 /* Starts a linear turn of the camera angles by values[0..2] over frame_count
- * frames (divided by the animation speed). No retail code calls it. */
+ * frames (divided by the vsync interval). No retail code calls it. */
 void battle_camera_set_rotation_delta_from_values(const s16* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_vsync_interval;
     s32 value_x = values[0];

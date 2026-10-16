@@ -47,7 +47,7 @@ void open_system_init_title_sequence(s32 skip_movie) {
 
 /* Set up the ending: reset the runtime state, park FRAME.BIN's 64x256 VRAM page
  * at (960, 256) in (960, 0), load the ending's graphics and start FFTEND.STR. */
-void open_movie_init_and_play_end(void) {
+void open_system_init_ending(void) {
     RECT source;
 
     main_sound_unload_scenario_music_and_tunes();
@@ -68,7 +68,7 @@ void open_movie_init_and_play_end(void) {
 }
 
 /* Copy FRAME.BIN's 64x256 VRAM page (the window frames and UI sprites) back
- * from (960, 0), where open_movie_init_and_play_end parked it before the
+ * from (960, 0), where open_system_init_ending parked it before the
  * ending's graphics loaded, to (960, 256). */
 void open_gfx_restore_frame_bin_page(void) {
     RECT source;

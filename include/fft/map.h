@@ -392,7 +392,7 @@ extern u16 g_map_refresh_pending;
 s32 map_get_weather(void);
 void map_wait_for_refresh(void);
 /* Thread body: marks the deployment finished, for a battle that skips the deployment screen. */
-void map_data_load_complete_thread(void);
+void map_skip_deployment_thread(void);
 
 /* script lighting */
 /* Interpolates the script light transform (g_script_light_* in script.h) each frame. */

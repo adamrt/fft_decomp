@@ -72,7 +72,7 @@ void battle_effect_replace_flags_0006(struct effect_flag_prefix* object, s32 val
 void battle_effect_reset_subsystems(void);
 void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_secondary_init_t* source);
 void battle_effect_start_new(s32 ability_id, s32 target_mode, effect_start_target_data_t target);
-s32 battle_effect_try_init_data(void);
+s32 battle_effect_poll_file_load(void);
 s32 battle_effect_update_cycle(void);
 
 /* script records */

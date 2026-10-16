@@ -52,7 +52,7 @@ static void battle_target_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi)
 static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y);
 static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags);
 static void battle_target_clear_range_on_untargetable_tiles(void);
-static s32 battle_target_clear_selection_state_of_all_panels(void);
+static s32 battle_target_set_ability_range_flags_from_marks(void);
 static s32 battle_target_keep_only_target_tile(const action_command_t* action);
 static s32 battle_target_run_calculator(const action_command_t* source);
 static s32 battle_target_set_ability_range_flags(void);
@@ -2975,7 +2975,7 @@ static s32 battle_target_set_ability_panels(const action_command_t* source) {
     if (flags_1
         & (ABILITY_SECONDARY_FLAG_1_VERTICAL_FIXED | ABILITY_SECONDARY_FLAG_1_ENEMY_UNIT_PANELS
             | ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS)) {
-        return battle_target_clear_selection_state_of_all_panels();
+        return battle_target_set_ability_range_flags_from_marks();
     }
     return battle_target_set_ability_range_flags();
 }
@@ -3034,7 +3034,7 @@ static s32 battle_target_set_ability_range_flags(void) {
  * vertical-fixed or a unit-panels flag; the others end with
  * battle_target_set_ability_range_flags, which tests the panel's
  * range instead of its mark. */
-static s32 battle_target_clear_selection_state_of_all_panels(void) {
+static s32 battle_target_set_ability_range_flags_from_marks(void) {
     map_tile_t* tile;
     target_panel_t* panel;
     s32 count = 0;

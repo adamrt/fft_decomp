@@ -105,5 +105,7 @@ extern s32 g_wldcore_loaded_background_set;
 /* Offsets of the 1 KiB bands of a picture, in the order its dissolving upload fills them. */
 extern u16* g_wldcore_dissolve_band_order;
 void wldcore_gfx_load_background_set(s32 set);
+s32 wldcore_gfx_load_location_picture(s32 index);
+void wldcore_gfx_load_picture_set(s32 value);
 
 #endif

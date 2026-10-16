@@ -12,8 +12,8 @@
 /* Raw VSync mode; animation and script steps use 1 when this is zero. */
 extern s8 g_menu_event_speed;
 /* Set while a menu thread forces event speed 2; the previous speed is saved. */
-extern u16 g_menu_animation_speed_forced;
-extern u16 g_menu_saved_animation_speed;
+extern u16 g_menu_vsync_interval_forced;
+extern u16 g_menu_saved_vsync_interval;
 
 s32 menu_get_event_speed(void);
 void menu_set_vsync_mode_and_event_speed(s32 speed);

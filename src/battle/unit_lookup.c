@@ -90,7 +90,7 @@ static void battle_state_run_deployment(void) {
     main_gfx_build_now_loading_center(g_battle_deployment_skipped);
     map_id = g_battle_map_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
     g_battle_state_map_init_step = 0;
-    g_battle_map_data_load_complete = 0;
+    g_battle_deployment_finished = 0;
 
     SetPolyF4(&g_battle_screen_fade_polygons[0]);
     setRGB0(&g_battle_screen_fade_polygons[0], 0, 0, 0);
@@ -147,7 +147,7 @@ static void battle_state_run_deployment(void) {
             g_battle_state_map_init_step, script_is_deployment_running(main_gfx_get_otag(), g_input_current_buttons));
         if (g_battle_state_map_init_step == 0xd) {
             battle_gfx_extract_deployed_unit_palettes();
-            battle_action_set_casting_unit_id_ff_and_init();
+            battle_state_enter_event_at_battle_start();
             g_battle_screen_fade_intensity = fade;
             /* Not `break`: jump optimization would move this exit block
              * past the loop end, which the target keeps inline. */
@@ -784,7 +784,7 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
         }
         if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_battle_gfx_worker8_sp2_files[index].size;
-            return main_file_call_build_header(lba, byte_length, destination) != 0;
+            return main_file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     } else {
         lba = g_battle_gfx_sp2_files[spritesheet_id].sector;
@@ -793,7 +793,7 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
         }
         if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_battle_gfx_sp2_files[spritesheet_id].size;
-            return main_file_call_build_header(lba, byte_length, destination) != 0;
+            return main_file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     }
     return -1;
@@ -912,8 +912,8 @@ static void battle_gfx_init_render_state(void) {
     g_battle_gfx_numeric_display_matrix.m[1][2] = 0;
     g_battle_gfx_numeric_display_matrix.m[0][2] = 0;
     g_battle_gfx_numeric_display_matrix.t[2] = 0;
-    g_battle_gfx_counter = 0;
-    g_battle_gfx_previous_counter = 0;
+    g_battle_gfx_sprite_prim_index = 0;
+    g_battle_gfx_frame_start_sprite_prim_index = 0;
     g_battle_gfx_unread_2 = 0;
     g_battle_gfx_unread_1 = 0;
     /* The in-use 32-bit value just past the last g_battle_units record. */
@@ -1042,14 +1042,14 @@ void battle_gfx_release_unit_sprite_display_stub(battle_gfx_sprite_display_data_
 static void battle_gfx_init_render_frame(void) {
     SetGeomOffset(0, 0);
     /* The target loads the counter unsigned (lhu). */
-    g_battle_gfx_previous_counter = g_battle_gfx_counter;
+    g_battle_gfx_frame_start_sprite_prim_index = g_battle_gfx_sprite_prim_index;
 }
 
 /* Takes the next of the 256 primitives of g_battle_gfx_sprite_prim_pool, used as
  * a ring, and returns its index. */
 s16 battle_gfx_take_sprite_prim(void) {
-    g_battle_gfx_counter = (g_battle_gfx_counter + 1) % 0x100;
-    return g_battle_gfx_counter;
+    g_battle_gfx_sprite_prim_index = (g_battle_gfx_sprite_prim_index + 1) % 0x100;
+    return g_battle_gfx_sprite_prim_index;
 }
 
 /* Queue one POLY_FT4 per sprite part in [start, end) of a sprite display.
@@ -1192,7 +1192,7 @@ void battle_gfx_set_sprite_part_semi_transparent(
 
 /* Move a point half a tile (14 units) on x and z, with signs set by the camera yaw quadrant, back
  * by `offset` on both, and 12 units up: the depth point of a stepping unit. */
-static void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32 offset) {
+static void battle_camera_get_step_depth_point(const SVECTOR* input, SVECTOR* output, s32 offset) {
     u16 x;
     u16 z;
 
@@ -1225,23 +1225,23 @@ static void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTO
     }
 }
 
-/* battle_camera_calculate_relative_offset with offset 1: the depth point of a stepping unit on a
+/* battle_camera_get_step_depth_point with offset 1: the depth point of a stepping unit on a
  * tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_calculate_relative_offset_by_1(const SVECTOR* input, SVECTOR* output) {
-    battle_camera_calculate_relative_offset(input, output, 1);
+void battle_camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output) {
+    battle_camera_get_step_depth_point(input, output, 1);
 }
 
-/* battle_camera_calculate_relative_offset with offset 5: the depth point of a stepping unit on a
+/* battle_camera_get_step_depth_point with offset 5: the depth point of a stepping unit on a
  * tile with MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR* output) {
-    battle_camera_calculate_relative_offset(input, output, 5);
+void battle_camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output) {
+    battle_camera_get_step_depth_point(input, output, 5);
 }
 
 /*
  * Snap a screen-space point to the 28-unit tile grid for the current camera
  * yaw, writing the result to output.
  *
- * Same shape as battle_camera_calculate_relative_offset: each of the x and z
+ * Same shape as battle_camera_get_step_depth_point: each of the x and z
  * components picks up the caller's offset with a sign that depends on the yaw
  * quadrant, and the y component is a plain bias. Here each component is first
  * snapped down to a whole tile, and on the side the camera faces away from it
@@ -1249,7 +1249,7 @@ void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR*
  * far_edge temporaries keep the target's add-then-subtract order; written
  * inline, GCC re-associates them into a longer sequence.
  */
-static void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* output, s32 offset) {
+static void battle_camera_get_tile_depth_point(const SVECTOR* input, SVECTOR* output, s32 offset) {
     s32 yaw;
 
     output->vy = input->vy - 0xb;
@@ -1285,16 +1285,16 @@ static void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input
     }
 }
 
-/* battle_camera_convert_screen_coords_by_rotation with offset 1: the depth point of a standing unit,
+/* battle_camera_get_tile_depth_point with offset 1: the depth point of a standing unit,
  * a cursor or a bubble on a tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination) {
-    battle_camera_convert_screen_coords_by_rotation(screen, destination, 1);
+void battle_camera_get_tile_depth_point_unbiased(const SVECTOR* screen, SVECTOR* destination) {
+    battle_camera_get_tile_depth_point(screen, destination, 1);
 }
 
-/* battle_camera_convert_screen_coords_by_rotation with offset 5: the depth point on a tile with
+/* battle_camera_get_tile_depth_point with offset 5: the depth point on a tile with
  * MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void battle_camera_convert_screen_coords_modify_by_5(const SVECTOR* screen, SVECTOR* destination) {
-    battle_camera_convert_screen_coords_by_rotation(screen, destination, 5);
+void battle_camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* destination) {
+    battle_camera_get_tile_depth_point(screen, destination, 5);
 }
 
 /* The unit's draw position: its world coordinates plus its event and SEQ offsets, with the float
@@ -1321,7 +1321,7 @@ void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* uni
  *   under the unit.
  *
  * battle_gfx_draw_unit_shadow calls it before projecting the quad. */
-void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
+void battle_gfx_build_unit_shadow_quad(battle_unit_t* unit) {
     SVECTOR coords;
     SVECTOR unused; /* unreferenced; keeps the 0x30-byte target frame */
     map_tile_t* tile;

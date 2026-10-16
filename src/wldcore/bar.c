@@ -148,9 +148,9 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
             wldcore_menu_suspend_bar_menu_level(level);
             wldcore_list_open_available_propositions();
             return;
-        case WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS:
+        case WLDCORE_BAR_MENU_ROW_RETURNED_PROPOSITIONS:
             wldcore_menu_suspend_bar_menu_level(level);
-            wldcore_list_open_completed_propositions();
+            wldcore_list_open_returned_propositions();
             return;
         case WLDCORE_BAR_MENU_ROW_PROPOSITIONS:
             wldcore_menu_suspend_bar_menu_level(level);

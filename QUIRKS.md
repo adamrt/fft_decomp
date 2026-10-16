@@ -33,7 +33,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   (a unit staged outside the map, its world coordinates read unsigned) gets no
   tile, and the null tile is read from RAM address 0. The unit shadow, palette
   modulation and per-frame rotation code (`battle_gfx_draw_unit_shadow`,
-  `battle_gfx_calculate_sprite_shadow_from_tile_slope`,
+  `battle_gfx_build_unit_shadow_quad`,
   `battle_gfx_apply_unit_palette_modulation`,
   `battle_gfx_project_all_units`) do the same for units
   that chapter-end cutscenes walk off the map.
@@ -498,7 +498,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Jump, and `menu_load_selected_unit` reloads the unit after every
   change, so the other edits are lost at once.
 - `wldcore_script_calculate_save_data_completion_percent` (no caller) counts
-  0x1000 bits from `g_main_saved_data_bits`, which holds 1,280 (40 words), so it
+  0x1000 bits from `g_main_sound_novel_read_section_bits`, which holds 1,280 (40 words), so it
   also counts `g_main_item_location_flags` and the first 224 bytes of
   `g_main_item_poached_quantities`.
 - `open_movie_update_stream_frame` restarts a stream whose ring has fewer than
@@ -537,7 +537,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   own bounds (`sequence_id > 0x100`, `frame > 0x200`) admit the index one past
   each table. `battle_ai_select_action_autobattle` falls back from the
   recovery policy to retreat on a -2 result, which
-  `battle_ai_select_action_recovery` never returns (only 0 or -1);
+  `battle_ai_select_action_protect_allies` never returns (only 0 or -1);
   `battle_action_run_between_turn_events` has a case for turn event 0x400
   (`BATTLE_TURN_EVENT_UNKNOWN_0400`), which its only source,
   `battle_action_run_between_turn_control`, never returns;
@@ -657,7 +657,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `wldcore_script_opcode_28_check_ramza_faith_at_most`) use it unchecked, so
   they test roster slot 16, the first guest slot.
 - `main_sound_start_music_load_into_free_slot` allocates the SMD block before
-  it requests the read; when `main_file_call_build_header` refuses (loader
+  it requests the read; when `main_file_request_read_bytes` refuses (loader
   busy) it reports `MAIN_SYSTEM_ERROR_SMD_LOAD` and returns 0 without freeing
   the block. `main_sound_open_music_into_slot` (no caller) does the same.
 
@@ -1136,7 +1136,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   duration means `duration` frames in a loop and over `duration` vertical
   blanks otherwise.
 - Lookups whose result is discarded:
-  `battle_target_store_cursor_unit_as_preview_target`,
+  `battle_target_show_right_unit_panel`,
   `battle_state_handle_resume_attack_phase_state` and
   `battle_state_handle_change_turn_state` call `battle_unit_get_source`;
   `battle_state_handle_targeting_range_state` (twice),

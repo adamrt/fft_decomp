@@ -43,9 +43,9 @@ void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* pos
         (position->vx / MAP_TILE_SIZE), (position->vz / MAP_TILE_SIZE), g_battle_cursor_z);
     position->vy -= tile->depth_half_height.depth * 12;
     if (tile->surface.depth_bias) {
-        battle_camera_convert_screen_coords_modify_by_5(position, raised);
+        battle_camera_get_tile_depth_point_biased(position, raised);
     } else {
-        battle_camera_convert_screen_coords_modify_by_1(position, raised);
+        battle_camera_get_tile_depth_point_unbiased(position, raised);
     }
     RotTrans(raised, projected, &flag);
     g_battle_cursor_screen_x = projected->vx;
@@ -53,7 +53,7 @@ void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* pos
 }
 
 /* Project the cursor tile and draw the map cursor over it with the glow quad on the tile surface;
- * battle_target_update_cursor calls it while g_battle_action_at_list_active is set. The tile's
+ * battle_target_update_cursor calls it while g_battle_target_cursor_visible is set. The tile's
  * untargetable flag picks the glow's palette. */
 void battle_target_calculate_tile_coords_with_cursor_glow(void) {
     SVECTOR position;
@@ -98,7 +98,7 @@ void battle_gfx_draw_wait_direction_unit(void) {
     main_util_set_svector(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
     /* The second RotTrans overwrites this result unread. */
     RotTrans(&base, &transformed, &flag);
-    battle_camera_convert_screen_coords_modify_by_1(&unit->world_coords, &raised);
+    battle_camera_get_tile_depth_point_unbiased(&unit->world_coords, &raised);
     raised.vy -= 48;
     RotTrans(&raised, &transformed, &flag);
     depth = transformed.vz / 4;

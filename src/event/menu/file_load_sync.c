@@ -9,7 +9,7 @@
  * the load has finished. */
 void file_load_sync(s32 lba, s32 size, void* destination) {
     while (1) {
-        g_thread_call_target = (void (*)(void))main_file_call_build_header;
+        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
         if (thread_call_on_main_stack(lba, size, destination) == 0) {
             break;
         }

@@ -17,7 +17,7 @@ extern wldcore_menu_stack_record_t g_wldcore_menu_stack_records[];
 /* The record and type arrays offset by one level, which the push routines index by the current depth: spelling
  * that as g_wldcore_menu_stack_records[depth + 1] changes their address arithmetic. The type view is kept only
  * where types[depth + 1] reschedules the push routine (proposition detail, tutorial topic text, the Brave Story and
- * the 0x03c0-0x03ff variable lists). */
+ * the persons list). */
 extern s32 g_wldcore_menu_stack_types_next[];
 extern wldcore_menu_stack_record_t g_wldcore_menu_stack_records_next[];
 /* Handlers by level type. Idle runs the top level each frame; suspend runs just before another level opens over it
@@ -52,7 +52,7 @@ void wldcore_menu_push_number_panel_level(void);
 void wldcore_menu_push_location_menu_level(s32 menu);
 void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
 void wldcore_menu_push_event_transition_level(s32 mode);
-void wldcore_menu_push_countdown_level(void);
+void wldcore_menu_push_discovery_level(void);
 
 /* remembered cursors */
 /* Slots of g_wldcore_menu_cursor_states: the remembered row of each list. */
@@ -61,7 +61,7 @@ typedef enum wldcore_cursor_slot {
     WLDCORE_CURSOR_SLOT_BAR_MENU = 1,
     WLDCORE_CURSOR_SLOT_RUMORS = 2,
     WLDCORE_CURSOR_SLOT_AVAILABLE_PROPOSITIONS = 3,
-    WLDCORE_CURSOR_SLOT_COMPLETED_PROPOSITIONS = 4,
+    WLDCORE_CURSOR_SLOT_RETURNED_PROPOSITIONS = 4,
     WLDCORE_CURSOR_SLOT_PROPOSITIONS = 5,
     WLDCORE_CURSOR_SLOT_UNEXPLORED_LANDS = 7,
     WLDCORE_CURSOR_SLOT_TREASURES = 8,
@@ -71,7 +71,7 @@ typedef enum wldcore_cursor_slot {
     WLDCORE_CURSOR_SLOT_PARTICIPANT_LIST = 15,
     WLDCORE_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS = 16,
     WLDCORE_CURSOR_SLOT_FORMATION_TUTORIALS = 18,
-    WLDCORE_CURSOR_SLOT_TUTORIAL_MASK_1_ENTRIES = 19,
+    WLDCORE_CURSOR_SLOT_BATTLE_TUTORIALS = 19,
     WLDCORE_CURSOR_SLOT_FACTS = 20,
 } wldcore_cursor_slot_e;
 
@@ -99,7 +99,7 @@ void wldcore_list_tutorial_topics_block_all_buttons(wldcore_menu_panel_level_t* 
 void wldcore_list_formation_tutorials_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_facts_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_battle_tutorials_block_all_buttons(wldcore_menu_panel_level_t* unused_level);
-void wldcore_list_completed_propositions_block_all_buttons(wldcore_menu_stack_record_t* unused_level);
+void wldcore_list_returned_propositions_block_all_buttons(wldcore_menu_stack_record_t* unused_level);
 void wldcore_bar_active_propositions_block_all_buttons(wldcore_menu_panel_level_t* level);
 
 /* bar */
@@ -107,7 +107,7 @@ void wldcore_bar_active_propositions_block_all_buttons(wldcore_menu_panel_level_
 typedef enum wldcore_bar_menu_row {
     WLDCORE_BAR_MENU_ROW_RUMORS = 0,
     WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS = 1,
-    WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS = 2,
+    WLDCORE_BAR_MENU_ROW_RETURNED_PROPOSITIONS = 2,
     WLDCORE_BAR_MENU_ROW_PROPOSITIONS = 3,
     WLDCORE_BAR_MENU_ROW_LEAVE = 4,
 } wldcore_bar_menu_row_e;
@@ -119,8 +119,8 @@ void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level);
 void wldcore_menu_resume_bar_menu_level(wldcore_menu_stack_record_t* level);
 void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* level);
 void wldcore_list_open_available_propositions(void);
-void wldcore_list_open_completed_propositions(void);
-void wldcore_list_handle_completed_propositions_input(wldcore_menu_stack_record_t* level);
+void wldcore_list_open_returned_propositions(void);
+void wldcore_list_handle_returned_propositions_input(wldcore_menu_stack_record_t* level);
 void wldcore_list_open_propositions(void);
 
 /* Brave Story */
@@ -160,7 +160,7 @@ void wldcore_list_open_treasures(void);
 /* Row kinds of the tutorial category list (wldcore_list_open_tutorial_categories). */
 typedef enum wldcore_tutorial_category_row {
     WLDCORE_TUTORIAL_CATEGORY_ROW_FORMATION = 0,
-    WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES = 1,
+    WLDCORE_TUTORIAL_CATEGORY_ROW_BATTLE = 1,
     WLDCORE_TUTORIAL_CATEGORY_ROW_TOPICS = 2,
     WLDCORE_TUTORIAL_CATEGORY_ROW_LEAVE = 3,
 } wldcore_tutorial_category_row_e;

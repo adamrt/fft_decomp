@@ -553,7 +553,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_EFFECT_START) {
             do {
                 thread_yield();
-                g_thread_call_target = (void (*)(void))battle_effect_try_init_data;
+                g_thread_call_target = (void (*)(void))battle_effect_poll_file_load;
             } while (thread_call_on_main_stack() != 0);
         } else if (opcode == EVENT_OPCODE_EFFECT_END) {
             thread_start(thread_resolve_id(THREAD_SLOT_FIRST_IDLE), &script_opcode_8b_effect_end_thread);

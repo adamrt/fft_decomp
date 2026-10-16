@@ -131,7 +131,7 @@ void battle_unit_start_ability_charge_animation(battle_unit_t* unit);
 void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit);
 void battle_unit_select_attack_animation_for_ability(battle_unit_t* attacker, battle_unit_t* target);
 void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_unit_t* target);
-void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id);
+void battle_unit_resolve_projectile_hit_by_runtime_id(u16 attacker_id, u16 target_id);
 void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* target);
 s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id);
 
@@ -140,8 +140,8 @@ extern s32 g_battle_unit_palette_animation_offset;
 extern s32 g_battle_unit_palette_animation_timer;
 extern s8 g_battle_unit_float_bob_offsets[24];
 
-void battle_unit_set_animation_based_on_status(battle_unit_t* unit);
-void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit);
+void battle_unit_set_status_animation(battle_unit_t* unit);
+void battle_unit_call_set_status_animation(struct battle_unit* unit);
 void battle_unit_update_animation_for_status_changes(battle_unit_t* unit);
 void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id);
 void battle_unit_set_mounted_animation(battle_unit_t* unit);

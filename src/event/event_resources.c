@@ -821,7 +821,7 @@ void gfx_load_evtchr_thread(void) {
     buffer = main_heap_alloc(0x7800);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_call_build_header;
+        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
     } while (thread_call_on_main_stack((block * 15) + DISC_SECTOR_EVENT_EVTCHR_BIN, 0x7800, buffer) != 0);
     do {
         thread_yield();
@@ -847,7 +847,7 @@ void script_opcode_50_portrait_col(s32 portrait_id) {
     buffer = menu_alloc_memory(sizeof(*buffer));
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_call_build_header;
+        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
     } while (thread_call_on_main_stack(portrait_id * 4 + DISC_SECTOR_EVENT_EVTFACE_BIN, sizeof(*buffer), buffer) != 0);
     do {
         thread_yield();
@@ -886,7 +886,7 @@ void script_load_event(s32 id) {
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_call_build_header;
+        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
     } while (thread_call_on_main_stack(
                  id * EVENT_BLOCK_SECTORS + DISC_SECTOR_EVENT_TEST_EVT, EVENT_BLOCK_BYTES, g_main_script_event_block)
         != 0);
@@ -931,7 +931,7 @@ void menu_noop_4(void) {
  * clear the request. */
 void menu_open_companion_data_file(void) {
     if ((g_menu_companion_data_file_request_index != 0) && (g_menu_companion_data_file_loading == 0)) {
-        g_thread_call_target = (void (*)(void))main_file_call_build_header;
+        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
         if (thread_call_on_main_stack(g_menu_companion_data_file_lbas[g_menu_companion_data_file_request_index],
                 g_menu_companion_data_file_sizes[g_menu_companion_data_file_request_index],
                 g_menu_companion_data_file_buffer)
@@ -955,7 +955,7 @@ void menu_open_companion_executable(void) {
     s32 idx = g_menu_companion_executable_request_index;
 
     if ((idx != 0) && (g_menu_companion_executable_loading == 0)) {
-        g_thread_call_target = (void (*)(void))main_file_call_build_header;
+        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
         if (thread_call_on_main_stack(g_menu_companion_executable_lbas[idx], g_menu_companion_executable_sizes[idx],
                 g_menu_companion_executable_offsets[idx] + (s32)g_main_heap_companion_overlay_load_address)
             == 0) {
@@ -1158,7 +1158,7 @@ s32 menu_poll_small_load(void) {
 }
 
 /* Returns 0 in BATTLE and WORLD; in BATTLE it sits between
- * menu_poll_small_load and map_data_load_complete_thread. Nothing on the disc
+ * menu_poll_small_load and map_skip_deployment_thread. Nothing on the disc
  * calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
 s32 map_return_zero_1(void) {
@@ -1166,7 +1166,7 @@ s32 map_return_zero_1(void) {
 }
 
 /* Mark map-data loading complete after one yield, then exit after another. */
-void map_data_load_complete_thread(void) {
+void map_skip_deployment_thread(void) {
     thread_yield();
     battle_deployment_mark_finished();
     thread_yield();

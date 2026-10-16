@@ -853,7 +853,7 @@ s32 battle_camera_get_input_direction(s32 source) {
 
 /* Start the hovered-unit stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
-void battle_target_store_cursor_unit_name_and_data(void) {
+void battle_target_show_hovered_unit_panel(void) {
     battle_unit_t* unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     s32 mode;
     s32 unit_id;
@@ -870,7 +870,7 @@ void battle_target_store_cursor_unit_name_and_data(void) {
 
 /* Start the right-side stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
-void battle_target_store_cursor_unit_as_preview_target(void) {
+void battle_target_show_right_unit_panel(void) {
     battle_unit_t* unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
 
     /* Retail looks up the source unit here and ignores it. */
@@ -885,7 +885,7 @@ void battle_target_store_cursor_unit_as_preview_target(void) {
 /* Start the unit panels for a selected target tile: the attack preview for the
  * source unit against the unit on the cursor tile, or the source unit's own stats
  * when the tile is empty. */
-void battle_target_store_cursor_casting_unit_name_and_data(void) {
+void battle_target_show_attack_preview_panel(void) {
     battle_unit_t* target
         = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     battle_unit_t* source = battle_unit_get_source();
@@ -920,10 +920,10 @@ void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const
         case BATTLE_GAME_STATE_FREE_CURSOR:
         case BATTLE_GAME_STATE_SELECT_MOVE_TILE:
         case BATTLE_GAME_STATE_TARGET_SELECT:
-            battle_target_store_cursor_unit_name_and_data();
+            battle_target_show_hovered_unit_panel();
             break;
         case BATTLE_GAME_STATE_TARGETING_RANGE:
-            battle_target_store_cursor_unit_as_preview_target();
+            battle_target_show_right_unit_panel();
             break;
         }
     }
@@ -1103,10 +1103,10 @@ s32 battle_target_move_cursor_by_input(void) {
         case BATTLE_GAME_STATE_FREE_CURSOR:
         case BATTLE_GAME_STATE_SELECT_MOVE_TILE:
         case BATTLE_GAME_STATE_TARGET_SELECT:
-            battle_target_store_cursor_unit_name_and_data();
+            battle_target_show_hovered_unit_panel();
             break;
         case BATTLE_GAME_STATE_TARGETING_RANGE:
-            battle_target_store_cursor_unit_as_preview_target();
+            battle_target_show_right_unit_panel();
             break;
         }
         return 1;
@@ -1263,7 +1263,7 @@ void battle_camera_handle_rotation_input(void) {
 }
 
 /* Step the yaw toward its destination by an increment that grows by twice the
- * animation speed each frame until it passes 0x2f. On arrival the yaw snaps to
+ * vsync interval each frame until it passes 0x2f. On arrival the yaw snaps to
  * the destination; while L1 (turning left) or R1 (turning right) is still held
  * outside an event, the next quarter turn starts at the speed reached, and
  * otherwise the rotation ends: both rotate sounds stop and the stop sound
@@ -1383,7 +1383,7 @@ void battle_camera_update_zoom_input(void) {
 }
 
 /* Step the three zoom scales toward the zoom target, ONE zooming in or 0xc00
- * zooming out, by an increment that grows by four times the animation speed
+ * zooming out, by an increment that grows by four times the vsync interval
  * each frame until it reaches 0x300. The zoom ends on the target. */
 void battle_camera_update_zoom(void) {
     s32 increment;
@@ -1509,7 +1509,7 @@ void battle_camera_update_tilt_input(void) {
 }
 
 /* Step the pitch toward the tilt target, 0x1c0 (high) or 0x12e (low), from
- * either side, by an increment that grows by twice the animation speed each
+ * either side, by an increment that grows by twice the vsync interval each
  * frame until it passes 0x2f. The tilt ends on the target. */
 void battle_camera_update_tilt(void) {
     s16 tilt;

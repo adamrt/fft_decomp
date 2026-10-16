@@ -31,7 +31,7 @@ extern u8 g_main_proposition_states[96]; /* wldcore_proposition_state_e */
 /* sound-novel records */
 struct wldcore_sound_novel_script_file;
 
-/* A saved sound-novel reading state (g_main_saved_records, 0x38 bytes each).
+/* A saved sound-novel reading state (g_main_sound_novel_saved_records, 0x38 bytes each).
  * wldcore_reset_selected_saved_record establishes the stride and
  * wldcore_reset_saved_record_fields resets fields selectively; meanings beyond
  * those stores remain provisional. */
@@ -40,7 +40,7 @@ typedef struct wldcore_saved_record {
     struct wldcore_sound_novel_script_file* buffer;
     u32* script_words; /* 0x04 */
     u32 instruction;   /* 0x08 */
-    /* 0x0c-0x37 mirror the live sound-novel state at g_wldcore_state_flags. */
+    /* 0x0c-0x37 mirror the live sound-novel state at g_wldcore_sound_novel_state_flags. */
     u16 state_flags;          /* 0x0c; wldcore_sound_novel_state_flag_e */
     s16 section;              /* 0x0e */
     s16 word_index;           /* 0x10; index of the 32-bit instruction in the section; cleared by
@@ -67,7 +67,7 @@ typedef struct wldcore_saved_record {
 } wldcore_saved_record_t;
 typedef char wldcore_saved_record_size_must_be_56[sizeof(wldcore_saved_record_t) == 56 ? 1 : -1];
 
-extern wldcore_saved_record_t g_main_saved_records[];
+extern wldcore_saved_record_t g_main_sound_novel_saved_records[];
 
 /* dates and saved bits */
 /* RAM bitmaps indexed by 32-bit values; the save serializer copies only their packed data
@@ -76,8 +76,8 @@ extern u32 g_main_proposition_last_attempt_date_bits[27]; /* written only for a 
 extern u32 g_main_treasure_acquisition_date_bits[14];
 extern u32 g_main_land_discovery_date_bits[5];
 
-extern u32 g_main_saved_data_bits[40];
-extern u32 g_main_secondary_saved_data_bits[2];
+extern u32 g_main_sound_novel_read_section_bits[40];
+extern u32 g_main_sound_novel_saved_flags[2];
 extern u8* g_main_brave_story_ages_source;
 extern u8 g_main_brave_story_character_ages[0x40];
 /* Saved and restored at save-image byte 0x1c88; nothing else uses it. */
@@ -89,7 +89,7 @@ extern u8 g_main_save_unread_byte; /* saved and restored with save image offset 
 extern s32 g_main_replay_story_event_index;
 extern menu_cursor_state_t g_main_saved_list_cursor_state;
 extern s32 g_main_saved_weather_variable;
-extern s32 g_main_saved_animation_speed;
+extern s32 g_main_saved_vsync_interval;
 /* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
 extern u32 g_main_tutorial_progress_masks[];
 

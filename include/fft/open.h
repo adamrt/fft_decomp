@@ -60,7 +60,7 @@ extern s32 g_open_file_current_openbk_image_id;
 extern const s32 g_open_file_openbk_start_sector_offsets[];
 extern const s32 g_open_file_openbk_end_sector_offsets[];
 
-void open_file_build_openbk_header(s32 image_id, void* destination);
+void open_file_request_openbk_image(s32 image_id, void* destination);
 void open_file_load_main_menu_graphics(void);
 void open_file_load_end_movie_graphics(void);
 s32 open_file_get_cd_sync_state_delta(void);
@@ -76,8 +76,8 @@ void open_sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration);
 /* Rows of g_open_controller_handlers: the value a push stores in
  * g_open_controller_handler_indices. */
 typedef enum open_controller_handler {
-    OPEN_CONTROLLER_FFTST_MOVIE = 0,           /* open_movie_finish_stream_controller_if_ready_or_skipped */
-    OPEN_CONTROLLER_FFTOP_MOVIE = 1,           /* open_movie_finish_fftop_controller_if_ready_or_skipped */
+    OPEN_CONTROLLER_FFTST_MOVIE = 0,           /* open_movie_update_fftst */
+    OPEN_CONTROLLER_FFTOP_MOVIE = 1,           /* open_movie_update_fftop */
     OPEN_CONTROLLER_TITLE_MENU = 2,            /* open_title_update_menu */
     OPEN_CONTROLLER_SOUND_TYPE_MENU = 3,       /* open_menu_handle_sound_type_input */
     OPEN_CONTROLLER_NEW_GAME_START = 4,        /* open_title_step_new_game_start */
@@ -85,9 +85,9 @@ typedef enum open_controller_handler {
     OPEN_CONTROLLER_BIRTHDAY_CONFIRMATION = 6, /* open_birthday_handle_confirmation_input */
     OPEN_CONTROLLER_MUSIC_TEST = 7,            /* open_menu_update_music_test */
     OPEN_CONTROLLER_TEXT_MESSAGE = 8,          /* open_controller_wait_text_message */
-    OPEN_CONTROLLER_FFTEND_MOVIE = 9,          /* open_movie_finish_fftend_controller_if_ready_or_skipped */
+    OPEN_CONTROLLER_FFTEND_MOVIE = 9,          /* open_movie_update_fftend */
     OPEN_CONTROLLER_SCRIPT = 10,               /* open_script_update_controller */
-    OPEN_CONTROLLER_TITLE_DEMO_MOVIE = 11,     /* open_movie_start_fftst_or_skip_controller */
+    OPEN_CONTROLLER_TITLE_DEMO_MOVIE = 11,     /* open_movie_update_title_demo */
     OPEN_CONTROLLER_TITLE_EXIT = 12,           /* open_title_update_card_warning */
 } open_controller_handler_e;
 
@@ -229,8 +229,8 @@ extern s32 g_open_current_controller_index;
 
 void open_controller_dispatch_current(void);
 /* The handlers, in open_controller_handler_e order. */
-void open_movie_finish_stream_controller_if_ready_or_skipped(open_controller_record_t* record);
-void open_movie_finish_fftop_controller_if_ready_or_skipped(open_controller_record_t* unused_record);
+void open_movie_update_fftst(open_controller_record_t* record);
+void open_movie_update_fftop(open_controller_record_t* unused_record);
 void open_title_update_menu(open_controller_record_t* record);
 void open_menu_handle_sound_type_input(open_controller_record_t* record);
 void open_title_step_new_game_start(open_controller_record_t* record);
@@ -238,9 +238,9 @@ void open_birthday_handle_menu_input(open_controller_record_t* record);
 void open_birthday_handle_confirmation_input(open_controller_record_t* record);
 void open_menu_update_music_test(open_controller_record_t* record);
 void open_controller_wait_text_message(open_controller_record_t* record);
-void open_movie_finish_fftend_controller_if_ready_or_skipped(open_controller_record_t* unused_record);
+void open_movie_update_fftend(open_controller_record_t* unused_record);
 void open_script_update_controller(open_controller_record_t* unused_record);
-void open_movie_start_fftst_or_skip_controller(open_controller_record_t* unused_record);
+void open_movie_update_title_demo(open_controller_record_t* unused_record);
 void open_title_update_card_warning(open_controller_record_t* record);
 
 /* title */

@@ -20,9 +20,9 @@ extern MATRIX g_battle_camera_matrix;
  * .vx is the camera pitch and .vy its yaw. */
 extern SVECTOR g_battle_camera_render_state;
 
-void battle_camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
-void battle_camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination);
-void battle_camera_convert_screen_coords_modify_by_5(const SVECTOR* screen, SVECTOR* destination);
+void battle_camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords);
+void battle_camera_get_tile_depth_point_unbiased(const SVECTOR* screen, SVECTOR* destination);
+void battle_camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* destination);
 void battle_camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords);
 void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation);
 void battle_camera_update_matrices(
@@ -166,8 +166,8 @@ extern VECTOR g_battle_camera_script_vector;
 
 /* effect tracks */
 void battle_camera_advance_effect_tracks(s16 frame);
-void battle_camera_calculate_relative_offset_by_1(const SVECTOR* input, SVECTOR* output);
-void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR* output);
+void battle_camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output);
+void battle_camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output);
 void battle_camera_start_effect_keyframe_moves(s16 frame);
 void battle_camera_update_effect_rotation_and_zoom(void);
 

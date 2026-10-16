@@ -13,7 +13,7 @@ s32 world_menu_input_read_tutorial_or_controller(s32 unused_0) {
     u32 input;
 
     if (g_world_tutorial_id != 0) {
-        input = g_world_tutorial_shift_command_bit;
+        input = g_world_tutorial_pressed_button;
     } else {
         input = PadRead(0);
     }

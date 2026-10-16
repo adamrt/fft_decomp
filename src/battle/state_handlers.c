@@ -282,7 +282,7 @@ void battle_state_handle_wait_direction_state(void) {
  * battle_unit_learn_from_crystal, RESTORE_HP_MP restores HP and MP and
  * finalizes the action, and the prompt answers only close). Then, once no effect is pending, the casting unit's
  * frame counter has reached 0x1f and no numeric display shows, work on the first
- * pending post-movement event of g_battle_move_find_result, clearing it once
+ * pending post-movement event of g_battle_move_post_move_events, clearing it once
  * done, and start the next post-movement step.
  */
 void battle_state_handle_crystal_learn_state(void) {
@@ -335,34 +335,34 @@ void battle_state_handle_crystal_learn_state(void) {
         return;
     }
 
-    if (g_battle_move_find_result & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
         if (battle_unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_z) != 0) {
             return;
         }
-        g_battle_move_find_result &= ~MOVE_POST_EVENT_CRYSTAL_OR_TREASURE;
+        g_battle_move_post_move_events &= ~MOVE_POST_EVENT_CRYSTAL_OR_TREASURE;
         battle_ai_init_selected_action();
-    } else if (g_battle_move_find_result & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
+    } else if (g_battle_move_post_move_events & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
         g_battle_action_post_action_display_phase += 1;
         if (g_battle_action_post_action_display_phase >= 2) {
-            g_battle_move_find_result &= ~MOVE_POST_EVENT_MOVEMENT_BENEFIT;
+            g_battle_move_post_move_events &= ~MOVE_POST_EVENT_MOVEMENT_BENEFIT;
         }
-    } else if (g_battle_move_find_result & MOVE_POST_EVENT_ITEM_FOUND) {
+    } else if (g_battle_move_post_move_events & MOVE_POST_EVENT_ITEM_FOUND) {
         /* Wait out a non-idle animation still playing (the find reaction). */
         if ((source->animation.wait != 0) && ((source->animation.sequence_id >> 1) >= BATTLE_UNIT_ANIMATION_WALK)) {
             return;
         }
         source->item_display_active = 0;
-        g_battle_move_find_result &= ~MOVE_POST_EVENT_ITEM_FOUND;
-    } else if (g_battle_move_find_result & MOVE_POST_EVENT_TRAP_TRIGGERED) {
-        g_battle_move_find_result &= ~MOVE_POST_EVENT_TRAP_TRIGGERED;
+        g_battle_move_post_move_events &= ~MOVE_POST_EVENT_ITEM_FOUND;
+    } else if (g_battle_move_post_move_events & MOVE_POST_EVENT_TRAP_TRIGGERED) {
+        g_battle_move_post_move_events &= ~MOVE_POST_EVENT_TRAP_TRIGGERED;
         battle_ai_init_selected_action();
         battle_unit_update_display_by_runtime_id(source->runtime_id);
-    } else if (g_battle_move_find_result & MOVE_POST_EVENT_CHARGING_CANCEL) {
-        g_battle_move_find_result &= ~MOVE_POST_EVENT_CHARGING_CANCEL;
-    } else if (g_battle_move_find_result & MOVE_POST_EVENT_SOURCE_DISPLAY) {
-        g_battle_move_find_result &= ~MOVE_POST_EVENT_SOURCE_DISPLAY;
-    } else if (g_battle_move_find_result & MOVE_POST_EVENT_MOUNT_STATUS_CHANGE) {
-        g_battle_move_find_result &= ~MOVE_POST_EVENT_MOUNT_STATUS_CHANGE;
+    } else if (g_battle_move_post_move_events & MOVE_POST_EVENT_CHARGING_CANCEL) {
+        g_battle_move_post_move_events &= ~MOVE_POST_EVENT_CHARGING_CANCEL;
+    } else if (g_battle_move_post_move_events & MOVE_POST_EVENT_SOURCE_DISPLAY) {
+        g_battle_move_post_move_events &= ~MOVE_POST_EVENT_SOURCE_DISPLAY;
+    } else if (g_battle_move_post_move_events & MOVE_POST_EVENT_MOUNT_STATUS_CHANGE) {
+        g_battle_move_post_move_events &= ~MOVE_POST_EVENT_MOUNT_STATUS_CHANGE;
     } else {
         return;
     }
@@ -731,7 +731,7 @@ void battle_state_handle_start_effect_file_open_state(void) {
         g_battle_state_animation_continue_check = 0;
     }
     if (g_battle_state_animation_continue_check == 0) {
-        battle_action_set_target_coords_and_attacker_anim();
+        battle_action_apply_strike_results();
     }
     battle_state_update_units();
 }
@@ -921,7 +921,7 @@ void battle_state_handle_resume_attack_phase_state(void) {
             battle_action_post_action_facing_stub(stats, facing & 0xff);
         }
         battle_action_store_acting_unit_data(unit->stats);
-        battle_unit_call_set_animation_based_on_status(unit);
+        battle_unit_call_set_status_animation(unit);
         battle_unit_update_target_displays(unit);
         battle_unit_get_source(); /* result unused */
         if (g_battle_action_phase != ACTION_PHASE_PRE_ACTION) {
@@ -993,7 +993,7 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
             }
             if (display_active == 0) {
                 casting_unit = battle_unit_get_source();
-                battle_unit_call_set_animation_based_on_status(casting_unit);
+                battle_unit_call_set_status_animation(casting_unit);
                 battle_unit_end_command(casting_unit);
             }
         }
@@ -1072,13 +1072,13 @@ void battle_state_handle_target_select_state(void) {
         /* The targeted choice requires an enemy, the recovery choice an ally. */
         if (target == 0) {
             battle_state_enter_target_select_denied();
-        } else if (caster->target_select_command == AI_COMMAND_AUTOBATTLE_TARGETED_SELECT) {
+        } else if (caster->target_select_command == AI_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_SELECT) {
             if ((caster->stats->team_flags & UNIT_TEAM_MASK) == (target->stats->team_flags & UNIT_TEAM_MASK)) {
                 battle_state_enter_target_select_denied();
             } else {
                 battle_state_enter_target_select_confirm();
             }
-        } else if (caster->target_select_command == AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT) {
+        } else if (caster->target_select_command == AI_COMMAND_AUTOBATTLE_PROTECT_ALLIES_SELECT) {
             if ((caster->stats->team_flags & UNIT_TEAM_MASK) == (target->stats->team_flags & UNIT_TEAM_MASK)) {
                 battle_state_enter_target_select_confirm();
             } else {
@@ -1304,7 +1304,7 @@ void battle_state_handle_status_execute_state(void) {
 
 /* Effect game-state handler: animate the units, the screen color modulation and
  * the camera while an effect plays. When the effect cycle has ended, the game
- * state and animation speed saved by battle_state_enter_effect_playback are
+ * state and vsync interval saved by battle_state_enter_effect_playback are
  * restored. Neither function that stores this state has a caller, so the
  * handler does not run. */
 void battle_state_handle_effect_state(void) {
@@ -1321,7 +1321,7 @@ void battle_state_handle_effect_state(void) {
     battle_gfx_draw_screen_color_modulation_overlay();
     if (g_battle_state_animation_continue_check == 0) {
         g_battle_game_state = g_battle_previous_game_state;
-        g_main_system_vsync_interval = g_main_saved_animation_speed;
+        g_main_system_vsync_interval = g_main_saved_vsync_interval;
     }
 }
 
@@ -1361,19 +1361,19 @@ void battle_state_update_event_mode(void) {
         break;
     case SCRIPT_EVENT_FRAME_TO_WORLD:
         battle_gfx_init_evtchr_vram_slots();
-        battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_WORLD);
+        battle_state_enter_close_battle(8, MAIN_GAME_FLOW_WORLD);
         break;
     case SCRIPT_EVENT_FRAME_NEXT_EVENT:
         battle_gfx_init_evtchr_vram_slots();
-        battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_BATTLE);
+        battle_state_enter_close_battle(8, MAIN_GAME_FLOW_BATTLE);
         break;
     case SCRIPT_EVENT_FRAME_RESET:
         battle_gfx_init_evtchr_vram_slots();
-        battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_RESET);
+        battle_state_enter_close_battle(8, MAIN_GAME_FLOW_RESET);
         break;
     case SCRIPT_EVENT_FRAME_ENDING:
         battle_gfx_init_evtchr_vram_slots();
-        battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_ENDING);
+        battle_state_enter_close_battle(8, MAIN_GAME_FLOW_ENDING);
         break;
     }
 
@@ -1521,7 +1521,7 @@ void battle_state_handle_change_map_init_state(void) {
 
 /* MapJumpingIn game-state handler: lighten the screen by
  * g_battle_state_screen_fade_step per frame. When it is clear, the saved game
- * state resumes at animation speed 1. */
+ * state resumes at vsync interval 1. */
 void battle_state_handle_map_jumping_in_state(void) {
     u16 intensity;
     s32 previous_state;
@@ -1576,10 +1576,10 @@ void battle_state_handle_change_map_jumping_in_state(void) {
         battle_action_check_between_turn_events();
         break;
     case SCRIPT_EVENT_FRAME_TO_WORLD:
-        battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_BATTLE);
+        battle_state_enter_close_battle(8, MAIN_GAME_FLOW_BATTLE);
         break;
     case SCRIPT_EVENT_FRAME_NEXT_EVENT:
-        battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_WORLD);
+        battle_state_enter_close_battle(8, MAIN_GAME_FLOW_WORLD);
         break;
     }
 

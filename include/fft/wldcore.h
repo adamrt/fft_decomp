@@ -13,7 +13,7 @@
 #include "psx/types.h"
 
 /* entry and frame loop */
-/* g_main_system_flags as wldcore_process_frame_gate last saw it (main_system_flags_e). */
+/* g_main_system_flags as wldcore_gfx_update_map_backdrop last saw it (main_system_flags_e). */
 extern u32 g_wldcore_previous_system_flags;
 s32 wldcore_entrypoint(void);
 void wldcore_switch_to_stack(void*);

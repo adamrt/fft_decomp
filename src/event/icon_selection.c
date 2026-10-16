@@ -72,9 +72,9 @@ void menu_auto_battle_setting_thread(void) {
     stats = menu_get_selected_unit_stats();
     if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
         cursor = 0;
-    } else if (stats->auto_battle_setting == AI_AUTOBATTLE_TARGETED) {
+    } else if (stats->auto_battle_setting == AI_AUTOBATTLE_FIGHT_FOR_LIFE) {
         cursor = 1;
-    } else if (stats->auto_battle_setting == AI_AUTOBATTLE_RECOVERY) {
+    } else if (stats->auto_battle_setting == AI_AUTOBATTLE_PROTECT_ALLIES) {
         cursor = 2;
     } else if (stats->auto_battle_setting == AI_AUTOBATTLE_FADING_LIFE) {
         cursor = 3;

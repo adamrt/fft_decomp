@@ -72,7 +72,7 @@ void battle_state_enter_event(void) {
 
 /* Enter the event state and run the scenario check with no unit (0xff), as the
  * deployment screen does when it finishes. */
-void battle_action_set_casting_unit_id_ff_and_init(void) {
+void battle_state_enter_event_at_battle_start(void) {
     battle_state_enter_event();
     menu_init_system_function(MENU_SYSTEM_COMMAND_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, 0xff, 0, 1);
 }
@@ -141,7 +141,7 @@ void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit) {
     }
 }
 
-/* Return to the source unit's action menus: set the AT-list-active flag, run the
+/* Return to the source unit's action menus: set the cursor-visible flag, run the
  * scenario check, and unless it starts an event enter the open-action-menus state
  * and turn the camera when the casting unit's tile is hidden. */
 void battle_menu_set_next_script_action_menus(void) {
@@ -160,7 +160,7 @@ void battle_menu_set_next_script_action_menus(void) {
     }
 }
 
-/* Return to the free-cursor state at animation speed 1: show the panel for the
+/* Return to the free-cursor state at vsync interval 1: show the panel for the
  * cursor tile and refresh the source unit's control flags from its ENTD flags. */
 void battle_state_set_free_cursor(void) {
     battle_unit_t* unit;
@@ -169,7 +169,7 @@ void battle_state_set_free_cursor(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_FREE_CURSOR;
     g_battle_menu_help_opening = 0;
-    battle_target_store_cursor_unit_name_and_data();
+    battle_target_show_hovered_unit_panel();
     battle_target_show_cursor();
     unit = battle_unit_get_source();
     if (unit != 0) {
@@ -220,7 +220,7 @@ static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
 
 /* Between turns: when the crystal count calls for a map reload
  * (battle_map_check_deep_dungeon_crystal_and_init_state), enter the Deep Dungeon
- * mesh-load state at animation speed 1. Returns 1 when the state changed. */
+ * mesh-load state at vsync interval 1. Returns 1 when the state changed. */
 static s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
     if (battle_map_check_deep_dungeon_crystal_and_init_state() != 0) {
         g_battle_game_state = BATTLE_GAME_STATE_DEEP_DUNGEON_MESH_LOAD;
@@ -565,7 +565,7 @@ void battle_action_show_at_list_entry(s32 at_index) {
             battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 0);
         }
     }
-    battle_target_store_cursor_unit_name_and_data();
+    battle_target_show_hovered_unit_panel();
     battle_target_show_cursor();
 }
 
@@ -596,7 +596,7 @@ static void battle_state_enter_move_range_exception(void) {
 /* Return to choosing a move destination: recompute the source unit's reachable
  * tiles, show them and enter the select-move-tile state with the cursor unit's
  * panel. With no reachable tile the move-range exception state is entered
- * instead. The AT-list-active flag follows whether the player controls the unit. */
+ * instead. The cursor-visible flag follows whether the player controls the unit. */
 void battle_state_enter_select_move_tile(void) {
     battle_unit_t* unit;
     battle_unit_t* casting;
@@ -615,7 +615,7 @@ void battle_state_enter_select_move_tile(void) {
         battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_MOVE, 1);
         g_battle_game_state = BATTLE_GAME_STATE_SELECT_MOVE_TILE;
         casting->state_frame_counter = 0;
-        battle_target_store_cursor_unit_name_and_data();
+        battle_target_show_hovered_unit_panel();
     } else {
         battle_state_enter_move_range_exception();
     }
@@ -705,7 +705,7 @@ void battle_state_enter_unit_moving(void) {
 
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_UNIT_MOVING;
-    battle_target_store_cursor_unit_name_and_data();
+    battle_target_show_hovered_unit_panel();
     unit = battle_unit_get_casting();
     battle_unit_save_previous_state(unit);
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_MOUNT) {
@@ -725,7 +725,7 @@ void battle_state_enter_unit_moving(void) {
  *
  * A failed Teleport shows its effect message; a successful one the move
  * confirmation. Other movement tints the unit by team and asks for confirmation,
- * silently when navigation messages are off. The AT-list-active flag follows
+ * silently when navigation messages are off. The cursor-visible flag follows
  * whether the player controls the unit. */
 void battle_menu_open_move_confirm(void) {
     battle_unit_t* source;
@@ -762,7 +762,7 @@ void battle_menu_open_move_confirm(void) {
     }
 }
 
-/* Enter the after-command state at animation speed 1: clear the post-action flag, put the cursor
+/* Enter the after-command state at vsync interval 1: clear the post-action flag, put the cursor
  * back on the source unit and close the system function window. */
 void battle_state_enter_after_command(void) {
     g_main_system_vsync_interval = 1;
@@ -807,7 +807,7 @@ void battle_unit_decide_facing_direction(battle_unit_t* unit, s32 facing) {
     default:
         return;
     }
-    battle_unit_set_animation_based_on_status(unit);
+    battle_unit_set_status_animation(unit);
 }
 
 /* Report a level up recorded in the unit's rewards: its message for three
@@ -851,7 +851,7 @@ static s32 battle_action_report_job_level_up(battle_unit_t* unit) {
 }
 
 /* Start the next post-movement step selected by the move_post_event_e flags in
- * g_battle_move_find_result.
+ * g_battle_move_post_move_events.
  *
  * Handles, in priority order, the crystal or treasure pickup, the movement
  * ability's EXP/JP and level-up reports, a found rare or common item, a tile
@@ -872,7 +872,7 @@ s32 battle_move_start_next_post_movement_step(void) {
     g_battle_game_state = BATTLE_GAME_STATE_CRYSTAL_LEARN;
     g_battle_action_post_action = 0;
     casting->state_frame_counter = 0;
-    if (g_battle_move_find_result & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
         target = battle_unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_z);
         /* -1 for a crystal, otherwise the treasure's item id. */
         item = menu_resolve_crystal_pickup(source->stats->battle_id);
@@ -918,7 +918,7 @@ s32 battle_move_start_next_post_movement_step(void) {
         main_sound_play_sfx_find_channel(MAIN_SFX_COMPLETE);
         return 1;
     }
-    if (g_battle_move_find_result & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
         switch (g_battle_action_post_action_display_phase) {
         case BATTLE_POST_ACTION_DISPLAY_LEVEL_UP:
             battle_action_init_movement_ability_benefit(casting->stats);
@@ -933,7 +933,7 @@ s32 battle_move_start_next_post_movement_step(void) {
         }
         return 1;
     }
-    if (g_battle_move_find_result & MOVE_POST_EVENT_ITEM_FOUND) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_ITEM_FOUND) {
         g_battle_move_find_display_item = *battle_map_determine_rare_common_item(casting->stats);
         battle_gfx_store_item_display_data(source, g_battle_move_find_display_item.item_id);
         battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_FOUND_ITEM, source->facing, source);
@@ -947,7 +947,7 @@ s32 battle_move_start_next_post_movement_step(void) {
             source->stats->battle_id, 0, 0);
         return 1;
     }
-    if (g_battle_move_find_result & MOVE_POST_EVENT_TRAP_TRIGGERED) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_TRAP_TRIGGERED) {
         trap = battle_action_apply_tile_trap(casting->stats);
         if ((source->pending_attack_result = battle_action_apply_target_result(source->stats->battle_id)) == -1) {
             battle_unit_find_relocation_tile(source->stats->battle_id, &source->dismount);
@@ -960,18 +960,18 @@ s32 battle_move_start_next_post_movement_step(void) {
         battle_ai_record_triggered_trap_coords(casting->map_x, casting->map_z, casting->map_y);
         return 1;
     }
-    if (g_battle_move_find_result & MOVE_POST_EVENT_CHARGING_CANCEL) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_CHARGING_CANCEL) {
         battle_status_remove_charging_ability_ct(casting->stats, 1);
         menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         return 1;
     }
-    if (g_battle_move_find_result & MOVE_POST_EVENT_SOURCE_DISPLAY) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_SOURCE_DISPLAY) {
         menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         battle_gfx_prepare_post_action_display_by_runtime_id(source->runtime_id);
         battle_unit_update_display_by_runtime_id(source->runtime_id);
         return 1;
     }
-    if (g_battle_move_find_result & MOVE_POST_EVENT_MOUNT_STATUS_CHANGE) {
+    if (g_battle_move_post_move_events & MOVE_POST_EVENT_MOUNT_STATUS_CHANGE) {
         menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         if (source->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
             target = battle_unit_get_by_runtime_id(source->mount_partner_runtime_id);
@@ -994,7 +994,7 @@ s32 battle_move_start_next_post_movement_step(void) {
  * steps.
  *
  * battle_move_get_post_move_events builds the step flags in
- * g_battle_move_find_result (0 for a unit without battle data), and the
+ * g_battle_move_post_move_events (0 for a unit without battle data), and the
  * post-action display starts at the level-up report. When any step is pending the
  * map cursor and its tile glow are hidden. */
 void battle_move_init_post_movement_display(void) {
@@ -1003,13 +1003,13 @@ void battle_move_init_post_movement_display(void) {
     battle_camera_disable_map_pan();
     stats = battle_unit_get_casting()->stats;
     if (stats != 0) {
-        g_battle_move_find_result = battle_move_get_post_move_events(stats);
+        g_battle_move_post_move_events = battle_move_get_post_move_events(stats);
     } else {
-        g_battle_move_find_result = 0;
+        g_battle_move_post_move_events = 0;
     }
     g_battle_action_post_action_display_phase = BATTLE_POST_ACTION_DISPLAY_LEVEL_UP;
     battle_move_start_next_post_movement_step();
-    if (g_battle_move_find_result != 0) {
+    if (g_battle_move_post_move_events != 0) {
         battle_target_hide_cursor();
     }
     g_battle_state_animation_continue_check = 0;
@@ -1048,7 +1048,7 @@ void battle_action_choose_facing_for_wait(void) {
  * A scenario check that finds a pending event whose finish operation is nonzero
  * starts that event instead. A unit whose turn status blocks the Wait menu goes
  * straight to the between-turn events. Otherwise the wait-menu state opens with
- * the cursor unit's panel. The AT-list-active flag follows whether the player
+ * the cursor unit's panel. The cursor-visible flag follows whether the player
  * controls the unit. */
 void battle_action_choose_wait(void) {
     battle_unit_t* unit;
@@ -1069,7 +1069,7 @@ void battle_action_choose_wait(void) {
         battle_action_check_between_turn_events();
     } else {
         g_battle_game_state = BATTLE_GAME_STATE_WAIT_MENU;
-        battle_target_store_cursor_unit_name_and_data();
+        battle_target_show_hovered_unit_panel();
         menu_init_system_function(MENU_SYSTEM_COMMAND_WAIT_MENU, 0, unit->stats->battle_id, 0,
             unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
     }
@@ -1244,7 +1244,7 @@ static void battle_unit_restore_all_facings_after_attack(void) {
     }
 }
 
-/* Enter the continue-turn state at animation speed 1 and restart the source unit's
+/* Enter the continue-turn state at vsync interval 1 and restart the source unit's
  * state frame counter. */
 void battle_state_enter_continue_turn(void) {
     battle_unit_t* unit;
@@ -1268,7 +1268,7 @@ void battle_unit_end_command(battle_unit_t* unit) {
 /*
  * Enter the targeting-prompt state after the ability preview: the
  * targeting prompt with MENU_TARGETING_PROMPT_NO_TARGET when the preview marked
- * no tile (TARGET_PANELS_NONE), MENU_TARGETING_PROMPT_DEFAULT otherwise. The AT-list-active flag then follows whether
+ * no tile (TARGET_PANELS_NONE), MENU_TARGETING_PROMPT_DEFAULT otherwise. The cursor-visible flag then follows whether
  * the player controls the unit.
  */
 void battle_state_enter_targeting_prompt(void) {
@@ -1295,10 +1295,10 @@ void battle_state_enter_targeting_prompt(void) {
  *
  * A plain attack (ability 0), the knockback strike (ABILITY_ID_KNOCKBACK) and an
  * ability without an effect file play nothing. Accumulate and the Charge
- * abilities play the effect at animation speed 1 unless it is an item effect.
- * Every other ability plays at animation speed 2 with the tracked sound effects
+ * abilities play the effect at vsync interval 1 unless it is an item effect.
+ * Every other ability plays at vsync interval 2 with the tracked sound effects
  * paused; an item effect is held back until the unit shows its hold-item
- * animation. The AT-list-active flag is cleared on every path. */
+ * animation. The cursor-visible flag is cleared on every path. */
 void battle_state_enter_action_execute(void) {
     battle_unit_t* unit;
     s32 ability;
@@ -1650,7 +1650,7 @@ void battle_action_init_learn_ability_on_hit(void) {
         }
         break;
     }
-    battle_target_store_cursor_unit_name_and_data();
+    battle_target_show_hovered_unit_panel();
 }
 
 /* Start the post-action reports: restore the units' facings, apply the source

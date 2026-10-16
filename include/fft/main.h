@@ -43,7 +43,7 @@ typedef enum main_system_flags {
     MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,
     /* wldcore_gfx_draw_calendar_date draws nothing. */
     MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE = 0x00001000,
-    /* wldcore_proposition_submit_marker_request draws no marker; set while a level moves or covers the map view. */
+    /* wldcore_map_draw_location_label draws no label; set while a level moves or covers the map view. */
     MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER = 0x00002000,
     /* WORLD's menu chose a map (script variable CURRENT_MAP): the return level restarts the core and travels there. */
     MAIN_SYSTEM_FLAG_REQUEST_DESTINATION = 0x00004000,

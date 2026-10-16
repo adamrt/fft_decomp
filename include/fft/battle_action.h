@@ -105,7 +105,7 @@ enum {
     BATTLE_AT_LIST_ENTRY_CHARGED_ACTION = 0x100,
 };
 
-extern s32 g_battle_action_at_list_active;
+extern s32 g_battle_target_cursor_visible;
 extern s32 g_battle_action_at_list_id;
 
 s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode);
@@ -134,7 +134,7 @@ void battle_action_confirm(void);
 s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit);
 void battle_action_handle_move_command(void);
 s32 battle_action_prepare_attack(action_command_t* source, action_command_t* dest, s32 phase);
-void battle_action_set_casting_unit_id_ff_and_init(void);
+void battle_state_enter_event_at_battle_start(void);
 void battle_action_switch_ability_to_default_attack(void);
 
 /* action outcomes */
@@ -344,7 +344,7 @@ s32 battle_action_init_current_data(s32 unit_id);
 s32 battle_action_apply_target_result(s32 battle_id);
 s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* work);
 s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 target_id);
-void battle_action_set_target_coords_and_attacker_anim(void);
+void battle_action_apply_strike_results(void);
 void battle_action_store_acting_unit_data(unit_stats_t* unit);
 void battle_action_store_target_ids(u8* src);
 s32 battle_action_store_target_stats_pointer_data(s32 unit_id);
@@ -366,7 +366,7 @@ extern s16 g_battle_current_reaction_ability_id;
 /* Separate link name for g_battle_action_saved_command.ability_id. */
 extern s16 g_battle_reaction_unit_last_ability_id;
 
-s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit);
+s32 battle_action_fails_reaction_roll(const unit_stats_t* unit);
 s32 battle_action_is_reaction_blocked(const unit_stats_t* unit);
 s32 battle_action_is_reaction_prevented(const unit_stats_t* unit);
 s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability);

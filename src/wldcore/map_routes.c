@@ -803,7 +803,7 @@ s32 wldcore_location_process_entry(s32 from_location, s32 to_location) {
             g_wldcore_map_projection_state.flags
                 |= WLDCORE_PROJECTION_FLAG_UPDATE_DIRECTION | WLDCORE_PROJECTION_FLAG_ALTERNATE_DIRECTION_SET;
         }
-        g_wldcore_map_projection_state.marker.sub_kind = wldcore_proposition_load_picture(to_location);
+        g_wldcore_map_projection_state.marker.sub_kind = wldcore_gfx_load_location_picture(to_location);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
         return 1;
     }

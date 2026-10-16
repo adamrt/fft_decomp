@@ -280,7 +280,7 @@ s32 main_sound_open_music_into_slot(s32 music_id, s32 slot) {
         suzuki_smd_header_t* data = main_heap_alloc_smd(g_main_sound_scenario_smd_files[music_id].size);
 
         if (data != 0
-            && main_file_call_build_header(g_main_sound_scenario_smd_files[music_id].sector,
+            && main_file_request_read_bytes(g_main_sound_scenario_smd_files[music_id].sector,
                    g_main_sound_scenario_smd_files[music_id].size, data)
                 == 0) {
             g_main_sound_music.slots.smd[slot - 1] = data;
@@ -307,7 +307,7 @@ int main_sound_start_music_load_into_free_slot(int music_id) {
         if (g_main_sound_music.slots.smd[i] == 0) {
             buffer = main_heap_alloc_smd(g_main_sound_scenario_smd_files[music_id].size);
             if (buffer != 0) {
-                if (main_file_call_build_header(g_main_sound_scenario_smd_files[music_id].sector,
+                if (main_file_request_read_bytes(g_main_sound_scenario_smd_files[music_id].sector,
                         g_main_sound_scenario_smd_files[music_id].size, buffer)
                     == 0) {
                     g_main_sound_music.slots.smd[i] = buffer;

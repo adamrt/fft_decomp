@@ -702,12 +702,12 @@ void world_card_build_save_image(s32 slot) {
         sizeof(g_world_load_work_buffer->proposition_last_attempt_date_bits));
     bcopy(g_main_proposition_states, g_world_load_work_buffer->proposition_states,
         sizeof(g_world_load_work_buffer->proposition_states));
-    bcopy(
-        g_main_saved_records, g_world_load_work_buffer->saved_records, sizeof(g_world_load_work_buffer->saved_records));
-    bcopy(g_main_saved_data_bits, g_world_load_work_buffer->saved_data_bits,
-        sizeof(g_world_load_work_buffer->saved_data_bits));
-    bcopy(g_main_secondary_saved_data_bits, g_world_load_work_buffer->secondary_saved_data_bits,
-        sizeof(g_world_load_work_buffer->secondary_saved_data_bits));
+    bcopy(g_main_sound_novel_saved_records, g_world_load_work_buffer->sound_novel_saved_records,
+        sizeof(g_world_load_work_buffer->sound_novel_saved_records));
+    bcopy(g_main_sound_novel_read_section_bits, g_world_load_work_buffer->sound_novel_read_section_bits,
+        sizeof(g_world_load_work_buffer->sound_novel_read_section_bits));
+    bcopy(g_main_sound_novel_saved_flags, g_world_load_work_buffer->sound_novel_saved_flags,
+        sizeof(g_world_load_work_buffer->sound_novel_saved_flags));
     bcopy(g_main_brave_story_character_ages, g_world_load_work_buffer->brave_story_character_ages,
         sizeof(g_world_load_work_buffer->brave_story_character_ages));
     g_world_load_work_buffer->proposition_count = g_main_save_proposition_count;
@@ -851,12 +851,12 @@ s32 world_card_load_globals_from_save_image(s32 partial_load) {
         sizeof(g_world_load_work_buffer->proposition_last_attempt_date_bits));
     bcopy(g_world_load_work_buffer->proposition_states, g_main_proposition_states,
         sizeof(g_world_load_work_buffer->proposition_states));
-    bcopy(
-        g_world_load_work_buffer->saved_records, g_main_saved_records, sizeof(g_world_load_work_buffer->saved_records));
-    bcopy(g_world_load_work_buffer->saved_data_bits, g_main_saved_data_bits,
-        sizeof(g_world_load_work_buffer->saved_data_bits));
-    bcopy(g_world_load_work_buffer->secondary_saved_data_bits, g_main_secondary_saved_data_bits,
-        sizeof(g_world_load_work_buffer->secondary_saved_data_bits));
+    bcopy(g_world_load_work_buffer->sound_novel_saved_records, g_main_sound_novel_saved_records,
+        sizeof(g_world_load_work_buffer->sound_novel_saved_records));
+    bcopy(g_world_load_work_buffer->sound_novel_read_section_bits, g_main_sound_novel_read_section_bits,
+        sizeof(g_world_load_work_buffer->sound_novel_read_section_bits));
+    bcopy(g_world_load_work_buffer->sound_novel_saved_flags, g_main_sound_novel_saved_flags,
+        sizeof(g_world_load_work_buffer->sound_novel_saved_flags));
     bcopy(g_world_load_work_buffer->brave_story_character_ages, g_main_brave_story_character_ages,
         sizeof(g_world_load_work_buffer->brave_story_character_ages));
     g_main_save_proposition_count = g_world_load_work_buffer->proposition_count;

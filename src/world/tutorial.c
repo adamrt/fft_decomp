@@ -32,12 +32,12 @@ static u8 g_world_tutorial_highlight_quad_count = 0;
 
 static void world_tutorial_advance_highlight_brightness(void);
 static void world_tutorial_draw_highlight_quads(s32 brightness);
-static void world_tutorial_opcode_00_shift(void);
+static void world_tutorial_opcode_00_press_button(void);
 static void world_tutorial_opcode_10_display_message(void);
 static void world_tutorial_opcode_11_change_dialog(void);
 static void world_tutorial_opcode_12_wait_for_message(void);
 static void world_tutorial_opcode_13_highlight_ring(void);
-static void world_tutorial_opcode_14_wait(void);
+static void world_tutorial_opcode_14_fade_out_highlight(void);
 static void world_tutorial_opcode_15_wait_time(void);
 static void world_tutorial_opcode_16_wait_for_button(void);
 static s32 world_tutorial_opcode_17_end(void);
@@ -84,7 +84,7 @@ void world_tutorial_start(s32 index) {
  * Reads pad 0 as the tutorial's own button input (the soft-reset combination
  * resets the game), advances the highlight brightness while a wait is timed,
  * and dispatches the command byte at g_world_tutorial_command_ptr:
- * values below WORLD_TUTORIAL_CMD_SHIFT_LIMIT are pad-input commands, the
+ * values below WORLD_TUTORIAL_CMD_PRESS_BUTTON_LIMIT are pad-input commands, the
  * rest display a message, draw the highlight ring, wait or end.
  */
 s32 world_tutorial_run_frame(void) {
@@ -99,18 +99,18 @@ s32 world_tutorial_run_frame(void) {
         world_game_reset();
     }
     g_world_tutorial_buttons = g_world_tutorial_button_input;
-    if (g_world_tutorial_wait_timer != 0) {
+    if (g_world_tutorial_highlight_brightness != 0) {
         world_tutorial_advance_highlight_brightness();
     }
     cmd = *g_world_tutorial_command_ptr;
-    if (cmd < WORLD_TUTORIAL_CMD_SHIFT_LIMIT) {
-        world_tutorial_opcode_00_shift();
+    if (cmd < WORLD_TUTORIAL_CMD_PRESS_BUTTON_LIMIT) {
+        world_tutorial_opcode_00_press_button();
     } else if (cmd == WORLD_TUTORIAL_CMD_DISPLAY_MESSAGE) {
         world_tutorial_opcode_10_display_message();
     } else if (cmd == WORLD_TUTORIAL_CMD_DRAW_CIRCLE) {
         world_tutorial_opcode_13_highlight_ring();
-    } else if (cmd == WORLD_TUTORIAL_CMD_WAIT) {
-        world_tutorial_opcode_14_wait();
+    } else if (cmd == WORLD_TUTORIAL_CMD_FADE_OUT_HIGHLIGHT) {
+        world_tutorial_opcode_14_fade_out_highlight();
     } else if (cmd == WORLD_TUTORIAL_CMD_WAIT_TIME) {
         world_tutorial_opcode_15_wait_time();
     } else if (cmd == WORLD_TUTORIAL_CMD_WAIT_FOR_BUTTON) {
@@ -153,20 +153,20 @@ static s32 world_tutorial_opcode_17_end(void) {
     }
 }
 
-/* Tutorial command below WORLD_TUTORIAL_CMD_SHIFT_LIMIT: press pad bit
+/* Tutorial command below WORLD_TUTORIAL_CMD_PRESS_BUTTON_LIMIT: press pad bit
  * number <command> for one frame, then wait 30 frames (counted by the VSync
  * mode) before moving to the next command. */
-static void world_tutorial_opcode_00_shift(void) {
+static void world_tutorial_opcode_00_press_button(void) {
     if (g_world_tutorial_command_active != 0) {
         g_world_tutorial_command_active -= menu_get_event_speed();
-        g_world_tutorial_shift_command_bit = 0;
+        g_world_tutorial_pressed_button = 0;
         if (g_world_tutorial_command_active <= 0) {
             g_world_tutorial_command_active = 0;
             ++g_world_tutorial_command_ptr;
         }
     } else {
         g_world_tutorial_command_active = 0x1E;
-        g_world_tutorial_shift_command_bit = 1 << *g_world_tutorial_command_ptr;
+        g_world_tutorial_pressed_button = 1 << *g_world_tutorial_command_ptr;
     }
 }
 
@@ -281,7 +281,7 @@ static void world_tutorial_opcode_13_highlight_ring(void) {
         (&g_world_tutorial_highlight_corners_b[30][0].x)[i] = (&g_world_tutorial_highlight_corners_b[0][0].x)[i];
     }
 
-    g_world_tutorial_wait_timer = 2;
+    g_world_tutorial_highlight_brightness = 2;
     g_world_tutorial_command_ptr += 6;
     g_world_tutorial_highlight_quad_count = 0;
 }
@@ -290,22 +290,22 @@ static void world_tutorial_opcode_13_highlight_ring(void) {
  * command runs, the ring grows by one quad per VSync up to all 30, at full
  * brightness (18); WAIT then counts the brightness down to fade it out. */
 static void world_tutorial_advance_highlight_brightness(void) {
-    if (*g_world_tutorial_command_ptr != WORLD_TUTORIAL_CMD_WAIT) {
-        g_world_tutorial_wait_timer = 0x12;
+    if (*g_world_tutorial_command_ptr != WORLD_TUTORIAL_CMD_FADE_OUT_HIGHLIGHT) {
+        g_world_tutorial_highlight_brightness = 0x12;
         g_world_tutorial_highlight_quad_count += menu_get_event_speed();
         if (g_world_tutorial_highlight_quad_count >= 0x1e) {
             g_world_tutorial_highlight_quad_count = 0x1e;
         }
     }
-    world_tutorial_draw_highlight_quads(g_world_tutorial_wait_timer);
+    world_tutorial_draw_highlight_quads(g_world_tutorial_highlight_brightness);
 }
 
-/* Tutorial command: count the wait timer down by the VSync mode and move to
- * the next command when it reaches zero. */
-static void world_tutorial_opcode_14_wait(void) {
-    g_world_tutorial_wait_timer -= menu_get_event_speed();
-    if (g_world_tutorial_wait_timer <= 0) {
-        g_world_tutorial_wait_timer = 0;
+/* Tutorial command: fade the highlight out, counting its brightness down by the
+ * VSync mode, and move to the next command when it reaches zero. */
+static void world_tutorial_opcode_14_fade_out_highlight(void) {
+    g_world_tutorial_highlight_brightness -= menu_get_event_speed();
+    if (g_world_tutorial_highlight_brightness <= 0) {
+        g_world_tutorial_highlight_brightness = 0;
         g_world_tutorial_command_ptr++;
     }
 }

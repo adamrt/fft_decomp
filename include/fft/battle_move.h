@@ -41,7 +41,7 @@ extern u8 g_battle_move_terrain_cost;
 extern u8 g_battle_move_weather_terrain_cost;
 
 move_effective_flags_e battle_move_get_effective_flags(const unit_stats_t* unit);
-s32 battle_move_get_support_flags(const unit_stats_t* unit);
+s32 battle_move_get_movement_ability_events(const unit_stats_t* unit);
 s32 battle_move_get_water_standing_offset(battle_unit_t* unit, map_tile_t* tile);
 
 /* pathfinding */
@@ -427,7 +427,7 @@ extern u8 g_battle_move_find_trap_id;
 extern s8 g_battle_move_find_occupying_unit_id;
 
 /* Pending move_post_event_flags_e bits, dispatched in priority order. */
-extern s32 g_battle_move_find_result;
+extern s32 g_battle_move_post_move_events;
 
 s32 battle_move_start_next_post_movement_step(void);
 void battle_move_init_post_movement_display(void);

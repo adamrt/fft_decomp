@@ -157,7 +157,7 @@ int main_entd_open_file(void) {
             lba = DISC_SECTOR_BATTLE_ENTD4_ENT;
         }
 
-        if (main_file_call_build_header(lba, sizeof(entd_file_t), entd_set) != 0) {
+        if (main_file_request_read_bytes(lba, sizeof(entd_file_t), entd_set) != 0) {
             main_heap_call_free(g_main_entd_set);
             return 0;
         }

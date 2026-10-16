@@ -72,9 +72,9 @@ typedef struct open_script_dispatch_state {
     /* 0x0c */ s32 font_index; /* each font has 0x380 bytes of glyph metrics */
     /* 0x10 */ s32 skew;       /* copied into each text record's skew */
     /* 0x14 */ s32 wide_glyphs;
-    /* 0x18 */ s32 timing_step;
-    /* 0x1c */ s32 timing_fraction;
-    /* 0x20 */ s32 external_counter;
+    /* 0x18 */ s32 scroll_speed;
+    /* 0x1c */ s32 scroll_fraction;
+    /* 0x20 */ s32 scrolled_distance;
     /* 0x24 */ s32 wait_counter;
     /* 0x28 */ open_script_cursor_t cursor;
 } open_script_dispatch_state_t;
@@ -109,13 +109,13 @@ typedef struct open_script_state {
 typedef char open_script_state_size_must_be_5800[(sizeof(open_script_state_t) == 5800) ? 1 : -1];
 
 extern open_script_state_t g_open_script_state;
-/* Scalar views of 32-bit fields of g_open_script_state. open_opcode_02_set_timing_step,
- * open_script_update_timing_and_record_values and
+/* Scalar views of 32-bit fields of g_open_script_state. open_opcode_02_set_scroll_speed,
+ * open_script_scroll_text and
  * open_gfx_update_opntex_sequence load and store each of these by absolute
  * address; the member spelling lets cse keep the address in a register. */
-extern s32 g_open_script_byte_offset;      /* dispatch.cursor.byte_offset */
-extern s32 g_open_script_timing_fraction;  /* dispatch.timing_fraction */
-extern s32 g_open_script_external_counter; /* dispatch.external_counter */
+extern s32 g_open_script_byte_offset;       /* dispatch.cursor.byte_offset */
+extern s32 g_open_script_scroll_fraction;   /* dispatch.scroll_fraction */
+extern s32 g_open_script_scrolled_distance; /* dispatch.scrolled_distance */
 extern u8* g_open_script_initial_data_base;
 
 /* opcodes */
@@ -146,11 +146,11 @@ extern open_script_entry_handler_t g_open_opcode_handlers[16];
 
 void open_opcode_00_end_script(s16* unused_entry);
 void open_opcode_01_create_positioned_text_record(s16* command);
-void open_opcode_02_set_timing_step(s16* entry);
+void open_opcode_02_set_scroll_speed(s16* entry);
 void open_opcode_03_start_overlay_fade_out(s16* command);
 void open_opcode_04_start_overlay_fade_in(s16* command);
 void open_opcode_05_wait_counted(s16* entry);
-void open_opcode_06_wait_for_external_counter(s16* entry);
+void open_opcode_06_wait_for_scroll(s16* entry);
 void open_opcode_07_start_xa_audio(s16* command);
 void open_opcode_08_start_sound_fade_in(s16* command);
 void open_opcode_09_start_sound_fade_out(s16* command);

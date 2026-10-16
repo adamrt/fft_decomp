@@ -713,7 +713,7 @@ void battle_effect_start_new(s32 ability_id, s32 target_mode, effect_start_targe
 
 /* battle_effect_update_file_load as a 0 or 1 result: the event script's EffectStart
  * instruction calls it on the main stack each frame until it returns 0. */
-s32 battle_effect_try_init_data(void) {
+s32 battle_effect_poll_file_load(void) {
     /* No argument is passed: for a load state outside 0..3, battle_effect_update_file_load
      * returns whatever this caller left in $a0. */
     return battle_effect_update_file_load() != 0;

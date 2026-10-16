@@ -341,7 +341,7 @@ void wldcore_gfx_draw_calendar_date(GsOT* ot) {
     wldcore_gfx_draw_animated_display_object(&request, ot);
 }
 
-/* Draws the name label of the selected location (g_wldcore_proposition_selected_entry,
+/* Draws the name label of the selected location (g_wldcore_map_selected_location,
  * location + 1) over its map dot, unless MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER
  * is set or no location is selected.
  *
@@ -349,7 +349,7 @@ void wldcore_gfx_draw_calendar_date(GsOT* ot) {
  * channels and tinted in place by wldcore_gfx_copy_color_with_tint. sequence
  * is written after that call because the target reloads the selection
  * there. */
-void wldcore_proposition_submit_marker_request(GsOT* ot) {
+void wldcore_map_draw_location_label(GsOT* ot) {
     world_animated_render_record_t request;
     CVECTOR color;
     s32 index;
@@ -358,11 +358,11 @@ void wldcore_proposition_submit_marker_request(GsOT* ot) {
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER) {
         return;
     }
-    if (g_wldcore_proposition_selected_entry == 0) {
+    if (g_wldcore_map_selected_location == 0) {
         return;
     }
 
-    index = g_wldcore_proposition_selected_entry - 1;
+    index = g_wldcore_map_selected_location - 1;
     request.flags = WORLD_RENDER_RECORD_ANIMATED;
     request.position.x = g_wldcore_map_dots[index].render.position.x;
     request.position.y = g_wldcore_map_dots[index].render.position.y;
@@ -378,7 +378,7 @@ void wldcore_proposition_submit_marker_request(GsOT* ot) {
     request.color.r = color.r;
     request.color.g = color.g;
     request.color.b = color.b;
-    request.sequence = g_wldcore_proposition_selected_entry + (WLDCORE_ANIM_SEQUENCE_LOCATION_NAME_FIRST - 1);
+    request.sequence = g_wldcore_map_selected_location + (WLDCORE_ANIM_SEQUENCE_LOCATION_NAME_FIRST - 1);
     wldcore_gfx_draw_animated_display_object(&request, ot);
 }
 
@@ -878,11 +878,11 @@ scroll:
 
 finish:
     if (level->map_cursor.wide_view == 0 && (hit = level->map_cursor.snap_hit) != 0) {
-        g_wldcore_proposition_selected_entry = hit;
+        g_wldcore_map_selected_location = hit;
         return;
     }
 
-    g_wldcore_proposition_selected_entry = 0;
+    g_wldcore_map_selected_location = 0;
 }
 
 /* Push a map-dot focus level and hide its parent window during the projection move.
@@ -1808,7 +1808,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
 
     /* menu + 0x37 is the cursor window's sequence; the identical arms are explained above. */
     g_wldcore_map_projection_state.marker.sub_kind
-        = wldcore_proposition_load_picture(g_wldcore_map_projection_state.marker.kind);
+        = wldcore_gfx_load_location_picture(g_wldcore_map_projection_state.marker.kind);
     if (g_wldcore_map_projection_state.marker.sub_kind != 0) {
         menu += 0x37;
     } else {
@@ -2399,7 +2399,7 @@ void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level) {
     }
 
     if (wldcore_proposition_count_returned(g_wldcore_map_projection_state.marker.kind) != 0) {
-        level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS;
+        level->entries[level->entry_count] = WLDCORE_BAR_MENU_ROW_RETURNED_PROPOSITIONS;
         level->entry_count++;
     }
 

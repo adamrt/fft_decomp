@@ -38,12 +38,12 @@ extern s16 g_world_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13;
  * their parameters: 0x10 message id (2) and y (1), 0x11 message id (2), 0x13 x, y, size, width mod and height mod
  * (1 each), 0x15 time (1). */
 enum {
-    WORLD_TUTORIAL_CMD_SHIFT_LIMIT = 0x10,
+    WORLD_TUTORIAL_CMD_PRESS_BUTTON_LIMIT = 0x10,
     WORLD_TUTORIAL_CMD_DISPLAY_MESSAGE = 0x10,
     WORLD_TUTORIAL_CMD_CHANGE_DIALOG = 0x11,
     WORLD_TUTORIAL_CMD_WAIT_FOR_MESSAGE = 0x12,
     WORLD_TUTORIAL_CMD_DRAW_CIRCLE = 0x13,
-    WORLD_TUTORIAL_CMD_WAIT = 0x14,
+    WORLD_TUTORIAL_CMD_FADE_OUT_HIGHLIGHT = 0x14,
     WORLD_TUTORIAL_CMD_WAIT_TIME = 0x15,
     WORLD_TUTORIAL_CMD_WAIT_FOR_BUTTON = 0x16,
     WORLD_TUTORIAL_CMD_END = 0x17,
@@ -94,9 +94,9 @@ typedef char world_tutorial_state_size_must_be_7688[sizeof(world_tutorial_state_
 extern s16 g_world_tutorial_categories_request_state; /* world_screen_request_state_e */
 extern world_tutorial_state_t g_world_tutorial_state;
 extern u8 g_world_tutorial_id;
-extern u16 g_world_tutorial_shift_command_bit;
+extern u16 g_world_tutorial_pressed_button;
 extern s16 g_world_tutorial_wait_time_remaining;
-extern s16 g_world_tutorial_wait_timer;
+extern s16 g_world_tutorial_highlight_brightness;
 extern s16 g_world_tutorial_buttons;
 extern u16 g_world_tutorial_latched_button;
 extern u8 g_world_tutorial_activation_timer;

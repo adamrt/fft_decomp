@@ -33,7 +33,7 @@ static void etc_graphic_open(s32 graphic_id) {
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))main_file_call_build_header;
+        g_thread_call_target = (void (*)(void))main_file_request_read_bytes;
     } while (
         thread_call_on_main_stack(g_etc_graphics[graphic_id].lba, g_etc_graphics[graphic_id].size, image_buffer) != 0);
     do {

@@ -53,10 +53,10 @@ static s32 battle_ai_select_action_general(void);
 static s32 battle_ai_select_action_initial(void);
 static s32 battle_ai_select_action_random(void);
 static s32 battle_ai_select_action_ranked(void);
-static s32 battle_ai_select_action_recovery(void);
+static s32 battle_ai_select_action_protect_allies(void);
 static s32 battle_ai_select_action_retreat(void);
 static s32 battle_ai_select_action_status(void);
-static s32 battle_ai_select_action_targeted(void);
+static s32 battle_ai_select_action_fight_for_life(void);
 static s32 battle_ai_select_active_units(ai_unit_filter_e mode, s32 target_id);
 static s32 battle_ai_select_destination(s32 max_distance, ai_destination_order_e order);
 static void battle_ai_select_destination_with_nearest_fallback(s32 range);
@@ -1086,14 +1086,14 @@ copy_status:
         sizeof(ai->considered_ability.parameters.fields.status_infliction));
 }
 
-/* g_battle_ai_recovery_status_ids: read-only table of this object (8 bytes at 0x80193d70), kept byte for byte
+/* g_battle_ai_protect_allies_status_ids: read-only table of this object (8 bytes at 0x80193d70), kept byte for byte
  * until it is written as its typed definition. */
-static const u32 g_ai_recovery_status_ids_rodata[2] = {
+static const u32 g_ai_protect_allies_status_ids_rodata[2] = {
     0x000d0802,
     0x00000000,
 };
-static s32 g_battle_ai_recovery_status_retry = 0; /* skip status pass after one failed attempt */
-static s32 g_battle_ai_recovery_status_index = 0; /* status-list cursor preserved for resume */
+static s32 g_battle_ai_protect_allies_status_retry = 0; /* skip status pass after one failed attempt */
+static s32 g_battle_ai_protect_allies_status_index = 0; /* status-list cursor preserved for resume */
 static s32 g_battle_ai_status_candidate_count = 0;
 static s32 g_battle_ai_status_insufficient_mp = 0;
 static s32 g_battle_ai_status_sufficient_mp = 0;
@@ -2342,14 +2342,14 @@ static s32 battle_ai_select_action_autobattle(void) {
 
     /* A -2 result falls back to another policy's case; those jumps stay gotos. */
     switch (g_battle_ai_data_base.autobattle_setting) {
-    case AI_AUTOBATTLE_TARGETED:
-        if (battle_ai_select_action_targeted() != -1) {
+    case AI_AUTOBATTLE_FIGHT_FOR_LIFE:
+        if (battle_ai_select_action_fight_for_life() != -1) {
             return 1;
         }
         break;
-    case AI_AUTOBATTLE_RECOVERY:
+    case AI_AUTOBATTLE_PROTECT_ALLIES:
     recovery_policy:
-        result = battle_ai_select_action_recovery();
+        result = battle_ai_select_action_protect_allies();
         if (result == -1) {
             return -1;
         }
@@ -2390,7 +2390,7 @@ static s32 battle_ai_select_action_autobattle(void) {
  * reloaded from the unit on every resume. Return -1 to suspend and 0 when
  * selection completes.
  */
-static s32 battle_ai_select_action_targeted(void) {
+static s32 battle_ai_select_action_fight_for_life(void) {
     s32 target = g_battle_ai_data_base.acting_unit->auto_battle_target;
     ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit;
@@ -2399,13 +2399,13 @@ static s32 battle_ai_select_action_targeted(void) {
     /* Reload the persistent target before every resume dispatch. */
     if (g_battle_ai_data_base.resume_pending) {
         switch (g_battle_ai_data_base.action_selection_phase) {
-        case AI_TARGETED_SELECTION_SCORE_TILES:
+        case AI_FIGHT_FOR_LIFE_SELECTION_SCORE_TILES:
             goto score_tiles;
-        case AI_TARGETED_SELECTION_MOVEMENT:
+        case AI_FIGHT_FOR_LIFE_SELECTION_MOVEMENT:
             goto movement;
-        case AI_TARGETED_SELECTION_CHARGING:
+        case AI_FIGHT_FOR_LIFE_SELECTION_CHARGING:
             goto charging;
-        case AI_TARGETED_SELECTION_TARGET_ABILITIES:
+        case AI_FIGHT_FOR_LIFE_SELECTION_TARGET_ABILITIES:
             goto target_abilities;
         default:
             goto other_abilities;
@@ -2452,12 +2452,12 @@ static s32 battle_ai_select_action_targeted(void) {
     ai->movement_scenario = 0;
 score_tiles:
     if (battle_ai_score_reachable_tiles() == -1) {
-        ai->action_selection_phase = AI_TARGETED_SELECTION_SCORE_TILES;
+        ai->action_selection_phase = AI_FIGHT_FOR_LIFE_SELECTION_SCORE_TILES;
         return -1;
     }
 movement:
     if (battle_ai_build_targeted_movement() == -1) {
-        ai->action_selection_phase = AI_TARGETED_SELECTION_MOVEMENT;
+        ai->action_selection_phase = AI_FIGHT_FOR_LIFE_SELECTION_MOVEMENT;
         return -1;
     }
     ai->movement_scenario = 2;
@@ -2467,7 +2467,7 @@ charging:
     result = battle_ai_evaluate_charging_movement();
     switch (result) {
     case -1:
-        ai->action_selection_phase = AI_TARGETED_SELECTION_CHARGING;
+        ai->action_selection_phase = AI_FIGHT_FOR_LIFE_SELECTION_CHARGING;
         return -1;
     case 1:
         return 0;
@@ -2476,7 +2476,7 @@ charging:
     if (battle_ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, target)) {
     target_abilities:
         if (battle_ai_evaluate_ability_list() == -1) {
-            ai->action_selection_phase = AI_TARGETED_SELECTION_TARGET_ABILITIES;
+            ai->action_selection_phase = AI_FIGHT_FOR_LIFE_SELECTION_TARGET_ABILITIES;
             return -1;
         }
         if (battle_ai_select_action_ranked())
@@ -2486,7 +2486,7 @@ charging:
     if (battle_ai_select_active_units(AI_UNIT_FILTER_ANY, 0)) {
     other_abilities:
         if (battle_ai_evaluate_ability_list() == -1) {
-            ai->action_selection_phase = AI_TARGETED_SELECTION_OTHER_ABILITIES;
+            ai->action_selection_phase = AI_FIGHT_FOR_LIFE_SELECTION_OTHER_ABILITIES;
             return -1;
         }
         if (battle_ai_select_action_ranked())
@@ -2501,7 +2501,7 @@ charging:
  * Prepare movement scenarios around the policy's designated target.
  *
  * Return -1 while target-distance propagation is suspended, otherwise 0.
- * Recovery mode limits its initial destination search to 2 when farther away;
+ * Protect allies mode limits its initial destination search to 2 when farther away;
  * scenario 2 may approach one tile closer if the actor has not acted.
  */
 static s32 battle_ai_build_targeted_movement(void) {
@@ -2531,7 +2531,7 @@ static s32 battle_ai_build_targeted_movement(void) {
     distance = distance_rows[ai->acting_unit_coords.fields.y][ai->acting_unit_coords.fields.x];
     within_two_tiles = distance < 3;
     ai->movement_scenario = 0;
-    if (ai->autobattle_setting == AI_AUTOBATTLE_RECOVERY && !within_two_tiles) {
+    if (ai->autobattle_setting == AI_AUTOBATTLE_PROTECT_ALLIES && !within_two_tiles) {
         limit = 2;
     }
     if (ai->acting_unit_decision->targeting_flags_1 & AI_TARGETING_FLAG_1_REFLECTED_ACTION) {
@@ -2563,30 +2563,30 @@ static s32 battle_ai_build_targeted_movement(void) {
 /* Select an action for the recovery (protect allies) auto-battle mode: move toward the
  * focus target, try to cancel its listed statuses, then rank abilities on it, on enemies
  * and on allies before the fallback. Returns -1 to suspend, else 0 (never -2). */
-static s32 battle_ai_select_action_recovery(void) {
+static s32 battle_ai_select_action_protect_allies(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* acting = g_battle_ai_data_base.acting_unit;
-    u8 statuses[AI_RECOVERY_STATUS_COUNT];
+    u8 statuses[AI_PROTECT_ALLIES_STATUS_COUNT];
     s32 target;
     u32 status;
     s32 result;
 
-    memcpy(statuses, g_battle_ai_recovery_status_ids, sizeof(statuses));
+    memcpy(statuses, g_battle_ai_protect_allies_status_ids, sizeof(statuses));
     target = acting->auto_battle_target;
     if (g_battle_ai_data_base.resume_pending) {
         /* Resume: each phase re-enters the step that suspended. */
         switch (g_battle_ai_data_base.action_selection_phase) {
-        case AI_RECOVERY_SELECTION_SCORE_TILES:
+        case AI_PROTECT_ALLIES_SELECTION_SCORE_TILES:
             goto score_tiles;
-        case AI_RECOVERY_SELECTION_MOVEMENT:
+        case AI_PROTECT_ALLIES_SELECTION_MOVEMENT:
             goto movement;
-        case AI_RECOVERY_SELECTION_CHARGING:
+        case AI_PROTECT_ALLIES_SELECTION_CHARGING:
             goto charging;
-        case AI_RECOVERY_SELECTION_TARGET_ABILITIES:
+        case AI_PROTECT_ALLIES_SELECTION_TARGET_ABILITIES:
             goto target_abilities;
-        case AI_RECOVERY_SELECTION_ENEMY_ABILITIES:
+        case AI_PROTECT_ALLIES_SELECTION_ENEMY_ABILITIES:
             goto enemy_abilities;
-        case AI_RECOVERY_SELECTION_CANCEL_STATUS:
+        case AI_PROTECT_ALLIES_SELECTION_CANCEL_STATUS:
             goto cancel_status;
         default:
             goto ally_abilities;
@@ -2595,10 +2595,10 @@ static s32 battle_ai_select_action_recovery(void) {
     g_battle_ai_data_base.movement_scenario = 0;
 score_tiles:
     if (battle_ai_score_reachable_tiles() == -1) {
-        ai->action_selection_phase = AI_RECOVERY_SELECTION_SCORE_TILES;
+        ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_SCORE_TILES;
         return -1;
     }
-    g_battle_ai_recovery_status_retry = 0;
+    g_battle_ai_protect_allies_status_retry = 0;
     if (((ai->unit_decisions[target].targeting_flags_2 >> 4) & (AI_TARGET_UNTARGETABLE >> 4))
         || ai->unit_decisions[target].enemy_flag) {
     retarget:
@@ -2608,23 +2608,25 @@ score_tiles:
     battle_ai_focus_on_target(target);
 movement:
     if (battle_ai_build_targeted_movement() == -1) {
-        ai->action_selection_phase = AI_RECOVERY_SELECTION_MOVEMENT;
+        ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_MOVEMENT;
         return -1;
     }
     ai->movement_scenario = 2;
     battle_ai_invert_target_priority();
     ai->movement_scenario = 0;
-    if (!g_battle_ai_recovery_status_retry
+    if (!g_battle_ai_protect_allies_status_retry
         && !((ai->unit_decisions[target].targeting_flags_2 >> 6) & (AI_TARGET_DEAD_WITH_RERAISE >> 6))) {
-        g_battle_ai_recovery_status_index = 0;
+        g_battle_ai_protect_allies_status_index = 0;
         do {
-            u32 status_flags = g_battle_unit_stats[target]
-                                   .status_sets.current[(status = statuses[g_battle_ai_recovery_status_index]) >> 3];
+            u32 status_flags
+                = g_battle_unit_stats[target]
+                      .status_sets.current[(status = statuses[g_battle_ai_protect_allies_status_index]) >> 3];
             if (status_flags & (0x80 >> (status & 7))) {
             cancel_status:
-                result = battle_ai_evaluate_status_cancellation(target, statuses[g_battle_ai_recovery_status_index]);
+                result
+                    = battle_ai_evaluate_status_cancellation(target, statuses[g_battle_ai_protect_allies_status_index]);
                 if (result == -1) {
-                    ai->action_selection_phase = AI_RECOVERY_SELECTION_CANCEL_STATUS;
+                    ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_CANCEL_STATUS;
                     return -1;
                 }
                 if (result == 2)
@@ -2633,19 +2635,19 @@ movement:
                     /* Retry target selection once, then skip further
                      * status-cancel attempts; the retry re-enters the
                      * retarget block above. */
-                    g_battle_ai_recovery_status_retry = 1;
+                    g_battle_ai_protect_allies_status_retry = 1;
                     goto retarget;
                 }
             }
-            g_battle_ai_recovery_status_index++;
-        } while (g_battle_ai_recovery_status_index < AI_RECOVERY_STATUS_COUNT);
+            g_battle_ai_protect_allies_status_index++;
+        } while (g_battle_ai_protect_allies_status_index < AI_PROTECT_ALLIES_STATUS_COUNT);
     }
     ai->movement_scenario = 1;
 charging:
     result = battle_ai_evaluate_charging_movement();
     switch (result) {
     case -1:
-        ai->action_selection_phase = AI_RECOVERY_SELECTION_CHARGING;
+        ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_CHARGING;
         return -1;
     case 1:
         return 0;
@@ -2654,7 +2656,7 @@ charging:
     if (battle_ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, target)) {
     target_abilities:
         if (battle_ai_evaluate_ability_list() == -1) {
-            ai->action_selection_phase = AI_RECOVERY_SELECTION_TARGET_ABILITIES;
+            ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_TARGET_ABILITIES;
             return -1;
         }
         if (battle_ai_select_action_ranked())
@@ -2664,7 +2666,7 @@ charging:
     if (battle_ai_select_active_units(AI_UNIT_FILTER_ENEMIES, 0)) {
     enemy_abilities:
         if (battle_ai_evaluate_ability_list() == -1) {
-            ai->action_selection_phase = AI_RECOVERY_SELECTION_ENEMY_ABILITIES;
+            ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_ENEMY_ABILITIES;
             return -1;
         }
         if (battle_ai_select_action_ranked())
@@ -2676,7 +2678,7 @@ charging:
             if (battle_ai_select_action_ranked())
                 return 0;
         } else {
-            ai->action_selection_phase = AI_RECOVERY_SELECTION_ALLY_ABILITIES;
+            ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_ALLY_ABILITIES;
             return -1;
         }
     }
@@ -2883,7 +2885,7 @@ static s32 battle_ai_can_cancel_current_status(const unit_stats_t* unit, s32 sta
 static s32 battle_ai_select_action_fading_life(void) {
     if (g_battle_ai_data_base.resume_pending == 0) {
         if (battle_ai_select_peril_target() != 0) {
-            g_battle_ai_data_base.autobattle_setting = AI_AUTOBATTLE_RECOVERY;
+            g_battle_ai_data_base.autobattle_setting = AI_AUTOBATTLE_PROTECT_ALLIES;
             return -2;
         }
         battle_ai_focus_on_target(g_battle_ai_data_base.acting_unit->auto_battle_target);
@@ -3612,9 +3614,9 @@ void battle_ai_init_unit_abilities(s32 unit_id) {
         unit->auto_battle_target = i;
         if ((g_battle_unit_stats[i].initial_team_flags & UNIT_TEAM_MASK)
             != (unit->initial_team_flags & UNIT_TEAM_MASK)) {
-            ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_TARGETED;
+            ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_FIGHT_FOR_LIFE;
         } else {
-            ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_RECOVERY;
+            ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_PROTECT_ALLIES;
         }
         return;
     }

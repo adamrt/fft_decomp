@@ -103,7 +103,7 @@ s32 menu_init_attack_resources_and_threads(void) {
     }
     attack_deploy_find_fieldable_units();
     if (result != 0) {
-        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, map_data_load_complete_thread);
+        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, map_skip_deployment_thread);
         return_value = 1;
     } else {
         g_sound_music_track_1_id = 0;
@@ -307,11 +307,11 @@ static void menu_run_unit_view_supervisor_thread(void) {
 }
 
 /* Set the event speed, which also divides the input repeat delays; BATTLE
- * sets the animation speed with it. */
+ * sets the vsync interval with it. */
 void script_set_event_speed(s32 speed) {
     g_script_event_speed = speed;
 #ifdef FFT_BATTLE
-    battle_state_set_animation_speed(speed);
+    battle_state_set_vsync_interval(speed);
 #endif
 }
 
@@ -1188,14 +1188,14 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)
         || thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0
         || thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
-        if (g_menu_animation_speed_forced == 0) {
-            g_menu_animation_speed_forced = 1;
-            g_menu_saved_animation_speed = battle_state_get_vsync_interval();
+        if (g_menu_vsync_interval_forced == 0) {
+            g_menu_vsync_interval_forced = 1;
+            g_menu_saved_vsync_interval = battle_state_get_vsync_interval();
             script_set_event_speed(2);
         }
-    } else if (g_menu_animation_speed_forced == 1) {
-        g_menu_animation_speed_forced = 0;
-        script_set_event_speed(g_menu_saved_animation_speed);
+    } else if (g_menu_vsync_interval_forced == 1) {
+        g_menu_vsync_interval_forced = 0;
+        script_set_event_speed(g_menu_saved_vsync_interval);
     }
     return result;
 }

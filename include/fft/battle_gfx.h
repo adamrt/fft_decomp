@@ -46,10 +46,10 @@ extern battle_render_buffer_t g_battle_render_buffers[2];
 void battle_gfx_init_render_buffers(void);
 
 /* sprite displays */
-/* g_battle_gfx_sprite_prim_pool is a ring of 256 POLY_FT4; g_battle_gfx_counter is the index of
- * the last one taken, and g_battle_gfx_previous_counter its value when the frame began. */
-extern s16 g_battle_gfx_counter;
-extern s16 g_battle_gfx_previous_counter;
+/* g_battle_gfx_sprite_prim_pool is a ring of 256 POLY_FT4; g_battle_gfx_sprite_prim_index is the index of
+ * the last one taken, and g_battle_gfx_frame_start_sprite_prim_index its value when the frame began. */
+extern s16 g_battle_gfx_sprite_prim_index;
+extern s16 g_battle_gfx_frame_start_sprite_prim_index;
 extern POLY_FT4* g_battle_gfx_sprite_prim_pool;
 
 s16 battle_gfx_take_sprite_prim(void);
@@ -87,7 +87,7 @@ void battle_gfx_store_item_display_data(struct battle_unit* unit, u32 item_id);
 void battle_gfx_update_sprite_transparency_flag(struct battle_unit* unit);
 
 /* shadows */
-void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit);
+void battle_gfx_build_unit_shadow_quad(battle_unit_t* unit);
 void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot);
 s32 battle_gfx_hide_unit_shadow_by_runtime_id(u32 runtime_id);
 s32 battle_gfx_show_unit_shadow_by_runtime_id(u32 runtime_id);

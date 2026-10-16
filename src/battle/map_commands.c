@@ -42,12 +42,12 @@ s32 battle_state_get_animation_continue_check(void) {
     return g_battle_state_animation_continue_check;
 }
 
-/* Enter the effect-playback game state, saving the state and animation speed
+/* Enter the effect-playback game state, saving the state and vsync interval
  * that battle_state_handle_effect_state restores. Returns 1 when the effect data is
  * not ready yet and the caller must retry. No code calls it. */
 s32 battle_state_enter_effect_playback(void) {
     s32 previous_state;
-    s32 previous_animation_speed;
+    s32 previous_vsync_interval;
 
     /* The target loads no argument; the parameter is the $a0 value unhandled states return. */
     if (battle_effect_update_file_load() != 0) {
@@ -55,7 +55,7 @@ s32 battle_state_enter_effect_playback(void) {
     }
     battle_effect_play();
     previous_state = g_battle_game_state;
-    previous_animation_speed = g_main_system_vsync_interval;
+    previous_vsync_interval = g_main_system_vsync_interval;
     g_battle_game_state = BATTLE_GAME_STATE_EFFECT;
     g_main_system_vsync_interval = 2;
     g_battle_gfx_screen_color_modulation_fade_frames = 0;
@@ -63,7 +63,7 @@ s32 battle_state_enter_effect_playback(void) {
     g_battle_camera_rotation_countdown = 0;
     g_battle_camera_zoom_countdown = 0;
     g_battle_previous_game_state = previous_state;
-    g_main_saved_animation_speed = previous_animation_speed;
+    g_main_saved_vsync_interval = previous_vsync_interval;
     return 0;
 }
 
@@ -101,7 +101,7 @@ s32 battle_state_get_vsync_interval(void) {
 
 /* Set g_main_system_vsync_interval, the number of vertical blanks per frame, to
  * 1 or 2. Returns 0, or -1 for any other value. */
-s32 battle_state_set_animation_speed(s32 speed) {
+s32 battle_state_set_vsync_interval(s32 speed) {
     if (speed == 1 || speed == 2) {
         g_main_system_vsync_interval = speed;
         return 0;
@@ -236,9 +236,9 @@ s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
 
 /* Release step 8 of battle_map_init_units_sprites_event_and_music, which waits for this flag
  * before setting up deployment graphics. The deployment screen sets it after placing units, and
- * map_data_load_complete_thread when deployment is skipped. */
+ * map_skip_deployment_thread when deployment is skipped. */
 void battle_deployment_mark_finished(void) {
-    g_battle_map_data_load_complete = 1;
+    g_battle_deployment_finished = 1;
 }
 
 /* Returns the hsync count battle_state_sync_frame measured for the last frame. No
@@ -257,7 +257,7 @@ void battle_state_set_min_vsync_interval(s32 value) {
 }
 
 /* Remove the minimum frame wait battle_state_set_min_vsync_interval set. */
-void battle_state_clear_frame_pacing(void) {
+void battle_state_clear_min_vsync_interval(void) {
     g_main_system_min_vsync_interval = 0;
 }
 
@@ -546,7 +546,7 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
  *
  * Unlike battle_map_step_init_sequence it randomizes a random battle's weather,
  * loads the shared SHP and SEQ data once (skipped when already loaded), waits
- * at step 8 until the deployment screen or map_data_load_complete_thread
+ * at step 8 until the deployment screen or map_skip_deployment_thread
  * releases it (battle_deployment_mark_finished), and at step 10 waits for
  * deployment to end before restoring the scenario music and darkness. Loader
  * steps retain their current state while work is pending. */
@@ -618,7 +618,7 @@ s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 depl
         }
         break;
     case 8:
-        if (g_battle_map_data_load_complete != 0) {
+        if (g_battle_deployment_finished != 0) {
             step++;
             battle_gfx_init_deployment_and_reset_unit_graphics_state();
             g_battle_deployment_skipped = 0;
@@ -689,7 +689,7 @@ void battle_gfx_restore_screen_color_modulation(void) {
 /*
  * Start a screen color-modulation fade towards (red, green, blue).
  *
- * The duration is scaled by the animation speed; a fade that rounds to zero
+ * The duration is scaled by the vsync interval; a fade that rounds to zero
  * frames only records the target color, and a zero duration does nothing. The
  * overlay draw mode is rebuilt with the given semi-transparency mode for both
  * screen polarities.

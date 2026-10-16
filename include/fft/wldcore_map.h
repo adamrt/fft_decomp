@@ -162,6 +162,9 @@ void wldcore_map_project_and_cull_dots(void);
 void wldcore_map_pulse_dot_colors(void);
 s32 wldcore_map_find_dot_at_point(point32_t point);
 s32 wldcore_map_get_dot_snap_step(point32_t point, s32* step_x, s32* step_y);
+/* The location whose name label is drawn over its map dot. */
+extern s32 g_wldcore_map_selected_location;
+void wldcore_map_draw_location_label(GsOT* ot);
 
 /* routes */
 /* World-map routes: g_wldcore_map_route_tables and the flags from

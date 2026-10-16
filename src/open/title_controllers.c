@@ -39,19 +39,19 @@ static void open_menu_push_sound_type_controller(void);
 void open_file_load_main_menu_graphics(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
-    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN, 0x11, g_open_file_destination);
+    file_wait_then_request_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN, 0x11, g_open_file_destination);
     file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x11, 0x11, g_open_file_destination);
+    file_wait_then_request_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x11, 0x11, g_open_file_destination);
     file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x22, 0x21, g_open_file_destination);
+    file_wait_then_request_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x22, 0x21, g_open_file_destination);
     file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    open_file_build_openbk_header(0, g_open_file_destination);
+    open_file_request_openbk_image(0, g_open_file_destination);
     file_wait_for_pending();
 }
 
@@ -63,11 +63,11 @@ void open_file_load_end_movie_graphics(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
     RECT frame;
 
-    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x65, 0x11, g_open_file_destination);
+    file_wait_then_request_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x65, 0x11, g_open_file_destination);
     file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    open_file_build_openbk_header(6, g_open_gfx_opntex_data);
+    open_file_request_openbk_image(6, g_open_gfx_opntex_data);
     file_wait_for_pending();
 
     frame.x = 0x200;
@@ -77,7 +77,7 @@ void open_file_load_end_movie_graphics(void) {
     LoadImage(&frame, g_open_gfx_opntex_data);
     DrawSync(0);
 
-    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x76, 0x170, g_open_gfx_opntex_data);
+    file_wait_then_request_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x76, 0x170, g_open_gfx_opntex_data);
     file_wait_for_pending();
 }
 
@@ -87,11 +87,11 @@ void open_file_load_end_movie_graphics(void) {
 static void open_file_load_prologue_text_pages(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
-    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x43, 0x11, g_open_file_destination);
+    file_wait_then_request_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x43, 0x11, g_open_file_destination);
     file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
-    file_wait_then_build_header(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x54, 0x11, g_open_file_destination);
+    file_wait_then_request_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x54, 0x11, g_open_file_destination);
     file_wait_for_pending();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 }
@@ -103,7 +103,7 @@ static void open_file_load_prologue_text_pages(void) {
  * The end-offset table is the start-offset table one entry further on. By their
  * sector counts images 0 and 1 are 320x240 and 256x240 frame images, 2 to 5 are
  * 210x180 pictures and 6 is the 512x240 ending picture. */
-void open_file_build_openbk_header(s32 image_id, void* destination) {
+void open_file_request_openbk_image(s32 image_id, void* destination) {
     s32 start_offset;
     s32 stack_padding[2];
 
@@ -113,7 +113,7 @@ void open_file_build_openbk_header(s32 image_id, void* destination) {
 
     g_open_file_current_openbk_image_id = image_id;
     start_offset = g_open_file_openbk_start_sector_offsets[image_id];
-    file_wait_then_build_header(&g_main_file_cd_state, DISC_SECTOR_OPEN_OPNBK_BIN + start_offset,
+    file_wait_then_request_read(&g_main_file_cd_state, DISC_SECTOR_OPEN_OPNBK_BIN + start_offset,
         g_open_file_openbk_end_sector_offsets[image_id] - start_offset, destination);
 }
 
@@ -208,7 +208,7 @@ void open_movie_stream_fftst_and_push_controller(
  * the controller is replaced by the title menu. The menu is given the sector just
  * past the stream, from the record's start sector and length, as the place to
  * stop the CD audio. */
-void open_movie_finish_stream_controller_if_ready_or_skipped(open_controller_record_t* record) {
+void open_movie_update_fftst(open_controller_record_t* record) {
     if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) {
         if (!(g_open_input_new_button_presses & PSX_PAD_START)) {
             return;
@@ -238,7 +238,7 @@ static void open_movie_stream_fftop_and_push_controller(s32 start_sector, s32 un
 
 /* OPEN_CONTROLLER_FFTOP_MOVIE: Start stops the opening movie; once it has stopped the controller
  * pops, blanks the display and ends OPENING with result 0. */
-void open_movie_finish_fftop_controller_if_ready_or_skipped(open_controller_record_t* unused_record) {
+void open_movie_update_fftop(open_controller_record_t* unused_record) {
     u32 flags;
     s32 controller;
 
@@ -520,7 +520,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             /* Nothing was loaded: rebuild the title screen and its menu controller. */
             if (world_card_run_menu_screen(0) == 0) {
                 g_open_file_current_openbk_image_id = -1;
-                open_file_build_openbk_header(0, g_open_file_destination);
+                open_file_request_openbk_image(0, g_open_file_destination);
                 file_wait_for_pending();
                 g_open_gfx_next_render_record_36 -= 6;
                 g_open_gfx_render_record_pointer_count -= 6;
@@ -733,7 +733,7 @@ void open_prologue_start(void) {
     main_sound_set_current_music_track(MAIN_MUSIC_NEW_GAME);
     suzuki_sound_set_master_volume(0x3fff, 5);
     open_file_load_prologue_text_pages();
-    open_file_build_openbk_header(1, g_open_file_destination);
+    open_file_request_openbk_image(1, g_open_file_destination);
     file_wait_for_pending();
     open_prologue_init_sequence(12, 3, g_open_prologue_entries);
     open_gfx_start_overlay_fade_out(0x20);

@@ -24,8 +24,8 @@ typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_VARIABLE_LIST = 11,
     WLDCORE_MENU_LEVEL_NUMBER_PANEL = 12,
     WLDCORE_MENU_LEVEL_PROPOSITION_DISPATCH_CONFIRM = 13,
-    WLDCORE_MENU_LEVEL_COMPLETED_PROPOSITIONS = 14,
-    WLDCORE_MENU_LEVEL_COMPLETED_PROPOSITIONS_BROWSE = 15,
+    WLDCORE_MENU_LEVEL_RETURNED_PROPOSITIONS = 14,
+    WLDCORE_MENU_LEVEL_RETURNED_PROPOSITIONS_BROWSE = 15,
     WLDCORE_MENU_LEVEL_PROPOSITION_REPORT = 16,
     WLDCORE_MENU_LEVEL_PROPOSITION_RESULT = 17,
     WLDCORE_MENU_LEVEL_PROPOSITIONS = 18,
@@ -55,7 +55,7 @@ typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_PROPOSITION_ATTEMPT_DETAIL = 42,
     WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES = 43,
     WLDCORE_MENU_LEVEL_FORMATION_TUTORIALS = 44,
-    WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES = 45,
+    WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS = 45,
     WLDCORE_MENU_LEVEL_FACTS = 46,
     WLDCORE_MENU_LEVEL_FACT_DETAIL = 47,
     WLDCORE_MENU_LEVEL_NUMBER_PANEL_WITH_ARGUMENT = 48,
@@ -65,7 +65,7 @@ typedef enum wldcore_menu_level_type {
     WLDCORE_MENU_LEVEL_FIXED_NUMBER_PANEL = 52,
     WLDCORE_MENU_LEVEL_MAP_PATH = 53,
     WLDCORE_MENU_LEVEL_MAP_LOCATION_VISIBILITY = 54,
-    WLDCORE_MENU_LEVEL_COUNTDOWN = 55,
+    WLDCORE_MENU_LEVEL_DISCOVERY = 55,
     WLDCORE_MENU_LEVEL_LAYOUT_WINDOW = 56,
 } wldcore_menu_level_type_e;
 
@@ -227,7 +227,7 @@ typedef struct wldcore_menu_variable_detail_level {
     s32 timer; /* 0x10; cleared at push; text delay or dissolve step, counted per frame */
 } wldcore_menu_variable_detail_level_t;
 
-/* transitions and countdowns */
+/* transitions and announcements */
 /* Provisional: the SCREEN_TRANSITION level pushed by wldcore_menu_push_screen_transition_level and stepped by
  * wldcore_menu_step_screen_transition_level. */
 typedef struct wldcore_menu_screen_transition_level {
@@ -285,23 +285,24 @@ typedef struct wldcore_menu_event_transition_level {
     s32 mode; /* 0x20; wldcore_event_transition_mode_e; argument of the push */
 } wldcore_menu_event_transition_level_t;
 
-/* wldcore_menu_countdown_t.phase. */
-typedef enum wldcore_countdown_phase {
-    WLDCORE_COUNTDOWN_PHASE_MESSAGES = 0,     /* circle shows the next message */
-    WLDCORE_COUNTDOWN_PHASE_LAST_MESSAGE = 1, /* waits for the message box, then starts MAIN_MUSIC_MILESTONE */
-    WLDCORE_COUNTDOWN_PHASE_JINGLE = 2,       /* 180 frames, then back to MAIN_MUSIC_BAR */
-    WLDCORE_COUNTDOWN_PHASE_CLOSE = 3,        /* waits for the audio queue, then pops */
-} wldcore_countdown_phase_e;
+/* wldcore_menu_discovery_t.phase. */
+typedef enum wldcore_discovery_phase {
+    WLDCORE_DISCOVERY_PHASE_MESSAGES = 0,     /* circle shows the next message */
+    WLDCORE_DISCOVERY_PHASE_LAST_MESSAGE = 1, /* waits for the message box, then starts MAIN_MUSIC_MILESTONE */
+    WLDCORE_DISCOVERY_PHASE_JINGLE = 2,       /* 180 frames, then back to MAIN_MUSIC_BAR */
+    WLDCORE_DISCOVERY_PHASE_CLOSE = 3,        /* waits for the audio queue, then pops */
+} wldcore_discovery_phase_e;
 
-/* Provisional: the COUNTDOWN level pushed by wldcore_menu_push_countdown_level: a run of messages ending in a
- * jingle. wldcore_menu_show_next_sequence_message shows each message and sets LAST_MESSAGE when the count runs
- * out; wldcore_map_step_discovery_announcement then advances the later phases. */
-typedef struct wldcore_menu_countdown {
+/* The DISCOVERY level pushed by wldcore_menu_push_discovery_level after a report that found treasure or
+ * unexplored land: a run of "found" messages ending in the milestone jingle. wldcore_menu_show_next_sequence_message
+ * shows each message and sets LAST_MESSAGE when the count runs out; wldcore_menu_step_discovery_level then advances
+ * the later phases. */
+typedef struct wldcore_menu_discovery {
     s32 current;
     s32 remaining;
-    s32 phase; /* 0x08; wldcore_countdown_phase_e */
+    s32 phase; /* 0x08; wldcore_discovery_phase_e */
     s32 timer; /* 0x0c; frames spent in phase 2 */
-} wldcore_menu_countdown_t;
+} wldcore_menu_discovery_t;
 
 /* map and locations */
 /* Provisional: the world-map cursor level (ROOT) stepped by wldcore_menu_step_map_cursor_level. */
@@ -507,7 +508,7 @@ typedef struct wldcore_menu_participant_level {
 } wldcore_menu_participant_level_t;
 
 /* Provisional: the COMPLETED_PROPOSITIONS_BROWSE level, which asks whether to hear a returned proposition's report.
- * wldcore_list_handle_completed_propositions_input pushes it over the yes/no panel. */
+ * wldcore_list_handle_returned_propositions_input pushes it over the yes/no panel. */
 typedef struct wldcore_proposition_report_confirm_level {
     s32 cursor_window; /* 0x00; window record moved between the two rows */
     s32 render_index;  /* 0x04; render record holding the confirmation text */
@@ -640,7 +641,7 @@ typedef union wldcore_menu_stack_record {
     wldcore_window_render_pair_t window_render;
     wldcore_menu_window_pair_level_t window_pair;
     wldcore_menu_window_pair_render_level_t window_pair_render;
-    wldcore_menu_countdown_t countdown; /* pushed by wldcore_menu_push_countdown_level */
+    wldcore_menu_discovery_t discovery; /* pushed by wldcore_menu_push_discovery_level */
     wldcore_menu_rumor_detail_level_t rumor_detail;
     wldcore_menu_list_window_level_t list_window;
     wldcore_menu_proposition_list_level_t proposition_list;

@@ -128,7 +128,6 @@ extern s32 g_wldcore_active_propositions_saved_cursor[];
 /* Saved category row, declared as an array for the same reason. */
 extern s32 g_wldcore_proposition_category_saved_cursor[];
 extern s32 g_wldcore_participant_list_saved_cursor;
-extern s32 g_wldcore_proposition_selected_entry;
 extern s32 g_wldcore_proposition_gil_amount;
 extern s32 g_wldcore_proposition_send_unit_count;
 extern s16 g_wldcore_proposition_candidate_levels[];
@@ -200,8 +199,5 @@ void wldcore_proposition_calculate_base_jp_and_gil(void);
 void wldcore_proposition_apply_extra_days_multiplier(void);
 void wldcore_proposition_roll_bonus_reward(void);
 s32 wldcore_get_completion_milestone_rank(void);
-s32 wldcore_proposition_load_picture(s32 index);
-void wldcore_proposition_load_picture_data_set(s32 value);
-void wldcore_proposition_submit_marker_request(GsOT* ot);
 
 #endif

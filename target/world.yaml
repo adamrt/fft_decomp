@@ -301,7 +301,7 @@ functions:
   - {addr: 0x800f0af4, size: 20, name: menu_request_open_small, hash: 0525dd738699e440, unit: event_resources}
   - {addr: 0x800f0b08, size: 84, name: menu_poll_small_load, hash: beff675275d527cf, unit: event_resources}
   - {addr: 0x800f0b5c, size: 8, name: map_return_zero_1, hash: 207819bf4ebe3078, unit: event_resources}
-  - {addr: 0x800f0b64, size: 56, name: map_data_load_complete_thread, hash: 9d186db038b3c37d, unit: event_resources}
+  - {addr: 0x800f0b64, size: 56, name: map_skip_deployment_thread, hash: 9d186db038b3c37d, unit: event_resources}
   - {addr: 0x800f0b9c, size: 72, name: sound_wait_for_music_load, hash: ae5d718d414b6204, unit: music_stubs}
   - {addr: 0x800f0be4, size: 168, name: sound_play_music_tracks, hash: 99f338e7d1920b8b, unit: music_stubs}
   - {addr: 0x800f0c8c, size: 444, name: menu_init_attack_resources_and_threads, hash: 1ae51b2896ef360b, unit: attack_resources}
@@ -977,13 +977,13 @@ functions:
   - {addr: 0x8012d964, size: 380, name: world_tutorial_start, hash: da06ff25c5a65781, unit: tutorial}
   - {addr: 0x8012dae0, size: 500, name: world_tutorial_run_frame, hash: 11fe2397ee7d1a2e, unit: tutorial}
   - {addr: 0x8012dcd4, size: 244, name: world_tutorial_opcode_17_end, hash: 85f71d536a432fc4, unit: tutorial}
-  - {addr: 0x8012ddc8, size: 208, name: world_tutorial_opcode_00_shift, hash: b473377ad5c727ac, unit: tutorial}
+  - {addr: 0x8012ddc8, size: 208, name: world_tutorial_opcode_00_press_button, hash: b473377ad5c727ac, unit: tutorial}
   - {addr: 0x8012de98, size: 232, name: world_tutorial_opcode_10_display_message, hash: a718aba642507e87, unit: tutorial}
   - {addr: 0x8012df80, size: 100, name: world_tutorial_opcode_12_wait_for_message, hash: aef8d1cba103508d, unit: tutorial}
   - {addr: 0x8012dfe4, size: 212, name: world_tutorial_opcode_11_change_dialog, hash: d5f6d9e038415e84, unit: tutorial}
   - {addr: 0x8012e0b8, size: 1468, name: world_tutorial_opcode_13_highlight_ring, hash: bc6845624b0f744d, unit: tutorial}
   - {addr: 0x8012e674, size: 172, name: world_tutorial_advance_highlight_brightness, hash: cb9190aefd64a045, unit: tutorial}
-  - {addr: 0x8012e720, size: 128, name: world_tutorial_opcode_14_wait, hash: 7e0b7a8fd1741a85, unit: tutorial}
+  - {addr: 0x8012e720, size: 128, name: world_tutorial_opcode_14_fade_out_highlight, hash: 7e0b7a8fd1741a85, unit: tutorial}
   - {addr: 0x8012e7a0, size: 676, name: world_tutorial_draw_highlight_quads, hash: 9db346e714a86bd0, unit: tutorial}
   - {addr: 0x8012ea44, size: 196, name: world_tutorial_opcode_15_wait_time, hash: 87875b5b22d4e6b0, unit: tutorial}
   - {addr: 0x8012eb08, size: 200, name: world_tutorial_opcode_16_wait_for_button, hash: c710620d03afae09, unit: tutorial}
@@ -1068,7 +1068,7 @@ functions:
   - {addr: 0x801368dc, size: 916, name: world_shop_run_sell_equipped_item_menu, hash: 1ab7fabf179f2347, unit: shop}
   - {addr: 0x80136c70, size: 388, name: world_shop_run_sell_menu_subflow_step, hash: 1944f51cf039ad40, unit: shop}
   - {addr: 0x80136df4, size: 188, name: world_shop_return_unit_equip_to_fitting_room, hash: f5b6d25866fa6472, unit: shop}
-  - {addr: 0x80136eb0, size: 380, name: world_shop_finalize_unit_equips_from_fitting_room, hash: 6fcbea08f09b460d, unit: shop}
+  - {addr: 0x80136eb0, size: 380, name: world_shop_take_off_tried_on_item, hash: 6fcbea08f09b460d, unit: shop}
   - {addr: 0x8013702c, size: 208, name: world_shop_buy_from_fitting_room, hash: 55f25e1a3ba9af3a, unit: shop}
   - {addr: 0x801370fc, size: 636, name: world_shop_run_fur_menu_step, hash: 825ee82e8fe74737, unit: shop}
   - {addr: 0x80137378, size: 80, name: world_shop_get_selected_poached_item_quantity, hash: ba51994016fdf9d4, unit: shop}
@@ -1325,8 +1325,8 @@ data:
   - {addr: 0x801564d0, name: g_menu_unit_view_thread_sets}
   - {addr: 0x80156690, name: g_menu_building_thread_started}
   - {addr: 0x801566b0, name: g_menu_panel_fade_modes}
-  - {addr: 0x801566b8, name: g_menu_saved_animation_speed}
-  - {addr: 0x801566ba, name: g_menu_animation_speed_forced}
+  - {addr: 0x801566b8, name: g_menu_saved_vsync_interval}
+  - {addr: 0x801566ba, name: g_menu_vsync_interval_forced}
   - {addr: 0x801566c0, name: g_menu_cleared_entry_indices}
   - {addr: 0x801566cc, name: g_menu_selection_remaps}
   - {addr: 0x801566f4, name: g_menu_action_type_modes}
@@ -1780,7 +1780,7 @@ data:
   - {addr: 0x80193c1c, name: g_world_text_resident_data}
   - {addr: 0x80193c40, name: g_world_tutorial_message_files}
   - {addr: 0x80193c78, name: g_world_tutorial_script_files}
-  - {addr: 0x80193cb0, name: g_world_tutorial_wait_timer}
+  - {addr: 0x80193cb0, name: g_world_tutorial_highlight_brightness}
   - {addr: 0x80193cb2, name: g_world_tutorial_buttons}
   - {addr: 0x80193cb4, name: g_world_card_save_file_names}
   - {addr: 0x80193cf0, name: g_world_card_slot_text_table}
@@ -2373,7 +2373,7 @@ data:
   - {addr: 0x801cd7e4, name: GsIDMATRIX2}
   - {addr: 0x801cd804, name: CLIP2}
   - {addr: 0x801cd80c, name: g_world_formation_unit_banner_at_bottom}
-  - {addr: 0x801cd810, name: g_world_tutorial_shift_command_bit}
+  - {addr: 0x801cd810, name: g_world_tutorial_pressed_button}
   - {addr: 0x801cd814, name: g_gfx_current_otag_entry}
   - {addr: 0x801cd818, name: g_event_pending_reserved_vram_release_slot}
   - {addr: 0x801cd81c, name: g_event_pending_evtchr_save_slot}

@@ -157,21 +157,21 @@ void wldcore_file_poll_vram_image_stream(main_file_load_descriptor_t* stream) {
 
 /* Load the picture data set of location record `index` (stored as set + 1)
  * and return the stored value; 0 means the record has no picture. */
-s32 wldcore_proposition_load_picture(s32 index) {
+s32 wldcore_gfx_load_location_picture(s32 index) {
     s32 value = g_wldcore_location_records[index].picture;
 
     if (value != 0)
-        wldcore_proposition_load_picture_data_set(value - 1);
+        wldcore_gfx_load_picture_set(value - 1);
     return value;
 }
 
 /* Load picture set `set` into its image buffer, skipping the transfer when it
  * is already resident. */
-void wldcore_proposition_load_picture_data_set(s32 set) {
+void wldcore_gfx_load_picture_set(s32 set) {
     if (set != g_wldcore_loaded_picture_set) {
         file_wait_for_pending();
         g_wldcore_loaded_picture_set = set;
-        file_wait_then_build_header(&g_main_file_cd_state,
+        file_wait_then_request_read(&g_main_file_cd_state,
             g_wldcore_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
             g_wldcore_picture_sector_offsets[set + 1] - g_wldcore_picture_sector_offsets[set],
             g_wldcore_picture_buffer);
@@ -188,7 +188,7 @@ void wldcore_gfx_load_background_set(s32 set) {
     if (set != g_wldcore_loaded_background_set) {
         file_wait_for_pending();
         g_wldcore_loaded_background_set = set;
-        file_wait_then_build_header(&g_main_file_cd_state,
+        file_wait_then_request_read(&g_main_file_cd_state,
             g_wldcore_background_sector_offsets[set] + DISC_SECTOR_WORLD_WLDBK_BIN,
             g_wldcore_background_sector_offsets[set + 1] - g_wldcore_background_sector_offsets[set],
             g_wldcore_scratch_buffer);
@@ -204,7 +204,7 @@ void wldcore_load_message_block_if_changed(s32 block) {
     if (block != g_wldcore_loaded_message_block) {
         file_wait_for_pending();
         g_wldcore_loaded_message_block = block;
-        file_wait_then_build_header(&g_main_file_cd_state,
+        file_wait_then_request_read(&g_main_file_cd_state,
             g_wldcore_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
             g_wldcore_message_block_sector_offsets[block + 1] - g_wldcore_message_block_sector_offsets[block],
             g_wldcore_message_buffer);
@@ -219,12 +219,12 @@ void wldcore_load_message_block_if_changed(s32 block) {
  * so entry i+1 minus entry i is that chapter's sector count. */
 void wldcore_load_sound_novel_files(s32 chapter) {
     file_wait_for_pending();
-    file_wait_then_build_header(&g_main_file_cd_state,
+    file_wait_then_request_read(&g_main_file_cd_state,
         g_wldcore_sound_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
         g_wldcore_sound_novel_script_sector_offsets[chapter + 1] - g_wldcore_sound_novel_script_sector_offsets[chapter],
         &g_wldcore_save_slot_buffer);
     file_wait_for_pending();
-    file_wait_then_build_header(&g_main_file_cd_state,
+    file_wait_then_request_read(&g_main_file_cd_state,
         g_wldcore_sound_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
         g_wldcore_sound_novel_text_sector_offsets[chapter + 1] - g_wldcore_sound_novel_text_sector_offsets[chapter],
         g_wldcore_message_buffer);
@@ -235,7 +235,7 @@ void wldcore_load_sound_novel_files(s32 chapter) {
 /* Queue a one-sector read of BATTLE.BIN's first sector with no destination,
  * which seeks the drive there while the event transition plays. */
 void wldcore_file_seek_to_battle_bin(void) {
-    file_wait_then_build_header(&g_main_file_cd_state, g_main_battle_bin_sector, 1, 0);
+    file_wait_then_request_read(&g_main_file_cd_state, g_main_battle_bin_sector, 1, 0);
 }
 
 /* Fill the rectangle with the 256x238 display area of frame

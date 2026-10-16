@@ -2259,7 +2259,7 @@ void battle_state_init_deployment_display(s32 width, s32 height, s32 projection,
  * and draw environments and draw the ordering table. Returns VSync's result,
  * which the game loop keeps as the frame's hsync count.
  *
- * At animation speed 1 the wait is one vertical blank. Otherwise it is
+ * At vsync interval 1 the wait is one vertical blank. Otherwise it is
  * g_main_system_vsync_interval blanks, except in the effect and action-execute
  * states: there it is 2 blanks, or 3 while g_main_frame_pacing_timer runs (4 while it
  * is 16 or more), with the timer counting down each frame, and g_main_system_min_vsync_interval

@@ -502,8 +502,8 @@ typedef enum battle_team_flags {
  * WORLD auto-battle menus store it and the AI reads it. */
 typedef enum ai_autobattle_mode {
     AI_AUTOBATTLE_MANUAL = 0, /* the player gives the orders */
-    AI_AUTOBATTLE_TARGETED = 12,
-    AI_AUTOBATTLE_RECOVERY = 14,
+    AI_AUTOBATTLE_FIGHT_FOR_LIFE = 12,
+    AI_AUTOBATTLE_PROTECT_ALLIES = 14,
     AI_AUTOBATTLE_FADING_LIFE = 16,
     AI_AUTOBATTLE_RETREAT = 17,
 } ai_autobattle_mode_e;
@@ -572,7 +572,7 @@ typedef struct action_data {
     u8 exp_change;                               /* 0x28; Steal EXP */
     u8 jp_change;                                /* 0x29; Move-JP Up / JP stolen */
     /* Written as a 16-bit value everywhere (battle_formula_apply_status lhu/sh,
-     * battle_action_check_arrow_guard_usability, battle_formula_apply_catch,
+     * battle_action_try_arrow_guard, battle_formula_apply_catch,
      * battle_formula_force_attack_miss). */
     s16 attack_accuracy; /* 0x2a */
 } action_data_t;

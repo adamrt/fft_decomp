@@ -202,7 +202,7 @@ void main_heap_clear_game_allocator_table(void) {
  *
  * Overlay callers pass a byte count; the lower-level builder takes sectors.
  */
-s32 main_file_call_build_header(s32 sector, u32 size, void* destination) {
+s32 main_file_request_read_bytes(s32 sector, u32 size, void* destination) {
     return main_file_request_read_quiet(&g_main_file_cd_state, sector, size >> 11, destination);
 }
 

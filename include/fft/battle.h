@@ -191,13 +191,13 @@ void battle_state_start_change_map_jump_out(s32 map_id, s32 duration);
 void battle_state_start_close_battle(s32 duration);
 void battle_state_start_map_jump_out(s32 map_id, s32 duration);
 /* Queues CLOSE_BATTLE; the callers always pass transition step 8. */
-void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32 close_flow_state);
+void battle_state_enter_close_battle(s32 transition_step, s32 close_flow_state);
 
 /* frame pacing */
-void battle_state_clear_frame_pacing(void);
+void battle_state_clear_min_vsync_interval(void);
 s32 battle_state_get_vsync_interval(void);
 void battle_state_reset_frame_pacing_timer(void);
-s32 battle_state_set_animation_speed(s32 speed);
+s32 battle_state_set_vsync_interval(s32 speed);
 void battle_state_set_min_vsync_interval(s32 value);
 
 /* deployment */

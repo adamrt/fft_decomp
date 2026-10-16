@@ -742,7 +742,7 @@ functions:
   - {addr: 0x800444dc, size: 292, name: main_heap_reserve_at, hash: bb2cd7a4ddd3dc36, unit: heap}
   - {addr: 0x80044600, size: 112, name: main_heap_free, hash: 51b9936a5ea34c17, unit: heap}
   - {addr: 0x80044670, size: 36, name: main_heap_clear_game_allocator_table, hash: baa90df5f4fd6324, unit: heap}
-  - {addr: 0x80044694, size: 52, name: main_file_call_build_header, hash: 0a87b13dd21b6135, unit: heap}
+  - {addr: 0x80044694, size: 52, name: main_file_request_read_bytes, hash: 0a87b13dd21b6135, unit: heap}
   - {addr: 0x800446c8, size: 16, name: main_file_is_still_loading, hash: 2bf2cd79d5e3b972, unit: heap}
   - {addr: 0x800446d8, size: 228, name: main_file_get_smd, hash: 7c3adb54cd59bad4, unit: heap}
   - {addr: 0x800447bc, size: 228, name: main_file_load_to_heap, hash: a436e8832314d2f3, unit: heap}
@@ -1284,7 +1284,7 @@ data:
   - {addr: 0x8004d720, name: g_main_gfx_now_loading_primitives}
   - {addr: 0x8004d950, name: g_main_system_flags}
   - {addr: 0x8004d954, name: g_main_special_portrait_unit_id}
-  - {addr: 0x8004d958, name: g_main_saved_animation_speed}
+  - {addr: 0x8004d958, name: g_main_saved_vsync_interval}
   - {addr: 0x8004d95c, name: g_main_sound_music}
   - {addr: 0x8004d9ac, name: g_main_special_portrait_wldface_id}
   - {addr: 0x8004d9b0, name: g_main_saved_weather_variable}
@@ -1329,15 +1329,15 @@ data:
   - {addr: 0x80057eec, name: g_main_active_propositions}
   - {addr: 0x80057f34, name: g_main_brave_story_character_ages}
   - {addr: 0x80057f74, name: g_main_party_units}
-  - {addr: 0x80059374, name: g_main_saved_data_bits}
+  - {addr: 0x80059374, name: g_main_sound_novel_read_section_bits}
   - {addr: 0x80059414, name: g_main_item_location_flags}
   - {addr: 0x80059494, name: g_main_item_poached_quantities}
-  - {addr: 0x80059594, name: g_main_saved_records}
+  - {addr: 0x80059594, name: g_main_sound_novel_saved_records}
   - {addr: 0x800596ac, name: g_main_land_discovery_date_bits}
   - {addr: 0x800596c0, name: g_main_card_bios_events}
   - {addr: 0x800596e0, name: g_main_item_quantities}
   - {addr: 0x800597e0, name: g_main_card_save_slot_playtimes}
-  - {addr: 0x80059810, name: g_main_secondary_saved_data_bits}
+  - {addr: 0x80059810, name: g_main_sound_novel_saved_flags}
   - {addr: 0x8005e90c, name: g_main_unit_generation_base_data}
   - {addr: 0x8005e93c, name: g_main_unit_generation_raw_stat_variance}
   - {addr: 0x8005e950, name: g_main_terrain_tile_info_pairs}

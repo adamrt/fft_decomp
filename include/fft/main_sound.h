@@ -16,7 +16,7 @@
 typedef enum main_music {
     MAIN_MUSIC_NONE = 0,       /* the *_sound_play_music_tracks functions and the WLDCORE audio queue skip it */
     MAIN_MUSIC_ALTIMA = 19,    /* EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC */
-    MAIN_MUSIC_MILESTONE = 20, /* wldcore_map_step_discovery_announcement, in the bar */
+    MAIN_MUSIC_MILESTONE = 20, /* wldcore_menu_step_discovery_level, in the bar */
     MAIN_MUSIC_TUTORIAL = 26,  /* the world menu's tutorial screen */
     MAIN_MUSIC_WORLD_MAP = 27,
     MAIN_MUSIC_SHOP = 28,                         /* world_shop_run_screen: the item shop */

@@ -502,7 +502,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
     u32 frame;
 
     if ((unit->shadow_dirty |= 1) != 0) {
-        battle_gfx_calculate_sprite_shadow_from_tile_slope(unit);
+        battle_gfx_build_unit_shadow_quad(unit);
         unit->shadow_dirty ^= 1;
     }
     SetRotMatrix(&g_battle_camera_matrix);
@@ -579,14 +579,14 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         position.vy -= tile->depth_half_height.depth * MAP_HEIGHT_STEP;
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if (tile->surface.depth_bias) {
-                battle_camera_calculate_relative_offset_by_5(&position, &offset);
+                battle_camera_get_step_depth_point_biased(&position, &offset);
             } else {
-                battle_camera_calculate_relative_offset_by_1(&position, &offset);
+                battle_camera_get_step_depth_point_unbiased(&position, &offset);
             }
         } else if (tile->surface.depth_bias) {
-            battle_camera_convert_screen_coords_modify_by_5(&position, &offset);
+            battle_camera_get_tile_depth_point_biased(&position, &offset);
         } else {
-            battle_camera_convert_screen_coords_modify_by_1(&position, &offset);
+            battle_camera_get_tile_depth_point_unbiased(&position, &offset);
         }
         SetRotMatrix(&g_battle_camera_matrix);
         SetTransMatrix(&g_battle_camera_matrix);
@@ -876,7 +876,7 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     prim->v0 = 0x80;
     prim->v3 = 0x98;
     prim->v2 = 0x98;
-    battle_camera_convert_screen_coords_modify_by_1(base, &screen);
+    battle_camera_get_tile_depth_point_unbiased(base, &screen);
     RotTrans(&screen, &transformed, &flag);
     AddPrim(ot + (transformed.vz / 4), prim);
 }
@@ -1249,7 +1249,7 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
     if (unit->status_bubble_timer & 0x10) {
         position.vy = y - 1;
     }
-    battle_camera_convert_screen_coords_modify_by_1(&base, &raised);
+    battle_camera_get_tile_depth_point_unbiased(&base, &raised);
     raised.vy += 12;
     RotTrans(&raised, &transformed, &flag);
     display = unit->status_bubble_display;

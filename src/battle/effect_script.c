@@ -247,7 +247,7 @@ void battle_effect_load_data(void) {
         g_battle_ability_effect_id = EFFECT_FILE_CURE;
         battle_effect_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
     }
-    main_file_call_build_header(lba, byte_length, 0);
+    main_file_request_read_bytes(lba, byte_length, 0);
 }
 
 /*
@@ -279,7 +279,7 @@ s32 battle_effect_update_file_load(void) {
                 g_battle_ability_effect_id = EFFECT_FILE_CURE;
                 battle_effect_load_lba_and_size(EFFECT_FILE_CURE, &lba, &byte_length);
             }
-            result = main_file_call_build_header(lba, byte_length, destination);
+            result = main_file_request_read_bytes(lba, byte_length, destination);
             if (result == 0) {
                 g_battle_effect_load_state = EFFECT_LOAD_READING;
                 result = 1;
@@ -463,7 +463,7 @@ static s32 battle_effect_update_stage(void) {
             g_main_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
         battle_effect_reset_subsystems();
         battle_effect_seed_camera_tracks();
-        battle_state_clear_frame_pacing();
+        battle_state_clear_min_vsync_interval();
         battle_effect_set_frame_data_pointer(g_battle_ability_effect_id);
         battle_effect_set_animation_sequences_pointer(g_battle_ability_effect_id);
         battle_effect_set_script_pointer(g_battle_ability_effect_id);
@@ -510,7 +510,7 @@ static s32 battle_effect_update_stage(void) {
             battle_map_configure_effect_data_state(MAP_EFFECT_DATA_END);
             battle_map_unfreeze();
             menu_enable_height_display();
-            battle_state_clear_frame_pacing();
+            battle_state_clear_min_vsync_interval();
             g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
             result = 0;
         }

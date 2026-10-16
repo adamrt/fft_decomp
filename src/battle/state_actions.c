@@ -1,4 +1,4 @@
-/* Charged action announcements, pre-attack animation, casting, target selection and display, animation speed halving,
+/* Charged action announcements, pre-attack animation, casting, target selection and display, vsync interval changes,
  * and the state handlers from the free cursor through unit moving. */
 
 #include "fft/battle.h"
@@ -190,7 +190,7 @@ s32 battle_state_announce_next_charged_action(void) {
                         battle_gfx_queue_charge_failure_message(unit, result);
                     }
                 }
-                battle_unit_set_animation_based_on_status(unit);
+                battle_unit_set_status_animation(unit);
                 battle_unit_end_command(unit);
                 result = -1;
             }
@@ -236,7 +236,7 @@ s32 battle_state_announce_next_charged_action(void) {
  *
  * continue_attack_count is nonzero on the follow-up strikes of a continued
  * attack. */
-void battle_action_set_target_coords_and_attacker_anim(void) {
+void battle_action_apply_strike_results(void) {
     battle_unit_t* unit;
     battle_unit_t* target;
     battle_strike_work_t* action;
@@ -325,14 +325,14 @@ void battle_action_start_next_strike_display(void) {
     battle_gfx_set_thrown_item_graphic_palette(unit->strike.used_weapon_id, unit);
     if (((reaction != 0) && (ability != reaction)) || (ability == ABILITY_ID_KNOCKBACK) || (ability == 0)
         || (battle_effect_ability_has_no_file(ability) != 0)) {
-        battle_action_set_target_coords_and_attacker_anim();
+        battle_action_apply_strike_results();
         return;
     }
     g_battle_game_state = BATTLE_GAME_STATE_START_EFFECT_FILE_OPEN;
     battle_effect_store_targets_and_display_types(ability, unit);
 }
 
-/* Enter the OpenSp2Files game state at full animation speed, with no SP2 buffer yet, so its
+/* Enter the OpenSp2Files game state at vsync interval 1, with no SP2 buffer yet, so its
  * handler starts a fresh load. */
 void battle_state_enter_open_sp2_files(void) {
     g_main_system_vsync_interval = 1;
@@ -481,7 +481,7 @@ void battle_target_select_tile(void) {
         g_battle_cursor_input_mode = BATTLE_CURSOR_INPUT_FREE_CURSOR;
         g_battle_cursor_input_mode_saved = saved_input_mode;
         battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
-        battle_target_store_cursor_casting_unit_name_and_data();
+        battle_target_show_attack_preview_panel();
         if (g_main_game_options.fields.target_flashing == GAME_OPTION_ON) {
             battle_gfx_tint_all_units_by_team();
         }
@@ -489,7 +489,7 @@ void battle_target_select_tile(void) {
     case 2:
         battle_camera_disable_map_pan();
         battle_state_enter_pre_attack_animation();
-        battle_target_store_cursor_casting_unit_name_and_data();
+        battle_target_show_attack_preview_panel();
         break;
     case -1:
         battle_menu_dispatch_idle_action_menu();
@@ -529,7 +529,7 @@ s32 battle_target_begin_tile_selection(void) {
         battle_camera_disable_map_pan();
         g_battle_game_state = BATTLE_GAME_STATE_TARGETING_RANGE;
         battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_RANGE, 2);
-        battle_target_store_cursor_unit_as_preview_target();
+        battle_target_show_right_unit_panel();
         if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
             battle_target_show_cursor();
         } else {
@@ -539,7 +539,7 @@ s32 battle_target_begin_tile_selection(void) {
     case TARGET_PANELS_NO_TARGETING:
         battle_camera_disable_map_pan();
         battle_target_select_tile();
-        battle_target_store_cursor_unit_as_preview_target();
+        battle_target_show_right_unit_panel();
         break;
     case TARGET_PANELS_INVALID:
     case TARGET_PANELS_NONE:
@@ -598,8 +598,8 @@ void battle_action_confirm(void) {
 
 /* Starts the repeating tint that marks the candidates of an auto-battle target
  * choice: red on every unit of another team than the casting unit's for
- * AI_COMMAND_AUTOBATTLE_TARGETED_SELECT, blue on every unit of its own
- * team for AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT. Other modes tint
+ * AI_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_SELECT, blue on every unit of its own
+ * team for AI_COMMAND_AUTOBATTLE_PROTECT_ALLIES_SELECT. Other modes tint
  * nothing. */
 static void battle_gfx_highlight_all_units_blue_or_red(s32 mode) {
     battle_unit_t* caster = battle_unit_get_casting();
@@ -615,12 +615,12 @@ static void battle_gfx_highlight_all_units_blue_or_red(s32 mode) {
             continue;
         }
         switch (mode) {
-        case AI_COMMAND_AUTOBATTLE_TARGETED_SELECT:
+        case AI_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_SELECT:
             if ((unit->stats->team_flags & UNIT_TEAM_MASK) != (caster->stats->team_flags & UNIT_TEAM_MASK)) {
                 battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 4, MAP_CLUT_ROW_UNITS, i, 0, 0x10, 0, 0);
             }
             continue;
-        case AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT:
+        case AI_COMMAND_AUTOBATTLE_PROTECT_ALLIES_SELECT:
             if ((unit->stats->team_flags & UNIT_TEAM_MASK) == (caster->stats->team_flags & UNIT_TEAM_MASK)) {
                 battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 4, MAP_CLUT_ROW_UNITS, i, 0, 0, 0, 0x18);
             }
@@ -650,7 +650,7 @@ static void battle_state_enter_target_select_start(void) {
 void battle_state_enter_target_select(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_TARGET_SELECT;
-    battle_target_store_cursor_unit_name_and_data();
+    battle_target_show_hovered_unit_panel();
     battle_gfx_highlight_all_units_blue_or_red(battle_unit_get_casting()->target_select_command);
 }
 
@@ -682,11 +682,11 @@ void battle_state_enter_target_select_denied(void) {
         return;
     }
     command = caster->target_select_command;
-    if (command == AI_COMMAND_AUTOBATTLE_TARGETED_SELECT) {
+    if (command == AI_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_SELECT) {
         menu_init_system_function(MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 1, caster->stats->battle_id, 0, 1);
         return;
     }
-    if (command == AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT) {
+    if (command == AI_COMMAND_AUTOBATTLE_PROTECT_ALLIES_SELECT) {
         menu_init_system_function(MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 2, caster->stats->battle_id, 0, 1);
     }
 }
@@ -767,21 +767,21 @@ void battle_state_enter_map_jumping_in(void) {
 }
 
 /* Queue the CloseBattle game state; callers always pass transition step 8. */
-void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32 close_flow_state) {
+void battle_state_enter_close_battle(s32 transition_step, s32 close_flow_state) {
     g_main_system_vsync_interval = 2;
     g_battle_game_state = BATTLE_GAME_STATE_CLOSE_BATTLE;
     g_battle_state_screen_fade_step = transition_step;
     g_battle_game_flow_state = close_flow_state;
 }
 
-/* Project the cursor tile to the screen; while g_battle_action_at_list_active is set, also draw
+/* Project the cursor tile to the screen; while g_battle_target_cursor_visible is set, also draw
  * the map cursor and its tile glow. */
 void battle_target_update_cursor(void) {
     SVECTOR position;
     SVECTOR raised;
     VECTOR projected;
 
-    if (g_battle_action_at_list_active != 0) {
+    if (g_battle_target_cursor_visible != 0) {
         battle_target_calculate_tile_coords_with_cursor_glow();
         return;
     }
@@ -792,7 +792,7 @@ void battle_target_update_cursor(void) {
  *
  * Projects the units, animates them unless the status screen owns the frame,
  * updates the status bubbles and unit graphics, and projects the cursor tile,
- * drawing the map cursor and tile glow while g_battle_action_at_list_active is
+ * drawing the map cursor and tile glow while g_battle_target_cursor_visible is
  * set. */
 void battle_state_update_units(void) {
     battle_gfx_project_all_units();
@@ -846,7 +846,7 @@ void battle_state_handle_free_cursor_state(void) {
         if (g_main_game_options.fields.multi_height_cursor_speed != GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP) {
             main_sound_play_sfx(MAIN_SFX_CONFIRM);
             battle_action_show_next_at_list_entry();
-            battle_target_store_cursor_unit_name_and_data();
+            battle_target_show_hovered_unit_panel();
         }
     } else if (input & PSX_PAD_TRIANGLE) {
         battle_action_clear_at_list_id();
@@ -988,13 +988,13 @@ void battle_state_handle_idling_action_menus_state(void) {
     case AI_COMMAND_END_TURN:
         battle_action_choose_wait();
         break;
-    case AI_COMMAND_AUTOBATTLE_TARGETED_SELECT:
-    case AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT:
+    case AI_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_SELECT:
+    case AI_COMMAND_AUTOBATTLE_PROTECT_ALLIES_SELECT:
         unit->target_select_command = command->kind;
         battle_state_enter_target_select_start();
         break;
-    case AI_COMMAND_AUTOBATTLE_TARGETED_DISPLAY:
-    case AI_COMMAND_AUTOBATTLE_RECOVERY_DISPLAY:
+    case AI_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_DISPLAY:
+    case AI_COMMAND_AUTOBATTLE_PROTECT_ALLIES_DISPLAY:
         unit->target_select_command = command->kind;
         battle_state_enter_target_display_start();
         break;
@@ -1280,7 +1280,7 @@ void battle_state_handle_select_move_tile_state(void) {
         }
         if (buttons & PSX_PAD_TRIANGLE) {
             battle_target_move_cursor_to_unit(battle_unit_get_source());
-            battle_target_store_cursor_unit_name_and_data();
+            battle_target_show_hovered_unit_panel();
         }
         return;
     }

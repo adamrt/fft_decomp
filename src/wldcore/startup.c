@@ -1,5 +1,5 @@
-/* WLDCORE entry, the frame gate, core and subsystem init, world frame drawing, the clip rect, world map state, loop
- * finalization and the restored menu level. */
+/* WLDCORE entry, the map backdrop update, core and subsystem init, world frame drawing, the clip rect, world map state,
+ * loop finalization and the restored menu level. */
 
 #include "fft/data.h"
 #include "fft/file.h"
@@ -44,7 +44,7 @@ static void wldcore_init_runtime_state(void);
 static void wldcore_init_subsystems(void);
 static void wldcore_init_world_map_state(void);
 static void wldcore_menu_restore_level_on_world_entry(void);
-static void wldcore_process_frame_gate(void);
+static void wldcore_gfx_update_map_backdrop(void);
 
 /* WLDCORE's main loop: set up, fade in and run world-map frames until a menu level
  * stops it, then return why as a main_world_result_e. A card-menu restart loops
@@ -71,7 +71,7 @@ s32 wldcore_entrypoint(void) {
             wldcore_fade_step_screen();
             wldcore_map_pulse_dot_colors();
             wldcore_menu_dispatch_idle_handler();
-            wldcore_process_frame_gate();
+            wldcore_gfx_update_map_backdrop();
             if (g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) {
                 wldcore_gfx_draw_world_frame_with_map();
             } else {
@@ -120,7 +120,7 @@ s32 wldcore_entrypoint(void) {
 /* When MAIN_SYSTEM_FLAG_DRAW_MAP goes from set to clear, capture the map
  * backdrop again (wldcore_gfx_capture_map_backdrop) for the frames that no longer redraw the
  * map. */
-static void wldcore_process_frame_gate(void) {
+static void wldcore_gfx_update_map_backdrop(void) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) == 0
         && (g_wldcore_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) != 0) {
         wldcore_gfx_capture_map_backdrop();
@@ -165,7 +165,7 @@ void wldcore_gfx_capture_map_backdrop(void) {
     wldcore_menu_run_world_frame(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_map_draw_location_label(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     GsDrawOt(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
@@ -197,7 +197,7 @@ static void wldcore_gfx_draw_world_frame_with_map(void) {
     wldcore_switch_to_stack(getScratchAddr(255));
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_map_draw_location_label(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     window_dispatch_record_list(&g_wldcore_gfx_aux_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
     window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
@@ -228,7 +228,7 @@ void wldcore_gfx_draw_world_frame(void) {
     wldcore_switch_to_stack(getScratchAddr(255));
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
-    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
+    wldcore_map_draw_location_label(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index]);
     window_dispatch_record_list(&g_wldcore_gfx_ordering_tables[g_main_gfx_active_buffer_index],
         g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_fade_draw_screen_overlays();
@@ -384,7 +384,7 @@ static void wldcore_init_world_map_state(void) {
     g_wldcore_calendar_display_x = -0x78;
     g_wldcore_calendar_display_y = -0x64;
     g_wldcore_location_marker_shade = 0x80;
-    g_wldcore_proposition_selected_entry = 0;
+    g_wldcore_map_selected_location = 0;
 
     if (!(g_main_system_flags & MAIN_SYSTEM_FLAG_TUTORIAL_EVENT)) {
         main_sound_unload_scenario_music_and_tunes();
@@ -476,7 +476,7 @@ static void wldcore_init_runtime_state(void) {
 
     SetDispMask(0);
     g_wldcore_map_projection_state.marker.sub_kind
-        = wldcore_proposition_load_picture(g_wldcore_map_projection_state.marker.kind);
+        = wldcore_gfx_load_location_picture(g_wldcore_map_projection_state.marker.kind);
     file_wait_for_pending();
     buffer_index = GsGetActiveBuff();
     g_main_gfx_active_buffer_index = buffer_index;
@@ -537,7 +537,7 @@ static void wldcore_menu_restore_level_on_world_entry(void) {
         g_wldcore_audio_queue.music.tracks[0] = 0x1B;
         g_wldcore_audio_queue.music.tracks[1] = 0x1A;
         g_wldcore_audio_queue.current_slot = 2;
-        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES, 1, 0);
+        wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS, 1, 0);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_TUTORIAL) {
         wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES, 0, 1);
     } else if (flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) {

@@ -378,10 +378,10 @@ void wldcore_script_opcode_24_focus_location(void) {
     g_wldcore_script_state.args[0] = entry;
     if (entry == 0xff) {
         index = g_wldcore_map_projection_state.marker.kind;
-        g_wldcore_proposition_selected_entry = index + 1;
+        g_wldcore_map_selected_location = index + 1;
     } else {
         index = entry;
-        g_wldcore_proposition_selected_entry = index + 1;
+        g_wldcore_map_selected_location = index + 1;
     }
     if (wldcore_map_is_point_outside_projection_bounds(&g_wldcore_map_dots[index].render.position) != 0) {
         s32* flags = &g_wldcore_script_state.flags;
@@ -502,7 +502,7 @@ s32 wldcore_script_calculate_save_data_completion_percent(void) {
     s32 i;
 
     for (i = 0; i < 0x1000; i++) {
-        if (wldcore_test_bit(g_main_saved_data_bits, i) != 0) {
+        if (wldcore_test_bit(g_main_sound_novel_read_section_bits, i) != 0) {
             count++;
         }
     }

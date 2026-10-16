@@ -2491,7 +2491,7 @@ s32 battle_effect_arrow_arc_secondary_handler(void) {
         battle_effect_draw_projectile_model(&spin, &position, &angles, &scale, parameter);
         if (g_battle_effect_projectile_step_count == 2 && g_battle_effect_trajectory_hit_unit_id != -1
             && g_battle_effect_current_secondary->target_count != 0) {
-            battle_unit_call_bow_hardcoding_by_runtime_id(
+            battle_unit_resolve_projectile_hit_by_runtime_id(
                 g_battle_effect_current_secondary->caster.data.unit.runtime_id,
                 g_battle_effect_current_secondary->target.record.data.unit.runtime_id);
         }
@@ -3796,10 +3796,10 @@ s32 battle_effect_teleport_secondary_handler(void) {
  *
  * With two frames left and a unit hit by the trajectory
  * (g_battle_effect_trajectory_hit_unit_id), the target's hit reaction
- * (battle_unit_call_bow_hardcoding_by_runtime_id) starts, unless the item is one of
+ * (battle_unit_resolve_projectile_hit_by_runtime_id) starts, unless the item is one of
  * the balls or a consumable (ITEM_ID_POTION to ITEM_ID_PHOENIX_DOWN). When the
  * count runs out the icon slot is freed; a unit target whose result is neither
- * MISSED nor NO_EFFECT releases the requested ability effect at animation speed
+ * MISSED nor NO_EFFECT releases the requested ability effect at vsync interval
  * 2, and otherwise a requested effect is dropped after the hit reaction. The
  * handler then enters Finalizing, whose return of 0 removes it.
  *
@@ -3897,7 +3897,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
             }
         }
 
-        battle_state_set_animation_speed(1);
+        battle_state_set_vsync_interval(1);
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
@@ -3953,7 +3953,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
             if ((kind < ITEM_ID_FIRE_BALL || kind > ITEM_ID_LIGHTNING_BALL)
                 && (kind < ITEM_ID_POTION || kind > ITEM_ID_PHOENIX_DOWN)
                 && g_battle_effect_current_secondary->target_count != 0) {
-                battle_unit_call_bow_hardcoding_by_runtime_id(
+                battle_unit_resolve_projectile_hit_by_runtime_id(
                     g_battle_effect_current_secondary->caster.data.unit.runtime_id,
                     g_battle_effect_current_secondary->target.record.data.unit.runtime_id);
             }
@@ -3972,10 +3972,10 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
                 && g_battle_effect_current_secondary->target.record.data.unit.result_animation
                     != EFFECT_HIT_NO_EFFECT) {
                 battle_effect_play();
-                battle_state_set_animation_speed(2);
+                battle_state_set_vsync_interval(2);
             } else if (battle_effect_get_playback_phase() == EFFECT_PLAYBACK_PHASE_REQUESTED) {
                 if (g_battle_effect_current_secondary->target_count != 0) {
-                    battle_unit_call_bow_hardcoding_by_runtime_id(
+                    battle_unit_resolve_projectile_hit_by_runtime_id(
                         g_battle_effect_current_secondary->caster.data.unit.runtime_id,
                         g_battle_effect_current_secondary->target.record.data.unit.runtime_id);
                 }

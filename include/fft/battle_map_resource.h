@@ -258,7 +258,7 @@ typedef enum map_gns_load_phase {
 } map_gns_load_phase_e;
 
 extern map_resource_t* g_battle_map_data_load_buffer;
-extern s32 g_battle_map_data_load_complete;
+extern s32 g_battle_deployment_finished;
 extern s32 g_battle_map_deep_dungeon_load_in_progress;
 extern char g_battle_map_directory_path[];
 extern u32 g_battle_map_gns_lba[MAP_ID_COUNT]; /* 0 where the map id has no file */

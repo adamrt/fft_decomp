@@ -827,7 +827,7 @@ void battle_formula_apply_finger_guard(void) {
     /* The target stores the accuracy as a 16-bit value (0x2a..0x2b). */
     g_battle_action_target_data->attack_accuracy = chance;
     if (chance != 0) {
-        if (battle_action_calculate_chance_to_react(unit) != 0)
+        if (battle_action_fails_reaction_roll(unit) != 0)
             return;
         if (g_battle_action_state != ACTION_STATE_EXECUTE)
             return;
@@ -860,7 +860,7 @@ void battle_formula_apply_catch(void) {
     /* The target stores the accuracy as a 16-bit value (0x2a..0x2b). */
     g_battle_action_target_data->attack_accuracy = chance;
     if (chance != 0) {
-        if (battle_action_calculate_chance_to_react(unit) != 0)
+        if (battle_action_fails_reaction_roll(unit) != 0)
             return;
         if (g_battle_action_state != ACTION_STATE_EXECUTE)
             return;

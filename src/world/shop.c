@@ -42,7 +42,7 @@
 static void world_menu_run_script_with_callback_suppressed(void);
 static void world_shop_undo_fitting_room(void);
 static void world_shop_buy_from_fitting_room(void);
-static void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 equipment_index);
+static void world_shop_take_off_tried_on_item(s16 formation_index, s16 equipment_index);
 static void world_shop_install_callbacks_and_run(void);
 static void world_shop_return_unit_equip_to_fitting_room(s16 unit_index, s16 equipment_index);
 static s32 world_shop_run_fitting_room_checkout_prompt(void);
@@ -1199,7 +1199,7 @@ void world_shop_run_fitting_room_remove_step(void) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
         } else {
             world_shop_add_fitting_room_cost(-world_item_get_price(equipped_item & ITEM_ENTRY_ID_MASK));
-            world_shop_finalize_unit_equips_from_fitting_room(g_unit_selected_index, slot & 0xFF);
+            world_shop_take_off_tried_on_item(g_unit_selected_index, slot & 0xFF);
             world_formation_recalculate_selected_unit_stats();
             g_sound_queued_effect_id = MAIN_SFX_UNEQUIP;
             g_world_shop_previewed_equip_slot = -1;
@@ -1682,7 +1682,7 @@ static void world_shop_return_unit_equip_to_fitting_room(s16 unit_index, s16 equ
  * own reserved item if it fits beside the other hand; any other slot always gets its reserved
  * item (possibly nothing) back. The fit check uses g_unit_selected_index, which is what every
  * caller passes as formation_index. */
-static void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 equipment_index) {
+static void world_shop_take_off_tried_on_item(s16 formation_index, s16 equipment_index) {
     u16 reserved_item;
 
     g_world_unit_pointers[formation_index]->equipment[equipment_index] = ITEM_ID_NOTHING;

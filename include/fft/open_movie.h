@@ -49,6 +49,6 @@ void open_movie_stream_fftst_and_push_controller(
 void open_movie_stream_title_demo_and_push_controller(
     s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level);
 void open_movie_play_end(void);
-void open_movie_init_and_play_end(void);
+void open_system_init_ending(void);
 
 #endif

@@ -1210,7 +1210,7 @@ void battle_unit_settle_on_tile(battle_unit_t* unit) {
     battle_gfx_calculate_world_height_from_world_coords(unit);
     battle_target_move_cursor_to_unit(unit);
     unit->path.count = 0;
-    battle_unit_set_animation_based_on_status(unit);
+    battle_unit_set_status_animation(unit);
 }
 
 /*

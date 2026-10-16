@@ -430,7 +430,7 @@ void battle_unit_set_walk_animation(battle_unit_t* unit) {
  * Animation 0x21 belongs to bit 0 of the 32-bit status mask, which no status maps
  * to (g_battle_unit_status_mask_by_handler_index): that arm never runs.
  */
-void battle_unit_set_animation_based_on_status(battle_unit_t* unit) {
+void battle_unit_set_status_animation(battle_unit_t* unit) {
     s32 animation;
     u8 water_depth = battle_move_get_water_animation_mode(unit);
     u8 spritesheet_id;
@@ -586,12 +586,12 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
     if (unit->statuses_to_add_5_6 & BATTLE_UNIT_STATUS_CHICKEN) {
         battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & BATTLE_UNIT_STATUS_CHICKEN) {
-        battle_unit_set_animation_based_on_status(unit);
+        battle_unit_set_status_animation(unit);
     }
     if (unit->statuses_to_add_5_6 & BATTLE_UNIT_STATUS_FROG) {
         battle_unit_force_animation_facing(BATTLE_UNIT_ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & BATTLE_UNIT_STATUS_FROG) {
-        battle_unit_set_animation_based_on_status(unit);
+        battle_unit_set_status_animation(unit);
     }
     if (unit->statuses_to_add_1_4 & BATTLE_UNIT_STATUS_DEAD) {
         if (g_battle_gfx_spritesheet_data[unit->spritesheet_id].seq_id == BATTLE_SEQ_CYOKO
@@ -724,7 +724,7 @@ void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_ef
             unit->animation.seq = battle_gfx_get_unit_seq_by_spritesheet_id(spritesheet_id);
             unit->spritesheet_id = spritesheet_id;
             battle_gfx_tint_unit_palette(unit, tile_effect_level, 1);
-            battle_unit_set_animation_based_on_status(unit);
+            battle_unit_set_status_animation(unit);
             battle_gfx_load_trap_and_unit_frame_parts(
                 unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
         }
@@ -735,7 +735,7 @@ void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_ef
         unit->animation.seq = unit->animation.saved_seq;
         unit->spritesheet_id = original_id;
         battle_gfx_check_tile_status_palette_mod(unit, tile_effect_level, 1);
-        battle_unit_set_animation_based_on_status(unit);
+        battle_unit_set_status_animation(unit);
         battle_gfx_load_trap_and_unit_frame_parts(
             unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     }
@@ -772,10 +772,10 @@ void battle_gfx_set_thrown_item_graphic_palette(s32 item_id, battle_unit_t* unit
     unit->equipped_weapon_type = weapon_type;
 }
 
-/* A plain call through to battle_unit_set_animation_based_on_status, used by the
+/* A plain call through to battle_unit_set_status_animation, used by the
  * battle state handlers. */
-void battle_unit_call_set_animation_based_on_status(battle_unit_t* unit) {
-    battle_unit_set_animation_based_on_status(unit);
+void battle_unit_call_set_status_animation(battle_unit_t* unit) {
+    battle_unit_set_status_animation(unit);
 }
 
 /* When the target blocked with a hand or a golem took the blow, replace the
@@ -2491,14 +2491,14 @@ void battle_gfx_project_all_units(void) {
             unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_z);
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if ((tile->surface.depth_bias) != 0) {
-                battle_camera_calculate_relative_offset_by_5(&screen, &adjusted);
+                battle_camera_get_step_depth_point_biased(&screen, &adjusted);
             } else {
-                battle_camera_calculate_relative_offset_by_1(&screen, &adjusted);
+                battle_camera_get_step_depth_point_unbiased(&screen, &adjusted);
             }
         } else if ((tile->surface.depth_bias) != 0) {
-            battle_camera_convert_screen_coords_modify_by_5(&screen, &adjusted);
+            battle_camera_get_tile_depth_point_biased(&screen, &adjusted);
         } else {
-            battle_camera_convert_screen_coords_modify_by_1(&screen, &adjusted);
+            battle_camera_get_tile_depth_point_unbiased(&screen, &adjusted);
         }
 
         if (unit->stats != 0) {
@@ -3103,7 +3103,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->animation.display->scale_x = ONE;
     unit->animation.display->scale_y = ONE;
     unit->animation.display->rotation = 0;
-    battle_unit_set_animation_based_on_status(unit);
+    battle_unit_set_status_animation(unit);
     battle_gfx_run_unit_seq_script(unit, cursor.animation, 1);
 
     /* Block 0 draws the weapon sheet, blocks 1 and 2 the effect sheet. */
@@ -3147,7 +3147,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     /* Settle the new unit's display and pose without landing sounds or effects. */
     unit->movement.suppress_sfx_and_landing_effects = 1;
     battle_unit_update_display_by_runtime_id(unit->runtime_id);
-    battle_unit_set_animation_based_on_status(unit);
+    battle_unit_set_status_animation(unit);
     unit->movement.suppress_sfx_and_landing_effects = 0;
     return unit;
 }
@@ -3218,7 +3218,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(
+            if (main_file_request_read_bytes(
                     g_battle_gfx_sprite_shp_files[*index].sector, g_battle_gfx_sprite_shp_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3233,7 +3233,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(
+            if (main_file_request_read_bytes(
                     g_battle_gfx_sprite_seq_files[*index].sector, g_battle_gfx_sprite_seq_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3248,7 +3248,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(
+            if (main_file_request_read_bytes(
                     g_battle_gfx_weapon_shp_files[*index].sector, g_battle_gfx_weapon_shp_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3263,7 +3263,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(
+            if (main_file_request_read_bytes(
                     g_battle_gfx_weapon_seq_files[*index].sector, g_battle_gfx_weapon_seq_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3278,7 +3278,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(
+            if (main_file_request_read_bytes(
                     g_battle_gfx_effect_shp_files[*index].sector, g_battle_gfx_effect_shp_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3293,7 +3293,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(
+            if (main_file_request_read_bytes(
                     g_battle_gfx_effect_seq_files[*index].sector, g_battle_gfx_effect_seq_files[*index].size, buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3306,7 +3306,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (*slot == 0) {
                 break;
             }
-            if (main_file_call_build_header(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, (void*)*slot) == 0) {
+            if (main_file_request_read_bytes(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, (void*)*slot) == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
                 main_heap_call_free((void*)*slot);
@@ -3317,7 +3317,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
             if (*slot == 0) {
                 break;
             }
-            if (main_file_call_build_header(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, (void*)*slot) == 0) {
+            if (main_file_request_read_bytes(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, (void*)*slot) == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
             } else {
                 main_heap_call_free((void*)*slot);
@@ -3513,7 +3513,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(g_battle_gfx_sprite_shp_files[id].sector,
+            if (main_file_request_read_bytes(g_battle_gfx_sprite_shp_files[id].sector,
                     g_battle_gfx_sprite_shp_files[id].size, g_battle_gfx_unit_graphics_load_state.buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3539,7 +3539,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(g_battle_gfx_sprite_seq_files[id].sector,
+            if (main_file_request_read_bytes(g_battle_gfx_sprite_seq_files[id].sector,
                     g_battle_gfx_sprite_seq_files[id].size, g_battle_gfx_unit_graphics_load_state.buffer)
                 == 0) {
                 g_battle_gfx_unit_graphics_load_state.phase++;
@@ -3576,7 +3576,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
                 break;
             }
-            if (main_file_call_build_header(
+            if (main_file_request_read_bytes(
                     g_battle_gfx_spritesheet_files[g_main_gfx_unit_graphics_load_queue
                                                        .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                        .spritesheet_id]

@@ -43,24 +43,24 @@ typedef enum ai_autobattle_stage {
     AI_AUTOBATTLE_ABILITIES = 7,
 } ai_autobattle_stage_e;
 
-typedef enum ai_targeted_selection_stage {
-    AI_TARGETED_SELECTION_SCORE_TILES = 0,
-    AI_TARGETED_SELECTION_MOVEMENT = 1,
-    AI_TARGETED_SELECTION_CHARGING = 2,
-    AI_TARGETED_SELECTION_TARGET_ABILITIES = 3,
-    AI_TARGETED_SELECTION_OTHER_ABILITIES = 4,
-} ai_targeted_selection_stage_e;
+typedef enum ai_fight_for_life_selection_stage {
+    AI_FIGHT_FOR_LIFE_SELECTION_SCORE_TILES = 0,
+    AI_FIGHT_FOR_LIFE_SELECTION_MOVEMENT = 1,
+    AI_FIGHT_FOR_LIFE_SELECTION_CHARGING = 2,
+    AI_FIGHT_FOR_LIFE_SELECTION_TARGET_ABILITIES = 3,
+    AI_FIGHT_FOR_LIFE_SELECTION_OTHER_ABILITIES = 4,
+} ai_fight_for_life_selection_stage_e;
 
 /* No pass saves stage 5; it follows the same ally-search fallback as stage 6. */
-typedef enum ai_recovery_selection_stage {
-    AI_RECOVERY_SELECTION_SCORE_TILES = 0,
-    AI_RECOVERY_SELECTION_MOVEMENT = 1,
-    AI_RECOVERY_SELECTION_CHARGING = 2,
-    AI_RECOVERY_SELECTION_TARGET_ABILITIES = 3,
-    AI_RECOVERY_SELECTION_ENEMY_ABILITIES = 4,
-    AI_RECOVERY_SELECTION_ALLY_ABILITIES = 6,
-    AI_RECOVERY_SELECTION_CANCEL_STATUS = 7,
-} ai_recovery_selection_stage_e;
+typedef enum ai_protect_allies_selection_stage {
+    AI_PROTECT_ALLIES_SELECTION_SCORE_TILES = 0,
+    AI_PROTECT_ALLIES_SELECTION_MOVEMENT = 1,
+    AI_PROTECT_ALLIES_SELECTION_CHARGING = 2,
+    AI_PROTECT_ALLIES_SELECTION_TARGET_ABILITIES = 3,
+    AI_PROTECT_ALLIES_SELECTION_ENEMY_ABILITIES = 4,
+    AI_PROTECT_ALLIES_SELECTION_ALLY_ABILITIES = 6,
+    AI_PROTECT_ALLIES_SELECTION_CANCEL_STATUS = 7,
+} ai_protect_allies_selection_stage_e;
 
 typedef enum ai_retreat_stage {
     AI_RETREAT_MOVEMENT = 0,
@@ -70,10 +70,10 @@ typedef enum ai_retreat_stage {
 } ai_retreat_stage_e;
 
 enum {
-    AI_RECOVERY_STATUS_COUNT = 3,
+    AI_PROTECT_ALLIES_STATUS_COUNT = 3,
 };
 
-extern u8 g_battle_ai_recovery_status_ids[AI_RECOVERY_STATUS_COUNT];
+extern u8 g_battle_ai_protect_allies_status_ids[AI_PROTECT_ALLIES_STATUS_COUNT];
 
 /* target selection */
 typedef enum ai_unit_filter {

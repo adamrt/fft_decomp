@@ -1,4 +1,4 @@
-/* Proposition participant messages, success and rewards, countdown and sequence messages, discovery announcements,
+/* Proposition participant messages, success and rewards, discovery announcements,
  * active propositions and cancel confirmation, sound novel levels, unexplored lands and treasures. */
 
 #include "fft/data.h"
@@ -47,7 +47,7 @@ static void wldcore_menu_push_sound_novel_history_level(void);
 static void wldcore_menu_push_sound_novel_quit_level(void);
 static void wldcore_menu_push_sound_novel_resume_level(s32 mode);
 static void wldcore_menu_push_unexplored_land_detail_level(s32 value);
-static void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* countdown);
+static void wldcore_menu_show_next_sequence_message(wldcore_menu_discovery_t* discovery);
 static void wldcore_proposition_push_cancel_confirm_level(s32 proposition);
 static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_level_t* level, s32 index);
 
@@ -127,7 +127,7 @@ s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_leve
 
 /* Proposition job category of a job: 0..19 for Squire..Mime, 22 for the
  * special jobs below Squire and 21 for anything above Mime (monsters). */
-static s32 wldcore_map_job_id_to_category_index(s32 job_id) {
+static s32 wldcore_proposition_get_job_category(s32 job_id) {
     if (job_id < JOB_ID_SQUIRE) {
         return 22;
     }
@@ -187,10 +187,10 @@ void wldcore_proposition_determine_success(void) {
 
         g_wldcore_proposition_report.participant_scores[i]
             = job_table_a[(g_wldcore_selected_proposition_row[0].category_index - 1) * 22
-                + wldcore_map_job_id_to_category_index(unit->job_id)];
+                + wldcore_proposition_get_job_category(unit->job_id)];
         g_wldcore_proposition_report.participant_scores[i]
             += job_table_b[(g_wldcore_selected_proposition_row[0].job_list_index - 1) * 22
-                + wldcore_map_job_id_to_category_index(unit->job_id)];
+                + wldcore_proposition_get_job_category(unit->job_id)];
 
         value = unit->bravery;
         if (value != 0) {
@@ -243,7 +243,7 @@ void wldcore_proposition_determine_success(void) {
         g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_indices[i]);
     for (i = 0; i < participant_count; i++) {
         if (g_wldcore_selected_proposition_row[0].preferred_job - 1
-            == wldcore_map_job_id_to_category_index(unit->job_id)) {
+            == wldcore_proposition_get_job_category(unit->job_id)) {
             if (((rand() * 100) >> 15) < 0x3D) {
                 g_wldcore_proposition_report.result = WLDCORE_PROPOSITION_RESULT_SUCCESS;
                 return;
@@ -473,7 +473,7 @@ s32 wldcore_proposition_find_preferred_job_unit(void) {
                 = g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_indices[i];
             unit = wldcore_get_party_unit(party_index);
             if (g_wldcore_selected_proposition_row[0].preferred_job - 1
-                == wldcore_map_job_id_to_category_index(unit->job_id)) {
+                == wldcore_proposition_get_job_category(unit->job_id)) {
                 candidates[count] = party_index;
                 count++;
             }
@@ -520,43 +520,43 @@ s32 wldcore_proposition_find_preferred_job_unit(void) {
 /* Push the discovery announcement for a treasure or unexplored-land milestone: the first milestone
  * shows four messages from the kind's first one, each later milestone a single message (first + 2
  * + rank). */
-void wldcore_menu_push_countdown_level(void) {
+void wldcore_menu_push_discovery_level(void) {
     s32 count = wldcore_get_completion_milestone_rank();
 
     if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_TREASURE) {
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].countdown.current
+        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].discovery.current
             = WLDCORE_TEXT_ID_TREASURE_FOUND_FIRST;
     } else {
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].countdown.current
+        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].discovery.current
             = WLDCORE_TEXT_ID_LAND_FOUND_FIRST;
     }
     if (count == 1) {
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].countdown.remaining = 4;
+        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].discovery.remaining = 4;
     } else {
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].countdown.remaining = 1;
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].countdown.current += 2 + count;
+        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].discovery.remaining = 1;
+        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].discovery.current += 2 + count;
     }
     if (thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) == 0) {
         thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
     }
-    wldcore_menu_show_next_sequence_message(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].countdown);
-    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_COUNTDOWN;
+    wldcore_menu_show_next_sequence_message(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].discovery);
+    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_DISCOVERY;
     g_wldcore_menu_stack_depth++;
 }
 
-/* Show the countdown's next message and count it off; the last one also
- * fades the music out and moves the countdown to
- * WLDCORE_COUNTDOWN_PHASE_LAST_MESSAGE with the timer cleared. */
-static void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* countdown) {
-    thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, countdown->current, 0);
-    countdown->current++;
-    countdown->remaining--;
-    if (countdown->remaining == 0) {
+/* Show the discovery announcement's next message and count it off; the last one
+ * also fades the music out and moves the announcement to
+ * WLDCORE_DISCOVERY_PHASE_LAST_MESSAGE with the timer cleared. */
+static void wldcore_menu_show_next_sequence_message(wldcore_menu_discovery_t* discovery) {
+    thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, discovery->current, 0);
+    discovery->current++;
+    discovery->remaining--;
+    if (discovery->remaining == 0) {
         wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_OUT, 4);
-        countdown->phase = WLDCORE_COUNTDOWN_PHASE_LAST_MESSAGE;
-        countdown->timer = 0;
+        discovery->phase = WLDCORE_DISCOVERY_PHASE_LAST_MESSAGE;
+        discovery->timer = 0;
     } else {
-        countdown->phase = WLDCORE_COUNTDOWN_PHASE_MESSAGES;
+        discovery->phase = WLDCORE_DISCOVERY_PHASE_MESSAGES;
     }
 }
 
@@ -618,37 +618,37 @@ s32 wldcore_get_completion_milestone_rank(void) {
 /* Step of a discovery announcement: Circle shows the next message; after the
  * last one (LAST_MESSAGE) it waits for the message box and plays the milestone
  * music, JINGLE waits at least 180 frames and switches back to the bar music,
- * and CLOSE pops the level into wldcore_list_open_completed_propositions once
+ * and CLOSE pops the level into wldcore_list_open_returned_propositions once
  * the audio queue is idle. The 32-bit busy fields
  * are read as g_wldcore_audio_queue members, not scalars, which keeps the timer store
  * ahead of their loads as in the target. */
-void wldcore_map_step_discovery_announcement(wldcore_menu_countdown_t* countdown) {
-    if (countdown->phase == WLDCORE_COUNTDOWN_PHASE_CLOSE) {
+void wldcore_menu_step_discovery_level(wldcore_menu_discovery_t* discovery) {
+    if (discovery->phase == WLDCORE_DISCOVERY_PHASE_CLOSE) {
         if (g_wldcore_audio_queue.count == 0 && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE) {
             g_wldcore_menu_stack_depth--;
-            wldcore_list_open_completed_propositions();
+            wldcore_list_open_returned_propositions();
         }
-    } else if (countdown->phase == WLDCORE_COUNTDOWN_PHASE_JINGLE) {
-        countdown->timer++;
+    } else if (discovery->phase == WLDCORE_DISCOVERY_PHASE_JINGLE) {
+        discovery->timer++;
         if (g_wldcore_audio_queue.count == 0 && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE
-            && countdown->timer >= 180) {
-            countdown->phase = WLDCORE_COUNTDOWN_PHASE_CLOSE;
+            && discovery->timer >= 180) {
+            discovery->phase = WLDCORE_DISCOVERY_PHASE_CLOSE;
             wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_OUT, 0x10);
             wldcore_sound_enqueue_audio_command(
                 WLDCORE_AUDIO_COMMAND_PLAY_MUSIC, WLDCORE_AUDIO_MUSIC(2, MAIN_MUSIC_BAR));
             wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 0x10);
         }
-    } else if (countdown->phase == WLDCORE_COUNTDOWN_PHASE_LAST_MESSAGE) {
+    } else if (discovery->phase == WLDCORE_DISCOVERY_PHASE_LAST_MESSAGE) {
         if (world_menu_get_event_state_flag() != 0
             && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE
             && g_wldcore_audio_queue.count == 0) {
             wldcore_sound_enqueue_audio_command(
                 WLDCORE_AUDIO_COMMAND_PLAY_MUSIC, WLDCORE_AUDIO_MUSIC(2, MAIN_MUSIC_MILESTONE));
             wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 0x10);
-            countdown->phase = WLDCORE_COUNTDOWN_PHASE_JINGLE;
+            discovery->phase = WLDCORE_DISCOVERY_PHASE_JINGLE;
         }
     } else if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
-        wldcore_menu_show_next_sequence_message(countdown);
+        wldcore_menu_show_next_sequence_message(discovery);
     }
 }
 
@@ -1003,7 +1003,7 @@ void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t
  * Pushes the sound-novel menu level (WLDCORE_MENU_LEVEL_SOUND_NOVEL).
  * `argument` is kept in the level and names the treasure detail reopened
  * when the novel ends; the novel read is the one in
- * g_wldcore_saved_record_index.
+ * g_wldcore_sound_novel_index.
  *
  * Hides the context value display, clears VRAM and the scratch buffer, and
  * appends the level's display objects, all hidden: the two button prompts,
@@ -1178,7 +1178,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
             fade->flags[0] = (fade->flags[0] & ~WLDCORE_SCREEN_FADE_BOX_VISIBLE) | WLDCORE_SCREEN_FADE_OUT;
             main_sound_stop_weather_sfx_music();
             suzuki_sound_remove_resource(g_wldcore_sound_novel_sound_resource);
-            wldcore_reset_selected_saved_record(g_wldcore_saved_record_index);
+            wldcore_reset_selected_saved_record(g_wldcore_sound_novel_index);
             g_wldcore_sound_novel_countdown_frames = 0;
             wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_TREASURE_DETAIL, level->message, 0);
             return;
@@ -1947,7 +1947,7 @@ static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
     calendar_date_t date;
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.value = value;
-    wldcore_proposition_load_picture_data_set(g_wldcore_unexplored_land_picture_sets[value]);
+    wldcore_gfx_load_picture_set(g_wldcore_unexplored_land_picture_sets[value]);
     index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
@@ -2212,7 +2212,7 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
     calendar_date_t date;
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.value = value;
-    wldcore_proposition_load_picture_data_set(g_wldcore_treasure_picture_sets[value]);
+    wldcore_gfx_load_picture_set(g_wldcore_treasure_picture_sets[value]);
     index = window_append_record(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
@@ -2340,8 +2340,8 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
             g_wldcore_window_render_object_count -= 6;
             saved = level->saved_record_index;
             g_wldcore_menu_stack_depth--;
-            g_wldcore_saved_record_index = saved;
-            if (slot < 5 && g_main_saved_records[slot].section != 0) {
+            g_wldcore_sound_novel_index = saved;
+            if (slot < 5 && g_main_sound_novel_saved_records[slot].section != 0) {
                 wldcore_menu_push_sound_novel_resume_level(level->value);
                 break;
             }
@@ -2372,7 +2372,7 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
             entry = g_wldcore_treasure_sound_novel_ids[level->value];
             if (entry != 0) {
                 level->saved_record_index = entry - 1;
-                if (entry - 1 >= 5 || g_main_saved_records[entry - 1].section == 0) {
+                if (entry - 1 >= 5 || g_main_sound_novel_saved_records[entry - 1].section == 0) {
                     wldcore_fade_start_screen(WLDCORE_SCREEN_FADE_OUT, 0x10);
                 }
                 g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
@@ -2568,7 +2568,7 @@ static void wldcore_menu_push_sound_novel_resume_level(s32 mode) {
  * row was chosen. Up and down toggle cursor_row, moving the cursor by 16.
  *
  * wldcore_reset_selected_saved_record ignores its argument; retail still
- * passes g_wldcore_saved_record_index. */
+ * passes g_wldcore_sound_novel_index. */
 void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_level_t* level) {
     GsIMAGE image;
     s32 buttons;
@@ -2594,7 +2594,7 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
         g_wldcore_window_render_object_count -= 4;
         g_wldcore_menu_stack_depth--;
         if (level->cursor_row != 0) {
-            wldcore_reset_selected_saved_record(g_wldcore_saved_record_index);
+            wldcore_reset_selected_saved_record(g_wldcore_sound_novel_index);
         }
         wldcore_menu_push_sound_novel_level(level->mode);
         return;

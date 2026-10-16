@@ -1,4 +1,4 @@
-/* Proposition dispatch confirmation, daily counters, the send unit level and browser, completed propositions, report
+/* Proposition dispatch confirmation, daily counters, the send unit level and browser, returned propositions, report
  * and result levels, and report speaker and message selection. */
 
 #include "fft/data.h"
@@ -977,7 +977,7 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
 
 /* Open the job report list: accepted jobs that have returned to this town, under 'Good job. You
  * came back from these jobs.'; with none, rebuild the bar rows and resume the bar. */
-void wldcore_list_open_completed_propositions(void) {
+void wldcore_list_open_returned_propositions(void) {
     point32_t origin;
     wldcore_window_panel_layout_t layout;
     point32_t unused_point;
@@ -1036,7 +1036,7 @@ void wldcore_list_open_completed_propositions(void) {
         origin.x = 0x48;
         layout.visible_rows = i;
         origin.y = 0x50;
-        wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_COMPLETED_PROPOSITIONS, count, i);
+        wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_RETURNED_PROPOSITIONS, count, i);
         wldcore_window_start_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL,
             g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.entry_count, &layout,
             &origin);
@@ -1048,27 +1048,27 @@ void wldcore_list_open_completed_propositions(void) {
 
     g_wldcore_menu_ordering_table_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_COMPLETED_PROPOSITIONS;
+    g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_RETURNED_PROPOSITIONS;
     g_wldcore_menu_stack_depth++;
 }
 
-/* Resume handler of the completed propositions list: block Circle, Cross and Select for the
+/* Resume handler of the returned propositions list: block Circle, Cross and Select for the
  * levels underneath and show WLDCORE_TEXT_ID_JOBS_RETURNED again. */
-void wldcore_list_completed_propositions_restore_prompt(void) {
+void wldcore_list_returned_propositions_restore_prompt(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_JOBS_RETURNED, 0);
 }
 
 /* Withhold every button from the WORLD menu frame while a level opened from the job report list
  * runs. */
-void wldcore_list_completed_propositions_block_all_buttons(wldcore_menu_stack_record_t* unused_level) {
+void wldcore_list_returned_propositions_block_all_buttons(wldcore_menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Handle input on the job report list: Cross closes the list and Select shows
  * its help. Circle prepares the selected job's report, asks "Wanna hear about
  * ...?" and pushes the confirmation level with an OK/NO panel. */
-void wldcore_list_handle_completed_propositions_input(wldcore_menu_stack_record_t* level) {
+void wldcore_list_handle_returned_propositions_input(wldcore_menu_stack_record_t* level) {
     s32 buttons;
     s32 depth;
     point32_t origin;
@@ -1086,29 +1086,29 @@ void wldcore_list_handle_completed_propositions_input(wldcore_menu_stack_record_
     buttons = g_wldcore_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
-        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_COMPLETED_PROPOSITIONS);
+        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_RETURNED_PROPOSITIONS);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         return;
     }
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_list_completed_propositions_block_all_buttons(level);
+        wldcore_list_returned_propositions_block_all_buttons(level);
         wldcore_menu_push_message_level(0x1061, 1);
         return;
     }
     if (buttons & PSX_PAD_CIRCLE) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
-        wldcore_list_completed_propositions_block_all_buttons(level);
+        wldcore_list_returned_propositions_block_all_buttons(level);
         wldcore_proposition_prepare_report(
             level->proposition_list.entries[g_wldcore_window_panel_render_state.selected_index]);
-        wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_COMPLETED_PROPOSITIONS);
+        wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_RETURNED_PROPOSITIONS);
         g_text_substitution_values[0] = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index];
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_HEAR_ABOUT_JOB, 0);
         origin.x = 0x48;
         origin.y = 0x20;
         wldcore_window_build_yes_no_panel(origin);
         depth = g_wldcore_menu_stack_depth;
-        g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_COMPLETED_PROPOSITIONS_BROWSE;
+        g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_RETURNED_PROPOSITIONS_BROWSE;
         g_wldcore_menu_stack_depth = depth + 1;
         g_wldcore_menu_stack_records_next[depth].proposition_report_confirm.argument
             = level->proposition_list.entries[g_wldcore_window_panel_render_state.selected_index];
@@ -1257,11 +1257,10 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         kind = &g_wldcore_proposition_report.reward_type;
         if (*kind == WLDCORE_PROPOSITION_REWARD_TREASURE) {
-            wldcore_proposition_load_picture_data_set(
-                g_wldcore_treasure_picture_sets[g_wldcore_proposition_report.reward_index]);
+            wldcore_gfx_load_picture_set(g_wldcore_treasure_picture_sets[g_wldcore_proposition_report.reward_index]);
         }
         if (*kind == WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND) {
-            wldcore_proposition_load_picture_data_set(
+            wldcore_gfx_load_picture_set(
                 g_wldcore_unexplored_land_picture_sets[g_wldcore_proposition_report.reward_index]);
         }
         level->load_phase = WLDCORE_PROPOSITION_REPORT_LOAD_DONE;
@@ -1685,7 +1684,7 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
  * state byte, and finally compacts the participant record out of
  * g_main_active_propositions. CLOSING waits for the message box and the audio
  * queue and restarts the bar music; DONE pops the level and hands off to the
- * countdown level or to wldcore_list_open_completed_propositions.
+ * discovery level or to wldcore_list_open_returned_propositions.
  *
  * The proposition, result and share 32-bit fields are read as g_wldcore_proposition_report
  * members: the target keeps that block's address in a register, which GCC
@@ -1706,13 +1705,13 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
         if (g_wldcore_audio_queue.count == 0 && g_wldcore_audio_queue.current_command == WLDCORE_AUDIO_COMMAND_NONE) {
             g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth - 1;
             if (wldcore_get_completion_milestone_rank() != 0) {
-                wldcore_menu_push_countdown_level();
+                wldcore_menu_push_discovery_level();
                 return;
             }
             if (g_wldcore_proposition_report.recalled == 0) {
                 wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 0x10);
             }
-            wldcore_list_open_completed_propositions();
+            wldcore_list_open_returned_propositions();
         }
         return;
     }

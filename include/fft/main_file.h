@@ -111,7 +111,7 @@ int main_file_request_read(
     main_file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
 /* Forwards main_file_request_read's result. */
 s32 main_file_request_read_quiet(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
-s32 main_file_call_build_header(s32 sector, u32 size, void* destination);
+s32 main_file_request_read_bytes(s32 sector, u32 size, void* destination);
 void main_file_poll_load(main_file_load_descriptor_t* state);
 int main_file_is_still_loading(void);
 void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state);

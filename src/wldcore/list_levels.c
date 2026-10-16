@@ -1170,7 +1170,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
             &g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].text_list);
         wldcore_window_close_parent_list_frame_windows();
         break;
-    case WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES:
+    case WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS:
         wldcore_window_set_render_objects_visible(0);
         world_menu_set_slot_4_cursor_index(3);
         wldcore_menu_suspend_root_level(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
@@ -1330,7 +1330,7 @@ void wldcore_menu_step_screen_transition_level(wldcore_menu_screen_transition_le
                 .flags &= ~WORLD_RENDER_RECORD_HIDDEN;
             wldcore_list_open_formation_tutorials();
             break;
-        case WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES:
+        case WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS:
             thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
             thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_TUTORIAL_WELCOME, 0);
             g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1]
@@ -1395,7 +1395,7 @@ static void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset)
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entries[0]
         = WLDCORE_TUTORIAL_CATEGORY_ROW_FORMATION;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entries[1]
-        = WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES;
+        = WLDCORE_TUTORIAL_CATEGORY_ROW_BATTLE;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entries[2]
         = WLDCORE_TUTORIAL_CATEGORY_ROW_TOPICS;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entries[3]
@@ -1586,7 +1586,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_formation_tutorials();
             return;
-        case WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES:
+        case WLDCORE_TUTORIAL_CATEGORY_ROW_BATTLE:
             wldcore_menu_suspend_tutorial_categories_level(level);
             g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
             wldcore_list_open_battle_tutorials();
@@ -1754,7 +1754,7 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
 /* Opens the list of the eight battle tutorials (TEXT_ID_TUTORIAL_NAME_BASE +
  * 16 + row), a row drawn in text color 8 once its bit of
  * g_main_tutorial_progress_masks[1] shows it was viewed, at (0x54, 0x50),
- * 0x8c wide, and pushes WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES. Sibling of
+ * 0x8c wide, and pushes WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS. Sibling of
  * wldcore_list_open_formation_tutorials. */
 static void wldcore_list_open_battle_tutorials(void) {
     wldcore_window_panel_layout_t layout;
@@ -1782,14 +1782,14 @@ static void wldcore_list_open_battle_tutorials(void) {
     origin.x = 0x54;
     layout.visible_rows = i;
     origin.y = 0x50;
-    wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_TUTORIAL_MASK_1_ENTRIES, count, i);
+    wldcore_list_clamp_cursor_state(WLDCORE_CURSOR_SLOT_BATTLE_TUTORIALS, count, i);
     wldcore_window_start_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL,
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count, &layout, &origin);
     record_index = g_wldcore_menu_stack_depth;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_wldcore_menu_ordering_table_offset = 9;
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
-    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES;
+    g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_BATTLE_TUTORIALS;
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
@@ -1826,7 +1826,7 @@ void wldcore_list_handle_battle_tutorials_input(wldcore_menu_panel_level_t* leve
             wldcore_set_bit_value(&g_main_tutorial_progress_masks[1], *selected, 1);
             script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_wldcore_tutorial_event_ids[*selected]);
-            wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_TUTORIAL_MASK_1_ENTRIES);
+            wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_BATTLE_TUTORIALS);
             g_main_saved_list_cursor_state = g_wldcore_tutorial_entries_cursor_state;
             g_main_system_flags = (g_main_system_flags | MAIN_SYSTEM_FLAG_TUTORIAL_EVENT) ^ MAIN_SYSTEM_FLAG_RUNNING;
             g_main_saved_weather_variable = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
@@ -1845,7 +1845,7 @@ void wldcore_list_handle_battle_tutorials_input(wldcore_menu_panel_level_t* leve
         g_menu_blocked_buttons = 0;
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         g_wldcore_menu_stack_depth--;
-        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_TUTORIAL_MASK_1_ENTRIES);
+        wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_BATTLE_TUTORIALS);
         wldcore_menu_dispatch_resume_handler();
         return;
     }

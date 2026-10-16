@@ -36,13 +36,13 @@ u8 g_battle_effect_weapon_projectile_animations[32]
 /* Show the map cursor and its tile glow again; the counterpart of
  * battle_target_hide_cursor. */
 void battle_target_show_cursor(void) {
-    g_battle_action_at_list_active = 1;
+    g_battle_target_cursor_visible = 1;
 }
 
 /* Hide the map cursor and its tile glow: the flag is read only by
  * battle_target_update_cursor. */
 void battle_target_hide_cursor(void) {
-    g_battle_action_at_list_active = 0;
+    g_battle_target_cursor_visible = 0;
 }
 
 /* Move the map cursor to a unit's tile and elevation; a null unit leaves it where it
@@ -386,7 +386,7 @@ static void battle_unit_resolve_projectile_hit(battle_unit_t* attacker, battle_u
 }
 
 /* battle_unit_resolve_projectile_hit for two battle ids. No retail code calls it. */
-void battle_unit_call_bow_hardcoding_by_battle_id(u16 attacker_id, u16 target_id) {
+void battle_unit_resolve_projectile_hit_by_battle_id(u16 attacker_id, u16 target_id) {
     battle_unit_t* attacker = battle_unit_get_by_battle_id(attacker_id);
     battle_unit_t* target = battle_unit_get_by_battle_id(target_id);
 
@@ -395,7 +395,7 @@ void battle_unit_call_bow_hardcoding_by_battle_id(u16 attacker_id, u16 target_id
 
 /* battle_unit_resolve_projectile_hit for two runtime ids: called by the arrow-arc
  * and linear projectile effects for the unit the projectile hits. */
-void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id) {
+void battle_unit_resolve_projectile_hit_by_runtime_id(u16 attacker_id, u16 target_id) {
     battle_unit_t* attacker = battle_unit_get_by_runtime_id(attacker_id);
     battle_unit_t* target = battle_unit_get_by_runtime_id(target_id);
 
@@ -424,7 +424,7 @@ static void battle_unit_update_display(battle_unit_t* unit) {
             battle_gfx_check_tile_status_palette_mod(unit, tile->flags.shading, 1);
         }
         battle_unit_apply_poach_morbol_transformation(unit);
-        battle_unit_set_animation_based_on_status(unit);
+        battle_unit_set_status_animation(unit);
         battle_unit_update_animation_for_status_changes(unit);
         battle_gfx_apply_status_spritesheet_change(unit, tile->flags.shading);
         battle_unit_update_float_and_jump_height(unit);
@@ -561,7 +561,7 @@ void battle_unit_mount_rider_onto_unit(battle_unit_t* rider, battle_unit_t* moun
     rider->map_y = mount->map_y;
     rider->map_z = mount->map_z;
     rider->status_flags_1_4 |= BATTLE_UNIT_STATUS_MOUNTED;
-    battle_unit_set_animation_based_on_status(rider);
+    battle_unit_set_status_animation(rider);
     rider->animation.script_pos = mount->animation.script_pos;
     battle_unit_update_display_by_runtime_id(rider->runtime_id);
     battle_unit_update_display_by_runtime_id(mount->runtime_id);

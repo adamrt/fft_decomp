@@ -22,7 +22,7 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-static void open_input_update_buttons_and_check_game_reset(void);
+static void open_input_update_controller(void);
 static void open_menu_update_world_formation(void);
 static u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state);
 static s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state);
@@ -75,7 +75,7 @@ s32 open_system_run_main_loop(s32 skip_movie) {
             current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_1);
             DrawOTag(current_otag - 1);
             DrawSync(0);
-            open_input_update_buttons_and_check_game_reset();
+            open_input_update_controller();
             VSync(0);
             open_movie_present_frame();
             main_system_frame_stub();
@@ -95,13 +95,13 @@ s32 open_system_run_main_loop(s32 skip_movie) {
  * calls VSync with g_open_system_vsync_mode (0 during the movie, 2 while the
  * script runs). The ordering table is drawn after the buffer flip, on top of the
  * background open_movie_present_frame has just put into the new draw buffer. On
- * exit the VRAM page saved by open_movie_init_and_play_end is restored, the
+ * exit the VRAM page saved by open_system_init_ending is restored, the
  * display is blanked and the CD audio returns to mix level 0xc0. */
 void open_system_run_ending_cutscene(void) {
     u32* otag_0;
     u32* otag_1;
 
-    open_movie_init_and_play_end();
+    open_system_init_ending();
     if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0) {
         otag_0 = g_open_gfx_otags[0];
         otag_1 = g_open_gfx_otags[1];
@@ -118,7 +118,7 @@ void open_system_run_ending_cutscene(void) {
             open_script_draw_text_records(current_otag, graphics_buffer_index);
             open_controller_dispatch_current();
             DrawSync(0);
-            open_input_update_buttons_and_check_game_reset();
+            open_input_update_controller();
             VSync(g_open_system_vsync_mode);
             open_movie_present_frame();
             current_otag = (u32*)((g_main_gfx_active_buffer_index ^ 1) * OPEN_OTAG_BUFFER_BYTES + (u32)otag_1);
@@ -469,7 +469,7 @@ static void open_movie_present_frame(void) {
  * OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED is set. L1, R1, Select and Start held
  * with nothing else reset the game. OPEN_SYSTEM_RUNTIME_FLAG_SOFT_RESET_DISABLED
  * would prevent that; no code in OPEN.BIN sets it. */
-static void open_input_update_buttons_and_check_game_reset(void) {
+static void open_input_update_controller(void) {
     u32 input;
     u32 previous;
 

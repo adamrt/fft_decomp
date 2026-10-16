@@ -27,7 +27,7 @@ static u8 g_battle_mimic_pending_flags[21] = { 0 };
 
 static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag);
 static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit);
-static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list);
+static s32 battle_action_insert_at_list_entry(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list);
 static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask);
 static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
 static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
@@ -1324,7 +1324,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
         /* The unit taking its turn heads the list with key 0. */
         unit = battle_unit_find_active_data_pointer();
         if (unit != 0) {
-            battle_action_sort_at_list(unit->battle_id, 0, 0, list);
+            battle_action_insert_at_list_entry(unit->battle_id, 0, 0, list);
         }
     }
 
@@ -1352,7 +1352,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
             if (value != 0 || unit->has_turn == 0 || mode != BATTLE_AT_LIST_MODE_PREVIEW) {
                 tick += phase_tick;
             }
-            placed += battle_action_sort_at_list(slot, 1, (tick << 8) & 0xff00, list);
+            placed += battle_action_insert_at_list_entry(slot, 1, (tick << 8) & 0xff00, list);
 
             /* A performer repeats its song or dance every ability_ct ticks while the tick fits
              * the key's high byte. */
@@ -1366,7 +1366,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
                         break;
                     }
                     key <<= 8;
-                    placed += battle_action_sort_at_list(slot, 1, key & 0xff00, list);
+                    placed += battle_action_insert_at_list_entry(slot, 1, key & 0xff00, list);
                 }
             }
         }
@@ -1443,7 +1443,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
             remainder %= UNIT_TURN_CT_THRESHOLD;
             ct = remainder;
             /* Within a tick, the unit that overshoots 100 CT further sorts first. */
-            added = battle_action_sort_at_list(
+            added = battle_action_insert_at_list_entry(
                 slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
             if (added == 0) {
                 break;
@@ -1462,7 +1462,7 @@ s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode
  * + AT_JUMP for Jump. For an ability id of 0x100 or more the code is battle
  * ID - 0x40, which as a byte is battle ID + 0xc0: the action entry plus
  * AT_ABILITY_ID_HIGH_BIT. Returns 1 when the entry was placed. */
-static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list) {
+static s32 battle_action_insert_at_list_entry(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list) {
     unit_stats_t* unit;
     s32 i;
     s32 j;

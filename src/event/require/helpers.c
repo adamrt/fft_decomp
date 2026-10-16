@@ -48,17 +48,17 @@ void require_party_update_bio_variable_for_unit_class(s32 unit_class, s32 value)
  */
 void require_reward_load_bonus_image(s32 image_id) {
     require_reward_bonus_image_file_t* allocation;
-    s32 (*build_operation)(s32 sector, u32 size, void* destination);
+    s32 (*read_operation)(s32 sector, u32 size, void* destination);
 
     do {
         thread_yield();
         allocation = main_heap_reserve_at(g_main_heap_high_overlay_load_address, 0x8000);
     } while (allocation != g_main_heap_high_overlay_load_address);
 
-    build_operation = main_file_call_build_header;
+    read_operation = main_file_request_read_bytes;
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))build_operation;
+        g_thread_call_target = (void (*)(void))read_operation;
     } while (
         thread_call_on_main_stack(image_id * 13 + DISC_SECTOR_EVENT_BONUS_BIN, sizeof(*allocation), allocation) != 0);
 

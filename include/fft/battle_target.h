@@ -83,9 +83,9 @@ void battle_target_move_cursor_to_unit(const battle_unit_t* unit);
 void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR* raised);
 void battle_target_select_tile(void);
 void battle_target_show_cursor(void);
-void battle_target_store_cursor_casting_unit_name_and_data(void);
-void battle_target_store_cursor_unit_as_preview_target(void);
-void battle_target_store_cursor_unit_name_and_data(void);
+void battle_target_show_attack_preview_panel(void);
+void battle_target_show_right_unit_panel(void);
+void battle_target_show_hovered_unit_panel(void);
 void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit);
 
 /* tile highlights */

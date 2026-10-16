@@ -40,7 +40,7 @@ static void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame
 static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset);
 static void open_script_push_controller(void);
 static void open_script_update_screen_fade(void);
-static void open_script_update_timing_and_record_values(void);
+static void open_script_scroll_text(void);
 static void open_script_update_xa_audio(void);
 static s32 open_text_decode_hex_digit(s32 character);
 
@@ -139,7 +139,7 @@ void open_menu_start_music_test_controller(void) {
     s32 four;
     s32 controller;
 
-    open_file_build_openbk_header(1, g_open_file_destination);
+    open_file_request_openbk_image(1, g_open_file_destination);
     file_wait_for_pending();
 
     for (i = 0; i < 96; i++) {
@@ -207,7 +207,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
         if (!(g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE)) {
             g_open_system_runtime_flags
                 ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED | OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
-            open_file_build_openbk_header(0, g_open_file_destination);
+            open_file_request_openbk_image(0, g_open_file_destination);
             file_wait_for_pending();
             g_open_current_controller_index--;
             open_title_push_menu_controller(0);
@@ -335,7 +335,7 @@ void open_movie_stream_title_demo_and_push_controller(
  * stopped, by itself or on the update after Start, the display is blanked and the
  * controller is replaced by the FFTST.STR logo movie, which leads back to the
  * title menu. */
-void open_movie_start_fftst_or_skip_controller(open_controller_record_t* unused_record) {
+void open_movie_update_title_demo(open_controller_record_t* unused_record) {
     if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
         SetDispMask(0);
         g_main_gfx_active_buffer_index = 1;
@@ -719,7 +719,7 @@ static void open_prologue_prepare_crossfade(s32 file_index) {
     g_open_prologue_crossfade_new_picture = copy_source;
     g_open_prologue_crossfade_old_picture = copy_destination;
     g_open_prologue_crossfade_frame_pixels = file_pixels;
-    open_file_build_openbk_header(file_index + 2, g_open_work_buffer_0);
+    open_file_request_openbk_image(file_index + 2, g_open_work_buffer_0);
 
     row = 0;
     source_row = 0;
@@ -865,9 +865,9 @@ static void open_script_init_state(void) {
     g_open_script_state.dispatch.tpage = (s16)GetTPage(0, 2, 0x300, 0);
     g_open_script_state.dispatch.clut = (s16)GetClut(0, 0x1e0);
     g_open_script_state._unknown_1674 = 0;
-    g_open_script_state.dispatch.external_counter = 0;
-    g_open_script_state.dispatch.timing_fraction = 0;
-    g_open_script_state.dispatch.timing_step = 0;
+    g_open_script_state.dispatch.scrolled_distance = 0;
+    g_open_script_state.dispatch.scroll_fraction = 0;
+    g_open_script_state.dispatch.scroll_speed = 0;
     g_open_script_state.dispatch.font_index = 0;
     g_open_script_state.dispatch.wide_glyphs = 0;
     g_open_script_state.dispatch.skew = 0;
@@ -927,7 +927,7 @@ static s32 open_script_run_frame(void) {
     s16* entry;
     u32 flags;
 
-    open_script_update_timing_and_record_values();
+    open_script_scroll_text();
     open_script_update_xa_audio();
     open_gfx_update_opntex_sequence();
     open_script_update_screen_fade();
@@ -1155,12 +1155,12 @@ static s32 open_script_build_text_record(u8* text) {
 
 /* Scroll the ending script's text.
  *
- * timing_step is the speed in 1/256 pixel per frame; a negative step scrolls up.
+ * scroll_speed is the speed in 1/256 pixel per frame; a negative step scrolls up.
  * The whole pixels moved are added to the y of every active text record and, as a
- * distance, to the external counter opcode 6 waits on. A record that leaves y
+ * distance, to the scrolled distance opcode 6 waits on. A record that leaves y
  * 0x10..0x100 is released. */
-static void open_script_update_timing_and_record_values(void) {
-    s32 step = g_open_script_state.dispatch.timing_step;
+static void open_script_scroll_text(void) {
+    s32 step = g_open_script_state.dispatch.scroll_speed;
     s32 work;
     s32 index;
 
@@ -1169,15 +1169,15 @@ static void open_script_update_timing_and_record_values(void) {
     }
 
     if (step > 0) {
-        work = step + g_open_script_timing_fraction;
-        g_open_script_timing_fraction = work & 0xff;
+        work = step + g_open_script_scroll_fraction;
+        g_open_script_scroll_fraction = work & 0xff;
         work >>= 8;
-        g_open_script_external_counter += work;
+        g_open_script_scrolled_distance += work;
     } else {
-        work = g_open_script_timing_fraction - step;
-        g_open_script_timing_fraction = work & 0xff;
+        work = g_open_script_scroll_fraction - step;
+        g_open_script_scroll_fraction = work & 0xff;
         work >>= 8;
-        g_open_script_external_counter += work;
+        g_open_script_scrolled_distance += work;
         work = -work;
     }
 
@@ -1510,7 +1510,7 @@ static void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame
 /* Handler 9, the FFTEND.STR ending movie: Start stops the stream. Once the stream
  * has stopped, by itself or on the update after Start, the display is blanked and
  * the controller is replaced by the ending script. */
-void open_movie_finish_fftend_controller_if_ready_or_skipped(open_controller_record_t* unused_record) {
+void open_movie_update_fftend(open_controller_record_t* unused_record) {
     u32 flags;
     s32 controller;
 
@@ -1621,14 +1621,14 @@ void open_opcode_01_create_positioned_text_record(s16* command) {
 /* Opcode 2: set the text scroll speed to command[1] (1/256 pixel per frame,
  * negative for upward) and zero the fraction and the scrolled-distance counter.
  * Four bytes. */
-void open_opcode_02_set_timing_step(s16* entry) {
+void open_opcode_02_set_scroll_speed(s16* entry) {
     const s16* command = entry;
     s32 value = command[1];
     s32 next = g_open_script_byte_offset + 4;
 
-    g_open_script_state.dispatch.external_counter = 0;
-    g_open_script_state.dispatch.timing_fraction = 0;
-    g_open_script_state.dispatch.timing_step = value;
+    g_open_script_state.dispatch.scrolled_distance = 0;
+    g_open_script_state.dispatch.scroll_fraction = 0;
+    g_open_script_state.dispatch.scroll_speed = value;
     g_open_script_byte_offset = next;
 }
 
@@ -1676,14 +1676,14 @@ void open_opcode_05_wait_counted(s16* entry) {
 
 /* Opcode 6: wait until the text has scrolled command[1] pixels, counted from the
  * call that arms the wait. Four bytes. */
-void open_opcode_06_wait_for_external_counter(s16* entry) {
+void open_opcode_06_wait_for_scroll(s16* entry) {
     u32 flags;
     open_script_dispatch_state_t* state = &g_open_script_state.dispatch;
 
     flags = state->flags;
     entry++;
     if (flags & OPEN_SCRIPT_DISPATCH_WAITING) {
-        if (state->external_counter >= *entry) {
+        if (state->scrolled_distance >= *entry) {
             state->flags = flags ^ OPEN_SCRIPT_DISPATCH_WAITING;
             state->cursor.byte_offset = state->cursor.byte_offset + 4;
         } else {
@@ -1691,7 +1691,7 @@ void open_opcode_06_wait_for_external_counter(s16* entry) {
         }
     } else {
         state->flags = (flags | OPEN_SCRIPT_DISPATCH_WAITING) ^ OPEN_SCRIPT_DISPATCH_CONTINUE;
-        state->external_counter = 0;
+        state->scrolled_distance = 0;
     }
 }
 
