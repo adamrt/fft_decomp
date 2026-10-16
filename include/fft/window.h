@@ -1,14 +1,14 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+/* Window render records: the display-list records the opening and the world
+ * map build their windows and text from. Both programs link their own
+ * revision of this source (56-byte records in OPEN, 52-byte in WLDCORE). */
+
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/types.h"
-
-/* Window render records: the display-list records the opening and the world
- * map build their windows and text from. Both programs link their own
- * revision of this source (56-byte records in OPEN, 52-byte in WLDCORE). */
 
 /* unified */
 s32 window_append_animated_record_variant(void** list, s32* count);

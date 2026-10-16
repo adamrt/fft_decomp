@@ -4,8 +4,8 @@
 #include "fft/main_item.h"
 #include "fft/menu.h"
 #include "fft/script.h"
-#include "fft/world.h"
 #include "fft/world_formation.h"
+#include "fft/world_menu.h"
 #include "fft/world_shop.h"
 #include "psx/types.h"
 

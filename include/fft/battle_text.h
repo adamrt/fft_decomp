@@ -1,8 +1,9 @@
-#include "psx/types.h"
 #ifndef BATTLE_TEXT_H
-#    define BATTLE_TEXT_H
+#define BATTLE_TEXT_H
 
 /* Battle and event-overlay text buffers, glyph rendering and messages. */
+
+#include "psx/types.h"
 
 /* glyph rendering */
 

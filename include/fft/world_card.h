@@ -1,3 +1,8 @@
+#ifndef WORLD_CARD_H
+#define WORLD_CARD_H
+
+/* WORLD's memory card screen. */
+
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/menu.h"
@@ -5,10 +10,18 @@
 #include "psx/kernel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
-#ifndef WORLD_CARD_H
-#    define WORLD_CARD_H
 
-/* WORLD's memory card screen. */
+/* Step of the WORLD memory card screen (world_card_run_menu_screen). */
+typedef enum world_card_menu_step {
+    WORLD_CARD_MENU_STEP_SELECT_CARD = 0, /* memory card slot 1 or 2 */
+    WORLD_CARD_MENU_STEP_SELECT_MODE = 1, /* save or load */
+    WORLD_CARD_MENU_STEP_SCANNING = 2,
+    WORLD_CARD_MENU_STEP_SELECT_SAVE = 3, /* the save slot list takes input */
+    WORLD_CARD_MENU_STEP_LOADING = 4,
+    WORLD_CARD_MENU_STEP_SAVING = 5,
+    WORLD_CARD_MENU_STEP_LEAVE = 9,   /* starts the fade out */
+    WORLD_CARD_MENU_STEP_LEFT = 0xff, /* no step runs while the screen fades */
+} world_card_menu_step_e;
 
 /* system */
 void world_card_close_stub(void);

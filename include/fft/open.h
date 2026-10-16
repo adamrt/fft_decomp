@@ -4,7 +4,6 @@
 /* OPEN/OPEN.BIN: opening and title. */
 
 #include "fft/gfx.h"
-#include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/world.h"

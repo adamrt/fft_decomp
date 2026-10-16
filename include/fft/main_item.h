@@ -1,9 +1,10 @@
-#include "fft/data.h"
-#include "psx/types.h"
 #ifndef MAIN_ITEM_H
-#    define MAIN_ITEM_H
+#define MAIN_ITEM_H
 
 /* Resident item data and inventory. */
+
+#include "fft/data.h"
+#include "psx/types.h"
 
 /* item */
 extern u8 g_main_item_quantities[ITEM_ID_COUNT];

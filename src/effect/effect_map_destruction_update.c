@@ -1,6 +1,5 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
-#include "fft/battle_script.h"
 #include "fft/effect.h"
 #include "fft/script.h"
 #include "psx/types.h"

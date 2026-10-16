@@ -1,12 +1,13 @@
+#ifndef BATTLE_AI_H
+#define BATTLE_AI_H
+
+/* Battle AI workspace, ability evaluation and action selection. */
+
 #include "fft/data.h"
 #include "fft/map.h"
 #include "fft/script.h"
 #include "fft/unit.h"
 #include "psx/types.h"
-#ifndef BATTLE_AI_H
-#    define BATTLE_AI_H
-
-/* Battle AI workspace, ability evaluation and action selection. */
 
 /* workspace limits */
 /* Fixed workspace capacities and tile-grid storage, independent of map bounds. */
@@ -192,7 +193,7 @@ typedef union ai_ability_parameters {
 
 /* Pack canonical status IDs 8..39 into the aligned 32-bit value covering status
  * bytes 1..4 of ai_ability_parameters_t. */
-#    define AI_STATUS_TAIL_PACKED_MASK(id) ((u32)STATUS_BYTE_MASK(id) << ((STATUS_BYTE_INDEX(id) - 1) * 8))
+#define AI_STATUS_TAIL_PACKED_MASK(id) ((u32)STATUS_BYTE_MASK(id) << ((STATUS_BYTE_INDEX(id) - 1) * 8))
 
 /* Considered ability, base+0x00. */
 typedef struct ai_considered_ability {

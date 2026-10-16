@@ -11,6 +11,7 @@
 #include "fft/battle_status.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
+#include "fft/data.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/main_gfx.h"

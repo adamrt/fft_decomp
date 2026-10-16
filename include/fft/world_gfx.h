@@ -1,10 +1,19 @@
+#ifndef WORLD_GFX_H
+#define WORLD_GFX_H
+
+/* WORLD's graphics: packet buffers, fades and the portrait faces. */
+
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
-#ifndef WORLD_GFX_H
-#    define WORLD_GFX_H
 
-/* WORLD's graphics: packet buffers, fades and the portrait faces. */
+/* Separate decreasing/increasing RGB-intensity flags.
+ * The getter packs them into bits 0/1 and returns 0 when disabled. */
+typedef enum world_fade_state {
+    WORLD_FADE_STATE_NONE = 0,
+    WORLD_FADE_STATE_DECREASING = 1,
+    WORLD_FADE_STATE_INCREASING = 2
+} world_fade_state_e;
 
 /* gfx */
 extern u8 g_world_gfx_fade_decreasing;

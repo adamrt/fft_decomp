@@ -5,7 +5,6 @@
 #include "fft/menu_input.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
-#include "fft/world.h"
 #include "fft/world_gfx.h"
 #include "fft/world_menu.h"
 #include "fft/world_script.h"

@@ -1,8 +1,9 @@
-#include "psx/types.h"
 #ifndef BATTLE_SCRIPT_H
-#    define BATTLE_SCRIPT_H
+#define BATTLE_SCRIPT_H
 
 /* Battle scene actions and orchestration invoked by scenario bytecode. */
+
+#include "psx/types.h"
 
 /* interpreter */
 

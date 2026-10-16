@@ -4,7 +4,6 @@
 #include "fft/data.h"
 #include "fft/main.h"
 #include "fft/unit.h"
-#include "fft/world.h"
 #include "fft/world_formation.h"
 #include "psx/types.h"
 

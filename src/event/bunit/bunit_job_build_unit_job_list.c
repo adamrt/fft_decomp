@@ -1,5 +1,6 @@
 #include "fft/data.h"
 #include "fft/event_bunit.h"
+#include "fft/job.h"
 #include "fft/main.h"
 #include "fft/unit.h"
 #include "psx/types.h"

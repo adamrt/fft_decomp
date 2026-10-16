@@ -4,6 +4,7 @@
 #include "fft/data.h"
 #include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

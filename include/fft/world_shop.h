@@ -11,6 +11,66 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Two-byte shop availability mask, stored most significant byte first: bit
+ * 0x8000 >> location id is set when that town's outfitter sells the item. */
+typedef struct world_shop_item_availability {
+    u8 high;
+    u8 low;
+} world_shop_item_availability_t;
+
+typedef char
+    world_shop_roster_count_menu_script_size_must_be_42[(sizeof(world_shop_roster_count_menu_script_t) == 42) ? 1 : -1];
+
+/* The shop screen's step: the index of its handler in
+ * g_world_shop_menu_step_handlers. The ordinary shop starts at MAIN_MENU, the
+ * fur shop at FUR_MENU and the soldier office at SOLDIER_OFFICE_MENU. */
+typedef enum world_shop_step {
+    WORLD_SHOP_STEP_EXIT = -1, /* world_shop_run_screen leaves its loop */
+    WORLD_SHOP_STEP_MAIN_MENU = 0,
+    WORLD_SHOP_STEP_BUY_LIST = 1,
+    WORLD_SHOP_STEP_BUY_CONFIRM = 2,
+    WORLD_SHOP_STEP_BUY_EQUIP = 3, /* who can equip the item under the cursor */
+    WORLD_SHOP_STEP_SELL_LIST = 4,
+    WORLD_SHOP_STEP_SELL_CONFIRM = 5,
+    WORLD_SHOP_STEP_FITTING_ROOM = 6, /* unit grid, then the fitting menu */
+    WORLD_SHOP_STEP_FITTING_ROOM_EQUIP = 7,
+    WORLD_SHOP_STEP_FITTING_ROOM_BEST_FIT = 8,
+    WORLD_SHOP_STEP_FITTING_ROOM_REMOVE = 9,
+    WORLD_SHOP_STEP_FITTING_ROOM_SELL_EQUIPPED = 10,
+    WORLD_SHOP_STEP_FITTING_ROOM_SELL = 11, /* runs the SELL_LIST and SELL_CONFIRM handlers */
+    WORLD_SHOP_STEP_FITTING_ROOM_CHECKOUT = 12,
+    WORLD_SHOP_STEP_EXIT_FADE = 13,
+    WORLD_SHOP_STEP_FUR_MENU = 14,
+    WORLD_SHOP_STEP_FUR_BUY_LIST = 15, /* the shop's poached stock */
+    WORLD_SHOP_STEP_FUR_BUY_CONFIRM = 16,
+    WORLD_SHOP_STEP_FUR_BUY_EQUIP = 17,
+    WORLD_SHOP_STEP_FUR_SELL_LIST = 18, /* the party's inventory */
+    WORLD_SHOP_STEP_FUR_SELL_CONFIRM = 19,
+    WORLD_SHOP_STEP_SOLDIER_OFFICE_MENU = 20,
+    WORLD_SHOP_STEP_HIRE_PREVIEW = 21,
+    WORLD_SHOP_STEP_HIRE_CONFIRM = 22, /* declining removes the recruit from the roster */
+    WORLD_SHOP_STEP_HIRE_NAME_ENTRY = 23,
+    WORLD_SHOP_STEP_HIRE_FEE_CONFIRM = 24,
+    WORLD_SHOP_STEP_SOLDIER_OFFICE_REOPEN = 25,
+    WORLD_SHOP_STEP_RENAME_SELECT_UNIT = 26,
+    WORLD_SHOP_STEP_RENAME_NAME_ENTRY = 27,
+} world_shop_step_e;
+
+/* Result of world_shop_run_fitting_room_checkout_prompt. */
+typedef enum world_shop_checkout_result {
+    WORLD_SHOP_CHECKOUT_DONE = -1,    /* bought, or left without buying: back to the shop's main menu */
+    WORLD_SHOP_CHECKOUT_CANCELED = 0, /* back to the fitting room */
+    WORLD_SHOP_CHECKOUT_PROMPT_OPEN = 1,
+} world_shop_checkout_result_e;
+
+/* Refusals of world_shop_run_item_purchase_quantity_menu and
+ * world_shop_run_fur_buy_quantity_menu; otherwise they return whether the
+ * quantity prompt is still open. */
+enum {
+    WORLD_SHOP_QUANTITY_HOLDING_MAX = -2, /* the party already holds 99 */
+    WORLD_SHOP_QUANTITY_CANNOT_AFFORD = -1,
+};
+
 /* gfx */
 /* Sector and size pairs, read as flat 32-bit values ([i * 2], [i * 2 + 1]): a record
  * member access changes how the target addresses them. */

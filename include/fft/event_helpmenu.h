@@ -3,8 +3,6 @@
 
 /* EVENT/HELPMENU.OUT: menu screen overlay that runs with BATTLE. */
 
-#include "fft/job.h"
-
 /* help menus */
 
 /* saved panels */

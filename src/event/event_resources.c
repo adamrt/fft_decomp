@@ -2,13 +2,9 @@
  * display conditions, the dark screen and spell quote threads, and the openers for the option, BUNIT, help, JOBSTTS,
  * EQUIP and DEBUGCHR menus. */
 
-#include "fft/battle_ai.h"
 #include "fft/battle_camera.h"
-#include "fft/battle_event.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
-#include "fft/battle_script.h"
-#include "fft/battle_text.h"
 #include "fft/battle_unit.h"
 #include "fft/camera.h"
 #include "fft/event_debugchr.h"

@@ -4,7 +4,6 @@
 /* EVENT/DEBUGCHR.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/gfx.h"
-#include "fft/job.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -6,9 +6,92 @@
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
-#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+/* State of a screen request raised from the world map menu (the
+ * g_world_*_request_state globals stepped by world_formation_run_menu_frame):
+ * fade out, run the screen, fade back in. States 4 to 7 only count frames. */
+typedef enum world_screen_request_state {
+    WORLD_SCREEN_REQUEST_IDLE = 0,
+    WORLD_SCREEN_REQUEST_START_FADE_OUT = 1,
+    WORLD_SCREEN_REQUEST_WAIT_FADE_OUT = 2,
+    WORLD_SCREEN_REQUEST_RUN = 3,
+    WORLD_SCREEN_REQUEST_START_FADE_IN = 8,
+    WORLD_SCREEN_REQUEST_WAIT_FADE_IN = 9,
+} world_screen_request_state_e;
+
+/* Ordinary outfitter screens use a town's world_location_id_e. These values
+ * identify the other screens that reuse the formation menu framework. */
+typedef enum world_menu_context {
+    WORLD_MENU_CONTEXT_NAME_ENTRY = -2,
+    WORLD_MENU_CONTEXT_FORMATION = -1,
+    WORLD_MENU_CONTEXT_FUR_SHOP = 100,
+    WORLD_MENU_CONTEXT_SOLDIER_OFFICE = 101,
+} world_menu_context_e;
+
+/* One cell of a directional grid menu: a description text id (base plus
+ * offset), the cell index reached by each d-pad direction, and the cursor
+ * position. A non-zero `vertical` draws the vertical cursor. */
+typedef struct world_menu_grid_cell {
+    s16* text_id;
+    u16 text_offset;
+    u8 next_up;
+    u8 next_down;
+    u8 next_right;
+    u8 next_left;
+    point16_t cursor;
+    s16 vertical;
+} world_menu_grid_cell_t;
+
+/* 0x24-byte menu thread-group record at 0x80189ecc, indexed by
+ * the 32-bit request index (0-3). Each group names up to three menu threads. */
+typedef struct world_menu_thread_group {
+    void (*function[3])(void); /* 0x00; -1 when unused */
+    s32 thread_id[3];          /* 0x0c; -1 when unused */
+    s32 task_id[3];            /* 0x18 */
+} world_menu_thread_group_t;
+
+/* The builder walks the table with a byte offset stepping by 8 (the
+ * target's induction variable), so it addresses these fields by offset. */
+enum world_menu_line_layout_offset {
+    WORLD_MENU_LINE_LAYOUT_X0 = 0,
+    WORLD_MENU_LINE_LAYOUT_Y0 = 1,
+    WORLD_MENU_LINE_LAYOUT_X1 = 2,
+    WORLD_MENU_LINE_LAYOUT_Y1 = 3,
+    WORLD_MENU_LINE_LAYOUT_ADD_W0 = 4,
+    WORLD_MENU_LINE_LAYOUT_ADD_H0 = 5,
+    WORLD_MENU_LINE_LAYOUT_ADD_W1 = 6,
+    WORLD_MENU_LINE_LAYOUT_ADD_H1 = 7,
+    WORLD_MENU_LINE_LAYOUT_SIZE = 8
+};
+
+/* Partial image view used by 0x801061e0. Upload rectangles determine the
+ * second page's size; it begins at byte +0x8000 in both resource layouts. */
+typedef struct world_menu_image_pages {
+    u32 first_page[8192];
+    u32 second_page[1];
+} world_menu_image_pages_t;
+
+/* Result slots the shop menus share. */
+enum {
+    WORLD_MENU_SELECTION_SHOP_QUANTITY = 3, /* chosen purchase/sale quantity */
+    WORLD_MENU_SELECTION_PROMPT_RESULT = 4, /* yes/no prompt result (0 confirms) */
+};
+
+/* Index of a saved cursor in g_menu_selection_values, as the formation
+ * and shop menus use them. */
+typedef enum world_menu_cursor {
+    WORLD_MENU_CURSOR_SHOP_ITEM_TAB = 0,
+    WORLD_MENU_CURSOR_EQUIP_SLOT = 2,
+    WORLD_MENU_CURSOR_REMOVE_SLOT = 3, /* equipment slot of the remove and sell menus */
+    WORLD_MENU_CURSOR_SET_ABILITY_SLOT = 4,
+    WORLD_MENU_CURSOR_REMOVE_ABILITY_SLOT = 5,
+    WORLD_MENU_CURSOR_ITEM_TAB = 7,
+    WORLD_MENU_CURSOR_ABILITY_TAB = 8,
+} world_menu_cursor_e;
+
+enum { WORLD_MENU_SCRIPT_END = 0x1c };
 
 /* dead unit */
 extern RECT g_world_screen_menu_thin_panel_texture_windows[7];

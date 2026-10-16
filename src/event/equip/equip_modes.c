@@ -1,5 +1,6 @@
 /* Equip screen state, the equip and remove modes, the clear-all prompt and the preview HP bonus. */
 
+#include "fft/data.h"
 #include "fft/event_equip.h"
 #include "fft/gfx.h"
 #include "fft/item.h"

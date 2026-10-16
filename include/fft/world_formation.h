@@ -12,6 +12,167 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Result of world_formation_process_job_change, kept in
+ * g_world_job_change_anim_state: the phase of the job-change dissolve. */
+typedef enum world_job_change_anim {
+    WORLD_JOB_CHANGE_ANIM_DONE = 0,
+    WORLD_JOB_CHANGE_ANIM_DISSOLVE = 1,
+    WORLD_JOB_CHANGE_ANIM_CLOSING = 2, /* the last 20 frames */
+} world_job_change_anim_e;
+
+/* An entry of the job list world_job_build_unit_list writes. */
+enum {
+    WORLD_JOB_LIST_ENTRY_ID_MASK = 0x3ff,
+    /* Set in mode INCLUDE_OTHER_UNIT_UNLOCKS on the unit's current job and on
+     * a job only another unit has unlocked: the job wheel shows the entry
+     * but does not change to it. */
+    WORLD_JOB_LIST_ENTRY_UNAVAILABLE = 0x4000,
+};
+
+/* The one mode world_job_build_unit_list tests; its callers also pass 0 and 1. */
+enum { WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS = 2 };
+
+enum {
+    WORLD_FORMATION_PREVIEW_UNIT_INDEX = PARTY_ROSTER_SLOT_COUNT,
+    WORLD_FORMATION_UNIT_RECORD_COUNT = WORLD_FORMATION_PREVIEW_UNIT_INDEX + 1,
+};
+
+/* Screen x and texture u of one background tile; two alternating rows of four. */
+typedef struct world_formation_background_tile {
+    u16 x;
+    u16 u;
+} world_formation_background_tile_t;
+typedef char world_formation_background_tile_size_must_be_4[(sizeof(world_formation_background_tile_t) == 4) ? 1 : -1];
+
+/*
+ * The sprite-set -> script-variable table walked by the
+ * dismissal tail, terminated by sprite_set == -1. The four-byte stride is
+ * proved by the target advancing both its record pointer and its byte-offset
+ * index by 4 per iteration.
+ */
+typedef struct world_formation_dismiss_entry {
+    s16 sprite_set;  /* 0x00 */
+    s16 variable_id; /* 0x02 */
+} world_formation_dismiss_entry_t;
+
+/* world_unit_t::proposition_status, copied from the party record:
+ * the label the formation grid draws below a unit that is away. */
+typedef enum world_formation_unit_proposition {
+    WORLD_FORMATION_UNIT_PROPOSITION_LEAVING = 1,
+    WORLD_FORMATION_UNIT_PROPOSITION_MISSING = 2,
+} world_formation_unit_proposition_e;
+
+/*
+ * WORLD menu unit record, compacted after roster and menu-specific filtering.
+ * Records at 0x801c8638 have stride 0x128; roster_slot preserves their roster
+ * identity. The builder and sorter produce the
+ * ordered g_world_unit_pointers list, not a roster-indexed array.
+ * The byte fields from 0x70 on mirror the party_unit_t layout above. Magical
+ * shield/accessory evade are provisionally placed at 0x50/0x52, after the
+ * physical fields at 0x40/0x42, to follow the 16-bit sequence.
+ */
+typedef struct world_unit {
+    menu_unit_status_record_t status;     /* 0x000; copied whole to the status banner */
+    menu_unit_status_identity_t identity; /* 0x022 */
+    s16 move;                             /* 0x030 */
+    s16 speed;                            /* 0x032 */
+    s16 jump;                             /* 0x034 */
+    s16 right_weapon_power;               /* 0x036 */
+    s16 left_weapon_power;                /* 0x038 */
+    s16 right_weapon_evade;               /* 0x03a */
+    s16 left_weapon_evade;                /* 0x03c */
+    s16 uses_monster_skillset;            /* 0x03e; primary skillset is in the monster range 0xb0..0xdf */
+    s16 two_handed;                       /* 0x040; unit_is_two_handing_weapon result */
+    s16 physical_attack;                  /* 0x042 */
+    s16 physical_class_evade;             /* 0x044 */
+    s16 physical_shield_evade;            /* 0x046 */
+    s16 physical_accessory_evade;         /* 0x048 */
+    u8 _unused_04a[2];
+    s16 magical_attack;                       /* 0x04c */
+    s16 magical_class_evade;                  /* 0x04e */
+    s16 magical_shield_evade;                 /* 0x050 */
+    s16 magical_accessory_evade;              /* 0x052 */
+    u16 equipment[MENU_EQUIPMENT_SLOT_COUNT]; /* 0x054; right hand, left hand, head, body, accessory */
+    world_formation_abilities_t abilities;    /* 0x05e */
+    u8 _unused_068[8];                        /* 0x068; spare tail of the stat-detail block */
+    u8 gender_flags;                          /* 0x070; unit_flags_e (fft/unit.h) */
+    u8 _unused_071;
+    u8 sprite_set;               /* 0x072; "Sprite Set ID": party_unit_t.sprite_set / character identity */
+    u8 equippable_item_types[4]; /* 0x073; bit per item type, read by can_unit_equip_item_id */
+    u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT];                                           /* 0x077 */
+    u8 learned_abilities[UNIT_LEARNED_ABILITY_JOB_COUNT][UNIT_LEARNED_ABILITY_BYTES_PER_JOB]; /* 0x07a through 0x0b2 */
+    u8 job_levels[UNIT_JOB_LEVEL_BYTE_COUNT];                                                 /* 0x0b3 */
+    u8 _padding_0bd;                                                                          /* aligns job_points */
+    unit_job_points_t job_points; /* 0x0be; current JP followed by total JP */
+    u8 name[0x10];                /* 0x10e; "unit Nickname" */
+    u8 monster_graphic;           /* 0x11e; added to formation graphic entry 0x3d when sprite_set == 0x82
+                                     (world_formation_build_unit_graphic_entry) */
+    u8 proposition_status;        /* 0x11f; "Proposition Byte": world_formation_unit_proposition_e, 0 when present */
+    u16 birthday;                 /* 0x120; unit_stats_t birthday & 0x1ff; egg readers split
+                                     it into nibbles */
+    u16 egg_color; /* 0x122; party_unit_t 0xd2; the formation sprite drawer (0x8011751c) loads it as a 16-bit palette
+                      index */
+    u8 support_abilities[4]; /* 0x124; copy of unit_stats_t.ability_flags.support, BATTLE_SUPPORT_SET_1..4_* */
+} world_unit_t;
+typedef char world_unit_size_must_be_296[(sizeof(world_unit_t) == 296) ? 1 : -1];
+
+/* The mode argument of world_formation_build_record_list: which roster units
+ * it lists. */
+typedef enum world_formation_record_list_mode {
+    WORLD_FORMATION_RECORD_LIST_ALL = 0,
+    WORLD_FORMATION_RECORD_LIST_AVAILABLE_HUMANS = 1, /* no unit on a proposition, egg or monster */
+    WORLD_FORMATION_RECORD_LIST_MONSTERS = 2,         /* no egg, male or female unit */
+} world_formation_record_list_mode_e;
+
+/* Result of world_formation_get_unit_lock: whether the unit's
+ * equipment and abilities can be changed, and why not. */
+typedef enum world_formation_unit_lock {
+    WORLD_FORMATION_UNIT_LOCK_MIME = -6, /* a Mime can still learn abilities */
+    WORLD_FORMATION_UNIT_LOCK_EGG = -4,
+    WORLD_FORMATION_UNIT_LOCK_MONSTER = -3,
+    WORLD_FORMATION_UNIT_LOCK_PROPOSITION = -2, /* away on a proposition */
+    WORLD_FORMATION_UNIT_UNLOCKED = 1,
+} world_formation_unit_lock_e;
+
+/* The formation screen's state: the index of its handler in
+ * g_world_formation_menu_handlers. */
+typedef enum world_formation_menu {
+    WORLD_FORMATION_MENU_UNIT_GRID = 0, /* unit grid and its triangle menu */
+    WORLD_FORMATION_MENU_ITEM = 1,      /* item icon list */
+    WORLD_FORMATION_MENU_ABILITY = 2,
+    WORLD_FORMATION_MENU_JOB_WHEEL = 3,
+    WORLD_FORMATION_MENU_DISMISS_UNIT = 4,
+    WORLD_FORMATION_MENU_ORDER_UNIT = 5,
+    WORLD_FORMATION_MENU_ITEM_EQUIP = 6, /* the item list's rows follow in order */
+    WORLD_FORMATION_MENU_ITEM_BEST_FIT = 7,
+    WORLD_FORMATION_MENU_ITEM_REMOVE = 8,
+    WORLD_FORMATION_MENU_ITEM_LIST = 9,
+    WORLD_FORMATION_MENU_ABILITY_SET = 10, /* the ability menu's rows follow in order */
+    WORLD_FORMATION_MENU_ABILITY_REMOVE = 11,
+    WORLD_FORMATION_MENU_ABILITY_LEARN = 12,
+    WORLD_FORMATION_MENU_VIEW_ABILITIES = 13,
+    WORLD_FORMATION_MENU_JOB_WHEEL_ENTER = 14,              /* the grid slides out, then the wheel opens */
+    WORLD_FORMATION_MENU_JOB_WHEEL_LEAVE = 15,              /* the wheel closes, then the grid returns */
+    WORLD_FORMATION_MENU_ITEM_ENTER = 16,                   /* the grid slides out */
+    WORLD_FORMATION_MENU_ITEM_LEAVE = 17,                   /* the grid returns */
+    WORLD_FORMATION_MENU_ABILITY_ENTER = 18,                /* the grid slides out */
+    WORLD_FORMATION_MENU_ABILITY_LEAVE = 19,                /* the grid returns */
+    WORLD_FORMATION_MENU_JOB_WHEEL_CLOSING = 20,            /* wheel close animation */
+    WORLD_FORMATION_MENU_JOB_WHEEL_OPENING = 21,            /* wheel open animation */
+    WORLD_FORMATION_MENU_ABILITY_ENTER_PORTRAIT_SLIDE = 22, /* only the portrait slides; nothing stores it */
+    WORLD_FORMATION_MENU_ITEM_ENTER_NO_SLIDE = 23,          /* nothing stores it */
+    WORLD_FORMATION_MENU_JOB_CHANGE = 24,                   /* job change flash on the wheel */
+} world_formation_menu_e;
+
+/* Provisional: one 4-byte breeding entry per monster job from 0x5e
+ * (0x8018debc): the hatch-day range and the three offspring jobs by rarity
+ * class (world_unit_update_monster_breeding). */
+typedef struct world_unit_monster_breed_entry {
+    u8 hatch_range; /* 0x00: rand() % hatch_range + 1 (at least 2) egg days */
+    u8 offspring_job_by_rarity[WORLD_MONSTER_BREED_RARITY_COUNT]; /* 0x01; common through rare */
+} world_unit_monster_breed_entry_t;
+typedef char world_unit_monster_breed_entry_size_must_be_4[(sizeof(world_unit_monster_breed_entry_t) == 4) ? 1 : -1];
+
 /* ability */
 extern s16 g_world_ability_category; /* menu_ability_category_e */
 extern RECT g_world_ability_panel_origin;

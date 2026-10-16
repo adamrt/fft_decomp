@@ -5,10 +5,40 @@
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
-#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+/* Resident text resource indices, used by world_text_get_resident_data and
+ * world_text_bind_section_data. */
+typedef enum world_text_data {
+    WORLD_TEXT_DATA_SKILLSET_NAMES = 0,
+    WORLD_TEXT_DATA_JOB_NAMES = 1,
+    WORLD_TEXT_DATA_ABILITY_NAMES = 2,
+    WORLD_TEXT_DATA_FORMATION_MESSAGES = 3,   /* TEXT_SECTION_FORMATION_MESSAGES */
+    WORLD_TEXT_DATA_DISMISS_UNIT_REPLIES = 4, /* WORLD_TEXT_SECTION_FORMATION_TEXT */
+    WORLD_TEXT_DATA_JOB_DESCRIPTIONS = 5,     /* WORLD_TEXT_SECTION_FORMATION_TEXT */
+    WORLD_TEXT_DATA_NAME_ENTRY_KEYBOARD = 7,
+    WORLD_TEXT_DATA_SHOP_DIALOGUE = 8, /* WORLD_TEXT_SECTION_SHOP_DIALOGUE */
+} world_text_data_e;
+
+/* WORLD text files materialize 32 section pointers after their 0x80-byte
+ * offset/header area. The same table is saved and restored around overlays. */
+enum {
+    WORLD_TEXT_SECTION_TABLE_BYTES = 128,
+    WORLD_TEXT_FILE_HEADER_BYTES = 128,
+};
+
+/* The text sections WORLD's screens bind while they are up (text_section_e
+ * has the resident ones). */
+typedef enum world_text_section {
+    WORLD_TEXT_SECTION_TUTORIAL_MESSAGES = 23, /* the running tutorial's message file */
+    WORLD_TEXT_SECTION_NAME_ENTRY_KEYS = 28,   /* name entry: the key rows */
+    WORLD_TEXT_SECTION_FORMATION_TEXT = 29,    /* formation: what a dismissed unit says, or the job wheel's
+                                                * descriptions, whichever was bound last */
+    WORLD_TEXT_SECTION_SHOP_MENU_LABELS = 30,
+    WORLD_TEXT_SECTION_SHOP_DIALOGUE = 31, /* the shopkeeper's lines */
+} world_text_section_e;
 
 /* text */
 extern u8* g_world_text_resident_data[9];

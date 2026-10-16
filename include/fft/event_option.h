@@ -3,7 +3,6 @@
 
 /* EVENT/OPTION.OUT: menu screen overlay that runs with BATTLE. */
 
-#include "fft/job.h"
 #include "fft/menu.h"
 #include "psx/types.h"
 

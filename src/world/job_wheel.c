@@ -3,6 +3,7 @@
 
 #include "fft/data.h"
 #include "fft/gfx.h"
+#include "fft/job.h"
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_sound.h"

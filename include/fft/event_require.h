@@ -5,7 +5,6 @@
 
 #include "fft/battle_unit.h"
 #include "fft/gfx.h"
-#include "fft/job.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

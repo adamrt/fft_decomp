@@ -1,11 +1,22 @@
+#ifndef WORLD_NAME_ENTRY_H
+#define WORLD_NAME_ENTRY_H
+
+/* WORLD's name entry keyboard. */
+
 #include "fft/menu.h"
 #include "fft/menu_script.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
-#ifndef WORLD_NAME_ENTRY_H
-#    define WORLD_NAME_ENTRY_H
 
-/* WORLD's name entry keyboard. */
+/* Editing keys of world_name_apply_entry_key; any other key is the character
+ * written at the cursor. */
+typedef enum world_name_entry_key {
+    WORLD_NAME_ENTRY_KEY_BACKSPACE = -1,
+    WORLD_NAME_ENTRY_KEY_DELETE = -2,
+    WORLD_NAME_ENTRY_KEY_INSERT_SPACE = -3,
+    WORLD_NAME_ENTRY_KEY_CURSOR_LEFT = -4,
+    WORLD_NAME_ENTRY_KEY_CURSOR_RIGHT = -5,
+} world_name_entry_key_e;
 
 /* name */
 extern u8 g_world_name_entry_character_rows[];

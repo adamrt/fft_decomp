@@ -4,9 +4,66 @@
 /* WORLD's event scripts, tutorials, controller input and sound requests. */
 
 #include "fft/gfx.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/world.h"
 #include "psx/types.h"
+
+/* Operand pairs that one WORLD script_execute_event_variant opcode stores together;
+ * each second 16-bit value sits off a 32-bit alignment boundary in WORLD bss, so each pair is
+ * one object. */
+typedef struct world_event_command_args {
+    s16 arg1;
+    s16 arg2;
+} world_event_command_args_t;
+
+typedef struct world_event_music_switch {
+    s16 volume;
+    s16 fade;
+} world_event_music_switch_t;
+
+typedef char
+    world_tutorial_message_instruction_size_must_be_4[sizeof(world_tutorial_message_instruction_t) == 4 ? 1 : -1];
+
+typedef char
+    world_tutorial_dialog_instruction_size_must_be_3[sizeof(world_tutorial_dialog_instruction_t) == 3 ? 1 : -1];
+
+typedef char
+    world_tutorial_circle_instruction_size_must_be_6[sizeof(world_tutorial_circle_instruction_t) == 6 ? 1 : -1];
+
+typedef struct world_tutorial_wait_instruction {
+    u8 opcode;
+    u8 frames;
+} world_tutorial_wait_instruction_t;
+typedef char world_tutorial_wait_instruction_size_must_be_2[sizeof(world_tutorial_wait_instruction_t) == 2 ? 1 : -1];
+
+/* The current game is serialized here while a tutorial runs; its message
+ * text and command stream follow the saved bytes at +0x1e00/+0x1e04. */
+typedef struct world_tutorial_state {
+    card_save_buffer_t saved_game;
+    u8* messages;
+    u8* script;
+} world_tutorial_state_t;
+
+typedef char world_tutorial_state_size_must_be_7688[sizeof(world_tutorial_state_t) == 7688 ? 1 : -1];
+
+/*
+ * WORLD.BIN tutorial command stream. Commands below 0x10 are one-byte shifts;
+ * the rest are ID (1) followed by the listed parameters: 0x10 message id (2) +
+ * y (1), 0x11 message id (2), 0x13 x, y, size, width mod, height mod (1 each),
+ * 0x15 time (1).
+ */
+enum {
+    WORLD_TUTORIAL_CMD_SHIFT_LIMIT = 0x10,
+    WORLD_TUTORIAL_CMD_DISPLAY_MESSAGE = 0x10,
+    WORLD_TUTORIAL_CMD_CHANGE_DIALOG = 0x11,
+    WORLD_TUTORIAL_CMD_WAIT_FOR_MESSAGE = 0x12,
+    WORLD_TUTORIAL_CMD_DRAW_CIRCLE = 0x13,
+    WORLD_TUTORIAL_CMD_WAIT = 0x14,
+    WORLD_TUTORIAL_CMD_WAIT_TIME = 0x15,
+    WORLD_TUTORIAL_CMD_WAIT_FOR_BUTTON = 0x16,
+    WORLD_TUTORIAL_CMD_END = 0x17,
+};
 
 /* script */
 extern u32 g_world_event_current_input;

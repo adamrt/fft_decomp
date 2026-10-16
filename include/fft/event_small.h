@@ -3,7 +3,6 @@
 
 /* EVENT/SMALL.OUT: menu screen overlay that runs with BATTLE. */
 
-#include "fft/job.h"
 #include "psx/types.h"
 
 /* text */

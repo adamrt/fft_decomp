@@ -1,12 +1,13 @@
+#ifndef EFFECT_H
+#define EFFECT_H
+
+/* Native ability-effect callbacks and their work records in EFFECT/E*.BIN.
+ * The resident runtime and shared effect layouts are declared in battle_effect.h. */
+
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
-#ifndef EFFECT_H
-#    define EFFECT_H
-
-/* Native ability-effect callbacks and their work records in EFFECT/E*.BIN.
- * The resident runtime and shared effect layouts are declared in battle_effect.h. */
 
 /* Effect script opcode 06 puts a handler in one of the callback slots, and a
  * particle keyframe whose 16-bit action value names the slot binds it to the record.

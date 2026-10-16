@@ -1,4 +1,5 @@
 #include "fft/event_bunit.h"
+#include "fft/job.h"
 #include "psx/types.h"
 
 s32 job_is_current_mastered(s32 unused_row) {
