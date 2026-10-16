@@ -117,7 +117,7 @@ static u8 battle_move_get_water_depth(battle_unit_t* unit) {
  *
  * g_battle_weapon_attack_animations has three animations for each item type:
  * at a higher target, a level one and a lower one. A bow indexes its row by
- * effect_get_bow_shot_angle. Other weapons compare the vertical
+ * battle_effect_get_bow_shot_angle. Other weapons compare the vertical
  * centers of the two sprites: a target 12 or more above the attacker takes
  * the first animation and one 12 or more below the third. A Golem or Blade
  * Grasp guard always takes the first, and the sheets from the crystal up

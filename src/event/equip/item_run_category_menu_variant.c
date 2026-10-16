@@ -13,7 +13,7 @@
  * callbacks; each frame it handles cancel, left/right slot changes and
  * confirm, and rebuilds the stat-delta preview when the highlighted row
  * changes. `category` is u16 so its load is a zero_extend:HI that CSE cannot
- * replace with the value just stored to g_equip_selected_slot: the target
+ * replace with the value just stored to g_menu_selected_slot: the target
  * reloads the slot after the store. */
 s32 item_run_category_menu_variant(void) {
     s16 selected;

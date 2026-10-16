@@ -221,7 +221,7 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
     g_menu_restore_depth = 2;
 }
 
-/* Battle twin of menu_validate_skill_selection_thread. Thread body: validates the skill chosen in menu entry 3
+/* Thread body: validates the skill chosen in menu entry 3
  * for the current menu (MP cost, blocking status, per-menu restrictions) and, when it is not usable, shows the matching
  * message before ending the thread. */
 void menu_validate_skill_selection_thread(void) {
@@ -561,7 +561,7 @@ s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, 
 }
 
 /* Run battle_unit_generate_crystal_or_treasure for the unit on the main stack,
- * keep its record in g_battle_dead_unit_context and return the treasure item when
+ * keep its record in g_menu_dead_unit_context and return the treasure item when
  * the result is 4, otherwise -1. */
 s32 menu_get_dead_unit_selection(s32 battle_id) {
     unit_stats_t* stats;
@@ -1103,7 +1103,7 @@ s32 script_get_current_scenario_finish_operation(void) {
     return g_main_scenario_event_finish_operations[script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT)];
 }
 
-/* Return the after-event code of the pending event (g_battle_next_event_id): bits
+/* Return the after-event code of the pending event (g_script_next_event_id): bits
  * 8-9 and 12-15 of its 16-bit finish-operation value, shifted down by 8. Zero means the
  * event has none. */
 u32 script_get_event_finish_operation(void) {
@@ -1158,7 +1158,7 @@ static void script_route_event_input_variant(void) {
 #endif
 
 #ifdef FFT_WORLD
-/* WORLD twin of script_update_event_input_state_variant: while the event thread
+/* WORLD twin of script_update_event_input_state: while the event thread
  * (0x10) is current, latch the pad state and derive the new-press mask with
  * the shared initial/repeat/secondary key-repeat delays. */
 static void script_route_event_input_variant(void) {
@@ -1234,12 +1234,12 @@ void script_filter_controller_input(u32* input) {
 #ifdef FFT_BATTLE
 /* Run one frame of BATTLE bookkeeping around the thread scheduler.
  *
- * BATTLE twin of script_run_event_frame_variant: returns the scenario-finish result
+ * BATTLE's body: returns the scenario-finish result
  * (9, 0xA, 0xB or 0x13, 0 when no finish operation is pending) once every
  * script thread has stopped, otherwise 1 (or g_script_frame_result_override while it is set, or 0
  * while menu input is disabled with state 2). The three BATTLE-only 16-bit clears come
  * after the 32-bit clears in source; the scheduler still groups them with the
- * other 16-bit stores, and this order keeps the g_battle_companion_overlay_state load
+ * other 16-bit stores, and this order keeps the g_menu_companion_overlay_state load
  * below them as in the target.
  */
 s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
@@ -1863,7 +1863,7 @@ void camera_store_state_to_script_variables(void) {
 #endif
 }
 
-/* The raw weather script variable. map_get_effective_weather applies the
+/* The raw weather script variable. battle_map_get_effective_weather applies the
  * map's indoor and snow flags to it. */
 s32 map_get_weather(void) {
     return g_script_variables[EVENT_SCRIPT_VAR_WEATHER];

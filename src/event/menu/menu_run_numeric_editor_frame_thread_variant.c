@@ -6,10 +6,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Thread task 0x3b: numeric editor panel; twin of equip_editor_run_numeric_thread;
- * like WORLD, BUNIT reads the 0/0xf0 draw offset from g_bunit_frame_arg.
+/* Thread task 0x3b: numeric editor panel;
+ * like WORLD, BUNIT reads the 0/0xf0 draw offset from g_frame_arg.
  * The primitive block is menu_status_panel_numeric_buffer_t, double buffered at
- * g_bunit_editor_numeric_state_a (thread 12) or _b; the thread parameter block is
+ * g_editor_numeric_state_a (thread 12) or _b; the thread parameter block is
  * menu_status_thread_t. */
 
 void menu_run_numeric_editor_frame_thread_variant(void) {

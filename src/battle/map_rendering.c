@@ -172,7 +172,7 @@ s32* battle_map_control_gte_background_color(s32 command, s32 value_1, s32 value
  * The translation rows add the start matrix element m[i][3] (the loop index
  * after the inner loop) rather than the start translation, as in the target.
  * Commands 0x5e-0x60 and 0x66-0x69 return the uninitialized result, like
- * map_light_state_command.
+ * battle_map_light_state_command.
  */
 MATRIX* battle_map_light_matrix_command(
     map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration) {
@@ -1939,7 +1939,7 @@ void battle_map_run_weather_command(map_weather_command_e command) {
 
 /* Set up the weather particles and their flat-textured sprites.
  *
- * 0x8f (snow, from map_run_weather_command 0x53/0x7e/0x7f) scatters 64 flakes;
+ * 0x8f (snow, from battle_map_run_weather_command 0x53/0x7e/0x7f) scatters 64 flakes;
  * 0x90 (rain, 0x55/0x7c/0x7d) scatters 32 drop pairs over the map extent and
  * records the lowest tile surface (largest y) in g_map_lowest_surface_y. The rain UV
  * pointer is formed from one combined byte offset: the target adds the
@@ -2066,7 +2066,7 @@ s32 battle_map_configure_effect_data_state(map_effect_data_command_e command) {
 }
 
 /* Advance the keyframe animations of map mesh parts 1-8 by one frame, from
- * map_draw_mesh_and_weather.
+ * battle_map_draw_mesh_and_weather.
  *
  * A part whose running instruction row has a successor (states[0][1].next) adds
  * (speed >> 4) * g_main_system_animation_speed to its elapsed time. When that

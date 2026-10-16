@@ -13,7 +13,7 @@
 #include "psx/types.h"
 
 /* Formation item-menu supervisor: menu 9 of world_formation_item_menu's
- * switch, which calls this as `done = world_formation_run_item_submenu_step()`. Dispatches to the
+ * switch, which calls this as `done = menu_update_equipment_variant()`. Dispatches to the
  * category / rearrange / equip-preview sub-menus and redraws the row window.
  *
  * `busy = 0;` is written after the pressable-button call. The target
@@ -30,7 +30,7 @@
  * redeclared here.
  *
  * g_world_item_submenu_initialized is `u8` in the header while the target reads it with `lb`, so it is reached
- * through an lvalue reinterpretation, as the twin src/world/world_item_run_category_menu.c does for the
+ * through an lvalue reinterpretation, as the twin src/world/item_run_category_menu_variant.c does for the
  * sibling byte g_world_item_category_menu_initialized (`*(s8*)&g_world_item_category_menu_initialized`).
  *
  * 0x801c8518 carries two cataloged names and the store and the reload use

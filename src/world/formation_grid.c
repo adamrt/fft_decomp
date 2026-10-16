@@ -41,8 +41,8 @@ void world_menu_toggle_preview_stats_window(s32 flag) {
     g_world_preview_stats_window_active = stored;
 }
 
-/* Starts thread 10 on world_menu_ability_panel_thread (parameter g_world_ability_panel_thread_params) when `enable` is
- * set and neither thread 9 nor 10 is running; stops threads 10 and 12 otherwise. */
+/* Starts thread 10 on menu_run_ability_list_thread_variant (parameter g_world_ability_panel_thread_params) when
+ * `enable` is set and neither thread 9 nor 10 is running; stops threads 10 and 12 otherwise. */
 void world_menu_toggle_ability_panel_thread(s32 enable) {
 
     if (enable != 0) {
@@ -259,9 +259,9 @@ s32 world_formation_is_unit_list_scroll_needed(void) {
 /*
  * Draw an on-screen button from its sprite pieces and animate its press.
  *
- * g_world_menu_button_press_timers[index] counts press frames (until 6 / vsync mode); a pressed
+ * g_menu_button_press_timers[index] counts press frames (until 6 / vsync mode); a pressed
  * button is drawn one pixel lower with the highlight CLUT. Pieces
- * g_world_menu_button_piece_starts[index]..g_world_menu_button_piece_starts[index + 1] are drawn at OT depth 50 upward.
+ * g_menu_button_piece_starts[index]..g_menu_button_piece_starts[index + 1] are drawn at OT depth 50 upward.
  * Compiled at -O1 like the other formation/shop sprite drawers.
  */
 void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id) {

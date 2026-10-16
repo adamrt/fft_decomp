@@ -321,7 +321,7 @@ static s32 world_menu_update_clear_all_abilities_prompt(void) {
  * Run the formation Set Ability menu for the selected unit.
  *
  * Return 0 when canceled and 1 while active. With the list closed the cursor
- * picks an ability slot and opens its candidate list (world_ability_find_unit_abilities for the
+ * picks an ability slot and opens its candidate list (ability_build_list_variant for the
  * secondary skillset, world_ability_build_equippable_rsm_list otherwise);
  * with it open, the chosen ability is written to the slot and the Move+N
  * stat preview is refreshed.

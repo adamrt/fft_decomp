@@ -11,10 +11,9 @@
 #include "psx/types.h"
 
 /* The packet, state and thread layouts are the shared fft/menu.h
- * records of the DEBUGCHR twin debugchr_panel_run_unit_status_thread. */
+ * records of the DEBUGCHR twin menu_run_unit_status_thread_variant. */
 
-/* Thread task 0x39: the character editor and status panels. BUNIT twin of
- * DEBUGCHR debugchr_panel_run_unit_status_thread. */
+/* Thread task 0x39: the character editor and status panels. BUNIT's body (DEBUGCHR has its own). */
 void menu_run_unit_status_thread_variant(void) {
     RECT rects[6];
     s32 anim_state;

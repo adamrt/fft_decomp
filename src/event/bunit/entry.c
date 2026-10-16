@@ -367,7 +367,7 @@ static s32 bunit_menu_run_unit_list_frame(void) {
  *
  * When the selected unit differs from g_bunit_unit_comparison_index it republishes that unit's
  * record, restarts the slide animation, and reports the scroll direction in
- * g_bunit_status_display_redraw_request; otherwise it advances the g_bunit_status_banner_slide_step slide and stops
+ * g_status_display_redraw_request; otherwise it advances the g_bunit_status_banner_slide_step slide and stops
  * thread 7 once the slide completes. */
 static void bunit_menu_update_unit_browser(void) {
     s32 index;

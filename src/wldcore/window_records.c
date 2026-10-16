@@ -276,7 +276,7 @@ step_frame:
 
 #ifdef FFT_WLDCORE
 /* Convert one display object into a libgs sprite primitive and sort it into the
- * ordering table handed down by wldcore_dispatch_display_object_list.
+ * ordering table handed down by window_dispatch_record_list_variant.
  *
  * Flag 0x004 selects the 8-bit color mode (attribute 0x01000000); flag 0x400 copies
  * the object's color verbatim, otherwise 0x80069718 applies the global fade
@@ -623,7 +623,7 @@ s32 window_append_animated_record_variant(void** list, s32* count) {
 #ifdef FFT_WLDCORE
 /* Attach the current render record to the caller's list and reset it.
  *
- * Sibling of wldcore_window_append_record_and_reset_color, which performs the same append for the 36-byte
+ * Sibling of window_append_animated_record_variant, which performs the same append for the 36-byte
  * window records. */
 s32 window_append_record_variant(void** queue, s32* count) {
     CVECTOR* color;

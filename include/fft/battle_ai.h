@@ -544,7 +544,7 @@ typedef enum ai_command_kind {
     AI_COMMAND_MOVE = 0,
     AI_COMMAND_ACT = 1,
     AI_COMMAND_END_TURN = 2,
-    /* The rest reach the command from battle_menu_resolve_selection, for a player's menu choice.
+    /* The rest reach the command from menu_resolve_selection, for a player's menu choice.
      * The auto-battle choices are 12 plus twice the option, plus one once a unit has been
      * picked for the two that name one (SELECT picks it, DISPLAY shows it); SELECT and the two
      * others equal their ai_autobattle_mode_e values. */

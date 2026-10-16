@@ -48,7 +48,7 @@ typedef enum battle_seq_opcode {
     BATTLE_SEQ_OP_MOVE_FORWARD_2 = 0xd1,
     BATTLE_SEQ_OP_MOVE_FORWARD_1 = 0xd2,
     BATTLE_SEQ_OP_WAIT_FOR_EFFECT_LOAD = 0xd3, /* offset: jump while g_battle_state_animation_continue_check is 1 */
-    BATTLE_SEQ_OP_PLAY_WEAPON_SOUND = 0xd4,    /* 0 swing, 1 hit: sound_play_weapon_sfx */
+    BATTLE_SEQ_OP_PLAY_WEAPON_SOUND = 0xd4,    /* 0 swing, 1 hit: battle_sound_play_weapon_sfx */
     BATTLE_SEQ_OP_RESTART = 0xd5,              /* back to the sequence's first byte, counting the restart */
     BATTLE_SEQ_OP_WAIT_FOR_EFFECT = 0xd6,      /* offset: jump while g_battle_state_animation_continue_check is not 0 */
     BATTLE_SEQ_OP_UNKNOWN_D7 = 0xd7,           /* one operand; the sequences of death and revival start with it */
@@ -200,7 +200,7 @@ typedef enum battle_unit_animation {
     BATTLE_UNIT_ANIMATION_GUN_HIGH = 80,
     BATTLE_UNIT_ANIMATION_GUN_LEVEL = 81,
     BATTLE_UNIT_ANIMATION_GUN_LOW = 82,
-    BATTLE_UNIT_ANIMATION_BOW_HIGH = 83, /* a bow shot takes its row from effect_get_bow_shot_angle */
+    BATTLE_UNIT_ANIMATION_BOW_HIGH = 83, /* a bow shot takes its row from battle_effect_get_bow_shot_angle */
     BATTLE_UNIT_ANIMATION_BOW_LEVEL = 84,
     BATTLE_UNIT_ANIMATION_BOW_LOW = 85,
     BATTLE_UNIT_ANIMATION_BOOK = 86,
@@ -833,7 +833,7 @@ typedef struct battle_unit {
     u32 statuses_to_remove_1_4;                /* 0x150 */
     u32 statuses_to_remove_5_6;                /* 0x154 */
     battle_unit_command_state_t command_state; /* 0x158..0x16f */
-    s32 sp2_ability_id;                        /* 0x170: ability whose SP2 file battle_open_sp2 loads */
+    s32 sp2_ability_id;                        /* 0x170: ability whose SP2 file battle_gfx_open_sp2_file loads */
     s32 ability_preview_phase;                 /* 0x174: target_panels_e */
     /* 0x178; target_calculate_for_menu_types result stored by
      * target_select_tile: 0/1 preview, 2 stop, -1 back to the menu. */
@@ -842,7 +842,7 @@ typedef struct battle_unit {
     s32 pending_attack_result; /* 0x180: attack result code; -1 signals death */
     /* Death-by-dismount destination (unit runtime record 0x184/0x186/
      * 0x188); battle_unit_set_map_coords_after_death_dismount copies them to
-     * map_x/map_z/map_y.  attack_result_animation_update passes &dismount. */
+     * map_x/map_z/map_y.  battle_unit_update_attack_result_animation passes &dismount. */
     map_tile_coordinates_t dismount; /* 0x184 */
     u8 _unused_18a[2];
     battle_strike_work_t strike; /* 0x18c..0x1b3; current action targets, result and rewards */

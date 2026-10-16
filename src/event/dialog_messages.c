@@ -58,7 +58,7 @@ void text_build_display_message(s32 offset, s32 flags, s32* out_width) {
 }
 
 #ifdef FFT_WORLD
-/* Menu twin of world_script_update_event_input_state: clears the new-press mask,
+/* Menu twin of script_route_event_input_variant: clears the new-press mask,
  * yields a frame, then reads the pad and derives the new-press mask with
  * the shared initial/repeat/secondary key-repeat delays. During a tutorial
  * with `EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set the

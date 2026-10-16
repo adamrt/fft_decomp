@@ -3,7 +3,7 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
-/* Twin of jobstts_cmd_run_stream; BUNIT's stream terminator is 0x1C. */
+/* Twin of menu_cmd_run_stream_variant; BUNIT's stream terminator is 0x1C. */
 void menu_cmd_run_stream_variant(menu_instruction_t* instruction, s32 flags) {
     g_menu_gfx_otag_index = 0;
     g_menu_gfx_semitransparency = 0;

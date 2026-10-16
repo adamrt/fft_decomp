@@ -16,7 +16,7 @@
 /*
  * The g_card_save_*_descriptor menu-thread descriptors below are 0x3c-byte
  * menu_entry_t menu records.
- * card_thread_start_managed and its delayed twin start descriptor->thread_entry
+ * menu_start_managed_thread and its delayed twin start descriptor->thread_entry
  * (+0x28). The yes/no prompts are a message record followed by a choice record
  * whose text_id is 0xd810; the choice's selected_index (+0x74 of the prompt) is
  * the default answer, and the message window.y (+0x0a) places the prompt.

@@ -174,7 +174,7 @@ static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
 }
 
 /* Between turns: when the crystal count calls for a map reload
- * (map_check_deep_dungeon_crystal_and_init_state), enter the Deep Dungeon
+ * (battle_map_check_deep_dungeon_crystal_and_init_state), enter the Deep Dungeon
  * mesh-load state at animation speed 1. Returns 1 when the state changed. */
 static s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
     if (battle_map_check_deep_dungeon_crystal_and_init_state() != 0) {
@@ -186,7 +186,7 @@ static s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
     return 0;
 }
 
-/* As map_try_start_deep_dungeon_mesh_load, entering the mesh-finish state
+/* As battle_map_try_start_deep_dungeon_mesh_load, entering the mesh-finish state
  * instead: the crystal count check made when a unit's post-movement steps end. */
 static s32 battle_map_refresh_deep_dungeon(void) {
     if (battle_map_check_deep_dungeon_crystal_and_init_state()) {
@@ -464,7 +464,7 @@ void battle_menu_open_free_cursor_mini_menu(void) {
 
 /* Leave the view of a unit picked from the AT list: enter the mini-menu state,
  * remove the tile marks and release OPTION.OUT's AT list thread, which waits on
- * g_battle_menu_at_list_selection_finished. */
+ * g_menu_at_list_selection_finished. */
 void battle_menu_open_mini_menu(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_MINI_MENU;

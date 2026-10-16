@@ -33,7 +33,7 @@
  * inflict-status commands), and clears the disabled-menu, disabled-input and
  * forced-input variables.
  *
- * Each pass fetches the opcode at instruction_offset in g_battle_event_block
+ * Each pass fetches the opcode at instruction_offset in g_script_event_block
  * with its first four operand bytes and its first 16-bit operand,
  * dispatches through the else-if chain, then advances by
  * 1 + g_script_event_instruction_sizes[opcode]. The jumps `continue`

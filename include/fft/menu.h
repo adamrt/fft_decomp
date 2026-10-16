@@ -265,7 +265,7 @@ typedef struct battle_menu_status_panel_numeric_geometry {
 } battle_menu_status_panel_numeric_geometry_t;
 
 /* Numeric editor panel buffer (0x2c0 bytes), double buffered by the
- * *_editor_run_numeric_thread routines (EQUIP equip_editor_run_numeric_thread copies it with
+ * *_editor_run_numeric_thread routines (EQUIP menu_run_numeric_editor_frame_thread_variant copies it with
  * sizeof). The draw modes are set up with gfx_set_draw_mode_for_texture_page /
  * SetDrawMode, the 18 SPRTs by the gfx_init_image_loading walk,
  * +0x18c and +0x298 are the arguments of
@@ -314,7 +314,7 @@ enum {
 /* Provisional 0xe-byte active-unit record (BATTLE 0x8014d080, WORLD
  * 0x8013a364, DEBUGCHR 0x801c5324, REQUIRE 0x801cb364, ATTACK 0x801ca0c8), saved and restored
  * whole by menu_copy_billboard_data_out and
- * battle_menu_copy_billboard_data_in. The load-selected-unit routines fill
+ * menu_copy_billboard_data_in. The load-selected-unit routines fill
  * job_id..zodiac for the unit named by battle_id; the overlays' status panels
  * keep a second record for the comparison unit 0x10 later. */
 typedef struct menu_active_unit {
@@ -341,12 +341,12 @@ struct unit_stats* menu_get_selected_unit_stats(void);
 /* Name, job and identity values copied into WORLD and EQUIP status panels.
  * The last displayed value is the roster slot, distinct from a battle id. */
 typedef struct menu_unit_status_identity {
-    s16 unit_index;  /* 0x00: name text 0x4000 + value (world_menu_unit_status_banner_thread) */
+    s16 unit_index;  /* 0x00: name text 0x4000 + value (menu_run_unit_status_thread_variant) */
     s16 job_id;      /* 0x02: job name text 0x3000 + value */
     s16 brave;       /* 0x04 */
     s16 faith;       /* 0x06 */
     s16 zodiac;      /* 0x08 */
-    s16 roster_slot; /* 0x0a: party slot (menu_get_party_unit_name_id); shown as value + 1 */
+    s16 roster_slot; /* 0x0a: party slot (world_menu_get_party_unit_name_id); shown as value + 1 */
     u8 _unused_0c[2];
 } menu_unit_status_identity_t;
 typedef char menu_unit_status_identity_size_must_be_14[sizeof(menu_unit_status_identity_t) == 14 ? 1 : -1];
@@ -514,7 +514,7 @@ typedef struct menu_status_panel_display_thread {
  *  - the TILE/LINE_F2 pair at +0x204/+0x224 (two translucent 16x90 backdrop
  *    tiles and eight vertical frame lines) is written, with the draw modes,
  *    by the *_gfx_init_menu_tile_and_line_primitives builders and
- *    world_gfx_init_menu_tile_and_line_primitives (0x80110260), which leave the
+ *    menu_init_status_panel_primitives (0x80110260), which leave the
  *    sprites between untouched;
  *  - the two draw-offset packets follow from the SetDrawOffset(packet,
  *    position) calls at +0x2a4/+0x2b0 and +0x2b4/+0x2c0;
@@ -688,7 +688,7 @@ typedef enum option_menu_type {
 } option_menu_type_e;
 
 /* A key in the list *_item_sort_id_list / item_sort_id_list_variant
- * sorts by (g_world_sort_key_lists, g_equip_item_type_order_lists); -1 ends
+ * sorts by (g_item_type_order_lists, g_item_type_order_lists); -1 ends
  * the list. TYPE sorts ascending, the others descending. */
 typedef enum item_sort_key {
     ITEM_SORT_KEY_TYPE = 0,
@@ -726,7 +726,7 @@ typedef enum item_list_mode {
 
 /* The grid help cursor over a unit's status display. A value above the text
  * ids in the pending description id (g_text_selection_id,
- * g_bunit_text_selection_id) selects one; it is latched in
+ * g_text_selection_id) selects one; it is latched in
  * g_world_grid_menu_id / g_bunit_help_screen_id instead of showing a
  * description. */
 typedef enum menu_grid_help_id {
@@ -755,8 +755,8 @@ typedef enum menu_unit_readout {
 
 /* Step of the job list menus (WORLD learn and view-abilities menus, BUNIT job
  * menu, the JOBSTTS page); each list's handler returns the next step. In
- * JOBSTTS, JOBS is jobstts_menu_update_job_list, ABILITIES is
- * jobstts_ability_update_list_menu and CLOSE makes jobstts_entrypoint close
+ * JOBSTTS, JOBS is menu_run_job_list_variant, ABILITIES is
+ * menu_ability_update_list_menu_variant and CLOSE makes jobstts_entrypoint close
  * the screen. */
 typedef enum menu_job_list_step {
     MENU_JOB_LIST_STEP_CLOSE = -1,
@@ -807,7 +807,7 @@ extern u8 g_menu_render_buffer[];
 
 /* menu entries */
 /* Provisional: record reached through menu_entry_t::context.
- * world_menu_text_entry_thread, world_menu_text_entry_wait_thread and the
+ * world_menu_text_entry_thread, menu_text_entry_wait_thread and the
  * overlays' *_menu_open_submenu_thread call the hook at +0 and start the text
  * thread whose id is at +6 with speaker_id as its third and fourth parameters. */
 typedef struct menu_text_binding {
@@ -827,7 +827,7 @@ enum { MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2 };
 /* Provisional: 60-byte menu entry used by BATTLE, WORLD and OPTION/EQUIP.
  * g_menu_thread_menu_data points to the scene's current table. 0x0c/0x0e are the
  * window size (frame rect 0x0c - 0x12 by 0x0e - 0x1a in WORLD 0x8010088c and
- * option_menu_run_at_list). The parent table at 0x24 (indexed by selected_index)
+ * menu_run_at_list_variant). The parent table at 0x24 (indexed by selected_index)
  * and the thread entry at 0x28 are known from
  * world_menu_start_entry_chain_threads. The record is also the first parameter
  * of the menu threads it starts: the icon threads read 0x00..0x07 as the text
@@ -932,7 +932,7 @@ typedef char menu_text_layout_size_must_be_40[sizeof(menu_text_layout_t) == 40 ?
 
 /* menu drawing */
 /* Provisional: one double-buffered menu sprite page (0xa0 bytes) built by
- * menu_build_sprite_page and its BATTLE twin battle_menu_build_sprite_page:
+ * menu_build_sprite_page and its BATTLE twin menu_build_sprite_page:
  * five DR_MODE texture-window packets followed by the five SPRTs they apply
  * to. Both modules keep two pages at 0x801cc074. */
 typedef struct menu_sprite_page {
@@ -1058,7 +1058,7 @@ typedef struct menu_icon_record {
 
 /* Provisional: one of the two 0x134-byte packet pages a scrolling text list
  * alternates between frames (menu_run_scrolling_ability_list_thread_variant at 0x801a3d58,
- * world_build_at_list at 0x801ac6b4, world_screen_build_at_list at 0x801bfda4). */
+ * menu_run_at_list_variant at 0x801ac6b4, world_screen_build_at_list at 0x801bfda4). */
 typedef struct menu_list_page {
     SPRT frame;                         /* 0x00: text image / cursor frame */
     SPRT arrows[2];                     /* 0x14: scroll arrows */
@@ -1251,7 +1251,7 @@ typedef enum dead_unit_menu_entry {
 
 /* Crystal/treasure pickup result (g_main_crystal_pickup_result, 0x8006623c)
  * that battle_unit_generate_crystal_or_treasure builds on the main thread
- * stack call and returns; BATTLE keeps the pointer in g_battle_dead_unit_context and
+ * stack call and returns; BATTLE keeps the pointer in g_menu_dead_unit_context and
  * WORLD in g_menu_dead_unit_context. The dead-unit panels pick
  * their variant from `result` and show `treasure_item`. */
 typedef struct crystal_pickup_result {
@@ -1325,7 +1325,7 @@ typedef enum battle_menu_system_command {
 } battle_menu_system_command_e;
 
 /* Result of *_menu_dispatch_system_function (and of
- * battle_menu_init_system_function, which returns it). */
+ * menu_init_system_function, which returns it). */
 typedef enum menu_system_dispatch_result {
     MENU_SYSTEM_DISPATCH_UNKNOWN_COMMAND = 0, /* the CLOSE function was started instead */
     MENU_SYSTEM_DISPATCH_DONE = 1,            /* a system function was started, or nothing had to run */
@@ -1433,7 +1433,7 @@ typedef enum battle_system_function_id {
 
 /* companion overlays */
 /* Companion overlay requests: index into the overlay LBA, size and load offset
- * tables (g_battle_menu_companion_executable_lbas and the WORLD twins). */
+ * tables (g_menu_companion_executable_lbas and the WORLD twins). */
 typedef enum companion_overlay {
     COMPANION_OVERLAY_OPTION = 1,             /* EVENT/OPTION.OUT */
     COMPANION_OVERLAY_BUNIT = 2,              /* EVENT/BUNIT.OUT, first half */
@@ -1471,7 +1471,7 @@ void menu_open_companion_data_file(void);
 void menu_open_companion_executable(void);
 extern s32 g_menu_companion_overlay_state;
 
-/* g_battle_companion_overlay_state / g_menu_companion_overlay_state: the overlay
+/* g_menu_companion_overlay_state / g_menu_companion_overlay_state: the overlay
  * entry the frame driver calls, cleared when the overlay returns. */
 typedef enum companion_overlay_state {
     COMPANION_OVERLAY_STATE_IDLE = 0,
@@ -1608,16 +1608,16 @@ extern s16 g_menu_selection_values[];
 s16 menu_update_wrapped_horizontal_selection(u16 entry_count, u8 selection_index, s32 input_mask);
 s32 menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);
 
-/* One row of the 31-entry menu table at g_battle_menu_id_records; its first 12 rows are the
+/* One row of the 31-entry menu table at g_menu_command_maps; its first 12 rows are the
  * menus whose selection is remembered per unit.
- * menu_restore_selection_for_selected_unit and battle_menu_record_selection_for_selected_unit
+ * menu_restore_selection_for_selected_unit and menu_record_selection_for_selected_unit
  * prove the 8-byte stride and read only the leading menu id;
- * battle_menu_resolve_selection walks all 31 rows. */
+ * menu_resolve_selection walks all 31 rows. */
 typedef struct menu_command_map {
     u16 menu_id;
     u16 _padding_02; /* aligns map */
     /* 0x04: per-menu command remap table. map[0] handles the 0xFF selection
-     * and map[n + 1] any other value; named by battle_menu_resolve_selection,
+     * and map[n + 1] any other value; named by menu_resolve_selection,
      * its only reader. The other readers use menu_id alone. */
     u8* map;
 } menu_command_map_t;
@@ -1955,7 +1955,7 @@ enum {
 };
 
 /* Encoded menu-string controls. The 0xe2-0xfd meanings come from the dialog
- * interpreter branches (battle_text_run_dialog_thread and its WORLD
+ * interpreter branches (text_run_dialog_thread_variant and its WORLD
  * twin) and, for 0xe7, the menu text-image renderers; codes with an operand
  * consume the following byte. F5/F6 are the {0xF5xx}{0xF6xx} "Alter String"
  * controls. The 0xe0-0xeb substitution codes are text_format_code_e. */
@@ -2158,7 +2158,7 @@ typedef struct text_reader_state {
     u8 _unused_20[4];
     s32* value_cursor; /* 0x24; next substitution value */
     s32 pending_width; /* 0x28; explicit digit width from 0xE8, 0xFFFF when none */
-    s32 glyph_page;    /* 0x2c; pending 0xDx page-prefix byte, 0 otherwise (world_measure_text_pixels) */
+    s32 glyph_page;    /* 0x2c; pending 0xDx page-prefix byte, 0 otherwise (text_measure_pixels) */
 } text_reader_state_t;
 
 /* Text window record of the dialog and message-box threads, rendered by the
@@ -2200,7 +2200,7 @@ typedef struct text_dialog_record {
 void menu_render_text_image_at_record_origin(text_dialog_record_t* record);
 
 /* One pending text glyph: BATTLE's dialogue renderer state at 0x8016dad4
- * (filled by battle_text_run_dialog_thread, drawn by
+ * (filled by text_run_dialog_thread_variant, drawn by
  * text_draw_glyph_with_typewriter_delay), WORLD's typewriter request at 0x8019a338
  * (text_draw_glyph_with_typewriter_delay) and message-box glyph at
  * 0x801c3474 (world_text_message_box_thread, ..._delay_2). The menu text state
@@ -2566,11 +2566,6 @@ typedef enum menu_vertical_scroll_direction {
     MENU_VERTICAL_SCROLL_WAIT = 2,
 } menu_vertical_scroll_direction_e;
 
-/* Scrollable list core of the BUNIT, EQUIP and JOBSTTS overlays: three bodies
- * that differ beyond their names (bunit_, equip_ and jobstts_
- * menu_init_scrollable_list_core). The shared wrappers bind this name to the
- * overlay's own body by override. */
-
 /* scrollable lists */
 extern s16 g_menu_list_row_group_count;
 extern s16 g_menu_list_row_height;
@@ -2633,6 +2628,7 @@ void menu_input_update_with_message_state_variant(void);
 s32 menu_update_equipment_variant(void);
 void menu_run_at_list_variant(void);
 void menu_start_at_list_thread(void);
+/* Scrollable list core: BUNIT, EQUIP, JOBSTTS and WORLD each link their own body. */
 void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
 
 /* per-module bodies: each module links its own copy under the shared name. */

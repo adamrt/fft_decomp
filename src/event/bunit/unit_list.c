@@ -185,12 +185,12 @@ static void bunit_menu_update_unit_list_scroll(s8* step, s8* offset) {
 
 /* Draw one slot's span of g_bunit_slot_sprite_entries sprite entries at (x, y).
  *
- * A nonzero `busy` clears the slot's g_bunit_menu_button_press_timers phase (CLUT
+ * A nonzero `busy` clears the slot's g_menu_button_press_timers phase (CLUT
  * g_menu_cursor_mode1_foreground_clut); a nonzero `pressed` starts it and
- * stores `sound_id` to g_bunit_sound_queued_effect_id; otherwise an active
+ * stores `sound_id` to g_sound_queued_effect_id; otherwise an active
  * phase advances until 6 / event speed frames have passed (CLUT
  * g_menu_cursor_mode0_foreground_clut once idle). While a phase is
- * active the sprite is drawn one pixel lower with CLUT g_bunit_menu_button_clut. abs()
+ * active the sprite is drawn one pixel lower with CLUT g_menu_button_clut. abs()
  * matters: GCC expands it to the single-insn abssi2, which keeps the entry
  * loop body one basic block as in the target. */
 static void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id) {
@@ -310,7 +310,7 @@ void bunit_menu_init_unit_list(s32 unused_selected_index) {
  *   the base constants (the target uses g_bunit_unit_grid_label_tiles+2 and +5). This raw
  *   offset is required for the byte-exact match.
  * - The two s16 cursor values give the frame's unreferenced 8-byte slots
- *   together with the two g_bunit_unit_selected_index tests; the unused
+ *   together with the two g_unit_selected_index tests; the unused
  *   RECTs reproduce the locals area.
  */
 s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_panel, s16 allow_stat_cycle,

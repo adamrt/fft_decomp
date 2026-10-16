@@ -12,7 +12,7 @@
 #include "psx/types.h"
 
 /*
- * Thread task 0x3b: the equipment twin of world_menu_ability_panel_thread (same 0x3d8-byte
+ * Thread task 0x3b: the equipment twin of menu_run_ability_list_thread_variant (same 0x3d8-byte
  * frame pair, thread record and callee sequence). It lists the five
  * equipment names of an item stat-detail record and draws their item icons.
  */
@@ -176,7 +176,7 @@ void menu_run_equipment_list_thread_variant(void) {
  * Thread task 0x3b: a two-column status panel that lists five ability labels
  * of an item stat-detail record. Thread 10 draws g_world_selected_unit_stat_detail into the first
  * frame pair, other threads draw g_item_preview_stat_detail into the
- * second. A trimmed relative of attack_panel_run_character_status_thread
+ * second. A trimmed relative of menu_run_status_panel_thread
  * (same 0x3d8-byte frame layout and callee sequence).
  */
 

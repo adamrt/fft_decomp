@@ -8,7 +8,7 @@
 
 /* Draw a row-callback value as a row of digit glyphs (opcodes 0x19-0x1B).
  *
- * BUNIT twin of world_menu_script_draw_formatted_number: getter/width/spacing/
+ * BUNIT's body: getter/width/spacing/
  * palette/x/y/value come from the command; 0x40000000 in the value selects the
  * highlighted CLUT, 0x20000000 draws dashes, and a negative value gets a minus
  * glyph ahead of the first cell.

@@ -884,9 +884,9 @@ void battle_camera_start_effect_keyframe_moves(s16 frame) {
 
 /* Starts the parent timeline's camera moves for this frame: each of the
  * rotation, position and zoom tracks that is idle takes its next keyframe
- * from the table camera_find_active_keyframe reports (phase 1, child
+ * from the table battle_camera_find_active_keyframe reports (phase 1, child
  * or phase 2). The three-table form of
- * camera_start_effect_keyframe_moves. */
+ * battle_camera_start_effect_keyframe_moves. */
 void battle_camera_advance_effect_tracks(s16 frame) {
     SVECTOR rotation;
     VECTOR vector;
@@ -1042,7 +1042,7 @@ static u8 battle_effect_allocate_secondary_slot(void) {
 /* Take secondary effect record id (1-16) off the active chain, free its work
  * block and append it to the end of the free chain headed by
  * g_effect_secondary_free_head: the inverse of
- * effect_allocate_secondary_slot. An id outside 1-16 only reaches the
+ * battle_effect_allocate_secondary_slot. An id outside 1-16 only reaches the
  * empty report hook with code 0x67.
  *
  * Both chains are walked through previous_slot_id. A record removed from the
@@ -1806,7 +1806,7 @@ static s32 battle_effect_test_position_for_obstacle(
  * component of the gravity impulse. Each step rotates the local (progress,
  * -trajectory term) offset into world space through the yaw matrix and tests
  * the result against the obstacle list, exactly as
- * effect_trace_projectile_path does for straight shots. On a clear
+ * battle_effect_trace_projectile_path does for straight shots. On a clear
  * path g_effect_trajectory_step_count holds the full step count and the result is 1; on a hit it
  * holds the steps taken and the result is 0.
  *
@@ -1881,8 +1881,8 @@ static s32 battle_effect_trace_arc_trajectory_path(
 
 /* Test whether either arcing projectile path reaches the target unit.
  *
- * The arc counterpart of effect_check_direct_trajectory_between_units: the
- * source is raised by two thirds of its sprite height, effect_calculate_arcing_trajectory yields
+ * The arc counterpart of battle_effect_check_direct_trajectory_between_units: the
+ * source is raised by two thirds of its sprite height, battle_effect_calculate_arcing_trajectory yields
  * the two candidate arcs for the offset, and each is traced against the
  * other units' positions. Returns 1 when an arc is clear. */
 s32 battle_effect_check_arc_trajectory_between_units(u8 source_id, u8 target_id) {
@@ -1921,7 +1921,7 @@ s32 battle_effect_check_arc_trajectory_between_units(u8 source_id, u8 target_id)
  * Set up an arcing projectile from source_id toward target_id (or the tile at
  * tile_position when target_id is -1) and pick the arc to fly.
  *
- * Both candidate arcs from effect_calculate_arcing_trajectory are
+ * Both candidate arcs from battle_effect_calculate_arcing_trajectory are
  * traced, arc_b first; a clear arc returns target_id. Otherwise an arc blocked
  * by a unit of another team than the source wins (arc_b's first) and returns
  * that unit. Failing that, arc_a's trace is kept and its blocker (or -1) is
@@ -2166,9 +2166,9 @@ s32 battle_effect_check_direct_trajectory_between_units(u8 source_id, u8 target_
  * target unit or a bare tile, and reports whether the flight is obstructed.
  *
  * Both endpoints are raised by two thirds of their sprite height (12 when the
- * target has none), as in effect_check_direct_trajectory_between_units;
+ * target has none), as in battle_effect_check_direct_trajectory_between_units;
  * the tile case instead centers on the tile at tile_position (x, layer, y) and
- * sits on its surface, as in effect_set_arrow_trajectory.  The extra
+ * sits on its surface, as in battle_effect_set_arrow_trajectory.  The extra
  * work over those two is the launch angle: ratan2 of the vertical delta
  * against the horizontal distance, biased by 0x400 (a quarter turn) into
  * g_effect_arctan_angle_mod.  Returns target_id when the path is clear
@@ -2220,7 +2220,7 @@ s32 battle_effect_check_direct_trajectory_to_target(s32 source_id, SVECTOR* tile
  * quarters of its height, or, when target_id is -1, to the center of the tile
  * at tile_position (x, layer, y) on its surface. g_effect_trajectory_step_count receives the
  * flight duration derived from the distance, as in
- * effect_check_direct_trajectory_between_units / effect_trace_projectile_path.
+ * battle_effect_check_direct_trajectory_between_units / battle_effect_trace_projectile_path.
  * `delta` reproduces the target's stores to an otherwise unused stack vector.
  */
 void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id) {
@@ -2339,7 +2339,7 @@ void battle_noop_801b0ff4(void) {
  * Phase 1 derives the arrow's heading, launch pitch and per-step gravity from
  * the trajectory origin/destination, builds its rotation matrix and allocates
  * the polygon work buffer. Phase 2 advances one step along the arc, orients
- * the arrow along the local slope and draws it with effect_draw_projectile_model; the last
+ * the arrow along the local slope and draws it with battle_effect_draw_projectile_model; the last
  * step or a positive height ends the flight. Phase 3 returns 0. An unknown
  * phase returns `result` uninitialized, as the target returns $s6 unwritten.
  */
@@ -3002,7 +3002,7 @@ s32 battle_effect_red_orbs_secondary_handler(void) {
 }
 
 /* Secondary effect function 0x07 in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_update_secondary_effects
+ * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
 s32 battle_noop_801b2968(void) {
 }
@@ -3114,13 +3114,13 @@ s32 battle_effect_splash_secondary_handler(void) {
 }
 
 /* Secondary effect function 0x0a in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_update_secondary_effects
+ * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
 s32 battle_noop_801b2bfc(void) {
 }
 
 /* Secondary effect function 0x0b in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_update_secondary_effects
+ * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
 s32 battle_noop_801b2c04(void) {
 }
@@ -3235,7 +3235,7 @@ s32 battle_effect_level_up_secondary_handler(void) {
 }
 
 /* Secondary effect function 0x0e in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_update_secondary_effects
+ * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
 s32 battle_noop_801b2e60(void) {
 }
@@ -3347,7 +3347,7 @@ s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) 
 }
 
 /* Secondary effect function 0x10 in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_update_secondary_effects
+ * handler. It sets no result, although battle_effect_update_secondary_effects
  * tests one to decide whether the effect ends. */
 s32 battle_noop_801b3118(void) {
 }
@@ -3462,7 +3462,7 @@ s32 battle_effect_zodiac_poof_secondary_handler(void) {
  * Phase 1 allocates and initializes the work buffer; phase 2 advances a
  * two-entry CLUT wipe near the end of the effect, uploads the CLUT, aims the
  * shield from the target's center toward the caster and hands the transform
- * to effect_draw_projectile_model; phase 3 finishes. The wipe indices are assigned inside the
+ * to battle_effect_draw_projectile_model; phase 3 finishes. The wipe indices are assigned inside the
  * subscript, each to its own variable: a separate statement or a folded
  * `timer - 1 - span` changes the order and association of the index
  * arithmetic. spin_timer keeps the timer load at full width (lh). */

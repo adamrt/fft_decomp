@@ -95,7 +95,7 @@ enum { OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE = 9 };
 
 enum { OPEN_GFX_RENDER_RECORD_CAPACITY = 16 };
 
-/* Render records. open_gfx_draw_render_record_pointer_list dispatches on flags
+/* Render records. window_dispatch_record_list_variant dispatches on flags
  * (world_render_record_flag_e): ANIMATED is a 36-byte record, IMAGE a
  * 56-byte record, and a record with BLANK or HIDDEN set is skipped.
  * Each pool holds OPEN_GFX_RENDER_RECORD_CAPACITY entries. */
@@ -256,7 +256,7 @@ typedef struct open_menu_sound_test_state {
 /* Text message controller state (handler 8). */
 typedef struct open_controller_thread_completion {
     s32 run_followup;
-    s32 saved_blocked_buttons; /* g_open_menu_blocked_buttons when the message started */
+    s32 saved_blocked_buttons; /* g_menu_blocked_buttons when the message started */
 } open_controller_thread_completion_t;
 
 /* Title exit controller state (handler 12). */
@@ -589,7 +589,7 @@ typedef struct open_sprite_prim {
 typedef char open_sprite_prim_size_must_be_32[(sizeof(open_sprite_prim_t) == 32) ? 1 : -1];
 
 /* Double-buffered draw/display environments at 0x800851c0, one pair per
- * frame buffer (0x70 bytes each); open_initialize_screen_environments fills
+ * frame buffer (0x70 bytes each); open_gfx_init_screen_environments fills
  * both and the movie presenter flips between them. */
 typedef struct open_screen_environment {
     DRAWENV draw; /* 0x00 */

@@ -101,7 +101,6 @@ void camera_clear_zoom_variable_low_bit(void) {
 
 /*
  * The event CAMERA instruction (0x19) thread.
- * Instruction-for-instruction twin of camera_thread (0x800f9438).
  *
  * The script supplies seven camera-component targets and a frame count; 10000
  * keeps a component's current value. The packed speed-curve byte selects the
@@ -1439,12 +1438,12 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
     }
 }
 
-/* Battle twin of unit_update_staged_status_data. Saves or restores the event status snapshot for every unit
+/* Saves or restores the event status snapshot for every unit
  * record of a unit.
  *
  * With restore clear, each resolved battle unit is snapshotted and its graphics are
  * refreshed on the main stack; otherwise the snapshot is replayed through
- * battle_unit_apply_staged_status_data. Follow-up flags add 40-frame waits. */
+ * unit_apply_staged_status_data. Follow-up flags add 40-frame waits. */
 void unit_update_staged_status_data(u16 unit_id, u16 restore) {
     s32 filter_mode;
     s32 unit_index;
@@ -1558,7 +1557,7 @@ void script_inflict_status_thread(void) {
  * unit an event unit id resolves to.
  *
  * The unit's pending infliction and removal bytes are cleared, the one status bit
- * is set and status_resolve_unit_changes runs on the main stack with
+ * is set and battle_status_resolve_unit_changes runs on the main stack with
  * removal_only. Nothing happens when the id resolves to no unit on the field. */
 static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
     s32 idx;

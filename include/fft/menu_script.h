@@ -48,7 +48,7 @@ typedef enum menu_number_value_flags {
 
 /* Ten-byte menu-script "draw number" command: an
  * opcode/length prefix followed by the value getter (a row-callback index),
- * layout and byte position operands. world_menu_script_draw_formatted_number
+ * layout and byte position operands. menu_script_draw_formatted_number_variant
  * and the overlay copies advance by `length`. */
 typedef struct menu_draw_number_command {
     u8 opcode;

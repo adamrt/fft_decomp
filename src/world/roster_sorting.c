@@ -12,7 +12,7 @@
 /* Sort a -1 terminated item-id list in place for a shop or equipment menu.
  *
  * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed first. The rest
- * are bubble-sorted by the signed-byte key list g_world_sort_key_lists[mode] (-1 ends
+ * are bubble-sorted by the signed-byte key list g_item_type_order_lists[mode] (-1 ends
  * it): 0 item type (0x13 ranks as 100, ascending), 1 price, 2 ranking value
  * (a shield compared with a non-shield ranks 0), 3 physical evade, 4 magic
  * evade, 5 owned plus equipped count; keys other than 0 sort descending.

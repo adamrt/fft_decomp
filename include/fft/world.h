@@ -246,7 +246,7 @@ typedef enum world_thread_slot {
     WORLD_THREAD_SLOT_TUTORIAL_TEXT = 16,       /* tutorial script text: the slot past the sixteen reset ones */
 } world_thread_slot_e;
 
-/* world_build_at_list runs its window frame thread in the upper menu's slot. */
+/* menu_run_at_list_variant runs its window frame thread in the upper menu's slot. */
 enum {
     WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME = 15,
 };
@@ -1321,7 +1321,7 @@ enum {
     WORLD_MENU_SELECTION_PROMPT_RESULT = 4, /* yes/no prompt result (0 confirms) */
 };
 
-/* Index of a saved cursor in g_world_menu_cursor_positions, as the formation
+/* Index of a saved cursor in g_menu_selection_values, as the formation
  * and shop menus use them. */
 typedef enum world_menu_cursor {
     WORLD_MENU_CURSOR_SHOP_ITEM_TAB = 0,

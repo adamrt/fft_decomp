@@ -293,7 +293,7 @@ void script_clamp_s32_to_range(s32* value, s32 min, s32 max) {
  * the event speed.
  *
  * No input at all, or a tutorial event that has Up or Down disabled, resets the
- * three repeat counters. world_script_update_event_input_state is the WORLD copy;
+ * three repeat counters. script_route_event_input_variant is the WORLD copy;
  * it takes no argument and fetches the buttons itself. */
 void script_update_event_input_state(u32 input) {
     u32 filtered_input;

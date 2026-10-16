@@ -13,7 +13,7 @@
 /* Per-frame event input update: derives the edge/auto-repeat 32-bit input mask,
  * publishes it, and yields once while tracking thread status changes.
  *
- * WORLD twin of bunit_input_update_event_state; publishes the state twice.
+ * WORLD's body; publishes the state twice.
  * The six g_world_frame_* 32-bit values at 0x801c0528 are laid out as a
  * menu_input_state_t, but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.

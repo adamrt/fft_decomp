@@ -57,7 +57,7 @@ typedef struct bunit_unit {
     s16 magical_accessory_evade; /* 0x52 */
     s16 equipment[5];            /* 0x54 */
     s16 abilities[5];            /* 0x5e; primary skillset, secondary, reaction, support, movement (filled by
-                                  * bunit_unit_build_record_from_stats; bunit_ability_build_list reads [0]) */
+                                  * bunit_unit_build_record_from_stats; ability_build_list_variant reads [0]) */
     u8 _unused_068[8];           /* 0x68; spare tail of the stat-detail block */
     u8 gender_flags;             /* 0x70; Bard/Dancer restrictions */
     u8 runtime_id;               /* 0x71 */
@@ -211,7 +211,7 @@ extern s16 g_bunit_menu_reorder_list_redraw_request;
 extern s16 g_bunit_menu_reorder_result;
 extern menu_button_piece_t g_bunit_slot_sprite_entries[];
 /* Text-section buffers: bunit_menu_run_reorder_list passes g_bunit_text_reorder_list_buffer
- * straight to bunit_text_concatenate_entries as its u8* output string and
+ * straight to text_concatenate_entries as its u8* output string and
  * g_bunit_text_menu_section as the text-section base; bunit_gfx_init_vram_and_start_fade
  * installs both addresses as u8* text-section pointers. */
 extern u8 g_bunit_text_menu_section[];

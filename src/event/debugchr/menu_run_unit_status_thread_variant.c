@@ -21,8 +21,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Thread task 0x39: draws the character editor and status panels. DEBUGCHR
- * twin of attack_panel_run_unit_status_thread; this copy scales each gauge
+/* Thread task 0x39: draws the character editor and status panels. DEBUGCHR's body; this copy scales each gauge
  * bar by its value/limit and can show the zodiac sign. */
 void menu_run_unit_status_thread_variant(void) {
     RECT rects[6];

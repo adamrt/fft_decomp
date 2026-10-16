@@ -12,7 +12,7 @@
  * selects text_id's entry.
  * Handles the substitution, script-variable, palette, width and numeric
  * control codes; glyph drawing is limited to the characters counted from
- * g_battle_menu_text_param_22 up to g_battle_menu_text_param_24, which are reset on exit.
+ * g_menu_text_param_22 up to g_menu_text_param_24, which are reset on exit.
  *
  * Reading each control operand through the byte local and the u8
  * variable_base keep the outer loop large enough that loop.c does not hoist

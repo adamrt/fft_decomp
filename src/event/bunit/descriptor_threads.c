@@ -28,9 +28,9 @@ s32 bunit_menu_run_descriptor_thread(s32 id, menu_entry_t* desc) {
     return g_bunit_menu_thread_running;
 }
 
-/* Start the text thread for g_bunit_text_selection_id (ids above 0x1FFFF are
+/* Start the text thread for g_text_selection_id (ids above 0x1FFFF are
  * stashed in g_bunit_help_screen_id instead); thread_data + 0x38 is the text
- * thread's dialog type, as in jobstts_text_start_help_thread. */
+ * thread's dialog type, as in menu_text_start_help_thread. */
 void bunit_text_start_selection_thread(s32 thread_data) {
     if (g_text_selection_id > 0x1FFFF) {
         g_bunit_help_screen_id = g_text_selection_id;

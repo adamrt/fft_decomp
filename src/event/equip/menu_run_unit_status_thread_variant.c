@@ -12,17 +12,16 @@
 #include "psx/types.h"
 
 /* The packet, state and thread layouts are the shared fft/menu.h
- * records: the editor packets at g_equip_panel_selected_editor_packets / g_equip_panel_comparison_editor_packets, the
- * status-panel packets at g_equip_panel_selected_packets / g_equip_panel_comparison_packets, the editor states
- * g_equip_selected_unit_stat_summary / g_equip_panel_comparison_billboard, and the per-thread display record.
- * g_equip_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar. */
+ * records: the editor packets at g_panel_selected_editor_packets / g_panel_comparison_editor_packets, the
+ * status-panel packets at g_panel_selected_packets / g_panel_comparison_packets, the editor states
+ * g_menu_selected_unit_stat_summary / g_panel_comparison_billboard, and the per-thread display record.
+ * g_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar. */
 
 /*
- * EQUIP twin of debugchr_panel_run_unit_status_thread (DEBUGCHR
- * 0x801bf750): the same unit editor/status display thread, with thread slot
+ * EQUIP's body (DEBUGCHR's is at 0x801bf750): the same unit editor/status display thread, with thread slot
  * 0xD selecting the first packet set. When g_equip_item_numeric_thread_enabled is set, the first
  * numeric block is drawn as five separate entries (two through
- * menu_text_render_decimal_entry_list), as in world_menu_unit_status_banner_thread; the
+ * menu_text_render_decimal_entry_list), as in menu_run_unit_status_thread_variant; the
  * zodiac/g_debugchr_editor_active branch of the DEBUGCHR version is absent.
  */
 void menu_run_unit_status_thread_variant(void) {

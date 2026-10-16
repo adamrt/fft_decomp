@@ -221,7 +221,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
  * plays at once on a free channel pair, as does an error message sound in
  * the menu queue. Then the id in g_sound_pending_sfx_id (dropped
  * when negative or while the menu sounds are muted), or failing that the one
- * in g_world_menu_sound_effect_id, plays on the main_sound_play_sfx channels
+ * in g_sound_queued_effect_id, plays on the main_sound_play_sfx channels
  * and both queues are cleared. Cancel and Cursor Move are copied to the menu
  * queue before the mute test, so they still play while muted. */
 void world_sound_dispatch_effect(void) {
@@ -468,7 +468,7 @@ void world_formation_process_frame(void) {
  *
  * On a new selection this snapshots the unit's display data, starts the
  * status-banner slide (g_world_formation_banner_slide_step), and records the scroll direction in
- * g_world_status_display_thread_params.redraw_request; it then toggles the per-menu windows and advances the slide.
+ * g_menu_status_display_thread_params.redraw_request; it then toggles the per-menu windows and advances the slide.
  * The caller in world_menu_run_remove_item passes two arguments that this body
  * never reads. Compiled at O1 like its world_formation_stage_selected_unit
  * neighbor.
@@ -606,10 +606,10 @@ void world_formation_stage_selected_unit(void) {
  *
  * On a change, the previous unit's display snapshot is kept for the slide
  * (g_world_comparison_unit_stat_summary/g_world_comparison_unit_identity, the second slot after
- * world_formation_stage_selected_unit's copies) and g_world_status_display_thread_params.redraw_request records the
+ * world_formation_stage_selected_unit's copies) and g_menu_status_display_thread_params.redraw_request records the
  * direction: 1 for 0x2000/0x8 input or a forward move, 2 otherwise. g_world_formation_banner_slide_step counts the
  * 16-frame banner slide in either direction, driving the banner y positions in
- * g_world_status_display_thread_params.y/g_world_comparison_display_thread_params.y. Compiled at -O1; the flag update
+ * g_menu_status_display_thread_params.y/g_menu_comparison_display_thread_params.y. Compiled at -O1; the flag update
  * goes through a pointer so each branch materialises the address like the target.
  */
 void world_shop_update_unit_selection(void) {

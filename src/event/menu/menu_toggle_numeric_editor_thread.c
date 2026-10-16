@@ -2,8 +2,8 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
-/* Starts thread 12 on menu_run_numeric_editor_frame_thread (parameter
- * g_world_numeric_editor_thread_params) when `enable` is set and the thread
+/* Starts thread 12 on menu_run_numeric_editor_frame_thread_variant (parameter
+ * g_menu_numeric_panel_params) when `enable` is set and the thread
  * is idle; stops it otherwise. */
 void menu_toggle_numeric_editor_thread(s32 enable) {
     if (enable != 0) {

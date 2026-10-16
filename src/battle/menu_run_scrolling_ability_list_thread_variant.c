@@ -12,15 +12,14 @@
 #include "psx/types.h"
 
 /*
- * Scrolling three-column ability list thread, the BATTLE twin of
- * menu_run_scrolling_ability_list_thread_variant (WORLD 0x800edaa8).
+ * Scrolling three-column ability list thread, BATTLE's body (WORLD's is at 0x800edaa8).
  *
  * Beyond the WORLD version, it nests through g_battle_menu_scroll_list_depth: nested lists keep
  * their packet pages at the event overlay + 0x1000 (level 2 also places the
  * text buffer at + 0x2000), and the outermost list saves the CLUT at
  * g_battle_menu_ability_list_clut_rect as the first of five CLUTs in a buffer, derives the other four from it
  * and blinks CLUTs 3/4 while it runs. Square/Circle on a row whose text is not
- * 0x7000 starts battle_menu_preview_ability_turn_at_list in the previous
+ * 0x7000 starts menu_preview_ability_turn_at_list in the previous
  * thread slot (with entry 52 of g_menu_thread_menu_data) and blinks CLUTs 1/2 until
  * it finishes.
  *

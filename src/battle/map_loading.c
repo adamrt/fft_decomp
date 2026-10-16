@@ -30,11 +30,11 @@ static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geome
  *   Four passes: primary meshes, override meshes, the default texture, then
  *   every other row whose comparison holds.
  * - Resources: read the pending rows one file at a time in type order and hand
- *   each to map_dispatch_gns_resource. Types 0x12-0x17 come last: 0x12
+ *   each to battle_map_dispatch_gns_resource. Types 0x12-0x17 come last: 0x12
  *   raises exception 0x3cb, the texture quarters load without being applied
  *   here, and the texture is followed by the pending lighting, the texture
  *   upload and the pending palettes.
- * - Mesh records: map_append_mesh_geometry requests them; the render
+ * - Mesh records: battle_map_append_mesh_geometry requests them; the render
  *   records of the nine mesh parts are rebuilt once in each render buffer.
  * - End: run the command records after the file rows, apply the script
  *   weather, free the buffer.
@@ -416,9 +416,9 @@ enum {
 /* Selects the last primary-mesh record, then substitutes an alternate whose
  * layout/weather/time comparison matches, and loads the selected record's
  * file into a temporary 0x20000-byte buffer. The loader's fourth argument is
- * the resource type, as at its other call sites; map_start_file_load
+ * the resource type, as at its other call sites; battle_map_start_file_load
  * does not read it. `palette_mode` is the animation mode the alternate mesh's
- * palette is applied with (map_update_palette_colors). */
+ * palette is applied with (battle_map_update_palette_colors). */
 s32 battle_map_load_alternate_mesh(s32 palette_mode) {
     s32 i;
     s16 state;
@@ -476,7 +476,7 @@ s32 battle_map_load_alternate_mesh(s32 palette_mode) {
  * a spare 16-bit value.  The first position vector's spare 16-bit value holds the
  * polygon's packed terrain-tile location.
  * Target 0x800f4dd4 is the geometry pass for primary and animated meshes;
- * map_init_mesh_render_records performs the separate packet
+ * battle_map_init_mesh_render_records performs the separate packet
  * pass. Count order is textured triangles/quads, then untextured
  * triangles/quads. The mesh metadata keeps the starting indices and the
  * incoming counts; the persistent totals advance at the end.
@@ -610,7 +610,7 @@ void battle_map_append_mesh_geometry(const map_mesh_geometry_t* geometry_data, m
 /*
  * Runtime polygon records interleave GPU packet fields with renderer state.
  * This pass skips the geometry and normal vectors consumed by
- * map_append_mesh_geometry, then appends UV coordinates, CLUT commands,
+ * battle_map_append_mesh_geometry, then appends UV coordinates, CLUT commands,
  * texture-page commands, and the initial state of untextured records.
  * Target 0x800f5578 reads textured triangles of five 16-bit values and textured quads
  * of six 16-bit values. 16-bit CLUT values keep their low six bits (the CLUT) and gain the map CLUT row;

@@ -7,7 +7,7 @@
 /* Advances the animated cursor at `pos` and draws it, bouncing vertically,
  * with its semi-transparent shadow through the shared sprite descriptor.
  *
- * Same state machine and curves as bunit_menu_update_and_draw_animated_cursor; the
+ * Same state machine and curves as menu_update_and_draw_sliding_cursor_variant; the
  * curve offset moves the quad's y edges instead of its x origin.
  */
 void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode) {

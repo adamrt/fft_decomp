@@ -86,11 +86,11 @@ s32 battle_map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y,
 }
 
 /* Store one packed field of the tile at (x, y, layer): the setter of
- * map_get_tile_data_value. Returns 0, or -2 for a selector with no case,
+ * battle_map_get_tile_data_value. Returns 0, or -2 for a selector with no case,
  * which includes the two mark selectors. The tile address is not bounds-checked.
  * The event script uses only the flat camera block selector.
  *
- * Selector 15 touches no tile: it calls map_tile_data_15_stub until that
+ * Selector 15 touches no tile: it calls battle_map_tile_data_15_stub until that
  * returns 0, at most 1000 times, and raises battle load exception 0x80 when it
  * never does. The callee always returns 0, so neither the retry nor the exception
  * can run. */
@@ -161,7 +161,7 @@ s32 battle_map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y,
     return result;
 }
 
-/* Selector 15 of map_set_tile_data_value retries this until it returns 0, which it does at
+/* Selector 15 of battle_map_set_tile_data_value retries this until it returns 0, which it does at
  * once. The 8-byte frame is one the retail build kept for an unreferenced local. */
 static s32 battle_map_tile_data_15_stub(void) {
     char unused[8];
@@ -894,7 +894,7 @@ void battle_formula_calculate_facing_evade(void) {
 /* Bows and crossbows lose a quarter of the base hit at night and another
  * quarter when the weather variable is 3 or 4 (a storm, or a snowstorm on a
  * snow map). The variable is read as it is, not through
- * map_get_effective_weather. */
+ * battle_map_get_effective_weather. */
 void battle_formula_apply_weather_effects_on_bows(void) {
     u8* base_hit;
     s32 weather;
@@ -907,7 +907,7 @@ void battle_formula_apply_weather_effects_on_bows(void) {
         if (time_of_day == 1) { /* night */
             g_action_current_ability.base_hit = g_action_current_ability.base_hit * 3 / 4;
         }
-        /* The raw weather variable, not map_get_effective_weather: a
+        /* The raw weather variable, not battle_map_get_effective_weather: a
          * storm strength counts on a snow map and on a map that ignores weather. */
         if (weather == BATTLE_WEATHER_STORM || weather == BATTLE_WEATHER_STRONG_STORM) {
             base_hit = &g_action_current_ability.base_hit;

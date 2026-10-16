@@ -2,7 +2,7 @@
 #include "fft/memory.h"
 #include "fft/script.h"
 #include "fft/thread.h"
-/* REQUIRE twin of debugchr_panel_run_unit_status_thread: the same doubled
+/* REQUIRE twin of menu_run_unit_status_thread_variant: the same doubled
  * 0x30C editor / 0x1D8 panel packets (fft/menu.h), without the shake
  * offsets, the bar division and the zodiac branch.
  */

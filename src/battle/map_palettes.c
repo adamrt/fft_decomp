@@ -82,7 +82,7 @@ static void battle_map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 c
 /* Set or blend CLUTs of a map row to `colors`: all sixteen (256 colors) when
  * update_all is 1, otherwise CLUT clut_index (16 colors). Mode 0 applies the
  * colors at once; another value starts a blend toward them and is kept as the
- * animation's mode (map_update_palette_colors_inner). Marks the rows for
+ * animation's mode (battle_map_update_palette_colors_inner). Marks the rows for
  * upload. */
 void battle_map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors) {
     s32 index;
@@ -104,9 +104,9 @@ void battle_map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s3
     }
 }
 
-/* map_update_palette_colors, then copy the colors into the row's packed
+/* battle_map_update_palette_colors, then copy the colors into the row's packed
  * mirror as well, which makes them the base colors that the MAP_COLOR_MODE_BASE
- * modes and RESTORE of map_modify_palette start from: all 256 when
+ * modes and RESTORE of battle_map_modify_palette start from: all 256 when
  * update_all is 1, otherwise the 16 of CLUT clut_index. */
 void battle_map_update_and_store_palette_colors(
     s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors) {
@@ -1090,7 +1090,7 @@ s32 battle_map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_colo
     return 0;
 }
 
-/* Stop a color rotation by the handle map_start_clut_cycle
+/* Stop a color rotation by the handle battle_map_start_clut_cycle
  * returned (slot index + 1). Returns 1 for a handle 1-8, else 0.
  *
  * Retail clears the active byte at handle * 10, not (handle - 1) * 10: it stops
@@ -1871,7 +1871,7 @@ void battle_map_upload_clut_rows(void) {
  * stopped, the background gradient and ambient light fades and their repeats off,
  * and the eight color rotation slots free.
  *
- * Each row's `enabled` is set, which makes map_update_animations blend the
+ * Each row's `enabled` is set, which makes battle_map_update_animations blend the
  * row's 256 colors as one under animation 0. The sprite, unit, unit shadow and
  * action result rows get 0 and blend each of their sixteen CLUTs on its own. Of
  * the stored deltas only the first color's red delta of each row is cleared. */
@@ -1914,14 +1914,14 @@ void battle_map_unfreeze(void) {
 }
 
 /* Event ColorField: tint or fade all 256 colors of the map CLUT row with
- * map_modify_palette. `first` is its color mode (map_color_mode_e) and
+ * battle_map_modify_palette. `first` is its color mode (map_color_mode_e) and
  * `second` its amount: 0 applies the colors at once, another value fades to
  * them. */
 void battle_map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue) {
     battle_map_modify_palette(first, second, MAP_CLUT_ROW_MAP, 0, 1, red, green, blue);
 }
 
-/* Tints one unit's two CLUTs through map_modify_palette; `preset_color` is
+/* Tints one unit's two CLUTs through battle_map_modify_palette; `preset_color` is
  * the MAP_COLOR_MODE_* command and `time` its amount.
  *
  * The unit's CLUT of MAP_CLUT_ROW_UNITS takes the offsets as given. Its CLUT of
@@ -1972,24 +1972,24 @@ void battle_map_modify_background_gradient(s32 mode, s32 frame_duration, s16 red
     battle_map_blend_background_gradient_color(mode, frame_duration, red, green, blue);
 }
 
-/* map_blend_ambient_light_color with the color offsets narrowed to s16:
+/* battle_map_blend_ambient_light_color with the color offsets narrowed to s16:
  * the entry event MapDarkness calls. */
 void battle_map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue) {
     battle_map_blend_ambient_light_color(mode, frame_duration, red, green, blue);
 }
 
-/* map_blend_darkness_color with the color offsets narrowed to s16. The
+/* battle_map_blend_darkness_color with the color offsets narrowed to s16. The
  * arguments are the mode, the frame duration and the red, green and blue offsets. */
 void battle_map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth) {
     battle_map_blend_darkness_color(first, second, third, fourth, fifth);
 }
 
-/* map_update_palette_colors for all sixteen CLUTs of the map row. */
+/* battle_map_update_palette_colors for all sixteen CLUTs of the map row. */
 void battle_map_update_all_palettes_from_color_data(s32 mode, const clut_t color_data) {
     battle_map_update_palette_colors(mode, MAP_CLUT_ROW_MAP, 0, 1, color_data);
 }
 
-/* map_update_palette_colors for one CLUT of the unit row. A clut_index of
+/* battle_map_update_palette_colors for one CLUT of the unit row. A clut_index of
  * 16 or more applies the same sixteen colors to every unit CLUT. */
 void battle_map_update_palette_colors_by_index(s32 mode, s32 clut_index, const palette_t* color_data) {
     s32 index;
@@ -2004,19 +2004,19 @@ void battle_map_update_palette_colors_by_index(s32 mode, s32 clut_index, const p
 }
 
 /* Fade the background gradient to `colors` without changing the base pair, unlike
- * map_transition_and_store_background_gradient. */
+ * battle_map_transition_and_store_background_gradient. */
 void battle_map_set_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors) {
     battle_map_transition_background_gradient(frame_duration, colors);
 }
 
 /* Fade the ambient light to `color` without changing the base color, unlike
- * map_transition_and_store_ambient_light_color. */
+ * battle_map_transition_and_store_ambient_light_color. */
 void battle_map_set_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
     battle_map_transition_ambient_light_color(frame_duration, color);
 }
 
 /* Fade the map darkness to `color` without changing the base color, unlike
- * map_transition_and_store_darkness_color. */
+ * battle_map_transition_and_store_darkness_color. */
 void battle_map_set_darkness_color(s32 frame_duration, const CVECTOR* color) {
     battle_map_transition_darkness_color(frame_duration, color);
 }

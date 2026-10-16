@@ -208,7 +208,7 @@ void require_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet,
 void require_gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
 
 /* text */
-/* Section offsets of the REQUIRE text file, relative to g_require_text_data (0x80 bytes before it). */
+/* Section offsets of the REQUIRE text file, relative to g_text_data (0x80 bytes before it). */
 /* REQUIRE's text, which its post-battle routines bind over the resident
  * sections; it binds its job names as TEXT_SECTION_JOB_NAMES. */
 typedef enum require_text_section {

@@ -357,7 +357,7 @@ typedef char wldcore_sortbox_state_size_must_be_56[sizeof(wldcore_sortbox_state_
  * is what wldcore_init_core indexes these globals with. */
 /* The ordering-table handle is libgs GsOT; see include/psx/libgs.h. */
 /* Heterogeneous display-object queues: each object's leading 32-bit flags
- * selects the handler in wldcore_dispatch_display_object_list:
+ * selects the handler in window_dispatch_record_list_variant:
  * bit 0 an animated object (world_animated_render_record_t), bit 1 a sprite
  * (wldcore_window_render_record_t). */
 struct wldcore_window_render_record;
@@ -534,7 +534,7 @@ typedef enum wldcore_script_request_flags {
 
 /* WLDCORE script interpreter state; the opcode handlers read ip/data here.
  * One object through the choice/argument 32-bit values:
- * wldcore_opcode_read_four_halfword_pairs reaches ip at -4 and the choice
+ * wldcore_opcode_map_request_choice reaches ip at -4 and the choice
  * values at +0x10 from its &choice_vars base. */
 typedef struct wldcore_script_state {
     s32 flags;          /* 0x00; wldcore_script_result_flags_e | wldcore_script_action_flags_e */
@@ -1402,7 +1402,7 @@ typedef char wldcore_window_layout_row_size_must_be_16[sizeof(wldcore_window_lay
 /* Message menu level pushed by 0x8006e860. */
 typedef struct wldcore_menu_message_level {
     s32 reload_text;
-    s32 saved_blocked_buttons; /* 0x04; g_wldcore_menu_blocked_buttons at push time */
+    s32 saved_blocked_buttons; /* 0x04; g_menu_blocked_buttons at push time */
     s32 window_index;          /* 0x08; window record appended by the type-2 push; cleared by the type-3 push */
     s32 _unknown_0c;           /* 0x0c; set to 8 at push */
 } wldcore_menu_message_level_t;

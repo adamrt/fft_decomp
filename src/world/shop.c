@@ -1330,7 +1330,7 @@ static void world_shop_apply_fitting_room_items_to_all_units(void) {
  * (`.frame vars=88, regs=6/0, args=16`); a single `unused[18]` pushes it to
  * sp+88.
  *
- * The target has `move s1,v0` after world_menu_run_thread and no
+ * The target has `move s1,v0` after menu_start_managed_thread and no
  * initialization of s1 at loop 2's head: loop 2's counter is the run_thread
  * result's allocno, so the source assigns the result to `i` and the loop is
  * written `for (; i < WORLD_EQUIPMENT_SLOT_ACCESSORY; i++)`. A fresh block-local takes a call-clobbered

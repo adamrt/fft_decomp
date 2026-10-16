@@ -66,7 +66,7 @@ void battle_gfx_update_unit_palettes(void) {
 
 /* Tint a unit's palette by its team: blue, red, green or light blue.
  *
- * `amount` passes through to map_modify_palette. */
+ * `amount` passes through to battle_map_modify_palette. */
 void battle_gfx_modify_palette_based_on_team(battle_unit_t* unit, s32 amount) {
     if (unit == 0) {
         return;
@@ -264,8 +264,8 @@ void battle_effect_start_action_projectile_secondary(battle_unit_t* unit) {
  * unit's sprite palette as the effect's parameter. A unit without battle data
  * starts nothing.
  *
- * The init record is a stack local of which effect_build_secondary_init
- * sets five fields; effect_init_secondary copies the rest of its caster
+ * The init record is a stack local of which battle_effect_build_secondary_init
+ * sets five fields; battle_effect_init_secondary copies the rest of its caster
  * and target blocks and its used_weapon_id as the stack left them. */
 static void battle_effect_set_secondary(battle_unit_t* unit, s32 effect_type) {
     effect_secondary_init_t data;

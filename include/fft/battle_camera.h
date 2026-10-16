@@ -28,7 +28,7 @@ void battle_camera_update_matrices(
     MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* screen_offset, VECTOR* camera_zoom);
 
 /* input */
-/* camera_get_input_direction sources: which button state it reads. */
+/* battle_camera_get_input_direction sources: which button state it reads. */
 typedef enum camera_input_source {
     CAMERA_INPUT_HELD = 0,
     CAMERA_INPUT_PRESSED = 1, /* newly pressed, repeating at the cursor repeat speed while held */

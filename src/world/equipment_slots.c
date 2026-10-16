@@ -654,7 +654,7 @@ void world_formation_remove_invalid_unit_loadout(s16 unit_id) {
  * include equipped copies) and their type fits the category. Mode 1 flags
  * items the unit cannot equip with 0x4000, or hides them like mode 2 when Show
  * Unequippable is not On. Categories 0-4 and 7 with sort modes 1-5 go
- * through world_item_sort_list_by_category_order, which returns the new count.
+ * through item_sort_list_by_category_order, which returns the new count.
  */
 s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode) {
     s32 count;

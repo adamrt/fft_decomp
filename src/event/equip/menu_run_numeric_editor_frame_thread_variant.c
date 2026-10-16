@@ -8,12 +8,12 @@
 #include "psx/types.h"
 
 /* The primitive block is menu_status_panel_numeric_buffer_t, double buffered
- * (g_equip_editor_numeric_state_a for thread 12, g_equip_editor_numeric_state_b otherwise); the thread parameter
+ * (g_editor_numeric_state_a for thread 12, g_editor_numeric_state_b otherwise); the thread parameter
  * block is menu_status_thread_t. */
 
 /* Thread task 0x3b: numeric editor panel.
  *
- * Twin of attack_editor_run_numeric_thread / bunit_menu_run_numeric_editor_thread
+ * Twin of menu_run_numeric_editor_thread / menu_run_numeric_editor_frame_thread_variant
  * with EQUIP's own draw-mode setup. Builds the primitive block once, copies it
  * into the second buffer, then each frame re-renders the three text images when
  * requested, rescales the draw area, recolors the sprites for the thread

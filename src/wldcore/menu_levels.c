@@ -375,7 +375,7 @@ void wldcore_load_formation_unit_name_and_face(void) {
  * Skipped while MAIN_SYSTEM_FLAG_SKIP_MENU_FRAME is set. While the unit panel
  * threads are in use it draws the window frames, runs the event input update
  * and plays the frame's sound effect itself; otherwise it runs the formation
- * menu frame. Buttons in g_wldcore_menu_blocked_buttons are withheld from
+ * menu frame. Buttons in g_menu_blocked_buttons are withheld from
  * the menus.
  */
 void wldcore_menu_run_world_frame(GsOT* context) {
@@ -1133,7 +1133,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
  * g_open_text_section_offsets; appends a window record (sequence 0xe,
  * priority 1); measures the entry, clamped to three rows; fills the shared
  * scrollable window and centers it and the window record on the measured box;
- * then saves g_wldcore_menu_blocked_buttons in the level, sets it to -1, plays sound
+ * then saves g_menu_blocked_buttons in the level, sets it to -1, plays sound
  * 0x12, writes the level type and bumps the depth.
  *
  * Taking the record base into `records` at the last block-one store lets CSE

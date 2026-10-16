@@ -4,11 +4,11 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
-/* Sort a -1 terminated item list in place (EQUIP twin of item_sort_id_list_variant).
+/* Sort a -1 terminated item list in place (EQUIP's body).
  *
  * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed, then the rest
  * are bubble-sorted by the signed-byte criterion list
- * g_equip_item_type_order_lists[mode] (negative ends it): 0 item type (0x13
+ * g_item_type_order_lists[mode] (negative ends it): 0 item type (0x13
  * ranks as 100, ascending), 1 price, 2 ranking value (a shield compared with a
  * non-shield ranks 0), 3 physical evade, 4 magic evade, 5 owned count; keys
  * other than 0 sort descending. The magic-evade key reads 0 for the left

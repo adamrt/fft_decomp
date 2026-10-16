@@ -51,7 +51,7 @@ typedef char map_terrain_resource_size_must_be_4098[sizeof(map_terrain_resource_
 /*
  * Script variable 0x23, set by event instruction {3C} Weather.  The same
  * strength scale covers rain and snow; the map's 32-bit palette-mod flags says
- * which one is falling.  map_get_effective_weather folds that flag in by
+ * which one is falling.  battle_map_get_effective_weather folds that flag in by
  * adding 3, so callers that compare against it see the snow values.
  */
 typedef enum map_weather {
@@ -185,7 +185,7 @@ typedef enum map_resource_apply_command {
     MAP_RESOURCE_APPLY_PALETTES = 0x33,
 } map_resource_apply_command_e;
 
-/* Commands of map_dispatch_map_data_command, which switches on command
+/* Commands of battle_map_dispatch_map_data_command, which switches on command
  * - 0x6a. This is its own id space: event Use3DObject (0x54) reaches command
  * 0x80. Names come from the case bodies. */
 typedef enum map_data_command {
@@ -205,7 +205,7 @@ typedef enum map_data_command {
 } map_data_command_e;
 
 /* lighting and weather commands */
-/* Commands of map_light_matrix_command. A START queues its STEP in
+/* Commands of battle_map_light_matrix_command. A START queues its STEP in
  * g_map_light_transition_command, which the map draw loop issues every frame. */
 typedef enum battle_map_light_matrix_command {
     MAP_LIGHT_MATRIX_COMMAND_SET = 0x5e,
@@ -219,7 +219,7 @@ typedef enum battle_map_light_matrix_command {
     MAP_LIGHT_MATRIX_COMMAND_STEP_DELTA = 0x69,
 } map_light_matrix_command_e;
 
-/* Commands of map_run_weather_command and map_init_weather_particles. */
+/* Commands of battle_map_run_weather_command and battle_map_init_weather_particles. */
 typedef enum map_weather_command {
     MAP_WEATHER_COMMAND_SNOW = 0x53,
     MAP_WEATHER_COMMAND_CLEAR = 0x54,
@@ -232,7 +232,7 @@ typedef enum map_weather_command {
     MAP_WEATHER_COMMAND_LIGHTNING = 0x8a,            /* random lightning from now on */
     MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER = 0x8b, /* issue the commands for the weather script variable */
     MAP_WEATHER_COMMAND_RESTORE_LIGHTING = 0x8c,
-    MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* map_init_weather_particles */
+    MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* battle_map_init_weather_particles */
     MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90,
 } map_weather_command_e;
 
@@ -253,7 +253,7 @@ typedef enum map_lightning_mode {
 } map_lightning_mode_e;
 
 /* loading states */
-/* Commands of map_load_data, read only while the GNS phase is idle. */
+/* Commands of battle_map_load_data, read only while the GNS phase is idle. */
 typedef enum map_load_command {
     MAP_LOAD_COMMAND_LOAD_GNS = 0x73, /* always read the GNS; no current caller issues this */
     MAP_LOAD_COMMAND_START = 0x75,
@@ -277,7 +277,7 @@ typedef enum map_resource_load_state {
 /* The loader otherwise returns g_map_gns_load_phase. */
 enum { MAP_LOAD_RESULT_HELD = 0x9b };
 
-/* g_map_gns_load_phase and the normal return of map_load_data. */
+/* g_map_gns_load_phase and the normal return of battle_map_load_data. */
 typedef enum map_gns_load_phase {
     MAP_GNS_LOAD_PHASE_IDLE = 0,
     MAP_GNS_LOAD_PHASE_RESOURCES = 1, /* loading the pending resource files one by one */
@@ -285,7 +285,7 @@ typedef enum map_gns_load_phase {
 } map_gns_load_phase_e;
 
 /* polygon and lighting commands */
-/* Commands of map_polygon_flag_command. */
+/* Commands of battle_map_polygon_flag_command. */
 typedef enum battle_map_polygon_flag_command {
     MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,    /* copy LIT into LIT_ACTIVE on every polygon */
     MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,    /* clear LIT_ACTIVE everywhere */
@@ -327,7 +327,7 @@ typedef enum map_light_command {
     MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR = 0x65,
 } map_light_command_e;
 
-/* Commands of map_configure_effect_data_state: the ordering-table
+/* Commands of battle_map_configure_effect_data_state: the ordering-table
  * handling of untextured map polygons while an effect draws. */
 typedef enum map_effect_data_command {
     MAP_EFFECT_DATA_END = 0x87,
@@ -360,7 +360,7 @@ typedef enum map_color_repeat {
 } map_color_repeat_e;
 
 /* A CLUT row of the battle map: one VRAM line of sixteen 16-color CLUTs,
- * at y 0x1e0 through 0x1ed (map_upload_clut_rows uploads a 256x14 image). Index into
+ * at y 0x1e0 through 0x1ed (battle_map_upload_clut_rows uploads a 256x14 image). Index into
  * map_palette_state_t.clut_rows and g_map_palette_modified_colors. */
 typedef enum map_clut_row {
     MAP_CLUT_ROW_MAP = 0,
@@ -438,9 +438,9 @@ typedef struct map_clut_row_state {
 } map_clut_row_state_t;
 typedef char map_clut_row_state_size_must_be_2434[(sizeof(map_clut_row_state_t) == 2434) ? 1 : -1];
 
-/* Palette runtime state block at 0x800995ec: map_update_animations
+/* Palette runtime state block at 0x800995ec: battle_map_update_animations
  * addresses the CLUT rows (0x800995f4) from this base. The upload/move 32-bit values are
- * the pending flags map_upload_clut_rows (0x80092f98) services. */
+ * the pending flags battle_map_upload_clut_rows (0x80092f98) services. */
 typedef struct map_palette_state {
     s32 upload_pending;
     s32 move_pending;
@@ -588,7 +588,7 @@ typedef char map_color_transition_size_must_be_32[(sizeof(map_color_transition_t
 
 /* The background gradient fade: one channel set per gradient color. colors[]
  * at 0x38 (0x800a1b48/0x800a1b4c) is the applied gradient pair;
- * map_blend_background_gradient_color indexes it from the same base. */
+ * battle_map_blend_background_gradient_color indexes it from the same base. */
 typedef struct map_gradient_transition {
     u8 active;
     u8 phase;
@@ -623,7 +623,7 @@ typedef struct map_mesh_part {
     u8 parent;                 /* 0x86; parent part, from mesh properties byte 0 */
     u8 keyframe;               /* 0x87; 0 = fetch next */
     /* 0x88: per-part start indices and counts of its render records, written
-     * by map_append_mesh_geometry (0x800f4dd4). */
+     * by battle_map_append_mesh_geometry (0x800f4dd4). */
     u16 textured_triangle_start;
     u16 textured_quad_start;
     u16 untextured_triangle_start;
@@ -713,9 +713,9 @@ typedef enum map_texture_animation_mode {
     MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_5 = 26,
     MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_6 = 27,
     MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_7 = 28,
-    /* starts a map_start_clut_cycle over colors canvas_x .. canvas_x + width - 1 of MAP_CLUT_ROW_MAP */
+    /* starts a battle_map_start_clut_cycle over colors canvas_x .. canvas_x + width - 1 of MAP_CLUT_ROW_MAP */
     MAP_TEXTURE_ANIMATION_MODE_COLOR_CYCLE = 29,
-    /* Playback states written and dispatched by map_update_texture_animations. */
+    /* Playback states written and dispatched by battle_map_update_texture_animations. */
     MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG_BACK = 128,
     MAP_TEXTURE_ANIMATION_MODE_PALETTE_PING_PONG_BACK = 129,
     MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_PLAYING = 130,
@@ -748,7 +748,7 @@ typedef char map_texture_animation_size_must_be_20[(sizeof(map_texture_animation
 
 /* lighting resource types */
 /* Lightning flash state at 0x800f79c0 (g_map_lightning_state).
- * map_set_light_matrices fills color_matrices[0] and [2]; the lightning weather commands clear the rotation part
+ * battle_map_set_light_matrices fills color_matrices[0] and [2]; the lightning weather commands clear the rotation part
  * of color_matrices[1] and start the 60-frame flash timer. */
 typedef struct battle_lightning_state {
     u32 timer;                                                /* 0x00 */
@@ -1036,7 +1036,7 @@ extern s32 g_map_untextured_fixed_ot_index;
 extern s32 g_map_untextured_otz_mask;
 extern CVECTOR g_map_white_cvector;
 
-/* Default vectors shared with map_apply_gns_command, which emits them. */
+/* Default vectors shared with battle_map_apply_gns_command, which emits them. */
 extern SVECTOR g_map_zero_svector;
 extern VECTOR g_map_unit_scale_vector;
 extern SVECTOR g_map_camera_rotation;

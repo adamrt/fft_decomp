@@ -147,21 +147,22 @@ typedef struct card_save_buffer {
     u8 poached_item_quantities[ITEM_ID_COUNT];       /* 0x1704; g_main_item_poached_quantities */
     /* 0x1804; first 0x40 bytes are Move-Find-Item flags, second half unknown. */
     u8 item_location_flags[0x80];
-    s32 script_variables[0x100];   /* 0x1884 */
-    game_options_fields_t options; /* 0x1c84; copied to g_main_game_options by world_card_init_screen */
-    u8 _unknown_1c88;              /* 0x1c88 */
-    s8 item_type_order_0[0xc];     /* 0x1c89; signed, -1-terminated */
-    u8 _unused_1c95[1];            /* 0x1c95; serialized and parity-covered */
-    s8 item_type_order_1[8];       /* 0x1c96; signed, -1-terminated */
-    u8 _unused_1c9e[1];            /* 0x1c9e; serialized and parity-covered */
-    s8 item_type_order_2[7];       /* 0x1c9f; signed, -1-terminated */
-    s8 item_type_order_3[5];       /* 0x1ca6; signed, -1-terminated */
-    s8 item_type_order_4[5];       /* 0x1cab; signed, -1-terminated */
-    s8 item_type_order_5[7];       /* 0x1cb0; signed, -1-terminated */
-    s8 item_type_order_6[5];       /* 0x1cb7; signed, -1-terminated */
-    u8 weapon_page_order[0x8a];    /* 0x1cbc */
-    u8 helmet_page_order[0x1d];    /* 0x1d46 */
-    u8 armor_page_order[0x25];     /* 0x1d63 */
+    s32 script_variables[0x100]; /* 0x1884 */
+    game_options_fields_t
+        options;                /* 0x1c84; copied to g_main_game_options by world_card_load_globals_from_save_image */
+    u8 _unknown_1c88;           /* 0x1c88 */
+    s8 item_type_order_0[0xc];  /* 0x1c89; signed, -1-terminated */
+    u8 _unused_1c95[1];         /* 0x1c95; serialized and parity-covered */
+    s8 item_type_order_1[8];    /* 0x1c96; signed, -1-terminated */
+    u8 _unused_1c9e[1];         /* 0x1c9e; serialized and parity-covered */
+    s8 item_type_order_2[7];    /* 0x1c9f; signed, -1-terminated */
+    s8 item_type_order_3[5];    /* 0x1ca6; signed, -1-terminated */
+    s8 item_type_order_4[5];    /* 0x1cab; signed, -1-terminated */
+    s8 item_type_order_5[7];    /* 0x1cb0; signed, -1-terminated */
+    s8 item_type_order_6[5];    /* 0x1cb7; signed, -1-terminated */
+    u8 weapon_page_order[0x8a]; /* 0x1cbc */
+    u8 helmet_page_order[0x1d]; /* 0x1d46 */
+    u8 armor_page_order[0x25];  /* 0x1d63 */
     u8 accessory_page_order[0x21]; /* 0x1d88 */
     u8 item_page_order[0x15];      /* 0x1da9 */
     u8 _unused_1dbe[0x42];         /* 0x1dbe; parity-covered tail */
@@ -556,7 +557,7 @@ enum {
 /* Sound resources. A sound id is SUZUKI_SOUND_ID(resource, sound): the id of a
  * loaded suzuki_sound_resource_t in the high 16 bits and the index of a
  * sound in it in the low. Each battle effect file brings a resource of its
- * own (effect_load_sound_section). */
+ * own (battle_effect_load_sound_section). */
 typedef enum main_sound_resource_id {
     MAIN_SOUND_RESOURCE_SYSTEM = 0,        /* SOUND/SYSTEM.SED: main_sfx_e */
     MAIN_SOUND_RESOURCE_ENV = 1,           /* SOUND/ENV.SED: main_env_sfx_e */
@@ -583,15 +584,15 @@ typedef enum main_sfx {
     MAIN_SFX_INVALID = 5,
     MAIN_SFX_PAGE_SWITCH = 6, /* L1/R1 unit and page switches */
     MAIN_SFX_UNEQUIP = 7,     /* remove equipment/abilities */
-    MAIN_SFX_RED_ORBS = 8,    /* effect_red_orbs_secondary_handler starts */
+    MAIN_SFX_RED_ORBS = 8,    /* battle_effect_red_orbs_secondary_handler starts */
     MAIN_SFX_DISMISS = 9,     /* dismiss unit */
     MAIN_SFX_EQUIP = 10,      /* equip, set ability, best fit */
     MAIN_SFX_CAMERA_ROTATE_LEFT = 11,
     MAIN_SFX_CAMERA_ROTATE_RIGHT = 12,
     MAIN_SFX_CAMERA_ROTATE_STOP = 13, /* the rotation reached its target */
-    /* Paired zoom sounds: camera_toggle_zoom and camera_zoom_map
+    /* Paired zoom sounds: battle_camera_toggle_zoom and battle_camera_zoom_map
      * play 0x11 with zoom action 4 and 0xe with action 2; the in/out reading
-     * follows the zoom-target comment in camera_toggle_zoom. The
+     * follows the zoom-target comment in battle_camera_toggle_zoom. The
      * ATTACK deploy screen also plays 0x11 when a placed unit is moved. */
     MAIN_SFX_CAMERA_ZOOM_IN = 14,
     /* L1/R1 on the world map (wldcore_menu_step_map_cursor_level): 0x10 when
@@ -601,7 +602,7 @@ typedef enum main_sfx {
     MAIN_SFX_WORLD_MAP_ZOOM_OUT = 16,
     MAIN_SFX_CAMERA_ZOOM_OUT = 17,
     MAIN_SFX_WINDOW_OPEN = 18, /* help, message or text window opens */
-    /* The weapon sounds of sound_play_weapon_sfx, by the weapon's
+    /* The weapon sounds of battle_sound_play_weapon_sfx, by the weapon's
      * item_type_e: g_sound_weapon_swing_sfx_ids (the swing, played
      * before the hit is known), g_sound_weapon_hit_sfx_ids and
      * g_sound_shield_deflect_sfx_ids. */
@@ -615,8 +616,8 @@ typedef enum main_sfx {
      * stop them with suzuki_sound_stop_sfx_channels when they finish. */
     MAIN_SFX_SPELL_CHARGE = 31,
     MAIN_SFX_SUMMON_CHARGE = 33,
-    MAIN_SFX_VENOM_TRAP = 34, /* effect_venom_trap_secondary_handler starts */
-    /* sound_play_landing_sfx_by_surface_type: water surfaces play
+    MAIN_SFX_VENOM_TRAP = 34, /* battle_effect_venom_trap_secondary_handler starts */
+    /* battle_sound_play_landing_sfx_by_surface_type: water surfaces play
      * 0x23, grassland, thicket and rug 0x28, wooden floor, tree and box 0x3a,
      * every other surface 0x29. A step that ends on another unit also plays
      * 0x28, and mounting a unit named by battle id plays 0x29. */
@@ -629,11 +630,11 @@ typedef enum main_sfx {
     MAIN_SFX_SHIELD_DEFLECT_HEAVY = 47, /* axe, flail */
     /* An error message opens: a memory-card load, save or scan failure, or a
      * refused equip, dismissal, job change or ability.
-     * sound_play_weapon_sfx plays it for an attack stopped by an
+     * battle_sound_play_weapon_sfx plays it for an attack stopped by an
      * accessory or class evade, a forced failure, a blade grasp or a catch,
      * and as the shield deflect of an instrument or book. */
     MAIN_SFX_ERROR_MESSAGE = 48,
-    MAIN_SFX_CAMERA_TILT = 49, /* camera_handle_tilt_request */
+    MAIN_SFX_CAMERA_TILT = 49, /* battle_camera_handle_tilt_request */
     MAIN_SFX_HIT_ROD = 56,     /* rod, staff */
     MAIN_SFX_LAND_WOOD = 58,
     /* Circle on a name-entry character key, or on an occupied tile of the
@@ -670,7 +671,7 @@ typedef enum main_sfx {
     MAIN_SFX_EVENT_TRANSITION_MODE_1 = 109,
     MAIN_SFX_STATUS_MENU_REQUEST
     = 113,                       /* Triangle queues the status menu on another unit's turn; again when it opens */
-    MAIN_SFX_CRITICAL_HIT = 114, /* a weapon hit whose action is critical (sound_play_weapon_sfx) */
+    MAIN_SFX_CRITICAL_HIT = 114, /* a weapon hit whose action is critical (battle_sound_play_weapon_sfx) */
     MAIN_SFX_TEXT_GLYPH = 115,   /* typewriter tick after a dialogue glyph */
     MAIN_SFX_HIT_ARROW = 116,    /* crossbow, bow */
     /* World map: 0x76 when a path animation starts, drawing or erasing; 0x77
@@ -692,8 +693,8 @@ typedef enum main_sfx {
  * holds 27 (0, 0x15, 0x16 and 0x17 are empty); event scripts choose the
  * others through EVENT_OPCODE_BG_SOUND. */
 typedef enum main_env_sfx {
-    MAIN_ENV_SFX_RAIN = 2,      /* map_run_weather_command: rain without snow, and the thunder command */
-    MAIN_ENV_SFX_THUNDER_A = 3, /* map_draw_mesh_and_weather picks one of the two for a lightning flash */
+    MAIN_ENV_SFX_RAIN = 2,      /* battle_map_run_weather_command: rain without snow, and the thunder command */
+    MAIN_ENV_SFX_THUNDER_A = 3, /* battle_map_draw_mesh_and_weather picks one of the two for a lightning flash */
     MAIN_ENV_SFX_THUNDER_B = 14,
 } main_env_sfx_e;
 
@@ -732,7 +733,7 @@ s32 main_sound_set_current_music_volume_timed(s32 time);
 s32 main_sound_set_tune_volume(s32 time);
 s32 main_sound_stop_current_music(void);
 
-/* map_step_init_sequence calls this without loading $a0, but the body reads sound_id. */
+/* battle_map_step_init_sequence calls this without loading $a0, but the body reads sound_id. */
 void main_sound_stop_sfx(int sound_id);
 suzuki_music_t* main_sound_switch_music_track(s32 slot, s32 volume, s32 fade);
 void main_sound_unload_current_scenario_music(void);
@@ -807,7 +808,7 @@ typedef enum main_system_flags {
     MAIN_SYSTEM_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
     /* wldcore_gfx_draw_world_frame does not load the scratch image into the display buffer. */
     MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
-    /* wldcore_dispatch_display_object_list draws nothing and wldcore_map_pulse_dot_colors returns. */
+    /* window_dispatch_record_list_variant draws nothing and wldcore_map_pulse_dot_colors returns. */
     MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
     /* wldcore_gfx_draw_context_value_display draws nothing. */
     MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,
@@ -1129,7 +1130,7 @@ extern game_options_t g_main_game_options_defaults;
 /* g_main_terrain_status_flags has one byte per map_surface_type_e; only
  * MAP_SURFACE_POISONED_MARSH has a bit. */
 enum {
-    MAIN_TERRAIN_STATUS_FLAG_POISON = 0x80, /* status_prepare_terrain_poison poisons a unit standing there */
+    MAIN_TERRAIN_STATUS_FLAG_POISON = 0x80, /* battle_status_prepare_terrain_poison poisons a unit standing there */
 };
 
 /* Rows of g_main_terrain_movement_cost_tables, chosen from the unit's movement

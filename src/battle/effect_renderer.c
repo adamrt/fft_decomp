@@ -190,7 +190,7 @@ static void battle_effect_init_render_state(void) {
     g_effect_sprite_count = 0;
 }
 
-/* The subset of effect_init_render_state that does not touch the
+/* The subset of battle_effect_init_render_state that does not touch the
  * prim buffer or the sprite counters. */
 void battle_effect_reset_render_state(void) {
     g_effect_matrix.m[2][2] = ONE;
@@ -470,7 +470,7 @@ static void battle_effect_init_record_chain(void) {
 
 /*
  * Take a work record from the free chain and attach it to state record
- * record_index; the inverse of effect_free_work_record.
+ * record_index; the inverse of battle_effect_free_work_record.
  *
  * Bits 12-15 of kind select the effect list node type allocated as the
  * record's data (0x0000-0x3000 map to list kinds 0, 2, 4 and 6); other kinds
@@ -1283,7 +1283,7 @@ s32 battle_effect_spawn_particle_motion(effect_emitter_values_t* values, effect_
     return battle_effect_get_random_between(values->lifetime_min, values->lifetime_max);
 }
 
-/* Calls the empty main_noop_800449f8 with (1, 0x50). No code calls it. */
+/* Calls the empty main_system_report_stub with (1, 0x50). No code calls it. */
 void battle_noop_801a866c(void) {
     main_system_report_stub(1, 0x50);
 }
@@ -1353,7 +1353,7 @@ s16 battle_effect_select_larger_magnitude_s16(s16 first, s16 second) {
 }
 
 /* Cosine-eased interpolation from start to end at current/duration; the same
- * curve as effect_interpolate_svector_cos, on a single s32. */
+ * curve as battle_effect_interpolate_svector_cos, on a single s32. */
 s32 battle_effect_interpolate_s32_cos(s32 start, s32 end, s32 duration, s32 current) {
     s32 difference;
     s32 scaled_difference;
@@ -1390,7 +1390,7 @@ void battle_effect_interpolate_svector_cos_q12(
     battle_effect_interpolate_svector(from, to, ONE - rcos((current * ONE) / duration), out);
 }
 
-/* Linear counterpart of effect_interpolate_svector_cos: t = current/duration in q13. */
+/* Linear counterpart of battle_effect_interpolate_svector_cos: t = current/duration in q13. */
 void battle_effect_interpolate_svector_linear(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out) {
     battle_effect_interpolate_svector(from, to, (current << 13) / duration, out);
@@ -1422,7 +1422,7 @@ void battle_effect_interpolate_vector_q13_cos_q12(
     battle_effect_interpolate_vector_q13(from, to, ONE - rcos((current * ONE) / duration), out);
 }
 
-/* Linear counterpart of effect_interpolate_vector_q13_cos: t = current/duration in q13. */
+/* Linear counterpart of battle_effect_interpolate_vector_q13_cos: t = current/duration in q13. */
 void battle_effect_interpolate_vector_q13_linear(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
     battle_effect_interpolate_vector_q13(from, to, (current << 13) / duration, out);
@@ -1772,17 +1772,17 @@ void battle_effect_add_2_to_halfword(u16* value) {
     *value += 2;
 }
 
-/* Nothing in the game calls it (see effect_add_2_to_halfword). */
+/* Nothing in the game calls it (see battle_effect_add_2_to_halfword). */
 void battle_effect_add_4_to_halfword(u16* value) {
     *value += 4;
 }
 
-/* Nothing in the game calls it (see effect_add_2_to_halfword). */
+/* Nothing in the game calls it (see battle_effect_add_2_to_halfword). */
 void battle_effect_add_6_to_halfword(u16* value) {
     *value += 6;
 }
 
-/* Nothing in the game calls it (see effect_add_2_to_halfword). */
+/* Nothing in the game calls it (see battle_effect_add_2_to_halfword). */
 void battle_effect_add_8_to_halfword(u16* value) {
     *value += 8;
 }
@@ -1972,7 +1972,7 @@ static void battle_effect_init_free_list(void) {
  *
  * The free list is not tested for exhaustion: with none free the sentinel node 0
  * would be handed out. There are as many nodes as work records, and
- * effect_alloc_work_record is the only caller. */
+ * battle_effect_alloc_work_record is the only caller. */
 static effect_list_node_t* battle_effect_alloc_list_node(s16 kind) {
     u16* free_head = &g_effect_free_list_node_head;
     u16* list_head = &g_effect_active_list_node_head;

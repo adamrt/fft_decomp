@@ -67,7 +67,7 @@ static void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height
 }
 
 /* Timed menu icon thread: shows one text entry with alternating sprite
- * records until input arrives or the g_battle_text_message_duration_frames frame budget (scaled by the
+ * records until input arrives or the g_text_message_duration_frames frame budget (scaled by the
  * event speed) runs out. Bit 8 of the budget suppresses cancel handling
  * until the budget expires. The thread-id check reads an unset local in the
  * original. */
@@ -758,7 +758,7 @@ void menu_load_portrait_image(s32 portrait_id) {
 
 /*
  * Loads one 0x7800-byte block of EVTCHR.BIN into a fresh allocation on the main
- * stack, publishing it through g_battle_event_pending_loaded_evtchr_slot / g_battle_event_loaded_evtchr_buffer before
+ * stack, publishing it through g_script_pending_loaded_evtchr_slot / g_script_loaded_evtchr_buffer before
  * releasing it. Parameter 2 selects the block; each occupies 15 sectors from 0x1d4c.
  */
 void gfx_load_evtchr_thread(void) {
@@ -996,7 +996,7 @@ enum {
  *
  * Nothing happens while menu input is blocked. The menu is also skipped while the
  * menus are suspended, a help window is open,
- * g_battle_menu_building_thread_started is set (it is cleared here either way) or
+ * g_menu_building_thread_started is set (it is cleared here either way) or
  * menu_id is BATTLE_MENU_ID_NONE.
  *
  * g_battle_menu_idle_action_entry_labels holds two window x bytes per entry, each

@@ -11,10 +11,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Thread task 0x39: the character editor and status panels. ATTACK twin of
- * DEBUGCHR debugchr_panel_run_unit_status_thread and BUNIT
- * bunit_panel_run_unit_status_thread; this copy draws fixed-width gauge bars and a
- * formation-slot number instead of the zodiac/unit-id field. */
+/* Thread task 0x39: the character editor and status panels. ATTACK's body (DEBUGCHR and BUNIT have their own); this
+ * copy draws fixed-width gauge bars and a formation-slot number instead of the zodiac/unit-id field. */
 void menu_run_unit_status_thread_variant(void) {
     RECT rects[6];
     s32 anim_state;

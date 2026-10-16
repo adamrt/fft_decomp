@@ -328,7 +328,7 @@ void world_menu_number_entry_thread(void) {
  *
  * Draws param->text_id left of the number and edits the 16-bit value at
  * param->value one decimal digit at a time within the range bound at param->context. The value is
- * written back each frame only while g_world_formation_screen_active is set. The initial label is
+ * written back each frame only while g_formation_screen_active is set. The initial label is
  * measured in pixels and each redraw in character columns (times 6).
  * i is shared by the quad setup loop and the frame loop, as in the target.
  */
@@ -490,7 +490,7 @@ void world_menu_labeled_number_entry_thread(void) {
  * Draw a signed decimal number right-aligned in `digits` columns of 6 pixels
  * starting at the pen, least significant digit first, with a minus glyph drawn
  * before the digits when the value is negative. Glyphs are 0x23 bytes apart
- * in the font block at g_world_text_glyph_bitmap_data.
+ * in the font block at g_text_glyph_bitmap_data.
  *
  * `digits` arrives as a full 32-bit value and only its low byte is used.
  */

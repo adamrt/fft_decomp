@@ -434,7 +434,7 @@ void battle_state_handle_illegal_range_state(void) {
 }
 
 /* AbilityPreviewHelp game-state handler: when the help window has gone
- * (battle_menu_is_still_building returns something other than 2), return to the
+ * (menu_get_thread_activity_variant returns something other than 2), return to the
  * ability preview with map panning. */
 void battle_state_handle_ability_preview_help_state(void) {
     if (menu_get_thread_activity_variant() != 2) {
@@ -686,7 +686,7 @@ void battle_state_handle_open_sp2_files_state(void) {
 }
 
 /* StartEffectFileOpen game-state handler: step the effect-file load
- * (effect_init_data); when no work remains, resolve the strike and pick
+ * (battle_effect_init_data); when no work remains, resolve the strike and pick
  * the attacker's animation. */
 void battle_state_handle_start_effect_file_open_state(void) {
     if (battle_effect_init_data() != 0) {

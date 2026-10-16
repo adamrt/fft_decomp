@@ -1181,7 +1181,7 @@ typedef enum item_id {
 /* world_unit_t.equipment 16-bit values carry the item id in the low ten
  * bits and flags above (bit 14 is tested by world_shop_buy_from_fitting_room
  * and the job wheel); the WORLD item tables are indexed by the masked id
- * (world_item_get_price, world_item_get_type). The range boundaries follow the
+ * (world_item_get_price, item_get_type). The range boundaries follow the
  * retail item table: throwable weapons start with Shuriken, followed by
  * shields, headgear, body armor, accessories, and consumables. */
 enum {

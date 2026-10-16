@@ -8,8 +8,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Scrollable-list body command; EQUIP copy of JOBSTTS jobstts_cmd_draw_scrollable_list_body_handler and BUNIT
- * menu_cmd_draw_scrollable_list_body_handler_variant without the event-speed multiplier.
+/* Scrollable-list body command; EQUIP's body: the JOBSTTS and BUNIT command without the event-speed multiplier.
  *
  * The padding arrays reproduce the target's frame (only rect and marker are
  * referenced). The scroll-down path follows WORLD's menu_cmd_draw_scrollable_list_body_handler_variant

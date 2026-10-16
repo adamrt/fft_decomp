@@ -802,7 +802,7 @@ static void attack_deploy_select_unit_for_stats_display(void) {
 
 /* ATTACK twin of require_editor_load_party_unit. Load a party roster unit into the ATTACK status/editor display.
  *
- * Party counterpart of require_editor_load_selected_unit: the unit is
+ * Party counterpart of menu_load_selected_unit_variant: the unit is
  * rebuilt from the roster into a scratch unit_stats_t, shown at full HP/MP
  * and CT, and without the monster-skill or name-text refresh. */
 void attack_editor_load_party_unit(s32 unused, s32 party_index) {

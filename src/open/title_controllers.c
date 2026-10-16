@@ -970,7 +970,7 @@ static void open_birthday_build_confirmation_menu(open_birthday_date_state_t* st
  * last one allocated) and rebuilds it. Left selects the month field and Right the
  * day field, moving the cursor 0x20 pixels.
  *
- * February has 28 days in g_open_birthday_month_lengths, so 29 February cannot be
+ * February has 28 days in g_unit_birthday_month_lengths, so 29 February cannot be
  * entered. */
 void open_birthday_handle_menu_input(open_controller_record_t* record) {
     open_birthday_date_state_t* menu = &record->birthday_date;

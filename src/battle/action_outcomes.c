@@ -195,7 +195,7 @@ void battle_unit_learn_used_ability(unit_stats_t* unit) {
 }
 
 /* Passes a status change on to the unit's display flags
- * (status_queue_runtime_graphics_flag_change), but only while an action is
+ * (battle_status_queue_runtime_graphics_flag_change), but only while an action is
  * executing: previews and AI simulations change no display state.
  *
  * status_id is the status handler index (status id + 1). */

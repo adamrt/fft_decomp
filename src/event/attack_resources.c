@@ -1297,7 +1297,6 @@ static void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
  * fills the 0x52-row work buffer at *g_ai_workspace_ptr through its own loader, then
  * the rows are sized, grayed (not enough MP, or silenced for voice abilities)
  * and the window layout at 0x80166994 is set up for 6 visible rows.
- * BATTLE twin of menu_build_ability_list (0x800f32e4); the two are masked-identical.
  *
  * Matching notes: the layout block is one struct (its x/y are s16, so `-= 4`
  * stays an addiu immediate and the constant is not shared); window_x is a

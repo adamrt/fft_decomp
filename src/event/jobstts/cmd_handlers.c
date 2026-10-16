@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
- * interior through jobstts_cmd_draw_background_tiles_handler.
+ * interior through menu_cmd_draw_background_tiles_handler.
  *
  * JOBSTTS copy of world_menu_parse_draw_window_frame without the rectangle
  * source selection. Reassigning the command pointer before the return keeps

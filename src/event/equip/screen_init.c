@@ -108,7 +108,7 @@ void equip_menu_init_screen(s32 battle_id) {
     menu_toggle_numeric_editor_thread(1);
 }
 
-/* Starts the unit status thread on equip_panel_run_unit_status_thread
+/* Starts the unit status thread on menu_run_unit_status_thread_variant
  * (parameter g_equip_unit_status_panel_params) when `enable` is set and the
  * thread is idle; stops it otherwise. */
 void equip_panel_toggle_unit_status_thread(s32 enable) {

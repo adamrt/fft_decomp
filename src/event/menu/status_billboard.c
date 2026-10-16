@@ -28,8 +28,7 @@ static void text_fill_field_with_terminators(u8* text) {
 
 #ifdef FFT_WORLD
 /* Fills a status billboard (level, team kind, HP/MP/CT and the live-unit
- * count) from a battle unit. WORLD links this shorter body under the shared
- * name of src/shared/menu/menu_copy_unit_data_to_status_billboard_variant.c.
+ * count) from a battle unit. This is WORLD's shorter body.
  *
  * Team kind is 0 for the player's side, 1 for the enemy team, 2 for a unit on
  * neither the enemy team nor under player control, and 3 for a unit on auto
@@ -350,8 +349,7 @@ void menu_load_selected_unit_variant(void) {
 #ifdef FFT_EVENT_DEBUGCHR
 /*
  * Fills the comparison and selected-unit billboards and the status panel's
- * fields for the selected battle unit. DEBUGCHR copy of
- * menu_load_selected_unit.
+ * fields for the selected battle unit. DEBUGCHR's body.
  *
  * The 16-bit fields are: 0 move, 1 speed, 2 jump, 3/4 right and left weapon
  * power, 5/6 right and left weapon evade, 7 set for a monster skillset, 8 set

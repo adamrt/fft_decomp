@@ -100,7 +100,7 @@ void battle_gfx_draw_wait_direction_unit(void) {
  * The unit moves to the head of the runtime list, enters BATTLE_UNIT_FADE_OUT_FLASH,
  * loses its shadow and its float and depth offsets, and is drawn with additive
  * blending while its palette fades by (red, green, blue) from the last applied
- * color. `mode` is the amount map_modify_palette steps the fade by, not a
+ * color. `mode` is the amount battle_map_modify_palette steps the fade by, not a
  * color mode. battle_unit_update_fade_out_removal continues from there. */
 void battle_gfx_start_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue) {
     battle_unit_t* unit;
@@ -731,7 +731,7 @@ static s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit) {
 }
 
 /* Teleport distortion: begin the departure flash. Altima's forms release the
- * ability effect that effect_start_altima_teleport_departure requested;
+ * ability effect that battle_effect_start_altima_teleport_departure requested;
  * the sprite switches to additive semi-transparency and a palette modulation of
  * +31 on each color component starts. The distortion moves to its next phase
  * with the timer at 0. */
@@ -748,7 +748,7 @@ static void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit)
 }
 
 /* Teleport distortion: begin the arrival. Altima's forms release the ability
- * effect that effect_start_altima_teleport_arrival requested; the unit's
+ * effect that battle_effect_start_altima_teleport_arrival requested; the unit's
  * palette is refreshed for the shadow mode of the tile it stands on and a palette
  * modulation of -31 on each color component starts. The distortion moves to its
  * next phase with the timer at 0. */

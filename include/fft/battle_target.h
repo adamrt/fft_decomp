@@ -52,7 +52,7 @@ typedef enum target_panels {
 /* highlight types */
 /* target_set_tile_background_color modes and the g_target_tile_mark_modes states:
  * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
- * request recolors the current render buffer; map_draw_mesh_and_weather then does the
+ * request recolors the current render buffer; battle_map_draw_mesh_and_weather then does the
  * other buffer and leaves the layer SHOWN or NONE. */
 typedef enum battle_tile_mark_mode {
     BATTLE_TILE_MARK_NONE = 0, /* as a mode: restore every polygon and request the three HIDEs */

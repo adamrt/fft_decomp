@@ -12,8 +12,7 @@
 #include "psx/types.h"
 
 /*
- * Scrolling three-column ability list thread (the WORLD twin of BATTLE
- * battle_menu_run_scrolling_ability_list_thread, reached from menu_preview_ability_turn_at_list).
+ * Scrolling three-column ability list thread (WORLD's body, reached from menu_preview_ability_turn_at_list).
  *
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row

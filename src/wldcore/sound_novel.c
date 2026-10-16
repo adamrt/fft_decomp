@@ -401,7 +401,7 @@ void wldcore_opcode_nop(void) {
 }
 
 /* Start thread 14 on operand_0 | 0x8800 (as
- * wldcore_opcode_start_script_thread_flags_04 does with the opcode operand), then push
+ * wldcore_opcode_start_text_thread does with the opcode operand), then push
  * operand_0 onto the four-entry history
  * g_wldcore_active_saved_record.text_history_0..3. */
 void wldcore_opcode_start_text_thread_and_push_history(void) {
@@ -1135,7 +1135,7 @@ void wldcore_opcode_wait_for_fade(void) {
 
 /* Shift the four-entry history g_wldcore_sound_novel_text_history_0..66 down one slot and push
  * operand_0 at the end (same shape as
- * wldcore_opcode_start_script_thread_and_push_history). */
+ * wldcore_opcode_start_text_thread_and_push_history). */
 /* Target 0x8008cb30. */
 void wldcore_opcode_push_operand_history(void) {
     u16 history_1;

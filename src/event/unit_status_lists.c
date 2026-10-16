@@ -50,9 +50,7 @@ s32 unit_has_any_current_status(s32 battle_id) {
  *
  * The flag reads go through local pointers so they are reloaded each
  * iteration as the target does; the columns are s16 so `index + 0x8800`
- * stays a 32-bit addition with the constant hoisted into a register.
- *
- * BATTLE twin of menu_build_unit_status_list. */
+ * stays a 32-bit addition with the constant hoisted into a register. */
 void menu_build_unit_status_list(void) {
     unit_stats_t* unit;
     u16 i;
@@ -392,8 +390,6 @@ static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly) {
  * Build one of the two double-buffered menu sprite pages: five draw-mode
  * packets (texture window per sprite) followed by five sprites placed from
  * the parameter table, then submit them all in reverse order.
- *
- * BATTLE twin of menu_build_sprite_page.
  */
 static void menu_build_sprite_page(s32 page_index, RECT* base_screen) {
     s32 i;
@@ -2025,7 +2021,7 @@ void menu_select_sprite_clut(void* packet) {
     primitive->sprt.clut = clut;
 }
 
-/* Select a menu sprite's CLUT as battle_menu_select_icon_cluts does for its fourth
+/* Select a menu sprite's CLUT as menu_select_icon_cluts does for its fourth
  * sprite: the dimmed one while the previous thread is running or g_menu_input_lock_mode is 1. */
 void menu_select_icon_sprite_clut(SPRT* sprite) {
     s32 clut;

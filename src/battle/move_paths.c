@@ -1263,7 +1263,7 @@ void battle_camera_update_rotation(void) {
 
 /* Start a zoom toward ONE (mode 0) or 0xc00 (mode 1) from whichever side the
  * scale is on. No retail code calls it; the L2 input goes through
- * camera_toggle_zoom. */
+ * battle_camera_toggle_zoom. */
 void battle_camera_zoom_map(s32 mode) {
     switch (mode) {
     case 0:
@@ -1385,7 +1385,7 @@ void battle_camera_update_zoom(void) {
 
 /* Start a tilt toward the low pitch 0x12e (mode 0) or the high pitch 0x1c0
  * (mode 1) from whichever side the pitch is on. No retail code calls it; the
- * R2 input goes through camera_toggle_tilt. */
+ * R2 input goes through battle_camera_toggle_tilt. */
 void battle_camera_handle_tilt_request(s32 mode) {
     switch (mode) {
     case 0:
@@ -1546,8 +1546,8 @@ static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
 }
 
 /* Doubles the cursor tile vector computed by
- * camera_calculate_cursor_tile_vector_normal and passes that routine's
- * result through; callers hand it to camera_step_focus_toward_cursor_tile. */
+ * battle_camera_calculate_cursor_tile_vector_normal and passes that routine's
+ * result through; callers hand it to battle_camera_step_focus_toward_cursor_tile. */
 static s32 battle_camera_scale_cursor_tile_vector(void) {
     s32 result = battle_camera_calculate_cursor_tile_vector_normal();
 
@@ -1664,13 +1664,13 @@ static void battle_camera_step_real_coords_toward_target(const battle_unit_t* ta
  * animation) track the source unit's camera-relative position and step the
  * real coordinates toward the unit; the other states below
  * BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT take the idle path of
- * camera_update_cursor_tile_vector, and that state and those above it
+ * battle_camera_update_cursor_tile_vector, and that state and those above it
  * clear the vector.
  *
  * The scaling routine passes the normal routine's result through, and these
  * callers hand it on.
  *
- * The idle path is camera_update_cursor_tile_vector verbatim. The four
+ * The idle path is battle_camera_update_cursor_tile_vector verbatim. The four
  * main_util_set_vector calls are one tail-merged block in the target, placed
  * last so it falls into the epilogue, so the idle path's window test is
  * spelled inverted with the clear-vector call as the function's last
@@ -1745,7 +1745,7 @@ void battle_camera_update_vector_from_game_state(void) {
  * offsets the cursor's screen position (g_battle_cursor_screen_x, g_battle_cursor_screen_y). Inside the
  * central window the vector is cleared; nearer the edge the unit tile normal
  * is used as is, otherwise doubled. The tile height left in $v0 by either
- * vector routine is passed on to camera_step_focus_toward_cursor_tile. */
+ * vector routine is passed on to battle_camera_step_focus_toward_cursor_tile. */
 void battle_camera_update_cursor_tile_vector(void) {
     battle_unit_t* unit;
     s32 height;

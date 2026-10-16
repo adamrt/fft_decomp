@@ -222,7 +222,7 @@ s32 attack_load_scenario_conditionals(void) {
 /* Re-syncs the two battle scenario-music slots with the pending track pair,
  * then applies the map darkness record.
  *
- * Skipped entirely when g_battle_scenario_event_active is clear or script variable 0x27 selects a
+ * Skipped entirely when g_script_scenario_event_active is clear or script variable 0x27 selects a
  * scenario in 410..425. When the currently playing id still appears in the
  * pending pair only that slot is reopened; otherwise both tracks restart.
  * `playing` is s32 rather than u16 because a u16 merge of the two lhu results

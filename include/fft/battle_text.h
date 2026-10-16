@@ -10,7 +10,7 @@
 
 /* text sections */
 /* Text variables $27 and $28 (rows of glyph pixels drawn, 0x10 by default),
- * bound separately: battle_menu_display_text also takes the table base, and
+ * bound separately: menu_display_text_variant also takes the table base, and
  * element spellings let GCC address them from it. */
 
 /* MAIN selects the BATTLE address of text_find_entry through this existing alias. */

@@ -7,7 +7,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Saves the camera position for camera_restore_current_real_coords (effect
+/* Saves the camera position for battle_camera_restore_current_real_coords (effect
  * script opcodes 09 and 0a). */
 void battle_camera_save_current_real_coords(void) {
     copyVector(&g_camera_saved_real_coords, &g_camera_current_real_coords);
@@ -27,7 +27,7 @@ void battle_camera_set_current_real_coords(const VECTOR* coords) {
 
 /* Starts a linear move of the camera position to `destination` (20.12) over
  * frame_count frames (divided by the animation speed), applied by
- * camera_update_real_coord_animation. No retail code calls it. */
+ * battle_camera_update_real_coord_animation. No retail code calls it. */
 void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destination, s32 frame_count) {
     s32 animation_frames;
 
@@ -84,7 +84,7 @@ void battle_camera_set_screen_offset(const VECTOR* coords) {
 
 /* Starts a linear move of all three screen-offset components to the one value
  * *destination_value over frame_count frames (divided by the animation speed).
- * camera_update_screen_offset_animation applies it.
+ * battle_camera_update_screen_offset_animation applies it.
  *
  * The per-frame step is stored in g_camera_real_coord_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
@@ -145,7 +145,7 @@ void battle_camera_update_screen_offset_animation(void) {
     }
 }
 
-/* Saves the camera zoom for camera_restore_zoom (effect script opcodes 0f
+/* Saves the camera zoom for battle_camera_restore_zoom (effect script opcodes 0f
  * and 24). */
 void battle_camera_save_zoom(void) {
     copyVector(&g_camera_zoom_backup, &g_camera_zoom);
@@ -165,7 +165,7 @@ void battle_camera_set_zoom(const VECTOR* zoom) {
 
 /* Starts a linear change of all three zoom scales to the one value
  * *destination_value over frame_count frames (divided by the animation speed),
- * applied by camera_update_zoom_animation. No retail code calls it. */
+ * applied by battle_camera_update_zoom_animation. No retail code calls it. */
 void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 frame_count) {
     s32 animation_frames;
     s32 delta_x;
@@ -225,7 +225,7 @@ void battle_camera_set_rotation(const SVECTOR* rotation) {
 
 /* Starts a linear turn of all three camera angles to the one value
  * *destination_value over frame_count frames (divided by the animation speed),
- * applied by camera_update_rotation_animation. No retail code calls it. */
+ * applied by battle_camera_update_rotation_animation. No retail code calls it. */
 void battle_camera_set_rotation_delta_from_value(const s16* destination_value, s32 frame_count) {
     s32 animation_frames;
     s32 delta_x;

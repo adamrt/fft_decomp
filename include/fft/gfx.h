@@ -222,7 +222,7 @@ typedef struct oriented_quad {
 typedef char oriented_quad_size_must_be_20[sizeof(oriented_quad_t) == 20 ? 1 : -1];
 
 /* Gouraud-textured rectangle source for gfx_enqueue_gouraud_textured_quad
- * (0x8012cfd4) and bunit_gfx_enqueue_gouraud_textured_quad: screen rectangle,
+ * (0x8012cfd4) and gfx_enqueue_gouraud_textured_quad: screen rectangle,
  * texture origin (only the low byte of u/v is used; the texture extent is the
  * screen extent), CLUT and texture page. The caller also passes four RGB
  * triples, one per corner. */

@@ -11,7 +11,7 @@
 
 /* Build the AT list.
  *
- * Port of world_build_at_list. The do/while (0) around the scroll redraw puts its render-buffer
+ * Port of menu_run_at_list_variant. The do/while (0) around the scroll redraw puts its render-buffer
  * references one loop level deeper, which raises the buffer's global-alloc priority above the
  * page pointer's (target: buffer s3, page s4; without it the two swap). */
 

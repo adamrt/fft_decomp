@@ -578,7 +578,7 @@ void wldcore_sound_enqueue_music_start(s32 value) {
     wldcore_sound_enqueue_audio_command(WLDCORE_AUDIO_COMMAND_FADE_IN, 0x10);
 }
 
-/* Twin of wldcore_wait_for_file_load (0x800686c8) with the audio-queue depth
+/* Twin of file_wait_for_pending_variant (0x800686c8) with the audio-queue depth
  * as the wait condition. The two 32-bit busy fields are read as g_wldcore_audio_queue members
  * rather than as separate scalars. */
 void wldcore_sound_wait_for_queue_drain(void) {

@@ -226,7 +226,7 @@ extern s32 g_attack_status_display_thread_params;
 
 /* numeric editor */
 /* Five name ids and five ability/skillset ids of the unit loaded into the
- * editor (g_attack_editor_unit_fields + 0x24). The target walks them from this
+ * editor (g_menu_selected_unit_fields + 0x24). The target walks them from this
  * standalone address: indexing the editor record instead folds 0x24 into each
  * load and allocates the walk from the record base. */
 extern s16 g_attack_editor_item_and_ability_ids[10];
@@ -258,7 +258,7 @@ typedef char attack_text_file_header_size_must_be_128[(sizeof(attack_text_file_t
 
 extern s32 g_attack_text_job_names_offset;
 /* Entries [1] and [2] of the unit-name text file's section-offset table (0x801cd2b0, s32[32], ending at
- * g_attack_text_data). */
+ * g_text_data). */
 extern s32 g_attack_text_roster_unit_names_offset;
 
 /* input */
@@ -270,7 +270,7 @@ extern s32 g_attack_text_roster_unit_names_offset;
  * numeric editor 12). */
 typedef enum attack_thread_slot {
     ATTACK_THREAD_SLOT_SELECT_MENU = 3,      /* attack_deploy_run_select_menu */
-    ATTACK_THREAD_SLOT_ROSTER_STEP = 4,      /* attack_deploy_select_next/previous_roster_unit */
+    ATTACK_THREAD_SLOT_ROSTER_STEP = 4,      /* attack_deploy_select_next_roster_unit and _previous_roster_unit */
     ATTACK_THREAD_SLOT_NOTICE = 13,          /* the notice shown for an invalid deployment input */
     ATTACK_THREAD_SLOT_SCREEN_GRAPHICS = 14, /* attack_deploy_update_screen_graphics, then the map title */
     ATTACK_THREAD_SLOT_DEPLOY_RENDER = 15,   /* attack_deploy_run_render_thread */

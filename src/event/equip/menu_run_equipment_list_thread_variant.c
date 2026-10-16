@@ -11,10 +11,10 @@
 #include "psx/types.h"
 
 /* The frame is menu_status_panel_buffer_t (0x3d8 bytes, double buffered); the
- * WORLD twin world_menu_equipment_panel_thread uses the same layout. */
+ * WORLD twin menu_run_equipment_list_thread_variant uses the same layout. */
 
 /* Equipment panel thread (task 0x3b): lists the five equipped item names and
- * draws their icons; EQUIP twin of WORLD world_menu_equipment_panel_thread.
+ * draws their icons; EQUIP's body (WORLD has its own).
  *
  * The sprite sheet layout (0-3) comes from the two mode flags; the text image
  * is rebuilt on the first frame or on request. The frame offset goes through

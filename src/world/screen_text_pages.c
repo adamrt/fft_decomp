@@ -74,7 +74,7 @@ static u8* world_screen_menu_redraw_text_page_on_scroll(
  * Scrolling three-column text list thread (an older sibling of
  * menu_run_scrolling_ability_list_thread_variant with a fixed page pair at 0x801bfda4 and helper thread
  * 15 running world_screen_menu_window_frame_thread). The menu-screen library's variant of
- * world_build_at_list: the formation screens, the world map menus and the title's music test run it.
+ * menu_run_at_list_variant: the formation screens, the world map menus and the title's music test run it.
  *
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row

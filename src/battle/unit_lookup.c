@@ -1173,13 +1173,13 @@ static void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTO
     }
 }
 
-/* camera_calculate_relative_offset with offset 1: the depth point of a stepping unit on a
+/* battle_camera_calculate_relative_offset with offset 1: the depth point of a stepping unit on a
  * tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
 void battle_camera_calculate_relative_offset_by_1(const SVECTOR* input, SVECTOR* output) {
     battle_camera_calculate_relative_offset(input, output, 1);
 }
 
-/* camera_calculate_relative_offset with offset 5: the depth point of a stepping unit on a
+/* battle_camera_calculate_relative_offset with offset 5: the depth point of a stepping unit on a
  * tile with MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
 void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR* output) {
     battle_camera_calculate_relative_offset(input, output, 5);
@@ -1189,7 +1189,7 @@ void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR*
  * Snap a screen-space point to the 28-unit tile grid for the current camera
  * yaw, writing the result to output.
  *
- * Same shape as camera_calculate_relative_offset: each of the x and z
+ * Same shape as battle_camera_calculate_relative_offset: each of the x and z
  * components picks up the caller's offset with a sign that depends on the yaw
  * quadrant, and the y component is a plain bias. Here each component is first
  * snapped down to a whole tile, and on the side the camera faces away from it
@@ -1233,13 +1233,13 @@ static void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input
     }
 }
 
-/* camera_convert_screen_coords_by_rotation with offset 1: the depth point of a standing unit,
+/* battle_camera_convert_screen_coords_by_rotation with offset 1: the depth point of a standing unit,
  * a cursor or a bubble on a tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
 void battle_camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination) {
     battle_camera_convert_screen_coords_by_rotation(screen, destination, 1);
 }
 
-/* camera_convert_screen_coords_by_rotation with offset 5: the depth point on a tile with
+/* battle_camera_convert_screen_coords_by_rotation with offset 5: the depth point on a tile with
  * MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
 void battle_camera_convert_screen_coords_modify_by_5(const SVECTOR* screen, SVECTOR* destination) {
     battle_camera_convert_screen_coords_by_rotation(screen, destination, 5);

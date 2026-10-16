@@ -39,7 +39,7 @@ extern u8 g_sound_queued_effect_id; /* main_sfx_e */
 extern u8 g_sound_shield_deflect_sfx_ids[];
 extern u8 g_sound_weapon_hit_sfx_ids[];
 /* main_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
- * hit, and the hit a shield or Golem stops (sound_play_weapon_sfx). */
+ * hit, and the hit a shield or Golem stops (battle_sound_play_weapon_sfx). */
 extern u8 g_sound_weapon_swing_sfx_ids[];
 
 void battle_sound_play_movement_sfx(struct battle_unit* unit, s32 sound_id);

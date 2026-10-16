@@ -206,7 +206,7 @@ void battle_effect_report_stub(void) {
     main_system_report_stub(1, 0x320);
 }
 
-/* Calls the empty main_noop_800449f8 with (1, 0x320) from a 0x100-byte frame it
+/* Calls the empty main_system_report_stub with (1, 0x320) from a 0x100-byte frame it
  * does not use. No code calls it. */
 void battle_noop_801a1328(void) {
     s32 unused[0x40];
@@ -215,7 +215,7 @@ void battle_noop_801a1328(void) {
 
 /* Start loading the effect file of g_battle_ability_effect_id; an effect whose
  * file has no size is replaced by the Cure effect. Nothing in the game calls it:
- * effect_init_data does the same in its first state. */
+ * battle_effect_init_data does the same in its first state. */
 void battle_effect_load_data(void) {
     s32 lba;
     s32 byte_length;
@@ -383,7 +383,7 @@ s32 battle_effect_is_item_ability(s32 ability_id) {
     return (entry & EFFECT_ABILITY_FLAG_ITEM) > 0;
 }
 
-/* Releases a requested effect: effect_update_stage starts it on its
+/* Releases a requested effect: battle_effect_update_stage starts it on its
  * next frame. */
 void battle_effect_play(void) {
     if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
@@ -559,7 +559,7 @@ static s16 battle_effect_alloc_state_record(void) {
  *
  * Frees every work record on its list, releases the four handler work slots,
  * clears the spawning record's reference to it, then unlinks it from the
- * allocated list; the inverse of effect_alloc_state_record. The
+ * allocated list; the inverse of battle_effect_alloc_state_record. The
  * separate `particle` copy keeps the call's work argument loaded at the loop
  * edges, as in the target, and the list-head pointers keep the target's
  * materialized global address. */
@@ -722,7 +722,7 @@ effect_script_result_e battle_effect_code_script_03_free_child(effect_record_t* 
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 04: end the script; effect_run_block's caller then frees the
+/* Opcode 04: end the script; battle_effect_run_block's caller then frees the
  * record. */
 effect_script_result_e battle_effect_code_script_04_end(effect_record_t* unused_record) {
     return EFFECT_SCRIPT_RESULT_ABORT;
@@ -1874,7 +1874,7 @@ static void battle_effect_advance_map_background_track(
  * (0 and 1 none, otherwise a sound channel of the flags section + 2) and its
  * entry count at 0x1c; entering an entry plays the channel's next sound.
  * Sound ids are relative to g_effect_sound_data_base, the effect sound
- * section's id set by effect_load_sound_section.
+ * section's id set by battle_effect_load_sound_section.
  */
 static void battle_effect_advance_parent_sound_track(
     effect_sound_track_t* schedule, s16* entry_index, s16* countdown, u8* unused_sound_state) {

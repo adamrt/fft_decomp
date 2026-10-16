@@ -1010,7 +1010,7 @@ void world_formation_set_menu_allowed_buttons(u32 mask) {
 
 /* The six 32-bit input masks at 0x801aed44 are g_world_formation_menu_input_state,
  * but a struct global makes GCC keep a base register for the field accesses
- * (see world_input_update_event_state), so they are separate scalars here. */
+ * (see menu_input_update_event_state_variant), so they are separate scalars here. */
 extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous_input,
     g_world_formation_menu_initial_repeat_counter, g_world_formation_menu_repeat_counter,
     g_world_formation_menu_secondary_repeat_counter;
@@ -1021,7 +1021,7 @@ extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous
  * g_world_formation_open_request_state.. flags is set), runs the formation/memory-card request
  * updates, publishes the input, yields once while tracking thread status
  * changes and returns the menu result slot g_menu_pending_selection[0] (-2 while pending).
- * Formation-menu sibling of world_input_update_event_state. */
+ * Formation-menu sibling of menu_input_update_event_state_variant. */
 s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     s32 profile;
     u32 previous_input;

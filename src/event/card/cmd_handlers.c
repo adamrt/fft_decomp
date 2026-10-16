@@ -33,7 +33,7 @@ u8* card_cmd_draw_textured_quad_handler(u8* command) {
 
 /*
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
- * the interior through card_cmd_draw_tiled_rectangle_handler.
+ * the interior through menu_cmd_draw_tiled_rectangle_handler.
  *
  * CARD copy of world_menu_parse_draw_window_frame: source 2 takes the signed
  * rectangle from the shared window record, other sources use the command's

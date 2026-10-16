@@ -31,7 +31,7 @@ extern u8 g_debugchr_editor_template_special[];
 extern s16 g_debugchr_editor_ct_max;
 extern u8 g_debugchr_editor_unit_ids[];
 extern u8 g_debugchr_editor_unit_name[];
-/* Views of g_debugchr_panel_selected_billboard.gauges[i].value (values[3 * i])
+/* Views of g_panel_selected_billboard.gauges[i].value (values[3 * i])
  * and gauges[i].max (the *_max 16-bit values): debugchr_editor_apply_values_to_battle_unit
  * reaches the values from their own base register and the limits by absolute
  * address, which the member spelling does not reproduce. */

@@ -211,7 +211,7 @@ typedef enum map_surface_type {
 
 enum { MAP_SURFACE_MASK = 0x3f };
 
-/* Selectors accepted by map_get_tile_data_value and its setter twin.
+/* Selectors accepted by battle_map_get_tile_data_value and its setter twin.
  * Selector 14 is unsupported; setter selector 15 performs a separate operation
  * whose relationship to tile data is not established. No caller passes
  * selector 1 or 10. */
@@ -329,7 +329,7 @@ enum {
     MAP_TILE_CAMERA_BLOCK_STEEP_MASK = 0xf0,
 };
 
-/* Eight-byte terrain record: map_get_tile_data_pointer (0x80183fb4)
+/* Eight-byte terrain record: battle_map_get_tile_data_pointer (0x80183fb4)
  * indexes (layer * 256 + y * width + x) * 8. Scenario opcode 0x40 at
  * BATTLE 0x801451c8 / WORLD 0x800f84f0 modifies bytes 0, 2 and 6.
  * Opcode 0x40 replaces the untargetable bit and clears the blocked bit. Its

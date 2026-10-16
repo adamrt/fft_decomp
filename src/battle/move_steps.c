@@ -1811,7 +1811,7 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
  * Advance a unit toward its current tile's exit edge; on reaching it, compare
  * the scaled heights of both step records and either continue into the next
  * tile or, when the next tile is more than one step higher, start the
- * 0x2000 vertical-motion path through move_start_unit_climb_jump_step_2.
+ * 0x2000 vertical-motion path through battle_move_start_float_climb_jump_step.
  */
 void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit) {
     s32 direction;
