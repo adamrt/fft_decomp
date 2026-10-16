@@ -2,6 +2,8 @@
  * party init and birthday zodiac conversion. */
 
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_unit.h"
 #include "fft/menu.h"
 #include "fft/open.h"
 #include "fft/unit.h"

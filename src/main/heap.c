@@ -1,6 +1,7 @@
 /* The SMD and game heap allocators, and file loading to the heap or to an address, checked or not. */
 
 #include "fft/main.h"
+#include "fft/main_file.h"
 #include "psx/libetc.h"
 #include "psx/suzuki.h"
 #include "psx/types.h"

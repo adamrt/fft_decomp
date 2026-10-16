@@ -7,6 +7,7 @@
 #include "fft/battle_status.h"
 #include "fft/battle_unit.h"
 #include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "fft/map.h"
 #include "fft/script.h"
 #include "psx/libc.h"

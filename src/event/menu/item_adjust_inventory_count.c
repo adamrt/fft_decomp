@@ -1,4 +1,4 @@
-#include "fft/main.h"
+#include "fft/main_item.h"
 #include "psx/types.h"
 
 /* EQUIP.OUT 001c684c - Add `delta` to the inventory count for the item id (low

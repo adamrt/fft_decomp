@@ -2,6 +2,10 @@
 
 #include "fft/battle.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_gfx.h"
+#include "fft/main_item.h"
+#include "fft/main_sound.h"
 #include "fft/script.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

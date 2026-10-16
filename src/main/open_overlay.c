@@ -2,6 +2,8 @@
 
 #include "fft/data.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_item.h"
 #include "fft/open.h"
 #include "psx/kernel.h"
 #include "psx/libapi.h"

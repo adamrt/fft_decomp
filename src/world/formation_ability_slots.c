@@ -5,6 +5,7 @@
 #include "fft/gfx.h"
 #include "fft/item.h"
 #include "fft/main.h"
+#include "fft/main_unit.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/unit.h"

@@ -1,5 +1,6 @@
 #include "fft/data.h"
 #include "fft/main.h"
+#include "fft/main_unit.h"
 #include "psx/types.h"
 
 /* Return the lowest job ID with this skillset, or -1. */

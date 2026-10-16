@@ -13,7 +13,7 @@
  * proven by this function's own accesses and the primitive strides it walks.
  */
 #include "fft/event_debugchr.h"
-#include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "fft/menu.h"
 #include "fft/text.h"
 #include "fft/unit.h"

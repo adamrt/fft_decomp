@@ -1,7 +1,7 @@
 /* The view zoom thread, the unit palette index, formation sprites and redraw requests. */
 
 #include "fft/data.h"
-#include "fft/main.h"
+#include "fft/main_unit.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"

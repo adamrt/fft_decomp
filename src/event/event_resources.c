@@ -18,6 +18,7 @@
 #include "fft/event_small.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
 #include "fft/map.h"
 #include "fft/memory.h"
 #include "fft/menu.h"

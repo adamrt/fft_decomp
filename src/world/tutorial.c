@@ -2,6 +2,7 @@
 
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
 #include "fft/menu.h"
 #include "fft/text.h"
 #include "fft/thread.h"

@@ -1,6 +1,6 @@
 /* The music wait stub and music track playback. */
 
-#include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "psx/libetc.h"

@@ -8,6 +8,8 @@
 #include "fft/battle_map.h"
 #include "fft/battle_target.h"
 #include "fft/main.h"
+#include "fft/main_gfx.h"
+#include "fft/main_sound.h"
 #include "fft/map.h"
 #include "fft/script.h"
 #include "fft/sound.h"

@@ -10,6 +10,8 @@
 #include "fft/data.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_gfx.h"
 #include "fft/map.h"
 #include "fft/unit.h"
 #include "psx/gte_inline.h"

@@ -1,6 +1,8 @@
 /* The Squaresoft and SCE boot logos, their drawing and fade out. */
 
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_gfx.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -10,6 +10,7 @@
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"
 #include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/map.h"
 #include "fft/menu.h"
 #include "fft/sound.h"

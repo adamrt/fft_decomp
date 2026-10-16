@@ -1,7 +1,7 @@
 /* CD mix and volume, opening and ending movie init, frame VRAM page restore, screen environments and runtime state
  * init. */
 
-#include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/open.h"
 #include "fft/window.h"

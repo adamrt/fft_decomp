@@ -2,6 +2,10 @@
 #include "fft/menu.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"
+#include "fft/wldcore_menu.h"
+#include "fft/wldcore_proposition.h"
+#include "fft/wldcore_script.h"
+#include "fft/wldcore_window.h"
 #include "psx/pad.h"
 
 /* Input step of a number-panel level that waits on WORLD thread 12: once the

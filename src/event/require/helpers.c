@@ -3,6 +3,7 @@
 
 #include "fft/event_require.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"

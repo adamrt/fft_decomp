@@ -4,6 +4,8 @@
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/open.h"
 #include "fft/script.h"

@@ -7,7 +7,7 @@
  * offsets, the bar division and the zodiac branch.
  */
 #include "fft/event_require.h"
-#include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "fft/menu.h"
 #include "fft/text.h"
 #include "fft/unit.h"

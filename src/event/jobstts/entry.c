@@ -3,6 +3,7 @@
 #include "fft/event_jobstts.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/sound.h"
 #include "fft/text.h"

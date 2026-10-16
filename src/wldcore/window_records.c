@@ -5,6 +5,7 @@
 #include "fft/main.h"
 #include "fft/open.h"
 #include "fft/wldcore.h"
+#include "fft/wldcore_window.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"

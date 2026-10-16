@@ -3,7 +3,7 @@
 
 #include "fft/battle_menu.h"
 #include "fft/gfx.h"
-#include "fft/main.h"
+#include "fft/main_file.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/thread.h"

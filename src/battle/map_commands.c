@@ -13,8 +13,13 @@
 #include "fft/battle_unit.h"
 #include "fft/event_attack.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_gfx.h"
+#include "fft/main_sound.h"
+#include "fft/main_unit.h"
 #include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/sound.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

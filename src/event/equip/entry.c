@@ -4,6 +4,8 @@
 #include "fft/event_equip.h"
 #include "fft/item.h"
 #include "fft/main.h"
+#include "fft/main_sound.h"
+#include "fft/main_unit.h"
 #include "fft/menu.h"
 #include "fft/sound.h"
 #include "fft/thread.h"

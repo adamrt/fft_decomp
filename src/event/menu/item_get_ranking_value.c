@@ -1,6 +1,6 @@
 #include "fft/data.h"
 #include "fft/item.h"
-#include "fft/main.h"
+#include "fft/main_item.h"
 #include "psx/types.h"
 
 /* Return the item category's primary stat for descending menu sorts. */

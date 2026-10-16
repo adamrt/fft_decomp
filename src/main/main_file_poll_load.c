@@ -1,4 +1,6 @@
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_gfx.h"
 #include "psx/libcd.h"
 #include "psx/types.h"
 

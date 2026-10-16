@@ -2,7 +2,7 @@
 
 #include "fft/gfx.h"
 #include "fft/item.h"
-#include "fft/main.h"
+#include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/thread.h"
 #include "fft/world.h"

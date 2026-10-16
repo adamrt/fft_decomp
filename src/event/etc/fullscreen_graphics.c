@@ -3,6 +3,8 @@
 #include "fft/event_etc.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_sound.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"

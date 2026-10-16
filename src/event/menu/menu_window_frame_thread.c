@@ -6,7 +6,7 @@
  * byte-identical apart from addresses). Layout notes below are the OPTION
  * twin's; the WORLD helpers are the same routines.
  */
-#include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"

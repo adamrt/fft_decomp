@@ -1,6 +1,8 @@
 /* File header building, the CD-ROM pause and the CD subsystem reset. */
 
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_gfx.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

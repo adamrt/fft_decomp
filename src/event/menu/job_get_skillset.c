@@ -1,4 +1,5 @@
 #include "fft/main.h"
+#include "fft/main_unit.h"
 #include "psx/types.h"
 
 s32 job_get_skillset(s32 job_id) {

@@ -2,6 +2,9 @@
  * callbacks, music loading, playback and parameters, tunes, and sound effects. */
 
 #include "fft/main.h"
+#include "fft/main_file.h"
+#include "fft/main_gfx.h"
+#include "fft/main_sound.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

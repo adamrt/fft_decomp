@@ -13,6 +13,7 @@
 #include "fft/battle_unit.h"
 #include "fft/data.h"
 #include "fft/main.h"
+#include "fft/main_item.h"
 #include "fft/map.h"
 #include "fft/menu.h"
 #include "fft/sound.h"

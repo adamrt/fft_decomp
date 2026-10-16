@@ -4,6 +4,7 @@
 #include "fft/event_debugchr.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"

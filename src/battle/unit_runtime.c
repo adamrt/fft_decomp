@@ -9,6 +9,7 @@
 #include "fft/battle_unit.h"
 #include "fft/gfx.h"
 #include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "fft/map.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"

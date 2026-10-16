@@ -9,7 +9,6 @@
 #include "fft/script.h"
 #include "fft/unit.h"
 #include "psx/libcd.h"
-#include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/suzuki.h"
@@ -26,8 +25,6 @@ typedef struct main_ability_monster_skillset {
     u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
 } main_ability_monster_skillset_t;
 
-extern ability_secondary_data_t g_main_ability_range_data[];
-
 /* One secondary-data byte per ability from ABILITY_ID_MATH_FIRST on (math,
  * reaction, support, movement). */
 extern u8 g_main_math_rsm_ability_data[ABILITY_ID_COUNT - ABILITY_ID_MATH_FIRST];
@@ -36,20 +33,10 @@ extern u8 g_main_math_rsm_ability_data[ABILITY_ID_COUNT - ABILITY_ID_MATH_FIRST]
 extern u8 g_main_throw_ability_item_types[];
 extern main_ability_jump_record_t g_main_jump_ability_data[12];
 extern main_ability_charge_record_t g_main_charge_ability_data[8];
-extern ability_data_t g_main_ability_data[];
 
 /* Indexed by reaction ability id - ABILITY_ID_REACTION_FIRST. */
 extern const u8 g_main_reaction_behavior_flags[ABILITY_ID_SUPPORT_FIRST - ABILITY_ID_REACTION_FIRST];
-extern main_ability_human_skillset_t g_main_ability_human_skillset_abilities[];
-extern main_ability_monster_skillset_t g_main_ability_monster_skillset_abilities[];
-extern u16 g_main_ability_temp_list[SKILLSET_ABILITY_LIST_COUNT];
 extern u8 g_main_calculator_primes[CALCULATOR_PRIME_COUNT];
-
-s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
-u16* main_ability_store_skillset_abilities(s32 skillset, s32 flags);
-s32 main_ability_calculate_pointers_and_type(
-    s32 id, ability_data_t** out_ability_data, main_ability_secondary_pointer_t* out_secondary_data);
-u32 main_ability_get_known(const unit_stats_t* unit, u32 skillset_id);
 
 /* card */
 /* Memory-card BIOS event handles opened by main_card_init_events; the CARD,
@@ -286,25 +273,7 @@ typedef struct main_file_load_descriptor {
 } main_file_load_descriptor_t;
 typedef char main_file_load_descriptor_size_must_be_36[sizeof(main_file_load_descriptor_t) == 36 ? 1 : -1];
 
-extern main_file_load_descriptor_t g_main_file_cd_state;
-extern u32 g_main_file_still_loading;
 extern s32 g_main_battle_bin_sector;
-
-/* File-header wrapper at 0x80011bd0 forwards main_file_build_header's result. */
-s32 main_file_build_header_nnl(main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
-s32 main_file_call_build_header(s32 sector, u32 size, void* destination);
-int main_file_is_still_loading(void);
-void main_file_reset_cd_subsystems(void);
-void main_file_handle_cd_read_callback(u8 event, u8* result);
-void main_file_handle_cd_ready_callback(u8 event, u8* result);
-int main_file_build_header(
-    main_file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
-void* main_file_load_checked_to_heap(int sector, int size);
-void* main_file_load_checked_to_address(int sector, int size, void* destination);
-suzuki_smd_header_t* main_file_get_smd(int sector, u32 size);
-void* main_file_load_to_address(int sector, u32 size, void* destination);
-void main_file_poll_load(main_file_load_descriptor_t* state);
-void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state);
 
 /* input */
 /* L1 + R1 + Select + Start restarts the game. */
@@ -328,68 +297,19 @@ extern u32 g_main_input_previous_copy_3;
 extern u32 g_main_input_stable_frames;
 
 /* item */
-extern u8 g_main_item_quantities[ITEM_ID_COUNT];
-extern item_attribute_t g_main_item_attributes[];
-extern u8 g_main_item_page_order[0x15];
 
-/* The first 0x40 bytes are Move-Find-Item flags; the second half is not yet
- * identified. Both halves are initialized and serialized as one block. */
-extern u8 g_main_item_location_flags[0x80];
-extern u8 g_main_item_poached_quantities[ITEM_ID_COUNT];
-extern item_secondary_data_t g_main_item_secondary_data[];
-
-/* &g_main_item_primary_data[0].secondary_data_id viewed as a stride-12 byte
- * array. main_unit_set_equipment_stats reads the secondary id through its own
- * %lo(g_main_item_primary_data+4) address while the type_flags test uses a
- * record pointer; reading both through item_data_t folds them onto one base
- * register and misses the byte-exact match. */
-extern u8 g_main_item_secondary_data_ids[];
-extern item_type_order_tables_t g_main_item_type_order_tables;
-
-/* Views of g_main_item_type_order_tables.order_1..6 for the WORLD save-image
- * copies (world_card_build_save_image, world_card_load_globals_from_save_image),
- * whose code the member spelling changes. */
-extern s8 g_main_item_type_order_1[8];
-extern u8 g_main_item_type_order_2[7];
-extern u8 g_main_item_type_order_3[5];
-extern u8 g_main_item_type_order_4[5];
-extern u8 g_main_item_type_order_5[7];
-extern u8 g_main_item_type_order_6[5];
-extern weapon_data_t g_main_item_weapon_data[]; /* 0x80063ab8 */
 extern u8 g_main_weapon_page_order[0x8a];
-extern u8 g_main_item_ability_item_ids[14];
-extern item_poach_t g_main_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRST + 1];
-extern item_evade_t g_main_item_accessory_data[]; /* 0x80063f58; unit accessory evade slots */
-extern armor_data_t g_main_item_helm_armor_secondary_data[];
-extern item_data_t g_main_item_primary_data[];
-extern item_evade_t g_main_item_shield_data[]; /* 0x80063eb8; unit right/left shield evade slots */
 extern u8 g_main_accessory_page_order[0x21];
 extern u8 g_main_armor_page_order[0x25];
 extern u8 g_main_helmet_page_order[0x1d];
 
-void main_item_init_new_game_inventory(void);
-void main_item_init_order_tables(void);
-item_data_t* main_item_get_data_pointer(s32 item_id);
-s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle);
-
 /* job */
-extern job_data_t g_main_job_data[];
-extern job_data_t* g_main_job_data_pointer;
-extern const u16 g_main_job_level_jp_requirements[UNIT_JOB_LEVEL_MAX];
-extern u16 g_main_job_jp_requirements_by_level[];
-extern const u8 g_main_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
 
 void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
 s32 job_find_first_for_skillset(s32 skillset);
 s32 job_get_generic_index(s32 job_id);
 s32 job_get_skillset(s32 job_id);
 s32 job_is_special_monster(s32 job_id);
-s32 main_job_add_proposition_jp(u32 party_index, s32 jp);
-u32 main_job_calculate_level(u16 job_jp);
-u32 main_job_calculate_unlocked(const u8* packed_job_levels, u32 gender_flags);
-s32 main_job_find_by_skillset(u8 skillset_id);
-job_data_t* main_job_get_data_pointer(s32 job_id);
-void main_job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
 
 /* save */
 /* Nine-byte active-proposition records at 0x80057eec. Daily update 0x80074b30
@@ -463,9 +383,7 @@ extern u32 g_main_saved_data_bits[40];
 extern menu_cursor_state_t g_main_saved_list_cursor_state;
 extern wldcore_proposition_progress_t g_main_active_propositions[8];
 extern wldcore_saved_record_t g_main_saved_records[];
-extern u8* g_main_brave_story_ages_source;
 extern u32 g_main_tutorial_progress_masks[];
-extern u8 g_main_brave_story_character_ages[0x40];
 extern u32 g_main_secondary_saved_data_bits[2];
 
 void main_save_init_data_tables(void);
@@ -698,52 +616,6 @@ typedef enum main_env_sfx {
     MAIN_ENV_SFX_THUNDER_B = 14,
 } main_env_sfx_e;
 
-extern u8 g_main_sound_env_sed_data[];
-extern u8 g_main_sound_system_sed_data[];
-extern main_sound_music_t g_main_sound_music;
-extern file_extent_t g_main_sound_scenario_smd_files[];
-extern file_extent_t g_main_sound_permanent_smd_files[5];
-extern s32 g_main_sound_weather_sfx_id; /* the background sound main_sound_play_bg_sfx started, 0 for none */
-
-void main_sound_set_sfx_echo(int sound_id, int volume);
-void main_sound_stop_weather_sfx_music(void);
-void main_sound_stop_current_weather_sfx(void);
-s32 main_sound_get_current_scenario_music(void);
-suzuki_music_t* main_sound_get_music_handle(s32 slot);
-
-/* Verified SCUS scenario-music and tune wrappers. Include this header in
- * their definitions as well as callers so ABI declarations cannot drift. */
-s32 main_sound_open_and_play_music(s32 music_id, s32 slot);
-void main_sound_open_generic_sfx(void);
-s32 main_sound_open_music_into_free_slot(s32 music_id);
-s32 main_sound_open_music_into_slot(s32 music_id, s32 slot);
-s32 main_sound_open_scenario_smd_files(s32 music_id);
-void main_sound_play_sfx(s32 sound_id);
-void main_sound_play_bg_sfx(s32 sound_id);
-void main_sound_play_sfx_find_channel(s32 sound_id);
-s32 main_sound_play_tune(s32 tune);
-s32 main_sound_poll_scenario_smd_load(void);
-s32 main_sound_set_current_music_balance_shift_timed(s32 value, s32 time);
-s32 main_sound_set_current_music_pitch_shift_timed(s32 value, s32 time);
-s32 main_sound_set_current_music_target(s32 volume, s32 time);
-s32 main_sound_set_current_music_tempo_scale_timed(s32 value, s32 time);
-void main_sound_set_current_music_track(s32 music_id);
-s32 main_sound_set_current_music_volume(s32 volume, s32 time);
-s32 main_sound_set_current_music_volume_timed(s32 time);
-s32 main_sound_set_tune_volume(s32 time);
-s32 main_sound_stop_current_music(void);
-
-/* battle_map_step_init_sequence calls this without loading $a0, but the body reads sound_id. */
-void main_sound_stop_sfx(int sound_id);
-suzuki_music_t* main_sound_switch_music_track(s32 slot, s32 volume, s32 fade);
-void main_sound_unload_current_scenario_music(void);
-s32 main_sound_unload_scenario_mus(s32 slot);
-void main_sound_unload_scenario_music_and_tunes(void);
-s32 main_sound_update_tunes(void);
-s32 main_sound_wait_for_scenario_smd_load(s32 music_id);
-void main_sound_replay_bg_sfx(void);
-s32 main_sound_is_music_loading_stub(void);
-
 /* status */
 /* Values accepted by main_status_set_action_state. */
 typedef enum main_unit_action_state {
@@ -769,19 +641,6 @@ typedef enum main_status_change {
     MAIN_STATUS_REMOVE = 1,
     MAIN_STATUS_REPLACE = 2
 } main_status_change_e;
-
-extern status_infliction_data_t g_main_status_infliction_data[];
-extern const status_effect_data_t g_main_status_effect_data[STATUS_COUNT];
-
-/* Built status masks, indexed by main_status_check_set_e. */
-extern u8 g_main_status_check_sets[MAIN_STATUS_CHECK_SET_COUNT][STATUS_BYTE_COUNT];
-
-void main_status_init_check_data(void);
-void main_status_change_unit(unit_stats_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
-void main_status_set_action_state(unit_stats_t* unit, u8 action_state);
-s32 main_status_set_ct(unit_stats_t* unit, s32 status_id, s32 removing);
-void main_status_store_current(unit_stats_t* unit);
-s32 main_status_find_action_highest_order_effect(const action_data_t* action);
 
 /* system */
 /* Bits of g_main_system_flags, the 32-bit control flags of the WLDCORE world-map
@@ -911,22 +770,6 @@ void main_system_store_stack_pointer(u32* destination);
 void main_system_handle_draw_sync_callback(void);
 void main_system_handle_vsync_callback(void);
 
-/* boot */
-extern s32 g_main_boot_startup2_has_run;
-extern u32 g_main_boot_squaresoft_logo_image_words[];
-
-void main_boot_run_startup(void);
-void main_boot_reset_game_state(void);
-void main_boot_build_and_draw_sceap_logo(void);
-void main_boot_build_and_draw_squaresoft_logo(void);
-void main_boot_fade_out_squaresoft_logo(void);
-
-/* overlay */
-int main_overlay_exec_open_bin_main_loop(int mode);
-void main_overlay_exec_open_bin_ending(void);
-int main_overlay_open_world_and_wldcore(int load_world);
-void main_overlay_open_world_bin(s32 mode);
-
 /* heap */
 /* Game and music heaps allocate whole pages, tagged by these byte tables. */
 enum {
@@ -935,23 +778,6 @@ enum {
     MAIN_HEAP_GAME_PAGE_COUNT = 64,
     MAIN_HEAP_SMD_PAGE_COUNT = 16,
 };
-
-extern u8 g_main_heap_game_allocator_table[MAIN_HEAP_GAME_PAGE_COUNT];
-extern u8 g_main_heap_smd_allocator_table[MAIN_HEAP_SMD_PAGE_COUNT];
-extern u8 g_main_heap_smd_base[];
-extern u8* g_main_heap_high_overlay_load_address;
-extern u8* g_main_heap_low_overlay_load_address;
-extern u8* g_main_heap_world_overlay_load_address;
-extern u8* g_main_heap_companion_overlay_load_address;
-
-void* main_heap_alloc(u32 size);
-void* main_heap_alloc_smd(u32 size);
-void main_heap_call_free(void* allocation);
-void main_heap_clear_game_allocator_table(void);
-s32 main_heap_free(void* allocation);
-u8* main_heap_reserve_at(u8* allocation, u32 size);
-s32 main_heap_free_smd(void* allocation);
-void main_heap_clear_smd_allocator_table(void);
 
 /* utilities */
 s32 main_util_roll_pass_fail(s32 maximum, s32 threshold);
@@ -979,72 +805,10 @@ typedef struct main_unit_generation_base_data {
 } main_unit_generation_base_data_t;
 typedef char main_unit_generation_base_data_size_must_be_12[(sizeof(main_unit_generation_base_data_t) == 12) ? 1 : -1];
 
-extern u8 g_main_party_highest_level;
-extern s32 g_main_entd_current_event_id;
-extern entd_file_t* g_main_entd_set;
-extern entd_unit_t* g_main_entd_current_unit;
-extern party_unit_t g_main_party_units[PARTY_ROSTER_SLOT_COUNT];
-extern main_unit_generation_base_data_t g_main_unit_generation_base_data[MAIN_UNIT_TYPE_COUNT];
-extern u8 g_main_unit_generation_raw_stat_variance[MAIN_UNIT_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
-extern u32 g_main_unit_name_uses_world_text;
-extern unit_deployment_coordinates_t* g_main_unit_deployed_coords;
-extern u8 g_main_crystal_learnable_abilities[];
-extern crystal_pickup_result_t g_main_crystal_pickup_result;
-extern u8 g_main_crystal_treasure_item_id;
 extern unit_deployment_coordinates_t g_main_deployed_unit_map_coordinates[6];
-
-void main_unit_update_formation_stats(unit_stats_t* unit);
-
-/* Current encounter, NULL while loading, or (entd_encounter_t *)-1 when
- * no encounter is selected. */
-entd_encounter_t* main_entd_get_encounter(void);
-int main_entd_open_file(void);
-void main_entd_init_event_unit_data(int event_id);
-void main_party_clear_all(void);
-s32 main_party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color);
-s32 main_party_find_free_slot(s32 save_formation, u8* palette);
-
-/* Out-of-battle generation normalizes every value except male, female and
- * monster to Ramza. The raw-stat generator indexes the tables directly. */
-s32 main_party_generate_unit(main_unit_generation_type_e unit_type);
-party_unit_t* main_party_get_unit(s32 party_index);
-void main_party_init_new_game(s32 mode);
-u32 main_party_level_unit_to_target(party_unit_t* party_unit, s32 level_delta);
-void main_party_remove_unit(u32 index);
-s32 main_party_save_unit(unit_stats_t* unit, s32 allow_guest);
-void main_unit_apply_level_growth(unit_stats_t* unit, s32 level_down);
-void main_unit_calculate_move_jump(unit_stats_t* unit, s32 keep_position);
-u8 main_unit_calculate_palette_spritesheet(unit_stats_t* unit, u8* palette);
-s32 main_unit_calculate_random_equipment(
-    unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
-u16 main_unit_calculate_rsm(unit_stats_t* unit, u16 ability_id, s32 flags, entd_unit_t* entd);
-s32 main_unit_calculate_zodiac_symbol(u16 birthday);
-s32 main_unit_check_level_up(unit_stats_t* unit);
-void main_unit_copy_last_ability_ct(unit_stats_t* unit);
-void main_unit_enable_rsm_flags(unit_stats_t* unit);
-s32 main_unit_has_status_in_set(const unit_stats_t* unit, main_status_check_set_e status_set);
-s32 main_unit_init(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initialize_for_battle);
-s32 main_unit_init_for_battle(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind);
-s32 main_unit_init_job_data(unit_stats_t* unit, s32 slot, s32 use_world_text);
-void main_unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels);
-void main_unit_init_status_and_rewards(unit_stats_t* unit, s32 clear_rewards);
-void main_unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_unit_t* entd);
-void main_unit_refresh_stats_and_statuses(unit_stats_t* unit);
-void main_unit_reset_battle_state(unit_stats_t* unit);
-void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check);
-
-/* SCUS_942.21 unit equipment/name pipeline, 0x8005ab00 and
- * 0x8005c398..0x8005cbd0. Signatures are shared with the matching definitions. */
-void main_unit_set_equipment_stats(unit_stats_t* unit);
-void main_unit_set_equippable_items(unit_stats_t* unit);
-u8 main_party_calculate_highest_level(void);
-void main_unit_increase_casualty_counters(unit_stats_t* unit);
-void main_unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd);
 
 /* zodiac */
 
-extern const u16 g_main_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
-extern POLY_FT4 g_main_zodiac_primitives[2][30];
 extern u16 g_main_month_start_day_offsets[13];
 
 /* gfx */
@@ -1083,40 +847,10 @@ typedef struct main_gfx_frame_bin {
 } main_gfx_frame_bin_t;
 typedef char main_gfx_frame_bin_size_must_be_38912[(sizeof(main_gfx_frame_bin_t) == 38912) ? 1 : -1];
 
-extern RECT g_main_gfx_frame_image_rect;
-extern RECT g_main_gfx_frame_palette_rect;
-extern RECT g_main_gfx_frame_palette_tail_rect;
-extern palette_t g_main_gfx_now_loading_palette;
-extern u32 g_main_gfx_now_loading_frame_counter;
-extern u32 g_main_gfx_now_loading_otags[2][2];
-
-/* Seven textured quads for each display buffer. */
-extern POLY_FT4 g_main_gfx_now_loading_primitives[2][7];
-extern u32 g_main_gfx_now_loading_visible;
-extern u32 g_main_gfx_battle_otags[2][0x180];
-extern main_gfx_unit_graphics_load_queue_t g_main_gfx_unit_graphics_load_queue;
-extern upoint16_t g_main_gfx_zodiac_screen_position;
-extern DISPENV g_main_gfx_display_envs[2];
-extern DRAWENV g_main_gfx_draw_envs[2];
-extern s32 g_main_gfx_loading_display_frame_counter;
-extern s32 g_main_gfx_screen_polarity;
 extern s32 g_main_font_print_enabled;
 extern u8 g_main_common_menu_graphics_loaded;
-extern u8 g_main_special_portrait_unit_id;
-extern u8 g_main_special_portrait_wldface_id;
 
-void main_gfx_add_now_loading_to_otag(u32* otag);
-void main_gfx_build_now_loading(u32 visible, s32 x, s32 y);
-void main_gfx_draw_now_loading_message(void);
-u32* main_gfx_get_otag(void);
-void main_gfx_load_efc_fnt(void);
-void main_gfx_load_frame_bin_into_vram(void);
-void main_gfx_load_zodiac_frame(void);
-void main_gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
-void main_gfx_swap_and_clear_otag(void);
 void main_set_display_draw(int width, int height, int projection, u8 red, u8 green, u8 blue);
-void main_gfx_build_now_loading_center(u32 visible);
-void main_gfx_call_build_zodiac_bin(zodiac_draw_context_t* context, POLY_FT4* poly);
 
 /* menu */
 extern u8 g_main_menu_scroll_accel_delay;

@@ -1,7 +1,7 @@
 /* GNS command application, GNS and move-find item loading, and file load starts. */
 
 #include "fft/battle_map.h"
-#include "fft/main.h"
+#include "fft/main_file.h"
 #include "fft/script.h"
 #include "psx/libc.h"
 #include "psx/types.h"

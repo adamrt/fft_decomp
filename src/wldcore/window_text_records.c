@@ -3,6 +3,7 @@
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/wldcore.h"
+#include "fft/wldcore_window.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -1,4 +1,4 @@
-#include "fft/main.h"
+#include "fft/main_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
