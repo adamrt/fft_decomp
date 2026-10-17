@@ -89,20 +89,15 @@ typedef struct effect_secondary_init {
     u8 spectator_count; /* 0x02; entries in spectator_ids */
     u8 math_skill_flag; /* 0x03; enables the effect flags' spawn_delay_override */
     effect_target_t targets[EFFECT_TARGET_COUNT_MAX + 1]; /* 0x04; caster at EFFECT_CASTER_ENTRY */
-    /* 0xae; living units that are neither targets nor the caster; also accessed
-     * through the separately bound g_effect_palette_target_runtime_ids. */
-    u8 spectator_ids[14];
-    effect_target_t target_tile; /* 0xbc; post-action destination tile */
-    u16 used_weapon_id;          /* 0xc6 */
+    /* 0xae; at most 15 units with stats, excluding targets and the caster. */
+    u8 spectator_ids[UNIT_RUNTIME_SLOT_COUNT - 1];
+    u8 _unused_bd;
+    SVECTOR target_tile; /* 0xbe; post-action destination tile, x/layer/y */
+    u16 used_weapon_id;  /* 0xc6 */
 } effect_secondary_init_t;
 typedef char effect_secondary_init_size_must_be_200[(sizeof(effect_secondary_init_t) == 200) ? 1 : -1];
 
 extern effect_secondary_init_t g_effect_context;
-extern u8 g_effect_palette_target_runtime_ids[];
-
-/* Tile target of the current effect: emitter origin CURSOR_TILE, homing CURSOR_TILE and camera source
- * CURSOR_TILE. */
-extern effect_target_t g_effect_target_tile;
 
 void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void effect_get_world_coords_by_battle_id(

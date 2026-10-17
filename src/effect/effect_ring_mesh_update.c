@@ -129,11 +129,11 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         case EFFECT_EMITTER_ORIGIN_WORLD:
             break;
         case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-            tile = battle_map_tile_get_pointer(g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz,
-                g_effect_target_tile.data.tile.vy);
-            origin.vx += g_effect_target_tile.data.tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+            tile = battle_map_tile_get_pointer(
+                g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
+            origin.vx += g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
             origin.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
-            origin.vz += g_effect_target_tile.data.tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+            origin.vz += g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
             break;
         case EFFECT_EMITTER_ORIGIN_CASTER:
             effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,

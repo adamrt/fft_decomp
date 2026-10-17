@@ -1454,7 +1454,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
                     for (i = 0; i < g_effect_context.spectator_count; i++) {
                         sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
+                            track->duration[index], g_effect_context.spectator_ids[i], red, green, blue);
                     }
                     /* The darkness color has 8-bit channels; the offsets are 5-bit palette steps. */
                     if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
@@ -1770,7 +1770,7 @@ static void effect_timeline_advance_surroundings_palette_track(
                     preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
                 for (i = 0; i < g_effect_context.spectator_count; i++) {
                     sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                        track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
+                        track->duration[index], g_effect_context.spectator_ids[i], red, green, blue);
                 }
                 if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
                     battle_map_darkness_start_blend(

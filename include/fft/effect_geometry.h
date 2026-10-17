@@ -12,7 +12,7 @@
  * every handler adds half the map geometry width and depth there. */
 typedef enum effect_emitter_origin {
     EFFECT_EMITTER_ORIGIN_WORLD = 0x000,
-    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* center of g_effect_target_tile */
+    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* center of g_effect_context.target_tile */
     EFFECT_EMITTER_ORIGIN_CASTER = 0x400,
     EFFECT_EMITTER_ORIGIN_TARGET = 0x600,
     EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE = 0x800, /* position of the spawning work record */

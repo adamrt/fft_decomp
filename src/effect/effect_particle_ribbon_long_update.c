@@ -234,10 +234,10 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
             case EFFECT_EMITTER_ORIGIN_WORLD:
                 break;
             case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-                tile = battle_map_tile_get_pointer(g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz,
-                    g_effect_target_tile.data.tile.vy);
-                origin.vx += g_effect_target_tile.data.tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-                origin.vz += g_effect_target_tile.data.tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+                tile = battle_map_tile_get_pointer(
+                    g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
+                origin.vx += g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+                origin.vz += g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
                 origin.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
                 break;
             case EFFECT_EMITTER_ORIGIN_CASTER:
@@ -316,10 +316,10 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
                 target_base.vz += target.vz;
                 break;
             case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-                tile = battle_map_tile_get_pointer(g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz,
-                    g_effect_target_tile.data.tile.vy);
-                target_base.vx += g_effect_target_tile.data.tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-                target_base.vz += g_effect_target_tile.data.tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+                tile = battle_map_tile_get_pointer(
+                    g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
+                target_base.vx += g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+                target_base.vz += g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
                 target_base.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
                 break;
             }

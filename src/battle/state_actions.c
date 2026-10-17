@@ -73,8 +73,8 @@ static void effect_start_for_action(s32 ability, unit_t* unit) {
     init.target_count = unit->strike.target_count;
     init.targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
     init.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id = unit->runtime_id;
-    vector_set_svector(&init.target_tile.data.tile, unit->strike.target_new_x, unit->strike.target_new_map_level,
-        unit->strike.target_new_y);
+    vector_set_svector(
+        &init.target_tile, unit->strike.target_new_x, unit->strike.target_new_map_level, unit->strike.target_new_y);
     block = &unit->strike;
     if (init.target_count != 0) {
         for (i = 0; i < init.target_count; i++) {

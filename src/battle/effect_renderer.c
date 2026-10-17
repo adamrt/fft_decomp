@@ -713,7 +713,7 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
         unit_coords = unit_get_event_offset_by_runtime_id(g_effect_context.targets[target_index].data.unit.runtime_id);
     }
     tile = battle_map_tile_get_pointer(
-        g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
+        g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
 
     EFFECT_READ_CURVE(curve, factor,
         (entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT) & 0xf, frame);
@@ -741,8 +741,8 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
     case EFFECT_EMITTER_ORIGIN_WORLD:
         break;
     case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-        spawn.vx += g_effect_target_tile.data.tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        spawn.vz += g_effect_target_tile.data.tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+        spawn.vx += g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+        spawn.vz += g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
         spawn.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
         break;
     case EFFECT_EMITTER_ORIGIN_CASTER:
@@ -1018,8 +1018,8 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
         }
         break;
     case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-        tile_anchor.vx = g_effect_target_tile.data.tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        tile_anchor.vz = g_effect_target_tile.data.tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+        tile_anchor.vx = g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+        tile_anchor.vz = g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
         tile_anchor.vy = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
         for (i = 0; i < count; i++) {
             particle->target.x = tile_anchor.vx + target_offset.vx;
