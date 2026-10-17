@@ -863,7 +863,7 @@ s32 move_start_next_post_event(void) {
     s32 trap;
 
     menu_init_system_function(MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
-    g_game_state = GAME_STATE_CRYSTAL_LEARN;
+    g_game_state = GAME_STATE_POST_MOVE_EVENTS;
     g_state_window_closed = 0;
     casting->state_frame_counter = 0;
     if (g_move_post_events & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
@@ -916,7 +916,7 @@ s32 move_start_next_post_event(void) {
         switch (g_reward_report_phase) {
         case REWARD_REPORT_LEVEL_UP:
             move_init_ability_benefit(casting->stats);
-            reward_build_display(casting->stats, &casting->strike.action_rewards);
+            reward_apply_result_and_collect(casting->stats, &casting->strike.action_rewards);
             result_prepare_display(casting);
             result_init_earned_exp_jp_display(casting);
             reward_report_level_up(casting);
@@ -942,13 +942,13 @@ s32 move_start_next_post_event(void) {
         return 1;
     }
     if (g_move_post_events & MOVE_POST_EVENT_TRAP_TRIGGERED) {
-        trap = move_find_apply_trap(casting->stats);
+        trap = move_find_prepare_trap_result(casting->stats);
         if ((source->pending_attack_result = action_apply_target_result(source->stats->battle_id)) == -1) {
             unit_find_relocation_tile(source->stats->battle_id, &source->dismount);
             unit_dismount_dead_rider(source);
         }
         result_prepare_display(source);
-        animation_set_target(0, source);
+        action_start_target_response(0, source);
         effect_secondary_set_trap(source);
         menu_init_system_function(MENU_SYSTEM_COMMAND_TRAP_RESULT, trap, source->stats->battle_id, 0, 1);
         ai_record_triggered_trap_coords(casting->map_x, casting->map_z, casting->map_y);
@@ -1600,12 +1600,12 @@ void state_enter_battle_message_display(void) {
  *
  * Phase 0 reports a level up, phase 1 a job level up, and phase 2 looks for a
  * unit that learns the used ability on hit; without one the phase advances. */
-void state_enter_learn_ability_on_hit(void) {
+void state_enter_post_action_reports(void) {
     unit_t* unit;
     unit_t* learner;
     u16 ability_id;
 
-    g_game_state = GAME_STATE_LEARN_ABILITY_ON_HIT;
+    g_game_state = GAME_STATE_POST_ACTION_REPORTS;
     g_system_vsync_interval = 1;
     unit = unit_get_source();
     menu_init_system_function(MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
@@ -1636,7 +1636,7 @@ void state_enter_learn_ability_on_hit(void) {
 /* Start the post-action reports: restore the units' facings, apply the source
  * unit's EXP and JP rewards (clearing the display values when nothing is
  * awarded), start the earned EXP/JP display and enter the level-up phase of
- * state_enter_learn_ability_on_hit. */
+ * state_enter_post_action_reports. */
 void reward_grant(void) {
     unit_t* unit = unit_get_source();
     unit_stats_t* stats;
@@ -1654,7 +1654,7 @@ void reward_grant(void) {
     result_init_earned_exp_jp_display(unit);
     g_reward_report_phase = REWARD_REPORT_LEVEL_UP;
     cursor_move_to_unit(unit);
-    state_enter_learn_ability_on_hit();
+    state_enter_post_action_reports();
     g_state_window_closed = 0;
     g_state_animation_continue_check = 0;
 }

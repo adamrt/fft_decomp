@@ -766,7 +766,7 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
         }
         break;
     case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
-        battle_map_store_max_coordinates(&map_max);
+        battle_map_store_dimensions(&map_max);
         spawn.vx += map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
         spawn.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
         break;
@@ -1000,7 +1000,7 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
         }
         break;
     case EFFECT_EMITTER_HOMING_MAP_CENTER:
-        battle_map_store_max_coordinates(&map_max);
+        battle_map_store_dimensions(&map_max);
         for (i = 0; i < count; i++) {
             particle->target.x = map_max.vx * (BATTLE_MAP_TILE_SIZE / 2) + target_offset.vx;
             particle->target.z = map_max.vz * (BATTLE_MAP_TILE_SIZE / 2) + target_offset.vz;
@@ -1097,7 +1097,7 @@ s32 effect_slot_spawn_motion(effect_emitter_values_t* values, effect_motion_t* m
     VECTOR angle;
     VECTOR half_spread;
     u8 _unused_c0[0x28]; /* reserved by the target frame, never referenced */
-    effect_secondary_init_t init;
+    effect_context_t init;
     s32 oriented;
     s16 scale;
     s16 speed_min;
@@ -1525,8 +1525,7 @@ void effect_model_decode_next_command(effect_decoded_model_command_t* out) {
  * onto it (y grows downward). A tile target uses the tile center
  * (x * 28 + 14, y * 28 + 14) and takes its height from the tile record,
  * adding the depth when add_depth is set. */
-void effect_resolve_target_world_coords(
-    s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out) {
+void effect_resolve_target_world_coords(s32 add_depth, s32 target_index, effect_context_t* coord_data, SVECTOR* out) {
     battle_map_tile_t* tile;
 
     if (target_index == EFFECT_TARGET_INDEX_CASTER) {
@@ -1586,7 +1585,7 @@ void effect_resolve_target_world_coords(
  * runtime id where effect_resolve_target_world_coords expects an index
  * into the effect's target list. Nothing in the game calls it. */
 void effect_get_world_coords_by_battle_id(
-    s32 adjust_for_tile_height, u32 battle_id, effect_secondary_init_t* effect_coordinates, SVECTOR* destination) {
+    s32 adjust_for_tile_height, u32 battle_id, effect_context_t* effect_coordinates, SVECTOR* destination) {
     effect_resolve_target_world_coords(
         adjust_for_tile_height, unit_get_runtime_id_by_battle_id(battle_id), effect_coordinates, destination);
 }

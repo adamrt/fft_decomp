@@ -333,8 +333,8 @@ void battle_entrypoint(void) {
             case GAME_STATE_WAIT_MENU:
                 state_handle_wait_menu();
                 break;
-            case GAME_STATE_CRYSTAL_LEARN:
-                state_handle_crystal_learn();
+            case GAME_STATE_POST_MOVE_EVENTS:
+                state_handle_post_move_events();
                 break;
             case GAME_STATE_TARGETING_PROMPT:
                 state_handle_targeting_prompt();
@@ -384,8 +384,8 @@ void battle_entrypoint(void) {
             case GAME_STATE_RESUME_ATTACK_PHASE:
                 state_handle_resume_attack_phase();
                 break;
-            case GAME_STATE_LEARN_ABILITY_ON_HIT:
-                state_handle_learn_ability_on_hit();
+            case GAME_STATE_POST_ACTION_REPORTS:
+                state_handle_post_action_reports();
                 break;
             case GAME_STATE_DEEP_DUNGEON_MESH_LOAD:
                 state_handle_deep_dungeon_mesh_load();
@@ -569,7 +569,7 @@ unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z) {
     unit = g_unit_list_head;
     while (unit != 0) {
         if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_z == map_z) && (unit->stats != 0)
-            && (unit->stats->entd_slot != UNIT_ENTD_SLOT_NONE)
+            && (unit->stats->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)
             && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP)) == 0)) {
             matches[count++] = unit;
         }
@@ -606,7 +606,7 @@ unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map
     unit = g_unit_list_head;
     while (unit != 0) {
         if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_z == map_z) && (unit->stats != 0)
-            && (unit->stats->entd_slot != UNIT_ENTD_SLOT_NONE)
+            && (unit->stats->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)
             && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) != 0)) {
             matches[count++] = unit;
         }
@@ -680,7 +680,7 @@ unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 z) {
     for (unit = g_unit_list_head; unit != 0; unit = unit->previous) {
         if (unit != self && unit->map_x == x && unit->map_y == y && unit->map_z == z) {
             stats = unit->stats;
-            if (stats != 0 && stats->entd_slot != UNIT_ENTD_SLOT_NONE) {
+            if (stats != 0 && stats->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
                 if (self->mount_state == UNIT_MOUNT_STATE_NONE || unit->runtime_id != self->mount_partner_runtime_id) {
                     list[count] = unit;
                     count += 1;

@@ -361,8 +361,8 @@ typedef enum battle_map_tile_data_selector {
     BATTLE_MAP_TILE_DATA_ABILITY_RANGE_MARK = 13,
 } battle_map_tile_data_selector_e;
 
-extern u8 g_battle_map_max_x;
-extern u8 g_battle_map_max_y;
+extern u8 g_battle_map_terrain_width;
+extern u8 g_battle_map_terrain_depth;
 
 /* Battle terrain: two layers of 256 records, indexed
  * (layer * 256 + y * width + x). Callers that walk it with raw byte offsets
@@ -381,7 +381,7 @@ battle_map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
 battle_map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id);
 battle_map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id);
 s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z);
-void battle_map_store_max_coordinates(SVECTOR* destination);
+void battle_map_store_dimensions(SVECTOR* destination);
 
 /* A typed terrain parameter loses the first retail byte-cursor increment. */
 void battle_map_tile_copy_size_and_data(u8* data);

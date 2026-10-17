@@ -189,7 +189,7 @@ void move_step_start_teleport_animation(unit_t* unit) {
 
 /* Puts the unit in the TELEPORT_START step phase. The init record it builds is not used. */
 void move_step_start_teleport(unit_t* unit) {
-    effect_secondary_init_t data;
+    effect_context_t data;
 
     effect_secondary_build_init(unit, &data);
     unit->step_phase = MOVE_STEP_PHASE_TELEPORT_START;

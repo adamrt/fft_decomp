@@ -33,6 +33,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Set before allocation and read acceptance: a failed request can be skipped
+ * on the next step because its ID already matches. */
+extern s32 g_sprite_last_requested_shp_id;
+extern s32 g_sprite_last_requested_seq_id;
+
 static file_extent_t g_sprite_seq_files[9] = { { 57037, 8192 }, { 57045, 8192 }, { 57053, 4096 }, { 57055, 6144 },
     { 57058, 4096 }, { 57060, 4096 }, { 57062, 4096 }, { 57064, 4096 }, { 0, 0 } };
 static file_extent_t g_sprite_shp_files[9] = { { 57017, 8192 }, { 57021, 10240 }, { 57026, 8192 }, { 57030, 4096 },
@@ -837,7 +842,7 @@ static void animation_set_attacker_for_shield_block(unit_t* attacker, unit_t* ta
  * crystal up play only the hurt animation. Knockback, Poach and Morbol start
  * here, and a broken or stolen item rebuilds the target's AI ability data.
  */
-void animation_set_target(unit_t* attacker, unit_t* target) {
+void action_start_target_response(unit_t* attacker, unit_t* target) {
     unit_stats_t* stats;
     action_data_t* action;
     s32 animation;
@@ -1415,7 +1420,7 @@ static void animation_run_unit_seq_script(unit_t* unit, animation_state_t* state
                         for (i = 0; i < unit->strike.target_count; i++) {
                             target = unit_get_by_battle_id(unit->strike.target_list[i]);
                             if (target != 0) {
-                                animation_set_target(unit, target);
+                                action_start_target_response(unit, target);
                                 animation_set_attacker_for_shield_block(unit, target);
                                 result_prepare_display_by_runtime_id(target->runtime_id);
                                 effect_secondary_start_weapon_hit(unit, 0);
@@ -3453,8 +3458,8 @@ void deploy_init_and_reset_sprite_load_state(void) {
  *
  * g_sprite_load_state holds the file kind (0 SHP, 1 SEQ, 2 SPR), the
  * phase (0 read, 1 wait, 2 install, 3 finish), the descriptor index and the
- * heap buffer. SHP/SEQ ids up to OTHER, or equal to the one already resident, and
- * an already loaded spritesheet skip the read. Returns 0 once every
+ * heap buffer. Shared SHP/SEQ ids or the last requested id skip the read, as
+ * does an already loaded spritesheet. Returns 0 once every
  * descriptor is done, otherwise 1 inside a step and 2 after a step boundary. */
 s32 sprite_load_step_queued(void) {
     s32 result = 1;
@@ -3467,14 +3472,14 @@ s32 sprite_load_step_queued(void) {
             id = g_sprite_sheet_data[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                      .shp_id;
             /* SHP ids up to OTHER are the shared files the startup loader keeps resident. */
-            if (id <= SPRITE_SHP_OTHER || id == g_sprite_last_loaded_shp_id) {
+            if (id <= SPRITE_SHP_OTHER || id == g_sprite_last_requested_shp_id) {
                 result = 2;
                 g_sprite_load_state.buffer = 0;
                 g_sprite_load_state.phase = SPRITE_LOAD_PHASE_FINISH;
                 break;
             }
 
-            g_sprite_last_loaded_shp_id = id;
+            g_sprite_last_requested_shp_id = id;
             g_sprite_load_state.buffer = heap_alloc(g_sprite_shp_files[id].size);
             if (g_sprite_load_state.buffer == 0) {
                 break;
@@ -3491,14 +3496,14 @@ s32 sprite_load_step_queued(void) {
             id = g_sprite_sheet_data[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                      .seq_id;
             /* SEQ ids up to OTHER are likewise resident. */
-            if (id < SPRITE_SEQ_RUKA || id == g_sprite_last_loaded_seq_id) {
+            if (id < SPRITE_SEQ_RUKA || id == g_sprite_last_requested_seq_id) {
                 result = 2;
                 g_sprite_load_state.buffer = 0;
                 g_sprite_load_state.phase = SPRITE_LOAD_PHASE_FINISH;
                 break;
             }
 
-            g_sprite_last_loaded_seq_id = id;
+            g_sprite_last_requested_seq_id = id;
             g_sprite_load_state.buffer = heap_alloc(g_sprite_seq_files[id].size);
             if (g_sprite_load_state.buffer == 0) {
                 break;

@@ -226,7 +226,7 @@ s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit);
  * Byte 2 holds Death Sentence CT only in the compact suspended record;
  * the baseline uses status_ct[15] and leaves this byte untouched. */
 typedef struct ai_status_snapshot {
-    u8 entd_slot;
+    u8 active_battle_id;
     u8 death_counter;
     u8 death_sentence_ct;
     u8 current_status[STATUS_BYTE_COUNT];
@@ -398,21 +398,22 @@ typedef struct ai_data {
     action_command_t unit_action_records[AI_COMPACT_UNIT_COUNT]; /* 0x0cd4 */
     u16 throw_ability_id;                                        /* 0x0e14 */
     u8 throw_weapon_id;                                          /* 0x0e16 */
-    /* All slots with entd_slot != 0xff, capped at 255 by ai_init_workspace. */
-    u8 present_unit_average_max_hp;           /* 0x0e17 */
-    u8 unit_acts_before_me[UNIT_SLOT_COUNT];  /* 0x0e18; all slots cleared by the action simulation */
-    u8 movement_scenario;                     /* 0x0e2d; 0..2 */
-    u8 acting_unit_id;                        /* 0x0e2e */
-    u8 acting_unit_compact_index;             /* 0x0e2f; unit_compact_indices[acting_unit_id] */
-    ai_coords_t acting_unit_coords;           /* 0x0e30 */
-    ai_unit_decision_t* acting_unit_decision; /* 0x0e34 */
-    u8 acting_unit_move;                      /* 0x0e38 */
-    u8 acting_unit_team;                      /* 0x0e39 */
-    u8 map_max_x;                             /* 0x0e3a */
-    u8 map_max_y;                             /* 0x0e3b */
-    u16 team_golem[UNIT_TEAM_COUNT];          /* 0x0e3c; scored as 16-bit values by the action simulation */
-    u8 status_to_cancel[STATUS_BYTE_COUNT];   /* 0x0e44; the statuses the actor's usable abilities cancel, built by
-                                                        ai_ability_set_considerations */
+    /* All slots with active_battle_id != 0xff, capped at 255 by ai_init_workspace. */
+    u8 present_unit_average_max_hp;                /* 0x0e17 */
+    u8 unit_had_move_opportunity[UNIT_SLOT_COUNT]; /* 0x0e18; possible relocation before simulated effects, not an
+                                                      executed move */
+    u8 movement_scenario;                          /* 0x0e2d; 0..2 */
+    u8 acting_unit_id;                             /* 0x0e2e */
+    u8 acting_unit_compact_index;                  /* 0x0e2f; unit_compact_indices[acting_unit_id] */
+    ai_coords_t acting_unit_coords;                /* 0x0e30 */
+    ai_unit_decision_t* acting_unit_decision;      /* 0x0e34 */
+    u8 acting_unit_move;                           /* 0x0e38 */
+    u8 acting_unit_team;                           /* 0x0e39 */
+    u8 terrain_width;                              /* 0x0e3a */
+    u8 terrain_depth;                              /* 0x0e3b */
+    u16 team_golem[UNIT_TEAM_COUNT];               /* 0x0e3c; scored as 16-bit values by the action simulation */
+    u8 status_to_cancel[STATUS_BYTE_COUNT];        /* 0x0e44; the statuses the actor's usable abilities cancel, built by
+                                                             ai_ability_set_considerations */
     /* Resumable reflected-origin search (ai_origin_evaluate_reflected).
      * Candidate x/y = 2 * reflector position - intended target position. */
     u8 reflector_unit_index;                                         /* 0x0e49 */
@@ -427,16 +428,16 @@ typedef struct ai_data {
     u8 saved_current_status;                                         /* 0x0ed1 */
     u8 saved_inflicted_status;                                       /* 0x0ed2 */
     u8 _unused_0ed3;
-    u8 main_ai_state;          /* 0x0ed4; ai_command_build_stage_e */
-    u8 autobattle_state;       /* 0x0ed5; ai_general_stage_e */
-    u8 charging_state;         /* 0x0ed6; ai_charging_stage_e */
-    u8 cast_origin_stage;      /* 0x0ed7; ai_cast_origin_stage_e */
-    u8 reflected_origin_phase; /* 0x0ed8; set and cleared by the reflected-origin search */
-    u8 highest_priority_state; /* 0x0ed9; ai_origin_evaluation_stage_e */
-    u8 max_possibilities;      /* 0x0eda; byte-truncated combination count, then the scan x of
-                                * ai_origin_evaluate_reachable */
-    u8 y_counter;              /* 0x0edb */
-    u8 map_level_counter;      /* 0x0edc */
+    u8 main_ai_state;           /* 0x0ed4; ai_command_build_stage_e */
+    u8 general_selection_stage; /* 0x0ed5; ai_general_stage_e */
+    u8 charging_state;          /* 0x0ed6; ai_charging_stage_e */
+    u8 cast_origin_stage;       /* 0x0ed7; ai_cast_origin_stage_e */
+    u8 reflected_origin_phase;  /* 0x0ed8; set and cleared by the reflected-origin search */
+    u8 origin_evaluation_stage; /* 0x0ed9; ai_origin_evaluation_stage_e */
+    u8 max_possibilities;       /* 0x0eda; byte-truncated combination count, then the scan x of
+                                 * ai_origin_evaluate_reachable */
+    u8 y_counter;               /* 0x0edb */
+    u8 map_level_counter;       /* 0x0edc */
     /* Calculator search counters (ai_math_evaluate_targets) survive suspension. */
     u8 math_ability_id;       /* 0x0edd; low byte of the selected ability entry */
     u8 math_type_index;       /* 0x0ede; 0..3 */

@@ -14,7 +14,7 @@
 static s32 formula_accuracy_calculate_friendly_magic(void) {
     formula_apply_magic_attack_up();
     formula_apply_zodiac_compatibility();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_calculate_faith();
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
@@ -36,7 +36,7 @@ static s32 formula_accuracy_calculate_golem(void) {
 
     formula_store_ma_and_x();
     formula_apply_magic_attack_up();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     if ((g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)] & STATUS_BYTE_MASK(STATUS_ID_FAITH))
         != 0) {
         g_action_current_ability.attacker_faith = 100;
@@ -74,7 +74,7 @@ void formula_calculate_truth_damage(void) {
 static s32 formula_accuracy_calculate_magic_without_strengthen(void) {
     formula_store_ma_and_x();
     formula_apply_magical_modifiers();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_calculate_faith();
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
@@ -86,7 +86,7 @@ s32 formula_accuracy_calculate_magic(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_calculate_faith();
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
@@ -97,7 +97,7 @@ s32 formula_accuracy_calculate_magic_without_faith(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
@@ -117,7 +117,7 @@ void formula_apply_physical_modifiers_without_supports(void) {
 s32 formula_accuracy_calculate_physical_status(void) {
     formula_apply_attack_up_and_martial_arts();
     formula_apply_physical_modifiers_without_supports();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
@@ -177,7 +177,7 @@ void formula_magic_gun(void) {
  * weather penalty; physical evade; 19% status. No retail weapon, ability or item
  * record uses it: Charge runs the weapon's own formula (its menu case falls
  * through to Attack's), so it keeps the element and the bow weather penalty. */
-void formula_weapon_damage_charge(void) {
+void formula_weapon_damage_without_element_or_weather(void) {
     if (formula_evade_calculate_physical_without_weather() == 0) {
         formula_calculate_base_xa();
         formula_apply_charge();
@@ -308,7 +308,7 @@ void formula_damage_hp_percent_hit_faith_ma_x_percent(void) {
         formula_apply_target_magical_statuses();
     }
     formula_apply_zodiac_compatibility();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_calculate_faith();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit == 0) {
@@ -419,7 +419,7 @@ void formula_magical_stat_reduction(void) {
         formula_store_ma_and_y();
         formula_element_apply_strengthen();
         formula_apply_magical_modifiers();
-        formula_store_hit_chance();
+        formula_store_xa_plus_ya();
         formula_calculate_faith();
         formula_use_hp_damage_as_action_hit_percent();
         if (g_action_target_data->hit == 0) {
@@ -633,7 +633,7 @@ void formula_steal_exp_hit_sp_x_percent(void) {
         formula_apply_defense_up();
         formula_apply_target_physical_statuses();
         formula_apply_zodiac_compatibility();
-        formula_store_hit_chance();
+        formula_store_xa_plus_ya();
         formula_use_hp_damage_as_action_hit_percent();
         /* Outside execution the amount is filled in even after a miss (a 0%
          * chance), so previews and the AI still see it. */
@@ -649,7 +649,7 @@ void formula_steal_exp_hit_sp_x_percent(void) {
 void formula_opposite_sex_hit_ma_x_percent(void) {
     formula_store_ma_and_x();
     formula_apply_zodiac_compatibility();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0) {
         if ((g_action_target->unit_flags & (UNIT_FLAG_MONSTER | UNIT_FLAG_FEMALE | UNIT_FLAG_MALE))

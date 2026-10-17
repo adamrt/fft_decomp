@@ -44,7 +44,7 @@ typedef char projectile_obstacle_unit_list_size_must_be_280[sizeof(projectile_ob
 
 extern s32 g_projectile_gravity_modifier;
 extern s32 g_projectile_gravity_scale;
-extern s32 g_projectile_arc_height;
+extern s32 g_projectile_launch_slope_q12;
 extern s16 g_projectile_arctan_angle_mod;
 extern s32 g_projectile_source_id;
 extern SVECTOR g_projectile_origin;

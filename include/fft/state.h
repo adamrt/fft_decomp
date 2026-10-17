@@ -34,7 +34,7 @@ typedef enum game_state {
     GAME_STATE_MOVE_CONFIRM_MENU = 18,
     GAME_STATE_WAIT_DIRECTION = 19,
     GAME_STATE_WAIT_MENU = 20,
-    GAME_STATE_CRYSTAL_LEARN = 21,
+    GAME_STATE_POST_MOVE_EVENTS = 21,
     GAME_STATE_TARGETING_PROMPT = 22,
     GAME_STATE_TARGETING_RANGE = 23,
     GAME_STATE_ILLEGAL_RANGE = 24,
@@ -53,7 +53,7 @@ typedef enum game_state {
     GAME_STATE_AFTER_COMMAND = 37,
     GAME_STATE_CONTINUE_TURN = 38,
     GAME_STATE_CHANGE_TURN = 39,
-    GAME_STATE_LEARN_ABILITY_ON_HIT = 40,
+    GAME_STATE_POST_ACTION_REPORTS = 40,
     GAME_STATE_ACTION_ANNOUNCEMENT = 41,
     GAME_STATE_OPEN_SP2_FILES = 42,
     GAME_STATE_START_EFFECT_FILE_OPEN = 43,
@@ -117,7 +117,7 @@ void state_handle_unit_moving(void);
 void state_handle_move_confirm_menu(void);
 void state_handle_wait_direction(void);
 void state_handle_wait_menu(void);
-void state_handle_crystal_learn(void);
+void state_handle_post_move_events(void);
 void state_handle_targeting_prompt(void);
 void state_handle_targeting_range(void);
 void state_handle_illegal_range(void);
@@ -136,7 +136,7 @@ void state_handle_target_display(void);
 void state_handle_after_command(void);
 void state_handle_continue_turn(void);
 void state_handle_change_turn(void);
-void state_handle_learn_ability_on_hit(void);
+void state_handle_post_action_reports(void);
 void state_handle_action_announcement(void);
 void state_handle_open_sp2_files(void);
 void state_handle_start_effect_file_open(void);
@@ -192,7 +192,7 @@ void state_enter_target_select_confirm(void);
 void state_enter_target_display(void);
 void state_enter_after_command(void);
 void state_enter_continue_turn(void);
-void state_enter_learn_ability_on_hit(void);
+void state_enter_post_action_reports(void);
 void state_enter_open_sp2_files(void);
 void state_enter_action_execute(void);
 void state_enter_battle_message_display(void);

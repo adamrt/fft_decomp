@@ -89,7 +89,7 @@ static void effect_camera_store_map_center_coordinates(VECTOR* destination) {
     SVECTOR map_max;
     s32 max_y;
 
-    battle_map_store_max_coordinates(&map_max);
+    battle_map_store_dimensions(&map_max);
     destination->vx = map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
     max_y = map_max.vz;
     destination->vy = 0;
@@ -1163,7 +1163,7 @@ static void effect_slot_free(u8 id) {
 /* Start secondary effect animation_id for the caster and first target of the
  * init record and return its id. parameter is the animation's own: an
  * element mask, a sprite palette or a duration. */
-s32 effect_secondary_init(s32 animation_id, s32 parameter, effect_secondary_init_t* source) {
+s32 effect_secondary_init(s32 animation_id, s32 parameter, effect_context_t* source) {
     s32 secondary_id = effect_secondary_allocate_record();
 
     g_effect_secondary_data[secondary_id].animation_id = animation_id;
@@ -1182,7 +1182,7 @@ s32 effect_secondary_init(s32 animation_id, s32 parameter, effect_secondary_init
  * animation selects the animation id (and its function id), the high half is
  * stored alongside it. Returns its id; phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
-s32 effect_secondary_init_projectile(s32 animation, effect_secondary_init_t* source) {
+s32 effect_secondary_init_projectile(s32 animation, effect_context_t* source) {
     u8 secondary_id = effect_secondary_allocate_record();
 
     g_effect_secondary_data[secondary_id].animation_id = animation;
@@ -1222,7 +1222,7 @@ s32 effect_get_element_index(s32 elements) {
  * keeps the slot's animation. The parameter
  * is the element effect index for the weapon's element mask. Returns its id,
  * or 0 when the init record has no targets. */
-s32 effect_secondary_init_weapon_hit(s32 elements, effect_secondary_init_t* source, s32 unused_is_bow) {
+s32 effect_secondary_init_weapon_hit(s32 elements, effect_context_t* source, s32 unused_is_bow) {
     u8 secondary_id;
 
     if (source->target_count != 0) {
@@ -1259,7 +1259,7 @@ s32 effect_secondary_init_weapon_hit(s32 elements, effect_secondary_init_t* sour
 /* Start the current effect target's fall-dust secondary effect at the
  * given position and return its id. Phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
-s32 effect_secondary_init_fall_dust(effect_secondary_init_t* source, VECTOR* position) {
+s32 effect_secondary_init_fall_dust(effect_context_t* source, VECTOR* position) {
     s32 secondary_id = effect_secondary_allocate_record();
 
     g_effect_secondary_data[secondary_id].timer = 0;
@@ -1668,44 +1668,44 @@ static s32 projectile_arc_calculate_trajectory(projectile_arc_query_t* query, s3
  * (2 * g_projectile_gravity_modifier) in 20.12 fixed point.
  *
  * This is the height of a ballistic arc after a horizontal distance b
- * (`progress`), where a (`height`) is the tangent of the launch pitch in Q12:
- * the callers take the pitch itself as ratan2(height, ONE).
+ * (`progress`), where a (`launch_slope_q12`) is the tangent of the launch pitch:
+ * the callers take the pitch itself as ratan2(launch_slope_q12, ONE).
  *
  * Both operands are pre-shifted by range so the squares stay within 32 bits.
  * g_projectile_gravity_modifier is the trajectory gravity modifier
  * (0xa8000).
  */
-static s32 projectile_arc_calculate_trajectory_term(s32 height, s32 progress) {
+static s32 projectile_arc_calculate_trajectory_term(s32 launch_slope_q12, s32 progress) {
     s32 divisor = (g_projectile_gravity_modifier * 2) >> 12;
-    s32 height_sq;
+    s32 slope_sq;
     s32 progress_sq;
     s32 linear;
 
-    if (height >= -0x7fff && height <= 0x7fff) {
-        height_sq = (height * height) >> 12;
+    if (launch_slope_q12 >= -0x7fff && launch_slope_q12 <= 0x7fff) {
+        slope_sq = (launch_slope_q12 * launch_slope_q12) >> 12;
         if (progress >= -0xfffff && progress <= 0xfffff) {
             progress_sq = (progress >> 5) * (progress >> 5);
             progress_sq >>= 2;
-            linear = (height * (progress >> 5)) >> 7;
+            linear = (launch_slope_q12 * (progress >> 5)) >> 7;
         } else {
             progress_sq = (progress >> 7) * (progress >> 7);
             progress_sq <<= 2;
-            linear = (height * (progress >> 7)) >> 5;
+            linear = (launch_slope_q12 * (progress >> 7)) >> 5;
         }
     } else {
-        height >>= 4;
-        height_sq = (height * height) >> 4;
+        launch_slope_q12 >>= 4;
+        slope_sq = (launch_slope_q12 * launch_slope_q12) >> 4;
         if (progress >= -0xfffff && progress <= 0xfffff) {
             progress_sq = (progress >> 5) * (progress >> 5);
             progress_sq >>= 2;
-            linear = (height * (progress >> 5)) >> 3;
+            linear = (launch_slope_q12 * (progress >> 5)) >> 3;
         } else {
             progress_sq = (progress >> 7) * (progress >> 7);
             progress_sq <<= 2;
-            linear = (height * (progress >> 7)) >> 1;
+            linear = (launch_slope_q12 * (progress >> 7)) >> 1;
         }
     }
-    return linear - (((height_sq + ONE) >> 6) * (progress_sq >> 6)) / divisor;
+    return linear - (((slope_sq + ONE) >> 6) * (progress_sq >> 6)) / divisor;
 }
 
 /* Offset of a point current along a straight path of length total: dst is src,
@@ -1740,14 +1740,15 @@ static void projectile_list_obstacle_units(s32 first, s32 second, projectile_obs
     (*out)->count = 0;
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = unit_get_stats(i);
-        if (unit->entd_slot != first && unit->entd_slot != second && unit->entd_slot != UNIT_ENTD_SLOT_NONE
+        if (unit->active_battle_id != first && unit->active_battle_id != second
+            && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
             && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)] & STATUS_BYTE_MASK(STATUS_ID_JUMP))
             && !(unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             slot = (*out)->count++;
-            (*out)->battle_ids[slot] = unit->entd_slot;
-            unit_get_tile_center_and_height_by_battle_id(unit->entd_slot, &position);
+            (*out)->battle_ids[slot] = unit->active_battle_id;
+            unit_get_tile_center_and_height_by_battle_id(unit->active_battle_id, &position);
             (*out)->positions[slot] = position;
-            (*out)->sprite_heights[slot] = sprite_get_unit_spritesheet_height_by_battle_id(unit->entd_slot);
+            (*out)->sprite_heights[slot] = sprite_get_unit_spritesheet_height_by_battle_id(unit->active_battle_id);
         }
     }
 }
@@ -1932,7 +1933,7 @@ s32 projectile_arc_check_between_units(u8 source_id, u8 target_id) {
  * by a unit of another team than the source wins (arc_b's first) and returns
  * that unit. Failing that, arc_a's trace is kept and its blocker (or -1) is
  * returned, except when only arc_a was blocked by a unit: then arc_b's
- * terrain-blocked result is restored and -1 returned. g_projectile_arc_height receives the
+ * terrain-blocked result is restored and -1 returned. g_projectile_launch_slope_q12 receives the
  * chosen arc height. `unused` reserves the target's 16 otherwise unused frame bytes.
  */
 s32 projectile_arc_set_and_validate(s32 source_id, SVECTOR* tile_position, s32 target_id) {
@@ -2056,7 +2057,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, SVECTOR* tile_position, s32 t
             }
         }
     }
-    g_projectile_arc_height = height;
+    g_projectile_launch_slope_q12 = height;
     return result;
 }
 
@@ -2380,8 +2381,8 @@ s32 effect_secondary_arrow_arc_handler(void) {
             - (((unit_facing_get_quadrant_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id) + 1)
                    & 3)
                 << 10);
-        g_effect_arrow_arc_height = g_projectile_arc_height;
-        g_effect_arrow_arc_launch_angle = ratan2(g_projectile_arc_height, ONE);
+        g_effect_arrow_launch_slope_q12 = g_projectile_launch_slope_q12;
+        g_effect_arrow_arc_launch_angle = ratan2(g_projectile_launch_slope_q12, ONE);
         g_effect_arrow_arc_distance = 0;
         velocity = projectile_arc_calculate_launch_velocity() >> 8;
         g_effect_arrow_arc_distance_step = (rcos(g_effect_arrow_arc_launch_angle) * velocity) >> 4;
@@ -2406,11 +2407,12 @@ s32 effect_secondary_arrow_arc_handler(void) {
         }
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        previous = -projectile_arc_calculate_trajectory_term(g_effect_arrow_arc_height, g_effect_arrow_arc_distance);
+        previous
+            = -projectile_arc_calculate_trajectory_term(g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance);
         g_effect_arrow_arc_distance += g_effect_arrow_arc_distance_step;
-        term = -projectile_arc_calculate_trajectory_term(g_effect_arrow_arc_height, g_effect_arrow_arc_distance);
+        term = -projectile_arc_calculate_trajectory_term(g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance);
         next = -projectile_arc_calculate_trajectory_term(
-            g_effect_arrow_arc_height, g_effect_arrow_arc_distance + g_effect_arrow_arc_distance_step);
+            g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance + g_effect_arrow_arc_distance_step);
         setVector(
             &angles, 0, g_effect_arrow_arc_yaw, ratan2(next - previous, g_effect_arrow_arc_distance_step * 2) + 0x400);
         SetRotMatrix(&g_effect_projectile_matrix);
@@ -2436,7 +2438,7 @@ s32 effect_secondary_arrow_arc_handler(void) {
         effect_model_draw_projectile(&spin, &position, &angles, &scale, parameter);
         if (g_effect_projectile_step_count == 2 && g_projectile_hit_unit_id != -1
             && g_effect_secondary_current->target_count != 0) {
-            action_resolve_projectile_hit_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id,
+            action_start_projectile_hit_response_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id,
                 g_effect_secondary_current->target.record.data.unit.runtime_id);
         }
         if (--g_effect_projectile_step_count == 0 || position.vy >= 0) {
@@ -3855,7 +3857,8 @@ s32 effect_secondary_linear_projectile_handler(void) {
             if ((kind < ITEM_ID_FIRE_BALL || kind > ITEM_ID_LIGHTNING_BALL)
                 && (kind < ITEM_ID_POTION || kind > ITEM_ID_PHOENIX_DOWN)
                 && g_effect_secondary_current->target_count != 0) {
-                action_resolve_projectile_hit_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id,
+                action_start_projectile_hit_response_by_runtime_id(
+                    g_effect_secondary_current->caster.data.unit.runtime_id,
                     g_effect_secondary_current->target.record.data.unit.runtime_id);
             }
         }
@@ -3875,7 +3878,8 @@ s32 effect_secondary_linear_projectile_handler(void) {
                 system_set_vsync_interval(2);
             } else if (effect_get_playback_phase() == EFFECT_PLAYBACK_PHASE_REQUESTED) {
                 if (g_effect_secondary_current->target_count != 0) {
-                    action_resolve_projectile_hit_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id,
+                    action_start_projectile_hit_response_by_runtime_id(
+                        g_effect_secondary_current->caster.data.unit.runtime_id,
                         g_effect_secondary_current->target.record.data.unit.runtime_id);
                 }
                 effect_cancel_playback_request();

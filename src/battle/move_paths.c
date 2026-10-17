@@ -1024,15 +1024,15 @@ s32 cursor_move_by_input(void) {
 
         /* Keep the cursor on the map: a step past the edge goes back, and a step below 0
          * compares as a large unsigned value and resets to 0. */
-        if (g_cursor_x == g_battle_map_max_x) {
+        if (g_cursor_x == g_battle_map_terrain_width) {
             g_cursor_x--;
-        } else if ((u32)g_cursor_x > g_battle_map_max_x) {
+        } else if ((u32)g_cursor_x > g_battle_map_terrain_width) {
             g_cursor_x = 0;
         }
-        if (g_cursor_y == g_battle_map_max_y) {
-            g_cursor_y = g_battle_map_max_y - 1;
+        if (g_cursor_y == g_battle_map_terrain_depth) {
+            g_cursor_y = g_battle_map_terrain_depth - 1;
         }
-        if ((u32)g_cursor_y > g_battle_map_max_y) {
+        if ((u32)g_cursor_y > g_battle_map_terrain_depth) {
             g_cursor_y = 0;
         }
 
@@ -1128,7 +1128,7 @@ void camera_pan_disable(void) {
  * Each held direction moves the x or map-depth coordinate by 0x4000 (four world
  * units in 20.12) per frame, diagonals both. The position is then clamped to four
  * tiles (0x70000) outside the map on every side: -0x70000 up to
- * g_battle_map_max_x or g_battle_map_max_y tiles of 0x1c000 plus 0x70000. */
+ * g_battle_map_terrain_width or g_battle_map_terrain_depth tiles of 0x1c000 plus 0x70000. */
 void camera_pan_update(void) {
     s32* coord;
     s32 limit;
@@ -1178,13 +1178,13 @@ void camera_pan_update(void) {
         }
         {
             s32* x = &g_camera_real_coords.vx;
-            limit = (g_battle_map_max_x * (BATTLE_MAP_TILE_SIZE * ONE)) + 4 * BATTLE_MAP_TILE_SIZE * ONE;
+            limit = (g_battle_map_terrain_width * (BATTLE_MAP_TILE_SIZE * ONE)) + 4 * BATTLE_MAP_TILE_SIZE * ONE;
             if (limit < *x)
                 *x = limit;
             if (*x < -(4 * BATTLE_MAP_TILE_SIZE * ONE))
                 *x = -(4 * BATTLE_MAP_TILE_SIZE * ONE);
         }
-        limit = (g_battle_map_max_y * (BATTLE_MAP_TILE_SIZE * ONE)) + 4 * BATTLE_MAP_TILE_SIZE * ONE;
+        limit = (g_battle_map_terrain_depth * (BATTLE_MAP_TILE_SIZE * ONE)) + 4 * BATTLE_MAP_TILE_SIZE * ONE;
         if (limit < g_camera_real_coords.vz)
             g_camera_real_coords.vz = limit;
         if (g_camera_real_coords.vz < -(4 * BATTLE_MAP_TILE_SIZE * ONE))
@@ -1734,7 +1734,7 @@ void camera_update_vector_from_game_state(void) {
     unit_t* unit;
     s32 height;
 
-    if (g_game_state == GAME_STATE_CRYSTAL_LEARN) {
+    if (g_game_state == GAME_STATE_POST_MOVE_EVENTS) {
         unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
         height = 0;
         if (unit != 0) {

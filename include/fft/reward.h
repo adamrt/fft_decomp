@@ -29,7 +29,7 @@ extern s32 g_reward_report_phase; /* reward_report_phase_e */
 
 void reward_grant(void);
 s32 reward_apply_action(s32 unit_index, action_reward_display_t* display);
-s32 reward_build_display(unit_stats_t* unit, action_reward_display_t* rewards);
+s32 reward_apply_result_and_collect(unit_stats_t* unit, action_reward_display_t* rewards);
 void reward_apply_exp_change(unit_stats_t* unit, u8 amount);
 s32 reward_load_job_level(unit_stats_t* unit, s32 job_id, s32* out_slot);
 s32 reward_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot);

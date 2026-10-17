@@ -253,7 +253,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
             case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
                 break;
             case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
-                battle_map_store_max_coordinates(&map_origin);
+                battle_map_store_dimensions(&map_origin);
                 origin.vx += map_origin.vx * (BATTLE_MAP_TILE_SIZE / 2);
                 origin.vz += map_origin.vz * (BATTLE_MAP_TILE_SIZE / 2);
                 break;
@@ -301,7 +301,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
             case EFFECT_EMITTER_HOMING_OFFSET_ALT:
                 break;
             case EFFECT_EMITTER_HOMING_MAP_CENTER:
-                battle_map_store_max_coordinates(&map_max);
+                battle_map_store_dimensions(&map_max);
                 target_base.vx += map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
                 target_base.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
                 break;

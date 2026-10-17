@@ -280,8 +280,6 @@ void animation_start_ability_charge(unit_t* unit);
 void animation_start_ability_charge_hold(unit_t* unit);
 void animation_select_attack_for_ability(unit_t* attacker, unit_t* target);
 void animation_select_weapon_attack(unit_t* attacker, unit_t* target);
-void animation_set_target(unit_t* attacker, unit_t* target);
-s32 animation_set_target_by_runtime_id(s32 runtime_id);
 
 /* distortions */
 /* unit_t.distortion_animation_id: the motion that

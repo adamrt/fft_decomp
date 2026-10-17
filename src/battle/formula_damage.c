@@ -27,7 +27,7 @@ void formula_talk_skill_hit_ma_x_percent(void) {
         if (g_action_target_data->hit != 0) {
             formula_store_ma_and_x();
             formula_apply_zodiac_compatibility();
-            formula_store_hit_chance();
+            formula_store_xa_plus_ya();
             formula_use_hp_damage_as_action_hit_percent();
             if (g_action_target_data->hit != 0) {
                 formula_apply_talk_skill();
@@ -143,10 +143,10 @@ void formula_damage_pa_plus_y_half_times_pa(void) {
 }
 
 /* Formula 0x32: damage ((PA + (PA + Y) / 2) * rnd(1..X)); physical evade. The
- * sum comes from formula_store_hit_chance, so zodiac compatibility
+ * sum comes from formula_store_xa_plus_ya, so zodiac compatibility
  * scales only its (PA + Y) / 2 part. The random factor is kept in
  * random_damage_factor. */
-void formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
+void formula_damage_random_x_times_pa_sum(void) {
     action_data_t* action;
     u8* factor;
     s32 rnd;
@@ -157,7 +157,7 @@ void formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
     formula_apply_attack_up_and_martial_arts();
     formula_apply_physical_modifiers_without_supports();
     formula_calculate_critical_hit();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     rnd = formula_get_random();
     factor = &g_action_current_ability.random_damage_factor;
     *factor = (rnd * g_action_current_ability.range_data.x) / 32768 + 1;
@@ -173,7 +173,7 @@ void formula_hit_pa_x_percent(void) {
     formula_apply_attack_up_and_martial_arts();
     formula_apply_attacker_berserk_frog();
     formula_apply_zodiac_compatibility();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0) {
         formula_apply_status_to_action();
@@ -203,7 +203,7 @@ void formula_heal_y_percent_hit_pa_x_percent(void) {
     formula_store_pa_and_x();
     formula_apply_attack_up_and_martial_arts();
     formula_apply_zodiac_compatibility();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0 && formula_apply_status_and_check_undead() != 0) {
         formula_calculate_hp_percent_damage();
@@ -240,7 +240,7 @@ void formula_damage_target_hp_minus_one_always_hit(void) {
 void formula_hit_sp_x_percent(void) {
     formula_store_speed_and_x();
     formula_apply_physical_modifiers();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0) {
         formula_apply_status_to_action();
@@ -251,7 +251,7 @@ void formula_hit_sp_x_percent(void) {
 void formula_undead_hit_sp_x_percent(void) {
     formula_store_speed_and_x();
     formula_apply_physical_modifiers();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0) {
         if ((g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
@@ -398,7 +398,7 @@ void formula_hit_ma_x_percent_no_evade(void) {
     formula_element_apply_strengthen();
     formula_apply_magic_attack_up();
     formula_apply_zodiac_compatibility();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0) {
         formula_apply_status_to_action();
@@ -515,7 +515,7 @@ void formula_set_morbol(void) {
     formula_element_apply_strengthen();
     formula_apply_magic_attack_up();
     formula_apply_zodiac_compatibility();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     action = g_action_target_data;
     if (action->hit == 0)

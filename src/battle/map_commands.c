@@ -116,8 +116,8 @@ void battle_map_store_selected_tile_coordinates(SVECTOR* destination) {
 }
 
 /* Write the map's width and depth in tiles to `destination` as (x, 0, z). */
-void battle_map_store_max_coordinates(SVECTOR* destination) {
-    vector_set_svector(destination, g_battle_map_max_x, 0, g_battle_map_max_y);
+void battle_map_store_dimensions(SVECTOR* destination) {
+    vector_set_svector(destination, g_battle_map_terrain_width, 0, g_battle_map_terrain_depth);
 }
 
 /* The tile a unit stands on, by runtime id. The runtime record lookup is not checked:

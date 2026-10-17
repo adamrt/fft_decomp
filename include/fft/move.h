@@ -139,7 +139,7 @@ enum {
 /* The acting unit's block at the start of the scratchpad (0x1f800000), reached through
  * g_move_config_ptr. Only target-proven bytes are named. */
 typedef struct move_pathfind_scratch {
-    u16 target_index;  /* 0x00; target tile index: (level << 8) + y * map_max_x + x */
+    u16 target_index;  /* 0x00; target tile index: (level << 8) + y * terrain_width + x */
     u8 jump_times_two; /* 0x02; 0x3e when flying / ignoring height */
     u8 _unused_03;
     u8 jump_or_1f;     /* 0x04 */
@@ -162,8 +162,8 @@ typedef struct move_pathfind_scratch {
     u8 mountable_chocobo;    /* 0x15 */
     u8 can_ride;             /* 0x16 */
     u8 _unused_17;
-    u8 map_max_x;       /* 0x18 */
-    u8 map_max_y;       /* 0x19 */
+    u8 terrain_width;   /* 0x18 */
+    u8 terrain_depth;   /* 0x19 */
     u8 _unknown_1a;     /* 0x1a; see g_move_config_unknown_1a_value */
     u8 unit_size;       /* 0x1b */
     u8 movement_set_3;  /* 0x1c */
@@ -464,7 +464,7 @@ extern move_find_map_data_t g_move_find_current_map_data;
 void move_find_load_item_data(move_find_map_data_t* map_data);
 move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer);
 move_found_item_t* move_find_determine_item(unit_stats_t* unit);
-s32 move_find_apply_trap(unit_stats_t* unit);
+s32 move_find_prepare_trap_result(unit_stats_t* unit);
 
 /* post movement */
 /* Composite event work produced after movement. This is separate from the

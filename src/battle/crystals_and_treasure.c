@@ -403,7 +403,7 @@ s32 unit_find_slot_by_identity(u32 character_identity) {
     identity = character_identity;
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = &g_unit_stats[i];
-        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE && unit->character_identity == identity) {
+        if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && unit->character_identity == identity) {
             status = unit->status_sets.current;
             if (status[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL)) {
                 return UNIT_CHARACTER_SLOT_UNAVAILABLE;
@@ -416,7 +416,7 @@ s32 unit_find_slot_by_identity(u32 character_identity) {
     }
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = &g_unit_stats[i];
-        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE && unit->character_identity == identity
+        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE && unit->character_identity == identity
             && unit->existence != UNIT_EXISTENCE_NONE) {
             if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
                 return UNIT_CHARACTER_SLOT_OFF_FIELD;
@@ -442,8 +442,8 @@ s32 unit_find_slot_by_identity(u32 character_identity) {
  * state: off field gives -2, disabled -3 and pending removal -6. Otherwise
  * returns 0 with -3. Both loops compare against (unit_id & 0xff): the (u8) cast
  * adds a loop insn and stops loop.c hoisting the constant 2 in the second loop.
- * The second loop's test of existence against entd_slot, just found to be
- * UNIT_ENTD_SLOT_NONE, is a test against UNIT_EXISTENCE_NONE (both
+ * The second loop's test of existence against active_battle_id, just found to be
+ * UNIT_ACTIVE_BATTLE_ID_NONE, is a test against UNIT_EXISTENCE_NONE (both
  * 0xff). */
 unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id) {
     unit_stats_t* unit;
@@ -451,7 +451,7 @@ unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id) {
 
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = &g_unit_stats[i];
-        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE && unit->unit_id == (unit_id & 0xff)) {
+        if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && unit->unit_id == (unit_id & 0xff)) {
             if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))
                 || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                     & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
@@ -465,8 +465,8 @@ unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id) {
 
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = &g_unit_stats[i];
-        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE && unit->unit_id == (unit_id & 0xff)
-            && unit->existence != unit->entd_slot) {
+        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE && unit->unit_id == (unit_id & 0xff)
+            && unit->existence != unit->active_battle_id) {
             if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
                 *out_battle_id = -2;
                 return unit;
@@ -569,7 +569,7 @@ s32 status_init_display_flags(s32 unit_id) {
     unit_stats_t* unit = &g_unit_stats[unit_id];
     s32 i;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return -1;
     }
     for (i = 0; i < STATUS_COUNT; i++) {
@@ -588,7 +588,7 @@ s32 battle_map_tile_calculate_unit_index(const unit_stats_t* unit) {
     u8 y = unit->position.y;
     u16 elevation = unit->position.higher_elevation;
     u8 x = unit->x;
-    return (elevation << 8) + (y * g_battle_map_max_x) + x;
+    return (elevation << 8) + (y * g_battle_map_terrain_width) + x;
 }
 
 /* The battle stats of an occupied unit slot, or 0 for an empty slot or an id past
@@ -597,7 +597,7 @@ unit_stats_t* unit_get_present_stats(u32 battle_id) {
     unit_stats_t* unit = 0;
     if (battle_id < UNIT_SLOT_COUNT) {
         unit = &g_unit_stats[battle_id];
-        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
             unit = 0;
         }
     }

@@ -74,7 +74,7 @@ static void equipment_build_unit_preview(unit_stats_t* stats, equipment_unit_pre
     }
     unit->list_index = value;
     unit->experience = stats->experience < UNIT_LEVEL_UP_EXPERIENCE ? stats->experience : UNIT_LEVEL_EXPERIENCE_MAX;
-    unit->unit_index = stats->entd_slot;
+    unit->unit_index = stats->active_battle_id;
     capped = UNIT_HP_MP_MAX;
     if (stats->hp <= UNIT_HP_MP_MAX) {
         capped = stats->hp;
@@ -100,7 +100,7 @@ static void equipment_build_unit_preview(unit_stats_t* stats, equipment_unit_pre
         unit->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
     }
     unit->gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
-    unit->identity.unit_index = stats->entd_slot;
+    unit->identity.unit_index = stats->active_battle_id;
     unit->identity.job_id = stats->job_id;
     unit->identity.brave = stats->brave;
     unit->identity.faith = stats->faith;
@@ -179,7 +179,7 @@ void equipment_load_unit(s32 battle_id) {
         if (stats == 0) {
             continue;
         }
-        if (stats->entd_slot == UNIT_ENTD_SLOT_NONE) {
+        if (stats->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
             continue;
         }
         if (stats->unit_flags & UNIT_FLAG_EGG) {

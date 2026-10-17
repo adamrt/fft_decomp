@@ -15,7 +15,7 @@ void formula_weapon_damage(void);
 void formula_weapon_damage_with_proc(void);
 void formula_gun_damage(void);
 void formula_magic_gun(void);
-void formula_weapon_damage_charge(void);
+void formula_weapon_damage_without_element_or_weather(void);
 void formula_weapon_absorb_hp(void);
 void formula_weapon_heal(void);
 void formula_magical_damage(void);
@@ -60,7 +60,7 @@ void formula_break_equipped_damage_pa_times_wp(void);
 void formula_absorb_mp_pa_times_wp(void);
 void formula_absorb_hp_pa_times_wp(void);
 void formula_damage_pa_plus_y_half_times_pa(void);
-void formula_damage_random_x_times_pa_plus_y_half_times_pa(void);
+void formula_damage_random_x_times_pa_sum(void);
 void formula_hit_pa_x_percent(void);
 void formula_heal_pa_times_y_and_mp(void);
 void formula_heal_y_percent_hit_pa_x_percent(void);
@@ -215,7 +215,7 @@ void formula_apply_talk_skill(void);
 void formula_check_dragon(void);
 void formula_force_sleeping_target_miss(void);
 s32 formula_roll_conditional_status_proc(void);
-void formula_store_hit_chance(void);
+void formula_store_xa_plus_ya(void);
 
 /* equipment and abilities */
 void formula_apply_maintenance(void);

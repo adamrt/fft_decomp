@@ -107,7 +107,8 @@ s32 ai_command_build(s32 unit_id, ai_command_t* command) {
         return 0;
     }
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        if (g_unit_stats[i].entd_slot != UNIT_ENTD_SLOT_NONE && ai->unit_compact_indices[i] >= AI_COMPACT_UNIT_COUNT) {
+        if (g_unit_stats[i].active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
+            && ai->unit_compact_indices[i] >= AI_COMPACT_UNIT_COUNT) {
             command->kind = AI_COMMAND_END_TURN;
             return 0;
         }
@@ -448,9 +449,9 @@ static s32 ai_move_build_reachable_tiles(s32 movement_taken) {
 
         ai_mem_zero_32bit_values(ai->walkable_tiles, sizeof(ai->walkable_tiles));
         for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-            for (y = 0; y < ai->map_max_y; y++) {
-                for (x = 0; x < ai->map_max_x; x++) {
-                    tile = &g_battle_map_tile_data[level * BATTLE_MAP_TILES_PER_LAYER + y * ai->map_max_x + x];
+            for (y = 0; y < ai->terrain_depth; y++) {
+                for (x = 0; x < ai->terrain_width; x++) {
+                    tile = &g_battle_map_tile_data[level * BATTLE_MAP_TILES_PER_LAYER + y * ai->terrain_width + x];
                     if (!(tile->flags.blocked) && (tile->surface.type) != BATTLE_MAP_SURFACE_CROSS_SECTION) {
                         /* Row bit 15 is x = 0. */
                         ai->walkable_tiles[level][y] |= 0x8000 >> x;
@@ -486,9 +487,9 @@ static s32 ai_move_build_reachable_tiles(s32 movement_taken) {
     }
     ai->resume_pending = 0;
     for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-        for (y = 0; y < ai->map_max_y; y++) {
-            for (x = 0; x < ai->map_max_x; x++) {
-                tile = &g_battle_map_tile_data[level * BATTLE_MAP_TILES_PER_LAYER + y * ai->map_max_x + x];
+        for (y = 0; y < ai->terrain_depth; y++) {
+            for (x = 0; x < ai->terrain_width; x++) {
+                tile = &g_battle_map_tile_data[level * BATTLE_MAP_TILES_PER_LAYER + y * ai->terrain_width + x];
                 if (ai->acting_unit->ability_flags.movement[1] & UNIT_MOVEMENT_SET_2_TELEPORT) {
                     if (!(ai->acting_unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER)) {
                         i = ai->acting_unit_coords.fields.x - x;
@@ -515,7 +516,7 @@ static s32 ai_move_build_reachable_tiles(s32 movement_taken) {
      * picks up by stepping on it. */
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = &g_unit_stats[i];
-        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE && i != ai->acting_unit_id
+        if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && i != ai->acting_unit_id
             && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))
             && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                 & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
@@ -1261,7 +1262,7 @@ static s32 ai_select_general(void) {
 
     if (g_ai_data.resume_pending != 0) {
         /* Resume: re-enter the step that suspended. */
-        resume_state = g_ai_data.autobattle_state;
+        resume_state = g_ai_data.general_selection_stage;
         if (resume_state == AI_GENERAL_MOVEMENT)
             goto evaluate_movement;
         if (resume_state == AI_GENERAL_CHARGING)
@@ -1271,7 +1272,7 @@ static s32 ai_select_general(void) {
     g_ai_data.movement_scenario = 1;
 evaluate_movement:
     if (ai_move_build_scenarios() == -1) {
-        ai->autobattle_state = AI_GENERAL_MOVEMENT;
+        ai->general_selection_stage = AI_GENERAL_MOVEMENT;
         return -1;
     }
     ai->movement_scenario = 0;
@@ -1281,7 +1282,7 @@ evaluate_charging:
     charging_result = ai_select_keep_charging();
     switch (charging_result) {
     case -1:
-        ai->autobattle_state = AI_GENERAL_CHARGING;
+        ai->general_selection_stage = AI_GENERAL_CHARGING;
         return -1;
     case 1:
         return 0;
@@ -1290,7 +1291,7 @@ evaluate_charging:
     if (ai_target_select_active_units(AI_UNIT_FILTER_ANY, 0) != 0) {
     evaluate_abilities:
         if (ai_ability_evaluate_list() == -1) {
-            ai->autobattle_state = AI_GENERAL_ABILITIES;
+            ai->general_selection_stage = AI_GENERAL_ABILITIES;
             return -1;
         }
     }
@@ -1410,7 +1411,7 @@ static s32 ai_move_build_scenarios(void) {
                 & STATUS_BYTE_MASK(STATUS_ID_DEATH_SENTENCE))) {
             for (g_ai_move_unit_index = 0; g_ai_move_unit_index < UNIT_SLOT_COUNT; g_ai_move_unit_index++) {
                 unit = &g_unit_stats[g_ai_move_unit_index];
-                if (unit->entd_slot != UNIT_ENTD_SLOT_NONE
+                if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
                     && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                         & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))) {
                     ai_copy_unit_coordinates(g_ai_move_unit_index, &ai->considered_unit_coords);
@@ -1461,7 +1462,7 @@ score_tiles:
     /* Scenario 2: the reachable tiles outside scenario 1. The XOR is that
      * difference because scenario 1 is filtered from scenario 0. */
     ai->movement_scenario = 2;
-    for (g_ai_move_unit_index = 0; g_ai_move_unit_index < ai->map_max_y; g_ai_move_unit_index++) {
+    for (g_ai_move_unit_index = 0; g_ai_move_unit_index < ai->terrain_depth; g_ai_move_unit_index++) {
         low = ai->reachable_tiles[0][0][g_ai_move_unit_index] ^ ai->reachable_tiles[1][0][g_ai_move_unit_index];
         high = ai->reachable_tiles[0][1][g_ai_move_unit_index] ^ ai->reachable_tiles[1][1][g_ai_move_unit_index];
         ai->reachable_tiles[2][0][g_ai_move_unit_index] = low;
@@ -1524,7 +1525,7 @@ static s32 ai_move_select_destination(s32 max_distance, ai_destination_order_e o
     s32 distance, score;
 
     for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             {
                 u32 scenario_address = ai->movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
                 u32 level_address;
@@ -1533,7 +1534,7 @@ static s32 ai_move_select_destination(s32 max_distance, ai_destination_order_e o
                 row = *(u16*)(y * sizeof(ai->reachable_tiles[0][0][0]) + level_address);
             }
             if (row != 0) {
-                for (x = 0; x < ai->map_max_x; x++) {
+                for (x = 0; x < ai->terrain_width; x++) {
                     if ((row << x) & 0x8000) {
                         u32 level_tile_index = y << 4;
                         u32 tile_index;
@@ -1601,10 +1602,10 @@ static s32 ai_move_filter_reachable_tiles_by_target_distance(s32 distance_limit)
         ai->reachable_tiles[ai->movement_scenario][1][x] = 0;
     }
     for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             row = ai->reachable_tiles[0][level][y];
             if (row != 0) {
-                for (x = 0; x < ai->map_max_x; x++) {
+                for (x = 0; x < ai->terrain_width; x++) {
                     if (((row << x) & 0x8000) && distance_limit >= ai->tile_target_distance[level][y][x]) {
                         ai->reachable_tiles[ai->movement_scenario][level][y] |= 0x8000 >> x;
                         found = 1;
@@ -1643,7 +1644,7 @@ s32 ai_target_is_untargetable(s32 unit_idx) {
     s32 mount;
 
     unit = &g_unit_stats[unit_idx];
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return 1;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))
@@ -2119,7 +2120,8 @@ static s32 ai_origin_calculate_ability_range(void) {
             tile->ceiling_depth_and_marks.ability_range = 0;
             tile++;
         } while (x < BATTLE_MAP_TILE_COUNT);
-        g_battle_map_tile_data[ai->current_action.coords.fields.y * ai->map_max_x + ai->current_action.coords.fields.x
+        g_battle_map_tile_data[ai->current_action.coords.fields.y * ai->terrain_width
+            + ai->current_action.coords.fields.x
             + (ai->current_action.coords.fields.elevation * BATTLE_MAP_TILES_PER_LAYER)]
             .ceiling_depth_and_marks.ability_range = 1;
     }
@@ -2128,16 +2130,16 @@ static s32 ai_origin_calculate_ability_range(void) {
     /* Direct typed row pointers change the original loop bytes. */
     for (level_address = (u32)ai; level < BATTLE_MAP_TERRAIN_LAYER_COUNT;
         level++, level_address += AI_GRID_ROW_COUNT * sizeof(u16)) {
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             target_rows = (u16*)(level_address + offsetof(ai_data_t, targetable_tiles));
             origin_rows = (u16*)(level_address + offsetof(ai_data_t, aim_tiles));
             target_rows[y] = 0;
             row = origin_rows[y];
             if (row != 0) {
-                for (x = 0; x < ai->map_max_x; x++) {
+                for (x = 0; x < ai->terrain_width; x++) {
                     tile_mask = row << x;
                     if (tile_mask & 0x8000) {
-                        if (g_battle_map_tile_data[y * ai->map_max_x + x + (level * BATTLE_MAP_TILES_PER_LAYER)]
+                        if (g_battle_map_tile_data[y * ai->terrain_width + x + (level * BATTLE_MAP_TILES_PER_LAYER)]
                                 .ceiling_depth_and_marks.ability_range) {
                             count++;
                             tile_mask = 0x8000;
@@ -2170,10 +2172,10 @@ static s32 ai_take_random_tile(
     }
     selected = rand() % count;
     for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             row = tiles[level][y];
             if (row != 0) {
-                for (x = 0; x < ai->map_max_x; x++) {
+                for (x = 0; x < ai->terrain_width; x++) {
                     if ((row << x) & 0x8000) {
                         if (selected == 0) {
                             coordinates->fields.x = x;
@@ -2207,10 +2209,10 @@ s32 ai_count_flagged_tiles_within_map_bounds(u16 rows[BATTLE_MAP_TERRAIN_LAYER_C
 
     ai = &g_ai_data;
     for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             row = rows[level][y];
             if (row != 0) {
-                for (x = 0; x < ai->map_max_x; x++) {
+                for (x = 0; x < ai->terrain_width; x++) {
                     if (((row << x) & 0x8000) != 0) {
                         count++;
                     }
@@ -2413,7 +2415,7 @@ static s32 ai_select_fight_for_life(void) {
             if (target == ai->acting_unit_id) {
                 for (i = 0; i < UNIT_SLOT_COUNT; i++) {
                     unit = &g_unit_stats[i];
-                    if (unit->entd_slot != UNIT_ENTD_SLOT_NONE && ai->unit_decisions[i].enemy_flag
+                    if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && ai->unit_decisions[i].enemy_flag
                         && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
                             & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT))) {
                         target = i;
@@ -3158,13 +3160,13 @@ static s32 ai_move_fill_target_distance_grid(const ai_coords_t* target) {
             return -1;
         ai->resume_pending = 0;
         target_remaining_range = g_target_panels[(target->fields.elevation * BATTLE_MAP_TILES_PER_LAYER)
-            + target->fields.y * ai->map_max_x + target->fields.x]
+            + target->fields.y * ai->terrain_width + target->fields.x]
                                      .remaining_range;
     }
     for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             if (ai->reachable_tiles[0][level][y] != 0) {
-                for (x = 0; x < ai->map_max_x; x++) {
+                for (x = 0; x < ai->terrain_width; x++) {
                     if (use_manhattan) {
                         distance = target->fields.x - x;
                         if (distance < 0)
@@ -3175,7 +3177,7 @@ static s32 ai_move_fill_target_distance_grid(const ai_coords_t* target) {
                         distance += y_distance;
                     } else {
                         distance = target_remaining_range
-                            - g_target_panels[(level * BATTLE_MAP_TILES_PER_LAYER) + y * ai->map_max_x + x]
+                            - g_target_panels[(level * BATTLE_MAP_TILES_PER_LAYER) + y * ai->terrain_width + x]
                                   .remaining_range;
                     }
                     ai->tile_target_distance[level][y][x] = distance;
@@ -3213,12 +3215,12 @@ static void ai_move_fill_foe_proximity_grid(void) {
     for (level = 0; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
         unit_stats_t* units = g_unit_stats;
         s32 proximity_limit = 10;
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             row = ai->reachable_tiles[0][level][y];
             if (row == 0) {
                 continue;
             }
-            for (x = 0; x < ai->map_max_x; x++) {
+            for (x = 0; x < ai->terrain_width; x++) {
                 if (!((row << x) & 0x8000)) {
                     continue;
                 }
@@ -3301,7 +3303,7 @@ static s32 ai_move_score_reachable_tiles(void) {
     g_ai_data.current_action.act_before_move = 0;
     g_ai_data.current_action.command.skillset_id = 0;
     for (; level < BATTLE_MAP_TERRAIN_LAYER_COUNT; level++) {
-        for (y = 0; y < ai->map_max_y; y++) {
+        for (y = 0; y < ai->terrain_depth; y++) {
             {
                 u32 scenario_address = ai->movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
                 u32 level_address;
@@ -3312,7 +3314,7 @@ static s32 ai_move_score_reachable_tiles(void) {
                 row = *(u16*)row_address;
             }
             if (row != 0) {
-                for (x = 0; x < ai->map_max_x; x++) {
+                for (x = 0; x < ai->terrain_width; x++) {
                     if ((row << x) & 0x8000) {
                         ai->current_action.coords.fields.x = x;
                         ai->current_action.coords.fields.y = y;
@@ -3361,7 +3363,7 @@ s32 ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit) {
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
         return 0x7FFFFFFF;
     }
-    if ((ai->unit_decisions[unit->entd_slot].targeting_flags_2 >> 5) & (AI_TARGET_DEAD_WITHOUT_RERAISE >> 5)) {
+    if ((ai->unit_decisions[unit->active_battle_id].targeting_flags_2 >> 5) & (AI_TARGET_DEAD_WITHOUT_RERAISE >> 5)) {
         return 0x7FFFFFFF;
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_STOP)] & STATUS_BYTE_MASK(STATUS_ID_STOP)) {
@@ -3444,11 +3446,11 @@ void ai_init_workspace(void) {
     ai->hardcoded_status_abilities[1].packed_id = ABILITY_ID_FROG_ATTACK;
     ai->hardcoded_status_abilities[1].usage.flags = AI_ABILITY_ENTRY_USABLE | AI_ABILITY_ENTRY_EXHAUSTIVE_ORIGIN_SCAN;
     ai->present_unit_average_max_hp = 0;
-    ai->map_max_x = g_battle_map_max_x;
-    ai->map_max_y = g_battle_map_max_y;
+    ai->terrain_width = g_battle_map_terrain_width;
+    ai->terrain_depth = g_battle_map_terrain_depth;
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         ai->unit_compact_indices[i] = 0xff;
-        if (g_unit_stats[i].entd_slot != UNIT_ENTD_SLOT_NONE) {
+        if (g_unit_stats[i].active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
             ai->unit_compact_indices[i] = present_count;
             ai_init_unit_abilities(i);
             present_count++;
@@ -3494,7 +3496,8 @@ void ai_init_unit_abilities(s32 unit_id) {
     s32 evade_count;
     s32 i;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE || ai->unit_compact_indices[unit_id] >= AI_COMPACT_UNIT_COUNT) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE
+        || ai->unit_compact_indices[unit_id] >= AI_COMPACT_UNIT_COUNT) {
         return;
     }
     ai_ability_build_list(unit_id);
@@ -3576,7 +3579,8 @@ void ai_init_unit_abilities(s32 unit_id) {
         return;
     }
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        if (g_unit_stats[i].entd_slot == UNIT_ENTD_SLOT_NONE || g_unit_stats[i].unit_id != decision->main_target_id) {
+        if (g_unit_stats[i].active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE
+            || g_unit_stats[i].unit_id != decision->main_target_id) {
             continue;
         }
         decision->main_target_id = i;

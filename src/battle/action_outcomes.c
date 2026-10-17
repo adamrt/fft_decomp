@@ -518,7 +518,7 @@ s32 action_mimic_set_ability(unit_stats_t* unit) {
     /* A byte flag test retains the original compound-condition scheduling. */
     if (result == TARGET_PANELS_INVALID || result == TARGET_PANELS_NONE
         || (result < TARGET_PANELS_NO_TARGETING
-            && !((*(u8*)&g_battle_map_tile_data[saved_state = (z << 8) + (g_battle_map_max_x * y) + x]
+            && !((*(u8*)&g_battle_map_tile_data[saved_state = (z << 8) + (g_battle_map_terrain_width * y) + x]
                          .ceiling_depth_and_marks)
                 & BATTLE_MAP_TILE_FLAG_ABILITY_RANGE))) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
@@ -587,14 +587,14 @@ s32 target_resolve_rotated_offset_layer(
     }
     *out_x = unit->x + dx;
     *out_y = unit->position.y + dy;
-    if (*out_x < 0 || *out_x >= g_battle_map_max_x) {
+    if (*out_x < 0 || *out_x >= g_battle_map_terrain_width) {
         return -1;
     }
-    if (*out_y < 0 || *out_y >= g_battle_map_max_y) {
+    if (*out_y < 0 || *out_y >= g_battle_map_terrain_depth) {
         return -1;
     }
     current = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)];
-    index = g_battle_map_max_x * *out_y + *out_x;
+    index = g_battle_map_terrain_width * *out_y + *out_x;
     upper_index = index + 0x100;
     upper = &g_battle_map_tile_data[upper_index];
     lower = &g_battle_map_tile_data[index];

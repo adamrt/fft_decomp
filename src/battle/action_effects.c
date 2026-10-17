@@ -185,7 +185,7 @@ void menu_status_clear(void) {
 /* Fill an init record for a secondary effect that one unit both casts and
  * receives: the caster and the single target are the unit. Every other field of
  * the record is left as the caller's stack held it. */
-void effect_secondary_build_init(unit_t* unit, effect_secondary_init_t* effect) {
+void effect_secondary_build_init(unit_t* unit, effect_context_t* effect) {
     effect->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
     effect->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id = unit->runtime_id;
     effect->target_count = 1;
@@ -200,7 +200,7 @@ void effect_secondary_build_init(unit_t* unit, effect_secondary_init_t* effect) 
  * read from its action data: a miss, no effect, a Golem block, an equipment
  * break, a critical or a normal hit. With no targets the first entry instead
  * holds the cursor tile. */
-static void effect_secondary_build_init_from_action(unit_t* unit, effect_secondary_init_t* init) {
+static void effect_secondary_build_init_from_action(unit_t* unit, effect_context_t* init) {
     unit_t* target;
     action_data_t* action;
     s32 i;
@@ -256,7 +256,7 @@ static void effect_secondary_build_init_from_action(unit_t* unit, effect_seconda
  * of the used weapon. `is_bow` is 1 from the projectile-hit path and 0
  * otherwise; effect_secondary_init_weapon_hit ignores it. */
 void effect_secondary_start_weapon_hit(unit_t* unit, s32 is_bow) {
-    effect_secondary_init_t secondary_init;
+    effect_context_t secondary_init;
 
     effect_secondary_build_init_from_action(unit, &secondary_init);
     effect_secondary_init_weapon_hit(g_item_weapon_data[unit->used_item_or_weapon_id].element, &secondary_init, is_bow);
@@ -268,7 +268,7 @@ void effect_secondary_start_weapon_hit(unit_t* unit, s32 is_bow) {
  * bows and crossbows, none for the rest). The retail code tests Throw
  * Shuriken on its own before the Item/Throw span, which already holds it. */
 void effect_secondary_start_projectile(unit_t* unit) {
-    effect_secondary_init_t secondary_init;
+    effect_context_t secondary_init;
     u16 ability_id;
     u8 animation_id;
 
@@ -295,7 +295,7 @@ void effect_secondary_start_projectile(unit_t* unit) {
  * sets five fields; effect_secondary_init copies the rest of its caster
  * and target blocks and its used_weapon_id as the stack left them. */
 static void effect_secondary_set(unit_t* unit, s32 effect_type) {
-    effect_secondary_init_t data;
+    effect_context_t data;
 
     effect_secondary_build_init(unit, &data);
     if (unit->stats != 0) {
@@ -341,21 +341,21 @@ void effect_secondary_set_teleport(unit_t* unit) {
 
 /* Start the reaction animation of the unit with this runtime id to the casting unit's action, for
  * effect keyframe actions. Always returns 1. */
-s32 animation_set_target_by_runtime_id(s32 runtime_id) {
+s32 action_start_target_response_by_runtime_id(s32 runtime_id) {
     unit_t* target = unit_get_by_runtime_id(runtime_id);
     unit_t* caster = unit_get_casting();
 
-    animation_set_target(caster, target);
+    action_start_target_response(caster, target);
     return 1;
 }
 
 /* Starts the reaction animation of the unit in slot battle_id to the casting
  * unit's action. Always returns 1. No retail code calls it. */
-s32 animation_set_target_by_battle_id(u16 battle_id) {
+s32 action_start_target_response_by_battle_id(u16 battle_id) {
     unit_t* target = unit_get_by_battle_id(battle_id);
     unit_t* caster = unit_get_casting();
 
-    animation_set_target(caster, target);
+    action_start_target_response(caster, target);
     return 1;
 }
 
@@ -374,30 +374,30 @@ s32 result_prepare_display_by_runtime_id(s32 runtime_id) {
 /* Lands a projectile strike on its target: the weapon hit sound, the target's
  * reaction animation, its post-action display and the evade and weapon-element
  * effect data. Does nothing when either unit is missing. */
-static void action_resolve_projectile_hit(unit_t* attacker, unit_t* target) {
+static void action_start_projectile_hit_response(unit_t* attacker, unit_t* target) {
     if ((attacker != 0) && (target != 0)) {
         action_play_weapon_sfx(attacker, 1);
-        animation_set_target(attacker, target);
+        action_start_target_response(attacker, target);
         result_prepare_display_by_runtime_id(target->runtime_id);
         effect_secondary_start_weapon_hit(attacker, 1);
     }
 }
 
-/* action_resolve_projectile_hit for two battle ids. No retail code calls it. */
-void action_resolve_projectile_hit_by_battle_id(u16 attacker_id, u16 target_id) {
+/* action_start_projectile_hit_response for two battle ids. No retail code calls it. */
+void action_start_projectile_hit_response_by_battle_id(u16 attacker_id, u16 target_id) {
     unit_t* attacker = unit_get_by_battle_id(attacker_id);
     unit_t* target = unit_get_by_battle_id(target_id);
 
-    action_resolve_projectile_hit(attacker, target);
+    action_start_projectile_hit_response(attacker, target);
 }
 
-/* action_resolve_projectile_hit for two runtime ids: called by the arrow-arc
+/* action_start_projectile_hit_response for two runtime ids: called by the arrow-arc
  * and linear projectile effects for the unit the projectile hits. */
-void action_resolve_projectile_hit_by_runtime_id(u16 attacker_id, u16 target_id) {
+void action_start_projectile_hit_response_by_runtime_id(u16 attacker_id, u16 target_id) {
     unit_t* attacker = unit_get_by_runtime_id(attacker_id);
     unit_t* target = unit_get_by_runtime_id(target_id);
 
-    action_resolve_projectile_hit(attacker, target);
+    action_start_projectile_hit_response(attacker, target);
 }
 
 /* Apply a unit's queued status changes (removals, then additions) and refresh everything that

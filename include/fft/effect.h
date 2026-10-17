@@ -41,7 +41,7 @@ s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_em
 /* targets */
 enum {
     EFFECT_TARGET_COUNT_MAX = UNIT_RUNTIME_SLOT_COUNT,
-    EFFECT_CASTER_ENTRY = EFFECT_TARGET_COUNT_MAX, /* index of the caster's record in effect_secondary_init_t.targets */
+    EFFECT_CASTER_ENTRY = EFFECT_TARGET_COUNT_MAX, /* index of the caster's record in effect_context_t.targets */
     /* the target index that makes effect_resolve_target_world_coords resolve the caster */
     EFFECT_TARGET_INDEX_CASTER = -1,
 };
@@ -84,7 +84,7 @@ typedef enum effect_hit_result {
 
 /* Complete 0xc8-byte effect context: built on the stack for secondary effects
  * and copied whole to g_effect_context for the ability effect. */
-typedef struct effect_secondary_init {
+typedef struct effect_context {
     u16 target_count;   /* 0x00; effect targets: one child record each, spawn_delay apart */
     u8 spectator_count; /* 0x02; entries in spectator_ids */
     u8 math_skill_flag; /* 0x03; enables the effect flags' spawn_delay_override */
@@ -94,16 +94,15 @@ typedef struct effect_secondary_init {
     u8 _unused_bd;
     SVECTOR target_tile; /* 0xbe; post-action destination tile, x/layer/y */
     u16 used_weapon_id;  /* 0xc6 */
-} effect_secondary_init_t;
-typedef char effect_secondary_init_size_must_be_200[(sizeof(effect_secondary_init_t) == 200) ? 1 : -1];
+} effect_context_t;
+typedef char effect_context_size_must_be_200[(sizeof(effect_context_t) == 200) ? 1 : -1];
 
-extern effect_secondary_init_t g_effect_context;
+extern effect_context_t g_effect_context;
 
 void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void effect_get_world_coords_by_battle_id(
-    s32 adjust_for_tile_height, u32 battle_id, effect_secondary_init_t* effect_coordinates, SVECTOR* destination);
-void effect_resolve_target_world_coords(
-    s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out);
+    s32 adjust_for_tile_height, u32 battle_id, effect_context_t* effect_coordinates, SVECTOR* destination);
+void effect_resolve_target_world_coords(s32 add_depth, s32 target_index, effect_context_t* coord_data, SVECTOR* out);
 
 /* particles */
 /* Motion state of an effect slot (effect_slot_t +0x98) and of a

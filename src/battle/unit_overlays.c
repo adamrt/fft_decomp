@@ -963,7 +963,7 @@ typedef s16 (*battle_screen_z_halfword_fn_t)(unit_t* unit);
  * A floating unit rises by the frame interval each update up to 12, then bobs through
  * g_unit_float_bob_offsets (24 entries, two frames each) unless it is
  * a mount's rider. Otherwise the offset decays to 0, except during the
- * crystal-learn state. The unit's world and real y are then raised to the
+ * post-move event state. The unit's world and real y are then raised to the
  * recalculated ground height when they lie below it. Jumping units whose
  * height is controlled by their jump animation are left untouched. */
 static void unit_increment_or_decrement_height_mod(unit_t* unit) {
@@ -984,7 +984,7 @@ static void unit_increment_or_decrement_height_mod(unit_t* unit) {
         } else {
             unit->float_bob_offset = 0;
         }
-    } else if (g_game_state != GAME_STATE_CRYSTAL_LEARN) {
+    } else if (g_game_state != GAME_STATE_POST_MOVE_EVENTS) {
         if (unit->depth_height_offset != 0) {
             unit->depth_height_offset -= g_system_vsync_interval;
             if (unit->depth_height_offset < 0) {

@@ -57,12 +57,12 @@ s32 unit_list_run_menu_thread(s32 id, menu_entry_t* desc);
 /* Unit List menu snapshot built from unit_stats_t, with display values and
  * the battle_id used to return the selected unit. */
 typedef struct unit_list_record {
-    s16 level;      /* 0x00; unit_list_get_level, _experience, _brave and _faith read the four stats */
-    s16 team_kind;  /* 0x02 */
-    s16 list_index; /* 0x04 */
-    s16 unit_count; /* 0x06; shown units plus eggs in each billboard record */
-    s16 experience; /* 0x08 */
-    s16 entd_slot;  /* 0x0a */
+    s16 level;            /* 0x00; unit_list_get_level, _experience, _brave and _faith read the four stats */
+    s16 team_kind;        /* 0x02 */
+    s16 list_index;       /* 0x04 */
+    s16 unit_count;       /* 0x06; shown units plus eggs in each billboard record */
+    s16 experience;       /* 0x08 */
+    s16 active_battle_id; /* 0x0a */
     menu_unit_status_gauge_t gauges[3]; /* 0x0c; HP, MP and CT */
     s16 formation_index;                /* 0x1e */
     u8 _unused_020[2];

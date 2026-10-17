@@ -129,7 +129,8 @@ s32 party_save_encounter_unit(entd_encounter_t* entd, s32 unit_id, s32 allow_gue
         unit_stats_t* unit_data = &unit;
 
         unit_data->battle_id = 0xff;
-        unit_data->entd_slot = 0x20;
+        /* Placeholder for this temporary roster-conversion record. */
+        unit_data->active_battle_id = 0x20;
         unit_data->existence = UNIT_EXISTENCE_ACTIVE;
         unit_data->formation_index = UNIT_FORMATION_INDEX_NONE;
         unit_init_from_encounter(unit_data, entd_unit, use_world_text, UNIT_ENTD_INIT_NEW);

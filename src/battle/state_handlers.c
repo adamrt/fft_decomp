@@ -287,7 +287,7 @@ void state_handle_wait_direction(void) {
  * pending post-movement event of g_move_post_events, clearing it once
  * done, and start the next post-movement step.
  */
-void state_handle_crystal_learn(void) {
+void state_handle_post_move_events(void) {
     ai_command_t* command;
     unit_t* source;
     unit_t* casting;
@@ -747,7 +747,7 @@ void state_handle_action_execute_start(void) {
  * display; nothing happens when either unit is missing. */
 static void action_start_target_animation_display(unit_t* attacker, unit_t* target) {
     if (attacker != 0 && target != 0) {
-        animation_set_target(attacker, target);
+        action_start_target_response(attacker, target);
         result_prepare_display_by_runtime_id(target->runtime_id);
     }
 }
@@ -939,7 +939,7 @@ void state_handle_resume_attack_phase(void) {
  * once no animation is pending and neither the casting unit nor any of its targets still shows a
  * numeric display, the source unit returns to its status animation and the after-command state
  * begins. */
-void state_handle_learn_ability_on_hit(void) {
+void state_handle_post_action_reports(void) {
     ai_command_t* selected_command_address;
     s32 selected_command;
     s32 i;
@@ -966,7 +966,7 @@ void state_handle_learn_ability_on_hit(void) {
         if (g_reward_report_phase >= 3) {
             g_state_window_closed = 1;
         } else {
-            state_enter_learn_ability_on_hit();
+            state_enter_post_action_reports();
         }
         break;
     }

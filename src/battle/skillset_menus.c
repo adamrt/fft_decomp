@@ -504,7 +504,7 @@ s32 skillset_monster_count_supporters(const unit_stats_t* unit) {
     s32 height;
     s32 sum;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return 0;
     }
     unit_calculate_height_data(&height_data, unit->battle_id);
@@ -527,11 +527,11 @@ static s32 skillset_monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, 
     s32 unit_index;
     s32 unit_team_flags = team_flags;
 
-    if (x < 0 || x >= g_battle_map_max_x) {
+    if (x < 0 || x >= g_battle_map_terrain_width) {
         return 0;
     }
     if (y >= 0) {
-        if (y >= g_battle_map_max_y) {
+        if (y >= g_battle_map_terrain_depth) {
             return 0;
         }
 
@@ -540,7 +540,7 @@ static s32 skillset_monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, 
         for (; unit_index < UNIT_SLOT_COUNT; unit_index++) {
             unit_stats_t* unit = &g_unit_stats[unit_index];
 
-            if (unit->entd_slot == UNIT_ENTD_SLOT_NONE || unit->x != x || unit->position.y != y
+            if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE || unit->x != x || unit->position.y != y
                 || reaction_is_prevented(unit) != 0
                 || !(unit->ability_flags.support[3] & UNIT_SUPPORT_SET_4_MONSTER_SKILL)
                 || ((unit->team_flags ^ unit_team_flags) & UNIT_TEAM_MASK)) {
@@ -664,7 +664,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
     if (mode == TURN_CLOCK_MODE_FIND_ACTIVE_UNIT) {
         for (i = 0; i < UNIT_SLOT_COUNT; i++) {
             unit = &g_unit_stats[i];
-            if (unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
+            if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
                 if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                         & (STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD)
                             | STATUS_BYTE_MASK(STATUS_ID_JUMP)))) {
@@ -805,7 +805,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
             i = 0;
             do {
                 unit = &g_unit_stats[i];
-                if (unit->entd_slot != UNIT_ENTD_SLOT_NONE
+                if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
                     status_update_expiring(i);
@@ -821,7 +821,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
             do {
                 unit = &g_unit_stats[i];
                 g_turn_pending_flags[i] = 0;
-                if (unit->entd_slot != UNIT_ENTD_SLOT_NONE
+                if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
                     g_turn_pending_flags[i] = unit->action.attack_type;
@@ -897,7 +897,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
             g_turn_clock_state = TURN_CLOCK_STATE_TERRAIN_POISON;
             if (g_turn_unit_id != -1) {
                 unit = &g_unit_stats[g_turn_unit_id];
-                if (status_apply_poison_and_regen(unit)) {
+                if (status_prepare_poison_and_regen(unit)) {
                     result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
@@ -917,7 +917,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
             g_turn_clock_state = TURN_CLOCK_STATE_MARK_MIMES;
             if (g_turn_unit_id != -1) {
                 unit = &g_unit_stats[g_turn_unit_id];
-                if (status_remove_transparent(unit)) {
+                if (status_prepare_transparent_removal(unit)) {
                     result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
@@ -929,7 +929,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
                 do {
                     unit = &g_unit_stats[i];
                     g_turn_pending_flags[i] = 0;
-                    if (unit->job_id == JOB_ID_MIME && unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
+                    if (unit->job_id == JOB_ID_MIME && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
                         g_turn_pending_flags[i] = 1;
                     }
                     /* clang-format off */
@@ -943,7 +943,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
             g_action_mimic_attacker.mimic_pending = 0;
             for (i = 0; i < UNIT_SLOT_COUNT; i++) {
                 unit = &g_unit_stats[i];
-                if (g_turn_pending_flags[i] != 0 && unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
+                if (g_turn_pending_flags[i] != 0 && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
                     g_turn_pending_flags[i] = 0;
                     ret = action_mimic_set_ability(unit);
                     if (ret == 1) {
@@ -1080,7 +1080,7 @@ s32 turn_calculate_status_flags(const unit_stats_t* unit) {
     s32 status5;
     s32 flags;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return TURN_STATUS_CT_FROZEN;
     }
     if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_FREEZE_CT) != 0) {
@@ -1145,7 +1145,7 @@ s32 event_check_battle_outcome(void) {
 
     for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
         unit = &g_unit_stats[unit_index];
-        if (unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
+        if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
             selected = unit->initial_team_flags & UNIT_TEAM_MASK;
             if (status_unit_has_any_in_set(unit, STATUS_CHECK_SET_KO) == 0) {
                 if (selected != 0) {
@@ -1174,7 +1174,7 @@ s32 at_list_find_unit(const unit_stats_t* unit) {
     at_entry_t* entry;
     u8 battle_id;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE)
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
         return -1;
     if (at_list_is_unit_excluded(unit) != 0)
         return -3;
@@ -1213,7 +1213,7 @@ s32 at_list_get_entry_unit_id(s32 at_index) {
 
 /* Return 1 when the unit cannot participate in the AT list. */
 static s32 at_list_is_unit_excluded(const unit_stats_t* unit) {
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return 1;
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
@@ -1507,7 +1507,7 @@ static s32 turn_set_move_act_taken(s32 unit_id, s32 move_flag, s32 act_flag) {
     unit_stats_t* unit = &g_unit_stats[unit_id];
     s32 ret;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE)
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
         return -1;
     if (move_flag != 0) {
         unit->movement_taken = 1;
@@ -1535,7 +1535,7 @@ s32 turn_end(s32 unit_id) {
     u8 action_check;
     u32 result;
 
-    if (g_unit_stats[unit_id].entd_slot == UNIT_ENTD_SLOT_NONE)
+    if (g_unit_stats[unit_id].active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
         return 1;
     if (unit->has_turn == 0)
         return 1;
@@ -1582,7 +1582,7 @@ static s32 turn_should_end(const unit_stats_t* unit) {
  * (turn_calculate_status_flags) ends it here. */
 s32 turn_is_over(s32 unit_id) {
     unit_stats_t* unit = &g_unit_stats[unit_id];
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return 1;
     }
     if (!(turn_calculate_status_flags(unit) & TURN_STATUS_BLOCKS_TURN_MASK)) {
@@ -1611,11 +1611,11 @@ s32 status_inflict_defending(s32 unit_id) {
 s32 unit_mark_pending_removal(s32 unit_id) {
     unit_stats_t* unit = &g_unit_stats[unit_id];
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE)
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
         return -1;
     if (unit->formation_index == UNIT_FORMATION_INDEX_NONE)
         return -1;
-    unit->entd_slot = UNIT_ENTD_SLOT_NONE;
+    unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
     unit->existence = UNIT_EXISTENCE_PENDING_REMOVAL;
     return 0;
 }

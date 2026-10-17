@@ -130,7 +130,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     record->list_index = list_index;
 
     record->experience = unit->experience < UNIT_LEVEL_UP_EXPERIENCE ? unit->experience : UNIT_LEVEL_EXPERIENCE_MAX;
-    record->entd_slot = unit->entd_slot;
+    record->active_battle_id = unit->active_battle_id;
     record->gauges[MENU_UNIT_STATUS_GAUGE_HP].value = unit->hp <= UNIT_HP_MP_MAX ? unit->hp : UNIT_HP_MP_MAX;
     record->gauges[MENU_UNIT_STATUS_GAUGE_HP].max = unit->max_hp <= UNIT_HP_MP_MAX ? unit->max_hp : UNIT_HP_MP_MAX;
     record->gauges[MENU_UNIT_STATUS_GAUGE_MP].value = unit->mp <= UNIT_HP_MP_MAX ? unit->mp : UNIT_HP_MP_MAX;
@@ -149,12 +149,12 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
 
     record->formation_index = unit->formation_index;
     /* The ENTD slot also serves as the record's name index and battle id. */
-    record->name_index = unit->entd_slot;
+    record->name_index = unit->active_battle_id;
     record->job_id = unit->job_id;
     record->brave = unit->brave;
     record->faith = unit->faith;
     record->zodiac = unit->birthday.zodiac;
-    record->battle_id = unit->entd_slot;
+    record->battle_id = unit->active_battle_id;
 
     record->move = unit->move;
     record->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -226,7 +226,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
         record->abilities[4] = unit->abilities.movement;
     }
 
-    record->runtime_id = unit_get_runtime_id_by_battle_id(unit->entd_slot);
+    record->runtime_id = unit_get_runtime_id_by_battle_id(unit->active_battle_id);
     record->initial_team_flags = unit->initial_team_flags;
     record->mount_info = unit->mount_info;
     record->two_handed
@@ -272,7 +272,7 @@ s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode) {
     /* Keep status-byte reads separate; GCC otherwise merges the two tests into one 16-bit load. */
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = unit_get_stats(i);
-        if ((unit != 0) && (unit->entd_slot != UNIT_ENTD_SLOT_NONE)) {
+        if ((unit != 0) && (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)) {
             if (unit->unit_flags & UNIT_FLAG_EGG) {
                 total++;
             } else if (!(*&unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]

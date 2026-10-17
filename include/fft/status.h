@@ -229,14 +229,14 @@ s32 status_find_action_highest_order_effect(const struct action_data* action);
 s32 status_modify_inflictions(s32 removal_only);
 s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only);
 void status_apply_unit_action_removal(struct unit_stats* unit);
-s32 status_remove_transparent(struct unit_stats* unit);
+s32 status_prepare_transparent_removal(struct unit_stats* unit);
 void status_remove_transparent_if_jump_used(struct unit_stats* unit);
 void status_clear_all(struct unit_stats* unit);
 
 /* per-turn upkeep */
 void status_update_expiring(s32 unit_id);
 s32 status_prepare_terrain_poison(struct unit_stats* unit);
-s32 status_apply_poison_and_regen(struct unit_stats* unit);
+s32 status_prepare_poison_and_regen(struct unit_stats* unit);
 
 /* status display */
 extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];

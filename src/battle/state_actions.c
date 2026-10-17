@@ -58,7 +58,7 @@
  * thread the failing tests straight to the call. Items 0x4a..0x4c (the
  * elemental guns) and ability 0x189 (Ninja Ball) are hard-coded exceptions. */
 static void effect_start_for_action(s32 ability, unit_t* unit) {
-    effect_secondary_init_t init;
+    effect_context_t init;
     unit_t* target;
     unit_t* spectator;
     unit_stats_t* target_stats;

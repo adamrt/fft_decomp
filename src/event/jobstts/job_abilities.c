@@ -28,7 +28,7 @@ static void status_screen_copy_unit_jobs(unit_stats_t* unit, status_screen_unit_
 
     out->job_id = unit->job_id;
     out->unit_flags = unit->unit_flags;
-    out->entd_slot = unit->entd_slot;
+    out->active_battle_id = unit->active_battle_id;
     out->character_identity = unit->character_identity;
     out->primary_skillset = unit->primary_skillset;
 

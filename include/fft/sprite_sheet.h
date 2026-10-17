@@ -481,8 +481,6 @@ extern sprite_load_state_t g_sprite_load_state;
 extern file_extent_t g_sprite_sp2_files[];
 extern file_extent_t g_sprite_worker8_sp2_files[];
 extern u32* g_sprite_sp2_data;
-extern s32 g_sprite_last_loaded_shp_id;
-extern s32 g_sprite_last_loaded_seq_id;
 extern u8 g_sprite_shp_frame_data_buffer[];
 extern u8 g_sprite_seq_data_buffer[];
 extern u8 g_sprite_fallback_shp_frame_data[];

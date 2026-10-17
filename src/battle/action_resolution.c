@@ -722,7 +722,7 @@ s32 action_apply_target_result(s32 battle_id) {
     g_action_current_ability.target_id = battle_id;
     g_action_target = &g_unit_stats[battle_id];
     g_action_target_data = &g_unit_stats[battle_id].action;
-    if (g_action_target->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (g_action_target->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return -1;
     }
 
@@ -1030,7 +1030,7 @@ s32 reaction_is_blocked(const unit_stats_t* unit) {
 }
 
 /* Nonzero when the unit cannot react: it has a status of the prevent-reaction
- * set, or the current action is itself a reaction or a simulation (anything but
+ * set, or the current action is a secondary application (anything but
  * the primary context), which never provokes one. */
 s32 reaction_is_prevented(const unit_stats_t* unit) {
     if (g_action_context != ACTION_CONTEXT_PRIMARY) {
@@ -1558,7 +1558,7 @@ s32 action_apply_attacker_result(s32 unit_id) {
     action = &g_unit_stats[unit_id].action;
     g_action_current_ability.target_id = unit_id;
     g_action_target_data = action;
-    if (stats->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (stats->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return -1;
     }
     mem_copy_byte_data_source_first(&g_action_attacker_action_data, action, sizeof(action_data_t));
@@ -1572,7 +1572,7 @@ s32 action_apply_attacker_result(s32 unit_id) {
 /* Set up a unit's Poison or Regen tick as an action against itself: Poison deals MaxHP/8,
  * otherwise Regen heals MaxHP/8. Returns the action type, 0 when neither applies or the unit is
  * out of action. */
-s32 status_apply_poison_and_regen(unit_stats_t* unit) {
+s32 status_prepare_poison_and_regen(unit_stats_t* unit) {
     u8 status;
 
     if (status_is_unit_out_of_action(unit) != 0) {
@@ -1598,7 +1598,7 @@ s32 status_apply_poison_and_regen(unit_stats_t* unit) {
  * Transparent. Returns the result's attack type, nonzero when there is a change
  * to show. Crystals, treasures, dead, petrified and jumping units return 0
  * untouched. */
-s32 status_remove_transparent(unit_stats_t* unit) {
+s32 status_prepare_transparent_removal(unit_stats_t* unit) {
     unit_stats_t* target;
 
     if (status_is_unit_out_of_action(unit) != 0) {
@@ -1669,7 +1669,7 @@ static void action_set_target(unit_stats_t* unit) {
 static s32 status_is_unit_out_of_action(const unit_stats_t* unit) {
     s32 result;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE)
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
         return 1;
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
         & (STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_JUMP)))
@@ -1728,7 +1728,7 @@ s32 status_prepare_terrain_poison(unit_stats_t* unit) {
  * mount): Degenerator lowers a level, Deathtrap inflicts Death Sentence and Sleeping Gas inflicts
  * Sleep (a miss when they cannot take hold), Steel Needle deals MaxHP/5. Returns the trap id, or
  * MOVE_FIND_TRAP_NONE. */
-s32 move_find_apply_trap(unit_stats_t* unit) {
+s32 move_find_prepare_trap_result(unit_stats_t* unit) {
     u8 trap = move_find_get_result(unit->x, unit->position.y, unit->position.higher_elevation)->trap_id;
     action_data_t* action;
 
@@ -1819,22 +1819,22 @@ s32 move_init_ability_benefit(unit_stats_t* unit) {
     return 0;
 }
 
-/* Apply the unit's pending action result to itself in the simulation context
+/* Apply the unit's pending action result to itself in the secondary context
  * (as for a movement ability's benefit) and write the EXP and JP gained and any
  * new level and job level to rewards. Returns -1 for an empty unit slot,
  * otherwise action_apply_target_result's result. */
-s32 reward_build_display(unit_stats_t* unit, action_reward_display_t* rewards) {
+s32 reward_apply_result_and_collect(unit_stats_t* unit, action_reward_display_t* rewards) {
     s32 job_slot[2];
     s32 result;
     s32 unit_id;
 
-    if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return -1;
     }
     unit_id = unit->battle_id;
     g_action_current_ability.level_gained_flag = 0;
     g_action_current_ability.job_level_gained_flag = 0;
-    g_action_context = ACTION_CONTEXT_REACTION_OR_SIMULATION;
+    g_action_context = ACTION_CONTEXT_SECONDARY;
     g_action_actor_id = unit_id;
     result = action_apply_target_result(unit->battle_id);
     g_action_context = ACTION_CONTEXT_PRIMARY;
@@ -1875,7 +1875,7 @@ static void reward_apply_jp_change(unit_stats_t* unit) {
 s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
     unit_action_status_changes_t saved;
 
-    if (g_unit_stats[unit_id].entd_slot == UNIT_ENTD_SLOT_NONE) {
+    if (g_unit_stats[unit_id].active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return -1;
     }
     mem_copy_byte_data_source_first(&g_action_target_data->status_changes, &saved, sizeof(saved));

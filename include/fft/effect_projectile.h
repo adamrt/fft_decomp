@@ -15,7 +15,7 @@
 extern s32 g_effect_arrow_arc_length;
 extern u16 g_effect_arrow_arc_yaw;
 extern s16 g_effect_arrow_arc_caster_relative_yaw;
-extern s32 g_effect_arrow_arc_height;
+extern s32 g_effect_arrow_launch_slope_q12;
 extern s16 g_effect_arrow_arc_launch_angle;
 extern s32 g_effect_arrow_arc_distance;
 extern s32 g_effect_arrow_arc_distance_step;

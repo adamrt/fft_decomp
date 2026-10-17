@@ -90,7 +90,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id); /* DEBUGCHR's read-only ride
 /* Job and ability data copied into JOBSTTS.OUT for the selected unit. */
 typedef struct status_screen_unit_jobs {
     s16 job_id;                /* 0x00 */
-    s16 entd_slot;             /* 0x02 */
+    s16 active_battle_id;      /* 0x02 */
     u16 primary_skillset;      /* 0x04 */
     u8 unit_flags;             /* 0x06 */
     u8 character_identity;     /* 0x07 */

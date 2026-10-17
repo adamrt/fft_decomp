@@ -36,7 +36,7 @@ void text_build_unit_name_list(void) {
     output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     for (; unit_id < UNIT_SLOT_COUNT; unit_id++) {
         unit = unit_get_stats(unit_id);
-        if (unit->entd_slot == UNIT_ENTD_SLOT_NONE) {
+        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
             *output++ = 0xfe;
         } else {
             length = 0;

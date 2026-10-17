@@ -62,8 +62,8 @@ void turn_activate_move_act(unit_stats_t* unit) {
 /* Load a terrain chunk: the map's x and y size from its first two bytes, then both 256-tile layers
  * into g_battle_map_tile_data. */
 void battle_map_tile_copy_size_and_data(u8* data) {
-    g_battle_map_max_x = *data++;
-    g_battle_map_max_y = *data++;
+    g_battle_map_terrain_width = *data++;
+    g_battle_map_terrain_depth = *data++;
     memcpy(g_battle_map_tile_data, data, sizeof(g_battle_map_tile_data));
 }
 
@@ -75,8 +75,8 @@ void move_find_load_item_data(move_find_map_data_t* map_data) {
 /* The tile at (x, y) of a layer, or 0 outside the map or for a layer other than 0
  * and 1. */
 battle_map_tile_t* battle_map_tile_get_pointer(s32 x, s32 y, u32 layer) {
-    s32 max_x = g_battle_map_max_x;
-    s32 max_y = g_battle_map_max_y;
+    s32 max_x = g_battle_map_terrain_width;
+    s32 max_y = g_battle_map_terrain_depth;
 
     if (x < 0 || x >= max_x || y < 0 || y >= max_y || layer >= 2U) {
         return 0;
@@ -87,7 +87,7 @@ battle_map_tile_t* battle_map_tile_get_pointer(s32 x, s32 y, u32 layer) {
 /* Return one packed field of the tile at (x, y, layer), or 0xff for an
  * unknown selector. The tile address is not bounds-checked. */
 s32 battle_map_tile_get_value(battle_map_tile_data_selector_e field, s32 x, s32 y, s32 layer) {
-    battle_map_tile_t* tile = &g_battle_map_tile_data[(layer << 8) + y * g_battle_map_max_x + x];
+    battle_map_tile_t* tile = &g_battle_map_tile_data[(layer << 8) + y * g_battle_map_terrain_width + x];
 
     switch (field) {
     case BATTLE_MAP_TILE_DATA_SURFACE_TYPE:
@@ -136,7 +136,7 @@ s32 battle_map_tile_set_value(battle_map_tile_data_selector_e field, s32 x, s32 
     s32 attempts = 0;
     s32 result = 0;
 
-    tile = &g_battle_map_tile_data[(layer << 8) + y * g_battle_map_max_x + x];
+    tile = &g_battle_map_tile_data[(layer << 8) + y * g_battle_map_terrain_width + x];
     switch (field) {
     case BATTLE_MAP_TILE_DATA_SURFACE_TYPE:
         tile->surface.type = value;
@@ -312,7 +312,7 @@ static void move_knockback_calculate(void) {
     if (level < 0) {
         return;
     }
-    tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_max_x + x];
+    tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_terrain_width + x];
     surface = tile->surface.type;
     if (tile->flags.untargetable) {
         return;
@@ -368,7 +368,7 @@ static s32 move_knockback_check_destination(s32 direction, s32 x, s32 y) {
     s32 index;
     s32 upper_index;
 
-    if (x < 0 || y < 0 || x >= g_battle_map_max_x || y >= g_battle_map_max_y) {
+    if (x < 0 || y < 0 || x >= g_battle_map_terrain_width || y >= g_battle_map_terrain_depth) {
         return -1;
     }
     switch (direction) {
@@ -391,7 +391,7 @@ static s32 move_knockback_check_destination(s32 direction, s32 x, s32 y) {
     }
     tile = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(g_action_target)];
     height = TILE_EDGE_HEIGHT(tile, source_shift);
-    index = y * g_battle_map_max_x + x;
+    index = y * g_battle_map_terrain_width + x;
     upper_index = index + BATTLE_MAP_TILES_PER_LAYER;
     lower = &g_battle_map_tile_data[index];
     upper = &g_battle_map_tile_data[upper_index];
@@ -1333,7 +1333,7 @@ void formula_store_xa_times_ya_damage(void) {
  * formula_use_hp_damage_as_action_hit_percent, or formula 0x32's damage
  * base. YA gets zodiac compatibility here (the callers apply it to XA), except
  * for Golem. */
-void formula_store_hit_chance(void) {
+void formula_store_xa_plus_ya(void) {
     u16 original_xa;
 
     if (g_action_current_ability.ability_id != ABILITY_ID_SUMMON_MAGIC_GOLEM) {

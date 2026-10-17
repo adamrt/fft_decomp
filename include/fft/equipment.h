@@ -65,7 +65,7 @@ typedef struct equipment_unit_preview {
     s16 list_index;                       /* 0x04; AT-list lookup + 1, or -1 */
     s16 unit_count;                       /* 0x06; units still present, set by equipment_load_unit */
     s16 experience;                       /* 0x08; capped at 99 */
-    s16 unit_index;                       /* 0x0a; unit_stats_t.entd_slot */
+    s16 unit_index;                       /* 0x0a; unit_stats_t.active_battle_id */
     menu_unit_status_gauge_t gauges[3];   /* 0x0c; HP, MP and CT */
     s16 battle_id;                        /* 0x1e */
     s16 _unused_20;                       /* 0x20 */

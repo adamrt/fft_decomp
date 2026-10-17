@@ -531,9 +531,9 @@ typedef enum unit_equipped_flags {
     UNIT_EQUIPPED_FLAG_SWORD = 0x08,
 } unit_equipped_flags_e;
 
-/* unit_stats_t.entd_slot value for an unused or removed slot. */
+/* active_battle_id marks absence independently of the persistent battle_id. */
 enum {
-    UNIT_ENTD_SLOT_NONE = 0xff,
+    UNIT_ACTIVE_BATTLE_ID_NONE = 0xff,
 };
 
 /* Seven encounter AI bytes copied together into the unit record. */
@@ -556,37 +556,37 @@ typedef char unit_ai_setup_size_must_be_7[(sizeof(unit_ai_setup_t) == UNIT_AI_SE
  * keeps UNIT_SLOT_COUNT of them in g_unit_stats; a live
  * unit_t points to its stats through the member at 0x134. */
 typedef struct unit_stats {
-    u8 character_identity;                               /* 0x000 */
-    u8 entd_slot;                                        /* 0x001; 0xff means absent */
-    u8 formation_index;                                  /* 0x002 */
-    u8 job_id;                                           /* 0x003 */
-    u8 sprite_palette;                                   /* 0x004 */
-    u8 team_flags;                                       /* 0x005 */
-    u8 unit_flags;                                       /* 0x006; mixed sex, monster, guest, and formation flags */
-    u8 death_counter;                                    /* 0x007 */
-    unit_birthday_t birthday;                            /* 0x008; zodiac is the high nibble */
-    u16 innate_abilities[4];                             /* 0x00a */
-    u8 primary_skillset;                                 /* 0x012 */
-    u8 secondary_skillset;                               /* 0x013 */
-    unit_abilities_t abilities;                          /* 0x014; reaction, support, movement */
-    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];             /* 0x01a; unit_equipment_slot_e */
-    u8 experience;                                       /* 0x021 */
-    u8 level;                                            /* 0x022 */
-    u8 original_brave;                                   /* 0x023 */
-    u8 brave;                                            /* 0x024 */
-    u8 original_faith;                                   /* 0x025 */
-    u8 faith;                                            /* 0x026 */
-    u8 transparent_removal_flag;                         /* 0x027 */
-    u16 hp;                                              /* 0x028 */
-    u16 max_hp;                                          /* 0x02a */
-    u16 mp;                                              /* 0x02c */
-    u16 max_mp;                                          /* 0x02e */
-    u8 base_attributes[3];                               /* 0x030; unit_attribute_index_e */
-    u8 equipment_attributes[3];                          /* 0x033; unit_attribute_index_e */
-    u8 attributes[3];                                    /* 0x036; unit_attribute_index_e */
-    u8 ct;                                               /* 0x039 */
-    u8 move;                                             /* 0x03a */
-    u8 jump;                                             /* 0x03b */
+    u8 character_identity;                   /* 0x000 */
+    u8 active_battle_id;                     /* 0x001; active battle slot, or 0xff; not an ENTD definition index */
+    u8 formation_index;                      /* 0x002 */
+    u8 job_id;                               /* 0x003 */
+    u8 sprite_palette;                       /* 0x004 */
+    u8 team_flags;                           /* 0x005 */
+    u8 unit_flags;                           /* 0x006; mixed sex, monster, guest, and formation flags */
+    u8 death_counter;                        /* 0x007 */
+    unit_birthday_t birthday;                /* 0x008; zodiac is the high nibble */
+    u16 innate_abilities[4];                 /* 0x00a */
+    u8 primary_skillset;                     /* 0x012 */
+    u8 secondary_skillset;                   /* 0x013 */
+    unit_abilities_t abilities;              /* 0x014; reaction, support, movement */
+    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT]; /* 0x01a; unit_equipment_slot_e */
+    u8 experience;                           /* 0x021 */
+    u8 level;                                /* 0x022 */
+    u8 original_brave;                       /* 0x023 */
+    u8 brave;                                /* 0x024 */
+    u8 original_faith;                       /* 0x025 */
+    u8 faith;                                /* 0x026 */
+    u8 transparent_removal_flag;             /* 0x027 */
+    u16 hp;                                  /* 0x028 */
+    u16 max_hp;                              /* 0x02a */
+    u16 mp;                                  /* 0x02c */
+    u16 max_mp;                              /* 0x02e */
+    u8 base_attributes[3];                   /* 0x030; unit_attribute_index_e */
+    u8 equipment_attributes[3];              /* 0x033; unit_attribute_index_e */
+    u8 attributes[3];                        /* 0x036; unit_attribute_index_e */
+    u8 ct;                                   /* 0x039 */
+    u8 move;                                 /* 0x03a */
+    u8 jump;                                 /* 0x03b */
     u8 equipment_stats[UNIT_EQUIPMENT_STAT_COUNT];       /* 0x03c; unit_equipment_stat_index_e */
     u8 x;                                                /* 0x047 */
     unit_position_t position;                            /* 0x048 */

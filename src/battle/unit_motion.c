@@ -597,9 +597,8 @@ s32 animation_distortion_jump_start(unit_t* unit) {
     unit->distortion_timer = timer;
 }
 
-/* unit_height_calculate_from_world_coords called with the coordinate buffer as a
- * second argument: the target sets $a1 before this call too, so the original declared it with the
- * same two parameters as unit_height_calculate_with_caller_coords. */
+/* This retail call passes an unused coordinate-buffer argument in $a1.
+ * Preserve the call shape even though the callee reads only the unit. */
 #define world_height_from_world_coords_passing_coords                                                                  \
     ((s32 (*)(unit_t*, const SVECTOR*))unit_height_calculate_from_world_coords)
 
@@ -684,7 +683,7 @@ s32 animation_distortion_fall_to_target(unit_t* unit) {
 /* Fill the init record of a teleport effect: the unit is the caster and the only
  * target, and there are no spectators. Both teleport starters use it for every
  * unit, not only for Altima. */
-static void animation_teleport_init_effect_data(unit_t* unit, effect_secondary_init_t* teleport_data) {
+static void animation_teleport_init_effect_data(unit_t* unit, effect_context_t* teleport_data) {
     u8 runtime_id;
     u8 repeated_runtime_id;
 
@@ -702,7 +701,7 @@ static void animation_teleport_init_effect_data(unit_t* unit, effect_secondary_i
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-out sound, and the result is 0. */
 static s32 animation_teleport_start_departure(unit_t* unit) {
-    effect_secondary_init_t teleport_data;
+    effect_context_t teleport_data;
 
     animation_teleport_init_effect_data(unit, &teleport_data);
     switch (unit->spritesheet_id) {
@@ -722,7 +721,7 @@ static s32 animation_teleport_start_departure(unit_t* unit) {
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-in sound, and the result is 0. */
 static s32 animation_teleport_start_arrival(unit_t* unit) {
-    effect_secondary_init_t teleport_data;
+    effect_context_t teleport_data;
 
     animation_teleport_init_effect_data(unit, &teleport_data);
     switch (unit->spritesheet_id) {

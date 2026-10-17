@@ -947,7 +947,7 @@ void formula_calculate_physical_damage(void) {
  * Returns 1 on a miss. */
 s32 formula_accuracy_calculate_physical(void) {
     formula_apply_physical_modifiers();
-    formula_store_hit_chance();
+    formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }

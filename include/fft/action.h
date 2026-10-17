@@ -110,9 +110,11 @@ s32 action_apply_target_result(s32 battle_id);
 s32 action_apply_attacker_result(s32 unit_id);
 
 /* strikes */
+/* Primary strikes versus secondary applications, including movement benefits.
+ * Execution, AI simulation and preview are the separate action_state_e axis. */
 typedef enum action_context {
     ACTION_CONTEXT_PRIMARY = 0,
-    ACTION_CONTEXT_REACTION_OR_SIMULATION = 1,
+    ACTION_CONTEXT_SECONDARY = 1,
 } action_context_e;
 
 typedef enum action_state {
@@ -282,7 +284,9 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
 void action_switch_ability_to_default_attack(void);
 void action_start_next_strike(void);
 void action_apply_strike_results(void);
-void action_resolve_projectile_hit_by_runtime_id(u16 attacker_id, u16 target_id);
+void action_start_target_response(unit_t* attacker, unit_t* target);
+s32 action_start_target_response_by_runtime_id(s32 runtime_id);
+void action_start_projectile_hit_response_by_runtime_id(u16 attacker_id, u16 target_id);
 void action_store_target_ids(u8* src);
 s32 action_copy_ability_targets(u8* out);
 void action_remove_ability_target(s32 target_battle_id);

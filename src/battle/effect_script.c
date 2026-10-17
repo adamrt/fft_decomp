@@ -3,6 +3,7 @@
 
 #include "fft/effect_script.h"
 #include "fft/ability.h"
+#include "fft/action.h"
 #include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_light.h"
@@ -337,7 +338,7 @@ s32 effect_file_update_load(void) {
  * animations for the equipment-break and Charge ability ranges are started,
  * and nothing is retained.
  */
-void effect_set_ability_animation(u32 packed, s32 ability, effect_secondary_init_t* source) {
+void effect_set_ability_animation(u32 packed, s32 ability, effect_context_t* source) {
     g_effect_load_state = EFFECT_LOAD_START;
     if (ability < ABILITY_ID_COUNT) {
         if (ability == ABILITY_ID_THROW_BALL) {
@@ -1296,7 +1297,7 @@ static void effect_timeline_run_keyframe_actions(u16 flags, u8 target, effect_re
         unit_update_display_by_runtime_id(runtime_id);
     }
     if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION) && runtime_id != -1) {
-        animation_set_target_by_runtime_id(runtime_id);
+        action_start_target_response_by_runtime_id(runtime_id);
     }
     animation = (flags & EFFECT_KEYFRAME_ACTION_ANIMATION_MASK) >> EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT;
     if (animation != 0 && runtime_id != -1) {
@@ -1351,7 +1352,7 @@ static s32 effect_timeline_select_sound_id(s32 channel) {
  * timeline's end. */
 effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record_t* record) {
     battle_map_background_gradient_colors_t colors;
-    effect_secondary_init_t init;
+    effect_context_t init;
     effect_record_timeline_t* timeline;
     effect_keyframe_table_t* table;
     effect_palette_track_t* track;
@@ -1645,12 +1646,12 @@ static void effect_timeline_run_keyframe_actions_all_targets(u16 flags, effect_r
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
             if (runtime_id != -1) {
-                animation_set_target_by_runtime_id(runtime_id);
+                action_start_target_response_by_runtime_id(runtime_id);
             }
         } else {
             for (i = 0; i < g_effect_context.target_count; i++) {
                 if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    animation_set_target_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
+                    action_start_target_response_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
                 }
             }
         }

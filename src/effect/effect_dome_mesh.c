@@ -170,7 +170,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             origin.vz += vertex.vz;
             break;
         case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
-            battle_map_store_max_coordinates(&map_max);
+            battle_map_store_dimensions(&map_max);
             origin.vx += map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
             origin.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
             break;
