@@ -32,11 +32,8 @@ typedef struct controller_text_message_state {
     s32 saved_blocked_buttons; /* g_menu_blocked_buttons when the message started */
 } controller_text_message_state_t;
 
-/* One 100-byte state record per controller, laid out by its handler. The current controller c runs
- * g_controller_handlers[g_controller_handler_indices[c - 1]] on
- * g_controller_records[c]. A push made while the current index is c
- * fills g_controller_records_next[c] (which is records[c + 1]) and
- * stores the new handler id at g_controller_handler_indices[c]. */
+/* One state record per controller. At depth c, dispatch uses slot c - 1.
+ * A push fills slot c and its handler index before incrementing the depth. */
 typedef union controller_record {
     movie_stream_state_t movie;
     title_menu_state_t title;
@@ -50,14 +47,11 @@ typedef union controller_record {
 } controller_record_t;
 typedef char controller_record_size_must_be_100[(sizeof(controller_record_t) == 100) ? 1 : -1];
 
-typedef void (*controller_handler_t)(controller_record_t* record);
+enum { CONTROLLER_STACK_CAPACITY = 4 };
 
-extern controller_handler_t g_controller_handlers[];
-extern s32 g_controller_handler_indices[]; /* controller_handler_e */
-extern controller_record_t g_controller_records[];
-extern controller_record_t g_controller_records_next[];
-extern s32 g_controller_current_index;
-extern s32 g_controller_selected_options[];
+extern s32 g_controller_handler_indices[CONTROLLER_STACK_CAPACITY]; /* controller_handler_e */
+extern controller_record_t g_controller_records[CONTROLLER_STACK_CAPACITY];
+extern s32 g_controller_depth;
 
 void controller_dispatch_current(void);
 void controller_wait_text_message(controller_record_t* record);

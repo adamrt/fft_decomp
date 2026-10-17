@@ -192,8 +192,7 @@ data:
   - {addr: 0x80073f10, name: g_psyq_press_vlc_state}
   - {addr: 0x80073f34, name: g_calendar_month_lengths}
   - {addr: 0x80073f40, name: g_birthday_zodiac_start_dates}
-  - {addr: 0x80073f58, name: g_file_openbk_start_sector_offsets}
-  - {addr: 0x80073f5c, name: g_file_openbk_end_sector_offsets}
+  - {addr: 0x80073f58, name: g_file_openbk_sector_offsets}
   - {addr: 0x80073f78, name: g_controller_handlers}
   - {addr: 0x80073fb4, name: g_music_test_row_actions}
   - {addr: 0x80073fd4, name: g_music_test_music_ids}
@@ -222,11 +221,8 @@ data:
   - {addr: 0x800852a8, name: g_window_render_record_count}
   - {addr: 0x800852ac, name: g_input_previous_buttons}
   - {addr: 0x800852b0, name: g_movie_mdec_stream_state}
-  - {addr: 0x800852c0, name: g_controller_records}
   - {addr: 0x800852e8, name: g_music_test_list_params}
-  - {addr: 0x80085324, name: g_controller_records_next}
-  - {addr: 0x80085324, name: g_title_menu_states}
-  - {addr: 0x80085328, name: g_controller_stream_length}
+  - {addr: 0x80085324, name: g_controller_records}
   - {addr: 0x80085340, name: g_controller_selected_options}
   - {addr: 0x800854b4, name: g_prologue_crossfade_rows}
   - {addr: 0x800854b5, name: g_prologue_crossfade_progress}
@@ -273,7 +269,7 @@ data:
   - {addr: 0x8008e574, name: g_ending_script_byte_offset}
   - {addr: 0x8008fbf0, name: g_controller_handler_indices}
   - {addr: 0x8008fc00, name: g_window_primitive_count}
-  - {addr: 0x8008fc04, name: g_controller_current_index}
+  - {addr: 0x8008fc04, name: g_controller_depth}
   - {addr: 0x8008fc08, name: g_movie_video_end_frame}
   - {addr: 0x8008fc0c, name: g_music_test_selected_option}
   - {addr: 0x8008fc10, name: g_movie_aligned_height}

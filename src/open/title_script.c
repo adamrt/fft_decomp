@@ -156,14 +156,14 @@ void music_test_open(void) {
     g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
     gfx_start_overlay_fade_out(0x20);
 
-    controller = g_controller_current_index;
-    g_controller_records_next[controller].music_test.music_id = 0;
-    g_controller_records_next[controller].music_test.delay = 0;
-    g_controller_records_next[controller].music_test.music_slot = 0;
-    g_controller_records_next[controller].music_test.step = four;
-    g_controller_records_next[controller].music_test.blink_frames = 0;
+    controller = g_controller_depth;
+    g_controller_records[controller].music_test.music_id = 0;
+    g_controller_records[controller].music_test.delay = 0;
+    g_controller_records[controller].music_test.music_slot = 0;
+    g_controller_records[controller].music_test.step = four;
+    g_controller_records[controller].music_test.blink_frames = 0;
     g_controller_handler_indices[controller] = CONTROLLER_MUSIC_TEST;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* Runs the hidden Music Test menu.
@@ -208,7 +208,7 @@ void music_test_update(controller_record_t* record) {
             g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED | SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
             file_request_openbk_image(0, g_file_destination);
             file_wait_for_pending();
-            g_controller_current_index--;
+            g_controller_depth--;
             title_push_menu(0);
         }
     } else if (state->step == MUSIC_TEST_STEP_CLOSE) {
@@ -271,9 +271,9 @@ void music_test_update(controller_record_t* record) {
 /* Start the text message thread and push the controller that waits for it. */
 static void controller_start_text_message(s32 parameter, s32 use_world_text) {
     {
-        s32 controller = g_controller_current_index;
+        s32 controller = g_controller_depth;
 
-        g_controller_records_next[controller].text_message.use_world_text = use_world_text;
+        g_controller_records[controller].text_message.use_world_text = use_world_text;
     }
     if (use_world_text != 0) {
         text_save_section_pointers();
@@ -284,20 +284,20 @@ static void controller_start_text_message(s32 parameter, s32 use_world_text) {
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, parameter, 0);
 
     {
-        s32 controller = g_controller_current_index;
+        s32 controller = g_controller_depth;
         s32 saved_blocked_buttons = g_menu_blocked_buttons;
 
         g_menu_blocked_buttons = -1;
-        g_controller_records_next[controller].text_message.saved_blocked_buttons = saved_blocked_buttons;
+        g_controller_records[controller].text_message.saved_blocked_buttons = saved_blocked_buttons;
     }
     sound_play_sfx(SOUND_SFX_WINDOW_OPEN);
 
     {
-        s32 controller = g_controller_current_index;
+        s32 controller = g_controller_depth;
         s32 next_controller = controller + 1;
 
         g_controller_handler_indices[controller] = CONTROLLER_TEXT_MESSAGE;
-        g_controller_current_index = next_controller;
+        g_controller_depth = next_controller;
     }
 }
 
@@ -309,7 +309,7 @@ void controller_wait_text_message(controller_record_t* record) {
         return;
     }
     g_menu_blocked_buttons = record->text_message.saved_blocked_buttons;
-    g_controller_current_index--;
+    g_controller_depth--;
     if (record->text_message.use_world_text != 0) {
         text_restore_section_pointers();
     }
@@ -322,11 +322,11 @@ void movie_stream_title_demo(s32 start_sector, s32 stream_length, s32 end_frame,
 
     movie_start_stream(start_sector, end_frame, -1, cd_mix_level);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-    controller = g_controller_current_index;
-    g_controller_records_next[controller].movie.start_sector = start_sector;
-    g_controller_records_next[controller].movie.stream_length = stream_length;
+    controller = g_controller_depth;
+    g_controller_records[controller].movie.start_sector = start_sector;
+    g_controller_records[controller].movie.stream_length = stream_length;
     g_controller_handler_indices[controller] = CONTROLLER_TITLE_DEMO_MOVIE;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* Handler 11, a title demo movie: Start stops the stream. Once the stream has
@@ -338,7 +338,7 @@ void movie_update_title_demo(controller_record_t* unused_record) {
         SetDispMask(0);
         g_gfx_active_buffer_index = 1;
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-        g_controller_current_index--;
+        g_controller_depth--;
         movie_stream_fftst(DISC_SECTOR_OPEN_FFTST_STR, 0x278a, 0x3df, 0x2de);
     } else if ((g_input_new_button_presses & PSX_PAD_START) != 0) {
         movie_stop_stream(1);
@@ -382,12 +382,12 @@ void title_select_new_game(void) {
     g_window_records[record].anim_counter = 0;
     g_window_records[record].frame_index = 0;
     position = &g_window_records[record].position;
-    controller = g_controller_current_index;
+    controller = g_controller_depth;
     position->x = -4;
     position->y = -16;
-    g_controller_records_next[controller].title_exit.state = 0;
+    g_controller_records[controller].title_exit.state = 0;
     g_controller_handler_indices[controller] = CONTROLLER_TITLE_EXIT;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* Per-frame handler of the title-exit controller (handler 12), pushed when New
@@ -408,7 +408,7 @@ void title_update_card_warning(controller_record_t* record) {
     if (record->title_exit.state != TITLE_EXIT_INPUT) {
         g_window_record_count -= 1;
         g_window_render_object_count -= 1;
-        g_controller_current_index -= 1;
+        g_controller_depth -= 1;
         state = record->title_exit.state;
         if (state == TITLE_EXIT_CANCEL) {
             s32* source;
@@ -1483,7 +1483,7 @@ static void ending_update_opntex_sequence(void) {
 /* Start FFTEND.STR (sector 0x21908, ending at frame 0x571) as the first
  * controller. */
 void movie_play_ending(void) {
-    g_controller_current_index = 0;
+    g_controller_depth = 0;
     g_gfx_active_buffer_index = 0;
     movie_stream_fftend(DISC_SECTOR_OPEN_FFTEND_STR, 0x3858, 0x571);
 }
@@ -1496,9 +1496,9 @@ static void movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame) {
     (void)unused;
     movie_start_stream(start_sector, end_frame, -1, 0x7e);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-    controller = g_controller_current_index;
+    controller = g_controller_depth;
     g_controller_handler_indices[controller] = CONTROLLER_FFTEND_MOVIE;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* Handler 9, the FFTEND.STR ending movie: Start stops the stream. Once the stream
@@ -1511,11 +1511,11 @@ void movie_update_fftend(controller_record_t* unused_record) {
     if (!(g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
         SetDispMask(0);
         flags = g_system_runtime_flags;
-        controller = g_controller_current_index;
+        controller = g_controller_depth;
         flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
         controller--;
         g_system_runtime_flags = flags;
-        g_controller_current_index = controller;
+        g_controller_depth = controller;
         ending_start_script();
         return;
     }
@@ -1537,10 +1537,10 @@ static void ending_start_script(void) {
     g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM;
     ending_init_script();
 
-    controller = g_controller_current_index;
+    controller = g_controller_depth;
     g_system_vsync_mode = 2;
     g_controller_handler_indices[controller] = CONTROLLER_SCRIPT;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* Handler 10: run the ending script for a frame. When it ends, VSync mode 0 is
@@ -1548,7 +1548,7 @@ static void ending_start_script(void) {
 void ending_update_script(controller_record_t* unused_record) {
     if (ending_run_script_frame() == 0) {
         g_system_vsync_mode = 0;
-        g_controller_current_index--;
+        g_controller_depth--;
         g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
     }
 }

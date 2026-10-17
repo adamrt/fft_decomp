@@ -31,6 +31,16 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+typedef void (*controller_handler_t)(controller_record_t* record);
+extern controller_handler_t g_controller_handlers[];
+
+/* Seven OPNBK images use eight sector boundaries. */
+extern const s32 g_file_openbk_sector_offsets[8];
+
+/* Interior sound-menu fields at +0x1c, with a 25-word controller stride.
+ * Direct member stores shrink title_push_sound_type_menu's frame by eight bytes. */
+extern s32 g_controller_selected_options[];
+
 static void birthday_build_menu_text(birthday_date_state_t* menu);
 static void birthday_push_confirmation(void);
 static void birthday_push_date_menu(void);
@@ -107,16 +117,15 @@ static void prologue_load_text_pages(void) {
  * 210x180 pictures and 6 is the 512x240 ending picture. */
 void file_request_openbk_image(s32 image_id, void* destination) {
     s32 start_offset;
-    s32 stack_padding[2];
 
     if (image_id == g_file_current_openbk_image_id) {
         return;
     }
 
     g_file_current_openbk_image_id = image_id;
-    start_offset = g_file_openbk_start_sector_offsets[image_id];
+    start_offset = g_file_openbk_sector_offsets[image_id];
     file_wait_then_request_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNBK_BIN + start_offset,
-        g_file_openbk_end_sector_offsets[image_id] - start_offset, destination);
+        g_file_openbk_sector_offsets[image_id + 1] - start_offset, destination);
 }
 
 /* Poll the pending CD command: 1 when it has completed, -1 on a disc error and 0
@@ -170,7 +179,7 @@ void gfx_load_opntex(u32* tim) {
  * frame 0x2de, so its CD audio plays on under the title menu), or the title
  * menu at once when use_alternate is set. */
 void title_start_logo_movie_or_menu(s32 use_alternate) {
-    g_controller_current_index = 0;
+    g_controller_depth = 0;
     if (use_alternate == 0) {
         g_gfx_active_buffer_index = 0;
         movie_stream_fftst(DISC_SECTOR_OPEN_FFTST_STR, 0x278A, 0x3DF, 0x2DE);
@@ -181,11 +190,11 @@ void title_start_logo_movie_or_menu(s32 use_alternate) {
 
 /* Run the current controller c: handler
  * g_controller_handlers[g_controller_handler_indices[c - 1]] on record
- * g_controller_records[c]. */
+ * g_controller_records[c - 1]. */
 void controller_dispatch_current(void) {
-    s32 controller = g_controller_current_index;
+    s32 controller = g_controller_depth;
 
-    g_controller_handlers[g_controller_handler_indices[controller - 1]](&g_controller_records[controller]);
+    g_controller_handlers[g_controller_handler_indices[controller - 1]](&g_controller_records[controller - 1]);
 }
 
 /* Start the logo movie at CD mix level 0x76 and push handler 0, whose record
@@ -196,11 +205,11 @@ void movie_stream_fftst(s32 start_sector, s32 stream_length, s32 end_frame, s32 
 
     movie_start_stream(start_sector, end_frame, video_end_frame, 0x76);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-    controller = g_controller_current_index;
-    g_controller_records_next[controller].movie.start_sector = start_sector;
-    g_controller_records_next[controller].movie.stream_length = stream_length;
+    controller = g_controller_depth;
+    g_controller_records[controller].movie.start_sector = start_sector;
+    g_controller_records[controller].movie.stream_length = stream_length;
     g_controller_handler_indices[controller] = CONTROLLER_FFTST_MOVIE;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* Handler 0, the FFTST.STR logo movie: when the stream has ended, or on Start
@@ -219,7 +228,7 @@ void movie_update_fftst(controller_record_t* record) {
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     }
 
-    g_controller_current_index--;
+    g_controller_depth--;
     title_push_menu(record->movie.start_sector + record->movie.stream_length);
 }
 
@@ -231,9 +240,9 @@ static void movie_stream_fftop(s32 start_sector, s32 unused_stream_length, s32 e
     (void)unused_stream_length;
     movie_start_stream(start_sector, end_frame, -1, 0x94);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-    controller = g_controller_current_index;
+    controller = g_controller_depth;
     g_controller_handler_indices[controller] = CONTROLLER_FFTOP_MOVIE;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* CONTROLLER_FFTOP_MOVIE: Start stops the opening movie; once it has stopped the controller
@@ -245,13 +254,13 @@ void movie_update_fftop(controller_record_t* unused_record) {
     if (!(g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
         SetDispMask(0);
         flags = g_system_runtime_flags;
-        controller = g_controller_current_index;
+        controller = g_controller_depth;
         g_system_result = 0;
         flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
         controller--;
         g_system_runtime_flags = flags;
         flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
-        g_controller_current_index = controller;
+        g_controller_depth = controller;
         g_system_runtime_flags = flags;
         return;
     }
@@ -260,11 +269,6 @@ void movie_update_fftop(controller_record_t* unused_record) {
         movie_stop_stream(1);
     }
 }
-
-/* Title-menu view of g_controller_records_next; indexing it as an array of
- * this type (rather than casting the controller-record array) is required for
- * the target's constant-folded field addresses. */
-extern title_menu_state_t g_title_menu_states[];
 
 /* Build the title menu (logo, four items and cursor) and push its controller.
  *
@@ -303,7 +307,7 @@ void title_push_menu(s32 argument) {
     records = entry;
     field = &records->position.x;
     positions = (window_xy_t*)field;
-    g_title_menu_states[g_controller_current_index].records_36[0] = record;
+    g_controller_records[g_controller_depth].title.records_36[0] = record;
     g_window_records[record].sequence = 0x11;
     g_window_records[record].priority = 4;
     g_window_records[record].anim_counter = 0;
@@ -313,7 +317,7 @@ void title_push_menu(s32 argument) {
 
     for (i = 0, y = 0x1e; i < 4; i++) {
         record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_title_menu_states[g_controller_current_index].records_36[i + 1] = record;
+        g_controller_records[g_controller_depth].title.records_36[i + 1] = record;
         g_window_records[record].sequence = i + 3;
         g_window_records[record].priority = 4;
         records[record].anim_counter = 0;
@@ -324,7 +328,7 @@ void title_push_menu(s32 argument) {
     }
 
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_title_menu_states[g_controller_current_index].cursor_record = record;
+    g_controller_records[g_controller_depth].title.cursor_record = record;
     entry = &g_window_records[record];
     entry->sequence = 0x13;
     g_window_records[record].priority = 4;
@@ -339,14 +343,14 @@ void title_push_menu(s32 argument) {
         gfx_start_overlay_fade_out(0x20);
     }
 
-    controller = g_controller_current_index;
-    g_title_menu_states[controller].cursor = TITLE_MENU_NEW_GAME;
-    g_title_menu_states[controller].idle_timer = 0;
-    g_title_menu_states[controller].cd_end_position = argument;
-    g_title_menu_states[controller].state = TITLE_STATE_MENU;
-    g_title_menu_states[controller].exiting = 0;
-    record = g_title_menu_states[controller].records_36[g_title_menu_states[controller].cursor + 1];
-    g_controller_current_index = controller + 1;
+    controller = g_controller_depth;
+    g_controller_records[controller].title.cursor = TITLE_MENU_NEW_GAME;
+    g_controller_records[controller].title.idle_timer = 0;
+    g_controller_records[controller].title.cd_end_position = argument;
+    g_controller_records[controller].title.state = TITLE_STATE_MENU;
+    g_controller_records[controller].title.exiting = 0;
+    record = g_controller_records[controller].title.records_36[g_controller_records[controller].title.cursor + 1];
+    g_controller_depth = controller + 1;
     g_window_records[record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
     field = &g_controller_handler_indices[controller];
     *field = CONTROLLER_TITLE_MENU;
@@ -446,7 +450,7 @@ void title_update_menu(controller_record_t* record) {
         g_window_record_count -= 6;
         g_window_render_object_count -= 6;
         demo = g_title_demo_movie_index;
-        g_controller_current_index--;
+        g_controller_depth--;
         switch (demo) {
         case 1:
             start_sector = DISC_SECTOR_OPEN_FFTPR_STR;
@@ -503,7 +507,7 @@ void title_update_menu(controller_record_t* record) {
             g_system_runtime_flags &= ~(SYSTEM_RUNTIME_FLAG_WORLD_OVERLAY_LOADED | SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN);
             g_window_record_count -= 6;
             g_window_render_object_count -= 6;
-            g_controller_current_index--;
+            g_controller_depth--;
             title_select_new_game();
             return;
 
@@ -521,7 +525,7 @@ void title_update_menu(controller_record_t* record) {
                 file_wait_for_pending();
                 g_window_record_count -= 6;
                 g_window_render_object_count -= 6;
-                g_controller_current_index--;
+                g_controller_depth--;
                 SetDispMask(0);
                 g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
                 title_push_menu(0);
@@ -544,7 +548,7 @@ void title_update_menu(controller_record_t* record) {
             g_system_result = 2;
             g_window_record_count -= 6;
             g_window_render_object_count -= 6;
-            g_controller_current_index--;
+            g_controller_depth--;
             g_system_flags |= SYSTEM_FLAG_TITLE_TUTORIAL;
             g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
             return;
@@ -628,7 +632,7 @@ static void title_push_sound_type_menu(void) {
 
     for (i = 0; i < TITLE_SOUND_MENU_ENTRY_COUNT; i++) {
         record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_controller_records_next[g_controller_current_index].sound_menu.entry_render_indices[i] = record;
+        g_controller_records[g_controller_depth].sound_menu.entry_render_indices[i] = record;
         g_window_records[record].priority = 4;
         g_window_records[record].sequence = i + 7;
         (&g_window_records[record])->anim_counter = 0;
@@ -638,18 +642,18 @@ static void title_push_sound_type_menu(void) {
         position->x = -0x14;
     }
 
-    g_controller_selected_options[g_controller_current_index * 25 + 1] = 0;
+    g_controller_selected_options[g_controller_depth * 25 + 1] = 0;
     sound_type = suzuki_sound_get_type();
-    controller_index = g_controller_current_index;
+    controller_index = g_controller_depth;
     g_controller_selected_options[controller_index * 25] = sound_type;
-    menu = &g_controller_records_next[controller_index].sound_menu;
+    menu = &g_controller_records[controller_index].sound_menu;
     sound_type <<= 2;
     /* The explicit byte offset preserves the target's index shift before the
      * menu-base addition; direct array indexing schedules those instructions
      * in the opposite order. */
     sound_type += (s32)menu;
     selected_record = *(s32*)sound_type;
-    g_controller_current_index = controller_index + 1;
+    g_controller_depth = controller_index + 1;
     g_window_records[selected_record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
     g_controller_handler_indices[controller_index] = CONTROLLER_SOUND_TYPE_MENU;
 }
@@ -669,10 +673,10 @@ void title_update_sound_type_menu(controller_record_t* record) {
     if (menu->step == 2) {
         g_window_record_count -= TITLE_SOUND_MENU_ENTRY_COUNT;
         g_window_render_object_count -= TITLE_SOUND_MENU_ENTRY_COUNT;
-        g_controller_current_index -= 1;
-        title_show_menu_entries(&g_controller_records[g_controller_current_index].title);
+        g_controller_depth -= 1;
+        title_show_menu_entries(&g_controller_records[g_controller_depth - 1].title);
         /* The title menu underneath, addressed from the pushed-record base. */
-        g_controller_records_next[g_controller_current_index - 1].title.idle_timer = 0;
+        g_controller_records[g_controller_depth - 1].title.idle_timer = 0;
         return;
     }
 
@@ -732,10 +736,10 @@ void prologue_start(void) {
     prologue_init_sequence(12, 3, g_prologue_entries);
     gfx_start_overlay_fade_out(0x20);
 
-    controller = g_controller_current_index;
-    g_controller_records_next[controller].new_game.step = 0;
+    controller = g_controller_depth;
+    g_controller_records[controller].new_game.step = 0;
     g_controller_handler_indices[controller] = CONTROLLER_NEW_GAME_START;
-    g_controller_current_index = controller + 1;
+    g_controller_depth = controller + 1;
 }
 
 /* Per-frame handler of the new-game controller (handler 4).
@@ -760,7 +764,7 @@ void new_game_update(controller_record_t* record) {
             return;
         }
         music_unload_current_scenario();
-        g_controller_current_index -= 1;
+        g_controller_depth -= 1;
         music_test_open();
         return;
     }
@@ -802,7 +806,7 @@ void new_game_update(controller_record_t* record) {
         name = name_entry_run_screen(text_find_entry(TEXT_ID_UNIT_NAME_SPECIAL_BASE), g_file_destination);
         party = party_get_unit(0);
         memcpy(party->name, name, sizeof(party->name));
-        g_controller_current_index -= 1;
+        g_controller_depth -= 1;
         birthday_push_date_menu();
         return;
     }
@@ -822,7 +826,7 @@ void new_game_update(controller_record_t* record) {
  * record, then seeds month/day to 1 and builds the menu text.
  *
  * Shaped like birthday_push_confirmation: the controller record
- * is reached through g_controller_records_next[g_controller_current_index]
+ * is reached through g_controller_records[g_controller_depth]
  * on every use (the target reloads the index after each call rather than
  * keeping it in a local), and the prompt record's position is written through
  * the images x/y view so the base register is set before the index scale.
@@ -843,14 +847,14 @@ static void birthday_push_date_menu(void) {
     window_gpu_image_position_t* position;
 
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_controller_records_next[g_controller_current_index].birthday_date.cursor_record = record;
+    g_controller_records[g_controller_depth].birthday_date.cursor_record = record;
     g_window_records[record].sequence = 0xC;
     g_window_records[record].priority = 4;
     g_window_records[record].anim_counter = 0;
     g_window_records[record].frame_index = 0;
 
     record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_controller_records_next[g_controller_current_index].birthday_date.title_image = record;
+    g_controller_records[g_controller_depth].birthday_date.title_image = record;
     quad.x = 0;
     quad.y = 0;
     quad.w = 0x80;
@@ -862,19 +866,19 @@ static void birthday_push_date_menu(void) {
     position->y = -0x60;
     position->x = -half_width;
     g_window_gpu_image_records[record].ot_layer = 4;
-    g_controller_records_next[g_controller_current_index].birthday_date.month = 1;
-    g_controller_records_next[g_controller_current_index].birthday_date.day = 1;
-    birthday_build_menu_text(&g_controller_records_next[g_controller_current_index].birthday_date);
+    g_controller_records[g_controller_depth].birthday_date.month = 1;
+    g_controller_records[g_controller_depth].birthday_date.day = 1;
+    birthday_build_menu_text(&g_controller_records[g_controller_depth].birthday_date);
 
-    controller = g_controller_current_index;
-    g_window_gpu_image_records[g_controller_records_next[controller].birthday_date.window_image].flags
+    controller = g_controller_depth;
+    g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].flags
         |= DISPLAY_OBJECT_POP_IN;
-    g_window_records[g_controller_records_next[controller].birthday_date.cursor_record].position.x
-        = g_window_gpu_image_records[g_controller_records_next[controller].birthday_date.window_image].x + 0x46;
-    g_controller_current_index = controller + 1;
-    g_window_records[g_controller_records_next[controller].birthday_date.cursor_record].position.y
-        = g_window_gpu_image_records[g_controller_records_next[controller].birthday_date.window_image].y + 0x18;
-    g_controller_records_next[controller].birthday_date.selecting_month = 0;
+    g_window_records[g_controller_records[controller].birthday_date.cursor_record].position.x
+        = g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].x + 0x46;
+    g_controller_depth = controller + 1;
+    g_window_records[g_controller_records[controller].birthday_date.cursor_record].position.y
+        = g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].y + 0x18;
+    g_controller_records[controller].birthday_date.selecting_month = 0;
     g_controller_handler_indices[controller] = CONTROLLER_BIRTHDAY_DATE;
 }
 
@@ -1085,43 +1089,43 @@ static void birthday_push_confirmation(void) {
     window_gpu_image_position_t* position;
 
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_controller_records_next[g_controller_current_index].birthday_confirmation.cursor_record = record;
+    g_controller_records[g_controller_depth].birthday_confirmation.cursor_record = record;
     g_window_records[record].sequence = 2;
     g_window_records[record].priority = 3;
     g_window_records[record].anim_counter = 0;
     g_window_records[record].frame_index = 0;
 
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_controller_records_next[g_controller_current_index].birthday_confirmation.label_record = record;
+    g_controller_records[g_controller_depth].birthday_confirmation.label_record = record;
     g_window_records[record].sequence = 0xE;
     g_window_records[record].priority = 3;
     g_window_records[record].anim_counter = 0;
     g_window_records[record].frame_index = 0;
 
     record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_controller_records_next[g_controller_current_index].birthday_confirmation.menu_image = record;
+    g_controller_records[g_controller_depth].birthday_confirmation.menu_image = record;
     quad.x = 0;
     quad.y = 0x60;
     quad.w = 0x28;
     quad.h = 0x30;
     window_init_text_record(record, quad, 0, 0xB80F, g_birthday_title_image);
-    controller = g_controller_current_index;
+    controller = g_controller_depth;
     position = g_window_gpu_image_positions;
     position += record;
     position->x = 0x3C;
     position->y = 0x28;
     g_window_gpu_image_records[record].ot_layer = 3;
 
-    g_window_records[g_controller_records_next[controller].birthday_confirmation.cursor_record].position.x
+    g_window_records[g_controller_records[controller].birthday_confirmation.cursor_record].position.x
         = g_window_gpu_image_records[record].x + 4;
-    g_window_records[g_controller_records_next[controller].birthday_confirmation.cursor_record].position.y
+    g_window_records[g_controller_records[controller].birthday_confirmation.cursor_record].position.y
         = g_window_gpu_image_records[record].y + 0xC;
-    g_window_records[g_controller_records_next[controller].birthday_confirmation.label_record].position.x
+    g_window_records[g_controller_records[controller].birthday_confirmation.label_record].position.x
         = g_window_gpu_image_records[record].x + 2;
-    g_controller_current_index = controller + 1;
-    g_window_records[g_controller_records_next[controller].birthday_confirmation.label_record].position.y
+    g_controller_depth = controller + 1;
+    g_window_records[g_controller_records[controller].birthday_confirmation.label_record].position.y
         = g_window_gpu_image_records[record].y - 2;
-    g_controller_records_next[controller].birthday_confirmation.selected_option = 0;
+    g_controller_records[controller].birthday_confirmation.selected_option = 0;
     g_controller_handler_indices[controller] = CONTROLLER_BIRTHDAY_CONFIRMATION;
 }
 
@@ -1150,7 +1154,7 @@ void birthday_update_confirmation(controller_record_t* record) {
         g_window_render_record_count -= 3;
         g_window_record_count -= 3;
         g_window_render_object_count -= 6;
-        g_controller_current_index -= 2;
+        g_controller_depth -= 2;
         movie_stream_fftop(DISC_SECTOR_OPEN_FFTOP_STR, 0x64D8, 0x9E4);
         return;
     }
@@ -1160,8 +1164,8 @@ void birthday_update_confirmation(controller_record_t* record) {
         sound_play_sfx(SOUND_SFX_CONFIRM);
         if (menu->selected_option == 0) {
             /* The date controller sits below this one on the controller stack. */
-            month = g_controller_records_next[g_controller_current_index - 2].birthday_date.month;
-            day = g_controller_records_next[g_controller_current_index - 2].birthday_date.day;
+            month = g_controller_records[g_controller_depth - 2].birthday_date.month;
+            day = g_controller_records[g_controller_depth - 2].birthday_date.day;
             script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, month);
             script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
             value = calendar_calculate_day_of_year(month, day);
@@ -1179,8 +1183,8 @@ void birthday_update_confirmation(controller_record_t* record) {
         g_window_render_object_count -= 3;
         g_window_render_record_count -= 1;
         g_window_record_count -= 2;
-        g_controller_current_index -= 1;
-        birthday_restore_date_menu(&g_controller_records[g_controller_current_index].birthday_date);
+        g_controller_depth -= 1;
+        birthday_restore_date_menu(&g_controller_records[g_controller_depth - 1].birthday_date);
         return;
     }
     if (buttons & PSX_PAD_CROSS) {
@@ -1189,8 +1193,8 @@ void birthday_update_confirmation(controller_record_t* record) {
         g_window_render_object_count -= 3;
         g_window_render_record_count -= 1;
         g_window_record_count -= 2;
-        g_controller_current_index -= 1;
-        birthday_restore_date_menu(&g_controller_records[g_controller_current_index].birthday_date);
+        g_controller_depth -= 1;
+        birthday_restore_date_menu(&g_controller_records[g_controller_depth - 1].birthday_date);
         return;
     }
 

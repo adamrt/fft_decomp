@@ -807,9 +807,6 @@ written that way.
   `g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_ENDING].function_id`
   under a second name; the table's own symbol covers the 21 records before
   it.
-- `g_file_openbk_end_sector_offsets` (`0x80073f5c`) is
-  `g_file_openbk_start_sector_offsets + 1`: eight sector offsets of
-  OPNBK.BIN under two names, each image ending where the next starts.
 - `g_prologue_crossfade_progress` (`0x800854b5`) is
   `g_prologue_crossfade_rows[1]`;
   `prologue_prepare_crossfade` clears it through the array.

@@ -130,8 +130,6 @@ void file_wait_for_pending(void);
 /* OPEN title backgrounds */
 extern void* g_file_destination;
 extern s32 g_file_current_openbk_image_id;
-extern const s32 g_file_openbk_start_sector_offsets[];
-extern const s32 g_file_openbk_end_sector_offsets[];
 
 void file_request_openbk_image(s32 image_id, void* destination);
 s32 file_get_cd_sync_state_delta(void);
