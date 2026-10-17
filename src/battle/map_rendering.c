@@ -2328,17 +2328,17 @@ static void battle_map_mesh_update_part_animations(void) {
                 }
                 if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[BATTLE_MAP_MESH_CHANNEL_SCALE_X]
                     & BATTLE_MAP_MESH_TWEEN_TO) {
-                    g_battle_map_mesh_parts[i].scale_step.vx = g_battle_map_mesh_animation_keyframes[anim].scale_x
+                    g_battle_map_mesh_parts[i].scale_step.vx = g_battle_map_mesh_animation_keyframes[anim].scale.vx
                         - g_battle_map_mesh_parts[i].scale_start.vx;
                 }
                 if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[BATTLE_MAP_MESH_CHANNEL_SCALE_Y]
                     & BATTLE_MAP_MESH_TWEEN_TO) {
-                    g_battle_map_mesh_parts[i].scale_step.vy = g_battle_map_mesh_animation_keyframes[anim].scale_y
+                    g_battle_map_mesh_parts[i].scale_step.vy = g_battle_map_mesh_animation_keyframes[anim].scale.vy
                         - g_battle_map_mesh_parts[i].scale_start.vy;
                 }
                 if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[BATTLE_MAP_MESH_CHANNEL_SCALE_Z]
                     & BATTLE_MAP_MESH_TWEEN_TO) {
-                    g_battle_map_mesh_parts[i].scale_step.vz = g_battle_map_mesh_animation_keyframes[anim].scale_z
+                    g_battle_map_mesh_parts[i].scale_step.vz = g_battle_map_mesh_animation_keyframes[anim].scale.vz
                         - g_battle_map_mesh_parts[i].scale_start.vz;
                 }
 
@@ -2374,15 +2374,15 @@ static void battle_map_mesh_update_part_animations(void) {
                 }
                 if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[BATTLE_MAP_MESH_CHANNEL_SCALE_X]
                     & BATTLE_MAP_MESH_TWEEN_BY) {
-                    g_battle_map_mesh_parts[i].scale_step.vx = g_battle_map_mesh_animation_keyframes[anim].scale_x;
+                    g_battle_map_mesh_parts[i].scale_step.vx = g_battle_map_mesh_animation_keyframes[anim].scale.vx;
                 }
                 if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[BATTLE_MAP_MESH_CHANNEL_SCALE_Y]
                     & BATTLE_MAP_MESH_TWEEN_BY) {
-                    g_battle_map_mesh_parts[i].scale_step.vy = g_battle_map_mesh_animation_keyframes[anim].scale_y;
+                    g_battle_map_mesh_parts[i].scale_step.vy = g_battle_map_mesh_animation_keyframes[anim].scale.vy;
                 }
                 if (g_battle_map_mesh_animation_keyframes[anim].tween_flags[BATTLE_MAP_MESH_CHANNEL_SCALE_Z]
                     & BATTLE_MAP_MESH_TWEEN_BY) {
-                    g_battle_map_mesh_parts[i].scale_step.vz = g_battle_map_mesh_animation_keyframes[anim].scale_z;
+                    g_battle_map_mesh_parts[i].scale_step.vz = g_battle_map_mesh_animation_keyframes[anim].scale.vz;
                 }
             }
 
@@ -3133,15 +3133,15 @@ static battle_map_state_record_t* battle_map_mesh_load_animation_record(battle_m
             g_battle_map_mesh_parts[i].scale.vx
                 = g_battle_map_mesh_animation_keyframes
                       [g_battle_map_mesh_animation_instructions[i].states[0][1].keyframe]
-                          .scale_x;
+                          .scale.vx;
             g_battle_map_mesh_parts[i].scale.vy
                 = g_battle_map_mesh_animation_keyframes
                       [g_battle_map_mesh_animation_instructions[i].states[0][1].keyframe]
-                          .scale_y;
+                          .scale.vy;
             g_battle_map_mesh_parts[i].scale.vz
                 = g_battle_map_mesh_animation_keyframes
                       [g_battle_map_mesh_animation_instructions[i].states[0][1].keyframe]
-                          .scale_z;
+                          .scale.vz;
         }
         for (; i < count; i++) {
             src += 4;

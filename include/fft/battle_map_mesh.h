@@ -142,10 +142,7 @@ typedef enum battle_map_mesh_channel {
 typedef struct battle_map_mesh_keyframe {
     SVECTOR rotation;                               /* 0x00; target */
     SVECTOR translation;                            /* 0x08; target */
-    s16 scale_x;                                    /* 0x10; ONE = 1.0 */
-    s16 scale_y;                                    /* 0x12 */
-    s16 scale_z;                                    /* 0x14 */
-    s16 _unused_16;                                 /* 0x16 */
+    SVECTOR scale;                                  /* 0x10; ONE = 1.0; fourth halfword unused */
     s16 angle_start[BATTLE_MAP_MESH_CHANNEL_COUNT]; /* 0x18 */
     s16 angle_end[BATTLE_MAP_MESH_CHANNEL_COUNT];   /* 0x2a */
     u16 tween_flags[BATTLE_MAP_MESH_CHANNEL_COUNT]; /* 0x3c */
