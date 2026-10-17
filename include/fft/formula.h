@@ -8,8 +8,7 @@
 #include "psx/types.h"
 
 /* formula handlers */
-/* The handlers in table order, indexed by formula id less 1: formula 0 has no handler. */
-extern void (*g_formula_handlers[])(void);
+/* Listed in formula-ID order; the dispatch table belongs to action resolution. */
 
 /* weapon attacks */
 void formula_weapon_damage(void);
