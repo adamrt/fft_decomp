@@ -1587,7 +1587,7 @@ static void gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     } while (count < 32);
 }
 
-/* Initialize the 8 semi-transparent POLY_GT4s of g_gfx_poly_gt4_array_8
+/* Initialize the final 8 semi-transparent POLY_GT4s of buffer 0
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void gfx_init_poly_gt4_array_8(s32 x, s32 y) {
@@ -1598,7 +1598,7 @@ static void gfx_init_poly_gt4_array_8(s32 x, s32 y) {
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
     palette_origin = &g_conditions_banner_palette_rect.y;
     do {
-        POLY_GT4* poly = &g_gfx_poly_gt4_array_8[count];
+        POLY_GT4* poly = &g_gfx_poly_gt4_buffers[0][32 + count];
         SetPolyGT4(poly);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
@@ -1892,7 +1892,7 @@ void conditions_special_thread(void) {
 
     for (quad_index = 0; quad_index < quad_count; quad_index++) {
         u8* parameters = &table[parameter_index];
-        POLY_GT4* poly = &(use_small_array == 0 ? g_gfx_poly_gt4_array_32 : g_gfx_poly_gt4_array_8)[quad_index];
+        POLY_GT4* poly = &(use_small_array == 0 ? g_gfx_poly_gt4_array_32 : &g_gfx_poly_gt4_buffers[0][32])[quad_index];
 
         setUV4(poly, QUAD.source.x, QUAD.source.y, QUAD.source.x + QUAD.source.w, QUAD.source.y, QUAD.source.x,
             QUAD.source.y + QUAD.source.h, QUAD.source.x + QUAD.source.w, QUAD.source.y + QUAD.source.h);

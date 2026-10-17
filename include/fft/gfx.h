@@ -350,12 +350,11 @@ void gfx_load_frame_bin(void);
 void gfx_restore_frame_bin_page(void);
 
 /* after-battle quads and fade */
-/* Two buffers of 40 POLY_GT4s that REQUIRE builds its gradient grid and reward
- * image quads in. _array_32 and _array_8 name the first 32 and the last 8
- * quads of the first buffer. */
+/* Two buffers of 40 POLY_GT4s for REQUIRE's gradient grid and reward images.
+ * The first 32 quads also have the retained _array_32 base alias; the reward
+ * images use the final 8 quads. */
 extern POLY_GT4 g_gfx_poly_gt4_buffers[2][40];
 extern POLY_GT4 g_gfx_poly_gt4_array_32[];
-extern POLY_GT4 g_gfx_poly_gt4_array_8[];
 
 /* overlay fade */
 /* gfx_overlay_fade_t.flags. */
