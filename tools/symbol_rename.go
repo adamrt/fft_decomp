@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 type symbolMutationResult struct {
@@ -258,13 +259,13 @@ type sourceIdentifierBatchPlan struct {
 }
 
 func planSourceIdentifierRenames(root string, renames []sourceIdentifierRename) (sourceIdentifierBatchPlan, error) {
-	return planSourceIdentifierRenamesUnify(root, renames, false)
+	return planSourceIdentifierRenamesUnify(root, renames, false, nil)
 }
 
 // planSourceIdentifierRenamesUnify is planSourceIdentifierRenames that, when
-// unify is set, lets the old and new names both have definitions as long as
-// they lie in different module folders: per-module bodies under one name.
-func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRename, unify bool) (sourceIdentifierBatchPlan, error) {
+// unify is set, lets the old and new definitions coexist only in disjoint
+// program views. Views records the source bindings before any file moves.
+func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRename, unify bool, views map[string][]*moduleSpec) (sourceIdentifierBatchPlan, error) {
 	plan := sourceIdentifierBatchPlan{
 		changes:       make(map[string]sourceTextChange),
 		references:    make([]map[string]bool, len(renames)),
@@ -341,19 +342,79 @@ func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRen
 			continue
 		}
 		if unify {
-			collide := false
-			for _, old := range plan.oldDefinition[index] {
-				for _, current := range plan.newDefinition[index] {
-					collide = collide || filepath.Dir(old) == filepath.Dir(current)
-				}
+			if err := validateUnifiedSourceDefinitions(rename, plan.oldDefinition[index], plan.newDefinition[index], views); err != nil {
+				return sourceIdentifierBatchPlan{}, err
 			}
-			if !collide {
-				continue
-			}
+			continue
 		}
 		return sourceIdentifierBatchPlan{}, fmt.Errorf("source definitions collide: %s and %s", rename.oldName, rename.newName)
 	}
 	return plan, nil
+}
+
+// validateUnifiedSourceDefinitions checks all target-bound views, including
+// static definitions that have no target entry of their own. Folder placement
+// cannot establish that two definitions are never compiled into one program.
+func validateUnifiedSourceDefinitions(rename sourceIdentifierRename, oldPaths, newPaths []string, views map[string][]*moduleSpec) error {
+	type definitions struct{ oldPath, newPath string }
+	byModule := make(map[string]definitions)
+	seen := make(map[string]bool)
+	for _, path := range append(append([]string(nil), oldPaths...), newPaths...) {
+		if seen[path] {
+			continue
+		}
+		seen[path] = true
+		if len(views[path]) == 0 {
+			return fmt.Errorf("cannot prove source definitions disjoint: %s has no target program view", path)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		// The conditional evaluator knows target macros, not arbitrary local
+		// or included definitions. Refuse an exclusion proof based on those.
+		for index, line := range strings.Split(string(data), "\n") {
+			trimmed := strings.TrimSpace(line)
+			if !strings.HasPrefix(trimmed, "#") {
+				continue
+			}
+			for _, name := range conditionalIdentifiers(trimmed) {
+				if !strings.HasPrefix(name, moduleMacroPrefix) && !strings.HasPrefix(name, definePrefix) {
+					return fmt.Errorf("%s:%d: cannot prove source definitions disjoint with non-target macro %s", path, index+1, name)
+				}
+			}
+			word, rest := directiveWord(trimmed)
+			if word == "define" || word == "undef" {
+				fields := strings.Fields(rest)
+				if len(fields) > 0 && (strings.HasPrefix(fields[0], moduleMacroPrefix) || strings.HasPrefix(fields[0], definePrefix)) {
+					return fmt.Errorf("%s:%d: cannot prove source definitions disjoint with a local target macro change", path, index+1)
+				}
+			}
+		}
+		for _, module := range views[path] {
+			active, err := activeConditionalText(string(data), module.macros())
+			if err != nil {
+				return fmt.Errorf("%s [%s]: %w", path, module.ID, err)
+			}
+			names, err := sourceDefinedIdentifiers([]byte(active))
+			if err != nil {
+				return fmt.Errorf("%s [%s]: %w", path, module.ID, err)
+			}
+			found := byModule[module.ID]
+			if names[rename.oldName] {
+				found.oldPath = path
+			}
+			if names[rename.newName] {
+				found.newPath = path
+			}
+			if found.oldPath != "" && found.newPath != "" {
+				return fmt.Errorf("source definitions collide in %s: %s (%s) and %s (%s)", module.ID,
+					rename.oldName, found.oldPath, rename.newName, found.newPath)
+			}
+			byModule[module.ID] = found
+		}
+	}
+	return nil
 }
 
 // sourceDefinedIdentifiers uses the declaration checker's file-scope parser,
@@ -653,6 +714,13 @@ func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, un
 		if err != nil {
 			return err
 		}
+		views := make(map[string][]*moduleSpec)
+		if unify {
+			for _, view := range declCheckViews(config) {
+				path := filepath.Join(p.root, filepath.FromSlash(view.source))
+				views[path] = append(views[path], config.byID[view.module])
+			}
+		}
 		type move struct{ from, to string }
 		var moves []move
 		for _, rename := range renames {
@@ -672,7 +740,7 @@ func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, un
 		for index, rename := range renames {
 			identifierRenames[index] = sourceIdentifierRename{rename.oldName, rename.newName}
 		}
-		sources, err := planSourceIdentifierRenamesUnify(p.root, identifierRenames, unify)
+		sources, err := planSourceIdentifierRenamesUnify(p.root, identifierRenames, unify, views)
 		if err != nil {
 			return err
 		}
