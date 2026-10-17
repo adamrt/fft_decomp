@@ -831,7 +831,7 @@ functions:
   - {addr: 0x801228cc, size: 36, name: formation_ability_has_secret_hunt, hash: d2861f612ae1e6a8, unit: ability_checks}
   - {addr: 0x801228f0, size: 816, name: ability_list_build, hash: 67540f592c51f8f1, unit: ability_checks}
   - {addr: 0x80122c20, size: 544, name: formation_ability_build_rsm_list, hash: e568d793cd50e453, unit: ability_checks}
-  - {addr: 0x80122e40, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, source: src/lib/menu/equipment_clear_stat_preview.c}
+  - {addr: 0x80122e40, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, unit: equipment_stat_changes}
   - {addr: 0x80122e88, size: 132, name: formation_ability_get_move_jump_bonus, hash: 15a592818d5c12ca, unit: equipment_stat_changes}
   - {addr: 0x80122f0c, size: 144, name: formation_ability_diff_movement_stats, hash: 1f6bb186e388a569, unit: equipment_stat_changes}
   - {addr: 0x80122f9c, size: 560, name: item_collect_stat_deltas, hash: 610e237773cc8653, unit: equipment_stat_changes}

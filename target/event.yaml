@@ -62,7 +62,7 @@ functions:
   - {addr: 0x801c34b4, size: 1612, name: scenario_load_conditionals, hash: bba39fd5570c99b6, unit: scenario_setup}
   - {addr: 0x801c3b00, size: 424, name: scenario_restore_music_and_darkness, hash: 7e9cd3acb0241ad1, unit: scenario_setup}
   - {addr: 0x801c3ca8, size: 148, name: deploy_find_deployable_units, hash: 5cd7505bb7bab58e, unit: scenario_setup}
-  - {addr: 0x801c3d3c, size: 80, name: deploy_is_roster_unit_deployed, hash: 5d2d6845961ff568}
+  - {addr: 0x801c3d3c, size: 80, name: deploy_is_roster_unit_deployed, hash: 5d2d6845961ff568, unit: scenario_setup}
   - {addr: 0x801c3d8c, size: 40, name: thread_wait_forever, hash: 1784b8534b53f3ba, source: src/lib/thread/thread_wait_forever.c}
   - {addr: 0x801c3db4, size: 80, name: deploy_has_roster_unit_on_tiles, hash: 5d2d6845961ff568, unit: deploy_screen}
   - {addr: 0x801c3e04, size: 88, name: deploy_remove_roster_unit, hash: 784067ef9c2286de, unit: deploy_screen}
@@ -1358,6 +1358,7 @@ units:
   - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: equipment_panels, source: src/event/equip/equipment_panels.c}
   - {name: equipment_rows, source: src/lib/menu/equipment_rows.c, data: [{addr: 0x801e8cc4, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801e8cd0, size: 12, hash: 15ec7bf0b50732b4}]}
+  - {name: equipment_stat_changes, source: src/event/equip/equipment_stat_changes.c}
   - {name: equipment_stat_deltas, source: src/lib/menu/equipment_stat_deltas.c}
   - {name: gfx_contexts, source: src/event/equip/gfx_contexts.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
@@ -1464,8 +1465,8 @@ functions:
   - {addr: 0x801c7980, size: 84, name: item_is_in_category_list, hash: 51620ec7a2e5446b, unit: item_order}
   - {addr: 0x801c79d4, size: 104, name: item_prepend_to_category_list, hash: ea719a53cf244b40, unit: item_order}
   - {addr: 0x801c7a3c, size: 128, name: item_remove_from_category_list, hash: 71937d05d6e62d46, unit: item_order}
-  - {addr: 0x801c7abc, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, source: src/lib/menu/equipment_clear_stat_preview.c}
-  - {addr: 0x801c7b04, size: 552, name: item_collect_stat_deltas, hash: 0ac56f16113047c1}
+  - {addr: 0x801c7abc, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, unit: equipment_stat_changes}
+  - {addr: 0x801c7b04, size: 552, name: item_collect_stat_deltas, hash: 0ac56f16113047c1, unit: equipment_stat_changes}
   - {addr: 0x801c7d2c, size: 188, name: equipment_calculate_swap_stat_delta, hash: b8cc1a11e7a4d8e7, unit: equipment_stat_deltas}
   - {addr: 0x801c7de8, size: 424, name: equipment_subtract_scaled_stat_preview, hash: 7621477fabb93d49, unit: equipment_stat_deltas}
   - {addr: 0x801c7f90, size: 216, name: equipment_calculate_total_swap_delta, hash: f6342e487bb56d15, unit: equipment_stat_deltas}
