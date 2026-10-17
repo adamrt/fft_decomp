@@ -64,7 +64,7 @@ static s32 g_effect_primitive_sizes[3] = { sizeof(POLY_FT4), sizeof(DR_MODE), 32
 extern psyq_tmd_object_t* g_effect_model_object;
 extern SVECTOR* g_effect_model_vertices;
 extern SVECTOR* g_effect_model_normals;
-extern psyq_tmd_packet_t* g_effect_model_commands;
+extern u32* g_effect_model_commands;
 extern s32 g_effect_model_command_word_offset;
 
 static s32 effect_particle_update_node_from_work(effect_record_t* unused_record, effect_work_record_t* work);
@@ -1491,8 +1491,7 @@ s32 effect_model_init_sections(psyq_tmd_header_t* resource, s32 unused_1) {
     /* TMD offsets are byte counts from the object table; word indexing keeps signed rounding. */
     g_effect_model_vertices = (SVECTOR*)&((u32*)resource->objects)[(s32)resource->objects[0].vertex_offset / 4];
     g_effect_model_normals = (SVECTOR*)&((u32*)resource->objects)[(s32)resource->objects[0].normal_offset / 4];
-    g_effect_model_commands
-        = (psyq_tmd_packet_t*)&((u32*)resource->objects)[(s32)resource->objects[0].primitive_offset / 4];
+    g_effect_model_commands = &((u32*)resource->objects)[(s32)resource->objects[0].primitive_offset / 4];
     g_effect_model_command_word_offset = 0;
     return resource->objects[0].primitive_count;
 }
@@ -1511,7 +1510,7 @@ void effect_model_decode_next_command(effect_decoded_model_command_t* out) {
     u32 header;
 
     index = g_effect_model_command_word_offset;
-    command = (psyq_tmd_packet_t*)((u8*)g_effect_model_commands + index * sizeof(u32));
+    command = (psyq_tmd_packet_t*)&g_effect_model_commands[index];
     header = command->id;
     memcpy(&out->header, &command->id, sizeof(out->header));
     /* Struct assignments use unaligned copies; memcpy preserves the 32-bit transfers.
@@ -1539,8 +1538,7 @@ void effect_model_decode_next_command(effect_decoded_model_command_t* out) {
     case EFFECT_MODEL_COMMAND_GT3_OPAQUE:
     case EFFECT_MODEL_COMMAND_GT3_SEMITRANSPARENT: {
         psyq_tmd_packet_t* extended;
-        extended
-            = (psyq_tmd_packet_t*)((u8*)g_effect_model_commands + g_effect_model_command_word_offset * sizeof(u32));
+        extended = (psyq_tmd_packet_t*)&g_effect_model_commands[g_effect_model_command_word_offset];
         memcpy(&dst->colors[0], &extended->gt3.r0, sizeof(dst->colors[0]));
         memcpy(&dst->colors[1], &extended->gt3.r1, sizeof(dst->colors[1]));
         memcpy(&dst->colors[2], &extended->gt3.r2, sizeof(dst->colors[2]));

@@ -1984,8 +1984,8 @@ static void projectile_list_obstacle_units(s32 first, s32 second, projectile_obs
  * listed unit's sprite box; the blocking unit's battle id is reported through
  * `out_unit`, which is otherwise left at -1.
  */
-static s32 projectile_test_position_for_obstacle(
-    projectile_obstacle_unit_list_t* list, VECTOR* position, s32* out_unit, battle_map_tile_coordinates_t* tile_ref) {
+static s32 projectile_test_position_for_obstacle(const projectile_obstacle_unit_list_t* list, const VECTOR* position,
+    s32* out_unit, battle_map_tile_coordinates_t* tile_ref) {
     battle_map_tile_t* tile;
     s32 ceiling;
     s32 height;
@@ -2048,8 +2048,8 @@ static s32 projectile_test_position_for_obstacle(
  * `hit` is deliberately left uninitialized: the target reads $s6 after a
  * zero-step loop without ever writing it.
  */
-static s32 projectile_arc_trace_path(
-    SVECTOR* origin, s32* height, s32* distance, SVECTOR* arc, projectile_obstacle_unit_list_t* obstacles) {
+static s32 projectile_arc_trace_path(const SVECTOR* origin, const s32* height, const s32* distance, SVECTOR* arc,
+    const projectile_obstacle_unit_list_t* obstacles) {
     SVECTOR rotation;
     SVECTOR step;
     VECTOR position;
@@ -2318,7 +2318,7 @@ s32 projectile_get_bow_shot_angle(void) {
  * divide; a literal 0x2000 folds to a shift.
  */
 static s32 projectile_direct_trace_path(
-    VECTOR* delta, SVECTOR* origin, s32* distance, projectile_obstacle_unit_list_t* obstacles) {
+    const VECTOR* delta, const SVECTOR* origin, const s32* distance, const projectile_obstacle_unit_list_t* obstacles) {
     VECTOR position;
     VECTOR previous;
     s32 step;
