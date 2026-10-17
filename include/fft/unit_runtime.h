@@ -423,7 +423,6 @@ s32 unit_facing_set_sixteenth_by_runtime_id(u32 runtime_id, s32 facing_nibble);
 void unit_facing_snap_all_to_quadrants(void);
 
 /* animation and display */
-extern s8 g_unit_float_bob_offsets[24];
 
 void unit_update_and_animate_all(void);
 void unit_update_target_displays(unit_t* unit);

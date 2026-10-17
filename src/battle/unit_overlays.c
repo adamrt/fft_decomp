@@ -951,16 +951,8 @@ void unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
     }
 }
 
-/* g_unit_float_bob_offsets: read-only table of this object (24 bytes at 0x800677f8), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_battle_unit_float_bob_offsets_rodata[6] = {
-    0x04040404,
-    0x02030303,
-    0x01010102,
-    0x00000000,
-    0x02010101,
-    0x03030302,
-};
+/* Defining the samples after their reader retains the original memory copy. */
+static const s8 g_unit_float_bob_offsets[24];
 
 /* unit_height_calculate_from_world_coords is called as returning s16; the target's
  * handling of the result needs it, and a plain s32 call compiles differently. */
@@ -1011,6 +1003,10 @@ static void unit_increment_or_decrement_height_mod(unit_t* unit) {
         unit->real.vy = ground_y * ONE;
     }
 }
+
+/* Floating height offsets, one sample every two frames. */
+static const s8 g_unit_float_bob_offsets[24]
+    = { 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3 };
 
 /* Advances one unit's status bubble by g_system_vsync_interval frames.
  *

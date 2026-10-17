@@ -37,6 +37,11 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Private cursor state for the SP2 nibble decoder. */
+extern const u8* g_sprite_compressed_data;
+extern s32 g_sprite_compressed_nibble_phase;
+extern s32 g_sprite_compressed_offset;
+
 static SVECTOR g_sprite_gte_rtpt_vxy0 = { 0 };
 static SVECTOR g_sprite_gte_rtpt_vxy1 = { 0 };
 static SVECTOR g_sprite_gte_rtpt_vxy2 = { 0 };

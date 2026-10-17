@@ -102,11 +102,6 @@ typedef struct effect_reflect_buffer {
 } effect_reflect_buffer_t;
 
 extern psyq_tmd_header_t* g_effect_model_files[];
-extern psyq_tmd_object_t* g_effect_model_object;
-extern SVECTOR* g_effect_model_vertices;
-extern SVECTOR* g_effect_model_normals;
-extern psyq_tmd_packet_t* g_effect_model_commands;
-extern s32 g_effect_model_command_word_offset;
 
 s32 effect_model_init_sections(psyq_tmd_header_t* resource, s32 unused_1);
 void effect_model_decode_next_command(effect_decoded_model_command_t* out);

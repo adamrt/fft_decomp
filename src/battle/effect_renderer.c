@@ -23,6 +23,13 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Private cursor state for the resident model decoder. */
+extern psyq_tmd_object_t* g_effect_model_object;
+extern SVECTOR* g_effect_model_vertices;
+extern SVECTOR* g_effect_model_normals;
+extern psyq_tmd_packet_t* g_effect_model_commands;
+extern s32 g_effect_model_command_word_offset;
+
 static void effect_vector_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out);
 static effect_list_node_t* effect_particle_alloc_list_node(s16 kind);
 static void effect_particle_free_list_node(effect_list_node_t* node);

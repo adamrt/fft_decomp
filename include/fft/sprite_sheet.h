@@ -487,9 +487,6 @@ extern u8 g_sprite_shp_frame_data_buffer[];
 extern u8 g_sprite_seq_data_buffer[];
 extern u8 g_sprite_fallback_shp_frame_data[];
 extern u8 g_sprite_fallback_seq_data[];
-extern const u8* g_sprite_compressed_data;
-extern s32 g_sprite_compressed_nibble_phase;
-extern s32 g_sprite_compressed_offset;
 
 /* Byte-granular bump-allocation cursors: the consuming files do raw byte arithmetic on these, so the element type
  * must stay u8. */
