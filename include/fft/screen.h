@@ -221,7 +221,6 @@ extern RECT g_screen_unit_image_rect_a;
 extern RECT g_screen_unit_image_rect_b;
 extern RECT g_screen_common_clut_rect;
 extern clut_t g_screen_common_clut_data;
-extern fade_overlay_t g_screen_tint_tiles[];    /* one tint tile per packet buffer */
 extern const u16 g_screen_zoom_percentages[12]; /* twelve crop percentages, indexed by step */
 extern RECT g_screen_thin_panel_texture_windows[7];
 

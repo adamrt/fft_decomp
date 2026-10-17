@@ -1983,7 +1983,7 @@ data:
   - {addr: 0x801a3494, name: g_status_screen_frames}
   - {addr: 0x801a3d58, name: g_formation_ability_list_pages}
   - {addr: 0x801a63d8, name: g_menu_panel_fade_frames}
-  - {addr: 0x801a6650, name: g_screen_tint_tiles}
+  - {addr: 0x801a6650, name: g_fade_overlays}
   - {addr: 0x801a6688, name: g_menu_active_menu}
   - {addr: 0x801a668c, name: g_crystal_pickup_panel_parameter}
   - {addr: 0x801a6690, name: g_script_next_event_id}

@@ -12,7 +12,9 @@ extern s32 g_fade_step;
 extern s16 g_fade_intensity;
 extern POLY_F4 g_fade_polygons[2];
 extern DR_MODE g_fade_draw_modes[];
-extern fade_overlay_t g_fade_overlays[]; /* one fade overlay per packet buffer */
+
+/* BATTLE and WORLD each define two overlays, one per packet buffer. */
+extern fade_overlay_t g_fade_overlays[2];
 
 /* color tint */
 extern rgb24_t g_fade_tint;
