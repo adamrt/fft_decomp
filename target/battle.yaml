@@ -2497,7 +2497,6 @@ data:
   - {addr: 0x80168668, name: g_unit_view_hovered_stats_setup}
   - {addr: 0x801686e0, name: g_unit_view_right_stats_setup}
   - {addr: 0x80168758, name: g_unit_view_attack_caster_stats_setup}
-  - {addr: 0x801687a0, name: g_menu_projected_value_panel}
   - {addr: 0x801687b8, name: g_unit_view_attack_target_stats_setup}
   - {addr: 0x80168818, name: g_unit_view_stats_gauge_colors}
   - {addr: 0x80168848, name: g_unit_view_stats_quad_image_params_by_mode}

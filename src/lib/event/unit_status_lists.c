@@ -563,20 +563,20 @@ static s32 unit_view_display_action_preview(
     action_data_t* action;
     u8 target_id;
 
-    /* Panel number formats (menu_draw_large_number_glyphs) are a digit count plus an optional sign
-     * flag; kind 2 hides a panel entry. */
+    /* The caster panel's last two numbers show the projected value and hit percentage.
+     * Number formats are a digit count plus an optional sign flag; kind 2 hides an entry. */
     extra = 0;
     show_empty = 0;
-    panel = g_menu_projected_value_panel;
+    panel = &g_unit_view_attack_caster_stats_setup[6];
     panel[0].x = 0xf;
-    g_menu_projected_value_panel[0].kind = 1;
-    g_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_MINUS | 3;
-    g_menu_projected_value_panel[0].y = 0;
+    panel[0].kind = 1;
+    panel[0].format = MENU_DECIMAL_SIGN_MINUS | 3;
+    panel[0].y = 0;
     digits_x = &panel[1].x;
     *digits_x = 0x32;
     label_x = &g_menu_attack_caster_quad_image_params[0][2].x_screen_offset;
     image = 0;
-    g_menu_projected_value_panel[1].kind = 0;
+    panel[1].kind = 0;
     *label_x = g_menu_attack_caster_quad_image_params[1][2].x_screen_offset;
     extra_label_x = &g_menu_attack_caster_quad_image_params[0][3].x_screen_offset;
     *extra_label_x = g_menu_attack_caster_quad_image_params[1][3].x_screen_offset;
@@ -586,12 +586,12 @@ static s32 unit_view_display_action_preview(
     g_unit_panel_selected_unit_status.projected_hit_percent = action->attack_accuracy;
     target_id = g_unit_panel_comparison_unit_data.battle_id;
     if (target_id == 0xff || action == 0) {
-        g_menu_projected_value_panel[0].kind = 2;
-        g_menu_projected_value_panel[1].kind = 2;
+        panel[0].kind = 2;
+        panel[1].kind = 2;
         return;
     }
     if (action->attack_type == 0) {
-        g_menu_projected_value_panel[0].kind = 2;
+        panel[0].kind = 2;
     }
 
     if (action->attack_type & ACTION_TYPE_HP_DAMAGE) {
@@ -600,22 +600,22 @@ static s32 unit_view_display_action_preview(
     } else if (action->attack_type & ACTION_TYPE_HP_HEALING) {
         value = action->hp_healing;
         image = ACTION_DISPLAY_IMAGE_HP;
-        g_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;
+        panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;
     } else if (action->attack_type & ACTION_TYPE_MP_DAMAGE) {
         value = action->mp_damage;
         image = ACTION_DISPLAY_IMAGE_MP;
     } else if (action->attack_type & ACTION_TYPE_MP_HEALING) {
         image = ACTION_DISPLAY_IMAGE_MP;
         value = action->mp_healing;
-        g_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;
+        panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;
     } else if (action->gil_change != 0 && (action->attack_type & ACTION_TYPE_PSEUDO_STATUS)) {
         value = action->gil_change;
         image = ACTION_DISPLAY_IMAGE_GIL;
         if (value >= 0) {
-            g_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_PLUS | 4;
+            panel[0].format = MENU_DECIMAL_SIGN_PLUS | 4;
         } else {
             value = -value;
-            g_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_MINUS | 4;
+            panel[0].format = MENU_DECIMAL_SIGN_MINUS | 4;
         }
         panel[0].kind = 0;
         *label_x -= 4;

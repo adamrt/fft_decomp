@@ -43,9 +43,6 @@ extern image_layout_t g_menu_sprite_page_image_params[5];
 /* Default placement for all five reaction-name sprite pieces. */
 extern image_layout_t g_menu_sprite_page_image_param_bases[5];
 
-/* The final two entries of g_unit_view_attack_caster_stats_setup. */
-extern menu_number_entry_t g_menu_projected_value_panel[2];
-
 /* Live caster-panel image parameters followed by their defaults. */
 extern image_layout_t g_menu_attack_caster_quad_image_params[2][5];
 
