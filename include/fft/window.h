@@ -132,15 +132,6 @@ typedef struct window_gpu_image_record {
 } window_gpu_image_record_t;
 typedef char window_gpu_image_record_size_must_be_56[sizeof(window_gpu_image_record_t) == 56 ? 1 : -1];
 
-/* Interior x/y view of OPEN's image pool, based at the first record's x.
- * A separate base register preserves the original index/address calculation. */
-typedef struct window_gpu_image_position {
-    s32 x; /* 0x00 */
-    s32 y; /* 0x04 */
-    u8 _unused_08[0x38 - 8];
-} window_gpu_image_position_t;
-typedef char window_gpu_image_position_size_must_be_56[sizeof(window_gpu_image_position_t) == 56 ? 1 : -1];
-
 /* One DR_MODE + SPRT pair in OPEN's per-buffer sprite packet pool. */
 typedef struct window_sprite_prim {
     DR_MODE mode; /* 0x00 */
@@ -149,7 +140,6 @@ typedef struct window_sprite_prim {
 typedef char window_sprite_prim_size_must_be_32[sizeof(window_sprite_prim_t) == 32 ? 1 : -1];
 
 extern window_gpu_image_record_t g_window_gpu_image_records[WINDOW_GPU_RECORD_CAPACITY];
-extern window_gpu_image_position_t g_window_gpu_image_positions[WINDOW_GPU_RECORD_CAPACITY];
 extern window_sprite_prim_t g_window_sprite_primitive_pool[2][32];
 extern s32 g_window_primitive_count;
 void window_init_vram_record(

@@ -501,11 +501,11 @@ s32 formation_update_grid(s16 background_y, s16 toggle_banner, s16 allow_browse,
         && g_formation_selection_cursor_ready != 0 && g_formation_current_menu != FORMATION_MENU_DISMISS_UNIT) {
         value = 0xf;
         if (g_formation_unit_banner_at_bottom != 0) {
-            window = &g_formation_stat_bar_window_top;
+            window = (menu_instruction_t*)g_formation_stat_bar_window_top;
             cells = g_formation_label_tiles;
         } else {
             value = 0xdb;
-            window = &g_formation_stat_bar_window_bottom;
+            window = (menu_instruction_t*)g_formation_stat_bar_window_bottom;
             cells = g_formation_label_tiles_bottom;
         }
         row = 0;

@@ -57,14 +57,13 @@ void* menu_alloc_buffer(s32 bytes);
 
 /* Record reached through menu_entry_t::context by menu_text_entry_wait_thread and WORLD's
  * screen_text_entry_thread: they call prepare, then start the text thread text_thread_id with speaker_id
- * as its third and fourth parameters. Provisional: only these members are known. */
+ * as its third and fourth parameters. */
 typedef struct menu_text_binding {
     void (*prepare)(void); /* 0x00 */
     u16 speaker_id;        /* 0x04: unit whose portrait speaks (roster slot) */
     u16 text_thread_id;    /* 0x06 */
-    u8 _unused_08[8];
-    s16* row_text_ids; /* 0x10: text ids indexed by entry selected_index (screen_help_text_thread) */
 } menu_text_binding_t;
+typedef char menu_text_binding_size_must_be_8[sizeof(menu_text_binding_t) == 8 ? 1 : -1];
 
 /* Row actions 0..0xff open that menu entry; this flag suppresses the confirm sound. */
 enum { MENU_ROW_ACTION_SILENT = 0x1000 };
@@ -128,10 +127,10 @@ typedef struct menu_entry {
      * poll (set to 1 to rebuild the text image). */
     void* context;
     void* value;           /* 0x34: thread-specific value data: s16 result cell or main-window s32 substitution pair */
-    s16 selected_index;    /* 0x38: selected row; indexes the binding's 16-bit table
+    s16 selected_index;    /* 0x38: selected row; indexes the scroll layout's 16-bit table
                               (screen_help_text_thread) */
     s16 select_text_table; /* 0x3a: "Index for select text": row of g_screen_entry_text_id_tables
-                              (0x11 = the binding's row_text_ids); 2 / -1 defer to the next running
+                              (0x11 = first text column of the scroll layout); 2 / -1 defer to the next running
                               thread's entry. The AT-list and option-list builders park their
                               scroll row offset here instead. */
 } menu_entry_t;

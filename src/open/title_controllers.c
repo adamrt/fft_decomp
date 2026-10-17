@@ -859,7 +859,7 @@ static void birthday_push_date_menu(void) {
     s32 record;
     s32 controller;
     s32 half_width;
-    window_gpu_image_position_t* position;
+    point32_t* position;
 
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     g_controller_records[g_controller_depth].birthday_date.cursor_record = record;
@@ -875,8 +875,8 @@ static void birthday_push_date_menu(void) {
     quad.w = 0x80;
     quad.h = 0x40;
     window_init_text_record(record, quad, 0, 0xB800, g_birthday_title_image);
-    position = g_window_gpu_image_positions;
-    position += record;
+    position = (point32_t*)&g_window_gpu_image_records[0].x;
+    position = (point32_t*)((u8*)position + record * sizeof(window_gpu_image_record_t));
     half_width = quad.w / 2;
     position->y = -0x60;
     position->x = -half_width;
@@ -908,7 +908,7 @@ static void birthday_build_menu_text(birthday_date_state_t* menu) {
     u16 height;
     s32 index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     s32 text_id;
-    window_gpu_image_position_t* translation;
+    point32_t* translation;
     s32* substitution;
 
     menu->window_image = index;
@@ -936,8 +936,8 @@ static void birthday_build_menu_text(birthday_date_state_t* menu) {
 
     window_load_render_record_image(index, (u32*)g_birthday_window_image);
 
-    translation = g_window_gpu_image_positions;
-    translation += index;
+    translation = (point32_t*)&g_window_gpu_image_records[0].x;
+    translation = (point32_t*)((u8*)translation + index * sizeof(window_gpu_image_record_t));
     translation->x = -(quad.w / 2);
     translation->y = -0x10;
     g_window_gpu_image_records[index].ot_layer = 4;
@@ -1101,7 +1101,7 @@ static void birthday_push_confirmation(void) {
     s32 unused[12];
     s32 record;
     s32 controller;
-    window_gpu_image_position_t* position;
+    point32_t* position;
 
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     g_controller_records[g_controller_depth].birthday_confirmation.cursor_record = record;
@@ -1125,8 +1125,8 @@ static void birthday_push_confirmation(void) {
     quad.h = 0x30;
     window_init_text_record(record, quad, 0, 0xB80F, g_birthday_title_image);
     controller = g_controller_depth;
-    position = g_window_gpu_image_positions;
-    position += record;
+    position = (point32_t*)&g_window_gpu_image_records[0].x;
+    position = (point32_t*)((u8*)position + record * sizeof(window_gpu_image_record_t));
     position->x = 0x3C;
     position->y = 0x28;
     g_window_gpu_image_records[record].ot_layer = 3;

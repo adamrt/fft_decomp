@@ -50,9 +50,9 @@ void screen_help_text_thread(void) {
     }
     index = entry->selected_index;
     if (kind == 0x11) {
-        menu_text_binding_t* binding = entry->context;
+        menu_scroll_text_layout_t* layout = entry->context;
 
-        value = binding->row_text_ids[index];
+        value = layout->columns.text_ids[0][index];
         value &= 0x7FF;
         if (value == 0x2B) {
             value = 0x63;

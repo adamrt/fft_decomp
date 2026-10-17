@@ -80,6 +80,21 @@ static s32 ending_decode_hex_digit(s32 character);
 #define PROLOGUE_IMAGE_HEIGHT     180
 #define PROLOGUE_IMAGE_ROW_STRIDE 256
 
+/* Crossfade control bytes and one fade step per picture row. */
+typedef struct prologue_crossfade {
+    u8 active;
+    u8 progress;
+    u8 row_steps[PROLOGUE_IMAGE_HEIGHT];
+} prologue_crossfade_t;
+typedef char prologue_crossfade_size_must_be_182[sizeof(prologue_crossfade_t) == 182 ? 1 : -1];
+
+extern prologue_crossfade_t g_prologue_crossfade;
+extern u16* g_prologue_crossfade_frame_pixels;
+extern u16* g_prologue_crossfade_old_picture;
+
+/* prologue_step_crossfade reloads the source pointer for every column. */
+extern u16* volatile g_prologue_crossfade_new_picture;
+
 /* A 256x240 16-bit frame image in 32-bit words. */
 #define PROLOGUE_FRAME_IMAGE_WORDS (256 * 240 / 2)
 
@@ -553,7 +568,7 @@ s32 prologue_update(void) {
                     break;
                 case PROLOGUE_START_CROSSFADE:
                     file_wait_for_pending();
-                    g_prologue_crossfade_rows[0] = 1;
+                    g_prologue_crossfade.active = 1;
                     break;
                 }
                 {
@@ -599,7 +614,7 @@ s32 prologue_update(void) {
     if (g_prologue.flags & PROLOGUE_SKIP) {
         if (g_prologue.intensity != 0) {
             g_prologue.intensity -= 2;
-        } else if (g_prologue_crossfade_rows[0] == 0) {
+        } else if (g_prologue_crossfade.active == 0) {
             return 0;
         }
     }
@@ -718,9 +733,8 @@ static void prologue_draw_text_lines(s32 intensity) {
  * new image into g_system_work_buffer_0 (the crossfade's source) and copies the
  * 210x180 picture on screen out of the frame image into g_system_work_buffer_1,
  * packed 210 pixels per row. It clears the per-row fade steps, the running flag
- * (g_prologue_crossfade_rows[0]) and the progress row (rows[1], the same byte as
- * g_prologue_crossfade_progress); image operation 0x20 of a later prologue
- * entry waits for the read and sets the running flag. */
+ * and the progress row; image operation 0x20 of a later prologue entry waits for
+ * the read and sets the running flag. */
 static void prologue_prepare_crossfade(s32 file_index) {
     u16* copy_source;
     u16* copy_destination;
@@ -759,12 +773,12 @@ static void prologue_prepare_crossfade(s32 file_index) {
             /* Destination indexing hoists pointer loads; byte-pointer arithmetic changes registers. */
             *(u16*)(destination_index + (u32)g_prologue_crossfade_old_picture) = value;
         }
-        g_prologue_crossfade_rows[row + 2] = 0;
+        g_prologue_crossfade.row_steps[row] = 0;
         source_row += PROLOGUE_IMAGE_WIDTH;
     }
 
-    g_prologue_crossfade_rows[0] = 0;
-    g_prologue_crossfade_rows[1] = 0;
+    g_prologue_crossfade.active = 0;
+    g_prologue_crossfade.progress = 0;
 }
 
 #define PROLOGUE_IMAGE_BLEND_BAND_HEIGHT 17
@@ -801,9 +815,9 @@ static void prologue_step_crossfade(void) {
     s32 difference;
     u8 fade;
 
-    if (g_prologue_crossfade_rows[0] != 0) {
-        row = g_prologue_crossfade_progress - PROLOGUE_IMAGE_BLEND_BAND_HEIGHT;
-        if (row < g_prologue_crossfade_progress) {
+    if (g_prologue_crossfade.active != 0) {
+        row = g_prologue_crossfade.progress - PROLOGUE_IMAGE_BLEND_BAND_HEIGHT;
+        if (row < g_prologue_crossfade.progress) {
             last_row = PROLOGUE_IMAGE_HEIGHT - 1;
             do {
                 if (row >= 0 && row < PROLOGUE_IMAGE_HEIGHT) {
@@ -811,7 +825,7 @@ static void prologue_step_crossfade(void) {
                     column = 0;
                     source_row_start = reverse_row * PROLOGUE_IMAGE_WIDTH;
                     destination_row_start = reverse_row * PROLOGUE_IMAGE_ROW_STRIDE;
-                    fade = g_prologue_crossfade_rows[row + 2]++;
+                    fade = g_prologue_crossfade.row_steps[row]++;
                     do {
                         /* An ordinary source-pointer load is hoisted and adds a saved-register frame. */
                         source_pixel = g_prologue_crossfade_new_picture[source_row_start + column];
@@ -842,13 +856,13 @@ static void prologue_step_crossfade(void) {
                     } while (column < PROLOGUE_IMAGE_WIDTH);
                 }
                 row++;
-            } while (row < g_prologue_crossfade_progress);
+            } while (row < g_prologue_crossfade.progress);
         }
         {
-            u8* progress = &g_prologue_crossfade_progress;
+            u8* progress = &g_prologue_crossfade.progress;
 
             if (++*progress >= PROLOGUE_IMAGE_BLEND_END_ROW) {
-                g_prologue_crossfade_rows[0] = 0;
+                g_prologue_crossfade.active = 0;
             }
         }
     }

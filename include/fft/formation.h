@@ -276,8 +276,8 @@ extern u8 g_formation_unit_banner_enabled;
 extern u8 g_formation_saved_banner_enabled;
 extern s8 g_formation_banner_slide_step;
 extern u8 g_formation_stat_display_mode; /* menu_unit_readout_e, HP to BRAVE_FAITH */
-extern menu_instruction_t g_formation_stat_bar_window_top;
-extern menu_instruction_t g_formation_stat_bar_window_bottom;
+extern u8 g_formation_stat_bar_window_top[12];
+extern u8 g_formation_stat_bar_window_bottom[12];
 extern menu_draw_number_command_t g_formation_gauge_value_number;
 extern menu_draw_number_command_t g_formation_gauge_max_number;
 extern menu_draw_number_command_t g_formation_level_number;

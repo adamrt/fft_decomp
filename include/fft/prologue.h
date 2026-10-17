@@ -63,13 +63,6 @@ typedef char prologue_size_must_be_56[(sizeof(prologue_t) == 56) ? 1 : -1];
 extern prologue_t g_prologue;
 extern prologue_entry_t** g_prologue_entries;
 extern POLY_GT4 g_prologue_line_primitives[2][14];
-extern u16* g_prologue_crossfade_frame_pixels;
-extern u16* g_prologue_crossfade_old_picture;
-extern u8 g_prologue_crossfade_progress;
-extern u8 g_prologue_crossfade_rows[];
-
-/* Volatile: prologue_step_crossfade reloads it every column. */
-extern u16* volatile g_prologue_crossfade_new_picture;
 
 void prologue_start(void);
 void prologue_init_sequence(s32 target, s32 ot_layer, prologue_entry_t** entry_table);
