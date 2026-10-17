@@ -308,8 +308,8 @@ extern clut_t g_sprite_trail_clut;
 
 void sprite_palette_reset_by_runtime_id(u32 runtime_id);
 void sprite_palette_restore_all(void);
-void sprite_palette_check_tile_status_mod(struct unit* unit, s32 tile_effect_level, s32 final_value);
-void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 final_value);
+void sprite_palette_check_tile_status_mod(struct unit* unit, s32 tile_effect_level, s32 update_current_colors);
+void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 update_current_colors);
 void sprite_palette_tint_by_team(struct unit* unit, s32 amount);
 void sprite_palette_tint_all_by_team(void);
 void sprite_palette_apply_modulation_to_units(s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue);

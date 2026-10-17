@@ -394,7 +394,7 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
 
                 /* Speeds are 1/512 unit a frame: << 3, or >> 9 of a 4.12 unit vector, gives 20.12. */
                 switch (flags & EFFECT_EMITTER_VELOCITY_MASK) {
-                case EFFECT_EMITTER_VELOCITY_OUTWARD:
+                case EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED:
                     vector.vx = angle_base.vx + RAND_SPREAD(angle_spread.vx);
                     vector.vy = angle_base.vy + RAND_SPREAD(angle_spread.vy);
                     vector.vz = angle_base.vz + RAND_SPREAD(angle_spread.vz);

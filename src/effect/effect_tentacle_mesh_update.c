@@ -26,8 +26,8 @@ typedef struct effect_tentacle_mesh_segment {
     VECTOR position;      /* 0x018: 20.12 fixed */
     POLY_GT4 quads[4][8]; /* 0x028: sets buffer and buffer + 2 */
     vec3s16_t points[9];  /* 0x6a8 */
-    s16 head;             /* 0x6de */
-    s16 length;           /* 0x6e0 */
+    s16 age;              /* 0x6de */
+    s16 travel_duration;  /* 0x6e0 */
     s16 active;           /* 0x6e2 */
     u8 _unused_6e4[0x02];
     s16 frame;             /* 0x6e6: texture animation frame */
@@ -50,7 +50,7 @@ typedef char effect_tentacle_mesh_work_size_must_be_14220[sizeof(effect_tentacle
  * tentacles start from random points of the emitter's spawn volume, each with
  * a launch velocity and a tip near the anchor that placement_flags selects.
  * Each frame a tentacle's newest trail point eases from its moving particle
- * towards the tip over its travel time (`length` frames); once there, the
+ * towards the tip over its travel time (`travel_duration` frames); once there, the
  * strip shortens from its tail a point a frame. The last nine points are
  * projected and drawn as a strip of up to eight quads mitered at the joints,
  * each paired with a copy one pixel right and down. The emitter's mid-life
@@ -79,8 +79,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
     const effect_geometry_record_t* entry;
     s16 speed_min;
     s16 speed_max;
-    s16 length_min;
-    s16 length_max;
+    s16 travel_duration_min;
+    s16 travel_duration_max;
     s32 i;
     s32 count;
     s32 j;
@@ -330,10 +330,10 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
 
             EFFECT_READ_CURVE(
                 index, factor, (tip_bindings >> EFFECT_TENTACLE_CURVE_TRAVEL_DURATION_SHIFT) & 0xf, frame);
-            length_min = effect_lerp_q8(
-                entry->tentacle_mesh.lifetime_start.min, entry->tentacle_mesh.lifetime_end.min, factor);
-            length_max = effect_lerp_q8(
-                entry->tentacle_mesh.lifetime_start.max, entry->tentacle_mesh.lifetime_end.max, factor);
+            travel_duration_min = effect_lerp_q8(
+                entry->tentacle_mesh.travel_duration_start.min, entry->tentacle_mesh.travel_duration_end.min, factor);
+            travel_duration_max = effect_lerp_q8(
+                entry->tentacle_mesh.travel_duration_start.max, entry->tentacle_mesh.travel_duration_end.max, factor);
 
             /* Start up to count tentacles while free segments remain. */
             for (i = 0; i < count; i++) {
@@ -390,7 +390,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
 
                 /* Speeds are 1/512 unit a frame: << 3, or >> 9 of a 4.12 unit vector, gives 20.12. */
                 switch (flags & EFFECT_EMITTER_VELOCITY_MASK) {
-                case EFFECT_EMITTER_VELOCITY_OUTWARD:
+                case EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED:
                     rotation.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
                     rotation.vy = base_angles.vy + RANDOM_BETWEEN(direction_spread.vy, -direction_spread.vy);
                     rotation.vz = base_angles.vz + RANDOM_BETWEEN(direction_spread.vz, -direction_spread.vz);
@@ -442,8 +442,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                     break;
                 }
 
-                seg->length = RANDOM_BETWEEN(length_min, length_max);
-                seg->head = 0;
+                seg->travel_duration = RANDOM_BETWEEN(travel_duration_min, travel_duration_max);
+                seg->age = 0;
                 seg->active = 1;
                 seg->frame = 0;
                 seg->frame_timer = entry->tentacle_mesh.frame_delay;
@@ -480,11 +480,10 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             /* The color curves are read at the tentacle's age, not the effect frame. */
             if (entry->tentacle_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
                 factor = (entry->tentacle_mesh.color_curves & 0xfff);
-                red = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][seg->head];
-                green = g_effect_animation_curve_data
-                            ->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][seg->head];
-                blue
-                    = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][seg->head];
+                red = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][seg->age];
+                green
+                    = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][seg->age];
+                blue = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][seg->age];
             } else {
                 red = green = blue = EFFECT_COLOR_NEUTRAL;
             }
@@ -494,15 +493,15 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             emitter.motion.position.x = x = seg->position.vx += seg->velocity.vx;
             emitter.motion.position.y = y = seg->position.vy += seg->velocity.vy;
             emitter.motion.position.z = z = seg->position.vz += seg->velocity.vz;
-            index = ++seg->head;
+            index = ++seg->age;
             point_index = index % 9;
             px = x >> 12;
             py = y >> 12;
             pz = z >> 12;
-            if (index <= seg->length) {
-                seg->points[point_index].x = effect_interpolate_s32_cos(px, seg->tip.vx, seg->length, index);
-                seg->points[point_index].y = effect_interpolate_s32_cos(py, seg->tip.vy, seg->length, index);
-                seg->points[point_index].z = effect_interpolate_s32_cos(pz, seg->tip.vz, seg->length, index);
+            if (index <= seg->travel_duration) {
+                seg->points[point_index].x = effect_interpolate_s32_cos(px, seg->tip.vx, seg->travel_duration, index);
+                seg->points[point_index].y = effect_interpolate_s32_cos(py, seg->tip.vy, seg->travel_duration, index);
+                seg->points[point_index].z = effect_interpolate_s32_cos(pz, seg->tip.vz, seg->travel_duration, index);
                 /* Assigned after the calls; the scheduler hoists both stores above them. */
                 shade_index = 8;
                 link_count = 8;
@@ -515,7 +514,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 seg->points[point_index].y = seg->tip.vy;
                 seg->points[point_index].z = seg->tip.vz;
                 tail_step = index - 8;
-                shade_index = seg->length - tail_step;
+                shade_index = seg->travel_duration - tail_step;
                 if (shade_index < 0) {
                     shade_index = 0;
                 }
@@ -535,7 +534,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             emitter.motion.position.z = seg->points[point_index].z * ONE;
             if (flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) {
                 effect_particle_spawn_from_emitter(
-                    record->record_index, seg->head, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
+                    record->record_index, seg->age, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
             }
 
             /* Head: the first quad's leading edge, perpendicular to the first segment (angle + 0x400).
@@ -664,10 +663,10 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             AddPrim(&ot[depth], quad);
 
             /* Done once the tail reaches the tip: the travel time plus a frame per trailing segment. */
-            if (seg->length + 8 == seg->head) {
+            if (seg->travel_duration + 8 == seg->age) {
                 if (flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) {
                     effect_particle_spawn_from_emitter(
-                        record->record_index, seg->head, entry->tentacle_mesh.child_emitter_on_death, &emitter);
+                        record->record_index, seg->age, entry->tentacle_mesh.child_emitter_on_death, &emitter);
                 }
                 seg->active = 0;
                 work->count--;

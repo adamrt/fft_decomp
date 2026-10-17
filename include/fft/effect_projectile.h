@@ -20,13 +20,12 @@ typedef enum effect_model {
     EFFECT_MODEL_SHURIKEN = 3, /* drawn for the thrown items of ITEM_TYPE_SHURIKEN */
 } effect_model_e;
 
-/* Opcodes (top header byte) of the effect model commands that effect_model_decode_next_command
- * decodes: each draws the primitive it is named for. Nothing in the code tells the two GT3 opcodes
- * apart except that effect_model_draw_projectile draws only the second. */
+/* Top-byte TMD commands decoded for the effect models. Bit 1 selects semitransparency;
+ * the shipped Reflect model uses the semitransparent GT3 form. */
 enum {
     EFFECT_MODEL_COMMAND_G3 = 0x31,
-    EFFECT_MODEL_COMMAND_GT3_35 = 0x35,
-    EFFECT_MODEL_COMMAND_GT3_37 = 0x37,
+    EFFECT_MODEL_COMMAND_GT3_OPAQUE = 0x35,
+    EFFECT_MODEL_COMMAND_GT3_SEMITRANSPARENT = 0x37,
     EFFECT_MODEL_COMMAND_G4 = 0x39,
 };
 

@@ -41,7 +41,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     VECTOR growth;      /* vx: radius speed step, vy: row height step, vz: row radius step */
     VECTOR growth_step; /* per-frame and per-row increments of growth */
     SVECTOR map_max;
-    effect_ring_mesh_work_t* work;
+    effect_radial_mesh_work_t* work;
     const effect_geometry_record_t* entry;
     s32 radius;
     s32 u;
@@ -90,7 +90,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         if (record->work_slots[callback_slot] != 0) {
             effect_heap_free_block(record->work_slots[callback_slot]);
         }
-        work = effect_heap_alloc_block(sizeof(effect_ring_mesh_work_t), record_index);
+        work = effect_heap_alloc_block(sizeof(effect_radial_mesh_work_t), record_index);
         record->work_slots[callback_slot] = work;
 
         configuration = entry->radial_mesh.texture_page_config;

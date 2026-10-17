@@ -358,24 +358,25 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
 
 /* ring and tube meshes */
 enum {
+    EFFECT_RADIAL_MESH_QUAD_CAPACITY = 64,
     RING_MESH_SEGMENTS = 32, /* quads around one ring */
     RING_MESH_QUADRANT_COUNT = 4,
     RING_MESH_SEGMENTS_PER_QUADRANT = RING_MESH_SEGMENTS / RING_MESH_QUADRANT_COUNT,
     RING_MESH_ARC_POINTS = RING_MESH_SEGMENTS_PER_QUADRANT + 1,
 };
 
-/* Work block: two POLY_GT4 buffers of two rings of 32 quads. */
-typedef struct effect_ring_mesh_work {
-    s32 buffer;                                /* 0x0000: 0 or 1, flipped after each update */
-    POLY_GT4 quads[2][RING_MESH_SEGMENTS * 2]; /* 0x0004: ring * 32 + segment */
-    s16 spin;                                  /* 0x1a04: ring rotation, modulo one turn */
-    s16 v_scroll;                              /* 0x1a06: 8.8 fixed, wrapped to v_span */
-    s32 radius_offset;                         /* 0x1a08: 24.8 fixed, added to the radius */
-    s32 radius_speed;                          /* 0x1a0c */
+/* Shared 64-quad buffers: two 32-segment rings, an 8-by-8 ring stack or an 8-by-8 tube. */
+typedef struct effect_radial_mesh_work {
+    s32 buffer;                                          /* 0x0000: 0 or 1, flipped after each update */
+    POLY_GT4 quads[2][EFFECT_RADIAL_MESH_QUAD_CAPACITY]; /* 0x0004: indexed by each mesh topology */
+    s16 spin;                                            /* 0x1a04: ring rotation, modulo one turn */
+    s16 v_scroll;                                        /* 0x1a06: 8.8 fixed, wrapped to v_span */
+    s32 radius_offset;                                   /* 0x1a08: 24.8 fixed, added to the radius */
+    s32 radius_speed;                                    /* 0x1a0c */
     u8 _unused_1a10[0x08];
     s32 destroy_delay; /* 0x1a18: the destroy phase waits one call before freeing */
-} effect_ring_mesh_work_t;
-typedef char effect_ring_mesh_work_size_must_be_6684[sizeof(effect_ring_mesh_work_t) == 6684 ? 1 : -1];
+} effect_radial_mesh_work_t;
+typedef char effect_radial_mesh_work_size_must_be_6684[sizeof(effect_radial_mesh_work_t) == 6684 ? 1 : -1];
 
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
  * the row, the lattice row (0-2) the column. */

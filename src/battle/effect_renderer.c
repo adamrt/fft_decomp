@@ -411,7 +411,7 @@ static void effect_slot_draw_billboard_sprite(effect_slot_t* slot) {
     SetRotMatrix(&g_effect_matrix);
     SetTransMatrix(&g_effect_matrix);
 
-    frame_group = g_effect_trap_frame_data.groups;
+    frame_group = g_effect_secondary_particle_frame_data.groups;
     /* The group's frame table starts frame_table_offset bytes into it, one halfword per frame. */
     offset = *(u16*)((u8*)frame_group + (slot->frame * 2 + frame_group->frame_table_offset));
     prim = &slot->quads[g_effect_buffer_index];
@@ -848,7 +848,7 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
 
     particle = head;
     switch (behavior_flags & EFFECT_EMITTER_VELOCITY_MASK) {
-    case EFFECT_EMITTER_VELOCITY_OUTWARD:
+    case EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED:
         for (i = 0; i < count; i++) {
             setVector(&rotation, angle.vx + RANDOM_BETWEEN(angle_spread.vx, -angle_spread.vx),
                 angle.vy + RANDOM_BETWEEN(angle_spread.vy, -angle_spread.vy),
@@ -1172,7 +1172,7 @@ s32 effect_slot_spawn_motion(effect_emitter_values_t* values, effect_motion_t* m
     setVector(&angle, values->angle.x, values->angle.y, values->angle.z);
     setVector(&half_spread, values->angle_spread.x / 2, values->angle_spread.y / 2, values->angle_spread.z / 2);
     switch (values->motion_flags & EFFECT_EMITTER_VELOCITY_MASK) {
-    case EFFECT_EMITTER_VELOCITY_OUTWARD:
+    case EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED:
     case EFFECT_EMITTER_VELOCITY_TOWARD_TARGET:
     case EFFECT_EMITTER_VELOCITY_CASTER_FACING:
         setVector(&vector, angle.vx + effect_get_random_between(half_spread.vx, -half_spread.vx),
@@ -1494,8 +1494,8 @@ void effect_model_decode_next_command(effect_decoded_model_command_t* out) {
         out->vertices.pairs[1] = *(u32*)&command->g3.v2;
         g_effect_model_command_word_offset = index + 6;
         break;
-    case EFFECT_MODEL_COMMAND_GT3_35:
-    case EFFECT_MODEL_COMMAND_GT3_37: {
+    case EFFECT_MODEL_COMMAND_GT3_OPAQUE:
+    case EFFECT_MODEL_COMMAND_GT3_SEMITRANSPARENT: {
         psyq_tmd_packet_t* extended;
         extended
             = (psyq_tmd_packet_t*)((u8*)g_effect_model_commands + g_effect_model_command_word_offset * sizeof(u32));

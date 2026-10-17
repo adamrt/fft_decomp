@@ -304,7 +304,7 @@ s32 sprite_sheet_claim_slot(s16 spritesheet_id) {
  * cross-jumping merges them only after register allocation, so the extra
  * references still rank clut_index above unit in global allocation. The two snow
  * (weather bit 0) branches are identical. */
-void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 final_value) {
+void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 update_current_colors) {
     s32 clut_index;
     s32 stored_palette;
     s32 slot = unit->spritesheet_vram_slot;
@@ -452,23 +452,23 @@ void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 final_value) {
     switch (unit->spritesheet_id) {
     case SPRITE_SHEET_ID_CRYSTAL:
         battle_map_palette_update_from_other(g_sprite_other_palettes.crystal[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, final_value);
+            clut_index, 0, red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
         battle_map_palette_update_from_other(g_sprite_other_palettes.chicken[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, final_value);
+            clut_index, 0, red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_FROG:
         battle_map_palette_update_from_other(g_sprite_other_palettes.frog[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, final_value);
+            clut_index, 0, red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_TREASURE:
         battle_map_palette_update_from_other(g_sprite_other_palettes.treasure[stored_palette],
-            BATTLE_MAP_CLUT_ROW_UNITS, clut_index, 0, red, green, blue, final_value);
+            BATTLE_MAP_CLUT_ROW_UNITS, clut_index, 0, red, green, blue, update_current_colors);
         break;
     default:
         battle_map_palette_update_from_other(g_sprite_sheet_slots[slot].clut[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, final_value);
+            clut_index, 0, red, green, blue, update_current_colors);
         break;
     }
 }
@@ -481,7 +481,7 @@ void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 final_value) {
  * sharing.
  */
 static void sprite_palette_modify_unit(unit_t* unit, s32 mode, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
-    s16 green, s16 blue, s32 final_value) {
+    s16 green, s16 blue, s32 update_current_colors) {
     s32 slot;
     s32 sheet;
     s32 palette;
@@ -492,23 +492,23 @@ static void sprite_palette_modify_unit(unit_t* unit, s32 mode, s32 clut_row, s32
     switch (sheet) {
     case SPRITE_SHEET_ID_CRYSTAL:
         battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.crystal[palette], clut_row, clut_index,
-            all_colors, red, green, blue, final_value);
+            all_colors, red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
         battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.chicken[palette], clut_row, clut_index,
-            all_colors, red, green, blue, final_value);
+            all_colors, red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_FROG:
         battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.frog[palette], clut_row, clut_index,
-            all_colors, red, green, blue, final_value);
+            all_colors, red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_TREASURE:
         battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.treasure[palette], clut_row, clut_index,
-            all_colors, red, green, blue, final_value);
+            all_colors, red, green, blue, update_current_colors);
         break;
     default:
         battle_map_palette_modify_from_other(mode, g_sprite_sheet_slots[slot].clut[palette], clut_row, clut_index,
-            all_colors, red, green, blue, final_value);
+            all_colors, red, green, blue, update_current_colors);
         break;
     }
 }
@@ -519,7 +519,7 @@ static void sprite_palette_modify_unit(unit_t* unit, s32 mode, s32 clut_row, s32
  * first matching renderer status (mode/RGB pairs below; Undead skips Skeleton
  * and Ghoul spritesheets); otherwise, or with no tinting status, it falls back
  * to sprite_palette_tint_unit. */
-static void sprite_palette_update_unit_status(unit_t* unit, s32 tile_effect_level, s32 final_value) {
+static void sprite_palette_update_unit_status(unit_t* unit, s32 tile_effect_level, s32 update_current_colors) {
     u32 status;
     s32 unit_id;
 
@@ -530,49 +530,49 @@ static void sprite_palette_update_unit_status(unit_t* unit, s32 tile_effect_leve
     unit_id = unit->runtime_id;
     if (status & UNIT_STATUS_PALETTE_MOD_MASK) {
         if (status & UNIT_STATUS_PETRIFY) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE_GRAY, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 0, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE_GRAY, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0,
+                0, 0, update_current_colors);
         } else if (status & UNIT_STATUS_BLOOD_SUCK) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE_GRAY, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 3, -1, 8, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE_GRAY, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 3,
+                -1, 8, update_current_colors);
         } else if (status & UNIT_STATUS_BERSERK) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 8, 0, 0, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 8, 0, 0,
+                update_current_colors);
         } else if (status & UNIT_STATUS_POISON) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 8, 0, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0,
+                8, 0, update_current_colors);
         } else if (status & UNIT_STATUS_REGEN) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 8, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 8,
+                update_current_colors);
         } else if (status & UNIT_STATUS_OIL) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, -4, -4, -4, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, -4,
+                -4, -4, update_current_colors);
         } else if (status & UNIT_STATUS_UNNAMED_0E) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, -8, -8, -8, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, -8,
+                -8, -8, update_current_colors);
         } else if ((status & UNIT_STATUS_UNDEAD) && unit->spritesheet_id != SPRITE_SHEET_ID_SKELETON
             && unit->spritesheet_id != SPRITE_SHEET_ID_GHOUL) {
-            sprite_palette_modify_unit(
-                unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 4, 0, 5, final_value);
+            sprite_palette_modify_unit(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 4,
+                0, 5, update_current_colors);
         } else {
-            sprite_palette_tint_unit(unit, tile_effect_level, final_value);
+            sprite_palette_tint_unit(unit, tile_effect_level, update_current_colors);
         }
         return;
     }
-    sprite_palette_tint_unit(unit, tile_effect_level, final_value);
+    sprite_palette_tint_unit(unit, tile_effect_level, update_current_colors);
 }
 
 /* Refresh the status palette of a unit and of its mount partner, unless suppressed. */
-void sprite_palette_check_tile_status_mod(unit_t* unit, s32 tile_effect_level, s32 final_value) {
+void sprite_palette_check_tile_status_mod(unit_t* unit, s32 tile_effect_level, s32 update_current_colors) {
     unit_t* partner;
 
     if (!(unit->movement.suppress_palette_update)) {
-        sprite_palette_update_unit_status(unit, tile_effect_level, final_value);
+        sprite_palette_update_unit_status(unit, tile_effect_level, update_current_colors);
     }
     if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
         partner = unit_get_by_runtime_id(unit->mount_partner_runtime_id);
         if (partner != 0 && !(partner->movement.suppress_palette_update)) {
-            sprite_palette_update_unit_status(partner, tile_effect_level, final_value);
+            sprite_palette_update_unit_status(partner, tile_effect_level, update_current_colors);
         }
     }
 }

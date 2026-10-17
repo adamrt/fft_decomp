@@ -59,12 +59,12 @@ typedef enum effect_work_kind {
 /* motion flags */
 /* Initial particle velocity mode: the velocity_inward bit (byte 0x06 mask
  * 0x10) and align_to_unit_facing bit (byte 0x07 mask 0x04) of the emitter's
- * 16-bit child/velocity flags. OUTWARD scatters around the base angles, INWARD aims at
- * the spawn point, CASTER_FACING rotates OUTWARD by the caster's facing, and
+ * 16-bit child/velocity flags. ANGLE_DIRECTED scatters around the base angles, INWARD aims at
+ * the spawn origin, CASTER_FACING rotates those angles by the caster's facing, and
  * TOWARD_TARGET (effect_slot_spawn_motion) rotates it along the
  * caster-to-target direction. */
 typedef enum effect_emitter_velocity {
-    EFFECT_EMITTER_VELOCITY_OUTWARD = 0x000,
+    EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED = 0x000,
     EFFECT_EMITTER_VELOCITY_INWARD = 0x010,
     EFFECT_EMITTER_VELOCITY_TOWARD_TARGET = 0x400,
     EFFECT_EMITTER_VELOCITY_CASTER_FACING = 0x410,
@@ -572,12 +572,12 @@ typedef struct effect_tentacle_mesh_geometry_view {
     u8 _unused_8e[0x02];
     s16 tip_spread_end_z; /* 0x90 */
     u8 _unused_92[0x02];
-    ranges16_t lifetime_start;     /* 0x94: the segment's length */
-    ranges16_t lifetime_end;       /* 0x98 */
-    vec3s16_t target_offset_start; /* 0x9c: the tip, added to the anchor chosen by placement_flags bits 5-7 */
-    vec3s16_t target_offset_end;   /* 0xa2 */
-    s16 texture_width;             /* 0xa8 */
-    s16 texture_height;            /* 0xaa */
+    ranges16_t travel_duration_start; /* 0x94: frames to reach the tip, excluding tail shrink */
+    ranges16_t travel_duration_end;   /* 0x98 */
+    vec3s16_t target_offset_start;    /* 0x9c: the tip, added to the anchor chosen by placement_flags bits 5-7 */
+    vec3s16_t target_offset_end;      /* 0xa2 */
+    s16 texture_width;                /* 0xa8 */
+    s16 texture_height;               /* 0xaa */
     u8 _unused_ac[0x04];
     s16 particle_count_start; /* 0xb0: segments spawned per interval */
     s16 particle_count_end;   /* 0xb2 */

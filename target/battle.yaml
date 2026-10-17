@@ -1939,7 +1939,7 @@ functions:
   - {addr: 0x801b06d0, size: 328, name: projectile_direct_check_between_units, hash: 00074ecc7438b34c, unit: effect_system}
   - {addr: 0x801b0818, size: 632, name: projectile_direct_check_to_target, hash: ea05f8f36d0b34dd, unit: effect_system}
   - {addr: 0x801b0a90, size: 504, name: projectile_set_arrow_trajectory, hash: cabea7a6753fca8b, unit: effect_system}
-  - {addr: 0x801b0c88, size: 104, name: effect_slot_init_trap_animation, hash: 1c82ddeba81b4537, unit: effect_system}
+  - {addr: 0x801b0c88, size: 104, name: effect_slot_init_secondary_animation, hash: 1c82ddeba81b4537, unit: effect_system}
   - {addr: 0x801b0cf0, size: 536, name: effect_secondary_start_group, hash: 72df2180b076033d, unit: effect_system}
   - {addr: 0x801b0f08, size: 228, name: effect_secondary_update_active_slots, hash: 8189eac9894daa3c, unit: effect_system}
   - {addr: 0x801b0fec, size: 8, name: effect_secondary_none_handler, hash: 207819bf4ebe3078, unit: effect_system}
@@ -2796,8 +2796,8 @@ data:
   - {addr: 0x801b69d0, name: g_effect_camera_position_mode}
   - {addr: 0x801b69d4, name: g_effect_camera_zoom_mode}
   - {addr: 0x801b69d8, name: g_camera_quadrant_block_directions}
-  - {addr: 0x801b7690, name: g_effect_trap_frame_data}
-  - {addr: 0x801b8320, name: g_effect_trap_animation_data}
+  - {addr: 0x801b7690, name: g_effect_secondary_particle_frame_data}
+  - {addr: 0x801b8320, name: g_effect_secondary_particle_animation_data}
   - {addr: 0x801b84ac, name: g_effect_secondary_by_charge_animation}
   - {addr: 0x801b84c0, name: g_effect_charge_trail_colors}
   - {addr: 0x801b84dc, name: g_effect_secondary_animations}
@@ -2805,7 +2805,7 @@ data:
   - {addr: 0x801b8534, name: g_effect_model_files}
   - {addr: 0x801b8544, name: g_effect_element_masks}
   - {addr: 0x801b8550, name: g_effect_reflect_palette_colors}
-  - {addr: 0x801b8564, name: g_effect_trap_particle_configs}
+  - {addr: 0x801b8564, name: g_effect_secondary_particle_configs}
   - {addr: 0x801b8874, name: g_projectile_gravity_scale}
   - {addr: 0x801b8878, name: g_projectile_gravity_modifier}
   - {addr: 0x801b8880, name: g_effect_charge_line_params}
@@ -2875,7 +2875,7 @@ data:
   - {addr: 0x801b9130, name: g_effect_secondary_active_tail}
   - {addr: 0x801b9134, name: g_effect_secondary_free_head}
   - {addr: 0x801b9138, name: g_effect_secondary_current_id}
-  - {addr: 0x801b913c, name: g_effect_trap_frame_data_ptr}
+  - {addr: 0x801b913c, name: g_effect_secondary_particle_frame_data_ptr}
   - {addr: 0x801b9140, name: g_effect_work_record_peak}
   - {addr: 0x801b9144, name: g_effect_callback_slots}
   - {addr: 0x801b9158, name: g_effect_available_record_head}

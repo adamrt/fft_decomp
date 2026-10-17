@@ -99,8 +99,8 @@ typedef char
  * upload staging g_battle_map_palette_modified_colors. Palette extraction fills
  * both; battle_map_clut_upload_rows uploads the staging and clears upload_pending. */
 typedef struct battle_map_clut_row_state {
-    u8 enabled;
-    u8 updates_disabled;
+    u8 blend_as_row;  /* nonzero: one animation for all 256 colors; zero: one per 16-color CLUT */
+    u8 load_disabled; /* blocks palette_load_data; tint and blend operations still run */
     battle_map_palette_animation_state_t animations[BATTLE_MAP_CLUTS_PER_ROW];
     battle_map_palette_color_components_t components[BATTLE_MAP_CLUT_ROW_COLOR_COUNT];
     u16 packed_colors[BATTLE_MAP_CLUT_ROW_COLOR_COUNT];
@@ -129,9 +129,9 @@ void battle_map_palette_update_all_from_color_data(s32 mode, const clut_t color_
 void battle_map_palette_update_and_store_colors(
     s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
 void battle_map_palette_update_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
-    s16 red, s16 green, s16 blue, s32 final_value);
+    s16 red, s16 green, s16 blue, s32 update_current_colors);
 void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
-    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value);
+    s32 all_colors, s16 red, s16 green, s16 blue, s32 update_current_colors);
 void battle_map_palette_store_modified_colors(s32 clut_row, s32 clut_index, s32 store_all);
 void battle_map_palette_modify(
     s32 command, s32 amount, s32 clut_row, s32 clut_index, s32 all_colors, s16 red, s16 green, s16 blue);

@@ -1061,7 +1061,7 @@ void effect_init_system(void) {
     g_effect_secondary_data[EFFECT_SECONDARY_SLOT_COUNT].function_id = 0;
     g_effect_secondary_data[EFFECT_SECONDARY_SLOT_COUNT].allocation = 0;
     g_effect_secondary_active_tail = 0;
-    g_effect_trap_frame_data_ptr = &g_effect_trap_frame_data;
+    g_effect_secondary_particle_frame_data_ptr = &g_effect_secondary_particle_frame_data;
     for (i = 0; i < EFFECT_SECONDARY_RECORD_COUNT; i++) {
         g_effect_secondary_data[i].active_count = 0;
         for (j = EFFECT_SLOT_COUNT - 1; j >= 0; j--) {
@@ -1511,7 +1511,7 @@ static void effect_model_draw_projectile(
         for (i = 0; i < g4_index;) {
             effect_model_decode_next_command(&command);
             i++;
-            if (command.header.opcode == EFFECT_MODEL_COMMAND_GT3_37) {
+            if (command.header.opcode == EFFECT_MODEL_COMMAND_GT3_SEMITRANSPARENT) {
                 tri = &work->prims[g_effect_buffer_index][gt3_index];
                 tri->tpage = 0x3f;
                 tri->clut = g_effect_secondary_current->own_slot_id + 0x7eff;
@@ -2302,18 +2302,19 @@ void projectile_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 
 /* Start the animation script of trap group on slot: reset the color and
  * script state and store the 16-bit CLUT value (callers pass CLUTs of
  * BATTLE_MAP_CLUT_ROW_WEAPONS) at 0x88. */
-static void effect_slot_init_trap_animation(s32 group, u16 clut, effect_slot_t* slot) {
+static void effect_slot_init_secondary_animation(s32 group, u16 clut, effect_slot_t* slot) {
     u32 offset;
 
     slot->clut = clut;
-    offset = *(u16*)(g_effect_trap_animation_data + (g_effect_trap_particle_configs[group].trap_animation << 1));
+    offset = *(u16*)(g_effect_secondary_particle_animation_data
+        + (g_effect_secondary_particle_configs[group].animation_id << 1));
     slot->color.b = 0x80;
     slot->color.g = 0x80;
     slot->color.r = 0x80;
     slot->step_index = 0;
     slot->hold = 0;
     slot->angle = 0;
-    slot->script = (effect_anim_script_t*)(g_effect_trap_animation_data + offset);
+    slot->script = (effect_anim_script_t*)(g_effect_secondary_particle_animation_data + offset);
 }
 
 /* Spawn this frame's share of a particle group's effect slots, drawn with CLUT
@@ -2329,11 +2330,11 @@ static void effect_secondary_start_group(s32 group, s32 clut_index) {
     s32 i;
     u8 id;
 
-    if (g_effect_trap_particle_configs[group].count > g_effect_secondary_current->active_count
-        && g_effect_secondary_current->timer >= g_effect_trap_particle_configs[group].spawn_start_frame
-        && g_effect_secondary_current->timer < g_effect_trap_particle_configs[group].spawn_end_frame) {
-        for (spawned = 0; spawned < g_effect_trap_particle_configs[group].spawns_per_frame; spawned++) {
-            for (i = 0; i < g_effect_trap_particle_configs[group].count; i++) {
+    if (g_effect_secondary_particle_configs[group].count > g_effect_secondary_current->active_count
+        && g_effect_secondary_current->timer >= g_effect_secondary_particle_configs[group].spawn_start_frame
+        && g_effect_secondary_current->timer < g_effect_secondary_particle_configs[group].spawn_end_frame) {
+        for (spawned = 0; spawned < g_effect_secondary_particle_configs[group].spawns_per_frame; spawned++) {
+            for (i = 0; i < g_effect_secondary_particle_configs[group].count; i++) {
                 if (g_effect_secondary_current->slot_ids[i] == 0) {
                     break;
                 }
@@ -2344,10 +2345,11 @@ static void effect_secondary_start_group(s32 group, s32 clut_index) {
                 break;
             }
             slot = &g_effect_slots[g_effect_secondary_current->slot_ids[i]];
-            slot->life = effect_slot_spawn_motion(&g_effect_trap_particle_configs[group], &slot->motion);
-            effect_slot_init_trap_animation(group, clut_index + BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 0), slot);
+            slot->life = effect_slot_spawn_motion(&g_effect_secondary_particle_configs[group], &slot->motion);
+            effect_slot_init_secondary_animation(
+                group, clut_index + BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 0), slot);
             g_effect_secondary_current->active_count++;
-            if (g_effect_secondary_current->active_count == g_effect_trap_particle_configs[group].count) {
+            if (g_effect_secondary_current->active_count == g_effect_secondary_particle_configs[group].count) {
                 break;
             }
         }
@@ -2361,7 +2363,7 @@ static void effect_secondary_update_active_slots(s32 group) {
     s32 i;
     s32 id;
 
-    for (i = 0; i < g_effect_trap_particle_configs[group].count; i++) {
+    for (i = 0; i < g_effect_secondary_particle_configs[group].count; i++) {
         id = g_effect_secondary_current->slot_ids[i];
         if (id != 0 && effect_slot_update(id) == 0) {
             effect_slot_free(id);
@@ -2579,8 +2581,8 @@ s32 effect_secondary_weapon_hit_handler(void) {
          * free-entry searches succeed. */
         if (state->frame < 4) {
             if (state->count_a < 8) {
-                for (i = 0; i < g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_WEAPON_HIT_A].spawns_per_frame;
-                    i++) {
+                for (i = 0;
+                    i < g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_WEAPON_HIT_A].spawns_per_frame; i++) {
                     for (j = 0; j < 8; j++) {
                         if (state->ids_a[j] == 0) {
                             break;
@@ -2592,8 +2594,8 @@ s32 effect_secondary_weapon_hit_handler(void) {
                     }
                     slot = &g_effect_slots[state->ids_a[j]];
                     slot->life = effect_slot_spawn_motion(
-                        &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_WEAPON_HIT_A], &slot->motion);
-                    effect_slot_init_trap_animation(EFFECT_PARTICLE_GROUP_WEAPON_HIT_A,
+                        &g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_WEAPON_HIT_A], &slot->motion);
+                    effect_slot_init_secondary_animation(EFFECT_PARTICLE_GROUP_WEAPON_HIT_A,
                         g_effect_secondary_current->parameter + BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 0), slot);
                     state->count_a++;
                     if (state->count_a == 8) {
@@ -2603,7 +2605,7 @@ s32 effect_secondary_weapon_hit_handler(void) {
             }
 
             if (state->frame < 4 && state->count_b < 16) {
-                for (i = 0; i < g_effect_trap_particle_configs[group].spawns_per_frame; i++) {
+                for (i = 0; i < g_effect_secondary_particle_configs[group].spawns_per_frame; i++) {
                     for (j = 0; j < 16; j++) {
                         if (state->ids_b[j] == 0) {
                             break;
@@ -2614,8 +2616,8 @@ s32 effect_secondary_weapon_hit_handler(void) {
                         break;
                     }
                     slot = &g_effect_slots[state->ids_b[j]];
-                    slot->life = effect_slot_spawn_motion(&g_effect_trap_particle_configs[group], &slot->motion);
-                    effect_slot_init_trap_animation(
+                    slot->life = effect_slot_spawn_motion(&g_effect_secondary_particle_configs[group], &slot->motion);
+                    effect_slot_init_secondary_animation(
                         EFFECT_PARTICLE_GROUP_WEAPON_HIT_B, BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 10), slot);
                     slot->color.r = slot->color.g = slot->color.b = 0xff;
                     state->count_b++;
@@ -2737,7 +2739,7 @@ s32 effect_secondary_golem_handler(void) {
         result = finish_timer != 1;
         current->timer = current->timer + 1;
         if (current->active_count == 0
-            && current->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_GOLEM].spawn_start_frame) {
+            && current->timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_GOLEM].spawn_start_frame) {
             current->finish_timer = finish_timer + 1;
         }
         break;
@@ -2832,8 +2834,8 @@ s32 effect_secondary_spell_charge_handler(void) {
         screen = unit_get_world_coords_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id);
         i = sprite_get_unit_spritesheet_height_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id)
             + 8;
-        g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE].position.y
-            = g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE_13].position.y = -i;
+        g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE].position.y
+            = g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE_13].position.y = -i;
         in.vx = screen->vx;
         in.vz = screen->vz;
         in.vy = screen->vy - i;
@@ -2885,7 +2887,8 @@ s32 effect_secondary_spell_charge_handler(void) {
 
         /* Top up the spell-charge particle group, at most 14 live at once. */
         if (state->count.particles < 14) {
-            for (i = 0; i < g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE].spawns_per_frame; i++) {
+            for (i = 0; i < g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE].spawns_per_frame;
+                i++) {
                 for (j = 0; j < 14; j++) {
                     if (state->ids_b[j] == 0) {
                         break;
@@ -2897,8 +2900,8 @@ s32 effect_secondary_spell_charge_handler(void) {
                 }
                 slot = &g_effect_slots[state->ids_b[j]];
                 slot->life = effect_slot_spawn_motion(
-                    &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE], &slot->motion);
-                effect_slot_init_trap_animation(
+                    &g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE], &slot->motion);
+                effect_slot_init_secondary_animation(
                     EFFECT_PARTICLE_GROUP_SPELL_CHARGE, BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 15), slot);
                 state->count.particles++;
                 if (state->count.particles == 14) {
@@ -3100,7 +3103,7 @@ s32 effect_secondary_red_orbs_handler(void) {
         result = finish_timer != 1;
         effect->timer = effect->timer + 1;
         if (effect->active_count == 0
-            && effect->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_RED_ORBS].spawn_start_frame) {
+            && effect->timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_RED_ORBS].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
         }
         break;
@@ -3155,7 +3158,7 @@ s32 effect_secondary_fall_dust_handler(void) {
         result = finish_timer != 1;
         effect->timer = effect->timer + 1;
         if (effect->active_count == 0
-            && effect->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_FALL_DUST].spawn_start_frame) {
+            && effect->timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_FALL_DUST].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
         }
         break;
@@ -3190,7 +3193,7 @@ s32 effect_secondary_splash_handler(void) {
     case EFFECT_SECONDARY_PHASE_EXECUTING:
         tile = battle_map_get_unit_tile_from_world_coords(
             g_effect_secondary_current->target.record.data.unit.runtime_id);
-        g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPLASH].position.y
+        g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPLASH].position.y
             = -((tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP)
             - unit_get_world_coords_by_runtime_id(g_effect_secondary_current->target.record.data.unit.runtime_id)->vy;
         effect_secondary_start_group(EFFECT_PARTICLE_GROUP_SPLASH, 11);
@@ -3211,7 +3214,7 @@ s32 effect_secondary_splash_handler(void) {
         result = finish_timer != 1;
         effect->timer = effect->timer + 1;
         if (effect->active_count == 0
-            && effect->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPLASH].spawn_start_frame) {
+            && effect->timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPLASH].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
         }
         break;
@@ -3275,7 +3278,7 @@ s32 effect_secondary_trap_handler(void) {
         result = finish_timer != 1;
         effect->timer = effect->timer + 1;
         if (effect->active_count == 0
-            && effect->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_TRAP].spawn_start_frame) {
+            && effect->timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_TRAP].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
         }
         break;
@@ -3305,14 +3308,14 @@ s32 effect_secondary_level_up_handler(void) {
         effect->timer = 0;
         effect->finish_timer = 0;
         effect->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
-        g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].position.y = -8;
+        g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].position.y = -8;
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
         effect_secondary_start_group(EFFECT_PARTICLE_GROUP_LEVEL_UP, 11);
         {
             /* Addressing through a pointer keeps the target lui/addiu pair. */
-            s16* rise = &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].position.y;
+            s16* rise = &g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].position.y;
             *rise -= 3;
         }
         /* fallthrough */
@@ -3332,7 +3335,7 @@ s32 effect_secondary_level_up_handler(void) {
         result = finish_timer != 1;
         current->timer = current->timer + 1;
         if (current->active_count == 0
-            && current->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].spawn_start_frame) {
+            && current->timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].spawn_start_frame) {
             current->finish_timer = finish_timer + 1;
         }
         break;
@@ -3347,12 +3350,12 @@ s32 effect_secondary_unused_0e_handler(void) {
 }
 
 enum {
-    EFFECT_TRAP_SLOT_COUNT = 2,
-    EFFECT_TRAP_CLUT = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 15),
+    EFFECT_DEATH_POOF_SLOT_COUNT = 2,
+    EFFECT_DEATH_POOF_CLUT = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 15),
 };
 
 /*
- * Death Poof secondary effect (0x0f) handler for the two-slot trap group 4: it
+ * Death Poof secondary effect (0x0f) handler for the two-slot particle group 4: it
  * starts this frame's share of the group's effect slots, steps them with a
  * gravity of (0, ONE, 0) and finishes once the spawn state's finish_timer
  * reaches 1.
@@ -3375,7 +3378,7 @@ s32 effect_secondary_death_poof_handler(void) {
     switch (effect->phase) {
     case EFFECT_SECONDARY_PHASE_INITIALIZING: {
         state->count = 0;
-        for (i = 0; i < EFFECT_TRAP_SLOT_COUNT; i++) {
+        for (i = 0; i < EFFECT_DEATH_POOF_SLOT_COUNT; i++) {
             state->ids[i] = 0;
         }
         state->finish_timer = 0;
@@ -3389,12 +3392,12 @@ s32 effect_secondary_death_poof_handler(void) {
         s32 i;
         u8 id;
 
-        if (effect->timer >= g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawn_start_frame
-            && effect->timer < g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawn_end_frame) {
+        if (effect->timer >= g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawn_start_frame
+            && effect->timer < g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawn_end_frame) {
             for (spawned = 0;
-                spawned < g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawns_per_frame;
+                spawned < g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawns_per_frame;
                 spawned++) {
-                for (i = 0; i < EFFECT_TRAP_SLOT_COUNT; i++) {
+                for (i = 0; i < EFFECT_DEATH_POOF_SLOT_COUNT; i++) {
                     if (state->ids[i] == 0) {
                         break;
                     }
@@ -3406,10 +3409,10 @@ s32 effect_secondary_death_poof_handler(void) {
                 }
                 slot = &g_effect_slots[state->ids[i]];
                 slot->life = effect_slot_spawn_motion(
-                    &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF], &slot->motion);
-                effect_slot_init_trap_animation(EFFECT_PARTICLE_GROUP_DEATH_POOF, EFFECT_TRAP_CLUT, slot);
+                    &g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF], &slot->motion);
+                effect_slot_init_secondary_animation(EFFECT_PARTICLE_GROUP_DEATH_POOF, EFFECT_DEATH_POOF_CLUT, slot);
                 state->count++;
-                if (state->count == EFFECT_TRAP_SLOT_COUNT) {
+                if (state->count == EFFECT_DEATH_POOF_SLOT_COUNT) {
                     break;
                 }
             }
@@ -3427,7 +3430,7 @@ s32 effect_secondary_death_poof_handler(void) {
         gravity.y = ONE;
         effect_save_gravity();
         effect_set_gravity(&gravity);
-        for (i = 0; i < EFFECT_TRAP_SLOT_COUNT; i++) {
+        for (i = 0; i < EFFECT_DEATH_POOF_SLOT_COUNT; i++) {
             id = state->ids[i];
             if (id != 0 && effect_slot_update(id) == 0) {
                 effect_slot_free(id);
@@ -3441,7 +3444,8 @@ s32 effect_secondary_death_poof_handler(void) {
         current->timer = current->timer + 1;
         result = state->finish_timer != 1;
         if (state->count == 0
-            && current->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawn_start_frame) {
+            && current->timer
+                > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawn_start_frame) {
             state->finish_timer = state->finish_timer + 1;
         }
         break;
@@ -3457,7 +3461,7 @@ s32 effect_secondary_unused_10_handler(void) {
 }
 
 enum {
-    EFFECT_TRAP3_SLOT_COUNT = 24,
+    EFFECT_ZODIAC_POOF_SLOT_COUNT = 24,
 };
 
 /* Secondary effect function 0x11 (Zodiac Poof): the 24-slot particle group 3.
@@ -3468,7 +3472,7 @@ enum {
  */
 s32 effect_secondary_zodiac_poof_handler(void) {
     effect_secondary_data_t* effect;
-    effect_trap_state_24_t* state;
+    effect_zodiac_poof_state_t* state;
     effect_slot_t* slot;
     s32 unused[6]; /* Reserves the target's 0x58-byte frame. */
     vec3s32_t gravity;
@@ -3486,7 +3490,7 @@ s32 effect_secondary_zodiac_poof_handler(void) {
     switch (effect->phase) {
     case EFFECT_SECONDARY_PHASE_INITIALIZING:
         state->count = 0;
-        for (spawned = 0; spawned < EFFECT_TRAP3_SLOT_COUNT; spawned++) {
+        for (spawned = 0; spawned < EFFECT_ZODIAC_POOF_SLOT_COUNT; spawned++) {
             state->ids[spawned] = 0;
         }
         state->done = 0;
@@ -3496,12 +3500,12 @@ s32 effect_secondary_zodiac_poof_handler(void) {
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
         clut_index = g_effect_zodiac_poof_animations[effect->parameter];
-        if (effect->timer >= g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_start_frame
-            && effect->timer < g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_end_frame) {
+        if (effect->timer >= g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_start_frame
+            && effect->timer < g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_end_frame) {
             for (spawned = 0;
-                spawned < g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawns_per_frame;
+                spawned < g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawns_per_frame;
                 spawned++) {
-                for (i = 0; i < EFFECT_TRAP3_SLOT_COUNT; i++) {
+                for (i = 0; i < EFFECT_ZODIAC_POOF_SLOT_COUNT; i++) {
                     if (state->ids[i] == 0) {
                         break;
                     }
@@ -3513,11 +3517,11 @@ s32 effect_secondary_zodiac_poof_handler(void) {
                 }
                 slot = &g_effect_slots[state->ids[i]];
                 slot->life = effect_slot_spawn_motion(
-                    &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF], &slot->motion);
-                effect_slot_init_trap_animation(EFFECT_PARTICLE_GROUP_ZODIAC_POOF,
+                    &g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF], &slot->motion);
+                effect_slot_init_secondary_animation(EFFECT_PARTICLE_GROUP_ZODIAC_POOF,
                     clut_index + BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 0), slot);
                 state->count++;
-                if (state->count == EFFECT_TRAP3_SLOT_COUNT) {
+                if (state->count == EFFECT_ZODIAC_POOF_SLOT_COUNT) {
                     break;
                 }
             }
@@ -3531,7 +3535,7 @@ s32 effect_secondary_zodiac_poof_handler(void) {
         gravity.y = ONE;
         effect_save_gravity();
         effect_set_gravity(&gravity);
-        for (spawned = 0; spawned < EFFECT_TRAP3_SLOT_COUNT; spawned++) {
+        for (spawned = 0; spawned < EFFECT_ZODIAC_POOF_SLOT_COUNT; spawned++) {
             id = state->ids[spawned];
             if (id != 0 && effect_slot_update(id) == 0) {
                 effect_slot_free(id);
@@ -3551,7 +3555,7 @@ s32 effect_secondary_zodiac_poof_handler(void) {
         done = state->done;
         result = done != 1;
         if (state->count == 0
-            && timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_start_frame) {
+            && timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_start_frame) {
             state->done = done + 1;
         }
         break;
@@ -3720,7 +3724,7 @@ s32 effect_secondary_teleport_handler(void) {
         result = finish_timer != 1;
         effect->timer = effect->timer + 1;
         if (effect->active_count == 0
-            && effect->timer > g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_TELEPORT].spawn_start_frame) {
+            && effect->timer > g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_TELEPORT].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
         }
         break;
@@ -3978,7 +3982,8 @@ s32 effect_secondary_equip_break_handler(void) {
         finish_timer = current->finish_timer;
         result = finish_timer != 1;
         current->timer = current->timer + 1;
-        if (current->active_count == 0 && current->timer > g_effect_trap_particle_configs[group].spawn_start_frame) {
+        if (current->active_count == 0
+            && current->timer > g_effect_secondary_particle_configs[group].spawn_start_frame) {
             current->finish_timer = finish_timer + 1;
         }
         break;
@@ -4035,8 +4040,8 @@ s32 effect_secondary_summon_charge_handler(void) {
             if (j != 0) {
                 slot = &g_effect_slots[j];
                 slot->life = effect_slot_spawn_motion(
-                    &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SUMMON_CHARGE], &slot->motion);
-                effect_slot_init_trap_animation(EFFECT_PARTICLE_GROUP_SUMMON_CHARGE, EFFECT_RING_CLUT, slot);
+                    &g_effect_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SUMMON_CHARGE], &slot->motion);
+                effect_slot_init_secondary_animation(EFFECT_PARTICLE_GROUP_SUMMON_CHARGE, EFFECT_RING_CLUT, slot);
             }
         }
         g_effect_secondary_current->timer = 0;

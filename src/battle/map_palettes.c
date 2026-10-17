@@ -1425,10 +1425,10 @@ void battle_map_update_color_animations(void) {
         }
     }
 
-    /* Rows with `enabled` clear (sprites, units, shadows, action results) blend each of their 16 CLUTs
+    /* Rows with `blend_as_row` clear (sprites, units, shadows, action results) blend each of their 16 CLUTs
      * on its own; the other rows blend all 256 colors under animation 0. */
     for (i = 0; i < BATTLE_MAP_CLUT_ROW_COUNT; i++) {
-        if (g_battle_map_palette_state.clut_rows[i].enabled == 0) {
+        if (g_battle_map_palette_state.clut_rows[i].blend_as_row == 0) {
             for (k = 0; k < BATTLE_MAP_CLUTS_PER_ROW; k++) {
                 if (g_battle_map_palette_state.clut_rows[i].animations[k].active == 0) {
                     continue;
@@ -1700,7 +1700,7 @@ void battle_map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 c
     s32 clear_index;
     s32 i;
 
-    if (g_battle_map_palette_state.clut_rows[clut_row].updates_disabled != 0) {
+    if (g_battle_map_palette_state.clut_rows[clut_row].load_disabled != 0) {
         return;
     }
 
@@ -1723,9 +1723,9 @@ void battle_map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 c
 /* Tint the colors at source into a CLUT row: all 256 when all_colors is 1, otherwise CLUT clut_index.
  * Each nonzero color takes the offsets added to itself, its half or its gray (mode), clamped to
  * 0..31 and kept from becoming transparent black. The results become the row's base colors;
- * final_value also stages them for upload and sets the components of CLUTs that are not blending. */
+ * update_current_colors also stages them for upload and sets the components of CLUTs that are not blending. */
 void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
-    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value) {
+    s32 all_colors, s16 red, s16 green, s16 blue, s32 update_current_colors) {
     s32 i;
     s32 index;
     u16 color;
@@ -1806,7 +1806,7 @@ void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s3
             if ((out_red | out_green | out_blue) == 0 && (color & 0x7fff)) {
                 out_blue = 1;
             }
-            if (final_value != 0) {
+            if (update_current_colors != 0) {
                 g_battle_map_palette_modified_colors[clut_row][i]
                     = out_red + (out_green << 5) + (out_blue << 10) + (semi_transparent << 15);
                 if (g_battle_map_palette_state.clut_rows[clut_row].animations[i / BATTLE_MAP_CLUT_COLOR_COUNT].active
@@ -1888,7 +1888,7 @@ void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s3
             if ((out_red | out_green | out_blue) == 0 && (color & 0x7fff)) {
                 out_blue = 1;
             }
-            if (final_value != 0) {
+            if (update_current_colors != 0) {
                 index = clut_index * BATTLE_MAP_CLUT_COLOR_COUNT + i;
                 g_battle_map_palette_modified_colors[clut_row][index]
                     = out_red + (out_green << 5) + (out_blue << 10) + (semi_transparent << 15);
@@ -1914,9 +1914,9 @@ void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s3
  * battle_map_palette_modify_from_other in BATTLE_MAP_COLOR_MODE_RESTORE, a mode in which it
  * neither halves nor grays the colors. */
 void battle_map_palette_update_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
-    s16 red, s16 green, s16 blue, s32 final_value) {
-    battle_map_palette_modify_from_other(
-        BATTLE_MAP_COLOR_MODE_RESTORE, source, clut_row, clut_index, all_colors, red, green, blue, final_value);
+    s16 red, s16 green, s16 blue, s32 update_current_colors) {
+    battle_map_palette_modify_from_other(BATTLE_MAP_COLOR_MODE_RESTORE, source, clut_row, clut_index, all_colors, red,
+        green, blue, update_current_colors);
 }
 
 /* Load the two map background gradient colors for the current map. */
@@ -1998,7 +1998,7 @@ void battle_map_clut_upload_rows(void) {
  * stopped, the background gradient and ambient light fades and their repeats off,
  * and the eight color rotation slots free.
  *
- * Each row's `enabled` is set, which makes battle_map_update_color_animations blend the
+ * Each row's `blend_as_row` is set, which makes battle_map_update_color_animations blend the
  * row's 256 colors as one under animation 0. The sprite, unit, unit shadow and
  * action result rows get 0 and blend each of their sixteen CLUTs on its own. Of
  * the stored deltas only the first color's red delta of each row is cleared. */
@@ -2010,8 +2010,8 @@ void battle_map_palette_init_state(void) {
     g_battle_map_palette_state.move_pending = 0;
 
     for (clut_row = 0; clut_row < BATTLE_MAP_CLUT_ROW_COUNT; clut_row++) {
-        g_battle_map_palette_state.clut_rows[clut_row].updates_disabled = 0;
-        g_battle_map_palette_state.clut_rows[clut_row].enabled = 1;
+        g_battle_map_palette_state.clut_rows[clut_row].load_disabled = 0;
+        g_battle_map_palette_state.clut_rows[clut_row].blend_as_row = 1;
 
         for (animation_index = BATTLE_MAP_CLUTS_PER_ROW - 1; animation_index >= 0; animation_index--) {
             g_battle_map_palette_state.clut_rows[clut_row].animations[animation_index].active = 0;
@@ -2024,10 +2024,10 @@ void battle_map_palette_init_state(void) {
     g_battle_map_background_transition.repeat = BATTLE_MAP_COLOR_REPEAT_OFF;
     g_battle_map_ambient_transition.active = 0;
     g_battle_map_ambient_transition.repeat = BATTLE_MAP_COLOR_REPEAT_OFF;
-    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_SPRITES].enabled = 0;
-    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_UNITS].enabled = 0;
-    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_UNIT_SHADOWS].enabled = 0;
-    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_ACTION_RESULTS].enabled = 0;
+    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_SPRITES].blend_as_row = 0;
+    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_UNITS].blend_as_row = 0;
+    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_UNIT_SHADOWS].blend_as_row = 0;
+    g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_ACTION_RESULTS].blend_as_row = 0;
     battle_map_clut_reset_cycles();
 }
 

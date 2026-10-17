@@ -20,8 +20,8 @@ typedef struct effect_trail_segment {
     VECTOR velocity;      /* 0x08: 20.12 fixed */
     VECTOR position;      /* 0x18: 20.12 fixed */
     vec3s16_t points[17]; /* 0x28 */
-    s16 head;             /* 0x8e */
-    s16 length;           /* 0x90 */
+    s16 age;              /* 0x8e */
+    s16 travel_duration;  /* 0x90 */
     s16 active;           /* 0x92 */
     u8 _unused_94[0x04];
 } effect_trail_segment_t;
@@ -63,8 +63,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
     const effect_geometry_record_t* entry = &g_effect_geometry_table->entries[emitter_index];
     s16 speed_min;
     s16 speed_max;
-    s16 length_min;
-    s16 length_max;
+    s16 travel_duration_min;
+    s16 travel_duration_max;
     s32 i;
     s32 count;
     s32 j;
@@ -260,10 +260,10 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
 
             EFFECT_READ_CURVE(
                 index, factor, (tip_bindings >> EFFECT_TENTACLE_CURVE_TRAVEL_DURATION_SHIFT) & 0xf, frame);
-            length_min = effect_lerp_q8(
-                entry->tentacle_mesh.lifetime_start.min, entry->tentacle_mesh.lifetime_end.min, factor);
-            length_max = effect_lerp_q8(
-                entry->tentacle_mesh.lifetime_start.max, entry->tentacle_mesh.lifetime_end.max, factor);
+            travel_duration_min = effect_lerp_q8(
+                entry->tentacle_mesh.travel_duration_start.min, entry->tentacle_mesh.travel_duration_end.min, factor);
+            travel_duration_max = effect_lerp_q8(
+                entry->tentacle_mesh.travel_duration_start.max, entry->tentacle_mesh.travel_duration_end.max, factor);
 
             /* Start up to count particles while free segments remain. */
             for (i = 0; i < count; i++) {
@@ -320,7 +320,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
 
                 /* Speeds are 1/512 unit a frame: << 3, or >> 9 of a 4.12 unit vector, gives 20.12. */
                 switch (flags & EFFECT_EMITTER_VELOCITY_MASK) {
-                case EFFECT_EMITTER_VELOCITY_OUTWARD:
+                case EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED:
                     rotation.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
                     rotation.vy = base_angles.vy + RANDOM_BETWEEN(direction_spread.vy, -direction_spread.vy);
                     rotation.vz = base_angles.vz + RANDOM_BETWEEN(direction_spread.vz, -direction_spread.vz);
@@ -372,8 +372,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     break;
                 }
 
-                seg->length = RANDOM_BETWEEN(length_min, length_max);
-                seg->head = 0;
+                seg->travel_duration = RANDOM_BETWEEN(travel_duration_min, travel_duration_max);
+                seg->age = 0;
                 seg->active = 1;
 
                 /* Only trail points 0-8 of the 17 are seeded on the spawn position (retail loop bound). */
@@ -400,21 +400,21 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             emitter.motion.position.x = x = seg->position.vx += seg->velocity.vx;
             emitter.motion.position.y = y = seg->position.vy += seg->velocity.vy;
             emitter.motion.position.z = z = seg->position.vz += seg->velocity.vz;
-            index = ++seg->head;
+            index = ++seg->age;
             point = index % 17;
             px = x >> 12;
             py = y >> 12;
             pz = z >> 12;
-            if (index <= seg->length) {
-                seg->points[point].x = effect_interpolate_s32_cos(px, seg->tip.vx, seg->length, index);
-                seg->points[point].y = effect_interpolate_s32_cos(py, seg->tip.vy, seg->length, index);
-                seg->points[point].z = effect_interpolate_s32_cos(pz, seg->tip.vz, seg->length, index);
+            if (index <= seg->travel_duration) {
+                seg->points[point].x = effect_interpolate_s32_cos(px, seg->tip.vx, seg->travel_duration, index);
+                seg->points[point].y = effect_interpolate_s32_cos(py, seg->tip.vy, seg->travel_duration, index);
+                seg->points[point].z = effect_interpolate_s32_cos(pz, seg->tip.vz, seg->travel_duration, index);
             } else {
                 seg->points[point].x = seg->tip.vx;
                 seg->points[point].y = seg->tip.vy;
                 seg->points[point].z = seg->tip.vz;
                 tail_step = index - 16;
-                shade_index = seg->length - tail_step;
+                shade_index = seg->travel_duration - tail_step;
                 if (shade_index < 0) {
                     shade_index = 0;
                 }
@@ -431,14 +431,14 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             emitter.motion.position.z = seg->points[point].z * ONE;
             if (flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) {
                 effect_particle_spawn_from_emitter(
-                    record->record_index, seg->head, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
+                    record->record_index, seg->age, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
             }
 
             /* Done once the trail has run out: the travel time plus a frame per trailing segment. */
-            if (seg->length + 16 == seg->head) {
+            if (seg->travel_duration + 16 == seg->age) {
                 if (flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) {
                     effect_particle_spawn_from_emitter(
-                        record->record_index, seg->head, entry->tentacle_mesh.child_emitter_on_death, &emitter);
+                        record->record_index, seg->age, entry->tentacle_mesh.child_emitter_on_death, &emitter);
                 }
                 seg->active = 0;
                 work->count--;

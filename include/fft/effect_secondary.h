@@ -167,7 +167,7 @@ extern u8 g_effect_element_masks[];
 s32 effect_get_element_index(s32 elements);
 
 /* particle groups */
-/* Index into g_effect_trap_particle_configs: the particle groups of the secondary effect
+/* Index into g_effect_secondary_particle_configs: the particle groups of the secondary effect
  * handlers, named after the handler that spawns each. */
 typedef enum effect_particle_group {
     /* effect_secondary_weapon_hit_handler: its first slot set */
@@ -190,16 +190,16 @@ typedef enum effect_particle_group {
 } effect_particle_group_e;
 
 /* One particle group of the secondary effects: a 0x2e-byte record of
- * g_effect_trap_particle_configs. Its leading bytes schedule the
+ * g_effect_secondary_particle_configs. Its leading bytes schedule the
  * group's effect slots (effect_secondary_start_group); the rest is a fixed
  * emitter, from which effect_slot_spawn_motion draws each slot's
  * motion as the effect file emitter does a particle's. */
 typedef struct effect_emitter_values {
-    u8 trap_animation;      /* 0x00; trap groups: index into g_effect_trap_animation_data */
+    u8 animation_id;        /* 0x00; secondary groups: index into g_effect_secondary_particle_animation_data */
     u8 _unused_01;          /* 0x01 */
-    u8 spawn_start_frame;   /* 0x02; trap groups */
-    u8 spawn_end_frame;     /* 0x03; trap groups */
-    u8 count;               /* 0x04; trap groups: slots the group owns */
+    u8 spawn_start_frame;   /* 0x02; secondary groups */
+    u8 spawn_end_frame;     /* 0x03; secondary groups */
+    u8 count;               /* 0x04; secondary groups: slots the group owns */
     u8 _unused_05;          /* 0x05 */
     u16 anchor_flags;       /* 0x06; effect_emitter_origin_e: CASTER and TARGET are honored */
     u16 motion_flags;       /* 0x08; effect_emitter_velocity_e */
@@ -210,7 +210,7 @@ typedef struct effect_emitter_values {
     ranges16_t weight;      /* 0x22 */
     u16 speed_min;          /* 0x26 */
     u16 speed_max;          /* 0x28 */
-    u8 spawns_per_frame;    /* 0x2a; trap groups: slots one frame may start */
+    u8 spawns_per_frame;    /* 0x2a; secondary groups: slots one frame may start */
     u8 _unused_2b;          /* 0x2b */
     s8 lifetime_min;        /* 0x2c */
     s8 lifetime_max;        /* 0x2d */
@@ -221,12 +221,12 @@ typedef char effect_emitter_values_size_must_be_46[(sizeof(effect_emitter_values
  * (0, ONE, 0); an effect file's script sets its own pair (opcode 27). */
 enum { EFFECT_SECONDARY_INERTIA_THRESHOLD = 560 };
 
-/* Per-group trap emitter records (stride 0x2e). The secondary-effect
+/* Per-group resident particle emitter records (stride 0x2e). The secondary-effect
  * handlers spawn while spawn_start_frame <= timer < spawn_end_frame and finish
  * once timer passes spawn_start_frame with no live slots;
  * effect_secondary_update_active_slots walks count active slots. The level-up
  * handler seeds group 5's position.y with -8, then lowers it by 3 per frame. */
-extern effect_emitter_values_t g_effect_trap_particle_configs[17];
+extern effect_emitter_values_t g_effect_secondary_particle_configs[17];
 
 s32 effect_slot_spawn_motion(effect_emitter_values_t* values, effect_motion_t* motion);
 
@@ -248,7 +248,7 @@ typedef char effect_anim_script_size_must_be_2[sizeof(effect_anim_script_t) == 2
 /* 0xcc-byte effect slots of g_effect_slots, chained through the leading next/prev
  * byte pair; slot 0 is the null sentinel. g_effect_slot_active_head heads the active chain
  * and g_effect_slot_free_head the free chain. RGB and the frame byte
- * are copied together by the billboard renderer; effect_slot_init_trap_animation resets
+ * are copied together by the billboard renderer; effect_slot_init_secondary_animation resets
  * the color and writes the 16-bit values at 0x88 and 0x8e. */
 typedef struct effect_slot {
     u8 next;                      /* 0x00 */
@@ -270,8 +270,8 @@ typedef struct effect_slot {
 typedef char effect_slot_size_must_be_204[sizeof(effect_slot_t) == 204 ? 1 : -1];
 
 extern effect_slot_t g_effect_slots[EFFECT_SLOT_RECORD_COUNT];
-extern effect_sprite_section_t g_effect_trap_frame_data;
-extern effect_sprite_section_t* g_effect_trap_frame_data_ptr;
+extern effect_sprite_section_t g_effect_secondary_particle_frame_data;
+extern effect_sprite_section_t* g_effect_secondary_particle_frame_data_ptr;
 
 /* Self-relative animation script table: each 16-bit value is a byte offset from
  * the table's own base to a effect_anim_script_t. Declared as bytes
@@ -279,8 +279,8 @@ extern effect_sprite_section_t* g_effect_trap_frame_data_ptr;
  * base plus a byte offset -- and the 16-bit entries are read through a cast
  * at the use site. Declaring it `u16[]` and casting the symbol to `u8*` for
  * the address instead reserves an unused 8-byte frame in
- * effect_slot_init_trap_animation. */
-extern u8 g_effect_trap_animation_data[];
+ * effect_slot_init_secondary_animation. */
+extern u8 g_effect_secondary_particle_animation_data[];
 
 s32 effect_slot_update(s32 id);
 
@@ -360,11 +360,11 @@ typedef struct effect_ring_state {
 } effect_ring_state_t;
 
 /* Zodiac-poof spawn state for the 24-slot particle group 3. */
-typedef struct effect_trap_state_24 {
+typedef struct effect_zodiac_poof_state {
     s32 done;   /* 0x00; reaches 1 when the effect is finished */
     s32 count;  /* 0x04; slots started so far */
     u8 ids[24]; /* 0x08 */
-} effect_trap_state_24_t;
+} effect_zodiac_poof_state_t;
 
 /* The work area g_effect_secondary_state, shared by the secondary effect handlers; the
  * spell-charge, summon-charge and zodiac-poof handlers each lay it out as
@@ -372,7 +372,7 @@ typedef struct effect_trap_state_24 {
 typedef union effect_secondary_state {
     effect_charge_state_t charge;
     effect_ring_state_t summon_ring;
-    effect_trap_state_24_t zodiac_poof;
+    effect_zodiac_poof_state_t zodiac_poof;
 } effect_secondary_state_t;
 
 extern effect_secondary_state_t g_effect_secondary_state;
