@@ -1895,12 +1895,11 @@ void move_path_calculate_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 leve
     move_path_calculate(flags, jump, x, y, level, target_x, target_y, target_level, initialize, suspended, 1);
 }
 
-/* Falls off the end: move_path_calculate leaves the path block pointer in $v0 and
- * the caller consumes it, so the result type belongs on this definition. */
+/* Calculate the complete WalkTo path synchronously; return null when no route exists. */
 move_path_t* move_path_calculate_walk_to(
     s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y, s32 target_level) {
     s32 suspended;
-    move_path_calculate(flags, jump, x, y, level, target_x, target_y, target_level, 1, &suspended, 0);
+    return move_path_calculate(flags, jump, x, y, level, target_x, target_y, target_level, 1, &suspended, 0);
 }
 
 /* Pathfinding pass for a generic unit (id 0x7f) from (x, y, level) to the target

@@ -409,7 +409,7 @@ s32 effect_secondary_unused_0b_handler(void);
 s32 effect_secondary_trap_handler(void);
 s32 effect_secondary_level_up_handler(void);
 s32 effect_secondary_unused_0e_handler(void);
-s32 effect_secondary_death_poof_handler(s32 unused_arg0, s32 passthrough);
+s32 effect_secondary_death_poof_handler(void);
 s32 effect_secondary_unused_10_handler(void);
 s32 effect_secondary_zodiac_poof_handler(void);
 s32 effect_secondary_reflect_handler(void);

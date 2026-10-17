@@ -41,12 +41,12 @@ void effect_heap_init(effect_heap_node_t* buffer, u32 buffer_size) {
     buffer->size = block_count;
     g_effect_heap_block_count = block_count;
     buffer->next = buffer;
-    for (owner = 16; owner >= 0; owner--) {
+    for (owner = EFFECT_HEAP_OWNER_COUNT - 1; owner >= 0; owner--) {
         g_effect_heap_owner_lists[owner].head = 0;
     }
 }
 
-/* Allocate `size` bytes from the battle heap for owner list `kind` (0-15) and
+/* Allocate `size` bytes from the battle heap for owner list `owner` (0-16) and
  * return the address past the block header.
  *
  * First fit along the circular free list, starting after the rover as in the K&R
@@ -54,7 +54,7 @@ void effect_heap_init(effect_heap_node_t* buffer, u32 buffer_size) {
  * an exact fit is unlinked and a larger block gives up its tail. The block goes
  * to the head of the owner's list. There is no failure exit: when no free block
  * is large enough the search goes round the list without end. */
-void* effect_heap_alloc_block(u32 size, s32 kind) {
+void* effect_heap_alloc_block(u32 size, s32 owner) {
     effect_heap_node_t* prev;
     effect_heap_node_t* node;
     u32 blocks = (size + 15) >> 3;
@@ -70,10 +70,10 @@ void* effect_heap_alloc_block(u32 size, s32 kind) {
                 node = (effect_heap_node_t*)((u8*)node + node->size * 8);
                 node->size = blocks;
             }
-            node->owner = kind;
-            node->next = g_effect_heap_owner_lists[kind].head;
+            node->owner = owner;
+            node->next = g_effect_heap_owner_lists[owner].head;
             g_effect_heap_rover = prev;
-            g_effect_heap_owner_lists[kind].head = node;
+            g_effect_heap_owner_lists[owner].head = node;
             return node + 1;
         } else {
             prev = node;
@@ -126,7 +126,7 @@ void effect_heap_free_block(void* ptr) {
 /*
  * Debug-print battle heap usage: total and largest free block on the free
  * ring, the low-water mark of the largest block, a "DP" value, and the bytes
- * held by each of the 16 allocation owners.
+ * held by owners 0 through 15. The original diagnostic omits owner 16.
  *
  * The ring-end test rereads g_effect_heap_rover; GCC hoists that load, which
  * produces the target copy of the rover into a separate register.

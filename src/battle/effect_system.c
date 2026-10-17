@@ -3314,11 +3314,10 @@ enum {
  * gravity of (0, ONE, 0) and finishes once the spawn state's finish_timer
  * reaches 1.
  *
- * The handler table calls it with no arguments: for a phase outside 1-3 the
- * result is `passthrough`, whatever the caller left in the second argument
- * register.
+ * A phase outside the three supported states leaves the result indeterminate,
+ * preserving the original register residue.
  */
-s32 effect_secondary_death_poof_handler(s32 unused_arg0, s32 passthrough) {
+s32 effect_secondary_death_poof_handler(void) {
     effect_secondary_data_t* effect;
     effect_death_poof_state_t* state;
     s32 unused[6]; /* Reserves the target's 0x58-byte frame. */
@@ -3328,7 +3327,6 @@ s32 effect_secondary_death_poof_handler(s32 unused_arg0, s32 passthrough) {
     s32 i;
 
     effect = g_effect_secondary_current;
-    result = passthrough;
     state = &g_effect_death_poof_states[effect->own_slot_id];
     /* Preserve the target's unsigned phase-dispatch comparison. */
     switch (effect->phase) {
