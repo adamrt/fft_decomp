@@ -135,11 +135,7 @@ typedef enum screen_fade_state {
     SCREEN_FADE_STATE_INCREASING = 2
 } screen_fade_state_e;
 
-extern s16 g_screen_fade_intensity;
 extern rgb24_t g_screen_black_tile_color;
-
-/* Fade tile RGB channels, set to equal levels by the fade updaters. */
-extern rgb24_t g_screen_fade_tile_color;
 
 void screen_fade_set_disabled(u8 disabled);
 s32 screen_fade_get_state(void);
@@ -394,8 +390,6 @@ s16 screen_text_get_char_at(const u8* table, s16 index, s32 position);
 u8* world_text_find_entry(u32 text_id);
 
 /* text images */
-extern menu_list_page_t g_screen_text_list_pages[2];
-
 void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 palette);
 void screen_text_kern(u8* text, s16* name, RECT* rect, s32 palette);
 s32 screen_text_measure_width(const u8* entry);
