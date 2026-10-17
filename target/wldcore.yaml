@@ -425,7 +425,7 @@ functions:
   - {addr: 0x80091450, size: 108, name: location_script_read_operand_pair, hash: 978db3ae06647cd2, unit: map_opcodes}
   - {addr: 0x800914bc, size: 92, name: location_script_opcode_02_check_var_at_least, hash: 0a07d0db212801e0, unit: map_opcodes}
   - {addr: 0x80091518, size: 92, name: location_script_opcode_03_check_var_at_most, hash: 1d33640e4361bc9b, unit: map_opcodes}
-  - {addr: 0x80091574, size: 188, name: location_script_opcode_04_check_roster_has_sprite_set, hash: ef88873683c9c523, unit: map_opcodes}
+  - {addr: 0x80091574, size: 188, name: location_script_opcode_04_check_roster_has_character, hash: ef88873683c9c523, unit: map_opcodes}
   - {addr: 0x80091630, size: 28, name: location_script_opcode_0c_skip_1_operand, hash: 768b510ec89c7449, unit: map_opcodes}
   - {addr: 0x8009164c, size: 28, name: location_script_opcode_0d_skip_1_operand, hash: 768b510ec89c7449, unit: map_opcodes}
   - {addr: 0x80091668, size: 116, name: location_script_opcode_0e_check_war_funds_at_least, hash: 979855247339c056, unit: map_opcodes}

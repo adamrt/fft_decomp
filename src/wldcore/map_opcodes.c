@@ -144,10 +144,11 @@ void location_script_opcode_03_check_var_at_most(void) {
     }
 }
 
-/* Reject the HasUnit condition when no roster unit has the operand's sprite set. */
-void location_script_opcode_04_check_roster_has_sprite_set(void) {
+/* Reject HasUnit when no occupied roster slot has the operand's character identity.
+ * The native scripts test Beowulf, joined Mustadio and Dragon Reis here. */
+void location_script_opcode_04_check_roster_has_character(void) {
     s32 i;
-    s32 sprite_set;
+    s32 character_identity;
     u16* ipp;
     u16 ip;
     party_unit_t* unit;
@@ -155,12 +156,12 @@ void location_script_opcode_04_check_roster_has_sprite_set(void) {
 
     ipp = &g_location_script_state.ip;
     ip = *ipp;
-    sprite_set = g_location_script_state.data[ip];
+    character_identity = g_location_script_state.data[ip];
     *ipp = ip + 1;
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
         unit = party_get_roster_unit(i);
         if (unit->party_id != PARTY_ID_NONE) {
-            if (unit->sprite_set == sprite_set) {
+            if (unit->sprite_set == character_identity) {
                 break;
             }
         }
@@ -695,7 +696,7 @@ static void (*g_location_script_opcodes[41])(void) = {
     location_script_opcode_01_check_var_equal,
     location_script_opcode_02_check_var_at_least,
     location_script_opcode_03_check_var_at_most,
-    location_script_opcode_04_check_roster_has_sprite_set,
+    location_script_opcode_04_check_roster_has_character,
     location_script_opcode_05_skip_2_operands,
     location_script_opcode_05_skip_2_operands,
     location_script_opcode_05_skip_2_operands,
