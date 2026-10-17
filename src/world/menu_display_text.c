@@ -14,8 +14,8 @@
  *
  * `text` of 0 or 1 selects `text_id` from the text tables; 1 also lets the
  * 0xFB command continue instead of ending the text. Walks the same command
- * stream as text_measure, drawing lines from g_menu_text_param_22
- * up to g_menu_text_param_24 and stopping at the window's right margin.
+ * stream as text_measure, drawing lines from g_menu_text_first_line
+ * up to g_menu_text_line_limit and stopping at the window's right margin.
  * Numbers (0xE4/0xE6) are drawn one digit per 6-pixel column. Indexing the
  * divisor table inside the digit loop, rather than walking a pointer, is
  * what gives the target's strength-reduced pointer and register choice. */

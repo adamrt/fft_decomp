@@ -13,8 +13,8 @@
  * The thread target installed by menu_display_text_entry. A `text` of 0 or 1
  * selects text_id's entry; any other value is the text itself.
  * Handles the substitution, script-variable, palette, width and numeric
- * control codes. Only lines g_menu_text_param_22 up to, not including,
- * g_menu_text_param_24 are drawn; earlier lines still advance the pen
+ * control codes. Only lines g_menu_text_first_line up to, not including,
+ * g_menu_text_line_limit are drawn; earlier lines still advance the pen
  * horizontally, and reaching the end line stops rendering. Both line limits
  * and the text palette are reset on exit. Rendering also stops when the pen
  * comes within 8 pixels of the image's right edge.
