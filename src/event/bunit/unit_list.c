@@ -508,12 +508,16 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
                     number_y = top;
                     rect.x = cell.x;
                     rect.y = top;
-                    rect.w = ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * 6 + 2];
-                    rect.h = ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * 6 + 3];
+                    rect.w = ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * sizeof(menu_sprite_cell_t)
+                        + offsetof(menu_sprite_cell_t, w)];
+                    rect.h = ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * sizeof(menu_sprite_cell_t)
+                        + offsetof(menu_sprite_cell_t, h)];
                     menu_gfx_enqueue_textured_quad(&rect,
-                        ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * 6 + 4],
-                        ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * 6 + 5], color, 0,
-                        g_menu_cursor_texture_page, g_menu_alternate_number_clut, 8);
+                        ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * sizeof(menu_sprite_cell_t)
+                            + offsetof(menu_sprite_cell_t, u)],
+                        ((u8*)g_unit_list_grid_label_tiles)[g_unit_list_stat_mode * sizeof(menu_sprite_cell_t)
+                            + offsetof(menu_sprite_cell_t, v)],
+                        color, 0, g_menu_cursor_texture_page, g_menu_alternate_number_clut, 8);
                     g_unit_list_grid_max_stat_number.x = cell.x + 40;
                     g_unit_list_grid_max_stat_number.y = cell_y + 45;
                     g_unit_list_grid_max_stat_number.value = unit_index;

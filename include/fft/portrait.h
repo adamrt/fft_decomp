@@ -36,7 +36,7 @@ extern RECT g_portrait_sheet_rect_0;
 extern RECT g_portrait_sheet_rect_1;
 extern RECT g_portrait_sheet_rect_2;
 extern RECT g_portrait_sheet_rect_3;
-extern u8 g_portrait_cell_pixels[];
+extern u8 g_portrait_cell_pixels[768];
 extern RECT g_portrait_cell_rect;
 extern RECT g_portrait_palette_rect;
 extern RECT g_portrait_special_rect;

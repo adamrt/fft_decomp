@@ -25,21 +25,17 @@ s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
     if (result < 0) {
         return result;
     }
-    /* The typed equipment field folds 0x54 into the pointer expression and
-     * changes register scheduling. This 16-bit view (halfword 42 is offset 0x54)
-     * preserves the exact target while indexing the same
-     * equipment_unit_preview_t.equipment array. */
     if (unit_index != 1) {
-        item_adjust_inventory_count(((s16*)g_equipment_unit_data[unit_index])[slot + 42], 1);
+        item_adjust_inventory_count(g_equipment_unit_data[unit_index]->equipment[slot], 1);
     }
     if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result != EQUIPMENT_SLOT_ITEM_ALLOWED) {
         s32 other = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         if (unit_index != 1) {
-            item_adjust_inventory_count(((s16*)g_equipment_unit_data[unit_index])[other + 42], 1);
+            item_adjust_inventory_count(g_equipment_unit_data[unit_index]->equipment[other], 1);
         }
-        ((s16*)g_equipment_unit_data[unit_index])[other + 42] = 0;
+        g_equipment_unit_data[unit_index]->equipment[other] = 0;
     }
-    ((s16*)g_equipment_unit_data[unit_index])[slot + 42] = value;
+    g_equipment_unit_data[unit_index]->equipment[slot] = value;
     if (unit_index != 1) {
         equipment_commit_loadout();
     }
