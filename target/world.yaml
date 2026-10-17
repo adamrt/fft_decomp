@@ -1470,9 +1470,8 @@ data:
   - {addr: 0x8018ab00, name: g_formation_selected_unit_stat_detail}
   - {addr: 0x8018ab40, name: g_item_preview_stat_detail}
   - {addr: 0x8018abd0, name: g_unit_panel_editor_numeric_geometry}
-  - {addr: 0x8018abd6, name: g_unit_panel_slide_up_y}
   - {addr: 0x8018abd8, name: g_unit_panel_item_icon_texture}
-  - {addr: 0x8018abde, name: g_unit_panel_slide_down_y}
+  - {addr: 0x8018abe0, name: g_unit_panel_slide_y}
   - {addr: 0x8018abf8, name: g_menu_portrait_origin}
   - {addr: 0x8018ac00, name: g_formation_panel_bar_colors}
   - {addr: 0x8018ac30, name: g_formation_selected_unit_number_entries}

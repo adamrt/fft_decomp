@@ -249,7 +249,7 @@ void unit_panel_banner_thread(void) {
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
         g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
 
-        /* A slide steps one table row every other frame (down rows 1-6, up rows 11-16),
+        /* A slide advances every other frame through the down or up half of the curve,
          * then clears every flag but HIDDEN. */
         if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
             shake = 1;
@@ -261,7 +261,7 @@ void unit_panel_banner_thread(void) {
         }
         if (shake != 0) {
             if (shake < 0xA) {
-                thread->position.y = g_unit_panel_slide_down_y[shake];
+                thread->position.y = g_unit_panel_slide_y[0][shake - 1];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -270,7 +270,7 @@ void unit_panel_banner_thread(void) {
                     thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
-                thread->position.y = g_unit_panel_slide_up_y[shake];
+                thread->position.y = g_unit_panel_slide_y[1][shake - 11];
                 if (frame & 1) {
                     shake += 1;
                 }

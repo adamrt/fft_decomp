@@ -222,8 +222,9 @@ extern u8 g_unit_panel_portrait_transition_offsets[];
  * and portrait. */
 extern RECT g_unit_panel_character_status_draw_area_rect;
 extern RECT g_unit_panel_frame_rect;
-extern s16 g_unit_panel_slide_down_y[];
-extern s16 g_unit_panel_slide_up_y[];
+
+/* WORLD, ATTACK, BUNIT, DEBUGCHR and EQUIP each bind this down/up curve. */
+extern s16 g_unit_panel_slide_y[2][6];
 extern CVECTOR g_unit_panel_gauge_bar_colors[];
 extern u16 g_unit_panel_editor_label_cluts[][2];
 extern u16 g_unit_panel_editor_value_cluts[][2];

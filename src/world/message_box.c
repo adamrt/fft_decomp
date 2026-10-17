@@ -299,7 +299,7 @@ void unit_panel_banner_thread(void) {
         }
         if (shake != 0) {
             if (shake < 0xA) {
-                thread->position.y = g_unit_panel_slide_down_y[shake];
+                thread->position.y = g_unit_panel_slide_y[0][shake - 1];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -308,7 +308,7 @@ void unit_panel_banner_thread(void) {
                     thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
-                thread->position.y = g_unit_panel_slide_up_y[shake];
+                thread->position.y = g_unit_panel_slide_y[1][shake - 11];
                 if (frame & 1) {
                     shake += 1;
                 }
