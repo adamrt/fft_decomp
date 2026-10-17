@@ -269,7 +269,7 @@ void music_test_update(controller_record_t* record) {
                 if (state->music_slot != 0) {
                     music_unload_scenario_slot(state->music_slot);
                 }
-                state->music_slot = music_open_into_free_slot(state->music_id);
+                state->music_slot = music_load_into_free_slot(state->music_id);
                 state->step = MUSIC_TEST_STEP_START_TRACK;
             } else {
                 if (state->music_slot != 0) {
@@ -1269,7 +1269,7 @@ static void ending_update_xa_audio(void) {
             {
                 s32* state = &g_ending_script_state.control_state;
 
-                g_system_session_frames = 0;
+                g_system_wait_frames = 0;
                 (*state)++;
             }
             break;
@@ -1282,7 +1282,7 @@ static void ending_update_xa_audio(void) {
             *state = value + delta;
 
             /* The frame counter was cleared when the seek was issued. */
-            if (g_system_session_frames >= 0x79 && *state == 5) {
+            if (g_system_wait_frames >= 0x79 && *state == 5) {
                 file_reset_cd_subsystems();
                 *state = 0;
             }

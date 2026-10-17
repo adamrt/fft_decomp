@@ -27,7 +27,7 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
-static s32 g_boot_startup2_has_run = 0;
+static s32 g_boot_has_reset_game_state = 0;
 
 /* Set the RAM size to 2 MB, initialize the CD library with debug output off, pause the drive and
  * mark the shared file descriptor idle. */
@@ -56,7 +56,7 @@ void zodiac_load_frame(void) {
  * the GPU, pad, SPU and CD, show the two logos, open the memory-card events and
  * load the shared sounds and the zodiac frame while the Squaresoft logo is up.
  *
- * rand is seeded with 1, and g_boot_startup2_has_run is cleared so the first
+ * rand is seeded with 1, and g_boot_has_reset_game_state is cleared so the first
  * boot_reset_game_state does not repeat the hardware restart. */
 void boot_run_startup(void) {
     heap_clear_game_table();
@@ -85,7 +85,7 @@ void boot_run_startup(void) {
     zodiac_load_frame();
     srand(1);
     boot_fade_out_squaresoft_logo();
-    g_boot_startup2_has_run = 0;
+    g_boot_has_reset_game_state = 0;
 }
 
 /* Prepare a fresh session before the opening runs: reset the 32-bit save values and
@@ -101,7 +101,7 @@ void boot_run_startup(void) {
 void boot_reset_game_state(void) {
     int frame;
 
-    if (g_boot_startup2_has_run != 0) {
+    if (g_boot_has_reset_game_state != 0) {
         heap_clear_game_table();
         music_unload_scenario_and_tunes();
         g_save_play_time_hours = 0;
@@ -123,14 +123,14 @@ void boot_reset_game_state(void) {
     save_init_data_tables();
     item_init_order_tables();
 
-    if (g_boot_startup2_has_run != 0) {
+    if (g_boot_has_reset_game_state != 0) {
         for (frame = 0; frame < 60; frame++) {
             VSync(0);
         }
         boot_fade_out_squaresoft_logo();
     }
 
-    g_boot_startup2_has_run = 1;
+    g_boot_has_reset_game_state = 1;
 }
 
 /* Start loading the ENTD file that holds g_encounter_current_id into a new

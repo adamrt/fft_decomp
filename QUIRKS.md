@@ -662,7 +662,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `music_start_load_into_free_slot` allocates the SMD block before
   it requests the read; when `file_request_read_bytes` refuses (loader
   busy) it reports `SYSTEM_ERROR_SMD_LOAD` and returns 0 without freeing
-  the block. `music_open_into_slot` (no caller) does the same.
+  the block. `music_start_load_into_slot` (no caller) does the same.
 
 ## Calls that disagree with the callee
 
@@ -1172,4 +1172,4 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `file_poll_load` and `world_map_poll_texture_stream` count failed
   seeks, refused reads and stalls in `error_count`, which nothing reads, so a
   disc error restarts the read indefinitely. `file_poll_load` also counts
-  `wait_frames` unread; its stall timeout uses `g_system_session_frames`.
+  `wait_frames` unread; its stall timeout uses `g_system_wait_frames`.

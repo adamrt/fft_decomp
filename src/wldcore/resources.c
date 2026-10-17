@@ -65,11 +65,11 @@ void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
     case FILE_LOAD_STATE_SET_DOUBLE_SPEED:
         mode[0] = CdlModeSpeed;
         CdControl(CdlSetmode, mode, 0);
-        g_system_session_frames = 0;
+        g_system_wait_frames = 0;
         stream->state++;
         break;
     case FILE_LOAD_STATE_WAIT_AFTER_SET_MODE:
-        if (g_system_session_frames < 4) {
+        if (g_system_wait_frames < 4) {
             return;
         }
         stream->state++;

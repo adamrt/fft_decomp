@@ -120,7 +120,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     tutorial = -(tutorial < 11) & tutorial;
     tutorial_start(tutorial);
     if (tutorial == 0) {
-        g_screen_music_slot = music_open_into_free_slot(MUSIC_FORMATION);
+        g_screen_music_slot = music_load_into_free_slot(MUSIC_FORMATION);
         while (music_is_loading_stub() != 0) { }
         music_switch_track(g_screen_music_slot, 0x7F, 0);
     }

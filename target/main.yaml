@@ -703,9 +703,9 @@ functions:
   - {addr: 0x800435b4, size: 8, name: file_handle_cd_ready, hash: 6d64edf91449c1b1, unit: sound_requests}
   - {addr: 0x800435bc, size: 8, name: file_handle_cd_read, hash: 6d64edf91449c1b1, unit: sound_requests}
   - {addr: 0x800435c4, size: 156, name: music_load_into_slot, hash: dc882519778a9dfe, unit: sound_requests}
-  - {addr: 0x80043660, size: 168, name: music_open_into_free_slot, hash: 185c9e9bb1bb9c55, unit: sound_requests}
+  - {addr: 0x80043660, size: 168, name: music_load_into_free_slot, hash: 185c9e9bb1bb9c55, unit: sound_requests}
   - {addr: 0x80043708, size: 8, name: music_is_loading_stub, hash: 207819bf4ebe3078, unit: sound_requests}
-  - {addr: 0x80043710, size: 200, name: music_open_into_slot, hash: d068d9f896a5379b, unit: sound_requests}
+  - {addr: 0x80043710, size: 200, name: music_start_load_into_slot, hash: d068d9f896a5379b, unit: sound_requests}
   - {addr: 0x800437d8, size: 248, name: music_start_load_into_free_slot, hash: 0b6f75c1755d440b, unit: sound_requests}
   - {addr: 0x800438d0, size: 136, name: music_poll_scenario_load, hash: 96a506be6e381a11, unit: sound_requests}
   - {addr: 0x80043958, size: 104, name: music_wait_for_scenario_load, hash: 793faa58744c23db, unit: sound_requests}
@@ -1287,7 +1287,7 @@ data:
   - {addr: 0x8004d95c, name: g_music}
   - {addr: 0x8004d9ac, name: g_portrait_special_wldface_id}
   - {addr: 0x8004d9b0, name: g_brave_story_saved_weather_variable}
-  - {addr: 0x8004d9b4, name: g_boot_startup2_has_run}
+  - {addr: 0x8004d9b4, name: g_boot_has_reset_game_state}
   - {addr: 0x8004d9b8, name: g_sound_env_sed_data}
   - {addr: 0x8004e5b8, name: g_loading_frame_counter}
   - {addr: 0x8004e5bc, name: g_gfx_active_buffer_index}
@@ -1300,7 +1300,7 @@ data:
   - {addr: 0x8004eaf4, name: g_file_cd_state}
   - {addr: 0x8004eb18, name: g_heap_smd_base}
   - {addr: 0x80056b18, name: g_gfx_battle_otags}
-  - {addr: 0x80057718, name: g_system_session_frames}
+  - {addr: 0x80057718, name: g_system_wait_frames}
   - {addr: 0x8005771c, name: g_script_variable_storage}
   - {addr: 0x80057b1c, name: g_save_unread_byte}
   - {addr: 0x80057b20, name: g_menu_sort_orders}

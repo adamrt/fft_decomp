@@ -142,7 +142,7 @@ typedef enum music_test_step {
 typedef struct music_test_state {
     /* 0x00 */ s32 music_id;     /* scenario music selected for playback */
     /* 0x04 */ s32 delay;        /* frames before loading music_id */
-    /* 0x08 */ s32 music_slot;   /* slot from music_open_into_free_slot */
+    /* 0x08 */ s32 music_slot;   /* slot from music_load_into_free_slot */
     /* 0x0c */ s32 step;         /* music_test_step_e */
     /* 0x10 */ s32 blink_frames; /* counts ten frames after a selection, while Up and Down stay blocked */
 } music_test_state_t;

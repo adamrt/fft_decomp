@@ -317,7 +317,7 @@ void new_game_fade_out_orbonne_caption(void) {
 
 /* VSync callback. Draws one rand() per frame, advances the play-time clock at 60
  * frames a second (the hours stop at 1000) and counts
- * g_system_session_frames. */
+ * g_system_wait_frames. */
 void system_handle_vsync(void) {
     rand();
 
@@ -337,7 +337,7 @@ void system_handle_vsync(void) {
         }
     }
 
-    g_system_session_frames++;
+    g_system_wait_frames++;
 }
 
 /* Empty DrawSync callback, installed by boot_run_startup. */
@@ -371,7 +371,7 @@ s32 music_load_into_slot(s32 music_id, s32 slot) {
 
 /* music_load_into_slot into the first free scenario slot (1 or
  * 2); returns 0 when both are taken. */
-int music_open_into_free_slot(int music_id) {
+int music_load_into_free_slot(int music_id) {
     int i;
     suzuki_smd_header_t* smd;
 
@@ -405,7 +405,7 @@ int music_is_loading_stub(void) {
  * it was occupied or the load failed, which also reports
  * SYSTEM_ERROR_SMD_LOAD. When the read cannot start (the loader is busy)
  * the SMD block stays allocated and is never freed. */
-s32 music_open_into_slot(s32 music_id, s32 slot) {
+s32 music_start_load_into_slot(s32 music_id, s32 slot) {
     if (g_music.slots.smd[slot - 1] == 0) {
         suzuki_smd_header_t* data = heap_alloc_smd(g_music_files[music_id].size);
 
@@ -424,7 +424,7 @@ s32 music_open_into_slot(s32 music_id, s32 slot) {
 /* Starts the asynchronous load of music file `music_id` (music_id_e) into
  * the first free scenario music slot (1 or 2) and returns that slot, or 0
  * when both are taken or the load fails (reporting SYSTEM_ERROR_SMD_LOAD;
- * as in music_open_into_slot, a read that cannot start leaks its
+ * as in music_start_load_into_slot, a read that cannot start leaks its
  * SMD block). music_poll_scenario_load creates the music record once
  * the file has arrived. */
 int music_start_load_into_free_slot(int music_id) {
@@ -702,7 +702,7 @@ void music_set_track(int music_id) {
         music_stop();
         music_unload_scenario_slot(slot);
     }
-    slot = music_open_into_free_slot(music_id);
+    slot = music_load_into_free_slot(music_id);
     if (slot != 0) {
         music_switch_track(slot, 0x7f, 0);
     }

@@ -37,8 +37,8 @@ typedef enum music_id {
 
 /* loading */
 s32 music_load_into_slot(s32 music_id, s32 slot);
-s32 music_open_into_slot(s32 music_id, s32 slot);
-s32 music_open_into_free_slot(s32 music_id);
+s32 music_load_into_free_slot(s32 music_id);
+s32 music_start_load_into_slot(s32 music_id, s32 slot);
 s32 music_start_load_into_free_slot(s32 music_id);
 s32 music_poll_scenario_load(void);
 s32 music_wait_for_scenario_load(s32 music_id);

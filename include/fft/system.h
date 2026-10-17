@@ -96,7 +96,8 @@ void system_restore_game_loop_stack_pointer(u32* source);
 void system_frame_stub(void);
 
 /* frame timing */
-extern s32 g_system_session_frames;
+/* Resettable VBlank counter used by CD waits and the title exit. */
+extern s32 g_system_wait_frames;
 extern s32 g_system_vsync_interval;
 extern s32 g_system_min_vsync_interval;
 extern s32 g_system_saved_vsync_interval;

@@ -282,7 +282,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
     g_save_menu_step = SAVE_STEP_SELECT_CARD;
     /* 1 from the world menu, 0 from the title screen's Continue (load only). */
     g_save_mode_select_enabled = mode_select_enabled;
-    music_handle = music_open_into_free_slot(MUSIC_SAVE);
+    music_handle = music_load_into_free_slot(MUSIC_SAVE);
     while (music_is_loading_stub() != 0) { }
     music_switch_track(music_handle, 0x7f, 0);
     memcard_consume_all_events();

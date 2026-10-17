@@ -168,7 +168,7 @@ void card_entrypoint(s32 unused) {
     save_gfx_init_contexts(context_storage, otag_storage, 0, 0, 0, g_gfx_poly_ft4_buffers, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         tile_storage, 0, 0, 0, 0, 0, 0, 0, 0);
     save_init_graphics();
-    music_slot = music_open_into_free_slot(MUSIC_SAVE);
+    music_slot = music_load_into_free_slot(MUSIC_SAVE);
     while (music_is_loading_stub() != 0) { }
     music_switch_track(music_slot, 0x7f, 0);
     memcard_consume_all_events();

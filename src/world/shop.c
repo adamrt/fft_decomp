@@ -150,7 +150,7 @@ void shop_run_screen(s32 shop_type) {
     g_text_section_pointers[SCREEN_TEXT_SECTION_SHOP_MENU_LABELS] = g_screen_text_shop_menu_labels_data;
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, disabled, 0);
-    g_screen_music_slot = music_open_into_free_slot(ot_index);
+    g_screen_music_slot = music_load_into_free_slot(ot_index);
     music_switch_track(g_screen_music_slot, 0x7F, 0);
     g_shop_background_visible = 1;
     g_formation_unit_banner_enabled = 0;
