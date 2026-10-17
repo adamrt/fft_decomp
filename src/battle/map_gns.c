@@ -48,15 +48,14 @@ s32 battle_map_gns_apply_command(s32 phase, battle_map_resource_t* record) {
         } else {
             /*
              * Requested map state, packed like the file row's map_state: layout in
-             * bits 0-11, weather in 12-14, time of day in 15.  The target reads
-             * the record's variable id and map state as single bytes (lbu), not
-             * as the 16-bit values the struct declares, so those two stay byte reads.
+             * bits 0-11, weather in 12-14, time of day in 15. Retail truncates
+             * the record's variable id and map state to their low bytes.
              */
-            requested_layout = script_get_variable(*(u8*)&selected->command.script_variable_id) & 0xfff;
+            requested_layout = script_get_variable((u8)selected->command.script_variable_id) & 0xfff;
             requested_layout_and_weather
                 = requested_layout | ((script_get_variable(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12);
             if (battle_map_gns_is_record_matching_state(selected->command.map_state_comparison,
-                    *(u8*)&selected->command.map_state,
+                    (u8)selected->command.map_state,
                     requested_layout_and_weather | ((script_get_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15))) {
                 battle_map_gns_dispatch_resource(selected->command.resource_type, selected);
             }
