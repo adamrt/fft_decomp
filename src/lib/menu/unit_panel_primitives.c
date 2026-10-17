@@ -1,10 +1,16 @@
-/* The two-column status panel frame and its texture draw modes. */
+/* The two-column unit-panel frame and texture draw modes, with the overlays' empty entry. */
 
 #include "fft/gfx_primitive.h"
 #include "fft/menu_gfx.h"
 #include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+/* WORLD links the initializer without this empty entry. */
+#if defined(FFT_EVENT)
+void menu_noop_8(void) {
+}
+#endif
 
 /* Build the two-column status-panel frame and its texture draw modes. */
 void unit_panel_init_primitives(unit_panel_buffer_t* menu) {

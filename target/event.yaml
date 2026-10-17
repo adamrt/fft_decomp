@@ -10,7 +10,9 @@ links: [battle]
 
 units:
   - {name: deploy_menu, source: src/event/attack/deploy_menu.c}
+  - {name: deploy_panel_primitives, source: src/event/attack/deploy_panel_primitives.c}
   - {name: deploy_screen, source: src/event/attack/deploy_screen.c}
+  - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: fieldable_units, source: src/event/attack/fieldable_units.c, data: [{addr: 0x801cd2b4, size: 4, hash: 67abdd721024f0ff}, {addr: 0x801cd2b8, size: 4, hash: e112d548bcb2311b}]}
   - {name: file_load_sync, source: src/lib/file/file_load_sync.c}
   - {name: gfx_set_formation_icon_uv, source: src/lib/menu/gfx_set_formation_icon_uv.c}
@@ -18,23 +20,25 @@ units:
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cabc4, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_textures, source: src/event/attack/portrait_textures.c, data: [{addr: 0x801dd2d4, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2dc, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2e4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x801dd5e4, size: 1152, hash: 4cf9816ed1062189}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: scenario_setup, source: src/event/attack/scenario_setup.c}
+  - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: zodiac_primitives, source: src/lib/menu/zodiac_primitives.c}
 
 functions:
-  - {addr: 0x801bf004, size: 464, name: menu_build_scaled_draw_area_packets, hash: 89323ef0080a45f6, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
-  - {addr: 0x801bf1d4, size: 52, name: menu_init_scaled_draw_area_packets, hash: 8568902b86f9d430, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
+  - {addr: 0x801bf004, size: 464, name: menu_build_scaled_draw_area_packets, hash: 89323ef0080a45f6, unit: scaled_draw_area}
+  - {addr: 0x801bf1d4, size: 52, name: menu_init_scaled_draw_area_packets, hash: 8568902b86f9d430, unit: scaled_draw_area}
   - {addr: 0x801bf208, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
-  - {addr: 0x801bf234, size: 88, name: portrait_build_poly, hash: a8a2d7a5b553b63f, source: src/lib/menu/portrait_build_poly.c}
+  - {addr: 0x801bf234, size: 88, name: portrait_build_poly, hash: a8a2d7a5b553b63f, unit: portrait_transitions}
   - {addr: 0x801bf28c, size: 100, name: portrait_clip_from_right, hash: 8b8f88a21b561ac0, unit: portrait_transitions}
   - {addr: 0x801bf2f0, size: 100, name: portrait_clip_from_left, hash: 0e59600fae531215, unit: portrait_transitions}
   - {addr: 0x801bf354, size: 1064, name: portrait_build_transition, hash: 9632d1e8775d742c, unit: portrait_transitions}
   - {addr: 0x801bf77c, size: 4352, name: unit_panel_banner_thread, hash: 9e9b6b997e6a356e}
-  - {addr: 0x801c087c, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_noop_8.c}
-  - {addr: 0x801c0884, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, source: src/lib/menu/unit_panel_init_primitives.c}
-  - {addr: 0x801c0aa4, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_equipment_thread.c}
-  - {addr: 0x801c0acc, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_ability_thread.c}
-  - {addr: 0x801c0af4, size: 1932, name: unit_panel_equipment_ability_thread, hash: 032d9823d70a2a5d, source: src/lib/menu/unit_panel_equipment_ability_thread_own_buffers.c}
+  - {addr: 0x801c087c, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, unit: unit_panel_primitives}
+  - {addr: 0x801c0884, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, unit: unit_panel_primitives}
+  - {addr: 0x801c0aa4, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
+  - {addr: 0x801c0acc, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
+  - {addr: 0x801c0af4, size: 1932, name: unit_panel_equipment_ability_thread, hash: 032d9823d70a2a5d, unit: equipment_panel_threads}
   - {addr: 0x801c1280, size: 380, name: unit_panel_set_colors, hash: 96535460369c6487, unit: panel_text}
   - {addr: 0x801c13fc, size: 84, name: unit_panel_select_palette, hash: edaf22379760b92c, unit: panel_text}
   - {addr: 0x801c1450, size: 268, name: menu_text_render_signed_decimal_entries, hash: "6394222889009711", unit: panel_text}
@@ -46,8 +50,8 @@ functions:
   - {addr: 0x801c1f28, size: 28, name: menu_thread_is_running, hash: d10e3403d7fec970, source: src/lib/thread/menu_thread_is_running.c}
   - {addr: 0x801c1f44, size: 1236, name: menu_draw_thread_status_indicators, hash: e022f2dec8a0a488, source: src/lib/menu/menu_draw_thread_status_indicators.c}
   - {addr: 0x801c2418, size: 580, name: gfx_set_scaled_poly_ft4_4bpp, hash: f989278e90fdce7c, source: src/lib/menu/gfx_set_scaled_poly_ft4_4bpp.c}
-  - {addr: 0x801c265c, size: 740, name: unit_panel_build_status_groups, hash: e865f008b1735c29}
-  - {addr: 0x801c2940, size: 412, name: gfx_build_gradient_grid_primitives, hash: c1250559a6268b13}
+  - {addr: 0x801c265c, size: 740, name: unit_panel_build_status_groups, hash: e865f008b1735c29, unit: deploy_panel_primitives}
+  - {addr: 0x801c2940, size: 412, name: gfx_build_gradient_grid_primitives, hash: c1250559a6268b13, unit: deploy_panel_primitives}
   - {addr: 0x801c2adc, size: 736, name: zodiac_build_sprite_polygon, hash: 37eac014a0b6e39f, source: src/lib/menu/zodiac_build_sprite_polygon.c}
   - {addr: 0x801c2dbc, size: 692, name: zodiac_build_primitives, hash: 919ae95c336b4817, unit: zodiac_primitives}
   - {addr: 0x801c3070, size: 8, name: deploy_noop_1, hash: 6d64edf91449c1b1, unit: fieldable_units}
@@ -60,7 +64,7 @@ functions:
   - {addr: 0x801c3ca8, size: 148, name: deploy_find_deployable_units, hash: 5cd7505bb7bab58e, unit: scenario_setup}
   - {addr: 0x801c3d3c, size: 80, name: deploy_is_roster_unit_deployed, hash: 5d2d6845961ff568}
   - {addr: 0x801c3d8c, size: 40, name: thread_wait_forever, hash: 1784b8534b53f3ba, source: src/lib/thread/thread_wait_forever.c}
-  - {addr: 0x801c3db4, size: 80, name: deploy_has_roster_unit_on_tiles, hash: 5d2d6845961ff568, source: src/event/attack/deploy_is_roster_unit_deployed.c, source_symbol: deploy_is_roster_unit_deployed}
+  - {addr: 0x801c3db4, size: 80, name: deploy_has_roster_unit_on_tiles, hash: 5d2d6845961ff568, unit: deploy_screen}
   - {addr: 0x801c3e04, size: 88, name: deploy_remove_roster_unit, hash: 784067ef9c2286de, unit: deploy_screen}
   - {addr: 0x801c3e5c, size: 112, name: deploy_swap_roster_unit_tile, hash: c3797b6bdb461354, unit: deploy_screen}
   - {addr: 0x801c3ecc, size: 120, name: deploy_reset_tables, hash: 695c7064518fcce4, unit: deploy_screen}
@@ -311,6 +315,7 @@ units:
   - {name: draw_commands, source: src/lib/menu/draw_commands.c}
   - {name: draw_state, source: src/lib/menu/draw_state.c}
   - {name: entry, source: src/event/bunit/entry.c}
+  - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
   - {name: job_abilities, source: src/event/bunit/job_abilities.c}
   - {name: job_list, source: src/event/bunit/job_list.c}
@@ -320,6 +325,7 @@ units:
   - {name: packet_buffers, source: src/event/bunit/packet_buffers.c, data: [{addr: 0x801eca28, size: 2, hash: 96a296d224f285c6}]}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cf440, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: screen_fade, source: src/lib/menu/screen_fade.c}
   - {name: selection_records, source: src/lib/menu/selection_records.c}
   - {name: status_thread_toggles, source: src/lib/menu/status_thread_toggles.c}
@@ -327,22 +333,23 @@ units:
   - {name: texture_commands, source: src/lib/menu/texture_commands.c}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
   - {name: unit_list, source: src/event/bunit/unit_list.c}
+  - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: unit_records, source: src/event/bunit/unit_records.c, data: [{addr: 0x801eb280, size: 44, hash: 85759b3811ff7dc4}, {addr: 0x801eb2ac, size: 2, hash: 96a296d224f285c6}, {addr: 0x801eb2b0, size: 5628, hash: 660b974630c79796}]}
   - {name: window_state, source: src/lib/menu/window_state.c}
 
 functions:
-  - {addr: 0x801bf204, size: 464, name: menu_build_scaled_draw_area_packets, hash: 6d2b5d586ec77661, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
-  - {addr: 0x801bf3d4, size: 52, name: menu_init_scaled_draw_area_packets, hash: ec5e4bf6bd7e4dd9, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
+  - {addr: 0x801bf204, size: 464, name: menu_build_scaled_draw_area_packets, hash: 6d2b5d586ec77661, unit: scaled_draw_area}
+  - {addr: 0x801bf3d4, size: 52, name: menu_init_scaled_draw_area_packets, hash: ec5e4bf6bd7e4dd9, unit: scaled_draw_area}
   - {addr: 0x801bf408, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
-  - {addr: 0x801bf434, size: 48, name: portrait_build_poly, hash: cb86608938578cd2, source: src/lib/menu/portrait_build_poly.c}
+  - {addr: 0x801bf434, size: 48, name: portrait_build_poly, hash: cb86608938578cd2, unit: portrait_transitions}
   - {addr: 0x801bf464, size: 100, name: portrait_clip_from_right, hash: 4632c34e611fc393, unit: portrait_transitions}
   - {addr: 0x801bf4c8, size: 100, name: portrait_clip_from_left, hash: e0267807ec7b0b13, unit: portrait_transitions}
   - {addr: 0x801bf52c, size: 1064, name: portrait_build_transition, hash: cdb73372750d229e, unit: portrait_transitions}
   - {addr: 0x801bf954, size: 4488, name: unit_panel_banner_thread, hash: 4713ce1b910c04cd, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {addr: 0x801c0adc, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_noop_8.c}
-  - {addr: 0x801c0ae4, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, source: src/lib/menu/unit_panel_init_primitives.c}
-  - {addr: 0x801c0d04, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_equipment_thread.c}
-  - {addr: 0x801c0d2c, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_ability_thread.c}
+  - {addr: 0x801c0adc, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, unit: unit_panel_primitives}
+  - {addr: 0x801c0ae4, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, unit: unit_panel_primitives}
+  - {addr: 0x801c0d04, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
+  - {addr: 0x801c0d2c, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
   - {addr: 0x801c0d54, size: 1920, name: unit_panel_equipment_ability_thread, hash: 0c7124ae8f128af3, source: src/lib/menu/unit_panel_equipment_ability_thread.c}
   - {addr: 0x801c14d4, size: 380, name: unit_panel_set_colors, hash: 7021fdda77fe2ab5, unit: panel_text}
   - {addr: 0x801c1650, size: 84, name: unit_panel_select_palette, hash: 85e585627cce3af8, unit: panel_text}
@@ -1165,26 +1172,29 @@ links: [battle]
 
 units:
   - {name: editor, source: src/event/debugchr/editor.c, data: [{addr: 0x801ce2e4, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801cec44, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cec94, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cece4, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cece8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cecec, size: 4, hash: df3f619804a92fdb}]}
+  - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801c5e20, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
+  - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: zodiac_primitives, source: src/lib/menu/zodiac_primitives.c}
 
 functions:
-  - {addr: 0x801bf000, size: 464, name: menu_build_scaled_draw_area_packets, hash: c8fda5f772410a7c, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
-  - {addr: 0x801bf1d0, size: 52, name: menu_init_scaled_draw_area_packets, hash: 50cc2b9872fcf539, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
+  - {addr: 0x801bf000, size: 464, name: menu_build_scaled_draw_area_packets, hash: c8fda5f772410a7c, unit: scaled_draw_area}
+  - {addr: 0x801bf1d0, size: 52, name: menu_init_scaled_draw_area_packets, hash: 50cc2b9872fcf539, unit: scaled_draw_area}
   - {addr: 0x801bf204, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
-  - {addr: 0x801bf230, size: 48, name: portrait_build_poly, hash: cb86608938578cd2, source: src/lib/menu/portrait_build_poly.c}
+  - {addr: 0x801bf230, size: 48, name: portrait_build_poly, hash: cb86608938578cd2, unit: portrait_transitions}
   - {addr: 0x801bf260, size: 100, name: portrait_clip_from_right, hash: b486060e906e736a, unit: portrait_transitions}
   - {addr: 0x801bf2c4, size: 100, name: portrait_clip_from_left, hash: acc71cf2f3953a3f, unit: portrait_transitions}
   - {addr: 0x801bf328, size: 1064, name: portrait_build_transition, hash: 28dadc40ac60e2ca, unit: portrait_transitions}
   - {addr: 0x801bf750, size: 4540, name: unit_panel_banner_thread, hash: 54bc0c002cea8319, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {addr: 0x801c090c, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_noop_8.c}
-  - {addr: 0x801c0914, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, source: src/lib/menu/unit_panel_init_primitives.c}
-  - {addr: 0x801c0b34, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_equipment_thread.c}
-  - {addr: 0x801c0b5c, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_ability_thread.c}
-  - {addr: 0x801c0b84, size: 1932, name: unit_panel_equipment_ability_thread, hash: c6c24e466ddf3b87, source: src/lib/menu/unit_panel_equipment_ability_thread_own_buffers.c}
+  - {addr: 0x801c090c, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, unit: unit_panel_primitives}
+  - {addr: 0x801c0914, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, unit: unit_panel_primitives}
+  - {addr: 0x801c0b34, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
+  - {addr: 0x801c0b5c, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
+  - {addr: 0x801c0b84, size: 1932, name: unit_panel_equipment_ability_thread, hash: c6c24e466ddf3b87, unit: equipment_panel_threads}
   - {addr: 0x801c1310, size: 380, name: unit_panel_set_colors, hash: 76cde603c79a62bb, unit: panel_text}
   - {addr: 0x801c148c, size: 84, name: unit_panel_select_palette, hash: 2f9f4012d54fe639, unit: panel_text}
   - {addr: 0x801c14e0, size: 268, name: menu_text_render_signed_decimal_entries, hash: 83b20a6522686833, unit: panel_text}
@@ -1343,6 +1353,7 @@ units:
   - {name: entry, source: src/event/equip/entry.c}
   - {name: equip_modes, source: src/event/equip/equip_modes.c}
   - {name: equipment_items, source: src/event/equip/equipment_items.c}
+  - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: equipment_panels, source: src/event/equip/equipment_panels.c}
   - {name: equipment_rows, source: src/lib/menu/equipment_rows.c, data: [{addr: 0x801e8cc4, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801e8cd0, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: equipment_stat_deltas, source: src/lib/menu/equipment_stat_deltas.c}
@@ -1358,6 +1369,7 @@ units:
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cefc8, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
   - {name: preview_bonuses, source: src/lib/menu/preview_bonuses.c}
+  - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: screen_init, source: src/event/equip/screen_init.c, data: [{addr: 0x801e0b9c, size: 472, hash: 22fec3bc784546d7}, {addr: 0x801e0d74, size: 720, hash: fe2f74a1e0b16a66}, {addr: 0x801e1044, size: 320, hash: 7b6436b0c98f6238}, {addr: 0x801e1184, size: 320, hash: 7b6436b0c98f6238}]}
   - {name: selection_records, source: src/lib/menu/selection_records.c}
   - {name: text_id_lists, source: src/lib/menu/text_id_lists.c}
@@ -1365,6 +1377,7 @@ units:
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
   - {name: unit_comparison, source: src/event/equip/unit_comparison.c}
   - {name: unit_loadout, source: src/event/equip/unit_loadout.c}
+  - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: window_state, source: src/lib/menu/window_state.c}
 
 functions:
@@ -1384,19 +1397,19 @@ functions:
   - {addr: 0x801bfa44, size: 60, name: menu_clear_selection_record, hash: fdca62f04b6534e1, unit: selection_records}
   - {addr: 0x801bfa80, size: 76, name: menu_set_selection_record, hash: e1f2abd2a5f39602, source: src/lib/menu/menu_set_selection_record.c}
   - {addr: 0x801bfacc, size: 252, name: menu_get_selection_record, hash: cc67bd98802fd36b, source: src/lib/menu/menu_get_selection_record.c}
-  - {addr: 0x801bfbc8, size: 464, name: menu_build_scaled_draw_area_packets, hash: a19dedeaac3d305d, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
-  - {addr: 0x801bfd98, size: 52, name: menu_init_scaled_draw_area_packets, hash: d2f5c8f99a47b099, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
+  - {addr: 0x801bfbc8, size: 464, name: menu_build_scaled_draw_area_packets, hash: a19dedeaac3d305d, unit: scaled_draw_area}
+  - {addr: 0x801bfd98, size: 52, name: menu_init_scaled_draw_area_packets, hash: d2f5c8f99a47b099, unit: scaled_draw_area}
   - {addr: 0x801bfdcc, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
-  - {addr: 0x801bfdf8, size: 48, name: portrait_build_poly, hash: cb86608938578cd2, source: src/lib/menu/portrait_build_poly.c}
+  - {addr: 0x801bfdf8, size: 48, name: portrait_build_poly, hash: cb86608938578cd2, unit: portrait_transitions}
   - {addr: 0x801bfe28, size: 100, name: portrait_clip_from_right, hash: 3e2eceefe192cbe3, unit: portrait_transitions}
   - {addr: 0x801bfe8c, size: 100, name: portrait_clip_from_left, hash: 3d34b3a8acab0923, unit: portrait_transitions}
   - {addr: 0x801bfef0, size: 1064, name: portrait_build_transition, hash: 6379fd02254cc356, unit: portrait_transitions}
   - {addr: 0x801c0318, size: 4612, name: unit_panel_banner_thread, hash: 0a90a88495dfd5ba, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {addr: 0x801c151c, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_noop_8.c}
-  - {addr: 0x801c1524, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, source: src/lib/menu/unit_panel_init_primitives.c}
+  - {addr: 0x801c151c, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, unit: unit_panel_primitives}
+  - {addr: 0x801c1524, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, unit: unit_panel_primitives}
   - {addr: 0x801c1744, size: 1612, name: unit_panel_equipment_thread, hash: 7da830216ec8b83b, unit: equipment_panels}
   - {addr: 0x801c1d90, size: 1492, name: unit_panel_ability_thread, hash: 6a196898819bd812, unit: equipment_panels}
-  - {addr: 0x801c2364, size: 1932, name: unit_panel_equipment_ability_thread, hash: 1dda05d5a5262c06, source: src/lib/menu/unit_panel_equipment_ability_thread_own_buffers.c}
+  - {addr: 0x801c2364, size: 1932, name: unit_panel_equipment_ability_thread, hash: 1dda05d5a5262c06, unit: equipment_panel_threads}
   - {addr: 0x801c2af0, size: 380, name: unit_panel_set_colors, hash: 20be337bba8e7497, unit: panel_text}
   - {addr: 0x801c2c6c, size: 84, name: unit_panel_select_palette, hash: b8ce70f8b32f6547, unit: panel_text}
   - {addr: 0x801c2cc0, size: 268, name: menu_text_render_signed_decimal_entries, hash: 92b05110dccf3eff, unit: panel_text}
@@ -2237,6 +2250,7 @@ defines: {VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 256, VARIANT_MENU_CHOICE_VRAM_X: 44
 
 units:
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
+  - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
 
 functions:
   - {addr: 0x801bf000, size: 480, name: menu_draw_text_columns, hash: dff47199f4742289, source: src/lib/menu/menu_draw_text_columns.c}
@@ -2244,8 +2258,8 @@ functions:
   - {addr: 0x801bf45c, size: 3172, name: at_list_run, hash: f7232e2ba35ab622, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x801c00c0, size: 40, name: text_set_blit_source_rect, hash: f4a7a9d08a0373d4, source: src/lib/menu/text_set_blit_source_rect.c}
   - {addr: 0x801c00e8, size: 24, name: text_set_blit_destination, hash: 957437a4742bb43c, source: src/lib/menu/text_set_blit_destination.c}
-  - {addr: 0x801c0100, size: 464, name: menu_build_scaled_draw_area_packets, hash: 868f2e1fad3c6996, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
-  - {addr: 0x801c02d0, size: 52, name: menu_init_scaled_draw_area_packets, hash: 21b5509e73189129, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
+  - {addr: 0x801c0100, size: 464, name: menu_build_scaled_draw_area_packets, hash: 868f2e1fad3c6996, unit: scaled_draw_area}
+  - {addr: 0x801c02d0, size: 52, name: menu_init_scaled_draw_area_packets, hash: 21b5509e73189129, unit: scaled_draw_area}
   - {addr: 0x801c0304, size: 1424, name: menu_window_frame_thread, hash: 445eed2f2625ac87, source: src/lib/menu/menu_window_frame_thread.c}
   - {addr: 0x801c0894, size: 1436, name: menu_thin_window_frame_thread, hash: 43c0e695459c989f, source: src/lib/menu/menu_thin_window_frame_thread.c}
   - {addr: 0x801c0e30, size: 40, name: thread_wait_forever, hash: 19480d7e83b49e1f, source: src/lib/thread/thread_wait_forever.c}
@@ -2314,6 +2328,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
+  - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: file_load_sync, source: src/lib/file/file_load_sync.c}
   - {name: gfx_set_formation_icon_uv, source: src/lib/menu/gfx_set_formation_icon_uv.c}
   - {name: helpers, source: src/event/require/helpers.c, data: [{addr: 0x801d0068, size: 8, hash: 4bf4d677f323ee13}]}
@@ -2323,23 +2338,25 @@ units:
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
   - {name: post_battle_party, source: src/event/require/post_battle_party.c, data: [{addr: 0x801d71f8, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d72c0, size: 200, hash: 6d9c54dee5660c46}]}
   - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
+  - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: zodiac_primitives, source: src/lib/menu/zodiac_primitives.c}
 
 functions:
-  - {addr: 0x801bf01c, size: 472, name: menu_build_scaled_draw_area_packets, hash: 79a90437bb46609d}
-  - {addr: 0x801bf1f4, size: 52, name: menu_init_scaled_draw_area_packets, hash: 9f34b6fd6a40f6d7, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
+  - {addr: 0x801bf01c, size: 472, name: menu_build_scaled_draw_area_packets, hash: 79a90437bb46609d, unit: scaled_draw_area}
+  - {addr: 0x801bf1f4, size: 52, name: menu_init_scaled_draw_area_packets, hash: 9f34b6fd6a40f6d7, unit: scaled_draw_area}
   - {addr: 0x801bf228, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
-  - {addr: 0x801bf254, size: 88, name: portrait_build_poly, hash: 5531851d002cce17, source: src/lib/menu/portrait_build_poly.c}
+  - {addr: 0x801bf254, size: 88, name: portrait_build_poly, hash: 5531851d002cce17, unit: portrait_transitions}
   - {addr: 0x801bf2ac, size: 100, name: portrait_clip_from_right, hash: f06c2f5b8900d3fa, unit: portrait_transitions}
   - {addr: 0x801bf310, size: 100, name: portrait_clip_from_left, hash: ca2ed33a312f5e93, unit: portrait_transitions}
   - {addr: 0x801bf374, size: 1064, name: portrait_build_transition, hash: 5d4cdd324a80f71e, unit: portrait_transitions}
   - {addr: 0x801bf79c, size: 4112, name: unit_panel_banner_thread, hash: 84522d3712046bee}
-  - {addr: 0x801c07ac, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_noop_8.c}
-  - {addr: 0x801c07b4, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, source: src/lib/menu/unit_panel_init_primitives.c}
-  - {addr: 0x801c09d4, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_equipment_thread.c}
-  - {addr: 0x801c09fc, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, source: src/lib/menu/unit_panel_ability_thread.c}
-  - {addr: 0x801c0a24, size: 1932, name: unit_panel_equipment_ability_thread, hash: 3488c32cb72cfd35, source: src/lib/menu/unit_panel_equipment_ability_thread_own_buffers.c}
+  - {addr: 0x801c07ac, size: 8, name: menu_noop_8, hash: 6d64edf91449c1b1, unit: unit_panel_primitives}
+  - {addr: 0x801c07b4, size: 544, name: unit_panel_init_primitives, hash: c0c46a118253c8ae, unit: unit_panel_primitives}
+  - {addr: 0x801c09d4, size: 40, name: unit_panel_equipment_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
+  - {addr: 0x801c09fc, size: 40, name: unit_panel_ability_thread, hash: fbcd24ded43d67df, unit: equipment_panel_threads}
+  - {addr: 0x801c0a24, size: 1932, name: unit_panel_equipment_ability_thread, hash: 3488c32cb72cfd35, unit: equipment_panel_threads}
   - {addr: 0x801c11b0, size: 380, name: unit_panel_set_colors, hash: 30e96407a0905f33, unit: panel_text}
   - {addr: 0x801c132c, size: 84, name: unit_panel_select_palette, hash: b44b9976ec55ce81, unit: panel_text}
   - {addr: 0x801c1380, size: 268, name: menu_text_render_signed_decimal_entries, hash: 060ec03592da47dc, unit: panel_text}

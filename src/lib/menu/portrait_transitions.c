@@ -1,7 +1,8 @@
-/* Portrait polygon clips and the status banner cross-fade primitives. */
+/* Portrait quads, clipping and transition construction. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
+#include "fft/gfx_primitive.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/portrait.h"
@@ -9,6 +10,29 @@
 #include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+/* WORLD keeps its roster-slot builder in its own source. */
+#ifdef FFT_EVENT
+/* ATTACK marks formation portraits with bit 0x200; REQUIRE uses bit 0x100. */
+#    ifdef FFT_EVENT_ATTACK
+enum { PORTRAIT_FORMATION_ICON = 0x200 };
+#    endif
+#    ifdef FFT_EVENT_REQUIRE
+enum { PORTRAIT_FORMATION_ICON = 0x100 };
+#    endif
+
+/* Other menu overlays leave the quad alone when either suppress bit is set. */
+void portrait_build_poly(s32 portrait_id, POLY_FT4* poly) {
+    if ((portrait_id & MENU_PORTRAIT_CLUT_SUPPRESS_MASK) == 0) {
+        portrait_build_unit_poly(poly, portrait_id);
+    }
+#    if defined(FFT_EVENT_ATTACK) || defined(FFT_EVENT_REQUIRE)
+    if ((portrait_id & PORTRAIT_FORMATION_ICON) != 0) {
+        gfx_set_formation_icon_uv(poly, portrait_id & 0xff);
+    }
+#    endif
+}
+#endif
 
 /* Narrow a portrait quad by amount pixels from its right edge, moving its texture start to keep
  * the image aligned (along v for a rotated texture). */

@@ -1,4 +1,4 @@
-/* The thread drawing the selected unit's equipment and ability status panel. */
+/* The combined equipment and ability panel, and yield-and-exit entries for overlays without separate panels. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
@@ -16,6 +16,21 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* The overlays with separate rendered panels keep their local bodies. */
+#if defined(FFT_EVENT_ATTACK) || defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_DEBUGCHR) || defined(FFT_EVENT_REQUIRE)
+void unit_panel_equipment_thread(void) {
+    thread_yield();
+    thread_exit_current();
+}
+
+void unit_panel_ability_thread(void) {
+    thread_yield();
+    thread_exit_current();
+}
+#endif
+
+/* BUNIT and WORLD keep the combined body that uses the field-y value and their equipment buffers. */
+#if defined(FFT_EVENT_ATTACK) || defined(FFT_EVENT_DEBUGCHR) || defined(FFT_EVENT_EQUIP) || defined(FFT_EVENT_REQUIRE)
 /* The selected unit's equipment and ability panel as unit_panel_equipment_ability_thread
  * draws it, from this program's own buffers and label layouts, with the draw offset following
  * the screen polarity. Runs until a stop request. */
@@ -219,3 +234,4 @@ void unit_panel_equipment_ability_thread(void) {
     thread_yield();
     thread_exit_current();
 }
+#endif

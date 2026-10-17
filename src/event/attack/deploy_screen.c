@@ -1,5 +1,4 @@
-/* The deployment screen, including roster tiles, navigation input, unit selection, cursor primitives, valid tiles, the
- * render thread and portrait quads. */
+/* Deployment tile membership, state, input and rendering. */
 
 #include "fft/ability.h"
 #include "fft/battle_map.h"
@@ -49,6 +48,22 @@ static void deploy_select_first_deployable_unit(void);
 static void deploy_update_cursors(s32 frame, deploy_render_buffer_t* buffer);
 static void deploy_text_graphics_thread(void);
 static void deploy_init_frame_quads(void);
+
+/* Return 1 when the roster unit stands on one of the current squad's 5x5 deployment tiles.
+ * ATTACK also links this body as deploy_is_roster_unit_deployed before the shared thread wait helper. */
+s32 deploy_has_roster_unit_on_tiles(s32 roster_id) {
+    s32 row;
+    s32 column;
+
+    for (row = 0; row < 5; row++) {
+        for (column = 0; column < 5; column++) {
+            if (g_deploy_roster_id_by_tile[row][column] == roster_id) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 /* Take roster unit `roster_id` off the 5x5 deployment grid by clearing the first tile
  * that holds it. */

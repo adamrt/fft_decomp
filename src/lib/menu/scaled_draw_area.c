@@ -1,4 +1,4 @@
-/* The double-buffered draw area pair of a window's open and close zoom, kept at the left edge. */
+/* Scaled window draw-area packet construction and initialization. */
 
 #include "fft/gfx.h"
 #include "fft/memory.h"
@@ -16,8 +16,7 @@
  * g_menu_draw_area_scale_percent[scale_index] percent of its size;
  * scale_index is doubled at event speed 2 and capped at 11. The second
  * rectangle is the frame buffer's own area. With `lower_half` zero both are
- * placed in the buffer at y 0xF0. REQUIRE then forces both
- * rectangles to x 0, discarding the horizontal crop position.
+ * placed in the buffer at y 0xF0.
  */
 void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const unit_panel_thread_t* thread) {
@@ -51,8 +50,18 @@ void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const 
         packet->rects[1].y = 0xF0;
         packet->rects[0].y += 0xF0;
     }
+#ifdef FFT_EVENT_REQUIRE
+    /* REQUIRE anchors both rectangles at the left edge; other overlays keep the horizontal crop. */
     packet->rects[0].x = 0;
     packet->rects[1].x = 0;
+#endif
     SetDrawArea(&packet->areas[0], &packet->rects[0]);
     SetDrawArea(&packet->areas[1], &packet->rects[1]);
+}
+
+/* Clear the first draw area's width and install the default second draw area. */
+void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data) {
+    data->rects[0].w = 0;
+    data->rects[1].h = 0;
+    mem_copy_bytes_nonempty(&data->rects[1], &g_menu_draw_area_template, sizeof(RECT));
 }

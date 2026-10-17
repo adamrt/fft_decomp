@@ -88,6 +88,7 @@ units:
   - {name: tutorial, source: src/world/tutorial.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801cc570, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc574, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc578, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc57c, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc674, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc76c, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc778, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc784, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: tutorial_controller_input, source: src/world/tutorial_controller_input.c, data: [{addr: 0x801ca6f8, size: 64, hash: f5a5fd42d16a2030}, {addr: 0x801ca738, size: 2, hash: 96a296d224f285c6}]}
   - {name: unit_name_list, source: src/lib/event/unit_name_list.c}
+  - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: unit_status_lists, source: src/lib/event/unit_status_lists.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156198, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x801561d0, size: 76, hash: ec0d1125a0b03828}]}
   - {name: window_images, source: src/lib/event/window_images.c, data: [{addr: 0x80156c40, size: 16, hash: 0e0f25166632e4a6}, {addr: 0x80156c50, size: 16, hash: e5c40d36a431f4b8}]}
   - {name: window_state, source: src/lib/menu/window_state.c, profile: gcc-2.6.3_O1_aspsx-2.34}
@@ -638,7 +639,7 @@ functions:
   - {addr: 0x8010ebd0, size: 984, name: screen_animate_window_quads_to_rects, hash: d8d4f05a2221c087, unit: message_box}
   - {addr: 0x8010efa8, size: 680, name: screen_animate_window_quad_crop, hash: 18f8ec0cf76ca5d5, unit: message_box}
   - {addr: 0x8010f250, size: 4112, name: message_box_thread, hash: 5bbee59933dd66a2, unit: message_box}
-  - {addr: 0x80110260, size: 544, name: unit_panel_init_primitives, hash: 2bdc8929b9ed31ea, source: src/lib/menu/unit_panel_init_primitives.c}
+  - {addr: 0x80110260, size: 544, name: unit_panel_init_primitives, hash: 2bdc8929b9ed31ea, unit: unit_panel_primitives}
   - {addr: 0x80110480, size: 1588, name: unit_panel_equipment_thread, hash: a00168623e174937, unit: list_threads}
   - {addr: 0x80110ab4, size: 1468, name: unit_panel_ability_thread, hash: 8a0b24b1c44d851a, unit: list_threads}
   - {addr: 0x80111070, size: 1920, name: unit_panel_equipment_ability_thread, hash: 13121306aa5d00d2, source: src/lib/menu/unit_panel_equipment_ability_thread.c}
