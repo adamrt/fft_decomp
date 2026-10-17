@@ -1850,7 +1850,7 @@ data:
   - {addr: 0x80194fe0, name: g_screen_text_shop_menu_labels_data}
   - {addr: 0x801950d6, name: g_shop_background_visible}
   - {addr: 0x801950d7, name: g_shop_item_category}
-  - {addr: 0x801950da, name: g_shop_quantity_limit}
+  - {addr: 0x801950d8, name: g_shop_quantity_range}
   - {addr: 0x801950e4, name: g_shop_quantity_menu_data}
   - {addr: 0x8019515c, name: g_shop_main_menu_thread_data}
   - {addr: 0x80195198, name: g_fur_shop_menu_thread_data}

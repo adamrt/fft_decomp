@@ -46,6 +46,9 @@ extern u8 g_shop_fitting_cost_menu_script[103];
 extern u8 g_fur_shop_purchase_menu_script[246];
 extern u8 g_soldier_office_fee_script[34];
 
+/* The quantity menu passes this range to screen_labeled_number_entry_thread. */
+extern screen_number_range_t g_shop_quantity_range;
+
 static void soldier_office_draw_unit_count(void);
 static void shop_fitting_undo(void);
 static void shop_fitting_buy(void);
@@ -243,8 +246,7 @@ void shop_run_screen(s32 shop_type) {
     heap_free(tim);
 }
 
-/* The on_change callback of the shop's quantity range (the range record whose max is
- * g_shop_quantity_limit): nothing to do. */
+/* The on_change callback of the shop's quantity range: nothing to do. */
 void shop_noop_callback(void) {
 }
 
@@ -549,7 +551,7 @@ static s32 shop_buy_quantity_prompt(void) {
             return SHOP_QUANTITY_CANNOT_AFFORD;
         }
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF808, 0);
-        g_shop_quantity_limit = count;
+        g_shop_quantity_range.bounds.max = count;
         g_shop_buy_total_shown = 0;
         g_sound_suppressed = 1;
     }
@@ -674,7 +676,7 @@ void shop_buy_equip_step(void) {
                 g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
                     g_item_preview_stat_detail.state.equipment, formation_ability_has_two_hands(g_unit_selected_index));
                 g_shop_buy_equip_preview_visible = 1;
-                g_item_preview_stat_detail.state.equipment[slot] = g_shop_buy_equip_item | SHOP_FITTING_ITEM;
+                g_item_preview_stat_detail.state.equipment[slot] = g_shop_buy_equip_item | FORMATION_HIGHLIGHT;
             }
         }
     } else {
@@ -814,7 +816,7 @@ static s32 shop_sell_quantity_prompt(void) {
             return -1;
         }
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80F, 0);
-        g_shop_quantity_limit = count;
+        g_shop_quantity_range.bounds.max = count;
         g_shop_sell_confirm_shown = 0;
         g_sound_suppressed = 1;
     }
@@ -1907,7 +1909,7 @@ static s32 fur_shop_sell_quantity_prompt(void) {
             return -1;
         }
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF843, 0);
-        g_shop_quantity_limit = count;
+        g_shop_quantity_range.bounds.max = count;
         g_shop_sell_total_shown = 0;
         g_sound_suppressed = 1;
     }
@@ -2104,7 +2106,7 @@ static s32 fur_shop_buy_quantity_prompt(void) {
         if (count >= stock) {
             count = stock;
         }
-        g_shop_quantity_limit = count;
+        g_shop_quantity_range.bounds.max = count;
         g_sound_suppressed = 1;
     }
     g_fur_shop_purchase_result = menu_start_managed_thread(SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_quantity_menu_data);

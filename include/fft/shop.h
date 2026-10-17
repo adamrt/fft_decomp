@@ -91,7 +91,6 @@ enum {
 };
 
 extern u8 g_shop_item_category;
-extern s16 g_shop_quantity_limit;
 extern menu_entry_t g_shop_quantity_menu_data[2];
 extern u8 g_shop_quantity_menu_running;
 extern s8 g_shop_buy_list_initialized;

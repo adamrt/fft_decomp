@@ -399,7 +399,7 @@ enum {
     ITEM_LIST_END = 0xff,             /* the item id that ends an item list */
     SHOP_FITTING_ITEM = 0x8000,       /* equipment 16-bit values: an unpaid shop item tried on in the fitting room */
     /* The equipment values of a WORLD stat detail: the top two bits pick the name's text palette, and
-     * HIGHLIGHT, the same bit as SHOP_ITEM, draws it in the highlight palette. */
+     * HIGHLIGHT, the same bit as SHOP_FITTING_ITEM, draws it in the highlight palette. */
     FORMATION_PALETTE_MASK = 0xc000,
     FORMATION_HIGHLIGHT = 0x8000
 };
