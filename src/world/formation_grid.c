@@ -24,6 +24,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Left edge of the slanted gauge fill; the right edge is 32 pixels to the right. */
+typedef struct formation_gauge_offsets {
+    s8 top_x;
+    s8 top_y;
+    s8 bottom_x;
+    s8 bottom_y;
+} formation_gauge_offsets_t;
+typedef char formation_gauge_offsets_size_must_be_4[sizeof(formation_gauge_offsets_t) == 4 ? 1 : -1];
+
+extern formation_gauge_offsets_t g_formation_gauge_bar_offsets;
+
 static s32 formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor);
 static void formation_draw_cursor_trail(point16_t* cursor);
 static void formation_draw_egg_sprite(
@@ -1239,15 +1250,15 @@ static void formation_draw_unit_readout(
             rect.w = 0x25;
             rect.h = 3;
             menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_menu_cursor_texture_page, clut, priority - 1);
-            xy[0].x = g_formation_gauge_bar_offsets[0] + x;
-            xy[0].y = g_formation_gauge_bar_offsets[1] + top + 8;
+            xy[0].x = g_formation_gauge_bar_offsets.top_x + x;
+            xy[0].y = g_formation_gauge_bar_offsets.top_y + top + 8;
             xy[3].x = xy[1].x = 0x20;
             xy[1].x += xy[0].x;
-            xy[1].y = g_formation_gauge_bar_offsets[1] + top + 8;
-            xy[2].x = g_formation_gauge_bar_offsets[2] + x;
-            xy[2].y = g_formation_gauge_bar_offsets[3] + top + 8;
+            xy[1].y = g_formation_gauge_bar_offsets.top_y + top + 8;
+            xy[2].x = g_formation_gauge_bar_offsets.bottom_x + x;
+            xy[2].y = g_formation_gauge_bar_offsets.bottom_y + top + 8;
             xy[3].x += xy[2].x;
-            xy[3].y = g_formation_gauge_bar_offsets[3] + top + 8;
+            xy[3].y = g_formation_gauge_bar_offsets.bottom_y + top + 8;
             gfx_enqueue_gouraud_quad(xy, rgb, 0, priority);
         } else if (g_formation_stat_display_mode == MENU_UNIT_READOUT_LEVEL_EXP) {
             s32 y40;

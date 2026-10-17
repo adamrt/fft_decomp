@@ -284,7 +284,6 @@ extern menu_draw_number_command_t g_formation_brave_number;
 extern menu_draw_number_command_t g_formation_faith_number;
 extern menu_draw_number_command_t g_formation_brave_number_wide;
 extern menu_draw_number_command_t g_formation_faith_number_wide;
-extern s8 g_formation_gauge_bar_offsets[4];
 extern rgb24_t g_formation_hp_gauge_colors[4];
 extern rgb24_t g_formation_mp_gauge_colors[4];
 extern rgb24_t g_formation_ct_gauge_colors[4];
