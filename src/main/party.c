@@ -648,7 +648,7 @@ const item_data_t* item_get_data(s32 item_id) {
 }
 
 /* Return a job's data record, or NULL for ids at or past JOB_ID_COUNT. */
-job_data_t* job_get_data(s32 job_id) {
+const job_data_t* job_get_data(s32 job_id) {
     if (job_id < JOB_ID_COUNT) {
         return &g_job_data[job_id];
     }

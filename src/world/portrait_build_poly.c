@@ -21,7 +21,7 @@
  */
 void portrait_build_poly(s32 roster_slot, POLY_FT4* poly) {
     party_unit_t* party = party_get_unit(roster_slot);
-    job_data_t* job;
+    const job_data_t* job;
     u32 sprite = party->sprite_set;
     u8 job_id;
     s32 offset;

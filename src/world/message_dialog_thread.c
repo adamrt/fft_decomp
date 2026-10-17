@@ -79,7 +79,7 @@ void message_dialog_thread(void) {
     menu_window_buffer_t* select_hidden_window;
     menu_window_buffer_t* select_hidden_window_next;
     party_unit_t* party;
-    job_data_t* job;
+    const job_data_t* job;
     const u8* text;
     s16 cursor_x;
     s32 column;

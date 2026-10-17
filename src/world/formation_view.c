@@ -77,7 +77,7 @@ void formation_zodiac_backdrop_thread(void) {
  */
 s32 formation_get_unit_palette_index(s32 party_index) {
     party_unit_t* unit = party_get_unit(party_index);
-    job_data_t* job;
+    const job_data_t* job;
     s32 portrait;
     s32 product;
     s32 palette_base;
@@ -137,7 +137,7 @@ s32 formation_get_unit_palette_index(s32 party_index) {
  * and for monsters bits 10-11 carry the job's portrait palette. */
 s32 portrait_get_party_unit_code(s32 party_index) {
     party_unit_t* party_unit = party_get_unit(party_index);
-    job_data_t* job_data;
+    const job_data_t* job_data;
     u32 sprite_set;
     s32 sprite_sheet;
     s32 portrait_code;

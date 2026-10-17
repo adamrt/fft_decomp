@@ -43,7 +43,7 @@ typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 extern job_data_t g_job_data[];
 extern job_data_t* g_job_data_pointer;
 
-job_data_t* job_get_data(s32 job_id);
+const job_data_t* job_get_data(s32 job_id);
 s32 job_find_by_skillset(u8 skillset_id);
 
 /* job ids */
@@ -347,7 +347,7 @@ s32 job_add_proposition_jp(u32 party_index, s32 jp);
 /* menu library helpers */
 struct party_unit;
 
-/* The menu library's job helpers (src/event/menu), compiled into WORLD and the
+/* The menu library's job helpers (src/lib/menu), compiled into WORLD and the
  * EVENT overlays. */
 void job_calculate_and_store_unlocks(struct party_unit* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
 s32 job_find_first_for_skillset(s32 skillset);

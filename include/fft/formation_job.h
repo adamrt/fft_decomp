@@ -30,6 +30,6 @@ void formation_job_wheel_menu(void);
 /* party portraits */
 /* The job record the ATTACK and REQUIRE party portrait builders last looked
  * up; each overlay defines its own. */
-extern job_data_t* g_formation_job_data;
+extern const job_data_t* g_formation_job_data;
 
 #endif
