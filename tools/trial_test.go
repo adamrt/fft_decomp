@@ -139,3 +139,44 @@ func TestTrialDefinesReachThePreprocessor(t *testing.T) {
 		t.Fatalf("trial copy missing: %v", err)
 	}
 }
+
+func TestTrialPreservesProgramMacrosAndTargetProfile(t *testing.T) {
+	requirePinnedToolchain(t)
+	p := validTestProject(t)
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, _ := config.module("event-attack")
+	f := m.function("attack_entry")
+	m.Defines = []defineSpec{{Name: "VARIANT_VALUE", Value: "7"}}
+	m.Units = []unitDef{{Name: "entry", Source: "src/event/attack_entry.c", Profile: "gcc-2.6.3_O0_aspsx-2.34"}}
+	f.Unit, f.Source = "entry", ""
+	body := `#if defined(FFT_EVENT) && defined(FFT_EVENT_ATTACK) && !defined(FFT_BATTLE)
+int attack_entry(void) { return VARIANT_VALUE; }
+#else
+#error wrong program view
+#endif
+`
+	writeTestFile(t, filepath.Join(p.root, "src/event/attack_entry.c"), []byte(body))
+	resolver := newSymbolResolver(config)
+	// Compile the same body as a standalone entry using its effective unit
+	// profile to obtain a baseline without needing an original disc fixture.
+	baseline := *f
+	baseline.Profile, baseline.Unit, baseline.Source = m.profileOf(f), "", m.sourceOf(f)
+	sections, err := p.compileFunction(resolver, m, &baseline, filepath.Join(p.root, "build/learn"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Size, f.Hash = len(sections[".text"]), shortHash(sections[".text"])
+	spec := trialSpec{Module: m.ID, Entry: f.Name, Source: m.sourceOf(f)}
+	result := p.runTrial(config, resolver, map[string][]byte{}, spec, 0, 4)
+	if result.Status != "match" {
+		t.Fatalf("program macros or unit profile were lost: %+v", result)
+	}
+	spec.Defines = map[string]string{"VARIANT_VALUE": "9"}
+	result = p.runTrial(config, resolver, map[string][]byte{}, spec, 1, 4)
+	if result.Status != "differ" {
+		t.Fatalf("variant override did not reach the same program view: %+v", result)
+	}
+}

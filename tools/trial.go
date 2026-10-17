@@ -33,8 +33,8 @@ type trialSpec struct {
 	Subst map[string]string `yaml:"subst,omitempty"`
 	// Defines are VARIANT_ values for this compile, over the module's own.
 	Defines map[string]string `yaml:"defines,omitempty"`
-	// Includes are headers prepended to the copy, such as the entry's module
-	// header that declares the substituted names.
+	// Includes are concept headers prepended to the copy to declare
+	// substituted names. The candidate's own includes remain intact.
 	Includes []string `yaml:"includes,omitempty"`
 	// Label names the trial in reports; empty means "<module> <entry> <- <source>".
 	Label string `yaml:"label,omitempty"`
@@ -231,7 +231,10 @@ func (p project) runTrial(config *projectConfig, resolver symbolResolver, images
 	for name, value := range spec.Defines {
 		defines[name] = value
 	}
-	flags := make([]string, 0, len(defines))
+	flags := make([]string, 0, len(defines)+len(m.macroNames()))
+	for _, name := range m.macroNames() {
+		flags = append(flags, "-D"+name+"=1")
+	}
 	for _, name := range sortedKeys(mapKeysTrue(defines)) {
 		flags = append(flags, "-D"+name+"="+defines[name])
 	}
@@ -389,7 +392,7 @@ func (p project) trialCommand(args []string) error {
 	var substFlags, defineFlags, includeFlags repeatedFlag
 	flags.Var(&substFlags, "subst", "OLD=NEW identifier substitution (repeatable)")
 	flags.Var(&defineFlags, "define", "VARIANT_NAME=VALUE for this compile (repeatable)")
-	flags.Var(&includeFlags, "include", "header to prepend to the copy, such as fft/world.h (repeatable)")
+	flags.Var(&includeFlags, "include", "header to prepend to the copy, such as fft/menu.h (repeatable)")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}

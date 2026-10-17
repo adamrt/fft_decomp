@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/binary"
+	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -149,7 +151,10 @@ func TestTwinGroupTrialsSubstituteRenamesBothWays(t *testing.T) {
 		},
 		Renames: []map[string]string{{"battle": "g_battle_value", "event-attack": "g_main_value"}},
 	}
-	specs := twinGroupTrials(config, group)
+	specs, err := p.twinGroupTrials(config, group)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(specs) != 2 {
 		t.Fatalf("specs = %+v", specs)
 	}
@@ -169,5 +174,87 @@ func TestTwinGroupTrialsSubstituteRenamesBothWays(t *testing.T) {
 	}
 	if _, err := p.twinTrials(config, "build/analysis/twins/none.yaml", []string{"t0001"}); err == nil {
 		t.Fatal("missing report accepted")
+	}
+}
+
+func TestTwinTrialIncludesUseCurrentSourceAndProgramView(t *testing.T) {
+	p := validTestProject(t)
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, _ := config.module("event-attack")
+	f := m.function("attack_entry")
+	// The current unit binding, not the report's old source path, owns the
+	// destination dependencies. Keep only its active includes, in source order.
+	m.Units = []unitDef{{Name: "entry", Source: "src/event/entry.c"}}
+	f.Unit, f.Source = "entry", ""
+	m.Defines = []defineSpec{{Name: "VARIANT_DETAIL", Value: "2"}}
+	writeTestFile(t, filepath.Join(p.root, "src/event/entry.c"), []byte(`#include "fft/menu.h"
+#if defined(FFT_EVENT) && defined(FFT_EVENT_ATTACK)
+#include "fft/deploy.h"
+#else
+#include "fft/unrelated.h"
+#endif
+#if VARIANT_DETAIL == 2
+# include <psx/types.h> /* the selected detail */
+#endif
+#include "fft/menu.h"
+void attack_entry(void) {}
+`))
+	group := twinsGroup{ID: "t0001", Members: []twinsMember{
+		{Module: "battle", Name: "battle_helper", Source: "src/battle/battle_helper.c"},
+		{Module: "event-attack", Name: "attack_entry", Source: "src/event/old_entry.c"},
+	}}
+	specs, err := p.twinGroupTrials(config, group)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"fft/menu.h", "fft/deploy.h", "psx/types.h"}
+	if len(specs) != 2 || !reflect.DeepEqual(specs[0].Includes, want) || len(specs[1].Includes) != 0 {
+		t.Fatalf("trial includes = %+v, want %v and no additions", specs, want)
+	}
+	writeTestFile(t, filepath.Join(p.root, "src/event/entry.c"), []byte("#include HEADER_MACRO\nvoid attack_entry(void) {}\n"))
+	if _, err := p.twinGroupTrials(config, group); err == nil || !strings.Contains(err.Error(), "literal include path") {
+		t.Fatalf("macro include should need an explicit trial: %v", err)
+	}
+}
+
+func TestTwinTrialsCompileWithDestinationConceptHeaders(t *testing.T) {
+	requirePinnedToolchain(t)
+	p := validTestProject(t)
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Each source includes only the concept that declares its own global.
+	// A cross-source trial also needs the other global's owning header.
+	writeTestFile(t, filepath.Join(p.root, "include/fft/left.h"), []byte("extern int g_battle_value;\n"))
+	writeTestFile(t, filepath.Join(p.root, "include/fft/right.h"), []byte("extern int g_main_value;\n"))
+	writeTestFile(t, filepath.Join(p.root, "src/battle/battle_helper.c"), []byte("#include \"fft/left.h\"\nint battle_helper(void) { return g_battle_value; }\n"))
+	writeTestFile(t, filepath.Join(p.root, "src/event/attack_entry.c"), []byte("#include \"fft/right.h\"\nint attack_entry(void) { return g_main_value; }\n"))
+	resolver := newSymbolResolver(config)
+	group := twinsGroup{ID: "t0001", Members: []twinsMember{
+		{Module: "battle", Name: "battle_helper", Source: "src/battle/battle_helper.c"},
+		{Module: "event-attack", Name: "attack_entry", Source: "src/event/attack_entry.c"},
+	}, Renames: []map[string]string{{"battle": "g_battle_value", "event-attack": "g_main_value"}}}
+	for _, member := range group.Members {
+		m, _ := config.module(member.Module)
+		f := m.function(member.Name)
+		sections, err := p.compileFunction(resolver, m, f, filepath.Join(p.root, "build/learn", member.Module))
+		if err != nil {
+			t.Fatal(err)
+		}
+		f.Size, f.Hash = len(sections[".text"]), shortHash(sections[".text"])
+	}
+	specs, err := p.twinGroupTrials(config, group)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for index, spec := range specs {
+		result := p.runTrial(config, resolver, map[string][]byte{}, spec, index, 4)
+		if result.Status != "match" {
+			t.Fatalf("cross-source trial: %+v", result)
+		}
 	}
 }

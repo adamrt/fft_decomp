@@ -813,7 +813,11 @@ func (p project) twinTrials(config *projectConfig, reportPath string, ids []stri
 			continue
 		}
 		delete(wanted, group.ID)
-		specs = append(specs, twinGroupTrials(config, group)...)
+		trials, err := p.twinGroupTrials(config, group)
+		if err != nil {
+			return nil, fmt.Errorf("twin group %s: %w", group.ID, err)
+		}
+		specs = append(specs, trials...)
 	}
 	if len(wanted) > 0 {
 		return nil, fmt.Errorf("no twin groups %s in %s", strings.Join(sortedKeys(wanted), ", "), reportPath)
@@ -824,20 +828,49 @@ func (p project) twinTrials(config *projectConfig, reportPath string, ids []stri
 	return specs, nil
 }
 
-// moduleHeader names the umbrella header that declares a module's own
-// symbols, which a twin trial prepends so substituted names resolve.
-func moduleHeader(id string) string {
-	switch {
-	case strings.HasPrefix(id, "event-"):
-		return "fft/event_" + strings.TrimPrefix(id, "event-") + ".h"
-	case strings.HasPrefix(id, "effect-"):
-		return "fft/effect.h"
+// twinTrialIncludes uses the destination source's concept dependencies to
+// declare substituted names. Resolve conditional includes in that program's
+// view; the trial keeps the candidate's own includes as well.
+func (p project) twinTrialIncludes(m *moduleSpec, f *functionSpec) ([]string, error) {
+	source := m.sourceOf(f)
+	path, err := projectPath(p.root, source, "twin destination source")
+	if err != nil {
+		return nil, err
 	}
-	return "fft/" + id + ".h"
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	active, err := activeConditionalText(string(data), m.macros())
+	if err != nil {
+		return nil, fmt.Errorf("%s [%s]: %w", source, m.ID, err)
+	}
+	var includes []string
+	seen := map[string]bool{}
+	for index, line := range strings.Split(active, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		word, header := directiveWord(trimmed)
+		if word != "include" {
+			continue
+		}
+		if len(header) < 3 || !(header[0] == '"' && header[len(header)-1] == '"' || header[0] == '<' && header[len(header)-1] == '>') {
+			return nil, fmt.Errorf("%s:%d: twin trial needs a literal include path, got %q", source, index+1, header)
+		}
+		header = header[1 : len(header)-1]
+		if !seen[header] {
+			seen[header] = true
+			includes = append(includes, header)
+		}
+	}
+	return includes, nil
 }
 
-func twinGroupTrials(config *projectConfig, group twinsGroup) []trialSpec {
+func (p project) twinGroupTrials(config *projectConfig, group twinsGroup) ([]trialSpec, error) {
 	var specs []trialSpec
+	includes := map[string][]string{}
 	// The rename rows are keyed like memberKeys: module, or module:name.
 	keyOf := func(member twinsMember) string {
 		count := 0
@@ -856,6 +889,20 @@ func twinGroupTrials(config *projectConfig, group twinsGroup) []trialSpec {
 			if to.Source == from.Source {
 				continue
 			}
+			key := to.Module + ":" + to.Name
+			if _, loaded := includes[key]; !loaded {
+				m, err := resolveModuleName(config, to.Module)
+				if err != nil {
+					return nil, err
+				}
+				f := m.function(to.Name)
+				if f == nil {
+					return nil, fmt.Errorf("no function %s in %s", to.Name, m.ID)
+				}
+				if includes[key], err = p.twinTrialIncludes(m, f); err != nil {
+					return nil, err
+				}
+			}
 			subst := map[string]string{}
 			for _, row := range group.Renames {
 				old, new := row[keyOf(from)], row[keyOf(to)]
@@ -870,7 +917,7 @@ func twinGroupTrials(config *projectConfig, group twinsGroup) []trialSpec {
 				}
 			}
 			specs = append(specs, trialSpec{Module: to.Module, Entry: to.Name, Source: from.Source, Symbol: symbol, Subst: subst,
-				Includes: []string{moduleHeader(to.Module)},
+				Includes: includes[key],
 				Label:    fmt.Sprintf("%s %s %s <- %s:%s", group.ID, to.Module, to.Name, from.Module, from.Name)})
 		}
 	}
@@ -884,5 +931,5 @@ func twinGroupTrials(config *projectConfig, group twinsGroup) []trialSpec {
 			unique = append(unique, spec)
 		}
 	}
-	return unique
+	return unique, nil
 }
