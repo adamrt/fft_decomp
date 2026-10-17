@@ -36,15 +36,14 @@ typedef struct world_map_route_point {
     s32 distance;
 } world_map_route_point_t;
 
-/* A route header followed by count travel points. */
-typedef struct world_map_route {
+/* Four-byte route header; count travel points follow it in the loaded data. */
+typedef struct world_map_route_header {
     u8 count;
     u8 start_location;
     u8 end_location;
     u8 cost;
-    world_map_route_point_t points[0]; /* 0x04; variable length */
-} world_map_route_t;
-typedef char world_map_route_size_must_be_4[sizeof(world_map_route_t) == 4 ? 1 : -1];
+} world_map_route_header_t;
+typedef char world_map_route_header_size_must_be_4[sizeof(world_map_route_header_t) == 4 ? 1 : -1];
 
 /* One random-encounter tier: the story-progress threshold that selects it,
  * the chance an encounter happens (a roll of 0..99 at or below it), and the
@@ -79,10 +78,9 @@ extern u8 g_world_map_dot_pulse_direction;
 extern u8 g_world_map_dot_pulse_phase;
 
 /* The route records by route id: a pointer cell to the WORLD_MAP_ROUTE_COUNT record pointers. */
-extern world_map_route_t** g_world_map_routes;
+extern world_map_route_header_t** g_world_map_routes;
 
-/* The route polylines by route id, as g_world_map_routes: each is a packed s16 count followed by that many
- * (x, y) pairs. */
+/* Polyline for each route: a 16-bit count followed by packed x/y pairs. */
 extern u16** g_world_map_route_polylines;
 
 static world_map_dot_source_t g_world_map_dot_source_data[LOCATION_COUNT];
@@ -618,7 +616,7 @@ void world_map_draw_routes(GsOT* ot) {
  * target's `or` operand order. */
 static s32 travel_begin_segment(travel_t* state, u32 route, s32 step) {
     s32 unused[8];
-    world_map_route_t* record;
+    world_map_route_header_t* record;
     s32 index;
     world_map_route_point_t* point_down;
     world_map_route_point_t* point_up;
@@ -626,17 +624,17 @@ static s32 travel_begin_segment(travel_t* state, u32 route, s32 step) {
     s32 flags;
 
     /* Direct indexing or separate typed locals move the table load after the route-ID store. */
-    record = (world_map_route_t*)g_world_map_routes;
+    record = (world_map_route_header_t*)g_world_map_routes;
     state->route_id = route & TRAVEL_PATH_ROUTE_MASK;
     flags = state->flags;
     state->flags = flags | ((route >> 7) & TRAVEL_REVERSED);
-    record = ((world_map_route_t**)record)[state->route_id];
+    record = ((world_map_route_header_t**)record)[state->route_id];
     if (state->flags & TRAVEL_REVERSED) {
         state->leg_end_location = record->start_location;
         state->leg_start_location = record->end_location;
         /* Direct point indexing moves the header addition past the shift. */
         index = (record->count - step - 1) * (sizeof(world_map_route_point_t) / sizeof(u32))
-            + offsetof(world_map_route_t, points) / sizeof(u32);
+            + sizeof(world_map_route_header_t) / sizeof(u32);
         point_down = (world_map_route_point_t*)(index * sizeof(u32) + (s32)record);
         word = point_down->position;
         state->position.vx = word;
@@ -652,8 +650,7 @@ static s32 travel_begin_segment(travel_t* state, u32 route, s32 step) {
     } else {
         state->leg_start_location = record->start_location;
         state->leg_end_location = record->end_location;
-        index = step * (sizeof(world_map_route_point_t) / sizeof(u32))
-            + offsetof(world_map_route_t, points) / sizeof(u32);
+        index = step * (sizeof(world_map_route_point_t) / sizeof(u32)) + sizeof(world_map_route_header_t) / sizeof(u32);
         point_up = (world_map_route_point_t*)(index * sizeof(u32) + (s32)record);
         word = point_up->position;
         state->position.vx = word;
@@ -683,9 +680,9 @@ static s32 travel_begin_segment(travel_t* state, u32 route, s32 step) {
  * register, from which the other three coordinates are addressed. The unused
  * local reproduces the target's frame size. */
 void world_map_prepare_path_animation(s32 from, s32 to) {
-    world_map_route_t** records;
+    world_map_route_header_t** records;
     u16* data;
-    world_map_route_t* record;
+    world_map_route_header_t* record;
     s32 unused[2];
     s32 first;
     s32 second;
@@ -813,9 +810,9 @@ static void travel_find_best_path(s32 from, s32 to) {
     s32 unused[4];
     s32 cost;
     s32 route;
-    world_map_route_t** table;
+    world_map_route_header_t** table;
     s32 i;
-    world_map_route_t* record;
+    world_map_route_header_t* record;
     s32 start;
     s32 end;
     s32 length;

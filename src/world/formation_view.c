@@ -18,7 +18,7 @@
 
 static zodiac_draw_context_t g_formation_view
     = { 0, 128, 1, 8192, 8192, { 0, 0, 0, 0, 0, 0, 0, 0 }, { { 0, 1, 128, 0, 0, 1, 0, 1 }, { 0, 0 } } };
-/* Portrait code per sprite set: low byte is the portrait index. */
+/* Portrait index per resolved sprite sheet. */
 static u16 g_formation_portrait_by_sprite_sheet[212] = { 0, 0, 1, 2, 3, 120, 121, 4, 122, 123, 124, 125, 5, 6, 126, 7,
     127, 13, 9, 10, 11, 12, 19, 13, 129, 14, 15, 130, 16, 131, 23, 17, 133, 18, 19, 134, 135, 136, 137, 138, 18, 14, 20,
     139, 21, 141, 142, 20, 21, 140, 22, 0, 23, 0, 0, 0, 0, 0, 141, 142, 143, 0, 144, 0, 145, 0, 0, 146, 0, 147, 0, 0,
