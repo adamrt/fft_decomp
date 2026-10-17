@@ -6,10 +6,18 @@
 #include "fft/unit.h"
 #include "fft/unit_party.h"
 #include "psx/libc.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
-/* Indexed by formation_sort_key_e; unselectable keys retain their retail entries. */
-static s8 g_formation_sort_field_indices[12] = { 22, 0, 18, 0, 19, 20, 0, 8, 0, 11, 0, 14 };
+/* Signed-halfword indices selected by formation_sort_key_e. Unselectable keys
+ * retain their retail entries, including CT max at index 11. */
+static s8 g_formation_sort_field_indices[12] = { offsetof(formation_unit_t, identity.roster_slot) / sizeof(s16),
+    offsetof(formation_unit_t, status.level) / sizeof(s16), offsetof(formation_unit_t, identity.job_id) / sizeof(s16),
+    0, offsetof(formation_unit_t, identity.brave) / sizeof(s16),
+    offsetof(formation_unit_t, identity.faith) / sizeof(s16), 0,
+    offsetof(formation_unit_t, status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max) / sizeof(s16), 0,
+    offsetof(formation_unit_t, status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max) / sizeof(s16), 0,
+    offsetof(formation_unit_t, status.gauges[MENU_UNIT_STATUS_GAUGE_CT].max) / sizeof(s16) };
 
 /* Sort a -1 terminated item-id list in place for a shop or equipment menu.
  *
