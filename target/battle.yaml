@@ -1387,13 +1387,13 @@ functions:
   - {addr: 0x801869ec, size: 268, name: formula_apply_song_abilities, hash: 301a70fb7154fd40, unit: formula_core, rodata: [{addr: 0x8017423c, size: 28, hash: 80e66fa8fd4b1cef}]}
   - {addr: 0x80186af8, size: 268, name: formula_apply_dance_abilities, hash: c8b849f77b62eb0d, unit: formula_core, rodata: [{addr: 0x8017425c, size: 28, hash: cd23e62c0d755c94}]}
   - {addr: 0x80186c04, size: 252, name: formula_apply_talk_skill, hash: 10fdfa9a2ac61d52, unit: formula_effects, rodata: [{addr: 0x8017427c, size: 28, hash: 451f45e2c1aac03b}]}
-  - {addr: 0x80186d00, size: 44, name: formula_add_brave_y, hash: 3433e4c5554e8f14, unit: formula_effects}
-  - {addr: 0x80186d2c, size: 44, name: formula_add_speed_y, hash: 0ef381316ef5960a, unit: formula_effects}
+  - {addr: 0x80186d00, size: 44, name: formula_cheer_up, hash: 3433e4c5554e8f14, unit: formula_effects}
+  - {addr: 0x80186d2c, size: 44, name: formula_yell, hash: 0ef381316ef5960a, unit: formula_effects}
   - {addr: 0x80186d58, size: 100, name: formula_add_brave_x_stats_y, hash: d7807c6c0a050c65, unit: formula_effects}
   - {addr: 0x80186dbc, size: 108, name: formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths, hash: f60d009aa58905cc, unit: formula_effects}
   - {addr: 0x80186e28, size: 44, name: formula_43_damage_caster_missing_hp, hash: 0d8d7af56fb384dd, unit: formula_effects}
-  - {addr: 0x80186e54, size: 36, name: formula_damage_hp_target_current_mp, hash: aa2fee3cf991a0ba, unit: formula_effects}
-  - {addr: 0x80186e78, size: 44, name: formula_damage_target_missing_hp, hash: aeec8464c74ad5c3, unit: formula_effects}
+  - {addr: 0x80186e54, size: 36, name: formula_difference, hash: aa2fee3cf991a0ba, unit: formula_effects}
+  - {addr: 0x80186e78, size: 44, name: formula_climhazzard, hash: aeec8464c74ad5c3, unit: formula_effects}
   - {addr: 0x80186ea4, size: 44, name: formula_set_brave_loss_y, hash: c33db6df89772a17, unit: formula_effects}
   - {addr: 0x80186ed0, size: 256, name: formula_element_apply_weather, hash: 67bc5f454dd4dcc6, unit: formula_effects}
   - {addr: 0x80186fd0, size: 40, name: formula_element_modify_weapon_damage, hash: 0e63aead82382650, unit: formula_effects}

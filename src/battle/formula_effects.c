@@ -46,13 +46,13 @@ void formula_apply_talk_skill(void) {
 }
 
 /* Formula 0x3A: +Brave (Y). */
-void formula_add_brave_y(void) {
+void formula_cheer_up(void) {
     g_action_target_data->brave_change = g_action_current_ability.range_data.y | ACTION_STAT_CHANGE_INCREASE;
     g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 
 /* Formula 0x39: +Speed (Y). */
-void formula_add_speed_y(void) {
+void formula_yell(void) {
     g_action_target_data->sp_change = g_action_current_ability.range_data.y | ACTION_STAT_CHANGE_INCREASE;
     g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
@@ -99,7 +99,7 @@ void formula_43_damage_caster_missing_hp(void) {
 }
 
 /* Formula 0x44: HP damage equal to the target's current MP. */
-void formula_damage_hp_target_current_mp(void) {
+void formula_difference(void) {
     u16 mp = g_action_target->mp;
     action_data_t* action = g_action_target_data;
 
@@ -108,7 +108,7 @@ void formula_damage_hp_target_current_mp(void) {
 }
 
 /* Formula 0x45: damage equal to the target's missing HP (max HP - HP). */
-void formula_damage_target_missing_hp(void) {
+void formula_climhazzard(void) {
     unit_stats_t* unit = g_action_target;
     action_data_t* action = g_action_target_data;
 
