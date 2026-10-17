@@ -27,9 +27,10 @@ type unitSpecYAML struct {
 }
 
 type unitInstanceYAML struct {
-	Module    string   `yaml:"module"`
-	Functions []string `yaml:"functions"`
-	Profile   string   `yaml:"profile"`
+	Module       string   `yaml:"module"`
+	Functions    []string `yaml:"functions"`
+	Profile      string   `yaml:"profile"`
+	OriginalUnit string   `yaml:"original_unit"` // exact member list; inherit this unit's target-owned data and profile
 }
 
 // unitSpec names a merged source and the original entries, in file order,
@@ -84,6 +85,9 @@ func parseUnitSpec(path string, data []byte) (*unitSpec, error) {
 	for _, instance := range spec.instances {
 		if instance.Module == "" {
 			return nil, fmt.Errorf("%s: every instance names a module", path)
+		}
+		if instance.OriginalUnit != "" && !validSymbol(instance.OriginalUnit) {
+			return nil, fmt.Errorf("%s: invalid original_unit %q", path, instance.OriginalUnit)
 		}
 		names := instance.Functions
 		if names == nil {
@@ -144,6 +148,29 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	names := instance.Functions
 	if names == nil {
 		names = spec.functions
+	}
+	if err := uniqueSymbols(names); err != nil {
+		return nil, fmt.Errorf("%s: instance %s: %w", spec.name, m.ID, err)
+	}
+	if instance.OriginalUnit != "" {
+		if len(spec.rodata) != 0 {
+			return nil, fmt.Errorf("%s: instance %s cannot combine original_unit with scratch rodata; its tables come from target", spec.name, m.ID)
+		}
+		original, err := m.unitInstance(config, instance.OriginalUnit)
+		if err != nil {
+			return nil, fmt.Errorf("%s: original unit %s:%s: %w", spec.name, m.ID, instance.OriginalUnit, err)
+		}
+		if strings.Join(names, " ") != strings.Join(original.symbols(), " ") {
+			return nil, fmt.Errorf("%s: instance %s must list all members of original unit %s in order: got %v, want %v",
+				spec.name, m.ID, instance.OriginalUnit, names, original.symbols())
+		}
+		if instance.Profile != "" && instance.Profile != original.profile.name {
+			return nil, fmt.Errorf("%s: instance %s asserts profile %s but original unit %s uses %s",
+				spec.name, m.ID, instance.Profile, instance.OriginalUnit, original.profile.name)
+		}
+		// Keep every configured contract, substituting only the scratch source.
+		original.spec = spec
+		return original, nil
 	}
 	unit := &unitInstance{spec: spec, module: m}
 	for _, name := range names {
@@ -531,7 +558,13 @@ func compareUnitSections(unit *unitInstance, sections map[string][]byte) ([]unit
 func mergeUnitSources(root string, sources []string) ([]byte, error) {
 	var includes, bodies []string
 	seen := map[string]bool{}
+	seenSources := map[string]bool{}
 	for _, source := range sources {
+		// Members of an existing unit all name its complete source file.
+		if seenSources[source] {
+			continue
+		}
+		seenSources[source] = true
 		data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source)))
 		if err != nil {
 			return nil, err
