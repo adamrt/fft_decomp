@@ -379,7 +379,9 @@ typedef union effect_secondary_state {
 extern effect_secondary_state_t g_effect_secondary_state;
 extern effect_death_poof_state_t g_effect_death_poof_states[];
 extern effect_charge_params_t g_effect_charge_line_params[2];
-extern DVECTOR g_effect_charge_line_direction_offsets[];
+
+/* Interleaved x/y offsets for eight direction sectors, then the first pair again. */
+extern s16 g_effect_charge_line_direction_offsets[18];
 extern u8 g_effect_charge_line_fade_levels[];
 extern rgb24_t g_effect_charge_trail_colors[]; /* spell-charge trail color of each effect_element_index_e */
 

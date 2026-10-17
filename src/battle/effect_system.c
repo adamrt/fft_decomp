@@ -2768,7 +2768,7 @@ s32 effect_secondary_spell_charge_handler(void) {
     SVECTOR* screen;
     effect_slot_t* slot;
     u32* ot;
-    s16* offsets;
+    s16* offsets_x;
     s16* offsets_y;
     s32 result;
     s32 index;
@@ -2937,8 +2937,8 @@ s32 effect_secondary_spell_charge_handler(void) {
         red = g_effect_charge_trail_colors[state->color].r;
         green = g_effect_charge_trail_colors[state->color].g;
         blue = g_effect_charge_trail_colors[state->color].b;
-        offsets = &g_effect_charge_line_direction_offsets[0].vx;
-        offsets_y = &g_effect_charge_line_direction_offsets[0].vy;
+        offsets_x = &g_effect_charge_line_direction_offsets[0];
+        offsets_y = &g_effect_charge_line_direction_offsets[1];
         for (i = 0; i < 16; i++) {
             j = state->trails[i].slot_id;
             if (j != 0) {
@@ -3000,7 +3000,7 @@ s32 effect_secondary_spell_charge_handler(void) {
                      * positive range before taking one of the 512-unit direction sectors. */
                     if (LINE_G2_XY_WORD(line, 0) != LINE_G2_XY_WORD(line, 1)) {
                         dir = (ratan2(line->y1 - line->y0, line->x1 - line->x0) + 0x900) / 512;
-                        line->x1 += offsets[dir * 2];
+                        line->x1 += offsets_x[dir * 2];
                         line->y1 += offsets_y[dir * 2];
                         ot = g_effect_polygon_depth_data;
                         link = (u32)line & 0xffffff;
