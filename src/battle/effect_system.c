@@ -2314,7 +2314,7 @@ static void effect_slot_init_secondary_animation(s32 group, u16 clut, effect_slo
     slot->step_index = 0;
     slot->hold = 0;
     slot->angle = 0;
-    slot->script = (effect_anim_script_t*)(g_effect_secondary_particle_animation_data + offset);
+    slot->script = (const effect_anim_script_t*)(g_effect_secondary_particle_animation_data + offset);
 }
 
 /* Spawn this frame's share of a particle group's effect slots, drawn with CLUT

@@ -229,7 +229,7 @@ enum { EFFECT_SECONDARY_INERTIA_THRESHOLD = 560 };
  * handler seeds group 5's position.y with -8, then lowers it by 3 per frame. */
 extern effect_emitter_values_t g_effect_secondary_particle_configs[17];
 
-s32 effect_slot_spawn_motion(effect_emitter_values_t* values, effect_motion_t* motion);
+s32 effect_slot_spawn_motion(const effect_emitter_values_t* values, effect_motion_t* motion);
 
 /* effect slots */
 /* One playback step of the animation script referenced by an effect slot:
@@ -252,21 +252,21 @@ typedef char effect_anim_script_size_must_be_2[sizeof(effect_anim_script_t) == 2
  * are copied together by the billboard renderer; effect_slot_init_secondary_animation resets
  * the color and writes the 16-bit values at 0x88 and 0x8e. */
 typedef struct effect_slot {
-    u8 next;                      /* 0x00 */
-    u8 prev;                      /* 0x01 */
-    u8 _padding_02[2];            /* aligns modes */
-    DR_MODE modes[2][2];          /* 0x04; two draw modes per buffer */
-    POLY_FT4 quads[2];            /* 0x34; one quad per buffer */
-    rgb24_t color;                /* 0x84 */
-    u8 frame;                     /* 0x87 */
-    u16 clut;                     /* 0x88 */
-    s16 step_index;               /* 0x8a */
-    s16 hold;                     /* 0x8c */
-    s16 angle;                    /* 0x8e; billboard quad rotation */
-    effect_anim_script_t* script; /* 0x90 */
-    s16 life;                     /* 0x94: negative runs until the script wraps */
-    u8 _padding_96[0x02];         /* aligns motion */
-    effect_motion_t motion;       /* 0x98 */
+    u8 next;                            /* 0x00 */
+    u8 prev;                            /* 0x01 */
+    u8 _padding_02[2];                  /* aligns modes */
+    DR_MODE modes[2][2];                /* 0x04; two draw modes per buffer */
+    POLY_FT4 quads[2];                  /* 0x34; one quad per buffer */
+    rgb24_t color;                      /* 0x84 */
+    u8 frame;                           /* 0x87 */
+    u16 clut;                           /* 0x88 */
+    s16 step_index;                     /* 0x8a */
+    s16 hold;                           /* 0x8c */
+    s16 angle;                          /* 0x8e; billboard quad rotation */
+    const effect_anim_script_t* script; /* 0x90 */
+    s16 life;                           /* 0x94: negative runs until the script wraps */
+    u8 _padding_96[0x02];               /* aligns motion */
+    effect_motion_t motion;             /* 0x98 */
 } effect_slot_t;
 typedef char effect_slot_size_must_be_204[sizeof(effect_slot_t) == 204 ? 1 : -1];
 

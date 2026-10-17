@@ -1126,7 +1126,7 @@ s32 effect_particle_spawn_from_emitter(
  *
  * The caster and target blocks use an effect context record, as in the
  * secondary initializers; effect_resolve_target_world_coords reads the same layout. */
-s32 effect_slot_spawn_motion(effect_emitter_values_t* values, effect_motion_t* motion) {
+s32 effect_slot_spawn_motion(const effect_emitter_values_t* values, effect_motion_t* motion) {
     MATRIX anchor_matrix;
     MATRIX rotation;
     SVECTOR anchor_angle;
