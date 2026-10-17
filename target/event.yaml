@@ -314,6 +314,7 @@ units:
   - {name: job_list, source: src/event/bunit/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
+  - {name: menu_list, source: src/event/bunit/menu_list.c}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: packet_buffers, source: src/event/bunit/packet_buffers.c, data: [{addr: 0x801eca28, size: 2, hash: 96a296d224f285c6}]}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cf440, size: 16, hash: 3a4a58bab2c48f5e}]}
@@ -428,15 +429,15 @@ functions:
   - {addr: 0x801c9634, size: 100, name: menu_opcode_18_add_blend_draw_mode, hash: 74bbfcd06b49e6bd, source: src/lib/menu/menu_opcode_18_add_blend_draw_mode.c}
   - {addr: 0x801c9698, size: 104, name: menu_opcode_0b_set_draw_color, hash: f8e9ecc48cf193a2, source: src/lib/menu/menu_opcode_0b_set_draw_color.c}
   - {addr: 0x801c9700, size: 24, name: menu_opcode_0f_set_draw_priority, hash: e3a66bb32067285c, source: src/lib/menu/menu_opcode_0f_set_draw_priority.c}
-  - {addr: 0x801c9718, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: a52fa763ae07e832}
-  - {addr: 0x801c9b4c, size: 424, name: menu_opcode_17_draw_right_aligned_number, hash: fbd03bb0cdf31870, source: src/lib/menu/menu_opcode_17_draw_right_aligned_number.c}
-  - {addr: 0x801c9cf4, size: 652, name: menu_update_and_draw_sliding_cursor, hash: 48df7a46e058abc1, source: src/lib/menu/menu_update_and_draw_sliding_cursor.c}
-  - {addr: 0x801c9f80, size: 864, name: menu_update_and_draw_bouncing_cursor, hash: 8fec6593004c6ff0}
-  - {addr: 0x801ca2e0, size: 108, name: menu_script_skip_group, hash: a7fc8159f10402de, source: src/lib/menu/menu_script_skip_group.c}
-  - {addr: 0x801ca34c, size: 672, name: menu_draw_scrollable_list, hash: c454dc9d46c8694d, source: src/lib/menu/menu_draw_scrollable_list.c}
-  - {addr: 0x801ca5ec, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d, source: src/lib/menu/menu_init_and_draw_scrollable_list_simple.c}
-  - {addr: 0x801ca61c, size: 52, name: menu_init_and_draw_scrollable_list, hash: 35dc1f5825a6e10d, source: src/lib/menu/menu_init_and_draw_scrollable_list.c}
-  - {addr: 0x801ca650, size: 2500, name: menu_opcode_10_draw_scrollable_list, hash: 358544f0b74bb783, source: src/lib/menu/menu_opcode_10_draw_scrollable_list.c}
+  - {addr: 0x801c9718, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: a52fa763ae07e832, unit: menu_list}
+  - {addr: 0x801c9b4c, size: 424, name: menu_opcode_17_draw_right_aligned_number, hash: fbd03bb0cdf31870, unit: menu_list}
+  - {addr: 0x801c9cf4, size: 652, name: menu_update_and_draw_sliding_cursor, hash: 48df7a46e058abc1, unit: menu_list}
+  - {addr: 0x801c9f80, size: 864, name: menu_update_and_draw_bouncing_cursor, hash: 8fec6593004c6ff0, unit: menu_list}
+  - {addr: 0x801ca2e0, size: 108, name: menu_script_skip_group, hash: a7fc8159f10402de, unit: menu_list}
+  - {addr: 0x801ca34c, size: 672, name: menu_draw_scrollable_list, hash: c454dc9d46c8694d, unit: menu_list}
+  - {addr: 0x801ca5ec, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d, unit: menu_list}
+  - {addr: 0x801ca61c, size: 52, name: menu_init_and_draw_scrollable_list, hash: 35dc1f5825a6e10d, unit: menu_list}
+  - {addr: 0x801ca650, size: 2500, name: menu_opcode_10_draw_scrollable_list, hash: 358544f0b74bb783, unit: menu_list}
   - {addr: 0x801cb014, size: 52, name: gfx_set_draw_color, hash: febb234714c08dd5, source: src/lib/menu/gfx_set_draw_color.c}
   - {addr: 0x801cb048, size: 16, name: gfx_set_otag_index, hash: b8570cd4076e6ca3, source: src/lib/menu/gfx_set_otag_index.c}
   - {addr: 0x801cb058, size: 220, name: menu_set_palette_mode, hash: 097927c9311af253, source: src/lib/menu/menu_set_palette_mode.c}
@@ -1344,6 +1345,7 @@ units:
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
   - {name: inventory_totals, source: src/event/equip/inventory_totals.c}
   - {name: item_actions, source: src/event/equip/item_actions.c}
+  - {name: menu_list, source: src/event/equip/menu_list.c}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cefc8, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
@@ -1509,13 +1511,13 @@ functions:
   - {addr: 0x801cbc64, size: 100, name: menu_opcode_18_add_blend_draw_mode, hash: 2c51d30300513ef9, source: src/lib/menu/menu_opcode_18_add_blend_draw_mode.c}
   - {addr: 0x801cbcc8, size: 104, name: menu_opcode_0b_set_draw_color, hash: ead031d84ebc84e9, source: src/lib/menu/menu_opcode_0b_set_draw_color.c}
   - {addr: 0x801cbd30, size: 24, name: menu_opcode_0f_set_draw_priority, hash: 0d38c979b93736fb, source: src/lib/menu/menu_opcode_0f_set_draw_priority.c}
-  - {addr: 0x801cbd48, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: 66875582960ce0d8}
-  - {addr: 0x801cc17c, size: 428, name: menu_opcode_17_draw_right_aligned_number, hash: 325db0fd2794a02d, source: src/lib/menu/menu_opcode_17_draw_right_aligned_number.c}
-  - {addr: 0x801cc328, size: 660, name: menu_update_and_draw_animated_cursor, hash: 3938e60d49f17206, source: src/lib/menu/menu_update_and_draw_animated_cursor.c}
-  - {addr: 0x801cc5bc, size: 108, name: menu_script_skip_group, hash: e3dba406e3887731, source: src/lib/menu/menu_script_skip_group.c}
-  - {addr: 0x801cc628, size: 672, name: menu_draw_scrollable_list, hash: b2d0e76db3f4d7ef, source: src/lib/menu/menu_draw_scrollable_list.c}
-  - {addr: 0x801cc8c8, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 822692f126a2bbf9, source: src/lib/menu/menu_init_and_draw_scrollable_list_simple.c}
-  - {addr: 0x801cc8f8, size: 2492, name: menu_opcode_10_draw_scrollable_list, hash: 94ee93a645f6dd65, source: src/lib/menu/menu_opcode_10_draw_scrollable_list.c}
+  - {addr: 0x801cbd48, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: 66875582960ce0d8, unit: menu_list}
+  - {addr: 0x801cc17c, size: 428, name: menu_opcode_17_draw_right_aligned_number, hash: 325db0fd2794a02d, unit: menu_list}
+  - {addr: 0x801cc328, size: 660, name: menu_update_and_draw_animated_cursor, hash: 3938e60d49f17206, unit: menu_list}
+  - {addr: 0x801cc5bc, size: 108, name: menu_script_skip_group, hash: e3dba406e3887731, unit: menu_list}
+  - {addr: 0x801cc628, size: 672, name: menu_draw_scrollable_list, hash: b2d0e76db3f4d7ef, unit: menu_list}
+  - {addr: 0x801cc8c8, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 822692f126a2bbf9, unit: menu_list}
+  - {addr: 0x801cc8f8, size: 2492, name: menu_opcode_10_draw_scrollable_list, hash: 94ee93a645f6dd65, unit: menu_list}
   - {addr: 0x801cd2b4, size: 44, name: gfx_set_draw_color, hash: 17666895092d599e, source: src/lib/menu/gfx_set_draw_color.c}
   - {addr: 0x801cd2e0, size: 16, name: gfx_set_otag_index, hash: bb1416428e2ecf6d, source: src/lib/menu/gfx_set_otag_index.c}
   - {addr: 0x801cd2f0, size: 220, name: menu_set_palette_mode, hash: 156ec1881c754753, source: src/lib/menu/menu_set_palette_mode.c}
@@ -1939,6 +1941,7 @@ units:
   - {name: job_list, source: src/event/jobstts/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
+  - {name: menu_list, source: src/event/jobstts/menu_list.c}
   - {name: menu_script, source: src/event/jobstts/menu_script.c}
   - {name: menu_window_commands, source: src/event/jobstts/menu_window_commands.c, data: [{addr: 0x801f0008, size: 16, hash: 488cf8e6977e8d53}]}
   - {name: selection_and_quads, source: src/event/jobstts/selection_and_quads.c, data: [{addr: 0x801fa6ac, size: 16, hash: 374708fff7719dd5}]}
@@ -2020,12 +2023,12 @@ functions:
   - {addr: 0x801e2fe4, size: 116, name: menu_opcode_0a_set_clut, hash: 41e76722475e6fa9, unit: cmd_clut_handlers}
   - {addr: 0x801e3058, size: 84, name: menu_opcode_0c_set_texture_page, hash: 6bd8f86e471c2d2f, unit: cmd_clut_handlers}
   - {addr: 0x801e30ac, size: 44, name: menu_opcode_0f_set_draw_priority_if_unlocked, hash: 2bdd2ff580aa0d01}
-  - {addr: 0x801e30d8, size: 704, name: menu_opcode_0d_draw_formatted_number, hash: a7c4288fdb526bef}
-  - {addr: 0x801e3398, size: 660, name: menu_update_and_draw_animated_cursor, hash: 1820d09644d45f32, source: src/lib/menu/menu_update_and_draw_animated_cursor.c}
-  - {addr: 0x801e362c, size: 108, name: menu_script_skip_group, hash: 68ca8c4bcbe84a81, source: src/lib/menu/menu_script_skip_group.c}
-  - {addr: 0x801e3698, size: 672, name: menu_draw_scrollable_list, hash: e44d487c3819b679, source: src/lib/menu/menu_draw_scrollable_list.c}
-  - {addr: 0x801e3938, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 461e97c53dac7c63, source: src/lib/menu/menu_init_and_draw_scrollable_list_simple.c}
-  - {addr: 0x801e3968, size: 2512, name: menu_opcode_10_draw_scrollable_list, hash: 8765fb678224aca4}
+  - {addr: 0x801e30d8, size: 704, name: menu_opcode_0d_draw_formatted_number, hash: a7c4288fdb526bef, unit: menu_list}
+  - {addr: 0x801e3398, size: 660, name: menu_update_and_draw_animated_cursor, hash: 1820d09644d45f32, unit: menu_list}
+  - {addr: 0x801e362c, size: 108, name: menu_script_skip_group, hash: 68ca8c4bcbe84a81, unit: menu_list}
+  - {addr: 0x801e3698, size: 672, name: menu_draw_scrollable_list, hash: e44d487c3819b679, unit: menu_list}
+  - {addr: 0x801e3938, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 461e97c53dac7c63, unit: menu_list}
+  - {addr: 0x801e3968, size: 2512, name: menu_opcode_10_draw_scrollable_list, hash: 8765fb678224aca4, unit: menu_list}
   - {addr: 0x801e4338, size: 220, name: menu_set_palette_mode, hash: 48580046bd100f9b, source: src/lib/menu/menu_set_palette_mode.c}
   - {addr: 0x801e4414, size: 136, name: menu_opcode_13_clear_temporary_draw_area, hash: 376bac94034d2252}
   - {addr: 0x801e449c, size: 116, name: menu_opcode_14_set_draw_area_if_unlocked, hash: fbe7c3c7c2471b38, source: src/lib/menu/menu_opcode_14_set_draw_area_if_unlocked.c}
