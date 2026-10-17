@@ -103,6 +103,9 @@ func asmDifferSettings(candidateBinary string) string {
 
 // asmDiffer writes both texts to dir and returns asm-differ's listing.
 func asmDiffer(dir string, expected, compiled []byte) ([]byte, error) {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, err
+	}
 	files := map[string][]byte{
 		"target.bin":       expected,
 		"compiled.bin":     compiled,

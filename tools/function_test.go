@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -38,6 +39,35 @@ func TestAsmDifferSettingsUsesPSXMIPSEndian(t *testing.T) {
 	for _, expected := range []string{`"arch"] = "mipsel"`, `"myimg"] = "compiled.bin"`, "mipsel-linux-gnu-objdump"} {
 		if !strings.Contains(settings, expected) {
 			t.Fatalf("settings do not contain %q:\n%s", expected, settings)
+		}
+	}
+}
+
+func TestAsmDifferCreatesFunctionWorkspace(t *testing.T) {
+	if _, err := exec.LookPath("asm-differ"); err != nil {
+		t.Skip("asm-differ is unavailable")
+	}
+	if _, err := exec.LookPath("mipsel-linux-gnu-objdump"); err != nil {
+		t.Skip("MIPS objdump is unavailable")
+	}
+	// A merged unit compiles into its unit directory, leaving the selected
+	// function's diff directory absent. The diagnostic must create it itself.
+	dir := filepath.Join(t.TempDir(), "battle", "unit_member")
+	expected := []byte{0x08, 0x00, 0xe0, 0x03, 0x00, 0x00, 0x00, 0x00}
+	compiled := []byte{0x08, 0x00, 0xe0, 0x03, 0x02, 0x00, 0x02, 0x24}
+	listing, err := asmDiffer(dir, expected, compiled)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(listing) == 0 {
+		t.Fatal("missing mismatch listing")
+	}
+	for name, want := range map[string][]byte{
+		"target.bin": expected, "compiled.bin": compiled, "diff.txt": listing,
+	} {
+		got, err := os.ReadFile(filepath.Join(dir, name))
+		if err != nil || !bytes.Equal(got, want) {
+			t.Fatalf("%s = %x, %v; want %x", name, got, err, want)
 		}
 	}
 }
