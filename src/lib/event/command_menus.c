@@ -64,6 +64,9 @@
 /* Five rain and five snow commands; the dispatcher consumes each halfword's low byte. */
 extern u16 g_event_weather_commands[10];
 
+/* The event frame compares slots 1..15 across its yield, including in WORLD. */
+extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];
+
 /* One row of g_menu_system_function_table (menu_run_system_function_thread,
  * menu_dispatch_system_function). Provisional. */
 typedef struct menu_system_function {

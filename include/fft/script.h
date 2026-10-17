@@ -78,7 +78,6 @@ extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
 extern s16 g_scenario_event_active;
 extern s16 g_script_threads_idle;
-extern u8 g_event_thread_status_snapshot[]; /* per-thread running flags sampled before the yield, indexed 1..15 */
 
 void script_run_next_event(void);
 void script_run_next_event_unused(void);
