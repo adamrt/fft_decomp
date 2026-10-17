@@ -320,7 +320,7 @@ units:
   - {name: job_abilities, source: src/event/bunit/job_abilities.c}
   - {name: job_list, source: src/event/bunit/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
-  - {name: menu_list, source: src/event/bunit/menu_list.c}
+  - {name: menu_list, source: src/event/bunit/menu_list.c, data: [{addr: 0x801cf98c, size: 112, hash: 5d1929456ef9e73d}]}
   - {name: menu_panel_backdrops, source: src/lib/menu/menu_draw_thread_status_indicators.c, data: [{addr: 0x801ce8d0, size: 32, hash: 66687aadf862bd77}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801ecb70, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
@@ -1365,7 +1365,7 @@ units:
   - {name: item_menu, source: src/event/equip/item_menu.c}
   - {name: item_order, source: src/lib/menu/item_order.c}
   - {name: menu_input, source: src/event/equip/menu_input.c}
-  - {name: menu_list, source: src/event/equip/menu_list.c}
+  - {name: menu_list, source: src/event/equip/menu_list.c, data: [{addr: 0x801d8700, size: 100, hash: fb40569aa0008599}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801e930c, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cefc8, size: 16, hash: 3a4a58bab2c48f5e}]}
@@ -1968,7 +1968,7 @@ units:
   - {name: job_list, source: src/event/jobstts/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_list, source: src/event/jobstts/menu_list.c}
-  - {name: menu_script, source: src/event/jobstts/menu_script.c}
+  - {name: menu_script, source: src/event/jobstts/menu_script.c, data: [{addr: 0x801eff9c, size: 88, hash: 22fa9b7c282d8045}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801fa81c, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_window_commands, source: src/event/jobstts/menu_window_commands.c, data: [{addr: 0x801f0008, size: 16, hash: 488cf8e6977e8d53}]}
   - {name: selection_and_quads, source: src/event/jobstts/selection_and_quads.c, data: [{addr: 0x801fa6ac, size: 16, hash: 374708fff7719dd5}]}

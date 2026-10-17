@@ -15,6 +15,35 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Dispatch slots before this program's end opcode; zero entries stay unhandled. */
+menu_opcode_handler_t g_menu_opcode_handlers[EQUIPMENT_SCRIPT_END] = {
+    menu_opcode_00_draw_window_frame,         /* 0x00 */
+    menu_opcode_01_if_group,                  /* 0x01 */
+    menu_opcode_02_if_else_group,             /* 0x02 */
+    menu_opcode_03_draw_tile,                 /* 0x03 */
+    menu_opcode_04_draw_textured_quad,        /* 0x04 */
+    menu_opcode_04_draw_textured_quad,        /* 0x05 */
+    menu_opcode_06_draw_callback_quad,        /* 0x06 */
+    menu_opcode_07_draw_line,                 /* 0x07 */
+    0,                                        /* 0x08 */
+    menu_opcode_09_set_fixed_clut,            /* 0x09 */
+    menu_opcode_0a_set_clut,                  /* 0x0a */
+    menu_opcode_0b_set_draw_color,            /* 0x0b */
+    menu_opcode_0c_set_texture_page,          /* 0x0c */
+    menu_opcode_0d_draw_formatted_number,     /* 0x0d */
+    menu_opcode_0e_set_semi_trans,            /* 0x0e */
+    menu_opcode_0f_set_draw_priority,         /* 0x0f */
+    menu_opcode_10_draw_scrollable_list,      /* 0x10 */
+    menu_opcode_11_draw_tiled_rectangle,      /* 0x11 */
+    menu_opcode_12_draw_opening_window_frame, /* 0x12 */
+    menu_opcode_13_clear_temporary_draw_area, /* 0x13 */
+    menu_opcode_14_set_draw_area_if_unlocked, /* 0x14 */
+    menu_opcode_15_repeat_draw_area,          /* 0x15 */
+    menu_opcode_16_advance_window_scale_step, /* 0x16 */
+    menu_opcode_17_draw_right_aligned_number, /* 0x17 */
+    menu_opcode_18_add_blend_draw_mode,       /* 0x18 */
+};
+
 /* Draw the getter's signed decimal value or dashes in the requested digit style: 0 the
  * 6x11 digits, 1 the 8x14 ones, 2 and up the 10x16 digits (eight to a row from u 0x20)
  * in the window CLUT. The getter is given the command's value, or the list row inside a

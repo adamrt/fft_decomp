@@ -14,8 +14,9 @@ struct menu_icon_source;
 /* Opcode byte of a menu script instruction: the index of its handler in g_menu_opcode_handlers, the table WORLD,
  * BUNIT, EQUIP and JOBSTTS each link. The handler for value NN is named menu_opcode_NN_<name>, both in the shared
  * menu library and in a program's own copy; CARD has no table and calls its few drawing routines directly. Opcode 8
- * has no handler anywhere. BUNIT also leaves 3 and 7 empty, EQUIP leaves 0x19-0x1b empty, and JOBSTTS leaves 3, 6,
- * 7, 0x0b and 0x16-0x1b empty. Each module ends a stream with its own opcode, the first one past its table
+ * has no handler anywhere. BUNIT also leaves slots 3 and 7 empty; JOBSTTS leaves 3, 6, 7 and 0x0b empty.
+ * EQUIP's dialect ends before 0x19, JOBSTTS's before 0x16. Each module ends a stream with its own opcode, the first
+ * one past its table
  * (SCREEN_SCRIPT_END, UNIT_LIST_SCRIPT_END, EQUIPMENT_SCRIPT_END, STATUS_SCREEN_SCRIPT_END). */
 typedef enum menu_script_opcode {
     MENU_SCRIPT_OP_WINDOW_FRAME = 0x00,
@@ -261,7 +262,7 @@ extern menu_callback_t g_menu_row_callbacks[16];
  * the handler of each instruction's opcode until the module's terminator. */
 typedef menu_instruction_t* (*menu_opcode_handler_t)(menu_instruction_t* instruction);
 
-extern menu_instruction_t* (*g_menu_opcode_handlers[])(menu_instruction_t* instruction);
+extern menu_opcode_handler_t g_menu_opcode_handlers[];
 
 /* Input the stream's instructions see; a dimmed palette or a zooming window withholds it. */
 extern u32 g_menu_script_input;
@@ -307,7 +308,7 @@ menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruc
 menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
-menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t* command);
+menu_instruction_t* menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
 
 /* JOBSTTS builds its own body. */

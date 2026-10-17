@@ -77,7 +77,7 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* des
 
 #ifdef FFT_EVENT_EQUIP
 /* Tile the command rectangle, or the shared rectangle when source is 2. */
-menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t* command) {
+menu_instruction_t* menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* command) {
     RECT rect;
     s32 base_x;
     s32 base_y;
@@ -90,7 +90,7 @@ menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t
     s32 row;
     s32 column;
 
-    if (command->rectangle_source == 2) {
+    if (command->window.rectangle_source == 2) {
         base_x = g_gfx_tiled_rect.x;
         base_y = g_gfx_tiled_rect.y;
         full_columns = g_gfx_tiled_rect.w / 16;
@@ -101,10 +101,10 @@ menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t
         u8 packed_width;
         u8 packed_height;
 
-        base_x = command->x;
-        base_y = command->y;
-        packed_width = command->width;
-        packed_height = command->height;
+        base_x = command->window.x;
+        base_y = command->window.y;
+        packed_width = command->window.width;
+        packed_height = command->window.height;
         full_columns = packed_width >> 4;
         partial_width = packed_width & 15;
         full_rows = packed_height >> 4;
@@ -145,7 +145,7 @@ menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t
         }
     }
 
-    command = (menu_window_command_t*)((u8*)command + command->length);
+    command = (menu_instruction_t*)((u8*)command + command->header.length);
     return command;
 }
 #endif
