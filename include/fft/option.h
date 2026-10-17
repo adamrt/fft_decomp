@@ -104,7 +104,6 @@ typedef union game_options {
 typedef char game_options_size_must_be_4[sizeof(game_options_t) == 4 ? 1 : -1];
 
 extern game_options_t g_game_options;
-extern game_options_t g_game_options_defaults;
 
 /* The player's options, saved while a tutorial event forces its own and restored when it ends. BATTLE and WORLD each
  * define it. */

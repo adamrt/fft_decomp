@@ -21,9 +21,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* Scratch list filled by ability_store_skillset_abilities. */
 static u32 g_unit_name_uses_world_text = 0;
 
+/* Scratch list filled by ability_store_skillset_abilities. */
 static u16 g_ability_temp_list[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
 
 static s32 job_get_random_unlocked(const unit_stats_t* unit);

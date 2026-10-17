@@ -151,8 +151,6 @@ typedef enum system_battle_load_exception {
     SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT = 600,
 } system_battle_load_exception_e;
 
-extern int g_system_graphics_error;
-
 void system_handle_error(int error_code);
 void system_handle_battle_load_exception(s32 value);
 void system_handle_pointer_exception(int error_code);

@@ -1257,10 +1257,10 @@ data:
   - {addr: 0x800473ac, name: g_game_options}
   - {addr: 0x800473b0, name: g_game_options_defaults}
   - {addr: 0x800473b4, name: g_zodiac_screen_position}
-  - {addr: 0x800473bc, name: g_menu_gfx_scaled_sprite_texture_page}
-  - {addr: 0x800473c4, name: g_menu_gfx_scaled_sprite_uv_rects}
-  - {addr: 0x80047520, name: g_menu_gfx_scaled_sprite_scale}
-  - {addr: 0x80047595, name: g_menu_gfx_scaled_sprite_count}
+  - {addr: 0x800473bc, name: g_zodiac_texture_page_origin}
+  - {addr: 0x800473c4, name: g_zodiac_sprite_frames}
+  - {addr: 0x80047520, name: g_zodiac_sprite_scales}
+  - {addr: 0x80047595, name: g_zodiac_sprite_count}
   - {addr: 0x80047598, name: g_gfx_frame_image_rect}
   - {addr: 0x800475a0, name: g_gfx_frame_palette_rect}
   - {addr: 0x800475a8, name: g_gfx_frame_palette_tail_rect}

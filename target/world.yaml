@@ -1409,7 +1409,7 @@ data:
   - {addr: 0x8016ed4c, name: g_screen_frame_palette_tail_rect}
   - {addr: 0x8016ed54, name: g_screen_frame_image_rect}
   - {addr: 0x8016ed64, name: g_screen_item_image_rect}
-  - {addr: 0x8016ed7c, name: g_menu_gfx_scaled_sprite_texture_page}
+  - {addr: 0x8016ed7c, name: g_zodiac_texture_page_origin}
   - {addr: 0x8016ed84, name: g_screen_common_clut_rect}
   - {addr: 0x8016ed8c, name: g_screen_item_palette_rect}
   - {addr: 0x8016ed94, name: g_screen_unit_image_rect_a}
@@ -1433,9 +1433,9 @@ data:
   - {addr: 0x80189ecc, name: g_world_map_menu_groups}
   - {addr: 0x80189f60, name: g_screen_allowed_buttons}
   - {addr: 0x80189f6c, name: g_formation_name_string_revision}
-  - {addr: 0x80189f70, name: g_menu_gfx_scaled_sprite_uv_rects}
-  - {addr: 0x8018a0cc, name: g_menu_gfx_scaled_sprite_scale}
-  - {addr: 0x8018a141, name: g_menu_gfx_scaled_sprite_count}
+  - {addr: 0x80189f70, name: g_zodiac_sprite_frames}
+  - {addr: 0x8018a0cc, name: g_zodiac_sprite_scales}
+  - {addr: 0x8018a141, name: g_zodiac_sprite_count}
   - {addr: 0x8018a144, name: g_formation_view}
   - {addr: 0x8018a168, name: g_formation_sprite_by_portrait}
   - {addr: 0x8018a310, name: g_formation_monster_sprite_table}

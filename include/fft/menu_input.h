@@ -93,7 +93,6 @@ typedef struct menu_input_timing_profile {
     u8 scroll_fast_step;   /* copied to g_menu_scroll_fast_step */
 } menu_input_timing_profile_t;
 
-extern u8 g_menu_scroll_unread_setting; /* set to 1 with the input repeat timings; never read */
 extern u8 g_menu_scroll_accel_delay;
 extern u8 g_menu_scroll_slow_step;
 extern u8 g_menu_scroll_fast_step;

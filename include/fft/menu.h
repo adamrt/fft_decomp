@@ -511,12 +511,6 @@ void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const 
 /* Clears the first draw area's width and installs the default second draw area. */
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 
-/* status icons and zodiac */
-extern u8 g_menu_gfx_scaled_sprite_count;
-extern point16_t g_menu_gfx_scaled_sprite_scale[];
-extern point16_t g_menu_gfx_scaled_sprite_texture_page;
-extern sprite_sheet_frame_t g_menu_gfx_scaled_sprite_uv_rects[];
-
 /* portraits */
 enum {
     MENU_WLDFACE_SHEET_COUNT = 4,

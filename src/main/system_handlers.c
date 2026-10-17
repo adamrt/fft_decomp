@@ -13,6 +13,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern int g_system_graphics_error;
+extern const game_options_t g_game_options_defaults;
+
+/* Set with the input repeat timings; never read. */
+extern u8 g_menu_scroll_unread_setting;
+
 /* Empty report hook. Callers pass a source number (0 from system_handle_error, 1 the effect
  * code, 7 the menu's system functions, 0x11 the crystal pickup menu) and a code. */
 void system_report_stub(s32 category, s32 code) {

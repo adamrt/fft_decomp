@@ -183,7 +183,7 @@ data:
   - {addr: 0x801cd09c, name: g_deploy_rect_09c}
   - {addr: 0x801cd0a4, name: g_deploy_cursor_texture_rect}
   - {addr: 0x801cd0ac, name: g_deploy_rect_0ac}
-  - {addr: 0x801cd0b4, name: g_menu_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801cd0b4, name: g_zodiac_texture_page_origin}
   - {addr: 0x801cd0c4, name: g_deploy_tile_clut_rect}
   - {addr: 0x801cd0cc, name: g_deploy_rect_0cc}
   - {addr: 0x801cd0d4, name: g_deploy_texture_location}
@@ -213,9 +213,9 @@ data:
   - {addr: 0x801cf5f8, name: g_deploy_slot_offsets}
   - {addr: 0x801cf5f8, name: g_unit_panel_status_y_offsets}
   - {addr: 0x801cf60c, name: g_unit_panel_status_offsets}
-  - {addr: 0x801cf648, name: g_menu_gfx_scaled_sprite_uv_rects}
-  - {addr: 0x801cf7a4, name: g_menu_gfx_scaled_sprite_scale}
-  - {addr: 0x801cf819, name: g_menu_gfx_scaled_sprite_count}
+  - {addr: 0x801cf648, name: g_zodiac_sprite_frames}
+  - {addr: 0x801cf7a4, name: g_zodiac_sprite_scales}
+  - {addr: 0x801cf819, name: g_zodiac_sprite_count}
   - {addr: 0x801cf938, name: g_scenario_table}
   - {addr: 0x801d3938, name: g_scenario_event_condition_blocks}
   - {addr: 0x801d5af4, name: g_deploy_vram_copy_rect}
@@ -1046,11 +1046,11 @@ data:
   - {addr: 0x801c9947, name: g_save_overwrite_prompt_active}
   - {addr: 0x801c994c, name: g_save_slot_quads}
   - {addr: 0x801c9d20, name: g_save_icon_records}
-  - {addr: 0x801ca680, name: g_menu_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801ca680, name: g_zodiac_texture_page_origin}
   - {addr: 0x801ca688, name: g_menu_draw_area_template}
-  - {addr: 0x801ca690, name: g_menu_gfx_scaled_sprite_uv_rects}
-  - {addr: 0x801ca7ec, name: g_menu_gfx_scaled_sprite_scale}
-  - {addr: 0x801ca861, name: g_menu_gfx_scaled_sprite_count}
+  - {addr: 0x801ca690, name: g_zodiac_sprite_frames}
+  - {addr: 0x801ca7ec, name: g_zodiac_sprite_scales}
+  - {addr: 0x801ca861, name: g_zodiac_sprite_count}
   - {addr: 0x801ca864, name: g_save_input_display_state}
   - {addr: 0x801ca888, name: g_memcard_file_open_descriptor}
   - {addr: 0x801ca88c, name: g_memcard_slot}
@@ -1288,9 +1288,9 @@ data:
   - {addr: 0x801c667c, name: g_unit_panel_panel_status_animation}
   - {addr: 0x801c6684, name: g_unit_panel_panel_status_y_offsets}
   - {addr: 0x801c6698, name: g_unit_panel_panel_status_offsets}
-  - {addr: 0x801c66d4, name: g_menu_gfx_scaled_sprite_uv_rects}
-  - {addr: 0x801c6830, name: g_menu_gfx_scaled_sprite_scale}
-  - {addr: 0x801c68a5, name: g_menu_gfx_scaled_sprite_count}
+  - {addr: 0x801c66d4, name: g_zodiac_sprite_frames}
+  - {addr: 0x801c6830, name: g_zodiac_sprite_scales}
+  - {addr: 0x801c68a5, name: g_zodiac_sprite_count}
   - {addr: 0x801c68a8, name: g_unit_editor_status_display_thread_params}
   - {addr: 0x801c68bc, name: g_unit_panel_numbers_thread_params}
   - {addr: 0x801c68d0, name: g_unit_panel_character_status_frame_config}
@@ -1317,7 +1317,7 @@ data:
   - {addr: 0x801ccb1c, name: g_unit_panel_editor_numeric_state_b}
   - {addr: 0x801cd09c, name: g_unit_panel_editor_numeric_text_a}
   - {addr: 0x801cd9b4, name: g_unit_panel_editor_numeric_text_b}
-  - {addr: 0x801ce2dc, name: g_menu_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801ce2dc, name: g_zodiac_texture_page_origin}
   - {addr: 0x801ce2e4, name: g_unit_editor_gfx_render_buffers}
   - {addr: 0x801cec44, name: g_unit_editor_cursor_polys}
   - {addr: 0x801cec94, name: g_unit_editor_cursor_shade_polys}
@@ -2484,7 +2484,7 @@ data:
   - {addr: 0x801d00a4, name: g_unit_panel_character_status_origin_x}
   - {addr: 0x801d00b0, name: g_unit_panel_character_status_redraw_request}
   - {addr: 0x801d00b4, name: g_unit_panel_dim_c}
-  - {addr: 0x801d00b8, name: g_menu_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801d00b8, name: g_zodiac_texture_page_origin}
   - {addr: 0x801d00e0, name: g_after_battle_join_menu_descriptor}
   - {addr: 0x801d0158, name: g_party_removal_menus}
   - {addr: 0x801d02f0, name: g_unit_panel_panel_status_uv_rects}
@@ -2495,9 +2495,9 @@ data:
   - {addr: 0x801d07d4, name: g_unit_panel_panel_status_animation}
   - {addr: 0x801d07dc, name: g_unit_panel_panel_status_y_offsets}
   - {addr: 0x801d07f0, name: g_unit_panel_panel_status_offsets}
-  - {addr: 0x801d082c, name: g_menu_gfx_scaled_sprite_uv_rects}
-  - {addr: 0x801d0988, name: g_menu_gfx_scaled_sprite_scale}
-  - {addr: 0x801d09fd, name: g_menu_gfx_scaled_sprite_count}
+  - {addr: 0x801d082c, name: g_zodiac_sprite_frames}
+  - {addr: 0x801d0988, name: g_zodiac_sprite_scales}
+  - {addr: 0x801d09fd, name: g_zodiac_sprite_count}
   - {addr: 0x801d0a00, name: g_after_battle_gfx_formation_sprite_groups}
   - {addr: 0x801d0adc, name: g_party_bio_update_records}
   - {addr: 0x801d0b34, name: g_party_affected_unit_count}

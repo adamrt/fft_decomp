@@ -8,6 +8,12 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* MAIN, WORLD, ATTACK, CARD, DEBUGCHR and REQUIRE each link this 29-sprite catalog. */
+extern const u8 g_zodiac_sprite_count;
+extern const point16_t g_zodiac_sprite_scales[29];
+extern const point16_t g_zodiac_texture_page_origin;
+extern const sprite_sheet_frame_t g_zodiac_sprite_frames[29];
+
 #if defined(FFT_EVENT_CARD) || defined(FFT_EVENT_DEBUGCHR) || defined(FFT_EVENT_REQUIRE) || defined(FFT_WORLD)
 /* Build an 8bpp sprite quad, rounding positive fixed-point remainders at half a pixel. */
 void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
@@ -67,15 +73,15 @@ void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
     s32 y;
     point16_t scale;
 
-    for (i = 0; i < g_menu_gfx_scaled_sprite_count; i++) {
+    for (i = 0; i < g_zodiac_sprite_count; i++) {
         SetPolyFT4(poly);
         poly->clut = GetClut(0, 0x1fd);
         setRGB0(poly, context->brightness, context->brightness, context->brightness);
         SetSemiTrans(poly, 1);
         SetShadeTex(poly, 0);
-        x = g_menu_gfx_scaled_sprite_scale[i].x;
+        x = g_zodiac_sprite_scales[i].x;
         x *= context->scale_x;
-        y = g_menu_gfx_scaled_sprite_scale[i].y;
+        y = g_zodiac_sprite_scales[i].y;
         y *= context->scale_y;
         if (x % ONE >= 0x800) {
             x += 1;
@@ -87,8 +93,8 @@ void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
         y /= ONE;
         scale.x = x;
         scale.y = y;
-        gfx_set_scaled_poly_ft4_8bpp(poly, &g_menu_gfx_scaled_sprite_texture_page, &g_menu_draw_area_template,
-            &g_menu_gfx_scaled_sprite_uv_rects[i], &scale, &context->offset);
+        gfx_set_scaled_poly_ft4_8bpp(poly, &g_zodiac_texture_page_origin, &g_menu_draw_area_template,
+            &g_zodiac_sprite_frames[i], &scale, &context->offset);
         if (context->link_primitives != 0) {
             addPrim(context->ot, poly);
             poly++;
