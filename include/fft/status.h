@@ -240,7 +240,6 @@ s32 status_prepare_poison_and_regen(struct unit_stats* unit);
 
 /* status display */
 extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
-extern const u8 g_status_display_image_ids[STATUS_COUNT];
 
 s32 status_init_display_flags(s32 unit_id);
 s32 status_queue_display_flag_change(s32 status, s32 enabled, s32 battle_id);

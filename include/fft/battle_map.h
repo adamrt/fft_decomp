@@ -413,9 +413,6 @@ extern const u8 g_terrain_movement_cost_tables[][64];
 extern const u8 g_terrain_status_flags[64];
 extern const u8 g_terrain_geomancy_abilities[];
 
-/* Two bytes per battle_map_surface_type_e; all 64 pairs are 0x19, 0x19. */
-extern u8 g_terrain_tile_info_pairs[64][2];
-
 /* selected tile */
 /* Provisional 0xa-byte selected-tile record, filled by
  * battle_map_store_selected_tile_data and copied whole by

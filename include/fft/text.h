@@ -19,7 +19,6 @@ enum { TEXT_GLYPH_BYTES = 35, TEXT_GLYPHS_PER_PREFIX = 208 };
 
 /* Glyph pixel widths, TEXT_GLYPHS_PER_PREFIX entries per prefix page. */
 extern const u8 g_text_glyph_widths[];
-extern u8 g_text_glyph_bitmaps[];
 extern u8* g_text_glyph_bitmap_data;
 extern glyph_blit_t g_text_small_number_glyph_rect; /* source of the small 6x10 number glyphs */
 
@@ -183,9 +182,7 @@ typedef enum text_section {
 
 extern s32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
 extern u8* g_text_section_pointers[TEXT_SECTION_COUNT];
-extern u8* g_text_saved_section_pointers[TEXT_SECTION_COUNT];
 extern u8* g_text_saved_pointers[32];
-extern s32 g_text_section_backup_active;
 
 /* The text file an overlay loaded. */
 extern u8 g_text_data[];
@@ -352,7 +349,6 @@ typedef struct menu_digit_glyph {
 } menu_digit_glyph_t;
 typedef char menu_digit_glyph_size_must_be_16[sizeof(menu_digit_glyph_t) == 16 ? 1 : -1];
 
-extern const char g_text_decimal_format[];
 extern u32 g_text_decimal_divisors[];
 
 s32 text_count_decimal_digits(s32 value);
@@ -371,8 +367,6 @@ void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* en
 void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos);
 
 /* debug font output */
-extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
-
 /* Prints value and value + 1 to the debug font stream. */
 void text_print_fnt_value_and_next(s32 value);
 
@@ -479,13 +473,9 @@ typedef struct text_glyph_state {
 } text_glyph_state_t;
 typedef char text_glyph_state_size_must_be_16[(sizeof(text_glyph_state_t) == 16) ? 1 : -1];
 
-extern s32 g_text_glyphs_per_wait;
-
 /* The three per-thread staging slots the typewriter draws glyphs through. */
 extern s32 g_text_slot_owner_thread_ids[3];
 extern s32 g_text_slot_glyph_counts[3];
-extern u8 g_text_slot_source_columns[];
-extern u8 g_text_slot_row_pitches[];
 
 /* text threads */
 extern s32 g_text_selection_id;

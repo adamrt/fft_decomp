@@ -25,6 +25,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern menu_scroll_text_layout_t g_at_list_layout;
+extern s16 g_auto_battle_option_colors[5]; /* text color per option */
+
 /* Provisional: the AT-list work area at_list_build_ability_preview
  * fills, reached through g_heap_companion_overlay_load_address. The five
  * parallel 16-bit columns become the layout's text_ids/text_colors tables,

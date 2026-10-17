@@ -249,8 +249,6 @@ void command_reset_unit_records_wrapper(void);
 void command_restore_unit_selection(s32 menu_id);
 
 /* Auto-Battle */
-extern s16 g_auto_battle_option_colors[5]; /* text color per option */
-
 /* The five-policy auto-battle menu. */
 void auto_battle_settings_thread(void);
 

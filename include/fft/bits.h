@@ -9,11 +9,8 @@
 /* primary and secondary streams */
 extern u8 g_bits_primary_reset;
 extern u8* g_bits_primary_cursor;
-extern s32 g_bits_primary_read_index;
-extern s32 g_bits_primary_write_index;
 extern u8 g_bits_secondary_reset;
 extern const u8* g_bits_secondary_cursor;
-extern s32 g_bits_secondary_read_index;
 
 /* WORLD builds its own bodies of these two. */
 void bits_init_primary_reader(u8* data);

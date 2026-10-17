@@ -35,6 +35,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Independent 15-row, 16-column grids for BATTLE and WORLD. */
+extern u8 g_gfx_texture_allocation_grid[15][16];
+
+/* The debug line menu_alloc_memory prints while it waits for free pages. */
+extern char g_message_wait_for_allocation_message[];
+extern menu_window_buffer_t* g_menu_window_buffer_slots[6];
 extern RECT g_status_screen_numbers_texture_window; /* texture window for the menu page */
 
 /* A first-fit allocator over 256-byte pages with sixteen allocation slots. Each program has its own arena of

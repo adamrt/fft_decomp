@@ -48,6 +48,26 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Twelve crop percentages, indexed by step. */
+extern u16 g_menu_cursor_zoom_percentages[];
+extern battle_map_tile_coordinates_t g_script_warp_coords;
+extern point16_t g_gfx_item_icon_image_location;
+extern s16 g_gfx_item_icon_clut_base_x;
+extern s16 g_gfx_item_icon_clut_base_y;
+
+/* Image placements passed to gfx_set_image_primitive_layout for the icon strips of the event library. The panel and
+ * numeric-panel cells of the menu library, which each menu program defines for itself, are in unit_panel.h. */
+/* Four pieces for each header from MENU_ICON_HEADER_ABILITY_TURN_REFLECT through MENU_ICON_HEADER_ABILITY. */
+extern image_layout_t g_menu_icon_strip_image_params[20];
+extern image_layout_t g_menu_single_icon_image_params[5];
+extern const u8 g_status_display_image_ids[STATUS_COUNT];
+extern u8* g_text_saved_section_pointers[TEXT_SECTION_COUNT];
+extern s32 g_text_section_backup_active;
+
+/* Target preview copies only generic_monster and the reaction ability here. */
+extern unit_panel_record_t g_unit_panel_comparison_unit_fields;
+extern point16_t g_menu_texture_origin; /* VRAM origin for menu image placement */
+
 /* One 0x100-byte slot holding a panel's palette primitive set. */
 typedef struct menu_palette_slot {
     menu_palette_primitives_t primitives; /* 0x00 */
@@ -174,7 +194,6 @@ extern image_layout_t g_status_screen_row_image_params_b[4];
 extern image_layout_t g_status_screen_sprite_image_params_a[19];
 extern image_layout_t g_status_screen_sprite_image_params_b[19];
 extern image_layout_t g_status_screen_item_icon_image_params[5];
-
 extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
 extern menu_number_entry_t g_status_screen_numbers_entries[15];
 extern RECT g_status_screen_numbers_frame_rect;

@@ -162,8 +162,6 @@ s32 script_resolve_runtime_id(s32 unit_id);
  * thread itself store the moving unit's runtime id; WaitSpriteMove matches it. */
 enum { SPRITE_MOVE_THREAD_WORD_RUNTIME_ID = 0 };
 
-extern battle_map_tile_coordinates_t g_script_warp_coords;
-
 void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction);
 void script_warp_unit_display_to_paired_unit(s32 runtime_id);
 void script_sprite_move(void);
@@ -268,8 +266,6 @@ void script_update_event_input_state(u32 buttons);
 void script_load_event_input_state(const menu_input_state_t* saved);
 
 /* debug */
-extern const char g_script_pause_message[];
-extern s16 g_script_debug_paused;
 extern s16 g_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
 
 void script_print_debug_message(void);

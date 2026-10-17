@@ -11,8 +11,6 @@
 struct menu_icon_source;
 
 /* primitives */
-extern point16_t g_menu_texture_origin; /* VRAM origin for menu image placement */
-
 /* An off-screen quad with neutral shading, the allocated-image texture page and the normal menu CLUT. */
 void menu_init_default_poly_ft4(POLY_FT4* poly);
 

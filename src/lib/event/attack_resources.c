@@ -55,6 +55,21 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Two bytes per battle_map_surface_type_e; all 64 pairs are 0x19, 0x19. */
+extern u8 g_terrain_tile_info_pairs[64][2];
+extern s32 g_camera_cross_product_overflow; /* set by the Q12 cross product on overflow */
+extern const char g_script_pause_message[];
+extern s16 g_script_debug_paused;
+extern u16 g_unit_view_cached_battle_id;
+extern u16 g_unit_view_cached_comparison_id;
+
+/* Set while a menu thread forces event speed 2; the previous speed is saved. */
+extern u16 g_menu_vsync_interval_forced;
+extern u16 g_menu_saved_vsync_interval;
+extern u8 g_menu_panel_fade_modes[];
+extern u8 g_text_glyph_bitmaps[];
+extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
+
 /* Provisional camera interpolation key: frame time and target value. */
 typedef struct camera_key {
     s32 time;  /* 0x00; cumulative frame of this key */

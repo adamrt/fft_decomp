@@ -60,7 +60,6 @@ void at_list_show_next_entry(void);
 /* list window */
 extern at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
 extern menu_entry_t g_at_list_state;
-extern menu_scroll_text_layout_t g_at_list_layout;
 
 /* WORLD and OPTION each define one column layout for the AT List menu. */
 extern menu_text_layout_t g_at_list_entry_table;

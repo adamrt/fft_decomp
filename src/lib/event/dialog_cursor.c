@@ -4,6 +4,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern const char g_text_decimal_format[];
+
 /* text_advance_cursor_with_backreferences with the remaining run length and return cursor passed
  * separately instead of in a text_reader_state_t. */
 const u8* text_advance_cursor_with_separate_backreference_state(

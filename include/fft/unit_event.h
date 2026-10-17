@@ -91,7 +91,6 @@ s32 unit_check_facing_relative_to_camera(s32 event_unit_id);
 s32 unit_is_moving(s32 runtime_id);
 
 /* event unit lookups */
-extern SVECTOR g_unit_runtime_coords; /* the position unit_copy_world_coords_to_scratch returns */
 extern SVECTOR g_unit_scratch_coords; /* a unit's map coordinates or projected screen position */
 
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);

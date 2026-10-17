@@ -17,6 +17,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern SVECTOR g_unit_runtime_coords; /* the position unit_copy_world_coords_to_scratch returns */
+
 /* Window interpolation fractions; ONE ends each curve. The first two overshoot
  * the final size, while the last curve also drives the closing fade. */
 static u16 g_menu_window_tween_small_overshoot[10] = { 832, 1600, 2304, 2944, 3520, 4032, 4192, 4160, 4128, ONE };

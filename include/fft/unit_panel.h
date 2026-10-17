@@ -76,9 +76,6 @@ extern unit_panel_summary_t g_unit_panel_selected_unit_stat_summary;
 extern unit_panel_unit_t g_unit_panel_comparison_unit_data;
 extern unit_panel_summary_t g_unit_panel_comparison_unit_status;
 
-/* Target preview copies only generic_monster and the reaction ability here. */
-extern unit_panel_record_t g_unit_panel_comparison_unit_fields;
-
 /* The selected unit's names, as unit_panel_load_selected copies them for the panels.
  * BATTLE, WORLD, DEBUGCHR and REQUIRE define all four; ATTACK defines the skillset windows. */
 extern u8 g_unit_panel_billboard_unit_name[];               /* name text window */

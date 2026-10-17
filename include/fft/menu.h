@@ -13,10 +13,6 @@
 /* Raw VSync mode; animation and script steps use 1 when this is zero. */
 extern s8 g_menu_event_speed;
 
-/* Set while a menu thread forces event speed 2; the previous speed is saved. */
-extern u16 g_menu_vsync_interval_forced;
-extern u16 g_menu_saved_vsync_interval;
-
 s32 menu_get_event_speed(void);
 void menu_set_vsync_mode_and_event_speed(s32 speed);
 s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
@@ -153,9 +149,6 @@ typedef char menu_number_entry_size_must_be_12[(sizeof(menu_number_entry_t) == 1
 extern s32 g_menu_formation_display_mode;
 extern s32 g_menu_post_battle_unit_changes_active;
 extern u8 g_menu_common_graphics_loaded;
-
-/* The debug line menu_alloc_memory prints while it waits for free pages. */
-extern char g_message_wait_for_allocation_message[];
 
 /* The field y (0 or 0xf0) handed to menu_input_update_event_state each frame; the panels draw into the other
  * frame-buffer half. */
@@ -451,7 +444,6 @@ typedef enum menu_panel_fade_mode {
 
 extern s32 g_menu_panel_fade_mode; /* menu_panel_fade_mode_e */
 extern s32 g_menu_panel_fade_intensity;
-extern u8 g_menu_panel_fade_modes[];
 
 void menu_update_panel_fade(void);
 

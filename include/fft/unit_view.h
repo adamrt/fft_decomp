@@ -23,8 +23,6 @@ typedef enum unit_view_mode {
 } unit_view_mode_e;
 
 extern s32 g_unit_view_mode;
-extern u16 g_unit_view_cached_battle_id;
-extern u16 g_unit_view_cached_comparison_id;
 
 /* Requests a view mode for the units unit_a and unit_b from the supervisor thread. */
 void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);

@@ -166,8 +166,6 @@ enum { CAMERA_FUSION_HOLD_SENTINEL = 0x2710 };
 void camera_fusion_thread(void);
 
 /* fixed-point math */
-extern s32 g_camera_cross_product_overflow; /* set by the Q12 cross product on overflow */
-
 s32 mul_div_s64(s32 a, s32 b, s32 c);
 s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 

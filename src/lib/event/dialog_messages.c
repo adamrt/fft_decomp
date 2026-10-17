@@ -25,6 +25,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s32 g_text_glyphs_per_wait;
+extern u8 g_text_slot_source_columns[];
+extern u8 g_text_slot_row_pitches[];
+
 /* Typed views for this scanner; each expansion re-reads the event-block base. */
 #define DISPLAY_MESSAGE_INSTRUCTION_AT(base, offset) ((event_display_message_instruction_t*)((base) + (offset)))
 #define CHANGE_DIALOG_INSTRUCTION_AT(base, offset)   ((event_change_dialog_instruction_t*)((base) + (offset)))

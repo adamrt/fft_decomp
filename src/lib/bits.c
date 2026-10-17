@@ -3,6 +3,10 @@
 #include "fft/bits.h"
 #include "psx/types.h"
 
+extern s32 g_bits_primary_read_index;
+extern s32 g_bits_primary_write_index;
+extern s32 g_bits_secondary_read_index;
+
 /* WORLD keeps both initializers with its grid-cursor helpers. */
 #ifndef FFT_WORLD
 /* Start the primary bit reader on a new data stream. */
