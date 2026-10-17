@@ -507,12 +507,14 @@ typedef struct item_poach {
 } item_poach_t;
 typedef char item_poach_size_must_be_2[(sizeof(item_poach_t) == 2) ? 1 : -1];
 
-extern item_data_t g_item_primary_data[];
-extern item_secondary_data_t g_item_secondary_data[];
-extern weapon_data_t g_item_weapon_data[];
-extern item_evade_t g_item_shield_data[]; /* unit right/left shield evade slots */
-extern armor_data_t g_item_helm_armor_secondary_data[];
-extern item_evade_t g_item_accessory_data[]; /* unit accessory evade slots */
+extern item_data_t g_item_primary_data[ITEM_ID_COUNT];
+extern item_secondary_data_t g_item_secondary_data[ITEM_ID_END - ITEM_ID_CONSUMABLE_FIRST];
+extern weapon_data_t g_item_weapon_data[ITEM_ID_SHIELD_FIRST];
+extern item_evade_t
+    g_item_shield_data[ITEM_ID_HEADGEAR_FIRST - ITEM_ID_SHIELD_FIRST]; /* unit right/left shield evade slots */
+extern armor_data_t g_item_helm_armor_secondary_data[ITEM_ID_ACCESSORY_FIRST - ITEM_ID_HEADGEAR_FIRST];
+extern item_evade_t
+    g_item_accessory_data[ITEM_ID_CONSUMABLE_FIRST - ITEM_ID_ACCESSORY_FIRST]; /* unit accessory evade slots */
 extern item_attribute_t g_item_attributes[];
 extern u8 g_item_ability_item_ids[14];
 extern item_poach_t g_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRST + 1];

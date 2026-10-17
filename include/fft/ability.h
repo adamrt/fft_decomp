@@ -586,7 +586,7 @@ typedef struct ability_data {
 } ability_data_t;
 typedef char ability_data_size_must_be_8[(sizeof(ability_data_t) == 8) ? 1 : -1];
 
-extern ability_data_t g_ability_data[];
+extern ability_data_t g_ability_data[ABILITY_ID_COUNT];
 extern animation_ability_data_t g_ability_animation_data[ANIMATION_ABILITY_COUNT];
 
 /* secondary records */
@@ -706,10 +706,10 @@ typedef union ability_secondary_pointer {
 } ability_secondary_pointer_t;
 typedef char ability_secondary_pointer_size_must_be_4[(sizeof(ability_secondary_pointer_t) == 4) ? 1 : -1];
 
-extern ability_secondary_data_t g_ability_range_data[];
+extern ability_secondary_data_t g_ability_range_data[ABILITY_ID_ITEM_FIRST];
 
 /* The item_type_e each Throw ability throws, indexed by ability id - ABILITY_ID_THROW_FIRST. */
-extern u8 g_ability_throw_item_types[];
+extern u8 g_ability_throw_item_types[ABILITY_ID_JUMP_FIRST - ABILITY_ID_THROW_FIRST];
 extern ability_jump_record_t g_ability_jump_data[12];
 extern ability_charge_record_t g_ability_charge_data[8];
 
@@ -742,8 +742,8 @@ typedef enum rsm_ability_filter {
     RSM_ABILITY_FILTER_MOVEMENT = 0x08,
 } rsm_ability_filter_e;
 
-extern ability_human_skillset_t g_ability_human_skillset_abilities[];
-extern ability_monster_skillset_t g_ability_monster_skillset_abilities[];
+extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
+extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];
 
 s32 ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* ability_store_skillset_abilities(s32 skillset, s32 flags);
