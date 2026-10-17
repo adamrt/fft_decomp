@@ -17,6 +17,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern help_navigation_record_t g_screen_grid_default_cells[];
+extern help_navigation_record_t g_screen_grid_shop_cells[];
+extern help_navigation_record_t g_screen_grid_shop_scrolled_cells[];
+extern help_navigation_record_t* g_screen_grid_active_cells;
+extern u8 g_screen_grid_selected_cell;
+extern u16 g_screen_grid_cursor_anim;
+extern u8 g_screen_grid_initialized;
+
 /* Open the pending menu description in a Help dialog at the requested position.
  * Grid-menu ids above 0x1ffff are latched without opening a text thread. */
 void screen_start_help_text(s32 position) {
@@ -32,7 +40,7 @@ void screen_start_help_text(s32 position) {
     }
 }
 
-/* g_screen_grid_default_cells[23]/[24].text_offset, bound separately: as
+/* g_screen_grid_default_cells[23]/[24].help_base, bound separately: as
  * members GCC addresses the second store from the first's base. */
 extern s16 g_screen_grid_cell_23_text_offset;
 extern s16 g_screen_grid_cell_24_text_offset;
@@ -82,19 +90,21 @@ void screen_update_grid_cursor(s16 alternate) {
             g_screen_grid_initialized = 0;
             g_help_message_text_id = menu_id;
         } else if (input & PSX_PAD_CIRCLE) {
-            text_id = g_screen_grid_active_cells[cell].text_id != 0 ? *g_screen_grid_active_cells[cell].text_id : 0;
+            text_id = g_screen_grid_active_cells[cell].value != 0 ? *g_screen_grid_active_cells[cell].value : 0;
             if (g_screen_grid_selected_cell < 0x12 || g_screen_grid_selected_cell >= 0x1C || text_id != 0) {
-                g_help_message_text_id = text_id + g_screen_grid_active_cells[g_screen_grid_selected_cell].text_offset;
+                /* This grid adds the base as an unsigned 16-bit text ID. */
+                g_help_message_text_id
+                    = text_id + (u16)g_screen_grid_active_cells[g_screen_grid_selected_cell].help_base;
                 screen_start_help_text(DIALOG_POSITION_CENTER);
             }
         } else if (input & PSX_PAD_UP) {
-            cell = g_screen_grid_active_cells[cell].next_up;
+            cell = g_screen_grid_active_cells[cell].destination[0];
         } else if (input & PSX_PAD_DOWN) {
-            cell = g_screen_grid_active_cells[cell].next_down;
+            cell = g_screen_grid_active_cells[cell].destination[1];
         } else if (input & PSX_PAD_RIGHT) {
-            cell = g_screen_grid_active_cells[cell].next_right;
+            cell = g_screen_grid_active_cells[cell].destination[2];
         } else if (input & PSX_PAD_LEFT) {
-            cell = g_screen_grid_active_cells[cell].next_left;
+            cell = g_screen_grid_active_cells[cell].destination[3];
         }
         /* The recruit preview grid steps over cell 7 between cells 6 and 8. */
         if (g_screen_grid_id == MENU_GRID_HELP_RECRUIT_PREVIEW) {
@@ -110,10 +120,10 @@ void screen_update_grid_cursor(s16 alternate) {
             g_screen_grid_selected_cell = cell;
         }
     }
-    cursor.x = g_screen_grid_active_cells[g_screen_grid_selected_cell].cursor.x;
-    cursor.y = g_screen_grid_active_cells[g_screen_grid_selected_cell].cursor.y;
+    cursor.x = g_screen_grid_active_cells[g_screen_grid_selected_cell].x;
+    cursor.y = g_screen_grid_active_cells[g_screen_grid_selected_cell].y;
     gfx_set_otag_index(0x3C);
-    if (g_screen_grid_active_cells[g_screen_grid_selected_cell].vertical != 0) {
+    if (g_screen_grid_active_cells[g_screen_grid_selected_cell].vertical_cursor != 0) {
         cursor.y++;
         menu_update_and_draw_bouncing_cursor(&cursor, &g_screen_grid_cursor_anim, busy);
     } else {

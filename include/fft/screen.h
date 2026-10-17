@@ -297,28 +297,7 @@ void screen_input_update_dialog_state(void);
 void screen_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode);
 
 /* grid menus */
-/* One cell of a directional grid menu: a description text id (base plus
- * offset), the cell index reached by each d-pad direction, and the cursor
- * position. A non-zero `vertical` draws the vertical cursor. */
-typedef struct screen_grid_cell {
-    s16* text_id;
-    u16 text_offset;
-    u8 next_up;
-    u8 next_down;
-    u8 next_right;
-    u8 next_left;
-    point16_t cursor;
-    s16 vertical;
-} screen_grid_cell_t;
-
-extern screen_grid_cell_t g_screen_grid_default_cells[];
-extern screen_grid_cell_t g_screen_grid_shop_cells[];
-extern screen_grid_cell_t g_screen_grid_shop_scrolled_cells[];
-extern screen_grid_cell_t* g_screen_grid_active_cells;
-extern u8 g_screen_grid_selected_cell; /* selected cell */
-extern u16 g_screen_grid_cursor_anim;  /* grid cursor animation state */
-extern u8 g_screen_grid_initialized;   /* grid menu initialized */
-extern s32 g_screen_grid_id;           /* help_grid_id_e */
+extern s32 g_screen_grid_id; /* help_grid_id_e */
 
 void screen_update_grid_cursor(s16 alternate);
 void screen_start_help_text(s32 position);
