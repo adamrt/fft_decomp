@@ -151,13 +151,13 @@ s32 formation_banner_countdown(s32 message_id, s32 frames) {
 }
 
 /* Selects the primary bitstream and resets its next operation to bit 7. */
-void bits_init_primary_reader(const u8* data) {
+void bits_init_primary_reader(u8* data) {
     g_bits_primary_reset = 1;
-    g_bits_primary_cursor = (u8*)data;
+    g_bits_primary_cursor = data;
 }
 
 /* Selects the secondary read-only bitstream and resets it to bit 7. */
 void bits_init_secondary_reader(const u8* data) {
-    g_bits_reader_2_reset = 1;
-    g_bits_reader_2_stream = data;
+    g_bits_secondary_reset = 1;
+    g_bits_secondary_cursor = data;
 }

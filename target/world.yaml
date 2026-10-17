@@ -1758,10 +1758,10 @@ data:
   - {addr: 0x8018e43c, name: g_formation_banner_menu}
   - {addr: 0x8018e478, name: g_formation_banner_state}
   - {addr: 0x8018e47c, name: g_bits_primary_reset}
-  - {addr: 0x8018e47d, name: g_bits_reader_2_reset}
-  - {addr: 0x8018e480, name: g_bits_reader_1_index}
-  - {addr: 0x8018e484, name: g_bits_writer_1_index}
-  - {addr: 0x8018e488, name: g_bits_reader_2_index}
+  - {addr: 0x8018e47d, name: g_bits_secondary_reset}
+  - {addr: 0x8018e480, name: g_bits_primary_read_index}
+  - {addr: 0x8018e484, name: g_bits_primary_write_index}
+  - {addr: 0x8018e488, name: g_bits_secondary_read_index}
   - {addr: 0x8018e48c, name: g_tutorial_id}
   - {addr: 0x8018e48d, name: g_formation_item_category_input_lock}
   - {addr: 0x8018e48e, name: g_tutorial_latched_button}
@@ -2175,7 +2175,7 @@ data:
   - {addr: 0x801ca6e8, name: g_screen_grid_active_cells}
   - {addr: 0x801ca6ec, name: g_screen_grid_selected_cell}
   - {addr: 0x801ca6f0, name: g_bits_primary_cursor}
-  - {addr: 0x801ca6f4, name: g_bits_reader_2_stream}
+  - {addr: 0x801ca6f4, name: g_bits_secondary_cursor}
   - {addr: 0x801ca6f8, name: g_tutorial_repeat_counters}
   - {addr: 0x801ca738, name: g_tutorial_previous_input}
   - {addr: 0x801ca73c, name: g_menu_selection_values}

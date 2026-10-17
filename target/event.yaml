@@ -1083,10 +1083,10 @@ data:
   - {addr: 0x801ca924, name: g_menu_cursor_reverse_offset_keyframes}
   - {addr: 0x801ca93c, name: g_menu_managed_thread_state}
   - {addr: 0x801ca940, name: g_bits_primary_reset}
-  - {addr: 0x801ca941, name: g_bits_reader_2_reset}
-  - {addr: 0x801ca944, name: g_bits_reader_1_index}
-  - {addr: 0x801ca948, name: g_bits_writer_1_index}
-  - {addr: 0x801ca94c, name: g_bits_reader_2_index}
+  - {addr: 0x801ca941, name: g_bits_secondary_reset}
+  - {addr: 0x801ca944, name: g_bits_primary_read_index}
+  - {addr: 0x801ca948, name: g_bits_primary_write_index}
+  - {addr: 0x801ca94c, name: g_bits_secondary_read_index}
   - {addr: 0x801ca950, name: g_input_activation_timer}
   - {addr: 0x801ca954, name: g_gfx_decreasing_fade_active}
   - {addr: 0x801ca955, name: g_gfx_increasing_fade_active}
@@ -1126,7 +1126,7 @@ data:
   - {addr: 0x801d9202, name: g_gfx_tiled_rect}
   - {addr: 0x801d920c, name: g_menu_text_active_key}
   - {addr: 0x801d9210, name: g_bits_primary_cursor}
-  - {addr: 0x801d9214, name: g_bits_reader_2_stream}
+  - {addr: 0x801d9214, name: g_bits_secondary_cursor}
   - {addr: 0x801d9218, name: g_input_repeat_counters}
   - {addr: 0x801d9258, name: g_save_input_previous}
   - {addr: 0x801d925c, name: g_save_input_latched_button}
@@ -1716,9 +1716,9 @@ data:
   - {addr: 0x801d87c6, name: g_input_page_scroll_hold_frames}
   - {addr: 0x801d87c8, name: g_menu_event_speed}
   - {addr: 0x801d87cc, name: g_bits_primary_reset}
-  - {addr: 0x801d87cd, name: g_bits_reader_2_reset}
-  - {addr: 0x801d87d0, name: g_bits_reader_1_index}
-  - {addr: 0x801d87d4, name: g_bits_reader_2_index}
+  - {addr: 0x801d87cd, name: g_bits_secondary_reset}
+  - {addr: 0x801d87d0, name: g_bits_primary_read_index}
+  - {addr: 0x801d87d4, name: g_bits_secondary_read_index}
   - {addr: 0x801d87dc, name: g_equipment_text_restore_pending}
   - {addr: 0x801d87e0, name: g_equipment_unit_initial_equipment}
   - {addr: 0x801d87ec, name: g_gfx_poly_ft4_buffer}
@@ -1801,7 +1801,7 @@ data:
   - {addr: 0x801e9048, name: g_gfx_otag_index_locked}
   - {addr: 0x801e9052, name: g_gfx_tiled_rect}
   - {addr: 0x801e905c, name: g_bits_primary_cursor}
-  - {addr: 0x801e9060, name: g_bits_reader_2_stream}
+  - {addr: 0x801e9060, name: g_bits_secondary_cursor}
   - {addr: 0x801e9064, name: g_menu_input_newly_pressed}
   - {addr: 0x801e9068, name: g_gfx_poly_f3_capacity}
   - {addr: 0x801e906c, name: g_gfx_poly_g3_capacity}
@@ -2120,9 +2120,9 @@ data:
   - {addr: 0x801f003e, name: g_input_page_scroll_hold_frames}
   - {addr: 0x801f0040, name: g_menu_event_speed}
   - {addr: 0x801f0044, name: g_bits_primary_reset}
-  - {addr: 0x801f0045, name: g_bits_reader_2_reset}
-  - {addr: 0x801f0048, name: g_bits_reader_1_index}
-  - {addr: 0x801f004c, name: g_bits_reader_2_index}
+  - {addr: 0x801f0045, name: g_bits_secondary_reset}
+  - {addr: 0x801f0048, name: g_bits_primary_read_index}
+  - {addr: 0x801f004c, name: g_bits_secondary_read_index}
   - {addr: 0x801f0050, name: g_ability_list_selected_ability_data}
   - {addr: 0x801f0050, name: g_ability_list_selected_ability_secondary_data}
   - {addr: 0x801f0054, name: g_status_screen_previous_event_mode}
@@ -2166,7 +2166,7 @@ data:
   - {addr: 0x801fa70c, name: g_gfx_otag_index_locked}
   - {addr: 0x801fa710, name: g_menu_list_scroll_direction}
   - {addr: 0x801fa714, name: g_bits_primary_cursor}
-  - {addr: 0x801fa718, name: g_bits_reader_2_stream}
+  - {addr: 0x801fa718, name: g_bits_secondary_cursor}
   - {addr: 0x801fa71c, name: g_menu_list_entry_count}
   - {addr: 0x801fa720, name: g_menu_input_newly_pressed}
   - {addr: 0x801fa724, name: g_gfx_poly_f3_capacity}
