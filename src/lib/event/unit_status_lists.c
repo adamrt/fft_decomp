@@ -2125,7 +2125,7 @@ s32 menu_should_close_thread(u32* input) {
 
 /* Publish the icon strip's text-image upload rectangle to the caller, build
  * the four menu sprites of the icon record, and place the icon sprites that
- * the strip's icon kind selects. Only WORLD has the icon kind 0x10 branch. */
+ * the strip's header selects. Only WORLD has the Menu header with an arrow. */
 void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
     s32 kind;
     s32 index;
@@ -2166,7 +2166,7 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
     /* The range test below reads its own 16-bit copy of the kind. */
     index = (s16)kind;
 #ifdef FFT_WORLD
-    if (kind == 0x10) {
+    if (kind == MENU_ICON_HEADER_MENU_WITH_ARROW) {
         const image_layout_t* image_params;
 
         menu_init_sprite_array(record->icons[0], 1, 0x7cfc);
@@ -2177,14 +2177,15 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
         image_params = param->context;
         record->icons[0]->x0 = image_params->source.h + param->window.x + 7;
         record->icons[0]->y0 = param->window.y - 1;
-        gfx_set_image_primitive_layout(
-            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[1]);
+        gfx_set_image_primitive_layout(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
+            &g_menu_single_icon_image_params[MENU_ICON_HEADER_MENU]);
     } else
 #endif
         if (kind < 5) {
         gfx_set_image_primitive_layout(
             &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[kind]);
     } else {
+        /* The native test also accepts 10 through 15, beyond the five header groups. */
         if (index >= 5 && index < 0x10) {
             menu_init_sprite_array(record->icons[0], 1, 0x7cfc);
             menu_init_sprite_array(record->icons[1], 1, 0x7cfc);

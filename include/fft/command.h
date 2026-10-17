@@ -104,8 +104,8 @@ extern s32 g_command_current_id; /* command_menu_e */
 extern s16 g_command_wait_row_actions[4];
 extern s16 g_command_confirm_stored_unit_row_actions;
 
-/* The scene's menu table; BATTLE's is indexed by command_menu_e. */
-extern menu_entry_t g_command_idle_action_entries[];
+/* BATTLE and WORLD each define the 56 records for command_menu_e IDs 0 through 55. */
+extern menu_entry_t g_command_idle_action_entries[56];
 
 /* Opens an idle action menu (command_menu_e) for the active-turn unit beside it and restores the row it last
  * chose. WORLD's body only clears g_menu_building_thread_started. */

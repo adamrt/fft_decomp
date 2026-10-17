@@ -38,6 +38,7 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 /* icon placements */
 /* Image placements passed to gfx_set_image_primitive_layout for the icon strips of the event library. The panel and
  * numeric-panel cells of the menu library, which each menu program defines for itself, are in unit_panel.h. */
+/* Four pieces for each header from MENU_ICON_HEADER_ABILITY_TURN_REFLECT through MENU_ICON_HEADER_ABILITY. */
 extern image_layout_t g_menu_icon_strip_image_params[20];
 extern image_layout_t g_menu_single_icon_image_params[5];
 

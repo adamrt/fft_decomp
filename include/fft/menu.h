@@ -71,6 +71,22 @@ typedef struct menu_text_layout {
 } menu_text_layout_t;
 typedef char menu_text_layout_size_must_be_40[sizeof(menu_text_layout_t) == 40 ? 1 : -1];
 
+/* Header sprites selected by menu_entry_t.header_id in the icon-list threads.
+ * The names are the labels in FRAME.BIN; NONE places its label off screen. */
+typedef enum menu_icon_header {
+    MENU_ICON_HEADER_NONE = 0,
+    MENU_ICON_HEADER_MENU = 1,
+    MENU_ICON_HEADER_CHECK = 2,
+    MENU_ICON_HEADER_EFFECT = 3,
+    MENU_ICON_HEADER_TURN = 4,
+    MENU_ICON_HEADER_ABILITY_TURN_REFLECT = 5,
+    MENU_ICON_HEADER_ABILITY_MP_TURN_REFLECT = 6,
+    MENU_ICON_HEADER_STOCK_TURN_REFLECT = 7,
+    MENU_ICON_HEADER_TURN_REFLECT = 8,
+    MENU_ICON_HEADER_ABILITY = 9,
+    MENU_ICON_HEADER_MENU_WITH_ARROW = 16
+} menu_icon_header_e;
+
 /* One menu window, shared by BATTLE, WORLD and the overlays; g_menu_thread_menu_data points at the scene's
  * current table. The icon threads read vram_origin and the inner size as the text image's upload rectangle and
  * window.x/y as the icon origin (the icon list thread clears bit 0 of window.y);
@@ -91,9 +107,8 @@ typedef struct menu_entry {
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
     s16* row_actions;            /* 0x24: each row's action, indexed by selected_index */
     void (*thread_entry)(void);  /* 0x28 */
-    s16 header_id;               /* 0x2c: menu header; text-thread parameter (screen_text_entry_thread); the
-                                    icon threads read it signed as the icon kind: 0x10 arrow, 0..4 single
-                                    icon, 5..15 four-piece icon (menu_build_window_sprites) */
+    s16 header_id;               /* 0x2c: text-thread parameter (screen_text_entry_thread);
+                                    icon threads use menu_icon_header_e */
     u8 _padding_2e[2];           /* aligns context */
     /* 0x30: context interpreted by the menu thread. Text threads use menu_text_binding_t
      * here, the list threads a menu_text_layout_t, the number threads a
