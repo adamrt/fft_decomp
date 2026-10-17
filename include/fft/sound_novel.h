@@ -19,9 +19,8 @@ struct sound_novel_script_file;
 typedef struct sound_novel_reading {
     /* 0x00: loaded sound-novel script, including its section-offset table. */
     struct sound_novel_script_file* buffer;
-    u32* script_words; /* 0x04 */
-    u32 instruction;   /* 0x08 */
-    /* 0x0c-0x37 mirror the live sound-novel state at g_sound_novel_state_flags. */
+    u32* script_words;        /* 0x04 */
+    u32 instruction;          /* 0x08 */
     u16 state_flags;          /* 0x0c; sound_novel_state_flag_e */
     s16 section;              /* 0x0e */
     s16 word_index;           /* 0x10; index of the 32-bit instruction in the section; cleared by
@@ -87,30 +86,6 @@ typedef enum sound_novel_state_flag {
     SOUND_NOVEL_STATE_WHITE_OVERLAY = 0x100, /* the white full-screen overlay is up */
 } sound_novel_state_flag_e;
 
-/* The live sound-novel state from the current instruction on: g_sound_novel_state views
- * g_sound_novel_reading from its offset 0x08. Handlers must reach it as in-struct references: the target
- * keeps each state_flags store ahead of the window and render-record updates and reloads render_index after them,
- * which GCC only does for in-struct accesses. g_sound_novel_state_flags is a separate scalar view for handlers
- * whose flag loads need their own symbol base. */
-typedef struct sound_novel_state {
-    u32 instruction; /* 0x00 */
-    u16 state_flags; /* 0x04; g_sound_novel_state_flags; sound_novel_state_flag_e */
-    u8 _unused_06[0x0e];
-    s16 render_index; /* 0x14 */
-    s16 picture;      /* 0x16 */
-    u8 _unused_18[0x0e];
-    s16 x; /* 0x26 */
-    s16 y; /* 0x28 */
-} sound_novel_state_t;
-
-extern u32 g_sound_novel_local_flags[];
-extern sound_novel_state_t g_sound_novel_state;
-
-/* Scalar view of g_sound_novel_reading.state_flags for opcode
- * handlers that read-modify-write it beside another record store: the member
- * spelling shares one base register where the target uses absolute addresses. */
-extern u16 g_sound_novel_state_flags;
-
 s32 sound_novel_run_until_yield(void);
 u32 sound_novel_find_section_instruction(s32 section, s32 opcode);
 void sound_novel_opcode_05_load_background_set(void);
@@ -125,11 +100,7 @@ extern u16 g_sound_novel_history_1;
 
 /* sounds, waits and the countdown */
 extern struct suzuki_sound_resource* g_sound_novel_sound_resource;
-extern s32 g_sound_novel_wait_counter;
-extern s32 g_sound_novel_wait_frames;
 extern s32 g_sound_novel_countdown_frames;
-extern s32 g_sound_novel_countdown_section;
-extern s32 g_sound_novel_countdown_elapsed;
 
 /* Sound resource the sound-novel menu passes to suzuki_sound_append_resource. */
 extern struct suzuki_sound_resource* g_sound_novel_default_sound_resource;

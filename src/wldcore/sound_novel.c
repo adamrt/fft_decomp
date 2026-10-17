@@ -24,6 +24,30 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Existing biased view retained only for opcodes 2c, 2f and 30. It aliases
+ * g_sound_novel_reading at instruction (+0x08); direct full-record accesses
+ * change register allocation, while a scalar alias shortens each body.
+ * The layout is a matching constraint, not evidence of a second state object. */
+typedef struct sound_novel_state {
+    u32 instruction; /* 0x00 */
+    u16 state_flags; /* 0x04; g_sound_novel_state_flags; sound_novel_state_flag_e */
+    u8 _unused_06[0x0e];
+    s16 render_index; /* 0x14 */
+    s16 picture;      /* 0x16 */
+    u8 _unused_18[0x0e];
+    s16 x; /* 0x26 */
+    s16 y; /* 0x28 */
+} sound_novel_state_t;
+
+extern sound_novel_state_t g_sound_novel_state;
+/* Scalar flag access retains the original bases in opcodes 2e and 33. */
+extern u16 g_sound_novel_state_flags;
+extern u32 g_sound_novel_local_flags[];
+extern s32 g_sound_novel_wait_counter;
+extern s32 g_sound_novel_wait_frames;
+extern s32 g_sound_novel_countdown_section;
+extern s32 g_sound_novel_countdown_elapsed;
+
 /* Opcode-indexed dispatch, defined after its handlers below. */
 static void (*g_sound_novel_opcode_handlers[54])(void);
 
@@ -78,14 +102,14 @@ void sound_novel_restore_reading(s32 render_record) {
     picture_id = g_sound_novel_reading.picture_id;
     if (picture_id != -1) {
         g_sound_novel_reading.picture_id = -1;
-        g_sound_novel_state.instruction
+        g_sound_novel_reading.instruction
             = (g_sound_novel_reading.picture_x << 24) | (g_sound_novel_reading.picture_y << 16) | (picture_id << 8);
         sound_novel_opcode_0a_load_picture();
     }
 
     transition = g_sound_novel_reading.background_set;
     if (transition != -1) {
-        g_sound_novel_state.instruction = transition << 8;
+        g_sound_novel_reading.instruction = transition << 8;
         g_sound_novel_reading.background_set = -1;
         g_picture_background_loaded_set = -1;
         sound_novel_opcode_05_load_background_set();
@@ -119,7 +143,7 @@ void sound_novel_restore_reading(s32 render_record) {
     }
 
     if (*state_flags & SOUND_NOVEL_STATE_VALUE_DISPLAY) {
-        g_sound_novel_state.instruction = g_sound_novel_reading.value_display_mode << 8;
+        g_sound_novel_reading.instruction = g_sound_novel_reading.value_display_mode << 8;
         sound_novel_opcode_1c_start_pending_value_transition();
     }
 
@@ -475,7 +499,7 @@ void sound_novel_opcode_05_load_background_set(void) {
 /* Sound-novel opcode 0x06: branch to the section in instruction byte 1. */
 void sound_novel_opcode_06_branch_to_section(void) {
     g_sound_novel_reading.section = (u8)(g_sound_novel_reading.instruction >> 8);
-    g_sound_novel_state_flags |= SOUND_NOVEL_STATE_BRANCH;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_BRANCH;
 }
 
 /* Sound-novel opcode 0x07: branch to the section in byte 1 when the chosen dialog option equals
@@ -543,17 +567,17 @@ void sound_novel_opcode_0a_load_picture(void) {
     s32 x;
     s32 y;
 
-    instruction = g_sound_novel_state.instruction;
+    instruction = g_sound_novel_reading.instruction;
     x = instruction >> 24;
     y = (instruction >> 16) & 0xFF;
     picture = (instruction & 0xFF00) >> 8;
-    g_sound_novel_state.picture = picture;
-    g_sound_novel_state.x = x;
-    g_sound_novel_state.y = y;
+    g_sound_novel_reading.picture_id = picture;
+    g_sound_novel_reading.picture_x = x;
+    g_sound_novel_reading.picture_y = y;
     picture_load_set(picture);
     file_wait_for_pending();
-    g_window_gs_image_records[g_sound_novel_state.render_index].base.x = x - 0x80;
-    g_window_gs_image_records[g_sound_novel_state.render_index].base.y = y - 0x78;
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].base.x = x - 0x80;
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].base.y = y - 0x78;
     GsGetTimInfo(g_picture_buffer + 1, &image);
     bounds.x = image.px;
     bounds.y = image.py;
@@ -563,9 +587,10 @@ void sound_novel_opcode_0a_load_picture(void) {
     clut_position.y = image.cy;
     LoadTPage(image.pixel, 0, 0, bounds.x, bounds.y, bounds.w * 4, bounds.h);
     LoadClut(image.clut, clut_position.x, clut_position.y);
-    window_init_vram_render_record(g_sound_novel_state.render_index, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
-    g_window_gs_image_records[g_sound_novel_state.render_index].anim_counter = 0;
-    g_sound_novel_state.state_flags |= SOUND_NOVEL_STATE_FETCH;
+    window_init_vram_render_record(
+        g_sound_novel_reading.picture_render_index, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].anim_counter = 0;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Hides the sound-novel picture's render record and forgets the picture. */
@@ -578,20 +603,20 @@ void sound_novel_opcode_0b_hide_picture(void) {
 /* Sound-novel opcode: a nonzero byte 1 shows the novel level's two button
  * windows and records PARENT_WINDOWS_VISIBLE, zero hides them and clears it. */
 void sound_novel_opcode_0c_set_parent_windows_visible(void) {
-    if ((u8)(g_sound_novel_state.instruction >> 8) != 0) {
-        g_sound_novel_state.state_flags |= SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
+    if ((u8)(g_sound_novel_reading.instruction >> 8) != 0) {
+        g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
         g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
         g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
-        g_sound_novel_state.state_flags &= ~SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
+        g_sound_novel_reading.state_flags &= ~SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
         g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].flags
             |= DISPLAY_OBJECT_HIDDEN;
         g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window].flags
             |= DISPLAY_OBJECT_HIDDEN;
     }
-    g_sound_novel_state.state_flags |= SOUND_NOVEL_STATE_FETCH;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode 0x0D: show message byte 1 of the novel's text in the message thread and
@@ -635,7 +660,7 @@ void sound_novel_opcode_0f_branch_if_section_read(void) {
  * g_sound_novel_read_section_bits equals `expected`; otherwise fetch the next
  * instruction. */
 static void sound_novel_branch_if_section_read_state(s32 expected) {
-    u32* instruction = &g_sound_novel_state.instruction;
+    u32* instruction = &g_sound_novel_reading.instruction;
     u16 flags;
 
     if (bits_test(g_sound_novel_read_section_bits, ((u8)(*instruction >> 8) << 8) | (u8)(*instruction >> 16))
@@ -663,7 +688,7 @@ void sound_novel_opcode_11_branch_if_saved_flag_set(void) {
 /* Branch to section byte 2 when bit byte 1 of g_sound_novel_saved_flags
  * equals `expected`; otherwise fetch the next instruction. */
 static void sound_novel_branch_if_saved_flag(s32 expected) {
-    u32* instruction = &g_sound_novel_state.instruction;
+    u32* instruction = &g_sound_novel_reading.instruction;
     u16 flags;
 
     /* Keep the instruction address live across the call for both operand loads. */
@@ -690,7 +715,7 @@ void sound_novel_opcode_13_branch_if_local_flag_set(void) {
 /* Branch to section byte 2 when bit byte 1 of g_sound_novel_local_flags
  * equals `expected`; otherwise fetch the next instruction. */
 static void sound_novel_branch_if_local_flag(s32 expected) {
-    u32* instruction = &g_sound_novel_state.instruction;
+    u32* instruction = &g_sound_novel_reading.instruction;
     u16 flags;
 
     if (bits_test(g_sound_novel_local_flags, (u8)(*instruction >> 8)) == expected) {
@@ -733,21 +758,21 @@ void sound_novel_opcode_18_clear_local_flag(void) {
 
 /* Sound-novel opcode 0x19: set the record's counter to the 16-bit operand in bytes 1-2. */
 void sound_novel_opcode_19_set_counter(void) {
-    g_sound_novel_reading.counter = (g_sound_novel_state.instruction << 8) >> 16;
-    g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
+    g_sound_novel_reading.counter = (g_sound_novel_reading.instruction << 8) >> 16;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: add the 16-bit operand (instruction bits 8..23) to the
  * record's counter delta. */
 void sound_novel_opcode_1a_add_counter_delta(void) {
-    g_sound_novel_reading.counter_delta += (g_sound_novel_state.instruction << 8) >> 16;
+    g_sound_novel_reading.counter_delta += (g_sound_novel_reading.instruction << 8) >> 16;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: subtract the 16-bit operand (instruction bits 8..23)
  * from the record's counter delta. */
 void sound_novel_opcode_1b_subtract_counter_delta(void) {
-    g_sound_novel_reading.counter_delta -= (g_sound_novel_state.instruction << 8) >> 16;
+    g_sound_novel_reading.counter_delta -= (g_sound_novel_reading.instruction << 8) >> 16;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -838,7 +863,7 @@ static void sound_novel_change_music(s32 music_id) {
  * script variable also changes the track, mode 0 plays only effects and weather sounds. */
 void sound_novel_opcode_21_set_sound_mode(void) {
     g_sound_novel_reading.sound_mode = (u8)(g_sound_novel_reading.instruction >> 8);
-    g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: branch to section byte 3 when the counter plus its
@@ -855,7 +880,7 @@ void sound_novel_opcode_22_branch_if_equal(void) {
     if (value < 0) {
         value = 0;
     }
-    word = g_sound_novel_state.instruction;
+    word = g_sound_novel_reading.instruction;
     operand = (word >> 8) & 0xffff;
     if (value == operand) {
         g_sound_novel_reading.section = word >> 24;
@@ -877,7 +902,7 @@ void sound_novel_opcode_23_branch_if_not_equal(void) {
     if (value < 0) {
         value = 0;
     }
-    word = g_sound_novel_state.instruction;
+    word = g_sound_novel_reading.instruction;
     operand = (word >> 8) & 0xffff;
     if (value != operand) {
         g_sound_novel_reading.section = word >> 24;
@@ -900,7 +925,7 @@ void sound_novel_opcode_24_branch_if_less(void) {
     if (value < 0) {
         value = 0;
     }
-    word = g_sound_novel_state.instruction;
+    word = g_sound_novel_reading.instruction;
     operand = (word >> 8) & 0xffff;
     if (value < operand) {
         g_sound_novel_reading.section = word >> 24;
@@ -923,7 +948,7 @@ void sound_novel_opcode_25_branch_if_greater(void) {
     if (value < 0) {
         value = 0;
     }
-    word = g_sound_novel_state.instruction;
+    word = g_sound_novel_reading.instruction;
     operand = (word >> 8) & 0xffff;
     if (operand < value) {
         g_sound_novel_reading.section = word >> 24;
@@ -1061,7 +1086,7 @@ void sound_novel_opcode_2c_play_sound_effect_quad(void) {
 void sound_novel_opcode_2d_stop_sound_effects(void) {
     sound_stop_all_sfx();
     g_sound_novel_reading.sound_id = 0;
-    g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: start a countdown of the 16-bit operand in seconds
@@ -1070,7 +1095,7 @@ void sound_novel_opcode_2d_stop_sound_effects(void) {
 void sound_novel_opcode_2e_start_countdown_timer(void) {
     u32 instruction;
 
-    instruction = g_sound_novel_state.instruction;
+    instruction = g_sound_novel_reading.instruction;
     g_sound_novel_countdown_elapsed = 0;
     g_sound_novel_countdown_frames = ((instruction << 8) >> 16) * 60;
     g_sound_novel_countdown_section = instruction >> 24;
@@ -1148,7 +1173,7 @@ void sound_novel_opcode_33_add_counter_delta_if_choice(void) {
     u32* instruction;
     u8 expected;
 
-    instruction = &g_sound_novel_state.instruction;
+    instruction = &g_sound_novel_reading.instruction;
 
     expected = *instruction >> 24;
     if (script_get_variable(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION) == expected) {
@@ -1179,7 +1204,7 @@ void sound_novel_opcode_35_push_operand_history(void) {
     g_sound_novel_history_1 = history_2;
     g_sound_novel_reading.text_history[2] = history_3;
     g_sound_novel_reading.text_history[3] = new_entry;
-    g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Dispatch by the instruction's low-byte opcode. */
