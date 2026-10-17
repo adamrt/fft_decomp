@@ -19,7 +19,8 @@
 /* The numeric stats panel as unit_panel_numbers_thread draws it, except that the
  * draw offset follows the screen polarity and both slots use g_unit_panel_editor_numeric_state, so a
  * preview panel shares the main panel's primitive buffers (retail). Runs until a stop
- * request. */
+ * request. ATTACK and REQUIRE only start slot 12. Their retained preview branch's
+ * text_b image range overlaps later cursor/menu state. */
 void unit_panel_numbers_polarity_thread(void) {
     unit_panel_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;

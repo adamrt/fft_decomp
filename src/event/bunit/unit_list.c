@@ -876,6 +876,7 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
     rgb.r = rgb.g = rgb.b = i > 0x80 ? 0x80 : i;
     frame = sprite_get_unit_frame_and_vram_ids(g_unit_list_pointers[unit]->runtime_id, &quad.query);
     base_y = (quad.query.graphic_height >> 1) + 0x16;
+    /* Retail tests -1, although an absent runtime unit returns 0 and leaves the query unset. */
     if (frame == (sprite_frame_t*)-1) {
         return;
     }
