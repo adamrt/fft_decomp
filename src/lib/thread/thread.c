@@ -51,7 +51,7 @@ void thread_exit_current(void) {
     thread_yield();
 }
 
-/* Zeroes all 16 thread records (16 * 0x400 bytes), makes thread 0 the current
+/* Zeroes the first 16 thread records (16 * 0x400 bytes), makes thread 0 the current
  * thread and marks it running. */
 void thread_reset_scheduler(void) {
     u32* word;

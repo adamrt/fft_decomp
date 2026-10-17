@@ -282,7 +282,7 @@ void unit_panel_banner_thread(void) {
             }
         }
 
-        /* Offset a moves each block to the thread's x and shake_y; offset b restores the plain offset after it. */
+        /* Offset a moves each block to the thread's position; offset b restores the plain offset after it. */
         panel_x = (u16)thread->position.x;
         panel_y_a = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = panel_x - 0x80;

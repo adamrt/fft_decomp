@@ -50,7 +50,7 @@ typedef enum world_map_request_state {
  * main menu starts together. */
 typedef struct world_map_menu_group {
     void (*function[3])(void); /* 0x00; -1 when unused */
-    s32 thread_id[3];          /* 0x0c; -1 when unused */
+    s32 thread_id[3];          /* 0x0c; member thread slots */
     s32 task_id[3];            /* 0x18 */
 } world_map_menu_group_t;
 typedef char world_map_menu_group_size_must_be_36[sizeof(world_map_menu_group_t) == 36 ? 1 : -1];

@@ -41,8 +41,8 @@ typedef struct thread {
 } thread_t;
 typedef char thread_size_must_be_1024[(sizeof(thread_t) == 1024) ? 1 : -1];
 
-/* Thread ids run below sixteen, and reset loops clear those sixteen
- * 0x400-byte slots. The table itself has VARIANT_THREAD_TABLE_SLOT_COUNT slots:
+/* Reset loops clear the first sixteen 0x400-byte slots. The table itself has
+ * VARIANT_THREAD_TABLE_SLOT_COUNT slots:
  * 16 in BATTLE, 17 in WORLD, whose slot 16 runs tutorial text; the scheduler
  * and the slot searches scan it, but reset does not clear it. */
 enum { THREAD_ID_COUNT = 16, THREAD_STRIDE = 1024 };

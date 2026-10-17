@@ -20,7 +20,7 @@
 
 /* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels, REQUIRE's
  * body. Same doubled packets (0x30C editor and 0x1D8 panel packets, fft/menu.h) as the other
- * bodies, without the slide animation (the thread's shake_y is used as it stands), with every
+ * bodies, without the slide animation (the thread's y position is used as it stands), with every
  * gauge bar at full width, two numeric entries in the second number image, and the battle id + 1
  * always as the third large number. */
 void unit_panel_banner_thread(void) {
@@ -239,7 +239,7 @@ void unit_panel_banner_thread(void) {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
 
-        /* Offset a moves each block to the thread's x and shake_y; offset b restores the plain offset after it. */
+        /* Offset a moves each block to the thread's position; offset b restores the plain offset after it. */
         panel_x = (u16)thread->position.x;
         panel->draw_offset_a.position.x = panel_x - 0x80;
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
