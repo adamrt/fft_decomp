@@ -487,8 +487,8 @@ void unit_play_sfx(struct unit* unit, s32 sound_id);
 /* action relocation */
 extern s32 g_unit_casting_runtime_id;
 
-/* Count and coordinates of the tiles already handed out as dismount
- * destinations this action. */
+/* Dismount destinations reserved since the last strike setup; turn-status
+ * and trap results also append. */
 extern s32 g_unit_relocated_count;
 extern move_tile_coordinates_t g_unit_relocated_coords[];
 
