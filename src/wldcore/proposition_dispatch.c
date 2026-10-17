@@ -39,6 +39,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s32 g_proposition_send_unit_count;
+extern s16 g_proposition_candidate_levels[];
+
 static s32 g_proposition_send_units[3] = { 0 };
 
 static void proposition_push_report_level(s32 argument);

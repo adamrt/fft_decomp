@@ -131,7 +131,6 @@ typedef struct proposition_fields {
 } proposition_fields_t;
 typedef char proposition_fields_size_must_be_46[sizeof(proposition_fields_t) == 46 ? 1 : -1];
 
-extern s32* g_proposition_data; /* the loaded proposition data file */
 extern proposition_fields_t g_proposition_selected_row;
 
 void proposition_unpack_row(proposition_fields_t* out, s32 index);
@@ -184,8 +183,6 @@ typedef struct proposition_recall_level {
     u8 _unused_1c[4];
     s32 frame_window; /* 0x20 */
 } proposition_recall_level_t;
-
-extern u32 g_proposition_detail_image_buffer[];
 
 void proposition_push_detail_level(s32 value);
 void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition, s32 coordinate_mode);
@@ -262,8 +259,6 @@ typedef struct proposition_send_unit_level {
 typedef char proposition_send_unit_level_size_must_be_92[sizeof(proposition_send_unit_level_t) == 92 ? 1 : -1];
 
 extern s32 g_proposition_gil_amount;
-extern s32 g_proposition_send_unit_count;
-extern s16 g_proposition_candidate_levels[];
 extern s32 g_proposition_dispatch_days;
 
 void proposition_push_send_unit_level(void);
@@ -397,11 +392,6 @@ typedef struct proposition_discovery_level {
     s32 phase; /* 0x08; proposition_discovery_phase_e */
     s32 timer; /* 0x0c; frames spent in phase 2 */
 } proposition_discovery_level_t;
-
-/* The collection counts that earn a milestone message (proposition_get_milestone_rank): eight each,
- * 1/4/8/12/16/20/24/31 treasures and 1/3/6/8/10/12/14/16 unexplored lands. */
-extern u8 g_proposition_treasure_milestones[];
-extern u8 g_proposition_unexplored_land_milestones[];
 
 s32 proposition_get_milestone_rank(void);
 void proposition_push_discovery_level(void);

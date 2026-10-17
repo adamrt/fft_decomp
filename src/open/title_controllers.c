@@ -31,6 +31,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern prologue_entry_t** g_prologue_entries;
+extern u8 g_birthday_title_image[];
+extern u8 g_birthday_window_image[];
+
 typedef void (*controller_handler_t)(controller_record_t* record);
 /* One callback for each controller_handler_e value, 0 through 12. */
 static controller_handler_t g_controller_handlers[13] = {

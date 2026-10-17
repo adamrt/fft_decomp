@@ -28,6 +28,31 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern ending_font_metrics_t* g_ending_script_font_metrics;
+extern POLY_FT4 g_ending_script_glyph_primitives[2][672];
+
+/* Two horizontal bands, one at the top and one at the bottom of the screen. */
+extern POLY_FT4 g_ending_credit_band_primitives[2];
+
+/* One per display buffer. */
+extern POLY_FT4 g_ending_fade_primitives[2];
+extern u8* g_ending_script_initial_data_base;
+
+/* Scalar views of 32-bit fields of g_ending_script_state. ending_opcode_02_set_scroll_speed, ending_scroll_text and
+ * ending_update_opntex_sequence load and store each of these by absolute address; the member spelling lets cse keep
+ * the address in a register. */
+extern s32 g_ending_script_byte_offset;       /* dispatch.cursor.byte_offset */
+extern s32 g_ending_script_scroll_fraction;   /* dispatch.scroll_fraction */
+extern s32 g_ending_script_scrolled_distance; /* dispatch.scrolled_distance */
+extern prologue_t g_prologue;
+extern POLY_GT4 g_prologue_line_primitives[2][14];
+extern menu_entry_t g_music_test_list_params;
+extern menu_text_layout_t g_music_test_list_state;
+extern s16 g_music_test_list_entries[96];
+extern s16 g_music_test_list_entry_flags[96];
+extern s16 g_music_test_selected_option;
+extern struct suzuki_music* g_music_test_sound_handle; /* handle of the playing music test track */
+
 static s16 g_music_test_row_actions[16]
     = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
 

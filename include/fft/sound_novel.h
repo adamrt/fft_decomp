@@ -98,9 +98,6 @@ extern u16 g_sound_novel_history_1;
 extern struct suzuki_sound_resource* g_sound_novel_sound_resource;
 extern s32 g_sound_novel_countdown_frames;
 
-/* Sound resource the sound-novel menu passes to suzuki_sound_append_resource. */
-extern struct suzuki_sound_resource* g_sound_novel_default_sound_resource;
-
 /* menu levels */
 /* Values of sound_novel_level_t.phase. */
 typedef enum sound_novel_phase {
@@ -171,8 +168,6 @@ typedef struct sound_novel_restart_level {
     u8 _unused_18[8];
     s32 mode; /* 0x20; argument of the push */
 } sound_novel_restart_level_t;
-
-extern u8 g_sound_novel_quit_help_text_ids[];
 
 void sound_novel_resume_level(menu_stack_record_t* level);
 void sound_novel_step_level(menu_stack_record_t* level);

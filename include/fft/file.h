@@ -68,8 +68,6 @@ typedef enum disc_sector {
     DISC_SECTOR_OPEN_ENDING_XA = 0x2f551,
 } disc_sector_e;
 
-extern s32 g_file_battle_sector;
-
 /* resident CD loader */
 /* Loading-display mode passed to the shared file-header builder. */
 typedef enum file_loading_display_mode {

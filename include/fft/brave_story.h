@@ -40,7 +40,6 @@ typedef struct brave_story_menu_level {
 typedef char brave_story_menu_level_size_must_be_80[sizeof(brave_story_menu_level_t) == 80 ? 1 : -1];
 
 extern s32 g_brave_story_saved_cursor[];
-extern u8 g_brave_story_help_text_ids[];
 
 void brave_story_push_level(void);
 void brave_story_handle_input(menu_stack_record_t* level);
@@ -71,7 +70,6 @@ typedef struct brave_story_detail_level {
 
 /* facts and events */
 extern menu_cursor_state_t g_brave_story_event_list_cursor;
-extern u16* g_brave_story_event_ids;
 
 /* A story event replayed from the Brave Story list: the event, the list cursor
  * to restore and the weather variable to put back afterwards. */
@@ -103,7 +101,6 @@ void brave_story_step_person_level(menu_stack_record_t* level);
 /* unexplored lands and treasures */
 extern u8 g_unexplored_land_picture_sets[];
 extern u8 g_treasure_picture_sets[];
-extern u8 g_treasure_sound_novel_ids[];
 
 /* RAM bitmaps indexed by 32-bit values; the save serializer copies only their packed data bytes and omits the
  * padding at the end of each allocation. */
@@ -190,13 +187,7 @@ typedef struct brave_story_participant_level {
     s32 participant;  /* 0x14; slot in participant_indices */
 } brave_story_participant_level_t;
 
-extern s32 g_brave_story_participant_saved_cursor;
-
-/* Saved proposition-list cursor row. Declared as an array: GCC's alias heuristic needs an in-struct object to keep
- * the target's load order in brave_story_handle_advancing_list_input; a scalar does not. */
-extern s32 g_brave_story_advancing_saved_cursor[];
-
-/* Saved category row, declared as an array for the same reason. */
+/* Saved category row, declared as an array to preserve the target's load order. */
 extern s32 g_brave_story_propositions_saved_cursor[];
 
 void brave_story_handle_participant_list_input(menu_stack_record_t* level);

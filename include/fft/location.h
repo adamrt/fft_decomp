@@ -78,7 +78,6 @@ typedef struct location_record {
 
 extern location_record_t* g_location_records;
 extern s32 g_location_label_shade;
-extern u32* g_location_picture_frame_tim;
 
 /* The location whose name label is drawn over its map dot. */
 extern s32 g_location_selected;
@@ -112,10 +111,6 @@ typedef struct location_menu_level {
     s32 entry_count; /* 0x30 */
     s32 entries[10]; /* 0x34 */
 } location_menu_level_t;
-
-/* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
- * choice from the location menu (location_build_menu_entries). */
-extern u8 g_location_choice_hidden_offsets[];
 
 s32 location_build_menu_entries(s32 location_id, s32* out);
 void location_push_menu_level(s32 menu);
@@ -182,9 +177,6 @@ typedef struct travel {
 } travel_t;
 typedef char travel_size_must_be_148[sizeof(travel_t) == 148 ? 1 : -1];
 
-extern s32 g_travel_search_depth;
-extern s32 g_travel_search_cost;
-extern travel_path_t g_travel_search_path;
 extern travel_t g_travel;
 
 /* Indexed so the store in travel_start stays behind the
@@ -221,11 +213,8 @@ typedef struct deep_dungeon_battle {
     u8 entd_ids[8];
 } deep_dungeon_battle_t;
 
-extern random_battle_road_t (*g_random_battle_roads)[3];
 extern s32 g_random_battle_entd_id;
-extern s32 g_random_battle_map_id;
 extern s32 g_random_battle_squad_id;
-extern deep_dungeon_battle_t* g_deep_dungeon_battles;
 
 /* location script */
 /* location_script_state_t.flags. The interpreter clears them before each block. Comparisons set CONDITION_FAILED
@@ -287,15 +276,8 @@ typedef struct location_script_state {
 typedef char location_script_state_size_must_be_48[sizeof(location_script_state_t) == 48 ? 1 : -1];
 
 /* The loaded world map script: a 16-bit offset per location to its list of conditional blocks. */
-extern u16* g_location_script_default_base;
 extern u16* g_location_script_base;
 extern location_script_state_t g_location_script_state;
-
-/* Scalar view of g_location_script_state.flags for the opcode handlers that
- * read-modify-write it: the member spelling there shares one base register
- * with the args/data accesses instead of the target's absolute addresses.
- * The load_* opcode handlers declare volatile views of flags/data/ip locally. */
-extern s32 g_location_script_flags;
 
 s32 location_script_run(s32 location, s32 action_mask);
 void location_script_dispatch_requests(void);

@@ -28,6 +28,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u8 g_brave_story_help_text_ids[];
+extern u16* g_brave_story_event_ids;
+
 static void brave_story_open_person_list(void);
 static void brave_story_open_event_list(void);
 static void brave_story_build_rows(void);

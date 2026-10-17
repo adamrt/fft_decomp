@@ -13,6 +13,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* g_system_flags as saved by world_map_toggle_captured_frame (system_flags_e). */
+extern u32 g_world_map_saved_system_flags;
+extern world_map_projected_tile_t g_world_map_projected_tiles[];
+
 static VECTOR g_world_map_projection_scale = { 0 };
 static SVECTOR g_world_map_projection_rotation = { 0 };
 

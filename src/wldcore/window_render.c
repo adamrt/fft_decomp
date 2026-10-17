@@ -18,6 +18,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern struct screen_number_range g_window_panel_number_state;
+
 static s16 g_window_panel_row_actions[16]
     = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
 

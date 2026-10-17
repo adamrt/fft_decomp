@@ -122,9 +122,6 @@ typedef struct birthday_confirmation_state {
 } birthday_confirmation_state_t;
 typedef char birthday_confirmation_state_size_must_be_100[(sizeof(birthday_confirmation_state_t) == 100) ? 1 : -1];
 
-extern u8 g_birthday_title_image[];
-extern u8 g_birthday_window_image[];
-
 void birthday_update_date_menu(union controller_record* record);
 void birthday_update_confirmation(union controller_record* record);
 
@@ -151,13 +148,6 @@ typedef struct music_test_state {
 enum {
     MUSIC_TEST_THREAD_SLOT_LIST = 12,
 };
-
-extern menu_entry_t g_music_test_list_params;
-extern menu_text_layout_t g_music_test_list_state;
-extern s16 g_music_test_list_entries[96];
-extern s16 g_music_test_list_entry_flags[96];
-extern s16 g_music_test_selected_option;
-extern struct suzuki_music* g_music_test_sound_handle; /* handle of the playing music test track */
 
 /* Entry of g_gfx_otags the WORLD menu frame draws into while
  * SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME is set. */

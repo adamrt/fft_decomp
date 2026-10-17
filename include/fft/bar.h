@@ -33,9 +33,6 @@ typedef struct bar_menu_level {
 } bar_menu_level_t;
 typedef char bar_menu_level_size_must_be_72[sizeof(bar_menu_level_t) == 72 ? 1 : -1];
 
-extern s32 g_bar_saved_cursor;
-extern u8 g_bar_row_help_text_ids[];
-
 void bar_build_rows(bar_menu_level_t* level);
 void bar_resume_level(menu_stack_record_t* level);
 void bar_handle_input(menu_stack_record_t* level);
@@ -53,8 +50,6 @@ typedef struct rumor_detail_level {
     s32 second_window;
     s32 render_index;
 } rumor_detail_level_t;
-
-extern s32* g_rumor_location_masks;
 
 /* Withhold every button before a list level opens a message over itself. */
 void rumor_block_list_buttons(menu_stack_record_t* unused_level);

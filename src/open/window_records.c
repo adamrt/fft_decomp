@@ -8,6 +8,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern window_sprite_prim_t g_window_sprite_primitive_pool[2][32];
+extern s32 g_window_primitive_count;
+
 static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
 static void window_draw_gpu_animated_record(display_object_animated_t* actor, u32* ot);
 static void window_draw_gpu_image_record(window_gpu_image_record_t* record, u32* ot);

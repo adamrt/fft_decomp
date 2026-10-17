@@ -86,9 +86,6 @@ extern u8 g_unit_panel_billboard_job_name[];                /* job name text win
 extern u8 g_unit_panel_billboard_skillset_name[];           /* primary skillset name text window */
 extern u8 g_unit_panel_billboard_secondary_skillset_name[]; /* secondary skillset name text window */
 
-/* The unit unit_panel_build_unit_data loads from a party slot for the status panels. */
-extern unit_stats_t g_unit_panel_unit;
-
 /* Fills the selected and comparison records, stats, equipment and ability names. */
 void unit_panel_load_selected(void);
 
@@ -361,8 +358,6 @@ typedef struct unit_panel_help_row {
     s16 kind;         /* 0x0e */
 } unit_panel_help_row_t;
 typedef char unit_panel_help_row_size_must_be_16[sizeof(unit_panel_help_row_t) == 16 ? 1 : -1];
-
-extern unit_panel_help_row_t g_unit_panel_help_rows[];
 
 void unit_panel_push_help_level(void);
 void unit_panel_resume_help_level(menu_stack_record_t* level);

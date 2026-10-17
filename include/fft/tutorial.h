@@ -35,13 +35,6 @@ typedef struct tutorial_menu_level {
 } tutorial_menu_level_t;
 typedef char tutorial_menu_level_size_must_be_68[sizeof(tutorial_menu_level_t) == 68 ? 1 : -1];
 
-extern s32 g_tutorial_menu_saved_cursor;
-extern menu_cursor_state_t g_tutorial_list_cursor;
-extern s32 g_tutorial_battle_event_ids[];
-
-/* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
-extern u32 g_tutorial_progress_masks[];
-
 void tutorial_open_topic_list(void);
 void tutorial_handle_topic_list_input(menu_stack_record_t* level);
 void tutorial_restore_topic_list_buttons(menu_stack_record_t* level);

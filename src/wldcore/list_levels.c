@@ -38,6 +38,21 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s32 g_brave_story_participant_saved_cursor;
+
+/* Saved proposition-list cursor row. Declared as an array: GCC's alias heuristic needs an in-struct object to keep
+ * the target's load order in brave_story_handle_advancing_list_input; a scalar does not. */
+extern s32 g_brave_story_advancing_saved_cursor[];
+extern s32 g_tutorial_menu_saved_cursor;
+extern menu_cursor_state_t g_tutorial_list_cursor;
+extern s32 g_tutorial_battle_event_ids[];
+
+/* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
+extern u32 g_tutorial_progress_masks[];
+
+/* The unit unit_panel_build_unit_data loads from a party slot for the status panels. */
+extern unit_stats_t g_unit_panel_unit;
+
 static void tutorial_build_menu_panel(tutorial_menu_level_t* panel);
 static void brave_story_open_advancing_list(void);
 static void brave_story_open_work_history(void);

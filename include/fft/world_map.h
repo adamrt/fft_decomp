@@ -58,17 +58,12 @@ enum { WORLD_MAP_BACKDROP_WORDS = 256 * 240 / 2 };
 extern PACKET g_world_map_primitive_buffers[];
 
 /* The libgs ordering tables of the two display buffers and their tags: the main table of 16 tags and an auxiliary
- * one of 4. world_map_capture_backdrop indexes the GsOT arrays with their 0x14-byte stride. */
-extern GsOT_TAG g_world_map_ot_tags[2][16];
+ * one of 4. world_map_toggle_captured_frame indexes the GsOT arrays with their 0x14-byte stride. */
 extern GsOT g_world_map_ordering_tables[2];
-extern GsOT_TAG g_world_map_aux_ot_tags[2][4];
 extern GsOT g_world_map_aux_ordering_tables[2];
 
 /* Begins with the 256x240 16-bit backdrop image, WORLD_MAP_BACKDROP_WORDS 32-bit words. */
 extern u32* g_world_map_scratch_buffer;
-
-/* g_system_flags as saved by world_map_toggle_captured_frame (system_flags_e). */
-extern u32 g_world_map_saved_system_flags;
 
 void world_map_draw_frame(void);
 void world_map_set_display_rect(s32 buffer_index, RECT* rect);
@@ -128,7 +123,6 @@ extern CVECTOR g_hud_color; /* color of the context-value display, tinted by wor
 /* Screen position of the context-value display; the sound-novel menu saves
  * and restores both 32-bit values as one point32_t. */
 extern point32_t g_hud_value_position;
-extern point32_t g_hud_saved_value_position; /* saved copy of g_hud_value_position */
 
 /* The values the display shows: the main value, a secondary one, and the seconds of a play time. */
 extern s32 g_hud_value;
@@ -148,9 +142,6 @@ extern s32 g_picture_background_loaded_set;
 
 /* Destination image buffer (read back as a TIM by sound_novel_opcode_0a_load_picture). */
 extern u32* g_picture_buffer;
-
-/* Offsets of the 1 KiB bands of a picture, in the order its dissolving upload fills them. */
-extern u16* g_picture_dissolve_band_order;
 
 void picture_load_background_set(s32 set);
 void picture_load_set(s32 value);
@@ -176,7 +167,6 @@ typedef struct world_map_projected_tile {
 typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
 
 extern s32* g_world_map_tile_descriptors;
-extern world_map_projected_tile_t g_world_map_projected_tiles[];
 
 void world_map_load_texture(void);
 void world_map_poll_texture_stream(file_load_descriptor_t* stream);
@@ -251,10 +241,6 @@ typedef struct world_map_scroll_axis {
     s32 output; /* 0x10; value >> 8, truncated toward zero */
 } world_map_scroll_axis_t;
 
-/* The horizontal and vertical map scroll axes. */
-extern world_map_scroll_axis_t g_world_map_scroll_x;
-extern world_map_scroll_axis_t g_world_map_scroll_y;
-
 void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction);
 void world_map_apply_clamped_scroll(point32_t* amount, VECTOR* position);
 void world_map_apply_clamped_horizontal_scroll(s32* amount, s32* position);
@@ -304,12 +290,8 @@ typedef struct world_map_marker_state {
     world_map_marker_t marker;
 } world_map_marker_state_t;
 
-extern world_map_dot_source_t* g_world_map_dot_sources;
-extern s32 g_world_map_dot_count;
 extern world_map_dot_t g_world_map_dots[];
 extern world_map_marker_state_t g_world_map_marker_state;
-extern u8 g_world_map_dot_pulse_direction;
-extern u8 g_world_map_dot_pulse_phase;
 
 void world_map_init_dots(void);
 void world_map_init_marker_and_camera(void);
@@ -362,13 +344,6 @@ typedef struct world_map_path_animation {
 typedef char world_map_path_animation_size_must_be_140[sizeof(world_map_path_animation_t) == 140 ? 1 : -1];
 
 extern world_map_path_animation_t g_world_map_path_animation;
-
-/* The route records by route id: a pointer cell to the WORLD_MAP_ROUTE_COUNT record pointers. */
-extern world_map_route_t** g_world_map_routes;
-
-/* The route polylines by route id, as g_world_map_routes: each is a packed s16 count followed by that many
- * (x, y) pairs. */
-extern u16** g_world_map_route_polylines;
 
 void world_map_draw_routes(GsOT* ot);
 void world_map_prepare_path_animation(s32 from, s32 to);

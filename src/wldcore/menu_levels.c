@@ -41,6 +41,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u32* g_location_picture_frame_tim;
+extern deep_dungeon_battle_t* g_deep_dungeon_battles;
+extern unit_panel_help_row_t g_unit_panel_help_rows[];
+
+/* The horizontal and vertical map scroll axes. */
+extern world_map_scroll_axis_t g_world_map_scroll_x;
+extern world_map_scroll_axis_t g_world_map_scroll_y;
+
 /* Menu-level dispatch tables; their definitions follow the callback declarations below. */
 static void (*g_menu_stack_idle_handlers[57])(menu_stack_record_t*);
 static void (*g_menu_stack_resume_handlers[57])(menu_stack_record_t*);

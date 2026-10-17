@@ -36,6 +36,19 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u8 g_treasure_sound_novel_ids[];
+extern u32 g_proposition_detail_image_buffer[];
+
+/* The collection counts that earn a milestone message (proposition_get_milestone_rank): eight each,
+ * 1/4/8/12/16/20/24/31 treasures and 1/3/6/8/10/12/14/16 unexplored lands. */
+extern u8 g_proposition_treasure_milestones[];
+extern u8 g_proposition_unexplored_land_milestones[];
+extern u8 g_sound_novel_quit_help_text_ids[];
+extern point32_t g_hud_saved_value_position; /* saved copy of g_hud_value_position */
+
+/* Offsets of the 1 KiB bands of a picture, in the order its dissolving upload fills them. */
+extern u16* g_picture_dissolve_band_order;
+
 /* Scalar history views retained for the Quit shuffle: direct member accesses
  * change its original loads and store scheduling. */
 extern s16 g_sound_novel_history_0;

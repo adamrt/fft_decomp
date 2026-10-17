@@ -24,6 +24,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Scalar view of g_location_script_state.flags for the opcode handlers that
+ * read-modify-write it: the member spelling there shares one base register
+ * with the args/data accesses instead of the target's absolute addresses.
+ * The load_* opcode handlers declare volatile views of flags/data/ip locally. */
+extern s32 g_location_script_flags;
+
 /* Opcode-indexed dispatch, defined after its handlers below. */
 static void (*g_location_script_opcodes[41])(void);
 

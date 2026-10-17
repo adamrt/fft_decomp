@@ -26,10 +26,6 @@ void calendar_advance_days(s32 days);
 void calendar_advance_one_year(void);
 
 /* zodiac signs */
-/* Twelve {month, day} pairs: the calendar date each zodiac sign starts on,
- * Aries (3/21) first. */
-extern calendar_date_t g_calendar_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT];
-
 void calendar_convert_date_to_zodiac(s32* month, s32* day);
 
 /* date bitmaps */

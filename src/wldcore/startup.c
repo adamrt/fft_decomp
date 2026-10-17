@@ -29,6 +29,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u16* g_location_script_default_base;
+
+/* Sound resource the sound-novel menu passes to suzuki_sound_append_resource. */
+extern struct suzuki_sound_resource* g_sound_novel_default_sound_resource;
+extern GsOT_TAG g_world_map_ot_tags[2][16];
+extern GsOT_TAG g_world_map_aux_ot_tags[2][4];
+
 static void world_map_finalize_loop(void);
 static void world_map_draw_frame_with_map(void);
 static void world_map_init_gfx(void);

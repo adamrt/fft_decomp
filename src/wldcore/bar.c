@@ -28,6 +28,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s32 g_bar_saved_cursor;
+extern u8 g_bar_row_help_text_ids[];
+extern s32* g_rumor_location_masks;
+
 static void rumor_push_detail_level(s32 value);
 static void rumor_open_list(void);
 

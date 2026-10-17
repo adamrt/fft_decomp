@@ -31,6 +31,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* zodiac signs */
+/* Twelve {month, day} pairs: the calendar date each zodiac sign starts on,
+ * Aries (3/21) first. */
+extern calendar_date_t g_calendar_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT];
+extern s32 g_file_battle_sector;
+extern u8 g_message_block_buffer[];
+extern s32* g_proposition_data; /* the loaded proposition data file */
+
 /* File-sector boundaries, including one terminal offset after the last payload. */
 extern s32 g_picture_sector_offsets[93];
 extern s32 g_picture_background_sector_offsets[132];

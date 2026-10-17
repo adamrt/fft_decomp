@@ -60,10 +60,6 @@ typedef struct prologue {
 } prologue_t;
 typedef char prologue_size_must_be_56[(sizeof(prologue_t) == 56) ? 1 : -1];
 
-extern prologue_t g_prologue;
-extern prologue_entry_t** g_prologue_entries;
-extern POLY_GT4 g_prologue_line_primitives[2][14];
-
 void prologue_start(void);
 void prologue_init_sequence(s32 target, s32 ot_layer, prologue_entry_t** entry_table);
 s32 prologue_update(void);

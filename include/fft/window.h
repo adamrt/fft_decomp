@@ -129,8 +129,6 @@ typedef struct window_sprite_prim {
 typedef char window_sprite_prim_size_must_be_32[sizeof(window_sprite_prim_t) == 32 ? 1 : -1];
 
 extern window_gpu_image_record_t g_window_gpu_image_records[WINDOW_GPU_RECORD_CAPACITY];
-extern window_sprite_prim_t g_window_sprite_primitive_pool[2][32];
-extern s32 g_window_primitive_count;
 void window_init_vram_record(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags);
 void window_dispatch_gpu_record_list(u32* otag, void** records, s32 count);
@@ -290,7 +288,6 @@ typedef struct window_panel_layout {
  * 0 text, 2 hidden, 3 alternate number) or, for number panels, g_window_panel_number_state. */
 extern menu_text_layout_t g_window_panel_label_state;
 extern menu_entry_t g_window_panel_render_state;
-extern struct screen_number_range g_window_panel_number_state;
 extern s16 g_window_panel_value;
 
 void window_build_yes_no_panel(point32_t origin);

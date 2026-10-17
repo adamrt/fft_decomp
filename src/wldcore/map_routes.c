@@ -21,6 +21,26 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
+ * choice from the location menu (location_build_menu_entries). */
+extern u8 g_location_choice_hidden_offsets[];
+extern s32 g_travel_search_depth;
+extern s32 g_travel_search_cost;
+extern travel_path_t g_travel_search_path;
+extern random_battle_road_t (*g_random_battle_roads)[3];
+extern s32 g_random_battle_map_id;
+extern world_map_dot_source_t* g_world_map_dot_sources;
+extern s32 g_world_map_dot_count;
+extern u8 g_world_map_dot_pulse_direction;
+extern u8 g_world_map_dot_pulse_phase;
+
+/* The route records by route id: a pointer cell to the WORLD_MAP_ROUTE_COUNT record pointers. */
+extern world_map_route_t** g_world_map_routes;
+
+/* The route polylines by route id, as g_world_map_routes: each is a packed s16 count followed by that many
+ * (x, y) pairs. */
+extern u16** g_world_map_route_polylines;
+
 static void world_map_negate_and_clamp(const SVECTOR* input, VECTOR* output);
 static s32 random_battle_roll(s32 location, s32 route);
 static void world_map_scroll_if_near_edge(point32_t* delta);
