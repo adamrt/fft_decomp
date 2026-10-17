@@ -660,27 +660,6 @@ typedef enum suzuki_sound_sfx_priority {
 enum { SUZUKI_SOUND_HEAP_BYTE_COUNT = 32768 };
 
 /* Suzuki CPU arena allocator; shared with the sound driver. */
-/* Suzuki heap block header (0x10 bytes; payload follows). The $gp-relative
- * allocator (0x8001423c-0x8001442c) rounds requests to 16 bytes and chains
- * blocks in address order from g_suzuki_sound_heap_blocks. */
-typedef struct suzuki_heap_block {
-    u16 flags;                      /* 0x00; suzuki_heap_block_flag_e; written, never tested */
-    u16 _unknown_02;                /* 0x02; cleared on allocation, never read */
-    u32 _unknown_04;                /* 0x04; cleared on allocation, never read */
-    u8* end;                        /* 0x08; end of the payload */
-    struct suzuki_heap_block* next; /* 0x0c */
-} suzuki_heap_block_t;
-
-/* suzuki_heap_block_t.flags. */
-typedef enum suzuki_heap_block_flag {
-    SUZUKI_HEAP_BLOCK_ALLOCATED = 0x0002,
-    SUZUKI_HEAP_BLOCK_HEAD = 0x8000, /* the list head suzuki_sound_init_heap places at the arena start */
-} suzuki_heap_block_flag_e;
-
-extern suzuki_heap_block_t* g_suzuki_sound_heap_arena;              /* 0x800329f8 */
-extern suzuki_heap_block_t* g_suzuki_sound_heap_blocks;             /* 0x800329fc */
-extern u32 g_suzuki_sound_heap_size;                                /* 0x80032a38 */
-extern u8* g_suzuki_sound_heap_end;                                 /* 0x80032a64 */
 extern u8 g_suzuki_sound_heap_memory[SUZUKI_SOUND_HEAP_BYTE_COUNT]; /* the CPU heap arena */
 
 void suzuki_sound_init_heap(void* arena, u32 size);
