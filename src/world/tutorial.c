@@ -24,10 +24,11 @@
 static u8* g_tutorial_command_ptr = 0;
 static s32 g_tutorial_command_active = 0;
 static u32 g_tutorial_button_input = 0;
-static point16_t g_tutorial_highlight_corners_a[31][2] = { 0 }; /* outer/middle ring samples */
-static point16_t g_tutorial_highlight_corners_b[31][2] = { 0 }; /* middle/inner ring samples */
-static rgb24_t g_tutorial_highlight_colors_a[4] = { 0 };        /* first quad corner colors */
-static rgb24_t g_tutorial_highlight_colors_b[4] = { 0 };        /* second quad corner colors */
+/* GPU coordinate halfwords; signed circle arithmetic is truncated when stored. */
+static upoint16_t g_tutorial_highlight_corners_a[31][2] = { 0 }; /* outer/middle ring samples */
+static upoint16_t g_tutorial_highlight_corners_b[31][2] = { 0 }; /* middle/inner ring samples */
+static rgb24_t g_tutorial_highlight_colors_a[4] = { 0 };         /* first quad corner colors */
+static rgb24_t g_tutorial_highlight_colors_b[4] = { 0 };         /* second quad corner colors */
 static u8 g_tutorial_highlight_quad_count = 0;
 
 static void tutorial_advance_highlight(void);

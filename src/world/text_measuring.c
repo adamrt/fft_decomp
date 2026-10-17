@@ -35,8 +35,8 @@ s32 screen_text_measure_width(const u8* text) {
  *
  * A lead byte 0xD0..0xDF and its glyph byte come back together as one 16-bit code (lead
  * byte high); everything else is a single byte. */
-s16 screen_text_get_char_at(u8* table, s16 index, s32 position) {
-    u8* cursor = screen_text_advance_chars(menu_text_find_entry_by_index(table, index, 2), position);
+s16 screen_text_get_char_at(const u8* table, s16 index, s32 position) {
+    const u8* cursor = screen_text_advance_chars(menu_text_find_entry_by_index(table, index, 2), position);
     s32 code = *cursor++;
 
     if (code >= TEXT_EXTENDED_GLYPH_PREFIX_FIRST && code <= TEXT_EXTENDED_GLYPH_PREFIX_LAST) {

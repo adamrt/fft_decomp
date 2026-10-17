@@ -967,18 +967,18 @@ static menu_instruction_t* screen_script_skip_group(menu_instruction_t* instruct
 /* Find the scrollable-list command in a menu script, load its row and column layout, clamp the
  * selection and scroll base to the list, and render the visible rows' text into the list image in
  * VRAM. */
-void screen_load_list_layout(menu_instruction_t* script) {
+void screen_load_list_layout(const menu_instruction_t* script) {
     RECT rect;
     s16 text_ids[20];
-    menu_list_record_t* record;
-    menu_instruction_t* instruction = script;
+    const menu_list_record_t* record;
+    const menu_instruction_t* instruction = script;
     s32 i;
 
     while (instruction->header.opcode != MENU_SCRIPT_OP_SCROLLABLE_LIST) {
         if (instruction->header.opcode == SCREEN_SCRIPT_END) {
             return;
         }
-        instruction = menu_next_instruction(instruction);
+        instruction = menu_next_const_instruction(instruction);
     }
     record = &instruction->list;
     g_screen_list_row_record_count = record->skip_count;

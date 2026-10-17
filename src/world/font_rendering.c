@@ -145,10 +145,10 @@ void screen_font_upload_glyph(u16 code, s32 x, s32 y, s32 style) {
 
 /* Advance over count characters of a 0xFE-terminated text entry; bytes
  * TEXT_EXTENDED_GLYPH_PREFIX_FIRST..TEXT_EXTENDED_GLYPH_PREFIX_LAST carry a one-byte operand. */
-u8* screen_text_advance_chars(u8* text, s32 count) {
+const u8* screen_text_advance_chars(const u8* text, s32 count) {
     s32 i;
     s32 offset = 0;
-    u8* cursor;
+    const u8* cursor;
 
     for (i = 0; i < count; i++) {
         cursor = &text[offset];

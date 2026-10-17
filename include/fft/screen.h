@@ -295,7 +295,7 @@ extern s32 g_screen_scrolling_list_depth;
 extern s16 g_screen_text_redraw_request;
 
 void screen_init_list(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script);
-void screen_load_list_layout(menu_instruction_t* script);
+void screen_load_list_layout(const menu_instruction_t* script);
 void screen_init_and_draw_list(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void screen_scroll_list_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
@@ -419,8 +419,8 @@ extern u8 g_screen_text_name_entry_keys_data[];
 
 u8* screen_text_get_resident(screen_text_data_e index);
 u8* screen_text_bind_section(u32 index);
-u8* screen_text_advance_chars(u8* text, s32 count);
-s16 screen_text_get_char_at(u8* table, s16 index, s32 position);
+const u8* screen_text_advance_chars(const u8* text, s32 count);
+s16 screen_text_get_char_at(const u8* table, s16 index, s32 position);
 
 /* MAIN selects the WORLD address of text_find_entry through this existing alias. */
 u8* world_text_find_entry(u32 text_id);

@@ -1170,7 +1170,7 @@ static void formation_draw_unit_readout(
     s16 unit_index, s32 mode, s32 x, s32 y, rgb24_t* color, s32 (*get_value)(s32), s32 enabled, s32 priority) {
     RECT unused_rect;
     RECT rect;
-    point16_t xy[10];
+    upoint16_t xy[10];
     s32 top;
     s16 label_y;
     s16 num_x;

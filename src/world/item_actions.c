@@ -58,7 +58,8 @@ s8 formation_item_action_menu(void) {
 
         /* Each option line starts with a palette code (0xE3) whose operand 4 grays the line out;
          * option states of 0x1000 and up refuse Circle. */
-        text = menu_text_find_entry_by_index(g_formation_menu_text_table, 3, 2);
+        /* The text seek returns a read-only view; this loaded menu table is mutable. */
+        text = (u8*)menu_text_find_entry_by_index(g_formation_menu_text_table, 3, 2);
         if (g_menu_list_entry_count != 0
             && (result = item_adjust_inventory_count(g_item_list_entries[g_menu_list_selected_index], 0)) != 0) {
             text[1] = 0;

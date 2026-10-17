@@ -1150,7 +1150,7 @@ static void save_scan_slots(void) {
  * passed on below is the address its store left in $v0. */
 static s32 save_build_slot_description(s32 mode, u8* destination) {
     s32 index;
-    u8* source;
+    const u8* source;
 
     if (mode == 1) {
         source = menu_text_find_entry_by_index(g_save_slot_text_table, 14, 1);
