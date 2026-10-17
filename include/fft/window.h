@@ -90,6 +90,16 @@ typedef struct display_object_animated {
 } display_object_animated_t;
 typedef char display_object_animated_size_must_be_36[sizeof(display_object_animated_t) == 36 ? 1 : -1];
 
+/* Retained compiler stride view of display_object_animated_t.position.
+ * It advances between x/y pairs at the 36-byte record stride; it is not a
+ * separate allocation or a recovered original record type. */
+typedef struct window_xy {
+    s32 x;
+    s32 y;
+    u8 _unused_08[0x1c];
+} window_xy_t;
+typedef char window_xy_size_must_be_36[sizeof(window_xy_t) == 36 ? 1 : -1];
+
 /* record lists */
 s32 window_append_animated_record(void** list, s32* count);
 s32 window_append_record(void** list, s32* count);
