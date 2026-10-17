@@ -21,6 +21,51 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* The tutorial command stream. Commands below 0x10 are one-byte shifts; the rest are the id (1 byte) followed by
+ * their parameters: 0x10 message id (2) and y (1), 0x11 message id (2), 0x13 x, y, size, width mod and height mod
+ * (1 each), 0x15 time (1). */
+enum {
+    TUTORIAL_CMD_PRESS_BUTTON_LIMIT = 0x10,
+    TUTORIAL_CMD_DISPLAY_MESSAGE = 0x10,
+    TUTORIAL_CMD_CHANGE_DIALOG = 0x11,
+    TUTORIAL_CMD_WAIT_FOR_MESSAGE = 0x12,
+    TUTORIAL_CMD_HIGHLIGHT_RING = 0x13,
+    TUTORIAL_CMD_FADE_OUT_HIGHLIGHT = 0x14,
+    TUTORIAL_CMD_WAIT_TIME = 0x15,
+    TUTORIAL_CMD_WAIT_FOR_BUTTON = 0x16,
+    TUTORIAL_CMD_END = 0x17
+};
+
+/* Serialized tutorial commands; opcode selects the operand record. */
+typedef struct tutorial_message_instruction {
+    u8 opcode;
+    u8 text_id_le[2];
+    u8 y_offset;
+} tutorial_message_instruction_t;
+typedef char tutorial_message_instruction_size_must_be_4[sizeof(tutorial_message_instruction_t) == 4 ? 1 : -1];
+
+typedef struct tutorial_dialog_instruction {
+    u8 opcode;
+    u8 text_id_le[2];
+} tutorial_dialog_instruction_t;
+typedef char tutorial_dialog_instruction_size_must_be_3[sizeof(tutorial_dialog_instruction_t) == 3 ? 1 : -1];
+
+typedef struct tutorial_circle_instruction {
+    u8 opcode;
+    u8 x;
+    u8 y;
+    u8 radius;
+    u8 scale_x;
+    u8 scale_y;
+} tutorial_circle_instruction_t;
+typedef char tutorial_circle_instruction_size_must_be_6[sizeof(tutorial_circle_instruction_t) == 6 ? 1 : -1];
+
+typedef struct tutorial_wait_instruction {
+    u8 opcode;
+    u8 frames;
+} tutorial_wait_instruction_t;
+typedef char tutorial_wait_instruction_size_must_be_2[sizeof(tutorial_wait_instruction_t) == 2 ? 1 : -1];
+
 static u8* g_tutorial_command_ptr = 0;
 static s32 g_tutorial_command_active = 0;
 static u32 g_tutorial_button_input = 0;

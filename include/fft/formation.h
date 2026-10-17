@@ -159,20 +159,12 @@ typedef enum formation_menu {
     FORMATION_MENU_JOB_CHANGE = 24                  /* job change flash on the wheel */
 } formation_menu_e;
 
-/* Screen x and texture u of one background tile; two alternating rows of four. */
-typedef struct formation_background_tile {
-    u16 x;
-    u16 u;
-} formation_background_tile_t;
-typedef char formation_background_tile_size_must_be_4[(sizeof(formation_background_tile_t) == 4) ? 1 : -1];
-
 extern s32 g_formation_current_menu; /* formation_menu_e */
 extern void (*g_formation_menu_handlers[])(void);
 extern u8 g_formation_screen_running;
 extern s8 g_formation_main_menu_initialized;
 extern u32* g_formation_ordering_table;
 extern POLY_FT4 g_formation_view_quads[2][30];
-extern formation_background_tile_t g_formation_background_tiles[2][4];
 extern u8 g_formation_menu_text_table[];
 extern u8 g_formation_menu_text_buffer[];
 extern clut_t g_formation_menu_palettes;

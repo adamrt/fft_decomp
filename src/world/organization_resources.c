@@ -34,6 +34,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Partial image view used by screen_load_common_graphics. Upload rectangles determine the second page's size;
+ * it begins at byte +0x8000 in both resource layouts. */
+typedef struct screen_image_pages {
+    u32 first_page[8192];
+    u32 second_page[1];
+} screen_image_pages_t;
+
 /* State of a screen request raised from the world map menu (the
  * *_request_state globals stepped by screen_menu_frame):
  * fade out, run the screen, fade back in. States 4 to 7 only count frames. */

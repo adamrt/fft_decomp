@@ -24,6 +24,15 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Screen x and texture u of one background tile; two alternating rows of four. */
+typedef struct formation_background_tile {
+    u16 x;
+    u16 u;
+} formation_background_tile_t;
+typedef char formation_background_tile_size_must_be_4[(sizeof(formation_background_tile_t) == 4) ? 1 : -1];
+
+extern formation_background_tile_t g_formation_background_tiles[2][4];
+
 /* Left edge of the slanted gauge fill; the right edge is 32 pixels to the right. */
 typedef struct formation_gauge_offsets {
     s8 top_x;

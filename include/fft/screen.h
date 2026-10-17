@@ -155,13 +155,6 @@ enum {
     SCREEN_TPAGE7_GRID_OCCUPIED = 0xff
 };
 
-/* Partial image view used by screen_load_common_graphics. Upload rectangles determine the second page's size;
- * it begins at byte +0x8000 in both resource layouts. */
-typedef struct screen_image_pages {
-    u32 first_page[8192];
-    u32 second_page[1];
-} screen_image_pages_t;
-
 extern u16 g_screen_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-sheet id */
 extern u16 g_screen_help_portrait_clut_by_sheet_id[];
 
