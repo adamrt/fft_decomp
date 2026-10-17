@@ -311,8 +311,7 @@ void action_store_used_weapon(action_command_t* action) {
         break;
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
-        /* Retail reads only the low byte of the 16-bit item/equipment field. */
-        weapon = action->item_or_equipment;
+        weapon = action->item_id;
         break;
     case ACTION_MENU_TYPE_JUMP:
     case ACTION_MENU_TYPE_UNKNOWN_0F:
@@ -377,8 +376,7 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         id = g_action_current_ability.secondary_weapon_id;
     }
     if (action.skillset_id == SKILLSET_ID_DRAW_OUT) {
-        /* Item selection reads only the low byte of the 16-bit item/equipment field. */
-        id = action.item_or_equipment;
+        id = action.item_id;
     }
     /* Weapon data covers only item ids below 0x80. */
     if (id >= 0x80) {
@@ -424,7 +422,7 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
     }
 
     if (menu_type == ACTION_MENU_TYPE_KATANA_INVENTORY) {
-        id = action.item_or_equipment;
+        id = action.item_id;
         action.ability_id = id + (ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE);
     }
 
@@ -461,7 +459,7 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         break;
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
         formula = ABILITY_FORMULA_WEAPON_DAMAGE;
-        id = action.item_or_equipment;
+        id = action.item_id;
         if (id >= ITEM_ID_CONSUMABLE_FIRST) {
             g_action_current_ability_view.weapon_id = id;
             id += ITEM_ID_COUNT - ITEM_ID_CONSUMABLE_FIRST;
@@ -806,7 +804,7 @@ s32 action_apply_target_result(s32 battle_id) {
 
     outcome |= action_remove_broken_or_stolen_equipment();
     if (g_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN) {
-        item_give(g_action_target, g_action_target->action_command.item_or_equipment);
+        item_give(g_action_target, g_action_target->action_command.item_id);
     }
 
     if (g_action_target_data->gil_change != 0 || g_action_target_data->exp_change != 0) {

@@ -3186,11 +3186,11 @@ s32 target_range_set_for_action(const action_command_t* source) {
         break;
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
         mode = 1;
-        item = action.item_or_equipment;
+        item = action.item_id;
         if (item < ITEM_ID_ASURA_KNIFE || item > ITEM_ID_CHIRIJIRADEN) {
             return TARGET_PANELS_INVALID;
         }
-        ability_id = (u8)action.item_or_equipment + (ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE);
+        ability_id = action.item_id + (ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE);
         break;
     case ACTION_MENU_TYPE_ATTACK:
     case ACTION_MENU_TYPE_CHARGE:
@@ -3281,11 +3281,11 @@ s32 target_area_set_for_action(const action_command_t* source) {
         ability_id = ability_get_elemental_id(unit);
         break;
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
-        item = action.item_or_equipment;
+        item = action.item_id;
         if (item < ITEM_ID_ASURA_KNIFE || item > ITEM_ID_CHIRIJIRADEN) {
             return -1;
         }
-        ability_id = (u8)action.item_or_equipment + (ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE);
+        ability_id = action.item_id + (ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE);
         break;
     case ACTION_MENU_TYPE_BLANK_05:
     case ACTION_MENU_TYPE_UNKNOWN_0F:

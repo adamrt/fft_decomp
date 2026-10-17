@@ -242,8 +242,7 @@ static void at_list_build_ability_preview(void) {
         g_command_selected_command.data.action.ability_id = text_id - TEXT_ID_ABILITY_NAME_BASE;
     } else {
         staged_item = 1;
-        /* Item selection updates only the low byte of the 16-bit command field. */
-        *(u8*)&g_command_selected_command.data.action.item_or_equipment = text_id;
+        g_command_selected_command.data.action.item_id = text_id;
     }
 
     action = &g_command_selected_command.data.action;
@@ -255,7 +254,7 @@ static void at_list_build_ability_preview(void) {
      * from the item text. */
     if (staged_item != 0) {
         work->entries[1].unit_code |= AT_ACTION_ENTRY;
-        work->entries[1].action_id_low = g_command_selected_command.data.action.item_or_equipment;
+        work->entries[1].action_id_low = g_command_selected_command.data.action.item_id;
     }
 
     /* Without an AT position for the action, this thread shows preview message 0x1023

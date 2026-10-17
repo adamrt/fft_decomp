@@ -404,15 +404,15 @@ typedef enum ai_autobattle_mode {
 
 /* actions */
 /* The 20-byte action command shared by unit stats, AI candidates and menus.
- * Targeting reads coordinates as signed or unsigned 16-bit values. Item selection
- * reads and updates only the low byte of the 16-bit item/equipment field. */
+ * Targeting reads coordinates as signed or unsigned 16-bit values. */
 typedef struct action_command {
     u8 actor_id;               /* 0x00 */
     u8 skillset_id;            /* 0x01 */
     s16 ability_id;            /* 0x02 */
     s16 calculator_type;       /* 0x04 */
     s16 calculator_multiplier; /* 0x06 */
-    u16 item_or_equipment;     /* 0x08 */
+    u8 item_id;                /* 0x08 */
+    u8 _unused_09;             /* 0x09 */
     u8 targeting_type;         /* 0x0a; target_type_e */
     u8 target_id;              /* 0x0b */
     SVECTOR target_position;   /* 0x0c; tile x, elevation, y; padding is unread */

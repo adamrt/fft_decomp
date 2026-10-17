@@ -488,8 +488,7 @@ s32 command_resolve_selection(void) {
                 if (command != 0xFF) {
                     if (menu == MENU_COMMAND_ID_CRYSTAL_PICKUP) {
                         command = g_crystal_pickup_action;
-                        /* Item selection updates only the low byte of the 16-bit command field. */
-                        *(u8*)&g_command_selected_command.data.action.item_or_equipment = g_crystal_pickup_item;
+                        g_command_selected_command.data.action.item_id = g_crystal_pickup_item;
                         option = MENU_SELECTION_NONE;
                     } else if (menu == MENU_COMMAND_ID_MESSAGE_YES_NO || menu >= 0x64) {
                         command = *(g_command_maps[i].map + option + 1);
@@ -543,7 +542,7 @@ s32 command_resolve_selection(void) {
             g_command_used_skillset_id = option;
             if (item != MENU_SELECTION_NONE) {
                 if (option == SKILLSET_ID_ITEM || option == SKILLSET_ID_DRAW_OUT || option == SKILLSET_ID_THROW) {
-                    *(u8*)&g_command_selected_command.data.action.item_or_equipment = item;
+                    g_command_selected_command.data.action.item_id = item;
                 } else {
                     g_command_selected_command.data.action.ability_id = item;
                 }
@@ -919,7 +918,7 @@ static s32 menu_dispatch_system_function(
             menu_start_system_function_thread(MENU_SYSTEM_FUNCTION_ARITHMETICKS_ANNOUNCEMENT);
         } else {
             if (action->skillset_id == SKILLSET_ID_ITEM || action->skillset_id == SKILLSET_ID_THROW) {
-                item_id = action->item_or_equipment;
+                item_id = action->item_id;
                 g_text_substitution_values[0] = item_id + TEXT_ID_ITEM_NAME_BASE;
             } else {
                 value = action->ability_id & ABILITY_ID_MASK;

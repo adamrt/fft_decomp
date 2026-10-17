@@ -207,7 +207,7 @@ s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase) 
      * CT step below. */
     switch (g_command_menu_types_by_skillset[action.skillset_id]) {
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
-        item = action.item_or_equipment;
+        item = action.item_id;
         if (g_item_primary_data[item].type != ITEM_TYPE_CONSUMABLE) {
             return ACTION_PREPARATION_INVALID;
         }
@@ -222,7 +222,7 @@ s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase) 
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
         /* Throw resolves to the Throw ability whose item type matches the thrown item. */
         ability = ABILITY_ID_THROW_FIRST;
-        item = action.item_or_equipment;
+        item = action.item_id;
         table = g_ability_throw_item_types - ABILITY_ID_THROW_FIRST;
         for (; ability < ABILITY_ID_JUMP_FIRST; ability++) {
             /* The index+base integer spelling of the biased table is byte-required. */
@@ -262,7 +262,7 @@ s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase) 
         action.ability_id = ability_get_elemental_id(unit);
         break;
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
-        item = action.item_or_equipment;
+        item = action.item_id;
         if (item < ITEM_ID_ASURA_KNIFE || item > ITEM_ID_CHIRIJIRADEN) {
             return ACTION_PREPARATION_INVALID;
         }
@@ -881,7 +881,7 @@ static void action_init_strike_data(unit_stats_t* unit) {
     }
 
     if (menu_type == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
-        g_action_current_ability.primary_weapon_id = unit->action_command.item_or_equipment;
+        g_action_current_ability.primary_weapon_id = unit->action_command.item_id;
         return;
     }
 
@@ -1424,8 +1424,7 @@ s32 reaction_prepare_next(s16* out_ability) {
                             break;
                         }
                         action->skillset_id = SKILLSET_ID_ITEM;
-                        /* Auto-Potion updates only the low byte of the 16-bit item/equipment field. */
-                        *(u8*)&action->item_or_equipment = result;
+                        action->item_id = result;
                         action->targeting_type = TARGET_TYPE_TILE;
                         action->target_id = i;
                         action->target_position.vx = unit->x;

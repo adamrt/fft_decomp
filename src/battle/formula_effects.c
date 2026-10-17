@@ -506,7 +506,7 @@ void formula_calculate_katana_break_chance(void) {
     }
 
     g_action_attacker_data->hit = 1;
-    g_action_attacker_data->item_lost = g_action_attacker->action_command.item_or_equipment;
+    g_action_attacker_data->item_lost = g_action_attacker->action_command.item_id;
     g_action_attacker_data->miss_type = ACTION_MISS_TYPE_CANCELED;
 
     if (g_action_state == ACTION_STATE_EXECUTE

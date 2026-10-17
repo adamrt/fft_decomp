@@ -1981,8 +1981,7 @@ static s32 ai_select_random(void) {
     g_ai_data.current_action.act_before_move = 0;
     g_ai_data.current_action.command.skillset_id = ai->considered_ability.skillset;
     g_ai_data.current_action.command.ability_id = ai->considered_ability.ability_id;
-    /* Item selection updates only the low byte of the 16-bit command field. */
-    *(u8*)&g_ai_data.current_action.command.item_or_equipment = ai->considered_ability.parameters.fields.item_id;
+    g_ai_data.current_action.command.item_id = ai->considered_ability.parameters.fields.item_id;
     if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ARITHMETICKS) {
         do {
             skillset = g_ai_math_source_skillsets[rand() % AI_MATH_SOURCE_SKILLSET_COUNT];

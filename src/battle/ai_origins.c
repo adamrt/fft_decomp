@@ -302,8 +302,7 @@ s32 ai_ability_evaluate_outcome(void) {
 
     ai->current_action.command.skillset_id = ai->considered_ability.skillset;
     ai->current_action.command.ability_id = ai->considered_ability.ability_id;
-    /* Item selection updates only the low byte of the 16-bit command field. */
-    *(u8*)&ai->current_action.command.item_or_equipment = ai->considered_ability.parameters.fields.item_id;
+    ai->current_action.command.item_id = ai->considered_ability.parameters.fields.item_id;
     for (i = 0; i < UNIT_SLOT_COUNT; i++)
         ai->targetability.live.unit_targetable[i] = ai->targetability.live.unit_active[i];
 
