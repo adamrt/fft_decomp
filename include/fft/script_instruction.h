@@ -29,7 +29,7 @@ enum {
     /* unit_get_battle_id_by_event_unit_id result for an absent unit: the same value. */
     EVENT_BATTLE_ID_NONE = EVENT_RUNTIME_ID_NONE,
     /* g_script_unit_slots[] entry with no ghost unit assigned. */
-    EVENT_UNIT_SLOT_EMPTY = 1000,
+    EVENT_UNIT_SLOT_EMPTY = 1000
 };
 
 /* opcodes */
@@ -276,7 +276,7 @@ typedef enum event_opcode {
     EVENT_OPCODE_WAIT_FOR_INSTRUCTION = 0xe5, /* 2: thread_task_e (u16); waits until no thread runs it */
     EVENT_OPCODE_YIELD = 0xf0,                /* 0 */
     EVENT_OPCODE_WAIT = 0xf1,                 /* 2: frames (s16) */
-    EVENT_OPCODE_NOP = 0xf2,                  /* 0 */
+    EVENT_OPCODE_NOP = 0xf2                   /* 0 */
 } event_opcode_e;
 
 /* operand values */
@@ -301,7 +301,7 @@ typedef enum event_call_function {
     EVENT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING = 0x0f,
     EVENT_CALL_FUNCTION_WARP_UNIT_5_DISPLAY_TO_UNIT_3_POSITION_AND_FACING = 0x10,
     EVENT_CALL_FUNCTION_COPY_UNIT_2_POSITION_AND_FACING_TO_UNIT_8_AND_RELOAD_GRAPHICS = 0x11,
-    EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS = 0x12,
+    EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS = 0x12
 } event_call_function_e;
 
 /* Display selected by the first EVENT_OPCODE_DISPLAY_CONDITIONS operand and
@@ -316,7 +316,7 @@ typedef enum event_display_condition {
     EVENT_DISPLAY_CONDITION_APPLY_PERMANENT_BRAVE_FAITH_CHANGES = 0x05,
     EVENT_DISPLAY_CONDITION_REMOVE_LOW_BRAVE_HIGH_FAITH_UNITS = 0x06,
     EVENT_DISPLAY_CONDITION_APPLY_POST_BATTLE_UNIT_CHANGES = 0x07,
-    EVENT_DISPLAY_CONDITION_GENERAL_FIRST = 0x08,
+    EVENT_DISPLAY_CONDITION_GENERAL_FIRST = 0x08
 } event_display_condition_e;
 
 /* EVENT_OPCODE_ROTATE_UNIT facing codes; any other value is an absolute
@@ -325,7 +325,7 @@ typedef enum event_display_condition {
 typedef enum event_rotate_unit_facing {
     EVENT_ROTATE_UNIT_FACING_CAMERA = 0x10,
     EVENT_ROTATE_UNIT_FACING_RELATIVE_FIRST = 0x11,
-    EVENT_ROTATE_UNIT_FACING_RESTORE = 0x14,
+    EVENT_ROTATE_UNIT_FACING_RESTORE = 0x14
 } event_rotate_unit_facing_e;
 
 /* First 16-bit value of a scenario condition record, as
@@ -358,7 +358,7 @@ typedef enum event_scenario_condition {
     /* Stores id as the current event; the result is always RUN_EVENT. */
     EVENT_SCENARIO_CONDITION_RUN_EVENT = 25,
     /* A unit with sprite palette id stands on that tile. */
-    EVENT_SCENARIO_CONDITION_PALETTE_UNIT_AT_TILE = 37,
+    EVENT_SCENARIO_CONDITION_PALETTE_UNIT_AT_TILE = 37
 } event_scenario_condition_e;
 
 /* Result of scenario_check_condition for one condition record.
@@ -368,7 +368,7 @@ typedef enum event_scenario_condition {
 typedef enum event_scenario_condition_result {
     EVENT_SCENARIO_CONDITION_RESULT_FAIL = 0,
     EVENT_SCENARIO_CONDITION_RESULT_PASS = 1,
-    EVENT_SCENARIO_CONDITION_RESULT_RUN_EVENT = 2,
+    EVENT_SCENARIO_CONDITION_RESULT_RUN_EVENT = 2
 } event_scenario_condition_result_e;
 
 /* Stat selected by EVENT_OPCODE_CHANGE_STATS; other values change nothing. */
@@ -376,7 +376,7 @@ typedef enum event_change_stats {
     EVENT_CHANGE_STATS_HP = 0x00,
     EVENT_CHANGE_STATS_CT = 0x02,
     EVENT_CHANGE_STATS_BRAVE = 0x03,
-    EVENT_CHANGE_STATS_FAITH = 0x04,
+    EVENT_CHANGE_STATS_FAITH = 0x04
 } event_change_stats_e;
 
 /* Operation selected by EVENT_OPCODE_INFLICT_STATUS; other values only wait. */
@@ -384,7 +384,7 @@ typedef enum event_inflict_status {
     /* A dead unit returns with 1 HP and Critical. */
     EVENT_INFLICT_STATUS_REVIVE = 0x00,
     EVENT_INFLICT_STATUS_CRYSTAL = 0x01,
-    EVENT_INFLICT_STATUS_POISON = 0x02,
+    EVENT_INFLICT_STATUS_POISON = 0x02
 } event_inflict_status_e;
 
 /* event file */
@@ -627,7 +627,7 @@ enum {
     EVENT_CAMERA_SPEED_CURVE_GROUP_MASK = 0x0c,
     EVENT_CAMERA_SPEED_CURVE_GROUP_SHIFT = 2,
     EVENT_CAMERA_SPEED_CURVE_EASING_MASK = 0xf0,
-    EVENT_CAMERA_SPEED_CURVE_EASING_SHIFT = 4,
+    EVENT_CAMERA_SPEED_CURVE_EASING_SHIFT = 4
 };
 
 /* Camera operands remain byte-aligned in the event stream. Positions are

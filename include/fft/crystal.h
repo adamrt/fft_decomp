@@ -16,7 +16,7 @@ typedef enum crystal_pickup_kind {
     CRYSTAL_PICKUP_NOTHING = 0,
     CRYSTAL_PICKUP_LEARNED = 0x1,
     CRYSTAL_PICKUP_CRYSTAL = 0x2,
-    CRYSTAL_PICKUP_TREASURE = 0x4,
+    CRYSTAL_PICKUP_TREASURE = 0x4
 } crystal_pickup_kind_e;
 
 /* Crystal/treasure pickup result (g_crystal_pickup_result) that crystal_build_pickup_result
@@ -35,7 +35,7 @@ typedef struct crystal_pickup_result {
 enum {
     CRYSTAL_LEARN_ABILITIES = 0x1,
     CRYSTAL_RESTORE_HP_MP = 0x2,
-    CRYSTAL_TAKE_TREASURE = 0x4, /* add the treasure's item instead */
+    CRYSTAL_TAKE_TREASURE = 0x4 /* add the treasure's item instead */
 };
 
 extern crystal_pickup_result_t g_crystal_pickup_result;
@@ -59,7 +59,7 @@ typedef enum crystal_pickup_entry {
     MENU_CRYSTAL_PICKUP_CONFIRM = 3,
     MENU_CRYSTAL_PICKUP_MESSAGE = 5,
     MENU_CRYSTAL_PICKUP_CHOICE = 6,
-    MENU_CRYSTAL_PICKUP_ENTRY_COUNT = 7,
+    MENU_CRYSTAL_PICKUP_ENTRY_COUNT = 7
 } crystal_pickup_entry_e;
 
 extern menu_entry_t g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_ENTRY_COUNT];

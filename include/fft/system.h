@@ -70,7 +70,7 @@ typedef enum system_flags {
     /* wldcore_entrypoint returns 5: system_run_game_loop goes back to OPENING. */
     SYSTEM_FLAG_RETURN_TO_TITLE = 0x10000000,
     /* The world entry opens the Brave Story screen, which leaves through RETURN_TO_TITLE; no code sets it. */
-    SYSTEM_FLAG_TITLE_BRAVE_STORY = 0x20000000,
+    SYSTEM_FLAG_TITLE_BRAVE_STORY = 0x20000000
 } system_flags_e;
 
 /* g_game_flow_state: what follows when the BATTLE.BIN loop closes a
@@ -79,7 +79,7 @@ typedef enum system_game_flow {
     SYSTEM_GAME_FLOW_BATTLE = 0, /* stay in battle_entrypoint for the next event */
     SYSTEM_GAME_FLOW_WORLD = 1,  /* back to the world map */
     SYSTEM_GAME_FLOW_RESET = 2,  /* stop display and audio and restart from the opening */
-    SYSTEM_GAME_FLOW_ENDING = 3, /* run the ending, then restart */
+    SYSTEM_GAME_FLOW_ENDING = 3  /* run the ending, then restart */
 } system_game_flow_e;
 
 extern u32 g_system_flags;                 /* system_flags_e bits; cleared by save_init_data_tables */
@@ -120,23 +120,23 @@ void system_reset_frame_pacing_timer(void);
 /* Error codes passed to system_handle_error, whose report hook is empty
  * in retail. */
 typedef enum system_error {
-    SYSTEM_ERROR_HEAP_ALLOC = 1,            /* file_load_to_heap got no block */
-    SYSTEM_ERROR_FILE_LOAD = 2,             /* a checked file load returned 0 */
-    SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT = 6,  /* unit_claim_slot found none free */
-    SYSTEM_ERROR_SHP_FRAME = 8,             /* frame index above 0x200 or frame pointer -1 */
-    SYSTEM_ERROR_SEQ_ANIMATION = 9,         /* animation index above 0x100 or sequence pointer -1 */
-    SYSTEM_ERROR_FRAME_PART_COUNT = 10,     /* more than eight parts in a unit frame */
-    SYSTEM_ERROR_NO_SPRITESHEET_SLOT = 11,  /* no free or reusable spritesheet slot */
-    SYSTEM_ERROR_SEQ_OPCODE = 13,           /* unknown sequence opcode, or a queued animation for slot 0 */
-    SYSTEM_ERROR_SMD_LOAD = 17,             /* no SMD buffer or the SMD load could not start */
-    SYSTEM_ERROR_DISTORTION_ANIMATION = 23, /* distortion animation id without a handler */
+    SYSTEM_ERROR_HEAP_ALLOC = 1,           /* file_load_to_heap got no block */
+    SYSTEM_ERROR_FILE_LOAD = 2,            /* a checked file load returned 0 */
+    SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT = 6, /* unit_claim_slot found none free */
+    SYSTEM_ERROR_SHP_FRAME = 8,            /* frame index above 0x200 or frame pointer -1 */
+    SYSTEM_ERROR_SEQ_ANIMATION = 9,        /* animation index above 0x100 or sequence pointer -1 */
+    SYSTEM_ERROR_FRAME_PART_COUNT = 10,    /* more than eight parts in a unit frame */
+    SYSTEM_ERROR_NO_SPRITESHEET_SLOT = 11, /* no free or reusable spritesheet slot */
+    SYSTEM_ERROR_SEQ_OPCODE = 13,          /* unknown sequence opcode, or a queued animation for slot 0 */
+    SYSTEM_ERROR_SMD_LOAD = 17,            /* no SMD buffer or the SMD load could not start */
+    SYSTEM_ERROR_DISTORTION_ANIMATION = 23 /* distortion animation id without a handler */
 } system_error_e;
 
 /* Error codes BATTLE passes to system_handle_pointer_exception. */
 typedef enum system_pointer_exception {
     SYSTEM_POINTER_EXCEPTION_NO_UNIT = 12,            /* a unit lookup by id found no runtime record */
     SYSTEM_POINTER_EXCEPTION_ATTACK_PREPARATION = 19, /* an attack preparation result with no handler */
-    SYSTEM_POINTER_EXCEPTION_TURN_EVENT = 20,         /* a turn event type with no handler */
+    SYSTEM_POINTER_EXCEPTION_TURN_EVENT = 20          /* a turn event type with no handler */
 } system_pointer_exception_e;
 
 /* system_handle_battle_load_exception values: a failure base plus the battle id of the unit
@@ -148,7 +148,7 @@ typedef enum system_battle_load_exception {
     SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_PLACEMENT = 300,  /* an ENTD unit's placement was rejected */
     SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_PLACEMENT = 400, /* a deployed unit's placement was rejected */
     SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_UNIT_LOAD = 500, /* a deployed unit's roster load failed */
-    SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT = 600,
+    SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT = 600
 } system_battle_load_exception_e;
 
 void system_handle_error(int error_code);
@@ -217,7 +217,7 @@ typedef enum system_runtime_flag {
      * uploading the file image. */
     SYSTEM_RUNTIME_FLAG_CLEAR_FRAME = 0x20000,
     SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM = 0x40000,
-    SYSTEM_RUNTIME_FLAG_SOFT_RESET_DISABLED = 0x80000,
+    SYSTEM_RUNTIME_FLAG_SOFT_RESET_DISABLED = 0x80000
 } system_runtime_flag_e;
 
 extern u32 g_system_runtime_flags;

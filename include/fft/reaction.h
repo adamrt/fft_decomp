@@ -14,7 +14,7 @@ typedef enum reaction_behavior_flag {
     REACTION_BEHAVIOR_FLAG_TARGET_SELF = 0x04,
     REACTION_BEHAVIOR_FLAG_TARGET_ATTACKER = 0x08,
     REACTION_BEHAVIOR_FLAG_PASSIVE = 0x10,
-    REACTION_BEHAVIOR_FLAG_ACTIVE = 0x20,
+    REACTION_BEHAVIOR_FLAG_ACTIVE = 0x20
 } reaction_behavior_flag_e;
 
 extern s16 g_reaction_ability_id;

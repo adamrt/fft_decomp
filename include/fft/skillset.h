@@ -173,13 +173,10 @@ typedef enum skillset_id {
     SKILLSET_ID_MONSTER_HYUDRA = 221,
     SKILLSET_ID_MONSTER_HYDRA = 222,
     SKILLSET_ID_MONSTER_TIAMAT = 223,
-    SKILLSET_ID_NONE = 255, /* empty ENTD skillset; ends a skillset or AI ability list */
+    SKILLSET_ID_NONE = 255 /* empty ENTD skillset; ends a skillset or AI ability list */
 } skillset_id_e;
 
-enum {
-    SKILLSET_ID_MONSTER_FIRST = 176,
-    SKILLSET_ID_END = 224,
-};
+enum { SKILLSET_ID_MONSTER_FIRST = 176, SKILLSET_ID_END = 224 };
 
 /* Human skillsets contain 16 action slots followed by six reaction/support/movement
  * slots. Monster records contain four ids; the shared scratch list reserves 24. */
@@ -187,7 +184,7 @@ enum {
     HUMAN_SKILLSET_ACTION_SLOT_COUNT = 16,
     HUMAN_SKILLSET_ABILITY_COUNT = 22,
     MONSTER_SKILLSET_ABILITY_COUNT = 4,
-    SKILLSET_ABILITY_LIST_COUNT = 24,
+    SKILLSET_ABILITY_LIST_COUNT = 24
 };
 
 /* Ability classes ability_store_skillset_abilities collects from a
@@ -197,7 +194,7 @@ typedef enum skillset_ability_filter {
     SKILLSET_ABILITY_FILTER_REACTION = 0x02,
     SKILLSET_ABILITY_FILTER_MOVEMENT = 0x04,
     SKILLSET_ABILITY_FILTER_SUPPORT = 0x08,
-    SKILLSET_ABILITY_FILTER_ALL = 0x0f,
+    SKILLSET_ABILITY_FILTER_ALL = 0x0f
 } skillset_ability_filter_e;
 
 /* action menu lists */

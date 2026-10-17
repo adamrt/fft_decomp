@@ -32,7 +32,7 @@ s32 formation_ability_has_two_hands(s16 unit_id);
 enum {
     FORMATION_ABILITY_MENU_TEXT_UNLOCKED = 0xd80b,
     FORMATION_ABILITY_MENU_TEXT_LOCKED = 0xd80c,
-    FORMATION_ABILITY_MENU_TEXT_MIME = 0xd80d,
+    FORMATION_ABILITY_MENU_TEXT_MIME = 0xd80d
 };
 
 extern s16 g_formation_ability_category; /* menu_ability_category_e */

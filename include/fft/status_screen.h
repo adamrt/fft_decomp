@@ -109,13 +109,9 @@ void status_screen_init_unit_jobs(s32 unit_id);
 
 /* menu display (JOBSTTS) */
 /* The opcode that ends a JOBSTTS menu display stream. */
-enum {
-    STATUS_SCREEN_SCRIPT_END = 0x16,
-};
+enum { STATUS_SCREEN_SCRIPT_END = 0x16 };
 
-enum {
-    STATUS_SCREEN_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6,
-};
+enum { STATUS_SCREEN_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6 };
 
 extern u8 g_status_screen_menu_palette_image[];
 

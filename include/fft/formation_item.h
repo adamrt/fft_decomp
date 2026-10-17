@@ -12,10 +12,7 @@
 /* item menu */
 /* Command texts of the Formation Item menu, chosen by the
  * selected unit's formation_unit_lock_e. */
-enum {
-    FORMATION_ITEM_MENU_TEXT_UNLOCKED = 0xd801,
-    FORMATION_ITEM_MENU_TEXT_LOCKED = 0xd802,
-};
+enum { FORMATION_ITEM_MENU_TEXT_UNLOCKED = 0xd801, FORMATION_ITEM_MENU_TEXT_LOCKED = 0xd802 };
 
 extern s8 g_formation_item_menu_mode; /* menu_item_list_state_e */
 extern menu_entry_t g_formation_item_icon_menu;

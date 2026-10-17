@@ -15,7 +15,7 @@ typedef enum fullscreen_graphic_id {
     FULLSCREEN_GRAPHIC_END1 = 8, /* g_gfx_screen_fade rises from -0xff; for the others it falls from 0xff */
     FULLSCREEN_GRAPHIC_END3 = 10,
     FULLSCREEN_GRAPHIC_END4 = 11,
-    FULLSCREEN_GRAPHIC_END5 = 12,
+    FULLSCREEN_GRAPHIC_END5 = 12
 } fullscreen_graphic_id_e;
 
 /* One image of g_fullscreen_graphics: its file, frame-buffer rectangle, tile

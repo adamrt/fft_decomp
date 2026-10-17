@@ -77,9 +77,7 @@ typedef struct menu_scroll_text_layout {
 /* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
  * helper redraws the page once and clears the request, which
  * screen_thread_request_redraw sets. */
-enum {
-    MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4,
-};
+enum { MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4 };
 
 void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 

@@ -354,10 +354,7 @@ static void sound_novel_play_pending_sounds(s32 sound_id, s32 weather_sound_id, 
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
 }
 
-enum {
-    SOUND_QUAD_COMMAND_COUNT = 4,
-    SOUND_QUAD_COMMAND_BASE = SUZUKI_SOUND_ID(SOUND_RESOURCE_SOUND_NOVEL, 0),
-};
+enum { SOUND_QUAD_COMMAND_COUNT = 4, SOUND_QUAD_COMMAND_BASE = SUZUKI_SOUND_ID(SOUND_RESOURCE_SOUND_NOVEL, 0) };
 
 /* Stops all sound effects and plays the row for sound_id from
  * g_sound_novel_sound_quads: four sounds of the sound novel's

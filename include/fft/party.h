@@ -38,7 +38,7 @@ typedef enum party_bio_state {
     PARTY_BIO_STATE_DISMISSED = 12, /* dismissed or turned away */
     PARTY_BIO_STATE_LEFT_LOW_BRAVE = 13,
     PARTY_BIO_STATE_LEFT_HIGH_FAITH = 14,
-    PARTY_BIO_STATE_LOST_IN_BATTLE = 15,
+    PARTY_BIO_STATE_LOST_IN_BATTLE = 15
 } party_bio_state_e;
 
 /* Three unit ids whose presence selects the event variable at +6. */

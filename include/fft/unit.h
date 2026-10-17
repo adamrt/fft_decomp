@@ -48,7 +48,7 @@ typedef enum unit_flags {
     UNIT_FLAG_JOIN_AFTER_EVENT = 0x10,
     UNIT_FLAG_MONSTER = 0x20,
     UNIT_FLAG_FEMALE = 0x40,
-    UNIT_FLAG_MALE = 0x80,
+    UNIT_FLAG_MALE = 0x80
 } unit_flags_e;
 
 /* abilities */
@@ -69,7 +69,7 @@ typedef enum unit_reaction_set_1 {
     UNIT_REACTION_SET_1_SUNKEN_STATE = 0x10,
     UNIT_REACTION_SET_1_SPEED_SAVE = 0x20,
     UNIT_REACTION_SET_1_MA_SAVE = 0x40,
-    UNIT_REACTION_SET_1_PA_SAVE = 0x80,
+    UNIT_REACTION_SET_1_PA_SAVE = 0x80
 } unit_reaction_set_1_e;
 
 typedef enum unit_reaction_set_2 {
@@ -80,7 +80,7 @@ typedef enum unit_reaction_set_2 {
     UNIT_REACTION_SET_2_CRITICAL_QUICK = 0x10,
     UNIT_REACTION_SET_2_MP_RESTORE = 0x20,
     UNIT_REACTION_SET_2_HP_RESTORE = 0x40,
-    UNIT_REACTION_SET_2_FAITH_UP = 0x80,
+    UNIT_REACTION_SET_2_FAITH_UP = 0x80
 } unit_reaction_set_2_e;
 
 typedef enum unit_reaction_set_3 {
@@ -91,7 +91,7 @@ typedef enum unit_reaction_set_3 {
     UNIT_REACTION_SET_3_AUTO_POTION = 0x10,
     UNIT_REACTION_SET_3_REFLECT = 0x20,
     UNIT_REACTION_SET_3_GILGAME_HEART = 0x40,
-    UNIT_REACTION_SET_3_ABSORB_USED_MP = 0x80,
+    UNIT_REACTION_SET_3_ABSORB_USED_MP = 0x80
 } unit_reaction_set_3_e;
 
 typedef enum unit_reaction_set_4 {
@@ -102,7 +102,7 @@ typedef enum unit_reaction_set_4 {
     UNIT_REACTION_SET_4_ABANDON = 0x10,
     UNIT_REACTION_SET_4_FINGER_GUARD = 0x20,
     UNIT_REACTION_SET_4_WEAPON_GUARD = 0x40,
-    UNIT_REACTION_SET_4_DAMAGE_SPLIT = 0x80,
+    UNIT_REACTION_SET_4_DAMAGE_SPLIT = 0x80
 } unit_reaction_set_4_e;
 
 /* Active support abilities occupy four MSB-first bitsets in unit_stats_t
@@ -116,7 +116,7 @@ typedef enum unit_support_set_1 {
     UNIT_SUPPORT_SET_1_EQUIP_KATANA = 0x10,
     UNIT_SUPPORT_SET_1_EQUIP_SWORD = 0x20,
     UNIT_SUPPORT_SET_1_EQUIP_SHIELD = 0x40,
-    UNIT_SUPPORT_SET_1_EQUIP_ARMOR = 0x80,
+    UNIT_SUPPORT_SET_1_EQUIP_ARMOR = 0x80
 } unit_support_set_1_e;
 
 typedef enum unit_support_set_2 {
@@ -127,7 +127,7 @@ typedef enum unit_support_set_2 {
     UNIT_SUPPORT_SET_2_ATTACK_UP = 0x10,
     UNIT_SUPPORT_SET_2_GAINED_EXP_UP = 0x20,
     UNIT_SUPPORT_SET_2_GAINED_JP_UP = 0x40,
-    UNIT_SUPPORT_SET_2_HALF_MP = 0x80,
+    UNIT_SUPPORT_SET_2_HALF_MP = 0x80
 } unit_support_set_2_e;
 
 typedef enum unit_support_set_3 {
@@ -138,7 +138,7 @@ typedef enum unit_support_set_3 {
     UNIT_SUPPORT_SET_3_MONSTER_TALK = 0x10,
     UNIT_SUPPORT_SET_3_MARTIAL_ARTS = 0x20,
     UNIT_SUPPORT_SET_3_SECRET_HUNT = 0x40,
-    UNIT_SUPPORT_SET_3_TRAIN = 0x80,
+    UNIT_SUPPORT_SET_3_TRAIN = 0x80
 } unit_support_set_3_e;
 
 typedef enum unit_support_set_4 {
@@ -146,7 +146,7 @@ typedef enum unit_support_set_4 {
     UNIT_SUPPORT_SET_4_SHORT_CHARGE = 0x08,
     UNIT_SUPPORT_SET_4_EQUIP_CHANGE = 0x20,
     UNIT_SUPPORT_SET_4_DEFEND = 0x40,
-    UNIT_SUPPORT_SET_4_MONSTER_SKILL = 0x80,
+    UNIT_SUPPORT_SET_4_MONSTER_SKILL = 0x80
 } unit_support_set_4_e;
 
 /* Active movement abilities occupy three MSB-first bytes in unit_stats_t.
@@ -159,7 +159,7 @@ typedef enum unit_movement_set_1 {
     UNIT_MOVEMENT_SET_1_JUMP_PLUS_1 = 0x10,
     UNIT_MOVEMENT_SET_1_MOVE_PLUS_3 = 0x20,
     UNIT_MOVEMENT_SET_1_MOVE_PLUS_2 = 0x40,
-    UNIT_MOVEMENT_SET_1_MOVE_PLUS_1 = 0x80,
+    UNIT_MOVEMENT_SET_1_MOVE_PLUS_1 = 0x80
 } unit_movement_set_1_e;
 
 typedef enum unit_movement_set_2 {
@@ -170,7 +170,7 @@ typedef enum unit_movement_set_2 {
     UNIT_MOVEMENT_SET_2_CANNOT_ENTER_WATER = 0x10,
     UNIT_MOVEMENT_SET_2_MOVE_GET_JP = 0x20,
     UNIT_MOVEMENT_SET_2_MOVE_GET_EXP = 0x40,
-    UNIT_MOVEMENT_SET_2_MOVE_MP_UP = 0x80,
+    UNIT_MOVEMENT_SET_2_MOVE_MP_UP = 0x80
 } unit_movement_set_2_e;
 
 typedef enum unit_movement_set_3 {
@@ -181,7 +181,7 @@ typedef enum unit_movement_set_3 {
     UNIT_MOVEMENT_SET_3_MOVE_UNDERWATER = 0x10,
     UNIT_MOVEMENT_SET_3_MOVE_ON_LAVA = 0x20,
     UNIT_MOVEMENT_SET_3_WALK_ON_WATER = 0x40, /* ability 0x1f7; wades one level deep */
-    UNIT_MOVEMENT_SET_3_MOVE_IN_WATER = 0x80, /* ability 0x1f6; stands on the water surface */
+    UNIT_MOVEMENT_SET_3_MOVE_IN_WATER = 0x80  /* ability 0x1f6; stands on the water surface */
 } unit_movement_set_3_e;
 
 /* equipment */
@@ -191,13 +191,13 @@ typedef enum unit_movement_set_3 {
 typedef enum unit_equipment_categories_1 {
     UNIT_EQUIPMENT_SET_1_AXE = 0x02,
     UNIT_EQUIPMENT_SET_1_KATANA = 0x04,
-    UNIT_EQUIPMENT_SET_1_SWORD = 0x10,
+    UNIT_EQUIPMENT_SET_1_SWORD = 0x10
 } unit_equipment_categories_1_e;
 
 typedef enum unit_equipment_categories_2 {
     UNIT_EQUIPMENT_SET_2_SPEAR = 0x01,
     UNIT_EQUIPMENT_SET_2_CROSSBOW = 0x10,
-    UNIT_EQUIPMENT_SET_2_GUN = 0x20,
+    UNIT_EQUIPMENT_SET_2_GUN = 0x20
 } unit_equipment_categories_2_e;
 
 typedef enum unit_equipment_categories_3 {
@@ -205,12 +205,10 @@ typedef enum unit_equipment_categories_3 {
     UNIT_EQUIPMENT_SET_3_RIBBON = 0x02,
     UNIT_EQUIPMENT_SET_3_HELM = 0x08,
     UNIT_EQUIPMENT_SET_3_SHIELD = 0x10,
-    UNIT_EQUIPMENT_SET_3_BAG = 0x40,
+    UNIT_EQUIPMENT_SET_3_BAG = 0x40
 } unit_equipment_categories_3_e;
 
-typedef enum unit_equipment_categories_4 {
-    UNIT_EQUIPMENT_SET_4_PERFUME = 0x01,
-} unit_equipment_categories_4_e;
+typedef enum unit_equipment_categories_4 { UNIT_EQUIPMENT_SET_4_PERFUME = 0x01 } unit_equipment_categories_4_e;
 
 /*
  * Seven-slot equipment order serialized by party_unit_t and unit_stats_t.
@@ -224,7 +222,7 @@ typedef enum unit_equipment_slot {
     UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD = 4,
     UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON = 5,
     UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD = 6,
-    UNIT_EQUIPMENT_SLOT_COUNT = 7,
+    UNIT_EQUIPMENT_SLOT_COUNT = 7
 } unit_equipment_slot_e;
 
 s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support);
@@ -245,13 +243,10 @@ typedef enum zodiac_sign {
     ZODIAC_SIGN_CAPRICORN = 9,
     ZODIAC_SIGN_AQUARIUS = 10,
     ZODIAC_SIGN_PISCES = 11,
-    ZODIAC_SIGN_SERPENTARIUS = 12,
+    ZODIAC_SIGN_SERPENTARIUS = 12
 } zodiac_sign_e;
 
-enum {
-    ZODIAC_SIGN_ORDINARY_COUNT = 12,
-    ZODIAC_SIGN_COUNT = 13,
-};
+enum { ZODIAC_SIGN_ORDINARY_COUNT = 12, ZODIAC_SIGN_COUNT = 13 };
 
 /* Packed birthday and zodiac at unit offset 0x008. Field updates preserve
  * the three reserved bits between the day-of-year and zodiac. */
@@ -264,19 +259,10 @@ typedef char unit_birthday_size_must_be_2[(sizeof(unit_birthday_t) == 2) ? 1 : -
 
 /* stats */
 /* Character progression; excess EXP is discarded on a level-up. */
-enum {
-    UNIT_LEVEL_MAX = 99,
-    UNIT_LEVEL_UP_EXPERIENCE = 100,
-    UNIT_LEVEL_EXPERIENCE_MAX = UNIT_LEVEL_UP_EXPERIENCE - 1,
-};
+enum { UNIT_LEVEL_MAX = 99, UNIT_LEVEL_UP_EXPERIENCE = 100, UNIT_LEVEL_EXPERIENCE_MAX = UNIT_LEVEL_UP_EXPERIENCE - 1 };
 
 /* Calculated stat caps; eggs use the full u16 range for HP and MP. */
-enum {
-    UNIT_HP_MP_MAX = 999,
-    UNIT_ATTACK_STAT_MAX = 99,
-    UNIT_SPEED_MAX = 50,
-    UNIT_BRAVE_FAITH_MAX = 100,
-};
+enum { UNIT_HP_MP_MAX = 999, UNIT_ATTACK_STAT_MAX = 99, UNIT_SPEED_MAX = 50, UNIT_BRAVE_FAITH_MAX = 100 };
 
 /* Five 24-bit raw values serialized in HP, MP, Speed, PA, MA order. */
 typedef enum unit_raw_stat_index {
@@ -285,12 +271,12 @@ typedef enum unit_raw_stat_index {
     UNIT_RAW_STAT_SPEED = 2,
     UNIT_RAW_STAT_PHYSICAL_ATTACK = 3,
     UNIT_RAW_STAT_MAGIC_ATTACK = 4,
-    UNIT_RAW_STAT_COUNT = 5,
+    UNIT_RAW_STAT_COUNT = 5
 } unit_raw_stat_index_e;
 
 enum {
     UNIT_RAW_STAT_SERIALIZED_BYTES = 3,
-    UNIT_RAW_STAT_DATA_BYTE_COUNT = UNIT_RAW_STAT_COUNT * UNIT_RAW_STAT_SERIALIZED_BYTES,
+    UNIT_RAW_STAT_DATA_BYTE_COUNT = UNIT_RAW_STAT_COUNT * UNIT_RAW_STAT_SERIALIZED_BYTES
 };
 
 /* The save format stores each unsigned 24-bit value in three bytes. */
@@ -313,13 +299,11 @@ typedef enum unit_attribute_index {
     UNIT_ATTRIBUTE_PHYSICAL_ATTACK = 0,
     UNIT_ATTRIBUTE_MAGIC_ATTACK = 1,
     UNIT_ATTRIBUTE_SPEED = 2,
-    UNIT_ATTRIBUTE_COUNT = 3,
+    UNIT_ATTRIBUTE_COUNT = 3
 } unit_attribute_index_e;
 
 /* CT points needed for a unit turn; speed supplies points each clocktick. */
-enum {
-    UNIT_TURN_CT_THRESHOLD = 100,
-};
+enum { UNIT_TURN_CT_THRESHOLD = 100 };
 
 /* unit_stats_t.equipment_stats (Battle Stats 0x3c-0x46), filled by
  * unit_set_equipment_stats: each hand's weapon power and weapon evade
@@ -339,14 +323,14 @@ typedef enum unit_equipment_stat_index {
     UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE = 8,
     UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE = 9,
     UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE = 10,
-    UNIT_EQUIPMENT_STAT_COUNT = 11,
+    UNIT_EQUIPMENT_STAT_COUNT = 11
 } unit_equipment_stat_index_e;
 
 /* position */
 /* Suppress random spell quotes for the matching primary or secondary skillset. */
 typedef enum unit_spell_quote_flags {
     UNIT_SPELL_QUOTE_SUPPRESS_SECONDARY = 0x01,
-    UNIT_SPELL_QUOTE_SUPPRESS_PRIMARY = 0x02,
+    UNIT_SPELL_QUOTE_SUPPRESS_PRIMARY = 0x02
 } unit_spell_quote_flags_e;
 
 /* Runtime Y, facing and tile-layer fields. ENTD entries use the narrower
@@ -364,7 +348,7 @@ typedef char unit_position_size_must_be_2[(sizeof(unit_position_t) == 2) ? 1 : -
 /* unit_stats_t.formation_index values that name no party roster slot. */
 typedef enum unit_formation_index {
     UNIT_FORMATION_INDEX_GENERATED_UNIT = 254,
-    UNIT_FORMATION_INDEX_NONE = 255,
+    UNIT_FORMATION_INDEX_NONE = 255
 } unit_formation_index_e;
 
 /* Deployment records share the byte written by ATTACK and read by BATTLE. */
@@ -387,11 +371,7 @@ extern unit_deployment_coordinates_t* g_unit_deployed_coords;
 
 /* teams and control */
 /* Team bits select one of four independently tracked battle teams. */
-enum {
-    UNIT_TEAM_COUNT = 4,
-    UNIT_TEAM_SHIFT = 4,
-    UNIT_TEAM_INDEX_MASK = 0x03,
-};
+enum { UNIT_TEAM_COUNT = 4, UNIT_TEAM_SHIFT = 4, UNIT_TEAM_INDEX_MASK = 0x03 };
 
 /* Battle Stats 0x05 and unit runtime record 0x13d share this byte. */
 typedef enum unit_team_flags {
@@ -409,7 +389,7 @@ typedef enum unit_team_flags {
      * load its graphics for a later AddUnit. */
     UNIT_TEAM_FLAG_RANDOMLY_PRESENT = 0x40,
     UNIT_TEAM_FLAG_ALWAYS_PRESENT = 0x80,
-    UNIT_TEAM_PRESENCE_MASK = 0xc0,
+    UNIT_TEAM_PRESENCE_MASK = 0xc0
 } unit_team_flags_e;
 
 /* unit_stats_t.auto_battle_setting and the AI copies of it. The BATTLE and
@@ -419,7 +399,7 @@ typedef enum ai_autobattle_mode {
     AI_AUTOBATTLE_FIGHT_FOR_LIFE = 12,
     AI_AUTOBATTLE_PROTECT_ALLIES = 14,
     AI_AUTOBATTLE_FADING_LIFE = 16,
-    AI_AUTOBATTLE_RETREAT = 17,
+    AI_AUTOBATTLE_RETREAT = 17
 } ai_autobattle_mode_e;
 
 /* actions */
@@ -442,8 +422,8 @@ typedef char action_command_size_must_be_20[(sizeof(action_command_t) == 20) ? 1
 /* action_data_t.ct_change values that are not an amount. Any other value is a gain when
  * bit 7 is set and a loss otherwise. */
 enum {
-    ACTION_CT_CHANGE_ZERO = 0x7f,  /* CT set to 0 */
-    ACTION_CT_CHANGE_QUICK = 0xff, /* CT filled */
+    ACTION_CT_CHANGE_ZERO = 0x7f, /* CT set to 0 */
+    ACTION_CT_CHANGE_QUICK = 0xff /* CT filled */
 };
 
 /* The pending infliction/removal masks are copied and cleared together. */
@@ -494,9 +474,9 @@ typedef char action_data_size_must_be_44[(sizeof(action_data_t) == 44) ? 1 : -1]
 
 /* action_data_t.miss_display_flags, loaded from the ability's AI flags. */
 typedef enum action_miss_display_flags {
-    ACTION_MISS_DISPLAY_TEAM_MASK = 0x03,       /* the AI target-allies / target-enemies pair */
-    ACTION_MISS_DISPLAY_ALLIES_ONLY = 0x01,     /* the team bits of an ability that targets allies only */
-    ACTION_MISS_DISPLAY_DODGE_ANIMATION = 0x80, /* the ability's evade-with-motion bit */
+    ACTION_MISS_DISPLAY_TEAM_MASK = 0x03,      /* the AI target-allies / target-enemies pair */
+    ACTION_MISS_DISPLAY_ALLIES_ONLY = 0x01,    /* the team bits of an ability that targets allies only */
+    ACTION_MISS_DISPLAY_DODGE_ANIMATION = 0x80 /* the ability's evade-with-motion bit */
 } action_miss_display_flags_e;
 
 /* battle stats */
@@ -505,7 +485,7 @@ typedef enum action_miss_display_flags {
 enum {
     UNIT_RUNTIME_SLOT_COUNT = 16, /* simultaneously present units, including event ghosts */
     UNIT_SLOT_COUNT = 21,
-    UNIT_ID_NONE = UNIT_SLOT_COUNT,
+    UNIT_ID_NONE = UNIT_SLOT_COUNT
 };
 
 /* Battle Stats 0x182 links the two simulation records in a mounted pair. */
@@ -513,7 +493,7 @@ typedef enum unit_mount_info_flags {
     UNIT_MOUNT_INFO_PARTNER_ID_MASK = 0x1f,
     UNIT_MOUNT_INFO_FLAG_MOUNT = 0x40,
     UNIT_MOUNT_INFO_FLAG_RIDER = 0x80,
-    UNIT_MOUNT_INFO_ROLE_MASK = 0xc0,
+    UNIT_MOUNT_INFO_ROLE_MASK = 0xc0
 } unit_mount_info_flags_e;
 
 /* Lifecycle states stored in Battle Stats 0x183. */
@@ -522,19 +502,17 @@ typedef enum unit_existence_state {
     UNIT_EXISTENCE_ACTIVE = 1,
     UNIT_EXISTENCE_PENDING_REMOVAL = 2,
     UNIT_EXISTENCE_DISABLED = 128,
-    UNIT_EXISTENCE_NONE = 255, /* empty slot */
+    UNIT_EXISTENCE_NONE = 255 /* empty slot */
 } unit_existence_state_e;
 
 /* unit_stats_t.equipped_flags: equipment that some abilities require. */
 typedef enum unit_equipped_flags {
     UNIT_EQUIPPED_FLAG_MATERIA_BLADE = 0x04,
-    UNIT_EQUIPPED_FLAG_SWORD = 0x08,
+    UNIT_EQUIPPED_FLAG_SWORD = 0x08
 } unit_equipped_flags_e;
 
 /* active_battle_id marks absence independently of the persistent battle_id. */
-enum {
-    UNIT_ACTIVE_BATTLE_ID_NONE = 0xff,
-};
+enum { UNIT_ACTIVE_BATTLE_ID_NONE = 0xff };
 
 /* Seven encounter AI bytes copied together into the unit record. */
 enum { UNIT_AI_SETUP_BYTE_COUNT = 7 };
@@ -641,9 +619,9 @@ typedef char unit_stats_size_must_be_448[(sizeof(unit_stats_t) == 448) ? 1 : -1]
 
 /* unit_stats_t.ability_outcome. */
 typedef enum unit_ability_outcome {
-    UNIT_ABILITY_OUTCOME_TARGETED = 0x01,      /* target of a primary action */
-    UNIT_ABILITY_OUTCOME_AFFECTED = 0x02,      /* that action changed the unit */
-    UNIT_ABILITY_OUTCOME_LEARN_CHECKED = 0x04, /* the learn-on-hit pass consumed AFFECTED */
+    UNIT_ABILITY_OUTCOME_TARGETED = 0x01,     /* target of a primary action */
+    UNIT_ABILITY_OUTCOME_AFFECTED = 0x02,     /* that action changed the unit */
+    UNIT_ABILITY_OUTCOME_LEARN_CHECKED = 0x04 /* the learn-on-hit pass consumed AFFECTED */
 } unit_ability_outcome_e;
 
 /* unit heights (BATTLE) */
@@ -669,7 +647,7 @@ typedef enum unit_motion_flags {
     UNIT_MOTION_FLAG_SUPPRESS_PALETTE_UPDATE = 0x04000000,
     UNIT_MOTION_FLAG_ALTERNATE_SHORT_HOP = 0x08000000,
     UNIT_MOTION_FLAG_FLOAT = 0x10000000,
-    UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000, /* set with each stored animation request */
+    UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000 /* set with each stored animation request */
 } unit_motion_flags_e;
 
 /* action state (BATTLE) */
@@ -735,7 +713,7 @@ typedef enum unit_entd_init_kind {
     UNIT_ENTD_INIT_NEW = 0, /* reset the unit and build it from its ENTD entry */
     /* Rebuild a transformed unit's stats for its new job in place: no reset, no ENTD data and no
      * ENTD equipment. */
-    UNIT_ENTD_INIT_TRANSFORM = 0x82,
+    UNIT_ENTD_INIT_TRANSFORM = 0x82
 } unit_entd_init_kind_e;
 
 s32 unit_init_from_encounter(unit_stats_t* unit, struct entd_unit* entd, u32 use_world_text, s32 kind);

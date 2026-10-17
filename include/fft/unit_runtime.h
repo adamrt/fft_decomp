@@ -204,14 +204,14 @@ typedef enum unit_fade_out_phase {
     UNIT_FADE_OUT_NONE = 0,
     UNIT_FADE_OUT_FLASH = 1,
     UNIT_FADE_OUT_DARKEN = 2,
-    UNIT_FADE_OUT_REMOVED = 3,
+    UNIT_FADE_OUT_REMOVED = 3
 } unit_fade_out_phase_e;
 
 /* unit_t.mount_state (runtime record 0x130): identifies which role mount_partner_runtime_id (0x131) links. */
 typedef enum unit_mount_state {
     UNIT_MOUNT_STATE_NONE = 0,
     UNIT_MOUNT_STATE_RIDER = 1,
-    UNIT_MOUNT_STATE_MOUNT = 2,
+    UNIT_MOUNT_STATE_MOUNT = 2
 } unit_mount_state_e;
 
 /* Renderer-side runtime unit status mirror. These packed masks do not use the
@@ -258,7 +258,7 @@ typedef enum unit_status_flags_1_4 {
     UNIT_STATUS_PALETTE_MOD_MASK = 0x60c26020,
     UNIT_STATUS_BUBBLE_MASK = 0x1fffc2c4,
     UNIT_STATUS_PREVENT_FACING_MASK = 0x00080074,
-    UNIT_STATUS_ANIMATION_SELECTION_MASK = 0x00003fff,
+    UNIT_STATUS_ANIMATION_SELECTION_MASK = 0x00003fff
 } unit_status_flags_1_4_e;
 
 typedef enum unit_status_flags_5_6 {
@@ -276,7 +276,7 @@ typedef enum unit_status_flags_5_6 {
     UNIT_STATUS_MORBOL = 0x00000100,
     UNIT_STATUS_JUMP_HEIGHT_ACTIVE = 0x00000200,
 
-    UNIT_STATUS_TRANSFORMATION_MASK = 0x0000000f,
+    UNIT_STATUS_TRANSFORMATION_MASK = 0x0000000f
 } unit_status_flags_5_6_e;
 
 /* unit slots and lookups */
@@ -293,7 +293,7 @@ typedef enum unit_character_slot {
     UNIT_CHARACTER_SLOT_OFF_FIELD = -2,
     UNIT_CHARACTER_SLOT_UNAVAILABLE = -3, /* a crystal or a treasure, or a disabled unit */
     UNIT_CHARACTER_SLOT_IN_PARTY = -4,    /* only in the party roster */
-    UNIT_CHARACTER_SLOT_ABSENT = -5,
+    UNIT_CHARACTER_SLOT_ABSENT = -5
 } unit_character_slot_e;
 
 /* The live units, chained through unit_t.previous. */
@@ -331,7 +331,7 @@ void unit_clear_all(void);
 typedef enum unit_height_flags {
     UNIT_HEIGHT_NON_CHOCOBO = 0x20,
     UNIT_HEIGHT_SHARED_TILE = 0x40,
-    UNIT_HEIGHT_UNAVAILABLE = 0x80,
+    UNIT_HEIGHT_UNAVAILABLE = 0x80
 } unit_height_flags_e;
 
 /* Selection policy for unit_find_at_tile.  Status bits are inclusive
@@ -342,7 +342,7 @@ typedef enum unit_tile_filter {
     UNIT_TILE_FILTER_TRANSPARENT = 0x10,
     UNIT_TILE_FILTER_CRYSTAL = 0x40,
     UNIT_TILE_FILTER_MOUNTABLE_CHOCOBO = 0x80,
-    UNIT_TILE_STATUS_FILTERS = UNIT_TILE_FILTER_TREASURE | UNIT_TILE_FILTER_TRANSPARENT | UNIT_TILE_FILTER_CRYSTAL,
+    UNIT_TILE_STATUS_FILTERS = UNIT_TILE_FILTER_TREASURE | UNIT_TILE_FILTER_TRANSPARENT | UNIT_TILE_FILTER_CRYSTAL
 } unit_tile_filter_e;
 
 s32 unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters);
@@ -365,7 +365,7 @@ s32 unit_height_calculate_from_world_coords(struct unit* unit);
 typedef enum unit_chocobo_mount_state {
     UNIT_CHOCOBO_MOUNT_NONE = 0, /* not a chocobo, or one in an unmountable status */
     UNIT_CHOCOBO_MOUNT_FREE = 1,
-    UNIT_CHOCOBO_MOUNT_PAIRED = 2, /* already carries a rider */
+    UNIT_CHOCOBO_MOUNT_PAIRED = 2 /* already carries a rider */
 } unit_chocobo_mount_state_e;
 
 /* Result of unit_get_action_restriction. */
@@ -375,7 +375,7 @@ typedef enum unit_action_restriction {
     UNIT_ACTION_RESTRICTION_CANNOT_ACT = 1,
     /* Tile depth 2 or more, unless the unit has Float, Chicken or Frog status,
      * a water movement ability or UNIT_MOUNT_INFO_FLAG_RIDER. */
-    UNIT_ACTION_RESTRICTION_DEEP_WATER = 2,
+    UNIT_ACTION_RESTRICTION_DEEP_WATER = 2
 } unit_action_restriction_e;
 
 void unit_mount_dismount_rider(unit_t* unit);
@@ -397,20 +397,17 @@ typedef enum unit_facing {
     UNIT_FACING_NORTH = 0x800,
     UNIT_FACING_NORTH_EAST = 0xa00,
     UNIT_FACING_EAST = 0xc00,
-    UNIT_FACING_SOUTH_EAST = 0xe00,
+    UNIT_FACING_SOUTH_EAST = 0xe00
 } unit_facing_e;
 
-enum {
-    UNIT_FACING_QUARTER_TURN = 0x400,
-    UNIT_FACING_MASK = 0x0fff,
-};
+enum { UNIT_FACING_QUARTER_TURN = 0x400, UNIT_FACING_MASK = 0x0fff };
 
 /* Facing values shifted to position bit 8 for the evasion comparisons. */
 enum {
     UNIT_POSITION_FACING_SOUTH = 0x0000,
     UNIT_POSITION_FACING_WEST = 0x0100,
     UNIT_POSITION_FACING_NORTH = 0x0200,
-    UNIT_POSITION_FACING_EAST = 0x0300,
+    UNIT_POSITION_FACING_EAST = 0x0300
 };
 
 void unit_facing_set_cardinal(unit_t* unit, s32 facing);

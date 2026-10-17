@@ -64,7 +64,7 @@ extern textured_rect_source_t g_formation_job_wheel_new_portrait_quad;
 typedef enum formation_job_change_anim {
     FORMATION_JOB_CHANGE_ANIM_DONE = 0,
     FORMATION_JOB_CHANGE_ANIM_DISSOLVE = 1,
-    FORMATION_JOB_CHANGE_ANIM_CLOSING = 2, /* the last 20 frames */
+    FORMATION_JOB_CHANGE_ANIM_CLOSING = 2 /* the last 20 frames */
 } formation_job_change_anim_e;
 
 extern u8 g_formation_job_change_active;

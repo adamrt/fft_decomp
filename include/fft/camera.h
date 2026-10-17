@@ -11,9 +11,7 @@
 struct unit;
 
 /* state and projection */
-enum {
-    CAMERA_PITCH_STEEP_MASK_THRESHOLD = 0x178,
-};
+enum { CAMERA_PITCH_STEEP_MASK_THRESHOLD = 0x178 };
 
 extern MATRIX g_camera_matrix;
 
@@ -36,7 +34,7 @@ void camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output);
 typedef enum camera_input_source {
     CAMERA_INPUT_HELD = 0,
     CAMERA_INPUT_PRESSED = 1, /* newly pressed, repeating at the cursor repeat speed while held */
-    CAMERA_INPUT_RELEASED = 2,
+    CAMERA_INPUT_RELEASED = 2
 } camera_input_source_e;
 
 /* Held directions pan the map instead of following the cursor tile. */
@@ -83,8 +81,8 @@ void camera_screen_offset_update_animation(void);
 /* Values of g_camera_rotation_action. */
 typedef enum camera_rotation_action {
     CAMERA_ROTATION_NONE = 0,
-    CAMERA_ROTATION_LEFT = 1,  /* the yaw falls to its destination */
-    CAMERA_ROTATION_RIGHT = 2, /* the yaw rises to its destination */
+    CAMERA_ROTATION_LEFT = 1, /* the yaw falls to its destination */
+    CAMERA_ROTATION_RIGHT = 2 /* the yaw rises to its destination */
 } camera_rotation_action_e;
 
 extern camera_rotation_action_e g_camera_rotation_action;
@@ -116,7 +114,7 @@ void camera_rotate_when_unit_tile_not_visible(const struct unit* unit);
 typedef enum camera_step_action {
     CAMERA_STEP_NONE = 0,
     CAMERA_STEP_INCREASE = 2, /* tilt up; zoom in */
-    CAMERA_STEP_DECREASE = 4, /* tilt down; zoom out */
+    CAMERA_STEP_DECREASE = 4  /* tilt down; zoom out */
 } camera_step_action_e;
 
 extern s32 g_camera_tilt_target;
@@ -164,9 +162,7 @@ void camera_store_state_to_script_variables(void);
 
 /* fusion tracks */
 /* A camera operand or key value that keeps the component's current value. */
-enum {
-    CAMERA_FUSION_HOLD_SENTINEL = 0x2710,
-};
+enum { CAMERA_FUSION_HOLD_SENTINEL = 0x2710 };
 
 void camera_fusion_thread(void);
 
@@ -180,14 +176,14 @@ s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 /* g_camera_tilt_target values the tilt code tests; the target is a tilt band plus one, and
  * bands 3 and 4 have no pitch here. */
 enum {
-    BATTLE_MAP_TILT_LOW = 1,  /* pitch 0x12e */
-    BATTLE_MAP_TILT_HIGH = 2, /* pitch 0x1c0 */
+    BATTLE_MAP_TILT_LOW = 1, /* pitch 0x12e */
+    BATTLE_MAP_TILT_HIGH = 2 /* pitch 0x1c0 */
 };
 
 /* g_camera_zoom_target values. */
 enum {
-    BATTLE_MAP_ZOOM_IN = 1,  /* scale ONE */
-    BATTLE_MAP_ZOOM_OUT = 4, /* scale 0xc00 */
+    BATTLE_MAP_ZOOM_IN = 1, /* scale ONE */
+    BATTLE_MAP_ZOOM_OUT = 4 /* scale 0xc00 */
 };
 
 #endif

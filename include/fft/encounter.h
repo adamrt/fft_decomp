@@ -13,7 +13,7 @@ typedef enum unit_entd_selection {
     UNIT_ENTD_SELECTION_ENTD_250 = 1,
     UNIT_ENTD_SELECTION_RANDOM_75_TO_79 = 2,
     UNIT_ENTD_SELECTION_RANDOM_1_TO_59 = 3,
-    UNIT_ENTD_SELECTION_MAP_ID = 4, /* the map's own id when it is not 0 */
+    UNIT_ENTD_SELECTION_MAP_ID = 4 /* the map's own id when it is not 0 */
 } unit_entd_selection_e;
 
 extern s32 g_encounter_current_id;

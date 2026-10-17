@@ -19,7 +19,7 @@
 typedef enum unit_list_menu {
     UNIT_LIST_MENU_UNIT_LIST = -1,   /* unit_list_run_frame: the grid and its triangle menu */
     UNIT_LIST_MENU_REORDER_LIST = 0, /* unit_list_run_sort_menu, the triangle menu's first row */
-    UNIT_LIST_MENU_JOB = 2,          /* unit_list_update_job_page: the selected unit's jobs and abilities */
+    UNIT_LIST_MENU_JOB = 2           /* unit_list_update_job_page: the selected unit's jobs and abilities */
 } unit_list_menu_e;
 
 enum { UNIT_LIST_SELECTION_RECORD_COUNT = 14 };
@@ -45,8 +45,8 @@ void unit_list_open(void);
 /* Slots of the unit list screen's own menus; thread_screen_slot_e
  * has the shared ones. */
 typedef enum unit_list_thread_slot {
-    UNIT_LIST_THREAD_SLOT_MENU = 5,          /* the unit list's triangle menu */
-    UNIT_LIST_THREAD_SLOT_REORDER_MENU = 15, /* the reorder list */
+    UNIT_LIST_THREAD_SLOT_MENU = 5,         /* the unit list's triangle menu */
+    UNIT_LIST_THREAD_SLOT_REORDER_MENU = 15 /* the reorder list */
 } unit_list_thread_slot_e;
 
 extern u8 g_unit_list_thread_running;
@@ -269,9 +269,7 @@ void unit_list_update_input(void);
 
 /* menu commands */
 /* The opcode that ends a BUNIT menu display stream. */
-enum {
-    UNIT_LIST_SCRIPT_END = 0x1c,
-};
+enum { UNIT_LIST_SCRIPT_END = 0x1c };
 
 /* text */
 extern u8 g_unit_list_help_text_state;

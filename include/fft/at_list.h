@@ -13,7 +13,7 @@
 enum {
     AT_LIST_CAPACITY = 40,
     AT_END_OF_LIST = 31, /* unit index of the entry that ends the list */
-    AT_UNIT_ID_MASK = 0x1f,
+    AT_UNIT_ID_MASK = 0x1f
 };
 
 /* One 4-byte entry of the 40-entry AT list built by at_list_build and
@@ -30,7 +30,7 @@ typedef char at_entry_size_must_be_4[(sizeof(at_entry_t) == 4) ? 1 : -1];
 typedef enum at_entry_flags {
     AT_JUMP = 0x20,
     AT_ACTION_ENTRY = 0x40, /* charged action or staged item preview */
-    AT_ABILITY_ID_HIGH_BIT = 0x80,
+    AT_ABILITY_ID_HIGH_BIT = 0x80
 } at_entry_flags_e;
 
 /* turn order */
@@ -39,16 +39,12 @@ typedef enum at_list_mode {
     AT_LIST_MODE_ALL = 0,
     AT_LIST_MODE_TURNS_ONLY = 1,   /* leave out the charged and performing actions */
     AT_LIST_MODE_ACTIONS_ONLY = 2, /* leave out the active unit and the simulated turns */
-    AT_LIST_MODE_PREVIEW = 3,      /* as ALL, with the acting unit's new charge counted from this tick */
+    AT_LIST_MODE_PREVIEW = 3       /* as ALL, with the acting unit's new charge counted from this tick */
 } at_list_mode_e;
 
 /* at_list_get_entry_unit_id results: the low byte is the unit's battle id, and a
  * charged-action entry adds AT_LIST_ENTRY_CHARGED_ACTION. */
-enum {
-    AT_LIST_ENTRY_EMPTY = -4,
-    AT_LIST_ENTRY_BATTLE_ID_MASK = 0xff,
-    AT_LIST_ENTRY_CHARGED_ACTION = 0x100,
-};
+enum { AT_LIST_ENTRY_EMPTY = -4, AT_LIST_ENTRY_BATTLE_ID_MASK = 0xff, AT_LIST_ENTRY_CHARGED_ACTION = 0x100 };
 
 extern s32 g_at_list_cursor;
 

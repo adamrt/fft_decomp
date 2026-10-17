@@ -29,9 +29,7 @@ void input_wait_frames_or_skip(s32 frames);
 
 /* repeat timing and button edges */
 /* L1 + R1 + Select + Start restarts the game. */
-enum {
-    INPUT_RESET_BUTTONS = PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_SELECT | PSX_PAD_START,
-};
+enum { INPUT_RESET_BUTTONS = PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_SELECT | PSX_PAD_START };
 
 extern u8 g_input_repeat_initial_delay;
 extern u8 g_input_repeat_period;

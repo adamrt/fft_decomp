@@ -13,7 +13,7 @@
 typedef enum menu_job_list_step {
     MENU_JOB_LIST_STEP_CLOSE = -1,
     MENU_JOB_LIST_STEP_JOBS = 0,
-    MENU_JOB_LIST_STEP_ABILITIES = 1,
+    MENU_JOB_LIST_STEP_ABILITIES = 1
 } menu_job_list_step_e;
 
 extern u8 g_job_list_initialized;

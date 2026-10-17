@@ -200,7 +200,7 @@ typedef enum event_script_variable_id {
     /* One nibble per Brave Story person: zero keeps the person off the list,
      * any other value picks the profile shown. The interpreters stop writing
      * a profile that has reached 12. */
-    EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST = 0x3c0,
+    EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST = 0x3c0
 } event_script_variable_id_e;
 
 /* How many variables each of those ranges holds. The location ranges hold
@@ -212,30 +212,22 @@ enum {
     EVENT_SCRIPT_VAR_TREASURE_COUNT = 47,
     EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT = 16,
     EVENT_SCRIPT_VAR_PROPOSITION_COUNT = 96,
-    EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT = 64,
+    EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT = 64
 };
 
 /* The Deep Dungeon location menu stores the chosen floor in the pending
  * sound effect's variable before it runs the entry script. */
-enum {
-    EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION = 0x5c,
-};
+enum { EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION = 0x5c };
 
 /* Script variable caps: script_set_variable and each program that adds to
  * EVENT_SCRIPT_VAR_WAR_FUNDS stop the war funds at 99,999,999, and
  * unit_increase_casualty_counters stops EVENT_SCRIPT_VAR_CASUALTIES and
  * EVENT_SCRIPT_VAR_INJURED at 9999. */
-enum {
-    EVENT_WAR_FUNDS_MAX = 99999999,
-    EVENT_CASUALTY_COUNT_MAX = 9999,
-};
+enum { EVENT_WAR_FUNDS_MAX = 99999999, EVENT_CASUALTY_COUNT_MAX = 9999 };
 
 /* EVENT_SCRIPT_VAR_TIME_OF_DAY values. Map loading puts the night bit in bit 15 of the GNS map
  * state. */
-enum {
-    TIME_OF_DAY_DAY = 0,
-    TIME_OF_DAY_NIGHT = 1,
-};
+enum { TIME_OF_DAY_DAY = 0, TIME_OF_DAY_NIGHT = 1 };
 
 /* Ordinary variables are 32-bit values; the remaining script-variable domains
  * are packed as 32 one-bit values or eight four-bit values per 32-bit value. */
@@ -244,7 +236,7 @@ enum {
     EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST = 0x360,
     EVENT_SCRIPT_VAR_END = 0x400,
     EVENT_SCRIPT_PACKED_BIT_WORD_FIRST = 0x80,
-    EVENT_SCRIPT_PACKED_NIBBLE_WORD_FIRST = 0x97,
+    EVENT_SCRIPT_PACKED_NIBBLE_WORD_FIRST = 0x97
 };
 
 /* Each scene points to the resident script-variable bank. */
@@ -307,7 +299,7 @@ typedef enum event_id {
     /* These two scenes carry on in the event that follows; the EVTCHR sprites
      * stay loaded after them. */
     EVENT_ID_OLAN_WOUNDED = 0x1ad, /* Brave Story record "Delita's betrayal" (setup 0x1ac) */
-    EVENT_ID_BEOWULF_INVITATION = 0x1d1,
+    EVENT_ID_BEOWULF_INVITATION = 0x1d1
 } event_id_e;
 
 #endif

@@ -52,7 +52,7 @@ enum {
     TEXT_ID_BATTLE_MESSAGE_TREASURE = 0x183c,
     TEXT_ID_BATTLE_MESSAGE_CRYSTAL = 0x183d,
     TEXT_ID_BATTLE_MESSAGE_JOB_LEVEL_UP = 0x183e,
-    TEXT_ID_BATTLE_MESSAGE_LEVEL_UP = 0x183f,
+    TEXT_ID_BATTLE_MESSAGE_LEVEL_UP = 0x183f
 };
 
 /* Hand the battle over to an event script: enter the event state at animation

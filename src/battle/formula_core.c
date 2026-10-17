@@ -46,7 +46,7 @@ enum {
     KNOCKBACK_DIRECTION_SOUTH = 0, /* -y */
     KNOCKBACK_DIRECTION_WEST = 1,  /* -x */
     KNOCKBACK_DIRECTION_NORTH = 2, /* +y */
-    KNOCKBACK_DIRECTION_EAST = 3,  /* +x */
+    KNOCKBACK_DIRECTION_EAST = 3   /* +x */
 };
 
 static s32 battle_map_tile_selector_15_stub(void);

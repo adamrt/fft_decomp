@@ -9,25 +9,19 @@
 
 /* The persistent roster, g_party_units, holds 16 formation slots
  * followed by four guest slots, each with the party_unit_t 0x100-byte stride. */
-enum {
-    PARTY_MEMBER_SLOT_COUNT = 16,
-    PARTY_GUEST_SLOT_FIRST = PARTY_MEMBER_SLOT_COUNT,
-    PARTY_ROSTER_SLOT_COUNT = 20,
-};
+enum { PARTY_MEMBER_SLOT_COUNT = 16, PARTY_GUEST_SLOT_FIRST = PARTY_MEMBER_SLOT_COUNT, PARTY_ROSTER_SLOT_COUNT = 20 };
 
 /* party_unit_t.party_id sentinel: `0xff` means the unit does not appear on
  * Formation; tested by the roster scans in src/main and the WORLD/WLDCORE
  * party walks. */
-enum {
-    PARTY_ID_NONE = 255,
-};
+enum { PARTY_ID_NONE = 255 };
 
 /* Serialized birthday and zodiac bits. */
 enum {
     PARTY_BIRTHDAY_DAY_MASK = 0x01ff,
     PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK = 0x01,
     PARTY_ZODIAC_SHIFT = 4,
-    PARTY_ZODIAC_MASK = 0xf0,
+    PARTY_ZODIAC_MASK = 0xf0
 };
 
 /*

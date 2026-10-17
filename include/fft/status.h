@@ -16,7 +16,7 @@ struct unit;
 enum {
     STATUS_COUNT = 40,
     STATUS_BYTE_COUNT = 5,
-    STATUS_TIMED_COUNT = 16, /* Poison through Death Sentence keep a CT byte each */
+    STATUS_TIMED_COUNT = 16 /* Poison through Death Sentence keep a CT byte each */
 };
 
 /* Canonical status IDs. The owning byte is id >> 3 and its MSB-first mask is
@@ -62,7 +62,7 @@ typedef enum status_id {
     STATUS_ID_DONT_MOVE = 36,
     STATUS_ID_DONT_ACT = 37,
     STATUS_ID_REFLECT = 38,
-    STATUS_ID_DEATH_SENTENCE = 39,
+    STATUS_ID_DEATH_SENTENCE = 39
 } status_id_e;
 
 #define STATUS_BYTE_INDEX(id)  ((id) >> 3)
@@ -119,7 +119,7 @@ typedef enum status_effect_flags_1 {
     STATUS_EFFECT_FLAG_1_KO = 0x01,
     STATUS_EFFECT_FLAG_1_UNIT_LOST = 0x02,
     STATUS_EFFECT_FLAG_1_CHECK_SET_2 = 0x04,
-    STATUS_EFFECT_FLAG_1_FREEZE_CT = 0x80,
+    STATUS_EFFECT_FLAG_1_FREEZE_CT = 0x80
 } status_effect_flags_1_e;
 
 typedef enum status_effect_flags_2 {
@@ -129,7 +129,7 @@ typedef enum status_effect_flags_2 {
     STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED = 0x08,
     STATUS_EFFECT_FLAG_2_MOUNT_REMOVAL = 0x10,
     STATUS_EFFECT_FLAG_2_IGNORE_ATTACKS = 0x20,
-    STATUS_EFFECT_FLAG_2_PREVENT_REACTION = 0x80,
+    STATUS_EFFECT_FLAG_2_PREVENT_REACTION = 0x80
 } status_effect_flags_2_e;
 
 /* Rows of g_status_check_sets. status_init_check_data builds rows 0
@@ -166,7 +166,7 @@ typedef enum status_check_set {
     /* Crystal, Dead, Petrify, Blood Suck, Treasure, Berserk, Chicken, Frog, Charm; set in code, not from the status
      * data. A chocobo with one of them cannot be mounted. */
     STATUS_CHECK_SET_UNMOUNTABLE = 10,
-    STATUS_CHECK_SET_COUNT = 11,
+    STATUS_CHECK_SET_COUNT = 11
 } status_check_set_e;
 
 /* Bit flags in status_infliction_data_t.type and the active-ability copy. The
@@ -175,7 +175,7 @@ typedef enum status_infliction_type {
     STATUS_INFLICTION_TYPE_CANCEL = 0x10,
     STATUS_INFLICTION_TYPE_SEPARATE = 0x20,
     STATUS_INFLICTION_TYPE_RANDOM_ONE = 0x40,
-    STATUS_INFLICTION_TYPE_ALL_OR_NOTHING = 0x80,
+    STATUS_INFLICTION_TYPE_ALL_OR_NOTHING = 0x80
 } status_infliction_type_e;
 
 /* Six-byte status-infliction records, g_status_infliction_data; byte 0
@@ -215,7 +215,7 @@ typedef enum status_action_state {
 enum {
     STATUS_ACTION_RESULT_INDEX_MASK = 0x7f,
     STATUS_ACTION_RESULT_REMOVAL = 0x80,
-    STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED = 0x100,
+    STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED = 0x100
 };
 
 void status_change_unit(struct unit_stats* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
@@ -256,7 +256,7 @@ typedef enum status_bubble {
     STATUS_BUBBLE_RERAISE = 10,
     STATUS_BUBBLE_DEATH_SENTENCE = 20, /* its counter */
     STATUS_BUBBLE_SOURCE_UNIT = 21,    /* the source unit's marker, not a status */
-    STATUS_BUBBLE_COUNT = 22,
+    STATUS_BUBBLE_COUNT = 22
 } status_bubble_e;
 
 extern s32 g_status_bubble_delay;

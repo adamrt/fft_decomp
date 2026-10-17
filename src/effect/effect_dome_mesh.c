@@ -41,10 +41,7 @@ static void effect_dome_mesh_load_translated_vertex(s32 group, s32 point, const 
     output->vz = scratchpad[element + 2] + offset->vz;
 }
 
-enum {
-    DOME_MESH_LATITUDE_STEP = ONE / (DOME_MESH_ROWS * 4),
-    DOME_MESH_LONGITUDE_STEP = ONE / DOME_MESH_SEGMENTS,
-};
+enum { DOME_MESH_LATITUDE_STEP = ONE / (DOME_MESH_ROWS * 4), DOME_MESH_LONGITUDE_STEP = ONE / DOME_MESH_SEGMENTS };
 
 /* Callback handler for the dome mesh: a hemisphere of 8 rows of 16 textured
  * quads over the emitter origin, spinning about the vertical axis. Its nine

@@ -10,7 +10,7 @@
 typedef enum turn_clock_mode {
     TURN_CLOCK_MODE_RUN = 0,
     TURN_CLOCK_MODE_RESET = 1,
-    TURN_CLOCK_MODE_FIND_ACTIVE_UNIT = 2,
+    TURN_CLOCK_MODE_FIND_ACTIVE_UNIT = 2
 } turn_clock_mode_e;
 
 /* g_turn_clock_state and g_turn_clock_resume_state: the phases of
@@ -29,7 +29,7 @@ typedef enum turn_clock_state {
     TURN_CLOCK_STATE_RUN_MIMES = 14,
     TURN_CLOCK_STATE_TERRAIN_POISON = 15,
     TURN_CLOCK_STATE_REMOVE_TRANSPARENT = 17,
-    TURN_CLOCK_STATE_POISON_AND_REGEN = 19,
+    TURN_CLOCK_STATE_POISON_AND_REGEN = 19
 } turn_clock_state_e;
 
 /* Returned by turn_calculate_status_flags. */
@@ -41,7 +41,7 @@ typedef enum turn_status_flags {
     TURN_STATUS_HASTE = 0x10,
     TURN_STATUS_SLOW = 0x20,
     TURN_STATUS_BLOCKS_WAIT_MENU_MASK = 0x0f,
-    TURN_STATUS_BLOCKS_TURN_MASK = 0x0d,
+    TURN_STATUS_BLOCKS_TURN_MASK = 0x0d
 } turn_status_flags_e;
 
 typedef enum turn_event {
@@ -50,21 +50,15 @@ typedef enum turn_event {
     TURN_EVENT_ACTION_RESULT = 0x0300,
     TURN_EVENT_UNKNOWN_0400 = 0x0400,
     TURN_EVENT_MIME = 0x0500,
-    TURN_EVENT_NONE = 0xff00,
+    TURN_EVENT_NONE = 0xff00
 } turn_event_e;
 
 /* unit_t.turn_action_flags. */
-typedef enum turn_action_flags {
-    TURN_ACTION_MOVED = 0x01,
-    TURN_ACTION_ACTED = 0x02,
-} turn_action_flags_e;
+typedef enum turn_action_flags { TURN_ACTION_MOVED = 0x01, TURN_ACTION_ACTED = 0x02 } turn_action_flags_e;
 
 /* End of turn: CT gains 20 for an unused move and 20 for an unused action, and
  * the result is capped at 60. */
-enum {
-    TURN_UNUSED_CT_REFUND = 20,
-    TURN_END_CT_MAX = 60,
-};
+enum { TURN_UNUSED_CT_REFUND = 20, TURN_END_CT_MAX = 60 };
 
 extern s32 g_turn_clock_state;
 extern s32 g_turn_clock_resume_state;

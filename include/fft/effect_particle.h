@@ -49,14 +49,11 @@ enum {
     EFFECT_OT_DEPTH_MIN = 4,
     EFFECT_OT_DEPTH_MAX = 383,
     EFFECT_OT_DEPTH_LIMIT = 384,
-    EFFECT_SPRITE_OT_DEPTH_MAX = 382, /* the farthest depth of a particle sprite */
+    EFFECT_SPRITE_OT_DEPTH_MAX = 382 /* the farthest depth of a particle sprite */
 };
 
 /* primitive_type of effect_render_alloc_primitive: an index into g_effect_primitive_sizes. */
-typedef enum effect_primitive_type {
-    EFFECT_PRIMITIVE_FT4 = 0,
-    EFFECT_PRIMITIVE_DR_MODE = 1,
-} effect_primitive_type_e;
+typedef enum effect_primitive_type { EFFECT_PRIMITIVE_FT4 = 0, EFFECT_PRIMITIVE_DR_MODE = 1 } effect_primitive_type_e;
 
 /* Size of the per-effect arena used by effect_render_alloc_primitive. */
 enum { EFFECT_PRIMITIVE_BUFFER_SIZE = 32768 };

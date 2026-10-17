@@ -15,7 +15,7 @@
 typedef enum battle_map_gns_state_comparison {
     GNS_MAP_STATE_EQUAL = 1,
     GNS_MAP_STATE_REQUESTED_LESS_THAN_RECORD = 2,
-    GNS_MAP_STATE_REQUESTED_GREATER_THAN_RECORD = 3,
+    GNS_MAP_STATE_REQUESTED_GREATER_THAN_RECORD = 3
 } battle_map_gns_state_comparison_e;
 
 /* GNS command rows follow the file-resource rows and use the same tag byte. */
@@ -28,14 +28,14 @@ typedef enum battle_map_gns_command_type {
     GNS_COMMAND_CLEAR_SNOW = 0x88,
     GNS_COMMAND_SET_SNOW = 0x89,
     GNS_COMMAND_UNHANDLED_8A = 0x8a, /* 28-byte rows; forwarded unconditionally and ignored by the dispatcher */
-    GNS_COMMAND_SET_WEATHER_MODIFIER = 0x8b,
+    GNS_COMMAND_SET_WEATHER_MODIFIER = 0x8b
 } battle_map_gns_command_type_e;
 
 /* Structural bounds and the tag separating file rows from command records. */
 enum {
     GNS_RECORD_NONE = 0,           /* empty file slot; also ends the command records */
     GNS_RESOURCE_TABLE_COUNT = 49, /* mesh 32-bit offsets and pending/loaded resource slots */
-    GNS_RECORD_COMMAND_SEPARATOR = 0x80,
+    GNS_RECORD_COMMAND_SEPARATOR = 0x80
 };
 
 /* File-load payload at +0x06 of a GNS row. The loader compares all fourteen
@@ -131,13 +131,13 @@ typedef enum battle_map_resource_type {
     BATTLE_MAP_RESOURCE_MESH_PRIMARY = 0x2e,
     BATTLE_MAP_RESOURCE_MESH_OVERRIDE = 0x2f,
     BATTLE_MAP_RESOURCE_MESH_ALTERNATE = 0x30,
-    BATTLE_MAP_RESOURCE_FILLER = 0x31, /* repeated file-section rows; the loader still visits them */
+    BATTLE_MAP_RESOURCE_FILLER = 0x31 /* repeated file-section rows; the loader still visits them */
 } battle_map_resource_type_e;
 
 /* Private dispatcher operations issued after a texture load, not serialized IDs. */
 typedef enum battle_map_resource_apply_command {
     BATTLE_MAP_RESOURCE_APPLY_LIGHTING = 0x32,
-    BATTLE_MAP_RESOURCE_APPLY_PALETTES = 0x33,
+    BATTLE_MAP_RESOURCE_APPLY_PALETTES = 0x33
 } battle_map_resource_apply_command_e;
 
 /* Mesh files begin with 49 byte offsets indexed by battle_map_resource_type_e.
@@ -180,7 +180,7 @@ typedef enum battle_map_mesh_animation_record_type {
     BATTLE_MAP_MESH_ANIMATION_RECORD_END = 0,
     BATTLE_MAP_MESH_ANIMATION_RECORD_KEYFRAMES = 1,
     BATTLE_MAP_MESH_ANIMATION_RECORD_INSTRUCTIONS = 2,
-    BATTLE_MAP_MESH_ANIMATION_RECORD_PART_PROPERTIES = 3,
+    BATTLE_MAP_MESH_ANIMATION_RECORD_PART_PROPERTIES = 3
 } battle_map_mesh_animation_record_type_e;
 
 /* Record header parsed by battle_map_mesh_load_animation_record: a 32-bit type,
@@ -217,7 +217,7 @@ typedef enum battle_map_load_command {
     BATTLE_MAP_LOAD_COMMAND_POLL = 0x76, /* an unhandled command only advances the load */
     BATTLE_MAP_LOAD_COMMAND_START_HELD
     = 0x99, /* as START, but hold dispatch until BATTLE_MAP_DATA_COMMAND_RELEASE_GNS_HOLD */
-    BATTLE_MAP_LOAD_COMMAND_POLL_HELD = 0x9c,
+    BATTLE_MAP_LOAD_COMMAND_POLL_HELD = 0x9c
 } battle_map_load_command_e;
 
 /* g_battle_map_resource_load_state; these are not the loader's normal return values. */
@@ -229,7 +229,7 @@ typedef enum battle_map_resource_load_state {
     BATTLE_MAP_LOAD_STATE_MESH_RECORDS = 0x79, /* rebuild render records once per buffer */
     BATTLE_MAP_LOAD_STATE_MESH_RECORDS_SECOND = 0x91,
     BATTLE_MAP_LOAD_STATE_APPLY_LIGHTING = 0x92,
-    BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE = 0x93,
+    BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE = 0x93
 } battle_map_resource_load_state_e;
 
 /* The loader otherwise returns g_battle_map_gns_load_phase. */
@@ -239,7 +239,7 @@ enum { BATTLE_MAP_LOAD_RESULT_HELD = 0x9b };
 typedef enum battle_map_gns_load_phase {
     BATTLE_MAP_GNS_LOAD_PHASE_IDLE = 0,
     BATTLE_MAP_GNS_LOAD_PHASE_RESOURCES = 1, /* loading the pending resource files one by one */
-    BATTLE_MAP_GNS_LOAD_PHASE_START = 15,    /* choose the resources once the GNS is in */
+    BATTLE_MAP_GNS_LOAD_PHASE_START = 15     /* choose the resources once the GNS is in */
 } battle_map_gns_load_phase_e;
 
 extern s32 g_battle_map_loaded_id;

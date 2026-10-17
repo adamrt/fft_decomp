@@ -25,10 +25,7 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 /* A first-fit allocator over 256-byte pages with sixteen allocation slots. Each program has its own arena of
  * VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD); menu_alloc_memory yields until a run of
  * free pages and a free slot exist. */
-enum {
-    MENU_BUFFER_ALLOCATION_COUNT = 16,
-    MENU_BUFFER_PAGE_SIZE = 256,
-};
+enum { MENU_BUFFER_ALLOCATION_COUNT = 16, MENU_BUFFER_PAGE_SIZE = 256 };
 
 /* One allocation: its first page, or -1 when the slot is free, and the length of the run in pages. */
 typedef struct menu_allocation {
@@ -68,17 +65,14 @@ enum { MENU_ROW_ACTION_SILENT = 0x1000 };
 
 /* Special row actions. CLEAR_SELECTION records no selection without opening another entry; NONE,
  * like any other value from 0x100 up, opens nothing, so Circle only records the row. */
-enum {
-    MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2,
-    MENU_ROW_ACTION_NONE = 0x7d0,
-};
+enum { MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2, MENU_ROW_ACTION_NONE = 0x7d0 };
 
 /* Values of menu_text_layout_t.mode[]: what a column of the layout draws. */
 typedef enum menu_text_column_mode {
-    MENU_TEXT_COLUMN_TEXT = 0,          /* text ids, drawn by menu_display_text_entry */
-    MENU_TEXT_COLUMN_NUMBER = 1,        /* two-digit numbers, drawn by menu_display_number_entry */
-    MENU_TEXT_COLUMN_HIDDEN = 2,        /* the column is skipped */
-    MENU_TEXT_COLUMN_NUMBER_GLYPHS = 3, /* two-digit numbers, drawn by menu_draw_large_number_glyphs */
+    MENU_TEXT_COLUMN_TEXT = 0,         /* text ids, drawn by menu_display_text_entry */
+    MENU_TEXT_COLUMN_NUMBER = 1,       /* two-digit numbers, drawn by menu_display_number_entry */
+    MENU_TEXT_COLUMN_HIDDEN = 2,       /* the column is skipped */
+    MENU_TEXT_COLUMN_NUMBER_GLYPHS = 3 /* two-digit numbers, drawn by menu_draw_large_number_glyphs */
 } menu_text_column_mode_e;
 
 /* Three-column text layout walked by menu_draw_text_columns and WORLD's screen_draw_text_columns,
@@ -215,7 +209,7 @@ typedef enum menu_equipment_slot {
     MENU_EQUIPMENT_SLOT_BODY = 3,
     MENU_EQUIPMENT_SLOT_ACCESSORY = 4,
     MENU_EQUIPMENT_SLOT_HAND_COUNT = 2,
-    MENU_EQUIPMENT_SLOT_COUNT = 5,
+    MENU_EQUIPMENT_SLOT_COUNT = 5
 } menu_equipment_slot_e;
 
 /* Name, job and identity values copied into WORLD and EQUIP status panels.
@@ -232,9 +226,7 @@ typedef struct menu_unit_status_identity {
 typedef char menu_unit_status_identity_size_must_be_14[sizeof(menu_unit_status_identity_t) == 14 ? 1 : -1];
 
 /* u16 view of the -1 stored in an empty menu_status_panel_slot_state_t.ability_ids row. */
-enum {
-    MENU_STATUS_PANEL_LABEL_NONE = 0xffff,
-};
+enum { MENU_STATUS_PANEL_LABEL_NONE = 0xffff };
 
 /* Unit stats and equipment/ability rows used by status panels and previews.
  * The arrays follow the five equipment and ability slots. */
@@ -270,11 +262,7 @@ typedef struct menu_status_panel_slot_state {
 } menu_status_panel_slot_state_t;
 typedef char menu_status_panel_slot_state_size_must_be_56[(sizeof(menu_status_panel_slot_state_t) == 56) ? 1 : -1];
 
-enum {
-    MENU_UNIT_STATUS_GAUGE_HP = 0,
-    MENU_UNIT_STATUS_GAUGE_MP = 1,
-    MENU_UNIT_STATUS_GAUGE_CT = 2,
-};
+enum { MENU_UNIT_STATUS_GAUGE_HP = 0, MENU_UNIT_STATUS_GAUGE_MP = 1, MENU_UNIT_STATUS_GAUGE_CT = 2 };
 
 /* HP, MP or CT gauge, drawn 32 * value / max pixels wide. Overlay panels
  * use a four-pixel stub when max is zero; the billboard builders instead
@@ -300,7 +288,7 @@ typedef enum menu_unit_readout {
     MENU_UNIT_READOUT_EQUIP_LABEL = 8, /* "equipping", or "can't equip" below a value of 100 */
     MENU_UNIT_READOUT_LEAVING = 9,     /* away on a proposition */
     MENU_UNIT_READOUT_EGG = 10,        /* nothing is drawn */
-    MENU_UNIT_READOUT_MISSING = 11,
+    MENU_UNIT_READOUT_MISSING = 11
 } menu_unit_readout_e;
 
 /* The battle unit stats of g_unit_panel_selected_unit. */
@@ -311,7 +299,7 @@ struct unit_stats* menu_get_selected_unit_stats(void);
 typedef enum menu_status_panel_flags {
     MENU_STATUS_PANEL_SLIDE_DOWN = 0x20, /* run the slide-down table once */
     MENU_STATUS_PANEL_SLIDE_UP = 0x40,   /* run the slide-up table once */
-    MENU_STATUS_PANEL_HIDDEN = 0x80,     /* draw nothing; the only flag kept when a slide ends */
+    MENU_STATUS_PANEL_HIDDEN = 0x80      /* draw nothing; the only flag kept when a slide ends */
 } menu_status_panel_flags_e;
 
 /* panel packets */
@@ -495,7 +483,7 @@ enum {
     MENU_WLDFACE_PORTRAITS_PER_SHEET = 40,
     MENU_WLDFACE_FIRST_MONSTER_PORTRAIT = 63,
     MENU_WLDFACE_MONSTER_PALETTE_ROW = 10, /* first row of the monsters' other palettes */
-    MENU_WLDFACE_MONSTER_PALETTE_ROW_COUNT = 6,
+    MENU_WLDFACE_MONSTER_PALETTE_ROW_COUNT = 6
 };
 
 /* Portrait code bits 8-9: either set means the code is not a unit portrait, so no portrait CLUT is built. */
@@ -511,7 +499,7 @@ extern RECT g_menu_portrait_palette_rect;
 typedef enum menu_panel_fade_mode {
     MENU_PANEL_FADE_NONE = 0, /* not drawn */
     MENU_PANEL_FADE_IN = 1,   /* intensity rises by 8 a frame up to 80 and holds */
-    MENU_PANEL_FADE_OUT = 2,  /* intensity falls by 8 a frame; at zero the mode returns to NONE */
+    MENU_PANEL_FADE_OUT = 2   /* intensity falls by 8 a frame; at zero the mode returns to NONE */
 } menu_panel_fade_mode_e;
 
 extern s32 g_menu_panel_fade_mode; /* menu_panel_fade_mode_e */
@@ -528,9 +516,9 @@ void menu_init_panel_fade_tiles(void);
 /* g_menu_indicator_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two translucent
  * panels menu_draw_status_panel_backdrops draws behind the unit status banners. */
 typedef enum menu_indicator_state {
-    MENU_INDICATOR_STATE_HIDDEN = 0,     /* not drawn */
-    MENU_INDICATOR_STATE_FADING_IN = 1,  /* brightness rises by 0xc a frame up to 0x78 and holds */
-    MENU_INDICATOR_STATE_FADING_OUT = 2, /* brightness falls by 0xc a frame; at zero the state returns to HIDDEN */
+    MENU_INDICATOR_STATE_HIDDEN = 0,    /* not drawn */
+    MENU_INDICATOR_STATE_FADING_IN = 1, /* brightness rises by 0xc a frame up to 0x78 and holds */
+    MENU_INDICATOR_STATE_FADING_OUT = 2 /* brightness falls by 0xc a frame; at zero the state returns to HIDDEN */
 } menu_indicator_state_e;
 
 extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];

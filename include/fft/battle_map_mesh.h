@@ -73,14 +73,14 @@ enum {
     BATTLE_MAP_POLYGON_FLAG_HIDDEN_MASK = 0x3ffc,
     /* Lit from its normals each frame; a polygon without it keeps the flat
      * ambient color. */
-    BATTLE_MAP_POLYGON_FLAG_LIT = 0x8000,
+    BATTLE_MAP_POLYGON_FLAG_LIT = 0x8000
 };
 
 /* Commands of battle_map_polygon_flag_command. */
 typedef enum battle_map_polygon_flag_command {
-    BATTLE_MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,    /* copy LIT into LIT_ACTIVE on every polygon */
-    BATTLE_MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,    /* clear LIT_ACTIVE everywhere */
-    BATTLE_MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT = 0x94, /* repaint the polygons without LIT in the ambient color */
+    BATTLE_MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,   /* copy LIT into LIT_ACTIVE on every polygon */
+    BATTLE_MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,   /* clear LIT_ACTIVE everywhere */
+    BATTLE_MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT = 0x94 /* repaint the polygons without LIT in the ambient color */
 } battle_map_polygon_flag_command_e;
 
 extern u8 g_battle_map_polygon_flag_clear_countdown;
@@ -131,7 +131,7 @@ typedef enum battle_map_mesh_channel {
     BATTLE_MAP_MESH_CHANNEL_SCALE_X = 6,
     BATTLE_MAP_MESH_CHANNEL_SCALE_Y = 7,
     BATTLE_MAP_MESH_CHANNEL_SCALE_Z = 8,
-    BATTLE_MAP_MESH_CHANNEL_COUNT = 9,
+    BATTLE_MAP_MESH_CHANNEL_COUNT = 9
 } battle_map_mesh_channel_e;
 
 /* One 0x50-byte keyframe from a mesh animation record of type 1.
@@ -158,8 +158,8 @@ typedef enum battle_map_mesh_tween_flags {
     BATTLE_MAP_MESH_TWEEN_TO = 0x01, /* delta = target - start */
     BATTLE_MAP_MESH_TWEEN_BY = 0x02, /* delta = the keyframe value */
     BATTLE_MAP_MESH_TWEEN_LINEAR = 0x04,
-    BATTLE_MAP_MESH_TWEEN_SINE = 0x08,        /* delta * sin */
-    BATTLE_MAP_MESH_TWEEN_RAISED_SINE = 0x10, /* delta * (sin + 1) */
+    BATTLE_MAP_MESH_TWEEN_SINE = 0x08,       /* delta * sin */
+    BATTLE_MAP_MESH_TWEEN_RAISED_SINE = 0x10 /* delta * (sin + 1) */
 } battle_map_mesh_tween_flags_e;
 
 /* One instruction from a mesh animation record of type 2. A duration of
@@ -223,7 +223,7 @@ typedef enum battle_map_texture_animation_mode {
     /* Playback states written and dispatched by battle_map_texture_update_animations. */
     BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG_BACK = 128,
     BATTLE_MAP_TEXTURE_ANIMATION_MODE_PALETTE_PING_PONG_BACK = 129,
-    BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_PLAYING = 130,
+    BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_PLAYING = 130
 } battle_map_texture_animation_mode_e;
 
 enum { BATTLE_MAP_TEXTURE_ANIMATION_COUNT = 32 };
@@ -291,7 +291,7 @@ void battle_map_mesh_append_geometry(const battle_map_mesh_geometry_t* geometry_
  * handling of untextured map polygons while an effect draws. */
 typedef enum battle_map_effect_data_command {
     BATTLE_MAP_EFFECT_DATA_END = 0x87,
-    BATTLE_MAP_EFFECT_DATA_BEGIN = 0x88,
+    BATTLE_MAP_EFFECT_DATA_BEGIN = 0x88
 } battle_map_effect_data_command_e;
 
 extern VECTOR g_battle_map_camera_zoom;

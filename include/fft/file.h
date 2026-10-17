@@ -65,7 +65,7 @@ typedef enum disc_sector {
     DISC_SECTOR_OPEN_FFTEND_STR = 0x21908,
     DISC_SECTOR_OPEN_FFTPR_STR = 0x25160,
     DISC_SECTOR_OPEN_FFTUNIT_STR = 0x26ec0,
-    DISC_SECTOR_OPEN_ENDING_XA = 0x2f551,
+    DISC_SECTOR_OPEN_ENDING_XA = 0x2f551
 } disc_sector_e;
 
 /* resident CD loader */
@@ -73,7 +73,7 @@ typedef enum disc_sector {
 typedef enum file_loading_display_mode {
     FILE_LOADING_DISPLAY_OFF = -1,
     FILE_LOADING_DISPLAY_INIT = 0,
-    FILE_LOADING_DISPLAY_PRESERVE = 1,
+    FILE_LOADING_DISPLAY_PRESERVE = 1
 } file_loading_display_mode_e;
 
 /* One poll advances at most one phase; recoverable CD errors restart setup. */
@@ -85,7 +85,7 @@ typedef enum file_load_state {
     FILE_LOAD_STATE_POLL_SEEK = 4,
     FILE_LOAD_STATE_START_READ = 5,
     FILE_LOAD_STATE_POLL_READ = 6,
-    FILE_LOAD_STATE_UPLOAD_VRAM = 7, /* WLDCORE image stream only */
+    FILE_LOAD_STATE_UPLOAD_VRAM = 7 /* WLDCORE image stream only */
 } file_load_state_e;
 
 /* Asynchronous CD read state advanced by file_poll_load. */

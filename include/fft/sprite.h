@@ -47,13 +47,11 @@ typedef struct sprite_frame_part {
 enum {
     SPRITE_SHP_PART_TILE_MASK = 0x03ff, /* the picture's place in the sheet in 8-pixel tiles: bits 0-4 u, 5-9 v */
     SPRITE_SHP_PART_SIZE_MASK = 0x3c00, /* bits 10-13: index of g_sprite_part_sizes */
-    SPRITE_SHP_PART_FLIP_MASK = 0xc000, /* shifted down 13: SPRITE_DISPLAY_HORIZONTAL_FLIP and _VERTICAL_FLIP */
+    SPRITE_SHP_PART_FLIP_MASK = 0xc000  /* shifted down 13: SPRITE_DISPLAY_HORIZONTAL_FLIP and _VERTICAL_FLIP */
 };
 
 /* The part size that a unit sheet draws as two 48x24 halves, the upper one nearer the camera. */
-enum {
-    SPRITE_SHP_PART_SIZE_48X48 = 14,
-};
+enum { SPRITE_SHP_PART_SIZE_48X48 = 14 };
 
 /* One frame of an SHP file: a 2-byte header followed by 4-byte parts
  * (sprite_frame_load_unit). */
@@ -133,7 +131,7 @@ typedef enum sprite_display_flags {
     SPRITE_DISPLAY_HORIZONTAL_FLIP = 0x02,
     SPRITE_DISPLAY_VERTICAL_FLIP = 0x04,
     /* A part's flags only: queued nearer the camera than the rest by its pitch and zoom. */
-    SPRITE_DISPLAY_NEARER = 0x80,
+    SPRITE_DISPLAY_NEARER = 0x80
 } sprite_display_flags_e;
 
 /* Two-bit selector in sprite flags and tpage, already shifted to bits 5-6. */
@@ -141,7 +139,7 @@ typedef enum sprite_display_blend_mode {
     SPRITE_DISPLAY_BLEND_AVERAGE = 0x00,
     SPRITE_DISPLAY_BLEND_ADD = 0x20,
     SPRITE_DISPLAY_BLEND_SUBTRACT = 0x40,
-    SPRITE_DISPLAY_BLEND_ADD_QUARTER = 0x60,
+    SPRITE_DISPLAY_BLEND_ADD_QUARTER = 0x60
 } sprite_display_blend_mode_e;
 
 enum { SPRITE_DISPLAY_BLEND_MASK = 0x60 };
@@ -229,7 +227,7 @@ void sprite_display_set_part_semi_transparent(sprite_display_t* display, s32 par
 typedef enum sprite_graphic_type {
     SPRITE_GRAPHIC_UNIT = 0,
     SPRITE_GRAPHIC_WEAPON = 1, /* WEP sheets */
-    SPRITE_GRAPHIC_EFFECT = 2, /* EFF sheets */
+    SPRITE_GRAPHIC_EFFECT = 2  /* EFF sheets */
 } sprite_graphic_type_e;
 
 /* Weapon/effect sprite animation block, runtime unit data 0x208, 0x238 and

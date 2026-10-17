@@ -21,7 +21,7 @@ enum { BATTLE_MAP_HEIGHT_STEP = 12 };
 enum {
     BATTLE_MAP_TERRAIN_LAYER_COUNT = 2,
     BATTLE_MAP_TILES_PER_LAYER = 256,
-    BATTLE_MAP_TILE_COUNT = BATTLE_MAP_TERRAIN_LAYER_COUNT * BATTLE_MAP_TILES_PER_LAYER,
+    BATTLE_MAP_TILE_COUNT = BATTLE_MAP_TERRAIN_LAYER_COUNT * BATTLE_MAP_TILES_PER_LAYER
 };
 
 /* Map x, terrain layer and map y, shared by unit placement and obstacle tests. */
@@ -156,7 +156,7 @@ typedef enum battle_map_id {
     BATTLE_MAP_ID_DEEP_DUNGEON_HORROR = 113,
     BATTLE_MAP_ID_DEEP_DUNGEON_END = 114,
     BATTLE_MAP_ID_BANISHED_FORT = 115,
-    BATTLE_MAP_ID_COUNT = 128,
+    BATTLE_MAP_ID_COUNT = 128
 } battle_map_id_e;
 
 extern s32 g_battle_map_id;
@@ -218,15 +218,13 @@ typedef enum battle_map_surface_type {
     BATTLE_MAP_SURFACE_TOMBSTONE = 0x2c,
     BATTLE_MAP_SURFACE_WATERFALL = 0x2d,
     BATTLE_MAP_SURFACE_COFFIN = 0x2e,
-    BATTLE_MAP_SURFACE_CROSS_SECTION = 0x3f,
+    BATTLE_MAP_SURFACE_CROSS_SECTION = 0x3f
 } battle_map_surface_type_e;
 
 enum { BATTLE_MAP_SURFACE_MASK = 0x3f };
 
 /* Depth-bias flag in terrain tile byte0; the low six bits use BATTLE_MAP_SURFACE_MASK. */
-enum {
-    BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS = 0x40,
-};
+enum { BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS = 0x40 };
 
 typedef struct battle_map_tile_surface {
     u8 type : 6;       /* battle_map_surface_type_e */
@@ -238,7 +236,7 @@ typedef struct battle_map_tile_surface {
 enum {
     BATTLE_MAP_TILE_FLAG_MOVE_DESTINATION = 0x20,
     BATTLE_MAP_TILE_FLAG_ABILITY_RANGE = 0x40,
-    BATTLE_MAP_TILE_FLAG_TARGETED = 0x80,
+    BATTLE_MAP_TILE_FLAG_TARGETED = 0x80
 };
 
 /* Tile byte 0x05. Retail reads the depth as a bitfield: its zero test and
@@ -255,7 +253,7 @@ enum {
     BATTLE_MAP_TILE_FLAG_BLOCKED = 0x01,
     BATTLE_MAP_TILE_FLAG_UNTARGETABLE = 0x02,
     BATTLE_MAP_TILE_COLLISION_MASK = 0x03,
-    BATTLE_MAP_TILE_FLAG_CANNOT_STOP = 0x80,
+    BATTLE_MAP_TILE_FLAG_CANNOT_STOP = 0x80
 };
 
 /* Terrain shading darkens the unit palette by 0, 4, 8 or 12 per channel. */
@@ -263,7 +261,7 @@ typedef enum battle_map_tile_shading {
     BATTLE_MAP_TILE_SHADING_NORMAL = 0,
     BATTLE_MAP_TILE_SHADING_DARK = 1,
     BATTLE_MAP_TILE_SHADING_DARKER = 2,
-    BATTLE_MAP_TILE_SHADING_DARKEST = 3,
+    BATTLE_MAP_TILE_SHADING_DARKEST = 3
 } battle_map_tile_shading_e;
 
 typedef struct battle_map_tile_flags {
@@ -278,7 +276,7 @@ typedef struct battle_map_tile_flags {
 enum {
     BATTLE_MAP_TILE_HALF_HEIGHT_MASK = 0x1f,
     BATTLE_MAP_TILE_DEPTH_VALUE_MASK = 0x07,
-    BATTLE_MAP_TILE_DEPTH_SHIFT = 5,
+    BATTLE_MAP_TILE_DEPTH_SHIFT = 5
 };
 
 /* Tile byte 0x03: five-bit slope half-height and three-bit depth. Both
@@ -303,7 +301,7 @@ typedef enum battle_map_slope_type {
     BATTLE_MAP_SLOPE_HIGH_CORNER_SOUTH_WEST = 0x69,
     BATTLE_MAP_SLOPE_EDGE_NORTH = 0x85,
     BATTLE_MAP_SLOPE_HIGH_CORNER_NORTH_EAST = 0x96,
-    BATTLE_MAP_SLOPE_HIGH_CORNER_NORTH_WEST = 0x99,
+    BATTLE_MAP_SLOPE_HIGH_CORNER_NORTH_WEST = 0x99
 } battle_map_slope_type_e;
 
 /* Direction bits shared by the flat and steep nibbles of tile byte 0x07. */
@@ -311,13 +309,13 @@ typedef enum battle_map_tile_camera_block_direction {
     BATTLE_MAP_TILE_CAMERA_BLOCK_NORTHWEST = 0x01,
     BATTLE_MAP_TILE_CAMERA_BLOCK_SOUTHWEST = 0x02,
     BATTLE_MAP_TILE_CAMERA_BLOCK_SOUTHEAST = 0x04,
-    BATTLE_MAP_TILE_CAMERA_BLOCK_NORTHEAST = 0x08,
+    BATTLE_MAP_TILE_CAMERA_BLOCK_NORTHEAST = 0x08
 } battle_map_tile_camera_block_direction_e;
 
 enum {
     BATTLE_MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK = 0x0f,
     BATTLE_MAP_TILE_CAMERA_BLOCK_STEEP_SHIFT = 4,
-    BATTLE_MAP_TILE_CAMERA_BLOCK_STEEP_MASK = 0xf0,
+    BATTLE_MAP_TILE_CAMERA_BLOCK_STEEP_MASK = 0xf0
 };
 
 /* Eight-byte terrain record: battle_map_tile_get_pointer indexes
@@ -358,7 +356,7 @@ typedef enum battle_map_tile_data_selector {
     BATTLE_MAP_TILE_DATA_UNKNOWN_FLAGS_4_6 = 10,
     BATTLE_MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK = 11,
     BATTLE_MAP_TILE_DATA_MOVE_DESTINATION_MARK = 12,
-    BATTLE_MAP_TILE_DATA_ABILITY_RANGE_MARK = 13,
+    BATTLE_MAP_TILE_DATA_ABILITY_RANGE_MARK = 13
 } battle_map_tile_data_selector_e;
 
 extern u8 g_battle_map_terrain_width;
@@ -390,7 +388,7 @@ void battle_map_tile_copy_size_and_data(u8* data);
 /* g_terrain_status_flags has one byte per battle_map_surface_type_e; only
  * BATTLE_MAP_SURFACE_POISONED_MARSH has a bit. */
 enum {
-    TERRAIN_STATUS_FLAG_POISON = 0x80, /* status_prepare_terrain_poison poisons a unit standing there */
+    TERRAIN_STATUS_FLAG_POISON = 0x80 /* status_prepare_terrain_poison poisons a unit standing there */
 };
 
 /* Rows of g_terrain_movement_cost_tables, chosen from the unit's movement
@@ -402,13 +400,13 @@ typedef enum terrain_cost_table {
     TERRAIN_COST_TABLE_FLOAT = 2,        /* every surface costs 1 */
     TERRAIN_COST_TABLE_WATER = 3,        /* Move in Water and Walk on Water */
     TERRAIN_COST_TABLE_UNDERWATER = 4,
-    TERRAIN_COST_TABLE_LAVA = 5,
+    TERRAIN_COST_TABLE_LAVA = 5
 } terrain_cost_table_e;
 
 /* Costs in those rows that are not a number of Move points. */
 enum {
-    TERRAIN_COST_WEATHER = 0,    /* replaced by move_get_weather_terrain_cost */
-    TERRAIN_COST_BLOCKED = 0xff, /* stays so under Any Ground */
+    TERRAIN_COST_WEATHER = 0,   /* replaced by move_get_weather_terrain_cost */
+    TERRAIN_COST_BLOCKED = 0xff /* stays so under Any Ground */
 };
 
 extern const u8 g_terrain_movement_cost_tables[][64];
@@ -451,7 +449,7 @@ typedef enum battle_map_tile_mark_mode {
     BATTLE_MAP_TILE_MARK_HIDE_TARGETS = 8,
     BATTLE_MAP_TILE_MARK_MOVE_SHOWN = 10,
     BATTLE_MAP_TILE_MARK_RANGE_SHOWN = 11,
-    BATTLE_MAP_TILE_MARK_TARGETS_SHOWN = 12,
+    BATTLE_MAP_TILE_MARK_TARGETS_SHOWN = 12
 } battle_map_tile_mark_mode_e;
 
 extern u16 g_battle_map_tile_mark_x;
@@ -466,7 +464,7 @@ extern render_buffer_t* g_battle_map_tile_mark_color_buffer;
 typedef enum battle_map_background_gradient_color {
     BATTLE_MAP_BACKGROUND_GRADIENT_TOP = 0,
     BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM = 1,
-    BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT = 2,
+    BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT = 2
 } battle_map_background_gradient_color_e;
 
 typedef struct battle_map_background_gradient_colors {
@@ -493,7 +491,7 @@ typedef enum battle_map_data_command {
     BATTLE_MAP_DATA_COMMAND_START_TEXTURE_ANIMATION = 0x83,
     BATTLE_MAP_DATA_COMMAND_SPLIT_MESH_PARTS = 0x98,
     BATTLE_MAP_DATA_COMMAND_RELEASE_GNS_HOLD = 0x9a,
-    BATTLE_MAP_DATA_COMMAND_SET_TEXTURE_ANIMATION_DURATION = 0x9d,
+    BATTLE_MAP_DATA_COMMAND_SET_TEXTURE_ANIMATION_DURATION = 0x9d
 } battle_map_data_command_e;
 
 s32 battle_map_dispatch_data_command(battle_map_data_command_e command, u32 index, s32 object_state, s32 flag);

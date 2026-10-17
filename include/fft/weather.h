@@ -22,18 +22,16 @@ typedef enum weather {
     WEATHER_STRONG_STORM = 4,
     WEATHER_SNOW = 5,
     WEATHER_SNOWSTORM = 6,
-    WEATHER_STRONG_SNOWSTORM = 7,
+    WEATHER_STRONG_SNOWSTORM = 7
 } weather_e;
 
 /* Added to a rain value to give its snow counterpart. */
-enum {
-    WEATHER_SNOW_OFFSET = 3,
-};
+enum { WEATHER_SNOW_OFFSET = 3 };
 
 /* Bits of g_weather_flags ("weather palette mods"). */
 typedef enum weather_flags {
     BATTLE_MAP_WEATHER_FLAG_SNOW = 0x01,
-    BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02,
+    BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02
 } weather_flags_e;
 
 /* Commands of weather_run_command and weather_init_particles. */
@@ -50,7 +48,7 @@ typedef enum weather_command {
     BATTLE_MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER = 0x8b, /* issue the commands for the weather script variable */
     BATTLE_MAP_WEATHER_COMMAND_RESTORE_LIGHTING = 0x8c,
     BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* weather_init_particles */
-    BATTLE_MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90,
+    BATTLE_MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90
 } weather_command_e;
 
 /* Stored renderer selector at g_weather_effect_mode. The ordinary
@@ -59,7 +57,7 @@ typedef enum weather_effect_mode {
     BATTLE_MAP_WEATHER_EFFECT_SNOW = BATTLE_MAP_WEATHER_COMMAND_SNOW,
     BATTLE_MAP_WEATHER_EFFECT_CLEAR = BATTLE_MAP_WEATHER_COMMAND_CLEAR,
     BATTLE_MAP_WEATHER_EFFECT_RAIN = BATTLE_MAP_WEATHER_COMMAND_RAIN,
-    BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM = 0x96,
+    BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM = 0x96
 } weather_effect_mode_e;
 
 /* weather_flags_e bits, with the signed palette modifier above BATTLE_MAP_WEATHER_MODIFIER_SHIFT. */
@@ -101,7 +99,7 @@ extern VECTOR g_weather_translation;
 typedef enum weather_lightning_mode {
     BATTLE_MAP_LIGHTNING_OFF = 0,
     BATTLE_MAP_LIGHTNING_RANDOM = 1,
-    BATTLE_MAP_LIGHTNING_ONCE = 2, /* back to OFF when the flash ends */
+    BATTLE_MAP_LIGHTNING_ONCE = 2 /* back to OFF when the flash ends */
 } weather_lightning_mode_e;
 
 /* Lightning flash state (g_weather_lightning_state).
@@ -141,9 +139,6 @@ s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it *
 
 /* palette modifier encoding */
 /* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
-enum {
-    BATTLE_MAP_WEATHER_MODIFIER_SHIFT = 7,
-    BATTLE_MAP_WEATHER_LOW_FLAGS_MASK = 0x7f,
-};
+enum { BATTLE_MAP_WEATHER_MODIFIER_SHIFT = 7, BATTLE_MAP_WEATHER_LOW_FLAGS_MASK = 0x7f };
 
 #endif

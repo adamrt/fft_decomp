@@ -23,14 +23,14 @@ typedef enum world_map_result {
     WORLD_MAP_RESULT_RANDOM_BATTLE = 1,
     WORLD_MAP_RESULT_EVENT = 2, /* a story event replay or a tutorial */
     WORLD_MAP_RESULT_DEEP_DUNGEON_BATTLE = 4,
-    WORLD_MAP_RESULT_TITLE = 5, /* back to the title, skipping the opening movie */
+    WORLD_MAP_RESULT_TITLE = 5 /* back to the title, skipping the opening movie */
 } world_map_result_e;
 
 /* Slots that the WLDCORE screens use for threads of their own. */
 typedef enum world_map_thread_slot {
     WORLD_MAP_THREAD_SLOT_TRANSITION = 4,    /* the zoom thread of a screen transition */
     WORLD_MAP_THREAD_SLOT_WINDOW_PANEL = 12, /* a list or number panel */
-    WORLD_MAP_THREAD_SLOT_MESSAGE = 14,      /* the message box and script text */
+    WORLD_MAP_THREAD_SLOT_MESSAGE = 14       /* the message box and script text */
 } world_map_thread_slot_e;
 
 /* g_system_flags as world_map_update_backdrop last saw it (system_flags_e). */
@@ -82,7 +82,7 @@ typedef enum world_map_fade_flag {
     WORLD_MAP_FADE_REDRAW_MAP = 0x04,  /* every fade step sets SYSTEM_FLAG_DRAW_MAP */
     WORLD_MAP_FADE_BOX_VISIBLE = 0x08, /* the fill box is drawn without a running fade */
     WORLD_MAP_FADE_STOP_MUSIC = 0x10,  /* also fades the music out and unloads it */
-    WORLD_MAP_FADE_START_MUSIC = 0x20, /* also loads AUDIO_MUSIC(1, MUSIC_WORLD_MAP), fading it in */
+    WORLD_MAP_FADE_START_MUSIC = 0x20  /* also loads AUDIO_MUSIC(1, MUSIC_WORLD_MAP), fading it in */
 } world_map_fade_flag_e;
 
 /* The screen fade and its two full-screen fill boxes. The parallel arrays share one object, which is why the
@@ -110,11 +110,11 @@ void world_map_fade_tint_color(CVECTOR* source, CVECTOR* out);
 /* g_hud_value_mode: the layout of the HUD's value display
  * (hud_draw_value). */
 typedef enum hud_value_mode {
-    HUD_VALUE_PLAIN = 0,          /* eight digits */
-    HUD_VALUE_FUNDS = 1,          /* labeled and underlined; the war funds */
-    HUD_VALUE_PLAY_TIME = 2,      /* hours, minutes and seconds */
-    HUD_VALUE_LABELED = 3,        /* PLAIN under a small label */
-    HUD_VALUE_COST_AND_FUNDS = 4, /* a labeled five-digit secondary value, then FUNDS */
+    HUD_VALUE_PLAIN = 0,         /* eight digits */
+    HUD_VALUE_FUNDS = 1,         /* labeled and underlined; the war funds */
+    HUD_VALUE_PLAY_TIME = 2,     /* hours, minutes and seconds */
+    HUD_VALUE_LABELED = 3,       /* PLAIN under a small label */
+    HUD_VALUE_COST_AND_FUNDS = 4 /* a labeled five-digit secondary value, then FUNDS */
 } hud_value_mode_e;
 
 extern s32 g_hud_value_mode;
@@ -151,7 +151,7 @@ void picture_load_set(s32 value);
 typedef enum world_map_tile_flag {
     WORLD_MAP_TILE_TPAGE_MASK = 0x0ff,
     WORLD_MAP_TILE_OFF_SCREEN = 0x100, /* set by the projection pass */
-    WORLD_MAP_TILE_EMPTY = 0x200,      /* the atlas has no tile here */
+    WORLD_MAP_TILE_EMPTY = 0x200       /* the atlas has no tile here */
 } world_map_tile_flag_e;
 
 /* Provisional: an entry of the projected-tile table (g_world_map_projected_tiles), filled by
@@ -186,7 +186,7 @@ typedef char world_map_projection_view_size_must_be_40[sizeof(world_map_projecti
 /* Values of world_map_pan_t.flags. */
 typedef enum world_map_pan_flag {
     WORLD_MAP_PAN_ACTIVE = 0x01,
-    WORLD_MAP_PAN_ZOOMED_OUT = 0x02, /* g_world_map_zoom: the wide view, or the move to it */
+    WORLD_MAP_PAN_ZOOMED_OUT = 0x02 /* g_world_map_zoom: the wide view, or the move to it */
 } world_map_pan_flag_e;
 
 /* Wrapped projection move: the origin and final target are copied as VECTORs. */
@@ -270,7 +270,7 @@ typedef char world_map_dot_source_size_must_be_8[sizeof(world_map_dot_source_t) 
 typedef enum world_map_marker_flag {
     WORLD_MAP_MARKER_UPDATE_POSITION = 0x01,
     WORLD_MAP_MARKER_UPDATE_DIRECTION = 0x02,
-    WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET = 0x04, /* set while the marker travels a route */
+    WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET = 0x04 /* set while the marker travels a route */
 } world_map_marker_flag_e;
 
 /* The player marker stores location and picture IDs, unlike static dot categories.
@@ -324,8 +324,8 @@ typedef char world_map_route_size_must_be_4[sizeof(world_map_route_t) == 4 ? 1 :
 
 /* Values of world_map_path_animation_t.flags. */
 typedef enum world_map_path_animation_flag {
-    WORLD_MAP_PATH_ANIMATION_RUNNING = 0x01,  /* the segment timer runs */
-    WORLD_MAP_PATH_ANIMATION_REVERSED = 0x02, /* the route is shown end to start */
+    WORLD_MAP_PATH_ANIMATION_RUNNING = 0x01, /* the segment timer runs */
+    WORLD_MAP_PATH_ANIMATION_REVERSED = 0x02 /* the route is shown end to start */
 } world_map_path_animation_flag_e;
 
 /* The path animation (g_world_map_path_animation): a route drawn segment by segment. route_id is the route
@@ -453,7 +453,7 @@ typedef enum world_map_text_id {
     TEXT_ID_CHOOSE_HUMAN_UNIT = 0xb8e0,           /* "Choose a good human to send, or one with no strings!" */
     TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST = 0xb8ed,    /* plus the floor: "Nogias" to "End" */
     TEXT_ID_TREASURE_FOUND_FIRST = 0xb8f9, /* the eleven messages for a treasure found, to "Treasure Hunter Master" */
-    TEXT_ID_LAND_FOUND_FIRST = 0xb904,     /* the same for an unexplored land, to "Master Adventurer" */
+    TEXT_ID_LAND_FOUND_FIRST = 0xb904      /* the same for an unexplored land, to "Master Adventurer" */
 } world_map_text_id_e;
 
 extern s32 g_world_map_window_index;
@@ -485,27 +485,27 @@ typedef enum event_transition_mode {
     /* Spins the screen in with a second sound and whites it out: every
      * battle the world scripts start. */
     EVENT_TRANSITION_MODE_SPIN_IN = 1,
-    EVENT_TRANSITION_MODE_FADE = 2, /* a plain screen fade: every scene they start */
+    EVENT_TRANSITION_MODE_FADE = 2 /* a plain screen fade: every scene they start */
 } event_transition_mode_e;
 
 /* Values of event_transition_level_t.phase. */
 typedef enum event_transition_phase {
     EVENT_TRANSITION_PHASE_SPIN_IN = 0,
     EVENT_TRANSITION_PHASE_SPIN_OUT = 1,
-    EVENT_TRANSITION_PHASE_DONE = 2,
+    EVENT_TRANSITION_PHASE_DONE = 2
 } event_transition_phase_e;
 
 /* Values of event_transition_level_t.fade_phase. */
 typedef enum event_transition_fade {
     EVENT_TRANSITION_FADE_NONE = 0,
-    EVENT_TRANSITION_FADE_FLASH = 1,     /* the fill box ramps by 0x10 up to 0x80, then restarts as WHITE_OUT */
-    EVENT_TRANSITION_FADE_WHITE_OUT = 2, /* ramps by 8 to white, then leaves the world loop */
+    EVENT_TRANSITION_FADE_FLASH = 1,    /* the fill box ramps by 0x10 up to 0x80, then restarts as WHITE_OUT */
+    EVENT_TRANSITION_FADE_WHITE_OUT = 2 /* ramps by 8 to white, then leaves the world loop */
 } event_transition_fade_e;
 
 /* Values of event_transition_level_t.drift_direction. */
 typedef enum event_transition_drift {
     EVENT_TRANSITION_DRIFT_RIGHT = 0x01, /* clear: left */
-    EVENT_TRANSITION_DRIFT_DOWN = 0x02,  /* clear: up */
+    EVENT_TRANSITION_DRIFT_DOWN = 0x02   /* clear: up */
 } event_transition_drift_e;
 
 /* Provisional: the EVENT_TRANSITION level pushed by event_transition_push_level and stepped by

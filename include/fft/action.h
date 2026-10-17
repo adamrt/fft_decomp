@@ -19,7 +19,7 @@ typedef enum action_preparation {
     ACTION_PREPARATION_CHARGE = 0, /* the action has a charge time; also Defend */
     ACTION_PREPARATION_IMMEDIATE = 1,
     ACTION_PREPARATION_CHANGE_EQUIPMENT = 2,
-    ACTION_PREPARATION_JUMP = 3,
+    ACTION_PREPARATION_JUMP = 3
 } action_preparation_e;
 
 void action_copy_data(const action_command_t* source, action_command_t* destination);
@@ -36,7 +36,7 @@ typedef enum action_type_flags {
     ACTION_TYPE_MP_HEALING = 0x10,
     ACTION_TYPE_MP_DAMAGE = 0x20,
     ACTION_TYPE_HP_HEALING = 0x40,
-    ACTION_TYPE_HP_DAMAGE = 0x80,
+    ACTION_TYPE_HP_DAMAGE = 0x80
 } action_type_flags_e;
 
 typedef enum action_miss_type {
@@ -53,7 +53,7 @@ typedef enum action_miss_type {
     ACTION_MISS_TYPE_GOLEM_GUARD = 10,
     ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD = 11,
     ACTION_MISS_TYPE_BUGGED_REFLECTION = 12,
-    ACTION_MISS_TYPE_CATCH = 13,
+    ACTION_MISS_TYPE_CATCH = 13
 } action_miss_type_e;
 
 typedef enum action_special_effect {
@@ -71,7 +71,7 @@ typedef enum action_special_effect {
     ACTION_SPECIAL_EFFECT_ELEMENTAL_WEAKNESS = 0x0800,
     ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_BROKEN = 0x1000,
     ACTION_SPECIAL_EFFECT_KNOCKBACK = 0x4000,
-    ACTION_SPECIAL_EFFECT_GOLEM_GUARD = 0x8000,
+    ACTION_SPECIAL_EFFECT_GOLEM_GUARD = 0x8000
 } action_special_effect_e;
 
 /* Bit order mirrors the seven serialized unit_stats_t equipment slots. */
@@ -84,22 +84,16 @@ typedef enum action_equipment_slot_mask {
     ACTION_EQUIPMENT_SLOT_LEFT_WEAPON = 0x04,
     ACTION_EQUIPMENT_SLOT_LEFT_SHIELD = 0x02,
     /* Every slot bit: stored by the Steal/Break slot picker before it chooses one. */
-    ACTION_EQUIPMENT_SLOT_ALL = 0xfe,
+    ACTION_EQUIPMENT_SLOT_ALL = 0xfe
 } action_equipment_slot_mask_e;
 
 /* Ordinary SP/PA/MA/Brave/Faith action-result encoding. CT and EXP reuse
  * these bits with distinct sentinel or sign meanings and are excluded. */
-enum {
-    ACTION_STAT_CHANGE_VALUE_MASK = 0x7f,
-    ACTION_STAT_CHANGE_INCREASE = 0x80,
-};
+enum { ACTION_STAT_CHANGE_VALUE_MASK = 0x7f, ACTION_STAT_CHANGE_INCREASE = 0x80 };
 
 /* action_data_t.exp_change: the low seven bits are the amount, and the top bit
  * marks a loss, the opposite sense of ACTION_STAT_CHANGE_INCREASE. */
-enum {
-    ACTION_EXP_CHANGE_VALUE_MASK = 0x7f,
-    ACTION_EXP_CHANGE_LOSS = 0x80,
-};
+enum { ACTION_EXP_CHANGE_VALUE_MASK = 0x7f, ACTION_EXP_CHANGE_LOSS = 0x80 };
 
 /* HP and MP damage and healing stop at 999. */
 enum { ACTION_VALUE_MAX = 999 };
@@ -112,15 +106,12 @@ s32 action_apply_attacker_result(s32 unit_id);
 /* strikes */
 /* Primary strikes versus secondary applications, including movement benefits.
  * Execution, AI simulation and preview are the separate action_state_e axis. */
-typedef enum action_context {
-    ACTION_CONTEXT_PRIMARY = 0,
-    ACTION_CONTEXT_SECONDARY = 1,
-} action_context_e;
+typedef enum action_context { ACTION_CONTEXT_PRIMARY = 0, ACTION_CONTEXT_SECONDARY = 1 } action_context_e;
 
 typedef enum action_state {
     ACTION_STATE_EXECUTE = 0,
     ACTION_STATE_AI_SIMULATION = 1,
-    ACTION_STATE_PREVIEW = 2,
+    ACTION_STATE_PREVIEW = 2
 } action_state_e;
 
 /* Why action_init_current_data rejects an action; result_queue_charge_failure_message
@@ -135,14 +126,14 @@ typedef enum action_rejection {
     /* A unit_action_restriction_e plus this offset. */
     ACTION_REJECTION_RESTRICTION_OFFSET = 6,
     ACTION_REJECTION_CANNOT_ACT = 7,
-    ACTION_REJECTION_DEEP_WATER = 8,
+    ACTION_REJECTION_DEEP_WATER = 8
 } action_rejection_e;
 
 /* g_action_phase: which unit's action the attack phase is announcing. */
 typedef enum action_phase {
-    ACTION_PHASE_PRE_ACTION = 0,    /* a reaction that pre-empts the pending action (Hamedo) */
-    ACTION_PHASE_ACTING_UNIT = 1,   /* the acting unit's own action */
-    ACTION_PHASE_REACTING_UNIT = 2, /* the reactions it provoked */
+    ACTION_PHASE_PRE_ACTION = 0,   /* a reaction that pre-empts the pending action (Hamedo) */
+    ACTION_PHASE_ACTING_UNIT = 1,  /* the acting unit's own action */
+    ACTION_PHASE_REACTING_UNIT = 2 /* the reactions it provoked */
 } action_phase_e;
 
 enum { ACTION_PHASE_COUNT = 3 };
@@ -212,7 +203,7 @@ typedef char action_current_ability_size_must_be_80[(sizeof(action_current_abili
 typedef enum action_post_message {
     ACTION_POST_MESSAGE_NONE = 0,
     ACTION_POST_MESSAGE_POACHED = 6,
-    ACTION_POST_MESSAGE_TRAINED = 9,
+    ACTION_POST_MESSAGE_TRAINED = 9
 } action_post_message_e;
 
 /* The experience and JP an action earned and the levels it raised, for the result display. */

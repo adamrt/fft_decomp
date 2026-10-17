@@ -32,9 +32,9 @@ extern u16 g_sound_music_track_2_id;
  * sound in it in the low. Each battle effect file brings a resource of its
  * own (effect_file_load_sound_section). */
 typedef enum sound_resource {
-    SOUND_RESOURCE_SYSTEM = 0,        /* SOUND/SYSTEM.SED: sound_sfx_e */
-    SOUND_RESOURCE_ENV = 1,           /* SOUND/ENV.SED: sound_env_sfx_e */
-    SOUND_RESOURCE_SOUND_NOVEL = 225, /* g_sound_novel_sound_resource, 81 sounds */
+    SOUND_RESOURCE_SYSTEM = 0,       /* SOUND/SYSTEM.SED: sound_sfx_e */
+    SOUND_RESOURCE_ENV = 1,          /* SOUND/ENV.SED: sound_env_sfx_e */
+    SOUND_RESOURCE_SOUND_NOVEL = 225 /* g_sound_novel_sound_resource, 81 sounds */
 } sound_resource_e;
 
 /* Sound-effect ids passed to sound_play_sfx and the module queues that
@@ -159,7 +159,7 @@ typedef enum sound_sfx {
     SOUND_SFX_ABILITY_LEARNED = 152,  /* an ability bought in the learn list */
     SOUND_SFX_DEATH_MALE = 154,
     SOUND_SFX_HIT_BOOK = 156, /* instrument, book */
-    SOUND_SFX_COUNT = 168,    /* the sound count in the SYSTEM.SED header */
+    SOUND_SFX_COUNT = 168     /* the sound count in the SYSTEM.SED header */
 } sound_sfx_e;
 
 /* Sounds of SOUND_RESOURCE_ENV that the code plays by number. ENV.SED
@@ -168,7 +168,7 @@ typedef enum sound_sfx {
 typedef enum sound_env_sfx {
     SOUND_ENV_SFX_RAIN = 2,      /* weather_run_command: rain without snow, and the thunder command */
     SOUND_ENV_SFX_THUNDER_A = 3, /* battle_map_draw_mesh_and_weather picks one of the two for a lightning flash */
-    SOUND_ENV_SFX_THUNDER_B = 14,
+    SOUND_ENV_SFX_THUNDER_B = 14
 } sound_env_sfx_e;
 
 void sound_open_generic_sfx(void);
@@ -204,7 +204,7 @@ void sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration);
 /* audio queue */
 /* Flags of audio_music_slots_t. */
 typedef enum audio_music_flag {
-    AUDIO_MUSIC_PLAYING = 0x01, /* the current slot's music is audible: a new start fades it out first */
+    AUDIO_MUSIC_PLAYING = 0x01 /* the current slot's music is audible: a new start fades it out first */
 } audio_music_flag_e;
 
 /* Playback flags followed by the loaded music IDs for slots 1 and 2. */
@@ -229,7 +229,7 @@ typedef enum audio_command {
     AUDIO_COMMAND_UNLOAD = 4,     /* value: slot, 0 for the current one */
     AUDIO_COMMAND_WAIT_LOAD = 16,
     AUDIO_COMMAND_WAIT_FADE_OUT = 17,
-    AUDIO_COMMAND_WAIT_FADE_IN = 18,
+    AUDIO_COMMAND_WAIT_FADE_IN = 18
 } audio_command_e;
 
 enum { AUDIO_QUEUE_CAPACITY = 16 };

@@ -24,7 +24,7 @@ typedef enum title_menu_entry {
     TITLE_MENU_NEW_GAME = 0,
     TITLE_MENU_CONTINUE = 1,
     TITLE_MENU_TUTORIAL = 2,
-    TITLE_MENU_SOUND = 3,
+    TITLE_MENU_SOUND = 3
 } title_menu_entry_e;
 
 /* display_object_animated_t.palette of the selected menu entry. */
@@ -34,7 +34,7 @@ enum { TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE = 9 };
 typedef enum title_state {
     TITLE_STATE_MENU = 0,
     TITLE_STATE_SOUND_MENU = 2, /* pushes the sound type menu on the next update */
-    TITLE_STATE_DEMO_MOVIE = 3, /* idle timeout: starts the next demo movie once the screen has faded */
+    TITLE_STATE_DEMO_MOVIE = 3  /* idle timeout: starts the next demo movie once the screen has faded */
 } title_state_e;
 
 /* Title-menu controller state (handler 2), pushed into the next controller
@@ -66,8 +66,8 @@ typedef char title_sound_type_menu_size_must_be_36[sizeof(title_sound_type_menu_
 /* 32-bit state of the no-memory-card warning controller (title_update_card_warning). */
 typedef enum title_card_warning_step {
     TITLE_CARD_WARNING_INPUT = 0,
-    TITLE_CARD_WARNING_CANCEL = 1,  /* cross: back to the title menu */
-    TITLE_CARD_WARNING_CONFIRM = 2, /* circle or start: the new-game prologue */
+    TITLE_CARD_WARNING_CANCEL = 1, /* cross: back to the title menu */
+    TITLE_CARD_WARNING_CONFIRM = 2 /* circle or start: the new-game prologue */
 } title_card_warning_step_e;
 
 /* No-memory-card warning controller state (handler 12). */
@@ -132,7 +132,7 @@ typedef enum music_test_step {
     MUSIC_TEST_STEP_CLOSE = 1,       /* waits for the list thread, then fades the screen */
     MUSIC_TEST_STEP_FADE_OUT = 2,    /* waits for the fade, then returns to the title menu */
     MUSIC_TEST_STEP_START_TRACK = 3, /* waits for the music to load, then plays it */
-    MUSIC_TEST_STEP_OPEN = 4,        /* waits for the fade, then starts the list thread */
+    MUSIC_TEST_STEP_OPEN = 4         /* waits for the fade, then starts the list thread */
 } music_test_step_e;
 
 /* Music test controller state (handler 7), pushed by music_test_open. */
@@ -145,9 +145,7 @@ typedef struct music_test_state {
 } music_test_state_t;
 
 /* The slot of the music test's list thread. */
-enum {
-    MUSIC_TEST_THREAD_SLOT_LIST = 12,
-};
+enum { MUSIC_TEST_THREAD_SLOT_LIST = 12 };
 
 /* Entry of g_gfx_otags the WORLD menu frame draws into while
  * SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME is set. */

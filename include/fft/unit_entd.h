@@ -14,14 +14,11 @@ enum {
     ENTD_ENCOUNTERS_PER_FILE = 128,
     ENTD2_FIRST_ENCOUNTER = ENTD_ENCOUNTERS_PER_FILE,
     ENTD3_FIRST_ENCOUNTER = 2 * ENTD_ENCOUNTERS_PER_FILE,
-    ENTD4_FIRST_ENCOUNTER = 3 * ENTD_ENCOUNTERS_PER_FILE,
+    ENTD4_FIRST_ENCOUNTER = 3 * ENTD_ENCOUNTERS_PER_FILE
 };
 
 /* The ENTD slots precede the five deployed-party slots in battle storage. */
-enum {
-    DEPLOY_UNIT_SLOT_FIRST = ENTD_UNITS_PER_ENCOUNTER,
-    DEPLOY_UNIT_SLOT_COUNT = 5,
-};
+enum { DEPLOY_UNIT_SLOT_FIRST = ENTD_UNITS_PER_ENCOUNTER, DEPLOY_UNIT_SLOT_COUNT = 5 };
 
 /* Y, facing and tile-layer fields of an entry; unit_position_t has a
  * wider facing field. */
@@ -43,11 +40,11 @@ typedef enum entd_equipment_slot {
     ENTD_EQUIPMENT_SLOT_ACCESSORY = 2,
     ENTD_EQUIPMENT_SLOT_RIGHT_HAND = 3,
     ENTD_EQUIPMENT_SLOT_LEFT_HAND = 4,
-    ENTD_EQUIPMENT_SLOT_COUNT = 5,
+    ENTD_EQUIPMENT_SLOT_COUNT = 5
 } entd_equipment_slot_e;
 
 enum {
-    ENTD_VALUE_RANDOM = 254, /* in an ENTD equipment, level or secondary skillset byte: pick one at random */
+    ENTD_VALUE_RANDOM = 254 /* in an ENTD equipment, level or secondary skillset byte: pick one at random */
 };
 
 /*

@@ -46,7 +46,7 @@ typedef enum menu_script_opcode {
     /* Variants of NUMBER that the WORLD and BUNIT number handlers tell apart from its plain form. */
     MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS = 0x19, /* sprite color; leading zeros not drawn */
     MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS = 0x1a,       /* leading zeros in the disabled clut */
-    MENU_SCRIPT_OP_NUMBER_TINTED = 0x1b,                  /* sprite color */
+    MENU_SCRIPT_OP_NUMBER_TINTED = 0x1b                   /* sprite color */
 } menu_script_opcode_e;
 
 /* instructions */
@@ -65,8 +65,8 @@ typedef struct menu_window_command {
 /* Flags a menu-script number getter (a row callback) returns above its value, read by every program's NUMBER handler
  * (menu_opcode_0d_draw_formatted_number). */
 typedef enum menu_number_value_flags {
-    MENU_NUMBER_VALUE_DASHES = 0x20000000,   /* a row of dashes instead of the digits */
-    MENU_NUMBER_VALUE_DISABLED = 0x40000000, /* drawn with the disabled number clut */
+    MENU_NUMBER_VALUE_DASHES = 0x20000000,  /* a row of dashes instead of the digits */
+    MENU_NUMBER_VALUE_DISABLED = 0x40000000 /* drawn with the disabled number clut */
 } menu_number_value_flags_e;
 
 /* Ten-byte menu-script "draw number" command: an
@@ -328,7 +328,7 @@ typedef enum menu_vertical_scroll_direction {
     MENU_VERTICAL_SCROLL_UP = -1,
     MENU_VERTICAL_SCROLL_NONE = 0,
     MENU_VERTICAL_SCROLL_DOWN = 1,
-    MENU_VERTICAL_SCROLL_WAIT = 2,
+    MENU_VERTICAL_SCROLL_WAIT = 2
 } menu_vertical_scroll_direction_e;
 
 /* BUNIT, EQUIP and JOBSTTS each define this row id and -1 sentinel, and the cursor state. */

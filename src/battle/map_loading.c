@@ -468,10 +468,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
     return g_battle_map_gns_load_phase;
 }
 
-enum {
-    BATTLE_MAP_MESH_LOAD_IDLE = 0,
-    BATTLE_MAP_MESH_LOAD_WAITING = 0x8d,
-};
+enum { BATTLE_MAP_MESH_LOAD_IDLE = 0, BATTLE_MAP_MESH_LOAD_WAITING = 0x8d };
 
 /* Selects the last primary-mesh record, then substitutes an alternate whose
  * layout/weather/time comparison matches, and loads the selected record's

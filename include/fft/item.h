@@ -56,7 +56,7 @@ typedef enum item_type {
     ITEM_TYPE_SHURIKEN = 32,
     ITEM_TYPE_BALL = 33,
     ITEM_TYPE_CONSUMABLE = 34,
-    ITEM_TYPE_COUNT = 35,
+    ITEM_TYPE_COUNT = 35
 } item_type_e;
 
 /* Bits of item_data_t.type_flags. */
@@ -68,7 +68,7 @@ typedef enum item_type_flag {
     ITEM_TYPE_FLAG_BODY_ARMOR = 0x10,
     ITEM_TYPE_FLAG_HEADGEAR = 0x20,
     ITEM_TYPE_FLAG_SHIELD = 0x40,
-    ITEM_TYPE_FLAG_WEAPON = 0x80,
+    ITEM_TYPE_FLAG_WEAPON = 0x80
 } item_type_flag_e;
 
 /* The four equippable-type bytes use MSB-first bit order for item types
@@ -77,11 +77,7 @@ typedef enum item_type_flag {
 #define EQUIPPABLE_ITEM_TYPE_BYTE_MASK(type)  (0x80 >> ((type) & 7))
 
 /* item ids */
-enum {
-    ITEM_ID_MASK = 0xff,
-    ITEM_ID_COUNT = 256,
-    ITEM_TYPE_FILTER_ANY = 255,
-};
+enum { ITEM_ID_MASK = 0xff, ITEM_ID_COUNT = 256, ITEM_TYPE_FILTER_ANY = 255 };
 
 /* Item ids index the 256 rows of g_item_primary_data. A name is the
  * item's name in the game's text; the second Javelin and the second
@@ -379,7 +375,7 @@ typedef enum item_id {
     ITEM_ID_HOLY_WATER = 251,
     ITEM_ID_REMEDY = 252,
     ITEM_ID_PHOENIX_DOWN = 253,
-    ITEM_ID_NONE = 255,
+    ITEM_ID_NONE = 255
 } item_id_e;
 
 /* Item table and equipment-category boundaries, in the retail item table's order: throwable weapons start with
@@ -391,7 +387,7 @@ enum {
     ITEM_ID_BODY_ARMOR_FIRST = ITEM_ID_LEATHER_ARMOR,
     ITEM_ID_ACCESSORY_FIRST = ITEM_ID_BATTLE_BOOTS,
     ITEM_ID_CONSUMABLE_FIRST = ITEM_ID_POTION,
-    ITEM_ID_END = 254, /* one past the last item; ENTD's Random and None follow */
+    ITEM_ID_END = 254 /* one past the last item; ENTD's Random and None follow */
 };
 
 /* formation_unit_t.equipment 16-bit values carry the item id in the low ten bits and flags above (bit 14 is tested
@@ -405,7 +401,7 @@ enum {
     /* The equipment values of a WORLD stat detail: the top two bits pick the name's text palette, and
      * HIGHLIGHT, the same bit as SHOP_ITEM, draws it in the highlight palette. */
     FORMATION_PALETTE_MASK = 0xc000,
-    FORMATION_HIGHLIGHT = 0x8000,
+    FORMATION_HIGHLIGHT = 0x8000
 };
 
 /* item records */
@@ -434,7 +430,7 @@ typedef enum weapon_flag {
     WEAPON_FLAG_ARC = 0x10,
     WEAPON_FLAG_DIRECT = 0x20,
     WEAPON_FLAG_LUNGING = 0x40,
-    WEAPON_FLAG_STRIKING = 0x80,
+    WEAPON_FLAG_STRIKING = 0x80
 } weapon_flag_e;
 
 /* Weapon record selected by item_data_t.secondary_data_id. Offsets are fixed
@@ -557,7 +553,7 @@ typedef enum item_menu_category {
     ITEM_MENU_CATEGORY_HEADGEAR = 2,
     ITEM_MENU_CATEGORY_BODY_ARMOR = 3,
     ITEM_MENU_CATEGORY_ACCESSORY = 4,
-    ITEM_MENU_CATEGORY_OTHER = 5,
+    ITEM_MENU_CATEGORY_OTHER = 5
 } item_menu_category_e;
 
 /* The category argument of formation_item_build_list,
@@ -572,7 +568,7 @@ typedef enum item_list_filter {
     ITEM_LIST_FILTER_ACCESSORY = 4,
     ITEM_LIST_FILTER_WEAPON = 5,
     ITEM_LIST_FILTER_SHIELD = 6,
-    ITEM_LIST_FILTER_OTHER = 7,
+    ITEM_LIST_FILTER_OTHER = 7
 } item_list_filter_e;
 
 /* The item menus' tabs (g_menu_selected_slot there, g_shop_item_category): tabs 0 to 3 (hand, head,
@@ -581,11 +577,11 @@ enum { ITEM_MENU_TAB_OTHER = 4 };
 
 /* The last argument of the same functions: the equip check against the unit. */
 typedef enum item_list_mode {
-    ITEM_LIST_MODE_ALL = 0,                     /* no check */
-    ITEM_LIST_MODE_MARK_UNEQUIPPABLE = 1,       /* 0x4000 on entries the unit cannot equip; taken as
-                                                   EQUIPPABLE unless Show Unequippable Items is on */
-    ITEM_LIST_MODE_EQUIPPABLE = 2,              /* entries the unit cannot equip are left out */
-    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3, /* formation_item_build_list only: as
+    ITEM_LIST_MODE_ALL = 0,                    /* no check */
+    ITEM_LIST_MODE_MARK_UNEQUIPPABLE = 1,      /* 0x4000 on entries the unit cannot equip; taken as
+                                                  EQUIPPABLE unless Show Unequippable Items is on */
+    ITEM_LIST_MODE_EQUIPPABLE = 2,             /* entries the unit cannot equip are left out */
+    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3 /* formation_item_build_list only: as
                                                    EQUIPPABLE, counting no equipped copies */
 } item_list_mode_e;
 
@@ -598,7 +594,7 @@ typedef enum menu_item_list_state {
     MENU_ITEM_LIST_STATE_REARRANGE = 1,
     MENU_ITEM_LIST_STATE_ACTION = 2, /* action strip for the selected item */
     MENU_ITEM_LIST_STATE_SORT_ORDER = 5,
-    MENU_ITEM_LIST_STATE_EQUIPPED_BY = 6, /* WORLD only: the units equipping the selected item */
+    MENU_ITEM_LIST_STATE_EQUIPPED_BY = 6 /* WORLD only: the units equipping the selected item */
 } menu_item_list_state_e;
 
 extern s16 g_item_list_entries[];
@@ -636,7 +632,7 @@ typedef enum item_sort_key {
     ITEM_SORT_KEY_RANKING = 2, /* item_get_ranking_value */
     ITEM_SORT_KEY_PHYSICAL_EVADE = 3,
     ITEM_SORT_KEY_MAGIC_EVADE = 4,
-    ITEM_SORT_KEY_HELD_COUNT = 5, /* inventory plus equipped copies */
+    ITEM_SORT_KEY_HELD_COUNT = 5 /* inventory plus equipped copies */
 } item_sort_key_e;
 
 /* Independent sort-key lists in their resident storage layout. Unit List and

@@ -23,7 +23,7 @@ typedef enum controller_handler {
     CONTROLLER_FFTEND_MOVIE = 9,          /* movie_update_fftend */
     CONTROLLER_SCRIPT = 10,               /* ending_update_script */
     CONTROLLER_TITLE_DEMO_MOVIE = 11,     /* movie_update_title_demo */
-    CONTROLLER_TITLE_CARD_WARNING = 12,   /* title_update_card_warning */
+    CONTROLLER_TITLE_CARD_WARNING = 12    /* title_update_card_warning */
 } controller_handler_e;
 
 /* Text message controller state (handler 8). */

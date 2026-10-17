@@ -11,7 +11,7 @@
 typedef enum name_entry_state {
     NAME_ENTRY_STATE_EDITING = 0,
     NAME_ENTRY_STATE_CONFIRMATION = 1,
-    NAME_ENTRY_STATE_FINISHED = 0xff,
+    NAME_ENTRY_STATE_FINISHED = 0xff
 } name_entry_state_e;
 
 extern void (*g_name_entry_state_handlers[])(void);
@@ -37,7 +37,7 @@ typedef enum name_entry_key {
     NAME_ENTRY_KEY_DELETE = -2,
     NAME_ENTRY_KEY_INSERT_SPACE = -3,
     NAME_ENTRY_KEY_CURSOR_LEFT = -4,
-    NAME_ENTRY_KEY_CURSOR_RIGHT = -5,
+    NAME_ENTRY_KEY_CURSOR_RIGHT = -5
 } name_entry_key_e;
 
 extern s16 g_name_entry_text_row_ids[];

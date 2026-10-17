@@ -13,7 +13,7 @@
 typedef enum proposition_progress_flag {
     PROPOSITION_PROGRESS_DISPATCHED = 0x01,
     PROPOSITION_PROGRESS_RECALLED = 0x02, /* canceled: returns on the next day */
-    PROPOSITION_PROGRESS_RETURNED = 0x04, /* the days are up: waiting for the report */
+    PROPOSITION_PROGRESS_RETURNED = 0x04  /* the days are up: waiting for the report */
 } proposition_progress_flag_e;
 
 /* One active proposition (g_proposition_active).
@@ -36,7 +36,7 @@ typedef char proposition_progress_size_must_be_9[sizeof(proposition_progress_t) 
 typedef enum proposition_variable_flag {
     PROPOSITION_VARIABLE_IN_PROGRESS = 0x02,
     PROPOSITION_VARIABLE_COMPLETED = 0x04,
-    PROPOSITION_VARIABLE_ATTEMPTED = 0x08, /* dispatched at least once */
+    PROPOSITION_VARIABLE_ATTEMPTED = 0x08 /* dispatched at least once */
 } proposition_variable_flag_e;
 
 /* g_proposition_states[]: days until a failed proposition is offered
@@ -44,14 +44,11 @@ typedef enum proposition_variable_flag {
 typedef enum proposition_state {
     PROPOSITION_STATE_DAYS_MASK = 0x3f,
     PROPOSITION_STATE_FAILURE = 0x40,
-    PROPOSITION_STATE_BAD_FAILURE = 0x80,
+    PROPOSITION_STATE_BAD_FAILURE = 0x80
 } proposition_state_e;
 
 /* The days a failed proposition waits before the bar offers it again; a bad failure waits less. */
-enum {
-    PROPOSITION_FAILURE_COOLDOWN_DAYS = 32,
-    PROPOSITION_BAD_FAILURE_COOLDOWN_DAYS = 16,
-};
+enum { PROPOSITION_FAILURE_COOLDOWN_DAYS = 32, PROPOSITION_BAD_FAILURE_COOLDOWN_DAYS = 16 };
 
 extern proposition_progress_t g_proposition_active[8];
 extern u8 g_proposition_count;      /* used entries of g_proposition_active */
@@ -80,7 +77,7 @@ typedef enum proposition_data_record {
     PROPOSITION_DATA_RANDOM_REWARDS = 11,
     PROPOSITION_DATA_EXTRA_DAY_JP_SCALES = 12,
     PROPOSITION_DATA_EXTRA_DAY_GIL_SCALES = 13,
-    PROPOSITION_DATA_JOB_LISTS = 14, /* nine job ids per job list */
+    PROPOSITION_DATA_JOB_LISTS = 14 /* nine job ids per job list */
 } proposition_data_record_e;
 
 /* A row of records DISCOVERY_REWARDS and RANDOM_REWARDS: one entry of each reward-amount table. */
@@ -94,14 +91,14 @@ typedef enum proposition_speaker {
     PROPOSITION_SPEAKER_HIGHEST_BRAVERY = 1,
     PROPOSITION_SPEAKER_LOWEST_BRAVERY = 2,
     PROPOSITION_SPEAKER_HIGHEST_FAITH = 3,
-    PROPOSITION_SPEAKER_LOWEST_FAITH = 4,
+    PROPOSITION_SPEAKER_LOWEST_FAITH = 4
 } proposition_speaker_e;
 
 /* proposition_fields_t.condition_flags: what must hold for the proposition to be offered. */
 typedef enum proposition_condition_flag {
     PROPOSITION_CONDITION_SHOP_AVAILABILITY = 0x01, /* EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY >= minimum */
     PROPOSITION_CONDITION_ZODIAC_SIGN = 0x02,       /* today's zodiac sign (1 = Aries) == condition_value */
-    PROPOSITION_CONDITION_STATUS = 0x04,
+    PROPOSITION_CONDITION_STATUS = 0x04
 } proposition_condition_flag_e;
 
 /* One 23-byte proposition row expanded to named 16-bit fields by
@@ -195,7 +192,7 @@ void proposition_handle_recall_input(menu_stack_record_t* level);
 typedef enum proposition_accept_mode {
     PROPOSITION_ACCEPT_MODE_CHOOSE = 0,
     PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE = 1, /* nobody can go: a press shows the second message */
-    PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE = 3,   /* a refusal message is up: a press closes the panel */
+    PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE = 3    /* a refusal message is up: a press closes the panel */
 } proposition_accept_mode_e;
 
 /* The accept-proposition prompt, including its no-unit/refusal message modes. */
@@ -230,7 +227,7 @@ typedef enum proposition_send_unit_mode {
     PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN = 3,  /* square: waits for the list threads, then opens the status panels */
     PROPOSITION_SEND_UNIT_MODE_STATUS = 4,       /* unit status, browsed with L1 and R1 */
     PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE = 5, /* waits for the status threads, then reopens the list */
-    PROPOSITION_SEND_UNIT_MODE_ACCEPT = 6,       /* start: closes and moves on to the day count */
+    PROPOSITION_SEND_UNIT_MODE_ACCEPT = 6        /* start: closes and moves on to the day count */
 } proposition_send_unit_mode_e;
 
 /* Provisional: the PROPOSITION_SEND_UNIT level, where up to three units are chosen for a proposition.
@@ -277,9 +274,9 @@ void proposition_handle_dispatch_confirm_input(menu_stack_record_t* level);
  * participants' total score. Only SUCCESS completes the proposition and earns
  * its reward. */
 typedef enum proposition_result {
-    PROPOSITION_RESULT_SUCCESS = 0,     /* score of 99 or more, or the preferred-job roll */
-    PROPOSITION_RESULT_FAILURE = 1,     /* score of 59 to 98: a tenth of the JP, a fifth of the gil */
-    PROPOSITION_RESULT_BAD_FAILURE = 2, /* lower score, or recalled: a twentieth of both */
+    PROPOSITION_RESULT_SUCCESS = 0,    /* score of 99 or more, or the preferred-job roll */
+    PROPOSITION_RESULT_FAILURE = 1,    /* score of 59 to 98: a tenth of the JP, a fifth of the gil */
+    PROPOSITION_RESULT_BAD_FAILURE = 2 /* lower score, or recalled: a twentieth of both */
 } proposition_result_e;
 
 /* What a successful proposition brought back (proposition_report_t.reward_type);
@@ -288,7 +285,7 @@ typedef enum proposition_reward {
     PROPOSITION_REWARD_NONE = 0,
     PROPOSITION_REWARD_TREASURE = 1,
     PROPOSITION_REWARD_UNEXPLORED_LAND = 2,
-    PROPOSITION_REWARD_RANDOM_BONUS = 3, /* the three-tier random reward */
+    PROPOSITION_REWARD_RANDOM_BONUS = 3 /* the three-tier random reward */
 } proposition_reward_e;
 
 /* Provisional: the PROPOSITION_REPORT_CONFIRM level, which asks whether to hear a returned proposition's report.
@@ -305,7 +302,7 @@ typedef struct proposition_report_confirm_level {
 typedef enum proposition_report_load {
     PROPOSITION_REPORT_LOAD_DONE = 0,
     PROPOSITION_REPORT_LOAD_MESSAGES = 1, /* waits for the audio queue, then loads the message block */
-    PROPOSITION_REPORT_LOAD_PICTURE = 2,  /* waits for it, then loads the reward's picture set */
+    PROPOSITION_REPORT_LOAD_PICTURE = 2   /* waits for it, then loads the reward's picture set */
 } proposition_report_load_e;
 
 /* Provisional: the PROPOSITION_REPORT level pushed by proposition_push_report_level, which starts the
@@ -324,7 +321,7 @@ typedef struct proposition_report_level {
 typedef enum proposition_result_phase {
     PROPOSITION_RESULT_PHASE_INPUT = 0,
     PROPOSITION_RESULT_PHASE_CLOSING = 1, /* waits for the audio queue and the message thread */
-    PROPOSITION_RESULT_PHASE_DONE = 2,    /* waits for the audio queue, then pops */
+    PROPOSITION_RESULT_PHASE_DONE = 2     /* waits for the audio queue, then pops */
 } proposition_result_phase_e;
 
 /* Provisional: the PROPOSITION_RESULT level pushed by proposition_push_result_level and stepped by
@@ -379,7 +376,7 @@ typedef enum proposition_discovery_phase {
     PROPOSITION_DISCOVERY_PHASE_MESSAGES = 0,     /* circle shows the next message */
     PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE = 1, /* waits for the message box, then starts MUSIC_MILESTONE */
     PROPOSITION_DISCOVERY_PHASE_JINGLE = 2,       /* 180 frames, then back to MUSIC_BAR */
-    PROPOSITION_DISCOVERY_PHASE_CLOSE = 3,        /* waits for the audio queue, then pops */
+    PROPOSITION_DISCOVERY_PHASE_CLOSE = 3         /* waits for the audio queue, then pops */
 } proposition_discovery_phase_e;
 
 /* The PROPOSITION_DISCOVERY level pushed by proposition_push_discovery_level after a report that found treasure or

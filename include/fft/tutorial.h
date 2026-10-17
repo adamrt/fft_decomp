@@ -65,7 +65,7 @@ enum {
     TUTORIAL_CMD_FADE_OUT_HIGHLIGHT = 0x14,
     TUTORIAL_CMD_WAIT_TIME = 0x15,
     TUTORIAL_CMD_WAIT_FOR_BUTTON = 0x16,
-    TUTORIAL_CMD_END = 0x17,
+    TUTORIAL_CMD_END = 0x17
 };
 
 /* Serialized tutorial commands; opcode selects the operand record. */

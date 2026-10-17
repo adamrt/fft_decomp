@@ -11,18 +11,14 @@
 /* action rewards */
 /* EXP starts at 10 for a success or 20 divided by the KO count for a kill,
  * and ends within 1..99. */
-enum {
-    REWARD_EXP_SUCCESS_BASE = 10,
-    REWARD_EXP_KILL_BASE = 20,
-    REWARD_EXP_MAX = 99,
-};
+enum { REWARD_EXP_SUCCESS_BASE = 10, REWARD_EXP_KILL_BASE = 20, REWARD_EXP_MAX = 99 };
 
 /* g_reward_report_phase: the reports shown one after another once an action
  * has resolved. The post-movement reports use the first two. */
 typedef enum reward_report_phase {
     REWARD_REPORT_LEVEL_UP = 0,
     REWARD_REPORT_JOB_LEVEL_UP = 1,
-    REWARD_REPORT_LEARN_ON_HIT = 2,
+    REWARD_REPORT_LEARN_ON_HIT = 2
 } reward_report_phase_e;
 
 extern s32 g_reward_report_phase; /* reward_report_phase_e */

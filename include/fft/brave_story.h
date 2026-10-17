@@ -49,9 +49,9 @@ void brave_story_handle_input(menu_stack_record_t* level);
  * treasure and unexplored-land detail steps. */
 typedef enum brave_story_detail_phase {
     BRAVE_STORY_DETAIL_PHASE_SHOWN = 0,
-    BRAVE_STORY_DETAIL_PHASE_LOAD = 1,   /* waits for the file */
-    BRAVE_STORY_DETAIL_PHASE_BUILD = 2,  /* waits for the message box, then builds the text and picture */
-    BRAVE_STORY_DETAIL_PHASE_POP_IN = 3, /* waits for the text window's opening animation */
+    BRAVE_STORY_DETAIL_PHASE_LOAD = 1,  /* waits for the file */
+    BRAVE_STORY_DETAIL_PHASE_BUILD = 2, /* waits for the message box, then builds the text and picture */
+    BRAVE_STORY_DETAIL_PHASE_POP_IN = 3 /* waits for the text window's opening animation */
 } brave_story_detail_phase_e;
 
 /* Provisional: the BRAVE_STORY_PERSON level pushed by brave_story_push_person_level over the list-window

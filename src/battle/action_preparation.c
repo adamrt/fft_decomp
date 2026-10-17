@@ -1331,7 +1331,7 @@ enum {
     REACTION_OUTCOME_NONE = 0,
     REACTION_OUTCOME_ATTACK = 1, /* the default: a counterattack */
     REACTION_OUTCOME_COUNTER = 2,
-    REACTION_OUTCOME_REFLECT = 3,
+    REACTION_OUTCOME_REFLECT = 3
 };
 
 /* Find the first unit holding a pending reaction and prepare it.

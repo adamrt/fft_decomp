@@ -1323,7 +1323,7 @@ static s32 ai_move_get_target_reach(void) {
 enum {
     AI_BASE_HIT_PERCENT = 100,
     AI_TILE_ROW_BYTE_STRIDE = AI_GRID_COLUMN_COUNT * sizeof(s16),
-    AI_TILE_LEVEL_BYTE_STRIDE = AI_GRID_ROW_COUNT * AI_TILE_ROW_BYTE_STRIDE,
+    AI_TILE_LEVEL_BYTE_STRIDE = AI_GRID_ROW_COUNT * AI_TILE_ROW_BYTE_STRIDE
 };
 
 /* 0x5f4; kept as a separate integer term so the target's addu/addiu order

@@ -22,7 +22,7 @@ typedef enum battle_map_light_matrix_command {
     BATTLE_MAP_LIGHT_MATRIX_COMMAND_START_BLEND = 0x66, /* towards the given matrices over the duration */
     BATTLE_MAP_LIGHT_MATRIX_COMMAND_STEP_BLEND = 0x67,
     BATTLE_MAP_LIGHT_MATRIX_COMMAND_START_DELTA = 0x68, /* add a frame-scaled delta */
-    BATTLE_MAP_LIGHT_MATRIX_COMMAND_STEP_DELTA = 0x69,
+    BATTLE_MAP_LIGHT_MATRIX_COMMAND_STEP_DELTA = 0x69
 } battle_map_light_matrix_command_e;
 
 extern MATRIX g_battle_map_light_color_matrix;
@@ -58,7 +58,7 @@ typedef enum battle_map_light_command {
     BATTLE_MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR = 0x5d,
     BATTLE_MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR = 0x63,
     BATTLE_MAP_LIGHT_COMMAND_RESET_DARKNESS_COLOR = 0x64,
-    BATTLE_MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR = 0x65,
+    BATTLE_MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR = 0x65
 } battle_map_light_command_e;
 
 /* Runtime color fades stepped by battle_map_update_color_animations:

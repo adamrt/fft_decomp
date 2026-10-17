@@ -66,10 +66,7 @@ s32 battle_map_gns_apply_command(s32 phase, battle_map_resource_t* record) {
     return 0;
 }
 
-enum {
-    GNS_INITIAL_LOAD_BYTES = 0x1000,
-    GNS_BUFFER_CLEAR_BYTES = 0xbb8,
-};
+enum { GNS_INITIAL_LOAD_BYTES = 0x1000, GNS_BUFFER_CLEAR_BYTES = 0xbb8 };
 
 /* Make a map current for loading: copy its move-find item record, clear the
  * 150-row GNS table and start reading the first 0x1000 bytes of its GNS file into

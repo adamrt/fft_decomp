@@ -13,10 +13,10 @@
 /* g_effect_load_state: the steps of effect_file_update_load, which loads the ability's effect file
  * while its charge secondary effect plays. */
 typedef enum effect_load_state {
-    EFFECT_LOAD_START = 0,            /* start reading the file */
-    EFFECT_LOAD_READING = 1,          /* wait for the read */
-    EFFECT_LOAD_COUNTDOWN = 2,        /* wait out the 60 frames given to a charge secondary effect */
-    EFFECT_LOAD_ENDING_SECONDARY = 3, /* wait for the charge secondary effect to end */
+    EFFECT_LOAD_START = 0,           /* start reading the file */
+    EFFECT_LOAD_READING = 1,         /* wait for the read */
+    EFFECT_LOAD_COUNTDOWN = 2,       /* wait out the 60 frames given to a charge secondary effect */
+    EFFECT_LOAD_ENDING_SECONDARY = 3 /* wait for the charge secondary effect to end */
 } effect_load_state_e;
 
 /* The stages of effect_update_stage, kept in g_effect_playback_phase. */
@@ -26,14 +26,14 @@ typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_INIT_PALETTE = 2,
     EFFECT_PLAYBACK_PHASE_START_SCRIPT = 3, /* bind the effect file's sections and start its script */
     EFFECT_PLAYBACK_PHASE_RUNNING = 4,
-    EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT = 6, /* start the script again without rebinding the file */
+    EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT = 6 /* start the script again without rebinding the file */
 } effect_playback_phase_e;
 
 /* The target_mode of effect_start_new. */
 typedef enum effect_start_target {
     EFFECT_START_ON_UNIT = 0,
     EFFECT_START_ON_TILE = 1,
-    EFFECT_START_ON_CASTER = 2, /* a unit that is both caster and target */
+    EFFECT_START_ON_CASTER = 2 /* a unit that is both caster and target */
 } effect_start_target_e;
 
 /* target_mode selects the unit id or the tile coordinate pointer. */
@@ -83,7 +83,7 @@ void effect_script_init_state_records(void);
 typedef enum effect_script_result {
     EFFECT_SCRIPT_RESULT_YIELD = 0,    /* stop for this frame */
     EFFECT_SCRIPT_RESULT_CONTINUE = 1, /* run the next instruction */
-    EFFECT_SCRIPT_RESULT_ABORT = 2,    /* the script has ended: free the record */
+    EFFECT_SCRIPT_RESULT_ABORT = 2     /* the script has ended: free the record */
 } effect_script_result_e;
 
 extern effect_script_result_e (*g_effect_script_instructions[120])(effect_record_t*);

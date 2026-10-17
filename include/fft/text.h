@@ -15,10 +15,7 @@
 /* The font, EVENT/FONT.BIN: 2200 glyphs of 14 rows of 10 two-bit pixels. A
  * byte from TEXT_EXTENDED_GLYPH_PREFIX_FIRST selects a page of glyphs and
  * the byte after it the glyph: (prefix & 0xf) * TEXT_GLYPHS_PER_PREFIX + byte. */
-enum {
-    TEXT_GLYPH_BYTES = 35,
-    TEXT_GLYPHS_PER_PREFIX = 208,
-};
+enum { TEXT_GLYPH_BYTES = 35, TEXT_GLYPHS_PER_PREFIX = 208 };
 
 /* Glyph pixel widths, TEXT_GLYPHS_PER_PREFIX entries per prefix page. */
 extern const u8 g_text_glyph_widths[];
@@ -54,7 +51,7 @@ typedef enum text_control {
     TEXT_CHOICE_SELECT = 0xfc,
     TEXT_WAIT_FOR_RESUME = 0xfd,
     TEXT_END_WAIT_FOR_CONFIRM = 0xfe,
-    TEXT_END_AUTO_CLOSE = 0xff,
+    TEXT_END_AUTO_CLOSE = 0xff
 } text_control_e;
 
 /* Substitution opcodes shared by battle messages and WORLD event text. */
@@ -65,7 +62,7 @@ typedef enum text_format_code {
     TEXT_FORMAT_LOCATION_NAME = 0xe5,
     TEXT_FORMAT_ITEM_NAME = 0xe9,
     TEXT_FORMAT_ABILITY_NAME = 0xea,
-    TEXT_FORMAT_EXPLICIT_ID = 0xeb,
+    TEXT_FORMAT_EXPLICIT_ID = 0xeb
 } text_format_code_e;
 
 /* Three-byte backreference: five length bits and a base-254 backward offset. */
@@ -112,7 +109,7 @@ enum {
     TEXT_SECTION_COUNT = 32,
     TEXT_ID_SECTION_MASK = 0xf800,
     TEXT_ID_SECTION_SHIFT = 11,
-    TEXT_ID_ENTRY_MASK = 0x07ff,
+    TEXT_ID_ENTRY_MASK = 0x07ff
 };
 
 /* Text ids of the first entry of the text sections that text resolution and unit-name loading use.
@@ -146,9 +143,9 @@ typedef enum text_id_base {
     TEXT_ID_PROPOSITION_NAME_BASE = 0xd000,
     TEXT_ID_UNEXPLORED_LAND_NAME_BASE = 0xd800,
     TEXT_ID_TREASURE_NAME_BASE = 0xe000,
-    TEXT_ID_STORY_EVENT_NAME_BASE = 0xe800,         /* the Brave Story's Record list */
-    TEXT_ID_PERSON_PROFILE_NAME_BASE = 0xf000,      /* by person * 16 + profile */
-    TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE = 0xf800, /* by proposition_fields_t::name_text less one */
+    TEXT_ID_STORY_EVENT_NAME_BASE = 0xe800,        /* the Brave Story's Record list */
+    TEXT_ID_PERSON_PROFILE_NAME_BASE = 0xf000,     /* by person * 16 + profile */
+    TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE = 0xf800 /* by proposition_fields_t::name_text less one */
 } text_id_base_e;
 
 /* Reward names in the TEXT_ID_PROPOSITION_REWARD_NAME_BASE section: the random bonuses from the base,
@@ -156,7 +153,7 @@ typedef enum text_id_base {
 enum {
     TEXT_ID_REWARD_NONE = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6,
     TEXT_ID_REWARD_LAND_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1b,
-    TEXT_ID_REWARD_TREASURE_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2e,
+    TEXT_ID_REWARD_TREASURE_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2e
 };
 
 enum { TEXT_ID_FORMATION_TEXT_BASE = SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
@@ -181,7 +178,7 @@ typedef enum text_section {
     TEXT_SECTION_COMPOSED_TEXT = 25,        /* a buffer the screen fills: a sort or reorder list, the entered name */
     TEXT_SECTION_DEPLOYMENT_UNIT_HELP = 26, /* ATTACK: eleven help strings per party slot */
     TEXT_SECTION_OVERLAY_SCREEN = 27,       /* each overlay screen binds its own text here */
-    TEXT_SECTION_AT_LIST = 31,              /* the AT list's text, built when the list opens */
+    TEXT_SECTION_AT_LIST = 31               /* the AT list's text, built when the list opens */
 } text_section_e;
 
 extern s32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
@@ -305,7 +302,7 @@ void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet,
 /* The sign flags of a number format (menu_number_entry_t::format). */
 typedef enum menu_decimal_sign_flag {
     MENU_DECIMAL_SIGN_PLUS = 0x0400,
-    MENU_DECIMAL_SIGN_MINUS = 0x0800,
+    MENU_DECIMAL_SIGN_MINUS = 0x0800
 } menu_decimal_sign_flag_e;
 
 /* The other format flags menu_text_render_decimal_value tests. */
@@ -314,7 +311,7 @@ typedef enum menu_decimal_format_flag {
     MENU_DECIMAL_WIDEN_FOR_100 = 0x0200,      /* a value of 100 is drawn with three digits */
     MENU_DECIMAL_THREE_COLUMN_FIELD = 0x2000, /* right-aligned in three digit columns */
     MENU_DECIMAL_LEADING_ZEROS = 0x4000,      /* every digit of the count is drawn */
-    MENU_DECIMAL_SLASH_PREFIX = 0x8000,       /* a "/" glyph before the number */
+    MENU_DECIMAL_SLASH_PREFIX = 0x8000        /* a "/" glyph before the number */
 } menu_decimal_format_flag_e;
 
 enum {
@@ -322,7 +319,7 @@ enum {
     MENU_DECIMAL_FIELD_WIDTH_CLEAR_MASK = 0xfff0,
     MENU_DECIMAL_SIGN_MASK = 0x0c00,
     MENU_DECIMAL_SIGN_CLEAR_MASK = 0xf3ff,
-    MENU_DECIMAL_ZERO_PLACEHOLDER_FLAGS = 0x0804,
+    MENU_DECIMAL_ZERO_PLACEHOLDER_FLAGS = 0x0804
 };
 
 /* Destination rectangle and source cell for a decimal digit. */
@@ -367,7 +364,7 @@ typedef enum dialog_box_type {
     DIALOG_BOX_TYPE_CHECK = 0x20,    /* one to four lines titled "Check" */
     DIALOG_BOX_TYPE_HELP = 0x30,     /* one to four lines titled "Help" */
     DIALOG_BOX_TYPE_TWO_LINE = 0x40,
-    DIALOG_BOX_TYPE_EIGHT_LINE = 0x50,
+    DIALOG_BOX_TYPE_EIGHT_LINE = 0x50
 } dialog_box_type_e;
 
 /* The low two dialog-type bits place the window vertically. */
@@ -375,7 +372,7 @@ typedef enum dialog_position {
     DIALOG_POSITION_AUTO = 0, /* portrait tail: choose above/below from projected speakers */
     DIALOG_POSITION_TOP = 1,
     DIALOG_POSITION_BOTTOM = 2,
-    DIALOG_POSITION_CENTER = 3,
+    DIALOG_POSITION_CENTER = 3
 } dialog_position_e;
 
 /* Fields of a DisplayMessage dialog type byte
@@ -386,7 +383,7 @@ enum {
     DIALOG_TYPE_BOX_TYPE_MASK = 0x70, /* dialog_box_type_e */
     /* The window stays open after its text: ChangeDialog resumes it with a new text id, and
      * text id 0xFFFF closes it. */
-    DIALOG_TYPE_KEEP_OPEN = 0x80,
+    DIALOG_TYPE_KEEP_OPEN = 0x80
 };
 
 /* The DIALOG_TYPE_OPTIONS_MASK field of a portrait box, as
@@ -395,7 +392,7 @@ enum {
 typedef enum dialog_options {
     DIALOG_OPTIONS_TAIL = 0x00,           /* a tail pointing at the speaker */
     DIALOG_OPTIONS_ALTERNATE_TAIL = 0x04, /* the second tail graphic, 16 rows tall */
-    DIALOG_OPTIONS_NO_TAIL = 0x08,        /* plain frame, not placed at the speaker */
+    DIALOG_OPTIONS_NO_TAIL = 0x08         /* plain frame, not placed at the speaker */
 } dialog_options_e;
 
 /* Text window record of the dialog and message-box threads, rendered by
@@ -441,7 +438,7 @@ enum {
     DIALOG_THREAD_WORD_Y_OFFSET = 3,
     DIALOG_THREAD_WORD_ARROW_OFFSET = 4,
     DIALOG_THREAD_WORD_WINDOW_OPTIONS = 5, /* low nibble picks the opening tween; a high nibble mirrors the tail */
-    DIALOG_THREAD_WORD_TEXT_WIDTH = 6,     /* nonzero overrides the measured width */
+    DIALOG_THREAD_WORD_TEXT_WIDTH = 6      /* nonzero overrides the measured width */
 };
 
 extern s32 g_text_current_line;

@@ -1740,9 +1740,7 @@ void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVEC
     destination->vz = source->vz + effect_get_random_between_s16(-range, range);
 }
 
-enum {
-    CAMERA_ROTATION_Q12_MASK = 0x0FFF,
-};
+enum { CAMERA_ROTATION_Q12_MASK = 0x0FFF };
 
 /* Add two effect rotations and wrap each axis to one Q12 revolution. */
 void effect_vector_add_rotations_mod_q12(const SVECTOR* first, const SVECTOR* second, SVECTOR* out) {

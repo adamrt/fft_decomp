@@ -9,10 +9,7 @@
 
 /* job records */
 /* The jump value and the stepping-stone flag of job_data_t.jump. */
-enum {
-    JOB_JUMP_VALUE_MASK = 0x7f,
-    JOB_JUMP_STEPPING_STONE = 0x80,
-};
+enum { JOB_JUMP_VALUE_MASK = 0x7f, JOB_JUMP_STEPPING_STONE = 0x80 };
 
 /* One pair for HP, MP, Speed, PA or MA. Unit growth uses the first byte;
  * deriving the battle stat uses the second. */
@@ -210,7 +207,7 @@ typedef enum job_id {
     JOB_ID_SERPENTARIUS = 151,
     JOB_ID_HOLY_DRAGON_98 = 152,
     JOB_ID_ARCHAIC_DEMON = 153,
-    JOB_ID_ULTIMA_DEMON = 154,
+    JOB_ID_ULTIMA_DEMON = 154
 } job_id_e;
 
 /* Table/range sizes are counts, not additional job IDs. The special-monster
@@ -230,7 +227,7 @@ enum {
     JOB_ID_MORBOL_FAMILY_COUNT = JOB_ID_MORBOL_FAMILY_LAST - JOB_ID_MORBOL + 1,
     JOB_ID_SPECIAL_MONSTER_2_FIRST = JOB_ID_BYBLOS,
     JOB_ID_SPECIAL_MONSTER_2_COUNT = 11,
-    JOB_ID_COUNT = 160,
+    JOB_ID_COUNT = 160
 };
 
 /* The spritesheet of a generic unit (sprite_sheet_id_e): (job - JOB_ID_GENERIC_FIRST) * 2 plus the
@@ -242,7 +239,7 @@ enum {
     JOB_SHEET_GENERIC_MALE_BASE = 0x60,
     JOB_SHEET_GENERIC_FEMALE_BASE = 0x61,
     JOB_SHEET_BARD = 0x82,
-    JOB_SHEET_DANCER = 0x83,
+    JOB_SHEET_DANCER = 0x83
 };
 
 /* unit career */
@@ -268,14 +265,11 @@ typedef enum unit_career_job_index {
     UNIT_CAREER_JOB_INDEX_CALCULATOR = 16,
     UNIT_CAREER_JOB_INDEX_BARD = 17,
     UNIT_CAREER_JOB_INDEX_DANCER = 18,
-    UNIT_CAREER_JOB_INDEX_MIME = 19,
+    UNIT_CAREER_JOB_INDEX_MIME = 19
 } unit_career_job_index_e;
 
 /* Career limits: JP-derived levels stop at 8; ENTD nibbles can encode higher levels. */
-enum {
-    UNIT_JOB_LEVEL_MAX = 8,
-    UNIT_JOB_POINT_MAX = 9999,
-};
+enum { UNIT_JOB_LEVEL_MAX = 8, UNIT_JOB_POINT_MAX = 9999 };
 
 /* Serialized unit-career layout shared by party records and battle stats.
  * unit_generate_party_record clears the 0x96-byte span, while
@@ -304,19 +298,13 @@ enum {
     UNIT_JOB_POINT_BYTE_COUNT = UNIT_CAREER_JOB_COUNT * UNIT_JOB_POINT_BYTES_PER_JOB,
     UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT = UNIT_JOB_POINT_BYTE_COUNT * 2,
     UNIT_CAREER_DATA_BYTE_COUNT = UNIT_UNLOCKED_JOB_BYTE_COUNT + UNIT_LEARNED_ABILITY_BYTE_COUNT
-        + UNIT_JOB_LEVEL_BYTE_COUNT + UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT,
+        + UNIT_JOB_LEVEL_BYTE_COUNT + UNIT_JOB_POINT_TABLE_PAIR_BYTE_COUNT
 };
 
 /* Twenty job-unlock bits occupy the high bits of the three-byte career value. */
-enum {
-    UNIT_UNLOCKED_JOB_DANCER = 0x20,
-    UNIT_UNLOCKED_JOB_BARD = 0x40,
-    UNIT_UNLOCKED_JOB_SQUIRE = 0x800000,
-};
+enum { UNIT_UNLOCKED_JOB_DANCER = 0x20, UNIT_UNLOCKED_JOB_BARD = 0x40, UNIT_UNLOCKED_JOB_SQUIRE = 0x800000 };
 
-enum {
-    UNIT_UNLOCKED_JOB_MASK = 0xfffff0,
-};
+enum { UNIT_UNLOCKED_JOB_MASK = 0xfffff0 };
 
 /* Most JP access is 16-bit; party generation and proposition awards use bytes. */
 typedef union unit_job_point_table {

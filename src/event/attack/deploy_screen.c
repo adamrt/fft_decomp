@@ -38,7 +38,7 @@ static unit_panel_thread_t g_deploy_character_status_frame_config = { 0 };
 enum {
     DEPLOY_NOTICE_NO_UNIT_PLACED = 0x900b,
     DEPLOY_NOTICE_SQUAD_FULL = 0x900c,
-    DEPLOY_NOTICE_RAMZA_REQUIRED = 0x900d,
+    DEPLOY_NOTICE_RAMZA_REQUIRED = 0x900d
 };
 
 static void deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);

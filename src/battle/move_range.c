@@ -1008,9 +1008,7 @@ static void move_spread_check_occupied_tile_standing_height(s32 record_index, s3
     }
 }
 
-enum {
-    TILE_CEILING_NONE = 0x7f,
-};
+enum { TILE_CEILING_NONE = 0x7f };
 
 /*
  * Returns the lowest ceiling above (x, y) across the two elevation layers, or

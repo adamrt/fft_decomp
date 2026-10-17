@@ -54,7 +54,7 @@ typedef enum message_block {
     MESSAGE_BLOCK_TUTORIAL_TOPICS = 5,
     MESSAGE_BLOCK_BRAVE_STORY_PROPOSITIONS = 10,
     MESSAGE_BLOCK_FACTS = 11,
-    MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST = 16, /* one block per proposition id */
+    MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST = 16 /* one block per proposition id */
 } message_block_e;
 
 extern s32 g_message_block_loaded; /* the block in g_message_block_buffer */

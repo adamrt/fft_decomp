@@ -1659,9 +1659,7 @@ void move_step_snap_axis_to_exit_edge(s32 direction, unit_t* unit) {
     }
 }
 
-enum {
-    TILE_CENTER_OFFSET = BATTLE_MAP_TILE_SIZE / 2,
-};
+enum { TILE_CENTER_OFFSET = BATTLE_MAP_TILE_SIZE / 2 };
 
 /*
  * Snaps the unit's world and real coordinate on the axis of travel to the

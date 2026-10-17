@@ -41,7 +41,7 @@ void target_area_clear_flags(void);
  * and in the command a unit stores. */
 typedef enum target_type {
     TARGET_TYPE_TILE = 5, /* aims at target_position */
-    TARGET_TYPE_UNIT = 6, /* follows the unit target_id */
+    TARGET_TYPE_UNIT = 6  /* follows the unit target_id */
 } target_type_e;
 
 /* Result of target_range_set_for_action, kept in
@@ -51,7 +51,7 @@ typedef enum target_panels {
     TARGET_PANELS_UNIT_OR_TILE = 0, /* the ability can follow a unit */
     TARGET_PANELS_TILE_ONLY = 1,    /* ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET */
     TARGET_PANELS_NO_TARGETING = 2, /* nothing to choose: the action is centered on the acting unit */
-    TARGET_PANELS_NONE = 3,         /* the panel routine marked no tile */
+    TARGET_PANELS_NONE = 3          /* the panel routine marked no tile */
 } target_panels_e;
 
 /* Directions of target_area_calculate_linear_attack_tiles. */
@@ -59,7 +59,7 @@ typedef enum target_line_direction {
     TARGET_LINE_EAST = 0,  /* +x */
     TARGET_LINE_WEST = 2,  /* -x */
     TARGET_LINE_SOUTH = 4, /* -y */
-    TARGET_LINE_NORTH = 6, /* +y */
+    TARGET_LINE_NORTH = 6  /* +y */
 } target_line_direction_e;
 
 s32 target_range_set_for_action(const action_command_t* action);

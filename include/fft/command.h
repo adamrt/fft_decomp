@@ -88,7 +88,7 @@ typedef enum command_menu {
     MENU_COMMAND_ID_ABILITY_PREVIEW_MESSAGE = 53, /* shown instead when that ability gets no turn */
     MENU_COMMAND_ID_EGG = 54,                     /* replaces OTHER_UNIT and OTHER_UNIT_INSPECT for an egg */
     MENU_COMMAND_ID_EGG_STATUS = 55,              /* EGG's Status row: only the invalid sound */
-    MENU_COMMAND_ID_CRYSTAL_PICKUP = 105,         /* crystal or treasure options */
+    MENU_COMMAND_ID_CRYSTAL_PICKUP = 105          /* crystal or treasure options */
 } command_menu_e;
 
 extern u8 g_menu_idle_action_window_x[];
@@ -141,14 +141,12 @@ typedef enum action_menu_type {
     ACTION_MENU_TYPE_UNKNOWN_0D = 13,
     ACTION_MENU_TYPE_BLANK_0E = 14,
     ACTION_MENU_TYPE_UNKNOWN_0F = 15,
-    ACTION_MENU_TYPE_COUNT = 16,
+    ACTION_MENU_TYPE_COUNT = 16
 } action_menu_type_e;
 
 /* Contextual skillset IDs synthesized by the action menu. The value 0xbc is
  * also an ordinary monster skillset when it comes from a monster unit. */
-typedef enum action_menu_pseudo_skillset {
-    ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 188,
-} action_menu_pseudo_skillset_e;
+typedef enum action_menu_pseudo_skillset { ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 188 } action_menu_pseudo_skillset_e;
 
 extern u8 g_command_menu_types_by_skillset[0xe0];
 extern u8 g_command_skillsets[]; /* SKILLSET_ID_NONE terminates the rows. */
@@ -190,9 +188,9 @@ typedef struct menu_ability_list {
 /* The mode argument of command_build_ability_list: which list an Arithmeticks
  * (Math Skill) menu shows. Any other menu type builds its ability list. */
 typedef enum menu_arithmeticks_list {
-    MENU_ARITHMETICKS_LIST_ABILITIES = 0,  /* skillset_math_collect_calculator_abilities */
-    MENU_ARITHMETICKS_LIST_MULTIPLES = 1,  /* skillset_math_load_multiples */
-    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2, /* skillset_math_load_attributes */
+    MENU_ARITHMETICKS_LIST_ABILITIES = 0, /* skillset_math_collect_calculator_abilities */
+    MENU_ARITHMETICKS_LIST_MULTIPLES = 1, /* skillset_math_load_multiples */
+    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2 /* skillset_math_load_attributes */
 } menu_arithmeticks_list_e;
 
 extern s32 g_menu_scrolling_list_depth;
@@ -306,14 +304,14 @@ typedef enum menu_system_command {
     MENU_SYSTEM_COMMAND_TRAP_RESULT = 14,    /* option: trap id */
     MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM = 15, /* option: item id */
     MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT = 16,
-    MENU_SYSTEM_COMMAND_POST_ACTION_RESULT = 17, /* option: action_display_image_id_e */
+    MENU_SYSTEM_COMMAND_POST_ACTION_RESULT = 17 /* option: action_display_image_id_e */
 } menu_system_command_e;
 
 /* MENU_SYSTEM_COMMAND_TARGETING_PROMPT options. */
 typedef enum menu_targeting_prompt_option {
     MENU_TARGETING_PROMPT_DEFAULT = 0,
-    MENU_TARGETING_PROMPT_NO_TARGET = 1,     /* the ability preview marked no tile */
-    MENU_TARGETING_PROMPT_NO_MOVE_RANGE = 2, /* the moving unit has no reachable tile */
+    MENU_TARGETING_PROMPT_NO_TARGET = 1,    /* the ability preview marked no tile */
+    MENU_TARGETING_PROMPT_NO_MOVE_RANGE = 2 /* the moving unit has no reachable tile */
 } menu_targeting_prompt_option_e;
 
 /* MENU_SYSTEM_COMMAND_MOVE_FEEDBACK options. Any option not named here rejects the move with the
@@ -322,14 +320,14 @@ typedef enum menu_move_feedback_option {
     MENU_MOVE_FEEDBACK_CLOSE = 0,
     MENU_MOVE_FEEDBACK_MOUNT = 1,        /* confirm mounting the unit on the destination */
     MENU_MOVE_FEEDBACK_ILLEGAL_MOVE = 2, /* reject the chosen destination */
-    MENU_MOVE_FEEDBACK_CRYSTAL = 4,      /* confirm a step onto a crystal */
+    MENU_MOVE_FEEDBACK_CRYSTAL = 4       /* confirm a step onto a crystal */
 } menu_move_feedback_option_e;
 
 /* MENU_SYSTEM_COMMAND_SCENARIO_CHECK options. */
 typedef enum menu_scenario_check_option {
     MENU_SCENARIO_CHECK_START = 0, /* start the event the check finds */
     MENU_SCENARIO_CHECK_SKIP = 1,  /* skip the checks and close */
-    MENU_SCENARIO_CHECK_TEST = 2,  /* only record the event in g_script_next_event_id */
+    MENU_SCENARIO_CHECK_TEST = 2   /* only record the event in g_script_next_event_id */
 } menu_scenario_check_option_e;
 
 /* Result of menu_dispatch_system_function (and of
@@ -337,7 +335,7 @@ typedef enum menu_scenario_check_option {
 typedef enum menu_system_dispatch_result {
     MENU_SYSTEM_DISPATCH_UNKNOWN_COMMAND = 0, /* the CLOSE function was started instead */
     MENU_SYSTEM_DISPATCH_DONE = 1,            /* a system function was started, or nothing had to run */
-    MENU_SYSTEM_DISPATCH_EVENT = 2,           /* SCENARIO_CHECK started an event, or queued it for option 2 */
+    MENU_SYSTEM_DISPATCH_EVENT = 2            /* SCENARIO_CHECK started an event, or queued it for option 2 */
 } menu_system_dispatch_result_e;
 
 /* Indices of g_menu_system_function_table that the dispatcher names; the rest are message variants. */
@@ -354,7 +352,7 @@ typedef enum menu_system_function_id {
     MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM = 39,
     MENU_SYSTEM_FUNCTION_MOVE_CONFIRM_SILENT = 40,
     MENU_SYSTEM_FUNCTION_ARITHMETICKS_ANNOUNCEMENT = 44,
-    MENU_SYSTEM_FUNCTION_POST_ACTION_RESULT = 50,
+    MENU_SYSTEM_FUNCTION_POST_ACTION_RESULT = 50
 } menu_system_function_id_e;
 
 extern s32 g_menu_system_function_thread_busy;

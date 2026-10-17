@@ -24,13 +24,11 @@ typedef enum screen_thread_slot {
     SCREEN_THREAD_SLOT_UPPER_MENU_CHILD = 14,    /* the child of the menu in slot 15, or a wait-forever thread
                                                   * standing in for it */
     SCREEN_THREAD_SLOT_UPPER_MENU = 15,          /* a second menu beside the one in slot 6 */
-    SCREEN_THREAD_SLOT_TUTORIAL_TEXT = 16,       /* tutorial script text: the slot past the sixteen reset ones */
+    SCREEN_THREAD_SLOT_TUTORIAL_TEXT = 16        /* tutorial script text: the slot past the sixteen reset ones */
 } screen_thread_slot_e;
 
 /* at_list_run runs its window frame thread in the upper menu's slot. */
-enum {
-    SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15,
-};
+enum { SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15 };
 
 void screen_thread_yield_forever(void);
 void screen_thread_request_redraw(s32 thread_id);
@@ -43,7 +41,7 @@ typedef enum screen_context {
     SCREEN_CONTEXT_NAME_ENTRY = -2,
     SCREEN_CONTEXT_FORMATION = -1,
     SCREEN_CONTEXT_FUR_SHOP = 100,
-    SCREEN_CONTEXT_SOLDIER_OFFICE = 101,
+    SCREEN_CONTEXT_SOLDIER_OFFICE = 101
 } screen_context_e;
 
 extern s16 g_screen_context_id; /* town location ID or screen_context_e */
@@ -158,7 +156,7 @@ enum {
     SCREEN_TPAGE7_CELL_PIXELS = 16,
     SCREEN_TPAGE7_CELL_PIXEL_SHIFT = 4,
     SCREEN_TPAGE7_CELL_PIXEL_MASK = 0x0f,
-    SCREEN_TPAGE7_GRID_OCCUPIED = 0xff,
+    SCREEN_TPAGE7_GRID_OCCUPIED = 0xff
 };
 
 /* Partial image view used by screen_load_common_graphics. Upload rectangles determine the second page's size;
@@ -279,7 +277,7 @@ void screen_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 /* Result slots the shop menus share. */
 enum {
     SCREEN_SELECTION_SHOP_QUANTITY = 3, /* chosen purchase/sale quantity */
-    SCREEN_SELECTION_PROMPT_RESULT = 4, /* yes/no prompt result (0 confirms) */
+    SCREEN_SELECTION_PROMPT_RESULT = 4  /* yes/no prompt result (0 confirms) */
 };
 
 /* Index of a saved cursor in g_menu_selection_values, as the formation
@@ -291,7 +289,7 @@ typedef enum screen_cursor {
     SCREEN_CURSOR_SET_ABILITY_SLOT = 4,
     SCREEN_CURSOR_REMOVE_ABILITY_SLOT = 5,
     SCREEN_CURSOR_ITEM_TAB = 7,
-    SCREEN_CURSOR_ABILITY_TAB = 8,
+    SCREEN_CURSOR_ABILITY_TAB = 8
 } screen_cursor_e;
 
 extern u8 g_screen_prompt_active;
@@ -365,15 +363,12 @@ typedef enum screen_text_data {
     SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES = 4, /* SCREEN_TEXT_SECTION_FORMATION_TEXT */
     SCREEN_TEXT_DATA_JOB_DESCRIPTIONS = 5,     /* SCREEN_TEXT_SECTION_FORMATION_TEXT */
     SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD = 7,
-    SCREEN_TEXT_DATA_SHOP_DIALOGUE = 8, /* SCREEN_TEXT_SECTION_SHOP_DIALOGUE */
+    SCREEN_TEXT_DATA_SHOP_DIALOGUE = 8 /* SCREEN_TEXT_SECTION_SHOP_DIALOGUE */
 } screen_text_data_e;
 
 /* WORLD text files materialize 32 section pointers after their 0x80-byte
  * offset/header area. The same table is saved and restored around overlays. */
-enum {
-    SCREEN_TEXT_SECTION_TABLE_BYTES = 128,
-    SCREEN_TEXT_FILE_HEADER_BYTES = 128,
-};
+enum { SCREEN_TEXT_SECTION_TABLE_BYTES = 128, SCREEN_TEXT_FILE_HEADER_BYTES = 128 };
 
 /* The text sections WORLD's screens bind while they are up (text_section_e
  * has the resident ones). */
@@ -383,7 +378,7 @@ typedef enum screen_text_section {
     SCREEN_TEXT_SECTION_FORMATION_TEXT = 29,    /* formation: what a dismissed unit says, or the job wheel's
                                                  * descriptions, whichever was bound last */
     SCREEN_TEXT_SECTION_SHOP_MENU_LABELS = 30,
-    SCREEN_TEXT_SECTION_SHOP_DIALOGUE = 31, /* the shopkeeper's lines */
+    SCREEN_TEXT_SECTION_SHOP_DIALOGUE = 31 /* the shopkeeper's lines */
 } screen_text_section_e;
 
 extern s32 g_screen_text_section_offsets[];

@@ -70,7 +70,7 @@ typedef enum menu_stack_level {
     MENU_STACK_LEVEL_WORLD_MAP_PATH = 53,
     MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY = 54,
     MENU_STACK_LEVEL_PROPOSITION_DISCOVERY = 55,
-    MENU_STACK_LEVEL_UNIT_PANEL_HELP = 56,
+    MENU_STACK_LEVEL_UNIT_PANEL_HELP = 56
 } menu_stack_level_e;
 
 enum { MENU_STACK_CAPACITY = 8 };
@@ -139,7 +139,7 @@ typedef enum menu_stack_window_mode {
     MENU_STACK_WINDOW_MODE_BROWSE = 0,
     MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE = 1, /* the farewell text is up; waits for circle or cross */
     MENU_STACK_WINDOW_MODE_FADE_OR_HELP = 2,  /* fading out after the farewell, or under the help message */
-    MENU_STACK_WINDOW_MODE_LEAVE_WAIT = 3,    /* faded out; waits for thread 14 to end, then pops */
+    MENU_STACK_WINDOW_MODE_LEAVE_WAIT = 3     /* faded out; waits for thread 14 to end, then pops */
 } menu_stack_window_mode_e;
 
 void menu_stack_push_message_level(s32 text, s32 reload_text);
@@ -171,7 +171,7 @@ typedef enum menu_stack_cursor_slot {
     MENU_STACK_CURSOR_SLOT_WORK_HISTORY = 16,
     MENU_STACK_CURSOR_SLOT_FORMATION_TUTORIALS = 18,
     MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS = 19,
-    MENU_STACK_CURSOR_SLOT_FACTS = 20,
+    MENU_STACK_CURSOR_SLOT_FACTS = 20
 } menu_stack_cursor_slot_e;
 
 enum { MENU_STACK_CURSOR_SLOT_COUNT = 21 };

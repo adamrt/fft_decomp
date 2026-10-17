@@ -71,7 +71,7 @@ typedef enum game_state {
     GAME_STATE_MAP_JUMPING_OUT_2 = 56,
     GAME_STATE_MAP_INITIALIZE_2 = 57,
     GAME_STATE_MAP_JUMPING_IN_2 = 58,
-    GAME_STATE_CLOSE_BATTLE = 59,
+    GAME_STATE_CLOSE_BATTLE = 59
 } game_state_e;
 
 extern s32 g_game_state;

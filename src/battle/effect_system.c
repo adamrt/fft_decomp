@@ -3349,10 +3349,7 @@ s32 effect_secondary_level_up_handler(void) {
 s32 effect_secondary_unused_0e_handler(void) {
 }
 
-enum {
-    EFFECT_DEATH_POOF_SLOT_COUNT = 2,
-    EFFECT_DEATH_POOF_CLUT = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 15),
-};
+enum { EFFECT_DEATH_POOF_SLOT_COUNT = 2, EFFECT_DEATH_POOF_CLUT = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 15) };
 
 /*
  * Death Poof secondary effect (0x0f) handler for the two-slot particle group 4: it
@@ -3460,9 +3457,7 @@ s32 effect_secondary_death_poof_handler(void) {
 s32 effect_secondary_unused_10_handler(void) {
 }
 
-enum {
-    EFFECT_ZODIAC_POOF_SLOT_COUNT = 24,
-};
+enum { EFFECT_ZODIAC_POOF_SLOT_COUNT = 24 };
 
 /* Secondary effect function 0x11 (Zodiac Poof): the 24-slot particle group 3.
  *
@@ -3991,10 +3986,7 @@ s32 effect_secondary_equip_break_handler(void) {
     return result;
 }
 
-enum {
-    EFFECT_RING_CLUT = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 12),
-    EFFECT_RING_SLOT_COUNT = 30,
-};
+enum { EFFECT_RING_CLUT = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 12), EFFECT_RING_SLOT_COUNT = 30 };
 
 /* Secondary effect 0x16 (summon charge): three rings of ten effect slots
  * spinning around the target.

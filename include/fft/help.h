@@ -20,7 +20,7 @@ typedef enum help_text_section {
     HELP_TEXT_SECTION_ITEMS = 13,        /* by item id */
     HELP_TEXT_SECTION_ABILITIES = 15,    /* by ability id */
     HELP_TEXT_SECTION_SKILLSETS = 19,    /* by skillset id */
-    HELP_TEXT_SECTION_STATUSES = 20,     /* by status id */
+    HELP_TEXT_SECTION_STATUSES = 20      /* by status id */
 } help_text_section_e;
 
 /* The first text id of the help text sections the code adds an id to. help_navigation_record_t.help_base
@@ -32,13 +32,13 @@ enum {
     HELP_TEXT_ID_ITEM_BASE = HELP_TEXT_SECTION_ITEMS << TEXT_ID_SECTION_SHIFT,
     HELP_TEXT_ID_ABILITY_BASE = HELP_TEXT_SECTION_ABILITIES << TEXT_ID_SECTION_SHIFT,
     HELP_TEXT_ID_SKILLSET_BASE = HELP_TEXT_SECTION_SKILLSETS << TEXT_ID_SECTION_SHIFT,
-    HELP_TEXT_ID_STATUS_BASE = HELP_TEXT_SECTION_STATUSES << TEXT_ID_SECTION_SHIFT,
+    HELP_TEXT_ID_STATUS_BASE = HELP_TEXT_SECTION_STATUSES << TEXT_ID_SECTION_SHIFT
 };
 
 /* The dialog type of a help window: a Help box without a tail; the help screens center it. */
 enum {
     HELP_DIALOG_TYPE = DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL,
-    HELP_DIALOG_TYPE_CENTERED = HELP_DIALOG_TYPE | DIALOG_POSITION_CENTER,
+    HELP_DIALOG_TYPE_CENTERED = HELP_DIALOG_TYPE | DIALOG_POSITION_CENTER
 };
 
 extern u16* const* g_help_active_text_id_tables;
@@ -73,7 +73,7 @@ typedef enum help_grid_id {
     MENU_GRID_HELP_BANNER_TOP = 0x20000, /* the status banner is at the top of the screen */
     MENU_GRID_HELP_BANNER_BOTTOM = 0x20001,
     MENU_GRID_HELP_UNIT_BROWSE = 0x20002,
-    MENU_GRID_HELP_RECRUIT_PREVIEW = 0x20003, /* WORLD: the cursor skips cell 7 */
+    MENU_GRID_HELP_RECRUIT_PREVIEW = 0x20003 /* WORLD: the cursor skips cell 7 */
 } help_grid_id_e;
 
 extern help_navigation_record_t g_help_after_battle_navigation[];

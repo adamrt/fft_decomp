@@ -13,7 +13,7 @@ enum {
     RENDER_TEXTURED_QUAD_COUNT = 710,
     RENDER_UNTEXTURED_TRIANGLE_COUNT = 64,
     RENDER_UNTEXTURED_QUAD_COUNT = 256,
-    RENDER_WEATHER_SPRITE_COUNT = 64,
+    RENDER_WEATHER_SPRITE_COUNT = 64
 };
 
 /* One of the two 60968-byte battle render buffers. The primitive pools are

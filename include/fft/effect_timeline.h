@@ -9,10 +9,7 @@
 
 /* timeline shape */
 /* Particle channels and sound tracks of each timeline phase. */
-enum {
-    EFFECT_PARTICLE_CHANNEL_COUNT = 5,
-    EFFECT_SOUND_TRACK_COUNT = 3,
-};
+enum { EFFECT_PARTICLE_CHANNEL_COUNT = 5, EFFECT_SOUND_TRACK_COUNT = 3 };
 
 /* particle channels */
 /* One 0x80-byte particle channel of an effect timeline. Keyframe k lasts
@@ -40,19 +37,17 @@ enum {
     EFFECT_KEYFRAME_ACTION_FLAG_UPDATE_DISPLAY = 0x0020,
     EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION = 0x0040,
     EFFECT_KEYFRAME_ACTION_ANIMATION_MASK = 0xff00,
-    EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT = 8,
+    EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT = 8
 };
 
 /* color tracks */
 /* Keyframe slots of a color track. */
-enum {
-    EFFECT_PALETTE_TRACK_KEYFRAMES = 33,
-};
+enum { EFFECT_PALETTE_TRACK_KEYFRAMES = 33 };
 
 /* The preset byte of a color track keyframe. */
 enum {
     EFFECT_COLOR_KEYFRAME_MODE_MASK = 0x7f, /* the map color mode (BATTLE_MAP_COLOR_MODE_*) the color is applied in */
-    EFFECT_COLOR_KEYFRAME_APPLY = 0x80,     /* clear on the unit tracks: the keyframe only waits */
+    EFFECT_COLOR_KEYFRAME_APPLY = 0x80      /* clear on the unit tracks: the keyframe only waits */
 };
 
 /* A color track of an effect timeline: timed palette changes of the
@@ -109,11 +104,7 @@ typedef struct effect_sound_track {
 
 /* camera tables */
 /* Bits 0-2 of an effect timeline camera command: the tracks the keyframe moves. */
-enum {
-    EFFECT_CAMERA_TRACK_ROTATION = 0x1,
-    EFFECT_CAMERA_TRACK_POSITION = 0x2,
-    EFFECT_CAMERA_TRACK_ZOOM = 0x4,
-};
+enum { EFFECT_CAMERA_TRACK_ROTATION = 0x1, EFFECT_CAMERA_TRACK_POSITION = 0x2, EFFECT_CAMERA_TRACK_ZOOM = 0x4 };
 
 /* Bits 0x1e0 of an effect timeline camera command: where the track's target value comes from.
  * The zoom command takes the command's vector for every source but CURRENT and SAVED. */
@@ -127,7 +118,7 @@ typedef enum effect_camera_source {
     EFFECT_CAMERA_SOURCE_SAVED = 0x100,
     EFFECT_CAMERA_SOURCE_CASTER = 0x140,
     EFFECT_CAMERA_SOURCE_TARGET_AVERAGE = 0x180, /* position: the mean of all unit targets */
-    EFFECT_CAMERA_SOURCE_CURSOR_TILE = 0x1c0,
+    EFFECT_CAMERA_SOURCE_CURSOR_TILE = 0x1c0
 } effect_camera_source_e;
 
 enum { EFFECT_CAMERA_SOURCE_MASK = 0x1e0 };
@@ -146,7 +137,7 @@ typedef enum effect_camera_mode {
     EFFECT_CAMERA_MODE_ADD_DECELERATING = 0x0e00, /* add a step that shrinks from the target to 0 */
     EFFECT_CAMERA_MODE_SHAKE_GROWING = 0x1000,    /* random offsets around the start */
     EFFECT_CAMERA_MODE_SHAKE = 0x1200,
-    EFFECT_CAMERA_MODE_SHAKE_DECAYING = 0x1400,
+    EFFECT_CAMERA_MODE_SHAKE_DECAYING = 0x1400
 } effect_camera_mode_e;
 
 enum { EFFECT_CAMERA_MODE_MASK = 0x1e00 };
@@ -166,11 +157,7 @@ typedef struct effect_camera_keyframes_21 {
 
 /* The camera table effect_camera_find_active_keyframe found its keyframe in: the high half of the
  * index it reports. */
-enum {
-    EFFECT_CAMERA_TABLE_PHASE1 = 0,
-    EFFECT_CAMERA_TABLE_CHILD = 1,
-    EFFECT_CAMERA_TABLE_PHASE2 = 2,
-};
+enum { EFFECT_CAMERA_TABLE_PHASE1 = 0, EFFECT_CAMERA_TABLE_CHILD = 1, EFFECT_CAMERA_TABLE_PHASE2 = 2 };
 
 /* timeline section */
 /* The child timeline, eight bytes into the timeline section
@@ -237,10 +224,7 @@ extern const effect_timing_curves_t* g_effect_timing_curves;
 /* timeline state */
 /* Steppers use the named tracks; resets clear each complete slot array.
  * The reset extents include slots that no track stepper reads. */
-enum {
-    EFFECT_CHILD_TRACK_RESET_SLOT_COUNT = 13,
-    EFFECT_PARENT_TRACK_RESET_SLOT_COUNT = 26,
-};
+enum { EFFECT_CHILD_TRACK_RESET_SLOT_COUNT = 13, EFFECT_PARENT_TRACK_RESET_SLOT_COUNT = 26 };
 
 /* Child timeline counters: twelve active tracks and one extra reset slot. */
 typedef union effect_child_track_counters {

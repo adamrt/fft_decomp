@@ -11,16 +11,13 @@
 
 /* status staging */
 /* unit_status_staging_t.jump_float_flags: a staged change removes the status from some unit. */
-enum {
-    UNIT_STATUS_STAGING_JUMP_REMOVED = 0x1,
-    UNIT_STATUS_STAGING_FLOAT_REMOVED = 0x2,
-};
+enum { UNIT_STATUS_STAGING_JUMP_REMOVED = 0x1, UNIT_STATUS_STAGING_FLOAT_REMOVED = 0x2 };
 
 /* unit_status_staging_t.state of one unit. */
 typedef enum unit_status_staging_state {
     UNIT_STATUS_STAGING_NONE = 0,
     UNIT_STATUS_STAGING_SAVED = 1,
-    UNIT_STATUS_STAGING_RESTORED = 2, /* blocks a second restore */
+    UNIT_STATUS_STAGING_RESTORED = 2 /* blocks a second restore */
 } unit_status_staging_state_e;
 
 /* unit_status_staging_t.inflict_status_mode of one unit: the change the
@@ -30,7 +27,7 @@ typedef enum unit_inflict_status_mode {
     UNIT_INFLICT_STATUS_MODE_NONE = 0,
     UNIT_INFLICT_STATUS_MODE_REVIVE = 1, /* 1 HP, Critical added, Dead removed */
     UNIT_INFLICT_STATUS_MODE_CRYSTAL = 2,
-    UNIT_INFLICT_STATUS_MODE_POISON = 3,
+    UNIT_INFLICT_STATUS_MODE_POISON = 3
 } unit_inflict_status_mode_e;
 
 /* Shared event snapshot for all 21 simulation slots. unit_save_staged_status_data
@@ -64,7 +61,7 @@ void unit_update_staged_status_data(u16 unit_id, u16 restore);
 typedef enum unit_rotate_mode {
     UNIT_ROTATE_MODE_SHORTEST = 0,  /* the direction with fewer steps */
     UNIT_ROTATE_MODE_INCREMENT = 1, /* facing + 1 each step */
-    UNIT_ROTATE_MODE_DECREMENT = 2, /* facing - 1 each step */
+    UNIT_ROTATE_MODE_DECREMENT = 2  /* facing - 1 each step */
 } unit_rotate_mode_e;
 
 /* Per-unit facing/animation state written by the event interpreters and

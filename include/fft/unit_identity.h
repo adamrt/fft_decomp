@@ -147,7 +147,7 @@ typedef enum character_identity {
     /* Job-dependent selectors, not fixed graphics. */
     CHARACTER_IDENTITY_GENERIC_MALE = 128,
     CHARACTER_IDENTITY_GENERIC_FEMALE = 129,
-    CHARACTER_IDENTITY_MONSTER = 130,
+    CHARACTER_IDENTITY_MONSTER = 130
 } character_identity_e;
 
 /* A selector range, not a count of valid identities. Values above 0x82 have
@@ -157,7 +157,7 @@ enum {
     CHARACTER_IDENTITY_HIGH_BIT_MASK = 0x80,
     CHARACTER_IDENTITY_SELECTOR_FIRST = CHARACTER_IDENTITY_GENERIC_MALE,
     CHARACTER_IDENTITY_GENERIC_HUMAN_COUNT = 2,
-    CHARACTER_IDENTITY_SELECTOR_COUNT = 3,
+    CHARACTER_IDENTITY_SELECTOR_COUNT = 3
 };
 
 #endif

@@ -83,7 +83,7 @@ typedef enum thread_slot {
     THREAD_SLOT_HOVERED_UNIT_STATS = 13, /* hovered unit stats or attack target stats */
     /* Passed to the thread_resolve_id functions, which return a slot below 16
      * unchanged and otherwise the first idle slot. */
-    THREAD_SLOT_FIRST_IDLE = 16,
+    THREAD_SLOT_FIRST_IDLE = 16
 } thread_slot_e;
 
 /* The menu screens: formation and unit list, shop, deployment, post-battle,
@@ -96,7 +96,7 @@ typedef enum thread_screen_slot {
     THREAD_SCREEN_SLOT_COMPARISON_STATUS = 7, /* the second (comparison) unit status banner */
     THREAD_SCREEN_SLOT_UNIT_STATUS = 8,       /* the unit status banner */
     THREAD_SCREEN_SLOT_CHARACTER_STATUS = 9,  /* the character status or equipment-and-ability panel */
-    THREAD_SCREEN_SLOT_NUMERIC_PANEL = 12,    /* the numeric stats panel */
+    THREAD_SCREEN_SLOT_NUMERIC_PANEL = 12     /* the numeric stats panel */
 } thread_screen_slot_e;
 
 /* Slots one routine takes for a thread of its own while the slot's usual
@@ -108,7 +108,7 @@ typedef enum thread_borrowed_slot {
     /* The AT list of the crystal pickup menu, once the unit view's panels have stopped. */
     THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD = 9, /* a wait-forever thread while the AT list's child runs */
     THREAD_BORROWED_SLOT_AT_LIST_MENU = 10,
-    THREAD_BORROWED_SLOT_FADE_OUT = 13, /* the fade-out thread that follows the unit list overlay */
+    THREAD_BORROWED_SLOT_FADE_OUT = 13 /* the fade-out thread that follows the unit list overlay */
 } thread_borrowed_slot_e;
 
 /* tasks */
@@ -167,7 +167,7 @@ typedef enum thread_task {
     THREAD_TASK_MINI_MENU = 66,
     THREAD_TASK_INFLICT_STATUS = 67,
     THREAD_TASK_EXECUTE_EVENT = 68,
-    THREAD_TASK_UNIT_MESSAGE = 70,
+    THREAD_TASK_UNIT_MESSAGE = 70
 } thread_task_e;
 
 /* lifecycle */

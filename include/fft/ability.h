@@ -29,7 +29,7 @@ enum {
     ABILITY_ID_MOVEMENT_FIRST = 486,
     /* 0x1fe/0x1ff request a random R/S/M pick; unit_calculate_rsm returns
      * any smaller id unchanged. */
-    ABILITY_ID_RANDOM_FIRST = 510,
+    ABILITY_ID_RANDOM_FIRST = 510
 };
 
 /* Ability ids, ABILITY_ID_<SKILLSET>_<NAME>. NAME is the ability's name in the
@@ -536,7 +536,7 @@ typedef enum ability_id {
     ABILITY_ID_MOVEMENT_FLY = 507,
     ABILITY_ID_MOVEMENT_SILENT_WALK = 508,
     ABILITY_ID_MOVEMENT_MOVE_FIND_ITEM = 509,
-    ABILITY_ID_KNOCKBACK = 512, /* past the id space: the strike that resolves a knockback */
+    ABILITY_ID_KNOCKBACK = 512 /* past the id space: the strike that resolves a knockback */
 } ability_id_e;
 
 /* ability records */
@@ -545,12 +545,10 @@ typedef enum ability_id {
 typedef enum ability_type_flag {
     ABILITY_TYPE_FLAG_LEARN_ON_HIT = 0x20,
     ABILITY_TYPE_FLAG_SHOW_NAME = 0x40, /* the announcement shows the ability's name when the option is on */
-    ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP = 0x80,
+    ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP = 0x80
 } ability_type_flag_e;
 
-enum {
-    ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT = 7,
-};
+enum { ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT = 7 };
 
 /* The ID-range classification returned by ability_get_data_and_type.
  * Values 0..8 are not the serialized low type_flags nibble, numbered 1..9. */
@@ -563,7 +561,7 @@ typedef enum ability_type {
     ABILITY_TYPE_MATH = 5,
     ABILITY_TYPE_REACTION = 6,
     ABILITY_TYPE_SUPPORT = 7,
-    ABILITY_TYPE_MOVEMENT = 8,
+    ABILITY_TYPE_MOVEMENT = 8
 } ability_type_e;
 
 /* Static AI behavior bytes. The AI working record replaces flags_4 with
@@ -599,7 +597,7 @@ typedef enum ability_secondary_flags_1 {
     ABILITY_SECONDARY_FLAG_1_CARDINAL_TARGET_RANGE = 0x10,
     ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE = 0x20,
     ABILITY_SECONDARY_FLAG_1_ENEMY_UNIT_PANELS = 0x40, /* mark the panels under enemy units */
-    ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS = 0x80,  /* mark the panels under allied units */
+    ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS = 0x80   /* mark the panels under allied units */
 } ability_secondary_flags_1_e;
 
 typedef enum ability_secondary_flags_2 {
@@ -610,7 +608,7 @@ typedef enum ability_secondary_flags_2 {
     ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET = 0x10, /* tile targeting without the follow-unit choice */
     ABILITY_SECONDARY_FLAG_2_TOP_DOWN = 0x20,         /* keeps the higher surface at each tile; no ability has it */
     ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES = 0x40,
-    ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES = 0x80,
+    ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES = 0x80
 } ability_secondary_flags_2_e;
 
 typedef enum ability_secondary_flags_3 {
@@ -621,7 +619,7 @@ typedef enum ability_secondary_flags_3 {
     ABILITY_SECONDARY_FLAG_3_CANNOT_MIMIC = 0x10,
     ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE = 0x20,
     ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE = 0x40,
-    ABILITY_SECONDARY_FLAG_3_REFLECTABLE = 0x80,
+    ABILITY_SECONDARY_FLAG_3_REFLECTABLE = 0x80
 } ability_secondary_flags_3_e;
 
 typedef enum ability_secondary_flags_4 {
@@ -631,7 +629,7 @@ typedef enum ability_secondary_flags_4 {
     ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE = 0x10,
     ABILITY_SECONDARY_FLAG_4_DIRECT_TARGETING = 0x20,
     ABILITY_SECONDARY_FLAG_4_COUNTER_MAGIC = 0x40,
-    ABILITY_SECONDARY_FLAG_4_COUNTER_FLOOD = 0x80,
+    ABILITY_SECONDARY_FLAG_4_COUNTER_FLOOD = 0x80
 } ability_secondary_flags_4_e;
 
 /* One-based formula IDs of abilities, weapons and items: BATTLE resolves an
@@ -645,14 +643,12 @@ typedef enum ability_formula {
     ABILITY_FORMULA_MULTIHIT_TRUTH_MAGIC = 30,
     ABILITY_FORMULA_UNFAITH_MAGICAL_DAMAGE = 31,
     ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA = 94,
-    ABILITY_FORMULA_DAMAGE_SP_TIMES_WP = 99,  /* thrown weapons */
-    ABILITY_FORMULA_DAMAGE_PA_TIMES_WP = 100, /* Jump */
+    ABILITY_FORMULA_DAMAGE_SP_TIMES_WP = 99, /* thrown weapons */
+    ABILITY_FORMULA_DAMAGE_PA_TIMES_WP = 100 /* Jump */
 } ability_formula_e;
 
 /* Valid formula IDs are 1..0x64; handlers are indexed by ID minus one. */
-enum {
-    ABILITY_FORMULA_ID_LIMIT = 101,
-};
+enum { ABILITY_FORMULA_ID_LIMIT = 101 };
 
 /* Default-ability secondary records, g_ability_range_data.
  * ability_get_range uses the 14-byte stride and the range;
@@ -739,7 +735,7 @@ typedef struct ability_monster_skillset {
 typedef enum rsm_ability_filter {
     RSM_ABILITY_FILTER_REACTION = 0x02,
     RSM_ABILITY_FILTER_SUPPORT = 0x04,
-    RSM_ABILITY_FILTER_MOVEMENT = 0x08,
+    RSM_ABILITY_FILTER_MOVEMENT = 0x08
 } rsm_ability_filter_e;
 
 extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
@@ -765,7 +761,7 @@ enum {
     CALCULATOR_MULTIPLE_FIVE = 0x04,
     CALCULATOR_MULTIPLE_FOUR = 0x02,
     CALCULATOR_MULTIPLE_THREE = 0x01,
-    CALCULATOR_MULTIPLE_MASK = 0x0f,
+    CALCULATOR_MULTIPLE_MASK = 0x0f
 };
 
 /* Attribute abilities occupy the first four slots, followed by four divisor tests. */
@@ -773,7 +769,7 @@ enum {
     CALCULATOR_ATTRIBUTE_ABILITY_COUNT = 4,
     CALCULATOR_MULTIPLE_ABILITY_COUNT = 4,
     CALCULATOR_ABILITY_COUNT = CALCULATOR_ATTRIBUTE_ABILITY_COUNT + CALCULATOR_MULTIPLE_ABILITY_COUNT,
-    CALCULATOR_PRIME_COUNT = 54,
+    CALCULATOR_PRIME_COUNT = 54
 };
 
 extern u8 g_ability_calculator_primes[CALCULATOR_PRIME_COUNT];
@@ -788,7 +784,7 @@ typedef enum element_flags {
     ELEMENT_WIND = 0x10,
     ELEMENT_ICE = 0x20,
     ELEMENT_LIGHTNING = 0x40,
-    ELEMENT_FIRE = 0x80,
+    ELEMENT_FIRE = 0x80
 } element_flags_e;
 
 /* Shared ordering for job, item-attribute, and runtime unit affinity arrays.
@@ -799,7 +795,7 @@ typedef enum elemental_affinity_index {
     ELEMENTAL_AFFINITY_NULLIFY = 1,
     ELEMENTAL_AFFINITY_HALF = 2,
     ELEMENTAL_AFFINITY_WEAK = 3,
-    ELEMENTAL_AFFINITY_STRENGTHEN = 4,
+    ELEMENTAL_AFFINITY_STRENGTHEN = 4
 } elemental_affinity_index_e;
 
 enum { ELEMENTAL_AFFINITY_COUNT = 5 };

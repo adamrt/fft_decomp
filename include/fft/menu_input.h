@@ -9,10 +9,10 @@
 /* input ownership */
 /* The controller or tutorial event that drives the scene menus. */
 typedef enum menu_input_mode {
-    MENU_INPUT_PLAYER = 0,   /* the controller */
-    MENU_INPUT_BLOCKED = 1,  /* the event frame returns early and no idle action menu is built;
-                                no code stores this value */
-    MENU_INPUT_TUTORIAL = 2, /* a tutorial event supplies the input; set by menu_start_entry_thread */
+    MENU_INPUT_PLAYER = 0,  /* the controller */
+    MENU_INPUT_BLOCKED = 1, /* the event frame returns early and no idle action menu is built;
+                               no code stores this value */
+    MENU_INPUT_TUTORIAL = 2 /* a tutorial event supplies the input; set by menu_start_entry_thread */
 } menu_input_mode_e;
 
 extern u16 g_menu_input_mode; /* menu_input_mode_e */
@@ -106,7 +106,7 @@ typedef enum menu_pressable_button {
     MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE = 2, /* formation item list */
     MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE = 3, /* shop buy lists */
     MENU_PRESSABLE_BUTTON_L2 = 4,
-    MENU_PRESSABLE_BUTTON_R2 = 5,
+    MENU_PRESSABLE_BUTTON_R2 = 5
 } menu_pressable_button_e;
 
 /* 12-byte piece of a pressable button (menu_draw_pressable_button, unit_list_draw_pressable_button): source

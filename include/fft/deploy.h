@@ -37,19 +37,15 @@ typedef enum deploy_orientation {
     DEPLOY_ORIENTATION_NORMAL = 0,
     DEPLOY_ORIENTATION_ROTATE_90 = 1,
     DEPLOY_ORIENTATION_ROTATE_180 = 2,
-    DEPLOY_ORIENTATION_ROTATE_270 = 3,
+    DEPLOY_ORIENTATION_ROTATE_270 = 3
 } deploy_orientation_e;
 
-enum {
-    DEPLOY_ORIENTATION_MASK = 0x0f,
-};
+enum { DEPLOY_ORIENTATION_MASK = 0x0f };
 
 /* The roster id of a deployment tile or placement record that holds no unit
  * (g_deploy_roster_id_by_tile, g_deploy_units_by_squad and
  * unit_deployment_coordinates_t.party_id). */
-enum {
-    DEPLOY_ROSTER_ID_NONE = 0xff,
-};
+enum { DEPLOY_ROSTER_ID_NONE = 0xff };
 
 /* Twelve-byte deployment-area record. The roster-fieldability routine proves
  * the stride, unit limit and map id; the valid-deployment-tile accessors
@@ -107,7 +103,7 @@ typedef enum deploy_menu_state {
     DEPLOY_MENU_SELECTED_UNIT = 2, /* the tile of the selected roster unit */
     DEPLOY_MENU_OTHER_UNIT = 3,    /* another placed unit */
     DEPLOY_MENU_SWAP_UNIT = 4,     /* the second cursor over a unit other than the picked one */
-    DEPLOY_MENU_HIDDEN = 5,        /* between squads and in tiles-only mode: no hint */
+    DEPLOY_MENU_HIDDEN = 5         /* between squads and in tiles-only mode: no hint */
 } deploy_menu_state_e;
 
 extern s32 g_deploy_menu_state; /* deploy_menu_state_e */
@@ -209,14 +205,14 @@ typedef enum deploy_thread_slot {
     DEPLOY_THREAD_SLOT_ROSTER_STEP = 4,      /* deploy_next_roster_unit_thread and _previous_roster_unit */
     DEPLOY_THREAD_SLOT_NOTICE = 13,          /* the notice shown for an invalid deployment input */
     DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS = 14, /* deploy_text_graphics_thread, then the map title */
-    DEPLOY_THREAD_SLOT_DEPLOY_RENDER = 15,   /* deploy_render_thread */
+    DEPLOY_THREAD_SLOT_DEPLOY_RENDER = 15    /* deploy_render_thread */
 } deploy_thread_slot_e;
 
 /* The same slots while the confirm prompt or the unit detail view is up. */
 typedef enum deploy_prompt_thread_slot {
     DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU_CHILD = 3, /* the child of the confirm menu */
     DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU = 4,       /* the menu that sets g_deploy_confirm_result */
-    DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER = 13,     /* a wait-forever thread while the unit detail panels are open */
+    DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER = 13      /* a wait-forever thread while the unit detail panels are open */
 } deploy_prompt_thread_slot_e;
 
 /* text */

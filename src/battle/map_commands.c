@@ -377,10 +377,7 @@ static s32 unit_entd_poll_and_load_units(void) {
     return 0;
 }
 
-enum {
-    WEATHER_CALENDAR_PERIOD_COUNT = 4,
-    WEATHER_RANDOM_VARIANT_COUNT = 10,
-};
+enum { WEATHER_CALENDAR_PERIOD_COUNT = 4, WEATHER_RANDOM_VARIANT_COUNT = 10 };
 
 /* Randomizes the battle's weather and time of day for the current date.
  *

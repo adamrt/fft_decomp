@@ -32,7 +32,7 @@ typedef enum effect_callback_phase {
     EFFECT_CALLBACK_PHASE_IDLE = 0,
     EFFECT_CALLBACK_PHASE_INIT = 1,
     EFFECT_CALLBACK_PHASE_UPDATE = 2,
-    EFFECT_CALLBACK_PHASE_DESTROY = 3,
+    EFFECT_CALLBACK_PHASE_DESTROY = 3
 } effect_callback_phase_e;
 
 /* Native callback at 0x801c44a0 in E000 (catalog ids 0, 24, 73, 92, 121); does nothing and leaves the result unset. */
@@ -43,14 +43,11 @@ enum {
     EFFECT_TARGET_COUNT_MAX = UNIT_RUNTIME_SLOT_COUNT,
     EFFECT_CASTER_ENTRY = EFFECT_TARGET_COUNT_MAX, /* index of the caster's record in effect_context_t.targets */
     /* the target index that makes effect_resolve_target_world_coords resolve the caster */
-    EFFECT_TARGET_INDEX_CASTER = -1,
+    EFFECT_TARGET_INDEX_CASTER = -1
 };
 
 /* The target_type of an effect target record. */
-typedef enum effect_target_type {
-    EFFECT_TARGET_TYPE_UNIT = 0,
-    EFFECT_TARGET_TYPE_TILE = 1,
-} effect_target_type_e;
+typedef enum effect_target_type { EFFECT_TARGET_TYPE_UNIT = 0, EFFECT_TARGET_TYPE_TILE = 1 } effect_target_type_e;
 
 /* Ten-byte target records of g_effect_context.targets.
  * Unit targets store a runtime id at 0x02; tile targets reuse that 16-bit value for X
@@ -78,8 +75,8 @@ typedef enum effect_hit_result {
     EFFECT_HIT_MISSED = 3,    /* weapon hits: evaded by an accessory, a hand or the class */
     EFFECT_HIT_NO_EFFECT = 4, /* nullified, missed outright, canceled, grasped or caught */
     EFFECT_HIT_GOLEM = 5,
-    EFFECT_HIT_BREAK = 6,     /* equipment broken */
-    EFFECT_HIT_BREAK_ALT = 7, /* handled like BREAK; nothing stores it */
+    EFFECT_HIT_BREAK = 6,    /* equipment broken */
+    EFFECT_HIT_BREAK_ALT = 7 /* handled like BREAK; nothing stores it */
 } effect_hit_result_e;
 
 /* Complete 0xc8-byte effect context: built on the stack for secondary effects
@@ -124,17 +121,14 @@ typedef char effect_motion_size_must_be_52[(sizeof(effect_motion_t) == 52) ? 1 :
 
 /* effect_list_node_t.kind: how effect_particle_render_sprite places the sprite, and the
  * FRAME_CHANGED bit it sets when the sequence picks another frame. */
-enum {
-    EFFECT_LIST_NODE_FRAME_CHANGED = 0x1,
-    EFFECT_LIST_NODE_PLACEMENT_MASK = 0x6,
-};
+enum { EFFECT_LIST_NODE_FRAME_CHANGED = 0x1, EFFECT_LIST_NODE_PLACEMENT_MASK = 0x6 };
 
 /* Placement subfield of effect_list_node_t.kind. */
 typedef enum effect_list_node_placement {
     EFFECT_LIST_NODE_WORLD = 0x0,          /* projected position, scaled by the camera zoom */
     EFFECT_LIST_NODE_SCREEN_OFFSET = 0x2,  /* screen position from the camera translation, scaled by the zoom */
     EFFECT_LIST_NODE_WORLD_UNSCALED = 0x4, /* projected position, no zoom */
-    EFFECT_LIST_NODE_SCREEN = 0x6,         /* screen position as stored, no zoom */
+    EFFECT_LIST_NODE_SCREEN = 0x6          /* screen position as stored, no zoom */
 } effect_list_node_placement_e;
 
 /* A sprite node's heap block (effect_render_alloc_sprite_block): an eight-byte prefix, then one
@@ -212,7 +206,7 @@ enum {
     EFFECT_RECORD_CALLBACK_SLOT_COUNT = 4,
     EFFECT_STATE_RECORD_CAPACITY = 16, /* record 0 is the list sentinel */
     EFFECT_SPRITE_NODE_CAPACITY = 256, /* node 0 is the list sentinel */
-    EFFECT_WORK_RECORD_CAPACITY = 256,
+    EFFECT_WORK_RECORD_CAPACITY = 256
 };
 
 /* One running effect script: a 0xf8-byte record of g_effect_state_records.
@@ -295,10 +289,7 @@ s32 effect_map_set_timed_transform_duration(
 
 /* texture pages */
 /* Fixed texture-page bits shared by the native effect renderers. */
-enum {
-    EFFECT_RENDER_TEXTURE_PAGE_BASE = 0x86,
-    EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT = 5,
-};
+enum { EFFECT_RENDER_TEXTURE_PAGE_BASE = 0x86, EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT = 5 };
 
 /* particle ribbon */
 /* The homing ribbon renderer has short 9-point trails and long 17-point trails. */
@@ -306,7 +297,7 @@ enum {
     EFFECT_PARTICLE_RIBBON_SHORT_SLOTS = 8,
     EFFECT_PARTICLE_RIBBON_SHORT_POINTS = 9,
     EFFECT_PARTICLE_RIBBON_LONG_SLOTS = 4,
-    EFFECT_PARTICLE_RIBBON_LONG_POINTS = 17,
+    EFFECT_PARTICLE_RIBBON_LONG_POINTS = 17
 };
 
 extern u32 g_effect_particle_ribbon_short_brightness_table[][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
@@ -323,7 +314,7 @@ enum {
     POLAR_MESH_QUADS_PER_QUADRANT = POLAR_MESH_RING_COUNT * POLAR_MESH_SEGMENTS_PER_QUADRANT,
     POLAR_MESH_QUAD_COUNT = POLAR_MESH_QUADRANT_COUNT * POLAR_MESH_QUADS_PER_QUADRANT,
     POLAR_MESH_OUTER_RING_OFFSET = (POLAR_MESH_RING_COUNT - 1) * POLAR_MESH_SEGMENTS_PER_QUADRANT,
-    POLAR_MESH_ANGLE_STEP = ONE / (POLAR_MESH_QUADRANT_COUNT * POLAR_MESH_SEGMENTS_PER_QUADRANT),
+    POLAR_MESH_ANGLE_STEP = ONE / (POLAR_MESH_QUADRANT_COUNT * POLAR_MESH_SEGMENTS_PER_QUADRANT)
 };
 
 /* Work block: two POLY_GT4 buffers of four quadrants of 5x4 quads. */
@@ -362,7 +353,7 @@ enum {
     RING_MESH_SEGMENTS = 32, /* quads around one ring */
     RING_MESH_QUADRANT_COUNT = 4,
     RING_MESH_SEGMENTS_PER_QUADRANT = RING_MESH_SEGMENTS / RING_MESH_QUADRANT_COUNT,
-    RING_MESH_ARC_POINTS = RING_MESH_SEGMENTS_PER_QUADRANT + 1,
+    RING_MESH_ARC_POINTS = RING_MESH_SEGMENTS_PER_QUADRANT + 1
 };
 
 /* Shared 64-quad buffers: two 32-segment rings, an 8-by-8 ring stack or an 8-by-8 tube. */
@@ -410,7 +401,7 @@ enum {
     DOME_MESH_LATTICE_COMPONENTS = 3,
     DOME_MESH_QUAD_COUNT = DOME_MESH_ROWS * DOME_MESH_SEGMENTS,
     DOME_MESH_LATTICE_POINT_BYTES = sizeof(vec3s16_t),
-    DOME_MESH_LATTICE_ROW_BYTES = (DOME_MESH_SEGMENTS + 1) * DOME_MESH_LATTICE_POINT_BYTES,
+    DOME_MESH_LATTICE_ROW_BYTES = (DOME_MESH_SEGMENTS + 1) * DOME_MESH_LATTICE_POINT_BYTES
 };
 
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
@@ -430,7 +421,7 @@ enum {
     EFFECT_PARTICLE_VERTEX_EMITTER_COUNT = 16,
     EFFECT_MAP_VERTEX_PART_COUNT = 8,
     EFFECT_MAP_VERTEX_COUNT_PER_PART = 4,
-    EFFECT_MAP_VERTEX_WORK_BYTES = EFFECT_MAP_VERTEX_PART_COUNT * EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(VECTOR),
+    EFFECT_MAP_VERTEX_WORK_BYTES = EFFECT_MAP_VERTEX_PART_COUNT * EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(VECTOR)
 };
 
 extern effect_map_vertex_location_t g_effect_banish_vertex_locations[12];

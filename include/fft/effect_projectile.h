@@ -17,7 +17,7 @@ typedef enum effect_model {
     EFFECT_MODEL_ARROW = 0,
     EFFECT_MODEL_STONE = 1,
     EFFECT_MODEL_REFLECT = 2,
-    EFFECT_MODEL_SHURIKEN = 3, /* drawn for the thrown items of ITEM_TYPE_SHURIKEN */
+    EFFECT_MODEL_SHURIKEN = 3 /* drawn for the thrown items of ITEM_TYPE_SHURIKEN */
 } effect_model_e;
 
 /* Top-byte TMD commands decoded for the effect models. Bit 1 selects semitransparency;
@@ -26,7 +26,7 @@ enum {
     EFFECT_MODEL_COMMAND_G3 = 0x31,
     EFFECT_MODEL_COMMAND_GT3_OPAQUE = 0x35,
     EFFECT_MODEL_COMMAND_GT3_SEMITRANSPARENT = 0x37,
-    EFFECT_MODEL_COMMAND_G4 = 0x39,
+    EFFECT_MODEL_COMMAND_G4 = 0x39
 };
 
 /* Shared output of the model-command decoder and input of the projectile renderer. */

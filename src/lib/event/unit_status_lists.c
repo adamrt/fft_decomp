@@ -61,7 +61,7 @@ typedef enum unit_stats_panel {
     UNIT_STATS_PANEL_HOVERED_UNIT = 0,  /* unit_view_refresh_hovered_stats */
     UNIT_STATS_PANEL_ATTACK_CASTER = 1, /* unit_view_preview_caster_stats */
     UNIT_STATS_PANEL_ATTACK_TARGET = 2, /* unit_view_preview_target_stats; shows the reaction ability name */
-    UNIT_STATS_PANEL_RIGHT_UNIT = 3,    /* unit_view_refresh_right_stats */
+    UNIT_STATS_PANEL_RIGHT_UNIT = 3     /* unit_view_refresh_right_stats */
 } unit_stats_panel_e;
 
 /* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page

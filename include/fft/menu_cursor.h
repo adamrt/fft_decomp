@@ -21,7 +21,7 @@ typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t
  * frame and resets whenever it sets or clears the active flag. */
 enum {
     MENU_CURSOR_THREAD_WORD_BOB_TIMER = 0,
-    MENU_CURSOR_THREAD_WORD_BOB_ACTIVE = 1, /* 2 after a press or while input is elsewhere: the active curve */
+    MENU_CURSOR_THREAD_WORD_BOB_ACTIVE = 1 /* 2 after a press or while input is elsewhere: the active curve */
 };
 
 /* The idle and active curves: (threshold, offset) pairs ending at threshold 0; entry 0 holds the modulus. */

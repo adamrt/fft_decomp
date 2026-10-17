@@ -1046,9 +1046,7 @@ static void menu_start_entry_thread(void) {
     thread_exit_current();
 }
 
-enum {
-    IDLE_ACTION_MENU_ENTRY_COUNT = 0x34,
-};
+enum { IDLE_ACTION_MENU_ENTRY_COUNT = 0x34 };
 
 /* Open an idle action menu (command_menu_e) for the active-turn unit: place the
  * entry windows beside the unit, restore the row the unit last chose and start

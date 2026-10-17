@@ -20,9 +20,7 @@ struct sprite_unit_shp_frame_tables;
  * ANIMATION_SEQ_OP_PREFIX, an opcode and its operand bytes. A jump offset is a
  * signed byte counted from the command's own prefix byte, so -2 repeats the
  * frame instruction before it. UNKNOWN_XX commands only skip their operands. */
-enum {
-    ANIMATION_SEQ_OP_PREFIX = 0xff,
-};
+enum { ANIMATION_SEQ_OP_PREFIX = 0xff };
 
 typedef enum animation_seq_opcode {
     /* 0xbe-0xd2 and 0xd4 are unit commands: a weapon or effect sequence that uses one is an error. */
@@ -91,15 +89,12 @@ typedef enum animation_seq_opcode {
     ANIMATION_SEQ_OP_REPEAT = 0xfc,               /* offset, count: jump count times, then go on */
     ANIMATION_SEQ_OP_JUMP = 0xfd,                 /* offset */
     ANIMATION_SEQ_OP_END_ANIMATION = 0xfe,        /* stop; a weapon or effect sprite is hidden too */
-    ANIMATION_SEQ_OP_PAUSE_ANIMATION = 0xff, /* stop; either one puts a unit in its g_animation_targeted_frame_* pose */
+    ANIMATION_SEQ_OP_PAUSE_ANIMATION = 0xff /* stop; either one puts a unit in its g_animation_targeted_frame_* pose */
 } animation_seq_opcode_e;
 
 /* Animation ids from 500 up are not doubled into a front and a back
  * sequence: 500 + n and 600 + n play sequence n of EVTCHR slot 0 and 1. */
-enum {
-    ANIMATION_SEQUENCE_EVTCHR_SLOT_0 = 500,
-    ANIMATION_SEQUENCE_EVTCHR_SLOT_1 = 600,
-};
+enum { ANIMATION_SEQUENCE_EVTCHR_SLOT_0 = 500, ANIMATION_SEQUENCE_EVTCHR_SLOT_1 = 600 };
 
 /* Unit sprite animation state passed to the sequence and frame renderers.
  * Weapon/effect sprite blocks share its first 0x1c bytes, with distinct tails. */
@@ -228,7 +223,7 @@ typedef enum animation {
     ANIMATION_JUMP_LAND = 118,
     ANIMATION_CLOTH_HIGH = 119, /* bags and cloths */
     ANIMATION_CLOTH_LEVEL = 120,
-    ANIMATION_CLOTH_LOW = 121,
+    ANIMATION_CLOTH_LOW = 121
 } animation_e;
 
 /* The teleport animation and the attack animations after it are ATTACK_FIRST and up. */
@@ -257,17 +252,10 @@ typedef struct animation_ability_data {
 typedef char animation_ability_data_size_must_be_3[(sizeof(animation_ability_data_t) == 3) ? 1 : -1];
 
 /* Rows of the ability animation table, and the charge animation sets with their two animations. */
-enum {
-    ANIMATION_ABILITY_COUNT = 454,
-    ANIMATION_CHARGE_SET_COUNT = 20,
-    ANIMATION_CHARGE_VARIANT_COUNT = 2,
-};
+enum { ANIMATION_ABILITY_COUNT = 454, ANIMATION_CHARGE_SET_COUNT = 20, ANIMATION_CHARGE_VARIANT_COUNT = 2 };
 
 /* Selectors in attack_animation; other values are animation_e IDs. */
-enum {
-    ANIMATION_ATTACK_USE_WEAPON = 0,
-    ANIMATION_ATTACK_USE_ITEM = 1,
-};
+enum { ANIMATION_ATTACK_USE_WEAPON = 0, ANIMATION_ATTACK_USE_ITEM = 1 };
 
 /* Two animation_e for each set: the one that starts a charge and
  * the one held while the unit charges or performs; 0 for none. */
@@ -304,11 +292,11 @@ typedef enum animation_distortion {
     ANIMATION_DISTORTION_TELEPORT = 14,               /* fade out, move to the step's destination, fade in */
     ANIMATION_DISTORTION_BACK_AWAY = 15,              /* part of a tile away from the target */
     ANIMATION_DISTORTION_JUMP_TO_OWN_TILE_FADED = 16, /* 7, blended, and dark until four frames remain */
-    ANIMATION_DISTORTION_JUMP_RISE = 17,              /* 12 with the jump sound, unless the unit is that high already */
+    ANIMATION_DISTORTION_JUMP_RISE = 17               /* 12 with the jump sound, unless the unit is that high already */
 } animation_distortion_e;
 
 enum {
-    ANIMATION_DISTORTION_COUNT = 18, /* the handlers of g_animation_distortion_handlers */
+    ANIMATION_DISTORTION_COUNT = 18 /* the handlers of g_animation_distortion_handlers */
 };
 
 /* The dispatcher ignores the result and the handlers supply no value. The s32

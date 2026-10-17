@@ -43,7 +43,7 @@ typedef enum world_map_request_state {
     WORLD_MAP_REQUEST_WAIT_FADE_OUT = 2,
     WORLD_MAP_REQUEST_RUN = 3,
     WORLD_MAP_REQUEST_START_FADE_IN = 8,
-    WORLD_MAP_REQUEST_WAIT_FADE_IN = 9,
+    WORLD_MAP_REQUEST_WAIT_FADE_IN = 9
 } world_map_request_state_e;
 
 /* A 0x24-byte menu thread group (g_world_map_menu_groups, by request index 0-3): up to three menu threads the

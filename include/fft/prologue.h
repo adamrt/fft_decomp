@@ -24,13 +24,10 @@ typedef char prologue_line_size_must_be_4[sizeof(prologue_line_t) == 4 ? 1 : -1]
 /* High nibble of the image command byte in prologue_entry_t.header. */
 typedef enum prologue_image_operation {
     PROLOGUE_PREPARE_IMAGE = 0x10,
-    PROLOGUE_START_CROSSFADE = 0x20,
+    PROLOGUE_START_CROSSFADE = 0x20
 } prologue_image_operation_e;
 
-enum {
-    PROLOGUE_IMAGE_OPERATION_MASK = 0xf0,
-    PROLOGUE_IMAGE_INDEX_MASK = 0x0f,
-};
+enum { PROLOGUE_IMAGE_OPERATION_MASK = 0xf0, PROLOGUE_IMAGE_INDEX_MASK = 0x0f };
 
 /* prologue_t.flags. */
 typedef enum prologue_flag {
@@ -38,7 +35,7 @@ typedef enum prologue_flag {
     PROLOGUE_NEXT_STEP = 0x02,   /* starts the next step of the entry */
     PROLOGUE_WAIT_CIRCLE = 0x08, /* the entry is complete: waits for circle */
     PROLOGUE_DIM = 0x10,         /* the line strips fade out before the next entry */
-    PROLOGUE_SKIP = 0x20,        /* start was pressed: fades out and ends */
+    PROLOGUE_SKIP = 0x20         /* start was pressed: fades out and ends */
 } prologue_flag_e;
 
 /* The new-game prologue's controller (g_prologue). */

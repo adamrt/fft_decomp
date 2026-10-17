@@ -30,7 +30,7 @@ typedef enum move_step_direction {
     MOVE_STEP_DIRECTION_EAST = 0,  /* +x */
     MOVE_STEP_DIRECTION_WEST = 1,  /* -x */
     MOVE_STEP_DIRECTION_SOUTH = 2, /* -y */
-    MOVE_STEP_DIRECTION_NORTH = 3, /* +y */
+    MOVE_STEP_DIRECTION_NORTH = 3  /* +y */
 } move_step_direction_e;
 
 /* One movement step: a path element, the unit's current step and the step
@@ -75,14 +75,11 @@ typedef char move_path_size_must_be_128[sizeof(move_path_t) == 128 ? 1 : -1];
  * (move_path_build_to_tile). */
 enum {
     MOVE_PATH_TELEPORT = 0xfe, /* the path bytes hold the destination x, y and level */
-    MOVE_PATH_TELEPORT_FAILED = 0xff,
+    MOVE_PATH_TELEPORT_FAILED = 0xff
 };
 
 /* move_path_t.pending_mount: the mount standing on the path's destination tile. */
-enum {
-    MOVE_PENDING_MOUNT_ID_MASK = 0x7f,
-    MOVE_PENDING_MOUNT_SET = 0x80,
-};
+enum { MOVE_PENDING_MOUNT_ID_MASK = 0x7f, MOVE_PENDING_MOUNT_SET = 0x80 };
 
 /* movement classes and terrain */
 /* Ordered class selection in move_spread_store_unit_to_scratchpad, not movement ability
@@ -98,7 +95,7 @@ typedef enum move_class {
     MOVE_CLASS_WATER_SURFACE = 4,
     MOVE_CLASS_WATER_DEPTH_ONE = 5,
     MOVE_CLASS_UNDERWATER = 6,
-    MOVE_CLASS_NORMAL = 7,
+    MOVE_CLASS_NORMAL = 7
 } move_class_e;
 
 typedef enum move_effective_flags {
@@ -107,7 +104,7 @@ typedef enum move_effective_flags {
     MOVE_EFFECTIVE_IN_WATER = 0x10, /* UNIT_MOVEMENT_SET_3_WALK_ON_WATER: one level below the surface */
     MOVE_EFFECTIVE_ON_WATER = 0x20, /* UNIT_MOVEMENT_SET_3_MOVE_IN_WATER: on the surface */
     MOVE_EFFECTIVE_FLOAT = 0x40,
-    MOVE_EFFECTIVE_FLY = 0x80,
+    MOVE_EFFECTIVE_FLY = 0x80
 } move_effective_flags_e;
 
 extern u8* g_move_terrain_costs_ptr;
@@ -120,21 +117,13 @@ s32 move_get_water_standing_offset(unit_t* unit, battle_map_tile_t* tile);
 
 /* pathfinding */
 /* Compact movement records have auxiliary panels after the terrain panels. */
-enum {
-    MOVE_RECORD_COUNT = 16,
-    MOVE_PANEL_COUNT = BATTLE_MAP_TILE_COUNT + MOVE_RECORD_COUNT,
-};
+enum { MOVE_RECORD_COUNT = 16, MOVE_PANEL_COUNT = BATTLE_MAP_TILE_COUNT + MOVE_RECORD_COUNT };
 
 /* Generic pathfinding flags, distinct from movement ability bytes. */
-typedef enum move_pathfind_flags {
-    MOVE_PATHFIND_IGNORE_TERRAIN_COST = 0x100,
-} move_pathfind_flags_e;
+typedef enum move_pathfind_flags { MOVE_PATHFIND_IGNORE_TERRAIN_COST = 0x100 } move_pathfind_flags_e;
 
 /* Generic mover and search range used by scripted and reverse pathfinding. */
-enum {
-    MOVE_GENERIC_UNIT_ID = 0x7f,
-    MOVE_PATHFIND_RANGE = 124,
-};
+enum { MOVE_GENERIC_UNIT_ID = 0x7f, MOVE_PATHFIND_RANGE = 124 };
 
 /* The acting unit's block at the start of the scratchpad (0x1f800000), reached through
  * g_move_config_ptr. Only target-proven bytes are named. */
@@ -177,10 +166,7 @@ typedef struct move_pathfind_scratch {
     u8 can_pass_lava;       /* 0x25 */
 } move_pathfind_scratch_t;
 
-enum {
-    MOVE_SAVED_SOURCE_HEIGHT = 1,
-    MOVE_SAVED_DESTINATION_HEIGHT = 2,
-};
+enum { MOVE_SAVED_SOURCE_HEIGHT = 1, MOVE_SAVED_DESTINATION_HEIGHT = 2 };
 
 /* Per-tile frontier flags produced by the movement spread pass. These are
  * distinct from battle_map_tile_t::ceiling_depth_and_marks and are consumed by the
@@ -193,14 +179,14 @@ enum {
     FRONTIER_FLAG_ENTERABLE = 0x10,      /* the terrain lets the mover in and no enemy stands there */
     FRONTIER_FLAG_MOUNTABLE_UNIT = 0x20, /* a unit of the mover's team that can be mounted stands there */
     FRONTIER_FLAG_STEEP = 0x40,          /* a slope higher than the mover's jump: no entry from its low side */
-    FRONTIER_FLAG_BLOCKED = 0x80,        /* a blocked tile, or the tile of Altima's second form */
+    FRONTIER_FLAG_BLOCKED = 0x80         /* a blocked tile, or the tile of Altima's second form */
 };
 
 /* move_spread_set_frontier_flags modes. Bit 0 clears the target panels' ranges. */
 typedef enum move_frontier_mode {
     MOVE_TILE_FLAGS_MODE_START_SPREAD = 1, /* mark the units and queue the mover's own tile */
     MOVE_TILE_FLAGS_MODE_KEEP_RANGES = 2,  /* mark the units only */
-    MOVE_TILE_FLAGS_MODE_TERRAIN_ONLY = 3, /* leave the units out */
+    MOVE_TILE_FLAGS_MODE_TERRAIN_ONLY = 3  /* leave the units out */
 } move_frontier_mode_e;
 
 /* Shared movement work state reached through g_move_scratch_pad_ptr.
@@ -312,7 +298,7 @@ enum {
     MOVE_RECORD_UNIT_ID_MASK = 0x1f,
     MOVE_RECORD_FLAG_NOT_MOUNTABLE = 0x20,
     MOVE_RECORD_FLAG_OTHER_TEAM = 0x40, /* team bits differ from the mover's */
-    MOVE_RECORD_NONE = 0xff,
+    MOVE_RECORD_NONE = 0xff
 };
 
 /* Sixteen seven-byte records reached through g_move_records_ptr.
@@ -378,15 +364,12 @@ void move_settle_on_tile(unit_t* unit);
 /* action_current_ability_t.knockback_flags: the kind of knockback found by
  * move_knockback_calculate, with PENDING set until it is applied. */
 typedef enum move_knockback_kind {
-    MOVE_KNOCKBACK_FALL_DAMAGE = 1,    /* a grounded target: the fall height can hurt */
-    MOVE_KNOCKBACK_NO_FALL_DAMAGE = 2, /* a flying target */
+    MOVE_KNOCKBACK_FALL_DAMAGE = 1,   /* a grounded target: the fall height can hurt */
+    MOVE_KNOCKBACK_NO_FALL_DAMAGE = 2 /* a flying target */
 } move_knockback_kind_e;
 
 /* Encoding of the kind and pending marker in the same byte. */
-enum {
-    MOVE_KNOCKBACK_KIND_MASK = 0x7f,
-    MOVE_KNOCKBACK_PENDING = 0x80,
-};
+enum { MOVE_KNOCKBACK_KIND_MASK = 0x7f, MOVE_KNOCKBACK_PENDING = 0x80 };
 
 extern s32 g_move_displacement_direction;
 
@@ -400,7 +383,7 @@ typedef enum move_find_trap_id {
     MOVE_FIND_TRAP_DEATHTRAP = 1,
     MOVE_FIND_TRAP_SLEEPING_GAS = 2,
     MOVE_FIND_TRAP_STEEL_NEEDLE = 3,
-    MOVE_FIND_TRAP_NONE = 255,
+    MOVE_FIND_TRAP_NONE = 255
 } move_find_trap_id_e;
 
 /* Four serialized move-find item/trap entries per map. */
@@ -410,7 +393,7 @@ typedef enum move_find_entry_flags {
     BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS = 0x04,
     BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE = 0x08,
     BATTLE_MAP_MOVE_FIND_ENTRY_NO_TRAP = 0x10,
-    BATTLE_MAP_MOVE_FIND_ENTRY_NO_ITEM = 0x20,
+    BATTLE_MAP_MOVE_FIND_ENTRY_NO_ITEM = 0x20
 } move_find_entry_flags_e;
 
 typedef struct move_find_entry {
@@ -439,7 +422,7 @@ typedef char move_found_item_size_must_be_8[sizeof(move_found_item_t) == 8 ? 1 :
 typedef enum move_find_result_flags {
     MOVE_FIND_RESULT_ITEM = 0x01,
     MOVE_FIND_RESULT_TRAP = 0x02,
-    MOVE_FIND_RESULT_OCCUPIED = 0x04,
+    MOVE_FIND_RESULT_OCCUPIED = 0x04
 } move_find_result_flags_e;
 
 typedef struct move_find_result_data {
@@ -478,7 +461,7 @@ typedef enum move_post_event_flags {
     MOVE_POST_EVENT_MOVE_GET_EXP = 0x0080,
     MOVE_POST_EVENT_MOVE_GET_JP = 0x0100,
     MOVE_POST_EVENT_SOURCE_DISPLAY = 0x0200, /* runs the source unit's post-action display */
-    MOVE_POST_EVENT_MOUNT_STATUS_CHANGE = 0x0400,
+    MOVE_POST_EVENT_MOUNT_STATUS_CHANGE = 0x0400
 } move_post_event_flags_e;
 
 /* Pending move_post_event_flags_e bits, dispatched in priority order. */

@@ -18,7 +18,7 @@
 enum {
     QUAD_GRID_SIZE = VARIANT_QUAD_GRID_SIZE,
     QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE,
-    QUAD_GRID_DEPTH_MIN = QUAD_GRID_SIZE == 4 ? 1 : EFFECT_OT_DEPTH_MIN,
+    QUAD_GRID_DEPTH_MIN = QUAD_GRID_SIZE == 4 ? 1 : EFFECT_OT_DEPTH_MIN
 };
 
 /* The renderer's work block, allocated in phase 1 and freed in phase 3. The 2x2 and 4x4 builds leave a 0x48-byte

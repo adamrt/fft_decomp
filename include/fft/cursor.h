@@ -15,7 +15,7 @@
 typedef enum cursor_input_mode {
     CURSOR_INPUT_OPTION_A = 0,
     CURSOR_INPUT_OPTION_B = 1,
-    CURSOR_INPUT_FREE_CURSOR = 2,
+    CURSOR_INPUT_FREE_CURSOR = 2
 } cursor_input_mode_e;
 
 extern s32 g_cursor_x;

@@ -1375,12 +1375,7 @@ s32 ai_evaluate_current_action(void) {
     return 0;
 }
 
-enum {
-    AI_HP_SCORE_SCALE = 128,
-    AI_MP_SCORE_SCALE = 64,
-    AI_EQUIPMENT_SCORE = 51,
-    AI_GOLEM_SCORE_SCALE = 128,
-};
+enum { AI_HP_SCORE_SCALE = 128, AI_MP_SCORE_SCALE = 64, AI_EQUIPMENT_SCORE = 51, AI_GOLEM_SCORE_SCALE = 128 };
 
 /*
  * Simulate the current action and intervening events, then score unit state.

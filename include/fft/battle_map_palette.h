@@ -22,14 +22,14 @@ typedef enum battle_map_color_mode {
     BATTLE_MAP_COLOR_MODE_RESTORE = 8, /* map transitions restore the last applied color and ignore offsets */
     BATTLE_MAP_COLOR_MODE_BASE_REPEAT
     = 9, /* as BASE, and record the offsets so that the fade alternates with RESTORE */
-    BATTLE_MAP_COLOR_MODE_STOP_REPEAT = 10, /* only clear the repeat record */
+    BATTLE_MAP_COLOR_MODE_STOP_REPEAT = 10 /* only clear the repeat record */
 } battle_map_color_mode_e;
 
 /* The repeat member of the map color transitions and of the CLUT animations. */
 typedef enum battle_map_color_repeat {
     BATTLE_MAP_COLOR_REPEAT_OFF = 0,
-    BATTLE_MAP_COLOR_REPEAT_TINTED = 1,   /* fading to the recorded offsets; a fade back to the base follows */
-    BATTLE_MAP_COLOR_REPEAT_RESTORED = 2, /* fading back to the base; the offsets follow again */
+    BATTLE_MAP_COLOR_REPEAT_TINTED = 1,  /* fading to the recorded offsets; a fade back to the base follows */
+    BATTLE_MAP_COLOR_REPEAT_RESTORED = 2 /* fading back to the base; the offsets follow again */
 } battle_map_color_repeat_e;
 
 /* CLUT rows */
@@ -48,7 +48,7 @@ typedef enum battle_map_clut_row {
     BATTLE_MAP_CLUT_ROW_UNITS_SECOND = 10, /* the second eight palettes of each unit's sheet */
     BATTLE_MAP_CLUT_ROW_WEAPONS = 11,
     BATTLE_MAP_CLUT_ROW_EFFECT = 12,
-    BATTLE_MAP_CLUT_ROW_EFFECT_SECOND = 13,
+    BATTLE_MAP_CLUT_ROW_EFFECT_SECOND = 13
 } battle_map_clut_row_e;
 
 enum {
@@ -56,7 +56,7 @@ enum {
     BATTLE_MAP_CLUTS_PER_ROW = CLUT_PALETTE_COUNT,
     BATTLE_MAP_CLUT_COLOR_COUNT = PALETTE_COLOR_COUNT,
     BATTLE_MAP_CLUT_ROW_COLOR_COUNT = BATTLE_MAP_CLUTS_PER_ROW * BATTLE_MAP_CLUT_COLOR_COUNT,
-    BATTLE_MAP_CLUT_ROWS_Y = 480, /* VRAM line of BATTLE_MAP_CLUT_ROW_MAP; the rows follow one line apart */
+    BATTLE_MAP_CLUT_ROWS_Y = 480 /* VRAM line of BATTLE_MAP_CLUT_ROW_MAP; the rows follow one line apart */
 };
 
 /* The 16-bit CLUT value of CLUT clut_index of a map CLUT row: the value of
@@ -69,7 +69,7 @@ enum {
     BATTLE_MAP_PALETTE_DELTA_BIAS = 31,
     BATTLE_MAP_PALETTE_DELTA_COUNT = 63,
     BATTLE_MAP_PALETTE_BLEND_STEP_COUNT = 32,
-    BATTLE_MAP_PALETTE_FAST_BLEND_STEP_COUNT = 8,
+    BATTLE_MAP_PALETTE_FAST_BLEND_STEP_COUNT = 8
 };
 
 /* Expanded five-bit RGB components and channel deltas biased by 31;

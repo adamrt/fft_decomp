@@ -297,11 +297,7 @@ void unit_view_start(s32 mode, s32 unit_a, s32 unit_b) {
     thread_set_parameters(THREAD_SLOT_UNIT_VIEW, mode, 0, 0);
 }
 
-enum {
-    MENU_UNIT_VIEW_SLOT_IDLE = 0,
-    MENU_UNIT_VIEW_SLOT_RESTART = 1,
-    MENU_UNIT_VIEW_SLOT_STARTED = 2,
-};
+enum { MENU_UNIT_VIEW_SLOT_IDLE = 0, MENU_UNIT_VIEW_SLOT_RESTART = 1, MENU_UNIT_VIEW_SLOT_STARTED = 2 };
 
 /* Starts the requested unit-view panel threads, stops stale panels, and restarts
  * them after they exit. A new parameter replaces the pending view request. */

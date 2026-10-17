@@ -30,7 +30,7 @@ typedef struct ending_font_metrics {
 /* text records */
 /* ending_text_record_t.flags. */
 typedef enum ending_text_record_flag {
-    ENDING_SCRIPT_RECORD_ACTIVE = 0x01, /* the record holds a text being shown */
+    ENDING_SCRIPT_RECORD_ACTIVE = 0x01 /* the record holds a text being shown */
 } ending_text_record_flag_e;
 
 typedef struct ending_text_record {
@@ -54,7 +54,7 @@ typedef enum ending_script_dispatch_flag {
     ENDING_SCRIPT_DISPATCH_XA_STOPPING = 0x10, /* the stop sequence of ending_update_xa_audio runs */
     ENDING_SCRIPT_DISPATCH_XA_STARTING = 0x20, /* its start sequence runs */
     ENDING_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY = 0x40,
-    ENDING_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY = 0x80,
+    ENDING_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY = 0x80
 } ending_script_dispatch_flag_e;
 
 /* Byte-addressed ending-script cursor. */
@@ -131,7 +131,7 @@ typedef enum ending_opcode {
     ENDING_SCRIPT_OPCODE_FADE_IN_PICTURE = 0x0c,
     ENDING_SCRIPT_OPCODE_FADE_OUT_PICTURE = 0x0d,
     ENDING_SCRIPT_OPCODE_WAIT_XA_AUDIO_IDLE = 0x0e,
-    ENDING_SCRIPT_OPCODE_START_OPNTEX_SEQUENCE = 0x0f,
+    ENDING_SCRIPT_OPCODE_START_OPNTEX_SEQUENCE = 0x0f
 } ending_opcode_e;
 
 void ending_opcode_00_end_script(s16* unused_entry);

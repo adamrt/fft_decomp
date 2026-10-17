@@ -36,10 +36,7 @@ typedef struct rgba5551 {
 typedef char rgba5551_size_must_be_2[sizeof(rgba5551_t) == 2 ? 1 : -1];
 
 /* Colors in a palette and palettes in a CLUT. */
-enum {
-    PALETTE_COLOR_COUNT = 16,
-    CLUT_PALETTE_COUNT = 16,
-};
+enum { PALETTE_COLOR_COUNT = 16, CLUT_PALETTE_COUNT = 16 };
 
 /* Sixteen packed texture colors. */
 typedef rgba5551_t palette_t[PALETTE_COLOR_COUNT];
@@ -129,7 +126,7 @@ typedef enum texture_uv_flip {
     TEXTURE_UV_FLIP_NONE = 0,
     TEXTURE_UV_FLIP_X = 1,
     TEXTURE_UV_FLIP_Y = 2,
-    TEXTURE_UV_FLIP_XY = TEXTURE_UV_FLIP_X | TEXTURE_UV_FLIP_Y,
+    TEXTURE_UV_FLIP_XY = TEXTURE_UV_FLIP_X | TEXTURE_UV_FLIP_Y
 } texture_uv_flip_e;
 
 /* Texture primitive used by the WORLD/BATTLE image-loading and texture-page allocation helpers: a SPRT (code
@@ -363,9 +360,9 @@ extern POLY_GT4 g_gfx_poly_gt4_array_8[];
 /* overlay fade */
 /* gfx_overlay_fade_t.flags. */
 typedef enum gfx_overlay_fade_flag {
-    GFX_OVERLAY_FADE_OUT = 0x01,    /* the overlay clears */
-    GFX_OVERLAY_FADE_IN = 0x02,     /* the overlay darkens the screen */
-    GFX_OVERLAY_FADE_ACTIVE = 0x04, /* the overlay is drawn; cleared when either fade ends */
+    GFX_OVERLAY_FADE_OUT = 0x01,   /* the overlay clears */
+    GFX_OVERLAY_FADE_IN = 0x02,    /* the overlay darkens the screen */
+    GFX_OVERLAY_FADE_ACTIVE = 0x04 /* the overlay is drawn; cleared when either fade ends */
 } gfx_overlay_fade_flag_e;
 
 /* The screen overlay fade: one record, since gfx_update_overlay_fade

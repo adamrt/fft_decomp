@@ -79,7 +79,7 @@ typedef enum sound_novel_state_flag {
     SOUND_NOVEL_STATE_END = 0x020,     /* the script ended */
     SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE = 0x040,
     SOUND_NOVEL_STATE_VALUE_DISPLAY = 0x080, /* the numeric value display is up */
-    SOUND_NOVEL_STATE_WHITE_OVERLAY = 0x100, /* the white full-screen overlay is up */
+    SOUND_NOVEL_STATE_WHITE_OVERLAY = 0x100  /* the white full-screen overlay is up */
 } sound_novel_state_flag_e;
 
 s32 sound_novel_run_until_yield(void);
@@ -103,7 +103,7 @@ extern s32 g_sound_novel_countdown_frames;
 typedef enum sound_novel_phase {
     SOUND_NOVEL_PHASE_RUN = 0,          /* the script runs */
     SOUND_NOVEL_PHASE_OPEN_HISTORY = 2, /* square: counts down, then pushes the history level */
-    SOUND_NOVEL_PHASE_END = 3,          /* the script ended: waits for thread 14, then leaves */
+    SOUND_NOVEL_PHASE_END = 3           /* the script ended: waits for thread 14, then leaves */
 } sound_novel_phase_e;
 
 /* The SOUND_NOVEL level pushed by sound_novel_push_level and stepped by
@@ -138,8 +138,8 @@ typedef struct sound_novel_quit_level {
 /* Values of sound_novel_history_level_t.phase. */
 typedef enum sound_novel_history_phase {
     SOUND_NOVEL_HISTORY_PHASE_BROWSE = 0,
-    SOUND_NOVEL_HISTORY_PHASE_DIM = 1,     /* five steps: the picture darkens under the fill box */
-    SOUND_NOVEL_HISTORY_PHASE_RESTORE = 2, /* the reverse ramp, then the level pops */
+    SOUND_NOVEL_HISTORY_PHASE_DIM = 1,    /* five steps: the picture darkens under the fill box */
+    SOUND_NOVEL_HISTORY_PHASE_RESTORE = 2 /* the reverse ramp, then the level pops */
 } sound_novel_history_phase_e;
 
 /* Provisional: the SOUND_NOVEL_HISTORY level pushed by sound_novel_push_history_level, which stores

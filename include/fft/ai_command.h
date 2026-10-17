@@ -29,7 +29,7 @@ typedef enum ai_command_kind {
     AI_COMMAND_REFRESH_CONTROL = 18, /* copy the control flag back from the stats */
     AI_COMMAND_MOVE_SELF = 25,       /* MOVE that never redirects to the unit's mount */
     AI_COMMAND_UNRESOLVED_FE = 0xfe,
-    AI_COMMAND_UNRESOLVED_FF = 0xff,
+    AI_COMMAND_UNRESOLVED_FF = 0xff
 } ai_command_kind_e;
 
 /* A unit's command, kept in its unit_t. ACT carries the action of the AI's selected action
@@ -49,7 +49,7 @@ typedef char ai_command_size_must_be_24[sizeof(ai_command_t) == 24 ? 1 : -1];
 typedef enum ai_command_build_stage {
     AI_COMMAND_BUILD_REFRESH = 0,
     AI_COMMAND_BUILD_MOVEMENT = 1,
-    AI_COMMAND_BUILD_CHOOSE_ACTION = 2,
+    AI_COMMAND_BUILD_CHOOSE_ACTION = 2
 } ai_command_build_stage_e;
 
 extern ai_command_t g_ai_command_history[2]; /* the last two commands built, newest last */

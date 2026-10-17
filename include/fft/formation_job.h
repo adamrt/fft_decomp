@@ -18,7 +18,7 @@ enum {
     /* Set in mode INCLUDE_OTHER_UNIT_UNLOCKS on the unit's current job and on
      * a job only another unit has unlocked: the job wheel shows the entry
      * but does not change to it. */
-    FORMATION_JOB_LIST_ENTRY_UNAVAILABLE = 0x4000,
+    FORMATION_JOB_LIST_ENTRY_UNAVAILABLE = 0x4000
 };
 
 /* The one mode job_list_build tests; its callers also pass 0 and 1. */

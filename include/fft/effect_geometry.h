@@ -17,7 +17,7 @@ typedef enum effect_emitter_origin {
     EFFECT_EMITTER_ORIGIN_TARGET = 0x600,
     EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE = 0x800, /* position of the spawning work record */
     EFFECT_EMITTER_ORIGIN_MAP_CENTER = 0xa00,
-    EFFECT_EMITTER_ORIGIN_TRACKED_ENTITY = 0xc00, /* target plus its unit coordinates */
+    EFFECT_EMITTER_ORIGIN_TRACKED_ENTITY = 0xc00 /* target plus its unit coordinates */
 } effect_emitter_origin_e;
 
 enum { EFFECT_EMITTER_ORIGIN_MASK = 0xe00 };
@@ -31,7 +31,7 @@ typedef enum effect_emitter_homing {
     EFFECT_EMITTER_HOMING_MAP_CENTER = 0x40,
     EFFECT_EMITTER_HOMING_CASTER = 0x60,
     EFFECT_EMITTER_HOMING_TARGET = 0x80,
-    EFFECT_EMITTER_HOMING_CURSOR_TILE = 0xa0,
+    EFFECT_EMITTER_HOMING_CURSOR_TILE = 0xa0
 } effect_emitter_homing_e;
 
 enum { EFFECT_EMITTER_HOMING_MASK = 0xe0 };
@@ -44,7 +44,7 @@ enum { EFFECT_EMITTER_HOMING_MASK = 0xe0 };
 enum {
     EFFECT_EMITTER_ORIENT_TO_VELOCITY = 0x0002, /* turn the sprite along its heading on screen */
     EFFECT_EMITTER_BOX_SPREAD = 0x0100,         /* spawn inside the spread box; clear, on the spread ellipsoid */
-    EFFECT_WORK_KIND_MASK = 0xf000,
+    EFFECT_WORK_KIND_MASK = 0xf000
 };
 
 /* The work-record payload selected by the high nibble of placement_flags. */
@@ -53,7 +53,7 @@ typedef enum effect_work_kind {
     EFFECT_WORK_KIND_SPRITE_SCREEN_OFFSET = 0x1000,
     EFFECT_WORK_KIND_SPRITE_WORLD_UNSCALED = 0x2000,
     EFFECT_WORK_KIND_SPRITE_SCREEN = 0x3000,
-    EFFECT_WORK_KIND_HEAP_BLOCK = 0x4000,
+    EFFECT_WORK_KIND_HEAP_BLOCK = 0x4000
 } effect_work_kind_e;
 
 /* motion flags */
@@ -67,7 +67,7 @@ typedef enum effect_emitter_velocity {
     EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED = 0x000,
     EFFECT_EMITTER_VELOCITY_INWARD = 0x010,
     EFFECT_EMITTER_VELOCITY_TOWARD_TARGET = 0x400,
-    EFFECT_EMITTER_VELOCITY_CASTER_FACING = 0x410,
+    EFFECT_EMITTER_VELOCITY_CASTER_FACING = 0x410
 } effect_emitter_velocity_e;
 
 enum { EFFECT_EMITTER_VELOCITY_MASK = 0x410 };
@@ -86,7 +86,7 @@ enum {
     /* A particle that comes within this distance of its homing target on all three axes ends its
      * life: the field shifted right by SHIFT is 16, 32 or 48 world units, 0 for never. */
     EFFECT_EMITTER_FLAG_ARRIVAL_DISTANCE_MASK = 0x0300,
-    EFFECT_EMITTER_FLAG_ARRIVAL_DISTANCE_SHIFT = 4,
+    EFFECT_EMITTER_FLAG_ARRIVAL_DISTANCE_SHIFT = 4
 };
 
 /* curve bindings */
@@ -112,7 +112,7 @@ enum {
     EFFECT_SPAWN_CURVE_SPAWN_SPREAD_SHIFT = 4,
     EFFECT_SPAWN_CURVE_VELOCITY_BASE_ANGLE_SHIFT = 8,
     EFFECT_SPAWN_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT = 12,
-    EFFECT_SPAWN_CURVE_RADIAL_SPEED_SHIFT = 28,
+    EFFECT_SPAWN_CURVE_RADIAL_SPEED_SHIFT = 28
 };
 
 /* Bit positions in the emitter's packed 32-bit motion-curve binding word.
@@ -125,18 +125,14 @@ enum {
     EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT = 20,
     EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT = 24,
     EFFECT_EMITTER_CURVE_HOMING_STRENGTH_SHIFT = 28,
-    EFFECT_EMITTER_CURVE_HOMING_MOTION_SHIFT = 30,
+    EFFECT_EMITTER_CURVE_HOMING_MOTION_SHIFT = 30
 };
 
 /* Nibble positions of the zero-based red, green and blue curve indices in a
  * record's color_curves word. The renderers copy the word into a signed local
  * and shift and mask each nibble. A bit-field record would extract with
  * different shifts, which the original instructions rule out. */
-enum {
-    EFFECT_COLOR_CURVE_RED_SHIFT = 0,
-    EFFECT_COLOR_CURVE_GREEN_SHIFT = 4,
-    EFFECT_COLOR_CURVE_BLUE_SHIFT = 8,
-};
+enum { EFFECT_COLOR_CURVE_RED_SHIFT = 0, EFFECT_COLOR_CURVE_GREEN_SHIFT = 4, EFFECT_COLOR_CURVE_BLUE_SHIFT = 8 };
 
 /* texture pages */
 /* Blend mode and primitive transparency control in a geometry record. */
@@ -150,7 +146,7 @@ typedef char effect_texture_page_config_size_must_be_2[sizeof(effect_texture_pag
 /* The texture_page_flags bits of the effect geometry records. */
 enum {
     EFFECT_TEXTURE_PAGE_ABR_MASK = 0x03, /* the semi-transparency rate, shifted into bits 5-6 of the tpage */
-    EFFECT_TEXTURE_PAGE_FLAG_CLEAR_ABE = 0x04,
+    EFFECT_TEXTURE_PAGE_FLAG_CLEAR_ABE = 0x04
 };
 
 /* particle emitter */
@@ -300,9 +296,7 @@ typedef char
 /* particle ribbon */
 /* The ribbon binds target spread at bit 4 of motion_curve_selectors, where the
  * emitter binds acceleration step; its other curves keep the emitter's places. */
-enum {
-    EFFECT_PARTICLE_RIBBON_CURVE_TARGET_SPREAD_SHIFT = 4,
-};
+enum { EFFECT_PARTICLE_RIBBON_CURVE_TARGET_SPREAD_SHIFT = 4 };
 
 /* The particle ribbon renderer's view of one emitter record. */
 typedef struct effect_particle_ribbon_geometry_view {
@@ -532,7 +526,7 @@ typedef char effect_radial_mesh_geometry_size_must_be_196[sizeof(effect_radial_m
 enum {
     EFFECT_TENTACLE_CURVE_TIP_SPREAD_SHIFT = 4,
     EFFECT_TENTACLE_CURVE_TRAVEL_DURATION_SHIFT = 8,
-    EFFECT_TENTACLE_CURVE_TIP_OFFSET_SHIFT = 12,
+    EFFECT_TENTACLE_CURVE_TIP_OFFSET_SHIFT = 12
 };
 
 /* Segment renderers reuse the particle emitter's spawn parameters;

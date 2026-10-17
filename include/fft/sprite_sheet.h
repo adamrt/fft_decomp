@@ -239,13 +239,13 @@ typedef enum sprite_sheet_id {
     SPRITE_SHEET_ID_CRYSTAL = 155,
     SPRITE_SHEET_ID_CHICKEN = 156,
     SPRITE_SHEET_ID_FROG = 157,
-    SPRITE_SHEET_ID_TREASURE = 158,
+    SPRITE_SHEET_ID_TREASURE = 158
 } sprite_sheet_id_e;
 
 enum {
     SPRITE_SHEET_ID_RAMZA_END = 4,
     SPRITE_SHEET_ID_JOB_FIRST = 96, /* the generic job sheets start here; the monsters' follow */
-    SPRITE_SHEET_ID_COUNT = 159,
+    SPRITE_SHEET_ID_COUNT = 159
 };
 
 /* Four-byte lookup record for the 0x9f ordinary unit spritesheets. */
@@ -266,7 +266,7 @@ typedef enum sprite_shp_type {
     SPRITE_SHP_MON = 3,
     SPRITE_SHP_OTHER = 4,
     SPRITE_SHP_ARUTE = 6,
-    SPRITE_SHP_KANZEN = 7,
+    SPRITE_SHP_KANZEN = 7
 } sprite_shp_type_e;
 
 /* sprite_sheet_data_t.seq_id: index of the sheet's animation file in
@@ -279,7 +279,7 @@ typedef enum sprite_seq_type {
     SPRITE_SEQ_OTHER = 4,
     SPRITE_SEQ_RUKA = 5,
     SPRITE_SEQ_ARUTE = 6,
-    SPRITE_SEQ_KANZEN = 7,
+    SPRITE_SEQ_KANZEN = 7
 } sprite_seq_type_e;
 
 extern sprite_sheet_data_t g_sprite_sheet_data[SPRITE_SHEET_ID_COUNT];
@@ -329,8 +329,8 @@ enum {
     SPRITE_TPAGE_OTHER = 11,
     /* Plus the unit's spritesheet slot. */
     SPRITE_TPAGE_SPRITESHEET_SLOT_0 = 0x14,
-    SPRITE_TPAGE_ITEM = 0x1e,  /* ITEM.BIN */
-    SPRITE_TPAGE_FRAME = 0x1f, /* FRAME.BIN */
+    SPRITE_TPAGE_ITEM = 0x1e, /* ITEM.BIN */
+    SPRITE_TPAGE_FRAME = 0x1f /* FRAME.BIN */
 };
 
 /* The nine spritesheet VRAM slots (g_sprite_sheet_slots), 0x32d6 bytes each;
@@ -352,7 +352,7 @@ enum {
     SPRITE_SHEET_STRIP_VRAM_X = 0x340,
     SPRITE_SHEET_STRIP_VRAM_Y = 0x100,
     SPRITE_SHEET_STRIP_WIDTH = 64,
-    SPRITE_SHEET_STRIP_HEIGHT = 32,
+    SPRITE_SHEET_STRIP_HEIGHT = 32
 };
 
 extern sprite_sheet_slot_t g_sprite_sheet_slots[SPRITE_SHEET_SLOT_COUNT];
@@ -363,7 +363,7 @@ s32 sprite_sheet_get_slot_by_battle_id(u32 battle_id);
 
 /* EVTCHR slots */
 enum {
-    SPRITE_SHP_FRAME_EVTCHR_FIRST = 210, /* frame 0 of an EVTCHR slot */
+    SPRITE_SHP_FRAME_EVTCHR_FIRST = 210 /* frame 0 of an EVTCHR slot */
 };
 
 /* The SHP frames of an EVTCHR slot, laid out as sprite_unit_shp_frame_tables_t
@@ -399,20 +399,20 @@ typedef char sprite_evtchr_slot_size_must_be_30052[(sizeof(sprite_evtchr_slot_t)
 
 typedef enum sprite_evtchr_slot_owner_marker {
     SPRITE_EVTCHR_SLOT_OWNER_EVTCHR = 0xfe, /* an EVTCHR image (sprite_evtchr_save_slot) */
-    SPRITE_EVTCHR_SLOT_OWNER_NONE = 0xff,
+    SPRITE_EVTCHR_SLOT_OWNER_NONE = 0xff
 } sprite_evtchr_slot_owner_marker_e;
 
 /* Otherwise owner is a runtime id combined with one of these image-kind bits. */
 typedef enum sprite_evtchr_slot_owner_flags {
     SPRITE_EVTCHR_SLOT_OWNER_SP2 = 0x40,
-    SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE = 0x80,
+    SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE = 0x80
 } sprite_evtchr_slot_owner_flags_e;
 
 enum { SPRITE_EVTCHR_SLOT_OWNER_ID_MASK = 0x1f };
 
 typedef enum sprite_evtchr_slot_buffer_marker {
     SPRITE_EVTCHR_SLOT_BUFFER_FREE = 0,
-    SPRITE_EVTCHR_SLOT_BUFFER_EVTCHR = 0xfe, /* an unpacked EVTCHR block, not yet saved to VRAM or cleared */
+    SPRITE_EVTCHR_SLOT_BUFFER_EVTCHR = 0xfe /* an unpacked EVTCHR block, not yet saved to VRAM or cleared */
 } sprite_evtchr_slot_buffer_marker_e;
 
 /* Other positive buffer values are upload countdowns decremented each frame. */
@@ -443,7 +443,7 @@ typedef enum sprite_load_phase {
     SPRITE_LOAD_PHASE_START_READ = 0,
     SPRITE_LOAD_PHASE_WAIT = 1,
     SPRITE_LOAD_PHASE_INSTALL = 2,
-    SPRITE_LOAD_PHASE_FINISH = 3,
+    SPRITE_LOAD_PHASE_FINISH = 3
 } sprite_load_phase_e;
 
 /* g_sprite_load_state.file_kind, the file kind, counts through one of two lists:
@@ -452,7 +452,7 @@ typedef enum sprite_load_phase {
 typedef enum sprite_load_queued_kind {
     SPRITE_LOAD_QUEUED_SHP = 0,
     SPRITE_LOAD_QUEUED_SEQ = 1,
-    SPRITE_LOAD_QUEUED_SPR = 2,
+    SPRITE_LOAD_QUEUED_SPR = 2
 } sprite_load_queued_kind_e;
 
 typedef enum sprite_load_shared_kind {
@@ -463,7 +463,7 @@ typedef enum sprite_load_shared_kind {
     SPRITE_LOAD_SHARED_EFFECT_SHP = 4,
     SPRITE_LOAD_SHARED_EFFECT_SEQ = 5,
     SPRITE_LOAD_SHARED_WEAPON_SPR = 6,
-    SPRITE_LOAD_SHARED_OTHER_SPR = 7,
+    SPRITE_LOAD_SHARED_OTHER_SPR = 7
 } sprite_load_shared_kind_e;
 
 /* Both load-kind lists start at zero. */

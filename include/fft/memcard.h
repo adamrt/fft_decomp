@@ -27,7 +27,7 @@ typedef enum memcard_result {
     MEMCARD_RESULT_COMPLETE = 0,
     MEMCARD_RESULT_ERROR = 1,
     MEMCARD_RESULT_TIMEOUT = 2,
-    MEMCARD_RESULT_NEW_CARD = 3,
+    MEMCARD_RESULT_NEW_CARD = 3
 } memcard_result_e;
 
 extern s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT];

@@ -72,7 +72,7 @@ typedef char conditions_burst_tile_size_must_be_72[sizeof(conditions_burst_tile_
 typedef enum conditions_burst_mode {
     CONDITIONS_BURST_FROM_CENTER = 0,
     CONDITIONS_BURST_FROM_ORIGIN = 1, /* the top-left corner */
-    CONDITIONS_BURST_HORIZONTAL = 2,  /* x only */
+    CONDITIONS_BURST_HORIZONTAL = 2   /* x only */
 } conditions_burst_mode_e;
 
 extern RECT g_conditions_banner_palette_rect;
@@ -93,8 +93,8 @@ void require_dark_screen_entrypoint(void);
 /* g_war_trophy_entry_types[]: what a war trophy entry's
  * value in g_war_trophy_entry_values is. */
 typedef enum war_trophy_entry {
-    WAR_TROPHY_ENTRY_ITEM = 0,        /* an item id */
-    WAR_TROPHY_ENTRY_BONUS_MONEY = 1, /* the gil amount */
+    WAR_TROPHY_ENTRY_ITEM = 0,       /* an item id */
+    WAR_TROPHY_ENTRY_BONUS_MONEY = 1 /* the gil amount */
 } war_trophy_entry_e;
 
 /* Double-buffered war-trophy primitives, copied when each page opens. */
@@ -141,7 +141,7 @@ void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
 typedef enum after_battle_text_section {
     AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS = 1,   /* a unit's Brave is low or its Faith high */
     AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES = 2, /* the unit leaves the party for it */
-    AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3,   /* what a unit turned away or dismissed says */
+    AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3    /* what a unit turned away or dismissed says */
 } after_battle_text_section_e;
 
 extern char g_after_battle_text_wait_for_file_allocation_message[];
@@ -150,9 +150,9 @@ extern char g_after_battle_text_wait_for_file_allocation_message[];
 /* Slots of the after-battle screens' own threads; thread_screen_slot_e
  * has the shared ones. */
 typedef enum after_battle_thread_slot {
-    AFTER_BATTLE_THREAD_SLOT_MENU = 5,        /* selection menus, prompts and the special-case display */
-    AFTER_BATTLE_THREAD_SLOT_MESSAGE = 7,     /* the icon strip, message text or menu shown with them */
-    AFTER_BATTLE_THREAD_SLOT_TRANSITION = 10, /* unit_panel_transition_thread */
+    AFTER_BATTLE_THREAD_SLOT_MENU = 5,       /* selection menus, prompts and the special-case display */
+    AFTER_BATTLE_THREAD_SLOT_MESSAGE = 7,    /* the icon strip, message text or menu shown with them */
+    AFTER_BATTLE_THREAD_SLOT_TRANSITION = 10 /* unit_panel_transition_thread */
 } after_battle_thread_slot_e;
 
 extern s32 g_after_battle_thread_suspended_id;

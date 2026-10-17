@@ -44,7 +44,7 @@ typedef enum shop_step {
     SHOP_STEP_HIRE_FEE_CONFIRM = 24,
     SHOP_STEP_SOLDIER_OFFICE_REOPEN = 25,
     SHOP_STEP_RENAME_SELECT_UNIT = 26,
-    SHOP_STEP_RENAME_NAME_ENTRY = 27,
+    SHOP_STEP_RENAME_NAME_ENTRY = 27
 } shop_step_e;
 
 extern void (*g_shop_menu_step_handlers[])(void);
@@ -87,7 +87,7 @@ s32 shop_adjust_gil(s32 delta);
  * quantity prompt is still open. */
 enum {
     SHOP_QUANTITY_HOLDING_MAX = -2, /* the party already holds 99 */
-    SHOP_QUANTITY_CANNOT_AFFORD = -1,
+    SHOP_QUANTITY_CANNOT_AFFORD = -1
 };
 
 extern u8 g_shop_item_category;
@@ -122,7 +122,7 @@ void shop_sell_confirm_step(void);
 typedef enum shop_fitting_checkout {
     SHOP_FITTING_CHECKOUT_DONE = -1,    /* bought, or left without buying: back to the shop's main menu */
     SHOP_FITTING_CHECKOUT_CANCELED = 0, /* back to the fitting room */
-    SHOP_FITTING_CHECKOUT_PROMPT_OPEN = 1,
+    SHOP_FITTING_CHECKOUT_PROMPT_OPEN = 1
 } shop_fitting_checkout_e;
 
 extern u8 g_shop_fitting_initialized;

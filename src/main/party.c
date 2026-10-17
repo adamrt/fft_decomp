@@ -1065,9 +1065,7 @@ static void unit_calculate_encounter_jobs_and_skillsets(unit_stats_t* unit, cons
     }
 }
 
-enum {
-    RANDOM_JOB_COUNT = JOB_ID_MIME - JOB_ID_GENERIC_FIRST,
-};
+enum { RANDOM_JOB_COUNT = JOB_ID_MIME - JOB_ID_GENERIC_FIRST };
 
 /* Return a random unlocked generic job ID below Mime, or 0 when none are unlocked.
  *
@@ -1804,9 +1802,7 @@ void unit_calculate_move_jump(unit_stats_t* unit, s32 keep_hp_mp) {
     unit->jump = jump;
 }
 
-enum {
-    NAME_GENDER_MASK = UNIT_FLAG_MALE | UNIT_FLAG_FEMALE | UNIT_FLAG_MONSTER,
-};
+enum { NAME_GENDER_MASK = UNIT_FLAG_MALE | UNIT_FLAG_FEMALE | UNIT_FLAG_MONSTER };
 
 /* Copy the unit's name, job name and skillset names into its battle record,
  * from BATTLE's or WORLD's text as g_unit_name_uses_world_text says. A

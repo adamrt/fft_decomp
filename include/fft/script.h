@@ -30,11 +30,7 @@ typedef char event_work_size_must_be_2532[(sizeof(event_work_t) == 2532) ? 1 : -
 /* event loading */
 /* The finish operation of a scenario's finish word: its high bits, as script_get_event_finish_operation
  * returns them. Another nonzero value acts as TO_WORLD and also clears the current event and ENTD. */
-enum {
-    SCRIPT_FINISH_TO_WORLD = 0x80,
-    SCRIPT_FINISH_NEXT_EVENT = 0x81,
-    SCRIPT_FINISH_RESET = 0x82,
-};
+enum { SCRIPT_FINISH_TO_WORLD = 0x80, SCRIPT_FINISH_NEXT_EVENT = 0x81, SCRIPT_FINISH_RESET = 0x82 };
 
 extern event_file_block_t g_script_event_block_buffer;
 
@@ -75,7 +71,7 @@ typedef enum script_event_frame_result {
     SCRIPT_EVENT_FRAME_TO_WORLD = 9,
     SCRIPT_EVENT_FRAME_NEXT_EVENT = 10,
     SCRIPT_EVENT_FRAME_RESET = 11,
-    SCRIPT_EVENT_FRAME_ENDING = 19, /* the Funeral event (EVENT_ID_FUNERAL) has ended */
+    SCRIPT_EVENT_FRAME_ENDING = 19 /* the Funeral event (EVENT_ID_FUNERAL) has ended */
 } script_event_frame_result_e;
 
 extern s32 g_script_event_speed;
@@ -166,9 +162,7 @@ s32 script_resolve_runtime_id(s32 unit_id);
 /* unit movement and animation */
 /* Task words of a sprite-move thread. The SpriteMove instruction and the
  * thread itself store the moving unit's runtime id; WaitSpriteMove matches it. */
-enum {
-    SPRITE_MOVE_THREAD_WORD_RUNTIME_ID = 0,
-};
+enum { SPRITE_MOVE_THREAD_WORD_RUNTIME_ID = 0 };
 
 extern battle_map_tile_coordinates_t g_script_warp_coords;
 
@@ -233,9 +227,9 @@ extern s32 g_event_pending_unit_vram_copy;
 /* Whether an event instruction loaded the ATTACK overlay and its graphics
  * before the deployment screen starts. */
 typedef enum script_attack_entry_mode {
-    SCRIPT_ATTACK_ENTRY_NORMAL = 1,       /* set when an event thread starts */
-    SCRIPT_ATTACK_ENTRY_PRELOADED = 2,    /* script_opcode_82_load_attack_graphics ran */
-    SCRIPT_ATTACK_ENTRY_PRELOAD_USED = 3, /* deploy_open skipped its loads */
+    SCRIPT_ATTACK_ENTRY_NORMAL = 1,      /* set when an event thread starts */
+    SCRIPT_ATTACK_ENTRY_PRELOADED = 2,   /* script_opcode_82_load_attack_graphics ran */
+    SCRIPT_ATTACK_ENTRY_PRELOAD_USED = 3 /* deploy_open skipped its loads */
 } script_attack_entry_mode_e;
 
 extern u16 g_script_attack_entry_mode; /* script_attack_entry_mode_e */
@@ -250,8 +244,8 @@ typedef enum script_tutorial_wait_value {
     SCRIPT_TUTORIAL_WAIT_ABILITY_LIST = 0xfb,
     SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST = 0xfc,
     SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS = 0xfd,
-    SCRIPT_TUTORIAL_WAIT_MINI_MENU = 0xfe,  /* the Triangle menu */
-    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff, /* menu_start_entry_thread opened a menu */
+    SCRIPT_TUTORIAL_WAIT_MINI_MENU = 0xfe, /* the Triangle menu */
+    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff /* menu_start_entry_thread opened a menu */
 } script_tutorial_wait_value_e;
 
 extern u32 g_script_unfiltered_controller_input;

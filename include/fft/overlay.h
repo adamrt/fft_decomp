@@ -30,25 +30,25 @@ typedef enum overlay_companion {
     COMPANION_OVERLAY_ETC = 12,               /* EVENT/ETC.OUT */
     COMPANION_OVERLAY_ATTACK = 13,            /* EVENT/ATTACK.OUT */
     COMPANION_OVERLAY_CARD = 14,              /* EVENT/CARD.OUT */
-    COMPANION_OVERLAY_BUNIT_SECOND_HALF = 15, /* loaded above the heap reservation */
+    COMPANION_OVERLAY_BUNIT_SECOND_HALF = 15  /* loaded above the heap reservation */
 } overlay_companion_e;
 
 /* Companion data file requests (the second LBA and size tables). */
 typedef enum overlay_companion_file {
-    COMPANION_FILE_WIN001 = 2,    /* EVENT/WIN001.BIN */
-    COMPANION_FILE_BONUS = 3,     /* EVENT/BONUS.BIN */
-    COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
+    COMPANION_FILE_WIN001 = 2,   /* EVENT/WIN001.BIN */
+    COMPANION_FILE_BONUS = 3,    /* EVENT/BONUS.BIN */
+    COMPANION_FILE_SPELL_MES = 4 /* EVENT/SPELL.MES */
 } overlay_companion_file_e;
 
 /* g_overlay_companion_overlay_state: the overlay entry the frame driver calls, cleared when the overlay
  * returns. */
 typedef enum overlay_companion_state {
     COMPANION_OVERLAY_STATE_IDLE = 0,
-    COMPANION_OVERLAY_STATE_STUB = 1,      /* an empty function */
-    COMPANION_OVERLAY_STATE_BUNIT = 2,     /* bunit_entrypoint */
-    COMPANION_OVERLAY_STATE_JOBSTTS = 3,   /* jobstts_entrypoint */
-    COMPANION_OVERLAY_STATE_EQUIP = 4,     /* equip_entrypoint */
-    COMPANION_OVERLAY_STATE_CARD_SAVE = 5, /* card_entrypoint */
+    COMPANION_OVERLAY_STATE_STUB = 1,     /* an empty function */
+    COMPANION_OVERLAY_STATE_BUNIT = 2,    /* bunit_entrypoint */
+    COMPANION_OVERLAY_STATE_JOBSTTS = 3,  /* jobstts_entrypoint */
+    COMPANION_OVERLAY_STATE_EQUIP = 4,    /* equip_entrypoint */
+    COMPANION_OVERLAY_STATE_CARD_SAVE = 5 /* card_entrypoint */
 } overlay_companion_state_e;
 
 extern s32 g_overlay_companion_overlay_state;

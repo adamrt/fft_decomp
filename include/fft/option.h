@@ -18,7 +18,7 @@
 enum {
     GAME_OPTIONS_NAVIGATION_MESSAGES_MASK = 0x00018000,
     GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK = 0x60000000,
-    GAME_OPTIONS_NAVIGATION_MESSAGES_OFF_BITS = 0x00008000,
+    GAME_OPTIONS_NAVIGATION_MESSAGES_OFF_BITS = 0x00008000
 };
 
 typedef enum game_option_index {
@@ -36,30 +36,27 @@ typedef enum game_option_index {
     GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE = 11,
     GAME_OPTION_SOUND_MODE = 12,
     GAME_OPTION_COUNT = 13,
-    GAME_OPTION_UNCHANGED = 13,
+    GAME_OPTION_UNCHANGED = 13
 } game_option_index_e;
 
-typedef enum game_option_toggle {
-    GAME_OPTION_ON = 0,
-    GAME_OPTION_OFF = 1,
-} game_option_toggle_e;
+typedef enum game_option_toggle { GAME_OPTION_ON = 0, GAME_OPTION_OFF = 1 } game_option_toggle_e;
 
 typedef enum game_cursor_movement {
     GAME_CURSOR_MOVEMENT_TYPE_A = 0,
-    GAME_CURSOR_MOVEMENT_TYPE_B = 1,
+    GAME_CURSOR_MOVEMENT_TYPE_B = 1
 } game_cursor_movement_e;
 
 typedef enum game_cursor_repeat_speed {
     GAME_CURSOR_REPEAT_SPEED_FAST = 0,
     GAME_CURSOR_REPEAT_SPEED_REGULAR = 1,
-    GAME_CURSOR_REPEAT_SPEED_SLOW = 2,
+    GAME_CURSOR_REPEAT_SPEED_SLOW = 2
 } game_cursor_repeat_speed_e;
 
 typedef enum game_multi_height_cursor_speed {
     GAME_MULTI_HEIGHT_CURSOR_SPEED_FAST = 0,
     GAME_MULTI_HEIGHT_CURSOR_SPEED_REGULAR = 1,
     GAME_MULTI_HEIGHT_CURSOR_SPEED_SLOW = 2,
-    GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP = 3,
+    GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP = 3
 } game_multi_height_cursor_speed_e;
 
 typedef enum game_finger_cursor_repeat_speed {
@@ -69,13 +66,13 @@ typedef enum game_finger_cursor_repeat_speed {
     GAME_FINGER_CURSOR_REPEAT_SPEED_REGULAR = 3,
     GAME_FINGER_CURSOR_REPEAT_SPEED_SLOW = 4,
     GAME_FINGER_CURSOR_REPEAT_SPEED_SLOWER = 5,
-    GAME_FINGER_CURSOR_REPEAT_SPEED_SLOWEST = 6,
+    GAME_FINGER_CURSOR_REPEAT_SPEED_SLOWEST = 6
 } game_finger_cursor_repeat_speed_e;
 
 typedef enum game_message_display_speed {
     GAME_MESSAGE_DISPLAY_SPEED_FAST = 0,
     GAME_MESSAGE_DISPLAY_SPEED_REGULAR = 1,
-    GAME_MESSAGE_DISPLAY_SPEED_SLOW = 2,
+    GAME_MESSAGE_DISPLAY_SPEED_SLOW = 2
 } game_message_display_speed_e;
 
 typedef struct game_options_fields {
@@ -115,7 +112,7 @@ extern game_options_t g_game_options_saved;
 typedef enum option_screen {
     MENU_OPTION_TYPE_GAME_OPTIONS = 0,
     MENU_OPTION_TYPE_AT_LIST = 1,
-    MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2, /* crystal and treasure panel */
+    MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2 /* crystal and treasure panel */
 } option_screen_e;
 
 void option_open(void);

@@ -32,7 +32,7 @@ typedef enum music_id {
     MUSIC_CONGRATULATIONS = 43,              /* victory_congratulations_thread */
     MUSIC_CONGRATULATIONS_FINAL_BATTLE = 44, /* the same screen after event 0x145 */
     MUSIC_GAME_OVER = 50,                    /* game_over_show */
-    MUSIC_COUNT = 100,
+    MUSIC_COUNT = 100
 } music_id_e;
 
 /* loading */
@@ -70,15 +70,11 @@ typedef enum music_tune {
     MUSIC_TUNE_LEVEL_UP = 1,
     MUSIC_TUNE_ITEM_FOUND = 2, /* an item found by moving, a poach, a trained monster */
     MUSIC_TUNE_JOB_LEVEL_UP = 3,
-    MUSIC_TUNE_JOB_CHANGE = 5,
+    MUSIC_TUNE_JOB_CHANGE = 5
 } music_tune_e;
 
 /* Packed tune-slot id and pending flag. PLAYING_MASK drops the pending flag once the tune starts. */
-enum {
-    MUSIC_TUNE_ID_MASK = 0x3f,
-    MUSIC_TUNE_PLAYING_MASK = 0x7f,
-    MUSIC_TUNE_PENDING = 0x80,
-};
+enum { MUSIC_TUNE_ID_MASK = 0x3f, MUSIC_TUNE_PLAYING_MASK = 0x7f, MUSIC_TUNE_PENDING = 0x80 };
 
 s32 music_play_tune(s32 tune);
 s32 music_set_tune_volume(s32 time);

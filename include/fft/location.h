@@ -58,7 +58,7 @@ typedef enum location_id {
     LOCATION_BARIAUS_VALLEY = 39,
     LOCATION_FINATH_RIVER = 40,
     LOCATION_POESKAS_LAKE = 41,
-    LOCATION_GERMINAS_PEAK = 42,
+    LOCATION_GERMINAS_PEAK = 42
 } location_id_e;
 
 /* Counts and the random-battle location range. */
@@ -66,7 +66,7 @@ enum {
     LOCATION_TOWN_COUNT = 15,
     LOCATION_FIELD_FIRST = LOCATION_MANDALIA_PLAINS,
     LOCATION_FIELD_COUNT = 19,
-    LOCATION_COUNT = 43,
+    LOCATION_COUNT = 43
 };
 
 /* Provisional: four-byte per-location records reached through g_location_records. */
@@ -139,15 +139,12 @@ typedef struct travel_path {
 typedef char travel_path_size_must_be_64[sizeof(travel_path_t) == 64 ? 1 : -1];
 
 /* A path entry packs the route id in its low byte and the direction in bit 8. */
-enum {
-    TRAVEL_PATH_ROUTE_MASK = 0xff,
-    TRAVEL_PATH_REVERSED = 0x100,
-};
+enum { TRAVEL_PATH_ROUTE_MASK = 0xff, TRAVEL_PATH_REVERSED = 0x100 };
 
 /* Values of travel_t.flags. */
 typedef enum travel_flag {
-    TRAVEL_ACTIVE = 0x01,   /* a path was found and is being traveled */
-    TRAVEL_REVERSED = 0x02, /* the current leg runs its route end to start */
+    TRAVEL_ACTIVE = 0x01,  /* a path was found and is being traveled */
+    TRAVEL_REVERSED = 0x02 /* the current leg runs its route end to start */
 } travel_flag_e;
 
 /* Provisional: the route travel state (g_travel), filled by the route search
@@ -222,7 +219,7 @@ extern s32 g_random_battle_squad_id;
  * they stage a request. */
 typedef enum location_script_result_flags {
     LOCATION_SCRIPT_RESULT_ACTION_REACHED = 0x001,
-    LOCATION_SCRIPT_RESULT_CONDITION_FAILED = 0x002,
+    LOCATION_SCRIPT_RESULT_CONDITION_FAILED = 0x002
 } location_script_result_flags_e;
 
 typedef enum location_script_action_flags {
@@ -240,7 +237,7 @@ typedef enum location_script_action_flags {
     LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK
     = LOCATION_SCRIPT_ACTION_DRAW_LOCATION | LOCATION_SCRIPT_ACTION_ERASE_LOCATION,
     LOCATION_SCRIPT_ACTION_MAP_MENU_MASK = LOCATION_SCRIPT_ACTION_PATH_MASK | LOCATION_SCRIPT_ACTION_FOCUS_LOCATION
-        | LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK,
+        | LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK
 } location_script_action_flags_e;
 
 /* What an action opcode stores: ACTION_REACHED with its action bit. */
@@ -258,7 +255,7 @@ typedef enum location_script_request_flags {
     LOCATION_SCRIPT_REQUEST_DRAW_LOCATION
     = LOCATION_SCRIPT_RESULT_ACTION_REACHED | LOCATION_SCRIPT_ACTION_DRAW_LOCATION,
     LOCATION_SCRIPT_REQUEST_ERASE_LOCATION
-    = LOCATION_SCRIPT_RESULT_ACTION_REACHED | LOCATION_SCRIPT_ACTION_ERASE_LOCATION,
+    = LOCATION_SCRIPT_RESULT_ACTION_REACHED | LOCATION_SCRIPT_ACTION_ERASE_LOCATION
 } location_script_request_flags_e;
 
 /* The interpreter's state; the opcode handlers read ip and data here. It is one object through the choice and

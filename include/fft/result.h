@@ -45,14 +45,11 @@ typedef enum action_display_flag {
     ACTION_DISPLAY_FLAG_GAINED_JP = 0x04000000,
     ACTION_DISPLAY_FLAG_NO_TARGET = 0x08000000,
     ACTION_DISPLAY_FLAG_SILENCED = 0x10000000,
-    ACTION_DISPLAY_FLAG_NO_MP = 0x20000000,
+    ACTION_DISPLAY_FLAG_NO_MP = 0x20000000
 } action_display_flag_e;
 
 /* Numeric values correspond to the first sixteen action display flags. */
-enum {
-    ACTION_DISPLAY_VALUE_COUNT = 16,
-    ACTION_DISPLAY_NUMERIC_FLAGS_MASK = 0x0000ffff,
-};
+enum { ACTION_DISPLAY_VALUE_COUNT = 16, ACTION_DISPLAY_NUMERIC_FLAGS_MASK = 0x0000ffff };
 
 /* Image IDs used by the projected-action display. These index the 49-entry
  * g_result_image_rects; they are not battle status IDs. */
@@ -100,7 +97,7 @@ typedef enum action_display_image_id {
     ACTION_DISPLAY_IMAGE_GIL = 46,
     ACTION_DISPLAY_IMAGE_EXP = 47,
     ACTION_DISPLAY_IMAGE_FROG = 48,
-    ACTION_DISPLAY_IMAGE_NONE = 255,
+    ACTION_DISPLAY_IMAGE_NONE = 255
 } action_display_image_id_e;
 
 enum { ACTION_DISPLAY_IMAGE_COUNT = ACTION_DISPLAY_IMAGE_FROG + 1 };
@@ -114,10 +111,7 @@ typedef struct action_display_image_rect {
 typedef char action_display_image_rect_size_must_be_4[(sizeof(action_display_image_rect_t) == 4) ? 1 : -1];
 
 /* Packed image IDs in the action-result status list. */
-enum {
-    ACTION_STATUS_DISPLAY_IMAGE_MASK = 0x7f,
-    ACTION_STATUS_DISPLAY_REMOVAL = 0x80,
-};
+enum { ACTION_STATUS_DISPLAY_IMAGE_MASK = 0x7f, ACTION_STATUS_DISPLAY_REMOVAL = 0x80 };
 
 /* Entries of unit_t.status_display_image_list. */
 enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
@@ -171,14 +165,11 @@ typedef enum result_display_selector {
     RESULT_DISPLAY_CT_ZERO = 0x0d0,
     RESULT_DISPLAY_NO_TARGET = 0x0e0,
     RESULT_DISPLAY_SILENCED = 0x0f0,
-    RESULT_DISPLAY_NO_MP = 0x100,
+    RESULT_DISPLAY_NO_MP = 0x100
 } result_display_selector_e;
 
 /* Encoding in action_result_display_t.selector. */
-enum {
-    RESULT_DISPLAY_SELECTOR_MASK = 0x1ff,
-    RESULT_DISPLAY_MODIFIER_CRITICAL = 0x200,
-};
+enum { RESULT_DISPLAY_SELECTOR_MASK = 0x1ff, RESULT_DISPLAY_MODIFIER_CRITICAL = 0x200 };
 
 extern const u8 g_result_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
 extern u16 g_result_display_values[ACTION_DISPLAY_VALUE_COUNT];

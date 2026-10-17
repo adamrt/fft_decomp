@@ -22,16 +22,12 @@ void ability_list_scrolling_thread(void);
 /* Packed entries shared by the WORLD, BUNIT, and JOBSTTS ability menus. The
  * low-ten-bit mask is intentionally wider than ABILITY_ID_MASK: bit 9 is
  * unused by supported IDs, while bits 10 and 11 remain outside the ID. */
-enum {
-    ABILITY_LIST_ENTRY_ID_MASK = 0x03ff,
-    ABILITY_LIST_ENTRY_DISABLED_SHIFT = 14,
-    ABILITY_LIST_ENTRY_END = -1,
-};
+enum { ABILITY_LIST_ENTRY_ID_MASK = 0x03ff, ABILITY_LIST_ENTRY_DISABLED_SHIFT = 14, ABILITY_LIST_ENTRY_END = -1 };
 
 typedef enum ability_list_entry_flag {
     ABILITY_LIST_ENTRY_LEARNED = 0x1000,
     ABILITY_LIST_ENTRY_HIDE_DETAILS = 0x2000,
-    ABILITY_LIST_ENTRY_DISABLED = 0x4000,
+    ABILITY_LIST_ENTRY_DISABLED = 0x4000
 } ability_list_entry_flag_e;
 
 /* Ability list tab of the WORLD, BUNIT and JOBSTTS ability menus
@@ -42,7 +38,7 @@ typedef enum menu_ability_category {
     MENU_ABILITY_CATEGORY_REACTION = 1,
     MENU_ABILITY_CATEGORY_SUPPORT = 2,
     MENU_ABILITY_CATEGORY_MOVEMENT = 3,
-    MENU_ABILITY_CATEGORY_ALL = 15, /* the list builders take any other value as all */
+    MENU_ABILITY_CATEGORY_ALL = 15 /* the list builders take any other value as all */
 } menu_ability_category_e;
 
 /* BUNIT/WORLD ability_list_build modes: every ability of the job, the learned
@@ -51,7 +47,7 @@ typedef enum ability_list_mode {
     ABILITY_LIST_MODE_VIEW_ALL = 0,
     ABILITY_LIST_MODE_LEARNED_ONLY = 1,
     ABILITY_LIST_MODE_LEARN_MENU = 2,
-    ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
+    ABILITY_LIST_MODE_COUNT_UNLEARNED = 3
 } ability_list_mode_e;
 
 extern u8 g_ability_list_ready;

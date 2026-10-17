@@ -629,7 +629,7 @@ static s32 move_step_calculate_layer_offset(s32 x, s32 y, u32 layer) {
 }
 
 enum {
-    MOVE_STEP_HEIGHT_SCALE = 6, /* world units per half height unit; world y grows downward */
+    MOVE_STEP_HEIGHT_SCALE = 6 /* world units per half height unit; world y grows downward */
 };
 
 /*
@@ -662,11 +662,7 @@ static s32 move_step_clamp_z_to_headroom(s32 value, s32 x, s32 y, u32 layer) {
     return value;
 }
 
-enum {
-    MOVE_STEP_HALF_WIDTH = BATTLE_MAP_TILE_SIZE / 2,
-    MOVE_STEP_NEAR_EDGE = -7,
-    MOVE_STEP_FAR_EDGE = 35,
-};
+enum { MOVE_STEP_HALF_WIDTH = BATTLE_MAP_TILE_SIZE / 2, MOVE_STEP_NEAR_EDGE = -7, MOVE_STEP_FAR_EDGE = 35 };
 
 /*
  * Build the per-frame velocity for a run of identical movement steps: walk

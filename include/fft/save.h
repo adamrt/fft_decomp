@@ -42,7 +42,7 @@ enum {
     SAVE_HEADER_MAGIC_S = 'S',
     SAVE_HEADER_MAGIC_C = 'C',
     SAVE_HEADER_ICON_ONE_FRAME = 0x11,
-    SAVE_HEADER_BLOCK_COUNT_ONE = 1,
+    SAVE_HEADER_BLOCK_COUNT_ONE = 1
 };
 
 /* What a save slot's line on the save screen shows: the first 0x18 bytes of a
@@ -110,11 +110,7 @@ typedef char save_image_size_must_be_7680[(sizeof(save_image_t) == 7680) ? 1 : -
 
 /* The 0x1e00-byte serialized save is parity-covered in 0x80-byte blocks;
  * each block contributes 0x400 one-bit reads to the primary parity stream. */
-enum {
-    SAVE_PARITY_BLOCK_COUNT = 60,
-    SAVE_PARITY_BITS_PER_BLOCK = 1024,
-    SAVE_PARITY_BLOCK_BYTES = 128,
-};
+enum { SAVE_PARITY_BLOCK_COUNT = 60, SAVE_PARITY_BITS_PER_BLOCK = 1024, SAVE_PARITY_BLOCK_BYTES = 128 };
 
 /* One selectable save-file icon: 16-color CLUT plus 16x16 4bpp image. */
 typedef struct save_icon {
@@ -140,9 +136,7 @@ typedef enum save_slot_state {
 enum { SAVE_SLOT_COUNT = 15 };
 
 /* The value of g_save_last_used_slot when no slot was loaded or written. */
-enum {
-    SAVE_LAST_USED_SLOT_NONE = 0xff,
-};
+enum { SAVE_LAST_USED_SLOT_NONE = 0xff };
 
 /* Hours, minutes and seconds shown for one memory-card save slot. */
 typedef struct save_play_time {
@@ -324,8 +318,8 @@ typedef enum save_step {
     SAVE_STEP_SELECT_SAVE = 3, /* the save slot list takes input */
     SAVE_STEP_LOADING = 4,
     SAVE_STEP_SAVING = 5,
-    SAVE_STEP_LEAVE = 9,   /* starts the fade out */
-    SAVE_STEP_LEFT = 0xff, /* no step runs while the screen fades */
+    SAVE_STEP_LEAVE = 9,  /* starts the fade out */
+    SAVE_STEP_LEFT = 0xff /* no step runs while the screen fades */
 } save_step_e;
 
 extern u8 g_save_menu_step; /* save_step_e */

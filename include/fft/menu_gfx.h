@@ -88,7 +88,7 @@ typedef enum menu_texture_page {
     MENU_TEXTURE_PAGE_ALLOCATED_IMAGES = 1, /* VRAM (448, 0): the grid gfx_alloc_texture_rect hands out */
     MENU_TEXTURE_PAGE_TEXT_IMAGES = 2,      /* VRAM (384, 0): rendered message and list text */
     MENU_TEXTURE_PAGE_UNIT_SPRITES = 3,     /* VRAM (832, 256): the first unit spritesheet column; no caller */
-    MENU_TEXTURE_PAGE_ITEM_ICONS = 4,       /* VRAM (896, 256): ITEM.BIN; the code passes y = 288 */
+    MENU_TEXTURE_PAGE_ITEM_ICONS = 4        /* VRAM (896, 256): ITEM.BIN; the code passes y = 288 */
 } menu_texture_page_e;
 
 /* Texture page and CLUT of the menu script's textured quads, set by its CLUT and texture-page commands and by
@@ -109,10 +109,7 @@ typedef char menu_palette_pair_size_must_be_64[(sizeof(menu_palette_pair_t) == 6
 
 /* CLUTs of the normal and dimmed menu colors: GetClut(0x3c0, 0x1f0) and
  * GetClut(0x3c0, 0x1f4). */
-enum {
-    MENU_CLUT_NORMAL = 0x7c3c,
-    MENU_CLUT_DIMMED = 0x7d3c,
-};
+enum { MENU_CLUT_NORMAL = 0x7c3c, MENU_CLUT_DIMMED = 0x7d3c };
 
 extern menu_palette_pair_t g_menu_palette_colors;
 extern u8 g_menu_use_alternate_palette;

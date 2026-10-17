@@ -22,7 +22,7 @@ typedef enum menu_window_frame_mode {
     MENU_WINDOW_FRAME_UPLOAD = 0,
     MENU_WINDOW_FRAME_BUILD = 1,
     MENU_WINDOW_FRAME_ALTERNATE_UPLOAD = 2,
-    MENU_WINDOW_FRAME_ALTERNATE_BUILD = 3,
+    MENU_WINDOW_FRAME_ALTERNATE_BUILD = 3
 } menu_window_frame_mode_e;
 
 /* Image the window frame thread composes its border pieces in before uploading them. */
@@ -42,9 +42,9 @@ u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, 
 /* menu_window_buffer_t::icon_flags: which of the window's three icon sprites
  * are drawn. */
 typedef enum menu_window_icon_flags {
-    MENU_WINDOW_ICON_SCROLL_UP = 0x01,     /* icon_sprites[0]: lines above the first drawn line */
-    MENU_WINDOW_ICON_SCROLL_DOWN = 0x02,   /* icon_sprites[1]: lines below the last drawn line */
-    MENU_WINDOW_ICON_SCROLL_MARKER = 0x04, /* icon_sprites[2]: the scroll position */
+    MENU_WINDOW_ICON_SCROLL_UP = 0x01,    /* icon_sprites[0]: lines above the first drawn line */
+    MENU_WINDOW_ICON_SCROLL_DOWN = 0x02,  /* icon_sprites[1]: lines below the last drawn line */
+    MENU_WINDOW_ICON_SCROLL_MARKER = 0x04 /* icon_sprites[2]: the scroll position */
 } menu_window_icon_flags_e;
 
 /* The six message window buffers, allocated and released as three adjacent pairs by

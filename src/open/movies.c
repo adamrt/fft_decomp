@@ -31,7 +31,7 @@
 typedef enum movie_stream_status {
     MOVIE_STREAM_PLAYING = 0,
     MOVIE_STREAM_STOP_AND_PAUSE_AUDIO = 1, /* reached g_movie_end_frame */
-    MOVIE_STREAM_STOP = 2,                 /* reached g_movie_video_end_frame; the CD audio plays on */
+    MOVIE_STREAM_STOP = 2                  /* reached g_movie_video_end_frame; the CD audio plays on */
 } movie_stream_status_e;
 
 /* Shared VLC/MDEC state used by OPEN.BIN's movie-stream pipeline. */

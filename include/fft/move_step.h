@@ -15,7 +15,7 @@ typedef enum move_direction {
     MOVE_DIRECTION_SOUTH = 0, /* -y */
     MOVE_DIRECTION_EAST = 1,  /* +x */
     MOVE_DIRECTION_NORTH = 2, /* +y */
-    MOVE_DIRECTION_WEST = 3,  /* -x */
+    MOVE_DIRECTION_WEST = 3   /* -x */
 } move_direction_e;
 
 /* unit_t.step_phase: the stage of the movement step in progress. Every stage has one
@@ -83,7 +83,7 @@ typedef enum move_step_phase {
     MOVE_STEP_PHASE_FLOAT_JUMP_WEST = 57,
     /* a teleport path (MOVE_PATH_TELEPORT and _FAILED): start the animation, then wait for it */
     MOVE_STEP_PHASE_TELEPORT_START = 59,
-    MOVE_STEP_PHASE_TELEPORT_ANIMATION = 60,
+    MOVE_STEP_PHASE_TELEPORT_ANIMATION = 60
 } move_step_phase_e;
 
 extern move_step_t g_move_step_value;

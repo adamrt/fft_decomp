@@ -152,15 +152,12 @@ void formula_apply_poach_and_train(void);
 
 /* accuracy and evasion */
 /* Chances in 100 of a critical hit and of a weapon's added effect. */
-enum {
-    FORMULA_CRITICAL_HIT_CHANCE = 4,
-    FORMULA_ADDED_EFFECT_CHANCE = 19,
-};
+enum { FORMULA_CRITICAL_HIT_CHANCE = 4, FORMULA_ADDED_EFFECT_CHANCE = 19 };
 
 typedef enum formula_facing_modifier {
     FORMULA_FACING_FRONT = 0,
     FORMULA_FACING_SIDE = 1,
-    FORMULA_FACING_BACK = 2,
+    FORMULA_FACING_BACK = 2
 } formula_facing_modifier_e;
 
 void formula_evade_apply_target_statuses(void);

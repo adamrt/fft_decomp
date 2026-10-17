@@ -22,7 +22,7 @@ typedef enum equipment_state {
     EQUIPMENT_STATE_EQUIP = 2,     /* equipment_run_equip_mode */
     EQUIPMENT_STATE_REMOVE = 4,    /* equipment_run_remove_mode */
     EQUIPMENT_STATE_ITEM_LIST = 5, /* equipment_update_menu */
-    EQUIPMENT_STATE_CLOSED = 0xff, /* equip_entrypoint returns its result */
+    EQUIPMENT_STATE_CLOSED = 0xff  /* equip_entrypoint returns its result */
 } equipment_state_e;
 
 extern u8 g_equipment_screen_state; /* equipment_state_e */
@@ -53,7 +53,7 @@ typedef enum equipment_slot_result {
     EQUIPMENT_SLOT_ITEM_CURRENT_LOCKED = -2,
     EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP = -1,
     EQUIPMENT_SLOT_ITEM_INCOMPATIBLE_PAIR = 0,
-    EQUIPMENT_SLOT_ITEM_ALLOWED = 1,
+    EQUIPMENT_SLOT_ITEM_ALLOWED = 1
 } equipment_slot_result_e;
 
 /* EQUIP.OUT's 0x7A-byte unit preview, built from unit_stats_t by
@@ -247,9 +247,7 @@ s32 equipment_input_read_page_scroll_direction(void);
 
 /* menu commands */
 /* The opcode that ends an EQUIP menu display stream. */
-enum {
-    EQUIPMENT_SCRIPT_END = 0x19,
-};
+enum { EQUIPMENT_SCRIPT_END = 0x19 };
 
 /* messages and sound */
 extern u8 g_equipment_text_restore_pending;
@@ -268,7 +266,7 @@ typedef enum equipment_thread_slot {
     EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST = 10,    /* unit_panel_equipment_thread */
     EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC = 11,      /* the numeric panel thread of the item panel */
     EQUIPMENT_THREAD_SLOT_UNIT_STATUS = 13,       /* unit_panel_banner_thread */
-    EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS = 14, /* the second banner slot the indicator draw watches */
+    EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS = 14  /* the second banner slot the indicator draw watches */
 } equipment_thread_slot_e;
 
 extern s8 g_equipment_thread_running;

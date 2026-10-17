@@ -113,7 +113,7 @@ typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_TELEPORT = 19,
     EFFECT_SECONDARY_ANIMATION_GOLEM = 20,
     /* the null handler; g_effect_secondary_ending_function_id is this record's function byte */
-    EFFECT_SECONDARY_ANIMATION_ENDING = 21,
+    EFFECT_SECONDARY_ANIMATION_ENDING = 21
 } effect_secondary_animation_id_e;
 
 /* The secondary animation parameter that makes the projectile handler draw the thrown item's own
@@ -159,7 +159,7 @@ typedef enum effect_element_index {
     EFFECT_ELEMENT_INDEX_HOLY = 5,
     EFFECT_ELEMENT_INDEX_DARK = 6,
     EFFECT_ELEMENT_INDEX_ICE = 7,
-    EFFECT_ELEMENT_INDEX_LIGHTNING = 8,
+    EFFECT_ELEMENT_INDEX_LIGHTNING = 8
 } effect_element_index_e;
 
 extern u8 g_effect_element_masks[];
@@ -186,7 +186,7 @@ typedef enum effect_particle_group {
     EFFECT_PARTICLE_GROUP_SPELL_CHARGE_13 = 13, /* given the height of group 12; nothing spawns it */
     EFFECT_PARTICLE_GROUP_SUMMON_CHARGE = 14,
     EFFECT_PARTICLE_GROUP_TELEPORT = 15,
-    EFFECT_PARTICLE_GROUP_GOLEM = 16,
+    EFFECT_PARTICLE_GROUP_GOLEM = 16
 } effect_particle_group_e;
 
 /* One particle group of the secondary effects: a 0x2e-byte record of

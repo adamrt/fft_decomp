@@ -29,12 +29,12 @@ typedef char formation_abilities_size_must_be_10[(sizeof(formation_abilities_t) 
  * the label the formation grid draws below a unit that is away. */
 typedef enum formation_unit_proposition {
     FORMATION_UNIT_PROPOSITION_LEAVING = 1,
-    FORMATION_UNIT_PROPOSITION_MISSING = 2,
+    FORMATION_UNIT_PROPOSITION_MISSING = 2
 } formation_unit_proposition_e;
 
 enum {
     FORMATION_PREVIEW_UNIT_INDEX = PARTY_ROSTER_SLOT_COUNT,
-    FORMATION_UNIT_RECORD_COUNT = FORMATION_PREVIEW_UNIT_INDEX + 1,
+    FORMATION_UNIT_RECORD_COUNT = FORMATION_PREVIEW_UNIT_INDEX + 1
 };
 
 /* The WORLD menus' record of a unit (g_formation_unit_records), compacted after roster and menu-specific filtering;
@@ -91,7 +91,7 @@ typedef char formation_unit_size_must_be_296[(sizeof(formation_unit_t) == 296) ?
 typedef enum formation_record_list_mode {
     FORMATION_RECORD_LIST_ALL = 0,
     FORMATION_RECORD_LIST_AVAILABLE_HUMANS = 1, /* no unit on a proposition, egg or monster */
-    FORMATION_RECORD_LIST_MONSTERS = 2,         /* no egg, male or female unit */
+    FORMATION_RECORD_LIST_MONSTERS = 2          /* no egg, male or female unit */
 } formation_record_list_mode_e;
 
 /* Result of formation_get_unit_lock: whether the unit's
@@ -101,7 +101,7 @@ typedef enum formation_unit_lock {
     FORMATION_UNIT_LOCK_EGG = -4,
     FORMATION_UNIT_LOCK_MONSTER = -3,
     FORMATION_UNIT_LOCK_PROPOSITION = -2, /* away on a proposition */
-    FORMATION_UNIT_UNLOCKED = 1,
+    FORMATION_UNIT_UNLOCKED = 1
 } formation_unit_lock_e;
 
 extern struct formation_unit g_formation_unit_records[FORMATION_UNIT_RECORD_COUNT];
@@ -157,7 +157,7 @@ typedef enum formation_menu {
     FORMATION_MENU_JOB_WHEEL_OPENING = 21,            /* wheel open animation */
     FORMATION_MENU_ABILITY_ENTER_PORTRAIT_SLIDE = 22, /* only the portrait slides; nothing stores it */
     FORMATION_MENU_ITEM_ENTER_NO_SLIDE = 23,          /* nothing stores it */
-    FORMATION_MENU_JOB_CHANGE = 24,                   /* job change flash on the wheel */
+    FORMATION_MENU_JOB_CHANGE = 24                    /* job change flash on the wheel */
 } formation_menu_e;
 
 /* Screen x and texture u of one background tile; two alternating rows of four. */
@@ -387,7 +387,7 @@ typedef enum formation_sort_key {
     FORMATION_SORT_KEY_BRAVE = 4,
     FORMATION_SORT_KEY_FAITH = 5,
     FORMATION_SORT_KEY_MAX_HP = 7,
-    FORMATION_SORT_KEY_MAX_MP = 9,
+    FORMATION_SORT_KEY_MAX_MP = 9
 } formation_sort_key_e;
 
 enum { FORMATION_SORT_KEY_COUNT = 7 };
@@ -405,13 +405,13 @@ typedef enum breeding_rarity {
     BREEDING_RARITY_NONE = 0,
     BREEDING_RARITY_COMMON = 1,
     BREEDING_RARITY_UNCOMMON = 2,
-    BREEDING_RARITY_RARE = 3,
+    BREEDING_RARITY_RARE = 3
 } breeding_rarity_e;
 
 enum {
     BREEDING_RARITY_COUNT = 3,
     BREEDING_MONTH_COUNT = 13,
-    BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1,
+    BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1
 };
 
 /* Provisional: the breeding entry of a monster job (JOB_ID_CHOCOBO on): the hatch-day range and the three offspring

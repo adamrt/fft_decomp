@@ -18,7 +18,7 @@ typedef enum zodiac_compatibility {
     ZODIAC_COMPATIBILITY_GOOD = 2,
     ZODIAC_COMPATIBILITY_GENDER_DEPENDENT = 3,
     ZODIAC_COMPATIBILITY_WORST = 4,
-    ZODIAC_COMPATIBILITY_BEST = 5,
+    ZODIAC_COMPATIBILITY_BEST = 5
 } zodiac_compatibility_e;
 
 /* One inclusive date limit and its zodiac ID. The 13-entry WORLD table has

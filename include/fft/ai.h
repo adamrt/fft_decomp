@@ -20,7 +20,7 @@ enum {
     AI_MOVEMENT_SCENARIO_COUNT = 3,
     AI_KNOWN_TRAP_COUNT = 4,
     AI_GRID_ROW_COUNT = 18,
-    AI_GRID_COLUMN_COUNT = 16,
+    AI_GRID_COLUMN_COUNT = 16
 };
 
 /* coordinates */
@@ -41,13 +41,13 @@ typedef union ai_coords {
 enum {
     AI_ABILITY_FLAG_1_TARGET_ALLIES = 0x01,
     AI_ABILITY_FLAG_1_TARGET_ENEMIES = 0x02,
-    AI_ABILITY_FLAG_1_AFFECTS_HP = 0x80,
+    AI_ABILITY_FLAG_1_AFFECTS_HP = 0x80
 };
 
 enum {
     AI_ABILITY_FLAG_2_EVADEABLE = 0x02,
     AI_ABILITY_FLAG_2_UNDEAD_REVERSE = 0x20,
-    AI_ABILITY_FLAG_2_TARGET_MAP_TILES = 0x80,
+    AI_ABILITY_FLAG_2_TARGET_MAP_TILES = 0x80
 };
 
 enum {
@@ -59,12 +59,12 @@ enum {
      * alone. With any of them set the AI tries every origin tile. */
     AI_ABILITY_FLAG_3_EXHAUSTIVE_ORIGIN_MASK = 0x3c,
     AI_ABILITY_FLAG_3_DIRECT_TRAJECTORY = 0x40,
-    AI_ABILITY_FLAG_3_ARC_TRAJECTORY = 0x80,
+    AI_ABILITY_FLAG_3_ARC_TRAJECTORY = 0x80
 };
 
 enum {
     AI_ABILITY_FLAG_4_EVADE_WITH_MOTION = 0x01, /* the static table's bit; the AI working copy reuses byte 4 */
-    AI_ABILITY_FLAG_4_USABLE_BY_AI = 0x80,
+    AI_ABILITY_FLAG_4_USABLE_BY_AI = 0x80
 };
 
 /* 32-bit flags of the considered ability. Bytes 1..3 retain the static table
@@ -97,9 +97,11 @@ enum {
     AI_ABILITY_EXHAUSTIVE_ORIGIN_SCAN = 0x04000000,
     AI_ABILITY_REQUIRES_MONSTER_SKILL = 0x08000000,
     AI_ABILITY_ENEMIES_ONLY = 0x20000000,
-    AI_ABILITY_ALLIES_ONLY = 0x40000000,
-    AI_ABILITY_USABLE_BY_AI = 0x80000000,
+    AI_ABILITY_ALLIES_ONLY = 0x40000000
 };
+
+/* The high bit is an unsigned mask; C89 enumerators must fit int. */
+#define AI_ABILITY_USABLE_BY_AI 0x80000000U
 
 /* Ability AI behavior flags 1..4. Consumers read the 32-bit value, two 16-bit values,
  * or individual bytes; use the corresponding masks above for each view. */
@@ -148,9 +150,7 @@ typedef char ai_considered_ability_size_must_be_20[(sizeof(ai_considered_ability
 
 /* actions */
 /* ai_action_rank_t.decided of the selected action once it is chosen. */
-enum {
-    AI_ACTION_DECIDED = 0xff,
-};
+enum { AI_ACTION_DECIDED = 0xff };
 
 /* The ranking tail of an action, compared by
  * ai_rank_compare. */
@@ -178,10 +178,7 @@ typedef char ai_action_data_size_must_be_32[(sizeof(ai_action_data_t) == 32) ? 1
 
 /* ability lists */
 /* The packed 16-bit value combines an ability ID and a physical unit slot. */
-enum {
-    AI_ABILITY_ENTRY_ABILITY_MASK = 0x03ff,
-    AI_ABILITY_ENTRY_UNIT_SHIFT = 10,
-};
+enum { AI_ABILITY_ENTRY_ABILITY_MASK = 0x03ff, AI_ABILITY_ENTRY_UNIT_SHIFT = 10 };
 
 /* Runtime policy byte in ai_ability_entry_t. The low three bits control
  * how the AI searches action origins and consumes evaluated aim tiles; initialization
@@ -194,7 +191,7 @@ typedef enum ai_ability_entry_flag {
     AI_ABILITY_ENTRY_ENEMIES_ONLY = 0x20,
     AI_ABILITY_ENTRY_ALLIES_ONLY = 0x40,
     AI_ABILITY_ENTRY_USABLE = 0x80,
-    AI_ABILITY_ENTRY_INIT_PRESERVE_MASK = 0xf8,
+    AI_ABILITY_ENTRY_INIT_PRESERVE_MASK = 0xf8
 } ai_ability_entry_flag_e;
 
 /* Four-byte entries in each compact unit's AI ability list. Whole usage
@@ -240,7 +237,7 @@ typedef enum ai_weapon_formula_flags {
     AI_WEAPON_FORMULA_NONE = 0x00, /* no weapon in either hand */
     AI_WEAPON_FORMULA_DAMAGE = 0x01,
     AI_WEAPON_FORMULA_ABSORB_HP = 0x02,
-    AI_WEAPON_FORMULA_HEAL = 0x04,
+    AI_WEAPON_FORMULA_HEAL = 0x04
 } ai_weapon_formula_flags_e;
 
 /* Per-compact-unit weapon summary. ai_ability_build_list clears two
@@ -275,20 +272,17 @@ typedef enum ai_decision_flags {
      * Reraise), unpetrified and without Death Sentence. Target searches skip a
      * unit without it unless the unit is confused. The copy from the ENTD
      * record leaves the stay-near tile's level here until the first refresh. */
-    AI_DECISION_CONSIDERED = 0x80,
+    AI_DECISION_CONSIDERED = 0x80
 } ai_decision_flags_e;
 
 /* Shares of usable abilities are measured in 128ths. */
-enum {
-    AI_ABILITY_SHARE_SCALE = 128,
-    AI_SUPPORT_SHARE_THRESHOLD = 77,
-};
+enum { AI_ABILITY_SHARE_SCALE = 128, AI_SUPPORT_SHARE_THRESHOLD = 77 };
 
 typedef enum ai_targeting_flags_1 {
     AI_TARGETING_FLAG_1_HAS_RANGED_ABILITY = 0x01, /* a usable ability has a direct or arc trajectory */
     AI_TARGETING_FLAG_1_CAN_HEAL_ALLIES = 0x02,    /* a usable ability affects HP and targets allies */
     AI_TARGETING_FLAG_1_MOSTLY_SUPPORT = 0x04,     /* ally-targeting share of the usable abilities >= 77/128 */
-    AI_TARGETING_FLAG_1_REFLECTED_ACTION = 0x08,
+    AI_TARGETING_FLAG_1_REFLECTED_ACTION = 0x08
 } ai_targeting_flags_1_e;
 
 /* Targeting policy copied from ENTD AI Flags 2 to decision +0x07. The low
@@ -302,7 +296,7 @@ typedef enum ai_targeting_flags_2 {
     AI_TARGET_UNTARGETABLE = 0x10,
     AI_TARGET_DEAD_WITHOUT_RERAISE = 0x20,
     AI_TARGET_DEAD_WITH_RERAISE = 0x40,
-    AI_TARGET_HP_BELOW_THREE_QUARTERS = 0x80,
+    AI_TARGET_HP_BELOW_THREE_QUARTERS = 0x80
 } ai_targeting_flags_2_e;
 
 /* Per-unit AI decision record (ai_data_t.unit_decisions); acting_unit_decision points at the
@@ -330,7 +324,7 @@ typedef enum ai_target_setting_flags {
     AI_TARGET_SETTING_REFRESH_UNIT_STATUS_FLAGS = 0x01000000,
     AI_TARGET_SETTING_CONSUME_EVALUATED_AIM_TILES = 0x02000000,
     AI_TARGET_SETTING_HAS_HOLY_WATER = 0x20000000, /* the acting unit can use the Holy Water item ability */
-    AI_TARGET_SETTING_RETREAT_SUPPORT_AVAILABLE = 0x40000000,
+    AI_TARGET_SETTING_RETREAT_SUPPORT_AVAILABLE = 0x40000000
 } ai_target_setting_flags_e;
 
 /* ai_data_t.targetability, +0x0c78..0x0cb7. The 21-byte save of unit_targetable at +0xca2

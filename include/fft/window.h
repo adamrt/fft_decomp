@@ -73,7 +73,7 @@ typedef enum display_object_flag {
     DISPLAY_OBJECT_POP_IN = 0x100,   /* image: the opening animation is running; clears itself */
     DISPLAY_OBJECT_UNTINTED = 0x400, /* WLDCORE: the color is used as is, without the fade tint */
     /* WLDCORE animated object: steps its frame counter even while SYSTEM_FLAG_FREEZE_ANIMATION is set. */
-    DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED = 0x800,
+    DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED = 0x800
 } display_object_flag_e;
 
 /* A 36-byte animated display object of WLDCORE or OPEN. sequence selects a row of the program's animation table; a
@@ -203,7 +203,7 @@ typedef enum window_anim_sequence {
     WINDOW_ANIM_SEND_UNIT_FRAME_B = 116,
     WINDOW_ANIM_SEND_UNIT_PORTRAIT = 117,
     WINDOW_ANIM_LAYOUT_CURSOR_IDLE = 120, /* the layout windows' cursor, looping */
-    WINDOW_ANIM_BRAVE_STORY_MARKER = 121, /* the brave-story list's two completion markers */
+    WINDOW_ANIM_BRAVE_STORY_MARKER = 121  /* the brave-story list's two completion markers */
 } window_anim_sequence_e;
 
 /* window and render records */
@@ -235,7 +235,7 @@ void window_set_render_objects_visible(s32 clear);
 typedef enum text_window_scroll {
     TEXT_WINDOW_SCROLL_PAGING = 0,
     TEXT_WINDOW_SCROLL_MANUAL = 1, /* while square is held: up and down scroll by rows */
-    TEXT_WINDOW_SCROLL_RETURN = 2, /* scrolls back to the page start */
+    TEXT_WINDOW_SCROLL_RETURN = 2  /* scrolls back to the page start */
 } text_window_scroll_e;
 
 /* A paged text window and its four decorative window records. */

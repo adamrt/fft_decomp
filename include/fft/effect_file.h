@@ -14,7 +14,7 @@ struct suzuki_sound_resource;
  * Event effects follow the action/reaction rows and use the script ID remapping. */
 enum {
     EFFECT_ABILITY_FILE_MASK = 0x1ff, /* the number in the file's name, EFFECT/E###.BIN */
-    EFFECT_ABILITY_FLAG_ITEM = 0x800, /* Item abilities and Throw Ball: effect_is_item_ability */
+    EFFECT_ABILITY_FLAG_ITEM = 0x800  /* Item abilities and Throw Ball: effect_is_item_ability */
 };
 
 /* One resident header and disc-table slot for each 9-bit effect file ID. */
@@ -25,7 +25,7 @@ enum {
     EFFECT_FILE_CURE = 1, /* loaded in place of a file of no size */
     EFFECT_FILE_FIRE = 16,
     EFFECT_FILE_BOLT = 20,
-    EFFECT_FILE_ICE = 24,
+    EFFECT_FILE_ICE = 24
 };
 
 /* section table */
@@ -53,7 +53,7 @@ typedef enum effect_sound_mode {
     EFFECT_SOUND_MODE_ALTERNATE = 1,            /* the first and second in turn */
     EFFECT_SOUND_MODE_FIRST_THEN_SECOND = 2,    /* the first once, then the second */
     EFFECT_SOUND_MODE_FIRST_THEN_ALTERNATE = 3, /* the first once, then the third and second in turn */
-    EFFECT_SOUND_MODE_CYCLE = 4,                /* the three in turn */
+    EFFECT_SOUND_MODE_CYCLE = 4                 /* the three in turn */
 } effect_sound_mode_e;
 
 /* One of the four sound channels of an effect: the sound tracks of the
@@ -80,7 +80,7 @@ enum {
     EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST = 0x08,
     EFFECT_FLAG_QUIET_MUSIC = 0x10,         /* lower the music while the effect loads and plays */
     EFFECT_FLAG_TIMING_CURVE_PHASE1 = 0x20, /* phase 1 of the parent timeline sets the time scale from its curve */
-    EFFECT_FLAG_TIMING_CURVE_CHILD = 0x40,  /* a child timeline sets the time scale from its curve */
+    EFFECT_FLAG_TIMING_CURVE_CHILD = 0x40   /* a child timeline sets the time scale from its curve */
 };
 
 extern const effect_flags_section_t* g_effect_flags_section;
@@ -188,9 +188,9 @@ typedef char effect_sprite_section_size_must_be_4[sizeof(effect_sprite_section_t
 /* flags of a sprite part (effect_sprite_part_t, effect_sprite_frameset_t). */
 enum {
     EFFECT_SPRITE_PART_CLUT_MASK = 0x000f,
-    EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW = 0x0010,  /* the CLUT is of BATTLE_MAP_CLUT_ROW_EFFECT_SECOND */
-    EFFECT_SPRITE_PART_TPAGE_MODE_MASK = 0x00e0,       /* the tpage's blend rate and 8-bit color bits */
-    EFFECT_SPRITE_PART_FLAG_SEMI_TRANSPARENT = 0x0200, /* draw it semi-transparent */
+    EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW = 0x0010, /* the CLUT is of BATTLE_MAP_CLUT_ROW_EFFECT_SECOND */
+    EFFECT_SPRITE_PART_TPAGE_MODE_MASK = 0x00e0,      /* the tpage's blend rate and 8-bit color bits */
+    EFFECT_SPRITE_PART_FLAG_SEMI_TRANSPARENT = 0x0200 /* draw it semi-transparent */
 };
 
 /* One textured quad of a multi-part effect sprite: a frame of an effect file's
@@ -223,14 +223,11 @@ extern u8* g_effect_frame_data;
 typedef enum effect_sequence_opcode {
     EFFECT_SEQUENCE_OP_LOOP = 1,       /* back to the first byte */
     EFFECT_SEQUENCE_OP_SET_OFFSET = 2, /* two s16 sprite offsets follow */
-    EFFECT_SEQUENCE_OP_ADD_OFFSET = 3, /* two s8 sprite offset deltas follow */
+    EFFECT_SEQUENCE_OP_ADD_OFFSET = 3  /* two s8 sprite offset deltas follow */
 } effect_sequence_opcode_e;
 
 /* The high bit distinguishes control bytes from ordinary frame indices. */
-enum {
-    EFFECT_SEQUENCE_OP_MASK = 0x7f,
-    EFFECT_SEQUENCE_OP_FLAG = 0x80,
-};
+enum { EFFECT_SEQUENCE_OP_MASK = 0x7f, EFFECT_SEQUENCE_OP_FLAG = 0x80 };
 
 /* effect_list_node_t.depth_mode: the third byte of a sequence frame, which adjusts the sprite's
  * ordering-table depth. */
@@ -240,7 +237,7 @@ typedef enum effect_sprite_depth_mode {
     EFFECT_SPRITE_DEPTH_FIXED_8 = 2,
     EFFECT_SPRITE_DEPTH_FIXED_FARTHEST = 3, /* EFFECT_SPRITE_OT_DEPTH_MAX */
     EFFECT_SPRITE_DEPTH_FIXED_16 = 4,
-    EFFECT_SPRITE_DEPTH_NEARER_16 = 5,
+    EFFECT_SPRITE_DEPTH_NEARER_16 = 5
 } effect_sprite_depth_mode_e;
 
 /* View at a sprite-sequence byte cursor: commands occupy one, three or five

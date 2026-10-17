@@ -27,7 +27,7 @@ enum {
     HEAP_PAGE_SHIFT = 11,
     HEAP_PAGE_SIZE = 1 << HEAP_PAGE_SHIFT,
     HEAP_GAME_PAGE_COUNT = 64,
-    HEAP_SMD_PAGE_COUNT = 16,
+    HEAP_SMD_PAGE_COUNT = 16
 };
 
 extern u32 g_heap_battle_end_address;
