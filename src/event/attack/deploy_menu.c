@@ -23,6 +23,15 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern help_navigation_record_t g_deploy_help_cursor_nodes[];
+
+/* text */
+/* g_scenario_event_condition_blocks help text, installed as TEXT_SECTION_OVERLAY_SCREEN */
+extern u8* g_deploy_help_text_section;
+
+/* g_scenario_table string arena, installed as TEXT_SECTION_DEPLOYMENT_UNIT_HELP */
+extern u8* g_deploy_unit_text_section;
+
 /* Overlay text-file header: offsets are relative to the data following the header. */
 typedef struct deploy_text_header {
     s32 section_offsets[32];

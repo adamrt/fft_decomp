@@ -17,6 +17,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Map darkness uses RGB and ignores the fourth byte. */
+extern const CVECTOR g_deploy_map_darkness_color;
+
 typedef struct scenario_setup {
     u8 id[2];            /* 0x00 */
     u8 map_id;           /* 0x02 */
