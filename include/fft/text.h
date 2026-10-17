@@ -285,7 +285,7 @@ void text_set_blit_destination(s16 destination_x, s16 destination_y);
 void text_render_glyph_to_4bpp_image(const u8* glyph_bitmap, u8* image, glyph_blit_t* origin, s32 palette_offset);
 void text_blit_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
 s32 menu_text_render_glyph_to_4bpp_image(s32 glyph_id, u8* image, const text_image_position_t* position, s32 style);
-void menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text);
+void menu_display_text_string(u8* image, glyph_blit_t* origin, const u8* text);
 void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text);
@@ -343,7 +343,8 @@ void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
  * skill_ct is 0 or 0xff. */
 void menu_draw_stacked_glyph_pair(u8* pixels, glyph_blit_t* position);
 void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin);
-void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count);
+void menu_draw_numeric_display_entries(
+    u8* buffer, const menu_number_entry_t* entries, glyph_blit_t* position, s32 count);
 void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
 void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
 

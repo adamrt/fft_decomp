@@ -686,7 +686,8 @@ void gfx_set_image_primitive_layout(
 /* Draw count positioned number entries into an image buffer: kind 0 in the small glyphs
  * (text_draw_small_number_glyphs), kind 1 in the large ones (menu_draw_large_number_glyphs); other kinds
  * draw nothing. */
-void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
+void menu_draw_numeric_display_entries(
+    u8* buffer, const menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
     s32 i;
 
     for (i = 0; i < count; i++) {

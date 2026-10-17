@@ -35,7 +35,7 @@ void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_bli
 }
 
 /* Render a text string the caller supplies instead of a text id, on the main stack. */
-void menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text) {
+void menu_display_text_string(u8* image, glyph_blit_t* origin, const u8* text) {
     g_thread_call_target = (void (*)(void))menu_display_text;
     thread_call_on_main_stack(0, image, origin, text);
 }
