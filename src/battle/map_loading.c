@@ -810,10 +810,9 @@ s32 battle_map_stop_clut_cycles_and_weather_sfx(void) {
     return 0;
 }
 
-/* Enable the weather sounds and start the rain sound when the weather has set one
- * (g_weather_primary_sfx_id). */
+/* Enable the weather sounds and start rain when its sound ID is stored. */
 void weather_start_sfx(void) {
-    s32 sound_id = g_weather_primary_sfx_id;
+    s32 sound_id = g_weather_rain_sfx_id;
 
     g_weather_sfx_enabled = 1;
     if (sound_id != 0) {
@@ -837,23 +836,23 @@ void weather_set_timed_transform_duration(s32 id, s32 value) {
  * is an unset local; no caller reads it. */
 s32 weather_stop_sfx(void) {
     s32 result;
-    s32 sound_id = g_weather_primary_sfx_id;
+    s32 sound_id = g_weather_rain_sfx_id;
 
     if (sound_id != 0) {
         sound_stop_sfx(sound_id);
-        g_weather_primary_sfx_id = 0;
+        g_weather_rain_sfx_id = 0;
     }
 
-    sound_id = g_weather_secondary_sfx_id;
+    sound_id = g_weather_thunder_a_sfx_id;
     if (sound_id != 0) {
         sound_stop_sfx(sound_id);
-        g_weather_secondary_sfx_id = 0;
+        g_weather_thunder_a_sfx_id = 0;
     }
 
-    sound_id = g_weather_tertiary_sfx_id;
+    sound_id = g_weather_thunder_b_sfx_id;
     if (sound_id != 0) {
         sound_stop_sfx(sound_id);
-        g_weather_tertiary_sfx_id = 0;
+        g_weather_thunder_b_sfx_id = 0;
     }
 
     /* The target returns an indeterminate saved-register value. */

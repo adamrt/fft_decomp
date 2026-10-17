@@ -2217,9 +2217,9 @@ data:
   - {addr: 0x800f5c58, name: g_battle_map_gns_load_phase}
   - {addr: 0x800f5c5c, name: g_battle_map_resource_load_state}
   - {addr: 0x800f5c60, name: g_battle_map_lowest_surface_y}
-  - {addr: 0x800f5c64, name: g_weather_primary_sfx_id}
-  - {addr: 0x800f5c68, name: g_weather_secondary_sfx_id}
-  - {addr: 0x800f5c6c, name: g_weather_tertiary_sfx_id}
+  - {addr: 0x800f5c64, name: g_weather_rain_sfx_id}
+  - {addr: 0x800f5c68, name: g_weather_thunder_a_sfx_id}
+  - {addr: 0x800f5c6c, name: g_weather_thunder_b_sfx_id}
   - {addr: 0x800f5c70, name: g_weather_sfx_enabled}
   - {addr: 0x800f5c74, name: g_battle_map_gns_lba}
   - {addr: 0x800f5e74, name: g_move_find_map_data}

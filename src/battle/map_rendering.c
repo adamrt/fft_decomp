@@ -460,10 +460,10 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
         if (rand() % 480 == 0) {
             g_weather_lightning_state.timer = 60;
             if (rand() & 1) {
-                g_weather_secondary_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_THUNDER_A);
+                g_weather_thunder_a_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_THUNDER_A);
                 sound_play_sfx_on_free_channel(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_THUNDER_A));
             } else {
-                g_weather_tertiary_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_THUNDER_B);
+                g_weather_thunder_b_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_THUNDER_B);
                 sound_play_sfx_on_free_channel(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_THUNDER_B));
             }
         }
@@ -1825,7 +1825,7 @@ void render_init_buffers(void) {
             }
         }
     }
-    g_weather_primary_sfx_id = 0;
+    g_weather_rain_sfx_id = 0;
     g_weather_sfx_enabled = 0;
     g_effect_map_vertices = 0;
 }
@@ -1996,7 +1996,7 @@ void weather_run_command(weather_command_e command) {
                 weather_stop_sfx();
                 weather_run_command(BATTLE_MAP_WEATHER_COMMAND_SNOW);
             } else {
-                g_weather_primary_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
+                g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
                 if (g_weather_sfx_enabled != 0) {
                     sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
                 }
@@ -2013,7 +2013,7 @@ void weather_run_command(weather_command_e command) {
                 weather_stop_sfx();
                 weather_run_command(BATTLE_MAP_WEATHER_COMMAND_HEAVY_RAIN);
                 weather_run_command(BATTLE_MAP_WEATHER_COMMAND_LIGHTNING);
-                g_weather_primary_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
+                g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
                 if (g_weather_sfx_enabled != 0) {
                     sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
                 }
@@ -2025,7 +2025,7 @@ void weather_run_command(weather_command_e command) {
     case BATTLE_MAP_WEATHER_COMMAND_THUNDER:
         g_weather_lightning_mode = BATTLE_MAP_LIGHTNING_ONCE;
         g_weather_lightning_state.timer = 0x3c;
-        g_weather_primary_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
+        g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
         if (g_weather_sfx_enabled != 0) {
             sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
         }
@@ -3444,7 +3444,7 @@ s32 battle_map_gns_dispatch_resource(u8 resource_type, battle_map_resource_t* da
         g_battle_map_lighting_pending = 0;
         setVector(&g_battle_map_light_rotation, 0, 0, 0);
 
-        /* The direction matrix follows the nine color entries. */
+        /* Start at the color matrix to retain the target's separate 18-byte address step. */
         vector = light->color[0];
         vector += 9;
         direction.m[0][0] = vector[0];

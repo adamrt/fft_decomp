@@ -128,10 +128,11 @@ extern s32 g_weather_timed_transform_unread; /* weather_set_timed_transform_dura
 void weather_set_timed_transform_duration(s32 id, s32 value);
 
 /* sound */
-/* The rain sound (primary) and the two thunder sounds, 0 when none plays. */
-extern s32 g_weather_primary_sfx_id;
-extern s32 g_weather_secondary_sfx_id;
-extern s32 g_weather_tertiary_sfx_id;
+/* Sound IDs remembered for weather_stop_sfx; zero means no ID is stored.
+ * The rain ID is also retained while weather sounds are disabled. */
+extern s32 g_weather_rain_sfx_id;
+extern s32 g_weather_thunder_a_sfx_id;
+extern s32 g_weather_thunder_b_sfx_id;
 extern u8 g_weather_sfx_enabled;
 
 void weather_start_sfx(void);
