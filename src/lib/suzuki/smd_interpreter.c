@@ -1,3 +1,5 @@
+/* SMD instruction dispatch, note timing, repeats and sound-effect commands. */
+
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
@@ -199,4 +201,236 @@ void suzuki_smd_read_instructions(suzuki_music_t* music, suzuki_music_channel_t*
         channel++;
         voice_bit <<= 1;
     } while (--channel_count != 0);
+}
+
+/* Empty routine between the SMD reader and the opcode handlers; no opcode
+ * table slot or call references it. */
+void suzuki_smd_noop_8(void) {
+}
+
+/* Handler of the 37 unassigned SMD opcode slots: consumes nothing. */
+u8* suzuki_smd_no_instruction(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    return note_data;
+}
+
+/* SMD opcode 0x80 "Rest": keys the channel off and waits the given number
+ * of ticks. */
+u8* suzuki_smd_rest(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    channel->event_ticks = note_data[0];
+    channel->flags |= SUZUKI_CHANNEL_KEYED_OFF;
+    channel->voice_update_flags |= SUZUKI_VOICE_UPDATE_KEY_OFF;
+    return note_data + 1;
+}
+
+/* SMD opcode 0x81 "Fermata": holds the sounding note for the given number
+ * of ticks without keying it on again. */
+u8* suzuki_smd_fermata(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    u16 value = *note_data++;
+
+    channel->flags |= SUZUKI_CHANNEL_SOUNDING;
+    channel->event_ticks = value;
+    return note_data;
+}
+
+/* SMD opcode 0x8A "Nop": a separate copy of suzuki_smd_no_instruction, with
+ * length 1 in g_suzuki_smd_opcode_lengths. */
+u8* suzuki_smd_opcode_8a(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    return note_data;
+}
+
+/* SMD opcode 0x8D "Loop Select": sets the loop point like Loop (0x91), but
+ * only when its byte equals music->loop_select. */
+u8* suzuki_smd_loop_point_if_selected(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    u8 selector = *note_data++;
+
+    if (selector == music->loop_select) {
+        channel->loop_note_data = note_data;
+        channel->loop_octave_base = channel->octave_base;
+    }
+    return note_data;
+}
+
+/* SMD opcode 0x8E "Skip 3": ignores its three parameter bytes. */
+u8* suzuki_smd_opcode_8e(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    return note_data + 3;
+}
+
+/* SMD opcode 0x8F "Nop": a separate copy of suzuki_smd_no_instruction, with
+ * length 1 in g_suzuki_smd_opcode_lengths. */
+u8* suzuki_smd_opcode_8f(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    return note_data;
+}
+
+/* SMD opcode 0x90 "End Bar": jumps back to the loop point set by Loop
+ * (0x91), counting the pass and restoring the octave. Without a loop
+ * point the channel ends: its SPU voice is queued for key-off (the SFX MUS
+ * record also drops the voice from its LFO, noise and reverb masks and from
+ * the SFX reservation, and marks envelope and LFO parameters for update),
+ * and the read position stays on this opcode. */
+u8* suzuki_smd_end_bar(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    u32 mask;
+
+    if (channel->loop_note_data) {
+        note_data = channel->loop_note_data;
+        channel->loop_count++;
+        channel->octave_base = channel->loop_octave_base;
+    } else {
+        channel->voice_update_flags &= ~(SUZUKI_VOICE_UPDATE_KEY_ON | SUZUKI_VOICE_UPDATE_KEY_OFF);
+        if (music->status & SUZUKI_MUSIC_STATUS_SFX) {
+            g_suzuki_sound_sfx_key_off_voices |= channel->voice_attr.voice;
+            mask = ~channel->voice_attr.voice;
+            music->lfo_voice_mask &= mask;
+            music->noise_voice_mask &= mask;
+            music->reverb_voice_mask &= mask;
+            g_suzuki_sound_sfx_reserved_voices &= mask;
+            channel->voice_attr_flags |= SUZUKI_VOICE_ATTR_SUSTAIN | SUZUKI_VOICE_ATTR_ATTACK | SUZUKI_VOICE_ATTR_PITCH;
+        } else {
+            g_suzuki_sound_music_key_off_voices |= channel->voice_attr.voice;
+        }
+        channel->flags = 0;
+        note_data--;
+    }
+    return note_data;
+}
+
+/* SMD opcode 0x91 "Loop": marks the loop point End Bar (0x90) jumps to,
+ * saving the note-data position and the current octave base. */
+u8* suzuki_smd_loop(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    channel->loop_note_data = note_data;
+    channel->loop_octave_base = channel->octave_base;
+    return note_data;
+}
+
+/* SMD opcode 0x94 "Octave": twelve semitones per octave. */
+u8* suzuki_smd_octave(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    channel->octave_base = note_data[0] * 12;
+    return note_data + 1;
+}
+
+/* SMD opcode 0x95 "Raise Octave": raises the octave base by 12
+ * semitones. */
+u8* suzuki_smd_raise_octave(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    channel->octave_base += 12;
+    return note_data;
+}
+
+/* SMD opcode 0x96 "Lower Octave": lowers the octave base by 12
+ * semitones. */
+u8* suzuki_smd_lower_octave(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    channel->octave_base -= 12;
+    return note_data;
+}
+
+/* SMD opcode 0x97 "Time Signature": numerator then denominator. They only
+ * drive the music's bar and beat counters.
+ * The numerator is held as a 16-bit value: `lbu` already zero-extends it,
+ * so a u8 temporary would be masked again before the 16-bit stores. */
+u8* suzuki_smd_time_signature(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    u16 numerator = note_data[0];
+    u8 denominator = note_data[1];
+
+    music->ticks_per_beat = 0xc0 / (denominator * music->tick_divisor);
+    music->beat_unit = denominator;
+    music->beats_per_bar = numerator;
+    music->beats_per_bar_copy = numerator;
+    music->beat_ticks_remaining = music->ticks_per_beat;
+    return note_data + 2;
+}
+
+/* SMD opcode 0xA4: sets the song-wide byte _unknown_01c, which nothing
+ * reads. */
+u8* suzuki_smd_opcode_a4(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    music->_unknown_01c = *note_data;
+    return note_data + 1;
+}
+
+/* SMD opcode 0xA5: adds a delta to the song-wide byte
+ * that opcode 0xA4 sets. */
+u8* suzuki_smd_opcode_a5(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    music->_unknown_01c += *note_data;
+    return note_data + 1;
+}
+
+/* SMD opcode 0x98 "Repeat": pushes a repeat entry that plays the
+ * following section as many times as its byte gives, remembering the start
+ * and the octave. */
+u8* suzuki_smd_repeat(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    suzuki_repeat_t* repeat;
+
+    channel->repeat_depth++;
+    repeat = &channel->repeats[channel->repeat_depth];
+    repeat->count = *note_data++ - 1;
+    repeat->start = note_data;
+    repeat->octave_base = channel->octave_base;
+    return note_data;
+}
+
+/* SMD opcode 0x99 "Coda": ends a repeated section. While passes
+ * remain it records this position and octave for To Coda (0x9A) and jumps
+ * back to the section start; after the last pass it pops the entry. */
+u8* suzuki_smd_coda(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    suzuki_repeat_t* repeat = &channel->repeats[channel->repeat_depth];
+
+    if (--repeat->count != 0xff) {
+        repeat->coda = note_data;
+        repeat->coda_octave = channel->octave_base;
+        note_data = repeat->start;
+        channel->octave_base = repeat->octave_base;
+    } else {
+        channel->repeat_depth--;
+    }
+    return note_data;
+}
+
+/* SMD opcode 0x9A "To Coda": on the last pass of a repeated section
+ * jumps past its Coda (0x99), restoring the octave recorded there, and pops
+ * the entry. */
+u8* suzuki_smd_to_coda(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    suzuki_repeat_t* repeat = &channel->repeats[channel->repeat_depth];
+
+    if (repeat->count == 0) {
+        note_data = repeat->coda;
+        channel->octave_base = repeat->coda_octave;
+        channel->repeat_depth--;
+    }
+    return note_data;
+}
+
+/* SMD opcode 0x9C: play a sound effect. Little-endian sound id, then a
+ * volume byte; the balance is centered. */
+u8* suzuki_smd_play_sfx(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    suzuki_sound_play_sfx_with_settings_find_channel(note_data[0] | (note_data[1] << 8), note_data[2], 0x40);
+    return note_data + 3;
+}
+
+/* SMD opcode 0x9D: stop the sound effect with the little-endian sound id.
+ * It consumes two parameter bytes; g_suzuki_smd_opcode_lengths gives it three. */
+u8* suzuki_smd_stop_sfx(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    suzuki_sound_stop_sfx_channels(note_data[0] | (note_data[1] << 8));
+    return note_data + 2;
+}
+
+/* SMD opcode 0x9E "Play VFX": moves the channel into a loaded sound
+ * resource. The resource is the one whose id matches the high half
+ * of the channel's sound id (id 0 takes the list head). Its channel_offsets
+ * entry sound * 2 + byte 2, with the sound number little-endian in bytes 0-1,
+ * gives the stream, and reading resumes three bytes past it. Without a matching resource
+ * the read position is returned unchanged, so the parameter bytes are read
+ * next as note data. */
+u8* suzuki_smd_play_vfx(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
+    suzuki_sound_resource_t* resource = g_suzuki_sound_resource_list;
+    s16 sound = note_data[0] | (note_data[1] << 8);
+    s16 id = channel->sound_id >> 16;
+    u8 index = note_data[2];
+
+    if (id != 0) {
+        while (resource->id != id) {
+            resource = resource->next;
+            if (resource == 0) {
+                return note_data;
+            }
+        }
+    }
+    note_data = (u8*)resource + resource->channel_offsets[sound * 2 + index];
+    return note_data + 3;
 }
