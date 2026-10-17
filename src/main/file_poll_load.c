@@ -51,7 +51,7 @@ void file_poll_load(file_load_descriptor_t* header) {
         }
         break;
     case FILE_LOAD_STATE_START_READ:
-        if (CdRead(header->sector_count, (u32*)header->destination, CdlModeSpeed) == 0) {
+        if (CdRead(header->sector_count, header->destination, CdlModeSpeed) == 0) {
             header->error_count = header->error_count + 1;
         } else {
             g_system_wait_frames = 0;

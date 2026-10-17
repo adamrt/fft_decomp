@@ -98,7 +98,7 @@ typedef struct file_load_descriptor {
     s32 lba;
     s32 sector_index; /* 0x18; sector being read by world_map_poll_texture_stream */
     CdlLOC position;
-    u8* destination;
+    u32* destination; /* word-aligned CD transfer buffer */
 } file_load_descriptor_t;
 typedef char file_load_descriptor_size_must_be_36[sizeof(file_load_descriptor_t) == 36 ? 1 : -1];
 

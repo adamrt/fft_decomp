@@ -124,7 +124,7 @@ void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
     case FILE_LOAD_STATE_POLL_READ:
         status = CdReady(1, 0);
         if (status == CdlDataReady) {
-            CdGetSector(stream->destination + (stream->sector_index & 1) * 2048, 0x200);
+            CdGetSector(stream->destination + (stream->sector_index & 1) * PSYQ_CD_DATA_WORDS, PSYQ_CD_DATA_WORDS);
             stream->wait_frames = 0;
             stream->state++;
             break;
@@ -149,17 +149,17 @@ void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
         /* Each sector holds a rectangle count, then per rectangle a packed
          * position, a packed size and the pixels. Keep the original word cursor:
          * a typed rectangle cursor folds address calculations and shortens the body. */
-        word = (stream->sector_index & 1) * 512;
-        rect_count = ((u32*)stream->destination)[(stream->sector_index & 1) * 512];
+        word = (stream->sector_index & 1) * PSYQ_CD_DATA_WORDS;
+        rect_count = stream->destination[(stream->sector_index & 1) * PSYQ_CD_DATA_WORDS];
         word++;
         for (n = 0; n < rect_count; n++) {
-            rect.x = ((u32*)stream->destination)[word];
-            rect.y = (((u32*)stream->destination)[word] & 0xFFFF0000) >> 16;
+            rect.x = stream->destination[word];
+            rect.y = (stream->destination[word] & 0xFFFF0000) >> 16;
             word++;
-            rect.w = ((u32*)stream->destination)[word];
-            rect.h = (((u32*)stream->destination)[word] & 0xFFFF0000) >> 16;
+            rect.w = stream->destination[word];
+            rect.h = (stream->destination[word] & 0xFFFF0000) >> 16;
             word++;
-            LoadImage(&rect, (u32*)stream->destination + word);
+            LoadImage(&rect, stream->destination + word);
             word += rect.w * rect.h / 2;
         }
         stream->sector_index++;
