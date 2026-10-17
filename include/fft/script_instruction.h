@@ -427,6 +427,17 @@ typedef struct event_change_dialog_instruction {
 } event_change_dialog_instruction_t;
 typedef char event_change_dialog_instruction_size_must_be_6[sizeof(event_change_dialog_instruction_t) == 6 ? 1 : -1];
 
+/* Byte-aligned Effect instruction; the coordinate operands are stored but not consumed. */
+typedef struct event_effect_instruction {
+    u8 opcode;
+    u8 effect_id_le[2];
+    u8 target_unit_id;
+    u8 x;
+    u8 y;
+    u8 target_mode;
+} event_effect_instruction_t;
+typedef char event_effect_instruction_size_must_be_7[sizeof(event_effect_instruction_t) == 7 ? 1 : -1];
+
 /* unit operands */
 /* Operand records start after the opcode byte. 16-bit values stay in
  * little-endian byte arrays because the interpreter may address them at any

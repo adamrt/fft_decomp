@@ -96,7 +96,8 @@ void script_execute_event(void) {
     u8* ghost_parameters;
     battle_map_tile_t* tile;
     unit_stats_t* copy_destination;
-    u8* effect_instruction;
+    u8* effect_bytes;
+    const event_effect_instruction_t* effect_instruction;
     thread_t* thread;
     thread_t* threads;
 
@@ -543,13 +544,15 @@ restart_script:
         /* ---- Effects ---- */
         else if (opcode == EVENT_OPCODE_EFFECT) {
             g_event_pending_effect_id = first_operand;
-            g_event_effect_target_runtime_id
-                = script_resolve_runtime_id(((((u8*)g_script_event_block) + instruction_offset))[3]);
-            effect_instruction = (u8*)g_script_event_block;
-            effect_instruction += instruction_offset;
-            g_event_effect_target_position.x = effect_instruction[4];
-            g_event_effect_target_position.y = effect_instruction[5];
-            g_event_effect_target_mode = effect_instruction[6];
+            g_event_effect_target_runtime_id = script_resolve_runtime_id(
+                ((const event_effect_instruction_t*)((u8*)g_script_event_block + instruction_offset))->target_unit_id);
+            /* Keep the base load and byte advance separate for the original register assignment. */
+            effect_bytes = (u8*)g_script_event_block;
+            effect_bytes += instruction_offset;
+            effect_instruction = (const event_effect_instruction_t*)effect_bytes;
+            g_event_effect_target_position.x = effect_instruction->x;
+            g_event_effect_target_position.y = effect_instruction->y;
+            g_event_effect_target_mode = effect_instruction->target_mode;
             script_set_variable(EVENT_SCRIPT_VAR_CAMERA_ROLL, 0);
             thread_wait_frames(2);
         } else if (opcode == EVENT_OPCODE_EFFECT_START) {
