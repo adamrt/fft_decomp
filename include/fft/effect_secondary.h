@@ -377,7 +377,7 @@ typedef union effect_secondary_state {
 } effect_secondary_state_t;
 
 extern effect_secondary_state_t g_effect_secondary_state;
-extern effect_death_poof_state_t g_effect_death_poof_states[];
+extern effect_death_poof_state_t g_effect_death_poof_states[EFFECT_SECONDARY_RECORD_COUNT];
 extern effect_charge_params_t g_effect_charge_line_params[2];
 
 /* Interleaved x/y offsets for eight direction sectors, then the first pair again. */
