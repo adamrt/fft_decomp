@@ -136,7 +136,7 @@ void option_game_options_thread(void) {
     } while (0);
 
     page = g_option_pages;
-    layout = g_option_entry_table;
+    layout = &g_option_entry_table;
     entry->window.h = layout->row_count * 16 + 0x10;
     entry->inner_height = layout->row_count * 16 + 0x10;
     entry->text_image.height = layout->row_count * 16 + 0x10;

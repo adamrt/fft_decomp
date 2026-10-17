@@ -82,7 +82,9 @@ typedef char at_list_work_size_must_be_1824[(sizeof(at_list_work_t) == 1824) ? 1
 extern at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
 extern menu_entry_t g_at_list_state;
 extern menu_scroll_text_layout_t g_at_list_layout;
-extern menu_text_layout_t g_at_list_entry_table[1];
+
+/* WORLD and OPTION each define one column layout for the AT List menu. */
+extern menu_text_layout_t g_at_list_entry_table;
 extern u8 g_at_list_text[];
 extern s16 g_at_list_indices[];
 extern s16 g_at_list_primary_values[];

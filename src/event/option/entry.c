@@ -64,7 +64,7 @@ void option_entrypoint(s32 menu_type) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
         thread_start(g_thread_current_id - 1, option_game_options_thread);
         menu->select_text_table = 1;
-        menu->context = g_option_entry_table;
+        menu->context = &g_option_entry_table;
         thread_set_parameters(g_thread_current_id - 1, menu, 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_exit_current();

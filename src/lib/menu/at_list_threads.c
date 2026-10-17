@@ -398,7 +398,7 @@ void at_list_start_thread(void) {
 
     g_at_list_state.select_text_table = 0x13;
     g_menu_thread_menu_data = list;
-    g_at_list_state.context = g_at_list_entry_table;
+    g_at_list_state.context = &g_at_list_entry_table;
     at_list_init(list);
     thread_start(g_thread_current_id - 2, at_list_run);
     thread_set_parameters(g_thread_current_id - 2, (s32)list, 0, 0);

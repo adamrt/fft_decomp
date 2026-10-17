@@ -143,7 +143,9 @@ typedef struct option_page {
 typedef char option_page_size_must_be_400[(sizeof(option_page_t) == 400) ? 1 : -1];
 
 extern option_page_t g_option_pages[2];
-extern menu_text_layout_t g_option_entry_table[1];
+
+/* WORLD and OPTION each define one column layout for the game options list. */
+extern menu_text_layout_t g_option_entry_table;
 extern menu_entry_t g_option_icon_thread_param;
 extern menu_icon_record_t g_option_picker_icon_records[2];
 extern menu_input_timing_profile_t g_option_input_repeat_timings[];
