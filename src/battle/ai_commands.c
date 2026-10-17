@@ -16,6 +16,7 @@
 #include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 static s32 ai_ability_add_usable_from_skillset(s32 unit_id, s32 skillset, s32 count);
@@ -1023,7 +1024,7 @@ static void ai_ability_load_entry(const ai_ability_entry_t* entry) {
          * retain the field-derived base cursor for the exact five-byte fill. */
         status_cursor = (u32)ai + value;
         do {
-            *(u8*)(status_cursor + ((u32)&ai->considered_ability.parameters.fields.status_infliction - (u32)ai))
+            *(u8*)(status_cursor + offsetof(ai_data_t, considered_ability.parameters.fields.status_infliction))
                 = included;
             value--;
             status_cursor--;
@@ -1325,7 +1326,7 @@ enum {
 
 /* 0x5f4; kept as a separate integer term so the target's addu/addiu order
  * survives (a typed &ai->tile_priority[...] folds the offset first). */
-#define AI_TILE_PRIORITY_OFFSET ((u32) & ((ai_data_t*)0)->tile_priority)
+#define AI_TILE_PRIORITY_OFFSET offsetof(ai_data_t, tile_priority)
 
 /*
  * Seed the move-only baseline action, which a ranked action must beat
@@ -1526,7 +1527,7 @@ static s32 ai_move_select_destination(s32 max_distance, ai_destination_order_e o
             {
                 u32 scenario_address = ai->movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
                 u32 level_address;
-                scenario_address += (u32)&ai->reachable_tiles - (u32)ai;
+                scenario_address += offsetof(ai_data_t, reachable_tiles);
                 level_address = level * sizeof(ai->reachable_tiles[0][0]) + scenario_address;
                 row = *(u16*)(y * sizeof(ai->reachable_tiles[0][0][0]) + level_address);
             }
@@ -1539,14 +1540,14 @@ static s32 ai_move_select_destination(s32 max_distance, ai_destination_order_e o
                         level_tile_index += x;
                         tile_index = level * sizeof(ai->tile_target_distance[0]) + level_tile_index;
                         byte_address = tile_index + (u32)ai;
-                        distance = *(u8*)(byte_address + ((u32)&ai->tile_target_distance - (u32)ai));
+                        distance = *(u8*)(byte_address + offsetof(ai_data_t, tile_target_distance));
                         if (max_distance < distance) {
                             continue;
                         }
                         {
-                            s32 proximity = *(u8*)(byte_address + ((u32)&ai->tile_foe_proximity - (u32)ai));
+                            s32 proximity = *(u8*)(byte_address + offsetof(ai_data_t, tile_foe_proximity));
                             score = *(u16*)(tile_index * sizeof(ai->tile_priority[0][0][0]) + (u32)ai
-                                + ((u32)&ai->tile_priority - (u32)ai));
+                                + offsetof(ai_data_t, tile_priority));
                             /* Compare the packed priority and proximity as a signed score. */
                             score = score << 16;
                             score += proximity;
@@ -1872,7 +1873,7 @@ static s32 ai_select_status_imposed(void) {
             i = UNIT_SLOT_COUNT - 1;
             cursor = (u32)ai + i;
             do {
-                *(u8*)(cursor + ((u32)&ai->targetability.live.unit_targetable - (u32)ai)) = 0;
+                *(u8*)(cursor + offsetof(ai_data_t, targetability.live.unit_targetable)) = 0;
                 i--;
                 cursor--;
             } while (i >= 0);
@@ -2127,8 +2128,8 @@ static s32 ai_origin_calculate_ability_range(void) {
     for (level_address = (u32)ai; level < BATTLE_MAP_TERRAIN_LAYER_COUNT;
         level++, level_address += AI_GRID_ROW_COUNT * sizeof(u16)) {
         for (y = 0; y < ai->map_max_y; y++) {
-            target_rows = (u16*)(level_address + ((u32)&ai->targetable_tiles - (u32)ai));
-            origin_rows = (u16*)(level_address + ((u32)&ai->aim_tiles - (u32)ai));
+            target_rows = (u16*)(level_address + offsetof(ai_data_t, targetable_tiles));
+            origin_rows = (u16*)(level_address + offsetof(ai_data_t, aim_tiles));
             target_rows[y] = 0;
             row = origin_rows[y];
             if (row != 0) {
@@ -2403,7 +2404,7 @@ static s32 ai_select_fight_for_life(void) {
             i = UNIT_SLOT_COUNT - 1;
             cursor = (u32)ai + i;
             do {
-                *(u8*)(cursor + ((u32)&ai->targetability.live.unit_targetable - (u32)ai)) = included;
+                *(u8*)(cursor + offsetof(ai_data_t, targetability.live.unit_targetable)) = included;
                 i--;
                 cursor--;
             } while (i >= 0);
@@ -2500,7 +2501,7 @@ static s32 ai_move_build_targeted(void) {
      * at +0xbc/+0xc0. Stage only the level base; retain the real member offset
      * and typed row/column indexing for the byte-exact match. */
     distance_level_base = ai->acting_unit_coords.fields.elevation * sizeof(ai->tile_target_distance[0]) + (u32)ai;
-    distance_rows = (u8(*)[AI_GRID_COLUMN_COUNT])(distance_level_base + (u32) & ((ai_data_t*)0)->tile_target_distance);
+    distance_rows = (u8(*)[AI_GRID_COLUMN_COUNT])(distance_level_base + offsetof(ai_data_t, tile_target_distance));
     limit = range;
     distance = distance_rows[ai->acting_unit_coords.fields.y][ai->acting_unit_coords.fields.x];
     within_two_tiles = distance < 3;
@@ -3075,30 +3076,30 @@ static void ai_move_set_candidate_and_actor_reachable(void) {
     for (row = 0; row < AI_GRID_ROW_COUNT; row++) {
         u32 row_address = row * sizeof(u16);
         u32 scenario_address = (u32)ai + ai->movement_scenario * sizeof(ai->reachable_tiles[0]);
-        *(u16*)(row_address + scenario_address + ((u32)&ai->reachable_tiles[0][0][0] - (u32)ai)) = 0;
+        *(u16*)(row_address + scenario_address + offsetof(ai_data_t, reachable_tiles[0][0][0])) = 0;
         scenario_address = (u32)ai + ai->movement_scenario * sizeof(ai->reachable_tiles[0]);
         row_address += scenario_address;
-        *(u16*)(row_address + ((u32)&ai->reachable_tiles[0][1][0] - (u32)ai)) = 0;
+        *(u16*)(row_address + offsetof(ai_data_t, reachable_tiles[0][1][0])) = 0;
     }
     {
         u32 scenario_address = ai->movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
         u32 coords_address = (u32)ai + ai->movement_scenario * sizeof(ai->candidate_coords[0]);
         u32 level_address;
         u32 row_address;
-        scenario_address += (u32)&ai->reachable_tiles - (u32)ai;
-        level_address = *(u8*)(coords_address + ((u32)&ai->candidate_coords[0].fields.elevation - (u32)ai))
+        scenario_address += offsetof(ai_data_t, reachable_tiles);
+        level_address = *(u8*)(coords_address + offsetof(ai_data_t, candidate_coords[0].fields.elevation))
                 * sizeof(ai->reachable_tiles[0][0])
             + scenario_address;
-        row_address = *(u8*)(coords_address + ((u32)&ai->candidate_coords[0].fields.y - (u32)ai))
+        row_address = *(u8*)(coords_address + offsetof(ai_data_t, candidate_coords[0].fields.y))
                 * sizeof(ai->reachable_tiles[0][0][0])
             + level_address;
-        *(u16*)row_address = 0x8000 >> *(u8*)(coords_address + ((u32)&ai->candidate_coords[0].fields.x - (u32)ai));
+        *(u16*)row_address = 0x8000 >> *(u8*)(coords_address + offsetof(ai_data_t, candidate_coords[0].fields.x));
     }
     {
         u32 scenario_address = ai->movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
         u32 level_address;
         u32 row_address;
-        scenario_address += (u32)&ai->reachable_tiles - (u32)ai;
+        scenario_address += offsetof(ai_data_t, reachable_tiles);
         level_address = ai->acting_unit_coords.fields.elevation * sizeof(ai->reachable_tiles[0][0]) + scenario_address;
         row_address = ai->acting_unit_coords.fields.y * sizeof(ai->reachable_tiles[0][0][0]) + level_address;
         *(u16*)row_address |= 0x8000 >> ai->acting_unit_coords.fields.x;
@@ -3287,7 +3288,7 @@ static s32 ai_move_score_reachable_tiles(void) {
             u32 scenario_address = g_ai_data.movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
             u32 level_address;
             u32 row_address;
-            scenario_address += (u32)&ai->reachable_tiles - (u32)ai;
+            scenario_address += offsetof(ai_data_t, reachable_tiles);
             level_address = level * sizeof(ai->reachable_tiles[0][0]) + scenario_address;
             row_address = y * sizeof(ai->reachable_tiles[0][0][0]) + level_address;
             row = *(u16*)row_address;
@@ -3304,7 +3305,7 @@ static s32 ai_move_score_reachable_tiles(void) {
                 u32 scenario_address = ai->movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
                 u32 level_address;
                 u32 row_address;
-                scenario_address += (u32)&ai->reachable_tiles - (u32)ai;
+                scenario_address += offsetof(ai_data_t, reachable_tiles);
                 level_address = level * sizeof(ai->reachable_tiles[0][0]) + scenario_address;
                 row_address = y * sizeof(ai->reachable_tiles[0][0][0]) + level_address;
                 row = *(u16*)row_address;
@@ -3325,7 +3326,7 @@ static s32 ai_move_score_reachable_tiles(void) {
                             u32 level_address = level * sizeof(ai->tile_priority[0]) + (u32)ai;
                             u32 row_address;
                             u32 tile_address;
-                            level_address += (u32)&ai->tile_priority - (u32)ai;
+                            level_address += offsetof(ai_data_t, tile_priority);
                             row_address = y * sizeof(ai->tile_priority[0][0]) + level_address;
                             tile_address = x * sizeof(ai->tile_priority[0][0][0]) + row_address;
                             *(u16*)tile_address = -ai->current_action.rank.priority;

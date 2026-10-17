@@ -21,6 +21,7 @@
 #include "fft/unit_party.h"
 #include "fft/unit_runtime.h"
 #include "psx/libc.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 /* Move-Find scratch and its existing scalar views are private to this unit.
@@ -313,9 +314,9 @@ s32 crystal_apply_choice(unit_stats_t* unit, s32 flags) {
         src = g_crystal_learnable_abilities;
         dst = (u8*)unit;
         do {
-            learned = dst + 0x99;
+            learned = dst + offsetof(unit_stats_t, career.learned_abilities);
             crystal_bits = src;
-            end = dst + 0x9C;
+            end = dst + offsetof(unit_stats_t, career.learned_abilities) + UNIT_LEARNED_ABILITY_BYTES_PER_JOB;
             do {
                 *learned |= *crystal_bits;
                 learned++;

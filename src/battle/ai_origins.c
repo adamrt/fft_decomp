@@ -16,6 +16,7 @@
 #include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 /* Signed scoring weights, indexed by status ID. */
@@ -1401,7 +1402,7 @@ s32 ai_simulate_action_and_score(void) {
     ai_unit_decision_t* decision;
     action_command_t* action;
     ai_data_t* clear_cursor;
-    ai_data_t* decision_base;
+    u8* decision_base;
     s32 unit_index;
     s32 status;
     s32 equipment_slot;
@@ -1581,7 +1582,7 @@ score_state:
             status = 0;
             /* A pointer to unit_decisions adds an addiu and changes scheduling;
              * retain the workspace-relative stride. */
-            decision_base = (ai_data_t*)((u8*)ai + unit_index * sizeof(ai_unit_decision_t));
+            decision_base = (u8*)ai + unit_index * sizeof(ai_unit_decision_t);
             for (weight_offset = 0; status < STATUS_COUNT; status++, weight_offset += 2) {
                 if (!((unit->status_sets.current[status / 8] << (status % 8)) & 0x80))
                     continue;
@@ -1596,10 +1597,10 @@ score_state:
                     continue;
                 switch (status) {
                 case STATUS_ID_DARKNESS:
-                    weight = weight * decision_base->unit_decisions[0].evade_mod / 4;
+                    weight = weight * decision_base[offsetof(ai_data_t, unit_decisions[0].evade_mod)] / 4;
                     break;
                 case STATUS_ID_SILENCE:
-                    weight = weight * decision_base->unit_decisions[0].silence_mod / 4;
+                    weight = weight * decision_base[offsetof(ai_data_t, unit_decisions[0].silence_mod)] / 4;
                     break;
                 case STATUS_ID_CONFUSION:
                 case STATUS_ID_BLOOD_SUCK:
@@ -2318,15 +2319,16 @@ static s32 ai_target_exclude_enemies_acting_before_ct(void) {
     s32 result = 0;
     s32 i;
     ai_data_t* ai = &g_ai_data;
-    ai_data_t* walk;
+    u8* walk;
 
     /* The target walks a pointer that starts at the block base and steps by
      * sizeof(ai_unit_decision_t), reaching unit_decisions[i].enemy_flag as a
      * 0x1834 displacement; a pointer started at unit_decisions adds an addiu. */
-    for (i = 0, walk = ai; i < UNIT_SLOT_COUNT; i++, walk = (ai_data_t*)((u8*)walk + sizeof(ai_unit_decision_t))) {
+    for (i = 0, walk = (u8*)ai; i < UNIT_SLOT_COUNT; i++, walk += sizeof(ai_unit_decision_t)) {
         if (ai->targetability.live.unit_targetable[i] != 0) {
             if ((ai->considered_ability.ai_flags.word & AI_ABILITY_TARGET_ENEMIES)
-                && (walk->unit_decisions[0].enemy_flag != 0) && (ai_can_unit_act_within_charge_time(i) != 0)) {
+                && (walk[offsetof(ai_data_t, unit_decisions[0].enemy_flag)] != 0)
+                && (ai_can_unit_act_within_charge_time(i) != 0)) {
                 ai->targetability.live.unit_targetable[i] = 0;
             } else {
                 result = 1;

@@ -29,6 +29,7 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 /* World position of a tile's center (x, layer, y in the SVECTOR): x and z are tile * 28 + 14 and y
@@ -1274,8 +1275,6 @@ s32 effect_secondary_init_fall_dust(effect_secondary_init_t* source, VECTOR* pos
     return secondary_id;
 }
 
-/* Timer and animation use field-address offsets to retain their store order. */
-
 /* Start EFFECT_SECONDARY_ANIMATION_ENDING in a fresh secondary effect
  * record and return its id. Its null handler only steps through the phases, so
  * the record lasts two more frames. The arrow handler starts it when the arrow
@@ -1286,8 +1285,9 @@ static s32 effect_secondary_end_on_current_unit(void) {
     u8 function_id;
 
     /* One byte offset serves both stores; indexing the record twice changes the code. */
-    *(s16*)((u8*)&g_effect_secondary_data[0].timer + record_offset) = 0;
-    *(u16*)((u8*)&g_effect_secondary_data[0].animation_id + record_offset) = EFFECT_SECONDARY_ANIMATION_ENDING;
+    *(s16*)((u8*)&g_effect_secondary_data + record_offset + offsetof(effect_secondary_data_t, timer)) = 0;
+    *(u16*)((u8*)&g_effect_secondary_data + record_offset + offsetof(effect_secondary_data_t, animation_id))
+        = EFFECT_SECONDARY_ANIMATION_ENDING;
     function_id = g_effect_secondary_ending_function_id;
     g_effect_secondary_data[secondary_id].phase = EFFECT_SECONDARY_PHASE_INITIALIZING;
     g_effect_secondary_data[secondary_id].function_id = function_id;
