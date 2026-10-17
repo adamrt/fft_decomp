@@ -114,7 +114,7 @@ extern unit_list_record_t* g_unit_list_pointers[];
  * unit_list_sort. The name is provisional. */
 extern s8 g_unit_list_sort_field_indices[];
 
-s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode);
+s32 unit_list_build_records(s32 unused_mode, unit_list_record_t** unused_records, s32 sort_mode);
 s32 unit_list_find_by_battle_id(s16 battle_id);
 void unit_list_sort(s32 sort_mode);
 

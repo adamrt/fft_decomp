@@ -260,10 +260,10 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
 }
 
 /* Copy every battle unit that is not an egg, crystal or treasure into the next
- * status billboard record, store the shown-plus-egg unit count in each
- * record and sort the shown list; returns the number of shown units. `mode`
- * and `unit_data` are not read. */
-s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode) {
+ * Unit List record, store the shown-plus-egg unit count in each record and
+ * sort the shown list. Returns the number of shown units; the first two
+ * parameters are retained but not read. */
+s32 unit_list_build_records(s32 unused_mode, unit_list_record_t** unused_records, s32 sort_mode) {
     unit_stats_t* unit;
     s32 i;
     s32 shown = 0;

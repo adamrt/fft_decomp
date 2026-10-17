@@ -289,7 +289,7 @@ static s32 unit_list_run_frame(void) {
             g_unit_list_status_banner_enabled = g_unit_list_saved_status_banner_enabled;
             g_unit_list_browse_enabled = g_unit_list_saved_unit_browse_enabled;
             unit_list_init(g_unit_selected_index);
-            g_unit_list_visible_count = unit_list_build_records(-1, (s32)g_unit_list_pointers, 1);
+            g_unit_list_visible_count = unit_list_build_records(-1, g_unit_list_pointers, 1);
             g_unit_list_reorderable_count = unit_list_build_sortable();
             unit_list_build_index_map();
             g_unit_list_grid_selected_cell = g_unit_list_index_map[g_unit_selected_index];
