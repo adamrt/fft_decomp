@@ -599,12 +599,12 @@ void helpmenu_after_battle_entrypoint(void) {
                             thread_start(text_thread_id, message_dialog_thread);
                             thread_set_parameters(text_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                         }
-                    } else if (entry->help_base == HELP_TEXT_ID_ABILITY_BASE && (*(u16*)entry->value - 1) >= 0x301U) {
+                    } else if (entry->help_base == HELP_TEXT_ID_ABILITY_BASE && ((u16)*entry->value - 1) >= 0x301U) {
                         *g_help_controller_state_ptr = 0;
-                    } else if (entry->help_base == HELP_TEXT_ID_ITEM_BASE && (*(u16*)entry->value - 1) >= 0x101U) {
+                    } else if (entry->help_base == HELP_TEXT_ID_ITEM_BASE && ((u16)*entry->value - 1) >= 0x101U) {
                         *g_help_controller_state_ptr = 0;
                     } else if (entry->help_base == (s16)HELP_TEXT_ID_SKILLSET_BASE
-                        && (*(u16*)entry->value - 1) >= 0x101U) {
+                        && ((u16)*entry->value - 1) >= 0x101U) {
                         *g_help_controller_state_ptr = 0;
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
