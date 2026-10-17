@@ -147,23 +147,6 @@ void picture_load_background_set(s32 set);
 void picture_load_set(s32 value);
 
 /* tiles */
-/* Values of world_map_projected_tile_t.flags. */
-typedef enum world_map_tile_flag {
-    WORLD_MAP_TILE_TPAGE_MASK = 0x0ff,
-    WORLD_MAP_TILE_OFF_SCREEN = 0x100, /* set by the projection pass */
-    WORLD_MAP_TILE_EMPTY = 0x200       /* the atlas has no tile here */
-} world_map_tile_flag_e;
-
-/* Provisional: an entry of the projected-tile table (g_world_map_projected_tiles), filled by
- * world_map_init_tile_atlas and projected by the RotTrans pass of world_map_project_tiles. */
-typedef struct world_map_projected_tile {
-    s32 flags;        /* 0x00; world_map_tile_flag_e */
-    s32 texture;      /* 0x04; packed texture rectangle: u << 24 | v << 16 | w << 8 | h */
-    point32_t map;    /* 0x08; tile corner before projection, copied to RotTrans vx/vy */
-    point32_t screen; /* 0x10; projected position, culled before conversion to GPU coordinates */
-} world_map_projected_tile_t;
-typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
-
 extern s32* g_world_map_tile_descriptors;
 
 void world_map_load_texture(void);
@@ -255,14 +238,6 @@ typedef struct world_map_dot {
 } world_map_dot_t;
 typedef char world_map_dot_size_must_be_52[sizeof(world_map_dot_t) == 52 ? 1 : -1];
 
-/* Packed eight-byte source row used by world_map_init_dots.
- * The low 16 bits of the first 32-bit value hold x; its high bytes select the animation. */
-typedef struct world_map_dot_source {
-    s32 position_and_kind;
-    s32 y;
-} world_map_dot_source_t;
-typedef char world_map_dot_source_size_must_be_8[sizeof(world_map_dot_source_t) == 8 ? 1 : -1];
-
 /* world_map_marker_state_t.flags: work pending for
  * world_map_update_marker, and the marker's sprite set. */
 typedef enum world_map_marker_flag {
@@ -302,23 +277,6 @@ s32 world_map_get_dot_snap_step(point32_t point, s32* step_x, s32* step_y);
 /* World-map routes: g_world_map_routes and the flags from
  * EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST. */
 enum { WORLD_MAP_ROUTE_COUNT = 48 };
-
-/* A travel point: packed x/y, a 32-bit heading, and segment distance. */
-typedef struct world_map_route_point {
-    u32 position;
-    u32 heading;
-    s32 distance;
-} world_map_route_point_t;
-
-/* A route header followed by count travel points. */
-typedef struct world_map_route {
-    u8 count;
-    u8 start_location;
-    u8 end_location;
-    u8 cost;
-    world_map_route_point_t points[0]; /* 0x04; variable length */
-} world_map_route_t;
-typedef char world_map_route_size_must_be_4[sizeof(world_map_route_t) == 4 ? 1 : -1];
 
 /* Values of world_map_path_animation_t.flags. */
 typedef enum world_map_path_animation_flag {

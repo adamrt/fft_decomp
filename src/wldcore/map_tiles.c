@@ -13,6 +13,23 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Values of world_map_projected_tile_t.flags. */
+typedef enum world_map_tile_flag {
+    WORLD_MAP_TILE_TPAGE_MASK = 0x0ff,
+    WORLD_MAP_TILE_OFF_SCREEN = 0x100, /* set by the projection pass */
+    WORLD_MAP_TILE_EMPTY = 0x200       /* the atlas has no tile here */
+} world_map_tile_flag_e;
+
+/* Provisional: an entry of the projected-tile table (g_world_map_projected_tiles), filled by
+ * world_map_init_tile_atlas and projected by the RotTrans pass of world_map_project_tiles. */
+typedef struct world_map_projected_tile {
+    s32 flags;        /* 0x00; world_map_tile_flag_e */
+    s32 texture;      /* 0x04; packed texture rectangle: u << 24 | v << 16 | w << 8 | h */
+    point32_t map;    /* 0x08; tile corner before projection, copied to RotTrans vx/vy */
+    point32_t screen; /* 0x10; projected position, culled before conversion to GPU coordinates */
+} world_map_projected_tile_t;
+typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
+
 /* g_system_flags as saved by world_map_toggle_captured_frame (system_flags_e). */
 extern u32 g_world_map_saved_system_flags;
 extern world_map_projected_tile_t g_world_map_projected_tiles[];

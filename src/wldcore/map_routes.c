@@ -21,6 +21,51 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Packed eight-byte source row used by world_map_init_dots.
+ * The low 16 bits of the first 32-bit value hold x; its high bytes select the animation. */
+typedef struct world_map_dot_source {
+    s32 position_and_kind;
+    s32 y;
+} world_map_dot_source_t;
+typedef char world_map_dot_source_size_must_be_8[sizeof(world_map_dot_source_t) == 8 ? 1 : -1];
+
+/* A travel point: packed x/y, a 32-bit heading, and segment distance. */
+typedef struct world_map_route_point {
+    u32 position;
+    u32 heading;
+    s32 distance;
+} world_map_route_point_t;
+
+/* A route header followed by count travel points. */
+typedef struct world_map_route {
+    u8 count;
+    u8 start_location;
+    u8 end_location;
+    u8 cost;
+    world_map_route_point_t points[0]; /* 0x04; variable length */
+} world_map_route_t;
+typedef char world_map_route_size_must_be_4[sizeof(world_map_route_t) == 4 ? 1 : -1];
+
+/* One random-encounter tier: the story-progress threshold that selects it,
+ * the chance an encounter happens (a roll of 0..99 at or below it), and the
+ * high-bit-first mask of which of the entry's eight ENTDs may be drawn. */
+typedef struct random_battle_tier {
+    u8 progress_threshold; /* 0x00 */
+    u8 encounter_chance;   /* 0x01 */
+    u8 encounter_mask;     /* 0x02 */
+} random_battle_tier_t;
+
+/* One road into a world-map location. Three per location, 19 locations
+ * (ids 24..42), reached through the pointer cell g_random_battle_roads. */
+typedef struct random_battle_road {
+    u8 route;                      /* 0x00 */
+    u8 deployment_squad_id;        /* 0x01: deployment zone id = this + 0x200 */
+    random_battle_tier_t tiers[4]; /* 0x02 */
+    u8 entd_ids[8];                /* 0x0e */
+    u8 battle_map_id;              /* 0x16 */
+    u8 script_variable_id;         /* 0x17 */
+} random_battle_road_t;
+
 /* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
  * choice from the location menu (location_build_menu_entries). */
 extern u8 g_location_choice_hidden_offsets[];

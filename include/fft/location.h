@@ -171,32 +171,6 @@ s32 travel_start(s32 from_location, s32 to_location);
 void travel_step(void);
 
 /* random battles */
-/* One random-encounter tier: the story-progress threshold that selects it,
- * the chance an encounter happens (a roll of 0..99 at or below it), and the
- * high-bit-first mask of which of the entry's eight ENTDs may be drawn. */
-typedef struct random_battle_tier {
-    u8 progress_threshold; /* 0x00 */
-    u8 encounter_chance;   /* 0x01 */
-    u8 encounter_mask;     /* 0x02 */
-} random_battle_tier_t;
-
-/* One road into a world-map location. Three per location, 19 locations
- * (ids 24..42), reached through the pointer cell g_random_battle_roads. */
-typedef struct random_battle_road {
-    u8 route;                      /* 0x00 */
-    u8 deployment_squad_id;        /* 0x01: deployment zone id = this + 0x200 */
-    random_battle_tier_t tiers[4]; /* 0x02 */
-    u8 entd_ids[8];                /* 0x0e */
-    u8 battle_map_id;              /* 0x16 */
-    u8 script_variable_id;         /* 0x17 */
-} random_battle_road_t;
-
-typedef struct deep_dungeon_battle {
-    u8 map_id;   /* 0x00 */
-    u8 squad_id; /* 0x01: deployment zone id */
-    u8 entd_ids[8];
-} deep_dungeon_battle_t;
-
 extern s32 g_random_battle_entd_id;
 extern s32 g_random_battle_squad_id;
 

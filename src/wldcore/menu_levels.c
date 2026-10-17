@@ -42,6 +42,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+typedef struct deep_dungeon_battle {
+    u8 map_id;   /* 0x00 */
+    u8 squad_id; /* 0x01: deployment zone id */
+    u8 entd_ids[8];
+} deep_dungeon_battle_t;
+
 extern u32* g_location_picture_frame_tim;
 extern deep_dungeon_battle_t* g_deep_dungeon_battles;
 extern help_navigation_record_t g_unit_panel_help_rows[];
