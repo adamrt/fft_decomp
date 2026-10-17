@@ -103,10 +103,6 @@ extern u8 g_status_screen_initialized;
 extern u8 g_status_screen_previous_event_mode;
 extern status_screen_unit_jobs_t* g_status_screen_unit_data[];
 
-/* The "%d" literal that JOBSTTS.OUT keeps at overlay file offset 0, i.e. the
- * three data bytes ahead of the first function. */
-extern const char g_status_screen_text_decimal_format[];
-
 /* Advance JOBSTTS one frame; return its ordering table while open, or zero on close. */
 u32* jobstts_entrypoint(s32 unit, void* unused_otag);
 void status_screen_init_unit_jobs(s32 unit_id);
@@ -121,11 +117,7 @@ enum {
     STATUS_SCREEN_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6,
 };
 
-extern s16 g_status_screen_menu_list_scroll_entry_ids;
 extern u8 g_status_screen_menu_palette_image[];
-
-/* Unsigned here where the other overlays keep signed values. */
-extern u16 g_status_screen_menu_list_cursor_anim_state;
 
 /* Window right edge; WORLD's twin stores it to g_screen_window_right_x. */
 extern s16 g_status_screen_menu_window_right_x;

@@ -222,7 +222,6 @@ void unit_list_update_help_cursor(s16 mode);
 
 /* cursors */
 extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
-extern u16 g_unit_list_cursor_anim_state;
 
 /* Oriented-quad descriptors for the two cursor halves. */
 extern oriented_quad_t g_unit_list_cursor_sprite;
@@ -272,10 +271,7 @@ enum {
     UNIT_LIST_SCRIPT_END = 0x1c,
 };
 
-extern s16 g_unit_list_scroll_entry_ids[];
-
 /* text */
-extern const char g_unit_list_text_decimal_format[];
 extern u8 g_unit_list_help_text_state;
 
 /* Text-section buffers: unit_list_run_sort_menu passes g_unit_list_text_reorder_list_buffer

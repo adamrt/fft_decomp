@@ -89,7 +89,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* dat
         }
         return menu_next_instruction(data);
     }
-    pad = data->number.width - sprintf(text, g_equipment_text_decimal_format, value) - negative;
+    pad = data->number.width - sprintf(text, g_menu_text_decimal_format, value) - negative;
     pos = 0;
     for (i = 0; i < data->number.width; i++) {
         cell_x = data->number.x + (i * data->number.spacing);

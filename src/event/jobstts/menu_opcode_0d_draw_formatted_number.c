@@ -71,7 +71,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* dat
         return menu_next_instruction(data);
     }
 
-    pad = data->number.width - sprintf(text, g_status_screen_text_decimal_format, value);
+    pad = data->number.width - sprintf(text, g_menu_text_decimal_format, value);
     pos = 0;
     i = 0;
     if (data->number.width != 0) {

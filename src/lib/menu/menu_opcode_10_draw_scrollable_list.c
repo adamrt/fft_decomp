@@ -1,5 +1,6 @@
 /* The menu command that draws a scrollable list's body, moving its cursor and scrolling by row or page. */
 
+#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
@@ -8,7 +9,6 @@
 #include "fft/menu_script.h"
 #include "fft/sound.h"
 #include "fft/text.h"
-#include "fft/unit_list.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -21,15 +21,19 @@
  * group once per visible row, plus one while a scroll offset is in effect.
  * An empty list skips its row command groups.
  *
- * BUNIT's body: unlike EQUIP's, its scroll speed is the event speed rather than a
- * constant 2, as in JOBSTTS's. The padding arrays reproduce the target's frame (only
- * rect and marker are referenced). The scroll-down path follows WORLD's
- * menu_opcode_10_draw_scrollable_list spelling.
+ * BUNIT uses the event speed and sliding cursor; EQUIP uses speed 2 and an
+ * animated cursor. The list scratch and cursor state bind to each overlay's own records.
+ * The padding arrays retain the original frames.
  */
 menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
+#ifdef FFT_EVENT_BUNIT
     point16_t marker;
+#else
+    /* EQUIP's cursor receives a full rectangle. */
+    RECT marker;
+#endif
     u8 pad1[0x8];
     u16 ot_index;
     u16 previous_selected;
@@ -55,14 +59,29 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
         }
         return command;
     }
+#ifdef FFT_EVENT_BUNIT
     speed = menu_get_event_speed();
     g_menu_list_row_mode = 1;
+#else
+    /* EQUIP snapshots selection before a pending redraw. */
+    g_menu_list_row_mode = 1;
+    previous_selected = g_menu_list_selected_index;
+    speed = 2;
+#endif
     if (g_menu_list_redraw_pending != 0) {
         menu_draw_scrollable_list(command);
     }
+#ifdef FFT_EVENT_BUNIT
+    /* BUNIT snapshots selection after the redraw. */
     previous_selected = g_menu_list_selected_index;
+#endif
     if (g_menu_list_scroll_direction == 0) {
+#ifdef FFT_EVENT_BUNIT
         j = menu_input_read_page_scroll_direction();
+#else
+        /* EQUIP reads page scrolling through its equipment input adapter. */
+        j = equipment_input_read_page_scroll_direction();
+#endif
         if (j != 0) {
             if (j != 2) {
                 menu_scroll_list_by_page(j, command);
@@ -75,7 +94,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                     if (scroll_base > 0) {
                         g_menu_list_scroll_direction = -1;
                         if (g_menu_list_text_table != 0) {
-                            row_ids = &g_unit_list_scroll_entry_ids[0];
+                            row_ids = &g_menu_list_row_text_ids[0];
                             text_id = g_menu_list_entries[scroll_base - 1];
                             rect.x = 0x100;
                             rect.y = 0x20;
@@ -96,7 +115,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             s16* entry_ids;
 
                             j = g_menu_scroll_base_index + g_menu_list_visible_rows - 1;
-                            entry_ids = &g_unit_list_scroll_entry_ids[0];
+                            entry_ids = &g_menu_list_row_text_ids[0];
                             *entry_ids = g_menu_list_entries[j + 1];
                             rect.x = 0x100;
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
@@ -209,7 +228,12 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_sliding_cursor(&marker, &g_unit_list_cursor_anim_state, g_menu_use_alternate_palette);
+#ifdef FFT_EVENT_BUNIT
+        menu_update_and_draw_sliding_cursor(&marker, &g_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+#else
+        /* EQUIP uses its animated cursor instead of BUNIT's sliding cursor. */
+        menu_update_and_draw_animated_cursor(&marker, &g_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+#endif
     }
     command = menu_next_instruction(command);
     g_menu_list_row_index = 0;

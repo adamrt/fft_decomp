@@ -108,7 +108,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
             value = next_remaining;
         }
     } else {
-        blanks = command->number.width - sprintf(text, g_unit_list_text_decimal_format, value) - negative;
+        blanks = command->number.width - sprintf(text, g_menu_text_decimal_format, value) - negative;
         text_index = 0;
         for (i = 0; i < command->number.width; i++) {
             x = command->number.x + i * command->number.spacing;

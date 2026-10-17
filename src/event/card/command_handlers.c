@@ -48,7 +48,7 @@ menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t*
     glyph.v = 0x10;
     glyph.w = 6;
     glyph.h = 0xB;
-    pad = command->width - sprintf(text, g_save_text_decimal_format, value);
+    pad = command->width - sprintf(text, g_menu_text_decimal_format, value);
     pos = 0;
     color = &g_menu_text_color;
     for (i = 0; i < command->width; i++) {

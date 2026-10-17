@@ -435,7 +435,7 @@ functions:
   - {addr: 0x801ca34c, size: 672, name: menu_draw_scrollable_list, hash: c454dc9d46c8694d, source: src/lib/menu/menu_draw_scrollable_list.c}
   - {addr: 0x801ca5ec, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d, source: src/lib/menu/menu_init_and_draw_scrollable_list_simple.c}
   - {addr: 0x801ca61c, size: 52, name: menu_init_and_draw_scrollable_list, hash: 35dc1f5825a6e10d, source: src/lib/menu/menu_init_and_draw_scrollable_list.c}
-  - {addr: 0x801ca650, size: 2500, name: menu_opcode_10_draw_scrollable_list, hash: 358544f0b74bb783}
+  - {addr: 0x801ca650, size: 2500, name: menu_opcode_10_draw_scrollable_list, hash: 358544f0b74bb783, source: src/lib/menu/menu_opcode_10_draw_scrollable_list.c}
   - {addr: 0x801cb014, size: 52, name: gfx_set_draw_color, hash: febb234714c08dd5, source: src/lib/menu/gfx_set_draw_color.c}
   - {addr: 0x801cb048, size: 16, name: gfx_set_otag_index, hash: b8570cd4076e6ca3, source: src/lib/menu/gfx_set_otag_index.c}
   - {addr: 0x801cb058, size: 220, name: menu_set_palette_mode, hash: 097927c9311af253, source: src/lib/menu/menu_set_palette_mode.c}
@@ -512,7 +512,7 @@ functions:
 
 data:
   - {addr: 0x801bf000, name: g_unit_list_clut}
-  - {addr: 0x801bf200, name: g_unit_list_text_decimal_format}
+  - {addr: 0x801bf200, name: g_menu_text_decimal_format}
   - {addr: 0x801ce8d0, name: g_menu_indicator_packet_index}
   - {addr: 0x801ce8d8, name: g_menu_indicator_brightness}
   - {addr: 0x801ce8e0, name: g_menu_indicator_fade_work}
@@ -672,8 +672,8 @@ data:
   - {addr: 0x801cfa38, name: g_menu_cursor_forward_offset_keyframes}
   - {addr: 0x801cfa44, name: g_menu_cursor_reverse_offset_keyframes}
   - {addr: 0x801cfa58, name: g_unit_list_bouncing_cursor_quad}
-  - {addr: 0x801cfa7c, name: g_unit_list_scroll_entry_ids}
-  - {addr: 0x801cfa80, name: g_unit_list_cursor_anim_state}
+  - {addr: 0x801cfa7c, name: g_menu_list_row_text_ids}
+  - {addr: 0x801cfa80, name: g_menu_list_cursor_anim_state}
   - {addr: 0x801cfa82, name: g_input_page_scroll_hold_frames}
   - {addr: 0x801cfa84, name: g_unit_list_help_nodes_unit_browse}
   - {addr: 0x801cfbf8, name: g_unit_list_help_node_23_help_base}
@@ -994,7 +994,7 @@ functions:
 
 data:
   - {addr: 0x801bf12c, name: g_save_title_template}
-  - {addr: 0x801bf16c, name: g_save_text_decimal_format}
+  - {addr: 0x801bf16c, name: g_menu_text_decimal_format}
   - {addr: 0x801c867c, name: g_save_sound_queued_effect_id}
   - {addr: 0x801c8680, name: g_save_file_names}
   - {addr: 0x801c86bc, name: g_text_data}
@@ -1514,7 +1514,7 @@ functions:
   - {addr: 0x801cc5bc, size: 108, name: menu_script_skip_group, hash: e3dba406e3887731, source: src/lib/menu/menu_script_skip_group.c}
   - {addr: 0x801cc628, size: 672, name: menu_draw_scrollable_list, hash: b2d0e76db3f4d7ef, source: src/lib/menu/menu_draw_scrollable_list.c}
   - {addr: 0x801cc8c8, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 822692f126a2bbf9, source: src/lib/menu/menu_init_and_draw_scrollable_list_simple.c}
-  - {addr: 0x801cc8f8, size: 2492, name: menu_opcode_10_draw_scrollable_list, hash: 94ee93a645f6dd65}
+  - {addr: 0x801cc8f8, size: 2492, name: menu_opcode_10_draw_scrollable_list, hash: 94ee93a645f6dd65, source: src/lib/menu/menu_opcode_10_draw_scrollable_list.c}
   - {addr: 0x801cd2b4, size: 44, name: gfx_set_draw_color, hash: 17666895092d599e, source: src/lib/menu/gfx_set_draw_color.c}
   - {addr: 0x801cd2e0, size: 16, name: gfx_set_otag_index, hash: bb1416428e2ecf6d, source: src/lib/menu/gfx_set_otag_index.c}
   - {addr: 0x801cd2f0, size: 220, name: menu_set_palette_mode, hash: 156ec1881c754753, source: src/lib/menu/menu_set_palette_mode.c}
@@ -1537,7 +1537,7 @@ functions:
   - {addr: 0x801ce034, size: 172, name: bits_read_secondary, hash: 0e449e9dc2d2660e, source: src/lib/menu/bits_read_secondary.c}
 
 data:
-  - {addr: 0x801bf000, name: g_equipment_text_decimal_format}
+  - {addr: 0x801bf000, name: g_menu_text_decimal_format}
   - {addr: 0x801ce0e0, name: g_text_data}
   - {addr: 0x801ce178, name: g_unit_panel_unit_status_panel_params}
   - {addr: 0x801ce180, name: g_unit_panel_unit_status_panel_flags}
@@ -1683,8 +1683,8 @@ data:
   - {addr: 0x801d878c, name: g_gfx_blank_cell_rect}
   - {addr: 0x801d87a0, name: g_menu_cursor_forward_offset_keyframes}
   - {addr: 0x801d87ac, name: g_menu_cursor_reverse_offset_keyframes}
-  - {addr: 0x801d87c0, name: g_equipment_list_scroll_entry_ids}
-  - {addr: 0x801d87c4, name: g_equipment_list_cursor_anim_state}
+  - {addr: 0x801d87c0, name: g_menu_list_row_text_ids}
+  - {addr: 0x801d87c4, name: g_menu_list_cursor_anim_state}
   - {addr: 0x801d87c6, name: g_input_page_scroll_hold_frames}
   - {addr: 0x801d87c8, name: g_menu_event_speed}
   - {addr: 0x801d87cc, name: g_bits_primary_reset}
@@ -2042,7 +2042,7 @@ functions:
   - {addr: 0x801e4f7c, size: 172, name: bits_read_secondary, hash: 7101073a60f65554, source: src/lib/menu/bits_read_secondary.c}
 
 data:
-  - {addr: 0x801df000, name: g_status_screen_text_decimal_format}
+  - {addr: 0x801df000, name: g_menu_text_decimal_format}
   - {addr: 0x801e5028, name: g_sound_queued_effect_id}
   - {addr: 0x801e502c, name: g_status_screen_menu_palette_image}
   - {addr: 0x801e522c, name: g_status_screen_active_page}
@@ -2082,8 +2082,8 @@ data:
   - {addr: 0x801f0008, name: g_status_screen_gfx_transition_height_percent}
   - {addr: 0x801f0018, name: g_menu_cursor_forward_offset_keyframes}
   - {addr: 0x801f0024, name: g_menu_cursor_reverse_offset_keyframes}
-  - {addr: 0x801f0038, name: g_status_screen_menu_list_scroll_entry_ids}
-  - {addr: 0x801f003c, name: g_status_screen_menu_list_cursor_anim_state}
+  - {addr: 0x801f0038, name: g_menu_list_row_text_ids}
+  - {addr: 0x801f003c, name: g_menu_list_cursor_anim_state}
   - {addr: 0x801f003e, name: g_input_page_scroll_hold_frames}
   - {addr: 0x801f0040, name: g_menu_event_speed}
   - {addr: 0x801f0044, name: g_bits_primary_reset}

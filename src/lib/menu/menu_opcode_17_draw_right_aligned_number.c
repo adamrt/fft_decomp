@@ -1,12 +1,10 @@
 /* The menu command that draws a row callback's value right-aligned in eight-pixel cells. */
 
-#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
-#include "fft/unit_list.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -32,14 +30,13 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
 #endif
 
     count = g_menu_row_callbacks[cmd->number.getter].value(cmd->number.value);
+    count = sprintf(digits, g_menu_text_decimal_format, count);
 #ifdef FFT_EVENT_BUNIT
-    count = sprintf(digits, g_unit_list_text_decimal_format, count);
     x = cmd->number.x;
     y = cmd->number.y;
     blanks = cmd->number.width - count;
 #else
     /* EQUIP computes the padding before loading the narrow coordinates. */
-    count = sprintf(digits, g_equipment_text_decimal_format, count);
     blanks = cmd->number.width - count;
     x = cmd->number.x;
     y = cmd->number.y;

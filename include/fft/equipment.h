@@ -260,15 +260,9 @@ enum {
     EQUIPMENT_SCRIPT_END = 0x19,
 };
 
-extern u16 g_equipment_list_cursor_anim_state[];
-extern s16 g_equipment_list_scroll_entry_ids;
-
 /* messages and sound */
 extern u8 g_equipment_text_restore_pending;
 extern u8 g_equipment_sound_suppress_queued;
-
-/* The "%d" format string at the head of the overlay. */
-extern const char g_equipment_text_decimal_format[];
 
 void equipment_show_message(s32 message_id, s32 sound_id);
 

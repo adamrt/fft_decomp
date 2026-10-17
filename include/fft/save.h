@@ -312,7 +312,6 @@ extern zodiac_draw_context_t g_save_input_display_state;
 extern u16 g_save_input_latched_button;
 extern u16 g_save_input_previous;
 extern u8 g_save_list_input_armed;
-extern const char g_save_text_decimal_format[];
 extern const u8 g_save_text_command_help[];
 extern const u8 g_save_text_job_name[];
 extern const u8 g_save_text_location_name[];

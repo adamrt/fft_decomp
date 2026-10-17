@@ -322,7 +322,6 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction
 /* scrollable lists */
 /* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of a
  * list record (menu_list_record_t). Each program draws the rows with its own menu_opcode_10_draw_scrollable_list. */
-
 /* Page scroll direction of the overlay unit, item and job lists. */
 typedef enum menu_vertical_scroll_direction {
     MENU_VERTICAL_SCROLL_UP = -1,
@@ -331,6 +330,9 @@ typedef enum menu_vertical_scroll_direction {
     MENU_VERTICAL_SCROLL_WAIT = 2,
 } menu_vertical_scroll_direction_e;
 
+/* BUNIT, EQUIP and JOBSTTS each define this row id and -1 sentinel, and the cursor state. */
+extern s16 g_menu_list_row_text_ids[2];
+extern u16 g_menu_list_cursor_anim_state;
 extern s16* g_menu_list_entries;
 extern s16 g_menu_list_entry_count;
 extern u8* g_menu_list_text_table;
@@ -353,7 +355,7 @@ extern s16 g_menu_list_scroll_offset;
 
 void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 
-/* BUNIT, EQUIP, JOBSTTS and WORLD each build their own body. */
+/* BUNIT, EQUIP and JOBSTTS share the core; WORLD uses its screen state. */
 void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* text_table);
 void menu_draw_scrollable_list(const menu_instruction_t* script);
 void menu_init_and_draw_scrollable_list(
@@ -362,5 +364,9 @@ void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
+
+/* number rendering */
+/* BUNIT, EQUIP, JOBSTTS and CARD each define this decimal-number format. */
+extern const char g_menu_text_decimal_format[];
 
 #endif

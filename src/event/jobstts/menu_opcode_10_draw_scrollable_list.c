@@ -74,7 +74,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                         g_menu_list_scroll_direction = -1;
                         if (g_menu_list_text_table != 0) {
                             s16 id;
-                            ids = &g_status_screen_menu_list_scroll_entry_ids;
+                            ids = &g_menu_list_row_text_ids[0];
                             id = g_menu_list_entries[g_menu_scroll_base_index - 1];
                             rect.x = 0x100;
                             rect.y = 0x20;
@@ -95,7 +95,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             s16* entry_ids;
 
                             j = g_menu_scroll_base_index + g_menu_list_visible_rows - 1;
-                            entry_ids = &g_status_screen_menu_list_scroll_entry_ids;
+                            entry_ids = &g_menu_list_row_text_ids[0];
                             *entry_ids = g_menu_list_entries[j + 1];
                             rect.x = 0x100;
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
@@ -209,8 +209,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             marker.x = command->list.x - command->list.cursor_x_offset;
             marker.y
                 = command->list.y + ((g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height);
-            menu_update_and_draw_animated_cursor(
-                &marker, &g_status_screen_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+            menu_update_and_draw_animated_cursor(&marker, &g_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
         }
     }
     command = menu_next_instruction(command);
