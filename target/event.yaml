@@ -305,7 +305,7 @@ links: [battle]
 defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16}
 
 units:
-  - {name: ability_page, source: src/event/bunit/ability_page.c}
+  - {name: ability_page, source: src/event/bunit/ability_page.c, data: [{addr: 0x801e373c, size: 4, hash: b7d1b3a1104cc86b}]}
   - {name: descriptor_threads, source: src/event/bunit/descriptor_threads.c}
   - {name: draw_commands, source: src/lib/menu/draw_commands.c}
   - {name: draw_state, source: src/lib/menu/draw_state.c}
@@ -693,7 +693,7 @@ data:
   - {addr: 0x801e354c, name: g_ability_list_menu_script}
   - {addr: 0x801e3739, name: g_job_list_menu_active}
   - {addr: 0x801e373a, name: g_ability_list_ready}
-  - {addr: 0x801e373c, name: g_ability_list_job_name_row}
+  - {addr: 0x801e373c, name: g_ability_list_job_name_ids}
   - {addr: 0x801e3740, name: g_gfx_decreasing_fade_active}
   - {addr: 0x801e3741, name: g_gfx_increasing_fade_active}
   - {addr: 0x801e3744, name: g_gfx_fade_rect}
@@ -1935,7 +1935,7 @@ links: [battle]
 defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 8}
 
 units:
-  - {name: ability_page, source: src/event/jobstts/ability_page.c}
+  - {name: ability_page, source: src/event/jobstts/ability_page.c, data: [{addr: 0x801e5500, size: 4, hash: b7d1b3a1104cc86b}]}
   - {name: bit_streams, source: src/lib/bits.c}
   - {name: draw_commands, source: src/lib/menu/draw_commands.c}
   - {name: draw_state, source: src/lib/menu/draw_state.c}

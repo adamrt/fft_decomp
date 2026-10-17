@@ -16,6 +16,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* The title is one mutable job ID followed by the text-row terminator. */
+static s16 g_ability_list_job_name_ids[2] = { 0, -1 };
+
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_ability_list_render_commands[492];
 

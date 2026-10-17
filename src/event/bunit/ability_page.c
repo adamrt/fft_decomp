@@ -17,6 +17,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* The title is one mutable job ID followed by the text-row terminator. */
+static s16 g_ability_list_job_name_ids[2] = { 0, -1 };
+
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_ability_list_menu_script[493];
 
@@ -110,9 +113,9 @@ s32 ability_list_update(void) {
         rect.y = 0xC8;
         rect.w = 0x14;
         rect.h = 0x10;
-        g_ability_list_job_name_row[0] = g_job_list_selected_id;
+        g_ability_list_job_name_ids[0] = g_job_list_selected_id;
         text_render_id_rows_to_vram(
-            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_job_name_row, &rect, 0);
+            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_job_name_ids, &rect, 0);
         g_ability_list_ability_category = menu_update_wrapped_horizontal_selection(4, 0, 0);
         ability_list_build(g_unit_selected_index, g_job_list_selected_id, g_ability_list_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
