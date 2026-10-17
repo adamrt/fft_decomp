@@ -117,10 +117,6 @@ void equipment_commit_loadout(void);
 s32 equipment_can_equip_item(s16 unit_index, s16 item_id);
 
 /* equipment slots */
-extern point16_t g_equipment_slot_marker_rect;
-extern point16_t g_equipment_remove_item_marker_rect;
-extern u16 g_equipment_equip_item_cursor_anim[];
-extern u16 g_equipment_remove_item_cursor_anim[];
 extern oriented_quad_t g_equipment_slot_marker_rects[];
 extern oriented_quad_t g_equipment_secondary_slot_marker;
 extern u8 g_equipment_slot_marker_x[];
@@ -128,7 +124,6 @@ extern u16 g_equipment_remove_all_equipment_ids[5]; /* weapon, shield, head, bod
 extern s8 g_equipment_remove_all_equipment_prompt_active;
 extern s16 g_equipment_remove_item_equipment[5];
 extern s8 g_equipment_remove_item_previewed_slot;
-extern point16_t g_equipment_clear_all_prompt_draw_params;
 extern volatile u16 g_equipment_clear_all_prompt_frame;
 
 /* One-shot entry flag for this mode. */

@@ -1620,13 +1620,13 @@ data:
   - {addr: 0x801cf103, name: g_equipment_item_slot}
   - {addr: 0x801cf104, name: g_equipment_item_list_refresh}
   - {addr: 0x801cf106, name: g_equipment_item_preview_active}
-  - {addr: 0x801cf108, name: g_equipment_equip_item_cursor_anim}
-  - {addr: 0x801cf10c, name: g_equipment_slot_marker_rect}
+  - {addr: 0x801cf108, name: g_equipment_equip_cursor_state}
+  - {addr: 0x801cf10c, name: g_equipment_equip_cursor_position}
   - {addr: 0x801cf110, name: g_equipment_remove_mode_initialized}
-  - {addr: 0x801cf112, name: g_equipment_remove_item_cursor_anim}
+  - {addr: 0x801cf112, name: g_equipment_remove_cursor_state}
   - {addr: 0x801cf114, name: g_equipment_remove_all_equipment_ids}
-  - {addr: 0x801cf120, name: g_equipment_remove_item_marker_rect}
-  - {addr: 0x801cf124, name: g_equipment_clear_all_prompt_draw_params}
+  - {addr: 0x801cf120, name: g_equipment_remove_cursor_position}
+  - {addr: 0x801cf124, name: g_equipment_remove_all_cursor_position}
   - {addr: 0x801cf128, name: g_equipment_status_label_image}
   - {addr: 0x801cf6c4, name: g_item_action_menu}
   - {addr: 0x801cf700, name: g_equipment_item_action_menu_single_item}

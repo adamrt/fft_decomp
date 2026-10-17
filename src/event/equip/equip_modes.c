@@ -22,6 +22,13 @@
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_equipment_item_menu_script[198];
 
+/* Cursor anchors and their packed active/frame states belong to these modes. */
+extern point16_t g_equipment_equip_cursor_position;
+extern u16 g_equipment_equip_cursor_state;
+extern point16_t g_equipment_remove_cursor_position;
+extern u16 g_equipment_remove_cursor_state;
+extern point16_t g_equipment_remove_all_cursor_position;
+
 /* EQUIP's screen message 9 (TEXT_SECTION_OVERLAY_SCREEN): none of the item is left. */
 enum { EQUIPMENT_TEXT_ID_OUT_OF_STOCK = (TEXT_SECTION_OVERLAY_SCREEN << TEXT_ID_SECTION_SHIFT) + 9 };
 
@@ -230,9 +237,9 @@ static s32 equipment_run_equip_mode(void) {
         g_equipment_item_list_refresh = 0;
     }
     unit_panel_toggle_item_numbers_thread(g_equipment_item_preview_active);
-    g_equipment_slot_marker_rect.y = g_equipment_item_slot * 16 + 0x90;
+    g_equipment_equip_cursor_position.y = g_equipment_item_slot * 16 + 0x90;
     gfx_set_otag_index(0x28);
-    menu_update_and_draw_animated_cursor(&g_equipment_slot_marker_rect, g_equipment_equip_item_cursor_anim,
+    menu_update_and_draw_animated_cursor(&g_equipment_equip_cursor_position, &g_equipment_equip_cursor_state,
         g_equipment_item_list_open != 0 || g_menu_input_lock_mode != 0);
     return 1;
 }
@@ -284,10 +291,10 @@ static s32 equipment_run_remove_mode(void) {
     }
     selection
         = menu_update_vertical_selection_and_mark_change(5, 1, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
-    g_equipment_remove_item_marker_rect.y = ((selection & 0xFF) << 4) + 0x90;
+    g_equipment_remove_cursor_position.y = ((selection & 0xFF) << 4) + 0x90;
     gfx_set_otag_index(0x28);
     menu_update_and_draw_animated_cursor(
-        &g_equipment_remove_item_marker_rect, g_equipment_remove_item_cursor_anim, g_menu_input_lock_mode);
+        &g_equipment_remove_cursor_position, &g_equipment_remove_cursor_state, g_menu_input_lock_mode);
 
     g_help_message_text_id = g_equipment_remove_item_equipment[selection & 0xFF] != 0
         ? g_equipment_remove_item_equipment[selection & 0xFF] + HELP_TEXT_ID_ITEM_BASE
@@ -339,10 +346,10 @@ static s32 equipment_update_remove_all_prompt(void) {
     g_equipment_clear_all_prompt_frame = g_equipment_clear_all_prompt_frame + 1;
     if (g_equipment_clear_all_prompt_frame & 1) {
         for (index = 0; index < 5; index++) {
-            g_equipment_clear_all_prompt_draw_params.y = 0x90 + index * 0x10;
+            g_equipment_remove_all_cursor_position.y = 0x90 + index * 0x10;
             marker_state = 0;
             menu_update_and_draw_animated_cursor(
-                &g_equipment_clear_all_prompt_draw_params, &marker_state, g_menu_input_lock_mode);
+                &g_equipment_remove_all_cursor_position, &marker_state, g_menu_input_lock_mode);
         }
     }
     flags = g_menu_input_primary_repeat;
