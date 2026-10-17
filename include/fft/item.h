@@ -506,13 +506,6 @@ extern item_attribute_t g_item_attributes[];
 extern u8 g_item_ability_item_ids[14];
 extern item_poach_t g_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRST + 1];
 
-/* &g_item_primary_data[0].secondary_data_id viewed as a stride-12 byte
- * array. unit_set_equipment_stats reads the secondary id through its own
- * %lo(g_item_primary_data+4) address while the type_flags test uses a
- * record pointer; reading both through item_data_t folds them onto one base
- * register and misses the byte-exact match. */
-extern u8 g_item_secondary_data_ids[];
-
 const item_data_t* item_get_data(s32 item_id);
 
 /* inventory */

@@ -89,7 +89,6 @@ void brave_story_restore_event_list_prompt(menu_stack_record_t* level);
 
 /* persons */
 extern struct calendar_date* g_brave_story_birthdays;
-extern u8* g_brave_story_ages_source;
 extern u8 g_brave_story_character_ages[0x40];
 
 void brave_story_block_person_list_buttons(menu_stack_record_t* unused_level);

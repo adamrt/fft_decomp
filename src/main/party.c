@@ -21,6 +21,16 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* &g_item_primary_data[0].secondary_data_id viewed as a stride-12 byte
+ * array. unit_set_equipment_stats reads the secondary id through its own
+ * %lo(g_item_primary_data+4) address while the type_flags test uses a
+ * record pointer; reading both through item_data_t folds them onto one base
+ * register and misses the byte-exact match. */
+extern u8 g_item_secondary_data_ids[];
+extern job_data_t g_job_data[];
+extern u8 g_party_highest_level;
+extern u16 g_calendar_month_start_day_offsets[13];
+
 /* One row of g_unit_generation_base_data, selected by
  * unit_generation_type_e. */
 typedef struct unit_generation_base_data {

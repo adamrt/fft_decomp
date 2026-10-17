@@ -10,6 +10,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern u8* g_heap_world_overlay_load_address;
+
 static RECT g_gfx_frame_image_rect = { 960, 256, 64, 256 };
 static RECT g_gfx_frame_palette_rect = { 960, 496, 16, 16 };
 static RECT g_gfx_frame_palette_tail_rect = { 976, 506, 16, 6 };

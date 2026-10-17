@@ -17,6 +17,8 @@
 #include "fft/zodiac.h"
 #include "psx/types.h"
 
+extern const u16 g_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
+
 /* The original wrote the body of mem_copy_bytes_source_first a second time as
  * mem_copy_byte_data_source_first. */
 void mem_copy_byte_data_source_first(const void* source, void* destination, int count) {

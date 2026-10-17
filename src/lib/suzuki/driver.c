@@ -6,6 +6,8 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+extern SpuReverbAttr g_suzuki_sound_reverb_attr; /* 0x80037008 */
+
 /* Ordinary driver-status view; the transfer wait keeps its measured volatile view. */
 extern s16 g_suzuki_sound_driver_flags;
 

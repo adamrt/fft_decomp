@@ -4,6 +4,10 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+typedef s32 (*suzuki_modulator_step_t)(suzuki_modulator_t* modulator);
+
+extern suzuki_modulator_step_t g_suzuki_smd_modulator_waveforms[16]; /* 0x80028f54 */
+
 /* Vibrato, tremolo and pan-LFO operands with a start delay. */
 typedef struct suzuki_smd_modulator_parameters {
     u8 speed;

@@ -149,8 +149,6 @@ typedef enum suzuki_modulator_flag {
     SUZUKI_MODULATOR_NEGATED = 0x8            /* the next step or amplitude is negated */
 } suzuki_modulator_flag_e;
 
-typedef s32 (*suzuki_modulator_step_t)(suzuki_modulator_t* modulator);
-
 /* Repeat stack entry (0xc bytes) pushed by Repeat and consumed by Coda and
  * To Coda. */
 typedef struct suzuki_repeat {
@@ -633,7 +631,6 @@ s32 suzuki_sound_get_largest_free_block(void);
 void suzuki_sound_clear_memory(void* destination, s32 size);
 
 /* driver */
-extern suzuki_modulator_step_t g_suzuki_smd_modulator_waveforms[16]; /* 0x80028f54 */
 
 /* Driver state shared by multiple sound-engine features. */
 extern s16
@@ -655,7 +652,6 @@ extern suzuki_music_t* g_suzuki_sound_active_music_list; /* 0x80032a50 */
 extern s32
     g_suzuki_sound_root_counter_2_event; /* 0x80032a5c; OpenEvent handle of suzuki_sound_root_counter_2_handler */
 extern suzuki_music_t* g_suzuki_sound_sfx_music;    /* 0x80032a60; eight channels on SPU voices 16-23 */
-extern SpuReverbAttr g_suzuki_sound_reverb_attr;    /* 0x80037008 */
 extern suzuki_spu_state_t g_suzuki_sound_spu_state; /* 0x80037020 */
 
 /* Suzuki driver entry points. The music handle passed by the game wrappers

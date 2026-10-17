@@ -17,7 +17,6 @@ typedef char calendar_date_size_must_be_2[sizeof(calendar_date_t) == 2 ? 1 : -1]
 
 /* days */
 extern u8 g_calendar_month_lengths[12];
-extern u16 g_calendar_month_start_day_offsets[13];
 
 s32 calendar_calculate_day_of_year(s32 month, s32 day);
 void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day);

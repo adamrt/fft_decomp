@@ -40,7 +40,6 @@ typedef struct job_data {
 } job_data_t;
 typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 
-extern job_data_t g_job_data[];
 extern job_data_t* g_job_data_pointer;
 
 const job_data_t* job_get_data(s32 job_id);

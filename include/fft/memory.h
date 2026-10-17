@@ -33,7 +33,6 @@ enum {
 extern u32 g_heap_battle_end_address;
 extern u8* g_heap_high_overlay_load_address;
 extern u8* g_heap_low_overlay_load_address;
-extern u8* g_heap_world_overlay_load_address;
 extern u8* g_heap_companion_overlay_load_address;
 
 void* heap_alloc(u32 size);

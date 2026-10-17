@@ -31,7 +31,6 @@ typedef enum memcard_result {
 } memcard_result_e;
 
 extern s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT];
-extern u8 g_memcard_bios_events_opened;
 
 void memcard_init_events(void);
 void memcard_consume_all_events(void);

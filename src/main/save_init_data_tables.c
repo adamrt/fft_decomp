@@ -8,6 +8,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+extern u8* g_brave_story_ages_source;
+
 /* Reset the save record fields and new-game data tables: the five saved
  * sound-novel states (no text history, picture or background, zero counters
  * and flags, each on the shared save-slot buffer, brightness 0x10 except in

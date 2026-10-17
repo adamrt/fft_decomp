@@ -13,7 +13,6 @@
 
 /* roster */
 extern party_unit_t g_party_units[PARTY_ROSTER_SLOT_COUNT];
-extern u8 g_party_highest_level;
 
 void party_clear(void);
 void party_init_new_game(s32 mode);
