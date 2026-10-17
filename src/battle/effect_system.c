@@ -106,7 +106,7 @@ typedef struct effect_reflect_buffer {
     POLY_GT3 prims[2][24];
 } effect_reflect_buffer_t;
 
-extern psyq_tmd_header_t* g_effect_model_files[];
+extern const psyq_tmd_header_t* g_effect_model_files[];
 
 /* Secondary handler work state. */
 /* Per-secondary-slot spawn state for the two-particle death poof. */
@@ -1544,8 +1544,8 @@ static void effect_model_draw_projectile(
     s32 unused[2];
     MATRIX matrix;
     SVECTOR point;
-    psyq_tmd_header_t* model;
-    SVECTOR* vertices;
+    const psyq_tmd_header_t* model;
+    const SVECTOR* vertices;
     VECTOR* scratch;
     s32 count;
     s32 i;
@@ -1565,7 +1565,7 @@ static void effect_model_draw_projectile(
     SetTransMatrix(&matrix);
     model = g_effect_model_files[parameter & 0xff];
     scratch = (VECTOR*)getScratchAddr(0);
-    vertices = (SVECTOR*)((u8*)model->objects + model->objects[0].vertex_offset);
+    vertices = (const SVECTOR*)((const u8*)model->objects + model->objects[0].vertex_offset);
     count = model->objects[0].vertex_count;
     for (i = 0; i < count; i++) {
         gte_RotTrans(&vertices[i], &scratch[i], &scratch[i].pad);

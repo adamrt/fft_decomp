@@ -52,7 +52,7 @@ typedef struct effect_decoded_model_command {
 } effect_decoded_model_command_t;
 typedef char effect_decoded_model_command_size_must_be_112[sizeof(effect_decoded_model_command_t) == 112 ? 1 : -1];
 
-s32 effect_model_init_sections(psyq_tmd_header_t* resource, s32 unused_1);
+s32 effect_model_init_sections(const psyq_tmd_header_t* resource, s32 unused_1);
 void effect_model_decode_next_command(effect_decoded_model_command_t* out);
 
 #endif
