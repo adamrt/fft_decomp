@@ -69,7 +69,7 @@ units:
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x8018b660, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: panel_toggles, source: src/world/panel_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: party_records, source: src/world/party_records.c}
-  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x8018aef8, size: 16, hash: ed44f3f59883c72d}]}
   - {name: preview_bonuses, source: src/lib/menu/preview_bonuses.c}
   - {name: roster_changes, source: src/world/roster_changes.c}
   - {name: roster_sorting, source: src/world/roster_sorting.c, data: [{addr: 0x8018d7cc, size: 12, hash: 28a6a05d27d888a6}]}

@@ -20,7 +20,7 @@ units:
   - {name: music_tracks, source: src/lib/sound/music_tracks.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cabc4, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_textures, source: src/event/attack/portrait_textures.c, data: [{addr: 0x801dd2d4, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2dc, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2e4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x801dd5e4, size: 1152, hash: 4cf9816ed1062189}]}
-  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801ca480, size: 16, hash: ed44f3f59883c72d}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: scenario_setup, source: src/event/attack/scenario_setup.c}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
@@ -315,7 +315,7 @@ units:
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: packet_buffers, source: src/event/bunit/packet_buffers.c, data: [{addr: 0x801eca28, size: 2, hash: 96a296d224f285c6}]}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cf440, size: 16, hash: 3a4a58bab2c48f5e}]}
-  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801cecfc, size: 16, hash: ed44f3f59883c72d}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: screen_fade, source: src/lib/menu/screen_fade.c}
   - {name: selection_records, source: src/lib/menu/selection_records.c}
@@ -1154,7 +1154,7 @@ units:
   - {name: menu_panel_backdrops, source: src/lib/menu/menu_draw_thread_status_indicators.c, data: [{addr: 0x801c52b0, size: 32, hash: 66687aadf862bd77}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801c5e20, size: 16, hash: 3a4a58bab2c48f5e}]}
-  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801c56dc, size: 16, hash: ed44f3f59883c72d}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
@@ -1344,7 +1344,7 @@ units:
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801e930c, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cefc8, size: 16, hash: 3a4a58bab2c48f5e}]}
-  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801ce884, size: 16, hash: ed44f3f59883c72d}]}
   - {name: preview_bonuses, source: src/lib/menu/preview_bonuses.c}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: screen_init, source: src/event/equip/screen_init.c, data: [{addr: 0x801e0b9c, size: 472, hash: 22fec3bc784546d7}, {addr: 0x801e0d74, size: 720, hash: fe2f74a1e0b16a66}, {addr: 0x801e1044, size: 320, hash: 7b6436b0c98f6238}, {addr: 0x801e1184, size: 320, hash: 7b6436b0c98f6238}]}
@@ -2308,7 +2308,7 @@ units:
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: music_tracks, source: src/lib/sound/music_tracks.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cbe60, size: 16, hash: 3a4a58bab2c48f5e}]}
-  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
+  - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801cb71c, size: 16, hash: ed44f3f59883c72d}]}
   - {name: post_battle_party, source: src/event/require/post_battle_party.c, data: [{addr: 0x801d71f8, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d72c0, size: 200, hash: 6d9c54dee5660c46}]}
   - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8304, size: 1060, hash: d50e2d8474134908}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}

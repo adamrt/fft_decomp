@@ -215,7 +215,6 @@ void unit_panel_build_status_groups(POLY_FT4* poly);
 /* portraits */
 extern palette_t g_unit_panel_selected_portrait_palettes[2];
 extern palette_t g_unit_panel_comparison_portrait_palettes[2];
-extern u8 g_unit_panel_portrait_transition_offsets[];
 
 /* character status panel */
 /* The selected unit's and the comparison unit's status panels, with their billboards, packets, numbers, name

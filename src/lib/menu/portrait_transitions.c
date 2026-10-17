@@ -7,9 +7,10 @@
 #include "fft/menu.h"
 #include "fft/portrait.h"
 #include "fft/script.h"
-#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+static u8 g_unit_panel_portrait_transition_offsets[16] = { 2, 2, 16, 16, 29, 29, 0, 0, 0, 0, 13, 13, 31, 31, 0, 0 };
 
 /* WORLD keeps its roster-slot builder in its own source. */
 #ifdef FFT_EVENT
