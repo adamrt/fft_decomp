@@ -61,7 +61,10 @@ typedef struct menu_text_row {
     u8 _unused_04;
 } menu_text_row_t;
 
-static u8 g_menu_cleared_entry_indices[11] = { 7, 24, 25, 26, 27, 37, 38, 40, 41, 42, 45 };
+static u8 g_menu_cleared_entry_indices[11] = { MENU_COMMAND_ID_WAIT_YES_NO, MENU_COMMAND_ID_PROMPT_YES_NO,
+    MENU_COMMAND_ID_MESSAGE_YES_NO, MENU_COMMAND_ID_TARGET_KIND, MENU_COMMAND_ID_PANEL_EXECUTE,
+    MENU_COMMAND_ID_MESSAGE_TARGET_KIND, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, MENU_COMMAND_ID_AUTO_BATTLE_UNIT,
+    MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT, MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT, MENU_COMMAND_ID_MESSAGE_EXECUTE };
 
 /* Reset the cursor row of the 11 menu entries listed in g_menu_cleared_entry_indices. */
 void menu_clear_entry_selections(void) {

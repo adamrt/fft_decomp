@@ -77,58 +77,102 @@ typedef struct menu_system_function {
 typedef char menu_system_function_size_must_be_20[(sizeof(menu_system_function_t) == 20) ? 1 : -1];
 
 /* System-menu requests: callbacks and their initial message/selection parameters. */
-menu_system_function_t g_menu_system_function_table[51] = {
-    { 25, 0x8004, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 0, { 0, 0 } },     /* 0 */
-    { 28, 0x800f, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 1 */
-    { 26, 0x5056, 26, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 2, { 0, 0 } },    /* 2 */
-    { 27, 0x5058, 27, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 3, { 0, 0 } },    /* 3 */
-    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 4 */
-    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 5 */
-    { 28, 0x800b, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 6 */
-    { 28, 0x8003, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 7 */
-    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 8 */
-    { 30, 0x5061, 30, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 9, { 0, 0 } },    /* 9 */
-    { 28, 0x5062, 31, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 10, { 0, 0 } },         /* 10 */
-    { 100, 0x8010, 28, 0x25, 1, { 0, 0 }, menu_icon_linked_entry_thread, 2, { 0, 0 } },    /* 11 */
-    { 101, 0x8011, 28, 0x26, 1, { 0, 0 }, menu_icon_linked_entry_thread, 3, { 0, 0 } },    /* 12 */
-    { 102, 0x8011, 28, 0x2d, 1, { 0, 0 }, menu_icon_linked_entry_thread, 9, { 0, 0 } },    /* 13 */
-    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 14 */
-    { 99, 0x1004, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 15, { 0, 0 } },  /* 15 */
-    { 99, 0x8006, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 16 */
-    { 99, 0x8007, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 17 */
-    { 99, 0x8008, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 18 */
-    { 99, 0x8009, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 19 */
-    { 28, 0x1012, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 20, { 0, 0 } },  /* 20 */
-    { 28, 0x1015, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 21, { 0, 0 } },  /* 21 */
-    { 99, 0x1014, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 22, { 0, 0 } },  /* 22 */
-    { 99, 0x1016, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 23, { 0, 0 } },  /* 23 */
-    { 40, 0x506e, 40, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 8, { 0, 0 } },    /* 24 */
-    { 40, 0x506f, 40, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 8, { 0, 0 } },    /* 25 */
-    { 103, 0x800d, 28, 0x29, 1, { 0, 0 }, menu_icon_linked_entry_thread, 24, { 0, 0 } },   /* 26 */
-    { 104, 0x800e, 28, 0x2a, 1, { 0, 0 }, menu_icon_linked_entry_thread, 25, { 0, 0 } },   /* 27 */
-    { 25, 0x802e, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 28 */
-    { 28, 0x0, 43, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 29, { 0, 0 } },            /* 29 */
-    { 25, 0x1017, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 30 */
-    { 105, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 31, { 0, 0 } }, /* 31 */
-    { 99, 0x1013, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 32, { 0, 0 } },  /* 32 */
-    { 25, 0x8006, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 33 */
-    { 28, 0x1830, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 34, { 0, 0 } },  /* 34 */
-    { 28, 0x1831, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 35, { 0, 0 } },  /* 35 */
-    { 28, 0x1832, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 36, { 0, 0 } },  /* 36 */
-    { 28, 0x1833, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 37, { 0, 0 } },  /* 37 */
-    { 28, 0x101d, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 38, { 0, 0 } },  /* 38 */
-    { 28, 0x101c, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 39, { 0, 0 } },  /* 39 */
-    { 28, 0x0, 28, 0xffff, 1, { 0, 0 }, menu_input_thread, 40, { 0, 0 } },                 /* 40 */
-    { 99, 0x100a, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 41, { 0, 0 } },  /* 41 */
-    { 106, 0x800c, 28, 0x2d, 1, { 0, 0 }, menu_icon_linked_entry_thread, 43, { 0, 0 } },   /* 42 */
-    { 98, 0x5061, 30, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 43, { 0, 0 } },   /* 43 */
-    { 28, 0x5089, 31, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 44, { 0, 0 } },         /* 44 */
-    { 101, 0x8012, 28, 0x26, 1, { 0, 0 }, menu_icon_linked_entry_thread, 3, { 0, 0 } },    /* 45 */
-    { 102, 0x8012, 28, 0x2d, 1, { 0, 0 }, menu_icon_linked_entry_thread, 9, { 0, 0 } },    /* 46 */
-    { 99, 0x100f, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 47 */
-    { 25, 0x8005, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 48 */
-    { 99, 0x1025, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 49, { 0, 0 } },  /* 49 */
-    { 28, 0x508c, 31, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 50, { 0, 0 } },         /* 50 */
+static menu_system_function_t g_menu_system_function_table[51] = {
+    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8004, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, 0, { 0, 0 } }, /* 0 */
+    { MENU_COMMAND_ID_MESSAGE, 0x800f, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 1 */
+    { MENU_COMMAND_ID_TARGET_KIND, 0x5056, MENU_COMMAND_ID_TARGET_KIND, 0xffff, 1, { 0, 0 },
+        menu_run_icon_selection_loop, 2, { 0, 0 } }, /* 2 */
+    { MENU_COMMAND_ID_PANEL_EXECUTE, 0x5058, MENU_COMMAND_ID_PANEL_EXECUTE, 0xffff, 1, { 0, 0 },
+        menu_run_icon_selection_loop, 3, { 0, 0 } }, /* 3 */
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 4 */
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 5 */
+    { MENU_COMMAND_ID_MESSAGE, 0x800b, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 6 */
+    { MENU_COMMAND_ID_MESSAGE, 0x8003, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 7 */
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 8 */
+    { MENU_COMMAND_ID_EXECUTE, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 9,
+        { 0, 0 } }, /* 9 */
+    { MENU_COMMAND_ID_MESSAGE, 0x5062, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+        MENU_SYSTEM_FUNCTION_ABILITY_ANNOUNCEMENT, { 0, 0 } }, /* 10 */
+    { 100, 0x8010, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_TARGET_KIND, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, 2, { 0, 0 } }, /* 11 */
+    { 101, 0x8011, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, 3, { 0, 0 } }, /* 12 */
+    { 102, 0x8011, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        9, { 0, 0 } }, /* 13 */
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } },                                                                /* 14 */
+    { 99, 0x1004, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 15, { 0, 0 } }, /* 15 */
+    { 99, 0x8006, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 16 */
+    { 99, 0x8007, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 17 */
+    { 99, 0x8008, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 18 */
+    { 99, 0x8009, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 19 */
+    { MENU_COMMAND_ID_MESSAGE, 0x1012, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 20,
+        { 0, 0 } }, /* 20 */
+    { MENU_COMMAND_ID_MESSAGE, 0x1015, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 21,
+        { 0, 0 } },                                                                                            /* 21 */
+    { 99, 0x1014, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 22, { 0, 0 } }, /* 22 */
+    { 99, 0x1016, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 23, { 0, 0 } }, /* 23 */
+    { MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0x506e, MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
+        menu_run_icon_selection_loop, MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 24 */
+    { MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0x506f, MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
+        menu_run_icon_selection_loop, MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 25 */
+    { 103, 0x800d, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, 24, { 0, 0 } }, /* 26 */
+    { 104, 0x800e, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, 25, { 0, 0 } }, /* 27 */
+    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x802e, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 28 */
+    { MENU_COMMAND_ID_MESSAGE, 0x0, MENU_COMMAND_ID_EFFECT_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+        MENU_SYSTEM_FUNCTION_EFFECT_MESSAGE, { 0, 0 } }, /* 29 */
+    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x1017, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 30 */
+    { MENU_COMMAND_ID_CRYSTAL_PICKUP, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 },
+        mini_menu_cancel_delay_thread, MENU_SYSTEM_FUNCTION_CRYSTAL_OR_TREASURE, { 0, 0 } },                   /* 31 */
+    { 99, 0x1013, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 32, { 0, 0 } }, /* 32 */
+    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8006, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 33 */
+    { MENU_COMMAND_ID_MESSAGE, 0x1830, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_TRAP_RESULT_FIRST, { 0, 0 } }, /* 34 */
+    { MENU_COMMAND_ID_MESSAGE, 0x1831, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 35,
+        { 0, 0 } }, /* 35 */
+    { MENU_COMMAND_ID_MESSAGE, 0x1832, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 36,
+        { 0, 0 } }, /* 36 */
+    { MENU_COMMAND_ID_MESSAGE, 0x1833, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 37,
+        { 0, 0 } }, /* 37 */
+    { MENU_COMMAND_ID_MESSAGE, 0x101d, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM_SOLD, { 0, 0 } }, /* 38 */
+    { MENU_COMMAND_ID_MESSAGE, 0x101c, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM, { 0, 0 } }, /* 39 */
+    { MENU_COMMAND_ID_MESSAGE, 0x0, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_input_thread,
+        MENU_SYSTEM_FUNCTION_MOVE_CONFIRM_SILENT, { 0, 0 } },                                                  /* 40 */
+    { 99, 0x100a, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 41, { 0, 0 } }, /* 41 */
+    { 106, 0x800c, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        43, { 0, 0 } },                                                                                       /* 42 */
+    { 98, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 43, { 0, 0 } }, /* 43 */
+    { MENU_COMMAND_ID_MESSAGE, 0x5089, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+        MENU_SYSTEM_FUNCTION_ARITHMETICKS_ANNOUNCEMENT, { 0, 0 } }, /* 44 */
+    { 101, 0x8012, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, 3, { 0, 0 } }, /* 45 */
+    { 102, 0x8012, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        9, { 0, 0 } }, /* 46 */
+    { 99, 0x100f, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } }, /* 47 */
+    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8005, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, MENU_SYSTEM_FUNCTION_CLOSE, { 0, 0 } },                                 /* 48 */
+    { 99, 0x1025, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 49, { 0, 0 } }, /* 49 */
+    { MENU_COMMAND_ID_MESSAGE, 0x508c, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+        MENU_SYSTEM_FUNCTION_POST_ACTION_RESULT, { 0, 0 } }, /* 50 */
 };
 
 static void camera_load_state_from_script_variables(void);
@@ -532,12 +576,12 @@ static void menu_run_system_function_thread(void) {
     g_menu_system_function_row_actions[0] = entry->row_action;
     g_command_current_id = menu_id;
     g_menu_thread_menu_data[entry->menu_entry_index].thread_count = entry->thread_count;
-    if (id == 0x1f) {
+    if (id == MENU_SYSTEM_FUNCTION_CRYSTAL_OR_TREASURE) {
         thread_start(THREAD_SLOT_MENU, crystal_open_pickup_panel);
         thread_set_parameters(THREAD_SLOT_MENU, 0, g_crystal_pickup_panel_parameter, 0);
         thread_exit_current();
     }
-    if (id != 8) {
+    if (id != MENU_SYSTEM_FUNCTION_CLOSE) {
         tutorial_pulse_wait_value(id);
     }
     thread_start(THREAD_SLOT_MENU, entry->thread_entry);
