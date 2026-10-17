@@ -49,9 +49,8 @@ extern u16* g_help_topic_text_ids;
 extern u32 g_help_text_table[];
 
 /* help cursor */
-/* One cursor-navigation node of the HELPMENU, BUNIT, ATTACK deployment and
- * DEBUGCHR editor screens (WORLD's help_navigation_record_t has the same
- * layout): the value or text id it refers to, its help-text base, the node
+/* One cursor-navigation node of the help screens, deployment, unit editor and
+ * WLDCORE status panel: the value or text id it refers to, its help-text base, the node
  * reached for each d-pad direction (up 0x1000, down 0x4000, right 0x2000,
  * left 0x8000) and the cursor position. */
 typedef struct help_navigation_record {

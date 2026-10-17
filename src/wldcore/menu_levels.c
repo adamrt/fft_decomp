@@ -9,6 +9,7 @@
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
+#include "fft/help.h"
 #include "fft/input.h"
 #include "fft/location.h"
 #include "fft/menu.h"
@@ -43,7 +44,7 @@
 
 extern u32* g_location_picture_frame_tim;
 extern deep_dungeon_battle_t* g_deep_dungeon_battles;
-extern unit_panel_help_row_t g_unit_panel_help_rows[];
+extern help_navigation_record_t g_unit_panel_help_rows[];
 
 /* The horizontal and vertical map scroll axes. */
 extern world_map_scroll_axis_t g_world_map_scroll_x;
@@ -1653,7 +1654,7 @@ static void unit_panel_move_help_cursor(unit_panel_help_level_t* request) {
 
     xy[index].x = g_unit_panel_help_rows[layout].x + 14;
     xy[index].y = g_unit_panel_help_rows[layout].y + 12;
-    kind = g_unit_panel_help_rows[layout].kind;
+    kind = g_unit_panel_help_rows[layout].vertical_cursor;
     if (kind != request->cached_layout_kind) {
         request->cached_layout_kind = kind;
         g_window_records[index].sequence = (kind != 0) ? WINDOW_ANIM_LAYOUT_CURSOR_IDLE : WINDOW_ANIM_CURSOR_IDLE;
@@ -1704,14 +1705,14 @@ void unit_panel_handle_help_input(menu_stack_record_t* request) {
 
     if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) != 0) {
         layout = request->layout_window.layout;
-        counter = g_unit_panel_help_rows[layout].counter;
+        counter = g_unit_panel_help_rows[layout].value;
         if (counter != 0) {
             if (layout != 0xB && *counter >= -1 && *counter < 1) {
                 return;
             }
-            message = g_unit_panel_help_rows[layout].message_base + *counter;
+            message = g_unit_panel_help_rows[layout].help_base + *counter;
         } else {
-            message = g_unit_panel_help_rows[layout].message_base;
+            message = g_unit_panel_help_rows[layout].help_base;
         }
         menu_stack_push_message_level(message, 1);
         g_menu_input_lock_mode = 1;
@@ -1725,33 +1726,33 @@ void unit_panel_handle_help_input(menu_stack_record_t* request) {
     }
 
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
-        if (g_unit_panel_help_rows[request->layout_window.layout].up != request->layout_window.layout) {
+        if (g_unit_panel_help_rows[request->layout_window.layout].destination[0] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
-            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].up;
+            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[0];
             unit_panel_move_help_cursor(&request->layout_window);
             return;
         }
     }
     if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        if (g_unit_panel_help_rows[request->layout_window.layout].down != request->layout_window.layout) {
+        if (g_unit_panel_help_rows[request->layout_window.layout].destination[1] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
-            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].down;
+            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[1];
             unit_panel_move_help_cursor(&request->layout_window);
             return;
         }
     }
     if (world_map_update_input_repeat(PSX_PAD_RIGHT) != 0) {
-        if (g_unit_panel_help_rows[request->layout_window.layout].right != request->layout_window.layout) {
+        if (g_unit_panel_help_rows[request->layout_window.layout].destination[2] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
-            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].right;
+            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[2];
             unit_panel_move_help_cursor(&request->layout_window);
             return;
         }
     }
     if (world_map_update_input_repeat(PSX_PAD_LEFT) != 0) {
-        if (g_unit_panel_help_rows[request->layout_window.layout].left != request->layout_window.layout) {
+        if (g_unit_panel_help_rows[request->layout_window.layout].destination[3] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
-            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].left;
+            request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[3];
             unit_panel_move_help_cursor(&request->layout_window);
         }
     }

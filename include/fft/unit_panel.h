@@ -336,23 +336,6 @@ typedef struct unit_panel_help_level {
     s32 saved_state; /* 0x0c; previous g_menu_stack_ot_offset, saved by the push */
 } unit_panel_help_level_t;
 
-/* Provisional: a row of the window-layout table. unit_panel_handle_help_input reads the first ten bytes:
- * a pointer to the level's live counter, the base message id, and the four neighboring layout ids reached by the
- * directional pad. unit_panel_move_help_cursor reads the rest: the record's x and y extents (plus 14 and 12) and the
- * kind that selects the redraw delay. */
-typedef struct unit_panel_help_row {
-    s16* counter;     /* 0x00 */
-    u16 message_base; /* 0x04 */
-    u8 up;            /* 0x06 */
-    u8 down;          /* 0x07 */
-    u8 right;         /* 0x08 */
-    u8 left;          /* 0x09 */
-    s16 x;            /* 0x0a */
-    s16 y;            /* 0x0c */
-    s16 kind;         /* 0x0e */
-} unit_panel_help_row_t;
-typedef char unit_panel_help_row_size_must_be_16[sizeof(unit_panel_help_row_t) == 16 ? 1 : -1];
-
 void unit_panel_push_help_level(void);
 void unit_panel_resume_help_level(menu_stack_record_t* level);
 
