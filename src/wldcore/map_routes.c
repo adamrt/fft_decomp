@@ -746,7 +746,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
     s32 depth;
 
     if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_LOAD_EVENT) != 0) {
-        g_window_records[g_menu_stack_records_next[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         g_travel_next_map_id[0] = 0;
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
         event_transition_push_level(g_location_script_state.args[1]);
@@ -773,7 +773,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
         g_world_map_projection_state.angle = g_travel.heading;
         depth = g_menu_stack_depth - 1;
         g_travel.menu_level = depth;
-        g_window_records[g_menu_stack_records_next[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         if (world_map_start_pan_if_outside(
                 &g_world_map_projection_state.marker.render.position, &g_world_map_projection_state.marker.position)
             == 0) {
@@ -834,7 +834,7 @@ void travel_step(void) {
                 g_world_map_projection_state.angle = 0;
                 g_world_map_projection_state.flags &= ~WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
                 g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
-                g_menu_stack_records_next[g_travel.menu_level].location_transition.location_id
+                g_menu_stack_records[g_travel.menu_level].location_transition.location_id
                     = g_world_map_projection_state.marker.kind;
                 return;
             }
@@ -854,7 +854,7 @@ void travel_step(void) {
                 g_world_map_projection_state.angle = 0;
                 g_world_map_projection_state.flags &= ~WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
                 g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
-                g_menu_stack_records_next[g_travel.menu_level].location_transition.location_id
+                g_menu_stack_records[g_travel.menu_level].location_transition.location_id
                     = g_world_map_projection_state.marker.kind;
                 return;
             }
@@ -867,11 +867,11 @@ void travel_step(void) {
                 g_world_map_projection_state.angle = g_travel.heading;
                 return;
             }
-            g_window_records[g_menu_stack_records_next[g_travel.menu_level].location_transition.window_index].flags
+            g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].flags
                 ^= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[g_menu_stack_records_next[g_travel.menu_level].location_transition.window_index].position.x
+            g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].position.x
                 = g_world_map_projection_state.marker.render.position.x;
-            g_window_records[g_menu_stack_records_next[g_travel.menu_level].location_transition.window_index].position.y
+            g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].position.y
                 = g_world_map_projection_state.marker.render.position.y - 4;
             g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
             g_travel.arrival_location = g_world_map_projection_state.marker.kind + 1;
@@ -879,12 +879,12 @@ void travel_step(void) {
             g_world_map_projection_state.angle = 0;
             g_world_map_projection_state.flags &= ~WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
             g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
-            g_menu_stack_records_next[g_travel.menu_level].location_transition.location_id
+            g_menu_stack_records[g_travel.menu_level].location_transition.location_id
                 = g_world_map_projection_state.marker.kind;
             result = location_collect_choices(g_world_map_projection_state.marker.kind,
-                g_menu_stack_records_next[g_menu_stack_depth].location_transition.choice_text_ids);
+                g_menu_stack_records[g_menu_stack_depth].location_transition.choice_text_ids);
             if (result != -1 && result > 0) {
-                g_menu_stack_records_next[g_menu_stack_depth].location_transition.pending_result = result;
+                g_menu_stack_records[g_menu_stack_depth].location_transition.pending_result = result;
                 menu_stack_dispatch_suspend();
                 location_push_menu_level(g_world_map_projection_state.marker.kind);
             }

@@ -73,15 +73,13 @@ typedef enum menu_stack_level {
     MENU_STACK_LEVEL_UNIT_PANEL_HELP = 56,
 } menu_stack_level_e;
 
-extern s32 g_menu_stack_depth;
-extern s32 g_menu_stack_types[]; /* menu_stack_level_e of each level */
-extern s32 g_menu_stack_ot_offset;
+enum { MENU_STACK_CAPACITY = 8 };
 
-/* The record and type arrays offset by one level, which the push routines index by the current depth: spelling
- * that as g_menu_stack_records[depth + 1] changes their address arithmetic. The type view is kept only
- * where types[depth + 1] reschedules the push routine (proposition detail, tutorial topic text, the Brave Story and
- * the persons list). */
-extern s32 g_menu_stack_types_next[];
+/* Depth is the number of active levels: the top occupies depth - 1, and a push
+ * writes slot depth before incrementing it. The root occupies physical slot 0. */
+extern s32 g_menu_stack_depth;
+extern s32 g_menu_stack_types[MENU_STACK_CAPACITY]; /* menu_stack_level_e of each level */
+extern s32 g_menu_stack_ot_offset;
 
 /* Handlers by level type. Idle runs the top level each frame; suspend runs just before another level opens over it
  * (list levels withhold every button, window levels dim their windows); resume undoes that when the level above

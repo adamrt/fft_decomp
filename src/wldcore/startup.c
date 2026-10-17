@@ -505,7 +505,7 @@ static void world_map_restore_entry_level(void) {
                 | SYSTEM_FLAG_TITLE_BRAVE_STORY))
         == 0) {
         if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_TEXT) != 0) {
-            world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+            world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
             menu_stack_push_scrollable_text_level(g_location_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);
         } else {
             location_script_dispatch_requests();

@@ -559,10 +559,9 @@ data:
   - {addr: 0x800bb500, name: g_picture_background_loaded_set}
   - {addr: 0x800bb504, name: g_window_records}
   - {addr: 0x800bb51c, name: g_window_record_positions}
-  - {addr: 0x800bb930, name: g_menu_stack_records}
   - {addr: 0x800bb984, name: g_input_previous_buttons}
   - {addr: 0x800bb988, name: g_picture_buffer}
-  - {addr: 0x800bb98c, name: g_menu_stack_records_next}
+  - {addr: 0x800bb98c, name: g_menu_stack_records}
   - {addr: 0x800bbc6c, name: g_travel_next_map_id}
   - {addr: 0x800bbc70, name: g_window_render_records}
   - {addr: 0x800bc2f0, name: g_world_map_input_new_button_presses}
@@ -625,9 +624,8 @@ data:
   - {addr: 0x800d4574, name: g_window_panel_value}
   - {addr: 0x800d4578, name: g_proposition_dispatch_days}
   - {addr: 0x800d457c, name: g_proposition_send_unit_count}
-  - {addr: 0x800d4580, name: g_menu_stack_types}
   - {addr: 0x800d4580, name: g_world_map_cursor_window}
-  - {addr: 0x800d4584, name: g_menu_stack_types_next}
+  - {addr: 0x800d4584, name: g_menu_stack_types}
   - {addr: 0x800d45a4, name: g_audio_queue}
   - {addr: 0x800d4644, name: g_location_script_flags}
   - {addr: 0x800d4644, name: g_location_script_state}

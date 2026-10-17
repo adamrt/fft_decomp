@@ -432,9 +432,9 @@ void world_map_run_world_menus(GsOT* context) {
 void menu_stack_reset(void) {
     g_menu_stack_depth = 0;
     world_map_push_cursor_level();
-    g_window_records[g_menu_stack_records[1].window_index].position.x
+    g_window_records[g_menu_stack_records[0].window_index].position.x
         = g_world_map_projection_state.marker.render.position.x;
-    g_window_records[g_menu_stack_records[1].window_index].position.y
+    g_window_records[g_menu_stack_records[0].window_index].position.y
         = g_world_map_projection_state.marker.render.position.y - 4;
 }
 
@@ -442,7 +442,7 @@ void menu_stack_reset(void) {
 void menu_stack_dispatch_idle(void) {
     s32 index = g_menu_stack_depth;
 
-    g_menu_stack_idle_handlers[g_menu_stack_types[index]](&g_menu_stack_records[index]);
+    g_menu_stack_idle_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Run the resume handler of the level now on top of the stack after the level above it closed:
@@ -450,7 +450,7 @@ void menu_stack_dispatch_idle(void) {
 void menu_stack_dispatch_resume(void) {
     s32 index = g_menu_stack_depth;
 
-    g_menu_stack_resume_handlers[g_menu_stack_types[index]](&g_menu_stack_records[index]);
+    g_menu_stack_resume_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Run the top level's suspend handler, called just before another level opens over it: list levels
@@ -459,7 +459,7 @@ void menu_stack_dispatch_resume(void) {
 void menu_stack_dispatch_suspend(void) {
     s32 index = g_menu_stack_depth;
 
-    g_menu_stack_suspend_handlers[g_menu_stack_types[index]](&g_menu_stack_records[index]);
+    g_menu_stack_suspend_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Pushes a two-window menu level: appends two window records, points the new
@@ -483,7 +483,7 @@ static void world_map_push_cursor_level(void) {
     records = g_window_records;
 
     depth = g_menu_stack_depth;
-    g_menu_stack_records_next[depth].window_pair.first_window = window_index;
+    g_menu_stack_records[depth].window_pair.first_window = window_index;
     g_window_records[window_index].sequence = WINDOW_ANIM_CURSOR_STILL;
     g_window_records[window_index].priority = 12;
     xy[window_index].x = 0;
@@ -494,7 +494,7 @@ static void world_map_push_cursor_level(void) {
     window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     depth = g_menu_stack_depth;
     g_hud_value_mode = HUD_VALUE_FUNDS;
-    g_menu_stack_records_next[depth].window_pair.second_window = window_index;
+    g_menu_stack_records[depth].window_pair.second_window = window_index;
     g_window_records[window_index].sequence = WINDOW_ANIM_MAP_EDGE_ARROWS;
     g_window_records[window_index].priority = 12;
     g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -516,11 +516,11 @@ static void world_map_push_cursor_level(void) {
 
     g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     level = g_menu_stack_depth;
-    g_menu_stack_records_next[level].map_cursor.wide_view = 0;
-    g_menu_stack_records_next[level].map_cursor.snap_hit = g_world_map_projection_state.marker.kind + 1;
-    g_menu_stack_records_next[level].map_cursor.pending_mode = 0;
+    g_menu_stack_records[level].map_cursor.wide_view = 0;
+    g_menu_stack_records[level].map_cursor.snap_hit = g_world_map_projection_state.marker.kind + 1;
+    g_menu_stack_records[level].map_cursor.pending_mode = 0;
     g_menu_stack_depth = level + 1;
-    g_menu_stack_types[level + 1] = MENU_STACK_LEVEL_WORLD_MAP;
+    g_menu_stack_types[level] = MENU_STACK_LEVEL_WORLD_MAP;
 }
 
 /* Resume handler of the world map's root level: show the war funds in the
@@ -561,15 +561,15 @@ void location_script_dispatch_requests(void) {
     }
     flags = &g_location_script_state.flags;
     if (*flags & LOCATION_SCRIPT_ACTION_PATH_MASK) {
-        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         world_map_push_path_level(g_location_script_state.args[0], g_location_script_state.args[1],
             (*flags & LOCATION_SCRIPT_ACTION_ERASE_PATH) > 0);
     } else if (*flags & LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK) {
-        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         world_map_push_location_visibility_level(
             g_location_script_state.args[0], (*flags & LOCATION_SCRIPT_ACTION_ERASE_LOCATION) > 0);
     } else if (*flags & LOCATION_SCRIPT_ACTION_FOCUS_LOCATION) {
-        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth]);
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         id = g_location_script_state.args[0];
         if (id == 0xFF) {
             id = *location;
@@ -655,9 +655,9 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
                         travel_start(g_world_map_projection_state.marker.kind, hit);
                         return;
                     }
-                    g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count
-                        = location_build_menu_entries(hit, g_menu_stack_records_next[g_menu_stack_depth].panel.entries);
-                    if (g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count != 0) {
+                    g_menu_stack_records[g_menu_stack_depth].panel.entry_count
+                        = location_build_menu_entries(hit, g_menu_stack_records[g_menu_stack_depth].panel.entries);
+                    if (g_menu_stack_records[g_menu_stack_depth].panel.entry_count != 0) {
                         world_map_suspend_cursor_level(level);
                         location_push_menu_level(hit);
                         return;
@@ -880,13 +880,13 @@ static void world_map_push_focus_level(s32 dot_index) {
     display_object_animated_t* render;
 
     render = &g_world_map_dots[dot_index].render;
-    g_menu_stack_records_next[g_menu_stack_depth].focus_dot_index = dot_index;
+    g_menu_stack_records[g_menu_stack_depth].focus_dot_index = dot_index;
     world_map_start_pan_if_outside(&render->position, &g_world_map_dots[dot_index].position);
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
         g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-        g_window_records[g_menu_stack_records_next[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     }
-    g_menu_stack_types[g_menu_stack_depth + 1] = MENU_STACK_LEVEL_WORLD_MAP_FOCUS;
+    g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_WORLD_MAP_FOCUS;
     g_menu_stack_depth = g_menu_stack_depth + 1;
 }
 
@@ -911,10 +911,10 @@ void world_map_step_focus_level(menu_stack_record_t* entry) {
     }
     level = g_menu_stack_depth;
     g_menu_stack_depth = level - 1;
-    g_window_records[g_menu_stack_records_next[level - 2].window_index].position.x
+    g_window_records[g_menu_stack_records[level - 2].window_index].position.x
         = g_world_map_dots[entry->focus_dot_index].render.position.x;
     g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    g_window_records[g_menu_stack_records_next[level - 2].window_index].position.y
+    g_window_records[g_menu_stack_records[level - 2].window_index].position.y
         = g_world_map_dots[entry->focus_dot_index].render.position.y - 4;
     menu_stack_dispatch_resume();
 }
@@ -928,13 +928,13 @@ static void world_map_push_path_level(s32 from, s32 to, s32 erase) {
 
     world_map_prepare_path_animation(from, to);
     depth = g_menu_stack_depth;
-    g_menu_stack_records_next[depth].path.path_id = from;
-    g_menu_stack_records_next[depth].path.path_id_hi = to;
-    g_menu_stack_records_next[depth].path.erase = erase;
-    g_menu_stack_records_next[depth].path.pending_sound = 1;
+    g_menu_stack_records[depth].path.path_id = from;
+    g_menu_stack_records[depth].path.path_id_hi = to;
+    g_menu_stack_records[depth].path.erase = erase;
+    g_menu_stack_records[depth].path.pending_sound = 1;
     g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    window_index = g_menu_stack_records_next[depth - 1].window_index;
-    g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_WORLD_MAP_PATH;
+    window_index = g_menu_stack_records[depth - 1].window_index;
+    g_menu_stack_types[depth] = MENU_STACK_LEVEL_WORLD_MAP_PATH;
     g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth + 1;
 }
@@ -995,7 +995,7 @@ void world_map_step_path_level(world_map_path_level_t* level) {
     g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
     depth = g_menu_stack_depth;
     g_menu_stack_depth = depth - 1;
-    window_index = g_menu_stack_records_next[depth - 2].window_index;
+    window_index = g_menu_stack_records[depth - 2].window_index;
     g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
     g_window_records[window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
     menu_stack_dispatch_resume();
@@ -1008,13 +1008,13 @@ static void world_map_push_location_visibility_level(s32 dot_index, s32 was_set)
     s32 depth = g_menu_stack_depth;
     s32 window_index;
 
-    g_menu_stack_records_next[depth].visibility.dot_index = dot_index;
-    g_menu_stack_records_next[depth].visibility.was_set = was_set;
-    g_menu_stack_records_next[depth].visibility.delay = 0x10;
-    g_menu_stack_records_next[depth].visibility.pending_sound = 1;
+    g_menu_stack_records[depth].visibility.dot_index = dot_index;
+    g_menu_stack_records[depth].visibility.was_set = was_set;
+    g_menu_stack_records[depth].visibility.delay = 0x10;
+    g_menu_stack_records[depth].visibility.pending_sound = 1;
     g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    window_index = g_menu_stack_records_next[depth - 1].window_index;
-    g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY;
+    window_index = g_menu_stack_records[depth - 1].window_index;
+    g_menu_stack_types[depth] = MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY;
     g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth + 1;
 }
@@ -1053,7 +1053,7 @@ void world_map_step_location_visibility_level(world_map_visibility_level_t* leve
     }
     g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
     g_menu_stack_depth--;
-    index = g_menu_stack_records_next[g_menu_stack_depth - 1].window_index;
+    index = g_menu_stack_records[g_menu_stack_depth - 1].window_index;
     g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
     g_window_records[index].flags &= ~DISPLAY_OBJECT_HIDDEN;
     menu_stack_dispatch_resume();
@@ -1071,8 +1071,8 @@ void world_map_push_menu_level(void) {
     g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     depth = g_menu_stack_depth;
     flags = g_system_flags;
-    g_menu_stack_records_next[depth].return_level.delay = 3;
-    g_menu_stack_records_next[depth].return_level.pending = 0;
+    g_menu_stack_records[depth].return_level.delay = 3;
+    g_menu_stack_records[depth].return_level.pending = 0;
     g_system_flags = flags & ~SYSTEM_FLAG_SCREEN_CLEARED;
     if ((flags & SYSTEM_FLAG_FADING) != 0) {
         g_system_flags = (flags & ~SYSTEM_FLAG_SCREEN_CLEARED) | SYSTEM_FLAG_FREEZE_ANIMATION;
@@ -1082,7 +1082,7 @@ void world_map_push_menu_level(void) {
     {
         s32 last;
         last = g_menu_stack_depth;
-        g_menu_stack_types[last + 1] = MENU_STACK_LEVEL_WORLD_MENU;
+        g_menu_stack_types[last] = MENU_STACK_LEVEL_WORLD_MENU;
         g_menu_stack_depth = last + 1;
     }
 }
@@ -1206,14 +1206,14 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     s32 unused[2];
     u8* entry;
 
-    g_menu_stack_records_next[g_menu_stack_depth].message.reload_text = reload_text;
+    g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_screen_text_section_offsets);
     }
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records_next[g_menu_stack_depth].message.window_index = index;
+    g_menu_stack_records[g_menu_stack_depth].message.window_index = index;
     g_window_records[index].sequence = WINDOW_ANIM_MESSAGE_LABEL;
     g_window_records[index].priority = 1;
     g_window_records[index].anim_counter = 0;
@@ -1245,7 +1245,7 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     g_text_window.text_substitutions[0] = -1;
     text_window_open(window);
 
-    index = g_menu_stack_records_next[g_menu_stack_depth].message.window_index;
+    index = g_menu_stack_records[g_menu_stack_depth].message.window_index;
     positions = &records[0].position;
     /* This byte-view stride retains the target addiu of &records[0].x;
      * &records[index].x removes it and breaks the exact match. */
@@ -1254,9 +1254,9 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     position->y = -(box.y / 2) - 2;
     sound_play_effect(SOUND_SFX_WINDOW_OPEN);
 
-    g_menu_stack_records_next[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
+    g_menu_stack_records[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
     g_menu_blocked_buttons = -1;
-    g_menu_stack_types[g_menu_stack_depth + 1] = MENU_STACK_LEVEL_TEXT_WINDOW;
+    g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_TEXT_WINDOW;
     g_menu_stack_depth = g_menu_stack_depth + 1;
 }
 
@@ -1290,7 +1290,7 @@ void menu_stack_wait_text_then_pop(menu_stack_message_level_t* level) {
 void menu_stack_push_message_level(s32 text, s32 reload_text) {
     s32 index;
 
-    g_menu_stack_records_next[g_menu_stack_depth].message.reload_text = reload_text;
+    g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_screen_text_section_offsets);
@@ -1301,13 +1301,13 @@ void menu_stack_push_message_level(s32 text, s32 reload_text) {
     } else {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, text, 0);
     }
-    g_menu_stack_records_next[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
+    g_menu_stack_records[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
     g_menu_blocked_buttons = -1;
     sound_play_effect(SOUND_SFX_WINDOW_OPEN);
     index = g_menu_stack_depth;
-    g_menu_stack_records_next[index].message._unknown_0c = 8;
-    g_menu_stack_records_next[index].message.window_index = 0;
-    g_menu_stack_types[index + 1] = MENU_STACK_LEVEL_MESSAGE;
+    g_menu_stack_records[index].message._unknown_0c = 8;
+    g_menu_stack_records[index].message.window_index = 0;
+    g_menu_stack_types[index] = MENU_STACK_LEVEL_MESSAGE;
     g_menu_stack_depth = index + 1;
 }
 
@@ -1317,8 +1317,8 @@ void menu_stack_push_message_level(s32 text, s32 reload_text) {
  * Over the Brave Story or proposition category level it keeps the displayed
  * play time current while waiting. */
 void menu_stack_wait_message_then_pop(menu_stack_message_level_t* level) {
-    if (g_menu_stack_types[g_menu_stack_depth - 1] == MENU_STACK_LEVEL_BRAVE_STORY
-        || g_menu_stack_types[g_menu_stack_depth - 1] == MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS) {
+    if (g_menu_stack_types[g_menu_stack_depth - 2] == MENU_STACK_LEVEL_BRAVE_STORY
+        || g_menu_stack_types[g_menu_stack_depth - 2] == MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS) {
         g_hud_value = g_save_play_time_hours;
         g_hud_value_secondary = g_save_play_time_minutes;
         g_hud_value_tertiary = g_save_play_time_seconds;
@@ -1350,26 +1350,26 @@ static void debug_push_variable_list_level(void) {
     u8 unused_locals[0x10];
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records_next[g_menu_stack_depth].variable_list.window_index = index;
+    g_menu_stack_records[g_menu_stack_depth].variable_list.window_index = index;
     g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
     g_window_records[index].priority = 3;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records_next[g_menu_stack_depth].variable_list.render_index = index;
+    g_menu_stack_records[g_menu_stack_depth].variable_list.render_index = index;
     g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
     g_window_render_records[index].priority = 3;
-    g_menu_stack_records_next[g_menu_stack_depth].variable_list.first_variable = 0;
-    debug_draw_variable_list(&g_menu_stack_records_next[g_menu_stack_depth].variable_list);
+    g_menu_stack_records[g_menu_stack_depth].variable_list.first_variable = 0;
+    debug_draw_variable_list(&g_menu_stack_records[g_menu_stack_depth].variable_list);
     record_index = g_menu_stack_depth;
-    g_menu_stack_records_next[record_index].variable_list.cursor = 0;
-    g_window_records[g_menu_stack_records_next[record_index].variable_list.window_index].position.x
-        = g_window_render_records[g_menu_stack_records_next[record_index].variable_list.render_index].base.x + 8;
+    g_menu_stack_records[record_index].variable_list.cursor = 0;
+    g_window_records[g_menu_stack_records[record_index].variable_list.window_index].position.x
+        = g_window_render_records[g_menu_stack_records[record_index].variable_list.render_index].base.x + 8;
     g_menu_stack_depth = record_index + 1;
-    g_window_records[g_menu_stack_records_next[record_index].variable_list.window_index].position.y
-        = g_window_render_records[g_menu_stack_records_next[record_index].variable_list.render_index].base.y
-        - -(g_menu_stack_records_next[record_index].variable_list.cursor * 0x10 + 0xC);
-    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST;
+    g_window_records[g_menu_stack_records[record_index].variable_list.window_index].position.y
+        = g_window_render_records[g_menu_stack_records[record_index].variable_list.render_index].base.y
+        - -(g_menu_stack_records[record_index].variable_list.cursor * 0x10 + 0xC);
+    g_menu_stack_types[record_index] = MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST;
 }
 
 /* Renders up to 10 rows of the debug variable list, from first_variable on
@@ -1542,9 +1542,9 @@ static void debug_push_variable_edit_level(s32 variable_id, s32 value) {
     origin.y = 0x20;
     window_start_number_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 9999 << 16, 0, &origin);
     record_index = g_menu_stack_depth;
-    g_menu_stack_records_next[record_index].panel.result = 0;
-    g_menu_stack_records_next[record_index].panel.variable_id = variable_id;
-    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT;
+    g_menu_stack_records[record_index].panel.result = 0;
+    g_menu_stack_records[record_index].panel.variable_id = variable_id;
+    g_menu_stack_types[record_index] = MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT;
     g_menu_stack_depth = record_index + 1;
 }
 
@@ -1572,13 +1572,12 @@ void debug_step_variable_edit_level(menu_stack_panel_level_t* level) {
         depth = g_menu_stack_depth - 1;
         g_menu_stack_depth = depth;
         if (level->result == 1) {
-            debug_draw_variable_list(&g_menu_stack_records[depth].variable_list);
+            debug_draw_variable_list(&g_menu_stack_records[depth - 1].variable_list);
         }
         parent = g_menu_stack_depth - 1;
-        g_window_records[g_menu_stack_records_next[parent].window_render.window_index].sequence
-            = WINDOW_ANIM_CURSOR_IDLE;
-        slot = g_menu_stack_records_next[parent].window_render.window_index;
-        g_window_render_records[g_menu_stack_records_next[parent].window_render.render_index].palette = 0;
+        g_window_records[g_menu_stack_records[parent].window_render.window_index].sequence = WINDOW_ANIM_CURSOR_IDLE;
+        slot = g_menu_stack_records[parent].window_render.window_index;
+        g_window_render_records[g_menu_stack_records[parent].window_render.render_index].palette = 0;
         record = &g_window_records[slot];
         record->palette = 0;
         record->frame_index = 0;
@@ -1608,18 +1607,18 @@ void debug_step_variable_edit_level(menu_stack_panel_level_t* level) {
 void unit_panel_push_help_level(void) {
     s32 window;
 
-    g_menu_stack_records_next[g_menu_stack_depth].layout_window.saved_state = g_menu_stack_ot_offset;
+    g_menu_stack_records[g_menu_stack_depth].layout_window.saved_state = g_menu_stack_ot_offset;
     g_menu_stack_ot_offset = 1;
     window = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records_next[g_menu_stack_depth].layout_window.window_index = window;
+    g_menu_stack_records[g_menu_stack_depth].layout_window.window_index = window;
     g_window_records[window].sequence = WINDOW_ANIM_LAYOUT_CURSOR_IDLE;
     g_window_records[window].priority = 2;
     g_window_records[window].anim_counter = 0;
     g_window_records[window].frame_index = 0;
-    g_menu_stack_records_next[g_menu_stack_depth].layout_window.layout = 0;
-    g_menu_stack_records_next[g_menu_stack_depth].layout_window.cached_layout_kind = 1;
-    unit_panel_move_help_cursor(&g_menu_stack_records_next[g_menu_stack_depth].layout_window);
-    g_menu_stack_types[g_menu_stack_depth + 1] = MENU_STACK_LEVEL_UNIT_PANEL_HELP;
+    g_menu_stack_records[g_menu_stack_depth].layout_window.layout = 0;
+    g_menu_stack_records[g_menu_stack_depth].layout_window.cached_layout_kind = 1;
+    unit_panel_move_help_cursor(&g_menu_stack_records[g_menu_stack_depth].layout_window);
+    g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_UNIT_PANEL_HELP;
     g_menu_stack_depth++;
 }
 
@@ -1791,16 +1790,16 @@ void location_push_menu_level(s32 menu) {
     file_wait_for_pending();
 
     flags = g_system_flags | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    level = &g_menu_stack_records_next[g_menu_stack_depth].location_list;
+    level = &g_menu_stack_records[g_menu_stack_depth].location_list;
     level->extra_render = -1;
     level->label_window = -1;
     level->frame_render = -1;
-    g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window = -1;
-    g_menu_stack_records_next[g_menu_stack_depth].location_list.mode = 0;
+    g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window = -1;
+    g_menu_stack_records[g_menu_stack_depth].location_list.mode = 0;
     g_system_flags = flags;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window = index;
+    g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window = index;
     records = g_window_records;
     /* Direct record.color access changes the column base and instruction scheduling. */
     color = &records->color;
@@ -1813,7 +1812,7 @@ void location_push_menu_level(s32 menu) {
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;
-    g_menu_stack_records_next[g_menu_stack_depth].location_list.mode = 8;
+    g_menu_stack_records[g_menu_stack_depth].location_list.mode = 8;
 
     /* With a picture: upload the frame and picture TIMs, then add the picture and its border window. */
     if (g_world_map_projection_state.marker.sub_kind != 0) {
@@ -1825,7 +1824,7 @@ void location_push_menu_level(s32 menu) {
         LoadClut(image.clut, image.cx, image.cy);
 
         index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_menu_stack_records_next[g_menu_stack_depth].location_list.frame_render = index;
+        g_menu_stack_records[g_menu_stack_depth].location_list.frame_render = index;
         bounds.x = image.px;
         bounds.y = image.py;
         bounds.w = image.pw;
@@ -1840,7 +1839,7 @@ void location_push_menu_level(s32 menu) {
         g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
 
         index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_menu_stack_records_next[g_menu_stack_depth].location_list.label_window = index;
+        g_menu_stack_records[g_menu_stack_depth].location_list.label_window = index;
         g_window_records[index].sequence = WINDOW_ANIM_LOCATION_PICTURE_BORDER;
         g_window_records[index].priority = 0xB;
         records[index].anim_counter = 0;
@@ -1855,10 +1854,10 @@ void location_push_menu_level(s32 menu) {
 
     /* Size the panel to the widest entry plus an 8-pixel margin. */
     widest = 0;
-    count = g_menu_stack_records_next[g_menu_stack_depth].location_list.entry_count;
+    count = g_menu_stack_records[g_menu_stack_depth].location_list.entry_count;
     for (i = 0; i < count; i++) {
         text_measure_pixels(&text_width, &text_rows,
-            text_find_entry(g_menu_stack_records_next[g_menu_stack_depth].location_list.entries[i]));
+            text_find_entry(g_menu_stack_records[g_menu_stack_depth].location_list.entries[i]));
         if (widest < text_width) {
             widest = text_width;
         }
@@ -1866,7 +1865,7 @@ void location_push_menu_level(s32 menu) {
     widest += 8;
 
     for (i = 0; i < count; i++) {
-        value = g_menu_stack_records_next[g_menu_stack_depth].location_list.entries[i];
+        value = g_menu_stack_records[g_menu_stack_depth].location_list.entries[i];
         g_menu_stack_entry_values[i] = value;
         g_menu_stack_row_flags[i] = 0;
     }
@@ -1885,8 +1884,7 @@ void location_push_menu_level(s32 menu) {
         origin.y = 0x70 - i * 8;
     }
     menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_LOCATION, count, i);
-    window_init_panel_state(
-        0xC, g_menu_stack_records_next[g_menu_stack_depth].location_list.entry_count, &layout, &origin);
+    window_init_panel_state(0xC, g_menu_stack_records[g_menu_stack_depth].location_list.entry_count, &layout, &origin);
     g_window_panel_render_state.vram_origin.x = 0x240;
     g_window_panel_render_state.header_id = 0;
     g_window_panel_render_state.vram_origin.y = 0x100;
@@ -1894,20 +1892,20 @@ void location_push_menu_level(s32 menu) {
     if (g_world_map_projection_state.marker.sub_kind != 0) {
         s32 unused[6]; /* frame padding: the target frame is 0xb8 */
 
-        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
-        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.y = 0;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.y = 0;
     } else {
         /* Here `index` is still the cursor window's record index, yet it reads the render record pool (retail). */
-        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
-        g_window_records[g_menu_stack_records_next[g_menu_stack_depth].location_list.cursor_window].position.y
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.y
             = g_window_render_records[index].base.y - 8;
     }
 
     depth = g_menu_stack_depth;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    g_menu_stack_records_next[depth].location_list.delay = 8;
+    g_menu_stack_records[depth].location_list.delay = 8;
     g_system_flags |= SYSTEM_FLAG_FREEZE_ANIMATION;
-    g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_LOCATION;
+    g_menu_stack_types[depth] = MENU_STACK_LEVEL_LOCATION;
     g_menu_stack_depth = depth + 1;
 }
 
@@ -2132,10 +2130,10 @@ static void location_run_shop(s32 shop_id) {
     audio_queue_wait_until_empty();
     shop_run_screen(shop_id);
     g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    world_map_suspend_cursor_level(&g_menu_stack_records_next[g_menu_stack_depth - 1]);
+    world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
     selected = &g_world_map_projection_state.marker.kind;
-    g_menu_stack_records_next[g_menu_stack_depth].panel.entry_count
-        = location_build_menu_entries(*selected, g_menu_stack_records_next[g_menu_stack_depth].panel.entries);
+    g_menu_stack_records[g_menu_stack_depth].panel.entry_count
+        = location_build_menu_entries(*selected, g_menu_stack_records[g_menu_stack_depth].panel.entries);
     location_push_menu_level(*selected);
     world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
     world_map_clear_screen_and_set_clip_rect(0);
@@ -2172,7 +2170,7 @@ void menu_stack_push_scrollable_text_level(s32 text) {
         s32 depth;
 
         index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_menu_stack_records_next[g_menu_stack_depth].window_index = index;
+        g_menu_stack_records[g_menu_stack_depth].window_index = index;
         g_window_records[index].sequence = WINDOW_ANIM_CHOICE_PANEL_HEADER;
         g_window_records[index].priority = 3;
         g_window_records[index].anim_counter = 0;
@@ -2195,13 +2193,13 @@ void menu_stack_push_scrollable_text_level(s32 text) {
 
         g_window_render_records[g_text_window.render_record_index].flags |= DISPLAY_OBJECT_HIDDEN;
         depth = g_menu_stack_depth;
-        g_window_records[g_menu_stack_records_next[depth].window_index].position.x = g_text_window.base.x + 3;
-        g_window_records[g_menu_stack_records_next[depth].window_index].position.y = g_text_window.base.y - 2;
+        g_window_records[g_menu_stack_records[depth].window_index].position.x = g_text_window.base.x + 3;
+        g_window_records[g_menu_stack_records[depth].window_index].position.y = g_text_window.base.y - 2;
         g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL | SYSTEM_FLAG_FREEZE_ANIMATION;
         g_menu_stack_depth = depth + 1;
-        g_window_records[g_menu_stack_records_next[depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_menu_stack_records_next[depth].scrollable_text._unknown_20 = 0x28;
-        g_menu_stack_types[depth + 1] = MENU_STACK_LEVEL_SCROLLABLE_TEXT;
+        g_window_records[g_menu_stack_records[depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_menu_stack_records[depth].scrollable_text._unknown_20 = 0x28;
+        g_menu_stack_types[depth] = MENU_STACK_LEVEL_SCROLLABLE_TEXT;
     }
 }
 
@@ -2229,7 +2227,7 @@ void menu_stack_step_scrollable_text_level(menu_stack_record_t* level) {
         depth = g_menu_stack_depth;
         g_menu_stack_depth = depth - 1;
         g_system_flags &= ~(SYSTEM_FLAG_HIDE_LOCATION_LABEL | SYSTEM_FLAG_FREEZE_ANIMATION);
-        g_window_records[g_menu_stack_records_next[depth - 2].window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[g_menu_stack_records[depth - 2].window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         menu_stack_dispatch_resume();
     }
 }
@@ -2249,8 +2247,8 @@ static void debug_push_party_number_level(void) {
     window_start_number_panel_thread(
         WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 999 << 16, TEXT_ID_PARTY_NUMBER_LABEL, &origin);
     record_index = g_menu_stack_depth;
-    g_menu_stack_records_next[record_index].panel.result = 0;
-    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER;
+    g_menu_stack_records[record_index].panel.result = 0;
+    g_menu_stack_types[record_index] = MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER;
     g_menu_stack_depth = record_index + 1;
 }
 
@@ -2312,16 +2310,16 @@ static void bar_push_level(void) {
     g_system_flags |= SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
-    g_menu_stack_records_next[g_menu_stack_depth].window_pair_render.first_window
+    g_menu_stack_records[g_menu_stack_depth].window_pair_render.first_window
         = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records_next[g_menu_stack_depth].window_pair_render.second_window
+    g_menu_stack_records[g_menu_stack_depth].window_pair_render.second_window
         = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records_next[g_menu_stack_depth].window_pair_render.render_index
+    g_menu_stack_records[g_menu_stack_depth].window_pair_render.render_index
         = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    bar_build_rows(&g_menu_stack_records_next[g_menu_stack_depth].list_window);
+    bar_build_rows(&g_menu_stack_records[g_menu_stack_depth].list_window);
     record_index = g_menu_stack_depth;
-    g_menu_stack_records_next[record_index].window_pair_render.panel_rows = 0;
-    g_menu_stack_types[record_index + 1] = MENU_STACK_LEVEL_BAR;
+    g_menu_stack_records[record_index].window_pair_render.panel_rows = 0;
+    g_menu_stack_types[record_index] = MENU_STACK_LEVEL_BAR;
     g_menu_stack_depth = record_index + 1;
 }
 
@@ -2391,8 +2389,8 @@ void bar_build_rows(menu_stack_window_level_t* level) {
         cursor->selected_index = 0;
     }
 
-    g_menu_stack_records_next[g_menu_stack_depth].list_window.selected_entry = cursor->selected_index;
-    g_menu_stack_records_next[g_menu_stack_depth].list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
+    g_menu_stack_records[g_menu_stack_depth].list_window.selected_entry = cursor->selected_index;
+    g_menu_stack_records[g_menu_stack_depth].list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
     render = &g_window_render_records[index];
     g_window_records[level->main_window].position.x = g_window_render_records[index].base.x + 6;
     g_window_records[level->main_window].position.y

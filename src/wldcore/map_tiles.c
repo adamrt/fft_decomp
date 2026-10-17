@@ -123,8 +123,8 @@ void world_map_toggle_captured_frame(s32 capture) {
 
 /* World-map tile atlas setup, run once from world_map_init_subsystems between
  * window_init_record_pools() and
- * world_map_init_menus_and_date(). Because the pools were just
- * zeroed, the two append calls here return records 0 and 1.
+ * world_map_init_menus_and_date(). Because the allocation counters were just
+ * reset, the two append calls here return records 0 and 1.
  *
  * Layout:
  *  - Origin, scale and rotation form g_world_map_projection_view. Their
@@ -133,9 +133,9 @@ void world_map_toggle_captured_frame(s32 capture) {
  *  - The 24-byte tile source table is reached through the pointer cell
  *    g_world_map_tile_descriptors. The target indexes it by 32-bit value
  *    (base + k*4, k += 6), not by record, so it is an s32* with a 32-bit element index.
- *  - g_world_map_cursor_window, which receives the root menu window's
- *    record index, shares its address with element 0 of
- *    g_menu_stack_types (the root level's type slot).
+ *  - g_world_map_cursor_window receives the root menu frame's record index
+ *    and precedes the menu-stack type array. The root level has depth 1
+ *    and occupies physical type slot 0.
  *
  * Shapes the bytes depend on:
  *  - `.map_x`/`.map_y` are written through one loop-invariant s32* to element

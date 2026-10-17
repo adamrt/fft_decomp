@@ -1,7 +1,7 @@
 #ifndef MENU_STACK_RECORDS_H
 #define MENU_STACK_RECORDS_H
 
-/* WLDCORE's menu stack records: the union of every level's record and the two record arrays the stack indexes. */
+/* WLDCORE's menu stack records: one slot per level, selected by its level type. */
 
 #include "fft/bar.h"
 #include "fft/brave_story.h"
@@ -61,7 +61,6 @@ union menu_stack_record {
 };
 typedef char menu_stack_record_size_must_be_92[sizeof(menu_stack_record_t) == 92 ? 1 : -1];
 
-extern menu_stack_record_t g_menu_stack_records[];
-extern menu_stack_record_t g_menu_stack_records_next[];
+extern menu_stack_record_t g_menu_stack_records[MENU_STACK_CAPACITY];
 
 #endif
