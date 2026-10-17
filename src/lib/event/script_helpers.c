@@ -60,8 +60,21 @@ extern s32 g_gfx_free_rect_cells[4];
 /* Menu palette color of each of the numeric display frame's twelve lines. */
 static u8 g_status_screen_numbers_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
 
-/* Twelve menu_line_layout_t records, walked by byte offset. */
-static s8 g_status_screen_numbers_frame_offsets[96]
+/* Eight-byte line placements: signed endpoint offsets and width/height selectors.
+ * Byte-offset indexing preserves the native loop; typed row indexing changes it. */
+typedef enum menu_line_layout_offset {
+    MENU_LINE_LAYOUT_X0 = 0,
+    MENU_LINE_LAYOUT_Y0 = 1,
+    MENU_LINE_LAYOUT_X1 = 2,
+    MENU_LINE_LAYOUT_Y1 = 3,
+    MENU_LINE_LAYOUT_ADD_W0 = 4,
+    MENU_LINE_LAYOUT_ADD_H0 = 5,
+    MENU_LINE_LAYOUT_ADD_W1 = 6,
+    MENU_LINE_LAYOUT_ADD_H1 = 7,
+    MENU_LINE_LAYOUT_SIZE = 8
+} menu_line_layout_offset_e;
+
+static s8 g_status_screen_numbers_frame_offsets[12 * MENU_LINE_LAYOUT_SIZE]
     = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, 0, 1, 0, 1, -2, 1, 0, 0, 1, 0, 1, 1, 1, -2, 0, 0, 0, 1, 1, -1, 1, -1,
           0, 1, 0, 1, -1, 2, -1, -2, 1, 0, 1, 1, -1, 1, -1, 1, 1, 0, 1, 0, 1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
           1, 1, 1, 2, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, -1, 1, 0, 1, 1 };

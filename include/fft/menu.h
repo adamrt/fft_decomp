@@ -317,44 +317,6 @@ typedef struct menu_palette_primitives {
 } menu_palette_primitives_t;
 typedef char menu_palette_primitives_size_must_be_236[(sizeof(menu_palette_primitives_t) == 236) ? 1 : -1];
 
-/* Placement of one of the twelve frame lines (menu_palette_primitives_t.lines): signed endpoint offsets from the
- * box origin and, per coordinate, a flag selecting whether the box width or height is added. The table,
- * g_status_screen_numbers_frame_offsets, is walked by byte offset (MENU_LINE_LAYOUT_*), so nothing uses
- * this type. Provisional. */
-typedef struct menu_line_layout {
-    s8 x0, y0, x1, y1;                 /* 0x00 */
-    s8 add_w0, add_h0, add_w1, add_h1; /* 0x04 */
-} menu_line_layout_t;
-
-/* The builder walks the table with a byte offset stepping by 8 (the
- * target's induction variable), so it addresses these fields by offset. */
-enum menu_line_layout_offset {
-    MENU_LINE_LAYOUT_X0 = 0,
-    MENU_LINE_LAYOUT_Y0 = 1,
-    MENU_LINE_LAYOUT_X1 = 2,
-    MENU_LINE_LAYOUT_Y1 = 3,
-    MENU_LINE_LAYOUT_ADD_W0 = 4,
-    MENU_LINE_LAYOUT_ADD_H0 = 5,
-    MENU_LINE_LAYOUT_ADD_W1 = 6,
-    MENU_LINE_LAYOUT_ADD_H1 = 7,
-    MENU_LINE_LAYOUT_SIZE = 8
-};
-
-/* Color and endpoint offsets of the Status screen panel's eight frame lines, relative to the panel box, seven bytes
- * per line (g_status_screen_line_colors). The loop walks the table with a byte offset stepping by 7 (the
- * target's induction variable and exit test), so the fields are addressed by
- * offset, as for menu_line_layout_t. */
-enum menu_status_screen_line_layout_offset {
-    MENU_STATUS_SCREEN_LINE_R = 0,
-    MENU_STATUS_SCREEN_LINE_G = 1,
-    MENU_STATUS_SCREEN_LINE_B = 2,
-    MENU_STATUS_SCREEN_LINE_X0 = 3,
-    MENU_STATUS_SCREEN_LINE_Y0 = 4,
-    MENU_STATUS_SCREEN_LINE_X1 = 5,
-    MENU_STATUS_SCREEN_LINE_Y1 = 6,
-    MENU_STATUS_SCREEN_LINE_SIZE = 7
-};
-
 /* One 0x100-byte slot holding a panel's palette primitive set. */
 typedef struct menu_palette_slot {
     menu_palette_primitives_t primitives; /* 0x00 */

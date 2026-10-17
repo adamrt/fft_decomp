@@ -123,6 +123,18 @@ extern menu_quad_colors_t g_unit_view_quad_colors;
 extern menu_quad_piece_t g_unit_view_quad_pieces[];
 extern menu_quad_page_t g_unit_view_height_display_pages[2];
 
+/* Seven-byte panel-line layouts: color followed by endpoint offsets. */
+typedef enum menu_status_screen_line_layout_offset {
+    MENU_STATUS_SCREEN_LINE_R = 0,
+    MENU_STATUS_SCREEN_LINE_G = 1,
+    MENU_STATUS_SCREEN_LINE_B = 2,
+    MENU_STATUS_SCREEN_LINE_X0 = 3,
+    MENU_STATUS_SCREEN_LINE_Y0 = 4,
+    MENU_STATUS_SCREEN_LINE_X1 = 5,
+    MENU_STATUS_SCREEN_LINE_Y1 = 6,
+    MENU_STATUS_SCREEN_LINE_SIZE = 7
+} menu_status_screen_line_layout_offset_e;
+
 static u8 g_status_screen_line_colors[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
     1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,
     123, 90, 32, 32, 32, 140, 1, 140, 90, 16, 16, 16, 141, 1, 141, 90 };
