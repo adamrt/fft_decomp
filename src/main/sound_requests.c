@@ -248,7 +248,7 @@ void new_game_fade_in_orbonne_caption(void) {
     while (intensity >= 0) {
         current_otag = otags[g_gfx_screen_polarity];
         ClearOTag(current_otag, 2);
-        setRGB0(&g_gfx_screen_polarity[fade_polygons], intensity, intensity, intensity);
+        setRGB0(&fade_polygons[g_gfx_screen_polarity], intensity, intensity, intensity);
         AddPrim(current_otag, &fade_polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
         AddPrim(current_otag, &title_polygons[g_gfx_screen_polarity]);
@@ -298,7 +298,7 @@ void new_game_fade_out_orbonne_caption(void) {
 
         current_otag = otags[g_gfx_screen_polarity];
         ClearOTag(current_otag, 2);
-        setRGB0(&g_gfx_screen_polarity[fade_polygons], intensity, intensity, intensity);
+        setRGB0(&fade_polygons[g_gfx_screen_polarity], intensity, intensity, intensity);
         AddPrim(current_otag, &fade_polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
         AddPrim(current_otag, &title_polygons[g_gfx_screen_polarity]);
