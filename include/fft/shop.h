@@ -49,15 +49,7 @@ typedef enum shop_step {
 
 extern s16 g_shop_menu_step; /* shop_step_e */
 extern menu_entry_t g_shop_main_menu_thread_data;
-extern u8 g_shop_main_menu_running;     /* menu open flag */
-extern u8 g_shop_exit_fade_started;     /* fade-out started */
-extern u8 g_shop_exit_step_initialized; /* state initialized */
 extern u8 g_shop_background_visible;
-extern RECT g_shop_background_rect;
-extern RECT g_shop_backdrop_tile_rect;
-extern RECT g_shop_edge_tile_rect;
-extern RECT g_shop_background_vram_rect;
-extern RECT g_shop_vram_backup_rect;
 
 void shop_run_screen(s32 shop_type);
 u32* shop_load_background(s32 index);

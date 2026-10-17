@@ -124,6 +124,16 @@ static void (*g_shop_menu_step_handlers[])(void) = {
     soldier_office_rename_name_step,
 };
 
+/* Backdrop and VRAM rectangles, followed by the main menu and exit gates. */
+static RECT g_shop_background_rect = { 0, 64, 255, 128 };
+static RECT g_shop_backdrop_tile_rect = { 0, 0, 256, 240 };
+static RECT g_shop_edge_tile_rect = { 255, 0, 1, 240 };
+static RECT g_shop_background_vram_rect = { 768, 0, 256, 128 };
+static RECT g_shop_vram_backup_rect = { 0, 0, 256, 128 };
+static u8 g_shop_main_menu_running = 0;
+static u8 g_shop_exit_fade_started = 0;
+static u8 g_shop_exit_step_initialized = 0;
+
 /* Run a shop screen (item shop, Fur Shop or Soldier Office): set the primitive budgets,
  * load the town's backdrop and the shop music, then run frames through the step handlers
  * until the exit step, saving the party records and restoring VRAM on the way out. */
