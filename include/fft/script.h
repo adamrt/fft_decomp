@@ -49,11 +49,14 @@ s32 scenario_get_finish_operation(void);
 u32 script_get_event_finish_operation(void);
 
 /* scenario */
-extern u8 g_scenario_table[];
+/* ATTACK reuses the setup records and condition blocks for deployment text after loading them. */
+extern u8 g_scenario_table[16384];
 extern u8 g_scenario_event_condition_blocks[];
-extern u16 g_scenario_event_finish_operations[];
-extern u16 g_scenario_condition_offsets[];
-extern s16 g_scenario_condition_data[];
+
+/* Resident copies survive that reuse. The condition runner inspects only the first ten offsets. */
+extern u16 g_scenario_event_finish_operations[512];
+extern u16 g_scenario_condition_offsets[16];
+extern s16 g_scenario_condition_data[256];
 extern s32 g_scenario_condition_unit_battle_id;
 
 s32 scenario_load_conditionals(void);

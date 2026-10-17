@@ -1070,7 +1070,7 @@ static unit_stats_t* unit_get_stats_by_unit_id(s32 unit_id) {
 
 /* Walk the scenario's condition chains and report whether one selects an event.
  *
- * g_scenario_condition_offsets holds up to ten byte offsets into
+ * The runner inspects the first ten of sixteen byte offsets into
  * g_scenario_condition_data, one per chain; a zero offset after the first
  * ends the list. A chain is a run of records, each a 16-bit type followed by
  * g_scenario_condition_param_lengths[type] 16-bit operands. Records are

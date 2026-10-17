@@ -267,21 +267,28 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
  * the ones the code singles out are named here for what their own script and
  * text show. */
 typedef enum event_id {
+    EVENT_ID_MILITARY_ACADEMY = 0x8,
+    EVENT_ID_GARILAND_BATTLE_SETUP = 0x9,
     /* CallFunction JOIN_UNITS_SILENTLY also restores the new-game inventory
      * in the events below this one. */
     EVENT_ID_NEW_GAME_INVENTORY_END = 0x4e,
+    EVENT_ID_FORT_ZEAKDEN_EXPLOSION = 0x5a,
+    EVENT_ID_CHAPTER_2_SETUP = 0x74,
     /* A Zodiac Stone speaks in these two. Their centered messages start at
      * the box's left edge while ETC's graphics are off. */
     EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9, /* Brave Story record "Velius" (setup 0xf8) */
     /* Also the event the ending leaves current, with the next scenario
      * requested, so that ATTACK steps on from it. */
     EVENT_ID_MALAK_REVIVED = 0x12a, /* Brave Story record "The lying heart" (setup 0x129) */
+    EVENT_ID_EPILOGUE_SETUP = 0x12b,
     /* King Delita and Ovelia. Its save does not request the next scenario. */
     EVENT_ID_EPILOGUE = 0x12c, /* Brave Story record "Things obtained" (setup 0x12b) */
     /* REQUIRE congratulates the player on completing the game after it. */
     EVENT_ID_FINAL_BATTLE_WON = 0x145,
     /* script_run_event_frame returns SCRIPT_EVENT_FRAME_ENDING when it ends. */
     EVENT_ID_FUNERAL = 0x147, /* Brave Story record "Reunion and beyond..." (setup 0x146) */
+    /* Ramza, Rafa and Malak discuss Alma after the battle. */
+    EVENT_ID_RIOVANES_AFTERMATH_SETUP = 0x148,
     /* A unit the event draws also gets its status graphics. */
     EVENT_ID_LIMBERRY_CEMETERY_BATTLE = 0x18c,
     /* The 0x1a events no scenario names, through TUTORIAL_LAST:
