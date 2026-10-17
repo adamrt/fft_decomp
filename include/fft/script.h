@@ -54,7 +54,6 @@ extern u8 g_scenario_event_condition_blocks[];
 extern u16 g_scenario_event_finish_operations[];
 extern u16 g_scenario_condition_offsets[];
 extern s16 g_scenario_condition_data[];
-extern u8 g_scenario_condition_param_lengths[];
 extern s32 g_scenario_condition_unit_battle_id;
 
 s32 scenario_load_conditionals(void);

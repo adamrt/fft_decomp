@@ -61,9 +61,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Five rain and five snow commands; the dispatcher consumes each halfword's low byte. */
-extern u16 g_event_weather_commands[10];
-
 /* The event frame compares slots 1..15 across its yield, including in WORLD. */
 extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];
 
@@ -180,6 +177,18 @@ static menu_system_function_t g_menu_system_function_table[51] = {
     { MENU_COMMAND_ID_MESSAGE, 0x508c, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
         MENU_SYSTEM_FUNCTION_POST_ACTION_RESULT, { 0, 0 } }, /* 50 */
 };
+
+/* Operand-halfword counts through condition 37. The compiler aligns the
+ * following weather table; the original declared extent is unknown. */
+static u8 g_scenario_condition_param_lengths[38] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 3, 3, 2, 2, 2, 2,
+    0, 3, 4, 2, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 };
+
+/* Five rain and five snow commands; the dispatcher consumes each halfword's low byte.
+ * WORLD retains this table even though it has no weather-request consumer. */
+static u16 g_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR,
+    BATTLE_MAP_WEATHER_COMMAND_LIGHT_RAIN, BATTLE_MAP_WEATHER_COMMAND_RAIN, BATTLE_MAP_WEATHER_COMMAND_HEAVY_RAIN,
+    BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_LIGHT_SNOW,
+    BATTLE_MAP_WEATHER_COMMAND_SNOW, BATTLE_MAP_WEATHER_COMMAND_HEAVY_SNOW };
 
 static void camera_load_state_from_script_variables(void);
 static void script_process_pending_requests(void);

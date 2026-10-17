@@ -16,7 +16,7 @@ units:
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801564d0, size: 336, hash: aee19a4a8c26100e}]}
   - {name: bit_streams, source: src/lib/bits.c}
   - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
-  - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}]}
+  - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}, {addr: 0x80156b4c, size: 38, hash: 5cf20e3c3f45bdbf}, {addr: 0x80156b74, size: 20, hash: 34d5f02d6411f13b}]}
   - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
@@ -1343,6 +1343,7 @@ data:
   - {addr: 0x80156748, name: g_announcement_spell_quote_exception_skillsets}
   - {addr: 0x80156750, name: g_menu_system_function_table}
   - {addr: 0x80156b4c, name: g_scenario_condition_param_lengths}
+  - {addr: 0x80156b74, name: g_event_weather_commands}
   - {addr: 0x80156b88, name: g_camera_wrap_yaw_pending}
   - {addr: 0x80156b8c, name: g_script_loaded_event_id}
   - {addr: 0x80156b90, name: g_script_map_darkness_durations}
