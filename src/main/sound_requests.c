@@ -15,6 +15,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern u8 g_sound_system_sed_data[];
+extern u8 g_sound_env_sed_data[];
+extern s32 g_sound_weather_sfx_id; /* the background sound sound_play_background started, 0 for none */
+
 /* Scenario-music playback state. current_music is the Suzuki music record of
  * the playing scenario music: music_stop hands it straight
  * to suzuki_smd_stop_music, which takes a suzuki_music_t*. */

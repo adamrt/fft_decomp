@@ -4,8 +4,6 @@
 /* System: MAIN's game loop and its control flags, frame timing, error reporting, debug switches, the boot logos and the
  * Now Loading message, BATTLE's frame pacing, and OPEN's main-loop flags. */
 
-#include "fft/gfx.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* game loop */
@@ -86,7 +84,6 @@ typedef enum system_game_flow {
 
 extern u32 g_system_flags;                 /* system_flags_e bits; cleared by save_init_data_tables */
 extern s32 g_system_frontend_world_result; /* world_map_result_e */
-extern u32 g_system_game_loop_stack_pointer;
 extern u8 g_system_go_straight_to_battle;
 
 /* Also entered by the native stack-restoring reset routine. */
@@ -181,8 +178,6 @@ extern s32 g_debug_font_print_enabled;
 void debug_load_efc_font(void);
 
 /* boot */
-extern u32 g_boot_squaresoft_logo_image_words[];
-
 void boot_run_startup(void);
 void boot_reset_game_state(void);
 int boot_draw_sceap_logo(u32* otag, u32* image);
@@ -194,14 +189,7 @@ void boot_fade_out_squaresoft_logo(void);
 void system_zero_padding(void);
 
 /* Now Loading */
-extern palette_t g_loading_palette;
-extern u32 g_loading_frame_counter;
 extern s32 g_loading_display_frame_counter;
-extern u32 g_loading_visible;
-extern u32 g_loading_otags[2][2];
-
-/* Seven textured quads for each display buffer. */
-extern POLY_FT4 g_loading_primitives[2][7];
 
 void loading_build_message(u32 visible, s32 x, s32 y);
 void loading_build_message_centered(u32 visible);

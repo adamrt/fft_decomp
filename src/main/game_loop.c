@@ -20,6 +20,15 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+extern u32 g_system_game_loop_stack_pointer;
+extern u32 g_boot_squaresoft_logo_image_words[];
+
+/* Now Loading display state. */
+extern palette_t g_loading_palette;
+extern u32 g_loading_frame_counter;
+extern u32 g_loading_visible;
+extern POLY_FT4 g_loading_primitives[2][7];
+
 /* Let the GPU finish, blank the display and shut down the sound driver and the SPU. */
 static void system_stop_display_and_audio(void) {
     DrawSync(0);

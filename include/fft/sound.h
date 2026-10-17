@@ -171,10 +171,6 @@ typedef enum sound_env_sfx {
     SOUND_ENV_SFX_THUNDER_B = 14,
 } sound_env_sfx_e;
 
-extern u8 g_sound_system_sed_data[];
-extern u8 g_sound_env_sed_data[];
-extern s32 g_sound_weather_sfx_id; /* the background sound sound_play_background started, 0 for none */
-
 void sound_open_generic_sfx(void);
 void sound_play_sfx(s32 sound_id);
 void sound_play_sfx_on_free_channel(s32 sound_id);
