@@ -861,19 +861,19 @@ static void birthday_push_date_menu(void) {
     half_width = quad.w / 2;
     position->y = -0x60;
     position->x = -half_width;
-    g_window_render_records_56[record].ot_layer = 4;
+    g_window_render_records[record].ot_layer = 4;
     g_controller_records_next[g_controller_current_index].birthday_date.month = 1;
     g_controller_records_next[g_controller_current_index].birthday_date.day = 1;
     birthday_build_menu_text(&g_controller_records_next[g_controller_current_index].birthday_date);
 
     controller = g_controller_current_index;
-    g_window_render_records_56[g_controller_records_next[controller].birthday_date.window_record_56].flags
+    g_window_render_records[g_controller_records_next[controller].birthday_date.window_record_56].flags
         |= DISPLAY_OBJECT_POP_IN;
     g_window_render_records_36[g_controller_records_next[controller].birthday_date.cursor_record_36].position.x
-        = g_window_render_records_56[g_controller_records_next[controller].birthday_date.window_record_56].x + 0x46;
+        = g_window_render_records[g_controller_records_next[controller].birthday_date.window_record_56].x + 0x46;
     g_controller_current_index = controller + 1;
     g_window_render_records_36[g_controller_records_next[controller].birthday_date.cursor_record_36].position.y
-        = g_window_render_records_56[g_controller_records_next[controller].birthday_date.window_record_56].y + 0x18;
+        = g_window_render_records[g_controller_records_next[controller].birthday_date.window_record_56].y + 0x18;
     g_controller_records_next[controller].birthday_date.selecting_month = 0;
     g_controller_handler_indices[controller] = CONTROLLER_BIRTHDAY_DATE;
 }
@@ -897,7 +897,7 @@ static void birthday_build_menu_text(birthday_date_state_t* menu) {
     quad.y = 0x40;
     quad.w = 0x50;
     quad.h = 0x20;
-    window_init_frame_record(index, quad, 0, (u16*)g_birthday_window_image);
+    window_build_render_record_image(index, quad, 0, (u32*)g_birthday_window_image);
 
     /* The month names are text entries 0xB803 (January) to 0xB80E. Entry 0xB801
      * prints the substituted month name and 0xB802 the substituted day. */
@@ -915,26 +915,26 @@ static void birthday_build_menu_text(birthday_date_state_t* menu) {
     *substitution = menu->day;
     window_display_text_entry(index, 0xB802, position, g_birthday_window_image);
 
-    window_load_record_image(index, (u32*)g_birthday_window_image);
+    window_load_render_record_image(index, (u32*)g_birthday_window_image);
 
     translation = g_window_record_translation;
     translation += index;
     translation->x = -(quad.w / 2);
     translation->y = -0x10;
-    g_window_render_records_56[index].ot_layer = 4;
-    g_window_render_records_56[index].flags &= ~DISPLAY_OBJECT_POP_IN;
+    g_window_render_records[index].ot_layer = 4;
+    g_window_render_records[index].flags &= ~DISPLAY_OBJECT_POP_IN;
 }
 
 /* Restore the date-selection records after leaving the confirmation prompt. */
 static void birthday_restore_date_menu(birthday_date_state_t* menu) {
-    window_record_56_t* records_56 = g_window_render_records_56;
+    window_render_record_t* records_56 = g_window_render_records;
     /* The target reserves a 24-byte frame it never touches, as in the twin
      * birthday_build_confirmation_menu. */
     s32 unused_scratch[6];
     s32 cursor;
     s32 cursor_last;
-    window_record_56_t* window;
-    window_record_56_t* title;
+    window_render_record_t* window;
+    window_render_record_t* title;
 
     g_window_render_records_36[menu->cursor_record_36].sequence = 12;
 
@@ -975,8 +975,8 @@ static void birthday_build_confirmation_menu(birthday_date_state_t* state) {
 
     g_window_render_records_36[state->cursor_record_36].palette = 7;
 
-    g_window_render_records_56[state->title_record_56].palette = 2;
-    g_window_render_records_56[state->window_record_56].palette = 2;
+    g_window_render_records[state->title_record_56].palette = 2;
+    g_window_render_records[state->window_record_56].palette = 2;
 }
 
 #define BIRTHDAY_MONTH_COUNT 12
@@ -996,7 +996,7 @@ static void birthday_build_confirmation_menu(birthday_date_state_t* state) {
  * entered. */
 void birthday_update_date_menu(controller_record_t* record) {
     birthday_date_state_t* menu = &record->birthday_date;
-    if (g_window_render_records_56[menu->window_record_56].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_render_records[menu->window_record_56].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -1111,17 +1111,17 @@ static void birthday_push_confirmation(void) {
     position += record;
     position->x = 0x3C;
     position->y = 0x28;
-    g_window_render_records_56[record].ot_layer = 3;
+    g_window_render_records[record].ot_layer = 3;
 
     g_window_render_records_36[g_controller_records_next[controller].birthday_confirmation.cursor_record_36].position.x
-        = g_window_render_records_56[record].x + 4;
+        = g_window_render_records[record].x + 4;
     g_window_render_records_36[g_controller_records_next[controller].birthday_confirmation.cursor_record_36].position.y
-        = g_window_render_records_56[record].y + 0xC;
+        = g_window_render_records[record].y + 0xC;
     g_window_render_records_36[g_controller_records_next[controller].birthday_confirmation.label_record].position.x
-        = g_window_render_records_56[record].x + 2;
+        = g_window_render_records[record].x + 2;
     g_controller_current_index = controller + 1;
     g_window_render_records_36[g_controller_records_next[controller].birthday_confirmation.label_record].position.y
-        = g_window_render_records_56[record].y - 2;
+        = g_window_render_records[record].y - 2;
     g_controller_records_next[controller].birthday_confirmation.selected_option = 0;
     g_controller_handler_indices[controller] = CONTROLLER_BIRTHDAY_CONFIRMATION;
 }
@@ -1199,7 +1199,7 @@ void birthday_update_confirmation(controller_record_t* record) {
         menu->selected_option ^= 1;
         /* Adding 12 before the option offset keeps the target's (option * 16 + 12) + y evaluation. */
         g_window_render_records_36[menu->cursor_record_36].position.y
-            = g_window_render_records_56[menu->menu_record_56].y + 12 + menu->selected_option * 16;
+            = g_window_render_records[menu->menu_record_56].y + 12 + menu->selected_option * 16;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }
@@ -1210,29 +1210,28 @@ void birthday_update_confirmation(controller_record_t* record) {
  * &records[index].tail and &records[index].color as values, while every other
  * field is stored directly off the record array. `half` and `scaled` keep
  * the target's x / 4 + (64 * depth + 0x180) grouping. */
-void window_init_frame_record(s32 index, RECT quad, s32 depth, u16* image) {
-    window_record_56_tail_t* tail;
+void window_build_render_record_image(s32 index, RECT quad, s32 depth, u32* image) {
+    window_render_record_tail_t* tail;
     CVECTOR* color;
     s32 half;
     s32 scaled;
 
-    g_window_render_records_56[index].flags
-        &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
-    g_window_render_records_56[index].x = quad.x - 0x80;
-    g_window_render_records_56[index].y = quad.y - 0x78;
-    g_window_render_records_56[index].depth = depth;
-    tail = &g_window_render_records_56[index].tail;
+    g_window_render_records[index].flags &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
+    g_window_render_records[index].x = quad.x - 0x80;
+    g_window_render_records[index].y = quad.y - 0x78;
+    g_window_render_records[index].depth = depth;
+    tail = &g_window_render_records[index].tail;
     tail->clut.y = 0x1E0;
     tail->clut.x = 0;
-    g_window_render_records_56[index].tail.quad = quad;
+    g_window_render_records[index].tail.quad = quad;
     half = quad.x / 4;
     scaled = depth * 64 + 0x180;
-    g_window_render_records_56[index].vram_x = half + scaled;
-    g_window_render_records_56[index].vram_y = quad.y;
-    color = &g_window_render_records_56[index].color;
+    g_window_render_records[index].vram_x = half + scaled;
+    g_window_render_records[index].vram_y = quad.y;
+    color = &g_window_render_records[index].color;
     color->b = color->g = color->r = 0x80;
-    g_window_render_records_56[index].pop_in_step = 0;
-    screen_build_window_frame_image(quad.w, quad.h, image);
+    g_window_render_records[index].pop_in_step = 0;
+    screen_build_window_frame_image(quad.w, quad.h, (u16*)image);
 }
 
 /* Upload a window record's image to its place in VRAM.
@@ -1240,18 +1239,18 @@ void window_init_frame_record(s32 index, RECT quad, s32 depth, u16* image) {
  * The record's quad is in 4-bit texels within its texture page, four to a
  * VRAM halfword, so the image goes to x = quad.x / 4 + 0x180 + 64 * depth
  * (texture page 6 + depth) with width quad.w / 4. */
-void window_load_record_image(s32 record_index, u32* image) {
+void window_load_render_record_image(s32 record_index, u32* image) {
     RECT destination;
     s32 x;
     s32 depth;
     s32 scaled;
 
-    x = g_window_render_records_56[record_index].tail.quad.x / 4;
-    depth = g_window_render_records_56[record_index].depth;
+    x = g_window_render_records[record_index].tail.quad.x / 4;
+    depth = g_window_render_records[record_index].depth;
     scaled = (depth << 6) + 0x180;
     destination.x = x + scaled;
-    destination.y = g_window_render_records_56[record_index].tail.quad.y;
-    destination.w = g_window_render_records_56[record_index].tail.quad.w / 4;
-    destination.h = g_window_render_records_56[record_index].tail.quad.h;
+    destination.y = g_window_render_records[record_index].tail.quad.y;
+    destination.w = g_window_render_records[record_index].tail.quad.w / 4;
+    destination.h = g_window_render_records[record_index].tail.quad.h;
     LoadImage(&destination, image);
 }

@@ -12,7 +12,7 @@
 
 static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
 static void window_draw_animated_record_56(display_object_animated_t* actor, u32* ot);
-static void window_draw_image_record_56(window_record_56_t* record, u32* ot);
+static void window_draw_image_record_56(window_render_record_t* record, u32* ot);
 static void window_draw_image_record(window_render_record_t* object, GsOT* ot);
 
 #ifdef FFT_WLDCORE
@@ -58,17 +58,17 @@ void window_init_record_pools(void) {
     g_window_next_render_record_36 = 0;
     g_window_render_record_pointer_count = 0;
 
-    for (i = 0; i < WINDOW_RECORD_56_CAPACITY; i++) {
+    for (i = 0; i < WINDOW_RECORD_CAPACITY; i++) {
         g_window_render_records_36[i].flags = DISPLAY_OBJECT_ANIMATED;
         g_window_render_records_36[i].priority = 8;
         color = &g_window_render_records_36[i].color;
         color->b = color->g = color->r = 0x80;
     }
 
-    for (i = 0; i < WINDOW_RECORD_56_CAPACITY; i++) {
-        g_window_render_records_56[i].flags = DISPLAY_OBJECT_IMAGE;
-        g_window_render_records_56[i].ot_layer = 8;
-        color = &g_window_render_records_56[i].color;
+    for (i = 0; i < WINDOW_RECORD_CAPACITY; i++) {
+        g_window_render_records[i].flags = DISPLAY_OBJECT_IMAGE;
+        g_window_render_records[i].ot_layer = 8;
+        color = &g_window_render_records[i].color;
         color->b = color->g = color->r = 0x80;
     }
 }
@@ -124,7 +124,7 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
             window_draw_image_record(image, otag);
 #endif
 #ifdef FFT_OPEN
-            window_record_56_t* image = object;
+            window_render_record_t* image = object;
             window_draw_image_record_56(image, (u32*)otag);
 #endif
         }
@@ -490,7 +490,7 @@ loop:
  * Sharing the position locals across the pop-in and full-size arms changes
  * load scheduling and register allocation.
  */
-static void window_draw_image_record_56(window_record_56_t* record, u32* ot) {
+static void window_draw_image_record_56(window_render_record_t* record, u32* ot) {
     point32_t clut;
     RECT scaled;
     s32 step;
@@ -636,15 +636,15 @@ s32 window_append_record(void** queue, s32* count) {
 /* Appends the next free 56-byte render record to `list`, resets it and
  * returns its pool index. */
 s32 window_append_record(void** list, s32* count) {
-    list[*count] = &g_window_render_records_56[g_window_next_render_record_56];
-    g_window_render_records_56[g_window_next_render_record_56].flags
+    list[*count] = &g_window_render_records[g_window_next_render_record_56];
+    g_window_render_records[g_window_next_render_record_56].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_SEMI_TRANSPARENT);
-    g_window_render_records_56[g_window_next_render_record_56].palette = 0;
+    g_window_render_records[g_window_next_render_record_56].palette = 0;
     /* Direct color members change the shared base and add four instructions. */
-    (&g_window_render_records_56[g_window_next_render_record_56].color)->r = 0x80;
-    (&g_window_render_records_56[g_window_next_render_record_56].color)->g = 0x80;
-    (&g_window_render_records_56[g_window_next_render_record_56].color)->b = 0x80;
-    g_window_render_records_56[g_window_next_render_record_56].pop_in_step = 0;
+    (&g_window_render_records[g_window_next_render_record_56].color)->r = 0x80;
+    (&g_window_render_records[g_window_next_render_record_56].color)->g = 0x80;
+    (&g_window_render_records[g_window_next_render_record_56].color)->b = 0x80;
+    g_window_render_records[g_window_next_render_record_56].pop_in_step = 0;
     (*count)++;
     return g_window_next_render_record_56++;
 }

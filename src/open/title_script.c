@@ -65,23 +65,23 @@ void window_init_vram_record(
     RECT* quad;
     CVECTOR* color;
 
-    g_window_render_records_56[record_index].flags
-        = (g_window_render_records_56[record_index].flags
+    g_window_render_records[record_index].flags
+        = (g_window_render_records[record_index].flags
               & ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN))
         | flags;
-    g_window_render_records_56[record_index].tail.clut = clut_position;
-    g_window_render_records_56[record_index].vram_x = vram_position.x;
-    g_window_render_records_56[record_index].vram_y = vram_position.y;
+    g_window_render_records[record_index].tail.clut = clut_position;
+    g_window_render_records[record_index].vram_x = vram_position.x;
+    g_window_render_records[record_index].vram_y = vram_position.y;
     /* Direct quad indexing changes the original record and column base selection. */
-    quad_base = &g_window_render_records_56[0].tail.quad;
-    quad = quad_base + record_index * (sizeof(window_record_56_t) / sizeof(RECT));
+    quad_base = &g_window_render_records[0].tail.quad;
+    quad = quad_base + record_index * (sizeof(window_render_record_t) / sizeof(RECT));
     quad->x = (vram_position.x & 0x3f) * 2;
     quad->y = vram_position.y & 0xFF;
     quad->w = image_size.x * 2;
     quad->h = image_size.y;
-    color = &g_window_render_records_56[record_index].color;
+    color = &g_window_render_records[record_index].color;
     color->b = color->g = color->r = 0x80;
-    g_window_render_records_56[record_index].pop_in_step = 0;
+    g_window_render_records[record_index].pop_in_step = 0;
 }
 
 /* Fills the music-test list's column layout and menu entry, then starts the

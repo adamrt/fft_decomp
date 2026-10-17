@@ -102,26 +102,30 @@ typedef char window_xy_size_must_be_36[sizeof(window_xy_t) == 36 ? 1 : -1];
 s32 window_append_animated_record(void** list, s32* count);
 s32 window_append_record(void** list, s32* count);
 void window_dispatch_record_list(GsOT* otag, void** records, s32 count);
+
+/* Each program builds and uploads images through its own window record layout. */
+void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
+void window_load_render_record_image(s32 index, u32* image);
 void window_init_text_record(s32 record_index, RECT quad, s32 depth, s32 combined_text_index, u32* image);
 void window_display_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u32* image);
 void window_init_record_pools(void);
 
-/* render records (OPEN) */
-/* Render records. window_dispatch_record_list dispatches on flags
- * (display_object_flag_e): ANIMATED is a 36-byte record, IMAGE a
- * 56-byte record, and a record with BLANK or HIDDEN set is skipped. Each pool
- * holds WINDOW_RECORD_56_CAPACITY entries, and both publish record
- * pointers to one queue, whose leading 32-bit flags select the layout. */
-enum { WINDOW_RECORD_56_CAPACITY = 16 };
-
+/* render records */
+/* window_dispatch_record_list dispatches on the leading flags: ANIMATED selects
+ * a 36-byte record, IMAGE selects the program's image record, and BLANK or
+ * HIDDEN skips the record. Each pool holds WINDOW_RECORD_CAPACITY entries. */
 /* CLUT position and source rectangle at +0x24 of a 56-byte record.
- * window_init_frame_record takes its address as one pointer. */
-typedef struct window_record_56_tail {
+ * window_build_render_record_image takes its address as one pointer. */
+typedef struct window_render_record_tail {
     /* 0x00 */ point32_t clut; /* window_draw_image_record_56 passes it to GetClut */
     /* 0x08 */ RECT quad;      /* sprite u, v, w, h: texels within the texture page */
-} window_record_56_tail_t;
+} window_render_record_tail_t;
 
-typedef struct window_record_56 {
+/* OPEN stores VRAM coordinates directly; WLDCORE stores a packed texture page. */
+#ifdef FFT_OPEN
+enum { WINDOW_RECORD_CAPACITY = 16 };
+
+typedef struct window_render_record {
     /* 0x00 */ u32 flags;
     /* 0x04 */ s32 vram_x; /* quad.x / 4 + 64 * depth + 0x180 */
     /* 0x08 */ s32 vram_y;
@@ -131,19 +135,43 @@ typedef struct window_record_56 {
     /* 0x18 */ s32 palette;
     /* 0x1c */ s32 x; /* quad.x - 0x80 */
     /* 0x20 */ s32 y; /* quad.y - 0x78 */
-    /* 0x24 */ window_record_56_tail_t tail;
-    /* 0x34: a sibling of `tail`, not part of it. window_init_frame_record
+    /* 0x24 */ window_render_record_tail_t tail;
+    /* 0x34: a sibling of `tail`, not part of it. window_build_render_record_image
      * computes its address as records + index * 0x38 + 0x34, which a nested
      * `&rec[i].tail.r` cannot give (CSE rewrites that as tail + 0x10). */
     CVECTOR color;
-} window_record_56_t;
-typedef char window_record_56_size_must_be_56[(sizeof(window_record_56_t) == 56) ? 1 : -1];
+} window_render_record_t;
+typedef char window_render_record_size_must_be_56[(sizeof(window_render_record_t) == 56) ? 1 : -1];
+#else
+enum { WINDOW_RECORD_CAPACITY = 32 };
+
+/* A 52-byte image render record (g_window_render_records). window_init_record_pools sets its flags to
+ * DISPLAY_OBJECT_IMAGE, so window_dispatch_record_list draws it as a sprite through
+ * window_draw_image_record. */
+typedef struct window_render_record {
+    s32 flags; /* 0x00; display_object_flag_e */
+    s32 tpage;
+    s32 priority; /* 0x08; OT priority passed to the sprite sort; 1 from the pool init */
+    s32 coordinate_mode;
+    s32 anim_counter; /* 0x10; DISPLAY_OBJECT_POP_IN animation counter, cleared on every rebind */
+    /* 0x14; CLUT selector: nonzero gives cx = clut_x + (palette - 1) << 4.
+     * proposition_resume_send_unit_level and proposition_suspend_send_unit_level clear it or set it
+     * to 2. */
+    s32 palette;
+    point32_t base; /* 0x18 */
+    point32_t clut; /* 0x20; (0x3c0, 0x1f0) from the pool init */
+    /* 0x28; image position and size, copied and passed by value as one struct; the width is read signed */
+    RECT bounds;
+    CVECTOR color; /* 0x30 */
+} window_render_record_t;
+typedef char window_render_record_size_must_be_52[sizeof(window_render_record_t) == 52 ? 1 : -1];
+#endif
 
 /* x/y view of the 56-byte render records, based at records_56[0].x; the
  * retail code addresses that pair through its own base register, loaded
  * before the index is scaled, which &records_56[i].x does not reproduce. */
 typedef struct window_record_56_position {
-    /* 0x00 */ s32 x; /* == g_window_render_records_56[i].x */
+    /* 0x00 */ s32 x; /* == g_window_render_records[i].x */
     /* 0x04 */ s32 y;
     /* 0x08 */ u8 _unused_08[0x38 - 8];
 } window_record_56_position_t;
@@ -155,9 +183,8 @@ typedef struct window_sprite_prim {
 } window_sprite_prim_t;
 typedef char window_sprite_prim_size_must_be_32[(sizeof(window_sprite_prim_t) == 32) ? 1 : -1];
 
-extern display_object_animated_t g_window_render_records_36[WINDOW_RECORD_56_CAPACITY];
-extern window_record_56_t g_window_render_records_56[WINDOW_RECORD_56_CAPACITY];
-extern window_record_56_position_t g_window_record_translation[WINDOW_RECORD_56_CAPACITY];
+extern display_object_animated_t g_window_render_records_36[WINDOW_RECORD_CAPACITY];
+extern window_record_56_position_t g_window_record_translation[WINDOW_RECORD_CAPACITY];
 extern s32 g_window_next_render_record_36;
 extern s32 g_window_next_render_record_56;
 extern void* g_window_render_record_pointers[]; /* the queue both pools publish to */
@@ -169,10 +196,8 @@ extern s32 g_window_primitive_count;
 
 void window_init_vram_record(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags);
-void window_init_frame_record(s32 record_index, RECT quad, s32 depth, u16* image);
-void window_load_record_image(s32 record_index, u32* image);
 
-/* OPEN and WLDCORE each build their own body. */
+/* OPEN measures character columns; WLDCORE measures proportional pixel widths. */
 void window_measure_text_image(s32 combined_text_index, size32_t* dimensions);
 
 /* window animations (WLDCORE) */
@@ -225,33 +250,11 @@ typedef enum window_anim_sequence {
 extern display_object_sequence_t** g_window_anim_sequences;
 extern display_object_cel_header_t** g_window_anim_cels;
 
-/* window and render records (WLDCORE) */
-enum { WINDOW_RECORD_CAPACITY = 32 };
-
-/* A 52-byte image render record (g_window_render_records). window_init_record_pools sets its flags to
- * DISPLAY_OBJECT_IMAGE, so window_dispatch_record_list draws it as a sprite through
- * window_draw_image_record. */
-typedef struct window_render_record {
-    s32 flags; /* 0x00; display_object_flag_e */
-    s32 tpage;
-    s32 priority; /* 0x08; OT priority passed to the sprite sort; 1 from the pool init */
-    s32 coordinate_mode;
-    s32 anim_counter; /* 0x10; DISPLAY_OBJECT_POP_IN animation counter, cleared on every rebind */
-    /* 0x14; CLUT selector: nonzero gives cx = clut_x + (palette - 1) << 4.
-     * wldcore_window_clear_states_and_restore_tint and wldcore_window_set_states_and_blue_tint clear it or set it
-     * to 2. */
-    s32 palette;
-    point32_t base; /* 0x18 */
-    point32_t clut; /* 0x20; (0x3c0, 0x1f0) from the pool init */
-    /* 0x28; image position and size, copied and passed by value as one struct; the width is read signed */
-    RECT bounds;
-    CVECTOR color; /* 0x30 */
-} window_render_record_t;
-typedef char window_render_record_size_must_be_52[sizeof(window_render_record_t) == 52 ? 1 : -1];
-
+/* window and render records */
+/* OPEN and WLDCORE each define this image-record pool, with their own layout and capacity. */
+extern window_render_record_t g_window_render_records[WINDOW_RECORD_CAPACITY];
 extern s32 g_window_record_count;
 extern s32 g_window_render_record_count;
-extern window_render_record_t g_window_render_records[WINDOW_RECORD_CAPACITY];
 extern u32 g_window_image_buffer[];
 
 /* The animated window records; g_window_record_positions views their x/y columns. */
@@ -259,8 +262,6 @@ extern display_object_animated_t g_window_records[WINDOW_RECORD_CAPACITY];
 extern window_xy_t g_window_record_positions[];
 
 void window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 flags);
-void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
-void window_load_render_record_image(s32 index, u32* image);
 void window_draw_centered_text(s32 window_index, s32 text_id);
 
 /* display object queues */

@@ -766,7 +766,7 @@ static void proposition_step_send_unit_status(proposition_send_unit_level_t* lev
     }
 }
 
-/* Undo wldcore_window_set_states_and_blue_tint when a sub-level closes:
+/* Undo proposition_suspend_send_unit_level when a sub-level closes:
  * default palettes on the send-unit windows and a neutral preview portrait. */
 void proposition_resume_send_unit_level(proposition_send_unit_level_t* level) {
     CVECTOR* color;
@@ -786,7 +786,7 @@ void proposition_resume_send_unit_level(proposition_send_unit_level_t* level) {
 
 /* Gray out the send-unit windows (palettes 6, 10 and 2) and tint the preview
  * portrait blue (0x40, 0x50, 0x70) while a sub-level runs over them; undone by
- * wldcore_window_clear_states_and_restore_tint. */
+ * proposition_resume_send_unit_level. */
 void proposition_suspend_send_unit_level(proposition_send_unit_level_t* level) {
     s32 pad[4];
 

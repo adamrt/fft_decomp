@@ -93,8 +93,8 @@ functions:
   - {addr: 0x8006bde0, size: 752, name: birthday_update_date_menu, hash: 4fcabd119932ad53, unit: title_controllers}
   - {addr: 0x8006c0d0, size: 916, name: birthday_push_confirmation, hash: 16fd129a48959bf2, unit: title_controllers}
   - {addr: 0x8006c464, size: 748, name: birthday_update_confirmation, hash: f574d10bdce9561d, unit: title_controllers}
-  - {addr: 0x8006c750, size: 344, name: window_init_frame_record, hash: 9fddadbd2cffc53b, unit: title_controllers}
-  - {addr: 0x8006c8a8, size: 196, name: window_load_record_image, hash: bdab620f029fd3c1, unit: title_controllers}
+  - {addr: 0x8006c750, size: 344, name: window_build_render_record_image, hash: 9fddadbd2cffc53b, unit: title_controllers}
+  - {addr: 0x8006c8a8, size: 196, name: window_load_render_record_image, hash: bdab620f029fd3c1, unit: title_controllers}
   - {addr: 0x8006c96c, size: 88, name: window_display_text_entry, hash: 5dccdaeb10297930, unit: window_text_records}
   - {addr: 0x8006c9c4, size: 104, name: window_measure_text_image, hash: 1dee4681dccf0eb6, unit: window_text_records}
   - {addr: 0x8006ca2c, size: 212, name: window_init_text_record, hash: 5f2251260b376d41, unit: window_text_records}
@@ -250,7 +250,7 @@ data:
   - {addr: 0x80085fc4, name: g_window_render_record_pointer_count}
   - {addr: 0x80085fc8, name: g_ending_fade_primitives}
   - {addr: 0x80086018, name: g_gfx_otags}
-  - {addr: 0x80086098, name: g_window_render_records_56}
+  - {addr: 0x80086098, name: g_window_render_records}
   - {addr: 0x800860b4, name: g_window_record_translation}
   - {addr: 0x80086418, name: g_input_directional_repeat_initial_delay}
   - {addr: 0x8008641c, name: g_input_directional_repeat_period}

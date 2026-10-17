@@ -19,7 +19,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
     origin.stride = g_window_render_records[record_index].bounds.w;
 #endif
 #ifdef FFT_OPEN
-    origin.stride = g_window_render_records_56[record_index].tail.quad.w;
+    origin.stride = g_window_render_records[record_index].tail.quad.w;
 #endif
     menu_display_text_entry(text_id, (u8*)buffer, &origin);
 }
@@ -49,23 +49,12 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
     point32_t text_origin;
 
     /* Each program's builder initializes its own record layout and VRAM mapping. */
-#ifdef FFT_WLDCORE
     window_build_render_record_image(record_index, bounds, coordinate_mode, image);
-#endif
-#ifdef FFT_OPEN
-    window_init_frame_record(record_index, bounds, coordinate_mode, (u16*)image);
-#endif
     text_origin.x = 8;
     text_origin.y = 8;
     if (text_id != 0) {
         window_display_text_entry(record_index, text_id, text_origin, image);
     }
-#ifdef FFT_WLDCORE
     window_load_render_record_image(record_index, image);
     g_window_render_records[record_index].flags |= DISPLAY_OBJECT_POP_IN;
-#endif
-#ifdef FFT_OPEN
-    window_load_record_image(record_index, image);
-    g_window_render_records_56[record_index].flags |= DISPLAY_OBJECT_POP_IN;
-#endif
 }
