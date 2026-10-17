@@ -32,6 +32,47 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Secondary pool and slot-chain ownership. */
+extern effect_secondary_data_t g_effect_secondary_data[EFFECT_SECONDARY_RECORD_COUNT];
+extern u16 g_effect_secondary_free_head;
+extern u16 g_effect_secondary_active_tail;
+extern u32 g_effect_secondary_current_id;
+extern effect_secondary_callback_t g_effect_secondary_handlers[23];
+extern u8 g_effect_slot_active_head;
+extern u8 g_effect_slot_free_head;
+
+/* Effect-camera track clocks. */
+extern s32 g_effect_camera_rotation_duration;
+extern s32 g_effect_camera_rotation_frame; /* reset by effect_camera_execute_angle_command */
+extern s32 g_effect_camera_position_duration;
+extern s32 g_effect_camera_position_frame;
+extern s32 g_effect_camera_zoom_duration;
+extern s32 g_effect_camera_zoom_frame;
+
+/* arrow arc */
+/* Flight state of effect_secondary_arrow_arc_handler, set in its first phase from the traced trajectory
+ * (g_projectile_*): heading, launch pitch, distance along the arc, steps left and the yaw rotation matrix. */
+extern s32 g_effect_arrow_arc_length;
+extern u16 g_effect_arrow_arc_yaw;
+extern s16 g_effect_arrow_arc_caster_relative_yaw;
+extern s32 g_effect_arrow_launch_slope_q12;
+extern s16 g_effect_arrow_arc_launch_angle;
+extern s32 g_effect_arrow_arc_distance;
+extern s32 g_effect_arrow_arc_distance_step;
+extern s16 g_effect_projectile_step_count;
+
+/* Provisional: 0x80000000 when an arrow arc ends without a hit; nothing reads it. */
+extern s32 g_effect_arrow_miss_marker;
+
+/* straight flight */
+/* Flight state of effect_secondary_linear_projectile_handler: the origin-to-destination offset and its length, the
+ * progress and speed along it, and the frames left (spin passes). */
+extern s32 g_effect_projectile_length;
+extern VECTOR g_effect_projectile_delta;
+extern s32 g_effect_projectile_progress;
+extern s32 g_effect_projectile_speed;
+extern s16 g_effect_projectile_spin_passes;
+
 /* World position of a tile's center (x, layer, y in the SVECTOR): x and z are tile * 28 + 14 and y
  * is the tile surface, -(height * BATTLE_MAP_HEIGHT_STEP), without the depth. */
 static void effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {
@@ -991,7 +1032,7 @@ void effect_init_system(void) {
     g_effect_slots[0].prev = 0;
     g_effect_slots[0].next = 0;
     g_effect_slot_free_head = 1;
-    for (i = 1; i < 32; i++) {
+    for (i = 1; i < EFFECT_SLOT_COUNT; i++) {
         g_effect_slots[i].next = i + 1;
         g_effect_slots[i].prev = i - 1;
     }
@@ -1023,7 +1064,7 @@ void effect_init_system(void) {
     g_effect_trap_frame_data_ptr = &g_effect_trap_frame_data;
     for (i = 0; i < EFFECT_SECONDARY_RECORD_COUNT; i++) {
         g_effect_secondary_data[i].active_count = 0;
-        for (j = 31; j >= 0; j--) {
+        for (j = EFFECT_SLOT_COUNT - 1; j >= 0; j--) {
             g_effect_secondary_data[i].slot_ids[j] = 0;
         }
     }

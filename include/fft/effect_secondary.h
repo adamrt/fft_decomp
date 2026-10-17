@@ -13,10 +13,12 @@
 #include "psx/types.h"
 
 /* secondary effects */
-/* Sixteen secondary effects may run at once; record zero anchors their chains. */
+/* Sixteen secondary effects and 32 billboard slots; each pool adds record zero as its chain sentinel. */
 enum {
     EFFECT_SECONDARY_SLOT_COUNT = 16,
     EFFECT_SECONDARY_RECORD_COUNT = EFFECT_SECONDARY_SLOT_COUNT + 1,
+    EFFECT_SLOT_COUNT = 32,
+    EFFECT_SLOT_RECORD_COUNT = EFFECT_SLOT_COUNT + 1
 };
 
 /* The stage a secondary effect's handler runs (effect_secondary_data_t.phase). */
@@ -62,20 +64,15 @@ typedef struct effect_secondary_data {
     /* 0x2c; live effect slots of its particle group: effect_secondary_start_group counts them up and
      * effect_secondary_update_active_slots down; the handlers finish at 0. */
     s16 active_count;
-    s16 finish_timer;  /* 0x2e; counts frames after the last slot finished */
-    u8 slot_ids[0x20]; /* 0x30; its effect slots, 0 for none; cleared when the record is allocated */
-    void* allocation;  /* 0x50; the handler's work block; freed when the record is removed */
+    s16 finish_timer;               /* 0x2e; counts frames after the last slot finished */
+    u8 slot_ids[EFFECT_SLOT_COUNT]; /* 0x30; its effect slots, 0 for none; cleared when the record is allocated */
+    void* allocation;               /* 0x50; the handler's work block; freed when the record is removed */
 } effect_secondary_data_t;
 typedef char effect_secondary_data_size_must_be_84[(sizeof(effect_secondary_data_t) == 84) ? 1 : -1];
 
 typedef s32 (*effect_secondary_callback_t)(void);
 
-extern effect_secondary_data_t g_effect_secondary_data[];
-extern u16 g_effect_secondary_free_head;
-extern u16 g_effect_secondary_active_tail;
-extern u32 g_effect_secondary_current_id;
 extern struct effect_secondary_data* g_effect_secondary_current;
-extern effect_secondary_callback_t g_effect_secondary_handlers[23];
 extern u8 g_effect_secondary_charge_id; /* id of the charge secondary effect started with the ability; 0 none */
 
 /* Set by effect_secondary_update each frame: the ordering table the secondary effects add their primitives to, and
@@ -272,9 +269,7 @@ typedef struct effect_slot {
 } effect_slot_t;
 typedef char effect_slot_size_must_be_204[sizeof(effect_slot_t) == 204 ? 1 : -1];
 
-extern effect_slot_t g_effect_slots[];
-extern u8 g_effect_slot_active_head;
-extern u8 g_effect_slot_free_head;
+extern effect_slot_t g_effect_slots[EFFECT_SLOT_RECORD_COUNT];
 extern effect_sprite_section_t g_effect_trap_frame_data;
 extern effect_sprite_section_t* g_effect_trap_frame_data_ptr;
 

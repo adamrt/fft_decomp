@@ -331,22 +331,16 @@ extern SVECTOR g_effect_camera_rotation_current;
 extern SVECTOR g_effect_camera_rotation_start;
 extern SVECTOR g_effect_camera_rotation_target;
 extern u32 g_effect_camera_rotation_mode;
-extern s32 g_effect_camera_rotation_duration;
-extern s32 g_effect_camera_rotation_frame; /* reset by effect_camera_execute_angle_command */
 extern SVECTOR g_effect_camera_rotation_saved;
 extern VECTOR g_effect_camera_position_current;
 extern VECTOR g_effect_camera_position_start;
 extern VECTOR g_effect_camera_position_target;
 extern u32 g_effect_camera_position_mode;
-extern s32 g_effect_camera_position_duration;
-extern s32 g_effect_camera_position_frame;
 extern VECTOR g_effect_camera_position_saved;
 extern VECTOR g_effect_camera_zoom_current;
 extern VECTOR g_effect_camera_zoom_start;
 extern VECTOR g_effect_camera_zoom_target;
 extern u32 g_effect_camera_zoom_mode;
-extern s32 g_effect_camera_zoom_duration;
-extern s32 g_effect_camera_zoom_frame;
 extern VECTOR g_effect_camera_zoom_saved;
 
 void effect_camera_init(void);

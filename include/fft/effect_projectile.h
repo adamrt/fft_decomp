@@ -1,38 +1,15 @@
 #ifndef EFFECT_PROJECTILE_H
 #define EFFECT_PROJECTILE_H
 
-/* BATTLE's projectile secondary effects: the flight state of arcing arrows and straight shots, and the projectile
- * models with their polygon buffers. */
+/* BATTLE projectile models, polygon buffers and shared flight transform. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* arrow arc */
-/* Flight state of effect_secondary_arrow_arc_handler, set in its first phase from the traced trajectory
- * (g_projectile_*): heading, launch pitch, distance along the arc, steps left and the yaw rotation matrix. */
-extern s32 g_effect_arrow_arc_length;
-extern u16 g_effect_arrow_arc_yaw;
-extern s16 g_effect_arrow_arc_caster_relative_yaw;
-extern s32 g_effect_arrow_launch_slope_q12;
-extern s16 g_effect_arrow_arc_launch_angle;
-extern s32 g_effect_arrow_arc_distance;
-extern s32 g_effect_arrow_arc_distance_step;
-extern s16 g_effect_projectile_step_count;
+/* Projectile rotation shared by the flight handlers and emitter transform. */
 extern MATRIX g_effect_projectile_matrix;
-
-/* Provisional: 0x80000000 when an arrow arc ends without a hit; nothing reads it. */
-extern s32 g_effect_arrow_miss_marker;
-
-/* straight flight */
-/* Flight state of effect_secondary_linear_projectile_handler: the origin-to-destination offset and its length, the
- * progress and speed along it, and the frames left (spin passes). */
-extern s32 g_effect_projectile_length;
-extern VECTOR g_effect_projectile_delta;
-extern s32 g_effect_projectile_progress;
-extern s32 g_effect_projectile_speed;
-extern s16 g_effect_projectile_spin_passes;
 
 /* models */
 /* The projectile models of g_effect_model_files. */
