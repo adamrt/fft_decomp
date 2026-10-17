@@ -17,7 +17,7 @@
 
 extern u8 g_sound_system_sed_data[];
 extern u8 g_sound_env_sed_data[];
-extern s32 g_sound_weather_sfx_id; /* the background sound sound_play_background started, 0 for none */
+extern s32 g_sound_background_sfx_id; /* the background sound sound_play_background started, 0 for none */
 
 /* Scenario-music playback state. current_music is the Suzuki music record of
  * the playing scenario music: music_stop hands it straight
@@ -720,16 +720,16 @@ void sound_play_sfx_on_free_channel(int sound_id) {
 }
 
 /* Plays a background sound on SFX channels 4-5 and remembers its id in
- * g_sound_weather_sfx_id, so sound_stop_weather can
+ * g_sound_background_sfx_id, so sound_stop_background can
  * stop it and sound_replay_background can start it again. */
 void sound_play_background(int sound_id) {
-    g_sound_weather_sfx_id = sound_id;
+    g_sound_background_sfx_id = sound_id;
     suzuki_sound_play_background_sfx(sound_id);
 }
 
 /* Starts the remembered background sound again. */
 void sound_replay_background(void) {
-    int sound_id = g_sound_weather_sfx_id;
+    int sound_id = g_sound_background_sfx_id;
 
     if (sound_id != 0) {
         suzuki_sound_play_background_sfx(sound_id);
@@ -740,8 +740,8 @@ void sound_replay_background(void) {
  * channel velocity, and 0 stops them (and forgets a remembered background
  * sound). */
 void sound_set_sfx_volume(int sound_id, int volume) {
-    if (g_sound_weather_sfx_id == sound_id && volume == 0) {
-        g_sound_weather_sfx_id = 0;
+    if (g_sound_background_sfx_id == sound_id && volume == 0) {
+        g_sound_background_sfx_id = 0;
     }
     suzuki_sound_set_sfx_volume(sound_id, volume);
 }
@@ -749,23 +749,23 @@ void sound_set_sfx_volume(int sound_id, int volume) {
 /* Forgets the remembered background sound and silences every SFX channel.
  * It leaves the music alone. */
 void sound_stop_all_sfx(void) {
-    g_sound_weather_sfx_id = 0;
+    g_sound_background_sfx_id = 0;
     suzuki_sound_stop_all_sfx();
 }
 
 /* Stops the SFX channels playing sound_id, forgetting it if it is the
  * remembered background sound. */
 void sound_stop_sfx(int sound_id) {
-    if (sound_id == g_sound_weather_sfx_id) {
-        g_sound_weather_sfx_id = 0;
+    if (sound_id == g_sound_background_sfx_id) {
+        g_sound_background_sfx_id = 0;
     }
     suzuki_sound_stop_sfx_channels(sound_id);
 }
 
 /* Stops the remembered background sound but keeps its id, so
  * sound_replay_background can restart it. */
-void sound_stop_weather(void) {
-    int sound_id = g_sound_weather_sfx_id;
+void sound_stop_background(void) {
+    int sound_id = g_sound_background_sfx_id;
 
     if (sound_id != 0) {
         suzuki_sound_stop_sfx_channels(sound_id);
@@ -799,7 +799,7 @@ void sound_open_generic_sfx(void) {
         g_music.slots.music[i] = 0;
     }
 
-    g_sound_weather_sfx_id = 0;
+    g_sound_background_sfx_id = 0;
     g_music.slots.smd[2] = file_load_smd(g_music_files[45].sector, g_music_files[45].size);
     g_music.slots.smd[3] = file_load_smd(g_music_files[46].sector, g_music_files[46].size);
     g_music.slots.smd[4] = file_load_smd(g_music_files[47].sector, g_music_files[47].size);

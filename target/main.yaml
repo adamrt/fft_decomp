@@ -736,7 +736,7 @@ functions:
   - {addr: 0x8004408c, size: 64, name: sound_set_sfx_volume, hash: 17e97804797bfd75, unit: sound_requests}
   - {addr: 0x800440cc, size: 40, name: sound_stop_all_sfx, hash: c0c1ba34c9724590, unit: sound_requests}
   - {addr: 0x800440f4, size: 52, name: sound_stop_sfx, hash: 21e1e455590397bf, unit: sound_requests}
-  - {addr: 0x80044128, size: 44, name: sound_stop_weather, hash: 47c3d337927a07ec, unit: sound_requests}
+  - {addr: 0x80044128, size: 44, name: sound_stop_background, hash: 47c3d337927a07ec, unit: sound_requests}
   - {addr: 0x80044154, size: 360, name: sound_open_generic_sfx, hash: ba9b164dee501015, unit: sound_requests}
   - {addr: 0x800442bc, size: 200, name: heap_alloc_smd, hash: a37ef45a15eb4c27, unit: heap}
   - {addr: 0x80044384, size: 108, name: heap_free_smd, hash: 1d3fc00bb5ccc417, unit: heap}
@@ -1234,7 +1234,7 @@ data:
   - {addr: 0x80045990, name: g_system_frame_pacing_suppressed}
   - {addr: 0x80045994, name: g_frame_counter}
   - {addr: 0x80045998, name: g_system_min_vsync_interval}
-  - {addr: 0x8004599c, name: g_sound_weather_sfx_id}
+  - {addr: 0x8004599c, name: g_sound_background_sfx_id}
   - {addr: 0x800459a0, name: g_deploy_deployed_unit_map_coordinates}
   - {addr: 0x800459b8, name: g_save_play_time_frames}
   - {addr: 0x800459bc, name: g_save_play_time_seconds}

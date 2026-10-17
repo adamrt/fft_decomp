@@ -1328,7 +1328,7 @@ void state_enter_action_execute(void) {
     if ((effect_is_item_ability(ability) == 0) || ((unit->animation.sequence_id >> 1) == ANIMATION_HOLD_ITEM)) {
         effect_play();
     }
-    sound_stop_weather();
+    sound_stop_background();
     g_system_vsync_interval = 2;
     cursor_hide();
 }
