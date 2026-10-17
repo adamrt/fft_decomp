@@ -119,7 +119,6 @@ data:
   - {addr: 0x801ca0c8, name: g_unit_panel_selected_unit}
   - {addr: 0x801ca0d8, name: g_unit_panel_comparison_unit_data}
   - {addr: 0x801ca0e8, name: g_unit_panel_selected_unit_fields}
-  - {addr: 0x801ca10c, name: g_unit_panel_editor_item_and_ability_ids}
   - {addr: 0x801ca168, name: g_unit_panel_billboard_skillset_name}
   - {addr: 0x801ca17c, name: g_unit_panel_billboard_secondary_skillset_name}
   - {addr: 0x801ca1b8, name: g_unit_panel_editor_numeric_geometry}

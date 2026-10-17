@@ -369,18 +369,18 @@ void deploy_build_strings(void) {
         }
         unit_panel_load_party_unit(1, i);
         for (j = 0; j < 5; j++) {
-            APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j], HELP_TEXT_ID_ITEM_BASE);
+            APPEND_TEXT_ID(g_unit_panel_selected_unit_fields.state.equipment[j], HELP_TEXT_ID_ITEM_BASE);
         }
         if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
             for (j = 0; j < 5; j++) {
-                APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
+                APPEND_TEXT_ID(g_unit_panel_selected_unit_fields.state.ability_ids[j], HELP_TEXT_ID_ABILITY_BASE);
             }
         } else {
             for (j = 0; j < 2; j++) {
-                APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_SKILLSET_BASE);
+                APPEND_TEXT_ID(g_unit_panel_selected_unit_fields.state.ability_ids[j], HELP_TEXT_ID_SKILLSET_BASE);
             }
             for (j = 2; j < 5; j++) {
-                APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
+                APPEND_TEXT_ID(g_unit_panel_selected_unit_fields.state.ability_ids[j], HELP_TEXT_ID_ABILITY_BASE);
             }
         }
         APPEND_TEXT(g_unit_panel_selected_unit.job_id + HELP_TEXT_ID_JOB_BASE);

@@ -284,12 +284,6 @@ extern menu_unit_stat_number_images_t g_unit_panel_editor_numeric_text_a;
 extern menu_unit_stat_number_images_t g_unit_panel_editor_numeric_text_b;
 extern struct unit_stats g_unit_panel_editor_party_unit_stats;
 
-/* Five name ids and five ability/skillset ids of the unit loaded into the
- * editor (g_unit_panel_selected_unit_fields + 0x24). The target walks them from this
- * standalone address: indexing the editor record instead folds 0x24 into each
- * load and allocates the walk from the record base. */
-extern s16 g_unit_panel_editor_item_and_ability_ids[10];
-
 void unit_panel_numbers_polarity_thread(void);
 
 /* BUNIT and WORLD share a source; DEBUGCHR and EQUIP each build their own body. */

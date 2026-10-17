@@ -898,7 +898,7 @@ static void deploy_select_first_deployable_unit(void) {
  * and CT, and without the monster-skill or name-text refresh.
  *
  * team_kind (0 player-controlled, 1 another team, 2 the player's team without player
- * control) is stored through `gauges`: written as g_unit_panel_selected_billboard.team_kind, GCC keeps the
+ * control) is stored through `gauges`: written as g_unit_panel_selected_unit_status.team_kind, GCC keeps the
  * field's address in a register across the three stores (4 bytes longer than the
  * target). */
 void unit_panel_load_party_unit(s32 unused, s32 party_index) {
