@@ -168,7 +168,7 @@ void formula_repeating_fist(void) {
 }
 
 /* Formula 0x33: hit (PA+X)%. */
-void formula_hit_pa_x_percent(void) {
+void formula_stigma_magic(void) {
     formula_store_pa_and_x();
     formula_apply_attack_up_and_martial_arts();
     formula_apply_attacker_berserk_frog();
@@ -248,7 +248,7 @@ void formula_hit_sp_x_percent(void) {
 }
 
 /* Formula 0x40: undead targets only, hit (SP+X)%. */
-void formula_undead_hit_sp_x_percent(void) {
+void formula_seal_evil(void) {
     formula_store_speed_and_x();
     formula_apply_physical_modifiers();
     formula_store_xa_plus_ya();
@@ -265,7 +265,7 @@ void formula_undead_hit_sp_x_percent(void) {
 }
 
 /* Formula 0x41: hit (MA+X)%; forced miss when caster and target share a zodiac sign. */
-void formula_hit_ma_x_percent_miss_same_zodiac(void) {
+void formula_galaxy_stop(void) {
     if (formula_accuracy_calculate_magic_without_faith() == 0) {
         if (g_action_target->birthday.zodiac == g_action_attacker->birthday.zodiac) {
             formula_force_attack_miss();
@@ -373,7 +373,7 @@ void formula_damage_ma_times_y(void) {
 
 /* Formula 0x4F: damage equal to the caster's missing HP, hit (MA+X)%; physical
  * evade. */
-void formula_damage_caster_missing_hp(void) {
+void formula_goblin_punch(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_ma_and_x();
         if (formula_accuracy_calculate_physical_status() == 0) {
@@ -444,14 +444,14 @@ void formula_damage_y_percent_hit_ma_x_percent(void) {
 }
 
 /* Formula 0x54: heal (MA * Y) MP. */
-void formula_heal_mp_ma_times_y(void) {
+void formula_magic_spirit(void) {
     formula_store_ma_and_y();
     formula_calculate_magical_xa_times_ya();
     formula_convert_hp_damage_to_mp_recovery();
 }
 
 /* Formula 0x55: -PA (Y), hit (MA+X)%. */
-void formula_lower_pa_y(void) {
+void formula_beaking(void) {
     if (formula_evade_calculate_magical() != 0 || formula_accuracy_calculate_magic_without_faith() != 0) {
         return;
     }
@@ -460,7 +460,7 @@ void formula_lower_pa_y(void) {
 }
 
 /* Formula 0x56: -MA (Y), hit (MA+X)%. */
-void formula_lower_ma_y(void) {
+void formula_circle(void) {
     if (formula_evade_calculate_magical() != 0 || formula_accuracy_calculate_magic_without_faith() != 0) {
         return;
     }
@@ -507,7 +507,7 @@ void formula_please_eat(void) {
 /* Formula 0x58 (Moldball Virus): hit (MA+X)%; no evade. A generic human or
  * monster target becomes a Morbol; an immortal, mounted or unique target, or
  * one already of the Morbol family, is a forced miss. */
-void formula_set_morbol(void) {
+void formula_moldball_virus(void) {
     action_data_t* action;
     unit_stats_t* target;
 
@@ -535,7 +535,7 @@ void formula_set_morbol(void) {
 
 /* Formula 0x59: -Level (1), hit (MA+X)%; magic evade. A level-1 target is a
  * forced miss that still carries the level-down effect. */
-void formula_lower_level_by_one(void) {
+void formula_level_blast(void) {
     action_data_t* action;
 
     if (formula_evade_calculate_magical() == 0) {
@@ -595,7 +595,7 @@ void formula_5e_damage_ma_plus_y_half_times_ma(void) {
 
 /* Formula 0x5F: damage ((MA + Y) / 2 * MA) with element, 19% status; magic
  * evade. */
-void formula_5f_damage_ma_plus_y_half_times_ma(void) {
+void formula_nanoflare(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_calculate_truth_damage();
     }
@@ -616,7 +616,7 @@ void formula_lower_brave_y(void) {
 }
 
 /* Formula 0x62: -Brave (Y), hit (MA+X)%; magic evade. */
-void formula_lower_brave_y_without_faith(void) {
+void formula_look_of_fright(void) {
     if (formula_evade_calculate_magical() == 0) {
         if (formula_accuracy_calculate_magic_without_faith() == 0) {
             formula_set_brave_loss_y();
