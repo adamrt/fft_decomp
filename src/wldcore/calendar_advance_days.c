@@ -33,7 +33,7 @@
 void calendar_advance_days(s32 days) {
     s32 i;
     s32 years;
-    u8(*birthdays)[2];
+    calendar_date_t* birthdays;
     s32 today;
     s32 month;
     s32 day;
@@ -53,8 +53,8 @@ void calendar_advance_days(s32 days) {
             month = script_get_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH);
             day = script_get_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY);
         } else {
-            month = birthdays[i][0];
-            day = birthdays[i][1];
+            month = birthdays[i].month;
+            day = birthdays[i].day;
         }
         /* Only birthdays later in this year count: an advance that runs past
          * 31 December misses those early in the new year (retail quirk). */

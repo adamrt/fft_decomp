@@ -766,8 +766,8 @@ void calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  * placeholder (1/1); the real birthday lives in
  * EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH and _DAY, written when the player picks
  * one at game start, so entry 0 is compared against those two variables and
- * the remaining 63 entries against the table. The table is a 64 x 2 array of
- * month/day byte pairs (g_brave_story_birthday_table) reached through
+ * the remaining 63 entries against the table. The table contains 64 calendar dates
+ * (g_brave_story_birthday_table), reached through
  * the pointer g_brave_story_birthdays.
  *
  * The age column is walked one byte at a time from index 1, which is why the
@@ -775,7 +775,7 @@ void calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  * is the only absolute access to the array.
  */
 static void calendar_advance_birthdays(void) {
-    const u8(*birthdays)[2] = g_brave_story_birthdays;
+    const calendar_date_t* birthdays = g_brave_story_birthdays;
     s32 day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
     s32 month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
     s32 birth_month = script_get_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH);
@@ -791,7 +791,7 @@ static void calendar_advance_birthdays(void) {
     }
 
     for (i = 1; i < 64; i++) {
-        if (month == birthdays[i][0] && day == birthdays[i][1]) {
+        if (month == birthdays[i].month && day == birthdays[i].day) {
             if (g_brave_story_character_ages[i] < 99) {
                 g_brave_story_character_ages[i]++;
             }
