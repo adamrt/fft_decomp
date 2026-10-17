@@ -256,7 +256,7 @@ void ability_list_scrolling_thread(void) {
                             layout->columns.text_ids[column][index], buffer, &g_menu_window_text_pen);
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                         if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
-                            && (g_ai_workspace_ptr->ability_list.flags[index] & 1)) {
+                            && (g_ai_workspace_ptr->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                             menu_set_text_origin(layout->columns.x[column] + 0x50, 0);
                             menu_display_text_entry(0x5088, buffer, &g_menu_window_text_pen);
                         }

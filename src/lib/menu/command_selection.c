@@ -399,7 +399,8 @@ static void command_build_ability_list(s32 mode) {
             }
         }
         if (type == ACTION_MENU_TYPE_DEFAULT || type == ACTION_MENU_TYPE_MONSTER) {
-            if ((g_ai_workspace_ptr->ability_list.flags[i] & 2) && g_ai_workspace_ptr->ability_list.skill_ct[i] != 0
+            if ((g_ai_workspace_ptr->ability_list.flags[i] & MENU_ABILITY_FLAG_AFFECTED_BY_SILENCE)
+                && g_ai_workspace_ptr->ability_list.skill_ct[i] != 0
                 && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SILENCE)]
                     & STATUS_BYTE_MASK(STATUS_ID_SILENCE))) {
                 g_ability_list_ability_display_flags[i] = 8;

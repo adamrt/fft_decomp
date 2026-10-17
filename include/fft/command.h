@@ -167,6 +167,12 @@ void command_act_menu_thread(void);
 void command_validate_ability_thread(void);
 
 /* ability lists */
+/* Packed menu attributes; the source ability record uses different bit positions. */
+typedef enum menu_ability_flag {
+    MENU_ABILITY_FLAG_REFLECTABLE = 0x01,
+    MENU_ABILITY_FLAG_AFFECTED_BY_SILENCE = 0x02
+} menu_ability_flag_e;
+
 /* The ability list the skillset menus build in the event work block (event_work_t::ability_list): 82 rows of
  * parallel columns. ids, values and extras become the three text-id columns of g_ability_list_ability_layout.
  * Provisional. */
@@ -176,7 +182,7 @@ typedef struct menu_ability_list {
     u16 extras[82];  /* 0x148 */
     u8 mp_costs[82]; /* 0x1ec; 0xff terminated */
     u8 ct[82];       /* 0x23e; CT */
-    u8 flags[82];    /* 0x290; bit 1 = blocked by unit flag 0x59 & 8 */
+    u8 flags[82];    /* 0x290; menu_ability_flag_e, with 0xff terminating the byte column */
     u8 turns[82];    /* 0x2e2 */
     u8 skill_ct[82]; /* 0x334 */
 } menu_ability_list_t;

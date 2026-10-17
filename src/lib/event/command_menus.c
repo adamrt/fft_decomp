@@ -344,7 +344,7 @@ void command_validate_ability_thread(void) {
         ct = 0;
     }
     message = 0;
-    blocked = skill_tables->flags[skill] & 2;
+    blocked = skill_tables->flags[skill] & MENU_ABILITY_FLAG_AFFECTED_BY_SILENCE;
     unit = menu_get_selected_unit_stats();
     if (g_menu_active_menu == ACTION_MENU_TYPE_DEFAULT && unit->mp - mp_cost < 0) {
         message = 0x800A;

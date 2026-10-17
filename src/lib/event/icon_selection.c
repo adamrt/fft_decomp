@@ -479,7 +479,7 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
                 menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
 #ifdef FFT_BATTLE
                 if (g_threads[g_thread_current_id].function_parameter_4 != 0
-                    && (g_ai_workspace_ptr->ability_list.flags[index] & 1)) {
+                    && (g_ai_workspace_ptr->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                     g_menu_text_palette_offset = layout->text_colors[column][index];
                     /* 32-bit x and y, as above. */
                     menu_set_text_origin(layout->x[column] + 0x50, row * 0x10);

@@ -59,7 +59,7 @@ s32 skillset_get_unit_ability_data(
     s32 skillset_index;
     s32 mp;
     s32 ct;
-    s32 kind;
+    s32 menu_flags;
     u8 requirements;
     u8 attributes;
     s32 turns;
@@ -133,7 +133,8 @@ s32 skillset_get_unit_ability_data(
             }
             ct = secondary->ct & 0x7f;
             attributes = secondary->flags_3;
-            kind = (attributes >> 7) | ((attributes & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE) >> 4);
+            /* Pack Reflectable and Affected by Silence into the menu flag byte. */
+            menu_flags = (attributes >> 7) | ((attributes & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE) >> 4);
             if (!(attributes & ABILITY_SECONDARY_FLAG_3_PERSEVERE)) {
                 if (charge == 1) {
                     ct = (ct + 1) >> 1;
@@ -145,7 +146,7 @@ s32 skillset_get_unit_ability_data(
             turns = at_list_count_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = mp;
             ct_out[count] = ct;
-            flags_out[count] = kind;
+            flags_out[count] = menu_flags;
             turns_out[count] = turns;
         } else if (ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST) {
             ct = (g_ability_charge_data - ABILITY_ID_CHARGE_FIRST)[ability].ct;
@@ -486,6 +487,7 @@ s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 u
         ability = id;
         if ((frog == 0 || id == ABILITY_ID_BLACK_MAGIC_FROG) && id != 0 && id >= 1 && id < ABILITY_ID_ITEM_FIRST) {
             flags = g_ability_range_data[id].flags_3;
+            /* Pack the same menu attributes as ordinary skillset abilities. */
             *flags_out++ = (flags >> 7) | ((flags & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE) >> 4);
             *out = ability;
             out++;
