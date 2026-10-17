@@ -2296,10 +2296,10 @@ void projectile_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 
         = SquareRoot12((delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz) * ONE) / 8 >> 12;
 }
 
-/* Keep the trap animation table as u8[]: another element type introduces an
+/* Keep the secondary animation table as u8[]: another element type introduces an
  * 8-byte compiler frame and changes the load-delay and return slots. */
 
-/* Start the animation script of trap group on slot: reset the color and
+/* Start the selected secondary animation on the slot: reset its color and
  * script state and store the 16-bit CLUT value (callers pass CLUTs of
  * BATTLE_MAP_CLUT_ROW_WEAPONS) at 0x88. */
 static void effect_slot_init_secondary_animation(s32 group, u16 clut, effect_slot_t* slot) {

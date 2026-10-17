@@ -1695,7 +1695,7 @@ static void battle_map_palette_extract_colors(const palette_t palette, s32 clut_
 /* Load colors into a map CLUT row and mark the rows for upload: the row's
  * sixteen CLUTs (256 colors) when load_all is 1, otherwise the sixteen colors
  * of CLUT clut_index. The blends of the loaded CLUTs stop. Nothing happens while
- * the row's updates are disabled. */
+ * palette loading is disabled for the row. */
 void battle_map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all) {
     s32 clear_index;
     s32 i;
