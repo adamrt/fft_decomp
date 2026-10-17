@@ -26,7 +26,31 @@ s32 suzuki_sound_root_counter_2_handler(void) {
     if ((requests & SUZUKI_VOICE_MASK_REQUEST_REVERB) != 0)
         suzuki_sound_calculate_reverb_voices();
     g_suzuki_sound_voice_update_requests = 0;
-    suzuki_sound_flush_key_on_inline();
+    /* The original handler contains the key-on flush directly. */
+    {
+        suzuki_music_t* music;
+        s16 status;
+        u32 allowed;
+        u32 voices;
+
+        voices = 0;
+        allowed = ~(g_suzuki_sound_sfx_reserved_voices | g_suzuki_sound_sfx_key_off_voices);
+        music = g_suzuki_sound_active_music_list;
+        while (music != 0) {
+            status = music->status;
+            if (status < 0) {
+                if ((status & SUZUKI_MUSIC_STATUS_SFX) != 0)
+                    voices |= music->key_on_mask;
+                else
+                    voices |= allowed & music->key_on_mask;
+                music->key_on_mask = 0;
+            }
+            music = music->next;
+        }
+
+        if (voices != 0)
+            SpuSetKey(SPU_ON, voices);
+    }
 
     if ((g_suzuki_sound_tick_count++ & 1) != 0) {
         if (g_suzuki_sound_spu_state.music_ramp.count != 0) {
@@ -107,6 +131,42 @@ s32 suzuki_sound_root_counter_2_handler(void) {
         music = music->next;
     }
 
-    suzuki_sound_flush_key_off_inline();
+    /* Release stopped voices and commit the queued key-offs. */
+    {
+        suzuki_music_t* music;
+        s16 status;
+        u32 allowed;
+        u32 voices;
+        u32 pending;
+        s32 voice;
+
+        allowed = ~(g_suzuki_sound_sfx_reserved_voices | g_suzuki_sound_sfx_key_off_voices);
+        voices = (allowed & g_suzuki_sound_music_key_off_voices) | g_suzuki_sound_sfx_key_off_voices;
+        music = g_suzuki_sound_active_music_list;
+        while (music != 0) {
+            status = music->status;
+            if (status < 0) {
+                if ((status & SUZUKI_MUSIC_STATUS_SFX) != 0)
+                    voices |= music->key_off_mask;
+                else
+                    voices |= allowed & music->key_off_mask;
+                music->key_off_mask = 0;
+            }
+            music = music->next;
+        }
+
+        pending = (allowed & g_suzuki_sound_music_key_off_voices) | g_suzuki_sound_sfx_key_off_voices;
+        if (pending != 0) {
+            for (voice = 23; voice >= 0; voice--) {
+                if ((pending & SPU_VOICECH(voice)) != 0)
+                    SpuSetVoiceRRAttr(voice, 6, SPU_VOICE_LINEARDecN);
+            }
+            g_suzuki_sound_sfx_key_off_voices = 0;
+            g_suzuki_sound_music_key_off_voices = 0;
+        }
+
+        if (voices != 0)
+            SpuSetKey(SPU_OFF, voices);
+    }
     return 0;
 }
