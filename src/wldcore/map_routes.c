@@ -142,14 +142,12 @@ void world_map_pulse_dots(void) {
         if (state == 0) {
             counter = g_world_map_dot_pulse_phase + 1;
             g_world_map_dot_pulse_phase = counter;
-            counter = counter;
             if (counter == flags) {
                 g_world_map_dot_pulse_direction = state ^ 1;
             }
         } else {
             counter = g_world_map_dot_pulse_phase - 1;
             g_world_map_dot_pulse_phase = counter;
-            counter = counter;
             if (counter == 0) {
                 g_world_map_dot_pulse_direction = state ^ 1;
             }
