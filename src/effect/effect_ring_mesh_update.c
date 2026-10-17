@@ -15,6 +15,17 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Scratchpad (0x1f800000) layout while the ring is rebuilt. points[row][0..8]
+ * sweep one quadrant in 0x80 steps; the rotating add helpers reuse them for
+ * the other three quadrants. */
+typedef struct effect_ring_mesh_scratch {
+    VECTOR points[3][RING_MESH_ARC_POINTS]; /* 0x000 */
+    VECTOR origin;                          /* 0x1b0 */
+    SVECTOR vertex;                         /* 0x1c0 */
+    VECTOR screen[4];                       /* 0x1c8: projected quad corners; RotTrans writes its flag to pad */
+    s16 depth[3][RING_MESH_SEGMENTS + 1];   /* 0x208 */
+} effect_ring_mesh_scratch_t;
+
 /* Callback handler for the ring mesh: a band two quads high and 32 around
  * the emitter origin, spinning about the vertical axis. Its three lattice rows
  * are circles whose height and radius step apart by the growth curves, and the

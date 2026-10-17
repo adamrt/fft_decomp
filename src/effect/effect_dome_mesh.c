@@ -15,6 +15,19 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Work block: two POLY_GT4 buffers of 8 rows x 16 columns. */
+typedef struct effect_dome_mesh_work {
+    s32 buffer;                              /* 0x0000: 0 or 1, flipped after each update */
+    POLY_GT4 quads[2][DOME_MESH_QUAD_COUNT]; /* 0x0004: row * 16 + column */
+    s16 spin;                                /* 0x3404: lattice rotation, modulo one turn */
+    s16 v_scroll;                            /* 0x3406: 8.8 fixed, wrapped to v_span */
+    s32 radius_offset;                       /* 0x3408: 24.8 fixed, added to the radius */
+    s32 radius_speed;                        /* 0x340c */
+    u8 _unused_3410[0x08];
+    s32 destroy_delay; /* 0x3418: the destroy phase waits one call before freeing */
+} effect_dome_mesh_work_t;
+typedef char effect_dome_mesh_work_size_must_be_13340[sizeof(effect_dome_mesh_work_t) == 13340 ? 1 : -1];
+
 /* Read lattice point `point` of dome row `group` from the scratchpad and add `offset`
  * to give a vertex ready for projection. */
 static void effect_dome_mesh_load_translated_vertex(s32 group, s32 point, const VECTOR* offset, SVECTOR* output) {

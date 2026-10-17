@@ -14,6 +14,29 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* A 17-point particle trail; spawning seeds only points 0-8 (the target's loop bound is 9). */
+typedef struct effect_trail_segment {
+    SVECTOR tip;          /* 0x00 */
+    VECTOR velocity;      /* 0x08: 20.12 fixed */
+    VECTOR position;      /* 0x18: 20.12 fixed */
+    vec3s16_t points[17]; /* 0x28 */
+    s16 head;             /* 0x8e */
+    s16 length;           /* 0x90 */
+    s16 active;           /* 0x92 */
+    u8 _unused_94[0x04];
+} effect_trail_segment_t;
+typedef char effect_trail_segment_size_must_be_152[sizeof(effect_trail_segment_t) == 152 ? 1 : -1];
+
+typedef struct effect_trail_work {
+    s32 buffer;                         /* 0x000 */
+    s16 count;                          /* 0x004 */
+    u8 _padding_006[0x02];              /* aligns segments */
+    effect_trail_segment_t segments[4]; /* 0x008 */
+    MATRIX matrix;                      /* 0x268 */
+    s32 destroy_delay;                  /* 0x288 */
+} effect_trail_work_t;
+typedef char effect_trail_work_size_must_be_652[sizeof(effect_trail_work_t) == 652 ? 1 : -1];
+
 /* Runs up to four unseen particles from the emitter's spawn volume towards a
  * tip, keeping a 17-point trail of each, and spawns the emitter's children
  * from the trail's head (the newest point while travelling, the arrival point

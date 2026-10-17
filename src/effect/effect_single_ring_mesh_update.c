@@ -16,6 +16,25 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Work block of the single-ring variant: two POLY_GT4 buffers of 32 quads. */
+typedef struct effect_single_ring_mesh_work {
+    s32 buffer;                            /* 0x000: 0 or 1, flipped after each update */
+    POLY_GT4 quads[2][RING_MESH_SEGMENTS]; /* 0x004 */
+    s16 spin;                              /* 0xd04: ring rotation, modulo one turn */
+    s16 v_scroll;                          /* 0xd06: 8.8 fixed, wrapped to v_span */
+    s32 radius_offset;                     /* 0xd08: 24.8 fixed, added to the radius */
+    s32 radius_speed;                      /* 0xd0c */
+    u8 _unused_d10[0x08];
+    s32 destroy_delay; /* 0xd18: the destroy phase waits one call before freeing */
+} effect_single_ring_mesh_work_t;
+typedef char effect_single_ring_mesh_work_size_must_be_3356[sizeof(effect_single_ring_mesh_work_t) == 3356 ? 1 : -1];
+
+/* Scratchpad (0x1f800000) layout of the single-ring variant: two lattice
+ * rows of one quadrant. */
+typedef struct effect_single_ring_mesh_scratch {
+    VECTOR points[2][RING_MESH_ARC_POINTS]; /* 0x000 */
+} effect_single_ring_mesh_scratch_t;
+
 /* Builds and draws a spinning, flaring ring of 32 textured quads: the
  * single-ring build of the ring mesh renderer (see effect_ring_mesh_update),
  * with two lattice rows of one quadrant in the scratchpad instead of three. It

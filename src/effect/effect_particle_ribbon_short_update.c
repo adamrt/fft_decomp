@@ -17,6 +17,36 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* One short ribbon: a particle and the double-buffered quad strip drawn along
+ * its recent path, one quad per pair of adjacent trail points. */
+typedef struct effect_particle_ribbon_short {
+    SVECTOR target;                                             /* 0x000: homing destination */
+    VECTOR velocity;                                            /* 0x008: 20.12 fixed */
+    VECTOR position;                                            /* 0x018: 20.12 fixed */
+    POLY_GT4 quads[2][EFFECT_PARTICLE_RIBBON_SHORT_POINTS - 1]; /* 0x028 */
+    vec3s16_t trail[EFFECT_PARTICLE_RIBBON_SHORT_POINTS];       /* 0x368: ring buffer indexed by age */
+    s16 age;                                                    /* 0x39e */
+    s16 lifetime;                                               /* 0x3a0 */
+    s16 active;                                                 /* 0x3a2 */
+    u8 _unused_3a4[0x02];
+    s16 frame;             /* 0x3a6: texture animation frame */
+    s16 frame_timer;       /* 0x3a8 */
+    u8 _padding_3aa[0x02]; /* tail padding to 4-byte alignment */
+} effect_particle_ribbon_short_t;
+typedef char effect_particle_ribbon_short_size_must_be_940[sizeof(effect_particle_ribbon_short_t) == 940 ? 1 : -1];
+
+/* Work block allocated by the short variant. */
+typedef struct effect_particle_ribbon_short_work {
+    s32 buffer;                                                                 /* 0x0000 */
+    s16 count;                                                                  /* 0x0004: active ribbons */
+    u8 _padding_0006[0x02];                                                     /* aligns ribbons */
+    effect_particle_ribbon_short_t ribbons[EFFECT_PARTICLE_RIBBON_SHORT_SLOTS]; /* 0x0008 */
+    MATRIX matrix;                                                              /* 0x1d68 */
+    s32 destroy_delay;                                                          /* 0x1d88 */
+} effect_particle_ribbon_short_work_t;
+typedef char
+    assert_effect_particle_ribbon_short_work_size[sizeof(effect_particle_ribbon_short_work_t) == 7564 ? 1 : -1];
+
 /* A random value in [-|x|, |x|). */
 #define RAND_SPREAD(x) ((x) == -(x) ? (x) : (-(x) < (x) ? rand() % ((x) * 2) - (x) : rand() % (-(x) - (x)) + (x)))
 

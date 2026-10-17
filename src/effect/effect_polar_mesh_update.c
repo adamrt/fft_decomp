@@ -13,6 +13,47 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Scratchpad (0x1f800000) layout used while one polar mesh is rebuilt.
+ * Each row sweeps one quadrant in four steps; its last point closes the
+ * quadrant by rotating the first point a quarter turn. The renderer never
+ * touches the unknown ranges. */
+typedef struct effect_polar_mesh_scratch {
+    s32 red_factor;   /* 0x00: color curve factors, 128 when curves are off */
+    s32 green_factor; /* 0x04 */
+    s32 blue_factor;  /* 0x08 */
+    u8 _unused_00c[0x04];
+    u32 rgb;  /* 0x10: packed 32-bit color value of the current ring */
+    u32 code; /* 0x14: primitive code byte of the first quad, kept in bits 24-31 */
+    u8 u0;    /* 0x18 */
+    u8 u1;    /* 0x19 */
+    u8 v0;    /* 0x1a */
+    u8 v1;    /* 0x1b */
+    u8 _unused_01c[0x20];
+    s32 translucent;       /* 0x3c */
+    u16 tpage;             /* 0x40 */
+    u8 _padding_042[0x02]; /* aligns half_width */
+    s32 half_width;        /* 0x44 */
+    s32 half_height;       /* 0x48 */
+    s32 brightness_row;    /* 0x4c */
+    u8 _unused_050[0x0c];
+    s32 velocity_angle;     /* 0x5c */
+    s32 acceleration_angle; /* 0x60 */
+    VECTOR center;          /* 0x64: interpolated emitter spawn position; z is written but unused */
+    u8 _unused_074[0x30];
+    point32_t velocity; /* 0xa4: center drift per ring, 20.12 fixed */
+    u8 _unused_0ac[0x08];
+    point32_t acceleration; /* 0xb4 */
+    u8 _unused_0bc[0x1c];
+    s32 radius;                                                                        /* 0xd8: 20.12 fixed */
+    s32 radius_step;                                                                   /* 0xdc */
+    s32 radius_step_delta;                                                             /* 0xe0 */
+    s32 angle;                                                                         /* 0xe4 */
+    s32 angle_step;                                                                    /* 0xe8 */
+    s32 angle_step_delta;                                                              /* 0xec */
+    s32 ot_depth;                                                                      /* 0xf0: clamped to 4..0x17f */
+    point16_t points[POLAR_MESH_RING_COUNT + 1][POLAR_MESH_SEGMENTS_PER_QUADRANT + 1]; /* 0xf4 */
+} effect_polar_mesh_scratch_t;
+
 /* Pack one primitive color and code word after applying 4.12 brightness. */
 #define PACK_RGB(scratch, brightness)                                                                                  \
     ((((brightness) * (scratch)->red_factor) / ONE) | (scratch)->code                                                  \

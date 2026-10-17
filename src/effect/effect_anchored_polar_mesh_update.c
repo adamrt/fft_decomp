@@ -15,6 +15,53 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Scratchpad (0x1f800000) layout of the Zodiac Stone glow variant. Its fields shift from
+ * effect_polar_mesh_scratch_t, so it is a separate layout, not a view. */
+typedef struct effect_anchored_polar_mesh_scratch {
+    s32 red_factor;   /* 0x00: color curve factors, 128 when curves are off */
+    s32 green_factor; /* 0x04 */
+    s32 blue_factor;  /* 0x08 */
+    u8 r;             /* 0x0c: color bytes of the current ring */
+    u8 _unused_00d;
+    u8 g; /* 0x0e */
+    u8 _unused_00f;
+    u8 b; /* 0x10 */
+    u8 _unused_011;
+    u8 u0; /* 0x12 */
+    u8 u1; /* 0x13 */
+    u8 v0; /* 0x14 */
+    u8 v1; /* 0x15 */
+    u8 _unused_016[0x22];
+    s32 translucent;       /* 0x38 */
+    u16 tpage;             /* 0x3c */
+    u8 _padding_03e[0x02]; /* aligns half_width */
+    s32 half_width;        /* 0x40 */
+    s32 half_height;       /* 0x44 */
+    s32 brightness_row;    /* 0x48 */
+    u8 _unused_04c[0x0c];
+    s32 velocity_angle;     /* 0x58 */
+    s32 acceleration_angle; /* 0x5c */
+    VECTOR center;          /* 0x60: interpolated emitter spawn position */
+    u8 _unused_070[0x30];
+    point32_t velocity; /* 0xa0 */
+    u8 _unused_0a8[0x08];
+    point32_t acceleration; /* 0xb0 */
+    u8 _unused_0b8[0x18];
+    s32 target_index; /* 0xd0 */
+    u8 _unused_0d4[0x14];
+    s32 radius;            /* 0xe8 */
+    s32 radius_step;       /* 0xec */
+    s32 radius_step_delta; /* 0xf0 */
+    s32 angle;             /* 0xf4 */
+    s32 angle_step;        /* 0xf8 */
+    s32 angle_step_delta;  /* 0xfc */
+    s32 ot_depth;          /* 0x100 */
+    SVECTOR position;      /* 0x104 */
+    SVECTOR* unit_coords;  /* 0x10c */
+    VECTOR screen;         /* 0x110; RotTrans stores flags in the unused fourth 32-bit value */
+    point16_t points[POLAR_MESH_RING_COUNT + 1][POLAR_MESH_SEGMENTS_PER_QUADRANT + 1]; /* 0x120 */
+} effect_anchored_polar_mesh_scratch_t;
+
 /* The polar mesh of effect_polar_mesh_update anchored to the effect's current
  * target: the target's world position plus its unit's event offset is
  * projected through the battle camera, and the spawn-position curve offsets

@@ -18,6 +18,34 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* The tentacle renderer draws textured strips; the related particle-trail
+ * renderer tracks points without drawing the strips. Both use the same emitter view. */
+typedef struct effect_tentacle_mesh_segment {
+    SVECTOR tip;          /* 0x000 */
+    VECTOR velocity;      /* 0x008: 20.12 fixed */
+    VECTOR position;      /* 0x018: 20.12 fixed */
+    POLY_GT4 quads[4][8]; /* 0x028: sets buffer and buffer + 2 */
+    vec3s16_t points[9];  /* 0x6a8 */
+    s16 head;             /* 0x6de */
+    s16 length;           /* 0x6e0 */
+    s16 active;           /* 0x6e2 */
+    u8 _unused_6e4[0x02];
+    s16 frame;             /* 0x6e6: texture animation frame */
+    s16 frame_timer;       /* 0x6e8 */
+    u8 _padding_6ea[0x02]; /* tail padding to 4-byte alignment */
+} effect_tentacle_mesh_segment_t;
+typedef char effect_tentacle_mesh_segment_size_must_be_1772[sizeof(effect_tentacle_mesh_segment_t) == 1772 ? 1 : -1];
+
+typedef struct effect_tentacle_mesh_work {
+    s32 buffer;                                 /* 0x0000 */
+    s16 count;                                  /* 0x0004 */
+    u8 _padding_0006[0x02];                     /* aligns segments */
+    effect_tentacle_mesh_segment_t segments[8]; /* 0x0008 */
+    MATRIX matrix;                              /* 0x3768 */
+    s32 destroy_delay;                          /* 0x3788 */
+} effect_tentacle_mesh_work_t;
+typedef char effect_tentacle_mesh_work_size_must_be_14220[sizeof(effect_tentacle_mesh_work_t) == 14220 ? 1 : -1];
+
 /* Callback handler for tentacle meshes. Every spawn interval up to eight
  * tentacles start from random points of the emitter's spawn volume, each with
  * a launch velocity and a tip near the anchor that placement_flags selects.

@@ -17,6 +17,36 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* One long ribbon: the short layout with 16 quads per buffer and a 17-point
+ * trail. */
+typedef struct effect_particle_ribbon_long {
+    SVECTOR target;                                            /* 0x000: homing destination */
+    VECTOR velocity;                                           /* 0x008: 20.12 fixed */
+    VECTOR position;                                           /* 0x018: 20.12 fixed */
+    POLY_GT4 quads[2][EFFECT_PARTICLE_RIBBON_LONG_POINTS - 1]; /* 0x028 */
+    vec3s16_t trail[EFFECT_PARTICLE_RIBBON_LONG_POINTS];       /* 0x6a8: ring buffer indexed by age */
+    s16 age;                                                   /* 0x70e */
+    s16 lifetime;                                              /* 0x710 */
+    s16 active;                                                /* 0x712 */
+    u8 _unused_714[0x02];
+    s16 frame;             /* 0x716: texture animation frame */
+    s16 frame_timer;       /* 0x718 */
+    u8 _padding_71a[0x02]; /* tail padding to 4-byte alignment */
+} effect_particle_ribbon_long_t;
+typedef char effect_particle_ribbon_long_size_must_be_1820[sizeof(effect_particle_ribbon_long_t) == 1820 ? 1 : -1];
+
+/* Work block allocated by the long variant. */
+typedef struct effect_particle_ribbon_long_work {
+    s32 buffer;                                                               /* 0x0000 */
+    s16 count;                                                                /* 0x0004: active ribbons */
+    u8 _padding_0006[0x02];                                                   /* aligns ribbons */
+    effect_particle_ribbon_long_t ribbons[EFFECT_PARTICLE_RIBBON_LONG_SLOTS]; /* 0x0008 */
+    MATRIX matrix;                                                            /* 0x1c78 */
+    s32 destroy_delay;                                                        /* 0x1c98 */
+} effect_particle_ribbon_long_work_t;
+typedef char
+    effect_particle_ribbon_long_work_size_must_be_7324[sizeof(effect_particle_ribbon_long_work_t) == 7324 ? 1 : -1];
+
 /* A random value in [-|x|, |x|). */
 #define RAND_SPREAD(x) ((x) == -(x) ? (x) : (-(x) < (x) ? rand() % ((x) * 2) - (x) : rand() % (-(x) - (x)) + (x)))
 
