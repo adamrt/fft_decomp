@@ -169,7 +169,6 @@ typedef char formation_background_tile_size_must_be_4[(sizeof(formation_backgrou
 
 extern s32 g_formation_current_menu; /* formation_menu_e */
 extern void (*g_formation_menu_handlers[])(void);
-extern s16 g_formation_open_request_state; /* world_map_request_state_e */
 extern u8 g_formation_screen_running;
 extern s8 g_formation_main_menu_initialized;
 extern u32* g_formation_ordering_table;

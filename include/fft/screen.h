@@ -49,7 +49,6 @@ typedef enum screen_context {
 extern s16 g_screen_context_id; /* town location ID or screen_context_e */
 extern s8 g_screen_music_slot;  /* formation music slot */
 extern menu_input_state_t g_screen_input_state;
-extern u32 g_screen_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
 
 /* Alias for the first 32-bit field retained for the target's separate absolute store. */
 extern s32 g_screen_new_buttons;
@@ -68,7 +67,6 @@ extern u32 g_screen_input_frame_previous;
 extern u32 g_screen_input_frame_initial_repeat_counter;
 extern u32 g_screen_input_frame_repeat_counter;
 extern u32 g_screen_input_frame_secondary_repeat_counter;
-extern menu_input_timing_profile_t g_screen_input_timing_profiles[];
 extern u16 g_screen_input_previous, g_screen_input_latched_button;
 extern u32 g_screen_input_primary_repeat;
 extern s32 g_screen_input_primary_repeat_latched;
@@ -173,13 +171,6 @@ typedef struct screen_image_pages {
 extern u16 g_screen_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-sheet id */
 extern u16 g_screen_help_portrait_clut_by_sheet_id[];
 
-/* Frame-buffer rectangles for the four WLDFACE pages; four separate objects,
- * since as RECT[4] screen_load_wldface_portraits shares one base. */
-extern RECT g_screen_wldface_vram_rects;
-extern RECT g_screen_wldface_vram_rect_1;
-extern RECT g_screen_wldface_vram_rect_2;
-extern RECT g_screen_wldface_vram_rect_3;
-
 /* palettes and colors */
 extern u16 g_screen_clut;
 extern u16 g_screen_window_tpage;
@@ -212,15 +203,6 @@ rgb24_t* screen_get_draw_color(void);
 void screen_set_brightness(s32 red, s32 green, s32 blue);
 
 /* window frames */
-extern RECT g_screen_frame_image_rect;
-extern RECT g_screen_frame_palette_rect;
-extern RECT g_screen_frame_palette_tail_rect;
-extern RECT g_screen_item_image_rect;
-extern RECT g_screen_item_palette_rect;
-extern RECT g_screen_unit_image_rect_a;
-extern RECT g_screen_unit_image_rect_b;
-extern RECT g_screen_common_clut_rect;
-extern clut_t g_screen_common_clut_data;
 extern const u16 g_screen_zoom_percentages[12]; /* twelve crop percentages, indexed by step */
 extern RECT g_screen_thin_panel_texture_windows[7];
 
@@ -238,15 +220,6 @@ void screen_panel_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 /* main menu */
 extern s32 g_screen_thread_result;
 extern s32 g_screen_dialog_waiting;
-extern s16 g_screen_open_entry_index;
-extern menu_entry_t g_screen_default_entries[];
-extern u32 g_screen_default_entry_0_text_values[2]; /* text index + 0xa000, value */
-extern s32 g_screen_default_entry_1_text_values[2]; /* value, 0 */
-extern u8 g_screen_submenu_page_counts[];
-extern u8* g_screen_submenu_page_text_ids[];
-extern menu_scroll_text_layout_t g_screen_submenu_page_layout;
-extern s32 g_screen_number_entry_value;
-extern RECT g_screen_clear_rect;
 
 void screen_open_entry_window(s32 index, s32 unused_x, s32 unused_y);
 void screen_set_default_entry_0_text(u32 text_index, u32 value);

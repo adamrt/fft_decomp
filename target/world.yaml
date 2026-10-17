@@ -1397,8 +1397,7 @@ data:
   - {addr: 0x8016e466, name: g_world_map_fixed_number_panel_request_state}
   - {addr: 0x8016e468, name: g_world_map_menu_group_parameter}
   - {addr: 0x8016e46c, name: g_world_map_destination_id}
-  - {addr: 0x8016e470, name: g_world_map_destination_window_x}
-  - {addr: 0x8016e474, name: g_world_map_destination_window_y}
+  - {addr: 0x8016e470, name: g_world_map_destination_position}
   - {addr: 0x8016e478, name: g_screen_default_entry_0_text_values}
   - {addr: 0x8016e480, name: g_screen_default_entry_1_text_values}
   - {addr: 0x8016e488, name: g_world_map_destination_text_id}

@@ -34,6 +34,78 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* State of a screen request raised from the world map menu (the
+ * *_request_state globals stepped by screen_menu_frame):
+ * fade out, run the screen, fade back in. States 4 to 7 only count frames. */
+typedef enum world_map_request_state {
+    WORLD_MAP_REQUEST_IDLE = 0,
+    WORLD_MAP_REQUEST_START_FADE_OUT = 1,
+    WORLD_MAP_REQUEST_WAIT_FADE_OUT = 2,
+    WORLD_MAP_REQUEST_RUN = 3,
+    WORLD_MAP_REQUEST_START_FADE_IN = 8,
+    WORLD_MAP_REQUEST_WAIT_FADE_IN = 9,
+} world_map_request_state_e;
+
+/* A 0x24-byte menu thread group (g_world_map_menu_groups, by request index 0-3): up to three menu threads the
+ * main menu starts together. */
+typedef struct world_map_menu_group {
+    void (*function[3])(void); /* 0x00; -1 when unused */
+    s32 thread_id[3];          /* 0x0c; -1 when unused */
+    s32 task_id[3];            /* 0x18 */
+} world_map_menu_group_t;
+typedef char world_map_menu_group_size_must_be_36[sizeof(world_map_menu_group_t) == 36 ? 1 : -1];
+
+/* location menus and screen requests */
+extern u8 g_world_map_location_names[];
+extern world_map_menu_group_t g_world_map_menu_groups[4];
+extern s32 g_world_map_menu_group_parameter;
+extern s16 g_world_map_screen_request;
+extern s32 g_world_map_menu_scroll_direction;
+extern s32 g_world_map_menu_scroll_threshold;
+extern s32 g_world_map_menu_dimmed;
+extern s32 g_world_map_destination_id;
+extern s32 g_world_map_destination_text_id;
+extern point32_t g_world_map_destination_position;
+extern u16 g_world_map_destination_list_text_ids[];
+extern s16 g_world_map_destination_list_row_colors[];
+extern menu_scroll_text_layout_t g_world_map_destination_list_layout;
+extern s16 g_world_map_brave_story_request_state; /* world_map_request_state_e */
+extern s16 g_world_map_tutorial_request_state;    /* world_map_request_state_e */
+extern s16 g_world_map_debug_variable_list_request_state;
+extern s16 g_world_map_fixed_number_panel_request_state;
+extern s16 g_formation_open_request_state; /* world_map_request_state_e */
+extern s16 g_save_menu_request_state;      /* world_map_request_state_e */
+
+/* menu input and entries */
+extern u32 g_screen_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
+extern menu_input_timing_profile_t g_screen_input_timing_profiles[];
+extern s16 g_screen_open_entry_index;
+extern menu_entry_t g_screen_default_entries[18];
+extern u32 g_screen_default_entry_0_text_values[2]; /* text index + 0xa000, value */
+extern s32 g_screen_default_entry_1_text_values[2]; /* value, 0 */
+extern u8 g_screen_submenu_page_counts[];
+extern u8* g_screen_submenu_page_text_ids[];
+extern menu_scroll_text_layout_t g_screen_submenu_page_layout;
+extern s32 g_screen_number_entry_value;
+
+/* menu image upload rectangles */
+/* Frame-buffer rectangles for the four WLDFACE pages; four separate objects,
+ * since as RECT[4] screen_load_wldface_portraits shares one base. */
+extern RECT g_screen_wldface_vram_rects;
+extern RECT g_screen_wldface_vram_rect_1;
+extern RECT g_screen_wldface_vram_rect_2;
+extern RECT g_screen_wldface_vram_rect_3;
+extern RECT g_screen_frame_image_rect;
+extern RECT g_screen_frame_palette_rect;
+extern RECT g_screen_frame_palette_tail_rect;
+extern RECT g_screen_item_image_rect;
+extern RECT g_screen_item_palette_rect;
+extern RECT g_screen_unit_image_rect_a;
+extern RECT g_screen_unit_image_rect_b;
+extern RECT g_screen_common_clut_rect;
+extern clut_t g_screen_common_clut_data;
+extern RECT g_screen_clear_rect;
+
 static u8 g_formation_thread_status_snapshot[16] = { 0 };
 static s16 g_screen_submenu_page_row_text_ids[12] = { 0 };
 static s32 g_screen_text_file_buffer[16512] = { 0 };
@@ -739,7 +811,7 @@ static void world_map_step_formation_request(void) {
         screen_reset_context();
         g_world_map_screen_request = 0;
         world_map_menu_start_group(g_world_map_menu_group_parameter, g_world_map_destination_id,
-            g_world_map_destination_window_x, g_world_map_destination_window_y);
+            g_world_map_destination_position.x, g_world_map_destination_position.y);
         screen_open_entry_window(g_screen_open_entry_index, -0x30, -0x38);
         g_menu_thread_menu_data = g_screen_default_entries;
         world_map_hide();
@@ -873,7 +945,7 @@ static void world_map_step_save_request(void) {
             return;
         }
         world_map_menu_start_group(g_world_map_menu_group_parameter, g_world_map_destination_id,
-            g_world_map_destination_window_x, g_world_map_destination_window_y);
+            g_world_map_destination_position.x, g_world_map_destination_position.y);
         screen_open_entry_window(g_screen_open_entry_index, -0x30, -0x38);
         world_map_clear_screen_and_set_clip_rect(0);
         for (i = 0x77FF; i >= 0; i--) {
@@ -936,8 +1008,8 @@ static void world_map_menu_start_group(s32 parameter, s32 location_id, s32 windo
         g_world_map_destination_text_id = location_id + TEXT_ID_LOCATION_NAME_BASE;
         g_world_map_menu_group_parameter = parameter;
         g_world_map_destination_id = location_id;
-        g_world_map_destination_window_x = window_x;
-        g_world_map_destination_window_y = window_y;
+        g_world_map_destination_position.x = window_x;
+        g_world_map_destination_position.y = window_y;
         g_screen_default_entries[2].text_id = location_id + TEXT_ID_LOCATION_NAME_BASE;
         g_screen_default_entries[2].window.x = window_x;
         g_screen_default_entries[2].window.y = window_y;

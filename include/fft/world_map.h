@@ -560,45 +560,6 @@ void event_transition_draw_sprite(GsOT* ot);
 void event_transition_seek_battle_bin(void);
 
 /* world map menu (WORLD) */
-/* State of a screen request raised from the world map menu (the
- * *_request_state globals stepped by screen_menu_frame):
- * fade out, run the screen, fade back in. States 4 to 7 only count frames. */
-typedef enum world_map_request_state {
-    WORLD_MAP_REQUEST_IDLE = 0,
-    WORLD_MAP_REQUEST_START_FADE_OUT = 1,
-    WORLD_MAP_REQUEST_WAIT_FADE_OUT = 2,
-    WORLD_MAP_REQUEST_RUN = 3,
-    WORLD_MAP_REQUEST_START_FADE_IN = 8,
-    WORLD_MAP_REQUEST_WAIT_FADE_IN = 9,
-} world_map_request_state_e;
-
-/* A 0x24-byte menu thread group (g_world_map_menu_groups, by request index 0-3): up to three menu threads the
- * main menu starts together. */
-typedef struct world_map_menu_group {
-    void (*function[3])(void); /* 0x00; -1 when unused */
-    s32 thread_id[3];          /* 0x0c; -1 when unused */
-    s32 task_id[3];            /* 0x18 */
-} world_map_menu_group_t;
-
-extern u8 g_world_map_location_names[];
-extern world_map_menu_group_t g_world_map_menu_groups[];
-extern s32 g_world_map_menu_group_parameter;
-extern s16 g_world_map_screen_request;
-extern s32 g_world_map_menu_scroll_direction;
-extern s32 g_world_map_menu_scroll_threshold;
-extern s32 g_world_map_menu_dimmed;
-extern s32 g_world_map_destination_id;
-extern s32 g_world_map_destination_text_id;
-extern s32 g_world_map_destination_window_x;
-extern s32 g_world_map_destination_window_y;
-extern u16 g_world_map_destination_list_text_ids[];
-extern s16 g_world_map_destination_list_row_colors[];
-extern menu_scroll_text_layout_t g_world_map_destination_list_layout;
-extern s16 g_world_map_brave_story_request_state; /* world_map_request_state_e */
-extern s16 g_world_map_tutorial_request_state;    /* world_map_request_state_e */
-extern s16 g_world_map_debug_variable_list_request_state;
-extern s16 g_world_map_fixed_number_panel_request_state;
-
 void world_map_confirm_destination(void);
 void world_map_menu_text_window_thread(void);
 void world_map_destination_list_thread(void);

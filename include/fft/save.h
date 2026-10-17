@@ -328,8 +328,7 @@ typedef enum save_step {
     SAVE_STEP_LEFT = 0xff, /* no step runs while the screen fades */
 } save_step_e;
 
-extern u8 g_save_menu_step;           /* save_step_e */
-extern s16 g_save_menu_request_state; /* world_map_request_state_e */
+extern u8 g_save_menu_step; /* save_step_e */
 extern u8 g_save_menu_result;
 extern u8 g_save_mode;
 extern s16 g_save_mode_select_enabled;
