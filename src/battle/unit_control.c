@@ -360,12 +360,12 @@ void camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords) 
  * and leaves them loaded in the GTE. */
 void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords) {
     VECTOR transformed_coords;
-    s32 result;
+    long flag;
 
     camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
-    RotTrans(world_coords, &transformed_coords, &result);
+    RotTrans(world_coords, &transformed_coords, &flag);
     screen_coords->vx = transformed_coords.vx;
     screen_coords->vy = transformed_coords.vy;
 }

@@ -109,7 +109,7 @@ struct unit {
     s16 camera_relative_y;                      /* 0x122 */
     u8 _unused_124[4];
     u32 otag_depth_index;                 /* 0x128 */
-    s32 gte_flag;                         /* 0x12c; RotTrans flag output of the unit and status bubble transforms */
+    long gte_flag;                        /* 0x12c; RotTrans flag output of the unit and status bubble transforms */
     u8 mount_state;                       /* 0x130; unit_mount_state_e */
     u8 mount_partner_runtime_id;          /* 0x131; linked rider or mount runtime ID */
     u8 previous_mount_state;              /* 0x132; unit_mount_state_e */
