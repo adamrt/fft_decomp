@@ -115,7 +115,6 @@ enum {
 };
 
 extern menu_palette_pair_t g_menu_palette_colors;
-extern menu_palette_pair_t g_menu_default_palette_colors;
 extern u8 g_menu_use_alternate_palette;
 extern u16 g_menu_palette_clut;
 extern u16 g_menu_active_clut_back;

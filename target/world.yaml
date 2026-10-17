@@ -1156,7 +1156,6 @@ data:
   - {addr: 0x8013a658, name: g_command_maps}
   - {addr: 0x8013a750, name: g_menu_unit_selection_records}
   - {addr: 0x8013a8b8, name: g_menu_glyph_image_data}
-  - {addr: 0x8013b8b8, name: g_menu_default_palette_colors}
   - {addr: 0x8013b8f8, name: g_text_glyph_bitmaps}
   - {addr: 0x8014e5c0, name: g_text_section_offsets}
   - {addr: 0x80153188, name: g_menu_texture_origin}

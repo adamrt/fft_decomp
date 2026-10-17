@@ -918,7 +918,7 @@ void menu_set_palette_colors(const menu_palette_pair_t* source) {
 
 /* Load the default menu palettes and rebuild the text section pointers. */
 void menu_init_palette_and_text(s32 unused_0) {
-    menu_set_palette_colors(&g_menu_default_palette_colors);
+    menu_set_palette_colors(&g_menu_glyph_image_data.palette);
     text_init_section_pointers();
 }
 
