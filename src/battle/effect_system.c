@@ -1977,7 +1977,7 @@ s32 projectile_arc_check_between_units(u8 source_id, u8 target_id) {
  * terrain-blocked result is restored and -1 returned. g_projectile_launch_slope_q12 receives the
  * chosen arc height. `unused` reserves the target's 16 otherwise unused frame bytes.
  */
-s32 projectile_arc_set_and_validate(s32 source_id, SVECTOR* tile_position, s32 target_id) {
+s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position, s32 target_id) {
     s32 unused[4];
     SVECTOR arc;
     VECTOR second_step;
@@ -2222,7 +2222,7 @@ s32 projectile_direct_check_between_units(u8 source_id, u8 target_id) {
  * g_projectile_arctan_angle_mod.  Returns target_id when the path is clear
  * and the blocking unit from g_projectile_hit_unit_id when it is not.
  */
-s32 projectile_direct_check_to_target(s32 source_id, SVECTOR* tile_position, s32 target_id) {
+s32 projectile_direct_check_to_target(s32 source_id, const SVECTOR* tile_position, s32 target_id) {
     VECTOR delta;
     battle_map_tile_t* tile;
     projectile_obstacle_unit_list_t* obstacles;
@@ -2270,7 +2270,7 @@ s32 projectile_direct_check_to_target(s32 source_id, SVECTOR* tile_position, s32
  * projectile_direct_check_between_units / projectile_direct_trace_path.
  * `delta` reproduces the target's stores to an otherwise unused stack vector.
  */
-void projectile_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id) {
+void projectile_set_arrow_trajectory(s32 source_id, const SVECTOR* tile_position, s32 target_id) {
     VECTOR delta;
     battle_map_tile_t* tile;
     s32 source_height = sprite_get_unit_spritesheet_height_by_battle_id(source_id) * 2 / 3;

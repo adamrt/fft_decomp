@@ -57,10 +57,10 @@ extern battle_map_tile_coordinates_t g_projectile_tile;
 extern s32 g_projectile_tile_flags;
 
 s32 projectile_arc_check_between_units(u8 source_id, u8 target_id);
-s32 projectile_arc_set_and_validate(s32 source_id, SVECTOR* tile_position, s32 target_id);
+s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position, s32 target_id);
 s32 projectile_get_bow_shot_angle(void);
 s32 projectile_direct_check_between_units(u8 source_id, u8 target_id);
-s32 projectile_direct_check_to_target(s32 source_id, SVECTOR* tile_position, s32 target_id);
-void projectile_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id);
+s32 projectile_direct_check_to_target(s32 source_id, const SVECTOR* tile_position, s32 target_id);
+void projectile_set_arrow_trajectory(s32 source_id, const SVECTOR* tile_position, s32 target_id);
 
 #endif
