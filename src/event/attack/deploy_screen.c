@@ -134,11 +134,7 @@ static void deploy_reset_tables(void) {
  * the scenario, then writes the deployed units' map coordinates and starts
  * the map title.
  *
- * Several globals are indexed as arrays (cursor column/row pairs, the 32-bit fade
- * value at g_deploy_status_display_offset_y, the selected-unit flag, the unit-state bytes): their
- * constant-index accesses must go through one address register so GCC hoists
- * it, which a scalar declaration does not reproduce. The per-squad unit count
- * walks rows with explicit pointers rather than nested loops: loop.c would
+ * The per-squad unit count walks rows with explicit pointers rather than nested loops: loop.c would
  * otherwise hoist its 0xff compare and grid base inside the squad loop first,
  * and those already-moved registers double the squad loop's cost estimate so
  * the constant 2 below is no longer hoisted as in the target.
@@ -711,7 +707,7 @@ ramza_placed:
         g_deploy_slot_offsets[4] = i;
         thread_yield();
         if (!(i & 3)) {
-            g_deploy_zodiac_brightness_word[0]--;
+            g_deploy_zodiac_draw_context.brightness--;
         }
     }
 

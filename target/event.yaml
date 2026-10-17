@@ -168,7 +168,6 @@ data:
   - {addr: 0x801ccfd4, name: g_deploy_arrow_clut_data}
   - {addr: 0x801cd014, name: g_formation_sprite_tall_cell}
   - {addr: 0x801cd028, name: g_deploy_zodiac_draw_context}
-  - {addr: 0x801cd02c, name: g_deploy_zodiac_brightness_word}
   - {addr: 0x801cd04c, name: g_deploy_cursor_1_submitted}
   - {addr: 0x801cd050, name: g_deploy_cursor_0_submitted}
   - {addr: 0x801cd054, name: g_battle_map_title_closing_past_midpoint}

@@ -183,11 +183,6 @@ extern s32 g_deploy_text_reveal_steps[9];
 extern RECT g_deploy_text_screen_origin;
 extern zodiac_draw_context_t g_deploy_zodiac_draw_context;
 
-/* The brightness byte of g_deploy_zodiac_draw_context (+4) as its own s32 symbol: the fade decrements the whole
- * 32-bit value (lw/addiu/sw), which a u8 member access would not reproduce. The array form lets GCC hoist its address
- * out of the fade loop, as the target does. */
-extern s32 g_deploy_zodiac_brightness_word[1];
-
 /* Map darkness uses RGB and ignores the fourth byte. */
 extern const CVECTOR g_deploy_map_darkness_color;
 
