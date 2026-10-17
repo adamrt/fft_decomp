@@ -1,4 +1,4 @@
-/* Slot items, equip checks, slot validation and the filtered item list. */
+/* Equipment slot changes, item eligibility and available item counts. */
 
 #include "fft/ability.h"
 #include "fft/bits.h"
@@ -10,8 +10,21 @@
 
 static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, s32 item_id);
 
-/* Install an item into a unit's equipment slot. EQUIP copy of
- * formation_item_equip.
+/* Number of copies of the item the party has equipped: the total held
+ * (g_equipment_item_inventory_totals) minus the inventory count (read with a zero delta). */
+s32 item_get_equipped_count(s32 item_entry) {
+    s32 item_id = item_entry & ITEM_ENTRY_ID_MASK;
+
+    return g_equipment_item_inventory_totals[item_id] - item_adjust_inventory_count(item_id, 0);
+}
+
+/* Return how many of an item the party has in all, from the inventory totals table; only the
+ * low ten bits of item_id are used. */
+s32 item_get_total_count(s16 item_id) {
+    return g_equipment_item_inventory_totals[item_id & ITEM_ENTRY_ID_MASK];
+}
+
+/* Install an item into a unit's equipment slot.
  *
  * Returns the validation result when it is negative. Otherwise the slot's
  * old item goes back to the inventory, and equipping into a hand slot with

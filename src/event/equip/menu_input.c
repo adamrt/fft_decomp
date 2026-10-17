@@ -1,8 +1,8 @@
-/* The equipment screen's per-frame input update, withholding input during transitions and help text. */
+/* Equipment menu input state and message/transition suppression. */
 
+#include "fft/menu_input.h"
 #include "fft/equipment.h"
 #include "fft/input.h"
-#include "fft/menu_input.h"
 #include "fft/menu_window.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -10,8 +10,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Store a value in g_equipment_input_unread_value. Nothing calls it and nothing reads that variable. */
+void equipment_set_unread_input_value(s32 value) {
+    g_equipment_input_unread_value = value;
+}
+
 /*
- * Per-frame input update of the EQUIP screen.
+ * Per-frame input update for the equipment screen.
  *
  * Reads the pad, then clears all three 32-bit input values during frames 1..3 of the
  * screen transition and while the text thread runs. The text state goes 1 on
