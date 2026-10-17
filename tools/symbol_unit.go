@@ -122,6 +122,33 @@ func (p project) unitSymbolsCommand(args []string) error {
 				return fmt.Errorf("%s already exists", clean)
 			}
 		}
+		// Keep the original units' section contracts in source order. Their
+		// declarations remain in the member pieces; forgetting the ranges here
+		// would leave initialized storage without its address and hash contract.
+		mergedUnits := map[*moduleSpec]unitDef{}
+		for _, m := range order {
+			list := byModule[m]
+			sort.Slice(list, func(i, j int) bool { return list[i].Addr < list[j].Addr })
+			merged := unitDef{Name: *name, Source: clean}
+			seen := map[string]bool{}
+			for _, f := range list {
+				if f.Unit == "" || seen[f.Unit] {
+					continue
+				}
+				seen[f.Unit] = true
+				original := m.unit(f.Unit)
+				merged.Data = append(merged.Data, original.Data...)
+				merged.Rodata = append(merged.Rodata, original.Rodata...)
+			}
+			for i := 1; i < len(merged.Data); i++ {
+				previous := merged.Data[i-1]
+				end := previous.Addr + uint32(previous.Size)
+				if merged.Data[i].Addr < end || merged.Data[i].Addr-end >= 8 {
+					return fmt.Errorf("%s:%s: data ranges are not contiguous in source order at 0x%08x", m.ID, *name, merged.Data[i].Addr)
+				}
+			}
+			mergedUnits[m] = merged
+		}
 		// Tables the unit will define sit among the members' literals; they
 		// must be known before the read-only ranges are checked for contiguity.
 		var owned []rodataSpec
@@ -136,7 +163,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 			}
 			list := byModule[order[0]]
 			sort.Slice(list, func(i, j int) bool { return list[i].Addr < list[j].Addr })
-			owned, fillers, err = ownedRodataTables(image, order[0], list)
+			owned, fillers, err = ownedRodataTables(image, order[0], list, mergedUnits[order[0]].Rodata)
 			if err != nil {
 				return err
 			}
@@ -151,10 +178,26 @@ func (p project) unitSymbolsCommand(args []string) error {
 			for _, f := range list {
 				functions = append(functions, f.Name)
 			}
-			spec := &unitSpec{name: *name, source: clean, functions: functions, rodata: owned}
-			if _, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID}); err != nil {
+			merged := mergedUnits[m]
+			merged.Rodata = append(merged.Rodata, owned...)
+			sort.Slice(merged.Rodata, func(i, j int) bool { return merged.Rodata[i].Addr < merged.Rodata[j].Addr })
+			spec := &unitSpec{name: *name, source: clean, functions: functions, rodata: merged.Rodata}
+			instance, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID})
+			if err != nil {
 				return err
 			}
+			profile := m.profileOf(list[0])
+			for _, f := range list[1:] {
+				if current := m.profileOf(f); current != profile {
+					return fmt.Errorf("%s:%s: original profile disagreement: %s uses %s, %s uses %s", m.ID, *name, list[0].Name, profile, f.Name, current)
+				}
+			}
+			// Resolve before removing any absorbed units: their profiles can be
+			// the only place the historical compiler flags are recorded.
+			if instance.profile.name != m.Profile {
+				merged.Profile = instance.profile.name
+			}
+			mergedUnits[m] = merged
 			if image, err := p.readModuleImage(m); err == nil {
 				if conflict := unitJumpTableConflict(image, m, list); conflict != "" {
 					return fmt.Errorf("%s: %s", m.ID, conflict)
@@ -227,7 +270,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 					kept = append(kept, unit)
 				}
 			}
-			m.Units = append(kept, unitDef{Name: *name, Source: clean, Rodata: owned})
+			m.Units = append(kept, mergedUnits[m])
 			aliases := map[string]bool{}
 			for _, f := range byModule[m] {
 				if f.SourceSymbol != "" {
@@ -544,7 +587,7 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 // runs to the next data row or member range. The filler keeps the original
 // bytes under a derived name; a later pass can turn it into the typed
 // definition and drop the header's extern.
-func ownedRodataTables(image []byte, m *moduleSpec, members []*functionSpec) ([]rodataSpec, map[string]string, error) {
+func ownedRodataTables(image []byte, m *moduleSpec, members []*functionSpec, inherited []rodataSpec) ([]rodataSpec, map[string]string, error) {
 	type span struct {
 		start, end uint32
 		member     string
@@ -566,6 +609,11 @@ func ownedRodataTables(image []byte, m *moduleSpec, members []*functionSpec) ([]
 	}
 	sort.Slice(rowAddrs, func(i, j int) bool { return rowAddrs[i] < rowAddrs[j] })
 	covered := func(addr uint32) bool {
+		for _, r := range inherited {
+			if r.Addr <= addr && addr < r.Addr+uint32(r.Size) {
+				return true
+			}
+		}
 		for _, sp := range spans {
 			if sp.start <= addr && addr < sp.end {
 				return true
@@ -575,6 +623,11 @@ func ownedRodataTables(image []byte, m *moduleSpec, members []*functionSpec) ([]
 	}
 	nextBoundary := func(addr uint32) uint32 {
 		next := hi
+		for _, r := range inherited {
+			if r.Addr > addr && r.Addr < next {
+				next = r.Addr
+			}
+		}
 		for _, sp := range spans {
 			if sp.start > addr && sp.start < next {
 				next = sp.start
