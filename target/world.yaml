@@ -19,7 +19,7 @@ units:
   - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}, {addr: 0x80156b4c, size: 38, hash: 5cf20e3c3f45bdbf}, {addr: 0x80156b74, size: 20, hash: 34d5f02d6411f13b}]}
   - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
-  - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
+  - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c, data: [{addr: 0x80154d38, size: 112, hash: d25818f8775b3f28}]}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a348, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8019a35c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: draw_areas, source: src/world/draw_areas.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: draw_state, source: src/lib/menu/draw_state.c, profile: gcc-2.6.3_O1_aspsx-2.34}
@@ -1265,6 +1265,11 @@ data:
   - {addr: 0x80154cc4, name: g_status_screen_numbers_palette_indices}
   - {addr: 0x80154cd0, name: g_status_screen_numbers_frame_offsets}
   - {addr: 0x80154d30, name: g_text_current_line}
+  - {addr: 0x80154d38, name: g_menu_window_tween_small_overshoot}
+  - {addr: 0x80154d4c, name: g_menu_window_tween_large_overshoot}
+  - {addr: 0x80154d64, name: g_menu_window_tween_linear}
+  - {addr: 0x80154d7c, name: g_menu_window_tween_ease_out}
+  - {addr: 0x80154d8c, name: g_menu_window_tween_fade}
   - {addr: 0x80154d94, name: g_menu_window_tween_easing_tables}
   - {addr: 0x80154da8, name: g_text_section_backup_active}
   - {addr: 0x80154dd4, name: g_auto_battle_option_colors}

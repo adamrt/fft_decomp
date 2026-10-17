@@ -22,7 +22,7 @@ units:
   - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
-  - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
+  - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c, data: [{addr: 0x801678ac, size: 112, hash: 7913c92a7308b758}]}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, data: [{addr: 0x8016dae4, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8016daf8, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: effect_renderer, source: src/battle/effect_renderer.c, data: [{addr: 0x801b69b0, size: 12, hash: 87026771f70658d8}, {addr: 0x801b69bc, size: 16, hash: d9c265329e338700}]}
   - {name: effect_script, source: src/battle/effect_script.c}
@@ -2466,6 +2466,11 @@ data:
   - {addr: 0x80167838, name: g_status_screen_numbers_palette_indices}
   - {addr: 0x80167844, name: g_status_screen_numbers_frame_offsets}
   - {addr: 0x801678a4, name: g_text_current_line}
+  - {addr: 0x801678ac, name: g_menu_window_tween_small_overshoot}
+  - {addr: 0x801678c0, name: g_menu_window_tween_large_overshoot}
+  - {addr: 0x801678d8, name: g_menu_window_tween_linear}
+  - {addr: 0x801678f0, name: g_menu_window_tween_ease_out}
+  - {addr: 0x80167900, name: g_menu_window_tween_fade}
   - {addr: 0x80167908, name: g_menu_window_tween_easing_tables}
   - {addr: 0x8016791c, name: g_text_section_backup_active}
   - {addr: 0x80167920, name: g_status_display_image_ids}

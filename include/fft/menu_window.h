@@ -91,8 +91,6 @@ void menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
 void menu_draw_active_window_frames(void);
 
 /* window scaling */
-extern u16* g_menu_window_tween_easing_tables[];
-
 /* Transition step of the windows that zoom open: menu script command 0x16 advances it up to 4, and the zoomed
  * draw-area command crops each window by it. */
 extern s8 g_gfx_transition_frame;

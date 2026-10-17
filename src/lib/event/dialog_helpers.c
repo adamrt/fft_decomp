@@ -17,6 +17,19 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Window interpolation fractions; ONE ends each curve. The first two overshoot
+ * the final size, while the last curve also drives the closing fade. */
+static u16 g_menu_window_tween_small_overshoot[10] = { 832, 1600, 2304, 2944, 3520, 4032, 4192, 4160, 4128, ONE };
+static u16 g_menu_window_tween_large_overshoot[11]
+    = { 1112, 2184, 3216, 4208, 4608, 4512, 4416, 4320, 4224, 4128, ONE };
+static u16 g_menu_window_tween_linear[11] = { 384, 768, 1152, 1536, 1920, 2304, 2688, 3072, 3456, 3840, ONE };
+static u16 g_menu_window_tween_ease_out[7] = { 832, 1600, 2304, 2944, 3520, 4032, ONE };
+static u16 g_menu_window_tween_fade[4] = { 1024, 2048, 3072, ONE };
+
+static u16* g_menu_window_tween_easing_tables[5]
+    = { g_menu_window_tween_small_overshoot, g_menu_window_tween_large_overshoot, g_menu_window_tween_linear,
+          g_menu_window_tween_ease_out, g_menu_window_tween_fade };
+
 static void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor);
 
 /* Return the start of text entry text_id: its section field picks the section pointer and its
