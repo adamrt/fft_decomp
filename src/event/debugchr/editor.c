@@ -1,10 +1,13 @@
 /* The debug unit editor and the mounted unit's status screen: applying values to a battle unit, the unit thread and
  * the session. */
 
+#include "fft/ability.h"
 #include "fft/command.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
+#include "fft/item.h"
+#include "fft/job.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
@@ -24,6 +27,33 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Rows of the editor navigation table and its value limits. */
+typedef enum unit_editor_field {
+    UNIT_EDITOR_FIELD_LEVEL = 0,
+    UNIT_EDITOR_FIELD_EXPERIENCE = 1,
+    UNIT_EDITOR_FIELD_JOB = 2,
+    UNIT_EDITOR_FIELD_BRAVE = 3,
+    UNIT_EDITOR_FIELD_FAITH = 4,
+    UNIT_EDITOR_FIELD_ZODIAC = 5,
+    UNIT_EDITOR_FIELD_MOVE = 6,
+    UNIT_EDITOR_FIELD_JUMP = 7,
+    UNIT_EDITOR_FIELD_SPEED = 8,
+    UNIT_EDITOR_FIELD_RIGHT_HAND = 9,
+    UNIT_EDITOR_FIELD_LEFT_HAND = 10,
+    UNIT_EDITOR_FIELD_HEAD = 11,
+    UNIT_EDITOR_FIELD_BODY = 12,
+    UNIT_EDITOR_FIELD_ACCESSORY = 13,
+    UNIT_EDITOR_FIELD_PRIMARY_SKILLSET = 14,
+    UNIT_EDITOR_FIELD_SECONDARY_SKILLSET = 15,
+    UNIT_EDITOR_FIELD_REACTION = 16,
+    UNIT_EDITOR_FIELD_SUPPORT = 17,
+    UNIT_EDITOR_FIELD_MOVEMENT = 18,
+    UNIT_EDITOR_FIELD_HP = 19,
+    UNIT_EDITOR_FIELD_MP = 20,
+    UNIT_EDITOR_FIELD_CT = 21,
+    UNIT_EDITOR_FIELD_COUNT = 22
+} unit_editor_field_e;
+
 typedef struct unit_editor_field_range {
     s32 min;
     s32 max;
@@ -32,58 +62,58 @@ typedef char unit_editor_field_range_size_must_be_8[sizeof(unit_editor_field_ran
 
 /* The 22nd field is CT. Retail copies only the first 21 ranges when changing
  * unit type, leaving the CT row at its original 1..100 range. */
-extern unit_editor_field_range_t g_unit_editor_field_ranges[22];
-static const unit_editor_field_range_t g_unit_editor_nonmonster_field_ranges[22] = {
-    { 1, 99 },    /* level */
-    { 1, 99 },    /* experience */
-    { 1, 153 },   /* job */
-    { 0, 100 },   /* Brave */
-    { 0, 100 },   /* Faith */
-    { 0, 12 },    /* zodiac */
-    { 1, 9 },     /* Move */
-    { 1, 9 },     /* Jump */
-    { 1, 99 },    /* Speed */
-    { 1, 143 },   /* right hand */
-    { 1, 143 },   /* left hand */
-    { 144, 171 }, /* head */
-    { 172, 207 }, /* body */
-    { 208, 239 }, /* accessory */
-    { 1, 187 },   /* primary skillset */
-    { 1, 187 },   /* secondary skillset */
-    { 428, 453 }, /* reaction ability */
-    { 454, 485 }, /* support ability */
-    { 486, 509 }, /* movement ability */
-    { 1, 999 },   /* HP */
-    { 1, 999 },   /* MP */
-    { 1, 100 },   /* CT */
+extern unit_editor_field_range_t g_unit_editor_field_ranges[UNIT_EDITOR_FIELD_COUNT];
+static const unit_editor_field_range_t g_unit_editor_nonmonster_field_ranges[UNIT_EDITOR_FIELD_COUNT] = {
+    { 1, 99 },                                                               /* level */
+    { 1, 99 },                                                               /* experience */
+    { JOB_ID_SQUIRE_RAMZA_CHAPTER_1, JOB_ID_ARCHAIC_DEMON },                 /* job */
+    { 0, 100 },                                                              /* Brave */
+    { 0, 100 },                                                              /* Faith */
+    { ZODIAC_SIGN_ARIES, ZODIAC_SIGN_SERPENTARIUS },                         /* zodiac */
+    { 1, 9 },                                                                /* Move */
+    { 1, 9 },                                                                /* Jump */
+    { 1, 99 },                                                               /* Speed */
+    { ITEM_ID_DAGGER, ITEM_ID_ESCUTCHEON_RARE },                             /* right hand */
+    { ITEM_ID_DAGGER, ITEM_ID_ESCUTCHEON_RARE },                             /* left hand */
+    { ITEM_ID_LEATHER_HELMET, ITEM_ID_RIBBON },                              /* head */
+    { ITEM_ID_LEATHER_ARMOR, ITEM_ID_ROBE_OF_LORDS },                        /* body */
+    { ITEM_ID_BATTLE_BOOTS, ITEM_ID_SALTY_RAGE },                            /* accessory */
+    { SKILLSET_ID_ATTACK, SKILLSET_ID_MONSTER_VAMPIRE },                     /* primary skillset */
+    { SKILLSET_ID_ATTACK, SKILLSET_ID_MONSTER_VAMPIRE },                     /* secondary skillset */
+    { ABILITY_ID_REACTION_REGENERATOR, ABILITY_ID_REACTION_HAMEDO },         /* reaction ability */
+    { ABILITY_ID_SUPPORT_FIRST, ABILITY_ID_MOVEMENT_FIRST - 1 },             /* support ability */
+    { ABILITY_ID_MOVEMENT_MOVE_PLUS_1, ABILITY_ID_MOVEMENT_MOVE_FIND_ITEM }, /* movement ability */
+    { 1, 999 },                                                              /* HP */
+    { 1, 999 },                                                              /* MP */
+    { 1, 100 },                                                              /* CT */
 };
-static const unit_editor_field_range_t g_unit_editor_monster_field_ranges[22] = {
-    { 1, 99 },    /* level */
-    { 1, 99 },    /* experience */
-    { 1, 153 },   /* job */
-    { 0, 100 },   /* Brave */
-    { 0, 100 },   /* Faith */
-    { 0, 12 },    /* zodiac */
-    { 1, 9 },     /* Move */
-    { 1, 9 },     /* Jump */
-    { 1, 99 },    /* Speed */
-    { 1, 143 },   /* right hand */
-    { 1, 143 },   /* left hand */
-    { 144, 171 }, /* head */
-    { 172, 207 }, /* body */
-    { 208, 239 }, /* accessory */
-    { 1, 356 },   /* primary skillset */
-    { 1, 356 },   /* secondary skillset */
-    { 1, 356 },   /* reaction ability */
-    { 1, 356 },   /* support ability */
-    { 1, 356 },   /* movement ability */
-    { 1, 999 },   /* HP */
-    { 1, 999 },   /* MP */
-    { 1, 100 },   /* CT */
+static const unit_editor_field_range_t g_unit_editor_monster_field_ranges[UNIT_EDITOR_FIELD_COUNT] = {
+    { 1, 99 },                                                   /* level */
+    { 1, 99 },                                                   /* experience */
+    { JOB_ID_SQUIRE_RAMZA_CHAPTER_1, JOB_ID_ARCHAIC_DEMON },     /* job */
+    { 0, 100 },                                                  /* Brave */
+    { 0, 100 },                                                  /* Faith */
+    { ZODIAC_SIGN_ARIES, ZODIAC_SIGN_SERPENTARIUS },             /* zodiac */
+    { 1, 9 },                                                    /* Move */
+    { 1, 9 },                                                    /* Jump */
+    { 1, 99 },                                                   /* Speed */
+    { ITEM_ID_DAGGER, ITEM_ID_ESCUTCHEON_RARE },                 /* right hand */
+    { ITEM_ID_DAGGER, ITEM_ID_ESCUTCHEON_RARE },                 /* left hand */
+    { ITEM_ID_LEATHER_HELMET, ITEM_ID_RIBBON },                  /* head */
+    { ITEM_ID_LEATHER_ARMOR, ITEM_ID_ROBE_OF_LORDS },            /* body */
+    { ITEM_ID_BATTLE_BOOTS, ITEM_ID_SALTY_RAGE },                /* accessory */
+    { ABILITY_ID_WHITE_MAGIC_CURE, ABILITY_ID_BYBLOS_PARASITE }, /* primary skillset */
+    { ABILITY_ID_WHITE_MAGIC_CURE, ABILITY_ID_BYBLOS_PARASITE }, /* secondary skillset */
+    { ABILITY_ID_WHITE_MAGIC_CURE, ABILITY_ID_BYBLOS_PARASITE }, /* reaction ability */
+    { ABILITY_ID_WHITE_MAGIC_CURE, ABILITY_ID_BYBLOS_PARASITE }, /* support ability */
+    { ABILITY_ID_WHITE_MAGIC_CURE, ABILITY_ID_BYBLOS_PARASITE }, /* movement ability */
+    { 1, 999 },                                                  /* HP */
+    { 1, 999 },                                                  /* MP */
+    { 1, 100 },                                                  /* CT */
 };
 
 extern u8 g_unit_editor_unit_ids[UNIT_SLOT_COUNT];
-extern help_navigation_record_t g_unit_editor_fields[22];
+extern help_navigation_record_t g_unit_editor_fields[UNIT_EDITOR_FIELD_COUNT];
 extern s32 g_unit_editor_field_edit_active;
 extern unit_panel_thread_t g_unit_editor_status_display_thread_params;
 
@@ -206,11 +236,11 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
         mem_copy_bytes_nonempty(
             g_unit_editor_field_ranges, g_unit_editor_monster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
-        g_unit_editor_fields[15].destination[0] = 0xe;
+        g_unit_editor_fields[UNIT_EDITOR_FIELD_SECONDARY_SKILLSET].destination[0] = UNIT_EDITOR_FIELD_PRIMARY_SKILLSET;
     } else {
         mem_copy_bytes_nonempty(
             g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
-        g_unit_editor_fields[15].destination[0] = 0xe;
+        g_unit_editor_fields[UNIT_EDITOR_FIELD_SECONDARY_SKILLSET].destination[0] = UNIT_EDITOR_FIELD_PRIMARY_SKILLSET;
     }
 
     {
@@ -416,9 +446,8 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
  * field editor and CROSS closes the panels and returns. Field editor: the D-pad follows
  * each field's links to its neighbors, CIRCLE starts or commits an edit and CROSS commits
  * one or goes back to unit selection. While editing, RIGHT/UP and LEFT/DOWN step the value
- * (by 10 while L1 is held) within the field's range, TRIANGLE zeroes rows 9 to
- * 13, and every change is written back to the battle unit. Each level step (row 0) also
- * applies one level's stat growth or its reversal. */
+ * (by 10 while L1 is held) within the field's range, TRIANGLE clears equipment slots, and every change is written back
+ * to the battle unit. Each level step also applies one level's stat growth or its reversal. */
 void debugchr_editor_entrypoint(void) {
     s32 battle_id;
     help_navigation_record_t* field;
@@ -450,7 +479,7 @@ void debugchr_editor_entrypoint(void) {
     u8 uv_s_hi;
     u8 uv_s_far;
     u8 uv_s_mid;
-    u8 mark;
+    u8 primary_skillset_field;
     s16* selected_battle_id;
     u16 unit_index;
     s32 clearable;
@@ -505,11 +534,11 @@ void debugchr_editor_entrypoint(void) {
     if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
         mem_copy_bytes_nonempty(
             g_unit_editor_field_ranges, g_unit_editor_monster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
-        g_unit_editor_fields[15].destination[0] = 0xE;
+        g_unit_editor_fields[UNIT_EDITOR_FIELD_SECONDARY_SKILLSET].destination[0] = UNIT_EDITOR_FIELD_PRIMARY_SKILLSET;
     } else {
         mem_copy_bytes_nonempty(
             g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
-        g_unit_editor_fields[15].destination[0] = 0xE;
+        g_unit_editor_fields[UNIT_EDITOR_FIELD_SECONDARY_SKILLSET].destination[0] = UNIT_EDITOR_FIELD_PRIMARY_SKILLSET;
     }
 
     g_unit_editor_status_display_thread_params.style = 0;
@@ -522,7 +551,7 @@ void debugchr_editor_entrypoint(void) {
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_character_status_frame_config, 0, 0);
 
-    row = 0;
+    row = UNIT_EDITOR_FIELD_LEVEL;
     /* The unit menu and the field editor re-enter each other by label: an
        enclosing loop's notes reweight the allocation of the whole body. */
 loop_outer:
@@ -530,9 +559,9 @@ loop_outer:
     /* name_id is five 16-bit values before battle_id; record access changes the store displacements. */
     selected_battle_id = &g_unit_panel_selected_unit.battle_id;
     for (;;) {
-        mark = 0xE;
+        primary_skillset_field = UNIT_EDITOR_FIELD_PRIMARY_SKILLSET;
         /* Removing the tied use changes the marker and menu-pointer allocation. */
-        __asm__("" : "=r"(mark) : "0"(mark));
+        __asm__("" : "=r"(primary_skillset_field) : "0"(primary_skillset_field));
         thread_yield();
         unit_panel_build_status_groups(g_unit_editor_gfx_render_buffers[i & 1]);
 
@@ -573,7 +602,7 @@ loop_outer:
                 mem_copy_bytes_nonempty(g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges,
                     21 * sizeof(unit_editor_field_range_t));
             }
-            g_unit_editor_fields[15].destination[0] = mark;
+            g_unit_editor_fields[UNIT_EDITOR_FIELD_SECONDARY_SKILLSET].destination[0] = primary_skillset_field;
 
             /* The status display takes its redraw request as the portrait wipe direction; L1 passes 2. */
             g_unit_editor_status_display_thread_params.redraw_request = 1;
@@ -604,7 +633,7 @@ loop_outer:
                 mem_copy_bytes_nonempty(g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges,
                     21 * sizeof(unit_editor_field_range_t));
             }
-            g_unit_editor_fields[15].destination[0] = mark;
+            g_unit_editor_fields[UNIT_EDITOR_FIELD_SECONDARY_SKILLSET].destination[0] = primary_skillset_field;
             /* Keeps the `li v0,2` for the redraw store below the byte store. */
             __asm__("");
             /* 2 runs the portrait wipe in the opposite direction from R1's. */
@@ -658,8 +687,8 @@ editor:
             }
         }
 
-        /* Triangle clears the value of rows 9 to 13 while editing. */
-        if ((g_unit_editor_field_edit_active != 0) && ((row - 9) < 5U)
+        /* Triangle clears an equipment slot while editing. */
+        if ((g_unit_editor_field_edit_active != 0) && ((row - UNIT_EDITOR_FIELD_RIGHT_HAND) < 5U)
             && (*g_menu_input_controller & PSX_PAD_TRIANGLE)) {
             *g_unit_editor_current_field->value = 0;
             debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
@@ -717,7 +746,7 @@ editor:
                     /* `i` is also the frame counter, so each step resets the cursor's buffer index and bob phase. */
                     for (i = 0; i < steps; i++) {
                         hi_limit = &g_unit_editor_field_ranges[row].max;
-                        span = row - 9;
+                        span = row - UNIT_EDITOR_FIELD_RIGHT_HAND;
                         clearable = span < 5U;
                         /* The native loop computes this range test without reading its result. */
                         __asm__("" : : "r"(clearable));
@@ -725,9 +754,9 @@ editor:
                         cur_u = *value;
                         if (cur_u < *hi_limit) {
                             *value = cur_u + 1;
-                            /* Row 0 is the level: growth depends on it, so it is applied with the old
+                            /* Growth depends on the level, so it is applied with the old
                              * level written back before the new value is restored. */
-                            if (row == 0) {
+                            if (row == UNIT_EDITOR_FIELD_LEVEL) {
                                 *g_unit_editor_current_field->value -= 1;
                                 debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
                                 unit_apply_level_growth(unit_get_stats(g_unit_editor_selected_unit_slot), 0);
@@ -759,7 +788,7 @@ editor:
 
                     for (i = 0; i < steps; i++) {
                         lo_limit = &g_unit_editor_field_ranges[row].min;
-                        span = row - 9;
+                        span = row - UNIT_EDITOR_FIELD_RIGHT_HAND;
                         clearable = span < 5U;
                         /* The native loop computes this range test without reading its result. */
                         __asm__("" : : "r"(clearable));
@@ -767,7 +796,7 @@ editor:
                         cur_d = *value;
                         if (*lo_limit < cur_d) {
                             *value = cur_d - 1;
-                            if (row == 0) {
+                            if (row == UNIT_EDITOR_FIELD_LEVEL) {
                                 *g_unit_editor_current_field->value += 1;
                                 debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
                                 unit_apply_level_growth(unit_get_stats(g_unit_editor_selected_unit_slot), 1);
