@@ -2485,7 +2485,7 @@ data:
   - {addr: 0x801d082c, name: g_zodiac_sprite_frames}
   - {addr: 0x801d0988, name: g_zodiac_sprite_scales}
   - {addr: 0x801d09fd, name: g_zodiac_sprite_count}
-  - {addr: 0x801d0a00, name: g_after_battle_gfx_formation_sprite_groups}
+  - {addr: 0x801d0a00, name: g_party_message_identity_groups}
   - {addr: 0x801d0adc, name: g_party_bio_update_records}
   - {addr: 0x801d0b34, name: g_party_affected_unit_count}
   - {addr: 0x801d0b38, name: g_after_battle_thread_suspended_id}

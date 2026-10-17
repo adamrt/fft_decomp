@@ -443,7 +443,7 @@ static s32 party_select_unit_to_dismiss(void) {
     s32 result;
     s32 should_restore;
     s32 message_id;
-    s32 formation_index;
+    s32 message_group_index;
     party_unit_t* party_unit;
     unit_stats_t* selected_battle_unit;
     RECT* portrait_rect;
@@ -622,38 +622,38 @@ static s32 party_select_unit_to_dismiss(void) {
 
         party_unit = party_get_unit(selected_party_index);
         /* Generic units get one of eight random messages for their kind; others look up
-         * their sprite group, with Ramza's messages apart from the special characters'. */
-        formation_index = 0;
+         * their message group, with Ramza's messages apart from the special characters'. */
+        message_group_index = 0;
         if (party_unit->sprite_set & CHARACTER_IDENTITY_HIGH_BIT_MASK) {
             message_id = ((party_unit->sprite_set - CHARACTER_IDENTITY_SELECTOR_FIRST) * 8)
                 + (script_get_variable(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 7) + 0x1800;
         } else {
-            s32 sprite_column;
-            u8* sprite_group;
-            u32 sprite_set;
+            s32 identity_column;
+            u8(*identity_group)[PARTY_MESSAGE_IDENTITIES_PER_GROUP];
+            u32 identity;
 
-            sprite_set = party_unit->sprite_set;
-            sprite_group = g_after_battle_gfx_formation_sprite_groups[0];
-        next_formation:
-            for (sprite_column = 0; sprite_column < 3; sprite_column++) {
-                if (sprite_set == sprite_group[sprite_column])
+            identity = party_unit->sprite_set;
+            identity_group = g_party_message_identity_groups;
+        next_identity_group:
+            for (identity_column = 0; identity_column < PARTY_MESSAGE_IDENTITIES_PER_GROUP; identity_column++) {
+                if (identity == (*identity_group)[identity_column])
                     break;
             }
-            if (sprite_column == 3) {
-                formation_index++;
-                sprite_group += 3;
-                if (formation_index < 73)
-                    goto next_formation;
+            if (identity_column == PARTY_MESSAGE_IDENTITIES_PER_GROUP) {
+                message_group_index++;
+                identity_group++;
+                if (message_group_index < PARTY_MESSAGE_IDENTITY_GROUP_COUNT)
+                    goto next_identity_group;
             }
-            if (formation_index == 73)
-                formation_index = 0;
-            /* Group 71 shares group 72's message. */
-            if (formation_index == 71)
-                formation_index = 72;
-            if (sprite_set != CHARACTER_IDENTITY_ENTD_NONE && sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
-                message_id = formation_index + 0x1862;
+            if (message_group_index == PARTY_MESSAGE_IDENTITY_GROUP_COUNT)
+                message_group_index = 0;
+            /* Reis's dragon form uses the final message group. */
+            if (message_group_index == 71)
+                message_group_index = 72;
+            if (identity != CHARACTER_IDENTITY_ENTD_NONE && identity < CHARACTER_IDENTITY_RAMZA_END) {
+                message_id = message_group_index + 0x1862;
             } else {
-                message_id = formation_index + 0x1818;
+                message_id = message_group_index + 0x1818;
             }
         }
 

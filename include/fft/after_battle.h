@@ -42,11 +42,13 @@ void require_dark_screen_entrypoint(void);
 /* menus and graphics */
 extern s16 g_after_battle_menu_selection_result;
 extern u8 g_after_battle_gfx_fade_rgb[3];
-extern u8 g_after_battle_gfx_formation_sprite_groups[][3];
 
 void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
 
 /* text */
+/* Character identities grouped by their warning, departure and dismissal text. */
+enum { PARTY_MESSAGE_IDENTITY_GROUP_COUNT = 73, PARTY_MESSAGE_IDENTITIES_PER_GROUP = 3 };
+
 /* Sections of REQUIRE's text file, whose offset table sits 0x80 bytes before
  * g_text_data with offsets relative to it. The after-battle routines bind
  * them over the resident sections, and the file's job names as
@@ -56,6 +58,8 @@ typedef enum after_battle_text_section {
     AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES = 2, /* the unit leaves the party for it */
     AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3    /* what a unit turned away or dismissed says */
 } after_battle_text_section_e;
+
+extern u8 g_party_message_identity_groups[PARTY_MESSAGE_IDENTITY_GROUP_COUNT][PARTY_MESSAGE_IDENTITIES_PER_GROUP];
 
 /* threads */
 /* Slots of the after-battle screens' own threads; thread_screen_slot_e

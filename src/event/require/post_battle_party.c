@@ -150,19 +150,19 @@ static s32 party_update_brave_faith(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 column;
 
-                /* Find the identity's sprite group (three identities each); an identity in
+                /* Find the identity's message group (three identities each); an identity in
                  * none uses group 0, and group 71 shares group 72's line. */
-                for (brave = 0; brave < 73; brave++) {
-                    for (column = 0; column < 3; column++) {
-                        if (unit->character_identity == g_after_battle_gfx_formation_sprite_groups[brave][column]) {
+                for (brave = 0; brave < PARTY_MESSAGE_IDENTITY_GROUP_COUNT; brave++) {
+                    for (column = 0; column < PARTY_MESSAGE_IDENTITIES_PER_GROUP; column++) {
+                        if (unit->character_identity == g_party_message_identity_groups[brave][column]) {
                             break;
                         }
                     }
-                    if (column != 3) {
+                    if (column != PARTY_MESSAGE_IDENTITIES_PER_GROUP) {
                         break;
                     }
                 }
-                if (brave == 73) {
+                if (brave == PARTY_MESSAGE_IDENTITY_GROUP_COUNT) {
                     brave = 0;
                 }
                 if (brave == 71) {
@@ -189,18 +189,17 @@ static s32 party_update_brave_faith(void) {
                 s32 group_index;
                 s32 column;
 
-                for (group_index = 0; group_index < 73; group_index++) {
-                    for (column = 0; column < 3; column++) {
-                        if (unit->character_identity
-                            == g_after_battle_gfx_formation_sprite_groups[group_index][column]) {
+                for (group_index = 0; group_index < PARTY_MESSAGE_IDENTITY_GROUP_COUNT; group_index++) {
+                    for (column = 0; column < PARTY_MESSAGE_IDENTITIES_PER_GROUP; column++) {
+                        if (unit->character_identity == g_party_message_identity_groups[group_index][column]) {
                             break;
                         }
                     }
-                    if (column != 3) {
+                    if (column != PARTY_MESSAGE_IDENTITIES_PER_GROUP) {
                         break;
                     }
                 }
-                if (group_index == 73) {
+                if (group_index == PARTY_MESSAGE_IDENTITY_GROUP_COUNT) {
                     group_index = 0;
                 }
                 if (group_index == 71) {
@@ -277,17 +276,17 @@ static s32 party_find_departures(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 count;
 
-                for (group = 0; group < 73; group++) {
-                    for (column = 0; column < 3; column++) {
-                        if (unit->character_identity == g_after_battle_gfx_formation_sprite_groups[group][column]) {
+                for (group = 0; group < PARTY_MESSAGE_IDENTITY_GROUP_COUNT; group++) {
+                    for (column = 0; column < PARTY_MESSAGE_IDENTITIES_PER_GROUP; column++) {
+                        if (unit->character_identity == g_party_message_identity_groups[group][column]) {
                             break;
                         }
                     }
-                    if (column != 3) {
+                    if (column != PARTY_MESSAGE_IDENTITIES_PER_GROUP) {
                         break;
                     }
                 }
-                if (group == 73) {
+                if (group == PARTY_MESSAGE_IDENTITY_GROUP_COUNT) {
                     group = 0;
                 }
                 if (group == 71) {
@@ -316,17 +315,17 @@ static s32 party_find_departures(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 count;
 
-                for (group = 0; group < 73; group++) {
-                    for (column = 0; column < 3; column++) {
-                        if (unit->character_identity == g_after_battle_gfx_formation_sprite_groups[group][column]) {
+                for (group = 0; group < PARTY_MESSAGE_IDENTITY_GROUP_COUNT; group++) {
+                    for (column = 0; column < PARTY_MESSAGE_IDENTITIES_PER_GROUP; column++) {
+                        if (unit->character_identity == g_party_message_identity_groups[group][column]) {
                             break;
                         }
                     }
-                    if (column != 3) {
+                    if (column != PARTY_MESSAGE_IDENTITIES_PER_GROUP) {
                         break;
                     }
                 }
-                if (group == 73) {
+                if (group == PARTY_MESSAGE_IDENTITY_GROUP_COUNT) {
                     group = 0;
                 }
                 if (group == 71) {
@@ -435,19 +434,19 @@ s32 party_update_after_battle(void) {
                 if (unit->unit_flags & UNIT_FLAG_SAVE_FORMATION) {
                     s32 column;
 
-                    /* Retail looks up the unit's formation sprite group and
+                    /* Retail looks up the unit's message identity group and
                      * then does not use it. */
-                    for (i = 0; i < 73; i++) {
-                        for (column = 0; column < 3; column++) {
-                            if (unit->character_identity == g_after_battle_gfx_formation_sprite_groups[i][column]) {
+                    for (i = 0; i < PARTY_MESSAGE_IDENTITY_GROUP_COUNT; i++) {
+                        for (column = 0; column < PARTY_MESSAGE_IDENTITIES_PER_GROUP; column++) {
+                            if (unit->character_identity == g_party_message_identity_groups[i][column]) {
                                 break;
                             }
                         }
-                        if (column != 3) {
+                        if (column != PARTY_MESSAGE_IDENTITIES_PER_GROUP) {
                             break;
                         }
                     }
-                    if (i == 73) {
+                    if (i == PARTY_MESSAGE_IDENTITY_GROUP_COUNT) {
                         i = 0;
                     }
                     if (i == 71) {
