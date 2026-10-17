@@ -140,9 +140,6 @@ extern unit_panel_thread_t g_unit_panel_banner_params;
 extern unit_panel_thread_t g_unit_panel_numbers_params;
 extern unit_panel_thread_t g_unit_panel_panel_params;
 
-/* Set by BUNIT and REQUIRE to ask the status banner to slide in again: 1 or 2 picks the slide direction. */
-extern s32 g_unit_panel_status_display_redraw_request;
-
 /* Each starts its panel thread when enable is set and the thread is idle, and asks it to stop otherwise. */
 void unit_panel_toggle_banner_thread(s32 enable);
 void unit_panel_toggle_comparison_thread(s32 enable);
@@ -226,7 +223,6 @@ extern u8 g_unit_panel_portrait_transition_offsets[];
 /* character status panel */
 /* The selected unit's and the comparison unit's status panels, with their billboards, packets, numbers, name
  * and portrait. */
-extern s32 g_unit_panel_character_status_redraw_request;
 extern RECT g_unit_panel_character_status_draw_area_rect;
 extern RECT g_unit_panel_frame_rect;
 extern s16 g_unit_panel_slide_down_y[];
@@ -275,7 +271,6 @@ void unit_panel_ability_thread(void);
 void unit_panel_equipment_thread(void);
 
 /* numeric panel */
-extern s32 g_unit_panel_numbers_redraw_request;
 extern menu_status_panel_numeric_geometry_t g_unit_panel_editor_numeric_table;
 extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state[2];
 extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state_a[2];
@@ -315,18 +310,10 @@ extern point16_t g_unit_panel_editor_numeric_geometry[];
 extern image_layout_t g_unit_panel_editor_numeric_texture[];
 
 /* panel state (BUNIT) */
-extern s32 g_unit_panel_comparison_display_flags;
-extern s32 g_unit_panel_comparison_display_offset_y;
-extern s32 g_unit_panel_comparison_display_redraw_request;
 extern unit_panel_unit_t g_unit_panel_panel_selected_unit_data;
 extern palette_t g_unit_panel_panel_selected_portrait_palettes[2];
 extern unit_panel_unit_t g_unit_panel_panel_comparison_unit_data;
 extern palette_t g_unit_panel_panel_comparison_portrait_palettes[2];
-extern u32 g_unit_panel_status_display_flags; /* menu_status_panel_flags_e */
-extern s32 g_unit_panel_status_display_offset_y;
-extern s32 g_unit_panel_status_display_dimmed;
-extern s32 g_unit_panel_character_status_dimmed;
-extern s32 g_unit_panel_numbers_dimmed;
 
 void unit_panel_toggle_equipment_and_numbers(s32 enable);
 
@@ -338,9 +325,6 @@ void unit_panel_toggle_equipment_threads(s32 enable);
 void unit_panel_toggle_item_numbers_thread(s32 enable);
 
 /* panel state (REQUIRE) */
-extern s32 g_unit_panel_dim_a;
-extern s32 g_unit_panel_dim_b;
-extern s32 g_unit_panel_dim_c;
 
 /* Scalar x aliases of the three panels' origins; they preserve the retail
  * transition-store scheduling. */

@@ -226,9 +226,9 @@ static s32 party_update_brave_faith(void) {
 
 /* Set the three panel dim flags and both status animation flags to `value`. */
 void unit_panel_set_transition(s32 value) {
-    g_unit_panel_dim_a = value;
-    g_unit_panel_dim_b = value;
-    g_unit_panel_dim_c = value;
+    g_unit_panel_status_display_thread_params.style = value;
+    g_unit_panel_numbers_thread_params.style = value;
+    g_unit_panel_character_status_frame_config.style = value;
     g_unit_panel_panel_status_animation[0] = value;
     g_unit_panel_panel_status_animation[1] = value;
 }

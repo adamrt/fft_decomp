@@ -104,7 +104,9 @@ static void unit_list_update_input_lock(void) {
 
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
         timer = 0xA;
-    } else if ((g_unit_panel_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) != 0) {
+    } else if ((g_unit_panel_status_display_thread_params.flags
+                   & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
+        != 0) {
         timer = 0xA;
     } else if (unit_list_is_scroll_needed() != 0) {
         timer = 0xA;
@@ -292,7 +294,7 @@ static s32 unit_list_run_frame(void) {
             unit_list_build_index_map();
             g_unit_list_grid_selected_cell = g_unit_list_index_map[g_unit_selected_index];
             unit_list_copy_selected();
-            g_unit_panel_status_display_dimmed = 0;
+            g_unit_panel_status_display_thread_params.style = 0;
             g_unit_panel_numbers_thread_params.style = 0;
             g_unit_panel_character_status_frame_config.style = 0;
             unit_list_reset_results();
@@ -350,7 +352,7 @@ static s32 unit_list_run_frame(void) {
             if (unit->uses_monster_skillset != 0 || (unit->initial_team_flags & UNIT_TEAM_MASK)) {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
             } else {
-                g_unit_panel_status_display_dimmed = 1;
+                g_unit_panel_status_display_thread_params.style = 1;
                 g_unit_panel_numbers_thread_params.style = 1;
                 g_unit_panel_character_status_frame_config.style = 1;
                 g_unit_list_initialized = 0;
@@ -367,17 +369,12 @@ static s32 unit_list_run_frame(void) {
     return 1;
 }
 
-/* The target reaches g_unit_panel_status_display_flags through an address register (lui/addiu, then
- * 0(reg)) at each access site, which is what GCC emits for a dereferenced
- * constant address; a plain global access folds the address into lui/%lo. */
-#define UNIT_LIST_REQUEST_FLAGS (*(s32*)&g_unit_panel_status_display_flags)
-
 /* Per-frame step of the unit browser.
  *
  * When the selected unit differs from g_unit_list_comparison_index it republishes that unit's
  * record, restarts the slide animation, and reports the scroll direction in
- * g_unit_panel_status_display_redraw_request; otherwise it advances the g_unit_list_status_banner_slide_step slide and
- * stops the comparison banner thread once the slide completes. */
+ * g_unit_panel_status_display_thread_params.redraw_request; otherwise it advances the
+ * g_unit_list_status_banner_slide_step slide and stops the comparison banner thread once the slide completes. */
 static void unit_list_update_browser(void) {
     s32 index;
     s32 enable;
@@ -386,8 +383,8 @@ static void unit_list_update_browser(void) {
 
     if (g_unit_selected_index != g_unit_list_comparison_index) {
         if (g_unit_list_status_banner_enabled != 0) {
-            g_unit_panel_comparison_display_flags = UNIT_LIST_REQUEST_FLAGS;
-            UNIT_LIST_REQUEST_FLAGS = 0;
+            g_unit_panel_comparison_display_thread_params.flags = g_unit_panel_status_display_thread_params.flags;
+            g_unit_panel_status_display_thread_params.flags = 0;
             if (g_unit_list_status_banner_at_bottom_latch != g_unit_list_status_banner_at_bottom) {
                 bcopy(g_unit_list_pointers[g_unit_list_comparison_index], &g_unit_panel_comparison_unit_status,
                     sizeof(g_unit_panel_comparison_unit_status));
@@ -409,19 +406,19 @@ static void unit_list_update_browser(void) {
             value = g_unit_list_status_banner_at_bottom;
             g_unit_list_status_banner_at_bottom_latch = value;
             if (value != 0) {
-                g_unit_panel_status_display_offset_y = 0x90;
+                g_unit_panel_status_display_thread_params.position.y = 0x90;
             } else {
-                g_unit_panel_status_display_offset_y = 0;
+                g_unit_panel_status_display_thread_params.position.y = 0;
             }
         }
         index = g_unit_list_comparison_index;
         unit_list_copy_selected();
         if ((g_menu_input_primary_repeat & PSX_PAD_RIGHT) || (g_menu_input_secondary_repeat & PSX_PAD_R1)) {
-            g_unit_panel_status_display_redraw_request = 1;
+            g_unit_panel_status_display_thread_params.redraw_request = 1;
         } else if ((g_menu_input_primary_repeat & PSX_PAD_LEFT) || (g_menu_input_secondary_repeat & PSX_PAD_L1)) {
-            g_unit_panel_status_display_redraw_request = 2;
+            g_unit_panel_status_display_thread_params.redraw_request = 2;
         } else {
-            g_unit_panel_status_display_redraw_request = index < g_unit_selected_index ? 1 : 2;
+            g_unit_panel_status_display_thread_params.redraw_request = index < g_unit_selected_index ? 1 : 2;
         }
         return;
     }
@@ -430,14 +427,14 @@ static void unit_list_update_browser(void) {
         g_unit_list_status_banner_at_bottom_latch = g_unit_list_status_banner_at_bottom;
         if (g_unit_list_status_banner_enabled != 0) {
             if (g_unit_list_status_banner_at_bottom != 0) {
-                UNIT_LIST_REQUEST_FLAGS |= MENU_STATUS_PANEL_SLIDE_DOWN;
+                g_unit_panel_status_display_thread_params.flags |= MENU_STATUS_PANEL_SLIDE_DOWN;
             } else {
-                UNIT_LIST_REQUEST_FLAGS |= MENU_STATUS_PANEL_SLIDE_UP;
+                g_unit_panel_status_display_thread_params.flags |= MENU_STATUS_PANEL_SLIDE_UP;
             }
         } else if (g_unit_list_status_banner_at_bottom != 0) {
-            g_unit_panel_status_display_offset_y = 0x90;
+            g_unit_panel_status_display_thread_params.position.y = 0x90;
         } else {
-            g_unit_panel_status_display_offset_y = 0;
+            g_unit_panel_status_display_thread_params.position.y = 0;
         }
     }
     unit_panel_toggle_equipment_and_numbers(g_unit_list_browse_enabled);
@@ -448,15 +445,15 @@ static void unit_list_update_browser(void) {
     unit_panel_toggle_banner_thread(enable);
     slide = g_unit_list_status_banner_slide_step;
     if (slide < 0) {
-        g_unit_panel_status_display_offset_y = slide * 8 + 0x108;
-        g_unit_panel_comparison_display_offset_y = slide * 8;
+        g_unit_panel_status_display_thread_params.position.y = slide * 8 + 0x108;
+        g_unit_panel_comparison_display_thread_params.position.y = slide * 8;
         if (--g_unit_list_status_banner_slide_step < -0xF) {
             g_unit_list_status_banner_slide_step = 0;
             menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
     } else if (slide > 0) {
-        g_unit_panel_status_display_offset_y = slide * 8 - 0x78;
-        g_unit_panel_comparison_display_offset_y = slide * 8 + 0x90;
+        g_unit_panel_status_display_thread_params.position.y = slide * 8 - 0x78;
+        g_unit_panel_comparison_display_thread_params.position.y = slide * 8 + 0x90;
         if (++g_unit_list_status_banner_slide_step >= 0x10) {
             g_unit_list_status_banner_slide_step = 0;
             menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
@@ -476,8 +473,8 @@ static void unit_list_copy_selected(void) {
         sizeof(g_unit_panel_panel_selected_unit_data));
     bcopy(&g_unit_list_pointers[g_unit_selected_index]->move, &g_unit_panel_selected_unit_fields,
         sizeof(g_unit_panel_selected_unit_fields));
-    g_unit_panel_status_display_redraw_request = 1;
-    g_unit_panel_comparison_display_redraw_request = 1;
+    g_unit_panel_status_display_thread_params.redraw_request = 1;
+    g_unit_panel_comparison_display_thread_params.redraw_request = 1;
     g_unit_panel_character_status_frame_config.redraw_request = 1;
     g_unit_panel_numbers_thread_params.redraw_request = 1;
 }

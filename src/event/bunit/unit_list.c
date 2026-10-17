@@ -34,7 +34,8 @@ static void unit_list_update_cursor_trail(point16_t* target);
  * threads to stop. */
 void unit_panel_toggle_equipment_and_numbers(s32 enable) {
     if (enable != 0) {
-        if (g_unit_panel_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
+        if (g_unit_panel_status_display_thread_params.flags
+            & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
             return;
         }
         if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) != 0) {
@@ -287,9 +288,9 @@ void unit_list_init(s32 unused_selected_index) {
     g_unit_list_status_banner_at_bottom = ret;
     g_unit_list_status_banner_at_bottom_latch = ret;
     if (g_unit_list_status_banner_at_bottom != 0) {
-        g_unit_panel_status_display_offset_y = 0x90;
+        g_unit_panel_status_display_thread_params.position.y = 0x90;
     } else {
-        g_unit_panel_status_display_offset_y = 0;
+        g_unit_panel_status_display_thread_params.position.y = 0;
     }
     unit_list_init_cursor_trail();
 }
@@ -385,7 +386,8 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     unit = 1;
     if (allow_browse != 0 && unit_list_get_input_lock() == 0
         && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
-        && !(g_unit_panel_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
+        && !(g_unit_panel_status_display_thread_params.flags
+            & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
         && g_unit_list_status_banner_slide_step == 0 && g_unit_list_scroll_step == 0) {
         if (buttons & PSX_PAD_CIRCLE) {
             if (g_unit_list_browse_enabled == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
@@ -407,7 +409,8 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     if (allow_banner_toggle != 0 && g_unit_list_browse_enabled == 0 && (buttons & PSX_PAD_SQUARE)
         && unit_list_is_scroll_needed() == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
         && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
-        && !(g_unit_panel_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
+        && !(g_unit_panel_status_display_thread_params.flags
+            & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
         g_unit_list_status_banner_enabled = g_unit_list_status_banner_enabled == 0;
     }

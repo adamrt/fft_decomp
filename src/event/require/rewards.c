@@ -39,6 +39,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Member access reschedules a summary-field store in party_apply_post_battle_changes. */
+extern s32 g_unit_panel_character_status_redraw_request;
+
 static void help_open_after_battle(void);
 static void text_build_battle_unit_names(void);
 
@@ -383,8 +386,8 @@ static s32 party_select_unit_to_dismiss(void) {
 
     unit_panel_copy_billboard_in(
         &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
-    g_unit_panel_status_display_redraw_request = 1;
-    g_unit_panel_numbers_redraw_request = 1;
+    g_unit_panel_status_display_thread_params.redraw_request = 1;
+    g_unit_panel_numbers_thread_params.redraw_request = 1;
     g_unit_panel_character_status_redraw_request = 1;
     thread_yield();
 
@@ -467,8 +470,8 @@ static s32 party_select_unit_to_dismiss(void) {
                         selected_party_index = 0;
                     if (g_party_removable_flags[selected_party_index] != 0) {
                         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-                        g_unit_panel_status_display_redraw_request = should_restore;
-                        g_unit_panel_numbers_redraw_request = should_restore;
+                        g_unit_panel_status_display_thread_params.redraw_request = should_restore;
+                        g_unit_panel_numbers_thread_params.redraw_request = should_restore;
                         g_unit_panel_character_status_redraw_request = should_restore;
                         unit_panel_load_party_unit(1, selected_party_index);
                         PARTY_MOVE_PARTY_PORTRAIT(
@@ -486,8 +489,8 @@ static s32 party_select_unit_to_dismiss(void) {
                         selected_party_index = PARTY_ROSTER_SLOT_COUNT - 1;
                 } while (g_party_removable_flags[selected_party_index] == 0);
                 g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-                g_unit_panel_status_display_redraw_request = 2;
-                g_unit_panel_numbers_redraw_request = should_restore;
+                g_unit_panel_status_display_thread_params.redraw_request = 2;
+                g_unit_panel_numbers_thread_params.redraw_request = should_restore;
                 g_unit_panel_character_status_redraw_request = should_restore;
                 unit_panel_load_party_unit(1, selected_party_index);
                 PARTY_MOVE_PARTY_PORTRAIT(selected_party_index, portrait_rect, portrait_destination, palette_rect);
@@ -722,8 +725,8 @@ static void party_apply_post_battle_changes(void) {
                 unit_panel_copy_billboard_in(
                     &g_unit_panel_selected_unit_status, unit_display_data, &g_unit_panel_selected_unit_fields);
                 index_value = *unit_index_ptr;
-                g_unit_panel_status_display_redraw_request = one;
-                g_unit_panel_numbers_redraw_request = one;
+                g_unit_panel_status_display_thread_params.redraw_request = one;
+                g_unit_panel_numbers_thread_params.redraw_request = one;
                 g_unit_panel_character_status_redraw_request = one;
                 g_unit_panel_selected_unit_status.unit_index = index_value;
                 thread_yield();
@@ -859,8 +862,8 @@ static void party_apply_post_battle_changes(void) {
                     unit_display_data->name_id = display_index;
                     unit_panel_load_selected();
                     index_value = *selected_unit_index_ptr;
-                    g_unit_panel_status_display_redraw_request = one;
-                    g_unit_panel_numbers_redraw_request = one;
+                    g_unit_panel_status_display_thread_params.redraw_request = one;
+                    g_unit_panel_numbers_thread_params.redraw_request = one;
                     g_unit_panel_character_status_redraw_request = one;
                     g_unit_panel_selected_unit_status.unit_index = index_value;
                     if (g_party_removal_result == 0) {
