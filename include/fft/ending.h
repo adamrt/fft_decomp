@@ -15,19 +15,6 @@ void open_ending_entrypoint(void);
 void ending_init(void);
 void ending_load_movie_graphics(void);
 
-/* fonts */
-/* Eight-byte glyph metrics record addressed by OPEN script text. */
-typedef struct ending_font_metrics {
-    u8 u;
-    u8 v;
-    u8 flags;
-    u8 bearing;
-    u8 height;
-    u8 width;
-    u8 descender;
-    u8 advance;
-} ending_font_metrics_t;
-
 /* text records */
 /* ending_text_record_t.flags. */
 typedef enum ending_text_record_flag {
@@ -112,43 +99,5 @@ extern ending_script_state_t g_ending_script_state;
 
 /* The ending script's controller handler (CONTROLLER_SCRIPT). */
 void ending_update_script(controller_record_t* unused_record);
-
-/* opcodes */
-/* Serialized ending-script opcodes, in the order of g_ending_opcode_handlers. */
-typedef enum ending_opcode {
-    ENDING_SCRIPT_OPCODE_END = 0x00,
-    ENDING_SCRIPT_OPCODE_POSITIONED_TEXT = 0x01,
-    ENDING_SCRIPT_OPCODE_SCROLL_SPEED = 0x02,
-    ENDING_SCRIPT_OPCODE_REVEAL_SCREEN = 0x03,
-    ENDING_SCRIPT_OPCODE_HIDE_SCREEN = 0x04,
-    ENDING_SCRIPT_OPCODE_WAIT_FRAMES = 0x05,
-    ENDING_SCRIPT_OPCODE_WAIT_SCROLL = 0x06,
-    ENDING_SCRIPT_OPCODE_START_XA_AUDIO = 0x07,
-    ENDING_SCRIPT_OPCODE_FADE_IN_AUDIO = 0x08,
-    ENDING_SCRIPT_OPCODE_FADE_OUT_AUDIO = 0x09,
-    ENDING_SCRIPT_OPCODE_STOP_XA_AUDIO = 0x0a,
-    ENDING_SCRIPT_OPCODE_LOAD_OPNTEX_FRAME = 0x0b,
-    ENDING_SCRIPT_OPCODE_FADE_IN_PICTURE = 0x0c,
-    ENDING_SCRIPT_OPCODE_FADE_OUT_PICTURE = 0x0d,
-    ENDING_SCRIPT_OPCODE_WAIT_XA_AUDIO_IDLE = 0x0e,
-    ENDING_SCRIPT_OPCODE_START_OPNTEX_SEQUENCE = 0x0f
-} ending_opcode_e;
-
-void ending_opcode_00_end_script(s16* unused_entry);
-void ending_opcode_01_create_positioned_text_record(s16* command);
-void ending_opcode_02_set_scroll_speed(s16* entry);
-void ending_opcode_03_start_overlay_fade_out(s16* command);
-void ending_opcode_04_start_overlay_fade_in(s16* command);
-void ending_opcode_05_wait_counted(s16* entry);
-void ending_opcode_06_wait_for_scroll(s16* entry);
-void ending_opcode_07_start_xa_audio(s16* command);
-void ending_opcode_08_start_sound_fade_in(s16* command);
-void ending_opcode_09_start_sound_fade_out(s16* command);
-void ending_opcode_0a_stop_xa_audio(s16* unused_entry);
-void ending_opcode_0b_load_opntex_frame(s16* command);
-void ending_opcode_0c_start_fade_intensity_increase(s16* command);
-void ending_opcode_0d_start_fade_intensity_decrease(s16* command);
-void ending_opcode_0e_wait_for_xa_audio_idle(s16* unused_entry);
-void ending_opcode_0f_start_opntex_sequence(s16* command);
 
 #endif
