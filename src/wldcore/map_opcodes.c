@@ -42,9 +42,9 @@ s32 location_script_run(s32 location, s32 action_mask) {
     u16 entry;
     s32 offset = g_location_script_base[location] & 0xFFFE;
 
-    g_location_script_state.list = (u16*)((s32)g_location_script_base - (-offset));
+    g_location_script_state.list = (u16*)((u8*)g_location_script_base + offset);
     for (i = 0; (entry = g_location_script_state.list[i]) != 0; i++) {
-        g_location_script_state.data = (u16*)((s32)g_location_script_base - (-(entry & 0xFFFE)));
+        g_location_script_state.data = (u16*)((u8*)g_location_script_base + (entry & 0xFFFE));
         g_location_script_state.ip = 0;
         g_location_script_state.flags = 0;
         do {

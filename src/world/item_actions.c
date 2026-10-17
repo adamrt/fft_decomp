@@ -339,10 +339,7 @@ void screen_draw_item_tabs(s32 wide, s32 row, s32 mode) {
     s16 x;
     s16 y;
     /* One pointer serves the script then the quad; separate locals remove the argument copy. */
-    union {
-        menu_instruction_t* script;
-        oriented_quad_t* quad;
-    } drawing;
+    void* drawing;
     s32 cursor_x;
     oriented_quad_t* cursor;
 
@@ -351,17 +348,17 @@ void screen_draw_item_tabs(s32 wide, s32 row, s32 mode) {
         x -= 1;
     }
     if (wide == 0) {
-        drawing.script = &g_formation_item_category_tabs_script;
+        drawing = &g_formation_item_category_tabs_script;
         y = 0x40;
     } else {
         y = 0x4F;
-        drawing.script = &g_formation_item_category_tabs_wide_script;
+        drawing = &g_formation_item_category_tabs_wide_script;
     }
-    menu_run_script_with_palette_mode(drawing.script, 0, mode);
-    drawing.quad = &g_formation_item_category_tab_sprites[row];
-    drawing.quad->position.x = x;
-    drawing.quad->position.y = y - (row == 0);
-    menu_gfx_enqueue_oriented_textured_quad(drawing.quad, screen_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
+    menu_run_script_with_palette_mode(drawing, 0, mode);
+    drawing = &g_formation_item_category_tab_sprites[row];
+    ((oriented_quad_t*)drawing)->position.x = x;
+    ((oriented_quad_t*)drawing)->position.y = y - (row == 0);
+    menu_gfx_enqueue_oriented_textured_quad(drawing, screen_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
     cursor = &g_formation_item_category_tab_cursor_sprite;
     cursor_x = x + 9;
     if (row == 3) {
