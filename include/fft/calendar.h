@@ -4,7 +4,7 @@
 /* The in-game date, the days passing, zodiac signs from birthdays and the yearly birthday updates; OPEN's birthday
  * screen shares its date-to-zodiac routine. */
 
-#include "fft/unit.h"
+#include "fft/gfx.h"
 #include "psx/libgs.h"
 #include "psx/types.h"
 
@@ -36,8 +36,7 @@ void calendar_read_date(u32* bits, s32 record, calendar_date_t* dest);
 
 /* date display */
 /* Screen position of the date calendar_draw_date draws. */
-extern s32 g_calendar_display_x;
-extern s32 g_calendar_display_y;
+extern point32_t g_calendar_display_position;
 
 void calendar_draw_date(GsOT* ot);
 

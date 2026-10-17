@@ -543,8 +543,7 @@ data:
   - {addr: 0x800bb356, name: g_window_panel_scroll_offset}
   - {addr: 0x800bb358, name: g_window_panel_number_state}
   - {addr: 0x800bb364, name: g_world_map_ordering_tables}
-  - {addr: 0x800bb38c, name: g_calendar_display_x}
-  - {addr: 0x800bb390, name: g_calendar_display_y}
+  - {addr: 0x800bb38c, name: g_calendar_display_position}
   - {addr: 0x800bb394, name: g_window_panel_label_state}
   - {addr: 0x800bb3c0, name: g_menu_blocked_buttons}
   - {addr: 0x800bb3c4, name: g_world_map_aux_ordering_tables}

@@ -328,8 +328,8 @@ void calendar_draw_date(GsOT* ot) {
     request.palette = 0;
     request.anim_counter = 0;
     request.frame_index = 0;
-    request.position.x = g_calendar_display_x;
-    request.position.y = g_calendar_display_y;
+    request.position.x = g_calendar_display_position.x;
+    request.position.y = g_calendar_display_position.y;
     world_map_fade_tint_color(&g_hud_color, &color);
     request.color.r = color.r;
     request.color.g = color.g;

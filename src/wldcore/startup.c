@@ -380,8 +380,8 @@ static void world_map_init_state(void) {
     g_hud_color.r = 0x80;
     g_hud_color.g = 0x80;
     g_hud_color.b = 0x80;
-    g_calendar_display_x = -0x78;
-    g_calendar_display_y = -0x64;
+    g_calendar_display_position.x = -0x78;
+    g_calendar_display_position.y = -0x64;
     g_location_label_shade = 0x80;
     g_location_selected = 0;
 
