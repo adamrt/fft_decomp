@@ -16,7 +16,24 @@ typedef enum tutorial_menu_row {
     TUTORIAL_MENU_ROW_BATTLE = 1,
     TUTORIAL_MENU_ROW_TOPICS = 2,
     TUTORIAL_MENU_ROW_LEAVE = 3,
+    TUTORIAL_MENU_ROW_COUNT = 4
 } tutorial_menu_row_e;
+
+/* The Tutorial category menu: two animated windows and an image containing
+ * its four rows. */
+typedef struct tutorial_menu_level {
+    s32 cursor_window;
+    s32 label_window; /* 0x04 */
+    s32 rows_image;   /* 0x08 */
+    s32 _unknown_0c;  /* set to 24 by the push; no reader found */
+    u8 _unused_10[8];
+    s32 mode; /* 0x18; menu_stack_window_mode_e */
+    s32 selected_entry;
+    u8 _unused_20[0x10];
+    s32 entry_count; /* 0x30 */
+    s32 entries[TUTORIAL_MENU_ROW_COUNT];
+} tutorial_menu_level_t;
+typedef char tutorial_menu_level_size_must_be_68[sizeof(tutorial_menu_level_t) == 68 ? 1 : -1];
 
 extern s32 g_tutorial_menu_saved_cursor;
 extern menu_cursor_state_t g_tutorial_list_cursor;

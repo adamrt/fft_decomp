@@ -20,8 +20,10 @@
  * stores a map-dot index instead. */
 union menu_stack_record {
     s32 window_index;
-    s32 focus_dot_index;   /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
-    s32 story_event_index; /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
+    s32 work_history_entry;   /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY */
+    s32 tutorial_topic_index; /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
+    s32 focus_dot_index;      /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
+    s32 story_event_index;    /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
     unit_panel_help_level_t layout_window;
     menu_stack_message_level_t message;
     world_map_menu_level_t return_level;
@@ -33,6 +35,8 @@ union menu_stack_record {
     rumor_detail_level_t rumor_detail;
     menu_stack_window_level_t list_window;
     bar_menu_level_t bar;
+    brave_story_propositions_level_t brave_story_propositions;
+    tutorial_menu_level_t tutorial_menu;
     brave_story_advancing_level_t proposition_list;
     debug_variable_list_level_t variable_list;
     brave_story_participant_level_t participant;

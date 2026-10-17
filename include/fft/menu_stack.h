@@ -142,9 +142,8 @@ typedef enum menu_stack_window_mode {
     MENU_STACK_WINDOW_MODE_LEAVE_WAIT = 3,    /* faded out; waits for thread 14 to end, then pops */
 } menu_stack_window_mode_e;
 
-/* Provisional: the list-window level of Brave Story and the tutorials, beneath their flag-list panels.
- * brave_story_open_work_history and brave_story_open_person_list hide its content render record when they
- * push; brave_story_wait_fact_then_pop shows its upper and lower windows again when it pops back to it. */
+/* The root Brave Story menu, beneath its flag-list panels. The categories and
+ * Tutorial menus have separate records in brave_story.h and tutorial.h. */
 typedef struct menu_stack_window_level {
     s32 main_window;
     s32 side_window;    /* 0x04 */
@@ -157,8 +156,7 @@ typedef struct menu_stack_window_level {
     s32 lower_window;   /* 0x24; Brave Story: completion star of the treasures row */
     u8 _unused_28[8];
     s32 entry_count; /* 0x30; rows drawn by brave_story_push_level */
-    s32 entries[10]; /* 0x34; row kinds of the owning list (bar_row_e, brave_story_row_e, tutorial_menu_row_e); Brave
-                      * Story text is TEXT_ID_BRAVE_STORY_ROW_FIRST + kind */
+    s32 entries[10]; /* 0x34; brave_story_row_e; text is TEXT_ID_BRAVE_STORY_ROW_FIRST + kind */
 } menu_stack_window_level_t;
 
 void menu_stack_push_message_level(s32 text, s32 reload_text);
@@ -179,9 +177,7 @@ typedef struct window_pair_level {
     s32 second_window; /* 0x04 */
 } window_pair_level_t;
 
-/* A level owning two window records and a render record: bar_push_level pushes it as MENU_STACK_LEVEL_BAR.
- * tutorial_push_topic_level hides all three (DISPLAY_OBJECT_HIDDEN) and tutorial_wait_topic_then_pop shows them
- * again. */
+/* A level owning two window records and a render record. */
 typedef struct window_pair_render_level {
     s32 first_window;
     s32 second_window; /* 0x04 */

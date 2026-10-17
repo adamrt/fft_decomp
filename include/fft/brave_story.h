@@ -109,7 +109,25 @@ void brave_story_step_treasure_level(menu_stack_record_t* level);
 typedef enum brave_story_proposition_row {
     BRAVE_STORY_PROPOSITION_ROW_ADVANCING = 0,
     BRAVE_STORY_PROPOSITION_ROW_WORK_HISTORY = 1,
+    BRAVE_STORY_PROPOSITION_ROW_COUNT = 2
 } brave_story_proposition_row_e;
+
+/* The Propositions category level owns a cursor and a row image, unlike the
+ * Advancing level's cursor and three column labels. */
+typedef struct brave_story_propositions_level {
+    s32 cursor_window;
+    s32 rows_image; /* 0x04 */
+    u8 _unused_08[4];
+    /* 0x0c; Work History hides and restores this image, but the category push
+     * never initializes it. Preserve the previous contents of the stack slot. */
+    s32 retained_image_index;
+    u8 _unused_10[0x0c];
+    s32 selected_entry; /* 0x1c */
+    u8 _unused_20[0x10];
+    s32 entry_count; /* 0x30 */
+    s32 entries[BRAVE_STORY_PROPOSITION_ROW_COUNT];
+} brave_story_propositions_level_t;
+typedef char brave_story_propositions_level_size_must_be_60[sizeof(brave_story_propositions_level_t) == 60 ? 1 : -1];
 
 /* Provisional: the BRAVE_STORY_ADVANCING level pushed by brave_story_open_advancing_list: a cursor window and
  * three column-header windows over one render record listing each active proposition's name, participant count and
