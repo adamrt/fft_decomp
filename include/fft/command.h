@@ -238,10 +238,8 @@ extern s32 g_command_resolved_command;
 extern s32 g_command_used_skillset_id;
 extern s32 g_command_used_item_id;
 
-/* The selected command: its kind, then the action command staged for
- * at_list_preview. Both scenes alias the action at +4 under its own name. */
+/* The selected command: its kind, then the action staged for at_list_preview. */
 extern ai_command_t g_command_selected_command;
-extern action_command_t g_command_selected_action;
 
 ai_command_t* command_get_selected(void);
 

@@ -1938,7 +1938,6 @@ data:
   - {addr: 0x80195c3c, name: g_unit_panel_status_left_text_ids}
   - {addr: 0x80195c64, name: g_unit_panel_status_right_text_ids}
   - {addr: 0x80195c8c, name: g_command_selected_command}
-  - {addr: 0x80195c90, name: g_command_selected_action}
   - {addr: 0x80195ca4, name: g_command_skillset_build_result}
   - {addr: 0x80195cd0, name: g_thread_contexts}
   - {addr: 0x80195dd0, name: g_unit_view_summary_digit_images}

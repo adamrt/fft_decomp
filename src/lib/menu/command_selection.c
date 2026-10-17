@@ -234,7 +234,7 @@ static void command_build_ability_list(s32 mode) {
     unit = menu_get_selected_unit_stats();
     type = g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
     skillset = g_command_skillsets[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
-    g_command_selected_action.skillset_id = skillset;
+    g_command_selected_command.data.action.skillset_id = skillset;
 
     for (i = 0; i < 80; i++) {
         g_ai_workspace_ptr->ability_list.ids[i] = 0xFFFF;
@@ -505,13 +505,13 @@ void command_ability_list_thread(void) {
                        .ids[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index]
                 - 0x7000;
             if (i == 2) {
-                g_command_selected_action.calculator_type = text;
+                g_command_selected_command.data.action.calculator_type = text;
             }
             if (i == 1) {
-                g_command_selected_action.calculator_multiplier = text;
+                g_command_selected_command.data.action.calculator_multiplier = text;
             }
             if (i == 0) {
-                g_command_selected_action.ability_id = text;
+                g_command_selected_command.data.action.ability_id = text;
             }
         }
     }

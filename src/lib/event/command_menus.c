@@ -439,7 +439,7 @@ s32 command_resolve_selection(void) {
                     if (menu == MENU_COMMAND_ID_CRYSTAL_PICKUP) {
                         command = g_crystal_pickup_action;
                         /* Item selection updates only the low byte of the 16-bit command field. */
-                        *(u8*)&g_command_selected_action.item_or_equipment = g_crystal_pickup_item;
+                        *(u8*)&g_command_selected_command.data.action.item_or_equipment = g_crystal_pickup_item;
                         option = MENU_SELECTION_NONE;
                     } else if (menu == MENU_COMMAND_ID_MESSAGE_YES_NO || menu >= 0x64) {
                         command = *(g_command_maps[i].map + option + 1);
@@ -459,7 +459,7 @@ s32 command_resolve_selection(void) {
         if (i < 16) {
             g_command_resolved_command = command;
         } else if (command == 5 || command == 6) {
-            g_command_selected_action.targeting_type = command;
+            g_command_selected_command.data.action.targeting_type = command;
         }
         if (command == 1) {
             g_menu_restore_pending = 1;
@@ -482,20 +482,20 @@ s32 command_resolve_selection(void) {
             option = g_command_skillsets[index];
             if (option == SKILLSET_ID_ATTACK || option == SKILLSET_ID_DEFEND || option == SKILLSET_ID_EQUIP_CHANGE
                 || option == SKILLSET_ID_BLANK_04 || option == SKILLSET_ID_ELEMENTAL || option == SKILLSET_ID_JUMP) {
-                g_command_selected_action.ability_id = 0;
+                g_command_selected_command.data.action.ability_id = 0;
                 item = MENU_SELECTION_NONE;
             } else if (option == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING && g_command_skillset_build_result == 0) {
                 item = g_ability_list_anything_ability_id;
             } else {
                 item = g_ai_workspace_ptr->ability_list.ids[item] & 0x1FF;
             }
-            g_command_selected_action.skillset_id = option;
+            g_command_selected_command.data.action.skillset_id = option;
             g_command_used_skillset_id = option;
             if (item != MENU_SELECTION_NONE) {
                 if (option == SKILLSET_ID_ITEM || option == SKILLSET_ID_DRAW_OUT || option == SKILLSET_ID_THROW) {
-                    *(u8*)&g_command_selected_action.item_or_equipment = item;
+                    *(u8*)&g_command_selected_command.data.action.item_or_equipment = item;
                 } else {
-                    g_command_selected_action.ability_id = item;
+                    g_command_selected_command.data.action.ability_id = item;
                 }
                 g_command_used_item_id = item;
             }

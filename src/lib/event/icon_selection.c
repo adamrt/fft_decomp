@@ -234,19 +234,19 @@ static void at_list_build_ability_preview(void) {
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].select_text_table = 0x13;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].context = &g_at_list_layout;
     text_id = at_table[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index];
-    g_command_selected_action.targeting_type = TARGET_TYPE_TILE;
+    g_command_selected_command.data.action.targeting_type = TARGET_TYPE_TILE;
     entry = &g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST];
 
     if ((text_id & 0xf800) == TEXT_ID_ABILITY_NAME_BASE) {
         staged_item = 0;
-        g_command_selected_action.ability_id = text_id - TEXT_ID_ABILITY_NAME_BASE;
+        g_command_selected_command.data.action.ability_id = text_id - TEXT_ID_ABILITY_NAME_BASE;
     } else {
         staged_item = 1;
         /* Item selection updates only the low byte of the 16-bit command field. */
-        *(u8*)&g_command_selected_action.item_or_equipment = text_id;
+        *(u8*)&g_command_selected_command.data.action.item_or_equipment = text_id;
     }
 
-    action = &g_command_selected_action;
+    action = &g_command_selected_command.data.action;
     action->actor_id = g_unit_panel_selected_unit.battle_id;
     stats = menu_get_selected_unit_stats();
     g_thread_call_target = (void (*)(void))at_list_preview;
@@ -255,7 +255,7 @@ static void at_list_build_ability_preview(void) {
      * from the item text. */
     if (staged_item != 0) {
         work->entries[1].unit_code |= AT_ACTION_ENTRY;
-        work->entries[1].action_id_low = g_command_selected_action.item_or_equipment;
+        work->entries[1].action_id_low = g_command_selected_command.data.action.item_or_equipment;
     }
 
     /* Without an AT position for the action, this thread shows preview message 0x1023
