@@ -311,7 +311,7 @@ units:
   - {name: descriptor_threads, source: src/event/bunit/descriptor_threads.c}
   - {name: entry, source: src/event/bunit/entry.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
-  - {name: job_list, source: src/lib/menu/job_list.c}
+  - {name: job_list, source: src/event/bunit/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
@@ -1936,7 +1936,7 @@ units:
   - {name: entry, source: src/event/jobstts/entry.c}
   - {name: gfx_contexts, source: src/event/jobstts/gfx_contexts.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
-  - {name: job_list, source: src/lib/menu/job_list.c}
+  - {name: job_list, source: src/event/jobstts/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
   - {name: menu_script, source: src/event/jobstts/menu_script.c}

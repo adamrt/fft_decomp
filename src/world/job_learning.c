@@ -1,4 +1,4 @@
-/* The learn job list, selected ability prompts and cached job level and JP lookups. */
+/* Formation job learning, its row callbacks and selected ability prompt. */
 
 #include "fft/ability_list.h"
 #include "fft/formation.h"
@@ -18,6 +18,36 @@
 #include "fft/unit.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+
+/* The JP the last looked-up job needs for its next level, as a row callback. */
+
+/* JP needed for the next level of the job whose level
+ * the current-level callback last cached: the table entry for levels
+ * below 8, otherwise the previous value with the dashes flag set. The
+ * `index`th job is looked up but its result is not used. */
+s32 job_list_calculate_next_level_jp(s32 index) {
+    s32 level;
+
+    job_get_generic_index(g_job_list_job_ids[index]);
+    level = g_job_list_job_current_level & 0xf;
+    if (level >= UNIT_JOB_LEVEL_MAX) {
+        g_job_list_job_next_level_jp_requirement |= MENU_NUMBER_VALUE_DASHES;
+    } else {
+        g_job_list_job_next_level_jp_requirement = g_job_level_jp_requirements[level];
+    }
+    return g_job_list_job_next_level_jp_requirement;
+}
+
+/* Whether a listed job's skillset has no ability left to learn for the selected unit, cached for row callbacks. */
+
+/* Caches and returns whether the `index`th job's skillset has nothing left
+ * for the selected unit to learn (no unlearned ability counted). */
+s32 job_list_calculate_mastered(s32 index) {
+    g_job_current_mastered = ability_list_build(g_unit_selected_index, g_job_list_job_ids[index],
+                                 MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED)
+        == 0;
+    return g_job_current_mastered;
+}
 
 /* Runs the learn menu's job list for the selected formation unit.
  *

@@ -20,12 +20,13 @@ preserving every original byte.
   constant goes there, and headers never use them. Every compile also
   defines the program macro `FFT_<MODULE>` (`FFT_BATTLE`, `FFT_WORLD`,
   `FFT_EVENT_BUNIT`, plus `FFT_EVENT` and `FFT_EFFECT` for the overlay
-  families). A shared source keeps program-specific code under `#ifdef
-  FFT_X` blocks proven in every module that compiles the file, with a short
-  comment saying what the other programs do. Statements the programs share
-  stay outside the block; a function whose body differs throughout is
-  written out once per program, each under its own block, rather than
-  interleaved line by line. Sources test only `FFT_` and `VARIANT_` names
+  families). A shared source keeps small program-specific variations under
+  `#ifdef FFT_X` blocks proven in every module that compiles the file, with
+  a short comment explaining the difference. Statements the programs share
+  stay outside the block. When substantial implementations differ, prefer
+  coherent feature files in the respective programs; do not force sharing
+  through whole alternate bodies or a thicket of conditionals. Small helpers
+  may remain duplicated with their owning feature. Sources test only `FFT_` and `VARIANT_` names
   in conditionals; a header may test `FFT_` names (a record laid out per
   program) but never `VARIANT_` names.
 - Preserve retail bugs and ABI disagreements. Explain them briefly in source
@@ -144,8 +145,9 @@ instead of including the record's header.
   single records are commands.
 - Globals follow the same rule (`g_shop_`, `g_unit_`, `g_menu_stack_`); a
   name that shared code binds to a different definition in each program
-  carries a comment saying which programs define it, and a record laid out
-  per program keeps its forms under `#ifdef FFT_X` in its header.
+  carries a comment saying which programs define it. Materially different
+  record layouts take distinct types; similar roles do not justify hiding
+  different representations behind one conditional typedef.
 - Preserve game terminology. Name an unknown by what the code shows it
   doing, and mark a name that rests on thin evidence `Provisional:` in its
   comment; keep an address in a name only when nothing else is known.
