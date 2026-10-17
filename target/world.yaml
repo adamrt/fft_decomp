@@ -31,7 +31,7 @@ units:
   - {name: equipment_stat_changes, source: src/lib/menu/equipment_stat_changes.c}
   - {name: equipment_stat_deltas, source: src/lib/menu/equipment_stat_deltas.c}
   - {name: event_frame, source: src/world/event_frame.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156b74, size: 20, hash: 34d5f02d6411f13b}]}
-  - {name: event_resources, source: src/lib/event/event_resources.c}
+  - {name: event_resources, source: src/lib/event/event_resources.c, data: [{addr: 0x801531a0, size: 16, hash: f1e39985d8b141f3}]}
   - {name: event_unit_lookup, source: src/lib/event/event_unit_lookup.c}
   - {name: font_rendering, source: src/world/font_rendering.c, data: [{addr: 0x801c9ee8, size: 2048, hash: e5a00aa9991ac8a5}]}
   - {name: formation_ability_menu, source: src/world/formation_ability_menu.c, data: [{addr: 0x801c8528, size: 10, hash: 01d448afd9280654}]}

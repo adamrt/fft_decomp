@@ -57,8 +57,14 @@ typedef struct portrait_image_file {
 } portrait_image_file_t;
 typedef char portrait_image_file_size_must_be_8192[sizeof(portrait_image_file_t) == 8192 ? 1 : -1];
 
-extern RECT g_menu_portrait_pixel_rect;
-extern RECT g_menu_portrait_palette_rect;
+/* The two programs reserve different menu image columns for EVTFACE. */
+#ifdef FFT_BATTLE
+static RECT g_menu_portrait_pixel_rect = { 448, 206, 64, 48 };
+static RECT g_menu_portrait_palette_rect = { 448, 254, 64, 2 };
+#else
+static RECT g_menu_portrait_pixel_rect = { 320, 206, 64, 48 };
+static RECT g_menu_portrait_palette_rect = { 320, 254, 64, 2 };
+#endif
 
 /* What every caller reserves at the high overlay address: room for the second half of BUNIT or
  * EQUIP, or for HELPMENU or JOBSTTS. */

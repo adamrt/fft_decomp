@@ -29,7 +29,7 @@ units:
   - {name: effect_script, source: src/battle/effect_script.c}
   - {name: effect_system, source: src/battle/effect_system.c}
   - {name: event_frame, source: src/battle/event_frame.c, data: [{addr: 0x801696e4, size: 20, hash: 34d5f02d6411f13b}]}
-  - {name: event_resources, source: src/lib/event/event_resources.c}
+  - {name: event_resources, source: src/lib/event/event_resources.c, data: [{addr: 0x80165ebc, size: 16, hash: 6176d19a13b8eb27}]}
   - {name: event_unit_lookup, source: src/lib/event/event_unit_lookup.c}
   - {name: formula_core, source: src/battle/formula_core.c, data: [{addr: 0x8018f600, size: 12, hash: 9b134ab1d56154c2}, {addr: 0x8018f60c, size: 5, hash: d7f2b411424619e0}]}
   - {name: formula_damage, source: src/battle/formula_damage.c}
