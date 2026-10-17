@@ -481,7 +481,7 @@ func (p project) findTwins(config *projectConfig, options twinsOptions) (*twinsR
 		scope := newTwinScope(config, m)
 		for index := range m.Functions {
 			f := &m.Functions[index]
-			if f.Asm != "" || f.Size < options.minBytes || strings.HasPrefix(m.sourceOf(f), "src/lib/") {
+			if f.Asm != "" || f.Size < options.minBytes || m.isLibraryFunction(f) {
 				continue
 			}
 			start := m.offset(f.Addr)

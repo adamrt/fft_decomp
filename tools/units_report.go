@@ -272,7 +272,8 @@ func renderUnitsMarkdown(reports []unitsReport) []byte {
 	out.WriteString("Candidates only. Each original source file became a contiguous run of functions and a\n")
 	out.WriteString("contiguous chunk of each data section, so boundaries are inferred from where the\n")
 	out.WriteString("BATTLE/WORLD/overlay object sequences diverge, from compiler-profile changes, from data\n")
-	out.WriteString("referenced by neighboring functions only, and from name prefixes. Confidence is the\n")
+	out.WriteString("referenced by neighboring functions only. Name prefixes describe the candidates, but\n")
+	out.WriteString("are not boundary evidence. Confidence is the\n")
 	out.WriteString("weaker of a unit's two edges; `certain` edges are hand-written assembly, library code\n")
 	out.WriteString("and group boundaries. Review the evidence before treating any unit as an original file.\n\n")
 	for _, report := range reports {

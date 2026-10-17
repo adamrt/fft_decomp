@@ -13,11 +13,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// placement reports module-folder functions whose link position, name and
-// call neighborhood say they belong to a shared subsystem's object file: a
-// function compiled between two shared menu routines in the event library's
-// link group came from that menu source, whether or not another module links
-// it. The report is read-only; `symbols move` applies accepted rows.
+// placement reports candidate game-library locations from link position and
+// call neighborhoods. Shared neighbors suggest a placement to review; they
+// do not prove an original object boundary. The report is read-only;
+// `symbols move` applies accepted rows.
 
 const placementSchemaVersion = 1
 
@@ -58,7 +57,7 @@ type placementMember struct {
 }
 
 // placementFamily proposes one name for counterpart bodies: a share when
-// the twins comparison finds one body, otherwise a _variant name with one
+// the twins comparison finds one body, otherwise the same name with one
 // body per folder (twin bodies still share one file).
 type placementFamily struct {
 	ID        string            `yaml:"id"`
@@ -85,7 +84,6 @@ type placementReport struct {
 type placementSignals struct {
 	prev, next   string         // shared subsystem of the address neighbors, "" when not shared
 	unitDominant string         // shared subsystem holding at least half of the unit's functions
-	prefix       string         // shared subsystem the name's prefix token belongs to
 	callees      map[string]int // shared subsystem -> module functions this one names
 	callers      map[string]int // shared subsystem -> module functions naming this one
 	calleeTotal  int
@@ -110,7 +108,6 @@ func placementScore(s placementSignals) (string, int, []string) {
 		add(s.next, 1, "the next function is shared")
 	}
 	add(s.unitDominant, 2, "the unit is mostly shared")
-	add(s.prefix, 1, "the name prefix")
 	if sub, count := mostCommonCount(s.callees); sub != "" && count*2 >= s.calleeTotal {
 		add(sub, 1, fmt.Sprintf("%d of %d named callees", count, s.calleeTotal))
 	}
@@ -120,7 +117,7 @@ func placementScore(s placementSignals) (string, int, []string) {
 	best, bestScore := "", 0
 	for _, sub := range sortedKeys(scoresKeys(scores)) {
 		score := scores[sub]
-		if score > bestScore || (score == bestScore && (sub == s.prefix || (best != s.prefix && sub == s.prev))) {
+		if score > bestScore || (score == bestScore && sub == s.prev) {
 			best, bestScore = sub, score
 		}
 	}
@@ -162,91 +159,43 @@ func placementVerdict(sub string, score int, s placementSignals, minScore int) s
 // under one shared name; the placement report still recognizes it.
 const variantSuffix = "_variant"
 
-// placementNewName drops a leading module token; a name that then starts
-// with no known subsystem token takes the destination's.
-func placementNewName(name, sub string, tokens map[string]string, folderToken map[string]string) (string, string) {
+// placementNewName preserves the function's concept name when its source moves.
+func placementNewName(name string) (string, string) {
 	if strings.HasSuffix(name, variantSuffix) {
 		return "", "a _variant body stays beside its module"
 	}
-	parts := strings.Split(name, "_")
-	stripped := name
-	if len(parts) > 1 && unitModuleTokens[parts[0]] {
-		stripped = strings.Join(parts[1:], "_")
-	}
-	first := strings.SplitN(stripped, "_", 2)[0]
-	if owner := tokens[first]; owner != "" {
-		if owner != sub {
-			return stripped, fmt.Sprintf("name prefix %s belongs to %s, not %s", first, owner, sub)
-		}
-		return stripped, ""
-	}
-	if token := folderToken[sub]; token != "" {
-		return token + "_" + stripped, "prefixed with the destination's token"
-	}
-	return stripped, ""
+	return name, ""
 }
 
 // programFolders are the top-level src/ folders that hold one program's own
 // code rather than a subsystem.
-var programFolders = map[string]bool{"battle": true, "world": true, "wldcore": true, "main": true, "open": true, "event": true, "effect": true, "lib": true}
+var programFolders = map[string]bool{"battle": true, "world": true, "wldcore": true, "main": true, "open": true, "event": true, "effect": true, "lib": true, "platform": true}
 
-// subsystemFolder names the subsystem of a top-level src/<subsystem>/ path.
+// subsystemFolder returns the path below src for a game-library folder.
+// Keep lib/<concept> intact so destinations preserve the nested source layout.
 func subsystemFolder(source string) string {
 	parts := strings.Split(source, "/")
+	if len(parts) >= 3 && parts[0] == "src" && parts[1] == "lib" {
+		if len(parts) == 3 {
+			return "lib"
+		}
+		return strings.Join(parts[1:3], "/")
+	}
 	if len(parts) > 2 && parts[0] == "src" && !programFolders[parts[1]] {
 		return parts[1]
 	}
 	return ""
 }
 
-// sharedSubsystemTokens maps the name tokens used under src/<sub>/ to their
-// folder, and each folder to its most common token.
-func sharedSubsystemTokens(root string) (map[string]string, map[string]string, error) {
-	entries, err := os.ReadDir(filepath.Join(root, "src"))
-	if err != nil {
-		return nil, nil, err
-	}
-	tokens := map[string]string{}
-	folderToken := map[string]string{}
-	for _, entry := range entries {
-		if !entry.IsDir() || programFolders[entry.Name()] {
-			continue
-		}
-		files, err := os.ReadDir(filepath.Join(root, "src", entry.Name()))
-		if err != nil {
-			return nil, nil, err
-		}
-		counts := map[string]int{}
-		for _, file := range files {
-			if filepath.Ext(file.Name()) != ".c" {
-				continue
-			}
-			counts[strings.SplitN(file.Name(), "_", 2)[0]]++
-		}
-		for token, count := range counts {
-			if count*2 >= len(files) || tokens[token] == "" {
-				tokens[token] = entry.Name()
-			}
-		}
-		folderToken[entry.Name()], _ = mostCommonCount(counts)
-	}
-	return tokens, folderToken, nil
-}
-
-// sharedSubsystemOf names the subsystem folder of a shared source. A
-// module-prefixed file, or a body in a module subfolder, is one program's
-// own routine of the subsystem, not a shared body, so it is not counted as
-// shared evidence.
+// sharedSubsystemOf names the game-library folder of a source directly in it.
+// Bodies in program subfolders stay with those programs. Function name tokens
+// are not evidence of ownership or an original object boundary.
 func sharedSubsystemOf(source string) string {
 	sub := subsystemFolder(source)
 	if sub == "" {
 		return ""
 	}
-	parts := strings.Split(source, "/")
-	if len(parts) != 3 {
-		return ""
-	}
-	if token := strings.SplitN(parts[2], "_", 2)[0]; unitModuleTokens[token] {
+	if filepath.ToSlash(filepath.Dir(source)) != "src/"+sub {
 		return ""
 	}
 	return sub
@@ -278,10 +227,6 @@ func (p project) placementCommand(args []string) error {
 			return err
 		}
 	}
-	tokens, folderToken, err := sharedSubsystemTokens(p.root)
-	if err != nil {
-		return err
-	}
 	taken := map[string]bool{}
 	for _, m := range config.Modules {
 		for index := range m.Functions {
@@ -303,7 +248,7 @@ func (p project) placementCommand(args []string) error {
 	options := placementOptions{outDir: outDir, minScore: *minScore}
 	reports := map[string]*placementReport{}
 	for _, m := range config.Modules {
-		report := p.placementReport(analyses[m.ID], options, tokens, folderToken, taken)
+		report := p.placementReport(analyses[m.ID], options, taken)
 		reports[m.ID] = &report
 	}
 	twinClass := map[string]string{}
@@ -342,7 +287,7 @@ func (p project) placementCommand(args []string) error {
 	return atomicWrite(filepath.Join(dir, "summary.md"), renderPlacementMarkdown(selectedReports, families))
 }
 
-func (p project) placementReport(an *unitModuleAnalysis, options placementOptions, tokens, folderToken map[string]string, taken map[string]bool) placementReport {
+func (p project) placementReport(an *unitModuleAnalysis, options placementOptions, taken map[string]bool) placementReport {
 	report := placementReport{SchemaVersion: placementSchemaVersion, CandidateOnly: true, Module: an.m.ID,
 		Totals: map[string]int{"candidates": 0, "move": 0, "review": 0, "keep": 0, "variant": 0}, BySubsystem: map[string]int{},
 		Moves: []placementRow{}, Review: []placementRow{}}
@@ -352,10 +297,15 @@ func (p project) placementReport(an *unitModuleAnalysis, options placementOption
 			callers[callee] = append(callers[callee], caller)
 		}
 	}
-	subsystemOf := func(index int) string { return sharedSubsystemOf(an.functions[index].source) }
+	subsystemOf := func(index int) string {
+		if an.functions[index].library {
+			return ""
+		}
+		return sharedSubsystemOf(an.functions[index].source)
+	}
 	for i := range an.functions {
 		fn := &an.functions[i]
-		if fn.library || fn.asm || fn.source == "" || sharedSubsystemOf(fn.source) != "" || strings.HasPrefix(fn.source, "src/lib/") {
+		if fn.library || fn.asm || fn.source == "" || subsystemFolder(fn.source) != "" {
 			continue
 		}
 		report.Totals["candidates"]++
@@ -377,7 +327,6 @@ func (p project) placementReport(an *unitModuleAnalysis, options placementOption
 		if sub, count := mostCommonCount(shared); sub != "" && count*2 >= len(unit.functions) {
 			signals.unitDominant = sub
 		}
-		signals.prefix = tokens[fn.prefix]
 		for _, j := range an.callees[i] {
 			signals.calleeTotal++
 			if sub := subsystemOf(j); sub != "" {
@@ -403,7 +352,7 @@ func (p project) placementReport(an *unitModuleAnalysis, options placementOption
 		sort.Strings(row.Evidence[len(evidence):])
 		if verdict != "keep" && verdict != "variant" {
 			var note string
-			row.NewName, note = placementNewName(fn.f.sourceSymbol(), sub, tokens, folderToken)
+			row.NewName, note = placementNewName(fn.f.sourceSymbol())
 			row.Apply = row.NewName != ""
 			if row.Apply {
 				row.Destination = "src/" + sub + "/" + row.NewName + ".c"
@@ -431,7 +380,7 @@ func (p project) placementReport(an *unitModuleAnalysis, options placementOption
 // object sequences align, rows that would take one name, and rows whose new
 // name an existing definition holds. Members with one source, or in one
 // twins group, are one body. A family with one body is a share; one with
-// several is a _variant name with a body per folder.
+// several keeps the same role name with a body per folder.
 func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAnalysis, reports map[string]*placementReport, twinClass map[string]string) []placementFamily {
 	type node struct {
 		module string
@@ -586,9 +535,9 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 			case variantName != "":
 				family.Name = variantName
 			case sharedName != "":
-				family.Name = sharedName + variantSuffix
+				family.Name = sharedName
 			default:
-				family.Name = common + variantSuffix
+				family.Name = common
 			}
 		}
 		if family.Name == "" {

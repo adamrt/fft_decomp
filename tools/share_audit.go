@@ -398,13 +398,8 @@ func (p project) shareAudit(config *projectConfig, options shareAuditOptions) (s
 			if f.Asm != "" || filepath.Ext(source) != ".c" {
 				reason = "assembly"
 			}
-			if strings.HasPrefix(source, "src/lib/") {
+			if m.isLibraryFunction(f) {
 				reason = "library"
-			}
-			for _, library := range m.Libraries {
-				if f.Addr < library.End && uint64(f.Addr)+uint64(f.Size) > uint64(library.Addr) {
-					reason = "library"
-				}
 			}
 			if reason != "" {
 				report.Excluded[reason]++

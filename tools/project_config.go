@@ -201,6 +201,21 @@ func (m *moduleSpec) contains(addr uint32, size int) bool {
 	return addr >= m.Load && uint64(addr)+uint64(size) <= m.end()
 }
 
+// isLibraryFunction identifies preserved SDK, runtime and middleware code.
+// Game libraries under src/lib remain analysis candidates; Suzuki is excluded
+// by its original target library ranges, independently of its source folder.
+func (m *moduleSpec) isLibraryFunction(f *functionSpec) bool {
+	if strings.HasPrefix(filepath.ToSlash(m.sourceOf(f)), "src/platform/") {
+		return true
+	}
+	for _, library := range m.Libraries {
+		if f.Addr < library.End && uint64(f.Addr)+uint64(f.Size) > uint64(library.Addr) {
+			return true
+		}
+	}
+	return false
+}
+
 func (m *moduleSpec) profileOf(f *functionSpec) string {
 	if f.Profile != "" {
 		return f.Profile

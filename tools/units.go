@@ -4,7 +4,7 @@
 // of functions and a contiguous chunk of each data section. The command scores
 // candidate boundaries from where other modules carry a different object
 // sequence, from compiler-profile changes, from data that only neighboring
-// functions reference, and from name prefixes. It is analysis only: it writes
+// functions reference. It is analysis only: it writes
 // reports under build/ and never touches target/ or src/.
 package main
 
@@ -314,7 +314,7 @@ func (p project) loadUnitFunctions(m *moduleSpec, identCache map[string]map[stri
 	for i, f := range order {
 		source := m.sourceOf(f)
 		fn := unitFunction{index: i, f: f, source: source, asm: f.Asm != "", aligned: map[string]string{}, positional: map[string]bool{}, unit: -1, jumpAlign: -1}
-		fn.library = strings.HasPrefix(source, "src/lib/") || m.inLibraryRange(f.Addr)
+		fn.library = m.isLibraryFunction(f)
 		fn.prefix = unitPrefix(f.Name)
 		fn.profile = m.profileOf(f)
 		if profile, ok := compilerProfileNamed(fn.profile); ok {
@@ -343,15 +343,6 @@ func (p project) loadUnitFunctions(m *moduleSpec, identCache map[string]map[stri
 		functions[i] = fn
 	}
 	return functions
-}
-
-func (m *moduleSpec) inLibraryRange(addr uint32) bool {
-	for _, library := range m.Libraries {
-		if library.Addr <= addr && addr < library.End {
-			return true
-		}
-	}
-	return false
 }
 
 // sourceHasDivision reports whether the source divides anywhere: only such
@@ -707,9 +698,6 @@ func (an *unitModuleAnalysis) scoreAndFormUnits(options unitsOptions) {
 		for i := group.first; i < group.last; i++ {
 			cut := unitCut{after: i}
 			cut.evidence = append(cut.evidence, an.evidence[i]...)
-			if an.functions[i].prefix != an.functions[i+1].prefix {
-				cut.evidence = append(cut.evidence, unitEvidence{"prefix_change", 1, an.functions[i].prefix + " -> " + an.functions[i+1].prefix})
-			}
 			cut.evidence = append(cut.evidence, an.ownershipEvidence(group, i)...)
 			cut.evidence = append(cut.evidence, an.callEvidence(group, i)...)
 			for _, evidence := range cut.evidence {

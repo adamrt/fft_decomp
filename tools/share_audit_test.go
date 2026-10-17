@@ -258,13 +258,13 @@ func TestShareAuditExcludesSingleSourceAssemblyLibrariesAndFilters(t *testing.T)
 			t.Fatalf("filter ignored: %+v", options)
 		}
 	}
-	main.Functions[0].Source = "src/lib/custom.c"
+	main.Functions[0].Source = "src/platform/psyq/custom.c"
 	report, err = p.shareAudit(config, shareAuditOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if report.Excluded["library"] != 1 {
-		t.Fatal("library source included")
+		t.Fatal("platform source included")
 	}
 }
 

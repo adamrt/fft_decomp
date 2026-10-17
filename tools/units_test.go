@@ -191,7 +191,7 @@ func TestUnitEvidenceFromProfilesCallsDataAndAlignment(t *testing.T) {
 	if evidenceKinds(straddled)["ownership_straddle"] >= 0 || straddled.confidence != "none" {
 		t.Fatalf("cut inside the first object: %+v", straddled)
 	}
-	if kinds := evidenceKinds(unitCutAfter(t, battle, "menu_b4")); kinds["alignment_divergence"] != 3 || kinds["prefix_change"] != 1 {
+	if kinds := evidenceKinds(unitCutAfter(t, battle, "menu_b4")); kinds["alignment_divergence"] != 3 || kinds["prefix_change"] != 0 {
 		t.Fatalf("evidence after menu_b4 = %v", kinds)
 	}
 	if kinds := evidenceKinds(unitCutAfter(t, world, "menu_a4")); kinds["alignment_divergence"] != 2 {
@@ -341,7 +341,7 @@ func TestUnitsEvidenceModeTakesOnlyBinaryCuts(t *testing.T) {
 	}
 	group := unitGroup{id: 1, first: 0, last: 3}
 	group.cuts = []unitCut{
-		{after: 0, score: 3, confidence: "low", evidence: []unitEvidence{{"prefix_change", 1, ""}, {"call_locality", 2, ""}}},
+		{after: 0, score: 2, confidence: "low", evidence: []unitEvidence{{"call_locality", 2, ""}}},
 		{after: 1, score: 6, confidence: "high", certain: true, evidence: []unitEvidence{{"profile_object", 6, ""}}},
 		{after: 2, score: 3, confidence: "low", evidence: []unitEvidence{{"alignment_divergence", 3, ""}}},
 	}
@@ -388,5 +388,33 @@ func TestUnitsEvidenceModeTakesOnlyBinaryCuts(t *testing.T) {
 	}
 	if err := p.unitsCommand([]string{"--evidence=weak", "--out=build/analysis/units"}); err == nil {
 		t.Fatal("an unknown evidence mode must be rejected")
+	}
+}
+
+func TestUnitBoundariesDoNotFollowNamePrefixes(t *testing.T) {
+	p := unitsTestProject(t)
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, _ := config.module("battle")
+	cuts := func(differentPrefixes bool) []unitCut {
+		options := unitsOptions{minConfidence: "low", maxOwners: 3}
+		an := p.analyzeModuleLayout(m, newSymbolResolver(config), map[string]map[string]struct{}{}, map[string]bool{}, options)
+		for i := range an.functions {
+			an.functions[i].prefix = "same"
+			if differentPrefixes {
+				an.functions[i].prefix = string(rune('a' + i))
+			}
+		}
+		an.scoreAndFormUnits(options)
+		var result []unitCut
+		for _, group := range an.groups {
+			result = append(result, group.cuts...)
+		}
+		return result
+	}
+	if same, different := cuts(false), cuts(true); !reflect.DeepEqual(same, different) {
+		t.Fatalf("name prefixes affected boundary scores: %+v != %+v", same, different)
 	}
 }
