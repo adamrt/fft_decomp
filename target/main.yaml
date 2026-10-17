@@ -1291,8 +1291,8 @@ data:
   - {addr: 0x8004a6bc, name: g_script_event_block_buffer}
   - {addr: 0x8004c6bc, name: g_tutorial_progress_masks}
   - {addr: 0x8004c6c4, name: g_system_graphics_error}
-  - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_array_32}
   - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_buffers}
+  - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_flat_pool}
   - {addr: 0x8004d720, name: g_loading_primitives}
   - {addr: 0x8004d950, name: g_system_flags}
   - {addr: 0x8004d954, name: g_portrait_special_unit_id}

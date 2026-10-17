@@ -118,6 +118,10 @@ extern s32 g_war_trophy_entry_types[16];
 extern s32 g_war_trophy_entry_values[16];
 extern s32 g_war_trophy_entry_count;
 
+/* Flat view of both 40-packet buffers. The separate base binding preserves
+ * conditions_special_thread's native address calculations. */
+extern POLY_GT4 g_gfx_poly_gt4_flat_pool[80];
+
 /* One color record per display-condition quad; the fourth byte of each
  * CVECTOR is not consumed by the banner renderer. */
 typedef struct conditions_colors {
@@ -1652,7 +1656,7 @@ static void gfx_scale_poly_gt4_colors(const conditions_colors_t* colors, s32 sca
     setRGB3(poly, r, g, b);
 }
 
-/* Initialize the 32 semi-transparent POLY_GT4s of g_gfx_poly_gt4_array_32
+/* Initialize the first 32 semi-transparent POLY_GT4s of buffer 0
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
 static void gfx_init_poly_gt4_array_32(s32 x, s32 y) {
@@ -1663,7 +1667,7 @@ static void gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     /* The y-centered pointer preserves the retail base address; RECT fields change it. */
     palette_origin = &g_conditions_banner_palette_rect.y;
     do {
-        POLY_GT4* poly = &g_gfx_poly_gt4_array_32[count];
+        POLY_GT4* poly = &g_gfx_poly_gt4_flat_pool[count];
         SetPolyGT4(poly);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
@@ -1955,7 +1959,7 @@ void conditions_noop_1(void) {
  * addresses; the target rematerializes them in each loop instead of folding
  * them into the loads. The buffer copy and the small-array address use
  * g_gfx_poly_gt4_buffers, the second symbol at the address of
- * g_gfx_poly_gt4_array_32: sharing that base lets the hoisted
+ * g_gfx_poly_gt4_flat_pool: sharing that base lets the hoisted
  * small-array address derive from the copy source, which keeps it live in s0. */
 void conditions_special_thread(void) {
     s32 banner_id;
@@ -1984,7 +1988,8 @@ void conditions_special_thread(void) {
 
     for (quad_index = 0; quad_index < quad_count; quad_index++) {
         u8* parameters = &table[banner_id];
-        POLY_GT4* poly = &(use_small_array == 0 ? g_gfx_poly_gt4_array_32 : &g_gfx_poly_gt4_buffers[0][32])[quad_index];
+        POLY_GT4* poly
+            = &(use_small_array == 0 ? g_gfx_poly_gt4_flat_pool : &g_gfx_poly_gt4_buffers[0][32])[quad_index];
 
         setUV4(poly, QUAD.source.x, QUAD.source.y, QUAD.source.x + QUAD.source.w, QUAD.source.y, QUAD.source.x,
             QUAD.source.y + QUAD.source.h, QUAD.source.x + QUAD.source.w, QUAD.source.y + QUAD.source.h);
@@ -2014,7 +2019,7 @@ void conditions_special_thread(void) {
             const conditions_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
-                POLY_GT4* poly = &(g_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
+                POLY_GT4* poly = &(g_gfx_poly_gt4_flat_pool + buffer * 40)[quad_index];
 
                 gfx_scale_poly_gt4_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
@@ -2044,7 +2049,7 @@ void conditions_special_thread(void) {
             const conditions_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
-                POLY_GT4* poly = &(g_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
+                POLY_GT4* poly = &(g_gfx_poly_gt4_flat_pool + buffer * 40)[quad_index];
 
                 gfx_scale_poly_gt4_colors(vertex_colors, 0x80, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
@@ -2070,7 +2075,7 @@ fade_out:
             const conditions_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
-                POLY_GT4* poly = &(g_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
+                POLY_GT4* poly = &(g_gfx_poly_gt4_flat_pool + buffer * 40)[quad_index];
 
                 gfx_scale_poly_gt4_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
