@@ -747,7 +747,7 @@ static s32 menu_dispatch_system_function(
     s32 value;
     s32 count;
     s32 i;
-    item_data_t* item;
+    const item_data_t* item;
     menu_system_function_t* entry;
     s32 flags;
     u8 item_id;

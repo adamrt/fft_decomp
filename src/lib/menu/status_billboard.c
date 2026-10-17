@@ -95,7 +95,7 @@ void unit_panel_load_selected(void) {
     unit_stats_t* unit = unit_get_stats(g_unit_panel_comparison_unit_data.battle_id);
     menu_status_panel_slot_state_t* editor = &g_unit_panel_selected_unit_fields.state;
     u16* innate_items;
-    item_data_t* item;
+    const item_data_t* item;
     s32 i;
     s32 output_index;
     s32 item_id;

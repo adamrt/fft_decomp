@@ -744,7 +744,7 @@ void sprite_sheet_apply_status_change(unit_t* unit, s32 tile_effect_level) {
  * the weapon SHP; a thrown weapon, any Throw ability and Throw Stone use
  * set 0x15. */
 void sprite_palette_set_thrown_item(s32 item_id, unit_t* unit) {
-    item_data_t* item;
+    const item_data_t* item;
     u32 weapon_type;
     s32 clut_index;
     /* The last test re-reads the ability id rather than reusing the value the

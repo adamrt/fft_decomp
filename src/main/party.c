@@ -643,7 +643,7 @@ s32 ability_get_data_and_type(
 }
 
 /* Return an item's primary data record; the id is masked to its low byte, so it never fails. */
-item_data_t* item_get_data(s32 item_id) {
+const item_data_t* item_get_data(s32 item_id) {
     return &g_item_primary_data[item_id & ITEM_ID_MASK];
 }
 

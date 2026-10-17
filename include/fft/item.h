@@ -513,7 +513,7 @@ extern item_poach_t g_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRS
  * register and misses the byte-exact match. */
 extern u8 g_item_secondary_data_ids[];
 
-item_data_t* item_get_data(s32 item_id);
+const item_data_t* item_get_data(s32 item_id);
 
 /* inventory */
 extern u8 g_item_quantities[ITEM_ID_COUNT];

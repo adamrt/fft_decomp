@@ -1447,7 +1447,7 @@ exit:
  * row from v = 0x20 of the item icon page, and the item's palette picks one of 8 CLUTs per
  * CLUT row from the item icon CLUT base. */
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
-    item_data_t* item = item_get_data(item_id);
+    const item_data_t* item = item_get_data(item_id);
     s32 sprite_id;
     s32 palette;
     s32 column;

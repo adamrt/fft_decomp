@@ -905,7 +905,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;
     u16* innate_items;
-    item_data_t* item;
+    const item_data_t* item;
     s32 i;
     s32 item_id;
     u8 item_flags;

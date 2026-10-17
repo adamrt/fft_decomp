@@ -63,7 +63,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;
     u16* innate_items;
-    item_data_t* item;
+    const item_data_t* item;
     s32 i;
     s32 item_id;
     u8 item_flags;
@@ -971,7 +971,7 @@ static void war_trophy_collect(void) {
     s32 adj;
     s32 funds;
     s32 item_count;
-    item_data_t* item;
+    const item_data_t* item;
     u8* qp;
     u32 pad[4];
     s32* iv;
