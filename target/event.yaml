@@ -2320,7 +2320,7 @@ units:
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cbe60, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
   - {name: post_battle_party, source: src/event/require/post_battle_party.c, data: [{addr: 0x801d71f8, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d72c0, size: 200, hash: 6d9c54dee5660c46}]}
-  - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8304, size: 1024, hash: 5f70bf18a0860070}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
@@ -2561,7 +2561,7 @@ data:
   - {addr: 0x801d7dbc, name: g_portrait_palette_rect}
   - {addr: 0x801d7dc4, name: g_portrait_cell_pixels}
   - {addr: 0x801d80c4, name: g_unit_panel_editor_party_unit_stats}
-  - {addr: 0x801d8304, name: g_after_battle_saved_thread_block}
+  - {addr: 0x801d8304, name: g_after_battle_saved_thread}
   - {addr: 0x801d8704, name: g_war_trophy_search_result}
   - {addr: 0x801d8719, name: g_war_trophy_item_count}
   - {addr: 0x801d8728, name: g_war_trophy_entry_types}

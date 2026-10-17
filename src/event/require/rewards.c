@@ -42,6 +42,8 @@
 /* Member access reschedules a summary-field store in party_apply_post_battle_changes. */
 extern s32 g_unit_panel_character_status_redraw_request;
 
+static thread_t g_after_battle_saved_thread = { 0 };
+
 static void help_open_after_battle(void);
 static void text_build_battle_unit_names(void);
 
@@ -649,7 +651,8 @@ static void party_apply_post_battle_changes(void) {
 
     g_menu_post_battle_unit_changes_active = 1;
     thread_suspend(THREAD_SLOT_EVENT);
-    mem_copy_bytes_nonempty(g_after_battle_saved_thread_block, &g_threads[THREAD_SLOT_EVENT], 0x400);
+    mem_copy_bytes_nonempty(
+        &g_after_battle_saved_thread, &g_threads[THREAD_SLOT_EVENT], sizeof(g_after_battle_saved_thread));
 
     text_data = g_text_data;
     g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = text_data + g_text_section_offsets[1];
@@ -934,7 +937,8 @@ static void party_apply_post_battle_changes(void) {
     thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     thread_wait_until_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
     g_menu_post_battle_unit_changes_active = 0;
-    mem_copy_bytes_nonempty(&g_threads[THREAD_SLOT_EVENT], g_after_battle_saved_thread_block, 0x400);
+    mem_copy_bytes_nonempty(
+        &g_threads[THREAD_SLOT_EVENT], &g_after_battle_saved_thread, sizeof(g_after_battle_saved_thread));
     g_menu_thread_menu_data = saved_menu_descriptor;
     thread_resume(THREAD_SLOT_EVENT);
     thread_yield();

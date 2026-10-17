@@ -160,7 +160,6 @@ typedef enum after_battle_thread_slot {
     AFTER_BATTLE_THREAD_SLOT_TRANSITION = 10, /* unit_panel_transition_thread */
 } after_battle_thread_slot_e;
 
-extern u8 g_after_battle_saved_thread_block[];
 extern s32 g_after_battle_thread_suspended_id;
 extern u8 g_after_battle_work[]; /* no named access */
 
