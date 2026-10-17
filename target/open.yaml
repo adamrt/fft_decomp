@@ -257,8 +257,6 @@ data:
   - {addr: 0x8008e540, name: g_movie_height}
   - {addr: 0x8008e544, name: g_movie_stream_status}
   - {addr: 0x8008e548, name: g_ending_script_state}
-  - {addr: 0x8008e564, name: g_ending_script_scroll_fraction}
-  - {addr: 0x8008e568, name: g_ending_script_scrolled_distance}
   - {addr: 0x8008e574, name: g_ending_script_byte_offset}
   - {addr: 0x8008fbf0, name: g_controller_handler_indices}
   - {addr: 0x8008fc00, name: g_window_primitive_count}

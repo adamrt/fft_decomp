@@ -992,10 +992,9 @@ static void world_map_negate_and_clamp(const SVECTOR* input, VECTOR* output) {
     output->vy = y;
 }
 
-/* Second names for three fields of g_world_map_pan: the
- * target loads each through its own address, in this order. */
+/* Separate addresses for two fields of g_world_map_pan: using the record's
+ * progress reschedules loads, and using target.vx shortens this body. */
 extern s32 g_world_map_pan_progress;
-extern s32 g_world_map_pan_origin_x;
 extern s32 g_world_map_pan_target_x;
 
 /* Advance one frame of the camera pan started by
@@ -1012,7 +1011,7 @@ s32 world_map_step_pan(void) {
     s32 progress;
     s32 distance;
     s32 target_x = g_world_map_pan_target_x;
-    s32 origin_x = g_world_map_pan_origin_x;
+    s32 origin_x = g_world_map_pan.origin.vx;
     s32 delta_x;
     s32 origin_y;
 

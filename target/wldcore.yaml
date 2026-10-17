@@ -595,7 +595,6 @@ data:
   - {addr: 0x800d0af4, name: g_message_block_loaded}
   - {addr: 0x800d0af8, name: g_world_map_pan}
   - {addr: 0x800d0b00, name: g_world_map_pan_progress}
-  - {addr: 0x800d0b04, name: g_world_map_pan_origin_x}
   - {addr: 0x800d0b14, name: g_world_map_pan_target_x}
   - {addr: 0x800d0b24, name: g_travel}
   - {addr: 0x800d0bb4, name: g_location_selected}
