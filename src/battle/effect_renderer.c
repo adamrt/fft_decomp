@@ -117,7 +117,7 @@ void* effect_heap_alloc_block(u32 size, s32 owner) {
                 prev->next = node->next;
             } else {
                 node->size = node->size - blocks;
-                node = (effect_heap_node_t*)((u8*)node + node->size * 8);
+                node += node->size;
                 node->size = blocks;
             }
             node->owner = owner;
