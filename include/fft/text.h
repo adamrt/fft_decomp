@@ -325,7 +325,7 @@ enum {
 };
 
 /* Small-glyph number formats use a digit count in the low byte and these flags in the high byte.
- * Both small-glyph renderers ignore bit 0x4000. */
+ * Bit 0x4000 has no standalone effect in digit mode. */
 typedef enum small_number_format_flag {
     SMALL_NUMBER_DOTS_PREFIX = 0x0100,
     SMALL_NUMBER_WIDEN_FOR_100 = 0x0200,

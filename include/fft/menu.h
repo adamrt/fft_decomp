@@ -33,8 +33,8 @@ void* menu_alloc_buffer(s32 bytes);
  * own record type through context. */
 
 /* Record reached through menu_entry_t::context by menu_text_entry_wait_thread and WORLD's
- * screen_text_entry_thread: they call prepare, then start the text thread text_thread_id with speaker_id
- * as its third and fourth parameters. */
+ * screen_text_entry_thread: they call prepare, then start text_thread_id with speaker_id as its third
+ * parameter. menu_text_entry_wait_thread also supplies speaker_id as the fourth parameter. */
 typedef struct menu_text_binding {
     void (*prepare)(void); /* 0x00 */
     u16 speaker_id;        /* 0x04: unit whose portrait speaks (roster slot) */

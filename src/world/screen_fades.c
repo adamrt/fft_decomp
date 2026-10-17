@@ -49,8 +49,8 @@ void screen_fade_start_increasing(void) {
 
 /* Steps the subtractive fade level down by 16 per VSync of the frame step and
  * draws the full-screen fade tile (abr 2, so the screen brightens as the level
- * falls); returns 1 while the fade is still running, 0 once done or when
- * fading is suppressed.
+ * falls). Returns 0 on the completion step or while disabled; otherwise 1,
+ * including calls when this fade direction is inactive.
  *
  * Unlike the fade out, the level is not clamped when it ends: at a frame step
  * of 2 it goes 16 to -16, and that last tile is drawn with the low byte, 240,
@@ -76,8 +76,8 @@ s32 screen_fade_update_in(void) {
 
 /* Sibling of screen_fade_update_in. Steps the subtractive fade level
  * up (the screen darkens) and draws the full-screen fade tile, ending clamped
- * at 0xFF; returns 1 while the fade is still running, 0 once done or when
- * fading is suppressed. */
+ * at 0xFF. Returns 0 on the completion step or while disabled; otherwise 1,
+ * including calls when this fade direction is inactive. */
 s32 screen_fade_update_out(void) {
     s32 running = 1;
     s32 unused[4]; /* target frame is 0x10 larger than the live locals need */
