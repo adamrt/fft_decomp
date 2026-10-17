@@ -3742,7 +3742,7 @@ s32 effect_secondary_teleport_handler(void) {
  *
  * With two frames left and a unit hit by the trajectory
  * (g_projectile_hit_unit_id), the target's hit reaction
- * (action_resolve_projectile_hit_by_runtime_id) starts, unless the item is one of
+ * (action_start_projectile_hit_response_by_runtime_id) starts, unless the item is one of
  * the balls or a consumable (ITEM_ID_POTION to ITEM_ID_PHOENIX_DOWN). When the
  * count runs out the icon slot is freed; a unit target whose result is neither
  * MISSED nor NO_EFFECT releases the requested ability effect at vsync interval

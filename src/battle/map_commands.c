@@ -50,7 +50,6 @@ s32 state_enter_effect_playback(void) {
     s32 previous_state;
     s32 previous_vsync_interval;
 
-    /* The target loads no argument; the parameter is the $a0 value unhandled states return. */
     if (effect_file_update_load() != 0) {
         return 1;
     }

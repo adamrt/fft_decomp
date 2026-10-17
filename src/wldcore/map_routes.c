@@ -762,7 +762,7 @@ static void travel_find_best_path(s32 from, s32 to) {
  * the address anchor that the later &g_travel argument is formed from, and
  * the chained 99999 store makes best_cost that anchor as in the target. The
  * location load and the two argument addresses share one base register in the
- * target, which needs them to be members of the one g_world_map_projection_state record. */
+ * target, which needs them to be members of the one g_world_map_marker_state record. */
 s32 travel_start(s32 from_location, s32 to_location) {
     s32 depth;
 
@@ -817,7 +817,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
  *
  * The two event-push tails are written out in full: GCC 2.7.2 cross-jumps
  * them into the single shared tail the target has, and only per-path CSE of
- * each copy keeps the target's direct g_world_map_projection_state accesses and the &state
+ * each copy keeps the target's direct g_world_map_marker_state accesses and the &state
  * base register in the flags update. */
 void travel_step(void) {
     point32_t delta;
