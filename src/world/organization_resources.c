@@ -1015,7 +1015,7 @@ static void screen_init_quad_from_record(RECT* out, const menu_entry_t* record, 
     out->h = record->inner_height;
     menu_init_sprt(primitive);
     primitive->clut = MENU_CLUT_NORMAL;
-    gfx_init_image_loading(primitive, &record->vram_origin, &record->window, &record->text_image);
+    gfx_set_image_primitive_layout(primitive, &record->vram_origin, &record->window, &record->text_image);
 }
 
 /* Set up the two menu sprites for one record. The first sprite is positioned

@@ -78,7 +78,7 @@ void unit_panel_numbers_thread(void) {
     descriptor = g_unit_panel_editor_numeric_texture;
     for (; i < 18; i++) {
         menu_init_sprt(&buffer->sprites[i]);
-        gfx_init_image_loading(&buffer->sprites[i], g_unit_panel_editor_numeric_geometry,
+        gfx_set_image_primitive_layout(&buffer->sprites[i], g_unit_panel_editor_numeric_geometry,
             &g_unit_panel_editor_numeric_table.texture_rect, descriptor);
         descriptor++;
     }

@@ -296,7 +296,7 @@ s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode) {
 }
 
 /* Bubble-sort g_unit_list_shown_unit_indices (the shown-unit index list) by the
- * successive keys of g_item_type_order_tables.order_0 (the unit sort order the
+ * successive keys of g_menu_sort_orders.unit_list (the unit sort order the
  * reorder list edits, each key a record field picked through g_unit_list_sort_field_indices; a tie
  * moves on to the next key), then publish the sorted record pointers into
  * g_unit_list_pointers. Keys 1 and 4 and up sort in descending order. `sort_mode` is
@@ -315,13 +315,13 @@ void unit_list_sort(s32 sort_mode) {
             k = 0;
             do {
                 rec = (s16*)&g_unit_list_records[g_unit_list_shown_unit_indices[j]];
-                lhs = rec[g_unit_list_sort_field_indices[g_item_type_order_tables.order_0[k]]];
+                lhs = rec[g_unit_list_sort_field_indices[g_menu_sort_orders.unit_list[k]]];
                 rec = (s16*)&g_unit_list_records[g_unit_list_shown_unit_indices[j + 1]];
-                rhs = rec[g_unit_list_sort_field_indices[g_item_type_order_tables.order_0[k]]];
+                rhs = rec[g_unit_list_sort_field_indices[g_menu_sort_orders.unit_list[k]]];
                 diff = rhs - lhs;
                 k++;
             } while (diff == 0);
-            if (g_item_type_order_tables.order_0[k - 1] == 1 || g_item_type_order_tables.order_0[k - 1] >= 4) {
+            if (g_menu_sort_orders.unit_list[k - 1] == 1 || g_menu_sort_orders.unit_list[k - 1] >= 4) {
                 diff = -diff;
             }
             if (diff < 0) {
@@ -340,24 +340,24 @@ void unit_list_sort(s32 sort_mode) {
 void unit_list_load_sort_order(s32 unused, s16* entries) {
     s32 i;
 
-    for (i = 0; (*entries = g_item_type_order_tables.order_0[i]) != -1; i++) {
+    for (i = 0; (*entries = g_menu_sort_orders.unit_list[i]) != -1; i++) {
         entries++;
     }
 }
 
-/* Copy the low byte of each 16-bit entry into g_item_type_order_tables.order_0
+/* Copy the low byte of each 16-bit entry into g_menu_sort_orders.unit_list
  * (the first, 12-byte list of those tables) until the terminator (-1) has been copied.
  * The first parameter is unused. */
 void unit_list_store_sort_order(s32 unused, const s16* entries) {
     s32 index = 0;
     s8 value = *entries;
 
-    g_item_type_order_tables.order_0[index] = value;
+    g_menu_sort_orders.unit_list[index] = value;
     while (value != -1) {
         entries++;
         value = *entries;
         index += 1;
-        g_item_type_order_tables.order_0[index] = value;
+        g_menu_sort_orders.unit_list[index] = value;
     }
 }
 

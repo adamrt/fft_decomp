@@ -12,7 +12,7 @@
 /* Scene-local GPU texture window; also the default draw-area rectangle. */
 extern RECT g_gfx_texture_window;
 
-void gfx_init_image_loading(
+void gfx_set_image_primitive_layout(
     void* primitive, const point16_t* base_load, const RECT* base_screen, const image_load_parameters_t* parameters);
 void gfx_load_image_and_wait(RECT* rect, void* data);
 void gfx_move_image_and_wait(RECT* rect, s16 x, s16 y);
@@ -52,7 +52,7 @@ extern s16 g_gfx_item_icon_clut_base_y;
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 
 /* icon placements */
-/* Image placements passed to gfx_init_image_loading for the icon strips of the event library. The panel and
+/* Image placements passed to gfx_set_image_primitive_layout for the icon strips of the event library. The panel and
  * numeric-panel cells of the menu library, which each menu program defines for itself, are in unit_panel.h. */
 extern image_load_parameters_t g_menu_icon_strip_image_params[20];
 extern image_load_parameters_t g_menu_single_icon_image_params[5];

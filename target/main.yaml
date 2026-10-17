@@ -1303,13 +1303,13 @@ data:
   - {addr: 0x80057718, name: g_system_session_frames}
   - {addr: 0x8005771c, name: g_script_variable_storage}
   - {addr: 0x80057b1c, name: g_save_unread_byte}
-  - {addr: 0x80057b20, name: g_item_type_order_tables}
-  - {addr: 0x80057b2c, name: g_item_type_order_1}
-  - {addr: 0x80057b34, name: g_item_type_order_2}
-  - {addr: 0x80057b3c, name: g_item_type_order_3}
-  - {addr: 0x80057b44, name: g_item_type_order_4}
-  - {addr: 0x80057b4c, name: g_item_type_order_5}
-  - {addr: 0x80057b54, name: g_item_type_order_6}
+  - {addr: 0x80057b20, name: g_menu_sort_orders}
+  - {addr: 0x80057b2c, name: g_formation_sort_order}
+  - {addr: 0x80057b34, name: g_weapons_and_shields_sort_order}
+  - {addr: 0x80057b3c, name: g_headgear_sort_order}
+  - {addr: 0x80057b44, name: g_body_armor_sort_order}
+  - {addr: 0x80057b4c, name: g_accessories_sort_order}
+  - {addr: 0x80057b54, name: g_other_items_sort_order}
   - {addr: 0x80057b5c, name: g_item_weapon_page_order}
   - {addr: 0x80057be8, name: g_item_helmet_page_order}
   - {addr: 0x80057c08, name: g_item_armor_page_order}

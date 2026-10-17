@@ -87,24 +87,24 @@ typedef struct save_image {
     u8 poached_item_quantities[ITEM_ID_COUNT];       /* 0x1704; g_item_poached_quantities */
     /* 0x1804; first 0x40 bytes are Move-Find-Item flags, second half unknown. */
     u8 item_location_flags[0x80];
-    s32 script_variables[0x100];   /* 0x1884 */
-    game_options_fields_t options; /* 0x1c84; copied to g_game_options by save_restore_image */
-    u8 _unknown_1c88;              /* 0x1c88 */
-    s8 item_type_order_0[0xc];     /* 0x1c89; signed, -1-terminated */
-    u8 _unused_1c95[1];            /* 0x1c95; serialized and parity-covered */
-    s8 item_type_order_1[8];       /* 0x1c96; signed, -1-terminated */
-    u8 _unused_1c9e[1];            /* 0x1c9e; serialized and parity-covered */
-    s8 item_type_order_2[7];       /* 0x1c9f; signed, -1-terminated */
-    s8 item_type_order_3[5];       /* 0x1ca6; signed, -1-terminated */
-    s8 item_type_order_4[5];       /* 0x1cab; signed, -1-terminated */
-    s8 item_type_order_5[7];       /* 0x1cb0; signed, -1-terminated */
-    s8 item_type_order_6[5];       /* 0x1cb7; signed, -1-terminated */
-    u8 weapon_page_order[0x8a];    /* 0x1cbc */
-    u8 helmet_page_order[0x1d];    /* 0x1d46 */
-    u8 armor_page_order[0x25];     /* 0x1d63 */
-    u8 accessory_page_order[0x21]; /* 0x1d88 */
-    u8 item_page_order[0x15];      /* 0x1da9 */
-    u8 _unused_1dbe[0x42];         /* 0x1dbe; parity-covered tail */
+    s32 script_variables[0x100];          /* 0x1884 */
+    game_options_fields_t options;        /* 0x1c84; copied to g_game_options by save_restore_image */
+    u8 _unknown_1c88;                     /* 0x1c88 */
+    s8 unit_list_sort_order[0xc];         /* 0x1c89; signed, -1-terminated */
+    u8 _unused_1c95[1];                   /* 0x1c95; serialized and parity-covered */
+    s8 formation_sort_order[8];           /* 0x1c96; signed, -1-terminated */
+    u8 _unused_1c9e[1];                   /* 0x1c9e; serialized and parity-covered */
+    s8 weapons_and_shields_sort_order[7]; /* 0x1c9f; signed, -1-terminated */
+    s8 headgear_sort_order[5];            /* 0x1ca6; signed, -1-terminated */
+    s8 body_armor_sort_order[5];          /* 0x1cab; signed, -1-terminated */
+    s8 accessories_sort_order[7];         /* 0x1cb0; signed, -1-terminated */
+    s8 other_items_sort_order[5];         /* 0x1cb7; signed, -1-terminated */
+    u8 weapon_page_order[0x8a];           /* 0x1cbc */
+    u8 helmet_page_order[0x1d];           /* 0x1d46 */
+    u8 armor_page_order[0x25];            /* 0x1d63 */
+    u8 accessory_page_order[0x21];        /* 0x1d88 */
+    u8 item_page_order[0x15];             /* 0x1da9 */
+    u8 _unused_1dbe[0x42];                /* 0x1dbe; parity-covered tail */
 } save_image_t;
 typedef char save_image_size_must_be_7680[(sizeof(save_image_t) == 7680) ? 1 : -1];
 
@@ -234,7 +234,7 @@ extern u8 g_save_overwrite_prompt_active;
 
 /* CARD scan and write */
 extern s8 g_save_open_result;
-extern s8 g_save_occupied_slot_count;
+extern s8 g_save_listed_slot_count;
 extern s8 g_save_scan_setup_step;
 extern u8 g_save_write_phase;
 extern u8 g_save_unread_flag; /* cleared with g_save_write_failed when a save starts; never read */

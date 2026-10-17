@@ -17,7 +17,7 @@
  * publishes it, and yields once while tracking thread status changes.
  *
  * Twin of menu_input_update_event_state; BUNIT additionally latches
- * `frame_arg`, clears g_unit_panel_hide_numeric_values, and calls menu_draw_thread_status_indicators after the
+ * `frame_arg`, clears g_unit_panel_hide_numeric_values, and calls menu_draw_status_panel_backdrops after the
  * yield. Needs the _divcheck profile for the three repeat-period divisions.
  */
 void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
@@ -109,7 +109,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;
     }
-    menu_draw_thread_status_indicators();
+    menu_draw_status_panel_backdrops();
     g_event_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {

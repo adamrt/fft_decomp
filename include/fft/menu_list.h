@@ -105,7 +105,7 @@ typedef struct menu_list_page {
 typedef char menu_list_page_size_must_be_308[sizeof(menu_list_page_t) == 308 ? 1 : -1];
 
 /* Text image placement: the upload rectangle plus the screen offsets
- * gfx_init_image_loading reads. */
+ * gfx_set_image_primitive_layout reads. */
 typedef struct menu_text_window {
     RECT rect;
     s16 x_screen_offset;

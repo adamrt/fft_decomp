@@ -432,7 +432,7 @@ void unit_view_tile_info_thread(void) {
     menu_init_sprite_array(page->sprites, 2, 0x7CBC);
     page->sprites[1].clut = 0x7D7C;
     for (i = 0; i < 2; i++) {
-        gfx_init_image_loading(&page->sprites[i], &g_menu_texture_origin, &g_unit_view_tile_info_image_location,
+        gfx_set_image_primitive_layout(&page->sprites[i], &g_menu_texture_origin, &g_unit_view_tile_info_image_location,
             &g_unit_view_tile_info_image_params[i]);
     }
     text_configure_sprite_vram(&rect, 0x18, 0x10, &page->sprites[0], 0);
@@ -519,7 +519,8 @@ static void menu_build_sprite_page(s32 page_index, RECT* base_screen) {
         sprite = &page->sprites[i];
         menu_init_sprt(sprite);
         SetDrawMode(&page->modes[i], 1, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_menu_sprite_page_texture_windows[i]);
-        gfx_init_image_loading(sprite, &g_menu_texture_origin, base_screen, &g_menu_sprite_page_image_params[i]);
+        gfx_set_image_primitive_layout(
+            sprite, &g_menu_texture_origin, base_screen, &g_menu_sprite_page_image_params[i]);
     }
     for (i = 4; i >= 0; i--) {
         gfx_draw_or_append_gpu_primitive(&page->sprites[i]);
@@ -760,7 +761,7 @@ static s32 unit_view_display_action_preview(
         params->y_load = rect->v;
         params->width = rect->width;
         params->height = rect->height;
-        gfx_init_image_loading(prim, base_load, base_screen, params);
+        gfx_set_image_primitive_layout(prim, base_load, base_screen, params);
     }
     prim->clut = 0x7d7c;
     if (image >= ACTION_DISPLAY_IMAGE_HP && image <= ACTION_DISPLAY_IMAGE_EXP) {
@@ -779,7 +780,7 @@ static s32 unit_view_display_action_preview(
         params->y_load = rect->v;
         params->width = rect->width;
         params->height = rect->height;
-        gfx_init_image_loading(prim, base_load, base_screen, params);
+        gfx_set_image_primitive_layout(prim, base_load, base_screen, params);
         return image;
     }
 
@@ -803,7 +804,7 @@ static s32 unit_view_display_action_preview(
                 params->y_load = rect->v;
                 params->width = rect->width;
                 params->height = rect->height;
-                gfx_init_image_loading(prim, base_load, base_screen, params);
+                gfx_set_image_primitive_layout(prim, base_load, base_screen, params);
                 value = prim->x1 - prim->x0;
                 if (value >= 0x18) {
                     prim->x0 += 0x18 - value;
@@ -908,22 +909,22 @@ static void unit_view_stats_panel_thread(
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &page->quads[1], 2);
     params = g_unit_view_stats_quad_image_params_by_mode[mode];
     if (mode == UNIT_STATS_PANEL_ATTACK_CASTER) {
-        gfx_init_image_loading(&page->quads[4], &g_menu_texture_origin, frame_rect, &params[4]);
+        gfx_set_image_primitive_layout(&page->quads[4], &g_menu_texture_origin, frame_rect, &params[4]);
         for (frame = 0; frame < 2; frame++, params++) {
-            gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+            gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
             page->quads[frame].clut = 0x7CBC;
         }
         unit_view_display_action_preview(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
     } else if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
         for (frame = 0; frame < 2; frame++, params++) {
-            gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+            gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
         }
         if (text_id != 0) {
-            gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+            gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
         }
     } else {
         for (frame = 0; frame < 4; frame++, params++) {
-            gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+            gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
         }
     }
     mem_copy_bytes_nonempty(&page[1], page, sizeof(unit_view_stats_page_t));
@@ -989,7 +990,7 @@ static void unit_view_stats_panel_thread(
             mem_copy_bytes_nonempty(
                 &params[6], &g_unit_view_stats_icon_image_params[status->team_kind], sizeof(*params));
             for (i = 0; i < 7; i++, params++) {
-                gfx_init_image_loading(&page->sprites[i], &g_menu_texture_origin, frame_rect, params);
+                gfx_set_image_primitive_layout(&page->sprites[i], &g_menu_texture_origin, frame_rect, params);
             }
         }
         if (mode != UNIT_STATS_PANEL_ATTACK_CASTER) {
@@ -1256,10 +1257,10 @@ void unit_view_summary_thread(void) {
     text_configure_sprite_vram(&rects[2], 0x10, 0xA, &frames[0].sprites[2], 0);
     text_configure_sprite_vram(&rects[3], 0x10, 0xA, &frames[0].sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&frames[0].sprites[frame], &g_menu_texture_origin, &g_unit_view_summary_panel_rect,
-            &g_unit_view_summary_sprite_image_params[frame]);
+        gfx_set_image_primitive_layout(&frames[0].sprites[frame], &g_menu_texture_origin,
+            &g_unit_view_summary_panel_rect, &g_unit_view_summary_sprite_image_params[frame]);
     }
-    gfx_init_image_loading(&frames[0].portrait, &g_menu_texture_origin, &g_unit_view_summary_panel_rect,
+    gfx_set_image_primitive_layout(&frames[0].portrait, &g_menu_texture_origin, &g_unit_view_summary_panel_rect,
         &g_unit_view_summary_portrait_image_params);
     if (unit->initial_team_flags & UNIT_TEAM_MASK) {
         frames[0].portrait.clut = 0x7FFD;
@@ -1565,7 +1566,7 @@ void status_screen_numbers_thread(void) {
     menu_free_memory(number_images);
     for (i = 0; i < 18; i++) {
         menu_init_sprt(&record->sprites[i]);
-        gfx_init_image_loading(&record->sprites[i], &g_menu_texture_origin, &g_status_screen_numbers_frame_rect,
+        gfx_set_image_primitive_layout(&record->sprites[i], &g_menu_texture_origin, &g_status_screen_numbers_frame_rect,
             &g_status_screen_numbers_image_params[i]);
     }
     mem_copy_bytes_nonempty(&record[1], record, sizeof(*record));
@@ -1712,19 +1713,19 @@ void status_screen_thread(void) {
     /* These sprite and rectangle records share the fields read by the image loader. */
     if (g_unit_panel_selected_unit_fields.state.generic_monster == 0) {
         for (i = 0; i < 19; i++) {
-            gfx_init_image_loading(&frame_record->sprites[i], &g_menu_texture_origin, &g_status_screen_panel_rect,
-                &g_status_screen_sprite_image_params_a[i]);
+            gfx_set_image_primitive_layout(&frame_record->sprites[i], &g_menu_texture_origin,
+                &g_status_screen_panel_rect, &g_status_screen_sprite_image_params_a[i]);
         }
     } else {
         for (i = 0; i < 19; i++) {
-            gfx_init_image_loading(&frame_record->sprites[i], &g_menu_texture_origin, &g_status_screen_panel_rect,
-                &g_status_screen_sprite_image_params_b[i]);
+            gfx_set_image_primitive_layout(&frame_record->sprites[i], &g_menu_texture_origin,
+                &g_status_screen_panel_rect, &g_status_screen_sprite_image_params_b[i]);
         }
     }
 
     menu_init_sprite_array(&frame_record->sprites[19], 5, 0x7CFC);
     for (i = 0; i < 5; i++) {
-        gfx_init_image_loading(&frame_record->sprites[19 + i], &g_gfx_item_icon_image_location,
+        gfx_set_image_primitive_layout(&frame_record->sprites[19 + i], &g_gfx_item_icon_image_location,
             &g_status_screen_panel_rect, &g_status_screen_item_icon_image_params[i]);
         gfx_set_item_icon_sprite(&frame_record->sprites[19 + i], g_unit_panel_selected_unit_fields.state.equipment[i]);
     }
@@ -2130,7 +2131,7 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
     record->_unknown_74 = 0;
     record->_unknown_78 = 0;
     menu_init_sprite_array(record->base.sprites, 4, 0x7cfc);
-    gfx_init_image_loading(record->base.sprites, &param->vram_origin, &param->window, &param->text_image);
+    gfx_set_image_primitive_layout(record->base.sprites, &param->vram_origin, &param->window, &param->text_image);
     SetSemiTrans(&record->base.sprites[1], 0);
     SetSemiTrans(&record->base.sprites[2], 1);
     size = 0x10;
@@ -2157,12 +2158,12 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
         image_params = param->context;
         record->icons[0]->x0 = image_params->height + param->window.x + 7;
         record->icons[0]->y0 = param->window.y - 1;
-        gfx_init_image_loading(
+        gfx_set_image_primitive_layout(
             &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[1]);
     } else
 #endif
         if (kind < 5) {
-        gfx_init_image_loading(
+        gfx_set_image_primitive_layout(
             &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[kind]);
     } else {
         if (index >= 5 && index < 0x10) {
@@ -2173,13 +2174,13 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
              * `kind * 4 + n`, fold collapses it to one x48 whose 3-op synth is an
              * instruction short; `(kind << 2) + n` selects the target's 4-op form. */
             kind -= 5;
-            gfx_init_image_loading(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
+            gfx_set_image_primitive_layout(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
                 &g_menu_icon_strip_image_params[(kind << 2)]);
-            gfx_init_image_loading(record->icons[0], &g_menu_texture_origin, &param->window,
+            gfx_set_image_primitive_layout(record->icons[0], &g_menu_texture_origin, &param->window,
                 &g_menu_icon_strip_image_params[(kind << 2) + 1]);
-            gfx_init_image_loading(record->icons[1], &g_menu_texture_origin, &param->window,
+            gfx_set_image_primitive_layout(record->icons[1], &g_menu_texture_origin, &param->window,
                 &g_menu_icon_strip_image_params[(kind << 2) + 2]);
-            gfx_init_image_loading(record->icons[2], &g_menu_texture_origin, &param->window,
+            gfx_set_image_primitive_layout(record->icons[2], &g_menu_texture_origin, &param->window,
                 &g_menu_icon_strip_image_params[(kind << 2) + 3]);
         } else {
             record->icons[0] = 0;

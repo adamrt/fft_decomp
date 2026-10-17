@@ -646,7 +646,7 @@ void script_frame_after_requests_stub(void) {
 /* Point a sprite (SPRT) or textured quad (POLY_FT4) at an image: texture source from parameters
  * relative to base_load, screen rectangle relative to base_screen. A negative x_load keeps the
  * primitive's texture fields and moves it only. */
-void gfx_init_image_loading(
+void gfx_set_image_primitive_layout(
     void* primitive, const point16_t* base_load, const RECT* base_screen, const image_load_parameters_t* parameters) {
     int texture_column;
     SPRT* sprite = primitive;

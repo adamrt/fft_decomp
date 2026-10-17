@@ -115,7 +115,7 @@ void unit_panel_banner_thread(void) {
     text_configure_sprite_vram(&rects[0], 0x38, 0x28, &editor->value_sprites[0], 2);
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
-        gfx_init_image_loading(&editor->value_sprites[frame], g_unit_panel_editor_numeric_geometry,
+        gfx_set_image_primitive_layout(&editor->value_sprites[frame], g_unit_panel_editor_numeric_geometry,
             &g_menu_portrait_origin, &g_unit_panel_editor_value_cells[frame]);
     }
 
@@ -129,7 +129,7 @@ void unit_panel_banner_thread(void) {
         mem_copy_bytes_nonempty(g_unit_panel_editor_mode_cell, g_unit_panel_editor_mode_cells, 0xC);
     }
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&editor->label_sprites[frame], g_unit_panel_editor_numeric_geometry,
+        gfx_set_image_primitive_layout(&editor->label_sprites[frame], g_unit_panel_editor_numeric_geometry,
             &g_menu_portrait_origin, &g_unit_panel_editor_label_cells[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
@@ -146,10 +146,10 @@ void unit_panel_banner_thread(void) {
     text_configure_sprite_vram(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
     text_configure_sprite_vram(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&panel->sprites[frame], g_unit_panel_editor_numeric_geometry, &g_unit_panel_frame_rect,
-            &g_unit_panel_sprite_cells[frame]);
+        gfx_set_image_primitive_layout(&panel->sprites[frame], g_unit_panel_editor_numeric_geometry,
+            &g_unit_panel_frame_rect, &g_unit_panel_sprite_cells[frame]);
     }
-    gfx_init_image_loading(
+    gfx_set_image_primitive_layout(
         &panel->portrait, g_unit_panel_editor_numeric_geometry, &g_unit_panel_frame_rect, g_unit_panel_portrait_cell);
     if (state->team_kind == 1) {
         panel->portrait.clut = 0x7FFD;
@@ -182,8 +182,8 @@ void unit_panel_banner_thread(void) {
         } else {
             mem_copy_bytes_nonempty(g_unit_panel_editor_mode_cell, g_unit_panel_editor_mode_cells, 0xC);
         }
-        gfx_init_image_loading(&editor->label_sprites[6], g_unit_panel_editor_numeric_geometry, &g_menu_portrait_origin,
-            g_unit_panel_editor_mode_cell);
+        gfx_set_image_primitive_layout(&editor->label_sprites[6], g_unit_panel_editor_numeric_geometry,
+            &g_menu_portrait_origin, g_unit_panel_editor_mode_cell);
         if (state->team_kind == 1) {
             panel->portrait.clut = 0x7FFD;
         } else {

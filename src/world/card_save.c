@@ -661,14 +661,20 @@ void save_build_image(s32 slot) {
     bcopy(
         g_script_variable_storage, g_save_work_buffer->script_variables, sizeof(g_save_work_buffer->script_variables));
     bcopy(&g_game_options, &g_save_work_buffer->options, sizeof(g_save_work_buffer->options));
-    bcopy(g_item_type_order_tables.order_0, g_save_work_buffer->item_type_order_0,
-        sizeof(g_save_work_buffer->item_type_order_0));
-    bcopy(g_item_type_order_1, g_save_work_buffer->item_type_order_1, sizeof(g_save_work_buffer->item_type_order_1));
-    bcopy(g_item_type_order_2, g_save_work_buffer->item_type_order_2, sizeof(g_save_work_buffer->item_type_order_2));
-    bcopy(g_item_type_order_3, g_save_work_buffer->item_type_order_3, sizeof(g_save_work_buffer->item_type_order_3));
-    bcopy(g_item_type_order_4, g_save_work_buffer->item_type_order_4, sizeof(g_save_work_buffer->item_type_order_4));
-    bcopy(g_item_type_order_5, g_save_work_buffer->item_type_order_5, sizeof(g_save_work_buffer->item_type_order_5));
-    bcopy(g_item_type_order_6, g_save_work_buffer->item_type_order_6, sizeof(g_save_work_buffer->item_type_order_6));
+    bcopy(g_menu_sort_orders.unit_list, g_save_work_buffer->unit_list_sort_order,
+        sizeof(g_save_work_buffer->unit_list_sort_order));
+    bcopy(g_formation_sort_order, g_save_work_buffer->formation_sort_order,
+        sizeof(g_save_work_buffer->formation_sort_order));
+    bcopy(g_weapons_and_shields_sort_order, g_save_work_buffer->weapons_and_shields_sort_order,
+        sizeof(g_save_work_buffer->weapons_and_shields_sort_order));
+    bcopy(g_headgear_sort_order, g_save_work_buffer->headgear_sort_order,
+        sizeof(g_save_work_buffer->headgear_sort_order));
+    bcopy(g_body_armor_sort_order, g_save_work_buffer->body_armor_sort_order,
+        sizeof(g_save_work_buffer->body_armor_sort_order));
+    bcopy(g_accessories_sort_order, g_save_work_buffer->accessories_sort_order,
+        sizeof(g_save_work_buffer->accessories_sort_order));
+    bcopy(g_other_items_sort_order, g_save_work_buffer->other_items_sort_order,
+        sizeof(g_save_work_buffer->other_items_sort_order));
     bcopy(
         g_item_weapon_page_order, g_save_work_buffer->weapon_page_order, sizeof(g_save_work_buffer->weapon_page_order));
     bcopy(
@@ -781,33 +787,38 @@ s32 save_restore_image(s32 partial_load) {
     suzuki_sound_set_type(g_game_options.fields.sound_mode);
 
     for (; i < 11; i++) {
-        if (g_save_work_buffer->item_type_order_0[i] == 11) {
+        if (g_save_work_buffer->unit_list_sort_order[i] == 11) {
             j = 1;
         }
     }
     if (!j) {
-        bcopy(g_save_work_buffer->item_type_order_0, g_item_type_order_tables.order_0,
-            sizeof(g_save_work_buffer->item_type_order_0));
+        bcopy(g_save_work_buffer->unit_list_sort_order, g_menu_sort_orders.unit_list,
+            sizeof(g_save_work_buffer->unit_list_sort_order));
     }
 
     j = 0;
-    g_item_type_order_tables.order_0[11] = -1;
+    g_menu_sort_orders.unit_list[11] = -1;
     for (i = 0; i < 7; i++) {
-        if (g_save_work_buffer->item_type_order_1[i] == 11) {
+        if (g_save_work_buffer->formation_sort_order[i] == 11) {
             j = 1;
         }
     }
     if (!j) {
-        bcopy(
-            g_save_work_buffer->item_type_order_1, g_item_type_order_1, sizeof(g_save_work_buffer->item_type_order_1));
+        bcopy(g_save_work_buffer->formation_sort_order, g_formation_sort_order,
+            sizeof(g_save_work_buffer->formation_sort_order));
     }
 
-    g_item_type_order_1[7] = -1;
-    bcopy(g_save_work_buffer->item_type_order_2, g_item_type_order_2, sizeof(g_save_work_buffer->item_type_order_2));
-    bcopy(g_save_work_buffer->item_type_order_3, g_item_type_order_3, sizeof(g_save_work_buffer->item_type_order_3));
-    bcopy(g_save_work_buffer->item_type_order_4, g_item_type_order_4, sizeof(g_save_work_buffer->item_type_order_4));
-    bcopy(g_save_work_buffer->item_type_order_5, g_item_type_order_5, sizeof(g_save_work_buffer->item_type_order_5));
-    bcopy(g_save_work_buffer->item_type_order_6, g_item_type_order_6, sizeof(g_save_work_buffer->item_type_order_6));
+    g_formation_sort_order[7] = -1;
+    bcopy(g_save_work_buffer->weapons_and_shields_sort_order, g_weapons_and_shields_sort_order,
+        sizeof(g_save_work_buffer->weapons_and_shields_sort_order));
+    bcopy(g_save_work_buffer->headgear_sort_order, g_headgear_sort_order,
+        sizeof(g_save_work_buffer->headgear_sort_order));
+    bcopy(g_save_work_buffer->body_armor_sort_order, g_body_armor_sort_order,
+        sizeof(g_save_work_buffer->body_armor_sort_order));
+    bcopy(g_save_work_buffer->accessories_sort_order, g_accessories_sort_order,
+        sizeof(g_save_work_buffer->accessories_sort_order));
+    bcopy(g_save_work_buffer->other_items_sort_order, g_other_items_sort_order,
+        sizeof(g_save_work_buffer->other_items_sort_order));
     bcopy(
         g_save_work_buffer->weapon_page_order, g_item_weapon_page_order, sizeof(g_save_work_buffer->weapon_page_order));
     bcopy(

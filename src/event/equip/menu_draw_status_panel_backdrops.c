@@ -19,7 +19,7 @@
  * further toward the outside, alternating between two primitive buffers so the
  * previous frame stays queued. Nothing in EQUIP calls it.
  */
-void menu_draw_thread_status_indicators(void) {
+void menu_draw_status_panel_backdrops(void) {
     menu_gradient_panel_prims_t* prims;
     unit_panel_thread_t* display;
     unit_panel_thread_t* descriptor;

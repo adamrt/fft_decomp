@@ -915,8 +915,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `battle_map_draw_mesh_and_weather`: when map command 0x96 (E458) ends, `weather_run_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.
 - `save_run_screen`: its 0xCCD8-byte stack frame, containing packet pools and directory entries, reaches below 0x801ff000 into the top cells of MAIN's game heap (0x801df000-0x801ff000); it is safe only while those cells are free.
 - `tutorial_opcode_17_end`: two paths fall off the end of the s32 handler and return a stale nonzero `$v0` (the fade's result, or the 1 just stored), so the formation loop keeps running.
-- `menu_draw_thread_status_indicators` in WORLD and BUNIT (the ATTACK, DEBUGCHR and REQUIRE
-  copies, and EQUIP's `menu_draw_thread_status_indicators`, have no caller): while a unit-status banner thread (8 or 7) is being
+- `menu_draw_status_panel_backdrops` in WORLD and BUNIT (the ATTACK, DEBUGCHR and REQUIRE
+  copies, and EQUIP's `menu_draw_status_panel_backdrops`, have no caller): while a unit-status banner thread (8 or 7) is being
   stopped its first parameter is 0, and the panel check reads that display
   record at RAM address 0.
 - `ending_draw_text_records`: passes OT entries by value (`otag[15]`, `otag[8]`) to `AddPrim`; after `ClearOTagR` each holds the physical address of the entry below it, so the credits fade, bands and glyphs link into layers 14 and 7 through the KUSEG mirror.

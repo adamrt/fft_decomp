@@ -192,7 +192,7 @@ void option_game_options_thread(void) {
     base->thumb.h = 8;
     base->thumb.clut = 0x7D7C;
     menu_init_sprt(&base->frame);
-    gfx_init_image_loading(&base->frame, &entry->vram_origin, &entry->window, &image_parameters);
+    gfx_set_image_primitive_layout(&base->frame, &entry->vram_origin, &entry->window, &image_parameters);
 
     menu_init_sprite_array(base->arrow_marks, 2, MENU_CLUT_NORMAL);
     base->arrow_marks[0].w = 6;

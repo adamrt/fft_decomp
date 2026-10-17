@@ -131,7 +131,8 @@ void ability_list_scrolling_thread(void) {
     page->thumb.h = 8;
     page->thumb.clut = 0x7D7C;
     menu_init_sprt(&page->frame);
-    gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
+    gfx_set_image_primitive_layout(
+        &page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
     page->arrow_marks[0].h = 0xC;
@@ -382,7 +383,7 @@ void ability_list_scrolling_thread(void) {
         frame->v0 = (ring * 16 + scroll_accum - 2) & 0x7F;
         /* The frame zooms open over the first 12 ticks. */
         if (i * g_script_event_speed < 12) {
-            gfx_init_image_loading(
+            gfx_set_image_primitive_layout(
                 &page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
             menu_zoom_cursor_frame(entry, frame, i * g_script_event_speed);
         }

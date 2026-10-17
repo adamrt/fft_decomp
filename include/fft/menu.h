@@ -481,7 +481,7 @@ typedef struct menu_status_panel_numeric_geometry {
 
 /* Numeric panel buffer (0x2c0 bytes), double buffered by unit_panel_numbers_thread, which copies it with sizeof. The
  * draw modes are set up with gfx_set_draw_mode_for_texture_page / SetDrawMode, the 18 SPRTs by the
- * gfx_init_image_loading walk, +0x18c and +0x298 are the arguments of status_screen_init_numbers_frame and
+ * gfx_set_image_primitive_layout walk, +0x18c and +0x298 are the arguments of status_screen_init_numbers_frame and
  * menu_init_scaled_draw_area_packets, and the draw offsets follow from the SetDrawOffset(packet, position) pairs. */
 typedef struct menu_status_panel_numeric_buffer {
     DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
@@ -547,7 +547,7 @@ void menu_init_panel_fade_tiles(void);
 
 /* thread status indicators */
 /* g_menu_indicator_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two translucent
- * panels menu_draw_thread_status_indicators draws behind the unit status banners. */
+ * panels menu_draw_status_panel_backdrops draws behind the unit status banners. */
 typedef enum menu_indicator_state {
     MENU_INDICATOR_STATE_HIDDEN = 0,     /* not drawn */
     MENU_INDICATOR_STATE_FADING_IN = 1,  /* brightness rises by 0xc a frame up to 0x78 and holds */
@@ -556,6 +556,6 @@ typedef enum menu_indicator_state {
 
 extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];
 
-void menu_draw_thread_status_indicators(void);
+void menu_draw_status_panel_backdrops(void);
 
 #endif

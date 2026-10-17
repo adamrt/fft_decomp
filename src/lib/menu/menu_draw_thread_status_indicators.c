@@ -21,7 +21,7 @@ static s32 g_menu_indicator_state[2] = { 0 };
  * between two primitive buffers so the previous frame stays queued. The
  * EQUIP twin watches threads 13 and 14.
  */
-void menu_draw_thread_status_indicators(void) {
+void menu_draw_status_panel_backdrops(void) {
     menu_gradient_panel_prims_t* prims;
     unit_panel_thread_t* display;
     unit_panel_thread_t* descriptor;

@@ -347,7 +347,7 @@ static void save_update_scan_result(void) {
             g_save_list_top_row = 0;
             g_save_list_selected_slot = 0;
             g_save_list_cursor_index = 0;
-            g_save_occupied_slot_count = save_init_slot_cursor();
+            g_save_listed_slot_count = save_init_slot_cursor();
             g_save_menu_state = SAVE_MENU_SELECT_SAVE;
         } else {
             g_save_sound_queued_effect_id = SOUND_SFX_ERROR_MESSAGE;
@@ -501,13 +501,13 @@ void save_build_image(s32 slot) {
     g_save_buffer_pointer->_unknown_1c88 = g_save_unread_byte;
     bcopy(g_script_variable_storage, g_save_buffer_pointer->script_variables, sizeof(g_script_variable_storage));
     bcopy(&g_game_options, &g_save_buffer_pointer->options, 4);
-    bcopy(g_item_type_order_tables.order_0, g_save_buffer_pointer->item_type_order_0, 0xc);
-    bcopy(g_item_type_order_tables.order_1, g_save_buffer_pointer->item_type_order_1, 8);
-    bcopy(g_item_type_order_tables.order_2, g_save_buffer_pointer->item_type_order_2, 7);
-    bcopy(g_item_type_order_tables.order_3, g_save_buffer_pointer->item_type_order_3, 5);
-    bcopy(g_item_type_order_tables.order_4, g_save_buffer_pointer->item_type_order_4, 5);
-    bcopy(g_item_type_order_tables.order_5, g_save_buffer_pointer->item_type_order_5, 7);
-    bcopy(g_item_type_order_tables.order_6, g_save_buffer_pointer->item_type_order_6, 5);
+    bcopy(g_menu_sort_orders.unit_list, g_save_buffer_pointer->unit_list_sort_order, 0xc);
+    bcopy(g_menu_sort_orders.formation, g_save_buffer_pointer->formation_sort_order, 8);
+    bcopy(g_menu_sort_orders.weapons_and_shields, g_save_buffer_pointer->weapons_and_shields_sort_order, 7);
+    bcopy(g_menu_sort_orders.headgear, g_save_buffer_pointer->headgear_sort_order, 5);
+    bcopy(g_menu_sort_orders.body_armor, g_save_buffer_pointer->body_armor_sort_order, 5);
+    bcopy(g_menu_sort_orders.accessories, g_save_buffer_pointer->accessories_sort_order, 7);
+    bcopy(g_menu_sort_orders.other_items, g_save_buffer_pointer->other_items_sort_order, 5);
     bcopy(g_item_weapon_page_order, g_save_buffer_pointer->weapon_page_order, 0x8a);
     bcopy(g_item_helmet_page_order, g_save_buffer_pointer->helmet_page_order, 0x1d);
     bcopy(g_item_armor_page_order, g_save_buffer_pointer->armor_page_order, 0x25);
@@ -1043,8 +1043,8 @@ static void save_update_slot_list(u16 input) {
                 index = g_save_list_cursor_index;
                 if (input & PSX_PAD_DOWN) {
                     g_save_list_cursor_index++;
-                    if (g_save_list_cursor_index >= g_save_occupied_slot_count) {
-                        g_save_list_cursor_index = g_save_occupied_slot_count - 1;
+                    if (g_save_list_cursor_index >= g_save_listed_slot_count) {
+                        g_save_list_cursor_index = g_save_listed_slot_count - 1;
                     }
                 } else if ((input & PSX_PAD_UP) && g_save_list_cursor_index != 0) {
                     g_save_list_cursor_index--;
@@ -1178,7 +1178,7 @@ static void save_update_slot_list(u16 input) {
         menu_gfx_enqueue_textured_quad(
             &rect, 0xd8, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
-    if (g_save_occupied_slot_count - g_save_list_top_row >= 5) {
+    if (g_save_listed_slot_count - g_save_list_top_row >= 5) {
         rect.x = 0xe3;
         rect.y = 0xba;
         rect.w = 8;

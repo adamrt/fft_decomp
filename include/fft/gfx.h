@@ -202,7 +202,7 @@ typedef struct textured_rect_source {
 } textured_rect_source_t;
 typedef char textured_rect_source_size_must_be_16[sizeof(textured_rect_source_t) == 16 ? 1 : -1];
 
-/* Texture and screen placement for gfx_init_image_loading (12 bytes).
+/* Texture and screen placement for gfx_set_image_primitive_layout (12 bytes).
  * g_menu_sprite_page_image_params holds one per menu sprite. */
 typedef struct image_load_parameters {
     s16 x_load;

@@ -183,7 +183,7 @@ void item_sort_id_list(s32 mode, s16* list) {
 
 /*
  * Sort the formation roster order by the formation_sort_key_e list selected by `index`
- * (the Order Unit menu uses index 0, which points to order_1),
+ * (the Order Unit menu uses index 0, which points to the formation order),
  * then move eggs to the end in descending record-index order
  * and rebuild the unit pointer table.
  *

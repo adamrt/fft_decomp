@@ -119,7 +119,7 @@ void at_list_run(void) {
     page->thumb.h = 8;
     page->thumb.clut = 0x7D7C;
     menu_init_sprt(&page->frame);
-    gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, &image_parameters);
+    gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &image_parameters);
 
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;

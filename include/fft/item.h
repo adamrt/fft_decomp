@@ -639,33 +639,34 @@ typedef enum item_sort_key {
     ITEM_SORT_KEY_HELD_COUNT = 5, /* inventory plus equipped copies */
 } item_sort_key_e;
 
-/* Seven signed-byte sort-key lists, each ending in -1: order_0 serves
- * BUNIT's Unit List, order_1 serves Formation, and order_2..6 serve items. */
-typedef struct item_type_order_tables {
-    s8 order_0[12];
-    s8 order_1[8];
-    s8 order_2[8];
-    s8 order_3[8];
-    s8 order_4[8];
-    s8 order_5[8];
-    s8 order_6[8];
-} item_type_order_tables_t;
+/* Independent sort-key lists in their resident storage layout. Unit List and
+ * Formation have their own key domains; the five item categories use item_sort_key_e.
+ * Each list ends in -1. The item rows save only their live lengths. */
+typedef struct menu_sort_orders {
+    s8 unit_list[12];
+    s8 formation[8];
+    s8 weapons_and_shields[8];
+    s8 headgear[8];
+    s8 body_armor[8];
+    s8 accessories[8];
+    s8 other_items[8];
+} menu_sort_orders_t;
 
-extern item_type_order_tables_t g_item_type_order_tables;
+extern menu_sort_orders_t g_menu_sort_orders;
 
-/* Views of g_item_type_order_tables.order_1..6 for the WORLD save-image
+/* Views of the individual menu sort orders for the WORLD save-image
  * copies (save_build_image, save_restore_image),
  * whose code the member spelling changes. */
-extern s8 g_item_type_order_1[8];
-extern u8 g_item_type_order_2[7];
-extern u8 g_item_type_order_3[5];
-extern u8 g_item_type_order_4[5];
-extern u8 g_item_type_order_5[7];
-extern u8 g_item_type_order_6[5];
+extern s8 g_formation_sort_order[8];
+extern u8 g_weapons_and_shields_sort_order[7];
+extern u8 g_headgear_sort_order[5];
+extern u8 g_body_armor_sort_order[5];
+extern u8 g_accessories_sort_order[7];
+extern u8 g_other_items_sort_order[5];
 
 /* Packed sort-key orders ending in -1. WORLD slot 0 points to Formation's
- * order_1 (formation_sort_key_e); EQUIP slot 0 is null. Slots 1..5 in both
- * programs point to order_2..6 (item_sort_key_e). */
+ * formation order (formation_sort_key_e); EQUIP slot 0 is null. Slots 1..5
+ * in both programs point to the five item-category orders (item_sort_key_e). */
 extern s8* g_item_type_order_lists[];
 
 void item_init_order_tables(void);

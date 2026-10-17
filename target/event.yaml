@@ -49,7 +49,7 @@ functions:
   - {addr: 0x801c1eb8, size: 104, name: item_build_icon_source, hash: 7085296bf6f5bbac, source: src/lib/menu/item_build_icon_source.c}
   - {addr: 0x801c1f20, size: 8, name: menu_input_update_event_state, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_input_update_event_state.c}
   - {addr: 0x801c1f28, size: 28, name: menu_thread_is_running, hash: d10e3403d7fec970, source: src/lib/thread/menu_thread_is_running.c}
-  - {addr: 0x801c1f44, size: 1236, name: menu_draw_thread_status_indicators, hash: e022f2dec8a0a488, unit: menu_panel_backdrops}
+  - {addr: 0x801c1f44, size: 1236, name: menu_draw_status_panel_backdrops, hash: e022f2dec8a0a488, unit: menu_panel_backdrops}
   - {addr: 0x801c2418, size: 580, name: gfx_set_scaled_poly_ft4_4bpp, hash: f989278e90fdce7c, source: src/lib/menu/gfx_set_scaled_poly_ft4_4bpp.c}
   - {addr: 0x801c265c, size: 740, name: unit_panel_build_status_groups, hash: e865f008b1735c29, unit: deploy_panel_primitives}
   - {addr: 0x801c2940, size: 412, name: gfx_build_gradient_grid_primitives, hash: c1250559a6268b13, unit: deploy_panel_primitives}
@@ -365,7 +365,7 @@ functions:
   - {addr: 0x801c255c, size: 104, name: item_build_icon_source, hash: 7085296bf6f5bbac, source: src/lib/menu/item_build_icon_source.c}
   - {addr: 0x801c25c4, size: 900, name: menu_input_update_event_state, hash: acd007f8639f10f5, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x801c2948, size: 28, name: menu_thread_is_running, hash: d10e3403d7fec970, source: src/lib/thread/menu_thread_is_running.c}
-  - {addr: 0x801c2964, size: 1236, name: menu_draw_thread_status_indicators, hash: 06245ec603b0e42d, unit: menu_panel_backdrops}
+  - {addr: 0x801c2964, size: 1236, name: menu_draw_status_panel_backdrops, hash: 06245ec603b0e42d, unit: menu_panel_backdrops}
   - {addr: 0x801c2e38, size: 624, name: unit_list_init_vram_and_fade, hash: c23f6e3bd5b189f3, unit: entry}
   - {addr: 0x801c30a8, size: 152, name: unit_list_update_input_lock, hash: 646e49326a7f1a0f, unit: entry}
   - {addr: 0x801c3140, size: 16, name: unit_list_get_input_lock, hash: 5ffe36f037271c3b, unit: entry}
@@ -1104,7 +1104,7 @@ data:
   - {addr: 0x801cc808, name: g_save_buffer_pointer}
   - {addr: 0x801cc80c, name: g_save_menu_state}
   - {addr: 0x801cc810, name: g_save_menu_work_buffer}
-  - {addr: 0x801cc814, name: g_save_occupied_slot_count}
+  - {addr: 0x801cc814, name: g_save_listed_slot_count}
   - {addr: 0x801cc818, name: g_gfx_poly_ft4_buffers}
   - {addr: 0x801d8398, name: g_save_slot_descriptions}
   - {addr: 0x801d8848, name: g_input_event}
@@ -1210,7 +1210,7 @@ functions:
   - {addr: 0x801c23a4, size: 104, name: item_build_icon_source, hash: 7085296bf6f5bbac, source: src/lib/menu/item_build_icon_source.c}
   - {addr: 0x801c240c, size: 8, name: menu_input_update_event_state, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_input_update_event_state.c}
   - {addr: 0x801c2414, size: 28, name: menu_thread_is_running, hash: d10e3403d7fec970, source: src/lib/thread/menu_thread_is_running.c}
-  - {addr: 0x801c2430, size: 1236, name: menu_draw_thread_status_indicators, hash: 42aee85dfc3d3b51, unit: menu_panel_backdrops}
+  - {addr: 0x801c2430, size: 1236, name: menu_draw_status_panel_backdrops, hash: 42aee85dfc3d3b51, unit: menu_panel_backdrops}
   - {addr: 0x801c2904, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, unit: status_billboard}
   - {addr: 0x801c2924, size: 460, name: unit_panel_fill_billboard, hash: dc13403e0a243847, unit: status_billboard}
   - {addr: 0x801c2af0, size: 1348, name: unit_panel_load_selected, hash: 944be0b3f140f098, unit: status_billboard}
@@ -1424,7 +1424,7 @@ functions:
   - {addr: 0x801c3b98, size: 104, name: item_build_icon_source, hash: 7085296bf6f5bbac, source: src/lib/menu/item_build_icon_source.c}
   - {addr: 0x801c3c00, size: 8, name: menu_input_update_event_state, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_input_update_event_state.c}
   - {addr: 0x801c3c08, size: 28, name: menu_thread_is_running, hash: d10e3403d7fec970, source: src/lib/thread/menu_thread_is_running.c}
-  - {addr: 0x801c3c24, size: 1240, name: menu_draw_thread_status_indicators, hash: a9a11aad5290e5d4}
+  - {addr: 0x801c3c24, size: 1240, name: menu_draw_status_panel_backdrops, hash: a9a11aad5290e5d4}
   - {addr: 0x801c40fc, size: 40, name: thread_wait_forever_by_frames, hash: 23983331f707d2fa, unit: equipment_rows}
   - {addr: 0x801c4124, size: 92, name: equipment_get_row_item_count, hash: 7c0e3a55d7cefb73, unit: equipment_rows}
   - {addr: 0x801c4180, size: 92, name: equipment_get_row_equipped_count, hash: 3ace587681cacb49, unit: equipment_rows}
@@ -2374,7 +2374,7 @@ functions:
   - {addr: 0x801c2244, size: 104, name: item_build_icon_source, hash: 7085296bf6f5bbac, source: src/lib/menu/item_build_icon_source.c}
   - {addr: 0x801c22ac, size: 8, name: menu_input_update_event_state, hash: 6d64edf91449c1b1, source: src/lib/menu/menu_input_update_event_state.c}
   - {addr: 0x801c22b4, size: 28, name: menu_thread_is_running, hash: d10e3403d7fec970, source: src/lib/thread/menu_thread_is_running.c}
-  - {addr: 0x801c22d0, size: 1236, name: menu_draw_thread_status_indicators, hash: 06809308c5329e70, unit: menu_panel_backdrops}
+  - {addr: 0x801c22d0, size: 1236, name: menu_draw_status_panel_backdrops, hash: 06809308c5329e70, unit: menu_panel_backdrops}
   - {addr: 0x801c27a4, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, unit: status_billboard}
   - {addr: 0x801c27c4, size: 196, name: unit_panel_fill_billboard, hash: 10a1714f8625994f, unit: status_billboard}
   - {addr: 0x801c2888, size: 1348, name: unit_panel_load_selected, hash: b9c009db7e6c8971, unit: status_billboard}

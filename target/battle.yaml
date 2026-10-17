@@ -1108,7 +1108,7 @@ functions:
   - {addr: 0x8014a81c, size: 8, name: script_return_zero_1, hash: 207819bf4ebe3078, unit: script_commands}
   - {addr: 0x8014a824, size: 8, name: script_noop_10, hash: 6d64edf91449c1b1, unit: script_commands}
   - {addr: 0x8014a82c, size: 8, name: script_frame_after_requests_stub, hash: 6d64edf91449c1b1, unit: script_commands}
-  - {addr: 0x8014a834, size: 584, name: gfx_init_image_loading, hash: 6b065a2d67c808c2, unit: script_commands}
+  - {addr: 0x8014a834, size: 584, name: gfx_set_image_primitive_layout, hash: 6b065a2d67c808c2, unit: script_commands}
   - {addr: 0x8014aa7c, size: 220, name: menu_draw_numeric_display_entries, hash: c2ce3ac37a505f2f, unit: script_commands}
   - {addr: 0x8014ab58, size: 216, name: menu_display_number_entry, hash: ee3a5bfa118b7022, unit: script_commands}
   - {addr: 0x8014ac30, size: 656, name: menu_draw_large_number_glyphs, hash: 97ee6a6ad4dcbfc5, unit: script_commands}
