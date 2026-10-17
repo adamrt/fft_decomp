@@ -712,7 +712,7 @@ void state_handle_open_sp2_files(void) {
             }
             slot++;
             offset += sizeof(sprite_evtchr_slot_t);
-        } while (slot < 2);
+        } while (slot < SPRITE_EVTCHR_SLOT_COUNT);
     }
     state_update_units();
     menu_update_menus_and_event_speed(gfx_get_battle_otag(), g_input_current_buttons);

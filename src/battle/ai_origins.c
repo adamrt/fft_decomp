@@ -454,9 +454,7 @@ static s32 ai_origin_evaluate_self_target(void) {
     ai->current_action.command.targeting_type = TARGET_TYPE_TILE;
     g_ai_origin_self_target_stage = 0;
     ai->current_action.act_before_move = 1;
-    /* The 32-bit view of the first member keeps this load after the phase store.
-     * Direct .word or whole-union assignment changes target scheduling. */
-    ai->considered_unit_coords.word = *(u32*)&ai->acting_unit_coords;
+    memcpy(&ai->considered_unit_coords, &ai->acting_unit_coords, sizeof(ai_coords_t));
 prepare_origin:
     mode = AI_TILE_MASK_AOE;
     if (ai->current_action.command.targeting_type == TARGET_TYPE_UNIT)

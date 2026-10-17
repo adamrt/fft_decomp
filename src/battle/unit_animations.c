@@ -1985,7 +1985,7 @@ static void sprite_evtchr_release_unit(unit_t* unit) {
     s32 i;
     s32 slot_id;
 
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
         slot_id = g_sprite_evtchr_slots[i].owner;
         if (slot_id != SPRITE_EVTCHR_SLOT_OWNER_EVTCHR && slot_id != SPRITE_EVTCHR_SLOT_OWNER_NONE
             && (slot_id & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id
@@ -2091,16 +2091,16 @@ static void animation_update_unit_wep_eff(unit_t* unit_data) {
                         if (index >= (u32)seq->first_attack_sequence) {
                             /* Keep a slot the unit already owns; otherwise load into a free slot and a free
                              * image buffer. */
-                            for (i = 0; i < 2; i++) {
+                            for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
                                 if ((g_sprite_evtchr_slots[i].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK)
                                     == unit->runtime_id) {
                                     break;
                                 }
                             }
-                            if (i == 2) {
-                                for (i = 0; i < 2; i++) {
+                            if (i == SPRITE_EVTCHR_SLOT_COUNT) {
+                                for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
                                     if (g_sprite_evtchr_slots[i].owner == SPRITE_EVTCHR_SLOT_OWNER_NONE) {
-                                        for (j = 0; j < 2; j++) {
+                                        for (j = 0; j < SPRITE_EVTCHR_SLOT_COUNT; j++) {
                                             if (g_sprite_evtchr_slots[j].image_buffer_state
                                                 == SPRITE_EVTCHR_SLOT_BUFFER_FREE) {
                                                 sprite_evtchr_load_unit(unit, i, j);
@@ -2110,11 +2110,11 @@ static void animation_update_unit_wep_eff(unit_t* unit_data) {
                                         break;
                                     }
                                 }
-                                if (i == 2) {
+                                if (i == SPRITE_EVTCHR_SLOT_COUNT) {
                                     ok = 0;
                                 }
                                 /* With no free slot, j was never set (QUIRKS.md). */
-                                if (j == 2) {
+                                if (j == SPRITE_EVTCHR_SLOT_COUNT) {
                                     ok = 0;
                                 }
 
@@ -3154,7 +3154,7 @@ void sprite_load_reset_state(void) {
         offset -= sizeof(sprite_sheet_slot_t)) {
         ((sprite_sheet_slot_t*)((u8*)g_sprite_sheet_slots + offset))->in_use = 0;
     }
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
         g_sprite_evtchr_slots[i].owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
         g_sprite_evtchr_slots[i].image_buffer_state = SPRITE_EVTCHR_SLOT_BUFFER_FREE;
         g_sprite_evtchr_slots[i].evtchr_load_state = 0;

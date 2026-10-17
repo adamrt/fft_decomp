@@ -506,7 +506,7 @@ s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot) {
     RECT rect;
 
     if (g_sprite_evtchr_slots[slot].owner == SPRITE_EVTCHR_SLOT_OWNER_EVTCHR) {
-        for (i = 0; i < 2; i++) {
+        for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
             if (g_sprite_evtchr_slots[i].image_buffer_state == SPRITE_EVTCHR_SLOT_BUFFER_FREE) {
                 image_data = g_sprite_evtchr_slots[i].image_data;
                 sprite_decompress_attack_image(
@@ -548,7 +548,7 @@ s32 sprite_evtchr_release_reserved_slot(s32 slot_index) {
 s32 sprite_evtchr_init_slots(void) {
     s32 slot_index;
 
-    for (slot_index = 0; slot_index < 2; slot_index++) {
+    for (slot_index = 0; slot_index < SPRITE_EVTCHR_SLOT_COUNT; slot_index++) {
         g_sprite_evtchr_slots[slot_index].owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
         g_sprite_evtchr_slots[slot_index].image_buffer_state = SPRITE_EVTCHR_SLOT_BUFFER_FREE;
         g_sprite_evtchr_slots[slot_index].evtchr_load_state = 0;
@@ -570,7 +570,7 @@ s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary) {
     u32 marker;
     unit_t* unit;
 
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
         owner = g_sprite_evtchr_slots[i].owner;
         if (owner == SPRITE_EVTCHR_SLOT_OWNER_NONE) {
             summary[i].spritesheet_id = 0xff;

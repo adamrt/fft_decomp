@@ -31,6 +31,7 @@
 #include "fft/unit_runtime.h"
 #include "psx/gte_inline.h"
 #include "psx/gte_inline_split.h"
+#include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -477,7 +478,7 @@ void battle_entrypoint(void) {
                 }
                 i++;
                 timer_field++;
-            } while (i < 2);
+            } while (i < SPRITE_EVTCHR_SLOT_COUNT);
 
             /* A frame that ran long during effects arms the pacing timer, which state_sync_frame
              * uses to lengthen the following waits. */
@@ -807,7 +808,7 @@ void sprite_evtchr_invalidate_sp2(unit_t* unit) {
 
     invalid = SPRITE_EVTCHR_SLOT_OWNER_NONE;
     slot = g_sprite_evtchr_slots;
-    for (; count < 2; count++, slot++) {
+    for (; count < SPRITE_EVTCHR_SLOT_COUNT; count++, slot++) {
         u32 descriptor = slot->owner;
 
         if (((descriptor & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id)
@@ -1141,7 +1142,7 @@ void sprite_display_construct_polygon_data(
         gte_ldv0(&g_sprite_gte_rtps_vxy0);
         gte_rtps();
         /* The retail color transfer combines red and green in one 16-bit value. */
-        *(u16*)&prim->r0 = *(u16*)&display->color.r;
+        memcpy(&prim->r0, &display->color.r, sizeof(u16));
         prim->b0 = display->color.b;
         gte_stsxy(&prim->x3);
         prim->u0 = prim->u2 = part->u;

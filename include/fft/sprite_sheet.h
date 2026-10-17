@@ -424,7 +424,9 @@ typedef struct sprite_evtchr_slot_summary {
     u8 evtchr_state;   /* 0xff none, 0xfe saved, 0xfd loaded */
 } sprite_evtchr_slot_summary_t;
 
-extern sprite_evtchr_slot_t g_sprite_evtchr_slots[];
+enum { SPRITE_EVTCHR_SLOT_COUNT = 2 };
+
+extern sprite_evtchr_slot_t g_sprite_evtchr_slots[SPRITE_EVTCHR_SLOT_COUNT];
 
 s32 sprite_evtchr_init_slots(void);
 s32 sprite_evtchr_unpack_to_slot(s32 index, const evtchr_file_record_t* file);
