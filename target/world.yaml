@@ -2422,7 +2422,7 @@ imports:
   - {addr: 0x801c9d68, name: battle_map_title_thread}
   - {addr: 0x801c9ec0, name: battle_map_title_load_graphic}
   - {addr: 0x801cafd4, name: conditions_dispatch}
-  - {addr: 0x801d7000, name: text_init_battle_pointers}
+  - {addr: 0x801d7000, name: text_init_name_sections}
   - {addr: 0x801df198, name: status_screen_update}
 
 overrides:

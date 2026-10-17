@@ -2592,8 +2592,8 @@ units:
   - {name: entry, source: src/event/small/entry.c}
 
 functions:
-  - {addr: 0x801d7000, size: 100, name: text_init_battle_pointers, hash: 33b5d60b7f13ad41, unit: entry}
-  - {addr: 0x801d7064, size: 8, name: text_return_zero_1, hash: 207819bf4ebe3078, unit: entry}
+  - {addr: 0x801d7000, size: 100, name: text_init_name_sections, hash: 33b5d60b7f13ad41, unit: entry}
+  - {addr: 0x801d7064, size: 8, name: overlay_return_zero, hash: 207819bf4ebe3078, unit: entry}
 
 data:
   - {addr: 0x801d7070, name: g_text_name_section_offsets}

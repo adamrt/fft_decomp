@@ -215,7 +215,8 @@ typedef struct text_name_section_offsets {
 extern u8 g_text_name_data[];
 extern const text_name_section_offsets_t g_text_name_section_offsets;
 
-void text_init_battle_pointers(void);
+/* SMALL.OUT's entrypoint: bind its battle name text and clear the deployment unit limit. */
+void text_init_name_sections(void);
 
 /* substitutions */
 /* Player-name substitution, padded to 20 bytes with TEXT_END_WAIT_FOR_CONFIRM. */

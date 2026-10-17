@@ -1,4 +1,4 @@
-/* Battle text pointer init and a zero return. */
+/* SMALL.OUT: binding the battle name text sections and an unreferenced return-zero stub. */
 
 #include "fft/script_variable.h"
 #include "fft/text.h"
@@ -7,7 +7,7 @@
 /* SMALL.OUT's entry point, run once the overlay is loaded: point the roster-name and
  * job-name text sections at its own name data, copy the skillset-names pointer and
  * clear the deployment unit limit. */
-void text_init_battle_pointers(void) {
+void text_init_name_sections(void) {
     u8* string_data = g_text_name_data;
 
     g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES] = string_data + g_text_name_section_offsets.unit_names;
@@ -16,7 +16,7 @@ void text_init_battle_pointers(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
 }
 
-/* Returns 0; nothing on the disc calls it. */
-s32 text_return_zero_1(void) {
+/* Unreferenced return-zero stub; its original role is unknown. */
+s32 overlay_return_zero(void) {
     return 0;
 }

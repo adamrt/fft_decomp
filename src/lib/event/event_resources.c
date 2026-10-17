@@ -1157,7 +1157,7 @@ s32 overlay_poll_small(void) {
     if (g_overlay_companion_executable_request_index != 0) {
         return 1;
     }
-    text_init_battle_pointers();
+    text_init_name_sections();
     return 0;
 }
 
