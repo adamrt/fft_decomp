@@ -30,8 +30,9 @@
  * The option index arrives in the thread's first parameter, which is then
  * replaced by the icon parameter block. The entries are drawn with the stored
  * value highlighted; up/down wrap the cursor, circle stores it and cross
- * cancels. For option index 13 circle only accepts entry 1, which restores
- * g_option_reference_values; any other option clears value 13.
+ * cancels. The Initialize row accepts only choice 1, restoring the reference
+ * values. Confirming any other row changes its value and marks this row Customize,
+ * even when the chosen value equals the reference value.
  * On exit the thirteen values are packed back into g_game_options, the
  * sound mode is applied on the main stack and the input-repeat timing is
  * reloaded from the finger-cursor speed profile.
@@ -117,7 +118,7 @@ void option_choice_thread(void) {
             if (*input & PSX_PAD_CIRCLE) {
                 g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                 /* Row 13 is the defaults entry: choice 1 restores every option to its reference value. */
-                if (kind == GAME_OPTION_COUNT) {
+                if (kind == GAME_OPTION_INITIALIZE) {
                     if (cursor == 1) {
                         /* Dead store: allocation device, see the file header. */
                         i = 0;
@@ -133,7 +134,7 @@ void option_choice_thread(void) {
                 } else {
                     g_option_values[kind] = cursor;
                     /* Changing any other option clears the defaults entry. */
-                    g_option_values[GAME_OPTION_UNCHANGED] = 0;
+                    g_option_values[GAME_OPTION_INITIALIZE] = 0;
                     break;
                 }
             }

@@ -13,8 +13,8 @@
 
 /* game options */
 /* The live options word is g_game_options. The options screen unpacks its fields in menu order. Toggle
- * settings encode On as 0 and Off as 1; the paired high bit participates in the menu's Customize/Initialize
- * state. */
+ * settings encode On as 0 and Off as 1. The menu compares each full field with its reference value
+ * when choosing between Customize and Initialize. */
 enum {
     GAME_OPTIONS_NAVIGATION_MESSAGES_MASK = 0x00018000,
     GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK = 0x60000000,
@@ -35,9 +35,10 @@ typedef enum game_option_index {
     GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS = 10,
     GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE = 11,
     GAME_OPTION_SOUND_MODE = 12,
-    GAME_OPTION_COUNT = 13,
-    GAME_OPTION_UNCHANGED = 13
+    GAME_OPTION_INITIALIZE = 13 /* menu-only row: Customize or Initialize */
 } game_option_index_e;
+
+enum { GAME_OPTION_COUNT = 13, GAME_OPTION_MENU_ROW_COUNT = 14 };
 
 typedef enum game_option_toggle { GAME_OPTION_ON = 0, GAME_OPTION_OFF = 1 } game_option_toggle_e;
 
@@ -121,21 +122,20 @@ void option_open(void);
 void option_entrypoint(s32 menu_type);
 
 /* game options screen */
-/* One of the two 0x190-byte packet pages of the options screen (g_option_pages), alternated by frame.
- * Provisional. */
+/* One of the two packet pages of the options screen, alternated each frame. */
 typedef struct option_page {
-    SPRT title;                         /* 0x000: window title image */
-    SPRT value;                         /* 0x014: selected value image */
-    scaled_draw_area_pair_t title_area; /* 0x028 */
-    scaled_draw_area_pair_t value_area; /* 0x050 */
-    DR_MODE text_mode;                  /* 0x078 */
-    DR_MODE window_mode;                /* 0x084 */
-    DR_MODE icon_mode;                  /* 0x090 */
-    menu_icon_record_t icons;           /* 0x09c */
-    SPRT frame;                         /* 0x118: cursor frame */
-    SPRT arrows[2];                     /* 0x12c: scroll arrows */
-    SPRT arrow_marks[2];                /* 0x154 */
-    SPRT thumb;                         /* 0x17c: scroll-bar thumb */
+    SPRT setting_panel;                   /* 0x000: lower panel and Current setting heading */
+    SPRT setting_value;                   /* 0x014: the selected option value */
+    scaled_draw_area_pair_t list_area;    /* 0x028 */
+    scaled_draw_area_pair_t setting_area; /* 0x050 */
+    DR_MODE text_mode;                    /* 0x078 */
+    DR_MODE list_mode;                    /* 0x084 */
+    DR_MODE icon_mode;                    /* 0x090 */
+    menu_icon_record_t icons;             /* 0x09c */
+    SPRT list_text;                       /* 0x118: scrolling list text */
+    SPRT arrows[2];                       /* 0x12c: scroll arrows */
+    SPRT arrow_marks[2];                  /* 0x154 */
+    SPRT thumb;                           /* 0x17c: scroll-bar thumb */
 } option_page_t;
 typedef char option_page_size_must_be_400[(sizeof(option_page_t) == 400) ? 1 : -1];
 
@@ -149,11 +149,11 @@ extern menu_input_timing_profile_t g_option_input_repeat_timings[];
 extern RECT g_option_title_image_rect;
 extern RECT g_option_entry_panel_rect;
 extern RECT g_option_value_image_rect;
-extern s32 g_option_values[GAME_OPTION_UNCHANGED + 1]; /* the values being edited, one per game_option_index_e */
-extern s32 g_option_reference_values[];
-extern s32 g_option_choice_counts[];
-extern s32 g_option_choice_widths[];
-extern s32 g_option_value_text_id_bases[];
+extern s32 g_option_values[GAME_OPTION_MENU_ROW_COUNT]; /* edited values plus the Initialize row */
+extern s32 g_option_reference_values[GAME_OPTION_MENU_ROW_COUNT];
+extern s32 g_option_choice_counts[GAME_OPTION_MENU_ROW_COUNT];
+extern s32 g_option_choice_widths[GAME_OPTION_MENU_ROW_COUNT];
+extern s32 g_option_value_text_id_bases[GAME_OPTION_MENU_ROW_COUNT];
 
 void option_game_options_thread(void);
 void option_choice_thread(void); /* the value picker thread of one game option */

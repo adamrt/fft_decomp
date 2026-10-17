@@ -30,8 +30,8 @@
  * and exits once it ends, MENU_OPTION_TYPE_AT_LIST starts the AT list and MENU_OPTION_TYPE_CRYSTAL_PICKUP the
  * crystal pickup threads.
  *
- * g_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
- * option equals its g_option_reference_values entry. */
+ * The Initialize row initially shows Initialize if all 13 options equal their
+ * reference values, otherwise Customize. */
 void option_entrypoint(s32 mode) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     game_options_fields_t options = g_game_options.fields;
@@ -51,10 +51,10 @@ void option_entrypoint(s32 mode) {
     g_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
     g_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
     g_option_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
-    g_option_values[GAME_OPTION_UNCHANGED] = 1;
+    g_option_values[GAME_OPTION_INITIALIZE] = 1;
     for (i = 0; i < GAME_OPTION_COUNT; i++) {
         if (g_option_values[i] != g_option_reference_values[i]) {
-            g_option_values[GAME_OPTION_UNCHANGED] = 0;
+            g_option_values[GAME_OPTION_INITIALIZE] = 0;
         }
     }
     g_menu_modal_open = 0;
@@ -124,7 +124,7 @@ void option_game_options_thread(void) {
     s32 arrow_y;
     s32 repeat;
     SPRT* arrow;
-    SPRT* frame;
+    SPRT* list_text;
     u8* image;
 
     g_screen_thread_result = 1;
@@ -166,7 +166,7 @@ void option_game_options_thread(void) {
     texture_window.y = 0;
     texture_window.w = 0x100;
     texture_window.h = 0x100;
-    SetDrawMode(&page->window_mode, 0, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
+    SetDrawMode(&page->list_mode, 0, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
 
     arrow = page->arrows;
@@ -191,8 +191,8 @@ void option_game_options_thread(void) {
     base->thumb.w = 8;
     base->thumb.h = 8;
     base->thumb.clut = 0x7D7C;
-    menu_init_sprt(&base->frame);
-    gfx_set_image_primitive_layout(&base->frame, &entry->vram_origin, &entry->window, &image_parameters);
+    menu_init_sprt(&base->list_text);
+    gfx_set_image_primitive_layout(&base->list_text, &entry->vram_origin, &entry->window, &image_parameters);
 
     menu_init_sprite_array(base->arrow_marks, 2, MENU_CLUT_NORMAL);
     base->arrow_marks[0].w = 6;
@@ -220,14 +220,14 @@ void option_game_options_thread(void) {
     LoadImage(&image_rect, (u32*)image);
     thread_wait_frames(1);
 
-    menu_init_scaled_draw_area_packets(&page->title_area);
-    menu_init_scaled_draw_area_packets(&page->value_area);
-    menu_init_sprt(&base->title);
-    text_configure_sprite_vram(&g_option_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
+    menu_init_scaled_draw_area_packets(&page->list_area);
+    menu_init_scaled_draw_area_packets(&page->setting_area);
+    menu_init_sprt(&base->setting_panel);
+    text_configure_sprite_vram(&g_option_title_image_rect, entry->inner_width, 0x2C, &base->setting_panel, 0);
     image = menu_build_and_upload_window_frame_image(
         entry->inner_width, 0x2C, &g_option_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
-    base->title.x0 = entry->window.x;
-    base->title.y0 = entry->window.y + entry->window.h + 1;
+    base->setting_panel.x0 = entry->window.x;
+    base->setting_panel.y0 = entry->window.y + entry->window.h + 1;
     g_menu_window_text_pen.stride = entry->inner_width;
     menu_set_text_origin(0x18, 0xE);
     menu_display_text_entry(0x502B, image, &g_menu_window_text_pen);
@@ -235,10 +235,10 @@ void option_game_options_thread(void) {
     thread_wait_frames(1);
     menu_free_memory(image);
 
-    value_rect.x = base->title.x0;
-    value_rect.y = base->title.y0;
-    value_rect.w = base->title.w;
-    value_rect.h = base->title.h;
+    value_rect.x = base->setting_panel.x0;
+    value_rect.y = base->setting_panel.y0;
+    value_rect.w = base->setting_panel.w;
+    value_rect.h = base->setting_panel.h;
     mem_copy_bytes_nonempty(&g_option_entry_panel_rect, &entry->window.x, sizeof(g_option_entry_panel_rect));
     thread_start(g_thread_current_id + 1, menu_window_frame_thread);
     g_option_entry_panel_rect.h += 0xC;
@@ -246,10 +246,10 @@ void option_game_options_thread(void) {
     thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_entry_panel_rect, 0, 0);
     thread_yield();
 
-    menu_init_sprt(&base->value);
-    text_configure_sprite_vram(&g_option_value_image_rect, 0x3C, 0x10, &base->value, 0);
-    base->value.x0 = entry->window.x + 0x5C;
-    base->value.y0 = entry->window.y + entry->window.h + 0xF;
+    menu_init_sprt(&base->setting_value);
+    text_configure_sprite_vram(&g_option_value_image_rect, 0x3C, 0x10, &base->setting_value, 0);
+    base->setting_value.x0 = entry->window.x + 0x5C;
+    base->setting_value.y0 = entry->window.y + entry->window.h + 0xF;
     menu_clear_render_buffer(buffer, 0x1E0);
     g_menu_window_text_pen.stride = 0x3C;
     menu_set_text_origin(0, 0);
@@ -367,7 +367,7 @@ void option_game_options_thread(void) {
             accum += delta * step;
         }
         timer += g_script_event_speed;
-        frame = &page->frame;
+        list_text = &page->list_text;
 
         /* A whole 16-pixel row has scrolled: commit it. A direction held past the initial repeat
          * delay is fed back into the input so the scroll keeps going. */
@@ -382,10 +382,10 @@ void option_game_options_thread(void) {
             }
         }
 
-        page->frame.v0 = ring * 16 + accum - 2;
-        menu_select_sprite_clut(&page->title);
-        menu_select_sprite_clut(&page->value);
-        menu_select_sprite_clut(frame);
+        page->list_text.v0 = ring * 16 + accum - 2;
+        menu_select_sprite_clut(&page->setting_panel);
+        menu_select_sprite_clut(&page->setting_value);
+        menu_select_sprite_clut(list_text);
 
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[3]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[1]);
@@ -417,18 +417,18 @@ void option_game_options_thread(void) {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_gfx_active_buffer_index);
-        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_gfx_active_buffer_index);
-        gfx_draw_or_append_gpu_primitive(&page->title_area.areas[1]);
+        gfx_build_scaled_draw_area_pair_swapped(&page->list_area, &entry->window, i, g_gfx_active_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->setting_area, &value_rect, i, g_gfx_active_buffer_index);
+        gfx_draw_or_append_gpu_primitive(&page->list_area.areas[1]);
         gfx_draw_or_append_gpu_primitive(&page->icon_mode);
-        gfx_draw_or_append_gpu_primitive(frame);
-        gfx_draw_or_append_gpu_primitive(&page->window_mode);
-        gfx_draw_or_append_gpu_primitive(&page->title_area.areas[0]);
-        gfx_draw_or_append_gpu_primitive(&page->value_area.areas[1]);
-        gfx_draw_or_append_gpu_primitive(&page->value);
-        gfx_draw_or_append_gpu_primitive(&page->title);
+        gfx_draw_or_append_gpu_primitive(list_text);
+        gfx_draw_or_append_gpu_primitive(&page->list_mode);
+        gfx_draw_or_append_gpu_primitive(&page->list_area.areas[0]);
+        gfx_draw_or_append_gpu_primitive(&page->setting_area.areas[1]);
+        gfx_draw_or_append_gpu_primitive(&page->setting_value);
+        gfx_draw_or_append_gpu_primitive(&page->setting_panel);
         gfx_draw_or_append_gpu_primitive(&page->text_mode);
-        gfx_draw_or_append_gpu_primitive(&page->value_area.areas[0]);
+        gfx_draw_or_append_gpu_primitive(&page->setting_area.areas[0]);
 
         /* Apply the option values every frame. g_thread_call_target is the callback that
          * thread_call_on_main_stack runs below with the sound mode. */

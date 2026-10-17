@@ -14,10 +14,10 @@
 
 /* OPTION.OUT entry, run on the battle menu thread whose first parameter is the menu
  * entry. Copy the saved options into g_option_values and select the defaults row
- * (GAME_OPTION_UNCHANGED = 1) only when every value equals its reference value. Unless opening the crystal
- * pickup panel, ask the four battle info panels to stop and wait for them. Then run
- * `menu_type`'s screen: the game options on the thread slot below this one (waiting for
- * it, then exiting), the AT list, or the crystal pickup (crystal and treasure) panel.
+ * (g_option_values[GAME_OPTION_INITIALIZE] = 1) only when every value equals its reference value. Unless opening the
+ * crystal pickup panel, ask the four battle info panels to stop and wait for them. Then run `menu_type`'s screen: the
+ * game options on the thread slot below this one (waiting for it, then exiting), the AT list, or the crystal pickup
+ * (crystal and treasure) panel.
  *
  * The values pulsed for tutorial scripts (0xfd options, 0xf9 AT list) are the same
  * screen codes WORLD's option entry pulses. */
@@ -39,11 +39,11 @@ void option_entrypoint(s32 menu_type) {
     g_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
     g_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
     g_option_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
-    g_option_values[GAME_OPTION_UNCHANGED] = 1;
+    g_option_values[GAME_OPTION_INITIALIZE] = 1;
 
     for (index = 0; index < GAME_OPTION_COUNT; index++) {
         if (g_option_values[index] != g_option_reference_values[index]) {
-            g_option_values[GAME_OPTION_UNCHANGED] = 0;
+            g_option_values[GAME_OPTION_INITIALIZE] = 0;
         }
     }
 
