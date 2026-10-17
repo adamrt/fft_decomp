@@ -831,12 +831,9 @@ void brave_story_handle_event_list_input(menu_stack_record_t* level) {
  * instructions. The two differ only in the name base substituted
  * (TEXT_ID_FACT_NAME_BASE there), the menu level type and the frame size.
  *
- * The coordinate mode is a constant local, yet retail still switched on it to
- * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
- * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_position.y keeps its absolute address while the
- * later stores go through the text_id base register. That only happens when
- * the live case is the last one.
+ * Matching constraint: the constant switch, with the selected case last,
+ * keeps image_position.y at its absolute address while later stores reuse
+ * the text_id base. This spelling does not establish the original source.
  *
  * The depth is spelled as the global at every use rather than cached in a
  * local: the target re-reads g_menu_stack_depth after each call.
@@ -1308,12 +1305,9 @@ void tutorial_handle_topic_list_input(menu_stack_record_t* level) {
  * windows and frame. tutorial_wait_topic_then_pop
  * steps the window and pops the level, showing all three again.
  *
- * The coordinate mode is a constant local, yet retail still switched on it to
- * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
- * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_position.y keeps its absolute address while the
- * later stores go through the text_id base register. That only happens when
- * the live case is the last one.
+ * Matching constraint: the constant switch, with the selected case last,
+ * keeps image_position.y at its absolute address while later stores reuse
+ * the text_id base. This spelling does not establish the original source.
  *
  * The menu-stack type store comes last so the
  * compiler scales depth by four late and in place, forcing the copy into v0

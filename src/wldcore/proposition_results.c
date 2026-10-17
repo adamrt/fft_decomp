@@ -1895,12 +1895,9 @@ void brave_story_handle_unexplored_land_list_input(menu_stack_record_t* level) {
  * hides the Brave Story menu's four windows and frame and says
  * TEXT_ID_BRAVE_STORY_ENTRY_INFO with the land's name.
  *
- * The coordinate mode is a constant local, yet retail still switched on it to
- * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
- * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_position.y keeps its absolute address while the
- * later stores go through the text_id base register. That only happens when
- * the live case is the last one.
+ * Matching constraint: the constant switch, with the selected case last,
+ * keeps image_position.y at its absolute address while later stores reuse
+ * the text_id base. This spelling does not establish the original source.
  *
  * The render record's position is written through a pointer to its base: the
  * target reaches base.x/base.y at 0 and 4 off one register holding
@@ -2163,12 +2160,9 @@ void brave_story_handle_treasure_list_input(menu_stack_record_t* level) {
  * place the picture render record (the step does), and it clears the new
  * level's timer as well as starting it in LOAD.
  *
- * The coordinate mode is a constant local, yet retail still switched on it to
- * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
- * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_position.y keeps its absolute address while the
- * later stores go through the text_id base register. That only happens when
- * the live case is the last one.
+ * Matching constraint: the constant switch, with the selected case last,
+ * keeps image_position.y at its absolute address while later stores reuse
+ * the text_id base. This spelling does not establish the original source.
  *
  * `unused` reproduces eight bytes of locals below the date bytes that the
  * target never touches. */
