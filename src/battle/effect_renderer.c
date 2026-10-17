@@ -67,12 +67,18 @@ extern SVECTOR* g_effect_model_normals;
 extern psyq_tmd_packet_t* g_effect_model_commands;
 extern s32 g_effect_model_command_word_offset;
 
+static s32 effect_particle_update_node_from_work(effect_record_t* unused_record, effect_work_record_t* work);
 static void effect_vector_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out);
 static effect_list_node_t* effect_particle_alloc_list_node(s16 kind);
 static void effect_particle_free_list_node(effect_list_node_t* node);
 static s32 effect_get_random_between(s32 value_a, s32 value_b);
 static void effect_particle_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index);
 static void effect_particle_render_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue);
+
+/* The four sprite work kinds share one updater; heap-block work has no entry. */
+s32 (*g_effect_particle_render_handlers[4])(effect_record_t* record, effect_work_record_t* work)
+    = { effect_particle_update_node_from_work, effect_particle_update_node_from_work,
+          effect_particle_update_node_from_work, effect_particle_update_node_from_work };
 
 /* Make `buffer` the battle heap: a single free block of buffer_size / 8 - 1 eight-byte
  * blocks that forms the free ring by itself, with owner lists 0 to 16 emptied. */
@@ -596,7 +602,7 @@ void effect_particle_free_work_record(s16 record_index, effect_work_record_t* wo
  * screen heading stored on the node. Color-curve records take each channel
  * from its animation curve at the record's curve frame; others use neutral
  * 0x80. */
-s32 effect_particle_update_node_from_work(effect_record_t* unused_record, effect_work_record_t* work) {
+static s32 effect_particle_update_node_from_work(effect_record_t* unused_record, effect_work_record_t* work) {
     SVECTOR direction;
     VECTOR rotated;
 

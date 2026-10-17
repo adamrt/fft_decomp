@@ -64,6 +64,12 @@ enum { EFFECT_PRIMITIVE_BUFFER_SIZE = 32768 };
 /* Initial Z coordinate of each particle sprite's four corner vectors. */
 enum { EFFECT_CORNER_Z_DEFAULT = 512 };
 
+/* Work-kind handlers, indexed by kind_flags >> 12. The int return type is
+ * load-bearing even though the result is ignored: the value-returning call is
+ * a second set of $2, so sched1 no longer boosts the final `$2 = 1` to the end
+ * of its block, and the pc update is allocated $3 as in the target. */
+extern s32 (*g_effect_particle_render_handlers[4])(effect_record_t* record, effect_work_record_t* work);
+
 extern MATRIX g_effect_matrix;
 extern u32* g_effect_otag;
 
