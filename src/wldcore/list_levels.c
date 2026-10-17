@@ -38,7 +38,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void tutorial_build_menu_panel(tutorial_menu_panel_t* panel);
+static void tutorial_build_menu_panel(menu_stack_window_level_t* panel);
 static void brave_story_open_advancing_list(void);
 static void brave_story_open_work_history(void);
 static void tutorial_open_formation_list(void);
@@ -1127,7 +1127,7 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
         audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_TUTORIAL));
         break;
     case MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST:
-        tutorial_build_menu_panel(&g_menu_stack_records[g_menu_stack_depth - 1].text_list);
+        tutorial_build_menu_panel(&g_menu_stack_records[g_menu_stack_depth - 1].list_window);
         menu_stack_close_parent_list_frame();
         break;
     case MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST:
@@ -1341,7 +1341,7 @@ static void tutorial_push_menu_level(s32 selected_entry, s32 reset) {
 
     g_menu_stack_records[g_menu_stack_depth].list_window.frame_render
         = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    tutorial_build_menu_panel(&g_menu_stack_records[g_menu_stack_depth].text_list);
+    tutorial_build_menu_panel(&g_menu_stack_records[g_menu_stack_depth].list_window);
 
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].list_window.selected_entry = selected_entry;
@@ -1366,17 +1366,17 @@ static void tutorial_push_menu_level(s32 selected_entry, s32 reset) {
  *
  * The base coordinates are written through a point view of base_x/base_y; the
  * target addresses them from &base_x, not from the record start. */
-static void tutorial_build_menu_panel(tutorial_menu_panel_t* panel) {
+static void tutorial_build_menu_panel(menu_stack_window_level_t* panel) {
     RECT bounds;
     point32_t point;
-    s32 index = panel->render_index;
+    s32 index = panel->frame_render;
     point32_t* base;
     s32 i;
 
     bounds.x = 0;
     bounds.y = 0;
     bounds.w = 0x44;
-    bounds.h = panel->row_count * 0x10 + 0x10;
+    bounds.h = panel->entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     g_window_gs_image_records[index].priority = 0xA;
     g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
@@ -1385,9 +1385,9 @@ static void tutorial_build_menu_panel(tutorial_menu_panel_t* panel) {
     base->y = -0x28;
     point.x = 8;
     point.y = 8;
-    for (i = 0; i < panel->row_count; i++) {
+    for (i = 0; i < panel->entry_count; i++) {
         window_display_text_entry(
-            index, panel->text_ids[i] + TEXT_ID_TUTORIAL_CATEGORY_ROW_FIRST, point, g_window_image_buffer);
+            index, panel->entries[i] + TEXT_ID_TUTORIAL_CATEGORY_ROW_FIRST, point, g_window_image_buffer);
         point.y += 0x10;
     }
     window_load_render_record_image(index, g_window_image_buffer);

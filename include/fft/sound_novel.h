@@ -48,7 +48,7 @@ typedef struct sound_novel_reading {
 typedef char sound_novel_reading_size_must_be_56[sizeof(sound_novel_reading_t) == 56 ? 1 : -1];
 
 extern sound_novel_reading_t g_sound_novel_reading;
-extern sound_novel_reading_t g_sound_novel_saved_readings[];
+extern sound_novel_reading_t g_sound_novel_saved_readings[5];
 extern u32 g_sound_novel_read_section_bits[40];
 extern u32 g_sound_novel_saved_flags[2];
 
@@ -140,10 +140,6 @@ extern s32 g_sound_novel_countdown_elapsed;
 
 /* Sound resource the sound-novel menu passes to suzuki_sound_append_resource. */
 extern struct suzuki_sound_resource* g_sound_novel_default_sound_resource;
-
-/* Rows of four sound numbers in the WLDCORE sound bank (id 0xE1), indexed by a sound id from 1. Row 0 is not a
- * sound row: its four bytes are the eighth value of g_tutorial_battle_event_ids (0x1a8). */
-extern u8 g_sound_novel_sound_quads[][4];
 
 /* menu levels */
 /* Values of sound_novel_level_t.phase. */

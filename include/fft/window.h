@@ -22,7 +22,7 @@ typedef struct display_object_frame {
 /* An animation: a frame count followed by its frames. */
 typedef struct display_object_sequence {
     s32 frame_count;                  /* 0x00 */
-    display_object_frame_t frames[1]; /* 0x04 */
+    display_object_frame_t frames[0]; /* 0x04; frame_count serialized entries */
 } display_object_sequence_t;
 
 /* Serialized cel header, followed by part_count eight-byte sprite parts.

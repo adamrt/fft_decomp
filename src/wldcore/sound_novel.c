@@ -24,6 +24,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Sound IDs 1 through 56 select four-byte rows in the WLDCORE sound bank. */
+extern u8 g_sound_novel_sound_quads[56][4];
+
 static void sound_novel_branch_if_dialog_option(s32 branch_if_equal);
 static void sound_novel_branch_if_local_flag(s32 expected);
 static void sound_novel_branch_if_saved_flag(s32 expected);
@@ -328,7 +331,7 @@ enum {
     SOUND_QUAD_COMMAND_BASE = SUZUKI_SOUND_ID(SOUND_RESOURCE_SOUND_NOVEL, 0),
 };
 
-/* Stops the weather sound and plays row sound_id of
+/* Stops the weather sound and plays the row for sound_id from
  * g_sound_novel_sound_quads: four sounds of the sound novel's
  * resource, one on each SFX channel pair. A zero byte selects that
  * resource's empty sound 0, which only stops its channel pair. */
@@ -338,7 +341,7 @@ static void sound_novel_play_sound_quad(s32 sound_id) {
 
     sound_stop_weather_music();
     for (i = 0; i < SOUND_QUAD_COMMAND_COUNT; i++) {
-        values[i] = g_sound_novel_sound_quads[sound_id][i] + SOUND_QUAD_COMMAND_BASE;
+        values[i] = g_sound_novel_sound_quads[sound_id - 1][i] + SOUND_QUAD_COMMAND_BASE;
     }
     suzuki_sound_play_4_sfx(values[0], values[1], values[2], values[3]);
 }

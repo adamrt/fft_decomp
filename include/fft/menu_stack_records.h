@@ -49,7 +49,6 @@ union menu_stack_record {
     proposition_send_unit_level_t send_unit;
     proposition_confirm_level_t choice_panel;
     proposition_report_confirm_level_t proposition_report_confirm;
-    tutorial_menu_panel_t text_list;
     world_map_cursor_level_t map_cursor;
     world_map_visibility_level_t visibility;
     world_map_path_level_t path;

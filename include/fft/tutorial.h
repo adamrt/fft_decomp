@@ -18,17 +18,6 @@ typedef enum tutorial_menu_row {
     TUTORIAL_MENU_ROW_LEAVE = 3,
 } tutorial_menu_row_e;
 
-/* Provisional: owner of a text-list render record, as
- * tutorial_build_menu_panel reads it; only the record
- * index, row count and text-id rows are established. */
-typedef struct tutorial_menu_panel {
-    u8 _unused_00[8];
-    s32 render_index; /* 0x08 */
-    u8 _unused_0c[0x24];
-    s32 row_count;   /* 0x30 */
-    s32 text_ids[1]; /* 0x34; row_count entries, relative to TEXT_ID_TUTORIAL_CATEGORY_ROW_FIRST */
-} tutorial_menu_panel_t;
-
 extern s32 g_tutorial_menu_saved_cursor;
 extern menu_cursor_state_t g_tutorial_list_cursor;
 extern s32 g_tutorial_battle_event_ids[];

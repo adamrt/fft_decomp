@@ -507,7 +507,7 @@ data:
   - {addr: 0x8009ebd4, name: g_unit_panel_panel_params}
   - {addr: 0x8009ebe8, name: g_unit_panel_numbers_params}
   - {addr: 0x8009ebfc, name: g_tutorial_battle_event_ids}
-  - {addr: 0x8009ec18, name: g_sound_novel_sound_quads}
+  - {addr: 0x8009ec1c, name: g_sound_novel_sound_quads}
   - {addr: 0x8009ecfc, name: g_sound_novel_opcode_handlers}
   - {addr: 0x8009edd3, name: g_location_choice_hidden_offsets}
   - {addr: 0x8009ee30, name: g_window_panel_row_actions}
