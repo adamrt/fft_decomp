@@ -20,7 +20,7 @@ units:
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}]}
   - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: proposition_results, source: src/wldcore/proposition_results.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
-  - {name: resources, source: src/wldcore/resources.c, data: [{addr: 0x800c72f8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c72fc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7300, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7304, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7308, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c730c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7310, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7314, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7318, size: 4, hash: df3f619804a92fdb}]}
+  - {name: resources, source: src/wldcore/resources.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: sound_novel, source: src/wldcore/sound_novel.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}]}
   - {name: startup, source: src/wldcore/startup.c}
   - {name: window_records, source: src/wldcore/window_records.c}
@@ -565,15 +565,7 @@ data:
   - {addr: 0x800bc2f0, name: g_world_map_input_new_button_presses}
   - {addr: 0x800bc2f4, name: g_message_block_buffer}
   - {addr: 0x800c72f4, name: g_world_map_scratch_buffer}
-  - {addr: 0x800c72f8, name: g_world_map_input_repeat_initial_delay}
-  - {addr: 0x800c72fc, name: g_world_map_input_repeat_period}
-  - {addr: 0x800c7300, name: g_world_map_input_secondary_repeat_period}
-  - {addr: 0x800c7304, name: g_world_map_input_repeat_counter_up}
-  - {addr: 0x800c7308, name: g_world_map_input_repeat_counter_down}
-  - {addr: 0x800c730c, name: g_world_map_input_repeat_counter_left}
-  - {addr: 0x800c7310, name: g_world_map_input_repeat_counter_right}
-  - {addr: 0x800c7314, name: g_world_map_input_repeat_counter_r1}
-  - {addr: 0x800c7318, name: g_world_map_input_repeat_counter_l1}
+  - {addr: 0x800c72f8, name: g_world_map_input_repeat}
   - {addr: 0x800c731c, name: g_input_polled_buttons}
   - {addr: 0x800c7320, name: g_world_map_projected_tiles}
   - {addr: 0x800c87d8, name: g_window_image_buffer}
