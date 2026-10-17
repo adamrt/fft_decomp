@@ -45,12 +45,7 @@ typedef char thread_size_must_be_1024[(sizeof(thread_t) == 1024) ? 1 : -1];
  * 0x400-byte slots. The table itself has VARIANT_THREAD_TABLE_SLOT_COUNT slots:
  * 16 in BATTLE, 17 in WORLD, whose slot 16 runs tutorial text; the scheduler
  * and the slot searches scan it, but reset does not clear it. */
-enum {
-    THREAD_ID_COUNT = 16,
-    THREAD_STRIDE = 1024,
-    THREAD_ARRAY_BYTES = 16384,
-    THREAD_LAST_WORD_OFFSET = 0x3ffc,
-};
+enum { THREAD_ID_COUNT = 16, THREAD_STRIDE = 1024 };
 
 /* BATTLE and WORLD each define the backing array, slot pointer and current id.
  * EVENT overlays use the resident BATTLE scheduler. */

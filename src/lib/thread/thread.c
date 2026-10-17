@@ -54,10 +54,10 @@ void thread_exit_current(void) {
 /* Zeroes all 16 thread records (16 * 0x400 bytes), makes thread 0 the current
  * thread and marks it running. */
 void thread_reset_scheduler(void) {
-    s32* word;
-    s32 index = (THREAD_ARRAY_BYTES / sizeof(s32)) - 1;
+    u32* word;
+    s32 index = (THREAD_ID_COUNT * sizeof(thread_t) / sizeof(u32)) - 1;
 
-    word = (s32*)((u8*)g_threads + THREAD_LAST_WORD_OFFSET);
+    word = (u32*)(g_threads + THREAD_ID_COUNT) - 1;
     do {
         *word = 0;
         index -= 1;
