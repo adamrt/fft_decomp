@@ -6,8 +6,9 @@
 
 /* text_advance_cursor_with_backreferences with the remaining run length and return cursor passed
  * separately instead of in a text_reader_state_t. */
-u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor) {
-    text_backref_t* backref;
+const u8* text_advance_cursor_with_separate_backreference_state(
+    s32* remaining_bytes, const u8* cursor, const u8** return_cursor) {
+    const text_backref_t* backref;
     s32 remaining = *remaining_bytes;
     s32 scratch;
     u8 command;
@@ -18,13 +19,13 @@ u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, 
         *remaining_bytes = remaining;
         if (remaining == 0) {
             cursor = *return_cursor;
-            *return_cursor = (u8*)-1;
+            *return_cursor = (const u8*)-1;
         }
     }
     command = cursor[0];
     if (((command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST) && ((command & 0xF) < 4)) {
         *return_cursor = cursor + 3;
-        backref = (text_backref_t*)cursor;
+        backref = (const text_backref_t*)cursor;
         scratch = backref->length_high << 3;
         *remaining_bytes = scratch + backref->length_low + 4;
         scratch = backref->offset_high;

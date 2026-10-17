@@ -19,9 +19,9 @@
  * Numbers (0xE4/0xE6) are drawn one digit per 6-pixel column. Indexing the
  * divisor table inside the digit loop, rather than walking a pointer, is
  * what gives the target's strength-reduced pointer and register choice. */
-void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
+void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text) {
     party_unit_t* party;
-    u8* cursor;
+    const u8* cursor;
     s32 i;
     u8* fill = g_text_player_name_buffer;
     u8 terminator;
@@ -40,7 +40,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
         g_text_player_name_buffer[i] = party->name[i];
     }
 
-    if (text == 0 || text == (u8*)1) {
+    if (text == 0 || text == (const u8*)1) {
         cursor = text_find_entry(text_id);
     } else {
         cursor = text;
@@ -48,7 +48,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
 
     state = (text_reader_state_t*)getScratchAddr(128);
     variable_id = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
-    state->return_cursor = (u8*)-1;
+    state->return_cursor = (const u8*)-1;
     state->value_cursor = g_text_substitution_values;
     state->pending_width = 0xFFFF;
     state->remaining_bytes = 0;
@@ -94,7 +94,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
                     g_menu_text_palette_offset = *cursor;
                 } else if (state->command == TEXT_CHOICE_MARK) {
                     /* The text ends at the choice mark unless the caller passed text 1. */
-                    if (text != (u8*)1) {
+                    if (text != (const u8*)1) {
                         break;
                     }
                 } else if (state->command == TEXT_SPACE) {
@@ -175,11 +175,11 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
 
                 /* 0xFE and 0xFF end the text, or return from a substituted string. */
                 if ((state->command & 0xFE) == 0xFE) {
-                    if (state->return_cursor == (u8*)-1) {
+                    if (state->return_cursor == (const u8*)-1) {
                         break;
                     }
                     cursor = state->return_cursor;
-                    state->return_cursor = (u8*)-1;
+                    state->return_cursor = (const u8*)-1;
                     continue;
                 }
                 cursor = menu_text_advance_cursor_with_backreferences(state, cursor);

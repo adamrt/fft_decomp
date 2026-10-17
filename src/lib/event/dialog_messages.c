@@ -401,9 +401,9 @@ s32 text_resolve_format_string_id(s32 format_code, s32 value) {
  * line's column count goes to *columns and the line count to *rows. Spaces count one column
  * and numeric values their digit count (or the pending number width). */
 void text_measure(s16* columns, s16* rows, const u8* text) {
-    text_backref_t* backref;
+    const text_backref_t* backref;
     party_unit_t* party;
-    u8* cursor;
+    const u8* cursor;
     s32 i;
     u8* fill = g_text_player_name_buffer;
     u8 terminator;
@@ -411,7 +411,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
 
     /* Stage the first party unit's name (Ramza) for TEXT_FORMAT_RAMZA_NAME, in a buffer of
      * terminators. */
-    cursor = (u8*)text;
+    cursor = text;
     party = party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
@@ -421,7 +421,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
         g_text_player_name_buffer[i] = party->name[i];
     }
     state = (text_reader_state_t*)getScratchAddr(0);
-    state->return_cursor = (u8*)-1;
+    state->return_cursor = (const u8*)-1;
     state->value_cursor = g_text_substitution_values;
     state->remaining_bytes = 0;
     state->column = 0;
@@ -437,13 +437,13 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
                 state->max_column = state->column;
             }
             if (state->command == TEXT_END_WAIT_FOR_CONFIRM || state->command == TEXT_END_AUTO_CLOSE) {
-                if (state->return_cursor == (u8*)-1) {
+                if (state->return_cursor == (const u8*)-1) {
                     state->column = 0;
                     state->row++;
                     break;
                 }
                 cursor = state->return_cursor;
-                state->return_cursor = (u8*)-1;
+                state->return_cursor = (const u8*)-1;
                 continue;
             }
             state->column = 0;
@@ -491,7 +491,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
         }
         if ((state->command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (state->command & 0xF) < 4) {
             state->return_cursor = cursor + 3;
-            backref = (text_backref_t*)cursor;
+            backref = (const text_backref_t*)cursor;
             state->scratch = backref->length_high * 8;
             state->remaining_bytes = backref->length_low;
             state->remaining_bytes = state->remaining_bytes + state->scratch + 4;
@@ -513,9 +513,9 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
  * the widest line and line count. Spaces are 4 pixels and numeric digits 6;
  * other glyphs use their prefix page's width table. */
 void text_measure_pixels(s16* width, s16* rows, const u8* text) {
-    text_backref_t* backref;
+    const text_backref_t* backref;
     party_unit_t* party;
-    u8* cursor;
+    const u8* cursor;
     s32 i;
     u8* fill = g_text_player_name_buffer;
     u8 terminator;
@@ -523,7 +523,7 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
 
     /* Stage the first party unit's name (Ramza) for TEXT_FORMAT_RAMZA_NAME, in a buffer of
      * terminators. */
-    cursor = (u8*)text;
+    cursor = text;
     party = party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
@@ -533,7 +533,7 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
         g_text_player_name_buffer[i] = party->name[i];
     }
     state = (text_reader_state_t*)getScratchAddr(0);
-    state->return_cursor = (u8*)-1;
+    state->return_cursor = (const u8*)-1;
     state->value_cursor = g_text_substitution_values;
     state->remaining_bytes = 0;
     state->column = 0;
@@ -551,13 +551,13 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
                 state->max_column = state->column;
             }
             if (state->command == TEXT_END_WAIT_FOR_CONFIRM || state->command == TEXT_END_AUTO_CLOSE) {
-                if (state->return_cursor == (u8*)-1) {
+                if (state->return_cursor == (const u8*)-1) {
                     state->column = 0;
                     state->row++;
                     break;
                 }
                 cursor = state->return_cursor;
-                state->return_cursor = (u8*)-1;
+                state->return_cursor = (const u8*)-1;
                 continue;
             }
             state->column = 0;
@@ -605,7 +605,7 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
         }
         if ((state->command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (state->command & 0xF) < 4) {
             state->return_cursor = cursor + 3;
-            backref = (text_backref_t*)cursor;
+            backref = (const text_backref_t*)cursor;
             state->scratch = backref->length_high * 8;
             state->remaining_bytes = backref->length_low;
             state->remaining_bytes = state->remaining_bytes + state->scratch + 4;

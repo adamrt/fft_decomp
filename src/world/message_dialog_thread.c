@@ -57,7 +57,7 @@ void message_dialog_thread(void) {
     RECT from;
     RECT to;
     s32 repeat;
-    u8* saved;
+    const u8* saved;
     s32 width_override;
     s16 cursor_y;
     s16 right;
@@ -80,7 +80,7 @@ void message_dialog_thread(void) {
     menu_window_buffer_t* select_hidden_window_next;
     party_unit_t* party;
     job_data_t* job;
-    u8* text;
+    const u8* text;
     s16 cursor_x;
     s32 column;
     s32 character;
@@ -477,7 +477,7 @@ void message_dialog_thread(void) {
     width_override = 0xFFFF;
     cursor_y = rec.y;
     rec.mark = -1;
-    saved = (u8*)-1;
+    saved = (const u8*)-1;
     repeat = 0;
 
     /* Draw one text byte per pass; `saved` is the return point after a substituted or replayed run. */
@@ -493,9 +493,9 @@ void message_dialog_thread(void) {
             }
             if (character == TEXT_END_WAIT_FOR_CONFIRM) {
                 /* The end of a substituted string returns to the text that named it. */
-                if (saved != (u8*)-1) {
+                if (saved != (const u8*)-1) {
                     text = saved;
-                    saved = (u8*)-1;
+                    saved = (const u8*)-1;
                     continue;
                 }
                 while (1) {
@@ -660,7 +660,7 @@ void message_dialog_thread(void) {
                     g_screen_dialog_waiting = 0;
                     win->portrait_code = rec.portrait;
                     value_index = 0;
-                    saved = (u8*)-1;
+                    saved = (const u8*)-1;
                     repeat = 0;
                     win[1].portrait_code = rec.portrait;
                     thread_yield();
@@ -768,7 +768,7 @@ void message_dialog_thread(void) {
                 rec.line = 0;
                 repeat = 0;
                 g_screen_dialog_waiting = 0;
-                saved = (u8*)-1;
+                saved = (const u8*)-1;
                 thread_yield();
                 continue;
             }

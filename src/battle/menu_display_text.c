@@ -22,9 +22,9 @@
  * Reading each control operand through the byte local and the u8
  * variable_base keep the outer loop large enough that loop.c does not hoist
  * the 0xFFFF pending-width constant, as in the target. */
-void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
+void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text) {
     text_reader_state_t* state;
-    u8* cursor;
+    const u8* cursor;
     u8 operand;
     s32 width;
     u32* divisor;
@@ -38,7 +38,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     /* The result is unused; WORLD's body copies the player's name from roster slot 0 here. */
     party_get_unit(0);
 
-    if (text == 0 || text == (u8*)1) {
+    if (text == 0 || text == (const u8*)1) {
         cursor = text_find_entry(text_id);
     } else {
         cursor = text;
@@ -48,7 +48,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     state = (text_reader_state_t*)getScratchAddr(128);
     powers = g_text_decimal_divisors;
     variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
-    state->return_cursor = (u8*)-1;
+    state->return_cursor = (const u8*)-1;
     state->value_cursor = g_text_substitution_values;
     state->pending_width = 0xFFFF;
     state->remaining_bytes = 0;
@@ -184,11 +184,11 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
 
                 /* 0xFE and 0xFF end the entry, or return from a substituted one. */
                 if ((state->command & 0xFE) == 0xFE) {
-                    if (state->return_cursor == (u8*)-1) {
+                    if (state->return_cursor == (const u8*)-1) {
                         break;
                     }
                     cursor = state->return_cursor;
-                    state->return_cursor = (u8*)-1;
+                    state->return_cursor = (const u8*)-1;
                     continue;
                 }
 

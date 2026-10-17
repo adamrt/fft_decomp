@@ -82,28 +82,29 @@ typedef char text_backref_size_must_be_3[sizeof(text_backref_t) == 3 ? 1 : -1];
 /* Text-stream cursor state used by measurement and menu rendering. The
  * measurers use scratchpad 0x1f800000; menu rendering uses 0x1f800200. */
 typedef struct text_reader_state {
-    s32 command;         /* 0x00; current text byte */
-    s32 column;          /* 0x04; characters on the current line */
-    s32 max_column;      /* 0x08; widest line so far */
-    s32 row;             /* 0x0c; completed lines */
-    s32 value;           /* 0x10; substitution value / text id */
-    s32 scratch;         /* 0x14; intermediate byte-count / back-offset */
-    s32 remaining_bytes; /* 0x18; bytes left before returning to return_cursor */
-    u8* return_cursor;   /* 0x1c; cursor to resume at, -1 when none */
+    s32 command;             /* 0x00; current text byte */
+    s32 column;              /* 0x04; characters on the current line */
+    s32 max_column;          /* 0x08; widest line so far */
+    s32 row;                 /* 0x0c; completed lines */
+    s32 value;               /* 0x10; substitution value / text id */
+    s32 scratch;             /* 0x14; intermediate byte-count / back-offset */
+    s32 remaining_bytes;     /* 0x18; bytes left before returning to return_cursor */
+    const u8* return_cursor; /* 0x1c; cursor to resume at, -1 when none */
     u8 _unused_20[4];
     s32* value_cursor; /* 0x24; next substitution value */
     s32 pending_width; /* 0x28; explicit digit width from 0xE8, 0xFFFF when none */
     s32 glyph_page;    /* 0x2c; pending 0xDx page-prefix byte, 0 otherwise (text_measure_pixels) */
 } text_reader_state_t;
 
-u8* text_advance_cursor_with_backreferences(text_reader_state_t* state, u8* cursor);
+const u8* text_advance_cursor_with_backreferences(text_reader_state_t* state, const u8* cursor);
 
 /* The menu renderer's own copy of the same cursor helper. */
-u8* menu_text_advance_cursor_with_backreferences(text_reader_state_t* state, u8* cursor);
+const u8* menu_text_advance_cursor_with_backreferences(text_reader_state_t* state, const u8* cursor);
 
 /* The form the script interpreter and the per-program dialog threads use, with the back-reference state in
  * separate variables. */
-u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor);
+const u8* text_advance_cursor_with_separate_backreference_state(
+    s32* remaining_bytes, const u8* cursor, const u8** return_cursor);
 
 /* text sections */
 /* A text id selects a section in its upper five bits and an entry in the lower eleven. */
@@ -290,7 +291,7 @@ s32 menu_text_render_glyph_to_4bpp_image(s32 glyph_id, u8* image, const text_ima
 void menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text);
 void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
-void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
+void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text);
 void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void menu_text_render_encoded_ids_to_image(u8* image, text_image_bounds_t* rect, s32 unused, s32 max_chars, u8* font,
     s16* ids, s32 count, s16 glyph, s32 unused_flags);

@@ -54,7 +54,7 @@ void message_dialog_thread(void) {
     RECT from;
     RECT to;
     s32 repeat;
-    u8* saved;
+    const u8* saved;
     s32 column;
     s32 width_override;
     s16 cursor_y;
@@ -75,7 +75,7 @@ void message_dialog_thread(void) {
     menu_window_buffer_t* select_window;
     menu_window_buffer_t* select_hidden_window;
     menu_window_buffer_t* select_hidden_window_next;
-    u8* text;
+    const u8* text;
     s16 cursor_x;
     s32 character;
     s32 i;
@@ -423,7 +423,7 @@ void message_dialog_thread(void) {
     width_override = 0xFFFF;
     cursor_y = rec.y;
     rec.mark = -1;
-    saved = (u8*)-1;
+    saved = (const u8*)-1;
     repeat = 0;
 
     while (1) {
@@ -438,9 +438,9 @@ void message_dialog_thread(void) {
             }
             if (character == TEXT_END_WAIT_FOR_CONFIRM) {
                 /* The end of a substituted entry returns to the text that referenced it. */
-                if (saved != (u8*)-1) {
+                if (saved != (const u8*)-1) {
                     text = saved;
-                    saved = (u8*)-1;
+                    saved = (const u8*)-1;
                     continue;
                 }
                 /* Skip to the end of the page; adding no_value (0xFFFF) to the u16 line count
@@ -620,7 +620,7 @@ void message_dialog_thread(void) {
                     win->portrait_code = rec.portrait;
                     g_text_awaiting_input = 0;
                     value_index = 0;
-                    saved = (u8*)-1;
+                    saved = (const u8*)-1;
                     repeat = 0;
                     win[1].portrait_code = rec.portrait;
                     thread_yield();
@@ -758,7 +758,7 @@ void message_dialog_thread(void) {
                 rec.color = 0;
                 rec.mark = -1;
                 rec.line = 0;
-                saved = (u8*)-1;
+                saved = (const u8*)-1;
                 repeat = 0;
                 g_text_awaiting_input = 0;
                 thread_yield();
