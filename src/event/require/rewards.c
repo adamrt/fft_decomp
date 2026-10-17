@@ -37,6 +37,7 @@
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 /* One 12x24 burst tile: a double-buffered flat quad plus its motion state. */
@@ -889,8 +890,7 @@ static void party_apply_post_battle_changes(void) {
                     half_menu_x = menu_x / 2;
                     /* A recovered struct pointer hoists the owner address across the call (two instructions differ).
                      * Derive each byte displacement from the named field instead. */
-#define MENU_FIELD(field)                                                                                              \
-    (*(s16*)(menu_fields + (unsigned long)&((menu_entry_t*)0)->field - (unsigned long)&((menu_entry_t*)0)->inner_width))
+#define MENU_FIELD(field) (*(s16*)(menu_fields + offsetof(menu_entry_t, field) - offsetof(menu_entry_t, inner_width)))
                     MENU_FIELD(text_image.source.w) = menu_x;
                     MENU_FIELD(window.w) = menu_x;
                     MENU_FIELD(inner_width) = menu_x;
@@ -906,19 +906,16 @@ static void party_apply_post_battle_changes(void) {
                         g_after_battle_menu_selection_result = 0xff;
                         thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, menu_icon_strip_thread);
                         thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MESSAGE,
-                            (s32)(menu_fields - (unsigned long)&((menu_entry_t*)0)->inner_width), 0, 0);
+                            (s32)(menu_fields - offsetof(menu_entry_t, inner_width)), 0, 0);
                         if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
                             thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
-                                (s32)(menu_fields + 8 * sizeof(*menu_base)
-                                    - (unsigned long)&((menu_entry_t*)0)->inner_width),
-                                0, 0);
+                                (s32)(menu_fields + 8 * sizeof(*menu_base) - offsetof(menu_entry_t, inner_width)), 0,
+                                0);
                         } else {
                             thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
-                                (s32)(menu_fields + sizeof(*menu_base)
-                                    - (unsigned long)&((menu_entry_t*)0)->inner_width),
-                                0, 0);
+                                (s32)(menu_fields + sizeof(*menu_base) - offsetof(menu_entry_t, inner_width)), 0, 0);
                         }
                     }
 
