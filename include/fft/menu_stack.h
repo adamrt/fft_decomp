@@ -129,35 +129,18 @@ typedef struct menu_stack_panel_level {
     u8 _unused_08[0x28];
     s32 entry_count; /* 0x30; rows in the panel list */
     /* 0x34; entry text ids, filled by location_build_menu_entries, whose result is the entry count;
-     * the same offset as the list_window and proposition_list entries */
+     * the same offset as the Brave Story and proposition-list entries */
     s32 entries[10];
 } menu_stack_panel_level_t;
 
-/* Phases of a list-window level (menu_stack_window_level_t.mode). The
- * town menu uses only the first two. */
+/* Phases used by the window-based menu levels. The town menu uses only
+ * the first two. */
 typedef enum menu_stack_window_mode {
     MENU_STACK_WINDOW_MODE_BROWSE = 0,
     MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE = 1, /* the farewell text is up; waits for circle or cross */
     MENU_STACK_WINDOW_MODE_FADE_OR_HELP = 2,  /* fading out after the farewell, or under the help message */
     MENU_STACK_WINDOW_MODE_LEAVE_WAIT = 3,    /* faded out; waits for thread 14 to end, then pops */
 } menu_stack_window_mode_e;
-
-/* The root Brave Story menu, beneath its flag-list panels. The categories and
- * Tutorial menus have separate records in brave_story.h and tutorial.h. */
-typedef struct menu_stack_window_level {
-    s32 main_window;
-    s32 side_window;    /* 0x04 */
-    s32 frame_render;   /* 0x08 */
-    s32 content_render; /* 0x0c */
-    u8 _unused_10[8];
-    s32 mode;           /* 0x18; menu_stack_window_mode_e */
-    s32 selected_entry; /* 0x1c; initial row from g_brave_story_saved_cursor */
-    s32 upper_window;   /* 0x20; Brave Story: completion star of the unexplored lands row */
-    s32 lower_window;   /* 0x24; Brave Story: completion star of the treasures row */
-    u8 _unused_28[8];
-    s32 entry_count; /* 0x30; rows drawn by brave_story_push_level */
-    s32 entries[10]; /* 0x34; brave_story_row_e; text is TEXT_ID_BRAVE_STORY_ROW_FIRST + kind */
-} menu_stack_window_level_t;
 
 void menu_stack_push_message_level(s32 text, s32 reload_text);
 void menu_stack_push_text_window_level(s32 text, s32 reload_text);

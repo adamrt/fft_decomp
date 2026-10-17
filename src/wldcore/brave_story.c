@@ -259,28 +259,28 @@ void brave_story_push_level(void) {
     g_system_flags = g_system_flags & ~SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].list_window.main_window = index;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.cursor_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
     g_window_records[index].priority = 0xA;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].list_window.upper_window = index;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.land_completion_star = index;
     g_window_records[index].sequence = WINDOW_ANIM_BRAVE_STORY_MARKER;
     g_window_records[index].priority = 0xA;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].list_window.lower_window = index;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.treasure_completion_star = index;
     g_window_records[index].sequence = WINDOW_ANIM_BRAVE_STORY_MARKER;
     g_window_records[index].priority = 0xA;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].list_window.side_window = index;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.label_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_LIST_SIDE_LABEL;
     g_window_records[index].priority = 0xA;
     g_window_records[index].anim_counter = 0;
@@ -290,11 +290,11 @@ void brave_story_push_level(void) {
     brave_story_build_rows();
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].list_window.frame_render = index;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.rows_image = index;
     bounds.x = 0;
     bounds.y = 0;
     bounds.w = 0x5C;
-    bounds.h = g_menu_stack_records[g_menu_stack_depth].list_window.entry_count * 0x10 + 0x10;
+    bounds.h = g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     g_window_gs_image_records[index].priority = 0xA;
     g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
@@ -306,16 +306,16 @@ void brave_story_push_level(void) {
 
     point.x = 8;
     point.y = 8;
-    for (; i < g_menu_stack_records[g_menu_stack_depth].list_window.entry_count; i++) {
+    for (; i < g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count; i++) {
         window_display_text_entry(index,
-            g_menu_stack_records[g_menu_stack_depth].list_window.entries[i] + TEXT_ID_BRAVE_STORY_ROW_FIRST, point,
+            g_menu_stack_records[g_menu_stack_depth].brave_story.entries[i] + TEXT_ID_BRAVE_STORY_ROW_FIRST, point,
             g_window_image_buffer);
         point.y += 0x10;
     }
     window_load_render_record_image(index, g_window_image_buffer);
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].list_window.content_render = index;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.casualty_image = index;
     value = script_get_variable(EVENT_SCRIPT_VAR_INJURED);
     if (value >= 10000) {
         value = 9999;
@@ -345,38 +345,38 @@ void brave_story_push_level(void) {
 
     depth = g_menu_stack_depth;
     /* temp spans two blocks without crossing a call, so global allocation
-     * gives the clamp flag and the upper window's y sum the target's v1.
+     * gives the clamp flag and the land star's y sum the target's v1.
      * A saved cursor past the last entry restarts at row 0. */
-    temp = g_menu_stack_records[depth].list_window.entry_count < g_brave_story_saved_cursor[0] + 1;
+    temp = g_menu_stack_records[depth].brave_story.entry_count < g_brave_story_saved_cursor[0] + 1;
     if (temp) {
         g_brave_story_saved_cursor[0] = 0;
     }
-    g_menu_stack_records[depth].list_window.selected_entry = g_brave_story_saved_cursor[0];
-    g_menu_stack_records[depth].list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
+    g_menu_stack_records[depth].brave_story.selected_entry = g_brave_story_saved_cursor[0];
+    g_menu_stack_records[depth].brave_story.mode = MENU_STACK_WINDOW_MODE_BROWSE;
 
     /* Place the windows on the list record: the cursor 16 pixels per saved row, and the two
      * stars by adding the row offsets brave_story_build_rows stored in their y. */
-    index = g_menu_stack_records[depth].list_window.frame_render;
-    g_window_records[g_menu_stack_records[depth].list_window.main_window].position.x
+    index = g_menu_stack_records[depth].brave_story.rows_image;
+    g_window_records[g_menu_stack_records[depth].brave_story.cursor_window].position.x
         = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[g_menu_stack_records[depth].list_window.main_window].position.y
+    g_window_records[g_menu_stack_records[depth].brave_story.cursor_window].position.y
         = g_window_gs_image_records[index].base.y - g_brave_story_saved_cursor[0] * -0x10 + 0xE;
-    g_window_records[g_menu_stack_records[depth].list_window.side_window].position.x
+    g_window_records[g_menu_stack_records[depth].brave_story.label_window].position.x
         = g_window_gs_image_records[index].base.x + 3;
-    g_window_records[g_menu_stack_records[depth].list_window.side_window].position.y
+    g_window_records[g_menu_stack_records[depth].brave_story.label_window].position.y
         = g_window_gs_image_records[index].base.y - 2;
-    g_window_records[g_menu_stack_records[depth].list_window.upper_window].position.x
+    g_window_records[g_menu_stack_records[depth].brave_story.land_completion_star].position.x
         = g_window_gs_image_records[index].base.x + 0x4C;
     {
         s32 base_y = g_window_gs_image_records[index].base.y;
 
-        temp = g_window_records[g_menu_stack_records[depth].list_window.upper_window].position.y + base_y;
-        g_window_records[g_menu_stack_records[depth].list_window.upper_window].position.y = temp;
+        temp = g_window_records[g_menu_stack_records[depth].brave_story.land_completion_star].position.y + base_y;
+        g_window_records[g_menu_stack_records[depth].brave_story.land_completion_star].position.y = temp;
     }
-    g_window_records[g_menu_stack_records[depth].list_window.lower_window].position.x
+    g_window_records[g_menu_stack_records[depth].brave_story.treasure_completion_star].position.x
         = g_window_gs_image_records[index].base.x + 0x30;
     g_menu_stack_depth = depth + 1;
-    g_window_records[g_menu_stack_records[depth].list_window.lower_window].position.y
+    g_window_records[g_menu_stack_records[depth].brave_story.treasure_completion_star].position.y
         += g_window_gs_image_records[index].base.y;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_BRAVE_STORY;
 }
@@ -385,16 +385,15 @@ void brave_story_push_level(void) {
  * pushes. The facts row is listed when EVENT_SCRIPT_VAR_FACTS_ENABLED and any
  * fact flag are set; the story events and persons rows always; the
  * propositions row while any job is active or completed; the unexplored
- * lands and treasures rows once one is found; then Leave. The upper and lower
- * windows are the completion stars of the unexplored lands and treasures
- * rows: they show (DISPLAY_OBJECT_BLANK cleared) once all 16 lands or
+ * lands and treasures rows once one is found; then Leave. The completion stars
+ * show (DISPLAY_OBJECT_BLANK cleared) once all 16 lands or
  * the first 31 treasures are found.
  */
 static void brave_story_build_rows(void) {
     s32 count;
     s32 i;
 
-    g_menu_stack_records[g_menu_stack_depth].list_window.entry_count = 0;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count = 0;
     if (script_get_variable(EVENT_SCRIPT_VAR_FACTS_ENABLED) != 0) {
         count = 0;
         for (i = 0; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
@@ -403,16 +402,16 @@ static void brave_story_build_rows(void) {
             }
         }
         if (count != 0) {
-            g_menu_stack_records[g_menu_stack_depth].list_window.entries[0] = BRAVE_STORY_ROW_FACTS;
-            g_menu_stack_records[g_menu_stack_depth].list_window.entry_count = 1;
+            g_menu_stack_records[g_menu_stack_depth].brave_story.entries[0] = BRAVE_STORY_ROW_FACTS;
+            g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count = 1;
         }
     }
     g_menu_stack_records[g_menu_stack_depth]
-        .list_window.entries[g_menu_stack_records[g_menu_stack_depth].list_window.entry_count] = BRAVE_STORY_ROW_EVENTS;
+        .brave_story.entries[g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count] = BRAVE_STORY_ROW_EVENTS;
     g_menu_stack_records[g_menu_stack_depth]
-        .list_window.entries[g_menu_stack_records[g_menu_stack_depth].list_window.entry_count + 1]
+        .brave_story.entries[g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count + 1]
         = BRAVE_STORY_ROW_PERSONS;
-    g_menu_stack_records[g_menu_stack_depth].list_window.entry_count += 2;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count += 2;
 
     count = g_proposition_count;
     for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
@@ -422,33 +421,35 @@ static void brave_story_build_rows(void) {
     }
     if (count != 0) {
         g_menu_stack_records[g_menu_stack_depth]
-            .list_window.entries[g_menu_stack_records[g_menu_stack_depth].list_window.entry_count]
+            .brave_story.entries[g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count]
             = BRAVE_STORY_ROW_PROPOSITIONS;
-        g_menu_stack_records[g_menu_stack_depth].list_window.entry_count++;
+        g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count++;
     }
 
     count = 0;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth].list_window.upper_window].flags |= DISPLAY_OBJECT_BLANK;
+    g_window_records[g_menu_stack_records[g_menu_stack_depth].brave_story.land_completion_star].flags
+        |= DISPLAY_OBJECT_BLANK;
     for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
             count++;
         }
     }
     if (count != 0) {
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].list_window.upper_window].position.y
-            = g_menu_stack_records[g_menu_stack_depth].list_window.entry_count * 0x10 + 0xE;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].brave_story.land_completion_star].position.y
+            = g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count * 0x10 + 0xE;
         if (count >= 0x10) {
-            g_window_records[g_menu_stack_records[g_menu_stack_depth].list_window.upper_window].flags
+            g_window_records[g_menu_stack_records[g_menu_stack_depth].brave_story.land_completion_star].flags
                 &= ~DISPLAY_OBJECT_BLANK;
         }
         g_menu_stack_records[g_menu_stack_depth]
-            .list_window.entries[g_menu_stack_records[g_menu_stack_depth].list_window.entry_count]
+            .brave_story.entries[g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count]
             = BRAVE_STORY_ROW_UNEXPLORED_LANDS;
-        g_menu_stack_records[g_menu_stack_depth].list_window.entry_count++;
+        g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count++;
     }
 
     count = 0;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth].list_window.lower_window].flags |= DISPLAY_OBJECT_BLANK;
+    g_window_records[g_menu_stack_records[g_menu_stack_depth].brave_story.treasure_completion_star].flags
+        |= DISPLAY_OBJECT_BLANK;
     for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
             count++;
@@ -456,25 +457,25 @@ static void brave_story_build_rows(void) {
     }
     if (count != 0) {
         count = 0;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].list_window.lower_window].position.y
-            = g_menu_stack_records[g_menu_stack_depth].list_window.entry_count * 0x10 + 0xE;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].brave_story.treasure_completion_star].position.y
+            = g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count * 0x10 + 0xE;
         for (i = 0; i < 31; i++) {
             if (script_get_variable(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
                 count++;
             }
         }
         if (count >= 0x1F) {
-            g_window_records[g_menu_stack_records[g_menu_stack_depth].list_window.lower_window].flags
+            g_window_records[g_menu_stack_records[g_menu_stack_depth].brave_story.treasure_completion_star].flags
                 &= ~DISPLAY_OBJECT_BLANK;
         }
         g_menu_stack_records[g_menu_stack_depth]
-            .list_window.entries[g_menu_stack_records[g_menu_stack_depth].list_window.entry_count]
+            .brave_story.entries[g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count]
             = BRAVE_STORY_ROW_TREASURES;
-        g_menu_stack_records[g_menu_stack_depth].list_window.entry_count++;
+        g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count++;
     }
     g_menu_stack_records[g_menu_stack_depth]
-        .list_window.entries[g_menu_stack_records[g_menu_stack_depth].list_window.entry_count] = BRAVE_STORY_ROW_LEAVE;
-    g_menu_stack_records[g_menu_stack_depth].list_window.entry_count++;
+        .brave_story.entries[g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count] = BRAVE_STORY_ROW_LEAVE;
+    g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count++;
 }
 
 /* Return the Brave Story menu to browsing when a sub-level closes: restore
@@ -482,29 +483,30 @@ static void brave_story_build_rows(void) {
  * again and show (with their pop-in) whichever of its records a sub-level
  * hid. */
 void brave_story_resume_level(menu_stack_record_t* level) {
-    g_window_records[level->list_window.main_window].palette = g_window_records[level->list_window.side_window].palette
-        = g_window_gs_image_records[level->list_window.frame_render].palette
-        = g_window_gs_image_records[level->list_window.content_render].palette = 0;
-    g_window_records[level->list_window.upper_window].palette
-        = g_window_records[level->list_window.lower_window].palette = 0;
-    g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[level->list_window.main_window].frame_index
-        = g_window_records[level->list_window.main_window].anim_counter = 0;
+    g_window_records[level->brave_story.cursor_window].palette
+        = g_window_records[level->brave_story.label_window].palette
+        = g_window_gs_image_records[level->brave_story.rows_image].palette
+        = g_window_gs_image_records[level->brave_story.casualty_image].palette = 0;
+    g_window_records[level->brave_story.land_completion_star].palette
+        = g_window_records[level->brave_story.treasure_completion_star].palette = 0;
+    g_window_records[level->brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_IDLE;
+    g_window_records[level->brave_story.cursor_window].frame_index
+        = g_window_records[level->brave_story.cursor_window].anim_counter = 0;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
-    if (g_window_gs_image_records[level->list_window.frame_render].flags & DISPLAY_OBJECT_HIDDEN) {
-        g_window_records[level->list_window.main_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->list_window.side_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->list_window.frame_render].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->list_window.frame_render].flags |= DISPLAY_OBJECT_POP_IN;
-        g_window_records[level->list_window.upper_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->list_window.lower_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    if (g_window_gs_image_records[level->brave_story.rows_image].flags & DISPLAY_OBJECT_HIDDEN) {
+        g_window_records[level->brave_story.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->brave_story.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[level->brave_story.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[level->brave_story.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
+        g_window_records[level->brave_story.land_completion_star].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->brave_story.treasure_completion_star].flags &= ~DISPLAY_OBJECT_HIDDEN;
     }
-    if (g_window_gs_image_records[level->list_window.content_render].flags & DISPLAY_OBJECT_HIDDEN) {
-        g_window_gs_image_records[level->list_window.content_render].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    if (g_window_gs_image_records[level->brave_story.casualty_image].flags & DISPLAY_OBJECT_HIDDEN) {
+        g_window_gs_image_records[level->brave_story.casualty_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
         g_system_flags &= ~SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
-        g_window_gs_image_records[level->list_window.content_render].flags |= DISPLAY_OBJECT_POP_IN;
+        g_window_gs_image_records[level->brave_story.casualty_image].flags |= DISPLAY_OBJECT_POP_IN;
     }
-    level->list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
+    level->brave_story.mode = MENU_STACK_WINDOW_MODE_BROWSE;
 }
 
 /* Gray out the Brave Story menu while a sub-level opens over it: the cursor
@@ -515,21 +517,21 @@ void brave_story_resume_level(menu_stack_record_t* level) {
  *
  * The chained store keeps one main-window index for both cleared fields. */
 void brave_story_suspend_level(menu_stack_record_t* state) {
-    g_window_records[state->list_window.main_window].palette = 10;
-    g_window_records[state->list_window.side_window].palette = 6;
-    g_window_gs_image_records[state->list_window.frame_render].palette = 2;
-    g_window_records[state->list_window.upper_window].palette = 5;
-    g_window_records[state->list_window.lower_window].palette = 5;
-    g_window_records[state->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
-    g_window_records[state->list_window.main_window].frame_index
-        = g_window_records[state->list_window.main_window].anim_counter = 0;
-    if (state->list_window.mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP) {
-        g_window_gs_image_records[state->list_window.content_render].palette = 2;
+    g_window_records[state->brave_story.cursor_window].palette = 10;
+    g_window_records[state->brave_story.label_window].palette = 6;
+    g_window_gs_image_records[state->brave_story.rows_image].palette = 2;
+    g_window_records[state->brave_story.land_completion_star].palette = 5;
+    g_window_records[state->brave_story.treasure_completion_star].palette = 5;
+    g_window_records[state->brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+    g_window_records[state->brave_story.cursor_window].frame_index
+        = g_window_records[state->brave_story.cursor_window].anim_counter = 0;
+    if (state->brave_story.mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP) {
+        g_window_gs_image_records[state->brave_story.casualty_image].palette = 2;
         return;
     }
-    if (state->list_window.entries[state->list_window.selected_entry] != BRAVE_STORY_ROW_PERSONS) {
+    if (state->brave_story.entries[state->brave_story.selected_entry] != BRAVE_STORY_ROW_PERSONS) {
         g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
-        g_window_gs_image_records[state->list_window.content_render].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[state->brave_story.casualty_image].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 }
 
@@ -561,18 +563,18 @@ void brave_story_handle_input(menu_stack_record_t* level) {
     g_hud_value_secondary = g_save_play_time_minutes;
     g_hud_value_tertiary = g_save_play_time_seconds;
 
-    if (g_window_gs_image_records[level->list_window.content_render].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->brave_story.casualty_image].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
     flags = g_system_flags;
     if (flags & SYSTEM_FLAG_INPUT_BLOCKED) {
-        if (level->list_window.mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP && !(flags & SYSTEM_FLAG_FADING)) {
-            level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_WAIT;
+        if (level->brave_story.mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP && !(flags & SYSTEM_FLAG_FADING)) {
+            level->brave_story.mode = MENU_STACK_WINDOW_MODE_LEAVE_WAIT;
             g_system_flags = flags | SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
             world_map_clear_vram_and_scratch(1);
         }
-        if (level->list_window.mode != MENU_STACK_WINDOW_MODE_LEAVE_WAIT) {
+        if (level->brave_story.mode != MENU_STACK_WINDOW_MODE_LEAVE_WAIT) {
             return;
         }
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
@@ -600,11 +602,11 @@ void brave_story_handle_input(menu_stack_record_t* level) {
         return;
     }
 
-    if (level->list_window.mode == MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE) {
+    if (level->brave_story.mode == MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE) {
         if (!(g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS))) {
             return;
         }
-        level->list_window.mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
+        level->brave_story.mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
@@ -626,7 +628,7 @@ void brave_story_handle_input(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_GOODBYE, 0);
-        level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
+        level->brave_story.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
 
         /* Release the level's four windows and two render records: six queue entries. */
         g_window_record_count -= 4;
@@ -636,32 +638,32 @@ void brave_story_handle_input(menu_stack_record_t* level) {
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        level->list_window.mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
+        level->brave_story.mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
         brave_story_suspend_level(level);
         menu_stack_push_message_level(
-            g_brave_story_help_text_ids[level->list_window.entries[level->list_window.selected_entry]] | 0x1000, 1);
+            g_brave_story_help_text_ids[level->brave_story.entries[level->brave_story.selected_entry]] | 0x1000, 1);
         return;
     }
 
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        g_brave_story_saved_cursor[0] = level->list_window.selected_entry;
-        switch (level->list_window.entries[level->list_window.selected_entry]) {
+        g_brave_story_saved_cursor[0] = level->brave_story.selected_entry;
+        switch (level->brave_story.entries[level->brave_story.selected_entry]) {
         case BRAVE_STORY_ROW_FACTS:
             message_block_load_if_changed(MESSAGE_BLOCK_FACTS);
             brave_story_suspend_level(level);
-            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_fact_list();
             return;
         case BRAVE_STORY_ROW_EVENTS:
             message_block_load_if_changed(MESSAGE_BLOCK_STORY_EVENTS);
             brave_story_suspend_level(level);
-            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_event_list();
             return;
         case BRAVE_STORY_ROW_PERSONS:
             brave_story_suspend_level(level);
-            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_person_list();
             return;
         case BRAVE_STORY_ROW_PROPOSITIONS:
@@ -672,19 +674,19 @@ void brave_story_handle_input(menu_stack_record_t* level) {
         case BRAVE_STORY_ROW_UNEXPLORED_LANDS:
             message_block_load_if_changed(MESSAGE_BLOCK_UNEXPLORED_LANDS);
             brave_story_suspend_level(level);
-            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_unexplored_land_list();
             return;
         case BRAVE_STORY_ROW_TREASURES:
             message_block_load_if_changed(MESSAGE_BLOCK_TREASURES);
             brave_story_suspend_level(level);
-            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_treasure_list();
             return;
         case BRAVE_STORY_ROW_LEAVE:
             /* The same goodbye and release as the cancel path above. */
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_GOODBYE, 0);
-            level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
+            level->brave_story.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
             g_window_record_count -= 4;
             g_window_render_record_count -= 2;
             g_window_render_object_count -= 6;
@@ -694,23 +696,23 @@ void brave_story_handle_input(menu_stack_record_t* level) {
     }
 
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
-        if (level->list_window.selected_entry != 0) {
-            g_window_records[level->list_window.main_window].position.y -= 0x10;
-            level->list_window.selected_entry = level->list_window.selected_entry - 1;
+        if (level->brave_story.selected_entry != 0) {
+            g_window_records[level->brave_story.cursor_window].position.y -= 0x10;
+            level->brave_story.selected_entry = level->brave_story.selected_entry - 1;
         } else {
-            g_window_records[level->list_window.main_window].position.y -= (level->list_window.entry_count - 1) * -16;
-            level->list_window.selected_entry = level->list_window.entry_count - 1;
+            g_window_records[level->brave_story.cursor_window].position.y -= (level->brave_story.entry_count - 1) * -16;
+            level->brave_story.selected_entry = level->brave_story.entry_count - 1;
         }
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        if (level->list_window.selected_entry < level->list_window.entry_count - 1) {
-            g_window_records[level->list_window.main_window].position.y += 0x10;
-            level->list_window.selected_entry = level->list_window.selected_entry + 1;
+        if (level->brave_story.selected_entry < level->brave_story.entry_count - 1) {
+            g_window_records[level->brave_story.cursor_window].position.y += 0x10;
+            level->brave_story.selected_entry = level->brave_story.selected_entry + 1;
         } else {
-            g_window_records[level->list_window.main_window].position.y -= (level->list_window.entry_count - 1) * 16;
-            level->list_window.selected_entry = 0;
+            g_window_records[level->brave_story.cursor_window].position.y -= (level->brave_story.entry_count - 1) * 16;
+            level->brave_story.selected_entry = 0;
         }
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
@@ -793,7 +795,7 @@ void brave_story_handle_event_list_input(menu_stack_record_t* level) {
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
-        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.content_render].flags
+        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.casualty_image].flags
             |= DISPLAY_OBJECT_POP_IN;
         menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_EVENTS);
         menu_stack_dispatch_resume();
@@ -865,15 +867,15 @@ void brave_story_push_event_level(s32 value) {
     g_text_window.text_substitutions[1] = -1;
     g_text_window.text_substitutions[0] = -1;
     text_window_open(&g_text_window);
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.main_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.cursor_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.side_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.label_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.rows_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.upper_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.land_completion_star].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.lower_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.treasure_completion_star].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_text_substitution_values[0] = value + TEXT_ID_STORY_EVENT_NAME_BASE;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
@@ -926,13 +928,13 @@ void brave_story_handle_event_input(menu_stack_record_t* level) {
     sound_play_effect(SOUND_SFX_CANCEL);
     depth = g_menu_stack_depth;
     index = depth - 2;
-    g_window_gs_image_records[g_menu_stack_records[index].list_window.frame_render].flags |= DISPLAY_OBJECT_POP_IN;
-    g_window_records[g_menu_stack_records[index].list_window.main_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[index].list_window.side_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[index].list_window.frame_render].flags &= ~DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[index].list_window.upper_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[index].brave_story.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
+    g_window_records[g_menu_stack_records[index].brave_story.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[index].brave_story.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[index].brave_story.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[index].brave_story.land_completion_star].flags &= ~DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth - 1;
-    g_window_records[g_menu_stack_records[index].list_window.lower_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[index].brave_story.treasure_completion_star].flags &= ~DISPLAY_OBJECT_HIDDEN;
     brave_story_open_event_list();
 }
 
@@ -984,7 +986,7 @@ static void brave_story_open_person_list(void) {
     g_menu_stack_ot_offset = 9;
     record_index = g_menu_stack_depth;
     g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
-    g_window_gs_image_records[g_menu_stack_records[record_index - 1].list_window.content_render].flags
+    g_window_gs_image_records[g_menu_stack_records[record_index - 1].brave_story.casualty_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_types[record_index] = MENU_STACK_LEVEL_BRAVE_STORY_PERSONS;
     g_menu_stack_depth = record_index + 1;
@@ -1019,7 +1021,7 @@ void brave_story_handle_person_list_input(menu_stack_record_t* level) {
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
-        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.content_render].flags
+        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.casualty_image].flags
             |= DISPLAY_OBJECT_POP_IN;
         menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_PERSONS);
         menu_stack_dispatch_resume();
@@ -1062,15 +1064,15 @@ static void brave_story_push_person_level(s32 value) {
     g_menu_stack_records[g_menu_stack_depth].detail.render_index = index;
     g_window_gs_image_records[index].flags
         = (g_window_gs_image_records[index].flags & ~DISPLAY_OBJECT_8BIT_CLUT) | DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.main_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.cursor_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.side_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.label_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.rows_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.upper_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.land_completion_star].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.lower_window].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.treasure_completion_star].flags
         |= DISPLAY_OBJECT_HIDDEN;
     if (variable == 0) {
         g_text_substitution_values[0] = (value & 0xF) + TEXT_ID_RAMZA_TITLE_FIRST;
@@ -1187,17 +1189,19 @@ void brave_story_step_person_level(menu_stack_record_t* level) {
     default:
         if (text_window_step(&g_text_window) == 0) {
             depth = g_menu_stack_depth;
-            g_window_gs_image_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
+            g_window_gs_image_records[g_menu_stack_records[depth - 2].brave_story.rows_image].flags
                 |= DISPLAY_OBJECT_POP_IN;
-            g_window_records[g_menu_stack_records[depth - 2].list_window.main_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-            g_window_records[g_menu_stack_records[depth - 2].list_window.side_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-            g_window_gs_image_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
+            g_window_records[g_menu_stack_records[depth - 2].brave_story.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_records[g_menu_stack_records[depth - 2].brave_story.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[g_menu_stack_records[depth - 2].brave_story.rows_image].flags
                 &= ~DISPLAY_OBJECT_HIDDEN;
             g_menu_stack_depth = depth - 1;
-            g_window_records[g_menu_stack_records[depth - 2].list_window.upper_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_records[g_menu_stack_records[depth - 2].brave_story.land_completion_star].flags
+                &= ~DISPLAY_OBJECT_HIDDEN;
             g_window_render_record_count = g_window_render_record_count - 1;
             g_window_render_object_count = g_window_render_object_count - 1;
-            g_window_records[g_menu_stack_records[depth - 2].list_window.lower_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_records[g_menu_stack_records[depth - 2].brave_story.treasure_completion_star].flags
+                &= ~DISPLAY_OBJECT_HIDDEN;
             brave_story_open_person_list();
         }
     }
@@ -1441,11 +1445,12 @@ static void brave_story_push_propositions_level(void) {
     window_load_render_record_image(index, g_window_image_buffer);
 
     depth = g_menu_stack_depth;
-    g_window_records[g_menu_stack_records[depth - 1].list_window.main_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[depth - 1].list_window.side_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[depth - 1].list_window.frame_render].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[depth - 1].list_window.upper_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[depth - 1].list_window.lower_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[depth - 1].brave_story.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.land_completion_star].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.treasure_completion_star].flags
+        |= DISPLAY_OBJECT_HIDDEN;
     if (g_menu_stack_records[depth].brave_story_propositions.entry_count
         < g_brave_story_propositions_saved_cursor[0] + 1) {
         g_brave_story_propositions_saved_cursor[0] = 0;

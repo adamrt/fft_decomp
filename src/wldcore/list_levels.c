@@ -56,17 +56,17 @@ static void menu_stack_close_parent_list_frame(void);
 void brave_story_resume_propositions_level(menu_stack_record_t* level) {
     g_window_records[level->brave_story_propositions.cursor_window].palette
         = g_window_gs_image_records[level->brave_story_propositions.rows_image].palette
-        = g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].list_window.content_render].palette
+        = g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].brave_story.casualty_image].palette
         = 0;
     g_window_records[level->brave_story_propositions.cursor_window].sequence = WINDOW_ANIM_CURSOR_IDLE;
     g_window_records[level->brave_story_propositions.cursor_window].frame_index
         = g_window_records[level->brave_story_propositions.cursor_window].anim_counter = 0;
-    if (g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].list_window.content_render].flags
+    if (g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].brave_story.casualty_image].flags
         & DISPLAY_OBJECT_HIDDEN) {
-        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].list_window.content_render].flags
+        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].brave_story.casualty_image].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
         g_system_flags &= ~SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
-        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].list_window.content_render].flags
+        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].brave_story.casualty_image].flags
             |= DISPLAY_OBJECT_POP_IN;
     }
 }
@@ -82,7 +82,7 @@ void brave_story_suspend_propositions_level(menu_stack_record_t* level) {
     g_window_records[level->brave_story_propositions.cursor_window].frame_index
         = g_window_records[level->brave_story_propositions.cursor_window].anim_counter = 0;
     g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
-    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].list_window.content_render].flags
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].brave_story.casualty_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
 }
 
@@ -114,7 +114,7 @@ void brave_story_handle_propositions_input(menu_stack_record_t* level) {
     if ((buttons & PSX_PAD_SELECT) != 0) {
         g_window_records[level->brave_story_propositions.cursor_window].palette = 0xA;
         g_window_gs_image_records[level->brave_story_propositions.rows_image].palette = 2;
-        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].list_window.content_render].palette = 2;
+        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 2].brave_story.casualty_image].palette = 2;
         g_window_records[level->brave_story_propositions.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
         window = level->brave_story_propositions.cursor_window;
         g_window_records[window].anim_counter = 0;
@@ -1185,28 +1185,28 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
     g_menu_stack_depth++;
 }
 
-/* Closes every window of the list-window level beneath the current one: the
+/* Closes every window of the Brave Story menu beneath the current level: the
  * main window goes to palette 10 (sequence, frame_index and anim_counter
  * cleared), the side window to palette 6, the frame and content render
- * records to palette 2, and the upper/lower windows to palette 5, each hidden. */
+ * records to palette 2, and the completion stars to palette 5, each hidden. */
 static void menu_stack_close_parent_list_windows(void) {
     s32 index = g_menu_stack_depth - 1;
 
-    g_window_records[g_menu_stack_records[index].list_window.main_window].palette = 10;
-    g_window_records[g_menu_stack_records[index].list_window.main_window].sequence = WINDOW_ANIM_CURSOR_STILL;
-    g_window_records[g_menu_stack_records[index].list_window.main_window].frame_index
-        = g_window_records[g_menu_stack_records[index].list_window.main_window].anim_counter = 0;
-    g_window_records[g_menu_stack_records[index].list_window.main_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[index].list_window.side_window].palette = 6;
-    g_window_records[g_menu_stack_records[index].list_window.side_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[index].list_window.frame_render].palette = 2;
-    g_window_gs_image_records[g_menu_stack_records[index].list_window.frame_render].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[index].list_window.content_render].palette = 2;
-    g_window_gs_image_records[g_menu_stack_records[index].list_window.content_render].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[index].list_window.upper_window].palette = 5;
-    g_window_records[g_menu_stack_records[index].list_window.upper_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[index].list_window.lower_window].palette = 5;
-    g_window_records[g_menu_stack_records[index].list_window.lower_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[index].brave_story.cursor_window].palette = 10;
+    g_window_records[g_menu_stack_records[index].brave_story.cursor_window].sequence = WINDOW_ANIM_CURSOR_STILL;
+    g_window_records[g_menu_stack_records[index].brave_story.cursor_window].frame_index
+        = g_window_records[g_menu_stack_records[index].brave_story.cursor_window].anim_counter = 0;
+    g_window_records[g_menu_stack_records[index].brave_story.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[index].brave_story.label_window].palette = 6;
+    g_window_records[g_menu_stack_records[index].brave_story.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[index].brave_story.rows_image].palette = 2;
+    g_window_gs_image_records[g_menu_stack_records[index].brave_story.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[index].brave_story.casualty_image].palette = 2;
+    g_window_gs_image_records[g_menu_stack_records[index].brave_story.casualty_image].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[index].brave_story.land_completion_star].palette = 5;
+    g_window_records[g_menu_stack_records[index].brave_story.land_completion_star].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[index].brave_story.treasure_completion_star].palette = 5;
+    g_window_records[g_menu_stack_records[index].brave_story.treasure_completion_star].flags |= DISPLAY_OBJECT_HIDDEN;
 }
 
 /* Closes the list window of the level beneath the current one: the main

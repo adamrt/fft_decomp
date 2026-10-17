@@ -30,7 +30,7 @@ union menu_stack_record {
     menu_stack_panel_level_t panel;
     proposition_discovery_level_t discovery; /* pushed by proposition_push_discovery_level */
     rumor_detail_level_t rumor_detail;
-    menu_stack_window_level_t list_window;
+    brave_story_menu_level_t brave_story;
     bar_menu_level_t bar;
     brave_story_propositions_level_t brave_story_propositions;
     tutorial_menu_level_t tutorial_menu;

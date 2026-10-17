@@ -19,7 +19,25 @@ typedef enum brave_story_row {
     BRAVE_STORY_ROW_UNEXPLORED_LANDS = 4,
     BRAVE_STORY_ROW_TREASURES = 5,
     BRAVE_STORY_ROW_LEAVE = 6,
+    BRAVE_STORY_ROW_COUNT = 7
 } brave_story_row_e;
+
+/* The root Brave Story menu, beneath its category and detail panels. */
+typedef struct brave_story_menu_level {
+    s32 cursor_window;
+    s32 label_window;   /* 0x04 */
+    s32 rows_image;     /* 0x08 */
+    s32 casualty_image; /* 0x0c */
+    u8 _unused_10[8];
+    s32 mode;                     /* 0x18; menu_stack_window_mode_e */
+    s32 selected_entry;           /* 0x1c; initial row from g_brave_story_saved_cursor */
+    s32 land_completion_star;     /* 0x20 */
+    s32 treasure_completion_star; /* 0x24 */
+    u8 _unused_28[8];
+    s32 entry_count;                    /* 0x30; rows drawn by brave_story_push_level */
+    s32 entries[BRAVE_STORY_ROW_COUNT]; /* 0x34; brave_story_row_e; text is TEXT_ID_BRAVE_STORY_ROW_FIRST + kind */
+} brave_story_menu_level_t;
+typedef char brave_story_menu_level_size_must_be_80[sizeof(brave_story_menu_level_t) == 80 ? 1 : -1];
 
 extern s32 g_brave_story_saved_cursor[];
 extern u8 g_brave_story_help_text_ids[];
