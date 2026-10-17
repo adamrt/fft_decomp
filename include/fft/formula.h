@@ -11,6 +11,7 @@
 /* The handlers in table order, indexed by formula id less 1: formula 0 has no handler. */
 extern void (*g_formula_handlers[])(void);
 
+/* weapon attacks */
 void formula_weapon_damage(void);
 void formula_weapon_damage_with_proc(void);
 void formula_gun_damage(void);
@@ -18,6 +19,8 @@ void formula_magic_gun(void);
 void formula_weapon_damage_without_element_or_weather(void);
 void formula_weapon_absorb_hp(void);
 void formula_healing_staff(void);
+
+/* shared magic, Time Magic, Summon Magic and boss spells */
 void formula_magical_damage(void);
 void formula_magic_hp_percent_damage(void);
 void formula_hit_faith_ma_x_percent(void);
@@ -36,56 +39,96 @@ void formula_mute(void);
 void formula_gravi_2(void);
 void formula_18_unused(void);
 void formula_19_unused(void);
+
+/* Destroy Sword */
 void formula_destroy_sword_stat_ruin(void);
 void formula_magic_ruin(void);
+
+/* Sing and Dance */
 void formula_song(void);
 void formula_dance(void);
+
+/* Truth, Holy Bracelet and Un-truth */
 void formula_multihit_truth_magic(void);
 void formula_un_truth(void);
+
+/* Draw Out */
 void formula_draw_out_damage(void);
 void formula_bizen_boat(void);
 void formula_draw_out_status(void);
 void formula_murasame(void);
+
+/* Elemental */
 void formula_elemental(void);
+
+/* Battle Skill: equipment breaks */
 void formula_battle_skill_equipment_break(void);
+
+/* Steal and shared gil-taking / Charm abilities */
 void formula_steal_equipment(void);
 void formula_steal_gil(void);
 void formula_steal_exp(void);
 void formula_charm(void);
+
+/* Talk Skill */
 void formula_talk_skill(void);
+
+/* Battle Skill: stat breaks */
 void formula_battle_skill_stat_break(void);
 void formula_magic_break(void);
+
+/* Holy Sword and Mighty Sword */
 void formula_holy_sword(void);
 void formula_mighty_sword(void);
+
+/* Dark Sword */
 void formula_dark_sword(void);
 void formula_night_sword(void);
+
+/* Punch Art and shared abilities */
 void formula_damage_pa_plus_y_half_times_pa(void);
 void formula_repeating_fist(void);
 void formula_stigma_magic(void);
 void formula_chakra(void);
 void formula_heal_y_percent_hit_pa_x_percent(void);
+
+/* Basic Skill and shared stat / status abilities */
 void formula_add_pa_y(void);
 void formula_damage_random_y_times_pa(void);
 void formula_apply_status_to_action(void);
+
+/* Guts and shared Dragon / Byblos helpers */
 void formula_yell(void);
 void formula_cheer_up(void);
 void formula_add_brave_x_stats_y(void);
 void formula_sacrifice_hp_to_heal(void);
+
+/* other status and damage formulas */
 void formula_hit_ma_x_percent_magical_evade(void);
 void formula_damage_target_hp_minus_one_always_hit(void);
+
+/* Snipe */
 void formula_snipe_aim(void);
 void formula_seal_evil(void);
+
+/* Starry Heaven and Work */
 void formula_galaxy_stop(void);
 void formula_work(void);
+
+/* Byblos, Limit and shared special abilities */
 void formula_damage_caster_missing_hp(void);
 void formula_difference(void);
 void formula_climhazzard(void);
 void formula_46_unused(void);
 void formula_blood_suck(void);
+
+/* Item */
 void formula_potion(void);
 void formula_ether(void);
 void formula_elixir(void);
 void formula_phoenix_down(void);
+
+/* monster abilities and shared Limit, Breath and Punch Art formulas */
 void formula_heal_ma_times_y(void);
 void formula_absorb_hp_y_percent_hit_ma_x_percent(void);
 void formula_damage_ma_times_y(void);
@@ -100,15 +143,21 @@ void formula_circle(void);
 void formula_please_eat(void);
 void formula_moldball_virus(void);
 void formula_level_blast(void);
+
+/* Dragon */
 void formula_dragon_tame(void);
 void formula_dragon_care(void);
 void formula_dragon_power_up(void);
 void formula_dragon_level_up(void);
+
+/* monster abilities, Night Magic and shared Brave reduction */
 void formula_fixed_multihit_magic(void);
 void formula_nanoflare(void);
 void formula_damage_ma_plus_y_half_times_ma_status(void);
 void formula_lower_brave_y(void);
 void formula_look_of_fright(void);
+
+/* Throw and Jump */
 void formula_throw_damage(void);
 void formula_jump_damage(void);
 
