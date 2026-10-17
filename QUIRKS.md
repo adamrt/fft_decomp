@@ -920,7 +920,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   stopped its first parameter is 0, and the panel check reads that display
   record at RAM address 0.
 - `ending_draw_text_records`: passes OT entries by value (`otag[15]`, `otag[8]`) to `AddPrim`; after `ClearOTagR` each holds the physical address of the entry below it, so the credits fade, bands and glyphs link into layers 14 and 7 through the KUSEG mirror.
-- `picture_step_dissolve_upload`: the step-0 call (start the dissolve) has no return value of its own; `$v0` keeps its clearing cursor, the address one byte below the band-progress table. Its three callers ignore that result.
+- `picture_step_dissolve_upload`: the step-0 call (start the dissolve) has no return value of its own; `$v0` keeps its clearing cursor, the address one byte below the band-progress table. Initialization callers ignore that result.
 - `menu_build_window_sprites`: for the Bar's send-unit list (header 0x10) the arrow x reads the "height" of the record at the panel's value pointer, `&g_window_panel_value` + 6, which is the upper half of `g_proposition_dispatch_days` (0).
 - `crystal_generate_treasure_item`: outside action execution (AI simulation, preview) it returns with no value, so `$v0` still holds `g_action_state` and the crystal pickup result names item 1 or 2 as the treasure.
 - `new_game_update`: no retail code sets step 5, which pops New Game and opens the Music Test (`music_test_open`, controller slots 7 and 8); only a poke of the 32-bit step value reaches it.

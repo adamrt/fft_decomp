@@ -2341,9 +2341,8 @@ void brave_story_step_treasure_level(menu_stack_record_t* level) {
  * given by the g_picture_dissolve_band_order offset table.
  *
  * Step 0 clears the buffer to 0xFF, uploads it and resets the per-band
- * progress; it returns the address its clearing cursor ends on, one
- * byte below the progress table, and no caller reads that result. Returns 0
- * once step reaches 50, otherwise 1.
+ * progress. Its result is unspecified, and initialization callers ignore it.
+ * Later steps return 0 once step reaches 50, otherwise 1.
  */
 static s32 picture_step_dissolve_upload(GsIMAGE* image, s32 step) {
     u8* pixels = (u8*)image->pixel;
@@ -2370,7 +2369,7 @@ static s32 picture_step_dissolve_upload(GsIMAGE* image, s32 step) {
         for (i = 15; i >= 0; i--) {
             *state-- = 0;
         }
-        return (s32)state;
+        return;
     }
 
     if (step >= 50) {
