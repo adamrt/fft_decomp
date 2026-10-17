@@ -20,6 +20,7 @@ units:
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a348, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8019a35c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: draw_areas, source: src/world/draw_areas.c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {name: draw_state, source: src/lib/menu/draw_state.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: equipment_menus, source: src/world/equipment_menus.c}
   - {name: equipment_rows, source: src/lib/menu/equipment_rows.c, data: [{addr: 0x801c8458, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801c8464, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: equipment_slots, source: src/world/equipment_slots.c, data: [{addr: 0x8018d7ec, size: 5, hash: 2b02997e9b337299}, {addr: 0x8018d7f4, size: 5, hash: 2b02997e9b337299}]}
@@ -49,6 +50,7 @@ units:
   - {name: memcard, source: src/lib/memcard.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_page_scroll_input, source: src/world/menu_page_scroll_input.c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: menu_script_opcodes, source: src/world/menu_script_opcodes.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018e034, size: 9, hash: b84f7d451d1a8f71}, {addr: 0x8018e040, size: 7, hash: 566b5911617a0e07}, {addr: 0x8018e048, size: 8, hash: 870550df4dc49692}, {addr: 0x8018e050, size: 20, hash: d7c4eba7f363ab22}, {addr: 0x8018e064, size: 12, hash: b7578635ff44fd32}, {addr: 0x8018e070, size: 12, hash: b935ba9af4787c03}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018ae8c, size: 16, hash: 5ad8dff169073b4e}, {addr: 0x8018ae9c, size: 28, hash: 2c65651a7bb2a2c9}, {addr: 0x8018aeb8, size: 48, hash: a7325a670181d088}, {addr: 0x8018aee8, size: 8, hash: 716d2b5fc41c7cf3}, {addr: 0x8018aef0, size: 8, hash: c0df20f9ed09ee15}]}
@@ -88,6 +90,7 @@ units:
   - {name: unit_name_list, source: src/lib/event/unit_name_list.c}
   - {name: unit_status_lists, source: src/lib/event/unit_status_lists.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156198, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x801561d0, size: 76, hash: ec0d1125a0b03828}]}
   - {name: window_images, source: src/lib/event/window_images.c, data: [{addr: 0x80156c40, size: 16, hash: 0e0f25166632e4a6}, {addr: 0x80156c50, size: 16, hash: e5c40d36a431f4b8}]}
+  - {name: window_state, source: src/lib/menu/window_state.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: zodiac_primitives, source: src/lib/menu/zodiac_primitives.c}
 
 libraries:
@@ -868,8 +871,8 @@ functions:
   - {addr: 0x801263a8, size: 32, name: menu_get_event_speed, hash: f20eb093659c8a8c, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_get_event_speed.c}
   - {addr: 0x801263c8, size: 224, name: menu_init_scrollable_list_core, hash: 6a1458a19bfa2633, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {addr: 0x801264a8, size: 52, name: menu_init_scrollable_list, hash: d88ea15b5c887ac0, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_init_scrollable_list.c}
-  - {addr: 0x801264dc, size: 148, name: menu_script_run, hash: 1c84c0b1ea5a5f1f, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_script_run.c}
-  - {addr: 0x80126570, size: 80, name: menu_run_script_with_palette_mode, hash: 0cd86ed57370c2e4, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_run_script_with_palette_mode.c}
+  - {addr: 0x801264dc, size: 148, name: menu_script_run, hash: 1c84c0b1ea5a5f1f, unit: menu_script_core}
+  - {addr: 0x80126570, size: 80, name: menu_run_script_with_palette_mode, hash: 0cd86ed57370c2e4, unit: menu_script_core}
   - {addr: 0x801265c0, size: 296, name: menu_opcode_01_if_group, hash: 60480ec4c28cde71, unit: menu_script_opcodes}
   - {addr: 0x801266e8, size: 416, name: menu_opcode_02_if_else_group, hash: 3fbe8187bcee91a7, unit: menu_script_opcodes}
   - {addr: 0x80126888, size: 224, name: menu_opcode_03_draw_tile, hash: 421cc7a32abed7db, unit: menu_script_opcodes}
@@ -896,14 +899,14 @@ functions:
   - {addr: 0x80128cac, size: 52, name: screen_init_and_draw_list, hash: 63e8f995fd661aee, unit: menu_script_opcodes}
   - {addr: 0x80128ce0, size: 2964, name: menu_opcode_10_draw_scrollable_list, hash: a229f784b447bedd, unit: menu_script_opcodes}
   - {addr: 0x80129874, size: 60, name: screen_set_sprite_color, hash: 15640358a165ed2d, unit: menu_script_opcodes}
-  - {addr: 0x801298b0, size: 16, name: gfx_set_otag_index, hash: b01b36934974a06a, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/gfx_set_otag_index.c}
+  - {addr: 0x801298b0, size: 16, name: gfx_set_otag_index, hash: b01b36934974a06a, unit: draw_state}
   - {addr: 0x801298c0, size: 264, name: screen_set_palette_mode, hash: 2d8a4bce38b1e631, unit: draw_areas}
   - {addr: 0x801299c8, size: 104, name: menu_opcode_13_clear_temporary_draw_area, hash: dbf624436af6a957, unit: draw_areas}
   - {addr: 0x80129a30, size: 132, name: menu_opcode_14_set_draw_area, hash: 9d02d6c74c6ea91e, unit: draw_areas}
   - {addr: 0x80129ab4, size: 96, name: menu_opcode_15_repeat_draw_area, hash: 37c6d54df36d5721, unit: draw_areas}
-  - {addr: 0x80129b14, size: 16, name: menu_set_window_scale_step, hash: 7b9f925f5e6d3828, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_set_window_scale_step.c}
-  - {addr: 0x80129b24, size: 16, name: menu_get_window_scale_step, hash: c135caf12190d2f9, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_get_window_scale_step.c}
-  - {addr: 0x80129b34, size: 56, name: menu_opcode_16_advance_window_scale_step, hash: 1258601e93a9f653, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_opcode_16_advance_window_scale_step.c}
+  - {addr: 0x80129b14, size: 16, name: menu_set_window_scale_step, hash: 7b9f925f5e6d3828, unit: window_state}
+  - {addr: 0x80129b24, size: 16, name: menu_get_window_scale_step, hash: c135caf12190d2f9, unit: window_state}
+  - {addr: 0x80129b34, size: 56, name: menu_opcode_16_advance_window_scale_step, hash: 1258601e93a9f653, unit: window_state}
   - {addr: 0x80129b6c, size: 16, name: screen_get_draw_color, hash: 3e15f7d69ea12f45, unit: menu_page_scroll_input}
   - {addr: 0x80129b7c, size: 368, name: screen_scroll_list_page, hash: 6d4d2dd3c505b695, unit: menu_page_scroll_input}
   - {addr: 0x80129cec, size: 352, name: menu_input_read_page_scroll_direction, hash: c4407d3709b24d54, unit: menu_page_scroll_input}

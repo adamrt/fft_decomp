@@ -1,8 +1,43 @@
-/* If and if/else command group handlers. */
+/* Menu script execution and conditional command groups. */
 
+#include "fft/gfx_primitive.h"
+#include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
+/* JOBSTTS advances its transition in a separate script runner. */
+#ifndef FFT_EVENT_JOBSTTS
+/* Run a menu command stream: reset the ordering-table index, semi-transparency and lock, keep
+ * `flags` as the stream's input, then dispatch each command through g_menu_opcode_handlers until
+ * the program's end opcode (VARIANT_MENU_CMD_END_OPCODE: 0x1C in BUNIT and WORLD, 0x19 in
+ * EQUIP). */
+void menu_script_run(menu_instruction_t* instruction, s32 flags) {
+    g_menu_gfx_otag_index = 0;
+    g_menu_gfx_semitransparency = 0;
+    g_menu_script_input = flags;
+    g_gfx_otag_index_locked = 0;
+    if (instruction->header.opcode != VARIANT_MENU_CMD_END_OPCODE) {
+        do {
+            instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
+        } while (instruction->header.opcode != VARIANT_MENU_CMD_END_OPCODE);
+    }
+}
+
+/* Run a menu display script with palette mode `mode` (nonzero dims it); a dimmed script also gets
+ * no input. */
+void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 input, s32 mode) {
+    s32 value = input;
+
+    if (mode != 0) {
+        value = 0;
+    }
+    menu_set_palette_mode(mode);
+    menu_script_run(script, value);
+}
+#endif
+
+/* WORLD keeps its group commands in its larger opcode unit. */
+#ifndef FFT_WORLD
 /* Menu script command: run the next count commands when the row predicate holds, otherwise skip
  * them. The predicate gets the command's literal row, or the current list row in list mode. */
 menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* cmd) {
@@ -70,3 +105,4 @@ menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* cmd) {
     }
     return cmd;
 }
+#endif
