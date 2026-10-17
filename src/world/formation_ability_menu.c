@@ -65,7 +65,7 @@ void formation_ability_menu(void) {
     s16* selection;
 
     state = g_formation_current_menu;
-    if (state == FORMATION_MENU_ABILITY_ENTER || state == FORMATION_MENU_ABILITY_ENTER_PORTRAIT_SLIDE) {
+    if (state == FORMATION_MENU_ABILITY_ENTER || state == FORMATION_MENU_ABILITY_ENTER_SPRITE_SLIDE) {
         if (g_formation_ability_menu_initialized == 0) {
             saved = g_formation_unit_browse_enabled;
             g_formation_unit_banner_at_bottom = 0;
@@ -78,7 +78,7 @@ void formation_ability_menu(void) {
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_ENTER) {
             g_formation_ability_menu_initialized = formation_step_grid_transition(1);
         } else {
-            g_formation_ability_menu_initialized = formation_step_portrait_slide();
+            g_formation_ability_menu_initialized = formation_update_sprite_slide();
         }
         if (g_formation_ability_menu_initialized == 0) {
             g_formation_current_menu = FORMATION_MENU_ABILITY;
@@ -99,7 +99,7 @@ void formation_ability_menu(void) {
         g_formation_ability_menu_unit_index = 0xff;
     }
     if (g_formation_current_menu < FORMATION_MENU_ABILITY_LEARN) {
-        formation_place_portrait_at_rest(g_unit_selected_index);
+        formation_draw_sprite_at_rest(g_unit_selected_index);
     }
     if (g_formation_ability_menu_unit_index != g_unit_selected_index) {
         value = formation_get_unit_lock(g_unit_selected_index);

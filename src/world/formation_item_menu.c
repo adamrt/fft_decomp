@@ -84,7 +84,7 @@ void formation_item_menu(void) {
         g_formation_item_menu_initialized = 1;
     }
     if (g_formation_current_menu < FORMATION_MENU_ITEM_LIST) {
-        formation_place_portrait_at_rest(g_unit_selected_index);
+        formation_draw_sprite_at_rest(g_unit_selected_index);
     }
     if (g_formation_item_menu_unit_index != g_unit_selected_index) {
         g_formation_item_menu_unit_index = g_unit_selected_index;

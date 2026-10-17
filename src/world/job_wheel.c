@@ -54,9 +54,9 @@ extern u8 g_formation_job_wheel_open_frame;
 extern u8 g_formation_job_wheel_closing;
 extern u8 g_formation_job_wheel_close_frame;
 
-/* The current and new job portraits have separate original address bindings. */
-extern textured_rect_source_t g_formation_job_wheel_portrait_quad;
-extern textured_rect_source_t g_formation_job_wheel_new_portrait_quad;
+/* The current and new job sprites use separate texture sources. */
+extern textured_rect_source_t g_formation_job_wheel_sprite_quad;
+extern textured_rect_source_t g_formation_job_wheel_new_sprite_quad;
 
 /* job-change animation */
 /* Result of formation_job_step_change, kept in
@@ -84,7 +84,7 @@ extern u8* g_formation_job_change_new_sprite_source;
 static void formation_job_build_wheel_availability(void);
 static void formation_job_build_wheel_name(void);
 static void formation_job_draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y);
-static void formation_job_layout_wheel_portrait(void);
+static void formation_job_prepare_selected_sprite(void);
 static s32 formation_job_step_change(s32 job);
 static void formation_job_step_wheel_close(void);
 static void formation_job_step_wheel_open(void);
@@ -208,7 +208,7 @@ void formation_job_wheel_menu(void) {
             job_list_build(
                 g_unit_selected_index, g_formation_job_wheel_jobs, FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS);
             g_formation_unit_banner_enabled = g_formation_saved_banner_enabled;
-            formation_job_layout_wheel_portrait();
+            formation_job_prepare_selected_sprite();
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL;
         }
 
@@ -261,9 +261,9 @@ void formation_job_wheel_menu(void) {
         }
 
         gfx_enqueue_gouraud_textured_quad(
-            &g_formation_job_wheel_portrait_quad, g_formation_job_change_flash_colors, 0, 0x33);
+            &g_formation_job_wheel_sprite_quad, g_formation_job_change_flash_colors, 0, 0x33);
         gfx_enqueue_gouraud_textured_quad(
-            &g_formation_job_wheel_new_portrait_quad, g_formation_job_change_flash_colors, 0, 0x33);
+            &g_formation_job_wheel_new_sprite_quad, g_formation_job_change_flash_colors, 0, 0x33);
         formation_job_draw_wheel_sprites(0, ONE, ONE);
     } else {
         banner = g_formation_unit_banner_enabled;
@@ -446,7 +446,7 @@ static void formation_job_draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius
             ot_index++;
         }
         job = index;
-        formation_get_generic_human_graphic(g_formation_job_wheel_jobs[job] & FORMATION_JOB_LIST_ENTRY_ID_MASK,
+        formation_build_job_sprite_source(g_formation_job_wheel_jobs[job] & FORMATION_JOB_LIST_ENTRY_ID_MASK,
             g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_FEMALE, &sprite.source);
         sprite.position.x = g_formation_job_wheel_center_x + ((scaled_x * rcos(theta)) >> 12) - 8;
         sprite.position.y = g_formation_job_wheel_center_y + ((scaled_y * rsin(theta)) >> 12) - 0x14;
@@ -515,7 +515,7 @@ static s32 formation_job_step_change(s32 job) {
         g_formation_job_change_new_sprite_image = heap_alloc(0x1e0);
         memset(g_formation_job_change_new_sprite_image, 0, 0x1e0);
         formation_job_change(FORMATION_PREVIEW_UNIT_INDEX, job, 0);
-        formation_build_unit_graphic(FORMATION_PREVIEW_UNIT_INDEX, &scratch.entry, 0);
+        formation_build_unit_sprite_source(FORMATION_PREVIEW_UNIT_INDEX, &scratch.entry, 0);
         g_formation_job_change_new_sprite_source = heap_alloc(0x1e0);
         if (scratch.entry.tpage == 100) {
             rect.x = (scratch.entry.u >> 2) + 0x100;
@@ -525,7 +525,7 @@ static s32 formation_job_step_change(s32 job) {
         rect.y = scratch.entry.v;
         rect.w = scratch.entry.w >> 2;
         rect.h = scratch.entry.h;
-        g_formation_job_wheel_new_portrait_quad.clut = scratch.entry.clut;
+        g_formation_job_wheel_new_sprite_quad.clut = scratch.entry.clut;
         gfx_store_image_and_wait(&rect, g_formation_job_change_new_sprite_source);
         g_formation_job_change_dissolve_order = heap_alloc(0x3c0);
         for (i = 479; i >= 0; i--) {
@@ -711,26 +711,26 @@ static void formation_job_update_wheel(void) {
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_CLOSING;
         }
     }
-    formation_job_layout_wheel_portrait();
+    formation_job_prepare_selected_sprite();
 }
 
-/* Center the two job-wheel portrait quads on (0x80, 0x7b) for the selected
+/* Center the two job-wheel sprite quads on (0x80, 0x7b) for the selected
  * unit's formation graphic and queue a VRAM move of that graphic to
- * (0x240, 0x130), where g_formation_job_wheel_portrait_quad samples it. */
-static void formation_job_layout_wheel_portrait(void) {
+ * (0x240, 0x130), where g_formation_job_wheel_sprite_quad samples it. */
+static void formation_job_prepare_selected_sprite(void) {
     texture_source_t entry;
     RECT rect;
     s16 x;
     s16 y;
 
-    formation_build_unit_graphic(g_unit_selected_index, &entry, 0);
+    formation_build_unit_sprite_source(g_unit_selected_index, &entry, 0);
     x = 0x80 - (entry.w >> 1);
     y = 0x7b - (entry.h >> 1);
-    g_formation_job_wheel_portrait_quad.y = y;
-    g_formation_job_wheel_new_portrait_quad.y = y;
-    g_formation_job_wheel_portrait_quad.x = x;
-    g_formation_job_wheel_new_portrait_quad.x = x;
-    g_formation_job_wheel_portrait_quad.clut = entry.clut;
+    g_formation_job_wheel_sprite_quad.y = y;
+    g_formation_job_wheel_new_sprite_quad.y = y;
+    g_formation_job_wheel_sprite_quad.x = x;
+    g_formation_job_wheel_new_sprite_quad.x = x;
+    g_formation_job_wheel_sprite_quad.clut = entry.clut;
     if (entry.tpage == 0x64) {
         rect.x = (entry.u >> 2) + 0x100;
     } else {

@@ -114,12 +114,12 @@ void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
     learned_abilities[byte] |= i;
 }
 
-/* Build the portrait source rectangle and palette for a formation unit.
+/* Build the sprite texture source and palette for a formation unit.
  *
- * Special jobs use fixed portrait entries; generic humans derive theirs from
+ * Special jobs use fixed sprite entries; generic humans derive theirs from
  * job and gender. The third argument is retained because all known callers
  * pass it even though this function does not consume it. */
-void formation_build_unit_graphic(s16 formation_index, texture_source_t* destination, s32 unused) {
+void formation_build_unit_sprite_source(s16 formation_index, texture_source_t* destination, s32 unused) {
     formation_unit_t* unit = g_formation_unit_pointers[formation_index];
     s16 job_id;
     s32 index;
@@ -144,12 +144,12 @@ void formation_build_unit_graphic(s16 formation_index, texture_source_t* destina
     } else if (unit->sprite_set == CHARACTER_IDENTITY_MONSTER) {
         index = unit->monster_graphic + 0x3D;
     } else if (unit->sprite_set < CHARACTER_IDENTITY_BOY) {
-        index = g_formation_generic_human_graphic_index_table[unit->sprite_set];
+        index = g_formation_sprite_index_by_identity[unit->sprite_set];
     } else {
-        formation_get_generic_human_graphic(job_id, unit->gender_flags & UNIT_FLAG_FEMALE, destination);
+        formation_build_job_sprite_source(job_id, unit->gender_flags & UNIT_FLAG_FEMALE, destination);
         return;
     }
-    bcopy(&g_formation_graphic_entries[index], destination, sizeof(*destination));
+    bcopy(&g_formation_sprite_sources[index], destination, sizeof(*destination));
     palette = (s16)formation_get_unit_palette_index(g_formation_unit_pointers[formation_index]->identity.roster_slot);
     clut_x = (palette % 4) * 0x10 + 0x140;
     job_id = palette / 4;
@@ -171,16 +171,16 @@ s32 formation_find_by_roster_slot(s16 roster_slot) {
     return index;
 }
 
-/* Copy the formation graphic entry of a generic human job. Jobs below 0x35
- * are looked up in a table; of the rest, Bard and Dancer have fixed entries
+/* Build the sprite texture source for a job. Jobs below 0x35 share their
+ * character identity lookup; of the rest, Bard and Dancer have fixed entries
  * (0x3a, 0x3b), while Mime uses 0x3c and the others job * 2 - 0x7c, both
  * plus one for a female unit. */
-void formation_get_generic_human_graphic(s32 job_id, s16 is_female, texture_source_t* destination) {
+void formation_build_job_sprite_source(s32 job_id, s16 is_female, texture_source_t* destination) {
     s16 id = job_id;
     s16 idx;
 
     if (id < JOB_ID_CHEMIST_35) {
-        idx = g_formation_generic_human_graphic_index_table[id];
+        idx = g_formation_sprite_index_by_identity[id];
     } else if (id == JOB_ID_DANCER) {
         idx = 0x3B;
     } else if (id == JOB_ID_BARD) {
@@ -195,7 +195,7 @@ void formation_get_generic_human_graphic(s32 job_id, s16 is_female, texture_sour
             idx += 1;
         }
     }
-    bcopy(&g_formation_graphic_entries[idx], destination, 0xC);
+    bcopy(&g_formation_sprite_sources[idx], destination, sizeof(*destination));
 }
 
 /*

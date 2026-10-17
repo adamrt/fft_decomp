@@ -75,7 +75,7 @@ typedef struct formation_unit {
     unit_job_points_t job_points; /* 0x0be; current JP followed by total JP */
     u8 name[UNIT_NAME_SIZE];      /* 0x10e; "unit Nickname" */
     u8 monster_graphic;           /* 0x11e; added to formation graphic entry 0x3d when sprite_set == 0x82
-                                     (formation_build_unit_graphic) */
+                                     (formation_build_unit_sprite_source) */
     u8 proposition_status;        /* 0x11f; "Proposition Byte": formation_unit_proposition_e, 0 when present */
     u16 birthday;                 /* 0x120; unit_stats_t birthday & 0x1ff; egg readers split
                                      it into nibbles */
@@ -146,17 +146,17 @@ typedef enum formation_menu {
     FORMATION_MENU_ABILITY_REMOVE = 11,
     FORMATION_MENU_ABILITY_LEARN = 12,
     FORMATION_MENU_VIEW_ABILITIES = 13,
-    FORMATION_MENU_JOB_WHEEL_ENTER = 14,              /* the grid slides out, then the wheel opens */
-    FORMATION_MENU_JOB_WHEEL_LEAVE = 15,              /* the wheel closes, then the grid returns */
-    FORMATION_MENU_ITEM_ENTER = 16,                   /* the grid slides out */
-    FORMATION_MENU_ITEM_LEAVE = 17,                   /* the grid returns */
-    FORMATION_MENU_ABILITY_ENTER = 18,                /* the grid slides out */
-    FORMATION_MENU_ABILITY_LEAVE = 19,                /* the grid returns */
-    FORMATION_MENU_JOB_WHEEL_CLOSING = 20,            /* wheel close animation */
-    FORMATION_MENU_JOB_WHEEL_OPENING = 21,            /* wheel open animation */
-    FORMATION_MENU_ABILITY_ENTER_PORTRAIT_SLIDE = 22, /* only the portrait slides; nothing stores it */
-    FORMATION_MENU_ITEM_ENTER_NO_SLIDE = 23,          /* nothing stores it */
-    FORMATION_MENU_JOB_CHANGE = 24                    /* job change flash on the wheel */
+    FORMATION_MENU_JOB_WHEEL_ENTER = 14,            /* the grid slides out, then the wheel opens */
+    FORMATION_MENU_JOB_WHEEL_LEAVE = 15,            /* the wheel closes, then the grid returns */
+    FORMATION_MENU_ITEM_ENTER = 16,                 /* the grid slides out */
+    FORMATION_MENU_ITEM_LEAVE = 17,                 /* the grid returns */
+    FORMATION_MENU_ABILITY_ENTER = 18,              /* the grid slides out */
+    FORMATION_MENU_ABILITY_LEAVE = 19,              /* the grid returns */
+    FORMATION_MENU_JOB_WHEEL_CLOSING = 20,          /* wheel close animation */
+    FORMATION_MENU_JOB_WHEEL_OPENING = 21,          /* wheel open animation */
+    FORMATION_MENU_ABILITY_ENTER_SPRITE_SLIDE = 22, /* only the sprite slides; nothing stores it */
+    FORMATION_MENU_ITEM_ENTER_NO_SLIDE = 23,        /* nothing stores it */
+    FORMATION_MENU_JOB_CHANGE = 24                  /* job change flash on the wheel */
 } formation_menu_e;
 
 /* Screen x and texture u of one background tile; two alternating rows of four. */
@@ -252,21 +252,23 @@ extern u8 g_formation_monster_sprite_table[20]; /* indexed by sprite code - 0x3f
 extern RECT g_formation_sheet_rect;
 extern RECT g_formation_sheet_source_rect;
 extern u8 g_formation_sprite_tall_cell[];
-extern texture_source_t g_formation_graphic_entries[];
-extern u8 g_formation_generic_human_graphic_index_table[];
+extern texture_source_t g_formation_sprite_sources[];
+
+/* Fixed character identities select sprite sources here; jobs below 0x35 use the same mapping. */
+extern u8 g_formation_sprite_index_by_identity[];
 extern u8 g_formation_unit_slide_pending;
 extern volatile u8 g_formation_unit_slide_frame;
-extern u8 g_formation_portrait_slide_frame;
+extern u8 g_formation_sprite_slide_frame;
 
 void formation_prepare_sprites(void);
 void formation_build_sprites(void);
 s32 formation_get_unit_palette_index(s32 roster_slot);
-void formation_build_unit_graphic(s16 formation_index, texture_source_t* destination, s32 unused);
-void formation_get_generic_human_graphic(s32 job_id, s16 is_female, texture_source_t* destination);
+void formation_build_unit_sprite_source(s16 formation_index, texture_source_t* destination, s32 unused);
+void formation_build_job_sprite_source(s32 job_id, s16 is_female, texture_source_t* destination);
 void formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* rgb, s32 ot_index);
 void formation_draw_sprite_with_shadow(const oriented_quad_t* pos, const rgb24_t* rgb, s32 ot_index);
-void formation_place_portrait_at_rest(s16 unit_index);
-u8 formation_step_portrait_slide(void);
+void formation_draw_sprite_at_rest(s16 unit_index);
+u8 formation_update_sprite_slide(void);
 
 /* unit banner and stat bar */
 extern u8 g_formation_unit_banner_enabled;

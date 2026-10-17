@@ -899,7 +899,7 @@ static void formation_draw_unit_slots(point16_t* positions, s32 shade) {
 
 /* Steps the 24-frame formation-grid transition and draws it.
  *
- * The selected unit slides from its grid cell to the portrait rest point
+ * The selected unit slides from its grid cell to the sprite rest point
  * (0x8b,0x9e; 0x61,0x63 when mode >= 2) and drags the cursor with it; the
  * other units drift sideways by frame^2/2 (alternating direction per row)
  * while the backdrop shade fades. Returns the frame counter, which wraps to
@@ -962,7 +962,7 @@ s32 formation_step_grid_transition(s32 mode) {
 }
 
 /*
- * Step the 24-frame return from the formation portrait to the unit grid.
+ * Step the 24-frame return of the selected sprite to the unit grid.
  *
  * This reverses formation_step_grid_transition: the frame counter runs
  * down from 24, sliding the selected unit from its rest point back to its
@@ -1036,7 +1036,7 @@ s32 formation_step_grid_return(s32 mode) {
 
 /* Interpolates the sprite position from (0x61, 0x63) to (0x8b, 0x9e) over 24
  * steps and advances the step counter, wrapping back to zero. */
-u8 formation_step_portrait_slide(void) {
+u8 formation_update_sprite_slide(void) {
     point16_t pos;
     s32 to_x = 0x8b;
     s32 to_y = 0x9e;
@@ -1045,22 +1045,22 @@ u8 formation_step_portrait_slide(void) {
     s32 step;
     s32 remaining;
 
-    step = g_formation_portrait_slide_frame;
+    step = g_formation_sprite_slide_frame;
     remaining = 24 - step;
     pos.x = (remaining * from_x + step * to_x) / 24;
     pos.y = (remaining * from_y + step * to_y) / 24;
     g_formation_cursor_position.x = pos.x + 0x1c;
     g_formation_cursor_position.y = pos.y + 0x19;
     formation_draw_unit_sprite(g_unit_selected_index, &pos, 0, 0x32);
-    g_formation_portrait_slide_frame++;
-    if (g_formation_portrait_slide_frame == 24) {
-        g_formation_portrait_slide_frame = 0;
+    g_formation_sprite_slide_frame++;
+    if (g_formation_sprite_slide_frame == 24) {
+        g_formation_sprite_slide_frame = 0;
     }
-    return g_formation_portrait_slide_frame;
+    return g_formation_sprite_slide_frame;
 }
 
 /* Draw a formation unit's sprite at its resting position (0x8B, 0x9E). */
-void formation_place_portrait_at_rest(s16 unit_index) {
+void formation_draw_sprite_at_rest(s16 unit_index) {
     point16_t pos;
 
     pos.x = 0x8B;
@@ -1082,7 +1082,7 @@ void formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* rgb, s3
     s32 h;
     rgb24_t* backdrop_rgb;
 
-    formation_build_unit_graphic(unit_index, &sprite.source, 0);
+    formation_build_unit_sprite_source(unit_index, &sprite.source, 0);
     if (g_formation_dismiss_anim_timer != 0 && (g_formation_dismiss_anim_timer >> 8) == unit_index) {
         scale = (g_formation_dismiss_anim_timer & 0xFF) + 1;
         w = sprite.source.w / scale;

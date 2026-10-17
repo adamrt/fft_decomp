@@ -712,8 +712,8 @@ functions:
   - {addr: 0x8011751c, size: 540, name: formation_draw_unit_slots, hash: cd90a473baf961d9, unit: formation_grid}
   - {addr: 0x80117738, size: 616, name: formation_step_grid_transition, hash: 2d3357a306d7ecd3, unit: formation_grid}
   - {addr: 0x801179a0, size: 696, name: formation_step_grid_return, hash: a13779fc69263885, unit: formation_grid}
-  - {addr: 0x80117c58, size: 288, name: formation_step_portrait_slide, hash: 68e1aaf0e2db61ed, unit: formation_grid}
-  - {addr: 0x80117d78, size: 64, name: formation_place_portrait_at_rest, hash: 28cbcbbb0c385095, unit: formation_grid}
+  - {addr: 0x80117c58, size: 288, name: formation_update_sprite_slide, hash: 68e1aaf0e2db61ed, unit: formation_grid}
+  - {addr: 0x80117d78, size: 64, name: formation_draw_sprite_at_rest, hash: 28cbcbbb0c385095, unit: formation_grid}
   - {addr: 0x80117db8, size: 580, name: formation_draw_unit_sprite, hash: 769106bf0e5b263b, unit: formation_grid}
   - {addr: 0x80117ffc, size: 336, name: formation_draw_egg_sprite, hash: 932443cf66c7df7a, unit: formation_grid}
   - {addr: 0x8011814c, size: 224, name: formation_draw_sprite_with_shadow, hash: a608b835cf084070, unit: formation_grid}
@@ -735,7 +735,7 @@ functions:
   - {addr: 0x8011a378, size: 364, name: formation_job_build_wheel_availability, hash: aaa008868515d070, unit: job_wheel}
   - {addr: 0x8011a4e4, size: 180, name: formation_job_step_wheel_open, hash: 0578a1771cc596a1, unit: job_wheel}
   - {addr: 0x8011a598, size: 236, name: formation_job_update_wheel, hash: 89dde75684b3d966, unit: job_wheel}
-  - {addr: 0x8011a684, size: 244, name: formation_job_layout_wheel_portrait, hash: 6b20b398ac425f37, unit: job_wheel}
+  - {addr: 0x8011a684, size: 244, name: formation_job_prepare_selected_sprite, hash: 6b20b398ac425f37, unit: job_wheel}
   - {addr: 0x8011a778, size: 264, name: formation_job_build_wheel_name, hash: de83300daa37b39e, unit: job_wheel}
   - {addr: 0x8011a880, size: 212, name: formation_job_draw_mastered_star, hash: 51273e24192e0e6b, unit: job_wheel}
   - {addr: 0x8011a954, size: 40, name: thread_wait_forever_by_frames, hash: 38437c674ba18e54, unit: equipment_rows}
@@ -866,9 +866,9 @@ functions:
   - {addr: 0x801253d4, size: 364, name: formation_ability_set_slot, hash: fc8aca691a77add1, unit: formation_ability_slots}
   - {addr: 0x80125540, size: 164, name: formation_get_unit_lock, hash: e3d4764d538820cd, unit: formation_ability_slots}
   - {addr: 0x801255e4, size: 228, name: formation_ability_learn, hash: aa1a32a0af924d02, unit: formation_ability_slots}
-  - {addr: 0x801256c8, size: 380, name: formation_build_unit_graphic, hash: 40ab9d6e7a39b152, unit: formation_ability_slots}
+  - {addr: 0x801256c8, size: 380, name: formation_build_unit_sprite_source, hash: 40ab9d6e7a39b152, unit: formation_ability_slots}
   - {addr: 0x80125844, size: 96, name: formation_find_by_roster_slot, hash: 0274b8b7a13644e3, unit: formation_ability_slots}
-  - {addr: 0x801258a4, size: 176, name: formation_get_generic_human_graphic, hash: f781dae0ee428e01, unit: formation_ability_slots}
+  - {addr: 0x801258a4, size: 176, name: formation_build_job_sprite_source, hash: f781dae0ee428e01, unit: formation_ability_slots}
   - {addr: 0x80125954, size: 60, name: formation_copy_unit_to_temp, hash: ef847502bf7e7faf, unit: formation_ability_slots}
   - {addr: 0x80125990, size: 116, name: zodiac_get_for_date, hash: 372e527c3d55f8f4, unit: formation_ability_slots}
   - {addr: 0x80125a04, size: 760, name: breeding_update, hash: c79a4f9e25086f3b, unit: formation_ability_slots}
@@ -1619,11 +1619,11 @@ data:
   - {addr: 0x8018c895, name: g_formation_grid_transition_frame}
   - {addr: 0x8018c896, name: g_formation_grid_return_frame}
   - {addr: 0x8018c897, name: g_formation_grid_return_done}
-  - {addr: 0x8018c898, name: g_formation_portrait_slide_frame}
+  - {addr: 0x8018c898, name: g_formation_sprite_slide_frame}
   - {addr: 0x8018c89c, name: g_formation_away_unit_color}
   - {addr: 0x8018c8a0, name: g_formation_job_wheel_unit_index}
-  - {addr: 0x8018c8a4, name: g_formation_job_wheel_portrait_quad}
-  - {addr: 0x8018c8b4, name: g_formation_job_wheel_new_portrait_quad}
+  - {addr: 0x8018c8a4, name: g_formation_job_wheel_sprite_quad}
+  - {addr: 0x8018c8b4, name: g_formation_job_wheel_new_sprite_quad}
   - {addr: 0x8018c8c4, name: g_formation_job_wheel_script}
   - {addr: 0x8018c8fa, name: g_formation_job_wheel_job_selected}
   - {addr: 0x8018c900, name: g_formation_job_wheel_unit_sprite_position}
@@ -1714,8 +1714,8 @@ data:
   - {addr: 0x8018d7f4, name: g_shop_fitting_best_fit_slot_categories}
   - {addr: 0x8018d7fc, name: g_item_type_icon_origins}
   - {addr: 0x8018d844, name: g_shop_item_availability}
-  - {addr: 0x8018da44, name: g_formation_graphic_entries}
-  - {addr: 0x8018de34, name: g_formation_generic_human_graphic_index_table}
+  - {addr: 0x8018da44, name: g_formation_sprite_sources}
+  - {addr: 0x8018de34, name: g_formation_sprite_index_by_identity}
   - {addr: 0x8018de84, name: g_zodiac_date_limits}
   - {addr: 0x8018deac, name: g_breeding_month_lengths}
   - {addr: 0x8018debc, name: g_breeding_table}
