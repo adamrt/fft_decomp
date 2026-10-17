@@ -35,6 +35,88 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* menu state */
+/* g_save_menu_state, the state card_entrypoint dispatches on. Only
+ * the states whose roles the matching handlers establish are named. */
+typedef enum save_menu_state {
+    SAVE_MENU_INITIAL_PROMPT = 0,
+    SAVE_MENU_SELECT_CARD = 1,
+    SAVE_MENU_SCAN_RESULT = 2,
+    SAVE_MENU_SCANNING = 3,
+    SAVE_MENU_SELECT_SAVE = 4,
+    SAVE_MENU_WRITING = 6,
+    SAVE_MENU_LEAVE_ALT = 9, /* never stored; handled like LEAVE */
+    SAVE_MENU_LEAVE = 10,    /* the player declined or is done: fade the music and the screen out */
+    SAVE_MENU_CLOSING = 0xff /* fading out; no state handler runs */
+} save_menu_state_e;
+
+extern save_image_t* g_save_buffer_pointer;
+extern u8 g_save_menu_state; /* save_menu_state_e */
+extern DIRENTRY* g_save_menu_work_buffer;
+extern clut_t g_save_menu_clut;
+extern s32 g_save_menu_script_callback;
+extern s16 g_save_menu_selection_index;
+extern s8 g_save_completed;
+
+/* prompts */
+/* The g_save_*_descriptor menu-thread descriptors are 0x3c-byte menu_entry_t menu records. menu_start_managed_thread
+ * and its delayed twin start descriptor->thread_entry (+0x28). The yes/no prompts are a message record followed by a
+ * choice record whose text_id is 0xd810; the choice's selected_index (+0x74 of the prompt) is the default answer,
+ * and the message window.y (+0x0a) places the prompt. */
+extern menu_entry_t g_save_initial_prompt_descriptor[];
+extern menu_entry_t g_save_card_slot_selection_descriptor[];
+extern menu_entry_t g_save_checking_message_descriptor[];
+extern menu_entry_t g_save_card_error_prompt_descriptor[];
+extern menu_entry_t g_save_no_data_prompt_descriptor[];
+extern menu_entry_t g_save_format_prompt_descriptor[2];
+extern menu_entry_t g_save_formatting_message_descriptor[];
+extern menu_entry_t g_save_overwrite_prompt_descriptor[2];
+extern menu_entry_t g_save_in_progress_thread_descriptor[];
+extern menu_entry_t g_save_failure_thread_descriptor[];
+
+/* A pointer cell, not a record: save_update_scan_result clears it to
+ * 0, tests it, and assigns g_save_no_data_prompt_descriptor into it. */
+extern menu_entry_t* g_save_slot_scan_prompt_descriptor;
+extern s16 g_save_initial_prompt_timer;
+extern u8 g_save_initial_prompt_thread_state;
+extern u8 g_save_slot_selection_thread_state;
+extern s8 g_save_error_prompt_closing;
+extern s8 g_save_format_prompt_active;
+extern u8 g_save_overwrite_prompt_active;
+
+/* scan and write */
+extern s8 g_save_open_result;
+extern s8 g_save_listed_slot_count;
+extern s8 g_save_scan_setup_step;
+extern u8 g_save_write_phase;
+extern u8 g_save_unread_flag; /* cleared with g_save_write_failed when a save starts; never read */
+
+/* slot list */
+/* Ten-byte number command in a 12-byte save-menu slot. */
+typedef struct save_slot_number_command {
+    menu_draw_number_command_t number;
+    u8 _unused_0a[2];
+} save_slot_number_command_t;
+typedef char save_slot_number_command_size_must_be_12[sizeof(save_slot_number_command_t) == 12 ? 1 : -1];
+
+extern s16 g_save_slot_index;
+extern s16 g_save_list_selected_slot;
+extern s16 g_save_list_top_row;
+extern u8 g_save_list_cursor_index;
+extern s16 g_save_list_scroll_anim_offset;
+extern s16 g_save_list_scroll_base_y;
+extern u16 g_save_slot_cursor_animation;
+extern point16_t g_save_slot_cursor_position;
+extern s16 g_save_slot_text_row_ids[];
+extern save_slot_number_command_t g_save_slot_number_commands[4];
+extern oriented_quad_t g_save_slot_quads[];
+
+/* fade and queued sound */
+extern rgb24_t g_save_gfx_fade_overlay_color;
+extern RECT g_save_gfx_fullscreen_fade_rect;
+extern u8 g_save_list_input_armed;
+extern u8 g_save_sound_queued_effect_id; /* sound_sfx_e */
+
 /* Save-image prefix and the additional bytes cleared with its working storage. */
 enum { SAVE_WORK_BUFFER_BYTES = 0x1e80 };
 extern u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];
