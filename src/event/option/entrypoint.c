@@ -21,7 +21,7 @@
  *
  * The values pulsed for tutorial scripts (0xfd options, 0xf9 AT list) are the same
  * screen codes WORLD's option entry pulses. */
-void option_entrypoint(s32 menu_type) {
+void option_dispatch(s32 menu_type) {
     menu_entry_t* menu = (menu_entry_t*)thread_get_current_parameter_1();
     s32 index;
     game_options_fields_t options = g_game_options.fields;

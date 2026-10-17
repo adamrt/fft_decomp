@@ -668,7 +668,7 @@ functions:
   - {addr: 0x80028a64, size: 104, name: psyq_card_restore_exception_prefix, hash: 1f518d7271104687, source: src/lib/psyq/libcard/psyq_card_restore_exception_prefix.c}
   - {addr: 0x80040934, size: 64, name: system_stop_display_and_audio, hash: c64016389ec5e4a0, unit: game_loop}
   - {addr: 0x80040974, size: 48, name: system_reset_game, hash: 561bc72b9357246b, unit: game_loop}
-  - {addr: 0x800409a4, size: 32, name: overlay_call_battle_entrypoint, hash: c58eafc808ea8434, unit: game_loop}
+  - {addr: 0x800409a4, size: 32, name: overlay_call_legacy_stub, hash: c58eafc808ea8434, unit: game_loop}
   - {addr: 0x800409c4, size: 60, name: overlay_exec_battle, hash: 9f332892998856cc, unit: game_loop}
   - {addr: 0x80040a00, size: 392, name: system_run_game_loop, hash: a21b6246c7cbd252, unit: game_loop}
   - {addr: 0x80040b88, size: 80, name: main, hash: 5c256ef1eae8d688, unit: game_loop}
@@ -1385,7 +1385,7 @@ data:
   - {addr: 0x80066308, name: g_party_highest_level}
   - {addr: 0x800670f0, name: title_run_main_loop}
   - {addr: 0x8006720c, name: ending_run}
-  - {addr: 0x800672f8, name: world_map_entrypoint}
+  - {addr: 0x800672f8, name: world_map_run}
   - {addr: 0x80079a98, name: state_run_game_loop}
   - {addr: 0x80093170, name: battle_map_color_field}
   - {addr: 0x800a778c, name: g_game_flow_state}

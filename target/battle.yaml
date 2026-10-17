@@ -2950,11 +2950,11 @@ data:
 
 imports:
   - {addr: 0x801bf3b8, name: save_run_menu}
-  - {addr: 0x801bf7e0, name: equipment_entrypoint}
+  - {addr: 0x801bf7e0, name: equipment_update}
   - {addr: 0x801c05d4, name: fullscreen_graphic_thread}
-  - {addr: 0x801c1a3c, name: option_entrypoint}
+  - {addr: 0x801c1a3c, name: option_dispatch}
   - {addr: 0x801c3078, name: deploy_find_fieldable_units}
-  - {addr: 0x801c3190, name: unit_list_entrypoint}
+  - {addr: 0x801c3190, name: unit_list_run}
   - {addr: 0x801c34b4, name: scenario_load_conditionals}
   - {addr: 0x801c3b00, name: scenario_restore_music_and_darkness}
   - {addr: 0x801c3d84, name: status_screen_mounted_unit_thread}
@@ -2970,7 +2970,7 @@ imports:
   - {addr: 0x801cafd4, name: conditions_dispatch}
   - {addr: 0x801d7000, name: text_init_battle_pointers}
   - {addr: 0x801df050, name: help_run_battle}
-  - {addr: 0x801df198, name: status_screen_entrypoint}
+  - {addr: 0x801df198, name: status_screen_update}
 
 overrides:
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80165ecc}

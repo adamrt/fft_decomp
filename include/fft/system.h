@@ -13,7 +13,7 @@
  * loop: frame state, what the frame leaves out, requests left by WORLD and
  * OPENING, and the reason the loop ends. */
 typedef enum system_flags {
-    /* world_map_entrypoint runs frames while set; world_map_init_state sets it, a level clears it to leave. */
+    /* world_map_run runs frames while set; world_map_init_state sets it, a level clears it to leave. */
     SYSTEM_FLAG_RUNNING = 0x00000001,
     /* Draw this frame with the 3D map; world_map_draw_frame_with_map clears it after drawing. */
     SYSTEM_FLAG_DRAW_MAP = 0x00000002,
@@ -25,7 +25,7 @@ typedef enum system_flags {
     SYSTEM_FLAG_HIDE_MAP_DOTS = 0x00000010,
     /* world_map_draw_routes draws no route. */
     SYSTEM_FLAG_HIDE_MAP_ROUTES = 0x00000020,
-    /* world_map_entrypoint masks the display for the frame. */
+    /* world_map_run masks the display for the frame. */
     SYSTEM_FLAG_DISPLAY_OFF = 0x00000040,
     /* world_map_run_world_menus returns without running the menu frame; no code sets it. */
     SYSTEM_FLAG_SKIP_MENU_FRAME = 0x00000080,
@@ -43,19 +43,19 @@ typedef enum system_flags {
     SYSTEM_FLAG_HIDE_LOCATION_LABEL = 0x00002000,
     /* WORLD's menu chose a map (script variable CURRENT_MAP): the return level restarts the core and travels there. */
     SYSTEM_FLAG_REQUEST_DESTINATION = 0x00004000,
-    /* travel_step rolled an encounter: world_map_entrypoint returns 1. */
+    /* travel_step rolled an encounter: world_map_run returns 1. */
     SYSTEM_FLAG_RANDOM_BATTLE = 0x00008000,
-    /* Set after the card menu returns 1: world_map_entrypoint restarts its loop instead of returning. */
+    /* Set after the card menu returns 1: world_map_run restarts its loop instead of returning. */
     SYSTEM_FLAG_RESTART = 0x00010000,
     /* The unit-panel threads (8, 9 and 12) run: the menu frame draws their windows, not the formation menu. */
     SYSTEM_FLAG_UNIT_PANEL_THREADS = 0x00020000,
-    /* A story event replays: world_map_entrypoint returns 2 and the next entry reopens the story-event list. */
+    /* A story event replays: world_map_run returns 2 and the next entry reopens the story-event list. */
     SYSTEM_FLAG_STORY_EVENT_REPLAY = 0x00040000,
     /* Set by title_update_menu: the world entry opens the tutorial menu, which leaves through RETURN_TO_TITLE. */
     SYSTEM_FLAG_TITLE_TUTORIAL = 0x00080000,
     /* Set by world_map_step_tutorial_request: the return level opens the tutorial menu. */
     SYSTEM_FLAG_REQUEST_TUTORIAL = 0x00100000,
-    /* A tutorial event plays: world_map_entrypoint returns 2 with the music kept; the next entry reopens its list. */
+    /* A tutorial event plays: world_map_run returns 2 with the music kept; the next entry reopens its list. */
     SYSTEM_FLAG_TUTORIAL_EVENT = 0x00200000,
     /* world_map_init_state sets the rumor, path, location and story-event variables; no code sets it. */
     SYSTEM_FLAG_UNLOCK_ALL = 0x00400000,
@@ -63,13 +63,13 @@ typedef enum system_flags {
     SYSTEM_FLAG_REQUEST_VARIABLE_LIST = 0x00800000,
     /* Set by world_map_step_fixed_number_panel_request: the return level opens the fixed number panel. */
     SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL = 0x01000000,
-    /* The location menu chose a deep-dungeon battle: world_map_entrypoint returns 4. */
+    /* The location menu chose a deep-dungeon battle: world_map_run returns 4. */
     SYSTEM_FLAG_DEEP_DUNGEON_BATTLE = 0x02000000,
     /* Set by world_map_clear_screen_and_set_clip_rect; the return level then recaptures the world frame. */
     SYSTEM_FLAG_SCREEN_CLEARED = 0x04000000,
     /* Map dots stop pulsing and window_draw_animated_record stops advancing frames. */
     SYSTEM_FLAG_FREEZE_ANIMATION = 0x08000000,
-    /* world_map_entrypoint returns 5: system_run_game_loop goes back to OPENING. */
+    /* world_map_run returns 5: system_run_game_loop goes back to OPENING. */
     SYSTEM_FLAG_RETURN_TO_TITLE = 0x10000000,
     /* The world entry opens the Brave Story screen, which leaves through RETURN_TO_TITLE; no code sets it. */
     SYSTEM_FLAG_TITLE_BRAVE_STORY = 0x20000000,

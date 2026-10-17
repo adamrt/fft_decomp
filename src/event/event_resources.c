@@ -554,14 +554,14 @@ void announcement_spell_quote_thread(void) {
 void option_open(void) {
     menu_set_modal_open();
     overlay_request_companion(COMPANION_OVERLAY_OPTION);
-    option_entrypoint(MENU_OPTION_TYPE_GAME_OPTIONS);
+    option_dispatch(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
 /* Thread entry of menu entry 0x1d: load OPTION.OUT and open its AT list. */
 void at_list_open(void) {
     menu_set_modal_open();
     overlay_request_companion(COMPANION_OVERLAY_OPTION);
-    option_entrypoint(MENU_OPTION_TYPE_AT_LIST);
+    option_dispatch(MENU_OPTION_TYPE_AT_LIST);
 }
 
 /* Thread started for system function 0x1f (crystal or treasure): load OPTION.OUT
@@ -569,7 +569,7 @@ void at_list_open(void) {
 void crystal_open_pickup_panel(void) {
     menu_set_modal_open();
     overlay_request_companion(COMPANION_OVERLAY_OPTION);
-    option_entrypoint(MENU_OPTION_TYPE_CRYSTAL_PICKUP);
+    option_dispatch(MENU_OPTION_TYPE_CRYSTAL_PICKUP);
 }
 
 /* Wait for the camera and menu transition, then run Triangle-menu selection. */

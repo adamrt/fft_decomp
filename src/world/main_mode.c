@@ -32,7 +32,7 @@
  *
  * g_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
  * option equals its g_option_reference_values entry. */
-void option_entrypoint(s32 mode) {
+void option_dispatch(s32 mode) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     game_options_fields_t options = g_game_options.fields;
     s32 i;
@@ -81,7 +81,7 @@ void option_entrypoint(s32 mode) {
 }
 
 /*
- * Options-menu thread started by option_entrypoint (MENU_OPTION_TYPE_GAME_OPTIONS) with
+ * Options-menu thread started by option_dispatch (MENU_OPTION_TYPE_GAME_OPTIONS) with
  * entry->context = &g_option_entry_table.
  *
  * Scrolls the two-column option list like ability_list_scrolling_thread, shows the

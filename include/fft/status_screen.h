@@ -107,7 +107,7 @@ extern status_screen_unit_jobs_t* g_status_screen_unit_data[];
  * three data bytes ahead of the first function. */
 extern const char g_status_screen_text_decimal_format[];
 
-u32* status_screen_entrypoint(s32 unit, void* unused_otag);
+u32* status_screen_update(s32 unit, void* unused_otag);
 void status_screen_init_unit_jobs(s32 unit_id);
 
 /* menu display (JOBSTTS) */

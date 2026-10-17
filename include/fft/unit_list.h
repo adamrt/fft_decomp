@@ -15,7 +15,7 @@
 #include "psx/types.h"
 
 /* screen */
-/* g_unit_list_current_menu: what unit_list_entrypoint runs. */
+/* g_unit_list_current_menu: what unit_list_run runs. */
 typedef enum unit_list_menu {
     UNIT_LIST_MENU_UNIT_LIST = -1,   /* unit_list_run_frame: the grid and its triangle menu */
     UNIT_LIST_MENU_REORDER_LIST = 0, /* unit_list_run_sort_menu, the triangle menu's first row */
@@ -32,7 +32,7 @@ extern u8 g_unit_list_saved_status_banner_enabled;
 extern u8 g_unit_list_saved_unit_browse_enabled;
 extern clut_t g_unit_list_clut;
 
-s32 unit_list_entrypoint(s32 unused_unit, void* unused_otag);
+s32 unit_list_run(s32 unused_unit, void* unused_otag);
 void unit_list_reset_results(void);
 s32 unit_list_is_busy(void);
 

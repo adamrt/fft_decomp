@@ -356,7 +356,7 @@ functions:
   - {addr: 0x801c30a8, size: 152, name: unit_list_update_input_lock, hash: 646e49326a7f1a0f, unit: entry}
   - {addr: 0x801c3140, size: 16, name: unit_list_get_input_lock, hash: 5ffe36f037271c3b, unit: entry}
   - {addr: 0x801c3150, size: 64, name: unit_list_read_pad, hash: 904c475e5825a616, unit: entry}
-  - {addr: 0x801c3190, size: 1120, name: unit_list_entrypoint, hash: dc10118e0b14ebdd, unit: entry}
+  - {addr: 0x801c3190, size: 1120, name: unit_list_run, hash: dc10118e0b14ebdd, unit: entry}
   - {addr: 0x801c35f0, size: 28, name: unit_list_reset_results, hash: f1a9680225463c24, unit: entry}
   - {addr: 0x801c360c, size: 96, name: unit_list_is_busy, hash: a0b95bde6cbc97b7, unit: entry}
   - {addr: 0x801c366c, size: 1020, name: unit_list_run_frame, hash: 213e7cb2462eaa46, unit: entry}
@@ -1367,7 +1367,7 @@ functions:
   - {addr: 0x801bf604, size: 336, name: equipment_load_selected_unit, hash: a4726c20fc7a9d20, unit: entry}
   - {addr: 0x801bf754, size: 40, name: equipment_reset_selection, hash: d85652e4ca0ab453, unit: entry}
   - {addr: 0x801bf77c, size: 100, name: equipment_show_message, hash: 2d3c0e2daf08dc59, unit: entry}
-  - {addr: 0x801bf7e0, size: 568, name: equipment_entrypoint, hash: 8be433f53088ee38, unit: entry}
+  - {addr: 0x801bf7e0, size: 568, name: equipment_update, hash: 8be433f53088ee38, unit: entry}
   - {addr: 0x801bfa18, size: 44, name: menu_clear_selection_records, hash: 8c01966bfacc9bba, unit: selection_records}
   - {addr: 0x801bfa44, size: 60, name: menu_clear_selection_record, hash: fdca62f04b6534e1, unit: selection_records}
   - {addr: 0x801bfa80, size: 76, name: menu_set_selection_record, hash: e1f2abd2a5f39602, source: src/event/menu/menu_set_selection_record.c}
@@ -1947,7 +1947,7 @@ units:
 
 functions:
   - {addr: 0x801df004, size: 404, name: status_screen_load_images, hash: e786b01b51200874, unit: entry}
-  - {addr: 0x801df198, size: 736, name: status_screen_entrypoint, hash: a58961af30913d26, unit: entry}
+  - {addr: 0x801df198, size: 736, name: status_screen_update, hash: a58961af30913d26, unit: entry}
   - {addr: 0x801df478, size: 44, name: menu_clear_selection_records, hash: c8ef83eb24f7123c, unit: selection_records}
   - {addr: 0x801df4a4, size: 60, name: menu_clear_selection_record, hash: 2bb5b087e1621ebe, unit: selection_records}
   - {addr: 0x801df4e0, size: 76, name: menu_set_selection_record, hash: 21d529d3737f9365, source: src/event/menu/menu_set_selection_record.c}
@@ -2238,7 +2238,7 @@ functions:
   - {addr: 0x801c14ec, size: 808, name: at_list_init, hash: 0e222271dd330fe9, unit: at_list_threads}
   - {addr: 0x801c1814, size: 328, name: at_list_select_unit_thread, hash: 2d768b550d19a17f, unit: at_list_threads}
   - {addr: 0x801c195c, size: 224, name: at_list_start_thread, hash: 5bf5050f008c2b98, unit: at_list_threads}
-  - {addr: 0x801c1a3c, size: 640, name: option_entrypoint, hash: 8f7b254e0391baa2, source: src/event/option/entrypoint.c}
+  - {addr: 0x801c1a3c, size: 640, name: option_dispatch, hash: 8f7b254e0391baa2, source: src/event/option/entrypoint.c}
   - {addr: 0x801c1cbc, size: 4384, name: option_game_options_thread, hash: 3180807fdb0707d1, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/event/option/menu_run_game_options.c}
   - {addr: 0x801c2ddc, size: 1652, name: option_choice_thread, hash: d496c0741c324433, source: src/event/menu/option_choice_thread.c}
 

@@ -1382,7 +1382,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     g_event_field_object_use_request = 0;
 
     if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
-        ordering_table = status_screen_entrypoint(g_unit_panel_selected_unit.battle_id, 0);
+        ordering_table = status_screen_update(g_unit_panel_selected_unit.battle_id, 0);
         g_overlay_companion_overlay_primitives = (s32)ordering_table;
         if (ordering_table != 0) {
             AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[0x3f]);
@@ -1391,7 +1391,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         }
     }
     if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_EQUIP) {
-        prims = equipment_entrypoint(g_unit_panel_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
+        prims = equipment_update(g_unit_panel_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
         g_overlay_companion_overlay_primitives = prims;
         if (prims >= 2) {
             AddPrims(g_gfx_current_otag_entry, (void*)prims, (void*)(prims + 0xFC));
@@ -1434,7 +1434,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
         script_set_event_speed(1);
-        i = unit_list_entrypoint(0, 0);
+        i = unit_list_run(0, 0);
         cursor_move_to_battle_id(i);
         g_unit_panel_selected_unit.battle_id = i;
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
@@ -1581,7 +1581,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     g_script_field_object_use_request = 0;
 
     if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
-        ordering_table = status_screen_entrypoint(g_unit_panel_selected_unit.battle_id, 0);
+        ordering_table = status_screen_update(g_unit_panel_selected_unit.battle_id, 0);
         g_overlay_companion_overlay_primitives = (s32)ordering_table;
         if (ordering_table != 0) {
             AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[0x3f]);
@@ -1590,7 +1590,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         }
     }
     if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_EQUIP) {
-        prims = equipment_entrypoint(g_unit_panel_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
+        prims = equipment_update(g_unit_panel_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
         g_overlay_companion_overlay_primitives = prims;
         if (prims >= 2) {
             AddPrims(g_gfx_current_otag_entry, (void*)prims, (void*)(prims + 0xFC));
@@ -1634,7 +1634,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
         script_set_event_speed(1);
-        i = unit_list_entrypoint(0, 0);
+        i = unit_list_run(0, 0);
         cursor_move_to_battle_id(i);
         g_unit_panel_selected_unit.battle_id = i;
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;

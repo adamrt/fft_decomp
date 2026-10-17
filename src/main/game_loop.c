@@ -1,5 +1,5 @@
-/* Game reset, the BATTLE.BIN entrypoint call, the main game loop, main, the Now Loading message, the display setter,
- * the Squaresoft and SCE boot logos and the display reset. */
+/* Game reset, BATTLE loading and the resident return stub, the main game loop, main, the Now Loading message, the
+ * display setter, the Squaresoft and SCE boot logos and the display reset. */
 
 #include "fft/file.h"
 #include "fft/gfx.h"
@@ -37,7 +37,7 @@ void system_reset_game(void) {
 }
 
 /* Call system_zero_padding, which only returns (see overlay_exec_battle). */
-static void overlay_call_battle_entrypoint(void) {
+static void overlay_call_legacy_stub(void) {
     system_zero_padding();
 }
 
@@ -48,7 +48,7 @@ static void overlay_call_battle_entrypoint(void) {
 static void overlay_exec_battle(void) {
     file_load_checked_to_address(DISC_SECTOR_BATTLE_BIN,
         g_heap_high_overlay_load_address - g_heap_low_overlay_load_address, g_heap_low_overlay_load_address);
-    overlay_call_battle_entrypoint();
+    overlay_call_legacy_stub();
 }
 
 /* The top-level loop of the game: opening, then world map and battles until a

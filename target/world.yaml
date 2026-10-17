@@ -528,7 +528,7 @@ functions:
   - {addr: 0x80102928, size: 808, name: at_list_init, hash: fa3c7133afaf86b2, unit: at_list_threads}
   - {addr: 0x80102c50, size: 328, name: at_list_select_unit_thread, hash: 9767ee804f9e3394, unit: at_list_threads}
   - {addr: 0x80102d98, size: 224, name: at_list_start_thread, hash: c8919ff036b5a45b, unit: at_list_threads}
-  - {addr: 0x80102e78, size: 520, name: option_entrypoint, hash: c6870290bae10381, unit: main_mode}
+  - {addr: 0x80102e78, size: 520, name: option_dispatch, hash: c6870290bae10381, unit: main_mode}
   - {addr: 0x80103080, size: 4408, name: option_game_options_thread, hash: cc716f3bf7078b8c, unit: main_mode}
   - {addr: 0x801041b8, size: 1652, name: option_choice_thread, hash: c92a8d3ef7a62251, source: src/event/menu/option_choice_thread.c}
   - {addr: 0x8010482c, size: 80, name: help_close, hash: 6d0bc77451aa653a, unit: help_overlay}
@@ -2408,10 +2408,10 @@ data:
 imports:
   - {addr: 0x800222fc, name: memset}
   - {addr: 0x801bf3b8, name: save_run_menu}
-  - {addr: 0x801bf7e0, name: equipment_entrypoint}
+  - {addr: 0x801bf7e0, name: equipment_update}
   - {addr: 0x801c05d4, name: fullscreen_graphic_thread}
   - {addr: 0x801c3078, name: deploy_find_fieldable_units}
-  - {addr: 0x801c3190, name: unit_list_entrypoint}
+  - {addr: 0x801c3190, name: unit_list_run}
   - {addr: 0x801c34b4, name: scenario_load_conditionals}
   - {addr: 0x801c3d84, name: status_screen_mounted_unit_thread}
   - {addr: 0x801c3f44, name: deploy_run}
@@ -2423,11 +2423,11 @@ imports:
   - {addr: 0x801c9ec0, name: battle_map_title_load_graphic}
   - {addr: 0x801cafd4, name: conditions_dispatch}
   - {addr: 0x801d7000, name: text_init_battle_pointers}
-  - {addr: 0x801df198, name: status_screen_entrypoint}
+  - {addr: 0x801df198, name: status_screen_update}
 
 overrides:
-  - {function: at_list_open, name: option_entrypoint, addr: 0x80102e78}
-  - {function: crystal_open_pickup_panel, name: option_entrypoint, addr: 0x80102e78}
+  - {function: at_list_open, name: option_dispatch, addr: 0x80102e78}
+  - {function: crystal_open_pickup_panel, name: option_dispatch, addr: 0x80102e78}
   - {function: crystal_start_pickup_threads, name: thread_wait_forever, addr: 0x8010226c}
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x801531b0}
   - {function: menu_run_script_with_palette_mode, name: menu_set_palette_mode, addr: 0x801298c0}
@@ -2440,7 +2440,7 @@ overrides:
   - {function: menu_window_frame_thread, name: g_text_glyph_source, addr: 0x801ac91c}
   - {function: menu_window_frame_thread, name: text_set_blit_source_rect, addr: 0x801014fc}
   - {function: option_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80156c8c}
-  - {function: option_open, name: option_entrypoint, addr: 0x80102e78}
+  - {function: option_open, name: option_dispatch, addr: 0x80102e78}
   - {function: screen_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x8016e44c}
   - {function: screen_thin_window_frame_thread, name: g_gfx_screen_polarity, addr: 0x8004e5bc}
   - {function: screen_thin_window_frame_thread, name: g_menu_thin_panel_texture_windows, addr: 0x8018a330}

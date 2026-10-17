@@ -111,7 +111,7 @@ extern game_options_t g_game_options_defaults;
 extern game_options_t g_game_options_saved;
 
 /* entry */
-/* The argument of option_entrypoint, both the OPTION overlay's and WORLD's: which of the OPTION overlay's screens to
+/* The argument of option_dispatch, both the OPTION overlay's and WORLD's: which of the OPTION overlay's screens to
  * run. */
 typedef enum option_screen {
     MENU_OPTION_TYPE_GAME_OPTIONS = 0,
@@ -121,7 +121,7 @@ typedef enum option_screen {
 
 void option_open(void);
 /* OPTION and WORLD each build their own body. */
-void option_entrypoint(s32 menu_type);
+void option_dispatch(s32 menu_type);
 
 /* game options screen */
 /* One of the two 0x190-byte packet pages of the options screen (g_option_pages), alternated by frame.
