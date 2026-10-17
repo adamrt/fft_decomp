@@ -24,16 +24,12 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
-/* Move-Find scratch and its existing scalar views are private to this unit.
- * Separate aliases retain the original absolute load/store addressing. */
+/* Move-Find scratch is private to this unit. The first-byte flags alias retains
+ * the target's independent address load; accessing every byte through the record
+ * instead merges that load with the returned record address. */
 extern move_found_item_t g_move_find_rare_item_result;
 extern move_find_result_data_t g_move_find_tile_result;
 extern u8 g_move_find_result_flags;
-extern u8 g_move_find_entry_index;
-extern u8 g_move_find_rare_item_id;
-extern u8 g_move_find_common_item_id;
-extern u8 g_move_find_trap_id;
-extern s8 g_move_find_occupying_unit_id;
 
 static s32 move_find_test_or_set_item_flag(s32 map_id, s32 tile_index, s32 save);
 static command_menu_e menu_action_get_unit_menu_id(const unit_stats_t* unit);
@@ -116,7 +112,7 @@ move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer) {
     }
     if (i != UNIT_SLOT_COUNT) {
         g_move_find_result_flags = MOVE_FIND_RESULT_OCCUPIED;
-        g_move_find_occupying_unit_id = unit;
+        g_move_find_tile_result.occupying_unit_id = unit;
     }
     for (i = 0; i < 4; i++) {
         tile = &g_move_find_current_map_data.entries[i];
@@ -125,12 +121,12 @@ move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer) {
         }
     }
     if (i != 4) {
-        g_move_find_entry_index = i;
+        g_move_find_tile_result.entry_index = i;
         if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
             if (move_find_test_or_set_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
                 g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
-                g_move_find_rare_item_id = tile->rare_item_id;
-                g_move_find_common_item_id = tile->common_item_id;
+                g_move_find_tile_result.rare_item_id = tile->rare_item_id;
+                g_move_find_tile_result.common_item_id = tile->common_item_id;
             }
         }
         if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
@@ -145,7 +141,7 @@ move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer) {
             }
             if (trap != MOVE_FIND_TRAP_NONE) {
                 result = &g_move_find_result_flags;
-                g_move_find_trap_id = trap;
+                g_move_find_tile_result.trap_id = trap;
                 *result |= MOVE_FIND_RESULT_TRAP;
             }
         }

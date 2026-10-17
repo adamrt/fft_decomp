@@ -45,7 +45,7 @@ typedef struct move_step {
 } move_step_t;
 typedef char move_step_size_must_be_1[sizeof(move_step_t) == 1 ? 1 : -1];
 
-/* Packed half-height offsets (g_move_path_height_offsets). A missing presence flag keeps
+/* Packed half-height offsets (move_path_t.height_offsets). A missing presence flag keeps
  * that side's previous value when move_path_apply_selected_candidate applies a saved candidate. */
 typedef struct move_height_offsets {
     u8 destination_present : 1;
@@ -340,9 +340,6 @@ extern move_pathfind_scratch_t* g_move_config_ptr;
 extern move_spread_state_t* g_move_scratch_pad_ptr;
 extern move_record_t* g_move_records_ptr;
 extern u8* g_move_frontier_flags_ptr;
-extern move_height_offsets_t g_move_path_height_offsets;
-extern u8 g_move_path_destination_unit_record;
-extern u8 g_move_path_effective_flags;
 extern u8* g_move_path_frontier;
 extern s32 g_move_path_resume_pass;
 extern s32 g_move_path_tile_index;

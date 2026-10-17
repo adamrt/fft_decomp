@@ -1192,7 +1192,7 @@ static void move_spread_horizontal_jump(void) {
  * unit before move_path_encode_steps builds the step list. Either way the result is
  * the path buffer at g_move_path.
  *
- * g_move_path_effective_flags is written through a pointer loaded twice: the
+ * g_move_path.flags is written through a pointer loaded twice: the
  * target materializes its address in a register in both blocks. */
 move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
     move_height_offsets_t no_offsets = { 0 };
@@ -1229,8 +1229,8 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
         return 0;
     }
     move_spread_set_frontier_flags(MOVE_TILE_FLAGS_MODE_KEEP_RANGES);
-    g_move_path_height_offsets = no_offsets;
-    g_move_path_destination_unit_record = 0;
+    g_move_path.height_offsets = no_offsets;
+    g_move_path.pending_mount = 0;
     config->source_tile_occupied = 0;
     config->destination_tile_occupied = 0;
     state->source_unit_record_flag = 0;
@@ -1244,8 +1244,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
         }
         config->destination_tile_occupied = 1;
         state->source_unit_record_index = g_target_panels[index].unit_record_index;
-        g_move_path_destination_unit_record
-            = (records[state->source_unit_record_index].unit_id_flags & MOVE_RECORD_UNIT_ID_MASK)
+        g_move_path.pending_mount = (records[state->source_unit_record_index].unit_id_flags & MOVE_RECORD_UNIT_ID_MASK)
             + MOVE_PENDING_MOUNT_SET;
         state->outer_count = 0x1c;
     }
@@ -1258,7 +1257,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
         config->source_tile_occupied = 1;
     }
     if (config->move_type == MOVE_CLASS_TELEPORT) {
-        move_flags = &g_move_path_effective_flags;
+        move_flags = &g_move_path.flags;
         *move_flags = MOVE_EFFECTIVE_TELEPORT;
         value = config->movement_3;
         if (value & UNIT_MOVEMENT_SET_3_MOVE_IN_WATER) {
@@ -1267,7 +1266,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
             *move_flags = MOVE_EFFECTIVE_TELEPORT | MOVE_EFFECTIVE_IN_WATER;
         }
         if (value & UNIT_MOVEMENT_SET_3_SILENT_WALK) {
-            move_flags = &g_move_path_effective_flags;
+            move_flags = &g_move_path.flags;
             *move_flags |= MOVE_EFFECTIVE_SILENT_WALK;
         }
         if (move_teleport_roll() != 0) {
@@ -1487,7 +1486,7 @@ static void move_path_encode_steps(void) {
             level = state->work_level * 32;
             state->source_unit_record_index = state->destination_unit_record_index;
             flag = state->destination_unit_record_index << 4;
-            if (step == state->path_length - 2 && g_move_path_height_offsets.source_present) {
+            if (step == state->path_length - 2 && g_move_path.height_offsets.source_present) {
                 flag = 0x10;
             }
             source_bit = state->source_climb << 2;
@@ -1506,9 +1505,9 @@ static void move_path_encode_steps(void) {
     }
     g_move_path.count = state->path_length - 1;
     if (config->unit_id >= UNIT_SLOT_COUNT) {
-        g_move_path_effective_flags = 0;
+        g_move_path.flags = 0;
     } else {
-        g_move_path_effective_flags = move_get_effective_flags(&g_unit_stats[config->unit_id]);
+        g_move_path.flags = move_get_effective_flags(&g_unit_stats[config->unit_id]);
     }
 }
 
@@ -1739,7 +1738,7 @@ static void move_path_apply_selected_candidate(move_spread_state_t* state) {
     state->tile_y = state->saved_y;
     state->tile_level = state->saved_level;
     if (state->saved_height_offset_flags & MOVE_SAVED_SOURCE_HEIGHT) {
-        move_height_offsets_t* offsets = &g_move_path_height_offsets;
+        move_height_offsets_t* offsets = &g_move_path.height_offsets;
         move_height_offsets_t packed = *offsets;
         packed.source_height_offset = state->saved_source_height_offset;
         packed.source_present = 1;
@@ -1747,7 +1746,7 @@ static void move_path_apply_selected_candidate(move_spread_state_t* state) {
     }
     if (state->saved_height_offset_flags & MOVE_SAVED_DESTINATION_HEIGHT) {
         /* Bit 0 is destination_present, bits 1-3 destination_height_offset. */
-        u8* offsets = (u8*)&g_move_path_height_offsets;
+        u8* offsets = (u8*)&g_move_path.height_offsets;
         u32 selected = state->saved_destination_height_offset;
         u32 packed = *offsets;
         selected &= 7;
@@ -2086,8 +2085,8 @@ static move_path_t* move_path_calculate(s32 flags, s32 jump, s32 x, s32 y, u32 l
     }
     g_move_path_frontier = frontier;
     target_clear_panel_spread_flags();
-    g_move_path_height_offsets = no_offsets;
-    g_move_path_destination_unit_record = 0;
+    g_move_path.height_offsets = no_offsets;
+    g_move_path.pending_mount = 0;
     config->source_tile_occupied = 0;
     config->destination_tile_occupied = 0;
     state->outer_count = 4;
