@@ -89,19 +89,6 @@ typedef struct unit_view_summary_frame {
     POLY_FT4 portrait;                  /* 0xc8 */
 } unit_view_summary_frame_t;
 
-/* 12-byte textured-quad piece (g_unit_view_quad_pieces) that unit_view_build_height_pieces turns into a POLY_GT4:
- * texture origin, size and screen position relative to g_unit_view_quad_origin. Provisional. */
-typedef struct menu_quad_piece {
-    u8 u; /* 0x00 */
-    u8 _unused_01;
-    s8 v;           /* 0x02: texture v + 0x78 */
-    u8 _padding_03; /* aligns w */
-    s16 w;          /* 0x04 */
-    s16 h;          /* 0x06 */
-    s16 x;          /* 0x08 */
-    s16 y;          /* 0x0a */
-} menu_quad_piece_t;
-
 /* The four vertex colors unit_view_build_height_pieces applies (g_unit_view_quad_colors); the leading 32-bit value is
  * untyped. Provisional. */
 typedef struct menu_quad_colors {
@@ -120,7 +107,9 @@ typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1
 
 extern unit_view_stats_page_t g_unit_view_stats_panel_pages[];
 extern menu_quad_colors_t g_unit_view_quad_colors;
-extern menu_quad_piece_t g_unit_view_quad_pieces[];
+/* Height readout pieces: source rectangles and offsets from the display origin. */
+extern image_layout_t g_unit_view_quad_pieces[204];
+extern u8 g_unit_view_quad_group_starts[65];
 extern menu_quad_page_t g_unit_view_height_display_pages[2];
 
 /* Seven-byte panel-line layouts: color followed by endpoint offsets. */
@@ -493,7 +482,7 @@ void unit_view_tile_info_thread(void) {
  * display_height value) as gradient quads at g_unit_view_quad_origin. Returns the number of quads
  * written. */
 static s32 unit_view_build_height_pieces(s32 group, POLY_GT4* poly) {
-    menu_quad_piece_t* piece;
+    image_layout_t* piece;
     s32 count;
     s32 i;
     menu_quad_colors_t* colors = &g_unit_view_quad_colors;
@@ -501,12 +490,16 @@ static s32 unit_view_build_height_pieces(s32 group, POLY_GT4* poly) {
     piece = &g_unit_view_quad_pieces[g_unit_view_quad_group_starts[group]];
     count = g_unit_view_quad_group_starts[group + 1] - g_unit_view_quad_group_starts[group];
     for (i = 0; i < count; i++) {
-        setXY4(poly, g_unit_view_quad_origin.x + piece->x, g_unit_view_quad_origin.y + piece->y,
-            g_unit_view_quad_origin.x + piece->x + piece->w, g_unit_view_quad_origin.y + piece->y,
-            g_unit_view_quad_origin.x + piece->x, g_unit_view_quad_origin.y + piece->y + (piece->h - 1),
-            g_unit_view_quad_origin.x + piece->x + piece->w, g_unit_view_quad_origin.y + piece->y + (piece->h - 1));
-        setUV4(poly, piece->u, piece->v - 0x78, piece->u + piece->w, piece->v - 0x78, piece->u,
-            piece->v - 0x78 + (piece->h - 1), piece->u + piece->w, piece->v - 0x78 + (piece->h - 1));
+        setXY4(poly, g_unit_view_quad_origin.x + piece->x_screen_offset,
+            g_unit_view_quad_origin.y + piece->y_screen_offset,
+            g_unit_view_quad_origin.x + piece->x_screen_offset + piece->source.w,
+            g_unit_view_quad_origin.y + piece->y_screen_offset, g_unit_view_quad_origin.x + piece->x_screen_offset,
+            g_unit_view_quad_origin.y + piece->y_screen_offset + (piece->source.h - 1),
+            g_unit_view_quad_origin.x + piece->x_screen_offset + piece->source.w,
+            g_unit_view_quad_origin.y + piece->y_screen_offset + (piece->source.h - 1));
+        setUV4(poly, piece->source.x, piece->source.y - 0x78, piece->source.x + piece->source.w, piece->source.y - 0x78,
+            piece->source.x, piece->source.y - 0x78 + (piece->source.h - 1), piece->source.x + piece->source.w,
+            piece->source.y - 0x78 + (piece->source.h - 1));
         setRGB0(poly, colors->vertex[0].r, colors->vertex[0].g, colors->vertex[0].b);
         setRGB1(poly, colors->vertex[1].r, colors->vertex[1].g, colors->vertex[1].b);
         setRGB2(poly, colors->vertex[2].r, colors->vertex[2].g, colors->vertex[2].b);

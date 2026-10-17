@@ -86,7 +86,6 @@ void unit_view_summary_thread(void);
 
 /* selected-tile display */
 /* The panel describing the tile under the cursor. */
-extern u8 g_unit_view_quad_group_starts[]; /* [group + 1] ends each group */
 extern point16_t g_unit_view_quad_origin;
 extern RECT g_unit_view_tile_info_image_location;
 extern image_layout_t g_unit_view_tile_info_image_params[2];
