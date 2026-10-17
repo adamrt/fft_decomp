@@ -378,7 +378,7 @@ void world_map_apply_clamped_scroll(point32_t* amount, VECTOR* position) {
 /* Apply a (negated) scroll amount to a position clamped to [-116, 128] (the
  * same x range world_map_negate_and_clamp clamps to) and leave the unapplied
  * remainder in *amount. */
-void world_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
+void world_map_apply_clamped_horizontal_scroll(s32* amount, long* position) {
     s32 delta = -(*amount);
     s32 old_position;
     s32 value;

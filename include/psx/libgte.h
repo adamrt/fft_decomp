@@ -14,10 +14,10 @@ typedef struct {
 } SVECTOR;
 
 typedef struct {
-    s32 vx;
-    s32 vy;
-    s32 vz;
-    s32 pad;
+    long vx;
+    long vy;
+    long vz;
+    long pad;
 } VECTOR;
 
 typedef struct {
