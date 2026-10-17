@@ -619,12 +619,6 @@ typedef struct suzuki_resource_prefix {
     u32 size_bytes; /* 0x08 */
 } suzuki_resource_prefix_t;
 
-/* The transfer controller indexes these records in 16-byte steps. */
-typedef struct suzuki_spu_transfer_status {
-    s16 status; /* 0x00 */
-    u8 _unused_02[14];
-} suzuki_spu_transfer_status_t;
-
 /* Elapsed play time filled by suzuki_smd_get_play_time. The root counter runs
  * at 240 Hz; music->ticks counts those ticks in 1/256 units. */
 typedef struct suzuki_play_time {
@@ -650,11 +644,6 @@ typedef enum suzuki_sound_sfx_priority {
 #define SUZUKI_SOUND_SFX_CHANNEL_ID(priority, channel) ((s16)(((priority) << 8) | (channel)))
 
 /* heap */
-enum { SUZUKI_SOUND_HEAP_BYTE_COUNT = 32768 };
-
-/* Suzuki CPU arena allocator; shared with the sound driver. */
-extern u8 g_suzuki_sound_heap_memory[SUZUKI_SOUND_HEAP_BYTE_COUNT]; /* the CPU heap arena */
-
 void suzuki_sound_init_heap(void* arena, u32 size);
 void* suzuki_sound_alloc(u32 size);
 void suzuki_sound_free(void* payload);
@@ -662,45 +651,21 @@ s32 suzuki_sound_get_largest_free_block(void);
 void suzuki_sound_clear_memory(void* destination, s32 size);
 
 /* driver */
-enum {
-    SUZUKI_SOUND_SPU_ALLOC_BLOCK_CAPACITY = 6,
-    SUZUKI_SOUND_SPU_ALLOC_RECORD_COUNT = SUZUKI_SOUND_SPU_ALLOC_BLOCK_CAPACITY + 1
-};
-
-/* Driver tables (read-only data 0x80028b0c-0x8002a8d8). */
-extern suzuki_smd_handler_t g_suzuki_smd_opcode_handlers[0x80]; /* 0x80028b0c; opcodes 0x80-0xff */
-extern u8 g_suzuki_smd_opcode_lengths[0x80];                    /* 0x80028d0c; opcode plus parameters */
-/* 0x80028d8c; ticks per note byte. Each of the twelve semitones has the same
- * 19 lengths: 0 (a length byte follows), then 192 (a whole note), 144, 96,
- * 72, 64, 48, 36, 32, 24, 18, 16, 12, 9, 8, 6, 4, 3 and 2. */
-extern u8 g_suzuki_smd_note_durations[228];
-extern u8 g_suzuki_smd_note_semitones[228];                          /* 0x80028e70; note byte / 19 */
 extern suzuki_modulator_step_t g_suzuki_smd_modulator_waveforms[16]; /* 0x80028f54 */
-extern u8 g_suzuki_smd_key_octaves[120];                             /* 0x80028fe8; key / 12 */
-extern u8 g_suzuki_smd_key_semitones[120];                           /* 0x80029060; key % 12 */
 
-/* 0x800290d8: SPU pitch for semitone s and fine step f at index (s << 8) + f
- * (octave 6 reference); suzuki_smd_calculate_pitch indexes it flat. */
-extern u16 g_suzuki_smd_pitch_table[12 * 256];
-
-/* Driver globals (0x800329f0-0x80032a68, gp = 0x800329bc). The heap globals
- * are only ever reached $gp-relative, by 0x8001423c-0x8001442c. */
+/* Driver state shared by multiple sound-engine features. */
 extern s16
     g_suzuki_sound_sfx_channel_count; /* channels suzuki_sound_start_sfx fills, one per stream of a sound: always 2 */
 extern suzuki_sound_resource_t* g_suzuki_sound_resource_list; /* 0x80032a00 */
-extern suzuki_spu_transfer_status_t* g_suzuki_sound_spu_transfer_status_records;
-extern u32 g_suzuki_sound_music_key_off_voices;      /* voices queued for key-off by stopped music */
-extern u32 g_suzuki_sound_sfx_reserved_voices;       /* 0x80032a0c; voices reserved by SFX */
-extern u32 g_suzuki_sound_sfx_restart_channels;      /* last SFX voice search: channel mask */
-extern u32 g_suzuki_sound_sfx_restart_voices;        /* last SFX voice search: voice mask */
-extern s32 g_suzuki_smd_random_state;                /* 0x80032a18 */
-extern s16 g_suzuki_sound_sfx_instrument;            /* instrument every started SFX channel begins with; always 0 */
-extern u32 g_suzuki_sound_sfx_key_off_voices;        /* SFX voices pending key-off */
-extern u32 g_suzuki_sound_tick_count;                /* root-counter tick count; odd ticks step the ramps */
-extern u16 g_suzuki_sound_spu_transfer_status_index; /* index into g_suzuki_sound_spu_transfer_status_records */
-extern CdlATV g_suzuki_sound_cd_mix;                 /* 0x80032a3c; written by Put Sound Type */
+extern u32 g_suzuki_sound_music_key_off_voices;               /* voices queued for key-off by stopped music */
+extern u32 g_suzuki_sound_sfx_reserved_voices;                /* 0x80032a0c; voices reserved by SFX */
+extern u32 g_suzuki_sound_sfx_restart_channels;               /* last SFX voice search: channel mask */
+extern u32 g_suzuki_sound_sfx_restart_voices;                 /* last SFX voice search: voice mask */
+extern s32 g_suzuki_smd_random_state;                         /* 0x80032a18 */
+extern s16 g_suzuki_sound_sfx_instrument;     /* instrument every started SFX channel begins with; always 0 */
+extern u32 g_suzuki_sound_sfx_key_off_voices; /* SFX voices pending key-off */
+extern u32 g_suzuki_sound_tick_count;         /* root-counter tick count; odd ticks step the ramps */
 
-extern s16 g_suzuki_sound_decoded_data_result;        /* SPU transfer controller state */
 extern suzuki_waveset_t* g_suzuki_sound_waveset_list; /* 0x80032a44 */
 extern s32 g_suzuki_sound_spu_event;             /* 0x80032a48; OpenEvent handle of suzuki_sound_spu_event_handler */
 extern u16 g_suzuki_sound_voice_update_requests; /* suzuki_voice_mask_request_e */
@@ -713,12 +678,7 @@ extern s32
 extern suzuki_music_t* g_suzuki_sound_sfx_music;    /* 0x80032a60; eight channels on SPU voices 16-23 */
 extern SpuReverbAttr g_suzuki_sound_reverb_attr;    /* 0x80037008 */
 extern suzuki_spu_state_t g_suzuki_sound_spu_state; /* 0x80037020 */
-/* Allocation records and one trailing free-range record. */
-extern psyq_spu_heap_record_t g_suzuki_sound_spu_malloc_table[SUZUKI_SOUND_SPU_ALLOC_RECORD_COUNT];
-typedef char suzuki_spu_allocator_storage_size_must_be_56[sizeof(g_suzuki_sound_spu_malloc_table) == 56 ? 1 : -1];
-extern u16 g_suzuki_sound_unread_value; /* only ever stored */
-extern u32 g_suzuki_unknown_80032a34;   /* only ever stored */
-extern s16 g_suzuki_unknown_80032a58;   /* only ever stored */
+extern u16 g_suzuki_sound_unread_value;             /* only ever stored */
 
 /* Suzuki driver entry points. The music handle passed by the game wrappers
  * is the suzuki_music_t* that suzuki_smd_create_music returns. */

@@ -1,6 +1,13 @@
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
+extern u8 g_suzuki_smd_key_octaves[120];   /* 0x80028fe8; key / 12 */
+extern u8 g_suzuki_smd_key_semitones[120]; /* 0x80029060; key % 12 */
+
+/* 0x800290d8: SPU pitch for semitone s and fine step f at index (s << 8) + f
+ * (octave 6 reference); suzuki_smd_calculate_pitch indexes it flat. */
+extern u16 g_suzuki_smd_pitch_table[12 * 256];
+
 /* Converts a key in 1/256 semitones (key number << 8 | fine step) to an SPU
  * pitch: the octave-6 table value for the semitone and fine step, shifted by
  * the key's octave distance from octave 6. */

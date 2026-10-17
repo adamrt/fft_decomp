@@ -1,6 +1,14 @@
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
+/* 0x80028d8c; ticks per note byte. Each of the twelve semitones has the same
+ * 19 lengths: 0 (a length byte follows), then 192 (a whole note), 144, 96,
+ * 72, 64, 48, 36, 32, 24, 18, 16, 12, 9, 8, 6, 4, 3 and 2. */
+extern u8 g_suzuki_smd_note_durations[228];
+extern u8 g_suzuki_smd_note_semitones[228];                     /* 0x80028e70; note byte / 19 */
+extern suzuki_smd_handler_t g_suzuki_smd_opcode_handlers[0x80]; /* 0x80028b0c; opcodes 0x80-0xff */
+extern u8 g_suzuki_smd_opcode_lengths[0x80];                    /* 0x80028d0c; opcode plus parameters */
+
 /* Reads the SMD events of channel_count consecutive channels, called once
  * per tick.
  *

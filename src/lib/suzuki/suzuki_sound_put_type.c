@@ -2,6 +2,8 @@
 #include "psx/libcd.h"
 #include "psx/types.h"
 
+extern CdlATV g_suzuki_sound_cd_mix; /* 0x80032a3c; written by Put Sound Type */
+
 /* Sets the CD audio attenuation for the current sound type;
  * level is 0xc0 at start-up.
  *

@@ -2,6 +2,8 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+extern s16 g_suzuki_sound_decoded_data_result; /* last decoded-data read result */
+
 /* Starts an SPU RAM transfer at spu_address once the previous one is done.
  *
  * The low nibble of mode selects it: 1 writes size bytes from data, 2 reads

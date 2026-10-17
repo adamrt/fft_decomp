@@ -3,6 +3,21 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+enum { SUZUKI_SOUND_HEAP_BYTE_COUNT = 32768 };
+
+enum {
+    SUZUKI_SOUND_SPU_ALLOC_BLOCK_CAPACITY = 6,
+    SUZUKI_SOUND_SPU_ALLOC_RECORD_COUNT = SUZUKI_SOUND_SPU_ALLOC_BLOCK_CAPACITY + 1
+};
+
+extern u8 g_suzuki_sound_heap_memory[SUZUKI_SOUND_HEAP_BYTE_COUNT]; /* the CPU heap arena */
+
+/* Allocation records and one trailing free-range record. */
+extern psyq_spu_heap_record_t g_suzuki_sound_spu_malloc_table[SUZUKI_SOUND_SPU_ALLOC_RECORD_COUNT];
+typedef char suzuki_spu_allocator_storage_size_must_be_56[sizeof(g_suzuki_sound_spu_malloc_table) == 56 ? 1 : -1];
+extern u32 g_suzuki_unknown_80032a34; /* only ever stored */
+extern s16 g_suzuki_unknown_80032a58; /* only ever stored */
+
 /* Starts the Suzuki driver once (status bit 15 marks it initialized).
  *
  * flags seeds the 16-bit status. Sets up SPU RAM allocation and the driver

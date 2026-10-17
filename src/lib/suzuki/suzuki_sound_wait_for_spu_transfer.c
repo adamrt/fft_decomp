@@ -1,6 +1,15 @@
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
+/* The transfer controller indexes these records in 16-byte steps. */
+typedef struct suzuki_spu_transfer_status {
+    s16 status; /* 0x00 */
+    u8 _unused_02[14];
+} suzuki_spu_transfer_status_t;
+
+extern u16 g_suzuki_sound_spu_transfer_status_index; /* index into g_suzuki_sound_spu_transfer_status_records */
+extern suzuki_spu_transfer_status_t* g_suzuki_sound_spu_transfer_status_records;
+
 /* Volatile view: the target re-reads the transfer flag on every poll. */
 extern volatile s16 g_suzuki_sound_driver_flags;
 
