@@ -758,13 +758,13 @@ void job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 u
 }
 
 /* Job level: how many of the eight thresholds in
- * g_job_level_jp_requirements the given JP has reached (0..8). */
+ * g_job_jp_requirements_by_level[1..8] the given JP has reached (0..8). */
 u32 job_calculate_level(u16 job_jp) {
     s32 job_level = 0;
     s32 level;
 
     for (level = 0; level < UNIT_JOB_LEVEL_MAX; level++) {
-        if (job_jp >= g_job_level_jp_requirements[level]) {
+        if (job_jp >= g_job_jp_requirements_by_level[level + 1]) {
             job_level++;
         }
     }

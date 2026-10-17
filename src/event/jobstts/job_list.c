@@ -58,7 +58,7 @@ s32 job_list_calculate_next_level_jp(s32 index) {
     if (level >= UNIT_JOB_LEVEL_MAX) {
         g_job_list_job_next_level_jp_requirement |= MENU_NUMBER_VALUE_DASHES;
     } else {
-        g_job_list_job_next_level_jp_requirement = g_job_level_jp_requirements[level];
+        g_job_list_job_next_level_jp_requirement = g_job_jp_requirements_by_level[level + 1];
     }
     return g_job_list_job_next_level_jp_requirement;
 }

@@ -335,8 +335,8 @@ typedef struct unit_career_data {
 typedef char unit_career_data_size_must_be_150[(sizeof(unit_career_data_t) == UNIT_CAREER_DATA_BYTE_COUNT) ? 1 : -1];
 
 /* levels, JP and unlocks */
-extern const u16 g_job_level_jp_requirements[UNIT_JOB_LEVEL_MAX];
-extern u16 g_job_jp_requirements_by_level[];
+/* Total JP needed for levels 0 through 8; the first entry is zero. */
+extern const u16 g_job_jp_requirements_by_level[UNIT_JOB_LEVEL_MAX + 1];
 extern const u8 g_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
 
 u32 job_calculate_level(u16 job_jp);

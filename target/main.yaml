@@ -1372,7 +1372,6 @@ data:
   - {addr: 0x80066064, name: g_item_poach_table}
   - {addr: 0x800660c4, name: g_job_unlock_requirements}
   - {addr: 0x80066182, name: g_job_jp_requirements_by_level}
-  - {addr: 0x80066184, name: g_job_level_jp_requirements}
   - {addr: 0x80066194, name: g_job_data_pointer}
   - {addr: 0x80066198, name: g_ability_calculator_primes}
   - {addr: 0x800661ce, name: g_calendar_month_start_day_offsets}
