@@ -1824,7 +1824,7 @@ void location_push_menu_level(s32 menu) {
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
-    /* The windows start black; the step reads `mode` as its fade level and brightens them from 8. */
+    /* The windows start black and brighten from fade level 8. */
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;

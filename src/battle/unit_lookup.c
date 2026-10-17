@@ -942,9 +942,9 @@ sprite_display_t* sprite_display_init_unit(s32 runtime_id) {
  * no flags on its three parts and none of them in use. */
 sprite_display_t* sprite_display_init_weapon(s32 unit_index, s32 display_type) {
     s32 weapon_part;
-    sprite_display_t* display = &((sprite_weapon_display_t*)((u8*)&g_unit_slot_states[unit_index]
-        + offsetof(unit_slot_state_t, unit.weapon_sprite_displays)))[display_type]
-                                     .header;
+    sprite_weapon_display_t* weapons = (sprite_weapon_display_t*)((u8*)&g_unit_slot_states[unit_index]
+        + offsetof(unit_slot_state_t, unit.weapon_sprite_displays));
+    sprite_display_t* display = &weapons[display_type].header;
 
     display->color.b = 0x80;
     display->color.g = 0x80;
