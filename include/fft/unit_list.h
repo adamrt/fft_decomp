@@ -140,8 +140,6 @@ extern s16 g_unit_list_current_stat_value;
 extern s16 g_unit_list_max_stat_value;
 extern menu_sprite_cell_t g_unit_list_grid_label_tiles[8];
 extern menu_sprite_cell_t g_unit_list_grid_label_tiles_bottom[8];
-extern menu_instruction_t g_unit_list_grid_stat_bar_script_top;
-extern menu_instruction_t g_unit_list_grid_stat_bar_script_bottom;
 extern menu_draw_number_command_t g_unit_list_grid_level_number;
 extern menu_draw_number_command_t g_unit_list_grid_experience_number;
 extern menu_draw_number_command_t g_unit_list_grid_brave_number;

@@ -59,8 +59,6 @@ extern u8 g_ability_list_initialized;
 extern s8 g_ability_list_confirm_prompt_state;
 extern s16 g_ability_list_job_name_row[];
 extern s16 g_ability_list_job_name_ids[];
-extern menu_instruction_t g_ability_list_menu_script;
-extern menu_instruction_t g_ability_list_render_commands;
 
 s32 ability_list_update(void);
 

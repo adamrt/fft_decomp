@@ -123,7 +123,6 @@ extern u16 g_equipment_equip_item_cursor_anim[];
 extern u16 g_equipment_remove_item_cursor_anim[];
 extern oriented_quad_t g_equipment_slot_marker_rects[];
 extern oriented_quad_t g_equipment_secondary_slot_marker;
-extern menu_instruction_t g_equipment_slot_marker_window;
 extern u8 g_equipment_slot_marker_x[];
 extern u16 g_equipment_remove_all_equipment_ids[5]; /* weapon, shield, head, body, accessory */
 extern s8 g_equipment_remove_all_equipment_prompt_active;
@@ -172,9 +171,6 @@ extern s8 g_equipment_item_preview_active;
 extern s16 g_equipment_item_previewed_cursor;
 extern u8 g_equipment_item_inventory_totals[];
 extern s8 g_equipment_substate; /* menu_item_list_state_e */
-extern menu_instruction_t g_equipment_item_menu_script;
-extern menu_instruction_t g_equipment_render_commands;
-extern menu_instruction_t g_equipment_armor_bonus_render_commands;
 
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 

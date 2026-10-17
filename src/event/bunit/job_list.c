@@ -15,6 +15,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams, including the terminating opcode. */
+extern u8 g_job_list_menu_script[217];
+
 /* Job level of the selected unit in the job list's `index`th job, also left
  * in g_job_list_job_current_level; levels are packed two per byte (odd jobs in
  * the low nibble). */
@@ -117,7 +120,8 @@ s32 job_list_run(void) {
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;
     }
-    menu_run_script_with_palette_mode(&g_job_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(
+        (menu_instruction_t*)g_job_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }
 

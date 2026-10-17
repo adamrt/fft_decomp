@@ -16,6 +16,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams, including the terminating opcode. */
+extern u8 g_equipment_slot_marker_window[121];
+
 /* Run the item list's action menu (a shorter variant when the list holds a single
  * entry). Only row 2, the sort order, does anything here; CIRCLE on any other row plays
  * the invalid sound. Returns MENU_ITEM_LIST_STATE_SORT_ORDER when row 2 is picked,
@@ -165,7 +168,8 @@ void equipment_draw_slot_marker(s32 unused, s32 slot, s32 override) {
     oriented_quad_t* secondary;
     s32 secondary_x;
 
-    menu_run_script_with_palette_mode(&g_equipment_slot_marker_window, EQUIPMENT_SLOT_MARKER_WINDOW_STATE, override);
+    menu_run_script_with_palette_mode(
+        (menu_instruction_t*)g_equipment_slot_marker_window, EQUIPMENT_SLOT_MARKER_WINDOW_STATE, override);
     marker = &g_equipment_slot_marker_rects[slot];
     marker->position.x = x;
     marker->position.y = width - (slot == 0);

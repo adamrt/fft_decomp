@@ -25,6 +25,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams, including the terminating opcode. */
+extern u8 g_unit_list_grid_stat_bar_script_top[12];
+extern u8 g_unit_list_grid_stat_bar_script_bottom[12];
+
 static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y);
 static void unit_list_init_cursor_trail(void);
 static void unit_list_update_cursor_trail(point16_t* target);
@@ -442,11 +446,11 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
         && show_stat_panel != 0 && g_unit_list_status_banner_enabled != 0 && g_unit_list_browse_enabled == 0) {
         top = 0xF;
         if (g_unit_list_status_banner_at_bottom != 0) {
-            menu = &g_unit_list_grid_stat_bar_script_top;
+            menu = (menu_instruction_t*)g_unit_list_grid_stat_bar_script_top;
             quads = g_unit_list_grid_label_tiles;
         } else {
             top = 0xDB;
-            menu = &g_unit_list_grid_stat_bar_script_bottom;
+            menu = (menu_instruction_t*)g_unit_list_grid_stat_bar_script_bottom;
             quads = g_unit_list_grid_label_tiles_bottom;
         }
         unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_L2, 0x26, top, buttons & PSX_PAD_L2,
