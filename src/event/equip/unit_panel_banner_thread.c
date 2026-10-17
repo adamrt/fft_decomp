@@ -425,9 +425,9 @@ void unit_panel_banner_thread(void) {
                 stride = &g_menu_window_text_pen.stride;
                 *stride = 0x38;
                 if (g_equipment_item_numeric_thread_enabled == 0) {
-                    menu_draw_numeric_display_entries(number_pixels, number_entries, (glyph_blit_t*)(stride - 2), 6);
+                    menu_draw_numeric_display_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
                 } else {
-                    position = (glyph_blit_t*)(stride - 2);
+                    position = &g_menu_window_text_pen;
                     menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], position, 1);
                     menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], position, 1);
                     menu_draw_numeric_display_entries(number_pixels, &number_entries[11], position, 1);
@@ -438,8 +438,7 @@ void unit_panel_banner_thread(void) {
             LoadImage(&rects[0], number_pixels);
 
             window_width = &g_menu_window_text_pen.stride;
-            /* The pen record begins two words before its stride member. */
-            text_position = (glyph_blit_t*)(window_width - 2);
+            text_position = &g_menu_window_text_pen;
             number_pixels_b = number_pixels + 0x400;
             *window_width = 0x60;
             menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_position, 4);

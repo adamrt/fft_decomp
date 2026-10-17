@@ -422,8 +422,7 @@ void unit_panel_banner_thread(void) {
             }
             menu_clear_render_buffer(number_pixels, 0x700);
             window_width = &g_menu_window_text_pen.stride;
-            /* The pen record begins two words before its stride member. */
-            text_position = (glyph_blit_t*)(window_width - 2);
+            text_position = &g_menu_window_text_pen;
             *window_width = 0x38;
             menu_draw_numeric_display_entries(number_pixels, number_entries, text_position, 6);
             LoadImage(&rects[0], number_pixels);
