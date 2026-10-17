@@ -290,11 +290,11 @@ extern rgb24_t g_formation_hp_gauge_colors[4];
 extern rgb24_t g_formation_mp_gauge_colors[4];
 extern rgb24_t g_formation_ct_gauge_colors[4];
 extern CVECTOR g_formation_panel_bar_colors[];
-extern image_load_parameters_t g_formation_summary_label_sprite_params[];
-extern image_load_parameters_t g_formation_summary_value_sprite_params[];
+extern image_layout_t g_formation_summary_label_sprite_params[];
+extern image_layout_t g_formation_summary_value_sprite_params[];
 extern RECT g_formation_status_panel_origin;
-extern image_load_parameters_t g_formation_status_sprite_params[];
-extern image_load_parameters_t g_formation_status_portrait_params;
+extern image_layout_t g_formation_status_sprite_params[];
+extern image_layout_t g_formation_status_portrait_params;
 extern u8 g_formation_banner_active;
 extern menu_entry_t g_formation_banner_menu;
 extern s8 g_formation_banner_state; /* banner state: 0 idle, 1 finishing, else countdown */

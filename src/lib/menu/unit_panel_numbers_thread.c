@@ -31,7 +31,7 @@ void unit_panel_numbers_thread(void) {
     RECT* upload_a;
     RECT* upload_b;
     RECT* upload_c;
-    const image_load_parameters_t* descriptor;
+    const image_layout_t* descriptor;
     s32 i;
     s32 frame;
     s32 field_y;

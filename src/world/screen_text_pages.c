@@ -99,7 +99,7 @@ static u8* screen_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offse
  * the image buffer the last callee-saved register instead of the layout.
  */
 void screen_text_list_thread(void) {
-    image_load_parameters_t image_parameters;
+    image_layout_t image_parameters;
     RECT image_rect;
     RECT clear;
     RECT texture_window;
@@ -142,14 +142,14 @@ void screen_text_list_thread(void) {
     binding = entry->context;
     entry->window.h = binding->row_count * 16 + 0x1C;
     entry->inner_height = binding->row_count * 16 + 0x1C;
-    entry->text_image.height = binding->row_count * 16 + 0x1C;
+    entry->text_image.source.h = binding->row_count * 16 + 0x1C;
 
-    image_parameters.x_load = 0;
-    image_parameters.y_load = 0x7E;
+    image_parameters.source.x = 0;
+    image_parameters.source.y = 0x7E;
     image_parameters.x_screen_offset = 8;
     image_parameters.y_screen_offset = 0xC;
-    image_parameters.width = entry->window.w - 0x12;
-    image_parameters.height = entry->window.h - 0x1A;
+    image_parameters.source.w = entry->window.w - 0x12;
+    image_parameters.source.h = entry->window.h - 0x1A;
 
     gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
     texture_window.x = 0;

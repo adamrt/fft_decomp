@@ -85,11 +85,11 @@ static void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height
     *height = *height * 16 + 16;
     entry->window.x = 0x102 - (*width >> 1);
     w = *width;
-    entry->text_image.width = w;
+    entry->text_image.source.w = w;
     entry->inner_width = w;
     entry->window.w = w;
     h = *height;
-    entry->text_image.height = h;
+    entry->text_image.source.h = h;
     entry->inner_height = h;
     entry->window.h = h;
 }

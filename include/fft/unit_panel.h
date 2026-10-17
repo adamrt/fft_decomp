@@ -255,11 +255,11 @@ extern RECT g_unit_panel_comparison_portrait_rect;
 extern unit_panel_buffer_t g_unit_panel_equipment_frames[2];
 extern RECT g_unit_panel_equipment_frame_rects[];
 extern RECT g_unit_panel_equipment_origins[];
-extern const image_load_parameters_t g_unit_panel_label_layouts_mode0[19];
-extern const image_load_parameters_t g_unit_panel_label_layouts_mode1[19];
-extern const image_load_parameters_t g_unit_panel_label_layouts_mode2[19];
-extern const image_load_parameters_t g_unit_panel_label_layouts_mode3[19];
-extern const image_load_parameters_t g_unit_panel_item_icon_layouts[MENU_EQUIPMENT_SLOT_COUNT];
+extern const image_layout_t g_unit_panel_label_layouts_mode0[19];
+extern const image_layout_t g_unit_panel_label_layouts_mode1[19];
+extern const image_layout_t g_unit_panel_label_layouts_mode2[19];
+extern const image_layout_t g_unit_panel_label_layouts_mode3[19];
+extern const image_layout_t g_unit_panel_item_icon_layouts[MENU_EQUIPMENT_SLOT_COUNT];
 
 /* The combined panel uses A for equipment and B for abilities; the separate panels reuse them for selected-unit
  * and item-preview text respectively. */
@@ -304,15 +304,15 @@ void unit_panel_numbers_polarity_thread(void);
 void unit_panel_numbers_thread(void);
 
 /* cell layouts */
-extern image_load_parameters_t g_unit_panel_editor_label_cells[];
-extern image_load_parameters_t g_unit_panel_editor_mode_cell[];
-extern image_load_parameters_t g_unit_panel_editor_mode_cells[];
-extern image_load_parameters_t g_unit_panel_editor_value_cells[];
+extern image_layout_t g_unit_panel_editor_label_cells[];
+extern image_layout_t g_unit_panel_editor_mode_cell[];
+extern image_layout_t g_unit_panel_editor_mode_cells[];
+extern image_layout_t g_unit_panel_editor_value_cells[];
 extern point16_t g_unit_panel_item_icon_texture[];
-extern image_load_parameters_t g_unit_panel_portrait_cell[];
-extern image_load_parameters_t g_unit_panel_sprite_cells[];
+extern image_layout_t g_unit_panel_portrait_cell[];
+extern image_layout_t g_unit_panel_sprite_cells[];
 extern point16_t g_unit_panel_editor_numeric_geometry[];
-extern image_load_parameters_t g_unit_panel_editor_numeric_texture[];
+extern image_layout_t g_unit_panel_editor_numeric_texture[];
 
 /* panel state (BUNIT) */
 extern s32 g_unit_panel_comparison_display_flags;

@@ -514,10 +514,10 @@ void world_map_menu_text_window_thread(void) {
     height = height * 16 + 16;
     entry->inner_width = width;
     entry->window.w = width;
-    entry->text_image.width = width;
+    entry->text_image.source.w = width;
     entry->inner_height = height;
     entry->window.h = height;
-    entry->text_image.height = height;
+    entry->text_image.source.h = height;
     /* Keep the window on screen; menu windows use centered coordinates (x and y about 0). */
     if (entry->window.x + width > 0x80) {
         entry->window.x = 0x78 - width;

@@ -115,7 +115,7 @@ typedef enum deploy_menu_state {
 extern s32 g_deploy_menu_state; /* deploy_menu_state_e */
 extern menu_entry_t g_deploy_menu_entries[];
 extern help_navigation_record_t g_deploy_help_cursor_nodes[];
-extern image_load_parameters_t g_deploy_button_hint_cells[];
+extern image_layout_t g_deploy_button_hint_cells[];
 extern s32 g_deploy_active_cursor;
 extern s32 g_deploy_cursor_row[2];
 extern s32 g_deploy_cursor_column[2];
@@ -182,7 +182,7 @@ extern RECT g_deploy_rect_0cc;
 extern RECT g_deploy_vram_copy_rect;
 extern s16 g_deploy_vram_copy_x;
 extern s16 g_deploy_vram_copy_y;
-extern image_load_parameters_t g_deploy_text_graphic_params[9];
+extern image_layout_t g_deploy_text_graphic_params[9];
 extern POLY_FT4 g_deploy_text_polys[2][9];
 extern s32 g_deploy_text_reveal_heights[9];
 extern s32 g_deploy_text_reveal_steps[9];

@@ -195,16 +195,14 @@ typedef struct textured_rect_source {
 } textured_rect_source_t;
 typedef char textured_rect_source_size_must_be_16[sizeof(textured_rect_source_t) == 16 ? 1 : -1];
 
-/* Texture and screen placement for gfx_set_image_primitive_layout (12 bytes).
- * g_menu_sprite_page_image_params holds one per menu sprite. */
-typedef struct image_load_parameters {
-    s16 x_load;
-    s16 y_load;
-    u16 width;
-    u16 height;
-    u16 x_screen_offset;
-    u16 y_screen_offset;
-} image_load_parameters_t;
+/* Texture rectangle and screen offsets for gfx_set_image_primitive_layout.
+ * A negative source.x moves the primitive without changing its texture fields. */
+typedef struct image_layout {
+    RECT source;
+    s16 x_screen_offset;
+    s16 y_screen_offset;
+} image_layout_t;
+typedef char image_layout_size_must_be_12[sizeof(image_layout_t) == 12 ? 1 : -1];
 
 /* sprites and glyphs */
 /* Sprite-sheet frame: sampled rectangle and scaled screen offset. */

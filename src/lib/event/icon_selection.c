@@ -369,7 +369,7 @@ static void at_list_build_ability_preview(void) {
         entry->window.x = 0x8c;
         entry->window.y = 0x30;
         entry->window.w = 0xe8;
-        entry->text_image.width = 0xe8;
+        entry->text_image.source.w = 0xe8;
         entry->inner_width = 0xe8;
     } else {
         menu_scroll_text_layout_t* layout = entry->context;
@@ -378,7 +378,7 @@ static void at_list_build_ability_preview(void) {
         entry->window.x = 0xbe;
         entry->window.y = 0x30;
         entry->window.w = 0x84;
-        entry->text_image.width = 0x84;
+        entry->text_image.source.w = 0x84;
         entry->inner_width = 0x84;
         g_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
     }

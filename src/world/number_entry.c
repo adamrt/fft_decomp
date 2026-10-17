@@ -648,7 +648,7 @@ void screen_fit_parent_entry_to_digits(void) {
         old_width = entry->inner_width;
         entry->inner_width = width;
         entry->window.w = width;
-        entry->text_image.width = width;
+        entry->text_image.source.w = width;
         entry->window.x -= width - old_width;
     }
 }

@@ -38,20 +38,20 @@ void unit_view_wait_for_panels(void);
 /* unit stats panels */
 /* The sprite page the stats panels draw their labels with (menu_sprite_page_t). */
 extern RECT g_menu_sprite_page_texture_windows[5];
-extern image_load_parameters_t g_menu_sprite_page_image_params[5];
+extern image_layout_t g_menu_sprite_page_image_params[5];
 
 /* Default placement for all five reaction-name sprite pieces. */
-extern image_load_parameters_t g_menu_sprite_page_image_param_bases[5];
+extern image_layout_t g_menu_sprite_page_image_param_bases[5];
 
 /* The final two entries of g_unit_view_attack_caster_stats_setup. */
 extern menu_number_entry_t g_menu_projected_value_panel[2];
 
 /* Live caster-panel image parameters followed by their defaults. */
-extern image_load_parameters_t g_menu_attack_caster_quad_image_params[2][5];
+extern image_layout_t g_menu_attack_caster_quad_image_params[2][5];
 
 /* Attack-target labels and their reset values are separate three-piece layouts. */
-extern image_load_parameters_t g_unit_view_target_quad_image_params[3];
-extern image_load_parameters_t g_unit_view_target_quad_default_image_params[3];
+extern image_layout_t g_unit_view_target_quad_image_params[3];
+extern image_layout_t g_unit_view_target_quad_default_image_params[3];
 extern RECT g_unit_view_hovered_stats_rect;
 extern menu_number_entry_t g_unit_view_hovered_stats_setup[10];
 extern RECT g_unit_view_right_stats_rect;
@@ -66,11 +66,11 @@ extern u8 g_unit_view_stats_first_page_by_mode[];
 extern u16 g_unit_view_stats_bounce_step;
 extern u16 g_unit_view_stats_bounce_offsets[];
 extern CVECTOR g_unit_view_stats_gauge_colors[];
-extern image_load_parameters_t g_unit_view_stats_icon_image_params[];
+extern image_layout_t g_unit_view_stats_icon_image_params[];
 extern u16 g_unit_view_stats_quad_clut_pairs[][2];
-extern image_load_parameters_t* g_unit_view_stats_quad_image_params_by_mode[];
+extern image_layout_t* g_unit_view_stats_quad_image_params_by_mode[];
 extern u16 g_unit_view_stats_sprite_clut_pairs[][2];
-extern image_load_parameters_t* g_unit_view_stats_sprite_image_params_by_mode[];
+extern image_layout_t* g_unit_view_stats_sprite_image_params_by_mode[];
 
 /* Each reloads its unit and redraws its panel; a negative list index draws dashes. */
 void unit_view_refresh_hovered_stats(void);
@@ -82,8 +82,8 @@ void unit_view_preview_target_stats(void);
 extern RECT g_unit_view_summary_panel_rect;
 extern menu_unit_number_images_t g_unit_view_summary_digit_images;
 extern menu_palette_slot_t g_unit_view_summary_palettes[];
-extern image_load_parameters_t g_unit_view_summary_sprite_image_params[];
-extern image_load_parameters_t g_unit_view_summary_portrait_image_params;
+extern image_layout_t g_unit_view_summary_sprite_image_params[];
+extern image_layout_t g_unit_view_summary_portrait_image_params;
 
 void unit_view_summary_thread(void);
 
@@ -92,7 +92,7 @@ void unit_view_summary_thread(void);
 extern u8 g_unit_view_quad_group_starts[]; /* [group + 1] ends each group */
 extern point16_t g_unit_view_quad_origin;
 extern RECT g_unit_view_tile_info_image_location;
-extern image_load_parameters_t g_unit_view_tile_info_image_params[2];
+extern image_layout_t g_unit_view_tile_info_image_params[2];
 extern u16 g_unit_view_depth_display_suppressed; /* nonzero while effects hide the tile's depth number */
 
 void unit_view_tile_info_thread(void);

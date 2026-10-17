@@ -33,11 +33,11 @@ extern RECT g_status_screen_cursor_rect; /* cursor source */
 extern menu_palette_primitives_t g_status_screen_palette;
 extern RECT g_status_screen_text_rect_a; /* first text image */
 extern RECT g_status_screen_text_rect_b; /* second text image */
-extern image_load_parameters_t g_status_screen_row_image_params_a[4];
-extern image_load_parameters_t g_status_screen_row_image_params_b[4];
-extern image_load_parameters_t g_status_screen_sprite_image_params_a[19];
-extern image_load_parameters_t g_status_screen_sprite_image_params_b[19];
-extern image_load_parameters_t g_status_screen_item_icon_image_params[5];
+extern image_layout_t g_status_screen_row_image_params_a[4];
+extern image_layout_t g_status_screen_row_image_params_b[4];
+extern image_layout_t g_status_screen_sprite_image_params_a[19];
+extern image_layout_t g_status_screen_sprite_image_params_b[19];
+extern image_layout_t g_status_screen_item_icon_image_params[5];
 
 void status_screen_thread(void);
 
@@ -57,7 +57,7 @@ typedef struct status_screen_numbers_record {
 extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
 extern menu_number_entry_t g_status_screen_numbers_entries[15];
 extern RECT g_status_screen_numbers_frame_rect;
-extern image_load_parameters_t g_status_screen_numbers_image_params[18];
+extern image_layout_t g_status_screen_numbers_image_params[18];
 extern menu_palette_slot_t g_status_screen_numbers_palettes[];
 extern RECT g_status_screen_numbers_text_rect_a;
 extern RECT g_status_screen_numbers_text_rect_b;

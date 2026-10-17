@@ -152,10 +152,10 @@ static void music_test_start_list_thread(s32 thread_id, s32 limit, point32_t* ex
     g_music_test_list_params.window.y = origin->y - 0x78;
     g_music_test_list_params.window.w = width;
     g_music_test_list_params.window.h = 0;
-    g_music_test_list_params.text_image.x_load = 0;
-    g_music_test_list_params.text_image.y_load = 0;
-    g_music_test_list_params.text_image.width = width;
-    g_music_test_list_params.text_image.height = 0;
+    g_music_test_list_params.text_image.source.x = 0;
+    g_music_test_list_params.text_image.source.y = 0;
+    g_music_test_list_params.text_image.source.w = width;
+    g_music_test_list_params.text_image.source.h = 0;
     g_music_test_list_params.text_image.x_screen_offset = 0;
     g_music_test_list_params.text_image.y_screen_offset = 0;
     g_music_test_list_params.text_id = 0;

@@ -782,7 +782,7 @@ static void party_apply_post_battle_changes(void) {
                      * Derive each byte displacement from the named field instead. */
 #define MENU_FIELD(field)                                                                                              \
     (*(s16*)(menu_fields + (unsigned long)&((menu_entry_t*)0)->field - (unsigned long)&((menu_entry_t*)0)->inner_width))
-                    MENU_FIELD(text_image.width) = menu_x;
+                    MENU_FIELD(text_image.source.w) = menu_x;
                     MENU_FIELD(window.w) = menu_x;
                     MENU_FIELD(inner_width) = menu_x;
                     MENU_FIELD(window.x) = 0x100 - half_menu_x + menu_x % 2;

@@ -386,7 +386,7 @@ static void command_build_ability_list(s32 mode) {
 
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].inner_width = window_x;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.w = window_x;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].text_image.width = window_x;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].text_image.source.w = window_x;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].header_id = row_mode;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].select_text_table = columns;
 
@@ -576,7 +576,7 @@ static void command_build_act_menu(void) {
     height = count * 16 + 16;
     rows[count - 1].terminator = 0xff;
     g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].max_row_index = count - 1;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].text_image.height = height;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].text_image.source.h = height;
     g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].window.h = height;
     g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].inner_height = height;
 }

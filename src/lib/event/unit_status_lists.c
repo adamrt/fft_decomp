@@ -133,7 +133,7 @@ static u16 g_status_screen_sprite_clut_pairs[19][2]
           0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c };
 
 static s32 unit_view_display_action_preview(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
-    const RECT* unused_base_screen, image_load_parameters_t* unused_parameters);
+    const RECT* unused_base_screen, image_layout_t* unused_parameters);
 
 static s32 unit_view_build_height_pieces(s32 group, POLY_GT4* poly);
 static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
@@ -546,7 +546,7 @@ void menu_noop_2(void) {
  * WORLD has no action previews: its copy is empty and leaves $v0 unset.
  */
 static s32 unit_view_display_action_preview(
-    POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params) {
+    POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_layout_t* params) {
 #ifdef FFT_BATTLE
     menu_number_entry_t* panel;
     u16* label_x;
@@ -757,10 +757,10 @@ static s32 unit_view_display_action_preview(
     g_unit_panel_selected_unit_status.projected_display_value = value;
     if (image != ACTION_DISPLAY_IMAGE_NONE && (image != 0 || show_empty != 0)) {
         rect = &g_result_image_rects[image];
-        params->x_load = rect->u;
-        params->y_load = rect->v;
-        params->width = rect->width;
-        params->height = rect->height;
+        params->source.x = rect->u;
+        params->source.y = rect->v;
+        params->source.w = rect->width;
+        params->source.h = rect->height;
         gfx_set_image_primitive_layout(prim, base_load, base_screen, params);
     }
     prim->clut = 0x7d7c;
@@ -776,10 +776,10 @@ static s32 unit_view_display_action_preview(
         params++;
         prim->clut = 0x7d7c;
         rect = &g_result_image_rects[extra];
-        params->x_load = rect->u;
-        params->y_load = rect->v;
-        params->width = rect->width;
-        params->height = rect->height;
+        params->source.x = rect->u;
+        params->source.y = rect->v;
+        params->source.w = rect->width;
+        params->source.h = rect->height;
         gfx_set_image_primitive_layout(prim, base_load, base_screen, params);
         return image;
     }
@@ -800,10 +800,10 @@ static s32 unit_view_display_action_preview(
             image = g_status_display_image_ids[image - 1];
             if (image != ACTION_DISPLAY_IMAGE_NONE && image != ACTION_DISPLAY_IMAGE_INVITE) {
                 rect = &g_result_image_rects[image];
-                params->x_load = rect->u;
-                params->y_load = rect->v;
-                params->width = rect->width;
-                params->height = rect->height;
+                params->source.x = rect->u;
+                params->source.y = rect->v;
+                params->source.w = rect->width;
+                params->source.h = rect->height;
                 gfx_set_image_primitive_layout(prim, base_load, base_screen, params);
                 value = prim->x1 - prim->x0;
                 if (value >= 0x18) {
@@ -844,7 +844,7 @@ static void unit_view_stats_panel_thread(
     s32 text_id;
     unit_stats_t* unit;
     unit_view_stats_page_t* page;
-    image_load_parameters_t* params;
+    image_layout_t* params;
     menu_unit_status_offsets_t* offs;
     POLY_G4* poly;
     menu_unit_status_gauge_t* gauge;
@@ -889,8 +889,8 @@ static void unit_view_stats_panel_thread(
             for (frame = 0; frame < 3; frame++) {
                 g_menu_sprite_page_image_params[frame].x_screen_offset
                     = g_menu_sprite_page_image_param_bases[frame].x_screen_offset + extent_w;
-                g_menu_sprite_page_image_params[frame].width
-                    = g_menu_sprite_page_image_param_bases[frame].width - extent_w;
+                g_menu_sprite_page_image_params[frame].source.w
+                    = g_menu_sprite_page_image_param_bases[frame].source.w - extent_w;
             }
             g_menu_sprite_page_image_params[3].x_screen_offset
                 = g_menu_sprite_page_image_param_bases[3].x_screen_offset + extent_w;
@@ -1691,23 +1691,23 @@ void status_screen_thread(void) {
     /* Each arm copies all four rows itself; the compiler cross-jumps the
      * common tails, leaving only the first call's table loads in the arms. */
     if (g_unit_panel_selected_unit_fields.state.two_hands != 0) {
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_a[2], g_status_screen_row_image_params_b,
-            2 * sizeof(image_load_parameters_t));
+        mem_copy_bytes_nonempty(
+            &g_status_screen_sprite_image_params_a[2], g_status_screen_row_image_params_b, 2 * sizeof(image_layout_t));
         mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_a[14], &g_status_screen_row_image_params_b[2],
-            2 * sizeof(image_load_parameters_t));
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_b[2], g_status_screen_row_image_params_b,
-            2 * sizeof(image_load_parameters_t));
+            2 * sizeof(image_layout_t));
+        mem_copy_bytes_nonempty(
+            &g_status_screen_sprite_image_params_b[2], g_status_screen_row_image_params_b, 2 * sizeof(image_layout_t));
         mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_b[14], &g_status_screen_row_image_params_b[2],
-            2 * sizeof(image_load_parameters_t));
+            2 * sizeof(image_layout_t));
     } else {
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_a[2], g_status_screen_row_image_params_a,
-            2 * sizeof(image_load_parameters_t));
+        mem_copy_bytes_nonempty(
+            &g_status_screen_sprite_image_params_a[2], g_status_screen_row_image_params_a, 2 * sizeof(image_layout_t));
         mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_a[14], &g_status_screen_row_image_params_a[2],
-            2 * sizeof(image_load_parameters_t));
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_b[2], g_status_screen_row_image_params_a,
-            2 * sizeof(image_load_parameters_t));
+            2 * sizeof(image_layout_t));
+        mem_copy_bytes_nonempty(
+            &g_status_screen_sprite_image_params_b[2], g_status_screen_row_image_params_a, 2 * sizeof(image_layout_t));
         mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_b[14], &g_status_screen_row_image_params_a[2],
-            2 * sizeof(image_load_parameters_t));
+            2 * sizeof(image_layout_t));
     }
 
     /* These sprite and rectangle records share the fields read by the image loader. */
@@ -2148,7 +2148,7 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
     index = (s16)kind;
 #ifdef FFT_WORLD
     if (kind == 0x10) {
-        const image_load_parameters_t* image_params;
+        const image_layout_t* image_params;
 
         menu_init_sprite_array(record->icons[0], 1, 0x7cfc);
         record->icons[0]->u0 = 0x30;
@@ -2156,7 +2156,7 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
         record->icons[0]->w = size;
         record->icons[0]->h = 8;
         image_params = param->context;
-        record->icons[0]->x0 = image_params->height + param->window.x + 7;
+        record->icons[0]->x0 = image_params->source.h + param->window.x + 7;
         record->icons[0]->y0 = param->window.y - 1;
         gfx_set_image_primitive_layout(
             &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[1]);
@@ -2318,8 +2318,8 @@ static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPR
     sprite->y0 = entry->window.y;
     sprite->u0 = (entry->vram_origin.x & 0x3f) * 4;
     sprite->v0 = entry->vram_origin.y;
-    sprite->w = entry->text_image.width;
-    sprite->h = entry->text_image.height;
+    sprite->w = entry->text_image.source.w;
+    sprite->h = entry->text_image.source.h;
 }
 
 /* Scale the sprite about its center by the percentage of zoom step `step` (0-11; later steps

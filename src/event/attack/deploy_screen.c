@@ -1667,7 +1667,7 @@ static void deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4
 
 /* Thread body that draws the deployment screen's nine text graphics, double buffered:
  * three groups of three, with the squad caption (first or later squad), the squad's
- * unit limit and the units it may still take (each digit picked by its x_load,
+ * unit limit and the units it may still take (each digit picked by its source.x,
  * 8 pixels per digit from 0xc8). Each graphic grows upward one line a frame to its
  * 12-line height; the units-left group (6-8) shrinks away once the squad is full. A
  * nonzero third thread parameter shrinks every graphic, and the thread exits once the
@@ -1697,21 +1697,21 @@ static void deploy_text_graphics_thread(void) {
             squad--;
         }
         if (squad == 0) {
-            g_deploy_text_graphic_params[1].x_load = 0xc0;
-            g_deploy_text_graphic_params[1].y_load = 0x18;
+            g_deploy_text_graphic_params[1].source.x = 0xc0;
+            g_deploy_text_graphic_params[1].source.y = 0x18;
         } else {
-            g_deploy_text_graphic_params[1].x_load = 0xe8;
-            g_deploy_text_graphic_params[1].y_load = 0xc;
+            g_deploy_text_graphic_params[1].source.x = 0xe8;
+            g_deploy_text_graphic_params[1].source.y = 0xc;
         }
-        g_deploy_text_graphic_params[4].x_load = g_deploy_current_squad_data->unit_limit * 8 + 0xc8;
-        g_deploy_text_graphic_params[7].x_load
+        g_deploy_text_graphic_params[4].source.x = g_deploy_current_squad_data->unit_limit * 8 + 0xc8;
+        g_deploy_text_graphic_params[7].source.x
             = (g_deploy_current_squad_data->unit_limit - g_deploy_deployed_unit_count) * 8 + 0xc8;
         for (i = 0; i < 9; i++) {
             off = parity * sizeof(g_deploy_text_polys[0]) + i * sizeof(POLY_FT4);
             if ((g_deploy_current_squad_data->unit_limit - g_deploy_deployed_unit_count - 1 < 0 && i >= 6)
                 || thread_get_current_parameter_3() != 0) {
                 if (g_deploy_current_squad_data->unit_limit - g_deploy_deployed_unit_count - 1 < 0) {
-                    g_deploy_text_graphic_params[7].x_load = 0xd0;
+                    g_deploy_text_graphic_params[7].source.x = 0xd0;
                 }
                 g_deploy_text_reveal_steps[6] = -1;
                 g_deploy_text_reveal_steps[7] = -1;

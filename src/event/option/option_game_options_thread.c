@@ -36,7 +36,7 @@
  * row-count loads, as in the target.
  */
 void option_game_options_thread(void) {
-    image_load_parameters_t image_parameters;
+    image_layout_t image_parameters;
     RECT image_rect;
     RECT clear;
     RECT texture_window;
@@ -79,14 +79,14 @@ void option_game_options_thread(void) {
     layout = &g_option_entry_table;
     entry->window.h = layout->row_count * 16 + 0x10;
     entry->inner_height = layout->row_count * 16 + 0x10;
-    entry->text_image.height = layout->row_count * 16 + 0x10;
+    entry->text_image.source.h = layout->row_count * 16 + 0x10;
 
     image_parameters.x_screen_offset = 8;
-    image_parameters.x_load = 0;
-    image_parameters.y_load = 0;
+    image_parameters.source.x = 0;
+    image_parameters.source.y = 0;
     image_parameters.y_screen_offset = 0xA;
-    image_parameters.width = entry->window.w - 0x20;
-    image_parameters.height = entry->window.h - 0xE;
+    image_parameters.source.w = entry->window.w - 0x20;
+    image_parameters.source.h = entry->window.h - 0xE;
 
     menu_build_window_sprites(&image_rect, entry, &page->icons);
     buffer = menu_alloc_memory(0x1E0);
@@ -96,7 +96,7 @@ void option_game_options_thread(void) {
      * two lines above the text ring's first row must stay blank. */
     clear.x = entry->vram_origin.x;
     clear.y = 0xFE;
-    clear.w = (s16)image_parameters.width / 4;
+    clear.w = image_parameters.source.w / 4;
     clear.h = 2;
     ClearImage(&clear, 0, 0, 0);
 

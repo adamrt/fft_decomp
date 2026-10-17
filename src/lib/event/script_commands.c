@@ -644,42 +644,43 @@ void script_frame_after_requests_stub(void) {
 }
 
 /* Point a sprite (SPRT) or textured quad (POLY_FT4) at an image: texture source from parameters
- * relative to base_load, screen rectangle relative to base_screen. A negative x_load keeps the
+ * relative to base_load, screen rectangle relative to base_screen. A negative source.x keeps the
  * primitive's texture fields and moves it only. */
 void gfx_set_image_primitive_layout(
-    void* primitive, const point16_t* base_load, const RECT* base_screen, const image_load_parameters_t* parameters) {
+    void* primitive, const point16_t* base_load, const RECT* base_screen, const image_layout_t* parameters) {
     int texture_column;
     SPRT* sprite = primitive;
     POLY_FT4* quad = primitive;
 
     /* GPU codes 0x64-0x67 are the free-size sprite (SPRT). */
     if ((getcode(primitive) & 0x7c) == 0x64) {
-        if (parameters->x_load >= 0) {
+        if (parameters->source.x >= 0) {
             /* A sprite uses the current texture page: u is the 4bpp pixel column within it. */
             texture_column = base_load->x & 0x3f;
-            sprite->u0 = (texture_column << 2) + parameters->x_load;
-            sprite->v0 = base_load->y + parameters->y_load;
-            sprite->w = parameters->width;
-            sprite->h = parameters->height;
+            sprite->u0 = (texture_column << 2) + parameters->source.x;
+            sprite->v0 = base_load->y + parameters->source.y;
+            sprite->w = parameters->source.w;
+            sprite->h = parameters->source.h;
         }
         sprite->x0 = base_screen->x + parameters->x_screen_offset;
         sprite->y0 = base_screen->y + parameters->y_screen_offset;
         return;
     }
 
-    if (parameters->x_load >= 0) {
+    if (parameters->source.x >= 0) {
         quad->tpage = GetTPage(0, 0, base_load->x, base_load->y & 0xf00);
-        setUV4(quad, parameters->x_load, base_load->y + parameters->y_load, parameters->x_load + parameters->width,
-            base_load->y + parameters->y_load, parameters->x_load,
-            base_load->y + parameters->y_load + parameters->height, parameters->x_load + parameters->width,
-            base_load->y + parameters->y_load + parameters->height);
+        setUV4(quad, parameters->source.x, base_load->y + parameters->source.y,
+            parameters->source.x + parameters->source.w, base_load->y + parameters->source.y, parameters->source.x,
+            base_load->y + parameters->source.y + parameters->source.h, parameters->source.x + parameters->source.w,
+            base_load->y + parameters->source.y + parameters->source.h);
     }
 
     setXY4(quad, base_screen->x + parameters->x_screen_offset, base_screen->y + parameters->y_screen_offset,
-        base_screen->x + parameters->x_screen_offset + parameters->width, base_screen->y + parameters->y_screen_offset,
-        base_screen->x + parameters->x_screen_offset, base_screen->y + parameters->y_screen_offset + parameters->height,
-        base_screen->x + parameters->x_screen_offset + parameters->width,
-        base_screen->y + parameters->y_screen_offset + parameters->height);
+        base_screen->x + parameters->x_screen_offset + parameters->source.w,
+        base_screen->y + parameters->y_screen_offset, base_screen->x + parameters->x_screen_offset,
+        base_screen->y + parameters->y_screen_offset + parameters->source.h,
+        base_screen->x + parameters->x_screen_offset + parameters->source.w,
+        base_screen->y + parameters->y_screen_offset + parameters->source.h);
 }
 
 /* Draw count positioned number entries into an image buffer: kind 0 in the small glyphs

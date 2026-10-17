@@ -48,8 +48,8 @@ static u16 g_formation_summary_value_cluts[4][2]
 
 static u16 g_formation_summary_label_cluts[7][2] = { 0x7efc, 0x7efc, 0x7f3c, 0x7f3c, 0x7f7c, 0x7f7c, 0x7ebd, 0x7efd,
     0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
-static image_load_parameters_t g_formation_summary_mode_row_params[4] = { { 0, 0, 2, 2, 0x200, 0 },
-    { 228, 144, 28, 10, 0xfffe, 0xfffc }, { 204, 144, 24, 10, 0xffff, 0xfffd }, { 232, 64, 24, 8, 0, 0xfffc } };
+static image_layout_t g_formation_summary_mode_row_params[4] = { { { 0, 0, 2, 2 }, 0x200, 0 },
+    { { 228, 144, 28, 10 }, -2, -4 }, { { 204, 144, 24, 10 }, -1, -3 }, { { 232, 64, 24, 8 }, 0, -4 } };
 static RECT g_formation_selected_unit_portrait_rect = { 0, 510, 16, 1 };
 static RECT g_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
 
@@ -168,10 +168,10 @@ void unit_panel_banner_thread(void) {
     }
     if (g_menu_post_battle_unit_changes_active == 0) {
         mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6],
-            &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
+            &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_layout_t));
     } else {
-        mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params,
-            sizeof(image_load_parameters_t));
+        mem_copy_bytes_nonempty(
+            &g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params, sizeof(image_layout_t));
     }
     for (frame = 0; frame < 7; frame++) {
         gfx_set_image_primitive_layout(&editor->label_sprites[frame], g_unit_panel_editor_numeric_geometry,
@@ -218,10 +218,10 @@ void unit_panel_banner_thread(void) {
         }
         if (g_menu_post_battle_unit_changes_active == 0) {
             mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6],
-                &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
+                &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_layout_t));
         } else {
             mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params,
-                sizeof(image_load_parameters_t));
+                sizeof(image_layout_t));
         }
         gfx_set_image_primitive_layout(&editor->label_sprites[6], g_unit_panel_editor_numeric_geometry,
             &g_menu_portrait_origin, &g_formation_summary_label_sprite_params[6]);

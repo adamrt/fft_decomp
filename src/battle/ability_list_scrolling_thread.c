@@ -43,7 +43,7 @@
  * thread-id load.
  */
 void ability_list_scrolling_thread(void) {
-    menu_text_window_t window;
+    image_layout_t window;
     RECT image_rect;
     RECT texture_window;
     SPRT icons0[2];
@@ -99,17 +99,17 @@ void ability_list_scrolling_thread(void) {
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
-    entry->text_image.height = layout->columns.row_count * 16 + 0x1C;
+    entry->text_image.source.h = layout->columns.row_count * 16 + 0x1C;
 
-    window.rect.x = 0x108 - entry->inner_width;
-    window.rect.y = 0xFE;
+    window.source.x = 0x108 - entry->inner_width;
+    window.source.y = 0xFE;
     window.x_screen_offset = 8;
     window.y_screen_offset = 0xC;
-    window.rect.w = entry->inner_width - 8;
-    window.rect.h = entry->window.h - 0x1A;
-    clear.x = window.rect.x / 4 + entry->vram_origin.x;
+    window.source.w = entry->inner_width - 8;
+    window.source.h = entry->window.h - 0x1A;
+    clear.x = window.source.x / 4 + entry->vram_origin.x;
     clear.y = (entry->vram_origin.y & 0xFF00) + 0xFE;
-    clear.w = window.rect.w / 4;
+    clear.w = window.source.w / 4;
     clear.h = 2;
     ClearImage(&clear, 0, 0, 0);
 
@@ -150,8 +150,7 @@ void ability_list_scrolling_thread(void) {
     page->thumb.clut = 0x7D7C;
 
     menu_init_sprt(&page->frame);
-    gfx_set_image_primitive_layout(
-        &page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
+    gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &window);
 
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
@@ -177,7 +176,7 @@ void ability_list_scrolling_thread(void) {
         buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     }
 
-    menu_clear_render_buffer(buffer, window.rect.w * window.rect.h / 2);
+    menu_clear_render_buffer(buffer, window.source.w * window.source.h / 2);
     /* Clamp the saved scroll position; a cursor beyond the visible rows restarts at the top. */
     row_offset = layout->row_offset;
     if (layout->columns.hidden_rows < row_offset) {
@@ -193,10 +192,10 @@ void ability_list_scrolling_thread(void) {
     redraw_pending = 1;
     ring = 0;
 
-    image_rect.x = window.rect.x / 4 + entry->vram_origin.x;
+    image_rect.x = window.source.x / 4 + entry->vram_origin.x;
     image_rect.y = 0x80;
-    image_rect.w = window.rect.w / 4;
-    image_rect.h = window.rect.h;
+    image_rect.w = window.source.w / 4;
+    image_rect.h = window.source.h;
     LoadImage(&image_rect, (u32*)buffer);
 
     /* Duplicate page 0 for the other packet buffer, then point each page at its own
@@ -295,9 +294,9 @@ void ability_list_scrolling_thread(void) {
                 image_rect.h = 0x10;
                 image_rect.y += 0x80;
                 row_buffer_live = 1;
-                buffer = menu_alloc_memory(window.rect.w * 8);
-                menu_clear_render_buffer(buffer, window.rect.w * 8);
-                g_menu_window_text_pen.stride = window.rect.w;
+                buffer = menu_alloc_memory(window.source.w * 8);
+                menu_clear_render_buffer(buffer, window.source.w * 8);
+                g_menu_window_text_pen.stride = window.source.w;
 
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + scroll_delta;
@@ -391,7 +390,7 @@ void ability_list_scrolling_thread(void) {
         }
 
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
-            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
+            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.source);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }
@@ -471,8 +470,7 @@ void ability_list_scrolling_thread(void) {
         frame->v0 = (ring * 16 + scroll_accum - 2) & 0x7F;
         /* The window zooms open over its first 12 frames. */
         if (i * g_script_event_speed < 12) {
-            gfx_set_image_primitive_layout(
-                &page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
+            gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &window);
             menu_zoom_cursor_frame(entry, frame, i * g_script_event_speed);
         }
 

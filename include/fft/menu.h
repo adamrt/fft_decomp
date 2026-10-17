@@ -107,7 +107,7 @@ typedef struct menu_entry {
     /* 0x10: text sprite placement (menu_build_window_sprites). width/height are set with the
      * inner and window sizes; the load origin and screen offsets are cleared
      * with them. */
-    image_load_parameters_t text_image;
+    image_layout_t text_image;
     s16 text_id;                 /* 0x1c: passed to text_find_entry */
     s16 max_row_index;           /* 0x1e: row count - 1 (command_build_act_menu) */
     s16 thread_count;            /* 0x20: threads menu_handle_cancel_input stops, -1 when there is no thread

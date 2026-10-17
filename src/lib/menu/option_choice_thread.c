@@ -85,14 +85,14 @@ void option_choice_thread(void) {
      * 1536/1792. */
     param->window.x = VARIANT_MENU_CHOICE_WINDOW_RIGHT_X - width;
     param->window.y = VARIANT_MENU_CHOICE_WINDOW_CENTER_Y - (height >> 1);
-    param->inner_width = param->window.w = param->text_image.width = width;
-    param->inner_height = param->window.h = param->text_image.height = height;
+    param->inner_width = param->window.w = param->text_image.source.w = width;
+    param->inner_height = param->window.h = param->text_image.source.h = height;
     param->vram_origin.x = VARIANT_MENU_CHOICE_VRAM_X;
     param->vram_origin.y = VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y - height;
     if (kind == GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED) {
         param->vram_origin.x = 0x1AE;
     }
-    param->text_image.width -= 4;
+    param->text_image.source.w -= 4;
 
     menu_build_window_sprites(&rect, param, &g_option_picker_icon_records[0]);
     /* The loop draws from the two icon records alternately. */

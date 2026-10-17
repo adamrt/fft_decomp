@@ -75,7 +75,7 @@ void crystal_start_pickup_threads(void) {
     menu->window.x = 0xc8;
     menu->window.y = 0x40;
     menu->window.w = 0x70;
-    menu->text_image.width = 0x70;
+    menu->text_image.source.w = 0x70;
     menu->inner_width = 0x70;
     if (value_count < 8) {
         menu_text_layout_t* layout;
@@ -325,7 +325,7 @@ static void at_list_init(menu_entry_t* menu) {
         menu->window.x = 0x8c;
         menu->window.y = 0x20;
         menu->window.w = 0xe8;
-        menu->text_image.width = 0xe8;
+        menu->text_image.source.w = 0xe8;
         menu->inner_width = 0xe8;
     } else {
         menu_text_layout_t* layout;
@@ -336,7 +336,7 @@ static void at_list_init(menu_entry_t* menu) {
         menu->window.x = 0xbe;
         menu->window.y = 0x20;
         menu->window.w = 0x84;
-        menu->text_image.width = 0x84;
+        menu->text_image.source.w = 0x84;
         menu->inner_width = 0x84;
     }
 
