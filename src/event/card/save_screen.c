@@ -43,6 +43,11 @@ extern u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];
 enum { SAVE_TEXTURED_QUADS_PER_BUFFER = 600 };
 extern POLY_FT4 g_save_gfx_textured_quads[2 * SAVE_TEXTURED_QUADS_PER_BUFFER];
 
+/* Bound into the shared mutable text-section table by save_init_graphics. */
+extern u8 g_save_text_command_help[];
+extern const u8 g_save_text_job_name[];
+extern const u8 g_save_text_location_name[];
+
 static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void save_build_slot_description(s32 mode, u8* destination);
 static void save_init_menu_state(void);
