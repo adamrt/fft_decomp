@@ -471,10 +471,10 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         }
         break;
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
-        formula = ABILITY_FORMULA_DAMAGE_SP_TIMES_WP;
+        formula = ABILITY_FORMULA_THROW_DAMAGE;
         break;
     case ACTION_MENU_TYPE_JUMP:
-        formula = ABILITY_FORMULA_DAMAGE_PA_TIMES_WP;
+        formula = ABILITY_FORMULA_JUMP_DAMAGE;
         break;
     case ACTION_MENU_TYPE_CHARGE:
         ability_id = action.ability_id;
@@ -529,7 +529,7 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
     if (formula < ABILITY_FORMULA_WEAPON_HEAL) {
         formula_apply_poach_and_train();
     }
-    if (formula == ABILITY_FORMULA_DAMAGE_PA_TIMES_WP) {
+    if (formula == ABILITY_FORMULA_JUMP_DAMAGE) {
         g_action_current_ability_view.weapon_id = ITEM_ID_NOTHING;
     }
 

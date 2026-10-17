@@ -643,8 +643,8 @@ typedef enum ability_formula {
     ABILITY_FORMULA_MULTIHIT_TRUTH_MAGIC = 30,
     ABILITY_FORMULA_UNFAITH_MAGICAL_DAMAGE = 31,
     ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA = 94,
-    ABILITY_FORMULA_DAMAGE_SP_TIMES_WP = 99, /* thrown weapons */
-    ABILITY_FORMULA_DAMAGE_PA_TIMES_WP = 100 /* Jump */
+    ABILITY_FORMULA_THROW_DAMAGE = 99,
+    ABILITY_FORMULA_JUMP_DAMAGE = 100
 } ability_formula_e;
 
 /* Valid formula IDs are 1..0x64; handlers are indexed by ID minus one. */

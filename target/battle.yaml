@@ -1535,8 +1535,8 @@ functions:
   - {addr: 0x8018aaf8, size: 32, name: formula_damage_ma_plus_y_half_times_ma_status, hash: 745ea22d2495e99e, unit: formula_damage}
   - {addr: 0x8018ab18, size: 64, name: formula_lower_brave_y, hash: 9615711393abaae9, unit: formula_damage}
   - {addr: 0x8018ab58, size: 64, name: formula_lower_brave_y_without_faith, hash: 9ab05173ce7cc826, unit: formula_damage}
-  - {addr: 0x8018ab98, size: 172, name: formula_damage_sp_times_wp, hash: a9334582c1a5c49d, unit: formula_damage}
-  - {addr: 0x8018ac44, size: 48, name: formula_damage_pa_times_wp, hash: 40f050d9561b0355, unit: formula_damage}
+  - {addr: 0x8018ab98, size: 172, name: formula_throw_damage, hash: a9334582c1a5c49d, unit: formula_damage}
+  - {addr: 0x8018ac44, size: 48, name: formula_jump_damage, hash: 40f050d9561b0355, unit: formula_damage}
   - {addr: 0x8018ac74, size: 104, name: status_remove_transparent_if_jump_used, hash: ce1be0a3793d8340, unit: action_resolution}
   - {addr: 0x8018acdc, size: 124, name: formula_apply_status_and_check_undead, hash: 7e43893b9dc201c3, unit: action_resolution}
   - {addr: 0x8018ad58, size: 156, name: action_switch_ability_to_default_attack, hash: 5ed037b233f770da, unit: action_resolution}

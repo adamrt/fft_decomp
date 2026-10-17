@@ -626,7 +626,7 @@ void formula_lower_brave_y_without_faith(void) {
 
 /* Formula 0x63: thrown weapon damage (SP * WP) with the weapon's element;
  * Catch, then physical evade. */
-void formula_damage_sp_times_wp(void) {
+void formula_throw_damage(void) {
     reaction_try_catch();
     if (g_action_target_data->hit == 0) {
         return;
@@ -647,7 +647,7 @@ void formula_damage_sp_times_wp(void) {
 
 /* Formula 0x64: damage (PA * WP); with a spear (PA * 3/2 * WP); bare-handed
  * (PA * (PA * Brave / 100)). No evade roll here. */
-void formula_damage_pa_times_wp(void) {
+void formula_jump_damage(void) {
     formula_store_jump_xa_ya();
     formula_apply_physical_modifiers_without_supports();
     formula_store_xa_times_ya_damage();

@@ -109,8 +109,8 @@ void formula_5f_damage_ma_plus_y_half_times_ma(void);
 void formula_damage_ma_plus_y_half_times_ma_status(void);
 void formula_lower_brave_y(void);
 void formula_lower_brave_y_without_faith(void);
-void formula_damage_sp_times_wp(void);
-void formula_damage_pa_times_wp(void);
+void formula_throw_damage(void);
+void formula_jump_damage(void);
 
 /* A second entry to formula 0x49's handler that the table does not point to and nothing calls. */
 void formula_49_unused_with_extra_steps(void);
