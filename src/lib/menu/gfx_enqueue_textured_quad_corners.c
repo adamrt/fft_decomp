@@ -3,6 +3,7 @@
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_gfx.h"
+#include "fft/status_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

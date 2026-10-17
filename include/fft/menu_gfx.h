@@ -37,7 +37,14 @@ typedef struct menu_sprite_cell {
 } menu_sprite_cell_t;
 typedef char menu_sprite_cell_size_must_be_6[(sizeof(menu_sprite_cell_t) == 6) ? 1 : -1];
 
+/* Active context in WORLD, BUNIT and EQUIP; JOBSTTS and CARD use distinct layouts. */
+#if defined(FFT_EVENT_JOBSTTS)
+extern struct status_screen_gfx_context* g_menu_gfx_context;
+#elif defined(FFT_EVENT_CARD)
+extern struct save_gfx_context* g_menu_gfx_context;
+#else
 extern menu_gfx_context_t* g_menu_gfx_context;
+#endif
 extern s16 g_menu_gfx_otag_index;
 extern u16 g_menu_atlas_texture_page;
 extern s16 g_menu_gfx_semitransparency;

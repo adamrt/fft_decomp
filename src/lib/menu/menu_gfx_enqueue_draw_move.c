@@ -1,6 +1,7 @@
 /* Queuing a VRAM rectangle move at an ordering-table entry. */
 
 #include "fft/menu_gfx.h"
+#include "fft/status_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

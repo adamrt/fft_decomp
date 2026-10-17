@@ -45,8 +45,8 @@ static void save_gfx_init_primitive_lists(save_gfx_context_t* lists) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_ft4_capacity; i++) {
-        SetPolyFT4(&lists->polygons[i]);
-        SetShadeTex(&lists->polygons[i], 0);
+        SetPolyFT4(&lists->textured_quads[i]);
+        SetShadeTex(&lists->textured_quads[i], 0);
     }
     for (i = 0; i < g_gfx_tile_capacity; i++) {
         SetTile(&lists->tiles[i]);
@@ -71,7 +71,7 @@ void save_gfx_init_contexts(save_gfx_context_t* contexts, u32* otags, s32 unused
     g_save_gfx_context = contexts;
     for (i = 0; i < 2; i++) {
         g_save_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
-        g_save_gfx_context_base[i].polygons = polygons + g_gfx_poly_ft4_capacity * i;
+        g_save_gfx_context_base[i].textured_quads = polygons + g_gfx_poly_ft4_capacity * i;
         g_save_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
         save_gfx_init_primitive_lists(&g_save_gfx_context_base[i]);
         SetDefDrawEnv(&g_save_gfx_context_base[i].draw_environment, 0, i * 0xf0, 0x100, 0xf0);

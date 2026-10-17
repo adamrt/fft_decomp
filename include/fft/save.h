@@ -280,7 +280,7 @@ extern menu_window_rect_source_t g_save_slot_window_rect_source[];
 typedef struct save_gfx_context {
     u32* otag;                   /* 0x00 */
     u8 _unused_04[0x0c];         /* 0x04 */
-    POLY_FT4* polygons;          /* 0x10 */
+    POLY_FT4* textured_quads;    /* 0x10 */
     u8 _unused_14[0x28];         /* 0x14 */
     TILE* tiles;                 /* 0x3c: TILE pool */
     u8 _unused_40[0x20];         /* 0x40 */
