@@ -34,18 +34,18 @@ void window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 
     RECT* record_bounds;
     CVECTOR* rgb;
 
-    g_window_render_records[index].flags
-        = (g_window_render_records[index].flags & ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) | flags;
-    g_window_render_records[index].clut = clut;
-    g_window_render_records[index].tpage = GetTPage(0, 0, bounds.x, bounds.y);
-    record_bounds = &g_window_render_records[index].bounds;
+    g_window_gs_image_records[index].flags
+        = (g_window_gs_image_records[index].flags & ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) | flags;
+    g_window_gs_image_records[index].clut = clut;
+    g_window_gs_image_records[index].tpage = GetTPage(0, 0, bounds.x, bounds.y);
+    record_bounds = &g_window_gs_image_records[index].bounds;
     record_bounds->x = (bounds.x & 0x3F) * 2;
     record_bounds->y = bounds.y & 0xFF;
     record_bounds->w = bounds.w * 2;
     record_bounds->h = bounds.h;
-    rgb = &g_window_render_records[index].color;
+    rgb = &g_window_gs_image_records[index].color;
     rgb->b = rgb->g = rgb->r = 0x80;
-    g_window_render_records[index].anim_counter = 0;
+    g_window_gs_image_records[index].anim_counter = 0;
 }
 
 /* Initialize panel state and start its WORLD rendering thread. */
@@ -233,9 +233,9 @@ void text_window_open(text_window_t* state) {
     window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_THUMB);
     render_index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     state->render_record_index = render_index;
-    g_window_render_records[render_index].flags |= DISPLAY_OBJECT_POP_IN;
-    g_window_render_records[state->render_record_index].priority = state->priority;
-    g_window_render_records[state->render_record_index].base = state->base;
+    g_window_gs_image_records[render_index].flags |= DISPLAY_OBJECT_POP_IN;
+    g_window_gs_image_records[state->render_record_index].priority = state->priority;
+    g_window_gs_image_records[state->render_record_index].base = state->base;
 
     padded_width = (state->text_width + 0x18) & 0xfffc;
     window_x = state->base.x + padded_width;
@@ -397,24 +397,24 @@ static void text_window_render_page(text_window_t* state, s32 row) {
         top = state->extra_base.y - offset;
         limit = state->base.y + 8;
         if (top >= limit) {
-            g_window_render_records[state->extra_render_index].base.y = top;
-            g_window_render_records[state->extra_render_index].bounds.y = state->extra_bounds.y;
-            g_window_render_records[state->extra_render_index].bounds.h = state->extra_bounds.h;
-            g_window_render_records[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[state->extra_render_index].base.y = top;
+            g_window_gs_image_records[state->extra_render_index].bounds.y = state->extra_bounds.y;
+            g_window_gs_image_records[state->extra_render_index].bounds.h = state->extra_bounds.h;
+            g_window_gs_image_records[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         } else if (top + state->extra_bounds.h >= limit) {
-            g_window_render_records[state->extra_render_index].base.y = limit;
-            g_window_render_records[state->extra_render_index].bounds.y = state->extra_bounds.y + offset;
-            g_window_render_records[state->extra_render_index].bounds.h = state->extra_bounds.h - offset;
-            g_window_render_records[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[state->extra_render_index].base.y = limit;
+            g_window_gs_image_records[state->extra_render_index].bounds.y = state->extra_bounds.y + offset;
+            g_window_gs_image_records[state->extra_render_index].bounds.h = state->extra_bounds.h - offset;
+            g_window_gs_image_records[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         } else {
-            g_window_render_records[state->extra_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[state->extra_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
         }
     }
     point.x = 8;
     point.y = 8;
     window_display_text_entry(state->render_record_index, state->text_id, point, g_window_image_buffer);
     window_load_render_record_image(state->render_record_index, g_window_image_buffer);
-    g_window_render_records[state->render_record_index].base = state->base;
+    g_window_gs_image_records[state->render_record_index].base = state->base;
 }
 
 /* Show the text-page prompt while more pages remain. */

@@ -647,10 +647,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   track in `tracks[n - 1]`. The novel always uses slot 2, so the store hits
   `current_slot` (zeroed next) and `tracks[1]` keeps the unloaded id: a later
   queued play of that track switches to the empty slot without loading it.
-- `window_draw_animated_record`: a part with its own palette gets
+- `window_draw_gs_animated_record`: a part with its own palette gets
   CLUT x `(clut_x + (word & 0xff0000)) >> 12`, shifting the cel's CLUT x
   origin out with the palette field; OPEN's
-  `window_draw_animated_record` adds the origin after the shift. All
+  `window_draw_gpu_animated_record` adds the origin after the shift. All
   141 WLDCORE cels have CLUT x 0, so nothing shows.
 - `party_find_ramza` returns 16 (`PARTY_MEMBER_SLOT_COUNT`) when
   no formation slot holds Ramza, and the four MCBrave/MCFaith opcodes

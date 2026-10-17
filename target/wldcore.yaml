@@ -81,9 +81,9 @@ functions:
   - {addr: 0x8006ac08, size: 144, name: world_map_apply_clamped_horizontal_scroll, hash: c3019786556de6da, unit: map_tiles}
   - {addr: 0x8006ac98, size: 144, name: world_map_apply_clamped_vertical_scroll, hash: d77a7b8dc971843f, unit: map_tiles}
   - {addr: 0x8006ad28, size: 248, name: window_init_record_pools, hash: e025d61aca5111d9, unit: window_records}
-  - {addr: 0x8006ae20, size: 176, name: window_dispatch_record_list, hash: a7e465f544089ca3, unit: window_records}
-  - {addr: 0x8006aed0, size: 924, name: window_draw_animated_record, hash: 370928c0ecd01289, unit: window_records}
-  - {addr: 0x8006b26c, size: 500, name: window_draw_image_record, hash: 3a72d1b76b19a115, unit: window_records}
+  - {addr: 0x8006ae20, size: 176, name: window_dispatch_gs_record_list, hash: a7e465f544089ca3, unit: window_records}
+  - {addr: 0x8006aed0, size: 924, name: window_draw_gs_animated_record, hash: 370928c0ecd01289, unit: window_records}
+  - {addr: 0x8006b26c, size: 500, name: window_draw_gs_image_record, hash: 3a72d1b76b19a115, unit: window_records}
   - {addr: 0x8006b460, size: 232, name: window_append_animated_record, hash: 9d472c712e7475fd, unit: window_records}
   - {addr: 0x8006b548, size: 304, name: window_append_record, hash: 8b95487b55821e0b, unit: window_records}
   - {addr: 0x8006b678, size: 276, name: gfx_calculate_scaled_rectangle, hash: 63903852735eac70, unit: window_records}
@@ -563,7 +563,7 @@ data:
   - {addr: 0x800bb988, name: g_picture_buffer}
   - {addr: 0x800bb98c, name: g_menu_stack_records}
   - {addr: 0x800bbc6c, name: g_travel_next_map_id}
-  - {addr: 0x800bbc70, name: g_window_render_records}
+  - {addr: 0x800bbc70, name: g_window_gs_image_records}
   - {addr: 0x800bc2f0, name: g_world_map_input_new_button_presses}
   - {addr: 0x800bc2f4, name: g_message_block_buffer}
   - {addr: 0x800c72f4, name: g_world_map_scratch_buffer}

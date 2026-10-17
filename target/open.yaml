@@ -18,8 +18,8 @@ units:
   - {name: movies, source: src/open/movies.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
   - {name: title_controllers, source: src/open/title_controllers.c}
   - {name: title_script, source: src/open/title_script.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}]}
-  - {name: window_records, source: src/wldcore/window_records.c}
-  - {name: window_text_records, source: src/wldcore/window_text_records.c}
+  - {name: window_records, source: src/open/window_records.c}
+  - {name: window_text_records, source: src/open/window_text_records.c}
 
 libraries:
   - {id: libpress, addr: 0x8007348c, end: 0x80073f10, kind: psyq, library: LIBPRESS}
@@ -58,9 +58,9 @@ functions:
   - {addr: 0x80068b74, size: 60, name: gfx_clear_and_draw_current_frame, hash: 22d70e319b6161e8, unit: init}
   - {addr: 0x80068bb0, size: 224, name: window_init_record_pools, hash: 39decc2065a64d27, unit: window_records}
   - {addr: 0x80068c90, size: 64, name: gfx_clear_current_otag, hash: 7dbb971d4cb43ee9, unit: window_records}
-  - {addr: 0x80068cd0, size: 176, name: window_dispatch_record_list, hash: a3a591bbfb26047c, unit: window_records}
-  - {addr: 0x80068d80, size: 1164, name: window_draw_animated_record_56, hash: d2445b3917e77445, unit: window_records}
-  - {addr: 0x8006920c, size: 1212, name: window_draw_image_record_56, hash: 6c7b3dae23c3f006, unit: window_records}
+  - {addr: 0x80068cd0, size: 176, name: window_dispatch_gpu_record_list, hash: a3a591bbfb26047c, unit: window_records}
+  - {addr: 0x80068d80, size: 1164, name: window_draw_gpu_animated_record, hash: d2445b3917e77445, unit: window_records}
+  - {addr: 0x8006920c, size: 1212, name: window_draw_gpu_image_record, hash: 6c7b3dae23c3f006, unit: window_records}
   - {addr: 0x800696c8, size: 232, name: window_append_animated_record, hash: a3135d544f819f6f, unit: window_records}
   - {addr: 0x800697b0, size: 272, name: window_append_record, hash: 6a95dfcd435c9a47, unit: window_records}
   - {addr: 0x800698c0, size: 276, name: gfx_calculate_scaled_rectangle, hash: 9676150bdf1ed31c, unit: window_records}
@@ -250,8 +250,8 @@ data:
   - {addr: 0x80085fc4, name: g_window_render_object_count}
   - {addr: 0x80085fc8, name: g_ending_fade_primitives}
   - {addr: 0x80086018, name: g_gfx_otags}
-  - {addr: 0x80086098, name: g_window_render_records}
-  - {addr: 0x800860b4, name: g_window_record_translation}
+  - {addr: 0x80086098, name: g_window_gpu_image_records}
+  - {addr: 0x800860b4, name: g_window_gpu_image_positions}
   - {addr: 0x80086418, name: g_input_directional_repeat_initial_delay}
   - {addr: 0x8008641c, name: g_input_directional_repeat_period}
   - {addr: 0x80086420, name: g_input_up_repeat_counter}

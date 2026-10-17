@@ -45,7 +45,7 @@ typedef struct title_menu_state {
     /* 0x18 */ s32 cd_end_position;
     /* 0x1c */ s32 cursor; /* title_menu_entry_e */
     /* 0x20 */ s32 state;  /* title_state_e */
-    /* 0x24 */ s32 cursor_record_36;
+    /* 0x24 */ s32 cursor_record;
     /* 0x28 */ s32 _unused_28[2];
     /* 0x30 */ s32 exit_timer;
     /* 0x34 */ s32 exiting;
@@ -98,11 +98,11 @@ void new_game_init_party(s32 party_mode, s32 world_load_mode);
 /* birthday */
 /* Birthday date-selection controller state (handler 5), shared with its redraw routine. */
 typedef struct birthday_date_state {
-    s32 cursor_record_36; /* 0x00: cursor moved between month and day */
+    s32 cursor_record; /* 0x00: cursor moved between month and day */
     s32 label_record;
-    s32 title_record_56;  /* 0x08: birthday title image (0xb800); palette 2 on
+    s32 title_image;  /* 0x08: birthday title image (0xb800); palette 2 on
                              confirmation, 0 on restore */
-    s32 window_record_56; /* 0x0c: flags bit 8 blocks input */
+    s32 window_image; /* 0x0c: flags bit 8 blocks input */
     s32 _unused_10[4];
     s32 month;           /* 0x20: 1..12 */
     s32 day;             /* 0x24 */
@@ -111,10 +111,10 @@ typedef struct birthday_date_state {
 
 /* Final birthday-confirmation controller state (handler 6). */
 typedef struct birthday_confirmation_state {
-    s32 cursor_record_36; /* 0x00 */
-    s32 label_record;     /* 0x04 */
-    s32 menu_record_56;   /* 0x08 */
-    s32 selected_option;  /* 0x0C: 0 confirms, 1 returns to date entry */
+    s32 cursor_record;   /* 0x00 */
+    s32 label_record;    /* 0x04 */
+    s32 menu_image;      /* 0x08 */
+    s32 selected_option; /* 0x0C: 0 confirms, 1 returns to date entry */
     s32 _unused_10[4];
     s32 month; /* 0x20 */
     s32 day;   /* 0x24 */

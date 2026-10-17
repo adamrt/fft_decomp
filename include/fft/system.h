@@ -33,7 +33,7 @@ typedef enum system_flags {
     SYSTEM_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
     /* world_map_draw_frame does not load the scratch image into the display buffer. */
     SYSTEM_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
-    /* window_dispatch_record_list draws nothing and world_map_pulse_dots returns. */
+    /* window_dispatch_gs_record_list draws nothing and world_map_pulse_dots returns. */
     SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
     /* hud_draw_value draws nothing. */
     SYSTEM_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,
@@ -67,7 +67,7 @@ typedef enum system_flags {
     SYSTEM_FLAG_DEEP_DUNGEON_BATTLE = 0x02000000,
     /* Set by world_map_clear_screen_and_set_clip_rect; the return level then recaptures the world frame. */
     SYSTEM_FLAG_SCREEN_CLEARED = 0x04000000,
-    /* Map dots stop pulsing and window_draw_animated_record stops advancing frames. */
+    /* Map dots stop pulsing and window_draw_gs_animated_record stops advancing frames. */
     SYSTEM_FLAG_FREEZE_ANIMATION = 0x08000000,
     /* wldcore_entrypoint returns 5: system_run_game_loop goes back to OPENING. */
     SYSTEM_FLAG_RETURN_TO_TITLE = 0x10000000,

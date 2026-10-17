@@ -322,7 +322,7 @@ void calendar_draw_date(GsOT* ot) {
     first = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
     second = script_get_variable(EVENT_SCRIPT_VAR_DAY);
     request.sequence = first + (WINDOW_ANIM_MONTH_FIRST - 1);
-    window_draw_animated_record(&request, ot);
+    window_draw_gs_animated_record(&request, ot);
 
     request.position.x += 0x1A;
     request.position.y -= 4;
@@ -330,11 +330,11 @@ void calendar_draw_date(GsOT* ot) {
         request.anim_counter = 0;
         request.frame_index = 0;
         request.sequence = second / 10 + WINDOW_ANIM_DIGIT_FIRST;
-        window_draw_animated_record(&request, ot);
+        window_draw_gs_animated_record(&request, ot);
         request.position.x += 8;
     }
     request.sequence = second % 10 + WINDOW_ANIM_DIGIT_FIRST;
-    window_draw_animated_record(&request, ot);
+    window_draw_gs_animated_record(&request, ot);
 }
 
 /* Draws the name label of the selected location (g_location_selected,
@@ -375,7 +375,7 @@ void location_draw_label(GsOT* ot) {
     request.color.g = color.g;
     request.color.b = color.b;
     request.sequence = g_location_selected + (WINDOW_ANIM_LOCATION_NAME_FIRST - 1);
-    window_draw_animated_record(&request, ot);
+    window_draw_gs_animated_record(&request, ot);
 }
 
 /* Init step: load WORLD's menu text and unit portraits, build the formation unit name strings,
@@ -1265,7 +1265,7 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
  * blocked-button mask it saved and (when asked) the text section pointers,
  * and resumes the level underneath. */
 void menu_stack_wait_text_then_pop(menu_stack_message_level_t* level) {
-    if (g_window_render_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
     if (text_window_step(&g_text_window) != 0) {
@@ -1357,17 +1357,17 @@ static void debug_push_variable_list_level(void) {
     g_window_records[index].frame_index = 0;
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].variable_list.render_index = index;
-    g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    g_window_render_records[index].priority = 3;
+    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+    g_window_gs_image_records[index].priority = 3;
     g_menu_stack_records[g_menu_stack_depth].variable_list.first_variable = 0;
     debug_draw_variable_list(&g_menu_stack_records[g_menu_stack_depth].variable_list);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].variable_list.cursor = 0;
     g_window_records[g_menu_stack_records[record_index].variable_list.window_index].position.x
-        = g_window_render_records[g_menu_stack_records[record_index].variable_list.render_index].base.x + 8;
+        = g_window_gs_image_records[g_menu_stack_records[record_index].variable_list.render_index].base.x + 8;
     g_menu_stack_depth = record_index + 1;
     g_window_records[g_menu_stack_records[record_index].variable_list.window_index].position.y
-        = g_window_render_records[g_menu_stack_records[record_index].variable_list.render_index].base.y
+        = g_window_gs_image_records[g_menu_stack_records[record_index].variable_list.render_index].base.y
         - -(g_menu_stack_records[record_index].variable_list.cursor * 0x10 + 0xC);
     g_menu_stack_types[record_index] = MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST;
 }
@@ -1405,8 +1405,8 @@ static void debug_draw_variable_list(debug_variable_list_level_t* level) {
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     /* Direct record indexing moves the symbol load after the index scaling
      * and breaks the exact match. Retain the target's biased base and stride. */
-    records = &g_window_render_records[0].base;
-    base = (point32_t*)((u8*)records + index * sizeof(window_render_record_t));
+    records = &g_window_gs_image_records[0].base;
+    base = (point32_t*)((u8*)records + index * sizeof(window_gs_image_record_t));
     base->x = -(bounds.w / 2);
     base->y = -88;
     point.x = 8;
@@ -1446,13 +1446,13 @@ void debug_handle_variable_list_input(debug_variable_list_level_t* level) {
     s32 variable;
     s32 dead[2];
 
-    if (g_window_render_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         g_window_records[level->window_index].palette = 0xA;
-        g_window_render_records[level->render_index].palette = 2;
+        g_window_gs_image_records[level->render_index].palette = 2;
         g_window_records[level->window_index].sequence = WINDOW_ANIM_CURSOR_PRESS;
         g_window_records[level->window_index].anim_counter = g_window_records[level->window_index].frame_index = 0;
         variable = level->first_variable + level->cursor;
@@ -1524,9 +1524,9 @@ cursor_down:
         level->cursor++;
     }
 move_cursor:
-    g_window_records[level->window_index].position.x = g_window_render_records[level->render_index].base.x + 8;
+    g_window_records[level->window_index].position.x = g_window_gs_image_records[level->render_index].base.x + 8;
     g_window_records[level->window_index].position.y
-        = g_window_render_records[level->render_index].base.y - -(level->cursor * 0x10 + 0xC);
+        = g_window_gs_image_records[level->render_index].base.y - -(level->cursor * 0x10 + 0xC);
 }
 
 /* Pushes MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT, a number panel (0 to
@@ -1577,7 +1577,7 @@ void debug_step_variable_edit_level(menu_stack_panel_level_t* level) {
         parent = g_menu_stack_depth - 1;
         g_window_records[g_menu_stack_records[parent].window_render.window_index].sequence = WINDOW_ANIM_CURSOR_IDLE;
         slot = g_menu_stack_records[parent].window_render.window_index;
-        g_window_render_records[g_menu_stack_records[parent].window_render.render_index].palette = 0;
+        g_window_gs_image_records[g_menu_stack_records[parent].window_render.render_index].palette = 0;
         record = &g_window_records[slot];
         record->palette = 0;
         record->frame_index = 0;
@@ -1832,11 +1832,11 @@ void location_push_menu_level(s32 menu) {
         origin.x = image.cx;
         origin.y = image.cy;
         window_init_vram_render_record(index, bounds, origin, DISPLAY_OBJECT_8BIT_CLUT);
-        base = &g_window_render_records[index].base;
-        g_window_render_records[index].priority = 0xB;
+        base = &g_window_gs_image_records[index].base;
+        g_window_gs_image_records[index].priority = 0xB;
         base->x = -0x40;
         base->y = -0x4C;
-        g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+        g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
 
         index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
         g_menu_stack_records[g_menu_stack_depth].location_list.label_window = index;
@@ -1898,7 +1898,7 @@ void location_push_menu_level(s32 menu) {
         /* Here `index` is still the cursor window's record index, yet it reads the render record pool (retail). */
         g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
         g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.y
-            = g_window_render_records[index].base.y - 8;
+            = g_window_gs_image_records[index].base.y - 8;
     }
 
     depth = g_menu_stack_depth;
@@ -1912,14 +1912,14 @@ void location_push_menu_level(s32 menu) {
 /* Restore the location list's optional renderer palette. */
 void location_resume_menu_level(menu_stack_record_t* level) {
     if (level->location_list.extra_render != -1) {
-        g_window_render_records[level->location_list.extra_render].palette = 0;
+        g_window_gs_image_records[level->location_list.extra_render].palette = 0;
     }
 }
 
 /* Sets the second owned render record's palette selector when its slot is present. */
 void location_suspend_menu_level(menu_stack_slot_set_t* slots) {
     if (slots->render_b != -1) {
-        g_window_render_records[slots->render_b].palette = 2;
+        g_window_gs_image_records[slots->render_b].palette = 2;
     }
 }
 
@@ -2191,7 +2191,7 @@ void menu_stack_push_scrollable_text_level(s32 text) {
         g_text_window.text_substitutions[0] = -1;
         text_window_open(&g_text_window);
 
-        g_window_render_records[g_text_window.render_record_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[g_text_window.render_record_index].flags |= DISPLAY_OBJECT_HIDDEN;
         depth = g_menu_stack_depth;
         g_window_records[g_menu_stack_records[depth].window_index].position.x = g_text_window.base.x + 3;
         g_window_records[g_menu_stack_records[depth].window_index].position.y = g_text_window.base.y - 2;
@@ -2214,13 +2214,13 @@ void menu_stack_step_scrollable_text_level(menu_stack_record_t* level) {
     s32* index = &g_text_window.render_record_index;
     s32 depth;
 
-    if (g_window_render_records[*index].flags & DISPLAY_OBJECT_HIDDEN) {
+    if (g_window_gs_image_records[*index].flags & DISPLAY_OBJECT_HIDDEN) {
         if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             sound_play_effect(SOUND_SFX_WINDOW_OPEN);
             g_window_records[level->window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-            g_window_render_records[*index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[*index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         }
-    } else if (!(g_window_render_records[*index].flags & DISPLAY_OBJECT_POP_IN)
+    } else if (!(g_window_gs_image_records[*index].flags & DISPLAY_OBJECT_POP_IN)
         && text_window_step(&g_text_window) == 0) {
         g_window_record_count--;
         g_window_render_object_count--;
@@ -2333,7 +2333,7 @@ void bar_build_rows(menu_stack_window_level_t* level) {
     s32 unused[8];
     menu_cursor_state_t* cursor;
     point32_t* base;
-    window_render_record_t* render;
+    window_gs_image_record_t* render;
     s32 i;
 
     index = level->main_window;
@@ -2371,9 +2371,9 @@ void bar_build_rows(menu_stack_window_level_t* level) {
     bounds.w = 0x48;
     bounds.h = level->entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
-    g_window_render_records[index].priority = 0xA;
-    g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    base = &g_window_render_records[index].base;
+    g_window_gs_image_records[index].priority = 0xA;
+    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_window_gs_image_records[index].base;
     base->x = -0x78;
     base->y = -0x28;
     point.x = 8;
@@ -2391,12 +2391,12 @@ void bar_build_rows(menu_stack_window_level_t* level) {
 
     g_menu_stack_records[g_menu_stack_depth].list_window.selected_entry = cursor->selected_index;
     g_menu_stack_records[g_menu_stack_depth].list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
-    render = &g_window_render_records[index];
-    g_window_records[level->main_window].position.x = g_window_render_records[index].base.x + 6;
+    render = &g_window_gs_image_records[index];
+    g_window_records[level->main_window].position.x = g_window_gs_image_records[index].base.x + 6;
     g_window_records[level->main_window].position.y
-        = g_window_render_records[index].base.y + cursor->selected_index * 0x10 + 0xE;
+        = g_window_gs_image_records[index].base.y + cursor->selected_index * 0x10 + 0xE;
     g_window_records[level->side_window].position.x = render->base.x + 3;
-    g_window_records[level->side_window].position.y = g_window_render_records[index].base.y - 2;
+    g_window_records[level->side_window].position.y = g_window_gs_image_records[index].base.y - 2;
 }
 
 /* Restore the bar list's palettes and cursor animation, then show its welcome text. */
@@ -2409,7 +2409,7 @@ void bar_resume_level(menu_stack_record_t* level) {
 
     main_window = level->list_window.main_window;
     side_window = level->list_window.side_window;
-    g_window_render_records[level->list_window.frame_render].palette = 0;
+    g_window_gs_image_records[level->list_window.frame_render].palette = 0;
     g_window_records[side_window].palette = 0;
     g_window_records[main_window].palette = 0;
     slot = level->list_window.main_window;

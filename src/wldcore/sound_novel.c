@@ -65,9 +65,9 @@ void sound_novel_restore_reading(s32 render_record) {
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
-    g_window_render_records[g_sound_novel_reading.picture_render_index].priority = 0xC;
-    g_window_render_records[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_render_records[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_POP_IN;
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].priority = 0xC;
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_POP_IN;
 
     picture_id = g_sound_novel_reading.picture_id;
     if (picture_id != -1) {
@@ -263,9 +263,10 @@ void window_draw_centered_text(s32 window_index, s32 text_id) {
     s32 i;
 
     text_measure_pixels(&text_width, &text_height, text_find_entry(text_id));
-    point.x = (((g_window_render_records[window_index].bounds.w - text_width) / 2) & 0xfffe) + 8;
+    point.x = (((g_window_gs_image_records[window_index].bounds.w - text_width) / 2) & 0xfffe) + 8;
     point.y = 10;
-    for (i = 0; i < g_window_render_records[window_index].bounds.w * g_window_render_records[window_index].bounds.h / 8;
+    for (i = 0;
+        i < g_window_gs_image_records[window_index].bounds.w * g_window_gs_image_records[window_index].bounds.h / 8;
         i++) {
         g_window_image_buffer[i] = 0;
     }
@@ -545,8 +546,8 @@ void sound_novel_opcode_0a_load_picture(void) {
     g_sound_novel_state.y = y;
     picture_load_set(picture);
     file_wait_for_pending();
-    g_window_render_records[g_sound_novel_state.render_index].base.x = x - 0x80;
-    g_window_render_records[g_sound_novel_state.render_index].base.y = y - 0x78;
+    g_window_gs_image_records[g_sound_novel_state.render_index].base.x = x - 0x80;
+    g_window_gs_image_records[g_sound_novel_state.render_index].base.y = y - 0x78;
     GsGetTimInfo(g_picture_buffer + 1, &image);
     bounds.x = image.px;
     bounds.y = image.py;
@@ -557,13 +558,13 @@ void sound_novel_opcode_0a_load_picture(void) {
     LoadTPage(image.pixel, 0, 0, bounds.x, bounds.y, bounds.w * 4, bounds.h);
     LoadClut(image.clut, clut_position.x, clut_position.y);
     window_init_vram_render_record(g_sound_novel_state.render_index, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
-    g_window_render_records[g_sound_novel_state.render_index].anim_counter = 0;
+    g_window_gs_image_records[g_sound_novel_state.render_index].anim_counter = 0;
     g_sound_novel_state.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Hides the sound-novel picture's render record and forgets the picture. */
 void sound_novel_opcode_0b_hide_picture(void) {
-    g_window_render_records[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_sound_novel_reading.picture_id = -1;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH | SOUND_NOVEL_STATE_YIELD;
 }

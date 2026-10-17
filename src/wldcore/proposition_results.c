@@ -689,16 +689,16 @@ void proposition_open_active_list(void) {
     previous = g_menu_stack_depth - 1;
     g_menu_stack_ot_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    if ((g_window_render_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
+    if ((g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
             & DISPLAY_OBJECT_HIDDEN)
         != 0) {
         g_window_records[g_menu_stack_records[previous].window_pair_render.first_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
         g_window_records[g_menu_stack_records[previous].window_pair_render.second_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_render_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
+        g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_render_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
+        g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
             |= DISPLAY_OBJECT_POP_IN;
     }
 
@@ -791,7 +791,7 @@ static void proposition_push_recall_level(s32 proposition) {
         |= DISPLAY_OBJECT_HIDDEN;
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.second_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_render_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.render_index].flags
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.render_index].flags
         |= DISPLAY_OBJECT_HIDDEN;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_PROMPT, 0);
 
@@ -816,19 +816,19 @@ static void proposition_push_recall_level(s32 proposition) {
     bounds.h = 0x30;
     bounds.y = 0;
     window_init_text_record(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
-    base = &g_window_render_records[index].base;
+    base = &g_window_gs_image_records[index].base;
     depth = g_menu_stack_depth;
-    g_window_render_records[index].priority = 8;
+    g_window_gs_image_records[index].priority = 8;
     base->x = 0x48;
     base->y = 0x20;
     g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.cursor_window].position.x
-        = g_window_render_records[index].base.x + 6;
+        = g_window_gs_image_records[index].base.x + 6;
     g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.cursor_window].position.y
-        = g_window_render_records[index].base.y + 0xE;
+        = g_window_gs_image_records[index].base.y + 0xE;
     g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.x
-        = g_window_render_records[index].base.x + 3;
+        = g_window_gs_image_records[index].base.x + 3;
     g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.y
-        = g_window_render_records[index].base.y - 2;
+        = g_window_gs_image_records[index].base.y - 2;
     proposition_build_detail_panel(&g_menu_stack_records[depth], proposition, 0);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.choice = 0;
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.confirmed = 0;
@@ -898,9 +898,9 @@ void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition,
             g_proposition_detail_image_buffer);
     }
     window_load_render_record_image(index, g_proposition_detail_image_buffer);
-    g_window_render_records[index].priority = 8;
-    g_window_render_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    base = &g_window_render_records[index].base;
+    g_window_gs_image_records[index].priority = 8;
+    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_window_gs_image_records[index].base;
     base->x = -0x7A;
     base->y = -0x28;
 }
@@ -913,7 +913,7 @@ void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition,
 void proposition_handle_recall_input(menu_stack_record_t* level) {
     s32 choice;
 
-    if (g_window_render_records[level->proposition_cancel_confirm.choice_render].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->proposition_cancel_confirm.choice_render].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -942,7 +942,8 @@ void proposition_handle_recall_input(menu_stack_record_t* level) {
         choice = level->proposition_cancel_confirm.choice ^ 1;
         level->proposition_cancel_confirm.choice = choice;
         g_window_records[level->proposition_cancel_confirm.cursor_window].position.y
-            = g_window_render_records[level->proposition_cancel_confirm.choice_render].base.y - -(choice * 0x10 + 0xE);
+            = g_window_gs_image_records[level->proposition_cancel_confirm.choice_render].base.y
+            - -(choice * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
@@ -964,7 +965,7 @@ void proposition_handle_recall_input(menu_stack_record_t* level) {
     g_proposition_active[level->proposition_cancel_confirm.proposition].flags |= PROPOSITION_PROGRESS_RECALLED;
     g_window_records[level->proposition_cancel_confirm.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
     g_window_records[level->proposition_cancel_confirm.frame_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_render_records[level->proposition_cancel_confirm.choice_render].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[level->proposition_cancel_confirm.choice_render].flags |= DISPLAY_OBJECT_HIDDEN;
 }
 
 /*
@@ -996,7 +997,7 @@ static void sound_novel_push_level(s32 argument) {
 
     /* Held from entry: with every saved register taken, reload rematerializes
      * the constant beside its one use, which is the target's la placement. */
-    render_pos = &g_window_render_records[0].base;
+    render_pos = &g_window_gs_image_records[0].base;
     g_hud_saved_value_position = g_hud_value_position;
     g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
     world_map_clear_vram_and_scratch(1);
@@ -1039,11 +1040,11 @@ static void sound_novel_push_level(s32 argument) {
     origin.x = 0x20;
     origin.y = 0x1E8;
     window_init_vram_render_record(index, bounds, origin, 0);
-    pos3 = (point32_t*)((s32)render_pos + index * sizeof(window_render_record_t));
+    pos3 = (point32_t*)((s32)render_pos + index * sizeof(window_gs_image_record_t));
     pos3->x = 0x34;
     pos3->y = 0x55;
-    g_window_render_records[index].priority = 8;
-    g_window_render_records[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
+    g_window_gs_image_records[index].priority = 8;
+    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.overlay_window = index;
@@ -1082,7 +1083,7 @@ void sound_novel_resume_level(menu_stack_record_t* level) {
         picture_load_background_set(set);
         file_wait_for_pending();
     }
-    g_window_render_records[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_BLANK;
+    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_BLANK;
     if (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE) {
         g_window_records[level->sound_novel.left_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
         g_window_records[level->sound_novel.right_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
@@ -1178,13 +1179,13 @@ void sound_novel_step_level(sound_novel_level_t* level) {
         }
 
         if (level->fade_timer != 0) {
-            g_window_render_records[level->render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[level->render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
             g_window_records[level->overlay_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
             width = 0x100 - g_sound_novel_reading.brightness;
-            g_window_render_records[level->render_index].bounds.w = width / 4;
+            g_window_gs_image_records[level->render_index].bounds.w = width / 4;
             level->fade_timer--;
         } else {
-            g_window_render_records[level->render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[level->render_index].flags |= DISPLAY_OBJECT_HIDDEN;
             g_window_records[level->overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
         }
 
@@ -1205,7 +1206,7 @@ void sound_novel_step_level(sound_novel_level_t* level) {
                 g_window_records[level->left_window].frame_index = g_window_records[level->left_window].anim_counter
                     = 0;
                 level->fade_timer = 0;
-                g_window_render_records[level->render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_window_gs_image_records[level->render_index].flags |= DISPLAY_OBJECT_HIDDEN;
                 g_window_records[level->overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
                 sound_novel_push_quit_level();
                 return;
@@ -1218,7 +1219,7 @@ void sound_novel_step_level(sound_novel_level_t* level) {
                 g_window_records[window].anim_counter = 0;
                 g_window_records[window].frame_index = 0;
                 level->fade_timer = 0;
-                g_window_render_records[level->render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_window_gs_image_records[level->render_index].flags |= DISPLAY_OBJECT_HIDDEN;
                 g_window_records[level->overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
                 g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
                 level->phase = SOUND_NOVEL_PHASE_OPEN_HISTORY;
@@ -1279,20 +1280,20 @@ static void sound_novel_push_quit_level(void) {
     bounds.h = 0x30;
     bounds.y = 0;
     window_init_text_record(index, bounds, 0, TEXT_ID_QUIT_CONTINUE, g_window_image_buffer);
-    base = &g_window_render_records[index].base;
-    g_window_render_records[index].priority = 8;
+    base = &g_window_gs_image_records[index].base;
+    g_window_gs_image_records[index].priority = 8;
     depth = g_menu_stack_depth;
     base->x = -(bounds.w / 2);
     base->y = -0x18;
     g_window_records[g_menu_stack_records[depth].sound_novel_quit.cursor_window].position.x
-        = g_window_render_records[index].base.x + 6;
+        = g_window_gs_image_records[index].base.x + 6;
     g_window_records[g_menu_stack_records[depth].sound_novel_quit.cursor_window].position.y
-        = g_window_render_records[index].base.y + 0xE;
+        = g_window_gs_image_records[index].base.y + 0xE;
     g_window_records[g_menu_stack_records[depth].sound_novel_quit.second_window].position.x
-        = g_window_render_records[index].base.x + 4;
+        = g_window_gs_image_records[index].base.x + 4;
     g_menu_blocked_buttons = -1;
     g_window_records[g_menu_stack_records[depth].sound_novel_quit.second_window].position.y
-        = g_window_render_records[index].base.y - 2;
+        = g_window_gs_image_records[index].base.y - 2;
     g_menu_stack_depth = depth + 1;
     fade = &g_world_map_fade;
     fade->boxes[0].r = 0;
@@ -1315,7 +1316,7 @@ void sound_novel_resume_quit_level(menu_stack_record_t* level) {
     /* The original frame reserves eight unused bytes. */
     s32 scratch[2];
 
-    g_window_render_records[level->sound_novel_quit.render_index].palette = 0;
+    g_window_gs_image_records[level->sound_novel_quit.render_index].palette = 0;
     g_window_records[second].palette = 0;
     g_window_records[first].palette = 0;
     g_window_records[level->sound_novel_quit.cursor_window].sequence = WINDOW_ANIM_CURSOR_IDLE;
@@ -1331,7 +1332,7 @@ void sound_novel_suspend_quit_level(sound_novel_quit_level_t* level) {
 
     g_window_records[level->cursor_window].palette = 10;
     g_window_records[level->second_window].palette = 6;
-    g_window_render_records[level->render_index].palette = 2;
+    g_window_gs_image_records[level->render_index].palette = 2;
     g_window_records[level->cursor_window].sequence = WINDOW_ANIM_CURSOR_STILL;
     index = level->cursor_window;
     g_window_records[index].anim_counter = 0;
@@ -1398,7 +1399,7 @@ void sound_novel_step_quit_level(sound_novel_quit_level_t* level) {
         return;
     }
 
-    if (g_window_render_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -1465,7 +1466,7 @@ void sound_novel_step_quit_level(sound_novel_quit_level_t* level) {
         value = level->choice ^ 1;
         level->choice = value;
         record = &g_window_records[level->cursor_window];
-        base = g_window_render_records[level->render_index].base.y;
+        base = g_window_gs_image_records[level->render_index].base.y;
         offset = value * 0x10 + 0xE;
         record->position.y = base + offset;
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
@@ -1578,23 +1579,23 @@ static void sound_novel_push_history_level(void) {
     bounds.x = 0;
     bounds.y = 0;
     window_build_render_record_image(index, bounds, 1, g_window_image_buffer);
-    position = &g_window_render_records[index].base;
+    position = &g_window_gs_image_records[index].base;
     newest = &g_sound_novel_reading.text_history_3;
-    g_window_render_records[index].priority = g_menu_stack_ot_offset;
+    g_window_gs_image_records[index].priority = g_menu_stack_ot_offset;
     position->x = -0x80;
     position->y = -0x64;
-    g_window_render_records[index].clut.x = 0x3C0;
-    g_window_render_records[index].clut.y = 0x1F2;
+    g_window_gs_image_records[index].clut.x = 0x3C0;
+    g_window_gs_image_records[index].clut.y = 0x1F2;
     window_draw_centered_text(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
 
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window].palette = 0xA;
     /* Direct record.color access changes the column base and instruction scheduling. */
-    colors = &g_window_render_records->color;
-    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_render_records[0])))->r
+    colors = &g_window_gs_image_records->color;
+    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_gs_image_records[0])))->r
         = 0x80;
-    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_render_records[0])))->g
+    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_gs_image_records[0])))->g
         = 0x80;
-    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_render_records[0])))->b
+    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_gs_image_records[0])))->b
         = 0x80;
     g_world_map_fade.boxes[0].r = 0;
     g_world_map_fade.boxes[0].g = 0;
@@ -1658,9 +1659,9 @@ void sound_novel_step_history_level(sound_novel_history_level_t* level) {
         case SOUND_NOVEL_HISTORY_PHASE_DIM:
             shade = 0x80 - level->step * 8;
             index1 = &g_sound_novel_reading.picture_render_index;
-            g_window_render_records[*index1].color.r = shade;
-            g_window_render_records[*index1].color.g = shade;
-            g_window_render_records[*index1].color.b = shade;
+            g_window_gs_image_records[*index1].color.r = shade;
+            g_window_gs_image_records[*index1].color.g = shade;
+            g_window_gs_image_records[*index1].color.b = shade;
             g_hud_color.r = shade;
             g_hud_color.g = shade;
             g_hud_color.b = shade;
@@ -1678,9 +1679,9 @@ void sound_novel_step_history_level(sound_novel_history_level_t* level) {
         case SOUND_NOVEL_HISTORY_PHASE_RESTORE:
             index2 = &g_sound_novel_reading.picture_render_index;
             shade = level->step * 0x10 + 0x40;
-            g_window_render_records[*index2].color.r = shade;
-            g_window_render_records[*index2].color.g = shade;
-            g_window_render_records[*index2].color.b = shade;
+            g_window_gs_image_records[*index2].color.r = shade;
+            g_window_gs_image_records[*index2].color.g = shade;
+            g_window_gs_image_records[*index2].color.b = shade;
             g_hud_color.r = shade;
             g_hud_color.g = shade;
             g_hud_color.b = shade;
@@ -1702,8 +1703,8 @@ void sound_novel_step_history_level(sound_novel_history_level_t* level) {
                 point.y = 8;
                 for (;;) {
                     render_index = level->render_index;
-                    if (i >= g_window_render_records[render_index].bounds.w
-                            * g_window_render_records[render_index].bounds.h / 8) {
+                    if (i >= g_window_gs_image_records[render_index].bounds.w
+                            * g_window_gs_image_records[render_index].bounds.h / 8) {
                         break;
                     }
                     i++;
@@ -1714,7 +1715,7 @@ void sound_novel_step_history_level(sound_novel_history_level_t* level) {
                 y = point.y;
                 box.rect.x = x;
                 box.rect.y = y;
-                box.stride = g_window_render_records[level->render_index].bounds.w;
+                box.stride = g_window_gs_image_records[level->render_index].bounds.w;
                 menu_display_text_entry_past_choice_marks(text_id, g_window_image_buffer, &box);
                 window_load_render_record_image(level->render_index, g_window_image_buffer);
                 script_set_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
@@ -1887,7 +1888,7 @@ void brave_story_handle_unexplored_land_list_input(menu_stack_panel_level_t* lev
  *
  * The render record's position is written through a pointer to its base: the
  * target reaches base.x/base.y at 0 and 4 off one register holding
- * &g_window_render_records[index].base, while the flags update above
+ * &g_window_gs_image_records[index].base, while the flags update above
  * it still uses the $at absolute form. Spelling both coordinates as ordinary
  * indexed field stores recomputes the $at base twice and costs four
  * instructions.
@@ -1905,8 +1906,8 @@ static void brave_story_push_unexplored_land_level(s32 value) {
     picture_load_set(g_unexplored_land_picture_sets[value]);
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].detail.render_index = index;
-    g_window_render_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
-    base = &g_window_render_records[index].base;
+    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    base = &g_window_gs_image_records[index].base;
     base->x = -0x74;
     base->y = -0x22;
     calendar_read_date(g_brave_story_land_discovery_date_bits, value, &date);
@@ -1936,7 +1937,7 @@ static void brave_story_push_unexplored_land_level(s32 value) {
         |= DISPLAY_OBJECT_HIDDEN;
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.side_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_render_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.upper_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
@@ -1974,7 +1975,7 @@ void brave_story_step_unexplored_land_level(brave_story_detail_level_t* level) {
 
     switch (level->phase) {
     case BRAVE_STORY_DETAIL_PHASE_LOAD:
-        if (!(g_window_render_records[level->saved_record_index].flags & DISPLAY_OBJECT_POP_IN)) {
+        if (!(g_window_gs_image_records[level->saved_record_index].flags & DISPLAY_OBJECT_POP_IN)) {
             level->phase = BRAVE_STORY_DETAIL_PHASE_BUILD;
         }
         break;
@@ -1993,25 +1994,25 @@ void brave_story_step_unexplored_land_level(brave_story_detail_level_t* level) {
         clut_position.x = image.cx;
         clut_position.y = image.cy;
         window_init_vram_render_record(render, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
-        g_window_render_records[render].priority = 0xA;
-        base = &g_window_render_records[render].base;
+        g_window_gs_image_records[render].priority = 0xA;
+        base = &g_window_gs_image_records[render].base;
         base->x = -0x74;
         base->y = -0x22;
-        g_window_render_records[render].flags
-            = (g_window_render_records[render].flags & ~DISPLAY_OBJECT_HIDDEN) | DISPLAY_OBJECT_POP_IN;
+        g_window_gs_image_records[render].flags
+            = (g_window_gs_image_records[render].flags & ~DISPLAY_OBJECT_HIDDEN) | DISPLAY_OBJECT_POP_IN;
         g_text_window.extra_render_index = render;
         g_text_window.extra_base = *base;
-        g_text_window.extra_bounds = g_window_render_records[render].bounds;
+        g_text_window.extra_bounds = g_window_gs_image_records[render].bounds;
         level->phase = level->phase + 1;
         break;
     case BRAVE_STORY_DETAIL_PHASE_POP_IN:
-        if (!(g_window_render_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN)) {
+        if (!(g_window_gs_image_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN)) {
             level->phase = BRAVE_STORY_DETAIL_PHASE_SHOWN;
         }
         break;
     default:
         index = &g_text_window.render_record_index;
-        if (g_window_render_records[*index].flags & DISPLAY_OBJECT_POP_IN) {
+        if (g_window_gs_image_records[*index].flags & DISPLAY_OBJECT_POP_IN) {
             break;
         }
         if (text_window_step(&g_text_window) != 0) {
@@ -2020,9 +2021,9 @@ void brave_story_step_unexplored_land_level(brave_story_detail_level_t* level) {
         depth = g_menu_stack_depth;
         g_window_records[g_menu_stack_records[depth - 2].list_window.main_window].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_window_records[g_menu_stack_records[depth - 2].list_window.side_window].flags ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_render_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
+        g_window_gs_image_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
             ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_render_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
+        g_window_gs_image_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
             |= DISPLAY_OBJECT_POP_IN;
         g_window_records[g_menu_stack_records[depth - 2].list_window.upper_window].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_window_render_record_count--;
@@ -2163,7 +2164,7 @@ void brave_story_push_treasure_level(s32 value) {
     picture_load_set(g_treasure_picture_sets[value]);
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].detail.render_index = index;
-    g_window_render_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
     calendar_read_date(g_brave_story_treasure_acquisition_date_bits, value, &date);
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
@@ -2191,7 +2192,7 @@ void brave_story_push_treasure_level(s32 value) {
         |= DISPLAY_OBJECT_HIDDEN;
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.side_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_render_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.upper_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
@@ -2240,7 +2241,7 @@ void brave_story_step_treasure_level(brave_story_detail_level_t* level) {
 
     switch (level->phase) {
     case BRAVE_STORY_DETAIL_PHASE_LOAD:
-        if (!(g_window_render_records[level->saved_record_index].flags & DISPLAY_OBJECT_POP_IN)) {
+        if (!(g_window_gs_image_records[level->saved_record_index].flags & DISPLAY_OBJECT_POP_IN)) {
             level->phase = BRAVE_STORY_DETAIL_PHASE_BUILD;
         }
         break;
@@ -2258,15 +2259,15 @@ void brave_story_step_treasure_level(brave_story_detail_level_t* level) {
         clut_position.x = image.cx;
         clut_position.y = image.cy;
         window_init_vram_render_record(render, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
-        g_window_render_records[render].priority = 0xA;
-        g_window_render_records[render].flags &= ~(DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_POP_IN);
-        base = &g_window_render_records[render].base;
+        g_window_gs_image_records[render].priority = 0xA;
+        g_window_gs_image_records[render].flags &= ~(DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_POP_IN);
+        base = &g_window_gs_image_records[render].base;
         base->x = -0x3E - image.pw;
         base->y = 0x10 - (image.ph >> 1);
         picture_step_dissolve_upload(&image, 0);
         g_text_window.extra_render_index = render;
         g_text_window.extra_base = *base;
-        g_text_window.extra_bounds = g_window_render_records[render].bounds;
+        g_text_window.extra_bounds = g_window_gs_image_records[render].bounds;
         level->phase = level->phase + 1;
         break;
     case BRAVE_STORY_DETAIL_PHASE_POP_IN:
@@ -2298,9 +2299,9 @@ void brave_story_step_treasure_level(brave_story_detail_level_t* level) {
             depth = g_menu_stack_depth;
             g_window_records[g_menu_stack_records[depth - 2].list_window.main_window].flags ^= DISPLAY_OBJECT_HIDDEN;
             g_window_records[g_menu_stack_records[depth - 2].list_window.side_window].flags ^= DISPLAY_OBJECT_HIDDEN;
-            g_window_render_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
+            g_window_gs_image_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
                 ^= DISPLAY_OBJECT_HIDDEN;
-            g_window_render_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
+            g_window_gs_image_records[g_menu_stack_records[depth - 2].list_window.frame_render].flags
                 |= DISPLAY_OBJECT_POP_IN;
             g_window_records[g_menu_stack_records[depth - 2].list_window.upper_window].flags ^= DISPLAY_OBJECT_HIDDEN;
             g_window_render_record_count--;
@@ -2450,7 +2451,7 @@ static void sound_novel_push_restart_level(s32 mode) {
     clut.x = image.cx;
     clut.y = image.cy;
     window_init_vram_render_record(index, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
-    g_window_render_records[index].priority = 0xA;
+    g_window_gs_image_records[index].priority = 0xA;
     picture_step_dissolve_upload(&image, 0);
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
@@ -2461,18 +2462,18 @@ static void sound_novel_push_restart_level(s32 mode) {
     bounds.h = 0x80;
     g_text_substitution_values[0] = mode + TEXT_ID_TREASURE_NAME_BASE;
     window_init_text_record(index, bounds, 1, TEXT_ID_SUBSTITUTED_TEXT, g_window_image_buffer);
-    g_window_render_records[index].priority = 0xA;
-    base1 = &g_window_render_records[index].base;
+    g_window_gs_image_records[index].priority = 0xA;
+    base1 = &g_window_gs_image_records[index].base;
     base1->x = -0x70;
     base1->y = -0x38;
     DrawSync(0);
     depth = g_menu_stack_depth;
-    base2 = &g_window_render_records[g_menu_stack_records[depth].sound_novel_resume.picture_render].base;
+    base2 = &g_window_gs_image_records[g_menu_stack_records[depth].sound_novel_resume.picture_render].base;
     offset_x = image.pw - 0x3E;
-    base2->x = g_window_render_records[index].base.x - offset_x;
-    base3 = &g_window_render_records[g_menu_stack_records[depth].sound_novel_resume.picture_render].base;
+    base2->x = g_window_gs_image_records[index].base.x - offset_x;
+    base3 = &g_window_gs_image_records[g_menu_stack_records[depth].sound_novel_resume.picture_render].base;
     offset_y = (image.ph >> 1) - 0x4C;
-    base3->y = g_window_render_records[index].base.y - offset_y;
+    base3->y = g_window_gs_image_records[index].base.y - offset_y;
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.option_render = index;
@@ -2481,14 +2482,14 @@ static void sound_novel_push_restart_level(s32 mode) {
     bounds.w = 0x70;
     bounds.h = 0x70;
     window_init_text_record(index, bounds, 1, TEXT_ID_SOUND_NOVEL_RESUME_CHOICES, g_window_image_buffer + 0x400);
-    g_window_render_records[index].priority = 0xA;
-    base4 = &g_window_render_records[index].base;
+    g_window_gs_image_records[index].priority = 0xA;
+    base4 = &g_window_gs_image_records[index].base;
     base4->x = 8;
     base4->y = -0x38;
     g_window_records[g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.cursor_window].position.x
-        = g_window_render_records[index].base.x + 0x18;
+        = g_window_gs_image_records[index].base.x + 0x18;
     g_window_records[g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.cursor_window].position.y
-        = g_window_render_records[index].base.y + 0x3C;
+        = g_window_gs_image_records[index].base.y + 0x3C;
     g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.dissolve_step = 1;
     g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.cursor_row = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_SOUND_NOVEL_RESTART;
@@ -2510,7 +2511,7 @@ void sound_novel_step_restart_level(sound_novel_restart_level_t* level) {
     GsIMAGE image;
     s32 buttons;
 
-    if (g_window_render_records[level->message_render].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->message_render].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -2565,7 +2566,7 @@ void sound_novel_step_restart_level(sound_novel_restart_level_t* level) {
 
     level->cursor_row ^= 1;
     g_window_records[level->cursor_window].position.y
-        = g_window_render_records[level->option_render].base.y + 0x3c + level->cursor_row * 0x10;
+        = g_window_gs_image_records[level->option_render].base.y + 0x3c + level->cursor_row * 0x10;
     sound_play_effect(SOUND_SFX_CURSOR_MOVE);
 }
 

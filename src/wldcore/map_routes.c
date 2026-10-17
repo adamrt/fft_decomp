@@ -1210,21 +1210,22 @@ void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mod
     CVECTOR* color;
     point32_t transformed;
 
-    g_window_render_records[index].flags &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
-    g_window_render_records[index].base.x = bounds.x - 0x80;
-    g_window_render_records[index].base.y = bounds.y - 0x78;
-    g_window_render_records[index].coordinate_mode = coordinate_mode;
+    g_window_gs_image_records[index].flags
+        &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
+    g_window_gs_image_records[index].base.x = bounds.x - 0x80;
+    g_window_gs_image_records[index].base.y = bounds.y - 0x78;
+    g_window_gs_image_records[index].coordinate_mode = coordinate_mode;
     /* Struct view of clut_x/clut_y: as plain s32 stores they could alias the
      * stacked image argument, whose load the target schedules after them. */
-    clut = &g_window_render_records[index].clut;
+    clut = &g_window_gs_image_records[index].clut;
     clut->y = 0x1E1;
     clut->x = 0;
-    g_window_render_records[index].bounds = bounds;
+    g_window_gs_image_records[index].bounds = bounds;
     window_get_image_vram_position(coordinate_mode, bounds, &transformed);
-    g_window_render_records[index].tpage = GetTPage(0, 0, transformed.x, transformed.y);
-    color = &g_window_render_records[index].color;
+    g_window_gs_image_records[index].tpage = GetTPage(0, 0, transformed.x, transformed.y);
+    color = &g_window_gs_image_records[index].color;
     color->b = color->g = color->r = 0x80;
-    g_window_render_records[index].anim_counter = 0;
+    g_window_gs_image_records[index].anim_counter = 0;
     screen_build_window_frame_image(bounds.w, bounds.h, (u16*)image);
 }
 
@@ -1256,10 +1257,10 @@ void window_load_render_record_image(s32 index, u32* image) {
     RECT rect;
 
     window_get_image_vram_position(
-        g_window_render_records[index].coordinate_mode, g_window_render_records[index].bounds, &transformed);
+        g_window_gs_image_records[index].coordinate_mode, g_window_gs_image_records[index].bounds, &transformed);
     rect.x = transformed.x;
     rect.y = transformed.y;
-    rect.w = g_window_render_records[index].bounds.w / 4;
-    rect.h = g_window_render_records[index].bounds.h;
+    rect.w = g_window_gs_image_records[index].bounds.w / 4;
+    rect.h = g_window_gs_image_records[index].bounds.h;
     LoadImage(&rect, image);
 }

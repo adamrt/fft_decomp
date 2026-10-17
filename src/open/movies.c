@@ -72,7 +72,7 @@ s32 open_title_entrypoint(s32 skip_movie) {
             graphics_buffer_index = g_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_0);
-            window_dispatch_record_list(current_otag, g_window_render_object_queue, g_window_render_object_count);
+            window_dispatch_gpu_record_list(current_otag, g_window_render_object_queue, g_window_render_object_count);
 
             graphics_buffer_index = g_gfx_active_buffer_index;
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_1);
