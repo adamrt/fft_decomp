@@ -24,6 +24,7 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_identity.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -32,6 +33,20 @@
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_list_script[493];
+
+/* Special identities whose Brave Story profile is marked when dismissed. */
+typedef struct formation_dismiss_entry {
+    s16 character_identity;
+    s16 variable_id; /* EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST range */
+} formation_dismiss_entry_t;
+
+static formation_dismiss_entry_t g_formation_dismiss_entries[] = { { CHARACTER_IDENTITY_AGRIAS_JOIN, 0x3ce },
+    { CHARACTER_IDENTITY_AGRIAS_GUEST, 0x3ce }, { CHARACTER_IDENTITY_ORLANDU, 0x3cf },
+    { CHARACTER_IDENTITY_BEOWULF, 0x3d6 }, { CHARACTER_IDENTITY_REIS_HUMAN, 0x3d8 },
+    { CHARACTER_IDENTITY_REIS_DRAGON, 0x3d8 }, { CHARACTER_IDENTITY_RAFA_JOIN, 0x3dc },
+    { CHARACTER_IDENTITY_MALAK, 0x3dd }, { CHARACTER_IDENTITY_MUSTADIO_JOIN, 0x3e2 },
+    { CHARACTER_IDENTITY_MUSTADIO_GUEST, 0x3e2 }, { CHARACTER_IDENTITY_BALMAFULA, 0x3d9 },
+    { CHARACTER_IDENTITY_MELIADOUL_JOIN, 0x3ed }, { CHARACTER_IDENTITY_CLOUD, 0x3ee }, { -1, 0 } };
 
 static s32 formation_ability_view_list(void);
 
@@ -143,7 +158,7 @@ s32 formation_ability_learn_list(void) {
                 g_formation_ability_learn_confirm_prompt_state
                     = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_formation_ability_learn_confirm_menu);
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
-                g_formation_ability_learn_confirm_submenu.selected_index = 0;
+                g_formation_ability_learn_confirm_menu[1].selected_index = 0;
                 g_sound_suppressed = 1;
             }
         } else if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
@@ -358,7 +373,7 @@ void formation_order_menu(void) {
         g_formation_unit_browse_enabled = 0;
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-        g_formation_order_cursor = 0;
+        g_formation_order_menu.selected_index = 0;
         g_formation_order_open = 1;
     }
 
@@ -368,7 +383,7 @@ void formation_order_menu(void) {
         g_formation_unit_browse_enabled = g_formation_order_saved_browse_enabled;
     }
 
-    g_help_message_text_id = g_formation_order_entries[g_formation_order_cursor] + 0x103f;
+    g_help_message_text_id = g_formation_order_entries[g_formation_order_menu.selected_index] + 0x103f;
     if (g_screen_selection_results[9] != -1) {
         /* Move the chosen entry to the front and redraw the options. */
         index = g_screen_selection_results[9];
@@ -409,10 +424,10 @@ void formation_unit_message_thread(void) {
  * Otherwise g_formation_dismiss_step takes
  * formation_can_dismiss's answer: 0 shows the unit's refusal line
  * and returns to the grid, nonzero runs the yes/no confirmation. The line
- * comes from the dismiss-reply text (TEXT_ID_FORMATION_TEXT_BASE + n): a generic unit (sprite set
- * 0x4B and up) draws one of eight lines for its gender or monster kind with
- * rand(); a special unit uses its sprite set, + 0x17 for the farewell and
- * + 0x61 for the refusal, with sprite set 0x48 sharing 0x49's lines.
+ * comes from the dismiss-reply text (TEXT_ID_FORMATION_TEXT_BASE + n): identities from Girl
+ * upward draw one of eight lines by gender or monster kind. Earlier identities, including Boy,
+ * use their identity + 0x17 for the farewell and + 0x61 for refusal. Dragon Reis uses the
+ * following identity's text slots.
  *
  * Confirming plays the dismiss sound and starts a 16-frame timer (the unit
  * index is carried in its high byte); when it runs out every
@@ -445,9 +460,9 @@ void formation_dismiss_menu(void) {
         if ((g_formation_dismiss_anim_timer & 0xFF) < 0x11) {
             return;
         }
-        for (i = 0; g_formation_dismiss_entries[i].sprite_set != -1; i++) {
+        for (i = 0; g_formation_dismiss_entries[i].character_identity != -1; i++) {
             if (g_formation_unit_pointers[g_unit_selected_index]->sprite_set
-                == g_formation_dismiss_entries[i].sprite_set) {
+                == g_formation_dismiss_entries[i].character_identity) {
                 script_set_variable(g_formation_dismiss_entries[i].variable_id, 0xC);
             }
         }
@@ -471,11 +486,10 @@ void formation_dismiss_menu(void) {
             }
             g_text_substitution_values[0] = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
 
-            /* Generic units (sprite set 0x4B and up) draw a random line for their kind; special units
-             * have their own farewell and refusal. */
+            /* The random-reply range begins at Girl; Boy still takes the indexed reply path. */
             unit = g_formation_unit_pointers[g_unit_selected_index];
             sprite = unit->sprite_set;
-            if (sprite >= 0x4B) {
+            if (sprite >= CHARACTER_IDENTITY_GIRL) {
                 flags = unit->gender_flags;
                 if (flags & UNIT_FLAG_MALE) {
                     value = rand() % 8;
@@ -485,8 +499,8 @@ void formation_dismiss_menu(void) {
                     value = rand() % 8 + 0x10;
                 }
             } else {
-                if (sprite == 0x48) {
-                    sprite = 0x49;
+                if (sprite == CHARACTER_IDENTITY_REIS_DRAGON) {
+                    sprite = CHARACTER_IDENTITY_REIS_DRAGON + 1;
                 }
                 if (g_formation_dismiss_step != 0) {
                     value = sprite + 0x17;
@@ -505,8 +519,8 @@ void formation_dismiss_menu(void) {
                 } else {
                     value = 0x1A;
                 }
-                g_formation_dismiss_prompt_kind = value;
-                g_formation_dismiss_prompt_text_id = text_id;
+                g_formation_dismiss_prompt.header_id = value;
+                g_formation_dismiss_prompt.text_id = text_id;
             } else {
                 menu = g_formation_dismiss_confirm_menu;
                 if (g_formation_unit_banner_at_bottom != 0) {

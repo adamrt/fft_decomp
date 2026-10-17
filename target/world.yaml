@@ -12,7 +12,7 @@ defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 112, VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y
 units:
   - {name: ability_checks, source: src/world/ability_checks.c}
   - {name: ability_list_text, source: src/world/ability_list_text.c}
-  - {name: ability_lists, source: src/world/ability_lists.c}
+  - {name: ability_lists, source: src/world/ability_lists.c, data: [{addr: 0x8018d76c, size: 56, hash: d2c131ff23d4c1fe}]}
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801564d0, size: 336, hash: aee19a4a8c26100e}]}
   - {name: bit_streams, source: src/lib/bits.c}
@@ -1693,18 +1693,14 @@ data:
   - {addr: 0x8018d1a0, name: g_formation_ability_category}
   - {addr: 0x8018d1a4, name: g_formation_ability_learn_job_list_script}
   - {addr: 0x8018d280, name: g_formation_ability_learn_confirm_menu}
-  - {addr: 0x8018d2bc, name: g_formation_ability_learn_confirm_submenu}
   - {addr: 0x8018d2f8, name: g_formation_ability_list_script}
   - {addr: 0x8018d4e8, name: g_formation_ability_learn_job_name_list}
   - {addr: 0x8018d4ec, name: g_formation_ability_view_job_names}
   - {addr: 0x8018d500, name: g_formation_order_menu}
-  - {addr: 0x8018d538, name: g_formation_order_cursor}
   - {addr: 0x8018d540, name: g_formation_selected_unit_text_binding}
   - {addr: 0x8018d548, name: g_formation_dismiss_confirm_menu}
   - {addr: 0x8018d638, name: g_formation_dismiss_confirm_menu_scrolled}
   - {addr: 0x8018d72c, name: g_formation_dismiss_prompt}
-  - {addr: 0x8018d748, name: g_formation_dismiss_prompt_text_id}
-  - {addr: 0x8018d758, name: g_formation_dismiss_prompt_kind}
   - {addr: 0x8018d768, name: g_formation_dismiss_anim_timer}
   - {addr: 0x8018d76c, name: g_formation_dismiss_entries}
   - {addr: 0x8018d7ac, name: g_item_type_order_lists}

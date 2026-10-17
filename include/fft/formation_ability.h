@@ -59,9 +59,6 @@ extern s16 g_formation_ability_learn_selected_job;
 extern s16 g_formation_ability_learn_selected_job_index;
 extern menu_entry_t g_formation_ability_learn_confirm_menu[2];
 
-/* The prompt chained after g_formation_ability_learn_confirm_menu. */
-extern menu_entry_t g_formation_ability_learn_confirm_submenu;
-
 /* Nonzero while the learn-confirmation menu thread (thread 6) is running. */
 extern u8 g_formation_ability_learn_confirm_prompt_state;
 

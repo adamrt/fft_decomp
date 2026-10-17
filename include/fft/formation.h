@@ -353,18 +353,7 @@ void formation_toggle_ability_panel(s32 enable);
 void formation_open_equipment_panel(s32 enabled);
 
 /* dismissal */
-/* An entry of the sprite-set to script-variable table the dismissal tail walks (g_formation_dismiss_entries),
- * terminated by sprite_set == -1. The four-byte stride is proved by the target advancing both its record pointer and
- * its byte-offset index by 4 per iteration. */
-typedef struct formation_dismiss_entry {
-    s16 sprite_set;  /* 0x00 */
-    s16 variable_id; /* 0x02 */
-} formation_dismiss_entry_t;
-
-extern formation_dismiss_entry_t g_formation_dismiss_entries[];
 extern menu_entry_t g_formation_dismiss_prompt;
-extern s16 g_formation_dismiss_prompt_text_id;
-extern s16 g_formation_dismiss_prompt_kind;
 extern menu_entry_t g_formation_dismiss_confirm_menu[4];
 extern menu_entry_t g_formation_dismiss_confirm_menu_scrolled[4];
 extern menu_entry_t* g_formation_dismiss_menu_data;
@@ -395,7 +384,6 @@ enum { FORMATION_SORT_KEY_COUNT = 7 };
 extern menu_entry_t g_formation_order_menu;
 extern u8 g_formation_order_saved_browse_enabled;
 extern s8 g_formation_order_open;
-extern s16 g_formation_order_cursor;
 extern s16 g_formation_order_entries[];
 
 void formation_order_menu(void);
