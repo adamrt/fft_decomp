@@ -15,7 +15,7 @@
  * the cursor moves to the row that holds that id (low ten bits), keeping the
  * scroll base, or both reset to 0 when the id is gone.
  */
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, const s16* entries) {
     s32 entry_id;
     s32 found_end;
     s32 i;

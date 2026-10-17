@@ -16,7 +16,7 @@ void menu_clear_selection_record(s32 index) {
 
 /* Save a list's cursor row and scroll base in selection record `index`,
  * together with the id (low ten bits) of the entry under the cursor. */
-void menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_index, s16* entries) {
+void menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_index, const s16* entries) {
     g_menu_selection_records[index].selected_index = selected_index;
     g_menu_selection_records[index].scroll_base_index = scroll_base_index;
     g_menu_selection_records[index].entry_id = entries[selected_index] & 0x3FF;
@@ -27,7 +27,7 @@ void menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_in
 /* Keep the saved cursor when it still names the same entry; otherwise find
  * that entry or reset both positions. EQUIP checks for an earlier terminator.
  * BUNIT and JOBSTTS trust the saved cursor when its entry still matches. */
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, const s16* entries) {
     s32 entry_id;
     s32 i;
 #    ifdef FFT_EVENT_EQUIP

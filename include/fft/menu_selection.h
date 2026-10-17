@@ -34,8 +34,8 @@ typedef char menu_selection_record_size_must_be_6[sizeof(menu_selection_record_t
 /* VARIANT_MENU_SELECTION_RECORD_COUNT records: 14 in BUNIT and WORLD, 5 in EQUIP and JOBSTTS. */
 extern menu_selection_record_t g_menu_selection_records[];
 
-void menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_index, s16* entries);
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
+void menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_index, const s16* entries);
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, const s16* entries);
 void menu_clear_selection_record(s32 index);
 void menu_clear_selection_records(void);
 
