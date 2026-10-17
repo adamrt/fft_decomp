@@ -30,6 +30,10 @@
 #include "psx/types.h"
 
 extern point16_t g_deploy_texture_origin;
+extern palette_t g_deploy_portrait_marker_clut_buffer;
+extern RECT g_deploy_portrait_marker_clut_source_rect;
+extern RECT g_deploy_portrait_marker_clut_rect;
+extern RECT g_deploy_semitrans_tile_clut_rect;
 
 static unit_panel_thread_t g_deploy_status_display_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_numbers_thread_params = { 0 };
@@ -1277,7 +1281,7 @@ static void deploy_render_thread(void) {
 
     LoadImage(&g_deploy_tile_clut_rect, (u32*)g_deploy_tile_clut_data);
     StoreImage(&g_deploy_tile_clut_rect, (u32*)g_deploy_tile_clut_buffer);
-    StoreImage(&g_deploy_rect_09c, (u32*)g_deploy_semitrans_clut_buffer);
+    StoreImage(&g_deploy_portrait_marker_clut_source_rect, (u32*)g_deploy_portrait_marker_clut_buffer);
     /* Let the readbacks finish, then upload semi-transparent copies of both CLUTs:
      * every color but entry 0 gets the STP bit, and entry 0 becomes transparent black. */
     thread_wait_frames(1);
@@ -1286,13 +1290,13 @@ static void deploy_render_thread(void) {
     }
     g_deploy_tile_clut_buffer[0].red = g_deploy_tile_clut_buffer[0].green = g_deploy_tile_clut_buffer[0].blue
         = g_deploy_tile_clut_buffer[0].semi_transparent = 0;
-    LoadImage(&g_deploy_rect_0cc, (u32*)g_deploy_tile_clut_buffer);
+    LoadImage(&g_deploy_semitrans_tile_clut_rect, (u32*)g_deploy_tile_clut_buffer);
     for (i = 1; i < 16; i++) {
-        g_deploy_semitrans_clut_buffer[i].semi_transparent = 1;
+        g_deploy_portrait_marker_clut_buffer[i].semi_transparent = 1;
     }
-    g_deploy_semitrans_clut_buffer[0].red = g_deploy_semitrans_clut_buffer[0].green
-        = g_deploy_semitrans_clut_buffer[0].blue = g_deploy_semitrans_clut_buffer[0].semi_transparent = 0;
-    LoadImage(&g_deploy_rect_0ac, (u32*)g_deploy_semitrans_clut_buffer);
+    g_deploy_portrait_marker_clut_buffer[0].red = g_deploy_portrait_marker_clut_buffer[0].green
+        = g_deploy_portrait_marker_clut_buffer[0].blue = g_deploy_portrait_marker_clut_buffer[0].semi_transparent = 0;
+    LoadImage(&g_deploy_portrait_marker_clut_rect, (u32*)g_deploy_portrait_marker_clut_buffer);
 
     SetDrawMode(&g_deploy_render_buffers[0].draw_mode_9c4, 0, 0, GetTPage(0, 1, 0x100, 0), &g_menu_draw_area_template);
     SetDrawMode(&g_deploy_render_buffers[0].draw_mode_9d0, 0, 0, GetTPage(0, 1, 0x100, 0), &g_menu_draw_area_template);

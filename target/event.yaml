@@ -182,12 +182,12 @@ data:
   - {addr: 0x801cd080, name: g_deploy_tiles_only_mode}
   - {addr: 0x801cd08c, name: g_deploy_cursor_clut_rect}
   - {addr: 0x801cd094, name: g_deploy_arrow_clut_rect}
-  - {addr: 0x801cd09c, name: g_deploy_rect_09c}
+  - {addr: 0x801cd09c, name: g_deploy_portrait_marker_clut_source_rect}
   - {addr: 0x801cd0a4, name: g_deploy_cursor_texture_rect}
-  - {addr: 0x801cd0ac, name: g_deploy_rect_0ac}
+  - {addr: 0x801cd0ac, name: g_deploy_portrait_marker_clut_rect}
   - {addr: 0x801cd0b4, name: g_zodiac_texture_page_origin}
   - {addr: 0x801cd0c4, name: g_deploy_tile_clut_rect}
-  - {addr: 0x801cd0cc, name: g_deploy_rect_0cc}
+  - {addr: 0x801cd0cc, name: g_deploy_semitrans_tile_clut_rect}
   - {addr: 0x801cd0d4, name: g_deploy_texture_origin}
   - {addr: 0x801cd0e4, name: g_deploy_menu_entries}
   - {addr: 0x801cd210, name: g_deploy_status_display_thread_params}
@@ -266,7 +266,7 @@ data:
   - {addr: 0x801dcadc, name: g_deploy_cursor_palette_cycle}
   - {addr: 0x801dcb1c, name: g_deploy_cursor_clut}
   - {addr: 0x801dcb3c, name: g_deploy_tile_clut_buffer}
-  - {addr: 0x801dcb9c, name: g_deploy_semitrans_clut_buffer}
+  - {addr: 0x801dcb9c, name: g_deploy_portrait_marker_clut_buffer}
   - {addr: 0x801dcbc4, name: g_deploy_confirm_result}
   - {addr: 0x801dcbc8, name: g_deploy_valid_tiles}
   - {addr: 0x801dcbe4, name: g_deploy_roster_id_by_tile}
