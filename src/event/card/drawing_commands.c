@@ -1,4 +1,4 @@
-/* The textured quad and window frame command handlers. */
+/* Save-menu textured quads, window frames, texture state and number drawing. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
@@ -6,6 +6,8 @@
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
 #include "fft/save.h"
+#include "fft/text.h"
+#include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -37,8 +39,7 @@ u8* menu_draw_textured_quad(u8* command) {
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
  * the interior through menu_opcode_11_draw_tiled_rectangle.
  *
- * CARD copy of menu_opcode_00_draw_window_frame: source 2 takes the signed
- * rectangle from the shared window record, other sources use the command's
+ * Source 2 takes the signed rectangle from the shared window record, other sources use the command's
  * byte operands, and source 1 selects the alternate border texture
  * coordinates. Returns the command that follows.
  */
@@ -195,4 +196,138 @@ menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
         &rect, u_right - 5, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     command = (menu_window_command_t*)((u8*)command + command->length);
     return command;
+}
+
+/* Tile the command rectangle, or the shared rectangle when source is 2. */
+menu_window_command_t* menu_opcode_11_draw_tiled_rectangle(menu_window_command_t* command) {
+    RECT rect;
+    s32 base_x;
+    s32 base_y;
+    s32 full_rows;
+    s32 partial_width;
+    s32 partial_height;
+    s32 otag_index = g_menu_gfx_otag_index;
+    u16 clut = g_menu_palette_clut;
+    s32 full_columns;
+    s32 row;
+    s32 column;
+
+    if (command->rectangle_source == 2) {
+        base_x = g_gfx_tiled_rect.x;
+        base_y = g_gfx_tiled_rect.y;
+        full_columns = g_gfx_tiled_rect.w / 16;
+        partial_width = g_gfx_tiled_rect.w % 16;
+        full_rows = g_gfx_tiled_rect.h / 16;
+        partial_height = g_gfx_tiled_rect.h % 16;
+    } else {
+        u8 packed_width;
+        u8 packed_height;
+
+        base_x = command->x;
+        base_y = command->y;
+        packed_width = command->width;
+        packed_height = command->height;
+        full_columns = packed_width >> 4;
+        partial_width = packed_width & 15;
+        full_rows = packed_height >> 4;
+        partial_height = packed_height & 15;
+    }
+
+    for (row = 0; row < full_rows; row++) {
+        rect.x = base_x;
+        rect.y = base_y + row * 16;
+        rect.w = partial_width;
+        rect.h = 16;
+        menu_gfx_enqueue_textured_quad(
+            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, otag_index);
+        for (column = 0; column < full_columns; column++) {
+            rect.x = base_x + partial_width + column * 16;
+            rect.y = base_y + row * 16;
+            rect.w = 16;
+            rect.h = 16;
+            menu_gfx_enqueue_textured_quad(
+                &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, otag_index);
+        }
+    }
+
+    if (partial_height != 0) {
+        rect.x = base_x;
+        rect.y = base_y + row * 16;
+        rect.w = partial_width;
+        rect.h = partial_height;
+        menu_gfx_enqueue_textured_quad(
+            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, otag_index);
+        for (column = 0; column < full_columns; column++) {
+            rect.x = base_x + partial_width + column * 16;
+            rect.y = base_y + row * 16;
+            rect.w = 16;
+            rect.h = partial_height;
+            menu_gfx_enqueue_textured_quad(
+                &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, otag_index);
+        }
+    }
+
+    command = (menu_window_command_t*)((u8*)command + command->length);
+    return command;
+}
+
+/* Stream command: set the texture page from the command (color mode
+ * data[4], x data[3] * 16, y data[2] * 256, blend rate 0) and return the
+ * next command. */
+const u8* menu_set_texture_page(const u8* data) {
+    g_save_gfx_texture_page = GetTPage(data[4], 0, data[3] << 4, data[2] << 8);
+    return data + data[1];
+}
+
+/* Menu script command: select the ordering-table slot later primitives go to (byte 3) and return
+ * the next command (byte 1 holds this command's length). */
+const u8* menu_set_draw_priority(const u8* data) {
+    g_menu_gfx_otag_index = data[3];
+    return data + data[1];
+}
+
+/* Draw the command's literal value as `width` zero-padded digit glyphs from (x, y),
+ * `spacing` pixels apart, tinted with the menu text color. A style of 2 or more draws
+ * nothing. Returns the next command. */
+menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command) {
+    s8 text[16];
+    menu_digit_glyph_t glyph;
+    RECT unused_minus_rect; /* Preserves the original frame size. */
+    s32 y;
+    s16 pad;
+    s32 pos;
+    s32 value;
+    s32 digit;
+    s32 i;
+    u16 clut;
+    const rgb24_t* color;
+
+    value = command->value;
+    y = command->y;
+    clut = g_menu_alternate_number_clut;
+    glyph.u = 0x78;
+    glyph.v = 0x10;
+    glyph.w = 6;
+    glyph.h = 0xB;
+    pad = command->width - sprintf(text, g_menu_text_decimal_format, value);
+    pos = 0;
+    color = &g_menu_text_color;
+    for (i = 0; i < command->width; i++) {
+        glyph.rect.x = command->x + (i * command->spacing);
+        glyph.rect.y = y;
+        glyph.rect.w = glyph.w;
+        glyph.rect.h = glyph.h;
+        if (pad != 0) {
+            digit = 0;
+            pad -= 1;
+        } else {
+            digit = text[pos] - '0';
+            pos += 1;
+        }
+        if (command->style < 2) {
+            menu_gfx_enqueue_textured_quad(&glyph.rect, glyph.u + (glyph.w * digit), glyph.v, color,
+                g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, g_menu_gfx_otag_index);
+        }
+    }
+    return (menu_draw_number_command_t*)((u8*)command + command->length);
 }

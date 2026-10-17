@@ -1,11 +1,131 @@
-/* Menu window-frame commands and their opening transition. */
+/* Menu textured-primitive and window-frame drawing commands. */
 
+#include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
+#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+/* Only EQUIP links the flat-tile and line instructions. */
+#ifdef FFT_EVENT_EQUIP
+/* Stream command: draw a flat tile of size (cmd->tile.width, cmd->tile.height) at
+ * (cmd->tile.x, cmd->tile.y) in cmd->tile.color. While a list row is
+ * rendered, y is offset by the row's position and the scroll offset. Returns
+ * the next command. */
+menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* cmd) {
+    RECT rect;
+    s32 y;
+    s32 base;
+
+    if (g_menu_list_row_mode == 0) {
+        y = cmd->tile.y;
+    } else {
+        base = g_menu_list_row_height * g_menu_list_row_index + cmd->tile.y;
+        y = base + g_menu_list_scroll_offset;
+        if (g_menu_list_scroll_offset < 0) {
+            y = y - g_menu_list_row_height;
+        }
+    }
+    rect.x = cmd->tile.x;
+    rect.y = y;
+    rect.w = cmd->tile.width;
+    rect.h = cmd->tile.height;
+    gfx_enqueue_tile(&rect, &cmd->tile.color, g_menu_gfx_semitransparency, g_menu_gfx_otag_index);
+    return menu_next_instruction(cmd);
+}
+#endif
+
+/* JOBSTTS links this setter here; BUNIT and EQUIP keep it with texture commands. */
+#ifdef FFT_EVENT_JOBSTTS
+/* Menu script command: turn semi-transparency on or off for later primitives and continue with the
+ * next command. */
+menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* data) {
+    g_menu_gfx_semitransparency = data->draw_state.value;
+    return menu_next_instruction(data);
+}
+#endif
+
+/* Draw a textured quad at its literal position or current list row. */
+menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* cmd) {
+    RECT rect;
+    s32 y;
+    rgb24_t* color;
+
+    if (g_menu_list_row_mode == 0) {
+        y = cmd->sprite.sprite.y;
+    } else {
+        y = g_menu_list_row_height * g_menu_list_row_index + cmd->sprite.sprite.y - g_menu_list_scroll_offset;
+        if (g_menu_list_scroll_offset < 0) {
+            y -= g_menu_list_row_height;
+        }
+    }
+
+    rect.x = cmd->sprite.sprite.x;
+    rect.y = y;
+    rect.w = cmd->sprite.sprite.w;
+    rect.h = cmd->sprite.sprite.h;
+
+    color = &g_menu_text_color;
+    if (cmd->header.opcode == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
+        color = 0;
+    }
+
+    menu_gfx_enqueue_textured_quad(&rect, cmd->sprite.sprite.u, cmd->sprite.sprite.v, color,
+        g_menu_gfx_semitransparency, g_menu_gfx_texture_page, g_menu_gfx_clut_id, g_menu_gfx_otag_index);
+    return menu_next_instruction(cmd);
+}
+
+#ifdef FFT_EVENT_EQUIP
+/* Stream command: draw a LINE_F2 from (x0, y0) to
+   (x1, y1) with the RGB that follows the endpoints in the command. */
+menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* stream) {
+    point16_t endpoints[2];
+
+    endpoints[0].x = stream->line.x0;
+    endpoints[0].y = stream->line.y0;
+    endpoints[1].x = stream->line.x1;
+    endpoints[1].y = stream->line.y1;
+    gfx_enqueue_line_f2(endpoints, &stream->line.color, g_menu_gfx_semitransparency, g_menu_gfx_otag_index);
+    return menu_next_instruction(stream);
+}
+#endif
+
+/* JOBSTTS has no callback-quad instruction and keeps its window commands in a separate unit. */
+#if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_EQUIP)
+/* Draw the selected callback's icon for the literal or current list row,
+ * using its texture, dimensions and palette. */
+menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* cmd) {
+    menu_icon_source_t* entry;
+    s32 row;
+    menu_icon_source_t* (*callback)(s32);
+
+    callback = g_menu_row_callbacks[cmd->callback_sprite.callback_index].icon;
+    if (g_menu_list_row_mode == 0) {
+        row = cmd->callback_sprite.row;
+    } else {
+        row = g_menu_scroll_base_index + g_menu_list_row_index;
+        if (g_menu_list_scroll_offset < 0) {
+            row -= 1;
+        }
+    }
+
+    entry = callback(row);
+    if (entry != 0) {
+        g_menu_script_quad_command.sprite.x = cmd->callback_sprite.x;
+        g_menu_script_quad_command.sprite.y = cmd->callback_sprite.y;
+        g_menu_script_quad_command.sprite.w = entry->w;
+        g_menu_script_quad_command.sprite.h = entry->h;
+        g_menu_script_quad_command.sprite.u = entry->u;
+        g_menu_script_quad_command.sprite.v = entry->v;
+        g_menu_gfx_clut_id = entry->clut;
+        g_menu_gfx_texture_page = entry->tpage;
+        menu_opcode_04_draw_textured_quad((menu_instruction_t*)&g_menu_script_quad_command);
+    }
+    return menu_next_instruction(cmd);
+}
 
 /* Draw a menu window's border and tile its interior through the overlay's handler.
  * Source 1 selects alternate border UVs. The final command reassignment
@@ -172,3 +292,4 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
     }
     return menu_opcode_00_draw_window_frame(command);
 }
+#endif
