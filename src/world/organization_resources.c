@@ -777,7 +777,7 @@ void debug_battle_setup_thread(void) {
     script_set_variable(EVENT_SCRIPT_VAR_WEATHER_AND_TIME, 0);
     script_set_variable(EVENT_SCRIPT_VAR_WEATHER, 0);
     script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, 0);
-    g_travel_next_map_id[0] = g_screen_number_entry_value;
+    g_travel_next_map_id = g_screen_number_entry_value;
     thread_exit_current();
 }
 

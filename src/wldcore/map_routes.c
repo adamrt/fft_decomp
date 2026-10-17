@@ -768,7 +768,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
 
     if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT) != 0) {
         g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_travel_next_map_id[0] = 0;
+        g_travel_next_map_id = 0;
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
         event_transition_push_level(g_location_script_state.args[1]);
         g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
@@ -849,7 +849,7 @@ void travel_step(void) {
             g_travel.route_index++;
             if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT)
                 != 0) {
-                g_travel_next_map_id[0] = 0;
+                g_travel_next_map_id = 0;
                 script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
                 event_transition_push_level(g_location_script_state.args[1]);
                 g_world_map_marker_state.angle = 0;
@@ -867,7 +867,7 @@ void travel_step(void) {
                     g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)
                 != 0) {
                 g_system_flags |= SYSTEM_FLAG_RANDOM_BATTLE;
-                g_travel_next_map_id[0] = g_random_battle_map_id;
+                g_travel_next_map_id = g_random_battle_map_id;
                 script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, g_random_battle_entd_id);
                 script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
                 script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_random_battle_squad_id);

@@ -2033,7 +2033,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
                         offset = g_location_script_state.args[0] * sizeof(deep_dungeon_battle_t);
                         records = g_deep_dungeon_battles;
                         record = &records[g_location_script_state.args[0]];
-                        g_travel_next_map_id[0] = record->map_id;
+                        g_travel_next_map_id = record->map_id;
                         /* Direct ENTD indexing folds the table base and removes a retail addition. */
                         script_set_variable(
                             EVENT_SCRIPT_VAR_CURRENT_ENTD, (&records->entd_ids[0])[((rand() * 8) >> 15) + offset]);
@@ -2055,7 +2055,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[*selected]);
             g_system_flags ^= SYSTEM_FLAG_RUNNING;
             value = values[*selected] & TEXT_ID_ENTRY_MASK;
-            g_travel_next_map_id[0] = value + 1;
+            g_travel_next_map_id = value + 1;
             return;
         }
 

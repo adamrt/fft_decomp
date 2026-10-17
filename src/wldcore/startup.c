@@ -463,7 +463,7 @@ static void world_map_finalize_loop(void) {
     if ((g_system_flags & SYSTEM_FLAG_TUTORIAL_EVENT) == 0) {
         music_unload_scenario_and_tunes();
     }
-    script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_travel_next_map_id[0]);
+    script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_travel_next_map_id);
 }
 
 /* Load the picture for the marker's location, capture the first map backdrop,

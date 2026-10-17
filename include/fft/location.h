@@ -161,9 +161,8 @@ typedef char travel_size_must_be_148[sizeof(travel_t) == 148 ? 1 : -1];
 
 extern travel_t g_travel;
 
-/* Indexed so the store in travel_start stays behind the
- * window-flag store (MEM_IN_STRUCT_P). */
-extern s32 g_travel_next_map_id[];
+/* Map published to the event script when the world-map loop exits. */
+extern s32 g_travel_next_map_id;
 
 s32 travel_start(s32 from_location, s32 to_location);
 void travel_step(void);
