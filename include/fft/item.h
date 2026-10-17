@@ -477,21 +477,12 @@ typedef struct item_attribute {
     u8 attributes[UNIT_ATTRIBUTE_COUNT]; /* 0x00; unit_attribute_index_e */
     u8 move;                             /* 0x03 */
     u8 jump;                             /* 0x04 */
-    initial_status_sets_t status_sets;   /* 0x05 */
+    u8 innate[STATUS_BYTE_COUNT];        /* 0x05 */
+    u8 immunity[STATUS_BYTE_COUNT];      /* 0x0a */
+    u8 starting[STATUS_BYTE_COUNT];      /* 0x0f */
     u8 elemental_affinity[5];            /* 0x14; elemental_affinity_index_e */
 } item_attribute_t;
 typedef char item_attribute_size_must_be_25[(sizeof(item_attribute_t) == 25) ? 1 : -1];
-
-/* Flat byte view of item attributes used by the status-icon renderers. */
-typedef struct item_attribute_flat {
-    u8 attributes[UNIT_ATTRIBUTE_COUNT];
-    u8 move;
-    u8 jump;
-    u8 innate[5];
-    u8 immunity[5];
-    u8 starting[5];
-    u8 elemental_affinity[5];
-} item_attribute_flat_t;
 
 /* Poach yields the rare item 31 times in 256. */
 enum { ITEM_POACH_RARE_ITEM_CHANCE = 31 };

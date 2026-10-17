@@ -9,11 +9,6 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Flat view of item_attribute_t. The target addresses `starting` as
- * attribute * 25 + (base + 15), rebuilt from the live base + 5 register;
- * the nested status_sets member instead reuses the innate address + 10. */
-#define ITEM_ATTRIBUTES_FLAT ((item_attribute_flat_t*)g_item_attributes)
-
 /* Draw the item detail panel's status column: immunity icons, then the
  * innate/starting status icons.
  *
@@ -32,14 +27,14 @@ void item_draw_status_list(s16 item_id) {
     s32 x;
     s32 y;
 
-    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
+    bits_init_primary_reader(g_item_attributes[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (bits_read_primary(1) != 0) {
             count++;
         }
     }
-    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].innate);
-    bits_init_secondary_reader(ITEM_ATTRIBUTES_FLAT[attribute].starting);
+    bits_init_primary_reader(g_item_attributes[attribute].innate);
+    bits_init_secondary_reader(g_item_attributes[attribute].starting);
     for (i = 0; i < STATUS_COUNT; i++) {
         bit = bits_read_primary(1);
         bit |= bits_read_secondary(1);
@@ -59,7 +54,7 @@ void item_draw_status_list(s16 item_id) {
     tpage = GetTPage(0, 0, 0x180, 0);
     drawn = 0;
     icon_tpage = g_menu_cursor_texture_page;
-    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
+    bits_init_primary_reader(g_item_attributes[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (drawn >= count) {
             break;
@@ -80,8 +75,8 @@ void item_draw_status_list(s16 item_id) {
             drawn++;
         }
     }
-    bits_init_primary_reader(ITEM_ATTRIBUTES_FLAT[attribute].innate);
-    bits_init_secondary_reader(ITEM_ATTRIBUTES_FLAT[attribute].starting);
+    bits_init_primary_reader(g_item_attributes[attribute].innate);
+    bits_init_secondary_reader(g_item_attributes[attribute].starting);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (drawn >= count) {
             break;

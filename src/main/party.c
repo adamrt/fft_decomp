@@ -1710,7 +1710,7 @@ void unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) {
             j = 0;
             target = unit->status_sets.innate;
             for (; j < 15; j++) {
-                *target = attribute->status_sets.innate[j] | *target;
+                *target = attribute->innate[j] | *target;
                 target++;
             }
             j = 0;
