@@ -35,34 +35,14 @@ void world_map_load_texture(void) {
 }
 #endif
 
-#ifdef FFT_WLDCORE
-/* Poll the CD load to completion, a frame at a time, keeping the audio queue
- * serviced. */
+/* Poll the pending CD load to completion, a frame at a time. WLDCORE also services its audio queue; OPEN has no queue
+ * here. */
 void file_wait_for_pending(void) {
     while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         file_poll_load(&g_file_cd_state);
+#ifdef FFT_WLDCORE
         audio_queue_process();
+#endif
         VSync(0);
     }
 }
-#endif
-
-#ifdef FFT_OPEN
-/* Poll the pending file load to completion, a frame at a time; unlike the WLDCORE
- * body there is no audio queue to service. */
-void file_wait_for_pending(void) {
-    u32* status = &g_file_still_loading;
-    file_load_descriptor_t* header;
-
-    if (*status == 0) {
-        return;
-    }
-
-    /* The flag aliases state; a separate descriptor symbol changes the load scheduling. */
-    header = (file_load_descriptor_t*)((u8*)status - offsetof(file_load_descriptor_t, state));
-    do {
-        file_poll_load(header);
-        VSync(0);
-    } while (g_file_still_loading != 0);
-}
-#endif
