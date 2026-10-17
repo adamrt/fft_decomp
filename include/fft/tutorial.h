@@ -19,6 +19,8 @@ typedef enum tutorial_menu_row {
     TUTORIAL_MENU_ROW_COUNT = 4
 } tutorial_menu_row_e;
 
+enum { TUTORIAL_FORMATION_COUNT = 7, TUTORIAL_BATTLE_COUNT = 8 };
+
 /* The Tutorial category menu: two animated windows and an image containing
  * its four rows. */
 typedef struct tutorial_menu_level {

@@ -13,7 +13,7 @@ units:
   - {name: bar, source: src/wldcore/bar.c}
   - {name: brave_story, source: src/wldcore/brave_story.c}
   - {name: file_wait, source: src/lib/file/file_wait.c}
-  - {name: list_levels, source: src/wldcore/list_levels.c}
+  - {name: list_levels, source: src/wldcore/list_levels.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
   - {name: map_opcodes, source: src/wldcore/map_opcodes.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}]}
   - {name: map_routes, source: src/wldcore/map_routes.c}
   - {name: map_tiles, source: src/wldcore/map_tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}]}

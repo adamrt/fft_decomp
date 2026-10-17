@@ -850,10 +850,10 @@ static u8* g_screen_text_resident_data[9]
           (u8*)&g_screen_text_name_entry_keyboard_data, (u8*)&g_screen_text_shop_dialogue_data };
 
 /* Sector and size pairs; flat 32-bit value access preserves the original addressing. */
-static s32 g_tutorial_message_files[7 * 2]
+static s32 g_tutorial_message_files[TUTORIAL_FORMATION_COUNT * 2]
     = { 72298, 4096, 72301, 6144, 72305, 6144, 72309, 4096, 72312, 6144, 72316, 2048, 72318, 2048 };
 
-static s32 g_tutorial_script_files[7 * 2]
+static s32 g_tutorial_script_files[TUTORIAL_FORMATION_COUNT * 2]
     = { 72297, 2048, 72300, 2048, 72304, 2048, 72308, 2048, 72311, 2048, 72315, 2048, 72317, 2048 };
 
 /* Load shop background image `index` to the heap; the table holds a sector

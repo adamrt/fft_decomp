@@ -41,7 +41,9 @@
 /* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING. A scalar declaration changes
  * the load order in brave_story_handle_advancing_list_input. */
 extern s32 g_brave_story_advancing_saved_cursor[];
-extern s32 g_tutorial_battle_event_ids[];
+static s32 g_tutorial_battle_event_ids[TUTORIAL_BATTLE_COUNT] = { EVENT_ID_TUTORIAL_FIRST, EVENT_ID_TUTORIAL_FIRST + 2,
+    EVENT_ID_TUTORIAL_FIRST + 4, EVENT_ID_TUTORIAL_FIRST + 6, EVENT_ID_TUTORIAL_FIRST + 8, EVENT_ID_TUTORIAL_FIRST + 10,
+    EVENT_ID_TUTORIAL_FIRST + 12, EVENT_ID_TUTORIAL_FIRST + 14 };
 
 /* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
 extern u32 g_tutorial_progress_masks[];
@@ -1599,7 +1601,7 @@ static void tutorial_open_formation_list(void) {
     s32 record_index;
     s32 enabled = 8;
 
-    for (; i < 7; i++) {
+    for (; i < TUTORIAL_FORMATION_COUNT; i++) {
         g_menu_stack_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE;
         if (bits_test(g_tutorial_progress_masks, i) != 0) {
             g_menu_stack_row_flags[i] = enabled;
@@ -1715,7 +1717,7 @@ static void tutorial_open_battle_list(void) {
     s32 count;
     s32 record_index;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < TUTORIAL_BATTLE_COUNT; i++) {
         g_menu_stack_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE + 16;
         if (bits_test(&g_tutorial_progress_masks[1], i) != 0) {
             g_menu_stack_row_flags[i] = 8;
