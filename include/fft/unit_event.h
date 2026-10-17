@@ -33,18 +33,6 @@ typedef enum unit_inflict_status_mode {
     UNIT_INFLICT_STATUS_MODE_POISON = 3,
 } unit_inflict_status_mode_e;
 
-/* Rows of g_unit_status_staging_masks, the per-byte status removal masks
- * applied while an event stages a unit: three eight-byte sets, of which the
- * first STATUS_BYTE_COUNT bytes are used. */
-typedef enum unit_status_staging_mask {
-    UNIT_STATUS_STAGING_MASK_BATTLE_STARTED = 0,
-    UNIT_STATUS_STAGING_MASK_PRE_BATTLE = 1,
-    /* Monster skillsets, both Altima forms and the six undead jobs. */
-    UNIT_STATUS_STAGING_MASK_PRE_BATTLE_MONSTER_OR_UNDEAD = 2,
-} unit_status_staging_mask_e;
-
-enum { UNIT_STATUS_STAGING_MASK_COUNT = 3 };
-
 /* Shared event snapshot for all 21 simulation slots. unit_save_staged_status_data
  * writes the saved fields; unit_apply_staged_status_data restores them and
  * applies intervening status differences through BATTLE callbacks. */

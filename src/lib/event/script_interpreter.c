@@ -31,6 +31,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Rows of the private status-removal mask table below. */
+typedef enum unit_status_staging_mask {
+    UNIT_STATUS_STAGING_MASK_BATTLE_STARTED = 0,
+    UNIT_STATUS_STAGING_MASK_PRE_BATTLE = 1,
+    UNIT_STATUS_STAGING_MASK_PRE_BATTLE_MONSTER_OR_UNDEAD = 2,
+    UNIT_STATUS_STAGING_MASK_COUNT = 3
+} unit_status_staging_mask_e;
+
 static s32 g_script_loaded_event_id = -1;
 static u16 g_script_map_darkness_durations[12] = { 1, 8, 16, 32, 64, 96, 128, 160, 192, 224, 0x100, 0 };
 static s16 g_camera_diagonal_yaws[4] = { 3584, 2560, 1536, 512 };
@@ -43,8 +51,37 @@ static u8 g_unit_rotation_speed_frames[4] = { 4, 2, 1, 0 };
 /* Camera-relative facings, indexed by camera quadrant. */
 static u8 g_unit_facing_by_camera_quadrant[4] = { 0, 3, 2, 1 };
 
-static u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8]
-    = { 20, 176, 22, 12, 49, 0, 0, 0, 31, 188, 254, 255, 255, 0, 0, 0, 15, 188, 190, 255, 255, 0, 0, 0 };
+/* Statuses removed while saving the event staging snapshot. The retail rows
+ * have an eight-byte stride, although only STATUS_BYTE_COUNT bytes are read. */
+static u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8] = {
+    /* Battle started: only these statuses are removed. */
+    { STATUS_BYTE_MASK(STATUS_ID_UNDEAD) | STATUS_BYTE_MASK(STATUS_ID_JUMP),
+        STATUS_BYTE_MASK(STATUS_ID_PETRIFY) | STATUS_BYTE_MASK(STATUS_ID_DARKNESS)
+            | STATUS_BYTE_MASK(STATUS_ID_CONFUSION),
+        STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN)
+            | STATUS_BYTE_MASK(STATUS_ID_FROG),
+        STATUS_BYTE_MASK(STATUS_ID_HASTE) | STATUS_BYTE_MASK(STATUS_ID_SLOW),
+        STATUS_BYTE_MASK(STATUS_ID_CHARM) | STATUS_BYTE_MASK(STATUS_ID_SLEEP)
+            | STATUS_BYTE_MASK(STATUS_ID_DEATH_SENTENCE),
+        0, 0, 0 },
+    /* Before battle: retain the first three statuses, Invitation, the unnamed
+     * darkening status, Treasure and Critical. */
+    { 0xff
+            & ~(STATUS_BYTE_MASK(STATUS_ID_UNNAMED_00) | STATUS_BYTE_MASK(STATUS_ID_CRYSTAL)
+                | STATUS_BYTE_MASK(STATUS_ID_DEAD)),
+        0xff
+            & ~(STATUS_BYTE_MASK(STATUS_ID_INVITE) | STATUS_BYTE_MASK(STATUS_ID_UNNAMED_0E)
+                | STATUS_BYTE_MASK(STATUS_ID_TREASURE)),
+        0xff & ~STATUS_BYTE_MASK(STATUS_ID_CRITICAL), 0xff, 0xff, 0, 0, 0 },
+    /* Monsters, Altima and undead jobs also retain Undead and Float. */
+    { 0xff
+            & ~(STATUS_BYTE_MASK(STATUS_ID_UNNAMED_00) | STATUS_BYTE_MASK(STATUS_ID_CRYSTAL)
+                | STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_UNDEAD)),
+        0xff
+            & ~(STATUS_BYTE_MASK(STATUS_ID_INVITE) | STATUS_BYTE_MASK(STATUS_ID_UNNAMED_0E)
+                | STATUS_BYTE_MASK(STATUS_ID_TREASURE)),
+        0xff & ~(STATUS_BYTE_MASK(STATUS_ID_FLOAT) | STATUS_BYTE_MASK(STATUS_ID_CRITICAL)), 0xff, 0xff, 0, 0, 0 }
+};
 
 static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only);
 

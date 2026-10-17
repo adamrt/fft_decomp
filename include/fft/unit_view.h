@@ -22,7 +22,7 @@ typedef enum unit_view_mode {
     UNIT_VIEW_MODE_RIGHT_UNIT = 4,     /* right-side unit stats */
     UNIT_VIEW_MODE_ATTACK_PREVIEW = 5, /* attack caster and attack target stats */
     /* Provisional: retained numeric, summary and hovered-unit configuration; no normal producer is known. */
-    UNIT_VIEW_MODE_NUMERIC_SUMMARY = 6,
+    UNIT_VIEW_MODE_NUMERIC_SUMMARY = 6
 } unit_view_mode_e;
 
 extern s32 g_unit_view_mode;
