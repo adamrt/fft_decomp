@@ -765,8 +765,8 @@ void formula_apply_status_to_action(void) {
     }
 }
 
-/* Formula 0x49: heal (Z * 10) MP, Z from the used item's data. */
-void formula_heal_mp_z_times_ten(void) {
+/* Formula 0x49 (Ether): heal (Z * 10) MP, Z from the used item's data. */
+void formula_ether(void) {
     s32 index = g_action_current_ability.used_item_id;
     s32 amount;
     action_data_t* action = g_action_target_data;

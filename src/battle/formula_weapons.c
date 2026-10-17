@@ -199,10 +199,10 @@ void formula_weapon_absorb_hp(void) {
     }
 }
 
-/* Formula 0x07: heal weapon (XA * YA) HP (damage to undead); no evade. Zodiac
+/* Formula 0x07 (Healing Staff): heal weapon (XA * YA) HP (damage to undead); no evade. Zodiac
  * compatibility is applied twice: here and again inside
  * formula_apply_physical_modifiers. */
-void formula_weapon_heal(void) {
+void formula_healing_staff(void) {
     formula_calculate_base_xa();
     formula_apply_zodiac_compatibility();
     formula_apply_charge();
@@ -367,8 +367,8 @@ void formula_set_golem(void) {
     }
 }
 
-/* Formula 0x15: CT to 0, hit F(MA+X)%; magic evade. */
-void formula_set_ct_zero(void) {
+/* Formula 0x15 (Return 2): CT to 0, hit F(MA+X)%; magic evade. */
+void formula_return_2(void) {
     if (formula_evade_calculate_magical() == 0) {
         if (formula_accuracy_calculate_magic_without_strengthen() == 0) {
             g_action_target_data->ct_change = ACTION_CT_CHANGE_ZERO;
@@ -377,9 +377,9 @@ void formula_set_ct_zero(void) {
     }
 }
 
-/* Formula 0x16: MP damage equal to the target's current MP, hit F(MA+X)%;
+/* Formula 0x16 (Mute): MP damage equal to the target's current MP, hit F(MA+X)%;
  * magic evade. */
-void formula_damage_mp_target_current_mp(void) {
+void formula_mute(void) {
     unit_stats_t* target;
     action_data_t* action;
     u16 mp;
@@ -395,9 +395,9 @@ void formula_damage_mp_target_current_mp(void) {
     }
 }
 
-/* Formula 0x17: damage equal to the target's current HP - 1, hit F(MA+X)%;
+/* Formula 0x17 (Gravi 2): damage equal to the target's current HP - 1, hit F(MA+X)%;
  * magic evade. */
-void formula_damage_target_hp_minus_one(void) {
+void formula_gravi_2(void) {
     if (formula_evade_calculate_magical() == 0) {
         if (formula_accuracy_calculate_magic_without_strengthen() == 0) {
             formula_calculate_damage_leaving_one_hp();
@@ -431,8 +431,8 @@ void formula_magical_stat_reduction(void) {
     }
 }
 
-/* Formula 0x1B: MP damage (Y)% of max MP, hit F(MA+X)%; magic evade. */
-void formula_damage_mp_percent(void) {
+/* Formula 0x1B (Magic Ruin): MP damage (Y)% of max MP, hit F(MA+X)%; magic evade. */
+void formula_magic_ruin(void) {
     if (formula_evade_calculate_magical() == 0) {
         if (formula_accuracy_calculate_magic() == 0) {
             formula_calculate_mp_percent_damage();
@@ -521,8 +521,8 @@ void formula_draw_out_damage(void) {
     formula_calculate_magical_damage_without_faith();
 }
 
-/* Formula 0x21: Draw Out MP damage (MA * Y); katana break roll. */
-void formula_draw_out_mp_damage(void) {
+/* Formula 0x21 (Bizen Boat): Draw Out MP damage (MA * Y); katana break roll. */
+void formula_bizen_boat(void) {
     s16 damage;
     action_data_t* action;
 
@@ -541,9 +541,9 @@ void formula_draw_out_status(void) {
     formula_apply_status_to_action();
 }
 
-/* Formula 0x23: Draw Out heal (MA * Y) HP with no modifiers (damage to
+/* Formula 0x23 (Murasame): Draw Out heal (MA * Y) HP with no modifiers (damage to
  * undead); katana break roll. */
-void formula_draw_out_heal(void) {
+void formula_murasame(void) {
     formula_calculate_katana_break_chance();
     formula_store_ma_and_y();
     formula_store_xa_times_ya_damage();
@@ -623,9 +623,9 @@ void formula_steal_gil(void) {
     }
 }
 
-/* Formula 0x28: steal (SP + Y) EXP, at most 100 and at most what the target
+/* Formula 0x28 (Steal Exp.): steal (SP + Y) EXP, at most 100 and at most what the target
  * has, hit (SP+X)%; physical evade. */
-void formula_steal_exp_hit_sp_x_percent(void) {
+void formula_steal_exp(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_speed_and_x();
         formula_apply_attack_up_and_martial_arts();

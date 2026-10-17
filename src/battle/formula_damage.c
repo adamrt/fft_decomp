@@ -47,8 +47,8 @@ void formula_physical_stat_reduction(void) {
     }
 }
 
-/* Formula 0x2C: MP damage (Y)% of max MP, hit (PA+Y)%; physical evade. */
-void formula_physical_mp_percent_damage(void) {
+/* Formula 0x2C (Magic Break): MP damage (Y)% of max MP, hit (PA+Y)%; physical evade. */
+void formula_magic_break(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_pa_and_y();
         if (formula_accuracy_calculate_physical() == 0) {
@@ -103,8 +103,8 @@ void formula_break_equipped_damage_pa_times_wp(void) {
     formula_element_apply_absorption();
 }
 
-/* Formula 0x2F: absorb (PA * WP) MP; physical evade. */
-void formula_absorb_mp_pa_times_wp(void) {
+/* Formula 0x2F (Dark Sword): absorb (PA * WP) MP; physical evade. */
+void formula_dark_sword(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_pa_and_weapon_power();
         formula_calculate_physical_damage();
@@ -112,8 +112,8 @@ void formula_absorb_mp_pa_times_wp(void) {
     }
 }
 
-/* Formula 0x30: absorb (PA * WP) HP; physical evade. */
-void formula_absorb_hp_pa_times_wp(void) {
+/* Formula 0x30 (Night Sword): absorb (PA * WP) HP; physical evade. */
+void formula_night_sword(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_pa_and_weapon_power();
         formula_calculate_physical_damage();
@@ -299,17 +299,17 @@ void formula_damage_pa_times_y_damage_caster_pa_times_y_over_x(void) {
 void formula_46_unused(void) {
 }
 
-/* Formula 0x47: absorb (Y)% of max HP, 100% status. */
-void formula_absorb_hp_y_percent_status(void) {
+/* Formula 0x47 (Blood Suck): absorb (Y)% of max HP, 100% status. */
+void formula_blood_suck(void) {
     formula_calculate_hp_percent_damage();
     formula_apply_hp_absorption();
     formula_apply_status();
 }
 
-/* Formula 0x48: heal (Z * 10) HP, Z from the used item's data. The amount is
+/* Formula 0x48 (Potion): heal (Z * 10) HP, Z from the used item's data. The amount is
  * stored as damage; formula_apply_undead_reversal turns it into healing
  * unless the target is undead. */
-void formula_heal_z_times_ten(void) {
+void formula_potion(void) {
     g_action_target_data->hp_damage = g_item_secondary_data[g_action_current_ability.used_item_id].z * 10;
     formula_apply_undead_reversal();
 }
@@ -317,18 +317,18 @@ void formula_heal_z_times_ten(void) {
 /* A second entry to formula 0x49's handler. The formula table does not point
  * here and no retail code calls it. */
 void formula_49_unused_with_extra_steps(void) {
-    formula_heal_mp_z_times_ten();
+    formula_ether();
 }
 
-/* Formula 0x4A: heal 100% HP and 100% MP. */
-void formula_heal_full_hp_mp(void) {
+/* Formula 0x4A (Elixir): heal 100% HP and 100% MP. */
+void formula_elixir(void) {
     formula_apply_full_hp_mp_heal();
     formula_apply_undead_reversal();
 }
 
-/* Formula 0x4B: heal rnd(1..Z) HP once its status applies; an undead target
+/* Formula 0x4B (Phoenix Down): heal rnd(1..Z) HP once its status applies; an undead target
  * takes its current HP as damage instead. */
-void formula_heal_random_one_to_z_add_status(void) {
+void formula_phoenix_down(void) {
     unit_stats_t* unit;
 
     if (formula_apply_status_and_check_undead() == 0)

@@ -1419,7 +1419,7 @@ functions:
   - {addr: 0x80187ca0, size: 532, name: formula_apply_poach_and_train, hash: c76a5a1a24eca582, unit: formula_effects}
   - {addr: 0x80187eb4, size: 112, name: formula_apply_status, hash: 7b84444a4587202b, unit: formula_effects}
   - {addr: 0x80187f24, size: 868, name: formula_apply_status_to_action, hash: 55cb61c643335384, unit: formula_effects}
-  - {addr: 0x80188288, size: 64, name: formula_heal_mp_z_times_ten, hash: b79a349fe6ac28dd, unit: formula_effects}
+  - {addr: 0x80188288, size: 64, name: formula_ether, hash: b79a349fe6ac28dd, unit: formula_effects}
   - {addr: 0x801882c8, size: 48, name: formula_apply_full_hp_mp_heal, hash: 609c4b69f8f3d928, unit: formula_effects}
   - {addr: 0x801882f8, size: 180, name: reaction_try_finger_guard, hash: f08d19021384c308, unit: formula_effects}
   - {addr: 0x801883ac, size: 220, name: reaction_try_catch, hash: 93b16a73f824bdfb, unit: formula_effects}
@@ -1452,7 +1452,7 @@ functions:
   - {addr: 0x80188c24, size: 120, name: formula_magic_gun, hash: fd658ca80d8d279e, unit: formula_weapons}
   - {addr: 0x80188c9c, size: 88, name: formula_weapon_damage_without_element_or_weather, hash: 8d0bbead2cf733ef, unit: formula_weapons}
   - {addr: 0x80188cf4, size: 72, name: formula_weapon_absorb_hp, hash: 16cdf5d294543a0e, unit: formula_weapons}
-  - {addr: 0x80188d3c, size: 72, name: formula_weapon_heal, hash: 34a8e41547c5ebdf, unit: formula_weapons}
+  - {addr: 0x80188d3c, size: 72, name: formula_healing_staff, hash: 34a8e41547c5ebdf, unit: formula_weapons}
   - {addr: 0x80188d84, size: 112, name: formula_magical_damage, hash: 35a8a49c28162f48, unit: formula_weapons}
   - {addr: 0x80188df4, size: 132, name: formula_magic_hp_percent_damage, hash: d22824035b1d6e97, unit: formula_weapons}
   - {addr: 0x80188e78, size: 64, name: formula_hit_faith_ma_x_percent, hash: 5ad89ec50c4e6784, unit: formula_weapons}
@@ -1466,34 +1466,34 @@ functions:
   - {addr: 0x8018912c, size: 56, name: formula_set_quick, hash: 89f4d804c5ac3ad1, unit: formula_weapons}
   - {addr: 0x80189164, size: 8, name: formula_13_unused, hash: 6d64edf91449c1b1, unit: formula_weapons}
   - {addr: 0x8018916c, size: 64, name: formula_set_golem, hash: cce64255fc6e00d2, unit: formula_weapons}
-  - {addr: 0x801891ac, size: 88, name: formula_set_ct_zero, hash: 787bdf34b9bed899, unit: formula_weapons}
-  - {addr: 0x80189204, size: 88, name: formula_damage_mp_target_current_mp, hash: edf3f3a71095eb63, unit: formula_weapons}
-  - {addr: 0x8018925c, size: 64, name: formula_damage_target_hp_minus_one, hash: f111946517004a48, unit: formula_weapons}
+  - {addr: 0x801891ac, size: 88, name: formula_return_2, hash: 787bdf34b9bed899, unit: formula_weapons}
+  - {addr: 0x80189204, size: 88, name: formula_mute, hash: edf3f3a71095eb63, unit: formula_weapons}
+  - {addr: 0x8018925c, size: 64, name: formula_gravi_2, hash: f111946517004a48, unit: formula_weapons}
   - {addr: 0x8018929c, size: 8, name: formula_18_unused, hash: 6d64edf91449c1b1, unit: formula_weapons}
   - {addr: 0x801892a4, size: 8, name: formula_19_unused, hash: 6d64edf91449c1b1, unit: formula_weapons}
   - {addr: 0x801892ac, size: 144, name: formula_magical_stat_reduction, hash: fb27a385cb7b66d8, unit: formula_weapons}
-  - {addr: 0x8018933c, size: 64, name: formula_damage_mp_percent, hash: 0eb3a00741f3d700, unit: formula_weapons}
+  - {addr: 0x8018933c, size: 64, name: formula_magic_ruin, hash: 0eb3a00741f3d700, unit: formula_weapons}
   - {addr: 0x8018937c, size: 92, name: formula_song, hash: f97b3b87d358b673, unit: formula_weapons}
   - {addr: 0x801893d8, size: 92, name: formula_dance, hash: 0fb2fa7d2c3e4b4f, unit: formula_weapons}
   - {addr: 0x80189434, size: 48, name: formula_multihit_truth_magic, hash: cd23e5d4ae3deda3, unit: formula_weapons}
   - {addr: 0x80189464, size: 352, name: formula_unfaith_magical_damage, hash: 21bc0d4ae0e24de7, unit: formula_weapons}
   - {addr: 0x801895c4, size: 48, name: formula_draw_out_damage, hash: f38c6019bc2221b8, unit: formula_weapons}
-  - {addr: 0x801895f4, size: 96, name: formula_draw_out_mp_damage, hash: e5fcbde9fe08848a, unit: formula_weapons}
+  - {addr: 0x801895f4, size: 96, name: formula_bizen_boat, hash: e5fcbde9fe08848a, unit: formula_weapons}
   - {addr: 0x80189654, size: 40, name: formula_draw_out_status, hash: e4677d6d66c0d973, unit: formula_weapons}
-  - {addr: 0x8018967c, size: 56, name: formula_draw_out_heal, hash: 99e3296540d07aa7, unit: formula_weapons}
+  - {addr: 0x8018967c, size: 56, name: formula_murasame, hash: 99e3296540d07aa7, unit: formula_weapons}
   - {addr: 0x801896b4, size: 56, name: formula_ma_pa_half_damage, hash: 3311ba219b1592fd, unit: formula_weapons}
   - {addr: 0x801896ec, size: 168, name: formula_break_equipped_hit_pa_wp_y_percent, hash: c4370090ee9c6785, unit: formula_weapons}
   - {addr: 0x80189794, size: 148, name: formula_steal_equipment, hash: 495f466453133c22, unit: formula_weapons}
   - {addr: 0x80189828, size: 72, name: formula_steal_gil, hash: 7562ecdc4ae00a45, unit: formula_weapons}
-  - {addr: 0x80189870, size: 160, name: formula_steal_exp_hit_sp_x_percent, hash: e12062f412c50b37, unit: formula_weapons}
+  - {addr: 0x80189870, size: 160, name: formula_steal_exp, hash: e12062f412c50b37, unit: formula_weapons}
   - {addr: 0x80189910, size: 148, name: formula_opposite_sex_hit_ma_x_percent, hash: 8c25bec110dc3e13, unit: formula_weapons}
   - {addr: 0x801899a4, size: 236, name: formula_talk_skill_hit_ma_x_percent, hash: 75acbbbc278b8022, unit: formula_damage}
   - {addr: 0x80189a90, size: 72, name: formula_physical_stat_reduction, hash: 1970f8954ca50f6e, unit: formula_damage}
-  - {addr: 0x80189ad8, size: 72, name: formula_physical_mp_percent_damage, hash: 01e6a7a9d35e8a3b, unit: formula_damage}
+  - {addr: 0x80189ad8, size: 72, name: formula_magic_break, hash: 01e6a7a9d35e8a3b, unit: formula_damage}
   - {addr: 0x80189b20, size: 116, name: formula_damage_pa_times_wp_plus_y_status, hash: e28b12a943b7ac77, unit: formula_damage}
   - {addr: 0x80189b94, size: 188, name: formula_break_equipped_damage_pa_times_wp, hash: ecbe82aee27f4971, unit: formula_damage}
-  - {addr: 0x80189c50, size: 64, name: formula_absorb_mp_pa_times_wp, hash: 88f777c9cc1f2ce3, unit: formula_damage}
-  - {addr: 0x80189c90, size: 64, name: formula_absorb_hp_pa_times_wp, hash: 4e96d1438f271114, unit: formula_damage}
+  - {addr: 0x80189c50, size: 64, name: formula_dark_sword, hash: 88f777c9cc1f2ce3, unit: formula_damage}
+  - {addr: 0x80189c90, size: 64, name: formula_night_sword, hash: 4e96d1438f271114, unit: formula_damage}
   - {addr: 0x80189cd0, size: 164, name: formula_damage_pa_plus_y_half_times_pa, hash: 8fa0f750e9792e16, unit: formula_damage}
   - {addr: 0x80189d74, size: 180, name: formula_repeating_fist, hash: a3453083943dfa90, unit: formula_damage}
   - {addr: 0x80189e28, size: 108, name: formula_stigma_magic, hash: 8f74cda3eb7fcbb0, unit: formula_damage}
@@ -1507,11 +1507,11 @@ functions:
   - {addr: 0x8018a114, size: 104, name: formula_galaxy_stop, hash: 352e19ad2a054160, unit: formula_damage}
   - {addr: 0x8018a17c, size: 156, name: formula_damage_pa_times_y_damage_caster_pa_times_y_over_x, hash: 3ce2529c4c9a6fdc, unit: formula_damage}
   - {addr: 0x8018a218, size: 8, name: formula_46_unused, hash: 6d64edf91449c1b1, unit: formula_damage}
-  - {addr: 0x8018a220, size: 48, name: formula_absorb_hp_y_percent_status, hash: ca12d2aead28b804, unit: formula_damage}
-  - {addr: 0x8018a250, size: 84, name: formula_heal_z_times_ten, hash: 46282eefafd9cbcc, unit: formula_damage}
+  - {addr: 0x8018a220, size: 48, name: formula_blood_suck, hash: ca12d2aead28b804, unit: formula_damage}
+  - {addr: 0x8018a250, size: 84, name: formula_potion, hash: 46282eefafd9cbcc, unit: formula_damage}
   - {addr: 0x8018a2a4, size: 32, name: formula_49_unused_with_extra_steps, hash: 0e55f6166a0fbdec, unit: formula_damage}
-  - {addr: 0x8018a2c4, size: 40, name: formula_heal_full_hp_mp, hash: c9b47ad5a6f867c5, unit: formula_damage}
-  - {addr: 0x8018a2ec, size: 180, name: formula_heal_random_one_to_z_add_status, hash: 4f38459b7b95ce62, unit: formula_damage}
+  - {addr: 0x8018a2c4, size: 40, name: formula_elixir, hash: c9b47ad5a6f867c5, unit: formula_damage}
+  - {addr: 0x8018a2ec, size: 180, name: formula_phoenix_down, hash: 4f38459b7b95ce62, unit: formula_damage}
   - {addr: 0x8018a3a0, size: 48, name: formula_heal_ma_times_y, hash: 666cebf1e4e1cc86, unit: formula_damage}
   - {addr: 0x8018a3d0, size: 80, name: formula_absorb_hp_y_percent_hit_ma_x_percent, hash: 3f9bac758e860e0a, unit: formula_damage}
   - {addr: 0x8018a420, size: 56, name: formula_damage_ma_times_y, hash: f8835609337a9a53, unit: formula_damage}
