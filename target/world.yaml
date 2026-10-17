@@ -43,6 +43,7 @@ units:
   - {name: icon_selection, source: src/lib/event/icon_selection.c, data: [{addr: 0x80153d08, size: 16, hash: 4bb06fad13fd7602}]}
   - {name: item_actions, source: src/world/item_actions.c}
   - {name: job_learning, source: src/world/job_learning.c}
+  - {name: job_list, source: src/lib/menu/job_list.c}
   - {name: job_locks, source: src/world/job_locks.c}
   - {name: job_wheel, source: src/world/job_wheel.c}
   - {name: list_threads, source: src/world/list_threads.c, data: [{addr: 0x8018af68, size: 8, hash: cbfe82027ae4ec1d}, {addr: 0x8018af70, size: 8, hash: 0fb476087acb5e89}]}
@@ -763,8 +764,8 @@ functions:
   - {addr: 0x8011ee88, size: 128, name: job_list_calculate_level, hash: 6f83eb9a67a84b05, unit: formation_ability_menu}
   - {addr: 0x8011ef08, size: 88, name: formation_ability_learn_job_jp, hash: 70ac82eff2c3e789, unit: formation_ability_menu}
   - {addr: 0x8011ef60, size: 96, name: job_list_calculate_total_jp, hash: f02d25a82a1e5bf3, unit: formation_ability_menu}
-  - {addr: 0x8011efc0, size: 128, name: job_list_calculate_next_level_jp, hash: 934847bcaf8b232a, source: src/lib/menu/job_list_calculate_next_level_jp.c}
-  - {addr: 0x8011f040, size: 80, name: job_list_calculate_mastered, hash: 13d6053a0d977809, source: src/lib/menu/job_list_calculate_mastered.c}
+  - {addr: 0x8011efc0, size: 128, name: job_list_calculate_next_level_jp, hash: 934847bcaf8b232a, unit: job_list}
+  - {addr: 0x8011f040, size: 80, name: job_list_calculate_mastered, hash: 13d6053a0d977809, unit: job_list}
   - {addr: 0x8011f090, size: 580, name: formation_ability_learn_job_list, hash: c3934fa3ca089972, unit: job_learning}
   - {addr: 0x8011f2d4, size: 72, name: formation_ability_build_learn_prompt, hash: 9fb82a8479d230b5, unit: job_learning}
   - {addr: 0x8011f31c, size: 52, name: formation_ability_get_chosen_job_jp, hash: 1a10d8add2a3d9f3, unit: job_learning}

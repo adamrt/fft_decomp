@@ -311,6 +311,7 @@ units:
   - {name: descriptor_threads, source: src/event/bunit/descriptor_threads.c}
   - {name: entry, source: src/event/bunit/entry.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
+  - {name: job_list, source: src/lib/menu/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
@@ -467,17 +468,17 @@ functions:
   - {addr: 0x801cc6dc, size: 164, name: menu_update_wrapped_horizontal_selection, hash: cb38c38746c32f7f, source: src/lib/menu/menu_update_wrapped_horizontal_selection.c}
   - {addr: 0x801cc780, size: 104, name: menu_update_horizontal_selection_and_mark_change, hash: 54c85e2ccf804088, source: src/lib/menu/menu_update_horizontal_selection_and_mark_change.c}
   - {addr: 0x801cc7e8, size: 32, name: menu_input_clear_state, hash: c3b917b4bb4be9ca, source: src/lib/menu/menu_input_clear_state.c}
-  - {addr: 0x801cc808, size: 128, name: job_list_calculate_level, hash: 6792aa8905ba14f8}
-  - {addr: 0x801cc888, size: 96, name: job_list_calculate_jp, hash: 9be830d1dea82b7c}
-  - {addr: 0x801cc8e8, size: 96, name: job_list_calculate_total_jp, hash: 7788884e757641be}
-  - {addr: 0x801cc948, size: 128, name: job_list_calculate_next_level_jp, hash: 6953427c216412ff, source: src/lib/menu/job_list_calculate_next_level_jp.c}
-  - {addr: 0x801cc9c8, size: 80, name: job_list_calculate_mastered, hash: 9e34c8881455e7b9, source: src/lib/menu/job_list_calculate_mastered.c}
-  - {addr: 0x801cca18, size: 532, name: job_list_run, hash: 9f6d31e244a4b13e}
-  - {addr: 0x801ccc2c, size: 16, name: job_list_get_jp, hash: 37bd825c7c410897, source: src/lib/menu/job_list_get_jp.c}
-  - {addr: 0x801ccc3c, size: 16, name: job_list_get_level, hash: c00599d9d4da1832, source: src/lib/menu/job_list_get_level.c}
-  - {addr: 0x801ccc4c, size: 16, name: job_list_get_next_level_jp, hash: 4b002aa7d2cccbc4, source: src/lib/menu/job_list_get_next_level_jp.c}
-  - {addr: 0x801ccc5c, size: 16, name: job_list_get_total_jp, hash: 5a5079be6a69dc2b, source: src/lib/menu/job_list_get_total_jp.c}
-  - {addr: 0x801ccc6c, size: 16, name: job_list_is_mastered, hash: f3957e2ed0b4ceeb, source: src/lib/menu/job_list_is_mastered.c}
+  - {addr: 0x801cc808, size: 128, name: job_list_calculate_level, hash: 6792aa8905ba14f8, unit: job_list}
+  - {addr: 0x801cc888, size: 96, name: job_list_calculate_jp, hash: 9be830d1dea82b7c, unit: job_list}
+  - {addr: 0x801cc8e8, size: 96, name: job_list_calculate_total_jp, hash: 7788884e757641be, unit: job_list}
+  - {addr: 0x801cc948, size: 128, name: job_list_calculate_next_level_jp, hash: 6953427c216412ff, unit: job_list}
+  - {addr: 0x801cc9c8, size: 80, name: job_list_calculate_mastered, hash: 9e34c8881455e7b9, unit: job_list}
+  - {addr: 0x801cca18, size: 532, name: job_list_run, hash: 9f6d31e244a4b13e, unit: job_list}
+  - {addr: 0x801ccc2c, size: 16, name: job_list_get_jp, hash: 37bd825c7c410897, unit: job_list}
+  - {addr: 0x801ccc3c, size: 16, name: job_list_get_level, hash: c00599d9d4da1832, unit: job_list}
+  - {addr: 0x801ccc4c, size: 16, name: job_list_get_next_level_jp, hash: 4b002aa7d2cccbc4, unit: job_list}
+  - {addr: 0x801ccc5c, size: 16, name: job_list_get_total_jp, hash: 5a5079be6a69dc2b, unit: job_list}
+  - {addr: 0x801ccc6c, size: 16, name: job_list_is_mastered, hash: f3957e2ed0b4ceeb, unit: job_list}
   - {addr: 0x801ccc7c, size: 112, name: ability_list_is_non_action_learned, hash: 70b6921fb12affba, unit: menu_ability_display_values}
   - {addr: 0x801cccec, size: 56, name: ability_list_is_non_action_unlearned, hash: 3c68eaf342aa2992, unit: menu_ability_display_values}
   - {addr: 0x801ccd24, size: 16, name: ability_list_is_action, hash: 360dd06bad7dc1c4, unit: menu_ability_display_values}
@@ -1935,6 +1936,7 @@ units:
   - {name: entry, source: src/event/jobstts/entry.c}
   - {name: gfx_contexts, source: src/event/jobstts/gfx_contexts.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
+  - {name: job_list, source: src/lib/menu/job_list.c}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
   - {name: menu_script, source: src/event/jobstts/menu_script.c}
@@ -1952,17 +1954,17 @@ functions:
   - {addr: 0x801df4a4, size: 60, name: menu_clear_selection_record, hash: 2bb5b087e1621ebe, unit: selection_records}
   - {addr: 0x801df4e0, size: 76, name: menu_set_selection_record, hash: 21d529d3737f9365, source: src/lib/menu/menu_set_selection_record.c}
   - {addr: 0x801df52c, size: 176, name: menu_get_selection_record, hash: 0db7da1324171bf7, source: src/lib/menu/menu_get_selection_record.c}
-  - {addr: 0x801df5dc, size: 108, name: job_list_calculate_level, hash: b5f033f5213a365d}
-  - {addr: 0x801df648, size: 76, name: job_list_calculate_jp, hash: 7a7626e0618d8ab0}
-  - {addr: 0x801df694, size: 76, name: job_list_calculate_total_jp, hash: 0df03e32871d265e}
-  - {addr: 0x801df6e0, size: 128, name: job_list_calculate_next_level_jp, hash: a4c0646e2fecc0cc, source: src/lib/menu/job_list_calculate_next_level_jp.c}
-  - {addr: 0x801df760, size: 76, name: job_list_calculate_mastered, hash: 21d6ba91698660e1}
-  - {addr: 0x801df7ac, size: 440, name: job_list_run, hash: 46b52dabd5fe68f5}
-  - {addr: 0x801df964, size: 16, name: job_list_get_jp, hash: 51fde6eb69508838, source: src/lib/menu/job_list_get_jp.c}
-  - {addr: 0x801df974, size: 16, name: job_list_get_level, hash: f6c5f24af18727bf, source: src/lib/menu/job_list_get_level.c}
-  - {addr: 0x801df984, size: 16, name: job_list_get_next_level_jp, hash: 1db351534299a8c6, source: src/lib/menu/job_list_get_next_level_jp.c}
-  - {addr: 0x801df994, size: 16, name: job_list_get_total_jp, hash: a9fc77f08f31ef8f, source: src/lib/menu/job_list_get_total_jp.c}
-  - {addr: 0x801df9a4, size: 16, name: job_list_is_mastered, hash: d962cac7878808e2, source: src/lib/menu/job_list_is_mastered.c}
+  - {addr: 0x801df5dc, size: 108, name: job_list_calculate_level, hash: b5f033f5213a365d, unit: job_list}
+  - {addr: 0x801df648, size: 76, name: job_list_calculate_jp, hash: 7a7626e0618d8ab0, unit: job_list}
+  - {addr: 0x801df694, size: 76, name: job_list_calculate_total_jp, hash: 0df03e32871d265e, unit: job_list}
+  - {addr: 0x801df6e0, size: 128, name: job_list_calculate_next_level_jp, hash: a4c0646e2fecc0cc, unit: job_list}
+  - {addr: 0x801df760, size: 76, name: job_list_calculate_mastered, hash: 21d6ba91698660e1, unit: job_list}
+  - {addr: 0x801df7ac, size: 440, name: job_list_run, hash: 46b52dabd5fe68f5, unit: job_list}
+  - {addr: 0x801df964, size: 16, name: job_list_get_jp, hash: 51fde6eb69508838, unit: job_list}
+  - {addr: 0x801df974, size: 16, name: job_list_get_level, hash: f6c5f24af18727bf, unit: job_list}
+  - {addr: 0x801df984, size: 16, name: job_list_get_next_level_jp, hash: 1db351534299a8c6, unit: job_list}
+  - {addr: 0x801df994, size: 16, name: job_list_get_total_jp, hash: a9fc77f08f31ef8f, unit: job_list}
+  - {addr: 0x801df9a4, size: 16, name: job_list_is_mastered, hash: d962cac7878808e2, unit: job_list}
   - {addr: 0x801df9b4, size: 112, name: ability_list_is_non_action_learned, hash: 76a1cae15d554342, unit: menu_ability_display_values}
   - {addr: 0x801dfa24, size: 56, name: ability_list_is_non_action_unlearned, hash: 47d28a7fb27637c9, unit: menu_ability_display_values}
   - {addr: 0x801dfa5c, size: 16, name: ability_list_is_action, hash: 84baaf655025c0a7, unit: menu_ability_display_values}

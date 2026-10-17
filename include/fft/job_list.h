@@ -45,7 +45,6 @@ extern u32 g_job_current_total_jp;
 extern s32 g_job_current_mastered;
 
 s32 job_list_calculate_level(s32 index);
-s32 job_list_calculate_jp(s32 index);
 s32 job_list_calculate_total_jp(s32 index);
 
 /* Caches and returns whether the index-th job's skillset has nothing left to learn for the selected unit. */
