@@ -38,13 +38,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s32 g_brave_story_participant_saved_cursor;
-
-/* Saved proposition-list cursor row. Declared as an array: GCC's alias heuristic needs an in-struct object to keep
- * the target's load order in brave_story_handle_advancing_list_input; a scalar does not. */
+/* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING. A scalar declaration changes
+ * the load order in brave_story_handle_advancing_list_input. */
 extern s32 g_brave_story_advancing_saved_cursor[];
-extern s32 g_tutorial_menu_saved_cursor;
-extern menu_cursor_state_t g_tutorial_list_cursor;
 extern s32 g_tutorial_battle_event_ids[];
 
 /* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
@@ -518,9 +514,8 @@ static void brave_story_push_participant_list_level(s32 proposition) {
 /* Input step of the participant list.
  *
  * Nothing happens while the panel pops in. Cross tears the level down and
- * returns to the active jobs list; Circle records the row in
- * g_brave_story_participant_saved_cursor and closes the message box, and once
- * it has gone the level hands the row to
+ * returns to the active jobs list; Circle saves the participant-list cursor and
+ * closes the message box. Once it has gone, the level hands the row to
  * brave_story_push_participant_level. Both release the cursor window
  * and the panel. Up/down wrap the cursor and slide the cursor window by one
  * 16-pixel row, and do nothing when there are fewer than two rows.
@@ -544,7 +539,7 @@ void brave_story_handle_participant_list_input(menu_stack_record_t* level) {
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        g_brave_story_participant_saved_cursor = 0;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_PARTICIPANTS].selected_index = 0;
         g_window_record_count--;
         g_window_render_record_count--;
         g_window_render_object_count -= 2;
@@ -556,7 +551,7 @@ void brave_story_handle_participant_list_input(menu_stack_record_t* level) {
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         g_window_record_count--;
-        g_brave_story_participant_saved_cursor = level->participant_list.cursor;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_PARTICIPANTS].selected_index = level->participant_list.cursor;
         g_window_render_record_count--;
         g_window_render_object_count -= 2;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
@@ -1145,7 +1140,7 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
         menu_stack_close_parent_list_windows();
         message_block_load_if_changed(MESSAGE_BLOCK_STORY_EVENTS);
         file_wait_for_pending();
-        g_brave_story_event_list_cursor = g_brave_story_saved_list_cursor_state;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_EVENTS] = g_brave_story_saved_list_cursor_state;
         break;
     case MENU_STACK_LEVEL_TUTORIAL:
         window_set_render_objects_visible(0);
@@ -1162,7 +1157,7 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         tutorial_push_menu_level(1, 0);
         menu_stack_close_parent_list_frame();
-        g_tutorial_list_cursor = g_brave_story_saved_list_cursor_state;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS] = g_brave_story_saved_list_cursor_state;
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_TREASURE:
         menu_stack_close_parent_list_windows();
@@ -1506,7 +1501,7 @@ void tutorial_handle_menu_input(menu_stack_record_t* level) {
             } else {
                 audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
             }
-            g_tutorial_menu_saved_cursor = 0;
+            g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_TUTORIAL].selected_index = 0;
         }
         return;
     }
@@ -1535,7 +1530,7 @@ void tutorial_handle_menu_input(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         selected_entry = &level->tutorial_menu.selected_entry;
-        g_tutorial_menu_saved_cursor = *selected_entry;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_TUTORIAL].selected_index = *selected_entry;
         switch (level->tutorial_menu.entries[*selected_entry]) {
         case TUTORIAL_MENU_ROW_FORMATION:
             tutorial_suspend_menu_level(level);
@@ -1784,7 +1779,7 @@ void tutorial_handle_battle_list_input(menu_stack_record_t* level) {
             script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_tutorial_battle_event_ids[*selected]);
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS);
-            g_brave_story_saved_list_cursor_state = g_tutorial_list_cursor;
+            g_brave_story_saved_list_cursor_state = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS];
             g_system_flags = (g_system_flags | SYSTEM_FLAG_TUTORIAL_EVENT) ^ SYSTEM_FLAG_RUNNING;
             g_brave_story_saved_weather_variable = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
         }

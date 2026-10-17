@@ -39,6 +39,7 @@ typedef struct brave_story_menu_level {
 } brave_story_menu_level_t;
 typedef char brave_story_menu_level_size_must_be_80[sizeof(brave_story_menu_level_t) == 80 ? 1 : -1];
 
+/* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY; retained for load ordering. */
 extern s32 g_brave_story_saved_cursor[];
 
 void brave_story_push_level(void);
@@ -69,8 +70,6 @@ typedef struct brave_story_detail_level {
 } brave_story_detail_level_t;
 
 /* facts and events */
-extern menu_cursor_state_t g_brave_story_event_list_cursor;
-
 /* A story event replayed from the Brave Story list: the event, the list cursor
  * to restore and the weather variable to put back afterwards. */
 extern s32 g_brave_story_replay_story_event_index;
@@ -187,7 +186,8 @@ typedef struct brave_story_participant_level {
     s32 participant;  /* 0x14; slot in participant_indices */
 } brave_story_participant_level_t;
 
-/* Saved category row, declared as an array to preserve the target's load order. */
+/* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS; the array declaration
+ * preserves the target's load order. */
 extern s32 g_brave_story_propositions_saved_cursor[];
 
 void brave_story_handle_participant_list_input(menu_stack_record_t* level);

@@ -28,7 +28,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s32 g_bar_saved_cursor;
 extern u8 g_bar_row_help_text_ids[];
 extern s32* g_rumor_location_masks;
 
@@ -115,7 +114,7 @@ void bar_handle_input(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
         /* Same exit as the Leave row below; GCC cross-jumps the two copies. */
-        g_bar_saved_cursor = 0;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR].selected_index = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
         level->bar.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
         g_window_record_count -= 2;
@@ -134,7 +133,7 @@ void bar_handle_input(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         selected_entry = &level->bar.selected_entry;
-        g_bar_saved_cursor = *selected_entry;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR].selected_index = *selected_entry;
         if (level->bar.entries[*selected_entry] != BAR_ROW_LEAVE) {
             g_window_records[level->bar.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
         }
@@ -158,7 +157,7 @@ void bar_handle_input(menu_stack_record_t* level) {
             proposition_open_active_list();
             return;
         case BAR_ROW_LEAVE:
-            g_bar_saved_cursor = 0;
+            g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR].selected_index = 0;
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
             level->bar.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
             g_window_record_count -= 2;

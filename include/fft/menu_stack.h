@@ -154,7 +154,8 @@ typedef struct window_render_pair {
 } window_render_pair_t;
 
 /* remembered cursors */
-/* Slots of g_menu_stack_cursor_states: the remembered row of each list. */
+/* Slots of g_menu_stack_cursor_states: the remembered row and scroll offset.
+ * Slot 6 is cleared at startup but has no menu reader. */
 typedef enum menu_stack_cursor_slot {
     MENU_STACK_CURSOR_SLOT_LOCATION = 0,
     MENU_STACK_CURSOR_SLOT_BAR = 1,
@@ -164,11 +165,15 @@ typedef enum menu_stack_cursor_slot {
     MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS = 5,
     MENU_STACK_CURSOR_SLOT_UNEXPLORED_LANDS = 7,
     MENU_STACK_CURSOR_SLOT_TREASURES = 8,
+    MENU_STACK_CURSOR_SLOT_BRAVE_STORY = 9,
     MENU_STACK_CURSOR_SLOT_EVENTS = 10,
     MENU_STACK_CURSOR_SLOT_PERSONS = 11,
     MENU_STACK_CURSOR_SLOT_TUTORIAL_TOPICS = 12,
+    MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS = 13,
+    MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING = 14,
     MENU_STACK_CURSOR_SLOT_PARTICIPANTS = 15,
     MENU_STACK_CURSOR_SLOT_WORK_HISTORY = 16,
+    MENU_STACK_CURSOR_SLOT_TUTORIAL = 17,
     MENU_STACK_CURSOR_SLOT_FORMATION_TUTORIALS = 18,
     MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS = 19,
     MENU_STACK_CURSOR_SLOT_FACTS = 20
@@ -176,7 +181,7 @@ typedef enum menu_stack_cursor_slot {
 
 enum { MENU_STACK_CURSOR_SLOT_COUNT = 21 };
 
-extern menu_cursor_state_t g_menu_stack_cursor_states[];
+extern menu_cursor_state_t g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_COUNT];
 
 void menu_stack_clamp_cursor(s32 index, s32 count, s32 visible);
 void menu_stack_clear_cursor(s32 index);

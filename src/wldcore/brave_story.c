@@ -902,7 +902,7 @@ void brave_story_handle_event_input(menu_stack_record_t* level) {
         flags = g_system_flags;
         if ((flags & SYSTEM_FLAG_FADING) == 0) {
             value = level->story_event_index;
-            g_brave_story_saved_list_cursor_state = g_brave_story_event_list_cursor;
+            g_brave_story_saved_list_cursor_state = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_EVENTS];
             g_system_flags = (flags ^ SYSTEM_FLAG_RUNNING) | SYSTEM_FLAG_STORY_EVENT_REPLAY;
             g_brave_story_replay_story_event_index = value;
             g_brave_story_saved_weather_variable = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
