@@ -21,6 +21,13 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* The first rain endpoint reuses fall_speed as its splash phase. */
+typedef enum weather_rain_phase {
+    WEATHER_RAIN_FALLING = 0,
+    WEATHER_RAIN_SPLASH_VISIBLE = 1,
+    WEATHER_RAIN_SPLASH_HIDDEN = 2
+} weather_rain_phase_e;
+
 /* Current and saved GTE background colors are three adjacent 32-bit channels. */
 typedef struct battle_map_back_color {
     s32 red;
@@ -887,8 +894,8 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
         PopMatrix();
     }
 
-    /* Rain: streak i runs from particle i (lower end) up to particle i + 32. Particle i's fall_speed
-     * holds the splash state (0 falling, 1 splash shown, 2 splash hidden); the splash's counts down. */
+    /* Rain: streak i runs from particle i (lower end) up to particle i + 32. Its fall_speed
+     * holds weather_rain_phase_e; the splash record uses that field as a frame countdown. */
     if (g_weather_effect_mode == BATTLE_MAP_WEATHER_EFFECT_RAIN) {
         half_size = g_battle_map_camera_zoom.vx * 22;
         half_size /= 0x2000;
@@ -901,7 +908,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
 
             /* A streak whose upper end passed the ground respawns at a random spot high above the map. */
             if (ground < g_weather_particles[i + 32].y) {
-                g_weather_particles[i].fall_speed = 0;
+                g_weather_particles[i].fall_speed = WEATHER_RAIN_FALLING;
                 g_weather_particles[i].x = rand() % (g_battle_map_tile_width * BATTLE_MAP_TILE_SIZE);
                 g_weather_particles[i].z = rand() % (g_battle_map_tile_depth * BATTLE_MAP_TILE_SIZE);
                 spawn_y = -0x180;
@@ -948,7 +955,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             }
 
             /* A falling streak that reaches the ground starts a 16-frame splash, hidden on untargetable tiles. */
-            if (g_weather_particles[i].fall_speed == 0
+            if (g_weather_particles[i].fall_speed == WEATHER_RAIN_FALLING
                 && ((ground < g_weather_particles[i].y && g_weather_particles[i + 32].y < ground)
                     || g_weather_particles[i].y == g_battle_map_lowest_surface_y)) {
                 g_weather_rain_splash_particles[i].fall_speed = 0x10;
@@ -956,9 +963,9 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
                 g_weather_rain_splash_particles[i].x = g_weather_particles[i].x;
                 g_weather_rain_splash_particles[i].z = g_weather_particles[i].z;
                 if (!(g_battle_map_tile_data_ptr[tile].flags.untargetable)) {
-                    g_weather_particles[i].fall_speed = 1;
+                    g_weather_particles[i].fall_speed = WEATHER_RAIN_SPLASH_VISIBLE;
                 } else {
-                    g_weather_particles[i].fall_speed = 2;
+                    g_weather_particles[i].fall_speed = WEATHER_RAIN_SPLASH_HIDDEN;
                 }
             }
 
@@ -976,7 +983,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
                     g_render_current_buffer->ft3[i + 32].y1 = splash_y + half_size;
                     g_render_current_buffer->ft3[i + 32].x2 = sx - half_size;
                     g_render_current_buffer->ft3[i + 32].y2 = splash_y + half_size;
-                    if (g_weather_particles[i].fall_speed == 1) {
+                    if (g_weather_particles[i].fall_speed == WEATHER_RAIN_SPLASH_VISIBLE) {
                         AddPrim(g_render_current_buffer->otag + depth, &g_render_current_buffer->ft3[i + 32]);
                     }
                 }
@@ -999,7 +1006,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
                 }
 
                 if (g_weather_rain_splash_particles[i].fall_speed == 0) {
-                    g_weather_particles[i].fall_speed = 0;
+                    g_weather_particles[i].fall_speed = WEATHER_RAIN_FALLING;
                 }
             }
         }
