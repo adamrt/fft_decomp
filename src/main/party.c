@@ -1708,7 +1708,7 @@ void unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) {
             unit->jump = value;
             /* One 15-byte pass covers all three status sets. */
             j = 0;
-            target = unit->status_sets.innate;
+            target = (u8*)&unit->status_sets;
             for (; j < 15; j++) {
                 *target = attribute->innate[j] | *target;
                 target++;
