@@ -420,8 +420,8 @@ void animation_set_walk(unit_t* unit) {
  * the three flying animations. In deeper water the choice is the dead, the
  * riding or one of the submerged idle animations.
  *
- * Animation 0x21 belongs to bit 0 of the 32-bit status mask, which no status maps
- * to (g_status_mask_by_handler_index): that arm never runs.
+ * The two animation 0x21 branches test bit 0 of status_flags_1_4, which normal
+ * status updates never set. Crystal's bit 0 belongs to status_flags_5_6.
  */
 void animation_set_for_status(unit_t* unit) {
     s32 animation;

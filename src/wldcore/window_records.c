@@ -291,7 +291,7 @@ step_frame:
  *   them narrowed instead of reusing the `lhu` value.
  * - `object->palette` needs one local shared by the `!= 0` test and the
  *   arithmetic, or the arithmetic re-loads it.
- * - `ox = object->x` must precede `fx = frame.x`: the three loads form one
+ * - `ox = object->base.x` must precede `fx = frame.x`: the three loads form one
  *   scheduler ready list ordered by source, and the other order transposes
  *   two of them.
  */

@@ -842,6 +842,11 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 
 ## Other surprises
 
+- `save_restore_image` skips a saved Unit List order if any of its first 11 keys is 11, and skips a saved Formation order if any of its first seven keys is 11. It preserves the live order, writes its final -1 terminator, and continues loading the save. Formation key 11 would read the fixed 100 CT maximum; the Order Unit menu exposes only keys 0, 1, 2, 4, 5, 7 and 9.
+- `weather_run_command` selects precipitation from the raw script weather and snow flag. The rain and snow drawing paths do not test `BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER`: that indoor flag suppresses elemental and movement weather rules through `weather_get_effective`, but does not itself suppress the particles.
+- `move_start_next_post_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `state_handle_crystal_learn` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
+- `animation_set_for_status` retains two branches selecting animation 0x21 when bit 0 of `status_flags_1_4` is set. Normal status updates never set that bit. Crystal's mask 1 belongs to the separate `status_flags_5_6` word; this does not rule out animation requests from other paths.
+- `formation_get_unit_palette_index` treats every portrait index of 63 or more as an index into its 20-byte monster remap. A party record with `sprite_set` 5 selects portrait 120 and reads remap byte 57 in the following window data. Other special identities also overread the remap; their normal-game reachability in Formation is unverified.
 - `debug_load_efc_font`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.
 - `StCdInterrupt`: tracks frame numbers through the header's low `u16`, while DMA completion and OPEN retain the full `u32` frame number.
 - `psyq_gte_apply_rotation_ir`: writes saturated IR1–IR3 32-bit output values and returns its unchanged third argument.
