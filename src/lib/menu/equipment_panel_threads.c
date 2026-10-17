@@ -88,19 +88,19 @@ void unit_panel_equipment_ability_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode0[i]);
             }
             if (mode == 1) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode1[i]);
             }
             if (mode == 2) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode2[i]);
             }
             if (mode == 3) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode3[i]);
             }
         }
@@ -158,7 +158,7 @@ void unit_panel_equipment_ability_thread(void) {
         }
 
         for (i = 0; i < 5; i++) {
-            gfx_set_image_primitive_layout(&screen->sprites[19 + i], g_unit_panel_item_icon_texture,
+            gfx_set_image_primitive_layout(&screen->sprites[19 + i], &g_unit_panel_item_icon_texture_origin,
                 &g_unit_panel_equipment_frame_rects[0], &g_unit_panel_item_icon_layouts[i]);
             if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 gfx_set_item_icon_sprite(&screen->sprites[19 + i], state->equipment[i]);

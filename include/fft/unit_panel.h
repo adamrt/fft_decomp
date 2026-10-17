@@ -295,10 +295,10 @@ extern image_layout_t g_unit_panel_editor_label_cells[];
 extern image_layout_t g_unit_panel_editor_mode_cell[];
 extern image_layout_t g_unit_panel_editor_mode_cells[];
 extern image_layout_t g_unit_panel_editor_value_cells[];
-extern point16_t g_unit_panel_item_icon_texture[];
+extern point16_t g_unit_panel_item_icon_texture_origin;
 extern image_layout_t g_unit_panel_portrait_cell[];
 extern image_layout_t g_unit_panel_sprite_cells[];
-extern point16_t g_unit_panel_editor_numeric_geometry[];
+extern point16_t g_unit_panel_texture_origin;
 extern image_layout_t g_unit_panel_editor_numeric_texture[];
 
 /* panel state (BUNIT) */

@@ -169,7 +169,6 @@ extern rgba5551_t g_deploy_tile_clut_buffer[48];
 extern const palette_t g_deploy_tile_clut_data[3];
 extern RECT g_deploy_tile_clut_rect;
 extern palette_t g_deploy_semitrans_clut_buffer;
-extern point16_t g_deploy_texture_location[];
 extern RECT g_deploy_rect_09c;
 extern RECT g_deploy_rect_0ac;
 extern RECT g_deploy_rect_0cc;

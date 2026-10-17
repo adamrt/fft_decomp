@@ -121,8 +121,8 @@ data:
   - {addr: 0x801ca0e8, name: g_unit_panel_selected_unit_fields}
   - {addr: 0x801ca168, name: g_unit_panel_billboard_skillset_name}
   - {addr: 0x801ca17c, name: g_unit_panel_billboard_secondary_skillset_name}
-  - {addr: 0x801ca1b8, name: g_unit_panel_editor_numeric_geometry}
-  - {addr: 0x801ca1c0, name: g_unit_panel_item_icon_texture}
+  - {addr: 0x801ca1b8, name: g_unit_panel_texture_origin}
+  - {addr: 0x801ca1c0, name: g_unit_panel_item_icon_texture_origin}
   - {addr: 0x801ca1c8, name: g_unit_panel_slide_y}
   - {addr: 0x801ca1e0, name: g_menu_portrait_origin}
   - {addr: 0x801ca1e8, name: g_unit_panel_gauge_bar_colors}
@@ -188,7 +188,7 @@ data:
   - {addr: 0x801cd0b4, name: g_zodiac_texture_page_origin}
   - {addr: 0x801cd0c4, name: g_deploy_tile_clut_rect}
   - {addr: 0x801cd0cc, name: g_deploy_rect_0cc}
-  - {addr: 0x801cd0d4, name: g_deploy_texture_location}
+  - {addr: 0x801cd0d4, name: g_deploy_texture_origin}
   - {addr: 0x801cd0e4, name: g_deploy_menu_entries}
   - {addr: 0x801cd210, name: g_deploy_status_display_thread_params}
   - {addr: 0x801cd224, name: g_deploy_numbers_thread_params}
@@ -526,8 +526,8 @@ data:
   - {addr: 0x801ce944, name: g_unit_panel_panel_selected_unit_data}
   - {addr: 0x801ce954, name: g_unit_panel_panel_comparison_unit_data}
   - {addr: 0x801ce964, name: g_unit_panel_selected_unit_fields}
-  - {addr: 0x801cea34, name: g_unit_panel_editor_numeric_geometry}
-  - {addr: 0x801cea3c, name: g_unit_panel_item_icon_texture}
+  - {addr: 0x801cea34, name: g_unit_panel_texture_origin}
+  - {addr: 0x801cea3c, name: g_unit_panel_item_icon_texture_origin}
   - {addr: 0x801cea44, name: g_unit_panel_slide_y}
   - {addr: 0x801cea5c, name: g_menu_portrait_origin}
   - {addr: 0x801cea64, name: g_unit_panel_gauge_bar_colors}
@@ -1219,8 +1219,8 @@ data:
   - {addr: 0x801c53d8, name: g_unit_panel_billboard_secondary_skillset_name}
   - {addr: 0x801c53ec, name: g_unit_panel_billboard_unit_name}
   - {addr: 0x801c5400, name: g_unit_panel_billboard_job_name}
-  - {addr: 0x801c5414, name: g_unit_panel_editor_numeric_geometry}
-  - {addr: 0x801c541c, name: g_unit_panel_item_icon_texture}
+  - {addr: 0x801c5414, name: g_unit_panel_texture_origin}
+  - {addr: 0x801c541c, name: g_unit_panel_item_icon_texture_origin}
   - {addr: 0x801c5424, name: g_unit_panel_slide_y}
   - {addr: 0x801c543c, name: g_menu_portrait_origin}
   - {addr: 0x801c5444, name: g_unit_panel_gauge_bar_colors}
@@ -1564,8 +1564,8 @@ data:
   - {addr: 0x801ce47c, name: g_equipment_comparison_unit_data}
   - {addr: 0x801ce48c, name: g_unit_panel_selected_unit_fields}
   - {addr: 0x801ce4cc, name: g_item_preview_stat_detail}
-  - {addr: 0x801ce55c, name: g_unit_panel_editor_numeric_geometry}
-  - {addr: 0x801ce564, name: g_unit_panel_item_icon_texture}
+  - {addr: 0x801ce55c, name: g_unit_panel_texture_origin}
+  - {addr: 0x801ce564, name: g_unit_panel_item_icon_texture_origin}
   - {addr: 0x801ce56c, name: g_unit_panel_slide_y}
   - {addr: 0x801ce584, name: g_menu_portrait_origin}
   - {addr: 0x801ce58c, name: g_unit_panel_gauge_bar_colors}
@@ -2415,8 +2415,8 @@ data:
   - {addr: 0x801cb418, name: g_unit_panel_billboard_secondary_skillset_name}
   - {addr: 0x801cb42c, name: g_unit_panel_billboard_unit_name}
   - {addr: 0x801cb440, name: g_unit_panel_billboard_job_name}
-  - {addr: 0x801cb454, name: g_unit_panel_editor_numeric_geometry}
-  - {addr: 0x801cb45c, name: g_unit_panel_item_icon_texture}
+  - {addr: 0x801cb454, name: g_unit_panel_texture_origin}
+  - {addr: 0x801cb45c, name: g_unit_panel_item_icon_texture_origin}
   - {addr: 0x801cb47c, name: g_menu_portrait_origin}
   - {addr: 0x801cb484, name: g_unit_panel_gauge_bar_colors}
   - {addr: 0x801cb4b4, name: g_unit_panel_selected_numeric_entries}

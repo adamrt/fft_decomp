@@ -29,6 +29,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern point16_t g_deploy_texture_origin;
+
 static unit_panel_thread_t g_deploy_status_display_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_numbers_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_character_status_frame_config = { 0 };
@@ -1175,7 +1177,7 @@ static void deploy_build_button_hint(s32 frame, u32 mode, deploy_render_buffer_t
         SetShadeTex(ptr, 1);
         /* The draw area's x/y serve as the screen base point. */
         gfx_set_image_primitive_layout(
-            ptr, g_deploy_texture_location, &g_menu_draw_area_template, &g_deploy_button_hint_cells[i]);
+            ptr, &g_deploy_texture_origin, &g_menu_draw_area_template, &g_deploy_button_hint_cells[i]);
     }
 
     if (mode != DEPLOY_MENU_BLOCKED_TILE) {
@@ -1726,7 +1728,7 @@ static void deploy_text_graphics_thread(void) {
             menu_init_default_poly_ft4(&g_deploy_text_polys[parity][i]);
             ((POLY_FT4*)((u8*)g_deploy_text_polys + off))->tpage = GetTPage(0, 0, 0x100, 0);
             ((POLY_FT4*)((u8*)g_deploy_text_polys + off))->clut = 0x7d7c;
-            gfx_set_image_primitive_layout(&g_deploy_text_polys[parity][i], g_deploy_texture_location,
+            gfx_set_image_primitive_layout(&g_deploy_text_polys[parity][i], &g_deploy_texture_origin,
                 &g_deploy_text_screen_origin, &g_deploy_text_graphic_params[i]);
             if (g_deploy_text_reveal_steps[i] != 0) {
                 if (g_deploy_text_reveal_steps[i] > 0) {

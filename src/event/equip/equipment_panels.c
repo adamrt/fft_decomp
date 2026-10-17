@@ -88,19 +88,19 @@ void unit_panel_equipment_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode0 + i);
             }
             if (mode == 1) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode1 + i);
             }
             if (mode == 2) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode2 + i);
             }
             if (mode == 3) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode3 + i);
             }
         }
@@ -127,7 +127,7 @@ void unit_panel_equipment_thread(void) {
         screen->sprites[13].u0 = u;
         menu_init_sprite_array(&screen->sprites[19], 5, 0x7cfc);
         for (i = 0; i < 5; i++) {
-            gfx_set_image_primitive_layout(&screen->sprites[19 + i], g_unit_panel_item_icon_texture,
+            gfx_set_image_primitive_layout(&screen->sprites[19 + i], &g_unit_panel_item_icon_texture_origin,
                 g_unit_panel_equipment_origins, g_unit_panel_item_icon_layouts + i);
             /* Read unsigned: the target extends the id only where it is passed on. */
             id = state->equipment[i];
@@ -253,12 +253,12 @@ void unit_panel_ability_thread(void) {
 
         if (state->generic_monster == 0) {
             for (i = 0; i < 19; i++) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode0 + i);
             }
         } else {
             for (i = 0; i < 19; i++) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
+                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
                     g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode1 + i);
             }
         }
