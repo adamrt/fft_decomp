@@ -1010,8 +1010,8 @@ void unit_list_run_sort_menu(void) {
             src++;
             i++;
             dst++;
-        } while (i < 11);
-        opts[11] = -1;
+        } while (i < UNIT_LIST_SORT_KEY_COUNT);
+        opts[UNIT_LIST_SORT_KEY_COUNT] = -1;
         text_concatenate_entries(g_unit_list_text_menu_section, g_unit_list_text_reorder_list_buffer, opts, 1);
         g_unit_list_reorder_list_initialized = 1;
     }
@@ -1040,8 +1040,8 @@ void unit_list_run_sort_menu(void) {
             src++;
             i++;
             dst++;
-        } while (i < 11);
-        opts[11] = -1;
+        } while (i < UNIT_LIST_SORT_KEY_COUNT);
+        opts[UNIT_LIST_SORT_KEY_COUNT] = -1;
         text_concatenate_entries(g_unit_list_text_menu_section, g_unit_list_text_reorder_list_buffer, opts, 1);
         g_unit_list_reorder_list_redraw_request = 1;
         unit_list_store_sort_order(1, g_unit_list_reorder_list_entries);

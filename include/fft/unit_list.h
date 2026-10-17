@@ -53,6 +53,24 @@ extern u8 g_unit_list_thread_running;
 
 s32 unit_list_run_menu_thread(s32 id, menu_entry_t* desc);
 
+/* sort keys */
+/* The eleven selectable priorities in the Unit List Reorder menu. */
+typedef enum unit_list_sort_key {
+    UNIT_LIST_SORT_KEY_NUMBER = 0,
+    UNIT_LIST_SORT_KEY_LEVEL = 1,
+    UNIT_LIST_SORT_KEY_JOB = 2,
+    UNIT_LIST_SORT_KEY_AT_LIST = 3,
+    UNIT_LIST_SORT_KEY_BRAVE = 4,
+    UNIT_LIST_SORT_KEY_FAITH = 5,
+    UNIT_LIST_SORT_KEY_HP = 6,
+    UNIT_LIST_SORT_KEY_MAX_HP = 7,
+    UNIT_LIST_SORT_KEY_MP = 8,
+    UNIT_LIST_SORT_KEY_MAX_MP = 9,
+    UNIT_LIST_SORT_KEY_CT = 10
+} unit_list_sort_key_e;
+
+enum { UNIT_LIST_SORT_KEY_COUNT = 11 };
+
 /* unit records */
 /* Unit List menu snapshot built from unit_stats_t, with display values and
  * the battle_id used to return the selected unit. */
@@ -109,10 +127,6 @@ typedef struct unit_list_record {
 typedef char unit_list_record_size_must_be_268[(sizeof(unit_list_record_t) == 268) ? 1 : -1];
 
 extern unit_list_record_t* g_unit_list_pointers[];
-
-/* 16-bit field index into unit_list_record_t, per sort key, used by
- * unit_list_sort. The name is provisional. */
-extern s8 g_unit_list_sort_field_indices[];
 
 s32 unit_list_build_records(s32 unused_mode, unit_list_record_t** unused_records, s32 sort_mode);
 s32 unit_list_find_by_battle_id(s16 battle_id);

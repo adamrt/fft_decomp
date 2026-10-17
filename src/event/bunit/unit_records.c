@@ -13,6 +13,10 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Signed halfword indices into unit_list_record_t. The twelfth entry selects maximum CT,
+ * but the Reorder menu exposes only the first eleven. */
+extern s8 g_unit_list_sort_field_indices[12];
+
 static s16 g_unit_list_shown_unit_indices[22] = { 0 };
 static s16 g_unit_list_count = 0;
 static unit_list_record_t g_unit_list_records[21] = { 0 };
@@ -299,7 +303,7 @@ s32 unit_list_build_records(s32 unused_mode, unit_list_record_t** unused_records
  * successive keys of g_menu_sort_orders.unit_list (the unit sort order the
  * reorder list edits, each key a record field picked through g_unit_list_sort_field_indices; a tie
  * moves on to the next key), then publish the sorted record pointers into
- * g_unit_list_pointers. Keys 1 and 4 and up sort in descending order. `sort_mode` is
+ * g_unit_list_pointers. Level and the Brave-through-CT keys sort in descending order. `sort_mode` is
  * not read. */
 void unit_list_sort(s32 sort_mode) {
     s32 count;
@@ -321,7 +325,8 @@ void unit_list_sort(s32 sort_mode) {
                 diff = rhs - lhs;
                 k++;
             } while (diff == 0);
-            if (g_menu_sort_orders.unit_list[k - 1] == 1 || g_menu_sort_orders.unit_list[k - 1] >= 4) {
+            if (g_menu_sort_orders.unit_list[k - 1] == UNIT_LIST_SORT_KEY_LEVEL
+                || g_menu_sort_orders.unit_list[k - 1] >= UNIT_LIST_SORT_KEY_BRAVE) {
                 diff = -diff;
             }
             if (diff < 0) {

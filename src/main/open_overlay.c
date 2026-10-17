@@ -8,6 +8,7 @@
 #include "fft/memory.h"
 #include "fft/overlay.h"
 #include "fft/title.h"
+#include "fft/unit_list.h"
 #include "psx/kernel.h"
 #include "psx/libapi.h"
 #include "psx/libc.h"
@@ -17,18 +18,18 @@
  * sequences, empty the weapon, helmet, armor, accessory and item page orders, and zero the
  * poached item counts. */
 void item_init_order_tables(void) {
-    g_menu_sort_orders.unit_list[0] = 0;
-    g_menu_sort_orders.unit_list[1] = 1;
-    g_menu_sort_orders.unit_list[2] = 2;
-    g_menu_sort_orders.unit_list[3] = 3;
-    g_menu_sort_orders.unit_list[4] = 4;
-    g_menu_sort_orders.unit_list[5] = 5;
-    g_menu_sort_orders.unit_list[6] = 6;
-    g_menu_sort_orders.unit_list[7] = 7;
-    g_menu_sort_orders.unit_list[8] = 8;
-    g_menu_sort_orders.unit_list[9] = 9;
-    g_menu_sort_orders.unit_list[10] = 10;
-    g_menu_sort_orders.unit_list[11] = -1;
+    g_menu_sort_orders.unit_list[0] = UNIT_LIST_SORT_KEY_NUMBER;
+    g_menu_sort_orders.unit_list[1] = UNIT_LIST_SORT_KEY_LEVEL;
+    g_menu_sort_orders.unit_list[2] = UNIT_LIST_SORT_KEY_JOB;
+    g_menu_sort_orders.unit_list[3] = UNIT_LIST_SORT_KEY_AT_LIST;
+    g_menu_sort_orders.unit_list[4] = UNIT_LIST_SORT_KEY_BRAVE;
+    g_menu_sort_orders.unit_list[5] = UNIT_LIST_SORT_KEY_FAITH;
+    g_menu_sort_orders.unit_list[6] = UNIT_LIST_SORT_KEY_HP;
+    g_menu_sort_orders.unit_list[7] = UNIT_LIST_SORT_KEY_MAX_HP;
+    g_menu_sort_orders.unit_list[8] = UNIT_LIST_SORT_KEY_MP;
+    g_menu_sort_orders.unit_list[9] = UNIT_LIST_SORT_KEY_MAX_MP;
+    g_menu_sort_orders.unit_list[10] = UNIT_LIST_SORT_KEY_CT;
+    g_menu_sort_orders.unit_list[UNIT_LIST_SORT_KEY_COUNT] = -1;
     g_menu_sort_orders.formation[0] = FORMATION_SORT_KEY_NUMBER;
     g_menu_sort_orders.formation[1] = FORMATION_SORT_KEY_LEVEL;
     g_menu_sort_orders.formation[2] = FORMATION_SORT_KEY_JOB;
