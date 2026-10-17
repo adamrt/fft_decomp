@@ -457,7 +457,7 @@ typedef struct ai_data {
     /* ai_select_action saves the complete decision before retreat and restores
      * it only after the retreat pass finishes, not when it suspends. */
     ai_unit_decision_t saved_acting_unit_decision; /* 0x197c */
-    u8 unit_compact_indices[UNIT_SLOT_COUNT];      /* 0x198c; slot -> index among present units (0..15) */
+    u8 unit_compact_indices[UNIT_SLOT_COUNT];      /* 0x198c; slot -> index among present units; 0xff when absent */
     u8 unit_autobattle_modes[UNIT_SLOT_COUNT];     /* 0x19a1; ai_autobattle_mode_e from ENTD AI flags */
     u8 autobattle_setting;                         /* 0x19b6 */
     u8 resume_pending;                             /* 0x19b7; an AI routine suspended on its frame budget */

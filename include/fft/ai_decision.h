@@ -248,8 +248,9 @@ typedef struct ai_extended_snapshot {
 } ai_extended_snapshot_t;
 typedef char ai_extended_snapshot_size_must_be_64[sizeof(ai_extended_snapshot_t) == 64 ? 1 : -1];
 
-/* Unit snapshots share the scratchpad-save arena used during movement propagation. */
-extern ai_extended_snapshot_t g_ai_unit_snapshot_storage[];
+/* Sixteen 64-byte snapshots share the 1024-byte scratchpad-save arena used
+ * during movement propagation. */
+extern ai_extended_snapshot_t g_ai_unit_snapshot_storage[AI_COMPACT_UNIT_COUNT];
 extern ai_extended_snapshot_t* g_ai_unit_snapshots;
 
 void ai_simulate_begin(void);

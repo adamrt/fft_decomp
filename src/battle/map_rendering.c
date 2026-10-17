@@ -3457,7 +3457,8 @@ s32 battle_map_gns_dispatch_resource(u8 resource_type, battle_map_resource_t* da
         direction.m[2][1] = vector[7];
         direction.m[2][2] = vector[8];
 
-        /* Retail reads the packed direction bytes as MATRIX translation fields. */
+        /* Retail reads packed direction bytes as the first MATRIX translation fields
+         * and copies the uninitialized direction.t fields of the second matrix. */
         battle_map_light_set_matrices((MATRIX*)light, &direction);
         battle_map_light_control_back_color(
             BATTLE_MAP_LIGHT_BACK_COLOR_SET, light->ambient.r, light->ambient.g, light->ambient.b);
