@@ -11,7 +11,7 @@ source_dir: src/main
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
-  - {name: cd_headers, source: src/main/cd_headers.c}
+  - {name: file_requests, source: src/main/file_requests.c}
   - {name: game_loop, source: src/main/game_loop.c}
   - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: open_overlay, source: src/main/open_overlay.c}
@@ -41,12 +41,12 @@ functions:
   - {addr: 0x80010b40, size: 104, name: __do_global_dtors, hash: 30e458972df14eda, source: src/platform/psyq/crt/__do_global_dtors.c}
   - {addr: 0x80011bb0, size: 16, name: system_store_stack_pointer, hash: 972f7e917252ee42}
   - {addr: 0x80011bc0, size: 16, name: system_restore_game_loop_stack_pointer, hash: 8b9c9cab30efada8, asm: "Stack-replacing ABI tail transfer to system_run_game_loop; ordinary C cannot assign sp."}
-  - {addr: 0x80011bd0, size: 36, name: file_request_read_quiet, hash: 323354187cbfd5ba, unit: cd_headers}
-  - {addr: 0x80011bf4, size: 484, name: file_request_read, hash: 2289317868ab7dd4, unit: cd_headers}
-  - {addr: 0x80011dd8, size: 64, name: file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: cd_headers}
-  - {addr: 0x80011e18, size: 32, name: file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: cd_headers}
+  - {addr: 0x80011bd0, size: 36, name: file_request_read_quiet, hash: 323354187cbfd5ba, unit: file_requests}
+  - {addr: 0x80011bf4, size: 484, name: file_request_read, hash: 2289317868ab7dd4, unit: file_requests}
+  - {addr: 0x80011dd8, size: 64, name: file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: file_requests}
+  - {addr: 0x80011e18, size: 32, name: file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: file_requests}
   - {addr: 0x80011e38, size: 488, name: file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
-  - {addr: 0x80012020, size: 212, name: loading_draw_message, hash: dd193b96065424a5, source: src/main/gfx_draw_now_loading_message.c}
+  - {addr: 0x80012020, size: 212, name: loading_draw_message, hash: dd193b96065424a5}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, source: src/lib/suzuki/suzuki_smd_create_music.c}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, source: src/lib/suzuki/suzuki_smd_unload_music.c}
   - {addr: 0x800121cc, size: 8, name: suzuki_smd_noop_1, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_smd_noop_1.c}
