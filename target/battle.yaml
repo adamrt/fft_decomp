@@ -2796,7 +2796,6 @@ data:
   - {addr: 0x801b84ac, name: g_effect_secondary_by_charge_animation}
   - {addr: 0x801b84c0, name: g_effect_charge_trail_colors}
   - {addr: 0x801b84dc, name: g_effect_secondary_animations}
-  - {addr: 0x801b8530, name: g_effect_secondary_ending_function_id}
   - {addr: 0x801b8534, name: g_effect_model_files}
   - {addr: 0x801b8544, name: g_effect_element_masks}
   - {addr: 0x801b8550, name: g_effect_reflect_palette_colors}

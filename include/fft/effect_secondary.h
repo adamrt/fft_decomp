@@ -112,9 +112,11 @@ typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_EQUIP_BREAK = 18, /* abilities 0x8a-0x91 */
     EFFECT_SECONDARY_ANIMATION_TELEPORT = 19,
     EFFECT_SECONDARY_ANIMATION_GOLEM = 20,
-    /* the null handler; g_effect_secondary_ending_function_id is this record's function byte */
+    /* the null handler */
     EFFECT_SECONDARY_ANIMATION_ENDING = 21
 } effect_secondary_animation_id_e;
+
+enum { EFFECT_SECONDARY_ANIMATION_COUNT = 22 };
 
 /* The secondary animation parameter that makes the projectile handler draw the thrown item's own
  * graphic instead of a model. */
@@ -131,8 +133,7 @@ typedef struct effect_secondary_animation {
     s16 parameter;
 } effect_secondary_animation_t;
 
-extern effect_secondary_animation_t g_effect_secondary_animations[];
-extern u8 g_effect_secondary_ending_function_id; /* function byte to store; 5 = nothing */
+extern effect_secondary_animation_t g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_COUNT];
 
 /* Secondary-animation id per charge animation set, indexed by the low 16 bits of the
  * caller's packed argument. */

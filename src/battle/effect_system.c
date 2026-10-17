@@ -1329,7 +1329,7 @@ static s32 effect_secondary_end_on_current_unit(void) {
     *(s16*)((u8*)&g_effect_secondary_data + record_offset + offsetof(effect_secondary_data_t, timer)) = 0;
     *(u16*)((u8*)&g_effect_secondary_data + record_offset + offsetof(effect_secondary_data_t, animation_id))
         = EFFECT_SECONDARY_ANIMATION_ENDING;
-    function_id = g_effect_secondary_ending_function_id;
+    function_id = g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_ENDING].function_id;
     g_effect_secondary_data[secondary_id].phase = EFFECT_SECONDARY_PHASE_INITIALIZING;
     g_effect_secondary_data[secondary_id].function_id = function_id;
     return secondary_id;
