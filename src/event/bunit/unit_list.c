@@ -29,6 +29,64 @@
 extern u8 g_unit_list_grid_stat_bar_script_top[12];
 extern u8 g_unit_list_grid_stat_bar_script_bottom[12];
 
+/* unit grid */
+extern point16_t g_unit_list_grid_cursor_target;
+extern u8 g_unit_list_stat_mode; /* menu_unit_readout_e */
+extern s16 g_unit_list_current_stat_value;
+extern s16 g_unit_list_max_stat_value;
+extern menu_sprite_cell_t g_unit_list_grid_label_tiles[8];
+extern menu_sprite_cell_t g_unit_list_grid_label_tiles_bottom[8];
+extern menu_draw_number_command_t g_unit_list_grid_level_number;
+extern menu_draw_number_command_t g_unit_list_grid_experience_number;
+extern menu_draw_number_command_t g_unit_list_grid_brave_number;
+extern menu_draw_number_command_t g_unit_list_grid_brave_number_wide;
+extern menu_draw_number_command_t g_unit_list_grid_faith_number;
+extern menu_draw_number_command_t g_unit_list_grid_faith_number_wide;
+extern menu_draw_number_command_t g_unit_list_grid_stat_number;
+extern menu_draw_number_command_t g_unit_list_grid_max_stat_number;
+extern s8 g_unit_list_grid_gauge_offsets[];
+extern u16 g_unit_list_grid_hp_gauge_clut;
+extern rgb24_t g_unit_list_grid_hp_gauge_colors[4];
+extern u16 g_unit_list_grid_mp_gauge_clut;
+extern rgb24_t g_unit_list_grid_mp_gauge_colors[4];
+extern u16 g_unit_list_grid_ct_gauge_clut;
+extern rgb24_t g_unit_list_grid_ct_gauge_colors[4];
+extern rgb24_t g_unit_list_grid_normal_color;
+extern rgb24_t g_unit_list_grid_dimmed_color;
+extern oriented_quad_t g_unit_list_dot_sprite;
+extern oriented_quad_t g_unit_list_shadow_sprite;
+extern s8 g_unit_list_dot_glow_direction;
+extern s8 g_unit_list_dot_glow_timer;
+extern menu_button_piece_t g_unit_list_slot_sprite_entries[];
+extern u8 g_unit_list_sprite_cell_sizes[][2];
+
+/* Signed 4.12 x/y scale pair per sprite entry; a negative scale flips the quad. */
+extern s16 g_unit_list_button_piece_scales[][2];
+
+/* reorder list */
+extern u8 g_unit_list_reorder_list_initialized;
+extern menu_entry_t g_unit_list_reorder_list_desc[];
+extern s16 g_unit_list_reorder_list_entries[];
+extern s16 g_unit_list_reorder_list_index;
+extern s16 g_unit_list_reorder_list_redraw_request;
+extern u8 g_unit_list_reorderable_indices[];
+
+/* cursor trail */
+/* Oriented-quad descriptors for the two cursor halves. */
+extern oriented_quad_t g_unit_list_cursor_sprite;
+extern oriented_quad_t g_unit_list_cursor_shadow_sprite;
+
+/* Rhombus-cursor trail, oldest point first; x == -1 marks an empty slot
+ * (unit_list_init_cursor_trail clears all eight). */
+extern point16_t g_unit_list_cursor_trail_points[8];
+extern u8 g_unit_list_cursor_trail_brightness[];
+
+/* row shading */
+extern u16 g_unit_list_gfx_background_clut;
+extern u16 g_unit_list_gfx_background_tile_layout[2][8]; /* per row parity: four (x, u) column pairs */
+extern s16 g_unit_list_gfx_falloff_focus_x;
+extern s16 g_unit_list_gfx_falloff_focus_y;
+
 static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y);
 static void unit_list_init_cursor_trail(void);
 static void unit_list_update_cursor_trail(point16_t* target);

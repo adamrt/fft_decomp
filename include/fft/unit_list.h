@@ -49,8 +49,6 @@ typedef enum unit_list_thread_slot {
     UNIT_LIST_THREAD_SLOT_REORDER_MENU = 15 /* the reorder list */
 } unit_list_thread_slot_e;
 
-extern u8 g_unit_list_thread_running;
-
 s32 unit_list_run_menu_thread(s32 id, menu_entry_t* desc);
 
 /* sort keys */
@@ -148,51 +146,13 @@ s32 unit_list_is_scroll_needed(void);
 
 /* unit grid */
 extern u8 g_unit_list_grid_selected_cell;
-extern point16_t g_unit_list_grid_cursor_target;
-extern u8 g_unit_list_stat_mode; /* menu_unit_readout_e */
-extern s16 g_unit_list_current_stat_value;
-extern s16 g_unit_list_max_stat_value;
-extern menu_sprite_cell_t g_unit_list_grid_label_tiles[8];
-extern menu_sprite_cell_t g_unit_list_grid_label_tiles_bottom[8];
-extern menu_draw_number_command_t g_unit_list_grid_level_number;
-extern menu_draw_number_command_t g_unit_list_grid_experience_number;
-extern menu_draw_number_command_t g_unit_list_grid_brave_number;
-extern menu_draw_number_command_t g_unit_list_grid_brave_number_wide;
-extern menu_draw_number_command_t g_unit_list_grid_faith_number;
-extern menu_draw_number_command_t g_unit_list_grid_faith_number_wide;
-extern menu_draw_number_command_t g_unit_list_grid_stat_number;
-extern menu_draw_number_command_t g_unit_list_grid_max_stat_number;
-extern s8 g_unit_list_grid_gauge_offsets[];
-extern u16 g_unit_list_grid_hp_gauge_clut;
-extern rgb24_t g_unit_list_grid_hp_gauge_colors[4];
-extern u16 g_unit_list_grid_mp_gauge_clut;
-extern rgb24_t g_unit_list_grid_mp_gauge_colors[4];
-extern u16 g_unit_list_grid_ct_gauge_clut;
-extern rgb24_t g_unit_list_grid_ct_gauge_colors[4];
-extern rgb24_t g_unit_list_grid_normal_color;
-extern rgb24_t g_unit_list_grid_dimmed_color;
-extern oriented_quad_t g_unit_list_dot_sprite;
-extern oriented_quad_t g_unit_list_shadow_sprite;
-extern s8 g_unit_list_dot_glow_direction;
-extern s8 g_unit_list_dot_glow_timer;
-extern menu_button_piece_t g_unit_list_slot_sprite_entries[];
-extern u8 g_unit_list_sprite_cell_sizes[][2];
-
-/* Signed 4.12 x/y scale pair per sprite entry; a negative scale flips the quad. */
-extern s16 g_unit_list_button_piece_scales[][2];
 
 s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_panel, s16 allow_stat_cycle,
     s16 stat_mode, s16 buttons, s16 locked);
 
 /* reorder list */
-extern u8 g_unit_list_reorder_list_initialized;
-extern menu_entry_t g_unit_list_reorder_list_desc[];
-extern s16 g_unit_list_reorder_list_entries[];
-extern s16 g_unit_list_reorder_list_index;
-extern s16 g_unit_list_reorder_list_redraw_request;
 extern s16 g_unit_list_reorder_result;
 extern u8 g_unit_list_reorderable_count;
-extern u8 g_unit_list_reorderable_indices[];
 
 void unit_list_run_sort_menu(void);
 s32 unit_list_build_sortable(void);
@@ -211,47 +171,16 @@ extern s8 g_unit_list_status_banner_slide_step;
 
 /* help */
 extern s32 g_unit_list_help_screen_id; /* help_grid_id_e */
-extern help_navigation_record_t* g_unit_list_help_nodes;
-extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[];
-extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];
-extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[];
-extern u8 g_unit_list_help_node_index;
-extern u16 g_unit_list_help_cursor_anim_state;
-extern u8 g_unit_list_help_cursor_initialized;
-
-/* Aliases of g_unit_list_help_nodes/g_unit_list_help_node_index; the target reloads them at each use
- * instead of reusing the cached copies, which separate symbols reproduce. */
-extern help_navigation_record_t* g_unit_list_help_nodes_reload;
-extern u8 g_unit_list_help_node_index_reload;
-extern u8 g_unit_list_help_node_index_reload_2;
-
-/* g_unit_list_help_nodes_unit_browse[23].help_base and [24].help_base as their own symbols: as element
- * accesses GCC derives the second store and the later table address from one base register. */
-extern s16 g_unit_list_help_node_23_help_base;
-extern s16 g_unit_list_help_node_24_help_base;
 
 void unit_list_update_help_cursor(s16 mode);
 
 /* cursors */
 extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
 
-/* Oriented-quad descriptors for the two cursor halves. */
-extern oriented_quad_t g_unit_list_cursor_sprite;
-extern oriented_quad_t g_unit_list_cursor_shadow_sprite;
-
-/* Rhombus-cursor trail, oldest point first; x == -1 marks an empty slot
- * (unit_list_init_cursor_trail clears all eight). */
-extern point16_t g_unit_list_cursor_trail_points[8];
-extern u8 g_unit_list_cursor_trail_brightness[];
-
 /* graphics */
 extern u16 g_unit_list_gfx_draw_area_capacity;
 extern u16 g_unit_list_gfx_draw_move_capacity;
 extern s16 g_unit_list_gfx_line_f2_count;
-extern u16 g_unit_list_gfx_background_clut;
-extern u16 g_unit_list_gfx_background_tile_layout[2][8]; /* per row parity: four (x, u) column pairs */
-extern s16 g_unit_list_gfx_falloff_focus_x;
-extern s16 g_unit_list_gfx_falloff_focus_y;
 
 /* Volatile capacity reads preserve the original packet-binder load scheduling. */
 extern volatile u16 g_unit_list_gfx_line_g2_capacity;
@@ -270,9 +199,6 @@ void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag);
 void unit_list_draw_shaded_rows(s32 y);
 
 /* input */
-extern u16 g_unit_list_input_latched_button;
-extern u16 g_unit_list_input_previous;
-extern u32 g_unit_list_input_primary_repeat;
 extern u32 g_unit_list_input_secondary_repeat;
 
 /* Named fields hoist the address; keep the 32-bit event-input alias for scalar accesses. */
@@ -286,8 +212,6 @@ void unit_list_update_input(void);
 enum { UNIT_LIST_SCRIPT_END = 0x1c };
 
 /* text */
-extern u8 g_unit_list_help_text_state;
-
 /* Text-section buffers: unit_list_run_sort_menu passes g_unit_list_text_reorder_list_buffer
  * straight to text_concatenate_entries as its u8* output string and
  * g_unit_list_text_menu_section as the text-section base; unit_list_init_vram_and_fade
@@ -296,10 +220,5 @@ extern u8 g_unit_list_text_menu_section[];
 extern u8 g_unit_list_text_reorder_list_buffer[];
 
 void unit_list_start_text_thread(s32 thread_data);
-
-/* bit streams */
-extern const u8* g_unit_list_bits_cursor;
-extern s32 g_unit_list_bits_index;
-extern u8 g_unit_list_bits_reader_reset;
 
 #endif

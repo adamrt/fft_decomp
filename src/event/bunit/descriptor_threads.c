@@ -21,6 +21,42 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* menu thread */
+extern u8 g_unit_list_thread_running;
+
+/* help cursor */
+extern help_navigation_record_t* g_unit_list_help_nodes;
+extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[];
+extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];
+extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[];
+extern u8 g_unit_list_help_node_index;
+extern u16 g_unit_list_help_cursor_anim_state;
+extern u8 g_unit_list_help_cursor_initialized;
+
+/* Aliases of g_unit_list_help_nodes/g_unit_list_help_node_index; the target reloads them at each use
+ * instead of reusing the cached copies, which separate symbols reproduce. */
+extern help_navigation_record_t* g_unit_list_help_nodes_reload;
+extern u8 g_unit_list_help_node_index_reload;
+extern u8 g_unit_list_help_node_index_reload_2;
+
+/* g_unit_list_help_nodes_unit_browse[23].help_base and [24].help_base as their own symbols: as element
+ * accesses GCC derives the second store and the later table address from one base register. */
+extern s16 g_unit_list_help_node_23_help_base;
+extern s16 g_unit_list_help_node_24_help_base;
+
+/* controller input */
+extern u16 g_unit_list_input_latched_button;
+extern u16 g_unit_list_input_previous;
+extern u32 g_unit_list_input_primary_repeat;
+
+/* help text */
+extern u8 g_unit_list_help_text_state;
+
+/* bit reader */
+extern const u8* g_unit_list_bits_cursor;
+extern s32 g_unit_list_bits_index;
+extern u8 g_unit_list_bits_reader_reset;
+
 /* Run menu `desc` on thread slot `id`: on the first call (while
  * g_unit_list_thread_running is clear) publish it as g_menu_thread_menu_data and start
  * its thread there, unless the slot is busy. Returns 1 while that thread runs and 0 once
