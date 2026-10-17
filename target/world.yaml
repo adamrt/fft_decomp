@@ -16,7 +16,7 @@ units:
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801564d0, size: 336, hash: aee19a4a8c26100e}]}
   - {name: bit_streams, source: src/lib/bits.c}
   - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
-  - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}, {addr: 0x80156b4c, size: 38, hash: 5cf20e3c3f45bdbf}, {addr: 0x80156b74, size: 20, hash: 34d5f02d6411f13b}]}
+  - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}, {addr: 0x80156b4c, size: 38, hash: 5cf20e3c3f45bdbf}]}
   - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c, data: [{addr: 0x80154d38, size: 112, hash: d25818f8775b3f28}]}
@@ -29,6 +29,7 @@ units:
   - {name: equipment_slots, source: src/world/equipment_slots.c, data: [{addr: 0x8018d7ec, size: 5, hash: 2b02997e9b337299}, {addr: 0x8018d7f4, size: 5, hash: 2b02997e9b337299}]}
   - {name: equipment_stat_changes, source: src/lib/menu/equipment_stat_changes.c}
   - {name: equipment_stat_deltas, source: src/lib/menu/equipment_stat_deltas.c}
+  - {name: event_frame, source: src/world/event_frame.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156b74, size: 20, hash: 34d5f02d6411f13b}]}
   - {name: event_resources, source: src/lib/event/event_resources.c}
   - {name: event_unit_lookup, source: src/lib/event/event_unit_lookup.c}
   - {name: font_rendering, source: src/world/font_rendering.c, data: [{addr: 0x801c9ee8, size: 2048, hash: e5a00aa9991ac8a5}]}
@@ -395,17 +396,17 @@ functions:
   - {addr: 0x800f5f0c, size: 1296, name: scenario_check_condition, hash: 5e07a4b1d51f3ad0, unit: command_menus}
   - {addr: 0x800f641c, size: 72, name: scenario_get_finish_operation, hash: deaa25ecf5628c12, unit: command_menus}
   - {addr: 0x800f6464, size: 44, name: script_get_event_finish_operation, hash: 7d999b7e3a6a55c0, unit: command_menus}
-  - {addr: 0x800f6490, size: 84, name: tutorial_pulse_wait_value, hash: 9e5204eaa009440e, unit: command_menus}
-  - {addr: 0x800f64e4, size: 132, name: script_apply_input_overrides, hash: a3e515891d532a57, unit: command_menus}
-  - {addr: 0x800f6568, size: 604, name: script_route_event_input, hash: 9e2593c6e781c5b6, unit: command_menus}
-  - {addr: 0x800f67c4, size: 44, name: script_filter_controller_input, hash: fe99b31bcc328180, unit: command_menus}
-  - {addr: 0x800f67f0, size: 1596, name: script_run_event_frame, hash: eac0cd402d9dd578, unit: command_menus}
-  - {addr: 0x800f6e2c, size: 60, name: script_set_current_otag_entry_and_update_input, hash: d5b6fdd929637d19, unit: command_menus}
-  - {addr: 0x800f6e68, size: 48, name: script_set_specialized_map_destroyed, hash: d1d0b33651696dd9, unit: command_menus}
-  - {addr: 0x800f6e98, size: 8, name: script_process_pending_requests, hash: 6d64edf91449c1b1, unit: command_menus}
-  - {addr: 0x800f6ea0, size: 8, name: camera_load_state_from_script_variables, hash: 6d64edf91449c1b1, unit: command_menus}
-  - {addr: 0x800f6ea8, size: 8, name: camera_store_state_to_script_variables, hash: 6d64edf91449c1b1, unit: command_menus}
-  - {addr: 0x800f6eb0, size: 24, name: battle_map_get_weather, hash: 81566a90318e897e, unit: command_menus}
+  - {addr: 0x800f6490, size: 84, name: tutorial_pulse_wait_value, hash: 9e5204eaa009440e, unit: event_frame}
+  - {addr: 0x800f64e4, size: 132, name: script_apply_input_overrides, hash: a3e515891d532a57, unit: event_frame}
+  - {addr: 0x800f6568, size: 604, name: script_route_event_input, hash: 9e2593c6e781c5b6, unit: event_frame}
+  - {addr: 0x800f67c4, size: 44, name: script_filter_controller_input, hash: fe99b31bcc328180, unit: event_frame}
+  - {addr: 0x800f67f0, size: 1596, name: script_run_event_frame, hash: eac0cd402d9dd578, unit: event_frame}
+  - {addr: 0x800f6e2c, size: 60, name: script_set_current_otag_entry_and_update_input, hash: d5b6fdd929637d19, unit: event_frame}
+  - {addr: 0x800f6e68, size: 48, name: script_set_specialized_map_destroyed, hash: d1d0b33651696dd9, unit: event_frame}
+  - {addr: 0x800f6e98, size: 8, name: script_process_pending_requests, hash: 6d64edf91449c1b1, unit: event_frame}
+  - {addr: 0x800f6ea0, size: 8, name: camera_load_state_from_script_variables, hash: 6d64edf91449c1b1, unit: event_frame}
+  - {addr: 0x800f6ea8, size: 8, name: camera_store_state_to_script_variables, hash: 6d64edf91449c1b1, unit: event_frame}
+  - {addr: 0x800f6eb0, size: 24, name: battle_map_get_weather, hash: 81566a90318e897e, unit: event_frame}
   - {addr: 0x800f6ec8, size: 40, name: script_run_next_event, hash: 7bcd75fff235e2a0, source: src/lib/event/script_run_next_event.c}
   - {addr: 0x800f6ef0, size: 40, name: script_run_next_event_unused, hash: 7bcd75fff235e2a0, source: src/lib/event/script_run_next_event.c, source_symbol: script_run_next_event}
   - {addr: 0x800f6f18, size: 8, name: script_opcode_45_add_unit, hash: 6d64edf91449c1b1, source: src/lib/event/script_opcode_45_add_unit.c}
