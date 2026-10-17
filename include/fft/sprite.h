@@ -269,7 +269,7 @@ typedef struct sprite_unit_query {
 } sprite_unit_query_t;
 
 void sprite_frame_load_unit(unit_t* unit, struct animation_state* state, u16 frame, u16 sequence_id);
-sprite_frame_t* sprite_get_unit_frame_and_vram_ids(u32 runtime_id, sprite_unit_query_t* out);
+const sprite_frame_t* sprite_get_unit_frame_and_vram_ids(u32 runtime_id, sprite_unit_query_t* out);
 void sprite_set_horizontal_flip_flag(u32 runtime_id);
 void sprite_clear_horizontal_flip_flag(u32 runtime_id);
 void sprite_update_transparency_flag(struct unit* unit);

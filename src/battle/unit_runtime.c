@@ -610,7 +610,7 @@ void sprite_evtchr_set_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32
  * the SHP frame it is showing: the submerged one for a rider. The crystal
  * and later status sheets share the OTHER texture page.
  */
-sprite_frame_t* sprite_get_unit_frame_and_vram_ids(u32 runtime_id, sprite_unit_query_t* out) {
+const sprite_frame_t* sprite_get_unit_frame_and_vram_ids(u32 runtime_id, sprite_unit_query_t* out) {
     unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {

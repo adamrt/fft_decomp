@@ -862,10 +862,10 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         s16 vh;
         sprite_unit_query_t query; /* 0x10 */
     } quad;
-    sprite_frame_t* frame;
+    const sprite_frame_t* frame;
     s32 base_y;
     s32 i;
-    sprite_frame_part_t* cells;
+    const sprite_frame_part_t* cells;
     s32 tile;
     s32 dx;
     s32 orientation;
@@ -877,7 +877,7 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
     frame = sprite_get_unit_frame_and_vram_ids(g_unit_list_pointers[unit]->runtime_id, &quad.query);
     base_y = (quad.query.graphic_height >> 1) + 0x16;
     /* Retail tests -1, although an absent runtime unit returns 0 and leaves the query unset. */
-    if (frame == (sprite_frame_t*)-1) {
+    if (frame == (const sprite_frame_t*)-1) {
         return;
     }
     cells = frame->parts;
