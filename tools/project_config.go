@@ -961,6 +961,9 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 				fail("%s: %v", where, err)
 			}
 		}
+		if err := validateUnitOwnedLayout(m); err != nil {
+			fail("%v", err)
+		}
 		for source := range unitSources {
 			sources[source] = true
 		}

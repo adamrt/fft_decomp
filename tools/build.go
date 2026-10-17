@@ -127,11 +127,19 @@ type compiledFunction struct {
 	err      error
 }
 
+type compiledModule struct {
+	functions []compiledFunction
+	unitData  [][]compiledDataSpan // indexed by moduleSpec.Units, emitted once per unit
+}
+
 // compileModule compiles the selected functions of one module (all when
 // only is nil) through the historical toolchain, each linked at its target
 // address, and returns their allocatable sections.
-func (p project) compileModule(config *projectConfig, resolver symbolResolver, m *moduleSpec, only map[string]bool) ([]compiledFunction, error) {
-	results := make([]compiledFunction, len(m.Functions))
+func (p project) compileModule(config *projectConfig, resolver symbolResolver, m *moduleSpec, only map[string]bool) (*compiledModule, error) {
+	results := &compiledModule{
+		functions: make([]compiledFunction, len(m.Functions)),
+		unitData:  make([][]compiledDataSpan, len(m.Units)),
+	}
 	jobs, err := toolJobs()
 	if err != nil {
 		return nil, err
@@ -182,10 +190,10 @@ func (p project) compileModule(config *projectConfig, resolver symbolResolver, m
 					compileSlots <- struct{}{}
 				}
 				if index >= 0 {
-					results[index].sections, results[index].err = p.compileFunction(resolver, m, &m.Functions[index], workDir)
+					results.functions[index].sections, results.functions[index].err = p.compileFunction(resolver, m, &m.Functions[index], workDir)
 					p.progress.step()
 				} else {
-					p.compileUnit(config, resolver, m, &m.Units[-index-1], workDir, results, indexOf)
+					results.unitData[-index-1] = p.compileUnit(config, resolver, m, &m.Units[-index-1], workDir, results.functions, indexOf)
 				}
 				if compileSlots != nil {
 					<-compileSlots
@@ -219,8 +227,9 @@ func (p project) compileEntry(config *projectConfig, resolver symbolResolver, m 
 }
 
 // compileUnit compiles one configured unit once and hands each member its
-// slice of the merged sections, or the unit's error.
-func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *moduleSpec, unit *unitDef, workDir string, results []compiledFunction, indexOf map[string]int) {
+// slice of the merged sections, or the unit's error. The unit-owned data is
+// returned separately so the module build can emit it once.
+func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *moduleSpec, unit *unitDef, workDir string, results []compiledFunction, indexOf map[string]int) []compiledDataSpan {
 	members := m.unitMembers(unit.Name)
 	step := func() {
 		if p.progress != nil {
@@ -236,18 +245,18 @@ func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *
 	instance, err := m.unitInstance(config, unit.Name)
 	if err != nil {
 		setError(err)
-		return
+		return nil
 	}
 	source := filepath.Join(p.root, filepath.FromSlash(unit.Source))
 	sections, err := p.compileUnitInstance(resolver, instance, source, filepath.Join(workDir, "units", unit.Name))
 	if err != nil {
 		setError(err)
-		return
+		return nil
 	}
 	memberResults, problems := compareUnitSections(instance, sections)
 	if len(problems) > 0 {
 		setError(errors.New(strings.Join(problems, "; ")))
-		return
+		return nil
 	}
 	text := sections[".text"]
 	for _, result := range memberResults {
@@ -265,6 +274,7 @@ func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *
 		results[indexOf[f.Name]].sections = slices
 		step()
 	}
+	return sliceUnitOwnedData(instance, sections)
 }
 
 // functionLinker returns f's source path and the linker script that binds the
@@ -377,8 +387,8 @@ func moduleBuildOutput(root string, m *moduleSpec) string {
 	return filepath.Join(root, "build", strings.ToLower(filepath.Dir(filepath.FromSlash(m.File))), base)
 }
 
-// buildModule replaces every configured function in a copy of the original
-// image with its compiled bytes, failing on the first difference unless
+// buildModule replaces every configured function and data range in a copy of
+// the original image with compiled bytes, failing on the first difference unless
 // TOOLS_REPORT_ALL_MISMATCHES is set, and writes the rebuilt image.
 func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *moduleSpec) (string, error) {
 	want, err := p.readModuleImage(m)
@@ -402,10 +412,10 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 		if f.Asm != "" {
 			language = "asm"
 		}
-		if results[index].err != nil {
-			return "", fmt.Errorf("compile %s: %w", f.Name, results[index].err)
+		if results.functions[index].err != nil {
+			return "", fmt.Errorf("compile %s: %w", f.Name, results.functions[index].err)
 		}
-		sections := results[index].sections
+		sections := results.functions[index].sections
 		start := m.offset(f.Addr)
 		expected := want[start : start+f.Size]
 		if shortHash(expected) != f.Hash {
@@ -449,6 +459,15 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 		}
 		return "", fmt.Errorf("%d function(s) did not match", len(mismatched))
 	}
+	for index := range m.Units {
+		unit := &m.Units[index]
+		if err := writeUnitOwnedData(m, unit, results.unitData[index], want, got); err != nil {
+			return "", err
+		}
+		for _, span := range results.unitData[index] {
+			fmt.Fprintf(p.stdout(), "matching C data: unit %s %s 0x%08x (%d bytes)\n", unit.Name, span.section, span.addr, len(span.data))
+		}
+	}
 	output := moduleBuildOutput(p.root, m)
 	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
 		return "", err
@@ -470,10 +489,11 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 }
 
 // validateUnitOwnedOriginal checks unit data contracts against the verified
-// original image. compileUnit verifies the emitted bytes against those hashes,
-// but its per-function results omit the unit-owned sections; buildModule would
-// otherwise leave original passthrough data even if the configured hash changed.
+// original image, independently of the compiled data's configured hashes.
 func validateUnitOwnedOriginal(m *moduleSpec, image []byte) error {
+	if err := validateUnitOwnedLayout(m); err != nil {
+		return err
+	}
 	for _, unit := range m.Units {
 		for _, section := range []struct {
 			name  string
@@ -687,7 +707,7 @@ func (p project) checkCommand(args []string) error {
 	defer func() { compileSlots = nil }()
 	resolver := newSymbolResolver(config)
 	type moduleCheck struct {
-		results []compiledFunction
+		results *compiledModule
 		err     error
 	}
 	checks := make([]moduleCheck, len(modules))
@@ -708,7 +728,7 @@ func (p project) checkCommand(args []string) error {
 		}
 		for functionIndex := range m.Functions {
 			f := &m.Functions[functionIndex]
-			result := checks[index].results[functionIndex]
+			result := checks[index].results.functions[functionIndex]
 			where := fmt.Sprintf("%s %s 0x%08x", m.ID, f.Name, f.Addr)
 			if result.err != nil {
 				problems = append(problems, fmt.Sprintf("%s: compile failed: %v", where, result.err))
