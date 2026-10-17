@@ -19,6 +19,23 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s8 g_equipment_equip_mode_initialized;
+extern s8 g_equipment_remove_mode_initialized;
+
+/* EQUIP's 0x3c-byte menu records: the main commands, the item actions and
+ * (in equipment_run_type_order_mode) the item-type order menus. Each is
+ * started through menu_start_managed_thread, which makes it the current
+ * g_menu_thread_menu_data. */
+extern menu_entry_t g_equipment_command_menu;
+extern volatile u16 g_equipment_clear_all_prompt_frame;
+extern s8 g_equipment_item_slot;
+extern s8 g_equipment_item_list_open;
+extern s8 g_equipment_item_list_refresh;
+extern s8 g_equipment_item_preview_active;
+extern s16 g_equipment_item_previewed_cursor;
+extern s8 g_equipment_thread_running;
+extern u8 g_equipment_thread_idle_stop_pending;
+
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_equipment_item_menu_script[198];
 

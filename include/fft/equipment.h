@@ -28,17 +28,6 @@ typedef enum equipment_state {
 extern u8 g_equipment_screen_state; /* equipment_state_e */
 extern void (*g_equipment_screen_state_handlers[])(void);
 extern s16 g_equipment_result_rows[4]; /* [2]: type-order row picked in the sub-menu, or -1 */
-extern s8 g_equipment_ready;
-extern s8 g_equipment_equip_mode_initialized;
-extern s8 g_equipment_remove_mode_initialized;
-extern s8 g_equipment_type_order_ready;
-extern clut_t g_equipment_palette_image;
-
-/* EQUIP's 0x3c-byte menu records: the main commands, the item actions and
- * (in equipment_run_type_order_mode) the item-type order menus. Each is
- * started through menu_start_managed_thread, which makes it the current
- * g_menu_thread_menu_data. */
-extern menu_entry_t g_equipment_command_menu;
 
 void equipment_thread(void);
 
@@ -98,10 +87,6 @@ typedef struct equipment_unit_preview {
 typedef char equipment_unit_preview_size_must_be_122[(sizeof(equipment_unit_preview_t) == 122) ? 1 : -1];
 
 extern u8 g_equipment_unit_selected_index;
-extern s16 g_equipment_unit_initial_equipment[];
-extern s16 g_equipment_unit_saved_hp;
-extern s16 g_equipment_unit_saved_mp;
-extern s8 g_equipment_unit_banner_enabled;
 
 /* Provisional: the 0x7A-byte preview records for the selected unit (index 0)
  * and its compare slot (index 1); several callers view one as raw bytes. */
@@ -117,20 +102,10 @@ void equipment_commit_loadout(void);
 s32 equipment_can_equip_item(s16 unit_index, s16 item_id);
 
 /* equipment slots */
-extern oriented_quad_t g_equipment_slot_marker_rects[];
-extern oriented_quad_t g_equipment_secondary_slot_marker;
-extern u8 g_equipment_slot_marker_x[];
 extern u16 g_equipment_remove_all_equipment_ids[5]; /* weapon, shield, head, body, accessory */
 extern s8 g_equipment_remove_all_equipment_prompt_active;
 extern s16 g_equipment_remove_item_equipment[5];
 extern s8 g_equipment_remove_item_previewed_slot;
-extern volatile u16 g_equipment_clear_all_prompt_frame;
-
-/* One-shot entry flag for this mode. */
-extern s8 g_equipment_slot_item_browser_initialized;
-
-/* List index whose stat preview was last built; -1 forces a rebuild. */
-extern s8 g_equipment_slot_item_browser_previewed_index;
 
 void equipment_draw_slot_marker(s32 unused, s32 slot, s32 override);
 
@@ -158,14 +133,7 @@ void equipment_calculate_total_swap_delta(
     unit_panel_record_t* detail_total, unit_panel_summary_t* summary_total, const u16* from_items, const u16* to_items);
 
 /* item lists */
-extern s8 g_equipment_item_slot;
-extern s8 g_equipment_item_list_open;
-extern s8 g_equipment_item_list_refresh;
-extern u8 g_equipment_item_list_has_multiple_entries;
-extern s8 g_equipment_item_preview_active;
-extern s16 g_equipment_item_previewed_cursor;
 extern u8 g_equipment_item_inventory_totals[];
-extern s8 g_equipment_substate; /* menu_item_list_state_e */
 
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 
@@ -179,50 +147,19 @@ s32 equipment_get_row_item_count(s32 row);
 s32 equipment_get_row_equipped_count(s32 row);
 
 /* item actions */
-
-extern s8 g_equipment_item_action_menu_active;
-extern menu_entry_t* g_equipment_item_action_active_menu;
-extern menu_entry_t g_equipment_item_action_menu_single_item;
-extern s16 g_equipment_text_redraw_flag;
-
 s32 equipment_update_item_actions(void);
 
 /* item type order */
-extern s16 g_equipment_item_type_order[];
-extern u8 g_equipment_item_type_order_names[];
-extern menu_entry_t* g_equipment_item_type_order_active_menu;
-extern menu_entry_t g_equipment_type_order_menu_hand_body;
-extern menu_entry_t g_equipment_type_order_menu_other_slots;
-
 s32 equipment_run_type_order_mode(void);
 
 /* unit panels */
 extern menu_unit_status_identity_t g_equipment_selected_unit_data;
-extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
 extern unit_panel_thread_t g_equipment_panel_params;
-extern u8 g_equipment_status_label_image[];
-extern RECT g_equipment_status_label_image_rect;
-
-/* RECT[1] (right panel) of g_unit_panel_equipment_origins. Kept as its own symbol: spelling it as an element lets
- * GCC derive the table base from this address and changes unit_panel_ability_thread. */
-extern RECT g_equipment_right_panel_frame_rect;
-
-/* status indicators */
-/* Double-buffer index, current level, fade level and state, one pair each for
- * the two status panels. */
-extern s32 g_equipment_indicator_buffer_index[2];
-extern s32 g_equipment_indicator_brightness[2];
-extern s32 g_equipment_indicator_edge_brightness[2];
-extern s32 g_equipment_indicator_state[2];
-extern menu_gradient_panel_prims_t g_equipment_thread_indicator_packets[2][2];
 
 /* graphics */
-extern menu_gfx_context_t* g_equipment_gfx_context_base;
 extern u32* g_equipment_gfx_current_ot;
 extern u16 g_equipment_gfx_draw_area_capacity;
 extern u16 g_equipment_gfx_draw_move_capacity;
-extern u16 g_equipment_gfx_poly_f4_count;
-extern u16 g_equipment_gfx_poly_g4_count;
 
 /* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in equipment_gfx_init_contexts. */
 extern volatile u16 g_equipment_gfx_line_g2_capacity;
@@ -236,8 +173,6 @@ void equipment_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* p
 void equipment_gfx_swap_context(s32 first_otag, s32 unused);
 
 /* input */
-extern s16 g_equipment_input_unread_value;
-
 s32 equipment_input_read_page_scroll_direction(void);
 
 /* menu commands */
@@ -245,7 +180,6 @@ s32 equipment_input_read_page_scroll_direction(void);
 enum { EQUIPMENT_SCRIPT_END = 0x19 };
 
 /* messages and sound */
-extern u8 g_equipment_text_restore_pending;
 extern u8 g_equipment_sound_suppress_queued;
 
 void equipment_show_message(s32 message_id, s32 sound_id);
@@ -264,9 +198,7 @@ typedef enum equipment_thread_slot {
     EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS = 14  /* the second banner slot the indicator draw watches */
 } equipment_thread_slot_e;
 
-extern s8 g_equipment_thread_running;
 extern s16 g_equipment_text_message_thread_active;
 extern s32 g_equipment_item_numeric_thread_enabled;
-extern u8 g_equipment_thread_idle_stop_pending;
 
 #endif

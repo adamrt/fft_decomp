@@ -309,7 +309,6 @@ extern palette_t g_unit_panel_panel_comparison_portrait_palettes[2];
 void unit_panel_toggle_equipment_and_numbers(s32 enable);
 
 /* panel state (EQUIP) */
-extern unit_panel_buffer_t g_unit_panel_frames_b[];
 extern unit_panel_thread_t g_unit_panel_unit_status_panel_params;
 
 void unit_panel_toggle_equipment_threads(s32 enable);

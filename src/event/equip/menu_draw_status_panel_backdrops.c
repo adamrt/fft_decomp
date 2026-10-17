@@ -8,6 +8,14 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Double-buffer index, current level, fade level and state, one pair each for
+ * the two status panels. */
+extern s32 g_equipment_indicator_buffer_index[2];
+extern s32 g_equipment_indicator_brightness[2];
+extern s32 g_equipment_indicator_edge_brightness[2];
+extern s32 g_equipment_indicator_state[2];
+extern menu_gradient_panel_prims_t g_equipment_thread_indicator_packets[2][2];
+
 /*
  * Builds and submits the two translucent letterbox panels behind the unit status
  * banner: the top band (y 0x1a to 0x5d) and the bottom one (y 0xa9 to 0xec).

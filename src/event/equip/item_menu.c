@@ -17,6 +17,18 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s8 g_equipment_ready;
+extern s8 g_equipment_unit_banner_enabled;
+
+/* One-shot entry flag for this mode. */
+extern s8 g_equipment_slot_item_browser_initialized;
+
+/* List index whose stat preview was last built; -1 forces a rebuild. */
+extern s8 g_equipment_slot_item_browser_previewed_index;
+extern s8 g_equipment_substate; /* menu_item_list_state_e */
+extern u8 g_equipment_status_label_image[];
+extern RECT g_equipment_status_label_image_rect;
+
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_equipment_render_commands[194];
 extern u8 g_equipment_armor_bonus_render_commands[88];

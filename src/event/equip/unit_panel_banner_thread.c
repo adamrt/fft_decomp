@@ -18,6 +18,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
+
 /*
  * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. EQUIP's
  * body (DEBUGCHR, ATTACK and BUNIT have their own): EQUIPMENT_THREAD_SLOT_UNIT_STATUS selects the

@@ -13,6 +13,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern menu_gfx_context_t* g_equipment_gfx_context_base;
+extern u16 g_equipment_gfx_poly_f4_count;
+extern u16 g_equipment_gfx_poly_g4_count;
+
 /* Read Square-modified vertical input with the configured repeat timing: a
  * menu_vertical_scroll_direction_e value, UP or DOWN on the first held frame and on each
  * repeat, WAIT on the held frames in between, NONE when nothing is held, page scrolling is

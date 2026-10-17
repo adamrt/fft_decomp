@@ -15,6 +15,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern clut_t g_equipment_palette_image;
+
 static menu_gfx_context_t g_equipment_gfx_contexts[2] = { 0 };
 static DR_MODE g_equipment_gfx_draw_mode_buffer[60] = { 0 };
 static LINE_F2 g_equipment_gfx_line_f2_buffer[20] = { 0 };

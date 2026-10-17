@@ -17,6 +17,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* RECT[1] (right panel) of g_unit_panel_equipment_origins. Kept as its own symbol: spelling it as an element lets
+ * GCC derive the table base from this address and changes unit_panel_ability_thread. */
+extern RECT g_equipment_right_panel_frame_rect;
+extern unit_panel_buffer_t g_unit_panel_frames_b[];
+
 /* Equipment panel thread (task THREAD_TASK_STATUS_PANEL): lists the five equipped item
  * names and draws their icons in a double-buffered unit_panel_buffer_t frame.
  *
