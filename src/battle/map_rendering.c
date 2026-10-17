@@ -3067,9 +3067,9 @@ static void battle_map_texture_update_animations(void) {
  * Type 1 fills entries 1..count of the 0x50-byte table, type 2 the 16 cells of
  * each of 8 rows for entries 1..8 of the 0x220-byte table, and type 3 sets up
  * the 0x98-byte entries 1..8 from the other two tables (4 input bytes per
- * entry, extra entries skipped). The caller at 0x800f32e4 stops at type 0
- * before calling, so the result for type 0 or an unknown type is never used;
- * `next` is left unset there, which is why the target returns $a1. */
+ * entry, extra entries skipped). The caller stops at type 0 before calling.
+ * An unknown nonzero type leaves `next` unset (the target returns $a1), yet
+ * the caller uses that result to read the next record's type. */
 static battle_map_state_record_t* battle_map_mesh_load_animation_record(battle_map_state_record_t* record) {
     battle_map_state_record_t* next;
     u32 count;

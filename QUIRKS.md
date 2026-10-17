@@ -404,6 +404,9 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   (`SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE`), which the EVTCHR (0xfe) and free
   (0xff) markers also carry, so the event instruction releases a saved EVTCHR
   slot too.
+- `effect_secondary_reflect_handler` leaves the shield spin's Y angle unset.
+  It clears X and Z, then writes the frame angle to Z again before the model
+  renderer passes the vector to `RotMatrix`, which reads all three angles.
 - `effect_model_draw_projectile`, the Reflect shield: the depth is
   assigned from each corner in turn where the other models sum them, so only
   the last corner counts, and every triangle is linked at ordering-table entry

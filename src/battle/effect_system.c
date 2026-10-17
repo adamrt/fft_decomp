@@ -2567,7 +2567,7 @@ void effect_noop_4(void) {
 }
 
 /*
- * Secondary-effect handler for bow and crossbow arrows.
+ * Secondary-effect handler for bow arrows; crossbow bolts use the straight-flight handler.
  *
  * Phase 1 derives the arrow's heading, launch pitch and per-step gravity from
  * the trajectory origin/destination, builds its rotation matrix and allocates
@@ -3841,6 +3841,7 @@ s32 effect_secondary_reflect_handler(void) {
         scale.vy = 0x140;
         scale.vx = 0x140;
         parameter = g_effect_secondary_animations[g_effect_secondary_current->animation_id].parameter;
+        /* Retail writes z twice and leaves spin.vy unset before RotMatrix reads it. */
         spin.vz = 0;
         spin.vx = 0;
         spin_timer = g_effect_secondary_current->timer;
