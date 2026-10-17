@@ -11,7 +11,7 @@ links: [battle]
 units:
   - {name: deploy_menu, source: src/event/attack/deploy_menu.c}
   - {name: deploy_panel_primitives, source: src/event/attack/deploy_panel_primitives.c}
-  - {name: deploy_screen, source: src/event/attack/deploy_screen.c, data: [{addr: 0x801cd210, size: 60, hash: 5dcc1b5872dd9ff1}]}
+  - {name: deploy_screen, source: src/event/attack/deploy_screen.c, data: [{addr: 0x801cd0dc, size: 368, hash: 66f4ed506159f631}]}
   - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: fieldable_units, source: src/event/attack/fieldable_units.c, data: [{addr: 0x801cd2b4, size: 4, hash: 67abdd721024f0ff}, {addr: 0x801cd2b8, size: 4, hash: e112d548bcb2311b}]}
   - {name: file_load_sync, source: src/lib/file/file_load_sync.c}
@@ -189,6 +189,7 @@ data:
   - {addr: 0x801cd0c4, name: g_deploy_tile_clut_rect}
   - {addr: 0x801cd0cc, name: g_deploy_semitrans_tile_clut_rect}
   - {addr: 0x801cd0d4, name: g_deploy_texture_origin}
+  - {addr: 0x801cd0dc, name: g_deploy_menu_row_actions}
   - {addr: 0x801cd0e4, name: g_deploy_menu_entries}
   - {addr: 0x801cd210, name: g_deploy_status_display_thread_params}
   - {addr: 0x801cd224, name: g_deploy_numbers_thread_params}
@@ -266,6 +267,8 @@ data:
   - {addr: 0x801dcb1c, name: g_deploy_cursor_clut}
   - {addr: 0x801dcb3c, name: g_deploy_tile_clut_buffer}
   - {addr: 0x801dcb9c, name: g_deploy_unit_marker_clut_buffer}
+  - {addr: 0x801dcbbc, name: g_deploy_notice_result}
+  - {addr: 0x801dcbc0, name: g_deploy_confirm_prompt_result}
   - {addr: 0x801dcbc4, name: g_deploy_confirm_result}
   - {addr: 0x801dcbc8, name: g_deploy_valid_tiles}
   - {addr: 0x801dcbe4, name: g_deploy_roster_id_by_tile}

@@ -45,6 +45,8 @@ extern u8 g_deploy_valid_tiles[5][5];
 extern unit_deployment_coordinates_t g_deploy_unit_map_coordinates[12];
 extern s32 g_deploy_deployed_unit_count;
 extern s32 g_deploy_pending_roster_index;
+extern s16 g_deploy_notice_result;
+extern s16 g_deploy_confirm_prompt_result;
 extern s16 g_deploy_confirm_result;
 
 /* Cleared with the deployed-unit count when the deploy screen opens; nothing
@@ -72,7 +74,6 @@ typedef enum deploy_menu_entry {
 } deploy_menu_entry_e;
 
 extern s32 g_deploy_menu_state; /* deploy_menu_state_e */
-extern menu_entry_t g_deploy_menu_entries[DEPLOY_ENTRY_COUNT];
 extern image_layout_t g_deploy_button_hint_cells[4];
 extern s32 g_deploy_active_cursor;
 extern s32 g_deploy_cursor_row[2];
@@ -163,6 +164,25 @@ typedef enum deploy_prompt_thread_slot {
     DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU = 4,       /* the menu that sets g_deploy_confirm_result */
     DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER = 13      /* a wait-forever thread while the unit detail panels are open */
 } deploy_prompt_thread_slot_e;
+
+/* Row actions and windows share the deployment screen's native data block. */
+static s16 g_deploy_menu_row_actions[4] = { -1, DEPLOY_ENTRY_CONFIRM_CHOICE, -2, -2 };
+static menu_entry_t g_deploy_menu_entries[DEPLOY_ENTRY_COUNT] = {
+    /* Two retained text windows precede the deployment dialogs. */
+    { { 384, 32 }, 64, 32, { 137, 88, 64, 32 }, { { 0, 0, 64, 32 }, 0, 0 }, 0x505c, 0, 0, { 0 }, 0, 0, 0, { 0 }, 0, 0,
+        0, 0 },
+    { { 384, 0 }, 64, 32, { 137, 116, 64, 32 }, { { 0, 0, 64, 32 }, 0, 0 }, 0x505d, 0, 0, { 0 }, 0, 0, 0, { 0 }, 0, 0,
+        0, 0 },
+    /* Notice, confirmation prompt and confirmation choices. */
+    { { 384, 64 }, 0, 0, { 0, 88, 0, 0 }, { { 0, 0, 0, 0 }, 0, 0 }, (s16)0x8002, 0, 1, { 0 },
+        &g_deploy_menu_row_actions[0], menu_icon_linked_entry_thread, MENU_ICON_HEADER_CHECK, { 0 }, 0,
+        &g_deploy_notice_result, 0, 0 },
+    { { 384, 0 }, 0, 0, { 0, 88, 0, 0 }, { { 0, 0, 0, 0 }, 0, 0 }, 0x509c, 0, 1, { 0 }, &g_deploy_menu_row_actions[1],
+        menu_icon_linked_entry_thread, MENU_ICON_HEADER_CHECK, { 0 }, 0, &g_deploy_confirm_prompt_result, 0, 0 },
+    { { 384, 64 }, 40, 48, { 0, 88, 40, 48 }, { { 0, 0, 40, 48 }, 0, 0 }, 0x5012, 1, 2, { 0 },
+        &g_deploy_menu_row_actions[2], menu_run_icon_selection_loop, MENU_ICON_HEADER_NONE, { 0 }, 0,
+        &g_deploy_confirm_result, 0, 0 }
+};
 
 static unit_panel_thread_t g_deploy_status_display_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_numbers_thread_params = { 0 };
