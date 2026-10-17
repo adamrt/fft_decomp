@@ -32,8 +32,9 @@ extern menu_cursor_bob_entry_t g_menu_cursor_bob_active_thresholds[];
 s32 menu_get_cursor_bob_offset(s32 mode);
 
 /* sliding markers */
-extern s8 g_menu_cursor_forward_offset_keyframes[];
-extern s8 g_menu_cursor_reverse_offset_keyframes[];
+/* Signed (last frame, offset) pairs; the two curves end at frames 46 and 36. */
+extern s8 g_menu_cursor_forward_offset_keyframes[6 * 2];
+extern s8 g_menu_cursor_reverse_offset_keyframes[10 * 2];
 extern u16 g_menu_cursor_texture_page;
 
 /* Marker CLUTs of the normal (mode0) and alternate (mode1) palettes, which menu_set_palette_mode activates. */
