@@ -21,6 +21,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams; each extent includes the terminating opcode. */
+extern u8 g_formation_item_category_tabs_script[121];
+extern u8 g_formation_item_category_tabs_wide_script[121];
+
 /*
  * Run the Items screen's action strip (MENU_ITEM_LIST_STATE_ACTION) and
  * return the next state: ACTION while it stays open, BROWSE when it is
@@ -123,7 +127,8 @@ s8 formation_item_action_menu(void) {
                         g_item_list_entries[i] = g_item_list_entries[i + 1];
                     }
                     screen_init_list(g_item_list_entries, g_menu_list_selected_index,
-                        g_text_section_pointers[TEXT_SECTION_ITEM_NAMES], &g_formation_item_list_window_script);
+                        g_text_section_pointers[TEXT_SECTION_ITEM_NAMES],
+                        (menu_instruction_t*)g_formation_item_list_window_script);
                     menu_set_window_scale_step(10);
                     item_rebuild_category_list(g_menu_selected_slot);
                     item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index],
@@ -348,11 +353,11 @@ void screen_draw_item_tabs(s32 wide, s32 row, s32 mode) {
         x -= 1;
     }
     if (wide == 0) {
-        drawing = &g_formation_item_category_tabs_script;
+        drawing = g_formation_item_category_tabs_script;
         y = 0x40;
     } else {
         y = 0x4F;
-        drawing = &g_formation_item_category_tabs_wide_script;
+        drawing = g_formation_item_category_tabs_wide_script;
     }
     menu_run_script_with_palette_mode(drawing, 0, mode);
     drawing = &g_formation_item_category_tab_sprites[row];

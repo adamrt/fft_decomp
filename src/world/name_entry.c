@@ -24,6 +24,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams; each extent includes the terminating opcode. */
+extern u8 g_name_entry_display_script[38];
+extern u8 g_name_entry_keyboard_script[41];
+
 static u8 g_name_entry_text[17] = { 0 };
 
 static void name_entry_apply_key(s16 key);
@@ -65,12 +69,13 @@ u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
         cursor.x = g_name_entry_cursor * 6 + 0x54;
         gfx_set_otag_index(0x28);
         menu_update_and_draw_bouncing_cursor(&cursor, &g_name_entry_keyboard_text_cursor_anim, busy);
-        menu_run_script_with_palette_mode(&g_name_entry_display_script, 0, busy);
+        menu_run_script_with_palette_mode((menu_instruction_t*)g_name_entry_display_script, 0, busy);
         menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
             SOUND_SFX_PAGE_SWITCH);
         menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
             SOUND_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode(&g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
+        menu_run_script_with_palette_mode(
+            (menu_instruction_t*)g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         if (g_name_entry_state != g_name_entry_keyboard_last_state) {
             g_name_entry_keyboard_last_state = g_name_entry_state;
         }
@@ -207,12 +212,13 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         cursor.x = value;
         gfx_set_otag_index(0x28);
         menu_update_and_draw_bouncing_cursor(&cursor, &g_name_entry_text_cursor_anim, busy);
-        menu_run_script_with_palette_mode(&g_name_entry_display_script, 0, busy);
+        menu_run_script_with_palette_mode((menu_instruction_t*)g_name_entry_display_script, 0, busy);
         menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
             SOUND_SFX_PAGE_SWITCH);
         menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
             SOUND_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode(&g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
+        menu_run_script_with_palette_mode(
+            (menu_instruction_t*)g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
         menu_input_update_event_state(
@@ -256,7 +262,8 @@ static void name_entry_open_key_list(void) {
     }
     g_name_entry_key_ids[count] = -1;
     screen_init_list(g_name_entry_key_ids, g_menu_list_selected_index,
-        screen_text_get_resident(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD), &g_name_entry_keyboard_script);
+        screen_text_get_resident(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD),
+        (menu_instruction_t*)g_name_entry_keyboard_script);
 }
 
 /*

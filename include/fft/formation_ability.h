@@ -7,7 +7,6 @@
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_list.h"
-#include "fft/menu_script.h"
 #include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -45,7 +44,6 @@ extern u8 g_formation_ability_menu_saved_browse_enabled;
 extern u8 g_formation_ability_submenu_running;
 extern RECT g_formation_ability_panel_origin;
 extern unit_panel_thread_t g_formation_ability_panel_thread_params;
-extern menu_instruction_t g_formation_ability_list_script;
 extern menu_list_page_t g_formation_ability_list_pages[][2];
 
 void formation_ability_menu(void);
@@ -54,7 +52,6 @@ void formation_ability_menu(void);
 extern s8 g_formation_ability_learn_menu_initialized;
 extern s8 g_formation_ability_learn_menu_step; /* menu_job_list_step_e */
 extern s8 g_formation_ability_learn_job_list_initialized;
-extern menu_instruction_t g_formation_ability_learn_job_list_script;
 extern s16 g_formation_ability_learn_job_name_list[];
 extern s32 g_formation_ability_learn_job_total_jp;
 extern s8 g_formation_ability_learn_ability_list_open;
@@ -91,7 +88,6 @@ extern s8 g_formation_ability_view_list_initialized;
 /* set ability */
 extern s8 g_formation_ability_set_initialized;
 extern u8 g_formation_ability_set_unit_index;
-extern menu_instruction_t g_formation_ability_set_window_script;
 extern s8 g_formation_ability_set_slot; /* ability slot under the cursor: 0..4 */
 extern u8 g_formation_ability_set_cursor;
 extern u16 g_formation_ability_set_cursor_anim;

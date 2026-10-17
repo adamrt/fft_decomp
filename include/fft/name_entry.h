@@ -4,7 +4,6 @@
 /* The name entry screen (new units, renames): its keyboard, cursors and the confirmation menu. */
 
 #include "fft/menu.h"
-#include "fft/menu_script.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -24,8 +23,6 @@ extern s8 g_name_entry_keyboard_last_state; /* last drawn state */
 extern u8 g_name_entry_input_delay;
 extern const u8* g_name_entry_original_name;
 extern u8 g_name_entry_used_original_name;
-extern menu_instruction_t g_name_entry_display_script;
-extern menu_instruction_t g_name_entry_keyboard_script;
 extern RECT g_name_entry_screen_image_rect;
 extern RECT g_name_entry_text_vram_rect;
 

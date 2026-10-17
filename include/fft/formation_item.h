@@ -6,7 +6,6 @@
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
-#include "fft/menu_script.h"
 #include "fft/screen.h"
 #include "psx/types.h"
 
@@ -19,13 +18,11 @@ enum {
 };
 
 extern s8 g_formation_item_menu_mode; /* menu_item_list_state_e */
-extern menu_instruction_t g_formation_item_menu_script;
 extern menu_entry_t g_formation_item_icon_menu;
 extern u8 g_formation_item_menu_unit_index;
 extern u16 g_formation_item_saved_selected_unit_index;
 extern u8 g_formation_item_menu_saved_browse_enabled;
 extern u8 g_formation_item_submenu_exit_pending;
-extern menu_instruction_t g_formation_item_hp_mp_bonus_window_script;
 
 /* Menu-subflow "running" flags. The readers sign-extend (lb), so these are
  * signed; the initializer only stores 0/1/2 and cannot distinguish. */
@@ -75,10 +72,8 @@ s32 formation_item_show_equipping_units(void);
 extern s8 g_formation_item_category_menu_initialized;
 extern u8 g_formation_item_category_input_lock;
 extern s8 g_formation_item_category_previewed_cursor;
-extern menu_instruction_t g_formation_item_category_tabs_script;      /* menu display stream (narrow variant) */
-extern menu_instruction_t g_formation_item_category_tabs_wide_script; /* menu display stream (wide variant) */
-extern oriented_quad_t g_formation_item_category_tab_sprites[];       /* 20-byte quads, one per row */
-extern u8 g_formation_item_category_tab_x[];                          /* per-row base x */
+extern oriented_quad_t g_formation_item_category_tab_sprites[]; /* 20-byte quads, one per row */
+extern u8 g_formation_item_category_tab_x[];                    /* per-row base x */
 extern oriented_quad_t g_formation_item_category_tab_cursor_sprite;
 
 /* The two item-category icon strips; the active one is kept in g_formation_item_category_icon_strip. */
@@ -88,7 +83,7 @@ extern menu_entry_t* g_formation_item_category_icon_strip;
 extern s16 g_formation_item_category_strip_text_ids[]; /* option text ids of the active strip, -1 terminated */
 
 /* item list */
-extern menu_instruction_t g_formation_item_list_window_script;
+extern u8 g_formation_item_list_window_script[194];
 
 /* The formation item menu's copy of the EQUIP screen's item-list state. */
 extern s8 g_formation_item_list_open;

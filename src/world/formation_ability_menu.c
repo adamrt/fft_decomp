@@ -29,6 +29,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams; each extent includes the terminating opcode. */
+extern u8 g_formation_ability_set_window_script[67];
+
 static s16 g_formation_ability_remove_slots[5] = { 0 };
 
 static s32 formation_ability_is_equip_support_change(s16 unit_id, s16 ability_id);
@@ -499,8 +502,8 @@ static s32 formation_ability_set_menu(void) {
                 g_formation_ability_set_show_stat_preview = 0;
             }
         }
-        menu_run_script_with_palette_mode(
-            &g_formation_ability_set_window_script, g_menu_input_primary_repeat, menu_input_get_lock_mode(0));
+        menu_run_script_with_palette_mode((menu_instruction_t*)g_formation_ability_set_window_script,
+            g_menu_input_primary_repeat, menu_input_get_lock_mode(0));
     }
 
     if (g_formation_ability_set_list_close_pending != 0) {

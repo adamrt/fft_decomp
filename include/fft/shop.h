@@ -94,8 +94,6 @@ extern u8 g_shop_item_category;
 extern s16 g_shop_quantity_limit;
 extern menu_entry_t g_shop_quantity_menu_data[2];
 extern u8 g_shop_quantity_menu_running;
-extern menu_instruction_t g_shop_war_funds_script;
-extern menu_instruction_t g_shop_buy_menu_script;
 extern s8 g_shop_buy_list_initialized;
 extern s8 g_shop_buy_equip_check_pending;
 extern s16 g_shop_buy_message_wait;
@@ -107,7 +105,6 @@ extern u8 g_shop_buy_equip_preview_visible;
 extern s16 g_shop_buy_equip_item;
 extern s16 g_shop_buy_equip_last_unit;
 extern u8 g_shop_buy_equip_saved_browse;
-extern menu_instruction_t g_shop_sell_list_menu_script;
 extern s8 g_shop_sell_list_initialized;
 extern s16 g_shop_sell_message_wait;
 extern u8 g_shop_sell_result;         /* sell-menu thread result */
@@ -115,7 +112,6 @@ extern u16 g_shop_sell_item;          /* item being sold */
 extern u8 g_shop_sell_confirm_shown;  /* confirmation prompt shown */
 extern u16 g_shop_sell_quantity_item; /* item being sold */
 extern u8 g_shop_sell_total_shown;    /* confirmation prompt shown */
-extern menu_instruction_t g_shop_sell_confirm_script;
 
 void shop_buy_equip_step(void);
 void shop_sell_list_step(void);
@@ -136,13 +132,11 @@ extern s32 g_shop_fitting_cost;
 extern u8 g_shop_fitting_unit_chosen;
 extern s8 g_shop_fitting_item_list_open;
 extern s16 g_shop_fitting_previewed_cursor;
-extern menu_instruction_t g_shop_fitting_item_list_menu_script;
 extern s8 g_shop_fitting_item_list_close;
 extern s8 g_shop_fitting_equip_menu_initialized;
 extern s8 g_shop_fitting_equip_slot;
 extern u16 g_shop_fitting_slot_cursor_anim;
 extern point16_t g_shop_fitting_slot_cursor_point;
-extern menu_instruction_t g_shop_fitting_cost_menu_script;
 extern s8 g_shop_fitting_remove_preview_initialized;
 extern u16 g_shop_fitting_remove_cursor_anim;
 extern point16_t g_shop_fitting_remove_cursor_point;
@@ -186,7 +180,6 @@ extern s8 g_fur_shop_access_granted;
 extern u8 g_fur_shop_has_secret_hunt;   /* any unit has Secret Hunt */
 extern u8 g_fur_shop_has_poached_stock; /* any poached item in stock */
 extern u8 g_fur_shop_waiting_message;   /* waiting for message dismissal */
-extern menu_instruction_t g_fur_shop_purchase_menu_script;
 extern s8 g_fur_shop_purchase_list_initialized;
 extern s8 g_fur_shop_equip_check_pending;
 extern s16 g_fur_shop_purchase_message_wait;
@@ -224,7 +217,6 @@ extern u8 g_soldier_office_rename_prompt_initialized;
 extern u8 g_soldier_office_rename_name_entry_initialized;
 extern u8 g_soldier_office_rename_error_shown;
 extern const u8* g_soldier_office_entered_name;
-extern menu_instruction_t g_soldier_office_fee_script;
 extern u32 g_soldier_office_fee;
 extern soldier_office_unit_count_script_t g_soldier_office_unit_count_script;
 extern u8 g_soldier_office_unit_count;

@@ -25,6 +25,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams; each extent includes the terminating opcode. */
+extern u8 g_formation_item_menu_script[198];
+
 static s32 formation_item_equip_menu(void);
 static s32 formation_item_remove_all_prompt(void);
 static s32 formation_item_best_fit_menu(void);
@@ -276,7 +279,7 @@ static s32 formation_item_equip_menu(void) {
             }
             g_unit_panel_status_display_thread_params.redraw_request = 1;
         }
-        menu_script_run(&g_formation_item_menu_script, g_menu_input_primary_repeat);
+        menu_script_run((menu_instruction_t*)g_formation_item_menu_script, g_menu_input_primary_repeat);
     }
 
     if (g_formation_item_list_refresh != 0) {

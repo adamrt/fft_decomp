@@ -19,6 +19,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Byte-aligned display streams; each extent includes the terminating opcode. */
+extern u8 g_formation_ability_learn_job_list_script[217];
+
 /* The JP the last looked-up job needs for its next level, as a row callback. */
 
 /* JP needed for the next level of the job whose level
@@ -96,8 +99,8 @@ s32 formation_ability_learn_job_list(void) {
         }
         message_box_show_with_sound(0xC007, SOUND_SFX_ERROR_MESSAGE);
     }
-    menu_run_script_with_palette_mode(
-        &g_formation_ability_learn_job_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode((menu_instruction_t*)g_formation_ability_learn_job_list_script,
+        g_menu_input_primary_repeat, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }
 

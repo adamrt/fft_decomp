@@ -39,7 +39,7 @@ extern s16 g_formation_job_wheel_job_count;
 extern s16 g_formation_job_wheel_cursor_index;
 extern u8 g_formation_job_wheel_job_selected;
 extern u8 g_formation_job_wheel_saved_browse_enabled;
-extern menu_instruction_t g_formation_job_wheel_script;
+extern u8 g_formation_job_wheel_script[54];
 extern s16 g_formation_job_wheel_name_text;
 extern RECT g_formation_job_wheel_name_rect;
 extern oriented_quad_t g_formation_job_wheel_mastered_icon_sprite;
@@ -54,8 +54,7 @@ extern u8 g_formation_job_wheel_open_frame;
 extern u8 g_formation_job_wheel_closing;
 extern u8 g_formation_job_wheel_close_frame;
 
-/* The current and the new job's portrait; separate objects, since
- * formation_job_wheel_menu addresses each with its own lui/addiu. */
+/* The current and new job portraits have separate original address bindings. */
 extern textured_rect_source_t g_formation_job_wheel_portrait_quad;
 extern textured_rect_source_t g_formation_job_wheel_new_portrait_quad;
 
@@ -397,7 +396,7 @@ void formation_job_wheel_menu(void) {
 
     menu_gfx_enqueue_textured_quad(
         &g_formation_job_wheel_name_rect, 0x30, 0x30, 0, 0, g_screen_window_tpage, g_screen_window_clut, 0x33);
-    menu_run_script_with_palette_mode(&g_formation_job_wheel_script, 0, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode((menu_instruction_t*)g_formation_job_wheel_script, 0, g_menu_input_lock_mode);
 }
 
 /*
@@ -487,6 +486,8 @@ static void formation_job_draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius
  * separate phase accumulator, changes the target's register assignment.
  */
 static s32 formation_job_step_change(s32 job) {
+    /* The phases reuse one stack slot. Separate locals, even in disjoint scopes,
+     * enlarge the original 88-byte frame to 104 bytes with this compiler. */
     union {
         texture_source_t entry;
         point16_t points[3];
