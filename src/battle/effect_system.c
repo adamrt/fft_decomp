@@ -32,6 +32,188 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Projectile trajectory queries and work state. */
+/* Arc endpoint handed to the per-arc obstacle test: the unit's raised tile position followed by its id and height
+ * allowance. */
+typedef struct projectile_arc_endpoint {
+    SVECTOR position;
+    s32 unit_id;
+    s32 height;
+} projectile_arc_endpoint_t;
+
+/* Offset to the target plus its fixed-point horizontal length. */
+typedef struct projectile_arc_delta {
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 distance;
+} projectile_arc_delta_t;
+
+/* Query read by projectile_arc_calculate_trajectory: the offset to the target and both endpoints. */
+typedef struct projectile_arc_query {
+    projectile_arc_delta_t delta;
+    projectile_arc_endpoint_t source;
+    projectile_arc_endpoint_t target;
+} projectile_arc_query_t;
+
+/* Unit list built in the scratchpad at 0x1f800000 by projectile_list_obstacle_units and read by the obstacle tests. */
+typedef struct projectile_obstacle_unit_list {
+    s32 count;                           /* 0x00 */
+    u8 battle_ids[UNIT_SLOT_COUNT];      /* 0x04 */
+    u8 _padding_19;                      /* 0x19; aligns the position vectors */
+    SVECTOR positions[UNIT_SLOT_COUNT];  /* 0x1a; tile center and height */
+    u8 _padding_c2[2];                   /* 0xc2; aligns the sprite heights */
+    s32 sprite_heights[UNIT_SLOT_COUNT]; /* 0xc4 */
+} projectile_obstacle_unit_list_t;
+typedef char projectile_obstacle_unit_list_size_must_be_280[sizeof(projectile_obstacle_unit_list_t) == 280 ? 1 : -1];
+
+extern s32 g_projectile_gravity_modifier;
+extern s32 g_projectile_gravity_scale;
+extern s32 g_projectile_launch_slope_q12;
+extern s16 g_projectile_arctan_angle_mod;
+extern s32 g_projectile_source_id;
+extern SVECTOR g_projectile_origin;
+extern SVECTOR g_projectile_destination;
+extern s32 g_projectile_step_count;
+extern VECTOR g_projectile_step;      /* last step's movement */
+extern SVECTOR g_projectile_position; /* final projectile position */
+extern s32 g_projectile_hit_unit_id;
+extern battle_map_tile_coordinates_t g_projectile_tile;
+extern s32 g_projectile_tile_flags;
+
+/* 0xc88-byte arrow work buffer of effect_secondary_arrow_arc_handler and
+ * effect_secondary_linear_projectile_handler: two sets of four G3 and thirteen G4
+ * polygons. */
+typedef struct effect_arrow_buffer {
+    POLY_G3 g3[2][4];  /* 0x000 */
+    POLY_G4 g4[2][13]; /* 0x0e0 */
+    u8 _unused_488[0x800];
+} effect_arrow_buffer_t;
+typedef char effect_arrow_buffer_size_must_be_3208[(sizeof(effect_arrow_buffer_t) == 3208) ? 1 : -1];
+
+/* Double-buffered polygons initialized by the secondary handler and drawn by
+ * effect_model_draw_projectile. */
+typedef struct effect_stone_buffer {
+    POLY_G3 g3[2][12];
+} effect_stone_buffer_t;
+
+typedef struct effect_shuriken_buffer {
+    POLY_G3 g3[2][16];
+} effect_shuriken_buffer_t;
+
+typedef struct effect_reflect_buffer {
+    u16 clut[2][6];
+    POLY_GT3 prims[2][24];
+} effect_reflect_buffer_t;
+
+extern psyq_tmd_header_t* g_effect_model_files[];
+
+/* Secondary handler work state. */
+/* Per-secondary-slot spawn state for the two-particle death poof. */
+typedef struct effect_death_poof_state {
+    s32 count;        /* 0x00; slots started so far */
+    u16 finish_timer; /* 0x04; reaches 1 when the effect is finished */
+    u8 ids[2];        /* 0x06 */
+} effect_death_poof_state_t;
+typedef char effect_death_poof_state_size_must_be_8[sizeof(effect_death_poof_state_t) == 8 ? 1 : -1];
+
+/* One trail of the spell charge effect: the recent screen positions of the effect slot it follows. */
+typedef struct effect_charge_trail {
+    DVECTOR points[7]; /* 0x00; screen positions, newest at age % 7 */
+    s16 age;           /* 0x1c */
+    u8 slot_id;        /* 0x1e */
+    u8 _padding_1f;    /* tail padding to 2-byte alignment */
+} effect_charge_trail_t;
+
+/* Spell-charge state: the center the trails converge on, two buffers of 96 additive lines (16 trails of 6 segments),
+ * its particle ids and counts, and the parameters copied from its g_effect_charge_line_params row; color is the
+ * charge's element index. */
+typedef struct effect_charge_state {
+    s16 x;                            /* 0x0000 */
+    s16 y;                            /* 0x0002 */
+    DR_MODE mode[2];                  /* 0x0004 */
+    LINE_G2 lines[2][96];             /* 0x001c */
+    effect_charge_trail_t trails[16]; /* 0x0f1c */
+    u8 ids_a[2];                      /* 0x111c */
+    u8 ids_b[14];                     /* 0x111e */
+    struct {
+        s16 trails;
+        u8 auxiliary_particles;
+        u8 particles;
+    } count;            /* 0x112c */
+    s32 angle;          /* 0x1130 */
+    s32 speed;          /* 0x1134 */
+    s32 spread_range;   /* 0x1138 */
+    s32 spread_offset;  /* 0x113c */
+    s32 duration;       /* 0x1140 */
+    s32 radius;         /* 0x1144 */
+    s32 spawn_interval; /* 0x1148 */
+    s32 color;          /* 0x114c */
+    s32 max_trails;     /* 0x1150 */
+    s32 fade_row;       /* 0x1154 */
+    s32 done;           /* 0x1158 */
+} effect_charge_state_t;
+
+/* One 14-byte parameter row for the spell-charge secondary effect. */
+typedef struct effect_charge_params {
+    s16 speed;
+    s16 spread_range;
+    s16 spread_offset;
+    s16 duration;
+    s16 radius;
+    u8 spawn_interval;
+    u8 _unused_0b;
+    u8 max_trails;
+    u8 fade_row;
+} effect_charge_params_t;
+typedef char effect_charge_params_size_must_be_14[sizeof(effect_charge_params_t) == 14 ? 1 : -1];
+
+/* g_effect_charge_line_fade_levels holds rows of seven fade steps,
+ * indexed flat (row * 7 + step) as the original does. */
+enum { EFFECT_CHARGE_LINE_FADE_STEPS = 7 };
+
+/* Summon-charge state: three rings of ten trailing points. */
+typedef struct effect_ring_state {
+    s32 index;             /* 0x00; newest trail column, 0..9 */
+    s32 radius;            /* 0x04 */
+    s32 angle;             /* 0x08 */
+    s32 angle_step;        /* 0x0c */
+    SVECTOR center;        /* 0x10 */
+    s32 brightness;        /* 0x18 */
+    SVECTOR points[3][10]; /* 0x1c */
+} effect_ring_state_t;
+
+/* Zodiac-poof spawn state for the 24-slot particle group 3. */
+typedef struct effect_zodiac_poof_state {
+    s32 done;   /* 0x00; reaches 1 when the effect is finished */
+    s32 count;  /* 0x04; slots started so far */
+    u8 ids[24]; /* 0x08 */
+} effect_zodiac_poof_state_t;
+
+/* The work area g_effect_secondary_state, shared by the secondary effect handlers; the
+ * spell-charge, summon-charge and zodiac-poof handlers each lay it out as
+ * their own state. */
+typedef union effect_secondary_state {
+    effect_charge_state_t charge;
+    effect_ring_state_t summon_ring;
+    effect_zodiac_poof_state_t zodiac_poof;
+} effect_secondary_state_t;
+
+extern effect_secondary_state_t g_effect_secondary_state;
+extern effect_death_poof_state_t g_effect_death_poof_states[EFFECT_SECONDARY_RECORD_COUNT];
+extern effect_charge_params_t g_effect_charge_line_params[2];
+
+/* Interleaved x/y offsets for eight direction sectors, then the first pair again. */
+extern s16 g_effect_charge_line_direction_offsets[18];
+extern u8 g_effect_charge_line_fade_levels[];
+extern rgb24_t g_effect_charge_trail_colors[]; /* spell-charge trail color of each effect_element_index_e */
+
+/* Brightness (out of 128) of each of a summon-charge ring's ten slots, newest point first. */
+extern u8 g_effect_summon_ring_brightness[];
+
+/* Six RGB byte triples, packed into both CLUT images as 15-bit colors. */
+extern rgb24_t g_effect_reflect_palette_colors[6];
+
 /* Secondary pool and slot-chain ownership. */
 extern effect_secondary_data_t g_effect_secondary_data[EFFECT_SECONDARY_RECORD_COUNT];
 extern u16 g_effect_secondary_free_head;

@@ -1,7 +1,7 @@
 #ifndef EFFECT_PROJECTILE_H
 #define EFFECT_PROJECTILE_H
 
-/* BATTLE projectile models, polygon buffers and shared flight transform. */
+/* Projectile model decoding and shared flight transform. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -51,33 +51,6 @@ typedef struct effect_decoded_model_command {
     } vertices; /* 0x68 */
 } effect_decoded_model_command_t;
 typedef char effect_decoded_model_command_size_must_be_112[sizeof(effect_decoded_model_command_t) == 112 ? 1 : -1];
-
-/* 0xc88-byte arrow work buffer of effect_secondary_arrow_arc_handler and
- * effect_secondary_linear_projectile_handler: two sets of four G3 and thirteen G4
- * polygons. */
-typedef struct effect_arrow_buffer {
-    POLY_G3 g3[2][4];  /* 0x000 */
-    POLY_G4 g4[2][13]; /* 0x0e0 */
-    u8 _unused_488[0x800];
-} effect_arrow_buffer_t;
-typedef char effect_arrow_buffer_size_must_be_3208[(sizeof(effect_arrow_buffer_t) == 3208) ? 1 : -1];
-
-/* Double-buffered polygons initialized by the secondary handler and drawn by
- * effect_model_draw_projectile. */
-typedef struct effect_stone_buffer {
-    POLY_G3 g3[2][12];
-} effect_stone_buffer_t;
-
-typedef struct effect_shuriken_buffer {
-    POLY_G3 g3[2][16];
-} effect_shuriken_buffer_t;
-
-typedef struct effect_reflect_buffer {
-    u16 clut[2][6];
-    POLY_GT3 prims[2][24];
-} effect_reflect_buffer_t;
-
-extern psyq_tmd_header_t* g_effect_model_files[];
 
 s32 effect_model_init_sections(psyq_tmd_header_t* resource, s32 unused_1);
 void effect_model_decode_next_command(effect_decoded_model_command_t* out);
